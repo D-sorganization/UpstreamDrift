@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import NDArray
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 if TYPE_CHECKING:
     from src.shared.python.force_overlay import OverlayWrench
@@ -204,7 +205,7 @@ def _configure_input_player(
     controls: Mapping[str, NDArray[np.float64]],
 ) -> None:
     """Install only the internally owned time-driven excitation player."""
-    import opensim as osim
+    osim = import_opensim()
 
     player = osim.PrescribedController()
     player.setName("independent_time_only_excitation_player")
@@ -223,7 +224,7 @@ def _restore_continuous_state(
     initial_time: float,
 ) -> tuple[Any, tuple[str, ...], dict[str, tuple[float, float]]]:
     """Initialize once and restore every supplied physical continuous state."""
-    import opensim as osim
+    osim = import_opensim()
 
     state = model.initSystem()
     names = model.getStateVariableNames()
@@ -288,7 +289,7 @@ def _admit_native_muscles(
     contact_force_paths: tuple[str, ...],
 ) -> tuple[Any, tuple[str, ...]]:
     """Reject hidden drive mechanisms before adding the owned input player."""
-    import opensim as osim
+    osim = import_opensim()
 
     recursive_muscle_paths = _audit_drive_components(model, osim, contact_force_paths)
     muscles = model.getMuscles()
@@ -318,7 +319,7 @@ def _native_replay_policy(
     model: Any, accuracy: float, contact_force_paths: tuple[str, ...]
 ) -> dict[str, str | float | bool]:
     """Identify executed drive, native force and numerical policies."""
-    import opensim as osim
+    osim = import_opensim()
 
     muscles = model.getMuscles()
     return {
@@ -378,7 +379,7 @@ def replay_muscle_excitations(
     complete model initialization contract. This API does not serialize native
     numerical history; it declares a cold-start Runge-Kutta-Merson policy.
     """
-    import opensim as osim
+    osim = import_opensim()
 
     grid, controls, initial = _validated_inputs(
         times, excitations, initial_state, accuracy

@@ -49,6 +49,7 @@ from src.engines.physics_engines.opensim.python import msk_club as mc
 from src.shared.python.model_appearance import club_assembly as ca
 from src.shared.python.model_appearance import club_face as cf
 from src.shared.python.model_appearance.grip_pose import DEFAULT_GRIP_POSE, Hand
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = logging.getLogger(__name__)
 
@@ -192,7 +193,7 @@ def landmark_weight(body: str) -> float:
 
 
 def _osim() -> Any:
-    import opensim
+    opensim = import_opensim()
 
     return opensim
 

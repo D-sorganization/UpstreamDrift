@@ -17,6 +17,7 @@ from typing import Any
 from .moco_initial_bindings import _finite_number
 from .native_muscle_bundle import _COMPONENTS, _registered_options
 from .native_prepared_state import DeclaredColdStart
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 
 class ActuationRole(str, Enum):
@@ -178,7 +179,7 @@ def admit_native_mixed_profile(
     constrained_cold_start: DeclaredColdStart | None = None,
 ) -> NativeMixedProfile:
     """Read back actual native law/units/options before admitting any input."""
-    import opensim as osim
+    osim = import_opensim()
 
     if not isinstance(profile, MixedActuationProfile):
         raise TypeError("mixed admission requires a typed profile")

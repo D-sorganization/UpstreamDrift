@@ -116,6 +116,14 @@ class CharacterBuilderModel:
         text, _media, filename = spec_export.export_character(self.compile(), fmt)
         return self._write_export(directory, filename, text)
 
+    def verify_cross_engine_parity(
+        self, *, mass_tol_kg: float = 1e-9, frame_tol_m: float = 1e-3
+    ) -> dict[str, Any]:
+        """Verify cross-engine L0 parity for the compiled model (CMB-11, #11662)."""
+        return spec_export.verify_cross_engine_l0_parity(
+            self.compile(), mass_tol_kg=mass_tol_kg, frame_tol_m=frame_tol_m
+        )
+
     def as_dict(self) -> dict[str, Any]:
         """Parameters as a plain mapping (for save/restore)."""
         return self._params.to_dict()

@@ -27,6 +27,7 @@ from src.shared.python.pose_interchange.live_kinematics import (
 from src.shared.python.pose_interchange.services._mock import (
     MockKinematicsService,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = get_logger(__name__)
 
@@ -67,7 +68,7 @@ class OpenSimKinematicsService:
             raise TypeError(
                 f"model_path must be a pathlib.Path, got {type(model_path).__name__}"
             )
-        import opensim  # type: ignore[import-not-found]
+        opensim = import_opensim()
 
         self._model = opensim.Model(str(model_path))
         self._state = self._model.initSystem()
@@ -146,7 +147,7 @@ class OpenSimKinematicsService:
                 "OpenSimKinematicsService.step: model not loaded; call load() first."
             )
 
-        import opensim  # type: ignore[import-not-found]
+        opensim = import_opensim()
 
         manager = opensim.Manager(self._model)
         manager.initialize(self._state)

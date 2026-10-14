@@ -40,7 +40,7 @@ from collections.abc import Iterable
 from typing import Any
 
 import numpy as np
-import opensim
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 from src.shared.python.biomechanics.grip_extraction import unavailable_analysis
 from src.shared.python.biomechanics.ground_reaction_wrenches import (
@@ -61,6 +61,8 @@ from src.shared.python.motion_matching.force_torque import (
     SpatialWrench,
     transform_wrench,
 )
+
+opensim = import_opensim()
 
 __all__ = ["R_ZUP_FROM_OPENSIM_GROUND", "OpenSimForceTorqueSource"]
 

@@ -45,6 +45,7 @@ from src.shared.python.perturbation.perturbation_base import (
     ComparisonReport,
     PerturbationAnalyzerBase,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = logging.getLogger(__name__)
 
@@ -257,7 +258,7 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
         """
         super().__init__()
         try:
-            import opensim as osim  # noqa: PLC0415
+            osim = import_opensim()
         except ImportError as e:
             raise ImportError(
                 "opensim not found. Please install it with 'pip install opensim'."
@@ -320,7 +321,7 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
         Each actuator's control follows ctrl_j(t) = sum_k c_jk * t^k.
         Uses the OpenSim Manager with a prescribed control function.
         """
-        import opensim as osim  # noqa: PLC0415
+        osim = import_opensim()
 
         model = self._model
         state = model.initSystem()

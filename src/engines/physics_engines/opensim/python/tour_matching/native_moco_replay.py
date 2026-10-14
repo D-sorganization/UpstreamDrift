@@ -42,6 +42,7 @@ from .native_mixed_replay import (
 )
 from .registration import register_points
 from .trc import read_trc
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 if TYPE_CHECKING:
     from .muscle_replay import NativeMuscleReplayResult
@@ -87,7 +88,7 @@ class NativeMocoScore:
 def _solution(
     request: NativeMocoRequest, solved: NativeMocoSolve, directory: Path
 ) -> Any:
-    import opensim as osim
+    osim = import_opensim()
 
     if not solved.success or solved.solution_sha256 is None:
         raise ValueError("Successful, saved native solution is required")
@@ -147,7 +148,7 @@ def _native_control_history(
     original: NDArray[np.float64],
     output: NDArray[np.float64],
 ) -> dict[str, NDArray[np.float64]]:
-    import opensim as osim
+    osim = import_opensim()
 
     model = osim.Model(str(request.model_path))
     muscles = (

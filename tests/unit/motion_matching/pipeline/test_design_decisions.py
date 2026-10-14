@@ -25,7 +25,7 @@ def test_design_decisions_parser_and_order() -> None:
     )
 
     decisions = load_design_decisions(DOC_DIR)
-    assert len(decisions) == 20, f"Expected 20 decisions, got {len(decisions)}"
+    assert len(decisions) == 21, f"Expected 21 decisions, got {len(decisions)}"
 
     # Validate decision contents and verify all referenced receipt links exist on disk
     validate_design_decisions(decisions, repo_root=REPO_ROOT)

@@ -44,6 +44,7 @@ from .native_contact_policy import (
     native_contact_provider_sha256,
     validate_native_contact_execution,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
@@ -153,7 +154,7 @@ def _audit_source_components(
     native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
     contact_declaration: NativeContactExecutionDeclaration | None = None,
 ) -> None:
-    import opensim as osim
+    osim = import_opensim()
 
     if wrapped_path_declaration is not None:
         validate_wrapped_path_declaration(
@@ -360,7 +361,7 @@ def _owned_prepared(
 
     @contextmanager
     def prepared() -> Any:
-        import opensim as osim
+        osim = import_opensim()
 
         path = declaration.model_path
         raw = path.read_bytes()
@@ -711,7 +712,7 @@ def _replay_constrained_snapshot(
     exact_557: bool = False,
 ) -> ConstrainedMuscleReplay:
     """Integrate and detach numeric replay output before native teardown."""
-    import opensim as osim
+    osim = import_opensim()
     from .native_scalar_replay import (
         NativeScalarReplayPolicy,
         integrate_native_scalar_replay,
@@ -784,7 +785,7 @@ def observe_constrained_markers(
     indices: NDArray[np.intp],
 ) -> tuple[NDArray[np.float64], str]:
     """Sample declared source frames on replayed states without native assembly."""
-    import opensim as osim
+    osim = import_opensim()
     from .native_prepared_state import reconstruct_declared_cold_start
 
     if set(replay.state_names) != set(declaration.named_state) or not bindings:
