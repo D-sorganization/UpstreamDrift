@@ -9,6 +9,13 @@ The Movement Optimizer is consumed from the vendored Tools tree
 (``vendor/ud-tools/src``); the source commit and Tools pin are recorded in
 the bundle provenance.  The window is centred on the squat bottom (lowest
 bar sample) so the bundle covers the descent-to-ascent reversal.
+
+``--geometry back_bar`` (#12347) carries the bar on the torso shelf with the
+parity standard's grip width and a medio-lateral axis, and writes the derived
+spec into the bundle.  The committed bundle is still ``legacy`` (the golf club
+grip): regenerating it with ``back_bar`` changes the inputs of the bar-path,
+kinetics and barbell evidence (#12340, #12341, #12345), so that happens
+together with their regeneration, not before.
 """
 
 from __future__ import annotations
@@ -29,6 +36,10 @@ TOOLS_SRC = ROOT / "vendor" / "ud-tools" / "src"
 if str(TOOLS_SRC) not in sys.path:
     sys.path.append(str(TOOLS_SRC))
 
+from src.shared.python.lifting.back_bar import (  # noqa: E402
+    BACK_SQUAT,
+    BackBarGeometry,
+)
 from src.shared.python.lifting.bundles import (  # noqa: E402
     BACK_SQUAT_BUNDLE,
     LIFT_SPEC,
@@ -66,6 +77,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--bar-mass", type=float, default=100.0)
     parser.add_argument("--duration", type=float, default=3.0)
     parser.add_argument("--n-eval", type=int, default=151)
+    parser.add_argument(
+        "--geometry",
+        choices=("legacy", "back_bar"),
+        default="legacy",
+        help="legacy: golf club grip (committed bundle); back_bar: #12347 geometry",
+    )
     return parser
 
 
@@ -80,7 +97,14 @@ def main(argv: list[str] | None = None) -> int:
         n_eval=args.n_eval,
     )
     spec = LIFT_SPEC.read_bytes()
-    lift = lift_to_full_body(spec, solution, load_seed_pose())
+    geometry = (
+        BackBarGeometry.from_standard(BACK_SQUAT, height_m=args.height)
+        if args.geometry == "back_bar"
+        else None
+    )
+    lift = lift_to_full_body(spec, solution, load_seed_pose(), geometry=geometry)
+    if lift.back_bar is not None:
+        spec = lift.back_bar.spec_bytes
     for label, value in lift.max_residual_by_landmark().items():
         logger.info("IK max residual %-10s %.5f m", label, value)
     logger.info("IK max closure %.3e m", lift.closure_m.max())

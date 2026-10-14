@@ -115,6 +115,46 @@ def lift_via_pose_names(lift: str) -> tuple[str, ...]:
     return tuple(_lift_block(lift).get("via_poses", {}))
 
 
+@dataclass(frozen=True)
+class LiftGrip:
+    """A lift's grip: palm-centre width on the bar and the standard's range."""
+
+    attach: str
+    kind: str
+    width_m: float
+    width_range_m: tuple[float, float]
+
+
+def lift_grip(lift: str) -> LiftGrip:
+    """Grip of *lift* from the standard (palm centres ``width_m`` apart).
+
+    Postcondition: ``width_m`` lies inside ``width_range_m``.
+
+    Raises:
+        ValueError: If *lift* is unknown.
+    """
+    raw = _lift_block(lift)["grip"]
+    low, high = (float(v) for v in raw["width_range_m"])
+    grip = LiftGrip(
+        attach=str(raw["attach"]),
+        kind=str(raw["type"]),
+        width_m=float(raw["width_m"]),
+        width_range_m=(low, high),
+    )
+    assert low <= grip.width_m <= high, f"{lift}: grip width outside its range"
+    return grip
+
+
+def bar_axis() -> tuple[float, float, float]:
+    """Bar long axis in the standard's canonical frame (``+Y``: medio-lateral)."""
+    return _triple(_standard()["grip_point"]["bar_axis"])
+
+
+def standard_height_m() -> float:
+    """Height the standard's positions are given for (they scale linearly)."""
+    return float(_standard()["anthropometrics"]["height_m"])
+
+
 def _triple(values: Any) -> tuple[float, float, float]:
     x, y, z = (float(v) for v in values)
     return (x, y, z)
