@@ -17,6 +17,7 @@ from types import ModuleType
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 from defusedxml import ElementTree as SafeET
 
 from src.engines.physics_engines.opensim.python import club_visuals
@@ -222,7 +223,7 @@ def test_bushing_grip_model_frees_the_club_with_two_bushings(tmp_path: Path) -> 
 # ------------------------------------------------------------------ OpenSim
 @pytest.fixture(scope="module")
 def osim():  # noqa: ANN201
-    module = pytest.importorskip("opensim")
+    module = require_opensim()
     if not hasattr(module, "Model"):
         pytest.skip("opensim in sys.modules is a test double")
     club_visuals.register_geometry_path()

@@ -10,6 +10,7 @@ from defusedxml import ElementTree
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 from src.engines.physics_engines.opensim.python.tour_matching.native_body_inertia import (
     audit_native_body_inertia,
@@ -24,7 +25,7 @@ def _digest(path: Path) -> str:
 
 
 def _model(path: Path, *, mass: float = 1.0, welded: bool = False) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     body = osim.Body(
         "segment", mass, osim.Vec3(0.1, -0.2, 0.3), osim.Inertia(0.03, 0.04, 0.05)
@@ -130,7 +131,7 @@ def test_exact_zero_mass_and_zero_inertia_route_is_explicit(tmp_path: Path) -> N
 def test_native_mass_readback_mismatch_is_rejected(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     source = tmp_path / "body.osim"
     _model(source)
     native_model = osim.Model

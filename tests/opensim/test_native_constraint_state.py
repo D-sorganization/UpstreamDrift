@@ -10,6 +10,7 @@ import re
 from typing import Any
 
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 from src.engines.physics_engines.opensim.python.tour_matching.native_constraint_state import (
     audit_native_constraint_state,
@@ -20,7 +21,7 @@ pytestmark = pytest.mark.unit
 
 
 def _pin_model(*, locked: bool = False) -> tuple[Any, Any, Any]:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     body = osim.Body("body", 1, osim.Vec3(0, -0.5, 0), osim.Inertia(1, 1, 1))
     joint = osim.PinJoint(
@@ -72,7 +73,7 @@ def test_declared_lock_target_does_not_become_verified_native_target() -> None:
 
 
 def test_model_owned_lock_target_can_change_another_native_state() -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model, first, coordinate = _pin_model(locked=True)
     before = audit_native_constraint_state(model, first)
     second = osim.State(first)
@@ -128,7 +129,7 @@ def test_source_audit_requires_complete_named_state(
 
 
 def test_native_coupler_enforcement_is_observed_separately() -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model, _, _ = _pin_model()
     body = osim.Body("second", 1, osim.Vec3(0), osim.Inertia(1, 1, 1))
     joint = osim.PinJoint(
@@ -166,7 +167,7 @@ def test_native_coupler_enforcement_is_observed_separately() -> None:
 
 
 def test_nonmuscle_assistance_remains_enabled_and_visible() -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model, _, _ = _pin_model()
     assistance = osim.CoordinateActuator("q")
     assistance.setName("reserve")
@@ -211,7 +212,7 @@ def test_target_container_requires_mapping_even_when_empty(targets: object) -> N
 def test_missing_visual_mesh_native_log_does_not_break_owned_xml_cleanup(
     tmp_path: Path,
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model, _, _ = _pin_model()
     body = model.updBodySet().get("body")
     body.attachGeometry(osim.Mesh("missing-visual-only.vtp"))

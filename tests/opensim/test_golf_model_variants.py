@@ -17,6 +17,7 @@ from __future__ import annotations
 from pathlib import Path
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 from src.engines.physics_engines.opensim.python.tour_matching.model_variants import (
     ActuationProfile,
@@ -213,7 +214,7 @@ def test_muscle_replay_api_reports_validation_without_simulation() -> None:
 
 def test_native_muscle_inventory_matches_sdk_model_readback(tmp_path: Path) -> None:
     """A positive native fixture reports only muscles actually loaded by OpenSim."""
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     model.setName("one_native_muscle")
     model.setGravity(osim.Vec3(0))
@@ -256,7 +257,7 @@ def test_native_muscle_inventory_matches_sdk_model_readback(tmp_path: Path) -> N
 
 def test_shipped_golf_model_has_no_native_muscles_when_sdk_is_available() -> None:
     """The shipped golf asset is read through OpenSim, not its declared target list."""
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     expected_count = int(osim.Model(str(SCALED_MODEL_PATH)).getMuscles().getSize())
     variant = create_muscle_model_variant(SCALED_MODEL_PATH)
 

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 from src.engines.physics_engines.opensim.python import club_visuals
 from src.engines.physics_engines.opensim.python import msk_club as mc
@@ -32,7 +33,7 @@ def _angle_deg(a: np.ndarray, b: np.ndarray) -> float:
 
 @pytest.fixture(scope="module")
 def cal():  # noqa: ANN201
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     if not hasattr(osim, "Model"):
         pytest.skip("opensim in sys.modules is a test double")
     club_visuals.register_geometry_path()
