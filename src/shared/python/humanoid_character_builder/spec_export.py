@@ -165,6 +165,10 @@ def preset_listing() -> list[dict[str, Any]]:
     ]
 
 
+from src.shared.python.humanoid_character_builder.cross_engine_parity import (
+    verify_cross_engine_l0_parity,
+)
+
 __all__ = [
     "EXPORT_FORMATS",
     "CompiledCharacter",
@@ -174,4 +178,5 @@ __all__ = [
     "export_character",
     "preset_listing",
     "resolve_parameters",
+    "verify_cross_engine_l0_parity",
 ]
