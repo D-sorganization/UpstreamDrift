@@ -31,7 +31,6 @@ from src.shared.python.reporting.swing_report.adapters_base import QuantityData
 from src.shared.python.reporting.swing_report.contract import Capture
 from src.shared.python.reporting.swing_report.policy import WITHHELD
 from src.shared.python.reporting.swing_report.validator import validate_swing_report
-from tests.helpers.opensim_support import require_opensim
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
@@ -259,7 +258,7 @@ def test_real_pinocchio_version_probe() -> None:
 
 @pytest.mark.requires_opensim
 def test_real_opensim_version_probe() -> None:
-    require_opensim()
+    pytest.importorskip("opensim")
     assert OpensimAdapter().engine_version() != "unknown"
 
 
