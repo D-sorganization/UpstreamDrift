@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.secur
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 from src.engines.physics_engines.opensim.python import msk_club
 from src.engines.physics_engines.opensim.python.grip_closure import (
@@ -114,7 +115,7 @@ def test_msk_club_grip_points_follow_the_grip_pose(club: str) -> None:
 
 @pytest.mark.parametrize("model", RAJAGOPAL_MODELS)
 def test_rajagopal_models_load_with_the_trail_constraint(model: str) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     loaded = osim.Model(str(MODELS / model))
     loaded.initSystem()
     constraints = loaded.getConstraintSet()
@@ -125,7 +126,7 @@ def test_rajagopal_models_load_with_the_trail_constraint(model: str) -> None:
 def test_generated_weld_closure_stays_within_tolerance_on_the_canned_swing(
     club: str,
 ) -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     spec = json.loads((SPECS / f"full_body_spec_anthro_{club}.json").read_bytes())
     swing = load_coordinate_swing(
         FIXTURES / f"swing_q_{club}.npz",

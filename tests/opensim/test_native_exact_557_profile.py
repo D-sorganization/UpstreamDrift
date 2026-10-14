@@ -10,6 +10,7 @@ from typing import Any
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 from src.engines.physics_engines.opensim.python.tour_matching.native_exact_557_profile import (
     EXACT_SOURCE_SHA256,
@@ -33,7 +34,7 @@ def _native_declaration() -> tuple[
     Any, np.ndarray[Any, Any], dict[str, np.ndarray[Any, Any]]
 ]:
     source, preparation = _installed_source()
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
 
     from src.engines.physics_engines.opensim.python.tour_matching.native_prepared_state import (
         DeclaredColdStart,

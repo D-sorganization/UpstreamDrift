@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 from src.engines.physics_engines.opensim.python.native_buet_hamner_assembly import (
     BuetHamnerAssemblyRequest,
@@ -31,7 +32,7 @@ def _sources() -> tuple[Path, Path]:
 def test_exact_source_assembly_preserves_owned_regions_after_reload(
     tmp_path: Path,
 ) -> None:
-    opensim = pytest.importorskip("opensim")
+    opensim = require_opensim()
     buet, hamner = _sources()
     output = tmp_path / "owned_assembly.osim"
     receipt = assemble_buet_hamner(

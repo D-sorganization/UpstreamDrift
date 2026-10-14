@@ -7,6 +7,7 @@ from defusedxml import ElementTree as SafeET
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 from src.engines.physics_engines.opensim.python.tour_matching.moco_initial_bindings import (
     MocoInitialBindings,
@@ -65,7 +66,7 @@ def _native_inputs(
     tmp_path: Path,
     times: np.ndarray | None = None,
 ) -> tuple[Path, Path, Path, MocoInitialBindings]:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = fixture
     model = osim.Model(str(path))
     model.addMarker(
@@ -146,7 +147,7 @@ def test_native_marker_weights_bind_every_selected_reference(
         initial_bindings=binding,
         marker_weights={"load_marker": 2.5},
     )
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     goal = osim.MocoMarkerTrackingGoal.safeDownCast(
         study.updProblem().updGoal("marker_tracking")
     )
@@ -207,7 +208,7 @@ def test_fixed_bounds_are_explicitly_supported() -> None:
 def test_native_existing_controller_requires_separate_policy(
     muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, trc, guess, binding = _native_inputs(muscle_fixture, tmp_path)
     model = osim.Model(str(path))
     controller = osim.PrescribedController()
@@ -229,7 +230,7 @@ def test_native_existing_controller_requires_separate_policy(
 def test_native_vector_actuator_requires_explicit_control_mapping(
     muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, trc, guess, binding = _native_inputs(muscle_fixture, tmp_path)
     model = osim.Model(str(path))
     actuator = osim.BodyActuator()
