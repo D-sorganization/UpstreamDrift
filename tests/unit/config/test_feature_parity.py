@@ -41,6 +41,22 @@ def test_club_head_and_ball_render_parity() -> None:
     assert "ballPositionAtAddress" in entry.notes
 
 
+def test_launch_monitor_analytics_parity() -> None:
+    """tools.launch_monitor_analytics must have status 'parity' and no open gap issue."""
+    registry = FeatureParityRegistry.load()
+    entry = registry.get("tools.launch_monitor_analytics")
+    assert entry is not None, (
+        "tools.launch_monitor_analytics entry missing from registry"
+    )
+
+    assert entry.status == "parity"
+    assert entry.issue is None, "Parity entry must not retain an open gap issue"
+    assert entry.pyqt == "src/tools/launch_monitor_analytics/gui.py"
+    assert entry.web == "ui/src/pages/LaunchMonitorAnalytics.tsx"
+    assert "LaunchMonitorSessionsPanel.tsx" in entry.notes
+    assert "LaunchMonitorReportsPanel.tsx" in entry.notes
+
+
 def test_all_gap_entries_have_valid_issues() -> None:
     """Every entry with status 'gap' must cite an open issue number."""
     registry = FeatureParityRegistry.load()
