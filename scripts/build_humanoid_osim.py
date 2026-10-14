@@ -66,7 +66,6 @@ Notes
 from __future__ import annotations
 
 import argparse
-import math
 import os
 import sys
 from pathlib import Path
@@ -77,7 +76,10 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from src.engines.physics_engines.opensim.python import msk_club  # noqa: E402
+from src.engines.physics_engines.opensim.python import (  # noqa: E402
+    golf_joint_limits,
+    msk_club,
+)
 
 _SUBMODULE_BASE_OSIM = (
     REPO_ROOT
@@ -131,13 +133,8 @@ GOLF_UNLOCKED_COORDINATES: tuple[str, ...] = (
     "mtp_angle_l",
 )
 
-GOLF_COORDINATE_RANGES: dict[str, tuple[float, float]] = {
-    "arm_flex_r": (math.radians(-120.0), math.radians(180.0)),
-    "arm_flex_l": (math.radians(-120.0), math.radians(180.0)),
-    "lumbar_rotation": (math.radians(-120.0), math.radians(120.0)),
-    "wrist_dev_r": (math.radians(-45.0), math.radians(45.0)),
-    "wrist_dev_l": (math.radians(-45.0), math.radians(45.0)),
-}
+#: Single source of the golf range overrides (forearm included, #12315).
+GOLF_COORDINATE_RANGES = golf_joint_limits.GOLF_COORDINATE_RANGES
 
 
 def _parse(path: Path) -> ET.ElementTree:

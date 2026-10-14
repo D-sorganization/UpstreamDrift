@@ -96,8 +96,10 @@ following modifications:
    their physiological deviation range, follows
    the generated model's hip, shoulder and elbow centres at the captured
    address and plants the feet (the generated feet are unobserved). The
-   lead forearm then sits at the Rajagopal pronation limit (90 deg,
-   neutral): a lead palm facing away from the target needs neutral or more,
+   lead forearm then sat at the Rajagopal pronation limit (90 deg,
+   neutral; the golf models now allow 80 deg of pronation past neutral, AAOS
+   normative, `golf_joint_limits.py`, #12315, with the stored calibration
+   still to be regenerated): a lead palm facing away from the target needs neutral or more,
    and the address landmark RMS rises from 14 to 25 mm (driver) and 15 to
    23 mm (7-iron) for `golf_humanoid`. The report lists the coordinates left
    at a range bound; `ADDRESS_BOUND_REASONS` records why the scaled model's

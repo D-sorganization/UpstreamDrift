@@ -44,7 +44,7 @@ from typing import Any
 
 import numpy as np
 
-from src.engines.physics_engines.opensim.python import club_visuals
+from src.engines.physics_engines.opensim.python import club_visuals, golf_joint_limits
 from src.engines.physics_engines.opensim.python import msk_club as mc
 from src.shared.python.model_appearance import club_assembly as ca
 from src.shared.python.model_appearance import club_face as cf
@@ -119,9 +119,14 @@ PALM_FACING = {
 #: Distance (rad or m) from a range bound below which the report lists a
 #: coordinate as sitting at that bound.
 BOUND_MARGIN = 0.01
+#: The forearm entries are the golf models' own range (no narrower address
+#: limit), taken from the one source so the reported bound check follows it
+#: (#12315).
 ADDRESS_RANGES = {
     "wrist_dev_r": (-0.43633231, 0.61086524),
     "wrist_dev_l": (-0.43633231, 0.61086524),
+    "pro_sup_r": golf_joint_limits.GOLF_COORDINATE_RANGES["pro_sup_r"],
+    "pro_sup_l": golf_joint_limits.GOLF_COORDINATE_RANGES["pro_sup_l"],
 }
 _SCALED_WRIST = (
     "the scaled skeleton misses the generated landmarks by 4-7 cm (straight "
