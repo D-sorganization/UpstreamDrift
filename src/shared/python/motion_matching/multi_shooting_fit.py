@@ -39,6 +39,9 @@ from src.shared.python.motion_matching.prefix_fit import (
     MarkerTarget,
     _readonly,
 )
+from src.shared.python.motion_matching.pipeline.finish_feasibility import (
+    evaluate_finish_root_yaw_feasibility,
+)
 
 Array: TypeAlias = NDArray[np.float64]
 SegmentedForward: TypeAlias = Callable[
@@ -87,6 +90,7 @@ class MultipleShootingOptions:
     pelvis_indices: tuple[int, int] | None = None
     pelvis_yaw_weight: float = 0.0
     pelvis_yaw_max_error_pct: float = 5.0
+    root_yaw_weight: float = 0.0
     regularization: Callable[[Array], Array] | None = None
     callback: Callable[[Array, Array, float], None] | None = None
     checkpoint_callback: (
@@ -145,6 +149,8 @@ class MultipleShootingOptions:
             )
         if self.defect_weight < 0:
             raise ValueError("defect_weight must be non-negative")
+        if self.root_yaw_weight < 0:
+            raise ValueError("root_yaw_weight must be non-negative")
         if self.defect_tolerance <= 0:
             raise ValueError("defect_tolerance must be positive")
         if self.step_tolerance is not None and (
@@ -191,6 +197,7 @@ class MultipleShootingFit:
     terminal_replay_gap_m: float | None = None
     pelvis_yaw_diff_deg: float = 0.0
     pelvis_yaw_error_pct: float = 0.0
+    root_yaw_diff_deg: float = 0.0
     theta_uncertainty: ParameterUncertainty | None = None
 
 
@@ -380,7 +387,12 @@ def fit_multiple_shooting(
                 term_delta = (pred_markers[-1] - last_w_points[-1])[last_w_obs[-1]]
                 res_parts.append(options.terminal_weight * term_delta.ravel())
 
-        if options.pelvis_indices is not None and options.pelvis_yaw_weight > 0:
+        effective_yaw_weight = (
+            options.root_yaw_weight
+            if options.root_yaw_weight > 0
+            else options.pelvis_yaw_weight
+        )
+        if options.pelvis_indices is not None and effective_yaw_weight > 0:
             wl_i, wr_i = options.pelvis_indices
             pred_term = (
                 pred_markers[-1] if pred_markers.shape[1] > max(wl_i, wr_i) else None
@@ -391,7 +403,7 @@ def fit_multiple_shooting(
                 target_markers_term=obs_term,
                 wl_i=wl_i,
                 wr_i=wr_i,
-                yaw_weight=options.pelvis_yaw_weight,
+                yaw_weight=effective_yaw_weight,
             )
             res_parts.append(yaw_res)
 
@@ -490,10 +502,15 @@ def fit_multiple_shooting(
                 terminal_jac = options.terminal_weight * global_marker[
                     -1, observed[-1]
                 ].reshape(-1, p.size)
+            effective_yaw_weight = (
+                options.root_yaw_weight
+                if options.root_yaw_weight > 0
+                else options.pelvis_yaw_weight
+            )
             if (
                 i == n_windows - 1
                 and options.pelvis_indices is not None
-                and options.pelvis_yaw_weight > 0
+                and effective_yaw_weight > 0
             ):
                 wl_i, wr_i = options.pelvis_indices
                 obs_term = (
@@ -517,7 +534,7 @@ def fit_multiple_shooting(
                     target_markers_term=obs_term,
                     wl_i=wl_i,
                     wr_i=wr_i,
-                    yaw_weight=options.pelvis_yaw_weight,
+                    yaw_weight=effective_yaw_weight,
                     marker_jac_term=global_marker[-1],
                 )
                 pelvis_yaw_jac = yaw_jac
@@ -712,6 +729,7 @@ def fit_multiple_shooting(
         terminal_replay_gap_m=terminal_replay_gap,
         pelvis_yaw_diff_deg=pelvis_yaw_diff_deg,
         pelvis_yaw_error_pct=pelvis_yaw_error_pct,
+        root_yaw_diff_deg=pelvis_yaw_diff_deg,
         theta_uncertainty=theta_uncertainty,
     )
 
