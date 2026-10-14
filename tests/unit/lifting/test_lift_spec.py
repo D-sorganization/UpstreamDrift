@@ -15,6 +15,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from src.shared.python.lifting import lift_spec
 from src.shared.python.lifting.pack_audit import analysis
 from src.shared.python.lifting.pack_audit.names import CANONICAL_COORDINATES, LIFTS
