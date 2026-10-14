@@ -25,7 +25,7 @@
 \title{Same-Input Cross-Engine Dynamics Parity\\[4pt]
 \large Calculation Reference for Epic \#11605 (Child P-9, Issue \#11614)}
 \author{UpstreamDrift Research Reference}
-\date{Revision 2026-10-06 \quad (levels L1, L2 and L3 reported)}
+\date{Revision 2026-10-14 \quad (levels L1, L2 and L3 reported; effort hold of \#12279 added)}
 
 \begin{document}
 \maketitle
@@ -204,7 +204,8 @@ the spec hash, closure-consistent $\bq_0,\bv_0$, the per-step joint efforts
 $\bt_k$, contact parameters and marker attachments.  The policy is identical in
 every engine:
 \begin{itemize}[nosep]
-\item classical RK4 with efforts held zero-order over each step;
+\item classical RK4 with efforts held zero-order over each hold (by default one
+  hold per step; see the effort-hold paragraph below);
 \item $1$~ms step with $8$ substeps (effective $0.125$~ms);
 \item exact weld KKT solve (Eq.~\eqref{eq:kkt}, no regularisation);
 \item closest-point closure projection after each step, tolerance
@@ -221,6 +222,61 @@ the RK4 stability region.  Two bundles were generated on 2026-10-06 on host
 tracks the capture about $4\times$ more loosely than the canonical pipeline
 (joint RMS $0.017$ versus $0.004$~rad), so the bundle is a dynamics-parity
 input and not a capture-matching result.
+
+\paragraph{Effort Hold (Issue \#12279).}  The reference export evaluates the
+pipeline computed-torque controller and holds each sample.  The hold length
+$h_e$ is a manifest parameter: with step $\Delta t=1$~ms, the number of holds
+per step is $n_h=\Delta t/h_e$, which must be an integer that divides the $8$
+RK4 substeps (so $n_h\in\{1,2,4,8\}$); \texttt{effort\_holds\_for} raises
+\texttt{ValueError} otherwise.  Hold $kn_h+i$ (hold $i$ of step $k$) is
+sampled at its start state and integrated with $8/n_h$ RK4 substeps of size
+$h_e/(8/n_h)$.  The closure projection still runs once per $1$~ms step.  The
+manifest records \texttt{policy.effort\_holds\_per\_step} and
+\texttt{policy.effort\_hold\_s}; for $n_h>1$ the bundle also stores
+\texttt{hold\_efforts} ($\text{steps}\times n_h$ rows), and \texttt{efforts}
+keeps each step's first hold.  Replays call \texttt{replay\_efforts()} with
+\texttt{step\_policy()} so every engine uses the recorded hold, and bundles
+without the keys load as one hold.  The default stays $1$~ms (owner ruling
+2026-10-11), which is bit-identical to the earlier integrator.  Every
+cross-engine receipt in this document (bundles and receipts of 2026-10-06) was
+produced with the default hold; \emph{no cross-engine receipt exists yet for a
+finer hold.}  A bundle may also carry a latched ball-impact plan
+(\texttt{provenance.ball\_impact}, GCV-20, \#11767) that every engine applies
+identically; this reference reports no impact-bearing parity result.
+
+\paragraph{Hold Measurements (Tracking Fidelity, Not Engine Parity).}
+Measured on host \texttt{brick} for \#12279 (7-iron run \texttt{s38-fxi2},
+$0$--$0.9$~s), recorded in \url{docs/development/full_body_models/DESIGN_DECISIONS_2.md}
+section~20 (merged in PR \#12478, commit \texttt{422bf65f8b}) and
+\texttt{simscape\_matching\_reference.tex}; they were taken in
+that session and not re-run for this revision.
+\begin{center}\small
+\begin{tabular}{lrrrr}
+\toprule
+Hold & Max foot slip & Slip $>10$~mm from & Root error at 0.7~s & \texttt{mtp\_angle\_r} error at 0.8~s\\
+\midrule
+1~ms (default) & 43~mm & 0.71~s & 24.0~mm & $-0.147$~rad\\
+0.125~ms & 3.3~mm & none & 8.2~mm & $-0.001$~rad\\
+\bottomrule
+\end{tabular}
+\end{center}
+Over the full horizon the 7-iron bundle gives $-5.0$\,\%, $-5.1$~ms, $8.71^\circ$
+(GCV-20 speed, peak timing, OSV-10 angle) with the $1$~ms hold and
+$-2.5$\,\%, $-7.3$~ms, $5.56^\circ$ with $0.125$~ms; the driver bundle gives
+$-2.5$\,\%, $-4.4$~ms, $16.88^\circ$ and $-1.2$\,\%, $-3.5$~ms, $16.91^\circ$.
+The finer hold fixes speed, face and foot contact, but the $7.3$~ms early
+7-iron peak still exceeds the $5$~ms limit, so that fixture still misses
+GCV-20 (follow-up under \#11767).  No tolerance was changed.  The engine-free
+test \texttt{tests/unit/motion\_matching/same\_input/test\_effort\_hold.py}
+uses a toy computed-torque loop (bandwidth $1500$~rad/s) with an exact
+tracked solution: the $1$~ms hold diverges from it and the $0.125$~ms hold
+stays within $10^{-6}$~rad.
+
+\paragraph{Rejected Alternatives.}  Making $0.125$~ms the default (owner
+ruling 2026-10-11: it would change every committed bundle and per-step
+consumer at once); a faster closure projection instead of a finer hold (the
+\#12279 measurements show the hold, not the projection rate, slides the feet);
+and hold counts that do not divide the substeps (uneven RK4 substeps).
 
 \section{Full-Swing Results (Levels L2 and L3)}\label{sec:fullswing}
 Error is the worst absolute generalized-coordinate difference against the
@@ -337,6 +393,14 @@ Simscape & --- & pending on the MATLAB R2025b host (P-8, \#11613)\\
 \end{tabular}
 \end{table}
 
+Child issues of epic \#11605 (state on 2026-10-14): P-1 (\#11606) and P-2
+(\#11607) closed, merged in PRs \#11615 and \#11628; P-5 (\#11610), P-6
+(\#11611) and P-7 (\#11612) closed, merged in PR \#11628; P-3 (\#11608) and
+P-4 (\#11609) are still open, so the Drake and Pinocchio rows above rest on the
+receipts listed in this document and are not claimed to close those issues;
+P-8 (\#11613) is open and pending; P-9 (\#11614) is this living reference
+(PRs \#11616, \#11625, \#11806 and this revision).
+
 \section{Reproduction}
 From the repository root:
 \begin{verbatim}
@@ -347,7 +411,7 @@ The first command rewrites the pointwise receipt; the second runs the
 behavioural tests.  The full-swing results are reproduced with
 \begin{verbatim}
 PYTHONPATH=.:src python -m scripts.same_input_bundle export \
-    --run-dir RUN --out bundle.npz
+    --run-dir RUN --out bundle.npz [--effort-hold-ms 0.125]
 PYTHONPATH=.:src python -m scripts.same_input_bundle replay \
     --bundle bundle.npz --engine {mujoco,drake,pinocchio,opensim,myosuite} \
     --out r.json [--segment-ms 50]
@@ -361,6 +425,10 @@ This document compiles with \texttt{tectonic same\_input\_parity.tex}.
 \section{Limitations}
 \begin{itemize}[nosep]
 \item Simscape (P-8, \#11613) is pending on the MATLAB R2025b host.
+\item The effort-hold measurements (\#12279) are single-host numbers from the
+  issue thread and were not re-run; the club-face fixtures are not regenerated
+  with the finer hold, and no cross-engine parity receipt exists at a finer
+  hold or with a ball-impact plan.
 \item Two bundles (one driver, one 7-iron swing) were compared, each from one
   anthropometric spec.
 \item Single full-horizon open loop cannot meet $10^{-6}$~rad beyond about
