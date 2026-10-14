@@ -182,7 +182,8 @@ class DrakeAdapter(EngineAdapter):
                 f"{self.pack.package} ships no contact_results.measure_ground_reaction"
             )
         try:
-            diagram = self.loaded.builder.Build()
+            builder = self.loaded.builder
+            diagram = builder.Build()
             root = diagram.CreateDefaultContext()
             plant_ctx = diagram.GetMutableSubsystemContext(self.plant, root)
             reaction = measure(self.plant, plant_ctx)
