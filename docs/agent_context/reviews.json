@@ -19,14 +19,14 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "51361ed30afae604c190097c8e49a640b1fd1245fe05d6cdda13cef9ca21201a",
+      "fingerprint": "1a673915c9b3e06f89ef570d922bc62d9fb30bff660835123da495a70ec839fd",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "d1f2a8805bec1187742e18ba7f99c2686a21708521e7a878d1ab85c8e585c73e",
+        "src/config/feature_parity.json": "01045c26354a735d6223a41c85723da22b52d878e8de81facdfb4989de019db7",
         "src/config/launcher_manifest.json": "abc9913955858006e7bb6b8e9dca8c9693313e62d48d90dcc1ace33e632a79dc",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
         "src/config/models.yaml": "2a2e303aa92f6dda0ef3868fcc881ccbdbc54cf362ac3aae931333163969b90f",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Reviewed the merge of main fe7aa8165a/6bc0262265 into #12418: feature_parity.json, launcher_manifest.json and models.yaml differ from main only by the shot_pattern_analysis tile and its exempt parity entry; main's reporting.swing_report_dialog entry is preserved. The parity matrix, capability atlas and ORG-01 baseline were regenerated (182 entries); 107 atlas, goal-catalog, companion-catalog and feature-parity tests pass. Inventory and software evidence only, not runtime availability or physical qualification."
+      "rationale": "Refreshed capability atlas and agent views after main sync for bunker API compare (#12449)."
     },
     "model-backends": {
       "fingerprint": "da739fcd3c56f6c4a3923b4f31202e515023487a49d54ca449090d33186a9685",

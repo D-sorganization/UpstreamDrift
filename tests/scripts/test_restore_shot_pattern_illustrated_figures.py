@@ -64,7 +64,11 @@ def _archive_bytes(members: dict[str, bytes]) -> bytes:
     handle = io.BytesIO()
     with zipfile.ZipFile(handle, "w") as archive:
         for name, content in members.items():
-            archive.writestr(name, content)
+            info = zipfile.ZipInfo(name)
+            # ZipInfo folds os.sep to "/" on Windows; write the raw name so a
+            # hostile backslash member is reproduced on every platform.
+            info.filename = name
+            archive.writestr(info, content)
     return handle.getvalue()
 
 
@@ -176,3 +180,263 @@ def test_legacy_hash_mismatch_writes_nothing(
     )
     assert restore.main() == 1
     assert not (report / path).exists()
+
+
+# --- Adversarial hardening (#12304) -----------------------------------------
+
+APPROVED = "phase2/final_figures_v1/details/approved.pdf"
+ARTICLE_BYTES = b"reviewed 39-page source"
+
+
+def _legacy_setup(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    archive: bytes,
+    *,
+    content: bytes = b"approved figure",
+) -> tuple[Path, Path]:
+    """Build a legacy-mode report root with a reviewed article and an archive."""
+    report = tmp_path / "report"
+    report.mkdir()
+    _legacy_selection(report, APPROVED, content)
+    article = report / "phase2/presentation_v2/article.tex"
+    article.parent.mkdir(parents=True)
+    article.write_bytes(ARTICLE_BYTES)
+    monkeypatch.setattr(restore, "_report_root", lambda: report)
+    monkeypatch.setattr(restore, "ARCHIVE_SHA256", _sha(archive))
+    monkeypatch.setattr(
+        restore, "_download_archive", lambda dest: dest.write_bytes(archive)
+    )
+    return report, article
+
+
+def _forbid_download(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        restore, "_download_archive", lambda _: pytest.fail("download attempted")
+    )
+
+
+@pytest.mark.parametrize(
+    "unsafe",
+    [
+        "../escaped.pdf",
+        "/etc/escaped.pdf",
+        "//server/share/escaped.pdf",
+        "C:/escaped.pdf",
+        "C:escaped.pdf",
+        "phase2/final_figures_v1/details/C:escaped.pdf",
+        "phase2/final_figures_v1/details/approved.pdf:stream.pdf",
+        "phase2/final_figures_v1/details/..\\..\\escaped.pdf",
+        "phase2/final_figures_v1/details/../../presentation_v2/article.pdf",
+        "phase2/final_figures_v1/details/./approved.pdf",
+        "phase2/final_figures_v1/details//approved.pdf",
+        "phase2/final_figures_v1/details/sub /approved.pdf",
+        "phase2/final_figures_v1/details/sub./approved.pdf",
+        "phase2/final_figures_v1/details/approved\x00.pdf",
+        "phase2/final_figures_v1/details/approved.pdf.",
+        "phase2/final_figures_v1/details/approved.PDF",
+        "phase2/final_figures_v1/details/article.tex",
+        "phase2/presentation_v2/article.tex",
+        "phase2/presentation_v2/summary.pdf",
+    ],
+)
+def test_legacy_selection_rejects_unsafe_paths_before_download(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, unsafe: str
+) -> None:
+    report = tmp_path / "report"
+    report.mkdir()
+    _legacy_selection(report, unsafe, b"escape")
+    monkeypatch.setattr(restore, "_report_root", lambda: report)
+    _forbid_download(monkeypatch)
+    assert restore.main() == 1
+    assert not (tmp_path / "escaped.pdf").exists()
+
+
+def test_legacy_selection_rejects_case_insensitive_collisions(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    report = tmp_path / "report"
+    selection = (
+        report / "phase2/validation/illustrated_article_v1/figure_selection.json"
+    )
+    selection.parent.mkdir(parents=True)
+    figures = [
+        {"path": APPROVED, "sha256": _sha(b"one")},
+        {"path": APPROVED.replace("approved", "Approved"), "sha256": _sha(b"two")},
+    ]
+    selection.write_text(json.dumps({"figures": figures}), encoding="utf-8")
+    monkeypatch.setattr(restore, "_report_root", lambda: report)
+    _forbid_download(monkeypatch)
+    assert restore.main() == 1
+
+
+def test_legacy_archive_duplicate_member_writes_nothing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    handle = io.BytesIO()
+    with (
+        pytest.warns(UserWarning, match="Duplicate name"),
+        zipfile.ZipFile(handle, "w") as bundle,
+    ):
+        bundle.writestr(APPROVED, b"approved figure")
+        bundle.writestr(APPROVED, b"evil twin")
+    report, article = _legacy_setup(tmp_path, monkeypatch, handle.getvalue())
+    assert restore.main() == 1
+    assert not (report / APPROVED).exists()
+    assert article.read_bytes() == ARTICLE_BYTES
+
+
+@pytest.mark.parametrize(
+    "alias",
+    [
+        APPROVED.replace("/", "\\"),
+        APPROVED.replace("approved", "APPROVED"),
+    ],
+)
+def test_legacy_archive_rejects_aliased_members(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, alias: str
+) -> None:
+    """A backslash or case alias of an allowlisted member is ambiguous on
+    Windows (zipfile and NTFS fold it onto the same path) and must fail closed
+    on every platform rather than restore whichever entry happens to win."""
+    archive = _archive_bytes({APPROVED: b"approved figure", alias: b"evil twin"})
+    report, article = _legacy_setup(tmp_path, monkeypatch, archive)
+    assert restore.main() == 1
+    assert not (report / APPROVED).exists()
+    assert article.read_bytes() == ARTICLE_BYTES
+
+
+def test_legacy_archive_backslash_only_member_is_not_trusted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    archive = _archive_bytes({APPROVED.replace("/", "\\"): b"approved figure"})
+    report, _ = _legacy_setup(tmp_path, monkeypatch, archive)
+    assert restore.main() == 1
+    assert not (report / APPROVED).exists()
+
+
+def test_legacy_archive_rejects_symlink_member(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    handle = io.BytesIO()
+    with zipfile.ZipFile(handle, "w") as bundle:
+        info = zipfile.ZipInfo(APPROVED)
+        info.create_system = 3  # Unix, so the mode bits are meaningful
+        info.external_attr = 0o120777 << 16  # S_IFLNK
+        bundle.writestr(info, b"approved figure")
+    report, article = _legacy_setup(tmp_path, monkeypatch, handle.getvalue())
+    assert restore.main() == 1
+    assert not (report / APPROVED).exists()
+    assert article.read_bytes() == ARTICLE_BYTES
+
+
+def _deflated(name: str, content: bytes) -> bytes:
+    handle = io.BytesIO()
+    with zipfile.ZipFile(handle, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
+        bundle.writestr(name, content)
+    return handle.getvalue()
+
+
+def test_legacy_archive_rejects_oversized_member(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    bomb = b"\0" * 4096
+    archive = _deflated(APPROVED, bomb)
+    report, _ = _legacy_setup(tmp_path, monkeypatch, archive, content=bomb)
+    monkeypatch.setattr(restore, "MAX_MEMBER_BYTES", 1024)
+    assert restore.main() == 1
+    assert not (report / APPROVED).exists()
+
+
+def test_legacy_archive_caps_member_that_lies_about_its_size(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The cap must hold while streaming even when the central directory
+    under-reports ``file_size`` (a classic zip-bomb trick)."""
+    bomb = b"\0" * 4096
+    archive = _deflated(APPROVED, bomb)
+    report, _ = _legacy_setup(tmp_path, monkeypatch, archive, content=bomb)
+    monkeypatch.setattr(restore, "MAX_MEMBER_BYTES", 1024)
+    real_infolist = zipfile.ZipFile.infolist
+
+    def lying_infolist(self: zipfile.ZipFile) -> list[zipfile.ZipInfo]:
+        infos = real_infolist(self)
+        for info in infos:
+            info.file_size = 10
+        return infos
+
+    monkeypatch.setattr(zipfile.ZipFile, "infolist", lying_infolist)
+    assert restore.main() == 1
+    assert not (report / APPROVED).exists()
+
+
+class _FakeResponse(io.BytesIO):
+    def __enter__(self) -> _FakeResponse:
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        self.close()
+
+
+def test_download_is_size_capped(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("GITHUB_REPOSITORY", raising=False)
+    monkeypatch.setattr(restore, "MAX_ARCHIVE_BYTES", 1024)
+    monkeypatch.setattr(
+        restore.urllib.request,
+        "urlopen",
+        lambda *_a, **_k: _FakeResponse(b"x" * 4096),
+    )
+    with pytest.raises(ValueError, match="exceeds"):
+        restore._download_archive(tmp_path / "archive.zip")
+
+
+@pytest.mark.parametrize(
+    "repo", ["evil.example/../x", "owner/repo/extra", "owner", "own er/repo"]
+)
+def test_download_rejects_malformed_repository(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, repo: str
+) -> None:
+    monkeypatch.setenv("GITHUB_REPOSITORY", repo)
+    monkeypatch.setattr(
+        restore.urllib.request,
+        "urlopen",
+        lambda *_a, **_k: pytest.fail("network attempted"),
+    )
+    with pytest.raises(ValueError, match="GITHUB_REPOSITORY"):
+        restore._download_archive(tmp_path / "archive.zip")
+
+
+def _symlink_or_skip(link: Path, target: Path, *, directory: bool = False) -> None:
+    try:
+        link.symlink_to(target, target_is_directory=directory)
+    except (OSError, NotImplementedError) as exc:  # Windows without privilege
+        pytest.skip(f"symlinks unavailable: {exc}")
+
+
+def test_legacy_restore_refuses_symlinked_target_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A planted ``approved.pdf -> article.tex`` link stays inside the report
+    root, so a containment check alone would let the restore overwrite TeX."""
+    archive = _archive_bytes({APPROVED: b"approved figure"})
+    report, article = _legacy_setup(tmp_path, monkeypatch, archive)
+    link = report / APPROVED
+    link.parent.mkdir(parents=True)
+    _symlink_or_skip(link, article)
+    assert restore.main() == 1
+    assert article.read_bytes() == ARTICLE_BYTES
+
+
+def test_legacy_restore_refuses_symlinked_parent_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    archive = _archive_bytes({APPROVED: b"approved figure"})
+    report, article = _legacy_setup(tmp_path, monkeypatch, archive)
+    details = report / "phase2/final_figures_v1/details"
+    details.parent.mkdir(parents=True)
+    _symlink_or_skip(details, article.parent, directory=True)
+    assert restore.main() == 1
+    assert not (article.parent / "approved.pdf").exists()
+    assert article.read_bytes() == ARTICLE_BYTES

@@ -13,7 +13,7 @@
   "totals": {
     "identical": 377,
     "diverged": 271,
-    "ud-only": 1700,
+    "ud-only": 1703,
     "tools-only": 838,
     "spelling-only": 121
   },
@@ -336,7 +336,7 @@
     "estimation": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 44,
+      "ud-only": 47,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -8296,7 +8296,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "mosaic",
-      "ud_bytes": 7131,
+      "ud_bytes": 11175,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8352,11 +8352,23 @@
       "spelling_only": false
     },
     {
+      "path": "estimation/mosaic/jerk_whiteness.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "mosaic",
+      "ud_bytes": 11717,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "estimation/mosaic/kinematic_basis.py",
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "mosaic",
-      "ud_bytes": 3909,
+      "ud_bytes": 4063,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8376,11 +8388,23 @@
       "spelling_only": false
     },
     {
+      "path": "estimation/mosaic/manifold_spline.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "mosaic",
+      "ud_bytes": 27531,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "estimation/mosaic/outer_solve.py",
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "mosaic",
-      "ud_bytes": 21340,
+      "ud_bytes": 22890,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8416,7 +8440,19 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "mosaic",
-      "ud_bytes": 7619,
+      "ud_bytes": 8510,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "estimation/mosaic/swing_registration.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "mosaic",
+      "ud_bytes": 13925,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

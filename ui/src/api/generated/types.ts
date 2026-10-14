@@ -770,6 +770,21 @@ export interface BunkerObjectiveReportV1 {
   reason: string;
 }
 
+export interface BunkerObjectiveRequestEchoV1 {
+  use: string;
+  target_carry_m: number;
+  tolerance_fraction: number;
+}
+
+/**
+ * The model's :class:`CarryObjectiveStanding`, field for field.
+ */
+export interface BunkerObjectiveStandingV1 {
+  disposition: string;
+  reasons: string[];
+  predictive: boolean;
+}
+
 /**
  * A carry-target playability objective and the use it is asked for.
  */
@@ -777,6 +792,21 @@ export interface BunkerObjectiveV1 {
   use: "exploratory" | "predictive";
   target_carry_m: number;
   tolerance_fraction: number;
+}
+
+export interface BunkerRankingV1 {
+  available: boolean;
+  unavailable_reason: string | null;
+  shared_points: number;
+  banded_verdict: string | null;
+  separation_m: number | null;
+  separated: boolean;
+}
+
+export interface BunkerRecordVerificationV1 {
+  valid: boolean;
+  schema_version: string;
+  digest: string;
 }
 
 /**
@@ -827,6 +857,36 @@ export interface BunkerVerdictV1 {
   caveats: string[];
   reasons: string[];
   reason_count: number;
+}
+
+/**
+ * One A/B comparison of two differently named soles. ``objective``, when given, sets the target carry and window the ranking is judged against; omitted, the workbench defaults apply.
+ */
+export interface BunkerWorkbenchCompareRequestV1 {
+  handedness: "right" | "left";
+  left: BunkerDesignV1;
+  right: BunkerDesignV1;
+  sand?: BunkerSandV1;
+  swing?: BunkerSwingV1;
+  objective?: BunkerObjectiveV1 | null;
+}
+
+/**
+ * The record returned for one A/B comparison; ``digest`` covers the rest. ``winner`` is ``None`` unless ``objective_standing.predictive``; a lead the bands show on an unqualified objective is ``exploratory_leader``.
+ */
+export interface BunkerWorkbenchComparisonV1 {
+  schema_version: string;
+  conventions: Record<string, unknown>;
+  left: BunkerWorkbenchEvaluationV1;
+  right: BunkerWorkbenchEvaluationV1;
+  objective: BunkerObjectiveRequestEchoV1 | null;
+  objective_standing: BunkerObjectiveStandingV1;
+  ranking: BunkerRankingV1;
+  predictive: boolean;
+  winner: string | null;
+  exploratory_leader: string | null;
+  verdict_statement: string;
+  digest: string;
 }
 
 /**
