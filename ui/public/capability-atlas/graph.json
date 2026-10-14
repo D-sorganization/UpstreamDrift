@@ -644,7 +644,7 @@
       "pyqt": "src/tools/bunker_shot_gui/gui.py",
       "api": "src/api/routes/bunker_workbench.py",
       "web": "ui/src/pages/BunkerWorkbench.tsx",
-      "issue": 9545,
+      "issue": 12536,
       "reason": null,
       "pending_decision": false,
       "tiles": [
@@ -3190,7 +3190,7 @@
   "inputs": {
     "src/config/models.yaml": "2a2e303aa92f6dda0ef3868fcc881ccbdbc54cf362ac3aae931333163969b90f",
     "src/config/launcher_manifest.json": "abc9913955858006e7bb6b8e9dca8c9693313e62d48d90dcc1ace33e632a79dc",
-    "src/config/feature_parity.json": "2c379a0ee8c6cdc9491c51ea54c185a30896e6762eadfeb89d03d69f23b35715",
+    "src/config/feature_parity.json": "46e831b130702aaa9025deb465debb9f78dc5160091bdf9ad48e795bf90ce984",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

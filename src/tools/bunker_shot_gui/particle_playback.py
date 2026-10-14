@@ -360,6 +360,19 @@ class ParticlePlayback:
         return float(self._times[self._index])
 
     @property
+    def time_span_s(self) -> tuple[float, float]:
+        """First and last retained frame times [s]; equal for one frame."""
+        return float(self._times[0]), float(self._times[-1])
+
+    def time_fraction(self) -> float:
+        """Where the current frame sits in the run's *time* span, in ``[0, 1]``.
+
+        The inverse of :meth:`scrub`; ``0.0`` for a single-frame run.
+        """
+        start, end = self.time_span_s
+        return 0.0 if end <= start else (self.time_s - start) / (end - start)
+
+    @property
     def decimation(self) -> DisplayDecimation:
         """Which roster rows are drawn."""
         return self._decimation
@@ -400,7 +413,7 @@ class ParticlePlayback:
         share = float(fraction)
         if not 0.0 <= share <= 1.0:
             raise ValueError(f"scrub fraction must be in [0, 1], got {fraction!r}")
-        start, end = float(self._times[0]), float(self._times[-1])
+        start, end = self.time_span_s
         return self.seek_time(start + share * (end - start))
 
     def view(self) -> ParticleFrameView:
