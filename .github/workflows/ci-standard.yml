@@ -1532,6 +1532,11 @@ jobs:
         run: git submodule update --init vendor/ud-tools
       - name: Install Dependency-Free Context Package and Test Tools
         run: python3 -m pip install ./vendor/ud-tools/packages/agent-context pytest PyYAML pydantic numpy
+      # The README.md/index.html views are generated on demand (#12544): render
+      # them before any step reads them, so `check` compares freshly rendered
+      # views and still fails on stale reviews, contracts, evidence or pins.
+      - name: Render Agent Context Views
+        run: python3 -m agent_context --root . render
       - name: Check Source, Contracts, Pins and Generated Views
         run: python3 -m agent_context --root . check
       - name: Validate Real Navigation Tasks
