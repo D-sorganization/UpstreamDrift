@@ -108,22 +108,22 @@ Each engine's FK against the standard's reference FK (all lifts, worst pose): Mu
 
 Closure is the native hand-to-bar residual at the pack start pose (m; OpenSim values are after model assembly, which moves coordinates off their defaults).
 
-| Lift | Engine | Attachment | Intended Half-Width m | Hand Half-Spacing m | Mismatch m | Native Start Closure |
+| Lift | Engine | Attachment | Intended Half-Width m | Start Hand Half-Spacing m | Mismatch m | Native Start Closure |
 |---|---|---|---|---|---|---|
 | Deadlift | MuJoCo | L weld constraint; R weld constraint | 0.22 | 0.1709 | 0.04912 | l 0.0491, r 0.0491 |
-| Deadlift | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.4 | 0.1594 | 0.2406 | weld_translation_norm 1.13e-16 |
+| Deadlift | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.4 | 0.4 | 1.11e-16 | weld_translation_norm 1.13e-16 |
 | Deadlift | Drake | L weld joint (bar is child); R none | 0.22 | 0.1709 | 0.04912 | - |
 | Deadlift | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.393 | 0.1709 | 0.2221 | - |
 | Bench Press | MuJoCo | L weld constraint; R weld constraint | 0.1709 | 0.1709 | 0 | l 3.33e-16, r 3.33e-16 |
-| Bench Press | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.4 | 0.1594 | 0.2406 | weld_translation_norm 8.87e-13 |
+| Bench Press | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.4 | 0.4 | 4.435e-13 | weld_translation_norm 8.87e-13 |
 | Bench Press | Drake | L weld joint (bar is child); R none | 0.4 | 0.1709 | 0.2291 | - |
 | Bench Press | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.393 | 0.1709 | 0.2221 | - |
 | Snatch | MuJoCo | L weld constraint; R weld constraint | 0.6 | 0.1709 | 0.4291 | l 0.429, r 0.429 |
-| Snatch | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.58 | 0.1594 | 0.4206 | weld_translation_norm 1.84e-13 |
-| Snatch | Drake | L weld joint (bar is child); R none | 0.58 | 0.1709 | 0.4091 | - |
+| Snatch | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.58 | 0.58 | 9.204e-14 | weld_translation_norm 1.84e-13 |
+| Snatch | Drake | L weld joint (bar is child); R none | 0.58 | 0.4664 | 0.1136 | - |
 | Snatch | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.5895 | 0.1709 | 0.4186 | - |
 | Clean and Jerk | MuJoCo | L weld constraint; R weld constraint | 0.25 | 0.1709 | 0.07912 | l 0.0791, r 0.0791 |
-| Clean and Jerk | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.25 | 0.1594 | 0.09065 | weld_translation_norm 1.11e-16 |
+| Clean and Jerk | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.25 | 0.25 | 0 | weld_translation_norm 1.11e-16 |
 | Clean and Jerk | Drake | L weld joint (bar is child); R none | 0.25 | 0.1709 | 0.07912 | - |
 | Clean and Jerk | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.3668 | 0.1709 | 0.1959 | - |
 
@@ -209,7 +209,7 @@ Hand-bar is the perpendicular distance from a hand origin to the bar axis, worst
 | Discrepancy | Engines | Issues | Epic Child | Issue |
 |---|---|---|---|---|
 | Right hand is not attached to the bar | Drake, Pinocchio | Drake_Models#365; Pinocchio_Models#443 | LIFT-3 | existing |
-| Grip half-width does not match achievable hand spacing | Drake, MuJoCo, OpenSim, Pinocchio | MuJoCo_Models#408; OpenSim_Models#394; Pinocchio_Models#443 | LIFT-3 | existing |
+| Grip half-width does not match achievable hand spacing | Drake, MuJoCo, Pinocchio | MuJoCo_Models#408; Pinocchio_Models#443 | LIFT-3 | existing |
 | Floor-pull start pose is not at the floor | Drake, MuJoCo, OpenSim, Pinocchio | Drake_Models#381; Drake_Models#364; MuJoCo_Models#407; OpenSim_Models#416; Pinocchio_Models#450 | LIFT-4 | new |
 | Joint limits differ from the parity standard | MuJoCo, Pinocchio | MuJoCo_Models#407; MuJoCo_Models#409; Pinocchio_Models#433 | LIFT-5 | existing |
 | Phase count differs from the standard | Drake, MuJoCo, Pinocchio | Drake_Models#372; MuJoCo_Models#401; Pinocchio_Models#434 | LIFT-6 | existing |
