@@ -375,8 +375,9 @@ class ParticleTrajectoryWriter:
                 f"rows_per_chunk must be positive, got {rows_per_chunk!r}"
             )
         self._path = Path(path)
-        if not self._path.parent.is_dir():
-            raise BunkerShot3DValueError(f"{self._path.parent} is not a directory")
+        parent_dir = self._path.parent
+        if not parent_dir.is_dir():
+            raise BunkerShot3DValueError(f"{parent_dir} is not a directory")
         self._roster = roster
         self._provenance = provenance
         self._chunk = int(rows_per_chunk)
