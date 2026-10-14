@@ -22,6 +22,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.native_constraint_
     native_muscles,
     owned_native_source_state,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 
 def _sha(value: Any) -> str:
@@ -376,7 +377,7 @@ def audit_source_reference(
     model_path: Path, reference: ReferenceStateDeclaration, reference_frame_path: str
 ) -> NativeReferenceObservation:
     """Observe one exact XML source at a documented native reference state."""
-    import opensim as osim
+    osim = import_opensim()
 
     source_sha = hashlib.sha256(Path(model_path).read_bytes()).hexdigest()
     if source_sha != reference.expected_source_sha256:

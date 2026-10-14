@@ -60,6 +60,7 @@ from .trc import read_trc, write_trc
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 from src.shared.python.estimation import dime_global_calibration
 from src.shared.python.motion_matching.jobs.io_atomic import atomic_write_bytes
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 
 def _sha(path: Path) -> str:
@@ -108,7 +109,7 @@ class NativeMocoSolve:
 
 def _native_goal_weights(study: Any) -> dict[str, float]:
     """Read the native goal's serialized weights, not the Python request object."""
-    import opensim as osim
+    osim = import_opensim()
 
     goal = osim.MocoMarkerTrackingGoal.safeDownCast(
         study.updProblem().updGoal("marker_tracking")
@@ -359,7 +360,7 @@ def _native_solve_once(
     current_input_audit_elapsed_wall_seconds: float = 0.0,
 ) -> NativeMocoSolve:
     """Run and read back one exact native solver attempt."""
-    import opensim as osim
+    osim = import_opensim()
 
     record_progress = _make_progress_recorder(
         request, directory, wall, cpu, current_input_audit_elapsed_wall_seconds

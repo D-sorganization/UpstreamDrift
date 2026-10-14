@@ -16,12 +16,13 @@ from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = logging.getLogger(__name__)
 
 # Try to import OpenSim; skip if unavailable
 try:
-    import opensim
+    opensim = import_opensim()
 
     OPENSIM_AVAILABLE = True
 except ImportError:

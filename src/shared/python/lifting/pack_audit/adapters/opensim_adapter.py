@@ -9,11 +9,13 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import opensim as osim
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 from ..frames import from_canonical, to_canonical
 from ..model import CoordinateInfo, EngineAdapter, PoseEval
 from ._common import PELVIS_ORIGIN, build_model_text, native_angles
+
+osim = import_opensim()
 
 _KINDS = {1: "rotational", 2: "translational", 3: "coupled"}
 

@@ -14,6 +14,7 @@ import numpy as np
 
 from src.shared.python.core.contracts import PreconditionError
 from src.shared.python.core.physical_inertia import validate_physical_inertia
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 Vec3 = tuple[float, float, float]
 Inertia6 = tuple[float, float, float, float, float, float]
@@ -145,7 +146,7 @@ def audit_native_body_inertia(
     source_model_path: Path, expected_source_sha256: str
 ) -> NativeBodyInertiaAudit:
     """Check all source bodies against fresh native readback and shared physics law."""
-    import opensim as osim
+    osim = import_opensim()
 
     raw = source_model_path.read_bytes()
     source_sha = hashlib.sha256(raw).hexdigest()

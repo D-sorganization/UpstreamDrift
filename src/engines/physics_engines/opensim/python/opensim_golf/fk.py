@@ -45,6 +45,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import math
 from numpy.typing import NDArray
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     import opensim as osim
@@ -96,7 +97,7 @@ def _require_opensim() -> None:
             of the engine package so users see consistent install hints.
     """
     try:
-        import opensim  # noqa: F401  # type: ignore[import-untyped]
+        import_opensim()
     except ImportError as exc:  # pragma: no cover - exercised w/o opensim
         raise ImportError(
             "OpenSim Python bindings are required for forward-kinematics "

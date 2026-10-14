@@ -23,6 +23,7 @@ from .native_mtp_reduction import (
     _sha,
     _transform,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 
 @dataclass(frozen=True)
@@ -392,7 +393,7 @@ def derive_zero_custom_joint_model(
     profile: ZeroCustomJointProfile,
 ) -> ZeroSubtalarReductionReceipt:
     """Weld only exact declared zero CustomJoints and independently reload."""
-    import opensim as osim
+    osim = import_opensim()
     from . import native_mtp_reduction as comparison
 
     source = request.source_model_path

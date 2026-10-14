@@ -21,6 +21,7 @@ from src.shared.python.contracts import postcondition, precondition
 
 from .moco_initial_bindings import MocoInitialBindings, apply_moco_initial_bindings
 from .trc import read_trc
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = logging.getLogger(__name__)
 
@@ -278,7 +279,7 @@ def build_moco_study(
     Requires OpenSim bindings.
     """
     try:
-        import opensim
+        opensim = import_opensim()
     except ImportError as err:
         raise RuntimeError("OpenSim bindings required to build MocoStudy") from err
 

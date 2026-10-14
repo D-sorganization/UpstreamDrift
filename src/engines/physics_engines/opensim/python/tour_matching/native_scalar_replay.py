@@ -10,6 +10,7 @@ import numpy as np
 from numpy.typing import NDArray
 from .native_prepared_state import DeclaredColdStart, observe_declared_native_sample
 from .moco_initial_bindings import _finite_number
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 
 @dataclass(frozen=True)
@@ -50,7 +51,7 @@ def _initialize_manager(
     model: Any, state: Any, names: tuple[str, ...], accuracy: float
 ) -> tuple[Any, Any]:
     """Reject internal projection instead of recording an unexecuted seed."""
-    import opensim as osim
+    osim = import_opensim()
 
     requested = tuple(model.getStateVariableValue(state, name) for name in names)
     manager = osim.Manager(model)
@@ -81,7 +82,7 @@ def integrate_native_scalar_replay(
     A fixed declared policy can read native constraint residuals at each sample;
     observations never supply or alter the saved actuator commands.
     """
-    import opensim as osim
+    osim = import_opensim()
 
     from .muscle_replay import (
         _contact_sampler,

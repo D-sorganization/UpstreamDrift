@@ -35,6 +35,7 @@ import yaml
 
 from src.engines.tiers import ENGINE_TIERS
 from src.shared.python.contracts import ensure, require
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = logging.getLogger(__name__)
 
@@ -750,7 +751,7 @@ def _native_mujoco(package: ModelPackage, repo_root: Path) -> dict[str, Any]:
 
 
 def _native_opensim(package: ModelPackage, repo_root: Path) -> dict[str, Any]:
-    import opensim  # type: ignore[import-untyped]
+    opensim = import_opensim()
 
     if not package.generated_model:
         raise RuntimeError(f"opensim package {package.id} lacks generated_model")
