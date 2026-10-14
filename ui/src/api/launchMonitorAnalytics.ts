@@ -7,7 +7,7 @@
  * paths — so every request is caller-supplied, bounded records.
  */
 
-import { apiFetch } from "./fetch";
+import { apiFetch, apiFetchForm } from "./fetch";
 import type {
   AnalyzePayloadV2,
   ComparisonPayloadV2,
@@ -648,3 +648,63 @@ export function formatStat(
   }
   return value.toFixed(digits);
 }
+
+export interface ImportMappingOverride {
+  source_column: string;
+  target_column: string;
+  source_unit?: string | null;
+  multiplier?: number;
+  measurement_status?: string;
+}
+
+export interface ImportOptionsRequest {
+  profile_id?: string | null;
+  mappings?: ImportMappingOverride[];
+  session_name?: string | null;
+  player?: string | null;
+  monitor_model?: string | null;
+  software_version?: string | null;
+  tags?: string[];
+}
+
+export interface ImportPreviewProfile {
+  profile_id: string;
+  vendor: string;
+}
+
+export interface ImportPreviewResponse {
+  filename: string;
+  headers: string[];
+  detected_profile_id: string;
+  detection_confidence: number;
+  profiles: ImportPreviewProfile[];
+  auto_mappings: Record<string, Record<string, unknown>[]>;
+  targets: string[];
+  measurement_statuses: string[];
+}
+
+export interface ImportedSessionResponse {
+  session_id: string;
+  name: string;
+  manifest: Record<string, unknown>;
+  columns: string[];
+  records: Record<string, string | number | null>[];
+  row_count: number;
+}
+
+export async function previewImportV2(file: File): Promise<ImportPreviewResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return apiFetchForm<ImportPreviewResponse>(`${BASE}/v2/import/preview`, formData);
+}
+
+export async function importSessionV2(
+  file: File,
+  options: ImportOptionsRequest = {},
+): Promise<ImportedSessionResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("options", JSON.stringify(options));
+  return apiFetchForm<ImportedSessionResponse>(`${BASE}/v2/import`, formData);
+}
+

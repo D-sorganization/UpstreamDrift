@@ -404,10 +404,9 @@
       "pyqt": "src/tools/launch_monitor_analytics/gui.py",
       "api": "src/api/routes/launch_monitor_analytics.py",
       "web": "ui/src/pages/LaunchMonitorAnalytics.tsx",
-      "status": "gap",
-      "issue": 11987,
+      "status": "parity",
       "tiles": ["launch_monitor_analytics"],
-      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. The web page (#11987) now covers Flexible Analysis (POST /v2/analyze), Trends (POST /v2/trend), Dispersion (POST /v2/dispersion), Relationships — correlations/partial correlations/dependency network, PCA, and VIF (POST /v2/relationships, POST /v2/multivariate), Monitor Comparison (POST /v2/comparison), Models (POST /v2/model) and Data Treatment (POST /v2/treatment). As on the desktop, the treated data becomes the analysis view that every other section reads, while treatment itself always runs on the raw rows. Still missing on the web: Sessions and Reports."
+      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. The web page (ui/src/pages/LaunchMonitorAnalytics.tsx) now covers all 8 desktop workbench surfaces: Sessions (POST /v2/import/preview, POST /v2/import via LaunchMonitorSessionsPanel.tsx), Flexible Analysis (POST /v2/analyze), Trends (POST /v2/trend), Dispersion (POST /v2/dispersion), Relationships (POST /v2/relationships, POST /v2/multivariate), Monitor Comparison (POST /v2/comparison), Models (POST /v2/model), Data Treatment (POST /v2/treatment), and Reports (POST /v2/report, POST /v2/export via LaunchMonitorReportsPanel.tsx)."
     },
     "tools.shot_pattern_analysis": {
       "title": "Shot Pattern Analysis Workbench",
