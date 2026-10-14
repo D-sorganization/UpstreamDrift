@@ -1244,6 +1244,42 @@
       "issue": 11739,
       "reason": "Issue #11739: OSV-7 export_full_body_osim gained the contact-grip options (9 parameters).",
       "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/simulate.py",
+      "symbol": "_make_controller_class",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 12065,
+      "reason": "Issue #12065: _make_controller_class factory holds polynomial torque controller class (122 lines > 100).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/simulate.py",
+      "symbol": "simulate_with_coefficients",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 12065,
+      "reason": "Issue #12065: simulate_with_coefficients executes end-to-end opensim dynamic simulation with polynomial controller (185 lines > 100).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/simulate.py",
+      "symbol": "_record_sample",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 12065,
+      "reason": "Issue #12065: _record_sample records coordinate states, speeds, and actuator forces (13 parameters > 8).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/motion_pipeline/matching/cmc.py",
+      "symbol": "CMCMatchingSolver.match",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 12065,
+      "reason": "Issue #12065: CMCMatchingSolver.match solves computed muscle control matching with fallback handling (107 lines > 100).",
+      "expires_on": "2026-12-31"
     }
   ]
 }
