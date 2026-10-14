@@ -55,6 +55,9 @@ def test_every_gap_has_an_issue_in_a_known_repo(receipt):
     gaps = derive_gaps(receipt)
     assert gaps
     for gap in gaps:
+        if gap["stale"]:  # measured before the trackers closed; re-measure
+            assert not gap["issues"] and "re-measure" in gap["evidence"][0]
+            continue
         assert gap["issues"], gap["key"]
         for ref in gap["issues"]:
             assert ref.split("#")[0] in REPO.values()

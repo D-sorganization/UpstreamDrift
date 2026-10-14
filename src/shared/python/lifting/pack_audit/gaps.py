@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from ..lift_spec import standard_version
 from . import analysis as an
 
 REPO = {
@@ -30,6 +31,10 @@ ISSUES: dict[str, dict[str, list[int]]] = {
     },
     "limits": {"mujoco": [407, 409], "pinocchio": [433]},
     "phase_count": {"mujoco": [401], "drake": [372], "pinocchio": [434]},
+    # phase_names has no tracker: the rename issues (MuJoCo_Models#401,
+    # Drake_Models#372, Pinocchio_Models#434) merged and all four packs match
+    # standard v2.1 on origin/main (2026-10-14). File one issue per pack if a
+    # fresh receipt shows the gap again.
     "phase_asymmetric": {"pinocchio": [449]},
     "phase_keys": {"opensim": [414], "drake": [390], "pinocchio": [436]},
     "bench_mass": {
@@ -43,13 +48,36 @@ ISSUES: dict[str, dict[str, list[int]]] = {
     "no_grf": {"drake": [371], "pinocchio": [432]},
 }
 
-EXISTING_ONLY = {"grip_attachment", "grip_width", "limits", "phase_count", "no_grf"}
+EXISTING_ONLY = {
+    "grip_attachment",
+    "grip_width",
+    "limits",
+    "phase_count",
+    "no_grf",
+}
+
+
+STALE_PHASE_NAMES = (
+    "stale: receipt predates pack renames (MuJoCo_Models#401, "
+    "Pinocchio_Models#434, Drake_Models#372 merged); measured at standard "
+    "v{measured}, vendored v{vendored}; re-measure with all four engines"
+)
 
 
 def _gap(
-    key: str, title: str, evidence: list[str], engines: list[str], story: str
+    key: str,
+    title: str,
+    evidence: list[str],
+    engines: list[str],
+    story: str,
+    stale: bool = False,
 ) -> dict[str, Any]:
-    issues = [f"{REPO[e]}#{n}" for e in engines for n in ISSUES.get(key, {}).get(e, [])]
+    """One gap; a *stale* gap cites no tracker and only asks for a re-measure."""
+    issues = (
+        []
+        if stale
+        else [f"{REPO[e]}#{n}" for e in engines for n in ISSUES.get(key, {}).get(e, [])]
+    )
     return {
         "key": key,
         "title": title,
@@ -57,8 +85,32 @@ def _gap(
         "evidence": evidence,
         "issues": issues,
         "lift_story": story,
-        "new_issue": key not in EXISTING_ONLY,
+        "new_issue": bool(issues) and key not in EXISTING_ONLY,
+        "stale": stale,
     }
+
+
+def _phase_names(receipt: dict[str, Any], rows: list[dict[str, Any]]) -> dict[str, Any]:
+    renamed = [r for r in rows if not r["names_match"]]
+    stale = bool(renamed) and an.receipt_predates_standard(receipt)
+    head = (
+        [
+            STALE_PHASE_NAMES.format(
+                measured=receipt["standard"]["version"],
+                vendored=standard_version(),
+            )
+        ]
+        if stale
+        else []
+    )
+    return _gap(
+        "phase_names",
+        "Phase names differ from the standard",
+        head + [f"{r['engine']}/{r['lift']}: {r['names_reason']}" for r in renamed],
+        sorted({r["engine"] for r in renamed}),
+        "LIFT-3",
+        stale=stale,
+    )
 
 
 def derive_gaps(receipt: dict[str, Any]) -> list[dict[str, Any]]:
@@ -184,6 +236,7 @@ def _phases(receipt: dict[str, Any]) -> list[dict[str, Any]]:
             sorted({r["engine"] for r in short}),
             "LIFT-6",
         ),
+        _phase_names(receipt, rows),
         _gap(
             "phase_asymmetric",
             "Phase targets are left-side only",
