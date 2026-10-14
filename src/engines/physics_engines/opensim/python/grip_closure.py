@@ -20,6 +20,7 @@ import numpy as np
 
 from src.shared.python.contracts import require
 from src.shared.python.grip_contact.closure_series import GripClosureSeries
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +86,7 @@ def weld_closure_series(
         "q must be (frames, len(coordinate_names))",
     )
     try:
-        import opensim as osim  # noqa: PLC0415 - optional heavy binding
+        osim = import_opensim()  # optional heavy binding
     except ImportError as exc:
         return GripClosureSeries.unavailable(
             "opensim", f"opensim not importable: {exc}"

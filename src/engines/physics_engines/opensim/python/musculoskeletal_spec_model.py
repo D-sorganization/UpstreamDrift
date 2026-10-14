@@ -24,6 +24,7 @@ from src.engines.physics_engines.opensim.python.musculoskeletal_swing import (
     resolve_base_model,
 )
 from src.shared.python.contracts import ensure, require
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 _REMOVED_SETS = (
     "updMarkerSet",
@@ -37,7 +38,7 @@ _TALUS_JOINT = "subtalar"
 
 
 def _osim() -> Any:
-    import opensim
+    opensim = import_opensim()
 
     return opensim
 

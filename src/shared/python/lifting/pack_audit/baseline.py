@@ -16,6 +16,7 @@ from .adapters import create_adapter
 from .model import Anthropometry, EngineAdapter, PoseEval
 from .names import ENGINES, LIFTS, SIDES
 from .packs import PackLocation, locate_pack
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 _AUDIT_ERRORS = (
     RuntimeError,
@@ -291,7 +292,7 @@ def _versions() -> dict[str, str]:
         except ImportError:
             out[mod] = "unavailable"
     try:
-        import opensim
+        opensim = import_opensim()
 
         out["opensim"] = str(opensim.GetVersion())
     except (ImportError, AttributeError):

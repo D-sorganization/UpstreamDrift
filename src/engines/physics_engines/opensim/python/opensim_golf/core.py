@@ -14,6 +14,7 @@ import numpy as np
 
 from src.shared.python.core import constants
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 # Configure logging
 logger = get_logger(__name__)
@@ -104,7 +105,7 @@ class GolfSwingModel:
             OpenSimModelLoadError: If the model cannot be loaded.
         """
         try:
-            import opensim  # type: ignore[import-untyped]
+            opensim = import_opensim()
         except ImportError as e:
             raise OpenSimNotInstalledError(
                 "OpenSim is not installed.\n"

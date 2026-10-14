@@ -12,6 +12,7 @@ from src.engines.physics_engines.opensim.python.motion_matching.simulate import 
     COEFFS_PER_JOINT,
     evaluate_polynomial_torque,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 UnavailableMode = Literal["raise", "fallback"]
 
@@ -164,7 +165,7 @@ def _coerce_actuator_names(
 
 def _import_opensim() -> Any | None:
     try:
-        import opensim  # type: ignore[import-not-found]  # noqa: PLC0415
+        opensim = import_opensim()
     except ImportError:
         return None
     return opensim

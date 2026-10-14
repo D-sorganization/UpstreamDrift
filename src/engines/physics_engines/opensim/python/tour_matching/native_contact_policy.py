@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from src.shared.python.force_overlay import WrenchKind
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 _SCHEMA = "native-sphere-halfspace-contact-v1"
 _CONTACT_CLASSES = {"HuntCrossleyForce", "SmoothSphereHalfSpaceForce"}
@@ -153,7 +154,7 @@ def declare_native_contact_execution(
     model_path: Path, source_sha256: str
 ) -> NativeContactExecutionDeclaration:
     """Capture supported force identities from exact pinned model bytes."""
-    import opensim as osim
+    osim = import_opensim()
 
     path = Path(model_path)
     raw = path.read_bytes()

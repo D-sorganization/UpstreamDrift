@@ -47,6 +47,7 @@ from src.shared.python.motion_matching.polynomial_torque import (
     evaluate_polynomial_torque,
 )
 from src.shared.python.motion_matching.validate_theta import validate_theta
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 # Default model path lives next to the engine; resolved lazily so tests
 # can override via SimOptions.osim_path.
@@ -183,7 +184,7 @@ def _load_model(osim_path: Path) -> Any:
     Returns a *fresh copy* of the cached model so callers can safely
     edit gravity / actuators without leaking state across calls.
     """
-    import opensim as osim  # noqa: PLC0415  -- optional engine dep
+    osim = import_opensim()  # optional engine dep
 
     key = str(osim_path.resolve())
     with _MODEL_CACHE_LOCKS[key]:
@@ -214,9 +215,9 @@ def _make_controller_class() -> type:  # noqa: C901, PLR0915 -- factory holds cl
     ``import opensim`` succeeds; we defer construction so the module
     imports cleanly without the optional dep.
     """
-    import opensim as osim  # noqa: PLC0415  -- optional engine dep
+    controller_base: Any = import_opensim().Controller  # optional engine dep
 
-    class PolynomialTorqueController(osim.Controller):
+    class PolynomialTorqueController(controller_base):
         """Evaluates ``tau_j(t) = sum_k a_jk * t^k`` per coordinate.
 
         The controller stores the coefficient matrix and the actuator
@@ -368,7 +369,7 @@ def simulate_with_coefficients(
         FileNotFoundError: If the ``.osim`` cannot be located.
         ImportError: If ``opensim`` is not installed.
     """
-    import opensim as osim  # noqa: PLC0415  -- optional engine dep
+    osim = import_opensim()  # optional engine dep
 
     opts = options if options is not None else SimOptions()
     osim_path = _resolve_osim_path(opts.osim_path)

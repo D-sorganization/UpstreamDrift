@@ -15,6 +15,7 @@ from typing import Any, Sequence
 
 import numpy as np
 from numpy.typing import NDArray
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = logging.getLogger(__name__)
 
@@ -297,7 +298,7 @@ def create_polynomial_prescribed_controller(
     model: Any,
 ) -> Any:
     """Create an opensim.PrescribedController with PolynomialFunction per actuator."""
-    import opensim
+    opensim = import_opensim()
 
     controller = opensim.PrescribedController()
     force_set = model.getForceSet()

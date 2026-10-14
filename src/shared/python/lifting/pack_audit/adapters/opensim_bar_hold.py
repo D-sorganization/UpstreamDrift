@@ -64,11 +64,13 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
-import opensim as osim
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 from ..frames import OPENSIM_Y_UP, to_canonical
 from ..model import unavailable_bar_hold
 from .bar_hold_static import static_hold_result, static_hold_split
+
+osim = import_opensim()
 
 _BAR_PREFIX = "barbell"
 _LEFT_HAND_BODY = "hand_l"

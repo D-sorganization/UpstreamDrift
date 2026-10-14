@@ -225,8 +225,8 @@ def _fixture_swing(club: str):
 _IMPACT_WAIVER_REASON = (
     "#12272: on the #12221 driver fixture (-2.5 % impact speed) the "
     "bushing reaches 2.62 deg and 51.3 N squeeze for 6 ms at ball impact "
-    "(t = 1.326-1.332 s; limits 2 deg, 50 N); the previous fixture "
-    "(-5.1 %) peaked at 1.81 deg and 34.5 N at the same instant"
+    "(t = 1.326-1.332 s; limits 2 deg, 50 N; see DESIGN_DECISIONS_2.md section 21); "
+    "the previous fixture (-5.1 %) peaked at 1.81 deg and 34.5 N at the same instant"
 )
 # (club, bound) -> ceiling: the measured exceedance plus 3 %, so only the
 # documented excursion is waived; every other assertion still runs first.

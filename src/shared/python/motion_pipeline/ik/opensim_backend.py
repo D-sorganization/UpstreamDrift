@@ -19,6 +19,7 @@ from ..contracts import (
     SkeletonRig,
 )
 from .base import BaseIKSolver, IKConfig, MarkerWeights
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +76,7 @@ class OpenSimIKBackend(BaseIKSolver):
 
         # Check if OpenSim is available
         try:
-            import opensim as osim  # noqa: F401
+            import_opensim()
         except ImportError as err:
             if self.allow_fallback:
                 logger.info("OpenSim not installed; falling back to GeometricIKSolver")

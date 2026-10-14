@@ -23,6 +23,7 @@ from ..contracts import (
     MarkerFrame,
     SkeletonRig,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = logging.getLogger(__name__)
 
@@ -206,7 +207,7 @@ class OpenSimScaleBackend:
 
         opensim_module = None
         try:
-            import opensim as osim  # type: ignore[import-not-found]
+            osim = import_opensim()
 
             opensim_module = osim
         except ImportError as exc:  # pragma: no cover - depends on env

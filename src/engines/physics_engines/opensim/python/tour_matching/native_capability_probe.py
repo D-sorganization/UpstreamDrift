@@ -15,6 +15,7 @@ from typing import Any
 import numpy as np
 
 from .native_prepared_state import DeclaredColdStart
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 NATIVE_CAPABILITY_PROTOCOL = "native-dynamics-closed-source-v1"
 
@@ -458,7 +459,7 @@ def _run_native_short_capability_probe(
     stage: dict[str, Any],
 ) -> tuple[str, float, float]:
     """Run finite native dynamics and source-bound observations for one short window."""
-    import opensim as osim
+    osim = import_opensim()
 
     observations: list[tuple[str, float]] = []
     native_joint_evaluations: list[tuple[str, str]] = []

@@ -32,6 +32,7 @@ from src.engines.physics_engines.opensim.python.musculoskeletal_swing import (
     read_states_table,
 )
 from src.shared.python.contracts import require
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,7 @@ class SolveWindow:
 
 
 def _opensim() -> Any:
-    import opensim
+    opensim = import_opensim()
 
     return opensim
 
