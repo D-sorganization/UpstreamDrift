@@ -1,3 +1,8 @@
+---
+issue: 11824
+summary: "Add a bounded native MuJoCo candidate benchmark for the synthetic rotary optimal-control fixture, with independent exact held-input truth, a fresh F06 replay, fail-closed torque/slew and numerical gates, and serial failure-retaining timing and receipt evidence"
+---
+
 ### Added
 
 - Added a bounded native MuJoCo candidate benchmark for the synthetic rotary
