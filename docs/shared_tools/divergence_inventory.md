@@ -59,7 +59,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `docker_config.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `engine_core` | 0 | 0 | 0 | 24 | 0 | 0 |
 | `engine_loaders.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `estimation` | 0 | 0 | 0 | 48 | 0 | 0 |
+| `estimation` | 0 | 0 | 0 | 49 | 0 | 0 |
 | `exceptions.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `feature_registry` | 0 | 0 | 0 | 6 | 0 | 0 |
 | `file_watcher` | 0 | 0 | 0 | 0 | 2 | 0 |
@@ -119,7 +119,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `security` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `sg_optimizer` | 0 | 0 | 0 | 22 | 0 | 0 |
 | `shadow_tracker` | 0 | 0 | 0 | 21 | 0 | 0 |
-| `sidekick` | 210 | 69 | 23 | 37 | 92 | 279 |
+| `sidekick` | 212 | 68 | 23 | 36 | 92 | 280 |
 | `sidekick_data_processing_bridge.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `signal_toolkit` | 0 | 0 | 0 | 1 | 27 | 0 |
 | `simulation_backends` | 0 | 0 | 0 | 21 | 0 | 0 |
@@ -143,7 +143,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 62 | 0 | 0 |
-| **Total** | **375** | **272** | **121** | **1705** | **838** | **647** |
+| **Total** | **377** | **271** | **121** | **1705** | **838** | **648** |
 
 ## Diverged Files by Package
 
@@ -285,7 +285,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `contracts.py` | -709 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
+| `contracts.py` | -1052 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-13 |
 
 ### Package `gui_launcher` (4 Diverged Files)
 
@@ -415,7 +415,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `reporting/__init__.py` | +387 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-05-15 |
 | `reporting/generator.py` | -58 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
 
-### Package `sidekick` (69 Diverged Files)
+### Package `sidekick` (68 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -428,7 +428,6 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `sidekick/data_processing/core.py` | -24973 |  | d-sorgclaudeagent[bot] 2026-10-13 | Dieter Olson 2026-08-23 |
 | `sidekick/data_processing/exceptions.py` | -1347 |  | d-sorgclaudeagent[bot] 2026-10-13 | Dieter Olson 2026-05-22 |
 | `sidekick/data_processing/io.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `sidekick/lab/bio/c3d_reader.py` | +696 |  | d-sorgclaudeagent[bot] 2026-10-13 | d-sorgclaudeagent[bot] 2026-10-13 |
 | `sidekick/latex_renderer.py` | -79 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
 | `sidekick/notes_store.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `sidekick/notes_tab.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
