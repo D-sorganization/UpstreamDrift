@@ -116,7 +116,16 @@ def _compute_planar_link_kinematics(
     q: FloatArray,
     v: FloatArray,
     a: FloatArray,
-) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray, FloatArray, FloatArray, FloatArray, FloatArray]:
+) -> tuple[
+    FloatArray,
+    FloatArray,
+    FloatArray,
+    FloatArray,
+    FloatArray,
+    FloatArray,
+    FloatArray,
+    FloatArray,
+]:
     batch = q.shape[0]
     phi = np.cumsum(q, axis=1)
     omega = np.cumsum(v, axis=1)
