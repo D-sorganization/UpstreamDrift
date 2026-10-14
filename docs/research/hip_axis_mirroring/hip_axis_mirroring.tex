@@ -3,9 +3,9 @@
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{url}
-\title{Left Hip Axis Mirroring in the Full-Body Specification (OSV-6, \#11737)}
+\title{Realistic Golfer Presentation and Lower-Limb Alignment in the Full-Body Specification (OSV-1--OSV-9, Epic \#11726, \#11731, \#11737)}
 \author{UpstreamDrift engineering reference}
-\date{2026-10-09}
+\date{2026-10-14}
 
 \begin{document}
 \maketitle
@@ -602,6 +602,105 @@ python3 -m src.shared.python.motion_matching.pipeline.cli \
   --out runs/hzn_iron
 \end{verbatim}
 
+\section{Two-Hand Golf Grip Definition and Kinetics (OSV-2, OSV-7, OSV-9)}
+\label{sec:grip}
+
+\paragraph{Coordinate Frames and Geometry.}
+Grip geometry is defined in the club coordinate frame $\mathcal{F}_c = (\mathbf{p}_c, \hat{\mathbf{x}}_c, \hat{\mathbf{y}}_c, \hat{\mathbf{z}}_c)$, where $\hat{\mathbf{z}}_c$ is the longitudinal shaft axis directed from the clubhead toward the grip butt cap, $\hat{\mathbf{x}}_c$ is the toe axis orthogonal to the shaft in the face-plane direction, and $\hat{\mathbf{y}}_c = \hat{\mathbf{z}}_c \times \hat{\mathbf{x}}_c$ is the face-normal axis pointing anteriorly from the clubface.
+
+The lead hand (left hand for a right-handed golfer) is placed adjacent to the butt cap with an offset $\Delta z_{\mathrm{lead}} = 15\text{ mm}$:
+\begin{equation}
+  \mathbf{p}_{\mathrm{lead}} = \mathbf{p}_{\mathrm{butt}} - \Delta z_{\mathrm{lead}} \hat{\mathbf{z}}_c .
+\end{equation}
+The trail hand (right hand) is placed immediately distal to the lead hand along the shaft axis:
+\begin{equation}
+  \mathbf{p}_{\mathrm{trail}} = \mathbf{p}_{\mathrm{lead}} - L_{\mathrm{sep}} \hat{\mathbf{z}}_c ,
+\end{equation}
+where $L_{\mathrm{sep}} = \|\mathbf{p}_{\mathrm{trail}} - \mathbf{p}_{\mathrm{lead}}\|$ is the hand centre separation distance reconciled from the full-body specification closure definitions (\texttt{closure.placement\_a} and \texttt{placement\_b}).
+
+\paragraph{Neutral Grip Orientations and V-Angles.}
+Anatomical grip closure specifies:
+\begin{enumerate}
+  \item \textbf{Lead Hand}: The ``V'' formed by the thumb and index finger web points in the quadrant between the golfer's chin and trail shoulder ($\theta_{V,\mathrm{lead}} \in [15^\circ, 25^\circ]$). The thumb sits slightly trail-side of the top-dead-centre line of the grip (short thumb).
+  \item \textbf{Trail Hand}: The thenar eminence (life line) wraps conformally over the dorsal aspect of the lead thumb. The trail ``V'' aligns parallel to the lead ``V'' ($\mathbf{v}_{\mathrm{trail}} \parallel \mathbf{v}_{\mathrm{lead}}$).
+  \item \textbf{Closure Style}: The default configuration is the Vardon overlap grip, with optional interlock and ten-finger variants supported by the geometry generator (\texttt{src/shared/python/model\_appearance/grip\_pose.py}).
+\end{enumerate}
+
+\paragraph{Kinematic Closure and Compliant Kinetics.}
+In OpenSim (\texttt{golf\_humanoid.osim} and musculoskeletal exports), both hands are constrained to the club. Kinematic loop closure enforces:
+\begin{equation}
+  \mathbf{\Phi}_{\mathrm{grip}}(\mathbf{q}) = 
+  \begin{bmatrix}
+    \mathbf{p}_{\mathrm{hand\_l}}(\mathbf{q}) - \mathbf{p}_{\mathrm{grip\_lead}}(\mathbf{q}) \\
+    \mathbf{p}_{\mathrm{hand\_r}}(\mathbf{q}) - \mathbf{p}_{\mathrm{grip\_trail}}(\mathbf{q})
+  \end{bmatrix} = \mathbf{0},
+\end{equation}
+with the closure residual bounded by $\|\mathbf{\Phi}_{\mathrm{grip}}(\mathbf{q}(t))\| \le 5\text{ mm}$ throughout the entire swing. For compliant kinetic parity (OSV-7), distributed bushing elements apply restorative wrenches:
+\begin{equation}
+  \mathbf{W}_{\mathrm{bushing}} = \mathbf{K}_b \Delta \mathbf{x} + \mathbf{D}_b \Delta \mathbf{v},
+\end{equation}
+matching the multi-engine KKT multiplier contact models across MuJoCo, Drake, Pinocchio, and OpenSim.
+
+\section{Head Gaze Stabilisation Schedule and Neck IK (OSV-3)}
+\label{sec:gaze}
+
+\paragraph{Coordinate Frames and Gaze Metric.}
+In the world frame $\mathcal{W}$ ($Z$-up, golfer facing $-X$, target line $-Y$):
+\begin{itemize}
+  \item \textbf{Eye Midpoint}: $\mathbf{e}(\mathbf{q}) = \mathbf{p}_{\mathrm{head}}(\mathbf{q}) + \mathbf{R}_{\mathrm{head}}(\mathbf{q}) \mathbf{d}_{\mathrm{eye}}$, using the de Leva (1996) anthropometric head midpoint offset $\mathbf{d}_{\mathrm{eye}} = [0.065, 0.0, 0.040]^\top\text{ m}$.
+  \item \textbf{Ball Location at Address}: $\mathbf{b} \in \mathbb{R}^3$, established at the clubface centre at address offset by one ball radius $r_{\mathrm{ball}} = 21.335\text{ mm}$ along the face normal, resting on the ground plane ($z = r_{\mathrm{ball}}$).
+  \item \textbf{Gaze Direction}: $\mathbf{g}(t) = \mathbf{R}_{\mathrm{head}}(t) \hat{\mathbf{g}}_{\mathrm{head}}$, where $\hat{\mathbf{g}}_{\mathrm{head}} = [1, 0, 0]^\top$ is the anatomical forward facial axis.
+  \item \textbf{Angular Gaze Error}:
+    \begin{equation}
+      \theta_{\mathrm{gaze}}(t) = \arccos\left( \frac{\mathbf{g}(t) \cdot (\mathbf{b} - \mathbf{e}(t))}{\|\mathbf{b} - \mathbf{e}(t)\|} \right) .
+    \end{equation}
+\end{itemize}
+
+\paragraph{Time-Dependent Gaze Schedule.}
+To provide human-like head stabilisation, the gaze target $\mathbf{r}^*(t)$ is scheduled over three distinct swing phases:
+\begin{equation}
+  \mathbf{r}^*(t) = 
+  \begin{cases}
+    \mathbf{b}, & t \le t_{\mathrm{impact}} + t_{\mathrm{hold}} \\
+    (1 - s(\tau)) \mathbf{b} + s(\tau) \left( \mathbf{e}(t) + d_{\mathrm{target}} \hat{\mathbf{x}}_t \right), & t_{\mathrm{impact}} + t_{\mathrm{hold}} < t < t_{\mathrm{impact}} + t_{\mathrm{hold}} + T_{\mathrm{rel}} \\
+    \mathbf{e}(t) + d_{\mathrm{target}} \hat{\mathbf{x}}_t, & t \ge t_{\mathrm{impact}} + t_{\mathrm{hold}} + T_{\mathrm{rel}}
+  \end{cases}
+\end{equation}
+where $t_{\mathrm{hold}} = 0.03\text{ s}$ (30 ms gaze hold through impact), $T_{\mathrm{rel}} = 0.35\text{ s}$ (release duration), $\hat{\mathbf{x}}_t = -\hat{\mathbf{y}}$ (down target line), and $s(\tau) = 10\tau^3 - 15\tau^4 + 6\tau^5$ is the quintic minimum-jerk transition function of normalised release time:
+\begin{equation}
+  \tau = \frac{t - (t_{\mathrm{impact}} + t_{\mathrm{hold}})}{T_{\mathrm{rel}}} \in [0, 1] .
+\end{equation}
+
+\paragraph{Neck Inverse Kinematics.}
+Head stabilization is solved through the neck degrees of freedom (\texttt{NeckInputX/Y/Z}, ROM: flexion $\pm 45^\circ$, lateral tilt $\pm 60^\circ$, axial rotation $\pm 80^\circ$) by adding a soft regularisation penalty to the tracking objective:
+\begin{equation}
+  J_{\mathrm{fit}}(\mathbf{q}) = J_{\mathrm{marker}}(\mathbf{q}) + w_{\mathrm{gaze}} \theta_{\mathrm{gaze}}^2(\mathbf{q}) .
+\end{equation}
+This regularisation is configurable and strictly receipt-tracked; marker-faithful fits remain available without alteration.
+
+\section{Neutral Address Foot Orientation and Progression Parity (OSV-4, OSV-6)}
+\label{sec:foot_progression_osv}
+
+\paragraph{Coordinate System and Foot Long Axis.}
+The address reference frame is oriented with up axis $\hat{\mathbf{z}}$, target axis $\hat{\mathbf{x}}_t = -\hat{\mathbf{y}}$, and golfer-forward axis $\hat{\mathbf{f}} = \hat{\mathbf{z}} \times \hat{\mathbf{x}}_t = -\hat{\mathbf{x}}$ directed toward the ball line.
+
+Using ground-projected markers:
+\begin{align}
+  \mathbf{p}_{\mathrm{heel}} &= \mathbf{p}_{\mathrm{AnkleOut}} - (\mathbf{p}_{\mathrm{AnkleOut}} \cdot \hat{\mathbf{z}}) \hat{\mathbf{z}} , \\
+  \mathbf{p}_{\mathrm{toe}} &= \frac{1}{2}(\mathbf{p}_{\mathrm{ToeIn}} + \mathbf{p}_{\mathrm{ToeOut}}) - \left( \frac{1}{2}(\mathbf{p}_{\mathrm{ToeIn}} + \mathbf{p}_{\mathrm{ToeOut}}) \cdot \hat{\mathbf{z}} \right) \hat{\mathbf{z}} .
+\end{align}
+The longitudinal foot unit vector is $\hat{\mathbf{a}} = \frac{\mathbf{p}_{\mathrm{toe}} - \mathbf{p}_{\mathrm{heel}}}{\|\mathbf{p}_{\mathrm{toe}} - \mathbf{p}_{\mathrm{heel}}\|}$.
+
+\paragraph{Foot Progression Angle.}
+The signed foot progression (toe-out) angle is computed as:
+\begin{equation}
+  \theta_{\mathrm{prog}} = \mathrm{atan2}\left( \hat{\mathbf{z}} \cdot (\hat{\mathbf{f}} \times \hat{\mathbf{a}}),\, \hat{\mathbf{f}} \cdot \hat{\mathbf{a}} \right) ,
+\end{equation}
+where positive $\theta_{\mathrm{prog}}$ designates outward flare (lead foot rotated toward target line, trail foot rotated away from target line). The address stance value is the median over the initial static stance window prior to takeaway. When markers are absent or uncalibrated, a default neutral stance of $\theta_{\mathrm{prog}} = 20^\circ$ per foot is applied.
+
+\paragraph{Interaction With Hip Mirroring (OSV-6).}
+Foot progression at address is achieved through the hip rotation coordinates (\texttt{hip\_rotation\_r}, \texttt{hip\_rotation\_l}) in conjunction with subtalar orientation. OpenSim's negative coefficient ($-1$) on \texttt{hip\_rotation\_l} ensures that positive lead hip rotation produces anatomical external rotation (toe-out). Prior to the hip mirroring fix, unmirrored kinematics forced the lead hip into internal rotation limit ($40^\circ$), causing severe lead-foot toe-in and preventing natural address posture.
+
 \section{Limitations and Failed Experiments}
 
 \begin{itemize}
@@ -642,6 +741,16 @@ python3 -m src.shared.python.motion_matching.pipeline.cli \
     regenerated.
   \item This is inverse kinematics plus feedback-assisted tracking. It is
     not an independently replayed open-loop dynamics result.
+  \item \textbf{Grip mesh and contact fidelity (OSV-2, OSV-7).} Curled hand meshes
+    use rigid visual geometry baked at the specified grip radius; live soft-tissue
+    pad deformation and individual finger contact mechanics are not solved in IK.
+    Distributed bushing kinetics provide multi-engine kinetic stability.
+  \item \textbf{Gaze regularisation scope (OSV-3).} Head gaze tracking applies
+    a soft regularisation term in neck inverse kinematics; head translation is not
+    artificially locked in world space and follows torso/cervical kinematics.
+  \item \textbf{Foot progression default (OSV-4).} The default $20^\circ$ toe-out
+    per foot represents a captured anatomical baseline and is superseded whenever
+    valid foot markers are present in the trial.
 \end{itemize}
 
 \section{Reproduction}
@@ -686,6 +795,16 @@ myo-python -m scripts.address_foot_progression_engines evaluate --run-dir $E \
   --label driver --engines myosuite --out $E/engines.json
 python3 -m scripts.address_foot_progression_engines render \
   --json $E/engines.json --out-dir stills --engines mujoco pinocchio myosuite
+# OSV-5: Golfer realism showcase test and render pipeline (#11731)
+python3 -m pytest tests/unit/scripts/test_render_golfer_realism_showcase.py -q
+python3 -m scripts.render_golfer_realism_showcase \
+  --capture capture-A \
+  --driver runs/anthro_driver_seeds/bundle.npz \
+  --iron7 runs/anthro_iron_seeds_zmp/bundle.npz \
+  --engines mujoco,myosuite,drake,pinocchio,opensim \
+  --views face_on,dtl,hands_closeup \
+  --speeds 1,0.5 --fps 60 \
+  --out ~/Videos/Parity\ Audit/golfer_realism/
 \end{verbatim}
 
 \end{document}
