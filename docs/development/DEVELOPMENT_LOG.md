@@ -1766,12 +1766,12 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Owner:** claude
 - **Issue:** #9545 (epic #9541)
 - **Branch:** claude/issue-9545-api
-- **PR:** #11516 (draft), #12449, #12495, #12440, #12506, #12515, #12519, #12522
+- **PR:** #11516 (draft), #12449, #12495, #12440, #12506, #12515, #12519, #12522, #12535
 - **Paths:** src/api/routes/bunker_workbench.py; src/tools/bunker_shot_gui/input_ranges.py; src/tools/bunker_shot_gui/design.py; src/tools/bunker_shot_gui/widgets.py; src/tools/bunker_shot_gui/report.py; src/tools/bunker_shot_gui/render.py; src/config/feature_parity.json; tests/bunkershot3d/test_bunker_workbench_api.py
 - **Started:** 2026-10-04
-- **Last verified:** 2026-10-14 (`e86772e9`; collated from changes/9545-bunkershot3d-particle-playback-viewer.md)
+- **Last verified:** 2026-10-14 (`4a813c93`; collated from changes/9545-bunkershot3d-figure-exports-carry-tier-v.md)
 - **Summary:** The headless workbench API enforces request ranges, handedness and source-stamped verdicts; predictive playability is refused or reported without ranking. UI and API share input-range authority.
-- **Next step:** Wire a real grain-resolving 3-D backend (Chrono F3 once pychrono is installable) into ParticleTrajectoryWriter, then embed the particle layer in ShotViewportWidget with playback controls.
+- **Next step:** Merge the PR; wire a desktop Export action to export_figure in a later slice.
 
 ### DL-#9544 · Bunker Contact Regimes and Coupled Club Rotation Across Fidelity Tiers
 
@@ -2288,6 +2288,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#11961 · Adopt the #11671 Foot Torsional-Friction Patch (0.05 m) in Canonical Club-Face Fixture Runs Against Ground Yaw Slip
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11961
+- **Branch:** merged via #12532
+- **PR:** #12532
+- **Paths:** see #12532
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`8c71f972`; collated from changes/11961-adopt-the-11671-foot-torsional-friction.md)
+- **Summary:** Adopt the #11671 foot torsional-friction patch (0.05 m) in canonical club-face fixture runs against ground yaw slip
+- **Next step:** Shipped in PR #12532.
+
+### DL-#11672 · Add Root-Yaw Target Tracking Support and Evaluate Finish-Window Root Yaw Feasibility for Shooting Fit
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11672
+- **Branch:** merged via #12532
+- **PR:** #12532
+- **Paths:** see #12532
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`8c71f972`; collated from changes/11672-add-root-yaw-target-tracking-support-and.md)
+- **Summary:** Add root-yaw target tracking support and evaluate finish-window root yaw feasibility for shooting fit
+- **Next step:** Shipped in PR #12532.
+
 ### DL-#11731 · Add OSV-5 Golfer Realism Showcase Render Script, Headless Smoke Test, and Modelling Reference Updates (#11731, #11726)
 
 - **State:** shipped
@@ -2580,10 +2606,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12347
 - **Branch:** merged via #12488
-- **PR:** #12488
+- **PR:** #12488, #12534
 - **Paths:** see #12488
 - **Started:** 2026-10-14
-- **Last verified:** 2026-10-14 (`976419b9`; collated from changes/12347-back-squat-bar-geometry-slice-1-torso-ba.md)
+- **Last verified:** 2026-10-14 (`aca30fca`; collated from changes/12347-back-squat-lift-body.md)
 - **Summary:** Back-squat bar geometry slice 1: torso bar shelf, standard grip width and medio-lateral bar axis from the parity standard (back_bar.py, lift_to_full_body geometry option, generate_lift_bundle --geometry back_bar); committed bundle and evidence not regenerated
 - **Next step:** Shipped in PR #12488.
 

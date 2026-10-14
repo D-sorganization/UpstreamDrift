@@ -2741,6 +2741,9 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-14 | #12535 | BunkerShot3D figure exports carry tier, verdict and sources as sealed PNG data; the reader refuses unstamped, edited or predictive-claiming files |
+| 2026-10-14 | #12534 | feat(lifting): regenerate back-squat bundle with back-bar lift body, torso shelf, standard grip width, and symmetric barbell bushing interface (LIFT-5 / #12347) |
+| 2026-10-14 | #12532 | Add root-yaw target tracking support and evaluate finish-window root yaw feasibility for shooting fit; Adopt the #11671 foot torsional-friction patch (0.05 m) in canonical club-face fixture runs against ground yaw slip |
 | 2026-10-14 | #12527 | Add OSV-5 golfer realism showcase render script, headless smoke test, and modelling reference updates (#11731, #11726) |
 | 2026-10-14 | #12523 | Add MATLAB R2025b Simscape Mechanics Explorer 4-view export script and deferred catalog entry (NV-8) (#11681, #11673) |
 | 2026-10-14 | #12525 | Add MATLAB R2025b Simscape same-input torque bundle replay harness and update parity reference (SIP P-8) (#11613, #11605) |
