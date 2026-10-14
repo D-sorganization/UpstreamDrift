@@ -89,6 +89,7 @@ Necromatcher and matching:
 - MOSAIC model-aware matching #11532; OpenCap to OpenSim #11400; MyoFullBody muscle-driven swing Epic #11642.
 - Centroidal feasibility filter v2 #11669; finish feasibility balance #11667; lift pack parity baseline LIFT-1 #11741 (Epic #11740).
 - Simscape: URDF exchange and run-102 playback #11569; same-input parity chapter SIP P-9 #11614 (Epic #11605); OpenSim swing #11617; native OpenSim geometry #11903; MeshCat framing NV-9 #11697.
+- Unified spec-exported URDF contract across engines and ledgered MyoSuite topology divergence #11570.
 - Character Builder docs and tutorial CMB-12 #11663 (open: CMB-6 #11657, CMB-7 #11658).
 
 Motion matching and tour baselines:
