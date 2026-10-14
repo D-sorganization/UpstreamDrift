@@ -182,3 +182,46 @@ export function formatMetric(value: number | null | undefined, unit: 'mm' | 'deg
   }
   return `${((value * 180) / Math.PI).toFixed(2)}°`;
 }
+
+export interface NativeViewerLaunchResponse {
+  schema_version: string;
+  run_id: string;
+  success: boolean;
+  backend: string;
+  url?: string | null;
+  message?: string | null;
+}
+
+export async function launchMatchedSwingNativeViewer(
+  runId: string,
+  backend: string = 'meshcat',
+  speed: number = 1.0,
+): Promise<NativeViewerLaunchResponse> {
+  const resp = await fetch(
+    apiUrl(`/api/matched-swings/${encodeURIComponent(runId)}/native-viewer`),
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ backend, speed }),
+    },
+  );
+  if (!resp.ok) {
+    const text = await resp.text();
+    let message = text;
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed.error?.message) {
+        message = parsed.error.message;
+      } else if (parsed.detail) {
+        message = typeof parsed.detail === 'string' ? parsed.detail : JSON.stringify(parsed.detail);
+      }
+    } catch {
+      // Keep raw text message
+    }
+    throw new Error(`Failed to launch native viewer: ${message}`);
+  }
+  return resp.json();
+}
+
