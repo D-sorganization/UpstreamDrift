@@ -36,6 +36,8 @@
 \newcommand{\btheta}{\boldsymbol{\theta}}
 \newcommand{\bxi}{\boldsymbol{\xi}}
 \newcommand{\blambda}{\boldsymbol{\lambda}}
+\newcommand{\btau}{\boldsymbol{\tau}}
+\newcommand{\bp}{\mathbf{p}}
 \newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
 
 \title{MOSAIC: Model-Aware Simultaneous Anthropometry, Inertia and Control\\
@@ -638,6 +640,43 @@ container.
     when unexcited.  Both open-loop rollouts (with and without the actuation
     layer) are evaluated on fitted trials and reported side-by-side in
     \texttt{SubjectFitReport.activation\_report} alongside declared provenance.
+\end{itemize}
+
+\subsection{Pinocchio Regressor Provider (MOSAIC-02)}
+\label{subsec:pinocchio_regressor}
+The first engine-backed \texttt{RegressorModel} is provided by \texttt{PinocchioRegressorModel}
+in \texttt{src/shared/python/estimation/mosaic/pinocchio\_provider.py}.  It exposes the
+linear regressor $\bY(\bq, \bv, \ba)$ via Pinocchio's \texttt{computeJointTorqueRegressor}
+vectorised across $N$ nodes.
+
+\paragraph{Parameter Conventions.} Each moving link $i$ is parameterised by a 10-vector
+of spatial dynamic parameters:
+\begin{equation}
+  \bpi_i = \begin{bmatrix} m_i & h_{ix} & h_{iy} & h_{iz} & I_{xx} & I_{xy} & I_{yy} & I_{xz} & I_{yz} & I_{zz} \end{bmatrix}^\top
+\end{equation}
+where $h_i = m_i c_i$ is the first moment of mass and $I$ is the rotational inertia
+about the joint frame origin.  Note that in Pinocchio $I_{yy}$ precedes $I_{xz}$,
+whereas in the internal \texttt{inertial.py} ordering $I_{xz}$ precedes $I_{yy}$.
+For planar motion in the $xy$-plane with $z$-axis revolute joints, the 4 active columns
+correspond exactly to indices $(0, 1, 2, 9) = (m, h_x, h_y, I_{zz})$, with all other 6
+columns identically zero.
+
+\paragraph{Conformance and Verification.}
+\begin{itemize}[nosep]
+  \item \textbf{Planar Oracle Conformance:} Tested against the 3-link planar oracle
+    fixture (\texttt{PlanarChain}).  Extracted planar columns match the analytic
+    regressor to a maximum discrepancy of $3.55 \times 10^{-15}$ across random
+    $(\bq, \bv, \ba)$ (acceptance criterion: $< 10^{-12}$).
+  \item \textbf{RNEA Torque Identity:} $\bY(\bq, \bv, \ba)\bpi = \btau_{\text{RNEA}}$ holds
+    to $1.26 \times 10^{-15}$ on fixed-base manipulators and $1.31 \times 10^{-14}$ on
+    floating-base humanoid models (including floating-base rows).
+  \item \textbf{Marker Forward Kinematics and Jacobians:} World marker positions $\bp_{\text{world}} = o_j + R_j p_{\text{local}}$
+    and analytic Jacobians $J_v = J_{\text{trans}} - [R_j p_{\text{local}}]_\times J_{\text{rot}}$
+    match numerical differentiation to $< 10^{-8}$.
+  \item \textbf{Batched Execution:} Evaluated over $N=150$ benchmark nodes; matches the
+    per-node loop to machine precision ($0.0$).
+  \item \textbf{Qualification:} If Pinocchio is uninstalled, tests skip with an
+    unqualified report (\texttt{pytest.mark.requires\_pinocchio}); no mock stands in for a pass.
 \end{itemize}
 
 \subsection{Floating-Base Manifold Spline on $SE(3)$ (MOSAIC-04, \#11536)}
