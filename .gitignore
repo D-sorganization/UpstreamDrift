@@ -313,5 +313,8 @@ test_event_filter.py
 docs/research/shot_pattern_analysis/**/*.zip
 docs/research/shot_pattern_analysis/**/*.jpg
 
-# Native motion-capture files are private (see tests/unit/repo_hygiene/test_no_private_capture_data.py)
+# Native motion-capture files and sidecars are private (see tests/unit/repo_hygiene/test_no_private_capture_data.py)
 *.gpcap
+*Capture.info
+PlayerInfo.bin
+* Capture Files/
