@@ -9,9 +9,10 @@ from pathlib import Path
 import numpy as np
 import pytest
 from defusedxml import ElementTree as ET
+from tests.helpers.opensim_support import require_opensim
 
 # Every test in this module exercises native OpenSim source or geometry APIs.
-pytest.importorskip("opensim")
+require_opensim()
 
 from src.engines.physics_engines.opensim.python.tour_matching.native_prepared_state import (
     DeclaredColdStart,
@@ -136,7 +137,7 @@ def test_wrapped_declaration_rejects_link_name_that_disagrees_with_native_target
         declaration,
         path_wraps=(replace(declaration.path_wraps[0], wrap_object_name="other"),),
     )
-    import opensim as osim
+    osim = require_opensim()
 
     model = osim.Model(str(path))
     model.finalizeConnections()
@@ -252,7 +253,7 @@ def test_conditional_declaration_does_not_admit_unsupported_wrap_shapes(
 ) -> None:
     from dataclasses import replace
 
-    import opensim as osim
+    osim = require_opensim()
 
     from tests.opensim.test_native_constrained_muscle import _controls, _source
 
@@ -283,7 +284,7 @@ def test_conditional_only_declaration_rejects_identity_mutations(
 ) -> None:
     from dataclasses import replace
 
-    import opensim as osim
+    osim = require_opensim()
 
     path, _ = _conditional_only_source(tmp_path)
     declaration = declare_wrapped_path_source(path)
@@ -510,7 +511,7 @@ def test_declaration_records_conditional_points_and_rejects_bad_active_range(
 def test_native_reference_observes_conditional_point_on_both_sides(
     tmp_path: Path,
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path = _wrapped_source(tmp_path)
     tree = ET.parse(path)
     points = tree.find(".//PathPointSet/objects")

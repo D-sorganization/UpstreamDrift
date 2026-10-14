@@ -30,6 +30,18 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.lifting.back_bar import (
+    BAR_CENTRE_FRAME,
+    BAR_LONG_AXIS_LOCAL,
+    SHELF_FRAME,
+    BackBarGeometry,
+    BackBarSetup,
+    BackBarStart,
+    apply_grip_width,
+    bar_axis_world,
+    fit_bar_shelf,
+    standard_bar_world,
+)
 from src.shared.python.lifting.sagittal_retarget import (
     LANDMARK_LABELS,
     SagittalFrame,
@@ -62,6 +74,16 @@ LIMITATIONS = (
     "bar at the shoulder joint (zero squat_bar_depth/squat_bar_height). The "
     "bar mass enters only the planar optimizer, not the full-body dynamics. "
     "Barbell body and hand contact are LIFT-4 (#11744)."
+)
+BACK_BAR_LIMITATIONS = (
+    "Back-bar geometry (#12347): the spec's golf club body is kept as the bar "
+    "carrier, with the left hand moved to the standard's grip width along it "
+    "(its mass travels with the hand); the club's shaft and grip solids are "
+    "unchanged and there is still no barbell body or load (LIFT-4, #11744). "
+    "The bar centre ('Grip' frame) is tracked to a torso shelf fitted so the "
+    "bar sits at the standard's start-pose position; the golf humanoid's "
+    "torso is not the standard's, so that shelf is not a measured anatomical "
+    "site. The scapulae are held at the seed pose and the arm chain is solved."
 )
 _ORIGIN = (0.0, 0.0, 0.0)
 LANDMARK_ATTACHMENTS: dict[str, tuple[str, tuple[float, float, float]]] = {
@@ -96,6 +118,18 @@ UPPER_LIMB_COORDINATES: tuple[str, ...] = (
     "RWInputX",
     "RWInputY",
 )
+SCAPULA_COORDINATES: tuple[str, ...] = (
+    "LScapInputX",
+    "LScapInputY",
+    "RScapInputX",
+    "RScapInputY",
+)
+ARM_CHAIN_COORDINATES: tuple[str, ...] = tuple(
+    n for n in UPPER_LIMB_COORDINATES if n not in SCAPULA_COORDINATES
+)
+#: Largest bar-centre and grip-closure error accepted from the arm solve, metres.
+BACK_BAR_REACH_TOLERANCE_M = 0.02
+BACK_BAR_CLOSURE_TOLERANCE_M = 1e-3
 TOE_COORDINATES: tuple[str, ...] = ("mtp_angle_l", "mtp_angle_r")
 POSTURE_COORDINATES: tuple[str, ...] = (
     "hip_adduction_l",
@@ -143,6 +177,12 @@ class FullBodyLift:
     q_standing: Array
     frame: SagittalFrame
     options: LiftIKOptions
+    back_bar: BackBarSetup | None = None
+
+    @property
+    def bar_frame(self) -> str:
+        """Spec frame whose world position is the lift's bar path."""
+        return BAR_FRAME if self.back_bar is None else BAR_CENTRE_FRAME
 
     def max_residual_by_landmark(self) -> dict[str, float]:
         """Largest landmark error over all frames, metres."""
@@ -151,10 +191,13 @@ class FullBodyLift:
 
     def summary(self) -> dict[str, Any]:
         """Provenance record of the IK solve."""
-        return {
+        attachments = _attachments(self.back_bar)
+        held = UPPER_LIMB_COORDINATES if self.back_bar is None else SCAPULA_COORDINATES
+        locked = held + TOE_COORDINATES
+        record: dict[str, Any] = {
             "solver": "FullBodyMarkerKinematics (MuJoCo), Levenberg-Marquardt",
-            "landmarks": {k: v[0] for k, v in LANDMARK_ATTACHMENTS.items()},
-            "locked": list(UPPER_LIMB_COORDINATES + TOE_COORDINATES),
+            "landmarks": {k: v[0] for k, v in attachments.items()},
+            "locked": list(locked),
             "flat_feet": list(STANCE_SPHERES),
             "options": asdict(self.options),
             "frames": int(self.time_s.size),
@@ -165,6 +208,9 @@ class FullBodyLift:
             "sagittal_forward": list(self.frame.forward),
             "q_standing": self.q_standing.tolist(),
         }
+        if self.back_bar is not None:
+            record["back_bar"] = self.back_bar.to_record()
+        return record
 
 
 def load_seed_pose(path: Path = SEED_RECORD) -> Array:
@@ -231,7 +277,13 @@ def solve_sagittal_squat(
     )
 
 
-def _foot_frame(kin: Any, q: Array, ground: Any) -> SagittalFrame:
+def stance_mid_foot(kin: Any, q: Array, ground: Any) -> Array:
+    """Floor point at mid-foot: the mean ground point of the contact spheres."""
+    points = kin.sphere_ground_points(q, ground)
+    return np.asarray(np.mean(list(points.values()), axis=0), dtype=float)
+
+
+def stance_frame(kin: Any, q: Array, ground: Any) -> SagittalFrame:
     """Sagittal frame of a pose: forward is the mean heel-to-forefoot line."""
     points = kin.sphere_ground_points(q, ground)
     forward = np.zeros(3)
@@ -277,24 +329,47 @@ def _fit_arrays(kin: Any, fits: list[Any]) -> tuple[Array, Array, Array, Array]:
     return residual, bar, closure, lowest
 
 
-def lift_to_full_body(
-    spec_bytes: bytes,
-    solution: SagittalSolution,
-    seed_q: Array,
-    *,
-    options: LiftIKOptions | None = None,
-) -> FullBodyLift:
-    """Full-body joint trajectory for ``solution`` by marker IK in MuJoCo.
+def _attachments(
+    back_bar: BackBarSetup | None,
+) -> dict[str, tuple[str, tuple[float, float, float]]]:
+    """Marker attachments: the bar landmark rides the Hub, or the bar-centre frame."""
+    if back_bar is None:
+        return LANDMARK_ATTACHMENTS
+    return {**LANDMARK_ATTACHMENTS, "bar": (BAR_CENTRE_FRAME, _ORIGIN)}
 
-    Args:
-        spec_bytes: Full-body spec (``full-body-v1``) document bytes.
-        solution: Planar lift solution.
-        seed_q: Seed pose in spec order; its upper-limb coordinates are held.
-        options: IK settings (defaults: :class:`LiftIKOptions`).
 
-    Postconditions: ``q`` has one row per solution sample; upper-limb and
-    toe coordinates are constant.
-    """
+@dataclass(frozen=True)
+class _Standing:
+    """Upright pose of the legacy (arms-on-club) spec and what the solves share."""
+
+    kin: Any
+    ground: Any
+    order: tuple[str, ...]
+    locked: dict[str, float]
+    posture: dict[str, tuple[float, float]]
+    options: LiftIKOptions
+    q: Array
+    frame: SagittalFrame
+    points: dict[str, Array]
+
+
+def _engine_kinematics(spec_bytes: bytes, attachments: Mapping[str, Any]) -> Any:
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
+        FullBodyMarkerKinematics,
+    )
+    from src.engines.physics_engines.mujoco.python.full_body_model import (
+        NativeMujocoFullBodyModel,
+    )
+
+    return FullBodyMarkerKinematics(
+        NativeMujocoFullBodyModel(bytes(spec_bytes)), dict(attachments)
+    )
+
+
+def _stand(
+    spec_bytes: bytes, seed_q: Array, options: LiftIKOptions | None
+) -> _Standing:
+    """Validate inputs and solve the upright pose with the upper limbs held."""
     if not isinstance(spec_bytes, bytes | bytearray):
         raise TypeError("spec_bytes must be the raw full-body spec bytes")
     order = tuple(json.loads(spec_bytes)["coordinate_order"])
@@ -303,17 +378,9 @@ def lift_to_full_body(
         raise ValueError(f"seed_q must be {len(order)} finite values in spec order")
     opts = options or LiftIKOptions()
 
-    from src.engines.physics_engines.mujoco.python.full_body_ik import (
-        FullBodyMarkerKinematics,
-    )
-    from src.engines.physics_engines.mujoco.python.full_body_model import (
-        NativeMujocoFullBodyModel,
-    )
     from src.shared.python.motion_matching.contact_law import GroundPlane
 
-    kin = FullBodyMarkerKinematics(
-        NativeMujocoFullBodyModel(bytes(spec_bytes)), LANDMARK_ATTACHMENTS
-    )
+    kin = _engine_kinematics(spec_bytes, LANDMARK_ATTACHMENTS)
     ground = GroundPlane(normal=(0.0, 0.0, 1.0), height_m=0.0)
     locked = {n: float(seed[order.index(n)]) for n in UPPER_LIMB_COORDINATES}
     posture = dict.fromkeys(POSTURE_COORDINATES, (0.0, opts.posture_weight))
@@ -322,7 +389,7 @@ def lift_to_full_body(
         name: np.asarray(pos, dtype=float)
         for name, pos in zip(LANDMARK_LABELS, seed_positions, strict=True)
     }
-    upright = _standing_targets(seed_points, _foot_frame(kin, seed, ground))
+    upright = _standing_targets(seed_points, stance_frame(kin, seed, ground))
     standing = kin.solve_pose(
         upright,
         np.asarray(np.isfinite(upright).all(axis=1), dtype=bool),
@@ -334,24 +401,142 @@ def lift_to_full_body(
         prior_weight=opts.prior_weight,
         posture_prior=posture,
     ).q
-    frame = _foot_frame(kin, standing, ground)
     standing_positions = kin.marker_positions(standing)
-    points: dict[str, Array] = {
-        name: np.asarray(pos, dtype=float)
-        for name, pos in zip(LANDMARK_LABELS, standing_positions, strict=True)
+    return _Standing(
+        kin=kin,
+        ground=ground,
+        order=order,
+        locked=locked,
+        posture=posture,
+        options=opts,
+        q=standing,
+        frame=stance_frame(kin, standing, ground),
+        points={
+            name: np.asarray(pos, dtype=float)
+            for name, pos in zip(LANDMARK_LABELS, standing_positions, strict=True)
+        },
+    )
+
+
+def _bar_axis_targets(
+    geometry: BackBarGeometry, frame: SagittalFrame
+) -> dict[str, tuple[tuple[float, ...], tuple[float, ...], float]]:
+    """IK axis target: the bar-centre frame's long axis along the standard's.
+
+    The club body's long axis runs from the left palm to the right palm, so it
+    points against the standard's ``+Y`` (the lifter's left) for the left hand
+    to sit on the lifter's left.
+    """
+    direction = tuple(float(x) for x in -bar_axis_world(geometry, frame))
+    return {BAR_CENTRE_FRAME: (BAR_LONG_AXIS_LOCAL, direction, 1.0)}
+
+
+def _back_bar_pose(
+    standing: _Standing, spec_bytes: bytes, geometry: BackBarGeometry
+) -> tuple[BackBarSetup, Any, Array]:
+    """Derived spec, torso shelf and the standing pose with the arms on the bar.
+
+    Only the arm chain moves; the legs, trunk and scapulae stay at ``standing``.
+
+    Raises:
+        RuntimeError: If the arms cannot put the bar centre on the shelf with
+            the grip closed.
+    """
+    if not isinstance(geometry, BackBarGeometry):
+        raise TypeError("geometry must be a BackBarGeometry")
+    kin, q = standing.kin, standing.q
+    mid_foot = stance_mid_foot(kin, q, standing.ground)
+    bar_target = standard_bar_world(geometry, mid_foot, standing.frame)
+    hub_rotation, hub_origin = kin.body_poses(q, [SHELF_FRAME])[SHELF_FRAME]
+    shelf = fit_bar_shelf(SHELF_FRAME, hub_rotation, hub_origin, bar_target)
+    setup = BackBarSetup(
+        spec_bytes=apply_grip_width(spec_bytes, geometry.grip_width_m),
+        geometry=geometry,
+        shelf=shelf,
+        bar_target_m=bar_target,
+        mid_foot_m=mid_foot,
+    )
+    arm_kin = _engine_kinematics(setup.spec_bytes, _attachments(setup))
+    targets = np.array(
+        [bar_target if k == "bar" else standing.points[k] for k in LANDMARK_LABELS]
+    )
+    fit = arm_kin.solve_pose(
+        targets,
+        np.ones(len(LANDMARK_LABELS), dtype=bool),
+        q,
+        locked={
+            n: float(q[standing.order.index(n)])
+            for n in standing.order
+            if n not in ARM_CHAIN_COORDINATES
+        },
+        flat_feet=STANCE_SPHERES,
+        iterations=standing.options.standing_iterations,
+        ground=standing.ground,
+        prior_weight=standing.options.prior_weight,
+        axis_targets=_bar_axis_targets(geometry, standing.frame),
+    )
+    reach = fit.per_marker_m["bar"]
+    if reach > BACK_BAR_REACH_TOLERANCE_M or (
+        fit.closure_error_m > BACK_BAR_CLOSURE_TOLERANCE_M
+    ):
+        raise RuntimeError(
+            f"arms cannot hold the bar on the shelf: bar {reach:.4f} m off, grip "
+            f"closure {fit.closure_error_m:.2e} m"
+        )
+    return setup, arm_kin, np.asarray(fit.q, dtype=float)
+
+
+def solve_back_bar_standing(
+    spec_bytes: bytes,
+    seed_q: Array,
+    geometry: BackBarGeometry,
+    *,
+    options: LiftIKOptions | None = None,
+) -> BackBarStart:
+    """Standing start pose with the bar on the torso shelf (#12347).
+
+    Poses the legs and trunk as :func:`lift_to_full_body` does, fits the torso
+    shelf to the standard's bar position, derives the spec with the standard's
+    grip width and solves the arm chain so the bar centre sits on the shelf with
+    its long axis medio-lateral and the grip closed.
+
+    Postconditions: the result's ``q`` refers to ``spec_bytes`` of the result
+    (the derived spec); its bar centre is within
+    :data:`BACK_BAR_REACH_TOLERANCE_M` of the standard's position.
+    """
+    standing = _stand(spec_bytes, seed_q, options)
+    setup, _, q = _back_bar_pose(standing, spec_bytes, geometry)
+    return BackBarStart(setup=setup, q=q, frame=standing.frame)
+
+
+def _track(
+    kin: Any,
+    standing: _Standing,
+    solution: SagittalSolution,
+    *,
+    points: Mapping[str, Array],
+    q_start: Array,
+    held: Mapping[str, float],
+    axes: Mapping[str, Any] | None,
+    back_bar: BackBarSetup | None,
+) -> FullBodyLift:
+    """Track the retargeted landmarks of ``solution`` from ``q_start``."""
+    targets = retarget_landmarks(solution, points, standing.frame)
+    locked = dict(held) | {
+        n: float(q_start[standing.order.index(n)]) for n in TOE_COORDINATES
     }
-    targets = retarget_landmarks(solution, points, frame)
-    locked |= {n: float(standing[order.index(n)]) for n in TOE_COORDINATES}
+    extra = {} if axes is None else {"axis_targets_per_frame": [axes] * len(targets)}
     q, fits = kin.solve_trajectory(
         targets,
         np.ones(targets.shape[:2], dtype=bool),
-        standing,
+        q_start,
         locked=locked,
         flat_feet_per_frame=[STANCE_SPHERES] * len(targets),
-        iterations=opts.iterations,
-        ground=ground,
-        prior_weight=opts.prior_weight,
-        posture_prior=posture,
+        iterations=standing.options.iterations,
+        ground=standing.ground,
+        prior_weight=standing.options.prior_weight,
+        posture_prior=standing.posture,
+        **extra,
     )
     residual, bar, closure, lowest = _fit_arrays(kin, fits)
     return FullBodyLift(
@@ -362,16 +547,67 @@ def lift_to_full_body(
         bar_m=bar,
         closure_m=closure,
         lowest_sphere_m=lowest,
-        q_standing=standing,
-        frame=frame,
-        options=opts,
+        q_standing=q_start,
+        frame=standing.frame,
+        options=standing.options,
+        back_bar=back_bar,
     )
 
 
-def bar_path(plant: VectorPlant, q_rows: Array) -> Array:
-    """World bar-landmark (``Hub`` frame) positions for each state row."""
+def lift_to_full_body(
+    spec_bytes: bytes,
+    solution: SagittalSolution,
+    seed_q: Array,
+    *,
+    options: LiftIKOptions | None = None,
+    geometry: BackBarGeometry | None = None,
+) -> FullBodyLift:
+    """Full-body joint trajectory for ``solution`` by marker IK in MuJoCo.
+
+    Args:
+        spec_bytes: Full-body spec (``full-body-v1``) document bytes.
+        solution: Planar lift solution.
+        seed_q: Seed pose in spec order; its upper-limb coordinates are held.
+        options: IK settings (defaults: :class:`LiftIKOptions`).
+        geometry: Back-bar geometry (#12347).  ``None`` keeps the golf club
+            grip with the upper limbs held at the seed; given, the bar is
+            tracked on the torso shelf with the standard's grip width and a
+            medio-lateral axis, the arm chain is solved and the lift refers to
+            the derived spec ``lift.back_bar.spec_bytes``.
+
+    Postconditions: ``q`` has one row per solution sample; toe coordinates are
+    constant, as are the upper-limb coordinates (the scapulae only, with
+    ``geometry``).
+    """
+    standing = _stand(spec_bytes, seed_q, options)
+    if geometry is None:
+        return _track(
+            standing.kin,
+            standing,
+            solution,
+            points=standing.points,
+            q_start=standing.q,
+            held=standing.locked,
+            axes=None,
+            back_bar=None,
+        )
+    setup, arm_kin, q_start = _back_bar_pose(standing, spec_bytes, geometry)
+    return _track(
+        arm_kin,
+        standing,
+        solution,
+        points={**standing.points, "bar": setup.bar_target_m},
+        q_start=q_start,
+        held={n: v for n, v in standing.locked.items() if n in SCAPULA_COORDINATES},
+        axes=_bar_axis_targets(geometry, standing.frame),
+        back_bar=setup,
+    )
+
+
+def bar_path(plant: VectorPlant, q_rows: Array, frame: str = BAR_FRAME) -> Array:
+    """World positions of spec frame ``frame`` (default the ``Hub`` bar landmark)."""
     rows = np.asarray(q_rows, dtype=float)
-    return np.array([plant.kinematic_frames(q)[BAR_FRAME][:3, 3] for q in rows])
+    return np.array([plant.kinematic_frames(q)[frame][:3, 3] for q in rows])
 
 
 def _window_indices(time_s: Array, start_s: float, window_s: float) -> int:
@@ -406,13 +642,16 @@ def build_lift_bundle(
     solution, the IK summary, the window's bar path and ``provenance``.
 
     Raises:
-        ValueError: For a window outside the lift or a missing ``lift``.
+        ValueError: For a window outside the lift, a missing ``lift``, or a
+            back-bar ``lift`` whose derived spec is not ``spec_bytes``.
     """
     start = _window_indices(solution.time_s, float(window_start_s), float(window_s))
     if lift is None or lift.q.shape[0] != solution.time_s.size:
         raise ValueError("lift must be the full-body trajectory of solution")
     if not lift_name:
         raise ValueError("lift_name must be non-empty")
+    if lift.back_bar is not None and bytes(spec_bytes) != lift.back_bar.spec_bytes:
+        raise ValueError("spec_bytes must be lift.back_bar.spec_bytes (derived spec)")
     times = solution.time_s[start:]
     record = {
         "lift": lift_name,
@@ -422,8 +661,8 @@ def build_lift_bundle(
         "ik": lift.summary(),
         "ik_bar_path_m": lift.bar_m.tolist(),
         "window": {"start_s": float(times[0]), "duration_s": float(window_s)},
-        "bar_frame": BAR_FRAME,
-        "limitations": LIMITATIONS,
+        "bar_frame": lift.bar_frame,
+        "limitations": LIMITATIONS if lift.back_bar is None else BACK_BAR_LIMITATIONS,
         **dict(provenance or {}),
     }
     bundle = generate_reference_bundle(
@@ -434,7 +673,7 @@ def build_lift_bundle(
         provenance=record,
     )
     plant = VectorPlant("mujoco", bundle.spec_bytes)
-    window_bar = bar_path(plant, bundle.reference_q)
+    window_bar = bar_path(plant, bundle.reference_q, lift.bar_frame)
     return InputBundle(
         spec_bytes=bundle.spec_bytes,
         coordinate_order=bundle.coordinate_order,

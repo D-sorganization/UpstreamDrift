@@ -8,6 +8,7 @@ from src.shared.python.motion_pipeline.matching.base import MotionMatchingResult
 from src.shared.python.motion_pipeline.matching.cmc import CMCMatchingSolver
 
 from ._local_fixtures import make_pendulum_reference_trajectory, make_simple_rig
+from tests.helpers.opensim_support import require_opensim
 
 
 def test_cmc_solver_constructs_without_opensim() -> None:
@@ -20,7 +21,7 @@ def test_cmc_solver_constructs_without_opensim() -> None:
     strict=True,
 )
 def test_cmc_solver_with_opensim() -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     s = CMCMatchingSolver()
     ref = make_pendulum_reference_trajectory(num_frames=5)
     rig = make_simple_rig(num_joints=1)

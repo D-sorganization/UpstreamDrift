@@ -26,6 +26,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.registration impor
     CaptureRegistration,
 )
 from tests.opensim.test_moco_initial_bindings import _native_inputs
+from tests.helpers.opensim_support import require_opensim
 
 pytest_plugins = ("tests.opensim.test_native_muscle_replay",)
 pytestmark = pytest.mark.unit
@@ -38,7 +39,7 @@ def _sha(path: Path) -> str:
 def test_source_native_guess_roundtrips_and_populates_actual_moco_problem(
     muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     clock = np.linspace(0.0, 0.01, 11)
     path, trc, _, bindings = _native_inputs(muscle_fixture, tmp_path, clock)
     receipt = materialize_native_moco_guess(path, _sha(path), clock, tmp_path / "guess")
@@ -86,7 +87,7 @@ def test_source_and_clock_changes_reject_before_writing(
 def test_native_guess_audit_rejects_missing_or_nonfinite_state(
     muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, _ = muscle_fixture
     clock = np.array([0.0, 0.005, 0.01])
     materialize_native_moco_guess(path, _sha(path), clock, tmp_path)
@@ -153,7 +154,7 @@ def test_preparation_distinguishes_real_guess_from_scientific_blockers(
 def test_actual_moco_builder_rejects_incomplete_seed_state_columns(
     muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, trc, _, bindings = _native_inputs(muscle_fixture, tmp_path)
     incomplete = osim.TimeSeriesTable()
     labels = osim.StdVectorString()

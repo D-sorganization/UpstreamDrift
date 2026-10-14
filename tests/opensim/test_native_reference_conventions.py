@@ -12,12 +12,13 @@ from src.engines.physics_engines.opensim.python.tour_matching.native_reference_c
     audit_source_reference,
     compare_native_references,
 )
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
 
 def _source(tmp_path: Path, coordinate: float = 0.2, *, dgf: bool = False) -> Path:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     tmp_path.mkdir(parents=True, exist_ok=True)
     model = osim.Model()
     model.setGravity(osim.Vec3(0))
@@ -160,7 +161,7 @@ def test_native_dgf_options_and_declared_wrap_are_observed_without_law_change(
 def test_explicit_named_reference_changes_state_identity_without_assembly(
     tmp_path: Path,
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path = _source(tmp_path)
     model = osim.Model(str(path))
     state = model.initSystem()
@@ -187,7 +188,7 @@ def test_explicit_named_reference_changes_state_identity_without_assembly(
 def test_post_init_system_reference_exposes_native_assembly_of_coupled_defaults(
     tmp_path: Path,
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     model.setGravity(osim.Vec3(0))
     for name, default in (("independent", 0.2), ("dependent", 0.9)):
@@ -232,7 +233,7 @@ def test_post_init_system_reference_exposes_native_assembly_of_coupled_defaults(
 def test_moving_path_point_reads_native_location_at_each_declared_state(
     tmp_path: Path,
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     model.setGravity(osim.Vec3(0))
     body = osim.Body("body", 1, osim.Vec3(0), osim.Inertia(0.1))
@@ -364,7 +365,7 @@ def test_comparison_requires_explicit_identity_and_correspondence(
 def test_frame_orientation_change_is_not_hidden_by_equal_frame_origins(
     tmp_path: Path,
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     paths = []
     for name, yaw in (("left", 0.0), ("right", 0.5)):
         model = osim.Model()

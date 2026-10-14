@@ -24,6 +24,7 @@ import math
 from typing import Any
 
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -53,7 +54,7 @@ _RIGHT_RESIDUAL_TOL_M = 1e-9
 
 
 def _mod():
-    pytest.importorskip("opensim")
+    require_opensim()
     from src.shared.python.lifting.pack_audit.adapters import opensim_bar_hold
 
     return opensim_bar_hold
@@ -139,7 +140,7 @@ def test_bar_hold_wrench_unavailable_when_bar_is_on_torso() -> None:
 
 
 def _opensim_lift_adapter(lift: str):
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     if not hasattr(osim, "__file__"):
         pytest.skip("opensim in sys.modules is a test double, not the real package")
     from src.shared.python.lifting.pack_audit.adapters import create_adapter

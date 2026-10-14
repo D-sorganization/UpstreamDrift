@@ -18,8 +18,9 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
-pytest.importorskip("opensim")
+require_opensim()
 
 from src.engines.physics_engines.opensim.python.grip_contact_osim_sim import (  # noqa: E402
     ContactGripSimulator,
@@ -90,7 +91,7 @@ def test_pad_force_vanishes_without_contact(foundation, mesh):
 
 def test_pad_on_a_fixed_grip_supports_the_expected_load(foundation, mesh):
     """Regression of the feasibility probe: a pad at the equilibrium depth stays."""
-    import opensim as osim
+    osim = require_opensim()
 
     weight = foundation.force_per_pad_n
     model, force, coord = single_pad_model(foundation, mesh, weight / G)

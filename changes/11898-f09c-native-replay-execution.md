@@ -1,3 +1,8 @@
+---
+issue: 11898
+summary: "Add a fail-closed F09 execution boundary that binds explicit F01 inventory rows to Tools T01 native replay bundles, calls the reviewed MuJoCo or Drake adapter and validates the native output against exact state, input, policy, model and time-grid identities; execution receipts remain unqualified"
+---
+
 # F09c Native Replay Execution
 
 Added a fail-closed F09 execution boundary that binds explicit F01 inventory

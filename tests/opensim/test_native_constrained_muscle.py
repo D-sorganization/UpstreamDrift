@@ -433,7 +433,7 @@ def test_structural_weld_fresh_reload_and_saved_excitation_replay(
         path, declaration.named_state
     )
     serialized = tmp_path / "roundtrip.osim"
-    import opensim as osim
+    osim = require_opensim()
 
     reloaded_model = osim.Model(str(path))
     reloaded_model.printToXML(str(serialized))

@@ -9,6 +9,7 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 HAS_OPENSIM = importlib.util.find_spec("opensim") is not None
 
@@ -29,7 +30,7 @@ def test_full_body_anthro_driver_opensim_instantiation() -> None:
     """Validate full-body driver model loading and topology inside OpenSim SDK."""
     if not DRIVER_OSIM.exists():
         pytest.skip("Generated driver osim not present")
-    import opensim  # type: ignore[import-not-found]
+    opensim = require_opensim()
 
     model = opensim.Model(str(DRIVER_OSIM))
     model.initSystem()
@@ -59,7 +60,7 @@ def test_full_body_anthro_iron7_opensim_instantiation() -> None:
     """Validate full-body iron7 model loading and topology inside OpenSim SDK."""
     if not IRON_OSIM.exists():
         pytest.skip("Generated iron7 osim not present")
-    import opensim  # type: ignore[import-not-found]
+    opensim = require_opensim()
 
     model = opensim.Model(str(IRON_OSIM))
     model.initSystem()

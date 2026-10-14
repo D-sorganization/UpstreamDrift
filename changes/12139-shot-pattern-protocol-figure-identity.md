@@ -1,10 +1,7 @@
 ---
 issue: 12139
 summary: "Prevent protocol collisions in supplemental figure paths and require unchanged numerical bytes before recovery rendering."
-dl_state: "in_review"
-next_step: "Complete the final canonical gate and live publication verification, then deliver through protected merge; no merge claimed yet."
 title: "Protocol-Qualified Supplemental Figure Identity"
-branch: "codex/shot-pattern-main-integration"
 paths: "src/tools/shot_pattern_analysis/matched_supplement_figures.py,src/tools/shot_pattern_analysis/matched_supplement_pipeline.py"
 ---
 

@@ -29,6 +29,7 @@ from src.shared.python.model_appearance.club_head_mesh import (
     measured_face_normal,
 )
 from tests.support.real_engines import real_module
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -70,7 +71,7 @@ def _assembly_head_vertices(club: str) -> np.ndarray:
 
 
 def _opensim(club: str) -> tuple[Pose, np.ndarray]:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     import tempfile
 
     from src.engines.physics_engines.opensim.python import club_visuals

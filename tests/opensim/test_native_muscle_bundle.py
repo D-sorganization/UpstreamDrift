@@ -7,6 +7,7 @@ from typing import Any
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 pytest_plugins = ("tests.opensim.test_native_muscle_replay",)
 
@@ -33,7 +34,7 @@ def _add_visual_mesh(
     fixture: NativeFixture, monkeypatch: pytest.MonkeyPatch
 ) -> NativeFixture:
     """Attach one real native Mesh backed by a small source-local VTP file."""
-    import opensim as osim
+    osim = require_opensim()
 
     path, initial = fixture
     monkeypatch.chdir(path.parent)
@@ -186,7 +187,7 @@ def test_external_resource_reference_is_rejected_before_native_load(
     muscle_fixture: NativeFixture,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    import opensim as osim
+    osim = require_opensim()
 
     path, initial = muscle_fixture
     raw = path.read_bytes()
@@ -286,7 +287,7 @@ def test_execution_uses_owned_frozen_source_bytes(
 
 
 def test_unreviewed_native_component_is_rejected(muscle_fixture: NativeFixture) -> None:
-    import opensim as osim
+    osim = require_opensim()
 
     path, initial = muscle_fixture
     model = osim.Model(str(path))

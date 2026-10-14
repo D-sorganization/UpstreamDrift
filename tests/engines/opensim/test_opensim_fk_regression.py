@@ -37,6 +37,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MODEL_PATH = (
@@ -189,10 +190,7 @@ def loaded_model_and_state():
 
     Module-scoped to amortise the SWIG load across all extractor tests.
     """
-    osim = pytest.importorskip(
-        "opensim",
-        reason="OpenSim Python bindings not installed",
-    )
+    osim = require_opensim()
 
     assert MODEL_PATH.is_file(), (
         f"golf_humanoid.osim missing at {MODEL_PATH}. "

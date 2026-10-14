@@ -17,6 +17,7 @@ from defusedxml import ElementTree as ET
 from src.engines.physics_engines.opensim.python.tour_matching.native_prepared_state import (
     DeclaredColdStart,
 )
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -24,7 +25,7 @@ pytestmark = pytest.mark.unit
 def _complex_source(tmp_path: Path) -> tuple[Path, DeclaredColdStart]:
     from tests.opensim.test_native_constrained_muscle import _source
 
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, _ = _source(tmp_path, locked=False, custom=True, moving=True, wrapped=True)
     tree = ET.parse(path)
     joint = tree.find(".//CustomJoint[@name='base']")
@@ -231,7 +232,7 @@ def test_native_mechanics_profile_is_source_and_component_bound(
 def test_native_mechanics_profile_crosses_moco_export_and_fresh_replay(
     tmp_path: Path,
 ) -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     if os.environ.get("UPSTREAMDRIFT_NATIVE_PROFILE_LIFECYCLE_CHILD") != "1":
         child_root = tmp_path / "bounded-profile-lifecycle"
         child_root.mkdir()
@@ -372,7 +373,7 @@ def test_native_mechanics_profile_crosses_moco_export_and_fresh_replay(
         write_trc,
     )
 
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     source_path, original_declaration = _complex_source(tmp_path)
     model = osim.Model(str(source_path))
     state = model.initSystem()

@@ -1,1 +1,6 @@
+---
+issue: 11910
+summary: "Add a strict native RK4 one-hinge BoxFDDP candidate with verified discrete derivatives, loaded-model identity, bounded post-solve admission and fail-closed fallback, compared with SciPy shooting on predeclared supported-MuJoCo trials using exact applied-torque replay and total measured time; F05 full-body and capture qualification remain open"
+---
+
 Add a strict native RK4 one-hinge BoxFDDP candidate with verified discrete derivatives, loaded-model identity, bounded post-solve admission and fail-closed fallback. Compare it with SciPy shooting on predeclared supported-MuJoCo trials using exact applied-torque replay and total measured setup/execution/export/replay time; keep F05 full-body and capture qualification open.

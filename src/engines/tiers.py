@@ -14,6 +14,7 @@ ENGINE_TIERS: dict[str, str] = {
     "myosuite": "experimental",
     "putting_green": "core",
     "jaxsim": "experimental",
+    "simscape": "experimental",
 }
 
 ENGINE_TIER_ALIASES: dict[str, str] = {
@@ -41,8 +42,6 @@ def get_engine_tier(engine_name: str) -> str:
     try:
         tier = ENGINE_TIERS[normalized_name]
     except KeyError as exc:
-        if normalized_name == "simscape":
-            return "experimental"
         raise ValueError(f"Unknown engine tier metadata for {engine_name!r}") from exc
 
     if tier not in ALLOWED_TIERS:
@@ -189,3 +188,42 @@ def are_engines_tier_compatible(
         )
 
     return bool(ENGINE_EQUIVALENCY_TIERS[norm_a] & ENGINE_EQUIVALENCY_TIERS[norm_b])
+
+
+# Public name for the primary equivalency tier lookup (single implementation).
+get_equivalency_tier = get_engine_equivalency_tier
+
+_RIGID_TIER = "tier_1_rigid_body"
+_MUSCULOSKELETAL_TIER = "tier_3_musculoskeletal"
+
+
+def assert_valid_parity_pair(
+    engine_a: str,
+    engine_b: str,
+    *,
+    allow_stripped_rigid_proxy: bool = False,
+) -> None:
+    """Fail closed on cross-tier parity comparisons (#11709 GCV-3).
+
+    Precondition: ``engine_a``/``engine_b`` name known engines; the flag is a bool.
+    Postcondition: returns ``None`` only if the pair is same-tier, or Tier 1 vs
+    Tier 3 with an explicit ``allow_stripped_rigid_proxy=True`` declaration.
+
+    Raises:
+        TypeError: an argument has the wrong type.
+        ValueError: an unknown engine, or an undeclared Tier 1 vs Tier 3 pair.
+    """
+    if not isinstance(allow_stripped_rigid_proxy, bool):
+        raise TypeError(
+            "allow_stripped_rigid_proxy must be a bool, "
+            f"got {type(allow_stripped_rigid_proxy).__name__}"
+        )
+    tier_a = get_equivalency_tier(engine_a)
+    tier_b = get_equivalency_tier(engine_b)
+    cross_tier = {tier_a, tier_b} == {_RIGID_TIER, _MUSCULOSKELETAL_TIER}
+    if cross_tier and not allow_stripped_rigid_proxy:
+        raise ValueError(
+            f"Parity comparison {engine_a!r} ({tier_a}) vs {engine_b!r} ({tier_b}) "
+            "crosses Tier 1 rigid body and Tier 3 musculoskeletal; pass "
+            "allow_stripped_rigid_proxy=True to declare a stripped rigid proxy"
+        )

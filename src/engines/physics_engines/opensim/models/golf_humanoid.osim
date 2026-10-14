@@ -3031,7 +3031,7 @@
 						<Coordinate name="pro_sup_r">
 							<default_value>0.75477106085191159</default_value>
 							<default_speed_value>0</default_speed_value>
-							<range>0 1.5707963300000001</range>
+							<range>0 2.96705972839036</range>
 							<clamped>true</clamped>
 							<locked>false</locked>
 							<prescribed_function />
@@ -3257,7 +3257,7 @@
 						<Coordinate name="pro_sup_l">
 							<default_value>1.5707963299999999</default_value>
 							<default_speed_value>0</default_speed_value>
-							<range>0 1.5707963300000001</range>
+							<range>0 2.96705972839036</range>
 							<clamped>true</clamped>
 							<locked>false</locked>
 							<prescribed_function />

@@ -185,7 +185,9 @@ if "pytest" in sys.modules or (
             elif backend == "pinocchio":
                 import pinocchio  # noqa: F401
             elif backend == "opensim":
-                import opensim  # noqa: F401
+                from tests.helpers.opensim_support import require_opensim
+
+                require_opensim()
             else:
                 return False, f"Unknown backend: {backend}"
             return True, ""

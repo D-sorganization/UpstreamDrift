@@ -7,11 +7,14 @@ dependency); ``solve_frame()`` always raises ``NotImplementedError``.
 
 from __future__ import annotations
 
+import importlib.util
+
 import pytest
 
 from src.shared.python.motion_pipeline.ik.opensim_backend import OpenSimIKSolver
 
 from ._local_fixtures import make_3dof_phantom_rig, make_phantom_marker_trajectory
+from tests.helpers.opensim_support import require_opensim
 
 
 def test_opensim_solver_constructs_without_opensim() -> None:
@@ -28,12 +31,11 @@ def test_opensim_solver_solve_raises_without_opensim() -> None:
     """
     rig = make_3dof_phantom_rig()
     traj = make_phantom_marker_trajectory(num_frames=2)
-    try:
-        import opensim  # noqa: F401
-    except ImportError:
+    if importlib.util.find_spec("opensim") is None:
         with pytest.raises(ImportError, match="OpenSim"):
             OpenSimIKSolver().solve(traj, rig)
         return
+    require_opensim()
     with pytest.raises(NotImplementedError):
         OpenSimIKSolver().solve(traj, rig)
 

@@ -4,7 +4,9 @@
 
 Evidence class: software consistency, provisional. This chapter records the
 same-input parity pathway of epic #11605 (children P-1 to P-8), so it can be
-inventoried. It is not approved. The registry blocker
+inventoried. Merged child state on 2026-10-14: P-1 (#11606), P-2 (#11607), P-5
+(#11610), P-6 (#11611) and P-7 (#11612) are merged and closed (PRs #11615 and
+#11628); P-3 (#11608), P-4 (#11609) and P-8 (#11613) are still open. It is not approved. The registry blocker
 `UP-D1-same-input-parity-inventory` stays open until UP-D1 inventories the
 pathway and a human reviews it. The calculation-level reference, with every
 table and receipt hash, is the editable research source
@@ -60,19 +62,33 @@ evidence.
    residual Jacobian, step $10^{-7}$). The search stops at
    $\max|r| \le 10^{-13}$, with a cap of 25 iterations, and otherwise raises
    `ArithmeticError`.
-3. Integration. Classical RK4 with efforts held zero-order over each step, a
-   1 ms step with 8 substeps (effective 0.125 ms) and closure projection after
-   every step. A single 1 ms step would amplify the stiff contact modes near
+3. Integration. Classical RK4 with efforts held zero-order over each hold (by
+   default one hold per step), a 1 ms step with 8 substeps (effective 0.125 ms)
+   and closure projection after every step. A single 1 ms step would amplify the stiff contact modes near
    $-9.9 \times 10^{3}\,\mathrm{s}^{-1}$ by $|R| \approx 274$; 8 substeps bring
    them inside the RK4 stability region.
 4. Pointwise gate (L1): $|\Delta a| \le 10^{-6} + 10^{-8} \max|a|$.
+5. Effort hold (#12279). With step $\Delta t = 1$ ms and hold length $h_e$, the
+   number of holds per step is $n_h = \Delta t / h_e$. It must be an integer
+   that divides the 8 substeps, so $n_h \in \{1, 2, 4, 8\}$; otherwise
+   `effort_holds_for` raises `ValueError`. Each hold is sampled at its start
+   state and integrated with $8 / n_h$ RK4 substeps. The closure projection
+   still runs once per step. The default is $n_h = 1$ (owner ruling
+   2026-10-11), which is bit-identical to the earlier integrator.
 
 ## Input Bundle
 
 Schema `same-input-bundle/v1` is exported by the MuJoCo reference and replayed
 by every other engine. It holds the spec hash, the closure-consistent
 $q_0, v_0$, the per-step efforts $\tau_k$, the contact parameters, the marker
-attachments and the integration policy above.
+attachments and the integration policy above. The manifest also records
+`policy.effort_holds_per_step` and `policy.effort_hold_s`. For $n_h > 1$ the
+bundle stores a `hold_efforts` table of steps $\times\, n_h$ rows, and
+`efforts` keeps the first hold of each step. Replays call `replay_efforts()`
+with `step_policy()` so every engine uses the recorded hold, and bundles
+without the keys load as one hold. A bundle may carry a latched ball-impact
+plan (`provenance.ball_impact`, GCV-20, #11767) that every engine applies
+identically; no impact-bearing parity result is recorded here.
 
 ## Acceptance Levels
 
@@ -107,6 +123,16 @@ receipt hashes and per-frame tables are in the LaTeX reference.
   engine pair leaves $10^{-6}$ rad after about 0.5–0.6 s. This is a property
   of the unstable open-loop swing, not an engine disagreement.
 - Simscape (P-8, #11613) is pending on the MATLAB R2025b host.
+- Every receipt above used the default 1 ms hold. No cross-engine receipt
+  exists for a finer hold.
+- Effort hold, tracking fidelity and not engine parity (#12279, PR #12478,
+  commit `422bf65f8b`; 7-iron run `s38-fxi2`, 0 to 0.9 s, measured on host
+  `brick` in that session and not re-run here): the 1 ms hold slides the feet
+  by up to 43 mm from 0.71 s, with a 24.0 mm root error at 0.7 s. A 0.125 ms
+  hold keeps the slip at 3.3 mm and the root error at 8.2 mm. The 7-iron
+  peak-timing error is still 7.3 ms against a 5 ms limit (follow-up under
+  #11767), so the fixture still misses GCV-20. The driver and 7-iron
+  full-horizon numbers are in the LaTeX reference.
 
 ## Failed Experiments
 
@@ -120,6 +146,10 @@ receipt hashes and per-frame tables are in the LaTeX reference.
   $1.1 \times 10^{-6}$ relative, which produced $3.3 \times 10^{-5}$ rad iron
   errors. The native exporter now emits `diaginertia` and `quat` from numpy
   `eigh`, with a determinant correction that keeps the frame right-handed.
+- Making a 0.125 ms effort hold the default was rejected by the owner ruling of
+  2026-10-11, because it changes every committed bundle. A faster closure
+  projection did not stop the foot slip; the hold length did. Hold counts that
+  do not divide the 8 substeps are rejected by `effort_holds_for`.
 
 ## Implementation
 
@@ -127,7 +157,7 @@ receipt hashes and per-frame tables are in the LaTeX reference.
 | --- | --- |
 | `VectorPlant`, `PARITY_ENGINES`, `OPTIONAL_ENGINES` | `src/shared/python/motion_matching/same_input/plant.py` |
 | `project_to_closure`, `ClosureProjection` | `src/shared/python/motion_matching/same_input/closure.py` |
-| `zoh_rk4_step`, `integrate`, `open_loop`, `StepPolicy`, `ROOT_COORDINATES` | `src/shared/python/motion_matching/same_input/integrator.py` |
+| `zoh_rk4_step`, `integrate`, `open_loop`, `StepPolicy`, `effort_holds_for`, `ROOT_COORDINATES` | `src/shared/python/motion_matching/same_input/integrator.py` |
 | `InputBundle`, `SCHEMA` | `src/shared/python/motion_matching/same_input/bundle.py` |
 | `generate_reference_bundle`, `closed_loop` | `src/shared/python/motion_matching/same_input/reference.py` |
 | `score_replay`, `segmented_replay`, `growth_rate` | `src/shared/python/motion_matching/same_input/scoring.py` |
@@ -144,7 +174,9 @@ MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.same_input_pointwise_parity
 The first command runs the behavioural tests; engine rows skip where an engine
 is not installed. The second rewrites the L1 receipt. The full-swing bundles
 and their 16 receipts are reproduced with `scripts/same_input_bundle.py`
-(`export`, `replay`, `closed-loop`), as listed in the LaTeX reference.
+(`export`, `replay`, `closed-loop`), as listed in the LaTeX reference. The
+opt-in finer effort hold is `export --effort-hold-ms 0.125`; its engine-free
+test is `tests/unit/motion_matching/same_input/test_effort_hold.py`.
 
 ## Assumptions and Limitations
 
@@ -159,6 +191,8 @@ and their 16 receipts are reproduced with `scripts/same_input_bundle.py`
   10^{8}$), so the relative tolerance is bounded by round-off, not by physics.
 - The OpenSim adapter works around two exporter defects (an escaped invalid XML
   element name and a marker set that references a nonexistent `Hub` body).
+- The effort-hold measurements are single-host numbers from the #12279 thread.
+  The club-face fixtures are not regenerated with the finer hold.
 - The full-swing receipts live outside the repository; only their hashes are
   recorded.
 - This is a software-consistency result. It is not scientific qualification

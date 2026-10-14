@@ -11,8 +11,9 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
-pytest.importorskip("opensim")
+require_opensim()
 
 from src.engines.physics_engines.opensim.python.grip_bushing_sim import (  # noqa: E402
     BushingGripSimulator,
