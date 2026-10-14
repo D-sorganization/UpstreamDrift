@@ -73,6 +73,30 @@ Baseline probe at the recorded states (issue \#11605): total mass is identical
 $\bh=\mathbf{C}(\bq,\bv)\bv+\mathbf{g}(\bq)$ agrees to $\le 8\times10^{-10}$
 N\,m.  The models therefore pass L0 and differ only in numerical policy.
 
+\paragraph{Three-Tier Cross-Engine Equivalency Contract (Issue \#11709, PR \#12468).}
+\texttt{src/engines/tiers.py} defines \texttt{ENGINE\_EQUIVALENCY\_TIERS} and
+\texttt{PRIMARY\_EQUIVALENCY\_TIER} across three mathematical tiers:
+\texttt{tier\_1\_rigid\_body} (\texttt{mujoco}, \texttt{drake},
+\texttt{pinocchio}, \texttt{simscape}, \texttt{opensim}, \texttt{myosuite},
+\texttt{jaxsim}), \texttt{tier\_2\_soft\_contact} (\texttt{mujoco},
+\texttt{putting\_green}, \texttt{simscape}), and
+\texttt{tier\_3\_musculoskeletal} (\texttt{opensim}, \texttt{myosuite}).
+The \texttt{same-input-bundle/v1} operates on the shared
+\texttt{tier\_1\_rigid\_body} torque-actuated specification while
+\texttt{are\_engines\_tier\_compatible} prevents invalid cross-tier parity
+claims against unstripped muscle-actuated \texttt{tier\_3\_musculoskeletal}
+models.
+
+\paragraph{Subject-Mass Hand-Scaling Policy (Issue \#12300, PR \#12486).}
+\texttt{build\_full\_body\_spec(..., match\_subject\_mass=True)} in
+\texttt{src/shared/python/full\_body/native\_spec.py} scales \texttt{LHand} and
+\texttt{RHand} segment masses uniformly with all other human segments
+(\texttt{scale = subject\_mass\_kg / default\_body\_mass}, updating the
+default spec hash from \texttt{2bba2beb} to \texttt{a656a18e}), whereas
+Simscape reference-capture builds intentionally pass
+\texttt{match\_subject\_mass=False} until the R2025b host recalibrates the
+capture bundle.
+
 \section{Constrained Dynamics}
 With rate map $\bD(\bq)$ ($\bD\bv$ is the weld rate residual), the
 accelerations $\ba$ and constraint forces $\bl$ solve the KKT system
