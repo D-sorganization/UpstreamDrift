@@ -78,7 +78,9 @@ from .units import DENSITY_UNIT, SHEAR_RATE_UNIT, TIME_UNIT, VELOCITY_UNIT
 __all__ = [
     "FieldLayout",
     "FieldQuantity",
+    "GrainRoster",
     "GridGeometry",
+    "ParticleKind",
     "SandFieldFrame",
     "SandFieldSeries",
     "series_digest",
@@ -266,6 +268,110 @@ class GridGeometry:
             shape=tuple(int(value) for value in payload["shape"]),
             axis_names=tuple(str(name) for name in payload["axis_names"]),
         )
+
+
+class ParticleKind(StrEnum):
+    """What one ``PARTICLE`` sample physically is (issue #9545 / #9692).
+
+    The three look identical on disk -- an id, a radius, a moving point --
+    and mean very different things, so the kind is recorded rather than
+    inferred.  A renderer that drew material points as grains would show
+    a granular picture a continuum tier never computed.
+    """
+
+    DISCRETE_GRAIN = "discrete_grain"
+    """One physical grain, radius its own. A DEM tier writes this."""
+
+    COARSE_PARTICLE = "coarse_particle"
+    """A coarse-grained parcel standing for many grains; the radius is the
+    parcel's, not a grain's."""
+
+    MATERIAL_POINT = "material_point"
+    """A continuum material point (MPM).  The radius is a rendering and
+    sampling scale, not a grain size."""
+
+
+@dataclass(frozen=True)
+class GrainRoster:
+    """The identity contract of a particle trajectory.
+
+    ``PARTICLE`` samples move, so the only thing that says "this is the
+    same grain as before" is a stable id.  The roster fixes the ids and
+    radii once for the whole run; every frame is then an array in roster
+    order, and a grain that enters or leaves is a mask, never a reshuffle.
+    That is what keeps two grains that cross from swapping identity.
+
+    Attributes:
+        grain_ids: ``(G,)`` unique non-negative ids, in storage order.
+        radius_m: ``(G,)`` positive finite radii.
+        kind: What each sample physically is.
+
+    Raises:
+        BunkerShot3DValueError: On an empty roster, duplicate or negative
+            ids, a radius that is not positive and finite, or a length
+            mismatch. These are checked unconditionally, not behind a
+            contract level, because a roster that fails them makes every
+            stored frame ambiguous.
+    """
+
+    grain_ids: NDArray[np.int64]
+    radius_m: NDArray[np.float64]
+    kind: ParticleKind
+
+    def __post_init__(self) -> None:
+        ids = np.array(self.grain_ids, dtype=np.int64, copy=True).reshape(-1)
+        radii = np.array(self.radius_m, dtype=np.float64, copy=True).reshape(-1)
+        if ids.size == 0:
+            raise BunkerShot3DValueError("a roster needs at least one grain")
+        if radii.shape != ids.shape:
+            raise BunkerShot3DValueError(
+                f"the roster needs one radius per grain: {ids.size} ids, "
+                f"{radii.size} radii"
+            )
+        if np.unique(ids).size != ids.size:
+            raise BunkerShot3DValueError(
+                "grain ids must be unique; a duplicate id makes two grains one "
+                "and their trajectories indistinguishable"
+            )
+        if bool(np.any(ids < 0)):
+            raise BunkerShot3DValueError("grain ids must be non-negative")
+        if not bool(np.all(np.isfinite(radii) & (radii > 0.0))):
+            raise BunkerShot3DValueError(
+                "every grain radius must be positive and finite"
+            )
+        ids.flags.writeable = False
+        radii.flags.writeable = False
+        object.__setattr__(self, "grain_ids", ids)
+        object.__setattr__(self, "radius_m", radii)
+        object.__setattr__(self, "kind", ParticleKind(str(self.kind)))
+
+    @property
+    def n_grains(self) -> int:
+        """Number of grains, the width of every stored frame."""
+        return int(self.grain_ids.size)
+
+    def index_of(self, grain_id: int) -> int:
+        """Storage index of one grain.
+
+        Args:
+            grain_id: A roster id.
+
+        Returns:
+            Its position in every per-frame array.
+
+        Raises:
+            BunkerShot3DValueError: If the id is not on the roster.
+        """
+        hits = np.flatnonzero(self.grain_ids == int(grain_id))
+        if hits.size != 1:
+            raise BunkerShot3DValueError(
+                f"grain {grain_id!r} is not on the roster of {self.n_grains} grains"
+            )
+        return int(hits[0])
+
+    def contains(self, grain_id: int) -> bool:
+        """Whether ``grain_id`` is on the roster."""
+        return bool(np.any(self.grain_ids == int(grain_id)))
 
 
 @dataclass(frozen=True, slots=True)

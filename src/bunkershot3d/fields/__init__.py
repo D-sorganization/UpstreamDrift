@@ -5,7 +5,7 @@ tier, so this package is what turns a march of that solver into
 something a view can animate and a reviewer can trace back to the run
 that made it.
 
-Four modules, four jobs:
+Four modules, four jobs, plus a persistent particle trajectory:
 
 * :mod:`.schema` -- what a field *is*, tier-neutrally.  A continuum tier
   and a grain tier write the same containers, so switching tiers does
@@ -19,6 +19,10 @@ Four modules, four jobs:
 * :mod:`.store` -- writing and reading it through
   :mod:`bunkershot3d.io`, with the digest that makes the recorded tier
   and validity status checkable rather than merely present.
+* :mod:`.trajectory` / :mod:`.trajectory_reader` -- the versioned 3-D
+  particle-trajectory and contact-event artifact (issue #9545, folded-in
+  #9692): stable grain ids, radii and masks, digests over every array,
+  bounded streaming and an atomic finalisation marker.
 
 The non-negotiable, in one sentence: the stored field carries its tier
 and validity status as data covered by a content digest, so an
@@ -39,7 +43,9 @@ from .shotcapture import (
 from .schema import (
     FieldLayout,
     FieldQuantity,
+    GrainRoster,
     GridGeometry,
+    ParticleKind,
     SandFieldFrame,
     SandFieldSeries,
     series_digest,
@@ -60,6 +66,16 @@ from .store import (
     load_field,
     save_field,
 )
+from .trajectory import (
+    TRAJECTORY_SCHEMA_VERSION,
+    ContactEvent,
+    ParticleTrajectoryWriter,
+    TrajectoryIncompleteError,
+    TrajectoryIntegrityError,
+    TrajectoryVersionError,
+    final_marker_path,
+)
+from .trajectory_reader import ParticleTrajectoryReader
 from .units import DENSITY_UNIT, SHEAR_RATE_UNIT, TIME_UNIT, VELOCITY_UNIT
 
 __all__ = [
@@ -70,24 +86,34 @@ __all__ = [
     "FIELD_SCHEMA_VERSION",
     "SHEAR_RATE_UNIT",
     "TIME_UNIT",
+    "TRAJECTORY_SCHEMA_VERSION",
     "VELOCITY_UNIT",
+    "ContactEvent",
     "FieldIntegrityError",
     "FieldLayout",
     "FieldProvenance",
     "FieldQuantity",
+    "GrainRoster",
     "GridFieldSample",
     "GridGeometry",
     "OccupancyRule",
+    "ParticleKind",
+    "ParticleTrajectoryReader",
+    "ParticleTrajectoryWriter",
     "RetentionPolicy",
     "RetentionRecord",
     "SandFieldFrame",
     "SandFieldSeries",
+    "TrajectoryIncompleteError",
+    "TrajectoryIntegrityError",
+    "TrajectoryVersionError",
     "WHOLE_SHOT_KINEMATICS_NOTE",
     "WholeShotRecorder",
     "capture_f1_field",
     "capture_f1_shot_field",
     "deterministic_seed_record",
     "field_manifest",
+    "final_marker_path",
     "load_field",
     "sample_grid_field",
     "save_field",
