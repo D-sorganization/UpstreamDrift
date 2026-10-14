@@ -3190,11 +3190,7 @@
   "inputs": {
     "src/config/models.yaml": "2a2e303aa92f6dda0ef3868fcc881ccbdbc54cf362ac3aae931333163969b90f",
     "src/config/launcher_manifest.json": "abc9913955858006e7bb6b8e9dca8c9693313e62d48d90dcc1ace33e632a79dc",
-<<<<<<< HEAD
-    "src/config/feature_parity.json": "f1c42ad6f663813cc7bb03e7c516f7ec8102120735227950e5baecae24d7e987",
-=======
-    "src/config/feature_parity.json": "6912b27b65886b5da76eefa699c4dd30ff0fbb449c72beeaadf2aaf9abe7dad7",
->>>>>>> origin/main
+    "src/config/feature_parity.json": "52b2a691ec5c697ca9bbb3941bc174f2cac8040020357e7bf7b75cac4fb091f7",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
