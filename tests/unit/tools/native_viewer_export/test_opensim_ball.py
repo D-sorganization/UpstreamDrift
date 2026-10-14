@@ -7,6 +7,7 @@ import pytest
 
 from src.shared.python.model_appearance.ball import BALL_RADIUS_M
 from src.tools.native_viewer_export.ball import BallPlacement
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 SPECS = Path(__file__).resolve().parents[4] / "docs/development/full_body_models"
@@ -43,7 +44,7 @@ def test_opensim_backend_no_longer_records_a_ball_limitation() -> None:
 
 
 def test_ball_body_sits_at_address_and_slides_out_of_view() -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     worker = _worker()
     raw = (SPECS / "full_body_spec_anthro_driver.json").read_bytes()
     model, _ = worker.build_model(osim, raw)

@@ -13,6 +13,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.wrist_compatibilit
     WristKinematicContract,
     observe_native_wrist,
 )
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -20,7 +21,7 @@ pytestmark = pytest.mark.unit
 @pytest.fixture
 def wrist_source(tmp_path: Path, request: pytest.FixtureRequest) -> Path:
     """Original small mechanism; no third-party anatomy or fitted parameters."""
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     model.setName("synthetic_coupled_wrist")
     radius = osim.Body("radius", 1, osim.Vec3(0), osim.Inertia(0.01))
@@ -187,7 +188,7 @@ def test_invalid_assembly_accuracy_rejected_before_loading(
 
 
 def test_locked_coordinate_cannot_silently_achieve_motion(wrist_source, contract):
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model(str(wrist_source))
     model.updCoordinateSet().get("flexion").setDefaultLocked(True)
     model.printToXML(str(wrist_source))
@@ -232,7 +233,7 @@ def test_perturbation_outside_native_range_fails(wrist_source, contract):
 
 
 def test_wrap_geometry_changes_actual_native_path_length(wrist_source, contract):
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     before = _observe(wrist_source, contract)
     model = osim.Model(str(wrist_source))
     wrap = osim.WrapCylinder.safeDownCast(
@@ -256,7 +257,7 @@ def test_wrap_geometry_changes_actual_native_path_length(wrist_source, contract)
 
 
 def test_native_coupler_function_changes_actual_hand_transform(wrist_source, contract):
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model(str(wrist_source))
     coupling = osim.CoordinateCouplerConstraint.safeDownCast(
         model.getComponent(contract.required_component_paths[0])
@@ -281,7 +282,7 @@ def test_derivative_disagreement_is_retained_not_promoted(wrist_source, contract
 
 
 def test_disabled_coupler_is_rejected(wrist_source, contract):
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model(str(wrist_source))
     coupling = osim.CoordinateCouplerConstraint.safeDownCast(
         model.getComponent(contract.required_component_paths[0])
@@ -320,7 +321,7 @@ def test_difference_step_must_exceed_assembly_coordinate_tolerance(contract, tmp
 
 
 def test_prescribed_coordinate_is_not_an_independent_probe(wrist_source, contract):
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model(str(wrist_source))
     coordinate = model.updCoordinateSet().get("flexion")
     coordinate.setPrescribedFunction(osim.Constant(0))
@@ -359,7 +360,7 @@ def test_native_coupled_motion_requires_explicit_radian_declaration(
 def test_non_target_native_assembly_drift_is_rejected(
     wrist_source, contract, monkeypatch
 ):
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     assemble = osim.Model.assemble
 
     def drift(model, state):
@@ -376,7 +377,7 @@ def test_non_target_native_assembly_drift_is_rejected(
 def test_requested_native_assembly_value_is_checked(
     wrist_source, contract, monkeypatch
 ):
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     assemble = osim.Model.assemble
 
     def wrong_target(model, state):

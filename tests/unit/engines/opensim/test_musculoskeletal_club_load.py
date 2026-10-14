@@ -22,6 +22,7 @@ from src.engines.physics_engines.opensim.python.musculoskeletal_solvers import (
     converged_frames,
     parse_static_optimization_log,
 )
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -140,7 +141,7 @@ def test_pipeline_config_trail_weld_needs_a_club(tmp_path: Path) -> None:
 
 
 def test_release_trail_weld_opens_the_two_hand_loop() -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     try:
         ms.resolve_base_model()
     except FileNotFoundError as exc:
@@ -155,7 +156,7 @@ def test_release_trail_weld_opens_the_two_hand_loop() -> None:
 
 
 def test_build_model_without_club_is_the_control() -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     try:
         ms.resolve_base_model()
     except FileNotFoundError as exc:

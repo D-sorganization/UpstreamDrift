@@ -14,15 +14,12 @@ Per issue #4116 acceptance criteria:
 from __future__ import annotations
 
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = [pytest.mark.unit]
 
 # Skip these tests if OpenSim is unavailable
-pytest.importorskip(
-    "opensim",
-    minversion=None,
-    reason="OpenSim not installed; install with: pip install opensim",
-)
+require_opensim()
 
 
 class TestFKModule:
@@ -122,7 +119,7 @@ class TestFKErrorHandling:
 
     def test_compute_skeleton_fk_rejects_empty_states(self) -> None:
         """Empty state sequence should raise ValueError."""
-        import opensim as osim
+        osim = require_opensim()
         from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
             compute_skeleton_fk,
         )
@@ -133,7 +130,7 @@ class TestFKErrorHandling:
 
     def test_compute_skeleton_fk_rejects_wrong_type(self) -> None:
         """Non-list/array states should raise TypeError."""
-        import opensim as osim
+        osim = require_opensim()
         from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
             compute_skeleton_fk,
         )
@@ -145,7 +142,8 @@ class TestFKErrorHandling:
     def test_compute_skeleton_fk_array_not_implemented(self) -> None:
         """Array-based state trajectories raise NotImplementedError pending #4110, #4114."""
         import numpy as np
-        import opensim as osim
+
+        osim = require_opensim()
         from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
             compute_skeleton_fk,
         )

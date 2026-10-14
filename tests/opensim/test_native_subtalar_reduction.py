@@ -8,9 +8,10 @@ from pathlib import Path
 import re
 
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.integration
-opensim = pytest.importorskip("opensim")
+opensim = require_opensim()
 
 from src.engines.physics_engines.opensim.python.native_subtalar_reduction import (  # noqa: E402
     ZeroSubtalarReductionRequest,

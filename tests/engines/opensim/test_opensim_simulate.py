@@ -29,6 +29,7 @@ from src.engines.physics_engines.opensim.python.motion_matching.simulate import 
     SimOut,
     evaluate_polynomial_torque,
 )
+from tests.helpers.opensim_support import require_opensim
 
 OPENSIM_AVAILABLE = importlib.util.find_spec("opensim") is not None
 opensim_required = pytest.mark.skipif(
@@ -166,7 +167,7 @@ def _n_actuators_from_model() -> int:
     Imports ``opensim`` lazily so module collection still works without
     the wheel installed.
     """
-    import opensim as osim  # noqa: PLC0415
+    osim = require_opensim()
     from src.engines.physics_engines.opensim.python.motion_matching.simulate import (
         _DEFAULT_OSIM,
         _coordinate_actuator_names,

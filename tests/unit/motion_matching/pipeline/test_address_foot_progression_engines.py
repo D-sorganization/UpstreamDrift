@@ -11,6 +11,7 @@ from src.shared.python.motion_matching.pipeline.address_feet import (
     NATIVE_TARGET_AXIS,
     NATIVE_UP_AXIS,
 )
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = [pytest.mark.unit]
 
@@ -104,7 +105,7 @@ def test_opensim_fk_matches_mujoco_toe_out_on_the_committed_address() -> None:
     import json
     from pathlib import Path
 
-    pytest.importorskip("opensim")
+    require_opensim()
     pytest.importorskip("mujoco")
     run = Path(afe.__file__).resolve().parents[1] / (
         "docs/development/full_body_models/evidence/foot_progression/osv6_myosuite/driver"

@@ -21,6 +21,7 @@ from tests.opensim.native_moco_ladder_harness import (
     _process_stop_reason,
     run_ladder,
 )
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -540,7 +541,7 @@ def test_parent_refinement_guess_exports_state_table_and_restores_exact_initial(
 def test_actual_parent_refinement_sdk_seed_uses_native_trajectory_api() -> None:
     import numpy as np
 
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     from tests.opensim.native_moco_ladder_harness import _sha256
     from tests.opensim.native_moco_refinement import (
         build_refinement_plan,
@@ -678,7 +679,7 @@ def test_native_loaded_mpp_curve_rejects_collinear_law(tmp_path: Path) -> None:
     from tests.opensim.native_moco_ladder_harness import build_synthetic_rung
     from tests.opensim.native_moco_ladder_harness import _verify_native_mpp_curvature
 
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, _ = build_synthetic_rung(DEFAULT_RUNGS[2], tmp_path / "curved")
     staged = tmp_path / "staged.osim"
     shutil.copyfile(path, staged)
@@ -791,7 +792,7 @@ def test_native_source_control_bounds_are_applied_exactly(
     from tests.opensim.native_moco_ladder_harness import build_synthetic_rung
     from tests.opensim.native_moco_ladder_worker import _native_control_bounds
 
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     source, _ = build_synthetic_rung(DEFAULT_RUNGS[0], tmp_path / "original")
     changed = tmp_path / "nondefault_bounds.osim"
     shutil.copyfile(source, changed)
@@ -847,7 +848,7 @@ def test_forward_witness_has_exact_saved_clock_and_nonzero_endpoint(
         _validate_actual_solver_settings,
     )
 
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, declaration = build_synthetic_rung(DEFAULT_RUNGS[0], tmp_path / "source")
     source_hash = hashlib.sha256(path.read_bytes()).hexdigest()
     profile = declare_native_mechanics_execution_profile(path, source_hash)
@@ -1669,7 +1670,7 @@ def test_saved_time_only_controls_reject_persisted_sto_mutation(tmp_path: Path) 
         _write_time_only_controls,
     )
 
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path = tmp_path / "time_only_controls.sto"
     grid = np.asarray([0.0, 0.01])
     controls = {"flexor": np.asarray([0.1, 0.2]), "extensor": np.asarray([0.3, 0.4])}
@@ -1693,7 +1694,7 @@ def test_saved_controls_must_match_persisted_solution_values(tmp_path: Path) -> 
         _write_time_only_controls,
     )
 
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     grid = np.asarray([0.0, 0.01])
     expected = {
         "flexor": np.asarray([0.1, 0.2]),

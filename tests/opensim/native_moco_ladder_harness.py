@@ -21,6 +21,7 @@ from typing import Any, Callable, Sequence
 
 from defusedxml import ElementTree as ET
 from src.shared.python.motion_matching.jobs.io_atomic import atomic_write_json
+from tests.helpers.opensim_support import require_opensim
 
 
 @dataclass(frozen=True)
@@ -195,7 +196,8 @@ def _edit_synthetic_source(path: Path, rung: LadderRung) -> None:
 
 def _derive_synthetic_cold_start(path: Path, rung: LadderRung):
     import hashlib
-    import opensim as osim
+
+    osim = require_opensim()
 
     from src.engines.physics_engines.opensim.python.tour_matching.native_prepared_state import (
         DeclaredColdStart,

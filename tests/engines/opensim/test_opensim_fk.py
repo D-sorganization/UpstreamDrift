@@ -20,6 +20,7 @@ from src.engines.physics_engines.opensim.python.motion_matching.forward_kinemati
     extract_full_pose,
     extract_grip_pose,
 )
+from tests.helpers.opensim_support import require_opensim
 
 # ---------------------------------------------------------------------------
 # Pure-NumPy unit tests (run on every CI; no OpenSim required).
@@ -225,10 +226,7 @@ _MODEL_PATH = (
 @pytest.fixture(scope="module")
 def opensim_module() -> object:
     """Import opensim or skip the module if unavailable."""
-    pytest.importorskip("opensim", reason="OpenSim Python bindings not installed")
-    import opensim  # type: ignore[import-untyped]
-
-    return opensim
+    return require_opensim()
 
 
 @pytest.fixture(scope="module")

@@ -29,6 +29,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.registration impor
 from tests.opensim.test_moco_initial_bindings import _native_inputs
 from tests.opensim.test_native_muscle_replay import muscle_fixture as muscle_fixture
 from src.shared.python.estimation import dime_global_calibration
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.integration
 
@@ -62,7 +63,7 @@ def _request(
 def _ready_request(
     fixture: tuple[Path, dict[str, float]], directory: Path
 ) -> NativeMocoRequest:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     request = _request(fixture, directory)
     model = osim.Model(str(request.model_path))
     model.initSystem()
@@ -85,7 +86,8 @@ def _ready_request(
 
 
 def test_valid_physical_body_audit_is_bound_to_preparation(
-    muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
+    muscle_fixture: tuple[Path, dict[str, float]],  # noqa: F811 - pytest fixture injected by name
+    tmp_path: Path,
 ) -> None:
     request = _request(muscle_fixture, tmp_path)
 
@@ -99,7 +101,7 @@ def test_valid_physical_body_audit_is_bound_to_preparation(
 
 
 def test_rotated_unphysical_body_cannot_reach_moco_solve(
-    muscle_fixture: tuple[Path, dict[str, float]],
+    muscle_fixture: tuple[Path, dict[str, float]],  # noqa: F811 - pytest fixture injected by name
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -135,7 +137,7 @@ def test_rotated_unphysical_body_cannot_reach_moco_solve(
 
 
 def test_native_solve_rejects_sidecar_and_validator_drift(
-    muscle_fixture: tuple[Path, dict[str, float]],
+    muscle_fixture: tuple[Path, dict[str, float]],  # noqa: F811 - pytest fixture injected by name
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -159,7 +161,8 @@ def test_native_solve_rejects_sidecar_and_validator_drift(
 
 
 def test_missing_physical_audit_cannot_upgrade_old_preparation(
-    muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
+    muscle_fixture: tuple[Path, dict[str, float]],  # noqa: F811 - pytest fixture injected by name
+    tmp_path: Path,
 ) -> None:
     request = _ready_request(muscle_fixture, tmp_path)
     directory = tmp_path / "prepared"
@@ -172,7 +175,8 @@ def test_missing_physical_audit_cannot_upgrade_old_preparation(
 
 
 def test_malformed_source_retains_physical_reason_and_other_blockers(
-    muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
+    muscle_fixture: tuple[Path, dict[str, float]],  # noqa: F811 - pytest fixture injected by name
+    tmp_path: Path,
 ) -> None:
     request = _request(muscle_fixture, tmp_path)
     tree = ElementTree.parse(request.model_path)

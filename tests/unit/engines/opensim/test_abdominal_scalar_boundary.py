@@ -10,6 +10,7 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -112,7 +113,7 @@ def test_finite_native_scalar_difference_remains_a_failure(
 def test_native_output_mutation_after_measurement_cannot_receive_receipt(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     source_text = os.environ.get("BUET_REDUCTION_SOURCE")
     prepared_text = os.environ.get("BUET_REDUCTION_PREPARED")
     if not source_text or not prepared_text:

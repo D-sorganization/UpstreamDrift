@@ -16,6 +16,7 @@ from src.engines.physics_engines.opensim.python.full_body_osim import (
 )
 from src.shared.python.model_appearance import club_head_mesh as chm
 from src.shared.python.model_appearance.club_assembly import assembly_from_spec
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[3]
@@ -94,7 +95,7 @@ def test_head_face_normal_matches_the_spec_loft_at_address(club) -> None:
 
 
 def test_generated_osim_loads_in_opensim_with_unchanged_mass() -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     club_visuals.register_geometry_path()
     raw = (SPEC_DIR / "full_body_spec_anthro_driver.json").read_bytes()
     masses = []

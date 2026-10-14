@@ -6,6 +6,7 @@ import importlib.util
 from pathlib import Path
 
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -128,7 +129,7 @@ def test_club_model_rejects_an_unknown_club(tmp_path: Path) -> None:
 
 
 def test_render_refuses_the_real_display(monkeypatch) -> None:  # noqa: ANN001
-    pytest.importorskip("opensim")
+    require_opensim()
     monkeypatch.setenv("DISPLAY", ":0")
     monkeypatch.setenv("NATIVE_VIEWER_XVFB", "1")
     with pytest.raises(RuntimeError, match="real display"):

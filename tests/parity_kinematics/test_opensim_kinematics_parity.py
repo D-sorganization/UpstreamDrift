@@ -21,6 +21,7 @@ from src.shared.python.pose_interchange.canonical import (
 from src.shared.python.pose_interchange.services._mock import (
     MockKinematicsService,
 )
+from tests.helpers.opensim_support import require_opensim
 
 
 def _canonical_pose_scenario(svc) -> dict[str, np.ndarray]:
@@ -48,7 +49,7 @@ def test_mock_opensim_kinematics_scenario() -> None:
 @pytest.mark.live_simulation
 @pytest.mark.requires_opensim
 def test_real_opensim_kinematics_scenario_matches_mock(tmp_path: Path) -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     from src.shared.python.pose_interchange.services.opensim import (
         OpenSimKinematicsService,
     )

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 from pathlib import Path
 
 import pytest
@@ -11,6 +11,7 @@ from anthropometrics import ADAPTER_REGISTRY, EngineAdapter, SubjectAnthropometr
 from anthropometrics.engine_adapters import OpenSimAdapter
 
 from ._assertions import assert_subjects_equal
+from tests.helpers.opensim_support import require_opensim
 
 
 def test_opensim_adapter_satisfies_protocol() -> None:
@@ -69,7 +70,7 @@ def test_opensim_optional_opensim_wheel_loadable(
     sixteen_segment_subject: SubjectAnthropometrics, tmp_path: Path
 ) -> None:
     """If the opensim wheel is installed, the produced model must parse."""
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     out = tmp_path / "subject.osim"
     OpenSimAdapter().export(sixteen_segment_subject, out)
     osim.Model(str(out))

@@ -8,10 +8,11 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.integration
 
-opensim = pytest.importorskip("opensim")
+opensim = require_opensim()
 
 from src.engines.physics_engines.opensim.python import native_mtp_reduction as reduction  # noqa: E402
 from src.engines.physics_engines.opensim.python.native_mtp_reduction import (  # noqa: E402

@@ -10,8 +10,9 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
-osim = pytest.importorskip("opensim", reason="OpenSim not installed")
+osim = require_opensim()
 if not hasattr(osim, "Model"):
     pytest.skip("real opensim is unavailable", allow_module_level=True)
 

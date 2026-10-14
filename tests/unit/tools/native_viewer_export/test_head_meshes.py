@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from src.tools.native_viewer_export.backends._head import head_mesh_files
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 SPECS = Path(__file__).resolve().parents[4] / "docs/development/full_body_models"
@@ -28,7 +29,7 @@ def test_spec_without_a_head_body_yields_no_files(tmp_path: Path) -> None:
 
 
 def test_opensim_model_gets_head_meshes_and_no_head_capsule() -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     from src.tools.native_viewer_export.backends import opensim_worker
 
     raw = (SPECS / "full_body_spec_anthro_driver.json").read_bytes()

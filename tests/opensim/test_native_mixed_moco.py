@@ -40,15 +40,17 @@ from src.engines.physics_engines.opensim.python.tour_matching.registration impor
 )
 from src.engines.physics_engines.opensim.python.tour_matching.trc import write_trc
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
 def mixed_request(
-    mixed_model: tuple[Any, Any, Path], tmp_path: Path
+    mixed_model: tuple[Any, Any, Path],  # noqa: F811 - pytest fixture injected by name
+    tmp_path: Path,
 ) -> NativeMocoRequest:
-    import opensim as osim
+    osim = require_opensim()
 
     model, state, path = mixed_model
     names = model.getStateVariableNames()
@@ -244,7 +246,7 @@ def test_native_mixed_moco_solve_export_and_independent_replay(
         mixed_request, prepared, solved, exported, native, directory
     )
     assert score.marker_rmse_m < 2e-4
-    import opensim as osim
+    osim = require_opensim()
 
     trajectory = osim.MocoTrajectory(str(directory / "solution.sto"))
     knots = np.asarray(trajectory.getTimeMat()).reshape(-1)

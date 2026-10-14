@@ -14,8 +14,9 @@ from src.shared.python.motion_pipeline.contracts import (
 from src.shared.python.motion_pipeline.scaling.opensim_scale import (
     OpenSimScaleBackend,
 )
+from tests.helpers.opensim_support import require_opensim
 
-opensim = pytest.importorskip("opensim")
+opensim = require_opensim()
 
 
 def _rig() -> SkeletonRig:

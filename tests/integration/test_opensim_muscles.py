@@ -19,6 +19,7 @@ from src.shared.python.engine_core.engine_availability import (
     skip_if_unavailable,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
+from tests.helpers.opensim_support import require_opensim
 
 logger = get_logger(__name__)
 
@@ -26,7 +27,7 @@ logger = get_logger(__name__)
 pytestmark = skip_if_unavailable("opensim")
 
 if OPENSIM_AVAILABLE:
-    import opensim
+    opensim = require_opensim()
 
 
 @pytest.fixture
