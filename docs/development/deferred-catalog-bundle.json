@@ -5,5 +5,19 @@
     "shared_scripts/deferred_validation.py": "152ab473b23daf5b3a32618563ef0cddcdb957d71580cf09aeeb03c17f9d5ee5",
     "shared_scripts/deferred_planning.py": "521f1a98fecf36990f1f31696144163c85d023be34a465dfbde9aacf81f33f94",
     "shared_scripts/handoff_validator.py": "eac9039b72c2a2d7f5708b0cb098f84d2a1e78568ed1ec6d17f6756ca6274cd5"
-  }
+  },
+  "deferred_items": [
+    {
+      "id": "NV-8",
+      "issue": 11681,
+      "epic_issue": 11673,
+      "title": "NV-8: Simscape Mechanics Explorer Video Export (MATLAB R2025b Host, Deferred)",
+      "status": "deferred",
+      "category": "native_viewer_export",
+      "host_requirement": "MATLAB R2025b (DeskComputer / ControlTower)",
+      "export_script": "scripts/matlab/export_simscape_mechanics_explorer_views.m",
+      "view_presets": ["face_on", "down_the_line", "overhead", "perspective"],
+      "rationale": "Simscape Mechanics Explorer video export (smwritevideo) requires MATLAB R2025b host and cannot run on headless CI (brick)."
+    }
+  ]
 }
