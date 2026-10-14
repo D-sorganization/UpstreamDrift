@@ -568,6 +568,76 @@ export async function applyTreatmentV2(
   });
 }
 
+/**
+ * Request body shared by `POST /v2/report` and `POST /v2/export`
+ * (`ReportPayloadV2` in `src/api/routes/launch_monitor_analytics_reports.py`).
+ */
+export interface ReportRequest {
+  records: Record<string, unknown>[];
+  project_name?: string;
+  treatment_audit_log?: Record<string, unknown>[];
+}
+
+/** Response body for `POST /v2/report` (`build_report_v2`). */
+export interface ReportResponse {
+  report_text: string;
+  project_name: string;
+  session_count: number;
+  shot_count: number;
+  canonical_metrics: string[];
+  treatment_action_count: number;
+}
+
+/** Response body for `POST /v2/export` (`export_report_v2`). */
+export interface ExportReportResponse {
+  csv: string;
+  data_export: Record<string, unknown>;
+  manifest: Record<string, unknown>;
+}
+
+/**
+ * Build the PyQt Reports tab's report text over caller-supplied inline
+ * records, via the same `build_project_report` contract the desktop tab
+ * calls (`src/tools/launch_monitor_analytics/gui.py` `_refresh_report`).
+ */
+export async function buildReportV2(
+  records: Record<string, unknown>[],
+  projectName = "Untitled Launch Monitor Study",
+  treatmentAuditLog: Record<string, unknown>[] = [],
+): Promise<ReportResponse> {
+  const payload: ReportRequest = {
+    records,
+    project_name: projectName,
+    treatment_audit_log: treatmentAuditLog,
+  };
+  return apiFetch<ReportResponse>(`${BASE}/v2/report`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Export the PyQt Reports tab's canonical CSV and reproducibility manifest
+ * over caller-supplied inline records, via the same
+ * `format_canonical_csv_export`/`build_reproducibility_manifest` contract the
+ * desktop tab calls (`export_data`/`export_manifest`).
+ */
+export async function exportReportV2(
+  records: Record<string, unknown>[],
+  projectName = "Untitled Launch Monitor Study",
+  treatmentAuditLog: Record<string, unknown>[] = [],
+): Promise<ExportReportResponse> {
+  const payload: ReportRequest = {
+    records,
+    project_name: projectName,
+    treatment_audit_log: treatmentAuditLog,
+  };
+  return apiFetch<ExportReportResponse>(`${BASE}/v2/export`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 /** Render a nullable statistic as the API would — never a misleading zero. */
 export function formatStat(
   value: number | null | undefined,
