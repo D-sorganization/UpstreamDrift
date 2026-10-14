@@ -17,15 +17,22 @@ solution ``a+ = u + (a - u) exp(-dt / tau)``; a step response therefore equals
 
 from __future__ import annotations
 
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import TypeAlias
+from typing import TYPE_CHECKING, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
 
 from src.shared.python.core.contracts import ensure, require
+from src.shared.python.estimation.mosaic.local_policy import StepFunction, replay
+
+if TYPE_CHECKING:
+    from src.shared.python.estimation.mosaic.outer_solve import TrialData
 
 FloatArray: TypeAlias = npt.NDArray[np.float64]
+ArrayLike: TypeAlias = FloatArray | float | Sequence[float]
+StepFactory: TypeAlias = Callable[[FloatArray, FloatArray, float], StepFunction]
 
 _EPS = 1e-9
 
@@ -48,19 +55,35 @@ class ActivationModel:
     rate_limit: FloatArray | None = None
     provenance: str = "declared"
 
-    def __post_init__(self) -> None:
-        fields = {n: _per_joint(getattr(self, n)) for n in _REQUIRED}
+    def __init__(
+        self,
+        tau_act: ArrayLike,
+        tau_deact: ArrayLike,
+        lower: ArrayLike,
+        upper: ArrayLike,
+        rate_limit: ArrayLike | None = None,
+        provenance: str = "declared",
+    ) -> None:
+        fields = {
+            "tau_act": _per_joint(tau_act),
+            "tau_deact": _per_joint(tau_deact),
+            "lower": _per_joint(lower),
+            "upper": _per_joint(upper),
+        }
         n_joints = max(v.size for v in fields.values())
         for name, val in fields.items():
             require(val.size in (1, n_joints), f"{name} size mismatch", val.size)
             object.__setattr__(self, name, np.broadcast_to(val, (n_joints,)).copy())
-        if self.rate_limit is not None:
-            rate = _per_joint(self.rate_limit)
+        if rate_limit is not None:
+            rate = _per_joint(rate_limit)
             require(rate.size in (1, n_joints), "rate_limit size mismatch", rate.size)
             object.__setattr__(
                 self, "rate_limit", np.broadcast_to(rate, (n_joints,)).copy()
             )
             require(bool(np.all(rate > 0.0)), "rate_limit must be > 0", rate)
+        else:
+            object.__setattr__(self, "rate_limit", None)
+        object.__setattr__(self, "provenance", provenance)
         require(bool(np.all(self.tau_act > 0.0)), "tau_act must be > 0")
         require(bool(np.all(self.tau_deact > 0.0)), "tau_deact must be > 0")
         require(bool(np.all(self.lower < self.upper)), "lower must be < upper")
@@ -82,6 +105,17 @@ class TimeConstantFit:
     tau_deact: float | None
     n_act_steps: int
     n_deact_steps: int
+
+
+@dataclass(frozen=True)
+class ActivationReport:
+    """Declared activation model and side-by-side open-loop replay results."""
+
+    model: ActivationModel
+    provenance: str
+    time_constants_fit: tuple[TimeConstantFit, ...]
+    open_loop_rms_without_actuation: tuple[float, ...]
+    open_loop_rms_with_actuation: tuple[float, ...]
 
 
 def _check_times(times: FloatArray) -> None:
@@ -187,3 +221,84 @@ def fit_time_constants(
         n_act_steps=int(rising.sum()),
         n_deact_steps=int(falling.sum()),
     )
+
+
+def evaluate_actuation_replays(
+    model: ActivationModel,
+    step_factory: StepFactory,
+    geometry: FloatArray,
+    parameters: FloatArray,
+    trials: Sequence[TrialData],
+    coefficients: Sequence[FloatArray],
+    inputs: FloatArray,
+    initial_perturbation: FloatArray | None = None,
+) -> ActivationReport:
+    """Compare open-loop rollouts with and without the declared actuation layer.
+
+    Evaluates side-by-side open-loop RMS error against kinematic reference,
+    and estimates time constants from the simulated response.
+    """
+    require(len(trials) >= 1, "at least one trial required")
+    require(len(trials) == len(coefficients), "mismatched trials and coefficients")
+
+    rms_without: list[float] = []
+    rms_with: list[float] = []
+    time_fits: list[TimeConstantFit] = []
+
+    offset = 0
+    for trial, coeff in zip(trials, coefficients, strict=True):
+        trial_inputs = inputs[offset : offset + trial.n_times]
+        offset += trial.n_times
+
+        steps = np.diff(trial.times)
+        dt = float(steps[0])
+
+        step = step_factory(geometry, parameters, dt)
+        q, v, _ = trial.basis.evaluate(coeff)
+        reference = np.concatenate([q, v], axis=1)
+        n_q = reference.shape[1] // 2
+
+        start = (
+            reference[0]
+            if initial_perturbation is None
+            else reference[0] + initial_perturbation
+        )
+
+        nominal_without = trial_inputs[:-1]
+        traj_without = replay(step, start, nominal_without)
+        err_without = np.linalg.norm(traj_without[:, :n_q] - reference[:, :n_q], axis=1)
+        rms_without.append(float(np.sqrt(np.mean(err_without**2))))
+
+        act_inputs = simulate_activation(model, trial.times, trial_inputs)
+        nominal_with = act_inputs[:-1]
+        traj_with = replay(step, start, nominal_with)
+        err_with = np.linalg.norm(traj_with[:, :n_q] - reference[:, :n_q], axis=1)
+        rms_with.append(float(np.sqrt(np.mean(err_with**2))))
+
+        if not time_fits:
+            for j in range(model.n_joints):
+                fit_j = fit_time_constants(
+                    trial.times,
+                    trial_inputs[:, j],
+                    act_inputs[:, j],
+                    lower=float(model.lower[j]),
+                    upper=float(model.upper[j]),
+                )
+                time_fits.append(fit_j)
+
+    report = ActivationReport(
+        model=model,
+        provenance=model.provenance,
+        time_constants_fit=tuple(time_fits),
+        open_loop_rms_without_actuation=tuple(rms_without),
+        open_loop_rms_with_actuation=tuple(rms_with),
+    )
+    ensure(
+        len(report.open_loop_rms_without_actuation) == len(trials),
+        "without-actuation RMS count mismatch",
+    )
+    ensure(
+        len(report.open_loop_rms_with_actuation) == len(trials),
+        "with-actuation RMS count mismatch",
+    )
+    return report

@@ -40,6 +40,9 @@ install:
 		git submodule update --init --recursive vendor/ud-tools; \
 	fi
 	pip install -r requirements.txt
+	@if [ -f requirements-tools.txt ]; then \
+		pip install -r requirements-tools.txt; \
+	fi
 	@if [ -f pyproject.toml ] || [ -f setup.py ]; then \
 		echo "Installing package in editable mode with dev dependencies..."; \
 		pip install -e ".[dev]"; \
