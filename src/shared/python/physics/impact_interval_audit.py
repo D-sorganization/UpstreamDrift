@@ -268,12 +268,46 @@ def qualified_post_impact_state(
     return result.to_post_impact_state()
 
 
+def audit_and_export_impact_run(
+    result: Any,
+    tolerances: ImpactAuditTolerances | None = None,
+) -> dict[str, Any]:
+    """Audit one impact run and return a deterministic export dictionary.
+
+    Distinguishes timeout (TIME_LIMIT), physical miss (NO_CONTACT), and completed
+    separation (SEPARATED). Only produces ``post_impact_state`` if ``verdict.qualified``
+    is True, failing closed on unfinished or unqualified contacts without invoking
+    ``result.to_post_impact_state()``.
+    """
+    verdict = audit_impact_interval(result, tolerances)
+    if verdict.contact_completed and verdict.termination == "SEPARATED":
+        completion_status = "separated"
+    elif verdict.termination == "TIME_LIMIT":
+        completion_status = "time_limit"
+    elif verdict.termination == "NO_CONTACT":
+        completion_status = "no_contact"
+    else:
+        completion_status = "incomplete"
+
+    post_impact_state = result.to_post_impact_state() if verdict.qualified else None
+
+    return {
+        "qualified": verdict.qualified,
+        "contact_completed": verdict.contact_completed,
+        "termination": verdict.termination,
+        "completion_status": completion_status,
+        "audit": verdict.to_report(),
+        "post_impact_state": post_impact_state,
+    }
+
+
 __all__ = [
     "IMPACT_AUDIT_LIMITATIONS",
     "IMPACT_INTERVAL_CONTRACT_MODULE",
     "ImpactAuditError",
     "ImpactAuditTolerances",
     "ImpactAuditVerdict",
+    "audit_and_export_impact_run",
     "audit_impact_interval",
     "qualified_post_impact_state",
     "recompute_energy_residual",
