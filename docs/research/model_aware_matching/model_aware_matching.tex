@@ -675,20 +675,30 @@ and no input smoothness the torques were dominated by acceleration noise
 anchor the scale gauge was resolved by the degenerate solution.  Each is now a
 test or a gate.
 
-\paragraph{Reproduction and Evidence Receipt.}
+\paragraph{Reproduction, Conformance Oracle and Evidence Receipt.}
+The benchmark protocol, experimental seeds, and acceptance thresholds are frozen in
+\texttt{src/config/mosaic\_benchmark\_protocol.json} and governed by the policy that no
+tolerance may be widened without empirical measurements and a
+\texttt{Tolerance-Change-Evidence} commit trailer.
+The planar fixture is exposed as a reusable oracle via
+\texttt{PlanarConformanceOracle} (\texttt{estimation.mosaic.planar\_oracle}) and compared
+against the IK+smoothing baseline (\texttt{run\_ik\_smoothing\_baseline}).
 Every number in the table is read from the committed receipt
 \texttt{docs/research/model\_aware\_matching/reference\_results.json}, which is
-regenerated deterministically (fixed seeds) by
+regenerated deterministically (fixed seeds) and verified by
 \begin{verbatim}
 export PYTHONPATH=$PWD:$PWD/src:$PWD/src/shared/python
 python3 -m src.shared.python.estimation.mosaic.reference_evidence
+python3 -m pytest tests/unit/estimation/mosaic/test_planar_oracle.py -q
+python3 -m pytest tests/unit/estimation/mosaic/test_benchmark_protocol.py -q
+python3 -m pytest tests/unit/estimation/mosaic/test_ik_baseline.py -q
+python3 -m pytest tests/unit/estimation/mosaic/test_negative_results.py -q
 python3 -m pytest tests/unit/estimation/mosaic -q
 \end{verbatim}
-and verified by \texttt{test\_reference\_evidence.py}, which re-runs the fixture
-and fails if any quoted quantity drifts from the receipt beyond its stated
-tolerance (timings are recorded but never compared; they depend on the host).
-Timings above were measured on NumPy~2.5/SciPy~1.18, one core of the session
-container.
+and verified by \texttt{test\_reference\_evidence.py} and \texttt{test\_planar\_oracle.py},
+which re-run the fixture and fail if any quoted quantity drifts from the receipt beyond its
+stated tolerance (timings are recorded but never compared; they depend on the host).
+Timings above were measured on NumPy~2.5/SciPy~1.18, one core of the session container.
 
 \section{Engine Integration Path}
 \label{sec:engines}
@@ -827,6 +837,84 @@ object plays the club's role (unknown inertia identified from the wrench
 transmitted through a known-inertia tool, or vice versa).  Identified
 parameters become the nominal model; residual learning or light randomisation
 covers what remains, rather than replacing identification.
+
+\subsection{Payload Spatial Inertia Identification}
+\label{sec:payload_identification}
+The spatial inertia of an unknown rigid body or manipulated object is
+parameterised by the standard 10-dimensional parameter vector
+\begin{equation}
+  \bpi_{\mathrm{obj}} = \begin{bmatrix} m & h_x & h_y & h_z & I_{xx} & I_{xy} & I_{xz} & I_{yy} & I_{yz} & I_{zz} \end{bmatrix}^{\!\top} \in \R^{10},
+  \label{eq:spatial_inertia_param}
+\end{equation}
+where $m > 0$ is the mass, $\bh = m\mathbf{c} \in \R^3$ is the first moment of
+inertia about the reference origin $O$, and $\mathbf{I}_O \in \R^{3\times3}$ is the rotational
+inertia tensor expressed at $O$.  Physical consistency requires mass positivity
+$m > 0$ and strict positive definiteness of the central rotational inertia
+$\mathbf{I}_C = \mathbf{I}_O - \frac{1}{m}[\bh]_\times^{\!\top}[\bh]_\times \succ 0$,
+satisfying triangle inequalities $\operatorname{tr}(\mathbf{I}_C)\mathbf{I}_3 - 2\mathbf{I}_C \succ 0$.
+
+At time step $k$, let the anchor frame experience translational acceleration
+$\ba_k \in \R^3$, angular velocity $\boldsymbol\omega_k \in \R^3$, and angular
+acceleration $\boldsymbol\alpha_k \in \R^3$.  With gravity $\mathbf{g} \in \R^3$,
+the net kinematic translational acceleration is $\ba_{\mathrm{net},k} = \ba_k - \mathbf{g}$.
+The transmitted spatial wrench $\mathbf{w}_k = [\mathbf{f}_k^{\!\top},\, \boldsymbol\tau_k^{\!\top}]^{\!\top} \in \R^6$
+exerted on the payload is linear in $\bpi_{\mathrm{obj}}$:
+\begin{equation}
+  \mathbf{w}_k = \mathbf{Y}_k \bpi_{\mathrm{obj}}, \quad
+  \mathbf{Y}_k = \begin{bmatrix}
+    \ba_{\mathrm{net},k} & [\boldsymbol\omega_k]_\times^2 + [\boldsymbol\alpha_k]_\times & \mathbf{0}_{3\times6} \\
+    \mathbf{0}_{3\times1} & -[\ba_{\mathrm{net},k}]_\times & \mathbf{J}_I(\boldsymbol\alpha_k, \boldsymbol\omega_k)
+  \end{bmatrix} \in \R^{6\times10},
+  \label{eq:spatial_regressor}
+\end{equation}
+where $[\mathbf{v}]_\times$ denotes the skew-symmetric cross-product matrix of $\mathbf{v}$,
+and $\mathbf{J}_I(\boldsymbol\alpha, \boldsymbol\omega) \in \R^{3\times6}$ maps the unique
+components of rotational inertia under the Euler equations:
+\begin{equation}
+  \mathbf{J}_I(\boldsymbol\alpha, \boldsymbol\omega)\,\mathrm{vech}(\mathbf{I}) = \mathbf{I}\boldsymbol\alpha + \boldsymbol\omega \times (\mathbf{I}\boldsymbol\omega).
+\end{equation}
+When the payload is manipulated through a known fixture or tool with prior
+spatial inertia $\bpi_{\mathrm{tool}}$, the net measured wrench $\mathbf{w}_{\mathrm{meas},k}$
+at the sensing anchor splits into tool and payload components:
+\begin{equation}
+  \mathbf{w}_{\mathrm{meas},k} - \mathbf{Y}_{\mathrm{tool},k}\bpi_{\mathrm{tool}} = \mathbf{Y}_{\mathrm{obj},k}\bpi_{\mathrm{obj}}.
+  \label{eq:tool_payload_anchor}
+\end{equation}
+Stamping $K$ observation epochs yields the stacked linear system $\mathbf{W} = \mathbf{Y}\bpi_{\mathrm{obj}}$.
+The least-squares estimate under Tikhonov regularisation $\lambda \ge 0$ is
+\begin{equation}
+  \hat{\bpi}_{\mathrm{obj}} = \bigl(\mathbf{Y}^{\!\top}\mathbf{Y} + \lambda \mathbf{I}_{10}\bigr)^{-1} \mathbf{Y}^{\!\top}\mathbf{W}.
+\end{equation}
+Observability of the 10 parameters requires sufficiently exciting motion trajectories;
+the condition number $\kappa(\mathbf{Y}) = \sigma_{\max}(\mathbf{Y}) / \sigma_{\min}(\mathbf{Y})$
+provides the observability diagnostic.
+
+\subsection{Reference-Plus-Gains WBC Export Schedule}
+\label{sec:wbc_export_schedule}
+Whole-body operational-space controllers (WBC) execute tracking by combining
+feedforward torques with time-varying feedback gains around a dynamically
+consistent nominal trajectory.  The exported schedule artifact is the tuple
+\begin{equation}
+  \mathcal{S}_{\mathrm{WBC}} = \Bigl( (\bq_k^\star, \bv_k^\star, \ba_k^\star)_{k=0}^N,\; (\bu_k^\star)_{k=0}^{N-1},\; (\bK_k)_{k=0}^{N-1},\; \bpi,\; \mathbf{s},\; \bS_{\mathrm{act}} \Bigr),
+  \label{eq:wbc_schedule_tuple}
+\end{equation}
+where:
+\begin{itemize}[nosep]
+  \item $(\bq_k^\star, \bv_k^\star, \ba_k^\star)$ are the reference generalised positions, velocities, and accelerations at $N+1$ trajectory knot points;
+  \item $\bu_k^\star \in \R^{n_u}$ is the feedforward control sequence;
+  \item $\bK_k \in \R^{n_u \times 2n_v}$ is the time-varying feedback gain matrix, obtained from the Riccati backward pass of the trajectory optimisation problem;
+  \item $\bpi \in \R^{10}$ and $\mathbf{s} \in \R^d$ are the identified payload inertia parameters and geometric scaling parameters;
+  \item $\bS_{\mathrm{act}} = \mathrm{diag}(\mathbf{0}_6, \mathbf{I}_{n_v-6})$ is the floating-base actuation selection matrix enforcing that the 6 root DOFs are unactuated.
+\end{itemize}
+The commanded control under state feedback deviation $\delta\bx_k = \bx_k - \bx_k^\star = [(\bq_k \ominus \bq_k^\star)^{\!\top}, (\bv_k - \bv_k^\star)^{\!\top}]^{\!\top}$ is:
+\begin{equation}
+  \bu_k = \bu_k^\star - \bK_k\,\delta\bx_k,
+  \label{eq:wbc_feedback_law}
+\end{equation}
+subject to actuator saturation and contact wrench cone constraints.
+The schedule is serialized to an immutable, portable JSON schema and verified via
+closed-loop forward replay (\texttt{validate\_wbc\_schedule}), guaranteeing bounded
+tracking error and non-divergent feedback effort under admissible perturbations.
 
 \section{Review of the DIME Epic and Repository Defects}
 \label{sec:dime_review}
