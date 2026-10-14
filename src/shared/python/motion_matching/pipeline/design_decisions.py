@@ -38,6 +38,7 @@ EXPECTED_DECISION_TITLES = [
     "MyoSuite Neck Retarget: NeckInputY to `neck_flexion` (OSV-3, #11729)",
     "MyoSuite Retarget Map Is One-to-One: Weighted Secondary Entries Dropped (#11729)",
     "Same-Input Effort Hold Is a Bundle Parameter (#12279)",
+    "OpenSim Bushing Grip Ball-Impact Transient Bounds (OSV-7, #12272)",
 ]
 
 
