@@ -7,13 +7,14 @@ from typing import Any
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
 def mixed_model(tmp_path: Path) -> tuple[Any, Any, Path]:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     model.setGravity(osim.Vec3(0))
     load = osim.Body("load", 1, osim.Vec3(0), osim.Inertia(0.1))
@@ -149,7 +150,8 @@ def test_renamed_ground_coordinate_cannot_hide_root_assistance(
     mixed_model: tuple[Any, Any, Path],
 ) -> None:
     from dataclasses import replace
-    import opensim as osim
+
+    osim = require_opensim()
     from src.engines.physics_engines.opensim.python.tour_matching.native_mixed_actuation import (
         admit_native_mixed_profile,
         ActuationRole,
@@ -355,7 +357,8 @@ def test_mixed_replay_rejects_changed_execution_identity(
     mixed_model: tuple[Any, Any, Path], mutation: str
 ) -> None:
     from dataclasses import replace
-    import opensim as osim
+
+    osim = require_opensim()
     from src.engines.physics_engines.opensim.python.tour_matching.native_mixed_actuation import (
         ActuationRole,
     )
@@ -479,7 +482,7 @@ def test_scalar_core_rejects_mislabeled_initial_native_time(
 def test_mixed_identity_requires_actual_native_binary(
     mixed_model: tuple[Any, Any, Path], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    import opensim as osim
+    osim = require_opensim()
     from src.engines.physics_engines.opensim.python.tour_matching.native_mixed_replay import (
         build_native_mixed_replay_bundle,
     )
@@ -502,7 +505,7 @@ def test_mixed_identity_requires_actual_native_binary(
 def test_mixed_admission_rejects_live_prescription(
     mixed_model: tuple[Any, Any, Path],
 ) -> None:
-    import opensim as osim
+    osim = require_opensim()
     from src.engines.physics_engines.opensim.python.tour_matching.native_mixed_actuation import (
         admit_native_mixed_profile,
     )

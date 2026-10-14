@@ -23,13 +23,14 @@ from src.engines.physics_engines.opensim.python.tour_matching.native_mixed_repla
     build_native_mixed_replay_bundle,
     replay_native_mixed_bundle,
 )
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
 def coupled_mixed(tmp_path: Path) -> tuple[Any, Any]:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, declaration = _source(tmp_path, custom=True)
     model = osim.Model(str(path))
     actuator = osim.CoordinateActuator("q")
@@ -285,9 +286,10 @@ def test_coupled_mixed_rejects_competing_input_policy(
 
 
 def test_maintained_moco_admits_explicit_coupled_mixed_request(
-    mixed_request: Any, tmp_path: Path
+    mixed_request: Any,  # noqa: F811 - pytest fixture injected by name
+    tmp_path: Path,
 ) -> None:
-    import opensim as osim
+    osim = require_opensim()
     from src.engines.physics_engines.opensim.python.tour_matching.native_prepared_state import (
         DeclaredColdStart,
     )

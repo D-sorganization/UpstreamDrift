@@ -1,6 +1,7 @@
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
-osim = pytest.importorskip("opensim", reason="OpenSim not installed")
+osim = require_opensim()
 if not hasattr(osim, "Model"):
     pytest.skip("real opensim is unavailable", allow_module_level=True)
 
@@ -71,7 +72,7 @@ def test_record_force_series_mocked() -> None:
 
 
 try:
-    import opensim as osim
+    osim = require_opensim()
 
     has_opensim = hasattr(osim, "Model")
 except ImportError:

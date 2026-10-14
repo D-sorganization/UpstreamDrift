@@ -30,6 +30,7 @@ from tests.opensim.native_moco_refinement import (
     child_hs_grid,
     piecewise_linear_samples,
 )
+from tests.helpers.opensim_support import require_opensim
 
 _SERIALIZATION_MAX_ULPS = 8
 
@@ -62,7 +63,7 @@ def run_rung(
     mesh_intervals: int = 10,
     refinement_plan_path: Path | None = None,
 ) -> None:
-    import opensim as osim
+    osim = require_opensim()
 
     rung = next(item for item in DEFAULT_RUNGS if item.name == rung_name)
     # The supervisor creates the per-rung directory before launching us.
@@ -84,7 +85,7 @@ def run_rung(
 def run_saved_replay_diagnostic(source_run: Path, output: Path) -> None:
     """Replay retained solution inputs without constructing or running a solver."""
     _start_replay_diagnostic(output)
-    import opensim as osim
+    osim = require_opensim()
 
     _write_diagnostic_stage(output, "opensim_imported")
     from src.engines.physics_engines.opensim.python.tour_matching.native_constrained_muscle import (

@@ -15,12 +15,13 @@ from src.engines.physics_engines.opensim.python.tour_matching.native_passive_rea
     audit_native_passive_readiness,
     require_native_passive_readiness,
 )
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
 
 def _model(length: float = 0.32, law: str = "Thelen2003Muscle") -> tuple[Any, Any, Any]:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     model.setGravity(osim.Vec3(0))
     body = osim.Body("body", 1, osim.Vec3(0), osim.Inertia(0.1))
@@ -208,7 +209,7 @@ def test_policy_requires_provenance_and_immutable_complete_limits() -> None:
 
 
 def test_native_boundary_rejects_fabricated_model_and_state() -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     with pytest.raises(TypeError, match="native"):
         require_native_passive_readiness(object(), object())
 

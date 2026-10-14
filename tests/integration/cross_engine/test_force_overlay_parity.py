@@ -39,6 +39,7 @@ from tests.integration.cross_engine.force_overlay_fixtures import (
     STANDARD,
     PendulumFixture,
 )
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = [pytest.mark.integration, pytest.mark.headless_safe]
 
@@ -302,7 +303,7 @@ def _build_drake(cls: type, fx: PendulumFixture, scenario: str, tmp: Path) -> An
 
 def _opensim_model(fx: PendulumFixture) -> Any:
     """Empty OpenSim model with Y-up gravity (the OpenSim convention)."""
-    import opensim as osim
+    osim = require_opensim()
 
     model = osim.Model()
     model.setName("synthetic_model")
@@ -322,7 +323,7 @@ def _load_opensim(cls: type, model: Any, tmp_path: Path) -> Any:
 def _build_opensim_pendulum(
     cls: type, fx: PendulumFixture, scenario: str, tmp_path: Path
 ) -> Any:
-    import opensim as osim
+    osim = require_opensim()
 
     model = _opensim_model(fx)
     com = osim.Vec3(0, -fx.com_distance, 0)
@@ -357,7 +358,7 @@ def _build_opensim_resting(
     cls: type, fx: PendulumFixture, scenario: str, tmp_path: Path
 ) -> Any:
     """Sphere on a half-space: OpenSim's supported contact pair (no box)."""
-    import opensim as osim
+    osim = require_opensim()
 
     model = _opensim_model(fx)
     radius = fx.box_rest_height

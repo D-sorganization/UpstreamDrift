@@ -42,6 +42,7 @@ from src.engines.native_replay_contracts import native_replay_contract_types
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
 from tests.opensim.test_moco_initial_bindings import _native_inputs
+from tests.helpers.opensim_support import require_opensim
 
 pytest_plugins = ("tests.opensim.test_native_muscle_replay",)
 pytestmark = pytest.mark.unit
@@ -299,7 +300,7 @@ def test_preparation_rejects_changed_weight_request_before_solver(
 def test_preparation_blocks_unused_references_and_nonmuscle_actuation(
     muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, trc, guess, binding = _native_inputs(muscle_fixture, tmp_path)
     model = osim.Model(str(path))
     reserve = osim.CoordinateActuator("slide")
@@ -347,7 +348,7 @@ def test_file_driven_native_moco_solve_reads_back_marker_weight(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, trc, guess, binding = _native_inputs(
         muscle_fixture, tmp_path, times=np.linspace(0.0, 0.01, 11)
     )
@@ -476,7 +477,7 @@ def test_two_dof_ordered_multi_muscle_controls_survive_native_replay(
     tmp_path: Path,
     mesh_interval_s: float,
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, _ = muscle_fixture
     model = osim.Model(str(path))
     model.updMuscles().get(0).setName("zeta")

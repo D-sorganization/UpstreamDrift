@@ -10,6 +10,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -18,7 +19,7 @@ FIXTURES = Path(__file__).resolve().parents[3] / "fixtures" / "musculoskeletal"
 
 @pytest.fixture(scope="module")
 def stack():  # type: ignore[no-untyped-def]
-    pytest.importorskip("opensim")
+    require_opensim()
     from src.engines.physics_engines.opensim.python import (
         musculoskeletal_pipeline_v2 as p2,
         musculoskeletal_spec_dynamics as dynamics,

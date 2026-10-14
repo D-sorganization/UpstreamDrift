@@ -10,6 +10,7 @@ from pathlib import Path
 import pytest
 
 from humanoid_character_builder.interfaces import CharacterBuilder
+from tests.helpers.opensim_support import require_opensim
 
 
 def _load_in_mujoco(urdf_path: Path) -> None:
@@ -60,10 +61,7 @@ def _load_in_opensim(urdf_path: Path) -> None:
     # OpenSim doesn't natively load URDF via simple python API directly in standard builds
     # or if it does, it's not well documented for python wrapper.
     # The requirement: "via existing OpenSim URDF import path or document its absence"
-    try:
-        import opensim  # noqa: F401 - import-only availability probe
-    except ImportError:
-        pytest.skip("opensim not installed")
+    require_opensim()  # skips when absent or across the runtime boundary
 
     # Try the URDF converter if it exists, or just skip noting the absence.
     # OpenSim python API doesn't have a direct `opensim.Model(urdf_path)`

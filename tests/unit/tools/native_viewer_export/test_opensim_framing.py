@@ -18,6 +18,7 @@ import pytest
 from src.shared.python.golf_view_presets import VIEWER_FOV_Y_RAD, get_view_preset
 from src.tools.native_viewer_export.backends import _opensim_framing as framing
 from src.tools.native_viewer_export.overlay2d import pinhole_for_view
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 SPECS = Path(__file__).resolve().parents[4] / "docs/development/full_body_models"
@@ -121,7 +122,7 @@ def test_framing_body_names_pick_feet_head_and_clubhead() -> None:
 
 
 def test_opensim_clip_keeps_feet_head_and_clubhead_in_the_face_on_image() -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     from src.tools.native_viewer_export.backends import opensim_worker as worker
 
     raw = (SPECS / "full_body_spec_anthro_driver.json").read_bytes()

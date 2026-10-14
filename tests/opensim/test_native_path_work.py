@@ -12,6 +12,7 @@ from src.engines.physics_engines.opensim.python.tour_matching import (
     compute_path_length_finite_difference_moment_arm,
     validate_moment_arm_consistency,
 )
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -39,7 +40,7 @@ def test_invalid_or_unresolved_stencil_rejected(q: float, dq: float) -> None:
 def test_original_native_probe_records_workless_identity_failure(
     tmp_path: Path,
 ) -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     from scripts.diagnostics.native_path_work import TOLERANCE_M, run_probe
 
     receipt = run_probe(tmp_path)
@@ -92,7 +93,7 @@ def test_original_native_probe_records_workless_identity_failure(
 def test_generic_audit_consumes_native_path_and_independent_force_fixture(
     tmp_path: Path, moving: bool
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     from src.engines.physics_engines.opensim.python.tour_matching.native_path_work_audit import (
         audit_native_path_work,
         inspect_native_path_work_identity,

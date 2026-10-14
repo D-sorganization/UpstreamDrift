@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 if TYPE_CHECKING:
     from src.engines.physics_engines.opensim.python.tour_matching.native_marker_geometry import (
@@ -99,7 +100,7 @@ def test_native_geometry_rejects_invalid_coordinate_requests(
 def test_native_geometry_rejects_uncontrollable_requested_coordinate(
     native_pin: Path, policy: str
 ) -> None:
-    import opensim as osim
+    osim = require_opensim()
 
     model = osim.Model(str(native_pin))
     coordinate = model.updCoordinateSet().get("angle")
@@ -175,7 +176,7 @@ def test_shared_ik_recovers_motion_through_actual_native_pose_callback(
 def test_actual_native_coupler_follows_dependent_coordinate_and_checks_its_range(
     native_pin: Path,
 ) -> None:
-    import opensim as osim
+    osim = require_opensim()
 
     model = osim.Model(str(native_pin))
     body = osim.Body("second", 1.0, osim.Vec3(0), osim.Inertia(0.02))
@@ -218,7 +219,7 @@ def test_actual_native_coupler_follows_dependent_coordinate_and_checks_its_range
 def test_native_assembly_cannot_silently_change_requested_values(
     native_pin: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    import opensim as osim
+    osim = require_opensim()
 
     assemble = osim.Model.assemble
 

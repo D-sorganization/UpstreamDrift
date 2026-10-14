@@ -15,10 +15,11 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 # Skip the whole module cleanly when OpenSim isn't installed — the
 # ``requires_opensim`` marker is informational.
-pytest.importorskip("opensim")
+require_opensim()
 
 from src.engines.physics_engines.opensim.python.motion_matching.simulate import (  # noqa: E402
     COEFFS_PER_JOINT,
@@ -47,7 +48,7 @@ def _coordinate_actuator_count() -> int:
         pytest.skip("opensim not installed")
     if not _OSIM_PATH.exists():
         pytest.skip(f"golf_humanoid.osim not found at {_OSIM_PATH}")
-    import opensim as osim
+    osim = require_opensim()
     from src.engines.physics_engines.opensim.python.motion_matching.simulate import (
         _coordinate_actuator_names,
     )
@@ -198,7 +199,7 @@ def test_simulate_contract_opensim_time_monotonic_starts_at_zero() -> None:
 
 def test_q_width_matches_model_n_coords() -> None:
     """SimOut.q has model.getNumCoordinates() columns at every timestep."""
-    import opensim as osim
+    osim = require_opensim()
 
     model = osim.Model(str(_OSIM_PATH))
     model.initSystem()

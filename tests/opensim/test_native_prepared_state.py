@@ -18,12 +18,13 @@ from src.engines.physics_engines.opensim.python.tour_matching.native_prepared_st
     replay_declared_constant_input,
     replay_declared_time_only_input,
 )
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
 
 def _locked_pin_source(path: Path) -> tuple[Path, dict[str, float]]:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     body = osim.Body("body", 1, osim.Vec3(0, -0.5, 0), osim.Inertia(1, 1, 1))
     joint = osim.PinJoint(
@@ -129,7 +130,7 @@ def test_invalid_native_inputs_are_rejected(tmp_path: Path) -> None:
 
 
 def _coupled_source(path: Path) -> tuple[Path, dict[str, float], dict[str, bool]]:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     for joint_name, coordinate_name, default in (
         ("base", "q", 0.3),
@@ -243,7 +244,7 @@ def test_coupled_replay_rejects_source_chart_exit(tmp_path: Path) -> None:
 def test_mechanical_diagnostic_rejects_unreviewed_native_force(
     tmp_path: Path,
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, named, _ = _coupled_source(tmp_path / "coupled.osim")
     model = osim.Model(str(path))
     limit = osim.CoordinateLimitForce()
@@ -304,7 +305,7 @@ def test_physical_humerus_chart_is_not_source_default() -> None:
     receipt = json.loads(Path(receipt_text).read_text(encoding="utf-8"))
     initial = receipt["variants"]["129"]["rollout"]["initial_named"]
     model_hash = receipt["variants"]["129"]["artifact_sha256"]
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model(str(source))
     state = model.initSystem()
     coordinates = model.getCoordinateSet()

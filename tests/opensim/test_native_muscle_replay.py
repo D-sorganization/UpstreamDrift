@@ -11,6 +11,7 @@ import pytest
 from src.engines.physics_engines.opensim.python.tour_matching import (
     replay_muscle_excitations,
 )
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -21,7 +22,7 @@ def contact_muscle_fixture(
     request: pytest.FixtureRequest,
 ) -> tuple[Path, dict[str, float]]:
     """Add native compliant contact opposing the slider's muscle force."""
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = muscle_fixture
     model = osim.Model(str(path))
     floor = osim.ContactHalfSpace(
@@ -124,7 +125,7 @@ def test_fixture_contact_leakage_is_bounded_across_off_contact_gap_sweep(
 def test_moving_halfspace_requires_bilateral_contact_evidence_policy(
     contact_muscle_fixture: tuple[Path, dict[str, float]],
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = contact_muscle_fixture
     model = osim.Model(str(path))
     plane = model.updContactGeometrySet().get("floor")
@@ -144,7 +145,7 @@ def test_moving_halfspace_requires_bilateral_contact_evidence_policy(
 def test_hunt_crossley_extra_geometry_cannot_be_silently_omitted(
     contact_muscle_fixture: tuple[Path, dict[str, float]],
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = contact_muscle_fixture
     model = osim.Model(str(path))
     force = osim.HuntCrossleyForce.safeDownCast(
@@ -187,7 +188,7 @@ def test_native_contact_changes_motion_and_survives_accuracy_refinement(
     contact_muscle_fixture: tuple[Path, dict[str, float]],
     tmp_path: Path,
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = contact_muscle_fixture
     times = np.linspace(0, 0.08, 33)
     controls = {"flexor": times * 0 + 0.4}
@@ -240,7 +241,7 @@ def test_contact_policy_requires_unique_absolute_paths(
 def test_allowlist_cannot_promote_arbitrary_external_force_to_contact(
     muscle_fixture: tuple[Path, dict[str, float]],
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = muscle_fixture
     model = osim.Model(str(path))
     force = osim.PrescribedForce()
@@ -263,7 +264,7 @@ def muscle_fixture(
     tmp_path: Path, request: pytest.FixtureRequest
 ) -> tuple[Path, dict[str, float]]:
     """Create an actual one-DOF compliant-tendon model, not a golf substitute."""
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     model.setName("synthetic_native_muscle_fixture")
     model.setGravity(osim.Vec3(0))
@@ -325,7 +326,7 @@ def test_native_replay_preserves_complete_nonzero_initial_state(
     assert first.policy["input_boundary"] == "muscle_excitation"
     assert first.policy["interpolation"] == "linear"
     assert first.policy["state_resets"] is False
-    native_model = pytest.importorskip("opensim").Model(str(path))
+    native_model = require_opensim().Model(str(path))
     actual_law = native_model.getMuscles().get(0).getConcreteClassName()
     muscle_laws = first.policy["muscle_laws"]
     assert isinstance(muscle_laws, str)
@@ -337,7 +338,7 @@ def test_unknown_derived_law_identity_is_rejected_before_native_init(
     muscle_fixture: tuple[Path, dict[str, float]], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Proxy identity boundary test; this does not load a compiled C++ plugin."""
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = muscle_fixture
     original_class_name = osim.Component.getConcreteClassName
     probe_model = osim.Model(str(path))
@@ -383,7 +384,7 @@ def test_zero_fiber_length_is_not_an_admissible_physical_initial_state(
 def test_ignored_muscle_dynamics_need_a_separate_state_policy(
     muscle_fixture: tuple[Path, dict[str, float]], mode: str
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = muscle_fixture
     model = osim.Model(str(path))
     muscle = model.updMuscles().get(0)
@@ -398,7 +399,7 @@ def test_ignored_muscle_dynamics_need_a_separate_state_policy(
 def test_restored_native_force_matches_independent_physical_state(
     muscle_fixture: tuple[Path, dict[str, float]],
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = muscle_fixture
     model = osim.Model(str(path))
     state = model.initSystem()
@@ -453,7 +454,7 @@ def test_excitation_is_finite_and_bounded_without_clipping(
 def test_hidden_reserve_cannot_pass_muscle_only_replay(
     muscle_fixture: tuple[Path, dict[str, float]],
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = muscle_fixture
     model = osim.Model(str(path))
     reserve = osim.CoordinateActuator("slide")
@@ -469,7 +470,7 @@ def test_hidden_reserve_cannot_pass_muscle_only_replay(
 def test_existing_controller_is_not_silently_executed(
     muscle_fixture: tuple[Path, dict[str, float]],
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = muscle_fixture
     model = osim.Model(str(path))
     controller = osim.PrescribedController()
@@ -529,7 +530,7 @@ def test_excitation_mapping_cannot_silently_omit_or_rename_muscle(
 def test_prescribed_coordinate_cannot_hide_motion_drive(
     muscle_fixture: tuple[Path, dict[str, float]],
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = muscle_fixture
     model = osim.Model(str(path))
     coordinate = model.updCoordinateSet().get("slide")
@@ -546,7 +547,7 @@ def test_prescribed_coordinate_cannot_hide_motion_drive(
 def test_external_force_requires_a_separate_qualified_force_policy(
     muscle_fixture: tuple[Path, dict[str, float]],
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = muscle_fixture
     model = osim.Model(str(path))
     force = osim.PrescribedForce()
@@ -564,7 +565,7 @@ def test_external_force_requires_a_separate_qualified_force_policy(
 def test_recursive_force_outside_legacy_force_set_cannot_hide_drive(
     muscle_fixture: tuple[Path, dict[str, float]],
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = muscle_fixture
     model = osim.Model(str(path))
     force = osim.PrescribedForce()
@@ -584,7 +585,7 @@ def test_recursive_force_outside_legacy_force_set_cannot_hide_drive(
 def test_recursive_controller_outside_controller_set_cannot_hide_feedback(
     muscle_fixture: tuple[Path, dict[str, float]],
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = muscle_fixture
     model = osim.Model(str(path))
     controller = osim.PrescribedController()
@@ -604,7 +605,7 @@ def test_recursive_controller_outside_controller_set_cannot_hide_feedback(
 def test_position_motion_cannot_bypass_prescribed_coordinate_guard(
     muscle_fixture: tuple[Path, dict[str, float]],
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = muscle_fixture
     model = osim.Model(str(path))
     coordinate = model.updCoordinateSet().get("slide")
@@ -624,7 +625,7 @@ def test_position_motion_cannot_bypass_prescribed_coordinate_guard(
 def test_locked_coordinate_with_inconsistent_speed_cannot_be_repaired_silently(
     muscle_fixture: tuple[Path, dict[str, float]],
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = muscle_fixture
     model = osim.Model(str(path))
     model.updCoordinateSet().get("slide").setDefaultLocked(True)
@@ -644,7 +645,7 @@ def test_initial_state_respects_model_specific_muscle_domain(
     state_suffix: str,
 ) -> None:
     path, initial = muscle_fixture
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model(str(path))
     model.initSystem()
     native = model.getMuscles().get(0)
@@ -680,7 +681,7 @@ def test_native_activation_domain_violation_during_replay_is_not_clipped(
 def test_muscle_outside_native_actuator_registry_is_not_silently_undriven(
     muscle_fixture: tuple[Path, dict[str, float]],
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, initial = muscle_fixture
     model = osim.Model(str(path))
     nested = osim.Millard2012EquilibriumMuscle(

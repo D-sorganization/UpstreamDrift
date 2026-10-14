@@ -31,6 +31,7 @@ from pathlib import Path
 import defusedxml.ElementTree as ET
 
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = [pytest.mark.unit, pytest.mark.smoke, pytest.mark.headless_safe]
 
@@ -285,7 +286,7 @@ _OPENSIM_AVAILABLE = importlib.util.find_spec("opensim") is not None
 )
 def test_model_loads_and_initsystem() -> None:
     """Issue #4110 acceptance: model must load and initialize without error."""
-    import opensim as osim  # gated import; module-level import would fail when opensim is absent
+    osim = require_opensim()
 
     model = osim.Model(str(MODEL_PATH))
     state = model.initSystem()  # raises on any structural problem

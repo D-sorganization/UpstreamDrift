@@ -12,6 +12,7 @@ These tests supplement test_third_party_integration_audit.py.
 
 from __future__ import annotations
 
+import importlib.util
 import inspect
 from pathlib import Path
 
@@ -26,6 +27,7 @@ from src.shared.python.engine_core.engine_availability import (
     OPENSIM_AVAILABLE,
     skip_if_unavailable,
 )
+from tests.helpers.opensim_support import require_opensim
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # 1. Drake Specific Tests (#1810)
@@ -402,8 +404,11 @@ class TestEngineAvailabilityDeep:
 
     def test_opensim_availability_consistent_with_import(self) -> None:
         """OPENSIM_AVAILABLE must be consistent with opensim import/init."""
+        if importlib.util.find_spec("opensim") is None:
+            assert not OPENSIM_AVAILABLE
+            return
         try:
-            import opensim  # noqa: F401
+            require_opensim()
 
             # opensim imported OK, but engine_availability may still report False
             # if initialization fails (e.g., missing shared libs in CI).

@@ -27,13 +27,6 @@ from src.shared.python.perturbation.config import PerturbationConfig
 # Availability check
 # ---------------------------------------------------------------------------
 
-try:
-    import opensim as _opensim  # noqa: F401
-
-    _OPENSIM_IMPORT_OK = True
-except ImportError:
-    _OPENSIM_IMPORT_OK = False
-
 # Use the shared engine availability check (consistent with production code).
 # opensim may be importable but still broken (e.g., missing shared libs in CI).
 from src.shared.python.engine_core.engine_availability import (

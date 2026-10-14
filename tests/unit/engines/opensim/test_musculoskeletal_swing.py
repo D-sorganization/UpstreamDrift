@@ -16,6 +16,7 @@ from src.engines.physics_engines.opensim.python.musculoskeletal_solvers import (
     SolveWindow,
     summarize_solution,
 )
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -159,7 +160,7 @@ def test_solve_window_validates() -> None:
 
 
 def test_build_model_has_muscles_club_and_golfer_mass() -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     golf = (
         Path(__file__).resolve().parents[4]
         / "src/engines/physics_engines/opensim/models/golf_humanoid_scaled.osim"

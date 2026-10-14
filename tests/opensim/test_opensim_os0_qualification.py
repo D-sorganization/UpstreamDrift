@@ -11,6 +11,7 @@ from __future__ import annotations
 import importlib.util
 
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 
 @pytest.mark.gate
@@ -20,7 +21,7 @@ def test_opensim_binding_installed() -> None:
     assert spec is not None, (
         "OS-0 RED GATE: 'opensim' module is not installed in the active environment."
     )
-    import opensim  # type: ignore[import-not-found]
+    opensim = require_opensim()
 
     assert hasattr(opensim, "Model"), (
         "OS-0 RED GATE: 'opensim.Model' class is missing from installed opensim module."
@@ -32,7 +33,7 @@ def test_opensim_moco_capabilities_available() -> None:
     """Assert that OpenSim Moco optimization toolchain is functional."""
     spec = importlib.util.find_spec("opensim")
     assert spec is not None, "OS-0 RED GATE: 'opensim' module is not installed."
-    import opensim  # type: ignore[import-not-found]
+    opensim = require_opensim()
 
     has_moco = hasattr(opensim, "MocoStudy") or hasattr(opensim, "MocoTrack")
     assert has_moco, (
