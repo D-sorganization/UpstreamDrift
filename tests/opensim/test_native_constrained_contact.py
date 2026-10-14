@@ -9,6 +9,7 @@ from typing import Any
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -18,7 +19,7 @@ def _contact_source(
 ) -> tuple[Path, Any, Any, Any]:
     from tests.opensim.test_native_constrained_muscle import _source
 
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, declaration = _source(
         tmp_path, locked=False, custom=True, moving=True, wrapped=True
     )

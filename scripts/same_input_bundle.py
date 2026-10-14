@@ -1,7 +1,7 @@
 """Export and replay same-input bundles (#11607, epic #11605).
 
     MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.same_input_bundle export \\
-        --run-dir RUN --out bundle.npz [--duration 0.85]
+        --run-dir RUN --out bundle.npz [--duration 0.85] [--effort-hold-ms 0.125]
     MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.same_input_bundle replay \\
         --bundle bundle.npz --engine drake --out receipt.json [--segment-ms 50]
 
@@ -10,7 +10,8 @@
 
 ``export`` reads a pipeline run directory (``full_body_spec_hipcal_scaled.json``
 and the ``q_track``/``track_time_s`` arrays of ``dynamics_record.npz``) and
-writes the MuJoCo reference bundle.  ``replay`` integrates the bundle efforts
+writes the MuJoCo reference bundle (``--effort-hold-ms`` sets the opt-in
+controller hold, #12279; default 1 ms).  ``replay`` integrates the bundle efforts
 open loop in one engine and writes the full-horizon and segmented scores.
 ``closed-loop`` tracks the run's reference in one engine with the identical
 controller function and scores it against the bundle's MuJoCo reference.
@@ -31,7 +32,6 @@ from src.shared.python.motion_matching.impact_force import ImpactForce
 from src.shared.python.motion_matching.same_input import (
     ALL_ENGINES,
     InputBundle,
-    StepPolicy,
     VectorPlant,
     closed_loop,
     generate_reference_bundle,
@@ -70,8 +70,17 @@ def _impact_plan(
     return plan, None if split is None else float(split) + offset
 
 
-def export(run_dir: Path, out: Path, duration_s: float | None) -> dict:
-    """Build the MuJoCo reference bundle of a pipeline run directory."""
+def export(
+    run_dir: Path,
+    out: Path,
+    duration_s: float | None,
+    effort_hold_ms: float = 1.0,
+) -> dict:
+    """Build the MuJoCo reference bundle of a pipeline run directory.
+
+    ``effort_hold_ms`` is the controller hold recorded in the manifest
+    (#12279); it must split the 1 ms step evenly into at most eight holds.
+    """
     spec_path = run_dir / "full_body_spec_hipcal_scaled.json"
     record_path, times, q_track = _track(run_dir)
     receipt = json.loads((run_dir / "receipt.json").read_text(encoding="utf-8"))
@@ -83,6 +92,7 @@ def export(run_dir: Path, out: Path, duration_s: float | None) -> dict:
         duration_s=duration_s,
         impact=impact,
         split_time_s=split,
+        effort_hold_s=effort_hold_ms * 1e-3,
         provenance={
             "run_dir": run_dir.name,
             "capture": receipt.get("capture"),
@@ -106,9 +116,9 @@ def replay(bundle_path: Path, engine: str, segment_ms: float) -> dict:
         plant,
         bundle.q0,
         bundle.v0,
-        bundle.efforts,
+        bundle.replay_efforts(),
         dt_s=bundle.dt_s,
-        policy=StepPolicy(stop_on_failure=True),
+        policy=bundle.step_policy(stop_on_failure=True),
         impact=bundle.ball_impact(),
     )
     elapsed = time.perf_counter() - started
@@ -152,6 +162,7 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
         duration_s=bundle.steps * bundle.dt_s,
         impact=None if impact is None else impact.rearmed(),
         split_time_s=bundle.provenance.get("impact_split_time_s"),
+        policy=bundle.step_policy(),
     )
     elapsed = time.perf_counter() - started
     plant = VectorPlant(engine, bundle.spec_bytes)
@@ -165,7 +176,7 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
         "elapsed_s": elapsed,
         "full_horizon": score.summary(),
         "max_effort_difference_nm": float(
-            np.abs(rollout.efforts - bundle.efforts).max()
+            np.abs(rollout.efforts - bundle.replay_efforts()).max()
         ),
         "max_pose_drift_m": float(rollout.pose_drift.max()),
     }
@@ -179,6 +190,12 @@ def build_parser() -> argparse.ArgumentParser:
     exp.add_argument("--run-dir", type=Path, required=True)
     exp.add_argument("--out", type=Path, required=True)
     exp.add_argument("--duration", type=float, default=None)
+    exp.add_argument(
+        "--effort-hold-ms",
+        type=float,
+        default=1.0,
+        help="controller hold recorded in the bundle (1, 0.5, 0.25 or 0.125 ms)",
+    )
     rep = sub.add_parser("replay")
     rep.add_argument("--bundle", type=Path, required=True)
     rep.add_argument("--engine", choices=ALL_ENGINES, required=True)
@@ -196,7 +213,7 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     args = build_parser().parse_args()
     if args.command == "export":
-        manifest = export(args.run_dir, args.out, args.duration)
+        manifest = export(args.run_dir, args.out, args.duration, args.effort_hold_ms)
         LOG.info("wrote %s: %d steps", args.out, manifest["steps"])
         return
     if args.command == "closed-loop":

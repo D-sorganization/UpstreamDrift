@@ -2,6 +2,10 @@
 
 A bundle fixes the model (spec bytes), a closure-consistent initial state,
 the per-step efforts (zero-order hold at ``dt_s``) and the integration policy.
+An opt-in finer effort hold (#12279) adds ``hold_efforts`` with
+``effort_holds`` rows per step; ``efforts`` keeps one row per step (each
+step's first hold) for the per-step consumers, and the manifest records the
+hold so every engine's replay uses the same policy.
 It also carries the reference engine's states so a replay can be scored
 without re-running the reference.  It is a single ``.npz`` with a JSON
 manifest, so it can be shipped to hosts that have only one engine.
@@ -37,7 +41,9 @@ class InputBundle:
     """Validated same-input bundle.
 
     Postconditions: ``efforts`` is (steps, nv); ``reference_q`` and
-    ``reference_v`` are (steps + 1, nv) and start at ``q0``/``v0``.
+    ``reference_v`` are (steps + 1, nv) and start at ``q0``/``v0``;
+    ``effort_holds`` divides the policy substeps, and ``hold_efforts`` is
+    (steps * effort_holds, nv) when ``effort_holds > 1``, else ``None``.
     """
 
     spec_bytes: bytes
@@ -50,6 +56,8 @@ class InputBundle:
     reference_v: Array
     reference_engine: str
     provenance: dict[str, Any] = field(default_factory=dict)
+    effort_holds: int = 1
+    hold_efforts: Array | None = None
 
     def __post_init__(self) -> None:
         nv = len(self.coordinate_order)
@@ -73,6 +81,29 @@ class InputBundle:
         arrays = (self.q0, self.v0, self.efforts, self.reference_q, self.reference_v)
         if not all(np.isfinite(a).all() for a in arrays):
             raise ValueError("bundle arrays must be finite")
+        self._check_hold_efforts()
+
+    def _check_hold_efforts(self) -> None:
+        """``hold_efforts`` is present iff ``effort_holds > 1`` and its every
+        ``effort_holds``-th row equals ``efforts`` (one hold per step)."""
+        from src.shared.python.motion_matching.same_input.integrator import (
+            StepPolicy,
+        )
+
+        StepPolicy(substeps=int(POLICY["substeps"]), effort_holds=self.effort_holds)
+        holds, table = self.effort_holds, self.hold_efforts
+        if holds == 1:
+            if table is not None:
+                raise ValueError("hold_efforts requires effort_holds > 1")
+            return
+        if table is None:
+            raise ValueError("effort_holds > 1 requires hold_efforts")
+        if table.shape != (self.efforts.shape[0] * holds, *self.efforts.shape[1:]):
+            raise ValueError("hold_efforts must be (steps * effort_holds, nv)")
+        if not np.isfinite(table).all() or not np.array_equal(
+            table[::holds], self.efforts
+        ):
+            raise ValueError("hold_efforts must start each step with efforts")
 
     @property
     def spec_sha256(self) -> str:
@@ -81,6 +112,37 @@ class InputBundle:
     @property
     def steps(self) -> int:
         return int(self.efforts.shape[0])
+
+    @property
+    def effort_hold_s(self) -> float:
+        """Duration each recorded effort is held for in a replay."""
+        return self.dt_s / self.effort_holds
+
+    def replay_efforts(self, steps: int | None = None) -> Array:
+        """Efforts at the hold rate for the first ``steps`` steps (default all).
+
+        Replay these with :meth:`step_policy`; they are ``efforts`` itself for
+        a one-hold bundle.
+        """
+        count = self.steps if steps is None else steps
+        if not 0 <= count <= self.steps:
+            raise ValueError(f"steps must lie in [0, {self.steps}]")
+        table = self.efforts if self.hold_efforts is None else self.hold_efforts
+        return table[: count * self.effort_holds]
+
+    def step_policy(self, **overrides: Any) -> Any:
+        """The ``StepPolicy`` this bundle was recorded with (hold rate and
+        substeps from the manifest); ``overrides`` set ``project`` or
+        ``stop_on_failure``."""
+        from src.shared.python.motion_matching.same_input.integrator import (
+            StepPolicy,
+        )
+
+        return StepPolicy(
+            substeps=int(POLICY["substeps"]),
+            effort_holds=self.effort_holds,
+            **overrides,
+        )
 
     def manifest(self) -> dict[str, Any]:
         """JSON-serialisable description stored beside the arrays."""
@@ -91,7 +153,11 @@ class InputBundle:
             "dt_s": self.dt_s,
             "steps": self.steps,
             "duration_s": self.steps * self.dt_s,
-            "policy": POLICY,
+            "policy": {
+                **POLICY,
+                "effort_holds_per_step": self.effort_holds,
+                "effort_hold_s": self.effort_hold_s,
+            },
             "reference_engine": self.reference_engine,
             "provenance": self.provenance,
         }
@@ -111,16 +177,18 @@ class InputBundle:
 
     def save(self, path: Path) -> None:
         """Write the bundle as one compressed ``.npz``."""
-        np.savez_compressed(
-            path,
-            manifest=np.array(json.dumps(self.manifest(), sort_keys=True)),
-            spec=np.frombuffer(self.spec_bytes, dtype=np.uint8),
-            q0=self.q0,
-            v0=self.v0,
-            efforts=self.efforts,
-            reference_q=self.reference_q,
-            reference_v=self.reference_v,
-        )
+        arrays: dict[str, Any] = {
+            "manifest": np.array(json.dumps(self.manifest(), sort_keys=True)),
+            "spec": np.frombuffer(self.spec_bytes, dtype=np.uint8),
+            "q0": self.q0,
+            "v0": self.v0,
+            "efforts": self.efforts,
+            "reference_q": self.reference_q,
+            "reference_v": self.reference_v,
+        }
+        if self.hold_efforts is not None:
+            arrays["hold_efforts"] = self.hold_efforts
+        np.savez_compressed(path, **arrays)
 
     @classmethod
     def load(cls, path: Path) -> InputBundle:
@@ -141,6 +209,10 @@ class InputBundle:
                 reference_v=data["reference_v"],
                 reference_engine=str(manifest["reference_engine"]),
                 provenance=dict(manifest.get("provenance", {})),
+                effort_holds=int(
+                    manifest.get("policy", {}).get("effort_holds_per_step", 1)
+                ),
+                hold_efforts=data.get("hold_efforts"),
             )
         if bundle.spec_sha256 != manifest["spec_sha256"]:
             raise ValueError("bundle spec hash does not match its manifest")

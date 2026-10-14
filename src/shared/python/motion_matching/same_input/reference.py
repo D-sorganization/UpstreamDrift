@@ -5,6 +5,11 @@ stage, so its logged torques cannot be replayed.  Here the same controller
 (same gains and tracked reference) is evaluated once per step and held, with
 the exact-KKT MuJoCo plant and per-step closure projection, so the logged
 efforts reproduce the reference motion when replayed open loop.
+
+The hold is a bundle parameter (#12279): the default 1 ms hold is the
+original contract; ``effort_hold_s = 0.125e-3`` (owner ruling 2026-10-11,
+opt-in for the club-face fixtures) re-evaluates the controller at every RK4
+substep while the closure projection stays once per 1 ms step.
 """
 
 from __future__ import annotations
@@ -20,12 +25,17 @@ from src.shared.python.motion_matching.pipeline.constants import DT_S
 from src.shared.python.motion_matching.same_input.bundle import InputBundle
 from src.shared.python.motion_matching.same_input.closure import project_to_closure
 from src.shared.python.motion_matching.same_input.integrator import (
+    DEFAULT_POLICY,
     Rollout,
+    StepPolicy,
+    effort_holds_for,
     integrate,
 )
 from src.shared.python.motion_matching.same_input.plant import VectorPlant
 
 Array = NDArray[np.float64]
+# The original bundle contract: one controller sample held per pipeline step.
+DEFAULT_EFFORT_HOLD_S = DT_S
 
 
 def _tracking_setup(
@@ -73,6 +83,7 @@ def closed_loop(
     duration_s: float | None = None,
     impact: ImpactForce | None = None,
     split_time_s: float | None = None,
+    policy: StepPolicy = DEFAULT_POLICY,
 ) -> Rollout:
     """Track ``q_track`` in ``engine`` with the shared controller held per step.
 
@@ -80,7 +91,8 @@ def closed_loop(
     ``track_time_s[0]``); an unscheduled passage plan is re-addressed to this
     run's start pose and latched from this engine's own state.
     ``split_time_s`` (same clock) splits the controller's reference rates at
-    the reference's impact.
+    the reference's impact.  ``policy`` sets the effort hold (a bundle's
+    ``step_policy()`` for a like-for-like comparison).
     """
     controller, q0, v0, steps = _tracking_setup(
         spec_bytes, track_time_s, q_track, duration_s, split_time_s
@@ -96,6 +108,7 @@ def closed_loop(
         lambda _k, t, q, v: controller(t, q, v),
         steps=steps,
         dt_s=DT_S,
+        policy=policy,
         impact=impact,
     )
 
@@ -109,6 +122,7 @@ def generate_reference_bundle(
     provenance: dict[str, Any] | None = None,
     impact: ImpactForce | None = None,
     split_time_s: float | None = None,
+    effort_hold_s: float = DEFAULT_EFFORT_HOLD_S,
 ) -> InputBundle:
     """Track ``q_track`` in MuJoCo with the pipeline controller held per step.
 
@@ -123,7 +137,16 @@ def generate_reference_bundle(
             engine's replay applies it identically (GCV-20).
         split_time_s: Reference impact time on the bundle clock, splitting
             the controller's reference rates (recorded in the provenance).
+        effort_hold_s: How long each controller sample is held (#12279);
+            must split the 1 ms step into a whole number of holds that
+            divides the eight RK4 substeps (1, 0.5, 0.25 or 0.125 ms).  The
+            default keeps the original 1 ms contract; the manifest records it.
+
+    Raises:
+        ValueError: If ``effort_hold_s`` does not split the step evenly.
     """
+    holds = effort_holds_for(effort_hold_s, DT_S)
+    policy = StepPolicy(effort_holds=holds)
     rollout = closed_loop(
         "mujoco",
         spec_bytes,
@@ -132,6 +155,7 @@ def generate_reference_bundle(
         duration_s=duration_s,
         impact=impact,
         split_time_s=split_time_s,
+        policy=policy,
     )
     return InputBundle(
         spec_bytes=bytes(spec_bytes),
@@ -139,7 +163,7 @@ def generate_reference_bundle(
         dt_s=DT_S,
         q0=rollout.q[0],
         v0=rollout.v[0],
-        efforts=rollout.efforts,
+        efforts=rollout.efforts[::holds],
         reference_q=rollout.q,
         reference_v=rollout.v,
         reference_engine="mujoco",
@@ -150,4 +174,6 @@ def generate_reference_bundle(
             "impact_split_time_s": split_time_s,
             **(provenance or {}),
         },
+        effort_holds=holds,
+        hold_efforts=None if holds == 1 else rollout.efforts,
     )

@@ -38,6 +38,7 @@ import { LaunchMonitorRelationshipsPanel } from "./LaunchMonitorRelationshipsPan
 import { LaunchMonitorComparisonPanel } from "./LaunchMonitorComparisonPanel";
 import { LaunchMonitorModelsPanel } from "./LaunchMonitorModelsPanel";
 import { LaunchMonitorTreatmentPanel } from "./LaunchMonitorTreatmentPanel";
+import { LaunchMonitorReportsPanel } from "./LaunchMonitorReportsPanel";
 
 const BOUNDARY_TEXT =
   "Associations and fitted regressions do not establish causality. " +
@@ -822,6 +823,7 @@ export function LaunchMonitorAnalyticsPage() {
         records={records}
         onTreated={setTreatedRecords}
       />
+      <LaunchMonitorReportsPanel records={analysisRecords} />
     </div>
   );
 

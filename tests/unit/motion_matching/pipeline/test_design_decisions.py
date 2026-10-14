@@ -18,14 +18,14 @@ def test_design_decisions_file_exists() -> None:
 
 
 def test_design_decisions_parser_and_order() -> None:
-    """Verify all 19 decisions exist in order, each with what, why, receipt, rejected."""
+    """Verify all 20 decisions exist in order, each with what, why, receipt, rejected."""
     from src.shared.python.motion_matching.pipeline.design_decisions import (
         load_design_decisions,
         validate_design_decisions,
     )
 
     decisions = load_design_decisions(DOC_DIR)
-    assert len(decisions) == 19, f"Expected 19 decisions, got {len(decisions)}"
+    assert len(decisions) == 20, f"Expected 20 decisions, got {len(decisions)}"
 
     # Validate decision contents and verify all referenced receipt links exist on disk
     validate_design_decisions(decisions, repo_root=REPO_ROOT)

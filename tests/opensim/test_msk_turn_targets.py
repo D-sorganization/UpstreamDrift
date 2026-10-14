@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 from src.engines.physics_engines.opensim.python import msk_club as mc
 from src.engines.physics_engines.opensim.python import msk_club_calibration as cal
@@ -385,7 +386,7 @@ def test_tracking_inputs_contracts(synthetic_capture: _Capture) -> None:
 # ------------------------------------------------------------- OpenSim tracking
 def test_retarget_reproduces_a_synthetic_marker_turn() -> None:
     """Tracked pelvis and thorax turn equal a known synthetic marker turn."""
-    pytest.importorskip("opensim")
+    require_opensim()
     pytest.importorskip("scipy")
     from src.engines.physics_engines.opensim.python import msk_club_tracking as mt
 
