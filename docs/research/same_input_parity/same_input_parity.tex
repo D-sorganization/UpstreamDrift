@@ -412,7 +412,7 @@ Drake & L0--L3 & passed (PR \#11615; full-swing results below)\\
 Pinocchio & L0--L3 & passed (PR \#11615; full-swing results below)\\
 OpenSim & L2, L3 & passed (Simbody adapter; closed loop $5\times10^{-12}$~rad)\\
 MyoSuite & L2, L3 & passed, bit-identical to MuJoCo (same core)\\
-Simscape & --- & pending on the MATLAB R2025b host (P-8, \#11613)\\
+Simscape & L0--L2 & contract defined for MATLAB R2025b host (\texttt{smimport} + $\tau_k$ replay, P-8, \#11613)\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -422,8 +422,25 @@ Child issues of epic \#11605 (state on 2026-10-14): P-1 (\#11606) and P-2
 (\#11611) and P-7 (\#11612) closed, merged in PR \#11628; P-3 (\#11608) and
 P-4 (\#11609) are still open, so the Drake and Pinocchio rows above rest on the
 receipts listed in this document and are not claimed to close those issues;
-P-8 (\#11613) is open and pending; P-9 (\#11614) is this living reference
-(PRs \#11616, \#11625, \#11806 and this revision).
+P-8 (\#11613) defines the MATLAB R2025b Simscape same-input replay harness
+(\texttt{scripts/matlab/run\_simscape\_same\_input\_replay.m}) with strict release
+enforcement and fail-closed rejection of R2026a; P-9 (\#11614) is this living
+reference (PRs \#11616, \#11625, \#11806 and this revision).
+
+\paragraph{Simscape Same-Input Replay Contract (P-8, Issue \#11613).}
+Simscape Multibody operates under MATLAB R2025b (asserted via
+\texttt{strcmp(version('-release'), '2025b')}; non-2025b releases such as R2026a
+fail closed).  The harness \texttt{scripts/matlab/run\_simscape\_same\_input\_replay.m}
+imports the spec-exported URDF (\texttt{golfer.urdf}) into Simscape Multibody
+via \texttt{smimport}.  The torque bundle \texttt{same-input-bundle/v1} supplies
+joint actuation torques $\bt_k$ held zero-order (ZOH) at \texttt{effort\_hold\_rate\_hz}
+(default $1000$~Hz) initialized from closure-consistent $(\bq_0, \bv_0)$.
+The harness evaluates L0 (mass/inertia topology and coordinate inventory via
+\texttt{simscape\_model\_inventory.m}), L1 (inverse dynamics torques against the
+Pinocchio RNEA reference), and L2 ($50$~ms windowed restarts with coordinate
+error $\le 10^{-6}$~rad and marker RMSE $\le 1$~mm, alongside open-loop divergence
+horizon $\ge 0.5$~s and exponential growth rate $\approx 40$~s$^{-1}$), outputting
+the structured receipt \texttt{simscape-same-input-replay/v1}.
 
 \section{Reproduction}
 From the repository root:
@@ -444,11 +461,15 @@ PYTHONPATH=.:src python -m scripts.same_input_bundle closed-loop \
 \end{verbatim}
 where the pipeline runs used
 \texttt{--spec} \url{docs/development/full_body_models/full_body_spec_anthro_driver.json} (and the \texttt{iron7} counterpart).
+Simscape R2025b same-input replay (SIP P-8, \#11613) is executed on the MATLAB host with:
+\begin{verbatim}
+matlab -batch "addpath('scripts/matlab'); receipt = run_simscape_same_input_replay('.', 'out');"
+\end{verbatim}
 This document compiles with \texttt{tectonic same\_input\_parity.tex}.
 
 \section{Limitations}
 \begin{itemize}[nosep]
-\item Simscape (P-8, \#11613) is pending on the MATLAB R2025b host.
+\item Simscape (P-8, \#11613) replay harness is wired and validated for the MATLAB R2025b host with fail-closed rejection of R2026a, consuming \texttt{same-input-bundle/v1} via \texttt{smimport} and ZOH torque actuation; final numerical evidence qualification remains bounded to the designated R2025b host (\texttt{DeskComputer} or \texttt{ControlTower}).
 \item The effort-hold measurements (\#12279) are single-host numbers from the
   issue thread and were not re-run; the club-face fixtures are not regenerated
   with the finer hold, and no cross-engine parity receipt exists at a finer

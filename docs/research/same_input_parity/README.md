@@ -13,13 +13,16 @@ manual source remains `manuals/upstreamdrift`.
 | Full-swing L2 (50 ms restarts) and L3 (closed loop) for Drake, Pinocchio, OpenSim, MyoSuite | Measured, 2026-10-06 (#11614); worst 1.1e-9 rad                                                   |
 | Single full-horizon open loop                                                               | Growth about 40 /s, agreement horizon 0.5-0.6 s (documented, not a pass/fail bound)               |
 | Opt-in controller effort hold (default 1 ms)                                                | Documented, #12279 (PR #12478); single-host measurements, no cross-engine receipt at a finer hold |
-| Simscape                                                                                    | Pending on the MATLAB R2025b host (#11613)                                                        |
+| Simscape                                                                                    | Contract defined and wired on MATLAB R2025b host (SIP P-8, #11613); `smimport` + $\tau_k$ replay  |
 
 ## Build and Reproduce
 
 ```bash
 cd docs/research/same_input_parity && tectonic same_input_parity.tex
 MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.same_input_pointwise_parity
+
+# Simscape R2025b same-input replay (SIP P-8, #11613):
+matlab -batch "addpath('scripts/matlab'); receipt = run_simscape_same_input_replay('.', 'out');"
 ```
 
 The generated PDF is not committed.
