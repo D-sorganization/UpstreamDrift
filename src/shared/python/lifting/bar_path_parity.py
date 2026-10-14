@@ -139,7 +139,8 @@ def replay_bar_path(
         policy=bundle.step_policy(),
     )
     reached = rollout.q.shape[0]
-    bar = bar_path(plant, rollout.q)
+    frame = bundle.provenance.get("bar_frame", "Hub")
+    bar = bar_path(plant, rollout.q, frame=frame)
     errors = np.abs(rollout.q - bundle.reference_q[:reached])
     return BarPathReplay(
         engine=engine,

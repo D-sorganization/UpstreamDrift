@@ -254,20 +254,8 @@ def test_start_pose_carries_the_bar_on_the_back_per_the_standard(
 
 @pytest.mark.integration
 @pytest.mark.requires_mujoco
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "#12347 slice 1: the committed npz predates the back-bar geometry; "
-        "regenerating it changes the bar-path, kinetics and barbell evidence "
-        "inputs (#12340, #12341, #12345), so it lands with that evidence"
-    ),
-)
 def test_committed_bundle_start_pose_matches_the_standard() -> None:
-    """The issue's acceptance item, on the committed bundle (open until slice 2).
-
-    ``strict`` turns the XPASS after regeneration into a failure, so the marker
-    cannot outlive the gap it documents.
-    """
+    """The issue's acceptance item, verified on the regenerated back_bar bundle."""
     pytest.importorskip("mujoco")
     bundle = InputBundle.load(BACK_SQUAT_BUNDLE)
     q = np.asarray(bundle.provenance["ik"]["q_standing"], dtype=float)

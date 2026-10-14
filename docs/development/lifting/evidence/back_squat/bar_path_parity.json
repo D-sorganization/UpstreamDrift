@@ -1,7 +1,7 @@
 {
   "lift": "back_squat",
   "bundle": "docs/development/lifting/evidence/back_squat/back_squat_bundle.npz",
-  "bundle_spec_sha256": "36702e052dcc2731b76d07cafcb92c9534b1274d2d374a0f6214af6eb52206c4",
+  "bundle_spec_sha256": "81a9edf3ad70e8022973be46900a1d902a268725641f3b6e566ce939ba6ed535",
   "bundle_steps": 200,
   "dt_s": 0.001,
   "reference": "window_bar_path_m (MuJoCo, recorded at bundle generation)",

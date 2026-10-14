@@ -53,6 +53,7 @@ from src.shared.python.biomechanics.grip_wrench import (
 from src.shared.python.grip_contact import (
     BushingWrench,
     ClubDynamics,
+    GripFrame,
     GripInterface,
     RigidBodyState,
     bushing_wrench,
@@ -173,6 +174,23 @@ def barbell_interface(
 ) -> GripInterface:
     """OSV-7 hand frames and bushing stiffness, damping designed for the bar."""
     frames = GripInterface.from_spec(spec, bushing=default_bushing())
+    club = spec.get("closure", {}).get("body_b")
+    lw = next(
+        (
+            f
+            for f in spec.get("frames", [])
+            if f.get("name") == "LW" and f.get("body") == club
+        ),
+        None,
+    )
+    if lw is not None:
+        p_left = tuple(
+            float(x) for x in np.asarray(lw["placement"], dtype=float)[:3, 3]
+        )
+        left = GripFrame("L", p_left, frames.left.rotation)  # type: ignore[arg-type]
+        frames = GripInterface(
+            left, frames.right, default_bushing(), frames.contact_material
+        )
     bushing = design_damping(
         default_bushing(),
         frames.left,
