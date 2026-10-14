@@ -180,7 +180,7 @@ pub fn calculate_impact(
     ContactResult {
         velocity: v_out,
         spin_rate: spin_out,
-        energy_lost: energy_lost.max(0.0),
+        energy_lost,
         is_rolling: speed_out < ROLLING_SPEED_THRESHOLD,
     }
 }
@@ -402,5 +402,26 @@ mod tests {
             normal: Vector3::new(0.0, 1.0, 0.0),
         };
         let _r = calculate_impact(&Vector3::new(0.0, -10.0, 0.0), 0.0, &params);
+    }
+
+    /// Test 10: Energy lost equals ke_in - ke_out without silent clamping.
+    #[test]
+    fn test_energy_lost_exact_difference_unclamped() {
+        let params = ContactParameters {
+            cor: 0.8,
+            friction: 0.3,
+            normal: Vector3::new(0.0, 1.0, 0.0),
+        };
+
+        let v_in = Vector3::new(20.0, -15.0, 5.0);
+        let result = calculate_impact(&v_in, 5000.0, &params);
+
+        let speed_in = v_in.magnitude();
+        let ke_in = 0.5 * speed_in * speed_in;
+        let speed_out = result.velocity.magnitude();
+        let ke_out = 0.5 * speed_out * speed_out;
+        let expected_loss = ke_in - ke_out;
+
+        assert_eq!(result.energy_lost, expected_loss);
     }
 }

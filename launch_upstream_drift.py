@@ -43,8 +43,8 @@ _REPO_ROOT = Path(__file__).resolve().parent
 def _ud_tools_distribution_installed() -> bool:
     """Return True when the ``ud-tools`` distribution is importable from site-packages.
 
-    ``pip install "upstream-drift[tools]"`` installs Tools from the git pin in
-    ``pyproject.toml`` (UD #9406). When present it is the preferred source and the
+    ``pip install -r requirements-tools.txt`` installs Tools from the git pin in
+    ``requirements-tools.txt`` (UD #9406). When present it is the preferred source and the
     ``vendor/ud-tools`` submodule is left off ``sys.path``.
     """
     try:

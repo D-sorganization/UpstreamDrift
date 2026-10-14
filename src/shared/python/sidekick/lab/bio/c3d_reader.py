@@ -80,6 +80,9 @@ C3D_HEADER_LENGTH = 2
 BIOMECHANICAL_MARKER_MIN_M = 0.001  # 1mm minimum - detects mm/m confusion
 BIOMECHANICAL_MARKER_MAX_M = 10.0  # 10m maximum - detects unrealistic scales
 
+# Channel keys every force plate must provide to be extracted
+_FORCE_PLATE_REQUIRED_KEYS = frozenset({"fx", "fy", "fz", "mx", "my", "mz"})
+
 
 @dataclass(frozen=True)
 class C3DEvent:
@@ -565,40 +568,10 @@ class C3DDataReader:
                 columns=self._force_plate_columns(include_time, compute_cop)
             )
 
-        # Filter to specific plate if requested
-        if plate_number is not None:
-            if plate_number not in plate_channels:
-                raise ValueError(
-                    f"Force plate {plate_number} not found. "
-                    f"Available plates: {list(plate_channels.keys())}"
-                )
-            plate_channels = {plate_number: plate_channels[plate_number]}
-
-        # Get analog data
-        analog_df = self.analog_dataframe(include_time=False)
-        metadata = self.get_metadata()
-        analog_rate = metadata.analog_rate
-
-        # Pivot to wide format
-        analog_wide = analog_df.pivot(
-            index="sample", columns="channel", values="value"
-        ).reset_index()
-
-        result_dfs = []
-
-        required_keys = {"fx", "fy", "fz", "mx", "my", "mz"}
-
-        for plate_num, channels in sorted(plate_channels.items()):
-            plate_df = self._build_plate_dataframe(
-                plate_num,
-                channels,
-                required_keys,
-                analog_wide,
-                compute_cop,
-                ground_height,
-            )
-            if plate_df is not None:
-                result_dfs.append(plate_df)
+        plate_channels = self._select_plate_channels(plate_channels, plate_number)
+        result_dfs = self._collect_plate_dataframes(
+            plate_channels, compute_cop, ground_height
+        )
 
         if not result_dfs:
             return pd.DataFrame(
@@ -607,6 +580,7 @@ class C3DDataReader:
 
         result = pd.concat(result_dfs, ignore_index=True)
 
+        analog_rate = self.get_metadata().analog_rate
         if include_time and analog_rate:
             result.insert(1, "time", result["sample"] / analog_rate)
 
@@ -618,6 +592,47 @@ class C3DDataReader:
         )
 
         return result
+
+    @staticmethod
+    def _select_plate_channels(
+        plate_channels: dict[int, dict[str, str]],
+        plate_number: int | None,
+    ) -> dict[int, dict[str, str]]:
+        """Restrict *plate_channels* to *plate_number* (all plates if None)."""
+        if plate_number is None:
+            return plate_channels
+        if plate_number not in plate_channels:
+            raise ValueError(
+                f"Force plate {plate_number} not found. "
+                f"Available plates: {list(plate_channels.keys())}"
+            )
+        return {plate_number: plate_channels[plate_number]}
+
+    def _collect_plate_dataframes(
+        self,
+        plate_channels: dict[int, dict[str, str]],
+        compute_cop: bool,
+        ground_height: float,
+    ) -> list[pd.DataFrame]:
+        """Build one DataFrame per complete plate, ordered by plate number."""
+        analog_df = self.analog_dataframe(include_time=False)
+        analog_wide = analog_df.pivot(
+            index="sample", columns="channel", values="value"
+        ).reset_index()
+
+        result_dfs = []
+        for plate_num, channels in sorted(plate_channels.items()):
+            plate_df = self._build_plate_dataframe(
+                plate_num,
+                channels,
+                _FORCE_PLATE_REQUIRED_KEYS,
+                analog_wide,
+                compute_cop,
+                ground_height,
+            )
+            if plate_df is not None:
+                result_dfs.append(plate_df)
+        return result_dfs
 
     @staticmethod
     def _force_plate_columns(
