@@ -1,0 +1,153 @@
+"""Lift definitions read from the vendored biomech parity standard (#11743).
+
+The standard (Repository_Management ``shared_scripts/model_parity/
+biomech_parity_standard.json``, v2.x, RM#2060/#2025/#2077) is the single
+source of truth for every lift's ordered named phases, root-joint policy and
+start/catch/lockout via-poses.  It is vendored byte-for-byte under
+``_canonical/`` with a ``MANIFEST.json`` digest; never edit the copy, re-sync
+it from Repository_Management instead.
+
+Callers use the accessors below rather than walking the raw JSON, so a
+standard bump changes phase names and poses everywhere at once.
+
+Postconditions (checked, ``AssertionError`` on violation):
+
+* phases are non-empty, uniquely named, number ``phase_count``, and their
+  ``t_frac`` start at 0, strictly increase and stay below 1;
+* every via-pose binds to one of the lift's phases and uses only canonical
+  coordinate names (``{side}`` patterns expanded to both sides).
+"""
+
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass
+from functools import lru_cache
+from pathlib import Path
+from typing import Any
+
+from .pack_audit.names import CANONICAL_COORDINATES, LIFTS
+
+STANDARD_PATH = (
+    Path(__file__).resolve().parent / "_canonical" / ("biomech_parity_standard.json")
+)
+
+
+@dataclass(frozen=True)
+class LiftPhase:
+    """One named phase: ``t_frac`` is the cycle fraction at which it starts."""
+
+    name: str
+    definition: str
+    t_frac: float
+
+
+@dataclass(frozen=True)
+class ViaPose:
+    """A whole-body pose the lift must pass through (standard 1.75 m lifter).
+
+    ``coordinates`` maps canonical coordinate names to radians; positions are
+    metres in the standard's world frame (floor origin at mid-foot, Z up).
+    """
+
+    name: str
+    phase: str
+    root_position_m: tuple[float, float, float]
+    root_orientation_rpy_rad: tuple[float, float, float]
+    bar_position_m: tuple[float, float, float]
+    coordinates: dict[str, float]
+
+
+@lru_cache(maxsize=1)
+def _standard() -> dict[str, Any]:
+    data: dict[str, Any] = json.loads(STANDARD_PATH.read_text(encoding="utf-8"))
+    return data
+
+
+def standard_version() -> str:
+    """Version string of the vendored parity standard (``"2.1.0"``...)."""
+    return str(_standard()["version"])
+
+
+def _lift_block(lift: str) -> dict[str, Any]:
+    if lift not in LIFTS:
+        raise ValueError(f"unknown lift {lift!r}; use {list(LIFTS)}")
+    block: dict[str, Any] = _standard()["exercises"][lift]
+    return block
+
+
+def lift_phases(lift: str) -> tuple[LiftPhase, ...]:
+    """Ordered named phases of *lift* from the standard.
+
+    Raises:
+        ValueError: If *lift* is not one of :data:`LIFTS`.
+    """
+    block = _lift_block(lift)
+    phases = tuple(
+        LiftPhase(str(p["name"]), str(p["definition"]), float(p["t_frac"]))
+        for p in block.get("phases", [])
+    )
+    fractions = [p.t_frac for p in phases]
+    assert phases, f"standard gives {lift!r} no named phases"
+    assert len(phases) == int(block["phase_count"]), f"{lift}: phase_count mismatch"
+    assert len({p.name for p in phases}) == len(phases), f"{lift}: duplicate phase"
+    assert fractions[0] == 0.0 and fractions[-1] < 1.0, f"{lift}: t_frac range"
+    assert all(b > a for a, b in zip(fractions, fractions[1:], strict=False)), (
+        f"{lift}: t_frac must strictly increase"
+    )
+    return phases
+
+
+def lift_phase_names(lift: str) -> tuple[str, ...]:
+    """Ordered phase names of *lift* (see :func:`lift_phases`)."""
+    return tuple(p.name for p in lift_phases(lift))
+
+
+def lift_root_joint(lift: str) -> str:
+    """Root-joint policy of *lift*: ``"free"`` or ``"weld"`` (RM#2024)."""
+    joint = str(_lift_block(lift).get("root_joint", _standard()["root"]["joint"]))
+    assert joint in ("free", "weld"), f"{lift}: unknown root joint {joint!r}"
+    return joint
+
+
+def lift_via_pose_names(lift: str) -> tuple[str, ...]:
+    """Names of the via-poses *lift* defines (``start``, ``catch``, ``lockout``)."""
+    return tuple(_lift_block(lift).get("via_poses", {}))
+
+
+def _triple(values: Any) -> tuple[float, float, float]:
+    x, y, z = (float(v) for v in values)
+    return (x, y, z)
+
+
+def _expand_sides(raw: dict[str, Any]) -> dict[str, float]:
+    out: dict[str, float] = {}
+    for name, value in raw.items():
+        sides = _standard()["sides"] if "{side}" in name else [None]
+        for side in sides:
+            out[name.format(side=side) if side else name] = float(value)
+    return out
+
+
+def lift_via_pose(lift: str, pose: str) -> ViaPose:
+    """The standard's via-pose *pose* of *lift*, sides expanded.
+
+    Raises:
+        ValueError: If *lift* is unknown or has no via-pose *pose*.
+    """
+    poses = _lift_block(lift).get("via_poses", {})
+    if pose not in poses:
+        raise ValueError(f"{lift!r} has no via-pose {pose!r}; has {sorted(poses)}")
+    raw = poses[pose]
+    via = ViaPose(
+        name=pose,
+        phase=str(raw["phase"]),
+        root_position_m=_triple(raw["root"]["position_m"]),
+        root_orientation_rpy_rad=_triple(raw["root"]["orientation_rpy_rad"]),
+        bar_position_m=_triple(raw["bar_position_m"]),
+        coordinates=_expand_sides(raw["coordinates"]),
+    )
+    assert via.phase in lift_phase_names(lift), f"{lift}/{pose}: unbound phase"
+    unknown = set(via.coordinates) - set(CANONICAL_COORDINATES)
+    assert not unknown, f"{lift}/{pose}: non-canonical coordinates {sorted(unknown)}"
+    return via

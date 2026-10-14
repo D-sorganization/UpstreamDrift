@@ -489,15 +489,15 @@
     {
       "feature_id": "render.club_head_and_ball",
       "title": "Realistic Club Head And Ball Rendering",
-      "status": "gap",
+      "status": "parity",
       "pyqt": "src/shared/python/model_appearance/club_head_mesh.py",
       "api": null,
       "web": "ui/src/components/visualization/ClubHead.tsx",
-      "issue": 11717,
+      "issue": null,
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). The web ClubHead.tsx now draws the same committed assets/club_heads STL heads at spec loft and lie with a hosel. GCV-13 (#11719) landed the shared address-ball geometry (src/shared/python/model_appearance/ball.py) and native-export decorative ball, resolved from the swing bundle's address frame (src/tools/native_viewer_export/ball.py): Drake and Pinocchio MeshCat (slice 2), then MuJoCo native-export, MyoSuite and OpenSim (slice 3, src/tools/native_viewer_export/backends/{_ball,mujoco_worker,myosuite_worker,opensim_worker}.py). Only the web GolferModel.tsx component still draws no ball, keeping the gap open.",
+      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). The web ClubHead.tsx now draws the same committed assets/club_heads STL heads at spec loft and lie with a hosel. GCV-13 (#11719) landed the shared address-ball geometry (src/shared/python/model_appearance/ball.py) and native-export decorative ball, resolved from the swing bundle's address frame (src/tools/native_viewer_export/ball.py): Drake and Pinocchio MeshCat (slice 2), then MuJoCo native-export, MyoSuite and OpenSim (slice 3, src/tools/native_viewer_export/backends/{_ball,mujoco_worker,myosuite_worker,opensim_worker}.py). The web GolferModel.tsx component renders <BallModel position={ADDRESS_BALL} /> via ballPositionAtAddress(ADDRESS_FACE_CENTRE, [1, 0, 0], 0) alongside the club shaft and head, matching the Python mesh placement contract (src/shared/python/ClubHeadMesh / BallMesh).",
       "id": "render.club_head_and_ball"
     },
     {
@@ -3190,7 +3190,7 @@
   "inputs": {
     "src/config/models.yaml": "2a2e303aa92f6dda0ef3868fcc881ccbdbc54cf362ac3aae931333163969b90f",
     "src/config/launcher_manifest.json": "abc9913955858006e7bb6b8e9dca8c9693313e62d48d90dcc1ace33e632a79dc",
-    "src/config/feature_parity.json": "292376cd76030a7e21253d449a8f3cc479360a50e4db47d15df1e8e05c71c351",
+    "src/config/feature_parity.json": "93f6ca92d82e0551df3616fb7d3004c749ebed786f8bbb02798a56d1c314066e",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
