@@ -12,6 +12,7 @@ pytestmark = pytest.mark.unit
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _PYPROJECT = _REPO_ROOT / "pyproject.toml"
 _LOCK = _REPO_ROOT / "requirements.lock"
+_DEV_LOCK = _REPO_ROOT / "requirements-dev.lock"
 _API_RUNTIME_DEPS = (
     "sqlalchemy",
     "alembic",
@@ -78,3 +79,17 @@ def test_starlette_lock_satisfies_security_floor() -> None:
     )
 
     assert (major, minor, patch) >= (1, 0, 1)
+
+
+def _parse_calver(version: str) -> tuple[int, int, int]:
+    return tuple(int(part) for part in version.split("."))
+
+
+def test_fsspec_locks_satisfy_security_floor() -> None:
+    """Issue #11587 / CVE-2026-104851: fixed in fsspec 2026.6.0 and later."""
+    floor = (2026, 6, 0)
+    for lock_path in (_LOCK, _DEV_LOCK):
+        lock_lines = lock_path.read_text(encoding="utf-8").splitlines()
+        locked = next(line for line in lock_lines if line.startswith("fsspec=="))
+        version = _parse_calver(locked.removeprefix("fsspec=="))
+        assert version >= floor
