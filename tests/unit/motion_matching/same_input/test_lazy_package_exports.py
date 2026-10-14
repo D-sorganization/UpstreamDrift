@@ -74,6 +74,11 @@ providers = {
     "closed_loop": "reference", "generate_reference_bundle": "reference",
     "ReplayScore": "scoring", "growth_rate": "scoring",
     "score_replay": "scoring", "segmented_replay": "scoring",
+    "DEFAULT_EFFORT_HOLD_DT_S": "bundle",
+    "EffortHoldPolicy": "bundle",
+    "FINE_EFFORT_HOLD_DT_S": "bundle",
+    "read_effort_hold_policy": "bundle",
+    "resolve_effort_hold_dt_s": "bundle",
 }
 assert set(facade.__all__) == set(providers)
 assert set(facade.__all__).issubset(dir(facade))
