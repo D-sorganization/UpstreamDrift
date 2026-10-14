@@ -34,10 +34,10 @@ governance pathway.
 
 - **Owner:** unassigned
 - **Depends on:** [#9549](https://github.com/D-sorganization/UpstreamDrift/issues/9549)
-- **Source:** —
-- **Existing tests:** `tests/shared_contracts/test_impact_interval_provider.py`
+- **Source:** `src/shared/python/physics/impact_interval_audit.py`
+- **Existing tests:** `tests/shared_contracts/test_impact_interval_provider.py` · `tests/unit/physics/test_impact_interval_audit_dbc.py`
 
-**Narrow PR plan.** Provider half landed: Tools #5088 (`183b4bb1fe34ec408c5cd400bb553bea999a88a0`, 2026-09-08) adds `ImpactTermination` (SEPARATED / TIME_LIMIT / NO_CONTACT), `ImpactIntervalResult.contact_completed`, a floor(T/dt) step budget that no longer runs a step past the configured cap, and `IncompleteContactError` carrying the partial trace from `to_post_impact_state()`. The audit pin `3d93bb2c89813e17551814d3be7e895f791e29af` had none of these names. UpstreamDrift consumes it through the vendored pin `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1` (first carried by `c487265f1ebc9c61a2e124267ad9cd1c96a6c007` #9916, current bump `e9b3278a13b497cfa5363b2a707494d9d5695c77` #10373); `tests/shared_contracts/test_impact_interval_provider.py` drives the audit probe (1e-5 s cap, ball still compressed under >10 kN) through the provider and pins TIME_LIMIT, the hard cap, the refusal and the inspectable partial trace. Still open on the product side: session/export schemas and the workbench UI do not yet carry a completion status because the live interval seam (I3, #9549) does not exist; land it there, then re-verify this entry's acceptance boxes against the seam's export schema before recording a merge.
+**Narrow PR plan.** Provider half landed: Tools #5088 (`183b4bb1fe34ec408c5cd400bb553bea999a88a0`, 2026-09-08) adds `ImpactTermination` (SEPARATED / TIME_LIMIT / NO_CONTACT), `ImpactIntervalResult.contact_completed`, a floor(T/dt) step budget that no longer runs a step past the configured cap, and `IncompleteContactError` carrying the partial trace from `to_post_impact_state()`. UpstreamDrift fail-closed export schema and DbC audit guards landed in `src/shared/python/physics/impact_interval_audit.py` with tests in `tests/unit/physics/test_impact_interval_audit_dbc.py` and provider tests in `tests/shared_contracts/test_impact_interval_provider.py`. Still open on the product side: workbench UI live interval seam (I3, #9549); land it there, then re-verify this entry's acceptance boxes against the live seam before recording a merge.
 
 ### I2 — Impact: Compute Contact Energy Loss Independently Instead of Zeroing the Audit Residual
 
@@ -45,10 +45,10 @@ governance pathway.
 
 - **Owner:** unassigned
 - **Depends on:** [#9549](https://github.com/D-sorganization/UpstreamDrift/issues/9549)
-- **Source:** —
-- **Existing tests:** `tests/shared_contracts/test_impact_interval_provider.py`
+- **Source:** `src/shared/python/physics/impact_interval_audit.py`
+- **Existing tests:** `tests/shared_contracts/test_impact_interval_provider.py` · `tests/unit/physics/test_impact_interval_audit_dbc.py`
 
-**Narrow PR plan.** Provider half landed: Tools #5079 (`669b478e1a8f93e8dbbed0aa3c6a7d263b011229`, 2026-09-07) reports recoverable spring energy as `stored_contact_energy_{initial,final}_j`, accumulates `unilateral_release_energy_j` only at identified tensile-clip steps, integrates dashpot/friction and torsional-grip damping independently, and keeps `energy_residual_j` as the signed remainder of the declared ledger. The audit pin still had `unilateral_release = max(0.0, raw_energy_residual)`, which relabelled the 5.777 J deficit of the truncated probe as release with a 0.0 J residual. Consumed through the same vendored pin as I1; the UpstreamDrift consumer contract asserts zero release, positive stored energy and the residual identity on the truncated probe. Still open on the product side: the audit terms and their dt-convergence limits are not surfaced in any UpstreamDrift report or UI, and no qualified output is blocked on a failed audit, because no live run consumes the interval solver yet (I3, #9549). Surface the audit in the I3 run record and export, then re-verify this entry's acceptance boxes before recording a merge.
+**Narrow PR plan.** Provider half landed: Tools #5079 (`669b478e1a8f93e8dbbed0aa3c6a7d263b011229`, 2026-09-07) reports recoverable spring energy as `stored_contact_energy_{initial,final}_j`, accumulates `unilateral_release_energy_j` only at identified tensile-clip steps, integrates dashpot/friction and torsional-grip damping independently, and keeps `energy_residual_j` as the signed remainder of the declared ledger. Consumed through the same vendored pin as I1; UpstreamDrift fail-closed audit residual recomputation landed in `src/shared/python/physics/impact_interval_audit.py` and is verified by `tests/unit/physics/test_impact_interval_audit_dbc.py`. Still open on the product side: surfacing the audit in the live I3 run record and workbench UI (I3, #9549).
 
 ### I3 — Impact: Integrate the Contact-Interval Solver Into Live Runs, Playback and Export
 
@@ -67,10 +67,10 @@ governance pathway.
 
 - **Owner:** unassigned
 - **Depends on:** [#9549](https://github.com/D-sorganization/UpstreamDrift/issues/9549)
-- **Source:** —
-- **Existing tests:** —
+- **Source:** `src/shared/python/physics/impact_model_capabilities.py`
+- **Existing tests:** `tests/unit/physics/test_impact_model_capabilities.py`
 
-**Narrow PR plan.** Cannot start before I3: end-to-end qualification of interactive and saved playback needs a live interval run to qualify. When I3 lands, this slice owns dimensional/sign/frame, energy/momentum and timestep-limit tests at the product boundary, desktop/web golden contract parity, calibration and independent physical validation for any advertised accuracy, rendered usability/accessibility inspection, and clean install/package evidence. Approximation modes named in Tools #4251 (gear-effect ramp, COR(v), spring-damper spin, tensor defaults, D-plane/energy presentation) stay labelled and are rechecked at implementation head rather than assumed. No entry here may be marked merged on a mock-only run, a skipped hardware test or a stale screenshot.
+**Narrow PR plan.** Cannot start before I3: end-to-end qualification of interactive and saved playback needs a live interval run to qualify. Capability and passivity matrices landed in `src/shared/python/physics/impact_model_capabilities.py` with tests in `tests/unit/physics/test_impact_model_capabilities.py`. When I3 lands, this slice owns dimensional/sign/frame, energy/momentum and timestep-limit tests at the product boundary, desktop/web golden contract parity, calibration and independent physical validation for any advertised accuracy, rendered usability/accessibility inspection, and clean install/package evidence. Approximation modes named in Tools #4251 (gear-effect ramp, COR(v), spring-damper spin, tensor defaults, D-plane/energy presentation) stay labelled and are rechecked at implementation head rather than assumed. No entry here may be marked merged on a mock-only run, a skipped hardware test or a stale screenshot.
 
 ### R1 — The Impact Explorer Web Route Has No Build Step in CI
 

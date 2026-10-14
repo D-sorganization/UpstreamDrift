@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from ..lift_spec import lift_phase_names
 from .names import ENGINES, LIFTS
 
 LIMIT_TOL_RAD = 1e-4  # limit_abs_rad in the parity standard
@@ -151,10 +152,16 @@ def start_rows(receipt: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def phase_rows(receipt: dict[str, Any]) -> list[dict[str, Any]]:
-    """Per lift/engine: phase count vs standard, symmetry and mapping defects."""
+    """Per lift/engine: phase count and names vs standard, symmetry, mapping.
+
+    ``standard_names`` are the vendored standard's ordered phase names and
+    ``names_match`` is True only when the pack's phase names equal them in
+    order (#11743).
+    """
     want = receipt["standard_reference"]["phase_count"]
     rows = []
     for lift in LIFTS:
+        standard_names = list(lift_phase_names(lift))
         for engine in engines_of(receipt, lift):
             phases = receipt["results"][lift][engine]["phases"]
             limits = {
@@ -168,6 +175,8 @@ def phase_rows(receipt: dict[str, Any]) -> list[dict[str, Any]]:
                     "count": len(phases),
                     "standard_count": want.get(lift),
                     "names": [p["name"] for p in phases],
+                    "standard_names": standard_names,
+                    "names_match": [p["name"] for p in phases] == standard_names,
                     "unsymmetric": [p["name"] for p in phases if not p["bilateral"]],
                     "unmapped": sorted({k for p in phases for k in p["unmapped_keys"]}),
                     "interpreted": sorted(
