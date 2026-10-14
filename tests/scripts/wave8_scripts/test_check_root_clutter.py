@@ -34,7 +34,7 @@ def test_main_passes_with_allowed_files(
     (root / "README.md").write_text("hi")
     (root / "LICENSE").write_text("x")
     (root / ".hidden").write_text("x")  # hidden is skipped
-    (root / "subdir").mkdir()  # dir is skipped
+    (root / "src").mkdir()  # allowlisted directory (#9415 checks directories)
     assert mod.main() == 0
 
 
@@ -64,7 +64,7 @@ def test_main_ignores_dotfiles(
     assert mod.main() == 0
 
 
-def test_main_ignores_directories(
+def test_main_passes_with_allowlisted_directories(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
