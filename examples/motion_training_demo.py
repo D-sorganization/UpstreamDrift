@@ -34,6 +34,24 @@ class IKSolverInitializationError(RuntimeError):
     """Raised when the demo cannot initialize the IK solver."""
 
 
+def _resolve_trajectory_path(trajectory: str | None) -> Path:
+    """Return the requested workbook, or the private default via the registry."""
+    if trajectory is not None:
+        return Path(trajectory)
+    if str(PROJECT_ROOT) not in sys.path:
+        sys.path.insert(0, str(PROJECT_ROOT))
+    from src.motion_capture.capture_registry import (
+        CaptureDataUnavailable,
+        resolve_capture,
+    )
+
+    try:
+        return resolve_capture("club-workbook-wiffle")
+    except CaptureDataUnavailable as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
@@ -42,8 +60,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--trajectory",
         "-t",
-        default=str(PROJECT_ROOT / "data/Wiffle_ProV1_club_3D_data.xlsx"),
-        help="Path to Excel file with club trajectory",
+        default=None,
+        help=(
+            "Path to Excel file with club trajectory "
+            "(default: private club workbook via CAPTURE_DATA_DIR)"
+        ),
     )
     parser.add_argument(
         "--sheet",
@@ -275,15 +296,13 @@ def main() -> None:
     """Main entry point."""
     args = parse_args()
 
-    trajectory_path = Path(args.trajectory)
+    trajectory_path = _resolve_trajectory_path(args.trajectory)
     urdf_path = Path(args.urdf)
     output_dir = Path(args.output)
 
     if not trajectory_path.exists():
         print(f"Error: Missing trajectory file at {trajectory_path}.")
-        print(
-            "Please use a supported Excel fixture file, such as data/Wiffle_ProV1_club_3D_data.xlsx"
-        )
+        print("Pass --trajectory with a club trajectory workbook.")
         sys.exit(1)
 
     if args.plot_only:
