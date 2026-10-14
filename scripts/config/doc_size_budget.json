@@ -16,7 +16,7 @@
     {
       "path": "SPEC.md",
       "owner": "@maintainers",
-      "reason": "Root repository specification is governed separately and updated by feature PRs. Capped at about 300 KB (tests/unit/repo_hygiene/test_spec_archive.py) after change-log history moved to docs/spec/CHANGELOG_ARCHIVE.md (issue #9415, owner ruling 2026-10-12); renewed 2027-01-31 pending the section split.",
+      "reason": "Root repository specification is governed separately and updated by feature PRs. Capped at about 350 KB (previously 300 KB, tests/unit/repo_hygiene/test_spec_archive.py) after change-log history moved to docs/spec/CHANGELOG_ARCHIVE.md (issue #9415, owner ruling 2026-10-12); renewed 2027-01-31 pending the section split.",
       "expires_on": "2027-01-31"
     },
     {
