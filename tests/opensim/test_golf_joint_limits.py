@@ -9,8 +9,7 @@ committed ``.osim`` XML directly, so they run without the OpenSim bindings.
 from __future__ import annotations
 
 import math
-import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep  # trusted repo files
-
+import defusedxml.ElementTree as ET
 import pytest
 
 from scripts import build_humanoid_osim as builder
@@ -26,7 +25,7 @@ BOUND_MARGIN = 0.01
 
 
 def _osim_range(model: str, coord: str) -> tuple[float, float]:
-    root = ET.parse(mc.MODELS_DIR / f"{model}.osim").getroot()  # noqa: S314
+    root = ET.parse(mc.MODELS_DIR / f"{model}.osim").getroot()
     nodes = [c for c in root.iter("Coordinate") if c.get("name") == coord]
     assert len(nodes) == 1, (model, coord)
     low, high = nodes[0].findtext("range").split()
