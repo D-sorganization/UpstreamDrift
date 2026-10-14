@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 import hashlib
-import importlib
 import json
 from pathlib import Path
 from typing import Any
@@ -78,7 +77,7 @@ class NativeMarkerGeometry:
         self.loaded_sha256 = hashlib.sha256(
             self._model.dump().encode("utf-8")
         ).hexdigest()
-        extension_path = importlib.import_module("opensim._simulation").__file__
+        extension_path = import_opensim("opensim._simulation").__file__
         if extension_path is None:
             raise ValueError("Native simulation extension file is unavailable")
         extension = Path(extension_path)

@@ -7,11 +7,12 @@ resolved only when ``render_with_opensim_visualizer`` is called.
 
 from __future__ import annotations
 
-import importlib
 import time as _time
 from typing import Any
 
 import numpy as np
+
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 from . import _adapters
 
@@ -22,7 +23,7 @@ class OpenSimVisualizerUnavailableError(RuntimeError):
 
 def _load_opensim_module() -> Any:
     try:
-        osim = importlib.import_module("opensim")
+        osim = import_opensim()
     except ImportError as exc:
         raise OpenSimVisualizerUnavailableError(
             "opensim Python bindings are not available; install the OpenSim "

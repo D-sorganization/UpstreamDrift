@@ -19,7 +19,6 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import enum
 import hashlib
-import importlib
 import logging
 from pathlib import Path
 from typing import Any
@@ -33,6 +32,7 @@ from src.engines.physics_engines.opensim.python.tour_matching._native_model_inve
     observe_native_model,
 )
 
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 from src.shared.python.motion_matching.club_models import (
     DRIVER,
     IRON_7,
@@ -495,7 +495,7 @@ def _read_native_muscle_inventory(
 ) -> NativeMuscleInventory | None:
     """Inspect native muscle components, leaving support unknown without OpenSim."""
     try:
-        opensim = importlib.import_module("opensim")
+        opensim = import_opensim()
     except (ImportError, OSError):
         return None
 

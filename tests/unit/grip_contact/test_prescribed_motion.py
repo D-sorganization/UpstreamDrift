@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from importlib import import_module
-
 import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
@@ -13,6 +11,7 @@ from src.shared.python.grip_contact.prescribed_motion import (
     RigidBodyState,
     fmm_spline_coefficients,
 )
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -38,10 +37,7 @@ def test_spline_preconditions() -> None:
 
 
 def test_spline_matches_opensim_simm_spline() -> None:
-    try:
-        osim = import_module("opensim")
-    except ImportError:
-        pytest.skip("opensim is not installed")
+    osim = require_opensim()
     rng = np.random.default_rng(4)
     t = np.arange(40) * 0.002
     y = np.cumsum(rng.normal(size=40))

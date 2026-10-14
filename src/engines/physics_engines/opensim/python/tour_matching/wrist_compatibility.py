@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 import hashlib
-from importlib import import_module
 import math
 from pathlib import Path
 import sys
@@ -16,6 +15,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.full_swing_trackin
 from src.engines.physics_engines.opensim.python.tour_matching.muscle_qualification import (
     compute_path_length_finite_difference_moment_arm,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 
 @dataclass(frozen=True)
@@ -355,7 +355,7 @@ def observe_native_wrist(
     """
     _validate_contract(contract)
     digest = validate_model_checkpoint(source, expected_sha256)
-    osim = import_module("opensim")
+    osim = import_opensim()
     model = osim.Model(str(source))
     model.finalizeConnections()
     source_accuracy = model.get_assembly_accuracy()

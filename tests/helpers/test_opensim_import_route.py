@@ -9,9 +9,13 @@ boundary before it imports the SDK.  A test that imports ``opensim`` directly,
 or reaches it through ``pytest.importorskip("opensim")``, bypasses that
 boundary and can load an ABI-incompatible ``ezc3d.dll`` into a pytest process
 that already hosts the Python ``ezc3d`` extension.  This guard scans the test
-tree with the AST (so source text inside strings, e.g. child-process scripts,
-is not mistaken for an import) and fails on any bypass.  Imports under
-``if TYPE_CHECKING:`` never execute, so they load no DLL and are ignored.
+and src trees with the AST (so source text inside strings, e.g. child-process
+scripts, is not mistaken for an import) and fails on any bypass, including
+dynamic loads such as ``importlib.import_module("opensim")`` and
+``__import__("opensim")`` with a literal name.  Imports under
+``if TYPE_CHECKING:`` never execute, so they load no DLL and are ignored, and
+``importlib.util.find_spec("opensim")`` only locates the package without
+loading it, so availability probes stay allowed.
 """
 
 from __future__ import annotations
@@ -56,6 +60,25 @@ def _is_importorskip(func: ast.expr) -> bool:
     return isinstance(func, ast.Name) and func.id == "importorskip"
 
 
+_DYNAMIC_IMPORTERS = frozenset({"import_module", "__import__"})
+
+
+def _dynamic_importer(func: ast.expr) -> str | None:
+    """Name of a dynamic importer call (``import_module``/``__import__``)."""
+    name = func.attr if isinstance(func, ast.Attribute) else None
+    if isinstance(func, ast.Name):
+        name = func.id
+    return name if name in _DYNAMIC_IMPORTERS else None
+
+
+def _literal_opensim(node: ast.Call) -> str | None:
+    """The first positional argument when it is a literal OpenSim module name."""
+    first = node.args[0] if node.args else None
+    if isinstance(first, ast.Constant) and isinstance(first.value, str):
+        return first.value if _is_opensim(first.value) else None
+    return None
+
+
 def _is_type_checking(test: ast.expr) -> bool:
     if isinstance(test, ast.Attribute):
         return test.attr == "TYPE_CHECKING"
@@ -81,12 +104,14 @@ def opensim_bypasses(source: str, filename: str = "<source>") -> list[str]:
         elif isinstance(node, ast.ImportFrom):
             if node.level == 0 and _is_opensim(node.module):
                 findings.append(f"{node.lineno}: from {node.module} import ...")
-        elif isinstance(node, ast.Call) and _is_importorskip(node.func):
-            first = node.args[0] if node.args else None
-            if isinstance(first, ast.Constant) and _is_opensim(
-                first.value if isinstance(first.value, str) else None
-            ):
-                findings.append(f"{node.lineno}: importorskip({first.value!r})")
+        elif isinstance(node, ast.Call):
+            module = _literal_opensim(node)
+            if module is None:
+                continue
+            if _is_importorskip(node.func):
+                findings.append(f"{node.lineno}: importorskip({module!r})")
+            elif (importer := _dynamic_importer(node.func)) is not None:
+                findings.append(f"{node.lineno}: {importer}({module!r})")
     return findings
 
 
@@ -102,6 +127,12 @@ def opensim_bypasses(source: str, filename: str = "<source>") -> list[str]:
         "pytest.importorskip('opensim', reason='x')\n",
         "from pytest import importorskip\nimportorskip('opensim')\n",
         "if TYPE_CHECKING:\n    pass\nelse:\n    import opensim\n",
+        "osim = importlib.import_module('opensim')\n",
+        "from importlib import import_module\nosim = import_module('opensim')\n",
+        "path = importlib.import_module('opensim._simulation').__file__\n",
+        "osim = __import__('opensim')\n",
+        "ok = hasattr(__import__('opensim'), 'Visualizer')\n",
+        "def f():\n    return import_module('x') or import_module('opensim')\n",
     ],
 )
 def test_scanner_flags_direct_opensim_imports(source: str) -> None:
@@ -121,6 +152,13 @@ def test_scanner_flags_direct_opensim_imports(source: str) -> None:
         "spec = importlib.util.find_spec('opensim')\n",
         "if TYPE_CHECKING:\n    import opensim as osim\n",
         "if typing.TYPE_CHECKING:\n    from opensim import Model\n",
+        "osim = import_opensim('opensim._simulation')\n",
+        "mod = importlib.import_module('opensim_models')\n",
+        "mod = importlib.import_module(dotted)\n",
+        "np = __import__('numpy')\n",
+        "if importlib.util.find_spec('opensim') is not None:\n    pass\n",
+        "if TYPE_CHECKING:\n    osim = importlib.import_module('opensim')\n",
+        "lib = ctypes.CDLL('opensim')\n",
     ],
 )
 def test_scanner_ignores_routed_and_unrelated_code(source: str) -> None:
