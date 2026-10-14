@@ -710,19 +710,14 @@ def compose_anthropometric_document(
     (#12199, #12300); the legs carry what the upper body does not. Raises
     ``ValueError`` when the upper body alone reaches ``mass_kg``.
     """
-    if native_path is None:
-        native_path = get_native_geometry_spec(None)
-    if osim_path is None:
-        osim_path = get_opensim_model(None)
-    if native_candidate_path is None:
-        native_candidate_path = get_candidate_geometry_spec(None)
+    native_path = native_path or get_native_geometry_spec(None)
+    osim_path = osim_path or get_opensim_model(None)
+    native_candidate_path = native_candidate_path or get_candidate_geometry_spec(None)
 
     trunk_scale = float(kwargs.get("trunk_scale", 1.0))
     arm_scale = float(kwargs.get("arm_scale", 1.0))
     shoulder_scale = float(kwargs.get("shoulder_scale", 1.0))
     grip_roll_deg = float(kwargs.get("grip_roll_deg", 0.0))
-    lead_grip_rotation = kwargs.get("lead_grip_rotation")
-    trail_grip_rotation = kwargs.get("trail_grip_rotation")
     match_subject_mass = bool(kwargs.get("match_subject_mass", False))
 
     native = json.loads(native_path.read_text(encoding="utf-8"))
@@ -736,8 +731,8 @@ def compose_anthropometric_document(
         club=CLUBS[club],
         grip_roll_deg=grip_roll_deg,
         grip_rotation_deg={
-            "L": lead_grip_rotation or GRIP_ROTATION_DEG["L"],
-            "R": trail_grip_rotation or GRIP_ROTATION_DEG["R"],
+            "L": kwargs.get("lead_grip_rotation") or GRIP_ROTATION_DEG["L"],
+            "R": kwargs.get("trail_grip_rotation") or GRIP_ROTATION_DEG["R"],
         },
         scale_hand_mass=match_subject_mass,
     )
