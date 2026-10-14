@@ -14,9 +14,12 @@ Contract
   ignored, and the handedness must be stated. Constructibility is still judged by the domain objects;
   their :class:`~src.tools.bunker_shot_gui.design.WorkbenchInputError` is a
   422, not a 500.
-* **The solve is bounded.** One nominal F0 shot at the default study
-  settings -- the playability sweep and the A/B ranking, which cost tens of
-  shots, are not run here. Long jobs and cancellation belong to #8880/#9472.
+* **The solve is bounded.** ``/v1/evaluate`` runs one nominal F0 shot at
+  the default study settings, without the playability sweep. ``/v1/compare``
+  runs the A/B ranking, which costs one nominal shot plus the fixed
+  ``playability_points ** 2`` sweep per design (52 shots at the defaults);
+  no request field can enlarge it. Long jobs and cancellation belong to
+  #8880/#9472.
 * **The verdict travels with every number.** The response carries the tier,
   the verdict, the in-frame stamp the PyQt views draw
   (:func:`~src.tools.bunker_shot_gui.report.validity_stamp`), the source of
@@ -24,7 +27,16 @@ Contract
 * **A playability objective is never predictive (#9239).** No
   sand-to-ball transfer qualification ships, so a ``predictive`` objective
   is refused and an exploratory one is reported with ``ranking_permitted``
-  false and its degeneracy stated.
+  false and its degeneracy stated. The comparison carries the model's own
+  :class:`~src.tools.bunker_shot_gui.objective.CarryObjectiveStanding` --
+  disposition and reasons in the canonical
+  :class:`~bunkershot3d.ball.ObjectiveDisposition` vocabulary -- and names a
+  ``winner`` only when that standing is ``supported``; any other lead is an
+  ``exploratory_leader``.
+* **A saved record can be checked, never re-trusted.** ``/v1/verify`` takes a
+  record a client saved and reloaded and accepts it only when its schema is
+  known and its digest still covers it, so an edited record -- an exploratory
+  leader promoted to ``winner``, say -- is refused as corrupt.
 
 The workbench model imports in seconds, so it is imported inside the
 handler, never at route discovery (the #8943 lazy-import pattern).
@@ -34,21 +46,42 @@ from __future__ import annotations
 
 import dataclasses
 import hashlib
+import hmac
+import re
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Literal
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Body, HTTPException, status
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.api.middleware.error_handler import handle_api_errors
 from src.tools.bunker_shot_gui.input_ranges import INPUT_RANGES
+from src.tools.bunker_shot_gui.objective import (
+    SHIPPED_CARRY_DISPOSITION,
+    UNCALIBRATED_REASON,
+)
 
 if TYPE_CHECKING:
-    from src.tools.bunker_shot_gui.design import SwingSetup
-    from src.tools.bunker_shot_gui.model import DesignEvaluation, ShotOutcome
+    from src.tools.bunker_shot_gui.design import (
+        SandCondition,
+        SolverSetup,
+        SwingSetup,
+        WedgeDesign,
+    )
+    from src.tools.bunker_shot_gui.model import (
+        DesignEvaluation,
+        ShotOutcome,
+        WorkbenchComparison,
+    )
+    from src.tools.bunker_shot_gui.objective import CarryObjectiveStanding
 
 __all__ = [
+    "COMPARISON_SCHEMA_VERSION",
     "SCHEMA_VERSION",
+    "BunkerWorkbenchCompareRequestV1",
     "BunkerWorkbenchRequestV1",
+    "comparison_record",
     "evaluation_record",
     "record_digest",
     "router",
@@ -57,15 +90,25 @@ __all__ = [
 SCHEMA_VERSION = "bunker-workbench-evaluation/1"
 """Version of the response record; bumped on any breaking change."""
 
+COMPARISON_SCHEMA_VERSION = "bunker-workbench-comparison/1"
+"""Version of the A/B comparison record; bumped on any breaking change."""
+
+_RECORD_SCHEMAS = frozenset({SCHEMA_VERSION, COMPARISON_SCHEMA_VERSION})
+"""The record schemas ``/v1/verify`` knows how to check."""
+
+_DIGEST_PATTERN = re.compile(r"[0-9a-f]{64}")
+"""A SHA-256 hex digest as :func:`record_digest` spells it."""
+
 MODEL_SOURCE = "src.tools.bunker_shot_gui.model.WorkbenchModel"
 """The headless surface every number in the response comes from."""
 
-_DISPOSITION_UNCALIBRATED = "unavailable-uncalibrated"
-"""``bunkershot3d.ball.ObjectiveDisposition.UNAVAILABLE_UNCALIBRATED``.
+_DISPOSITION_UNCALIBRATED = SHIPPED_CARRY_DISPOSITION.value
+"""The shipped carry objective's disposition, from its one owner (#9239).
 
 No ``TransferQualification`` ships, so this is the only disposition the
-carry objective can have (#9239). Spelled here so that refusing a
-predictive objective does not cost the multi-second model import."""
+carry objective can have. :mod:`~src.tools.bunker_shot_gui.objective` is
+cheap to import, so refusing a predictive objective still does not cost the
+multi-second model import."""
 
 _LEFT_HANDED_REASON = (
     "the F0 workbench scene is built for a right-handed player (+x toward the "
@@ -178,6 +221,21 @@ class BunkerWorkbenchRequestV1(_Strict):
     objective: BunkerObjectiveV1 | None = None
 
 
+class BunkerWorkbenchCompareRequestV1(_Strict):
+    """One A/B comparison of two differently named soles.
+
+    ``objective``, when given, sets the target carry and window the ranking
+    is judged against; omitted, the workbench defaults apply.
+    """
+
+    handedness: Literal["right", "left"]
+    left: BunkerDesignV1
+    right: BunkerDesignV1
+    sand: BunkerSandV1 = Field(default_factory=BunkerSandV1)
+    swing: BunkerSwingV1 = Field(default_factory=BunkerSwingV1)
+    objective: BunkerObjectiveV1 | None = None
+
+
 # ----------------------------------------------------------------- response
 
 
@@ -253,6 +311,56 @@ class BunkerWorkbenchEvaluationV1(BaseModel):
     sources: BunkerSourcesV1
     objective: BunkerObjectiveReportV1 | None
     predictive: bool
+    digest: str
+
+
+class BunkerObjectiveStandingV1(BaseModel):
+    """The model's :class:`CarryObjectiveStanding`, field for field."""
+
+    disposition: str
+    reasons: list[str]
+    predictive: bool
+
+
+class BunkerRankingV1(BaseModel):
+    available: bool
+    unavailable_reason: str | None
+    shared_points: int
+    banded_verdict: str | None
+    separation_m: float | None
+    separated: bool
+
+
+class BunkerObjectiveRequestEchoV1(BaseModel):
+    use: str
+    target_carry_m: float
+    tolerance_fraction: float
+
+
+class BunkerWorkbenchComparisonV1(BaseModel):
+    """The record returned for one A/B comparison; ``digest`` covers the rest.
+
+    ``winner`` is ``None`` unless ``objective_standing.predictive``; a lead
+    the bands show on an unqualified objective is ``exploratory_leader``.
+    """
+
+    schema_version: str
+    conventions: dict[str, Any]
+    left: BunkerWorkbenchEvaluationV1
+    right: BunkerWorkbenchEvaluationV1
+    objective: BunkerObjectiveRequestEchoV1 | None
+    objective_standing: BunkerObjectiveStandingV1
+    ranking: BunkerRankingV1
+    predictive: bool
+    winner: str | None
+    exploratory_leader: str | None
+    verdict_statement: str
+    digest: str
+
+
+class BunkerRecordVerificationV1(BaseModel):
+    valid: bool
+    schema_version: str
     digest: str
 
 
@@ -379,10 +487,7 @@ def _objective_report(
         "nominal_carry_m": carry_m,
         "degenerate": degenerate,
         "ranking_permitted": False,
-        "reason": (
-            "no sand-to-ball transfer qualification exists (#9239, #9543), so "
-            "carry is a placeholder product and cannot rank designs"
-        ),
+        "reason": UNCALIBRATED_REASON,
     }
 
 
@@ -439,6 +544,82 @@ def evaluation_record(
     return record
 
 
+def _standing(standing: CarryObjectiveStanding) -> dict[str, Any]:
+    """The objective standing in the canonical disposition vocabulary."""
+    return {
+        "disposition": standing.disposition.value,
+        "reasons": list(standing.reasons),
+        "predictive": standing.predictive,
+    }
+
+
+def _ranking(comparison: WorkbenchComparison) -> dict[str, Any]:
+    """Whether the pair was ranked, on how many conditions, and how far apart."""
+    banded = comparison.banded
+    return {
+        "available": banded is not None,
+        "unavailable_reason": (
+            comparison.verdict_statement if banded is None else None
+        ),
+        "shared_points": comparison.shared_points,
+        "banded_verdict": None if banded is None else banded.verdict.value,
+        "separation_m": None if banded is None else float(banded.separation),
+        "separated": comparison.separated,
+    }
+
+
+def comparison_record(
+    comparison: WorkbenchComparison,
+    swing: SwingSetup,
+    *,
+    handedness: str,
+    objective: BunkerObjectiveV1 | None,
+) -> dict[str, Any]:
+    """Build the v1 record for one A/B comparison, digest included.
+
+    A pure function of the model's comparison: the standing, the winner and
+    the exploratory leader are read off it, never re-derived, so the route
+    can claim no more than :class:`WorkbenchComparison` allows (#9239).
+
+    Args:
+        comparison: The model's comparison of two designs.
+        swing: The nominal delivery both were evaluated at.
+        handedness: The stated handedness; only ``"right"`` is supported.
+        objective: The exploratory objective the comparison was judged
+            against, or ``None`` for the workbench defaults.
+
+    Returns:
+        The record, with ``digest`` over every other key. Postcondition:
+        ``winner`` is ``None`` unless ``objective_standing.predictive``.
+
+    Raises:
+        ValueError: If ``handedness`` is not ``"right"``.
+    """
+    sides = {
+        side: evaluation_record(
+            evaluation, swing, handedness=handedness, objective=objective
+        )
+        for side, evaluation in (
+            ("left", comparison.left),
+            ("right", comparison.right),
+        )
+    }
+    record: dict[str, Any] = {
+        "schema_version": COMPARISON_SCHEMA_VERSION,
+        "conventions": CONVENTIONS,
+        **sides,
+        "objective": None if objective is None else objective.model_dump(),
+        "objective_standing": _standing(comparison.objective),
+        "ranking": _ranking(comparison),
+        "predictive": comparison.predictive,
+        "winner": comparison.winner,
+        "exploratory_leader": comparison.exploratory_leader,
+        "verdict_statement": comparison.verdict_statement,
+    }
+    record["digest"] = record_digest(record)
+    return record
+
+
 # -------------------------------------------------------------------- route
 
 
@@ -450,15 +631,18 @@ def _unprocessable(code: str, message: str, **extra: str) -> HTTPException:
     )
 
 
-def _require_answerable(request: BunkerWorkbenchRequestV1) -> None:
+def _require_answerable(handedness: str, objective: BunkerObjectiveV1 | None) -> None:
     """Refuse, before any solve, a request this route cannot answer honestly.
+
+    Args:
+        handedness: The stated handedness.
+        objective: The requested objective, if any.
 
     Raises:
         HTTPException: 422 for a left-handed request or a predictive objective.
     """
-    if request.handedness != "right":
+    if handedness != "right":
         raise _unprocessable("handedness_unsupported", _LEFT_HANDED_REASON)
-    objective = request.objective
     if objective is not None and objective.use == "predictive":
         raise _unprocessable(
             "objective_not_predictive",
@@ -467,6 +651,48 @@ def _require_answerable(request: BunkerWorkbenchRequestV1) -> None:
             "Request it with use='exploratory'.",
             disposition=_DISPOSITION_UNCALIBRATED,
         )
+
+
+@contextmanager
+def _workbench_input() -> Iterator[None]:
+    """Relabel the domain's construction failure as a precise 422."""
+    from src.tools.bunker_shot_gui.design import WorkbenchInputError
+
+    try:
+        yield
+    except WorkbenchInputError as error:
+        raise _unprocessable("invalid_workbench_input", str(error)) from error
+
+
+def _wedge(design: BunkerDesignV1) -> WedgeDesign:
+    """The domain design; ``None`` fields keep the preset's values."""
+    from src.tools.bunker_shot_gui.design import WedgeDesign
+
+    return WedgeDesign(**design.model_dump(exclude_none=True))
+
+
+def _conditions(
+    sand: BunkerSandV1, swing: BunkerSwingV1
+) -> tuple[SandCondition, SwingSetup]:
+    """The domain sand condition and delivery."""
+    from src.tools.bunker_shot_gui.design import SandCondition, SwingSetup
+
+    return (
+        SandCondition(**sand.model_dump(exclude_none=True)),
+        SwingSetup(**swing.model_dump(exclude_none=True)),
+    )
+
+
+def _study_settings(objective: BunkerObjectiveV1 | None) -> SolverSetup:
+    """The study settings, with the objective's target and window if given."""
+    from src.tools.bunker_shot_gui.design import SolverSetup
+
+    if objective is None:
+        return SolverSetup()
+    return SolverSetup(
+        target_carry_m=objective.target_carry_m,
+        carry_tolerance_fraction=objective.tolerance_fraction,
+    )
 
 
 @router.post("/v1/evaluate", response_model=BunkerWorkbenchEvaluationV1)
@@ -481,24 +707,83 @@ def evaluate_v1(request: BunkerWorkbenchRequestV1) -> dict[str, Any]:
         HTTPException: 422 for input the workbench cannot construct, a
             left-handed request or a predictive objective.
     """
-    _require_answerable(request)
-    from src.tools.bunker_shot_gui.design import (
-        SandCondition,
-        SwingSetup,
-        WedgeDesign,
-        WorkbenchInputError,
-    )
+    _require_answerable(request.handedness, request.objective)
     from src.tools.bunker_shot_gui.model import WorkbenchModel
 
-    try:
-        design = WedgeDesign(**request.design.model_dump(exclude_none=True))
-        sand = SandCondition(**request.sand.model_dump(exclude_none=True))
-        swing = SwingSetup(**request.swing.model_dump(exclude_none=True))
+    with _workbench_input():
+        design = _wedge(request.design)
+        sand, swing = _conditions(request.sand, request.swing)
         evaluation = WorkbenchModel().evaluate(
             design, sand, swing, include_playability=False
         )
-    except WorkbenchInputError as error:
-        raise _unprocessable("invalid_workbench_input", str(error)) from error
     return evaluation_record(
         evaluation, swing, handedness=request.handedness, objective=request.objective
     )
+
+
+@router.post("/v1/compare", response_model=BunkerWorkbenchComparisonV1)
+@handle_api_errors
+def compare_v1(request: BunkerWorkbenchCompareRequestV1) -> dict[str, Any]:
+    """Compare two soles over the shared delivery sweep, with the standing.
+
+    The ranking is the model's (:meth:`WorkbenchModel.compare`); this route
+    adds no judgement of its own. With no transfer qualification shipped the
+    standing is ``unavailable-uncalibrated``, so ``winner`` is ``None`` and a
+    lead the bands show is reported as ``exploratory_leader`` (#9239).
+
+    Synchronous on purpose, like :func:`evaluate_v1`.
+
+    Raises:
+        HTTPException: 422 for two designs with one name, input the workbench
+            cannot construct, a left-handed request or a predictive objective.
+    """
+    _require_answerable(request.handedness, request.objective)
+    if request.left.name == request.right.name:
+        raise _unprocessable(
+            "design_names_not_distinct",
+            "the two designs must have different names; the comparison "
+            f"reports them by name and both are {request.left.name!r}",
+        )
+    from src.tools.bunker_shot_gui.model import WorkbenchModel
+
+    with _workbench_input():
+        left, right = _wedge(request.left), _wedge(request.right)
+        sand, swing = _conditions(request.sand, request.swing)
+        model = WorkbenchModel(_study_settings(request.objective))
+        comparison = model.compare(left, right, sand, swing)
+    return comparison_record(
+        comparison, swing, handedness=request.handedness, objective=request.objective
+    )
+
+
+@router.post("/v1/verify", response_model=BunkerRecordVerificationV1)
+@handle_api_errors
+def verify_v1(record: dict[str, Any] = Body(...)) -> dict[str, Any]:
+    """Check a saved v1 record before it is trusted again.
+
+    Fail-closed: the record must name a known schema and carry a well-formed
+    digest that still covers every other key. Nothing is re-solved.
+
+    Raises:
+        HTTPException: 422 ``record_schema_unknown``,
+            ``record_digest_invalid`` or ``record_digest_mismatch``.
+    """
+    schema = record.get("schema_version")
+    if schema not in _RECORD_SCHEMAS:
+        raise _unprocessable(
+            "record_schema_unknown",
+            f"schema_version {schema!r} is not one of {sorted(_RECORD_SCHEMAS)}",
+        )
+    digest = record.get("digest")
+    if not isinstance(digest, str) or not _DIGEST_PATTERN.fullmatch(digest):
+        raise _unprocessable(
+            "record_digest_invalid",
+            "the record carries no 64-character lowercase SHA-256 digest",
+        )
+    if not hmac.compare_digest(record_digest(record), digest):
+        raise _unprocessable(
+            "record_digest_mismatch",
+            "the record was changed after it was produced; its digest no "
+            "longer covers its contents",
+        )
+    return {"valid": True, "schema_version": schema, "digest": digest}
