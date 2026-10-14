@@ -9,3 +9,25 @@ fixture.  See ``docs/research/model_aware_matching/`` for the methods.
 """
 
 from __future__ import annotations
+
+from src.shared.python.estimation.mosaic.contact_wrenches import (
+    ConeViolationReport,
+    ContactIdentifiabilityDiagnostics,
+    ContactWrenchProblem,
+    ContactWrenchSolution,
+    compute_cone_violations,
+    compute_identifiability_diagnostics,
+    project_friction_cone,
+    solve_contact_wrenches,
+)
+
+__all__ = [
+    "ConeViolationReport",
+    "ContactIdentifiabilityDiagnostics",
+    "ContactWrenchProblem",
+    "ContactWrenchSolution",
+    "compute_cone_violations",
+    "compute_identifiability_diagnostics",
+    "project_friction_cone",
+    "solve_contact_wrenches",
+]
