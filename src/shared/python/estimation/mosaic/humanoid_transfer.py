@@ -320,11 +320,15 @@ def export_wbc_schedule(
     u_feedforward: FloatArray,
     gains_k: FloatArray,
     inertial_parameters: FloatArray,
-    geometry_parameters: FloatArray,
-    model_name: str = "generic_humanoid",
-    extra_metadata: dict[str, Any] | None = None,
+    **kwargs: Any,
 ) -> WBCSchedule:
     """Export fitted trajectory, inertias, and feedback gains to structured WBC schedule."""
+    geometry_parameters: FloatArray = kwargs.get(
+        "geometry_parameters", np.array([], dtype=np.float64)
+    )
+    model_name: str = kwargs.get("model_name", "generic_humanoid")
+    extra_metadata: dict[str, Any] | None = kwargs.get("extra_metadata", None)
+
     meta: dict[str, Any] = {
         "non_claims": list(NON_CLAIMS),
         "source": "MOSAIC_estimation",
