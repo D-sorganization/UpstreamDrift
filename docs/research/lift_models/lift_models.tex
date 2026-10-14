@@ -216,6 +216,28 @@ tracked as board proposal \texttt{D-sorganization/Repository\_Management\#2060}
 is open and awaits owner approval; no shared specification is implemented
 before that decision.
 
+\subsection{Additional Movements (LIFT-10, Issue \#11750)}
+Five additional movements extend the baseline exercise repertoire: \texttt{split\_jerk},
+\texttt{push\_press}, \texttt{overhead\_press}, \texttt{front\_squat}, and \texttt{lunge}.
+Each movement defines an ordered sequence of named phases with strictly increasing
+cycle fractions $t_{\text{frac}} \in [0, 1)$, canonical start/catch/lockout via-poses,
+grip widths and ranges, barbell load parameters, and stance geometry:
+\begin{itemize}[noitemsep]
+\item \textbf{Split Jerk:} 6 named phases (\texttt{dip}, \texttt{drive}, \texttt{split\_drop},
+  \texttt{overhead\_catch}, \texttt{recovery\_front}, \texttt{lockout}). Features an asymmetric
+  split-stance geometry with longitudinal displacement ($s_x = 0.75\,\text{m}$), lead foot forward
+  and trail foot posterior with independent toe-out angles.
+\item \textbf{Push Press:} 5 named phases (\texttt{setup}, \texttt{dip}, \texttt{drive},
+  \texttt{press\_transition}, \texttt{lockout}) with bilateral symmetric stance and front-rack bar support.
+\item \textbf{Overhead Press:} 4 named phases (\texttt{setup}, \texttt{press}, \texttt{head\_pass},
+  \texttt{lockout}) enforcing strict vertical pressing without lower-limb drive.
+\item \textbf{Front Squat:} 5 named phases (\texttt{standing}, \texttt{descent}, \texttt{bottom},
+  \texttt{ascent}, \texttt{lockout}) with anterior deltoid bar shelf and wide bilateral stance ($0.42\,\text{m}$).
+\item \textbf{Lunge:} 5 named phases (\texttt{standing}, \texttt{step\_descent}, \texttt{bottom},
+  \texttt{drive\_recovery}, \texttt{lockout}) with asymmetric split-stance geometry ($s_x = 0.80\,\text{m}$),
+  lead thigh horizontal, and trailing knee suspended.
+\end{itemize}
+
 \section{Inverse Dynamics, Spine Load and Muscle Redundancy}
 
 \subsection{What Runs Today}
@@ -289,9 +311,31 @@ epic's note that ``muscle content in the OpenSim pack is unverified'' (issue
 supplies torque-angle-velocity capacity and sticking-point detection
 (\texttt{strength.py}) for its single three-link chain only; it does not
 distribute load across named muscles and is not a muscle-redundancy solver
-for a full-body musculoskeletal model. Full-body musculoskeletal lifts with
-muscle forces, and muscle-redundancy solving across them, are future work
-under LIFT-6.
+for a full-body musculoskeletal model.
+
+\subsection{OpenSim Full-Body Musculoskeletal Lifts (LIFT-6, Issue \#11746)}
+The OpenSim full-body musculoskeletal lift formulation (\texttt{opensim\_full\_body\_lifts.py})
+drives a validated full-body musculoskeletal model (\texttt{Rajagopal2015} or \texttt{MyoFullBody})
+with full-body lift trajectories. The barbell is coupled via rigid zero-DOF weld joints and constraints
+to the hands (for deadlift, snatch, clean and jerk, presses, and split jerk) or to the thoracic shelf/rack
+(for back squat and front squat).
+
+Foot--ground contact interfaces employ contact spheres with smooth sphere-halfspace
+(\texttt{SmoothSphereHalfSpaceForce}) or Hunt--Crossley compliant contact laws. Bench press adds a
+rigid bench surface and thoracic back contact.
+
+The inverse-dynamics and muscle redundancy pipeline evaluates:
+\begin{enumerate}[noitemsep]
+\item Generalized joint moments via inverse dynamics under ground reaction and hand-barbell external wrenches.
+\item Static optimization or Computed Muscle Control (CMC) allocating joint moments to individual muscle actuators.
+\item Per-hand bar wrench decomposition reusing the shared GCV-7 minimum-norm allocation contract.
+\item Ground-reaction breakdown reusing the shared GCV-1 contract (per-foot forces, net GRF, and CoP).
+\item L5/S1 spinal joint loading for posture cross-validation against Movement Optimizer.
+\end{enumerate}
+In accordance with Design by Contract and scientific integrity principles, the evaluator fails closed:
+any evaluation where native OpenSim is uninstalled or where reserve actuator contributions exceed
+the 5\% threshold ($\epsilon_{\text{reserve}} \le 0.05$) is marked with an explicit \texttt{"unqualified"}
+status and descriptive diagnostic reason string, never returning falsified zero residuals.
 
 \section{Measured Parity Results}
 All figures below are read from the committed receipt,
@@ -462,5 +506,27 @@ compiles with:
 pdflatex -interaction=nonstopmode -halt-on-error lift_models.tex
 \end{verbatim}
 run twice to resolve references; the generated PDF is not committed.
+
+\subsection{Lifting Showcase Video Protocol and Overlays (LIFT-9, Issue \#11749)}
+A committed headless-capable rendering pipeline (\texttt{scripts/render\_lifting\_showcase.py})
+provides deterministic 60\,fps visualization across all four physics engines (OpenSim, MuJoCo,
+Drake, and Pinocchio):
+\begin{itemize}[noitemsep]
+\item \textbf{Frame Schedules:} Real-time ($1.0\times$) and half-speed slow-motion ($0.5\times$)
+  deterministic 60\,fps schedules.
+\item \textbf{Views:} Multi-angle camera perspectives including \texttt{side}, \texttt{front},
+  and \texttt{oblique} viewpoints.
+\item \textbf{Overlay Protocol:}
+  \begin{itemize}[noitemsep]
+  \item \texttt{clean}: Unadorned lifter musculoskeletal/kinematic geometry and competition barbell.
+  \item \texttt{forces}: Comprehensive biomechanical overlay depicting per-hand bar force vectors
+    (blue), net bar resultant force and couple (purple), per-foot ground reaction vectors (green),
+    net ground reaction force (amber), and instant ground-plane centre of pressure (CoP) marker.
+  \end{itemize}
+\item \textbf{Headless Execution:} Strictly offscreen execution via \texttt{MPLBACKEND=Agg},
+  \texttt{QT\_QPA\_PLATFORM=offscreen}, \texttt{MUJOCO\_GL=egl}, and \texttt{SDL\_VIDEODRIVER=dummy}.
+  Unavailable engines generate an explicit \texttt{"unavailable"} status in the output manifest
+  rather than failing the run or omitting provenance.
+\end{itemize}
 
 \end{document}
