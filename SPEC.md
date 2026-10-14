@@ -2741,6 +2741,7 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-14 | #12515 | BunkerShot3D web page runs evaluate/compare as polled, cancellable jobs with a labelled progress bar, Cancel button, failed/cancelled states and a stale-result guard (slice 5) |
 | 2026-10-14 | #12507 | LIFT-3 slice 3: re-measure the lift-pack parity baseline live with all four engines; update the audit name map and MuJoCo root placement to the current packs; cite open issues for every remaining gap |
 | 2026-10-14 | #12506 | BunkerShot3D workbench solves run as bounded, cancellable API jobs (/v1/jobs/evaluate, /v1/jobs/compare, poll with per-shot progress, cancel) on the shared TaskManager; a cancelled or failed job never carries a result, and a completed one names its job id and input digest |
 | 2026-10-14 | #12513 | Route the remaining dynamic OpenSim loads (import_module/__import__) in src and two grip tests through import_opensim/require_opensim; the import-route guard now flags literal dynamic loads |
