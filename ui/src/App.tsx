@@ -118,6 +118,11 @@ const LiftBaselinePage = lazy(() =>
     default: m.LiftBaselinePage,
   })),
 );
+const BunkerWorkbenchPage = lazy(() =>
+  import("./pages/BunkerWorkbench").then((m) => ({
+    default: m.BunkerWorkbenchPage,
+  })),
+);
 /** Themed full-viewport fallback shown while a route chunk loads (#7433). */
 function PageLoadingFallback() {
   return (
@@ -173,6 +178,11 @@ export function RoutedContent() {
           />
           {/* Lift Baseline (LIFT-8 slice 3, #11748) */}
           <Route path="/tools/lift-baseline" element={<LiftBaselinePage />} />
+          {/* BunkerShot3D designer workbench (#9545) */}
+          <Route
+            path="/tools/bunker-workbench"
+            element={<BunkerWorkbenchPage />}
+          />
           <Route path="/tools/terrain" element={<TerrainPage />} />
           <Route path="/tools/dataset" element={<DatasetGeneratorPage />} />
           <Route path="/tools/analysis" element={<AnalysisToolsPage />} />
