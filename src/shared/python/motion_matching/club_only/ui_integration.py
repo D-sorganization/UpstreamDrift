@@ -46,7 +46,6 @@ from src.shared.python.motion_matching.club_only.seeds import (
 )
 from src.shared.python.motion_matching.club_only.workbook_identity import (
     CANONICAL_TRIAL_SHEETS,
-    CLUB_DATA_RELATIVE,
     CLUB_DATA_SHA256,
     EXPECTED_SAMPLE_COUNTS,
     IDENTITY_SCHEMA,
@@ -401,17 +400,11 @@ def load_club_only_workbook_observation(
     if trial_id not in CANONICAL_TRIAL_SHEETS:
         raise ValueError(f"unknown trial_id={trial_id!r}")
     root = Path(repo_root)
-    from src.motion_capture.capture_registry import (
-        CaptureRegistryError,
-        resolve_capture,
-    )
+    from src.motion_capture.capture_registry import resolve_capture
 
-    try:
-        workbook = resolve_capture("club-workbook-main", repo_root=root)
-    except CaptureRegistryError:
-        workbook = root / CLUB_DATA_RELATIVE
-    if not workbook.is_file():
-        raise FileNotFoundError(f"club workbook missing: {workbook}")
+    # Raises CaptureDataUnavailable (a FileNotFoundError) when the private
+    # workbook is not available through CAPTURE_DATA_DIR.
+    workbook = resolve_capture("club-workbook-main", repo_root=root)
     verify_workbook_hash(workbook, CLUB_DATA_SHA256)
     from src.shared.python.motion_matching.club_only.adapters import (
         club_target_to_observation,
