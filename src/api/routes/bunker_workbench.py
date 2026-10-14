@@ -103,9 +103,6 @@ _RECORD_SCHEMAS = frozenset({SCHEMA_VERSION, COMPARISON_SCHEMA_VERSION})
 _DIGEST_PATTERN = re.compile(r"[0-9a-f]{64}")
 """A SHA-256 hex digest as :func:`record_digest` spells it."""
 
-MODEL_SOURCE = "src.tools.bunker_shot_gui.model.WorkbenchModel"
-"""The headless surface every number in the response comes from."""
-
 _DISPOSITION_UNCALIBRATED = SHIPPED_CARRY_DISPOSITION.value
 """The shipped carry objective's disposition, from its one owner (#9239).
 
@@ -439,23 +436,6 @@ def _carry(shot: ShotOutcome) -> dict[str, Any] | None:
     }
 
 
-def _sources(evaluation: DesignEvaluation) -> dict[str, Any]:
-    """Where the model, every sand property and the carry band come from."""
-    from src.tools.bunker_shot_gui.uncertainty import CARRY_BAND_SOURCE
-
-    provenance = evaluation.sand.provenance
-    entries = provenance.entries
-    band = evaluation.shot.carry_band
-    return {
-        "model": MODEL_SOURCE,
-        "sand": {
-            name: {"basis": entry.basis.value, "source": entry.source}
-            for name, entry in entries.items()
-        },
-        "carry_band": None if band is None else CARRY_BAND_SOURCE,
-    }
-
-
 def _inputs(evaluation: DesignEvaluation, swing: SwingSetup) -> dict[str, Any]:
     """The resolved inputs the record is bound to."""
     sand = evaluation.sand
@@ -519,7 +499,11 @@ def evaluation_record(
     Raises:
         ValueError: If ``handedness`` is not ``"right"``.
     """
-    from src.tools.bunker_shot_gui.report import TIER_MODEL_NAMES, validity_stamp
+    from src.tools.bunker_shot_gui.report import (
+        TIER_MODEL_NAMES,
+        evaluation_sources,
+        validity_stamp,
+    )
 
     if handedness != "right":
         raise ValueError(_LEFT_HANDED_REASON)
@@ -538,7 +522,7 @@ def evaluation_record(
         "delivered": _delivered(shot),
         "carry": _carry(shot),
         "unavailable": list(shot.unavailable),
-        "sources": _sources(evaluation),
+        "sources": evaluation_sources(evaluation),
         "objective": (
             None if objective is None else _objective_report(objective, shot.carry_m)
         ),
