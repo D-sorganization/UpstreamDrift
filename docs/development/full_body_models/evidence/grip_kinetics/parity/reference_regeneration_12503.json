@@ -1,0 +1,198 @@
+{
+  "issue": 12503,
+  "generated_utc": "2026-10-14T11:09:55+00:00",
+  "host": "Brick",
+  "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+  "python": "3.12.13",
+  "opensim": "4.6",
+  "base_commit": "4aca3f1aeadc9e7ac8d76baba702bea217f07e74",
+  "command": "run_grip_parity.py --club <club> --reference; then --engines mujoco drake pinocchio --report",
+  "fixtures_sha256": {
+    "tests/fixtures/club_face/swing_q_driver.npz": "df7802600828a7e04158cec5cdb487505a5ba1fff0c15044756540c5eb68bc0a",
+    "tests/fixtures/club_face/swing_q_iron7.npz": "21dc49fa59b46c1a35af0b926c5f2ebfec79e8cc122c8c1a673df003821c01e8",
+    "tests/fixtures/club_face/address_poses.json": "a45f6bcb916422dec734797dd5c7c09e14e5d516641bd788dabede5a369f8a6a",
+    "docs/development/full_body_models/full_body_spec_anthro_driver.json": "cba352f4e19f1fc6dc3c6846f4a5b4677746c571c601fab190b6f3126af854d1",
+    "docs/development/full_body_models/full_body_spec_anthro_iron7.json": "07f0b6908c660e681b8c9785ee1f140072305dc600c79acd0e5437d6ef5b6b9c"
+  },
+  "not_rerun": {
+    "myosuite": "myosuite is not installed on this host; its committed series predate the fixtures, so metrics_<club>.json reports it against the fresh reference without a re-run (the test skips it)"
+  },
+  "clubs": {
+    "driver": {
+      "reference_sha256": {
+        "before": "5c85c8067e6ef35f302ee078aa9af2cd62b4425e148bbeecc7e5d63aaaf37246",
+        "after": "d1a8bb5aeb1d4bb65ad3c69cb0c27562e50a8674d1751b79c0ede6f00e31bd7d"
+      },
+      "reference_run": {
+        "engine": "opensim",
+        "accuracy": 1e-5,
+        "wall_time_s": 86.71895137199317
+      },
+      "engines": {
+        "mujoco": {
+          "against_stale_reference": {
+            "passes": false,
+            "failing": [
+              "couple",
+              "deflection_L",
+              "deflection_R",
+              "force_L",
+              "force_R",
+              "internal_force",
+              "net_force",
+              "rotation_L",
+              "rotation_R",
+              "squeeze"
+            ],
+            "worst_peak": ["squeeze", 14.630526861639247],
+            "worst_rms": ["squeeze", 0.9726653135508774]
+          },
+          "against_fresh_reference": {
+            "passes": true,
+            "failing": [],
+            "worst_peak": ["net_force", 0.00014063362810651277],
+            "worst_rms": ["net_force", 1.8063698901049914e-5]
+          }
+        },
+        "drake": {
+          "against_stale_reference": {
+            "passes": false,
+            "failing": [
+              "couple",
+              "deflection_L",
+              "deflection_R",
+              "force_L",
+              "force_R",
+              "internal_force",
+              "net_force",
+              "rotation_L",
+              "rotation_R",
+              "squeeze"
+            ],
+            "worst_peak": ["squeeze", 13.98835680216559],
+            "worst_rms": ["squeeze", 0.9341269853586118]
+          },
+          "against_fresh_reference": {
+            "passes": true,
+            "failing": [],
+            "worst_peak": ["squeeze", 0.04104196990935672],
+            "worst_rms": ["squeeze", 0.003829176807873719]
+          }
+        },
+        "pinocchio": {
+          "against_stale_reference": {
+            "passes": false,
+            "failing": [
+              "couple",
+              "deflection_L",
+              "deflection_R",
+              "force_L",
+              "force_R",
+              "internal_force",
+              "net_force",
+              "rotation_L",
+              "rotation_R",
+              "squeeze"
+            ],
+            "worst_peak": ["squeeze", 14.629873303185464],
+            "worst_rms": ["squeeze", 0.9726408388544441]
+          },
+          "against_fresh_reference": {
+            "passes": true,
+            "failing": [],
+            "worst_peak": ["deflection_L", 3.854651880276747e-6],
+            "worst_rms": ["net_force", 6.764194689436834e-6]
+          }
+        }
+      }
+    },
+    "iron7": {
+      "reference_sha256": {
+        "before": "945422ea67be353796cc079742833916ec2b38be2a7a11ee1f79a8bc358f83ce",
+        "after": "d5be90b02b7246d980d8d64ebfda601615904d262763a9e112308ea6a57543d2"
+      },
+      "reference_run": {
+        "engine": "opensim",
+        "accuracy": 1e-5,
+        "wall_time_s": 101.11827150298632
+      },
+      "engines": {
+        "mujoco": {
+          "against_stale_reference": {
+            "passes": false,
+            "failing": [
+              "couple",
+              "deflection_L",
+              "deflection_R",
+              "force_L",
+              "force_R",
+              "internal_force",
+              "net_force",
+              "rotation_L",
+              "rotation_R",
+              "squeeze"
+            ],
+            "worst_peak": ["squeeze", 6.527353121931662],
+            "worst_rms": ["squeeze", 0.5333980687752642]
+          },
+          "against_fresh_reference": {
+            "passes": true,
+            "failing": [],
+            "worst_peak": ["net_force", 4.4966188133655636e-5],
+            "worst_rms": ["net_force", 1.2624240364274611e-5]
+          }
+        },
+        "drake": {
+          "against_stale_reference": {
+            "passes": false,
+            "failing": [
+              "couple",
+              "deflection_L",
+              "deflection_R",
+              "force_L",
+              "force_R",
+              "internal_force",
+              "net_force",
+              "rotation_L",
+              "rotation_R",
+              "squeeze"
+            ],
+            "worst_peak": ["squeeze", 6.287709152432258],
+            "worst_rms": ["squeeze", 0.5128832720412756]
+          },
+          "against_fresh_reference": {
+            "passes": true,
+            "failing": [],
+            "worst_peak": ["squeeze", 0.031810324662886656],
+            "worst_rms": ["squeeze", 0.0034799705725460893]
+          }
+        },
+        "pinocchio": {
+          "against_stale_reference": {
+            "passes": false,
+            "failing": [
+              "couple",
+              "deflection_L",
+              "deflection_R",
+              "force_L",
+              "force_R",
+              "internal_force",
+              "net_force",
+              "rotation_L",
+              "rotation_R",
+              "squeeze"
+            ],
+            "worst_peak": ["squeeze", 6.52716359361956],
+            "worst_rms": ["squeeze", 0.5333935115823454]
+          },
+          "against_fresh_reference": {
+            "passes": true,
+            "failing": [],
+            "worst_peak": ["squeeze", 1.7733259288954253e-6],
+            "worst_rms": ["net_force", 1.6625141830157115e-6]
+          }
+        }
+      }
+    }
+  }
+}
