@@ -31,7 +31,12 @@ from src.shared.python.motion_matching.anthropometry import (
     de_leva_table_sha256,
 )
 from src.shared.python.motion_matching.club_models import CLUBS
-from src.shared.python.motion_matching.execution.assets import get_club_markers
+from src.shared.python.motion_matching.execution.assets import (
+    get_candidate_geometry_spec,
+    get_club_markers,
+    get_native_geometry_spec,
+    get_opensim_model,
+)
 from src.shared.python.motion_matching.execution.club_markers import (
     CLUB_MARKER_BODY,
     Offset,
@@ -677,13 +682,13 @@ class AnthropometricDocument:
 
 
 def compose_anthropometric_document(
-    *,
-    native_path: Path,
-    osim_path: Path,
-    native_candidate_path: Path,
-    stature_m: float,
-    mass_kg: float,
+    stature_m: float = 1.80,
+    mass_kg: float = 80.0,
     club: str = "driver",
+    *,
+    native_path: Path | None = None,
+    osim_path: Path | None = None,
+    native_candidate_path: Path | None = None,
     **kwargs: Any,
 ) -> AnthropometricDocument:
     """Compose the candidate full-body document in memory (no files written).
@@ -695,19 +700,25 @@ def compose_anthropometric_document(
     non-driver club without one raises ``ValueError``. Postcondition: the
     document passed ``validate_full_body_spec`` inside ``derive_full_body_spec``.
 
-    ``match_subject_mass`` (kwarg, default ``False``) scales the Rajagopal
-    legs with :func:`scale_leg_mass` so that the body mass without the club
-    equals ``mass_kg`` (#12199); the legs carry what the upper body does not.
-    It raises ``ValueError`` when the upper body alone reaches ``mass_kg``.
-    Without it the legs keep the reference Rajagopal masses, which the
-    capture reference builds and their receipts pin.
+    ``match_subject_mass`` (kwarg, default ``False``): when ``False``, preserves
+    the unscaled De Leva segment sum and pinned Simscape
+    ``native_geometry_spec_9967.json`` hand masses (``0.5491357853472616 kg``
+    per hand) for deterministic reference-capture parity. When ``True``, scales
+    both the native hand solids (``0.0061 * mass_kg`` each) and the total character
+    body mass so total subject mass equals ``mass_kg``, scaling the Rajagopal legs
+    with :func:`scale_leg_mass` so body mass without the club equals ``mass_kg``
+    (#12199, #12300); the legs carry what the upper body does not. Raises
+    ``ValueError`` when the upper body alone reaches ``mass_kg``.
     """
+    native_path = native_path or get_native_geometry_spec(None)
+    osim_path = osim_path or get_opensim_model(None)
+    native_candidate_path = native_candidate_path or get_candidate_geometry_spec(None)
+
     trunk_scale = float(kwargs.get("trunk_scale", 1.0))
     arm_scale = float(kwargs.get("arm_scale", 1.0))
     shoulder_scale = float(kwargs.get("shoulder_scale", 1.0))
     grip_roll_deg = float(kwargs.get("grip_roll_deg", 0.0))
-    lead_grip_rotation = kwargs.get("lead_grip_rotation")
-    trail_grip_rotation = kwargs.get("trail_grip_rotation")
+    match_subject_mass = bool(kwargs.get("match_subject_mass", False))
 
     native = json.loads(native_path.read_text(encoding="utf-8"))
     upper = build_upper_body(
@@ -720,16 +731,15 @@ def compose_anthropometric_document(
         club=CLUBS[club],
         grip_roll_deg=grip_roll_deg,
         grip_rotation_deg={
-            "L": lead_grip_rotation or GRIP_ROTATION_DEG["L"],
-            "R": trail_grip_rotation or GRIP_ROTATION_DEG["R"],
+            "L": kwargs.get("lead_grip_rotation") or GRIP_ROTATION_DEG["L"],
+            "R": kwargs.get("trail_grip_rotation") or GRIP_ROTATION_DEG["R"],
         },
+        scale_hand_mass=match_subject_mass,
     )
 
     hip_frame = next(f for f in upper["frames"] if f["name"] == "Hip")
     leg_mass_kg = (
-        mass_kg - _body_mass_without_club(upper)
-        if kwargs.get("match_subject_mass", False)
-        else None
+        mass_kg - _body_mass_without_club(upper) if match_subject_mass else None
     )
     extension, notes, hip_half = _build_aligned_leg_extension(
         osim_path, stature_m, hip_frame, leg_mass_kg
