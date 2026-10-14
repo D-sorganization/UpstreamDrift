@@ -15230,16 +15230,12 @@
     {
       "key": "grip_width",
       "title": "Grip half-width does not match achievable hand spacing",
-      "engines": ["drake", "mujoco", "opensim", "pinocchio"],
+      "engines": ["drake", "mujoco", "pinocchio"],
       "evidence": [
         "worst mujoco/snatch: 0.429 m",
         "mujoco: native start closure above 0.01 m"
       ],
-      "issues": [
-        "MuJoCo_Models#408",
-        "OpenSim_Models#394",
-        "Pinocchio_Models#443"
-      ],
+      "issues": ["MuJoCo_Models#408", "Pinocchio_Models#443"],
       "lift_story": "LIFT-3",
       "new_issue": false,
       "stale": false
