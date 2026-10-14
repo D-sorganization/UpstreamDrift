@@ -1766,12 +1766,12 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Owner:** claude
 - **Issue:** #9545 (epic #9541)
 - **Branch:** claude/issue-9545-api
-- **PR:** #11516 (draft), #12449, #12495, #12440, #12506, #12515
+- **PR:** #11516 (draft), #12449, #12495, #12440, #12506, #12515, #12519
 - **Paths:** src/api/routes/bunker_workbench.py; src/tools/bunker_shot_gui/input_ranges.py; src/tools/bunker_shot_gui/design.py; src/tools/bunker_shot_gui/widgets.py; src/tools/bunker_shot_gui/report.py; src/tools/bunker_shot_gui/render.py; src/config/feature_parity.json; tests/bunkershot3d/test_bunker_workbench_api.py
 - **Started:** 2026-10-04
-- **Last verified:** 2026-10-14 (`14cad979`; collated from changes/9545-bunkershot3d-web-page-runs-evaluate-comp.md)
+- **Last verified:** 2026-10-14 (`8f3f2371`; collated from changes/9545-bunkershot3d-versioned-3-d-particle-traj.md)
 - **Summary:** The headless workbench API enforces request ranges, handedness and source-stamped verdicts; predictive playability is refused or reported without ranking. UI and API share input-range authority.
-- **Next step:** Merge the PR; then wire the web page to the job routes (progress bar, Cancel, stale-result guard by input digest), sand/swing inputs and /v1/verify save-reload.
+- **Next step:** Merge the PR; then wire a real canonical 3-D backend capture into the writer (#9692 acceptance) and render it in the VTK viewport (#9693 slice).
 
 ### DL-#9544 · Bunker Contact Regimes and Coupled Club Rotation Across Fidelity Tiers
 
