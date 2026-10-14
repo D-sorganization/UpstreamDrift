@@ -8,7 +8,11 @@ fresh result. ``mark_running`` only starts a task that is still pending.
 
 from __future__ import annotations
 
+import pytest
+
 from src.api.task_manager import TaskManager, TaskStatus
+
+pytestmark = [pytest.mark.unit]
 
 
 def _pending(tm: TaskManager, task_id: str = "t1") -> None:
