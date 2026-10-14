@@ -11,9 +11,9 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 377,
-    "diverged": 271,
-    "ud-only": 1703,
+    "identical": 375,
+    "diverged": 272,
+    "ud-only": 1705,
     "tools-only": 838,
     "spelling-only": 121
   },
@@ -336,7 +336,7 @@
     "estimation": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 47,
+      "ud-only": 48,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -754,9 +754,9 @@
       "spelling-only": 0
     },
     "sidekick": {
-      "identical": 212,
-      "diverged": 68,
-      "ud-only": 36,
+      "identical": 210,
+      "diverged": 69,
+      "ud-only": 37,
       "tools-only": 92,
       "spelling-only": 23
     },
@@ -6581,8 +6581,8 @@
       "package": "contracts.py",
       "subpackage": "",
       "ud_bytes": 24271,
-      "tools_bytes": 25323,
-      "byte_delta": -1052,
+      "tools_bytes": 24980,
+      "byte_delta": -709,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -8308,7 +8308,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "mosaic",
-      "ud_bytes": 24047,
+      "ud_bytes": 24132,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -22096,7 +22096,7 @@
       "classification": "ud-only",
       "package": "physics",
       "subpackage": "",
-      "ud_bytes": 11347,
+      "ud_bytes": 12658,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -26461,13 +26461,13 @@
     },
     {
       "path": "sidekick/lab/bio/c3d_reader.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "sidekick",
       "subpackage": "lab",
       "ud_bytes": 35430,
-      "tools_bytes": 35430,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "tools_bytes": 34734,
+      "byte_delta": 696,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -28741,13 +28741,13 @@
     },
     {
       "path": "sidekick/tests/lab/bio/test_c3d_force_plate_dataframe.py",
-      "classification": "identical",
+      "classification": "ud-only",
       "package": "sidekick",
       "subpackage": "tests",
       "ud_bytes": 5037,
-      "tools_bytes": 5037,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -40630,9 +40630,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "d-sorgcodexagent[bot]",
-        "date": "2026-10-13",
-        "commit": "9b880daf7c689b61313a1b590f65cfdfbdae4364"
+        "author": "Dieter Olson",
+        "date": "2026-08-20",
+        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
       }
     },
     {
@@ -41959,6 +41959,19 @@
         "author": "d-sorgcodexagent[bot]",
         "date": "2026-06-16",
         "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+      }
+    },
+    {
+      "path": "sidekick/lab/bio/c3d_reader.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-10-14",
+        "commit": "8322d476ccfb2f78c2555b16c3969ed859dca0c7"
+      },
+      "tools": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-10-13",
+        "commit": "bdc3eed0e934ec84d94f5f74ef4b2b7745c1a545"
       }
     },
     {
