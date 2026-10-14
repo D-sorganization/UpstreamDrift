@@ -296,6 +296,7 @@ class ShootingFitConfig:
     iterations: int
     gain: float = SHOOTING_RELAXATION
     tracking_backend: str = "kkt"
+    root_yaw_weight: float = 0.0
 
 
 def weight_fraction_report(lane: Lane, record: fs.SimulationRecord) -> dict[str, Any]:
@@ -433,7 +434,11 @@ def shooting_fit(
             best_q, best_rms = q_track, rms
         if k == iterations:
             break
-        command = command - gain * (sim_q[:, root] - target)
+        root_diff = sim_q[:, root] - target
+        if config.root_yaw_weight > 0.0 and "HipInputZ" in SHOOTING_LOCKED:
+            yaw_col = SHOOTING_LOCKED.index("HipInputZ")
+            root_diff[:, yaw_col] *= config.root_yaw_weight
+        command = command - gain * root_diff
         locked = [
             {name: float(command[j, i]) for i, name in enumerate(SHOOTING_LOCKED)}
             for j in range(len(lane.times))
@@ -457,6 +462,7 @@ def shooting_fit(
     report = {
         "locked": list(SHOOTING_LOCKED),
         "relaxation": gain,
+        "root_yaw_weight": config.root_yaw_weight,
         "iterations": history,
         "best_iteration": int(
             np.argmin([float(h["replay_marker_rms_m"]) for h in history])

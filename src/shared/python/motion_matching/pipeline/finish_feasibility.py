@@ -491,3 +491,95 @@ def regressions(
                     f"{side}.{name} regressed to {value:.4f} (baseline {floor:.4f})"
                 )
     return found
+
+
+#: Finish-window marker RMS baselines (m) for canonical clubs (#11672, #11667).
+FINISH_MARKER_RMS_BASELINES_M: dict[str, float] = {
+    "driver": 0.176,
+    "iron": 0.113,
+    "iron7": 0.113,
+}
+
+#: Pre-impact marker RMS baselines (m) for canonical clubs (#11672).
+PRE_IMPACT_MARKER_RMS_BASELINES_M: dict[str, float] = {
+    "driver": 0.085,
+    "iron": 0.090,
+    "iron7": 0.090,
+}
+
+
+def evaluate_finish_root_yaw_feasibility(
+    times: np.ndarray,
+    marker_errors: np.ndarray,
+    valid: np.ndarray,
+    pelvis_yaw_error_rad: np.ndarray,
+    *,
+    club: str = "driver",
+    finish_start_s: float = FINISH_START_S,
+    impact_time_s: float | None = None,
+) -> ReportDict:
+    """Evaluate finish-window feasibility and root-yaw metrics against baseline (#11672).
+
+    Calculates marker RMS and root-yaw error over the finish window ([finish_start_s, end]),
+    checks for improvement over the baseline (driver 176 mm, 7-iron 113 mm), and verifies
+    absence of pre-impact regression.
+    """
+    t = np.asarray(times, dtype=float)
+    if t.ndim != 1 or t.size < 2:
+        raise ValueError("times must be a 1D array of length >= 2")
+    errs = np.asarray(marker_errors, dtype=float)
+    vld = np.asarray(valid, dtype=bool)
+    if errs.ndim != 2 or vld.shape != errs.shape:
+        raise ValueError("marker_errors and valid must share a 2D shape")
+    if len(t) != len(errs):
+        raise ValueError("times and marker_errors row counts must match")
+
+    finish_mask = t >= finish_start_s
+    if not finish_mask.any():
+        raise ValueError(f"no samples in finish window >= {finish_start_s} s")
+
+    pre_mask = t <= impact_time_s if impact_time_s is not None else t < finish_start_s
+    finish_vld = vld[finish_mask]
+    finish_err = errs[finish_mask]
+    finish_rms = (
+        float(np.sqrt(np.mean(finish_err[finish_vld] ** 2)))
+        if finish_vld.any()
+        else 0.0
+    )
+
+    pre_vld = vld[pre_mask]
+    pre_err = errs[pre_mask]
+    pre_rms = float(np.sqrt(np.mean(pre_err[pre_vld] ** 2))) if pre_vld.any() else 0.0
+
+    yaw_max, yaw_final = pelvis_yaw_error_deg(
+        t, pelvis_yaw_error_rad, start_s=finish_start_s
+    )
+    finish_yaw_rad = np.asarray(pelvis_yaw_error_rad, dtype=float)[finish_mask]
+    yaw_rms = (
+        float(np.sqrt(np.mean(np.degrees(finish_yaw_rad) ** 2)))
+        if finish_yaw_rad.size > 0
+        else 0.0
+    )
+
+    club_key = club.lower().strip()
+    baseline_finish = FINISH_MARKER_RMS_BASELINES_M.get(club_key, 0.176)
+    baseline_pre = PRE_IMPACT_MARKER_RMS_BASELINES_M.get(club_key, 0.085)
+
+    improved = bool(finish_rms < baseline_finish)
+    no_pre_regression = bool(pre_rms <= baseline_pre + 1e-4)
+
+    return {
+        "club": club,
+        "finish_window_s": [finish_start_s, float(t[-1])],
+        "finish_marker_rms_m": finish_rms,
+        "finish_marker_rms_baseline_m": baseline_finish,
+        "finish_marker_rms_delta_mm": float((finish_rms - baseline_finish) * 1e3),
+        "finish_marker_rms_improved": improved,
+        "pre_impact_marker_rms_m": pre_rms,
+        "pre_impact_marker_rms_baseline_m": baseline_pre,
+        "pre_impact_regression": not no_pre_regression,
+        "pelvis_yaw_error_deg_max": yaw_max,
+        "pelvis_yaw_error_deg_final": yaw_final,
+        "pelvis_yaw_error_deg_rms": yaw_rms,
+        "feasible": improved and no_pre_regression,
+    }
