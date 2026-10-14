@@ -948,7 +948,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #11831
 - **Branch:** feat/11793-f09a-output-sampling
 - **PR:** #11830
-- **Paths:** src/shared/python/motion_matching/replay_metrics.py,src/shared/python/motion_matching/__init__.py,tests/unit/motion_matching/test_replay_observation_sampling.py,docs/development/feedback_controls/F09A-OBSERVATION-SAMPLING.md,docs/development/feedback_controls/TURNOVER.md,manuals/upstreamdrift/chapters/13-feedback-comparison.qmd
+- **Paths:** src/shared/python/motion_matching/replay_metrics.py,src/shared/python/motion_matching/**init**.py,tests/unit/motion_matching/test_replay_observation_sampling.py,docs/development/feedback_controls/F09A-OBSERVATION-SAMPLING.md,docs/development/feedback_controls/TURNOVER.md,manuals/upstreamdrift/chapters/13-feedback-comparison.qmd
 - **Started:** 2026-10-14
 - **Last verified:** 2026-10-14 (`fb692749`; collated from changes/11831-f09a-observation-output-sampling.md)
 - **Summary:** Sample native replay marker outputs on the observation clock
@@ -4472,7 +4472,7 @@ open. Preserve explicit ground configuration in independent replay.
 - **Summary:** Marker-overlay video export takes a frame size (size_px), so the run-102 Simscape playback renders at 1920x1080 60 fps (1x, 0.5x, 0.1x).
 - **Next step:** Shipped in PR #11901.
 
-### DL-#11554 · DIME Dynamics Window: Multiple Shooting With States and Controls as Decision Variables, Real Transition Defects D_K = X_{K+1} - Phi(X_K, U_K, Dt) From the Provider Step, and Real Costs Evaluated on the Returned Trajectory
+### DL-#11554 · DIME Dynamics Window: Multiple Shooting With States and Controls as Decision Variables, Real Transition Defects D*K = X*{K+1} - Phi(X_K, U_K, Dt) From the Provider Step, and Real Costs Evaluated on the Returned Trajectory
 
 - **State:** shipped
 - **Owner:** unassigned
@@ -4482,7 +4482,7 @@ open. Preserve explicit ground configuration in independent replay.
 - **Paths:** see #11699
 - **Started:** 2026-10-14
 - **Last verified:** 2026-10-14 (`e50a9ba1`; collated from changes/11554-dime-dynamics-window-multiple-shooting-w.md)
-- **Summary:** DIME dynamics window: multiple shooting with states and controls as decision variables, real transition defects d_k = x_{k+1} - Phi(x_k, u_k, dt) from the provider step, and real costs evaluated on the returned trajectory
+- **Summary:** DIME dynamics window: multiple shooting with states and controls as decision variables, real transition defects d*k = x*{k+1} - Phi(x_k, u_k, dt) from the provider step, and real costs evaluated on the returned trajectory
 - **Next step:** Shipped in PR #11699.
 
 ### DL-#11546 · Vectorised Multi-Trial Batching (Block-Arrow Schur, Time-Parallel Riccati) and Runtime Receipts (MOSAIC-14)

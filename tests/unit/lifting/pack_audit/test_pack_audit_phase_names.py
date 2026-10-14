@@ -126,9 +126,14 @@ def test_renamed_or_missing_phase_is_a_gap_with_a_reason(receipt):
     assert "mujoco/deadlift: missing: first_pull; unexpected: below_knee" in evidence
 
 
+def _rename_one_phase(receipt: dict[str, Any]) -> None:
+    receipt["results"]["deadlift"]["mujoco"]["phases"][1]["name"] = "below_knee"
+
+
 def test_phase_names_gap_never_cites_the_closed_rename_trackers(receipt):
     """MuJoCo#401, Drake#372 and Pinocchio#434 merged; all packs match v2.1."""
     _measured_against_vendored_standard(receipt)
+    _rename_one_phase(receipt)
     gap = _phase_names_gap(receipt)
     assert gap is not None
     assert gap["issues"] == []
@@ -152,29 +157,43 @@ def test_receipt_standard_version_must_be_semver(receipt, version: Any):
         an.receipt_predates_standard(receipt)
 
 
-def test_committed_receipt_marks_the_phase_names_gap_stale(committed):
-    """The receipt was measured at standard v1.2, before the pack renames."""
-    assert an.receipt_predates_standard(committed)
-    gap = _phase_names_gap(committed)
+def test_old_receipt_marks_the_phase_names_gap_stale(receipt):
+    """A receipt measured at standard v1.2, before the pack renames, is stale."""
+    receipt["standard"]["version"] = "1.2.0"
+    _rename_one_phase(receipt)
+    assert an.receipt_predates_standard(receipt)
+    gap = _phase_names_gap(receipt)
     assert gap is not None
     assert gap["stale"] is True
     assert gap["issues"] == []
     assert not gap["new_issue"]
-    assert gap["engines"] == sorted(an.ENGINES)
     assert gap["evidence"][0].startswith("stale: receipt predates pack renames")
     assert "re-measure" in gap["evidence"][0]
     assert len(gap["evidence"]) == 1 + sum(
-        not r["names_match"] for r in an.phase_rows(committed)
+        not r["names_match"] for r in an.phase_rows(receipt)
     )
 
 
-def test_every_other_gap_is_not_stale(committed):
+def test_committed_receipt_is_live_at_the_vendored_standard(committed):
+    """Re-measured on brick with all four engines (#11743 slice 3)."""
+    assert committed["standard"]["version"] == standard_version()
+    assert not an.receipt_predates_standard(committed)
+    assert committed["deferred"] == []
+    assert all(r["names_match"] for r in an.phase_rows(committed))
+    keys = {g["key"] for g in derive_gaps(committed)}
+    assert "phase_names" not in keys
+    assert "phase_count" not in keys
+
+
+def test_no_committed_gap_is_stale(committed):
     for gap in derive_gaps(committed):
-        assert gap["stale"] is (gap["key"] == "phase_names"), gap["key"]
+        assert gap["stale"] is False, gap["key"]
 
 
-def test_report_has_a_names_column_built_on_names_match(committed):
-    text = render_markdown(committed)
+def test_report_has_a_names_column_built_on_names_match(receipt):
+    receipt["standard"]["version"] = "1.2.0"
+    _rename_one_phase(receipt)
+    text = render_markdown(receipt)
     assert "| Names Match Standard |" in text
     row = next(
         ln for ln in text.splitlines() if "Phase names differ from the standard" in ln

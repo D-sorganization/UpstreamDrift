@@ -8,7 +8,13 @@ from pathlib import Path
 import pytest
 
 from src.shared.python.lifting.pack_audit import analysis as an
-from src.shared.python.lifting.pack_audit.gaps import ISSUES, REPO, derive_gaps
+from src.shared.python.lifting.pack_audit.gaps import (
+    AUDIT_ISSUES,
+    AUDIT_REPO,
+    ISSUES,
+    REPO,
+    derive_gaps,
+)
 from src.shared.python.lifting.pack_audit.report import condense, render_markdown
 from src.shared.python.lifting.pack_audit.stills import render_still
 
@@ -60,8 +66,47 @@ def test_every_gap_has_an_issue_in_a_known_repo(receipt):
             continue
         assert gap["issues"], gap["key"]
         for ref in gap["issues"]:
-            assert ref.split("#")[0] in REPO.values()
+            assert ref.split("#")[0] in {*REPO.values(), AUDIT_REPO}
         assert gap["evidence"], gap["key"]
+
+
+#: Trackers confirmed closed on 2026-10-14 when the baseline was re-measured
+#: live on brick (#11743 slice 3). A gap that still reproduces must cite an
+#: open issue instead.
+CLOSED_TRACKERS = {
+    "Drake_Models#365",
+    "Drake_Models#371",
+    "Drake_Models#372",
+    "MuJoCo_Models#401",
+    "MuJoCo_Models#408",
+    "MuJoCo_Models#427",
+    "MuJoCo_Models#428",
+    "OpenSim_Models#394",
+    "OpenSim_Models#415",
+    "Pinocchio_Models#432",
+    "Pinocchio_Models#434",
+    "Pinocchio_Models#443",
+    "Pinocchio_Models#451",
+}
+
+
+def test_committed_gaps_cite_no_closed_tracker(receipt):
+    for gap in derive_gaps(receipt):
+        assert not CLOSED_TRACKERS & set(gap["issues"]), gap["key"]
+
+
+def test_audit_side_gaps_cite_the_audit_issue(receipt):
+    """Gaps caused by the audit lagging the packs cite UpstreamDrift#12504."""
+    gaps = {g["key"]: g for g in derive_gaps(receipt)}
+    for key in ("grip_attachment", "no_grf"):
+        assert f"{AUDIT_REPO}#12504" in gaps[key]["issues"], key
+
+
+def test_pack_side_gaps_cite_the_issues_filed_by_the_re_measure(receipt):
+    gaps = {g["key"]: g for g in derive_gaps(receipt)}
+    assert "Drake_Models#429" in gaps["limits"]["issues"]
+    assert "Drake_Models#429" in gaps["bench_mass"]["issues"]
+    assert "MuJoCo_Models#496" in gaps["contacts"]["issues"]
 
 
 def test_issue_map_references_positive_numbers():
@@ -69,6 +114,8 @@ def test_issue_map_references_positive_numbers():
         for engine, nums in per_engine.items():
             assert engine in REPO
             assert all(isinstance(n, int) and n > 0 for n in nums)
+    for nums in AUDIT_ISSUES.values():
+        assert nums and all(isinstance(n, int) and n > 0 for n in nums)
 
 
 def test_unattached_right_hand_is_reported_for_drake_and_pinocchio(receipt):

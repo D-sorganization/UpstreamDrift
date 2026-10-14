@@ -38,22 +38,17 @@ CANONICAL_COORDINATES: tuple[str, ...] = _SIDELESS + tuple(
     pattern.format(s=s) for pattern in _SIDED for s in SIDES
 )
 
+# OpenSim_Models (4f87e2d) and Pinocchio_Models (7d3d60f) adopted the standard
+# v2 coordinate names; only Drake_Models (2eeba80) keeps the legacy spellings.
 _RENAMES: dict[str, dict[str, str]] = {
     "mujoco": {},
-    "opensim": {
-        "wrist_{s}_deviate": "wrist_{s}_deviation",
-        "ankle_{s}_invert": "ankle_{s}_inversion",
-    },
+    "opensim": {},
     "drake": {
         "knee_{s}_flex": "knee_{s}",
         "elbow_{s}_flex": "elbow_{s}",
         "neck_flex": "neck",
     },
-    "pinocchio": {
-        "knee_{s}_flex": "knee_{s}",
-        "elbow_{s}_flex": "elbow_{s}",
-        "neck_flex": "neck",
-    },
+    "pinocchio": {},
 }
 
 
