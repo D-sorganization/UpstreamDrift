@@ -1762,7 +1762,7 @@
       "id": "movement_optimizer",
       "title": "Movement Optimizer",
       "description": "Cross-engine barbell trajectory optimization (unified task mapped with tools_movement_optimizer under #9406 authority; retains legacy IDs and alternate provider diagnostics — #10514)",
-      "path": "src/movement_optimizer/__main__.py",
+      "path": "src/config/models.yaml",
       "launch_target": "src/movement_optimizer/__main__.py",
       "category": "biomechanics",
       "status": "experimental",
