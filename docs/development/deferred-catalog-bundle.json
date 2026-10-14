@@ -18,6 +18,16 @@
       "export_script": "scripts/matlab/export_simscape_mechanics_explorer_views.m",
       "view_presets": ["face_on", "down_the_line", "overhead", "perspective"],
       "rationale": "Simscape Mechanics Explorer video export (smwritevideo) requires MATLAB R2025b host and cannot run on headless CI (brick)."
+    },
+    {
+      "id": "BS3D-F3-GRAIN-PRODUCER",
+      "issue": 12536,
+      "epic_issue": 9545,
+      "title": "BS3D: Real 3-D grain producer (Chrono F3 via pychrono, conda-only)",
+      "status": "deferred",
+      "category": "bunkershot3d_solver",
+      "host_requirement": "conda-forge python with pychrono (F3 grain simulation)",
+      "rationale": "Real 3-D DEM grain simulation via pychrono requires specialized conda-forge binary packages not present in core pip environments. Deferred by owner ruling 2026-10-14 under #12536."
     }
   ]
 }
