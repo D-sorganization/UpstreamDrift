@@ -1,0 +1,28 @@
+{
+  "number": 11542,
+  "html_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11542",
+  "title": "[MOSAIC-10] Multi-swing acquisition and registration (phase alignment, event anchoring) \u2014 the repository has one trial per capture",
+  "body": "## Purpose\nThe repository holds one trial per capture, so the multi-trial machinery has no real multi-swing input. Provide acquisition and registration for multiple swings of one player: phase alignment and event anchoring (e.g. address, top, impact) so trials share a template time base. Deferred human data collection must be recorded as deferred validation, not faked.\n\n## Depends on\n#11533 (MOSAIC-01).\n\n## Acceptance criteria\n- Registration test on synthetic multi-trial data with known time warps recovers phase to a stated tolerance; event anchors are propagated into the shared template.\n- Ingest path for multiple trials per capture is specified and tested with synthetic fixtures (data contracts, provenance, anonymisation).\n- Missing or mislabelled events produce explicit errors/unqualified reports rather than defaulting.\n- Any acceptance requiring real multi-swing capture is entered in the deferred-validation catalog and not closed by synthetic data.\n- Time-warp artefacts on shared torque template are quantified (explained variance before/after registration).\n\n## Definition of done (per `AGENTS.md` / `CLAUDE.md`)\n- [ ] TDD: failing behavioural test committed first (RED evidence in the PR), then GREEN, with analytic or synthetic truth.\n- [ ] DbC: public functions validate preconditions via `core.contracts.require`; postconditions documented in docstrings.\n- [ ] Law of Demeter: no call chains longer than two levels; add delegating methods instead.\n- [ ] DRY: reuse the `src/shared/python/estimation/mosaic/` kernels (regressors, bases, solvers); do not re-implement per engine.\n- [ ] Change fragment added (`python3 shared_scripts/changes_fragment.py new --issue N --summary \"...\"`); no direct edits to HANDOFF/DEVELOPMENT_LOG/SPEC change log.\n- [ ] Calculation-level LaTeX reference (`docs/research/model_aware_matching/model_aware_matching.tex`) updated in the same PR: assumptions, equations, parameters, acceptance criteria, failed experiments, reproduction commands.\n- [ ] Tests run headless (`QT_QPA_PLATFORM=offscreen`, `MPLBACKEND=Agg`); unavailable engines are skipped and reported as unqualified, never as passing.\n- [ ] `ruff check`, `ruff format --check`, file-size budget and `python3 -m scripts.pre_pr` pass; no tolerance widened without a `Tolerance-Change-Evidence` trailer.\n\nParent: #11532\n",
+  "updated_at": "2026-10-13T19:53:13Z",
+  "labels": [
+    {
+      "id": "LA_kwDOQqJAi88AAAACfqG_Sg",
+      "name": "research",
+      "description": "P6 research lane — Friday batch merges only during stabilization windows, RM #1510",
+      "color": "5319e7"
+    },
+    {
+      "id": "LA_kwDOQqJAi88AAAACib_8pA",
+      "name": "claim:local",
+      "description": "Local human session holds an active claim on this issue.",
+      "color": "FBCA04"
+    },
+    {
+      "id": "LA_kwDOQqJAi88AAAAClZPy1Q",
+      "name": "estimation",
+      "description": "Physics-matched estimation engine",
+      "color": "5319E7"
+    }
+  ],
+  "state": "open"
+}

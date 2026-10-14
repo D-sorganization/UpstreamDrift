@@ -299,12 +299,13 @@
       "tests": [
         "tests/config/feature_parity/test_registry.py",
         "tests/unit/tools/bunker_shot_gui/test_workbench_model.py",
-        "tests/unit/tools/bunker_shot_gui/test_objective_admissibility_9239.py"
+        "tests/unit/tools/bunker_shot_gui/test_objective_admissibility_9239.py",
+        "tests/bunkershot3d/test_bunker_workbench_compare_api.py"
       ],
       "acceptance_evidence": null,
       "owner": "unassigned",
       "depends_on": [8880, 9693],
-      "plan": "`src/config/feature_parity.json` records `tools.bunkershot3d_workbench` as a gap with no API route or web page. After U14 and U11: RED, an installed-product journey test that selects measured inputs, runs and cancels, inspects synchronized traces and playback, compares cases only on admissible objectives, saves and reloads a digest-bound run and exports a report carrying units, frames, parameter sources, limitations and verdicts; GREEN, the API route and web page consume `model.py` and the registry entry moves from gap to parity with rendered evidence."
+      "plan": "`src/config/feature_parity.json` records `tools.bunkershot3d_workbench` as a gap with no API route or web page. After U14 and U11: RED, an installed-product journey test that selects measured inputs, runs and cancels, inspects synchronized traces and playback, compares cases only on admissible objectives, saves and reloads a digest-bound run and exports a report carrying units, frames, parameter sources, limitations and verdicts; GREEN, the API route and web page consume `model.py` and the registry entry moves from gap to parity with rendered evidence. Partial (#9545 API slice): `POST /tools/bunker-workbench/v1/compare` serves the model's A/B comparison with its `CarryObjectiveStanding` (disposition and reasons in the canonical vocabulary, `winner` null unless supported, `exploratory_leader` otherwise), and `POST /v1/verify` accepts a saved and reloaded record only while its digest still covers it. Remaining: progress/cancel (U14), web page, report export and installed-product journey."
     },
     {
       "key": "U16",

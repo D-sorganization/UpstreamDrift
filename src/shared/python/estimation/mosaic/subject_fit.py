@@ -25,6 +25,11 @@ import numpy as np
 import numpy.typing as npt
 
 from src.shared.python.core.contracts import require
+from src.shared.python.estimation.mosaic.activation_dynamics import (
+    ActivationModel,
+    ActivationReport,
+    evaluate_actuation_replays,
+)
 from src.shared.python.estimation.mosaic.identifiability_subspace import (
     ObservabilityReport,
     structural_observability,
@@ -84,6 +89,7 @@ class SubjectFitReport:
     template: FloatArray | None
     modes: PrincipalModes | None
     timings_s: dict[str, float]
+    activation_report: ActivationReport | None = None
 
     @property
     def open_loop_accepted(self) -> bool:
@@ -152,6 +158,7 @@ class SubjectFitProblem:
     parameterization: InertialParameterization
     priors: OuterPriors
     options: OuterOptions
+    activation_model: ActivationModel | None = None
 
     def __post_init__(self) -> None:
         require(len(self.trials) >= 1, "at least one trial")
@@ -222,8 +229,31 @@ def fit_subject(
         )
         if len(trials) >= 2:
             modes = principal_modes(per_trial, n_modes=1)
+
+    activation_report: ActivationReport | None = None
+    if problem.activation_model is not None and replay_config is not None:
+        started = time.perf_counter()
+        activation_report = evaluate_actuation_replays(
+            problem.activation_model,
+            replay_config.step_factory,
+            fit.geometry,
+            fit.parameters,
+            trials,
+            fit.coefficients,
+            fit.inner.inputs,
+            replay_config.initial_perturbation,
+        )
+        timings["actuation_layer"] = time.perf_counter() - started
+
     return SubjectFitReport(
-        fit, observability, tuple(replays), tuple(gains), template, modes, timings
+        fit,
+        observability,
+        tuple(replays),
+        tuple(gains),
+        template,
+        modes,
+        timings,
+        activation_report,
     )
 
 
