@@ -156,7 +156,14 @@ def _open_viewport(
     """The VTK viewport, or the reason there is none -- never an exception."""
     try:
         return open_particle_viewport(playback, window_size=_WINDOW_SIZE)
-    except Exception as error:  # noqa: BLE001 - viewport degradation, not a bug
+    except (
+        RuntimeError,
+        ValueError,
+        TypeError,
+        AttributeError,
+        OSError,
+        ImportError,
+    ) as error:
         logger.warning("particle viewport degraded to no-VTK: %s", error)
         return ParticleViewportUnavailable(
             f"the particle layer did not build ({error})."
@@ -621,7 +628,13 @@ class ParticlePlaybackPanel(QGroupBox):
             try:
                 viewport.show_frame(playback.frame_index)
                 self._pixels = viewport.image_array()
-            except Exception as error:  # noqa: BLE001 - render-time degradation
+            except (
+                RuntimeError,
+                ValueError,
+                TypeError,
+                AttributeError,
+                OSError,
+            ) as error:
                 logger.warning("particle render degraded to no-VTK: %s", error)
                 viewport.close()
                 self._viewport = ParticleViewportUnavailable(
