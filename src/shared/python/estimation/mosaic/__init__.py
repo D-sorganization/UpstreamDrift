@@ -28,6 +28,12 @@ from src.shared.python.estimation.mosaic.ik_baseline import (
     IKBaselineResult,
     run_ik_smoothing_baseline,
 )
+from src.shared.python.estimation.mosaic.leave_one_trial_out import (
+    LeaveOneTrialOutConfig,
+    LeaveOneTrialOutReport,
+    TrialFoldReceipt,
+    run_leave_one_trial_out_study,
+)
 from src.shared.python.estimation.mosaic.negative_results import (
     AccelerationNoiseReport,
     MasslessCollapseReport,
@@ -67,10 +73,13 @@ __all__ = [
     "GateResult",
     "GateStatus",
     "IKBaselineResult",
+    "LeaveOneTrialOutConfig",
+    "LeaveOneTrialOutReport",
     "MasslessCollapseReport",
     "PlanarConformanceOracle",
     "ScaleCollapseReport",
     "ToleranceConfig",
+    "TrialFoldReceipt",
     "check_closed_loop_effort",
     "check_cross_trial_consistency",
     "check_declared_discrepancy",
@@ -84,6 +93,7 @@ __all__ = [
     "load_benchmark_protocol",
     "project_friction_cone",
     "run_ik_smoothing_baseline",
+    "run_leave_one_trial_out_study",
     "solve_contact_wrenches",
     "verify_acceleration_noise_without_input_smoothness",
     "verify_massless_collapse_under_resolved_basis",
