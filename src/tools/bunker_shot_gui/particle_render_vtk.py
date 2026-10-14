@@ -27,6 +27,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from .render3d_vtk import PyVistaNotAvailableError, pyvista_available, require_pyvista
+from .shot3d import CameraPreset
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     import pyvista as pv
@@ -34,6 +35,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from .particle_playback import BodyPose, ParticleFrameView, ParticlePlayback
 
 __all__ = [
+    "CLIP_DESCRIPTION",
     "ParticleGlyphLayer",
     "ParticleViewport",
     "ParticleViewportUnavailable",
@@ -51,6 +53,10 @@ _STAMP_NAME = "particle_stamp"
 _STAMP_FONT_PT = 9
 _RADIUS_ARRAY = "radius_mm"
 _MASK_ARRAY = "visible"
+_VIEW_UP = (0.0, 0.0, 1.0)
+_CLIP_NORMAL = (0.0, 1.0, 0.0)
+CLIP_DESCRIPTION = "clip at y = 0 mm: hide particles on the -y side of the x-z plane"
+"""What the clipping toggle does, in the words the panel shows."""
 
 
 @dataclass(frozen=True)
@@ -65,6 +71,13 @@ class ParticleViewportUnavailable:
             "3-D particle viewport unavailable: "
             f"{self.reason} Frame playback, scrub and stamps still work."
         )
+
+
+def _vtk_plane() -> Any:
+    """A ``vtkPlane``, imported on first use."""
+    from vtkmodules.vtkCommonDataModel import vtkPlane
+
+    return vtkPlane()
 
 
 def _vtk_classes() -> tuple[Any, Any]:
@@ -141,6 +154,19 @@ class ParticleGlyphLayer:
         """Whether the named body's marker is drawn this frame."""
         return bool(self._bodies[name].GetVisibility())
 
+    def set_clipping(self, enabled: bool) -> None:
+        """Clip the glyphs at the ``y = 0`` plane, or stop clipping.
+
+        Postcondition: exactly one clipping plane when ``enabled``, none
+        otherwise. Body markers are never clipped.
+        """
+        self._mapper.RemoveAllClippingPlanes()
+        if enabled:
+            plane = _vtk_plane()
+            plane.SetOrigin(0.0, 0.0, 0.0)
+            plane.SetNormal(*_CLIP_NORMAL)
+            self._mapper.AddClippingPlane(plane)
+
     def update(self, view: ParticleFrameView) -> None:
         """Move glyphs and bodies to ``view`` and redraw the stamp.
 
@@ -190,6 +216,8 @@ class ParticleViewport:
         view = playback.view()
         self._stamp = "\n".join(view.stamp_lines)
         self._layer = ParticleGlyphLayer(plotter, view)
+        self._camera: CameraPreset | None = None
+        self._clipping = False
         if owns_plotter:
             plotter.reset_camera()
 
@@ -207,6 +235,37 @@ class ParticleViewport:
     def stamp_text(self) -> str:
         """The stamp of the frame last shown."""
         return self._stamp
+
+    @property
+    def camera(self) -> CameraPreset | None:
+        """The named view last applied; ``None`` until one is."""
+        return self._camera
+
+    @property
+    def clipping(self) -> bool:
+        """Whether the particle glyphs are clipped at ``y = 0``."""
+        return self._clipping
+
+    def set_camera(self, camera: CameraPreset | str) -> None:
+        """Look at the scene from one of the shot's named views.
+
+        The eye direction is :attr:`~.shot3d.CameraPreset.eye_direction`,
+        the same backend-neutral vector the shot viewport uses, framed on
+        what this plotter draws.
+
+        Raises:
+            ValueError: If ``camera`` is not a preset name.
+        """
+        chosen = CameraPreset(camera)
+        self._plotter.view_vector(
+            np.asarray(chosen.eye_direction, dtype=np.float64), viewup=_VIEW_UP
+        )
+        self._camera = chosen
+
+    def set_clipping(self, enabled: bool) -> None:
+        """Turn the ``y = 0`` clipping plane on or off (see :data:`CLIP_DESCRIPTION`)."""
+        self._layer.set_clipping(bool(enabled))
+        self._clipping = bool(enabled)
 
     def show_frame(self, index: int) -> None:
         """Seek the playback to ``index``, update and render."""
