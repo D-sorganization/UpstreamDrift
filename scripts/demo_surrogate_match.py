@@ -20,7 +20,7 @@ Usage::
 
 Optional arguments::
 
-    --target   <path to Wiffle xlsx>   default: canonical ProV1 file
+    --target   <path to Wiffle xlsx>   default: private ProV1 workbook
     --sheet    <sheet name>            default: TW_ProV1
     --ckpt     <surrogate .pt path>    default: data/training/surrogate_v4/checkpoint_production.pt
     --out      <output directory>      default: output/surrogate_match
@@ -63,11 +63,8 @@ _LOG = logging.getLogger("demo_surrogate_match")
 # Constants
 # ---------------------------------------------------------------------------
 
-# Canonical Wiffle ProV1 file (relative to repo root)
-_DEFAULT_TARGET = (
-    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/"
-    "src/apps/golf_gui/Motion Capture Plotter/Wiffle_ProV1_club_3D_data.xlsx"
-)
+# Default target: the private Wiffle ProV1 club workbook (capture registry id).
+_DEFAULT_TARGET_CAPTURE_ID = "club-workbook-wiffle"
 _DEFAULT_CKPT = "data/training/surrogate_v4/checkpoint_production.pt"
 
 #: cm → metres conversion factor used by the MATLAB ``load_club_target_excel.m``
@@ -651,7 +648,18 @@ def main() -> int:
 
     repo_root = PROJECT_ROOT
 
-    target_path = args.target or (repo_root / _DEFAULT_TARGET)
+    target_path = args.target
+    if target_path is None:
+        from src.motion_capture.capture_registry import (
+            CaptureDataUnavailable,
+            resolve_capture,
+        )
+
+        try:
+            target_path = resolve_capture(_DEFAULT_TARGET_CAPTURE_ID)
+        except CaptureDataUnavailable as exc:
+            _LOG.error("Default target unavailable: %s", exc)
+            return 1
     ckpt_path = args.ckpt or (repo_root / _DEFAULT_CKPT)
     out_dir = args.out
 

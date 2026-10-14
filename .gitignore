@@ -312,3 +312,6 @@ test_event_filter.py
 # python3 -m scripts.research.shot_pattern_analysis.fetch_release_assets
 docs/research/shot_pattern_analysis/**/*.zip
 docs/research/shot_pattern_analysis/**/*.jpg
+
+# Native motion-capture files are private (see tests/unit/repo_hygiene/test_no_private_capture_data.py)
+*.gpcap

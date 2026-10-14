@@ -99,7 +99,9 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
         load_layout.addWidget(self.btn_load_clubs)
 
         self.btn_load_default = QtWidgets.QPushButton("Load Default")
-        self.btn_load_default.setToolTip("Load default Club_Data.xlsx")
+        self.btn_load_default.setToolTip(
+            "Load the default club workbook (requires CAPTURE_DATA_DIR)"
+        )
         self.btn_load_default.clicked.connect(self._load_default_club_data)
         load_layout.addWidget(self.btn_load_default)
 
@@ -286,11 +288,10 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
 
             club_file = resolve_capture("club-workbook-main")
             self._load_club_file(str(club_file))
-        except CaptureRegistryError:
-            if self._data_dir and self._data_dir.exists():
-                club_file = self._data_dir / "Club_Data.xlsx"
-                if club_file.exists():
-                    self._load_club_file(str(club_file))
+        except CaptureRegistryError as exc:
+            # The default workbook is private; without CAPTURE_DATA_DIR the
+            # tab simply starts empty and the user can load a file manually.
+            logger.info("Default club workbook not loaded: %s", exc)
 
     def _on_load_clubs(self) -> None:
         """Handle load clubs button click."""
@@ -305,31 +306,22 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
             self._load_club_file(file_path)
 
     def _load_default_club_data(self) -> None:
-        """Load the default Club_Data.xlsx file."""
+        """Load the default club workbook through the capture registry."""
+        from src.motion_capture.capture_registry import (
+            CaptureRegistryError,
+            resolve_capture,
+        )
+
         try:
-            from src.motion_capture.capture_registry import (
-                CaptureRegistryError,
-                resolve_capture,
-            )
-
             club_file = resolve_capture("club-workbook-main")
-            self._load_club_file(str(club_file))
-            return
-        except CaptureRegistryError:
-            pass
-
-        if self._data_dir is None:
-            return
-
-        club_file = self._data_dir / "Club_Data.xlsx"
-        if club_file.exists():
-            self._load_club_file(str(club_file))
-        else:
+        except CaptureRegistryError as exc:
             QtWidgets.QMessageBox.warning(
                 self,
-                "File Not Found",
-                f"Default club data file not found at:\n{club_file}",
+                "Default Club Data Unavailable",
+                str(exc),
             )
+            return
+        self._load_club_file(str(club_file))
 
     def _load_club_file(self, file_path: str) -> None:
         """Load clubs from a file."""
