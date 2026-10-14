@@ -131,7 +131,12 @@ def replay_bar_path(
     recorded = recorded_bar_path(bundle)
     plant = VectorPlant(engine, bundle.spec_bytes)
     rollout = open_loop(
-        plant, bundle.q0, bundle.v0, bundle.efforts[:count], dt_s=bundle.dt_s
+        plant,
+        bundle.q0,
+        bundle.v0,
+        bundle.replay_efforts(count),
+        dt_s=bundle.dt_s,
+        policy=bundle.step_policy(),
     )
     reached = rollout.q.shape[0]
     bar = bar_path(plant, rollout.q)

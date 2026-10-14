@@ -10,6 +10,12 @@ Substeps are required, not optional: the open-loop linearisation has stiff,
 stable ground-contact modes near -1e4 1/s, so a single 1 ms RK4 step has
 amplification |R(lambda dt)| ~ 270 and round-off differences between engines
 grow ~7x per step.  Eight substeps (0.125 ms) keep |lambda dt| ~ 1.2.
+
+The effort hold is a separate policy choice (#12279): ``effort_holds`` splits
+each step into that many equal holds, each with its own effort sample and
+``substeps / effort_holds`` RK4 substeps, while the closure projection stays
+once per step.  The default (one hold per 1 ms step) is the original bundle
+contract; a finer hold tracks a stiff computed-torque law far more closely.
 """
 
 from __future__ import annotations
@@ -33,6 +39,7 @@ from src.shared.python.motion_matching.impact_force import (
 Array = NDArray[np.float64]
 EffortSource = Callable[[int, float, Array, Array], Array]
 DEFAULT_SUBSTEPS = 8
+DEFAULT_EFFORT_HOLDS = 1
 
 ROOT_COORDINATES: tuple[str, ...] = (
     "TranslationInputX",
@@ -51,20 +58,55 @@ class StepPolicy:
     ``substeps`` RK4 substeps per step, closure projection after each step when
     ``project``, and with ``stop_on_failure`` a diverging run (nonfinite or
     singular dynamics, failed projection) ends early instead of raising.
+    ``effort_holds`` effort samples per step, each held over an equal share of
+    the substeps (#12279); it must divide ``substeps``.
     """
 
     substeps: int = DEFAULT_SUBSTEPS
     project: bool = True
     stop_on_failure: bool = False
+    effort_holds: int = DEFAULT_EFFORT_HOLDS
 
     def __post_init__(self) -> None:
-        if isinstance(self.substeps, bool) or not isinstance(self.substeps, int):
-            raise TypeError("substeps must be an int")
-        if self.substeps < 1:
-            raise ValueError("substeps must be positive")
+        for name in ("substeps", "effort_holds"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise TypeError(f"{name} must be an int")
+            if value < 1:
+                raise ValueError(f"{name} must be positive")
+        if self.substeps % self.effort_holds:
+            raise ValueError("effort_holds must divide substeps")
+
+    @property
+    def substeps_per_hold(self) -> int:
+        """RK4 substeps integrated under one held effort sample."""
+        return self.substeps // self.effort_holds
 
 
 DEFAULT_POLICY = StepPolicy()
+
+
+def effort_holds_for(
+    effort_hold_s: float, dt_s: float, substeps: int = DEFAULT_SUBSTEPS
+) -> int:
+    """Holds per step for an effort hold of ``effort_hold_s`` (#12279).
+
+    Preconditions: ``effort_hold_s`` and ``dt_s`` are positive and finite,
+    ``dt_s / effort_hold_s`` is an integer (to 1e-9 relative) that divides
+    ``substeps``.  Raises ``ValueError`` otherwise.
+    """
+    if not (np.isfinite(effort_hold_s) and effort_hold_s > 0.0):
+        raise ValueError("effort_hold_s must be positive and finite")
+    if not (np.isfinite(dt_s) and dt_s > 0.0):
+        raise ValueError("dt_s must be positive and finite")
+    ratio = dt_s / effort_hold_s
+    holds = int(round(ratio))
+    if holds < 1 or abs(ratio - holds) > 1e-9 * ratio:
+        raise ValueError(
+            f"effort_hold_s {effort_hold_s} must divide the step {dt_s} evenly"
+        )
+    StepPolicy(substeps=substeps, effort_holds=holds)  # holds must divide substeps
+    return holds
 
 
 class DynamicsPlant(ClosurePlant, Protocol):
@@ -148,35 +190,35 @@ def integrate(
     policy: StepPolicy = DEFAULT_POLICY,
     impact: ImpactForce | None = None,
 ) -> Rollout:
-    """Integrate ``steps`` steps, asking ``source(k, t, q, v)`` for each effort.
+    """Integrate ``steps`` steps, asking ``source(j, t, q, v)`` for each effort.
 
-    The effort is requested once per step at the step's start state and held
-    over the step's ``policy.substeps`` RK4 substeps.  Root entries are forced
-    to zero.  With ``policy.stop_on_failure`` a diverging run returns the
-    states reached so far instead of raising.  ``impact`` adds the ball's
-    collision force over its window (GCV-20): a step containing a window edge
-    is split there, each part keeping the substep size, and the closure is
-    projected once at the end of the step.  An unlatched plan is latched from
-    this plant's state; a latched one (a recorded bundle) is applied as is.
+    Each step holds ``policy.effort_holds`` efforts in turn; hold ``j``
+    (global index ``k * effort_holds + h``, time ``j * dt_s / effort_holds``)
+    is requested at its start state and held over ``policy.substeps_per_hold``
+    RK4 substeps.  With the default single hold, ``j`` is the step index.
+    Root entries are forced to zero.  With ``policy.stop_on_failure`` a
+    diverging run returns the states reached so far instead of raising.
+    ``impact`` adds the ball's collision force over its window (GCV-20): a
+    hold containing a window edge is split there, each part keeping the
+    substep size.  The closure is projected once at the end of each step.  An
+    unlatched plan is latched from this plant's state; a latched one (a
+    recorded bundle) is applied as is.
+
+    Postconditions: ``q``/``v`` have ``steps + 1`` rows on the step grid and
+    ``efforts`` has ``effort_holds`` rows per completed step.
     """
     if steps < 1 or not (np.isfinite(dt_s) and dt_s > 0.0):
         raise ValueError("steps and dt_s must be positive")
-    inner_dt = dt_s / policy.substeps
     root = root_indices(plant.coordinate_order)
     q, v = np.asarray(q0, dtype=float).copy(), np.asarray(v0, dtype=float).copy()
     qs, vs, efforts, drift = [q.copy()], [v.copy()], [], []
     failure = None
     poses = None if impact is None else _plant_poses(plant)
     for k in range(steps):
-        tau = np.asarray(source(k, k * dt_s, q, v), dtype=float).copy()
-        tau[root] = 0.0
         try:
-            if impact is None:
-                q, v, step_drift = _step(plant, q, v, tau, inner_dt, policy)
-            else:
-                q, v, impact, step_drift = _impact_step(
-                    plant, (q, v, tau), (k * dt_s, dt_s), impact, poses, policy
-                )
+            q, v, impact, taus, step_drift = _held_step(
+                plant, (q, v), k, dt_s, (source, root, impact, poses), policy
+            )
         except (ArithmeticError, np.linalg.LinAlgError, ValueError) as exc:
             if not policy.stop_on_failure:
                 raise
@@ -185,7 +227,7 @@ def integrate(
         drift.append(step_drift)
         qs.append(q.copy())
         vs.append(v.copy())
-        efforts.append(tau)
+        efforts.extend(taus)
     return Rollout(
         time_s=np.arange(len(qs), dtype=np.float64) * dt_s,
         q=np.array(qs),
@@ -197,20 +239,54 @@ def integrate(
     )
 
 
-def _impact_step(
+def _held_step(
+    plant: DynamicsPlant,
+    state: tuple[Array, Array],
+    k: int,
+    dt_s: float,
+    inputs: tuple[EffortSource, Array, ImpactForce | None, Any],
+    policy: StepPolicy,
+) -> tuple[Array, Array, ImpactForce | None, list[Array], float]:
+    """One step: ``effort_holds`` held efforts, then the closure projection."""
+    source, root, impact, poses = inputs
+    q, v = state
+    holds = policy.effort_holds
+    hold_dt = dt_s / holds
+    taus = []
+    for h in range(holds):
+        j = k * holds + h
+        tau = np.asarray(source(j, j * hold_dt, q, v), dtype=float).copy()
+        tau[root] = 0.0
+        taus.append(tau)
+        if impact is None:
+            for _ in range(policy.substeps_per_hold):
+                q, v = zoh_rk4_step(
+                    plant, q, v, tau, hold_dt / policy.substeps_per_hold
+                )
+        else:
+            q, v, impact = _impact_hold(
+                plant, (q, v, tau), (j * hold_dt, hold_dt), impact, poses, policy
+            )
+    if not policy.project:
+        return q, v, impact, taus, float(np.abs(plant.closure_pose_residual(q)).max())
+    projected = project_to_closure(plant, q, v)
+    return projected.q, projected.v, impact, taus, projected.pose_residual_before
+
+
+def _impact_hold(
     plant: DynamicsPlant,
     state: tuple[Array, Array, Array],
     clock: tuple[float, float],
     impact: ImpactForce,
     poses: Any,
     policy: StepPolicy,
-) -> tuple[Array, Array, ImpactForce, float]:
-    """One held-effort step through the ball window, then closure projection."""
+) -> tuple[Array, Array, ImpactForce]:
+    """One held effort through the ball window (no closure projection)."""
     q, v, tau = state
-    t, dt_s = clock
+    t, hold_dt = clock
 
     def advance(_t: float, h: float, q_a: Array, v_a: Array, external: Any) -> tuple:
-        parts = max(1, int(np.ceil(policy.substeps * h / dt_s - 1e-9)))
+        parts = max(1, int(np.ceil(policy.substeps_per_hold * h / hold_dt - 1e-9)))
         forced = plant if external is None else _ForcedPlant(plant, external)
         for _ in range(parts):
             q_a, v_a = zoh_rk4_step(forced, q_a, v_a, tau, h / parts)  # type: ignore[arg-type]
@@ -219,7 +295,7 @@ def _impact_step(
     q, v, latched, _ = step_through_impact(
         impact,
         t,
-        dt_s,
+        hold_dt,
         q,
         v,
         advance,
@@ -228,26 +304,7 @@ def _impact_step(
     )
     if latched is None:
         raise ValueError("ball impact plan was lost during the step")
-    if not policy.project:
-        return q, v, latched, float(np.abs(plant.closure_pose_residual(q)).max())
-    projected = project_to_closure(plant, q, v)
-    return projected.q, projected.v, latched, projected.pose_residual_before
-
-
-def _step(
-    plant: DynamicsPlant,
-    q: Array,
-    v: Array,
-    tau: Array,
-    inner_dt: float,
-    policy: StepPolicy,
-) -> tuple[Array, Array, float]:
-    for _ in range(policy.substeps):
-        q, v = zoh_rk4_step(plant, q, v, tau, inner_dt)
-    if not policy.project:
-        return q, v, float(np.abs(plant.closure_pose_residual(q)).max())
-    state = project_to_closure(plant, q, v)
-    return state.q, state.v, state.pose_residual_before
+    return q, v, latched
 
 
 def open_loop(
@@ -260,22 +317,30 @@ def open_loop(
     policy: StepPolicy = DEFAULT_POLICY,
     impact: ImpactForce | None = None,
 ) -> Rollout:
-    """Replay a fixed effort sequence (steps, nv); root columns must be zero.
+    """Replay a fixed effort sequence (steps * effort_holds, nv).
 
-    ``impact`` (normally the bundle's recorded, latched ball force) is applied
-    identically in every engine.
+    Root columns must be zero, and the table holds ``policy.effort_holds``
+    rows per step (a bundle's ``replay_efforts()`` with its
+    ``step_policy()``).  ``impact`` (normally the bundle's recorded, latched
+    ball force) is applied identically in every engine.
     """
     table = np.asarray(efforts, dtype=float)
     if table.ndim != 2 or table.shape[1] != len(plant.coordinate_order):
         raise ValueError("efforts must be (steps, nv) in spec order")
     if np.any(table[:, root_indices(plant.coordinate_order)] != 0.0):
         raise ValueError("root efforts must be zero")
+    steps, extra = divmod(table.shape[0], policy.effort_holds)
+    if extra:
+        raise ValueError(
+            f"efforts rows {table.shape[0]} are not a whole number of steps "
+            f"at effort_holds = {policy.effort_holds}"
+        )
     return integrate(
         plant,
         q0,
         v0,
-        lambda k, _t, _q, _v: table[k],
-        steps=table.shape[0],
+        lambda j, _t, _q, _v: table[j],
+        steps=steps,
         dt_s=dt_s,
         policy=policy,
         impact=impact,
