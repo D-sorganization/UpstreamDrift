@@ -31,6 +31,7 @@ class BSplineBasis:
     position: FloatArray
     velocity: FloatArray
     acceleration: FloatArray
+    jerk: FloatArray | None = None
 
     @property
     def n_coefficients(self) -> int:
@@ -67,15 +68,17 @@ class BSplineBasis:
         )
         identity = np.eye(n_coefficients)
         spline = BSpline(knots, identity, degree, extrapolate=False)
+        orders = range(4 if degree >= 3 else 3)
         matrices = [
             spline.derivative(order)(samples) if order else spline(samples)
-            for order in range(3)
+            for order in orders
         ]
         position, velocity, acceleration = (
-            np.nan_to_num(matrix) for matrix in matrices
+            np.nan_to_num(matrices[i]) for i in range(3)
         )
+        jerk = np.nan_to_num(matrices[3]) if degree >= 3 else None
         ensure(bool(np.allclose(position.sum(axis=1), 1.0)), "basis partitions unity")
-        return cls(samples, knots, degree, position, velocity, acceleration)
+        return cls(samples, knots, degree, position, velocity, acceleration, jerk)
 
     def fit_least_squares(self, samples: FloatArray, ridge: float = 0.0) -> FloatArray:
         """Return coefficients ``C`` minimising ``|P C - samples|^2 + ridge |C|^2``."""

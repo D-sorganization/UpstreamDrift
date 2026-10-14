@@ -256,6 +256,36 @@
         "evidence": null
       },
       "activation_issue": null
+    },
+    {
+      "id": "DV-11542",
+      "title": "MOSAIC-10: Multi-Swing Acquisition and Registration Across Real Golfer Trials",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/11542",
+      "source_snapshot": "source-11542.json",
+      "record": "DV-11542.md",
+      "disposition": "split",
+      "kind": "human-validation",
+      "status": "deferred",
+      "rationale": "Validation against multi-swing physical golfer trials requires real human swing captures and high-speed motion instrumentation across varied skill levels that cannot be synthetically generated or self-approved by coding agents.",
+      "prerequisites": [
+        {
+          "name": "Cohort of human golfers under institutional protocol",
+          "evidence": null
+        },
+        {
+          "name": "Multi-camera optical motion capture or high-speed synchronized IMU instrumentation rig",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Validate phase registration variance reduction and event anchoring accuracy against multi-trial physical golfer human captures.",
+        "Never report physical accuracy claims or synthetic values as empirical acceptance."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
     }
   ]
 }
