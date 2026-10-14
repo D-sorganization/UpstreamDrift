@@ -131,7 +131,7 @@ def generate_reference_bundle(
     defaults to 1 ms (0.001 s) with optional 0.125 ms (0.000125 s).
     ``effort_hold_s`` is accepted as a backward-compatible alias.
     """
-    from src.shared.python.motion_matching.same_input.effort_hold_policy import (
+    from src.shared.python.motion_matching.same_input.bundle import (
         resolve_effort_hold_dt_s,
     )
 

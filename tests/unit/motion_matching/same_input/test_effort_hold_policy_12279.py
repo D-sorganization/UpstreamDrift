@@ -27,7 +27,7 @@ from src.shared.python.motion_matching.same_input import (
     read_effort_hold_policy,
     resolve_effort_hold_dt_s,
 )
-from src.shared.python.motion_matching.same_input.effort_hold_policy import (
+from src.shared.python.motion_matching.same_input.bundle import (
     DEFAULT_EFFORT_SUBSTEPS,
     DEFAULT_PROJECTION_DT_S,
     FINE_EFFORT_SUBSTEPS,

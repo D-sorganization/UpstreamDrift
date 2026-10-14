@@ -18,9 +18,9 @@ _LAZY_EXPORTS: dict[str, tuple[str, str]] = {
     "ROOT_COORDINATES": (".integrator", "ROOT_COORDINATES"),
     "SCHEMA": (".bundle", "SCHEMA"),
     "ClosureProjection": (".closure", "ClosureProjection"),
-    "DEFAULT_EFFORT_HOLD_DT_S": (".effort_hold_policy", "DEFAULT_EFFORT_HOLD_DT_S"),
-    "EffortHoldPolicy": (".effort_hold_policy", "EffortHoldPolicy"),
-    "FINE_EFFORT_HOLD_DT_S": (".effort_hold_policy", "FINE_EFFORT_HOLD_DT_S"),
+    "DEFAULT_EFFORT_HOLD_DT_S": (".bundle", "DEFAULT_EFFORT_HOLD_DT_S"),
+    "EffortHoldPolicy": (".bundle", "EffortHoldPolicy"),
+    "FINE_EFFORT_HOLD_DT_S": (".bundle", "FINE_EFFORT_HOLD_DT_S"),
     "InputBundle": (".bundle", "InputBundle"),
     "ReplayScore": (".scoring", "ReplayScore"),
     "Rollout": (".integrator", "Rollout"),
@@ -32,8 +32,8 @@ _LAZY_EXPORTS: dict[str, tuple[str, str]] = {
     "integrate": (".integrator", "integrate"),
     "open_loop": (".integrator", "open_loop"),
     "project_to_closure": (".closure", "project_to_closure"),
-    "read_effort_hold_policy": (".effort_hold_policy", "read_effort_hold_policy"),
-    "resolve_effort_hold_dt_s": (".effort_hold_policy", "resolve_effort_hold_dt_s"),
+    "read_effort_hold_policy": (".bundle", "read_effort_hold_policy"),
+    "resolve_effort_hold_dt_s": (".bundle", "resolve_effort_hold_dt_s"),
     "score_replay": (".scoring", "score_replay"),
     "segmented_replay": (".scoring", "segmented_replay"),
     "zoh_rk4_step": (".integrator", "zoh_rk4_step"),
@@ -70,7 +70,7 @@ __all__ = [
 if TYPE_CHECKING:
     from .bundle import SCHEMA, InputBundle
     from .closure import ClosureProjection, project_to_closure
-    from .effort_hold_policy import (
+    from .bundle import (
         DEFAULT_EFFORT_HOLD_DT_S,
         FINE_EFFORT_HOLD_DT_S,
         EffortHoldPolicy,
