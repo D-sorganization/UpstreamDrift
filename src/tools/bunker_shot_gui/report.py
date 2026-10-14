@@ -12,7 +12,7 @@ and every report opens by saying so.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import cast
+from typing import Any, cast
 
 import numpy as np
 
@@ -28,11 +28,13 @@ from .model import (
     SoleLoadMap,
     WorkbenchComparison,
 )
+from .uncertainty import CARRY_BAND_SOURCE
 
 __all__ = [
     "ACCELERATED_MASS_CAVEAT",
     "CARRY_CAVEAT",
     "MAX_REPORTED_REASONS",
+    "MODEL_SOURCE",
     "PATCH_CONFOUND_CAVEAT",
     "SHADE_RAMP",
     "STATUS_COLOUR",
@@ -40,6 +42,7 @@ __all__ = [
     "TIER_MODEL_NAMES",
     "comparison_report",
     "evaluation_report",
+    "evaluation_sources",
     "playability_text",
     "shade_grid",
     "shot_report",
@@ -58,6 +61,9 @@ happened here" are never the same character."""
 
 MAX_REPORTED_REASONS = 8
 """Reason lines shown before the remainder is counted rather than listed."""
+
+MODEL_SOURCE = "src.tools.bunker_shot_gui.model.WorkbenchModel"
+"""The headless surface every reported number comes from."""
 
 STATUS_HEADLINE: dict[EnvelopeStatus, str] = {
     EnvelopeStatus.WITHIN: ("WITHIN ENVELOPE - inside 3D-RFT's own published limits"),
@@ -159,6 +165,34 @@ def validity_stamp(status: EnvelopeStatus, tier: FidelityTier) -> str:
         f"{tier.value.upper()} {TIER_MODEL_NAMES[tier]}\n"
         "not calibrated for bunker sand"
     )
+
+
+def evaluation_sources(evaluation: DesignEvaluation) -> dict[str, Any]:
+    """Where the model, every sand property and the carry band come from.
+
+    The one composition of the source block, shared by the v1 API record and
+    the stamped figure export (issue #9545), so a saved record and an
+    exported picture of the same evaluation name the same sources.
+
+    Args:
+        evaluation: The model's evaluation of one design.
+
+    Returns:
+        A JSON-ready mapping: ``model`` (always :data:`MODEL_SOURCE`),
+        ``sand`` (basis and source per property) and ``carry_band`` (its
+        source, or ``None`` when the shot has no band).
+    """
+    provenance = evaluation.sand.provenance
+    entries = provenance.entries
+    band = evaluation.shot.carry_band
+    return {
+        "model": MODEL_SOURCE,
+        "sand": {
+            name: {"basis": entry.basis.value, "source": entry.source}
+            for name, entry in entries.items()
+        },
+        "carry_band": None if band is None else CARRY_BAND_SOURCE,
+    }
 
 
 def verdict_report(
