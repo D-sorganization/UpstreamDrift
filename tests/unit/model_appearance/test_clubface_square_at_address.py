@@ -475,11 +475,10 @@ IMPACT_SPEED_TOL = 0.03
 _CAPTURE_B_SPEED_XFAIL = pytest.mark.xfail(
     strict=True,
     reason=(
-        "GCV-20 #11767 acceptance not met on capture-B: the 7-iron fixture "
-        "(#12222, 4bd77f5818) reaches the ball at -3.9 % (39.64 / 41.26 m/s) "
-        "against the 3 % limit; the peak timing passes (-3.9 ms against "
-        "5 ms). The #12221 grip refit passes on the tracked swing but not "
-        "through its same-input export (-5.0 %), so it is not adopted yet"
+        "GCV-20 #11767 acceptance not met on capture-B: the 7-iron #12221 "
+        "refit fixture, exported with the 0.125 ms effort hold (#12279), "
+        "reaches the ball at -2.6 % (40.20 / 41.26 m/s, 3 % limit) but its "
+        "speed peaks 7.2 ms early against the 5 ms limit"
     ),
 )
 

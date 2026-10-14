@@ -96,3 +96,66 @@ def test_fixture_feet_stand_on_the_ground_at_address(club: str, poses) -> None:
     }
     assert len(heights) == 4
     assert all(0.0 <= h <= FOOT_HEIGHT_LIMIT_M for h in heights.values()), heights
+
+
+# ------------------------------- the feet follow the tracked swing (#12279)
+#: Acceptance of #12279: each foot within 10 mm of the tracked swing.
+TRACKED_FOOT_LIMIT_M = 0.010
+#: Through the downswing; the trail toe slides from about 1.17 s in every
+#: variant, the pipeline's own forward dynamics included (#12279).
+TRACKED_FOOT_HORIZON_S = 1.1
+FEET = ("calcn_r", "toes_r", "calcn_l", "toes_l")
+#: Clubs whose fixture is exported with the 0.125 ms hold and records its
+#: tracked swing (``tracked_q_<club>.npz``).
+TRACKED_CLUBS = ("iron7",)
+
+
+def _foot_origins(spec: dict, order: list[str], q: np.ndarray) -> np.ndarray:
+    """MuJoCo FK of the four foot body origins, (frames, 4, 3) in metres."""
+    pytest.importorskip("mujoco")
+    from src.shared.python.motion_matching.pipeline.plant import get_plant
+
+    plant = get_plant("mujoco", spec)
+    columns = [order.index(name) for name in plant.coordinate_order]
+    frames = {name: (name, (0.0, 0.0, 0.0)) for name in FEET}
+    return np.array(
+        [
+            [plant.frame_poses(frames, row[columns])[name][1] for name in FEET]
+            for row in np.asarray(q, dtype=float)
+        ]
+    )
+
+
+@pytest.mark.parametrize("club", TRACKED_CLUBS)
+def test_tracked_swing_is_the_recorded_run_q_track(club: str, provenance) -> None:
+    data = (FIXTURES / f"tracked_q_{club}.npz").read_bytes()
+    assert hashlib.sha256(data).hexdigest() == provenance[club]["tracked_sha256"]
+    assert provenance[club]["bundle_manifest"]["policy"]["effort_hold_s"] == (
+        pytest.approx(1.25e-4)
+    )
+
+
+@pytest.mark.parametrize("club", TRACKED_CLUBS)
+def test_fixture_feet_follow_the_tracked_swing_through_the_downswing(
+    club: str, poses
+) -> None:
+    """The same-input export keeps both feet within 10 mm of the tracked
+    swing through 1.1 s: the 1 ms effort hold slid them from 0.67 s."""
+    spec = _load(f"spec_{club}.json")
+    order = list(poses[club]["coordinate_order"])
+    fixture = np.load(FIXTURES / f"swing_q_{club}.npz")["q"].astype(float)
+    with np.load(FIXTURES / f"tracked_q_{club}.npz") as tracked:
+        time_s, q_track = tracked["time_s"], tracked["q"].astype(float)
+    keep = time_s <= TRACKED_FOOT_HORIZON_S
+    rows = np.rint(time_s[keep] / 0.002).astype(int)  # fixture: every 2 ms
+    assert rows[-1] < len(fixture)
+    gap = np.linalg.norm(
+        _foot_origins(spec, order, fixture[rows])
+        - _foot_origins(spec, order, q_track[keep]),
+        axis=2,
+    )
+    worst = np.unravel_index(int(np.argmax(gap)), gap.shape)
+    assert gap.max() <= TRACKED_FOOT_LIMIT_M, (
+        f"{club}: {FEET[worst[1]]} {1e3 * gap.max():.1f} mm from the tracked "
+        f"swing at {time_s[keep][worst[0]]:.3f} s"
+    )

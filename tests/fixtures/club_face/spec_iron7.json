@@ -1257,15 +1257,15 @@
       "child": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
       "child_to_follower": [
         [
-          -0.5343338817661774, -0.7357083276751796, 0.4161977407267835,
+          0.10240873383131316, -0.5404089810476043, 0.8351470436025962,
           -0.02501411692651008
         ],
         [
-          0.30908343009591993, 0.28822496143962084, 0.9063077870366498,
+          0.5462337351331348, 0.7322077175465519, 0.40681760651153304,
           -0.9079999999999999
         ],
         [
-          -0.7867367641319611, 0.6129107832242139, 0.07338689100003808,
+          -0.831348998819131, 0.4145238130293098, 0.3701740814725825,
           0.05908933628725997
         ],
         [0.0, 0.0, 0.0, 1.0]
@@ -1399,9 +1399,9 @@
     {
       "child": "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff",
       "child_to_follower": [
-        [0.8598872403227148, 0.19501971017073785, 0.47176397337557163, 0.0],
-        [0.3261223507816858, -0.9208415297808589, -0.21376409743330366, 0.0],
-        [0.3927316466123055, 0.3376657958333494, -0.8554201681474538, 0.0127],
+        [0.8268993350110894, -0.18808890286663893, 0.529962314109826, 0.0],
+        [-0.33885406631702486, -0.9187579240847278, 0.20263711079646607, 0.0],
+        [0.4487932837049091, -0.3471403772970612, -0.8234550060272988, 0.0127],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "name": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
@@ -1438,16 +1438,16 @@
       "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
       "parent_to_base": [
         [
-          -0.028806607623916358, 0.9995848482362506, 0.0005572555192803507,
-          -0.005010614545413137
+          -0.02880660762391824, 0.9995848482362506, 0.0005572555192807342,
+          -0.005010614545413017
         ],
         [
-          -0.9652018188748286, -0.027960688348424374, 0.26000701672801996,
-          -0.10510059317219148
+          -0.9652018188748284, -0.02796068834842629, 0.2600070167280208,
+          -0.10510059317219117
         ],
         [
-          0.259914655604343, 0.006952056069561693, 0.9656065662154962,
-          -0.02497596096705229
+          0.2599146556043439, 0.006952056069561838, 0.965606566215496,
+          -0.024975960967052294
         ],
         [0.0, 0.0, 0.0, 1.0]
       ],
@@ -1612,16 +1612,16 @@
       "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
       "parent_to_base": [
         [
-          0.44249415219687316, -0.8967712164971939, -0.0005572555192803507,
-          -0.00455960457980698
+          0.442494152196875, -0.896771216497193, -0.0005572555192807342,
+          -0.004559604579806553
         ],
         [
-          -0.8659925570930604, -0.42714545802527026, -0.26000701672801996,
-          0.10533385137723636
+          -0.8659925570930593, -0.4271454580252718, -0.2600070167280208,
+          0.10533385137723622
         ],
         [
-          0.2329287795249725, 0.11553416356439918, -0.9656065662154962,
-          -0.08163949804960405
+          0.2329287795249729, 0.11553416356440037, -0.965606566215496,
+          -0.08163949804960413
         ],
         [0.0, 0.0, 0.0, 1.0]
       ],
@@ -1838,37 +1838,37 @@
     "Marker_2:2:1": {
       "body": "Clubhead",
       "offset_m": [
-        -0.005013763277325188, -0.04723804658646823, -0.020422312849740262
+        -0.007327540324495248, -0.08631616596535785, -0.01714432071883919
       ]
     },
     "Marker_2:2:2": {
       "body": "Clubhead",
       "offset_m": [
-        0.039764746459329495, 0.033540927867569084, -0.021534496183147525
+        0.037275077966665786, -0.011449684473765744, -0.0772524604048805
       ]
     },
     "Marker_2:2:3": {
       "body": "Clubhead",
       "offset_m": [
-        0.05213033572826101, 0.014535978774719217, 0.025324102391800447
+        -0.047068573801067694, -0.08360904669160808, -0.014431176458904947
       ]
     },
     "Marker_3:3:1": {
       "body": "Clubhead",
       "offset_m": [
-        -0.6889570460849377, -0.07981249704439086, -0.0394272179523681
+        -0.520720025536925, -0.06863097474093219, -0.0018351083910104315
       ]
     },
     "Marker_3:3:2": {
       "body": "Clubhead",
       "offset_m": [
-        -0.760691797691206, -0.07648040771272901, -0.0032467887386094605
+        -0.5898717949605801, -0.04982548788730709, 0.034891412489872556
       ]
     },
     "Marker_3:3:3": {
       "body": "Clubhead",
       "offset_m": [
-        -0.8101014861494318, -0.08113826173535343, -0.035081864800729966
+        -0.6414131568446119, -0.06288050368017623, 0.008591084602100502
       ]
     },
     "RAnkleOut": {
@@ -1924,7 +1924,7 @@
       "offset_m": [0.02, -0.15, 0.08]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057) | hip joints relocated to functional centres from the capture (radii 0.4278/0.3952 m, sphere sd 2.1/1.9 mm over 649 frames) with zero twist calibrated (R: -1.53 deg, L: 26.38 deg) | toe contact spheres added on calcanei; stiffness 5e+04 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from iron7.json (#12210); grip rotation refitted per capture from docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_iron7.json (#12221) | hip joints relocated to functional centres from the capture (radii 0.4278/0.3952 m, sphere sd 2.1/1.9 mm over 649 frames) with zero twist calibrated (R: -1.53 deg, L: 26.38 deg) | toe contact spheres added on calcanei; stiffness 5e+04 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
@@ -1932,8 +1932,8 @@
     "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
     "grip_roll_deg": 0.0,
     "grip_rotation_deg": {
-      "L": [-90.0, 47.0, 0.0],
-      "R": [-34.0, 46.0, 62.0]
+      "L": [-48.993, 15.681, 29.676],
+      "R": [37.035, 49.131, 121.189]
     },
     "hip_zero_twist_deg": {
       "l": 26.38,

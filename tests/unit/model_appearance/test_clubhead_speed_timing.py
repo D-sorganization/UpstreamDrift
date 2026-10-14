@@ -133,12 +133,11 @@ def test_speed_timing_record_is_json_ready() -> None:
 _IRON7_SPEED_XFAIL = pytest.mark.xfail(
     strict=True,
     reason=(
-        "GCV-20 #11767 acceptance not met on the 7-iron: its fixture "
-        "(4bd77f5818) reaches the ball at -3.9 % (3 % limit), peaks 3.9 ms "
-        "early and loses 38.7 % less speed through the ball (10 % limit). The "
-        "#12221 grip refit meets GCV-20 on the tracked swing (-1.9 %, "
-        "-0.2 ms), but its same-input export gives -5.0 %, -5.1 ms and an "
-        "8.7 deg impact face, so the 7-iron is not regenerated yet"
+        "GCV-20 #11767 acceptance not met on the 7-iron: its #12221 refit "
+        "fixture, exported with the 0.125 ms effort hold (#12279), reaches "
+        "the ball at -2.6 % (3 % limit) but peaks 7.2 ms early (5 ms limit) "
+        "and loses 27.9 % less speed through the ball (10 % limit); the "
+        "tracked swing peaks 0.2 ms early"
     ),
 )
 

@@ -9,9 +9,12 @@ For each capture this script
    on the committed anthropometric document, with the flags of the original
    fixture runs and the face-orientation residual weight;
 2. exports the MuJoCo same-input reference bundle of that run
-   (``scripts.same_input_bundle export``);
+   (``scripts.same_input_bundle export``) with the 0.125 ms effort hold
+   (``CLUB_FACE_EFFORT_HOLD_MS``, #12279); a reused bundle recorded with
+   another hold is re-exported;
 3. writes ``tests/fixtures/club_face/swing_q_<club>.npz`` (every second
-   1 kHz reference sample, float32), the address pose in
+   1 kHz reference sample, float32), the run's tracked swing in
+   ``tracked_q_<club>.npz`` (#12279), the address pose in
    ``address_poses.json``, the run's scaled document in ``spec_<club>.json``
    and a per-club provenance record in ``provenance.json``: commands, input
    and output hashes, marker RMS, the model-versus-capture face fit, the
@@ -34,6 +37,10 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.motion_matching.same_input.bundle import (
+    FINE_EFFORT_HOLD_DT_S,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures" / "club_face"
 DOCS = ROOT / "docs" / "development" / "full_body_models"
@@ -47,8 +54,8 @@ SCALED_SPEC = "full_body_spec_hipcal_scaled.json"
 #: original fixture runs, read back from their receipts). The driver's static
 #: trial holds the measured club cluster fixed: its per-capture grip rotation
 #: is fitted on it, and a free cluster moves the capture's own face (#12221).
-#: The 7-iron keeps its grip until its same-input export stops degrading the
-#: tracked swing (impact face 2.6 -> 8.7 deg on the refit).
+#: The 7-iron refit is adopted the same way now that the 0.125 ms export hold
+#: keeps its tracked swing (impact face 8.7 -> 5.6 deg against 3.2, #12279).
 CAPTURE_RUNS: dict[str, tuple[str, str, tuple[str, ...]]] = {
     "driver": (
         "driver",
@@ -58,9 +65,15 @@ CAPTURE_RUNS: dict[str, tuple[str, str, tuple[str, ...]]] = {
     "iron": (
         "iron7",
         "full_body_spec_anthro_iron7.json",
-        ("--static-seeds", "--zmp-filter"),
+        ("--static-seeds", "--zmp-filter", "--fix-club-markers"),
     ),
 }
+#: Controller effort hold of the club-face same-input export (ms). The 1 ms
+#: zero-order hold slides the 7-iron feet from about 0.67 s; 0.125 ms keeps
+#: them planted. Owner ruling on #12279 (2026-10-11): opt-in for these
+#: fixtures only; the global ``same_input_bundle`` default stays 1 ms. It is
+#: the shared fine hold of the same-input policy (#12502), in ms.
+CLUB_FACE_EFFORT_HOLD_MS = round(FINE_EFFORT_HOLD_DT_S * 1e3, 9)
 #: Address foot progression of every fixture run: the OSV-4 capture toe-out
 #: calibration (#11730), held through the swing by the planted stance (#12222).
 FOOT_PROGRESSION = "capture"
@@ -106,9 +119,21 @@ def run_and_export(
         args = pipeline_argv(capture, run_dir, face_weight)
         run_pipeline(build_parser().parse_args(args))
     bundle = work / "bundles" / f"{capture}.npz"
-    if not (reuse and bundle.is_file()):
-        export(run_dir, bundle, None)
+    if not (reuse and _bundle_hold_ms(bundle) == CLUB_FACE_EFFORT_HOLD_MS):
+        export(run_dir, bundle, None, effort_hold_ms=CLUB_FACE_EFFORT_HOLD_MS)
     return run_dir, bundle
+
+
+def _bundle_hold_ms(bundle: Path) -> float | None:
+    """Effort hold (ms) recorded in a bundle's manifest; ``None`` if absent.
+
+    A manifest without the hold key is a legacy 1 ms bundle (#12279).
+    """
+    if not bundle.is_file():
+        return None
+    with np.load(bundle, allow_pickle=False) as data:
+        policy = json.loads(str(data["manifest"])).get("policy", {})
+    return round(float(policy.get("effort_hold_s", 1e-3)) * 1e3, 9)
 
 
 def _git_head() -> str:
@@ -238,6 +263,7 @@ def write_fixtures(
         "bundle_sha256": _sha256(bundle_path),
         "run_receipt_sha256": _sha256(run_dir / "receipt.json"),
         "fixture_sha256": _sha256(npz_path),
+        "tracked_sha256": _sha256(_write_tracked_swing(club, run_dir)),
         "spec_sha256": _sha256(spec_path),
         "foot_progression": _foot_record(run_dir, receipt, q_fixture[0]),
         "marker_rms_m": {
@@ -297,6 +323,21 @@ def _triad_offsets(receipt: dict[str, Any]) -> dict[str, list[float]]:
         if attached[label]["body"] != FACE_FRAME:
             raise ValueError(f"{label} is not attached to {FACE_FRAME}")
     return {label: list(attached[label]["offset_m"]) for label in HEAD_TRIAD_LABELS}
+
+
+def _write_tracked_swing(club: str, run_dir: Path) -> Path:
+    """Commit the run's tracked swing beside the fixture (#12279).
+
+    ``tracked_q_<club>.npz`` holds ``q_track`` (float32) and ``time_s`` on
+    the bundle clock (zero at the first tracked frame), so the fixture's feet
+    can be checked against the swing it was exported from.
+    """
+    with np.load(run_dir / "dynamics_record.npz") as record:
+        time_s = np.asarray(record["track_time_s"], dtype=float)
+        q_track = np.asarray(record["q_track"], dtype=np.float32)
+    path = FIXTURES / f"tracked_q_{club}.npz"
+    np.savez_compressed(path, q=q_track, time_s=time_s - time_s[0])
+    return path
 
 
 def _write_address_pose(club: str, manifest: dict[str, Any], q0: np.ndarray) -> None:

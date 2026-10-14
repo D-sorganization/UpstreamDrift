@@ -128,7 +128,7 @@ Full-horizon GCV-20 / OSV-10 results for the 7-iron bundle: −5.0 %, −5.1 ms,
 
 ### Limitations
 
-The club-face fixtures have not been regenerated with the finer hold. Regenerating them needs the capture data and a re-solve on a simulation host. The dependent tests (MSK grip recalibration, bushing) cascade from that. The 7-iron and driver expected-failure markers stay in place.
+The 7-iron club-face fixture was regenerated with the finer hold on brick (`scripts/regenerate_club_face_fixtures.py --capture iron`, fresh pipeline run and export; `CLUB_FACE_EFFORT_HOLD_MS = 0.125`). It adopts the #12221 7-iron grip refit: `fit_grip_rotation_receipt_iron7.json` applied to `full_body_spec_anthro_iron7.json` and `--fix-club-markers` added to the 7-iron fixture and calibrated commands. Against the capture the fixture goes from −3.9 %, −3.9 ms, impact face 2.83° to −2.6 %, −7.2 ms, 5.47° (capture 3.21°); every foot stays within 5.5 mm of the tracked swing through 1.1 s (the 1 ms export of the `s38-fxi2` refit run: 53.4 mm, first above 10 mm at 0.705 s; its 0.125 ms export: 5.5 mm), and the trail toe passes 10 mm at 1.18 s, as in the pipeline FD. `tests/unit/motion_matching/test_club_face_fixture_feet.py` checks this against the committed tracked swing (`tracked_q_iron7.npz`). The 7-iron speed-timing expected-failure markers stay (peak 7.2 ms early against 5 ms; #11767). The driver fixture is unchanged (1 ms hold, meets GCV-20).
 
 ### Reproduction
 
@@ -161,9 +161,18 @@ Driving the OpenSim bushing grip (`BushingGripSimulator`) with that fixture over
 | Peak axial squeeze    | 50.0 N            | 34.5 N at $t = 1.332$ s | **51.3 N** at $t = 1.330$ s | $t = 1.326$–$1.332$ s |
 | Translation           | 3.0 mm            | 1.98 mm                 | 1.98 mm                     | within bound          |
 
+The 7-iron fixture regenerated with the opt-in 0.125 ms effort hold (#12279; -2.6 % impact speed against capture-B, previously -3.9 %) shows the same transient at its own ball impact (capture impact $t = 1.334$ s):
+
+| Metric                | Full-Swing Bound  | Peak (7-iron, #12279)       | Contact Window        |
+| --------------------- | ----------------- | --------------------------- | --------------------- |
+| Peak bushing rotation | 2.0° (0.0349 rad) | **2.98°** at $t = 1.338$ s  | $t = 1.334$–$1.344$ s |
+| Peak axial squeeze    | 50.0 N            | **58.2 N** at $t = 1.342$ s | $t = 1.340$–$1.344$ s |
+
 ### Decision (Owner Ruling 2026-10-11)
 
-Apply the full-swing bounds outside the $\pm 5$ ms ball-contact window ($t = 1.3255 \pm 0.005$ s). The impact-transient exceedance is governed by a strict xfail waiver (`_IMPACT_WAIVERS` ceiling: 2.62° + 3% and 51.3 N + 3%), ensuring no silent loosening of physics bounds occurs outside the documented excursion window.
+Apply the full-swing bounds outside the measured ball-contact window. The impact-transient exceedance is governed by a strict xfail waiver (`_IMPACT_WAIVERS` ceiling: 2.62° + 3% and 51.3 N + 3%), ensuring no silent loosening of physics bounds occurs outside the documented excursion window.
+
+**7-iron (owner ruling 2026-10-14, #12279):** the same rule is approved for the 7-iron fixture: ceilings of 2.98° + 3% = 3.07° and 58.2 N + 3% = 59.9 N, inside $t = 1.334$–$1.344$ s only. Both waivers are now window-limited in the test itself (`_IMPACT_WINDOWS_S`: driver $1.326$–$1.332$ s, 7-iron $1.334$–$1.344$ s): every sample outside the window must meet the plain 2° / 50 N bound, the in-window peak must exceed it (otherwise the waiver is dropped) and stay under the ceiling.
 
 ### Why
 
@@ -177,5 +186,5 @@ The excess is a physical ball-contact collision transient: as clubhead speed inc
 
 ### Evidence Receipt
 
-- Tests: [`tests/unit/motion_matching/test_grip_bushing_opensim.py`](../../../tests/unit/motion_matching/test_grip_bushing_opensim.py) (`test_full_swing_deflection_within_limits[driver]` and `test_full_swing_internal_force_is_physical[driver]`).
-- Reference: issues #12272, #12221, #11767, #11739.
+- Tests: [`tests/unit/motion_matching/test_grip_bushing_opensim.py`](../../../tests/unit/motion_matching/test_grip_bushing_opensim.py) (`test_full_swing_deflection_within_limits[driver|iron7]`, `test_full_swing_internal_force_is_physical[driver|iron7]` and the waiver contract `test_impact_waiver_is_limited_to_its_window_and_ceiling`).
+- Reference: issues #12272, #12279, #12221, #11767, #11739.
