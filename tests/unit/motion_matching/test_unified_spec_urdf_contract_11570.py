@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from src.shared.python.motion_matching.unified_urdf_contract import (
+from src.shared.python.motion_matching.validators import (
     MYOSUITE_TOPOLOGY_DIVERGENCE_LEDGER,
     RETIRED_LEGACY_URDF_PATHS,
     get_canonical_golfer_urdf_bundle,
