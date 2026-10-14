@@ -327,7 +327,7 @@ def export_wbc_schedule(
         "geometry_parameters", np.array([], dtype=np.float64)
     )
     model_name: str = kwargs.get("model_name", "generic_humanoid")
-    extra_metadata: dict[str, Any] | None = kwargs.get("extra_metadata", None)
+    extra_metadata: dict[str, Any] | None = kwargs.get("extra_metadata")
 
     meta: dict[str, Any] = {
         "non_claims": list(NON_CLAIMS),
