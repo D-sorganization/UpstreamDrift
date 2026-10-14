@@ -2288,6 +2288,45 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#11731 · Add OSV-5 Golfer Realism Showcase Render Script, Headless Smoke Test, and Modelling Reference Updates (#11731, #11726)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11731
+- **Branch:** merged via #12527
+- **PR:** #12527
+- **Paths:** see #12527
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`9aa4f2ea`; collated from changes/11731-add-osv-5-golfer-realism-showcase-render.md)
+- **Summary:** Add OSV-5 golfer realism showcase render script, headless smoke test, and modelling reference updates (#11731, #11726)
+- **Next step:** Shipped in PR #12527.
+
+### DL-#11681 · Add MATLAB R2025b Simscape Mechanics Explorer 4-View Export Script and Deferred Catalog Entry (NV-8) (#11681, #11673)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11681
+- **Branch:** merged via #12523
+- **PR:** #12523
+- **Paths:** see #12523
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`8aa6be83`; collated from changes/11681-add-matlab-r2025b-simscape-mechanics-exp.md)
+- **Summary:** Add MATLAB R2025b Simscape Mechanics Explorer 4-view export script and deferred catalog entry (NV-8) (#11681, #11673)
+- **Next step:** Shipped in PR #12523.
+
+### DL-#11613 · Add MATLAB R2025b Simscape Same-Input Torque Bundle Replay Harness and Update Parity Reference (SIP P-8) (#11613, #11605)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11613
+- **Branch:** merged via #12525
+- **PR:** #12525
+- **Paths:** see #12525
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`59d0e9b7`; collated from changes/11613-add-matlab-r2025b-simscape-same-input-to.md)
+- **Summary:** Add MATLAB R2025b Simscape same-input torque bundle replay harness and update parity reference (SIP P-8) (#11613, #11605)
+- **Next step:** Shipped in PR #12525.
+
 ### DL-#9700 · Add MockEngineQuarantineError, Assert_Not_Mock_Engine Guard, and GOLF_FORBID_MOCK_ENGINE Enforcement
 
 - **State:** shipped
