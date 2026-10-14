@@ -32,16 +32,16 @@ pytestmark = pytest.mark.unit
 # Measured maxima over all 151 frames (metres); see module docstring.
 IK_RESIDUAL_THRESHOLDS_M = {
     "ankle_l": 0.0083,
-    "ankle_r": 0.0052,
+    "ankle_r": 0.0054,
     "knee_l": 0.0270,
-    "knee_r": 0.0099,
+    "knee_r": 0.0110,
     "hip_l": 0.0149,
-    "hip_r": 0.0138,
-    "shoulder_l": 0.0097,
-    "shoulder_r": 0.0097,
+    "hip_r": 0.0153,
+    "shoulder_l": 0.0098,
+    "shoulder_r": 0.0098,
     "bar": 0.0044,
 }
-CLOSURE_THRESHOLD_M = 1.5e-6
+CLOSURE_THRESHOLD_M = 1.9e-6
 FOOT_PENETRATION_THRESHOLD_M = 5.4e-4
 
 
@@ -78,7 +78,13 @@ def test_bundle_carries_provenance(bundle: InputBundle) -> None:
     ik = prov["ik"]
     assert set(ik["max_residual_m"]) == set(LANDMARK_LABELS)
     assert prov["spec_sha256"] == bundle.spec_sha256
-    assert bundle.spec_bytes == LIFT_SPEC.read_bytes()
+    if "back_bar" in ik:
+        from src.shared.python.lifting.back_bar import apply_grip_width
+
+        width = ik["back_bar"]["geometry"]["grip_width_m"]
+        assert bundle.spec_bytes == apply_grip_width(LIFT_SPEC.read_bytes(), width)
+    else:
+        assert bundle.spec_bytes == LIFT_SPEC.read_bytes()
 
 
 def test_recorded_ik_residuals_are_below_thresholds(bundle: InputBundle) -> None:
@@ -96,7 +102,17 @@ def test_ik_from_the_recorded_solution_meets_thresholds(
 ) -> None:
     pytest.importorskip("mujoco")
     solution = SagittalSolution.from_record(bundle.provenance["sagittal_solution"])
-    lift = lift_to_full_body(bundle.spec_bytes, solution, load_seed_pose())
+    geom_rec = bundle.provenance["ik"].get("back_bar", {}).get("geometry")
+    geometry = None
+    if geom_rec is not None:
+        from src.shared.python.lifting.back_bar import BackBarGeometry
+
+        geometry = BackBarGeometry.from_standard(
+            geom_rec["lift"], height_m=geom_rec["height_m"]
+        )
+    lift = lift_to_full_body(
+        bundle.spec_bytes, solution, load_seed_pose(), geometry=geometry
+    )
     residual = lift.max_residual_by_landmark()
     for label, limit in IK_RESIDUAL_THRESHOLDS_M.items():
         assert residual[label] <= limit, (label, residual[label])
@@ -113,7 +129,7 @@ def test_mujoco_replay_reproduces_the_bar_path(bundle: InputBundle) -> None:
     full-window cross-engine bar-path parity is the next LIFT-5 slice.
     """
     pytest.importorskip("mujoco")
-    from src.shared.python.lifting.bundles import bar_path
+    from src.shared.python.lifting.bundles import BAR_FRAME, bar_path
     from src.shared.python.motion_matching.same_input import VectorPlant, open_loop
 
     steps = 10
@@ -123,8 +139,12 @@ def test_mujoco_replay_reproduces_the_bar_path(bundle: InputBundle) -> None:
     )
     np.testing.assert_array_equal(rollout.q, bundle.reference_q[: steps + 1])
     recorded = np.asarray(bundle.provenance["window_bar_path_m"], dtype=float)
+    frame = bundle.provenance.get("bar_frame", BAR_FRAME)
     np.testing.assert_allclose(
-        bar_path(plant, rollout.q), recorded[: steps + 1], rtol=0, atol=1e-9
+        bar_path(plant, rollout.q, frame=frame),
+        recorded[: steps + 1],
+        rtol=0,
+        atol=1e-9,
     )
 
 

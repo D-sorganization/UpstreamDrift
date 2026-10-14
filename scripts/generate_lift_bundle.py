@@ -80,8 +80,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--geometry",
         choices=("legacy", "back_bar"),
-        default="legacy",
-        help="legacy: golf club grip (committed bundle); back_bar: #12347 geometry",
+        default="back_bar",
+        help="back_bar: #12347 geometry (committed bundle); legacy: golf club grip",
     )
     return parser
 

@@ -1,43 +1,40 @@
 {
-  "bundle": "docs/development/lifting/evidence/back_squat/back_squat_barbell_bundle.npz",
-  "bundle_spec_sha256": "36702e052dcc2731b76d07cafcb92c9534b1274d2d374a0f6214af6eb52206c4",
+  "bundle": "docs\\development\\lifting\\evidence\\back_squat\\back_squat_barbell_bundle.npz",
+  "bundle_spec_sha256": "81a9edf3ad70e8022973be46900a1d902a268725641f3b6e566ce939ba6ed535",
   "engines": {
     "drake": {
-      "bar_acceleration": 3.296810291431029e-8,
-      "body_acceleration": 1.523500770872488e-6,
-      "hand_force_L": 1.0582149911897432e-7,
-      "hand_force_R": 1.1044502556956104e-7,
-      "hand_moment_L": 2.259753273392562e-9,
-      "hand_moment_R": 2.259753273392562e-9
+      "unavailable": "ModuleNotFoundError: No module named 'pydrake'"
     },
     "opensim": {
-      "bar_acceleration": 3.387461333659303e-8,
-      "body_acceleration": 1.1256488789967989e-6,
-      "hand_force_L": 9.270695500163129e-8,
-      "hand_force_R": 9.406062417838257e-8,
-      "hand_moment_L": 2.811669119751059e-9,
-      "hand_moment_R": 2.811669119751059e-9
+      "unavailable": "AttributeError: module 'opensim' has no attribute 'Logger'"
     },
     "pinocchio": {
-      "bar_acceleration": 1.9188689748261822e-8,
-      "body_acceleration": 8.411793714913074e-7,
-      "hand_force_L": 1.1040916092497355e-7,
-      "hand_force_R": 1.1213205652893521e-7,
-      "hand_moment_L": 2.3297506146491287e-9,
-      "hand_moment_R": 2.3297506146491287e-9
+      "unavailable": "ModuleNotFoundError: No module named 'pinocchio'"
     }
   },
   "generator": "scripts/generate_barbell_squat_evidence.py --part parity",
-  "indices": [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200],
+  "indices": [
+    0,
+    20,
+    40,
+    60,
+    80,
+    100,
+    120,
+    140,
+    160,
+    180,
+    200
+  ],
   "lift": "back_squat",
   "mujoco_scale": {
-    "bar_acceleration": 211.08861373160934,
-    "body_acceleration": 2863.5713156239813,
-    "hand_force_L": 1006.9840371613284,
-    "hand_force_R": 1012.2659587893287,
-    "hand_moment_L": 13.86967164366968,
-    "hand_moment_R": 13.86967164366968
+    "bar_acceleration": 118.48691101545886,
+    "body_acceleration": 1751.7913482710026,
+    "hand_force_L": 531.2783187158404,
+    "hand_force_R": 549.9280407874547,
+    "hand_moment_L": 9.574915687688762,
+    "hand_moment_R": 9.574915687688762
   },
-  "source_commit": "553b93ecddf1ccb02bc957caee4baa57f7ec72e8",
+  "source_commit": "2c5684a07c15f1150fd08d9025d56e9900b289fe",
   "tolerance": "|dX| <= 1e-6 + 1e-8 * max|X| (L1, epic #11605)"
 }
