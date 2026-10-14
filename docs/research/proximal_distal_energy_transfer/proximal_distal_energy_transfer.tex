@@ -9045,6 +9045,36 @@ power within \(5.51\times10^{-14}\) W. These checks are independent of
 the exact equal-and-opposite force sum and expose velocity-frame,
 moment-arm, and sign errors that force closure alone cannot detect.
 
+\subsection{Internal Angular-Momentum Balance and Grip Constitutive Qualification}\label{sec-spatial-carriage-angular-momentum-qualification}
+
+Although the paired Kelvin--Voigt contact law in Equation~\eqref{eq-spatial-forward-contact-force} closes linear force (\(\mathbf F_i + (-\mathbf F_i) = \mathbf 0\)) and satisfies the interface power balance identically, it does not by itself close the internal angular-momentum balance for separated contact endpoints (\#11195). Let \(\mathbf d_i = \mathbf h_i - \mathbf p_i\) denote the endpoint displacement. The net moment exerted by the contact pair \((+\mathbf F_i \text{ at } \mathbf p_i, -\mathbf F_i \text{ at } \mathbf h_i)\) about any common origin \(\mathbf O\) is
+\begin{equation}\phantomsection\label{eq-spatial-carriage-contact-pair-moment}{
+\mathbf M_i = (\mathbf p_i - \mathbf O)\times \mathbf F_i + (\mathbf h_i - \mathbf O)\times (-\mathbf F_i) = -\mathbf d_i \times \mathbf F_i.
+}\end{equation}
+Substituting \(\mathbf F_i = k_c \mathbf d_i + c_c \dot{\mathbf d}_i\), the elastic spring force is central (\(\mathbf d_i \times k_c \mathbf d_i \equiv \mathbf 0\)), but the directional viscous damping term yields a nonzero internal couple:
+\begin{equation}\phantomsection\label{eq-spatial-carriage-damper-moment}{
+\mathbf M_i = -c_c \mathbf d_i \times \dot{\mathbf d}_i = -c_c (\mathbf h_i - \mathbf p_i)\times (\dot{\mathbf h}_i - \dot{\mathbf p}_i).
+}\end{equation}
+
+\noindent\textbf{Adverse Synthetic Counterexample.} An adverse counterexample illustrates the separation between passivity and angular-momentum closure: let \(\mathbf d = (0.01, 0, 0)\)~m, relative velocity \(\mathbf v_{\mathrm{rel}} = \dot{\mathbf d} = (0, 1, 0)\)~m/s, \(k_c = 1800\)~N/m, and \(c_c = 18\)~N~s/m. The contact force sum is identically zero, and the body power plus rate of stored energy equals \(-18\)~W (matching dissipation \(-18\)~W exactly), yet the contact pair exerts a net internal moment of \((0, 0, -0.18)\)~N~m. Passivity and equal-and-opposite forces therefore do not imply internal moment balance for separated spatial contacts.
+
+\noindent\textbf{Archived Simulation Evidence Audit.} Direct evaluation of the archived multi-engine trajectories in \texttt{data/spatial\_forward\_contact\_study.npz} reveals peak net contact-pair moments of \(0.0826\)~N~m in MuJoCo (\(0.0826086564194171\)~N~m) and \(0.0827\)~N~m in Pinocchio (\(0.08273899228765469\)~N~m), with post-killswitch (\(t \ge 0.180\)~s) peaks of \(0.0336\)~N~m and a maximum endpoint gap of \(0.01125\)~m.
+
+\noindent\textbf{Closed Internal Constitutive Formulations.} Under the Owner ruling for Issue~\#11195, treating the hand carriage interface as a closed internal grip requires replacing or augmenting the legacy directional law with one of two formulations:
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item \textbf{Central-force compliant contact:} projects the viscous damping velocity onto the instantaneous line-of-action unit vector \(\hat{\mathbf d}_i = \mathbf d_i / \lVert\mathbf d_i\rVert\),
+\begin{equation}\phantomsection\label{eq-spatial-carriage-central-force}{
+\mathbf F_i = \left[k_c \lVert\mathbf d_i\rVert + c_c (\dot{\mathbf h}_i - \dot{\mathbf p}_i)\cdot \hat{\mathbf d}_i\right]\hat{\mathbf d}_i,
+}\end{equation}
+guaranteeing \((\mathbf p_i - \mathbf h_i)\times \mathbf F_i \equiv \mathbf 0\) identically for all separated endpoints \(\mathbf p_i \neq \mathbf h_i\) and preserving rigid-body frame indifference (objectivity under superimposed rigid rotation \(\dot{\mathbf d}_i = \boldsymbol\omega \times \mathbf d_i \implies \dot{\mathbf d}_i \cdot \hat{\mathbf d}_i = 0\)).
+\item \textbf{Closed-wrench compliant contact:} pairs the directional spring-damper force \(\mathbf F_i = k_c \mathbf d_i + c_c \dot{\mathbf d}_i\) with compensating internal reaction couples \(\boldsymbol\tau_{p,i} = \boldsymbol\tau_{h,i} = \frac{1}{2}\mathbf d_i \times \mathbf F_i\), so that the combined wrench pair \((\mathbf F_i, \boldsymbol\tau_{p,i})\) at \(\mathbf p_i\) and \((-\mathbf F_i, \boldsymbol\tau_{h,i})\) at \(\mathbf h_i\) has identically zero net internal moment about any common origin:
+\begin{equation}\phantomsection\label{eq-spatial-carriage-closed-wrench}{
+(\mathbf p_i \times \mathbf F_i + \boldsymbol\tau_{p,i}) + (\mathbf h_i \times (-\mathbf F_i) + \boldsymbol\tau_{h,i}) = \mathbf 0.
+}\end{equation}
+\end{enumerate}
+Both closed formulations are audited by automated unit tests in \texttt{tests/unit/research/test\_spatial\_carriage\_angular\_momentum\_closure.py} and verified to preserve the passivity and interface-power contracts without modifying the archived historical evidence artifacts.
+
 A world-referenced trajectory moves the finite hand carriages through a
 grounded spring--damper driver,
 
