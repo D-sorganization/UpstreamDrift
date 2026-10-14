@@ -38,7 +38,9 @@ PROBE_ORDERS: tuple[tuple[str, ...], ...] = (
     ("opensim", "ezc3d"),
     ("ezc3d", "opensim"),
 )
-_RUNTIMES = {"ezc3d": "c3d-preparation", "opensim": "native-opensim"}
+# Public: the supported runtime identities a process may host (one at a time);
+# the pytest-side boundary in tests/helpers/native_runtime_boundary.py reuses it.
+RUNTIME_ROLES = {"ezc3d": "c3d-preparation", "opensim": "native-opensim"}
 Probe = Mapping[str, Any]
 _SCHEMA = "upstreamdrift.native_runtime_identity.v1"
 
@@ -62,7 +64,7 @@ def _module_version(module: object) -> str | None:
 def _probe(order: Sequence[str]) -> dict[str, object]:
     """Import ``order`` in this (fresh) process and record every outcome."""
     guard = _load_dll_guard()
-    clean = not any(name in sys.modules for name in _RUNTIMES)
+    clean = not any(name in sys.modules for name in RUNTIME_ROLES)
     steps: list[dict[str, object]] = []
     for name in order:
         step: dict[str, object] = {"module": name}
@@ -139,9 +141,9 @@ def classify_runtimes(probes: Sequence[Probe]) -> dict[str, str]:
     """
     if not all(probe["clean_start"] for probe in probes):
         raise ValueError("Every probe must start in a clean process")
-    alone = {name: _alone(probes, name) for name in _RUNTIMES}
+    alone = {name: _alone(probes, name) for name in RUNTIME_ROLES}
     identities = {
-        _RUNTIMES[name]: _runtime_identity(step) for name, step in alone.items()
+        RUNTIME_ROLES[name]: _runtime_identity(step) for name, step in alone.items()
     }
     unusable = [name for name, step in alone.items() if step["status"] != "ok"]
     if unusable:
@@ -175,7 +177,9 @@ def exit_status(probes: Sequence[Probe]) -> int:
     if any(probe.get("crashed") for probe in probes):
         return 1
     broken = [
-        name for name in _RUNTIMES if _alone(probes, name)["status"] == "import-error"
+        name
+        for name in RUNTIME_ROLES
+        if _alone(probes, name)["status"] == "import-error"
     ]
     return 1 if broken else 0
 
