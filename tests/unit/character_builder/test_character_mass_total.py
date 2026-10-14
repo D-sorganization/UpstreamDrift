@@ -18,6 +18,9 @@ from src.shared.python.humanoid_character_builder.presets.loader import (
 from src.shared.python.humanoid_character_builder.spec_export import (
     compile_character,
 )
+from src.shared.python.motion_matching.anthropometric_geometry import (
+    build_upper_body,
+)
 from src.shared.python.motion_matching.execution import assets
 from src.shared.python.motion_matching.execution.spec_builder import (
     LEG_BODIES,
@@ -48,6 +51,15 @@ def _body_mass_without_club(document: dict) -> float:
 
 def _legs(document: dict) -> dict[str, float]:
     return {k: v for k, v in _masses(document).items() if k.endswith(LEG_SUFFIXES)}
+
+
+def _hand_solids(document: dict) -> dict[str, dict]:
+    body = next(b for b in document["bodies"] if b["name"].endswith("Clubface Vector"))
+    return {
+        s["name"].rsplit("/", 1)[-1]: s
+        for s in body["solids"]
+        if s.get("name", "").rsplit("/", 1)[-1] in ("LHand", "RHand")
+    }
 
 
 @pytest.mark.parametrize("preset", list_character_presets())
@@ -101,9 +113,54 @@ def test_reference_build_keeps_rajagopal_leg_masses() -> None:
 
 
 def test_mass_below_upper_body_mass_is_rejected() -> None:
-    # The upper body alone (fixed hands and joint solid) outweighs 2 kg.
+    # The upper body alone outweighs 0.5 kg.
     with pytest.raises(ValueError, match="leg mass"):
-        _compose(2.0, match_subject_mass=True)
+        _compose(0.5, match_subject_mass=True)
+
+
+def test_build_upper_body_scales_hand_mass_and_inertia() -> None:
+    doc_60 = build_upper_body(1.80, 60.0, "driver", scale_hand_mass=True)
+    hands_60 = _hand_solids(doc_60)
+    assert set(hands_60) == {"LHand", "RHand"}
+    for side in ("LHand", "RHand"):
+        assert hands_60[side]["mass_kg"] == pytest.approx(0.0061 * 60.0, abs=1e-12)
+
+    doc_100 = build_upper_body(1.80, 100.0, "driver", scale_hand_mass=True)
+    hands_100 = _hand_solids(doc_100)
+    for side in ("LHand", "RHand"):
+        assert hands_100[side]["mass_kg"] == pytest.approx(0.0061 * 100.0, abs=1e-12)
+        factor = 100.0 / 60.0
+        np.testing.assert_allclose(
+            hands_100[side]["inertia_com_kg_m2"],
+            np.asarray(hands_60[side]["inertia_com_kg_m2"]) * factor,
+            rtol=1e-12,
+        )
+
+
+def test_build_upper_body_preserves_native_hand_mass_by_default() -> None:
+    doc_default = build_upper_body(1.80, 80.0, "driver")
+    hands = _hand_solids(doc_default)
+    for side in ("LHand", "RHand"):
+        assert hands[side]["mass_kg"] == pytest.approx(0.5491357853472616, abs=1e-9)
+
+    doc_explicit_false = build_upper_body(1.80, 80.0, "driver", scale_hand_mass=False)
+    hands_false = _hand_solids(doc_explicit_false)
+    for side in ("LHand", "RHand"):
+        assert hands_false[side]["mass_kg"] == pytest.approx(
+            0.5491357853472616, abs=1e-9
+        )
+
+
+def test_compose_anthropometric_document_scales_hands_and_total_body_mass() -> None:
+    composed = compose_anthropometric_document(
+        1.80, 95.0, "driver", match_subject_mass=True
+    ).document
+    hands = _hand_solids(composed)
+    for side in ("LHand", "RHand"):
+        assert hands[side]["mass_kg"] == pytest.approx(0.0061 * 95.0, abs=1e-12)
+    assert _body_mass_without_club(composed) == pytest.approx(
+        95.0, abs=MASS_TOLERANCE_KG
+    )
 
 
 def test_mass_sums_do_not_depend_on_python_version() -> None:

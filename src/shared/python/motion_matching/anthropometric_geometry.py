@@ -32,7 +32,9 @@ numbers and R2025b frame parity is re-run; every consumer must say so.
 from __future__ import annotations
 
 import json
+import os
 from collections.abc import Mapping, Sequence
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -44,7 +46,12 @@ from src.shared.python.motion_matching.anthropometry import (
     inertia_about_axis,
     segment_parameters,
 )
-from src.shared.python.motion_matching.club_models import DRIVER, ClubSpec, apply_club
+from src.shared.python.motion_matching.club_models import (
+    CLUBS,
+    DRIVER,
+    ClubSpec,
+    apply_club,
+)
 from src.shared.python.motion_matching.grip_fit import grip_rotation
 from src.shared.python.motion_matching.range_of_motion import UPPER_RANGES_DEG
 
@@ -184,17 +191,46 @@ def _copy(value: Any) -> Any:
     return json.loads(json.dumps(value))
 
 
+def _default_native_spec_path() -> Path:
+    env_path = os.environ.get("UD_NATIVE_GEOMETRY_SPEC")
+    if env_path:
+        p = Path(env_path)
+        if p.is_file():
+            return p
+    return (
+        Path(__file__).resolve().parents[4]
+        / "docs"
+        / "development"
+        / "simscape_tour_matching"
+        / "native_evidence"
+        / "native_geometry_spec_9967.json"
+    )
+
+
+def _load_default_native_spec() -> dict[str, Any]:
+    path = _default_native_spec_path()
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"Native geometry spec ({path.name}) not found at {path}. "
+            "Set UD_NATIVE_GEOMETRY_SPEC environment variable or pass native explicitly."
+        )
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def build_upper_body(
-    native: Mapping[str, Any],
+    native: Mapping[str, Any] | float | None = None,
+    mass_kg_pos: float | None = None,
+    club_pos: ClubSpec | str | None = None,
     *,
-    stature_m: float,
-    mass_kg: float,
+    stature_m: float | None = None,
+    mass_kg: float | None = None,
     trunk_scale: float = 1.0,
     arm_scale: float = 1.0,
     shoulder_scale: float = 1.0,
-    club: ClubSpec = DRIVER,
+    club: ClubSpec | str = DRIVER,
     grip_roll_deg: float = GRIP_ROLL_DEG,
     grip_rotation_deg: Mapping[str, Sequence[float]] | None = None,
+    scale_hand_mass: bool = False,
 ) -> dict[str, Any]:
     """Return the anthropometric upper-body document for a subject.
 
@@ -206,6 +242,16 @@ def build_upper_body(
     ``shoulder_scale`` the biacromial breadth: subjects depart from mean
     proportions and the capture decides these three.
 
+    ``scale_hand_mass`` (default ``False``): ``native_geometry_spec_9967.json``
+    (Simscape Multibody export) supplies ``GolfSwing3D_Kinetic/Grip/LHand`` and
+    ``RHand`` at fixed reference mass ``0.5491357853472616 kg`` each (plus
+    ``0.01 kg`` ``LHandStandoff`` / ``RHandStandoff``). When ``scale_hand_mass=True``,
+    ``LHand`` and ``RHand`` are scaled to ``segment_parameters(stature_m, mass_kg, "hand").mass_kg``
+    (``0.0061 * mass_kg``, De Leva 1996 male hand mass fraction) with ``inertia_com_kg_m2``
+    scaled proportionally by ``target_hand_mass / old_hand_mass``. Setting
+    ``scale_hand_mass=False`` preserves exact pinned Simscape native hand masses
+    and ``full_body_spec_anthro_{driver,iron7}.json`` hashes for reference capture builds.
+
     ``native`` supplies the body, joint and frame names, the club and
     right-hand standoff bodies, the wrist joint frames and the grip closure,
     all copied verbatim. Preconditions: positive stature and mass, native
@@ -213,12 +259,30 @@ def build_upper_body(
     same body and joint names, total mass within 1 % of the de Leva sum for
     the bodies built here plus the copied club and hands.
     """
-    if stature_m <= 0 or mass_kg <= 0:
+    if isinstance(native, (int, float)):
+        stature_m = float(native)
+        if mass_kg_pos is not None:
+            mass_kg = float(mass_kg_pos)
+        if club_pos is not None:
+            club = club_pos
+        native_dict = _load_default_native_spec()
+    elif native is None:
+        native_dict = _load_default_native_spec()
+    elif isinstance(native, Mapping):
+        native_dict = dict(native)
+    else:
+        raise TypeError(
+            f"native must be a Mapping, float, or None, got {type(native).__name__}"
+        )
+
+    if stature_m is None or mass_kg is None or stature_m <= 0 or mass_kg <= 0:
         raise ValueError("Stature and mass must be positive")
     if trunk_scale <= 0 or arm_scale <= 0 or shoulder_scale <= 0:
         raise ValueError("Scale factors must be positive")
-    if tuple(native["coordinate_order"]) != COORDINATES:
+    if tuple(native_dict["coordinate_order"]) != COORDINATES:
         raise ValueError("Native document must carry the 27 native coordinates")
+    if isinstance(club, str):
+        club = CLUBS[club]
     grip_rotation = {
         side: tuple(float(v) for v in angles)
         for side, angles in (grip_rotation_deg or GRIP_ROTATION_DEG).items()
@@ -227,9 +291,9 @@ def build_upper_body(
         len(v) != 3 for v in grip_rotation.values()
     ):
         raise ValueError("grip_rotation_deg needs three angles for L and R")
-    names = {b["name"].rsplit("/", 1)[-1]: b["name"] for b in native["bodies"]}
-    joints = {j["child"]: j for j in native["joints"]}
-    jname = {j["child"].rsplit("/", 1)[-1]: j["name"] for j in native["joints"]}
+    names = {b["name"].rsplit("/", 1)[-1]: b["name"] for b in native_dict["bodies"]}
+    joints = {j["child"]: j for j in native_dict["joints"]}
+    jname = {j["child"].rsplit("/", 1)[-1]: j["name"] for j in native_dict["joints"]}
 
     trunk = segment_parameters(stature_m, mass_kg, "trunk").length_m * trunk_scale
     pelvis_h = PELVIS_HEIGHT_FRACTION * trunk
@@ -356,6 +420,7 @@ def build_upper_body(
         [("Rx", "NeckInputX"), ("Ry", "NeckInputY"), ("Rz", "NeckInputZ")],
     )
     frame("Head", head, (0, 0, 0))
+    subsystems: dict[str, dict[str, Any]] = {}
     for side, sign in (("L", 1.0), ("R", -1.0)):
         link = body(
             f"Hubto{side}S",
@@ -448,14 +513,25 @@ def build_upper_body(
         rotation = (
             WRIST_ROLL @ np.asarray(native_wrist["parent_to_base"], float)[:3, :3]
         )
-        hand = body(
-            hand_suffix,
-            _copy(
-                next(b for b in native["bodies"] if b["name"] == names[hand_suffix])[
-                    "solids"
-                ]
-            ),
+        hand_solids = _copy(
+            next(b for b in native_dict["bodies"] if b["name"] == names[hand_suffix])[
+                "solids"
+            ]
         )
+        subsystems[hand_suffix] = {"name": names[hand_suffix], "solids": hand_solids}
+        if scale_hand_mass and hand_suffix == "Clubface Vector":
+            target_hand_mass = segment_parameters(stature_m, mass_kg, "hand").mass_kg
+            for s in subsystems["Clubface Vector"].get("solids", []):
+                if s.get("name", "").rsplit("/", 1)[-1] in ("LHand", "RHand"):
+                    old_hand_mass = float(s.get("mass_kg", 0.0))
+                    s["mass_kg"] = target_hand_mass
+                    if old_hand_mass > 0.0 and "inertia_com_kg_m2" in s:
+                        scale_factor = target_hand_mass / old_hand_mass
+                        s["inertia_com_kg_m2"] = (
+                            np.asarray(s["inertia_com_kg_m2"], dtype=float)
+                            * scale_factor
+                        ).tolist()
+        hand = body(hand_suffix, subsystems[hand_suffix]["solids"])
         joint(
             hand_suffix,
             fore,
@@ -471,19 +547,19 @@ def build_upper_body(
                 native_wrist["child_to_follower"], grip_roll_deg, grip_rotation[side]
             ),
         )
-    for f in native["frames"]:
+    for f in native_dict["frames"]:
         if f["body"] in (names["Clubface Vector"], names["RHandStandoff"]):
             frames.append(_copy(f))
-    order = list(native["coordinate_order"]) + list(NECK_COORDINATES)
+    order = list(native_dict["coordinate_order"]) + list(NECK_COORDINATES)
     document = {
-        "schema_version": native["schema_version"],
+        "schema_version": native_dict["schema_version"],
         "qualification": "anthropometric geometry (AN-1); unqualified until Simscape parity",
-        "gravity_m_s2": _copy(native["gravity_m_s2"]),
+        "gravity_m_s2": _copy(native_dict["gravity_m_s2"]),
         "coordinate_order": order,
         "bodies": bodies,
         "joints": joints_out,
         "frames": frames,
-        "closure": _copy(native["closure"]),
+        "closure": _copy(native_dict["closure"]),
         "subject": {
             "stature_m": stature_m,
             "mass_kg": mass_kg,
