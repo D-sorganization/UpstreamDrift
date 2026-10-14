@@ -12,6 +12,7 @@ import hashlib
 import json
 from pathlib import Path
 from typing import Any
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 _SCHEMA = "native-sdk-mechanics-v1"
 _PROFILE_CLASSES = {"CustomJoint", "MovingPathPoint"}
@@ -145,7 +146,7 @@ def declare_native_mechanics_execution_profile(
     model_path: Path, source_sha256: str
 ) -> NativeMechanicsExecutionProfile:
     """Capture only exact native joint/path mechanics outside the narrow subset."""
-    import opensim as osim
+    osim = import_opensim()
 
     path = Path(model_path)
     raw = path.read_bytes()
@@ -165,7 +166,7 @@ def validate_native_mechanics_execution_profile(
     expected_source_sha256: str,
 ) -> None:
     """Require complete exact path/class/dump closure before SDK delegation."""
-    import opensim as osim
+    osim = import_opensim()
 
     if not isinstance(profile, NativeMechanicsExecutionProfile):
         raise TypeError("native mechanics execution profile must be typed")

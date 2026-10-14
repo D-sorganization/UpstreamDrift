@@ -15,19 +15,23 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = get_logger(__name__)
 
-try:
+if TYPE_CHECKING:
     import opensim
-except ImportError:
-    opensim = None
-    logger.warning("OpenSim not installed - muscle analysis unavailable")
+else:
+    try:
+        opensim = import_opensim()
+    except ImportError:
+        opensim = None
+        logger.warning("OpenSim not installed - muscle analysis unavailable")
 
 # Constants for muscle analysis
 NINETY_DEGREES_RAD = 1.5708  # π/2 radians for 90° rotation
@@ -591,7 +595,7 @@ def _require_opensim() -> Any:
             caller never silently degrades.
     """
     try:
-        import opensim as _osim  # noqa: PLC0415 — intentional lazy import
+        _osim = import_opensim()  # intentional lazy import
     except ImportError as exc:  # pragma: no cover — env dependent
         raise ModuleNotFoundError(
             "OpenSim Python bindings are not installed; the Rajagopal2015 "

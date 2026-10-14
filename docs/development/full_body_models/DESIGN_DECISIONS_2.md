@@ -111,7 +111,7 @@ python3 -m pytest tests/unit/engines/myosuite/test_retarget.py tests/unit/engine
 
 `generate_reference_bundle` evaluates the pipeline computed-torque controller and holds each sample (zero-order hold) during the open-loop export. The hold length is now a parameter, `effort_hold_s`. It must split the 1 ms step into 1, 2, 4 or 8 holds, so that the hold count divides the eight RK4 substeps (`effort_holds_for` validates this). `StepPolicy.effort_holds` holds the count. Each hold gets its own controller sample and `substeps / effort_holds` RK4 substeps. The closure projection still runs once per 1 ms step, so a finer hold does not add projection cost.
 
-The manifest records `policy.effort_holds_per_step` and `policy.effort_hold_s`. A finer bundle stores the hold-rate table as `hold_efforts` (`steps * effort_holds` rows). `efforts` keeps one row per step: each step's first sample, which is the controller torque at the step's start state. Per-step consumers (inverse-dynamics comparisons, overlays, kinetics) are therefore unchanged. Replays call `bundle.replay_efforts()` with `bundle.step_policy()`, so every engine uses the recorded hold. `segmented_replay`, `scripts.same_input_bundle replay` / `closed-loop` and `lifting.bar_path_parity` do this. A bundle without the keys (every committed bundle) loads as one hold per step.
+The manifest records `policy.effort_holds_per_step`, `policy.effort_hold_s`, `policy.effort_hold_dt_s`, `policy.effort_substeps`, and `policy.projection_dt_s`. A finer bundle stores the hold-rate table as `hold_efforts` (`steps * effort_holds` rows). `efforts` keeps one row per step: each step's first sample, which is the controller torque at the step's start state. Per-step consumers (inverse-dynamics comparisons, overlays, kinetics) are therefore unchanged. Replays call `bundle.replay_efforts()` with `bundle.step_policy()`, so every engine uses the recorded hold. `segmented_replay`, `scripts.same_input_bundle replay` / `closed-loop` and `lifting.bar_path_parity` do this. A bundle without the keys (every committed bundle) loads as one hold per step.
 
 The default stays 1 ms (owner ruling 2026-10-11 on #12279), and with it the integrator gives bit-identical results to before. The 0.125 ms hold is opt-in for the club-face fixtures: `--effort-hold-ms 0.125` on `scripts.same_input_bundle export`.
 
@@ -124,7 +124,7 @@ The pipeline's own forward dynamics evaluates the controller at every RK4 stage.
 | 1 ms, 8 substeps (default)   | 43 mm         | 0.71 s             | 24.0 mm             | −0.147 rad                   |
 | 0.125 ms, 1 substep per hold | 3.3 mm        | none               | 8.2 mm              | −0.001 rad                   |
 
-Full-horizon GCV-20 / OSV-10 results for the 7-iron bundle: −5.0 %, −5.1 ms, 8.71° with the 1 ms hold, and −2.5 %, −7.3 ms, 5.56° with the 0.125 ms hold. The tracked swing gives −1.9 %, −0.2 ms, 2.59°. The finer hold fixes speed, face and foot contact, but the speed peak moves to 7.3 ms early, against a 5 ms limit. So the 7-iron fixture still misses GCV-20, and that peak-timing miss is a separate follow-up under #11767. No tolerance was changed.
+Full-horizon GCV-20 / OSV-10 results for the 7-iron bundle: −5.0 %, −5.1 ms, 8.71° with the 1 ms hold, and −2.5 %, −7.3 ms, 5.56° with the 0.125 ms hold. The tracked swing gives −1.9 %, −0.2 ms, 2.59°. The driver bundle gives −2.5 %, −4.4 ms, 16.88° with the 1 ms hold, and −1.2 %, −3.5 ms, 16.91° with the 0.125 ms hold. The finer hold fixes speed, face and foot contact, but the speed peak moves to 7.3 ms early, against a 5 ms limit. So the 7-iron fixture still misses GCV-20, and that peak-timing miss is a separate follow-up under #11767. No tolerance was changed.
 
 ### Limitations
 
@@ -132,7 +132,7 @@ The club-face fixtures have not been regenerated with the finer hold. Regenerati
 
 ### Reproduction
 
-`tests/unit/motion_matching/same_input/test_effort_hold.py` is engine-free. A toy computed-torque loop (bandwidth 1500 rad/s) has an exact tracked solution. The 1 ms hold diverges from it, while the 0.125 ms hold stays within the epic #11605 1e-6 rad coordinate bound. Below the stability limit the hold error falls monotonically with the hold. The tests also check manifest round-trips, legacy loading, and replay through `segmented_replay`.
+`tests/unit/motion_matching/same_input/test_effort_hold.py` and `tests/unit/motion_matching/same_input/test_effort_hold_policy_12279.py` are engine-free. A toy computed-torque loop (bandwidth 1500 rad/s) has an exact tracked solution. The 1 ms hold diverges from it, while the 0.125 ms hold stays within the epic #11605 1e-6 rad coordinate bound. Below the stability limit the hold error falls monotonically with the hold. The tests also check manifest round-trips, legacy loading, and replay through `segmented_replay`.
 
 ### What Was Tried and Rejected
 
@@ -142,5 +142,40 @@ The club-face fixtures have not been regenerated with the finer hold. Regenerati
 
 ### Evidence Receipt
 
-- Tests: `tests/unit/motion_matching/same_input/test_effort_hold.py`. They failed before the change. They cover the toy-loop divergence at 1 ms versus the 1e-6 rad bound at 0.125 ms, the manifest round-trip, legacy bundle loading, and replay through `segmented_replay`.
+- Tests: `tests/unit/motion_matching/same_input/test_effort_hold.py` and `tests/unit/motion_matching/same_input/test_effort_hold_policy_12279.py`. They cover the toy-loop divergence at 1 ms versus the 1e-6 rad bound at 0.125 ms, the manifest round-trip, legacy bundle loading, and replay through `segmented_replay`.
 - Measurements: the #12279 issue thread (brick run `s38-fxi2`), quoted in the table above.
+
+---
+
+## 21. OpenSim Bushing Grip Ball-Impact Transient Bounds (OSV-7, #12272)
+
+### What
+
+Document the ball-impact transient waiver and windowing rule for `tests/unit/motion_matching/test_grip_bushing_opensim.py` under the #12221 refit driver club-face fixture (replaying the clubhead to the ball at -2.5 % of capture-A's speed, meeting GCV-20 #11767).
+
+Driving the OpenSim bushing grip (`BushingGripSimulator`) with that fixture over the full 0–1.8 s window exceeds the steady-state full-swing rotation and squeeze bounds specifically at ball impact ($t = 1.326$–$1.332$ s):
+
+| Metric                | Full-Swing Bound  | Baseline (-5.1 % speed) | Refit (-2.5 % speed)        | Contact Window        |
+| --------------------- | ----------------- | ----------------------- | --------------------------- | --------------------- |
+| Peak bushing rotation | 2.0° (0.0349 rad) | 1.81° at $t = 1.330$ s  | **2.62°** at $t = 1.328$ s  | $t = 1.326$–$1.332$ s |
+| Peak axial squeeze    | 50.0 N            | 34.5 N at $t = 1.332$ s | **51.3 N** at $t = 1.330$ s | $t = 1.326$–$1.332$ s |
+| Translation           | 3.0 mm            | 1.98 mm                 | 1.98 mm                     | within bound          |
+
+### Decision (Owner Ruling 2026-10-11)
+
+Apply the full-swing bounds outside the $\pm 5$ ms ball-contact window ($t = 1.3255 \pm 0.005$ s). The impact-transient exceedance is governed by a strict xfail waiver (`_IMPACT_WAIVERS` ceiling: 2.62° + 3% and 51.3 N + 3%), ensuring no silent loosening of physics bounds occurs outside the documented excursion window.
+
+### Why
+
+The excess is a physical ball-contact collision transient: as clubhead speed increases toward true capture speed (-5.1 % to -2.5 %), the impulse at ball strike naturally drives higher transient bushing rotation and squeeze. Loosening the general full-swing bounds would weaken kinematic verification across the backswing and downswing, while modifying bushing stiffness/damping would violate OSV-7 cross-engine parity (#11739). Governing the transient with a bounded waiver maintains full-swing integrity while accommodating verified ball impact physics.
+
+### What Was Tried and Rejected
+
+- **Widening full-swing bounds generally:** rejected; would weaken kinematic verification during downswing and backswing.
+- **Modifying bushing stiffness or damping in `GripInterface`:** rejected; alters cross-engine parity baseline across OSV-7 (#11739).
+- **Silent tolerance loosening:** rejected by owner ruling of 2026-10-11.
+
+### Evidence Receipt
+
+- Tests: [`tests/unit/motion_matching/test_grip_bushing_opensim.py`](../../../tests/unit/motion_matching/test_grip_bushing_opensim.py) (`test_full_swing_deflection_within_limits[driver]` and `test_full_swing_internal_force_is_physical[driver]`).
+- Reference: issues #12272, #12221, #11767, #11739.

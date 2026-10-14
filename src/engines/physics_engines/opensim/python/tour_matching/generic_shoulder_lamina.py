@@ -19,6 +19,7 @@ from typing import Any, cast
 from defusedxml import ElementTree
 import numpy as np
 from numpy.typing import NDArray
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 RECIPE = "generic-shoulder-triangle-multiset-lamina/1.0.0"
 REGISTRATION = "right-identity-left-local-z-reflection/1.0.0"
@@ -558,7 +559,7 @@ def audit_reviewed_557_shoulder_candidate(
     Pose offsets are relative to each native initialized coordinate. This
     cannot qualify anatomy, dynamics over a chart, or full-swing tracking.
     """
-    import opensim as osim
+    osim = import_opensim()
 
     from .native_body_inertia import audit_native_body_inertia
 

@@ -15,6 +15,7 @@ from typing import Any
 from defusedxml import ElementTree
 
 import numpy as np
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 _JOINTS = ("mtp_r", "mtp_l")
 _COORDINATES = ("mtp_angle_r", "mtp_angle_l")
@@ -180,7 +181,7 @@ def _mass_on_common_coordinates(
 
 
 def _native_mass(model: Any, state: Any) -> np.ndarray:
-    import opensim as osim
+    osim = import_opensim()
 
     matrix = osim.Matrix()
     model.getMatterSubsystem().calcM(state, matrix)
@@ -195,7 +196,7 @@ def _native_mass(model: Any, state: Any) -> np.ndarray:
 
 
 def _speed_projection(model: Any, state: Any, names: tuple[str, ...]) -> np.ndarray:
-    import opensim as osim
+    osim = import_opensim()
 
     columns: list[np.ndarray] = []
     for name in names:
@@ -218,7 +219,7 @@ def _projected_total_force(
 
 def _native_total_generalized_force(model: Any, state: Any) -> np.ndarray:
     """Native body-force projection plus direct mobility force, before bias/reactions."""
-    import opensim as osim
+    osim = import_opensim()
 
     model.realizeDynamics(state)
     body_forces = model.getRigidBodyForces(state)
@@ -370,7 +371,7 @@ def _perturbed_pose(
     derived_state: Any,
     name: str,
 ) -> tuple[Any, Any] | None:
-    import opensim as osim
+    osim = import_opensim()
 
     original_coordinate = original.getCoordinateSet().get(name)
     if original_coordinate.getLocked(original_state):
@@ -515,7 +516,7 @@ def _native_comparison(
 
 def derive_zero_mtp_model(request: ZeroMtpReductionRequest) -> ZeroMtpReductionReceipt:
     """Apply native zero-only bilateral weld and verify a fresh saved artifact."""
-    import opensim as osim
+    osim = import_opensim()
 
     source = request.source_model_path
     output = request.derived_model_path

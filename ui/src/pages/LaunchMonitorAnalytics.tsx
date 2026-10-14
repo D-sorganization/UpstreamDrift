@@ -32,6 +32,7 @@ import type {
   FlexibleAnalysisPayload,
   LaunchMonitorAnalysisResultV2,
 } from "@/api/generated/types";
+import { LaunchMonitorSessionsPanel } from "./LaunchMonitorSessionsPanel";
 import { LaunchMonitorTrendsPanel } from "./LaunchMonitorTrendsPanel";
 import { LaunchMonitorDispersionPanel } from "./LaunchMonitorDispersionPanel";
 import { LaunchMonitorRelationshipsPanel } from "./LaunchMonitorRelationshipsPanel";
@@ -798,6 +799,14 @@ export function LaunchMonitorAnalyticsPage() {
         </>
       )}
 
+      <LaunchMonitorSessionsPanel
+        onSessionImported={(imported) => {
+          setColumns(imported.columns);
+          setRecords(imported.records);
+          setTreatedRecords(null);
+          setFileName(imported.name);
+        }}
+      />
       <LaunchMonitorTrendsPanel
         columns={analysisColumns}
         records={analysisRecords}

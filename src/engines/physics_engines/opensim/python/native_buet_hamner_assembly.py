@@ -20,6 +20,7 @@ from src.engines.physics_engines.opensim.python.native_mtp_reduction import (
     _native_mass,
     _native_total_generalized_force,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 _DISTAL_BODIES = tuple(
     f"{body}_{side}"
@@ -145,7 +146,7 @@ def _physical_body_signature(body: Any) -> tuple[float, ...]:
 
 
 def _check_source_inventory(buet: Any, hamner: Any) -> tuple[str, ...]:
-    import opensim as osim
+    osim = import_opensim()
 
     buet_bodies = set(_native_names(buet.getBodySet()))
     hamner_bodies = set(_native_names(hamner.getBodySet()))
@@ -349,10 +350,10 @@ def assemble_buet_hamner(
     request: BuetHamnerAssemblyRequest,
 ) -> BuetHamnerAssemblyReceipt:
     """Build the explicit source-owned candidate and verify fresh native paths."""
-    import opensim as osim
-    import opensim._actuators as native_actuators
-    import opensim._simbody as native_simbody
-    import opensim._simulation as native_simulation
+    osim = import_opensim()
+    native_actuators = import_opensim("opensim._actuators")
+    native_simbody = import_opensim("opensim._simbody")
+    native_simulation = import_opensim("opensim._simulation")
 
     if (
         not request.buet_source.is_file()

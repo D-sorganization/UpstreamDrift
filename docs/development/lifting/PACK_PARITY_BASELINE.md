@@ -108,24 +108,24 @@ Each engine's FK against the standard's reference FK (all lifts, worst pose): Mu
 
 Closure is the native hand-to-bar residual at the pack start pose (m; OpenSim values are after model assembly, which moves coordinates off their defaults).
 
-| Lift | Engine | Attachment | Intended Half-Width m | Hand Half-Spacing m | Mismatch m | Native Start Closure |
+| Lift | Engine | Attachment | Intended Half-Width m | Start Hand Half-Spacing m | Mismatch m | Native Start Closure |
 |---|---|---|---|---|---|---|
-| Deadlift | MuJoCo | L weld constraint; R weld constraint | 0.2248 | 0.1709 | 0.05388 | l 6.16e-10, r 6.16e-10 |
-| Deadlift | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.2248 | 0.1709 | 0.05388 | weld_translation_norm 2.38e-14 |
+| Deadlift | MuJoCo | L weld constraint; R weld constraint | 0.2248 | 0.2248 | -1.665e-10 | l 6.16e-10, r 6.16e-10 |
+| Deadlift | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.2248 | 0.2248 | 1.191e-14 | weld_translation_norm 2.38e-14 |
 | Deadlift | Drake | L weld joint (bar is child); R none | 0.1709 | 0.1709 | 0 | - |
-| Deadlift | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.2248 | 0.1709 | 0.05388 | - |
-| Bench Press | MuJoCo | L weld constraint; R weld constraint | 0.3666 | 0.1709 | 0.1957 | l 3.74e-10, r 3.74e-10 |
-| Bench Press | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.3666 | 0.1709 | 0.1957 | weld_translation_norm 1.23e-13 |
+| Deadlift | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.2248 | 0.2248 | -6.827e-09 | - |
+| Bench Press | MuJoCo | L weld constraint; R weld constraint | 0.3666 | 0.3666 | -7.13e-11 | l 3.74e-10, r 3.74e-10 |
+| Bench Press | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.3666 | 0.3666 | 6.156e-14 | weld_translation_norm 1.23e-13 |
 | Bench Press | Drake | L weld joint (bar is child); R none | 0.1709 | 0.1709 | 0 | - |
-| Bench Press | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.3666 | 0.1709 | 0.1957 | - |
-| Snatch | MuJoCo | L weld constraint; R weld constraint | 0.4375 | 0.1709 | 0.2666 | l 4.75e-10, r 4.75e-10 |
-| Snatch | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.4375 | 0.1709 | 0.2666 | weld_translation_norm 5.55e-15 |
-| Snatch | Drake | L weld joint (bar is child); R none | 0.4664 | 0.1709 | 0.2955 | - |
-| Snatch | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.4375 | 0.1709 | 0.2666 | - |
-| Clean and Jerk | MuJoCo | L weld constraint; R weld constraint | 0.2957 | 0.1709 | 0.1248 | l 6.14e-10, r 6.14e-10 |
-| Clean and Jerk | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.2957 | 0.1709 | 0.1248 | weld_translation_norm 4.39e-15 |
+| Bench Press | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.3666 | 0.3666 | 4.605e-08 | - |
+| Snatch | MuJoCo | L weld constraint; R weld constraint | 0.4375 | 0.4375 | 1.008e-10 | l 4.75e-10, r 4.75e-10 |
+| Snatch | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.4375 | 0.4375 | 2.776e-15 | weld_translation_norm 5.55e-15 |
+| Snatch | Drake | L weld joint (bar is child); R none | 0.4664 | 0.4664 | -1.148e-07 | - |
+| Snatch | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.4375 | 0.4375 | 4.137e-07 | - |
+| Clean and Jerk | MuJoCo | L weld constraint; R weld constraint | 0.2957 | 0.2957 | -1.396e-11 | l 6.14e-10, r 6.14e-10 |
+| Clean and Jerk | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.2957 | 0.2957 | 2.331e-15 | weld_translation_norm 4.39e-15 |
 | Clean and Jerk | Drake | L weld joint (bar is child); R none | 0.1709 | 0.1709 | 0 | - |
-| Clean and Jerk | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.2957 | 0.1709 | 0.1248 | - |
+| Clean and Jerk | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.2957 | 0.2957 | 1.88e-07 | - |
 
 ## Start Poses
 
@@ -209,7 +209,6 @@ Hand-bar is the perpendicular distance from a hand origin to the bar axis, worst
 | Discrepancy | Engines | Issues | Epic Child | Issue |
 |---|---|---|---|---|
 | Right hand is not attached to the bar | Drake, Pinocchio | UpstreamDrift#12504 | LIFT-3 | existing |
-| Grip half-width does not match achievable hand spacing | Drake, MuJoCo, OpenSim, Pinocchio | UpstreamDrift#12504 | LIFT-3 | existing |
 | Joint limits differ from the parity standard | Drake | Drake_Models#429 | LIFT-5 | existing |
 | Bench mass convention differs across packs | Drake, MuJoCo, OpenSim, Pinocchio | Drake_Models#429 | LIFT-2 | new |
 | Start pose carries unphysical contact force | MuJoCo | MuJoCo_Models#496 | LIFT-4 | new |

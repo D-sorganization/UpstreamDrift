@@ -45,6 +45,7 @@ from src.tools.native_viewer_export.backends._scene import (
 )
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.overlay2d import draw_glyphs_rgb, pinhole_for_view
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 UI_STRIP_PX = 40
 FOV_Y_RAD = VIEWER_FOV_Y_RAD
@@ -286,7 +287,7 @@ def set_camera(
 
 def main(job_path: str) -> None:
     require_virtual_display()
-    import opensim as osim
+    osim = import_opensim()
 
     job = WorkerJob.load(Path(job_path))
     bundle = InputBundle.load(Path(job.bundle_path))

@@ -63,6 +63,7 @@ from .native_wrapped_path import (
 from .trc import read_trc, write_trc
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 from src.shared.python.estimation import dime_global_calibration
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 
 def _sha(path: Path) -> str:
@@ -492,7 +493,7 @@ def _native_preparation(
     NativeProbeFailure | None,
 ]:
     """Read the actual prepared state and independent provider dispositions."""
-    import opensim as osim
+    osim = import_opensim()
 
     from .muscle_replay import _restore_continuous_state
 

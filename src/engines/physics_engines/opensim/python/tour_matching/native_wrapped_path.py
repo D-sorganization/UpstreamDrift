@@ -13,6 +13,7 @@ import json
 import math
 from pathlib import Path
 from typing import Any
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 _SCHEMA_VERSION = "native-wrapped-path-v1"
 _SHAPES = {"WrapCylinder", "WrapEllipsoid", "WrapSphere"}
@@ -239,7 +240,7 @@ def _load_native_wrapped_model(
     source: Path, source_sha256: str
 ) -> tuple[Any | None, NativeWrappedPathAudit | None]:
     """Load and connect the exact native model without exporting its ownership."""
-    import opensim as osim
+    osim = import_opensim()
 
     try:
         model = osim.Model(str(source))
@@ -548,7 +549,7 @@ def _validate_path_wrap_owners(
 
 
 def _identity_from_model(model: Any, source_sha256: str) -> WrappedPathDeclaration:
-    import opensim as osim
+    osim = import_opensim()
 
     objects: list[WrapObjectIdentity] = []
     links: list[PathWrapIdentity] = []
@@ -579,7 +580,7 @@ def _identity_from_model(model: Any, source_sha256: str) -> WrappedPathDeclarati
 
 def declare_wrapped_path_source(model_path: Path) -> WrappedPathDeclaration:
     """Capture a typed declaration; callers must pin and retain its source hash."""
-    import opensim as osim
+    osim = import_opensim()
 
     source = Path(model_path)
     raw = source.read_bytes()

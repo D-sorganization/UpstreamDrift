@@ -10,7 +10,15 @@ from typing import Any
 import numpy as np
 
 from ..model import CoordinateInfo, EngineAdapter, PoseEval
-from ._common import PELVIS_ORIGIN, build_model_text, native_angles
+from ._common import (
+    PELVIS_ORIGIN,
+    build_model_text,
+    contact_measured,
+    contact_unavailable,
+    hand_attachment,
+    native_angles,
+    pack_api,
+)
 
 
 class DrakeAdapter(EngineAdapter):
@@ -68,15 +76,15 @@ class DrakeAdapter(EngineAdapter):
         return {n: float(p.GetBodyByName(n).default_mass()) for n in self._bodies()}
 
     def _hand_attachment(self) -> dict[str, str]:
-        out = {"l": "none", "r": "none"}
         p = self.plant
+        joints = []
         for i in p.GetJointIndices(self.loaded.model_instance):
             j = p.get_joint(i)
-            parent, child = j.parent_body().name(), j.child_body().name()
-            for side in out:
-                if parent == f"hand_{side}" and child.startswith("barbell"):
-                    out[side] = f"{j.type_name()} joint (bar is child)"
-        return out
+            joints.append(
+                (j.name(), j.type_name(), j.parent_body().name(), j.child_body().name())
+            )
+        welds = [(w.parent, w.child) for w in self.loaded.weld_specs]
+        return hand_attachment(joints, welds)
 
     def _initial_pose_name(self) -> str | None:
         pose = self.loaded.initial_pose
@@ -166,11 +174,28 @@ class DrakeAdapter(EngineAdapter):
         )
 
     def start_contact_force(self) -> dict[str, Any]:
-        return {
-            "value_n": None,
-            "reason": "audit does not read the pack contact API yet "
-            "(UpstreamDrift#12504)",
-        }
+        measure = pack_api(
+            self.pack.package, "contact_results", "measure_ground_reaction"
+        )
+        if measure is None:
+            return contact_unavailable(
+                f"{self.pack.package} ships no contact_results.measure_ground_reaction"
+            )
+        try:
+            builder = self.loaded.builder
+            diagram = builder.Build()
+            root = diagram.CreateDefaultContext()
+            plant_ctx = diagram.GetMutableSubsystemContext(self.plant, root)
+            reaction = measure(self.plant, plant_ctx)
+        except (RuntimeError, ValueError) as exc:
+            return contact_unavailable(
+                f"pack GRF API failed at the start pose: {str(exc)[:200]}"
+            )
+        return contact_measured(
+            reaction.vertical_force,
+            source=f"{self.pack.package}.contact_results.measure_ground_reaction",
+            n_feet_in_contact=sum(f.in_contact for f in reaction.feet.values()),
+        )
 
     def bar_hold_wrench(self) -> dict[str, Any]:
         from .drake_bar_hold import bar_hold_wrench as _bar_hold_wrench

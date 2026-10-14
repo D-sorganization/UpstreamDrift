@@ -23,6 +23,7 @@ from src.shared.python.motion_matching.tour_capture_contract import (
     MARKER_VALIDITY_POLICY,
     tracked_labels,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 GOLF_HUMANOID_MARKER_BODIES: MappingProxyType[str, str] = MappingProxyType(
     {
@@ -188,7 +189,7 @@ def build_ik_task_set(
     weights: Mapping[str, float] | None = None,
 ) -> object:
     """Build OpenSim IKTaskSet object using native SDK if available."""
-    import opensim  # type: ignore[import-not-found]
+    opensim = import_opensim()
 
     w_map = weights if weights is not None else marker_weights(is_valid=True)
     tasks = opensim.IKTaskSet()

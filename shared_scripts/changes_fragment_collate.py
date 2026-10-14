@@ -12,6 +12,7 @@ import logging
 import re
 import sys
 from collections.abc import Sequence
+from dataclasses import replace
 from datetime import date
 from pathlib import Path
 
@@ -174,6 +175,33 @@ def _render_entry(
     return f"### DL-#{fragment.issue} · {title}\n\n{body}\n"
 
 
+def terminal_transition(text: str, fragment: Fragment) -> str | None:
+    """Return why ``fragment`` would move a terminal entry in ``text``, or None.
+
+    A ``shipped`` or ``abandoned`` entry never changes state; continuing work
+    needs a new issue-keyed entry. ``validate`` reports this at PR time and
+    ``collate`` keeps the entry terminal after the merge (#2044), so both use
+    this one rule.
+    """
+    span = _entry_span(text.splitlines(keepends=True), f"DL-#{fragment.issue}")
+    if span is None or not fragment.dl_state:
+        return None
+    start, end = span
+    lines = text.splitlines(keepends=True)
+    entry = development_log.parse_entries(
+        _canonical_heading(lines[start]) + "".join(lines[start + 1 : end])
+    )[0]
+    if entry.state not in development_log.TERMINAL_STATES:
+        return None
+    if fragment.dl_state == entry.state:
+        return None
+    return (
+        f"DL-#{fragment.issue} is {entry.state}; it never moves to "
+        f"{fragment.dl_state}. Open a new issue and write the fragment against "
+        "that issue's new entry."
+    )
+
+
 def apply_devlog_entry(
     text: str,
     fragment: Fragment,
@@ -190,9 +218,11 @@ def apply_devlog_entry(
     the top of the Shipped section. A missing entry is created (default state
     ``shipped``) at the top of Active or Shipped. Idempotent for equal input.
 
-    Raises :class:`FragmentError` when the fragment would move a terminal
-    (shipped or abandoned) entry to another state: that work needs a new
-    issue-keyed entry.
+    A terminal (shipped or abandoned) entry keeps its state: a fragment that
+    asks to move it is stale by the time it is collated, because its pull
+    request has merged. The pull request and Last verified are still recorded,
+    the stale state and next step are dropped, and a warning is logged (#2044).
+    ``validate`` refuses such a fragment before the merge.
     """
     assert SHA.match(sha), "sha must be a hex commit id"
     lines = text.splitlines(keepends=True)
@@ -212,16 +242,28 @@ def apply_devlog_entry(
     lines[start] = _canonical_heading(lines[start])
     current = development_log.parse_entries("".join(lines[start:end]))[0]
     old_state = current.state
+    refusal = terminal_transition("".join(lines), fragment)
+    if refusal is not None:
+        log.warning("%s Recorded PR #%d; the entry stays %s.", refusal, pr, old_state)
+        fragment = replace(fragment, dl_state=None, next_step=None)
     new_state = fragment.dl_state or old_state
-    if old_state in terminal and new_state != old_state:
-        raise FragmentError(
-            f"{entry_id} is {old_state}; it never moves to {new_state}. Open a "
-            "new issue and write the fragment against that issue's new entry."
-        )
+    assert not (old_state in terminal and new_state != old_state), (
+        "a terminal entry never changes state"
+    )
     updates = {
         "Last verified": verified,
         "PR": _merge_pr(current.fields.get("PR", ""), pr),
     }
+    if not current.fields.get("Paths", "").strip():
+        updates["Paths"] = fragment.paths or f"see #{pr}"
+    if not current.fields.get("Started", "").strip():
+        updates["Started"] = "unknown (inherited without start date)"
+    if not current.fields.get("Owner", "").strip():
+        updates["Owner"] = fragment.owner or "unassigned"
+    if not current.fields.get("Issue", "").strip():
+        updates["Issue"] = f"#{fragment.issue}"
+    if not current.fields.get("Summary", "").strip():
+        updates["Summary"] = fragment.summary
     if fragment.dl_state:
         updates["State"] = fragment.dl_state
     if fragment.next_step:
@@ -234,6 +276,8 @@ def apply_devlog_entry(
     ):
         if not fragment.branch:
             raise FragmentError(f"{entry_id} becomes {new_state}; set 'branch:'")
+        updates["Branch"] = fragment.branch
+    elif fragment.branch and not current.fields.get("Branch", "").strip():
         updates["Branch"] = fragment.branch
     block = _normalise_block(_set_fields(lines[start:end], updates))
 

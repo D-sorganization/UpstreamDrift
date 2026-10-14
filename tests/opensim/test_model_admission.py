@@ -76,7 +76,7 @@ def test_serialized_counterexample_preserves_unknowns(
 
 def test_hash_mismatch_precedes_runtime_loading(serialized_candidate: Path) -> None:
     with patch(
-        "src.engines.physics_engines.opensim.python.tour_matching.model_admission.import_module"
+        "src.engines.physics_engines.opensim.python.tour_matching.model_admission.import_opensim"
     ) as loader:
         with pytest.raises(ValueError, match="hash mismatch"):
             audit_muscle_model_asset(serialized_candidate, "0" * 64)
@@ -87,7 +87,7 @@ def test_unavailable_runtime_retains_serialized_facts(
     serialized_candidate: Path,
 ) -> None:
     with patch(
-        "src.engines.physics_engines.opensim.python.tour_matching.model_admission.import_module",
+        "src.engines.physics_engines.opensim.python.tour_matching.model_admission.import_opensim",
         side_effect=ModuleNotFoundError("no native runtime", name="opensim"),
     ):
         result = audit_muscle_model_asset(

@@ -18,18 +18,1136 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12413 · \ Restore DBC Level in Test_Ud_Contract_Level_Alias_Sync to Prevent Xdist Pollution\
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12413
+- **Branch:** fix/12413-flaky-test-missing-columns-contract-level
+- **PR:** #12414
+- **Paths:** see #12414
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`2202a2b3`; collated from changes/12413-restore-dbc-level-in-test-ud-contract-le.md)
+- **Summary:** \ Restore DBC level in test_ud_contract_level_alias_sync to prevent xdist pollution\
+- **Next step:** \Merge the PR.\
+
+### DL-#12405 · Reconcile Package Collision Gate With Initialized Tools Provider Layout, Distinguishing Verified Canonical Aliases and Seam Counterparts While Eliminating Redundant Nested Tools Roots From Pythonpath.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12405
+- **Branch:** fix/12405-reconcile-package-collision-gate
+- **PR:** #12419
+- **Paths:** see #12419
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`7b74513b`; collated from changes/12405-reconcile-package-collision-gate-with-in.md)
+- **Summary:** Reconcile package collision gate with initialized Tools provider layout, distinguishing verified canonical aliases and seam counterparts while eliminating redundant nested Tools roots from pythonpath.
+- **Next step:** Merge the PR.
+
+### DL-#12404 · Reconcile Optimized Contract Defaults Across Provider Boundaries in Test Probes Without Creating an Unapproved Public Contracts Fork.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12404
+- **Branch:** fix/12404-reconcile-optimized-contract-defaults
+- **PR:** #12426
+- **Paths:** see #12426
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`d56b30b8`; collated from changes/12404-reconcile-optimized-contract-defaults-ac.md)
+- **Summary:** Reconcile optimized contract defaults across provider boundaries in test probes without creating an unapproved public contracts fork.
+- **Next step:** Merge the PR.
+
+### DL-#12353 · Allow Native Moco Preparation to Skip Only the Short Capability Probe While Recording Runtime as Not Attempted and Keeping Solve Readiness False
+
+- **State:** in_progress
+- **Owner:** unassigned
+- **Issue:** #12353
+- **Branch:** feat/native-no-probe-12353-20261012
+- **PR:** #12367
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py,src/engines/physics_engines/opensim/python/tour_matching/native_body_inertia.py,src/engines/physics_engines/opensim/python/tour_matching/native_passive_receipt.py,src/engines/physics_engines/opensim/python/tour_matching/cli.py,tests/opensim/test_native_passive_receipt.py,tests/opensim/test_native_moco_inertia_preflight.py,tests/unit/engines/opensim/test_native_moco_probe_mode.py,tests/unit/engines/opensim/test_native_path_optimizer_domains.py,manuals/upstreamdrift/chapters/56-native-diagnostic-execution-contract.qmd,manuals/upstreamdrift/calculation-registry.json,SPEC.md,AGENT_HANDOFF.md,docs/development/feedback_controls/F07_NATIVE_NO_PROBE_PREPARATION_TURNOVER.md,docs/agent_context/README.md,docs/agent_context/index.html
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`56c9b40e`; collated from changes/12353-native-moco-skip-capability-probe.md)
+- **Summary:** Allow native Moco preparation to skip only the short capability probe while recording runtime as not attempted and keeping solve readiness false
+- **Next step:** Root review of implementation, focused tests, and manual-governance updates.
+
+### DL-#12319 · Putt Scene Export for Public Explorer
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #12319
+- **Branch:** feat/12319-putt-export
+- **PR:** #12335
+- **Paths:** `src/tools/putting_green_gui/_scene_export.py`
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`178b32b6`; collated from changes/12319-export-the-3-d-putt-simulation-as-the-ud.md)
+- **Summary:** Export the 3-D putt simulation as the ud.putt_scene/1 mirror artifact for the public explorer Putting tab
+- **Next step:** Merge the PR; sync the artifact into the public explorer mirror.
+
+### DL-#12317 · Force Redistribution Reports Optimizer Convergence Only When the Optimizer Reports Success, Independently of the Candidate Feasibility Audit.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12317
+- **Branch:** fix/force-allocation-convergence-12317
+- **PR:** #12322
+- **Paths:** src/shared/python/motion_matching/force_nullspace.py,tests/unit/motion_matching/test_force_nullspace.py,docs/design/force_redistribution_convergence.md,docs/motion_matching/README.md,docs/development/force_allocation_convergence_12317_turnover.md
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ed672ef3`; collated from changes/12317-force-allocation-convergence.md)
+- **Summary:** Force redistribution reports optimizer convergence only when the optimizer reports success, independently of the candidate feasibility audit.
+- **Next step:** Root review of the committed implementation and validation.
+
+### DL-#12315 · Widen the Golf Models' Forearm Pronation Range to the AAOS Normative 80 Deg From Neutral, From One Shared Source
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12315
+- **Branch:** fix/12315-forearm-pronation-range
+- **PR:** #12484
+- **Paths:** see #12484
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`6d665f59`; collated from changes/12315-widen-the-golf-models-forearm-pronation.md)
+- **Summary:** Widen the golf models' forearm pronation range to the AAOS normative 80 deg from neutral, from one shared source
+- **Next step:** Regenerate the OSV-9 calibration and re-render after merge.
+
+### DL-#12309 · Migrate Final Figure Builder Calls to FigureOptions and Verify Real Writer Integration and Intended-Output Parity
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12309
+- **Branch:** codex/shot-pattern-safe-followup
+- **PR:** #12418, #12445
+- **Paths:** scripts/research/shot_pattern_analysis/build_final_figures.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`9f60d7c4`; collated from changes/12309-single-figureoptions-mapping-helper-for.md)
+- **Summary:** Migrate final figure builder calls to FigureOptions and verify real writer integration and intended-output parity
+- **Next step:** Include validated fix in the shot-pattern integration PR; merge remains pending
+
+### DL-#12302 · Refactor Shot-Pattern Duplication and Architecture Debt While Preserving Frozen Research Evidence
+
+- **State:** in_progress
+- **Owner:** unassigned
+- **Issue:** #12302
+- **Branch:** codex/shot-pattern-refinement-integration
+- **PR:** #12418
+- **Paths:** see #12418
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/12302-refactor-shot-pattern-duplication-and-ar.md)
+- **Summary:** Refactor shot-pattern duplication and architecture debt while preserving frozen research evidence
+- **Next step:** Complete remaining decomposition and unchanged architecture/DRY gates before PR integration
+
+### DL-#12299 · Reconcile Shot-Pattern Integration and Repair Inherited Validation Blockers While Preserving Frozen Science and the Approved DRY Baseline
+
+- **State:** in_progress
+- **Owner:** unassigned
+- **Issue:** #12299
+- **Branch:** codex/shot-pattern-safe-followup
+- **PR:** #12418
+- **Paths:** see #12418
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/12299-restore-multi-runtime-dry-baseline.md)
+- **Summary:** Reconcile shot-pattern integration and repair inherited validation blockers while preserving frozen science and the approved DRY baseline
+- **Next step:** Finish provider repairs and merged Tools dependency, then pass complete canonical validation and protected integration
+
+### DL-#12280 · Admit Exact Zero-Coordinate Structural WeldJoint in Constrained Muscle Replay
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12280
+- **Branch:** feat/opensim-weldjoint-12280
+- **PR:** #12282
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/native_constrained_muscle.py;tests/opensim/test_native_constrained_weld_policy.py;tests/opensim/test_native_constrained_muscle.py;manuals/upstreamdrift/chapters/59-native-structural-weld-admission.qmd;manuals/upstreamdrift/index.qmd;docs/development/feedback_controls/DESIGN.md;docs/development/feedback_controls/F07_WELDJOINT_ADMISSION_TURNOVER.md;docs/development/feedback_controls/evidence/native_weldjoint_12280/child-tests.json;docs/development/feedback_controls/evidence/native_weldjoint_12280/junit.xml;docs/development/feedback_controls/evidence/native_weldjoint_12280/manifest.json
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`55f93c42`; collated from changes/12280-native-weldjoint-admission.md)
+- **Summary:** Admit exact zero-coordinate structural WeldJoint in constrained muscle replay
+- **Next step:** Complete aggregate pre-PR checks, then validate the source-specific replay path separately from this synthetic fixture.
+
+### DL-#12275 · Retain Hash-Bound Manufactured Native Diagnostics
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12275
+- **Branch:** docs/manufactured-feedback-evidence-12275
+- **PR:** #12277
+- **Paths:** see #12277
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`7016d485`; collated from changes/12275-retain-manufactured-native-diagnostic-evidence.md)
+- **Summary:** Retain hash-bound manufactured native diagnostics
+- **Next step:** Review byte-preserved evidence and documentation; keep all production qualification gates open.
+
+### DL-#12271 · Add Hash-Bound One-Pass Nonuniform Moco Mesh Refinement Planning
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12271
+- **Branch:** feat/f07-native-component-audit-budget-12244
+- **PR:** #12273
+- **Paths:** see #12273
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`60598915`; collated from changes/12271-native-moco-history-appendices.md)
+- **Summary:** Add hash-bound one-pass nonuniform Moco mesh refinement planning
+- **Next step:** Preserve source-bound failures and strict replay limits; do not infer production or physical qualification from synthetic solver results.
+
+### DL-#12249 · MyoSuite Native Muscle Actuator Classification
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12249
+- **Branch:** fix/12249-native-muscle-actuator-enum
+- **PR:** #12252
+- **Paths:** src/engines/physics_engines/myosuite/python/muscle_analysis.py;tests/unit/engines/myosuite/test_muscle_analysis.py;manuals/upstreamdrift/chapters/31-myosuite-native-excitation-replay.qmd;docs/development/feedback_controls/F09Q-MYOSUITE-ACTUATOR-CLASSIFICATION-TURNOVER.md
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0870e093`; collated from changes/12249-native-muscle-actuator-classification.md)
+- **Summary:** Use MuJoCo's named muscle enum for native MyoSuite actuator classification.
+- **Next step:** Root will publish the reviewed branch; retain physiology and replay qualification gates.
+
+### DL-#12243 · Repair Matched-Supplement Density Figure Clearance
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12243
+- **Branch:** codex/shot-pattern-main-integration
+- **PR:** #12418
+- **Paths:** src/tools/shot_pattern_analysis/matched_supplement_figures.py,tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/12243-increase-matched-supplement-density-figu.md)
+- **Summary:** Increase matched-supplement density figure gutters to clear legends, panel titles, and colorbars.
+- **Next step:** Complete the final canonical gate and live publication verification, then deliver through protected merge; no merge claimed yet.
+
+### DL-#12242 · Keep Research PDF Headings With Their Following Tables and Paragraphs
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12242
+- **Branch:** codex/shot-pattern-main-integration
+- **PR:** #12418
+- **Paths:** see #12418
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/12242-keep-research-pdf-headings-with-their-fo.md)
+- **Summary:** Keep Research PDF Headings With Their Following Tables and Paragraphs
+- **Next step:** Complete the final canonical gate and live publication verification, then deliver through protected merge; no merge claimed yet.
+
+### DL-#12236 · Add Source-Bound Native Diagnostic Admission, Runtime, and Qualification Contract.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12236
+- **Branch:** feat/native-diagnostic-contract-12236
+- **PR:** #12250
+- **Paths:** see #12250
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`f131464b`; collated from changes/12236-add-source-bound-native-diagnostic-admis.md)
+- **Summary:** Add source-bound native diagnostic admission, runtime, and qualification contract.
+- **Next step:** Complete native regression and governed checks, then integrate the validated diagnostic contract.
+
+### DL-#12233 · Bound Moco Optimizer States to Source Moving-Path Function Domains
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12233
+- **Branch:** fix/native-path-connection-finalization-12233-20261012
+- **PR:** #12318, #12228
+- **Paths:** see #12318
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`49ef898b`; collated from changes/12233-source-bound-moving-path-chart-audit.md)
+- **Summary:** Bound Moco optimizer states to source moving-path function domains
+- **Next step:** Complete repository gates and review bounded diagnostic scope; no replay or global workless qualification is granted.
+
+### DL-#12231 · Bind Native OpenSim Visual Meshes to a Strict Source-Owned Resource Closure
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12231
+- **Branch:** fix/12231-source-bound-visual-assets
+- **PR:** #12232
+- **Paths:** .prettierignore,src/engines/physics_engines/opensim/python/tour_matching/native_visual_resources.py,src/engines/physics_engines/opensim/python/tour_matching/native_muscle_bundle.py,tests/opensim/test_native_muscle_bundle.py,manuals/upstreamdrift/chapters/13-native-muscle-replay.qmd,docs/agent_context/README.md,docs/agent_context/index.html,src/engines/native_replay_contracts.py,src/engines/physics_engines/myosuite/python/native_direct_model_replay.py,tests/unit/engines/test_native_replay_contracts.py,docs/development/feedback_controls/F07_VISUAL_RESOURCE_CLOSURE_TURNOVER.md
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`b2ff2d1c`; collated from changes/12231-bind-native-opensim-visual-meshes-to-a-s.md)
+- **Summary:** Bind native OpenSim visual meshes to a strict source-owned resource closure
+- **Next step:** Complete native and repository gates, then review the draft PR.
+
+### DL-#12225 · Explicitly Unqualified Native Moco Feasibility
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #12225
+- **Branch:** feat/f07-unqualified-moco-feasibility-12225
+- **PR:** #12228
+- **Paths:** see #12228
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`49ef898b`; collated from changes/12225-unqualified-moco-feasibility.md)
+- **Summary:** Keep explicitly unqualified native Moco feasibility separate from solve convergence and failed or incomplete independent replay
+- **Next step:** Analyze the retained source-bound activation-law residual and continuous control representation without changing replay limits; then validate controller-to-independent-open-loop replay before binding full capture inputs
+
+### DL-#12222 · Club-Face Fixtures Keep the Capture Address Toe-Out: The Swing IK and Every Re-Solve Plant the Stance at the Calibrated Address When Foot Progression Is on; Fixtures Regenerated With --Foot-Progression Capture (Driver 16.64/3.57 vs 16.37/4.03 Deg, 7-Iron 15.43/-0.96 vs 15.00/-0.37 Deg)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12222
+- **Branch:** claude/12222-fixture-toe-out
+- **PR:** #12230
+- **Paths:** see #12230
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`9e5f87c4`; collated from changes/12222-club-face-fixtures-keep-the-capture-addr.md)
+- **Summary:** Club-face fixtures keep the capture address toe-out: the swing IK and every re-solve plant the stance at the calibrated address when foot progression is on; fixtures regenerated with --foot-progression capture (driver 16.64/3.57 vs 16.37/4.03 deg, 7-iron 15.43/-0.96 vs 15.00/-0.37 deg)
+- **Next step:** Merge after #12223; then #12221 grip calibration on the new fixtures
+
+### DL-#12221 · Adopt the Per-Capture Grip Rotation on the Fixed Driver Club Cluster and Regenerate the Three Driver Ground-Support Receipts, the Driver OpenSim Export, the Driver Club-Face Fixture (Meets GCV-20) and the MSK Driver Grip Calibration; the 7-Iron Refit Is Deferred Because Its Same-Input Export Fails GCV-20 and OSV-10
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12221
+- **Branch:** claude/12221-grip-adopt
+- **PR:** #12274, #12265, #12270, #12251
+- **Paths:** see #12274
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0f0d7ee7`; collated from changes/12221-opt-in-fix-club-markers-keeps-the-club-c.md)
+- **Summary:** Adopt the per-capture grip rotation on the fixed driver club cluster and regenerate the three driver ground-support receipts, the driver OpenSim export, the driver club-face fixture (meets GCV-20) and the MSK driver grip calibration; the 7-iron refit is deferred because its same-input export fails GCV-20 and OSV-10
+- **Next step:** Owner decision on --fix-club-markers, then apply the per-capture grip receipts and regenerate receipts
+
+### DL-#12211 · Generic Shoulder Triangle-Lamina Candidate
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #12211
+- **Branch:** fix/f07-parent-receipt-12198
+- **PR:** #12198
+- **Paths:** scripts/opensim/triangle_lamina_provider_worker.py,scripts/opensim/derive_generic_shoulder_lamina.py,src/engines/physics_engines/opensim/python/tour_matching/generic_shoulder_lamina.py,src/engines/physics_engines/opensim/python/tour_matching/native_body_inertia.py,src/shared/python/core/physical_inertia.py,src/shared/python/estimation/dime_global_calibration.py,tests/opensim/test_generic_shoulder_lamina.py,tests/unit/core/test_physical_inertia.py,docs/development/feedback_controls/F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md,manuals/upstreamdrift/chapters/54-generic-shoulder-triangle-lamina.qmd,changes/12211-add-a-separately-identified-source-bound.md,src/config/impact_acceptance.json,docs/development/impact_acceptance_matrix.md,docs/development/feedback_controls/F07_PROVIDER_12246_IMPACT_SERVED_RECEIPT.json
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`7b925718`; collated from changes/12211-add-a-separately-identified-source-bound.md)
+- **Summary:** Add a separately identified source-bound generic shoulder triangle-lamina candidate with native physical and sampled kinematic checks
+- **Next step:** Keep the candidate diagnostic while remaining force/work, replay, and muscular capture gates are resolved
+
+### DL-#12210 · Give the 7-Iron Anthropometric Document Its Own Clubhead Marker Cluster (Per-Club Club-Markers File Read by the Builder); Head-Triad Residual on the 7-Iron Capture 42.4 to 0.24 mm; Both 7-Iron Receipts Regenerated (Nominal IK 67.9 to 45.2 mm; Calibrated Dynamics 54.5 to 109.9 mm, Owner Decision Pending)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12210
+- **Branch:** claude/12210-iron-head-triad
+- **PR:** #12219
+- **Paths:** see #12219
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`4cd2991b`; collated from changes/12210-give-the-7-iron-anthropometric-document.md)
+- **Summary:** Give the 7-iron anthropometric document its own clubhead marker cluster (per-club club-markers file read by the builder); head-triad residual on the 7-iron capture 42.4 to 0.24 mm; both 7-iron receipts regenerated (nominal IK 67.9 to 45.2 mm; calibrated dynamics 54.5 to 109.9 mm, owner decision pending)
+- **Next step:** Owner decides which calibrated 7-iron receipt is canonical; static-trial calibration depends on its club priors
+
+### DL-#12205 · Require Native Source-Body Physical Admission Before OpenSim Moco Solve
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12205
+- **Branch:** feat/f07-moco-inertia-preflight-12205
+- **PR:** #12198
+- **Paths:** see #12198
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`7b925718`; collated from changes/12205-native-moco-physical-preflight.md)
+- **Summary:** Require native source-body physical admission before OpenSim Moco solve
+- **Next step:** Qualify an authoritative physical source, then anatomy, passive forces, contact, capture registration and full-horizon independent replay.
+
+### DL-#12203 · Make the Engine-Module Teardown Guard Tolerate a Concurrently Removed Package Binding
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12203
+- **Branch:** fix/f09-drake-import-laziness-12203
+- **PR:** #12202
+- **Paths:** see #12202
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`e42e9307`; collated from changes/12203-make-the-engine-module-teardown-guard-to.md)
+- **Summary:** Make the engine-module teardown guard tolerate a concurrently removed package binding
+- **Next step:** Merge the PR.
+
+### DL-#12191 · Bind Exact OpenSim Body Properties to Native Physical-Inertia Admission
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12191
+- **Branch:** feat/f07-native-body-inertia-12191
+- **PR:** #12198
+- **Paths:** see #12198
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`7b925718`; collated from changes/12191-native-source-body-inertia.md)
+- **Summary:** Bind exact OpenSim Body properties to native physical-inertia admission
+- **Next step:** Obtain an authoritative physically valid source, then qualify anatomy, passive forces, contact and full-horizon excitation replay.
+
+### DL-#12178 · Exercise Calibrated Native Marker Replay Through Existing Observation Scoring
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12178
+- **Branch:** feat/f09-calibrated-marker-score-12178
+- **PR:** #12288
+- **Paths:** see #12288
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`9bc8e05f`; collated from changes/12178-calibrated-marker-replay-score.md)
+- **Summary:** Exercise calibrated native marker replay through existing observation scoring
+- **Next step:** Review the synthetic native replay-to-score handoff without promoting qualification or production attachments.
+
+### DL-#12176 · Verify Exact Zero-MTP CustomJoint Reduction on Assembled 557-Muscle Native Source
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12176
+- **Branch:** feat/f07-buet-zero-custom-mtp-12176
+- **PR:** #12181
+- **Paths:** see #12181
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`cd25e8ab`; collated from changes/12176-source-bound-zero-custom-mtp-reduction.md)
+- **Summary:** Verify exact zero-MTP CustomJoint reduction on assembled 557-muscle native source
+- **Next step:** Merge after subtalar and assembly prerequisites; independently qualify original-to-final composition and Moco initialization.
+
+### DL-#12173 · Replay Constrained Mixed OpenSim Moco Inputs Without Hiding Native State Projection
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12173
+- **Branch:** feat/f07-constrained-mixed-native-12173
+- **PR:** #12184
+- **Paths:** see #12184
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`6af5715f`; collated from changes/12173-constrained-mixed-native-moco.md)
+- **Summary:** Replay Constrained Mixed OpenSim Moco Inputs Without Hiding Native State Projection
+- **Next step:** Review native regression and retain production scientific blockers.
+
+### DL-#12167 · Verify Exact Zero-Subtalar CustomJoint Reduction With Sampled Native 557-Muscle Mechanics
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12167
+- **Branch:** feat/f07-buet-zero-subtalar-12167
+- **PR:** #12172
+- **Paths:** see #12172
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`1bef5534`; collated from changes/12167-verify-exact-zero-subtalar-customjoint-r.md)
+- **Summary:** Verify exact zero-subtalar CustomJoint reduction with sampled native 557-muscle mechanics
+- **Next step:** Merge after BUET-Hamner and zero-MTP prerequisites; compose locks separately.
+
+### DL-#12164 · Add Source-Bound Provisional Marker Calibration Artifacts
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12164
+- **Branch:** feat/f09-marker-calibration-12164
+- **PR:** #12288
+- **Paths:** see #12288
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`9bc8e05f`; collated from changes/12164-add-source-bound-provisional-marker-cali.md)
+- **Summary:** Add source-bound provisional marker calibration artifacts
+- **Next step:** Review and merge the stacked marker calibration artifact PR; preserve all heldout and qualification gates.
+
+### DL-#12160 · Qualify Shot-Pattern Validation Helpers for Repository Gates
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12160
+- **Branch:** codex/shot-pattern-main-integration
+- **PR:** #12418
+- **Paths:** see #12418
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/12160-qualify-shot-pattern-validation-helpers.md)
+- **Summary:** Qualify shot-pattern validation helpers for repository gates
+- **Next step:** Complete the final canonical gate and live publication verification, then deliver through protected merge; no merge claimed yet.
+
+### DL-#12159 · Correct Phase-Two Article Source Fidelity and Unsupported Review Claims
+
+- **State:** in_progress
+- **Owner:** unassigned
+- **Issue:** #12159
+- **Branch:** codex/shot-pattern-matched-delivery
+- **PR:** #12418, #12480
+- **Paths:** see #12418
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`639f5570`; collated from changes/12159-reconcile-shot-pattern-analysis-paper-pr.md)
+- **Summary:** Correct phase-two article source fidelity and unsupported review claims
+- **Next step:** Numerical article repair independently verified; resolve external compiler issue #12120 and qualify rendered publication before ready PR delivery
+
+### DL-#12158 · Bind Observation Scores to Native Marker Replay Evidence
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12158
+- **Branch:** feat/f09-observation-receipts-12158
+- **PR:** #12288
+- **Paths:** see #12288
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`9bc8e05f`; collated from changes/12158-f09-native-marker-score-binding.md)
+- **Summary:** Bind observation scores to native marker replay evidence
+- **Next step:** Keep qualification unpromoted; add further native consumers only with their own source-bound replay evidence.
+
+### DL-#12148 · Report OpenSim Golf Muscle Support Only From Source-Bound Native Readback
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12148
+- **Branch:** feat/f09-opensim-native-muscle-capability-12148
+- **PR:** #12288
+- **Paths:** see #12288
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`9bc8e05f`; collated from changes/12148-report-opensim-golf-muscle-support-only.md)
+- **Summary:** Report OpenSim golf muscle support only from source-bound native readback
+- **Next step:** Complete focused CI and review native capability contract
+
+### DL-#12143 · Bind Declared Native Constrained Muscle States to Moco and Independent Excitation Replay
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12143
+- **Branch:** feat/f07-constrained-muscle-replay-12143
+- **PR:** #12163
+- **Paths:** see #12163
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5e5757ef`; collated from changes/12143-constrained-native-muscle-moco-replay.md)
+- **Summary:** Bind declared native constrained muscle states to Moco and independent excitation replay
+- **Next step:** Review stacked child after its declared cold-start prerequisite and retain locked-source and production scientific blockers.
+
+### DL-#12136 · Declare and Verify Native OpenSim Constrained Cold Starts With Exact Mechanical Replay Diagnostics
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12136
+- **Branch:** feat/f07-constrained-cold-start-12136
+- **PR:** #12163
+- **Paths:** see #12163
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5e5757ef`; collated from changes/12136-declare-and-verify-native-opensim-constr.md)
+- **Summary:** Declare and verify native OpenSim constrained cold starts with exact mechanical replay diagnostics
+- **Next step:** Review the focused child PR and preserve production model blockers.
+
+### DL-#12132 · Covariance Caption Containment and Verified Publication
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12132
+- **Branch:** codex/shot-pattern-main-integration
+- **PR:** #12418
+- **Paths:** src/tools/shot_pattern_analysis/matched_supplement_figures.py,scripts/research/shot_pattern_analysis/supplement_publication.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/12132-shot-pattern-caption-publication.md)
+- **Summary:** Wrap complete covariance captions and add selective, provenance-checked figure revision publication.
+- **Next step:** Complete the final canonical gate and live publication verification, then deliver through protected merge; no merge claimed yet.
+
+### DL-#12131 · Paired Density Row Spacing
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12131
+- **Branch:** codex/shot-pattern-main-integration
+- **PR:** #12418
+- **Paths:** src/tools/shot_pattern_analysis/matched_supplement_figures.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/12131-shot-pattern-density-row-spacing.md)
+- **Summary:** Increase paired density row spacing while preserving scientific arrays, limits and population identities.
+- **Next step:** Complete the final canonical gate and live publication verification, then deliver through protected merge; no merge claimed yet.
+
+### DL-#12129 · Keep Report Numerical Tokens Intact Using Compact Condition Keys and Separate Scoring and Population Tables
+
+- **State:** in_progress
+- **Owner:** unassigned
+- **Issue:** #12129
+- **Branch:** codex/shot-pattern-matched-delivery
+- **PR:** #12418
+- **Paths:** see #12418
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/12129-keep-report-numerical-tokens-intact-usin.md)
+- **Summary:** Keep report numerical tokens intact using compact condition keys and separate scoring and population tables
+- **Next step:** Review complete assembled report PDF after supplemental rendering and publish ready PR
+
+### DL-#12128 · Derive Final Shot-Pattern Conclusions From Qualified Selected Results and Preserve Protocol and Population Identities
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12128
+- **Branch:** codex/shot-pattern-main-integration
+- **PR:** #12418
+- **Paths:** see #12418
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/12128-derive-final-shot-pattern-conclusions-fr.md)
+- **Summary:** Derive final shot-pattern conclusions from qualified selected results and preserve protocol and population identities
+- **Next step:** Complete the final canonical gate and live publication verification, then deliver through protected merge; no merge claimed yet.
+
+### DL-#12117 · Regenerate the Club-Face Swing Fixtures on the Current Spec (Feet Flat Instead of 9-41 cm up), Fix Impact_Frame's Missing Ball-Radius Check, Check the Address Face Against the Capture's Own Face, Regenerate the OSV-9 MSK Grip Calibration, and Strict-Xfail the 7-Iron Impact Face (#12221)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12117
+- **Branch:** claude/12117-club-face-fixtures
+- **PR:** #12223, #12145
+- **Paths:** see #12223
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`3a63d61c`; collated from changes/12117-split-the-reference-zmp-rates-at-the-bal.md)
+- **Summary:** Regenerate the club-face swing fixtures on the current spec (feet flat instead of 9-41 cm up), fix impact_frame's missing ball-radius check, check the address face against the capture's own face, regenerate the OSV-9 MSK grip calibration, and strict-xfail the 7-iron impact face (#12221)
+- **Next step:** Diagnose the computed-torque replay's speed loss through the release (reference +0.9 %, replay -9.2 %); regenerate club-face fixtures once #11960 and #12125 are on main
+
+### DL-#12064 · Correct SG Optimizer CLI Integration Invocation
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12064
+- **Branch:** fix/12064-sg-optimizer-cli-test
+- **PR:** #12144
+- **Paths:** see #12144
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`7eac477a`; collated from changes/12064-correct-sg-optimizer-cli-integration-inv.md)
+- **Summary:** Correct SG optimizer CLI integration invocation
+- **Next step:** Merge the test-only CLI invocation fix.
+
+### DL-#12052 · MyoSuite Leg Retarget Maps the Hip Orientation Through the Calibrated Hip Frames and Fixes the Left Knee Sign; MyoSuite Address Feet Within 2 Deg on Both Captures
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12052
+- **Branch:** claude/osv-6e-myosuite-hip-retarget
+- **PR:** #12145
+- **Paths:** see #12145
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`3a63d61c`; collated from changes/12052-myosuite-leg-retarget-maps-the-hip-orien.md)
+- **Summary:** MyoSuite leg retarget maps the hip orientation through the calibrated hip frames and fixes the left knee sign; MyoSuite address feet within 2 deg on both captures
+- **Next step:** Merge after #12051; #12057 (right knee range) is open
+
+### DL-#12039 · Drake IK Uses MuJoCo's Principal-Log Weld Rotation Row and Exact Jacobian; Drake and MuJoCo Address Stages Now Agree Within 0.02 mm on Both Tour Captures and the Capture-A Drake Receipt Is Regenerated
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12039
+- **Branch:** claude/12039-drake-address-parity
+- **PR:** #12216
+- **Paths:** see #12216
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`7da0a298`; collated from changes/12039-drake-ik-uses-mujoco-s-principal-log-wel.md)
+- **Summary:** Drake IK uses MuJoCo's principal-log weld rotation row and exact Jacobian; Drake and MuJoCo address stages now agree within 0.02 mm on both tour captures and the capture-A Drake receipt is regenerated
+- **Next step:** Merge; Drake now tracks MuJoCo through IK and dynamics on capture-A
+
+### DL-#12030 · Fail Closed When the Clubhead Triad Offsets Do Not Match the Captured Triad; the Nominal 7-Iron IK Drops From 264.8 to 67.9 mm (Frame 0 70.2 mm) and Its Dynamics From 1355 to 79.2 mm, With Both Nominal Receipts Regenerated
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12030
+- **Branch:** claude/12030-nominal-iron-ik
+- **PR:** #12208
+- **Paths:** see #12208
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`7e105580`; collated from changes/12030-fail-closed-when-the-clubhead-triad-offs.md)
+- **Summary:** Fail closed when the clubhead triad offsets do not match the captured triad; the nominal 7-iron IK drops from 264.8 to 67.9 mm (frame 0 70.2 mm) and its dynamics from 1355 to 79.2 mm, with both nominal receipts regenerated
+- **Next step:** Correct the 7-iron document's nominal head triad (it is the driver's) in a separate spec-hash change
+
+### DL-#12023 · Add Frozen Source-Bound Native Tracking Costs for Mixed-Command Search.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12023
+- **Branch:** feat/f09m-native-tracking-objective-12023
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/12023-native-tracking-objective.md)
+- **Summary:** Add frozen source-bound native tracking costs for mixed-command search.
+- **Next step:** Integrate bounded command search after stacked replay and contract dependencies.
+
+### DL-#12021 · Extract One Bounded Candidate Search Loop Behind Finite Cost and Signed Hard Margins
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12021
+- **Branch:** feat/f02-bounded-callback-12021
+- **PR:** #12024
+- **Paths:** see #12024
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`e47a21e2`; collated from changes/12021-extract-one-bounded-candidate-search-loo.md)
+- **Summary:** Extract one bounded candidate search loop behind finite cost and signed hard margins
+- **Next step:** Validate stacked callback PR, then integrate native iron adapter using declared 20 ms source-only reference and fresh promotion.
+
+### DL-#12015 · Use SciPy's Typed Vector Inequality Constraint for F02 SLSQP and Count Its Preparatory Evaluations Within the Existing Budget
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12015
+- **Branch:** fix/f02-scipy-typing-12015
+- **PR:** #11816
+- **Paths:** see #11816
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`1fe02740`; collated from changes/12015-type-f02-slsqp-options-and-inequality-co.md)
+- **Summary:** Use SciPy's typed vector inequality constraint for F02 SLSQP and count its preparatory evaluations within the existing budget
+- **Next step:** Merge stacked PR after F02 #11816 reaches main and its scoped CI passes.
+
+### DL-#11976 · Add Matched Delivery, Correlated Noise, Density Graphics and Finite-Head Contact Study
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11976
+- **Branch:** codex/shot-pattern-matched-delivery
+- **PR:** #12418
+- **Paths:** see #12418
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/11976-shot-pattern-remote-restoration.md)
+- **Summary:** Add matched delivery, correlated noise, density graphics and finite-head contact study
+- **Next step:** Review the delivery PR; resolve documented repository gates before merge
+
+### DL-#11962 · Observe Exact Native Source Reference Frames and Muscle Path Conventions
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11962
+- **Branch:** feat/f07-reference-conventions-11962
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11962-native-reference-conventions.md)
+- **Summary:** Observe exact native source reference frames and muscle path conventions
+- **Next step:** Resolve donor release, frame correspondence and resource closure before muscle-model calibration.
+
+### DL-#11955 · Bind Compiled Actuator Command Profiles to Native Replay Execution.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11955
+- **Branch:** feat/f01f-compiled-command-admission-11955
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11955-compiled-actuator-command-admission.md)
+- **Summary:** Bind compiled actuator command profiles to native replay execution.
+- **Next step:** Merge the stacked F09 compiled-command admission PR after its dependency chain.
+
+### DL-#11950 · Add Bounded Native MyoSuite Model Resource Closure Admission.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11950
+- **Branch:** feat/f09h-native-muscle-replay-11950
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11950-add-bounded-native-myosuite-model-resour.md)
+- **Summary:** Add bounded native MyoSuite model resource closure admission.
+- **Next step:** Merge the stacked F09h provider and closure PR.
+
+### DL-#11949 · Native Moco Initial-State Bindings
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11949
+- **Branch:** feat/feedback-moco-state-binding-11791
+- **PR:** #12141
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/moco_initial_bindings.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11949-native-moco-initial-bindings.md)
+- **Summary:** Apply complete continuous initial-state and scalar-control bounds before native Moco guess creation
+- **Next step:** Review the ready stacked PR against native muscle bundle parent #11917; keep unarmed until safe retargeting to main.
+
+### DL-#11942 · Bind Owned Tools Native Envelopes to Actual R2025b Diagnostic Restart and Changed Future-Force Replay
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11942
+- **Branch:** feat/feedback-simscape-owned-native-11942
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11942-owned-native-simscape-replay.md)
+- **Summary:** Bind owned Tools native envelopes to actual R2025b diagnostic restart and changed future-force replay
+- **Next step:** Publish and validate the owned native adapter, then implement production variants while retaining capture and parity gates
+
+### DL-#11939 · Require Explicit Native Passive-Load Readiness Before Muscle Matching
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11939
+- **Branch:** feat/feedback-passive-readiness-11939
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11939-require-explicit-native-passive-load-rea.md)
+- **Summary:** Require explicit native passive-load readiness before muscle matching
+- **Next step:** Land focused passive-readiness gate after native constraint observer dependency; retain physiological policy and donor ancestry blockers.
+
+### DL-#11935 · Reconcile Development Log Provenance, Legacy Headings, and Source-Backed Delivery States Without Qualifying Scientific Work.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11935
+- **Branch:** chore/development-log-collation-11935
+- **PR:** #12337
+- **Paths:** see #12337
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`d8a6e303`; collated from changes/11935-reconcile-development-log-provenance-leg.md)
+- **Summary:** Reconcile Development Log provenance, legacy headings, and source-backed delivery states without qualifying scientific work.
+- **Next step:** Review the evidence inventory and validator results; merge only after approved review.
+
+### DL-#11933 · Add Actual R2025b Physical and Discrete Saved-Operating-Point Restart Prerequisite
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11933
+- **Branch:** feat/feedback-simscape-replay-11921
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11933-add-actual-r2025b-physical-and-discrete.md)
+- **Summary:** Add actual R2025b physical and discrete saved-operating-point restart prerequisite
+- **Next step:** Integrate immutable Tools native artifact consumer and production model bindings; retain all parity blockers
+
+### DL-#11923 · Native Constrained-Source Readiness
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #11923
+- **Branch:** feat/feedback-constrained-source-11923
+- **PR:** #11931
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/native_constraint_state.py,tests/opensim/test_native_constraint_state.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`2e3c79b4`; collated from changes/11923-native-constrained-state.md)
+- **Summary:** Observe actual native constrained state and preserve unverified full-model restart, lock-target and physiology gates.
+- **Next step:** Complete protected review; qualify fixed-lock source policy before full-model replay.
+
+### DL-#11912 · Frozen Training Capture Registration
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11912
+- **Branch:** fix/11912-reland-frozen-registration
+- **PR:** #12363
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/frozen_registration.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`4a1809f9`; collated from changes/11912-frozen-training-registration.md)
+- **Summary:** Freeze training-only native capture registration with explicit geometry lineage
+- **Next step:** Qualify anatomical correspondences and ground registration before independent muscle-driven capture replay.
+
+### DL-#11908 · Native Muscle Experiment Bundle Development Boundary
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #11908
+- **Branch:** feat/feedback-opensim-bundle-11908
+- **PR:** #12141
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/native_muscle_bundle.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11908-native-muscle-bundle.md)
+- **Summary:** Bind native OpenSim muscle replay to the shared experiment bundle
+- **Next step:** Complete native state policy review, negative coverage and qualification gates.
+
+### DL-#11903 · Native OpenSim Geometry Admission
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11903
+- **Branch:** feat/feedback-native-markers-11903
+- **PR:** #11911
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/native_marker_geometry.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b21b80a`; collated from changes/11903-native-opensim-geometry.md)
+- **Summary:** Bind explicit native OpenSim marker geometry and reject placeholder physical evidence
+- **Next step:** Freeze source-backed frame registration and anatomical offsets before independent full-body capture fitting.
+
+### DL-#11900 · Native Pinocchio Replay Development Boundary
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #11900
+- **Branch:** feat/feedback-pinocchio-native-11900
+- **PR:** #12141
+- **Paths:** src/engines/physics_engines/pinocchio/python/native_torque_replay.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11900-native-pinocchio-torque-replay.md)
+- **Summary:** Add native Pinocchio frozen torque replay through the existing engine
+- **Next step:** Qualify shared-adapter regressions and required production model bindings.
+
+### DL-#11867 · Reject Unqualified Concrete Muscle Laws Before Native Initialization
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11867
+- **Branch:** fix/feedback-exact-law-11867
+- **PR:** #11897
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/muscle_replay.py,tests/opensim/test_native_muscle_replay.py,manuals/upstreamdrift/chapters/13-native-muscle-replay.qmd
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`da8228db`; collated from changes/11867-reject-unqualified-concrete-muscle-laws.md)
+- **Summary:** Reject unqualified concrete muscle laws before native initialization
+- **Next step:** Merge Thelen dependency and retain full-model native qualification gates.
+
+### DL-#11856 · Reproduce Native Moving-Path Force-Length Mismatch and Reject Nonfinite Derivative Evidence
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11856
+- **Branch:** feat/feedback-path-work-11856
+- **PR:** #12228
+- **Paths:** scripts/diagnostics/native_path_work.py,src/engines/physics_engines/opensim/python/tour_matching/muscle_qualification.py,tests/opensim/test_native_path_work.py,manuals/upstreamdrift/chapters/24-native-path-work.qmd
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`49ef898b`; collated from changes/11856-reproduce-native-moving-path-force-lengt.md)
+- **Summary:** Reproduce native moving-path force-length mismatch and reject nonfinite derivative evidence
+- **Next step:** Review force-law alternatives before donor or runtime changes; full F07 qualification remains open.
+
+### DL-#11851 · Cast Numeric Refinement Rows Explicitly in numerics.py to Resolve Mypy Static Type Errors.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11851
+- **Branch:** fix/11851-correct-static-types-shot-pattern
+- **PR:** #12452
+- **Paths:** see #12452
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`c6ad9cc2`; collated from changes/11851-correct-static-types-shot-pattern.md)
+- **Summary:** Cast numeric refinement rows explicitly in numerics.py to resolve mypy static type errors.
+- **Next step:** Merge the PR.
+
+### DL-#11840 · Correct Central Impact and Add Three-Club Shot Pattern Analysis
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11840
+- **Branch:** codex/shot-pattern-analysis
+- **PR:** #12418
+- **Paths:** see #12418
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/11840-correct-central-impact-and-add-three-clu.md)
+- **Summary:** Correct Central Impact and Add Three-Club Shot Pattern Analysis
+- **Next step:** Complete final scientific gates and publish the ready analysis PR.
+
+### DL-#11838 · Native Drake Replay Development Boundary
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11838
+- **Branch:** feat/feedback-drake-native-11838
+- **PR:** #12141
+- **Paths:** src/engines/physics_engines/drake/python/native_torque_replay.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11838-native-drake-torque-replay.md)
+- **Summary:** Add restricted native Drake frozen torque replay
+- **Next step:** Integrate native candidates and qualify refinement, contact and full-model parity.
+
+### DL-#11837 · Score Native Output Against Frozen Observations With Full Replay Identity
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11837
+- **Branch:** feat/11837-f09b-native-observation-qualification
+- **PR:** #12141
+- **Paths:** src/engines/feedback_observation_qualification.py,tests/unit/engines/test_feedback_observation_qualification.py,tests/motion_capture/rig/test_tools_session_export.py,docs/development/feedback_controls/IMPLEMENTATION_PLAN.md,docs/development/feedback_controls/F09B-OBSERVATION-QUALIFICATION.md,docs/development/feedback_controls/TURNOVER.md,manuals/upstreamdrift/chapters/13-feedback-comparison.qmd,vendor/ud-tools
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11837-f09b-native-observation-scoring.md)
+- **Summary:** Score native output against frozen observations with full replay identity
+- **Next step:** Integrate per-engine native outputs and qualification evidence without relaxing gates.
+
+### DL-#11834 · Observe Pinned Native Coupled-Wrist Geometry With Explicit Assembly and Derivative Gates
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11834
+- **Branch:** fix/11834-reland-wrist-gate
+- **PR:** #12362
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/wrist_compatibility.py,tests/opensim/test_native_wrist_compatibility.py,manuals/upstreamdrift/chapters/29-native-wrist-compatibility.qmd
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ba06c0da`; collated from changes/11834-native-wrist-compatibility.md)
+- **Summary:** Observe pinned native coupled-wrist geometry with explicit assembly and derivative gates
+- **Next step:** Resolve native donor derivative and anatomical registration gates before F07/F08 qualification.
+
+### DL-#11831 · Sample Native Replay Marker Outputs on the Observation Clock
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11831
+- **Branch:** feat/11793-f09a-output-sampling
+- **PR:** #11830
+- **Paths:** src/shared/python/motion_matching/replay_metrics.py,src/shared/python/motion_matching/__init__.py,tests/unit/motion_matching/test_replay_observation_sampling.py,docs/development/feedback_controls/F09A-OBSERVATION-SAMPLING.md,docs/development/feedback_controls/TURNOVER.md,manuals/upstreamdrift/chapters/13-feedback-comparison.qmd
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`fb692749`; collated from changes/11831-f09a-observation-output-sampling.md)
+- **Summary:** Sample native replay marker outputs on the observation clock
+- **Next step:** Integrate sampled native outputs with F09 comparison levels without changing frozen acceptance criteria.
+
+### DL-#11826 · Native Thelen Replay Boundary
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11826
+- **Branch:** feat/feedback-native-thelen-11826
+- **PR:** #11829
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/muscle_replay.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`cde5a1ec`; collated from changes/11826-native-thelen-replay.md)
+- **Summary:** Admit compliant native Thelen muscle replay with explicit subtype and state policy
+- **Next step:** Qualify ignored-state modes, native full-body resources and anatomy; retain F07/F08 scientific gates.
+
+### DL-#11823 · Native Torque Replay Development Boundary
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11823
+- **Branch:** feat/feedback-native-replay-11790
+- **PR:** #11836
+- **Paths:** src/engines/physics_engines/mujoco/python/native_torque_replay.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`9d336118`; collated from changes/11823-native-torque-replay.md)
+- **Summary:** Add a full-state native MuJoCo consumer of the Tools torque replay bundle
+- **Next step:** Pin merged Tools T01 and qualify remaining engine and native muscle/contact replay paths.
+
+### DL-#11821 · Add Synthetic Sparse Inverse-Dynamics Collocation Spike and Benchmark Existing Multiple Shooting With Fresh Replay Diagnostics
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11821
+- **Branch:** feat/f03-constrained-ocp-11787
+- **PR:** #11822
+- **Paths:** src/shared/python/motion_matching/sparse_collocation_spike.py,tests/unit/motion_matching/test_sparse_collocation_spike.py,manuals/upstreamdrift/chapters/17-sparse-collocation-benchmark.qmd
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`72a58405`; collated from changes/11821-sparse-collocation-spike.md)
+- **Summary:** Add synthetic sparse inverse-dynamics collocation spike and benchmark existing multiple shooting with fresh replay diagnostics
+- **Next step:** Integrate early F06 native replay validator and D02 frozen private protocol before production backend selection
+
+### DL-#11819 · Add Pinned Native OpenSim Muscle-Model Structural Admission Without Anatomical Qualification
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11819
+- **Branch:** feat/feedback-native-admission-11819
+- **PR:** #11825
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/model_admission.py; tests/opensim/test_model_admission.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`1b149c36`; collated from changes/11819-native-model-admission.md)
+- **Summary:** Add pinned native OpenSim muscle-model structural admission without anatomical qualification
+- **Next step:** Review native inventory; continue licensed F07 model provisioning and independent qualification.
+
+### DL-#11815 · Native Muscle Contact Replay
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11815
+- **Branch:** feat/feedback-native-contact-11815
+- **PR:** #11820
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/muscle_replay.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`194cf468`; collated from changes/11815-native-muscle-contact.md)
+- **Summary:** Add explicit model-owned native contact policies and complete wrench evidence to muscle replay
+- **Next step:** Qualify full-body anatomy, calibrated ground/grip contact and full-horizon private mocap replay.
+
+### DL-#11810 · Prevent Parameter-Only Muscle Audits From Fabricating Native Qualification Evidence
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11810
+- **Branch:** fix/feedback-muscle-evidence-11791
+- **PR:** #11814
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/muscle_qualification.py; tests/opensim/test_muscle_cmc.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5ef39d92`; collated from changes/11810-muscle-evidence-guard.md)
+- **Summary:** Prevent parameter-only muscle audits from fabricating native qualification evidence
+- **Next step:** Review evidence guard; continue genuine native qualification under F07 #11791.
+
+### DL-#11809 · Native Muscle Replay Development Boundary
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11809
+- **Branch:** feat/feedback-opensim-11791
+- **PR:** #11812
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/muscle_replay.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`45615364`; collated from changes/11809-native-muscle-replay.md)
+- **Summary:** Add early native continuous-state muscle replay and reconcile reviewed epic milestone dependencies
+- **Next step:** Qualify explicit native contact/state policies and the full-body muscle model; retain F07/F08 qualification gates.
+
+### DL-#11786 · Add Phase-Gated Tangent Feedback With Constrained Actuator Allocation and Auditable Applied-Torque Evidence
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11786
+- **Branch:** feat/f02-distributed-feedback-11786
+- **PR:** #11816
+- **Paths:** src/shared/python/motion_matching/distributed_feedback.py,tests/unit/motion_matching/test_distributed_feedback.py,manuals/upstreamdrift/chapters/16-distributed-feedback.qmd
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`1fe02740`; collated from changes/11786-distributed-feedback.md)
+- **Summary:** Add phase-gated tangent feedback with constrained actuator allocation and auditable applied-torque evidence
+- **Next step:** Integrate native tangent/task adapters and independently replay exact applied torque under F09 gates
+
+### DL-#11785 · Freeze Six-Engine Feedback Comparison Admission and Independent Replay Prerequisites
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11785
+- **Branch:** feat/f01-six-engine-contracts-11785
+- **PR:** #11808
+- **Paths:** src/engines/feedback_comparison.py,src/engines/model_inventory.py,src/config/engine_model_inventory.json,manuals/upstreamdrift/chapters/13-feedback-comparison.qmd
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`a0a29db1`; collated from changes/11785-feedback-comparison.md)
+- **Summary:** Freeze six-engine feedback comparison admission and independent replay prerequisites
+- **Next step:** F09 maps versioned Tools T01 bundles to native full-horizon replay receipts before numerical qualification.
+
+### DL-#11784 · Document Researched Distributed Feedback Epic, Six-Engine Parity and Muscle-Driven OpenSim Target
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11784
+- **Branch:** docs/feedback-controls-11784
+- **PR:** #11798
+- **Paths:** docs/development/feedback_controls
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`b488dbbd`; collated from changes/11784-feedback-controls-design.md)
+- **Summary:** Document researched distributed feedback epic, six-engine parity and muscle-driven OpenSim target
+- **Next step:** Start F01 inventory and gate freeze; preserve MOSAIC and parity authorities
+
+### DL-#11745 · LIFT-5 Slice 1: Back-Squat Same-Input Bundle From the Movement Optimizer via Full-Body Marker IK, With Provenance, Regeneration Script and MuJoCo Replay Smoke Test
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11745
+- **Branch:** claude/lift-5-squat-bundle
+- **PR:** #12245, #12340
+- **Paths:** see #12245
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ba48dafa`; collated from changes/11745-lift-5-slice-cross-engine-open-loop-bar.md)
+- **Summary:** LIFT-5 slice 1: back-squat same-input bundle from the Movement Optimizer via full-body marker IK, with provenance, regeneration script and MuJoCo replay smoke test
+- **Next step:** Cross-engine bar-path replay parity of the back-squat bundle in MuJoCo, Pinocchio and Drake; then the other four lifts.
+
+### DL-#11737 · OSV-6 Lead Foot: Lateral-Marker Zero-Twist Correction (Knee_Flexion_Axis) and Leg-Marker Calibration Constraints Under --Foot-Progression; MuJoCo Address Toe-Out Within 2 Deg on Both Captures (Driver +0.2/-0.3, Iron -0.0/-1.4 Deg); Canonical Receipts Unchanged (Default-On Correction Is a Recorded Failed Experiment)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11737
+- **Branch:** claude/osv-6b-leg-azimuth
+- **PR:** #12049, #12051
+- **Paths:** see #12049
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b2ef7a6`; collated from changes/11737-osv-6-record-the-full-address-coordinate.md)
+- **Summary:** OSV-6 lead foot: lateral-marker zero-twist correction (knee_flexion_axis) and leg-marker calibration constraints under --foot-progression; MuJoCo address toe-out within 2 deg on both captures (driver +0.2/-0.3, iron -0.0/-1.4 deg); canonical receipts unchanged (default-on correction is a recorded failed experiment)
+- **Next step:** Lead foot still 15-32 deg out at address in MuJoCo/Drake: trade hip adduction against stance width; heel-proxy malleolus correction; Pinocchio/MyoSuite stills
+
+### DL-#11729 · MyoSuite Anthro Map: NeckInputY Drives Neck_Flexion (Sign -1 by FK), NeckInputX (Lateral Bending) Unmapped, Neck_Rotation No Longer Overwritten
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11729
+- **Branch:** claude/osv-3-myosuite-neck-flexion
+- **PR:** #11768, #11772, #11979, #12154, #12194
+- **Paths:** see #11768
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`31b4252b`; collated from changes/11729-osv-3d-closed-loop-gaze-neck-fd-neck-gaz.md)
+- **Summary:** MyoSuite anthro map: NeckInputY drives neck_flexion (sign -1 by FK), NeckInputX (lateral bending) unmapped, neck_rotation no longer overwritten
+- **Next step:** Merge after #11768; FK-fit scapula absorption and pelvis root orientation for MyoSuite replay
+
+### DL-#11659 · Typed Attachment Ports, Part Catalog and Drag-and-Drop Assembly Canvas in the Frankenstein Editor (CMB-8, CMB-9)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11659
+- **Branch:** feat/frankenstein-ports-dnd-cmb-11659
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11659-typed-attachment-ports-part-catalog-and.md)
+- **Summary:** Typed attachment ports, part catalog and drag-and-drop assembly canvas in the Frankenstein editor (CMB-8, CMB-9)
+- **Next step:** Web drag-and-drop (CMB-10, #11661)
+
 ### DL-#11792 — F08: Match Mocap With Muscle Excitations and Verify Pure OpenSim Replay
 
 - **State:** in_progress
 - **Owner:** codex
 - **Issue:** #11792 (parent #11784; children #12342, #12343, #12353)
-- **PR:** #12344 (draft); related #12355
+- **PR:** #12344 (draft); related #12355, #12318, #12402, #12407, #12386, #12442, #12401
 - **Branch:** `fix/native-path-connection-finalization-12233-20261012`
 - **Started:** 2026-10-09 (parent issue opened)
 - **Paths:** `changes/12233-bound-moco-optimizer-states-to-source-mo.md`; `docs/agent_context/README.md`; `docs/agent_context/index.html`; `docs/development/feedback_controls/F07_PATH_WORK_TURNOVER.md`; `manuals/upstreamdrift/chapters/24-native-path-work.qmd`; `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py`; `tests/unit/engines/opensim/test_native_path_optimizer_domains.py`
 - **Summary:** This software/readiness work moves native connection finalization before optimizer-domain and passive audits. It does not claim a solve, optimum, learned replay, or physical qualification; all 17 registered model/variant rows remain unqualified.
-- **Next step:** Complete the combined no-probe preparation and physiological-policy/solver full-clock replay work under the existing acceptance gates.
-- **Last verified:** 2026-10-12 (merge commit `f637c179e1bac10b410882b6499050b27f7b1ddf`; pinned QA 3.12 pre_pr all gates passed; 23 focused lifecycle tests passed, 2 warnings; no native calls).
+- **Next step:** Review and integrate the stateless policy extraction, then implement an explicitly mapped muscle-allocation bridge and validate controller-off replay; native model qualification remains separate.
+- **Last verified:** 2026-10-14 (`85b810d4`; collated from changes/11792-stateless-feedback-policy-12390.md)
 
 ### DL-#11719 · GCV-13 Slice 3: Decorative Address Ball in the MuJoCo, OpenSim and MyoSuite Native Export
 
@@ -37,10 +1155,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #11719 (epic #11706)
 - **Branch:** claude/gcv-13c-native-ball-backends
-- **PR:** not created (stacked on #12114, which is stacked on #11992)
+- **PR:** not created (stacked on #12114, which is stacked on #11992), #12140, #12332, #12283, #12297, #12481
 - **Paths:** src/tools/native_viewer_export/backends/\_ball.py, src/tools/native_viewer_export/backends/\_worker_job.py, src/tools/native_viewer_export/backends/\_subprocess.py, src/tools/native_viewer_export/backends/mujoco_native.py, src/tools/native_viewer_export/backends/mujoco_worker.py, src/tools/native_viewer_export/backends/myosuite_arena.py, src/tools/native_viewer_export/backends/myosuite_worker.py, src/tools/native_viewer_export/backends/opensim_simbody.py, src/tools/native_viewer_export/backends/opensim_worker.py, src/tools/native_viewer_export/README.md, src/config/feature_parity.json, tests/unit/tools/native_viewer_export/test_ball_native_backends.py
 - **Started:** 2026-10-10
-- **Last verified:** 2026-10-10 (`f621f12f`)
+- **Last verified:** 2026-10-14 (`c0b6c94b`; collated from changes/11719-promote-render-club-head-and-ball-to-par.md)
 - **Summary:** GCV-13 adds the resolved decorative address ball to remaining engine backends and worker transport; OpenSim attaches build-time ground geometry. The web ClubHead follow-up remains open; this presentation change does not alter physics.
 - **Next step:** Push `claude/gcv-13c-native-ball-backends` and open the PR stacked on #12114.
 
@@ -77,10 +1195,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #11614
 - **Branch:** docs/sip-9-parity-reference-11614
-- **PR:** #11616, #11625
+- **PR:** #11616, #11625, #12485, #11806, #12493
 - **Paths:** see #11616
 - **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`cf3e475f`; collated from changes/11614-document-full-swing-five-engine-same-inp.md)
+- **Last verified:** 2026-10-14 (`4aca3f1a`; collated from changes/11614-synchronize-same-input-parity-calculatio.md)
 - **Summary:** Same-input parity LaTeX research reference (P-1 pointwise result)
 - **Next step:** Extend with P-2..P-5 trajectory and closed-loop results
 
@@ -514,11 +1632,11 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **State:** in_review
 - **Owner:** claude
 - **Issue:** #9415
-- **PR:** draft PR from `agy/ud-9415-root-allowlist`
+- **PR:** draft PR from `agy/ud-9415-root-allowlist`, #12334, #12464, #12472, #12393
 - **Branch:** `agy/ud-9415-root-allowlist`
 - **Paths:** `scripts/check_docs_governance.py`, `scripts/config/root_allowlist.json`, `docs/governance/DOCS_GOVERNANCE.md`, `tests/scripts/test_doc_governance_checks.py`, `tests/unit/scripts/test_check_docs_governance_root_allowlist.py`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
+- **Last verified:** 2026-10-14 (`b686ab17`; collated from changes/9415-spec-archive.md)
 - **Summary:** Committed root entries (`git ls-tree --name-only HEAD`) must match `scripts/config/root_allowlist.json`; unlisted and stale entries both fail, and a failed git call or malformed config fails closed. Closes the last software checkbox of #9415; the history rewrite, Jules workflows and SPEC cap remain owner decisions.
 - **Next step:** CI green, review, merge.
 
@@ -648,12 +1766,12 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Owner:** claude
 - **Issue:** #9545 (epic #9541)
 - **Branch:** claude/issue-9545-api
-- **PR:** #11516 (draft)
+- **PR:** #11516 (draft), #12449, #12495, #12440
 - **Paths:** src/api/routes/bunker_workbench.py; src/tools/bunker_shot_gui/input_ranges.py; src/tools/bunker_shot_gui/design.py; src/tools/bunker_shot_gui/widgets.py; src/tools/bunker_shot_gui/report.py; src/tools/bunker_shot_gui/render.py; src/config/feature_parity.json; tests/bunkershot3d/test_bunker_workbench_api.py
 - **Started:** 2026-10-04
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
+- **Last verified:** 2026-10-14 (`9ab1fc85`; collated from changes/9545-bunkershot3d-workbench-comparison-never.md)
 - **Summary:** The headless workbench API enforces request ranges, handedness and source-stamped verdicts; predictive playability is refused or reported without ranking. UI and API share input-range authority.
-- **Next step:** Review the draft PR and list the route in the U15 entry of `src/config/bunkershot3d_qualification.json`.
+- **Next step:** Merge the PR; then re-run the nominal grid on the supported flight stack (#9239) and continue #9545 save/reload/export and web parity.
 
 ### DL-#9544 · Bunker Contact Regimes and Coupled Club Rotation Across Fidelity Tiers
 
@@ -828,10 +1946,10 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Owner:** claude
 - **Issue:** #9550 (epic #9546)
 - **Branch:** conductor/issue-9550
-- **PR:** #10441
+- **PR:** #10441, #12471
 - **Paths:** src/config/impact_acceptance.json; tests/config/impact_acceptance/test_impact_acceptance_matrix.py; scripts/ci/verify_impact_explorer_bundle.py; tests/ci/test_verify_impact_explorer_bundle.py; tests/api/test_impact_explorer_mount.py; .github/workflows/ci-standard.yml; src/config/feature_parity.json; docs/development/impact_acceptance_matrix.md
 - **Started:** 2026-09-18
-- **Last verified:** 2026-09-18 at HEAD (SELF; matrix gate 26 passed; verifier + mount 14 passed; feature-parity/industrial-readiness gates 91 passed; real pinned bundle `62e8cdbf` verified locally: 76 assets, 5 JS, 404 on missing artifact)
+- **Last verified:** 2026-10-14 (`126b0964`; collated from changes/9550-add-frozen-impactmodelcapabilitymatrix-a.md)
 - **Summary:** Froze the model-capability matrix for `src/shared/python/physics/impact_model` (spin support stated as unavailable where absent), recorded the six acceptance items with evidence or explicit open state and a `code_verified_only` claim, made CI stamp Tools' release artifacts with the pinned gitlink and verify that `/impact-explorer-app/` serves that revision's real JavaScript, and downgraded `tools.rate_of_closure` parity to an evidence-based gap.
 - **Next step:** Open the PR and, once #9417 fixes the artifact set, run the served-bundle verifier against the installed artifact with restart/reload/offline checks.
 - **Evidence:** docs/development/impact_acceptance_matrix.md; tests/config/impact_acceptance/test_impact_acceptance_matrix.py.
@@ -1170,6 +2288,2398 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#9700 · Add MockEngineQuarantineError, Assert_Not_Mock_Engine Guard, and GOLF_FORBID_MOCK_ENGINE Enforcement
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #9700
+- **Branch:** merged via #12476
+- **PR:** #12476
+- **Paths:** see #12476
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`256b5859`; collated from changes/9700-add-mockenginequarantineerror-assert-not.md)
+- **Summary:** Add MockEngineQuarantineError, assert_not_mock_engine guard, and GOLF_FORBID_MOCK_ENGINE enforcement
+- **Next step:** Shipped in PR #12476.
+
+### DL-#9547 · Add Fail-Closed Impact-Interval Export Schema and Mutation Tests for Residual Zeroing and Unfinished Contact
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #9547
+- **Branch:** merged via #12466
+- **PR:** #12466
+- **Paths:** see #12466
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`6561420c`; collated from changes/9547-add-fail-closed-impact-interval-export-s.md)
+- **Summary:** Add fail-closed impact-interval export schema and mutation tests for residual zeroing and unfinished contact
+- **Next step:** Shipped in PR #12466.
+
+### DL-#9417 · Extend Rust Optional Extra to All 10 Maturin Crates and Populate Deploy/README.md
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #9417
+- **Branch:** merged via #12489
+- **PR:** #12489
+- **Paths:** see #12489
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`fe92399b`; collated from changes/9417-extend-rust-optional-extra-to-all-10-mat.md)
+- **Summary:** Extend rust optional extra to all 10 Maturin crates and populate deploy/README.md
+- **Next step:** Shipped in PR #12489.
+
+### DL-#9406 · Add Per-Engine Optional Extras in Pyproject.Toml and Enforce Requirements-Tools.Txt Pin Contract
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #9406
+- **Branch:** merged via #12467
+- **PR:** #12467
+- **Paths:** see #12467
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`471e2f65`; collated from changes/9406-add-per-engine-optional-extras-in-pyproj.md)
+- **Summary:** Add per-engine optional extras in pyproject.toml and enforce requirements-tools.txt pin contract
+- **Next step:** Shipped in PR #12467.
+
+### DL-#2064 · Bootstrap Rustup With --No-Modify-Path Before Dtolnay/Rust-Toolchain so CI Stops Appending CARGO_HOME Env Lines to Runner Shell Profiles (Repository_Management#2064)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #2064
+- **Branch:** merged via #12218
+- **PR:** #12218
+- **Paths:** see #12218
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ed91c702`; collated from changes/2064-bootstrap-rustup-with-no-modify-path-bef.md)
+- **Summary:** Bootstrap rustup with --no-modify-path before dtolnay/rust-toolchain so CI stops appending CARGO_HOME env lines to runner shell profiles (Repository_Management#2064)
+- **Next step:** Shipped in PR #12218.
+
+### DL-#1917 · Sync the Agent-Identity Managed Block: The Owner's Personal Token Is an Approved Agent Identity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #1917
+- **Branch:** merged via #12264
+- **PR:** #12264
+- **Paths:** see #12264
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`7b40a7fa`; collated from changes/1917-sync-the-agent-identity-managed-block-th.md)
+- **Summary:** Sync the agent-identity managed block: the owner's personal token is an approved agent identity
+- **Next step:** Shipped in PR #12264.
+
+### DL-#1893 · Re-Archive HANDOFF.md Under the 200-Line Target
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #1893
+- **Branch:** merged via #12359
+- **PR:** #12359
+- **Paths:** see #12359
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`77b9e6ea`; collated from changes/1893-re-archive-handoff-md-under-the-200-line.md)
+- **Summary:** Re-archive HANDOFF.md under the 200-line target
+- **Next step:** Shipped in PR #12359.
+
+### DL-#12510 · Accommodate Collated Change-Log Rows in SPEC Cap and Test_Spec_Archive
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12510
+- **Branch:** merged via #12512
+- **PR:** #12512
+- **Paths:** see #12512
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`40cc066c`; collated from changes/12510-accommodate-collated-rows-in-spec-cap.md)
+- **Summary:** accommodate collated change-log rows in SPEC cap and test_spec_archive
+- **Next step:** Shipped in PR #12512.
+
+### DL-#12504 · Pack-Audit Adapters Track the Packs: Recognise Leaf/Loop-Closure Hand_R Weld to the Bar (Shared Hand_Attachment Helper), Measure Grip Width at the Start Pose, Read Start GRF Through the Drake/Pinocchio Pack Contact APIs
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12504
+- **Branch:** merged via #12509
+- **PR:** #12509
+- **Paths:** see #12509
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`b7661855`; collated from changes/12504-pack-audit-adapters-track-the-packs-reco.md)
+- **Summary:** Pack-audit adapters track the packs: recognise leaf/loop-closure hand_r weld to the bar (shared hand_attachment helper), measure grip width at the start pose, read start GRF through the Drake/Pinocchio pack contact APIs
+- **Next step:** Shipped in PR #12509.
+
+### DL-#12503 · Regenerate the Grip-Parity OpenSim Reference Series and Engine Series From the Current Club-Face Fixtures, With a Regeneration Receipt; MuJoCo, Drake and Pinocchio Pass Again on Both Clubs
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12503
+- **Branch:** merged via #12505
+- **PR:** #12505
+- **Paths:** see #12505
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`686b0c61`; collated from changes/12503-regenerate-the-grip-parity-opensim-refer.md)
+- **Summary:** Regenerate the grip-parity OpenSim reference series and engine series from the current club-face fixtures, with a regeneration receipt; MuJoCo, Drake and Pinocchio pass again on both clubs
+- **Next step:** Shipped in PR #12505.
+
+### DL-#12492 · Collate-Changes Keeps Going Past a Refused Fragment and Fails Only After Proposing the Rest (Port of Repository_Management #2046)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12492
+- **Branch:** merged via #12490
+- **PR:** #12490, #12511
+- **Paths:** see #12490
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`d13d5efc`; collated from changes/12492-re-sync-shared-scripts-collator-with-rep.md)
+- **Summary:** collate-changes keeps going past a refused fragment and fails only after proposing the rest (port of Repository_Management #2046)
+- **Next step:** Shipped in PR #12490.
+
+### DL-#12473 · Remove Private Native Capture Files, Original Capture Exports and Club Workbooks From the Public Tree; Workbooks Resolve Only Through the Capture Registry (CAPTURE_DATA_DIR); Add a Hash-Denylist Hygiene Guard
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12473
+- **Branch:** merged via #12474
+- **PR:** #12474
+- **Paths:** see #12474
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`18497550`; collated from changes/12473-move-private-captures-out-of-public-tree.md)
+- **Summary:** Remove private native capture files, original capture exports and club workbooks from the public tree; workbooks resolve only through the capture registry (CAPTURE_DATA_DIR); add a hash-denylist hygiene guard
+- **Next step:** Shipped in PR #12474.
+
+### DL-#12435 · Unblock Collate Change Fragments: The MOSAIC-13 Multi-Trial #11545 Fragment No Longer Reopens Shipped DL-#11545 as in_Review; It Records Against the Shipped Entry
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12435
+- **Branch:** claude/fix-dl-11545-shipped-fragments
+- **PR:** #12436
+- **Paths:** changes/11545-mosaic-13-closed-form-multi-trial-benchm.md
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`3bbd5d09`; collated from changes/12435-collate-shipped-dl-11545.md)
+- **Summary:** Unblock Collate Change Fragments: the MOSAIC-13 multi-trial #11545 fragment no longer reopens shipped DL-#11545 as in_review; it records against the shipped entry
+- **Next step:** Shipped in PR #12436.
+
+### DL-#12422 · Make UI API Type Generation Deterministic: Share One GroupColumn Literal so ModelPayloadV2.Group_Column No Longer Flips Order by Import Order
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12422
+- **Branch:** merged via #12423
+- **PR:** #12423
+- **Paths:** see #12423
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`16ad31e9`; collated from changes/12422-make-ui-api-type-generation-deterministi.md)
+- **Summary:** Make UI API type generation deterministic: share one GroupColumn Literal so ModelPayloadV2.group_column no longer flips order by import order
+- **Next step:** Shipped in PR #12423.
+
+### DL-#12416 · Move Per-Slice AGENT_HANDOFF.md History Verbatim to Docs/Development/AGENT_HANDOFF_ARCHIVE.md; Live Handoff Is Current-State Only (96 Lines), the Expiring Doc-Size Exception Is Dropped.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12416
+- **Branch:** merged via #12417
+- **PR:** #12417
+- **Paths:** see #12417
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`01c4da6f`; collated from changes/12416-move-per-slice-agent-handoff-md-history.md)
+- **Summary:** Move per-slice AGENT_HANDOFF.md history verbatim to docs/development/AGENT_HANDOFF_ARCHIVE.md; live handoff is current-state only (96 lines), the expiring doc-size exception is dropped.
+- **Next step:** Shipped in PR #12417.
+
+### DL-#12409 · Shot-Pattern Article: 2,000-Resample Headline Statistics, Clubhead-Assumption Band (136 Runs), Generated Hash-Bound Tables in SG per 100 Shots and m (Yd); Shared Figure Palette With Reproducible PDF/SVG Metadata; Preset-Modification and Driver-Lean Cautions; Matched Physics Rejects an Ignored Nominal Face
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12409
+- **Branch:** merged via #12418
+- **PR:** #12418
+- **Paths:** see #12418
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/12409-shot-pattern-study-hardening-fail-fast-s.md)
+- **Summary:** Shot-pattern article: 2,000-resample headline statistics, clubhead-assumption band (136 runs), generated hash-bound tables in SG per 100 shots and m (yd); shared figure palette with reproducible PDF/SVG metadata; preset-modification and driver-lean cautions; matched physics rejects an ignored nominal face
+- **Next step:** Shipped in PR #12418.
+
+### DL-#12391 · Restore Development Log Capacity With Source-Backed DL-#10783 Shipped Metadata, the Official Zero-Day Archive Routine, and Two Narrowly Scoped Title-Case Corrections; Preserve All Other Metadata and Canonical-Function Exception Deadlines.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12391
+- **Branch:** merged via #12396
+- **PR:** #12396
+- **Paths:** see #12396
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`8a22fd99`; collated from changes/12391-development-log-capacity-maintenance.md)
+- **Summary:** Restore Development Log capacity with source-backed DL-#10783 shipped metadata, the official zero-day archive routine, and two narrowly scoped title-case corrections; preserve all other metadata and canonical-function exception deadlines.
+- **Next step:** Shipped in PR #12396.
+
+### DL-#12388 · Add Bounded Invocation-Local Muscle Path Observation Caching to Avoid Redundant Solves During Dense Finite-Difference Probes; Preserve Complete Allocation Results, Candidate Accounting, and Error Propagation.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12388
+- **Branch:** merged via #12433
+- **PR:** #12433
+- **Paths:** see #12433
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ef7f1daf`; collated from changes/12388-bounded-muscle-path-caching.md)
+- **Summary:** Add bounded invocation-local muscle path observation caching to avoid redundant solves during dense finite-difference probes; preserve complete allocation results, candidate accounting, and error propagation.
+- **Next step:** Shipped in PR #12433.
+
+### DL-#12387 · Expose a Shared Immutable Quasistatic Hill Force Snapshot for Allocator and Future Validated Replay Consumers; Preserve Allocator Behavior and Keep Model Qualification Unchanged.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12387
+- **Branch:** merged via #12389
+- **PR:** #12389
+- **Paths:** see #12389
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`a014437c`; collated from changes/12387-expose-a-shared-immutable-quasistatic-hi.md)
+- **Summary:** Expose a shared immutable quasistatic Hill force snapshot for allocator and future validated replay consumers; preserve allocator behavior and keep model qualification unchanged.
+- **Next step:** Shipped in PR #12389.
+
+### DL-#12347 · Back-Squat Bar Geometry Slice 1: Torso Bar Shelf, Standard Grip Width and Medio-Lateral Bar Axis From the Parity Standard (back_bar.py, Lift_to_Full_Body Geometry Option, Generate_Lift_Bundle --Geometry Back_Bar); Committed Bundle and Evidence Not Regenerated
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12347
+- **Branch:** merged via #12488
+- **PR:** #12488
+- **Paths:** see #12488
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`976419b9`; collated from changes/12347-back-squat-bar-geometry-slice-1-torso-ba.md)
+- **Summary:** Back-squat bar geometry slice 1: torso bar shelf, standard grip width and medio-lateral bar axis from the parity standard (back_bar.py, lift_to_full_body geometry option, generate_lift_bundle --geometry back_bar); committed bundle and evidence not regenerated
+- **Next step:** Shipped in PR #12488.
+
+### DL-#12331 · Add Pinocchio OpenSim and MATLAB 3D Adapters for Swing Report Parity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12331
+- **Branch:** merged via #12430
+- **PR:** #12430
+- **Paths:** see #12430
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`6685e235`; collated from changes/12331-add-pinocchio-opensim-and-matlab-3d-adap.md)
+- **Summary:** Add Pinocchio OpenSim and MATLAB 3D adapters for swing report parity
+- **Next step:** Shipped in PR #12430.
+
+### DL-#12330 · Swing Report React/Tauri Parity: Web Full/Custom Dialog Over POST /Api/Swing-Report/View (PyQt ReportViewModel Rows) and Zip Package Export via POST /Api/Swing-Report/Export
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12330
+- **Branch:** merged via #12421
+- **PR:** #12421
+- **Paths:** see #12421
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`fe7aa816`; collated from changes/12330-swing-report-web-parity.md)
+- **Summary:** Swing Report React/Tauri parity: web Full/Custom dialog over POST /api/swing-report/view (PyQt ReportViewModel rows) and zip package export via POST /api/swing-report/export
+- **Next step:** Shipped in PR #12421.
+
+### DL-#12329 · Swing Report S6: PyQt Full/Custom Report Dialog and Qt-Free View-Model Over the Validated Report
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12329
+- **Branch:** merged via #12406
+- **PR:** #12406
+- **Paths:** see #12406
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ded03ad8`; collated from changes/12329-swing-report-s6-pyqt-full-custom-report.md)
+- **Summary:** Swing Report S6: PyQt Full/Custom report dialog and Qt-free view-model over the validated report
+- **Next step:** Shipped in PR #12406.
+
+### DL-#12328 · Swing Report S5: MuJoCo and Drake Adapters With Cross-Engine Speed Parity Harness
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12328
+- **Branch:** merged via #12395
+- **PR:** #12395
+- **Paths:** see #12395
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`9d9e05d6`; collated from changes/12328-swing-report-s5-mujoco-and-drake-adapter.md)
+- **Summary:** Swing report S5: MuJoCo and Drake adapters with cross-engine speed parity harness
+- **Next step:** Shipped in PR #12395.
+
+### DL-#12327 · Swing Report S4: Package Exporter and CLI (Report.Json, Series CSVs, Value-Only Plots, MANIFEST.Json Sha256s, Markdown Summary) With Fail-Closed Round-Trip Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12327
+- **Branch:** merged via #12394
+- **PR:** #12394
+- **Paths:** see #12394
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`51f56377`; collated from changes/12327-swing-report-s4-package-exporter-and-cli.md)
+- **Summary:** Swing report S4: package exporter and CLI (report.json, series CSVs, value-only plots, MANIFEST.json sha256s, markdown summary) with fail-closed round-trip tests
+- **Next step:** Shipped in PR #12394.
+
+### DL-#12326 · Swing Report S3: Plot Registry and Full/Custom Plot Selection With Unavailable Reasons
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12326
+- **Branch:** merged via #12366
+- **PR:** #12366
+- **Paths:** see #12366
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`7e9e8d63`; collated from changes/12326-swing-report-s3-plot-registry-and-full-c.md)
+- **Summary:** Swing report S3: plot registry and Full/Custom plot selection with unavailable reasons
+- **Next step:** Shipped in PR #12366.
+
+### DL-#12325 · Swing Report S2: Build_Swing_Report Assembles Runs, Quantities and Provenance From Engine Results Under the Fail-Closed #10382 Policy (Withheld Stubs Always Value-Free, Advertised Quantities Need Two-Engine Spread, Nulls Never Zero-Filled); Reuses the S1 Schema, Policy and Validator
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12325
+- **Branch:** merged via #12354
+- **PR:** #12354
+- **Paths:** see #12354
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`c68d5a4c`; collated from changes/12325-swing-report-s2-build-swing-report-assem.md)
+- **Summary:** Swing Report S2: build_swing_report assembles runs, quantities and provenance from engine results under the fail-closed #10382 policy (withheld stubs always value-free, advertised quantities need two-engine spread, nulls never zero-filled); reuses the S1 schema, policy and validator
+- **Next step:** Shipped in PR #12354.
+
+### DL-#12324 · Swing Report Contract V1 (S1): Schemas/Swing-Report-V1.Json, Quantity Policy Table, Fail-Closed Validate_Swing_Report With Named I1-I12 Errors, Valid/Invalid Fixtures
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12324
+- **Branch:** merged via #12336
+- **PR:** #12336
+- **Paths:** see #12336
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`fb1f4183`; collated from changes/12324-swing-report-contract-v1-s1-schemas-swin.md)
+- **Summary:** Swing report contract v1 (S1): schemas/swing-report-v1.json, quantity policy table, fail-closed validate_swing_report with named I1-I12 errors, valid/invalid fixtures
+- **Next step:** Shipped in PR #12336.
+
+### DL-#12320 · R05: Neural Promotion Gate Fails Closed on Missing, Zero, or Non-Comparable Evidence
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12320
+- **Branch:** merged via #12333
+- **PR:** #12333
+- **Paths:** see #12333
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`713b5242`; collated from changes/12320-r05-neural-promotion-gate-fails-closed-o.md)
+- **Summary:** R05: neural promotion gate fails closed on missing, zero, or non-comparable evidence
+- **Next step:** Shipped in PR #12333.
+
+### DL-#12308 · Frame the OpenSim Same-Input View From the Trajectory so Feet and Clubhead Stay in the Face-On Image
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12308
+- **Branch:** merged via #12313
+- **PR:** #12313, #12496
+- **Paths:** see #12313
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`f56f18f3`; collated from changes/12308-msk-address-posture-and-impact-offset.md)
+- **Summary:** Frame the OpenSim same-input view from the trajectory so feet and clubhead stay in the face-on image
+- **Next step:** Shipped in PR #12313.
+
+### DL-#12307 · OSV-9 MSK Turn_Feet Mode Drives Per-Frame Foot Targets (Heel and Toe Lift) From the Capture Foot Markers
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12307
+- **Branch:** merged via #12311
+- **PR:** #12311
+- **Paths:** see #12311
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`b1edc27e`; collated from changes/12307-osv-9-msk-turn-feet-mode-drives-per-fram.md)
+- **Summary:** OSV-9 MSK turn_feet mode drives per-frame foot targets (heel and toe lift) from the capture foot markers
+- **Next step:** Shipped in PR #12311.
+
+### DL-#12306 · OSV-9 MSK Grip: Specified Hand Grip Rotation (Trail Palm to Target, Lead Palm Away, Thumb Down the Shaft) Replaces the IK-Inherited Frame; Calibration, Models and MSK Renders Regenerated
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12306
+- **Branch:** merged via #12314
+- **PR:** #12314
+- **Paths:** see #12314
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`14ba9306`; collated from changes/12306-osv-9-msk-grip-specified-hand-grip-rotat.md)
+- **Summary:** OSV-9 MSK grip: specified hand grip rotation (trail palm to target, lead palm away, thumb down the shaft) replaces the IK-inherited frame; calibration, models and MSK renders regenerated
+- **Next step:** Shipped in PR #12314.
+
+### DL-#12304 · Harden CI Shot-Pattern Figure Restore: Strict Path Charset, Symlink/Alias/Duplicate ZIP Member Rejection, Size Caps, Atomic Non-Following Writes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12304
+- **Branch:** merged via #12446
+- **PR:** #12446, #12418
+- **Paths:** see #12446
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/12304-protect-revised-latex-sources-by-verifyi.md)
+- **Summary:** Harden CI shot-pattern figure restore: strict path charset, symlink/alias/duplicate ZIP member rejection, size caps, atomic non-following writes
+- **Next step:** Shipped in PR #12446.
+
+### DL-#12303 · Batch Matplotlib Face Vertex Gathering to Preserve the 1 ms Frame Update Contract
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12303
+- **Branch:** merged via #12418
+- **PR:** #12418, #12305
+- **Paths:** see #12418
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`e1429bde`; collated from changes/12303-vectorize-matplotlibrenderer-face-gather.md)
+- **Summary:** Batch Matplotlib face vertex gathering to preserve the 1 ms frame update contract
+- **Next step:** Shipped in PR #12418.
+
+### DL-#12300 · Scale Native Hand Masses With Subject Mass When Match_Subject_Mass Is Enabled and Document Reference Capture Hand Mass Policy
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12300
+- **Branch:** merged via #12486
+- **PR:** #12486
+- **Paths:** see #12486
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`67fd3188`; collated from changes/12300-scale-native-hand-masses-with-subject-ma.md)
+- **Summary:** Scale native hand masses with subject mass when match_subject_mass is enabled and document reference capture hand mass policy
+- **Next step:** Shipped in PR #12486.
+
+### DL-#12286 · Realtime Soak Nightly Skips Cleanly Unless SOAK_RUNNER_AVAILABLE Is True
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12286
+- **Branch:** merged via #12298
+- **PR:** #12298
+- **Paths:** see #12298
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`944d798e`; collated from changes/12286-realtime-soak-nightly-skips-cleanly-unle.md)
+- **Summary:** Realtime soak nightly skips cleanly unless SOAK_RUNNER_AVAILABLE is true
+- **Next step:** Shipped in PR #12298.
+
+### DL-#12285 · Cross-Engine Equivalence Keeps One Running Plus the Newest Pending Main Run Instead of Queuing One per Push
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12285
+- **Branch:** merged via #12296
+- **PR:** #12296
+- **Paths:** see #12296
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`06804d56`; collated from changes/12285-cross-engine-equivalence-keeps-one-runni.md)
+- **Summary:** Cross-Engine Equivalence keeps one running plus the newest pending main run instead of queuing one per push
+- **Next step:** Shipped in PR #12296.
+
+### DL-#12279 · Add Explicit Effort Hold Rate Manifest Policy for Same-Input Bundles and Document 0.125 ms ZOH Findings
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12279
+- **Branch:** merged via #12502
+- **PR:** #12502
+- **Paths:** see #12502
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`07619775`; collated from changes/12279-add-explicit-effort-hold-rate-manifest-p.md)
+- **Summary:** Add explicit effort hold rate manifest policy for same-input bundles and document 0.125 ms ZOH findings
+- **Next step:** Shipped in PR #12502.
+
+### DL-#12272 · Record OpenSim Bushing Grip Ball-Impact Transient Bounds Decision 21 in DESIGN_DECISIONS_2.md
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12272
+- **Branch:** merged via #12500
+- **PR:** #12500
+- **Paths:** see #12500
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`e8acf52b`; collated from changes/12272-record-bushing-impact-transient-bounds.md)
+- **Summary:** Record OpenSim bushing grip ball-impact transient bounds decision 21 in DESIGN_DECISIONS_2.md
+- **Next step:** Shipped in PR #12500.
+
+### DL-#12267 · Retire the Drifted In-Tree Movement Optimizer Copy; the Legacy Src.Shared.Python.Movement_Optimizer Spelling Now Binds to the Pinned Tools Package With a DeprecationWarning, and the Maturin Parity Gate Builds the Pinned Crate.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12267
+- **Branch:** merged via #12268
+- **PR:** #12268
+- **Paths:** see #12268
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ceffab6c`; collated from changes/12267-retire-the-drifted-in-tree-movement-opti.md)
+- **Summary:** Retire the drifted in-tree Movement Optimizer copy; the legacy src.shared.python.movement_optimizer spelling now binds to the pinned Tools package with a DeprecationWarning, and the maturin parity gate builds the pinned crate.
+- **Next step:** Shipped in PR #12268.
+
+### DL-#12224 · CI: Heavy Cross-Engine Equivalence, Optional-Stack and PR Leaderboard-Artifact Lanes Run Nightly, on Dispatch or on the Ci:Full PR Label Instead of Every PR Push; Non-PR Cross-Engine Runs Are Never Cancelled and a Nightly Failure Files an Issue
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12224
+- **Branch:** merged via #12226
+- **PR:** #12226
+- **Paths:** see #12226
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`d54e57c3`; collated from changes/12224-ci-heavy-cross-engine-equivalence-option.md)
+- **Summary:** CI: heavy cross-engine equivalence, optional-stack and PR leaderboard-artifact lanes run nightly, on dispatch or on the ci:full PR label instead of every PR push; non-PR cross-engine runs are never cancelled and a nightly failure files an issue
+- **Next step:** Shipped in PR #12226.
+
+### DL-#12217 · Design Manual Index Integrity: Restore Lost Chapter 50, Include Orphaned Chapter 31, Drop Three Duplicate Includes, Renumber OpenSim Geometry Chapter 26 to 60, and Add a Ratchet Test Against New Collisions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12217
+- **Branch:** merged via #12293
+- **PR:** #12293
+- **Paths:** see #12293
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`40c319d0`; collated from changes/12217-design-manual-index-integrity-restore-lo.md)
+- **Summary:** Design manual index integrity: restore lost chapter 50, include orphaned chapter 31, drop three duplicate includes, renumber OpenSim geometry chapter 26 to 60, and add a ratchet test against new collisions
+- **Next step:** Shipped in PR #12293.
+
+### DL-#12204 · Real-Engine Tests Skip on Conftest MagicMock Engines Through One Shared Tests.Support.Real_Engines.Real_Module Helper
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12204
+- **Branch:** merged via #12295
+- **PR:** #12295
+- **Paths:** see #12295
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`522260f6`; collated from changes/12204-real-engine-tests-skip-on-conftest-magic.md)
+- **Summary:** Real-engine tests skip on conftest MagicMock engines through one shared tests.support.real_engines.real_module helper
+- **Next step:** Shipped in PR #12295.
+
+### DL-#12199 · Character Builder Mass_kg Now Sets the Compiled Body Mass: The Rajagopal Legs Scale to Carry What the Upper Body Does Not.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12199
+- **Branch:** merged via #12301
+- **PR:** #12301
+- **Paths:** see #12301
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`f0408393`; collated from changes/12199-character-builder-mass-kg-now-sets-the-c.md)
+- **Summary:** Character Builder mass_kg now sets the compiled body mass: the Rajagopal legs scale to carry what the upper body does not.
+- **Next step:** Shipped in PR #12301.
+
+### DL-#12187 · Preserve Canonical Ground-Support Numerical Receipt Bytes Through Formatting Hooks
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12187
+- **Branch:** fix/f10-inertia-principal-moments-12183
+- **PR:** #12163
+- **Paths:** .prettierignore, docs/development/full_body_models/HANDOFF.md
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5e5757ef`; collated from changes/12187-canonical-receipt-formatting.md)
+- **Summary:** Preserve canonical ground-support numerical receipt bytes through formatting hooks
+- **Next step:** Shipped in PR #12163.
+
+### DL-#12183 · Reject Impossible Rotated Inertia Tensors and Scale-Masked Asymmetry
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12183
+- **Branch:** fix/f10-inertia-principal-moments-12183
+- **PR:** #12188
+- **Paths:** src/shared/python/estimation/dime_global_calibration.py, manuals/upstreamdrift/chapters/51-physical-inertia-validation.qmd
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`c30934fc`; collated from changes/12183-physical-inertia-principal-moments.md)
+- **Summary:** Reject impossible rotated inertia tensors and scale-masked asymmetry
+- **Next step:** Shipped in PR #12188.
+
+### DL-#12182 · Re-Land the Exact 557-Muscle Diagnostic Replay Profile (Native_Exact_557_Profile, V3 Opt-In) That Stack Consolidation Dropped From Main
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12182
+- **Branch:** merged via #12361
+- **PR:** #12361
+- **Paths:** see #12361
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`f66a30ad`; collated from changes/12182-re-land-the-exact-557-muscle-diagnostic.md)
+- **Summary:** Re-land the exact 557-muscle diagnostic replay profile (native_exact_557_profile, v3 opt-in) that stack consolidation dropped from main
+- **Next step:** Shipped in PR #12361.
+
+### DL-#12177 · Use the Src.Shared.Python Prefix for Ud-Canonical Model_Generation/Humanoid_Character_Builder Self-Imports so the Drake Path Works Without PYTHONPATH=Src
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12177
+- **Branch:** merged via #12179
+- **PR:** #12179
+- **Paths:** see #12179
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5bb9f688`; collated from changes/12177-use-the-src-shared-python-prefix-for-ud.md)
+- **Summary:** Use the src.shared.python prefix for ud-canonical model_generation/humanoid_character_builder self-imports so the Drake path works without PYTHONPATH=src
+- **Next step:** Shipped in PR #12179.
+
+### DL-#12169 · Pin the Paired-Figure Renderer Protocol Precondition: Protocol_Id-Only References Raise ValueError Before Any I/O or Figure Allocation for Every Selectable Kind
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12169
+- **Branch:** merged via #12447
+- **PR:** #12447, #12418
+- **Paths:** see #12447
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/12169-reject-missing-pair-protocols-before-ren.md)
+- **Summary:** Pin the paired-figure renderer protocol precondition: protocol_id-only references raise ValueError before any I/O or figure allocation for every selectable kind
+- **Next step:** Shipped in PR #12447.
+
+### DL-#12161 · Guard Partial BUET Abdominal Zero-Translation Reduction With Native Source and State Verification.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12161
+- **Branch:** merged via #12171
+- **PR:** #12171
+- **Paths:** see #12171
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`f192ead7`; collated from changes/12161-native-abdominal-reduction.md)
+- **Summary:** Guard partial BUET abdominal zero-translation reduction with native source and state verification.
+- **Next step:** Shipped in PR #12171.
+
+### DL-#12157 · Compose Exact BUET Upper and Hamner Distal Native OpenSim Sources With Fresh-Reload Sampled Mechanical Checks
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12157
+- **Branch:** feat/f07-buet-hamner-assembly-12157
+- **PR:** #12165
+- **Paths:** src/engines/physics_engines/opensim/python/native_buet_hamner_assembly.py, manuals/upstreamdrift/chapters/44-native-buet-hamner-assembly.qmd
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`fa7ee92f`; collated from changes/12157-native-buet-hamner-assembly.md)
+- **Summary:** Compose exact BUET upper and Hamner distal native OpenSim sources with fresh-reload sampled mechanical checks
+- **Next step:** Shipped in PR #12165.
+
+### DL-#12151 · Add Assistance-Explicit OpenSim Scalar Replay With Native Force and Work Accounting
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12151
+- **Branch:** merged via #12152
+- **PR:** #12152
+- **Paths:** see #12152
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5482cf8c`; collated from changes/12151-opensim-mixed-actuation-replay.md)
+- **Summary:** Add assistance-explicit OpenSim scalar replay with native force and work accounting
+- **Next step:** Shipped in PR #12152.
+
+### DL-#12150 · Add a Source-Bound Native Zero-MTP Reduction With Exact Rajagopal and Scaled-Club Mechanical Checks
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12150
+- **Branch:** feat/f07-rajagopal-mtp-reduction-12150
+- **PR:** #12153
+- **Paths:** src/engines/physics_engines/opensim/python/native_mtp_reduction.py, manuals/upstreamdrift/chapters/43-native-zero-mtp-reduction.qmd
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`9df5191b`; collated from changes/12150-native-zero-mtp-reduction.md)
+- **Summary:** Add a source-bound native zero-MTP reduction with exact Rajagopal and scaled-club mechanical checks
+- **Next step:** Shipped in PR #12153.
+
+### DL-#12147 · Link Assistance-Explicit Moco Controls to Independent Native Replay
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12147
+- **Branch:** merged via #12163
+- **PR:** #12163
+- **Paths:** see #12163
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5e5757ef`; collated from changes/12147-link-mixed-moco-to-native-replay.md)
+- **Summary:** Link Assistance-Explicit Moco Controls to Independent Native Replay
+- **Next step:** Shipped in PR #12163.
+
+### DL-#12139 · Prove Paired-Figure Stems Are Unique and Unchanged Over the Saved 384-Comparison Inventory and Cover Full-Precision Target, Delimiter and Fractional-Label Collision Cases
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12139
+- **Branch:** merged via #12447
+- **PR:** #12447, #12418
+- **Paths:** see #12447
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/12139-shot-pattern-protocol-figure-identity.md)
+- **Summary:** Prove paired-figure stems are unique and unchanged over the saved 384-comparison inventory and cover full-precision target, delimiter and fractional-label collision cases
+- **Next step:** Shipped in PR #12447.
+
+### DL-#12137 · Fix 11 Motion-Matching Unit Failures: DrakeFullBodyIK Reads Spec Offset_m and Keeps Every Spec-Referenced Body in Pose_Fn; Event-Alignment and Drake Fit Tests Repointed to the Current Reader and Dispatch Seams
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12137
+- **Branch:** merged via #12138
+- **PR:** #12138
+- **Paths:** see #12138
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`fa5eef0e`; collated from changes/12137-fix-11-motion-matching-unit-failures-dra.md)
+- **Summary:** Fix 11 motion-matching unit failures: DrakeFullBodyIK reads spec offset_m and keeps every spec-referenced body in pose_fn; event-alignment and Drake fit tests repointed to the current reader and dispatch seams
+- **Next step:** Shipped in PR #12138.
+
+### DL-#12109 · Hip Rewrite Uses the Spec's Own Pelvis Alignment; Anthro Hips No Longer Start 24-66 Deg Yawed, Hip_Rotation Leaves Its +-40 Deg Limits and Both Feet Meet the 2 Deg Toe-Out Target at Address
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12109
+- **Branch:** merged via #12145
+- **PR:** #12145
+- **Paths:** see #12145
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`3a63d61c`; collated from changes/12109-hip-rewrite-uses-the-spec-s-own-pelvis-a.md)
+- **Summary:** Hip rewrite uses the spec's own pelvis alignment; anthro hips no longer start 24-66 deg yawed, hip_rotation leaves its +-40 deg limits and both feet meet the 2 deg toe-out target at address
+- **Next step:** Shipped in PR #12145.
+
+### DL-#12073 · LIFT-1 Drake Pack-Audit Adapter Reports Segment Inertia About the COM, Not Bo; Regenerate Parity Baseline
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12073
+- **Branch:** merged via #12105
+- **PR:** #12105
+- **Paths:** see #12105
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`2dc710d2`; collated from changes/12073-lift-1-drake-pack-audit-adapter-reports.md)
+- **Summary:** LIFT-1 Drake pack-audit adapter reports segment inertia about the COM, not Bo; regenerate parity baseline
+- **Next step:** Shipped in PR #12105.
+
+### DL-#12065 · Add Shared Ezc3d Import Guard That Diagnoses the OpenSim/Ezc3d DLL Conflict With an Explicit NativeDllConflictError and Process-Boundary Guidance
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12065
+- **Branch:** merged via #12350
+- **PR:** #12350, #12454, #12437, #12451, #12470, #12499, #12475, #12365, #12482
+- **Paths:** see #12350
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`b2d8af8a`; collated from changes/12065-route-the-remaining-test-side-opensim-im.md)
+- **Summary:** Add shared ezc3d import guard that diagnoses the OpenSim/ezc3d DLL conflict with an explicit NativeDllConflictError and process-boundary guidance
+- **Next step:** Shipped in PR #12350.
+
+### DL-#12060 · Restore Shared Native Feedback Admission After Platform Integration
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12060
+- **Branch:** merged via #12141
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/12060-native-feedback-platform-integration.md)
+- **Summary:** Restore shared native feedback admission after platform integration
+- **Next step:** Shipped in PR #12141.
+
+### DL-#12057 · Right Knee Flexes Negative Like the Left (Spec Builder + Committed Specs); Canonical Ground-Support Receipts Regenerated: Calibrated IK Improves, Dynamics Replay Regresses (#12110), Trail Toe-Out Misses 2 Deg (#12109)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12057
+- **Branch:** merged via #12113
+- **PR:** #12113
+- **Paths:** see #12113
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`d2070536`; collated from changes/12057-right-knee-flexes-negative-like-the-left.md)
+- **Summary:** Right knee flexes negative like the left (spec builder + committed specs); canonical ground-support receipts regenerated: calibrated IK improves, dynamics replay regresses (#12110), trail toe-out misses 2 deg (#12109)
+- **Next step:** Shipped in PR #12113.
+
+### DL-#12055 · Native Prediction Verifies Complete Live/Source/Model/Handle/Callback Identity After Bundle Preparation Before Stepping, Closing a Late Handle-Mutation Gap, and the Execution Validator Reuses That Verification, Cutting Repeated Library-Byte Reads by 25 Percent in Controlled Short Native Fixtures; Full Matching and Parity Acceptance Remain Open
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12055
+- **Branch:** merged via #12141
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/12055-prediction-integrity-boundaries.md)
+- **Summary:** Native prediction verifies complete live/source/model/handle/callback identity after bundle preparation before stepping, closing a late handle-mutation gap, and the execution validator reuses that verification, cutting repeated library-byte reads by 25 percent in controlled short native fixtures; full matching and parity acceptance remain open
+- **Next step:** Shipped in PR #12141.
+
+### DL-#12046 · Move the Expired Realtime Shadow-Ledger Entry to #12046 With a 30-Day Sunset to Unblock the Merge Queue
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12046
+- **Branch:** merged via #12048
+- **PR:** #12048
+- **Paths:** see #12048
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`d50b9317`; collated from changes/12046-move-the-expired-realtime-shadow-ledger.md)
+- **Summary:** Move the expired realtime shadow-ledger entry to #12046 with a 30-day sunset to unblock the merge queue
+- **Next step:** Shipped in PR #12048.
+
+### DL-#12044 · Integrate Admitted Tools/Private Replay Contracts Into Native Command Solving
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12044
+- **Branch:** merged via #12141
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/12044-native-tools-integration.md)
+- **Summary:** Integrate admitted Tools/private replay contracts into native command solving
+- **Next step:** Shipped in PR #12141.
+
+### DL-#12042 · Commit the Golf_Humanoid and Golf_Humanoid_Scaled 7-Iron MSK Grip Calibrations, so the OpenSim MSK Retarget and Render Run for the 7-Iron
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12042
+- **Branch:** merged via #12248
+- **PR:** #12248, #12108, #12145, #12078, #12116, #12166, #12247
+- **Paths:** see #12248
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`8ed0f40a`; collated from changes/12042-the-osv-9-msk-club-render-can-track-with.md)
+- **Summary:** Commit the golf_humanoid and golf_humanoid_scaled 7-iron MSK grip calibrations, so the OpenSim MSK retarget and render run for the 7-iron
+- **Next step:** Shipped in PR #12248.
+
+### DL-#12036 · Connect Native Tracking to Shared Bounded Command Search With Independently Replayed Fallback and Guarded Promotion.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12036
+- **Branch:** merged via #12141
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/12036-native-command-solve.md)
+- **Summary:** Connect native tracking to shared bounded command search with independently replayed fallback and guarded promotion.
+- **Next step:** Shipped in PR #12141.
+
+### DL-#12018 · Keep F09 Replay Contracts on One Private Tools Module Identity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12018
+- **Branch:** merged via #12141
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/12018-f09-private-tools-contract-consumers.md)
+- **Summary:** Keep F09 replay contracts on one private Tools module identity
+- **Next step:** Shipped in PR #12141.
+
+### DL-#12016 · Align Tools Dependency Pins to Merged Main
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12016
+- **Branch:** merged via #12141
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/12016-align-tools-dependency-pins-to-merged-ma.md)
+- **Summary:** Align Tools dependency pins to merged main
+- **Next step:** Shipped in PR #12141.
+
+### DL-#12013 · Parity Harness Records the Producing Engine of Each Baseline and Rejects a MuJoCo-Produced Baseline Labelled Simscape (Fail-Closed); Real Simscape Regeneration Remains Deferred
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12013
+- **Branch:** merged via #12349
+- **PR:** #12349
+- **Paths:** see #12349
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`4bca4ce7`; collated from changes/12013-parity-harness-records-the-producing-eng.md)
+- **Summary:** Parity harness records the producing engine of each baseline and rejects a MuJoCo-produced baseline labelled Simscape (fail-closed); real Simscape regeneration remains deferred
+- **Next step:** Shipped in PR #12349.
+
+### DL-#12006 · Fix Reversed Toe/Heel Sign in Legacy Compute_Gear_Effect_Spin; Toe Now Curves Left (Draw) for Right-Handed +X Shots
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12006
+- **Branch:** merged via #12346
+- **PR:** #12346
+- **Paths:** see #12346
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`e4b3dfea`; collated from changes/12006-fix-reversed-toe-heel-sign-in-legacy-com.md)
+- **Summary:** Fix reversed toe/heel sign in legacy compute_gear_effect_spin; toe now curves left (draw) for right-handed +X shots
+- **Next step:** Shipped in PR #12346.
+
+### DL-#11997 · MyoSuite Native Export Worker No Longer Imports the Removed Myosuite.Envs.Env_Base: It Builds a Raw Mujoco Model, Takes MJRenderer Through Myosuite_Compat (3.X Then 2.X), and Unavailable_Reason() Probes That Same Import
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11997
+- **Branch:** merged via #12348
+- **PR:** #12348, #12140
+- **Paths:** see #12348
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`e68baeab`; collated from changes/11997-myosuite-native-export-worker-supports-m.md)
+- **Summary:** MyoSuite native export worker no longer imports the removed myosuite.envs.env_base: it builds a raw mujoco model, takes MJRenderer through myosuite_compat (3.x then 2.x), and unavailable_reason() probes that same import
+- **Next step:** Shipped in PR #12348.
+
+### DL-#11995 · Authenticate Physics API Endpoint Tests via Scoped Dependency Override and Add Explicit 401 Contract Coverage
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11995
+- **Branch:** merged via #12321
+- **PR:** #12321
+- **Paths:** see #12321
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`7e14eeeb`; collated from changes/11995-authenticate-physics-api-endpoint-tests.md)
+- **Summary:** Authenticate physics API endpoint tests via scoped dependency override and add explicit 401 contract coverage
+- **Next step:** Shipped in PR #12321.
+
+### DL-#11994 · Load the Pinned Tools Mocap Package Under a Private Name so Native Torque Replay No Longer Grafts It Onto Sidekick.Lab, Fixing the Order-Dependent Vendored-Fallback Test
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11994
+- **Branch:** merged via #12002
+- **PR:** #12002
+- **Paths:** see #12002
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`d3b2da07`; collated from changes/11994-load-the-pinned-tools-mocap-package-unde.md)
+- **Summary:** Load the pinned Tools mocap package under a private name so native torque replay no longer grafts it onto sidekick.lab, fixing the order-dependent vendored-fallback test
+- **Next step:** Shipped in PR #12002.
+
+### DL-#11990 · Materialize a Source-Bound Numerical Moco Guess on the Frozen Observation Clock and Reject Incomplete Native Guess State Tables.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11990
+- **Branch:** merged via #12141
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11990-native-moco-numerical-guess.md)
+- **Summary:** Materialize a source-bound numerical Moco guess on the frozen observation clock and reject incomplete native guess state tables.
+- **Next step:** Shipped in PR #12141.
+
+### DL-#11987 · Add LaunchMonitorReportsPanel and V2 Report/Export API Client Functions for Web Parity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11987
+- **Branch:** merged via #12479
+- **PR:** #12479, #12508, #12076, #12130, #12155, #12168, #12063, #12001, #12061, #12112, #12028, #12037, #12118, #12019, #12072, #12054, #12140, #12079, #12008, #12106, #12025, #12469
+- **Paths:** see #12479
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`a2e56098`; collated from changes/11987-wire-matchedswings-native-viewer-handoff.md)
+- **Summary:** Add LaunchMonitorReportsPanel and v2 report/export API client functions for web parity
+- **Next step:** Shipped in PR #12479.
+
+### DL-#11986 · Explain the 4X Per-Hand Contact-Grip Force: Input Drift Is Zero, Internal Force Is a Hyperstatic Ring Redundant (Diagnostics and Evidence)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11986
+- **Branch:** merged via #12022
+- **PR:** #12022
+- **Paths:** see #12022
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`43385ba6`; collated from changes/11986-explain-the-4x-per-hand-contact-grip-for.md)
+- **Summary:** Explain the 4x per-hand contact-grip force: input drift is zero, internal force is a hyperstatic ring redundant (diagnostics and evidence)
+- **Next step:** Shipped in PR #12022.
+
+### DL-#11982 · Reconcile Twelve Stale Feature-Parity Gap Entries That Cited Ten Closed Issues: Eight Flipped to Parity With Verified Api/Web Paths, Frankenstein Canvas Re-Pointed to Epic #11651, Three Real Web Gaps Re-Pointed to New Tracker #11987
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11982
+- **Branch:** merged via #11981
+- **PR:** #11981
+- **Paths:** see #11981
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`c2952e1d`; collated from changes/11982-reconcile-ten-stale-feature-parity-gap-e.md)
+- **Summary:** Reconcile twelve stale feature-parity gap entries that cited ten closed issues: eight flipped to parity with verified api/web paths, frankenstein canvas re-pointed to epic #11651, three real web gaps re-pointed to new tracker #11987
+- **Next step:** Shipped in PR #11981.
+
+### DL-#11968 · Native Offline Muscle Matching Runner
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #11968
+- **Branch:** feat/f07-native-offline-matching-11968
+- **PR:** #12141
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11968-native-offline-moco-runner.md)
+- **Summary:** Add file-driven native OpenSim Moco preparation, exact-knot excitation export, independent replay and masked scoring
+- **Next step:** Shipped in PR #12141.
+
+### DL-#11958 · Add an Activation-Aware Native Floating-Root Manifold and Complete-State Command Replay Boundary.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11958
+- **Branch:** feat/f05e-activation-manifold-11958
+- **PR:** #11816
+- **Paths:** see #11816
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`1fe02740`; collated from changes/11958-native-activation-manifold.md)
+- **Summary:** Add an activation-aware native floating-root manifold and complete-state command replay boundary.
+- **Next step:** Shipped in PR #11816.
+
+### DL-#11952 · Exercise Bounded F04 Feedback Tuning and Paired Motor Interventions on a Native Floating-Root Fixture.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11952
+- **Branch:** feat/f04-native-coupling-11788
+- **PR:** #11816
+- **Paths:** see #11816
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`1fe02740`; collated from changes/11952-native-coupling.md)
+- **Summary:** Exercise bounded F04 feedback tuning and paired motor interventions on a native floating-root fixture.
+- **Next step:** Shipped in PR #11816.
+
+### DL-#11948 · Fit Exact-Clock Masked Native Site Markers With Bounded Manifold Control and Complete-State Replay.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11948
+- **Branch:** feat/f03-native-marker-fit-11787
+- **PR:** #11816
+- **Paths:** see #11816
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`1fe02740`; collated from changes/11948-native-marker-fit.md)
+- **Summary:** Fit exact-clock masked native site markers with bounded manifold control and complete-state replay.
+- **Next step:** Shipped in PR #11816.
+
+### DL-#11946 · Connect F02 Feedback to Native Floating-Root Manifold State and Independently Replay Post-Limit Torques.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11946
+- **Branch:** feat/f02-native-manifold-11946
+- **PR:** #11816
+- **Paths:** see #11816
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`1fe02740`; collated from changes/11946-native-manifold-feedback.md)
+- **Summary:** Connect F02 feedback to native floating-root manifold state and independently replay post-limit torques.
+- **Next step:** Shipped in PR #11816.
+
+### DL-#11945 · Label the MyoSuite Inventory MJCF Compile Probe as Bare MuJoCo Evidence and Reject It as Gym-Provider Availability
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11945
+- **Branch:** merged via #12360
+- **PR:** #12360
+- **Paths:** see #12360
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ba57e270`; collated from changes/11945-label-the-myosuite-inventory-mjcf-compil.md)
+- **Summary:** Label the MyoSuite inventory MJCF compile probe as bare MuJoCo evidence and reject it as Gym-provider availability
+- **Next step:** Shipped in PR #12360.
+
+### DL-#11940 · Regenerate Stale Articulated-Ground Post-Hoc Sensitivity Provenance (Atlas SHA256) With Its Generator; Add Regenerate-Equality Test
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11940
+- **Branch:** merged via #12323
+- **PR:** #12323
+- **Paths:** see #12323
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`439ee710`; collated from changes/11940-regenerate-stale-articulated-ground-post.md)
+- **Summary:** Regenerate stale articulated-ground post-hoc sensitivity provenance (atlas SHA256) with its generator; add regenerate-equality test
+- **Next step:** Shipped in PR #12323.
+
+### DL-#11934 · Fix(Drake): Prevent Offscreen Widget Abort During Induced Source Combo Clear
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11934
+- **Branch:** merged via #12441
+- **PR:** #12441
+- **Paths:** see #12441
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`54121413`; collated from changes/11934-fix-drake-prevent-offscreen-widget-abort.md)
+- **Summary:** fix(drake): prevent offscreen widget abort during induced source combo clear
+- **Next step:** Shipped in PR #12441.
+
+### DL-#11932 · Add a Bounded Native Multi-DOF Manifold BoxFDDP Candidate With Complete-State Torque Replay and a Matched SciPy Comparison.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11932
+- **Branch:** feat/f05d-multidof-boxfddp-11932
+- **PR:** #11816
+- **Paths:** see #11816
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`1fe02740`; collated from changes/11932-native-multidof-box-fddp.md)
+- **Summary:** Add a bounded native multi-DOF manifold BoxFDDP candidate with complete-state torque replay and a matched SciPy comparison.
+- **Next step:** Shipped in PR #11816.
+
+### DL-#11920 · Add a Strict Floating-Root, Two-Hinge Native MuJoCo Tangent-Derivative Fixture With Ordered Bounded Motors, Quaternion-Aware Finite-Difference Checks and Independent Full-State Replay of Frozen ZOH Torques, Recording Source-Hashed Supported-Provider Timing; Optimal-Control, Contact, Muscle and Capture Qualification Remain Open
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11920
+- **Branch:** merged via #11816
+- **PR:** #11816
+- **Paths:** see #11816
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`1fe02740`; collated from changes/11920-native-manifold-derivative-replay.md)
+- **Summary:** Add a strict floating-root, two-hinge native MuJoCo tangent-derivative fixture with ordered bounded motors, quaternion-aware finite-difference checks and independent full-state replay of frozen ZOH torques, recording source-hashed supported-provider timing; optimal-control, contact, muscle and capture qualification remain open
+- **Next step:** Shipped in PR #11816.
+
+### DL-#11918 · Add an F09 Native MyoSuite Muscle-Excitation Consumer for Versioned T01 Bundles That Applies Exact Normalized Excitation Directly to Native MuJoCo Controls With Full State Restore and Strict Provider/Model Identity, and Share Wrapper-State Capture and Restoration in One Chain-Walk Implementation; the Elbow Fixture Remains Test-Only and the Six-Engine Parity Denominator Stays Unqualified
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11918
+- **Branch:** merged via #12141
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11918-f09f-myosuite-native-excitation.md)
+- **Summary:** Add an F09 native MyoSuite muscle-excitation consumer for versioned T01 bundles that applies exact normalized excitation directly to native MuJoCo controls with full state restore and strict provider/model identity, and share wrapper-state capture and restoration in one chain-walk implementation; the elbow fixture remains test-only and the six-engine parity denominator stays unqualified
+- **Next step:** Shipped in PR #12141.
+
+### DL-#11914 · F09e Adds Pinocchio Native Replay Outputs to the F09 Marker Forward-Kinematics Path Using the Actual Full-State Q/V Trajectory and Explicit Frame-Local Offsets, Preserving All Registered Rows and Six Required Engines; Native Receipts Remain Unqualified and MyoSuite, OpenSim and Simscape Gaps Stay Visible
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11914
+- **Branch:** merged via #12141
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11914-f09e-pinocchio-marker-fk.md)
+- **Summary:** F09e adds Pinocchio native replay outputs to the F09 marker forward-kinematics path using the actual full-state q/v trajectory and explicit frame-local offsets, preserving all registered rows and six required engines; native receipts remain unqualified and MyoSuite, OpenSim and Simscape gaps stay visible
+- **Next step:** Shipped in PR #12141.
+
+### DL-#11910 · Add a Strict Native RK4 One-Hinge BoxFDDP Candidate With Verified Discrete Derivatives, Loaded-Model Identity, Bounded Post-Solve Admission and Fail-Closed Fallback, Compared With SciPy Shooting on Predeclared Supported-MuJoCo Trials Using Exact Applied-Torque Replay and Total Measured Time; F05 Full-Body and Capture Qualification Remain Open
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11910
+- **Branch:** merged via #11816
+- **PR:** #11816
+- **Paths:** see #11816
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`1fe02740`; collated from changes/11910-native-box-fddp-derivative-candidate.md)
+- **Summary:** Add a strict native RK4 one-hinge BoxFDDP candidate with verified discrete derivatives, loaded-model identity, bounded post-solve admission and fail-closed fallback, compared with SciPy shooting on predeclared supported-MuJoCo trials using exact applied-torque replay and total measured time; F05 full-body and capture qualification remain open
+- **Next step:** Shipped in PR #11816.
+
+### DL-#11907 · Add a Fail-Closed Native Replay to Marker-Position Bridge for MuJoCo and Drake With Explicit Ordered Body/Frame Attachments, Local Offsets, Source/Model/Provider Identities and Output Hashes; Unsupported Engines Stay in the Required Denominator and No Qualification Is Inferred
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11907
+- **Branch:** merged via #12141
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11907-f09d-native-marker-fk.md)
+- **Summary:** Add a fail-closed native replay to marker-position bridge for MuJoCo and Drake with explicit ordered body/frame attachments, local offsets, source/model/provider identities and output hashes; unsupported engines stay in the required denominator and no qualification is inferred
+- **Next step:** Shipped in PR #12141.
+
+### DL-#11904 · Add Bounded Robust Shooting NMPC With Fail-Closed Actuator Fallback, Native MuJoCo Step Execution and Independent Frozen-Torque Replay, Benchmarked Against F02 TVLQR on Two Predeclared Perturbed One-Hinge Trials; TVLQR Is Retained for Native-Step Operation Because the Shooting Prototype Cannot Meet the 10 ms Step Budget, and F05 Full-Swing and Capture Qualification Remain Open
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11904
+- **Branch:** merged via #11816
+- **PR:** #11816
+- **Paths:** see #11816
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`1fe02740`; collated from changes/11904-native-bounded-nmpc.md)
+- **Summary:** Add bounded robust shooting NMPC with fail-closed actuator fallback, native MuJoCo step execution and independent frozen-torque replay, benchmarked against F02 TVLQR on two predeclared perturbed one-hinge trials; TVLQR is retained for native-step operation because the shooting prototype cannot meet the 10 ms step budget, and F05 full-swing and capture qualification remain open
+- **Next step:** Shipped in PR #11816.
+
+### DL-#11899 · Add Frozen Marker Scoring Without Fitting Withheld Observations
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #11899
+- **Branch:** fix/feedback-frozen-holdout-11899
+- **PR:** #11902
+- **Paths:** see #11902
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`009eb282`; collated from changes/11899-frozen-marker-holdout.md)
+- **Summary:** Add frozen marker scoring without fitting withheld observations
+- **Next step:** Review scoped scoring boundary; keep private D02 and full F07/F08 qualification open
+
+### DL-#11898 · Instrument Native Moco Solve Progress and Solver-Stage Identity Without Changing Model, Request, Physics, or Solver Policy
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11898
+- **Branch:** merged via #12318
+- **PR:** #12318, #12269, #12141
+- **Paths:** see #12318
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`9410bb19`; collated from changes/11898-same-input-lazy-exports.md)
+- **Summary:** Instrument native Moco solve progress and solver-stage identity without changing model, request, physics, or solver policy
+- **Next step:** Shipped in PR #12318.
+
+### DL-#11859 · Add Bounded Coupled F02 Loop Tuning, Frozen-Controller Sensitivity and Honest Heldout/Perturbation Reports on a Two-Coordinate Synthetic Forward Plant
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11859
+- **Branch:** merged via #11816
+- **PR:** #11816
+- **Paths:** see #11816
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`1fe02740`; collated from changes/11859-coupled-control-loop-tuning.md)
+- **Summary:** Add bounded coupled F02 loop tuning, frozen-controller sensitivity and honest heldout/perturbation reports on a two-coordinate synthetic forward plant
+- **Next step:** Shipped in PR #11816.
+
+### DL-#11854 · Bind Actual Initial-State Payload Identity in Versioned Independent Replay and Same-Input Comparison Admission; Retain Legacy Identity/Transcription Receipts
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11854
+- **Branch:** merged via #12141
+- **PR:** #12141
+- **Paths:** see #12141
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11854-initial-state-replay-binding.md)
+- **Summary:** Bind actual initial-state payload identity in versioned independent replay and same-input comparison admission; retain legacy identity/transcription receipts
+- **Next step:** Shipped in PR #12141.
+
+### DL-#11847 · Bound Impact Acceptance Claims to the Tested Central-Contact Model
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11847
+- **Branch:** merged via #12357
+- **PR:** #12357
+- **Paths:** see #12357
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`20a661f2`; collated from changes/11847-bound-impact-acceptance-claims-to-the-te.md)
+- **Summary:** Bound impact acceptance claims to the tested central-contact model
+- **Next step:** Shipped in PR #12357.
+
+### DL-#11828 · F01 Docs: Replay Admission Requires Full_Horizon and a Separate Observation_Time_Grid_Sha256 (Contract Repair From PR #12141, Not a Numerical Qualification)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11828
+- **Branch:** merged via #12356
+- **PR:** #12356, #12141
+- **Paths:** see #12356
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec109fa1`; collated from changes/11828-replay-horizon-observation-clock.md)
+- **Summary:** F01 docs: replay admission requires full_horizon and a separate observation_time_grid_sha256 (contract repair from PR #12141, not a numerical qualification)
+- **Next step:** Shipped in PR #12356.
+
+### DL-#11824 · Add a Bounded Native MuJoCo Candidate Benchmark for the Synthetic Rotary Optimal-Control Fixture, With Independent Exact Held-Input Truth, a Fresh F06 Replay, Fail-Closed Torque/Slew and Numerical Gates, and Serial Failure-Retaining Timing and Receipt Evidence
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11824
+- **Branch:** merged via #11816
+- **PR:** #11816
+- **Paths:** see #11816
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`1fe02740`; collated from changes/11824-native-candidate-benchmark.md)
+- **Summary:** Add a bounded native MuJoCo candidate benchmark for the synthetic rotary optimal-control fixture, with independent exact held-input truth, a fresh F06 replay, fail-closed torque/slew and numerical gates, and serial failure-retaining timing and receipt evidence
+- **Next step:** Shipped in PR #11816.
+
+### DL-#11818 · Raise Canonical Golfer Root to 0.98 m so the Feet Rest on the Floor; Regenerate MJCF/Simscape, Update Inventory Hashes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11818
+- **Branch:** merged via #12351
+- **PR:** #12351
+- **Paths:** see #12351
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`e710cd41`; collated from changes/11818-raise-canonical-golfer-root-to-0-98-m-so.md)
+- **Summary:** Raise canonical golfer root to 0.98 m so the feet rest on the floor; regenerate MJCF/Simscape, update inventory hashes
+- **Next step:** Shipped in PR #12351.
+
+### DL-#11811 · Generated MuJoCo Golfer: Segment Geoms Use Contype 2 / Conaffinity 1 so They Touch the Floor (And a Ball) but Never Each Other; Golfer.Xml Regenerated and Its Inventory Hash Updated; the Four-Engine MuJoCo Parity Tests Are Strict-Xfail Because Their 'Simscape' Baseline Is a Rollout of the Self-Colliding MuJoCo Golfer (#12013)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11811
+- **Branch:** merged via #11817
+- **PR:** #11817
+- **Paths:** see #11817
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`924cdc77`; collated from changes/11811-golfer-mjcf-self-collision.md)
+- **Summary:** Generated MuJoCo golfer: segment geoms use contype 2 / conaffinity 1 so they touch the floor (and a ball) but never each other; golfer.xml regenerated and its inventory hash updated; the four-engine MuJoCo parity tests are strict-xfail because their 'Simscape' baseline is a rollout of the self-colliding MuJoCo golfer (#12013)
+- **Next step:** Shipped in PR #11817.
+
+### DL-#11796 · OpenSim FK No Longer Calls the Missing State.isValid Binding; an Uninitialised State Is Rejected by Its Empty Subsystem List
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11796
+- **Branch:** merged via #11833
+- **PR:** #11833
+- **Paths:** see #11833
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`3effe852`; collated from changes/11796-opensim-fk-no-longer-calls-the-missing-s.md)
+- **Summary:** OpenSim FK no longer calls the missing State.isValid binding; an uninitialised state is rejected by its empty subsystem list
+- **Next step:** Shipped in PR #11833.
+
+### DL-#11778 · Simscape Grip Fixture Now Comes From the Qualified Run-102 Replay; Model-Workspace Coefficients Diagnosed as Out of Bounds (Max 1.2E10) and Divergent
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11778
+- **Branch:** merged via #11783
+- **PR:** #11783
+- **Paths:** see #11783
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`44f09127`; collated from changes/11778-simscape-grip-fixture-now-comes-from-the.md)
+- **Summary:** Simscape grip fixture now comes from the qualified run-102 replay; model-workspace coefficients diagnosed as out of bounds (max 1.2e10) and divergent
+- **Next step:** Shipped in PR #11783.
+
+### DL-#11777 · Prettier Ignores the Generated Matched-Swing Ledger and the Budget-Held DESIGN_DECISIONS.md so the Hook No Longer Fights Test_Ledger_Freshness and the Doc Size Budget
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11777
+- **Branch:** merged via #11805
+- **PR:** #11805
+- **Paths:** see #11805
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`8f4a2d73`; collated from changes/11777-prettier-ignores-the-generated-matched-s.md)
+- **Summary:** Prettier ignores the generated matched-swing ledger and the budget-held DESIGN_DECISIONS.md so the hook no longer fights test_ledger_freshness and the doc size budget
+- **Next step:** Shipped in PR #11805.
+
+### DL-#11767 · Clubhead Speed Timing Around Impact
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11767
+- **Branch:** claude/gcv-20-speed-timing
+- **PR:** #12145
+- **Paths:** see #12145
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`3a63d61c`; collated from changes/11767-gcv-20-clubhead-speed-timing.md)
+- **Summary:** GCV-20: ball contact impulse in every replay, release-preserving pre-contact cutoff and grip-weld projection of the tracked reference; peak clubhead-speed timing now within 5 ms of the capture, impact speed still 4-7 % low (strict xfail with measured numbers)
+- **Next step:** Shipped in PR #12145.
+
+### DL-#11759 · Club-Face Orientation Residual in the Shared IK
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11759
+- **Branch:** claude/osv-10-face-roll-refit
+- **PR:** #11772
+- **Paths:** see #11772
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`509c6933`; collated from changes/11759-osv-10-face-roll-refit.md)
+- **Summary:** OSV-10: shared marker IK gains an explicit club-face orientation residual (weight 3) from the capture head triad; club-face fixtures regenerated by script with provenance; each engine's face tracks the capture within 5 degrees at address, top and impact
+- **Next step:** Shipped in PR #11772.
+
+### DL-#11756 · OSV-9: Rajagopal Golf Models and the Muscle Model Hold the Shared Club in Both Hands (Lead Weld + Trail Constraint or Bushings), Calibrated to the Captured Address; Swing Tracking and Offscreen Renders
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11756
+- **Branch:** merged via #11795
+- **PR:** #11795, #12145
+- **Paths:** see #11795
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`3a63d61c`; collated from changes/11756-osv-9-slice-2-tour-matching-variants-rea.md)
+- **Summary:** OSV-9: Rajagopal golf models and the muscle model hold the shared club in both hands (lead weld + trail constraint or bushings), calibrated to the captured address; swing tracking and offscreen renders
+- **Next step:** Shipped in PR #11795.
+
+### DL-#11755 · Square the Clubface at Address in Every Engine: One Shared Head Roll About the Shaft (OSV-8)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11755
+- **Branch:** merged via #11772
+- **PR:** #11772
+- **Paths:** src/shared/python/model_appearance/club_assembly.py
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`509c6933`; collated from changes/11755-square-the-clubface-at-address-in-every.md)
+- **Summary:** Square the clubface at address in every engine: one shared head roll about the shaft (OSV-8)
+- **Next step:** Shipped in PR #11772.
+
+### DL-#11753 · Scrub Capture-System Identifiers From Docs, Research Checkpoints and Exploratory MATLAB Comments per Private Data Policy
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11753
+- **Branch:** merged via #11754
+- **PR:** #11754
+- **Paths:** see #11754
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5275f770`; collated from changes/11753-scrub-capture-system-identifiers.md)
+- **Summary:** Scrub capture-system identifiers from docs, research checkpoints and exploratory MATLAB comments per private data policy
+- **Next step:** Shipped in PR #11754.
+
+### DL-#11751 · Design Manual: LIFT-4 Static-Hold Per-Hand Bar Wrench Section in Chapter 15 and Its Registry Blocker
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11751
+- **Branch:** merged via #12215
+- **PR:** #12215, #11978, #11835, #12010
+- **Paths:** see #12215
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`f781a7e1`; collated from changes/11751-standalone-latex-research-reference-for.md)
+- **Summary:** Design manual: LIFT-4 static-hold per-hand bar wrench section in chapter 15 and its registry blocker
+- **Next step:** Shipped in PR #12215.
+
+### DL-#11748 · PyQt Cross-Engine Lift Baseline Panel in the Exercise Dashboard
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11748
+- **Branch:** merged via #12140
+- **PR:** #12140, #12070, #11971, #12075
+- **Paths:** see #12140
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`bb5ee162`; collated from changes/11748-web-lift-baseline-page-tools-lift-baseli.md)
+- **Summary:** PyQt cross-engine lift baseline panel in the Exercise Dashboard
+- **Next step:** Shipped in PR #12140.
+
+### DL-#11747 · LIFT-7 Slice: Back-Squat GRF Breakdown (Per Foot, Net, CoP, Free Moment) and Per-Hand Grip Wrench Parity Across MuJoCo, Drake, Pinocchio and OpenSim From the LIFT-5 Bundle; KINETICS_PARITY.md Report
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11747
+- **Branch:** merged via #12341
+- **PR:** #12341
+- **Paths:** see #12341
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`e76b1f50`; collated from changes/11747-lift-7-slice-back-squat-grf-breakdown-pe.md)
+- **Summary:** LIFT-7 slice: back-squat GRF breakdown (per foot, net, CoP, free moment) and per-hand grip wrench parity across MuJoCo, Drake, Pinocchio and OpenSim from the LIFT-5 bundle; KINETICS_PARITY.md report
+- **Next step:** Shipped in PR #12341.
+
+### DL-#11744 · LIFT-4: Barbell Held at Both Hands Through the OSV-7 Compliant Bushing on the Back-Squat Same-Input Bundle, With Per-Hand Bushing Wrench, a Recorded Quasi-Static Hold and Four-Engine Parity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11744
+- **Branch:** merged via #12345
+- **PR:** #12345, #12189
+- **Paths:** see #12345
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`7d05b4f1`; collated from changes/11744-lift-4-per-hand-bar-wrench-static-hold-f.md)
+- **Summary:** LIFT-4: barbell held at both hands through the OSV-7 compliant bushing on the back-squat same-input bundle, with per-hand bushing wrench, a recorded quasi-static hold and four-engine parity
+- **Next step:** Shipped in PR #12345.
+
+### DL-#11743 · LIFT-3: Per-Engine and Per-Lift Start-Pose Conformance Checks (Bar, Feet, Closure, Joint Limits, Static GRF) With a Recorded Matrix
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11743
+- **Branch:** merged via #12241
+- **PR:** #12241, #12477, #12498
+- **Paths:** see #12241
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`f995dcd3`; collated from changes/11743-pack-parity-audit-gains-a-phase-names-ga.md)
+- **Summary:** LIFT-3: per-engine and per-lift start-pose conformance checks (bar, feet, closure, joint limits, static GRF) with a recorded matrix
+- **Next step:** Shipped in PR #12241.
+
+### DL-#11741 · Add Lift Model Pack Audit and Cross-Engine Parity Baseline (LIFT-1): Baseline Doc, Receipt, Audit Package, Stills Script
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11741
+- **Branch:** merged via #11771
+- **PR:** #11771
+- **Paths:** see #11771
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`071eb55b`; collated from changes/11741-add-lift-model-pack-audit-and-cross-engi.md)
+- **Summary:** Add lift model pack audit and cross-engine parity baseline (LIFT-1): baseline doc, receipt, audit package, stills script
+- **Next step:** Shipped in PR #11771.
+
+### DL-#11739 · OpenSim Contact Grip (ElasticFoundationForce on Closed Meshes): Driver and 7-Iron Full Swings, Net Force Within 3 Percent of Bushing
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11739
+- **Branch:** merged via #12022
+- **PR:** #12022, #12119, #11774, #11963, #11985, #11772
+- **Paths:** see #12022
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`509c6933`; collated from changes/11739-osv7-bushing-grip.md)
+- **Summary:** OpenSim contact grip (ElasticFoundationForce on closed meshes): driver and 7-iron full swings, net force within 3 percent of bushing
+- **Next step:** Shipped in PR #12022.
+
+### DL-#11730 · OSV-4: Address Foot Progression (Toe-Out) Measured From Markers and Fitted in the Shared Address Seed, Explicit --Foot-Progression Option With Receipt Fields
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11730
+- **Branch:** merged via #11736
+- **PR:** #11736, #12175
+- **Paths:** see #11736
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ee8920e5`; collated from changes/11730-osv-4-final-evidence-per-engine-address.md)
+- **Summary:** OSV-4: address foot progression (toe-out) measured from markers and fitted in the shared address seed, explicit --foot-progression option with receipt fields
+- **Next step:** Shipped in PR #11736.
+
+### DL-#11728 · OSV-2 Item 4: Hand-on-Grip Orientation (Palm Diagonal, Palm Facing) Moves From the OpenSim Calibration Into the Shared Grip_Pose Definition; No Per-Engine Grip Angle
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11728
+- **Branch:** merged via #12439
+- **PR:** #12439, #12145, #12240, #12339
+- **Paths:** see #12439
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`88b2d9eb`; collated from changes/11728-osv-2-slice-2b-both-curled-finger-grip-h.md)
+- **Summary:** OSV-2 item 4: hand-on-grip orientation (palm diagonal, palm facing) moves from the OpenSim calibration into the shared grip_pose definition; no per-engine grip angle
+- **Next step:** Shipped in PR #12439.
+
+### DL-#11727 · Visible Shaft, Grip and Head Meshes in Every Generated OpenSim Model and the Tour-Matching Golf Humanoid
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11727
+- **Branch:** merged via #11772
+- **PR:** #11772
+- **Paths:** see #11772
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`509c6933`; collated from changes/11727-visible-shaft-grip-and-head-meshes-in-ev.md)
+- **Summary:** Visible shaft, grip and head meshes in every generated OpenSim model and the tour-matching golf humanoid
+- **Next step:** Shipped in PR #11772.
+
+### DL-#11725 · Add Scripts/render_forces_showcase.py: Reproducible Owner Showcase Driver (Clean, Club Forces, GRF Clips) Over Native_Viewer_Export, With Manifest and Smoke Test
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11725
+- **Branch:** merged via #12237
+- **PR:** #12237, #12287, #12292, #12312
+- **Paths:** see #12237
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`3e683941`; collated from changes/11725-gcv-19-myosuite-evidence.md)
+- **Summary:** Add scripts/render_forces_showcase.py: reproducible owner showcase driver (clean, club forces, GRF clips) over native_viewer_export, with manifest and smoke test
+- **Next step:** Shipped in PR #12237.
+
+### DL-#11724 · GCV-18 Slice 1: Provisional Design-Manual Chapter and Registry Blocker for the GCV-1 Ground-Reaction Breakdown; User Manual 12.4/12.7 Corrected (CoP and Free-Moment Equations, Metrics Not Computed)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11724
+- **Branch:** merged via #11782
+- **PR:** #11782, #11801, #11803, #11804
+- **Paths:** see #11782
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`d2d0e1c4`; collated from changes/11724-gcv-18-slice-4-adr-0052-grip-derived-lab.md)
+- **Summary:** GCV-18 slice 1: provisional design-manual chapter and registry blocker for the GCV-1 ground-reaction breakdown; user manual 12.4/12.7 corrected (CoP and free-moment equations, metrics not computed)
+- **Next step:** Shipped in PR #11782.
+
+### DL-#11723 · Impact Parameters Panel: API Route, PyQt Dock and Web Panel With Parity Registration (GCV-17)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11723
+- **Branch:** merged via #11772
+- **PR:** #11772
+- **Paths:** see #11772
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`509c6933`; collated from changes/11723-impact-parameters-panel-api-route-pyqt-d.md)
+- **Summary:** Impact parameters panel: API route, PyQt dock and web panel with parity registration (GCV-17)
+- **Next step:** Shipped in PR #11772.
+
+### DL-#11722 · ClubheadSeries Adapters for MuJoCo, MyoSuite, Drake, Pinocchio, OpenSim and Simscape With Cross-Engine Parity (GCV-16)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11722
+- **Branch:** merged via #11772
+- **PR:** #11772, #11970
+- **Paths:** see #11772
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`c15a386b`; collated from changes/11722-run-the-gcv-16-clubhead-series-adapter-a.md)
+- **Summary:** ClubheadSeries adapters for MuJoCo, MyoSuite, Drake, Pinocchio, OpenSim and Simscape with cross-engine parity (GCV-16)
+- **Next step:** Shipped in PR #11772.
+
+### DL-#11721 · GCV-15: Add Impact_Parameters Package (Speed, AoA, Path, Face, Face-to-Path, Dynamic/Spin Loft, Low Point) With Fail-Closed Tools Delivery Gateway
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11721
+- **Branch:** merged via #11735
+- **PR:** #11735, #11861
+- **Paths:** see #11735
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`18123597`; collated from changes/11721-gcv-15-engine-free-adapter-contract-test.md)
+- **Summary:** GCV-15: add impact_parameters package (speed, AoA, path, face, face-to-path, dynamic/spin loft, low point) with fail-closed Tools delivery gateway
+- **Next step:** Shipped in PR #11735.
+
+### DL-#11720 · GCV-14: Full-, Half- and Quarter-Speed (1X, 0.5X, 0.25X at 60 Fps) Are Now the Default Native Export Variants, and Motion_Matching.Export.Export_Video_Variants Writes the Same Three Clips for Any Engine
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11720
+- **Branch:** merged via #12026
+- **PR:** #12026, #11734, #12124, #12004, #12043, #12133
+- **Paths:** see #12026
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`eeefefbc`; collated from changes/11720-playbacktiming-groups-render-playback-ti.md)
+- **Summary:** GCV-14: full-, half- and quarter-speed (1x, 0.5x, 0.25x at 60 fps) are now the default native export variants, and motion_matching.export.export_video_variants writes the same three clips for any engine
+- **Next step:** Shipped in PR #12026.
+
+### DL-#11718 · GCV-12: Visible Parametric Head, Face and Neck on the Spec Head Body in MuJoCo, Drake, Pinocchio, MyoSuite and OpenSim Renders; Visual-Only Gaze Orientation Channel
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11718
+- **Branch:** merged via #11772
+- **PR:** #11772
+- **Paths:** see #11772
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`509c6933`; collated from changes/11718-gcv-12-visible-parametric-head-face-and.md)
+- **Summary:** GCV-12: visible parametric head, face and neck on the spec Head body in MuJoCo, Drake, Pinocchio, MyoSuite and OpenSim renders; visual-only gaze orientation channel
+- **Next step:** Shipped in PR #11772.
+
+### DL-#11717 · Realistic Parametric Clubhead Meshes in the MuJoCo, OpenSim, Drake, Pinocchio and MyoSuite Visual Layers via One Shared Adapter, With Committed STL Fallback Assets
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11717
+- **Branch:** merged via #11772
+- **PR:** #11772, #12140
+- **Paths:** see #11772
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`e68baeab`; collated from changes/11717-web-clubhead-stl-heads-at-spec-loft-lie.md)
+- **Summary:** Realistic parametric clubhead meshes in the MuJoCo, OpenSim, Drake, Pinocchio and MyoSuite visual layers via one shared adapter, with committed STL fallback assets
+- **Next step:** Shipped in PR #11772.
+
+### DL-#11716 · GCV-10 Club Force and Torque Overlays and Plots: Per-Hand, Net and Couple Glyphs, Grip Plot Route, PyQt Tile and Web Charts, Hands Close-Up Camera, Grip Export in Native Viewer
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11716
+- **Branch:** merged via #11775
+- **PR:** #11775
+- **Paths:** see #11775
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`c9fd0bed`; collated from changes/11716-gcv-10-club-force-and-torque-overlays-an.md)
+- **Summary:** GCV-10 club force and torque overlays and plots: per-hand, net and couple glyphs, grip plot route, PyQt tile and web charts, hands close-up camera, grip export in native viewer
+- **Next step:** Shipped in PR #11775.
+
+### DL-#11715 · Simscape Per-Hand Grip Wrench Channels (Grip:Hand_Left/Right) and an R2025b Grip Fixture With a Reconstruction Receipt (GCV-9)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11715
+- **Branch:** merged via #11779
+- **PR:** #11779
+- **Paths:** see #11779
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`50a68358`; collated from changes/11715-simscape-per-hand-grip-wrench-channels-g.md)
+- **Summary:** Simscape per-hand grip wrench channels (grip:hand_left/right) and an R2025b grip fixture with a reconstruction receipt (GCV-9)
+- **Next step:** Shipped in PR #11779.
+
+### DL-#11714 · GCV-8 Gaps: Grip-Modelling Tab Reuses Grip_Efc, Drake URDF Right-Hand Grip Wrench With Left Unavailable, Pinocchio Lambda_Grip Routed Through Grip_From_Allocation
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11714
+- **Branch:** merged via #12035
+- **PR:** #12035, #11757
+- **Paths:** see #12035
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`f13bad3b`; collated from changes/11714-gcv-8-per-hand-grip-wrench-extraction-fo.md)
+- **Summary:** GCV-8 gaps: grip-modelling tab reuses grip_efc, Drake URDF right-hand grip wrench with left unavailable, Pinocchio lambda_grip routed through grip_from_allocation
+- **Next step:** Shipped in PR #12035.
+
+### DL-#11713 · Add Shared Grip Wrench Core (Per-Hand Wrench, Midpoint Net Force and Couple, Contact-Moment/Free-Torque Split) for GCV-7
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11713
+- **Branch:** merged via #11732
+- **PR:** #11732
+- **Paths:** see #11732
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ca8bab43`; collated from changes/11713-add-shared-grip-wrench-core-per-hand-wre.md)
+- **Summary:** Add shared grip wrench core (per-hand wrench, midpoint net force and couple, contact-moment/free-torque split) for GCV-7
+- **Next step:** Shipped in PR #11732.
+
+### DL-#11712 · Route Every Centre-of-Pressure Computation Through the Shared Ground-Reaction Core; Legacy Helpers Become Deprecation Shims (GCV-6)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11712
+- **Branch:** merged via #11802
+- **PR:** #11802
+- **Paths:** see #11802
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`b7d4189c`; collated from changes/11712-route-every-centre-of-pressure-computati.md)
+- **Summary:** Route every centre-of-pressure computation through the shared ground-reaction core; legacy helpers become deprecation shims (GCV-6)
+- **Next step:** Shipped in PR #11802.
+
+### DL-#11711 · GCV-5 Ground-Reaction Plots: Shared Plot Series, GET /Api/Analysis/Ground-Reaction, PyQt Ground Reaction Plots Tile and Web Charts With Per-Foot Force, Load Share, CoP Path, Free Moment and Moment About CoM
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11711
+- **Branch:** merged via #11781
+- **PR:** #11781, #11802
+- **Paths:** see #11781
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`b7d4189c`; collated from changes/11711-gcv-5-mujoco-run-ground-reaction-series.md)
+- **Summary:** GCV-5 ground-reaction plots: shared plot series, GET /api/analysis/ground-reaction, PyQt Ground Reaction Plots tile and web charts with per-foot force, load share, CoP path, free moment and moment about CoM
+- **Next step:** Shipped in PR #11781.
+
+### DL-#11710 · Commit the Canonical Driver Per-Frame GRF Series and Assert the Native-Export Arrows Never Clamp (GCV-4)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11710
+- **Branch:** merged via #12180
+- **PR:** #12180, #11981, #11772, #11969
+- **Paths:** see #12180
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`ec337448`; collated from changes/11710-matplotlib-and-qpainter-force-renderers.md)
+- **Summary:** Commit the canonical driver per-frame GRF series and assert the native-export arrows never clamp (GCV-4)
+- **Next step:** Shipped in PR #12180.
+
+### DL-#11709 · Define 3-Tier Mathematical Engine Equivalency Contract and Verify Simscape Unavailable Contact Channel
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11709
+- **Branch:** merged via #12468
+- **PR:** #12468, #11780, #12483
+- **Paths:** see #12468
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`0829f00f`; collated from changes/11709-simscape-tier-registry.md)
+- **Summary:** Define 3-tier mathematical engine equivalency contract and verify Simscape unavailable contact channel
+- **Next step:** Shipped in PR #12468.
+
+### DL-#11708 · GCV-2 Ground-Reaction Parity Test Loads Each Engine Module Once (Module-Scoped Breakdown): Re-Executing the Drake/Pinocchio Test Modules Broke Their Native Imports, so Only the First Drake/Pinocchio Row Ran
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11708
+- **Branch:** merged via #12050
+- **PR:** #12050, #11991, #11802
+- **Paths:** see #12050
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`b7d4189c`; collated from changes/11708-wire-the-shared-ground-reaction-core-int.md)
+- **Summary:** GCV-2 ground-reaction parity test loads each engine module once (module-scoped breakdown): re-executing the Drake/Pinocchio test modules broke their native imports, so only the first Drake/Pinocchio row ran
+- **Next step:** Shipped in PR #12050.
+
+### DL-#11707 · GCV-1: Shared Ground-Reaction Analysis Core (Per-Foot and Net GRF, CoP, Free Moment, Moments About CoM); Bundle Provider Consumes It
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11707
+- **Branch:** merged via #11772
+- **PR:** #11772
+- **Paths:** see #11772
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`509c6933`; collated from changes/11707-gcv-1-shared-ground-reaction-analysis-co.md)
+- **Summary:** GCV-1: shared ground-reaction analysis core (per-foot and net GRF, CoP, free moment, moments about CoM); bundle provider consumes it
+- **Next step:** Shipped in PR #11772.
+
+### DL-#11697 · NV-9: Shared Viewer FOV (0.7 rad) for MeshCat Exports, Projected-Extent and Fitted-Distance Framing Helpers
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11697
+- **Branch:** merged via #11813
+- **PR:** #11813
+- **Paths:** see #11813
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`548a068f`; collated from changes/11697-nv-9-shared-viewer-fov-0-7-rad-for-meshc.md)
+- **Summary:** NV-9: shared viewer FOV (0.7 rad) for MeshCat exports, projected-extent and fitted-distance framing helpers
+- **Next step:** Shipped in PR #11813.
+
+### DL-#11689 · MyoFullBody Reserve Attribution, Share IK and Torque Neck; Reserves Still Above 10 Percent (Not Qualified)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11689
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11689-myofullbody-reserve-attribution-share-ik.md)
+- **Summary:** MyoFullBody reserve attribution, share IK and torque neck; reserves still above 10 percent (not qualified)
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11679 · Labelled 2X2 Multi-View Compositor and Clip Writer for Native Viewer Export
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11679
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11679-labelled-2x2-multi-view-compositor-and-c.md)
+- **Summary:** Labelled 2x2 multi-view compositor and clip writer for native viewer export
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11678 · Native Viewer Export CLI With Drake MeshCat, Pinocchio MeshCat, OpenSim Simbody (Xvfb) and MyoSuite Backends
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11678
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11678-native-viewer-export-cli-with-drake-mesh.md)
+- **Summary:** Native viewer export CLI with Drake MeshCat, Pinocchio MeshCat, OpenSim simbody (xvfb) and MyoSuite backends
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11677 · MeshCat Overlays for the Drake and Pinocchio Native Exports; Fix Drake Sink MeshcatCone Argument Order
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11677
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11677-meshcat-overlays-for-the-drake-and-pinoc.md)
+- **Summary:** MeshCat overlays for the Drake and Pinocchio native exports; fix Drake sink MeshcatCone argument order
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11676 · Add Engine-Agnostic Bundle Overlay Frame Provider (Joint Torque Arcs, Per-Foot GRF at the CoP, Weight at the CoM) and a MuJoCo Overlay Source
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11676
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11676-add-engine-agnostic-bundle-overlay-frame.md)
+- **Summary:** Add engine-agnostic bundle overlay frame provider (joint torque arcs, per-foot GRF at the CoP, weight at the CoM) and a MuJoCo overlay source
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11675 · Initialise MjvGeom Glyph Slots With Mjv_initGeom so Renderer.Render No Longer Segfaults With Arrows or Arcs
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11675
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11675-initialise-mjvgeom-glyph-slots-with-mjv.md)
+- **Summary:** Initialise MjvGeom glyph slots with mjv_initGeom so Renderer.render no longer segfaults with arrows or arcs
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11674 · Add Shared Golf Camera View Presets (Face-On, Down-the-Line, Overhead, Oblique) With MuJoCo, Drake MeshCat, MeshCat and Simbody Camera Adapters
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11674
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11674-add-shared-golf-camera-view-presets-face.md)
+- **Summary:** Add shared golf camera view presets (face-on, down-the-line, overhead, oblique) with MuJoCo, Drake MeshCat, MeshCat and simbody camera adapters
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11671 · Foot Contact: Torsional Friction (Opt-In --Torsional-Patch-m) and Foot-Width Spheres (Opt-In --Foot-Half-Width-m)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11671
+- **Branch:** merged via #11772
+- **PR:** #11772
+- **Paths:** see #11772
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`509c6933`; collated from changes/11671-foot-contact-torsional-friction-opt-in-t.md)
+- **Summary:** Foot contact: torsional friction (opt-in --torsional-patch-m) and foot-width spheres (opt-in --foot-half-width-m)
+- **Next step:** Shipped in PR #11772.
+
+### DL-#11670 · Contact-Wrench Tracking QP as Opt-In --Tracking Wrench-Qp; Negative Result Recorded
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11670
+- **Branch:** merged via #11772
+- **PR:** #11772
+- **Paths:** see #11772
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`509c6933`; collated from changes/11670-contact-wrench-tracking-qp-as-opt-in-tra.md)
+- **Summary:** Contact-wrench tracking QP as opt-in --tracking wrench-qp; negative result recorded
+- **Next step:** Shipped in PR #11772.
+
+### DL-#11669 · Add Centroidal Feasibility Filter V2 (Full ZMP, Vertical Force and Friction Cone Over the Finish) as the Opt-In --Centroidal-Filter Pipeline Stage
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11669
+- **Branch:** merged via #11772
+- **PR:** #11772
+- **Paths:** see #11772
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`509c6933`; collated from changes/11669-add-centroidal-feasibility-filter-v2-ful.md)
+- **Summary:** Add centroidal feasibility filter v2 (full ZMP, vertical force and friction cone over the finish) as the opt-in --centroidal-filter pipeline stage
+- **Next step:** Shipped in PR #11772.
+
+### DL-#11668 · Add Finish-Feasibility Metrics (ZMP-Inside Fraction, Friction-Cone Utilisation, Foot Slide and Yaw, Pelvis Yaw Error, Vertical Force Range) to the Dynamics Receipt, With a Post-Processing CLI and a Regression Ratchet
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11668
+- **Branch:** merged via #11690
+- **PR:** #11690
+- **Paths:** see #11690
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`35464009`; collated from changes/11668-add-finish-feasibility-metrics-zmp-insid.md)
+- **Summary:** Add finish-feasibility metrics (ZMP-inside fraction, friction-cone utilisation, foot slide and yaw, pelvis yaw error, vertical force range) to the dynamics receipt, with a post-processing CLI and a regression ratchet
+- **Next step:** Shipped in PR #11690.
+
+### DL-#11663 · Character Builder Docs: Web Builder and Appearance-V1 Sections, and a Reproducible Build-Dress-Export Tutorial (CMB-12)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11663
+- **Branch:** merged via #12200
+- **PR:** #12200, #12235, #12294, #12206
+- **Paths:** see #12200
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5812c63d`; collated from changes/11663-desktop-character-builder-walkthrough-wi.md)
+- **Summary:** Character Builder docs: web builder and appearance-v1 sections, and a reproducible build-dress-export tutorial (CMB-12)
+- **Next step:** Shipped in PR #12200.
+
+### DL-#11662 · Add CMB-11 Cross-Engine L0 Export Parity Verification Across MJCF, URDF, OpenSim, and Pinocchio
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11662
+- **Branch:** merged via #12497
+- **PR:** #12497
+- **Paths:** see #12497
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`d388660f`; collated from changes/11662-add-cmb-11-cross-engine-l0-export-parity.md)
+- **Summary:** Add CMB-11 cross-engine L0 export parity verification across MJCF, URDF, OpenSim, and Pinocchio
+- **Next step:** Shipped in PR #12497.
+
+### DL-#11661 · CMB-10 Slice 1: Stateless Frankenstein Assembly REST API (Parts, Plan Replay With Drop Evaluation, URDF/MJCF Export) Over AssemblySession
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11661
+- **Branch:** merged via #11799
+- **PR:** #11799
+- **Paths:** see #11799
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`17d1fd9f`; collated from changes/11661-cmb-10-slice-1-stateless-frankenstein-as.md)
+- **Summary:** CMB-10 slice 1: stateless Frankenstein assembly REST API (parts, plan replay with drop evaluation, URDF/MJCF export) over AssemblySession
+- **Next step:** Shipped in PR #11799.
+
+### DL-#11658 · Character Appearance API: Material Library and Validated Appearance-V1 Sidecar Bound to the Spec (CMB-7B)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11658
+- **Branch:** merged via #12186
+- **PR:** #12186, #12220, #12213, #12193, #12174
+- **Paths:** see #12186
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5e7903c2`; collated from changes/11658-web-character-builder-drives-the-spec-na.md)
+- **Summary:** Character appearance API: material library and validated appearance-v1 sidecar bound to the spec (CMB-7b)
+- **Next step:** Shipped in PR #12186.
+
+### DL-#11657 · CMB-6 Slice 1: Engine-Free Spec FK and a Rigidly Skinned Procedural glTF Body Export (One Bone per Spec Body, Y-Up), Wired Into the Character-Builder API, Desktop and Web Export Buttons
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11657
+- **Branch:** merged via #12220
+- **PR:** #12220
+- **Paths:** see #12220
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`9b93fb2a`; collated from changes/11657-cmb-6-slice-2-gltf-animation-of-the-skin.md)
+- **Summary:** CMB-6 slice 1: engine-free spec FK and a rigidly skinned procedural glTF body export (one bone per spec body, Y-up), wired into the character-builder API, desktop and web export buttons
+- **Next step:** Shipped in PR #12220.
+
+### DL-#11656 · Add Game-Quality MuJoCo Appearance: Materials, Textures, Skybox, Smooth Meshes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11656
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11656-add-game-quality-mujoco-appearance-mater.md)
+- **Summary:** Add game-quality MuJoCo appearance: materials, textures, skybox, smooth meshes
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11655 · Add the Engine-Agnostic Appearance-V1 Schema and Material Library
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11655
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11655-add-the-engine-agnostic-appearance-v1-sc.md)
+- **Summary:** Add the engine-agnostic appearance-v1 schema and material library
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11654 · Character Builder Launcher Tile, Embed Adapter and Working Spec API (Build, Preview, Export)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11654
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11654-character-builder-launcher-tile-embed-ad.md)
+- **Summary:** Character Builder launcher tile, embed adapter and working spec API (build, preview, export)
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11653 · Character Presets Library (JSON, Schema-Validated, Compiled via CMB-1)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11653
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11653-character-presets-library-json-schema-va.md)
+- **Summary:** Character presets library (JSON, schema-validated, compiled via CMB-1)
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11652 · Spec-Native Character Parameters Compile to Full_Body_Spec via the Shared De Leva Builder
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11652
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11652-spec-native-character-parameters-compile.md)
+- **Summary:** Spec-native character parameters compile to full_body_spec via the shared De Leva builder
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11651 · Consolidate Appearance, Character Builder, Frankenstein Assembly, Native Viewer Export and MyoFullBody PRs; Reconcile Registries
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11651
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11651-consolidate-appearance-character-builder.md)
+- **Summary:** Consolidate appearance, character builder, Frankenstein assembly, native viewer export and MyoFullBody PRs; reconcile registries
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11647 · LaTeX Reference for the MyoFullBody Full-Body Muscle-Driven Swing Study
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11647
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11647-latex-reference-for-the-myofullbody-full.md)
+- **Summary:** LaTeX reference for the MyoFullBody full-body muscle-driven swing study
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11646 · Activation-Coloured Four-View MyoFullBody Swing Renderer at Quarter Speed With Activation and Reserve Plots
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11646
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11646-activation-coloured-four-view-myofullbod.md)
+- **Summary:** Activation-coloured four-view MyoFullBody swing renderer at quarter speed with activation and reserve plots
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11645 · Per-Frame Muscle Static Optimisation on MyoFullBody With Reserve Actuators, ID-Consistency Check and Fail-Closed Receipt
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11645
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11645-per-frame-muscle-static-optimisation-on.md)
+- **Summary:** Per-frame muscle static optimisation on MyoFullBody with reserve actuators, ID-consistency check and fail-closed receipt
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11644 · Map the 44 Spec Coordinates Onto MyoFullBody by Segment-Orientation IK With Exact Joint-Equality Couplings, ROM Clamp and Muscle-Length Receipts
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11644
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11644-map-the-44-spec-coordinates-onto-myofull.md)
+- **Summary:** Map the 44 spec coordinates onto MyoFullBody by segment-orientation IK with exact joint-equality couplings, ROM clamp and muscle-length receipts
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11643 · Pinned Hash-Verified MyoFullBody Asset Fetch With Licence Record
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11643
+- **Branch:** merged via #11702
+- **PR:** #11702
+- **Paths:** see #11702
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5b607519`; collated from changes/11643-pinned-hash-verified-myofullbody-asset-f.md)
+- **Summary:** Pinned hash-verified MyoFullBody asset fetch with licence record
+- **Next step:** Shipped in PR #11702.
+
+### DL-#11587 · Guard Fsspec Lock Floor for CVE-2026-104851 (#11587)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11587
+- **Branch:** merged via #12465
+- **PR:** #12465
+- **Paths:** see #12465
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`47c49436`; collated from changes/11587-bump-fsspec-to-2026-6-0-for-cve-2026-104.md)
+- **Summary:** Guard fsspec lock floor for CVE-2026-104851 (#11587)
+- **Next step:** Shipped in PR #12465.
+
+### DL-#11570 · Consume Spec-Exported URDF Bundle Across Engines and Ledger MyoSuite Topology Divergence
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11570
+- **Branch:** merged via #12501
+- **PR:** #12501
+- **Paths:** see #12501
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5c8d6434`; collated from changes/11570-consume-spec-exported-urdf-bundle-across.md)
+- **Summary:** Consume spec-exported URDF bundle across engines and ledger MyoSuite topology divergence
+- **Next step:** Shipped in PR #12501.
+
+### DL-#11569 · Marker-Overlay Video Export Takes a Frame Size (Size_Px), so the Run-102 Simscape Playback Renders at 1920X1080 60 Fps (1X, 0.5X, 0.1X).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11569
+- **Branch:** merged via #11901
+- **PR:** #11901, #11868
+- **Paths:** see #11901
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`82946677`; collated from changes/11569-simscape-urdf-exchange-receipt-r2025b-sm.md)
+- **Summary:** Marker-overlay video export takes a frame size (size_px), so the run-102 Simscape playback renders at 1920x1080 60 fps (1x, 0.5x, 0.1x).
+- **Next step:** Shipped in PR #11901.
+
+### DL-#11554 · DIME Dynamics Window: Multiple Shooting With States and Controls as Decision Variables, Real Transition Defects D_K = X_{K+1} - Phi(X_K, U_K, Dt) From the Provider Step, and Real Costs Evaluated on the Returned Trajectory
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11554
+- **Branch:** fix/11554-multiple-shooting
+- **PR:** #11699
+- **Paths:** see #11699
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`e50a9ba1`; collated from changes/11554-dime-dynamics-window-multiple-shooting-w.md)
+- **Summary:** DIME dynamics window: multiple shooting with states and controls as decision variables, real transition defects d_k = x_{k+1} - Phi(x_k, u_k, dt) from the provider step, and real costs evaluated on the returned trajectory
+- **Next step:** Shipped in PR #11699.
+
+### DL-#11546 · Vectorised Multi-Trial Batching (Block-Arrow Schur, Time-Parallel Riccati) and Runtime Receipts (MOSAIC-14)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11546
+- **Branch:** merged via #12456
+- **PR:** #12456
+- **Paths:** see #12456
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`e2e1416d`; collated from changes/11546-mosaic-14-multi-trial-batching.md)
+- **Summary:** Vectorised multi-trial batching (block-arrow Schur, time-parallel Riccati) and runtime receipts (MOSAIC-14)
+- **Next step:** Shipped in PR #12456.
+
+### DL-#11545 · Document the DIME Manifold Chart, Retraction and Local-Coordinates Jacobians (Closed Forms From #11560) in the Model-Aware Matching Reference, With FD Acceptance Evidence
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11545
+- **Branch:** fix/11545-dime-manifold-jacobians
+- **PR:** #11700, #11693, #11698, #11695, #11694
+- **Paths:** docs/research/model_aware_matching/model_aware_matching.tex
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`d867e857`; collated from changes/11545-mosaic-13-closed-form-multi-trial-benchm.md)
+- **Summary:** Document the DIME manifold chart, retraction and local-coordinates Jacobians (closed forms from #11560) in the model-aware matching reference, with FD acceptance evidence
+- **Next step:** Shipped in PR #11700.
+
+### DL-#11544 · Humanoid/Manipulation Transfer: Known-Payload Anchor and Reference-Plus-Gains WBC Export (MOSAIC-12)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11544
+- **Branch:** merged via #12461
+- **PR:** #12461
+- **Paths:** see #12461
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`7a652440`; collated from changes/11544-mosaic-12-humanoid-transfer.md)
+- **Summary:** Humanoid/manipulation transfer: known-payload anchor and reference-plus-gains WBC export (MOSAIC-12)
+- **Next step:** Shipped in PR #12461.
+
+### DL-#11543 · Actuation Layer: Declared Joint-Level Activation Model and Replay Comparison
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11543
+- **Branch:** merged via #12460
+- **PR:** #12460, #12364
+- **Paths:** see #12460
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`23817951`; collated from changes/11543-mosaic-11-first-slice-declared-joint-lev.md)
+- **Summary:** Actuation layer: declared joint-level activation model and replay comparison
+- **Next step:** Shipped in PR #12460.
+
+### DL-#11542 · Multi-Swing Acquisition and Phase Registration With Event Anchoring (MOSAIC-10)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11542
+- **Branch:** merged via #12462
+- **PR:** #12462
+- **Paths:** see #12462
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`425da9f3`; collated from changes/11542-mosaic-10-swing-registration.md)
+- **Summary:** Multi-swing acquisition and phase registration with event anchoring (MOSAIC-10)
+- **Next step:** Shipped in PR #12462.
+
+### DL-#11540 · Analytic Dynamics Derivatives Replacing Finite Differences (MOSAIC-08)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11540
+- **Branch:** merged via #12458
+- **PR:** #12458
+- **Paths:** see #12458
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`088511f2`; collated from changes/11540-mosaic-08-analytic-derivatives.md)
+- **Summary:** Analytic dynamics derivatives replacing finite differences (MOSAIC-08)
+- **Next step:** Shipped in PR #12458.
+
+### DL-#11539 · MOSAIC-07: Kinematic Jerk Prior, Whiteness Gate and Declared-Discrepancy Calculator
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11539
+- **Branch:** merged via #12444
+- **PR:** #12444
+- **Paths:** see #12444
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`db2c6fe2`; collated from changes/11539-mosaic-07-kinematic-jerk-prior-whiteness.md)
+- **Summary:** MOSAIC-07: kinematic jerk prior, whiteness gate and declared-discrepancy calculator
+- **Next step:** Shipped in PR #12444.
+
+### DL-#11538 · Observation Factors: 2-D Keypoint Projection, Robust Kernels, Marker Attachment Offsets (MOSAIC-06)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11538
+- **Branch:** merged via #12455
+- **PR:** #12455
+- **Paths:** see #12455
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`67b0a4ec`; collated from changes/11538-mosaic-06-observation-factors.md)
+- **Summary:** Observation factors: 2-D keypoint projection, robust kernels, marker attachment offsets (MOSAIC-06)
+- **Next step:** Shipped in PR #12455.
+
+### DL-#11537 · Contact Wrenches in the Inner Solve: Unilateral/Friction-Cone SOCP, Measured GRF (MOSAIC-05)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11537
+- **Branch:** merged via #12459
+- **PR:** #12459
+- **Paths:** see #12459
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`57085018`; collated from changes/11537-mosaic-05-contact-wrenches.md)
+- **Summary:** Contact wrenches in the inner solve: unilateral/friction-cone SOCP, measured GRF (MOSAIC-05)
+- **Next step:** Shipped in PR #12459.
+
+### DL-#11536 · MOSAIC-04: Floating-Base Manifold Spline on SE(3) With Retraction, Exact Jacobians, and Outer Gauss-Newton Solve From Marker Observations
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11536
+- **Branch:** merged via #12457
+- **PR:** #12457
+- **Paths:** see #12457
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`5067c0bd`; collated from changes/11536-mosaic-04-manifold-spline.md)
+- **Summary:** MOSAIC-04: Floating-base manifold spline on SE(3) with retraction, exact Jacobians, and outer Gauss-Newton solve from marker observations
+- **Next step:** Shipped in PR #12457.
+
+### DL-#11535 · MuJoCo/MJX Regressor Provider With Inertia Mapping and Planar Conformance MOSAIC-03
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11535
+- **Branch:** merged via #12463
+- **PR:** #12463
+- **Paths:** see #12463
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`078f6e1d`; collated from changes/11535-mosaic-03-mujoco-regressor.md)
+- **Summary:** MuJoCo/MJX regressor provider with inertia mapping and planar conformance MOSAIC-03
+- **Next step:** Shipped in PR #12463.
+
+### DL-#11534 · Provide the Pinocchio RegressorModel Provider (computeJointTorqueRegressor, Batched) With Planar Oracle Conformance (MOSAIC-02)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11534
+- **Branch:** merged via #12450
+- **PR:** #12450
+- **Paths:** see #12450
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`9abae67c`; collated from changes/11534-mosaic-02-pinocchio-regressor.md)
+- **Summary:** Provide the Pinocchio RegressorModel provider (computeJointTorqueRegressor, batched) with planar oracle conformance (MOSAIC-02)
+- **Next step:** Shipped in PR #12450.
+
+### DL-#11533 · Freeze Benchmark Protocol, Tolerances and Planar Conformance Oracle
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11533
+- **Branch:** merged via #12453
+- **PR:** #12453
+- **Paths:** see #12453
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`9b60143d`; collated from changes/11533-freeze-benchmark-protocol-tolerances-and.md)
+- **Summary:** Freeze benchmark protocol, tolerances and planar conformance oracle
+- **Next step:** Shipped in PR #12453.
+
+### DL-#11026 · Add Neutral Swing Posture Metrics (Pelvis Shift, Trunk Tilt Change) With Caller-Supplied Thresholds and Provenance (#11007 Package 3)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11026
+- **Branch:** merged via #12358
+- **PR:** #12358
+- **Paths:** see #12358
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`6863fca6`; collated from changes/11026-add-neutral-swing-posture-metrics-pelvis.md)
+- **Summary:** Add neutral swing posture metrics (pelvis shift, trunk tilt change) with caller-supplied thresholds and provenance (#11007 package 3)
+- **Next step:** Shipped in PR #12358.
+
+### DL-#10382 · Audit Club Face-Angle Observability (Sparse, Collinear, Uncaptured, Gapped or Mismatched Head Markers) and Keep Face Angle Unavailable in the Output Policy When It Is Unobservable
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #10382
+- **Branch:** merged via #12420
+- **PR:** #12420, #12425, #12338, #12431, #12434, #12424
+- **Paths:** see #12420
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`989890a8`; collated from changes/10382-wire-the-face-angle-observability-audit.md)
+- **Summary:** Audit club face-angle observability (sparse, collinear, uncaptured, gapped or mismatched head markers) and keep face angle unavailable in the output policy when it is unobservable
+- **Next step:** Shipped in PR #12420.
+
 ### DL-#9507 · Cone-Mode Sparse Checkout in Sidekick Wheel Smoke Job
 
 - **State:** shipped
@@ -1178,10 +4688,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Branch:** `claude/issue-9507`
 - **Paths:** `.github/workflows/package-standalone-sidekick.yml`, `tests/unit/packaging/test_standalone_sidekick_workflows.py`
 - **Started:** 2026-10-04
-- **Last verified:** 2026-10-12 (`0c612812`; collated from changes/9507-metadata-only-completed-checkout-reconci.md)
+- **Last verified:** 2026-10-14 (`0644635c`; collated from changes/9507-metadata-only-completed-checkout-reconci.md)
 - **Summary:** `smoke-test-wheel` used non-cone sparse checkout, which leaves `core.sparseCheckout=true` in `.git/config` and poisons later jobs on reused self-hosted runners. Switched to cone mode on `tests/fixtures` and added a guard test over all workflows.
 - **Next step:** Implementation completed in merged #11522 (43d63ce98bcb6d4318bf5ab7ba8a6adf87071caf), issue #9507 closed completed. Metadata-only reconciliation: 24 checkout/workflow contract tests pass on 0c612812cb; no new fleet-runtime, scientific or physical qualification is claimed. Continue routine runner monitoring.
-- **PR:** #11522, #12278
+- **PR:** #11522, #12278, #12418
 
 ### DL-#10783 · Enforce the Deferred Validation Catalog
 

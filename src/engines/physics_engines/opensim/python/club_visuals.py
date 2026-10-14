@@ -26,6 +26,7 @@ from src.shared.python.model_appearance.club_assembly import (
 )
 from src.shared.python.model_appearance.club_head_mesh import load_club_head
 from src.shared.python.model_appearance.mesh_io import stl_bytes
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 OPENSIM_DIR = Path(__file__).resolve().parents[1]
 GEOMETRY_DIR = OPENSIM_DIR / "models" / "geometry" / "club"
@@ -171,7 +172,7 @@ def register_geometry_path(directory: Path = GEOMETRY_DIR) -> bool:
     Returns ``False`` when the ``opensim`` package is not installed. Idempotent.
     """
     try:
-        import opensim
+        opensim = import_opensim()
     except ImportError:
         return False
     opensim.ModelVisualizer.addDirToGeometrySearchPaths(str(Path(directory).resolve()))

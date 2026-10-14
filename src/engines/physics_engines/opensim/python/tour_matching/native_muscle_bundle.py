@@ -32,6 +32,7 @@ import src.engines.physics_engines.opensim.python.tour_matching.muscle_replay as
 from src.engines.physics_engines.opensim.python.tour_matching import (
     native_visual_resources,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
@@ -190,7 +191,7 @@ def _prepare(
     controls: Mapping[str, NDArray[np.float64]],
     visual_resources: tuple[native_visual_resources.SourceVisualResource, ...] = (),
 ) -> tuple[Any, Any, tuple[str, ...], tuple[str, ...], dict[str, tuple[float, ...]]]:
-    import opensim as osim
+    osim = import_opensim()
 
     raw = path.read_bytes()
     _validate_self_contained_source(raw, visual_resources)
@@ -224,7 +225,7 @@ def _coordinate_units(
     native_mechanics_profile: Any | None = None,
     coupled_rotation_paths: frozenset[str] = frozenset(),
 ) -> dict[str, str]:
-    import opensim as osim
+    osim = import_opensim()
 
     units = {}
     observed_coupled: set[str] = set()
@@ -361,7 +362,7 @@ def _identity(
 ) -> Any:
     path, model, names = subject.path, subject.model, subject.names
     muscles, options = subject.muscles, subject.options
-    import opensim as osim
+    osim = import_opensim()
 
     provider = hashlib.sha256(native_replay_admission_bytes())
     native_extensions = tuple(sorted(Path(osim.__file__).parent.glob("*.pyd")))

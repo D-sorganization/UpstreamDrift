@@ -100,12 +100,8 @@ def test_native_visualizer_raises_typed_unavailable_error_without_opensim(
         "src.engines.physics_engines.opensim.python.motion_matching.viz.native"
     )
 
-    def fail_import(name: str):
-        if name == "opensim":
-            raise ImportError("missing test opensim")
-        return importlib.import_module(name)
-
-    monkeypatch.setattr(module.importlib, "import_module", fail_import)
+    # A ``None`` entry makes the routed import raise ``ImportError``.
+    monkeypatch.setitem(sys.modules, "opensim", None)
 
     sim = SimpleNamespace(time=np.array([0.0]), states=np.zeros((1, 1)))
     with pytest.raises(module.OpenSimVisualizerUnavailableError, match="opensim"):

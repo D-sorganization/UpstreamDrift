@@ -1,6 +1,0 @@
----
-issue: 11914
-summary: "F09e adds Pinocchio native replay outputs to the F09 marker forward-kinematics path using the actual full-state q/v trajectory and explicit frame-local offsets, preserving all registered rows and six required engines; native receipts remain unqualified and MyoSuite, OpenSim and Simscape gaps stay visible"
----
-
-F09e adds Pinocchio native replay outputs to the F09 marker forward-kinematics path. The integration uses the actual full-state q/v trajectory, retains distinct `nq`/`nv`, maps explicit frame-local offsets through the existing `PinocchioPhysicsEngine`, and preserves all registered rows and six required engines. Native receipts remain unqualified; MyoSuite, OpenSim, and Simscape gaps stay visible.

@@ -21,6 +21,7 @@ export const ROUTE_TITLES: ReadonlyArray<readonly [string, string]> = [
   ['/tools/data-explorer', 'Data Explorer'],
   ['/tools/motion-capture', 'Motion Capture'],
   ['/tools/terrain', 'Terrain'],
+  ['/tools/bunker-workbench', 'BunkerShot3D Workbench'],
   ['/tools/dataset', 'Dataset Generator'],
   ['/tools/analysis', 'Analysis Tools'],
   ['/tools/character-builder', 'Character Builder'],

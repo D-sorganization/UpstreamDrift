@@ -34,6 +34,7 @@ from PyQt6.QtWidgets import (
 )
 
 import contextlib
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 with contextlib.suppress(Exception):
     matplotlib.use("QtAgg")
@@ -227,7 +228,7 @@ class MainWidget(QWidget):
     def _check_opensim_availability(self) -> None:
         """Check if OpenSim library is available."""
         try:
-            import opensim  # noqa: F401
+            import_opensim()
 
             self._opensim_available = True
         except ImportError:

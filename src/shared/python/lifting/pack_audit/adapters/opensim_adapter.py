@@ -9,11 +9,18 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import opensim as osim
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 from ..frames import from_canonical, to_canonical
 from ..model import CoordinateInfo, EngineAdapter, PoseEval
-from ._common import PELVIS_ORIGIN, build_model_text, native_angles
+from ._common import (
+    PELVIS_ORIGIN,
+    build_model_text,
+    hand_bar_weld_side,
+    native_angles,
+)
+
+osim = import_opensim()
 
 _KINDS = {1: "rotational", 2: "translational", 3: "coupled"}
 
@@ -135,9 +142,10 @@ class OpensimAdapter(EngineAdapter):
             j = js.get(i)
             parent = j.getParentFrame().findBaseFrame().getName()
             child = j.getChildFrame().findBaseFrame().getName()
-            for side in out:
-                if parent == f"hand_{side}" and child.startswith("barbell"):
-                    out[side] = f"{j.getConcreteClassName()} (bar is child)"
+            side = hand_bar_weld_side(parent, child)
+            if side is not None:
+                role = "bar is child" if parent == f"hand_{side}" else "hand is child"
+                out[side] = f"{j.getConcreteClassName()} ({role})"
         cons = m.getConstraintSet()
         for i in range(cons.getSize()):
             c = cons.get(i)

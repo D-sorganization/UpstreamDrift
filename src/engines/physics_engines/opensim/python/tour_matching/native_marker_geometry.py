@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 import hashlib
-import importlib
 import json
 from pathlib import Path
 from typing import Any
@@ -20,6 +19,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.marker_set import 
     MarkerPlacement,
 )
 from src.shared.python.motion_matching.marker_calibration import Array, Pose
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 Bindings = Mapping[str, tuple[str, Sequence[float]]]
 
@@ -41,7 +41,7 @@ class NativeMarkerGeometry:
         assembly_accuracy: float = 1e-14,
         coordinate_tolerance: float = 1e-7,
     ) -> None:
-        import opensim as osim
+        osim = import_opensim()
 
         paths = tuple(coordinate_paths)
         if not paths or len(set(paths)) != len(paths):
@@ -77,7 +77,7 @@ class NativeMarkerGeometry:
         self.loaded_sha256 = hashlib.sha256(
             self._model.dump().encode("utf-8")
         ).hexdigest()
-        extension_path = importlib.import_module("opensim._simulation").__file__
+        extension_path = import_opensim("opensim._simulation").__file__
         if extension_path is None:
             raise ValueError("Native simulation extension file is unavailable")
         extension = Path(extension_path)

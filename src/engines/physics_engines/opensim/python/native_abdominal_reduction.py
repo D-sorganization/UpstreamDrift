@@ -17,6 +17,7 @@ from typing import Any
 from defusedxml import ElementTree
 
 from src.engines.physics_engines.opensim.python.native_mtp_reduction import _pose_error
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 _REMOVED = ("Abs_t1", "Abs_t2")
 _REFERENCE = re.compile(r"(?<![A-Za-z0-9_])(?:Abs_t1|Abs_t2)(?![A-Za-z0-9_])")
@@ -304,7 +305,8 @@ def derive_abdominal_zero_translations(
     never overwritten. Receipt describes sampled mechanical equivalence only.
     """
     import json
-    import opensim as osim
+
+    osim = import_opensim()
     from src.engines.physics_engines.opensim.python import native_mtp_reduction
 
     source, output = request.source_model_path, request.derived_model_path

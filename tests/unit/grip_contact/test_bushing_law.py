@@ -8,7 +8,6 @@ analytic properties everywhere.
 from __future__ import annotations
 
 import math
-from importlib import import_module
 
 import numpy as np
 import pytest
@@ -21,6 +20,7 @@ from src.shared.python.grip_contact.bushing_law import (
     bushing_wrench,
 )
 from src.shared.python.grip_contact.parameters import BushingParameters
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 
@@ -146,10 +146,7 @@ def _frame_state(osim, frame, state) -> BushingState:  # noqa: ANN001
 @pytest.mark.parametrize("seed", [0, 1, 2])
 def test_matches_opensim_bushing_force_records(seed: int) -> None:
     """Deflection of a few mm/deg with random rates: OpenSim records to 1e-9."""
-    try:
-        osim = import_module("opensim")
-    except ImportError:
-        pytest.skip("opensim is not installed")
+    osim = require_opensim()
     osim.Logger.setLevelString("Warn")
     rng = np.random.default_rng(seed)
     model = osim.Model()

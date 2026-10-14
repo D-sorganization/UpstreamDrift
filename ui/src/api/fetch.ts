@@ -5,7 +5,7 @@
  *  - Builds the full URL via `getApiBase()` so Tauri and browser builds
  *    both resolve to the right origin (fixes #6637 independently here too).
  *  - Throws a descriptive `Error` on non-2xx responses, extracting the
- *    `detail` field from FastAPI JSON error bodies when available.
+ *    `detail` field (or its `message`) from FastAPI JSON error bodies.
  *  - Returns the parsed JSON body typed as `T`.
  *
  * Usage:
@@ -60,6 +60,19 @@ function buildSignal(
     return AbortSignal.any([callerSignal, timeoutSignal]);
   }
   return timeoutSignal;
+}
+
+/**
+ * The human-readable message of a FastAPI `detail`: the string itself, or the
+ * `message` of a structured `{code, message}` refusal (#9545); else undefined.
+ */
+function detailMessage(detail: unknown): string | undefined {
+  if (typeof detail === 'string') return detail;
+  if (detail !== null && typeof detail === 'object') {
+    const message = (detail as Record<string, unknown>).message;
+    if (typeof message === 'string') return message;
+  }
+  return undefined;
 }
 
 /**
@@ -121,9 +134,7 @@ export async function apiFetchWithHeaders<T>(
     let detail: string | undefined;
     try {
       const body = (await response.json()) as Record<string, unknown>;
-      if (typeof body.detail === 'string') {
-        detail = body.detail;
-      }
+      detail = detailMessage(body.detail);
     } catch {
       // Body was not valid JSON — that's fine, fall through to generic message
     }
@@ -203,9 +214,7 @@ export async function apiFetchForm<T>(
     let detail: string | undefined;
     try {
       const body = (await response.json()) as Record<string, unknown>;
-      if (typeof body.detail === 'string') {
-        detail = body.detail;
-      }
+      detail = detailMessage(body.detail);
     } catch {
       // ignore
     }
@@ -253,9 +262,7 @@ export async function apiFetchBlob(
     let detail: string | undefined;
     try {
       const body = (await response.json()) as Record<string, unknown>;
-      if (typeof body.detail === 'string') {
-        detail = body.detail;
-      }
+      detail = detailMessage(body.detail);
     } catch {
       // ignore
     }

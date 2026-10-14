@@ -12,7 +12,15 @@ import numpy as np
 pin: Any = importlib.import_module("pinocchio")
 
 from ..model import CoordinateInfo, EngineAdapter, PoseEval
-from ._common import PELVIS_ORIGIN, build_model_text, native_angles
+from ._common import (
+    PELVIS_ORIGIN,
+    build_model_text,
+    contact_measured,
+    contact_unavailable,
+    hand_attachment,
+    native_angles,
+    pack_api,
+)
 
 
 class PinocchioAdapter(EngineAdapter):
@@ -79,21 +87,16 @@ class PinocchioAdapter(EngineAdapter):
         return out
 
     def _hand_attachment(self) -> dict[str, str]:
-        out = {"l": "none", "r": "none"}
-        for joint in self._root.findall("joint"):
-            parent = joint.find("parent").get("link", "")  # type: ignore[union-attr]
-            child = joint.find("child").get("link", "")  # type: ignore[union-attr]
-            for side in out:
-                if parent == f"hand_{side}" and child.startswith("barbell"):
-                    out[side] = f"{joint.get('type')} joint (bar is child)"
-            for side in out:
-                if (
-                    out[side] == "none"
-                    and f"hand_{side}" in joint.get("name", "")
-                    and parent.startswith("barbell")
-                ):
-                    out[side] = f"none (only dummy frame {child})"
-        return out
+        joints = [
+            (
+                j.get("name", ""),
+                j.get("type", ""),
+                j.find("parent").get("link", ""),  # type: ignore[union-attr]
+                j.find("child").get("link", ""),  # type: ignore[union-attr]
+            )
+            for j in self._root.findall("joint")
+        ]
+        return hand_attachment(joints)
 
     def _bar_parent(self) -> str:
         for joint in self._root.findall("joint"):
@@ -202,11 +205,22 @@ class PinocchioAdapter(EngineAdapter):
         )
 
     def start_contact_force(self) -> dict[str, Any]:
-        return {
-            "value_n": None,
-            "reason": "audit does not read the pack contact API yet "
-            "(UpstreamDrift#12504)",
-        }
+        grf = pack_api(self.pack.package, "contact_dynamics", "ground_reaction_forces")
+        if grf is None:
+            return contact_unavailable(
+                f"{self.pack.package} ships no contact_dynamics.ground_reaction_forces"
+            )
+        try:
+            reaction = grf(self.model, self._initial_q())
+        except (RuntimeError, ValueError) as exc:
+            return contact_unavailable(
+                f"pack GRF API failed at the start pose: {str(exc)[:200]}"
+            )
+        return contact_measured(
+            reaction.total_force[2],
+            source=f"{self.pack.package}.contact_dynamics.ground_reaction_forces",
+            n_feet_in_contact=sum(f.in_contact for f in reaction.per_foot.values()),
+        )
 
     def bar_hold_wrench(self) -> dict[str, Any]:
         from .pinocchio_bar_hold import bar_hold_wrench as _bar_hold_wrench

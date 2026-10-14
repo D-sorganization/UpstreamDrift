@@ -5586,15 +5586,22 @@ OpenSim export and receipts are unchanged, and
 \paragraph{Same-Input Effort Hold (Issue \#12279).}
 The same-input export holds each controller sample for one 1~ms step over eight
 RK4 substeps, while the pipeline's own forward dynamics re-evaluates the controller
-at every RK4 stage. The hold is now a bundle parameter (\texttt{effort\_hold\_s}). It
-splits the step into 1, 2, 4 or 8 holds and is recorded in the manifest
-(\texttt{effort\_holds\_per\_step}), and every engine's replay reads it there. The
-closure projection stays once per step. The 1~ms default is unchanged; the
-0.125~ms hold is opt-in for the club-face fixtures (owner ruling, 2026-10-11).
+at every RK4 stage. The hold is now an explicit bundle parameter and manifest policy
+(\texttt{effort\_hold\_dt\_s}, \texttt{effort\_substeps}, \texttt{projection\_dt\_s},
+with backward-compatible \texttt{effort\_hold\_s} and \texttt{effort\_holds\_per\_step}).
+It splits the step into 1, 2, 4 or 8 holds (substeps 8, 4, 2, or 1 per hold) and is
+recorded in the manifest, and every engine's replay reads it there. The
+closure projection stays once per 1~ms step (\texttt{projection\_dt\_s} $= 0.001$~s).
+The 1~ms default (\texttt{effort\_hold\_dt\_s} $= 0.001$~s, 8 substeps) is unchanged;
+the 0.125~ms hold (\texttt{effort\_hold\_dt\_s} $= 0.000125$~s, 1 substep) is opt-in for
+the club-face fixtures (owner ruling, 2026-10-11).
 The following numbers were measured on brick for \#12279 (7-iron run
 \texttt{s38-fxi2}, 0--0.9~s) and were not re-run here. Over that window the
 1~ms hold slides the feet by up to 43~mm, from 0.71~s, with a 24.0~mm root error
-at 0.7~s. The 0.125~ms hold keeps the slip at 3.3~mm, with an 8.2~mm root error.
+at 0.7~s, and right metatarsophalangeal angle error (\texttt{mtp\_angle\_r}) at
+0.8~s of $-0.147$~rad. The 0.125~ms hold keeps the slip at 3.3~mm (bounded within
+10.0~mm through 1.1~s), with an 8.2~mm root error at 0.7~s and \texttt{mtp\_angle\_r}
+error at 0.8~s reduced to $-0.001$~rad.
 Changing the projection rate made no difference. Over the full horizon, the
 7-iron bundle gives $-5.0$~\%, $-5.1$~ms and 8.71~deg with the 1~ms hold, and
 $-2.5$~\%, $-7.3$~ms and 5.56~deg with the 0.125~ms hold. The driver bundle gives

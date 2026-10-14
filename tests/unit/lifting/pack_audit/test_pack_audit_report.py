@@ -98,7 +98,7 @@ def test_committed_gaps_cite_no_closed_tracker(receipt):
 def test_audit_side_gaps_cite_the_audit_issue(receipt):
     """Gaps caused by the audit lagging the packs cite UpstreamDrift#12504."""
     gaps = {g["key"]: g for g in derive_gaps(receipt)}
-    for key in ("grip_attachment", "grip_width", "no_grf"):
+    for key in ("grip_attachment", "no_grf"):
         assert f"{AUDIT_REPO}#12504" in gaps[key]["issues"], key
 
 
