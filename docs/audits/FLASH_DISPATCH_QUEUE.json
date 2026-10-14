@@ -1,0 +1,152 @@
+[
+  {
+    "packet_id": "WAVE-1-TOOLS-5606",
+    "wave": "Wave 1",
+    "repo": "D-sorganization/Tools",
+    "issue_number": 5606,
+    "parent_epic": "#9415 (EPIC-5: Monorepo Hygiene & Agent Governance)",
+    "supersedes": [],
+    "allowed_files": ["tests/scada/test_f_matrix.py"],
+    "instructions": [
+      "In `tests/scada/test_f_matrix.py`, add `# pragma: allowlist secret` inline comments to the 6 40-character git commit SHA strings in `MERGED_SLICES` (lines 80, 85, 90, 95, 100, 105) so `detect-secrets` does not flag them as Hex High Entropy Strings on `main`.",
+      "Verify that `pytest tests/scada/test_f_matrix.py` and `detect-secrets` baseline comparison pass."
+    ],
+    "dbc_contract": {
+      "preconditions": "`MERGED_SLICES` maps requirement IDs to `(pr_str, commit_sha_40_hex, file_path)`.",
+      "postconditions": "All 6 commit SHAs remain intact for `test_row_cites_its_merged_slice` while `detect-secrets` scans report 0 added findings relative to `.secrets.baseline`.",
+      "invariants": "Never delete or truncate the 40-char commit SHAs in `MERGED_SLICES`."
+    },
+    "verification_command": "pytest tests/scada/test_f_matrix.py -q"
+  },
+  {
+    "packet_id": "WAVE-1-UD-9415",
+    "wave": "Wave 1",
+    "repo": "D-sorganization/UpstreamDrift",
+    "issue_number": 9415,
+    "parent_epic": "#9415 (EPIC-5: Monorepo Hygiene & Agent Governance)",
+    "supersedes": [12432],
+    "allowed_files": [
+      "scripts/check_root_clutter.py",
+      "tests/unit/scripts/test_check_root_clutter.py",
+      ".gitignore",
+      ".ai/README.md",
+      "docs/audits/ARGON_DEEP_AUDIT.md",
+      "docs/audits/ISSUE_TRIAGE_LEDGER.md",
+      "docs/audits/FLASH_DISPATCH_QUEUE.json"
+    ],
+    "instructions": [
+      "Update `scripts/check_root_clutter.py` to enforce a `DIRECTORY_ALLOWLIST` for top-level non-hidden directories (`apps`, `assets`, `benchmarks`, `candidates`, `changes`, `data`, `deploy`, `docker`, `docs`, `evidence`, `examples`, `installer`, `knowledge`, `manuals`, `models`, `notebooks`, `output`, `reports`, `rust_core`, `saved_states`, `schemas`, `scripts`, `shared`, `shared_scripts`, `src`, `stubs`, `tests`, `tools`, `ui`, `vendor`) and `HIDDEN_DIR_ALLOWLIST` so unauthorized top-level directories (such as accidental `UsersdieteRepositorieswt-11c` or wrong-cwd `motion_matching`) are rejected.",
+      "Add unit tests in `tests/unit/scripts/test_check_root_clutter.py` verifying that `check_root_clutter` rejects unauthorized files and unauthorized directories.",
+      "Update `.gitignore` to ignore `sessions/`, `worktrees/`, `logs/`, and `UsersdieteRepositories*`.",
+      "Create `.ai/README.md` indexing the repository's agent governance structure and pointing to `AGENTS.md` as the single source of truth.",
+      "Commit the Argon audit deliverables (`docs/audits/ARGON_DEEP_AUDIT.md`, `docs/audits/ISSUE_TRIAGE_LEDGER.md`, `docs/audits/FLASH_DISPATCH_QUEUE.json`)."
+    ],
+    "dbc_contract": {
+      "preconditions": "Repository root contains tracked and untracked files/directories.",
+      "postconditions": "`python scripts/check_root_clutter.py` exits 0 on a clean root and returns non-zero when an unallowed file or directory exists.",
+      "invariants": "Never delete tracked domain code or modify FLEET-MANAGED blocks in `AGENTS.md`."
+    },
+    "verification_command": "pytest tests/unit/scripts/test_check_root_clutter.py -q && python scripts/check_root_clutter.py"
+  },
+  {
+    "packet_id": "WAVE-2-UD-9406",
+    "wave": "Wave 2",
+    "repo": "D-sorganization/UpstreamDrift",
+    "issue_number": 9406,
+    "parent_epic": "#9406 (EPIC-4: vendor/ud-tools Decoupling & Optional Engine Packaging)",
+    "supersedes": [],
+    "allowed_files": [
+      "pyproject.toml",
+      "launch_upstream_drift.py",
+      "Makefile",
+      "tests/unit/test_packaging_extras_contract.py"
+    ],
+    "instructions": [
+      "In `pyproject.toml`, add explicit optional dependency groups `mujoco`, `opensim`, `myosuite`, and `ui` under `[project.optional-dependencies]` so users and CI can install modular engine extras (`upstream-drift[mujoco]`, `upstream-drift[drake,pinocchio]`, `upstream-drift[opensim,myosuite]`, `upstream-drift[ui]`).",
+      "In `launch_upstream_drift.py`, update the misleading error/help message referencing non-existent `pip install \"upstream-drift[tools]\"` to reference `pip install -r requirements-tools.txt` (per PEP 508 / #9406).",
+      "In `Makefile`, update the `install` target to also install `-r requirements-tools.txt` so developer installations automatically pull the pinned `ud-tools` package.",
+      "Write a unit test `tests/unit/test_packaging_extras_contract.py` verifying that `pyproject.toml` defines `mujoco`, `drake`, `pinocchio`, `opensim`, `myosuite`, `biomechanics`, `gui-tools`, and `ui` extras."
+    ],
+    "dbc_contract": {
+      "preconditions": "`pyproject.toml` defines `[project.optional-dependencies]`.",
+      "postconditions": "All engine tiers and UI surfaces have explicit optional dependency keys in `pyproject.toml`.",
+      "invariants": "Do not weaken existing dependency version bounds in `pyproject.toml`."
+    },
+    "verification_command": "pytest tests/unit/test_packaging_extras_contract.py -q"
+  },
+  {
+    "packet_id": "WAVE-3A-UD-9547",
+    "wave": "Wave 3",
+    "repo": "D-sorganization/UpstreamDrift",
+    "issue_number": 9547,
+    "parent_epic": "#9700 (EPIC-1: Scientific & Numerical Fail-Closed Integrity)",
+    "supersedes": [9549, 9550],
+    "allowed_files": [
+      "rust_core/upstream-physics/src/contact.rs",
+      "src/shared/python/physics/impact_interval_audit.py",
+      "tests/unit/physics/test_impact_interval_audit.py"
+    ],
+    "instructions": [
+      "In `rust_core/upstream-physics/src/contact.rs`, remove the silent `.max(0.0)` clamping on `energy_lost` (or add a fail-closed check/assertion in debug/audit mode and preserve signed `energy_lost` so non-conservative energy creation is never silently zeroed) and add a Rust unit test verifying signed energy accounting.",
+      "In `src/shared/python/physics/impact_interval_audit.py`, ensure `qualified_post_impact_state` and `audit_impact_interval` strictly reject any interval result where contact is unfinished (`contact_completed` is False, final normal force > 0, or separation has not occurred) or where `energy_residual_j` exceeds tolerance, raising a typed `UnqualifiedImpactError`.",
+      "Add mutation/regression tests in `tests/unit/physics/test_impact_interval_audit.py` proving that truncated contact (`maximum_time_s=1e-5` with nonzero normal force) and artificially zeroed slack residuals (`unilateral_release` manipulation) are caught and rejected."
+    ],
+    "dbc_contract": {
+      "preconditions": "Impact interval solver outputs an `ImpactIntervalResult` or ledger dictionary.",
+      "postconditions": "`qualified_post_impact_state` raises `ValueError` / `UnqualifiedImpactError` whenever contact is unfinished or the recomputed signed energy residual exceeds tolerance.",
+      "invariants": "Never clamp energy residuals to zero (`max(0.0, residual)`) or substitute mock physics in verification tests."
+    },
+    "verification_command": "pytest tests/unit/physics/test_impact_interval_audit.py -q"
+  },
+  {
+    "packet_id": "WAVE-3B-UD-11709",
+    "wave": "Wave 3",
+    "repo": "D-sorganization/UpstreamDrift",
+    "issue_number": 11709,
+    "parent_epic": "#11605 (EPIC-2: Cross-Engine Tiered Equivalency Contracts)",
+    "supersedes": [12013],
+    "allowed_files": [
+      "src/engines/tiers.py",
+      "src/engines/simscape/adapter.py",
+      "tests/unit/engines/test_engine_tiers_contract.py"
+    ],
+    "instructions": [
+      "In `src/engines/tiers.py`, register `simscape` in `ENGINE_TIERS` and add an explicit 3-Tier Equivalency Contract mapping (`ENGINE_EQUIVALENCY_TIERS`: `tier_1_rigid_body` -> `('mujoco', 'pinocchio', 'drake', 'simscape')`, `tier_2_soft_contact` -> `('mujoco', 'putting_green')`, `tier_3_musculoskeletal` -> `('opensim', 'myosuite')`) with helper functions `get_equivalency_tier(engine_name: str) -> str` and `assert_valid_parity_pair(engine_a: str, engine_b: str, *, allow_stripped_rigid_proxy: bool = False) -> None`.",
+      "In `src/engines/simscape/adapter.py` (around line 718), update `compute_contact_forces` so that when the underlying Simscape model has no foot-ground contact channel (e.g., canonical `GolfSwing3D_Kinetic`), it returns `None` (unavailable) or raises/signals unavailable per the GCV-3 contract (#11709) instead of returning fabricated zeros `np.zeros(6)`.",
+      "Create `tests/unit/engines/test_engine_tiers_contract.py` testing `ENGINE_TIERS`, `ENGINE_EQUIVALENCY_TIERS`, `assert_valid_parity_pair` (verifying Tier 1 vs Tier 3 comparisons fail closed unless `allow_stripped_rigid_proxy=True`), and verifying `SimscapeAdapter.compute_contact_forces` does not fabricate zeros when contact channels are absent."
+    ],
+    "dbc_contract": {
+      "preconditions": "Engine names and adapter instances are queried for cross-engine parity or contact forces.",
+      "postconditions": "Unavailable contact forces are never represented as zero vectors; cross-tier parity comparisons without explicit proxy declarations raise `ValueError`.",
+      "invariants": "Preserve backward compatibility for existing `ENGINE_TIERS` callers."
+    },
+    "verification_command": "pytest tests/unit/engines/test_engine_tiers_contract.py -q"
+  },
+  {
+    "packet_id": "WAVE-4-UD-11987",
+    "wave": "Wave 4",
+    "repo": "D-sorganization/UpstreamDrift",
+    "issue_number": 11987,
+    "parent_epic": "#11987 (EPIC-3: React/Tauri UI Consolidation & Web Parity)",
+    "supersedes": [],
+    "allowed_files": [
+      "ui/src/pages/MatchedSwings.tsx",
+      "ui/src/pages/MatchedSwings.test.tsx",
+      "ui/src/pages/LaunchMonitorAnalytics.tsx",
+      "ui/src/pages/LaunchMonitorAnalytics.test.tsx",
+      "src/config/impact_zone_readiness.json"
+    ],
+    "instructions": [
+      "In `ui/src/pages/MatchedSwings.tsx`, wire a 'Launch Native Viewer' handoff action button for each matched swing run that calls `POST /api/matched-swings/{run_id}/native-viewer` and displays the launch status/feedback in the UI.",
+      "In `ui/src/pages/LaunchMonitorAnalytics.tsx`, add the missing 'Sessions' and 'Reports' tabs/views wired to `/api/launch-monitor-analytics/sessions` and `/api/launch-monitor-analytics/reports` so the web page matches the backend API and PyQt6 workbench.",
+      "In `src/config/impact_zone_readiness.json`, reconcile stale status fields for closed issues (#9349) while keeping genuinely open items (#9547, #9549, #9550) accurately tracked.",
+      "Add/update Vitest component tests in `ui/src/pages/MatchedSwings.test.tsx` and `ui/src/pages/LaunchMonitorAnalytics.test.tsx`."
+    ],
+    "dbc_contract": {
+      "preconditions": "FastAPI routes `/api/matched-swings/{run_id}/native-viewer` and `/api/launch-monitor-analytics/{sessions,reports}` exist.",
+      "postconditions": "Both React pages expose and test the missing parity controls without breaking existing tests.",
+      "invariants": "Follow TypeScript strict typing and React hooks best practices."
+    },
+    "verification_command": "npm --prefix ui test -- --run src/pages/MatchedSwings.test.tsx src/pages/LaunchMonitorAnalytics.test.tsx"
+  }
+]
