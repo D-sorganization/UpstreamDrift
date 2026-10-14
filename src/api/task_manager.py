@@ -266,26 +266,67 @@ class TaskManager:
                 self._tasks[task_id]["progress"] = min(max(progress, 0.0), 100.0)
                 self._timestamps[task_id] = time.time()
 
-    def mark_completed(self, task_id: str, result: dict[str, Any]) -> None:
-        """Mark a task as completed with its result."""
-        with self._lock:
-            self._ensure_open()
-            self._cleanup_expired_locked()
-            if task_id in self._tasks and not self._is_expired_locked(task_id):
-                self._tasks[task_id]["status"] = TaskStatus.COMPLETED.value
-                self._tasks[task_id]["result"] = result
-                self._tasks[task_id]["progress"] = 100.0
-                self._timestamps[task_id] = time.time()
+    def _settleable_locked(self, task_id: str) -> dict[str, Any] | None:
+        """The live task a worker may still settle, or ``None``.
 
-    def mark_failed(self, task_id: str, error: str) -> None:
-        """Mark a task as failed with error information."""
+        Caller holds the lock. A cancelled task is terminal: cancellation is
+        cooperative, so a worker can finish the step it was on after the
+        cancel landed, and its late outcome must not turn the task back into
+        a result (issue #9545).
+        """
+        self._cleanup_expired_locked()
+        task = self._tasks.get(task_id)
+        if task is None or self._is_expired_locked(task_id):
+            return None
+        if task.get("status") == TaskStatus.CANCELLED.value:
+            return None
+        return task
+
+    def mark_running(self, task_id: str) -> bool:
+        """Move a pending task to running; ``False`` if it is not pending."""
         with self._lock:
             self._ensure_open()
-            self._cleanup_expired_locked()
-            if task_id in self._tasks and not self._is_expired_locked(task_id):
-                self._tasks[task_id]["status"] = TaskStatus.FAILED.value
-                self._tasks[task_id]["error"] = error
-                self._timestamps[task_id] = time.time()
+            task = self._settleable_locked(task_id)
+            if task is None or task.get("status") != TaskStatus.PENDING.value:
+                return False
+            task["status"] = TaskStatus.RUNNING.value
+            self._timestamps[task_id] = time.time()
+            return True
+
+    def mark_completed(self, task_id: str, result: dict[str, Any]) -> bool:
+        """Mark a task as completed with its result.
+
+        Returns:
+            ``False`` when the task is absent, expired or was cancelled, in
+            which case it is left unchanged.
+        """
+        with self._lock:
+            self._ensure_open()
+            task = self._settleable_locked(task_id)
+            if task is None:
+                return False
+            task["status"] = TaskStatus.COMPLETED.value
+            task["result"] = result
+            task["progress"] = 100.0
+            self._timestamps[task_id] = time.time()
+            return True
+
+    def mark_failed(self, task_id: str, error: str) -> bool:
+        """Mark a task as failed with error information.
+
+        Returns:
+            ``False`` when the task is absent, expired or was cancelled, in
+            which case it is left unchanged.
+        """
+        with self._lock:
+            self._ensure_open()
+            task = self._settleable_locked(task_id)
+            if task is None:
+                return False
+            task["status"] = TaskStatus.FAILED.value
+            task["error"] = error
+            self._timestamps[task_id] = time.time()
+            return True
 
     def active_count(self) -> int:
         """Return the number of active (non-expired) tasks."""

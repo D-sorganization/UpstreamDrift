@@ -18,8 +18,8 @@ Contract
   the default study settings, without the playability sweep. ``/v1/compare``
   runs the A/B ranking, which costs one nominal shot plus the fixed
   ``playability_points ** 2`` sweep per design (52 shots at the defaults);
-  no request field can enlarge it. Long jobs and cancellation belong to
-  #8880/#9472.
+  no request field can enlarge it. The same solves also run as bounded,
+  cancellable jobs with progress (``bunker_workbench_jobs``).
 * **The verdict travels with every number.** The response carries the tier,
   the verdict, the in-frame stamp the PyQt views draw
   (:func:`~src.tools.bunker_shot_gui.report.validity_stamp`), the source of
@@ -48,7 +48,7 @@ import dataclasses
 import hashlib
 import hmac
 import re
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -79,10 +79,14 @@ if TYPE_CHECKING:
 __all__ = [
     "COMPARISON_SCHEMA_VERSION",
     "SCHEMA_VERSION",
+    "BoundedSolve",
     "BunkerWorkbenchCompareRequestV1",
     "BunkerWorkbenchRequestV1",
+    "ShotHook",
     "comparison_record",
+    "comparison_solve",
     "evaluation_record",
+    "evaluation_solve",
     "record_digest",
     "router",
 ]
@@ -695,30 +699,116 @@ def _study_settings(objective: BunkerObjectiveV1 | None) -> SolverSetup:
     )
 
 
-@router.post("/v1/evaluate", response_model=BunkerWorkbenchEvaluationV1)
-@handle_api_errors
-def evaluate_v1(request: BunkerWorkbenchRequestV1) -> dict[str, Any]:
-    """Run one bounded nominal F0 solve and return the stamped record.
+ShotHook = Callable[[], None]
+"""Called before every shot; a job runner counts it and raises to cancel."""
 
-    Synchronous on purpose: FastAPI runs it in its threadpool, so the
-    second-scale solve does not block the event loop.
+
+@dataclasses.dataclass(frozen=True)
+class BoundedSolve:
+    """A request already validated at the boundary, whose solve has not run.
+
+    Built by :func:`evaluation_solve` or :func:`comparison_solve`, so every
+    refusal (left-handed, predictive, duplicate names, an unconstructible
+    sole) is raised before any shot. ``run`` performs the bounded solve and
+    returns the stamped record; the synchronous routes call it inline and
+    the job routes (``bunker_workbench_jobs``) on a worker thread.
+
+    Attributes:
+        kind: ``"evaluate"`` or ``"compare"``.
+        planned_shots: Shots ``run`` performs at most, for progress.
+        run: Solve with an optional :data:`ShotHook`; returns the record.
+    """
+
+    kind: Literal["evaluate", "compare"]
+    planned_shots: int
+    run: Callable[[ShotHook | None], dict[str, Any]]
+
+
+def evaluation_solve(request: BunkerWorkbenchRequestV1) -> BoundedSolve:
+    """Validate an evaluation request and return its one-shot solve.
 
     Raises:
         HTTPException: 422 for input the workbench cannot construct, a
             left-handed request or a predictive objective.
     """
     _require_answerable(request.handedness, request.objective)
-    from src.tools.bunker_shot_gui.model import WorkbenchModel
-
     with _workbench_input():
         design = _wedge(request.design)
         sand, swing = _conditions(request.sand, request.swing)
-        evaluation = WorkbenchModel().evaluate(
-            design, sand, swing, include_playability=False
+        design.geometry()
+
+    def run(on_shot: ShotHook | None) -> dict[str, Any]:
+        from src.tools.bunker_shot_gui.model import WorkbenchModel
+
+        with _workbench_input():
+            evaluation = WorkbenchModel(on_shot=on_shot).evaluate(
+                design, sand, swing, include_playability=False
+            )
+        return evaluation_record(
+            evaluation,
+            swing,
+            handedness=request.handedness,
+            objective=request.objective,
         )
-    return evaluation_record(
-        evaluation, swing, handedness=request.handedness, objective=request.objective
-    )
+
+    return BoundedSolve(kind="evaluate", planned_shots=1, run=run)
+
+
+def comparison_solve(request: BunkerWorkbenchCompareRequestV1) -> BoundedSolve:
+    """Validate a comparison request and return its bounded A/B solve.
+
+    Each design costs one nominal shot plus the fixed
+    ``playability_points ** 2`` sweep; no request field can enlarge it.
+
+    Raises:
+        HTTPException: 422 for two designs with one name, input the workbench
+            cannot construct, a left-handed request or a predictive objective.
+    """
+    _require_answerable(request.handedness, request.objective)
+    if request.left.name == request.right.name:
+        raise _unprocessable(
+            "design_names_not_distinct",
+            "the two designs must have different names; the comparison "
+            f"reports them by name and both are {request.left.name!r}",
+        )
+    with _workbench_input():
+        left, right = _wedge(request.left), _wedge(request.right)
+        sand, swing = _conditions(request.sand, request.swing)
+        settings = _study_settings(request.objective)
+        left.geometry()
+        right.geometry()
+
+    def run(on_shot: ShotHook | None) -> dict[str, Any]:
+        from src.tools.bunker_shot_gui.model import WorkbenchModel
+
+        with _workbench_input():
+            model = WorkbenchModel(settings, on_shot=on_shot)
+            comparison = model.compare(left, right, sand, swing)
+        return comparison_record(
+            comparison,
+            swing,
+            handedness=request.handedness,
+            objective=request.objective,
+        )
+
+    shots = 2 * (1 + settings.playability_points**2)
+    return BoundedSolve(kind="compare", planned_shots=shots, run=run)
+
+
+@router.post("/v1/evaluate", response_model=BunkerWorkbenchEvaluationV1)
+@handle_api_errors
+def evaluate_v1(request: BunkerWorkbenchRequestV1) -> dict[str, Any]:
+    """Run one bounded nominal F0 solve and return the stamped record.
+
+    Synchronous on purpose: FastAPI runs it in its threadpool, so the
+    second-scale solve does not block the event loop. The job routes run
+    the same solve with progress and cancellation.
+
+    Raises:
+        HTTPException: 422 for input the workbench cannot construct, a
+            left-handed request or a predictive objective.
+    """
+    return evaluation_solve(request).run(None)
 
 
 @router.post("/v1/compare", response_model=BunkerWorkbenchComparisonV1)
@@ -737,23 +827,7 @@ def compare_v1(request: BunkerWorkbenchCompareRequestV1) -> dict[str, Any]:
         HTTPException: 422 for two designs with one name, input the workbench
             cannot construct, a left-handed request or a predictive objective.
     """
-    _require_answerable(request.handedness, request.objective)
-    if request.left.name == request.right.name:
-        raise _unprocessable(
-            "design_names_not_distinct",
-            "the two designs must have different names; the comparison "
-            f"reports them by name and both are {request.left.name!r}",
-        )
-    from src.tools.bunker_shot_gui.model import WorkbenchModel
-
-    with _workbench_input():
-        left, right = _wedge(request.left), _wedge(request.right)
-        sand, swing = _conditions(request.sand, request.swing)
-        model = WorkbenchModel(_study_settings(request.objective))
-        comparison = model.compare(left, right, sand, swing)
-    return comparison_record(
-        comparison, swing, handedness=request.handedness, objective=request.objective
-    )
+    return comparison_solve(request).run(None)
 
 
 @router.post("/v1/verify", response_model=BunkerRecordVerificationV1)
