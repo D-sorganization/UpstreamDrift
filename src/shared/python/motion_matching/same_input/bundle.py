@@ -348,8 +348,9 @@ def _extract_manifest_policy(source: Any) -> tuple[dict[str, Any], float]:
             return _extract_manifest_policy(source["manifest"])
         if "policy" in source and isinstance(source["policy"], dict):
             return source["policy"], float(source.get("dt_s", DEFAULT_PROJECTION_DT_S))
+        fallback_dt = source.get("dt_s", source.get("projection_dt_s"))
         return source, float(
-            source.get("dt_s", source.get("projection_dt_s", DEFAULT_PROJECTION_DT_S))
+            DEFAULT_PROJECTION_DT_S if fallback_dt is None else fallback_dt
         )
     raise TypeError(f"cannot read effort hold policy from {type(source).__name__}")
 
