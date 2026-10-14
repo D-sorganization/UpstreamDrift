@@ -222,29 +222,127 @@ def _fixture_swing(club: str):
     return spec_bytes, swing
 
 
-_IMPACT_WAIVER_REASON = (
-    "#12272: on the #12221 driver fixture (-2.5 % impact speed) the "
-    "bushing reaches 2.62 deg and 51.3 N squeeze for 6 ms at ball impact "
-    "(t = 1.326-1.332 s; limits 2 deg, 50 N; see DESIGN_DECISIONS_2.md section 21); "
-    "the previous fixture (-5.1 %) peaked at 1.81 deg and 34.5 N at the same instant"
-)
+_IMPACT_WAIVER_REASONS = {
+    "driver": (
+        "#12272: on the #12221 driver fixture (-2.5 % impact speed) the "
+        "bushing reaches 2.62 deg and 51.3 N squeeze for 6 ms at ball impact "
+        "(t = 1.326-1.332 s; limits 2 deg, 50 N; see DESIGN_DECISIONS_2.md "
+        "section 21); the previous fixture (-5.1 %) peaked at 1.81 deg and "
+        "34.5 N at the same instant"
+    ),
+    "iron7": (
+        "#12279: on the 0.125 ms-hold 7-iron fixture (-2.6 % impact speed) the "
+        "bushing reaches 2.98 deg and 58.2 N squeeze for 10 ms at ball impact "
+        "(t = 1.334-1.344 s; limits 2 deg, 50 N); owner ruling 2026-10-14 on "
+        "the #12272 rule, see DESIGN_DECISIONS_2.md section 21"
+    ),
+}
 # (club, bound) -> ceiling: the measured exceedance plus 3 %, so only the
 # documented excursion is waived; every other assertion still runs first.
 _IMPACT_WAIVERS = {
     ("driver", "rotation"): np.radians(2.62 * 1.03),
     ("driver", "squeeze"): 51.3 * 1.03,
+    ("iron7", "rotation"): np.radians(2.98 * 1.03),
+    ("iron7", "squeeze"): 58.2 * 1.03,
 }
+# club -> measured ball-impact exceedance window (s, inclusive); outside it the
+# plain bound holds on every sample.  Slack covers the 2 ms sample clock only.
+_IMPACT_WINDOWS_S = {"driver": (1.326, 1.332), "iron7": (1.334, 1.344)}
+_WINDOW_SLACK_S = 1e-6
 
 
-def _assert_bound(club: str, bound: str, value: float, limit: float) -> None:
-    """``value <= limit``, or the documented #12272 exceedance (then xfail)."""
+def _in_impact_window(club: str, time_s: np.ndarray) -> np.ndarray:
+    """Samples inside the club's documented impact exceedance window."""
+    lo, hi = _IMPACT_WINDOWS_S[club]
+    t = np.asarray(time_s, dtype=float)
+    return (t >= lo - _WINDOW_SLACK_S) & (t <= hi + _WINDOW_SLACK_S)
+
+
+def _assert_bound(
+    club: str, bound: str, time_s: np.ndarray, series: np.ndarray, limit: float
+) -> None:
+    """``series <= limit``, or a documented impact exceedance (then xfail).
+
+    A waived club must hold the plain bound outside its impact window, exceed
+    it inside, and stay under the recorded ceiling (#12272, #12279).
+    """
+    series = np.asarray(series, dtype=float)
     ceiling = _IMPACT_WAIVERS.get((club, bound))
     if ceiling is None:
-        assert value <= limit
+        assert series.max() <= limit
         return
-    assert value > limit, f"{club} {bound} is within its bound: drop the waiver"
-    assert value <= ceiling, f"{club} {bound} {value:.4g} exceeds the #12272 record"
-    pytest.xfail(_IMPACT_WAIVER_REASON)
+    lo, hi = _IMPACT_WINDOWS_S[club]
+    outside_peak = series[~_in_impact_window(club, time_s)].max(initial=0.0)
+    assert outside_peak <= limit, (
+        f"{club} {bound} {outside_peak:.4g} breaks its bound outside the "
+        f"{lo}-{hi} s impact window"
+    )
+    peak = series.max()
+    assert peak > limit, f"{club} {bound} is within its bound: drop the waiver"
+    assert peak <= ceiling, f"{club} {bound} {peak:.4g} exceeds the waiver record"
+    pytest.xfail(_IMPACT_WAIVER_REASONS[club])
+
+
+def _rotation_series_rad(run) -> np.ndarray:
+    return np.maximum(
+        run.rotation_deflection_rad["L"], run.rotation_deflection_rad["R"]
+    )
+
+
+def _squeeze_series_n(forces, points) -> np.ndarray:
+    """|axial internal force| per sample (the series behind ``peak_squeeze_n``)."""
+    dec = decompose_hand_forces(*forces, *points)
+    return np.abs(np.atleast_1d(dec.internal_axial_n))
+
+
+_WAIVER_T = np.arange(1.300, 1.360, 0.002)
+
+
+def _pulse(club: str, peak: float, limit: float) -> np.ndarray:
+    """``0.5 * limit`` everywhere, ``peak`` inside the club's impact window."""
+    return np.where(_in_impact_window(club, _WAIVER_T), peak, 0.5 * limit)
+
+
+@pytest.mark.parametrize(
+    ("club", "bound", "limit"),
+    [
+        ("driver", "rotation", MAX_ROTATION_RAD),
+        ("driver", "squeeze", 50.0),
+        ("iron7", "rotation", MAX_ROTATION_RAD),
+        ("iron7", "squeeze", 50.0),
+    ],
+)
+def test_impact_waiver_is_limited_to_its_window_and_ceiling(club, bound, limit):
+    """Each waiver xfails only an in-window excursion below its ceiling."""
+    ceiling = _IMPACT_WAIVERS[(club, bound)]
+    with pytest.raises(pytest.xfail.Exception):
+        _assert_bound(club, bound, _WAIVER_T, _pulse(club, ceiling, limit), limit)
+    above = _pulse(club, ceiling * 1.001, limit)
+    with pytest.raises(AssertionError, match="exceeds"):
+        _assert_bound(club, bound, _WAIVER_T, above, limit)
+    outside = _pulse(club, ceiling, limit)
+    outside[0] = 1.001 * limit  # t = 1.300 s, before every impact window
+    with pytest.raises(AssertionError, match="outside"):
+        _assert_bound(club, bound, _WAIVER_T, outside, limit)
+    with pytest.raises(AssertionError, match="drop the waiver"):
+        _assert_bound(club, bound, _WAIVER_T, _pulse(club, limit, limit), limit)
+
+
+def test_iron7_waiver_records_the_owner_ruled_ceilings():
+    """#12279 owner ruling 2026-10-14: measured value + 3 %, impact window only."""
+    assert _IMPACT_WINDOWS_S["iron7"] == (1.334, 1.344)
+    assert np.degrees(_IMPACT_WAIVERS[("iron7", "rotation")]) == pytest.approx(
+        3.07, abs=0.005
+    )
+    assert _IMPACT_WAIVERS[("iron7", "squeeze")] == pytest.approx(59.9, abs=0.05)
+
+
+def test_unwaived_bound_is_the_plain_limit_over_the_whole_series():
+    series = np.full(_WAIVER_T.shape, 0.5)
+    _assert_bound("", "squeeze", _WAIVER_T, series, 1.0)
+    series[15] = 1.01
+    with pytest.raises(AssertionError):
+        _assert_bound("", "squeeze", _WAIVER_T, series, 1.0)
 
 
 @pytest.fixture(scope="module", params=["driver", "iron7"])
@@ -274,9 +372,10 @@ def test_fixture_swing_closes_the_two_hand_loop(club: str) -> None:
 def test_full_swing_deflection_within_limits(full_swing_run) -> None:
     club, run = full_swing_run
     assert run.time_s[-1] > 1.8
-    trans, rot, _ = _worst(run)
+    trans, _, _ = _worst(run)
     assert trans <= MAX_DEFLECTION_M
-    _assert_bound(club, "rotation", rot, MAX_ROTATION_RAD)
+    rot = _rotation_series_rad(run)
+    _assert_bound(club, "rotation", run.time_s, rot, MAX_ROTATION_RAD)
 
 
 def _assert_internal_force_is_physical(run, spec, club: str = "") -> None:
@@ -299,7 +398,9 @@ def _assert_internal_force_is_physical(run, spec, club: str = "") -> None:
     assert res.checked.mean() > 0.5  # the check covers the loaded swing
     assert res.checked[int(np.argmax(res.actual_transverse_n))]
     assert res.max_relative_error() <= MAX_COUPLE_RELATIVE_ERROR
-    _assert_bound(club, "squeeze", peak_squeeze_n(*forces, *points), MAX_SQUEEZE_N)
+    squeeze = _squeeze_series_n(forces, points)
+    assert squeeze.max() == pytest.approx(peak_squeeze_n(*forces, *points))
+    _assert_bound(club, "squeeze", run.time_s, squeeze, MAX_SQUEEZE_N)
 
 
 @pytest.mark.slow

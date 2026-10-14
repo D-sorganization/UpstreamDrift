@@ -1,0 +1,110 @@
+{
+  "issue": 12279,
+  "generated_utc": "2026-10-14T17:06:13+00:00",
+  "host": "Brick",
+  "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+  "python": "3.12.13",
+  "opensim": "4.6-2026-06-22-85aaf64",
+  "base_commit": "7c27fd218fe5726ad0f4deee5c5d40be602d5289",
+  "command": "run_grip_parity.py --club iron7 --reference; then --engines mujoco drake pinocchio; then --report",
+  "reason": "the 7-iron club-face fixture was regenerated with the 0.125 ms effort hold (#12279), so the #12503 iron7 reference no longer matches its input; the driver reference is unchanged",
+  "fixtures_sha256": {
+    "tests/fixtures/club_face/swing_q_iron7.npz": "e33dc871adea1279849c41aae2a341686d64fdc894d49ee37740aa0c7a5a5e54",
+    "tests/fixtures/club_face/address_poses.json": "d126eb4369a6cde2ab1304c2784b45132e7be0a0d308fe406c2d3aa2c4d9bdf3",
+    "docs/development/full_body_models/full_body_spec_anthro_iron7.json": "2f2a3d94dc5e5246dcd40745fe37254d107ae8398396f4b15a3a2d05348be108"
+  },
+  "not_rerun": {
+    "myosuite": "myosuite is not installed on this host; the test skips it",
+    "driver": "driver fixture and document unchanged; its #12503 reference stays"
+  },
+  "clubs": {
+    "iron7": {
+      "reference_sha256": {
+        "before": "d5be90b02b7246d980d8d64ebfda601615904d262763a9e112308ea6a57543d2",
+        "after": "07f59c5f16faf7255503eadb588f8aa371d4f9f68482fcb5e6322ee69cde7092"
+      },
+      "reference_run": {
+        "engine": "opensim",
+        "accuracy": 1e-5,
+        "wall_time_s": 141.91627612299635
+      },
+      "engines": {
+        "mujoco": {
+          "against_stale_reference": {
+            "passes": false,
+            "failing": [
+              "couple",
+              "deflection_L",
+              "deflection_R",
+              "force_L",
+              "force_R",
+              "internal_force",
+              "net_force",
+              "rotation_L",
+              "rotation_R",
+              "squeeze"
+            ],
+            "worst_peak": ["squeeze", 1.0032329611271538],
+            "worst_rms": ["squeeze", 0.09299207475657464]
+          },
+          "against_fresh_reference": {
+            "passes": true,
+            "failing": [],
+            "worst_peak": ["net_force", 7.565564492915936e-5],
+            "worst_rms": ["net_force", 1.0235561475205022e-5]
+          }
+        },
+        "drake": {
+          "against_stale_reference": {
+            "passes": false,
+            "failing": [
+              "couple",
+              "deflection_L",
+              "deflection_R",
+              "force_L",
+              "force_R",
+              "internal_force",
+              "net_force",
+              "rotation_L",
+              "rotation_R",
+              "squeeze"
+            ],
+            "worst_peak": ["squeeze", 0.9178404106038579],
+            "worst_rms": ["squeeze", 0.0923389198263027]
+          },
+          "against_fresh_reference": {
+            "passes": true,
+            "failing": [],
+            "worst_peak": ["squeeze", 0.042620945601970814],
+            "worst_rms": ["squeeze", 0.004136969117962562]
+          }
+        },
+        "pinocchio": {
+          "against_stale_reference": {
+            "passes": false,
+            "failing": [
+              "couple",
+              "deflection_L",
+              "deflection_R",
+              "force_L",
+              "force_R",
+              "internal_force",
+              "net_force",
+              "rotation_L",
+              "rotation_R",
+              "squeeze"
+            ],
+            "worst_peak": ["squeeze", 1.0032215996491378],
+            "worst_rms": ["squeeze", 0.09299208122066863]
+          },
+          "against_fresh_reference": {
+            "passes": true,
+            "failing": [],
+            "worst_peak": ["net_force", 4.7383062721014296e-6],
+            "worst_rms": ["net_force", 1.4543477885432576e-6]
+          }
+        }
+      }
+    }
+  }
+}

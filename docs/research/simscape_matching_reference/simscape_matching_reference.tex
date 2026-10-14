@@ -5582,6 +5582,8 @@ beyond the 5~deg limit. The committed 7-iron fixture gives $-3.9$~\%, $-3.9$~ms 
 so adopting the refit would turn eight passing face tests red. The 7-iron document,
 OpenSim export and receipts are unchanged, and
 \texttt{fit\_grip\_rotation\_receipt\_iron7.json} stays committed for a follow-up.
+It was adopted for \#12279 once the export used the 0.125~ms effort hold (next
+paragraph).
 
 \paragraph{Same-Input Effort Hold (Issue \#12279).}
 The same-input export holds each controller sample for one 1~ms step over eight
@@ -5608,11 +5610,35 @@ $-2.5$~\%, $-7.3$~ms and 5.56~deg with the 0.125~ms hold. The driver bundle give
 $-2.5$~\%, $-4.4$~ms and 16.88~deg with the 1~ms hold, and $-1.2$~\%, $-3.5$~ms and
 16.91~deg with the 0.125~ms hold. With the finer hold the 7-iron peak is still
 7.3~ms early, beyond the 5~ms limit, so the 7-iron fixture would still fail
-GCV-20. No tolerance is changed. The fixtures are not yet regenerated, and their
-expected-failure markers stay. Regenerate them with:
+GCV-20. No tolerance is changed.
+
+The 7-iron club-face fixture was then regenerated on brick with the hold
+(\texttt{CLUB\_FACE\_EFFORT\_HOLD\_MS} $= 0.125$~ms in
+\texttt{scripts/regenerate\_club\_face\_fixtures.py}; fresh pipeline run and
+export at \texttt{639f557086} plus the change). It adopts the \#12221 7-iron grip
+refit: the fitted rotation is applied to the 7-iron document and the 7-iron
+calibrated and fixture commands add \texttt{--fix-club-markers}. Against the
+capture the fixture goes from $-3.9$~\%, $-3.9$~ms and a 2.83~deg impact face to
+$-2.6$~\%, $-7.2$~ms and 5.47~deg (capture 3.21~deg); the post-impact speed drop
+is 27.9~\% below the capture's (10~\% limit). Every foot origin stays within
+5.5~mm of the tracked swing through 1.1~s; the 1~ms export of the
+\texttt{s38-fxi2} refit run reached 53.4~mm there and passed 10~mm at 0.705~s.
+The trail toe passes 10~mm at 1.18~s, as in the pipeline's own forward dynamics.
+The regenerated 7-iron receipts (address / IK / dynamics) are
+\texttt{anthro\_iron\_seeds\_zmp} 8.4 / 28.9 / 82.8~mm (was 4.0 / 28.4 /
+109.9~mm) and nominal \texttt{anthro\_iron} 40.4 / 44.5 / 86.3~mm (was 41.5 /
+45.2 / 104.9~mm). The 7-iron peak-timing miss stays an expected failure under
+\#11767. Driven by this fixture, the OpenSim bushing grip exceeds its full-swing
+bounds only at the 7-iron's ball impact ($t = 1.334$--$1.344$~s: 2.98~deg against
+2~deg, 58.2~N against 50~N); the owner extended the \#12272 rule to it on
+2026-10-14 (ceilings 3.07~deg and 59.9~N, measured value plus 3~\%). Both clubs'
+waivers are now limited to their impact window in the test: every sample outside
+it must meet the plain bound. The 7-iron grip-parity OpenSim reference and the MuJoCo, Drake and
+Pinocchio series were regenerated from this fixture with the \#12503 recipe
+(\texttt{reference\_regeneration\_12279.json}); every engine passes the 5~\% peak and
+2~\% RMS acceptance against it (worst: Drake squeeze, 4.3~\% peak). The driver fixture keeps the 1~ms hold. Regenerate with:
 \begin{verbatim}
-python3 -m scripts.same_input_bundle export --run-dir <run> \
-  --out <bundle.npz> --effort-hold-ms 0.125
+python3 -m scripts.regenerate_club_face_fixtures --work <dir> --capture iron
 \end{verbatim}
 
 Reproduce (ControlTower \texttt{ud-sim}, repository root):

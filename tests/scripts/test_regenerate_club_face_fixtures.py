@@ -27,13 +27,90 @@ def test_pipeline_argv_keeps_the_original_run_flags_and_the_weight() -> None:
         regen.pipeline_argv("owner", Path("o"), 3.0)
 
 
-def test_driver_fixture_run_holds_the_measured_club_cluster_fixed() -> None:
-    # The driver's grip rotation is fitted on the fixed cluster; a free
-    # cluster re-absorbs it and moves the capture's own face (#12221). The
-    # 7-iron keeps its free cluster and grip until its refit is adopted.
-    argv = regen.pipeline_argv("driver", Path("r"), 3.0)
+@pytest.mark.parametrize("capture", ["driver", "iron"])
+def test_fixture_runs_hold_the_measured_club_cluster_fixed(capture: str) -> None:
+    # Each grip rotation is fitted on the fixed cluster; a free cluster
+    # re-absorbs it and moves the capture's own face (#12221). The 7-iron
+    # refit is adopted with the 0.125 ms export hold (#12279).
+    argv = regen.pipeline_argv(capture, Path("r"), 3.0)
     assert "--fix-club-markers" in argv and "--static-seeds" in argv
-    assert "--fix-club-markers" not in regen.pipeline_argv("iron", Path("r"), 3.0)
+
+
+def test_club_face_export_requests_the_opt_in_eighth_millisecond_hold(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Owner ruling on #12279 (2026-10-11): the club-face fixtures export with
+    # the 0.125 ms effort hold; the global same-input default stays 1 ms.
+    import inspect
+
+    from scripts import same_input_bundle
+
+    run_dir = tmp_path / "iron"
+    run_dir.mkdir()
+    (run_dir / "receipt.json").write_text("{}", encoding="utf-8")
+    calls: list[tuple] = []
+
+    def fake_export(run, out, duration_s, effort_hold_ms=1.0):  # noqa: ANN001, ANN202
+        calls.append((run, out, duration_s, effort_hold_ms))
+        return {}
+
+    monkeypatch.setattr(same_input_bundle, "export", fake_export)
+    run, bundle = regen.run_and_export("iron", tmp_path, 3.0, reuse=True)
+    assert run == run_dir and bundle == tmp_path / "bundles" / "iron.npz"
+    assert calls == [(run_dir, bundle, None, 0.125)]
+    assert regen.CLUB_FACE_EFFORT_HOLD_MS == 0.125
+    default = inspect.signature(same_input_bundle.export).parameters
+    assert default["effort_hold_ms"].default == 1.0
+
+
+def test_a_reused_bundle_with_another_hold_is_re_exported(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # --reuse-run must not adopt a bundle exported on the 1 ms contract.
+    import numpy as np
+
+    from scripts import same_input_bundle
+
+    (tmp_path / "iron").mkdir()
+    (tmp_path / "iron" / "receipt.json").write_text("{}", encoding="utf-8")
+    bundle = tmp_path / "bundles" / "iron.npz"
+    bundle.parent.mkdir()
+    calls: list[float] = []
+    monkeypatch.setattr(
+        same_input_bundle,
+        "export",
+        lambda run, out, d, effort_hold_ms=1.0: calls.append(effort_hold_ms) or {},
+    )
+    for hold_s, expected in ((1e-3, [0.125]), (1.25e-4, [])):
+        manifest = {"policy": {"effort_hold_s": hold_s}}
+        np.savez(bundle, manifest=np.array(json.dumps(manifest)))
+        calls.clear()
+        regen.run_and_export("iron", tmp_path, 3.0, reuse=True)
+        assert calls == expected
+    np.savez(bundle, manifest=np.array(json.dumps({"policy": {}})))
+    calls.clear()
+    regen.run_and_export("iron", tmp_path, 3.0, reuse=True)
+    assert calls == [0.125]  # a legacy bundle holds 1 ms
+
+
+def test_tracked_swing_is_written_beside_the_fixture_on_the_bundle_clock(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The #12279 foot acceptance compares the fixture with the run's tracked
+    # swing, so the regeneration commits that q_track (float32) as well.
+    import numpy as np
+
+    run = tmp_path / "run"
+    run.mkdir()
+    q = np.arange(12.0).reshape(3, 4)
+    np.savez(run / "dynamics_record.npz", track_time_s=[0.5, 0.6, 0.7], q_track=q)
+    monkeypatch.setattr(regen, "FIXTURES", tmp_path)
+    path = regen._write_tracked_swing("iron7", run)  # noqa: SLF001
+    assert path == tmp_path / "tracked_q_iron7.npz"
+    with np.load(path) as data:
+        np.testing.assert_allclose(data["time_s"], [0.0, 0.1, 0.2], atol=1e-12)
+        assert data["q"].dtype == np.float32
+        np.testing.assert_array_equal(data["q"], q)
 
 
 def test_previous_fixture_is_measured_on_its_own_committed_model(
