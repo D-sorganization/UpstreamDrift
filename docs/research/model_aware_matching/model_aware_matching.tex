@@ -531,6 +531,53 @@ independent and batch over trials; the time axis is parallel because no
 integration occurs.  The reference implementation is pure NumPy; the same
 kernels accept MJX/JAX batched regressors unchanged.
 
+\subsection{Contact Wrenches, Friction-Cone SOCP, and Measured GRF}
+\label{sec:contact_wrenches}
+When interaction with the ground or environment occurs, contact forces enter
+the inverse-dynamics equation of motion as
+\begin{equation}
+  \bY(\bq_n,\bv_n,\ba_n; s)\,\bpi = \bB\bu_n + \bJ_c(\bq_n)^{\!\top}\blambda_n ,
+  \label{eq:contact_eom}
+\end{equation}
+where $\bJ_c\in\R^{n_\lambda\times n_v}$ is the contact Jacobian mapping generalized velocities
+to contact velocities, and $\blambda_n\in\R^{n_\lambda}$ stacks the $C$ contact point forces
+$\mathbf{f}^{(c)}_n = (f_{x,n}^{(c)}, f_{y,n}^{(c)}, f_{z,n}^{(c)})$.
+
+\paragraph{Conic Constraints (SOCP).}
+Physical contact is strictly unilateral and dissipative under Coulomb friction:
+\begin{align}
+  f_{z,n}^{(c)} &\ge 0 \quad\text{(unilateral: ground pushes, cannot pull)}, \label{eq:unilateral}\\
+  \norm{(f_{x,n}^{(c)}, f_{y,n}^{(c)})}_2 &\le \mu f_{z,n}^{(c)} \quad\text{(second-order Coulomb friction cone } \mathcal{K}_\mu \text{)}, \label{eq:friction_cone}
+\end{align}
+where $\mu>0$ is the friction coefficient.  The projection of a trial force $\mathbf{f}$ onto $\mathcal{K}_\mu$
+has an exact closed-form Euclidean formula:
+\begin{equation}
+  \Pi_{\mathcal{K}_\mu}(\mathbf{f}) = \begin{cases}
+    \mathbf{f}, & \text{if } \norm{\mathbf{f}_t}\le\mu f_z \text{ and } f_z\ge 0,\\
+    \mathbf{0}, & \text{if } f_z + \mu\norm{\mathbf{f}_t} \le 0 \quad\text{(polar cone reflection)},\\
+    \left(\mu f_z^\star \frac{\mathbf{f}_t}{\norm{\mathbf{f}_t}},\, f_z^\star\right),
+    \quad f_z^\star = \frac{f_z+\mu\norm{\mathbf{f}_t}}{1+\mu^2}, & \text{otherwise}.
+  \end{cases}
+\end{equation}
+
+\paragraph{Inner Solve and Identifiability Loss.}
+With measured ground reaction forces $\blambda^{\mathrm{meas}}_n$ entering as observations
+weighted by $w_{\mathrm{grf}}$, the inner objective minimizes
+\begin{equation}
+  \min_{\bu, \blambda} \sum_{n} \frac12\norm{\bW_\tau\big[\bY_n\bpi - \bB\bu_n - \bJ_{c,n}^{\!\top}\blambda_n\big]}^2
+  + \frac{w_u^2}{2}\sum_n\norm{\bu_n}^2 + \frac{w_\lambda^2}{2}\sum_n\norm{\blambda_n}^2
+  + \frac{w_{\mathrm{grf}}^2}{2}\sum_n\norm{\blambda_n - \blambda^{\mathrm{meas}}_n}^2
+\end{equation}
+subject to \eqref{eq:unilateral}--\eqref{eq:friction_cone}.  Without GRF observations,
+the inner system matrix $\begin{bmatrix} \bB & \bJ_c^{\!\top} \end{bmatrix}$ is generally rank-deficient
+whenever $n_u + n_\lambda > n_v$, leading to internal force ambiguity, an infinite condition number
+$\kappa=\infty$, and per-variable observable fractions $<1.0$.  Measured GRF observation rows
+$\begin{bmatrix}\mathbf{0} & \mathbf{I}\end{bmatrix}$ restore full column rank, unit observable fractions,
+and well-conditioned recovery.  Cone violations and non-convergence are explicitly tracked
+(\texttt{ConeViolationReport}) and never silently clipped.  Physical edge cases such as lift-off
+($f_z\to 0$ without unphysical tension) and stick-slip friction saturation
+($\norm{\mathbf{f}_t}=\mu f_z$) are verified by retained negative fixtures.
+
 \section{Qualification Gates}
 \label{sec:gates}
 A fit is reported with the following measured items; a missing item is
