@@ -58,6 +58,16 @@ class ViaPose:
     coordinates: dict[str, float]
 
 
+@dataclass(frozen=True)
+class LiftGrip:
+    """A lift's grip: palm-centre width on the bar and the standard's range."""
+
+    attach: str
+    kind: str
+    width_m: float
+    width_range_m: tuple[float, float]
+
+
 @lru_cache(maxsize=1)
 def _standard() -> dict[str, Any]:
     data: dict[str, Any] = json.loads(STANDARD_PATH.read_text(encoding="utf-8"))
@@ -80,8 +90,13 @@ def lift_phases(lift: str) -> tuple[LiftPhase, ...]:
     """Ordered named phases of *lift* from the standard.
 
     Raises:
-        ValueError: If *lift* is not one of :data:`LIFTS`.
+        ValueError: If *lift* is not one of :data:`LIFTS` or :data:`ADDITIONAL_LIFTS`.
     """
+    from .additional_movements import additional_movement_spec, is_additional_movement
+
+    if is_additional_movement(lift):
+        spec = additional_movement_spec(lift)
+        return spec.phases
     block = _lift_block(lift)
     phases = tuple(
         LiftPhase(str(p["name"]), str(p["definition"]), float(p["t_frac"]))
@@ -105,6 +120,11 @@ def lift_phase_names(lift: str) -> tuple[str, ...]:
 
 def lift_root_joint(lift: str) -> str:
     """Root-joint policy of *lift*: ``"free"`` or ``"weld"`` (RM#2024)."""
+    from .additional_movements import additional_movement_spec, is_additional_movement
+
+    if is_additional_movement(lift):
+        spec = additional_movement_spec(lift)
+        return spec.root_joint
     joint = str(_lift_block(lift).get("root_joint", _standard()["root"]["joint"]))
     assert joint in ("free", "weld"), f"{lift}: unknown root joint {joint!r}"
     return joint
@@ -112,17 +132,12 @@ def lift_root_joint(lift: str) -> str:
 
 def lift_via_pose_names(lift: str) -> tuple[str, ...]:
     """Names of the via-poses *lift* defines (``start``, ``catch``, ``lockout``)."""
+    from .additional_movements import additional_movement_spec, is_additional_movement
+
+    if is_additional_movement(lift):
+        spec = additional_movement_spec(lift)
+        return tuple(spec.via_poses.keys())
     return tuple(_lift_block(lift).get("via_poses", {}))
-
-
-@dataclass(frozen=True)
-class LiftGrip:
-    """A lift's grip: palm-centre width on the bar and the standard's range."""
-
-    attach: str
-    kind: str
-    width_m: float
-    width_range_m: tuple[float, float]
 
 
 def lift_grip(lift: str) -> LiftGrip:
@@ -133,6 +148,11 @@ def lift_grip(lift: str) -> LiftGrip:
     Raises:
         ValueError: If *lift* is unknown.
     """
+    from .additional_movements import additional_movement_spec, is_additional_movement
+
+    if is_additional_movement(lift):
+        spec = additional_movement_spec(lift)
+        return spec.grip
     raw = _lift_block(lift)["grip"]
     low, high = (float(v) for v in raw["width_range_m"])
     grip = LiftGrip(
@@ -175,7 +195,13 @@ def lift_via_pose(lift: str, pose: str) -> ViaPose:
     Raises:
         ValueError: If *lift* is unknown or has no via-pose *pose*.
     """
+    from .additional_movements import additional_movement_spec, is_additional_movement
+
+    if is_additional_movement(lift):
+        spec = additional_movement_spec(lift)
+        return spec.via_pose(pose)
     poses = _lift_block(lift).get("via_poses", {})
+
     if pose not in poses:
         raise ValueError(f"{lift!r} has no via-pose {pose!r}; has {sorted(poses)}")
     raw = poses[pose]
@@ -191,3 +217,23 @@ def lift_via_pose(lift: str, pose: str) -> ViaPose:
     unknown = set(via.coordinates) - set(CANONICAL_COORDINATES)
     assert not unknown, f"{lift}/{pose}: non-canonical coordinates {sorted(unknown)}"
     return via
+
+
+_REEXPORT_NAMES: frozenset[str] = frozenset(
+    {
+        "ADDITIONAL_LIFTS",
+        "AdditionalMovementSpec",
+        "BarbellLoad",
+        "StanceGeometry",
+        "additional_movement_spec",
+        "is_additional_movement",
+    }
+)
+
+
+def __getattr__(name: str) -> Any:
+    if name in _REEXPORT_NAMES:
+        from . import additional_movements
+
+        return getattr(additional_movements, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

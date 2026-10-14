@@ -26,6 +26,14 @@ from src.shared.python.physics.swing_optimizer import (
     SwingOptimizationResult,
     SwingOptimizer,
 )
+from src.shared.python.physics.impact_interval_handoff import (
+    ContactPlaybackFrame,
+    UD_IMPACT_PLAYBACK_SCHEMA,
+    UD_PRE_IMPACT_BUNDLE_FORMAT,
+    export_impact_run_playback_summary,
+    export_pre_impact_kernel_bundle,
+    interpolate_contact_trajectory_frames,
+)
 from src.shared.python.physics.water_hazard import (
     WaterEntryResult,
     water_entry_kinematics,
@@ -55,4 +63,11 @@ __all__: list[str] = [
     "SwingOptimizationDiagnostics",
     "SwingOptimizationResult",
     "SwingOptimizer",
+    # Impact interval handoff and pre-impact bundle export (Issues #9549, #9703)
+    "ContactPlaybackFrame",
+    "UD_IMPACT_PLAYBACK_SCHEMA",
+    "UD_PRE_IMPACT_BUNDLE_FORMAT",
+    "export_impact_run_playback_summary",
+    "export_pre_impact_kernel_bundle",
+    "interpolate_contact_trajectory_frames",
 ]

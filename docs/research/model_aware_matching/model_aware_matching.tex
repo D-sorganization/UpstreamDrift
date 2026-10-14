@@ -676,6 +676,32 @@ A fit is reported with the following measured items; a missing item is
     spread of shared parameters across leave-one-trial-out refits.
 \end{enumerate}
 
+\subsection{Leave-One-Trial-Out Cross-Validation (MOSAIC-09, \#11541)}
+\label{subsec:leave_one_trial_out}
+To verify that identified inertial parameters and body geometry reflect invariant subject physiology rather than overfitting individual execution noise, MOSAIC evaluates cross-trial consistency (Gate~7) via a leave-one-trial-out (LOTO) cross-validation study across $M \ge 2$ trials.
+
+\paragraph{Formulation.}
+For each evaluation fold $m \in \{0, \dots, M-1\}$, the training set comprises the remaining $M-1$ trials $\mathcal{T}_{-m} = \{k \in \{0, \dots, M-1\} \mid k \ne m\}$. Joint continuation fitting identifies shared parameters $(\hat{\mathbf{l}}_{-m}, \hat{\boldsymbol{\pi}}_{-m})$ on $\mathcal{T}_{-m}$. The held-out trial $m$ is then evaluated with subject parameters held strictly fixed:
+\begin{enumerate}[nosep]
+  \item \textbf{Held-Out Marker Tracking RMSE:} Kinematic trajectory $\mathbf{q}_m(t)$ is initialised from inverse kinematics given $\hat{\mathbf{l}}_{-m}$ and evaluated against observed markers $\mathbf{y}_m(t)$:
+  \begin{equation}
+    \mathrm{RMSE}_{\text{track}} = \sqrt{\frac{1}{T N_{\text{markers}}} \sum_{t=1}^T \|\mathbf{m}(\mathbf{q}_m(t); \hat{\mathbf{l}}_{-m}) - \mathbf{y}_m(t)\|^2}.
+  \end{equation}
+  \item \textbf{Held-Out Dynamics Residual:} Holding $\hat{\boldsymbol{\pi}}_{-m}$ fixed, the inner variable-projection linear solve yields optimal inputs $\mathbf{u}_m(t)$ for the held-out kinematics. The inverse-dynamics residual is measured as:
+  \begin{equation}
+    \mathbf{r}_{\text{dyn}}(t) = \mathbf{Y}(\mathbf{q}_m(t), \mathbf{v}_m(t), \mathbf{a}_m(t))\,\hat{\boldsymbol{\pi}}_{-m} - \mathbf{B}\,\mathbf{u}_m(t), \quad
+    \mathrm{RMS}_{\text{dyn}} = \sqrt{\frac{1}{T n_v} \sum_{t=1}^T \|\mathbf{r}_{\text{dyn}}(t)\|^2}.
+  \end{equation}
+  \item \textbf{Held-Out Qualification Gate Protocol:} The held-out trial is qualified through all seven gates (\S\ref{sec:gates}). If any gate input is unavailable (for example, missing simulation forward step or unmeasured discrepancy floor), the gate reports explicitly as \texttt{"unqualified"}. A pass is never fabricated, and frozen tolerances are never widened.
+  \item \textbf{Parameter Spread and Cryptographic Receipts:} Parameter spread across folds is logged as $\boldsymbol{\sigma}_\pi = \operatorname{std}(\{\hat{\boldsymbol{\pi}}_{-m}\}_{m=0}^{M-1})$ and $\boldsymbol{\sigma}_l = \operatorname{std}(\{\hat{\mathbf{l}}_{-m}\}_{m=0}^{M-1})$. Deterministic SHA-256 hashes of input trajectories and fold allocations are retained in immutable fold receipts (\texttt{TrialFoldReceipt.input\_hash}), guaranteeing complete scientific reproducibility while preserving subject capture anonymity.
+\end{enumerate}
+
+\paragraph{Reproduction Command.}
+\begin{verbatim}
+QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg python3 -m pytest \
+  tests/unit/estimation/mosaic/test_leave_one_trial_out.py -q -n 0 --no-cov
+\end{verbatim}
+
 \section{Reference Results on the Planar Fixture}
 \label{sec:results}
 Fixture: pinned planar 3-link chain (pelvis--arm--club analogue), first joint

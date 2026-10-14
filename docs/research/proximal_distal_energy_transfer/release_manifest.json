@@ -2409,6 +2409,10 @@
       "sha256": "1668f88d47d2c7b9d59b3a9344e995031c1c2ea2c745b49ae0febc4bf4cc342c",
       "bytes": 12840
     },
+    "scripts/research/proximal_distal_energy/frozen_replay_provenance_audit.py": {
+      "sha256": "46fd7b30414136f95cec06987807e32179ec4b6e0807bafd7a8ddcc8c8ecdea1",
+      "bytes": 16015
+    },
     "scripts/research/proximal_distal_energy/generate_articulated_shaft_structural_basis.py": {
       "sha256": "0ccf6f8f02fde877a9a4330cdd034afc1518c39f9c5d55a2b70fccd9c7858d2e",
       "bytes": 2635
@@ -3116,6 +3120,10 @@
     "scripts/research/proximal_distal_energy/shoulder_velocity_transfer.py": {
       "sha256": "4ccf6da086963619f35385c96acb844989659b06f3e8c6c794a70b7cfc32b9ab",
       "bytes": 10365
+    },
+    "scripts/research/proximal_distal_energy/spatial_carriage_closure.py": {
+      "sha256": "444b6a10b5b2b875d8a0dba762e1c9afa48b46af80b4cebf927abc1f2b2de0ac",
+      "bytes": 13623
     },
     "scripts/research/proximal_distal_energy/spatial_forward_contract.py": {
       "sha256": "04bb646557de3516d106806e50d7ace90f2ac9243a5a1a57b83a4d6381af071c",
