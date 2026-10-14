@@ -415,9 +415,44 @@ and $\partial\mathbf{m}/\partial s$; dynamics rows exactly in $\btheta$
 ($\bW\bY\,\partial\bpi/\partial\btheta$) and by \emph{vectorised} central
 differences in $(\bq,\bv,\ba,s)$---each perturbation applied to all nodes of
 all trials at once, so one iteration costs $2(3n_v+n_s)$ batched regressor
-evaluations plus one sparse factorisation.  Analytic derivatives (Singh--
-Russell--Wensing; GRiD) replace the differences without changing the
-algorithm.
+evaluations plus one sparse factorisation.  \subsection{Analytic Dynamics Derivatives (Singh--Russell--Wensing)}
+\label{subsec:analytic_derivatives}
+
+In the outer Levenberg--Marquardt step, the dynamics residual block requires derivatives
+of the inverse dynamics $\boldsymbol{\tau}(\bq, \bv, \ba; \bpi) = \bY(\bq, \bv, \ba)\bpi$
+and forward dynamics $\ddot{\bq}(\bq, \bv, \bu; \bpi) = \bM(\bq, \bpi)^{-1}(\bB\bu - \bh(\bq, \bv, \bpi))$
+with respect to kinematics and inertial parameters. Following Singh, Russell, and Wensing \cite{Singh2022},
+these Jacobians are computed analytically without finite-difference step-size heuristics.
+
+\paragraph{Inverse Dynamics Derivatives.}
+For the equations of motion $\boldsymbol{\tau} = \bM(\bq, \bpi)\ba + \bh(\bq, \bv, \bpi)$, the analytic derivatives are:
+\begin{equation}
+  \frac{\partial \boldsymbol{\tau}}{\partial \ba} = \bM(\bq, \bpi), \qquad
+  \frac{\partial \boldsymbol{\tau}}{\partial \bpi} = \bY(\bq, \bv, \ba), \qquad
+  \frac{\partial \boldsymbol{\tau}}{\partial \bq} = \frac{\partial \bM}{\partial \bq}\ba + \frac{\partial \bh}{\partial \bq}, \qquad
+  \frac{\partial \boldsymbol{\tau}}{\partial \bv} = \frac{\partial \bh}{\partial \bv} .
+\end{equation}
+In spatial-vector and planar kinematics, $\partial \boldsymbol{\tau}/\partial \bq$ and
+$\partial \boldsymbol{\tau}/\partial \bv$ are evaluated analytically through link-wise
+acceleration and velocity propagation, matching $\partial\bY/\partial\bq\cdot\bpi$ and $\partial\bY/\partial\bv\cdot\bpi$.
+
+\paragraph{Forward Dynamics Derivatives.}
+By implicit differentiation of $\boldsymbol{\tau}(\bq, \bv, \ddot{\bq}, \bpi) = \bB\bu$ at $\ba = \ddot{\bq}$:
+\begin{align}
+  \frac{\partial \ddot{\bq}}{\partial \bq} &= -\bM^{-1}\left( \frac{\partial \bh}{\partial \bq} + \frac{\partial \bM}{\partial \bq}\ddot{\bq} \right)
+  = -\bM^{-1} \left. \frac{\partial \boldsymbol{\tau}}{\partial \bq} \right|_{\ba = \ddot{\bq}} , \\
+  \frac{\partial \ddot{\bq}}{\partial \bv} &= -\bM^{-1}\frac{\partial \bh}{\partial \bv}
+  = -\bM^{-1} \left. \frac{\partial \boldsymbol{\tau}}{\partial \bv} \right|_{\ba = \ddot{\bq}} , \\
+  \frac{\partial \ddot{\bq}}{\partial \bu} &= \bM^{-1}\bB , \\
+  \frac{\partial \ddot{\bq}}{\partial \bpi} &= -\bM^{-1} \bY(\bq, \bv, \ddot{\bq}) .
+\end{align}
+On the physically consistent manifold chart $\btheta$, the parameter Jacobian is:
+\begin{equation}
+  \frac{\partial \ddot{\bq}}{\partial \btheta} = \frac{\partial \ddot{\bq}}{\partial \bpi} \frac{\partial \bpi}{\partial \btheta}
+  = -\bM^{-1}\bY(\bq, \bv, \ddot{\bq})\, \frac{\partial \bpi}{\partial \btheta} .
+\end{equation}
+Evaluating these expressions analytically avoids $2(3n_v)$ regressor sweeps per outer iteration,
+yielding exact gradient directions and runtime speedups over finite differences.
 
 \subsection{Continuation}
 A schedule $\gamma\in\{0,\,10^{-2},\,10^{-1},\,1\}$ moves the problem from a
