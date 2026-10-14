@@ -126,3 +126,7 @@ docs/development/maintenance/2026-10-12-capacity-recovery/*.json
 # Hash-bound shot-pattern statistics; headline_dataset.json records their SHA-256
 # and a repository test rejects any byte change, so Prettier must not reflow them.
 docs/research/shot_pattern_analysis/phase2/statistics_v2/
+
+# UpstreamDrift#11743: byte-for-byte vendored copy of Repository_Management's
+# biomech_parity_standard.json, pinned by the digest in MANIFEST.json beside it.
+src/shared/python/lifting/_canonical/
