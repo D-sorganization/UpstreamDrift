@@ -371,7 +371,7 @@ def instantaneous_parity(
     for engine in engines:
         try:
             rows = values(barbell_plant(engine, bundle))
-        except (ImportError, RuntimeError, ValueError) as exc:
+        except (ImportError, RuntimeError, ValueError, AttributeError) as exc:
             report["engines"][engine] = {"unavailable": f"{type(exc).__name__}: {exc}"}
             continue
         report["engines"][engine] = {

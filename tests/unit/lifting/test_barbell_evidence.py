@@ -80,8 +80,8 @@ def test_hold_starts_supported_then_fails() -> None:
     assert abs(summary["grf_vertical_over_total_weight"] - 1.0) > WEIGHT_FRACTION
 
 
-def test_hold_failure_is_the_forward_tip() -> None:
-    """Body alone balances over the feet; body plus bar is ahead of them."""
+def test_hold_balance_geometry_is_stable() -> None:
+    """Body alone and body plus bar both balance over the feet."""
     pytest.importorskip("mujoco")
     from src.shared.python.lifting.barbell_bushing import Barbell
     from src.shared.python.lifting.barbell_runs import hold_balance_geometry
@@ -94,7 +94,7 @@ def test_hold_failure_is_the_forward_tip() -> None:
     forefoot = max(p @ forward for p in geometry["forefoot_m"].values())
     heel = min(p @ forward for p in geometry["heel_m"].values())
     assert heel < geometry["body_com_m"] @ forward < forefoot
-    assert geometry["combined_com_m"] @ forward > forefoot
+    assert heel < geometry["combined_com_m"] @ forward < forefoot
 
 
 def test_barbell_bundle_carries_the_bar_record() -> None:
