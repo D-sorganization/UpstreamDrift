@@ -40,6 +40,7 @@ from src.shared.python.physics.impact_interval_handoff import (
     export_impact_run_playback_summary,
     export_pre_impact_kernel_bundle,
     interpolate_contact_trajectory_frames,
+    kernel_bundle_to_pre_impact_bundle,
 )
 from src.shared.python.physics.pre_impact_bundle import (
     PRE_IMPACT_BUNDLE_SCHEMA,
@@ -169,7 +170,7 @@ def test_export_pre_impact_kernel_bundle_schema_and_roundtrip() -> None:
 
     # Check top-level contract requirements
     assert bundle_dict["format"] == UD_PRE_IMPACT_BUNDLE_FORMAT
-    assert bundle_dict["schema"] == UD_PRE_IMPACT_BUNDLE_FORMAT
+    assert bundle_dict["schema"] == PRE_IMPACT_BUNDLE_SCHEMA
     assert bundle_dict["version"] == 1
     assert bundle_dict["units"] == "SI"
 
@@ -190,9 +191,9 @@ def test_export_pre_impact_kernel_bundle_schema_and_roundtrip() -> None:
     assert raw_json is not None
 
     # Check reloading into PreImpactBundle
-    bundle = PreImpactBundle.from_dict(bundle_dict)
+    bundle = kernel_bundle_to_pre_impact_bundle(bundle_dict)
     assert isinstance(bundle, PreImpactBundle)
-    assert bundle.schema in (PRE_IMPACT_BUNDLE_SCHEMA, UD_PRE_IMPACT_BUNDLE_FORMAT)
+    assert bundle.schema == PRE_IMPACT_BUNDLE_SCHEMA
     assert bundle.version == PRE_IMPACT_BUNDLE_VERSION
 
     # Check re-export from loaded bundle
@@ -222,7 +223,7 @@ def test_export_from_swing_state_maps_kinematics() -> None:
     assert head["contact_offset_m"]["value"] == [0.0, 0.015, -0.005]
 
     # Reconstruct bundle and verify head tools contact body fields
-    bundle = PreImpactBundle.from_dict(bundle_dict)
+    bundle = kernel_bundle_to_pre_impact_bundle(bundle_dict)
     body_fields = bundle.head.tools_contact_body_fields()
     assert body_fields["mass_kg"] == pytest.approx(0.205)
     assert body_fields["contact_offset_m"] == (0.0, 0.015, -0.005)
@@ -232,7 +233,7 @@ def test_unsupported_schema_rejected() -> None:
     bundle_dict = export_pre_impact_kernel_bundle()
     bundle_dict["schema"] = "invalid.bundle/9"
     with pytest.raises(PreImpactBundleError, match="unsupported_schema"):
-        PreImpactBundle.from_dict(bundle_dict)
+        kernel_bundle_to_pre_impact_bundle(bundle_dict)
 
 
 # ==============================================================================
@@ -242,7 +243,7 @@ def test_unsupported_schema_rejected() -> None:
 
 def test_hand_wrench_power_invariance() -> None:
     bundle_dict = export_pre_impact_kernel_bundle()
-    bundle = PreImpactBundle.from_dict(bundle_dict)
+    bundle = kernel_bundle_to_pre_impact_bundle(bundle_dict)
 
     # Power test: Wrench and twist transformed between frames must have invariant power
     force = np.array([25.0, -40.0, 150.0])
@@ -279,7 +280,7 @@ def test_hand_wrench_origin_shift_invariance() -> None:
 
 def test_absent_trail_wrench_raises_on_numeric_access() -> None:
     bundle_dict = export_pre_impact_kernel_bundle()
-    bundle = PreImpactBundle.from_dict(bundle_dict)
+    bundle = kernel_bundle_to_pre_impact_bundle(bundle_dict)
 
     trail = bundle.hand("trail")
     assert trail.force_n.is_absent
@@ -298,7 +299,7 @@ def test_modal_elastic_state_energy_and_projection() -> None:
         velocities=[0.4, 0.08],
     )
     bundle_dict = export_pre_impact_kernel_bundle(shaft=shaft)
-    bundle = PreImpactBundle.from_dict(bundle_dict)
+    bundle = kernel_bundle_to_pre_impact_bundle(bundle_dict)
 
     # Known energy: 0.5 * qd^T M qd + 0.5 * q^T K q
     # M = eye(2), K = diag([900, 25000])

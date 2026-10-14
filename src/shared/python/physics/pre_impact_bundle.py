@@ -57,8 +57,6 @@ from src.shared.python.physics._pre_impact_frames import (
 )
 
 PRE_IMPACT_BUNDLE_SCHEMA = "upstreamdrift.pre_impact_bundle"
-UD_PRE_IMPACT_BUNDLE_SCHEMA = "ud.pre_impact_bundle/1"
-SUPPORTED_SCHEMAS = frozenset({PRE_IMPACT_BUNDLE_SCHEMA, UD_PRE_IMPACT_BUNDLE_SCHEMA})
 PRE_IMPACT_BUNDLE_VERSION = 1
 UNIT_SYSTEM = "SI"
 WORLD_FRAME_ID = "world"
@@ -405,11 +403,8 @@ class PreImpactBundle:
     units: str = UNIT_SYSTEM
 
     def __post_init__(self) -> None:
-        if self.schema not in SUPPORTED_SCHEMAS:
-            fail(
-                "unsupported_schema",
-                f"schema must be one of {sorted(SUPPORTED_SCHEMAS)}",
-            )
+        if self.schema != PRE_IMPACT_BUNDLE_SCHEMA:
+            fail("unsupported_schema", f"schema must be {PRE_IMPACT_BUNDLE_SCHEMA!r}")
         if self.version != PRE_IMPACT_BUNDLE_VERSION or isinstance(self.version, bool):
             fail("unsupported_version", f"version {self.version!r} is not supported")
         if self.units != UNIT_SYSTEM:
@@ -682,9 +677,13 @@ def _hand_from_dict(raw: object) -> HandWrench:
 
 
 def _bundle_from_dict(payload: object) -> PreImpactBundle:
-    allowed = _TOP | {"conventions", "format"} if isinstance(payload, Mapping) else _TOP
+    allowed = (
+        _TOP | {"conventions"}
+        if isinstance(payload, Mapping) and "conventions" in payload
+        else _TOP
+    )
     data = reject_unknown(payload, frozenset(allowed), "bundle")
-    if data["schema"] not in SUPPORTED_SCHEMAS:
+    if data["schema"] != PRE_IMPACT_BUNDLE_SCHEMA:
         fail("unsupported_schema", f"schema {data['schema']!r} is not supported")
     if data["version"] != PRE_IMPACT_BUNDLE_VERSION or isinstance(
         data["version"], bool
@@ -774,8 +773,6 @@ __all__ = [
     "CONVENTIONS",
     "PRE_IMPACT_BUNDLE_SCHEMA",
     "PRE_IMPACT_BUNDLE_VERSION",
-    "SUPPORTED_SCHEMAS",
-    "UD_PRE_IMPACT_BUNDLE_SCHEMA",
     "AbsentFieldError",
     "BallState",
     "FieldOrigin",
