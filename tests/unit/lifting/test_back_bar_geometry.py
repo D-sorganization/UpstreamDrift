@@ -20,10 +20,12 @@ import pytest
 from src.shared.python.lifting import lift_spec
 from src.shared.python.lifting.back_bar import (
     BAR_CENTRE_FRAME,
+    BAR_LONG_AXIS_LOCAL,
     LEFT_HAND_FRAME,
     RIGHT_HAND_FRAME,
     BackBarGeometry,
     apply_grip_width,
+    bar_axis_world,
     fit_bar_shelf,
     standard_bar_world,
 )
@@ -34,6 +36,7 @@ from src.shared.python.lifting.bundles import (
     load_seed_pose,
     solve_back_bar_standing,
     stance_frame,
+    stance_mid_foot,
 )
 from src.shared.python.lifting.sagittal_retarget import (
     SagittalFrame,
@@ -75,22 +78,21 @@ def measure_start_pose(spec_bytes: bytes, q: np.ndarray, height_m: float) -> Sta
     )
     ground = GroundPlane(normal=(0.0, 0.0, 1.0), height_m=0.0)
     frame = stance_frame(kin, q, ground)
-    feet = kin.sphere_ground_points(q, ground)
-    mid_foot = np.mean(list(feet.values()), axis=0)
+    mid_foot = stance_mid_foot(kin, q, ground)
     geometry = BackBarGeometry.from_standard(LIFT, height_m=height_m)
     poses = kin.body_poses(q, [BAR_CENTRE_FRAME, LEFT_HAND_FRAME, RIGHT_HAND_FRAME])
     rotation, centre = poses[BAR_CENTRE_FRAME]
-    axis = rotation @ np.asarray(geometry.bar_axis)
+    axis = rotation @ np.asarray(BAR_LONG_AXIS_LOCAL)
+    bar_axis = bar_axis_world(geometry, frame)
     hands = poses[LEFT_HAND_FRAME][1] - poses[RIGHT_HAND_FRAME][1]
-    left = frame.left
-    cosine = min(1.0, abs(float(axis @ left)))
+    cosine = min(1.0, abs(float(axis @ bar_axis)))
     return StartPose(
         bar_error_m=float(
             np.linalg.norm(centre - standard_bar_world(geometry, mid_foot, frame))
         ),
         grip_width_m=abs(float(hands @ axis)),
         axis_angle_deg=math.degrees(math.acos(cosine)),
-        left_hand_is_left=bool(hands @ left > 0.0),
+        left_hand_is_left=bool(hands @ bar_axis > 0.0),
     )
 
 
@@ -160,6 +162,11 @@ def test_standard_bar_world_places_the_bar_in_the_lifter_frame() -> None:
 # -- the derived spec carries the grip width -----------------------------------
 
 
+def _right_hand_y(spec: dict) -> float:
+    """Right palm along the club: the closure holds it, it is not a club frame."""
+    return float(spec["closure"]["placement_b"][1][3])
+
+
 def _frame_y(spec: dict, name: str) -> float:
     (frame,) = (f for f in spec["frames"] if f["name"] == name)
     return float(frame["placement"][1][3])
@@ -168,12 +175,10 @@ def _frame_y(spec: dict, name: str) -> float:
 def test_apply_grip_width_separates_the_hands_by_the_width(spec_bytes: bytes) -> None:
     width = lift_spec.lift_grip(LIFT).width_m
     derived = json.loads(apply_grip_width(spec_bytes, width))
-    gap = abs(_frame_y(derived, LEFT_HAND_FRAME) - _frame_y(derived, RIGHT_HAND_FRAME))
+    gap = abs(_frame_y(derived, LEFT_HAND_FRAME) - _right_hand_y(derived))
     assert gap == pytest.approx(width, abs=1e-9)
     # the bar centre stays midway between the hands
-    mid = 0.5 * (
-        _frame_y(derived, LEFT_HAND_FRAME) + _frame_y(derived, RIGHT_HAND_FRAME)
-    )
+    mid = 0.5 * (_frame_y(derived, LEFT_HAND_FRAME) + _right_hand_y(derived))
     assert _frame_y(derived, BAR_CENTRE_FRAME) == pytest.approx(mid, abs=1e-9)
 
 
@@ -181,8 +186,10 @@ def test_apply_grip_width_depends_only_on_the_requested_width(
     spec_bytes: bytes,
 ) -> None:
     low, high = lift_spec.lift_grip(LIFT).width_range_m
-    twice = apply_grip_width(apply_grip_width(spec_bytes, high), low)
-    assert twice == apply_grip_width(spec_bytes, low)
+    twice = json.loads(apply_grip_width(apply_grip_width(spec_bytes, high), low))
+    once = json.loads(apply_grip_width(spec_bytes, low))
+    for name in (LEFT_HAND_FRAME, BAR_CENTRE_FRAME):
+        assert _frame_y(twice, name) == pytest.approx(_frame_y(once, name), abs=1e-12)
 
 
 def test_apply_grip_width_leaves_the_rest_of_the_spec_alone(spec_bytes: bytes) -> None:

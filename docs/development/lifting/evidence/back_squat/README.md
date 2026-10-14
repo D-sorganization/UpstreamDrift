@@ -114,3 +114,30 @@ MUJOCO_GL=egl python3 scripts/generate_lift_bundle.py
 ```
 
 Generation takes a few minutes (most of it the 200-step MuJoCo tracking run).
+
+## Back-Bar Geometry (#12347)
+
+The committed bundle above still carries the golf club grip (hands 0.08 m
+apart in front of the body), which is why a barbell attached there tips the
+lifter forward (#12345). `scripts/generate_lift_bundle.py --geometry back_bar`
+builds the bundle on the standard's back-squat geometry instead
+(`src/shared/python/lifting/back_bar.py`, every value read from the parity
+standard through `lift_spec`):
+
+- the left hand is moved to the standard's grip width (`grip.width_m`) along
+  the club body, with its mass, and the bar centre (`Grip` frame) stays midway
+  between the palms;
+- the bar sits on a torso shelf: a fixed offset in the `Hub` frame fitted so the
+  bar is at the `start` via-pose bar position when the lifter stands (mid-foot
+  origin, scaled to the lifter height);
+- the scapulae stay at the seed pose and the arm chain is solved with the bar
+  long axis medio-lateral (`tests/unit/lifting/test_back_bar_geometry.py`).
+
+Measured on the standing start pose: bar centre 3.4 mm from the standard
+position, palms 0.59997 m apart (standard 0.6 m), bar axis 0.05 degrees from
+medio-lateral; the committed bundle's golf grip is 0.72 m, 0.076 m and 86
+degrees off. A full scratch regeneration takes about 45 s, but is not
+committed: it changes the bundle spec hash recorded in the bar-path, kinetics
+and barbell evidence (#12340, #12341, #12345) and exceeds two recorded IK
+thresholds (`hip_r` 0.0153 m against 0.0138 m, closure 1.9e-6 m against
+1.5e-6 m), so it lands with that evidence in the next slice.
