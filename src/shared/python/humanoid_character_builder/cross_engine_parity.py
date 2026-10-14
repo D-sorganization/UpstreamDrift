@@ -8,17 +8,6 @@ import defusedxml.ElementTree as DefusedET
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from src.engines.physics_engines.drake.python.full_body_urdf import (
-    export_full_body_urdf,
-)
-from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
-    export_full_body_mjcf,
-)
-from src.engines.physics_engines.opensim.python.full_body_osim import (
-    clean_osim_body_name,
-    export_full_body_osim,
-)
-from src.engines.physics_engines.pinocchio.python.native_model import depth_first_joints
 from src.shared.python.humanoid_character_builder.spec_params import serialize_spec
 from src.shared.python.motion_matching.full_body_spec import order_full_body_joints
 
@@ -70,6 +59,10 @@ def _verify_mjcf(
     spec_bytes: bytes, spec_frame_origins: dict[str, np.ndarray]
 ) -> tuple[float, float]:
     """Verify MJCF mass conservation and site origins."""
+    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
+        export_full_body_mjcf,
+    )
+
     mjcf_xml, mjcf_meta = export_full_body_mjcf(spec_bytes)
     mjcf_root = DefusedET.fromstring(mjcf_xml)
     mjcf_mass_kg = float(
@@ -107,6 +100,10 @@ def _verify_urdf(
     spec_bytes: bytes, spec_frame_origins: dict[str, np.ndarray]
 ) -> tuple[float, float]:
     """Verify URDF mass conservation and frame links."""
+    from src.engines.physics_engines.drake.python.full_body_urdf import (
+        export_full_body_urdf,
+    )
+
     urdf_xml, urdf_sidecar = export_full_body_urdf(spec_bytes)
     urdf_root = DefusedET.fromstring(urdf_xml)
     urdf_mass_kg = float(
@@ -233,6 +230,11 @@ def _verify_osim(
     doc: dict[str, Any], spec_body_poses: dict[str, np.ndarray]
 ) -> tuple[float, float]:
     """Verify OpenSim mass conservation and body placement parity."""
+    from src.engines.physics_engines.opensim.python.full_body_osim import (
+        clean_osim_body_name,
+        export_full_body_osim,
+    )
+
     osim_xml, _ = export_full_body_osim(doc)
     osim_root = DefusedET.fromstring(osim_xml.replace("::", "__"))
     osim_mass_kg = float(
@@ -291,6 +293,10 @@ def _verify_pinocchio(
     frame_tol_m: float,
 ) -> int:
     """Verify Pinocchio depth-first joint tree length and native frame origins if installed."""
+    from src.engines.physics_engines.pinocchio.python.native_model import (
+        depth_first_joints,
+    )
+
     pin_joints = depth_first_joints(doc["joints"])
     if len(pin_joints) != len(doc["joints"]):
         raise ValueError(
