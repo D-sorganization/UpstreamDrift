@@ -2741,6 +2741,7 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-14 | #12542 | Complete BunkerShot3D workbench export views, save/reload, VTK stamped export, and API docs (#12536) |
 | 2026-10-14 | #12538 | Qualify spatial carriage damper angular-momentum closure with central-force and closed-wrench laws (#11195); Add MOSAIC-09 leave-one-trial-out cross-validation study and update model-aware matching reference (#11541, #11532); Add OpenSim full-body musculoskeletal lift model composer and kinetics analyzer; \ Add lifting showcase video planner and headless smoke renderer\; Add five additional weightlifting movement specifications with split stance; Add frozen research replay provenance auditor and source-authority amendment ledger (#12398); Add transactional muscle allocation stepper, fresh controller-off replay, R2025b T01 binding, and F10 turnover packet (#12399, #11898, #11921, #11784); Add versioned pre-impact kernel bundle adapter and contact-interval playback/export integration (#9549, #9703, #9700) |
 | 2026-10-14 | #12535 | BunkerShot3D figure exports carry tier, verdict and sources as sealed PNG data; the reader refuses unstamped, edited or predictive-claiming files |
 | 2026-10-14 | #12534 | feat(lifting): regenerate back-squat bundle with back-bar lift body, torso shelf, standard grip width, and symmetric barbell bushing interface (LIFT-5 / #12347) |
