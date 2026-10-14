@@ -1766,12 +1766,12 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Owner:** claude
 - **Issue:** #9545 (epic #9541)
 - **Branch:** claude/issue-9545-api
-- **PR:** #11516 (draft), #12449, #12495, #12440
+- **PR:** #11516 (draft), #12449, #12495, #12440, #12506
 - **Paths:** src/api/routes/bunker_workbench.py; src/tools/bunker_shot_gui/input_ranges.py; src/tools/bunker_shot_gui/design.py; src/tools/bunker_shot_gui/widgets.py; src/tools/bunker_shot_gui/report.py; src/tools/bunker_shot_gui/render.py; src/config/feature_parity.json; tests/bunkershot3d/test_bunker_workbench_api.py
 - **Started:** 2026-10-04
-- **Last verified:** 2026-10-14 (`9ab1fc85`; collated from changes/9545-bunkershot3d-workbench-comparison-never.md)
+- **Last verified:** 2026-10-14 (`c3849a2f`; collated from changes/9545-bunkershot3d-workbench-bounded-cancellab.md)
 - **Summary:** The headless workbench API enforces request ranges, handedness and source-stamped verdicts; predictive playability is refused or reported without ranking. UI and API share input-range authority.
-- **Next step:** Merge the PR; then re-run the nominal grid on the supported flight stack (#9239) and continue #9545 save/reload/export and web parity.
+- **Next step:** Merge the PR; then wire the web page to the job routes (progress bar, Cancel, stale-result guard by input digest), sand/swing inputs and /v1/verify save-reload.
 
 ### DL-#9544 · Bunker Contact Regimes and Coupled Club Rotation Across Fidelity Tiers
 
@@ -3048,10 +3048,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12065
 - **Branch:** merged via #12350
-- **PR:** #12350, #12454, #12437, #12451, #12470, #12499, #12475, #12365, #12482
+- **PR:** #12350, #12454, #12437, #12451, #12470, #12499, #12475, #12365, #12482, #12513
 - **Paths:** see #12350
 - **Started:** 2026-10-14
-- **Last verified:** 2026-10-14 (`b2d8af8a`; collated from changes/12065-route-the-remaining-test-side-opensim-im.md)
+- **Last verified:** 2026-10-14 (`1019e19f`; collated from changes/12065-route-the-remaining-dynamic-opensim-load.md)
 - **Summary:** Add shared ezc3d import guard that diagnoses the OpenSim/ezc3d DLL conflict with an explicit NativeDllConflictError and process-boundary guidance
 - **Next step:** Shipped in PR #12350.
 
