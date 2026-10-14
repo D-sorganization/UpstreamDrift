@@ -984,8 +984,15 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
     ``tryfirst`` puts this ahead of pytest's own setup hook, so the snapshot is
     still taken before the first test's fixtures run.  This is a fallback for
     runners that reach the run loop without ``pytest_collection_finish``.
+    It also holds ``requires_opensim`` tests at the native-runtime process
+    boundary (#12065) so OpenSim never loads beside the Python ezc3d DLL.
     """
     _arm_qt_guard()
+    if item.get_closest_marker("requires_opensim") is not None:
+        # Lazy: the boundary helper needs the pinned Tools tree (vendor/ud-tools).
+        from tests.helpers.native_runtime_boundary import check_item_boundary
+
+        check_item_boundary(item)
 
 
 @pytest.hookimpl(trylast=True)
