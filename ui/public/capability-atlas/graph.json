@@ -736,17 +736,17 @@
     {
       "feature_id": "tools.launch_monitor_analytics",
       "title": "Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends",
-      "status": "gap",
+      "status": "parity",
       "pyqt": "src/tools/launch_monitor_analytics/gui.py",
       "api": "src/api/routes/launch_monitor_analytics.py",
       "web": "ui/src/pages/LaunchMonitorAnalytics.tsx",
-      "issue": 11987,
+      "issue": null,
       "reason": null,
       "pending_decision": false,
       "tiles": [
         "launch_monitor_analytics"
       ],
-      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. The web page (#11987) now covers Flexible Analysis (POST /v2/analyze), Trends (POST /v2/trend), Dispersion (POST /v2/dispersion), Relationships — correlations/partial correlations/dependency network, PCA, and VIF (POST /v2/relationships, POST /v2/multivariate), Monitor Comparison (POST /v2/comparison), Models (POST /v2/model) and Data Treatment (POST /v2/treatment). As on the desktop, the treated data becomes the analysis view that every other section reads, while treatment itself always runs on the raw rows. Still missing on the web: Sessions and Reports.",
+      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. The web page (ui/src/pages/LaunchMonitorAnalytics.tsx) now covers all 8 desktop workbench surfaces: Sessions (POST /v2/import/preview, POST /v2/import via LaunchMonitorSessionsPanel.tsx), Flexible Analysis (POST /v2/analyze), Trends (POST /v2/trend), Dispersion (POST /v2/dispersion), Relationships (POST /v2/relationships, POST /v2/multivariate), Monitor Comparison (POST /v2/comparison), Models (POST /v2/model), Data Treatment (POST /v2/treatment), and Reports (POST /v2/report, POST /v2/export via LaunchMonitorReportsPanel.tsx).",
       "id": "tools.launch_monitor_analytics"
     },
     {
@@ -1430,7 +1430,7 @@
       "id": "video_analyzer",
       "title": "Video Analyzer (Pose & Motion Tracking)",
       "description": "Video-based motion analysis with pose estimation and tracking: extract poses and joint tracks from swing video. Not for converting or trimming video files -- see Video Processor for that.",
-      "path": "vendor/ud-tools/src/video_analyzer/launch_video_analyzer.py",
+      "path": "src/config/models.yaml",
       "launch_target": "tools://src/video_analyzer/launch_video_analyzer.py",
       "category": "motion_capture",
       "status": "ready",
@@ -1445,7 +1445,7 @@
       "id": "video_processor",
       "title": "Video Processor (Convert & Extract Frames)",
       "description": "Shared Tools media processor for video conversion, frame extraction, and analysis: format-convert clips and pull individual frames. Not for pose or motion tracking -- see Video Analyzer for that.",
-      "path": "vendor/ud-tools/src/media_processing/video_processor/apps/web/launch_platform.py",
+      "path": "src/config/models.yaml",
       "launch_target": "tools://src/media_processing/video_processor/apps/web/launch_platform.py",
       "category": "motion_capture",
       "status": "ready",
@@ -1593,7 +1593,7 @@
       "id": "data_explorer",
       "title": "Data Explorer (Import & Visualize)",
       "description": "Import, filter, and visualize simulation datasets interactively. Not for signal processing or calculators -- see Data Processor for that.",
-      "path": "vendor/ud-tools/src/data_explorer/data_explorer_app.py",
+      "path": "src/config/models.yaml",
       "launch_target": "tools://src/data_explorer/data_explorer_app.py",
       "category": "tool",
       "status": "ready",
@@ -1608,7 +1608,7 @@
       "id": "data_processor",
       "title": "Data Processor (Signal & Time-Series)",
       "description": "Shared Tools signal processing and time-series data analysis tool: filter, transform, and compute statistics over recorded signals. Not for open-ended dataset browsing -- see Data Explorer for that.",
-      "path": "vendor/ud-tools/src/data_processing/data_processor/launch_pyqt6.py",
+      "path": "src/config/models.yaml",
       "launch_target": "tools://src/data_processing/data_processor/launch_pyqt6.py",
       "category": "tool",
       "status": "ready",
@@ -3190,7 +3190,7 @@
   "inputs": {
     "src/config/models.yaml": "2a2e303aa92f6dda0ef3868fcc881ccbdbc54cf362ac3aae931333163969b90f",
     "src/config/launcher_manifest.json": "abc9913955858006e7bb6b8e9dca8c9693313e62d48d90dcc1ace33e632a79dc",
-    "src/config/feature_parity.json": "fc6e3fd1c7449ac17a62024751fa483f4632a094c5ff9ea6f8ab35ea1e141dfb",
+    "src/config/feature_parity.json": "6912b27b65886b5da76eefa699c4dd30ff0fbb449c72beeaadf2aaf9abe7dad7",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
