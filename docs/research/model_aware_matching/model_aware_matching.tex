@@ -94,13 +94,14 @@ record \texttt{docs/research/simscape\_matching\_reference/}.
 
 \paragraph{Qualification Status (Truthful).}
 \begin{itemize}[nosep]
-  \item Verified: all equations of \S\ref{sec:structure}--\S\ref{sec:algorithm}
-    against closed-form double-pendulum dynamics and synthetic ground truth
-    (36 behavioural tests, \texttt{tests/unit/estimation/mosaic/}).
+  \item Verified: all equations of \S\ref{sec:structure}--\S\ref{sec:algorithm},
+    including the floating-base $SE(3)$ manifold spline (\S\ref{sec:manifold_spline}),
+    against closed-form double-pendulum dynamics, analytic screw motions and synthetic ground truth
+    (47 behavioural tests, \texttt{tests/unit/estimation/mosaic/}).
   \item Measured: the planar results of \S\ref{sec:results} on the analytic
     fixture (capture-A/capture-O style noise levels, no engine).
   \item Not yet done: any fit of a human capture (capture-A, capture-O), any
-    3-D floating-base model, any contact-wrench estimation, any engine-backed
+    full-body 3-D floating-base model with contacts, any contact-wrench estimation, any engine-backed
     regressor.  These are the child issues of the follow-up epic
     (\S\ref{sec:roadmap}).  Nothing here qualifies the GS3DX IK videos.
 \end{itemize}
@@ -536,7 +537,7 @@ Timings above were measured on NumPy~2.5/SciPy~1.18, one core of the session con
     or MJX autodiff with \texttt{vmap}), Drake (AutoDiffXd).  Marker forward
     kinematics and Jacobians come from the same engine.
   \item \textbf{Floating base and manifold.} Replace the Euclidean spline by a
-    spline in local coordinates with retraction (Sol\`a); the inner solve is
+    spline in local coordinates with retraction (Sol\`a, \S\ref{sec:manifold_spline}); the inner solve is
     unchanged because it never differentiates $\bq$.
   \item \textbf{Contact.} Add $\blambda$ to $w$ with friction-cone/unilateral
     constraints (the inner problem becomes a small SOCP; use an active-set or
@@ -566,6 +567,57 @@ Timings above were measured on NumPy~2.5/SciPy~1.18, one core of the session con
     layer) are evaluated on fitted trials and reported side-by-side in
     \texttt{SubjectFitReport.activation\_report} alongside declared provenance.
 \end{itemize}
+
+\subsection{Floating-Base Manifold Spline on $SE(3)$ (MOSAIC-04, \#11536)}
+\label{sec:manifold_spline}
+For systems with a floating base, the base configuration manifold is the special Euclidean group $SE(3)=\mathbb{R}^3\rtimes SO(3)$. Direct Euclidean polynomial interpolation on rotation matrices or unit quaternions violates manifold geometry and hemisphere continuity. In MOSAIC-04, trajectory representation on $SE(3)$ is formulated via local coordinates and retraction maps following Sol\`a \emph{et al.}~\cite{Sola2018}.
+
+\paragraph{Retraction and Local Coordinates.}
+Let $\mathbf{T} = \begin{bmatrix} \mathbf{R} & \mathbf{p} \\ \mathbf{0} & 1 \end{bmatrix} \in SE(3)$ represent the base pose, with position $\mathbf{p}\in\mathbb{R}^3$ and rotation $\mathbf{R}\in SO(3)$. A perturbation $\boldsymbol{\delta\xi} = (\boldsymbol{\rho}, \boldsymbol{\phi}) \in \mathfrak{se}(3) \cong \mathbb{R}^6$ maps to $SE(3)$ via the exponential map:
+\begin{equation}
+  \operatorname{Exp}(\boldsymbol{\delta\xi}) = \begin{bmatrix} \operatorname{Exp}_{SO(3)}(\boldsymbol{\phi}) & \mathbf{V}(\boldsymbol{\phi})\,\boldsymbol{\rho} \\ \mathbf{0} & 1 \end{bmatrix},
+  \label{eq:se3_exp}
+\end{equation}
+where $\mathbf{V}(\boldsymbol{\phi}) = \mathbf{I}_3 + \frac{1-\cos\theta}{\theta^2}[\boldsymbol{\phi}]_\times + \frac{\theta-\sin\theta}{\theta^3}[\boldsymbol{\phi}]_\times^2$ is the $SO(3)$ left Jacobian ($\theta = \lVert\boldsymbol{\phi}\rVert$).
+The retraction map is defined by left group action:
+\begin{equation}
+  R(\mathbf{T}, \boldsymbol{\delta\xi}) = \operatorname{Exp}(\boldsymbol{\delta\xi}) \circ \mathbf{T}.
+  \label{eq:se3_retract}
+\end{equation}
+The local-coordinates difference between poses $\mathbf{T}_0$ and $\mathbf{T}_1$ is
+\begin{equation}
+  \operatorname{Log}(\mathbf{T}_1 \circ \mathbf{T}_0^{-1}) \in \mathfrak{se}(3),
+  \label{eq:se3_local_coords}
+\end{equation}
+with $\boldsymbol{\phi} = \operatorname{Log}_{SO(3)}(\mathbf{R}_1 \mathbf{R}_0^{\!\top})$ and $\boldsymbol{\rho} = \mathbf{V}(\boldsymbol{\phi})^{-1} (\mathbf{p}_1 - \mathbf{R}_1 \mathbf{R}_0^{\!\top} \mathbf{p}_0)$.
+The exact Jacobians of retraction and local coordinates with respect to tangent perturbations satisfy
+\begin{align}
+  \mathbf{J}_{\mathrm{retract}} &= \frac{\partial \operatorname{vec}_7(R(\mathbf{T}, \boldsymbol{\delta\xi}))}{\partial \boldsymbol{\delta\xi}} \in \mathbb{R}^{7\times 6}, \\
+  \mathbf{J}_{\mathrm{local}} &= \left. \frac{\partial \operatorname{Log}\big(\operatorname{Exp}(\mathbf{d})\circ \mathbf{T}_1 \circ \mathbf{T}_0^{-1}\big)}{\partial \mathbf{d}} \right|_{\mathbf{d}=\mathbf{0}} \in \mathbb{R}^{6\times 6},
+\end{align}
+and are verified against central finite differences ($H=10^{-6}$, absolute tolerance $10^{-7}$) under nonzero velocities and away from identity.
+
+\paragraph{Manifold Spline Representation.}
+Given clamped B-spline basis functions $B_j(t)$ with knot vectors $t_0,\dots,t_{K+d}$, a trajectory is initialised around nominal control poses $\bar{\mathbf{T}}_j$. Perturbations $\boldsymbol{\delta}\mathbf{C}_j \in \mathbb{R}^6$ at the control points define the tangent perturbation at time $t$:
+\begin{equation}
+  \boldsymbol{\delta\xi}(t) = \sum_{j=0}^{K-1} B_j(t)\,\boldsymbol{\delta}\mathbf{C}_j,
+\end{equation}
+yielding the evaluated pose $\mathbf{T}(t) = \operatorname{Exp}(\boldsymbol{\delta\xi}(t)) \circ \bar{\mathbf{T}}(t)$. The body-frame or spatial twist $\boldsymbol{\nu}(t) = (\mathbf{v}(t), \boldsymbol{\omega}(t)) \in \mathfrak{se}(3)$ and acceleration $\mathbf{a}(t) = \dot{\boldsymbol{\nu}}(t) \in \mathbb{R}^6$ match continuous screw motion derivatives $\dot{\boldsymbol{\nu}}\equiv\mathbf{0}$ for constant screw motions.
+
+\paragraph{Outer Gauss--Newton Solve on the Manifold.}
+Observed marker positions $\mathbf{y}_{im}$ at times $t_i$ from body-fixed marker offsets $\mathbf{x}_m$ yield the whitened residual:
+\begin{equation}
+  \mathbf{r}_{im}(\mathbf{C}) = \frac{1}{\sigma_m} \big(\mathbf{R}(t_i)\,\mathbf{x}_m + \mathbf{p}(t_i) - \mathbf{y}_{im}\big).
+\end{equation}
+Under tangent perturbation $\boldsymbol{\delta\xi}_i$ at node $i$, the marker perturbation is $\delta \mathbf{y}_{im} = \boldsymbol{\rho}_i - [\mathbf{R}(t_i)\mathbf{x}_m + \mathbf{p}(t_i)]_\times \boldsymbol{\phi}_i$. The exact analytical Jacobian with respect to outer coefficient block $j$ is:
+\begin{equation}
+  \frac{\partial \mathbf{r}_{im}}{\partial \boldsymbol{\delta}\mathbf{C}_j} = \frac{1}{\sigma_m} B_j(t_i) \begin{bmatrix} \mathbf{I}_3 & -[\mathbf{R}(t_i)\mathbf{x}_m + \mathbf{p}(t_i)]_\times \end{bmatrix} \in \mathbb{R}^{3\times 6}.
+  \label{eq:marker_jacobian}
+\end{equation}
+The outer update $\boldsymbol{\delta}\mathbf{C} = -(\mathbf{H} + \mu \operatorname{diag}\mathbf{H})^{-1} \mathbf{g}$ updates each control pose on the manifold via $\bar{\mathbf{T}}_j \leftarrow \operatorname{Exp}(\boldsymbol{\delta}\mathbf{C}_j) \circ \bar{\mathbf{T}}_j$ (retraction).
+
+\paragraph{Qualification Gate 1 Diagnostics.}
+Under pure kinematic fitting ($\gamma=0$), the whiteness diagnostic computes the innovation autocorrelation $\hat{\rho}_k$ and Ljung--Box statistic $Q = N(N+2)\sum_{k=1}^L \frac{\hat{\rho}_k^2}{N-k}$ across time. If the spline basis lacks sufficient degrees of freedom to resolve the true kinematics, residual autocorrelation flags non-whiteness, rejecting the fit before dynamics coupling is introduced.
 
 \section{Generalisation to Humanoids and Manipulation}
 The kernels are model-agnostic: a humanoid's floating-base rows supply
@@ -965,7 +1017,8 @@ tests/unit/estimation/test\_dime\_drift\_prediction.py}.
 \section{Roadmap}
 \label{sec:roadmap}
 The follow-up epic (MOSAIC) sequences: engine regressor providers and a
-conformance test against this reference; floating-base manifold spline;
+conformance test against this reference; floating-base manifold spline on $SE(3)$
+(\S\ref{sec:manifold_spline}, \#11536);
 contact wrenches with cones and GRF observations; 2-D keypoint observations and
 attachment-offset geometry; capture-A/capture-O fits with the gates of
 \S\ref{sec:gates}; multi-swing acquisition (the repository holds one trial per
