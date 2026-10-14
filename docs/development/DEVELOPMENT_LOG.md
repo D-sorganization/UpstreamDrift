@@ -1567,11 +1567,11 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **State:** in_review
 - **Owner:** claude
 - **Issue:** #9549 (epic #9546)
-- **PR:** draft PR from `agy/ud-9549-ruling-guard`
+- **PR:** draft PR from `agy/ud-9549-ruling-guard`, #12538
 - **Branch:** `agy/ud-9549-ruling-guard`
 - **Paths:** `tests/shared_contracts/test_impact_interval_provider.py`, `docs/development/DEVELOPMENT_LOG.md`
 - **Started:** 2026-09-25
-- **Last verified:** 2026-09-25 (`ff9fbee62`) — verified 11 contract tests pass in tests/shared_contracts/test_impact_interval_provider.py guarding owner interval-tab ruling
+- **Last verified:** 2026-10-14 (`b8bb030b`; collated from changes/9549-add-versioned-pre-impact-kernel-bundle-a.md)
 - **Summary:** Replaced obsolete strict-xfail pin gate in test_impact_interval_provider.py with test_provider_honours_interval_tab_ruling guarding the owner ruling from Tools #4946 / Tools PR #5289 (IMPACT_INTERVAL_TAB_RULING.md): standalone interval tab dropped, ImpactModelType gains no INTERVAL member, and contact-interval solver remains headless (#9549).
 - **Next step:** CI green, review, merge.
 
@@ -2287,6 +2287,97 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#12399 · Add Transactional Muscle Allocation Stepper, Fresh Controller-Off Replay, R2025b T01 Binding, and F10 Turnover Packet (#12399, #11898, #11921, #11784)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12399
+- **Branch:** merged via #12538
+- **PR:** #12538
+- **Paths:** see #12538
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`b8bb030b`; collated from changes/12399-add-transactional-muscle-allocation-step.md)
+- **Summary:** Add transactional muscle allocation stepper, fresh controller-off replay, R2025b T01 binding, and F10 turnover packet (#12399, #11898, #11921, #11784)
+- **Next step:** Shipped in PR #12538.
+
+### DL-#12398 · Add Frozen Research Replay Provenance Auditor and Source-Authority Amendment Ledger (#12398)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12398
+- **Branch:** merged via #12538
+- **PR:** #12538
+- **Paths:** see #12538
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`b8bb030b`; collated from changes/12398-add-frozen-research-replay-provenance-au.md)
+- **Summary:** Add frozen research replay provenance auditor and source-authority amendment ledger (#12398)
+- **Next step:** Shipped in PR #12538.
+
+### DL-#11750 · Add Five Additional Weightlifting Movement Specifications With Split Stance
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11750
+- **Branch:** merged via #12538
+- **PR:** #12538
+- **Paths:** see #12538
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`b8bb030b`; collated from changes/11750-add-five-additional-weightlifting-moveme.md)
+- **Summary:** Add five additional weightlifting movement specifications with split stance
+- **Next step:** Shipped in PR #12538.
+
+### DL-#11749 · \ Add Lifting Showcase Video Planner and Headless Smoke Renderer\
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11749
+- **Branch:** merged via #12538
+- **PR:** #12538
+- **Paths:** see #12538
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`b8bb030b`; collated from changes/11749-add-lifting-showcase-video-planner-and-h.md)
+- **Summary:** \ Add lifting showcase video planner and headless smoke renderer\
+- **Next step:** Shipped in PR #12538.
+
+### DL-#11746 · Add OpenSim Full-Body Musculoskeletal Lift Model Composer and Kinetics Analyzer
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11746
+- **Branch:** merged via #12538
+- **PR:** #12538
+- **Paths:** see #12538
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`b8bb030b`; collated from changes/11746-add-opensim-full-body-musculoskeletal-li.md)
+- **Summary:** Add OpenSim full-body musculoskeletal lift model composer and kinetics analyzer
+- **Next step:** Shipped in PR #12538.
+
+### DL-#11541 · Add MOSAIC-09 Leave-One-Trial-Out Cross-Validation Study and Update Model-Aware Matching Reference (#11541, #11532)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11541
+- **Branch:** merged via #12538
+- **PR:** #12538
+- **Paths:** see #12538
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`b8bb030b`; collated from changes/11541-add-mosaic-09-leave-one-trial-out-cross.md)
+- **Summary:** Add MOSAIC-09 leave-one-trial-out cross-validation study and update model-aware matching reference (#11541, #11532)
+- **Next step:** Shipped in PR #12538.
+
+### DL-#11195 · Qualify Spatial Carriage Damper Angular-Momentum Closure With Central-Force and Closed-Wrench Laws (#11195)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11195
+- **Branch:** merged via #12538
+- **PR:** #12538
+- **Paths:** see #12538
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`b8bb030b`; collated from changes/11195-qualify-spatial-carriage-damper-angular.md)
+- **Summary:** Qualify spatial carriage damper angular-momentum closure with central-force and closed-wrench laws (#11195)
+- **Next step:** Shipped in PR #12538.
 
 ### DL-#11961 · Adopt the #11671 Foot Torsional-Friction Patch (0.05 m) in Canonical Club-Face Fixture Runs Against Ground Yaw Slip
 
