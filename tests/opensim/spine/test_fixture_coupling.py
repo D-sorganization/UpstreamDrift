@@ -59,6 +59,23 @@ def _root(**kwargs) -> ET.Element:
 
 
 @pytest.mark.unit
+def test_tendon_slack_positive_and_matches_analytic_length() -> None:
+    from src.engines.physics_engines.opensim.python.spine import fixture_coupling
+
+    spec = FixtureSpec()
+    root = ET.fromstring(build_fixture_osim(spec, muscles=True))  # noqa: S314  # nosemgrep  # generated, trusted
+    muscles = root.findall(".//Millard2012EquilibriumMuscle")
+    assert len(muscles) == 8
+    lengths = fixture_coupling.neutral_path_lengths(spec)
+    for node in muscles:
+        name = node.get("name")
+        slack = float(node.findtext("tendon_slack_length"))
+        fiber = float(node.findtext("optimal_fiber_length"))
+        assert slack > 0.0
+        assert slack + fiber == pytest.approx(lengths[name], abs=1e-12)
+
+
+@pytest.mark.unit
 class TestCouplerXml:
     def test_default_has_no_driver_no_constraints_no_muscles(self) -> None:
         root = _root()
@@ -422,3 +439,38 @@ class TestNativeMuscles:
         internal = muscle_moment_arm(model, state, "internal_oblique_l", coord)
         assert abs(ext) > 1e-5 and abs(internal) > 1e-5
         assert ext * internal < 0.0
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+class TestNeutralMuscleLength:
+    def test_native_length_matches_analytic_and_fibre_is_optimal(
+        self, muscled
+    ) -> None:
+        from src.engines.physics_engines.opensim.python.spine import (
+            fixture_coupling,
+        )
+
+        model, state = muscled
+        lengths = fixture_coupling.neutral_path_lengths(FixtureSpec())
+        muscles = model.getMuscles()
+        for i in range(muscles.getSize()):
+            muscle = muscles.get(i)
+            assert muscle.getLength(state) == pytest.approx(
+                lengths[muscle.getName()], abs=1e-9
+            )
+            assert muscle.getLength(state) - muscle.get_tendon_slack_length() == (
+                pytest.approx(muscle.get_optimal_fiber_length(), abs=1e-9)
+            )
+
+    def test_full_activation_gives_active_force_at_neutral(self, muscled) -> None:
+        model, state = muscled
+        muscles = model.getMuscles()
+        for i in range(muscles.getSize()):
+            muscle = muscles.get(i)
+            muscle.setActivation(state, 1.0)
+        model.equilibrateMuscles(state)
+        model.realizeDynamics(state)
+        for i in range(muscles.getSize()):
+            muscle = muscles.get(i)
+            assert muscle.getActiveFiberForce(state) > 0.5 * muscle.getMaxIsometricForce()
