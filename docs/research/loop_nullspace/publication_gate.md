@@ -60,12 +60,13 @@ Authority).
   and Bosch dead-zone claims as REMOVED. Check (manual, until the NSX-11 gate
   exists): `git grep -n -i "thornton\|mehta\|sorokin\|two-thirds\|SPAR\|dead zone"`
   on the figure source and report text.
-- [ ] The runtime display gate exists and is enforced. Check (not yet
-  implemented): `require_verified_for_display` and `load_registry`, specified
-  in `docs/research/loop_nullspace/contracts.md` (section `NSX-11 Registry
-  Loader`). Status: open, NSX-11 (#12556). The loader is implemented in PR
-  #12613 (in the merge queue at the time of writing), but no `load_registry`
-  exists under `src/` on this branch.
+- [ ] The runtime display gate exists and is enforced. Check:
+  `require_verified_for_display` and `load_registry` in
+  `src/shared/python/loop_nullspace/registry.py`, specified in
+  `docs/research/loop_nullspace/contracts.md` (section `NSX-11 Registry
+  Loader`), and `git grep -n require_verified_for_display -- src` for callers.
+  Status: the gate exists (NSX-11, #12556, merged in PR #12613) but is not yet
+  enforced: no figure or report path under `src/` calls it.
 - [ ] Hypothesis IDs in the external validation record match the registry. Check:
   `git grep -n "H-TORQUE-CAPACITY-BOX\|H-GRIP-FRICTION-CONE" -- docs`.
   Status: discrepancy. `docs/development/planning/DV-12554.md` uses
