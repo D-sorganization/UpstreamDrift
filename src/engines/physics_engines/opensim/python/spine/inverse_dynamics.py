@@ -744,7 +744,7 @@ def run_spinal_inverse_dynamics(
         model_id,
         (external_loads, filter_hz, disable_couplers),
         opts,
-        False,
+        True,  # GENERALIZED_EFFORT is the net joint moment: muscles excluded
     )
     inventory, layout = run.inventory, run.layout
     signs = _axis_signs(inventory, opts, model_id)
@@ -756,7 +756,7 @@ def run_spinal_inverse_dynamics(
         generalized[i], res_m[i], res_f[i] = _pelvis_wrench(
             run.tau[i], run.q[i], layout
         )
-    prov = {k: v for k, v in run.provenance.items() if k != "muscles"}
+    prov = dict(run.provenance)
     series = SpinalLoadSeries(
         time_s=run.times,
         levels=inventory.levels,
