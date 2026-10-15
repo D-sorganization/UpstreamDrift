@@ -14,6 +14,7 @@ from scipy.spatial.transform import Rotation
 
 from src.engines.physics_engines.mujoco.python.native_mjcf import export_native_mjcf
 from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
+from src.shared.python.loop_nullspace.closure_convention import NativeClosureConvention
 
 
 def _pack_vector(
@@ -45,6 +46,15 @@ def _extract_frame_poses(
         pose[:3, 3] = data.site_xpos[index]
         result[name] = pose
     return result
+
+
+# Convention of ``_evaluate_weld_closure`` (NSX-02, #12551).  The result is
+# jacSite(native_closure_a) - jacSite(native_closure_b), V_a - V_b, in the WORLD
+# frame with each site's linear rows taken at its own ``site_xpos`` (equal at
+# closure); mj_jacSite stacks [linear; angular].
+CLOSURE_CONVENTION = NativeClosureConvention(
+    row_order="lin_ang", frame="WORLD", point="site_xpos", relative_sign=1
+)
 
 
 def _evaluate_weld_closure(

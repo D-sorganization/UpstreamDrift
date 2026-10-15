@@ -54,7 +54,9 @@ class NativeClosureConvention:
 
     def __post_init__(self) -> None:
         if self.row_order not in ("lin_ang", "ang_lin"):
-            raise ValueError(f"row_order must be lin_ang or ang_lin: {self.row_order!r}")
+            raise ValueError(
+                f"row_order must be lin_ang or ang_lin: {self.row_order!r}"
+            )
         if self.frame not in ("LOCAL", "WORLD"):
             raise ValueError(f"frame must be LOCAL or WORLD: {self.frame!r}")
         if self.relative_sign not in (1, -1):
@@ -125,7 +127,9 @@ def _check_closure_arrays(jacobian: ArrayLike, drift: ArrayLike) -> tuple[Array,
     vec = np.asarray(drift, dtype=float)
     require(jac.ndim == 2 and jac.shape[0] == 6, "jacobian must be 6 x n")
     require(vec.shape == (6,), "drift must have length 6")
-    require(bool(np.isfinite(jac).all() and np.isfinite(vec).all()), "values must be finite")
+    require(
+        bool(np.isfinite(jac).all() and np.isfinite(vec).all()), "values must be finite"
+    )
     return jac, vec
 
 

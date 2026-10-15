@@ -96,7 +96,9 @@ def test_power_is_preserved_by_the_dual_transform(golden, engine) -> None:
     np.testing.assert_allclose(
         lam_native @ (j_native @ v), lam_c @ (j_c @ v), rtol=RTOL, atol=ATOL
     )
-    assert lam_c @ (j_c @ v) == pytest.approx(float(Fraction(golden["power_lambda_dot_Jv"])))
+    assert lam_c @ (j_c @ v) == pytest.approx(
+        float(Fraction(golden["power_lambda_dot_Jv"]))
+    )
 
 
 @pytest.mark.parametrize("engine", ENGINES)
@@ -146,9 +148,13 @@ def test_preconditions(golden) -> None:
         )
     reflection = np.diag([1.0, 1.0, -1.0])
     with pytest.raises(ValueError, match="rotation"):
-        to_canonical_closure(j, np.zeros(6), **{**kw, "native_frame_rotation": reflection})
+        to_canonical_closure(
+            j, np.zeros(6), **{**kw, "native_frame_rotation": reflection}
+        )
     with pytest.raises(ValueError, match="length 3"):
-        to_canonical_closure(j, np.zeros(6), **{**kw, "grip_reference_point": np.zeros(2)})
+        to_canonical_closure(
+            j, np.zeros(6), **{**kw, "grip_reference_point": np.zeros(2)}
+        )
 
 
 def test_world_native_frame_requires_identity_rotation(golden) -> None:
