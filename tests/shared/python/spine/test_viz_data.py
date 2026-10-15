@@ -66,13 +66,13 @@ def _series(force: np.ndarray | None = None) -> SpinalLoadSeries:
 
 def _stack(**kw) -> StackData:
     poses = [_pose(10, 15, 20), _pose(20, 30, 40)]
-    args = dict(
-        handedness="right", distribution_source=SOURCE, scientific_status="unqualified"
-    )
-    args.update(kw)
-    return level_angle_stack(
-        np.array([0.0, 0.1]), poses, "x_factor_jcs_axial", **args
-    )
+    args = {
+        "handedness": "right",
+        "distribution_source": SOURCE,
+        "scientific_status": "unqualified",
+        **kw,
+    }
+    return level_angle_stack(np.array([0.0, 0.1]), poses, "x_factor_jcs_axial", **args)
 
 
 def test_stack_shapes_order_units_and_metadata() -> None:
