@@ -2288,6 +2288,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12555 · NSX-10: ClosedLoopSnapshot, LoopTopology and Evidence-Axis Contracts
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12555
+- **Branch:** merged via #12612
+- **PR:** #12612
+- **Paths:** see #12612
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`3e0aa085`; collated from changes/12555-nsx-10-closedloopsnapshot-looptopology-a.md)
+- **Summary:** NSX-10: ClosedLoopSnapshot, LoopTopology and evidence-axis contracts
+- **Next step:** Shipped in PR #12612.
+
 ### DL-#12551 · NSX-02 Canonical Closure Jacobian Convention (Frame, Row Order, Sign) With Per-Engine Declared Conventions, Golden and Cross-Engine Tests
 
 - **State:** shipped
