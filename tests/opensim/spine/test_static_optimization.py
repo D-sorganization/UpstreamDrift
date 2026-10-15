@@ -11,10 +11,9 @@ ID moments are in general NOT reachable there.  The tests therefore use
 * the default FIVE-LEVEL fixture, where reserves must carry exactly the
   weighted least-squares remainder (KKT-checked) and the frame is flagged.
 
-The SPN-7b tendon slack lengths leave several muscles slack (zero active
-force) on these geometries, so ``_retune`` sets each tendon slack length to
-``path length - optimal fibre length`` at the neutral pose (invented values,
-test-local; the SPN-7b generator is unchanged).  Every number is invented.
+The generator sets each tendon slack length to ``neutral path length -
+optimal fibre length`` (SPN-7b follow-up), so no muscle is slack at neutral.
+Every number is invented.
 """
 
 from __future__ import annotations
@@ -123,20 +122,6 @@ def test_options_contract() -> None:
 # ----------------------------------------------------------- native fixtures
 
 
-def _retune(path: Path) -> Path:
-    """Set tendon slack = neutral path length - optimal fibre length."""
-    osim = require_opensim()
-    model = osim.Model(str(path))
-    state = model.initSystem()
-    muscles = model.getMuscles()
-    for i in range(muscles.getSize()):
-        muscle = muscles.get(i)
-        slack = muscle.getLength(state) - muscle.get_optimal_fiber_length()
-        muscle.set_tendon_slack_length(slack)
-    model.printToXML(str(path))
-    return path
-
-
 def _columns(spec: FixtureSpec, angles: dict[SpinalLevel, np.ndarray]) -> dict:
     cols = {n: np.zeros(_TIMES.size) for n in FIXTURE_PELVIS.rotation}
     cols.update({n: np.zeros(_TIMES.size) for n in FIXTURE_PELVIS.translation})
@@ -162,7 +147,7 @@ def one_level(tmp_path_factory):
     require_opensim()
     spec = FixtureSpec(levels=(SpinalLevel.L3_L4,))
     tmp = tmp_path_factory.mktemp("so_one")
-    muscled = _retune(write_fixture_osim(spec, tmp / "muscled.osim", muscles=True))
+    muscled = write_fixture_osim(spec, tmp / "muscled.osim", muscles=True)
     bare = write_fixture_osim(spec, tmp / "bare.osim")
     full = load_level_maps()["fixture"]
     level_map = replace(
@@ -293,7 +278,7 @@ def test_five_level_reserves_carry_the_remainder_and_are_flagged(
     require_opensim()
     spec = FixtureSpec()
     tmp = tmp_path_factory.mktemp("so_five")
-    path = _retune(write_fixture_osim(spec, tmp / "five.osim", muscles=True))
+    path = write_fixture_osim(spec, tmp / "five.osim", muscles=True)
     angles = {
         names.level: (
             _ramp(0.05 + 0.02 * k, 0.1),

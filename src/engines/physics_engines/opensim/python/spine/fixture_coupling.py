@@ -28,7 +28,10 @@ pelvis -> L3 via point -> thorax_proxy.  Frames: X anterior, Y cranial, Z
 right, so right-side points have ``z > 0`` and the pair mirrors in the
 sagittal (``z -> -z``) plane.  The parameters are invented and only meant to
 give finite, bilaterally consistent moment arms for static-optimisation
-tests: they carry no physiological claim.
+tests: they carry no physiological claim.  Each tendon slack length is
+``neutral path length - optimal fibre length`` (path length computed
+analytically in :func:`neutral_path_lengths`), so every fibre sits at its
+optimal length at the neutral pose and no muscle is slack there.
 """
 
 from __future__ import annotations
@@ -48,7 +51,10 @@ from src.engines.physics_engines.opensim.python.spine.fixture_model import (
     _AXES,
     _COORD_RANGE_RAD,
     FixtureSpec,
+    fixture_base_offset,
     fixture_level_names,
+    fixture_neutral_transforms,
+    fixture_terminal_offset,
 )
 from src.shared.python.spine.coupling import LinearCouplingLaw
 
@@ -58,6 +64,7 @@ __all__ = [
     "MAX_INDEPENDENT_COORDINATES",
     "augment_fixture_tree",
     "fixture_muscle_names",
+    "neutral_path_lengths",
 ]
 
 DRIVER_BODY = "spine_coupling_driver"
@@ -101,13 +108,59 @@ _MUSCLES = (
     ),
 )
 _OPTIMAL_FIBER_M = 0.12  # invented
-_TENDON_SLACK_M = 0.17  # invented
 _PENNATION_RAD = 0.0
 
 
 def fixture_muscle_names() -> tuple[str, ...]:
     """The eight muscle names: each stem as ``_l`` then ``_r``."""
     return tuple(f"{m.stem}_{side}" for m in _MUSCLES for side in ("l", "r"))
+
+
+def _neutral_body_transforms(spec: FixtureSpec) -> dict[str, np.ndarray]:
+    """Neutral pose of each muscle-bearing body expressed in the pelvis frame."""
+    poses = {_PELVIS: np.eye(4)}
+    bodies = spec._bodies
+    poses[bodies[1]] = fixture_base_offset(spec)
+    neutral = fixture_neutral_transforms(spec)
+    for names in fixture_level_names(spec):
+        poses[names.superior_body] = poses[names.inferior_body] @ neutral[names.level]
+    poses[_THORAX] = poses[bodies[-1]] @ fixture_terminal_offset(spec)
+    return poses
+
+
+def _path_length(mdef: _MuscleDef, side: str, poses: dict[str, np.ndarray]) -> float:
+    sign = 1.0 if side == "r" else -1.0
+    bodies = (_PELVIS, _VIA_BODY, _THORAX)
+    world = [
+        (poses[b] @ np.array([x, y, sign * z, 1.0]))[:3]
+        for b, (x, y, z) in zip(bodies, mdef.points, strict=True)
+    ]
+    return float(
+        sum(np.linalg.norm(b - a) for a, b in zip(world, world[1:], strict=False))
+    )
+
+
+def neutral_path_lengths(spec: FixtureSpec) -> dict[str, float]:
+    """Analytic neutral muscle path length [m] per muscle name.
+
+    Sum of straight segment lengths between the path points expressed in the
+    pelvis frame at the neutral pose (all coordinates zero).  Pure Python;
+    equals OpenSim's ``getLength`` at the default state to rounding.
+
+    Raises:
+        TypeError: ``spec`` is not a :class:`FixtureSpec`.
+        ValueError: the spec has no ``L3`` body for the via point.
+    """
+    if not isinstance(spec, FixtureSpec):
+        raise TypeError(f"spec must be a FixtureSpec, got {type(spec).__name__}")
+    poses = _neutral_body_transforms(spec)
+    if _VIA_BODY not in poses:
+        raise ValueError(f"fixture spec has no {_VIA_BODY} body for the via point")
+    return {
+        f"{m.stem}_{side}": _path_length(m, side, poses)
+        for m in _MUSCLES
+        for side in ("l", "r")
+    }
 
 
 def _validate_law(law: object, spec: FixtureSpec) -> LinearCouplingLaw:
@@ -200,7 +253,9 @@ def _add_couplers(model: ET.Element, law: LinearCouplingLaw, spec: FixtureSpec) 
             ET.SubElement(item, "scale_factor").text = "1"
 
 
-def _add_muscle(forces: ET.Element, mdef: _MuscleDef, side: str) -> None:
+def _add_muscle(
+    forces: ET.Element, mdef: _MuscleDef, side: str, path_length: float
+) -> None:
     sign = 1.0 if side == "r" else -1.0
     muscle = ET.SubElement(
         forces,
@@ -212,7 +267,9 @@ def _add_muscle(forces: ET.Element, mdef: _MuscleDef, side: str) -> None:
     ET.SubElement(muscle, "optimal_fiber_length").text = format(
         _OPTIMAL_FIBER_M, ".17g"
     )
-    ET.SubElement(muscle, "tendon_slack_length").text = format(_TENDON_SLACK_M, ".17g")
+    ET.SubElement(muscle, "tendon_slack_length").text = format(
+        path_length - _OPTIMAL_FIBER_M, ".17g"
+    )
     ET.SubElement(muscle, "pennation_angle_at_optimal").text = format(
         _PENNATION_RAD, ".17g"
     )
@@ -227,12 +284,13 @@ def _add_muscle(forces: ET.Element, mdef: _MuscleDef, side: str) -> None:
         ET.SubElement(point, "socket_parent_frame").text = f"/bodyset/{body}"
 
 
-def _add_muscles(model: ET.Element) -> None:
+def _add_muscles(model: ET.Element, spec: FixtureSpec) -> None:
+    lengths = neutral_path_lengths(spec)
     forceset = ET.SubElement(model, "ForceSet", attrib={"name": "forceset"})
     objects = ET.SubElement(forceset, "objects")
     for mdef in _MUSCLES:
         for side in ("l", "r"):
-            _add_muscle(objects, mdef, side)
+            _add_muscle(objects, mdef, side, lengths[f"{mdef.stem}_{side}"])
 
 
 #: Assembly accuracy for coupled fixtures; OpenSim's default (1e-9) leaves
@@ -278,4 +336,4 @@ def augment_fixture_tree(
         _add_driver_joint(model, law.independent)
         _add_couplers(model, law, spec)
     if muscles:
-        _add_muscles(model)
+        _add_muscles(model, spec)

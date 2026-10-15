@@ -444,9 +444,7 @@ class TestNativeMuscles:
 @pytest.mark.requires_opensim
 @pytest.mark.integration
 class TestNeutralMuscleLength:
-    def test_native_length_matches_analytic_and_fibre_is_optimal(
-        self, muscled
-    ) -> None:
+    def test_native_length_matches_analytic_and_fibre_is_optimal(self, muscled) -> None:
         from src.engines.physics_engines.opensim.python.spine import (
             fixture_coupling,
         )
@@ -473,4 +471,6 @@ class TestNeutralMuscleLength:
         model.realizeDynamics(state)
         for i in range(muscles.getSize()):
             muscle = muscles.get(i)
-            assert muscle.getActiveFiberForce(state) > 0.5 * muscle.getMaxIsometricForce()
+            assert (
+                muscle.getActiveFiberForce(state) > 0.5 * muscle.getMaxIsometricForce()
+            )
