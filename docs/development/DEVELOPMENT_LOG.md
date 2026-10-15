@@ -2288,6 +2288,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12553 · NSX-04: Per-Slot Torque-Capacity Registry and Capacity_for Loader With Verified and Assumed Sources
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12553
+- **Branch:** merged via #12611
+- **PR:** #12611
+- **Paths:** see #12611
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`c19af88d`; collated from changes/12553-nsx-04-per-slot-torque-capacity-registry.md)
+- **Summary:** NSX-04: per-slot torque-capacity registry and capacity_for loader with verified and assumed sources
+- **Next step:** Shipped in PR #12611.
+
 ### DL-#12550 · Hand-on-Club Grip Wrench Uses the Bare Club Inertia (Club_Solids_Partition); Legacy Composite Kept as Wrist_on_Hands_Plus_Club
 
 - **State:** shipped
