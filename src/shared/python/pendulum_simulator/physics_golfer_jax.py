@@ -134,6 +134,36 @@ def _club_point_jax(anchor: JaxArray, theta_club: JaxArray, offset: Any) -> JaxA
     return jnp.array([anchor[0] + dx, anchor[1] + dy])
 
 
+def _arm_chain_jax(
+    shoulder_x: JaxArray,
+    shoulder_y: JaxArray,
+    th_upper_abs: JaxArray,
+    alpha_elbow: JaxArray,
+    L_upper: Any,
+    L_fore: Any,
+) -> tuple[JaxArray, JaxArray]:
+    """Elbow and hand positions of one arm hanging from its shoulder.
+
+    ``th_upper_abs`` is the absolute upper-arm angle (hub angle plus shoulder
+    angle); the forearm's absolute angle adds ``alpha_elbow``. Both arms of
+    ``forward_kinematics_jax`` share this chain, so the formula lives once.
+    """
+    th_fore_abs = th_upper_abs + alpha_elbow
+    sin_u = jnp.sin(th_upper_abs)
+    cos_u = jnp.cos(th_upper_abs)
+    sin_f = jnp.sin(th_fore_abs)
+    cos_f = jnp.cos(th_fore_abs)
+
+    elbow = jnp.array([shoulder_x + L_upper * sin_u, shoulder_y - L_upper * cos_u])
+    hand = jnp.array(
+        [
+            shoulder_x + L_upper * sin_u + L_fore * sin_f,
+            shoulder_y - L_upper * cos_u - L_fore * cos_f,
+        ]
+    )
+    return elbow, hand
+
+
 def forward_kinematics_jax(q: JaxArray, p: GolferParamsJAX) -> dict[str, JaxArray]:
     """Compute all joint positions in world frame (JAX version).
 
@@ -179,43 +209,13 @@ def forward_kinematics_jax(q: JaxArray, p: GolferParamsJAX) -> dict[str, JaxArra
     ls_y = hub_y - p.d_ls * perp_y
     ls = jnp.array([ls_x, ls_y])
 
-    # Right arm kinematics
-    th_rs_abs = th_hub + alpha_rs
-    th_re_abs = th_hub + alpha_rs + alpha_re
-
-    sin_rs = jnp.sin(th_rs_abs)
-    cos_rs = jnp.cos(th_rs_abs)
-    sin_re = jnp.sin(th_re_abs)
-    cos_re = jnp.cos(th_re_abs)
-
-    # Right elbow from right shoulder
-    re_x = rs_x + p.L_r_upper * sin_rs
-    re_y = rs_y - p.L_r_upper * cos_rs
-    re = jnp.array([re_x, re_y])
-
-    # Right hand from right shoulder (via upper arm + forearm)
-    rh_x = rs_x + p.L_r_upper * sin_rs + p.L_r_fore * sin_re
-    rh_y = rs_y - p.L_r_upper * cos_rs - p.L_r_fore * cos_re
-    rh = jnp.array([rh_x, rh_y])
-
-    # Left arm kinematics
-    th_ls_abs = th_hub + alpha_ls
-    th_le_abs = th_hub + alpha_ls + alpha_le
-
-    sin_ls = jnp.sin(th_ls_abs)
-    cos_ls = jnp.cos(th_ls_abs)
-    sin_le = jnp.sin(th_le_abs)
-    cos_le = jnp.cos(th_le_abs)
-
-    # Left elbow from left shoulder
-    le_x = ls_x + p.L_l_upper * sin_ls
-    le_y = ls_y - p.L_l_upper * cos_ls
-    le = jnp.array([le_x, le_y])
-
-    # Left hand from left shoulder (via upper arm + forearm)
-    lh_x = ls_x + p.L_l_upper * sin_ls + p.L_l_fore * sin_le
-    lh_y = ls_y - p.L_l_upper * cos_ls - p.L_l_fore * cos_le
-    lh = jnp.array([lh_x, lh_y])
+    # Arm chains: elbow and hand from each shoulder (same formula both sides)
+    re, rh = _arm_chain_jax(
+        rs_x, rs_y, th_hub + alpha_rs, alpha_re, p.L_r_upper, p.L_r_fore
+    )
+    le, lh = _arm_chain_jax(
+        ls_x, ls_y, th_hub + alpha_ls, alpha_le, p.L_l_upper, p.L_l_fore
+    )
 
     # Club points: the club base sits grip_right behind the right wrist pin
     # (mirrors ``golfer_kinematics.forward_kinematics``; #12669).
