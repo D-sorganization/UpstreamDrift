@@ -132,7 +132,7 @@ class ReplayReport:
     mode: ReplayMode
     policy: ReplayPolicy
     times_s: Array
-    frame_node_index: Array
+    frame_node_index: np.ndarray[Any, np.dtype[np.signedinteger[Any]]]
     q: Array
     v: Array
     reference_q: Array | None
@@ -289,7 +289,8 @@ def _check_mode_inputs(
         if feedback.n_actuated != setup.n_actuated:
             raise ValueError(
                 f"feedback gains must act on every actuated joint "
-                f"({setup.n_actuated}), got {feedback.kp.shape}"
+                f"({setup.n_actuated}), got "
+                f"{feedback.kp.shape if isinstance(feedback, FeedbackLaw) else feedback.n_actuated}"
             )
     ref = setup.reference
     if ref is not None and not ref.covers(*window):
@@ -529,6 +530,8 @@ def replay(
     drift = _closure_drift(physics, q, v)
     budget = None
     if fb_series is not None:
+        if feedback is None:
+            raise ValueError("a feedback series requires a feedback law")
         budget = feedback_budget(
             nodes, allocated, fb_series, v @ setup.actuation.T, feedback.torque_limit
         )
