@@ -442,7 +442,12 @@ golden `closure_convention`.
 Each implements the NSX-13 adapter methods and passes canonical equality with
 Pinocchio on states projected by `project_to_closure` to `1e-6` scaled.
 MuJoCo (NSX-51): hard-KKT evaluation, drift method recorded in provenance
-(finite difference declared). MyoSuite (NSX-52): reuses the MuJoCo path,
+(finite difference declared). MuJoCo declares `CLOSED_LOOP_SNAPSHOT` FULL from `mj_fullM`,
+`qfrc_bias`, the weld site Jacobians and a central-difference drift
+(`drift=central_finite_difference` in the model provenance); stock soft-weld
+stepping is the separate divergence entry `mujoco-stock-soft-weld-vs-hard-kkt`.
+The cross-engine test holds `M`, `h`, `J_c` and `Jdot_v` to 1e-11, 1e-12 and 1e-8
+scaled (measured 2e-14, 3e-15, 3e-9). MyoSuite (NSX-52): reuses the MuJoCo path,
 records `kkt_regularization`, `FULL` only when 0. Drake (NSX-53): native
 adapter, explicit `from pydrake.X import Y` imports, no module-level mocks.
 OpenSim (NSX-54): delegates to `OpenSimFullBodyParityAdapter`.

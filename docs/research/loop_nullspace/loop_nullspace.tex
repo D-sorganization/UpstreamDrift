@@ -688,6 +688,31 @@ tag alone is insufficient.  The golden \texttt{closure\_convention} passes one
 analytic relative twist through all four conventions and asserts equal
 canonical output and power.
 
+\paragraph{MuJoCo Hard-KKT Snapshot (NSX-51).}
+The MuJoCo snapshot never reads stock stepping, whose weld equality is
+compliant (\texttt{solref}, \texttt{solimp}).  It assembles $M$
+(\texttt{mj\_fullM}), $h$ (\texttt{qfrc\_bias}) and the weld Jacobian
+$J=J_{a}-J_{b}$ of the two closure sites (\texttt{mj\_jacSite}, WORLD axes,
+each site's own point), and evaluates the exact system
+$\begin{bsmallmatrix}M&-J^{\top}\\J&0\end{bsmallmatrix}
+\begin{bsmallmatrix}a\\\lambda\end{bsmallmatrix}=
+\begin{bsmallmatrix}\tau-h\\-\dot{J}v\end{bsmallmatrix}$
+with zero regularisation.  MuJoCo has no analytic $\dot{J}$; the declared
+method is the central difference
+$\dot{J}v=\left[J(q+\epsilon v)-J(q-\epsilon v)\right]v/(2\epsilon)$,
+$\epsilon=10^{-6}$, valid because every coordinate is a scalar slide or hinge.
+It is $O(\epsilon^{2})$, against the first-order difference inside
+\texttt{mj\_jacDot}, and is recorded in the snapshot model provenance as
+\texttt{drift=central\_finite\_difference}.  At a matched, closure-consistent
+state the canonical $M$, $h$, $J_c$ and $\dot{J}_cv$ agree with Pinocchio to
+$2\times10^{-14}$, $4\times10^{-13}$, $3\times10^{-15}$ and
+$3\times10^{-9}$ (absolute); the last is the finite difference and is the only
+irreducible difference.  Stock stepping leaves a closure-acceleration residual
+of 2 to 290 percent of the free one on the same states and has its own
+divergence entry, \texttt{mujoco-stock-soft-weld-vs-hard-kkt}.  Reproduce with
+\texttt{pytest tests/unit/loop\_nullspace/test\_mujoco\_snapshot.py
+tests/unit/loop\_nullspace/test\_cross\_engine\_snapshot.py}.
+
 \section{Audit of the Pendulum Constraint Rank}
 \label{sec:audit}
 
