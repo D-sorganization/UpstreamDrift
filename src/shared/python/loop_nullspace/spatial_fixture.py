@@ -185,7 +185,11 @@ def _foot_points(points_per_foot: int) -> list[Array]:
 
 
 def _build(
-    floating_root: bool, feet: bool, grip: pin.SE3 | None, points_per_foot: int = 1
+    floating_root: bool,
+    feet: bool,
+    grip: pin.SE3 | None,
+    points_per_foot: int = 1,
+    zero_root: bool = False,
 ) -> _Spatial:
     model = pin.Model()
     root = 0
@@ -231,7 +235,8 @@ def _build(
                 )
             )
     n_root = 6 if floating_root else 0
-    q_star = np.array([*(_Q_ROOT if floating_root else []), *_Q_LEAD, *_Q_TRAIL])
+    root_q = [0.0] * 6 if zero_root else _Q_ROOT
+    q_star = np.array([*(root_q if floating_root else []), *_Q_LEAD, *_Q_TRAIL])
     return _Spatial(
         model,
         model.createData(),
@@ -245,16 +250,19 @@ def _build(
 
 
 def _build_closed(
-    floating_root: bool, feet: bool, points_per_foot: int = 1
+    floating_root: bool,
+    feet: bool,
+    points_per_foot: int = 1,
+    zero_root: bool = False,
 ) -> _Spatial:
     """Two-pass build: place the grip frame where the trail hand already is."""
-    probe = _build(floating_root, feet, None, points_per_foot)
+    probe = _build(floating_root, feet, None, points_per_foot, zero_root)
     pin.forwardKinematics(probe.model, probe.data, probe.q_star)
     pin.updateFramePlacements(probe.model, probe.data)
     o_lead = probe.data.oMf[probe.lead_grip]
     o_trail = probe.data.oMf[probe.trail_grip]
     grip = o_lead.inverse() * o_trail
-    sp = _build(floating_root, feet, grip, points_per_foot)
+    sp = _build(floating_root, feet, grip, points_per_foot, zero_root)
     pin.forwardKinematics(sp.model, sp.data, sp.q_star)
     pin.updateFramePlacements(sp.model, sp.data)
     sp.rot_grip = np.array(sp.data.oMf[sp.lead_grip].rotation)
@@ -291,7 +299,11 @@ def _welded_inertias() -> tuple[SpatialInertia, ...]:
 
 
 def build_case(
-    *, floating_root: bool = False, feet: bool = False, foot_points: int = 1
+    *,
+    floating_root: bool = False,
+    feet: bool = False,
+    foot_points: int = 1,
+    zero_root_pose: bool = False,
 ) -> FixtureCase:
     """Build the spatial snapshot and attach its NSX-00 ``spatial_counts`` golden.
 
@@ -299,12 +311,16 @@ def build_case(
         ValueError: If ``feet`` is requested without ``floating_root`` (the
             feet are rigidly attached to the root), or ``foot_points`` is not
             1 or 2 (points per foot; 2 gives the four-point NSX-60 variant).
+        ``zero_root_pose`` puts the floating root at the world origin with no
+        rotation, so the world-axis point Jacobians equal the symbolic ones of
+        the NSX-60 observation golden (root rows are a permutation of the net
+        wrench about the origin).
     """
     if feet and not floating_root:
         raise ValueError("feet require floating_root=True (feet attach to the root)")
     if foot_points not in (1, 2):
         raise ValueError(f"foot_points must be 1 or 2, got {foot_points!r}")
-    sp = _build_closed(floating_root, feet, foot_points)
+    sp = _build_closed(floating_root, feet, foot_points, zero_root_pose)
     model, data, q = sp.model, sp.data, sp.q_star
     v, a = _admissible_rates(sp, np.random.default_rng(_SEED))
     jc = sp.closure_jacobian(q)

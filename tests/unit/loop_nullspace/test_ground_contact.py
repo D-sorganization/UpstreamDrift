@@ -79,7 +79,7 @@ def _consistent(snap: ClosedLoopSnapshot) -> ClosedLoopSnapshot:
 @pytest.fixture(scope="module", params=sorted(VARIANTS))
 def case(request):
     snap, golden = spatial_two_arm_club_snapshot(
-        floating_root=True, feet=True, **VARIANTS[request.param]
+        floating_root=True, feet=True, zero_root_pose=True, **VARIANTS[request.param]
     )
     snap = _consistent(snap)
     dec = decompose(snap, weights=np.eye(snap.topology.n_actuated))
@@ -416,7 +416,7 @@ def test_accounting_rejects_an_observation_of_the_wrong_size(case) -> None:
 
 
 # ------------------------------------- GRF observation: feasible set --------
-def _grf_hypotheses():
+def _grf_hypotheses(hypothesis_id: str = GRF_ID):
     from src.shared.python.loop_nullspace.registry import (
         Hypothesis,
         HypothesisSet,
@@ -426,7 +426,7 @@ def _grf_hypotheses():
     return HypothesisSet(
         "t",
         "Grf",
-        (Hypothesis(GRF_ID, "grf", Source(None, "t"), "NOT_APPLICABLE"),),
+        (Hypothesis(hypothesis_id, "t", Source(None, "t"), "NOT_APPLICABLE"),),
         (),
     )
 
@@ -452,10 +452,12 @@ def test_observation_rows_are_two_sided_bands_in_z(case) -> None:
 
 def test_feasible_set_requires_the_grf_hypothesis_to_be_declared(case) -> None:
     _, snap, dec, _, obs_golden = case
-    obs = _true_observation(snap, dec, obs_golden.payload["observations"]["force_per_foot"])
+    obs = _true_observation(
+        snap, dec, obs_golden.payload["observations"]["force_per_foot"]
+    )
     with pytest.raises(ValueError, match="H-GRF-OBSERVATION"):
         FeasibleSet.from_hypotheses(
-            dec, registry.preset("envelope_only"), observation=obs, capacity=None
+            dec, _grf_hypotheses("H-FRICTION-CONE"), observation=obs
         )
 
 
@@ -476,8 +478,8 @@ def test_feasible_set_with_observation_is_narrower_than_without(case) -> None:
     q = EnvelopeQuantity("f0", dec.N[lead], float(dec.x_p[lead]), "N", 100.0)
     row_free = static_envelopes([free], [q])
     row_seen = static_envelopes([seen], [q])
-    width_free = float(row_free.width[0, 0])
-    width_seen = float(row_seen.width[0, 0])
+    width_free = float(row_free.width()[0, 0])
+    width_seen = float(row_seen.width()[0, 0])
     assert width_seen < width_free or np.isnan(width_free)
     assert width_seen <= 2 * obs.coverage * 5.0 + 1e-6
     assert GRF_ID in seen.hypothesis_ids
