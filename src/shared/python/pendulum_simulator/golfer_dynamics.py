@@ -231,23 +231,22 @@ def _left_arm_chain_jacobian(
 def _club_jacobians(
     p: GolferParams, tc: _TrigCache, j_rh: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Compute Jacobians for club COM and club tip, reusing the RH Jacobian."""
-    # Club COM: RH chain + club angle
+    """Compute Jacobians for club COM and club tip, reusing the RH Jacobian.
+
+    A club point ``rh + s * (sin, -cos)(theta_club)`` has club-angle column
+    ``s * (cos, sin)(theta_club)`` (#12608).
+    """
     if not (p is not None):
         raise ValueError("p must be provided")
-    coeff_com_x = 0.5 * p.L_club - p.grip_right
-    coeff_com_y = -0.5 * (p.L_club - 2 * p.grip_right)
+    club_tangent = np.array([tc.cos_club, tc.sin_club])
 
+    # Club COM: RH chain + club angle, midway between base and tip
     J_club_com = j_rh.copy()
-    J_club_com[0, 7] = coeff_com_x * tc.cos_club
-    J_club_com[1, 7] = coeff_com_y * tc.sin_club
+    J_club_com[:, 7] = (0.5 * p.L_club - p.grip_right) * club_tangent
 
-    # Club TIP: RH chain + club angle (different coefficient)
-    coeff_tip = p.L_club - p.grip_right
-
+    # Club TIP: RH chain + club angle
     J_club_tip = j_rh.copy()
-    J_club_tip[0, 7] = coeff_tip * tc.cos_club
-    J_club_tip[1, 7] = -coeff_tip * tc.sin_club
+    J_club_tip[:, 7] = (p.L_club - p.grip_right) * club_tangent
 
     return J_club_com, J_club_tip
 

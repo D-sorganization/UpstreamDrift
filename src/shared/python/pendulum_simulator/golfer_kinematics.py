@@ -21,11 +21,27 @@ points on a shared club segment, closing the kinematic loop.
 Coordinate convention:
     Angles measured from downward vertical, positive counterclockwise.
     World frame: x→right, y→up, origin at hub.
+    A segment of absolute angle ``a`` points along ``u(a) = (sin a, -cos a)``;
+    ``theta_club`` is the absolute club angle, so every club point is
+    ``rh + (s - grip_right) * u(theta_club)`` for an arc length ``s`` measured
+    from the club base (#12608 fixed a flipped y sign here).
+
+Closure decision (#12608, NSX-00 ``PLANAR_POINT2``):
+    The hands do not enter the loop closure.  ``rh`` and ``lh`` are forearm
+    end points (the wrist pins); the club is pinned at both wrists, exactly as
+    the NSX-00 planar two-arm fixture closes the trail hand onto a grip point.
+    The hand angles ``alpha_rh``/``alpha_lh`` are free hand DOFs that move no
+    point of this model, so their constraint-Jacobian columns are zero.  The
+    closure therefore has two independent rows and its Jacobian has rank 2 on
+    the constraint manifold; ``golfer_constraints`` rows 2-3 are an orthogonal
+    rotation of rows 0-1 and add no rank there.
 """
 
 from __future__ import annotations
 
 import numpy as np
+
+from src.shared.python.core.contracts import ensure, require
 
 from . import native_backend as _native_backend
 from .physics_golfer import N_DOF, GolferParams
@@ -88,6 +104,34 @@ def _chain_endpoint(
     for angle, length in zip(angles_abs, lengths, strict=False):
         x += length * np.sin(angle)
         y -= length * np.cos(angle)
+    return (x, y)
+
+
+def point_on_club(
+    anchor: tuple[float, float], theta_club: float, offset: float
+) -> tuple[float, float]:
+    """Point ``offset`` metres from ``anchor`` along the club shaft.
+
+    The shaft direction is ``u(theta_club) = (sin, -cos)``, the same direction
+    as every arm segment and as ``golfer_constraints`` rows 2-3.
+
+    Preconditions:
+        ``theta_club`` and ``offset`` are finite.
+    Postconditions:
+        The returned point is exactly ``|offset|`` from ``anchor``.
+    """
+    require(
+        bool(np.isfinite(theta_club) and np.isfinite(offset)),
+        "theta_club and offset must be finite",
+        (theta_club, offset),
+    )
+    x = anchor[0] + offset * float(np.sin(theta_club))
+    y = anchor[1] - offset * float(np.cos(theta_club))
+    ensure(
+        bool(np.isclose(np.hypot(x - anchor[0], y - anchor[1]), abs(offset))),
+        "club point must lie |offset| from its anchor",
+        (x, y),
+    )
     return (x, y)
 
 
@@ -175,23 +219,10 @@ def forward_kinematics(
     le = _chain_endpoint(ls, [l_abs[0]], [p.L_l_upper])
     lh = _chain_endpoint(ls, l_abs[:2], [p.L_l_upper, p.L_l_fore])
 
-    # Club direction unit vector
-    club_dx = np.sin(th_club)
-    club_dy = -np.cos(th_club)
-
-    # Club base defined from right-hand grip position along club direction
-    club_base = (
-        rh[0] - p.grip_right * club_dx,
-        rh[1] + p.grip_right * club_dy,
-    )
-    grip_l_on_club = (
-        club_base[0] + p.grip_left * club_dx,
-        club_base[1] - p.grip_left * club_dy,
-    )
-    club_tip = (
-        club_base[0] + p.L_club * club_dx,
-        club_base[1] - p.L_club * club_dy,
-    )
+    # Club points: the club base sits grip_right behind the right wrist pin.
+    club_base = point_on_club(rh, th_club, -p.grip_right)
+    grip_l_on_club = point_on_club(rh, th_club, p.grip_left - p.grip_right)
+    club_tip = point_on_club(rh, th_club, p.L_club - p.grip_right)
 
     result = {
         "origin": (0.0, 0.0),

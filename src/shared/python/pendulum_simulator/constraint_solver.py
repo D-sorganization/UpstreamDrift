@@ -31,6 +31,7 @@ import numpy as np
 from . import native_backend as _native_backend
 from .golfer_constraints import analytical_constraint_jacobian as constraint_jacobian
 from .golfer_constraints import (
+    INDEPENDENT_CLOSURE_ROWS,
     constraint_vector,
     friction_torque_vector,
 )
@@ -134,28 +135,30 @@ def _solve_constrained_dynamics(
     # Baumgarte RHS
     rhs_constraint = -gamma - 2.0 * alpha * Phi_dot - beta**2 * Phi
 
-    # Assemble KKT system
+    # Assemble the KKT system on the independent closure rows only (#12608):
+    # rows 2-3 rotate rows 0-1, so including them makes the KKT matrix
+    # near-singular off the manifold and amplifies the residual without bound.
+    rows = list(INDEPENDENT_CLOSURE_ROWS)
     n = N_DOF
-    m = N_CONSTRAINTS
+    m = len(rows)
     KKT = np.zeros((n + m, n + m))
     KKT[:n, :n] = M
-    KKT[:n, n:] = Phi_q.T
-    KKT[n:, :n] = Phi_q
+    KKT[:n, n:] = Phi_q[rows].T
+    KKT[n:, :n] = Phi_q[rows]
 
     rhs = np.zeros(n + m)
     rhs[:n] = rhs_dyn
-    rhs[n:] = rhs_constraint
+    rhs[n:] = rhs_constraint[rows]
 
-    # Solve KKT system
-    try:
-        sol = np.linalg.solve(KKT, rhs)
-    except np.linalg.LinAlgError:
-        logger.warning("KKT system singular, falling back to least-squares solver")
-        # Fallback: use least-squares if KKT is singular
-        sol, _, _, _ = np.linalg.lstsq(KKT, rhs, rcond=None)
+    # The massless wrist DOFs leave exact zero columns in M and Phi_q, so the
+    # KKT matrix stays singular; the minimum-norm least-squares solution is
+    # exact for that consistent singular system.
+    sol, _, _, _ = np.linalg.lstsq(KKT, rhs, rcond=None)
 
     qddot = sol[:n]
-    lambda_forces = sol[n:]
+    # Report all N_CONSTRAINTS multipliers; the redundant rows carry none.
+    lambda_forces = np.zeros(N_CONSTRAINTS)
+    lambda_forces[rows] = sol[n:]
 
     assert np.all(np.isfinite(qddot)), f"qddot has non-finite values: {qddot}"
     assert np.all(np.isfinite(lambda_forces)), (
