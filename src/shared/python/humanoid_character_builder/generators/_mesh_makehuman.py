@@ -207,25 +207,10 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
                     )
                     if len(seg_verts) == 0:
                         continue
-                    submesh = _trimesh_module.Trimesh(  # type: ignore[union-attr]
-                        vertices=seg_verts, faces=seg_faces
+                    vpath, cpath = self._export_segment(
+                        seg_verts, seg_faces, segment_name, visual_dir, collision_dir
                     )
-                    vpath = visual_dir / f"{segment_name}.stl"
-                    submesh.export(str(vpath))
                     mesh_paths[segment_name] = vpath
-                    cpath = collision_dir / f"{segment_name}.stl"
-                    # Convex hull can fail (e.g. qhull QH6214) when the segment
-                    # has too few or coplanar points. Fall back to the segment
-                    # mesh itself as collision geometry — better than skipping.
-                    try:
-                        submesh.convex_hull.export(str(cpath))
-                    except (RuntimeError, ValueError, OSError) as hull_exc:
-                        logger.warning(
-                            "Convex hull failed for %s (%s); using segment mesh as collision",
-                            segment_name,
-                            hull_exc,
-                        )
-                        submesh.export(str(cpath))
                     collision_paths[segment_name] = cpath
                 except (
                     AttributeError,
@@ -243,6 +228,39 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
             vertex_groups=vertex_groups,
             metadata={"backend": "makehuman"},
         )
+
+    @staticmethod
+    def _export_segment(
+        seg_verts: np.ndarray,
+        seg_faces: np.ndarray,
+        segment_name: str,
+        visual_dir: Path,
+        collision_dir: Path,
+    ) -> tuple[Path, Path]:
+        """Export one segment's visual STL and collision STL.
+
+        Returns:
+            ``(visual_path, collision_path)``; both files exist on return.
+        """
+        submesh = _trimesh_module.Trimesh(  # type: ignore[union-attr]
+            vertices=seg_verts, faces=seg_faces
+        )
+        vpath = visual_dir / f"{segment_name}.stl"
+        submesh.export(str(vpath))
+        cpath = collision_dir / f"{segment_name}.stl"
+        # Convex hull can fail (e.g. qhull QH6214) when the segment has too
+        # few or coplanar points. Use the segment mesh itself as collision
+        # geometry and say so, rather than skipping the segment.
+        try:
+            submesh.convex_hull.export(str(cpath))
+        except (RuntimeError, ValueError, OSError) as hull_exc:
+            logger.warning(
+                "Convex hull failed for %s (%s); using segment mesh as collision",
+                segment_name,
+                hull_exc,
+            )
+            submesh.export(str(cpath))
+        return vpath, cpath
 
     def _generate_from_presets(
         self,
