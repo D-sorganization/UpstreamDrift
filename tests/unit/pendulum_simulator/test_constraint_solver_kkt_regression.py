@@ -94,7 +94,9 @@ def test_accelerations_and_multipliers_match_the_independent_row_reference(
     a_new, lam_new = cs._solve_constrained_dynamics(
         state, 0.3, params, _torque, alpha, beta
     )
-    a_old, lam_old = _independent_row_reference(state, 0.3, params, _torque, alpha, beta)
+    a_old, lam_old = _independent_row_reference(
+        state, 0.3, params, _torque, alpha, beta
+    )
     assert np.max(np.abs(a_new - a_old)) / max(1.0, np.max(np.abs(a_old))) < 1e-8
     assert np.max(np.abs(lam_new - lam_old)) / max(1.0, np.max(np.abs(lam_old))) < 1e-7
 
@@ -104,7 +106,9 @@ def test_zero_torque_counterfactual_is_unchanged() -> None:
         [np.linspace(-0.3, 0.4, N_DOF), np.linspace(0.2, -0.5, N_DOF)]
     )
     params = _params()
-    ref, _ = _independent_row_reference(state, 0.0, params, lambda t: (0.0,) * 7, 5.0, 5.0)
+    ref, _ = _independent_row_reference(
+        state, 0.0, params, lambda t: (0.0,) * 7, 5.0, 5.0
+    )
     out = zero_torque_accelerations(state, params)
     assert np.max(np.abs(out - ref)) / max(1.0, np.max(np.abs(ref))) < 1e-8
 

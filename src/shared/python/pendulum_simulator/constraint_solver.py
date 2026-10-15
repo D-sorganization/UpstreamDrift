@@ -58,6 +58,45 @@ DEFAULT_ALPHA = 5.0
 DEFAULT_BETA = 5.0
 
 
+def _independent_row_solve(
+    M: np.ndarray,
+    h: np.ndarray,
+    load: np.ndarray,
+    Phi: np.ndarray,
+    Phi_q: np.ndarray,
+    gamma: np.ndarray,
+    qdot: np.ndarray,
+    gains: tuple[float, float],
+) -> tuple[np.ndarray, np.ndarray]:
+    """One KKT projector solve on the independent closure rows (NSX-30, #12608).
+
+    Rows 2-3 rotate rows 0-1 and make the KKT matrix near-singular off the
+    manifold, so only ``INDEPENDENT_CLOSURE_ROWS`` enter and the redundant rows
+    carry zero multiplier.  The pendulum convention is
+    ``M qddot + Phi_q^T lambda = load - h``, i.e. lambda = -lambda_projector.
+    """
+    alpha, beta = gains
+    rows = list(INDEPENDENT_CLOSURE_ROWS)
+    phi_q_ind = Phi_q[rows]
+    qddot, lam = constrained_acceleration(
+        M,
+        h,
+        load,
+        phi_q_ind,
+        gamma[rows],
+        baumgarte=Baumgarte(
+            alpha=alpha,
+            beta=beta,
+            position_error=Phi[rows],
+            velocity_error=phi_q_ind @ qdot,
+        ),
+        singular_mass_fallback=True,
+    )
+    lambda_forces = np.zeros(N_CONSTRAINTS)
+    lambda_forces[rows] = -lam
+    return qddot, lambda_forces
+
+
 def _solve_constrained_dynamics(
     state: State,
     t: float,
@@ -131,30 +170,9 @@ def _solve_constrained_dynamics(
     # Gamma term: Phi_qq * qdot * qdot (computed numerically)
     gamma = _constraint_acceleration_bias(q, qdot, params)
 
-    # One KKT projector for every closed-loop solve (NSX-30, #12570), on the
-    # independent closure rows only (#12608): rows 2-3 rotate rows 0-1 and make
-    # the KKT matrix near-singular off the manifold.  The pendulum convention is
-    # ``M qddot + Phi_q^T lambda = tau + tau_f - C - G``, i.e.
-    # lambda = -lambda_projector; Baumgarte terms are declared explicitly and the
-    # redundant rows carry zero multiplier.
-    rows = list(INDEPENDENT_CLOSURE_ROWS)
-    phi_q_ind = Phi_q[rows]
-    qddot, lam = constrained_acceleration(
-        M,
-        C + G,
-        tau + tau_f,
-        phi_q_ind,
-        gamma[rows],
-        baumgarte=Baumgarte(
-            alpha=alpha,
-            beta=beta,
-            position_error=Phi[rows],
-            velocity_error=phi_q_ind @ qdot,
-        ),
-        singular_mass_fallback=True,
+    qddot, lambda_forces = _independent_row_solve(
+        M, C + G, tau + tau_f, Phi, Phi_q, gamma, qdot, (alpha, beta)
     )
-    lambda_forces = np.zeros(N_CONSTRAINTS)
-    lambda_forces[rows] = -lam
 
     assert np.all(np.isfinite(qddot)), f"qddot has non-finite values: {qddot}"
     assert np.all(np.isfinite(lambda_forces)), (
