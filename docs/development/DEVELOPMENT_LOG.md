@@ -2301,6 +2301,58 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12700 · Pinocchio Reference Adapter Finite-Differences the Trajectory on the Base Lie Group (World Linear, Body Angular via the Quaternion Log) and Feeds the Result Through the NSX-50 Velocity Map, Instead of Differentiating Raw Native Q
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12700
+- **Branch:** merged via #12704
+- **PR:** #12704
+- **Paths:** see #12704
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`12f14c0b`; collated from changes/12700-pinocchio-fd-frames.md)
+- **Summary:** Pinocchio reference adapter finite-differences the trajectory on the base Lie group (world linear, body angular via the quaternion log) and feeds the result through the NSX-50 velocity map, instead of differentiating raw native q
+- **Next step:** Shipped in PR #12704.
+
+### DL-#12669 · Correct the Club Y-Sign, Hub Direction and Club Jacobians in the JAX Golfer Path; Club Points and Club-Angle Jacobian Columns Now Share Backend-Agnostic Formulas With the NumPy Kinematics, Pinned by NumPy-vs-JAX Parity Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12669
+- **Branch:** merged via #12679
+- **PR:** #12679
+- **Paths:** see #12679
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`3ec138c7`; collated from changes/12669-correct-the-club-y-sign-hub-direction-an.md)
+- **Summary:** Correct the club y-sign, hub direction and club Jacobians in the JAX golfer path; club points and club-angle Jacobian columns now share backend-agnostic formulas with the NumPy kinematics, pinned by NumPy-vs-JAX parity tests
+- **Next step:** Shipped in PR #12679.
+
+### DL-#12592 · NSX-74 Publication Gate Checklist for Loop Null-Space Results
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12592
+- **Branch:** merged via #12664
+- **PR:** #12664
+- **Paths:** see #12664
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`b24d4235`; collated from changes/12592-nsx-74-publication-gate-checklist-for-lo.md)
+- **Summary:** NSX-74 publication gate checklist for loop null-space results
+- **Next step:** Shipped in PR #12664.
+
+### DL-#12562 · NSX-17 Invariant Quantities With Validity Gates
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12562
+- **Branch:** merged via #12638
+- **PR:** #12638
+- **Paths:** see #12638
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`d497012c`; collated from changes/12562-nsx-17-invariant-quantities-with-validit.md)
+- **Summary:** NSX-17 invariant quantities with validity gates
+- **Next step:** Shipped in PR #12638.
+
 ### DL-#12584 · Two-Track Cross-Engine Closed-Loop Conformance Harness (Numerical Snapshot Equality Plus Propagated Scientific Envelopes), Registry Entries per Engine Pair, Native OpenSim Adapter Registered in the Engine Factory
 
 - **State:** shipped
