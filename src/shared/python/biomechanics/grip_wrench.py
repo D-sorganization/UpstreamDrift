@@ -56,6 +56,7 @@ SplitMethod = Literal[
     "logged",
     "bushing",
     "contact",
+    "loop_nullspace_family",
     "unavailable",
 ]
 SPLIT_METHODS: tuple[str, ...] = get_args(SplitMethod)
@@ -66,6 +67,7 @@ GripInterfaceName = Literal[
 GRIP_INTERFACES: tuple[str, ...] = get_args(GripInterfaceName)
 DEFAULT_GRIP_INTERFACE: GripInterfaceName = "hand_on_bare_club"
 LEGACY_COMPOSITE_GRIP_INTERFACE: GripInterfaceName = "wrist_on_hands_plus_club"
+SPLITS: tuple[str, ...] = SPLIT_METHODS
 
 _BODY = "club"
 _ZERO: Vec3 = (0.0, 0.0, 0.0)
@@ -73,6 +75,7 @@ _ZERO: Vec3 = (0.0, 0.0, 0.0)
 __all__ = [
     "DEFAULT_GRIP_INTERFACE",
     "GRIP_INTERFACES",
+    "SPLITS",
     "GripAnalysis",
     "GripInterfaceName",
     "GripSeries",
