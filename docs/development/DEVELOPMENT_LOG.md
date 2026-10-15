@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12784 · Nightly motion-matching-smoke.yml Runs Tests/Integration/Motion_Matching (Slow, --Timeout=0) via Scripts/Ci/Run_Motion_Matching_Smoke.Sh on the Fleet; a Failure Opens or Updates an Issue and the Red Scheduled Run Reaches Fleet-Main-Health; Not Coupled to Heavy-Tests-Opt-In Parity
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12784
+- **Branch:** ci/12784-motion-matching-smoke-lane
+- **PR:** #12786
+- **Paths:** see #12786
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`c4b15957`; collated from changes/12784-motion-matching-smoke-lane.md)
+- **Summary:** Nightly motion-matching-smoke.yml runs tests/integration/motion_matching (slow, --timeout=0) via scripts/ci/run_motion_matching_smoke.sh on the fleet; a failure opens or updates an issue and the red scheduled run reaches fleet-main-health; not coupled to heavy-tests-opt-in parity
+- **Next step:** Merge the PR; the first scheduled run needs #12776 and #12783 on main to be green.
+
 ### DL-#12702 · Fix the 'Spec Has No Club Body' Crash on the MuJoCo-Native Driver Run: Assembly_From_Spec Now Recognises the Native Simscape Club (Segmented 2.5in Butt Grip, No Grip Solid) so the Default V2 Spec Carries a Club Body; Lane.Set_Club_Targets Fails Fast via Club_Face_Target.Require_Club_Assembly Naming the Spec Source. the Smoke Test Now Gets Past Set_Club_Targets but Still Fails on Dynamics Marker RMS (0.51 m vs 0.15 m Bound), a Separate Regression; the Smoke Is Marked Slow and Runs in No CI Lane
 
 - **State:** in_review
@@ -2326,6 +2339,97 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#12748 · SPN-6a: Spine Model Asset Manifest and Local-Source SHA-256 Admission
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12748
+- **Branch:** merged via #12781
+- **PR:** #12781
+- **Paths:** see #12781
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7dea9b22`; collated from changes/12748-spn-6a-spine-model-asset-manifest-and-lo.md)
+- **Summary:** SPN-6a: spine model asset manifest and local-source SHA-256 admission
+- **Next step:** Shipped in PR #12781.
+
+### DL-#12747 · SPN-5 Spinal Load Series, Sign Conventions and Tension-Positive Axial Bridge
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12747
+- **Branch:** merged via #12781
+- **PR:** #12781
+- **Paths:** see #12781
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7dea9b22`; collated from changes/12747-spn-5-spinal-load-series-sign-convention.md)
+- **Summary:** SPN-5 spinal load series, sign conventions and tension-positive axial bridge
+- **Next step:** Shipped in PR #12781.
+
+### DL-#12740 · SPN-1B: Segmental Spine Per-Level Transforms and Ordered Composition (Spine.Segmental)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12740
+- **Branch:** merged via #12781
+- **PR:** #12781
+- **Paths:** see #12781
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7dea9b22`; collated from changes/12740-spn-1b-segmental-spine-per-level-transfo.md)
+- **Summary:** SPN-1b: segmental spine per-level transforms and ordered composition (spine.segmental)
+- **Next step:** Shipped in PR #12781.
+
+### DL-#12739 · SPN-1a: Spinal Level Enumeration, Regions and Adjacency (Spine.Levels)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12739
+- **Branch:** merged via #12781
+- **PR:** #12781
+- **Paths:** see #12781
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7dea9b22`; collated from changes/12739-spn-1a-spinal-level-enumeration-regions.md)
+- **Summary:** SPN-1a: spinal level enumeration, regions and adjacency (spine.levels)
+- **Next step:** Shipped in PR #12781.
+
+### DL-#12738 · Segmental Spine Research Reference Scaffold, Provisional Manual Chapter 66 and Registry Blocker
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12738
+- **Branch:** merged via #12781
+- **PR:** #12781
+- **Paths:** see #12781
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7dea9b22`; collated from changes/12738-segmental-spine-research-reference-scaff.md)
+- **Summary:** Segmental spine research reference scaffold, provisional manual chapter 66 and registry blocker
+- **Next step:** Shipped in PR #12781.
+
+### DL-#12737 · Primary Data Extraction for Segmental Spine (Bruno, Fujii, Wilke, Golf Loads) With Provenance Flags
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12737
+- **Branch:** merged via #12781
+- **PR:** #12781
+- **Paths:** see #12781
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7dea9b22`; collated from changes/12737-primary-data-extraction-for-segmental-sp.md)
+- **Summary:** Primary data extraction for segmental spine (Bruno, Fujii, Wilke, golf loads) with provenance flags
+- **Next step:** Shipped in PR #12781.
+
+### DL-#12736 · ADR-0055: Segmental Spine Kinematics, Load Observables and Golf-Term Definitions (SPN-0)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12736
+- **Branch:** merged via #12781
+- **PR:** #12781
+- **Paths:** see #12781
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7dea9b22`; collated from changes/12736-adr-0055-segmental-spine-kinematics-load.md)
+- **Summary:** ADR-0055: segmental spine kinematics, load observables and golf-term definitions (SPN-0)
+- **Next step:** Shipped in PR #12781.
 
 ### DL-#12775 · OpenSim MSK Renders Draw the Wrapped-Finger Grip Hands on the Club and Hide the Flat Rajagopal Hand Bones
 
