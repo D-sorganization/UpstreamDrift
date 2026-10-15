@@ -138,3 +138,91 @@ def test_appearance_renders_960x720_offscreen() -> None:
         renderer.close()
     assert image.shape == (720, 960, 3)
     assert image.mean() > 20.0 and image.std() > 10.0
+
+
+# --- R1 (#12680): trunk and shoe cross-sections in the exported MJCF -----
+
+ANTHRO = (
+    ROOT / "docs/development/full_body_models/full_body_spec_anthro_driver.json",
+    ROOT / "docs/development/full_body_models/full_body_spec_anthro_iron7.json",
+)
+
+
+def _skin_meshes_in_spec_frames(spec_path: Path) -> tuple[dict, dict]:
+    """Skin mesh vertices per body, mapped back from MJCF into spec body frames.
+
+    The MJCF body frame is the joint follower frame, so a spec-body point p
+    sits at ``inv(child_to_follower) @ p`` in MJCF; invert that here.
+    """
+    import xml.etree.ElementTree as ET  # nosec B405 - parsing our own export
+
+    raw = spec_path.read_bytes()
+    spec = json.loads(raw)
+    xml, _ = exporter.export_full_body_mjcf(raw, appearance=document_from_dict(DOC))
+    root = ET.fromstring(xml)  # nosec B314 - trusted, generated in-process
+    verts = {
+        m.get("name"): np.array(m.get("vertex").split(), float).reshape(-1, 3)
+        for m in root.iter("mesh")
+    }
+    follower = {j["child"]: np.asarray(j["child_to_follower"]) for j in spec["joints"]}
+    out: dict[str, list[np.ndarray]] = {}
+    for body in root.iter("body"):
+        name = body.get("name")
+        for geom in body.findall("geom"):
+            mesh = geom.get("mesh") or ""
+            if "_skin" not in mesh:
+                continue
+            offset = np.linalg.inv(follower[name])
+            local = (verts[mesh] - offset[:3, 3]) @ offset[:3, :3]
+            out.setdefault(name, []).append(local)
+    return spec, out
+
+
+def _mid_ring_extents(
+    vertices: np.ndarray, start, end, width: np.ndarray
+) -> tuple[float, float]:
+    """(width-axis, depth-axis) extent of the ring nearest the segment middle."""
+    a = np.subtract(end, start) / np.linalg.norm(np.subtract(end, start))
+    s = (vertices - np.asarray(start)) @ a
+    mid = 0.5 * float(np.linalg.norm(np.subtract(end, start)))
+    ring = vertices[np.isclose(s, s[np.argmin(np.abs(s - mid))], atol=1e-6)]
+    depth = np.cross(a, width)
+    return float(np.ptp(ring @ width)), float(np.ptp(ring @ depth))
+
+
+@pytest.mark.parametrize("spec_path", ANTHRO, ids=lambda p: p.stem)
+def test_trunk_and_shoe_cross_sections_are_wider_than_deep(spec_path) -> None:
+    from src.shared.python.model_appearance.cross_section import body_sections
+    from src.shared.python.model_appearance.library import PART_ASPECT, classify_body
+    from src.shared.python.motion_matching.visual_skeleton import (
+        derive_visual_skeleton,
+    )
+
+    spec, meshes = _skin_meshes_in_spec_frames(spec_path)
+    sections = body_sections(spec)
+    by_body: dict[str, list] = {}
+    for cap in derive_visual_skeleton(spec).capsules:
+        by_body.setdefault(cap.body, []).append(cap)
+    seen: set[str] = set()
+    for body, caps in by_body.items():
+        part = classify_body(body)
+        if part not in ("torso", "pelvis", "foot") or body not in meshes:
+            continue
+        ml = sections[body].ml_axis
+        for cap, verts in zip(caps, meshes[body], strict=True):
+            axis = np.subtract(cap.end_m, cap.start_m)
+            if cap.length_m() < 0.05 or abs(np.dot(axis, ml)) > 0.1 * np.linalg.norm(
+                axis
+            ):
+                continue  # short stub, or a lobe that runs along ML (to a hip)
+            width_ext, depth_ext = _mid_ring_extents(verts, cap.start_m, cap.end_m, ml)
+            assert width_ext > depth_ext, (body, width_ext, depth_ext)
+            assert depth_ext / width_ext == pytest.approx(
+                PART_ASPECT[part], abs=0.02
+            ), body
+            seen.add(part if part != "foot" else body)
+    assert {"calcn_r", "calcn_l"} <= seen and ({"torso", "pelvis"} & seen)
+    pelvis = next(b for b in by_body if b.endswith("LowerTorso"))
+    pts = np.vstack(meshes[pelvis])
+    depth = sections[pelvis].depth_axis
+    assert np.ptp(pts @ sections[pelvis].ml_axis) > np.ptp(pts @ depth)
