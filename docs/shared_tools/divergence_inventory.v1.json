@@ -13,7 +13,7 @@
   "totals": {
     "identical": 377,
     "diverged": 271,
-    "ud-only": 1744,
+    "ud-only": 1745,
     "tools-only": 839,
     "spelling-only": 121
   },
@@ -497,7 +497,7 @@
     "loop_nullspace": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 10,
+      "ud-only": 11,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -7775,7 +7775,7 @@
       "classification": "ud-only",
       "package": "engine_core",
       "subpackage": "",
-      "ud_bytes": 13359,
+      "ud_bytes": 13822,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13567,6 +13567,18 @@
       "spelling_only": false
     },
     {
+      "path": "loop_nullspace/snapshot.py",
+      "classification": "ud-only",
+      "package": "loop_nullspace",
+      "subpackage": "",
+      "ud_bytes": 7205,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "loop_nullspace/solvers.py",
       "classification": "ud-only",
       "package": "loop_nullspace",
@@ -17327,7 +17339,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 27889,
+      "ud_bytes": 29921,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17495,7 +17507,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 37011,
+      "ud_bytes": 37138,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

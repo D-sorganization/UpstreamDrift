@@ -207,6 +207,35 @@ NSX-12 spatial fixture built independently; the corrected
 `verify_acceleration_parity` agrees with `constraintDynamics` to `1e-9`
 scaled.
 
+Implementation notes (Pinocchio reference, #12558):
+
+- The optional members live in `ClosedLoopSnapshotAdapter` (a separate
+  protocol, so existing adapters stay `BaseEngineForceAdapter` conformant) and
+  add `native_closure_frame(q) -> (R, point)`, the frame and reference point of
+  the native rows, which the NSX-02 converter needs alongside the grip frame
+  returned by `closure_wrench_frame(q)`, and `closure_topology() -> LoopTopology`.
+- Pinocchio drift: constrained dynamics solves `J a0 + gamma = 0` with no
+  Baumgarte term, so `Jdot v = gamma = -J a0` at zero effort. It equals the
+  finite difference of `J(q + t v) v` (tests at `1e-7` scaled) on and off the
+  closure tangent space.
+- For Pinocchio the grip frame is the hand-side weld frame (the native LOCAL
+  frame), so the canonical conversion is the identity there; the converter is
+  still applied, and the allocator is tested against fixtures served in other
+  native conventions.
+- `club_inertia_split` returns `SpatialInertia` values in the club-side
+  closure frame (body-fixed; it coincides with the grip frame on a closed
+  loop). `loop_support_indices` are the coordinates on the tree path between
+  the two constrained joints.
+- `verify_acceleration_parity` has one semantics: it takes applied joint
+  efforts only and compares the target with `constraintDynamics(q, v, tau)`.
+  A target built with an inconsistent multiplier is flagged. Legacy adapters
+  keep the raw-equation audit; `parity_effort` folds `J^T lambda` in for them
+  only.
+- Spatial fixture check: `test_snapshot_vs_spatial_fixture.py` drives the NSX-12
+  Pinocchio model through the real adapter methods and compares `M`, `h`,
+  `J_c` and `Jdot_v` at `1e-9` scaled; only the spec-driven club inertia split
+  is supplied from the fixture.
+
 ## NSX-14 Admission (#12559)
 
 ```python

@@ -10,6 +10,7 @@ from numpy.typing import NDArray
 
 from src.engines.physics_engines.pinocchio.python.marker_kinematics import CoordinateMap
 from src.engines.physics_engines.pinocchio.python.native_model import (
+    CLOSURE_CONVENTION,
     FullBodyPinocchioModel,
 )
 from src.engines.physics_engines.pinocchio.python.pinocchio_force_torque import (
@@ -21,6 +22,15 @@ from src.shared.python.biomechanics.club_inertia_partition import (
     newton_euler_keywords,
 )
 from src.shared.python.biomechanics.grip_wrench import GripAnalysis
+from src.shared.python.engine_core.capabilities import Capability, CapabilityLevel
+from src.shared.python.loop_nullspace.closure_convention import (
+    NativeClosureConvention,
+)
+from src.shared.python.loop_nullspace.contracts import (
+    ClosureKind,
+    LoopTopology,
+    SpatialInertia,
+)
 from src.shared.python.motion_matching.multi_engine_torque_allocator import EngineType
 from src.shared.python.motion_matching.polynomial_actuation import ROOT_COORDINATES
 
@@ -252,11 +262,112 @@ class PinocchioForceAdapter:
     def verify_acceleration_parity(
         self, q: Array, v: Array, tau_effective: Array, a_target: Array
     ) -> float:
+        """``||constraintDynamics(q, v, tau) - a_target||_inf`` (one semantics).
+
+        ``tau_effective`` is the *applied* joint effort only: actuator torques
+        plus any other external generalised force (ground reaction, root
+        residual).  The closure reaction ``J_c^T lambda`` is NOT part of it;
+        Pinocchio's constrained forward dynamics supplies its own multiplier,
+        so ``a* = constraintDynamics(q, v, tau)`` is the acceleration the loop
+        really produces and the target is compared with it (#12558).  A target
+        built with an inconsistent multiplier therefore differs from ``a*``.
+        Raises ``ValueError`` on nonfinite input or result.
+        """
         configuration = self._checked(q, "configuration")
         velocity = self._checked(v, "velocity")
         effort = self._checked(tau_effective, "effective effort")
         target = self._checked(a_target, "target acceleration")
-        actual = self._pin.aba(self._model, self._data, configuration, velocity, effort)
-        if not np.isfinite(actual).all():
-            raise ValueError("Native forward acceleration is nonfinite")
+        try:
+            actual = self._plant.constrained_acceleration(
+                configuration, velocity, effort
+            )
+        except FloatingPointError as exc:
+            raise ValueError("Native forward acceleration is nonfinite") from exc
         return float(np.max(np.abs(actual - target)))
+
+    # -- closed-loop snapshot capability (NSX-13, #12558) -------------------
+
+    def capability(self, capability: Capability) -> CapabilityLevel:
+        """Level for ``capability``; only adapter-boundary ones are declared.
+
+        ``CLOSED_LOOP_SNAPSHOT`` is FULL: the adapter provides the closure
+        Jacobian, its drift, the wrench frame, the club inertia split and the
+        native convention.  Anything else answers ``NONE`` here.
+        """
+        if capability is Capability.CLOSED_LOOP_SNAPSHOT:
+            return CapabilityLevel.FULL
+        return CapabilityLevel.NONE
+
+    @property
+    def native_closure_convention(self) -> NativeClosureConvention:
+        """Layout of :meth:`compute_grip_jacobian` rows (NSX-02 constant)."""
+        return CLOSURE_CONVENTION
+
+    def _named_state(self, values: Array, name: str) -> dict[str, float]:
+        return dict(zip(self._names, self._checked(values, name).tolist(), strict=True))
+
+    def compute_closure_drift(self, q: Array, v: Array) -> Array:
+        """Native ``Jdot v`` (6,) of :meth:`compute_grip_jacobian` (NSX-13)."""
+        return np.array(
+            self._plant.closure_velocity_drift(
+                self._named_state(q, "configuration"), self._named_state(v, "velocity")
+            )
+        )
+
+    def native_closure_frame(self, q: Array) -> tuple[Array, Array]:
+        """World rotation and origin of the frame the native rows use (LOCAL)."""
+        return self._plant.closure_frame_pose(self._named_state(q, "configuration"))
+
+    def closure_wrench_frame(self, q: Array) -> tuple[Array, Array]:
+        """Canonical grip frame ``(R world<-grip, origin)`` (NSX-13).
+
+        For Pinocchio the grip frame is the hand-side weld frame, i.e. the
+        native LOCAL frame itself, so native to canonical conversion reduces to
+        the identity.  The club-side frame coincides with it on a closed loop.
+        """
+        return self.native_closure_frame(q)
+
+    def club_inertia_split(self) -> tuple[SpatialInertia, tuple[SpatialInertia, ...]]:
+        """``(bare club, welded hand solids)`` in the club-side closure frame.
+
+        Body-fixed (state independent).  The hand solids are welded into the
+        club body in the specification (NSX-01) and belong to the hand side.
+        """
+        joint, bare_in_joint = self._bare_club_in_joint_frame()
+        constraint = self._plant.constraints[0]
+        if int(constraint.joint2_id) != joint:
+            raise ValueError("closure club-side joint differs from the club body joint")
+        to_frame = np.linalg.inv(np.asarray(constraint.joint2_placement.homogeneous))
+        _, body_pose = self._plant.body_placement(self._spec["closure"]["body_b"])
+        hands = club_solids_partition(self._spec).welded_hands
+        in_frame = to_frame @ np.asarray(body_pose.homogeneous)
+        return (
+            _spatial(bare_in_joint.expressed_in(to_frame)),
+            tuple(_spatial(h.expressed_in(in_frame)) for h in hands.values()),
+        )
+
+    def closure_topology(self) -> LoopTopology:
+        """Weld topology: hands close the loop onto the club (NSX-13).
+
+        ``loop_support_indices`` are the coordinates on the tree path between
+        the two constrained joints (common ancestors cancel in a relative
+        twist), in this adapter's native order.
+        """
+        actuated = set(self._actuated)
+        return LoopTopology(
+            closure_kind=ClosureKind.WELD6,
+            closing_side="hands",
+            holding_side="club",
+            actuated_indices=self._actuated,
+            unactuated_indices=tuple(i for i in range(self.nv) if i not in actuated),
+            loop_support_indices=self._plant.closure_path_velocity_indices(),
+            coordinate_order=self._names,
+        )
+
+
+def _spatial(inertia: RigidInertia) -> SpatialInertia:
+    return SpatialInertia(
+        mass=inertia.mass_kg,
+        com=np.asarray(inertia.com_m),
+        inertia=inertia.inertia_com_kg_m2,
+    )

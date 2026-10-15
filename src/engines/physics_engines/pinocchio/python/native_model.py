@@ -443,6 +443,50 @@ class NativePinocchioModel:
             np.array(pose.translation, dtype=float, copy=True),
         )
 
+    def closure_path_velocity_indices(self) -> tuple[int, ...]:
+        """Velocity indices of the joints between the two constrained bodies.
+
+        Joints shared by both constrained branches cancel in the relative
+        twist, so every other column of :meth:`closure_force_jacobian` is
+        exactly zero (NSX-13 loop support).
+        """
+        constraint = self.constraints[0]
+        supports = self.model.supports
+        path = set(supports[constraint.joint1_id]) ^ set(supports[constraint.joint2_id])
+        indices: list[int] = []
+        for joint in sorted(path):
+            first, width = self.model.joints[joint].idx_v, self.model.joints[joint].nv
+            indices.extend(range(first, first + width))
+        return tuple(sorted(indices))
+
+    def closure_velocity_drift(
+        self, coordinates: Mapping[str, float], rates: Mapping[str, float]
+    ) -> NDArray[np.float64]:
+        """Native drift ``Jdot v`` of the weld velocity constraint (NSX-13).
+
+        Pinocchio's constrained forward dynamics solves ``J a0 + gamma = 0``
+        for the zero-effort acceleration ``a0`` (no Baumgarte term), so
+        ``Jdot v = gamma = -J a0``.  It is expressed in the same native
+        convention as :meth:`closure_force_jacobian` (``CLOSURE_CONVENTION``)
+        and equals ``d/dt (J(q(t))) v`` for ``q' = v``, exactly so on
+        ``J v = 0``.  Preconditions: exactly the native coordinate and rate
+        inventories, all finite.  Postcondition: a finite read-only 6-vector.
+        """
+        names = tuple(coordinates)
+        if set(rates) != set(names):
+            raise ValueError(
+                "Provide exactly the native coordinate and rate inventories"
+            )
+        zero_efforts = {name: 0.0 for name in names}
+        accel = self.accelerations(coordinates, rates, zero_efforts)
+        _, jacobian = self._constraints_jacobian(names)
+        a0 = np.asarray([accel[name] for name in names], dtype=float)
+        drift = np.array(-(jacobian @ a0), dtype=float, copy=True)
+        if drift.shape != (6,) or not np.isfinite(drift).all():
+            raise ValueError("Invalid native weld velocity drift")
+        drift.setflags(write=False)
+        return drift
+
     def closure_trajectory_residuals(
         self,
         coordinates: Mapping[str, float],
@@ -658,6 +702,38 @@ class NativePinocchioModel:
             self.model, self.data, q, v, tau, self.constraints, self.constraint_data
         )
         return self._acceleration_dict(acceleration)
+
+    def constrained_acceleration(
+        self,
+        configuration: NDArray[np.float64],
+        velocity: NDArray[np.float64],
+        effort: NDArray[np.float64],
+    ) -> NDArray[np.float64]:
+        """Constrained forward acceleration for native-order vectors (NSX-13).
+
+        ``configuration``, ``velocity`` and ``effort`` are in Pinocchio's own
+        index order (the scalar-joint adapters use it unchanged).  Wraps
+        ``constraintDynamics``; ``effort`` excludes the closure reaction, which
+        the solver adds.  Raises ``FloatingPointError`` on a nonfinite result.
+        """
+        accel = np.array(
+            self._pin.constraintDynamics(
+                self.model,
+                self.data,
+                configuration,
+                velocity,
+                effort,
+                self.constraints,
+                self.constraint_data,
+            ),
+            dtype=float,
+            copy=True,
+        )
+        if not np.isfinite(accel).all():
+            raise FloatingPointError(
+                "Native constrained dynamics produced nonfinite acceleration"
+            )
+        return accel
 
     def _acceleration_dict(self, acceleration: Any) -> dict[str, float]:
         if not np.all(np.isfinite(acceleration)):
