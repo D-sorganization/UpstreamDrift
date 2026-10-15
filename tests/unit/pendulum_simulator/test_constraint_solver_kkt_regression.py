@@ -100,7 +100,9 @@ def test_accelerations_and_multipliers_match_the_independent_row_reference(
 
 
 def test_zero_torque_counterfactual_is_unchanged() -> None:
-    state = np.concatenate([np.linspace(-0.3, 0.4, N_DOF), np.linspace(0.2, -0.5, N_DOF)])
+    state = np.concatenate(
+        [np.linspace(-0.3, 0.4, N_DOF), np.linspace(0.2, -0.5, N_DOF)]
+    )
     params = _params()
     ref, _ = _independent_row_reference(state, 0.0, params, lambda t: (0.0,) * 7, 5.0, 5.0)
     out = zero_torque_accelerations(state, params)

@@ -488,6 +488,37 @@ def _evaluate_constraints(
     return status, is_accepted, tuple(reasons)
 
 
+def _rollout_window(
+    session: CandidateSession, fork_frame_idx: int, duration_frames: int | None
+) -> tuple[
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.float64],
+]:
+    """Copies of ``(time, q0, v0, base_q, base_tau)`` for the rollout window."""
+    end_idx = (
+        session.frame_count
+        if duration_frames is None
+        else min(fork_frame_idx + duration_frames, session.frame_count)
+    )
+    if end_idx <= fork_frame_idx + 1:
+        raise ValueError(
+            f"Rollout window too short: [{fork_frame_idx}, {end_idx}) frames"
+        )
+    window = slice(fork_frame_idx, end_idx)
+    q0 = session.q[fork_frame_idx].copy()
+    v0 = (
+        session.v[fork_frame_idx].copy() if session.v is not None else np.zeros_like(q0)
+    )
+    base_q = session.q[window]
+    base_tau = (
+        session.tau[window].copy() if session.tau is not None else np.zeros_like(base_q)
+    )
+    return session.time_s[window].copy(), q0, v0, base_q, base_tau
+
+
 @precondition(
     lambda session, fork_frame_idx, **_: (
         session.supports_counterfactuals
@@ -524,29 +555,10 @@ def create_counterfactual_rollout(
     # Strict immutability guarantee: hash baseline state before rollout
     baseline_digest_before = _compute_baseline_hash(session)
 
-    end_idx = (
-        session.frame_count
-        if duration_frames is None
-        else min(fork_frame_idx + duration_frames, session.frame_count)
+    time_window, q0, v0, base_q, base_tau = _rollout_window(
+        session, fork_frame_idx, duration_frames
     )
-    if end_idx <= fork_frame_idx + 1:
-        raise ValueError(
-            f"Rollout window too short: [{fork_frame_idx}, {end_idx}) frames"
-        )
-
-    fork_time_s = float(session.time_s[fork_frame_idx])
-    time_window = session.time_s[fork_frame_idx:end_idx].copy()
-    q0 = session.q[fork_frame_idx].copy()
-    v0 = (
-        session.v[fork_frame_idx].copy() if session.v is not None else np.zeros_like(q0)
-    )
-
-    base_q = session.q[fork_frame_idx:end_idx]
-    base_tau = (
-        session.tau[fork_frame_idx:end_idx].copy()
-        if session.tau is not None
-        else np.zeros_like(base_q)
-    )
+    fork_time_s = float(time_window[0])
 
     altered_tau = _alter_torques(
         base_tau=base_tau,

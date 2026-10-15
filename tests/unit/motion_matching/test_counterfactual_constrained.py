@@ -101,7 +101,11 @@ def planar():
         # advance with the cf integrator's own scheme: one RK4 step, ZOH load
         q, v = _rk4(provider, q, v, taus[-1], DT)
     t = np.arange(FRAMES) * DT
-    return provider, _session(t, np.array(qs), np.array(vs), np.array(acc), np.array(taus)), decs
+    return (
+        provider,
+        _session(t, np.array(qs), np.array(vs), np.array(acc), np.array(taus)),
+        decs,
+    )
 
 
 def _rk4(provider, q, v, tau, dt):
@@ -146,7 +150,9 @@ def test_unconstrained_rollout_is_the_exact_forward_dynamics() -> None:
     n = 5
     t = np.arange(n) * 0.1
     q = np.zeros((n, 2))
-    session = _session(t, q, np.zeros((n, 2)), np.zeros((n, 2)), np.ones((n, 2)), ("a", "b"))
+    session = _session(
+        t, q, np.zeros((n, 2)), np.zeros((n, 2)), np.ones((n, 2)), ("a", "b")
+    )
     dyn = CounterfactualDynamics(_DiagProvider(np.array([2.0, 4.0]), np.zeros(2)))
     fork = create_counterfactual_rollout(
         session=session,
@@ -156,7 +162,9 @@ def test_unconstrained_rollout_is_the_exact_forward_dynamics() -> None:
         dynamics=dyn,
     )
     np.testing.assert_allclose(fork.a, np.tile([0.5, 0.25], (n, 1)), atol=1e-14)
-    np.testing.assert_allclose(fork.q[-1], 0.5 * np.array([0.5, 0.25]) * 0.4**2, atol=1e-12)
+    np.testing.assert_allclose(
+        fork.q[-1], 0.5 * np.array([0.5, 0.25]) * 0.4**2, atol=1e-12
+    )
 
 
 def test_constrained_rollout_reproduces_the_baseline_motion(planar) -> None:
@@ -191,15 +199,20 @@ def test_closure_drift_stays_below_tolerance_over_the_horizon(planar) -> None:
 def test_constrained_rollout_differs_from_the_unconstrained_one(planar) -> None:
     provider, session, _ = planar
     free = CounterfactualDynamics(
-        _DiagProvider(np.diag(provider.mass_matrix(session.q[0])), provider.bias_forces(session.q[0], session.v[0]))
+        _DiagProvider(
+            np.diag(provider.mass_matrix(session.q[0])),
+            provider.bias_forces(session.q[0], session.v[0]),
+        )
     )
-    kwargs = dict(
-        session=session,
-        fork_frame_idx=0,
-        strategy=CounterfactualStrategy.CUSTOM,
-        control_override=np.array(session.tau),
+    kwargs = {
+        "session": session,
+        "fork_frame_idx": 0,
+        "strategy": CounterfactualStrategy.CUSTOM,
+        "control_override": np.array(session.tau),
+    }
+    closed = create_counterfactual_rollout(
+        **kwargs, dynamics=CounterfactualDynamics(provider)
     )
-    closed = create_counterfactual_rollout(**kwargs, dynamics=CounterfactualDynamics(provider))
     open_ = create_counterfactual_rollout(**kwargs, dynamics=free)
     assert np.max(np.abs(closed.a - open_.a)) > 1e-3
 
@@ -273,7 +286,9 @@ def test_nullspace_strategy_without_exploration_fails_closed(planar) -> None:
 
 def test_nullspace_frame_count_mismatch_is_rejected(planar) -> None:
     provider, session, decs = planar
-    bad = NullspaceExploration(decompositions=tuple(decs[:3]), actuated_indices=(0, 1, 2, 3, 4))
+    bad = NullspaceExploration(
+        decompositions=tuple(decs[:3]), actuated_indices=(0, 1, 2, 3, 4)
+    )
     with pytest.raises(ValueError, match="decompositions"):
         create_counterfactual_rollout(
             session=session,

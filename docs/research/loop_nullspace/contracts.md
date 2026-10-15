@@ -466,6 +466,25 @@ KKT projector `M^-1 (I - J_c^T Lambda_c J_c M^-1)` with
 `Lambda_c = (J_c M^-1 J_c^T)^-1`. Postconditions: `J_c qdd + Jdot_v = 0` to
 `1e-9` scaled; the total control-induced acceleration is independent of the
 chosen `lambda` family. Planar goldens provide `M`, `h`, `J_c`, `Jdot_v`.
+
+Implementation (NSX-30): `loop_nullspace/constrained_dynamics.py` holds the single
+projector (`constrained_acceleration`, `kkt_projector`, declared `Baumgarte`
+terms, `closure_acceleration_residual`); `tau` is the generalised load
+`S^T tau_a`. The pendulum solver calls it with
+`singular_mass_fallback=True` because its massless club coordinate makes `M`
+only semi-definite; the fallback solves the equivalent augmented block system
+and is an error without the flag. `simulation_backends.protocol` adds
+`ConstrainedEquationsOfMotionProvider` (`closure_jacobian`, `closure_drift`);
+`ztcf_acceleration`, `zvcf_acceleration`, `drift_and_control_split` and
+`zero_velocity_control_preserved_acceleration` dispatch to the projector for such a
+provider. `constrained_counterfactual_report` returns ZTCF, ZVCF, the control
+total (`INVARIANT`) and the per-actuator split (`FAMILY_DEPENDENT`).
+`loop_nullspace.provider.AdapterConstrainedProvider` exposes any `FULL`
+NSX-13 adapter as such a provider. `create_counterfactual_rollout` requires
+`dynamics=CounterfactualDynamics(provider, nullspace=...)`, integrates the
+provider with RK4 (load held per step), and `NULLSPACE_EXPLORATION` samples `z`
+through `NullspaceExploration` (NSX-15 decompositions); the `m_eff = 1.0` mock
+and the `5 sin(t)` placeholder are removed.
 `ztcf_zvcf` keeps its naming: ZTCF removes the control torque, ZVCF sets
 `v = 0` and `u = 0`; on a loop both use the projector with the reaction
 re-solved, never a held `lambda`.

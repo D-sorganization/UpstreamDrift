@@ -81,8 +81,10 @@ class Baumgarte:
                 f"Baumgarte errors have shape {self.position_error.shape} but "
                 f"Jdot_v has shape {jdot_v.shape}"
             )
-        return jdot_v + 2.0 * self.alpha * self.velocity_error + (
-            self.beta**2 * self.position_error
+        return (
+            jdot_v
+            + 2.0 * self.alpha * self.velocity_error
+            + (self.beta**2 * self.position_error)
         )
 
 
@@ -214,7 +216,9 @@ def constrained_acceleration(
 
 
 def closure_acceleration_residual(
-    J_c: ArrayLike, a: ArrayLike, Jdot_v: ArrayLike  # noqa: N803 - spec name
+    J_c: ArrayLike,
+    a: ArrayLike,
+    Jdot_v: ArrayLike,  # noqa: N803 - spec name
 ) -> Array:
     """``J_c a + Jdot_v``: zero when the acceleration respects the closure."""
     j_arr = np.asarray(J_c, dtype=np.float64)

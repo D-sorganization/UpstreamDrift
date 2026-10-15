@@ -120,9 +120,7 @@ def test_baumgarte_terms_are_declared_and_change_only_the_correction(generic) ->
         position_error=np.zeros(2),
         velocity_error=np.zeros(2),
     )
-    same, _ = constrained_acceleration(
-        s.M, s.h, tau, s.J_c, s.Jdot_v, baumgarte=zero
-    )
+    same, _ = constrained_acceleration(s.M, s.h, tau, s.J_c, s.Jdot_v, baumgarte=zero)
     np.testing.assert_allclose(same, plain, atol=1e-12)
     phi = np.array([1e-3, -2e-3])
     gains = Baumgarte(
@@ -160,4 +158,6 @@ def test_preconditions_raise_value_error(generic, kwargs, match) -> None:
 
 def test_baumgarte_rejects_negative_gains() -> None:
     with pytest.raises(ValueError, match="alpha"):
-        Baumgarte(alpha=-1.0, beta=1.0, position_error=np.zeros(2), velocity_error=np.zeros(2))
+        Baumgarte(
+            alpha=-1.0, beta=1.0, position_error=np.zeros(2), velocity_error=np.zeros(2)
+        )

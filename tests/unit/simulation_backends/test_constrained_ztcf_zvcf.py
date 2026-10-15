@@ -121,9 +121,7 @@ def test_measured_acceleration_is_ztcf_plus_control_total(planar) -> None:
 
 def test_dependence_labels_follow_nsx00(planar) -> None:
     s, provider = planar
-    report = constrained_counterfactual_report(
-        provider, s.q, s.v, s.S.T @ np.ones(5)
-    )
+    report = constrained_counterfactual_report(provider, s.q, s.v, s.S.T @ np.ones(5))
     dep = report.dependence
     assert dep["ztcf"] is AllocationDependence.INVARIANT
     assert dep["zvcf"] is AllocationDependence.INVARIANT
@@ -138,7 +136,11 @@ def test_total_is_invariant_and_per_actuator_is_family_dependent(planar) -> None
     dec = decompose(s, weights=AllocationMetric.identity(5))
     assert dec.nullity > 0
     reports = []
-    for z in (np.zeros(dec.nullity), np.full(dec.nullity, 2.0), np.linspace(-1, 1, dec.nullity)):
+    for z in (
+        np.zeros(dec.nullity),
+        np.full(dec.nullity, 2.0),
+        np.linspace(-1, 1, dec.nullity),
+    ):
         reports.append(
             constrained_counterfactual_report(provider, s.q, s.v, s.S.T @ dec.torque(z))
         )
@@ -161,7 +163,10 @@ def test_canonical_trajectory_dispatches_to_the_constrained_path(planar) -> None
         tau=(s.S.T @ np.ones(5))[None, :],
     )
     res = evaluate_ztcf_zvcf_on_canonical_trajectory(provider, traj)
-    assert np.max(np.abs(res.ztcf_acceleration[0] - ztcf_acceleration(provider, s.q, s.v))) == 0
+    assert (
+        np.max(np.abs(res.ztcf_acceleration[0] - ztcf_acceleration(provider, s.q, s.v)))
+        == 0
+    )
     assert np.max(np.abs(s.J_c @ res.ztcf_acceleration[0] + s.Jdot_v)) < 1e-9
 
 
@@ -245,7 +250,15 @@ def test_pinocchio_ztcf_zvcf_match_constraint_dynamics(pin_case) -> None:
 
     jc = provider.closure_jacobian(q)
     assert _scaled(jc @ ztcf + provider.closure_drift(q, v), 1.0) < 1e-8
-    assert np.max(np.abs(ztcf - np.linalg.solve(provider.mass_matrix(q), -provider.bias_forces(q, v)))) > 1e-6
+    assert (
+        np.max(
+            np.abs(
+                ztcf
+                - np.linalg.solve(provider.mass_matrix(q), -provider.bias_forces(q, v))
+            )
+        )
+        > 1e-6
+    )
 
 
 @pytest.mark.requires_pinocchio
@@ -260,6 +273,9 @@ def test_pinocchio_report_splits_invariant_from_family_dependent(pin_case) -> No
     tau[act] = rng.normal(size=len(act))
     report = constrained_counterfactual_report(provider, q, v, tau)
     full_ref, _ = _pin_constraint_dynamics(pin, adapter, q, v, tau)
-    assert _scaled(report.ztcf + report.control_total - full_ref, np.max(np.abs(full_ref))) < TOL
+    assert (
+        _scaled(report.ztcf + report.control_total - full_ref, np.max(np.abs(full_ref)))
+        < TOL
+    )
     assert report.dependence["control_total"] is AllocationDependence.INVARIANT
     assert report.dependence["per_actuator"] is AllocationDependence.FAMILY_DEPENDENT
