@@ -4,7 +4,12 @@ from __future__ import annotations
 
 import pytest
 
-from src.shared.python.spine import SpinalLevel, SpinalRegion, levels_between, parse_level
+from src.shared.python.spine import (
+    SpinalLevel,
+    SpinalRegion,
+    levels_between,
+    parse_level,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -36,7 +41,7 @@ def test_enum_has_seventeen_thoracolumbar_levels_in_caudal_to_cranial_order():
 
 def test_levels_are_contiguous_superior_matches_next_inferior():
     members = list(SpinalLevel)
-    for caudal, cranial in zip(members, members[1:]):
+    for caudal, cranial in zip(members, members[1:], strict=False):
         assert caudal.superior == cranial.inferior, (caudal, cranial)
 
 
@@ -89,9 +94,7 @@ def test_levels_between_full_range_yields_seventeen_levels():
 
 
 def test_levels_between_same_level_is_singleton():
-    assert levels_between(SpinalLevel.T8_T9, SpinalLevel.T8_T9) == (
-        SpinalLevel.T8_T9,
-    )
+    assert levels_between(SpinalLevel.T8_T9, SpinalLevel.T8_T9) == (SpinalLevel.T8_T9,)
 
 
 def test_levels_between_reversed_arguments_raise_value_error():
@@ -106,7 +109,9 @@ def test_levels_between_rejects_non_spinal_level():
         levels_between(SpinalLevel.L5_S1, 3)  # type: ignore[arg-type]
 
 
-@pytest.mark.parametrize("spelling", ["L4_L5", "L4-L5", "L4/L5", "l4_l5", "l4-l5", "l4/l5"])
+@pytest.mark.parametrize(
+    "spelling", ["L4_L5", "L4-L5", "L4/L5", "l4_l5", "l4-l5", "l4/l5"]
+)
 def test_parse_level_accepts_three_spellings_case_insensitively(spelling):
     assert parse_level(spelling) is SpinalLevel.L4_L5
 

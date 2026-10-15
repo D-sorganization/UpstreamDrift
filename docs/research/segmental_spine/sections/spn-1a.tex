@@ -1,0 +1,64 @@
+\subsection{Spinal Level Enumeration, Regions and Adjacency}
+\label{sec:spn-1a}
+
+This section defines the thoracolumbar intervertebral level vocabulary used by
+the segmental spine model (issue \#12739, epic \#12735). It is pure
+bookkeeping: no kinematics, no inertia and no OpenSim model are involved.
+
+\paragraph{Scope.}
+The module \texttt{src/shared/python/spine/levels.py} provides the enumeration
+\texttt{SpinalLevel} (17 thoracolumbar disc levels, L5-S1 through T1-T2), the
+region enumeration \texttt{SpinalRegion}, and the helpers
+\texttt{levels\_between} and \texttt{parse\_level}. Cervical levels are out of
+scope; the extension point is documented in the module docstring.
+
+\paragraph{Ordering and Frames.}
+Level $k$ with $k \in \{0,\dots,16\}$ denotes the disc space between an
+inferior (caudal) vertebra $V_{\mathrm{inf}}$ and a superior (cranial)
+vertebra $V_{\mathrm{sup}}$. The enum order is caudal to cranial:
+\[
+  \mathrm{L5\_S1} \;(k{=}0) \rightarrow \mathrm{L4\_L5} \rightarrow \cdots
+  \rightarrow \mathrm{T1\_T2}\;(k{=}16).
+\]
+Adjacency is contiguous: for every $k < 16$,
+$V_{\mathrm{sup}}(k) = V_{\mathrm{inf}}(k+1)$. The frame convention of the
+transforms built on these levels (superior frame mapped into the inferior
+frame, ISB axes) is defined in ADR \#12736 and is not restated here.
+
+\paragraph{Functions.}
+\begin{itemize}
+  \item \texttt{inferior}, \texttt{superior}: vertebra labels, e.g.\
+    $\mathrm{L4\_L5} \mapsto (\mathrm{L5}, \mathrm{L4})$ and
+    $\mathrm{L5\_S1} \mapsto (\mathrm{S1}, \mathrm{L5})$.
+  \item \texttt{region}: region of the superior vertebra, e.g.\
+    $\mathrm{T12\_L1} \mapsto$ THORACIC and $\mathrm{L1\_L2} \mapsto$ LUMBAR.
+  \item \texttt{ordinal}: zero-based caudal-to-cranial index.
+  \item \texttt{levels\_between}$(c, r)$: the inclusive tuple
+    $(\ell_{c}, \ell_{c+1}, \dots, \ell_{r})$ in caudal-to-cranial order.
+    Precondition $\mathrm{ordinal}(c) \le \mathrm{ordinal}(r)$, otherwise
+    \texttt{ValueError}; non-\texttt{SpinalLevel} arguments raise
+    \texttt{TypeError}. Postcondition: first element $c$, last element $r$.
+  \item \texttt{parse\_level}$(s)$: accepts \texttt{L4\_L5}, \texttt{L4-L5} and
+    \texttt{L4/L5}, case-insensitive, with surrounding whitespace stripped.
+    Non-\texttt{str} input raises \texttt{TypeError}; empty or unknown input
+    raises \texttt{ValueError}.
+\end{itemize}
+
+\paragraph{Assumptions and Limitations.}
+Labels follow the usual clinical convention for the thoracolumbar spine with
+S1 as the caudal vertebra of L5-S1. The enumeration does not model sacral
+segments beyond the S1 label, and \texttt{SpinalRegion.SACRAL} is defined but
+no level uses it as its superior vertebra. Validation uses explicit
+\texttt{TypeError}/\texttt{ValueError} checks so that the documented errors do
+not depend on the DbC enforcement level.
+
+\paragraph{Verification and Reproduction.}
+Test evidence (30 unit tests, marker \texttt{unit}): contiguity of the adjacency
+chain, the 17-level ordering, the five-member run \texttt{levels\_between}(L5\_S1,
+L1\_L2), reversed-argument rejection, the three accepted spellings, and rejection
+of malformed names and non-string input.
+\begin{verbatim}
+python3 -m pytest tests/shared/python/spine/test_levels.py -q
+python3 -m ruff check src/shared/python/spine tests/shared/python/spine
+python3 -m ruff format --check src/shared/python/spine tests/shared/python/spine
+\end{verbatim}
