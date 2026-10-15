@@ -439,6 +439,31 @@ def _records(
     }
 
 
+def _feedback_series(
+    feedback: Any, feedback_at: Any, nodes: Array, q: Array, v: Array
+) -> Array | None:
+    """Feedback torque at every replayed node (``None`` in open loop)."""
+    if feedback is None:
+        return None
+    return np.array(
+        [feedback_at(t, qi, vi) for t, qi, vi in zip(nodes, q, v, strict=True)]
+    )
+
+
+def _record_series(
+    drift: ClosureDrift, q: Array, ref_q: Array | None, fb_series: Array | None
+) -> dict[str, tuple[Array, str]]:
+    """Series that get a ``QuantityRecord`` (feedback kept as its own entry)."""
+    series: dict[str, tuple[Array, str]] = {
+        "closure_velocity_drift": (drift.velocity, "m/s|rad/s")
+    }
+    if ref_q is not None:
+        series["state_error"] = (np.max(np.abs(q - ref_q), axis=1), "m|rad")
+    if fb_series is not None:
+        series["feedback_torque"] = (fb_series, "N m")
+    return series
+
+
 def replay(
     allocation: AllocationResult,
     provider: Any,
@@ -496,11 +521,7 @@ def replay(
     k = len(trace.q)
     nodes, q, v = nodes[:k], np.array(trace.q), np.array(trace.v)
     allocated = np.array([sched(t) for t in nodes])
-    fb_series = None
-    if feedback is not None:
-        fb_series = np.array(
-            [feedback_at(t, qi, vi) for t, qi, vi in zip(nodes, q, v, strict=True)]
-        )
+    fb_series = _feedback_series(feedback, feedback_at, nodes, q, v)
     applied = allocated if fb_series is None else allocated + fb_series
     ref_q = ref_v = None
     if setup.reference is not None:
@@ -511,13 +532,7 @@ def replay(
         budget = feedback_budget(
             nodes, allocated, fb_series, v @ setup.actuation.T, feedback.torque_limit
         )
-    series: dict[str, tuple[Array, str]] = {
-        "closure_velocity_drift": (drift.velocity, "m/s|rad/s")
-    }
-    if ref_q is not None:
-        series["state_error"] = (np.max(np.abs(q - ref_q), axis=1), "m|rad")
-    if fb_series is not None:
-        series["feedback_torque"] = (fb_series, "N m")
+    series = _record_series(drift, q, ref_q, fb_series)
     frame_index = np.arange(times.size) * cfg.substeps
     return ReplayReport(
         mode=mode,
