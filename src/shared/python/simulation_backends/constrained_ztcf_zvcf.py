@@ -25,7 +25,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeGuard
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -55,7 +55,9 @@ _GAUGE_HYPOTHESIS = (
 )
 
 
-def is_constrained_provider(provider: Any) -> bool:
+def is_constrained_provider(
+    provider: Any,
+) -> TypeGuard[ConstrainedEquationsOfMotionProvider]:
     """Whether ``provider`` also supplies the closure rows."""
     return isinstance(provider, ConstrainedEquationsOfMotionProvider)
 
