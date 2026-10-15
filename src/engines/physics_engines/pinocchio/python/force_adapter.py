@@ -37,6 +37,8 @@ from src.shared.python.loop_nullspace.contracts import (
 from src.shared.python.loop_nullspace.derivative_capability import (
     ClosedLoopDerivatives,
 )
+from src.shared.python.loop_nullspace.evidence import FootContact
+from src.shared.python.loop_nullspace.ground_contact import ContactCandidate
 from src.shared.python.motion_matching.multi_engine_torque_allocator import EngineType
 from src.shared.python.motion_matching.polynomial_actuation import (
     actuated_coordinate_indices,
@@ -153,6 +155,33 @@ class PinocchioForceAdapter:
             )
             result[3 * i : 3 * i + 3] = jac[:3]
         return result
+
+    def foot_contact_candidates(self, q: Array) -> tuple[ContactCandidate, ...]:
+        """Contact spheres as candidates, in ``contact_names`` order (NSX-60).
+
+        Each candidate sits at the sphere centre (where
+        :meth:`compute_contact_jacobian` evaluates its rows), with the ground
+        normal and the spec's static friction coefficient (a declared
+        hypothesis, ``H-FRICTION-CONE``).  ``gap_m`` is the signed distance
+        from the sphere surface to the ground plane (negative when the compliant
+        contact law penetrates).
+        """
+        configuration = self._checked(q, "configuration")
+        self._pin.forwardKinematics(self._model, self._data, configuration)
+        self._pin.updateFramePlacements(self._model, self._data)
+        ground = self._plant.ground
+        normal = np.asarray(ground.normal, dtype=float)
+        mu = float(self._spec["contact"]["parameters"]["static_friction"])
+        out = []
+        for sphere, frame in zip(
+            self._plant.contact_spheres, self._contact_ids, strict=True
+        ):
+            center = np.asarray(self._data.oMf[frame].translation, dtype=float).copy()
+            gap = float(normal @ center) - ground.height_m - sphere.radius_m
+            out.append(
+                ContactCandidate(FootContact(sphere.name, center, normal, mu), gap)
+            )
+        return tuple(out)
 
     def compute_grip_jacobian(self, q: Array) -> Array:
         configuration = self._checked(q, "configuration")

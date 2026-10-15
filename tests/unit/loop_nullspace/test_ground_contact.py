@@ -226,12 +226,12 @@ def test_foot_cones_enter_the_feasible_set_with_their_hypothesis(case) -> None:
 
 # -------------------------------------- GRF observation: construction -------
 def test_ground_observation_rejects_undeclared_uncertainty() -> None:
-    base = dict(
-        selector=np.eye(2),
-        values=np.zeros(2),
-        labels=("a", "b"),
-        source="test",
-    )
+    base = {
+        "selector": np.eye(2),
+        "values": np.zeros(2),
+        "labels": ("a", "b"),
+        "source": "test",
+    }
     with pytest.raises(ValueError, match="sigma"):
         GroundObservation(sigma=np.array([1.0, 0.0]), **base)
     with pytest.raises(ValueError, match="sigma"):
