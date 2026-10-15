@@ -72,7 +72,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ground_model` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `gui_launcher` | 4 | 4 | 0 | 3 | 1 | 8 |
 | `gui_pkg` | 0 | 0 | 0 | 12 | 0 | 0 |
-| `humanoid_character_builder` | 13 | 27 | 9 | 36 | 3 | 40 |
+| `humanoid_character_builder` | 12 | 28 | 9 | 36 | 3 | 40 |
 | `impact_parameters` | 0 | 0 | 0 | 15 | 0 | 0 |
 | `import_aliases.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `injury` | 0 | 0 | 0 | 5 | 0 | 0 |
@@ -144,7 +144,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 62 | 0 | 0 |
-| **Total** | **377** | **271** | **121** | **1746** | **839** | **648** |
+| **Total** | **376** | **272** | **121** | **1746** | **839** | **648** |
 
 ## Diverged Files by Package
 
@@ -297,7 +297,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `gui_launcher/registry.py` | -75 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
 | `gui_launcher/tools_sidebar_integration.py` | +10123 |  | Dieter Olson 2026-05-29 | Dieter Olson 2026-08-20 |
 
-### Package `humanoid_character_builder` (27 Diverged Files)
+### Package `humanoid_character_builder` (28 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -308,11 +308,12 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `humanoid_character_builder/core/body_parameters.py` | +1288 |  | Dieter Olson 2026-08-09 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/core/model.py` | +478 |  | Dieter Olson 2026-08-18 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/generators/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/generators/_makehuman_generator.py` | +21 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-06-20 |
+| `humanoid_character_builder/generators/_makehuman_generator.py` | -19721 |  | Dieter Olson 2026-10-15 | Dieter Olson 2026-06-20 |
 | `humanoid_character_builder/generators/_mesh_types.py` | +1917 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/generators/_primitive_generator.py` | +25 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-06-20 |
 | `humanoid_character_builder/generators/_smplx_generator.py` | +340 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-06-20 |
-| `humanoid_character_builder/generators/mesh_generator.py` | +380 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
+| `humanoid_character_builder/generators/mesh_generator.py` | +375 |  | Dieter Olson 2026-10-15 | d-sorgcodexagent[bot] 2026-06-16 |
+| `humanoid_character_builder/generators/mesh_generator_makehuman.py` | -10 |  | Dieter Olson 2026-10-15 | codex-scheduled-tasks[bot] 2026-05-03 |
 | `humanoid_character_builder/generators/mesh_generator_primitive.py` | +16 | yes | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/generators/mesh_generator_smplx.py` | +16 | yes | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/generators/urdf_generator.py` | -442 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
