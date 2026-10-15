@@ -497,9 +497,36 @@ otherwise a deferred-validation record and capability `NONE`.
 
 ## NSX-56 Conformance (#12584)
 
-Track N compares canonical `M`, `h`, `J_c`, `Jdot_v` tightly; Track S compares
-invariants and envelopes with tolerance propagated from Track N differences.
-Never hand-widened.
+`tests/integration/cross_engine/test_loop_nullspace_conformance.py` is the one
+parametrised harness over every FULL engine (Pinocchio reference; MuJoCo, Drake,
+OpenSim). Each state is projected once with `project_to_closure`, each engine
+builds its snapshot through `snapshot_from_adapter`, and arrays are permuted to
+the reference order by coordinate name.
+
+Track N compares canonical `M`, `h`, `J_c`, `Jdot_v` tightly. Tolerances are the
+per-pair, per-metric entries (`check: closed_loop_snapshot_conformance`) in
+`tests/integration/cross_engine/divergence_registry.yaml`, with
+the rationale and the measured agreement; the grip frame, club inertia split and
+loop topology are compared in the same track. Measured: `M`, `h` below 1e-15,
+`J_c` below 3e-15, `Jdot_v` 1.8e-12 (Drake, OpenSim, analytic or exact) and
+1.2e-10 (MuJoCo central finite difference), all scaled by `max(1, |ref|)`.
+
+Track S compares quantities derived from the snapshot: the rigid KKT
+acceleration and grip-wrench multiplier, kinetic energy, power, closure singular
+values (rank 6) and the closed-form grip-wrench envelope over a unit actuator
+box. Its tolerance is propagated from the Track N differences measured in the
+same run (`kkt_bound`: `|K^-1| (|dr| + |dK||x|) / (1 - |K^-1||dK|)`; Weyl for
+singular values), never hand-widened. A perturbed-engine control proves both
+tracks discriminate.
+
+Capability per engine: Pinocchio, MuJoCo, MyoSuite, Drake and OpenSim are FULL
+and are registered in `create_engine_force_adapter`; the harness skips MyoSuite
+cleanly when `myosuite` is not importable. Simscape (no native adapter) and the
+synthetic fixtures declare NONE and are asserted to refuse a snapshot. MyoSuite
+2.12.2 agrees with Pinocchio to the same digits as MuJoCo (the adapter reuses
+the MuJoCo code); MuJoCo 3.6.0 and 3.8.0 give identical Track N errors to three
+significant digits. Agreement between engines is not physical
+validation.
 
 ## NSX-60 Lower-Body Loop (#12585, Strong)
 

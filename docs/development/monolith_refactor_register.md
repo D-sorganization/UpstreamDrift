@@ -125,12 +125,12 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 943 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_match_export.m` |
 | 942 | `src/bunkershot3d/solvers/shot.py` |
 | 942 | `src/shared/python/estimation/dime_dynamics_window.py` |
+| 938 | `src/shared/python/motion_matching/multi_engine_torque_allocator.py` |
 | 934 | `src/shared/python/sidekick/ui/tools_sidebar/os_terminal.py` |
 | 932 | `src/shared/python/model_generation/library/model_library.py` |
 | 926 | `src/shared/python/engine_core/cross_engine_validator.py` |
 | 924 | `src/engines/physics_engines/opensim/python/muscle_analysis.py` |
 | 924 | `src/research/differentiable/engine.py` |
-| 924 | `src/shared/python/motion_matching/multi_engine_torque_allocator.py` |
 | 922 | `src/shared/python/shadow_tracker/service.py` |
 | 919 | `src/bunkershot3d/vandv/ledger.py` |
 | 916 | `src/tools/bunker_shot_gui/export.py` |

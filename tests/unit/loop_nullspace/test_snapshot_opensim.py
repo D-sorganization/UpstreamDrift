@@ -42,12 +42,8 @@ EVIDENCE = (
 SPEC_PATH = EVIDENCE / "full_body_spec_hipcal_scaled.json"
 PROVENANCE = InputProvenance(kind="test", source="dynamics_record frame 400")
 
-# Scaled tolerances (max |err| / max(1, max |ref|)); measured agreement is
-# recorded in the PR (M, h ~1e-14, closure rows ~1e-13).
-TOL_MASS = 1e-11
-TOL_BIAS = 1e-11
-TOL_JACOBIAN = 1e-9
-TOL_DRIFT = 1e-8
+# Scaled tolerance of the acceleration checks (Pinocchio equality of M, h, J_c
+# and Jdot_v is the NSX-56 conformance harness, with registered tolerances).
 TOL_ACCEL = 1e-8
 
 
@@ -173,48 +169,9 @@ def test_snapshot_is_a_valid_weld6_snapshot(snapshots, os_adapter) -> None:
     assert snap.J_g is None
 
 
-def test_mass_and_bias_equal_pinocchio(snapshots, perm) -> None:
-    pin, snap = snapshots
-    ix = np.ix_(perm, perm)
-    assert _scaled(snap.M[ix] - pin.M, pin.M) < TOL_MASS
-    assert _scaled(snap.h[perm] - pin.h, pin.h) < TOL_BIAS
-
-
-def test_canonical_closure_rows_equal_pinocchio(snapshots, perm) -> None:
-    pin, snap = snapshots
-    assert _scaled(snap.J_c[:, perm] - pin.J_c, pin.J_c) < TOL_JACOBIAN
-    assert _scaled(snap.Jdot_v - pin.Jdot_v, pin.Jdot_v) < TOL_DRIFT
-
-
-def test_grip_frame_and_club_inertia_equal_pinocchio(snapshots) -> None:
-    pin, snap = snapshots
-    np.testing.assert_allclose(
-        snap.grip_frame.rotation, pin.grip_frame.rotation, rtol=0, atol=1e-10
-    )
-    np.testing.assert_allclose(
-        snap.grip_frame.origin, pin.grip_frame.origin, rtol=0, atol=1e-10
-    )
-    assert snap.bare_club.mass == pytest.approx(pin.bare_club.mass, abs=1e-12)
-    np.testing.assert_allclose(snap.bare_club.com, pin.bare_club.com, atol=1e-9)
-    np.testing.assert_allclose(snap.bare_club.inertia, pin.bare_club.inertia, atol=1e-9)
-    assert len(snap.welded_hand_inertias) == len(pin.welded_hand_inertias)
-    masses = sorted(h.mass for h in snap.welded_hand_inertias)
-    expect = sorted(h.mass for h in pin.welded_hand_inertias)
-    np.testing.assert_allclose(masses, expect, atol=1e-12)
-
-
-def test_actuation_and_loop_support_equal_pinocchio(
-    snapshots, pin_adapter, os_adapter
-) -> None:
-    pin, snap = snapshots
-    pin_names = pin_adapter.coordinate_order
-    os_names = os_adapter.coordinate_order
-    assert {os_names[i] for i in snap.topology.actuated_indices} == {
-        pin_names[i] for i in pin.topology.actuated_indices
-    }
-    assert {os_names[i] for i in snap.topology.loop_support_indices} == {
-        pin_names[i] for i in pin.topology.loop_support_indices
-    }
+def test_jacobian_support_is_inside_the_declared_loop_support(snapshots) -> None:
+    """Name-wise equality with Pinocchio is in the NSX-56 conformance harness."""
+    _, snap = snapshots
     # World-frame stations cancel on shared ancestors only to round-off, and
     # only on the closed loop (the state here is projected onto it).
     nonzero = {i for i in range(snap.topology.n) if np.abs(snap.J_c[:, i]).max() > 1e-9}
@@ -293,19 +250,3 @@ def test_state_shape_is_validated(os_adapter, os_state) -> None:
         snapshot_from_adapter(os_adapter, q[:-1], v, v, input_provenance=PROVENANCE)
     with pytest.raises(ValueError):
         os_adapter.compute_closure_drift(q, v[:-1])
-
-
-def test_measured_agreement_is_far_inside_the_stated_tolerances(
-    snapshots, perm
-) -> None:
-    pin, snap = snapshots
-    errs = {
-        "M": _scaled(snap.M[np.ix_(perm, perm)] - pin.M, pin.M),
-        "h": _scaled(snap.h[perm] - pin.h, pin.h),
-        "J_c": _scaled(snap.J_c[:, perm] - pin.J_c, pin.J_c),
-        "Jdot_v": _scaled(snap.Jdot_v - pin.Jdot_v, pin.Jdot_v),
-    }
-    for key, tol in zip(
-        errs, (TOL_MASS, TOL_BIAS, TOL_JACOBIAN, TOL_DRIFT), strict=True
-    ):
-        assert errs[key] < tol / 10.0
