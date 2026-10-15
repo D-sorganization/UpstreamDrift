@@ -2,7 +2,7 @@
 
 Verifies:
 1. Quarantine enforcement: create_engine_force_adapter fails closed with RuntimeError
-   for unbridged native engines (Drake, OpenSim, Simscape) unless allow_synthetic=True.
+   for unbridged native engines (Simscape; Drake and OpenSim are native) unless allow_synthetic=True.
 2. Protocol conformance: BaseEngineForceAdapter protocol requirements including
    model_hash, coordinate_order, contact_names, and compute_mass_and_bias.
 3. MuJoCo adapter conformance: Native dynamic equations, non-passive raw inverse dynamics,
@@ -39,12 +39,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_quarantine_fails_closed_without_allow_synthetic() -> None:
-    """Unregistered/unbridged native engines (not Drake, NSX-53) must raise RuntimeError when allow_synthetic=False."""
-    with pytest.raises(
-        RuntimeError, match="OpenSim Simbody force adapter is not yet registered"
-    ):
-        create_engine_force_adapter(EngineType.OPENSIM, allow_synthetic=False)
-
+    """Unbridged native engines (Simscape; Drake and OpenSim are native since NSX-53/54) fail closed."""
     with pytest.raises(
         RuntimeError, match="Simscape force adapter is not yet registered"
     ):
@@ -183,10 +178,43 @@ def test_cli_rejects_synthetic_without_flag(tmp_path: Path) -> None:
         cli_main(
             [
                 "--engine",
-                "opensim",
+                "simscape",
                 "--candidate",
                 str(candidate_file),
                 "--out",
                 str(out_file),
             ]
+        )
+
+
+SPEC = Path(__file__).resolve().parents[3] / (
+    "docs/development/full_body_models/evidence/ground_support/"
+    "full_body_spec_hipcal_scaled.json"
+)
+
+
+@pytest.mark.requires_opensim
+def test_opensim_native_adapter_is_registered_without_synthetic() -> None:
+    """NSX-56: the native OpenSim adapter is what production routes receive."""
+    pytest.importorskip("opensim")
+    from src.engines.physics_engines.opensim.python.force_adapter import (
+        OpenSimNativeForceAdapter,
+    )
+    from src.shared.python.engine_core.capabilities import (
+        Capability,
+        CapabilityLevel,
+    )
+
+    adapter = create_engine_force_adapter(
+        EngineType.OPENSIM, SPEC, allow_synthetic=False
+    )
+    assert isinstance(adapter, OpenSimNativeForceAdapter)
+    assert not isinstance(adapter, SyntheticMultibodyFixture)
+    assert adapter.capability(Capability.CLOSED_LOOP_SNAPSHOT) is CapabilityLevel.FULL
+
+
+def test_opensim_native_registration_requires_an_existing_spec() -> None:
+    with pytest.raises(Exception, match="OpenSim specification not found"):
+        create_engine_force_adapter(
+            EngineType.OPENSIM, "no/such/spec.json", allow_synthetic=False
         )
