@@ -832,4 +832,4 @@ placeholders or revive the retired OpenSim IK backend.
 
 ## Segmental Spine
 
-- `src/shared/python/spine/` — segmental spine kinematics and loads: per-level ISB ZXY transforms, chain composition, coupling laws and intervertebral load contract. Conventions per [ADR-0054](../adr/0054-segmental-spine-kinematics-and-loads.md); research reference `docs/research/segmental_spine/segmental_spine.tex`. Couplers prescribe kinematics only.
+- `src/shared/python/spine/` — segmental spine kinematics and loads: per-level ISB ZXY transforms, chain composition, coupling laws and intervertebral load contract. Conventions per [ADR-0055](../adr/0055-segmental-spine-kinematics-and-loads.md); research reference `docs/research/segmental_spine/segmental_spine.tex`. Couplers prescribe kinematics only.

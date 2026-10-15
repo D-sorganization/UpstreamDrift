@@ -433,7 +433,7 @@
     {
       "id": "UP-D1-segmental-spine-inventory",
       "owner": "UpstreamDrift issue #12735",
-      "resolution": "Inventory the segmental-spine kinematics and loads pathway (src/shared/python/spine, to be created by children SPN-1a to SPN-17) with provisional chapter 66-segmental-spine.qmd and the standalone reference docs/research/segmental_spine/segmental_spine.tex. SPN-0c delivers the documentation scaffold only; there is no production code and no registered calculation. Conventions follow ADR-0054 and no coupling law, distribution rule, load or golfer result is qualified. Keep calculations empty and publication blocked until implementation, UP-D1 inventory, independent validation and review."
+      "resolution": "Inventory the segmental-spine kinematics and loads pathway (src/shared/python/spine, to be created by children SPN-1a to SPN-17) with provisional chapter 66-segmental-spine.qmd and the standalone reference docs/research/segmental_spine/segmental_spine.tex. SPN-0c delivers the documentation scaffold only; there is no production code and no registered calculation. Conventions follow ADR-0055 and no coupling law, distribution rule, load or golfer result is qualified. Keep calculations empty and publication blocked until implementation, UP-D1 inventory, independent validation and review."
     }
   ],
   "calculations": []

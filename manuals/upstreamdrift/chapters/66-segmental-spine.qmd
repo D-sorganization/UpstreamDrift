@@ -21,7 +21,7 @@ from this manual and is not a manual artifact.
 - Loads are the force and moment exerted on the superior body by the inferior
   body, expressed in the inferior vertebra frame; compression is positive F_y.
 
-The binding record is ADR-0054.
+The binding record is ADR-0055.
 
 ## Non-Claims
 

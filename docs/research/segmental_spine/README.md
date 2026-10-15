@@ -2,8 +2,8 @@
 
 Editable research source: [segmental_spine.tex](segmental_spine.tex)
 (compile with `tectonic`; the PDF is not committed). Epic #12735, scaffold
-issue #12738. Binding conventions: ADR-0054
-(`docs/adr/0054-segmental-spine-kinematics-and-loads.md`). Code lives in
+issue #12738. Binding conventions: ADR-0055
+(`docs/adr/0055-segmental-spine-kinematics-and-loads.md`). Code lives in
 `src/shared/python/spine/`.
 
 ## Layout
