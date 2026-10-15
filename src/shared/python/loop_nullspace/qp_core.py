@@ -44,7 +44,8 @@ def _fixed_rows(
 def _as_rows(a: Any, b: Any, n: int) -> tuple[sp.csr_matrix, np.ndarray]:
     if a is None:
         return sp.csr_matrix((0, n)), np.zeros(0)
-    mat = sp.csr_matrix(a if sp.issparse(a) else np.asarray(a, dtype=float))
+    source: Any = a if sp.issparse(a) else np.asarray(a, dtype=float)
+    mat = sp.csr_matrix(source)
     return mat, np.asarray(b, dtype=float)
 
 

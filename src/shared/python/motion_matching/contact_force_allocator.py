@@ -442,7 +442,11 @@ class ContactForceAllocator:
                 res.status.value,
                 res.reason,
             )
-        y_sol = res.x if solver_converged else np.zeros(n_total_vars)
+        if solver_converged and res.x is None:
+            raise ValueError("optimal solve returned no solution vector")
+        y_sol: np.ndarray = (
+            res.x if solver_converged and res.x is not None else np.zeros(n_total_vars)
+        )
 
         # Unscale solution: x = y * d_inv
         x_sol = y_sol * d_inv
