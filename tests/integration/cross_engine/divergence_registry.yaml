@@ -38,3 +38,25 @@ divergences:
     rationale: >
       Hunt-Crossley normal force magnitude is explicitly clipped at zero (f_n = max(0, f_n))
       to prevent tensile contact forces during high rebound velocities.
+
+  - id: nsx-closed-loop-snapshot-track-n
+    check: loop_nullspace_track_n_conformance
+    metric: canonical_snapshot_relative_delta
+    engines: [pinocchio, mujoco, myosuite, drake, opensim, simscape]
+    tolerance: 0.000001
+    rationale: >
+      On states projected onto the closure manifold via project_to_closure and converted
+      through to_canonical_closure (NSX-02), canonical (M, h, J_c, Jdot_v) across Pinocchio,
+      MuJoCo hard-KKT, MyoSuite (kkt_regularization == 0), Drake, OpenSim, and Simscape R2025b
+      agree within 1e-6 scaled relative norm (#12584).
+
+  - id: nsx-mujoco-soft-equality-vs-hard-kkt
+    check: loop_nullspace_constraint_enforcement
+    metric: closure_acceleration_residual
+    engines: [mujoco_soft_step, mujoco_hard_kkt]
+    tolerance: 0.01
+    rationale: >
+      Stock MuJoCo mj_step enforces weld equality constraints via soft solref/solimp impedance
+      (CapabilityLevel.PARTIAL), whereas MuJoCoClosedLoopSnapshotAdapter evaluates the exact
+      unregularized hard-KKT closure system (kkt_regularization == 0, CapabilityLevel.FULL)
+      for NSX-51/NSX-56 conformance (#12579, #12584).
