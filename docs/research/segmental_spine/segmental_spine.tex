@@ -68,7 +68,7 @@
 \IfFileExists{sections/spn-11a.tex}{\input{sections/spn-11a}}{\subsection{Benchmark Reproduction Part A}Pending --- SPN-11A (\#12763).}
 \IfFileExists{sections/spn-11b.tex}{\input{sections/spn-11b}}{\subsection{Benchmark Reproduction Part B}Pending --- SPN-11B (\#12764).}
 
-\section{Additional Children}
+\section{Injury Integration}
 \IfFileExists{sections/spn-12.tex}{\input{sections/spn-12}}{\subsection{Child SPN-12}Pending --- SPN-12 (\#12765).}
 
 \section{Studies}
@@ -80,16 +80,41 @@
 \IfFileExists{sections/spn-14a.tex}{\input{sections/spn-14a}}{\subsection{Sensitivity Part A}Pending --- SPN-14A (\#12769).}
 \IfFileExists{sections/spn-14b.tex}{\input{sections/spn-14b}}{\subsection{Sensitivity Part B}Pending --- SPN-14B (\#12770).}
 
-\section{Later Children}
+\section{Visualisation, Documentation and Tooling}
 \IfFileExists{sections/spn-15a.tex}{\input{sections/spn-15a}}{\subsection{Child SPN-15A}Pending --- SPN-15A (\#12771).}
 \IfFileExists{sections/spn-15b.tex}{\input{sections/spn-15b}}{\subsection{Child SPN-15B}Pending --- SPN-15B (\#12772).}
 \IfFileExists{sections/spn-16.tex}{\input{sections/spn-16}}{\subsection{Child SPN-16}Pending --- SPN-16 (\#12773).}
 \IfFileExists{sections/spn-17.tex}{\input{sections/spn-17}}{\subsection{Child SPN-17}Pending --- SPN-17 (\#12774).}
 
 \section{Limitations}
-Pending; each child lists its own limitations in its subsection and this section collects them when the children land.
+Each subsection states its own limitations; the cross-cutting ones are:
+\begin{itemize}
+  \item \textbf{No Qualified Result.} Every receipt, aggregate, sensitivity report and plot carries \texttt{scientific\_status = unqualified}; context bands from the golf literature are comparisons, never acceptance criteria (\texttt{is\_acceptance = false}).
+  \item \textbf{Invented Fixture.} All native tests run on a repository-authored five-level lumbar fixture whose geometry, inertia, stiffness and muscles are invented. Fixture numbers say nothing about physiology.
+  \item \textbf{Owner-Blocked Validation.} The licensed Bruno 2015 model (SimTK download, \#12749), the primary-source PDFs (\#12737), and the children that need them (\#12755, \#12758, \#12763, \#12770, and the native Bruno runs of \#12761 and \#12762) are deferred, not faked.
+  \item \textbf{Distribution Is an Assumption.} Per-level angles come from a coupling law, not a measurement. The shipped laws are \texttt{bruno2015\_regional}, \texttt{fujii2007\_lumbar} and \texttt{uniform\_reference}; \texttt{bruno2015\_per\_level} and \texttt{pearcy1984\_lumbar} remain pending, so robustness to the distribution cannot yet be concluded (Section~\ref{sec:spn-14a}).
+  \item \textbf{Golf Terms Are Path-Dependent.} Per-level contributions telescope exactly to the global term but are not Cardan angles of the individual levels.
+  \item \textbf{Receipts Pin Bytes, Not Meaning.} Hashes prove which inputs were used, not that they are anatomically correct; an ExternalLoads data file is hashed only when it sits beside its XML.
+  \item \textbf{Stored Observables.} Study artifacts store generalized effort and joint reactions; passive-element loads and per-level poses are not yet stored, so aggregation and the viewer do not report them.
+\end{itemize}
 
 \section{Failed Experiments}
-Pending; failed and abandoned attempts are recorded here with their exact commands.
+Failed and corrected attempts, with the test that now guards each:
+\begin{enumerate}
+  \item \textbf{Fujii Sign Map.} The first Fujii 2007 transcription used Fujii's flexion-positive convention directly; the ISB map is now explicit (\texttt{distribution.isb\_sign}: coupled flexion $-1$, coupled lateral bend $-1$, axial rotation $+1$). Guard: \path{tests/shared/python/spine/test_coupling_data.py}.
+  \item \textbf{Coupler Closure at $10^{-9}$.} With OpenSim's default assembly accuracy ($10^{-9}$) the coupled fixture missed the $10^{-9}$ closure tolerance. The tolerance was kept; the fixture now assembles at $10^{-12}$. Guard: \path{tests/opensim/spine/}.
+  \item \textbf{Muscles in Generalized Effort.} The first inverse-dynamics pass included muscle forces, so \texttt{GENERALIZED\_EFFORT} was not the net joint moment; muscles are now excluded. Guard: \texttt{test\_generalized\_effort\_excludes\_muscle\_forces}.
+  \item \textbf{Fixture Tendon Slack.} Tests first retuned tendon slack lengths after building the fixture; the generator now sets slack $=$ neutral path length $-$ optimal fibre length analytically.
+  \item \textbf{Legacy Golf Terms and NaN.} Delegating the legacy X-factor and crunch terms initially rejected NaN input, changing behaviour; they now propagate NaN.
+  \item \textbf{Model Provider Reporting SAFE.} Model-based loads without a risk assessment initially reported \texttt{SAFE}; they now report \texttt{NOT\_ASSESSED}.
+  \item \textbf{Static Optimization at Early Samples (Open).} On the invented fixture with the five-sample synthetic motion, static optimization does not converge at the first two samples; those runs are reported \texttt{unqualified} and the pass-path tests select the mid and late events. The cause has not been investigated.
+  \item \textbf{Distribution Sensitivity With Fujii (Open).} Fujii 2007 has one independent coordinate and cannot reproduce a three-axis target (drive residual up to 0.89\,rad), so its spread confounds the law with a different realised motion; at a $10^{-6}$\,rad drive tolerance it is excluded, and Bruno and uniform then agree to $\le 8.5\times10^{-11}$ on the lumbar fixture (Section~\ref{sec:spn-14a}).
+  \item \textbf{Gravity-Only Study Run.} The README study run on the fixture exits \texttt{unqualified} (pelvis residual over budget, reserve frames flagged) because no external loads are applied; budgets were not widened.
+\end{enumerate}
+Reproduce all guards with
+\begin{verbatim}
+python3 -m pytest tests/shared/python/spine tests/opensim/spine \
+  -q -n 4 -p no:cacheprovider -o addopts=""
+\end{verbatim}
 
 \end{document}
