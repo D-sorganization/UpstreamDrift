@@ -547,7 +547,7 @@ def family_record(
             model = first.model_provenance
             break
     vals = np.asarray(values, dtype=float)
-    common = {
+    common: dict[str, Any] = {
         "units": units,
         "model_provenance": model,
         "input_provenance": InputProvenance("probe", source, note),

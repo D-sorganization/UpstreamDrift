@@ -152,9 +152,13 @@ class ParetoFront:
     def is_monotone(self, *, rtol: float = DOMINANCE_RTOL) -> bool:
         """``J_a*`` is non-increasing and ``J_b`` within ``eps`` along ``eps``."""
         pts = self.solved()
+        prim = [p.primary for p in pts]
+        if any(v is None for v in prim):
+            raise ValueError("solved Pareto points must carry a primary objective")
+        floats = [float(v) for v in prim if v is not None]
         ok = all(
-            b.primary <= a.primary + rtol * (1.0 + abs(a.primary))  # type: ignore[operator]
-            for a, b in zip(pts, pts[1:], strict=False)
+            nxt <= cur + rtol * (1.0 + abs(cur))
+            for cur, nxt in zip(floats, floats[1:], strict=False)
         )
         return ok and all(
             p.constrained <= p.eps + rtol * (1.0 + p.eps)  # type: ignore[operator]
