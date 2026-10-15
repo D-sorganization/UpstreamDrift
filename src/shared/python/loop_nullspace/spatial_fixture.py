@@ -91,6 +91,7 @@ class _Spatial:
     q_star: Array
     n_root: int
     rot_grip: Array  # world <- grip rotation (fixed, from the closed posture)
+    n_ball: int = 0  # lead hand-club ball coordinates, appended after the arms
 
     def closure_jacobian(self, q: Array) -> Array:
         """Canonical ``J_c`` (6, n) at ``q`` with the fixed grip rotation."""
@@ -184,38 +185,52 @@ def _foot_points(points_per_foot: int) -> list[Array]:
     ]
 
 
+def _composite(*joints: object) -> pin.JointModelComposite:
+    comp = pin.JointModelComposite()
+    for joint in joints:
+        comp.addJoint(joint)
+    return comp
+
+
 def _build(
     floating_root: bool,
     feet: bool,
     grip: pin.SE3 | None,
     points_per_foot: int = 1,
     zero_root: bool = False,
+    lead_ball: bool = False,
 ) -> _Spatial:
     model = pin.Model()
     root = 0
     if floating_root:
-        comp = pin.JointModelComposite()
-        for joint in (
+        comp = _composite(
             pin.JointModelPX(),
             pin.JointModelPY(),
             pin.JointModelPZ(),
             pin.JointModelRZ(),
             pin.JointModelRY(),
             pin.JointModelRX(),
-        ):
-            comp.addJoint(joint)
+        )
         root = model.addJoint(0, comp, pin.SE3.Identity(), "root")
         model.appendBodyToJoint(
             root,
             pin.Inertia(30.0, np.array([0.0, 0.0, -0.2]), np.eye(3) * 1.0),
             pin.SE3.Identity(),
         )
-    club = (_club_inertia(), grip) if grip is not None else None
+    ball = lead_ball and grip is not None
+    club = (_club_inertia(), grip) if grip is not None and not ball else None
     lead = _add_arm(model, root, np.array([-_SHOULDER_X, 0.0, 0.0]), 0, club)
     trail = _add_arm(model, root, np.array([_SHOULDER_X, 0.0, 0.0]), 3, None)
     lead_grip_pose = grip if grip is not None else pin.SE3.Identity()
+    lead_parent = lead
+    if ball:
+        # the club hangs on a 3-DOF ball (z-y-x) at the grip point of the lead hand
+        euler = _composite(pin.JointModelRZ(), pin.JointModelRY(), pin.JointModelRX())
+        lead_parent = model.addJoint(lead, euler, lead_grip_pose, "lead_ball")
+        model.appendBodyToJoint(lead_parent, _club_inertia(), pin.SE3.Identity())
+        lead_grip_pose = pin.SE3.Identity()
     lead_grip = model.addFrame(
-        pin.Frame("lead_grip", lead, 0, lead_grip_pose, pin.FrameType.OP_FRAME)
+        pin.Frame("lead_grip", lead_parent, 0, lead_grip_pose, pin.FrameType.OP_FRAME)
     )
     trail_grip = model.addFrame(
         pin.Frame("trail_grip", trail, 0, pin.SE3.Identity(), pin.FrameType.OP_FRAME)
@@ -236,7 +251,10 @@ def _build(
             )
     n_root = 6 if floating_root else 0
     root_q = [0.0] * 6 if zero_root else _Q_ROOT
-    q_star = np.array([*(root_q if floating_root else []), *_Q_LEAD, *_Q_TRAIL])
+    n_ball = 3 if ball else 0
+    q_star = np.array(
+        [*(root_q if floating_root else []), *_Q_LEAD, *_Q_TRAIL, *([0.0] * n_ball)]
+    )
     return _Spatial(
         model,
         model.createData(),
@@ -246,6 +264,7 @@ def _build(
         q_star,
         n_root,
         np.eye(3),
+        n_ball,
     )
 
 
@@ -254,6 +273,7 @@ def _build_closed(
     feet: bool,
     points_per_foot: int = 1,
     zero_root: bool = False,
+    lead_ball: bool = False,
 ) -> _Spatial:
     """Two-pass build: place the grip frame where the trail hand already is."""
     probe = _build(floating_root, feet, None, points_per_foot, zero_root)
@@ -262,7 +282,7 @@ def _build_closed(
     o_lead = probe.data.oMf[probe.lead_grip]
     o_trail = probe.data.oMf[probe.trail_grip]
     grip = o_lead.inverse() * o_trail
-    sp = _build(floating_root, feet, grip, points_per_foot, zero_root)
+    sp = _build(floating_root, feet, grip, points_per_foot, zero_root, lead_ball)
     pin.forwardKinematics(sp.model, sp.data, sp.q_star)
     pin.updateFramePlacements(sp.model, sp.data)
     sp.rot_grip = np.array(sp.data.oMf[sp.lead_grip].rotation)
@@ -298,6 +318,87 @@ def _welded_inertias() -> tuple[SpatialInertia, ...]:
     return (hand, hand)
 
 
+def closed_spatial_plant(
+    *, floating_root: bool = False, lead_ball: bool = False
+) -> _Spatial:
+    """Closed spatial plant (no feet); ``lead_ball`` hangs the club on a ball.
+
+    With ``lead_ball`` the club is joined to the lead hand by a 3-DOF z-y-x
+    ball at the grip point (three extra unactuated coordinates appended after
+    the arms) and the trail hand welds to the club: the closure still has six
+    rows but the lead hand no longer transmits the club's orientation.
+    """
+    return _build_closed(floating_root, False, 1, False, lead_ball)
+
+
+def snapshot_at(
+    sp: _Spatial,
+    q: Array,
+    v: Array,
+    a: Array,
+    *,
+    input_provenance: InputProvenance,
+    with_feet: bool = False,
+) -> ClosedLoopSnapshot:
+    """WELD6 snapshot of ``sp`` at state ``(q, v, a)`` (grip rows ``fx..tz``).
+
+    The closure rows are expressed in the fixed grip frame of the closed
+    posture and ordered ``[lin; ang]`` with the grip ``z`` axis along the club.
+    Coordinates are ``root | lead arm | trail arm | ball``; the ball
+    coordinates, if any, are unactuated and belong to the loop support.
+    """
+    model, data = sp.model, sp.data
+    jc = sp.closure_jacobian(q)
+    drift = sp.closure_drift(q, v)
+    mass = np.array(pin.crba(model, data, q))
+    mass = np.triu(mass) + np.triu(mass, 1).T
+    h = np.array(pin.nonLinearEffects(model, data, q, v))
+    n, n_root, n_ball = model.nv, sp.n_root, sp.n_ball
+    names = (
+        *(["root_x", "root_y", "root_z", "root_rz", "root_ry", "root_rx"][:n_root]),
+        *(f"lead_{c}" for c in _COORD_ARM),
+        *(f"trail_{c}" for c in _COORD_ARM),
+        *(["ball_rz", "ball_ry", "ball_rx"][:n_ball]),
+    )
+    actuated = tuple(range(n_root, n - n_ball))
+    unactuated = (*range(n_root), *range(n - n_ball, n))
+    topo = LoopTopology(
+        ClosureKind.WELD6,
+        "trail",
+        "lead",
+        actuated,
+        unactuated,
+        tuple(range(n_root, n)),
+        names,
+    )
+    contacts, j_g = _foot_contacts(sp) if with_feet else ((), None)
+    return ClosedLoopSnapshot(
+        q=q,
+        v=v,
+        a=a,
+        M=mass,
+        h=h,
+        S=np.eye(n)[list(actuated)],
+        J_c=jc,
+        Jdot_v=drift,
+        grip_frame=GripFrame(sp.rot_grip, np.array(data.oMf[sp.lead_grip].translation)),
+        bare_club=SpatialInertia(
+            _CLUB_MASS,
+            np.array([0.0, 0.0, _CLUB_LENGTH / 2.0 - _CLUB_BUTT]),
+            np.diag([_CLUB_MASS * _CLUB_LENGTH**2 / 12.0] * 2 + [1e-4]),
+        ),
+        welded_hand_inertias=_welded_inertias(),
+        model_provenance=ModelProvenance(
+            "spatial_two_arm_club_pinocchio" + ("_lead_ball" if n_ball else ""),
+            pin.__version__,
+        ),
+        input_provenance=input_provenance,
+        topology=topo,
+        J_g=j_g,
+        foot_contacts=contacts,
+    )
+
+
 def build_case(
     *,
     floating_root: bool = False,
@@ -321,58 +422,18 @@ def build_case(
     if foot_points not in (1, 2):
         raise ValueError(f"foot_points must be 1 or 2, got {foot_points!r}")
     sp = _build_closed(floating_root, feet, foot_points, zero_root_pose)
-    model, data, q = sp.model, sp.data, sp.q_star
     v, a = _admissible_rates(sp, np.random.default_rng(_SEED))
-    jc = sp.closure_jacobian(q)
-    drift = sp.closure_drift(q, v)
-    mass = np.array(pin.crba(model, data, q))
-    mass = np.triu(mass) + np.triu(mass, 1).T
-    h = np.array(pin.nonLinearEffects(model, data, q, v))
-    n, n_root = model.nv, sp.n_root
-    names = (
-        *(["root_x", "root_y", "root_z", "root_rz", "root_ry", "root_rx"][:n_root]),
-        *(f"lead_{c}" for c in _COORD_ARM),
-        *(f"trail_{c}" for c in _COORD_ARM),
-    )
-    actuated = tuple(range(n_root, n))
-    topo = LoopTopology(
-        ClosureKind.WELD6,
-        "trail",
-        "lead",
-        actuated,
-        tuple(range(n_root)),
-        tuple(range(n_root, n)),
-        names,
-    )
-    contacts, j_g = _foot_contacts(sp) if feet else ((), None)
-    grip_rot = sp.rot_grip
-    snap = ClosedLoopSnapshot(
-        q=q,
-        v=v,
-        a=a,
-        M=mass,
-        h=h,
-        S=np.eye(n)[list(actuated)],
-        J_c=jc,
-        Jdot_v=drift,
-        grip_frame=GripFrame(grip_rot, np.array(data.oMf[sp.lead_grip].translation)),
-        bare_club=SpatialInertia(
-            _CLUB_MASS,
-            np.array([0.0, 0.0, _CLUB_LENGTH / 2.0 - _CLUB_BUTT]),
-            np.diag([_CLUB_MASS * _CLUB_LENGTH**2 / 12.0] * 2 + [1e-4]),
-        ),
-        welded_hand_inertias=_welded_inertias(),
-        model_provenance=ModelProvenance(
-            "spatial_two_arm_club_pinocchio", pin.__version__
-        ),
+    snap = snapshot_at(
+        sp,
+        sp.q_star,
+        v,
+        a,
         input_provenance=InputProvenance(
             "synthetic",
             "nsx-00-golden:spatial_counts",
             f"floating_root={floating_root} feet={feet} seed={_SEED}",
         ),
-        topology=topo,
-        J_g=j_g,
-        foot_contacts=contacts,
+        with_feet=feet,
     )
     variant = (
         (
