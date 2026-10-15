@@ -198,6 +198,7 @@ class PinocchioForceAdapter:
             self._model, self._data, configuration, velocity, acceleration
         )
         joint, inertia = self._bare_club_in_joint_frame()
+        gravity = self._model.gravity
         world_aligned = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
         placement = self._data.oMi[joint]
         motion = pin.getVelocity(self._model, self._data, joint, world_aligned)
@@ -212,7 +213,7 @@ class PinocchioForceAdapter:
             omega=motion.angular,
             alpha=spatial_acc.angular,
             accel_origin=classical.linear,
-            gravity=self._model.gravity.linear,
+            gravity=gravity.linear,
         )
 
     def bare_club_net_wrench(self, q: Array, v: Array, a: Array) -> tuple[Array, Array]:
