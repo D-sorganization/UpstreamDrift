@@ -27,7 +27,7 @@ LUMBAR = levels_between(SpinalLevel.L5_S1, SpinalLevel.L1_L2)  # 5 levels
 
 def _axial_law() -> LinearCouplingLaw:
     """Diagonal law; the 5 lumbar AR gains sum to 0.17, T12_L1 holds 0.83."""
-    gains = {lv: 0.034 for lv in LUMBAR}
+    gains = dict.fromkeys(LUMBAR, 0.034)
     gains[SpinalLevel.T12_L1] = 0.83
     mats = {}
     for lv, g in gains.items():
@@ -55,10 +55,10 @@ def _state_law() -> StateDependentCouplingLaw:
     mats = {}
     for k, level in enumerate(lv):
         arr = np.zeros((3, 3, 2))
-        arr[:, 0, 0] = [1.0 + k, 0.1, 0.0]
-        arr[:, 1, 0] = [2.0 + k, 0.2, 0.3]
-        arr[:, 2, 0] = [2.5 + k, -0.4, 0.3]
-        arr[:, :, 1] = np.array([[0.0, 0.3, 0.1]] * 3).T
+        arr[0, :, 0] = [1.0 + k, 0.1, 0.0]
+        arr[1, :, 0] = [2.0 + k, 0.2, 0.3]
+        arr[2, :, 0] = [2.5 + k, -0.4, 0.3]
+        arr[:, :, 1] = np.array([[0.0, 0.3, 0.1]] * 3)
         mats[level] = arr
     return StateDependentCouplingLaw(
         "rhythm", "1", ("flex", "twist"), "flex", bps, mats, CITE
@@ -100,7 +100,7 @@ def test_regional_fraction_preconditions() -> None:
 def test_cross_axis_sign_flip() -> None:
     law = _cross_law()
     out = law.expand(np.array([0.2, 0.1]))
-    np.testing.assert_allclose(out[SpinalLevel.L5_S1], [0.05, 0.1 * 2 * 0.1 * 0 - 0.04, 0.02])
+    np.testing.assert_allclose(out[SpinalLevel.L5_S1], [0.05, -0.04, 0.02])
     np.testing.assert_allclose(out[SpinalLevel.L4_L5], [0.05, 0.04, 0.02])
     assert out[SpinalLevel.L5_S1][1] == -out[SpinalLevel.L4_L5][1]
 
@@ -155,7 +155,9 @@ def test_level_rotations_neutral() -> None:
     law = _cross_law()
     neutral = np.eye(4)
     neutral[:3, 3] = [0.0, 0.03, 0.0]
-    pose = level_rotations(law, np.array([0.0, 0.0]), neutral={SpinalLevel.L5_S1: neutral})
+    pose = level_rotations(
+        law, np.array([0.0, 0.0]), neutral={SpinalLevel.L5_S1: neutral}
+    )
     np.testing.assert_allclose(pose.transforms[0].neutral, neutral)
     np.testing.assert_allclose(pose.transforms[1].neutral, np.eye(4))
     with pytest.raises(ValueError, match="neutral"):
@@ -176,9 +178,13 @@ def test_linear_construction_preconditions() -> None:
     good = {SpinalLevel.L5_S1: np.zeros((3, 1)), SpinalLevel.L4_L5: np.zeros((3, 1))}
 
     def mk(**kw):
-        args = dict(
-            law_id="x", version="1", matrices=good, independent=("a",), citation=CITE
-        )
+        args = {
+            "law_id": "x",
+            "version": "1",
+            "matrices": good,
+            "independent": ("a",),
+            "citation": CITE,
+        }
         args.update(kw)
         return LinearCouplingLaw(**args)
 
@@ -198,7 +204,12 @@ def test_linear_construction_preconditions() -> None:
     with pytest.raises(TypeError, match="SpinalLevel"):
         mk(matrices={"L5_S1": np.zeros((3, 1))})
     with pytest.raises(ValueError, match="contiguous"):
-        mk(matrices={SpinalLevel.L5_S1: np.zeros((3, 1)), SpinalLevel.L3_L4: np.zeros((3, 1))})
+        mk(
+            matrices={
+                SpinalLevel.L5_S1: np.zeros((3, 1)),
+                SpinalLevel.L3_L4: np.zeros((3, 1)),
+            }
+        )
     with pytest.raises(ValueError, match="law_id"):
         mk(law_id="")
     with pytest.raises(ValueError, match="independent"):
@@ -222,15 +233,15 @@ def test_state_dependent_preconditions() -> None:
     lv = {SpinalLevel.L5_S1: np.zeros((3, 3, 2))}
 
     def mk(**kw):
-        args = dict(
-            law_id="r",
-            version="1",
-            independent=("flex", "twist"),
-            scheduling="flex",
-            breakpoints=np.array([0.0, 0.5, 1.0]),
-            matrices=lv,
-            citation=CITE,
-        )
+        args = {
+            "law_id": "r",
+            "version": "1",
+            "independent": ("flex", "twist"),
+            "scheduling": "flex",
+            "breakpoints": np.array([0.0, 0.5, 1.0]),
+            "matrices": lv,
+            "citation": CITE,
+        }
         args.update(kw)
         return StateDependentCouplingLaw(**args)
 
@@ -322,12 +333,6 @@ def test_from_joint_coupling_rejections() -> None:
 
 
 def test_from_joint_coupling_multi_driver() -> None:
-    jc = JointCoupling(
-        qpos0=np.zeros(3),
-        dependent=(2,),
-        driver=(0,),
-        poly=np.array([[0.0, 1.0, 0.0, 0.0, 0.0]]),
-    )
     # same level, two axes driven by different drivers is allowed (cross-axis)
     jc2 = JointCoupling(
         qpos0=np.zeros(4),
@@ -348,4 +353,3 @@ def test_from_joint_coupling_multi_driver() -> None:
             jc2,
             {0: "a", 1: "a", 2: (SpinalLevel.L5_S1, 0), 3: (SpinalLevel.L5_S1, 1)},
         )
-    del jc
