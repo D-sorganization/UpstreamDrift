@@ -27,6 +27,7 @@ import math
 from collections import Counter
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
+from typing import Any
 
 import numpy as np
 
@@ -203,7 +204,8 @@ def kinematic_ensemble(source: EnsembleSource, n: int, seed: int) -> EnsembleRes
     report = source.nominal.report
     nq = source.nominal.snapshots[0].q.size
     draws = source.sampling.sigma_q * np.random.default_rng(seed).normal(size=(n, nq))
-    accepted, indices, rejected, repaired = [], [], Counter(), 0
+    accepted, indices, repaired = [], [], 0
+    rejected: Counter[str] = Counter()
     for k in range(n):
         try:
             rep = admit(
@@ -322,7 +324,7 @@ class EnsembleEnvelope:
         source: InputProvenance,
     ) -> QuantityRecord:
         vals = np.stack([lower, upper], axis=1)
-        common = {
+        common: dict[str, Any] = {
             "units": self.units[j],
             "model_provenance": model,
             "input_provenance": source,
@@ -432,7 +434,11 @@ def envelope_union_intersection(
     st_hi: list[list[BoundStatus]] = []
     st_i: list[list[BoundStatus]] = []
     for t in range(f):
-        row = ([], [], [])
+        row: tuple[list[BoundStatus], list[BoundStatus], list[BoundStatus]] = (
+            [],
+            [],
+            [],
+        )
         for j in range(q):
             union, inter = _cell([_interval(m, t, j) for m in members])
             u_lo[t, j], u_hi[t, j] = union[0], union[1]
