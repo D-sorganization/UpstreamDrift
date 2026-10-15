@@ -2482,6 +2482,44 @@ export interface LongitudinalSummaryV1 {
 }
 
 /**
+ * One job; ``result`` only when ``completed``, ``partial`` only before.
+ */
+export interface LoopNullspaceJobStatusV1 {
+  job_id: string;
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
+  stage?: string | null;
+  progress_percent: number;
+  cache_key: string;
+  cache_hit: boolean;
+  worker_active: boolean;
+  error?: string | null;
+  partial?: Record<string, unknown> | null;
+  result?: Record<string, unknown> | null;
+}
+
+/**
+ * What to compute (mirrors :class:`AnalysisOptions`).
+ */
+export interface LoopNullspaceOptions {
+  metric: string;
+  include_envelopes: boolean;
+  include_allocation: boolean;
+  effort_weight: number;
+  rate_weight: number;
+}
+
+/**
+ * A job request: a registered source, its frames, the preset and options.
+ */
+export interface LoopNullspaceRequest {
+  source_id: string;
+  engine: string;
+  preset: string;
+  frame_indices: number[];
+  options?: LoopNullspaceOptions;
+}
+
+/**
  * Request model for distance measurement between bodies. See issue #1179
  */
 export interface MeasurementRequest {
