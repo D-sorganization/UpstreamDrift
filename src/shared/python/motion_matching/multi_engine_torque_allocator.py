@@ -207,6 +207,7 @@ class MujocoForceAdapter:
         self._model = NativeMujocoFullBodyModel(spec_bytes)
         self._mj = self._model._mj
         mj_model = self._model.model
+        self._nq = int(mj_model.nq)
         self._nv = int(mj_model.nv)
         self._actuated_indices = list(range(6, self._nv))
         self._n_spheres = len(self._model._spheres)
@@ -255,7 +256,7 @@ class MujocoForceAdapter:
         Preconditions: finite vectors of length ``nv``.  Postcondition: finite
         6-vector in the WORLD frame of :attr:`native_closure_convention`.
         """
-        configuration = self._checked_vector(q, self._model.model.nq, "configuration")
+        configuration = self._checked_vector(q, self._nq, "configuration")
         velocity = self._checked_vector(v, self._nv, "velocity")
         drift = self._model.closure_drift_central_difference(configuration, velocity)
         if drift.shape != (6,) or not np.isfinite(drift).all():
