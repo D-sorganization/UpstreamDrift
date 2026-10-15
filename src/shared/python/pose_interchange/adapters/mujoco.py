@@ -37,6 +37,10 @@ from src.shared.python.pose_interchange.canonical import (
     CONVENTION_TAG,
     CanonicalPose,
 )
+from src.shared.python.pose_interchange.dynamic_maps import (
+    DynamicMapsMixin,
+    NativeDynamicLayout,
+)
 from src.shared.python.pose_interchange.protocol import JointSlot
 
 _PELVIS_PREFIX = 7  # [x, y, z, qw, qx, qy, qz]
@@ -147,10 +151,17 @@ def _layout_from_model(model: Any | None) -> Mapping[str, JointSlot]:
     )
 
 
-class MujocoAdapter:
+_DYNAMIC_LAYOUT = NativeDynamicLayout(
+    "mujoco", "quat_wxyz", 3, 7, False, "world", "body"
+)
+"""MuJoCo free joint: linear world, angular local (matches canonical-v2)."""
+
+
+class MujocoAdapter(DynamicMapsMixin):
     """Adapter for MuJoCo MJCF (free-joint qpos is ``[xyz, quat_wxyz]``)."""
 
     engine_name: str = "mujoco"
+    dynamic_layout = _DYNAMIC_LAYOUT
 
     def __init__(self, backend: MujocoCanonicalBackend | None = None) -> None:
         self._backend = backend

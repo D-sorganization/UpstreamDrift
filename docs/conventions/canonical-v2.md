@@ -228,3 +228,30 @@ forward-integrate a zero-torque or zero-velocity counterfactual.
 - Pose-only callers need no change; they keep using `CanonicalPose`.
 - `pose_interchange.__version__` is bumped to `2.0.0` when CC-2 lands the
   `CanonicalState` type and manifold ops.
+
+## 9. Dual Dynamic Maps Between Engines (NSX-50)
+
+`pose_interchange.dynamic_maps` gives the Pinocchio, MuJoCo, Drake and OpenSim
+adapters `velocity_map`, `acceleration_map` and `generalized_force_map`. For a
+native configuration `q` the native tangent vector is `v_n = T(q) v_c`, the
+acceleration is `a_n = T a_c + Tdot v_c` with `Tdot = dT/dt` along `v_c`, and the
+dual generalized force is `tau_c = T^T tau_n`, so `tau_n . v_n = tau_c . v_c`
+(power invariance, checked by `check_power_invariance`).
+
+| Engine    | Base block of `v_n`         | Linear frame | Angular frame     | `Tdot v` term         |
+| --------- | --------------------------- | ------------ | ----------------- | --------------------- |
+| Pinocchio | `[lin; ang]`                | body (`R^T`) | body              | `-[w]x R^T` (linear)  |
+| MuJoCo    | `[lin; ang]`                | world        | body              | none (T = I)          |
+| Drake     | `[ang; lin]`                | world        | world (`R`)       | none for the velocity |
+| OpenSim   | `[lin; Euler rate]` (deg/s) | world        | `S(euler)^-1`     | `d(S^-1)/dt`          |
+
+Joint speeds scale by the slot `sign` and by `180/pi` for degree slots. The
+Euler-rate map is singular at `cos(beta) = 0`. OpenSim's own FreeJoint speed is
+the parent-frame angular velocity, not `dq/dt`; the adapter maps coordinate
+rates. Pinocchio's free-flyer linear velocity is LOCAL (verified against
+`data.v`); the canonical linear velocity is world-frame, so the map applies
+`R^T`, which differs from the pass-through in `pinocchio_reference.py`.
+Closure-row twist and wrench duals (`pose_interchange.wrench_transform`) reuse
+the NSX-02 converter. Verification: `tests/unit/pose_interchange/test_dynamic_maps.py`,
+`tests/unit/pose_interchange/test_wrench_transform.py` and the engine ground
+truth in `tests/integration/pose_interchange/test_dynamic_maps_engines.py`.

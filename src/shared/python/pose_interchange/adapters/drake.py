@@ -41,6 +41,10 @@ from src.shared.python.pose_interchange.canonical import (
     CONVENTION_TAG,
     CanonicalPose,
 )
+from src.shared.python.pose_interchange.dynamic_maps import (
+    DynamicMapsMixin,
+    NativeDynamicLayout,
+)
 from src.shared.python.pose_interchange.protocol import JointSlot
 
 _PELVIS_PREFIX = 6  # [x, y, z, roll, pitch, yaw]
@@ -195,10 +199,17 @@ def _layout_from_model(model: Any | None) -> Mapping[str, JointSlot]:
     )
 
 
-class DrakeAdapter:
+_DYNAMIC_LAYOUT = NativeDynamicLayout(
+    "drake", "quat_wxyz", 0, 6, True, "world", "world"
+)
+"""Drake QuaternionFloatingJoint dynamic state: q [quat_wxyz, xyz, joints], v [ang_world, lin_world, joints]."""
+
+
+class DrakeAdapter(DynamicMapsMixin):
     """Adapter for Drake URDF/SDF (free-flyer ``q`` is ``[xyz, rpy]``)."""
 
     engine_name: str = "drake"
+    dynamic_layout = _DYNAMIC_LAYOUT
     capabilities: DrakeAdapterCapabilities = DRAKE_ADAPTER_CAPABILITIES
 
     def get_capabilities(self) -> EngineCapabilities:
