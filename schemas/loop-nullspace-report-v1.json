@@ -1,0 +1,681 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://upstreamdrift.dev/schemas/loop_nullspace/loop-nullspace-report-v1.json",
+  "title": "UpstreamDrift Closed-Loop Null-Space Exploration (NSX) Report (v1)",
+  "description": "Versioned backend contract for Closed-Loop Null-Space Exploration (NSX-40, issue #12572). Every user-visible quantity carries the six independent evidence axes (allocation_dependence, model_provenance, input_provenance, conventions, hypotheses, gate_status/reason) and embeds the admission report, invariants, static/trajectory envelopes, optional allocation representative, optional restriction sensitivity, and hypothesis records with registry version.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "report_id",
+    "compute_cache_key",
+    "registry_version",
+    "preset",
+    "engine",
+    "time_s",
+    "model_provenance",
+    "input_provenance",
+    "admission",
+    "hypotheses",
+    "invariants",
+    "envelopes",
+    "allocation",
+    "restriction_sensitivity",
+    "diagnostics"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "SemVer major 1 schema version."
+    },
+    "report_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "compute_cache_key": {
+      "$ref": "#/$defs/Sha256"
+    },
+    "registry_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "preset": {
+      "type": "string",
+      "minLength": 1
+    },
+    "engine": {
+      "type": "string",
+      "minLength": 1
+    },
+    "time_s": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "number"
+      }
+    },
+    "model_provenance": {
+      "$ref": "#/$defs/ModelProvenance"
+    },
+    "input_provenance": {
+      "$ref": "#/$defs/InputProvenance"
+    },
+    "admission": {
+      "$ref": "#/$defs/AdmissionReport"
+    },
+    "hypotheses": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/HypothesisRecord"
+      }
+    },
+    "invariants": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/QuantityRecord"
+      }
+    },
+    "envelopes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/EnvelopeRecord"
+      }
+    },
+    "allocation": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/AllocationSection"
+        }
+      ]
+    },
+    "restriction_sensitivity": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/RestrictionSensitivitySection"
+        }
+      ]
+    },
+    "diagnostics": {
+      "$ref": "#/$defs/DiagnosticsSection"
+    }
+  },
+  "$defs": {
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "AllocationDependence": {
+      "type": "string",
+      "enum": ["INVARIANT", "FAMILY_DEPENDENT", "UNAVAILABLE"]
+    },
+    "GateStatus": {
+      "type": "string",
+      "enum": ["PASS", "FAIL", "UNAVAILABLE"]
+    },
+    "ValidationStatus": {
+      "type": "string",
+      "enum": ["UNVALIDATED", "DEFERRED_EXTERNAL"]
+    },
+    "SignClass": {
+      "type": "string",
+      "enum": ["POSITIVE", "NEGATIVE", "INDETERMINATE", "ZERO", "UNBOUNDED"]
+    },
+    "ModelProvenance": {
+      "type": "object",
+      "required": [
+        "engine",
+        "spec_sha256",
+        "inertial_source",
+        "bare_club_partition_id",
+        "kkt_regularization"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "engine": {
+          "type": "string",
+          "minLength": 1
+        },
+        "spec_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "inertial_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bare_club_partition_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kkt_regularization": {
+          "type": "number",
+          "minimum": 0.0
+        }
+      }
+    },
+    "InputProvenance": {
+      "type": "object",
+      "required": [
+        "trajectory_sha256",
+        "kinematic_source",
+        "derivative_method",
+        "noise_floor",
+        "time_synced"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "trajectory_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "kinematic_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "derivative_method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "noise_floor": {
+          "type": "number",
+          "minimum": 0.0
+        },
+        "time_synced": {
+          "type": "boolean"
+        }
+      }
+    },
+    "AdmissionReport": {
+      "type": "object",
+      "required": [
+        "admitted",
+        "gate_status",
+        "reason",
+        "repair_applied",
+        "phi_scaled",
+        "phidot_scaled",
+        "phiddot_scaled",
+        "stance_foot_vel_mps"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "admitted": {
+          "type": "boolean"
+        },
+        "gate_status": {
+          "$ref": "#/$defs/GateStatus"
+        },
+        "reason": {
+          "type": ["string", "null"]
+        },
+        "repair_applied": {
+          "type": "string",
+          "enum": ["none", "project_to_closure"]
+        },
+        "phi_scaled": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number",
+            "minimum": 0.0
+          }
+        },
+        "phidot_scaled": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number",
+            "minimum": 0.0
+          }
+        },
+        "phiddot_scaled": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number",
+            "minimum": 0.0
+          }
+        },
+        "stance_foot_vel_mps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number",
+            "minimum": 0.0
+          }
+        }
+      }
+    },
+    "HypothesisRecord": {
+      "type": "object",
+      "required": [
+        "id",
+        "statement",
+        "source",
+        "verification_status",
+        "registry_version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verification_status": {
+          "type": "string",
+          "enum": ["VERIFIED", "ASSUMED", "UNVERIFIED", "REMOVED"]
+        },
+        "registry_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parameters": {
+          "type": "object"
+        }
+      }
+    },
+    "QuantityRecord": {
+      "type": "object",
+      "required": [
+        "quantity_id",
+        "label",
+        "units",
+        "values",
+        "allocation_dependence",
+        "model_provenance",
+        "input_provenance",
+        "conventions",
+        "hypotheses",
+        "gate_status",
+        "reason",
+        "validation_status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "quantity_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "units": {
+          "type": "string",
+          "minLength": 1
+        },
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "oneOf": [
+              {
+                "type": ["number", "null"]
+              },
+              {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": ["number", "null"]
+                }
+              }
+            ]
+          }
+        },
+        "allocation_dependence": {
+          "$ref": "#/$defs/AllocationDependence"
+        },
+        "model_provenance": {
+          "$ref": "#/$defs/ModelProvenance"
+        },
+        "input_provenance": {
+          "$ref": "#/$defs/InputProvenance"
+        },
+        "conventions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "hypotheses": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "gate_status": {
+          "$ref": "#/$defs/GateStatus"
+        },
+        "reason": {
+          "type": ["string", "null"]
+        },
+        "validation_status": {
+          "$ref": "#/$defs/ValidationStatus"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "allocation_dependence": {
+                "const": "INVARIANT"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "hypotheses": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "allocation_dependence": {
+                "const": "FAMILY_DEPENDENT"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "hypotheses": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "allocation_dependence": {
+                "const": "UNAVAILABLE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "EnvelopeRecord": {
+      "type": "object",
+      "required": [
+        "quantity_id",
+        "label",
+        "units",
+        "envelope_kind",
+        "lower",
+        "upper",
+        "chebyshev_center",
+        "chebyshev_radius",
+        "sign_class",
+        "active_constraint_duals",
+        "allocation_dependence",
+        "model_provenance",
+        "input_provenance",
+        "conventions",
+        "hypotheses",
+        "gate_status",
+        "reason",
+        "validation_status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "quantity_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "units": {
+          "type": "string",
+          "minLength": 1
+        },
+        "envelope_kind": {
+          "type": "string",
+          "enum": ["STATIC", "TRAJECTORY_COUPLED"]
+        },
+        "lower": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": ["number", "null"]
+          }
+        },
+        "upper": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": ["number", "null"]
+          }
+        },
+        "chebyshev_center": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": ["number", "null"]
+          }
+        },
+        "chebyshev_radius": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": ["number", "null"]
+          }
+        },
+        "sign_class": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/SignClass"
+          }
+        },
+        "active_constraint_duals": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          }
+        },
+        "allocation_dependence": {
+          "const": "FAMILY_DEPENDENT"
+        },
+        "model_provenance": {
+          "$ref": "#/$defs/ModelProvenance"
+        },
+        "input_provenance": {
+          "$ref": "#/$defs/InputProvenance"
+        },
+        "conventions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "hypotheses": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "gate_status": {
+          "$ref": "#/$defs/GateStatus"
+        },
+        "reason": {
+          "type": ["string", "null"]
+        },
+        "validation_status": {
+          "$ref": "#/$defs/ValidationStatus"
+        }
+      }
+    },
+    "AllocationSection": {
+      "type": "object",
+      "required": [
+        "preset_name",
+        "solver_status",
+        "kkt_residual_max",
+        "representatives"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "preset_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "solver_status": {
+          "type": "string",
+          "enum": ["OPTIMAL", "INFEASIBLE", "UNBOUNDED", "NUMERICAL"]
+        },
+        "kkt_residual_max": {
+          "type": "number",
+          "minimum": 0.0
+        },
+        "representatives": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/QuantityRecord"
+          }
+        }
+      }
+    },
+    "RestrictionSensitivitySection": {
+      "type": "object",
+      "required": [
+        "label",
+        "closure_kinds",
+        "monotonic_inclusion_verified",
+        "by_closure_kind"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "const": "REACTION_RESTRICTION_SENSITIVITY"
+        },
+        "closure_kinds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "WELD6",
+              "SHAFT_FREE5",
+              "BALL3",
+              "PLANAR_POINT2",
+              "PLANAR_WELD3"
+            ]
+          }
+        },
+        "monotonic_inclusion_verified": {
+          "type": "boolean"
+        },
+        "by_closure_kind": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/$defs/EnvelopeRecord"
+            }
+          }
+        }
+      }
+    },
+    "DiagnosticsSection": {
+      "type": "object",
+      "required": [
+        "rank_jc",
+        "condition_number_jc",
+        "equality_nullity",
+        "multiplier_gauge",
+        "attainable_torque_variation",
+        "chebyshev_radius"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "rank_jc": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "condition_number_jc": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number",
+            "minimum": 1.0
+          }
+        },
+        "equality_nullity": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "multiplier_gauge": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "attainable_torque_variation": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "chebyshev_radius": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}
