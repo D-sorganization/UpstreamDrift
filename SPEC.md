@@ -2741,6 +2741,10 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-15 | #12695 | R5: one clubhead measurement point (face centre via club_face_target.face_centre_path) for the fd_phase impact split, the exporter impact detector and a new dynamics.fd_phase.clubhead_speed receipt block (simulated/reference/capture speed, % error, peak-timing offset); scripts/diagnose_clubhead_speed.py decomposition |
+| 2026-10-15 | #12694 | Pelvis wears the active outfit's pants material: body classification is order-independent (leaf segment before parent folder, exact before prefix before substring, equal-specificity ties raise), GolfSwing3D LowerTorso maps to pelvis, and check_clothing enforces pelvis garment == pants for every preset |
+| 2026-10-15 | #12636 | NSX-52: MyoSuite CLOSED_LOOP_SNAPSHOT via MuJoCo adapter reuse; kkt_regularization recorded, FULL only at 0 |
+| 2026-10-15 | #12632 | NSX-16: grip-frame split coordinates, grasp map kernel and bare-club net wrench |
 | 2026-10-15 | #12699 | Pinocchio reference adapter maps the free-flyer world linear velocity/acceleration into Pinocchio's LOCAL frame via the NSX-50 velocity map |
 | 2026-10-15 | #12631 | NSX-15 closed-loop decomposition: dimension accounting, zero-side three-case solve, minimum-metric torque |
 | 2026-10-15 | #12630 | NSX-53 native Drake force adapter with closed-loop snapshot; synthetic Drake route quarantined to tests |
