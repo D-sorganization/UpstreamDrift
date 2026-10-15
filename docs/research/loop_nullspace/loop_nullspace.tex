@@ -735,6 +735,165 @@ this finding covers only the Python path.
 Any child that builds on this module must use only independent rows and must
 not assume the closure is generically satisfiable.
 
+\section{Variability Sensitivity}
+\label{sec:variability}
+
+This section fixes the mathematics that every variability child of epic
+\#12593 (section 5A, rules V1--V8) implements.  Rule R2's allocation family
+$x=x_p+Nz$ leaves the \emph{nominal} motion unchanged.  What $z$ can change is
+the \emph{variance} of the outcome under perturbation, and it can do so only
+through the three declared mechanisms of Section~\ref{sec:var-mechanisms}.
+Reproduction: \texttt{derivations/variability\_goldens.py} (golden
+\texttt{variability\_sensitivity}); it uses exact rational data and imports no
+repository production code.
+
+\subsection{Tangent-Bundle Linearization With Reactions Re-Solved}
+\label{sec:var-lin}
+
+Take $M(q)a+h(q,v)=S^{\!\top}u+J_c(q)^{\!\top}\lambda$ with closure
+$\Phi(q)=0$ and its acceleration form $\Phi_{qq}[v,v]+J_c a=0$.  Fix the
+feed-forward $(u,\lambda)=x_p+Nz$ of the nominal swing and perturb the state on
+the tangent bundle, $J_c\,\delta q=0$ and $J_c\,\delta v+\Phi_{qq}[v,\delta q]=0$.
+Differentiating both equations and eliminating $\delta\lambda$ gives the
+\emph{KKT linearization}
+\begin{equation}
+\begin{bmatrix} M & -J_c^{\!\top}\\ J_c & 0\end{bmatrix}
+\begin{bmatrix}\delta a\\ \delta\lambda\end{bmatrix}
+=\begin{bmatrix}
+S^{\!\top}\delta u-(\partial_q h)\,\delta q-(\partial_v h)\,\delta v
+-(\partial_q M\,a)\,\delta q+K_{\mathrm{geom}}(\lambda)\,\delta q\\[2pt]
+-\Phi_{qq}[a,\delta q]-\Phi_{qqq}[v,v,\delta q]-2\Phi_{qq}[v,\delta v]
+\end{bmatrix},
+\label{eq:var-kkt}
+\end{equation}
+where the \emph{geometric preload term} is
+\begin{equation}
+K_{\mathrm{geom}}(\lambda)=\sum_{r=1}^{m}\lambda_r\,\nabla_q^2\Phi_r(q).
+\label{eq:var-kgeom}
+\end{equation}
+Holding $J_c$ fixed while differentiating $J_c^{\!\top}\lambda$ drops
+$K_{\mathrm{geom}}$; that is an error, because $\lambda=\lambda_p+K_\lambda z$
+varies over the allocation family.  Reading the tangent acceleration off the
+solution yields $\delta\dot x_t=F_t(z)\,\delta x_t+G_t\,\delta u$, with
+$\delta x_t=(\delta q_t,\delta v_t)$ in tangent coordinates.  Two facts follow:
+$G_t N=0$ (the nominal motion does not move with $z$) and $F_t$ depends on $z$
+through $K_{\mathrm{geom}}(\lambda(z))$ \emph{only}.
+
+\paragraph{Worked Case.}  A point mass on the circle
+$\Phi=\tfrac12(\lvert q\rvert^2-L^2)$ with two actuator forces and one reaction
+has $H=\nabla^2\Phi=I$ and a one-parameter family $N=(-q,\,1)$.  In the angle
+$\theta$ and rate $\omega$, with $a=L\alpha\,\hat t-L\omega^2\hat e_r$,
+\begin{equation}
+F_t=\begin{bmatrix}0&1\\ \omega^2+\lambda(z)/m & 0\end{bmatrix},\qquad
+G_t=\frac{1}{mL}\begin{bmatrix}0&0\\ \hat t^{\!\top}\end{bmatrix}.
+\end{equation}
+Without $K_{\mathrm{geom}}$ the entry is $\omega^2$ for every $z$.  An
+independent reduced-coordinate derivation
+$\alpha=(\hat t\cdot u-mg\sin\theta)/(mL)$ at fixed $u$ gives the same $F_t$,
+so the golden fails if the term is dropped.  The planar two-arm oracle supplies
+$P^{\!\top}K_{\mathrm{geom}}(\lambda)P$, with $P$ spanning $\ker J_c$, for two
+reaction allocations; it differs between them (basis-free projector form is
+stored).
+
+\subsection{Event Section and Saltation Correction}
+\label{sec:var-salt}
+
+Outcomes are evaluated at the physical impact event $g(x)=0$ (V2).  Let
+$f^-=f(x^-)$ be the flow just before the event, $f^+$ just after, and
+$R$ the reset map ($R=\mathrm{id}$ for a crossing without state jump).  The
+perturbation of the state \emph{at the event} is
+\begin{equation}
+\delta x_{\mathrm{ev}}=\Pi\,\Phi(t^*,0)\,\delta x_0,\qquad
+\Pi=I-\frac{f^-\nabla g^{\!\top}}{\nabla g^{\!\top}f^-},
+\end{equation}
+with $\nabla g^{\!\top}\Pi=0$ and $\Pi f^-=0$; evaluating at a fixed time
+instead omits the event-time shift $\delta t^*=-\nabla g^{\!\top}\delta x/
+(\nabla g^{\!\top}f^-)$.  The perturbation \emph{after} a reset is propagated by
+the saltation matrix
+\begin{equation}
+S=R_x+\frac{(f^+-R_xf^-)\,\nabla g^{\!\top}}{\nabla g^{\!\top}f^-},\qquad
+S f^-=f^+ .
+\end{equation}
+The golden verifies both on a solvable constant-acceleration flow:
+$\partial x(T)/\partial x_0=\Phi^+(T-t^*)\,S\,\Phi^-(t^*)$ holds, and fails if
+the timing term is removed.  Fixed-time and peak-speed-proxy outcomes are
+diagnostics only.
+
+\subsection{Covariance Propagation and Adjoint}
+\label{sec:var-cov}
+
+For discrete steps $\delta x_{k+1}=A_k(z)\delta x_k+B_k w_k$, with
+$A_k=I+\Delta t\,F_t$ (explicit Euler, a declared discretization) and
+$B_k=\Delta t\,G_t$,
+\begin{equation}
+P_{k+1}=A_kP_kA_k^{\!\top}+B_k\Sigma_w(z)B_k^{\!\top},\qquad
+\operatorname{Var}(y)=c^{\!\top}P_{\mathrm{ev}}c .
+\end{equation}
+The adjoint form gives all input sensitivities in one backward sweep:
+$\psi_N=c$, $\psi_k=A_k^{\!\top}\psi_{k+1}$ and
+$b_k=B_k^{\!\top}\psi_{k+1}$, so
+$\operatorname{Var}(y)=\psi_0^{\!\top}P_0\psi_0+\sum_k b_k^{\!\top}\Sigma_{w,k}(z)b_k$.
+Noise amplitudes are per-step variances and must be timestep-consistent (V6):
+a continuous white spectral density $S_w$ becomes $\Sigma_w=S_w/\Delta t$.
+
+\subsection{Mechanisms by Which the Allocation Changes Variance}
+\label{sec:var-mechanisms}
+
+With the nominal motion fixed, $\operatorname{Var}(y)$ depends on $z$ only
+through
+\begin{description}[leftmargin=*]
+\item[M1] signal-dependent noise
+$\sigma_i^2=\sigma_{0,i}^2+k_i^2u_i(z)^2$ (hypothesis
+\texttt{H-NOISE-SIGNAL-DEPENDENT});
+\item[M2] geometric preload stiffness $K_{\mathrm{geom}}(\lambda(z))$ in
+$A_k(z)$ (\texttt{H-GEOMETRIC-PRELOAD});
+\item[M3] activation-dependent muscle impedance (\texttt{H-MUSCLE-SHORT-RANGE-STIFFNESS};
+MyoSuite and OpenSim only).
+\end{description}
+Declared impedance in torque-driven models is the hypothesis
+\texttt{H-DECLARED-JOINT-IMPEDANCE} with its own feedback budget; it is never
+inferred from net torque.  If none of M1--M3 is declared the objective is
+constant in $z$ and the optimizer must return \texttt{OBJECTIVE\_FLAT\_INVARIANT}.
+
+\paragraph{Additive Noise (Flat Case).}  With $k_i=0$ and no M2, $A$ and
+$\Sigma_w$ are independent of $z$, so $\nabla_z\operatorname{Var}=0$
+\emph{symbolically}; the golden stores the exact polynomial derivative $0$.
+With the same additive noise \emph{and} M2 the gradient is not zero (stored),
+so flatness is a statement about the declared mechanisms.
+
+\paragraph{Closed-Form Minimum Variance.}  With frozen $A$ (M1 only) the
+variance is a convex quadratic in $z$,
+$\operatorname{Var}(z)=\mathrm{const}+\sum_ib_i^2k_i^2(u_{p,i}-q_iz)^2$ for
+$N_u=-q$, so
+\begin{equation}
+z^*=\frac{\sum_ib_i^2k_i^2\,u_{p,i}\,q_i}{\sum_ib_i^2k_i^2\,q_i^2},
+\qquad \operatorname{Var}''(z)=2\sum_ib_i^2k_i^2q_i^2>0 .
+\end{equation}
+The golden gives $z^*$ in exact rationals for the declared small case and
+checks it against a grid minimum.  With M2 the derivative is a polynomial in
+$z$ of higher degree and has no such closed form; its coefficients are stored.
+No claim is made that any golfer uses a minimum-variance allocation.
+
+\subsection{Face-Angle Statistics}
+\label{sec:var-face}
+
+Angles are compared through the wrapped error
+$e=\operatorname{atan2}(\sin(\phi-\phi_{\mathrm{tgt}}),\cos(\phi-\phi_{\mathrm{tgt}}))\in(-\pi,\pi]$.
+Reported: bias (circular mean of $e$), standard deviation, interquartile range,
+tolerance exceedance $P(\lvert e\rvert>\epsilon)$ and miss probability.  The
+coefficient of variation $\mathrm{SD}/\lvert\mathrm{mean}\rvert$ is banned for
+zero-centred outcomes, where it is undefined or arbitrarily large.  Face rows
+are \texttt{UNAVAILABLE} when axial club rotation is not observed.
+
+\subsection{Non-Claims for Variability Sensitivity}
+\label{sec:var-nonclaims}
+
+Noise amplitudes, delays and jitter are \emph{declared hypotheses}, not
+measurements.  Nothing here says that a golfer minimizes variance, that
+co-contraction helps, or that any ranking of strategies is coaching advice
+(V8).  Linear predictions are conditional on a nonlinearity gate and a paired
+Monte Carlo check (V7).
+
 \section{Citation Verification Table}
 \label{sec:citations}
 
@@ -759,6 +918,13 @@ Sorokin 2025 & UNVERIFIED & No paper found for this author, year and topic. & no
 SPAR & REMOVED & No source for the acronym in this context; the term is not used. & none \\
 Bosch 15--40~ms dead zone & REMOVED & No datasheet or application note found stating this figure; not used. & none \\
 $\sqrt6\,\sigma/\Delta t^2$ & VERIFIED (derivation) & Variance of the second difference of independent noise is $6\sigma^2/\Delta t^4$; $\sqrt6\times10^{-3}/10^{-4}=24.5$~m/s$^2$ per mm at 100~Hz. & Section~\ref{sec:gates} \\
+Harris and Wolpert 1998, Nature 394:780--784 & UNVERIFIED & Intended claim: motor noise grows with command magnitude.  Not retrieved against its DOI; not used in user-facing text. & none \\
+Jones, Hamilton and Wolpert 2002, J Neurophysiol 88(3):1533--1544 & UNVERIFIED & Intended claim: force variability grows with force level.  Not retrieved. & none \\
+Todorov and Jordan 2002, Nat Neurosci 5(11):1226--1235 & UNVERIFIED & Intended claim: minimum-intervention optimal feedback control.  Not retrieved. & none \\
+Scholz and Sch\"oner 1999, Exp Brain Res 126(3):289--306 & UNVERIFIED & Intended claim: uncontrolled-manifold variance partition.  Not retrieved. & none \\
+M\"uller and Sternad 2004, J Exp Psychol Hum Percept Perform 30(1):212--233 & UNVERIFIED & Intended claim: tolerance, noise and covariation components.  Not retrieved. & none \\
+Burdet et al. 2001, Nature 414:446--449 & UNVERIFIED & Intended claim: impedance learning stabilizes unstable dynamics.  Not retrieved. & none \\
+Cusumano and Dingwell 2013, Hum Mov Sci 32(5):899--923 & UNVERIFIED & Intended claim: variability near goal-equivalent manifolds.  Not retrieved. & none \\
 \bottomrule
 \end{longtable}
 

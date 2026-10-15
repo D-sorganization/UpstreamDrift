@@ -91,6 +91,62 @@
       "url": "https://brieflands.com/journals/mejrh/articles/91039",
       "claim_checked": "Table 1 (HTML read): maximum isometric trunk flexion 325.0 +/- 64.4 Nm, extension 422.8 +/- 178.4 Nm, right rotation 75.7, left rotation 72.4 Nm (17 men, mean 20.8 y).",
       "verification_status": "VERIFIED"
+    },
+    {
+      "id": "CIT-HARRIS-WOLPERT-1998",
+      "reference": "Harris C.M., Wolpert D.M. Signal-dependent noise determines motor planning. Nature 394:780-784 (1998).",
+      "doi": null,
+      "url": null,
+      "claim_checked": "Intended claim: motor noise standard deviation grows with command magnitude. Not retrieved against the DOI or full text.",
+      "verification_status": "UNVERIFIED"
+    },
+    {
+      "id": "CIT-JONES-2002",
+      "reference": "Jones K.E., Hamilton A.F. de C., Wolpert D.M. Sources of signal-dependent noise during isometric force production. J Neurophysiol 88(3):1533-1544 (2002).",
+      "doi": null,
+      "url": null,
+      "claim_checked": "Intended claim: force variability grows with force level, with a motor-unit recruitment explanation. Not retrieved against the DOI or full text.",
+      "verification_status": "UNVERIFIED"
+    },
+    {
+      "id": "CIT-TODOROV-JORDAN-2002",
+      "reference": "Todorov E., Jordan M.I. Optimal feedback control as a theory of motor coordination. Nat Neurosci 5(11):1226-1235 (2002).",
+      "doi": null,
+      "url": null,
+      "claim_checked": "Intended claim: minimum-intervention feedback control corrects only task-relevant deviations. Not retrieved against the DOI or full text.",
+      "verification_status": "UNVERIFIED"
+    },
+    {
+      "id": "CIT-SCHOLZ-SCHONER-1999",
+      "reference": "Scholz J.P., Schoner G. The uncontrolled manifold concept: identifying control variables for a functional task. Exp Brain Res 126(3):289-306 (1999).",
+      "doi": null,
+      "url": null,
+      "claim_checked": "Intended claim: variance partition into components that do and do not change a task variable. Not retrieved against the DOI or full text.",
+      "verification_status": "UNVERIFIED"
+    },
+    {
+      "id": "CIT-MULLER-STERNAD-2004",
+      "reference": "Muller H., Sternad D. Decomposition of variability in the execution of goal-oriented tasks: three components of skill improvement. J Exp Psychol Hum Percept Perform 30(1):212-233 (2004).",
+      "doi": null,
+      "url": null,
+      "claim_checked": "Intended claim: tolerance, noise and covariation components of outcome variability. Not retrieved against the DOI or full text.",
+      "verification_status": "UNVERIFIED"
+    },
+    {
+      "id": "CIT-BURDET-2001",
+      "reference": "Burdet E., Osu R., Franklin D.W., Milner T.E., Kawato M. The central nervous system stabilizes unstable dynamics by learning optimal impedance. Nature 414:446-449 (2001).",
+      "doi": null,
+      "url": null,
+      "claim_checked": "Intended claim: humans raise limb impedance to stabilise unstable dynamics. Not retrieved against the DOI or full text.",
+      "verification_status": "UNVERIFIED"
+    },
+    {
+      "id": "CIT-CUSUMANO-DINGWELL-2013",
+      "reference": "Cusumano J.P., Dingwell J.B. Movement variability near goal equivalent manifolds: fluctuations, control, and model-based analysis. Hum Mov Sci 32(5):899-923 (2013).",
+      "doi": null,
+      "url": null,
+      "claim_checked": "Intended claim: fluctuations along goal-equivalent manifolds are less corrected than transverse ones, with caveats on inference. Not retrieved against the DOI or full text.",
+      "verification_status": "UNVERIFIED"
     }
   ],
   "hypotheses": [
@@ -135,6 +191,55 @@
       "parameters": {"mu": "declared", "facets": "declared", "approximation": "inner or outer"},
       "source": {"citation_id": null, "note": "Modelling choice."},
       "verification_status": "NOT_APPLICABLE"
+    },
+    {
+      "id": "H-NOISE-ADDITIVE",
+      "statement": "Actuation noise has a declared variance that does not depend on the commanded torque. With this hypothesis alone, outcome variance does not depend on the allocation and the optimiser must report an invariant objective.",
+      "parameters": {"sigma0": "declared per actuator"},
+      "source": {"citation_id": null, "note": "Declared modelling choice and the negative control of the variability branch (epic section 5A, rule V1). No empirical claim."},
+      "verification_status": "NOT_APPLICABLE"
+    },
+    {
+      "id": "H-NOISE-SIGNAL-DEPENDENT",
+      "statement": "Actuation noise variance grows with the squared commanded magnitude, sigma_i^2 = sigma0_i^2 + k_i^2 u_i^2, with declared sigma0 and k. Amplitudes are declared hypotheses, not measurements of any golfer.",
+      "parameters": {"sigma0": "declared", "k": "declared"},
+      "source": {"citation_id": "CIT-HARRIS-WOLPERT-1998", "note": "Mechanism M1. Related unverified sources recorded for later verification: CIT-JONES-2002 (isometric force), CIT-TODOROV-JORDAN-2002 (feedback control)."},
+      "verification_status": "UNVERIFIED"
+    },
+    {
+      "id": "H-GEOMETRIC-PRELOAD",
+      "statement": "Reaction forces acting on a curved constraint add a geometric stiffness, the sum over closure rows of lambda_r times the Hessian of Phi_r, to the linearised dynamics. The term depends on the allocation through the reaction.",
+      "parameters": {"term": "sum_r lambda_r grad^2 Phi_r"},
+      "source": {"citation_id": null, "note": "Mechanism M2: a consequence of differentiating the constrained dynamics, derived in the Variability Sensitivity section; no empirical claim."},
+      "verification_status": "NOT_APPLICABLE"
+    },
+    {
+      "id": "H-DECLARED-JOINT-IMPEDANCE",
+      "statement": "Joint stiffness and damping are declared inputs with their own feedback budget in torque-driven models; they are never inferred from net joint torque.",
+      "parameters": {"stiffness": "declared", "damping": "declared", "feedback_budget": "declared"},
+      "source": {"citation_id": "CIT-BURDET-2001", "note": "Declared impedance (rule V5). The source motivates impedance modulation only; no impedance values are adopted."},
+      "verification_status": "UNVERIFIED"
+    },
+    {
+      "id": "H-SENSORIMOTOR-DELAY",
+      "statement": "Feedback acts on the state after a declared fixed delay; the delay is an input to the disturbance and feedback model.",
+      "parameters": {"delay_s": "declared"},
+      "source": {"citation_id": null, "note": "Declared modelling input; no value or source adopted."},
+      "verification_status": "NOT_APPLICABLE"
+    },
+    {
+      "id": "H-TIMING-JITTER",
+      "statement": "The release or activation timing carries a declared random offset with a declared spread, independent of the amplitude noise.",
+      "parameters": {"jitter_sd_s": "declared"},
+      "source": {"citation_id": null, "note": "Declared modelling input; no value or source adopted."},
+      "verification_status": "NOT_APPLICABLE"
+    },
+    {
+      "id": "H-MUSCLE-SHORT-RANGE-STIFFNESS",
+      "statement": "In muscle-actuated models activation raises short-range muscle stiffness, so co-contraction changes the linearised dynamics and adds muscle noise. Applies to MyoSuite and OpenSim only.",
+      "parameters": {"model": "engine muscle model"},
+      "source": {"citation_id": null, "note": "Mechanism M3. No source adopted yet; the physiological claim stays UNVERIFIED until a source is retrieved."},
+      "verification_status": "UNVERIFIED"
     }
   ],
   "conventions": [

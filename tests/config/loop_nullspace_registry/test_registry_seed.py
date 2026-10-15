@@ -50,13 +50,15 @@ def test_every_hypothesis_has_a_declared_status(reg: dict) -> None:
 
 
 def test_statements_never_rest_on_unverified_sources(reg: dict) -> None:
+    """An UNVERIFIED hypothesis may exist (NSX-80) but no preset may reach it."""
     status = {c["id"]: c["verification_status"] for c in reg["citations"]}
+    in_preset = {h for p in reg["presets"] for h in p["hypotheses"]}
     for h in reg["hypotheses"]:
         cid = h["source"]["citation_id"]
-        if cid is not None:
-            assert status[cid] == "VERIFIED", h["id"]
         if h["verification_status"] in {"UNVERIFIED", "REMOVED"}:
-            raise AssertionError(f"{h['id']} would present an unverified source")
+            assert h["id"] not in in_preset, h["id"]
+        elif cid is not None:
+            assert status[cid] == "VERIFIED", h["id"]
 
 
 SLOT_STATUS = {"VERIFIED", "UNVERIFIED"}
