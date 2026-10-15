@@ -63,8 +63,9 @@ Authority).
 - [ ] The runtime display gate exists and is enforced. Check (not yet
   implemented): `require_verified_for_display` and `load_registry`, specified
   in `docs/research/loop_nullspace/contracts.md` (section `NSX-11 Registry
-  Loader`). Status: open, NSX-11 (#12556). No `load_registry` exists under
-  `src/`.
+  Loader`). Status: open, NSX-11 (#12556). The loader is implemented in PR
+  #12613 (in the merge queue at the time of writing), but no `load_registry`
+  exists under `src/` on this branch.
 - [ ] Hypothesis IDs in the external validation record match the registry. Check:
   `git grep -n "H-TORQUE-CAPACITY-BOX\|H-GRIP-FRICTION-CONE" -- docs`.
   Status: discrepancy. `docs/development/planning/DV-12554.md` uses
@@ -136,8 +137,9 @@ Authority).
   bound. Check: `test_a_perturbed_engine_fails_track_n_and_stays_inside_the_track_s_bound`.
 - [ ] Engines that were skipped, unavailable or fail-closed are named in the
   figure. Simscape has no native snapshot: `test_simscape_native_adapter_fails_closed`
-  asserts this. NSX-55 (#12583) is open, and no deferred record for it appears
-  in `docs/development/planning/catalog.json`.
+  asserts this. NSX-55 (#12583) is open. Its PR #12644 adds the deferred record
+  `docs/development/planning/DV-12583.md` and its `catalog.json` entry, neither
+  of which is on this branch yet.
 - [ ] Agreement between engines is stated as numerical conformance only, not
   physical validation (`docs/research/loop_nullspace/contracts.md`, section
   `NSX-56 Conformance`).
