@@ -75,7 +75,7 @@ def _zero_tilt_spec(levels=None) -> FixtureSpec:
     """Vertical stack: no lordosis, sacral slope or thorax tilt."""
     kwargs = {} if levels is None else {"levels": levels}
     probe = FixtureSpec(**kwargs)
-    zero = {lv: 0.0 for lv in probe.levels}
+    zero = dict.fromkeys(probe.levels, 0.0)
     return FixtureSpec(neutral_lordosis_deg=zero, **_ZERO_TILT, **kwargs)
 
 

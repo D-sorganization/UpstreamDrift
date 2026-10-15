@@ -651,6 +651,50 @@ def _disable_muscles(prepared: PreparedModel) -> int:
     return int(muscles.getSize())
 
 
+@dataclass(frozen=True)
+class _Kinematics:
+    """Motion samples, derivatives and coordinate bookkeeping of one run."""
+
+    times: np.ndarray
+    q: np.ndarray
+    qd: np.ndarray
+    qdd: np.ndarray
+    layout: _Layout
+    inventory: SpineInventory
+    source: str
+    defaulted: list[str]
+
+
+def _load_kinematics(
+    prepared: PreparedModel,
+    motion: DriveResult | str | Path,
+    model_id: str,
+    opts: SpineIDOptions,
+    filter_hz: float | None,
+) -> _Kinematics:
+    """Read ``motion`` and derive ``q, qd, qdd`` for the prepared model.
+
+    Shared by inverse dynamics and the joint-reaction run (SPN-10c) so both
+    use identical coordinates, derivatives and mobility layout.
+    """
+    model, state = prepared.model, prepared.state
+    times, cols, source, _label = _motion_table(model, motion)
+    inventory = inventory_spine(model, model_id, level_map=opts.level_map)
+    pelvis = _resolve_pelvis(model, opts)
+    names = _coordinate_names(model)
+    required = [c for lv in inventory.levels for c in inventory.coordinate_names[lv]]
+    required += [*pelvis.rotation, *pelvis.translation]
+    q, qd, qdd = _derivatives(
+        times, _coordinate_matrix(names, cols, required), filter_hz
+    )
+    free = state.getNQ() != state.getNU()
+    if free:
+        _check_free_pelvis_speeds(model, state, pelvis)
+    layout = _Layout(names, _u_indices(model, state), pelvis, free)
+    defaulted = [x for x in names if x not in cols]
+    return _Kinematics(times, q, qd, qdd, layout, inventory, source, defaulted)
+
+
 def _solve_trajectory(
     model_path: str | Path,
     motion: DriveResult | str | Path,
@@ -668,22 +712,11 @@ def _solve_trajectory(
     )
     n_muscles = _disable_muscles(prepared) if exclude_muscles else 0
     model = prepared.model
-    times, cols, source, _label = _motion_table(model, motion)
-    inventory = inventory_spine(model, model_id, level_map=opts.level_map)
-    pelvis = _resolve_pelvis(model, opts)
-    names = _coordinate_names(model)
-    required = [c for lv in inventory.levels for c in inventory.coordinate_names[lv]]
-    required += [*pelvis.rotation, *pelvis.translation]
-    q, qd, qdd = _derivatives(
-        times, _coordinate_matrix(names, cols, required), filter_hz
-    )
-    state = prepared.state
-    free = state.getNQ() != state.getNU()
-    if free:
-        _check_free_pelvis_speeds(model, state, pelvis)
-    layout = _Layout(names, _u_indices(model, state), pelvis, free)
+    kin = _load_kinematics(prepared, motion, model_id, opts, filter_hz)
+    times, q, qd, qdd = kin.times, kin.q, kin.qd, kin.qdd
+    layout, inventory = kin.layout, kin.inventory
     solver = import_opensim().InverseDynamicsSolver(model)
-    tau = np.zeros((times.size, len(names)))
+    tau = np.zeros((times.size, len(layout.names)))
     try:
         for i in range(times.size):
             tau[i] = _solve_frame(
@@ -691,9 +724,10 @@ def _solve_trajectory(
             )
     except RuntimeError as exc:
         raise ValueError(f"inverse dynamics failed: {exc}") from exc
-    defaulted = [x for x in names if x not in cols]
     prov = _provenance(
-        prepared, (Path(model_path), model_id, source, filter_hz), defaulted
+        prepared,
+        (Path(model_path), model_id, kin.source, filter_hz),
+        kin.defaulted,
     )
     prov["muscles"] = (
         f"excluded ({n_muscles} muscles not applying force)"
