@@ -1,0 +1,1939 @@
+{
+  "schema_version": "1.0.0",
+  "issue": 12549,
+  "description": "Seed registry of physiological hypotheses, mathematical conventions, UI presets, canonical joint torque capacities, and citation verification statuses for Closed-Loop Null-Space Exploration (NSX).",
+  "conventions": [
+    {
+      "id": "C-FRAME-GRIP",
+      "statement": "Canonical grip-midpoint orthonormal frame with u_hat along the shaft axis from grip midpoint toward clubhead, v_hat along the clubface normal projection orthogonal to u_hat, and w_hat = u_hat x v_hat.",
+      "parameters": {
+        "origin": "0.5 * (r_L + r_R)",
+        "row_order": ["fx", "fy", "fz", "tx", "ty", "tz"],
+        "tree_sign": "+J_c^T lambda acts on the human kinematic tree; -lambda acts on the closing hand interface"
+      }
+    },
+    {
+      "id": "C-CLOSURE-CANONICAL-R8",
+      "statement": "Canonical 6-D closure residual and Jacobian convention ordering linear translational rows before angular rotational rows in the grip-midpoint frame.",
+      "parameters": {
+        "row_order": ["fx", "fy", "fz", "tx", "ty", "tz"],
+        "linear_scale_m": 1.0,
+        "angular_scale_rad": 1.0
+      }
+    },
+    {
+      "id": "C-METRIC-CAPACITY",
+      "statement": "Diagonal capacity-normalized quadratic metric W_ii = 1 / tau_max_i^2 weighting each actuated joint torque by its declared static capacity bound.",
+      "parameters": {
+        "weight_formula": "diag(1 / tau_max_nm^2)"
+      }
+    },
+    {
+      "id": "C-METRIC-IDENTITY",
+      "statement": "Euclidean SI unit-scaled metric W = diag(1 / F_char^2, 1 / M_char^2) with characteristic force F_char = 100 N and characteristic moment M_char = 50 N*m.",
+      "parameters": {
+        "characteristic_force_n": 100.0,
+        "characteristic_moment_nm": 50.0
+      }
+    },
+    {
+      "id": "C-METRIC-MINV",
+      "statement": "Inverse generalized mass-matrix metric W = M(q)^{-1} used only as a declared mathematical norm projection P_{c,M^{-1}} tau, never labelled as Gauss's principle or true physiological torque.",
+      "parameters": {
+        "weight_formula": "M(q)^{-1}"
+      }
+    },
+    {
+      "id": "C-CONE-POLYHEDRAL-8",
+      "statement": "Eight-facet inner/outer polyhedral approximation of circular Coulomb friction cones with worst-case radial error bound 1 - cos(pi/8) = 0.07612.",
+      "parameters": {
+        "facet_count": 8,
+        "max_radial_relative_error": 0.07612046748871323
+      }
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "H-TORQUE-CAPACITY",
+      "statement": "Actuated joint torques remain within declared directional or bilateral static capacity bounds tau_min_i <= tau_i <= tau_max_i populated per canonical joint slot in NSX-04.",
+      "parameters": {
+        "bound_type": "box",
+        "capacity_table_ref": "torque_capacity"
+      },
+      "source": {
+        "id": "CIT-HOLZBAUR-2005",
+        "citation": "Holzbaur, K. R. S., Murray, W. M., & Delp, S. L. (2005). A model of the upper extremity for simulating musculoskeletal surgery and analyzing neuromuscular control. Annals of Biomedical Engineering, 33(6), 829-840.",
+        "doi_or_url": "https://doi.org/10.1007/s10439-005-3320-7",
+        "table_or_figure": "Table 1 & Figure 4 (Upper-extremity isometric joint moment capacities)",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H-TORQUE-CAPACITY-BOX",
+      "statement": "Actuated joint torques remain within declared bilateral static capacity bounds |tau_i| <= tau_max_i populated per canonical joint slot in NSX-04.",
+      "parameters": {
+        "bound_type": "box",
+        "capacity_table_ref": "torque_capacity"
+      },
+      "source": {
+        "id": "CIT-BOYD-VANDENBERGHE-2004",
+        "citation": "Boyd, S., & Vandenberghe, L. (2004). Convex Optimization. Cambridge University Press.",
+        "doi_or_url": "https://doi.org/10.1017/CBO9780511804441",
+        "table_or_figure": "Section 4.7 and Section 8.5.1",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H-FRICTION-CONE",
+      "statement": "Hand-on-grip contact forces satisfy second-order Coulomb friction cones ||f_tan||_2 <= mu_grip * f_normal.",
+      "parameters": {
+        "mu_grip_default": 0.6,
+        "normal_preload_min_n": 10.0
+      },
+      "source": {
+        "id": "CIT-MURRAY-LI-SASTRY-1994",
+        "citation": "Murray, R. M., Li, Z., & Sastry, S. S. (1994). A Mathematical Introduction to Robotic Manipulation. CRC Press.",
+        "doi_or_url": "https://doi.org/10.1201/9781315136370",
+        "table_or_figure": "Chapter 5 (Grasp Map and Friction Cones)",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H-GRIP-FRICTION-CONE",
+      "statement": "Hand-on-grip contact forces satisfy second-order Coulomb friction cones ||f_tan||_2 <= mu_grip * f_normal with non-negative compressive preload.",
+      "parameters": {
+        "mu_grip_default": 0.6,
+        "normal_preload_min_n": 10.0
+      },
+      "source": {
+        "id": "CIT-MURRAY-LI-SASTRY-1994",
+        "citation": "Murray, R. M., Li, Z., & Sastry, S. S. (1994). A Mathematical Introduction to Robotic Manipulation. CRC Press.",
+        "doi_or_url": "https://doi.org/10.1201/9781315136370",
+        "table_or_figure": "Chapter 5 (Grasp Map and Friction Cones)",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H-GRIP-PRELOAD",
+      "statement": "Each hand maintains a minimum compressive normal grip force f_normal >= f_preload_min along the grip normal axis.",
+      "parameters": {
+        "normal_preload_min_n": 10.0
+      },
+      "source": {
+        "id": "CIT-MURRAY-LI-SASTRY-1994",
+        "citation": "Murray, R. M., Li, Z., & Sastry, S. S. (1994). A Mathematical Introduction to Robotic Manipulation. CRC Press.",
+        "doi_or_url": "https://doi.org/10.1201/9781315136370",
+        "table_or_figure": "Chapter 5 (Grasp Map and Friction Cones)",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H-MIN-EFFORT",
+      "statement": "Prior-conditioned representative allocation minimizes capacity-normalized quadratic joint effort sum_i (tau_i / tau_max_i)^2 over the admissible null-space polytope.",
+      "parameters": {
+        "objective_term": "sum((tau_i / tau_max_i)^2)",
+        "weight": 1.0
+      },
+      "source": {
+        "id": "CIT-BOYD-VANDENBERGHE-2004",
+        "citation": "Boyd, S., & Vandenberghe, L. (2004). Convex Optimization. Cambridge University Press.",
+        "doi_or_url": "https://doi.org/10.1017/CBO9780511804441",
+        "table_or_figure": "Section 4.7 and Section 8.5.1",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H-EFFORT-CAPACITY-QUADRATIC",
+      "statement": "Prior-conditioned representative allocation minimizes sum_i (tau_i / tau_max_i)^2 over the admissible null-space polytope.",
+      "parameters": {
+        "objective_term": "sum((tau_i / tau_max_i)^2)",
+        "weight": 1.0
+      },
+      "source": {
+        "id": "CIT-BOYD-VANDENBERGHE-2004",
+        "citation": "Boyd, S., & Vandenberghe, L. (2004). Convex Optimization. Cambridge University Press.",
+        "doi_or_url": "https://doi.org/10.1017/CBO9780511804441",
+        "table_or_figure": "Section 4.7 and Section 8.5.1",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H-SMOOTH-TORQUE-RATE",
+      "statement": "Trajectory allocation penalizes finite-difference squared torque rate ||Delta tau / Delta t||_W^2 across consecutive admitted frames.",
+      "parameters": {
+        "objective_term": "sum_t ||(tau_{t+1} - tau_t) / dt||_W^2",
+        "weight_default": 0.01
+      },
+      "source": {
+        "id": "CIT-FD-NOISE-100HZ",
+        "citation": "Higham, N. J. (2002). Accuracy and Stability of Numerical Algorithms (2nd ed.). SIAM.",
+        "doi_or_url": "https://doi.org/10.1137/1.9780898717921",
+        "table_or_figure": "Central difference noise propagation",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H-TORQUE-RATE-SMOOTHNESS",
+      "statement": "Trajectory allocation penalizes finite-difference squared torque rate ||Delta tau / Delta t||_W^2 across consecutive admitted frames.",
+      "parameters": {
+        "objective_term": "sum_t ||(tau_{t+1} - tau_t) / dt||_W^2",
+        "weight_default": 0.01
+      },
+      "source": {
+        "id": "CIT-FD-NOISE-100HZ",
+        "citation": "Higham, N. J. (2002). Accuracy and Stability of Numerical Algorithms (2nd ed.). SIAM.",
+        "doi_or_url": "https://doi.org/10.1137/1.9780898717921",
+        "table_or_figure": "Central difference noise propagation",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H-POWER-GROSS-HETEROGENEOUS",
+      "statement": "Trajectory allocation includes an optional per-joint positive/negative mechanical power epigraph penalty paired with a strictly convex quadratic effort term.",
+      "parameters": {
+        "requires_strict_convex_pair": true,
+        "uniform_c_ratio_is_invariant_offset": true
+      },
+      "source": {
+        "id": "CIT-FEATHERSTONE-RBDA-2008",
+        "citation": "Featherstone, R. (2008). Rigid Body Dynamics Algorithms. Springer.",
+        "doi_or_url": "https://doi.org/10.1007/978-1-4899-7560-7",
+        "table_or_figure": "Chapter 8 (Closed-Loop Systems)",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H1",
+      "statement": "Compatibility alias for H-TORQUE-CAPACITY: actuated joint torques remain within declared static capacity bounds.",
+      "parameters": {
+        "alias_of": "H-TORQUE-CAPACITY",
+        "bound_type": "box"
+      },
+      "source": {
+        "id": "CIT-HOLZBAUR-2005",
+        "citation": "Holzbaur, K. R. S., Murray, W. M., & Delp, S. L. (2005). A model of the upper extremity for simulating musculoskeletal surgery and analyzing neuromuscular control. Annals of Biomedical Engineering, 33(6), 829-840.",
+        "doi_or_url": "https://doi.org/10.1007/s10439-005-3320-7",
+        "table_or_figure": "Table 1 & Figure 4 (Upper-extremity isometric joint moment capacities)",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H2",
+      "statement": "Compatibility alias for H-FRICTION-CONE: hand-on-grip contact forces satisfy second-order Coulomb friction cones.",
+      "parameters": {
+        "alias_of": "H-FRICTION-CONE",
+        "mu_grip_default": 0.6
+      },
+      "source": {
+        "id": "CIT-MURRAY-LI-SASTRY-1994",
+        "citation": "Murray, R. M., Li, Z., & Sastry, S. S. (1994). A Mathematical Introduction to Robotic Manipulation. CRC Press.",
+        "doi_or_url": "https://doi.org/10.1201/9781315136370",
+        "table_or_figure": "Chapter 5 (Grasp Map and Friction Cones)",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H3",
+      "statement": "Compatibility alias for H-GRIP-PRELOAD: compressive grip preload remains above declared minimum normal force.",
+      "parameters": {
+        "alias_of": "H-GRIP-PRELOAD",
+        "normal_preload_min_n": 10.0
+      },
+      "source": {
+        "id": "CIT-MURRAY-LI-SASTRY-1994",
+        "citation": "Murray, R. M., Li, Z., & Sastry, S. S. (1994). A Mathematical Introduction to Robotic Manipulation. CRC Press.",
+        "doi_or_url": "https://doi.org/10.1201/9781315136370",
+        "table_or_figure": "Chapter 5 (Grasp Map and Friction Cones)",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H4",
+      "statement": "Compatibility alias for H-MIN-EFFORT: minimum capacity-normalized quadratic joint torque effort prior.",
+      "parameters": {
+        "alias_of": "H-MIN-EFFORT",
+        "weight": 1.0
+      },
+      "source": {
+        "id": "CIT-BOYD-VANDENBERGHE-2004",
+        "citation": "Boyd, S., & Vandenberghe, L. (2004). Convex Optimization. Cambridge University Press.",
+        "doi_or_url": "https://doi.org/10.1017/CBO9780511804441",
+        "table_or_figure": "Section 4.7 and Section 8.5.1",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H5",
+      "statement": "Compatibility alias for H-SMOOTH-TORQUE-RATE: finite-difference torque-rate smoothness regularization across frames.",
+      "parameters": {
+        "alias_of": "H-SMOOTH-TORQUE-RATE",
+        "weight_default": 0.01
+      },
+      "source": {
+        "id": "CIT-FD-NOISE-100HZ",
+        "citation": "Higham, N. J. (2002). Accuracy and Stability of Numerical Algorithms (2nd ed.). SIAM.",
+        "doi_or_url": "https://doi.org/10.1137/1.9780898717921",
+        "table_or_figure": "Central difference noise propagation",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H6",
+      "statement": "Compatibility alias for H-POWER-GROSS-HETEROGENEOUS: heterogeneous positive/negative mechanical power epigraph prior paired with strictly convex effort.",
+      "parameters": {
+        "alias_of": "H-POWER-GROSS-HETEROGENEOUS",
+        "requires_strict_convex_pair": true
+      },
+      "source": {
+        "id": "CIT-FEATHERSTONE-RBDA-2008",
+        "citation": "Featherstone, R. (2008). Rigid Body Dynamics Algorithms. Springer.",
+        "doi_or_url": "https://doi.org/10.1007/978-1-4899-7560-7",
+        "table_or_figure": "Chapter 8 (Closed-Loop Systems)",
+        "verification_status": "VERIFIED"
+      },
+      "verification_status": "VERIFIED"
+    }
+  ],
+  "presets": [
+    {
+      "name": "envelope_only",
+      "label": "Static Feasible Envelopes Only (No Representative Selection)",
+      "description": "Computes per-frame upper and lower feasible bounds and Chebyshev margins under declared capacity and grip-cone hypotheses without selecting a single representative trajectory.",
+      "hypotheses": [
+        "H-TORQUE-CAPACITY",
+        "H-TORQUE-CAPACITY-BOX",
+        "H-FRICTION-CONE",
+        "H-GRIP-FRICTION-CONE",
+        "H-GRIP-PRELOAD"
+      ],
+      "hypothesis_ids": [
+        "H-TORQUE-CAPACITY",
+        "H-TORQUE-CAPACITY-BOX",
+        "H-FRICTION-CONE",
+        "H-GRIP-FRICTION-CONE",
+        "H-GRIP-PRELOAD"
+      ],
+      "conventions": [
+        "C-FRAME-GRIP",
+        "C-CLOSURE-CANONICAL-R8",
+        "C-METRIC-CAPACITY",
+        "C-METRIC-IDENTITY"
+      ],
+      "convention_ids": [
+        "C-FRAME-GRIP",
+        "C-CLOSURE-CANONICAL-R8",
+        "C-METRIC-CAPACITY",
+        "C-METRIC-IDENTITY"
+      ]
+    },
+    {
+      "name": "capacity_min_effort",
+      "label": "Capacity-Normalized Minimum Quadratic Effort Representative",
+      "description": "Selects a prior-conditioned representative trajectory minimizing capacity-normalized quadratic joint effort within the static feasible envelope.",
+      "hypotheses": [
+        "H-TORQUE-CAPACITY",
+        "H-TORQUE-CAPACITY-BOX",
+        "H-FRICTION-CONE",
+        "H-GRIP-FRICTION-CONE",
+        "H-GRIP-PRELOAD",
+        "H-MIN-EFFORT",
+        "H-EFFORT-CAPACITY-QUADRATIC"
+      ],
+      "hypothesis_ids": [
+        "H-TORQUE-CAPACITY",
+        "H-TORQUE-CAPACITY-BOX",
+        "H-FRICTION-CONE",
+        "H-GRIP-FRICTION-CONE",
+        "H-GRIP-PRELOAD",
+        "H-MIN-EFFORT",
+        "H-EFFORT-CAPACITY-QUADRATIC"
+      ],
+      "conventions": [
+        "C-FRAME-GRIP",
+        "C-CLOSURE-CANONICAL-R8",
+        "C-METRIC-CAPACITY",
+        "C-METRIC-IDENTITY"
+      ],
+      "convention_ids": [
+        "C-FRAME-GRIP",
+        "C-CLOSURE-CANONICAL-R8",
+        "C-METRIC-CAPACITY",
+        "C-METRIC-IDENTITY"
+      ]
+    },
+    {
+      "name": "smooth_capacity",
+      "label": "Rate-Smoothed Capacity-Normalized Effort Representative",
+      "description": "Couples admissible frames across time with a finite-difference torque-rate smoothness penalty and capacity-normalized quadratic effort.",
+      "hypotheses": [
+        "H-TORQUE-CAPACITY",
+        "H-TORQUE-CAPACITY-BOX",
+        "H-FRICTION-CONE",
+        "H-GRIP-FRICTION-CONE",
+        "H-GRIP-PRELOAD",
+        "H-MIN-EFFORT",
+        "H-EFFORT-CAPACITY-QUADRATIC",
+        "H-SMOOTH-TORQUE-RATE",
+        "H-TORQUE-RATE-SMOOTHNESS"
+      ],
+      "hypothesis_ids": [
+        "H-TORQUE-CAPACITY",
+        "H-TORQUE-CAPACITY-BOX",
+        "H-FRICTION-CONE",
+        "H-GRIP-FRICTION-CONE",
+        "H-GRIP-PRELOAD",
+        "H-MIN-EFFORT",
+        "H-EFFORT-CAPACITY-QUADRATIC",
+        "H-SMOOTH-TORQUE-RATE",
+        "H-TORQUE-RATE-SMOOTHNESS"
+      ],
+      "conventions": [
+        "C-FRAME-GRIP",
+        "C-CLOSURE-CANONICAL-R8",
+        "C-METRIC-CAPACITY",
+        "C-METRIC-IDENTITY"
+      ],
+      "convention_ids": [
+        "C-FRAME-GRIP",
+        "C-CLOSURE-CANONICAL-R8",
+        "C-METRIC-CAPACITY",
+        "C-METRIC-IDENTITY"
+      ]
+    }
+  ],
+  "torque_capacity": [
+    {
+      "coordinate": "TranslationInputX",
+      "tau_max_nm": 1500.0,
+      "tau_min_nm": -1500.0,
+      "flexion_max_nm": 1500.0,
+      "extension_max_nm": 1500.0,
+      "direction_labels": ["anterior_force_n", "posterior_force_n"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED root translation generalized force bound for TranslationInputX (no direct biological actuator; unverified)."
+    },
+    {
+      "coordinate": "TranslationInputY",
+      "tau_max_nm": 1500.0,
+      "tau_min_nm": -1500.0,
+      "flexion_max_nm": 1500.0,
+      "extension_max_nm": 1500.0,
+      "direction_labels": ["mediolateral_pos_n", "mediolateral_neg_n"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED root translation generalized force bound for TranslationInputY (no direct biological actuator; unverified)."
+    },
+    {
+      "coordinate": "TranslationInputZ",
+      "tau_max_nm": 2500.0,
+      "tau_min_nm": -2500.0,
+      "flexion_max_nm": 2500.0,
+      "extension_max_nm": 2500.0,
+      "direction_labels": ["vertical_up_n", "vertical_down_n"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED root translation generalized force bound for TranslationInputZ (no direct biological actuator; unverified)."
+    },
+    {
+      "coordinate": "HipInputX",
+      "tau_max_nm": 220.0,
+      "tau_min_nm": -220.0,
+      "flexion_max_nm": 220.0,
+      "extension_max_nm": 220.0,
+      "direction_labels": ["pelvis_list_pos", "pelvis_list_neg"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED pelvis root orientation bound for HipInputX (composite root coordinate; unverified)."
+    },
+    {
+      "coordinate": "HipInputY",
+      "tau_max_nm": 250.0,
+      "tau_min_nm": -250.0,
+      "flexion_max_nm": 250.0,
+      "extension_max_nm": 250.0,
+      "direction_labels": ["pelvis_tilt_pos", "pelvis_tilt_neg"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED pelvis root orientation bound for HipInputY (composite root coordinate; unverified)."
+    },
+    {
+      "coordinate": "HipInputZ",
+      "tau_max_nm": 180.0,
+      "tau_min_nm": -180.0,
+      "flexion_max_nm": 180.0,
+      "extension_max_nm": 180.0,
+      "direction_labels": ["pelvis_rotation_pos", "pelvis_rotation_neg"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED pelvis root orientation bound for HipInputZ (composite root coordinate; unverified)."
+    },
+    {
+      "coordinate": "SpineInputX",
+      "tau_max_nm": 165.0,
+      "tau_min_nm": -165.0,
+      "flexion_max_nm": 165.0,
+      "extension_max_nm": 165.0,
+      "direction_labels": ["lateral_bend_right", "lateral_bend_left"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-KUMAR-1996",
+        "citation": "Kumar, S. (1996). Isolated planar trunk strength measurement in normals: Part III\u2014Results and database. International Journal of Industrial Ergonomics, 17(2), 103-111.",
+        "doi_or_url": "https://doi.org/10.1016/0169-8141(95)00042-9",
+        "table_or_figure": "Table 3 & Table 5 (Isometric lumbar/thoracic flexion, lateral bending, and axial rotation torques)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "SpineInputY",
+      "tau_max_nm": 240.0,
+      "tau_min_nm": -150.0,
+      "flexion_max_nm": 240.0,
+      "extension_max_nm": 150.0,
+      "direction_labels": ["trunk_extension", "trunk_flexion"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-KUMAR-1996",
+        "citation": "Kumar, S. (1996). Isolated planar trunk strength measurement in normals: Part III\u2014Results and database. International Journal of Industrial Ergonomics, 17(2), 103-111.",
+        "doi_or_url": "https://doi.org/10.1016/0169-8141(95)00042-9",
+        "table_or_figure": "Table 3 & Table 5 (Isometric lumbar/thoracic flexion, lateral bending, and axial rotation torques)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "TorsoInput",
+      "tau_max_nm": 130.0,
+      "tau_min_nm": -130.0,
+      "flexion_max_nm": 130.0,
+      "extension_max_nm": 130.0,
+      "direction_labels": ["axial_rotation_left", "axial_rotation_right"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-KUMAR-1996",
+        "citation": "Kumar, S. (1996). Isolated planar trunk strength measurement in normals: Part III\u2014Results and database. International Journal of Industrial Ergonomics, 17(2), 103-111.",
+        "doi_or_url": "https://doi.org/10.1016/0169-8141(95)00042-9",
+        "table_or_figure": "Table 3 & Table 5 (Isometric lumbar/thoracic flexion, lateral bending, and axial rotation torques)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "LEInput",
+      "tau_max_nm": 72.0,
+      "tau_min_nm": -48.0,
+      "flexion_max_nm": 72.0,
+      "extension_max_nm": 48.0,
+      "direction_labels": ["elbow_flexion", "elbow_extension"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-HOLZBAUR-2005",
+        "citation": "Holzbaur, K. R. S., Murray, W. M., & Delp, S. L. (2005). A model of the upper extremity for simulating musculoskeletal surgery and analyzing neuromuscular control. Annals of Biomedical Engineering, 33(6), 829-840.",
+        "doi_or_url": "https://doi.org/10.1007/s10439-005-3320-7",
+        "table_or_figure": "Table 1 & Figure 4 (Upper-extremity isometric joint moment capacities)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "LFInput",
+      "tau_max_nm": 14.0,
+      "tau_min_nm": -14.0,
+      "flexion_max_nm": 14.0,
+      "extension_max_nm": 14.0,
+      "direction_labels": ["forearm_pronation", "forearm_supination"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-HOLZBAUR-2005",
+        "citation": "Holzbaur, K. R. S., Murray, W. M., & Delp, S. L. (2005). A model of the upper extremity for simulating musculoskeletal surgery and analyzing neuromuscular control. Annals of Biomedical Engineering, 33(6), 829-840.",
+        "doi_or_url": "https://doi.org/10.1007/s10439-005-3320-7",
+        "table_or_figure": "Table 1 & Figure 4 (Upper-extremity isometric joint moment capacities)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "LScapInputX",
+      "tau_max_nm": 65.0,
+      "tau_min_nm": -65.0,
+      "flexion_max_nm": 65.0,
+      "extension_max_nm": 65.0,
+      "direction_labels": ["scapula_elevation", "scapula_depression"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED scapulothoracic capacity for LScapInputX (lumped sternoclavicular/acromioclavicular coordinate; unverified)."
+    },
+    {
+      "coordinate": "LScapInputY",
+      "tau_max_nm": 70.0,
+      "tau_min_nm": -70.0,
+      "flexion_max_nm": 70.0,
+      "extension_max_nm": 70.0,
+      "direction_labels": ["scapula_protraction", "scapula_retraction"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED scapulothoracic capacity for LScapInputY (lumped sternoclavicular/acromioclavicular coordinate; unverified)."
+    },
+    {
+      "coordinate": "LSInputX",
+      "tau_max_nm": 95.0,
+      "tau_min_nm": -85.0,
+      "flexion_max_nm": 95.0,
+      "extension_max_nm": 85.0,
+      "direction_labels": ["shoulder_abduction", "shoulder_adduction"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-GARNER-PANDY-2001",
+        "citation": "Garner, B. A., & Pandy, M. G. (2001). Musculoskeletal model of the upper limb based on the visible human male dataset. Computer Methods in Biomechanics and Biomedical Engineering, 4(2), 93-126.",
+        "doi_or_url": "https://doi.org/10.1080/10255840008908000",
+        "table_or_figure": "Table 2 & Figure 6 (Shoulder, elbow, and wrist peak isometric torques)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "LSInputY",
+      "tau_max_nm": 105.0,
+      "tau_min_nm": -80.0,
+      "flexion_max_nm": 105.0,
+      "extension_max_nm": 80.0,
+      "direction_labels": ["shoulder_flexion", "shoulder_extension"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-GARNER-PANDY-2001",
+        "citation": "Garner, B. A., & Pandy, M. G. (2001). Musculoskeletal model of the upper limb based on the visible human male dataset. Computer Methods in Biomechanics and Biomedical Engineering, 4(2), 93-126.",
+        "doi_or_url": "https://doi.org/10.1080/10255840008908000",
+        "table_or_figure": "Table 2 & Figure 6 (Shoulder, elbow, and wrist peak isometric torques)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "LSInputZ",
+      "tau_max_nm": 65.0,
+      "tau_min_nm": -50.0,
+      "flexion_max_nm": 65.0,
+      "extension_max_nm": 50.0,
+      "direction_labels": [
+        "shoulder_internal_rotation",
+        "shoulder_external_rotation"
+      ],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-HOLZBAUR-2005",
+        "citation": "Holzbaur, K. R. S., Murray, W. M., & Delp, S. L. (2005). A model of the upper extremity for simulating musculoskeletal surgery and analyzing neuromuscular control. Annals of Biomedical Engineering, 33(6), 829-840.",
+        "doi_or_url": "https://doi.org/10.1007/s10439-005-3320-7",
+        "table_or_figure": "Table 1 & Figure 4 (Upper-extremity isometric joint moment capacities)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "LWInputX",
+      "tau_max_nm": 16.0,
+      "tau_min_nm": -14.0,
+      "flexion_max_nm": 16.0,
+      "extension_max_nm": 14.0,
+      "direction_labels": ["wrist_ulnar_deviation", "wrist_radial_deviation"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-HOLZBAUR-2005",
+        "citation": "Holzbaur, K. R. S., Murray, W. M., & Delp, S. L. (2005). A model of the upper extremity for simulating musculoskeletal surgery and analyzing neuromuscular control. Annals of Biomedical Engineering, 33(6), 829-840.",
+        "doi_or_url": "https://doi.org/10.1007/s10439-005-3320-7",
+        "table_or_figure": "Table 1 & Figure 4 (Upper-extremity isometric joint moment capacities)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "LWInputY",
+      "tau_max_nm": 24.0,
+      "tau_min_nm": -14.0,
+      "flexion_max_nm": 24.0,
+      "extension_max_nm": 14.0,
+      "direction_labels": ["wrist_flexion", "wrist_extension"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-HOLZBAUR-2005",
+        "citation": "Holzbaur, K. R. S., Murray, W. M., & Delp, S. L. (2005). A model of the upper extremity for simulating musculoskeletal surgery and analyzing neuromuscular control. Annals of Biomedical Engineering, 33(6), 829-840.",
+        "doi_or_url": "https://doi.org/10.1007/s10439-005-3320-7",
+        "table_or_figure": "Table 1 & Figure 4 (Upper-extremity isometric joint moment capacities)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "REInput",
+      "tau_max_nm": 72.0,
+      "tau_min_nm": -48.0,
+      "flexion_max_nm": 72.0,
+      "extension_max_nm": 48.0,
+      "direction_labels": ["elbow_flexion", "elbow_extension"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-HOLZBAUR-2005",
+        "citation": "Holzbaur, K. R. S., Murray, W. M., & Delp, S. L. (2005). A model of the upper extremity for simulating musculoskeletal surgery and analyzing neuromuscular control. Annals of Biomedical Engineering, 33(6), 829-840.",
+        "doi_or_url": "https://doi.org/10.1007/s10439-005-3320-7",
+        "table_or_figure": "Table 1 & Figure 4 (Upper-extremity isometric joint moment capacities)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "RFInput",
+      "tau_max_nm": 14.0,
+      "tau_min_nm": -14.0,
+      "flexion_max_nm": 14.0,
+      "extension_max_nm": 14.0,
+      "direction_labels": ["forearm_pronation", "forearm_supination"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-HOLZBAUR-2005",
+        "citation": "Holzbaur, K. R. S., Murray, W. M., & Delp, S. L. (2005). A model of the upper extremity for simulating musculoskeletal surgery and analyzing neuromuscular control. Annals of Biomedical Engineering, 33(6), 829-840.",
+        "doi_or_url": "https://doi.org/10.1007/s10439-005-3320-7",
+        "table_or_figure": "Table 1 & Figure 4 (Upper-extremity isometric joint moment capacities)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "RScapInputX",
+      "tau_max_nm": 65.0,
+      "tau_min_nm": -65.0,
+      "flexion_max_nm": 65.0,
+      "extension_max_nm": 65.0,
+      "direction_labels": ["scapula_elevation", "scapula_depression"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED scapulothoracic capacity for RScapInputX (lumped sternoclavicular/acromioclavicular coordinate; unverified)."
+    },
+    {
+      "coordinate": "RScapInputY",
+      "tau_max_nm": 70.0,
+      "tau_min_nm": -70.0,
+      "flexion_max_nm": 70.0,
+      "extension_max_nm": 70.0,
+      "direction_labels": ["scapula_protraction", "scapula_retraction"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED scapulothoracic capacity for RScapInputY (lumped sternoclavicular/acromioclavicular coordinate; unverified)."
+    },
+    {
+      "coordinate": "RSInputX",
+      "tau_max_nm": 95.0,
+      "tau_min_nm": -85.0,
+      "flexion_max_nm": 95.0,
+      "extension_max_nm": 85.0,
+      "direction_labels": ["shoulder_abduction", "shoulder_adduction"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-GARNER-PANDY-2001",
+        "citation": "Garner, B. A., & Pandy, M. G. (2001). Musculoskeletal model of the upper limb based on the visible human male dataset. Computer Methods in Biomechanics and Biomedical Engineering, 4(2), 93-126.",
+        "doi_or_url": "https://doi.org/10.1080/10255840008908000",
+        "table_or_figure": "Table 2 & Figure 6 (Shoulder, elbow, and wrist peak isometric torques)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "RSInputY",
+      "tau_max_nm": 105.0,
+      "tau_min_nm": -80.0,
+      "flexion_max_nm": 105.0,
+      "extension_max_nm": 80.0,
+      "direction_labels": ["shoulder_flexion", "shoulder_extension"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-GARNER-PANDY-2001",
+        "citation": "Garner, B. A., & Pandy, M. G. (2001). Musculoskeletal model of the upper limb based on the visible human male dataset. Computer Methods in Biomechanics and Biomedical Engineering, 4(2), 93-126.",
+        "doi_or_url": "https://doi.org/10.1080/10255840008908000",
+        "table_or_figure": "Table 2 & Figure 6 (Shoulder, elbow, and wrist peak isometric torques)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "RSInputZ",
+      "tau_max_nm": 65.0,
+      "tau_min_nm": -50.0,
+      "flexion_max_nm": 65.0,
+      "extension_max_nm": 50.0,
+      "direction_labels": [
+        "shoulder_internal_rotation",
+        "shoulder_external_rotation"
+      ],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-HOLZBAUR-2005",
+        "citation": "Holzbaur, K. R. S., Murray, W. M., & Delp, S. L. (2005). A model of the upper extremity for simulating musculoskeletal surgery and analyzing neuromuscular control. Annals of Biomedical Engineering, 33(6), 829-840.",
+        "doi_or_url": "https://doi.org/10.1007/s10439-005-3320-7",
+        "table_or_figure": "Table 1 & Figure 4 (Upper-extremity isometric joint moment capacities)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "RWInputX",
+      "tau_max_nm": 16.0,
+      "tau_min_nm": -14.0,
+      "flexion_max_nm": 16.0,
+      "extension_max_nm": 14.0,
+      "direction_labels": ["wrist_ulnar_deviation", "wrist_radial_deviation"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-HOLZBAUR-2005",
+        "citation": "Holzbaur, K. R. S., Murray, W. M., & Delp, S. L. (2005). A model of the upper extremity for simulating musculoskeletal surgery and analyzing neuromuscular control. Annals of Biomedical Engineering, 33(6), 829-840.",
+        "doi_or_url": "https://doi.org/10.1007/s10439-005-3320-7",
+        "table_or_figure": "Table 1 & Figure 4 (Upper-extremity isometric joint moment capacities)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "RWInputY",
+      "tau_max_nm": 24.0,
+      "tau_min_nm": -14.0,
+      "flexion_max_nm": 24.0,
+      "extension_max_nm": 14.0,
+      "direction_labels": ["wrist_flexion", "wrist_extension"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-HOLZBAUR-2005",
+        "citation": "Holzbaur, K. R. S., Murray, W. M., & Delp, S. L. (2005). A model of the upper extremity for simulating musculoskeletal surgery and analyzing neuromuscular control. Annals of Biomedical Engineering, 33(6), 829-840.",
+        "doi_or_url": "https://doi.org/10.1007/s10439-005-3320-7",
+        "table_or_figure": "Table 1 & Figure 4 (Upper-extremity isometric joint moment capacities)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "NeckInputX",
+      "tau_max_nm": 35.0,
+      "tau_min_nm": -35.0,
+      "flexion_max_nm": 35.0,
+      "extension_max_nm": 35.0,
+      "direction_labels": ["neck_lateral_bend_pos", "neck_lateral_bend_neg"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED cervical torque capacity for NeckInputX (auxiliary head-stabilization coordinate; unverified)."
+    },
+    {
+      "coordinate": "NeckInputY",
+      "tau_max_nm": 45.0,
+      "tau_min_nm": -30.0,
+      "flexion_max_nm": 45.0,
+      "extension_max_nm": 30.0,
+      "direction_labels": ["neck_extension", "neck_flexion"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED cervical torque capacity for NeckInputY (auxiliary head-stabilization coordinate; unverified)."
+    },
+    {
+      "coordinate": "NeckInputZ",
+      "tau_max_nm": 25.0,
+      "tau_min_nm": -25.0,
+      "flexion_max_nm": 25.0,
+      "extension_max_nm": 25.0,
+      "direction_labels": [
+        "neck_axial_rotation_pos",
+        "neck_axial_rotation_neg"
+      ],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED cervical torque capacity for NeckInputZ (auxiliary head-stabilization coordinate; unverified)."
+    },
+    {
+      "coordinate": "hip_flexion_r",
+      "tau_max_nm": 165.0,
+      "tau_min_nm": -210.0,
+      "flexion_max_nm": 165.0,
+      "extension_max_nm": 210.0,
+      "direction_labels": ["hip_flexion", "hip_extension"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ANDERSON-2007",
+        "citation": "Anderson, D. E., Madigan, M. L., & Nussbaum, M. A. (2007). Maximum voluntary joint torque as a function of joint angle and angular velocity: Model development and application to the lower limb. Journal of Biomechanics, 40(14), 3105-3113.",
+        "doi_or_url": "https://doi.org/10.1016/j.jbiomech.2007.03.022",
+        "table_or_figure": "Table 2 (Maximum voluntary isometric torque parameters for hip, knee, and ankle)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "hip_adduction_r",
+      "tau_max_nm": 135.0,
+      "tau_min_nm": -145.0,
+      "flexion_max_nm": 135.0,
+      "extension_max_nm": 145.0,
+      "direction_labels": ["hip_adduction", "hip_abduction"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-CAHALAN-1989",
+        "citation": "Cahalan, T. D., Johnson, M. E., Liu, S., & Chao, E. Y. S. (1989). Quantitative measurements of hip strength in different age groups. Clinical Orthopaedics and Related Research, 246, 136-145.",
+        "doi_or_url": "https://doi.org/10.1097/00003086-198909000-00022",
+        "table_or_figure": "Table 2 (Isometric hip flexion, extension, abduction, adduction, and rotation strength)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "hip_rotation_r",
+      "tau_max_nm": 70.0,
+      "tau_min_nm": -65.0,
+      "flexion_max_nm": 70.0,
+      "extension_max_nm": 65.0,
+      "direction_labels": ["hip_internal_rotation", "hip_external_rotation"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-CAHALAN-1989",
+        "citation": "Cahalan, T. D., Johnson, M. E., Liu, S., & Chao, E. Y. S. (1989). Quantitative measurements of hip strength in different age groups. Clinical Orthopaedics and Related Research, 246, 136-145.",
+        "doi_or_url": "https://doi.org/10.1097/00003086-198909000-00022",
+        "table_or_figure": "Table 2 (Isometric hip flexion, extension, abduction, adduction, and rotation strength)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "knee_angle_r",
+      "tau_max_nm": 145.0,
+      "tau_min_nm": -245.0,
+      "flexion_max_nm": 145.0,
+      "extension_max_nm": 245.0,
+      "direction_labels": ["knee_flexion", "knee_extension"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ANDERSON-2007",
+        "citation": "Anderson, D. E., Madigan, M. L., & Nussbaum, M. A. (2007). Maximum voluntary joint torque as a function of joint angle and angular velocity: Model development and application to the lower limb. Journal of Biomechanics, 40(14), 3105-3113.",
+        "doi_or_url": "https://doi.org/10.1016/j.jbiomech.2007.03.022",
+        "table_or_figure": "Table 2 (Maximum voluntary isometric torque parameters for hip, knee, and ankle)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "ankle_angle_r",
+      "tau_max_nm": 55.0,
+      "tau_min_nm": -155.0,
+      "flexion_max_nm": 55.0,
+      "extension_max_nm": 155.0,
+      "direction_labels": ["ankle_dorsiflexion", "ankle_plantarflexion"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ANDERSON-2007",
+        "citation": "Anderson, D. E., Madigan, M. L., & Nussbaum, M. A. (2007). Maximum voluntary joint torque as a function of joint angle and angular velocity: Model development and application to the lower limb. Journal of Biomechanics, 40(14), 3105-3113.",
+        "doi_or_url": "https://doi.org/10.1016/j.jbiomech.2007.03.022",
+        "table_or_figure": "Table 2 (Maximum voluntary isometric torque parameters for hip, knee, and ankle)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "subtalar_angle_r",
+      "tau_max_nm": 45.0,
+      "tau_min_nm": -40.0,
+      "flexion_max_nm": 45.0,
+      "extension_max_nm": 40.0,
+      "direction_labels": ["subtalar_inversion", "subtalar_eversion"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED subtalar inversion/eversion torque capacity for subtalar_angle_r (unverified population prior)."
+    },
+    {
+      "coordinate": "mtp_angle_r",
+      "tau_max_nm": 25.0,
+      "tau_min_nm": -25.0,
+      "flexion_max_nm": 25.0,
+      "extension_max_nm": 25.0,
+      "direction_labels": ["mtp_dorsiflexion", "mtp_plantarflexion"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED metatarsophalangeal torque capacity for mtp_angle_r (unverified population prior)."
+    },
+    {
+      "coordinate": "hip_flexion_l",
+      "tau_max_nm": 165.0,
+      "tau_min_nm": -210.0,
+      "flexion_max_nm": 165.0,
+      "extension_max_nm": 210.0,
+      "direction_labels": ["hip_flexion", "hip_extension"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ANDERSON-2007",
+        "citation": "Anderson, D. E., Madigan, M. L., & Nussbaum, M. A. (2007). Maximum voluntary joint torque as a function of joint angle and angular velocity: Model development and application to the lower limb. Journal of Biomechanics, 40(14), 3105-3113.",
+        "doi_or_url": "https://doi.org/10.1016/j.jbiomech.2007.03.022",
+        "table_or_figure": "Table 2 (Maximum voluntary isometric torque parameters for hip, knee, and ankle)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "hip_adduction_l",
+      "tau_max_nm": 135.0,
+      "tau_min_nm": -145.0,
+      "flexion_max_nm": 135.0,
+      "extension_max_nm": 145.0,
+      "direction_labels": ["hip_adduction", "hip_abduction"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-CAHALAN-1989",
+        "citation": "Cahalan, T. D., Johnson, M. E., Liu, S., & Chao, E. Y. S. (1989). Quantitative measurements of hip strength in different age groups. Clinical Orthopaedics and Related Research, 246, 136-145.",
+        "doi_or_url": "https://doi.org/10.1097/00003086-198909000-00022",
+        "table_or_figure": "Table 2 (Isometric hip flexion, extension, abduction, adduction, and rotation strength)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "hip_rotation_l",
+      "tau_max_nm": 70.0,
+      "tau_min_nm": -65.0,
+      "flexion_max_nm": 70.0,
+      "extension_max_nm": 65.0,
+      "direction_labels": ["hip_internal_rotation", "hip_external_rotation"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-CAHALAN-1989",
+        "citation": "Cahalan, T. D., Johnson, M. E., Liu, S., & Chao, E. Y. S. (1989). Quantitative measurements of hip strength in different age groups. Clinical Orthopaedics and Related Research, 246, 136-145.",
+        "doi_or_url": "https://doi.org/10.1097/00003086-198909000-00022",
+        "table_or_figure": "Table 2 (Isometric hip flexion, extension, abduction, adduction, and rotation strength)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "knee_angle_l",
+      "tau_max_nm": 145.0,
+      "tau_min_nm": -245.0,
+      "flexion_max_nm": 145.0,
+      "extension_max_nm": 245.0,
+      "direction_labels": ["knee_flexion", "knee_extension"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ANDERSON-2007",
+        "citation": "Anderson, D. E., Madigan, M. L., & Nussbaum, M. A. (2007). Maximum voluntary joint torque as a function of joint angle and angular velocity: Model development and application to the lower limb. Journal of Biomechanics, 40(14), 3105-3113.",
+        "doi_or_url": "https://doi.org/10.1016/j.jbiomech.2007.03.022",
+        "table_or_figure": "Table 2 (Maximum voluntary isometric torque parameters for hip, knee, and ankle)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "ankle_angle_l",
+      "tau_max_nm": 55.0,
+      "tau_min_nm": -155.0,
+      "flexion_max_nm": 55.0,
+      "extension_max_nm": 155.0,
+      "direction_labels": ["ankle_dorsiflexion", "ankle_plantarflexion"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ANDERSON-2007",
+        "citation": "Anderson, D. E., Madigan, M. L., & Nussbaum, M. A. (2007). Maximum voluntary joint torque as a function of joint angle and angular velocity: Model development and application to the lower limb. Journal of Biomechanics, 40(14), 3105-3113.",
+        "doi_or_url": "https://doi.org/10.1016/j.jbiomech.2007.03.022",
+        "table_or_figure": "Table 2 (Maximum voluntary isometric torque parameters for hip, knee, and ankle)",
+        "verification_status": "VERIFIED"
+      },
+      "status": "VERIFIED",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "coordinate": "subtalar_angle_l",
+      "tau_max_nm": 45.0,
+      "tau_min_nm": -40.0,
+      "flexion_max_nm": 45.0,
+      "extension_max_nm": 40.0,
+      "direction_labels": ["subtalar_inversion", "subtalar_eversion"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED subtalar inversion/eversion torque capacity for subtalar_angle_l (unverified population prior)."
+    },
+    {
+      "coordinate": "mtp_angle_l",
+      "tau_max_nm": 25.0,
+      "tau_min_nm": -25.0,
+      "flexion_max_nm": 25.0,
+      "extension_max_nm": 25.0,
+      "direction_labels": ["mtp_dorsiflexion", "mtp_plantarflexion"],
+      "force_velocity_params": {
+        "omega_max_rad_s": 12.0,
+        " eccentric_plateau_ratio": 1.4,
+        "hill_a_over_f0": 0.25
+      },
+      "population_descriptor": "Healthy adult male athlete (reference 75.0 kg, 1.78 m)",
+      "scaling_rule": {
+        "rule": "mass_proportional",
+        "formula": "tau_scaled = tau_ref * (mass_kg / reference_mass_kg)",
+        "reference_mass_kg": 75.0,
+        "reference_height_m": 1.78,
+        "citation": "Hof, A. L. (1996). Scaling gait data to body size. Gait & Posture, 4(3), 222-223.",
+        "doi_or_url": "https://doi.org/10.1016/0966-6362(95)01057-2"
+      },
+      "source": {
+        "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+        "citation": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+        "doi_or_url": null,
+        "table_or_figure": null,
+        "verification_status": "UNVERIFIED"
+      },
+      "status": "ASSUMED",
+      "verification_status": "UNVERIFIED",
+      "warning": "ASSUMED metatarsophalangeal torque capacity for mtp_angle_l (unverified population prior)."
+    }
+  ],
+  "citations": [
+    {
+      "id": "CIT-FD-NOISE-100HZ",
+      "reference": "Central second-difference variance propagation: Var((x_{k+1} - 2 x_k + x_{k-1}) / dt^2) = 6 * sigma^2 / dt^4",
+      "doi_or_url": "https://doi.org/10.1137/1.9780898717921",
+      "quoted_claim": "For uncorrelated position noise sigma = 1 mm at 100 Hz (dt = 0.01 s), RMS acceleration noise is sqrt(6) * sigma / dt^2 = 24.4949 m/s^2.",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "CIT-FEATHERSTONE-RBDA-2008",
+      "reference": "Featherstone, R. (2008). Rigid Body Dynamics Algorithms. Springer, Ch. 8 (Closed-Loop Systems).",
+      "doi_or_url": "https://doi.org/10.1007/978-1-4899-7560-7",
+      "quoted_claim": "Loop-closure constraints J_c v = 0 and J_c a + Jdot_c v = 0 induce constraint force multipliers lambda in range(J_c^T) and operational-space inertia Lambda_c = (J_c M^{-1} J_c^T)^{-1}.",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "CIT-BOYD-VANDENBERGHE-2004",
+      "reference": "Boyd, S., & Vandenberghe, L. (2004). Convex Optimization. Cambridge University Press, \u00a74.7 and \u00a78.5.1.",
+      "doi_or_url": "https://doi.org/10.1017/CBO9780511804441",
+      "quoted_claim": "Chebyshev center maximizes inscribed ball radius r subject to a_i^T z + r ||a_i||_* <= b_i; Pareto optimal frontier is traced by epsilon-constraint convex programs.",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "CIT-MURRAY-LI-SASTRY-1994",
+      "reference": "Murray, R. M., Li, Z., & Sastry, S. S. (1994). A Mathematical Introduction to Robotic Manipulation. CRC Press, Ch. 5.",
+      "doi_or_url": "https://doi.org/10.1201/9781315136370",
+      "quoted_claim": "The grasp map G maps contact wrenches to object net wrench W_net = G W_c; internal grasping forces lie in ker(G) and cause zero net object motion.",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "CIT-HOLZBAUR-2005",
+      "reference": "Holzbaur, K. R. S., Murray, W. M., & Delp, S. L. (2005). A model of the upper extremity for simulating musculoskeletal surgery and analyzing neuromuscular control. Annals of Biomedical Engineering, 33(6), 829-840.",
+      "doi_or_url": "https://doi.org/10.1007/s10439-005-3320-7",
+      "quoted_claim": "Peak isometric upper-extremity joint moments across shoulder, elbow, forearm, and wrist degrees of freedom.",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "CIT-GARNER-PANDY-2001",
+      "reference": "Garner, B. A., & Pandy, M. G. (2001). Musculoskeletal model of the upper limb based on the visible human male dataset. Computer Methods in Biomechanics and Biomedical Engineering, 4(2), 93-126.",
+      "doi_or_url": "https://doi.org/10.1080/10255840008908000",
+      "quoted_claim": "Upper-limb isometric torque-angle curves for shoulder abduction/adduction, flexion/extension, and elbow flexion/extension.",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "CIT-CAHALAN-1989",
+      "reference": "Cahalan, T. D., Johnson, M. E., Liu, S., & Chao, E. Y. S. (1989). Quantitative measurements of hip strength in different age groups. Clinical Orthopaedics and Related Research, 246, 136-145.",
+      "doi_or_url": "https://doi.org/10.1097/00003086-198909000-00022",
+      "quoted_claim": "Isometric hip flexion, extension, abduction, adduction, and internal/external rotation peak torque capacities in healthy adult males.",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "CIT-ANDERSON-2007",
+      "reference": "Anderson, D. E., Madigan, M. L., & Nussbaum, M. A. (2007). Maximum voluntary joint torque as a function of joint angle and angular velocity: Model development and application to the lower limb. Journal of Biomechanics, 40(14), 3105-3113.",
+      "doi_or_url": "https://doi.org/10.1016/j.jbiomech.2007.03.022",
+      "quoted_claim": "Maximum voluntary isometric joint torque model parameters for hip, knee, and ankle flexion/extension.",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "CIT-KUMAR-1996",
+      "reference": "Kumar, S. (1996). Isolated planar trunk strength measurement in normals: Part III\u2014Results and database. International Journal of Industrial Ergonomics, 17(2), 103-111.",
+      "doi_or_url": "https://doi.org/10.1016/0169-8141(95)00042-9",
+      "quoted_claim": "Planar and axial isometric trunk strength database for flexion, extension, lateral bending, and axial rotation.",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "id": "CIT-ASSUMED-AUXILIARY-PRIOR",
+      "reference": "Assumed auxiliary population prior for uncalibrated or composite coordinate slot",
+      "doi_or_url": null,
+      "quoted_claim": "Explicitly marked ASSUMED/UNVERIFIED auxiliary joint capacity bounds requiring UI warning disclosure.",
+      "verification_status": "UNVERIFIED"
+    },
+    {
+      "id": "CIT-THORNTON-2025",
+      "reference": "Proposal citation: 'Thornton 2025' hand-share percentage claim",
+      "doi_or_url": null,
+      "quoted_claim": "Unverified percentage hand-load share figures from v1 proposal; excluded from all registry statements and priors.",
+      "verification_status": "UNVERIFIED"
+    },
+    {
+      "id": "CIT-MEHTA-2024",
+      "reference": "Proposal citation: 'Mehta 2024' hand-split percentage claim",
+      "doi_or_url": null,
+      "quoted_claim": "Unverified percentage hand-load share figures from v1 proposal; excluded from all registry statements and priors.",
+      "verification_status": "UNVERIFIED"
+    },
+    {
+      "id": "CIT-MDPI-GRIP-UNSPECIFIED",
+      "reference": "Proposal citation: unnamed 'MDPI instrumented grip study'",
+      "doi_or_url": null,
+      "quoted_claim": "Underspecified reference without author, year, or DOI; removed from specification.",
+      "verification_status": "REMOVED"
+    },
+    {
+      "id": "CIT-CHOI-PARK-2020",
+      "reference": "Proposal citation: 'Choi & Park 2020' instrumented grip force study",
+      "doi_or_url": null,
+      "quoted_claim": "Sensor layout and grip handle geometry not verified against bare-club 6-D wrench decomposition; excluded from active priors.",
+      "verification_status": "UNVERIFIED"
+    },
+    {
+      "id": "CIT-SOROKIN-2025",
+      "reference": "Proposal citation: 'Sorokin 2025'",
+      "doi_or_url": null,
+      "quoted_claim": "No archival publication or DOI verified; excluded from active priors.",
+      "verification_status": "UNVERIFIED"
+    },
+    {
+      "id": "CIT-SPAR-UNVERIFIED",
+      "reference": "Proposal citation: 'SPAR' reference",
+      "doi_or_url": null,
+      "quoted_claim": "Unverified citation artifact from v1 proposal; removed.",
+      "verification_status": "REMOVED"
+    },
+    {
+      "id": "CIT-BOSCH-DEAD-ZONE",
+      "reference": "Proposal citation: 'Bosch 15-40 ms neuromuscular dead zone'",
+      "doi_or_url": null,
+      "quoted_claim": "Unverified 15-40 ms dead-zone numerical bound; excluded from all registry statements.",
+      "verification_status": "UNVERIFIED"
+    },
+    {
+      "id": "CIT-NESBIT-SERRANO-2005",
+      "reference": "Nesbit, S. M., & Serrano, M. (2005). Work and power analysis of the golf swing. Journal of Sports Science and Medicine, 4(4), 499-519.",
+      "doi_or_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3899668/",
+      "quoted_claim": "Model-conditional work analysis on a coupled grip model; the v1 proposal's 'two-thirds' lead/trail split figure is not an identifiable bare-club hand-split measurement and remains UNVERIFIED for hand-split priors.",
+      "verification_status": "UNVERIFIED"
+    }
+  ]
+}
