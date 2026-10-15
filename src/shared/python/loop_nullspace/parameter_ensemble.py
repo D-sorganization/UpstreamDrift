@@ -331,12 +331,12 @@ def identifiability_basis(
     )
 
 
-def _qr_diagonal(scaled: Array) -> tuple[Array, Array]:
+def _qr_diagonal(scaled: Array) -> tuple[Array, np.ndarray[Any, np.dtype[np.intp]]]:
     """``|diag R|`` and the column pivots of a column-pivoted QR."""
     if scaled.shape[0] == 0:
-        return np.zeros(1), np.arange(scaled.shape[1])
+        return np.zeros(1), np.arange(scaled.shape[1], dtype=np.intp)
     r, pivots = qr(scaled, mode="r", pivoting=True)
-    return np.abs(np.diag(r)), pivots
+    return np.abs(np.diag(r)), np.asarray(pivots, dtype=np.intp)
 
 
 def stacked_unactuated_regressor(
@@ -536,7 +536,10 @@ class ParameterSensitivityReport:
 
 def _class_name(series: EnvelopeSeries, t: int, j: int) -> str:
     cls = series.sign_class[t]
-    return "NONE" if not cls or cls[j] is None else cls[j].name
+    if not cls:
+        return "NONE"
+    entry = cls[j]
+    return "NONE" if entry is None else entry.name
 
 
 def _stats(values: Array) -> tuple[float | None, float | None, float | None]:
