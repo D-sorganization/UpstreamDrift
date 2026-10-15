@@ -240,8 +240,24 @@ Implementation notes (Pinocchio reference, #12558):
 
 ```python
 def admit(trajectory: Sequence[ClosedLoopSnapshot], *, gates: AdmissionGates,
-          repair: Literal["none", "project_to_closure"] = "none") -> AdmissionReport
+          times: ArrayLike, plant: ClosurePlant | None = None,
+          repair: Literal["none", "project_to_closure"] = "none",
+          rebuild: Callable[[Array, Array, Array], ClosedLoopSnapshot] | None = None,
+          ) -> AdmissionReport
 ```
+
+`times` holds one time stamp per frame. `plant` supplies the position-level
+residual `Phi(q)` (the `ClosurePlant` of `project_to_closure`); a snapshot
+carries no position residual. Without a plant the gate rejects unless
+`gates.require_position` is `False`, an explicit and recorded skip of the
+position level. `rebuild(q, v, a)` re-creates a snapshot at a repaired state and
+is required, together with `plant`, when `repair="project_to_closure"`.
+
+Repair reuses `project_to_closure` on frames failing at the position or
+velocity level, then projects the acceleration onto the tangent set of the
+projected state, `a' = a - J_c^+ (J_c a + Jdot_v)`, and re-evaluates. Every
+correction (`dq`, `dv`, `da` norms and the before and after states) is recorded.
+A frame failing only at the acceleration level is never repaired.
 
 `AdmissionReport` carries per-frame scaled `Phi`, `Phi_dot`, `Phi_ddot`
 residuals, derivative method and noise floor, time-synchronisation result,
@@ -250,7 +266,9 @@ contact-mode consistency and a verdict `ADMITTED`, `REJECTED(reasons)` or
 time. Postcondition: `AdmittedTrajectory` is constructible only from an
 `ADMITTED` or `REPAIRED` report. Residual scaling: position `Phi` by the
 characteristic length, velocity by length over time, acceleration by length
-over time squared. Default gate: scaled residual below `1e-6` at each level.
+over time squared. Default gate: scaled residual below `1e-6` at each level. The characteristic
+scales default to `L = 1 m` and `T = 1 s` (`length_scale_m`, `time_scale_s`);
+callers should pass model scales.
 Failing frames are named by index.
 
 ## NSX-15 Decomposition (#12560)
@@ -274,6 +292,18 @@ def min_metric_torque(snapshot, W: np.ndarray | AllocationMetric) -> np.ndarray
 - `min_metric_torque` returns `tau = W^-1 S J_c^T lambda`-form minimiser of
   `tau^T W tau` subject to the equality; `W = M^-1` is allowed only as the
   labelled metric `C-METRIC-MINV`.
+- Implementation notes (`loop_nullspace/decomposition.py`): `AllocationMetric`
+  is a labelled SPD matrix on the actuated torques (`identity`, `inverse_mass`
+  for `C-METRIC-MINV`; a bare matrix is recorded as `USER_DECLARED`). `x_p` is
+  the minimum-metric-torque particular solution, with minimum scaled norm among
+  those. `zero_side_solve` resolves the side from coordinate-name prefixes
+  (`lead` and `club`; `trail`; `club`) unless `indices=` is given, reports the
+  residual in physical (`residual`) and characteristic (`residual_scaled`)
+  units, and records `damping`. `dimension_accounting` gives the counts without
+  requiring a balanced state; `decompose` raises `BalanceInconsistentError`
+  (a `ValueError`) when the unactuated rows cannot be balanced.
+  `decompose_trajectory`, `zero_side_trajectory` and
+  `min_metric_torque_trajectory` accept only an `AdmittedTrajectory` (NSX-14).
 - Goldens: all four planar variants (`dimensions`, `zero_side`,
   `min_metric_torque`). Dimension identity
   `nullity = multiplier_gauge + attainable_torque_variation` holds when
@@ -442,8 +472,15 @@ golden `closure_convention`.
 Each implements the NSX-13 adapter methods and passes canonical equality with
 Pinocchio on states projected by `project_to_closure` to `1e-6` scaled.
 MuJoCo (NSX-51): hard-KKT evaluation, drift method recorded in provenance
-(finite difference declared). MyoSuite (NSX-52): reuses the MuJoCo path,
-records `kkt_regularization`, `FULL` only when 0. Drake (NSX-53): native
+(finite difference declared). MuJoCo declares `CLOSED_LOOP_SNAPSHOT` FULL from `mj_fullM`,
+`qfrc_bias`, the weld site Jacobians and a central-difference drift
+(`drift=central_finite_difference` in the model provenance); stock soft-weld
+stepping is the separate divergence entry `mujoco-stock-soft-weld-vs-hard-kkt`.
+The cross-engine test holds `M`, `h`, `J_c` and `Jdot_v` to 1e-11, 1e-12 and 1e-8
+scaled (measured 2e-14, 3e-15, 3e-9). MyoSuite (NSX-52, `MyoSuiteForceAdapter`): subclasses
+`MujocoForceAdapter` (no second implementation), records
+`kkt_regularization=<value>` in the model provenance (`name=myosuite`), and is
+`FULL` only while that value is exactly 0, else `NONE`. Drake (NSX-53): native
 adapter, explicit `from pydrake.X import Y` imports, no module-level mocks.
 OpenSim (NSX-54): delegates to `OpenSimFullBodyParityAdapter`.
 

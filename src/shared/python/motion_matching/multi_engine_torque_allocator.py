@@ -28,6 +28,11 @@ from numpy.typing import NDArray
 
 from src.shared.python.contracts import require
 from src.shared.python.engine_core.capabilities import Capability, CapabilityLevel
+from src.shared.python.loop_nullspace.contracts import (
+    ClosureKind,
+    LoopTopology,
+    SpatialInertia,
+)
 from src.shared.python.loop_nullspace.snapshot import (
     canonical_closure_jacobian,
     parity_effort,
@@ -52,6 +57,7 @@ class EngineType(str, Enum):
     DRAKE = "drake"
     OPENSIM = "opensim"
     SIMSCAPE = "simscape"
+    MYOSUITE = "myosuite"
 
 
 @dataclass(frozen=True)
@@ -195,27 +201,103 @@ class MujocoForceAdapter:
     """MuJoCo adapter for full-body inverse dynamics and contact Jacobians."""
 
     def __init__(self, spec_bytes: bytes) -> None:
-        from src.engines.physics_engines.mujoco.python.full_body_model import (
-            NativeMujocoFullBodyModel,
-        )
-
-        self._model = NativeMujocoFullBodyModel(spec_bytes)
+        self._model = self._make_model(spec_bytes)
         self._mj = self._model._mj
         mj_model = self._model.model
+        self._nq = int(mj_model.nq)
         self._nv = int(mj_model.nv)
         self._actuated_indices = list(range(6, self._nv))
         self._n_spheres = len(self._model._spheres)
         self._model_hash = getattr(self._model, "model_sha256", "")
-        self._coordinate_order = tuple(getattr(self._model, "coordinate_order", ()))
+        # State vectors use MuJoCo dof order, which need not be spec order.
+        self._coordinate_order = self._model.native_coordinate_order
         self._contact_names = tuple(getattr(self._model, "_spheres", {}).keys())
+
+    def _make_model(self, spec_bytes: bytes) -> Any:
+        """Native model this adapter drives; subclasses supply another runtime."""
+        from src.engines.physics_engines.mujoco.python.full_body_model import (
+            NativeMujocoFullBodyModel,
+        )
+
+        return NativeMujocoFullBodyModel(spec_bytes)
 
     @property
     def engine_type(self) -> EngineType:
         return EngineType.MUJOCO
 
     def capability(self, capability: Capability) -> CapabilityLevel:
-        """``CLOSED_LOOP_SNAPSHOT`` is not yet implemented (NSX-51)."""
+        """``CLOSED_LOOP_SNAPSHOT`` is FULL by hard-KKT evaluation (NSX-51).
+
+        ``M`` and ``h`` come from ``mj_fullM`` and ``qfrc_bias``, the closure
+        rows from the weld site Jacobians, and the drift from a declared
+        central finite difference (:attr:`closure_drift_method`).  Nothing is
+        read from stock soft-constraint stepping, whose solref/solimp
+        compliance has its own divergence-registry entry.  Everything else is
+        ``NONE`` at this boundary.
+        """
+        if capability is Capability.CLOSED_LOOP_SNAPSHOT:
+            return CapabilityLevel.FULL
         return CapabilityLevel.NONE
+
+    # -- closed-loop snapshot capability (NSX-51, #12579) -------------------
+
+    closure_drift_method = "central_finite_difference"
+    """How :meth:`compute_closure_drift` obtains ``Jdot v`` (recorded in provenance)."""
+
+    @property
+    def native_closure_convention(self) -> Any:
+        """Layout of :meth:`compute_grip_jacobian` rows (NSX-02 constant)."""
+        from src.engines.physics_engines.mujoco.python.native_model import (
+            CLOSURE_CONVENTION,
+        )
+
+        return CLOSURE_CONVENTION
+
+    def compute_closure_drift(self, q: Array, v: Array) -> Array:
+        """Native ``Jdot v`` (6,) of :meth:`compute_grip_jacobian` at ``(q, v)``.
+
+        Central finite difference of the weld Jacobian along ``v`` (MuJoCo has
+        no analytic derivative; ``mj_jacDot`` is a first-order difference).
+        Preconditions: finite vectors of length ``nv``.  Postcondition: finite
+        6-vector in the WORLD frame of :attr:`native_closure_convention`.
+        """
+        configuration = self._checked_vector(q, self._nq, "configuration")
+        velocity = self._checked_vector(v, self._nv, "velocity")
+        drift = self._model.closure_drift_central_difference(configuration, velocity)
+        if drift.shape != (6,) or not np.isfinite(drift).all():
+            raise ValueError("Invalid native weld velocity drift")
+        return drift
+
+    def native_closure_frame(self, q: Array) -> tuple[Array, Array]:
+        """``(R, origin)`` of the native rows: WORLD axes, point ``site_xpos``."""
+        self._prepare_state(q)
+        return np.eye(3), self._model.closure_hand_frame()[1]
+
+    def closure_wrench_frame(self, q: Array) -> tuple[Array, Array]:
+        """Canonical grip frame ``(R world<-grip, origin)``: the hand-side site.
+
+        The club-side site coincides with it on a closed loop.
+        """
+        self._prepare_state(q)
+        return self._model.closure_hand_frame()
+
+    def club_inertia_split(self) -> tuple[SpatialInertia, tuple[SpatialInertia, ...]]:
+        """``(bare club, welded hand solids)`` in the club-side closure frame."""
+        bare, hands = self._model.club_inertia_split()
+        return _spatial(bare), tuple(_spatial(h) for h in hands)
+
+    def closure_topology(self) -> LoopTopology:
+        """Weld topology: hands close the loop onto the club (NSX-13)."""
+        actuated = set(self._actuated_indices)
+        return LoopTopology(
+            closure_kind=ClosureKind.WELD6,
+            closing_side="hands",
+            holding_side="club",
+            actuated_indices=tuple(self._actuated_indices),
+            unactuated_indices=tuple(i for i in range(self._nv) if i not in actuated),
+            loop_support_indices=self._model.closure_path_dof_indices(),
+            coordinate_order=tuple(self._coordinate_order),
+        )
 
     @property
     def nv(self) -> int:
@@ -304,16 +386,39 @@ class MujocoForceAdapter:
     def verify_acceleration_parity(
         self, q: Array, v: Array, tau_effective: Array, a_target: Array
     ) -> float:
-        """Audit the raw equation at this exact state, independent of call order.
+        """``||a_hard_KKT(q, v, tau) - a_target||_inf`` (one semantics, NSX-51).
 
-        tau_effective includes every externally supplied force and reaction.
-        This algebraic audit is not constrained/contact forward replay.
+        ``tau_effective`` is the *applied* effort only (actuators, ground
+        reaction, root residual); the closure reaction ``J^T lambda`` is not
+        part of it.  The acceleration is the exact rigid-weld solve
+        ``M a - J^T lambda = tau - h``, ``J a = -Jdot v`` (zero Tikhonov term,
+        central-difference drift), independent of call order and of stock
+        soft-constraint stepping.  Raises ``ValueError`` on nonfinite input or
+        result.
         """
         effort = self._checked_vector(tau_effective, self._nv, "effective effort")
         target = self._checked_vector(a_target, self._nv, "target acceleration")
         mass, bias = self._mass_and_bias(q, v)
-        a_forward = np.linalg.solve(mass, effort - bias)
+        jac = self.compute_grip_jacobian(q)
+        drift = self.compute_closure_drift(q, v)
+        from src.engines.physics_engines.mujoco.python.native_model import (
+            _solve_kkt_with_multipliers,
+        )
+
+        a_forward, _ = _solve_kkt_with_multipliers(
+            mass, effort - bias, jac, drift, regularization=0.0
+        )
+        if not np.isfinite(a_forward).all():
+            raise ValueError("Native forward acceleration is nonfinite")
         return float(np.max(np.abs(a_forward - target)))
+
+
+def _spatial(inertia: Any) -> SpatialInertia:
+    return SpatialInertia(
+        mass=inertia.mass_kg,
+        com=np.asarray(inertia.com_m),
+        inertia=inertia.inertia_com_kg_m2,
+    )
 
 
 class SyntheticMultibodyFixture:
@@ -440,11 +545,12 @@ class SyntheticMultibodyFixture:
 _AnalyticalMultibodyBase = SyntheticMultibodyFixture
 
 
-class DrakeForceAdapter(SyntheticMultibodyFixture):
-    """Drake multibody adapter with exact spatial inverse dynamics and Jacobians.
+class DrakeSyntheticForceAdapter(SyntheticMultibodyFixture):
+    """Drake synthetic multibody adapter for test fixtures only.
 
-    QUARANTINED FIXTURE: Evaluates analytical spatial Featherstone dynamics
-    conforming to Drake spatial vector conventions for test fixtures.
+    The native adapter is ``DrakeForceAdapter`` in
+    ``engines/physics_engines/drake/python/force_adapter.py`` (NSX-53); this
+    analytical fixture is reachable only with ``allow_synthetic=True``.
     """
 
     def __init__(
@@ -456,16 +562,6 @@ class DrakeForceAdapter(SyntheticMultibodyFixture):
         super().__init__(
             nv=nv, n_spheres=n_spheres, mass_scale=mass_scale, leg_coupling=0.08
         )
-        self._has_pydrake = False
-        try:
-            import pydrake  # type: ignore[import-untyped]  # noqa: F401
-
-            self._has_pydrake = True
-            logger.info("DrakeForceAdapter initialized with live pydrake backend.")
-        except ImportError:
-            logger.info(
-                "DrakeForceAdapter running in analytical multibody mode (pydrake not installed)."
-            )
 
     @property
     def engine_type(self) -> EngineType:
@@ -735,6 +831,13 @@ class MultiEngineTorqueAllocator:
         )
 
 
+def _resolve_spec_path(spec_path: Path | str | None, repo_root: Path) -> Path:
+    """Resolve a full-body spec path, defaulting to v1 and falling back to the
+    repository root for relative paths.  The returned path may not exist."""
+    p = Path(spec_path or "docs/development/full_body_models/full_body_spec_v1.json")
+    return p if p.is_file() else repo_root / p
+
+
 def create_engine_force_adapter(
     engine: EngineType | str,
     spec_path: Path | str | None = None,
@@ -754,11 +857,7 @@ def create_engine_force_adapter(
     if e == EngineType.PINOCCHIO:
         if spec_path is None and allow_synthetic and nv != 41:
             return PinocchioSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
-        p = Path(
-            spec_path or "docs/development/full_body_models/full_body_spec_v1.json"
-        )
-        if not p.is_file():
-            p = repo_root / p
+        p = _resolve_spec_path(spec_path, repo_root)
         if not p.is_file() and allow_synthetic:
             return PinocchioSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
         try:
@@ -774,22 +873,40 @@ def create_engine_force_adapter(
     if e == EngineType.MUJOCO:
         if spec_path is None and allow_synthetic and nv != 41:
             return MujocoSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
+        p = _resolve_spec_path(spec_path, repo_root)
+        if not p.is_file() and allow_synthetic:
+            return MujocoSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
+        require(p.is_file(), f"MuJoCo specification not found: {p}")
+        return MujocoForceAdapter(p.read_bytes())
+    if e == EngineType.MYOSUITE:
+        p = _resolve_spec_path(spec_path, repo_root)
+        require(p.is_file(), f"MyoSuite specification not found: {p}")
+        from src.engines.physics_engines.myosuite.python.force_adapter import (
+            MyoSuiteForceAdapter,
+        )
+
+        return MyoSuiteForceAdapter(p.read_bytes())
+    if e == EngineType.DRAKE:
+        if spec_path is None and allow_synthetic and nv != 41:
+            return DrakeSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
         p = Path(
             spec_path or "docs/development/full_body_models/full_body_spec_v1.json"
         )
         if not p.is_file():
             p = repo_root / p
         if not p.is_file() and allow_synthetic:
-            return MujocoSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
-        require(p.is_file(), f"MuJoCo specification not found: {p}")
-        return MujocoForceAdapter(p.read_bytes())
-    if e == EngineType.DRAKE:
-        if not allow_synthetic:
-            raise RuntimeError(
-                "Native Drake MultibodyPlant force adapter is not yet registered for production; "
-                "synthetic fixture is quarantined (allow_synthetic=True required)."
+            return DrakeSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
+        require(p.is_file(), f"Drake specification not found: {p}")
+        try:
+            from src.engines.physics_engines.drake.python.force_adapter import (
+                DrakeForceAdapter,
             )
-        return DrakeForceAdapter(nv=nv, n_spheres=n_spheres)
+
+            return DrakeForceAdapter(p.read_bytes())
+        except ImportError:
+            if allow_synthetic:
+                return DrakeSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
+            raise
     if e == EngineType.OPENSIM:
         if not allow_synthetic:
             raise RuntimeError(

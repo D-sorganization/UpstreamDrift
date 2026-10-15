@@ -26,7 +26,7 @@ from src.engines.physics_engines.pinocchio.python.force_adapter import (
 )
 from src.shared.python.motion_matching.multi_engine_torque_allocator import (
     BaseEngineForceAdapter,
-    DrakeForceAdapter,
+    DrakeSyntheticForceAdapter,
     EngineType,
     MujocoForceAdapter,
     OpenSimForceAdapter,
@@ -39,12 +39,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_quarantine_fails_closed_without_allow_synthetic() -> None:
-    """Unregistered/unbridged native engines must raise RuntimeError when allow_synthetic=False."""
-    with pytest.raises(
-        RuntimeError, match="Drake MultibodyPlant force adapter is not yet registered"
-    ):
-        create_engine_force_adapter(EngineType.DRAKE, allow_synthetic=False)
-
+    """Unregistered/unbridged native engines (not Drake, NSX-53) must raise RuntimeError when allow_synthetic=False."""
     with pytest.raises(
         RuntimeError, match="OpenSim Simbody force adapter is not yet registered"
     ):
@@ -59,7 +54,7 @@ def test_quarantine_fails_closed_without_allow_synthetic() -> None:
 def test_quarantine_permits_synthetic_when_explicitly_flagged() -> None:
     """When allow_synthetic=True, synthetic fixtures instantiate cleanly."""
     drake = create_engine_force_adapter(EngineType.DRAKE, allow_synthetic=True)
-    assert isinstance(drake, DrakeForceAdapter)
+    assert isinstance(drake, DrakeSyntheticForceAdapter)
     assert isinstance(drake, SyntheticMultibodyFixture)
     assert isinstance(drake, BaseEngineForceAdapter)
 
@@ -188,7 +183,7 @@ def test_cli_rejects_synthetic_without_flag(tmp_path: Path) -> None:
         cli_main(
             [
                 "--engine",
-                "drake",
+                "opensim",
                 "--candidate",
                 str(candidate_file),
                 "--out",

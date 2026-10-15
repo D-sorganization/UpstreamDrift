@@ -23,7 +23,7 @@ from src.shared.python.motion_matching.contact_force_allocator import (
 )
 from src.shared.python.motion_matching.multi_engine_torque_allocator import (
     BaseEngineForceAdapter,
-    DrakeForceAdapter,
+    DrakeSyntheticForceAdapter,
     EngineType,
     MujocoForceAdapter,
     MultiEngineTorqueAllocator,
@@ -61,7 +61,7 @@ def test_drake_force_adapter(
     dummy_trajectory: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
 ) -> None:
     time_s, q, v, a = dummy_trajectory
-    adapter = DrakeForceAdapter(nv=44, n_spheres=6)
+    adapter = DrakeSyntheticForceAdapter(nv=44, n_spheres=6)
     assert isinstance(adapter, BaseEngineForceAdapter)
     assert adapter.engine_type == EngineType.DRAKE
     assert adapter.nv == 44
@@ -139,7 +139,7 @@ def test_trail_arm_suppression(
     dummy_trajectory: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
 ) -> None:
     time_s, q, v, a = dummy_trajectory
-    adapter = DrakeForceAdapter(nv=44, n_spheres=6)
+    adapter = DrakeSyntheticForceAdapter(nv=44, n_spheres=6)
     allocator = MultiEngineTorqueAllocator(adapter=adapter)
 
     trail_indices = list(range(18, 27))

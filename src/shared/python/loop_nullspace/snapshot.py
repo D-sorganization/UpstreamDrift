@@ -136,6 +136,24 @@ def _require_full(adapter: Any) -> None:
         )
 
 
+def _provenance_version(adapter: Any) -> str:
+    """Snapshot version tag, plus the drift method when the adapter declares one.
+
+    A closure drift obtained numerically (NSX-51: MuJoCo) is declared by the
+    adapter's ``closure_drift_method`` and recorded as ``;drift=<method>``.  An
+    adapter that exposes ``kkt_regularization`` (MyoSuite, NSX-52) has it
+    recorded as ``;kkt_regularization=<value>``.
+    """
+    method = getattr(adapter, "closure_drift_method", None)
+    regularization = getattr(adapter, "kkt_regularization", None)
+    tag = "closed_loop_snapshot_v1"
+    if method:
+        tag += f";drift={method}"
+    if regularization is not None:
+        tag += f";kkt_regularization={regularization:g}"
+    return tag
+
+
 def snapshot_from_adapter(
     adapter: Any,
     q: ArrayLike,
@@ -190,7 +208,7 @@ def snapshot_from_adapter(
         welded_hand_inertias=tuple(welded),
         model_provenance=ModelProvenance(
             name=adapter.engine_type.value,
-            version="closed_loop_snapshot_v1",
+            version=_provenance_version(adapter),
             content_hash=adapter.model_hash,
         ),
         input_provenance=input_provenance,

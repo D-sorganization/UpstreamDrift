@@ -51,12 +51,42 @@ def test_inverse_dynamics_is_raw_mass_acceleration_plus_bias(native_pair):
 
 
 def test_parity_refreshes_native_state_without_prior_inverse_call(native_pair):
-    adapter, _, model, _, _ = native_pair
+    """Parity is the exact rigid-closure acceleration for the applied effort (NSX-51).
+
+    The target is the hard-KKT solution, built here from raw MuJoCo and numpy,
+    so the audit must refresh its own state and reproduce it.
+    """
+    adapter, mj, model, data, metadata = native_pair
     q = np.linspace(-0.02, 0.03, model.nq)
     v = np.linspace(-0.1, 0.1, model.nv)
-    a = np.linspace(-0.2, 0.2, model.nv)
+    tau = np.linspace(-1.0, 1.0, model.nv)
     mass, bias = _reference(native_pair, q, v)
-    assert adapter.verify_acceleration_parity(q, v, mass @ a + bias, a) < 1e-7
+    sites = [model.site(f"native_closure_{s}").id for s in ("a", "b")]
+    jacs = []
+    for sign in (1.0, -1.0):
+        data.qpos[:] = q + sign * 1e-6 * v
+        mj.mj_fwdPosition(model, data)
+        pair = []
+        for site in sites:
+            jp, jr = np.zeros((3, model.nv)), np.zeros((3, model.nv))
+            mj.mj_jacSite(model, data, jp, jr, site)
+            pair.append(np.vstack([jp, jr]))
+        jacs.append(pair[0] - pair[1])
+    drift = (jacs[0] - jacs[1]) @ v / 2e-6
+    data.qpos[:] = q
+    mj.mj_fwdPosition(model, data)
+    jac = np.zeros((6, model.nv))
+    for site, sign in zip(sites, (1.0, -1.0), strict=True):
+        jp, jr = np.zeros((3, model.nv)), np.zeros((3, model.nv))
+        mj.mj_jacSite(model, data, jp, jr, site)
+        jac += sign * np.vstack([jp, jr])
+    n = model.nv
+    sol = np.linalg.solve(
+        np.block([[mass, -jac.T], [jac, np.zeros((6, 6))]]),
+        np.concatenate([tau - bias, -drift]),
+    )
+    scale = max(1.0, float(np.max(np.abs(sol[:n]))))
+    assert adapter.verify_acceleration_parity(q, v, tau, sol[:n]) / scale < 1e-7
 
 
 def test_fresh_contact_jacobian_matches_native_position_differences(native_pair):

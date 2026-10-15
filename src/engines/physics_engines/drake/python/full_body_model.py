@@ -795,6 +795,91 @@ class FullBodyDrakeModel:
         sol_ordered = sol_raw[self._v_indices]
         return sol_ordered[:, 1:], sol_ordered[:, 0]
 
+    # -- native closed-loop terms for the force adapter (NSX-53, #12581) -----
+
+    def _set_state(self, q: Array, v: Array | None = None) -> None:
+        """Push spec-ordered ``q`` (and ``v``) into the model context."""
+        self.plant.SetPositions(self.context, self.to_plant_positions(q))
+        if v is not None:
+            self.plant.SetVelocities(self.context, self.to_plant_velocities(v))
+
+    def _spec_vector(self, plant_vector: Array) -> Array:
+        """Plant-ordered generalised vector -> spec order."""
+        return np.asarray(plant_vector, dtype=float)[self._v_indices].copy()
+
+    def set_configuration(self, q: Array) -> None:
+        """Set the context positions from spec-ordered ``q``."""
+        self._set_state(q)
+
+    def mass_and_bias(self, q: Array, v: Array) -> tuple[Array, Array]:
+        """Spec-ordered ``(M(q), h(q, v))`` with ``M a + h = tau_applied``.
+
+        ``h = CalcBiasTerm - CalcGravityGeneralizedForces`` is the
+        Coriolis-plus-gravity vector on the same side as Pinocchio's
+        ``nonLinearEffects``.  Postcondition: ``M`` symmetric ``(n, n)``.
+        """
+        self._set_state(q, v)
+        mass_plant = np.asarray(self.plant.CalcMassMatrix(self.context), dtype=float)
+        order = self._v_indices
+        mass = mass_plant[np.ix_(order, order)].copy()
+        bias = self._spec_vector(
+            np.asarray(self.plant.CalcBiasTerm(self.context))
+            - np.asarray(self.plant.CalcGravityGeneralizedForces(self.context))
+        )
+        return mass, bias
+
+    def closure_jacobian_and_drift(self, q: Array, v: Array) -> tuple[Array, Array]:
+        """Native weld ``J`` (6, n) spec columns and ``Jdot v`` (6,).
+
+        Convention: :data:`CLOSURE_CONVENTION` (rows angular; linear, LOCAL in
+        frame ``a``, ``V_b - V_a``).  The drift is Drake's own
+        ``CalcBiasSpatialAcceleration`` of the same spatial Jacobian.
+        """
+        self._set_state(q, v)
+        _, _, jacobian, bias = self._closure_bias_and_jacobian()
+        return self.named_columns(jacobian).copy(), np.asarray(bias, dtype=float)
+
+    def closure_frame_pose(self, q: Array) -> tuple[Array, Array]:
+        """World rotation and origin of closure frame ``a`` (the LOCAL frame)."""
+        self._set_state(q)
+        pose = self.plant.CalcRelativeTransform(
+            self.context, self.plant.world_frame(), self._closure[0]
+        )
+        return (
+            np.array(pose.rotation().matrix(), dtype=float),
+            np.array(pose.translation(), dtype=float),
+        )
+
+    def closure_path_velocity_indices(self) -> tuple[int, ...]:
+        """Spec indices of the coordinates on the tree path between ``a`` and ``b``.
+
+        A joint moves exactly one of the two closure bodies iff it lies on the
+        path; common ancestors cancel in the relative twist.
+        """
+        body_a, body_b = (frame.body().index() for frame in self._closure)
+        path = []
+        for position, name in enumerate(self.names):
+            joint = self._joints[name]
+            moved = self.plant.GetBodiesKinematicallyAffectedBy([joint.index()])
+            if (body_a in moved) != (body_b in moved):
+                path.append(position)
+        return tuple(path)
+
+    def club_inertia_split(self) -> tuple[RigidInertia, tuple[RigidInertia, ...]]:
+        """``(bare club, welded hand solids)`` expressed in closure frame ``b``.
+
+        Body-fixed.  The spec places frame ``b`` at ``placement_b`` in the club
+        body, so the body-frame inertias are moved with its inverse (NSX-01).
+        """
+        to_frame = np.linalg.inv(
+            np.asarray(self.specification["closure"]["placement_b"], dtype=float)
+        )
+        partition = club_solids_partition(self.specification)
+        return (
+            partition.bare_club.expressed_in(to_frame),
+            tuple(h.expressed_in(to_frame) for h in partition.welded_hands.values()),
+        )
+
     def sphere_jacobians(self) -> Array:
         """Jacobian rows of all contact sphere centers in canonical coordinate order."""
         rows = [

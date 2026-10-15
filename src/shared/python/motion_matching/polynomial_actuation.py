@@ -29,6 +29,17 @@ _ROOT_PRIMITIVES = dict(
 )
 
 
+def actuated_coordinate_indices(names: Sequence[str]) -> tuple[int, ...]:
+    """Indices of the actuated (non-root) coordinates in ``names``.
+
+    Precondition: ``names`` contains every name in :data:`ROOT_COORDINATES`.
+    Postcondition: ascending indices of every name not in the root set.
+    """
+    if not set(ROOT_COORDINATES).issubset(names):
+        raise ValueError("Force adapter requires the named unactuated root coordinates")
+    return tuple(i for i, name in enumerate(names) if name not in ROOT_COORDINATES)
+
+
 def _names(values: Sequence[str], label: str) -> tuple[str, ...]:
     result = tuple(values)
     if not result or any(not isinstance(name, str) or not name for name in result):
