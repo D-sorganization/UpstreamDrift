@@ -286,6 +286,41 @@
         "evidence": null
       },
       "activation_issue": null
+    },
+    {
+      "id": "DV-12554",
+      "title": "NSX-05: External Validation Protocol for Closed-Loop Null-Space Exploration (Instrumented Grip, Surface EMG, and Held-Out Swings)",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/12554",
+      "source_snapshot": "source-12554.json",
+      "record": "DV-12554.md",
+      "disposition": "split",
+      "kind": "physical-measurement",
+      "status": "deferred",
+      "rationale": "Falsifying or validating closed-loop hand-split envelopes and prior-conditioned allocations requires physical 6-axis dual-hand instrumented golf grips, synchronized high-speed motion capture, and surface EMG across held-out golfer swings that cannot be synthetically generated.",
+      "prerequisites": [
+        {
+          "name": "Dual-section 6-axis instrumented golf grip with calibrated bare-club mass and inertia properties matching the NSX-01 hand_on_bare_club interface",
+          "evidence": null
+        },
+        {
+          "name": "Synchronized high-speed optical motion capture, bilateral force plates, and surface EMG acquisition rig with pre-declared electromechanical delay observation model",
+          "evidence": null
+        },
+        {
+          "name": "Authorized multi-swing human golfer cohort with disjoint training and held-out test trials under institutional protocol",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Verify net bare-club wrench balance W_L + W_R == W_net^bare within propagated sensor and kinematic noise on held-out swings before evaluating internal hand splits.",
+        "Test whether measured 6-D grip-split coordinates s_1..s_6 lie within NSX-22/NSX-25 feasible envelopes and satisfy pre-registered sign/timing certificates without post-hoc weight tuning.",
+        "Evaluate surface EMG only through a pre-declared activation-proxy observation model, never as direct hand-wrench ground truth."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
     }
   ]
 }

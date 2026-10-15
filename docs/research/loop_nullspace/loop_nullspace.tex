@@ -1,0 +1,718 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\geometry{margin=25mm}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,citecolor=blue!60!black}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\bq}{\mathbf{q}}
+\newcommand{\bv}{\mathbf{v}}
+\newcommand{\ba}{\mathbf{a}}
+\newcommand{\bu}{\mathbf{u}}
+\newcommand{\bx}{\mathbf{x}}
+\newcommand{\bz}{\mathbf{z}}
+\newcommand{\bb}{\mathbf{b}}
+\newcommand{\bh}{\mathbf{h}}
+\newcommand{\bM}{\mathbf{M}}
+\newcommand{\bS}{\mathbf{S}}
+\newcommand{\bJ}{\mathbf{J}}
+\newcommand{\bA}{\mathbf{A}}
+\newcommand{\bG}{\mathbf{G}}
+\newcommand{\bK}{\mathbf{K}}
+\newcommand{\bN}{\mathbf{N}}
+\newcommand{\bP}{\mathbf{P}}
+\newcommand{\bW}{\mathbf{W}}
+\newcommand{\bI}{\mathbf{I}}
+\newcommand{\bLambda}{\boldsymbol{\Lambda}}
+\newcommand{\blambda}{\boldsymbol{\lambda}}
+\newcommand{\btau}{\boldsymbol{\tau}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+
+\title{Closed-Loop Null-Space Exploration (NSX) in Two-Handed Golf Swings:\\
+Invariants, Grasp-Map Split Coordinates, Envelopes and Conic Allocation\\[4pt]
+\large Mathematical Specification and Working Research Reference for UpstreamDrift (\#12549 / Epic \#12593)}
+\author{UpstreamDrift Biomechanics and Estimation Working Reference}
+\date{Revision 2026-10-14 \quad (standalone research and specification record; see \S\ref{sec:governance})}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+A two-handed golf swing forms a closed kinematic chain through the arms, torso
+and club. Even when full-body kinematics $(\bq,\bv,\ba)$ and bare-club inertial
+parameters are known exactly, inverse dynamics determines only the generalized
+load $\bb = \bM(\bq)\ba + \bh(\bq,\bv)$ and the net bare-club wrench; it cannot
+uniquely determine how loads distribute across the left and right hands, across
+actuated joints inside the upper-body loop, or across two feet in stance. This
+specification pins the exact algebra implemented by the Closed-Loop Null-Space
+Exploration (NSX) epic (\#12593): (1) the general equality allocation system
+$\bA\bx = \bb$ with four distinct dimension counts; (2) the three-case
+diagnostic for zero-side solves on overdetermined limb chains; (3) the exact
+invertible $6\times 6$ grasp-map kernel at the canonical grip midpoint frame;
+(4) bare-club Newton--Euler reduction with welded hand solids partitioned out of
+the composite club body; (5) six allocation-invariant quantities with scaled
+residual validity gates; (6) the $c_+/c_-$ gross-power identity proving uniform
+asymmetry is an invariant offset on $\bJ_c\bv = \mathbf{0}$; (7) constrained
+zero-torque and zero-velocity counterfactuals (ZTCF/ZVCF) via the KKT operational
+projector; (8) static versus trajectory-coupled feasible envelopes, Chebyshev
+margins and inclusion-minimal conflict sets; (9) reaction-restriction
+sensitivity ($\texttt{WELD6}\to\texttt{SHAFT\_FREE5}\to\texttt{BALL3}$) on a
+fixed trajectory; and (10) a complete citation audit of the original proposal.
+Every symbolic derivation and numerical golden fixture is verified by SymPy in
+\texttt{docs/research/loop\_nullspace/derivations/generate\_goldens.py}.
+\end{abstract}
+
+\tableofcontents
+
+\section{Status, Governance and Evidence Axes (R1)}
+\label{sec:governance}
+
+This document is an editable standalone research and mathematical specification
+record in the sense of \texttt{AGENTS.md} (``Modeling Reference Documentation'').
+It is not the released engineering design manual, whose canonical editable QMD
+source is \texttt{manuals/upstreamdrift} (governed by
+\texttt{scripts/check\_design\_manual\_governance.py} and tracked under blocker
+\texttt{UP-NSX-loop-nullspace-exploration}).
+
+\paragraph{Binding Rule R1 (Six Independent Evidence Axes).}
+Every user-visible numeric output in NSX is encapsulated in a frozen
+\texttt{QuantityRecord} carrying six orthogonal evidence metadata axes:
+\begin{enumerate}[nosep]
+  \item \texttt{allocation\_dependence} $\in \{\texttt{INVARIANT},
+    \texttt{FAMILY\_DEPENDENT}, \texttt{UNAVAILABLE(reason)}\}$. Here
+    \texttt{INVARIANT} means algebraically constant across all solutions of the
+    admissible equality system $\bA\bx=\bb$ (it does \emph{not} mean empirically
+    measured).
+  \item \texttt{model\_provenance}: specification SHA-256, inertial parameter
+    source, bare-club partition identifier and engine solver mode (e.g.,
+    \texttt{kkt\_regularization}).
+  \item \texttt{input\_provenance}: kinematic source, time-synchronization audit,
+    and differentiation operator with its noise floor.
+  \item \texttt{conventions}: declared mathematical conventions (e.g.,
+    \texttt{C-FRAME-GRIP}, \texttt{C-METRIC-CAPACITY},
+    \texttt{C-METRIC-IDENTITY}, \texttt{C-METRIC-MINV}). Conventions are
+    analyst choices, not physiological hypotheses.
+  \item \texttt{hypotheses}: physiological priors (e.g.,
+    \texttt{H-TORQUE-CAPACITY-BOX}, \texttt{H-GRIP-FRICTION-CONE}). By contract,
+    \texttt{FAMILY\_DEPENDENT} outputs require at least one hypothesis, whereas
+    \texttt{INVARIANT} outputs forbid hypotheses.
+  \item \texttt{validation\_status}: \texttt{UNVALIDATED} until compared against
+    held-out physical measurements under protocol \texttt{DV-12554}.
+\end{enumerate}
+
+\section{General Allocation Equation and Four Dimension Counts (R2)}
+\label{sec:allocation_equation}
+
+Let $\bq \in \mathcal{Q}$, $\bv \in \R^{n_v}$ and $\ba \in \R^{n_v}$ denote the
+admitted configuration, generalized velocity and generalized acceleration of the
+multibody tree with one hand-grip loop cut and optional ground-contact wrenches.
+The equations of motion form the linear equality system
+\begin{equation}
+  \bA \bx = \bb, \qquad
+  \bA = \begin{bmatrix} \bS^\top & \bJ_c^\top & \bJ_g^\top \end{bmatrix}
+  \in \R^{n_v \times d_x}, \qquad
+  \bx = \begin{bmatrix} \btau \\ \blambda \\ \mathbf{f}_g \end{bmatrix}
+  \in \R^{d_x}, \qquad
+  \bb = \bM(\bq)\ba + \bh(\bq,\bv) \in \R^{n_v},
+  \label{eq:general_balance}
+\end{equation}
+where:
+\begin{itemize}[nosep]
+  \item $\bS^\top \in \R^{n_v \times n_\tau}$ selects the $n_\tau$ actuated
+    tree joints (leaving $n_u = n_v - n_\tau$ unactuated coordinates indexed by
+    $u$, such as a 6-DOF floating pelvis or an unactuated hinge);
+  \item $\bJ_c \in \R^{m_c \times n_v}$ is the canonical loop-closure constraint
+    Jacobian in the grip midpoint frame (\S\ref{sec:grasp_map} and R8), with
+    $+\bJ_c^\top\blambda$ acting on the human tree;
+  \item $\bJ_g \in \R^{m_g \times n_v}$ stacks the optional lower-body ground
+    contact Jacobians with contact wrench vector $\mathbf{f}_g \in \R^{m_g}$
+    ($m_g = 0$ for fixed-base or single-loop analyses);
+  \item $d_x = n_\tau + m_c + m_g$ is the total decision dimension.
+\end{itemize}
+
+\begin{proposition}[Four Distinct Dimension Counts (R2)]
+\label{prop:dimensions}
+Partition the rows of $\bM\ba + \bh = \bS^\top\btau + \bJ_c^\top\blambda +
+\bJ_g^\top\mathbf{f}_g$ into actuated rows $a$ ($|a|=n_\tau$, $\bS_a = \bI_{n_\tau}$)
+and unactuated rows $u$ ($|u|=n_u$, $\bS_u = \mathbf{0}$):
+\begin{align}
+  \btau + \bJ_{c,a}^\top\blambda + \bJ_{g,a}^\top\mathbf{f}_g &= \bb_a,
+  \label{eq:actuated_rows} \\
+  \bJ_{c,u}^\top\blambda + \bJ_{g,u}^\top\mathbf{f}_g &= \bb_u.
+  \label{eq:unactuated_rows}
+\end{align}
+The allocation problem possesses four distinct structural dimensions that must
+be reported separately:
+\begin{enumerate}[label=(\roman*),nosep]
+  \item \textbf{Equality nullity:}
+    \begin{equation}
+      \nu_{\mathrm{eq}} = \dim\ker\bA = d_x - \operatorname{rank}(\bA).
+    \end{equation}
+  \item \textbf{Multiplier gauge:} the subspace of closure multipliers that
+    produce zero generalized force on the entire tree,
+    \begin{equation}
+      \nu_{\mathrm{gauge}} = \dim\ker(\bJ_c^\top) = m_c - \operatorname{rank}(\bJ_c).
+    \end{equation}
+  \item \textbf{Attainable torque variation (at fixed $\mathbf{f}_g$):} the
+    dimension of the affine subspace of actuated torque vectors $\btau$
+    consistent with \eqref{eq:actuated_rows}--\eqref{eq:unactuated_rows} for a
+    fixed $\mathbf{f}_g$,
+    \begin{equation}
+      \nu_\tau = \dim\left(\bJ_{c,a}^\top \ker(\bJ_{c,u}^\top)\right)
+      = \operatorname{rank}(\bJ_c^\top) - \operatorname{rank}(\bJ_{c,u}^\top),
+    \end{equation}
+    where the second equality holds whenever $\ker(\bJ_c^\top) =
+    \ker(\bJ_{c,a}^\top) \cap \ker(\bJ_{c,u}^\top)$.
+  \item \textbf{Feasible-set dimension:} the affine dimension $\dim\mathcal{F}$
+    of the inequality-constrained set $\mathcal{F} = \{\bz \in \R^{\nu_{\mathrm{eq}}}
+    : \bx_p + \bN\bz \in \mathcal{C}\}$ after intersecting with torque capacity
+    bounds and contact friction cones $\mathcal{C}$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+For fixed $\mathbf{f}_g$, any two multiplier solutions $\blambda_1,\blambda_2$
+of \eqref{eq:unactuated_rows} differ by $\Delta\blambda \in \ker(\bJ_{c,u}^\top)$,
+which has dimension $m_c - \operatorname{rank}(\bJ_{c,u}^\top)$. The induced
+change in actuated torques from \eqref{eq:actuated_rows} is $\Delta\btau =
+-\bJ_{c,a}^\top\Delta\blambda$. The kernel of the restriction of $\bJ_{c,a}^\top$
+to $\ker(\bJ_{c,u}^\top)$ is precisely $\ker(\bJ_{c,a}^\top)\cap\ker(\bJ_{c,u}^\top)
+= \ker(\bJ_c^\top)$, which has dimension $m_c - \operatorname{rank}(\bJ_c^\top)$.
+By the rank--nullity theorem applied to $\bJ_{c,a}^\top|_{\ker(\bJ_{c,u}^\top)}$,
+$\dim(\bJ_{c,a}^\top\ker(\bJ_{c,u}^\top)) = (m_c - \operatorname{rank}(\bJ_{c,u}^\top))
+- (m_c - \operatorname{rank}(\bJ_c^\top)) = \operatorname{rank}(\bJ_c^\top) -
+\operatorname{rank}(\bJ_{c,u}^\top)$. Furthermore, setting $\blambda = \mathbf{0}$
+with $\mathbf{f}_g = \mathbf{0}$ requires $\bb_u = \mathbf{0}$; whenever
+$\bb_u \neq \mathbf{0}$, the unactuated rows make $\blambda = \mathbf{0}$
+strictly infeasible.
+\end{proof}
+
+Table~\ref{tab:dimension_fixtures} records the exact SymPy-verified dimension
+counts across the four NSX-12 golden fixtures committed in
+\texttt{derivations/golden\_fixtures.json}.
+
+\begin{table}[htbp]
+\centering
+\caption{SymPy-Verified R2 Dimension Counts Across the Four NSX-12 Golden Fixtures.}
+\label{tab:dimension_fixtures}
+\small
+\begin{tabular}{@{}lccccccccc@{}}
+\toprule
+Fixture ID & $n_v$ & $n_\tau$ & $n_u$ & $m_c$ & $m_g$ & $d_x$ & $\operatorname{rank}\bA$ & $\nu_{\mathrm{eq}}$ & $\nu_{\mathrm{gauge}}$ / $\nu_\tau$ \\
+\midrule
+\texttt{planar\_two\_arm\_fixed\_base} & 5 & 5 & 0 & 2 & 0 & 7 & 5 & 2 & $0 \;/\; 2$ \\
+\texttt{planar\_two\_arm\_underactuated} & 5 & 4 & 1 & 2 & 0 & 6 & 5 & 1 & $0 \;/\; 1$ \\
+\texttt{floating\_base\_two\_arm} & 7 & 4 & 3 & 2 & 4 & 10 & 7 & 3 & $0 \;/\; 2$ \\
+\texttt{straight\_arm\_rank\_deficient} & 4 & 4 & 0 & 2 & 0 & 6 & 4 & 2 & $1 \;/\; 1$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Zero-Side Three-Case Diagnostic Analysis (R3)}
+\label{sec:zero_side}
+
+A frequent biomechanical question is whether one limb side $s \in \{\text{lead},
+\text{trail}\}$ can carry zero active joint torque ($\btau_s = \mathbf{0}$) at a
+given frame. Setting $\btau_s = \mathbf{0}$ in the side rows of
+\eqref{eq:actuated_rows} (with $\bJ_{g,s} = \mathbf{0}$ for upper-limb joints)
+yields the linear subsystem
+\begin{equation}
+  \bJ_{c,s}^\top \blambda = \btau_{\mathrm{ID},s}, \qquad
+  \btau_{\mathrm{ID},s} := \bb_s \in \R^{n_s}, \qquad
+  \bJ_{c,s}^\top \in \R^{n_s \times m_c}.
+  \label{eq:zero_side}
+\end{equation}
+For a 3-D anatomical arm with $n_s = 7$ or $9$ actuated degrees of freedom and a
+weld closure of dimension $m_c = 6$, \eqref{eq:zero_side} has more equations
+than unknowns ($n_s > m_c$) and is generically \textbf{overdetermined}.
+
+\begin{definition}[Three-Case Zero-Side Classification (R3)]
+Let $\bJ_s^\top := \bJ_{c,s}^\top$ (scaled by characteristic moment $M_{\mathrm{char}}$
+and force $F_{\mathrm{char}}$), and let $(\bJ_s^\top)^+$ denote its
+Moore--Penrose pseudoinverse computed via singular value decomposition with
+singular value threshold $\epsilon_{\mathrm{svd}} = 10^{-10}\sigma_{\max}$.
+Define the minimum-norm orthogonal residual vector and its Euclidean norm:
+\begin{equation}
+  \mathbf{r}_s = \left(\bI_{n_s} - \bJ_s^\top (\bJ_s^\top)^+\right)\btau_{\mathrm{ID},s},
+  \qquad
+  \rho_s = \norm{\left(\bI_{n_s} - \bJ_s^\top (\bJ_s^\top)^+\right)\btau_{\mathrm{ID},s}}_2.
+  \label{eq:zero_side_residual}
+\end{equation}
+Given consistency tolerance $\epsilon_{\mathrm{cons}} = 10^{-8}\max(\norm{\btau_{\mathrm{ID},s}}_2, M_{\mathrm{char}})$,
+\texttt{zero\_side\_solve} classifies the frame into exactly one of three cases:
+\begin{enumerate}[nosep]
+  \item \texttt{CONSISTENT\_UNIQUE}: $\rho_s \le \epsilon_{\mathrm{cons}}$ and
+    $\dim\ker(\bJ_s^\top) = m_c - \operatorname{rank}(\bJ_s^\top) = 0$. The unique
+    multiplier $\blambda_\star = (\bJ_s^\top)^+\btau_{\mathrm{ID},s}$ achieves
+    $\btau_s = \mathbf{0}$.
+  \item \texttt{CONSISTENT\_NONUNIQUE}: $\rho_s \le \epsilon_{\mathrm{cons}}$ and
+    $\dim\ker(\bJ_s^\top) > 0$. An affine family $\blambda(\boldsymbol{\alpha}) =
+    (\bJ_s^\top)^+\btau_{\mathrm{ID},s} + \bK_s\boldsymbol{\alpha}$ achieves
+    $\btau_s = \mathbf{0}$.
+  \item \texttt{INCONSISTENT(residual)}: $\rho_s > \epsilon_{\mathrm{cons}}$.
+    No closure wrench can zero the side torques while maintaining dynamic
+    balance. The solver returns the minimum-residual side torque
+    $\btau_{s,\min} = \mathbf{r}_s$ and scaled residual $\rho_s / M_{\mathrm{char}}$,
+    and \textbf{never} labels the result ``zero trail'' or relaxes $\bA\bx=\bb$.
+\end{enumerate}
+\end{definition}
+
+\section{Exact \texorpdfstring{$6\times 6$}{6x6} Grasp-Map Kernel at the Grip Midpoint Frame (R4)}
+\label{sec:grasp_map}
+
+Let $\mathbf{r}_L, \mathbf{r}_R \in \R^3$ be the world-frame left (lead) and
+right (trail) hand grip attachment points on the club handle, separated by
+$2h = \norm{\mathbf{r}_R - \mathbf{r}_L}_2 > 0$.
+
+\paragraph{Canonical Grip-Midpoint Frame (\texttt{C-FRAME-GRIP}).}
+The grip midpoint is $\mathbf{r}_M = \tfrac{1}{2}(\mathbf{r}_L + \mathbf{r}_R)$.
+The orthonormal basis $\mathbf{R}_G = [\hat{\mathbf{u}} \;\; \hat{\mathbf{v}} \;\; \hat{\mathbf{w}}] \in SO(3)$ is defined by:
+\begin{equation}
+  \hat{\mathbf{u}} = \frac{\mathbf{r}_{\mathrm{head}} - \mathbf{r}_M}{\norm{\mathbf{r}_{\mathrm{head}} - \mathbf{r}_M}_2},
+  \qquad
+  \hat{\mathbf{v}} = \frac{(\bI_3 - \hat{\mathbf{u}}\hat{\mathbf{u}}^\top)\hat{\mathbf{n}}_{\mathrm{face}}}{\norm{(\bI_3 - \hat{\mathbf{u}}\hat{\mathbf{u}}^\top)\hat{\mathbf{n}}_{\mathrm{face}}}_2},
+  \qquad
+  \hat{\mathbf{w}} = \hat{\mathbf{u}} \times \hat{\mathbf{v}},
+  \label{eq:grip_frame}
+\end{equation}
+where $\hat{\mathbf{u}}$ points along the shaft axis from the grip midpoint
+toward the clubhead ($\mathbf{r}_L - \mathbf{r}_M = -h\hat{\mathbf{u}}$,
+$\mathbf{r}_R - \mathbf{r}_M = +h\hat{\mathbf{u}}$) and $\hat{\mathbf{v}}$ points
+along the projection of the clubface normal perpendicular to the shaft.
+
+\paragraph{Grasp Map and Exact $6\times 6$ Internal-Wrench Kernel.}
+Express all forces and moments in the canonical grip frame $\mathbf{R}_G$ under
+the ADR-0052 sign convention (wrenches exerted \emph{by the hand on the club}).
+Let $\bW_L = [\mathbf{F}_L^\top, \btau_L^\top]^\top \in \R^6$ and
+$\bW_R = [\mathbf{F}_R^\top, \btau_R^\top]^\top \in \R^6$. The net hand-on-club
+wrench at $\mathbf{r}_M$ is $\bW_{\mathrm{net}} = [\mathbf{F}_{\mathrm{net}}^\top,
+\mathbf{M}_M^\top]^\top = \bG [\bW_L^\top, \bW_R^\top]^\top$, where
+\begin{equation}
+  \bG = \begin{bmatrix}
+    \bI_3 & \mathbf{0}_{3\times 3} & \bI_3 & \mathbf{0}_{3\times 3} \\
+    -h[\hat{\mathbf{u}}]_\times & \bI_3 & +h[\hat{\mathbf{u}}]_\times & \bI_3
+  \end{bmatrix} \in \R^{6\times 12},
+  \qquad
+  [\hat{\mathbf{u}}]_\times = \begin{bmatrix}
+    0 & 0 & 0 \\
+    0 & 0 & -1 \\
+    0 & 1 & 0
+  \end{bmatrix}.
+  \label{eq:grasp_matrix}
+\end{equation}
+
+\begin{theorem}[Invertible $12\times 12$ Grasp-Split Decomposition (R4)]
+\label{thm:grasp_kernel}
+Define the $6\times 1$ grip-split coordinate vector
+$\mathbf{s} = [\mathbf{s}_f^\top, \mathbf{s}_m^\top]^\top = [s_1, s_2, s_3, s_4, s_5, s_6]^\top$
+with $\mathbf{s}_f = [s_1, s_2, s_3]^\top \in \R^3$ (in $\mathrm{N}$) and
+$\mathbf{s}_m = [s_4, s_5, s_6]^\top \in \R^3$ (in $\mathrm{N\cdot m}$), the
+symmetric right-inverse $\bG_p \in \R^{12\times 6}$, and the kernel basis matrix
+$\bK \in \R^{12\times 6}$:
+\begin{equation}
+  \bG_p = \frac{1}{2}\begin{bmatrix}
+    \bI_3 & \mathbf{0} \\
+    \mathbf{0} & \bI_3 \\
+    \bI_3 & \mathbf{0} \\
+    \mathbf{0} & \bI_3
+  \end{bmatrix}, \qquad
+  \bK = \begin{bmatrix}
+    -\bI_3 & \mathbf{0}_{3\times 3} \\
+    -h[\hat{\mathbf{u}}]_\times & -\bI_3 \\
+    +\bI_3 & \mathbf{0}_{3\times 3} \\
+    -h[\hat{\mathbf{u}}]_\times & +\bI_3
+  \end{bmatrix}.
+  \label{eq:grasp_kernel}
+\end{equation}
+Then $\bG\bG_p = \bI_6$, $\bG\bK = \mathbf{0}_{6\times 6}$, $\operatorname{rank}(\bK) = 6$,
+and the $12\times 12$ synthesis matrix $\mathbf{T}_{12\times 12} = [\bG_p \;\; \bK]$
+mapping $[\bW_{\mathrm{net}}^\top, \mathbf{s}^\top]^\top \mapsto [\bW_L^\top, \bW_R^\top]^\top$
+has the exact closed-form inverse
+\begin{equation}
+  \mathbf{T}_{12\times 12}^{-1} = \begin{bmatrix}
+    \bI_3 & \mathbf{0} & \bI_3 & \mathbf{0} \\
+    -h[\hat{\mathbf{u}}]_\times & \bI_3 & +h[\hat{\mathbf{u}}]_\times & \bI_3 \\
+    -\tfrac{1}{2}\bI_3 & \mathbf{0} & +\tfrac{1}{2}\bI_3 & \mathbf{0} \\
+    \mathbf{0} & -\tfrac{1}{2}\bI_3 & \mathbf{0} & +\tfrac{1}{2}\bI_3
+  \end{bmatrix},
+  \qquad
+  \begin{aligned}
+    \mathbf{s}_f &= \tfrac{1}{2}(\mathbf{F}_R - \mathbf{F}_L), \\
+    \mathbf{s}_m &= \tfrac{1}{2}(\btau_R - \btau_L).
+  \end{aligned}
+  \label{eq:grasp_inverse}
+\end{equation}
+Explicitly, the six split coordinates have the following physical meanings:
+\begin{itemize}[nosep]
+  \item $s_1 = \tfrac{1}{2}(F_{R,u} - F_{L,u})$ ($\mathrm{N}$): axial internal
+    tension/compression along the shaft axis $\hat{\mathbf{u}}$ (zero moment arm);
+  \item $s_2 = \tfrac{1}{2}(F_{R,v} - F_{L,v})$ ($\mathrm{N}$): transverse
+    internal shear along $\hat{\mathbf{v}}$ paired with compensating symmetric
+    free wrist moments $\tau_{L,w} = \tau_{R,w} = -h s_2$ canceling the force
+    couple $+2h s_2\hat{\mathbf{w}}$;
+  \item $s_3 = \tfrac{1}{2}(F_{R,w} - F_{L,w})$ ($\mathrm{N}$): transverse
+    internal shear along $\hat{\mathbf{w}}$ paired with compensating symmetric
+    free wrist moments $\tau_{L,v} = \tau_{R,v} = +h s_3$ canceling the force
+    couple $-2h s_3\hat{\mathbf{v}}$;
+  \item $s_4, s_5, s_6 = \tfrac{1}{2}(\btau_R - \btau_L)_{u,v,w}$
+    ($\mathrm{N\cdot m}$): pure differential free moments (axial twist battle
+    $s_4$ and bending moment battles $s_5, s_6$).
+\end{itemize}
+\end{theorem}
+
+\paragraph{Numeric Worked Example (from \texttt{golden\_fixtures.json}).}
+For half-grip separation $h = 0.04\,\mathrm{m}$, net bare-club wrench
+$\bW_{\mathrm{net}} = [120, -40, 80, \; 6, -18, 24]^\top$ ($\mathrm{N}, \mathrm{N\cdot m}$)
+and internal split coordinates $\mathbf{s} = [35, -15, 10, \; 2, -3, 4]^\top$,
+equations \eqref{eq:grasp_kernel}--\eqref{eq:grasp_inverse} yield:
+\begin{align*}
+  \bW_L &= [25.0, \; -5.0, \; 30.0, \;\; 1.0, \; -5.6, \; 8.6]^\top, \\
+  \bW_R &= [95.0, \; -35.0, \; 50.0, \;\; 5.0, \; -11.6, \; 16.6]^\top,
+\end{align*}
+verifying $\mathbf{F}_L + \mathbf{F}_R = [120, -40, 80]^\top$ and
+$\mathbf{M}_M = \btau_L + \btau_R + h\hat{\mathbf{u}}\times(\mathbf{F}_R - \mathbf{F}_L)
+= [6, -6 - 11.6, 8.6 + 16.6]^\top + [0, -0.8, -1.2]^\top = [6, -18, 24]^\top$.
+
+\section{Bare-Club Newton--Euler and Welded Hand Solid Partition (R4, NSX-01)}
+\label{sec:bare_club}
+
+In \texttt{full\_body\_spec\_anthro\_driver.json}, the rigid body
+\texttt{solid\_reference:GolfSwing3D\_Kinetic/Club/Clubface Vector} aggregates
+six constituent solids into a single composite mass of $m_{\mathrm{comp}} = 1.4212\,\mathrm{kg}$.
+Passing $m_{\mathrm{comp}}$ into Newton--Euler attributes the inertia of both
+hands to the club. NSX-01 partitions the solids into two disjoint sets
+(Table~\ref{tab:club_solids}).
+
+\begin{table}[htbp]
+\centering
+\caption{Constituent solids of \texttt{Clubface Vector} in \texttt{full\_body\_spec\_anthro\_driver.json}.}
+\label{tab:club_solids}
+\small
+\begin{tabular}{@{}llrr@{}}
+\toprule
+Partition & Solid Name & Mass ($\mathrm{kg}$) & Share of Composite \\
+\midrule
+Bare Club ($\mathcal{S}_{\mathrm{club}}$) & \texttt{Clubhead} & $0.1980$ & $13.93\,\%$ \\
+Bare Club ($\mathcal{S}_{\mathrm{club}}$) & \texttt{Rigid Shaft} & $0.0650$ & $4.57\,\%$ \\
+Bare Club ($\mathcal{S}_{\mathrm{club}}$) & \texttt{Grip} & $0.0500$ & $3.52\,\%$ \\
+\textbf{Subtotal Bare Club} & \texttt{club.total\_mass\_kg} & $\mathbf{0.3130}$ & $\mathbf{22.02\,\%}$ \\
+\midrule
+Welded Hands ($\mathcal{S}_{\mathrm{hands}}$) & \texttt{LHand} & $0.5491$ & $38.64\,\%$ \\
+Welded Hands ($\mathcal{S}_{\mathrm{hands}}$) & \texttt{LHandStandoff} & $0.0100$ & $0.70\,\%$ \\
+Welded Hands ($\mathcal{S}_{\mathrm{hands}}$) & \texttt{RHand} & $0.5491$ & $38.64\,\%$ \\
+\textbf{Subtotal Welded Hands} & — & $\mathbf{1.1082}$ & $\mathbf{77.98\,\%}$ \\
+\midrule
+\textbf{Total Composite Body} & \texttt{Clubface Vector} & $\mathbf{1.4212}$ & $\mathbf{100.00\,\%}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+For any subset $\mathcal{S} \in \{\mathcal{S}_{\mathrm{club}}, \mathcal{S}_{\mathrm{hands}}\}$,
+the aggregated mass, center of mass $\mathbf{c}_{\mathcal{S}}$, and rotational
+inertia tensor $\mathbf{I}_{\mathcal{S}}$ about $\mathbf{c}_{\mathcal{S}}$ are
+\begin{equation}
+  m_{\mathcal{S}} = \sum_{k\in\mathcal{S}} m_k, \qquad
+  \mathbf{c}_{\mathcal{S}} = \frac{1}{m_{\mathcal{S}}}\sum_{k\in\mathcal{S}} m_k \mathbf{c}_k, \qquad
+  \mathbf{I}_{\mathcal{S}} = \sum_{k\in\mathcal{S}} \left(
+    \mathbf{R}_k \mathbf{I}_k \mathbf{R}_k^\top
+    + m_k \left(\norm{\mathbf{d}_k}_2^2 \bI_3 - \mathbf{d}_k\mathbf{d}_k^\top\right)
+  \right),
+  \label{eq:parallel_axis}
+\end{equation}
+where $\mathbf{d}_k = \mathbf{c}_k - \mathbf{c}_{\mathcal{S}}$. Outside impact
+and aerodynamic drag windows, the net hand-on-bare-club wrench at the grip
+midpoint $\mathbf{r}_M$ is the allocation-invariant Newton--Euler resultant:
+\begin{equation}
+  \mathbf{F}_{\mathrm{net}}^{\mathrm{bare}} = m_{\mathrm{club}}(\ba_{\mathbf{c}_{\mathrm{club}}} - \mathbf{g}),
+  \qquad
+  \mathbf{M}_M^{\mathrm{bare}} = \mathbf{I}_{\mathrm{club}}\boldsymbol{\alpha}_{\mathrm{club}}
+  + \boldsymbol{\omega}_{\mathrm{club}} \times (\mathbf{I}_{\mathrm{club}}\boldsymbol{\omega}_{\mathrm{club}})
+  + (\mathbf{c}_{\mathrm{club}} - \mathbf{r}_M) \times \mathbf{F}_{\mathrm{net}}^{\mathrm{bare}}.
+  \label{eq:bare_club_ne}
+\end{equation}
+
+\section{Allocation-Invariant Quantities and Scaled Validity Gates (R5)}
+\label{sec:invariants}
+
+Every quantity in Table~\ref{tab:invariants} is algebraically independent of the
+null-space coordinate $\bz \in \R^{\nu_{\mathrm{eq}}}$ whenever its scaled
+kinematic or contact gate holds. If the gate residual exceeds its threshold, the
+quantity is emitted as \texttt{UNAVAILABLE(reason)} with \texttt{NaN} values,
+never silently approximated.
+
+\begin{table}[htbp]
+\centering
+\caption{Allocation-Invariant Quantities (R5 A--F) and Their Scaled Validity Gates.}
+\label{tab:invariants}
+\small
+\begin{tabularx}{\textwidth}{@{}llX@{}}
+\toprule
+ID & Invariant Quantity & Formula and Scaled Validity Gate \\
+\midrule
+R5(a) & Net bare-club wrench $\bW_{\mathrm{net}}^{\mathrm{bare}}$ &
+  Eq.~\eqref{eq:bare_club_ne}; gated on non-impact window ($|t - t_{\mathrm{imp}}| > \Delta t_{\mathrm{imp}}$) and position/acceleration closure admission. \\
+R5(b) & Summed actuator power $P_{\mathrm{net}}$ &
+  $(\bS\bv)^\top\btau = \bv^\top(\bb - \bJ_g^\top\mathbf{f}_g)$; valid iff scaled velocity closure residual $\norm{\bJ_c\bv}_{\mathrm{scaled}} \le 10^{-6}$ and stance contacts are workless ($\norm{\bJ_g\bv}_{\mathrm{scaled}} \le 10^{-4}$). \\
+R5(c) & Total external wrench on base $\bW_{\mathrm{ext},u}$ &
+  $\bJ_{g,u}^\top\mathbf{f}_g = \bb_u$ on the $n_u = 6$ unactuated floating-base rows; requires floating-base topology ($n_u = 6$). \\
+R5(d) & Non-loop actuated joint torques $\tau_i$ &
+  $\tau_i = b_i - (\bJ_g^\top\mathbf{f}_g)_i$ for actuated joints with $\operatorname{row}_i(\bJ_c^\top) = \mathbf{0}$ (e.g., neck or lower-limb joints when $\mathbf{f}_g$ is observed). \\
+R5(e) & Metric-free tangent projection $\bN_c^\top\btau$ &
+  For full-actuation ($\bS=\bI$) and $\bJ_c\bN_c = \mathbf{0}$, $\bN_c^\top\btau = \bN_c^\top(\bb - \bJ_g^\top\mathbf{f}_g)$ is metric-free. The metric-lifted vector $\bP_{c,\bW}\btau = \bW^{-1}\bN_c(\bN_c^\top\bW^{-1}\bN_c)^{-1}\bN_c^\top\btau$ is \texttt{INVARIANT} with required convention \texttt{C-METRIC-*}. \\
+R5(f) & Constrained ZTCF \& total control accel. &
+  $\ba_{\mathrm{ZTCF}}$ and $\ba_{\mathrm{ctrl}} = \ba - \ba_{\mathrm{ZTCF}}$ via KKT projector \eqref{eq:kkt_projector}; gated on $\norm{\bJ_c\ba + \dot{\bJ}_c\bv}_{\mathrm{scaled}} \le 10^{-5}$. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{The \texorpdfstring{$c_+/c_-$}{c+/c-} Gross-Power Identity and Curvature Condition (R6)}
+\label{sec:power_identity}
+
+For each actuated joint $i \in \{1,\dots,n_\tau\}$, let $p_i(\bz) = v_i \tau_i(\bz)$
+be the instantaneous mechanical joint power, decomposed into positive (concentric)
+part $[p_i]_+ = \max(p_i, 0)$ and negative (eccentric) part $[-p_i]_+ = \max(-p_i, 0)$.
+
+\begin{proposition}[Asymmetric Power Identity (R6)]
+\label{prop:cpm_identity}
+For any uniform scalar weights $c_+ > 0$ and $c_- > 0$,
+\begin{equation}
+  \sum_{i=1}^{n_\tau} \left(c_+[p_i(\bz)]_+ + c_-[-p_i(\bz)]_+\right)
+  = \frac{c_+ + c_-}{2}\sum_{i=1}^{n_\tau} |p_i(\bz)|
+  + \frac{c_+ - c_-}{2} P_{\mathrm{net}},
+  \label{eq:cpm_identity}
+\end{equation}
+where $P_{\mathrm{net}} = \sum_{i=1}^{n_\tau} p_i(\bz) = (\bS\bv)^\top\btau(\bz)$.
+Whenever the velocity lies on the constraint manifold ($\bJ_c\bv = \mathbf{0}$ and
+$\bv_u = \mathbf{0}$ or $\mathbf{f}_g$ is fixed), $P_{\mathrm{net}} = \bv^\top(\bb - \bJ_g^\top\mathbf{f}_g)$
+is independent of $\bz$. Consequently, the uniform ratio $c_-/c_+$ only shifts
+the objective by an additive constant and scales $\sum_i |p_i(\bz)|$; it cannot
+alter the argmin unless $c_{+,i}, c_{-,i}$ vary across joints.
+\end{proposition}
+
+\begin{proof}
+Use the scalar identities $[p]_+ = \tfrac{1}{2}(|p| + p)$ and
+$[-p]_+ = \tfrac{1}{2}(|p| - p)$. Summing over $i$ gives \eqref{eq:cpm_identity}.
+Substituting $\btau(\bz) = \btau_p - \bJ_{c,a}^\top\blambda(\bz)$ with
+$\bv_u = \mathbf{0}$ yields $(\bS\bv)^\top\btau(\bz) = \bv^\top\btau_p -
+(\bJ_c\bv)^\top\blambda(\bz) = \bv^\top\btau_p$ whenever $\bJ_c\bv = \mathbf{0}$.
+\end{proof}
+
+\paragraph{Strict Curvature Precondition.}
+Because the $\ell_1$ gross-power epigraph $\sum_i |p_i(\bz)|$ is piecewise linear,
+minimizing it alone produces non-unique facet jumps across frames. By Rule R6,
+every trajectory allocation objective in NSX-23 must include a quadratic Hessian
+$\mathbf{H}_{\mathrm{quad}}$ satisfying the strict reduced-space curvature gate
+\begin{equation}
+  \lambda_{\min}\!\left(\bN^\top \mathbf{H}_{\mathrm{quad}} \bN\right) \ge \mu_{\min} > 0
+  \qquad (\mu_{\min} = 10^{-8}\text{ in scaled coordinates}).
+  \label{eq:curvature_gate}
+\end{equation}
+
+\section{Constrained Counterfactuals and \texttt{ztcf\_zvcf.py} Alignment (R9)}
+\label{sec:counterfactuals}
+
+On a closed kinematic loop, setting active joint torques to zero ($\btau = \mathbf{0}$)
+changes the constraint reaction $\blambda$ required to keep the hands together.
+Holding $\blambda$ fixed at its inverse-dynamics value violates $\bJ_c\ba + \dot{\bJ}_c\bv = \mathbf{0}$.
+Solving the KKT system
+\begin{equation}
+  \begin{bmatrix}
+    \bM(\bq) & -\bJ_c^\top \\
+    -\bJ_c & \mathbf{0}
+  \end{bmatrix}
+  \begin{bmatrix}
+    \ba \\ \blambda
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+    \bS^\top\btau - \bh(\bq,\bv) \\
+    \dot{\bJ}_c\bv
+  \end{bmatrix}
+  \label{eq:kkt_system}
+\end{equation}
+yields the operational-space constraint inertia
+$\bLambda_c = (\bJ_c \bM^{-1} \bJ_c^\top)^{-1}$ (damped via SVD when
+$\nu_{\mathrm{gauge}} > 0$) and the constrained acceleration decomposition
+\begin{align}
+  \bP_{\mathrm{KKT}} &:= \bM^{-1}\left(\bI_{n_v} - \bJ_c^\top \bLambda_c \bJ_c \bM^{-1}\right),
+  \label{eq:kkt_projector} \\
+  \ba(\btau) &= \underbrace{-\bP_{\mathrm{KKT}}\bh(\bq,\bv) - \bM^{-1}\bJ_c^\top\bLambda_c\dot{\bJ}_c\bv}_{\ba_{\mathrm{ZTCF}}(\bq,\bv) \;\; (\texttt{INVARIANT})}
+  + \underbrace{\bP_{\mathrm{KKT}}\bS^\top\btau}_{\ba_{\mathrm{ctrl}}(\btau) \;\; (\texttt{INVARIANT})}.
+  \label{eq:constrained_ztcf}
+\end{align}
+
+\begin{proposition}[Invariance of Total Constrained Counterfactuals vs Family-Dependent Attribution (R9)]
+Along an admitted trajectory ($\bJ_c\ba + \dot{\bJ}_c\bv = \mathbf{0}$), every
+admissible torque allocation $\btau(\bz) = \btau_p + \bN_\tau\bz$ satisfies
+$\bN_\tau = -\bJ_{c,a}^\top\bN_\lambda$, so $\bP_{\mathrm{KKT}}\bS^\top\bN_\tau =
+-\bP_{\mathrm{KKT}}\bJ_c^\top\bN_\lambda = \mathbf{0}$. Therefore:
+\begin{enumerate}[nosep]
+  \item The constrained Zero-Torque Counterfactual acceleration
+    $\ba_{\mathrm{ZTCF}}(\bq,\bv)$ (with $\btau=\mathbf{0}$ at measured $\bq,\bv$),
+    the constrained Zero-Velocity Counterfactual acceleration
+    $\ba_{\mathrm{ZVCF}}(\bq) := -\bP_{\mathrm{KKT}}\bh(\bq,\mathbf{0})$ (with
+    $\bv=\mathbf{0}$ and $\btau=\mathbf{0}$, matching \texttt{ztcf\_zvcf.py}),
+    and the total control-induced acceleration $\ba_{\mathrm{ctrl}} = \ba - \ba_{\mathrm{ZTCF}}$
+    are strictly $\blambda$-invariant (\texttt{INVARIANT}).
+  \item Individual joint or single-limb control attributions
+    $\ba_{\mathrm{ctrl},i}(\bz) = \bP_{\mathrm{KKT}}\mathbf{e}_i\tau_i(\bz)$
+    depend linearly on $\bz$ whenever $\operatorname{row}_i(\bJ_c^\top)\neq \mathbf{0}$
+    and must be tagged \texttt{FAMILY\_DEPENDENT}.
+\end{enumerate}
+\end{proposition}
+
+\section{Envelope Geometry, Chebyshev Center and Conflict Sets}
+\label{sec:envelopes}
+
+At frame $t$, substituting $\bx(\bz_t) = \bx_{p,t} + \bN_t\bz_t$ into the
+declared linear/conic hypotheses $\mathcal{H}$ yields the equality-reduced
+feasible set $\mathcal{F}_t = \{\bz_t \in \R^{\nu_{\mathrm{eq},t}} : \mathbf{C}_t\bz_t \le \mathbf{d}_t, \; (\mathbf{E}_{k,t}\bz_t + \mathbf{f}_{k,t}) \in \mathcal{K}_{\mathrm{soc}}\}$.
+\begin{itemize}[nosep]
+  \item \textbf{Static vs Trajectory-Coupled Envelopes:} Optimizing a linear
+    functional $\mathbf{c}^\top\bx(\bz_t)$ over $\mathcal{F}_t$ independently per
+    frame yields the \texttt{STATIC} envelope $[q_{\min,t}^{\mathrm{stat}},
+    q_{\max,t}^{\mathrm{stat}}]$. Adding inter-frame rate bounds or smoothness
+    priors couples $\bz_{1:T}$ and yields a narrower \texttt{TRAJECTORY\_COUPLED}
+    envelope $[q_{\min,t}^{\mathrm{traj}}, q_{\max,t}^{\mathrm{traj}}] \subseteq
+    [q_{\min,t}^{\mathrm{stat}}, q_{\max,t}^{\mathrm{stat}}]$.
+  \item \textbf{Sign-Determinacy Classification:} For each scalar quantity $q$,
+    \texttt{sign\_class} is \texttt{POSITIVE} if $q_{\min} > \epsilon_{\mathrm{zero}}$,
+    \texttt{NEGATIVE} if $q_{\max} < -\epsilon_{\mathrm{zero}}$, \texttt{ZERO}
+    if $\max(|q_{\min}|, |q_{\max}|) \le \epsilon_{\mathrm{zero}}$, and
+    \texttt{INDETERMINATE} if $q_{\min} < -\epsilon_{\mathrm{zero}}$ and
+    $q_{\max} > \epsilon_{\mathrm{zero}}$.
+  \item \textbf{Unbounded Directions:} If the LP/SOCP along $+\mathbf{c}$ or
+    $-\mathbf{c}$ returns \texttt{UNBOUNDED}, the bound is recorded as
+    \texttt{NaN} with status \texttt{UNBOUNDED} and \texttt{UNAVAILABLE(reason)},
+    never clamped to an arbitrary constant.
+  \item \textbf{Chebyshev Center and Margin:} In the equality-reduced coordinates
+    equipped with metric norm $\norm{\cdot}_{\bW}$, the Chebyshev center
+    $(\bz_{\mathrm{cheb}}, r_{\mathrm{cheb}})$ solves
+    \begin{equation}
+      \max_{\bz \in \R^{\nu_{\mathrm{eq}}},\; r \ge 0} \; r
+      \quad \text{subject to} \quad
+      \mathbf{c}_i^\top \bz + r\norm{\mathbf{c}_i}_{\bW^{-1}} \le d_i
+      \quad \forall i.
+      \label{eq:chebyshev}
+    \end{equation}
+  \item \textbf{Inclusion-Minimal Conflict Sets (IIS):} When $\mathcal{F}_t = \emptyset$,
+    an elastic feasibility LP $\min_{\bz,\mathbf{s}\ge\mathbf{0}} \mathbf{1}^\top\mathbf{s}$
+    subject to $\mathbf{C}_t\bz - \mathbf{s} \le \mathbf{d}_t$ followed by
+    deletion filtering identifies an inclusion-minimal irreducible inconsistent
+    subsystem (IIS) mapped back to registry hypothesis IDs.
+\end{itemize}
+
+\section{Reaction-Restriction Sensitivity vs True Closure Alternatives}
+\label{sec:restriction}
+
+Evaluating a single welded trajectory $(\bq_t, \bv_t, \ba_t)$ under progressively
+smaller row subsets of $\bJ_c$ in the canonical grip frame $\mathbf{R}_G$:
+\begin{equation}
+  \texttt{WELD6} \; (\text{rows } \{0,1,2,3,4,5\})
+  \;\supset\;
+  \texttt{SHAFT\_FREE5} \; (\text{rows } \{0,1,2,4,5\}, \text{ dropping } t_u)
+  \;\supset\;
+  \texttt{BALL3} \; (\text{rows } \{0,1,2\}, \text{ forces only})
+  \label{eq:restriction_chain}
+\end{equation}
+restricts the set of allowable reaction wrenches $\blambda$ while holding
+$(\bq_t,\bv_t,\ba_t)$ fixed. Because shrinking the subspace of multipliers shrinks
+the affine hull of solutions, the static feasible sets satisfy the monotonicity
+inclusion $\mathcal{F}_t(\texttt{BALL3}) \subseteq \mathcal{F}_t(\texttt{SHAFT\_FREE5})
+\subseteq \mathcal{F}_t(\texttt{WELD6})$ when mapped to actuated joint torques
+$\btau$. This diagnostic is strictly labelled
+\texttt{REACTION\_RESTRICTION\_SENSITIVITY} (NSX-26); it is \emph{not} a model of
+a physical hinge or ball-joint grip, which would follow a different kinematic
+trajectory $\bq(t)$ and is deferred to research issue NSX-72 (\#12590).
+
+\section{Citation Verification Audit Table (R13)}
+\label{sec:citations}
+
+Every reference from the v1 proposal was audited against primary archival
+sources. By Rule R13, no \texttt{UNVERIFIED} or \texttt{REMOVED} citation may
+appear in any user-facing string or registry \texttt{statement} field.
+
+\begin{table}[htbp]
+\centering
+\caption{Audit of All References and Quantitative Claims From the Original Proposal.}
+\label{tab:citations}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}llp{3.6cm}X@{}}
+\toprule
+Citation ID & Status & Source / DOI / URL & Quoted Claim \& Audit Disposition \\
+\midrule
+\texttt{CIT-FD-NOISE-100HZ} & \texttt{VERIFIED} &
+  Standard numerical analysis; $\ddot{x}_k = (x_{k+1}-2x_k+x_{k-1})/\Delta t^2$ &
+  For i.i.d.\ position error $\sigma = 1\,\mathrm{mm}$ at $100\,\mathrm{Hz}$ ($\Delta t = 0.01\,\mathrm{s}$), $\operatorname{SD}(\ddot{x}) = \sqrt{6}\sigma/\Delta t^2 = 24.4949\,\mathrm{m/s^2}$. Verified exactly. \\
+\texttt{CIT-FEATHERSTONE-RBDA-2008} & \texttt{VERIFIED} &
+  Featherstone (2008), DOI \texttt{10.1007/978-1-4899-7560-7} &
+  Ch.~8 closed-loop KKT equations and operational constraint inertia $\bLambda_c = (\bJ_c\bM^{-1}\bJ_c^\top)^{-1}$. Verified. \\
+\texttt{CIT-BOYD-VANDENBERGHE-2004} & \texttt{VERIFIED} &
+  Boyd \& Vandenberghe (2004), DOI \texttt{10.1017/CBO9780511804441} &
+  \S4.7 $\epsilon$-constraint Pareto front and \S8.5.1 Chebyshev center LP. Verified. \\
+\texttt{CIT-MURRAY-LI-SASTRY-1994} & \texttt{VERIFIED} &
+  Murray, Li \& Sastry (1994), DOI \texttt{10.1201/9781315136370} &
+  Ch.~5 grasp map $\bG$ and internal contact wrench null space $\ker\bG$. Verified. \\
+\texttt{CIT-THORNTON-2025} & \texttt{UNVERIFIED} &
+  None (v1 proposal ``Thornton 2025'') &
+  Percentage hand-share claims in v1 proposal could not be matched to a peer-reviewed DOI. Prohibited in user-facing statements. \\
+\texttt{CIT-MEHTA-2024} & \texttt{UNVERIFIED} &
+  None (v1 proposal ``Mehta 2024'') &
+  Hand-split percentage claims in v1 proposal could not be verified. Prohibited in user-facing statements. \\
+\texttt{CIT-MDPI-GRIP-UNSPECIFIED} & \texttt{REMOVED} &
+  None (v1 proposal ``MDPI instrumented grip'') &
+  Underspecified citation lacking authors, title and DOI. Removed. \\
+\texttt{CIT-CHOI-PARK-2020} & \texttt{UNVERIFIED} &
+  None verified for 6-D golf bare-club wrench &
+  Sensor layout not verified as 6-D bare-club wrench ground truth. Prohibited in user-facing statements. \\
+\texttt{CIT-SOROKIN-2025} & \texttt{UNVERIFIED} &
+  None (v1 proposal ``Sorokin 2025'') &
+  No archival publication or DOI located. Prohibited in user-facing statements. \\
+\texttt{CIT-SPAR-UNVERIFIED} & \texttt{REMOVED} &
+  None (v1 proposal ``SPAR'') &
+  Unverified citation artifact from v1 proposal. Removed. \\
+\texttt{CIT-BOSCH-DEAD-ZONE} & \texttt{UNVERIFIED} &
+  None (v1 proposal ``Bosch 15--40 ms dead zone'') &
+  Specific $15\text{--}40\,\mathrm{ms}$ dead-zone bound unverified in primary literature. Prohibited in user-facing statements. \\
+\texttt{CIT-NESBIT-SERRANO-2005} & \texttt{UNVERIFIED} &
+  Nesbit \& Serrano (2005), PMC3899668 &
+  Paper exists, but its coupled grip model cannot identify internal hand splits; the ``two-thirds'' hand-share figure is unverified as a physical split prior. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Explicit Non-Claims}
+\label{sec:non_claims}
+
+\begin{enumerate}[nosep]
+  \item \textbf{No unique hand split from kinematics:} Motion capture and inverse
+    dynamics determine $\bW_{\mathrm{net}}^{\mathrm{bare}}$ but never select a
+    unique split $\mathbf{s} \in \R^6$ without prior hypotheses.
+  \item \textbf{No stiffness or co-contraction inference:} Net joint torques
+    $\btau$ carry zero information about antagonist muscle co-contraction or
+    joint impedance.
+  \item \textbf{No inertial identification beyond MOSAIC:} NSX performs zero
+    inertial parameter estimation (R14).
+  \item \textbf{No aerodynamic resolution of ZTCF identifiability:} Aerodynamic
+    drag does not make internal loop multipliers identifiable.
+  \item \textbf{No empirical validation claimed:} External validation with
+    instrumented grips and synchronized EMG remains open and deferred under
+    \texttt{DV-12554}.
+\end{enumerate}
+
+\end{document}
