@@ -62,15 +62,15 @@
       "rationale": "Mark orchestrator test_api with unit marker (#8875)"
     },
     "pose-conventions": {
-      "fingerprint": "c1d86bdd40d3b50e9b856385ce92f8fcbd0c311fbc6f69bf96eafb2430d78d05",
+      "fingerprint": "a967be96dead4f816e7e2046cc950985d5da2d007ac1eded50915a8fbb9db15c",
       "inputs": {
-        "docs/agent_context/contracts/pose-conventions.md": "e83c61880f6c564fd6e545eba3981009ae59e9a945f1b65616063c5fd2ae7f1b",
-        "src/shared/python/pose_interchange/adapters/mujoco.py": "582e537a802ea60f13a91c22188dad2d38b6312661bb92aba123bd2922d515ec",
+        "docs/agent_context/contracts/pose-conventions.md": "9d73f2e49ca0ec42deb6778c91afdc7423193a27ecc8fbac23448e155dc83ea0",
+        "src/shared/python/pose_interchange/adapters/mujoco.py": "e9ad0fe5ae522e83bc23666059cd31d4f3704d3192af60c4753268f506bf910a",
         "src/shared/python/pose_interchange/canonical.py": "57812fb94fb2551de828191880760787324228794aa2a2f06e4005d412c13487",
         "src/shared/python/pose_interchange/protocol.py": "7cc8d1181169d8b425e53f26ef664b9fd09ecc41e663b9615fc95b6e12309b7f",
         "tests/unit/pose_interchange/adapters/test_mujoco_protocol.py": "ea910a2a4cdcc1b026f9f6e56376226a15343cac5484f286db3edf3ea6a0ebc7"
       },
-      "rationale": "Reviewed canonical pose ownership and MuJoCo adapter protocol, explicit coordinate conventions and capability limits. Existing test_mujoco_protocol.py passed in the 41-test boundary run on 2026-09-09; no scientific validity assertion is added."
+      "rationale": "NSX-50 (#12578): MujocoAdapter now mixes in DynamicMapsMixin with a NativeDynamicLayout (quat_wxyz, linear world, angular body); static pose translation in canonical.py/protocol.py is unchanged. Contract updated for the dynamic-map surface and the multi-DOF ValueError. Validated: test_mujoco_protocol.py plus the NSX-50 dynamic-map unit and engine tests (64 passed)."
     },
     "project-task-native-replay": {
       "fingerprint": "c0d2feff8bc9217b912dc693741475b04be094d8c833db756966bbe6e80a1447",

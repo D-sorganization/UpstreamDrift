@@ -21,6 +21,7 @@ from src.shared.python.pose_interchange.adapters import (
     PinocchioAdapter,
 )
 from src.shared.python.pose_interchange.canonical_state import CanonicalState
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = [pytest.mark.integration]
 
@@ -128,7 +129,7 @@ def test_opensim_free_joint_euler_rates_match_engine_rotation() -> None:
     maps coordinate rates, so the engine is used here for its rotation
     ``R(q)`` and the body angular velocity is its finite difference.
     """
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     body = osim.Body("b", 1.0, osim.Vec3(0), osim.Inertia(1, 1, 1))
     joint = osim.FreeJoint(

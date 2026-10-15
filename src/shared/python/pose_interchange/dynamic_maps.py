@@ -138,6 +138,10 @@ def _base_blocks(
     """Return ``(A_lin, A_ang, dA_lin, dA_ang)``: native = A canonical, rate dA."""
     rot = base_rotation(layout, q)
     spin = _skew(omega_body)
+    lin: Array
+    dlin: Array
+    ang: Array
+    dang: Array
     if layout.linear_frame == "body":
         lin, dlin = rot.T, -spin @ rot.T
     else:
@@ -167,7 +171,10 @@ def canonical_joint_names(joint_layout: Mapping[str, JointSlot]) -> list[str]:
 
 def _joint_scale(slot: JointSlot) -> float:
     if slot.length != 1:
-        raise NotImplementedError(f"joint slot {slot.canonical_name!r} is not 1-DOF")
+        raise ValueError(
+            f"joint slot {slot.canonical_name!r} is not 1-DOF; dynamic maps "
+            "support scalar joint slots only"
+        )
     return float(slot.sign) * (180.0 / np.pi if slot.units == "deg" else 1.0)
 
 
@@ -189,6 +196,7 @@ def velocity_map_matrices(
     qvec = np.asarray(q, dtype=float)
     names = canonical_joint_names(joint_layout)
     n_c = _BASE_NV + len(names)
+    vc: Array
     if v_canonical is None:
         vc = np.zeros(n_c)
     else:
@@ -345,7 +353,8 @@ class DynamicMapsMixin:
     dynamic_layout: NativeDynamicLayout
 
     def joint_layout(self, model: Any | None = None) -> Mapping[str, JointSlot]:
-        raise NotImplementedError
+        """Native joint layout; every concrete adapter overrides this."""
+        raise TypeError(f"{type(self).__name__} must define joint_layout()")
 
     def velocity_map(
         self, engine_q: npt.ArrayLike, *, model: Any | None = None

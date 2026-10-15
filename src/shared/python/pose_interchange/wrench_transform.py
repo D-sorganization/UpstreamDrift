@@ -87,7 +87,9 @@ def twist_to_canonical(twist: npt.ArrayLike, frames: ClosureFrames) -> Array:
 
 def twist_from_canonical(twist: npt.ArrayLike, frames: ClosureFrames) -> Array:
     """``C^-1 @ twist`` (inverse of :func:`twist_to_canonical`)."""
-    return np.linalg.solve(frames.matrix(), _vec6(twist, "twist"))
+    return np.asarray(
+        np.linalg.solve(frames.matrix(), _vec6(twist, "twist")), dtype=np.float64
+    )
 
 
 def wrench_from_canonical(wrench: npt.ArrayLike, frames: ClosureFrames) -> Array:
@@ -97,7 +99,9 @@ def wrench_from_canonical(wrench: npt.ArrayLike, frames: ClosureFrames) -> Array
 
 def wrench_to_canonical(wrench: npt.ArrayLike, frames: ClosureFrames) -> Array:
     """``C^-T @ wrench`` (inverse of :func:`wrench_from_canonical`)."""
-    return np.linalg.solve(frames.matrix().T, _vec6(wrench, "wrench"))
+    return np.asarray(
+        np.linalg.solve(frames.matrix().T, _vec6(wrench, "wrench")), dtype=np.float64
+    )
 
 
 def check_pairing_preserved(
