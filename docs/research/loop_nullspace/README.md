@@ -27,6 +27,7 @@ rank audit of the pendulum constraints and the citation verification table.
 - `publication_gate.md` is the checklist that must pass before any NSX result is published externally.
 - `contracts.md` is the per-child contract appendix for NSX-02 to NSX-62:
   signatures, preconditions, postconditions and golden names.
+- `muscle_level_view.md` is the exploratory scoping report for a muscle-redundancy layer above the envelopes (NSX-73, #12591).
 - `derivations/` holds the sympy scripts. They import no repository production
   code. `generate_goldens.py` writes the golden JSON files.
 - The golden files are in `tests/fixtures/loop_nullspace/goldens/`.
