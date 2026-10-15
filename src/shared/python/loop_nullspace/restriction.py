@@ -237,10 +237,11 @@ def _check_kinds(
     if len(set(resolved)) != len(resolved):
         raise ValueError(f"kinds must be unique, got {[k.value for k in resolved]}")
     for snap in frames:
-        if snap.topology.closure_kind is not resolved[0]:
+        frame_kind = snap.topology.closure_kind
+        if frame_kind is not resolved[0]:
             raise ValueError(
                 f"the first kind {resolved[0].value} must be the closure kind of "
-                f"every frame, got {snap.topology.closure_kind.value}"
+                f"every frame, got {frame_kind.value}"
             )
     for kind in resolved[1:]:
         restriction_rows(resolved[0], kind)
