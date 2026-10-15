@@ -20,6 +20,8 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
+from tests.helpers.opensim_support import require_opensim
+
 from scripts.allocate_swing_torques import main as cli_main
 from src.engines.physics_engines.pinocchio.python.force_adapter import (
     PinocchioForceAdapter,
@@ -196,7 +198,7 @@ SPEC = Path(__file__).resolve().parents[3] / (
 @pytest.mark.requires_opensim
 def test_opensim_native_adapter_is_registered_without_synthetic() -> None:
     """NSX-56: the native OpenSim adapter is what production routes receive."""
-    pytest.importorskip("opensim")
+    require_opensim()
     from src.engines.physics_engines.opensim.python.force_adapter import (
         OpenSimNativeForceAdapter,
     )
