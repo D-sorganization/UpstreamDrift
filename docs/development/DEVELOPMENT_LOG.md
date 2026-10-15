@@ -2288,6 +2288,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12578 · NSX-50: Pose_Interchange Dual Velocity/Acceleration/Force Maps and Closure Wrench Duals
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12578
+- **Branch:** merged via #12615
+- **PR:** #12615
+- **Paths:** see #12615
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`696113fc`; collated from changes/12578-nsx-50-pose-interchange-dual-velocity-ac.md)
+- **Summary:** NSX-50: pose_interchange dual velocity/acceleration/force maps and closure wrench duals
+- **Next step:** Shipped in PR #12615.
+
 ### DL-#12557 · NSX-12: Analytic Closed-Loop Oracle Fixtures (Planar Two-Arm Golfer, Straight Arm, Envelope, Spatial Pinocchio Chain) Reproducing NSX-00 Goldens
 
 - **State:** shipped

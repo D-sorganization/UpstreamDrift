@@ -2741,6 +2741,7 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-15 | #12615 | NSX-50: pose_interchange dual velocity/acceleration/force maps and closure wrench duals |
 | 2026-10-15 | #12614 | NSX-12: analytic closed-loop oracle fixtures (planar two-arm golfer, straight arm, envelope, spatial Pinocchio chain) reproducing NSX-00 goldens |
 | 2026-10-15 | #12612 | NSX-10: ClosedLoopSnapshot, LoopTopology and evidence-axis contracts |
 | 2026-10-15 | #12610 | NSX-02 canonical closure Jacobian convention (frame, row order, sign) with per-engine declared conventions, golden and cross-engine tests |
