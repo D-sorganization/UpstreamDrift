@@ -33,6 +33,10 @@ rank audit of the pendulum constraints and the citation verification table.
 - `muscle_level_view.md` is the exploratory scoping report for a muscle-redundancy layer above the envelopes (NSX-73, #12591).
 - `closure_alternatives_report.md` compares grip models that each have their own
   closure kinematics (NSX-72); its records are in `records/`.
+- `inverse_optimal_control_report.md` is the NSX-71 research report: inverse
+  optimal control of the allocation weights with a pre-registered held-out
+  evaluation (result: the effort-plus-rate family is rejected on the anthro
+  record; one swing, no measured torques).
 - `derivations/` holds the sympy scripts. They import no repository production
   code. `generate_goldens.py` writes the golden JSON files.
 - The golden files are in `tests/fixtures/loop_nullspace/goldens/`.
