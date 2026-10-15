@@ -128,6 +128,9 @@ class SpineStudyRequest:
             by SHA-256 or the study is ``unqualified``.
         coupling_law_id: ``coupling_data`` law id, or ``None`` to extract the
             law from the model's own couplers.
+        restrict_law_to_model: restrict the named law to the model's mapped
+            level range (SPN-14a, ``coupling.restrict_to_levels``); requires
+            ``coupling_law_id``.  Recorded in the receipt's law version.
         cost_exponent: static-optimisation exponent (2 or 3).
         external_loads: ExternalLoads XML or ``None`` (gravity only).
         events / stride / max_frames: static-optimisation frame selection.
@@ -163,6 +166,7 @@ class SpineStudyRequest:
     residual_moment_fraction: float = 0.01
     reserve_limit_nm: float = 1.0
     reserve_max_share: float = 0.05
+    restrict_law_to_model: bool = False
 
     def __post_init__(self) -> None:
         if not isinstance(self.study_id, str) or not _ID_RE.fullmatch(self.study_id):
@@ -186,6 +190,10 @@ class SpineStudyRequest:
             self.coupling_law_id, str
         ):
             raise TypeError("coupling_law_id must be a str or None")
+        if not isinstance(self.restrict_law_to_model, bool):
+            raise TypeError("restrict_law_to_model must be a bool")
+        if self.restrict_law_to_model and self.coupling_law_id is None:
+            raise ValueError("restrict_law_to_model requires a coupling_law_id")
         if isinstance(self.cost_exponent, bool) or self.cost_exponent not in _EXPONENTS:
             raise ValueError(
                 f"cost_exponent must be one of {_EXPONENTS}, got {self.cost_exponent!r}"
@@ -207,7 +215,11 @@ class SpineStudyRequest:
         object.__setattr__(self, "events", _events(self.events))
 
     def canonical_dict(self) -> dict[str, Any]:
-        """Path-free, JSON-compatible definition (basenames, no output_dir)."""
+        """Path-free, JSON-compatible definition (basenames, no output_dir).
+
+        ``restrict_law_to_model`` appears only when set, so the fingerprints of
+        requests that predate it are unchanged.
+        """
 
         def base(path: Path | None) -> str | None:
             return None if path is None else path.name
@@ -232,6 +244,7 @@ class SpineStudyRequest:
             "residual_moment_fraction": self.residual_moment_fraction,
             "reserve_limit_nm": self.reserve_limit_nm,
             "reserve_max_share": self.reserve_max_share,
+            **({"restrict_law_to_model": True} if self.restrict_law_to_model else {}),
         }
 
     @classmethod

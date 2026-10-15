@@ -41,6 +41,7 @@ __all__ = [
     "from_joint_coupling",
     "level_rotations",
     "regional_fraction",
+    "restrict_to_levels",
 ]
 
 _DENOM_TOL = 1e-12
@@ -423,6 +424,52 @@ def from_joint_coupling(
     if not order:
         raise ValueError("unmapped: level_map names no independent driver")
     return PolynomialCouplingLaw(law_id, version, order, tuple(terms), citation)
+
+
+# ------------------------------------------------------------- restriction
+
+
+def restrict_to_levels(
+    law: LinearCouplingLaw, levels: Sequence[SpinalLevel]
+) -> LinearCouplingLaw:
+    """The sub-law of ``law`` on the contiguous range ``levels`` (SPN-14a).
+
+    Used when a shipped law covers more levels than a model (e.g. a
+    full-spine regional law on a lumbar-only fixture).  The retained matrices
+    are copied unchanged, so per-level ratios within the range are preserved;
+    absolute shares are not (the distribution solve rescales ``phi`` so the
+    composed range reaches the target).  This is a repository operation, not
+    a published result, and it is recorded in the version
+    (``<version>+levels:<first>..<last>``) and the citation.
+
+    Preconditions: ``law`` is a :class:`LinearCouplingLaw` (``TypeError``);
+    ``levels`` are :class:`SpinalLevel` (``TypeError``), non-empty, contiguous
+    and covered by the law (``ValueError``).
+
+    Postconditions: the result covers exactly ``levels`` with bit-identical,
+    read-only matrices; when ``levels`` is the law's whole range the law
+    itself is returned.
+    """
+    if not isinstance(law, LinearCouplingLaw):
+        raise TypeError(f"law must be a LinearCouplingLaw, got {type(law).__name__}")
+    if isinstance(levels, str) or not isinstance(levels, Sequence) or not levels:
+        raise ValueError("levels must name at least one level")
+    wanted = _check_contiguous(list(levels))
+    missing = [lv.name for lv in wanted if lv not in law.matrices]
+    if missing:
+        raise ValueError(f"levels {missing} are not covered by law {law.law_id!r}")
+    if wanted == law.levels:
+        return law
+    span = f"{wanted[0].name}..{wanted[-1].name}"
+    out = LinearCouplingLaw(
+        law_id=law.law_id,
+        version=f"{law.version}+levels:{span}",
+        matrices={lv: law.matrices[lv] for lv in wanted},
+        independent=law.independent,
+        citation=f"{law.citation}; restricted to {span} (repository operation)",
+    )
+    ensure(out.levels == wanted, "restricted law must cover the requested levels")
+    return out
 
 
 # ------------------------------------------------------------ derived quantities

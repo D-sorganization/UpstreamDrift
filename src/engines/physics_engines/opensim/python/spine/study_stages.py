@@ -28,6 +28,9 @@ from src.engines.physics_engines.opensim.python.spine.drive import (
 from src.engines.physics_engines.opensim.python.spine.golf_input import (
     read_golf_humanoid_motion,
 )
+from src.engines.physics_engines.opensim.python.spine.inventory import (
+    load_level_maps,
+)
 from src.engines.physics_engines.opensim.python.spine.inverse_dynamics import (
     ResidualBudget,
     SpineIDOptions,
@@ -51,6 +54,7 @@ from src.engines.physics_engines.opensim.python.spine.study_receipt import (
 from src.shared.python.core.constants import GRAVITY_FLOAT
 from src.shared.python.pose_estimation.model_files import sha256_of
 from src.shared.python.spine.context_bands import annotate
+from src.shared.python.spine.coupling import CouplingLaw, restrict_to_levels
 from src.shared.python.spine.coupling_data import coupling_law
 
 logger = logging.getLogger(__name__)
@@ -106,6 +110,19 @@ def _record(
     )
 
 
+def _requested_law(request: Any) -> CouplingLaw | None:
+    """The named law, restricted to the model's mapped levels when asked."""
+    if request.coupling_law_id is None:
+        return None
+    law = coupling_law(request.coupling_law_id)
+    if not request.restrict_law_to_model:
+        return law
+    entry = load_level_maps().get(request.model_id)
+    if entry is None or not entry.levels:
+        raise ValueError(f"no mapped levels for model_id {request.model_id!r}")
+    return restrict_to_levels(law, tuple(entry.levels))
+
+
 def _drive(request: Any, model: Path, scrub: Any, out: StageOutcome) -> DriveResult:
     golf = read_golf_humanoid_motion(request.motion_path, request.golf_model_path)
     out.stages.append(
@@ -116,11 +133,7 @@ def _drive(request: Any, model: Path, scrub: Any, out: StageOutcome) -> DriveRes
             scrub,
         )
     )
-    law = (
-        None
-        if request.coupling_law_id is None
-        else coupling_law(request.coupling_law_id)
-    )
+    law = _requested_law(request)
     options = DriveOptions(
         tolerance_rad=request.drive_tolerance_rad, pelvis=_PELVIS[request.pelvis]
     )
