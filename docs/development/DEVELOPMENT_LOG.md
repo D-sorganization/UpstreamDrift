@@ -2288,6 +2288,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12558 · NSX-13: Snapshot_From_Adapter With CLOSED_LOOP_SNAPSHOT Capability (Pinocchio FULL), Canonical Closure in the Torque Allocator, constraintDynamics Parity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12558
+- **Branch:** merged via #12623
+- **PR:** #12623
+- **Paths:** see #12623
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`8c56e217`; collated from changes/12558-nsx-13-snapshot-from-adapter-with-closed.md)
+- **Summary:** NSX-13: snapshot_from_adapter with CLOSED_LOOP_SNAPSHOT capability (Pinocchio FULL), canonical closure in the torque allocator, constraintDynamics parity
+- **Next step:** Shipped in PR #12623.
+
 ### DL-#12556 · NSX-11 Typed Loop-Nullspace Registry Loader With CI Citation Gate
 
 - **State:** shipped

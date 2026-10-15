@@ -2741,6 +2741,7 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-15 | #12623 | NSX-13: snapshot_from_adapter with CLOSED_LOOP_SNAPSHOT capability (Pinocchio FULL), canonical closure in the torque allocator, constraintDynamics parity |
 | 2026-10-15 | #12613 | NSX-11 typed loop-nullspace registry loader with CI citation gate |
 | 2026-10-15 | #12615 | NSX-50: pose_interchange dual velocity/acceleration/force maps and closure wrench duals |
 | 2026-10-15 | #12614 | NSX-12: analytic closed-loop oracle fixtures (planar two-arm golfer, straight arm, envelope, spatial Pinocchio chain) reproducing NSX-00 goldens |
