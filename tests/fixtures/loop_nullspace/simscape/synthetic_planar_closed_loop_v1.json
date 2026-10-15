@@ -2,6 +2,7 @@
  "schema": "simscape-closed-loop-snapshot/v1",
  "provenance": {
   "provenance_kind": "synthetic_test_fixture",
+    "model_scope": "verification_rig",
   "matlab_release": null,
   "matlab_version": null,
   "model_file": null,

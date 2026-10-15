@@ -7,7 +7,7 @@ file `simscape-closed-loop-snapshot/v1`, read by
 Required release: **MATLAB R2025b** only; the exporter refuses to run in any other
 release, and R2026a results are never acceptance evidence.
 
-**Status.** The method is validated on a planar test rig. The golf models cannot be
+**Status.** The method is validated on a planar test rig (scope `verification_rig`, capability NONE). The golf models cannot be
 exported yet; see `docs/development/planning/DV-12583.md`. The golf-model
 `CLOSED_LOOP_SNAPSHOT` capability stays NONE.
 
@@ -66,6 +66,15 @@ agreement with the analytic planar model is 4e-15 (`M`), 7e-15 (`h`), 3e-16 (`J_
 in; its SHA-256 is recorded in the export. A rebuilt `.slx` has a different hash.
 `synthetic_planar_closed_loop_v1.json` is a separate test-only fixture serialised from
 the analytic model (`provenance_kind: synthetic_test_fixture`, capability NONE).
+
+## Model Scope
+
+Every export declares `provenance.model_scope`: `golf_model` or `verification_rig`. Only a
+`golf_model` export from R2025b can grant `CLOSED_LOOP_SNAPSHOT` FULL; this exporter always
+writes `verification_rig`. The checked-in R2025b rig export was re-labelled by adding
+`model_scope: verification_rig` to its provenance. That is a declared re-labelling of our
+own output: the recorded SHA-256, MATLAB version string and all data are unchanged. Its
+capability is NONE and snapshots need `test_only=True`, like the synthetic fixture.
 
 ## Limits
 

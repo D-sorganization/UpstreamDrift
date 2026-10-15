@@ -6,7 +6,8 @@ it with the NSX-10 contracts and decides which capability the file can support.
 
 The decision is deliberately conservative (AGENTS.md "Required MATLAB
 Release"): ``CLOSED_LOOP_SNAPSHOT`` is declared ``FULL`` only for a file whose
-``provenance_kind`` is ``"matlab_export"`` and whose ``matlab_release`` is
+``provenance_kind`` is ``"matlab_export"``, whose ``model_scope`` is
+``"golf_model"`` (a ``"verification_rig"`` never counts) and whose ``matlab_release`` is
 exactly ``"R2025b"``.  A ``"synthetic_test_fixture"`` (serialised from the
 analytic planar model, never from MATLAB) and any other MATLAB release,
 including R2026a, are capability ``NONE``; their data may only be turned into a
@@ -16,7 +17,7 @@ File layout (all SI, canonical grip-frame closure rows ``[fx fy fz tx ty tz]``
 per ``docs/research/loop_nullspace/contracts.md``)::
 
     schema        "simscape-closed-loop-snapshot/v1"
-    provenance    provenance_kind, matlab_release, matlab_version, model_file,
+    provenance    provenance_kind, model_scope, matlab_release, matlab_version, model_file,
                   model_sha256, exported_at, exporter, note
     topology      closure_kind, closing_side, holding_side, coordinate_order,
                   actuated_indices, unactuated_indices, loop_support_indices
@@ -56,6 +57,8 @@ from src.shared.python.loop_nullspace.evidence import Array
 __all__ = [
     "ACCEPTANCE_RELEASE",
     "SCHEMA_ID",
+    "SCOPE_GOLF",
+    "SCOPE_RIG",
     "SimscapeExport",
     "SimscapeProvenance",
     "SimscapeState",
@@ -72,6 +75,9 @@ ACCEPTANCE_RELEASE = "R2025b"
 _KIND_MATLAB = "matlab_export"
 _KIND_SYNTHETIC = "synthetic_test_fixture"
 _KINDS = (_KIND_MATLAB, _KIND_SYNTHETIC)
+SCOPE_GOLF = "golf_model"
+SCOPE_RIG = "verification_rig"
+_SCOPES = (SCOPE_GOLF, SCOPE_RIG)
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 _MATLAB_REQUIRED = ("matlab_release", "matlab_version", "model_file", "model_sha256")
 _SYNTHETIC_FORBIDDEN = ("matlab_release", "matlab_version", "model_sha256")
@@ -83,6 +89,7 @@ class SimscapeProvenance:
     """Where an export came from; the evidence the capability decision uses."""
 
     provenance_kind: str
+    model_scope: str
     matlab_release: str | None
     matlab_version: str | None
     model_file: str | None
@@ -92,6 +99,12 @@ class SimscapeProvenance:
     note: str = ""
 
     def __post_init__(self) -> None:
+        if self.model_scope not in _SCOPES:
+            raise ValueError(
+                f"model_scope must be one of {_SCOPES}, got {self.model_scope!r}"
+            )
+        if self.provenance_kind == _KIND_SYNTHETIC and self.model_scope != SCOPE_RIG:
+            raise ValueError("a synthetic_test_fixture must have model_scope rig")
         if self.provenance_kind not in _KINDS:
             raise ValueError(
                 f"provenance_kind must be one of {_KINDS}, got {self.provenance_kind!r}"
@@ -154,6 +167,11 @@ class SimscapeExport:
                 f"provenance_kind={prov.provenance_kind!r} is test-only, not "
                 "a MATLAB export"
             )
+        if prov.model_scope != SCOPE_GOLF:
+            return (
+                f"model_scope={prov.model_scope!r} is a verification rig, not "
+                "the golf model"
+            )
         if prov.matlab_release != ACCEPTANCE_RELEASE:
             return (
                 f"matlab_release={prov.matlab_release!r} is not acceptance "
@@ -162,10 +180,11 @@ class SimscapeExport:
         return f"matlab_export from {ACCEPTANCE_RELEASE}"
 
     def capability(self) -> CapabilityLevel:
-        """``FULL`` only for a ``matlab_export`` from R2025b, else ``NONE``."""
+        """``FULL`` only for a golf-model ``matlab_export`` from R2025b."""
         prov = self.provenance
         ok = (
             prov.provenance_kind == _KIND_MATLAB
+            and prov.model_scope == SCOPE_GOLF
             and prov.matlab_release == ACCEPTANCE_RELEASE
         )
         return CapabilityLevel.FULL if ok else CapabilityLevel.NONE
@@ -197,6 +216,7 @@ def _parse_provenance(raw: Any) -> SimscapeProvenance:
     kind = _require_key(doc, "provenance_kind", "provenance")
     return SimscapeProvenance(
         provenance_kind=kind,
+        model_scope=_require_key(doc, "model_scope", "provenance"),
         matlab_release=doc.get("matlab_release"),
         matlab_version=doc.get("matlab_version"),
         model_file=doc.get("model_file"),
@@ -409,6 +429,7 @@ def export_to_dict(export: SimscapeExport) -> dict[str, Any]:
         "schema": export.schema,
         "provenance": {
             "provenance_kind": prov.provenance_kind,
+            "model_scope": prov.model_scope,
             "matlab_release": prov.matlab_release,
             "matlab_version": prov.matlab_version,
             "model_file": prov.model_file,
@@ -469,6 +490,7 @@ def export_from_snapshot(
         schema=SCHEMA_ID,
         provenance=SimscapeProvenance(
             provenance_kind=_KIND_SYNTHETIC,
+            model_scope=SCOPE_RIG,
             matlab_release=None,
             matlab_version=None,
             model_file=None,

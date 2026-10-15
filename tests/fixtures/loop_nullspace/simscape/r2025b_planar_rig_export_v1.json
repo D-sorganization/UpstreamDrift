@@ -2,6 +2,7 @@
   "schema": "simscape-closed-loop-snapshot/v1",
   "provenance": {
     "provenance_kind": "matlab_export",
+    "model_scope": "verification_rig",
     "matlab_release": "R2025b",
     "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
     "model_file": "NSX_PlanarRig.slx",

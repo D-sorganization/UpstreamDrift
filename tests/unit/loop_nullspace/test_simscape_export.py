@@ -52,6 +52,7 @@ def _matlab_doc(**prov: Any) -> dict[str, Any]:
     doc = _fixture()
     doc["provenance"].update(
         provenance_kind="matlab_export",
+        model_scope="golf_model",
         matlab_release="R2025b",
         matlab_version="25.2.0.0 (R2025b)",
         model_file="rig.slx",
@@ -262,13 +263,17 @@ def test_checked_in_r2025b_export_is_a_genuine_matlab_export() -> None:
     assert prov.matlab_release == "R2025b"
     assert "(R2025b)" in str(prov.matlab_version)
     assert prov.model_file == "NSX_PlanarRig.slx"
-    assert export.capability() is CapabilityLevel.FULL
+    assert prov.model_scope == "verification_rig"
+    assert export.capability() is CapabilityLevel.NONE
+    assert "verification rig" in export.capability_reason()
     assert "Not the golf model" in prov.note
 
 
 def test_r2025b_rig_export_agrees_with_the_analytic_planar_model() -> None:
     export = load_simscape_export(REAL)
-    snap = snapshot_from_export(export, 0, input_provenance=INPUT)
+    with pytest.raises(CapabilityUnavailable, match="verification rig"):
+        snapshot_from_export(export, 0, input_provenance=INPUT)
+    snap = snapshot_from_export(export, 0, input_provenance=INPUT, test_only=True)
     ref = planar_golfer_snapshot().snapshot
     np.testing.assert_array_equal(snap.q, ref.q)
     for name in ("M", "h", "J_c", "Jdot_v"):
@@ -281,7 +286,8 @@ def test_r2025b_rig_export_agrees_with_the_analytic_planar_model() -> None:
 
 
 def test_r2025b_rig_export_satisfies_the_closure_identities() -> None:
-    snap = snapshot_from_export(load_simscape_export(REAL), 0, input_provenance=INPUT)
+    export = load_simscape_export(REAL)
+    snap = snapshot_from_export(export, 0, input_provenance=INPUT, test_only=True)
     assert np.max(np.abs(snap.J_c @ snap.v)) < 1e-12
     assert np.max(np.abs(snap.J_c @ snap.a + snap.Jdot_v)) < 1e-12
 
@@ -297,3 +303,37 @@ def test_rig_spec_carries_inputs_only_and_matches_the_fixture_layout() -> None:
     state = spec["states"][0]
     assert set(state) == {"q", "v", "a"}  # no M, h, J_c: those come from Simscape
     assert "Not the golf model" in spec["note"]
+
+
+def test_verification_rig_scope_never_grants_capability_even_from_r2025b() -> None:
+    export = parse_simscape_export(_matlab_doc(model_scope="verification_rig"))
+    assert export.provenance.matlab_release == "R2025b"
+    assert export.capability() is CapabilityLevel.NONE
+    with pytest.raises(CapabilityUnavailable, match="verification rig"):
+        snapshot_from_export(export, 0, input_provenance=INPUT)
+    snapshot_from_export(export, 0, input_provenance=INPUT, test_only=True)
+
+
+def test_golf_model_r2026a_is_none() -> None:
+    doc = _matlab_doc(matlab_release="R2026a", matlab_version="26.1 (R2026a)")
+    assert parse_simscape_export(doc).capability() is CapabilityLevel.NONE
+
+
+@pytest.mark.parametrize("scope", ["", "golf", None])
+def test_model_scope_must_be_a_known_value(scope: Any) -> None:
+    with pytest.raises(ValueError, match="model_scope"):
+        parse_simscape_export(_matlab_doc(model_scope=scope))
+
+
+def test_model_scope_is_required() -> None:
+    doc = _fixture()
+    del doc["provenance"]["model_scope"]
+    with pytest.raises(ValueError, match="model_scope"):
+        parse_simscape_export(doc)
+
+
+def test_synthetic_fixture_cannot_claim_golf_scope() -> None:
+    doc = _fixture()
+    doc["provenance"]["model_scope"] = "golf_model"
+    with pytest.raises(ValueError, match="model_scope"):
+        parse_simscape_export(doc)
