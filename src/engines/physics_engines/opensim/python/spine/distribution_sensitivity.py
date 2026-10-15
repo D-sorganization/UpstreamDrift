@@ -58,6 +58,7 @@ from src.engines.physics_engines.opensim.python.spine.read_kinematics import (
 )
 from src.engines.physics_engines.opensim.python.spine.study import (
     SpineStudyRequest,
+    load_request_file,
     run_spine_study,
 )
 from src.engines.physics_engines.opensim.python.spine.study_aggregation import (
@@ -673,10 +674,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--threshold", type=float, default=DEFAULT_ROBUST_THRESHOLD)
     args = parser.parse_args(argv)
-    raw = json.loads(args.request.read_text(encoding="utf-8"))
-    if args.out is not None:
-        raw = {**raw, "output_dir": str(args.out.resolve())}
-    base = SpineStudyRequest.from_dict(raw, args.request.resolve().parent)
+    base = load_request_file(args.request, args.out)
     report = run_distribution_sensitivity(
         base, args.laws, robust_threshold=args.threshold
     )

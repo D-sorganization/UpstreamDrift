@@ -59,8 +59,8 @@ python3 -c "from src.engines.physics_engines.opensim.python.spine.fixture_model 
 The request maps one-to-one onto `SpineStudyRequest`. Relative paths resolve
 against the directory of the request file, so the example expects
 `study/request.json`, the fixture as `study/fixture.osim` and your swing as
-`study/swing.sto`. `output_dir` is required in the file even when `--out` is
-given.
+`study/swing.sto`. `output_dir` may be omitted from the file when `--out` is
+given; `--out` overrides the file's value otherwise.
 
 ```json
 {

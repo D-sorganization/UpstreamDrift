@@ -526,19 +526,30 @@ def run_spine_study(
     return receipt
 
 
+def load_request_file(path: Path, out: Path | None = None) -> SpineStudyRequest:
+    """Read a request JSON file; a non-``None`` ``out`` overrides ``output_dir``.
+
+    ``out`` is merged before validation, so the file need not carry
+    ``output_dir`` when ``out`` is given.  Relative paths resolve against the
+    directory of the request file.
+
+    Raises:
+        ValueError: the file is not a valid request (including a missing
+            ``output_dir`` when ``out`` is ``None``).
+    """
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if out is not None:
+        raw = {**raw, "output_dir": str(out.resolve())}
+    return SpineStudyRequest.from_dict(raw, path.resolve().parent)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """CLI: run the study of a JSON request file; exit 0 only on ``pass``."""
     parser = argparse.ArgumentParser(prog="spine.study", description=__doc__)
     parser.add_argument("--request", type=Path, required=True)
     parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args(argv)
-    raw = json.loads(args.request.read_text(encoding="utf-8"))
-    request = SpineStudyRequest.from_dict(raw, args.request.resolve().parent)
-    if args.out is not None:
-        request = SpineStudyRequest.from_dict(
-            {**raw, "output_dir": str(args.out.resolve())},
-            args.request.resolve().parent,
-        )
+    request = load_request_file(args.request, args.out)
     receipt = run_spine_study(request, env=os.environ)
     sys.stdout.write(receipt_to_json(receipt))
     return 0 if receipt.status == "pass" else 1
