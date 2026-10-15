@@ -544,14 +544,10 @@ def golfer_forward_kinematics(
         _warn_once("golfer_forward_kinematics", exc)
         return None
 
-    theta_club = float(q_arr[7])
-    club_dx = float(np.sin(theta_club))
-    club_dy = float(-np.cos(theta_club))
+    from .golfer_kinematics import point_on_club  # local: avoids import cycle
+
     club_base = tuple(result["club_base"])
-    grip_left = (
-        float(club_base[0] + params.grip_left * club_dx),
-        float(club_base[1] - params.grip_left * club_dy),
-    )
+    grip_left = point_on_club(club_base, float(q_arr[7]), params.grip_left)
 
     return {
         "origin": (0.0, 0.0),

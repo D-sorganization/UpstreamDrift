@@ -2,8 +2,9 @@
 
 The golfer model (`src.shared.python.pendulum_simulator.physics_golfer`) has a genuine
 closed kinematic loop: both hands grip a shared club, giving 8 generalized coordinates
-subject to 4 holonomic constraints whose Jacobian is rank-3 (per TB-00's registry entry
-for `constrained_upper_body_golfer`), leaving 5 independent DOFs. This module never
+subject to 4 holonomic constraints whose Jacobian is rank 2 on the closed manifold (per
+TB-00's registry entry for `constrained_upper_body_golfer`, corrected by #12608), leaving
+6 independent DOFs. This module never
 substitutes a simpler open-chain model and never fakes loop closure by drawing the
 second hand onto the club after the fact -- it reuses the existing Baumgarte-stabilized
 constrained solver (`constraint_solver.py`) and Newton constraint projection
@@ -27,7 +28,6 @@ from src.shared.python.pendulum_simulator.golfer_constraints import (
 )
 from src.shared.python.pendulum_simulator.golfer_kinematics import forward_kinematics
 from src.shared.python.pendulum_simulator.physics_golfer import (
-    N_CONSTRAINTS,
     N_DOF,
     GolferParams,
 )
@@ -37,8 +37,8 @@ from src.shared.python.tour_baselines.registry import get_golf_model
 MODEL_ID_GOLFER: str = "constrained_upper_body_golfer"
 
 # Jacobian singular values below this magnitude are treated as numerically
-# rank-deficient when auditing loop closure (distinct from a legitimate,
-# well-conditioned rank-3 Jacobian that TB-00 already established).
+# rank-deficient when auditing loop closure (distinct from the legitimate,
+# well-conditioned rank-2 closure Jacobian recorded in TB-00's registry).
 _RANK_SINGULAR_VALUE_TOL: float = 1e-8
 
 
@@ -123,6 +123,12 @@ class GolferFeasibilityReport:
     reason: str = ""
 
 
+def _registered_closure_rank() -> int:
+    """Closure-Jacobian rank recorded by TB-00 (``dof - independent_dof``)."""
+    identity = get_golf_model(MODEL_ID_GOLFER)
+    return identity.dof - identity.independent_dof
+
+
 def _jacobian_rank(q: np.ndarray, params: GolferParams) -> tuple[np.ndarray, int]:
     jac = analytical_constraint_jacobian(q, params)
     singular_values = np.linalg.svd(jac, compute_uv=False)
@@ -179,9 +185,10 @@ def solve_feasible_initial_state(
         )
 
     singular_values, rank = _jacobian_rank(q0, params)
-    if rank < N_CONSTRAINTS - 1:
-        # TB-00 established a genuine rank-3 Jacobian (redundant row) as expected;
-        # anything lower indicates a true kinematic singularity at this pose.
+    expected_rank = _registered_closure_rank()
+    if rank < expected_rank:
+        # The closure has two redundant rows (#12608); anything below the
+        # registered rank indicates a true kinematic singularity at this pose.
         return GolferFeasibilityReport(
             feasible=False,
             q0=q0,
@@ -192,7 +199,7 @@ def solve_feasible_initial_state(
             jacobian_rank=rank,
             reason=(
                 f"constraint Jacobian rank {rank} < expected minimum "
-                f"{N_CONSTRAINTS - 1} at the projected pose (kinematic singularity)"
+                f"{expected_rank} at the projected pose (kinematic singularity)"
             ),
         )
 
