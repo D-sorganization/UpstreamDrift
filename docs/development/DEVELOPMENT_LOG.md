@@ -2288,6 +2288,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12581 · NSX-53 Native Drake Force Adapter With Closed-Loop Snapshot; Synthetic Drake Route Quarantined to Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12581
+- **Branch:** merged via #12630
+- **PR:** #12630
+- **Paths:** see #12630
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`3b2357c0`; collated from changes/12581-nsx-53-native-drake-force-adapter-with-c.md)
+- **Summary:** NSX-53 native Drake force adapter with closed-loop snapshot; synthetic Drake route quarantined to tests
+- **Next step:** Shipped in PR #12630.
+
 ### DL-#12559 · NSX-14 Kinematic and Contact Admission Gate (Admit, AdmittedTrajectory)
 
 - **State:** shipped

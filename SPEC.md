@@ -2741,6 +2741,7 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-15 | #12630 | NSX-53 native Drake force adapter with closed-loop snapshot; synthetic Drake route quarantined to tests |
 | 2026-10-15 | #12625 | NSX-14 kinematic and contact admission gate (admit, AdmittedTrajectory) |
 | 2026-10-15 | #12676 | Guard MOSAIC inertial parameter layouts: audit found no live Pinocchio/inertial.py mix; tests pin each module's ordering and block unconverted coupling |
 | 2026-10-15 | #12627 | NSX-54: OpenSim closed-loop snapshot adapter delegating to OpenSimFullBodyParityAdapter, equal to Pinocchio |
