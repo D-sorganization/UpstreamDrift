@@ -197,6 +197,14 @@ def test_analyzer_with_model_provider_reports_model_and_skips_heuristic_risk() -
     assert result.provider_id != "heuristic_v1"
     assert result.is_model_based is True
     assert result.risk_assessed is False
+    # Heuristic bands do not apply to model loads; never report "safe".
+    for risk in (
+        result.compression_risk,
+        result.shear_risk,
+        result.x_factor_risk,
+        result.overall_risk,
+    ):
+        assert risk is SpinalRiskLevel.NOT_ASSESSED
     assert set(result.segments) == {"L5-S1", "L4-L5"}
     np.testing.assert_allclose(
         result.segments["L4-L5"].compression, series.compression_n()[:, 1], atol=1e-12
