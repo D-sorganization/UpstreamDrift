@@ -253,6 +253,74 @@ vector.  Without feet, all six root rows are conditions ($b_{root}=0$ is
 required).  The gauge of $1$ in the two-foot row is the contact force pair
 along the line $p_1p_2$ (a squeeze that produces no net wrench).
 
+\subsection{Lower-Body Loop: Ground Contact and Observations}
+\label{sec:lowerbody}
+
+With rigid unilateral feet the balance is $A\,x=b$ with
+$A=[S^{\top}\;J_c^{\top}\;J_g^{\top}]$ and
+$x=(\tau,\lambda,f_g)$, where $f_g$ stacks a world-axis three-vector for every
+contact point and $J_g$ is the stacked point Jacobian.  A point is a contact
+when its signed gap to the ground is at most a declared tolerance; the load of
+a contact lies in a Coulomb cone $\sqrt{f_{t1}^2+f_{t2}^2}\le\mu f_n$ in the
+frame $(t_1,t_2,n)$ of its normal, with $\mu$ a declared coefficient
+(hypothesis \texttt{H-FRICTION-CONE}), never a measurement.  The foot contact
+cones share the constraint class of the grip cones.
+
+A ground-reaction observation is a linear map of the contact loads,
+$E\,f_g=g$, with a declared one-sigma uncertainty $\sigma_i$ for every row
+(hypothesis \texttt{H-GRF-OBSERVATION}).  Embedding $E_x=[0\;0\;E]$ and writing
+$x=x_p+Nz$,
+\begin{equation}
+\text{nullity after observation}=\text{nullity}(A)-\rank(E_xN),
+\end{equation}
+the exact limit of vanishing measurement uncertainty.  The rank counts the
+null directions the data can see; a net ground wrench is already fixed by the
+unactuated root rows, so it contributes rank $0$.  With finite uncertainty the
+observation is the two-sided band
+\begin{equation}
+\bigl|E_x(x_p+Nz)-g\bigr|_i\le k\,\sigma_i,
+\end{equation}
+with coverage factor $k$ (default $3$), added to the feasible set as rows of
+kind \texttt{grf}; the null dimension is unchanged.  The accounting reports the
+singular values of $\operatorname{diag}(1/\sigma)E_xN$: a value below one means
+a unit scaled null step moves the prediction by less than the declared
+uncertainty, so that direction is not resolved by the data.  The restriction
+routine moves $x_p$ to the weighted least-squares member of the family and
+drops the visible directions; it refuses (never absorbs) data that disagree
+with the balance by more than $k\sigma$.
+
+\begin{table}[ht]
+\centering
+\caption{Observation Rank Against the Exact Golden (Point Feet)}
+\label{tab:lowerbody}
+\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Observation $E$ & 2 points (1 per foot) & 4 points (2 per foot) \\
+\midrule
+Nullity before observation        & 7 & 12 \\
+Net force and moment              & 0 & 0 \\
+Net force                         & 0 & 0 \\
+Vertical load of each foot        & 0 & 1 \\
+Force of each foot                & 1 & 3 \\
+Every point force                 & 1 & 6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The table lists $\rank(E_xN)$, computed exactly over the rationals by
+\texttt{derivations/lower\_body\_counts.py} (golden
+\texttt{lower\_body\_observation}); the numeric fixture at zero root pose
+reproduces every entry.  With two point feet the contact map has rank $5$, so
+the vertical loads of the two feet are already fixed by the balance and the
+only visible direction of the per-foot force is the horizontal squeeze along
+the line $p_1p_2$.
+
+Non-claims: contacts are rigid and unilateral (no compliance, no slip
+dynamics); a friction coefficient is a declared hypothesis; an observation
+produced by a simulation standing in for a force plate is a simulation record,
+not a measurement; contact loads are not physiological quantities.
+
 \section{Zero-Side Three-Case Analysis}
 \label{sec:zeroside}
 

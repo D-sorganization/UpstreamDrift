@@ -34,7 +34,8 @@ issue.
 | `planar_two_arm_full` | 5-DOF planar two-arm golfer, all coordinates actuated: `M`, `h`, `S`, `J_c`, `Jdot_v`, dimension counts, three-case zero-side classification with residual, minimum-metric torque | NSX-12, 15, 17, 22, 23, 30 |
 | `planar_two_arm_club_unactuated` | Same configuration, club angle unactuated | NSX-12, 15, 17, 30 |
 | `planar_straight_arm_rank_deficient` | Collinear configuration (rank `J_c` = 1), both actuation variants, exact rational data | NSX-12, 15, 26 |
-| `spatial_counts` | Dimension counts for fixed base, floating root, floating root with two point feet (counts only, no numeric state) | NSX-12, 15, 60 |
+| `spatial_counts` | Dimension counts for fixed base, floating root, floating root with two point feet and with four point feet (counts only, no numeric state) | NSX-12, 15, 60 |
+| `lower_body_observation` | Exact (sympy) nullity and `rank(E_x N)` of five ground-reaction observation maps for two-point and four-point feet | NSX-60 |
 | `envelope_analytic_lp` | Closed-form envelope, Chebyshev centre, trajectory coupling, infeasible and unbounded certificates, sign classes | NSX-12, 20, 21, 22, 25 |
 | `grasp_map_worked_example` | `G`, `K`, `Phi`, `G#`, closing-hand map `Q`, bare-club Newton-Euler worked example, split coordinates | NSX-16, 17 |
 | `c_pm_identity` | `c_plus`/`c_minus` identity samples, unique uniform minimiser, heterogeneous minimiser | NSX-23 |
@@ -450,21 +451,37 @@ Implementation notes (`loop_nullspace/envelopes.py`, #12565):
   (time-varying `x_p`, torque rows only) solve all joint-torque envelopes plus
   the Chebyshev LP in about 3.7 s on the 4-core shared brick host. The real 200-frame
   anthropometric run is blocked (below).
-- **Real anthro benchmark: BLOCKED, not run.** The chain
-  `snapshot_from_adapter -> admit -> decompose -> FeasibleSet -> static_envelopes`
-  was exercised on `ground_support/dynamics_record.npz` with
-  `full_body_spec_hipcal_scaled.json` (Pinocchio, 41 coordinates, 35 actuated,
-  capacity rows exist for all 35). Frames 0, 150, 300, 450 and 600 (state
-  projected with `project_to_closure`, acceleration from the recorded efforts)
-  all fail at `decompose` with `BalanceInconsistentError`, scaled residual
-  92, 217, 202, 62 and 42: the six unactuated root rows are balanced by
-  foot-ground loads, and `snapshot_from_adapter` leaves `J_g` unset (foot
-  contacts are outside that seam; the run uses compliant contact spheres).
-  No substitute was made. Unblocking needs an adapter foot Jacobian `J_g` plus
-  contact cones (`H-FRICTION-CONE`) for the anthro model.
-  `tests/integration/test_loop_nullspace_anthro_envelope_blocker.py` pins this
-  and must be replaced by the 200-frame benchmark (evenly strided frames
-  `0, 3, ..., 597`) once `J_g` exists.
+- **Real anthro benchmark (run in NSX-60, #12585).** Chain:
+  `snapshot_from_adapter(foot_contact_tol_m=0.0) -> decompose -> FeasibleSet
+  (envelope_only, capacity, foot cones) -> static_envelopes` on the 200 strided
+  frames `0, 3, ..., 597` of `ground_support/dynamics_record.npz` with
+  `full_body_spec_hipcal_scaled.json` (Pinocchio, 41 coordinates, 35 actuated;
+  23 of 35 capacity slots are ASSUMED). Quantities: 35 joint torques, the six
+  closure multipliers, the net ground force and the two foot loads (46 per
+  frame). Measured on host `Brick` (Linux 7.0.0-38 x86_64, Python 3.12.13,
+  4-core shared machine, load about 2):
+
+  | Item | Result |
+  |---|---|
+  | Frames decomposed | 199 of 200 |
+  | Frame refused | 510 (airborne, no sphere within the tolerance): `BalanceInconsistentError`, scaled residual `1.89e-8` against `BALANCE_TOL = 1e-9`; not repaired, tolerance unchanged |
+  | Flight frames that decompose with no contact | 18 (471, 474, 489-507, 540-564 stride 3) |
+  | Snapshot, closure projection and decomposition, 199 frames | 57 to 84 s over three runs |
+  | `static_envelopes` wall time, 199 frames x 46 quantities | 19.5 s (73 513 simplex iterations) |
+  | Status | 124 BOUNDED, 75 INFEASIBLE |
+  | Conflict set of every INFEASIBLE frame | `H-TORQUE-CAPACITY` only |
+  | Chebyshev margin, BOUNDED frames | min 0.0059, median 1.19, max 3.30 |
+
+  The INFEASIBLE frames are the recorded efforts exceeding the ASSUMED
+  capacities (the deletion filter names no contact or cone hypothesis); they
+  are a statement about the capacity prior, not about the contacts. Contact set:
+  a sphere is a rigid contact when its gap to the ground is at most
+  `foot_contact_tol_m = 0.0`, the set the compliant law penetrates; friction
+  coefficient `0.9` is the spec's static friction, a declared hypothesis
+  (`H-FRICTION-CONE`). The benchmark is recorded, not gated:
+  `tests/integration/test_loop_nullspace_anthro_envelope_benchmark.py`
+  (`slow`, `requires_pinocchio`; `LOOP_NULLSPACE_BENCH_JSON=<path>` writes the
+  measured record). It replaces the former blocker test.
 - Non-claim: static envelopes over-approximate trajectory-feasible ranges when
   smoothness priors are active (NSX-25).
 
@@ -647,9 +664,93 @@ validation.
 
 ## NSX-60 Lower-Body Loop (#12585, Strong)
 
-Golden `spatial_counts` variant `floating_root_two_point_feet`: contact-map
-rank is 5 for two point feet, so the balance equations carry one consistency
-condition; observed GRF reduces nullity by its rank.
+Two-foot ground contact is a second unilateral null space: with rigid contacts
+the balance is `A x = b`, `A = [S^T J_c^T J_g^T]`, `x = (tau, lambda, f_g)`.
+Golden `spatial_counts` variants `floating_root_two_point_feet` and
+`floating_root_four_point_feet` fix the counts (two point feet: contact-map
+rank 5, nullity 7, gauge 1; four point feet: nullity 12). Golden
+`lower_body_observation` (sympy, exact, no repository code) gives
+`rank(E_x N)` for five observation maps, and the numeric fixture at zero root
+pose (`zero_root_pose=True`) reproduces every entry.
+
+| Observation map | 2 points | 4 points |
+|---|---|---|
+| Net force and moment (root rows already fix it) | 0 | 0 |
+| Net force | 0 | 0 |
+| Vertical load of each foot | 0 | 1 |
+| Force of each foot | 1 | 3 |
+| Every point force | 1 | 6 |
+
+Implementation (`loop_nullspace/ground_contact.py`, `ground_envelopes.py`):
+
+- Seam: `PinocchioForceAdapter.foot_contact_candidates(q)` returns the six
+  contact spheres (`ContactCandidate`: `FootContact` at the sphere centre, world
+  ground normal, spec static friction, signed gap). `snapshot_from_adapter(...,
+  foot_contact_tol_m=T)` keeps candidates with `gap <= T` and stacks their rows
+  of `compute_contact_jacobian` as `J_g`; without `T` (default) `J_g` stays
+  `None` and no other engine changes. An adapter without the method raises
+  `CapabilityUnavailable`.
+- Cones: `foot_friction_cones(snapshot)` builds one `ContactCone` per contact over
+  its three `f_g` entries, reusing `force_nullspace.constraints.FrictionCone`;
+  they enter `FeasibleSet.from_hypotheses(cones=...)` under `H-FRICTION-CONE`.
+- Observation: `GroundObservation(selector, values, sigma, labels, source,
+  coverage=3)` with mandatory positive per-row `sigma` and constructors
+  `from_point_loads`, `from_contact_groups`, `from_normal_load_and_cop`.
+  `observation_accounting` reports `rank(E_x N)`, the observed nullity, the
+  singular values of `diag(1/sigma) E_x N` and the chi-square disagreement with
+  the balance; `restrict_to_observation` is the zero-uncertainty limit (drops the
+  visible directions, moves `x_p` to the weighted least-squares member, refuses
+  inconsistent data with `ObservationInconsistentError`);
+  `FeasibleSet.from_hypotheses(observation=...)` adds the band
+  `|E f_g - g| <= k sigma` as `grf` rows under the new hypothesis
+  `H-GRF-OBSERVATION` (preset `envelope_grf_observed`), keeping the null
+  dimension.
+- Quantities: `closure_wrench_quantities()` and `ground_force_quantities(...)`
+  feed `static_envelopes` with the multiplier block and the ground loads.
+
+Anthro acceptance report (same 199 frames, same host, `H-TORQUE-CAPACITY` prior
+unchanged; observed variants run on the 124 frames whose free set is non-empty,
+since observation rows only add constraints):
+
+- The record `dynamics_record.npz` carries `normal_force_n`, `weight_fraction`,
+  `cop_m` and sphere heights: simulation output of the compliant contact law
+  (not a force plate), net vertical load and centre of pressure only, with no
+  per-foot split and no tangential force. Declared uncertainties are hypotheses:
+  5 N and 5 mm.
+- Record-native observation (3 rows; 180 frames with load): visible rank 0 on
+  43 frames, 1 on 10, 2 on 127; nullity median 9 to 7; singular values over
+  sigma at most 0.09 (median 0.05), so the data are not resolved at the declared
+  sigma. Result: every envelope width equals the free one (median ratio 1.0 to
+  `1e-11`) and no sign class changes. The record's GRF adds no information.
+- Simulated per-foot plates (force sum per side from the compliant law at the
+  projected state; 181 frames): visible rank 0 on 46, 1 on 8, 2 on 45, 3 on 82;
+  nullity median 9 to 7; singular values over sigma 0.12 to 1.17 (median 0.25).
+  Result: the leg-joint torque envelopes narrow; median width ratio
+  (observed over free): hip flexion 0.42 (both legs), hip adduction 0.12 (right)
+  and 0.14 (left), hip rotation 0.53 (right) and 0.42 (left), knee 0.47 and
+  0.42, ankle 0.81 and 0.80, subtalar 0.42 (both), toe joints pinned in both variants; the
+  trunk, shoulder, elbow, forearm and wrist envelopes are unchanged (ratio 1.0).
+  Sign classes of the leg joints move from INDETERMINATE to decided on many
+  frames (for example left hip adduction on 112 of 123 frames, all to NEGATIVE;
+  right hip adduction on 92, to POSITIVE). One further frame (345) becomes
+  INFEASIBLE with conflict set `H-TORQUE-CAPACITY`, `H-GRF-OBSERVATION`.
+- Hand-split conclusions: the anthro model has only the closing-hand wrench
+  `lambda` (the lead-hand grip point needed for the couple split is unavailable,
+  and the axial split needs the shaft direction in grip axes). The six `lambda`
+  envelopes are unchanged by either observation (median width ratio 1.0, no sign
+  class change): the hand wrench is already determined independently of how the
+  feet share the load. What a lower-body observation changes is the leg joint
+  torque envelopes and the foot-load split, not the hand split.
+- Honest residuals: data derive from the same recorded state, so the normalised
+  disagreement with the balance is at most `2.4e-10` sigma (consistency, not
+  independent validation); frame 510 is refused; HiGHS returns `NUMERICAL`
+  (not `INFEASIBLE`) on the empty set of frame 342 with plate rows, which the
+  library raises rather than recodes, so observed variants skip frames already
+  empty without them.
+
+Non-claims: rigid unilateral contacts only; friction coefficient is a declared
+hypothesis; the stand-in plates are simulation, not measurement; no
+scientific qualification (software correctness only).
 
 ## NSX-61 and NSX-62 Ensembles (#12586, #12587)
 
