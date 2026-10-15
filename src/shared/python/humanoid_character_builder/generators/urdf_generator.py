@@ -26,9 +26,8 @@ UpstreamDrift-canonical (``docs/shared_tools/seam_rulings.v1.json``).
 from __future__ import annotations
 
 import logging
-import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 from src.shared.python.humanoid_character_builder.contracts import (
@@ -91,6 +90,9 @@ from src.shared.python.humanoid_character_builder.mesh.primitive_inertia import 
     estimate_segment_primitive,
 )
 from src.shared.python.body_part_viz.contracts import BodyPartShape
+
+if TYPE_CHECKING:  # annotations only; nothing here parses XML
+    import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - type annotations only
 
 logger = logging.getLogger(__name__)
 
@@ -471,7 +473,7 @@ def _is_valid_xml(xml_str: str) -> bool:
     try:
         DefusedET.fromstring(xml_str)  # nosec B314 — parsing self-generated URDF, not untrusted input
         return True
-    except ET.ParseError:
+    except DefusedET.ParseError:
         return False
 
 

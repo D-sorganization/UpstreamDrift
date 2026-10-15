@@ -49,6 +49,13 @@ except ImportError:
     TRIMESH_AVAILABLE = False
 
 
+def _failure(message: str) -> GeneratedMeshResult:
+    """Return a failed :class:`GeneratedMeshResult` carrying *message*."""
+    return GeneratedMeshResult(
+        success=False, solver_status="failure", error_message=message
+    )
+
+
 class SMPLXMeshGenerator(MeshGeneratorInterface):
     """Generate meshes using SMPL-X body model.
 
@@ -376,30 +383,21 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         from . import mesh_generator as _mg
 
         if not _mg.SMPLX_AVAILABLE:
-            return GeneratedMeshResult(
-                success=False,
-                solver_status="failure",
-                error_message="smplx package not installed. Install with: pip install smplx",
+            return _failure(
+                "smplx package not installed. Install with: pip install smplx"
             )
-
         if not _mg.TRIMESH_AVAILABLE:
-            return GeneratedMeshResult(
-                success=False,
-                solver_status="failure",
-                error_message="trimesh package not installed. Install with: pip install trimesh",
+            return _failure(
+                "trimesh package not installed. Install with: pip install trimesh"
             )
 
         # Resolve the model directory instead of passing ``str(None)`` to
         # smplx.create when none was configured (ported from the deleted copy).
         model_dir = self._find_model_path()
         if model_dir is None:
-            return GeneratedMeshResult(
-                success=False,
-                solver_status="failure",
-                error_message=(
-                    "SMPL-X model files not found: pass an existing model_dir "
-                    "or install them in ~/.smplx"
-                ),
+            return _failure(
+                "SMPL-X model files not found: pass an existing model_dir "
+                "or install them in ~/.smplx"
             )
 
         output_dir = Path(output_dir)
@@ -461,11 +459,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             ImportError,
         ) as e:
             logger.error("SMPL-X generation failed: %s", e)
-            return GeneratedMeshResult(
-                success=False,
-                solver_status="failure",
-                error_message=f"SMPL-X generation error: {e}",
-            )
+            return _failure(f"SMPL-X generation error: {e}")
 
     def _find_model_path(self) -> Path | None:
         """Find SMPL-X model files.
