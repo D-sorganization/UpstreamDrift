@@ -2320,10 +2320,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12549
 - **Branch:** merged via #12596
-- **PR:** #12596
+- **PR:** #12596, #12598
 - **Paths:** see #12596
 - **Started:** 2026-10-15
-- **Last verified:** 2026-10-15 (`c50ced25`; collated from changes/12549-add-nsx-00-mathematical-specification-sy.md)
+- **Last verified:** 2026-10-15 (`f6b7efb7`; collated from changes/12549-nsx-00-loop-null-space-specification-sym.md)
 - **Summary:** Add NSX-00 mathematical specification, SymPy golden fixtures, ADR-0054, hypothesis registry seed, and contract appendix
 - **Next step:** Shipped in PR #12596.
 
