@@ -829,3 +829,7 @@ coordinate ranges; it does not supply dynamics or grip closure. Reuse the existi
 `full_body_ik.solve_full_body_ik_trajectory` optional finite `coordinate_bounds`
 for bounded TRF. See canonical chapter26 and #11903; do not reintroduce metadata
 placeholders or revive the retired OpenSim IK backend.
+
+## Segmental Spine
+
+- `src/shared/python/spine/` — segmental spine kinematics and loads: per-level ISB ZXY transforms, chain composition, coupling laws and intervertebral load contract. Conventions per [ADR-0054](../adr/0054-segmental-spine-kinematics-and-loads.md); research reference `docs/research/segmental_spine/segmental_spine.tex`. Couplers prescribe kinematics only.

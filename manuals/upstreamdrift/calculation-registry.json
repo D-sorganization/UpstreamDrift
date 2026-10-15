@@ -429,6 +429,11 @@
       "id": "UP-NSX-loop-nullspace-exploration",
       "owner": "UpstreamDrift epic #12593, NSX-00 #12549",
       "resolution": "Inventory the closed-loop null-space exploration pathway (src/shared/python/loop_nullspace, to be created by children NSX-10 to NSX-62) with provisional chapter 65-loop-null-space.qmd and the standalone reference docs/research/loop_nullspace/loop_nullspace.tex. NSX-00 delivers specification, sympy goldens and a hypothesis registry seed only; there is no production code and no registered calculation. The allocation equation, rank accounting, three-case zero-side analysis, grasp-map kernel, c-plus/minus identity and envelope geometry are derived, not qualified. Hypotheses are priors, torque capacities are empty until NSX-04, and every allocation-dependent output is family dependent. No golfer result, hand-split claim, stiffness inference or physiological validation exists; external validation stays deferred. Keep calculations empty and publication blocked until implementation, UP-D1 inventory, independent validation and review."
+    },
+    {
+      "id": "UP-D1-segmental-spine-inventory",
+      "owner": "UpstreamDrift issue #12735",
+      "resolution": "Inventory the segmental-spine kinematics and loads pathway (src/shared/python/spine, to be created by children SPN-1a to SPN-17) with provisional chapter 66-segmental-spine.qmd and the standalone reference docs/research/segmental_spine/segmental_spine.tex. SPN-0c delivers the documentation scaffold only; there is no production code and no registered calculation. Conventions follow ADR-0054 and no coupling law, distribution rule, load or golfer result is qualified. Keep calculations empty and publication blocked until implementation, UP-D1 inventory, independent validation and review."
     }
   ],
   "calculations": []
