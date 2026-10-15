@@ -13,7 +13,7 @@
   "totals": {
     "identical": 377,
     "diverged": 271,
-    "ud-only": 1738,
+    "ud-only": 1741,
     "tools-only": 839,
     "spelling-only": 121
   },
@@ -497,7 +497,7 @@
     "loop_nullspace": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 6,
+      "ud-only": 9,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -13531,11 +13531,47 @@
       "spelling_only": false
     },
     {
+      "path": "loop_nullspace/fixtures.py",
+      "classification": "ud-only",
+      "package": "loop_nullspace",
+      "subpackage": "",
+      "ud_bytes": 13412,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "loop_nullspace/planar_model.py",
+      "classification": "ud-only",
+      "package": "loop_nullspace",
+      "subpackage": "",
+      "ud_bytes": 7125,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "loop_nullspace/solvers.py",
       "classification": "ud-only",
       "package": "loop_nullspace",
       "subpackage": "",
       "ud_bytes": 25287,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "loop_nullspace/spatial_fixture.py",
+      "classification": "ud-only",
+      "package": "loop_nullspace",
+      "subpackage": "",
+      "ud_bytes": 13349,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
