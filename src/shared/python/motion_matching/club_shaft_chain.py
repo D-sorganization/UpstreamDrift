@@ -512,12 +512,13 @@ def apply_shaft_chain(document: Mapping[str, Any], chain: ShaftChain) -> dict[st
     ]
     parent = prefix
     for i, bounds in enumerate(chain.link_bounds_m):
-        link = {
-            "name": f"{prefix}/Shaft Link {i}",
-            "solids": [_shaft_piece(prefix, chain, bounds, f"Link {i}")],
-        }
+        link_solids = [_shaft_piece(prefix, chain, bounds, f"Link {i}")]
         if i == chain.n_links - 1:
-            link["solids"].append(head)
+            link_solids.append(head)
+        link: dict[str, Any] = {
+            "name": f"{prefix}/Shaft Link {i}",
+            "solids": link_solids,
+        }
         doc["bodies"].append(link)
         doc["joints"].append(_chain_joint(prefix, chain, i, parent))
         parent = link["name"]
@@ -571,7 +572,7 @@ def clamped_shaft_document(
             solids.append(head)
         bodies.append({"name": f"{prefix}/Shaft Link {i}", "solids": solids})
         joints.append(_chain_joint(prefix, chain, i, parent))
-        parent = bodies[-1]["name"]
+        parent = f"{prefix}/Shaft Link {i}"
     return {
         "gravity_m_s2": list(gravity),
         "coordinate_order": list(chain.coordinates()),
