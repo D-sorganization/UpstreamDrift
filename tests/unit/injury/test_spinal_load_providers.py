@@ -56,7 +56,7 @@ def _model_series(n: int = 11, scale: float = 1.0) -> SpinalLoadSeries:
     force[:, :, 2] = -20.0
     moment = np.zeros((n, 2, 3))
     moment[:, :, 1] = 7.0
-    prov = {key: "synthetic" for key in REQUIRED_PROVENANCE_KEYS}
+    prov = dict.fromkeys(REQUIRED_PROVENANCE_KEYS, "synthetic")
     return SpinalLoadSeries(
         time_s=time,
         levels=levels,
@@ -142,7 +142,9 @@ def test_heuristic_series_is_labelled_heuristic_not_model() -> None:
     assert SpinalLevel.L4_L5 in series.levels
     k = series.levels.index(SpinalLevel.L4_L5)
     ref = analyzer.analyze(**inputs).segments["L4-L5"]
-    np.testing.assert_allclose(series.compression_n()[:, k], ref.compression, atol=1e-12)
+    np.testing.assert_allclose(
+        series.compression_n()[:, k], ref.compression, atol=1e-12
+    )
     np.testing.assert_allclose(series.ap_shear_n()[:, k], ref.ap_shear, atol=1e-12)
     np.testing.assert_allclose(series.ml_shear_n()[:, k], ref.lateral_shear, atol=1e-12)
 
