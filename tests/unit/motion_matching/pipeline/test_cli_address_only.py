@@ -62,3 +62,20 @@ def test_run_address_stage_writes_report_with_hip_coordinates(
 def test_calibrated_run_is_a_plain_record() -> None:
     run = cli.CalibratedRun(None, None, {}, (), None)  # type: ignore[arg-type]
     assert run.base_spec == {}
+
+
+def test_canonical_address_enables_foot_progression_by_default() -> None:
+    """R3 (#12683): the canonical commands pass no ``--foot-progression``, so
+    the parser default is what turns the trail foot out at address."""
+    from src.shared.python.motion_matching.pipeline.address_feet import (
+        CANONICAL_FOOT_PROGRESSION,
+        MODES,
+    )
+
+    canonical = ["--address-only", "--static-seeds", "--fix-club-markers"]
+    args = cli.build_parser().parse_args(canonical)
+    assert args.foot_progression == CANONICAL_FOOT_PROGRESSION == "style"
+    action = next(
+        a for a in cli.build_parser()._actions if a.dest == "foot_progression"
+    )
+    assert tuple(action.choices) == MODES

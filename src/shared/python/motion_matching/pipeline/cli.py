@@ -41,12 +41,16 @@ from src.shared.python.motion_matching.pipeline.address import (
     solve_address_stage,
 )
 from src.shared.python.motion_matching.pipeline.address_feet import (
+    CANONICAL_FOOT_PROGRESSION,
     build_foot_targets,
     foot_progression_series,
     model_feet_deg,
     record_foot_progression,
     seed_document_feet,
     split_address_coordinates,
+)
+from src.shared.python.motion_matching.pipeline.address_feet import (
+    MODES as FOOT_PROGRESSION_MODES,
 )
 from src.shared.python.motion_matching.pipeline.constants import (
     CANDIDATE,
@@ -371,14 +375,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--foot-progression",
-        choices=("off", "capture", "default"),
-        default="off",
+        choices=FOOT_PROGRESSION_MODES,
+        default=CANONICAL_FOOT_PROGRESSION,
         help=(
-            "address foot toe-out (OSV-4, #11730): 'capture' sets each foot to the "
-            "capture's measured toe-out (flagged 20 deg default where the markers "
-            "are unreliable), 'default' forces 20 deg per foot, 'off' (default) "
-            "keeps the legacy multi-start result. Also squares the forefoot marker "
-            "seeds and records model vs capture angles in the receipt."
+            "address foot toe-out (OSV-4, #11730): 'style' (default, R3 #12683) "
+            "turns the trail foot out to the owner's style target and keeps the "
+            "lead foot on the capture; 'capture' sets each foot to the capture's "
+            "measured toe-out (flagged 20 deg default where the markers are "
+            "unreliable); 'default' forces 20 deg per foot; 'off' keeps the "
+            "legacy multi-start result. Also squares the forefoot marker seeds "
+            "and records model vs target angles and each target's source in "
+            "the receipt."
         ),
     )
     parser.add_argument(
