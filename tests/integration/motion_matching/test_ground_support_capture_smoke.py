@@ -20,15 +20,22 @@ from src.motion_capture.capture_registry import require_capture
 pytestmark = [pytest.mark.integration, pytest.mark.slow]
 
 # Owner's real-world anthropometry (height, mass), scaled onto the de Leva
-# candidate for the owner capture only; the driver capture uses the qualified
-# spec's own default geometry (no scaling) as every other committed evidence
-# receipt does.
+# candidate for the owner capture only. The driver capture runs the canonical
+# driver document (no scaling) that every committed driver evidence receipt
+# names as ``base_spec_file``; the pipeline's default spec is the native v2
+# document, which lacks the measured club cluster and per-capture grip
+# rotation and gives 0.51 m dynamics RMS on this capture (#12702).
+CAPTURE_SPECS: dict[str, Path] = {
+    "driver": Path(__file__).resolve().parents[3]
+    / "docs/development/full_body_models/full_body_spec_anthro_driver.json",
+}
 OWNER_STATURE_M = 1.956
 OWNER_MASS_KG = 104.3
 
 # Marker RMS bounds (m).  Measured 2026-09-30: IK 0.052 (driver) and 0.083
 # (owner); dynamics 0.089 (driver) and 0.567 (owner, #11166 open: the
-# driver-tuned rig does not yet track the scaled owner).
+# driver-tuned rig does not yet track the scaled owner).  Current main on the
+# canonical driver document: IK 0.046, dynamics 0.072 (receipt anthro_driver).
 IK_RMS_BOUND_M = 0.10
 DYNAMICS_RMS_BOUND_M = 0.15
 
@@ -56,6 +63,8 @@ def test_mujoco_native_match_smoke(
     )
 
     argv = ["--out", str(tmp_path), "--capture", capture_name]
+    if capture_name in CAPTURE_SPECS:
+        argv += ["--spec", str(CAPTURE_SPECS[capture_name])]
     if capture_name == "owner":
         argv += [
             "--anthropometric",
