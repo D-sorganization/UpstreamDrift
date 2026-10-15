@@ -65,7 +65,7 @@ class TestConfigSchema:
 
     def test_raw_json_flags(self) -> None:
         raw = json.loads(CONFIG.read_text(encoding="utf-8"))
-        for model_id, body in raw["models"].items():
+        for body in raw["models"].values():
             assert isinstance(body["verified"], bool)
             if not body["verified"]:
                 assert "UNVERIFIED" in body["names_status"]
@@ -133,7 +133,9 @@ def _swapped_axis_path(src: Path, dst: Path) -> Path:
             continue
         for axis in joint.iter("TransformAxis"):
             if axis.get("name") == "rotation1":
-                axis.find("axis").text = "1 0 0"
+                axis.find(
+                    "axis"
+                ).text = "0 1 1"  # 45 deg from ISB Z; OpenSim rejects collinear axes
     tree.write(dst)
     return dst
 
@@ -176,7 +178,7 @@ class TestNativeInventory:
         assert not inv.axis_ok
         assert len(inv.axis_failures) == 1
         assert "L4_L5" in inv.axis_failures[0]
-        assert inv.axis_alignment_deg[SpinalLevel.L4_L5][0] == pytest.approx(90.0)
+        assert inv.axis_alignment_deg[SpinalLevel.L4_L5][0] == pytest.approx(45.0)
 
     def test_swapped_axis_strict_raises(
         self, fixture_path: Path, tmp_path: Path
@@ -222,7 +224,9 @@ class TestNativeInventory:
         levels = {
             **base.levels,
             SpinalLevel.L4_L5: LevelMapEntry(
-                lm.joint, (lm.coordinates[0], "ghost_coord", lm.coordinates[2]), lm.axis_sign
+                lm.joint,
+                (lm.coordinates[0], "ghost_coord", lm.coordinates[2]),
+                lm.axis_sign,
             ),
         }
         entry = type(base)(True, base.pelvis_body, base.terminal_body, levels)
