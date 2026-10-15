@@ -133,7 +133,8 @@ class GripModelResult:
             else list(self.allocation_nullity),
             "counts": self.counts(),
             "median_torque_width_nm": self.median_width("tau_"),
-            "median_closure_width": self.median_width("lambda_"),
+            "median_force_multiplier_width_n": self.median_width("lambda_f"),
+            "median_moment_multiplier_width_nm": self.median_width("lambda_t"),
             "label": self.label,
         }
 

@@ -535,6 +535,38 @@ every kind; `BALANCE_TOL` is unchanged. Output label
 `restriction_counts` (exact sympy). Anthro record:
 `records/restriction_anthro_stride1.json` (199 frames).
 
+## NSX-72 Closure Alternatives (#12590)
+
+`closure_alternatives.SpatialGripPlant(model, *, floating_root=False)` for
+`model` in `GripModel` (`WELD`, `SHAFT_TWIST_REVOLUTE`, `TRAIL_BALL`,
+`LEAD_BALL`); `GRIP_MODEL_SPECS[model]` gives the closure kind, kept rows,
+extra coordinates, a summary and the stated limitation. Each plant is a
+`ClosurePlant` (`closure_pose_residual`, `closure_rate_matrix`) with the model's
+own rows in the shaft-first grip frame. `motion_frames(plant, motion, *,
+n_frames, seed, source=None)` samples `Motion.WELDED | TWIST | TILT | OWN` at
+the closed posture; `position_probe(plant, motion, *, steps)` takes small
+finite steps off it; `admit_model` / `admission_outcome` return a
+`ModelAdmission` with the model's own scaled `max_phi`, `max_phi_dot` and
+`max_phi_ddot`. A motion sampled in a different coordinate count is
+`not representable` (`ValueError`), never mapped. Gates stay at the NSX-00
+`1e-6`.
+
+`closure_alternatives_report.evaluate_grip_model(admission, *, quantities,
+feasible_set_of) -> GripModelResult` runs the NSX-26 machinery with the model's
+single closure kind on an admitted trajectory only (a refused trajectory has
+`report=None`). Result fields: kinematic nullity (`n - rank J_c`, the admitted
+velocity dimension), allocation nullity, outcome counts, envelope widths.
+Output label `CLOSURE_ALTERNATIVE_COMPARISON`; the non-claims travel with it.
+Rows-only models (`SHAFT_TWIST_REVOLUTE`, `TRAIL_BALL`) on a welded trajectory
+reproduce the NSX-26 restriction exactly (tested); what they change is the
+admitted motion. `LEAD_BALL` adds three unactuated coordinates (club on a z-y-x
+ball at the lead hand, trail hand welded to the club) and exists only on the
+spatial fixture. Counts: the rows-only models match the `restriction_counts`
+golden; `LEAD_BALL` counts are structural (generic rank), not an exact golden.
+Record: `records/closure_alternatives_spatial.json`,
+`records/closure_alternatives_anthro_stride1.json`; report:
+`closure_alternatives_report.md`.
+
 ## NSX-30 Constrained Counterfactuals (#12570)
 
 ```python
