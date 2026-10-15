@@ -27,6 +27,18 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import require
+from src.shared.python.engine_core.capabilities import (
+    Capability,
+    CapabilityLevel,
+    normalize_capability,
+)
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
+from src.shared.python.loop_nullspace.closure_convention import (
+    CANONICAL_CLOSURE_CONVENTION,
+    MUJOCO_CLOSURE_CONVENTION,
+    NativeClosureConvention,
+    to_canonical_closure,
+)
 from src.shared.python.motion_matching.contact_force_allocator import (
     AllocationObjective,
     ContactForceAllocation,
@@ -40,6 +52,14 @@ from src.shared.python.loop_nullspace.closure_convention import (
 logger = logging.getLogger(__name__)
 
 Array: TypeAlias = NDArray[np.float64]
+
+
+def _resolve_adapter_capability(adapter: Any, cap: Capability | str) -> CapabilityLevel:
+    """Resolve an adapter capability query for CLOSED_LOOP_SNAPSHOT."""
+    if normalize_capability(cap) is Capability.CLOSED_LOOP_SNAPSHOT:
+        if hasattr(adapter, "closed_loop_snapshot_capability"):
+            return adapter.closed_loop_snapshot_capability()
+    return CapabilityLevel.NONE
 
 
 class EngineType(str, Enum):
@@ -128,6 +148,19 @@ class BaseEngineForceAdapter(Protocol):
         """Names of ground contact points/spheres."""
         ...
 
+    @property
+    def native_closure_convention(self) -> NativeClosureConvention:
+        """Declarative specification of the adapter's native closure Jacobian."""
+        return getattr(self, "NATIVE_CLOSURE_CONVENTION", CANONICAL_CLOSURE_CONVENTION)
+
+    def closed_loop_snapshot_capability(self) -> CapabilityLevel:
+        """Return support level for Capability.CLOSED_LOOP_SNAPSHOT (default NONE)."""
+        return CapabilityLevel.NONE
+
+    def capability(self, cap: Capability | str) -> CapabilityLevel:
+        """Return support level for the requested capability."""
+        return _resolve_adapter_capability(self, cap)
+
     def compute_mass_and_bias(self, q: Array, v: Array) -> tuple[Array, Array]:
         """Compute inertia matrix M(q) and Coriolis/gravity bias vector b(q, v)."""
         ...
@@ -144,6 +177,18 @@ class BaseEngineForceAdapter(Protocol):
         """Compute 6-DoF spatial loop-closure weld Jacobian between hands (6, nv)."""
         ...
 
+    def compute_closure_drift(self, q: Array, v: Array) -> Array:
+        """Compute native 6-DoF loop-closure acceleration drift Jdot(q, v) v."""
+        raise NotImplementedError("compute_closure_drift is not implemented")
+
+    def closure_wrench_frame(self, q: Array) -> tuple[Array, Array]:
+        """Return (R_WG, origin_W) of the canonical grip wrench frame at state q."""
+        raise NotImplementedError("closure_wrench_frame is not implemented")
+
+    def club_inertia_split(self) -> tuple[Any, tuple[Any, ...]]:
+        """Return (bare_club_inertia, welded_hand_inertias) from model specification."""
+        raise NotImplementedError("club_inertia_split is not implemented")
+
     def verify_acceleration_parity(
         self, q: Array, v: Array, tau_effective: Array, a_target: Array
     ) -> float:
@@ -153,6 +198,8 @@ class BaseEngineForceAdapter(Protocol):
 
 class MujocoForceAdapter:
     """MuJoCo adapter for full-body inverse dynamics and contact Jacobians."""
+
+    NATIVE_CLOSURE_CONVENTION = MUJOCO_CLOSURE_CONVENTION
 
     def __init__(self, spec_bytes: bytes) -> None:
         from src.engines.physics_engines.mujoco.python.full_body_model import (
@@ -196,6 +243,16 @@ class MujocoForceAdapter:
     @property
     def contact_names(self) -> Sequence[str]:
         return self._contact_names
+
+    @property
+    def native_closure_convention(self) -> NativeClosureConvention:
+        return self.NATIVE_CLOSURE_CONVENTION
+
+    def closed_loop_snapshot_capability(self) -> CapabilityLevel:
+        return CapabilityLevel.NONE
+
+    def capability(self, cap: Capability | str) -> CapabilityLevel:
+        return _resolve_adapter_capability(self, cap)
 
     def _checked_vector(self, value: Array, size: int, name: str) -> Array:
         vector = np.asarray(value, dtype=np.float64)
@@ -259,6 +316,19 @@ class MujocoForceAdapter:
         jac_weld, _ = self._model.evaluate_weld_closure()
         return np.asarray(jac_weld, dtype=np.float64)
 
+    def compute_closure_drift(self, q: Array, v: Array) -> Array:
+        self._prepare_state(q, v)
+        return np.zeros(6, dtype=np.float64)
+
+    def closure_wrench_frame(self, q: Array) -> tuple[Array, Array]:
+        self._prepare_state(q)
+        return np.eye(3, dtype=np.float64), np.zeros(3, dtype=np.float64)
+
+    def club_inertia_split(self) -> tuple[Any, tuple[Any, ...]]:
+        raise NotImplementedError(
+            "MujocoForceAdapter does not provide bare-club inertia split"
+        )
+
     def verify_acceleration_parity(
         self, q: Array, v: Array, tau_effective: Array, a_target: Array
     ) -> float:
@@ -281,6 +351,8 @@ class SyntheticMultibodyFixture:
     restricted to test-only scenarios where allow_synthetic=True. Production routes
     must evaluate native model-conformant bridges (#10439).
     """
+
+    NATIVE_CLOSURE_CONVENTION = CANONICAL_CLOSURE_CONVENTION
 
     def __init__(
         self,
@@ -322,6 +394,29 @@ class SyntheticMultibodyFixture:
     @property
     def contact_names(self) -> Sequence[str]:
         return tuple(f"contact_{i}" for i in range(self._n_spheres))
+
+    @property
+    def native_closure_convention(self) -> NativeClosureConvention:
+        return getattr(
+            self, "_native_closure_convention", self.NATIVE_CLOSURE_CONVENTION
+        )
+
+    def closed_loop_snapshot_capability(self) -> CapabilityLevel:
+        return CapabilityLevel.NONE
+
+    def capability(self, cap: Capability | str) -> CapabilityLevel:
+        return _resolve_adapter_capability(self, cap)
+
+    def compute_closure_drift(self, q: Array, v: Array) -> Array:
+        return np.zeros(6, dtype=np.float64)
+
+    def closure_wrench_frame(self, q: Array) -> tuple[Array, Array]:
+        return np.eye(3, dtype=np.float64), np.zeros(3, dtype=np.float64)
+
+    def club_inertia_split(self) -> tuple[Any, tuple[Any, ...]]:
+        raise NotImplementedError(
+            "SyntheticMultibodyFixture does not provide bare-club inertia split"
+        )
 
     def _get_mass_diag(self) -> Array:
         """Return analytical mass diagonal for dynamics and parity evaluation."""
@@ -572,6 +667,44 @@ class MultiEngineTorqueAllocator:
             root_penalty_weight=root_penalty_weight,
         )
 
+    def canonical_grip_jacobian(self, q: Array) -> Array:
+        """Return the adapter's closure Jacobian converted to the canonical R8 grip frame."""
+        j_native = np.asarray(self.adapter.compute_grip_jacobian(q), dtype=np.float64)
+        if j_native.shape[0] != 6:
+            return j_native
+        conv = getattr(
+            self.adapter,
+            "native_closure_convention",
+            getattr(
+                self.adapter,
+                "NATIVE_CLOSURE_CONVENTION",
+                CANONICAL_CLOSURE_CONVENTION,
+            ),
+        )
+        if hasattr(self.adapter, "closure_wrench_frame"):
+            try:
+                r_wg, p_g = self.adapter.closure_wrench_frame(q)
+            except NotImplementedError:
+                r_wg = np.eye(3, dtype=np.float64)
+                p_g = np.zeros(3, dtype=np.float64)
+        else:
+            r_wg = np.eye(3, dtype=np.float64)
+            p_g = np.zeros(3, dtype=np.float64)
+        p_ref = (
+            self.adapter.native_closure_reference_point(q)
+            if hasattr(self.adapter, "native_closure_reference_point")
+            else p_g
+        )
+        j_canon, _ = to_canonical_closure(
+            j_native,
+            np.zeros(6, dtype=np.float64),
+            native=conv,
+            grip_frame_rotation=r_wg,
+            grip_origin=p_g,
+            reference_point=p_ref,
+        )
+        return j_canon
+
     def allocate_frame(
         self,
         q: Array,
@@ -583,7 +716,7 @@ class MultiEngineTorqueAllocator:
         """Allocate dynamic forces for a single frame."""
         tau_rnea = self.adapter.compute_inverse_dynamics(q, v, a)
         j_ground = self.adapter.compute_contact_jacobian(q)
-        j_grip = self.adapter.compute_grip_jacobian(q)
+        j_grip = self.canonical_grip_jacobian(q)
 
         return self.allocator.allocate(
             tau_rnea=tau_rnea,
@@ -657,7 +790,7 @@ class MultiEngineTorqueAllocator:
                 tau_full = np.zeros(self.adapter.nv, dtype=np.float64)
                 tau_full[self.adapter.actuated_indices] = alloc.tau_actuated
                 j_g = self.adapter.compute_contact_jacobian(q_k)
-                j_w = self.adapter.compute_grip_jacobian(q_k)
+                j_w = self.canonical_grip_jacobian(q_k)
                 root_full = np.concatenate(
                     [alloc.delta_tau_root, np.zeros(self.adapter.nv - 6)]
                 )

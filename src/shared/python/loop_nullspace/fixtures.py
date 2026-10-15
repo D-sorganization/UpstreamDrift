@@ -640,7 +640,7 @@ def planar_golfer_snapshot(
     M = np.asarray(base_data["M"], dtype=np.float64)
     h = np.asarray(base_data["h"], dtype=np.float64)
     b = np.asarray(base_data["b"], dtype=np.float64)
-    a = np.linalg.solve(M, b - h)
+    a = np.asarray(np.linalg.solve(M, b - h), dtype=np.float64)
     v = np.asarray(fixtures["c_plus_minus_identity"]["v_admissible"], dtype=np.float64)
     q = np.zeros(5, dtype=np.float64)
     S = _selection_matrix(actuated, 5)
@@ -659,7 +659,7 @@ def planar_golfer_snapshot(
         J_c = np.vstack([J_c_2, orient_row])
         Jdot_v = np.append(Jdot_2, 0.0)
         A = np.hstack([S.T, J_c.T])
-        x_p = np.linalg.lstsq(A, b, rcond=None)[0]
+        x_p = np.asarray(np.linalg.lstsq(A, b, rcond=None)[0], dtype=np.float64)
         null_basis = scipy.linalg.null_space(A)
         rank_jc = int(np.linalg.matrix_rank(J_c))
         rank_jcu = int(np.linalg.matrix_rank(J_c[:, unactuated])) if unactuated else 0
@@ -880,10 +880,10 @@ def spatial_two_arm_club_snapshot(
         b = b_arm
         A = np.hstack([S.T, J_c.T])
 
-    a = np.linalg.solve(M, b - h)
+    a = np.asarray(np.linalg.solve(M, b - h), dtype=np.float64)
     v = np.zeros(n_v, dtype=np.float64)
     q = np.zeros(n_v, dtype=np.float64)
-    x_p = np.linalg.lstsq(A, b, rcond=None)[0]
+    x_p = np.asarray(np.linalg.lstsq(A, b, rcond=None)[0], dtype=np.float64)
     null_basis = scipy.linalg.null_space(A)
 
     grip_frame, bare_club, hands, model_prov, input_prov = _standard_grip_and_inertias()
