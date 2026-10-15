@@ -2288,6 +2288,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12556 · NSX-11 Typed Loop-Nullspace Registry Loader With CI Citation Gate
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12556
+- **Branch:** merged via #12613
+- **PR:** #12613
+- **Paths:** see #12613
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`bd34dcce`; collated from changes/12556-nsx-11-typed-loop-nullspace-registry-loa.md)
+- **Summary:** NSX-11 typed loop-nullspace registry loader with CI citation gate
+- **Next step:** Shipped in PR #12613.
+
 ### DL-#12578 · NSX-50: Pose_Interchange Dual Velocity/Acceleration/Force Maps and Closure Wrench Duals
 
 - **State:** shipped
