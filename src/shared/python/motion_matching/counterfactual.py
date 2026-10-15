@@ -542,16 +542,18 @@ def create_counterfactual_rollout(
     The fork is a forward simulation of ``dynamics.provider`` from the measured
     fork state under the altered generalised load (NSX-30): on a
     ``ConstrainedEquationsOfMotionProvider`` the closed loop is respected and
-    the reaction is re-solved at every step.  ``dynamics`` is required; there is
-    no placeholder inertia, so a missing provider raises ``ValueError``.
+    the reaction is re-solved at every step.  Without ``dynamics`` the provider is
+    built from the session's own model specification; if that is missing the
+    call raises ``ValueError`` naming the input (no placeholder inertia).
     ``constraint_status`` reports ``closure_velocity_residual_max`` for a
     constrained provider.
     """
-    if dynamics is None or getattr(dynamics, "provider", None) is None:
-        raise ValueError(
-            "create_counterfactual_rollout requires dynamics=CounterfactualDynamics"
-            "(provider=...): a counterfactual rollout integrates a real model"
+    if dynamics is None:
+        from src.shared.python.motion_matching.counterfactual_provider import (
+            resolve_session_dynamics,
         )
+
+        dynamics = resolve_session_dynamics(session)
     # Strict immutability guarantee: hash baseline state before rollout
     baseline_digest_before = _compute_baseline_hash(session)
 

@@ -21,7 +21,7 @@ from src.shared.python.loop_nullspace.snapshot import (
     require_closed_loop_capability,
 )
 
-__all__ = ["AdapterConstrainedProvider"]
+__all__ = ["AdapterConstrainedProvider", "ReorderedProvider"]
 
 
 class AdapterConstrainedProvider:
@@ -72,3 +72,46 @@ class AdapterConstrainedProvider:
         return canonical_closure(
             self._adapter, self._vector(q, "q"), self._vector(v, "v")
         )[1]
+
+
+class ReorderedProvider:
+    """A constrained provider re-expressed in another coordinate order.
+
+    ``native_order`` is the wrapped provider's coordinate order and
+    ``order`` the caller's; both must hold the same names.  ``M``, ``h`` and
+    ``J_c`` are permuted consistently, so every counterfactual is unchanged.
+    """
+
+    def __init__(
+        self, provider: Any, native_order: tuple[str, ...], order: tuple[str, ...]
+    ) -> None:
+        if sorted(native_order) != sorted(order) or len(set(order)) != len(order):
+            raise ValueError("native_order and order must name the same coordinates")
+        self._provider = provider
+        self._take = np.array([order.index(n) for n in native_order])
+        self._back = np.array([native_order.index(n) for n in order])
+
+    def _native(self, x: ArrayLike) -> Array:
+        return np.asarray(x, dtype=np.float64)[self._take]
+
+    def mass_matrix(self, q: ArrayLike) -> Array:
+        """``M`` in the caller's order."""
+        mass = self._provider.mass_matrix(self._native(q))
+        return np.asarray(mass)[np.ix_(self._back, self._back)]
+
+    def bias_forces(self, q: ArrayLike, v: ArrayLike) -> Array:
+        """``h`` in the caller's order."""
+        bias = self._provider.bias_forces(self._native(q), self._native(v))
+        return np.asarray(bias)[self._back]
+
+    def closure_jacobian(self, q: ArrayLike) -> Array:
+        """``J_c`` with columns in the caller's order."""
+        return np.asarray(self._provider.closure_jacobian(self._native(q)))[
+            :, self._back
+        ]
+
+    def closure_drift(self, q: ArrayLike, v: ArrayLike) -> Array:
+        """``Jdot_v`` (row space is unaffected by coordinate order)."""
+        return np.asarray(
+            self._provider.closure_drift(self._native(q), self._native(v))
+        )

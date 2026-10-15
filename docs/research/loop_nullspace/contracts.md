@@ -485,6 +485,17 @@ NSX-13 adapter as such a provider. `create_counterfactual_rollout` requires
 provider with RK4 (load held per step), and `NULLSPACE_EXPLORATION` samples `z`
 through `NullspaceExploration` (NSX-15 decompositions); the `m_eff = 1.0` mock
 and the `5 sin(t)` placeholder are removed.
+Without an explicit `dynamics`, `motion_matching/counterfactual_provider.py`
+builds the provider from the session's own model specification (Pinocchio
+adapter, `AdapterConstrainedProvider`, re-expressed in the session coordinate
+order by `ReorderedProvider`) and caches it by `model_sha256`. A specification
+missing `bodies`/`joints`/`coordinate_order`, with a mismatched coordinate
+order, or without a `closure` fails closed with a `ValueError` naming the
+input, which the route returns as 400; the Pinocchio model needs a closure,
+so no unconstrained provider is built from a specification. Achieved evidence
+on the 41-coordinate anthro model against raw `constraintDynamics`: ZTCF
+8.4e-12 and ZVCF 3.9e-13 scaled; ZTCF + control total under a random actuated
+load (reference magnitude 9.5e3) 2.5e-12 scaled.
 `ztcf_zvcf` keeps its naming: ZTCF removes the control torque, ZVCF sets
 `v = 0` and `u = 0`; on a loop both use the projector with the reaction
 re-solved, never a held `lambda`.
