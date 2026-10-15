@@ -22,14 +22,23 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
+import logging
 import math
+import warnings
 from typing import Any, TypeAlias
 
 import numpy as np
+import scipy.sparse as sp
 from numpy.typing import NDArray
-from scipy.optimize import minimize
 
 from src.shared.python.contracts import require
+from src.shared.python.loop_nullspace.qp_core import solve_qp
+from src.shared.python.loop_nullspace.solvers import SolveStatus
+
+logger = logging.getLogger(__name__)
+
+# Clarabel tolerance for the scaled allocation QP (the legacy SLSQP used ftol=1e-8).
+_SOLVER_TOL = 1e-9
 
 Array: TypeAlias = NDArray[np.float64]
 IntArray: TypeAlias = NDArray[np.integer[Any]]
@@ -183,6 +192,13 @@ class ContactForceAllocator:
         regularisation_grip: float = 1e-4,
         root_penalty_weight: float = 1e6,
     ) -> None:
+        warnings.warn(
+            "ContactForceAllocator is a compatibility shim over the conic core; "
+            "use src.shared.python.loop_nullspace (allocate_trajectory / "
+            "qp_core.solve_qp) for new code (NSX-24, #12567).",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         require(nv > 6, "nv must exceed 6 floating base coordinates", nv)
         require(len(actuated_indices) > 0, "must have actuated coordinates")
         require(n_contact_spheres > 0, "must have contact spheres")
@@ -403,39 +419,33 @@ class ContactForceAllocator:
 
         lb_y = lb_x * d_vec
         ub_y = ub_x * d_vec
-        bounds_y = list(zip(lb_y, ub_y, strict=True))
 
-        constraints: list[dict[str, Any]] = [
-            {
-                "type": "eq",
-                "fun": lambda y: a_eq_scaled @ y - tau_rnea,
-                "jac": lambda y: a_eq_scaled,
-            }
-        ]
-        if len(c_ineq) > 0:
-            constraints.append(
-                {
-                    "type": "ineq",
-                    "fun": lambda y: c_ineq_scaled @ y,
-                    "jac": lambda y: c_ineq_scaled,
-                }
-            )
-
-        # Initial point
-        y0 = np.zeros(n_total_vars)
-
-        res = minimize(  # type: ignore[call-overload]
-            fun=lambda y: 0.5 * np.sum(y**2),
-            x0=y0,
-            jac=lambda y: y,
-            method="SLSQP",
-            bounds=bounds_y,
-            constraints=constraints,
-            options={"maxiter": 200, "ftol": 1e-8},
+        # Convex QP in the scaled variables y (Hessian = I): exact conic solve
+        # through the shared core (NSX-24).  Never falls back to another
+        # optimizer; a missing backend raises ImportError (R11).
+        res = solve_qp(
+            sp.identity(n_total_vars, format="csr"),
+            np.zeros(n_total_vars),
+            A_eq=a_eq_scaled,
+            b_eq=tau_rnea,
+            A_ub=-c_ineq_scaled if len(c_ineq) > 0 else None,
+            b_ub=np.zeros(len(c_ineq)) if len(c_ineq) > 0 else None,
+            lo=lb_y,
+            hi=ub_y,
+            tol=_SOLVER_TOL,
         )
+        solver_converged = res.status is SolveStatus.OPTIMAL
+        if not solver_converged:
+            logger.warning(
+                "Contact force allocation not solved (%s %s); returning the "
+                "zero iterate with success=False",
+                res.status.value,
+                res.reason,
+            )
+        y_sol = res.x if solver_converged else np.zeros(n_total_vars)
 
         # Unscale solution: x = y * d_inv
-        x_sol = res.x * d_inv
+        x_sol = y_sol * d_inv
         tau_sol = x_sol[: self.n_actuated]
         f_sol = x_sol[idx_ground:idx_grip]
         lambda_sol = x_sol[idx_grip:idx_root]
@@ -529,11 +539,6 @@ class ContactForceAllocator:
                 and np.all(tau_sol <= tau_bounds[1] + 1e-5)
             )
 
-        solver_converged = bool(
-            res.success
-            or (res.status in (0, 8, 9) and eq_res < 1e-4)
-            or (eq_res < 1e-4 and friction_viol_max < 1e-3)
-        )
         success = bool(solver_converged and eq_res < 1e-4 and bounds_satisfied)
 
         return ContactForceAllocation(

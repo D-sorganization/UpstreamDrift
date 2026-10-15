@@ -1,26 +1,29 @@
-"""Force redistribution solvers on a null space (NSX-03 split from force_nullspace)."""
+"""Force redistribution solvers on a null space (NSX-03 split from force_nullspace).
+
+NSX-24 (#12567): both solvers are convex (weighted least squares plus a rate
+penalty over bounds, linear rows and exact Coulomb cones), so they are shims
+over the conic core (:func:`src.shared.python.loop_nullspace.qp_core.solve_qp`,
+Clarabel) and no longer run SLSQP.  A missing ``clarabel`` raises
+``ImportError`` naming the ``loop-nullspace`` extra; there is no fallback.
+"""
 
 from __future__ import annotations
 
-import importlib
+import logging
 from dataclasses import dataclass
 from typing import Any, Sequence
 
 import numpy as np
-from scipy.optimize import LinearConstraint, NonlinearConstraint
+import scipy.sparse as sp
+
+from src.shared.python.loop_nullspace.qp_core import friction_cone_rows, solve_qp
+from src.shared.python.loop_nullspace.solvers import SOCBlock, SolveStatus
 
 from ._common import Array, _array
 from .constraints import ForceConstraints
 from .space import ForceNullSpace
 
-
-def _minimize(*args: Any, **kwargs: Any) -> Any:
-    """Delegate to the package-level ``minimize``.
-
-    The package attribute is the public patch point used by the existing tests,
-    so the solver call is resolved through it at call time.
-    """
-    return importlib.import_module(__package__).minimize(*args, **kwargs)
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -91,6 +94,135 @@ def _is_solution_feasible(
     )
 
 
+def _stacked_problem(
+    spaces: Sequence[ForceNullSpace],
+    constraints: Sequence[ForceConstraints],
+    w: Array,
+    references: Array,
+    smoothness_weight: float,
+    dts: Array,
+) -> tuple[sp.csr_matrix, Array, dict[str, Any]]:
+    """Assemble the convex QP in the stacked null-space coordinates ``z``.
+
+    ``x_k = particular_k + basis_k z_k``.  Cost
+    ``sum ||W (x_k - ref_k)||^2 + smoothness sum ||(x_{k+1}-x_k)/dt_k||^2``
+    is evaluated on physical ``x`` (basis-invariant).  Returns the Hessian,
+    the gradient offset and the keyword rows for ``solve_qp``.
+    """
+    t_count, n = len(spaces), spaces[0].particular.size
+    sizes = [s.basis.shape[1] for s in spaces]
+    offsets = np.concatenate([[0], np.cumsum(sizes)]).astype(int)
+    total = int(offsets[-1])
+    basis = sp.lil_matrix((t_count * n, total))
+    for k, s in enumerate(spaces):
+        basis[k * n : (k + 1) * n, offsets[k] : offsets[k + 1]] = s.basis
+    b_mat = basis.tocsr()
+    x0 = np.concatenate([s.particular for s in spaces])
+    w_sq = sp.diags(np.tile(w**2, t_count))
+    quad = w_sq
+    if t_count > 1 and smoothness_weight > 0.0:
+        diff = sp.lil_matrix(((t_count - 1) * n, t_count * n))
+        for k in range(t_count - 1):
+            rows = slice(k * n, (k + 1) * n)
+            diff[rows, k * n : (k + 1) * n] = -sp.identity(n) / dts[k]
+            diff[rows, (k + 1) * n : (k + 2) * n] = sp.identity(n) / dts[k]
+        diff = diff.tocsr()
+        quad = w_sq + smoothness_weight * (diff.T @ diff)
+    hess = (2.0 * (b_mat.T @ quad @ b_mat)).tocsr()
+    grad = 2.0 * b_mat.T @ (quad @ x0 - w_sq @ references.ravel())
+    rows = _constraint_rows(constraints, b_mat, x0, n)
+    return hess, grad, rows
+
+
+def _constraint_rows(
+    constraints: Sequence[ForceConstraints],
+    b_mat: sp.csr_matrix,
+    x0: Array,
+    n: int,
+) -> dict[str, Any]:
+    """Bounds, linear rows and exact friction cones as rows in ``z``."""
+    t_count = len(constraints)
+    lower = np.concatenate([c.lower for c in constraints])
+    upper = np.concatenate([c.upper_bound for c in constraints])
+    fixed = np.isclose(lower, upper, atol=1e-12)
+    a_eq, b_eq = b_mat[fixed], lower[fixed] - x0[fixed]
+    ub_blocks, ub_rhs = [], []
+    for sel, sign, rhs in (
+        (~fixed, 1.0, upper - x0),
+        (~fixed, -1.0, x0 - lower),
+    ):
+        ub_blocks.append(sign * b_mat[sel])
+        ub_rhs.append(rhs[sel])
+    cones = []
+    for k, c in enumerate(constraints):
+        if c.matrix is not None and c.upper is not None and c.matrix.shape[0] > 0:
+            g = sp.hstack(
+                [sp.csr_matrix((c.matrix.shape[0], k * n)), sp.csr_matrix(c.matrix)]
+                + [sp.csr_matrix((c.matrix.shape[0], (t_count - k - 1) * n))]
+            ).tocsr()
+            ub_blocks.append(g @ b_mat)
+            ub_rhs.append(c.upper - g @ x0)
+        for cone in c.cones:
+            idx = tuple(k * n + i for i in cone.indices)
+            block, a_uni, b_uni = friction_cone_rows(
+                t_count * n, idx, cone.frame, cone.mu
+            )
+            ub_blocks.append(a_uni @ b_mat)
+            ub_rhs.append(b_uni - a_uni @ x0)
+            cones.append(_cone_in_z(block, b_mat, x0))
+    return {
+        "A_eq": a_eq,
+        "b_eq": b_eq,
+        "A_ub": sp.vstack(ub_blocks).tocsr(),
+        "b_ub": np.concatenate(ub_rhs),
+        "cones": cones,
+    }
+
+
+def _cone_in_z(block: SOCBlock, b_mat: sp.csr_matrix, x0: Array) -> SOCBlock:
+    """Express an x-space SOC block ``-A x in SOC`` on ``x = x0 + B z``."""
+    return SOCBlock(A=block.A @ b_mat, b=-(block.A @ x0))
+
+
+def _solve_stacked(
+    spaces: Sequence[ForceNullSpace],
+    constraints: Sequence[ForceConstraints],
+    w: Array,
+    references: Array,
+    smoothness_weight: float,
+    dts: Array,
+    *,
+    tolerance: float,
+    max_iterations: int,
+) -> tuple[Array, bool, str]:
+    """Solve for the stacked ``z``; non-optimal statuses return ``z = 0``.
+
+    ``z = 0`` is the particular solution: it satisfies the equality, so the
+    independent audit then reports any bound violation honestly (no repair,
+    no clipping) and ``converged`` is False.
+    """
+    hess, grad, rows = _stacked_problem(
+        spaces, constraints, w, references, smoothness_weight, dts
+    )
+    total = hess.shape[0]
+    res = solve_qp(
+        hess,
+        grad,
+        A_eq=rows["A_eq"],
+        b_eq=rows["b_eq"],
+        A_ub=rows["A_ub"],
+        b_ub=rows["b_ub"],
+        cones=rows["cones"],
+        tol=max(tolerance, 1e-9),
+        max_iter=max_iterations,
+    )
+    if res.status is SolveStatus.OPTIMAL:
+        return res.x, True, "Optimal (conic core)"
+    message = f"{res.status.value}: {res.reason}".rstrip(": ")
+    logger.warning("Force redistribution not solved (%s)", message)
+    return np.zeros(total), False, message
+
+
 def redistribute_forces(
     space: ForceNullSpace,
     weights: Array,
@@ -105,7 +237,9 @@ def redistribute_forces(
     Weights are inverse physical scales (not squared cost coefficients).
     A physical reference may encode a previous force solution; this is not a
     trajectory smoothing solver. Returned feasibility is independently audited
-    even if SLSQP reports success. No clipping or equilibrium repair occurs.
+    even if the conic solver reports success. No clipping or equilibrium repair
+    occurs. Solved by the conic core (NSX-24); a non-optimal solver status
+    yields ``converged=False`` and the particular solution, audited as is.
     tolerance applies to scaled equality residuals and the caller's constraint
     margins; callers must choose consistent row units for linear inequalities.
     """
@@ -119,87 +253,36 @@ def redistribute_forces(
     if not np.isfinite(tolerance) or tolerance <= 0 or max_iterations < 1:
         raise ValueError("tolerance and max_iterations must be positive")
     basis = space.basis
-    offset = space.particular - target
-    weighted_basis = w[:, None] * basis
-    weighted_offset = w * offset
-
-    def objective(z: Array) -> float:
-        residual = weighted_offset + weighted_basis @ z
-        return float(residual @ residual)
-
-    def gradient(z: Array) -> Array:
-        return 2 * weighted_basis.T @ (weighted_offset + weighted_basis @ z)
-
     if basis.shape[1]:
-        initial = np.linalg.lstsq(weighted_basis, -weighted_offset, rcond=None)[0]
-        cons_list: list[Any] = []
-        lb_box = constraints.lower - space.particular
-        ub_box = constraints.upper_bound - space.particular
-        eq_mask = np.isclose(lb_box, ub_box, atol=1e-12)
-        if np.any(eq_mask):
-            cons_list.append(
-                LinearConstraint(basis[eq_mask], lb_box[eq_mask], lb_box[eq_mask])
-            )
-        if np.any(~eq_mask):
-            cons_list.append(
-                LinearConstraint(basis[~eq_mask], lb_box[~eq_mask], ub_box[~eq_mask])
-            )
-        if (
-            constraints.matrix is not None
-            and constraints.upper is not None
-            and constraints.matrix.shape[0] > 0
-        ):
-            cons_list.append(
-                LinearConstraint(
-                    constraints.matrix @ basis,
-                    -np.inf,
-                    constraints.upper - constraints.matrix @ space.particular,
-                )
-            )
-        if constraints.cones:
-            cons_list.append(
-                NonlinearConstraint(
-                    lambda z: np.concatenate(
-                        [
-                            cone.margins(space.particular + basis @ z)
-                            for cone in constraints.cones
-                        ]
-                    ),
-                    0.0,
-                    np.inf,
-                )
-            )
-        solve = _minimize(
-            objective,
-            initial,
-            jac=gradient,
-            method="SLSQP",
-            constraints=cons_list,
-            options={"ftol": max(tolerance, 1e-12), "maxiter": max_iterations},
+        z, converged, message = _solve_stacked(
+            [space],
+            [constraints],
+            w,
+            target[None, :],
+            0.0,
+            np.zeros(0),
+            tolerance=tolerance,
+            max_iterations=max_iterations,
         )
-        z = solve.x
-        converged = bool(solve.success)
-        message = str(solve.message)
     else:
         z = np.empty(0)
         converged, message = True, "Unique equality solution; constraints audited"
     x = space.particular + basis @ z
+    residual = w * (x - target)
     finite = bool(np.isfinite(x).all())
     error = (
         float(np.max(np.abs((space.matrix @ x - space.rhs) / space.row_scale)))
         if finite
         else float("inf")
     )
-    margins = constraints.margins(x)
-    violation = _margin_violation(margins, finite=finite)
-    cost = objective(z)
+    violation = _margin_violation(constraints.margins(x), finite=finite)
     return _finalize_redistribution(
         x,
         finite=finite,
         converged=converged,
         error=error,
         violation=violation,
-        cost=cost,
+        cost=float(residual @ residual),
         message=message,
         tolerance=tolerance,
     )
@@ -226,6 +309,7 @@ def redistribute_trajectory(
     Because the smoothing penalty is evaluated strictly on physical force/torque
     derivatives dx/dt rather than z derivatives, the formulation is strictly
     invariant to null-space basis column sign changes or basis rotations.
+    Solved as one convex QP by the conic core (NSX-24).
     """
     t_count = len(spaces)
     if t_count == 0:
@@ -250,152 +334,26 @@ def redistribute_trajectory(
     if t_count > 1 and np.any(dts <= 0):
         raise ValueError("time_s must be strictly increasing")
 
-    slices: list[slice] = []
-    offset = 0
-    for s in spaces:
-        d_k = s.basis.shape[1]
-        slices.append(slice(offset, offset + d_k))
-        offset += d_k
-    total_dim = offset
-
-    def unpack_x(z: Array) -> list[Array]:
-        return [
-            spaces[k].particular + spaces[k].basis @ z[slices[k]]
-            for k in range(t_count)
-        ]
-
-    def objective(z: Array) -> float:
-        xs = unpack_x(z)
-        cost = 0.0
-        for k in range(t_count):
-            wx = w * xs[k]
-            cost += float(wx @ wx)
-        for k in range(t_count - 1):
-            dt = dts[k]
-            dx = (xs[k + 1] - xs[k]) / dt
-            cost += float(smoothness_weight * (dx @ dx))
-        return cost
-
-    def gradient(z: Array) -> Array:
-        xs = unpack_x(z)
-        grad = np.zeros(total_dim)
-        w_sq = w**2
-        for k in range(t_count):
-            if slices[k].stop > slices[k].start:
-                grad[slices[k]] += 2.0 * spaces[k].basis.T @ (w_sq * xs[k])
-        for k in range(t_count - 1):
-            dt = dts[k]
-            coeff = 2.0 * smoothness_weight / (dt**2)
-            diff = xs[k + 1] - xs[k]
-            if slices[k].stop > slices[k].start:
-                grad[slices[k]] -= coeff * (spaces[k].basis.T @ diff)
-            if slices[k + 1].stop > slices[k + 1].start:
-                grad[slices[k + 1]] += coeff * (spaces[k + 1].basis.T @ diff)
-        return grad
-
-    if total_dim > 0:
-        z_init = np.zeros(total_dim)
-        for k in range(t_count):
-            if slices[k].stop > slices[k].start:
-                wb = w[:, None] * spaces[k].basis
-                wp = w * spaces[k].particular
-                z_init[slices[k]] = np.linalg.lstsq(wb, -wp, rcond=None)[0]
-
-        a_blocks = np.zeros((t_count * n, total_dim))
-        lb_list: list[Array] = []
-        ub_list: list[Array] = []
-        for k in range(t_count):
-            d_k = spaces[k].basis.shape[1]
-            if d_k > 0:
-                a_blocks[k * n : (k + 1) * n, slices[k]] = spaces[k].basis
-            lb_list.append(constraints[k].lower - spaces[k].particular)
-            ub_list.append(constraints[k].upper_bound - spaces[k].particular)
-
-        lb_all = np.concatenate(lb_list)
-        ub_all = np.concatenate(ub_list)
-        eq_mask_traj = np.isclose(lb_all, ub_all, atol=1e-12)
-
-        cons_traj: list[Any] = []
-        if np.any(eq_mask_traj):
-            cons_traj.append(
-                LinearConstraint(
-                    a_blocks[eq_mask_traj],
-                    lb_all[eq_mask_traj],
-                    lb_all[eq_mask_traj],
-                )
-            )
-        if np.any(~eq_mask_traj):
-            cons_traj.append(
-                LinearConstraint(
-                    a_blocks[~eq_mask_traj],
-                    lb_all[~eq_mask_traj],
-                    ub_all[~eq_mask_traj],
-                )
-            )
-
-        has_matrix = any(
-            c.matrix is not None and c.upper is not None and c.matrix.shape[0] > 0
-            for c in constraints
+    if sum(s.basis.shape[1] for s in spaces) > 0:
+        z_all, converged, message = _solve_stacked(
+            spaces,
+            constraints,
+            w,
+            np.zeros((t_count, n)),
+            smoothness_weight,
+            dts,
+            tolerance=tolerance,
+            max_iterations=max_iterations,
         )
-        if has_matrix:
-            g_rows = sum(
-                c.matrix.shape[0]
-                for c in constraints
-                if c.matrix is not None and c.upper is not None
-            )
-            g_mat = np.zeros((g_rows, total_dim))
-            g_ub: list[Array] = []
-            curr_row = 0
-            for k in range(t_count):
-                c = constraints[k]
-                if (
-                    c.matrix is not None
-                    and c.upper is not None
-                    and c.matrix.shape[0] > 0
-                ):
-                    m_k = c.matrix.shape[0]
-                    d_k = spaces[k].basis.shape[1]
-                    if d_k > 0:
-                        g_mat[curr_row : curr_row + m_k, slices[k]] = (
-                            c.matrix @ spaces[k].basis
-                        )
-                    g_ub.append(c.upper - c.matrix @ spaces[k].particular)
-                    curr_row += m_k
-            cons_traj.append(LinearConstraint(g_mat, -np.inf, np.concatenate(g_ub)))
-
-        has_cones = any(len(c.cones) > 0 for c in constraints)
-        if has_cones:
-
-            def cone_margins(z: Array) -> Array:
-                xs = unpack_x(z)
-                return np.concatenate(
-                    [
-                        np.concatenate(
-                            [cone.margins(xs[k]) for cone in constraints[k].cones]
-                        )
-                        for k in range(t_count)
-                        if constraints[k].cones
-                    ]
-                )
-
-            cons_traj.append(NonlinearConstraint(cone_margins, 0.0, np.inf))
-
-        solve = _minimize(
-            objective,
-            z_init,
-            jac=gradient,
-            method="SLSQP",
-            constraints=cons_traj,
-            options={"ftol": max(tolerance, 1e-12), "maxiter": max_iterations},
-        )
-        z_sol = solve.x
-        converged = bool(solve.success)
-        message = str(solve.message)
     else:
-        z_sol = np.empty(0)
+        z_all = np.empty(0)
         converged, message = True, "Unique trajectory solution; constraints audited"
 
-    x_list = unpack_x(z_sol)
+    cuts = np.cumsum([0] + [s.basis.shape[1] for s in spaces])
+    x_list = [
+        spaces[k].particular + spaces[k].basis @ z_all[cuts[k] : cuts[k + 1]]
+        for k in range(t_count)
+    ]
     x_all = np.stack(x_list)
     finite = bool(np.isfinite(x_all).all())
     error = (
@@ -416,14 +374,16 @@ def redistribute_trajectory(
     all_margins = np.concatenate(
         [constraints[k].margins(x_list[k]) for k in range(t_count)]
     )
-    violation = _margin_violation(all_margins, finite=finite)
-    cost = objective(z_sol)
+    cost = sum(float((w * x) @ (w * x)) for x in x_list)
+    for k in range(t_count - 1):
+        rate = (x_list[k + 1] - x_list[k]) / dts[k]
+        cost += float(smoothness_weight * (rate @ rate))
     return _finalize_redistribution(
         x_all,
         finite=finite,
         converged=converged,
         error=error,
-        violation=violation,
+        violation=_margin_violation(all_margins, finite=finite),
         cost=cost,
         message=message,
         tolerance=tolerance,

@@ -520,6 +520,35 @@ Preserve public signatures of `ContactForceAllocator` and
 `zero_side_solve`. An `INCONSISTENT` frame is reported with its residual.
 Golden: `planar_two_arm_full.zero_side`.
 
+Implemented as follows (the first four items are the contract; the last
+records what was deliberately not done).
+
+- `loop_nullspace/qp_core.py` is the one place that turns "quadratic, equality
+  rows, inequality rows, box, exact Coulomb cones" into `solve_socp`
+  (Clarabel). Lower and upper bounds that coincide become equality rows.
+- `ContactForceAllocator.allocate` solves the same scaled QP it always built
+  (diagonal weights, 8-facet inscribed friction pyramid, actuator and root
+  slack penalties) through `solve_qp`. SLSQP agrees with the conic optimum to
+  about 1e-13 relative on the parity fixtures; where SLSQP stops short, the
+  conic objective is no larger and the result is feasible.
+- `redistribute_forces` and `redistribute_trajectory` solve one convex QP in the
+  stacked null-space coordinates with exact Coulomb cones (SOC blocks), not
+  SLSQP. The rate penalty is evaluated on physical `x`, so the result is
+  invariant to basis sign flips.
+- A non-optimal solver status (`INFEASIBLE`, `NUMERICAL`) is never repaired:
+  the allocator returns the zero iterate with `success=False`; the
+  redistribution shims return the particular solution with `converged=False`
+  and the independent audit decides `feasible`. A missing `clarabel` raises
+  `ImportError` naming the `loop-nullspace` extra (rule R11); there is no
+  fallback optimizer.
+- Not done: `HARD_ZERO_TRAIL` is not routed through NSX-15 `zero_side_solve`.
+  The legacy signature carries only `tau_rnea` and the Jacobians, not a
+  `ClosedLoopSnapshot`, so the three-case diagnostic has no inputs. The
+  existing slack formulation already reports `INFEASIBLE_HARD_ZERO_TRAIL`
+  rather than hiding the inconsistency. The adapter over `allocate_trajectory`
+  and `FeasibleSet` requires snapshots and is the next step, together with
+  removing the shims.
+
 ## NSX-25 Pareto and Probes (#12568)
 
 `pareto_front(feasible_sets, objectives, eps_grid)`,
