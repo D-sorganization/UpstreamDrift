@@ -370,6 +370,16 @@ class PinocchioForceAdapter:
             )
         )
 
+    def closure_position_error(self, q: Array) -> Array:
+        """Native weld pose error (6,) at ``q`` (NSX-31 replay drift report).
+
+        The Pinocchio ``contact_placement_error`` (linear then angular, LOCAL, in
+        m and rad), the same row convention as :meth:`compute_grip_jacobian`.  It
+        is a diagnostic: nothing here projects or corrects the state.
+        """
+        pose, _ = self._plant.closure_residuals(self._named_state(q, "configuration"))
+        return np.array(pose)
+
     def native_closure_frame(self, q: Array) -> tuple[Array, Array]:
         """World rotation and origin of the frame the native rows use (LOCAL)."""
         return self._plant.closure_frame_pose(self._named_state(q, "configuration"))
