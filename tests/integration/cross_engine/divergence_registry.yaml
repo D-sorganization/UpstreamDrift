@@ -43,7 +43,7 @@ divergences:
     check: closed_loop_snapshot_conformance
     metric: closure_acceleration_residual_ratio
     engines: [mujoco-stock-step, mujoco-hard-kkt]
-    tolerance: 3.0
+    tolerance: 10.0
     rationale: >
       Stock mj_step / mj_forward keeps the grip weld as a compliant equality
       (solref 0.02 1, solimp 0.9 0.95 0.001) and solves it with the contact
@@ -52,9 +52,12 @@ divergences:
       h (qfrc_bias) and the weld site Jacobians and solves the exact KKT system
       with zero regularisation, so J a + Jdot v closes to round-off.  The metric
       is |J qacc_stock + Jdot v| / |J a_free + Jdot v| at contact-free,
-      limit-free closure-consistent states.  Measured on frames 100, 250, 400
-      and 500 of the ground_support dynamics record with zero and unit-normal
-      actuator effort, the ratio spans 0.02 to 2.9, so 3.0 is a measured
-      envelope for documentation, not a convergence tolerance, and stock
-      stepping is not a 1e-10 reference.  The hard-KKT side is held to the
-      tolerances of the Pinocchio cross-engine snapshot test.
+      limit-free closure-consistent states.  Measured ratios (zero effort,
+      unit-normal effort) per ground_support dynamics-record frame: 100:
+      0.778, 0.022; 250: 2.612, 0.023; 400: 1.858, 0.028; 500: 2.906, 0.055.
+      The tolerance of 10 is an order-of-magnitude sanity envelope, not a fit
+      to these values and not a convergence tolerance: this entry documents
+      that stock stepping differs from the rigid solve (the test asserts the
+      ratio exceeds 1e-3), it does not certify agreement.  Stock stepping is
+      not a 1e-10 reference.  The hard-KKT side is held to the tolerances of
+      the Pinocchio cross-engine snapshot test.
