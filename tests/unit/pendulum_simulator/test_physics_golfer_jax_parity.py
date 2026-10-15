@@ -248,17 +248,18 @@ def test_club_point_jacobians_match_central_difference(grip_right: float) -> Non
     p = _params(grip_right)
     pj = _jax_params(p)
 
-    def club_points(x: Any) -> dict[str, Any]:
-        fk = pgj.forward_kinematics_jax(x, pj)
+    def club_points(x: np.ndarray) -> Any:
+        """Club tip and club COM (midpoint of base and tip), shape (2, 2)."""
+        fk = pgj.forward_kinematics_jax(_jnp(x), pj)
         com = 0.5 * (fk["club_base"] + fk["club_tip"])
-        return {"club_tip": fk["club_tip"], "club_com": com}
+        return jax.numpy.stack([fk["club_tip"], com])
 
     for q in _random_states(16)[:6]:
         jac = pgj.analytical_fk_jacobians_jax(_jnp(q), pj)
-        for key in ("club_tip", "club_com"):
-            fd = _central_fd(lambda x, k=key: club_points(_jnp(x))[k], q)
+        fd = _central_fd(club_points, q)
+        for index, key in enumerate(("club_tip", "club_com")):
             np.testing.assert_allclose(
-                np.asarray(jac[key]), fd, atol=FD_TOL, rtol=0.0, err_msg=key
+                np.asarray(jac[key]), fd[index], atol=FD_TOL, rtol=0.0, err_msg=key
             )
 
 

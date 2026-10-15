@@ -39,6 +39,8 @@ Closure decision (#12608, NSX-00 ``PLANAR_POINT2``):
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 
 from src.shared.python.core.contracts import ensure, require
@@ -107,6 +109,27 @@ def _chain_endpoint(
     return (x, y)
 
 
+def club_shaft_offset(theta_club: Any, offset: Any, xp: Any = np) -> tuple[Any, Any]:
+    """Displacement ``offset * u(theta_club)`` along the shaft, ``u = (sin, -cos)``.
+
+    The single formula for club points (#12608, #12669).  It is
+    backend-agnostic, so ``xp`` may be ``numpy`` or ``jax.numpy``, and it carries
+    no contracts so JAX can trace it; ``point_on_club`` adds them for NumPy.
+    """
+    return offset * xp.sin(theta_club), -offset * xp.cos(theta_club)
+
+
+def club_shaft_offset_derivative(
+    theta_club: Any, offset: Any, xp: Any = np
+) -> tuple[Any, Any]:
+    """``d/d theta_club`` of ``club_shaft_offset``: ``offset * (cos, sin)``.
+
+    This is the club-angle column of every club-point Jacobian.  It is
+    backend-agnostic in the same way as ``club_shaft_offset``.
+    """
+    return offset * xp.cos(theta_club), offset * xp.sin(theta_club)
+
+
 def point_on_club(
     anchor: tuple[float, float], theta_club: float, offset: float
 ) -> tuple[float, float]:
@@ -125,8 +148,9 @@ def point_on_club(
         "theta_club and offset must be finite",
         (theta_club, offset),
     )
-    x = anchor[0] + offset * float(np.sin(theta_club))
-    y = anchor[1] - offset * float(np.cos(theta_club))
+    dx, dy = club_shaft_offset(theta_club, offset)
+    x = anchor[0] + float(dx)
+    y = anchor[1] + float(dy)
     ensure(
         bool(np.isclose(np.hypot(x - anchor[0], y - anchor[1]), abs(offset))),
         "club point must lie |offset| from its anchor",
