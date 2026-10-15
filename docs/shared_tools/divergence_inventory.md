@@ -94,7 +94,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `notes` | 0 | 0 | 0 | 0 | 6 | 0 |
 | `optimization` | 0 | 0 | 0 | 29 | 0 | 0 |
 | `output_manager.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `pendulum_simulator` | 0 | 0 | 0 | 79 | 0 | 0 |
+| `pendulum_simulator` | 0 | 0 | 0 | 80 | 0 | 0 |
 | `perturbation` | 0 | 0 | 0 | 17 | 0 | 0 |
 | `physics` | 0 | 0 | 0 | 80 | 0 | 0 |
 | `physics_informed` | 0 | 0 | 0 | 7 | 0 | 0 |
@@ -145,7 +145,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 62 | 0 | 0 |
-| **Total** | **377** | **271** | **121** | **1754** | **839** | **648** |
+| **Total** | **377** | **271** | **121** | **1755** | **839** | **648** |
 
 ## Diverged Files by Package
 
