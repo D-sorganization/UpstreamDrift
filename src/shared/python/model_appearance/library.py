@@ -105,32 +105,72 @@ SKIN_TONES = ("skin_light", "skin_medium", "skin_tan", "skin_dark")
 HEADWEAR_DEFAULT_MATERIAL = {"hair": "hair_brown", "cap": "cap_navy"}
 CLUB_FINISHES = ("satin_steel", "chrome", "graphite", "black_pvd")
 
+# The lower-body garment is keyed on the thigh; the pelvis always wears it.
+PANTS_PART = "thigh"
+
+
+def _outfit(top: str, pants: str, shoes: str, *, full_length: bool) -> dict[str, str]:
+    """One outfit: the shirt dresses the trunk and upper arms, the pants (and
+    nothing else) dress the pelvis and thighs, and the shins when full length."""
+    parts = {
+        "torso": top,
+        "shoulder": top,
+        "upper_arm": top,
+        "pelvis": pants,
+        PANTS_PART: pants,
+        "foot": shoes,
+        "hand": "glove_white",
+    }
+    if full_length:
+        parts["shin"] = pants
+    return parts
+
+
 # Anatomical part -> material, per clothing preset; absent parts show skin.
 CLOTHING: dict[str, dict[str, str]] = {
     "none": {"foot": "shoe_white", "hand": "glove_white"},
-    "golf_polo_shorts": {
-        "torso": "polo_navy",
-        "pelvis": "shorts_khaki",
-        "upper_arm": "polo_navy",
-        "shoulder": "polo_navy",
-        "thigh": "shorts_khaki",
-        "foot": "shoe_white",
-        "hand": "glove_white",
-    },
-    "golf_polo_trousers": {
-        "torso": "polo_white",
-        "pelvis": "trousers_charcoal",
-        "upper_arm": "polo_white",
-        "shoulder": "polo_white",
-        "thigh": "trousers_charcoal",
-        "shin": "trousers_charcoal",
-        "foot": "shoe_black",
-        "hand": "glove_white",
-    },
+    "golf_polo_shorts": _outfit(
+        "polo_navy", "shorts_khaki", "shoe_white", full_length=False
+    ),
+    "golf_polo_trousers": _outfit(
+        "polo_white", "trousers_charcoal", "shoe_black", full_length=True
+    ),
 }
 
-# First match wins. Lowercased fnmatch patterns over the body name.
+
+def pants_material(preset: str) -> str | None:
+    """Lower-body garment of ``preset`` (what the pelvis wears), or ``None``."""
+    if preset not in CLOTHING:
+        raise ValueError(f"Unknown clothing preset: {preset}")
+    return CLOTHING[preset].get(PANTS_PART)
+
+
+def check_clothing(presets: Mapping[str, Mapping[str, str]]) -> None:
+    """Every preset names library materials, and its pelvis wears its pants."""
+    for preset, parts in presets.items():
+        for part, name in parts.items():
+            if name not in MATERIALS:
+                raise ValueError(
+                    f"Unknown material name for clothing {preset}.{part}: {name}"
+                )
+        pants = parts.get(PANTS_PART)
+        if parts.get("pelvis") != pants:
+            raise ValueError(
+                f"Clothing {preset}: pelvis garment {parts.get('pelvis')!r} must "
+                f"equal the pants ({PANTS_PART}) garment {pants!r}"
+            )
+
+
+# One classification table: lowercased fnmatch patterns over ONE path
+# component of the body name. A pattern without wildcards is an exact segment
+# name (most specific), a trailing-only wildcard anchors a prefix, anything
+# else is a substring match (least specific). Order is irrelevant.
 PART_RULES: tuple[tuple[str, str], ...] = (
+    # GolfSwing3D trunk segments sit in the "Hips and Torso Inputs" folder,
+    # which names both the pelvis and the torso, so they are named exactly.
+    ("lowertorso", "pelvis"),
+    ("uppertorsobase", "torso"),
+    ("comrod", "torso"),
     ("*clubface*", "club"),
     ("*club*", "club"),
     ("*shaft*", "club"),
@@ -144,7 +184,6 @@ PART_RULES: tuple[tuple[str, str], ...] = (
     ("*ulna*", "forearm"),
     ("*hubto*", "shoulder"),
     ("*torso*", "torso"),
-    ("*comrod*", "torso"),
     ("*spine*", "torso"),
     ("*pelvis*", "pelvis"),
     ("*hips*", "pelvis"),
@@ -198,13 +237,44 @@ def blend_scale(garment: bool) -> float:
 GARMENT_PARTS = ("torso", "pelvis", "shoulder", "upper_arm", "thigh", "shin")
 
 
+def _specificity(pattern: str) -> int:
+    """0 = exact segment name, 1 = prefix, 2 = substring (lower is more specific)."""
+    if not any(c in pattern for c in "*?["):
+        return 0
+    return 1 if pattern.endswith("*") and not pattern[:-1].count("*") else 2
+
+
+def _component_part(component: str, body_name: str) -> str | None:
+    """Part of one path component from its most specific matching rules."""
+    hits = [
+        (_specificity(pattern), part)
+        for pattern, part in PART_RULES
+        if fnmatchcase(component, pattern)
+    ]
+    if not hits:
+        return None
+    best = min(rank for rank, _ in hits)
+    parts = sorted({part for rank, part in hits if rank == best})
+    if len(parts) > 1:
+        raise ValueError(
+            f"Ambiguous body classification for {body_name!r}: "
+            f"{component!r} matches {parts} at equal specificity"
+        )
+    return parts[0]
+
+
 def classify_body(body_name: str) -> str:
-    """Anatomical part of a body, or ``"other"``."""
+    """Anatomical part of a body, or ``"other"``.
+
+    Specific before general: the leaf segment (text after the last ``/``)
+    decides; only when no rule matches it does the nearest enclosing folder
+    decide. The result never depends on the order of ``PART_RULES``.
+    """
     if not isinstance(body_name, str) or not body_name:
         raise ValueError("Body name must be a non-empty string")
-    lowered = body_name.lower()
-    for pattern, part in PART_RULES:
-        if fnmatchcase(lowered, pattern):
+    for component in reversed(body_name.lower().split("/")):
+        part = _component_part(component.strip(), body_name)
+        if part is not None:
             return part
     return "other"
 
@@ -229,6 +299,7 @@ def check_references(doc: AppearanceDocument) -> None:
     materials = library_materials(doc)
     if doc.clothing not in CLOTHING:
         raise ValueError(f"Unknown clothing preset: {doc.clothing}")
+    check_clothing({doc.clothing: CLOTHING[doc.clothing]})
     for label, name in (
         ("skin_tone", doc.skin_tone),
         ("club_finish", doc.club_finish),

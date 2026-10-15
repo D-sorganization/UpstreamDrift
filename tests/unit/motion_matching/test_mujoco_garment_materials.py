@@ -21,10 +21,11 @@ def _pelvis_materials(spec: Path, doc_dict: dict) -> set[str]:
         spec.read_bytes(), appearance=document_from_dict(doc_dict)
     )
     body = next(b for b in ET.fromstring(xml).iter("body") if b.get("name") == PELVIS)
+    # Appearance meshes on the body; the skin loft is fully under the garment.
     return {
         g.get("material", "")
         for g in body.findall("geom")
-        if g.get("name", "").startswith("visual_") and "_skin" not in g.get("name", "")
+        if g.get("type") == "mesh" and "_skin" not in g.get("name", "")
     }
 
 
