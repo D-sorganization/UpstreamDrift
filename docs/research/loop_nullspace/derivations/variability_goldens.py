@@ -398,7 +398,23 @@ def _poly_coeffs(expr: sp.Expr) -> list[str]:
     return [str(c) for c in poly.all_coeffs()]
 
 
-def generate() -> dict[str, Any]:
+def _model_block() -> dict[str, Any]:
+    return {
+        "equation": "m a + h(q) = u + J(q)^T lambda; Phi = (|q|^2 - L^2)/2",
+        "allocation": "x = (u, lambda) = x_p + N z, N = (-q, 1)",
+        "parameters": {k: str(v) for k, v in PEND.items() if k != "u_particular"},
+        "u_particular": [str(x) for x in PEND["u_particular"]],
+        "noise_declared": {
+            "dt": str(NOISE["dt"]),
+            "c_outcome": [str(x) for x in NOISE["c_outcome"]],
+            "sigma0": [str(x) for x in NOISE["sigma0"]],
+            "k": [str(x) for x in NOISE["k"]],
+            "P0_diag": [str(x) for x in NOISE["P0_diag"]],
+        },
+    }
+
+
+def _linearization_block() -> dict[str, Any]:
     sub = nominal_subs()
     with_m2 = linearization(include_preload=True)
     without_m2 = linearization(include_preload=False)
@@ -433,6 +449,19 @@ def generate() -> dict[str, Any]:
     g_nom = with_m2["G"].subs(sub).applyfunc(_trig_exact)
     g_nom = g_nom.applyfunc(sp.nsimplify)
 
+    return {
+        "symbolic_F10_with_preload": str(sp.simplify(with_m2["F"][1, 0])),
+        "kkt_equals_reduced_coordinate_symbolic": bool(kkt_vs_reduced == 0),
+        "F01": "1",
+        "F11": str(with_m2["F"][1, 1]),
+        "G_nominal_om_row": cm.exact_mat(g_nom[1, :]),
+        "G_times_allocation_direction_is_zero": g_times_n_zero,
+        "lambda_particular": str(lam_p_n),
+        "allocation_table": table,
+    }
+
+
+def _saltation_block() -> dict[str, Any]:
     # Saltation on the pendulum nominal point (event: x-coordinate hits d).
     t_n = _vec(PEND["cos_theta"], PEND["sin_theta"])
     q_n = PEND["L"] * _vec(PEND["sin_theta"], -PEND["cos_theta"])
@@ -474,14 +503,50 @@ def generate() -> dict[str, Any]:
     }
     salt["independent_closed_form_check"] = saltation_closed_form_check()
 
+    return salt
+
+
+def _min_variance_block() -> dict[str, Any]:
     zres = closed_form_zstar()
-    flat = additive_flat_case()
     var_m1 = zres["var_poly"]
     var_m2 = variance_model(include_preload=True)["var"]
     z_stars_m2 = sp.Poly(sp.diff(var_m2, ZZ), ZZ).all_coeffs()
     f_wo = variance_model(include_preload=False)
     f_wi = variance_model(include_preload=True)
 
+    return {
+        "model": (
+            "dx1 = (I + dt F) dx0 + dt G w; y = c^T dx1; "
+            "Var(z) = c^T A P0 A^T c + sum_i b_i^2 (sigma0_i^2 + k_i^2 u_i(z)^2)"
+        ),
+        "b": [str(x) for x in zres_b()],
+        "var_poly_coeffs_descending_M1": _poly_coeffs(var_m1),
+        "z_star": str(zres["z_star"]),
+        "z_star_closed_form": str(zres["z_star_formula"]),
+        "z_star_matches_closed_form": bool(
+            sp.simplify(zres["z_star"] - zres["z_star_formula"]) == 0
+        ),
+        "second_derivative": str(zres["second_derivative"]),
+        "var_at_zstar": str(zres["var_at_zstar"]),
+        "dvar_dz_coeffs_with_preload_M1_M2": [str(c) for c in z_stars_m2],
+        "F10_frozen_without_preload": str(f_wo["F"][1, 0]),
+        "F10_with_preload_at_lambda_p": str(f_wi["F"][1, 0]),
+    }
+
+
+def _flat_block() -> dict[str, Any]:
+    flat = additive_flat_case()
+    return {
+        "k": ["0", "0"],
+        "gradient_no_preload": str(flat["gradient_no_preload"]),
+        "gradient_no_preload_is_zero": bool(flat["gradient_no_preload"] == 0),
+        "gradient_with_preload": str(flat["gradient_with_preload"]),
+        "gradient_with_preload_is_zero": bool(flat["gradient_with_preload"] == 0),
+    }
+
+
+def generate() -> dict[str, Any]:
+    """Assemble the golden payload (see the module docstring)."""
     return cm.dump(
         NAME,
         {
@@ -489,59 +554,11 @@ def generate() -> dict[str, Any]:
                 "NSX-80 variability-sensitivity goldens: redundantly actuated "
                 "planar pendulum (exact) and planar-golfer preload block."
             ),
-            "model": {
-                "equation": "m a + h(q) = u + J(q)^T lambda; Phi = (|q|^2 - L^2)/2",
-                "allocation": "x = (u, lambda) = x_p + N z, N = (-q, 1)",
-                "parameters": {
-                    k: str(v) for k, v in PEND.items() if k != "u_particular"
-                },
-                "u_particular": [str(x) for x in PEND["u_particular"]],
-                "noise_declared": {
-                    "dt": str(NOISE["dt"]),
-                    "c_outcome": [str(x) for x in NOISE["c_outcome"]],
-                    "sigma0": [str(x) for x in NOISE["sigma0"]],
-                    "k": [str(x) for x in NOISE["k"]],
-                    "P0_diag": [str(x) for x in NOISE["P0_diag"]],
-                },
-            },
-            "linearization": {
-                "symbolic_F10_with_preload": str(sp.simplify(with_m2["F"][1, 0])),
-                "kkt_equals_reduced_coordinate_symbolic": bool(kkt_vs_reduced == 0),
-                "F01": "1",
-                "F11": str(with_m2["F"][1, 1]),
-                "G_nominal_om_row": cm.exact_mat(g_nom[1, :]),
-                "G_times_allocation_direction_is_zero": g_times_n_zero,
-                "lambda_particular": str(lam_p_n),
-                "allocation_table": table,
-            },
-            "saltation": salt,
-            "min_variance": {
-                "model": (
-                    "dx1 = (I + dt F) dx0 + dt G w; y = c^T dx1; "
-                    "Var(z) = c^T A P0 A^T c + sum_i b_i^2 (sigma0_i^2 + k_i^2 u_i(z)^2)"
-                ),
-                "b": [str(x) for x in zres_b()],
-                "var_poly_coeffs_descending_M1": _poly_coeffs(var_m1),
-                "z_star": str(zres["z_star"]),
-                "z_star_closed_form": str(zres["z_star_formula"]),
-                "z_star_matches_closed_form": bool(
-                    sp.simplify(zres["z_star"] - zres["z_star_formula"]) == 0
-                ),
-                "second_derivative": str(zres["second_derivative"]),
-                "var_at_zstar": str(zres["var_at_zstar"]),
-                "dvar_dz_coeffs_with_preload_M1_M2": [str(c) for c in z_stars_m2],
-                "F10_frozen_without_preload": str(f_wo["F"][1, 0]),
-                "F10_with_preload_at_lambda_p": str(f_wi["F"][1, 0]),
-            },
-            "additive_noise_flat": {
-                "k": ["0", "0"],
-                "gradient_no_preload": str(flat["gradient_no_preload"]),
-                "gradient_no_preload_is_zero": bool(flat["gradient_no_preload"] == 0),
-                "gradient_with_preload": str(flat["gradient_with_preload"]),
-                "gradient_with_preload_is_zero": bool(
-                    flat["gradient_with_preload"] == 0
-                ),
-            },
+            "model": _model_block(),
+            "linearization": _linearization_block(),
+            "saltation": _saltation_block(),
+            "min_variance": _min_variance_block(),
+            "additive_noise_flat": _flat_block(),
             "golfer_preload": golfer_preload(),
         },
     )
