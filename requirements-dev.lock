@@ -38,9 +38,13 @@ certifi==2026.1.4
     #   pyproj
     #   requests
 cffi==2.0.0
-    # via cryptography
+    # via
+    #   clarabel
+    #   cryptography
 charset-normalizer==3.4.7
     # via requests
+clarabel==0.11.1
+    # via upstream-drift (pyproject.toml)
 click==8.4.2
     # via
     #   flask
@@ -89,6 +93,8 @@ h11==0.16.0
     #   httpcore
     #   uvicorn
 h5py==3.16.0
+    # via upstream-drift (pyproject.toml)
+highspy==1.15.1
     # via upstream-drift (pyproject.toml)
 httpcore==1.0.9
     # via httpx
@@ -156,9 +162,11 @@ narwhals==2.20.0
 numpy==2.2.6
     # via
     #   bokeh
+    #   clarabel
     #   contourpy
     #   ezc3d
     #   h5py
+    #   highspy
     #   imageio
     #   matplotlib
     #   mujoco
@@ -293,7 +301,9 @@ rpds-py==2026.6.3
 ruff==0.15.12
     # via upstream-drift (pyproject.toml)
 scipy==1.15.3
-    # via upstream-drift (pyproject.toml)
+    # via
+    #   clarabel
+    #   upstream-drift (pyproject.toml)
 scipy-stubs==1.17.1.4
     # via upstream-drift (pyproject.toml)
 simpleeval==1.0.7
