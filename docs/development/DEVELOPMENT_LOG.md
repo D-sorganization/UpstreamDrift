@@ -2288,6 +2288,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12536 · Complete BunkerShot3D Workbench Export Views, Save/Reload, VTK Stamped Export, and API Docs (#12536)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12536
+- **Branch:** merged via #12542
+- **PR:** #12542
+- **Paths:** see #12542
+- **Started:** 2026-10-14
+- **Last verified:** 2026-10-14 (`477af06c`; collated from changes/12536-complete-bunkershot3d-workbench-export-v.md)
+- **Summary:** Complete BunkerShot3D workbench export views, save/reload, VTK stamped export, and API docs (#12536)
+- **Next step:** Shipped in PR #12542.
+
 ### DL-#12399 · Add Transactional Muscle Allocation Stepper, Fresh Controller-Off Replay, R2025b T01 Binding, and F10 Turnover Packet (#12399, #11898, #11921, #11784)
 
 - **State:** shipped
