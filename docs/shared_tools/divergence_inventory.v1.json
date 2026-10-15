@@ -13531,6 +13531,18 @@
       "spelling_only": false
     },
     {
+      "path": "loop_nullspace/decomposition.py",
+      "classification": "ud-only",
+      "package": "loop_nullspace",
+      "subpackage": "",
+      "ud_bytes": 27481,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "loop_nullspace/evidence.py",
       "classification": "ud-only",
       "package": "loop_nullspace",

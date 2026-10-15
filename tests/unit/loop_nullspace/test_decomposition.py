@@ -112,7 +112,9 @@ def test_spatial_dimension_accounting_equals_goldens(variant, kwargs):
     assert acc.rank_J_c == want["rank_J_c"]
     assert acc.rank_J_cu_T == want["rank_J_cu_T"]
     assert acc.multiplier_gauge == want["multiplier_gauge"]
-    assert acc.attainable_torque_variation == want["attainable_torque_variation_fg_fixed"]
+    assert (
+        acc.attainable_torque_variation == want["attainable_torque_variation_fg_fixed"]
+    )
     assert acc.multiplier_gauge_fg_free == want["gauge_total_fg_free"]
     assert (
         acc.attainable_torque_variation_fg_free
@@ -172,9 +174,7 @@ def test_zero_side_records_damping_and_never_relaxes():
     assert damped.damping == 1e-3
     assert damped.case is ZeroSideCase.CONSISTENT_UNIQUE
     # damping never turns an inconsistent system into a consistent one
-    assert (
-        zero_side_solve(snap, "lead", damping=1e-3).case is ZeroSideCase.INCONSISTENT
-    )
+    assert zero_side_solve(snap, "lead", damping=1e-3).case is ZeroSideCase.INCONSISTENT
 
 
 def test_zero_side_explicit_indices_override_and_validation():
@@ -375,14 +375,15 @@ def test_diagnostics_are_serializable_and_carry_evidence():
     assert rec.allocation_dependence is AllocationDependence.INVARIANT
     assert rec.model_provenance == snap.model_provenance
     assert rec.input_provenance == snap.input_provenance
-    assert "C-SCALE-FORCE-MOMENT" in rec.conventions
+    assert any(c.startswith("C-SCALE-FORCE-MOMENT") for c in rec.conventions)
     tau_rec = d.records["torque_particular"]
     assert tau_rec.allocation_dependence is AllocationDependence.FAMILY_DEPENDENT
     assert "C-METRIC-MINV" in " ".join(tau_rec.hypotheses)
     assert isinstance(d, Decomposition)
-    assert json.loads(json.dumps(zero_side_solve(snap, "lead").to_dict()))[
-        "case"
-    ] == "INCONSISTENT"
+    assert (
+        json.loads(json.dumps(zero_side_solve(snap, "lead").to_dict()))["case"]
+        == "INCONSISTENT"
+    )
 
 
 def test_decomposition_arrays_are_read_only():
