@@ -395,6 +395,22 @@ hypothesis id. `conflict_set()` returns an inclusion-minimal set of ids
 set. Circular cones: declared facet count `k` and error bound
 `1/cos(pi/k) - 1` for the outer polygon (inner polygon scale `cos(pi/k)`).
 
+Implementation (`feasible_set.py`, `feasible_rows.py`): `x = x_p + N z` with
+`x = (tau, lambda, f_g)`; rows are `g . z <= h` with labels
+`<hypothesis id>:<item>:<side>` and the declaring hypothesis id. Torque rows
+use the `CapacityVector` (actuated order must match the decomposition). Each
+`FrictionCone` (indices into `x`) gives a unilateral normal row, `k` linear
+facets (outer or inner, declared `k` and bound `1/cos(pi/k) - 1` or
+`1 - cos(pi/k)`) and one exact SOC block `(mu n, t1, t2)`. A hand squeeze
+floor is `selector . x + offset >= minimum` (sign convention of NSX-16: `s1`
+negative is squeeze). `is_empty()` and the conflict queries use the exact
+cones; `to_lp()` uses the linearisation; `to_socp()` uses the exact cones.
+`conflict_set()` is minimal at hypothesis level (deletion filter);
+`conflict_rows()` is a row-level IIS (elastic filter, then deletion filter).
+Rows resting on an ASSUMED capacity slot or on a hypothesis that fails the
+display gate carry flags (`flagged_rows()`, `rests_on_unverified`). Cone
+data is accepted only when `H-FRICTION-CONE` is declared, likewise for grip.
+
 ## NSX-22 Static Envelopes (#12565)
 
 `static_envelopes(feasible_sets, quantities) -> EnvelopeSeries`. Golden
