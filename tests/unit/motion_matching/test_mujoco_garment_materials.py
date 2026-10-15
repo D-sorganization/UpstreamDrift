@@ -1,9 +1,9 @@
 """R2 (#12681): the pelvis body wears the active outfit's pants in the MJCF."""
 
-import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import pytest
+from defusedxml import ElementTree as ET
 
 from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter
 from src.shared.python.model_appearance import CLOTHING, document_from_dict
