@@ -70,7 +70,11 @@ def order_full_body_joints(spec: Mapping[str, Any]) -> list[Mapping[str, Any]]:
     lower_ordered = [
         lower_joints_by_name[name] for name in leg_chain if name in lower_joints_by_name
     ]
-    return list(upper_ordered) + lower_ordered
+    # Appended extensions (the chain shaft, #12686) follow in document order,
+    # which is parent before child; a rigid spec has none.
+    placed = set(leg_chain) | upper_joint_names
+    appended = [j for j in spec["joints"] if j["name"] not in placed]
+    return list(upper_ordered) + lower_ordered + appended
 
 
 Array: TypeAlias = NDArray[np.float64]
