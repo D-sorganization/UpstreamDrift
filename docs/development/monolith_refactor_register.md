@@ -191,6 +191,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 822 | `src/tools/capture_rig/layout_editor.py` |
 | 819 | `src/shared/python/model_generation/converters/simscape/simscape_converter.py` |
 | 815 | `src/engines/physics_engines/mujoco/python/native_full_body_replay.py` |
+| 813 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 813 | `src/engines/physics_engines/drake/python/src/drake_golf_model.py` |
 | 813 | `src/robotics/control/whole_body/wbc_controller.py` |
 | 813 | `src/shared/python/gui_pkg/help_system.py` |

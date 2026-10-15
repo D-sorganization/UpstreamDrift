@@ -135,7 +135,8 @@ def _combine(placed: Sequence[tuple[float, np.ndarray, np.ndarray]]) -> RigidIne
     mass = sum(m for m, _, _ in placed)
     if mass <= 0.0:
         return RigidInertia(0.0, (0.0, 0.0, 0.0), np.zeros((3, 3)))
-    com = np.sum([m * c for m, c, _ in placed], axis=0) / mass
+    com = np.asarray(np.sum([m * c for m, c, _ in placed], axis=0), dtype=np.float64)
+    com = com / mass
     inertia = np.zeros((3, 3))
     for m, c, i_c in placed:
         d = c - com
