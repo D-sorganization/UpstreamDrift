@@ -21,6 +21,20 @@ from src.shared.python.spine.coupling import (
     level_rotations,
     regional_fraction,
 )
+from src.shared.python.spine.coupling_data import (
+    available_laws,
+    coupling_law,
+    load_coupling_laws,
+)
+from src.shared.python.spine.distribution import (
+    ChainOffsets,
+    DistributionResult,
+    DistributionSeriesResult,
+    ObservabilityReport,
+    distribute,
+    distribute_series,
+    distribute_series_detailed,
+)
 from src.shared.python.spine.golf_terms import (
     GolfTermDefinition,
     contribution_remainder,
@@ -48,13 +62,17 @@ from src.shared.python.spine.segmental import (
 
 __all__ = [
     "REQUIRED_PROVENANCE_KEYS",
+    "ChainOffsets",
     "ContextBand",
     "ContextComparison",
     "CouplingLaw",
+    "DistributionResult",
+    "DistributionSeriesResult",
     "GolfTermDefinition",
     "LevelTransform",
     "LinearCouplingLaw",
     "LoadObservable",
+    "ObservabilityReport",
     "PolynomialCouplingLaw",
     "SegmentalKinematicsSeries",
     "SegmentalPose",
@@ -64,13 +82,19 @@ __all__ = [
     "SpinalRegion",
     "StateDependentCouplingLaw",
     "annotate",
+    "available_laws",
     "context_bands",
     "contribution_remainder",
+    "coupling_law",
+    "distribute",
+    "distribute_series",
+    "distribute_series_detailed",
     "from_joint_coupling",
     "from_wrench_in_frame",
     "level_rotations",
     "levels_between",
     "load_context_bands",
+    "load_coupling_laws",
     "parse_level",
     "regional_fraction",
     "registered_terms",
