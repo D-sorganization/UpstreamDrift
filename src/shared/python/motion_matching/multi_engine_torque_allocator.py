@@ -22,6 +22,7 @@ import json
 import logging
 from pathlib import Path
 from typing import Any, Protocol, TypeAlias, runtime_checkable
+import warnings
 
 import numpy as np
 from numpy.typing import NDArray
@@ -646,7 +647,7 @@ class MujocoSyntheticForceAdapter(SyntheticMultibodyFixture):
 
 
 class MultiEngineTorqueAllocator:
-    """Universal multi-engine torque allocator orchestrating full trajectory kinetics."""
+    """Universal multi-engine torque allocator (shim delegating to loop_nullspace core)."""
 
     def __init__(
         self,
@@ -655,7 +656,16 @@ class MultiEngineTorqueAllocator:
         regularisation_contact: float = 1e-4,
         regularisation_grip: float = 1e-4,
         root_penalty_weight: float = 1e4,
+        *,
+        warn_deprecated: bool = False,
     ) -> None:
+        if warn_deprecated:
+            warnings.warn(
+                "MultiEngineTorqueAllocator is a legacy compatibility shim; prefer "
+                "src.shared.python.loop_nullspace.allocation.allocate_trajectory.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         self.adapter = adapter
         self.allocator = ContactForceAllocator(
             nv=adapter.nv,
@@ -726,6 +736,27 @@ class MultiEngineTorqueAllocator:
             trail_arm_indices=trail_arm_indices,
         )
 
+    def _audit_frame_parity(
+        self,
+        q_k: Array,
+        v_k: Array,
+        a_k: Array,
+        alloc: ContactForceAllocation,
+    ) -> float:
+        """Compute forward acceleration parity residual for an allocated frame."""
+        nv = self.adapter.nv
+        tau_full = np.zeros(nv, dtype=np.float64)
+        tau_full[self.adapter.actuated_indices] = alloc.tau_actuated
+        j_g = self.adapter.compute_contact_jacobian(q_k)
+        j_w = self.adapter.compute_grip_jacobian(q_k)
+        root_full = np.concatenate([alloc.delta_tau_root, np.zeros(nv - 6)])
+        tau_eff = (
+            tau_full + j_g.T @ alloc.f_ground + j_w.T @ alloc.lambda_grip + root_full
+        )
+        return self.adapter.verify_acceleration_parity(
+            q=q_k, v=v_k, tau_effective=tau_eff, a_target=a_k
+        )
+
     def allocate_trajectory(
         self,
         time_s: Array,
@@ -761,10 +792,7 @@ class MultiEngineTorqueAllocator:
         all_success = True
 
         for out_idx, frame_idx in enumerate(indices):
-            q_k = q_traj[frame_idx]
-            v_k = v_traj[frame_idx]
-            a_k = a_traj[frame_idx]
-
+            q_k, v_k, a_k = q_traj[frame_idx], v_traj[frame_idx], a_traj[frame_idx]
             alloc = self.allocate_frame(
                 q=q_k,
                 v=v_k,
@@ -772,38 +800,16 @@ class MultiEngineTorqueAllocator:
                 objective=objective,
                 trail_arm_indices=trail_arm_indices,
             )
-
             tau_actuated[out_idx] = alloc.tau_actuated
             f_ground[out_idx] = alloc.f_ground
             lambda_grip[out_idx] = alloc.lambda_grip
             delta_tau_root[out_idx] = alloc.delta_tau_root
+            max_eq_res = max(max_eq_res, alloc.equilibrium_residual)
+            max_root_res = max(max_root_res, alloc.root_balance_residual)
+            all_success = all_success and alloc.success
 
-            if alloc.equilibrium_residual > max_eq_res:
-                max_eq_res = alloc.equilibrium_residual
-            if alloc.root_balance_residual > max_root_res:
-                max_root_res = alloc.root_balance_residual
-            if not alloc.success:
-                all_success = False
-
-            # Verify forward acceleration parity periodically
             if out_idx % max(1, n_eval // 10) == 0:
-                tau_full = np.zeros(self.adapter.nv, dtype=np.float64)
-                tau_full[self.adapter.actuated_indices] = alloc.tau_actuated
-                j_g = self.adapter.compute_contact_jacobian(q_k)
-                j_w = self.canonical_grip_jacobian(q_k)
-                root_full = np.concatenate(
-                    [alloc.delta_tau_root, np.zeros(self.adapter.nv - 6)]
-                )
-                tau_eff = (
-                    tau_full
-                    + j_g.T @ alloc.f_ground
-                    + j_w.T @ alloc.lambda_grip
-                    + root_full
-                )
-                parity_err = self.adapter.verify_acceleration_parity(
-                    q=q_k, v=v_k, tau_effective=tau_eff, a_target=a_k
-                )
-                parity_residuals.append(parity_err)
+                parity_residuals.append(self._audit_frame_parity(q_k, v_k, a_k, alloc))
 
         return TrajectoryAllocationResult(
             engine=self.adapter.engine_type,
