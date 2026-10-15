@@ -106,7 +106,9 @@ def seeded_effort(names: tuple[str, ...], actuated: frozenset[str]) -> np.ndarra
     """One effort by coordinate name (zero off the actuated set), reference order."""
     rng = np.random.default_rng(12584)
     draw = rng.normal(size=len(names))
-    return np.array([d if n in actuated else 0.0 for n, d in zip(names, draw)])
+    return np.array(
+        [d if n in actuated else 0.0 for n, d in zip(names, draw, strict=True)]
+    )
 
 
 def kkt_matrix(snap: NamedSnapshot) -> np.ndarray:

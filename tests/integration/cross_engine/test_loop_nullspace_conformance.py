@@ -239,7 +239,6 @@ def test_track_s_energy_power_and_closure_spectrum(pair, effort) -> None:
 def test_track_s_grip_wrench_envelope(pair, effort) -> None:
     _, ref, other = pair
     tau, idx = effort
-    n = ref.M.shape[0]
     lo_r, hi_r = multiplier_envelope(ref, tau, idx)
     lo_o, hi_o = multiplier_envelope(other, tau, idx)
     x_ref = kkt_solve(ref, tau)
@@ -285,11 +284,9 @@ def test_reference_engine_is_full(reference_adapter) -> None:
     assert level is CapabilityLevel.FULL
 
 
-@pytest.mark.parametrize("engine", list(EngineType))
+@pytest.mark.parametrize("engine", [e for e in EngineType if e is not REFERENCE])
 def test_synthetic_fixtures_never_claim_conformance(engine) -> None:
     """Quarantined fixtures declare NONE and refuse a snapshot (no silent skip)."""
-    if engine is REFERENCE:
-        pytest.skip("Pinocchio synthetic fixture covered by its adapter tests")
     synthetic = create_engine_force_adapter(engine, allow_synthetic=True)
     assert synthetic.capability(Capability.CLOSED_LOOP_SNAPSHOT) is (
         CapabilityLevel.NONE
