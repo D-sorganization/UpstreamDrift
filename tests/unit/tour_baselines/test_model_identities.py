@@ -73,13 +73,17 @@ def test_triple_pendulum_reconstruction_vs_driven_distinction():
 
 
 def test_upper_body_golfer_constraint_rank_and_independent_dof():
-    """Upper body golfer has 8 generalized coords, rank-3 constraint, and 5 independent DOFs."""
+    """Upper body golfer has 8 generalized coords, rank-2 closure and 6 independent DOFs.
+
+    Rank 2 on the closed manifold, not 3 (#12608): rank 3 was an artefact of the
+    club y-sign bug in ``golfer_kinematics.forward_kinematics``.
+    """
     golfer = get_golf_model("constrained_upper_body_golfer")
 
     assert golfer.topology == ModelTopology.CONSTRAINED_UPPER_BODY
     assert golfer.dof == 8
     assert golfer.constraint_count == 4
-    assert golfer.independent_dof == 5
+    assert golfer.independent_dof == 6
     assert golfer.has_simulated_club is True
     assert "loop closure" in golfer.constraint_description.lower()
 

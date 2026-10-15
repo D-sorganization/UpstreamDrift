@@ -52,8 +52,9 @@ class TestTopologyRecording:
         topo = describe_golfer_topology()
         assert topo["n_generalized_coordinates"] == N_DOF
         assert topo["n_constraints"] == 4
-        assert topo["constraint_jacobian_rank"] == 3
-        assert topo["n_independent_dof"] == 5
+        # #12608: rank 2 on the closed manifold (was 3 under the club y-sign bug)
+        assert topo["constraint_jacobian_rank"] == 2
+        assert topo["n_independent_dof"] == 6
         assert topo["has_hand_club_loop_closure"] is True
         assert topo["n_actuated_joints"] == 7
 
