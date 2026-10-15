@@ -193,6 +193,16 @@
       "tiles": [],
       "notes": "FTO-10 (#11295): the PyQt6 MuJoCo GUI renders shaded 3D force arrows and torque arcs from the engine provider through add_glyphs_to_scene and MeshcatGlyphRenderer. The web Three.js ForceOverlay draws the same provider GlyphSet over /api/force-overlays and the simulation WebSocket (FTO-22 #11307, FTO-23 #11308, closed with Playwright evidence). GCV-4 (#11710): the Visualization tab and the web ForceOverlayPanel share scale-mode (fixed, body weight, peak), reference-length and group controls; clamped arrows draw a distinct tip."
     },
+    "tools.spine_viewer": {
+      "title": "Segmental spine viewer (per-level load heatmaps from study receipts)",
+      "pyqt": "src/tools/spine_viewer/gui.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 12772,
+      "tiles": ["spine_viewer"],
+      "notes": "PyQt6 SPN-15b viewer of hash-verified study receipts with always-visible scientific status and distribution source. No React/Tauri equivalent exists yet; the web counterpart is tracked under epic #12735."
+    },
     "analysis.grip_wrench": {
       "title": "Per-hand grip wrench on the club (weld multipliers and efc_force): overlay glyphs and force/couple plots",
       "pyqt": "src/tools/grip_wrench_plots/gui.py",

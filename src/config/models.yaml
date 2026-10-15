@@ -587,6 +587,21 @@ models:
       status: "beta"
       default_launch: "tab"
 
+  - id: "spine_viewer"
+    name: "Spine Viewer"
+    description: "Read-only per-level spinal load heatmaps from hash-verified study receipts; always shows scientific status and distribution source"
+    type: "special_app"
+    path: "src/tools/spine_viewer/__main__.py"
+    capabilities:
+      - "spine"
+      - "joint_reaction"
+      - "study_receipt"
+    launcher:
+      category: "tool"
+      logo: "assets/urdf_icon.png"
+      status: "beta"
+      default_launch: "tab"
+
   - id: "necromatcher"
     help: "docs/help/necromatcher.md"
     name: "Necromatcher"
