@@ -1136,6 +1136,8 @@ def _simulate_and_receipt(
             shooting_report=shooting_report,
             tracking_backend=tracking,
             finish_feasibility=finish,
+            club_spec=cal_res.scaled_spec,
+            club_attachments=cal_res.attachments,
         )
     )
     _save_dynamics_record(ctx.out_dir, record, sim_errors, lane, q_track)

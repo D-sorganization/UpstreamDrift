@@ -42,8 +42,10 @@ from src.shared.python.motion_matching.pipeline.reference import (
     smooth_reference,
 )
 from src.shared.python.motion_matching.pipeline.fd_phase import (
+    capture_face_path,
+    clubhead_speed_report,
     fd_phase_report,
-    reference_clubhead,
+    model_face_path,
 )
 from src.shared.python.motion_matching.pipeline.address_feet import planted_stance
 from src.shared.python.motion_matching.pipeline.turn_split import (
@@ -622,6 +624,31 @@ class DynamicsReportInputs:
     sim_errors: np.ndarray | None = None
     tracking_backend: str = "kkt"
     finish_feasibility: dict[str, Any] | None = None
+    #: Scaled document and calibrated head-triad attachments that place the
+    #: face centre, the one clubhead measurement point (#12682).
+    club_spec: Mapping[str, Any] | None = None
+    club_attachments: Mapping[str, tuple[str, Sequence[float]]] | None = None
+
+
+def _fd_phase_block(
+    inputs: DynamicsReportInputs, sim_errors: np.ndarray
+) -> dict[str, Any]:
+    """``dynamics.fd_phase``: the phase split at the reference face-centre
+    ball passage plus the face-centre clubhead speed block (#12682)."""
+    lane, spec = inputs.lane, inputs.club_spec
+    reference = model_face_path(inputs.kin, inputs.q_ref, lane.times, spec)
+    block = fd_phase_report(lane.times, sim_errors, lane.valid, reference.centres)
+    block["clubhead_speed"] = clubhead_speed_report(
+        simulated=model_face_path(inputs.kin, inputs.sim_q, lane.times, spec),
+        reference=reference,
+        capture=capture_face_path(
+            lane.times,
+            (lane.points, lane.valid, lane.labels),
+            inputs.club_attachments,
+            spec,
+        ),
+    )
+    return block
 
 
 def _build_reference_zmp_report(
@@ -826,9 +853,7 @@ def build_dynamics_report(
             record,
             rate_hz=rate_hz,
         ),
-        "fd_phase": fd_phase_report(
-            lane.times, sim_errors, lane.valid, reference_clubhead(kin, q_ref)
-        ),
+        "fd_phase": _fd_phase_block(inputs, sim_errors),
         "peak_joint_torque_n_m": float(np.abs(record.tau).max()),
         "lowest_sphere_height_min_m": float(record.lowest_sphere_height_m.min()),
         "lowest_sphere_height_max_m": float(record.lowest_sphere_height_m.max()),

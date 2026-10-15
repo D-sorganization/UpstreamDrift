@@ -220,9 +220,19 @@ def _patch_mujoco_overlay_source(
     )
 
 
+_DRIVER_SPEC = (
+    Path(__file__).resolve().parents[4]
+    / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+)
+
+
 def _swing_for(t: np.ndarray) -> SimpleNamespace:
+    """A swing whose specification places the face centre (#12682); the stub
+    poses are pure translations, so its ball passage is the head path's."""
     return SimpleNamespace(
-        bundle=SimpleNamespace(coordinate_order=("a",), spec_bytes=b"{}"),
+        bundle=SimpleNamespace(
+            coordinate_order=("a",), spec_bytes=_DRIVER_SPEC.read_bytes()
+        ),
         q=np.zeros((len(t), 1)),
         source_times_s=tuple(t),
     )
@@ -274,7 +284,8 @@ def test_hud_impact_time_raises_when_the_head_never_returns_to_the_ball(
 
 
 def test_hud_impact_time_for_capture_a_fixture_is_within_one_frame() -> None:
-    """Capture-A driver fixture: exporter impact time vs ``ball_passage`` (OSV-10)."""
+    """Capture-A driver fixture: exporter impact time vs ``ball_passage`` of
+    the face centre (OSV-10, #12682)."""
     pytest.importorskip("mujoco")
     from src.engines.physics_engines.mujoco.python.overlay_source import (
         MujocoOverlaySource,
@@ -291,12 +302,22 @@ def test_hud_impact_time_for_capture_a_fixture_is_within_one_frame() -> None:
     order = json.loads(spec.read_text())["coordinate_order"]
     dt = 0.002  # the fixture holds every second sample of the 1 kHz reference
     times = np.arange(len(q)) * dt
+    from src.shared.python.motion_matching.club_face_target import (
+        face_centre_in_frame,
+        face_centre_path,
+    )
+
     source = MujocoOverlaySource(spec.read_bytes())
-    head = np.array(
+    poses = np.array(
         [
-            source.frame_poses(dict(zip(order, row, strict=True)))["Clubhead"][:3, 3]
+            source.frame_poses(dict(zip(order, row, strict=True)))["Clubhead"]
             for row in q
         ]
+    )
+    head = face_centre_path(
+        poses[:, :3, :3],
+        poses[:, :3, 3],
+        face_centre_in_frame(json.loads(spec.read_text())),
     )
     swing = SimpleNamespace(
         bundle=SimpleNamespace(
