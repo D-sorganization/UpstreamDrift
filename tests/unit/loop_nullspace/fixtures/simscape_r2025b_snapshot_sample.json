@@ -1,0 +1,86 @@
+{
+  "schema_version": "simscape-closed-loop-snapshot/v1",
+  "issue": 12583,
+  "matlab_release": "R2025b",
+  "matlab_version": "25.2.0.2998904 (R2025b)",
+  "model_name": "GolfSwing3D_ClosedLoop_Benchmark",
+  "model_sha256": "d7aeb9a886c6e2cf414e99af9d0e33cf62d6060271b1a9d23c36678cacfeb678",
+  "inertial_source": "simscape_smimport_full_body_v1",
+  "bare_club_bench_id": "driver_bare_0p313kg",
+  "closure_convention": "canonical",
+  "topology": {
+    "closure_kind": "WELD6",
+    "closing_side": "right",
+    "holding_side": "left",
+    "actuated_indices": [0, 1, 2, 3, 4, 5, 6, 7],
+    "unactuated_indices": [],
+    "loop_support_indices": [0, 1, 2, 3, 4, 5, 6, 7],
+    "coordinate_order": [
+      "lead_shoulder_flex",
+      "lead_shoulder_abd",
+      "lead_elbow_flex",
+      "lead_wrist_cock",
+      "trail_shoulder_flex",
+      "trail_shoulder_abd",
+      "trail_elbow_flex",
+      "trail_wrist_cock"
+    ]
+  },
+  "state": {
+    "q": [0.25, -0.15, 0.45, -0.1, 0.25, 0.15, 0.45, 0.1],
+    "v": [-0.4, 0.2, -0.6, 0.5, -0.4, -0.2, -0.6, 0.5],
+    "a": [1.2, -0.8, 1.5, -0.5, 1.0, 0.6, 1.1, 0.3]
+  },
+  "dynamics": {
+    "M": [
+      [2.5, 0.2, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0],
+      [0.2, 1.8, 0.15, 0.0, 0.0, 0.0, 0.0, 0.0],
+      [0.1, 0.15, 1.2, 0.05, 0.0, 0.0, 0.0, 0.0],
+      [0.0, 0.0, 0.05, 0.6, 0.0, 0.0, 0.0, 0.0],
+      [0.0, 0.0, 0.0, 0.0, 2.4, 0.2, 0.1, 0.0],
+      [0.0, 0.0, 0.0, 0.0, 0.2, 1.7, 0.15, 0.0],
+      [0.0, 0.0, 0.0, 0.0, 0.1, 0.15, 1.1, 0.05],
+      [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.05, 0.55]
+    ],
+    "h": [0.45, -0.3, 0.2, -0.05, 0.4, 0.25, 0.18, 0.04],
+    "J_c": [
+      [1.0, 0.0, 0.5, 0.0, -1.0, 0.0, -0.5, 0.0],
+      [0.0, 1.0, 0.0, 0.25, 0.0, 1.0, 0.0, -0.25],
+      [0.0, 0.0, 1.0, 0.2, 0.0, 0.0, -1.0, 0.2],
+      [0.2, 0.0, 0.0, 1.0, -0.2, 0.0, 0.0, -1.0],
+      [0.0, 0.3, 0.1, 0.0, 0.0, 0.3, -0.1, 0.0],
+      [0.1, -0.2, 0.0, 0.5, -0.1, -0.2, 0.0, -0.5]
+    ],
+    "Jdot_v": [0.08, -0.04, 0.12, -0.02, 0.05, -0.03]
+  },
+  "grip_frame": {
+    "rotation": [
+      [1.0, 0.0, 0.0],
+      [0.0, 1.0, 0.0],
+      [0.0, 0.0, 1.0]
+    ],
+    "origin": [0.15, -0.22, 0.88]
+  },
+  "bare_club": {
+    "mass_kg": 0.313,
+    "com_m": [0.0, -0.65, 0.02],
+    "inertia_com_kg_m2": [
+      [0.042, 0.0, 0.0],
+      [0.0, 0.0012, 0.0],
+      [0.0, 0.0, 0.042]
+    ],
+    "solid_names": ["Clubhead", "Rigid Shaft", "Grip"]
+  },
+  "welded_hand_inertias": [
+    {
+      "mass_kg": 1.1082,
+      "com_m": [0.0, -0.04, 0.0],
+      "inertia_com_kg_m2": [
+        [0.0025, 0.0, 0.0],
+        [0.0, 0.0018, 0.0],
+        [0.0, 0.0, 0.0025]
+      ],
+      "solid_names": ["LHand", "LHandStandoff", "RHand"]
+    }
+  ]
+}

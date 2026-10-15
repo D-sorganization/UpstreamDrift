@@ -239,6 +239,13 @@ class OpenSimFullBodyParityAdapter:
         )
         return self._ordered(raw.reshape(-1))
 
+    def bias_forces(
+        self, coordinates: Mapping[str, float], rates: Mapping[str, float]
+    ) -> Array:
+        """Public generalized bias force ``C(q, u) - gravity`` in spec order."""
+        self._set_state(self._vector(coordinates), self._vector(rates))
+        return self._bias_forces()
+
     def _station_rows(
         self, body: Any, station: Array
     ) -> tuple[Array, Array, Array, Array]:
@@ -291,6 +298,23 @@ class OpenSimFullBodyParityAdapter:
         pose, jacobian, _ = self._closure_blocks()
         return pose, jacobian @ u
 
+    def closure_jacobian_and_bias(
+        self, coordinates: Mapping[str, float], rates: Mapping[str, float]
+    ) -> tuple[Array, Array, Array]:
+        """Return native world-frame ``(pose_residual_ba, jacobian_ba, bias_ba)``."""
+        q, u = self._vector(coordinates), self._vector(rates)
+        self._set_state(q, u)
+        return self._closure_blocks()
+
+    def closure_frame_pose(
+        self, coordinates: Mapping[str, float]
+    ) -> tuple[Array, Array]:
+        """Return world rotation ``(3, 3)`` and origin ``(3,)`` of closure frame ``a``."""
+        self._set_state(self._vector(coordinates))
+        body_a, placement_a = self._closure[0]
+        pose_a = self._pose(body_a, self._state, placement_a)
+        return pose_a[:3, :3].copy(), pose_a[:3, 3].copy()
+
     # -- contact ------------------------------------------------------------
     def contact_forces(
         self, coordinates: Mapping[str, float], rates: Mapping[str, float]
@@ -298,6 +322,14 @@ class OpenSimFullBodyParityAdapter:
         """Shared-law contact sample of every spec contact sphere."""
         self._set_state(self._vector(coordinates), self._vector(rates))
         return {name: sample for name, (sample, _) in self._contact().items()}
+
+    def contact_jacobian(self, coordinates: Mapping[str, float]) -> Array:
+        """Stacked ``(3 * n_spheres, nv)`` translational ground contact Jacobian."""
+        self._set_state(self._vector(coordinates), np.zeros(self.nv))
+        rows = [jac for _, jac in self._contact().values()]
+        if not rows:
+            return np.zeros((0, self.nv), dtype=float)
+        return np.vstack(rows)
 
     def _contact(self) -> dict[str, tuple[ContactSample, Array]]:
         """Per sphere: shared-law sample and its 3 x nv world Jacobian."""

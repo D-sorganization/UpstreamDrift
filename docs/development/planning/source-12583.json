@@ -1,0 +1,40 @@
+{
+  "number": 12583,
+  "html_url": "https://github.com/D-sorganization/UpstreamDrift/issues/12583",
+  "title": "[NSX-55] Simscape (MATLAB R2025b) Closed-Loop Snapshot Export or Deferred-Validation Record",
+  "body": "**NSX-55** \u00b7 Phase 5 Engine breadth \u00b7 `tier:strong` \u00b7 Parent epic: #12593\n\n### Goal\nSimscape parity, executed only in R2025b (AGENTS.md), or an honest deferral.\n\n### Read first (verified on `main`)\nAGENTS.md 'Required MATLAB Release'; `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/`; the existing Simscape synthetic adapter (quarantined).\n\n### Deliverables / contract\nA MATLAB R2025b export of `M, h, J_c, J\u0307_c v` at given states to a versioned file format read by a Python snapshot loader with full provenance (MATLAB release, model checksum). If execution is unavailable on the session host, record a deferred-validation entry instead of faking it.\n\n### Tests to write first\nLoader tests on a checked-in small export; the R2025b run itself is `requires_matlab`.\n\n### Acceptance\nEither conformance passes with R2025b evidence, or the DV record exists and the capability is NONE.\n\n### Non-claims\nR2026a results are not acceptance evidence.\n\n### Out of scope\n\u2014\n\n### Depends on\n#12558 (NSX-13), #12578 (NSX-50)\n\n---\n### Standards (binding \u2014 see epic rules R1\u2013R14)\n- **TDD:** write the listed tests first and see them fail (red), then implement (green), then refactor. Tests ship in the same PR.\n- **DbC:** public functions validate preconditions and raise `ValueError`/`TypeError` with descriptive messages; postconditions documented in docstrings; frozen dataclasses for value objects.\n- **LoD:** no chains deeper than `a.b.c()`; add delegating/accessor methods (e.g. `snapshot.closure_rows()`).\n- **DRY:** reuse the modules listed under *Read first*; never re-implement `ForceNullSpace`, `FrictionCone`, `project_to_closure`, `holding_hand_wrench` or the NSX-02 converter.\n- **Evidence:** every user-visible quantity is a `QuantityRecord` with its six evidence axes (from NSX-10 onward).\n- No tolerance widening without a `Tolerance-Change-Evidence:` trailer. No `--no-verify`. Never edit `vendor/ud-tools/`.\n\n### Gate commands\n```bash\npython3 -m ruff check .\npython3 -m ruff format --check .\npython3 -m pytest tests/unit/loop_nullspace -n auto --timeout=60\npython3 scripts/ci/check_file_size_budget.py\npython3 -m scripts.check_design_manual_governance\n```\n\n### Process\n1. Lease: `python -m scripts.check_agent_claim --repo UpstreamDrift --issue <this>` then `post_agent_lease` (Repository_Management).\n2. Branch `feat/<this>-nsx-\u2026` in your own worktree. Change fragment: `python3 shared_scripts/changes_fragment.py new --issue <this> --summary \"...\"`.\n3. PR ready-for-review with `Closes #<this>` only when **all** acceptance items are met; otherwise `Refs #<this>` plus a status comment.\n4. Specs, goldens and contracts come from NSX-00 (`docs/research/loop_nullspace/`). If the spec is ambiguous, stop and ask on the issue \u2014 do not invent math.\n",
+  "updated_at": "2026-10-15T03:13:44Z",
+  "labels": [
+    {
+      "id": "LA_kwDOQqJAi88AAAACb-Yzcg",
+      "name": "physics-engine",
+      "description": "Physics engine implementation",
+      "color": "1D76DB"
+    },
+    {
+      "id": "LA_kwDOQqJAi88AAAACb-Y1SQ",
+      "name": "cross-engine",
+      "description": "Cross-engine integration",
+      "color": "C5DEF5"
+    },
+    {
+      "id": "LA_kwDOQqJAi88AAAACfqG_Sg",
+      "name": "research",
+      "description": "P6 research lane \u2014 Friday batch merges only during stabilization windows, RM #1510",
+      "color": "5319e7"
+    },
+    {
+      "id": "LA_kwDOQqJAi88AAAACib_8pA",
+      "name": "claim:local",
+      "description": "Local human session holds an active claim on this issue.",
+      "color": "FBCA04"
+    },
+    {
+      "id": "LA_kwDOQqJAi88AAAAC4Yg5pA",
+      "name": "tier:strong",
+      "description": "Architecture, research and complex implementation",
+      "color": "8B0000"
+    }
+  ],
+  "state": "open"
+}

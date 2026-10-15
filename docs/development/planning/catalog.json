@@ -321,6 +321,36 @@
         "evidence": null
       },
       "activation_issue": null
+    },
+    {
+      "id": "DV-12583",
+      "title": "NSX-55: Live MATLAB R2025b Simscape Multibody Closed-Loop Snapshot Qualification",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/12583",
+      "source_snapshot": "source-12583.json",
+      "record": "DV-12583.md",
+      "disposition": "split",
+      "kind": "external-review",
+      "status": "deferred",
+      "rationale": "Live execution of export_simscape_closed_loop_snapshot.m requires a licensed MATLAB R2025b workstation with Simscape Multibody (never R2026a), which is unavailable on unattended CI runners; the Python snapshot loader and checked-in R2025b export fixture are verified in CI while live runtime capability remains NONE.",
+      "prerequisites": [
+        {
+          "name": "Licensed MATLAB R2025b (version('-release') == '2025b') workstation with Simscape and Simscape Multibody toolboxes",
+          "evidence": null
+        },
+        {
+          "name": "Compiled 3D_Golf_Model Simscape Multibody assembly matched to full_body_spec_hipcal_scaled.json",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Execute export_simscape_closed_loop_snapshot.m under MATLAB R2025b across the full-body swing trajectory and verify SHA-256 provenance.",
+        "Confirm Track N (1e-6 scaled) and Track S (propagated cond(A) bound) conformance against Pinocchio; reject R2026a or synthetic MATLAB outputs."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
     }
   ]
 }
