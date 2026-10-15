@@ -255,6 +255,13 @@
       "parameters": {"sigma_q": "declared (rad or m per coordinate)", "offset": "time-constant, tangent to the closure, then project_to_closure", "seed": "declared"},
       "source": {"citation_id": null, "note": "Modelling choice (NSX-61, #12586)."},
       "verification_status": "NOT_APPLICABLE"
+    },
+    {
+      "id": "H-GRF-OBSERVATION",
+      "statement": "Observed ground-reaction data E f_g = g enter as two-sided bands |E f_g - g| <= k sigma with a declared per-row 1-sigma measurement uncertainty and coverage factor k; in the zero-uncertainty limit they are equality rows that remove rank(E_x N) null directions. The data are a hypothesis about the measurement, not a correction of the balance.",
+      "parameters": {"sigma": "declared per row", "coverage_k": "declared", "selector_E": "declared linear map of the contact loads", "source": "declared (force plate, or a labelled simulation standing in for one)"},
+      "source": {"citation_id": null, "note": "Modelling choice; spec section Lower-Body Loop."},
+      "verification_status": "NOT_APPLICABLE"
     }
   ],
   "conventions": [

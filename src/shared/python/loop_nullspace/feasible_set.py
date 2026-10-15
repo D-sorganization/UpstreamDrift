@@ -38,11 +38,16 @@ import scipy.sparse as sp
 from src.shared.python.loop_nullspace.capacity import CapacityVector
 from src.shared.python.loop_nullspace.decomposition import Decomposition
 from src.shared.python.loop_nullspace.evidence import Array
+from src.shared.python.loop_nullspace.ground_contact import (
+    GroundObservation,
+    observation_rows,
+)
 from src.shared.python.loop_nullspace.feasible_rows import (
     CONE_ID,
     DEFAULT_CONE_FACETS,
     FLAG_ASSUMED,
     FLAG_UNVERIFIED,
+    GRF_ID,
     GRIP_ID,
     TORQUE_ID,
     ConeBlock,
@@ -199,6 +204,7 @@ class FeasibleSet:
         grip_preloads: Sequence[GripPreload] = (),
         cone_facets: int = DEFAULT_CONE_FACETS,
         linearization: str = "outer",
+        observation: GroundObservation | None = None,
     ) -> FeasibleSet:
         """Express the declared constraints in the coordinates ``z`` of ``decomposition``.
 
@@ -207,7 +213,8 @@ class FeasibleSet:
         ``H-TORQUE-CAPACITY`` is declared and its actuated order matches the
         decomposition's torques; cone and grip data are accepted only when
         ``H-FRICTION-CONE`` / ``H-GRIP-PRELOAD`` is declared ("not declared"
-        ``ValueError``); ``cone_facets >= 3``.
+        ``ValueError``); ``cone_facets >= 3``; an ``observation`` (ground-reaction
+        data, NSX-60) only with ``H-GRF-OBSERVATION`` declared.
         Postconditions: every row and block names a declared hypothesis; rows
         resting on ASSUMED capacity slots or unverified hypotheses carry flags.
         """
@@ -220,7 +227,7 @@ class FeasibleSet:
                 f"hypothesis_set must be HypothesisSet, got {type(hypothesis_set)!r}"
             )
         declared = hypothesis_set.hypothesis_ids()
-        _check_declared(declared, capacity, cones, grip_preloads)
+        _check_declared(declared, capacity, cones, grip_preloads, observation)
         err = cone_error_bound(cone_facets, linearization)
         unverified = _unverified_ids(hypothesis_set)
         rows: list[FeasibleRow] = []
@@ -234,6 +241,8 @@ class FeasibleSet:
                 blocks.append(b)
         if GRIP_ID in declared:
             rows += [_grip_row(decomposition, g) for g in grip_preloads]
+        if GRF_ID in declared and observation is not None:
+            rows += observation_rows(decomposition, observation)
         rows = [_with_unverified(r, unverified) for r in rows]
         blocks = [_with_unverified_block(b, unverified) for b in blocks]
         return cls(
@@ -339,6 +348,7 @@ def _check_declared(
     capacity: CapacityVector | None,
     cones: Sequence[ContactCone],
     grips: Sequence[GripPreload],
+    observation: GroundObservation | None = None,
 ) -> None:
     if TORQUE_ID in declared and capacity is None:
         raise ValueError(f"{TORQUE_ID} is declared but no capacity was supplied")
@@ -348,6 +358,8 @@ def _check_declared(
         raise ValueError(f"cones supplied but {CONE_ID} not declared")
     if grips and GRIP_ID not in declared:
         raise ValueError(f"grip preloads supplied but {GRIP_ID} not declared")
+    if observation is not None and GRF_ID not in declared:
+        raise ValueError(f"observation supplied but {GRF_ID} not declared")
 
 
 def _unverified_ids(hypothesis_set: HypothesisSet) -> frozenset[str]:
