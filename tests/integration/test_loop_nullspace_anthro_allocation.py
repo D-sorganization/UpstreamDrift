@@ -1,23 +1,27 @@
 """NSX-23 (#12566) acceptance: anthro-fixture trajectory allocation.
 
 "Anthro fixture allocation converges with recorded solve time and KKT
-residuals" is BLOCKED on the foot-contact Jacobian ``J_g``: the Pinocchio
-anthro model is ground-supported, ``snapshot_from_adapter`` leaves ``J_g``
-unset, and ``decompose`` refuses every frame (see
-``test_loop_nullspace_anthro_envelope_blocker.py`` and the blocker section of
-``docs/research/loop_nullspace/contracts.md``).  Parallel child NSX-60 adds the
-rows.  This test skips with that reason until ``J_g`` exists, then runs the
-allocation over evenly strided frames and records solve time and KKT residuals.
-It never substitutes a fake ``J_g`` or treats the root as actuated.
+residuals."  The foot-contact Jacobian ``J_g`` and Coulomb cones come from
+NSX-60 (#12585), so the ground-supported anthro frames decompose and their
+feasible sets (``H-TORQUE-CAPACITY`` prior, unchanged, plus ``H-FRICTION-CONE``)
+can be allocated.
 
-The post-unblock branch (everything after the skip) has not been executed: the
-skip is the only path that can run today.
+A trajectory allocation is feasible only if every frame's set is non-empty.  On
+the 199 decomposable benchmark frames, 75 are INFEASIBLE under the ASSUMED
+capacity prior (recorded efforts exceed it), so the full window is infeasible
+by construction and reports ``INFEASIBLE``; the capacity prior is never relaxed.
+The acceptance window is the longest contiguous run of feasible frames.  The
+record's frame spacing is 3 samples (0.009 s), so the rate term differences
+strided frames.
+
+Set ``LOOP_NULLSPACE_ALLOC_JSON`` to a file path to write the measured record.
 """
 
 from __future__ import annotations
 
+import json
 import logging
-import time
+import os
 from pathlib import Path
 
 import numpy as np
@@ -32,97 +36,146 @@ from src.shared.python.loop_nullspace.allocation import (  # noqa: E402
     allocate_trajectory,
     torque_scale_from_capacity,
 )
-from src.shared.python.loop_nullspace.capacity import (  # noqa: E402
-    CapacitySubject,
-    capacity_for,
+from src.shared.python.loop_nullspace.evidence import (  # noqa: E402
+    AllocationDependence,
 )
-from src.shared.python.loop_nullspace.contracts import InputProvenance  # noqa: E402
-from src.shared.python.loop_nullspace.decomposition import decompose  # noqa: E402
-from src.shared.python.loop_nullspace.feasible_set import FeasibleSet  # noqa: E402
-from src.shared.python.loop_nullspace.registry import preset  # noqa: E402
-from src.shared.python.loop_nullspace.snapshot import (  # noqa: E402
-    snapshot_from_adapter,
-)
-from src.shared.python.motion_matching.multi_engine_torque_allocator import (  # noqa: E402
-    EngineType,
-    create_engine_force_adapter,
-)
-from src.shared.python.motion_matching.same_input import (  # noqa: E402
-    VectorPlant,
-    project_to_closure,
+from src.shared.python.loop_nullspace.solvers import SolveStatus  # noqa: E402
+from tests.integration.loop_nullspace_lower_body_support import (  # noqa: E402
+    BENCHMARK_FRAMES,
+    AnthroBench,
+    Frame,
+    build_frames,
+    contiguous_runs,
+    host_record,
 )
 
-pytestmark = [pytest.mark.integration, pytest.mark.requires_pinocchio]
-
-EVIDENCE = (
-    Path(__file__).resolve().parents[2]
-    / "docs/development/full_body_models/evidence/ground_support"
-)
-SPEC = EVIDENCE / "full_body_spec_hipcal_scaled.json"
-ROOT_PREFIXES = ("Translation", "HipInput")
-FRAMES = tuple(range(0, 600, 3))
-BLOCKER = (
-    "blocked on NSX-60: the anthro adapter supplies no foot-contact Jacobian "
-    "J_g, so the ground-supported root rows cannot be balanced "
-    "(contracts.md, NSX-22 blocker; test_loop_nullspace_anthro_envelope_blocker)"
-)
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.slow,
+    pytest.mark.requires_pinocchio,
+]
 
 logger = logging.getLogger(__name__)
+KKT_TOL = 1e-6
+EFFORT_WEIGHT = 1.0
+RATE_WEIGHT = 0.1
 
 
-def _snapshot(adapter, plant, rec, frame):
-    q0, v0, tau = rec["q"][frame], rec["v"][frame], rec["tau"][frame]
-    proj = project_to_closure(plant, q0, v0)
-    order = list(adapter.coordinate_order)
-    named = [
-        plant._named(x)
-        for x in (proj.q, proj.v, plant.acceleration(proj.q, proj.v, tau))
-    ]
-    q, v, a = (np.array([d[n] for n in order]) for d in named)
-    return snapshot_from_adapter(
-        adapter, q, v, a, input_provenance=InputProvenance("test", f"frame {frame}")
-    )
+@pytest.fixture(scope="module")
+def bench() -> AnthroBench:
+    return AnthroBench()
 
 
-def test_anthro_trajectory_allocation_converges_with_recorded_kkt(caplog) -> None:
-    adapter = create_engine_force_adapter(
-        EngineType.PINOCCHIO, SPEC, allow_synthetic=False
-    )
-    plant = VectorPlant("pinocchio", SPEC.read_bytes())
-    with np.load(EVIDENCE / "dynamics_record.npz") as rec:
-        first = _snapshot(adapter, plant, rec, FRAMES[0])
-        if first.J_g is None:
-            pytest.skip(BLOCKER)
-        snaps = [first] + [_snapshot(adapter, plant, rec, f) for f in FRAMES[1:]]
-        times = np.asarray(rec["t"])[list(FRAMES)] if "t" in rec else None
-    order = list(adapter.coordinate_order)
-    actuated = [n for n in order if not n.startswith(ROOT_PREFIXES)]
-    cap = capacity_for(order, CapacitySubject(80.0, 1.8), actuated=actuated)
-    hyp = preset("smooth_capacity")
-    frames = []
-    for snap in snaps:
-        dec = decompose(snap, weights=np.eye(snap.topology.n_actuated))
-        frames.append(FeasibleSet.from_hypotheses(dec, hyp, capacity=cap))
-    if times is None:
-        times = 0.01 * np.arange(len(frames))
-    spec = ObjectiveSpec(
+@pytest.fixture(scope="module")
+def decomposed(bench):
+    frames, _refused = build_frames(bench, BENCHMARK_FRAMES)
+    sets = [bench.feasible_set(f, None) for f in frames]
+    return frames, sets, [not fs.is_empty() for fs in sets]
+
+
+@pytest.fixture(scope="module")
+def window(decomposed) -> list[int]:
+    """Positions (in ``decomposed``) of the longest contiguous feasible run."""
+    frames, _sets, flags = decomposed
+    runs = contiguous_runs(frames, flags)
+    longest = max(runs, key=len)
+    first = frames.index(longest[0])
+    return list(range(first, first + len(longest)))
+
+
+def _objective(bench, frames: list[Frame]) -> ObjectiveSpec:
+    times = np.array([bench.record["time_s"][f.index] for f in frames])
+    return ObjectiveSpec(
         times_s=times,
-        torque_scale=torque_scale_from_capacity(cap),
-        effort_weight=1.0,
-        rate_weight=0.1,
+        torque_scale=torque_scale_from_capacity(bench.capacity),
+        effort_weight=EFFORT_WEIGHT,
+        rate_weight=RATE_WEIGHT,
     )
-    t0 = time.perf_counter()
-    result = allocate_trajectory(frames, spec)
-    wall = time.perf_counter() - t0
-    with caplog.at_level(logging.INFO):
-        logger.info(
-            "NSX-23 anthro allocation: %d frames, %.3f s wall, %.3f s solve, KKT %s",
-            len(frames),
-            wall,
-            result.solve_time_s,
-            result.kkt_residuals,
-        )
-    assert result.status.name == "OPTIMAL"
-    assert result.kkt_residuals is not None
-    assert result.kkt_residuals.max() < 1e-6
-    assert result.record is not None
+
+
+def _measure(bench, frames, sets, positions) -> tuple[dict, object]:
+    chosen = [frames[i] for i in positions]
+    result = allocate_trajectory(
+        [sets[i] for i in positions], _objective(bench, chosen)
+    )
+    summary = {
+        "frames": len(chosen),
+        "record_frames": [chosen[0].index, chosen[-1].index],
+        "status": result.status.name,
+        "solve_time_s": result.solve_time_s,
+        "iterations": result.iterations,
+        "kkt": None
+        if result.kkt_residuals is None
+        else {
+            "primal": result.kkt_residuals.primal,
+            "dual": result.kkt_residuals.dual,
+            "complementarity": result.kkt_residuals.complementarity,
+            "max": result.kkt_residuals.max(),
+        },
+        "objective_terms": result.objective_terms,
+        "power_reduction": None
+        if result.power_reduction is None
+        else result.power_reduction.kind,
+        "gauge_dimension": None
+        if result.convexity is None
+        else result.convexity.gauge_dimension,
+        "retained_rank": None if result.convexity is None else result.convexity.rank,
+        "reason": result.reason,
+    }
+    return summary, result
+
+
+def test_infeasible_frames_make_the_full_window_infeasible(bench, decomposed) -> None:
+    """75 frames violate the ASSUMED capacity prior: the full window is empty."""
+    frames, sets, flags = decomposed
+    assert not all(flags) and any(flags)
+    summary, result = _measure(bench, frames, sets, list(range(len(frames))))
+    logger.info("full window: %s", summary)
+    assert result.status is SolveStatus.INFEASIBLE
+    assert result.record is None  # never a relaxed answer
+
+
+def test_window_across_one_infeasible_frame_is_infeasible(bench, decomposed) -> None:
+    frames, sets, flags = decomposed
+    bad = flags.index(False)
+    positions = [i for i in range(max(0, bad - 1), bad + 2) if i < len(frames)]
+    _summary, result = _measure(bench, frames, sets, positions)
+    assert result.status is SolveStatus.INFEASIBLE
+
+
+def test_longest_feasible_run_allocation_converges(bench, decomposed, window) -> None:
+    frames, sets, _flags = decomposed
+    assert len(window) >= 60
+    summary, result = _measure(bench, frames, sets, window)
+    logger.info("longest feasible run: %s", summary)
+    assert result.status is SolveStatus.OPTIMAL, result.reason
+    assert result.kkt_residuals is not None and result.kkt_residuals.max() < KKT_TOL
+    assert result.solve_time_s > 0.0 and result.iterations > 0
+    record = result.record
+    assert record is not None
+    assert record.allocation_dependence is AllocationDependence.FAMILY_DEPENDENT
+    assert "H-TORQUE-CAPACITY" in record.hypotheses
+    assert "H-FRICTION-CONE" in record.hypotheses
+    # Torques respect the capacity prior the feasible sets were built with.
+    cap = bench.capacity
+    tau = result.torque
+    assert np.all(tau <= cap.tau_max_positive_nm + 1e-6)
+    assert np.all(tau >= -cap.tau_max_negative_nm - 1e-6)
+
+    short, short_result = _measure(bench, frames, sets, window[:10])
+    assert short_result.status is SolveStatus.OPTIMAL, short_result.reason
+    assert short["kkt"]["max"] < KKT_TOL
+
+    full, _ = _measure(bench, frames, sets, list(range(len(frames))))
+    target = os.environ.get("LOOP_NULLSPACE_ALLOC_JSON")
+    if target:
+        report = {
+            "host": host_record(),
+            "weights": {"effort": EFFORT_WEIGHT, "rate": RATE_WEIGHT},
+            "feasible_frames": sum(_flag for _flag in decomposed[2]),
+            "decomposed_frames": len(frames),
+            "longest_run": summary,
+            "first_10_of_run": short,
+            "full_window": full,
+        }
+        Path(target).write_text(json.dumps(report, indent=2, default=str))
