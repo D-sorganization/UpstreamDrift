@@ -158,6 +158,8 @@ class InverseProblem:
                 f"gross_power must be a GrossPowerSpec with velocity {obs.shape}"
             )
         for fs in frames:
+            if fs.decomposition is None:
+                raise ValueError("every frame must carry a decomposition")
             if fs.decomposition.n_actuated != scale.size:
                 raise ValueError(
                     "every frame must have len(torque_scale) actuated torques"
@@ -256,6 +258,8 @@ def _trapezoid(times: Array) -> Array:
 
 def _gross_gradient(problem: InverseProblem, tau: Array, omega: Array) -> Array:
     gp = problem.gross_power
+    if gp is None:
+        raise ValueError("gross_power is required for the gross-power gradient")
     p = tau * gp.joint_velocity
     slope = np.where(
         p > 0.0,
@@ -363,6 +367,8 @@ def _project(problem: InverseProblem) -> tuple[Array, Array, list[tuple[Array, A
     geom = []
     for k, fs in enumerate(problem.feasible_sets):
         dec = fs.decomposition
+        if dec is None:
+            raise ValueError(f"frame {k} must carry a decomposition")
         n_a, t0 = s.size, dec.x_p[: s.size]
         n_mat = dec.N[:n_a]
         z0 = np.linalg.lstsq(n_mat, problem.observed_torque[k] - t0, rcond=None)[0]
@@ -404,7 +410,10 @@ def stationarity(
             smooth.append(k)
         else:
             used.append(k)
-            n_mat = fs.decomposition.N[: problem.torque_scale.size]
+            dec = fs.decomposition
+            if dec is None:
+                raise ValueError(f"frame {k} must carry a decomposition")
+            n_mat = dec.N[: problem.torque_scale.size]
             blocks.append(np.column_stack([n_mat.T @ grads[n][k] for n in names]))
             full = np.array([np.linalg.norm(grads[n][k]) for n in names])
             scales += np.linalg.norm(n_mat, 2) * full
@@ -668,7 +677,7 @@ def replay_allocation(
         raise ValueError("gross_power weight > 0 but the problem has no gross_power")
     gross = (
         dataclasses.replace(problem.gross_power, weight=w["gross_power"])
-        if w["gross_power"] > 0.0
+        if w["gross_power"] > 0.0 and problem.gross_power is not None
         else None
     )
     spec = ObjectiveSpec(
