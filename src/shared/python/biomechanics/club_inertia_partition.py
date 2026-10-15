@@ -135,12 +135,12 @@ def _combine(placed: Sequence[tuple[float, np.ndarray, np.ndarray]]) -> RigidIne
     mass = sum(m for m, _, _ in placed)
     if mass <= 0.0:
         return RigidInertia(0.0, (0.0, 0.0, 0.0), np.zeros((3, 3)))
-    com = sum(m * c for m, c, _ in placed) / mass
+    com = np.sum([m * c for m, c, _ in placed], axis=0) / mass
     inertia = np.zeros((3, 3))
     for m, c, i_c in placed:
         d = c - com
         inertia += i_c + m * ((d @ d) * np.eye(3) - np.outer(d, d))
-    return RigidInertia(mass, (com[0], com[1], com[2]), inertia)
+    return RigidInertia(mass, (float(com[0]), float(com[1]), float(com[2])), inertia)
 
 
 def club_solids_partition(spec: Mapping[str, Any]) -> ClubSolidsPartition:
