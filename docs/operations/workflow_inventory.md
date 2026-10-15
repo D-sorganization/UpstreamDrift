@@ -48,17 +48,18 @@ Triggers abbreviations: `PR` = `pull_request`, `P` = `push`,
 
 ### Group: CI / Quality Gates (kebab-case)
 
-| File                       | `name:` field                   | Triggers     | Purpose                                               |
-| -------------------------- | ------------------------------- | ------------ | ----------------------------------------------------- |
-| `ci-standard.yml`          | CI Standard                     | P, PR, WD, S | Primary quality gate (ruff, format, tests, coverage). |
-| `ci-optional-stack.yml`    | CI Optional Stack               | P, PR, WD, S | Optional engine stack (Drake / Pinocchio / MuJoCo).   |
-| `ci-failure-digest.yml`    | Weekly CI Failure Digest        | WD           | Weekly rollup of failing required checks.             |
-| `spec-check.yml`           | Spec Check                      | PR           | `SPEC.md` freshness / specification-exempt gate.      |
-| `critical-files-guard.yml` | Critical Files Guard            | PR           | Blocks unauthorised edits to critical files.          |
-| `docker-security-scan.yml` | Docker Security Scan            | P, PR, S, WD | Trivy / grype scan on published images.               |
-| `docker-size-gates.yml`    | Docker Size and Health Check    | P, WD        | Image-size budget enforcement.                        |
-| `heavy-tests-opt-in.yml`   | Heavy Integration Tests         | WD, S        | Opt-in long-running integration suite.                |
-| `nightly-cross-engine.yml` | Nightly Cross-Engine Validation | S, WD        | Nightly cross-engine parity checks.                   |
+| File                        | `name:` field                   | Triggers     | Purpose                                               |
+| --------------------------- | ------------------------------- | ------------ | ----------------------------------------------------- |
+| `ci-standard.yml`           | CI Standard                     | P, PR, WD, S | Primary quality gate (ruff, format, tests, coverage). |
+| `ci-optional-stack.yml`     | CI Optional Stack               | P, PR, WD, S | Optional engine stack (Drake / Pinocchio / MuJoCo).   |
+| `ci-failure-digest.yml`     | Weekly CI Failure Digest        | WD           | Weekly rollup of failing required checks.             |
+| `spec-check.yml`            | Spec Check                      | PR           | `SPEC.md` freshness / specification-exempt gate.      |
+| `critical-files-guard.yml`  | Critical Files Guard            | PR           | Blocks unauthorised edits to critical files.          |
+| `docker-security-scan.yml`  | Docker Security Scan            | P, PR, S, WD | Trivy / grype scan on published images.               |
+| `docker-size-gates.yml`     | Docker Size and Health Check    | P, WD        | Image-size budget enforcement.                        |
+| `heavy-tests-opt-in.yml`    | Heavy Integration Tests         | WD, S        | Opt-in long-running integration suite.                |
+| `nightly-cross-engine.yml`  | Nightly Cross-Engine Validation | S, WD        | Nightly cross-engine parity checks.                   |
+| `motion-matching-smoke.yml` | Motion-Matching Smoke           | S, WD        | Nightly slow motion-matching integration smokes.      |
 
 ### Group: Docs (kebab-case)
 
