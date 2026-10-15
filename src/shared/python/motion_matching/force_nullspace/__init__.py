@@ -4,8 +4,6 @@ Split into submodules by NSX-03 (#12552) with no behavior change. Import paths
 through ``motion_matching.force_nullspace`` are unchanged.
 """
 
-from scipy.optimize import minimize  # noqa: F401 - patch point used by tests
-
 from ._common import Array
 from .constraints import ForceConstraints, FrictionCone
 from .redistribution import (
