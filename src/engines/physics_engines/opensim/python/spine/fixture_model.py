@@ -53,12 +53,14 @@ from src.engines.physics_engines.opensim.python.full_body_osim import (
     _format_numbers,
     _make_physical_offset_frame,
 )
+from src.shared.python.spine.coupling import LinearCouplingLaw
 from src.shared.python.spine.levels import SpinalLevel
 
 __all__ = [
     "FixtureLevelNames",
     "FixtureSpec",
     "build_fixture_osim",
+    "build_fixture_tree",
     "fixture_base_offset",
     "fixture_body_names",
     "fixture_level_names",
@@ -454,16 +456,11 @@ def _build_jointset(model: ET.Element, spec: FixtureSpec) -> None:
     )
 
 
-def build_fixture_osim(spec: FixtureSpec) -> str:
-    """Return the ``.osim`` XML text (OpenSim 4 format) for ``spec``.
+def build_fixture_tree(spec: FixtureSpec) -> ET.Element:
+    """Return the uncoupled, muscle-free ``OpenSimDocument`` element for ``spec``.
 
-    Preconditions: ``spec`` is a :class:`FixtureSpec`.  Postconditions: the text
-    is deterministic for equal specs, has one ``CustomJoint`` per level in
-    caudal-to-cranial order with ISB ZXY rotation axes, and positive mass and
-    positive-definite inertia on every body.  No muscles.
-
-    Raises:
-        TypeError: if ``spec`` is not a :class:`FixtureSpec`.
+    Shared by :func:`build_fixture_osim` and ``fixture_coupling`` (SPN-7b),
+    which augments the tree in place.  Raises ``TypeError`` for a non-spec.
     """
     if not isinstance(spec, FixtureSpec):
         raise TypeError(f"spec must be a FixtureSpec, got {type(spec).__name__}")
@@ -475,18 +472,61 @@ def build_fixture_osim(spec: FixtureSpec) -> str:
     ET.SubElement(model, "force_units").text = "N"
     _build_bodyset(model, spec)
     _build_jointset(model, spec)
+    return root
+
+
+def build_fixture_osim(
+    spec: FixtureSpec,
+    coupling: LinearCouplingLaw | None = None,
+    muscles: bool = False,
+) -> str:
+    """Return the ``.osim`` XML text (OpenSim 4 format) for ``spec``.
+
+    Args:
+        spec: the fixture parameters.
+        coupling: optional :class:`LinearCouplingLaw`; adds a massless driver
+            body with the law's independent coordinates and one
+            ``CoordinateCouplerConstraint`` per dependent level coordinate
+            (SPN-7b, see ``fixture_coupling``).
+        muscles: if true, add 8 bilateral lumped trunk muscles (SPN-7b).
+
+    Preconditions: ``spec`` is a :class:`FixtureSpec`; ``muscles`` is a bool.
+    Postconditions: the text is deterministic for equal arguments, has one
+    ``CustomJoint`` per level in caudal-to-cranial order with ISB ZXY rotation
+    axes, and positive mass and positive-definite inertia on every fixture
+    body (the optional driver body is the only massless one).  With neither
+    option there are no constraints, driver or muscles.
+
+    Raises:
+        TypeError: if ``spec`` is not a :class:`FixtureSpec`, ``muscles`` is
+            not a bool or ``coupling`` is not a :class:`LinearCouplingLaw`.
+        ValueError: if the law does not fit the fixture.
+    """
+    root = build_fixture_tree(spec)
+    if coupling is not None or muscles is not False:
+        from src.engines.physics_engines.opensim.python.spine.fixture_coupling import (
+            augment_fixture_tree,
+        )
+
+        augment_fixture_tree(root, spec, coupling, muscles)
     return ET.tostring(root, encoding="utf-8").decode("utf-8")
 
 
-def write_fixture_osim(spec: FixtureSpec, path: str | Path) -> Path:
+def write_fixture_osim(
+    spec: FixtureSpec,
+    path: str | Path,
+    coupling: LinearCouplingLaw | None = None,
+    muscles: bool = False,
+) -> Path:
     """Write the fixture to ``path`` (must end in ``.osim``) and return it.
 
+    ``coupling`` and ``muscles`` are forwarded to :func:`build_fixture_osim`.
     Parent directories are created.  Raises ``ValueError`` for another suffix.
     """
     out = Path(path)
     if out.suffix != ".osim":
         raise ValueError(f"fixture path must end in .osim, got {out.name!r}")
-    text = build_fixture_osim(spec)
+    text = build_fixture_osim(spec, coupling, muscles)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(text, encoding="utf-8")
     return out

@@ -67,7 +67,9 @@ class TestCouplerXml:
         assert root.find(".//ForceSet") is None
 
     def test_driver_body_is_massless_and_inertia_free(self) -> None:
-        body = _root(coupling=_law()).find(f".//BodySet/objects/Body[@name='{DRIVER_BODY}']")
+        body = _root(coupling=_law()).find(
+            f".//BodySet/objects/Body[@name='{DRIVER_BODY}']"
+        )
         assert body is not None
         assert float(body.findtext("mass")) == 0.0
         assert [float(v) for v in body.findtext("inertia").split()] == [0.0] * 6
@@ -91,7 +93,9 @@ class TestCouplerXml:
         couplers = root.findall(".//ConstraintSet/objects/CoordinateCouplerConstraint")
         expected = [
             (c, lv)
-            for lv, names in zip(LUMBAR, fixture_level_names(FixtureSpec()), strict=True)
+            for lv, names in zip(
+                LUMBAR, fixture_level_names(FixtureSpec()), strict=True
+            )
             for c in names.coordinates
             for lv in (lv,)
         ]
@@ -102,12 +106,17 @@ class TestCouplerXml:
                 PHI_NAMES
             )
             row = int(
-                [n.coordinates for n in fixture_level_names(FixtureSpec())
-                 if n.level is level][0].index(coord)
+                [
+                    n.coordinates
+                    for n in fixture_level_names(FixtureSpec())
+                    if n.level is level
+                ][0].index(coord)
             )
             coeffs = [
                 float(v)
-                for v in item.findtext("coupled_coordinates_function/LinearFunction/coefficients").split()
+                for v in item.findtext(
+                    "coupled_coordinates_function/LinearFunction/coefficients"
+                ).split()
             ]
             np.testing.assert_allclose(coeffs[:-1], law.matrices[level][row])
             assert coeffs[-1] == 0.0
@@ -147,7 +156,7 @@ class TestCouplerXml:
     def test_law_level_outside_spec_raises(self) -> None:
         spec = FixtureSpec(
             levels=LUMBAR[:2],
-            neutral_lordosis_deg={lv: 1.0 for lv in LUMBAR[:2]},
+            neutral_lordosis_deg=dict.fromkeys(LUMBAR[:2], 1.0),
             segment_mass_kg={"pelvis": 10.0, "sacrum": 1.0, "L5": 1.0, "L4": 1.0},
             segment_length_m={"pelvis": 0.1, "sacrum": 0.05, "L5": 0.04, "L4": 0.04},
         )
@@ -190,8 +199,12 @@ class TestMuscleXml:
         assert len(names) == 8
         assert sum(n.endswith("_l") for n in names) == 4
         assert sum(n.endswith("_r") for n in names) == 4
-        for stem in ("erector_spinae", "rectus_abdominis", "external_oblique",
-                     "internal_oblique"):
+        for stem in (
+            "erector_spinae",
+            "rectus_abdominis",
+            "external_oblique",
+            "internal_oblique",
+        ):
             assert {f"{stem}_l", f"{stem}_r"} <= set(names)
 
     def test_positive_max_isometric_force_and_path_spans_pelvis_to_thorax(self) -> None:
@@ -199,13 +212,23 @@ class TestMuscleXml:
             assert float(muscle.findtext("max_isometric_force")) > 0.0
             points = muscle.findall(".//PathPointSet/objects/PathPoint")
             parents = [p.findtext("socket_parent_frame") for p in points]
-            assert parents == ["/bodyset/pelvis", "/bodyset/L3", "/bodyset/thorax_proxy"]
+            assert parents == [
+                "/bodyset/pelvis",
+                "/bodyset/L3",
+                "/bodyset/thorax_proxy",
+            ]
 
     def test_muscles_mirror_about_the_sagittal_plane(self) -> None:
         root = _root(muscles=True)
-        by_name = {m.get("name"): m for m in root.findall(".//Millard2012EquilibriumMuscle")}
-        for stem in ("erector_spinae", "rectus_abdominis", "external_oblique",
-                     "internal_oblique"):
+        by_name = {
+            m.get("name"): m for m in root.findall(".//Millard2012EquilibriumMuscle")
+        }
+        for stem in (
+            "erector_spinae",
+            "rectus_abdominis",
+            "external_oblique",
+            "internal_oblique",
+        ):
             left = [
                 [float(v) for v in p.findtext("location").split()]
                 for p in by_name[f"{stem}_l"].findall(".//PathPoint")
@@ -284,7 +307,9 @@ class TestNativeCoupling:
             got = [coordinate_value(model, state, n) for n in names.coordinates]
             np.testing.assert_allclose(got, expand[lv], atol=1e-8, rtol=0)
         for name, value in zip(PHI_NAMES, phi, strict=True):
-            assert coordinate_value(model, state, name) == pytest.approx(value, abs=1e-8)
+            assert coordinate_value(model, state, name) == pytest.approx(
+                value, abs=1e-8
+            )
 
     @pytest.mark.parametrize("seed", range(3))
     def test_thorax_pose_equals_composition(self, coupled, seed) -> None:
@@ -298,7 +323,9 @@ class TestNativeCoupling:
         phi = np.random.default_rng(100 + seed).uniform(-0.5, 0.5, size=3)
         set_independent_values(model, state, dict(zip(PHI_NAMES, phi, strict=True)))
         pose = level_rotations(_law(), phi, fixture_neutral_transforms(spec))
-        want = fixture_base_offset(spec) @ pose.compose() @ fixture_terminal_offset(spec)
+        want = (
+            fixture_base_offset(spec) @ pose.compose() @ fixture_terminal_offset(spec)
+        )
         got = body_transform_in(model, state, "thorax_proxy", "pelvis")
         np.testing.assert_allclose(got, want, atol=1e-8, rtol=0)
 
@@ -328,12 +355,25 @@ class TestNativeMuscles:
         for name in fixture_muscle_names():
             assert muscle_max_isometric_force(model, name) > 0.0
 
-    def test_state_derivatives_run(self, muscled) -> None:
+    def test_state_derivatives_run_and_are_finite(self, muscled) -> None:
+        from src.engines.physics_engines.opensim.python.spine._osim_helpers import (
+            state_derivatives,
+        )
+
         model, state = muscled
         model.equilibrateMuscles(state)
-        model.realizeAcceleration(state)
-        deriv = model.computeStateVariableDerivatives(state)
-        assert deriv.size() > 0
+        deriv = state_derivatives(model, state)
+        assert deriv.size >= 6 * 2 + 15 * 2 + 8 * 2
+        assert np.all(np.isfinite(deriv))
+
+    def test_coupled_model_is_kinematic_only(self, coupled) -> None:
+        """The massless driver makes forward dynamics singular (documented)."""
+        from src.engines.physics_engines.opensim.python.spine._osim_helpers import (
+            state_derivatives,
+        )
+
+        model, state = coupled
+        assert not np.all(np.isfinite(state_derivatives(model, state)))
 
     def test_moment_arms_finite_and_bilaterally_consistent(self, muscled) -> None:
         from src.engines.physics_engines.opensim.python.spine._osim_helpers import (
@@ -345,8 +385,12 @@ class TestNativeMuscles:
         set_coordinate_values(model, state, {})
         names = fixture_level_names(FixtureSpec())
         for level in names:
-            for stem in ("erector_spinae", "rectus_abdominis", "external_oblique",
-                         "internal_oblique"):
+            for stem in (
+                "erector_spinae",
+                "rectus_abdominis",
+                "external_oblique",
+                "internal_oblique",
+            ):
                 arms = {
                     side: [
                         muscle_moment_arm(model, state, f"{stem}_{side}", coord)

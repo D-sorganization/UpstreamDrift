@@ -1,0 +1,66 @@
+\subsection{Fixture Coupler Constraints and Lumped Trunk Muscles}
+\label{sec:spn-7b}
+
+This section extends the synthetic fixture of Section~\ref{sec:spn-7a} with
+optional kinematic coupling and lumped trunk muscles. All numbers are invented;
+nothing is transcribed from a SimTK model. Generation is pure ElementTree and
+needs no OpenSim import
+(\texttt{fixture\_coupling.py}, called from \texttt{build\_fixture\_osim(spec, coupling, muscles)}).
+
+\paragraph{Coupling Law.} Only the linear family
+$\theta_i = C_i\,\phi$, $C_i\in\mathbb{R}^{3\times n_\phi}$, is representable
+($\theta_i=(\mathrm{FE},\mathrm{LB},\mathrm{AR})$ in rad, $\phi$ in rad or m).
+State-dependent and polynomial laws raise \texttt{TypeError}. Cross-axis terms
+(off-diagonal entries of $C_i$) are exact because OpenSim's
+\texttt{LinearFunction} is multivariate.
+
+\paragraph{Massless Driver.} The independent coordinates are placed on a
+massless, inertia-free body \texttt{spine\_coupling\_driver} joined to the pelvis
+by the \texttt{CustomJoint} \texttt{spine\_coupling\_driver\_jnt} with identity
+offsets. $\phi_0,\phi_1,\phi_2$ rotate about $Z$, $X$, $Y$ and
+$\phi_3,\phi_4,\phi_5$ translate along $X$, $Y$, $Z$ (at most six, ranges
+$\pm1$). Nothing hangs off the driver, so inventories exclude it by name and it
+cannot contribute to inverse dynamics or joint reaction. Independent names must
+be unique and must not clash with level coordinates.
+
+\paragraph{Couplers.} For every level in the law and each row $r$ of $C_i$ one
+\texttt{CoordinateCouplerConstraint} is added with dependent coordinate
+$\theta_{i,r}$, independent coordinates the law's names and
+\texttt{LinearFunction} coefficients $[C_{i,r,1},\dots,C_{i,r,n_\phi},0]$:
+\begin{equation}
+  q_{\mathrm{dep}} = \sum_k C_{i,r,k}\,\phi_k + 0 .
+\end{equation}
+The composed pose is still
+$T_{\mathrm{base}}\,T_1\cdots T_n\,T_{\mathrm{term}}$ with $T_i$ built from
+$\theta_i=C_i\phi$ (angles never add).
+
+\paragraph{Muscles.} Eight bilateral \texttt{Millard2012EquilibriumMuscle}
+objects (erector spinae, rectus abdominis, external and internal oblique, suffix
+\texttt{\_l}/\texttt{\_r}) run \texttt{pelvis} $\to$ \texttt{L3} (via point)
+$\to$ \texttt{thorax\_proxy}. Right-side points have $z>0$ and the left side
+mirrors $z\to -z$. Invented values: maximum isometric forces 1500, 900, 700,
+600~N; optimal fibre length 0.12~m; tendon slack length 0.17~m; zero pennation.
+The two obliques cross the midline in opposite senses so that their axial
+moment arms are non-zero and of opposite sign. No physiological claim is made.
+
+\paragraph{Verification.} Native tests (OpenSim 4.6) load the coupled model,
+prescribe $\phi$ (locked) and call \texttt{assemble}; every level coordinate
+equals $C_i\phi$ to $10^{-8}$ and the thorax-proxy pose equals the
+\texttt{level\_rotations} composition to $10^{-8}$. For the muscled model the
+state derivatives are finite, moment arms about every level coordinate are
+finite, and mirror exactly (flexion even, lateral bending and axial rotation
+odd, to $10^{-9}$).
+
+\paragraph{Limitations.} The coupled model is kinematic only: the massless
+driver coordinates give a singular mass matrix, so forward dynamics returns
+non-finite derivatives (asserted by a test); couplers are disabled for ID, SO
+and joint reaction (ADR-0055 item~6), which use the uncoupled fixture. A
+CoordinateCouplerConstraint prescribes the level coordinates, so their own
+limits are not enforced independently. The muscle geometry is not anatomical and
+passing the tests establishes software correctness only, not scientific
+qualification.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/opensim/spine -q -n 0
+\end{verbatim}
