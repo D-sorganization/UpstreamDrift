@@ -73,7 +73,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1063 | `src/bunkershot3d/metrics/divot.py` |
 | 1053 | `src/engines/model_inventory.py` |
 | 1053 | `src/tools/tour_matching_viewer/core.py` |
-| 1046 | `src/shared/python/motion_matching/pinocchio_g2_g3.py` |
+| 1052 | `src/shared/python/motion_matching/pinocchio_g2_g3.py` |
 | 1042 | `src/shared/python/physics/flight_models.py` |
 | 1040 | `src/bunkershot3d/solvers/mpm/order_of_accuracy.py` |
 | 1040 | `src/tools/tour_matching_viewer/gui.py` |
@@ -204,6 +204,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 810 | `src/shared/python/humanoid_character_builder/mesh/mesh_processor.py` |
 | 809 | `src/shared/python/model_generation/converters/urdf_parser.py` |
 | 809 | `src/shared/python/pose_editor/widgets.py` |
+| 807 | `src/shared/python/motion_matching/multi_engine_torque_allocator.py` |
 | 806 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/evaluate_matching_workflow.py` |
 | 806 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_main_application.py` |
 | 806 | `src/launchers/_launcher_navigation_ui.py` |
