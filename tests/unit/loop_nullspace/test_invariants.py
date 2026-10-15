@@ -359,6 +359,7 @@ def _with_consistent_grf(snap):
     return dataclasses.replace(snap, grf_observed=np.array(dec.x_p[n_a + m :])), dec
 
 
+@pytest.mark.requires_pinocchio
 def test_base_rows_unavailable_without_floating_base_or_contact_or_grf():
     for snap, word in (
         (_spatial(False, False), "floating base"),
@@ -371,6 +372,7 @@ def test_base_rows_unavailable_without_floating_base_or_contact_or_grf():
         assert word in rec.reason
 
 
+@pytest.mark.requires_pinocchio
 def test_base_rows_with_observed_grf_are_invariant_for_fixed_ground_load():
     snap, dec = _with_consistent_grf(_spatial(True, True))
     _, decs, rep = _report(snap, gates=LOOSE)
@@ -397,6 +399,7 @@ def test_base_rows_with_observed_grf_are_invariant_for_fixed_ground_load():
     assert dec.nullity > 0
 
 
+@pytest.mark.requires_pinocchio
 def test_base_rows_unavailable_when_observed_grf_is_inconsistent():
     snap, _ = _with_consistent_grf(_spatial(True, True))
     unact = list(snap.topology.unactuated_indices)
