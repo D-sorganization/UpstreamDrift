@@ -31,12 +31,13 @@ a limitation, not filled in.  No engine other than Pinocchio is imported.
 
 from __future__ import annotations
 
+import importlib
 from collections.abc import Sequence
 from dataclasses import dataclass, replace
 from enum import Enum
+from typing import Any
 
 import numpy as np
-import pinocchio as pin
 from numpy.typing import NDArray
 
 from src.shared.python.loop_nullspace.admission import (
@@ -57,6 +58,10 @@ from src.shared.python.loop_nullspace.spatial_fixture import (
 )
 
 Array = NDArray[np.float64]
+
+# Pinocchio's bundled stubs omit some bindings (e.g. ``log6``); same pattern as
+# ``spatial_fixture`` on main.
+pin: Any = importlib.import_module("pinocchio")
 
 __all__ = [
     "GRIP_MODEL_SPECS",
@@ -230,7 +235,7 @@ class SpatialGripPlant:
         pin.updateFramePlacements(sp.model, sp.data)
         rel = sp.data.oMf[sp.lead_grip].inverse() * sp.data.oMf[sp.trail_grip]
         err = np.asarray(pin.log6(rel).vector)[_SHAFT_FIRST]
-        return np.asarray(err[list(self.spec.rows)])
+        return np.asarray(err[list(self.spec.rows)], dtype=np.float64)
 
     def _rows6(self, q: Array) -> Array:
         return np.asarray(self._sp.closure_jacobian(q)[_SHAFT_FIRST])
@@ -307,7 +312,7 @@ class SpatialGripPlant:
 
 
 def _times(n_frames: int) -> Array:
-    return np.arange(n_frames) * _FRAME_DT_S
+    return np.asarray(np.arange(n_frames) * _FRAME_DT_S, dtype=np.float64)
 
 
 def motion_frames(
