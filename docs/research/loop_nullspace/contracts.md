@@ -602,10 +602,180 @@ re-solved, never a held `lambda`.
 
 ## NSX-31 Replay (#12571)
 
-`replay(allocation, provider, *, policy) -> ReplayReport`. Mode label
-`OPEN_LOOP` or `FEEDBACK` is mandatory; feedback torque is reported as its
-own series with a norm budget. Exact allocation on the oracle gives open-loop
-drift within the integration tolerance.
+`replay(allocation, provider, *, policy, setup, feedback=None, settings=None)
+-> ReplayReport` (`loop_nullspace/replay.py`; inputs in `replay_spec.py`,
+ground loads in `replay_ground.py`). It integrates the constrained dynamics
+forward from the first state only, under the allocated torques, and compares
+the result with the reference trajectory. It reuses the NSX-30 KKT projector
+(`constrained_acceleration`, with the reaction re-solved at every RK4 stage) and
+the counterfactual RK4 (`rk4_step_with_load`, the generalisation of the
+existing `_rk4_step` to a time- and state-dependent load). There is no second
+integrator or projector.
+
+### Modes and the Mandatory Label
+
+| `ReplayPolicy`           | `ReplayMode` | `evidence_label`                | What it is                                                            |
+| ------------------------ | ------------ | ------------------------------- | --------------------------------------------------------------------- |
+| `INDEPENDENT_TIME_ONLY`  | `OPEN_LOOP`  | `independent_open_loop_replay`  | Allocated torque applied as is; only time enters.                     |
+| `STATE_FEEDBACK`         | `FEEDBACK`   | `feedback_assisted_tracking`    | Allocated torque plus a declared feedback law on the state error.     |
+
+`ReplayReport.__post_init__` refuses a mode that disagrees with its policy, an
+open-loop report that carries any feedback, a feedback report without its law,
+series and budget, and any state reset. `may_present_as_validation` is always
+`False`: a feedback-assisted replay is tracking, never validation, and a UI may
+not show it as the latter. The report also carries `NON_CLAIM`.
+
+### Equations
+
+With `S` the actuation selection (coordinate rows), `tau_a(t)` the allocated
+torque interpolated from the allocation nodes (`zoh`, `linear` or `cubic`
+spline: orders 1, 2 and about 4), `g(t, q) = J_g(q)^T f_g(t)` the known external
+ground load and `(a, lambda) = KKT(M, h, S^T tau + g, J_c, Jdot v)`:
+
+- open loop: `tau = tau_a(t)`;
+- feedback: `tau = tau_a(t) + tau_fb`, `tau_fb = F(q_ref - q, v_ref - v, q)`.
+
+`tau_fb` is stored as its own series and never added into `allocated_torque`.
+Its budget is relative to the allocated series: `peak_norm_ratio = max_t
+|tau_fb| / max_t |tau_a|`, `energy_ratio = int |tau_fb|^2 dt / int |tau_a|^2
+dt`, `rms_ratio`, absolute mechanical work `int sum_i |tau_i v_i| dt` of each
+series, the per-joint RMS, and the fraction of saturated samples (trapezoid
+integrals). A zero allocation with non-zero feedback has ratio `inf`, never
+`nan`.
+
+Closure drift is reported in both modes: velocity `J_c v` always, position
+`Phi(q)` only when the provider exposes `closure_error` (otherwise `None`, not
+zero). Any Baumgarte stabilisation (`ReplaySettings.baumgarte`, gains
+`alpha`, `beta`) is declared in the report together with the peak
+acceleration it added, `stabilisation_acceleration_peak`, and is reported apart
+from the physics; the default is none.
+
+Time to divergence is the first replay node at which `max_i |q_i - q_ref,i|`
+exceeds `divergence_tolerance` (radians or metres per coordinate; 0.05 for the
+anthro runs). A run that blows up (non-finite state, a state above `1e8`, or a
+KKT failure) stops there and says so in `terminated_reason`.
+
+### Declared Feedback Laws
+
+`FeedbackLaw(kp, kd)` is a per-joint or symmetric PSD joint-space PD law.
+`AccelerationFeedbackLaw` is the state-dependent acceleration-space PD used for
+the anthro runs: `tau_fb = pinv(R(q)) (omega^2 e + 2 zeta omega e_dot)` with
+`R(q) = S P_c(q) S^T` the actuated acceleration response of the closed loop at
+the current configuration and `zeta = 1`. It is scale-free across joints
+whose inertia spans `1e-6` to `1e0` kg m^2 and removes directions the loop makes
+uncontrollable (`rcond = 1e-6`). Only the 35 actuated coordinates get feedback;
+the six root coordinates are unactuated.
+
+### Window Rule (Anthro Fixture)
+
+Frames `0, 3, ..., 597` of the ground-supported anthro record are the NSX-22
+benchmark set, 199 frames of which 124 have a non-empty free feasible set under
+the ASSUMED capacity prior (75 are INFEASIBLE, as already recorded). The replay
+window is the longest run of adjacent (3 record steps apart) usable frames,
+earliest on ties. It is chosen by that rule alone, not by outcome: runs are
+(frames, count) 0 to 90 (31), **96 to 339 (82)**, 345 to 348 (2), 534 to 537
+(2), 543 (1), 549 to 564 (6). The window is record frames 96 to 339, `t =
+0.288` to `1.017 s`, 0.729 s long. The initial state is the closure-projected
+measured state of frame 96. The allocation (NSX-23, `rate_weight = 0.1`) is
+OPTIMAL with KKT residuals primal 2.6e-14, dual 5.7e-10, complementarity 2.2e-13.
+
+Ground loads: the allocated `f_g` is applied as a known external load
+`J_g(q)^T f_g` at the replayed configuration on the contact set of the
+allocation frame. It is an input, not feedback, and not contact dynamics: no
+contact is released or made.
+
+Load-map check (so a divergence is dynamics, not plumbing): at the measured
+states, the allocated loads reproduce the measured accelerations to 2.5e-7
+(1.8e-9 relative to the peak acceleration).
+
+### Results on the Anthro Window
+
+Open loop (`INDEPENDENT_TIME_ONLY`, RK4 3 sub-steps per 9 ms, linear
+interpolation):
+
+- Diverges early: time to divergence **21 ms** (tolerance 0.05); the error is
+  0.013 at 10 ms, 0.10 at 30 ms, 0.63 at 50 ms, 8.8 at 100 ms, and the run
+  blows up (state above `1e8`) at `t = 0.45 s`. Early log-linear growth rate
+  about 105 per second (6 to 30 ms): this is a hard-unstable open loop, not
+  noise. Worst coordinates at 50 ms: `mtp_angle_r` 0.68, `mtp_angle_l` 0.41,
+  `subtalar_angle_l` 0.24 rad.
+- Integrator check: 6 sub-steps give the same 21 ms and the same early errors
+  (0.0127 at 10 ms, 0.103 at 30 ms). `zoh` diverges at 12 ms, `cubic` at 21 ms.
+  Interpolation changes the amplitude, not the verdict.
+- Closure drift stays tiny until divergence (velocity 7.4e-7, position 1.2e-8)
+  and is huge only in the blow-up tail (max 1.3 velocity, 1.4e-3 position); do
+  not read the tail maxima as a closure statement.
+
+Feedback-assisted (`STATE_FEEDBACK`, acceleration PD, `zeta = 1`). `omega` is the
+natural frequency of the declared law; `capacity` is the ASSUMED torque
+capacity prior.
+
+| `omega` [rad/s] | sub-steps | time to divergence | max state error | peak ratio | energy ratio | abs-work ratio | peak / capacity | joints over capacity |
+| --------------- | --------- | ------------------ | --------------- | ---------- | ------------ | -------------- | --------------- | -------------------- |
+| 50              | 3         | 36 ms              | 4.1             | 1.93       | 1.65         | 1.17           | 8.8             | 20                   |
+| 100             | 6         | 135 ms             | 2.9             | 1.63       | 0.99         | 1.18           | 6.5             | 19                   |
+| 150             | 6         | none               | 0.048           | 0.196      | 0.0076       | 0.12           | 1.24            | 1                    |
+| 300             | 12        | none               | 0.047           | 0.229      | 0.0086       | 0.13           | 1.55            | 1                    |
+
+Reading it honestly: the allocated torques alone do not reproduce the motion
+beyond about 21 ms. Tracking the whole 0.729 s window needs feedback at
+`omega >= 150`; at 150 the feedback has 0.76 percent of the allocated energy,
+12 percent of its absolute work and a peak 20 percent of the allocated peak,
+but its peak is 1.24 times the ASSUMED capacity on `RFInput`, one joint, and
+1.55 times at `omega = 300`. At `omega = 50` and `100` the law does not hold the
+state, so their ratios describe the feedback fighting a diverged state and are
+not a budget; do not quote them as one. The numbers hold for this law, window,
+capacity prior and tolerance only.
+
+Reproduce (about 3.5 min, needs Pinocchio, HiGHS and Clarabel; `-m slow` is
+required because the default `addopts` deselects it):
+
+```bash
+LOOP_NULLSPACE_REPLAY_JSON=<path>.json python3 -m pytest \
+  tests/integration/test_loop_nullspace_anthro_replay.py -n 0 -m slow \
+  --timeout=1500 -p no:cacheprovider
+python3 -m pytest tests/unit/loop_nullspace/test_replay.py \
+  tests/unit/loop_nullspace/test_replay_feedback_laws.py -n 0
+```
+
+The record holds window, allocation status and KKT, the open-loop report for
+each interpolation, the finer-step run and the feedback sweep.
+
+### Oracle Evidence (Planar Golfer)
+
+The reference is DOP853 at `rtol = 1e-13` with dense output (no inverse crime).
+Exact-torque open-loop replay reproduces it within integrator error; RK4 with a
+held load is fourth order; interpolation orders are 1, 2 and about 4; feedback is
+negligible when tracking is exact (peak under 1e-4 of allocated, energy under
+1e-9); a zero-gain law equals the open loop; the feedback budget grows with an
+injected parameter mismatch; and a real NSX-23 allocation (a different family
+member from the driving torque, differing by more than 1 N m) replays to the
+same trajectory (error 5.6e-6).
+
+### Failed Experiments
+
+- Fixed per-joint PD gains (`kp = 300`, `kd = 30`) were unstable under explicit
+  RK4 on the oracle (the state exploded within 10 nodes); the oracle test uses
+  `kp = 40`, `kd = 1.5`.
+- On the anthro chain, diagonal PD and a frozen-`Lambda` matrix PD both blew up:
+  inertias span six orders of magnitude and the closure couples them. This is
+  why the state-dependent `AccelerationFeedbackLaw` is the declared law.
+- A stride-1 allocation of the same window returned `NUMERICAL` with
+  `rate_weight = 0.1`; the stride-3 window above is the reported one.
+
+### Limitations and Non-Claims
+
+- Inverse kinematics, feedback-assisted tracking and independently replayed
+  open-loop dynamics are different things. Only the open-loop mode is an
+  independent replay, and even it shows only that this allocation, with this
+  model, does or does not hold; it does not validate or refute the torques.
+- The ground load is an applied input. A diverged replay keeps pushing at the
+  allocated force through contacts that may have moved.
+- The feedback law is one declared choice. Another law gives another budget.
+- Capacity, friction and grip hypotheses remain ASSUMED; foot and head
+  observability limits are unchanged.
+- Software correctness only. Scientific qualification stays in the
+  design-manual governance pathway; a successful run is not acceptance.
 
 ## NSX-40 Report, Service and Routes (#12572)
 
