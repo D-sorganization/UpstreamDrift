@@ -113,9 +113,8 @@ def test_kkt_residuals_detect_a_wrong_point() -> None:
         a_ub,
         np.array([4.0]),
         [(0.0, 3.0), (0.0, 2.5)],
-        x=np.array([2.0, 2.5]),  # violates x + y <= 4
-        row_dual=good.row_dual,
-        col_dual=good.col_dual,
+        # x violates x + y <= 4
+        primal_dual=(np.array([2.0, 2.5]), good.row_dual, good.col_dual),
     )
     assert bad.primal > 0.05
 

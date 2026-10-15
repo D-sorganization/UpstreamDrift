@@ -303,11 +303,11 @@ def lp_kkt_residuals(
     b_ub: Any,
     bounds: Any,
     *,
-    x: np.ndarray,
-    row_dual: np.ndarray,
-    col_dual: np.ndarray,
+    primal_dual: tuple[np.ndarray, np.ndarray, np.ndarray],
 ) -> KKTResiduals:
     """Scaled KKT residuals of a primal/dual pair for the LP in the module docs.
+
+    ``primal_dual`` is ``(x, row_dual, col_dual)``.
 
     Multipliers follow HiGHS: ``c - A^T row_dual = col_dual`` and, for a
     minimisation, a multiplier is nonnegative at a lower bound and nonpositive
@@ -321,9 +321,9 @@ def lp_kkt_residuals(
     big_a = sp.vstack([a_eq, a_ub]).tocsr()
     row_lo = np.concatenate([be, np.full(bu.size, -np.inf)])
     row_hi = np.concatenate([be, bu])
-    xx = np.asarray(x, dtype=float)
-    y = np.asarray(row_dual, dtype=float)
-    z = np.asarray(col_dual, dtype=float)
+    if len(primal_dual) != 3:
+        raise ValueError("primal_dual must be (x, row_dual, col_dual)")
+    xx, y, z = (np.asarray(part, dtype=float) for part in primal_dual)
     ax = big_a @ xx
     fin = np.concatenate([row_lo, row_hi, lo, hi])
     fin = fin[np.isfinite(fin)]
@@ -521,9 +521,7 @@ class LPSession:
             self._a_ub if self._a_ub.shape[0] else None,
             self._b_ub if self._a_ub.shape[0] else None,
             list(zip(self._lo, self._hi, strict=True)),
-            x=x,
-            row_dual=y,
-            col_dual=z,
+            primal_dual=(x, y, z),
         )
         return LPResult(
             SolveStatus.OPTIMAL,
