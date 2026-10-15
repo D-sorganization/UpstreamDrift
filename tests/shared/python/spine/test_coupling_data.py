@@ -149,10 +149,13 @@ def test_fujii_matches_extraction_rows() -> None:
         assert row["coupled_flexion"] == src["coupled_flexion"]
         assert row["coupled_lateral_bend"] == src["coupled_lateral_bend"]
         level = SpinalLevel[row["level"]]
+        # ADR-0055 sign map: Fujii reports flexion positive and lateral bend
+        # positive in the direction of the rotation; ISB takes extension,
+        # right bend and left rotation positive.
         expected = np.array(
             [
-                [math.radians(src["coupled_flexion"][0])],
-                [math.radians(src["coupled_lateral_bend"][0])],
+                [-math.radians(src["coupled_flexion"][0])],
+                [-math.radians(src["coupled_lateral_bend"][0])],
                 [math.radians(src["axial_rotation"][0])],
             ]
         ) / math.radians(rot)
@@ -248,3 +251,13 @@ def test_returned_law_is_independent_copy() -> None:
     second = coupling_law("uniform_reference")
     assert first is not second
     assert not first.matrices[SpinalLevel.L5_S1].flags.writeable
+
+
+def test_fujii_isb_signs_follow_adr_0055() -> None:
+    """Left (ISB-positive) trunk rotation flexes L3/4 and bends it right."""
+    law = coupling_law("fujii2007_lumbar")
+    gains = law.matrices[SpinalLevel.L3_L4][:, 0]
+    assert gains[0] < 0.0  # coupled flexion is negative ISB flexion_extension
+    assert gains[1] > 0.0  # bend opposite to a left rotation is a right bend
+    assert gains[2] > 0.0
+    assert law.matrices[SpinalLevel.L5_S1][1, 0] < 0.0  # same-direction bend
