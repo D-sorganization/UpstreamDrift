@@ -434,6 +434,11 @@
       "id": "UP-D1-segmental-spine-inventory",
       "owner": "UpstreamDrift issue #12735",
       "resolution": "Inventory the segmental-spine kinematics and loads pathway (src/shared/python/spine, to be created by children SPN-1a to SPN-17) with provisional chapter 66-segmental-spine.qmd and the standalone reference docs/research/segmental_spine/segmental_spine.tex. SPN-0c delivers the documentation scaffold only; there is no production code and no registered calculation. Conventions follow ADR-0055 and no coupling law, distribution rule, load or golfer result is qualified. Keep calculations empty and publication blocked until implementation, UP-D1 inventory, independent validation and review."
+    },
+    {
+      "id": "UP-R6-flexible-shaft-chain",
+      "owner": "UpstreamDrift issue #12686, epic #12678",
+      "resolution": "Inventory the opt-in flexible-shaft pathway (src/shared/python/motion_matching/club_shaft_chain.py, the spring emission in native_mjcf.py and shaft_chain_mjcf.py) with provisional chapter 67-flexible-golf-shaft.qmd. The rigid club stays the byte-identical default; the chain is MuJoCo-only and other engines refuse it. The STIFF profile is generic and flagged default_not_measured: the modulus is calibrated to the SHAFT_FLEX_DATA cpm, not to a measured shaft. Static deflection and first frequency agree with the finite-element reference within 1 % at N = 4, mass properties are exact, and the x 1e6 rigid limit tracks the rigid model; these are verification checks, not validation against a measured club. The deflected-shaft render and the dynamic clubhead-speed study are not done. Keep calculations empty until a measured profile, UP-D1 inventory and review."
     }
   ],
   "calculations": []
