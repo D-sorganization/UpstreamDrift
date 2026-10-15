@@ -20,8 +20,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import importlib
+from typing import Any
+
 import numpy as np
-import pinocchio as pin
 from numpy.typing import NDArray
 
 from src.shared.python.loop_nullspace.contracts import (
@@ -35,6 +37,8 @@ from src.shared.python.loop_nullspace.contracts import (
     SpatialInertia,
 )
 from src.shared.python.loop_nullspace.fixtures import FixtureCase, load_golden
+
+pin: Any = importlib.import_module("pinocchio")
 
 Array = NDArray[np.float64]
 
