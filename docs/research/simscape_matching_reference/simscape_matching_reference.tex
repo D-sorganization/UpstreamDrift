@@ -5900,6 +5900,29 @@ route of the previous subsection: on \texttt{golf\_humanoid}, landmark RMS
 20.7 deg. \texttt{golf\_humanoid\_scaled} was already at 38.9 mm with the
 lead wrist on its 35 deg bound, and is now at 41.4 mm, still on the bound.
 
+Issue \#12315 (PR \#12484) widened the golf forearm range to 0--170 deg but
+did not re-solve the calibration, so the lead forearm \texttt{pro\_sup\_l}
+stayed on the old 90 deg bound in the committed address poses (\#12777). With
+the calibration re-solved on the widened range, \texttt{pro\_sup\_l} is
+interior for every model and club: 119.5 and 54.7 deg on
+\texttt{golf\_humanoid} (driver, 7-iron), and 134.8 and 90.2 deg on
+\texttt{golf\_humanoid\_scaled}. Grip orientation errors stay at or below
+1.5 deg, and hand grip-point gaps at or below 0.8 mm. The landmark RMS is
+28.5 / 23.9 mm (\texttt{golf\_humanoid}) and 56.6 / 65.4 mm
+(\texttt{golf\_humanoid\_scaled}). The driver value on \texttt{golf\_humanoid}
+is 3.1 mm above the bounded solve (25.4 mm): freeing the forearm moves the
+least-squares fit to a different local minimum, and the solver stops on its
+function tolerance. The knee and lead-elbow bounds, and the scaled skeleton's
+wrist-deviation bounds (a recorded reason), are unchanged. Reproduce:
+\begin{verbatim}
+python3 -m src.engines.physics_engines.opensim.python.msk_club_calibration \
+  src/engines/physics_engines/opensim/models/golf_humanoid.osim \
+  src/engines/physics_engines/opensim/models/golf_humanoid_scaled.osim \
+  --club driver   # then --club iron7
+# then scripts/build_humanoid_osim.py rebuild_club(<model>) on both models
+python3 -m pytest tests/opensim/test_msk_grip_palms.py tests/opensim/test_msk_club.py
+\end{verbatim}
+
 Reproduction (repository root, \texttt{MUJOCO\_GL=egl PYTHONPATH=.:src}):
 \begin{verbatim}
 python3 -m scripts.regenerate_club_face_fixtures --work RUNS --capture driver
