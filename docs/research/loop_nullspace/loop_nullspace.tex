@@ -753,7 +753,7 @@ Envelopes of the restricted kinds are contained in the \texttt{WELD6}
 envelope, and a restricted set can be empty.  This is a \emph{restriction of
 the reaction set on the welded kinematics}.  It is not a different closure
 model: a true alternative grip changes the kinematics themselves and has to be
-re-derived (research item NSX-72).  Outputs carry the label
+re-derived (research item NSX-72, Section~\ref{sec:alternatives}).  Outputs carry the label
 \texttt{REACTION\_RESTRICTION\_SENSITIVITY}.
 
 \subsection{Calculation Reference}
@@ -803,6 +803,29 @@ position level of admission was skipped (no closure plant).
 python3 -m pytest tests/integration/test\_loop\_nullspace\_restriction\_anthro.py}
 writes the record kept at
 \texttt{docs/research/loop\_nullspace/records/restriction\_anthro\_stride1.json}.
+
+\subsection{Closure Alternatives With Re-Derived Kinematics}
+\label{sec:alternatives}
+A grip model is a closure with its \emph{own} rows, hence its own admitted
+motions (research item NSX-72).  Write the weld closure as
+$\Phi_6(q)=\log_6(T_{\mathrm{lead}}^{-1}T_{\mathrm{trail}})$ in the shaft-first
+grip frame, rows $(f_x,f_y,f_z,\tau_x,\tau_y,\tau_z)$ with $x$ along the club.
+The shaft-twist revolute drops the twist component, $\Phi_5=(\Phi_6)_{\{0,1,2,4,5\}}$;
+the trail ball keeps the position part, $\Phi_3=(\Phi_6)_{\{0,1,2\}}$; the lead
+ball hangs the club on three extra unactuated coordinates $\beta$ (a $z$-$y$-$x$
+ball at the grip point) and keeps six rows, $\Phi_6(q,\beta)$.  Each model has
+$J_c=\partial\Phi/\partial q$ and $\dot J_c v$ of its own rows, checked here
+against a central difference of its own residual, and admission is evaluated
+at position ($\Phi/L$), velocity ($J_c v\,T/L$) and acceleration
+($(J_c a+\dot J_c v)T^2/L$) with the gate $10^{-6}$ unchanged.  The admitted
+velocity space has dimension $n-\operatorname{rank}J_c$, which grows as rows
+drop; the dynamics $Ma+h=S^\top\tau+J_c^\top\lambda$ use the same rows.  On a
+trajectory the weld also admits, the rows-only models give exactly the NSX-26
+restriction; they differ in which other trajectories they admit.  The lead ball
+changes the unactuated rows and therefore the allocation nullity.  The record
+of numbers and every limitation is
+\texttt{docs/research/loop\_nullspace/closure\_alternatives\_report.md}; the
+synthetic fixture and the declared torque box are not a golfer.
 
 \section{Canonical Closure Conversion}
 \label{sec:conversion}
