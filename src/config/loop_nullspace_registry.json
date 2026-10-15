@@ -109,7 +109,7 @@
       "verification_status": "VERIFIED"
     },
     {
-      "id": "CIT-TODOROV-JORDAN-2002",
+      "id": "CIT-OPTIMAL-FEEDBACK-2002",
       "reference": "Todorov E, Jordan MI. Optimal feedback control as a theory of motor coordination. Nat Neurosci 5:1226-1235 (2002).",
       "doi": "10.1038/nn963",
       "url": "https://pubmed.ncbi.nlm.nih.gov/12404008/",
@@ -211,7 +211,7 @@
       "id": "H-NOISE-SIGNAL-DEPENDENT",
       "statement": "Actuation noise variance increases with the size of the control signal, modelled as sigma_i^2 = sigma0_i^2 + k_i^2 u_i^2 with declared sigma0 and k. Force variability that scales with mean force in voluntary contractions is supporting context. The amplitudes are declared hypotheses, not measurements of any golfer.",
       "parameters": {"sigma0": "declared", "k": "declared"},
-      "source": {"citation_id": "CIT-HARRIS-WOLPERT-1998", "note": "Mechanism M1. The abstract states that noise variance grows with control signal size. Supporting context: CIT-JONES-HAMILTON-WOLPERT-2002 (force SD scales with mean force in voluntary isometric contractions, attributed to motor-unit pool organization, not necessarily command noise); CIT-TODOROV-JORDAN-2002 (feedback control)."},
+      "source": {"citation_id": "CIT-HARRIS-WOLPERT-1998", "note": "Mechanism M1. The abstract states that noise variance grows with control signal size. Supporting context: CIT-JONES-HAMILTON-WOLPERT-2002 (force SD scales with mean force in voluntary isometric contractions, attributed to motor-unit pool organization, not necessarily command noise); CIT-OPTIMAL-FEEDBACK-2002 (feedback control)."},
       "verification_status": "VERIFIED"
     },
     {
