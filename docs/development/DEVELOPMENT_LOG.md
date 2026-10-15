@@ -2288,6 +2288,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12550 · Hand-on-Club Grip Wrench Uses the Bare Club Inertia (Club_Solids_Partition); Legacy Composite Kept as Wrist_on_Hands_Plus_Club
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12550
+- **Branch:** merged via #12603
+- **PR:** #12603
+- **Paths:** see #12603
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`a9f98220`; collated from changes/12550-hand-on-club-grip-wrench-uses-the-bare-c.md)
+- **Summary:** Hand-on-club grip wrench uses the bare club inertia (club_solids_partition); legacy composite kept as wrist_on_hands_plus_club
+- **Next step:** Shipped in PR #12603.
+
 ### DL-#12552 · Split force_nullspace.py Into a Force_Nullspace Package With Re-Export Shims and Public API Contract Test (NSX-03, No Behavior Change)
 
 - **State:** shipped
