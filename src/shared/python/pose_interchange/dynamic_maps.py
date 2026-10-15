@@ -154,7 +154,7 @@ def _base_blocks(
         start = layout.orientation_start
         euler_rad = np.radians(q[start : start + 3])
         s_mat, d_beta, d_gamma = _euler_rate_matrix(euler_rad)
-        s_inv = np.linalg.inv(s_mat)
+        s_inv = np.asarray(np.linalg.inv(s_mat), dtype=np.float64)
         euler_rate = s_inv @ omega_body
         s_dot = d_beta * euler_rate[1] + d_gamma * euler_rate[2]
         scale = 180.0 / np.pi
