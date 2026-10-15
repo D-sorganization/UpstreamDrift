@@ -215,7 +215,8 @@ class SpatialGripPlant:
             else self
         )
         self.q_star: Array = np.array(self._sp.q_star)
-        self.n: int = int(self._sp.model.nv)
+        plant_model = self._sp.model
+        self.n: int = int(plant_model.nv)
 
     # ------------------------------------------------------------ kinematics
     def integrate(self, q: Array, dq: Array) -> Array:
