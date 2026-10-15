@@ -453,3 +453,29 @@ def test_importing_the_module_does_not_import_solvers(monkeypatch) -> None:
         [sys.executable, "-c", code], env=env, capture_output=True, text=True
     )
     assert done.returncode == 0, done.stderr
+
+
+# --------------------------------------------------- quadratic objective (P)
+def test_socp_quadratic_objective_matches_closed_form() -> None:
+    """min 1/2 x'Px + c'x s.t. x1 + x2 = 1 has a closed-form optimum (NSX-23)."""
+    p = np.diag([2.0, 4.0])
+    c = np.array([1.0, 0.0])
+    a_eq = np.array([[1.0, 1.0]])
+    res = solve_socp(c, a_eq, [1.0], None, None, [], P=p)
+    assert res.status is SolveStatus.OPTIMAL
+    # Stationarity: Px + c = nu * 1, x1 + x2 = 1 -> x = (1/6 .. ) solved exactly.
+    kkt = np.block([[p, -a_eq.T], [a_eq, np.zeros((1, 1))]])
+    sol = np.linalg.solve(kkt, np.array([-1.0, 0.0, 1.0]))
+    assert res.x == pytest.approx(sol[:2], abs=1e-7)
+    assert res.objective == pytest.approx(0.5 * sol[:2] @ p @ sol[:2] + c @ sol[:2])
+    assert res.kkt_residuals is not None
+    assert res.kkt_residuals.max() < 1e-7
+
+
+def test_socp_quadratic_objective_preconditions() -> None:
+    with pytest.raises(ValueError, match="P must be"):
+        solve_socp([0.0, 0.0], None, None, None, None, [], P=np.eye(3))
+    with pytest.raises(ValueError, match="symmetric"):
+        solve_socp(
+            [0.0, 0.0], None, None, None, None, [], P=np.array([[1.0, 2.0], [0.0, 1.0]])
+        )
