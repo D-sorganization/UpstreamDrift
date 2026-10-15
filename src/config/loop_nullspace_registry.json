@@ -1,216 +1,137 @@
 {
-  "schema_version": "1.0.0",
-  "issue": 12549,
-  "description": "Seed registry of physiological hypotheses, mathematical conventions, UI presets, and citation verification statuses for Closed-Loop Null-Space Exploration (NSX).",
-  "conventions": [
+  "schema_version": 1,
+  "registry_version": "0.1.0",
+  "status": "seed",
+  "description": "Seed registry of hypotheses, conventions and presets for closed-loop null-space exploration (epic #12593). Seeded by NSX-00 (#12549). Loader and CI citation gate land in NSX-11 (#12556).",
+  "schema_note": {
+    "hypotheses": "id, statement, parameters, source, verification_status. A hypothesis is a physiological or modelling prior that conditions a FAMILY_DEPENDENT output. statement is user-facing and must not rely on a source whose verification_status is UNVERIFIED or REMOVED.",
+    "conventions": "id, statement, parameters. A convention is a choice of metric, scale or frame; it is not physiology and never appears in an INVARIANT claim as a hypothesis.",
+    "presets": "id, label, hypotheses, conventions. A preset is a named hypothesis set for the UI; every id must exist.",
+    "torque_capacity": "Empty until NSX-04 (#12553). Each entry: joint_slot, direction, tau_max_nm, scaling_rule, population, source, verification_status, assumed (bool). An entry without a verified source must set assumed=true and verification_status=UNVERIFIED.",
+    "source": "Object {citation_id | null, note}. citation_id refers to citations[] below.",
+    "verification_status": "One of VERIFIED, UNVERIFIED, REMOVED, NOT_APPLICABLE (a modelling choice with no empirical claim)."
+  },
+  "citations": [
     {
-      "id": "C-FRAME-GRIP",
-      "statement": "Canonical grip-midpoint orthonormal frame with u_hat along the shaft axis from grip midpoint toward clubhead, v_hat along the clubface normal projection orthogonal to u_hat, and w_hat = u_hat x v_hat.",
-      "parameters": {
-        "origin": "0.5 * (r_L + r_R)",
-        "row_order": ["fx", "fy", "fz", "tx", "ty", "tz"],
-        "tree_sign": "+J_c^T lambda acts on the human kinematic tree; -lambda acts on the closing hand interface"
-      }
+      "id": "CIT-STANEV-2019",
+      "reference": "Stanev D., Moustakas K. Modeling musculoskeletal kinematic and dynamic redundancy using null space projection. PLoS ONE 14(1):e0209171 (2019).",
+      "doi": "10.1371/journal.pone.0209171",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6314624/",
+      "claim_checked": "Abstract: bounds on joint reaction loads from the feasible muscle-force space; misinterpretation is possible if null-space forces are ignored.",
+      "verification_status": "VERIFIED"
     },
     {
-      "id": "C-METRIC-CAPACITY",
-      "statement": "Diagonal capacity-normalized quadratic metric W_ii = 1 / tau_max_i^2 weighting each actuated joint torque by its declared static capacity bound.",
-      "parameters": {
-        "weight_formula": "diag(1 / tau_max_nm^2)"
-      }
+      "id": "CIT-CHOI-PARK-2020",
+      "reference": "Choi H., Park S. Three Dimensional Upper Limb Joint Kinetics of a Golf Swing with Measured Internal Grip Force. Sensors 20(13):3672 (2020).",
+      "doi": "10.3390/s20133672",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7374515/",
+      "claim_checked": "Abstract: six-axis force-torque instrumented grip, nine professional golfers; right-hand torque about three times the left-hand torque.",
+      "verification_status": "VERIFIED"
     },
     {
-      "id": "C-METRIC-IDENTITY",
-      "statement": "Euclidean SI unit-scaled metric W = diag(1 / F_char^2, 1 / M_char^2) with characteristic force F_char = 100 N and characteristic moment M_char = 50 N*m.",
-      "parameters": {
-        "characteristic_force_n": 100.0,
-        "characteristic_moment_nm": 50.0
-      }
-    },
-    {
-      "id": "C-METRIC-MINV",
-      "statement": "Inverse generalized mass-matrix metric W = M(q)^{-1} used only as a declared mathematical norm projection P_{c,M^{-1}} tau, never labelled as Gauss's principle or true physiological torque.",
-      "parameters": {
-        "weight_formula": "M(q)^{-1}"
-      }
-    },
-    {
-      "id": "C-CONE-POLYHEDRAL-8",
-      "statement": "Eight-facet inner/outer polyhedral approximation of circular Coulomb friction cones with worst-case radial error bound 1 - cos(pi/8) = 0.07612.",
-      "parameters": {
-        "facet_count": 8,
-        "max_radial_relative_error": 0.07612046748871324
-      }
+      "id": "CIT-NESBIT-SERRANO-2005",
+      "reference": "Nesbit S.M., Serrano M. Work and Power Analysis of the Golf Swing. J Sports Sci Med 4(4):520-533 (2005).",
+      "doi": null,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3899668",
+      "claim_checked": "Bibliographic record, abstract and Table 3 swing efficiencies (20.2 to 26.8 percent); no two-thirds statement found.",
+      "verification_status": "VERIFIED"
     }
   ],
   "hypotheses": [
     {
-      "id": "H-TORQUE-CAPACITY-BOX",
-      "statement": "Actuated joint torques remain within declared bilateral static capacity bounds |tau_i| <= tau_max_i populated per canonical joint slot in NSX-04.",
-      "parameters": {
-        "bound_type": "box",
-        "capacity_table_ref": "torque_capacity"
-      },
-      "source": "CIT-BOYD-VANDENBERGHE-2004",
-      "verification_status": "VERIFIED"
+      "id": "H-TORQUE-CAPACITY",
+      "statement": "Each actuated joint can sustain a torque of at most its declared capacity in each direction; torques beyond capacity are excluded from the feasible set.",
+      "parameters": {"capacity_table": "torque_capacity[] (NSX-04, #12553)", "uncited_slots": "flagged ASSUMED"},
+      "source": {"citation_id": null, "note": "Capacities are a population prior; values and sources arrive with NSX-04."},
+      "verification_status": "NOT_APPLICABLE"
     },
     {
-      "id": "H-GRIP-FRICTION-CONE",
-      "statement": "Hand-on-grip contact forces satisfy second-order Coulomb friction cones ||f_tan||_2 <= mu_grip * f_normal with non-negative compressive preload.",
-      "parameters": {
-        "mu_grip_default": 0.6,
-        "normal_preload_min_n": 10.0
-      },
-      "source": "CIT-MURRAY-LI-SASTRY-1994",
-      "verification_status": "VERIFIED"
+      "id": "H-EFFORT-CAPACITY",
+      "statement": "Among admissible allocations, the representative minimises the sum of squared torques each divided by its joint capacity.",
+      "parameters": {"weights": "1/tau_max_i^2"},
+      "source": {"citation_id": null, "note": "Modelling choice; requires H-TORQUE-CAPACITY."},
+      "verification_status": "NOT_APPLICABLE"
     },
     {
-      "id": "H-EFFORT-CAPACITY-QUADRATIC",
-      "statement": "Prior-conditioned representative allocation minimizes sum_i (tau_i / tau_max_i)^2 over the admissible null-space polytope.",
-      "parameters": {
-        "objective_term": "sum((tau_i / tau_max_i)^2)",
-        "weight": 1.0
-      },
-      "source": "CIT-BOYD-VANDENBERGHE-2004",
-      "verification_status": "VERIFIED"
+      "id": "H-SMOOTH-TORQUE-RATE",
+      "statement": "The representative penalises the squared torque rate, favouring smooth torque histories.",
+      "parameters": {"weight": "declared by the preset"},
+      "source": {"citation_id": null, "note": "Modelling choice."},
+      "verification_status": "NOT_APPLICABLE"
     },
     {
-      "id": "H-TORQUE-RATE-SMOOTHNESS",
-      "statement": "Trajectory allocation penalizes finite-difference squared torque rate ||Delta tau / Delta t||_W^2 across consecutive admitted frames.",
-      "parameters": {
-        "objective_term": "sum_t ||(tau_{t+1} - tau_t) / dt||_W^2",
-        "weight_default": 0.01
-      },
-      "source": "CIT-FD-NOISE-100HZ",
-      "verification_status": "VERIFIED"
+      "id": "H-GROSS-POWER-COST",
+      "statement": "Positive and negative joint power carry separate costs c_plus and c_minus; with c_plus equal to c_minus the cost reduces to a net-power term plus absolute power.",
+      "parameters": {"c_plus": "per joint", "c_minus": "per joint"},
+      "source": {"citation_id": null, "note": "Modelling choice; identity proved in the specification."},
+      "verification_status": "NOT_APPLICABLE"
     },
     {
-      "id": "H-POWER-GROSS-HETEROGENEOUS",
-      "statement": "Trajectory allocation includes an optional per-joint positive/negative mechanical power epigraph penalty paired with a strictly convex quadratic effort term.",
-      "parameters": {
-        "requires_strict_convex_pair": true,
-        "uniform_c_ratio_is_invariant_offset": true
-      },
-      "source": "CIT-FEATHERSTONE-RBDA-2008",
-      "verification_status": "VERIFIED"
+      "id": "H-GRIP-PRELOAD",
+      "statement": "Each hand keeps at least a declared axial squeeze on the club, so hand contact never goes slack.",
+      "parameters": {"min_axial_squeeze_n": "declared by the preset"},
+      "source": {"citation_id": null, "note": "Preload magnitudes are not sourced here; Choi and Park 2020 measured internal grip forces but no value is adopted."},
+      "verification_status": "NOT_APPLICABLE"
+    },
+    {
+      "id": "H-FRICTION-CONE",
+      "statement": "Contact loads lie inside a friction cone with a declared coefficient, approximated by a polyhedron with a declared facet count and error bound.",
+      "parameters": {"mu": "declared", "facets": "declared", "approximation": "inner or outer"},
+      "source": {"citation_id": null, "note": "Modelling choice."},
+      "verification_status": "NOT_APPLICABLE"
+    }
+  ],
+  "conventions": [
+    {
+      "id": "C-FRAME-GRIP",
+      "statement": "Closure rows and hand wrenches are expressed in the grip frame: origin at the midpoint of the two grip points, u along the shaft toward the clubhead, v the face-normal projection orthogonal to u, w = u x v.",
+      "parameters": {"row_order": "[fx fy fz tx ty tz]", "sign": "+J_c^T lambda acts on the tree; the closing hand exerts -lambda on the club"}
+    },
+    {
+      "id": "C-METRIC-CAPACITY",
+      "statement": "Torque norms are weighted by inverse squared joint capacity.",
+      "parameters": {"W": "diag(1/tau_max^2)"}
+    },
+    {
+      "id": "C-METRIC-IDENTITY",
+      "statement": "Torque norms use the identity metric on actuated torques.",
+      "parameters": {"W": "I"}
+    },
+    {
+      "id": "C-METRIC-MINV",
+      "statement": "Torque norms use the inverse mass matrix on actuated coordinates; this is a labelled metric and is not Gauss's principle.",
+      "parameters": {"W": "M^-1 restricted to actuated rows"}
+    },
+    {
+      "id": "C-SCALE-FORCE-MOMENT",
+      "statement": "Forces are scaled by a characteristic force and moments by a characteristic moment before rank decisions and in null-space coordinates.",
+      "parameters": {"F_c_n": 100, "M_c_nm": 5}
+    },
+    {
+      "id": "C-RANK-TOLERANCE",
+      "statement": "Numerical rank uses a relative singular-value tolerance against the largest singular value of the scaled matrix.",
+      "parameters": {"rtol": 1e-10}
     }
   ],
   "presets": [
     {
-      "name": "envelope_only",
-      "label": "Static Feasible Envelopes Only (No Representative Selection)",
-      "description": "Computes per-frame upper and lower feasible bounds and Chebyshev margins under declared capacity and grip-cone hypotheses without selecting a single representative trajectory.",
-      "hypotheses": ["H-TORQUE-CAPACITY-BOX", "H-GRIP-FRICTION-CONE"],
-      "conventions": ["C-FRAME-GRIP", "C-METRIC-CAPACITY", "C-METRIC-IDENTITY"]
+      "id": "envelope_only",
+      "label": "Envelope Only",
+      "hypotheses": ["H-TORQUE-CAPACITY", "H-FRICTION-CONE", "H-GRIP-PRELOAD"],
+      "conventions": ["C-FRAME-GRIP", "C-SCALE-FORCE-MOMENT", "C-RANK-TOLERANCE"]
     },
     {
-      "name": "capacity_min_effort",
-      "label": "Capacity-Normalized Minimum Quadratic Effort Representative",
-      "description": "Selects a prior-conditioned representative trajectory minimizing capacity-normalized quadratic joint effort within the static feasible envelope.",
-      "hypotheses": [
-        "H-TORQUE-CAPACITY-BOX",
-        "H-GRIP-FRICTION-CONE",
-        "H-EFFORT-CAPACITY-QUADRATIC"
-      ],
-      "conventions": ["C-FRAME-GRIP", "C-METRIC-CAPACITY", "C-METRIC-IDENTITY"]
+      "id": "capacity_min_effort",
+      "label": "Capacity-Weighted Minimum Effort",
+      "hypotheses": ["H-TORQUE-CAPACITY", "H-EFFORT-CAPACITY", "H-FRICTION-CONE", "H-GRIP-PRELOAD"],
+      "conventions": ["C-FRAME-GRIP", "C-METRIC-CAPACITY", "C-SCALE-FORCE-MOMENT", "C-RANK-TOLERANCE"]
     },
     {
-      "name": "smooth_capacity",
-      "label": "Rate-Smoothed Capacity-Normalized Effort Representative",
-      "description": "Couples admissible frames across time with a finite-difference torque-rate smoothness penalty and capacity-normalized quadratic effort.",
-      "hypotheses": [
-        "H-TORQUE-CAPACITY-BOX",
-        "H-GRIP-FRICTION-CONE",
-        "H-EFFORT-CAPACITY-QUADRATIC",
-        "H-TORQUE-RATE-SMOOTHNESS"
-      ],
-      "conventions": ["C-FRAME-GRIP", "C-METRIC-CAPACITY", "C-METRIC-IDENTITY"]
+      "id": "smooth_capacity",
+      "label": "Smooth Capacity-Weighted Effort",
+      "hypotheses": ["H-TORQUE-CAPACITY", "H-EFFORT-CAPACITY", "H-SMOOTH-TORQUE-RATE", "H-FRICTION-CONE", "H-GRIP-PRELOAD"],
+      "conventions": ["C-FRAME-GRIP", "C-METRIC-CAPACITY", "C-SCALE-FORCE-MOMENT", "C-RANK-TOLERANCE"]
     }
   ],
-  "citations": [
-    {
-      "id": "CIT-FD-NOISE-100HZ",
-      "reference": "Central second-difference variance propagation: Var((x_{k+1} - 2 x_k + x_{k-1}) / dt^2) = 6 * sigma^2 / dt^4",
-      "doi_or_url": "https://doi.org/10.1137/1.9780898717921",
-      "quoted_claim": "For uncorrelated position noise sigma = 1 mm at 100 Hz (dt = 0.01 s), RMS acceleration noise is sqrt(6) * sigma / dt^2 = 24.4949 m/s^2.",
-      "verification_status": "VERIFIED"
-    },
-    {
-      "id": "CIT-FEATHERSTONE-RBDA-2008",
-      "reference": "Featherstone, R. (2008). Rigid Body Dynamics Algorithms. Springer, Ch. 8 (Closed-Loop Systems).",
-      "doi_or_url": "https://doi.org/10.1007/978-1-4899-7560-7",
-      "quoted_claim": "Loop-closure constraints J_c v = 0 and J_c a + Jdot_c v = 0 induce constraint force multipliers lambda in range(J_c^T) and operational-space inertia Lambda_c = (J_c M^{-1} J_c^T)^{-1}.",
-      "verification_status": "VERIFIED"
-    },
-    {
-      "id": "CIT-BOYD-VANDENBERGHE-2004",
-      "reference": "Boyd, S., & Vandenberghe, L. (2004). Convex Optimization. Cambridge University Press, §4.7 and §8.5.1.",
-      "doi_or_url": "https://doi.org/10.1017/CBO9780511804441",
-      "quoted_claim": "Chebyshev center maximizes inscribed ball radius r subject to a_i^T z + r ||a_i||_* <= b_i; Pareto optimal frontier is traced by epsilon-constraint convex programs.",
-      "verification_status": "VERIFIED"
-    },
-    {
-      "id": "CIT-MURRAY-LI-SASTRY-1994",
-      "reference": "Murray, R. M., Li, Z., & Sastry, S. S. (1994). A Mathematical Introduction to Robotic Manipulation. CRC Press, Ch. 5.",
-      "doi_or_url": "https://doi.org/10.1201/9781315136370",
-      "quoted_claim": "The grasp map G maps contact wrenches to object net wrench W_net = G W_c; internal grasping forces lie in ker(G) and cause zero net object motion.",
-      "verification_status": "VERIFIED"
-    },
-    {
-      "id": "CIT-THORNTON-2025",
-      "reference": "Proposal citation: 'Thornton 2025' hand-share percentage claim",
-      "doi_or_url": null,
-      "quoted_claim": "Unverified percentage hand-load share figures from v1 proposal; excluded from all registry statements and priors.",
-      "verification_status": "UNVERIFIED"
-    },
-    {
-      "id": "CIT-MEHTA-2024",
-      "reference": "Proposal citation: 'Mehta 2024' hand-split percentage claim",
-      "doi_or_url": null,
-      "quoted_claim": "Unverified percentage hand-load share figures from v1 proposal; excluded from all registry statements and priors.",
-      "verification_status": "UNVERIFIED"
-    },
-    {
-      "id": "CIT-MDPI-GRIP-UNSPECIFIED",
-      "reference": "Proposal citation: unnamed 'MDPI instrumented grip study'",
-      "doi_or_url": null,
-      "quoted_claim": "Underspecified reference without author, year, or DOI; removed from specification.",
-      "verification_status": "REMOVED"
-    },
-    {
-      "id": "CIT-CHOI-PARK-2020",
-      "reference": "Proposal citation: 'Choi & Park 2020' instrumented grip force study",
-      "doi_or_url": null,
-      "quoted_claim": "Sensor layout and grip handle geometry not verified against bare-club 6-D wrench decomposition; excluded from active priors.",
-      "verification_status": "UNVERIFIED"
-    },
-    {
-      "id": "CIT-SOROKIN-2025",
-      "reference": "Proposal citation: 'Sorokin 2025'",
-      "doi_or_url": null,
-      "quoted_claim": "No archival publication or DOI verified; excluded from active priors.",
-      "verification_status": "UNVERIFIED"
-    },
-    {
-      "id": "CIT-SPAR-UNVERIFIED",
-      "reference": "Proposal citation: 'SPAR' reference",
-      "doi_or_url": null,
-      "quoted_claim": "Unverified citation artifact from v1 proposal; removed.",
-      "verification_status": "REMOVED"
-    },
-    {
-      "id": "CIT-BOSCH-DEAD-ZONE",
-      "reference": "Proposal citation: 'Bosch 15-40 ms neuromuscular dead zone'",
-      "doi_or_url": null,
-      "quoted_claim": "Unverified 15-40 ms dead-zone numerical bound; excluded from all registry statements.",
-      "verification_status": "UNVERIFIED"
-    },
-    {
-      "id": "CIT-NESBIT-SERRANO-2005",
-      "reference": "Nesbit, S. M., & Serrano, M. (2005). Work and power analysis of the golf swing. Journal of Sports Science and Medicine, 4(4), 499-519.",
-      "doi_or_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3899668/",
-      "quoted_claim": "Model-conditional work analysis on a coupled grip model; the v1 proposal's 'two-thirds' lead/trail split figure is not an identifiable bare-club hand-split measurement and remains UNVERIFIED for hand-split priors.",
-      "verification_status": "UNVERIFIED"
-    }
-  ]
+  "torque_capacity": []
 }

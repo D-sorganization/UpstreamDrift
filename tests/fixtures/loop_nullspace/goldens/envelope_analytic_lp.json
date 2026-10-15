@@ -1,0 +1,379 @@
+{
+  "description": "Exact envelopes of a 2-D multiplier polygon; infeasible and unbounded certificates.",
+  "infeasible": {
+    "farkas_multipliers": [
+      "0",
+      "1",
+      "1",
+      "0",
+      "0"
+    ],
+    "farkas_rhs": "-1/4",
+    "feasible": false,
+    "inclusion_minimal_conflict_sets": [
+      [
+        "H-TORQUE-CAPACITY:joint1:lower",
+        "H-GRIP-PRELOAD:axial_nonpositive"
+      ]
+    ],
+    "rows": [
+      {
+        "g": [
+          "1",
+          "0"
+        ],
+        "h": "3/4",
+        "label": "H-TORQUE-CAPACITY:joint1:upper"
+      },
+      {
+        "g": [
+          "-1",
+          "0"
+        ],
+        "h": "-1/4",
+        "label": "H-TORQUE-CAPACITY:joint1:lower"
+      },
+      {
+        "g": [
+          "1",
+          "0"
+        ],
+        "h": "0",
+        "label": "H-GRIP-PRELOAD:axial_nonpositive"
+      },
+      {
+        "g": [
+          "0",
+          "1"
+        ],
+        "h": "3/4",
+        "label": "H-TORQUE-CAPACITY:joint2:upper"
+      },
+      {
+        "g": [
+          "0",
+          "-1"
+        ],
+        "h": "5/4",
+        "label": "H-TORQUE-CAPACITY:joint2:lower"
+      }
+    ]
+  },
+  "name": "analytic_envelope",
+  "schema": "loop-nullspace-golden/1",
+  "static": {
+    "J_c_T": [
+      [
+        "1",
+        "0"
+      ],
+      [
+        "0",
+        "1"
+      ],
+      [
+        "1",
+        "1"
+      ]
+    ],
+    "capacity": [
+      "1/2",
+      "3/4",
+      "1/2"
+    ],
+    "chebyshev": {
+      "euclidean": {
+        "center": [
+          "sqrt(2)/2",
+          "-1/2 + sqrt(2)/2"
+        ],
+        "center_float": [
+          0.7071067811865476,
+          0.20710678118654752
+        ],
+        "center_unique": true,
+        "radius": "1 - sqrt(2)/2",
+        "radius_float": 0.2928932188134525
+      },
+      "weighted_diag_1_4": {
+        "center": [
+          "-1/2 + sqrt(5)/2",
+          "-1/4 + sqrt(5)/4"
+        ],
+        "center_float": [
+          0.6180339887498949,
+          0.30901699437494745
+        ],
+        "center_unique": true,
+        "radius": "3/2 - sqrt(5)/2",
+        "radius_float": 0.38196601125010515
+      }
+    },
+    "envelopes": {
+      "lam_1": {
+        "argmax_vertex": [
+          "1",
+          "1/2"
+        ],
+        "argmin_vertex": [
+          "0",
+          "1/2"
+        ],
+        "lower": "0",
+        "lower_float": 0.0,
+        "sign_class": "INDETERMINATE",
+        "status_lower": "BOUNDED",
+        "status_upper": "BOUNDED",
+        "upper": "1",
+        "upper_float": 1.0
+      },
+      "lam_2": {
+        "argmax_vertex": [
+          "0",
+          "1/2"
+        ],
+        "argmin_vertex": [
+          "1",
+          "-1/2"
+        ],
+        "lower": "-1/2",
+        "lower_float": -0.5,
+        "sign_class": "INDETERMINATE",
+        "status_lower": "BOUNDED",
+        "status_upper": "BOUNDED",
+        "upper": "1/2",
+        "upper_float": 0.5
+      },
+      "tau_1": {
+        "argmax_vertex": [
+          "0",
+          "1/2"
+        ],
+        "argmin_vertex": [
+          "1",
+          "1/2"
+        ],
+        "lower": "-1/2",
+        "lower_float": -0.5,
+        "sign_class": "INDETERMINATE",
+        "status_lower": "BOUNDED",
+        "status_upper": "BOUNDED",
+        "upper": "1/2",
+        "upper_float": 0.5
+      },
+      "tau_2": {
+        "argmax_vertex": [
+          "1",
+          "-1/2"
+        ],
+        "argmin_vertex": [
+          "0",
+          "1/2"
+        ],
+        "lower": "-3/4",
+        "lower_float": -0.75,
+        "sign_class": "INDETERMINATE",
+        "status_lower": "BOUNDED",
+        "status_upper": "BOUNDED",
+        "upper": "1/4",
+        "upper_float": 0.25
+      },
+      "tau_3": {
+        "argmax_vertex": [
+          "0",
+          "1/2"
+        ],
+        "argmin_vertex": [
+          "1",
+          "1/2"
+        ],
+        "lower": "-1/2",
+        "lower_float": -0.5,
+        "sign_class": "INDETERMINATE",
+        "status_lower": "BOUNDED",
+        "status_upper": "BOUNDED",
+        "upper": "1/2",
+        "upper_float": 0.5
+      }
+    },
+    "polygon_area": "1/2",
+    "rows": [
+      {
+        "g": [
+          "-1",
+          "0"
+        ],
+        "h": "0",
+        "label": "cap_1_upper"
+      },
+      {
+        "g": [
+          "1",
+          "0"
+        ],
+        "h": "1",
+        "label": "cap_1_lower"
+      },
+      {
+        "g": [
+          "0",
+          "-1"
+        ],
+        "h": "1",
+        "label": "cap_2_upper"
+      },
+      {
+        "g": [
+          "0",
+          "1"
+        ],
+        "h": "1/2",
+        "label": "cap_2_lower"
+      },
+      {
+        "g": [
+          "-1",
+          "-1"
+        ],
+        "h": "-1/2",
+        "label": "cap_3_upper"
+      },
+      {
+        "g": [
+          "1",
+          "1"
+        ],
+        "h": "3/2",
+        "label": "cap_3_lower"
+      }
+    ],
+    "sign_class_cases": [
+      {
+        "lower": "0",
+        "sign_class": "ZERO",
+        "upper": "0"
+      },
+      {
+        "lower": "0",
+        "sign_class": "INDETERMINATE",
+        "upper": "1"
+      },
+      {
+        "lower": "-1",
+        "sign_class": "INDETERMINATE",
+        "upper": "0"
+      },
+      {
+        "lower": "1/4",
+        "sign_class": "POSITIVE",
+        "upper": "1"
+      },
+      {
+        "lower": "-1",
+        "sign_class": "NEGATIVE",
+        "upper": "-1/4"
+      },
+      {
+        "lower": "-1",
+        "sign_class": "INDETERMINATE",
+        "upper": "1"
+      }
+    ],
+    "sign_class_rule": "ZERO iff lower = upper = 0; POSITIVE iff lower > 0; NEGATIVE iff upper < 0; otherwise INDETERMINATE (a bound that touches zero is INDETERMINATE)",
+    "tau_ID": [
+      "1/2",
+      "-1/4",
+      "1"
+    ],
+    "vertices": [
+      [
+        "0",
+        "1/2"
+      ],
+      [
+        "1",
+        "-1/2"
+      ],
+      [
+        "1",
+        "1/2"
+      ]
+    ]
+  },
+  "trajectory_coupled": {
+    "coupled_is_subset_of_static": true,
+    "coupled_strictly_narrower_somewhere": true,
+    "delta": "1/8",
+    "lam_1_frame_1": {
+      "coupled_lower": "0",
+      "coupled_upper": "5/8",
+      "static_lower": "0",
+      "static_upper": "1"
+    },
+    "lam_1_frame_2": {
+      "coupled_lower": "-1/8",
+      "coupled_upper": "1/2",
+      "static_lower": "-1/2",
+      "static_upper": "1/2"
+    },
+    "lam_2_frame_1": {
+      "coupled_lower": "-1/8",
+      "coupled_upper": "1/2",
+      "static_lower": "-1/2",
+      "static_upper": "1/2"
+    },
+    "lam_2_frame_2": {
+      "coupled_lower": "-1/4",
+      "coupled_upper": "5/8",
+      "static_lower": "-1/2",
+      "static_upper": "3/4"
+    },
+    "tau_ID_frame_2": [
+      "0",
+      "0",
+      "1/2"
+    ]
+  },
+  "unbounded": {
+    "note": "ray certificate: g.ray <= 0 and c.ray != 0 for lam_2 and tau_3",
+    "recession_ray": [
+      "0",
+      "1"
+    ],
+    "rows": [
+      {
+        "g": [
+          "-1",
+          "0"
+        ],
+        "h": "0"
+      },
+      {
+        "g": [
+          "1",
+          "0"
+        ],
+        "h": "1"
+      }
+    ],
+    "statuses": {
+      "lam_1": {
+        "lower": "0",
+        "status": "BOUNDED",
+        "upper": "1"
+      },
+      "lam_2": {
+        "lower": null,
+        "status_lower": "UNBOUNDED",
+        "status_upper": "UNBOUNDED",
+        "upper": null
+      },
+      "tau_3": {
+        "lower": null,
+        "status_lower": "UNBOUNDED",
+        "status_upper": "UNBOUNDED",
+        "upper": null
+      }
+    }
+  }
+}

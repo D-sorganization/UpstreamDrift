@@ -2,104 +2,61 @@
 
 ## Status
 
-Evidence class: derived, provisional specification. This chapter records the
-mathematical specification delivered by NSX-00 (#12549) and the deferred
-external-validation protocol from NSX-05 (#12554) under epic #12593 so the
-pathway can be inventoried as child modules land. It is not approved. The
-registry blocker `UP-NSX-loop-nullspace-exploration` stays open until UP-D1
-inventories the complete calculation pathway and a human reviews it.
+Evidence class: specification only, not approved. This chapter records the
+mathematical specification delivered by NSX-00 (#12549) for epic #12593 so the
+pathway can be inventoried. No calculation is registered. The registry blocker
+`UP-NSX-loop-nullspace-exploration` stays open until the implementing children
+land, UP-D1 inventories the pathway and a human reviews it.
+
+The standalone research reference is
+`docs/research/loop_nullspace/loop_nullspace.tex`. It is editable separately
+from this manual and is not a manual artifact.
 
 ## Purpose
 
-Characterize the affine family of joint torques, internal hand-on-club closure
-wrenches, and ground-reaction forces consistent with an admitted two-handed golf
-swing trajectory across all modeling engines, separating model-determined
-invariants from hypothesis-conditioned feasible envelopes:
-
-- the general equality allocation system $A x = b$ and its four structural
-  dimensions (equality nullity, multiplier gauge, attainable torque variation,
-  and inequality-bounded feasible dimension);
-- the three-case diagnostic for zero-side limb solves (`CONSISTENT_UNIQUE`,
-  `CONSISTENT_NONUNIQUE`, `INCONSISTENT`);
-- the exact $6 \times 6$ grasp-map kernel at the canonical grip midpoint frame
-  and the bare-club Newton–Euler resultant with welded hand solids removed;
-- the six allocation-invariant quantities and their scaled residual validity
-  gates;
-- static and trajectory-coupled feasible envelopes, Chebyshev margins, and
-  prior-conditioned conic allocations.
+Describe every torque and hand-load family that is consistent with one
+measured two-handed swing, and report which quantities are the same for the
+whole family. The motion fixes the generalized load and the net bare-club
+wrench. It does not fix how that load divides between the hands or between
+joints inside the loop.
 
 ## Conventions
 
-- Sign (binding, ADR-0052 and ADR-0054): every hand wrench is the loading
-  **exerted by the hand on the bare club**; in the tree equation of motion,
-  $+J_c^\top \lambda$ acts on the human kinematic tree and $-\lambda$ acts on the
-  closing hand interface.
-- Canonical grip-midpoint frame (`C-FRAME-GRIP`): origin at
-  $r_M = \tfrac{1}{2}(r_L + r_R)$, $\hat{u}$ along the shaft from grip toward
-  clubhead, $\hat{v}$ along the clubface normal projection orthogonal to
-  $\hat{u}$, and $\hat{w} = \hat{u} \times \hat{v}$, with row order
-  `[fx, fy, fz, tx, ty, tz]`.
-- Every numeric output is a `QuantityRecord` carrying six evidence axes:
-  `allocation_dependence`, `model_provenance`, `input_provenance`,
-  `conventions`, `hypotheses`, and `validation_status`.
+- Unknowns $x = (\tau, \lambda, f_g)$ and the allocation equation
+  $$A x = b, \qquad A = \begin{bmatrix} S^{\top} & J_c^{\top} & J_g^{\top}
+  \end{bmatrix}, \qquad b = M(q)\,a + h(q, v).$$
+- Closure rows are $[f_x\ f_y\ f_z\ \tau_x\ \tau_y\ \tau_z]$ in the grip
+  frame. The term $+J_c^{\top}\lambda$ acts on the human tree, so the closing
+  hand exerts $-\lambda$ on the club.
+- Hand wrenches follow the ADR-0052 sign: loading exerted by the hand on the
+  club.
 
 ## Equations
 
-1. General allocation equality (R2):
-   $$A x = b, \qquad A = \begin{bmatrix} S^\top & J_c^\top & J_g^\top \end{bmatrix}, \qquad x = \begin{bmatrix} \tau \\ \lambda \\ f_g \end{bmatrix}, \qquad b = M(q)a + h(q, v)$$
-2. Four dimension counts (R2):
-   $$\nu_{\text{eq}} = \dim x - \operatorname{rank} A, \qquad \nu_{\text{gauge}} = m_c - \operatorname{rank} J_c, \qquad \nu_\tau = \operatorname{rank}(J_c^\top) - \operatorname{rank}(J_{c,u}^\top)$$
-3. Zero-side minimum-residual diagnostic (R3):
-   $$\rho_s = \left\lVert \left(I - J_s^\top (J_s^\top)^+\right)\tau_{\text{ID},s} \right\rVert_2$$
-4. Bare-club mass partition (`full_body_spec_anthro_driver.json`, R4 / NSX-01):
-   $$m_{\text{club}}^{\text{bare}} = 0.198 + 0.065 + 0.050 = 0.313\,\mathrm{kg}, \qquad m_{\text{hands}}^{\text{welded}} = 0.5491 + 0.010 + 0.5491 = 1.1082\,\mathrm{kg}$$
-5. Grasp-map $6 \times 6$ split coordinates at $r_M$ with $\mathbf{r}_{R,L} - \mathbf{r}_M = \pm h\hat{u}$ (R4):
-   $$F_{L,R} = \tfrac{1}{2}F_{\text{net}} \mp s_f, \qquad \tau_{L,R} = \tfrac{1}{2}M_M - h(\hat{u} \times s_f) \mp s_m$$
-   with exact inverse $s_f = \tfrac{1}{2}(F_R - F_L)$ and
-   $s_m = \tfrac{1}{2}(\tau_R - \tau_L)$.
-6. Asymmetric gross-power identity on $J_c v = 0$ (R6):
-   $$\sum_i \left(c_+[p_i]_+ + c_-[-p_i]_+\right) = \tfrac{1}{2}(c_+ + c_-)\sum_i |p_i| + \tfrac{1}{2}(c_+ - c_-)P_{\text{net}}$$
-7. Constrained KKT operational projector for ZTCF/ZVCF (R9):
-   $$P_{\text{KKT}} = M^{-1}\left(I - J_c^\top (J_c M^{-1} J_c^\top)^{-1} J_c M^{-1}\right)$$
+1. Rank accounting. With $u$ the unactuated rows:
+   $$\operatorname{rank} A = n_a + \operatorname{rank}\begin{bmatrix}
+   J_{c,u}^{\top} & J_{g,u}^{\top}\end{bmatrix}$$
+   $$\text{nullity} = m + n_g - \operatorname{rank}\begin{bmatrix}
+   J_{c,u}^{\top} & J_{g,u}^{\top}\end{bmatrix}$$
+2. Multiplier gauge $m - \operatorname{rank} J_c$. Attainable torque variation
+   $\operatorname{rank} J_c^{\top} - \operatorname{rank} J_{c,u}^{\top}$ when
+   $f_g$ is fixed.
+3. Zero-side residual for a side with transposed Jacobian $J_s^{\top}$:
+   $$\left\lVert \left(I - J_s^{\top}(J_s^{\top})^{+}\right)\tau_{ID,s}
+   \right\rVert$$
+4. Grasp map $G\in\mathbb{R}^{6\times 12}$ and kernel $K\in\mathbb{R}^{12\times 6}$
+   with $G K = 0$; the split coordinates are $s = \Phi\, y$.
+
+The full derivations, goldens and worked examples are in the research
+reference and in `tests/fixtures/loop_nullspace/goldens`.
 
 ## Unavailable Values
 
-- Any invariant whose kinematic or contact admission gate ($\Phi$, $\dot{\Phi}$,
-  $\ddot{\Phi}$, or stance-foot slip) exceeds its scaled threshold is emitted as
-  `UNAVAILABLE(reason)` with `NaN` values, never approximated.
-- Any envelope direction that is unbounded or unobservable under the declared
-  hypothesis set is recorded as `NaN` with status `UNBOUNDED`.
-- If the `highspy` or `clarabel` solver backend is absent, envelope and conic
-  allocation routines return `UNAVAILABLE(reason="solver_unavailable")`.
+Any quantity whose validity gate fails, whose direction is unbounded, or whose
+solver backend is missing is reported `UNAVAILABLE` with a reason. It is never
+reported as zero or as a large number.
 
-## Implementation
+## Non-Claims
 
-| Artifact / Symbol | Location |
-| --- | --- |
-| Standalone LaTeX specification | `docs/research/loop_nullspace/loop_nullspace.tex` |
-| Per-child contract appendix (`NSX-01`…`NSX-62`) | `docs/research/loop_nullspace/contract_appendix.md` |
-| SymPy golden generator & fixture JSON | `docs/research/loop_nullspace/derivations/generate_goldens.py`, `golden_fixtures.json` |
-| Architecture and output-policy ADR | `docs/adr/0054-closed-loop-null-space-exploration.md` |
-| Hypothesis, convention & citation registry seed | `src/config/loop_nullspace_registry.json` |
-| Deferred external-validation record | `docs/development/planning/DV-12554.md` |
-
-## Tests and Reproduction
-
-```bash
-python3 docs/research/loop_nullspace/derivations/generate_goldens.py
-python3 -m pytest tests/unit/loop_nullspace/test_golden_derivations.py -q
-python3 -m scripts.check_design_manual_governance
-python3 shared_scripts/deferred_validation.py
-```
-
-## Assumptions and Limitations
-
-- Invariance (`INVARIANT`) means algebraically constant across the null space of
-  $A x = b$ for a fixed multibody model and admitted trajectory; it does not
-  mean empirically measured.
-- No unique hand split is identifiable from motion capture alone; all split
-  coordinates $s_1 \dots s_6$ and loop joint torques are `FAMILY_DEPENDENT`.
-- Net joint torques carry no information about antagonist muscle co-contraction
-  or joint stiffness.
-- External validation against instrumented golf grips and synchronized surface
-  EMG remains open and deferred under `DV-12554`.
+No numerical result about any golfer. No claim that any single hand split is
+the golfer's. No stiffness or co-contraction inference from net joint torques.
