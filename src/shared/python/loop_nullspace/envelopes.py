@@ -501,7 +501,7 @@ class EnvelopeSeries:
         self, j: int, name: str, model: ModelProvenance, source: InputProvenance
     ) -> QuantityRecord:
         vals = np.stack([self.lower[:, j], self.upper[:, j]], axis=1)
-        common = {
+        common: dict[str, Any] = {
             "units": self.units[j],
             "model_provenance": model,
             "input_provenance": source,
