@@ -1,14 +1,18 @@
 """Pinocchio reference adapter for canonical-v2 engine boundaries.
 
 Canonical-v2 stores a floating base as ``[xyz, quat_wxyz]`` and six base
-velocity/acceleration entries as ``[linear; angular]`` with angular velocity in
-the BODY (local) frame (``docs/conventions/canonical-v2.md`` §2). Pinocchio's
-free-flyer joint uses the **same** ``[linear; angular]`` motion layout in the
-LOCAL frame, so base motion vectors pass through unchanged — *only the
-quaternion order is reordered* (canonical ``w``-first vs Pinocchio ``w``-last),
-exactly as the per-engine table in the spec states. This module keeps that
-quaternion remap explicit so the reference engine can be exercised without
-importing the heavy Pinocchio wheel.
+velocity/acceleration entries as ``[linear; angular]`` with linear velocity in
+the WORLD frame and angular velocity in the BODY (local) frame
+(``docs/conventions/canonical-v2.md`` §2). Pinocchio's free-flyer joint uses
+the same ``[linear; angular]`` ordering but expresses **both** blocks in the
+LOCAL frame, so the base linear velocity is rotated, ``v_local = R^T v_world``
+(issue #12605), and the base linear acceleration picks up the ``-[w]x R^T v``
+drift term. Those maps are delegated to the NSX-50 dual dynamic maps
+(:mod:`pose_interchange.dynamic_maps`, the Pinocchio row of the spec §9 table)
+rather than re-derived here. The quaternion is reordered (canonical
+``w``-first vs Pinocchio ``w``-last). Generalized forces (``tau``) and the
+gradient blocks stay in Pinocchio native coordinates; the canonical dual is
+``tau_c = T^T tau_n``. The module runs without importing the Pinocchio wheel.
 """
 
 from __future__ import annotations
@@ -28,14 +32,25 @@ from src.shared.python.engine_core.capabilities import (
 from src.shared.python.engine_core.finite_difference import (
     require_enough_frames_for_finite_diff as _require_enough_frames_for_finite_diff,
 )
+from src.shared.python.pose_interchange.adapters.pinocchio import PinocchioAdapter
 from src.shared.python.pose_interchange.canonical_layout import (
     ANGULAR,
     LINEAR,
     FREE_FLYER_Q as _FREE_FLYER_Q,
     FREE_FLYER_V as _FREE_FLYER_V,
 )
+from src.shared.python.pose_interchange.dynamic_maps import (
+    canonical_acceleration,
+    canonical_velocity,
+    native_acceleration,
+    native_velocity,
+    velocity_map_matrices,
+)
+from src.shared.python.pose_interchange.protocol import JointSlot
 
 _DEFAULT_EPS = 1.0e-6
+# Free-flyer block only: joint speeds pass through, so no joint slots are mapped.
+_NO_JOINTS: Mapping[str, JointSlot] = {}
 
 
 class PinocchioReferenceCapability(str, Enum):
@@ -52,8 +67,8 @@ class CanonicalV2State:
 
     ``q`` begins with ``[x, y, z, qw, qx, qy, qz]``. ``v`` and ``a`` begin with
     ``[linear_x, linear_y, linear_z, angular_x, angular_y, angular_z]`` with the
-    angular block in the BODY (local) frame, per
-    ``docs/conventions/canonical-v2.md`` §2.
+    linear block in the WORLD frame and the angular block in the BODY (local)
+    frame, per ``docs/conventions/canonical-v2.md`` §2.
     """
 
     q: npt.NDArray[np.float64]
@@ -77,8 +92,8 @@ class PinocchioNativeState:
 
     ``q`` begins with ``[x, y, z, qx, qy, qz, qw]`` (quaternion ``w``-last).
     ``v`` and ``a`` begin with
-    ``[linear_x, linear_y, linear_z, angular_x, angular_y, angular_z]`` in the
-    LOCAL frame — identical to canonical-v2's motion layout.
+    ``[linear_x, linear_y, linear_z, angular_x, angular_y, angular_z]`` with
+    BOTH blocks in the LOCAL frame (canonical-v2's linear block is WORLD).
     """
 
     q: npt.NDArray[np.float64]
@@ -187,21 +202,23 @@ class PinocchioReferenceAdapter:
         )
 
     def from_canonical_v2(self, state: CanonicalV2State) -> PinocchioNativeState:
-        """Map canonical-v2 q/v/a into Pinocchio native ordering."""
+        """Map canonical-v2 q/v/a into Pinocchio native ordering and frames."""
 
+        q_native = _canonical_q_to_pinocchio(state.q)
         return PinocchioNativeState(
-            q=_canonical_q_to_pinocchio(state.q),
-            v=_canonical_motion_to_pinocchio(state.v),
-            a=_canonical_motion_to_pinocchio(state.a),
+            q=q_native,
+            v=_canonical_velocity_to_pinocchio(q_native, state.v),
+            a=_canonical_acceleration_to_pinocchio(q_native, state.a, state.v),
         )
 
     def to_canonical_v2(self, state: PinocchioNativeState) -> CanonicalV2State:
-        """Map Pinocchio native q/v/a into canonical-v2 ordering."""
+        """Map Pinocchio native q/v/a into canonical-v2 ordering and frames."""
 
+        v_canonical = _pinocchio_velocity_to_canonical(state.q, state.v)
         return CanonicalV2State(
             q=_pinocchio_q_to_canonical(state.q),
-            v=_pinocchio_motion_to_canonical(state.v),
-            a=_pinocchio_motion_to_canonical(state.a),
+            v=v_canonical,
+            a=_pinocchio_acceleration_to_canonical(state.q, state.a, v_canonical),
         )
 
     def fk(self, state: CanonicalV2State, frame_name: str) -> npt.NDArray[np.float64]:
@@ -218,22 +235,30 @@ class PinocchioReferenceAdapter:
     ) -> Mapping[str, npt.NDArray[np.float64]]:
         """Return Jacobian blocks in canonical-v2 ``[linear; angular]`` order.
 
-        Pinocchio emits spatial Jacobian rows as ``[linear; angular]``, which is
-        the canonical-v2 motion order, so the ``spatial`` block passes through
-        unchanged (``spatial @ v`` agrees with canonical ``v``).
+        Pinocchio emits spatial Jacobian rows as ``[linear; angular]`` (the
+        canonical-v2 row order) with columns for the native velocity. The base
+        columns are composed with the NSX-50 map, ``J_c = J_n T``, so
+        ``spatial @ v`` agrees with the canonical ``v`` (issue #12605).
         """
 
         native = self.from_canonical_v2(state)
         pin_jacobian = np.asarray(
             self._backend.jacobian(native.q, frame_name), dtype=np.float64
         )
-        if pin_jacobian.ndim != 2 or pin_jacobian.shape[0] != _FREE_FLYER_V:
+        if (
+            pin_jacobian.ndim != 2
+            or pin_jacobian.shape[0] != _FREE_FLYER_V
+            or pin_jacobian.shape[1] < _FREE_FLYER_V
+        ):
             raise ValueError(
-                "jacobian must be a 6-row matrix in Pinocchio "
-                f"[linear; angular] order, got {pin_jacobian.shape}"
+                "jacobian must be a 6-row matrix in Pinocchio [linear; angular] "
+                f"order with free-flyer columns, got {pin_jacobian.shape}"
             )
-        linear = pin_jacobian[LINEAR, :].copy()
-        angular = pin_jacobian[ANGULAR, :].copy()
+        t_mat, _ = _base_maps(native.q)
+        canonical_jacobian = pin_jacobian.copy()
+        canonical_jacobian[:, :_FREE_FLYER_V] = pin_jacobian[:, :_FREE_FLYER_V] @ t_mat
+        linear = canonical_jacobian[LINEAR, :].copy()
+        angular = canonical_jacobian[ANGULAR, :].copy()
         return {
             "linear": linear,
             "angular": angular,
@@ -241,7 +266,7 @@ class PinocchioReferenceAdapter:
         }
 
     def inverse_dynamics(self, state: CanonicalV2State) -> npt.NDArray[np.float64]:
-        """Compute RNEA torques for one canonical-v2 state."""
+        """Compute RNEA generalized forces (Pinocchio native coordinates)."""
 
         native = self.from_canonical_v2(state)
         return _as_tau(self._backend.rnea(native.q, native.v, native.a), native.v)
@@ -249,7 +274,11 @@ class PinocchioReferenceAdapter:
     def forward_dynamics(
         self, state: CanonicalV2State, tau: npt.ArrayLike
     ) -> npt.NDArray[np.float64]:
-        """Compute ABA acceleration and return canonical-v2 acceleration order."""
+        """Compute ABA acceleration and return the canonical-v2 acceleration.
+
+        ``tau`` is in Pinocchio native generalized-force coordinates (the output
+        of :meth:`inverse_dynamics`).
+        """
 
         native = self.from_canonical_v2(state)
         tau_array = _require_vector(
@@ -260,8 +289,10 @@ class PinocchioReferenceAdapter:
         native_accel = np.asarray(
             self._backend.aba(native.q, native.v, tau_array), dtype=np.float64
         )
-        return _pinocchio_motion_to_canonical(
-            _require_vector(native_accel, "aba", expected_size=native.v.shape[0])
+        return _pinocchio_acceleration_to_canonical(
+            native.q,
+            _require_vector(native_accel, "aba", expected_size=native.v.shape[0]),
+            state.v,
         )
 
     def inverse_dynamics_trajectory(
@@ -277,6 +308,12 @@ class PinocchioReferenceAdapter:
         When the optional ``upstream_pinocchio_id`` wheel is importable this
         routes finite differencing and the frame loop through the Rust driver.
         Otherwise it uses the NumPy fallback with the same callback boundary.
+
+        Canonical ``qdot``/``qddot`` overrides are mapped per frame into the
+        Pinocchio LOCAL base frame (issue #12605) and returned unchanged; a
+        ``qddot`` override needs its ``qdot`` because the base acceleration map
+        depends on velocity. Without overrides the returned derivatives are the
+        raw native finite differences.
         """
 
         q_canonical = _require_matrix(np.asarray(q, dtype=np.float64), "q")
@@ -292,12 +329,31 @@ class PinocchioReferenceAdapter:
             need_qddot=qddot is None,
         )
         q_native = _map_rows(q_canonical, _canonical_q_to_pinocchio)
-        qdot_native = _optional_motion_matrix(qdot, "qdot")
-        qddot_native = _optional_motion_matrix(qddot, "qddot")
-        if qdot_native is not None:
-            qdot_native = _map_rows(qdot_native, _canonical_motion_to_pinocchio)
-        if qddot_native is not None:
-            qddot_native = _map_rows(qddot_native, _canonical_motion_to_pinocchio)
+        qdot_canonical = _optional_motion_matrix(qdot, "qdot", q_native.shape[0])
+        qddot_canonical = _optional_motion_matrix(qddot, "qddot", q_native.shape[0])
+        qdot_native: npt.NDArray[np.float64] | None = None
+        qddot_native: npt.NDArray[np.float64] | None = None
+        if qdot_canonical is not None:
+            qdot_native = np.vstack(
+                [
+                    _canonical_velocity_to_pinocchio(q_row, v_row)
+                    for q_row, v_row in zip(q_native, qdot_canonical, strict=True)
+                ]
+            )
+        if qddot_canonical is not None:
+            if qdot_canonical is None:
+                raise ValueError(
+                    "a qddot override requires the matching canonical qdot "
+                    "override: the Pinocchio base acceleration map depends on v"
+                )
+            qddot_native = np.vstack(
+                [
+                    _canonical_acceleration_to_pinocchio(q_row, a_row, v_row)
+                    for q_row, a_row, v_row in zip(
+                        q_native, qddot_canonical, qdot_canonical, strict=True
+                    )
+                ]
+            )
 
         rust = _load_rust_driver()
         if rust is not None:
@@ -309,8 +365,8 @@ class PinocchioReferenceAdapter:
                 qddot_native,
             )
             return InverseDynamicsBatch(
-                qdot=_map_rows(qdot_out, _pinocchio_motion_to_canonical),
-                qddot=_map_rows(qddot_out, _pinocchio_motion_to_canonical),
+                qdot=_derivative_output(qdot_canonical, qdot_out),
+                qddot=_derivative_output(qddot_canonical, qddot_out),
                 tau=np.asarray(tau, dtype=np.float64),
                 backend="rust",
             )
@@ -327,8 +383,8 @@ class PinocchioReferenceAdapter:
                 qdot_fallback[index],
             )
         return InverseDynamicsBatch(
-            qdot=_map_rows(qdot_fallback, _pinocchio_motion_to_canonical),
-            qddot=_map_rows(qddot_fallback, _pinocchio_motion_to_canonical),
+            qdot=_derivative_output(qdot_canonical, qdot_fallback),
+            qddot=_derivative_output(qddot_canonical, qddot_fallback),
             tau=tau,
             backend="numpy",
         )
@@ -343,7 +399,11 @@ class PinocchioReferenceAdapter:
         ) = None,
         epsilon: float = _DEFAULT_EPS,
     ) -> InverseDynamicsGradients:
-        """Return analytic gradients when supplied by backend, else finite diff."""
+        """Return analytic gradients when supplied by backend, else finite diff.
+
+        The blocks differentiate the native ``rnea`` with respect to the
+        Pinocchio native ``q``/``v``/``a``, not the canonical-v2 coordinates.
+        """
 
         native = self.from_canonical_v2(state)
         analytic = getattr(self._backend, "rnea_gradients", None)
@@ -417,29 +477,84 @@ def _pinocchio_q_to_canonical(
     return result
 
 
-def _canonical_motion_to_pinocchio(
-    value: npt.NDArray[np.float64],
-) -> npt.NDArray[np.float64]:
-    """Map canonical-v2 base motion to Pinocchio native motion.
+def _base_maps(
+    q_native: npt.NDArray[np.float64],
+    v_canonical: npt.NDArray[np.float64] | None = None,
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """Return the 6x6 free-flyer ``(T, Tdot)`` with ``v_native = T v_canonical``.
 
-    Per ``docs/conventions/canonical-v2.md`` §3, the Pinocchio free-flyer joint
-    uses the same ``[linear; angular]`` LOCAL-frame motion layout as
-    canonical-v2, so this is an identity copy (only the quaternion order, handled
-    separately, differs). ``_require_vector`` validation is retained.
+    Delegates to the NSX-50 :func:`velocity_map_matrices` with the Pinocchio
+    adapter's dynamic layout (linear and angular both LOCAL) so the frame
+    convention lives in one place. Precondition: unit base quaternion.
     """
 
-    return _require_vector(value, "motion", min_size=_FREE_FLYER_V).copy()
+    base_v = None if v_canonical is None else v_canonical[:_FREE_FLYER_V]
+    return velocity_map_matrices(
+        PinocchioAdapter.dynamic_layout, q_native, _NO_JOINTS, base_v
+    )
 
 
-def _pinocchio_motion_to_canonical(
-    value: npt.NDArray[np.float64],
+def _canonical_velocity_to_pinocchio(
+    q_native: npt.NDArray[np.float64], v: npt.NDArray[np.float64]
 ) -> npt.NDArray[np.float64]:
-    """Map Pinocchio native base motion to canonical-v2 (identity copy).
+    """Canonical ``v`` (world linear) -> Pinocchio ``v`` (``R^T`` linear)."""
 
-    See :func:`_canonical_motion_to_pinocchio` — the two layouts coincide.
-    """
+    result = _require_vector(v, "v", min_size=_FREE_FLYER_V).copy()
+    t_mat, _ = _base_maps(q_native)
+    result[:_FREE_FLYER_V] = native_velocity(t_mat, result[:_FREE_FLYER_V])
+    return result
 
-    return _require_vector(value, "motion", min_size=_FREE_FLYER_V).copy()
+
+def _pinocchio_velocity_to_canonical(
+    q_native: npt.NDArray[np.float64], v: npt.NDArray[np.float64]
+) -> npt.NDArray[np.float64]:
+    """Inverse of :func:`_canonical_velocity_to_pinocchio`."""
+
+    result = _require_vector(v, "v", min_size=_FREE_FLYER_V).copy()
+    t_mat, _ = _base_maps(q_native)
+    result[:_FREE_FLYER_V] = canonical_velocity(t_mat, result[:_FREE_FLYER_V])
+    return result
+
+
+def _canonical_acceleration_to_pinocchio(
+    q_native: npt.NDArray[np.float64],
+    a: npt.NDArray[np.float64],
+    v_canonical: npt.NDArray[np.float64],
+) -> npt.NDArray[np.float64]:
+    """Canonical ``a`` -> Pinocchio ``a`` (``T a + Tdot v`` on the base block)."""
+
+    result = _require_vector(a, "a", min_size=_FREE_FLYER_V).copy()
+    t_mat, t_dot = _base_maps(q_native, v_canonical)
+    result[:_FREE_FLYER_V] = native_acceleration(
+        t_mat, t_dot, result[:_FREE_FLYER_V], v_canonical[:_FREE_FLYER_V]
+    )
+    return result
+
+
+def _pinocchio_acceleration_to_canonical(
+    q_native: npt.NDArray[np.float64],
+    a: npt.NDArray[np.float64],
+    v_canonical: npt.NDArray[np.float64],
+) -> npt.NDArray[np.float64]:
+    """Inverse of :func:`_canonical_acceleration_to_pinocchio`."""
+
+    result = _require_vector(a, "a", min_size=_FREE_FLYER_V).copy()
+    t_mat, t_dot = _base_maps(q_native, v_canonical)
+    result[:_FREE_FLYER_V] = canonical_acceleration(
+        t_mat, t_dot, result[:_FREE_FLYER_V], v_canonical[:_FREE_FLYER_V]
+    )
+    return result
+
+
+def _derivative_output(
+    canonical_override: npt.NDArray[np.float64] | None,
+    native_estimate: npt.ArrayLike,
+) -> npt.NDArray[np.float64]:
+    """Return the canonical override if supplied, else the native estimate."""
+
+    if canonical_override is not None:
+        return canonical_override.copy()
+    return np.asarray(native_estimate, dtype=np.float64)
 
 
 def _finite_difference(
@@ -556,11 +671,14 @@ def _load_rust_driver() -> Any | None:
 
 
 def _optional_motion_matrix(
-    value: npt.ArrayLike | None, name: str
+    value: npt.ArrayLike | None, name: str, n_rows: int
 ) -> npt.NDArray[np.float64] | None:
     if value is None:
         return None
-    return _require_matrix(np.asarray(value, dtype=np.float64), name)
+    matrix = _require_matrix(np.asarray(value, dtype=np.float64), name)
+    if matrix.shape[0] != n_rows:
+        raise ValueError(f"{name} rows must match q rows ({n_rows})")
+    return matrix
 
 
 def _map_rows(

@@ -13,7 +13,7 @@
   "totals": {
     "identical": 376,
     "diverged": 272,
-    "ud-only": 1746,
+    "ud-only": 1747,
     "tools-only": 839,
     "spelling-only": 121
   },
@@ -497,7 +497,7 @@
     "loop_nullspace": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 12,
+      "ud-only": 13,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -11519,7 +11519,7 @@
       "classification": "ud-only",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 28376,
+      "ud_bytes": 28747,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13524,6 +13524,18 @@
       "package": "loop_nullspace",
       "subpackage": "",
       "ud_bytes": 6776,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "loop_nullspace/decomposition.py",
+      "classification": "ud-only",
+      "package": "loop_nullspace",
+      "subpackage": "",
+      "ud_bytes": 27497,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -24443,7 +24455,7 @@
       "classification": "ud-only",
       "package": "pose_interchange",
       "subpackage": "adapters",
-      "ud_bytes": 22049,
+      "ud_bytes": 27069,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

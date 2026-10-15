@@ -2288,6 +2288,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12581 · NSX-53 Native Drake Force Adapter With Closed-Loop Snapshot; Synthetic Drake Route Quarantined to Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12581
+- **Branch:** merged via #12630
+- **PR:** #12630
+- **Paths:** see #12630
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`3b2357c0`; collated from changes/12581-nsx-53-native-drake-force-adapter-with-c.md)
+- **Summary:** NSX-53 native Drake force adapter with closed-loop snapshot; synthetic Drake route quarantined to tests
+- **Next step:** Shipped in PR #12630.
+
+### DL-#12559 · NSX-14 Kinematic and Contact Admission Gate (Admit, AdmittedTrajectory)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12559
+- **Branch:** merged via #12625
+- **PR:** #12625
+- **Paths:** see #12625
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`caf2cfb0`; collated from changes/12559-nsx-14-kinematic-and-contact-admission-g.md)
+- **Summary:** NSX-14 kinematic and contact admission gate (admit, AdmittedTrajectory)
+- **Next step:** Shipped in PR #12625.
+
 ### DL-#12675 · Guard MOSAIC Inertial Parameter Layouts: Audit Found No Live Pinocchio/inertial.py Mix; Tests Pin Each Module's Ordering and Block Unconverted Coupling
 
 - **State:** shipped
