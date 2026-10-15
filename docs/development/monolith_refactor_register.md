@@ -130,11 +130,11 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 924 | `src/engines/physics_engines/opensim/python/muscle_analysis.py` |
 | 924 | `src/research/differentiable/engine.py` |
 | 922 | `src/shared/python/shadow_tracker/service.py` |
+| 921 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
 | 919 | `src/bunkershot3d/vandv/ledger.py` |
 | 916 | `src/tools/bunker_shot_gui/export.py` |
 | 914 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 913 | `src/engines/physics_engines/opensim/python/tour_matching/native_diagnostic_contract.py` |
-| 911 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
 | 907 | `src/unreal_integration/mesh_loader.py` |
 | 903 | `src/shared/python/motion_matching/club_only/body_candidates.py` |
 | 902 | `src/tools/capture_rig/reference_comparison.py` |
@@ -188,10 +188,10 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 830 | `src/research/deformable/objects.py` |
 | 830 | `src/shared/python/motion_pipeline/preprocessing/gap_fill.py` |
 | 828 | `src/bunkershot3d/solvers/envelope.py` |
+| 823 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 822 | `src/tools/capture_rig/layout_editor.py` |
 | 819 | `src/shared/python/model_generation/converters/simscape/simscape_converter.py` |
 | 815 | `src/engines/physics_engines/mujoco/python/native_full_body_replay.py` |
-| 813 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 813 | `src/engines/physics_engines/drake/python/src/drake_golf_model.py` |
 | 813 | `src/robotics/control/whole_body/wbc_controller.py` |
 | 813 | `src/shared/python/gui_pkg/help_system.py` |
