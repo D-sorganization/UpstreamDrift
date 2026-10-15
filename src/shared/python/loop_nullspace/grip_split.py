@@ -214,32 +214,39 @@ def _infer_club_kinematics(
 
     coords = snapshot.topology.coordinate_order
     r_rel = snapshot.bare_club.com_m - snapshot.grip_origin
-    omega_default = np.zeros(3, dtype=np.float64)
-    alpha_default = np.zeros(3, dtype=np.float64)
+    omega_default: FloatArray = np.zeros(3, dtype=np.float64)
+    alpha_default: FloatArray = np.zeros(3, dtype=np.float64)
     if "q_club" in coords:
         idx = coords.index("q_club")
         omega_default[2] = float(snapshot.v[idx])
         alpha_default[2] = float(snapshot.a[idx])
     elif snapshot.nv() >= 3:
-        omega_default = np.asarray(snapshot.v[-3:], dtype=np.float64)
-        alpha_default = np.asarray(snapshot.a[-3:], dtype=np.float64)
+        omega_default = _readonly_float_array(
+            snapshot.v[-3:], "omega_default", shape=(3,)
+        )
+        alpha_default = _readonly_float_array(
+            snapshot.a[-3:], "alpha_default", shape=(3,)
+        )
 
-    omega = (
+    omega: FloatArray = (
         omega_default
         if club_ang_vel_world_rad_s is None
         else _readonly_float_array(
             club_ang_vel_world_rad_s, "club_ang_vel_world_rad_s", shape=(3,)
         )
     )
-    alpha = (
+    alpha: FloatArray = (
         alpha_default
         if club_ang_accel_world_rad_s2 is None
         else _readonly_float_array(
             club_ang_accel_world_rad_s2, "club_ang_accel_world_rad_s2", shape=(3,)
         )
     )
-    a_com_default = np.cross(alpha, r_rel) + np.cross(omega, np.cross(omega, r_rel))
-    a_com = (
+    a_com_raw = np.cross(alpha, r_rel) + np.cross(omega, np.cross(omega, r_rel))
+    a_com_default: FloatArray = _readonly_float_array(
+        a_com_raw, "a_com_default", shape=(3,)
+    )
+    a_com: FloatArray = (
         a_com_default
         if club_com_accel_world_m_s2 is None
         else _readonly_float_array(

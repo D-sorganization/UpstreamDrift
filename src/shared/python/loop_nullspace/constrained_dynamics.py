@@ -84,15 +84,19 @@ def _parse_constrained_accel_options(
     ):
         raise ValueError("baumgarte gains and regularization must be finite (reg >= 0)")
 
-    stabilization = np.zeros(m_c, dtype=np.float64)
+    stabilization: FloatArray = np.zeros(m_c, dtype=np.float64)
     v_err = options.get("v_err")
     if v_err is not None:
         v_err_arr = _readonly_float_array(v_err, "v_err", shape=(m_c,))
-        stabilization = stabilization + 2.0 * alpha * v_err_arr
+        stabilization = np.asarray(
+            stabilization + 2.0 * alpha * v_err_arr, dtype=np.float64
+        )
     q_err = options.get("q_err")
     if q_err is not None:
         q_err_arr = _readonly_float_array(q_err, "q_err", shape=(m_c,))
-        stabilization = stabilization + (beta**2) * q_err_arr
+        stabilization = np.asarray(
+            stabilization + (beta**2) * q_err_arr, dtype=np.float64
+        )
     return s_t, stabilization, reg
 
 

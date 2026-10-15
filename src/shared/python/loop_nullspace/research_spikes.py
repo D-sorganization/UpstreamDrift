@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
 from scipy.optimize import linprog, minimize
@@ -125,8 +125,16 @@ def _compute_lp_envelopes(
             res_max = linprog(
                 -unit, A_ub=a_t, b_ub=b_t, bounds=free_bounds, method="highs"
             )
-            lp_min[t, j] = float(res_min.fun) if res_min.success else -np.inf
-            lp_max[t, j] = -float(res_max.fun) if res_max.success else np.inf
+            lp_min[t, j] = (
+                float(res_min.fun)
+                if res_min.success and res_min.fun is not None
+                else -np.inf
+            )
+            lp_max[t, j] = (
+                -float(res_max.fun)
+                if res_max.success and res_max.fun is not None
+                else np.inf
+            )
     return _freeze_array(lp_min), _freeze_array(lp_max)
 
 
@@ -346,7 +354,7 @@ def fit_ioc_allocation_weights(
     gram = phi_train.T @ phi_train
 
     w0 = np.full(n_terms, 1.0 / n_terms, dtype=np.float64)
-    constraints = {"type": "eq", "fun": lambda w: float(np.sum(w) - 1.0)}
+    constraints: Any = {"type": "eq", "fun": lambda w: float(np.sum(w) - 1.0)}
     bounds = [(0.0, 1.0)] * n_terms
     res = minimize(
         lambda w: 0.5 * float(w @ gram @ w),

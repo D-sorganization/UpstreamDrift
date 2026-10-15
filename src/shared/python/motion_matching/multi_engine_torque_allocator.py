@@ -45,10 +45,6 @@ from src.shared.python.motion_matching.contact_force_allocator import (
     ContactForceAllocation,
     ContactForceAllocator,
 )
-from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
-from src.shared.python.loop_nullspace.closure_convention import (
-    MUJOCO_CLOSURE_CONVENTION,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -180,15 +176,21 @@ class BaseEngineForceAdapter(Protocol):
 
     def compute_closure_drift(self, q: Array, v: Array) -> Array:
         """Compute native 6-DoF loop-closure acceleration drift Jdot(q, v) v."""
-        raise NotImplementedError("compute_closure_drift is not implemented")
+        raise NotImplementedError(
+            "compute_closure_drift is not implemented"
+        )  # tracked: #12558
 
     def closure_wrench_frame(self, q: Array) -> tuple[Array, Array]:
         """Return (R_WG, origin_W) of the canonical grip wrench frame at state q."""
-        raise NotImplementedError("closure_wrench_frame is not implemented")
+        raise NotImplementedError(
+            "closure_wrench_frame is not implemented"
+        )  # tracked: #12558
 
     def club_inertia_split(self) -> tuple[Any, tuple[Any, ...]]:
         """Return (bare_club_inertia, welded_hand_inertias) from model specification."""
-        raise NotImplementedError("club_inertia_split is not implemented")
+        raise NotImplementedError(
+            "club_inertia_split is not implemented"
+        )  # tracked: #12558
 
     def verify_acceleration_parity(
         self, q: Array, v: Array, tau_effective: Array, a_target: Array
@@ -310,8 +312,6 @@ class MujocoForceAdapter:
             j_ground[idx * 3 : (idx + 1) * 3, :] = jac_pos
         return j_ground
 
-    NATIVE_CLOSURE_CONVENTION = MUJOCO_CLOSURE_CONVENTION
-
     def compute_grip_jacobian(self, q: Array) -> Array:
         self._prepare_state(q)
         jac_weld, _ = self._model.evaluate_weld_closure()
@@ -328,7 +328,7 @@ class MujocoForceAdapter:
     def club_inertia_split(self) -> tuple[Any, tuple[Any, ...]]:
         raise NotImplementedError(
             "MujocoForceAdapter does not provide bare-club inertia split"
-        )
+        )  # tracked: #12558
 
     def verify_acceleration_parity(
         self, q: Array, v: Array, tau_effective: Array, a_target: Array
@@ -417,7 +417,7 @@ class SyntheticMultibodyFixture:
     def club_inertia_split(self) -> tuple[Any, tuple[Any, ...]]:
         raise NotImplementedError(
             "SyntheticMultibodyFixture does not provide bare-club inertia split"
-        )
+        )  # tracked: #12558
 
     def _get_mass_diag(self) -> Array:
         """Return analytical mass diagonal for dynamics and parity evaluation."""

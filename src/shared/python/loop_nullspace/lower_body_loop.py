@@ -233,8 +233,10 @@ def solve_nullspace_envelopes(
         res_min = linprog(c_z, A_ub=a_ub, b_ub=b_ub, bounds=bounds, method="highs")
         res_max = linprog(-c_z, A_ub=a_ub, b_ub=b_ub, bounds=bounds, method="highs")
         p_i = float(particular[idx])
-        lower[idx] = p_i + float(res_min.fun) if res_min.success else p_i
-        upper[idx] = p_i - float(res_max.fun) if res_max.success else p_i
+        min_fun = res_min.fun if res_min.success and res_min.fun is not None else 0.0
+        max_fun = res_max.fun if res_max.success and res_max.fun is not None else 0.0
+        lower[idx] = p_i + float(min_fun)
+        upper[idx] = p_i - float(max_fun)
 
     signs = tuple(
         classify_sign(float(lower[i]), float(upper[i])) for i in range(n_quantities)
@@ -276,6 +278,93 @@ def _compute_dimensions(
     }
 
 
+def _solve_observed_grf_branch(
+    S: FloatArray,
+    J_c: FloatArray,
+    J_g: FloatArray,
+    unact: tuple[int, ...],
+    space_free: ForceNullSpace,
+    b_eff: FloatArray,
+    params: tuple[FloatArray, float, float, float],
+) -> tuple[ForceNullSpace, FloatArray, FloatArray, tuple[str, ...], dict[str, int]]:
+    """Solve active null-space and envelopes when observed GRF is provided."""
+    f_obs, grf_uncertainty_sigma, mu_ground, torque_bound = params
+    n_tau, m_c, m_g = S.shape[0], int(J_c.shape[0]), int(J_g.shape[0])
+    if grf_uncertainty_sigma == 0.0:
+        a_obs_mat = np.hstack([S.T, J_c.T])
+        space_active = ForceNullSpace.from_balance(a_obs_mat, b_eff)
+        g_act, h_act = _build_ground_inequalities(
+            n_tau, m_c, 0, mu_ground, torque_bound, grf_box=None
+        )
+        lo_act, hi_act, signs_act = solve_nullspace_envelopes(
+            space_active.particular, space_active.basis, g_act, h_act, n_tau + m_c
+        )
+        dims = _compute_dimensions(S, J_c, None, unact, space_active)
+        return space_active, lo_act, hi_act, signs_act, dims
+
+    sigma_vec = np.full(m_g, float(grf_uncertainty_sigma), dtype=np.float64)
+    g_act, h_act = _build_ground_inequalities(
+        n_tau,
+        m_c,
+        m_g,
+        mu_ground,
+        torque_bound,
+        grf_box=(f_obs - sigma_vec, f_obs + sigma_vec),
+    )
+    lo_act, hi_act, signs_act = solve_nullspace_envelopes(
+        space_free.particular, space_free.basis, g_act, h_act, n_tau + m_c
+    )
+    dims = _compute_dimensions(S, J_c, J_g, unact, space_free)
+    return space_free, lo_act, hi_act, signs_act, dims
+
+
+def _pack_loop_result(
+    space_active: ForceNullSpace,
+    free_null: int,
+    obs_nullity: int,
+    gnd_red: int,
+    ranks_and_dims: tuple[int, int, dict[str, int], int, int],
+    bounds: tuple[
+        FloatArray,
+        FloatArray,
+        FloatArray,
+        tuple[str, ...],
+        tuple[int, ...],
+        tuple[int, ...],
+    ],
+    grf_meta: tuple[bool, float],
+) -> LowerBodyLoopResult:
+    """Assemble LowerBodyLoopResult from active null-space and envelope bounds."""
+    rank_jg, rank_jgu, dims, n_tau, m_c = ranks_and_dims
+    b_eff, lo, hi, signs, ch_tau, ch_split = bounds
+    used, sigma = grf_meta
+    act_null = int(space_active.basis.shape[1])
+    return LowerBodyLoopResult(
+        equality_nullity=act_null,
+        free_equality_nullity=free_null,
+        observed_equality_nullity=obs_nullity,
+        nullity_reduction=free_null - act_null,
+        ground_wrench_nullity_reduction=gnd_red,
+        rank_A=int(space_active.rank),
+        rank_Jg=rank_jg,
+        rank_Jg_u=rank_jgu,
+        dimensions=dims,
+        particular=space_active.particular,
+        null_basis=space_active.basis,
+        effective_rhs=b_eff,
+        torque_lower=lo[:n_tau],
+        torque_upper=hi[:n_tau],
+        torque_sign_class=signs[:n_tau],
+        hand_split_lower=lo[n_tau : n_tau + m_c],
+        hand_split_upper=hi[n_tau : n_tau + m_c],
+        hand_split_sign_class=signs[n_tau : n_tau + m_c],
+        changed_torque_signs=ch_tau,
+        changed_hand_split_signs=ch_split,
+        grf_observed_used=used,
+        grf_uncertainty_sigma=float(sigma),
+    )
+
+
 def analyze_lower_body_loop(
     snapshot: Any,
     *,
@@ -305,107 +394,58 @@ def analyze_lower_body_loop(
     m_c, m_g = int(J_c.shape[0]), int(J_g.shape[0])
     _act, unact = _extract_indices(snapshot, n_v, S)
 
-    a_free = np.hstack([S.T, J_c.T, J_g.T])
-    space_free = ForceNullSpace.from_balance(a_free, b)
+    space_free = ForceNullSpace.from_balance(np.hstack([S.T, J_c.T, J_g.T]), b)
     g_free, h_free = _build_ground_inequalities(
         n_tau, m_c, m_g, mu_ground, torque_bound, grf_box=None
     )
     lo_free, hi_free, signs_free = solve_nullspace_envelopes(
         space_free.particular, space_free.basis, g_free, h_free, n_tau + m_c
     )
-
     rank_jg = int(np.linalg.matrix_rank(J_g.T))
     rank_jgu = int(np.linalg.matrix_rank(J_g[:, list(unact)].T)) if unact else 0
-    a_obs_mat = np.hstack([S.T, J_c.T])
-    obs_nullity = int((n_tau + m_c) - np.linalg.matrix_rank(a_obs_mat))
+    obs_nullity = int((n_tau + m_c) - np.linalg.matrix_rank(np.hstack([S.T, J_c.T])))
+    free_null = int(space_free.basis.shape[1])
 
     if grf_observed is None:
         dims = _compute_dimensions(S, J_c, J_g, unact, space_free)
-        return LowerBodyLoopResult(
-            equality_nullity=int(space_free.basis.shape[1]),
-            free_equality_nullity=int(space_free.basis.shape[1]),
-            observed_equality_nullity=obs_nullity,
-            nullity_reduction=0,
-            ground_wrench_nullity_reduction=0,
-            rank_A=int(space_free.rank),
-            rank_Jg=rank_jg,
-            rank_Jg_u=rank_jgu,
-            dimensions=dims,
-            particular=space_free.particular,
-            null_basis=space_free.basis,
-            effective_rhs=b,
-            torque_lower=lo_free[:n_tau],
-            torque_upper=hi_free[:n_tau],
-            torque_sign_class=signs_free[:n_tau],
-            hand_split_lower=lo_free[n_tau : n_tau + m_c],
-            hand_split_upper=hi_free[n_tau : n_tau + m_c],
-            hand_split_sign_class=signs_free[n_tau : n_tau + m_c],
-            changed_torque_signs=(),
-            changed_hand_split_signs=(),
-            grf_observed_used=False,
-            grf_uncertainty_sigma=float(grf_uncertainty_sigma),
+        return _pack_loop_result(
+            space_free,
+            free_null,
+            obs_nullity,
+            0,
+            (rank_jg, rank_jgu, dims, n_tau, m_c),
+            (b, lo_free, hi_free, signs_free, (), ()),
+            (False, grf_uncertainty_sigma),
         )
 
     f_obs = readonly_array(grf_observed, "grf_observed", 1)
     if f_obs.shape != (m_g,):
         raise ValueError(f"grf_observed length {f_obs.shape[0]} must match m_g ({m_g})")
     b_eff = readonly_array(b - J_g.T @ f_obs, "b_eff", 1)
-
-    if grf_uncertainty_sigma == 0.0:
-        space_active = ForceNullSpace.from_balance(a_obs_mat, b_eff)
-        g_act, h_act = _build_ground_inequalities(
-            n_tau, m_c, 0, mu_ground, torque_bound, grf_box=None
-        )
-        lo_act, hi_act, signs_act = solve_nullspace_envelopes(
-            space_active.particular, space_active.basis, g_act, h_act, n_tau + m_c
-        )
-        dims = _compute_dimensions(S, J_c, None, unact, space_active)
-    else:
-        space_active = space_free
-        sigma_vec = np.full(m_g, float(grf_uncertainty_sigma), dtype=np.float64)
-        g_act, h_act = _build_ground_inequalities(
-            n_tau,
-            m_c,
-            m_g,
-            mu_ground,
-            torque_bound,
-            grf_box=(f_obs - sigma_vec, f_obs + sigma_vec),
-        )
-        lo_act, hi_act, signs_act = solve_nullspace_envelopes(
-            space_active.particular, space_active.basis, g_act, h_act, n_tau + m_c
-        )
-        dims = _compute_dimensions(S, J_c, J_g, unact, space_active)
-
-    free_null = int(space_free.basis.shape[1])
+    space_active, lo_act, hi_act, signs_act, dims = _solve_observed_grf_branch(
+        S,
+        J_c,
+        J_g,
+        unact,
+        space_free,
+        b_eff,
+        (f_obs, grf_uncertainty_sigma, mu_ground, torque_bound),
+    )
     act_null = int(space_active.basis.shape[1])
     changed_tau = tuple(i for i in range(n_tau) if signs_act[i] != signs_free[i])
     changed_split = tuple(
         j for j in range(m_c) if signs_act[n_tau + j] != signs_free[n_tau + j]
     )
     ensure(act_null <= free_null, "observing GRF cannot increase equality nullity")
-    return LowerBodyLoopResult(
-        equality_nullity=act_null,
-        free_equality_nullity=free_null,
-        observed_equality_nullity=obs_nullity,
-        nullity_reduction=free_null - act_null,
-        ground_wrench_nullity_reduction=rank_jg if grf_uncertainty_sigma == 0.0 else 0,
-        rank_A=int(space_active.rank),
-        rank_Jg=rank_jg,
-        rank_Jg_u=rank_jgu,
-        dimensions=dims,
-        particular=space_active.particular,
-        null_basis=space_active.basis,
-        effective_rhs=b_eff,
-        torque_lower=lo_act[:n_tau],
-        torque_upper=hi_act[:n_tau],
-        torque_sign_class=signs_act[:n_tau],
-        hand_split_lower=lo_act[n_tau : n_tau + m_c],
-        hand_split_upper=hi_act[n_tau : n_tau + m_c],
-        hand_split_sign_class=signs_act[n_tau : n_tau + m_c],
-        changed_torque_signs=changed_tau,
-        changed_hand_split_signs=changed_split,
-        grf_observed_used=True,
-        grf_uncertainty_sigma=float(grf_uncertainty_sigma),
+    gnd_red = rank_jg if grf_uncertainty_sigma == 0.0 else 0
+    return _pack_loop_result(
+        space_active,
+        free_null,
+        obs_nullity,
+        gnd_red,
+        (rank_jg, rank_jgu, dims, n_tau, m_c),
+        (b_eff, lo_act, hi_act, signs_act, changed_tau, changed_split),
+        (True, grf_uncertainty_sigma),
     )
 
 

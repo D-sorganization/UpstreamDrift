@@ -12,6 +12,11 @@ from src.engines.physics_engines.pinocchio.python.marker_kinematics import Coord
 from src.engines.physics_engines.pinocchio.python.native_model import (
     FullBodyPinocchioModel,
 )
+from src.shared.python.biomechanics.club_solids_partition import (
+    BARE_CLUB_SOLID_NAMES,
+    CLUB_BODY_SUFFIX,
+    club_solids_partition,
+)
 from src.shared.python.biomechanics.grip_extraction import (
     DEFAULT_GRIP_INTERFACE,
     GRIP_INTERFACES,
@@ -21,12 +26,6 @@ from src.shared.python.biomechanics.grip_extraction import (
     closing_side_from_closure,
     closure_and_club_analysis,
 )
-from src.shared.python.biomechanics.club_solids_partition import (
-    BARE_CLUB_SOLID_NAMES,
-    CLUB_BODY_SUFFIX,
-    club_solids_partition,
-)
-from src.shared.python.biomechanics.grip_extraction import allocation_grip_analysis
 from src.shared.python.biomechanics.grip_wrench import GripAnalysis
 from src.shared.python.engine_core.capabilities import (
     Capability,

@@ -416,6 +416,38 @@ def chebyshev_margin(
     return radius
 
 
+def _solve_quantity_bounds(
+    fs: FeasibleSet,
+    spec: LinearQuantitySpec,
+    w_min: FloatArray | None,
+    w_max: FloatArray | None,
+    zero_tol: float,
+) -> tuple[
+    float,
+    float,
+    BoundStatus,
+    BoundStatus,
+    SignClass,
+    int,
+    FloatArray | None,
+    FloatArray | None,
+]:
+    """Solve directional min/max LPs and sign classification for one quantity at one frame."""
+    c_z, offset = spec.resolve(fs)
+    a_ub, b_ub = fs.A_ub, fs.b_ub
+    lo_val, lo_st, it_lo, z_lo = _solve_directional_lp(
+        c_z, offset, a_ub, b_ub, warm_basis=w_min
+    )
+    neg_hi_val, hi_st, it_hi, z_hi = _solve_directional_lp(
+        -c_z, -offset, a_ub, b_ub, warm_basis=w_max
+    )
+    hi_val = -neg_hi_val if hi_st == "BOUNDED" else float("nan")
+    sign_cl = classify_sign(
+        lo_val, hi_val, zero_tol=zero_tol, lower_status=lo_st, upper_status=hi_st
+    )
+    return lo_val, hi_val, lo_st, hi_st, sign_cl, it_lo + it_hi, z_lo, z_hi
+
+
 def static_envelopes(
     feasible_sets: Sequence[FeasibleSet] | FeasibleSet,
     quantities: Any = None,
@@ -467,37 +499,21 @@ def static_envelopes(
         r_t, c_t = chebyshev_ball(fs, metric_weights=metric_weights, tol=zero_tol)
         margins[t_idx] = r_t
         centers.append(c_t)
-        a_ub, b_ub = fs.A_ub, fs.b_ub
 
         for q_idx, spec in enumerate(specs):
-            c_z, offset = spec.resolve(fs)
             w_min = prev_min_z[q_idx] if warm_start else None
             w_max = prev_max_z[q_idx] if warm_start else None
-
-            lo_val, lo_st, it_lo, z_lo = _solve_directional_lp(
-                c_z, offset, a_ub, b_ub, warm_basis=w_min
+            lo_val, hi_val, lo_st, hi_st, sign_cl, iters, z_lo, z_hi = (
+                _solve_quantity_bounds(fs, spec, w_min, w_max, zero_tol)
             )
-            neg_hi_val, hi_st, it_hi, z_hi = _solve_directional_lp(
-                -c_z, -offset, a_ub, b_ub, warm_basis=w_max
-            )
-            hi_val = -neg_hi_val if hi_st == "BOUNDED" else float("nan")
-            total_iters += it_lo + it_hi
+            total_iters += iters
             prev_min_z[q_idx] = z_lo
             prev_max_z[q_idx] = z_hi
-
             lowers[t_idx, q_idx] = lo_val
             uppers[t_idx, q_idx] = hi_val
             lo_statuses[q_idx].append(lo_st)
             hi_statuses[q_idx].append(hi_st)
-            signs[q_idx].append(
-                classify_sign(
-                    lo_val,
-                    hi_val,
-                    zero_tol=zero_tol,
-                    lower_status=lo_st,
-                    upper_status=hi_st,
-                )
-            )
+            signs[q_idx].append(sign_cl)
 
     union_hyps: list[str] = []
     for fs in fs_Sequence:

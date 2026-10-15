@@ -485,11 +485,15 @@ def _solve_newton_kkt(
     if p == 0:
         try:
             cho = linalg.cho_factor(h_mat)
-            return linalg.cho_solve(cho, rhs_x), np.zeros(0, dtype=np.float64)
+            x_step = np.asarray(linalg.cho_solve(cho, rhs_x), dtype=np.float64)
+            return x_step, np.zeros(0, dtype=np.float64)
         except linalg.LinAlgError:
-            return linalg.solve(h_mat, rhs_x), np.zeros(0, dtype=np.float64)
+            x_step = np.asarray(linalg.solve(h_mat, rhs_x), dtype=np.float64)
+            return x_step, np.zeros(0, dtype=np.float64)
     kkt = np.block([[h_mat, a_eq.T], [a_eq, -1e-12 * np.eye(p, dtype=np.float64)]])
-    sol = linalg.solve(kkt, np.concatenate([rhs_x, rhs_y]))
+    sol = np.asarray(
+        linalg.solve(kkt, np.concatenate([rhs_x, rhs_y])), dtype=np.float64
+    )
     return sol[:n], sol[n:]
 
 
@@ -527,6 +531,34 @@ def _normalize_inequality_rows(
     )
 
 
+def _solve_ldp_whitened(
+    g_bar: Array,
+    h_bar: Array,
+) -> tuple[Array, Array, bool]:
+    """Solve Lawson-Hanson (1974) Ch. 23 Least Distance Programming via NNLS."""
+    from scipy import optimize
+
+    m, n = g_bar.shape
+    beta = max(1.0, float(np.max(np.abs(h_bar))))
+    h_scaled = h_bar / beta
+    e_ldp = np.vstack([-g_bar.T, -h_scaled[np.newaxis, :]])
+    f_ldp = np.zeros(n + 1, dtype=np.float64)
+    f_ldp[-1] = 1.0
+    u_nnls_raw, _ = optimize.nnls(e_ldp, f_ldp, maxiter=max(10 * m, 2000))
+    u_nnls = np.asarray(u_nnls_raw, dtype=np.float64)
+    r_ldp = np.asarray(e_ldp @ u_nnls - f_ldp, dtype=np.float64)
+    denom = float(-r_ldp[-1])
+    if denom <= 1e-15:
+        return (
+            np.zeros(n, dtype=np.float64),
+            np.zeros(m, dtype=np.float64),
+            True,
+        )
+    y_opt = np.asarray(beta * (r_ldp[:-1] / denom), dtype=np.float64)
+    mu_bar = np.asarray(beta * (u_nnls / denom), dtype=np.float64)
+    return y_opt, mu_bar, False
+
+
 def solve_conic_qp(
     p_mat: Array,
     q_vec: Array,
@@ -537,20 +569,19 @@ def solve_conic_qp(
     x_init: Array | None = None,
 ) -> tuple[Array, Array, Array, float, float, float, bool]:
     """Solve strictly convex conic QP min 0.5 x^T P x + q^T x s.t. G x <= h via Lawson-Hanson LDP."""
-    from scipy import optimize
-
     _ = x_init
-    n = p_mat.shape[0]
-    m_raw = g_mat.shape[0]
+    n, m_raw = p_mat.shape[0], g_mat.shape[0]
     a_mat = np.zeros((0, n), dtype=np.float64) if a_eq is None else a_eq
     b_vec = np.zeros(0, dtype=np.float64) if b_eq is None else b_eq
     p = a_mat.shape[0]
+    z_m = np.zeros(m_raw, dtype=np.float64)
+    z_0 = np.zeros(0, dtype=np.float64)
 
     if n == 0:
         viol0 = float(np.max(np.maximum(0.0, -h_vec))) if m_raw > 0 else 0.0
         return (
-            np.zeros(0, dtype=np.float64),
-            np.zeros(m_raw, dtype=np.float64),
+            z_0,
+            z_m,
             np.zeros(p, dtype=np.float64),
             viol0,
             0.0,
@@ -565,68 +596,31 @@ def solve_conic_qp(
         d_res = float(
             np.max(np.abs(p_mat @ x_sol + q_vec + (a_mat.T @ y_sol if p > 0 else 0.0)))
         )
-        return (
-            x_sol,
-            np.zeros(m_raw, dtype=np.float64),
-            y_sol,
-            p_res,
-            d_res,
-            0.0,
-            p_res <= 1e-5,
-        )
+        return x_sol, z_m, y_sol, p_res, d_res, 0.0, p_res <= 1e-5
 
-    l_chol = linalg.cholesky(p_sym, lower=True)
-    x_unc = linalg.cho_solve((l_chol, True), -q_vec)
+    l_chol = np.asarray(linalg.cholesky(p_sym, lower=True), dtype=np.float64)
+    x_unc = np.asarray(linalg.cho_solve((l_chol, True), -q_vec), dtype=np.float64)
     if np.all(g_mat @ x_unc <= h_vec + 1e-12):
         d_res = float(np.max(np.abs(p_mat @ x_unc + q_vec))) / (
             1.0 + float(np.max(np.abs(q_vec)))
         )
-        return (
-            x_unc,
-            np.zeros(m_raw, dtype=np.float64),
-            np.zeros(0, dtype=np.float64),
-            0.0,
-            d_res,
-            0.0,
-            True,
-        )
+        return x_unc, z_m, z_0, 0.0, d_res, 0.0, True
 
-    # Whiten coordinates: y = L^T (x - x_unc), so G x <= h <=> (G L^{-T}) y <= h - G x_unc
-    g_tilde = linalg.solve_triangular(l_chol, g_mat.T, lower=True).T
-    h_tilde = h_vec - g_mat @ x_unc
-    g_bar, h_bar, row_norms, zero_viol = _normalize_inequality_rows(g_tilde, h_tilde)
+    g_tilde = np.asarray(
+        linalg.solve_triangular(l_chol, g_mat.T, lower=True), dtype=np.float64
+    ).T
+    g_bar, h_bar, row_norms, zero_viol = _normalize_inequality_rows(
+        g_tilde, h_vec - g_mat @ x_unc
+    )
     m = g_bar.shape[0]
     if m == 0:
-        return (
-            x_unc,
-            np.zeros(m_raw, dtype=np.float64),
-            np.zeros(0, dtype=np.float64),
-            zero_viol,
-            0.0,
-            0.0,
-            zero_viol <= 1e-5,
-        )
+        return x_unc, z_m, z_0, zero_viol, 0.0, 0.0, zero_viol <= 1e-5
 
-    # Lawson & Hanson (1974) Ch. 23 Least Distance Programming (LDP) via NNLS:
-    # Scale h_bar by beta = max(1, ||h_bar||_inf) so both blocks of E have O(1) norm.
-    beta = max(1.0, float(np.max(np.abs(h_bar))))
-    h_scaled = h_bar / beta
-    e_ldp = np.vstack([-g_bar.T, -h_scaled[np.newaxis, :]])
-    f_ldp = np.zeros(n + 1, dtype=np.float64)
-    f_ldp[-1] = 1.0
-    u_nnls, _ = optimize.nnls(e_ldp, f_ldp, maxiter=max(10 * m, 2000))
-    r_ldp = e_ldp @ u_nnls - f_ldp
-    denom = float(-r_ldp[-1])
-    if denom <= 1e-15:
-        y_opt = np.zeros(n, dtype=np.float64)
-        mu_bar = np.zeros(m, dtype=np.float64)
-        infeasible = True
-    else:
-        y_opt = beta * (r_ldp[:-1] / denom)
-        mu_bar = beta * (u_nnls / denom)
-        infeasible = False
-
-    x = x_unc + linalg.solve_triangular(l_chol.T, y_opt, lower=False)
+    y_opt, mu_bar, infeasible = _solve_ldp_whitened(g_bar, h_bar)
+    step = np.asarray(
+        linalg.solve_triangular(l_chol.T, y_opt, lower=False), dtype=np.float64
+    )
+    x = x_unc + step
     duals_full = np.zeros(m_raw, dtype=np.float64)
     active_mask = row_norms > 1e-12
     duals_full[active_mask] = mu_bar / row_norms[active_mask]
@@ -640,15 +634,7 @@ def solve_conic_qp(
         max(1, m) * (1.0 + 0.5 * float(y_opt @ y_opt))
     )
     converged = (not infeasible) and max(primal_viol, dual_res, comp_res) < 1e-4
-    return (
-        x,
-        duals_full,
-        np.zeros(0, dtype=np.float64),
-        primal_viol,
-        dual_res,
-        comp_res,
-        converged,
-    )
+    return x, duals_full, z_0, primal_viol, dual_res, comp_res, converged
 
 
 def _build_trajectory_qp_matrices(
@@ -708,9 +694,6 @@ def _build_trajectory_qp_matrices(
             h_blocks.append(h_t)
 
         if has_power:
-            # Using u_t^- = u_t^+ - p_t(z_t) eliminates the equality constraint:
-            # cost = (c_+ + c_-) u_t^+ - c_- (v_t * (tau_p + N_tau z_t))
-            # s.t. -u_t^+ <= 0  and  v_t * N_tau z_t - u_t^+ <= -v_t * tau_p
             v_t = (
                 np.zeros(n_tau, dtype=np.float64)
                 if frame.v_actuated is None
@@ -750,6 +733,38 @@ def _build_trajectory_qp_matrices(
     return p_mat, q_vec, g_all, h_all, has_power
 
 
+def _unpack_trajectory_solution(
+    frames: Sequence[TrajectoryFeasibleFrame],
+    slices: Sequence[slice],
+    z_sol: Array,
+    n_tau: int,
+) -> tuple[Array, Array, list[Array], list[Array]]:
+    """Recover per-frame (tau, lambda_c, power_list, jc_v_list) from null-space coordinates z."""
+    tau_list: list[Array] = []
+    lam_list: list[Array] = []
+    power_list: list[Array] = []
+    jc_v_list: list[Array] = []
+    for t, frame in enumerate(frames):
+        z_t = z_sol[slices[t]]
+        tau_t = frame.tau_particular + frame.null_basis_tau @ z_t
+        tau_list.append(tau_t)
+        if frame.lambda_particular is not None and frame.null_basis_lambda is not None:
+            lam_list.append(frame.lambda_particular + frame.null_basis_lambda @ z_t)
+        else:
+            lam_list.append(np.zeros(0, dtype=np.float64))
+        v_t = (
+            np.zeros(n_tau, dtype=np.float64)
+            if frame.v_actuated is None
+            else frame.v_actuated
+        )
+        power_list.append(tau_t * v_t)
+        if frame.J_c is not None and frame.v_actuated is not None:
+            jc_v_list.append(frame.J_c @ frame.v_actuated)
+    tau_arr = _readonly_array(np.stack(tau_list, axis=0), "tau")
+    lam_arr = _readonly_array(np.stack(lam_list, axis=0), "lambda_c")
+    return tau_arr, lam_arr, power_list, jc_v_list
+
+
 def allocate_trajectory(
     feasible_sets: Sequence[Any],
     objective: ObjectiveSpec,
@@ -787,59 +802,19 @@ def allocate_trajectory(
     total_z = int(offsets[-1])
 
     t0 = time.perf_counter()
-    p_mat, q_vec, g_mat, h_vec, has_power = _build_trajectory_qp_matrices(
+    p_mat, q_vec, g_mat, h_vec, _has_power = _build_trajectory_qp_matrices(
         frames, objective, ref_arr, dt, slices, total_z
     )
-
-    x_init: Array | None = None
-    if initial_z is not None:
-        z_flat = np.asarray(initial_z, dtype=np.float64).ravel()
-        if z_flat.size == total_z:
-            x_init = np.zeros(p_mat.shape[0], dtype=np.float64)
-            x_init[:total_z] = z_flat
-            if has_power:
-                for t, frame in enumerate(frames):
-                    v_t = (
-                        np.zeros(n_tau, dtype=np.float64)
-                        if frame.v_actuated is None
-                        else frame.v_actuated
-                    )
-                    p_t = v_t * (
-                        frame.tau_particular + frame.null_basis_tau @ z_flat[slices[t]]
-                    )
-                    u_idx = total_z + t * n_tau + np.arange(n_tau)
-                    x_init[u_idx] = np.maximum(0.0, p_t) + 0.5
-
+    _ = initial_z
     x_sol, duals, eq_duals, p_res, d_res, c_res, converged = solve_conic_qp(
-        p_mat, q_vec, g_mat, h_vec, x_init=x_init
+        p_mat, q_vec, g_mat, h_vec
     )
     solve_time_s = float(time.perf_counter() - t0)
 
     z_sol = x_sol[:total_z]
-    tau_list: list[Array] = []
-    lam_list: list[Array] = []
-    power_list: list[Array] = []
-    jc_v_list: list[Array] = []
-
-    for t, frame in enumerate(frames):
-        z_t = z_sol[slices[t]]
-        tau_t = frame.tau_particular + frame.null_basis_tau @ z_t
-        tau_list.append(tau_t)
-        if frame.lambda_particular is not None and frame.null_basis_lambda is not None:
-            lam_list.append(frame.lambda_particular + frame.null_basis_lambda @ z_t)
-        else:
-            lam_list.append(np.zeros(0, dtype=np.float64))
-        v_t = (
-            np.zeros(n_tau, dtype=np.float64)
-            if frame.v_actuated is None
-            else frame.v_actuated
-        )
-        power_list.append(tau_t * v_t)
-        if frame.J_c is not None and frame.v_actuated is not None:
-            jc_v_list.append(frame.J_c @ frame.v_actuated)
-
-    tau_arr = _readonly_array(np.stack(tau_list, axis=0), "tau")
-    lam_arr = _readonly_array(np.stack(lam_list, axis=0), "lambda_c")
+    tau_arr, lam_arr, power_list, jc_v_list = _unpack_trajectory_solution(
+        frames, slices, z_sol, n_tau
+    )
     z_out = (
         _readonly_array(z_sol.reshape(t_count, dims[0]), "z")
         if len(set(dims)) == 1
@@ -853,7 +828,6 @@ def allocate_trajectory(
     )
     kkt_norm = float(max(p_res, d_res, c_res))
     obj_val = float(0.5 * (x_sol @ (p_mat @ x_sol)) + q_vec @ x_sol)
-
     frame_hyps = tuple(dict.fromkeys([h for f in frames for h in f.hypotheses]))
     all_hyps = tuple(dict.fromkeys([*objective.hypotheses, *frame_hyps]))
 

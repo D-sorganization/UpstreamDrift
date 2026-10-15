@@ -595,6 +595,41 @@ def _selection_matrix(actuated_indices: tuple[int, ...], n_v: int) -> FloatArray
     return S
 
 
+def _planar_weld3_decomposition(
+    J_c_2: FloatArray,
+    Jdot_2: FloatArray,
+    S: FloatArray,
+    b: FloatArray,
+    actuated: tuple[int, ...],
+    unactuated: tuple[int, ...],
+) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray, FloatArray, dict[str, int]]:
+    """Build 3-row PLANAR_WELD3 closure matrices and dimension dictionary."""
+    orient_row = np.array([[1.0, 1.0, 1.0, -1.0, -1.0]], dtype=np.float64)
+    J_c = np.vstack([J_c_2, orient_row])
+    Jdot_v = np.append(Jdot_2, 0.0)
+    A = np.hstack([S.T, J_c.T])
+    x_p = np.asarray(np.linalg.lstsq(A, b, rcond=None)[0], dtype=np.float64)
+    null_basis = np.asarray(scipy.linalg.null_space(A), dtype=np.float64)
+    rank_jc = int(np.linalg.matrix_rank(J_c))
+    rank_jcu = int(np.linalg.matrix_rank(J_c[:, unactuated])) if unactuated else 0
+    dims = {
+        "n_v": 5,
+        "n_tau": len(actuated),
+        "n_u": len(unactuated),
+        "m_c": 3,
+        "m_g": 0,
+        "dim_x": len(actuated) + 3,
+        "rank_A": int(np.linalg.matrix_rank(A)),
+        "equality_nullity": int(null_basis.shape[1]),
+        "multiplier_gauge": 3 - rank_jc,
+        "rank_Jc": rank_jc,
+        "rank_Jc_u": rank_jcu,
+        "attainable_torque_variation": rank_jc - rank_jcu,
+        "feasible_set_dim": int(null_basis.shape[1]),
+    }
+    return J_c, Jdot_v, A, x_p, null_basis, dims
+
+
 def planar_golfer_snapshot(
     config: Mapping[str, Any] | None = None,
     *,
@@ -617,14 +652,14 @@ def planar_golfer_snapshot(
 
     fixtures = load_golden_fixtures()
     base_data = fixtures["planar_two_arm_fixed_base"]
-    under_data = fixtures["planar_two_arm_underactuated"]
-    raw_data = base_data if act_mode == "full" else under_data
+    raw_data = (
+        base_data if act_mode == "full" else fixtures["planar_two_arm_underactuated"]
+    )
     fixture_id = (
         "planar_two_arm_fixed_base"
         if act_mode == "full"
         else "planar_two_arm_underactuated"
     )
-
     actuated = (0, 1, 2, 3, 4) if act_mode == "full" else (0, 1, 3, 4)
     unactuated: tuple[int, ...] = () if act_mode == "full" else (2,)
     topology = LoopTopology(
@@ -644,40 +679,19 @@ def planar_golfer_snapshot(
     v = np.asarray(fixtures["c_plus_minus_identity"]["v_admissible"], dtype=np.float64)
     q = np.zeros(5, dtype=np.float64)
     S = _selection_matrix(actuated, 5)
-
     J_c_2 = np.asarray(base_data["J_c"], dtype=np.float64)
     Jdot_2 = np.asarray(base_data["Jdot_v"], dtype=np.float64)
+
     if kind is ClosureKind.PLANAR_POINT2:
-        J_c = J_c_2
-        Jdot_v = Jdot_2
+        J_c, Jdot_v = J_c_2, Jdot_2
         A = np.asarray(raw_data["A"], dtype=np.float64)
         x_p = np.asarray(raw_data["x_particular"], dtype=np.float64)
         null_basis = np.asarray(raw_data["null_basis"], dtype=np.float64)
         dims = dict(raw_data["dimensions"])
     else:
-        orient_row = np.array([[1.0, 1.0, 1.0, -1.0, -1.0]], dtype=np.float64)
-        J_c = np.vstack([J_c_2, orient_row])
-        Jdot_v = np.append(Jdot_2, 0.0)
-        A = np.hstack([S.T, J_c.T])
-        x_p = np.asarray(np.linalg.lstsq(A, b, rcond=None)[0], dtype=np.float64)
-        null_basis = scipy.linalg.null_space(A)
-        rank_jc = int(np.linalg.matrix_rank(J_c))
-        rank_jcu = int(np.linalg.matrix_rank(J_c[:, unactuated])) if unactuated else 0
-        dims = {
-            "n_v": 5,
-            "n_tau": len(actuated),
-            "n_u": len(unactuated),
-            "m_c": 3,
-            "m_g": 0,
-            "dim_x": len(actuated) + 3,
-            "rank_A": int(np.linalg.matrix_rank(A)),
-            "equality_nullity": int(null_basis.shape[1]),
-            "multiplier_gauge": 3 - rank_jc,
-            "rank_Jc": rank_jc,
-            "rank_Jc_u": rank_jcu,
-            "attainable_torque_variation": rank_jc - rank_jcu,
-            "feasible_set_dim": int(null_basis.shape[1]),
-        }
+        J_c, Jdot_v, A, x_p, null_basis, dims = _planar_weld3_decomposition(
+            J_c_2, Jdot_2, S, b, actuated, unactuated
+        )
 
     grip_frame, bare_club, hands, model_prov, input_prov = _standard_grip_and_inertias()
     snapshot = ClosedLoopSnapshot(
@@ -696,6 +710,7 @@ def planar_golfer_snapshot(
         input_provenance=input_prov,
         topology=topology,
     )
+    is_base_point2 = act_mode == "full" and kind is ClosureKind.PLANAR_POINT2
     golden = GoldenValues(
         fixture_id=fixture_id,
         description=str(raw_data["description"]),
@@ -709,12 +724,8 @@ def planar_golfer_snapshot(
         x_particular=x_p,
         null_basis=null_basis,
         dimensions=dims,
-        tau_min_Minv=base_data.get("tau_min_Minv")
-        if act_mode == "full" and kind is ClosureKind.PLANAR_POINT2
-        else None,
-        a_ztcf=base_data.get("a_ztcf")
-        if act_mode == "full" and kind is ClosureKind.PLANAR_POINT2
-        else None,
+        tau_min_Minv=base_data.get("tau_min_Minv") if is_base_point2 else None,
+        a_ztcf=base_data.get("a_ztcf") if is_base_point2 else None,
         lambda_zero_feasible=bool(raw_data["lambda_zero_feasible"]),
         raw=raw_data,
     )
@@ -775,34 +786,8 @@ def straight_arm_snapshot() -> tuple[ClosedLoopSnapshot, GoldenValues]:
     return snapshot, golden
 
 
-def spatial_two_arm_club_snapshot(
-    *,
-    floating_base: bool = False,
-    include_feet: bool = False,
-) -> tuple[ClosedLoopSnapshot, GoldenValues]:
-    """Return a 3-D spatial two-arm (2x3-link) + rigid bare club WELD6 snapshot."""
-    arm_coords = ("q_L1", "q_L2", "q_L3", "q_R1", "q_R2", "q_R3")
-    base_coords = (
-        ("base_vx", "base_vy", "base_vz", "base_wx", "base_wy", "base_wz")
-        if floating_base
-        else ()
-    )
-    coords = base_coords + arm_coords
-    n_u = len(base_coords)
-    n_v = len(coords)
-    unactuated = tuple(range(n_u))
-    actuated = tuple(range(n_u, n_v))
-
-    topology = LoopTopology(
-        closure_kind=ClosureKind.WELD6,
-        closing_side="right",
-        holding_side="left",
-        actuated_indices=actuated,
-        unactuated_indices=unactuated,
-        loop_support_indices=actuated,
-        coordinate_order=coords,
-    )
-
+def _spatial_two_arm_jacobian(n_u: int, floating_base: bool) -> FloatArray:
+    """Build 6xN spatial two-arm WELD6 closure Jacobian."""
     J_L = np.array(
         [
             [1.0, 0.5, 0.25],
@@ -826,70 +811,114 @@ def spatial_two_arm_club_snapshot(
         dtype=np.float64,
     )
     J_c_arm = np.hstack([J_L, -J_R])
-    J_c = (
+    return (
         np.hstack([np.zeros((6, n_u), dtype=np.float64), J_c_arm])
         if floating_base
         else J_c_arm
     )
-    Jdot_v = np.array([0.1, -0.05, 0.08, 0.02, -0.03, 0.04], dtype=np.float64)
 
-    diag_m = np.linspace(1.5, 3.0, n_v, dtype=np.float64)
-    M = np.diag(diag_m) + 0.1 * np.eye(n_v, k=1) + 0.1 * np.eye(n_v, k=-1)
+
+def _spatial_foot_contacts(
+    n_v: int,
+) -> tuple[FloatArray, tuple[FootContact, ...], FloatArray]:
+    """Build 6xN foot Jacobian, FootContact tuple, and base load for floating-base model."""
+    J_foot_l, J_foot_r = (
+        np.zeros((3, n_v), dtype=np.float64),
+        np.zeros((3, n_v), dtype=np.float64),
+    )
+    J_foot_l[:, :3] = J_foot_r[:, :3] = np.eye(3)
+    J_foot_l[:, 3:6] = np.array([[0.0, 0.0, 0.2], [0.0, 0.0, -0.1], [-0.2, 0.1, 0.0]])
+    J_foot_r[:, 3:6] = np.array([[0.0, 0.0, -0.2], [0.0, 0.0, -0.1], [0.2, 0.1, 0.0]])
+    J_g = np.vstack([J_foot_l, J_foot_r])
+    n_up = np.array([0.0, 0.0, 1.0])
+    foot_contacts = (
+        FootContact("left_foot", np.array([-0.1, 0.2, 0.0]), n_up, J_foot_l, 0.6),
+        FootContact("right_foot", np.array([-0.1, -0.2, 0.0]), n_up, J_foot_r, 0.6),
+    )
+    f_g_true = np.array([30.0, -20.0, 380.0, 25.0, 20.0, 400.0])
+    return J_g, foot_contacts, np.asarray(J_g[:, :6].T @ f_g_true, dtype=np.float64)
+
+
+def _spatial_two_arm_dims(
+    actuated: tuple[int, ...],
+    unactuated: tuple[int, ...],
+    J_c: FloatArray,
+    J_g: FloatArray | None,
+    A: FloatArray,
+    null_basis: FloatArray,
+) -> dict[str, int]:
+    rank_jc = int(np.linalg.matrix_rank(J_c))
+    rank_jcu = int(np.linalg.matrix_rank(J_c[:, unactuated])) if unactuated else 0
+    return {
+        "n_v": int(A.shape[0]),
+        "n_tau": len(actuated),
+        "n_u": len(unactuated),
+        "m_c": 6,
+        "m_g": 0 if J_g is None else int(J_g.shape[0]),
+        "dim_x": int(A.shape[1]),
+        "rank_A": int(np.linalg.matrix_rank(A)),
+        "equality_nullity": int(null_basis.shape[1]),
+        "multiplier_gauge": 6 - rank_jc,
+        "rank_Jc": rank_jc,
+        "rank_Jc_u": rank_jcu,
+        "attainable_torque_variation": rank_jc - rank_jcu,
+        "feasible_set_dim": int(null_basis.shape[1]),
+    }
+
+
+def spatial_two_arm_club_snapshot(
+    *,
+    floating_base: bool = False,
+    include_feet: bool = False,
+) -> tuple[ClosedLoopSnapshot, GoldenValues]:
+    """Return a 3-D spatial two-arm (2x3-link) + rigid bare club WELD6 snapshot."""
+    arm_coords = ("q_L1", "q_L2", "q_L3", "q_R1", "q_R2", "q_R3")
+    base_coords = (
+        ("base_vx", "base_vy", "base_vz", "base_wx", "base_wy", "base_wz")
+        if floating_base
+        else ()
+    )
+    coords = base_coords + arm_coords
+    n_u, n_v = len(base_coords), len(coords)
+    unactuated, actuated = tuple(range(n_u)), tuple(range(n_u, n_v))
+    topology = LoopTopology(
+        closure_kind=ClosureKind.WELD6,
+        closing_side="right",
+        holding_side="left",
+        actuated_indices=actuated,
+        unactuated_indices=unactuated,
+        loop_support_indices=actuated,
+        coordinate_order=coords,
+    )
+    J_c = _spatial_two_arm_jacobian(n_u, floating_base)
+    Jdot_v = np.array([0.1, -0.05, 0.08, 0.02, -0.03, 0.04], dtype=np.float64)
+    M = (
+        np.diag(np.linspace(1.5, 3.0, n_v, dtype=np.float64))
+        + 0.1 * np.eye(n_v, k=1)
+        + 0.1 * np.eye(n_v, k=-1)
+    )
     h = np.linspace(-0.4, 0.6, n_v, dtype=np.float64)
     S = _selection_matrix(actuated, n_v)
-
     b_arm = np.array([2.2, -1.5, 0.9, 1.7, -1.1, 0.6], dtype=np.float64)
     foot_contacts: tuple[FootContact, ...] = ()
     J_g: FloatArray | None = None
     if floating_base and include_feet:
-        J_foot_l = np.zeros((3, n_v), dtype=np.float64)
-        J_foot_r = np.zeros((3, n_v), dtype=np.float64)
-        J_foot_l[:, :3] = np.eye(3)
-        J_foot_r[:, :3] = np.eye(3)
-        J_foot_l[:, 3:6] = np.array(
-            [[0.0, 0.0, 0.2], [0.0, 0.0, -0.1], [-0.2, 0.1, 0.0]]
-        )
-        J_foot_r[:, 3:6] = np.array(
-            [[0.0, 0.0, -0.2], [0.0, 0.0, -0.1], [0.2, 0.1, 0.0]]
-        )
-        J_g = np.vstack([J_foot_l, J_foot_r])
-        foot_contacts = (
-            FootContact(
-                foot_id="left_foot",
-                point_world_m=np.array([-0.1, 0.2, 0.0]),
-                normal_world=np.array([0.0, 0.0, 1.0]),
-                jacobian=J_foot_l,
-                friction_coeff=0.6,
-            ),
-            FootContact(
-                foot_id="right_foot",
-                point_world_m=np.array([-0.1, -0.2, 0.0]),
-                normal_world=np.array([0.0, 0.0, 1.0]),
-                jacobian=J_foot_r,
-                friction_coeff=0.6,
-            ),
-        )
-        f_g_true = np.array([30.0, -20.0, 380.0, 25.0, 20.0, 400.0])
-        b_base = J_g[:, :6].T @ f_g_true
-        b = np.concatenate([b_base, b_arm])
-        A = np.hstack([S.T, J_c.T, J_g.T])
+        J_g, foot_contacts, b_base = _spatial_foot_contacts(n_v)
+        b, A = np.concatenate([b_base, b_arm]), np.hstack([S.T, J_c.T, J_g.T])
     elif floating_base:
-        b = np.concatenate([np.zeros(6, dtype=np.float64), b_arm])
-        A = np.hstack([S.T, J_c.T])
+        b, A = (
+            np.concatenate([np.zeros(6, dtype=np.float64), b_arm]),
+            np.hstack([S.T, J_c.T]),
+        )
     else:
-        b = b_arm
-        A = np.hstack([S.T, J_c.T])
-
+        b, A = b_arm, np.hstack([S.T, J_c.T])
     a = np.asarray(np.linalg.solve(M, b - h), dtype=np.float64)
-    v = np.zeros(n_v, dtype=np.float64)
-    q = np.zeros(n_v, dtype=np.float64)
     x_p = np.asarray(np.linalg.lstsq(A, b, rcond=None)[0], dtype=np.float64)
-    null_basis = scipy.linalg.null_space(A)
-
+    null_basis = np.asarray(scipy.linalg.null_space(A), dtype=np.float64)
     grip_frame, bare_club, hands, model_prov, input_prov = _standard_grip_and_inertias()
     snapshot = ClosedLoopSnapshot(
-        q=q,
-        v=v,
+        q=np.zeros(n_v, dtype=np.float64),
+        v=np.zeros(n_v, dtype=np.float64),
         a=a,
         M=M,
         h=h,
@@ -905,24 +934,7 @@ def spatial_two_arm_club_snapshot(
         J_g=J_g,
         foot_contacts=foot_contacts,
     )
-    m_g = 0 if J_g is None else int(J_g.shape[0])
-    rank_jc = int(np.linalg.matrix_rank(J_c))
-    rank_jcu = int(np.linalg.matrix_rank(J_c[:, unactuated])) if unactuated else 0
-    dims = {
-        "n_v": n_v,
-        "n_tau": len(actuated),
-        "n_u": n_u,
-        "m_c": 6,
-        "m_g": m_g,
-        "dim_x": int(A.shape[1]),
-        "rank_A": int(np.linalg.matrix_rank(A)),
-        "equality_nullity": int(null_basis.shape[1]),
-        "multiplier_gauge": 6 - rank_jc,
-        "rank_Jc": rank_jc,
-        "rank_Jc_u": rank_jcu,
-        "attainable_torque_variation": rank_jc - rank_jcu,
-        "feasible_set_dim": int(null_basis.shape[1]),
-    }
+    dims = _spatial_two_arm_dims(actuated, unactuated, J_c, J_g, A, null_basis)
     golden = GoldenValues(
         fixture_id="spatial_two_arm_club",
         description="Spatial 2x3-link arms + rigid bare club with WELD6 closure",

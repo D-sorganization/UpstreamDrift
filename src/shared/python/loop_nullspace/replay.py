@@ -19,8 +19,6 @@ from typing import Any, Literal
 
 import numpy as np
 
-from src.engines.feedback_comparison import ReplayPolicy
-
 ReplayMode = Literal["OPEN_LOOP", "FEEDBACK"]
 
 _BUDGET_EPS = 1e-12
@@ -186,11 +184,15 @@ class ReplayReport:
         )
 
 
-def _normalize_mode(mode: ReplayMode | ReplayPolicy) -> ReplayMode:
-    if isinstance(mode, ReplayPolicy):
-        return "OPEN_LOOP" if mode == ReplayPolicy.INDEPENDENT_TIME_ONLY else "FEEDBACK"
+def _normalize_mode(mode: ReplayMode | Any) -> ReplayMode:
     if mode in ("OPEN_LOOP", "FEEDBACK"):
         return mode
+    enum_name = getattr(mode, "name", None)
+    enum_val = getattr(mode, "value", None)
+    if enum_name == "INDEPENDENT_TIME_ONLY" or enum_val == "independent_time_only":
+        return "OPEN_LOOP"
+    if enum_name is not None or enum_val is not None:
+        return "FEEDBACK"
     raise ValueError(
         f"Unsupported replay mode {mode!r}; expected 'OPEN_LOOP' or 'FEEDBACK'"
     )
@@ -238,7 +240,7 @@ def replay(
     allocation: Any,
     provider: Any,
     *,
-    mode: ReplayMode | ReplayPolicy = "OPEN_LOOP",
+    mode: ReplayMode | Any = "OPEN_LOOP",
     kp: float = 0.0,
     kd: float = 0.0,
     divergence_threshold: float = 0.1,

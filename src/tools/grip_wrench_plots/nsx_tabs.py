@@ -220,7 +220,7 @@ class NSXAnalysisWorker(QRunnable):
                 self.signals.cancelled.emit(self.preset_name)
                 return
             self.signals.completed.emit(model)
-        except Exception as exc:  # noqa: BLE001
+        except (ValueError, RuntimeError, TypeError, KeyError, OSError) as exc:
             self.signals.failed.emit(str(exc))
 
 

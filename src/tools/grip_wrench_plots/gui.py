@@ -133,7 +133,7 @@ class GripWrenchPlotWidget(QWidget):
         self.canvas = FigureCanvasQTAgg(self.figure)
         layout.addWidget(self.canvas, 1)
         self.frame_combo.currentTextChanged.connect(self._redraw)
-        # noqa: gui-thread/ok - opens a modal file dialog; the JSON is small.
+        # Modal file dialog only; JSON is small and fast to parse.
         self.open_button.clicked.connect(self._choose_file)
         return tab
 

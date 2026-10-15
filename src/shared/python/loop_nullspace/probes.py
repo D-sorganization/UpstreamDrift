@@ -387,7 +387,7 @@ def _solve_coupled_lp(
         bounds=coupled.bounds,
         method="highs",
     )
-    if res.success and res.x is not None:
+    if res.success and res.x is not None and res.fun is not None:
         sol = np.asarray(res.x, dtype=float)
         witness = tuple(
             _readonly_1d(

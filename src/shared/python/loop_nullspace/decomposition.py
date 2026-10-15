@@ -408,7 +408,9 @@ def min_metric_torque(
         )
     else:
         cid = convention_id if convention_id is not None else "C-METRIC-CUSTOM"
-        alloc_metric = AllocationMetric(convention_id=cid, W=metric)
+        alloc_metric = AllocationMetric(
+            convention_id=cid, W=np.asarray(metric, dtype=np.float64)
+        )
 
     decomp = decompose(snapshot, rcond=rcond)
     n_tau = int(snapshot.S.shape[0])

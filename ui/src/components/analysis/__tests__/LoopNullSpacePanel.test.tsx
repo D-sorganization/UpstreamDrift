@@ -127,7 +127,7 @@ describe('LoopNullSpacePanel', () => {
   });
 
   it('shows partial invariants while running and cancels the active job via DELETE', async () => {
-    let resolvePoll: ((val: unknown) => void) | null = null;
+    let resolvePoll: (val: unknown) => void = () => {};
     mockFetch.mockImplementation((url: string, init?: RequestInit) => {
       if (init?.method === 'POST') {
         return Promise.resolve({
@@ -178,8 +178,6 @@ describe('LoopNullSpacePanel', () => {
       '/analysis/loop-nullspace/jobs/job-cancel-99',
       expect.objectContaining({ method: 'DELETE' }),
     );
-    if (resolvePoll) {
-      resolvePoll({ ok: true, status: 200, json: async () => ({ status: 'cancelled' }) });
-    }
+    resolvePoll({ ok: true, status: 200, json: async () => ({ status: 'cancelled' }) });
   });
 });

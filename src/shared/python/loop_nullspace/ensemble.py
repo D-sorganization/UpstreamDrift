@@ -262,6 +262,62 @@ def _aggregate_envelopes(
     return union_band, inter_band
 
 
+def _sample_trajectory_candidate(
+    snapshots: Sequence[Any],
+    sample_idx: int,
+    rng: np.random.Generator,
+    perturbation_sigma: float,
+    closure_tol: float,
+    project_fn: Callable[..., Any] | None,
+) -> AdmittedTrajectorySample | None:
+    """Sample and project one candidate trajectory across all frames."""
+    q_frames: list[FloatArray] = []
+    v_frames: list[FloatArray] = []
+    lo_frames: list[FloatArray] = []
+    hi_frames: list[FloatArray] = []
+    snap_frames: list[Any] = []
+    max_pose = 0.0
+    max_rate = 0.0
+
+    for snap in snapshots:
+        q_base = readonly_array(snap.q, "q", 1)
+        v_base = readonly_array(snap.v, "v", 1)
+        q_pert = q_base + rng.normal(0.0, float(perturbation_sigma), size=q_base.shape)
+        v_pert = v_base + rng.normal(0.0, float(perturbation_sigma), size=v_base.shape)
+        try:
+            q_proj, v_proj, pose_res, rate_res = _project_frame_state(
+                snap, q_pert, v_pert, float(closure_tol), project_fn
+            )
+        except (ArithmeticError, ValueError):
+            return None
+
+        max_pose = max(max_pose, pose_res)
+        max_rate = max(max_rate, rate_res)
+        if pose_res > closure_tol or rate_res > closure_tol:
+            return None
+
+        lo_f, hi_f = _frame_static_envelope(snap, q_proj, v_proj)
+        q_frames.append(q_proj)
+        v_frames.append(v_proj)
+        lo_frames.append(lo_f)
+        hi_frames.append(hi_f)
+        try:
+            snap_frames.append(replace(snap, q=q_proj, v=v_proj))
+        except TypeError:
+            snap_frames.append(snap)
+
+    return AdmittedTrajectorySample(
+        sample_index=sample_idx,
+        snapshots=tuple(snap_frames),
+        q_trajectory=np.stack(q_frames, axis=0),
+        v_trajectory=np.stack(v_frames, axis=0),
+        max_pose_residual=max_pose,
+        max_rate_residual=max_rate,
+        envelope_lower=np.stack(lo_frames, axis=0),
+        envelope_upper=np.stack(hi_frames, axis=0),
+    )
+
+
 def kinematic_ensemble(
     base_snapshots: Sequence[Any],
     n: int,
@@ -294,64 +350,18 @@ def kinematic_ensemble(
     rejected_count = 0
 
     for sample_idx in range(int(n)):
-        q_frames: list[FloatArray] = []
-        v_frames: list[FloatArray] = []
-        lo_frames: list[FloatArray] = []
-        hi_frames: list[FloatArray] = []
-        snap_frames: list[Any] = []
-        max_pose = 0.0
-        max_rate = 0.0
-        sample_ok = True
-
-        for snap in snapshots:
-            q_base = readonly_array(snap.q, "q", 1)
-            v_base = readonly_array(snap.v, "v", 1)
-            q_pert = q_base + rng.normal(
-                0.0, float(perturbation_sigma), size=q_base.shape
-            )
-            v_pert = v_base + rng.normal(
-                0.0, float(perturbation_sigma), size=v_base.shape
-            )
-            try:
-                q_proj, v_proj, pose_res, rate_res = _project_frame_state(
-                    snap, q_pert, v_pert, float(closure_tol), project_fn
-                )
-            except (ArithmeticError, ValueError):
-                sample_ok = False
-                break
-
-            max_pose = max(max_pose, pose_res)
-            max_rate = max(max_rate, rate_res)
-            if pose_res > closure_tol or rate_res > closure_tol:
-                sample_ok = False
-                break
-
-            lo_f, hi_f = _frame_static_envelope(snap, q_proj, v_proj)
-            q_frames.append(q_proj)
-            v_frames.append(v_proj)
-            lo_frames.append(lo_f)
-            hi_frames.append(hi_f)
-            try:
-                snap_frames.append(replace(snap, q=q_proj, v=v_proj))
-            except TypeError:
-                snap_frames.append(snap)
-
-        if not sample_ok:
-            rejected_count += 1
-            continue
-
-        admitted.append(
-            AdmittedTrajectorySample(
-                sample_index=sample_idx,
-                snapshots=tuple(snap_frames),
-                q_trajectory=np.stack(q_frames, axis=0),
-                v_trajectory=np.stack(v_frames, axis=0),
-                max_pose_residual=max_pose,
-                max_rate_residual=max_rate,
-                envelope_lower=np.stack(lo_frames, axis=0),
-                envelope_upper=np.stack(hi_frames, axis=0),
-            )
+        sample = _sample_trajectory_candidate(
+            snapshots,
+            sample_idx,
+            rng,
+            float(perturbation_sigma),
+            float(closure_tol),
+            project_fn,
         )
+        if sample is None:
+            rejected_count += 1
+        else:
+            admitted.append(sample)
 
     union_band, inter_band = _aggregate_envelopes(admitted, n_frames, n_quantities)
     ensure(

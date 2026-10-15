@@ -11,6 +11,7 @@ subject to the pseudo-inertia positive-definite LMI from
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any, Callable
 
@@ -247,6 +248,44 @@ def _sample_consistent_theta(
     raise ValueError("Unable to find physically consistent parameter sample in ker(Y)")
 
 
+def _summarize_parameter_envelopes(
+    theta0: FloatArray,
+    nom_lo: FloatArray,
+    nom_hi: FloatArray,
+    nom_width: FloatArray,
+    samples: Sequence[ParameterSample],
+) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray, FloatArray]:
+    """Compute union envelope bounds, width growth, and per-quantity sensitivity."""
+    all_lo = np.vstack([nom_lo, *[s.envelope_lower for s in samples]])
+    all_hi = np.vstack([nom_hi, *[s.envelope_upper for s in samples]])
+    union_lo = readonly_array(np.min(all_lo, axis=0), "union_lo", 1)
+    union_hi = readonly_array(np.max(all_hi, axis=0), "union_hi", 1)
+    union_width = readonly_array(union_hi - union_lo, "union_width", 1)
+    growth = readonly_array(union_width - nom_width, "envelope_width_growth", 1)
+    norms = [max(float(np.linalg.norm(s.theta - theta0)), 1e-12) for s in samples]
+    sens = np.max(
+        np.stack(
+            [
+                np.maximum(
+                    np.abs(s.envelope_upper - nom_hi),
+                    np.abs(s.envelope_lower - nom_lo),
+                )
+                / d_norm
+                for s, d_norm in zip(samples, norms, strict=True)
+            ],
+            axis=0,
+        ),
+        axis=0,
+    )
+    return (
+        union_lo,
+        union_hi,
+        union_width,
+        growth,
+        readonly_array(sens, "per_quantity_sensitivity", 1),
+    )
+
+
 def parameter_ensemble(
     base_snapshot: Any,
     regressor_matrix: np.ndarray,
@@ -310,26 +349,8 @@ def parameter_ensemble(
         )
 
     ensure(max_drift < _INVARIANCE_ATOL, "identified base combinations drifted")
-    all_lo = np.vstack([nom_lo, *[s.envelope_lower for s in samples]])
-    all_hi = np.vstack([nom_hi, *[s.envelope_upper for s in samples]])
-    union_lo = readonly_array(np.min(all_lo, axis=0), "union_lo", 1)
-    union_hi = readonly_array(np.max(all_hi, axis=0), "union_hi", 1)
-    union_width = readonly_array(union_hi - union_lo, "union_width", 1)
-    growth = readonly_array(union_width - nom_width, "envelope_width_growth", 1)
-    norms = [max(float(np.linalg.norm(s.theta - theta0)), 1e-12) for s in samples]
-    sens = np.max(
-        np.stack(
-            [
-                np.maximum(
-                    np.abs(s.envelope_upper - nom_hi),
-                    np.abs(s.envelope_lower - nom_lo),
-                )
-                / d_norm
-                for s, d_norm in zip(samples, norms, strict=True)
-            ],
-            axis=0,
-        ),
-        axis=0,
+    union_lo, union_hi, union_width, growth, sens = _summarize_parameter_envelopes(
+        theta0, nom_lo, nom_hi, nom_width, samples
     )
 
     return ParameterSensitivityReport(
@@ -350,7 +371,7 @@ def parameter_ensemble(
         envelope_union_upper=union_hi,
         envelope_union_width=union_width,
         envelope_width_growth=growth,
-        per_quantity_sensitivity=readonly_array(sens, "per_quantity_sensitivity", 1),
+        per_quantity_sensitivity=sens,
     )
 
 

@@ -178,6 +178,43 @@ def _resolve_provenance(
     return resolved_model, resolved_input
 
 
+def _canonical_closure_terms(
+    adapter: BaseEngineForceAdapter,
+    q_arr: FloatArray,
+    v_arr: FloatArray,
+) -> tuple[GripFrame, FloatArray, FloatArray]:
+    """Compute GripFrame and canonical (J_c, Jdot_v) from native adapter methods."""
+    j_native = np.asarray(adapter.compute_grip_jacobian(q_arr), dtype=np.float64)
+    jdot_v_native = np.asarray(
+        adapter.compute_closure_drift(q_arr, v_arr), dtype=np.float64
+    )
+    r_wg, p_g = adapter.closure_wrench_frame(q_arr)
+    grip_frame = GripFrame(rotation=r_wg, origin=p_g)
+    conv = getattr(
+        adapter,
+        "native_closure_convention",
+        getattr(adapter, "NATIVE_CLOSURE_CONVENTION", CANONICAL_CLOSURE_CONVENTION),
+    )
+    p_ref = (
+        adapter.native_closure_reference_point(q_arr)
+        if hasattr(adapter, "native_closure_reference_point")
+        else p_g
+    )
+    j_c, jdot_v = (
+        to_canonical_closure(
+            j_native,
+            jdot_v_native,
+            native=conv,
+            grip_frame_rotation=r_wg,
+            grip_origin=p_g,
+            reference_point=p_ref,
+        )
+        if j_native.shape[0] == 6
+        else (j_native, jdot_v_native)
+    )
+    return grip_frame, j_c, jdot_v
+
+
 def snapshot_from_adapter(
     adapter: BaseEngineForceAdapter,
     q: ArrayLike,
@@ -209,35 +246,7 @@ def snapshot_from_adapter(
         )
 
     mass, bias = adapter.compute_mass_and_bias(q_arr, v_arr)
-    j_native = np.asarray(adapter.compute_grip_jacobian(q_arr), dtype=np.float64)
-    jdot_v_native = np.asarray(
-        adapter.compute_closure_drift(q_arr, v_arr), dtype=np.float64
-    )
-    r_wg, p_g = adapter.closure_wrench_frame(q_arr)
-    grip_frame = GripFrame(rotation=r_wg, origin=p_g)
-
-    conv = getattr(
-        adapter,
-        "native_closure_convention",
-        getattr(adapter, "NATIVE_CLOSURE_CONVENTION", CANONICAL_CLOSURE_CONVENTION),
-    )
-    p_ref = (
-        adapter.native_closure_reference_point(q_arr)
-        if hasattr(adapter, "native_closure_reference_point")
-        else p_g
-    )
-    j_c, jdot_v = (
-        to_canonical_closure(
-            j_native,
-            jdot_v_native,
-            native=conv,
-            grip_frame_rotation=r_wg,
-            grip_origin=p_g,
-            reference_point=p_ref,
-        )
-        if j_native.shape[0] == 6
-        else (j_native, jdot_v_native)
-    )
+    grip_frame, j_c, jdot_v = _canonical_closure_terms(adapter, q_arr, v_arr)
 
     bare_raw, hands_raw = adapter.club_inertia_split()
     bare_club = _to_spatial_inertia(
@@ -280,6 +289,6 @@ def snapshot_from_adapter(
             )
             pose_res.setflags(write=False)
             object.__setattr__(snapshot, "_closure_pose_residual", pose_res)
-        except Exception:
+        except (ValueError, RuntimeError, TypeError, AttributeError):
             pass
     return snapshot
