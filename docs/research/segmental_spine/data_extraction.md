@@ -41,7 +41,9 @@ found. The crunch factor is attributed in the literature to Sugaya et al.
 (1997/1999) and was tested by Cole and Grimshaw (2014, Spine J). Wu "2005"
 Part II is the upper limb; the spine recommendation is the 2002 Part I paper.
 
-## Bruno 2015 (bruno2015)
+## Bruno 2015
+
+Source key: `bruno2015`.
 
 ### Table B1: Regional Motion Split (Main Text, Section 2.1)
 
@@ -163,7 +165,9 @@ The vertebral body load comparison also appears in Bruno Table 2 (muscle CSA
 and moment-arm RMSE); that table is irrelevant to the kinematic distribution
 and is not transcribed.
 
-## Pearcy and Tibrewal 1984 (pearcy1984)
+## Pearcy and Tibrewal 1984
+
+Source key: `pearcy1984`.
 
 Primary text not accessible (Lippincott paywall; PubMed fetch returned only a
 cookie page). The 1985 monograph (Pearcy, Acta Orthop Scand Suppl 212) is open
@@ -183,7 +187,9 @@ extension, axial rotation, lateral bending per level), so the figures can be
 read there as a citing source once an owner confirms them; they were not
 transcribed here.
 
-## Fujii 2007 (fujii2007)
+## Fujii 2007
+
+Source key: `fujii2007`.
 
 Results text, n = 10 healthy volunteers (6 men, 4 women per the extraction),
 3D MRI, trunk rotated 45 deg, mean +/- SD, degrees. Axial rotation is per
@@ -222,7 +228,9 @@ independent extractions agree; PDF re-check recommended).
 
 (Each pair is [mean, SD].)
 
-## Wilke 1999 (wilke1999)
+## Wilke 1999
+
+Source key: `wilke1999`.
 
 Single volunteer (male, 45 years, 70 kg, 1.68 m), transducer in the
 non-degenerated L4-L5 nucleus, range to 3.5 MPa. Source: Table 1, page 757,
@@ -300,7 +308,7 @@ read. verified_from_primary: true
 {"position":"night_increase_7h","range":[0.10,0.24]}]}
 ```
 
-## Golf Lumbar Loads (Context Bands for SPN-11b)
+## Golf Lumbar Loads: Context Bands
 
 ### Table G1: Hosea 1990 L3-L4 (Secondary Citation Only)
 
