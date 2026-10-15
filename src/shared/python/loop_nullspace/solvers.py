@@ -611,8 +611,16 @@ def solve_socp(
     *,
     bounds: Any = None,
     max_iter: int | None = None,
+    P: Any = None,
+    tol: float | None = None,
 ) -> ConicResult:
-    """Solve a linear objective over polyhedral and second-order-cone constraints.
+    """Solve a (convex quadratic) objective over polyhedral and SOC constraints.
+
+    The objective is ``1/2 x^T P x + c^T x``; ``P=None`` means linear (NSX-20
+    behaviour, unchanged).  ``P`` must be symmetric positive semidefinite of
+    shape ``(n, n)`` (symmetry is checked here, semidefiniteness by Clarabel).
+    ``tol``, when given, replaces Clarabel's absolute/relative gap and
+    feasibility tolerances (default solver tolerances otherwise).
 
     Rows are stacked ``[A_eq; A_ub; finite bounds; SOC blocks]`` with
     ``A x + s = b``, ``s`` in zero/nonnegative/second-order cones.
@@ -626,6 +634,7 @@ def solve_socp(
     cl = _import_backend("clarabel")
     cc = _as_vector(c, "c")
     n = cc.size
+    p_mat = _quadratic(P, n)
     a_eq, be = _rows(A_eq, b_eq, n, "A_eq", "b_eq")
     a_ub, bu = _rows(A_ub, b_ub, n, "A_ub", "b_ub")
     if bounds is None:
@@ -650,13 +659,38 @@ def solve_socp(
     settings.verbose = False
     if max_iter is not None:
         settings.max_iter = int(max_iter)
+    if tol is not None:
+        if not np.isfinite(tol) or tol <= 0.0:
+            raise ValueError(f"tol must be positive and finite, got {tol!r}")
+        settings.tol_gap_abs = settings.tol_gap_rel = settings.tol_feas = float(tol)
     solver = cl.DefaultSolver(
-        sp.csc_matrix((n, n)), cc, big_a, big_b, cone_list, settings
+        sp.triu(p_mat).tocsc(), cc, big_a, big_b, cone_list, settings
     )
     sol = solver.solve()
     return _conic_result(
-        sol, cc, big_a, big_b, n_zero=be.size, n_nonneg=bu.size + h.size, blocks=blocks
+        sol,
+        cc,
+        big_a,
+        big_b,
+        n_zero=be.size,
+        n_nonneg=bu.size + h.size,
+        blocks=blocks,
+        p_mat=p_mat,
     )
+
+
+def _quadratic(P: Any, n: int) -> sp.csr_matrix:
+    """Validated symmetric ``n x n`` quadratic term (zero when ``P`` is None)."""
+    if P is None:
+        return sp.csr_matrix((n, n))
+    mat = _as_sparse(P, "P")
+    if mat.shape != (n, n):
+        raise ValueError(f"P must be ({n}, {n}), got {mat.shape}")
+    asym = abs(mat - mat.T)
+    scale = max(1.0, float(abs(mat).max()) if mat.nnz else 1.0)
+    if asym.nnz and float(asym.max()) > 1e-12 * scale:
+        raise ValueError("P must be symmetric")
+    return mat
 
 
 def _conic_result(
@@ -668,6 +702,7 @@ def _conic_result(
     n_zero: int,
     n_nonneg: int,
     blocks: Sequence[SOCBlock],
+    p_mat: sp.csr_matrix,
 ) -> ConicResult:
     name = str(sol.status)
     status = _CLARABEL_STATUS.get(name, SolveStatus.NUMERICAL)
@@ -689,19 +724,20 @@ def _conic_result(
         float(max(0.0, -s[n_zero:off].min())) if n_nonneg else 0.0,
         max(0.0, _soc_violation(s[off:], dims)),
     )
-    dual = float(np.abs(c + a.T @ z).max()) if c.size else 0.0
+    dual = float(np.abs(p_mat @ x + c + a.T @ z).max()) if c.size else 0.0
     dual = max(
         dual,
         float(max(0.0, -z[n_zero:off].min())) if n_nonneg else 0.0,
         max(0.0, _soc_violation(z[off:], dims)),
     )
-    comp = abs(float(s @ z)) / (1.0 + abs(float(c @ x)))
+    objective = float(c @ x + 0.5 * x @ (p_mat @ x))
+    comp = abs(float(s @ z)) / (1.0 + abs(objective))
     return ConicResult(
         status,
         x=_readonly(x),
         z=_readonly(z),
         s=_readonly(s),
-        objective=float(c @ x),
+        objective=objective,
         kkt_residuals=KKTResiduals(primal / pscale, dual / dscale, comp),
         iterations=iters,
     )
