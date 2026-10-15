@@ -2741,6 +2741,7 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-15 | #12597 | NSX-20: convex solver backends (highspy LP session with basis reuse, Clarabel SOCP), loop-nullspace extra, benchmark |
 | 2026-10-15 | #12596 | Add NSX-00 mathematical specification, SymPy golden fixtures, ADR-0054, hypothesis registry seed, and contract appendix; Add NSX-05 deferred-validation record DV-12554 and external validation protocol |
 | 2026-10-15 | #12541 | BunkerShot3D: particle playback panel embedded in the shot viewport (Open particle trajectory action, play/pause/step, time scrubber in simulation seconds, playback time scale, camera presets, y=0 clipping toggle, visible frame stamp, reader errors shown for rejected artifacts, a stated reason for every disabled control, keyboard shortcuts and focus order). Workbench parity gap now points at follow-up #12536. |
 | 2026-10-14 | #12542 | Complete BunkerShot3D workbench export views, save/reload, VTK stamped export, and API docs (#12536) |

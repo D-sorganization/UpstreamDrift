@@ -2288,6 +2288,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12563 · NSX-20: Convex Solver Backends (Highspy LP Session With Basis Reuse, Clarabel SOCP), Loop-Nullspace Extra, Benchmark
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12563
+- **Branch:** merged via #12597
+- **PR:** #12597
+- **Paths:** see #12597
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`fe6d354d`; collated from changes/12563-nsx-20-convex-solver-backends-highspy-lp.md)
+- **Summary:** NSX-20: convex solver backends (highspy LP session with basis reuse, Clarabel SOCP), loop-nullspace extra, benchmark
+- **Next step:** Shipped in PR #12597.
+
 ### DL-#12554 · Add NSX-05 Deferred-Validation Record DV-12554 and External Validation Protocol
 
 - **State:** shipped
