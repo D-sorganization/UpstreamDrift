@@ -581,11 +581,15 @@ citable contract for every variability child (epic section 5A, V1 to V8):
 Registry additions (`src/config/loop_nullspace_registry.json`): hypotheses
 `H-NOISE-ADDITIVE`, `H-NOISE-SIGNAL-DEPENDENT`, `H-GEOMETRIC-PRELOAD`,
 `H-DECLARED-JOINT-IMPEDANCE`, `H-SENSORIMOTOR-DELAY`, `H-TIMING-JITTER`,
-`H-MUSCLE-SHORT-RANGE-STIFFNESS`; seven citations, all `UNVERIFIED` (no DOI was
-retrieved). Hypotheses resting on an `UNVERIFIED` source or claim are
-`UNVERIFIED`, appear in no preset and are rejected by
-`require_verified_for_display`. A later child may promote one only after a
-source is retrieved and the claim found.
+`H-MUSCLE-SHORT-RANGE-STIFFNESS`; eight citations, all `VERIFIED` against
+retrieved abstracts (Harris and Wolpert 1998, Jones et al. 2002, Todorov and
+Jordan 2002, Scholz and Schoener 1999, Mueller and Sternad 2004, Burdet et al.
+2001, Cusumano and Dingwell 2013, Cui et al. 2008). Partial-support caveats are
+kept in each `claim_checked`: Scholz and Schoener (variance partition not in the
+abstract), Burdet (impedance geometry, not co-contraction) and Cui (feline,
+force-dependent rather than activation). Hypothesis statements claim only what
+the abstract supports; impedance values and noise amplitudes are declared by the
+user, not measured.
 
 Preconditions for consumers: use the golden values as oracles, never as
 inputs. Postconditions: the `z`-dependence of `F_t` appears only through

@@ -21,12 +21,13 @@ NEW_HYPOTHESES = (
 )
 NEW_CITATIONS = (
     "CIT-HARRIS-WOLPERT-1998",
-    "CIT-JONES-2002",
+    "CIT-JONES-HAMILTON-WOLPERT-2002",
     "CIT-TODOROV-JORDAN-2002",
     "CIT-SCHOLZ-SCHONER-1999",
     "CIT-MULLER-STERNAD-2004",
     "CIT-BURDET-2001",
     "CIT-CUSUMANO-DINGWELL-2013",
+    "CIT-CUI-2008",
 )
 
 
@@ -39,33 +40,29 @@ def test_all_new_hypotheses_and_citations_present(shipped: reg_mod.Registry) -> 
     for hid in NEW_HYPOTHESES:
         assert shipped.hypothesis(hid).statement.strip()
     for cid in NEW_CITATIONS:
-        assert shipped.citation_status(cid) in {"UNVERIFIED", "VERIFIED"}
+        assert shipped.citation_status(cid) == "VERIFIED", cid
 
 
-def test_new_citations_are_unverified_until_checked(shipped: reg_mod.Registry) -> None:
-    """No DOI could be checked in NSX-80, so none may claim VERIFIED."""
-    for cid in NEW_CITATIONS:
-        assert shipped.citation_status(cid) == "UNVERIFIED", cid
-
-
-def test_no_statement_cites_an_unverified_source_id(shipped: reg_mod.Registry) -> None:
+def test_no_statement_cites_a_source_id(shipped: reg_mod.Registry) -> None:
     for hid in NEW_HYPOTHESES:
         text = shipped.hypothesis(hid).statement
         assert not any(cid in text for cid in NEW_CITATIONS), hid
 
 
-def test_unverified_hypotheses_blocked_from_display(shipped: reg_mod.Registry) -> None:
-    for hid in ("H-NOISE-SIGNAL-DEPENDENT", "H-DECLARED-JOINT-IMPEDANCE"):
-        assert shipped.hypothesis(hid).verification_status == "UNVERIFIED"
-        with pytest.raises(ValueError, match="UNVERIFIED"):
-            shipped.require_verified_for_display([hid])
-    with pytest.raises(ValueError, match="UNVERIFIED"):
-        shipped.require_verified_for_display(["H-MUSCLE-SHORT-RANGE-STIFFNESS"])
+def test_new_hypotheses_may_be_displayed(shipped: reg_mod.Registry) -> None:
+    assert shipped.require_verified_for_display(NEW_HYPOTHESES) == NEW_HYPOTHESES
 
 
-def test_modelling_choice_hypotheses_display(shipped: reg_mod.Registry) -> None:
-    ids = ["H-NOISE-ADDITIVE", "H-GEOMETRIC-PRELOAD"]
-    assert shipped.require_verified_for_display(ids) == tuple(ids)
+def test_cited_hypotheses_rest_on_verified_sources(shipped: reg_mod.Registry) -> None:
+    expected = {
+        "H-NOISE-SIGNAL-DEPENDENT": "CIT-HARRIS-WOLPERT-1998",
+        "H-DECLARED-JOINT-IMPEDANCE": "CIT-BURDET-2001",
+        "H-MUSCLE-SHORT-RANGE-STIFFNESS": "CIT-CUI-2008",
+    }
+    for hid, cid in expected.items():
+        hyp = shipped.hypothesis(hid)
+        assert hyp.source.citation_id == cid
+        assert hyp.verification_status == "VERIFIED"
 
 
 def test_planted_unverified_id_is_rejected_by_the_gate() -> None:
