@@ -507,7 +507,16 @@ class Lane:
         spec: Mapping[str, Any],
         face_weight: float,
     ) -> None:
-        """Face-orientation targets (OSV-10) and the capture impact (GCV-20)."""
+        """Face-orientation targets (OSV-10) and the capture impact (GCV-20).
+
+        Precondition: ``spec`` carries a club body; otherwise ``ValueError``
+        names the spec source before any target is built (#12702).
+        """
+        from src.shared.python.motion_matching.club_face_target import (
+            require_club_assembly,
+        )
+
+        require_club_assembly(spec)
         self.set_face_targets(attachments, spec, face_weight)
         self.set_impact_split(attachments, spec)
 
