@@ -541,3 +541,15 @@ def test_drive_result_input_matches_mot_input(spec, model_path, tmp_path) -> Non
     from_mot, _ = _run(model_path, _static_mot(spec, theta, tmp_path))
     np.testing.assert_allclose(from_drive.moment_nm, from_mot.moment_nm, atol=1e-12)
     assert from_drive.provenance["distribution_source"] == "invented distribution"
+
+
+def test_generalized_effort_excludes_muscle_forces(spec, model_path, tmp_path) -> None:
+    """GENERALIZED_EFFORT is the net joint moment: muscles never contribute."""
+    muscled = write_fixture_osim(spec, tmp_path / "muscled.osim", muscles=True)
+    mot = _static_mot(spec, _theta(spec), tmp_path)
+    bare, _ = _run(model_path, mot)
+    with_muscles, _ = _run(muscled, mot)
+    np.testing.assert_allclose(
+        with_muscles.moment_nm, bare.moment_nm, atol=1e-9, rtol=0
+    )
+    assert with_muscles.provenance["muscles"].startswith("excluded")
