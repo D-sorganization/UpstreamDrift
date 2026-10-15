@@ -2301,6 +2301,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12584 · Two-Track Cross-Engine Closed-Loop Conformance Harness (Numerical Snapshot Equality Plus Propagated Scientific Envelopes), Registry Entries per Engine Pair, Native OpenSim Adapter Registered in the Engine Factory
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12584
+- **Branch:** merged via #12639
+- **PR:** #12639
+- **Paths:** see #12639
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`16e88462`; collated from changes/12584-two-track-cross-engine-closed-loop-confo.md)
+- **Summary:** Two-track cross-engine closed-loop conformance harness (numerical snapshot equality plus propagated scientific envelopes), registry entries per engine pair, native OpenSim adapter registered in the engine factory
+- **Next step:** Shipped in PR #12639.
+
 ### DL-#12681 · Pelvis Wears the Active Outfit's Pants Material: Body Classification Is Order-Independent (Leaf Segment Before Parent Folder, Exact Before Prefix Before Substring, Equal-Specificity Ties Raise), GolfSwing3D LowerTorso Maps to Pelvis, and Check_Clothing Enforces Pelvis Garment == Pants for Every Preset
 
 - **State:** shipped
