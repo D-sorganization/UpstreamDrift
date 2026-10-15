@@ -26,8 +26,13 @@ from src.engines.physics_engines.mujoco.python.native_model import (
     _solve_kkt_with_multipliers,
 )
 from src.shared.python.biomechanics.grip_extraction import (
+    DEFAULT_GRIP_INTERFACE,
+    GRIP_INTERFACES,
+    ClubSolidsPartition,
+    bare_club_kinematics_from_body_frame,
     closing_side_from_closure,
     closure_and_club_analysis,
+    club_solids_partition,
 )
 from src.shared.python.biomechanics.grip_wrench import (
     GripAnalysis,
@@ -89,14 +94,19 @@ class NativeMujocoFullBodyModel:
         if self.model.nq != len(self._indices) or self.model.nv != len(self._indices):
             raise ValueError("All coordinates must be scalar 1-DOF joints")
 
-        self._sites = {
-            name: self.model.site(site).id
-            for name, site in self.metadata["frame_sites"].items()
-        }
-        self._closure = [self.model.site(f"native_closure_{s}").id for s in ("a", "b")]
+        model = self.model
+        frame_sites = self.metadata["frame_sites"]
+        self._sites = {name: model.site(site).id for name, site in frame_sites.items()}
+        self._closure = [model.site(f"native_closure_{s}").id for s in ("a", "b")]
         self.closing_hand_side: str = closing_side_from_closure(spec["closure"])
+        self._club_body_name: str = str(spec["closure"]["body_b"])
+        self.club_partition: ClubSolidsPartition | None = (
+            club_solids_partition(spec) if "club" in spec else None
+        )
+        self._init_contact(spec)
+        self._errors: tuple[np.ndarray, np.ndarray] | None = None
 
-        # Contact setup
+    def _init_contact(self, spec: Mapping[str, Any]) -> None:
         contact_cfg = spec["contact"]
         self.contact_parameters = ContactParameters(**contact_cfg["parameters"])
         ground_cfg = contact_cfg["ground"]
@@ -111,25 +121,23 @@ class NativeMujocoFullBodyModel:
         )
         self.ground_plane = GroundPlane(normal=ground_normal, height_m=ground_height)
 
-        # Optional spin-friction patch (#11671); absent means point contacts.
         torsion = contact_cfg.get("torsion") or {}
         self._torsion_patch_m = float(torsion.get("patch_radius_m", 0.0))
         self._torsion_rate_rad_s = float(torsion.get("transition_rad_s", 0.5))
 
+        model = self.model
+        contact_sites = self.metadata["contact_sites"]
         self._spheres: dict[str, dict[str, Any]] = {}
         for sphere in contact_cfg["spheres"]:
             s_name = sphere["name"]
-            site_name = self.metadata["contact_sites"][s_name]
-            site_id = self.model.site(site_name).id
-            body_id = int(self.model.site_bodyid[site_id])
-            radius = float(sphere["radius_m"])
+            site_name = contact_sites[s_name]
+            site_id = model.site(site_name).id
+            body_id = int(model.site_bodyid[site_id])
             self._spheres[s_name] = {
                 "site_id": site_id,
                 "body_id": body_id,
-                "radius": radius,
+                "radius": float(sphere["radius_m"]),
             }
-
-        self._errors: tuple[np.ndarray, np.ndarray] | None = None
 
     def _build_model(self, xml: str) -> tuple[Any, Any]:
         """Compile ``xml`` into the ``(model, data)`` pair the adapter drives.
@@ -305,10 +313,43 @@ class NativeMujocoFullBodyModel:
         )
         return self._as_named(acceleration), multiplier.copy()
 
-    def _club_newton_euler(self, acceleration: np.ndarray) -> dict[str, Any]:
+    def _club_newton_euler(
+        self,
+        acceleration: np.ndarray,
+        *,
+        interface: str = DEFAULT_GRIP_INTERFACE,
+    ) -> dict[str, Any]:
         """Club kinematics for the Newton-Euler keywords at the last solve state."""
+        if interface not in GRIP_INTERFACES:
+            raise ValueError(
+                f"interface must be one of {GRIP_INTERFACES}, got {interface!r}"
+            )
         mj, model, data = self._mj, self.model, self.data
         body = int(model.site_bodyid[self._closure[1]])
+        gravity = np.array(model.opt.gravity)
+        if interface == DEFAULT_GRIP_INTERFACE and self.club_partition is not None:
+            t_fb = self.body_frames[self._club_body_name]
+            rot_wf = np.array(data.xmat[body]).reshape(3, 3)
+            pos_b = np.array(data.xpos[body]) + rot_wf @ t_fb[:3, 3]
+            rot_wb = rot_wf @ t_fb[:3, :3]
+            jacp, jacr = np.zeros((3, model.nv)), np.zeros((3, model.nv))
+            dotp, dotr = np.zeros((3, model.nv)), np.zeros((3, model.nv))
+            mj.mj_jac(model, data, jacp, jacr, pos_b, body)
+            mj.mj_jacDot(model, data, dotp, dotr, pos_b, body)
+            return bare_club_kinematics_from_body_frame(
+                self.club_partition,
+                body_position_world_m=pos_b,
+                body_rotation_world=rot_wb,
+                body_linear_velocity_world_m_s=jacp @ data.qvel,
+                body_linear_acceleration_world_m_s2=(
+                    jacp @ acceleration + dotp @ data.qvel
+                ),
+                body_angular_velocity_world_rad_s=jacr @ data.qvel,
+                body_angular_acceleration_world_rad_s2=(
+                    jacr @ acceleration + dotr @ data.qvel
+                ),
+                gravity_m_s2=gravity,
+            )
         com = np.array(data.xipos[body])
         jacp, jacr = np.zeros((3, model.nv)), np.zeros((3, model.nv))
         dotp, dotr = np.zeros((3, model.nv)), np.zeros((3, model.nv))
@@ -317,7 +358,7 @@ class NativeMujocoFullBodyModel:
         rot = np.array(data.ximat[body]).reshape(3, 3)
         return {
             "mass_kg": float(model.body_mass[body]),
-            "gravity_m_s2": np.array(model.opt.gravity),
+            "gravity_m_s2": gravity,
             "com_m": com,
             "com_acceleration_m_s2": jacp @ acceleration + dotp @ data.qvel,
             "inertia_world_kg_m2": rot @ np.diag(model.body_inertia[body]) @ rot.T,
@@ -330,6 +371,8 @@ class NativeMujocoFullBodyModel:
         coordinates: Mapping[str, float],
         rates: Mapping[str, float],
         primitive_efforts: Mapping[str, float],
+        *,
+        interface: str = DEFAULT_GRIP_INTERFACE,
     ) -> GripAnalysis:
         """Per-hand grip wrenches ON THE CLUB from the KKT multiplier (GCV-8).
 
@@ -339,26 +382,30 @@ class NativeMujocoFullBodyModel:
         ``F_hold = m (a_c - g) - F_close`` and ``tau_hold`` likewise about the
         club centre of mass (see
         :func:`~src.shared.python.biomechanics.grip_extraction.holding_hand_wrench`).
-        The holding grip point is the club body origin (the wrist-joint
-        follower frame); the split between hands is solver-defined and is
-        recorded as ``split_method="constraint_multiplier"``.
+        By default (``interface="hand_on_bare_club"``), the Newton-Euler mass and
+        inertia are the bare-club partition (excluding welded hand solids, #12550);
+        pass ``interface="wrist_on_hands_plus_club"`` for the legacy composite body.
         """
         acceleration, multiplier = self._constrained_solve(
             coordinates, rates, primitive_efforts
         )
         site_b = self._closure[1]
+        data = self.data
         body = int(self.model.site_bodyid[site_b])
+        club_kin = self._club_newton_euler(acceleration, interface=interface)
         return closure_and_club_analysis(
             closing_side=self.closing_hand_side,
-            closing_point_m=self.data.site_xpos[site_b],
+            closing_point_m=data.site_xpos[site_b],
             closing_force_n=-multiplier[:3],
             closing_torque_nm=-multiplier[3:],
-            holding_point_m=self.data.xpos[body],
-            club=self._club_newton_euler(acceleration),
+            holding_point_m=data.xpos[body],
+            club=club_kin,
             split_method="constraint_multiplier",
+            interface=interface,
             metadata={
                 "engine": "mujoco",
                 "kkt_regularization": self.kkt_regularization,
+                "club_mass_kg": float(club_kin["mass_kg"]),
             },
         )
 
@@ -367,9 +414,13 @@ class NativeMujocoFullBodyModel:
         coordinates: Mapping[str, float],
         rates: Mapping[str, float],
         primitive_efforts: Mapping[str, float],
+        *,
+        interface: str = DEFAULT_GRIP_INTERFACE,
     ) -> list[OverlayWrench]:
         """``WrenchKind.GRIP`` overlay wrenches for the current state (ADR-0052)."""
-        analysis = self.grip_analysis(coordinates, rates, primitive_efforts)
+        analysis = self.grip_analysis(
+            coordinates, rates, primitive_efforts, interface=interface
+        )
         return to_overlay_wrenches(analysis, source="mujoco:kkt_multiplier")
 
     def closure_errors(self) -> tuple[np.ndarray, np.ndarray]:

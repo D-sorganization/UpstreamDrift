@@ -59,18 +59,29 @@ SplitMethod = Literal[
     "unavailable",
 ]
 SPLIT_METHODS: tuple[str, ...] = get_args(SplitMethod)
+GripInterfaceName = Literal[
+    "hand_on_bare_club",
+    "wrist_on_hands_plus_club",
+]
+GRIP_INTERFACES: tuple[str, ...] = get_args(GripInterfaceName)
+DEFAULT_GRIP_INTERFACE: GripInterfaceName = "hand_on_bare_club"
+LEGACY_COMPOSITE_GRIP_INTERFACE: GripInterfaceName = "wrist_on_hands_plus_club"
 
 _BODY = "club"
 _ZERO: Vec3 = (0.0, 0.0, 0.0)
 
 __all__ = [
-    "allocate_min_norm",
-    "SPLIT_METHODS",
+    "DEFAULT_GRIP_INTERFACE",
+    "GRIP_INTERFACES",
     "GripAnalysis",
+    "GripInterfaceName",
     "GripSeries",
     "HandWrench",
+    "LEGACY_COMPOSITE_GRIP_INTERFACE",
+    "SPLIT_METHODS",
     "SplitMethod",
     "about_axis",
+    "allocate_min_norm",
     "analyze_grip",
     "to_contact_reaction_wrench",
     "to_overlay_wrenches",
@@ -134,6 +145,13 @@ class GripAnalysis:
     net_force_local_n: Vec3 | None = None
     unavailable_reason: str = ""
     metadata: Mapping[str, Any] = field(default_factory=dict)
+    interface: str = DEFAULT_GRIP_INTERFACE
+
+    def __post_init__(self) -> None:
+        if self.interface not in GRIP_INTERFACES:
+            raise ValueError(
+                f"interface must be one of {GRIP_INTERFACES}, got {self.interface!r}"
+            )
 
     def net_wrench_at(self, point_m: ArrayLike) -> OverlayWrench:
         """Net wrench moved to ``point_m`` via the shared transport helper.
@@ -214,6 +232,7 @@ def _unavailable(
     right: HandWrench | None,
     split_method: SplitMethod,
     metadata: Mapping[str, Any],
+    interface: str = DEFAULT_GRIP_INTERFACE,
 ) -> GripAnalysis:
     missing = [s for s, h in (("L", left), ("R", right)) if h is None]
     reason = f"hand wrench missing for: {', '.join(missing)}"
@@ -230,6 +249,7 @@ def _unavailable(
         split_method=split_method,
         unavailable_reason=reason,
         metadata=dict(metadata),
+        interface=interface,
     )
 
 
@@ -240,6 +260,7 @@ def analyze_grip(
     split_method: SplitMethod,
     club_rotation: ArrayLike | None = None,
     metadata: Mapping[str, Any] | None = None,
+    interface: str = DEFAULT_GRIP_INTERFACE,
 ) -> GripAnalysis:
     """Reduce two hand wrenches on the club to the midpoint net wrench.
 
@@ -249,22 +270,29 @@ def analyze_grip(
         club_rotation: optional world-from-club-local rotation ``R``; the
             club-local couple is ``R^T M_M``.
         metadata: solver metadata copied into the result.
+        interface: interface label, ``"hand_on_bare_club"`` (default) or
+            legacy ``"wrist_on_hands_plus_club"``.
 
     Postconditions: ``couple == contact_force_moment + applied_free_torque``
     and ``contact_force_moment == mof_left + mof_right``.  Any quantity that
     cannot be computed is ``None`` with ``unavailable_reason`` set.
 
     Raises:
-        ValueError: on invalid ``split_method``, wrong side slot or rotation.
+        ValueError: on invalid ``split_method``, ``interface``, wrong side slot
+            or rotation.
     """
     if split_method not in SPLIT_METHODS:
         raise ValueError(f"split_method must be one of {SPLIT_METHODS}")
+    if interface not in GRIP_INTERFACES:
+        raise ValueError(
+            f"interface must be one of {GRIP_INTERFACES}, got {interface!r}"
+        )
     _validate_slot(left, "L")
     _validate_slot(right, "R")
     rot = None if club_rotation is None else _check_rotation(club_rotation)
     meta = metadata or {}
     if left is None or right is None:
-        return _unavailable(left, right, split_method, meta)
+        return _unavailable(left, right, split_method, meta, interface=interface)
 
     mid = _tuple3((np.array(left.point_m) + np.array(right.point_m)) / 2.0)
     net = _tuple3(np.array(left.force_on_club_n) + np.array(right.force_on_club_n))
@@ -301,6 +329,7 @@ def analyze_grip(
         net_force_local_n=net_local,
         unavailable_reason=reason,
         metadata=dict(meta),
+        interface=interface,
     )
 
 

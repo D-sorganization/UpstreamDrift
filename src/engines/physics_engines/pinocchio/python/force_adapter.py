@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import TypeAlias
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -12,8 +12,15 @@ from src.engines.physics_engines.pinocchio.python.marker_kinematics import Coord
 from src.engines.physics_engines.pinocchio.python.native_model import (
     FullBodyPinocchioModel,
 )
-from src.engines.physics_engines.pinocchio.python.pinocchio_force_torque import (
-    PinocchioForceTorqueSource,
+from src.shared.python.biomechanics.grip_extraction import (
+    DEFAULT_GRIP_INTERFACE,
+    GRIP_INTERFACES,
+    ClubSolidsPartition,
+    allocation_grip_analysis,
+    bare_club_kinematics_from_body_frame,
+    closing_side_from_closure,
+    closure_and_club_analysis,
+    club_solids_partition,
 )
 from src.shared.python.biomechanics.grip_wrench import GripAnalysis
 from src.shared.python.motion_matching.multi_engine_torque_allocator import EngineType
@@ -33,21 +40,29 @@ class PinocchioForceAdapter:
     """
 
     def __init__(self, spec_bytes: bytes) -> None:
-        self._plant = FullBodyPinocchioModel(json.loads(spec_bytes))
+        spec = json.loads(spec_bytes)
+        self._plant = FullBodyPinocchioModel(spec)
         self._pin = self._plant._pin
         self._model = self._plant.model
         self._data = self._model.createData()
+        self.closing_hand_side: str = closing_side_from_closure(spec["closure"])
+        self._club_body_name: str = str(spec["closure"]["body_b"])
+        self._gravity = np.asarray(spec["gravity_m_s2"], dtype=float)
+        self.club_partition: ClubSolidsPartition | None = (
+            club_solids_partition(spec) if "club" in spec else None
+        )
         mapping = CoordinateMap.from_plant(self._plant)
+        v_idx = mapping.v_index
         if (
             self._model.nq != self._model.nv
             or mapping.n != self._model.nv
-            or sorted(mapping.v_index.tolist()) != list(range(mapping.n))
-            or not np.array_equal(mapping.q_index, mapping.v_index)
+            or sorted(v_idx.tolist()) != list(range(mapping.n))
+            or not np.array_equal(mapping.q_index, v_idx)
         ):
             raise ValueError(
                 "Force adapter requires a complete scalar q/v coordinate map"
             )
-        self._names = tuple(mapping.names[i] for i in np.argsort(mapping.v_index))
+        self._names = tuple(mapping.names[i] for i in np.argsort(v_idx))
         if not set(ROOT_COORDINATES).issubset(self._names):
             raise ValueError(
                 "Force adapter requires the named unactuated root coordinates"
@@ -138,19 +153,94 @@ class PinocchioForceAdapter:
     def compute_grip_jacobian(self, q: Array) -> Array:
         configuration = self._checked(q, "configuration")
         coordinates = dict(zip(self._names, configuration.tolist(), strict=True))
-        return self._plant.closure_force_jacobian(coordinates).jacobian.copy()
+        closure_jac = self._plant.closure_force_jacobian(coordinates)
+        return closure_jac.jacobian.copy()
+
+    def club_newton_euler(
+        self,
+        q: Array,
+        v: Array,
+        a: Array,
+        *,
+        interface: str = DEFAULT_GRIP_INTERFACE,
+    ) -> dict[str, Any]:
+        """Club kinematics for Newton-Euler grip extraction (NSX-01, #12550)."""
+        if interface not in GRIP_INTERFACES:
+            raise ValueError(
+                f"interface must be one of {GRIP_INTERFACES}, got {interface!r}"
+            )
+        configuration = self._checked(q, "configuration")
+        velocity = self._checked(v, "velocity")
+        acceleration = self._checked(a, "acceleration")
+        self._pin.forwardKinematics(
+            self._model, self._data, configuration, velocity, acceleration
+        )
+        joint_id, body_pose = self._plant.body_placement(self._club_body_name)
+        o_mb = self._data.oMi[joint_id] * body_pose
+        origin_b = np.asarray(o_mb.translation, dtype=float)
+        rot_wb = np.asarray(o_mb.rotation, dtype=float)
+        v_local = body_pose.actInv(self._data.v[joint_id])
+        a_local = body_pose.actInv(self._data.a[joint_id])
+        v_origin = rot_wb @ np.asarray(v_local.linear, dtype=float)
+        omega = rot_wb @ np.asarray(v_local.angular, dtype=float)
+        alpha = rot_wb @ np.asarray(a_local.angular, dtype=float)
+        a_origin = rot_wb @ np.asarray(a_local.linear, dtype=float) + np.cross(
+            omega, v_origin
+        )
+        if self.club_partition is not None:
+            inertia = (
+                self.club_partition.bare_club_inertia
+                if interface == DEFAULT_GRIP_INTERFACE
+                else self.club_partition.composite_inertia
+            )
+            return bare_club_kinematics_from_body_frame(
+                inertia,
+                body_position_world_m=origin_b,
+                body_rotation_world=rot_wb,
+                body_linear_velocity_world_m_s=v_origin,
+                body_linear_acceleration_world_m_s2=a_origin,
+                body_angular_velocity_world_rad_s=omega,
+                body_angular_acceleration_world_rad_s2=alpha,
+                gravity_m_s2=self._gravity,
+            )
+        joint_inertia = self._model.inertias[joint_id]
+        inertia_b = body_pose.actInv(joint_inertia)
+        com_b = np.asarray(inertia_b.lever, dtype=float)
+        r = rot_wb @ com_b
+        return {
+            "mass_kg": float(inertia_b.mass),
+            "gravity_m_s2": self._gravity.copy(),
+            "com_m": origin_b + r,
+            "com_acceleration_m_s2": (
+                a_origin + np.cross(alpha, r) + np.cross(omega, np.cross(omega, r))
+            ),
+            "inertia_world_kg_m2": (
+                rot_wb @ np.asarray(inertia_b.inertia, dtype=float) @ rot_wb.T
+            ),
+            "angular_velocity_rad_s": omega,
+            "angular_acceleration_rad_s2": alpha,
+        }
 
     def grip_analysis_from_allocation(
-        self, q: Array, lambda_grip: Array
+        self,
+        q: Array,
+        lambda_grip: Array,
+        *,
+        v: Array | None = None,
+        a: Array | None = None,
+        interface: str = DEFAULT_GRIP_INTERFACE,
     ) -> GripAnalysis:
-        """Net grip analysis of one allocated ``lambda_grip`` (GCV-8, #11714).
+        """Grip analysis of one allocated ``lambda_grip`` (GCV-8, #11714, #12550).
 
-        ``lambda_grip`` is the allocator's 6-D closure wrench (linear then
-        angular, constraint LOCAL frame, ``J.T @ lambda`` the load on the
-        human).  It is rotated to the world and reported at the closure frame
-        origin through :meth:`PinocchioForceTorqueSource.grip_from_allocation`:
-        ``split_method="allocation"``, per-hand wrenches unavailable.
+        When ``v`` and ``a`` are omitted, returns the net 6-D allocation wrench
+        at the closure frame origin. When ``v`` and ``a`` are provided, uses
+        club Newton-Euler (with the bare-club partition by default) to resolve
+        both the closing and holding hand wrenches.
         """
+        if (v is None) != (a is None):
+            raise ValueError(
+                "Both v and a must be provided together for club Newton-Euler grip split"
+            )
         configuration = self._checked(q, "configuration")
         wrench = np.asarray(lambda_grip, dtype=float)
         if wrench.shape != (6,) or not np.isfinite(wrench).all():
@@ -159,16 +249,41 @@ class PinocchioForceAdapter:
             )
         coordinates = dict(zip(self._names, configuration.tolist(), strict=True))
         rotation, origin = self._plant.closure_frame_pose(coordinates)
-        return PinocchioForceTorqueSource.grip_from_allocation(
-            wrench,
-            point_m=origin,
-            ordering="force_torque",
-            load_on="human",
-            rotation_world_from_frame=rotation,
+        if v is None or a is None:
+            return allocation_grip_analysis(
+                wrench,
+                point_m=origin,
+                ordering="force_torque",
+                load_on="human",
+                rotation_world_from_frame=rotation,
+                interface=interface,
+            )
+        club_kin = self.club_newton_euler(q, v, a, interface=interface)
+        joint_id, _ = self._plant.body_placement(self._club_body_name)
+        o_mi = self._data.oMi[joint_id]
+        holding_point = np.asarray(o_mi.translation, dtype=float)
+        return closure_and_club_analysis(
+            closing_side=self.closing_hand_side,
+            closing_point_m=origin,
+            closing_force_n=-rotation @ wrench[:3],
+            closing_torque_nm=-rotation @ wrench[3:],
+            holding_point_m=holding_point,
+            club=club_kin,
+            split_method="allocation",
+            interface=interface,
+            metadata={
+                "engine": "pinocchio",
+                "load_on": "human",
+                "club_mass_kg": float(club_kin["mass_kg"]),
+            },
         )
 
     def grip_analyses_from_allocation(
-        self, q_traj: Array, lambda_grip: Array
+        self,
+        q_traj: Array,
+        lambda_grip: Array,
+        *,
+        interface: str = DEFAULT_GRIP_INTERFACE,
     ) -> list[GripAnalysis]:
         """:meth:`grip_analysis_from_allocation` for each frame of a trajectory."""
         q_arr = np.asarray(q_traj, dtype=float)
@@ -179,7 +294,7 @@ class PinocchioForceAdapter:
                 f"(n, 6), got {q_arr.shape} and {lam_arr.shape}"
             )
         return [
-            self.grip_analysis_from_allocation(q_k, lam_k)
+            self.grip_analysis_from_allocation(q_k, lam_k, interface=interface)
             for q_k, lam_k in zip(q_arr, lam_arr, strict=True)
         ]
 

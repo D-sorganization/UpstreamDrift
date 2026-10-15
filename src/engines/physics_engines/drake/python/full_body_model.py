@@ -22,8 +22,14 @@ from src.engines.physics_engines.drake.python.full_body_urdf import (
     export_full_body_urdf,
 )
 from src.shared.python.biomechanics.grip_extraction import (
+    DEFAULT_GRIP_INTERFACE,
+    GRIP_INTERFACES,
+    ClubSolidsPartition,
+    SolidSpatialInertia,
+    bare_club_kinematics_from_body_frame,
     closing_side_from_closure,
     closure_and_club_analysis,
+    club_solids_partition,
 )
 from src.shared.python.biomechanics.grip_wrench import (
     GripAnalysis,
@@ -90,31 +96,45 @@ def club_newton_euler(
     gravity: Array,
     *,
     welded: Sequence[Any] | None = None,
+    partition: ClubSolidsPartition | SolidSpatialInertia | None = None,
 ) -> dict[str, Any]:
     """Club kinematics as the ``holding_hand_wrench`` Newton-Euler keywords.
 
-    The club mass may live on solid links welded to ``body``, so by default the
-    composite inertia of everything welded to it is used; ``welded`` overrides
-    the body-index list (for a club that is itself the only club mass).
-    ``acceleration`` is the
-    generalised acceleration ``vdot`` at the state held by ``context``.
+    When ``partition`` is supplied (NSX-01, #12550), the bare-club spatial
+    inertia from ``partition`` is transported to world coordinates using the
+    kinematics of ``body``; otherwise the composite inertia of bodies welded
+    to ``body`` (or ``welded``) is used.
     """
-    rot_wb = plant.EvalBodyPoseInWorld(context, body).rotation().matrix()
-    origin = plant.EvalBodyPoseInWorld(context, body).translation()
-    if welded is None:
-        welded = [b.index() for b in plant.GetBodiesWeldedTo(body)]
-    spatial_inertia = plant.CalcSpatialInertia(context, body.body_frame(), welded)
-    com_b = np.asarray(spatial_inertia.get_com())
-    inertia_com_b = spatial_inertia.CalcRotationalInertia().ShiftToCenterOfMass(
-        float(spatial_inertia.get_mass()), com_b
-    )
-    r = rot_wb @ com_b
+    pose = plant.EvalBodyPoseInWorld(context, body)
+    rot_obj = pose.rotation()
+    rot_wb = rot_obj.matrix()
+    origin = pose.translation()
     velocity = plant.EvalBodySpatialVelocityInWorld(context, body)
     omega = np.asarray(velocity.rotational())
     accels = plant.CalcSpatialAccelerationsFromVdot(context, acceleration)
     spatial_acc = accels[int(body.index())]
     alpha = np.asarray(spatial_acc.rotational())
     a_origin = np.asarray(spatial_acc.translational())
+    if partition is not None:
+        return bare_club_kinematics_from_body_frame(
+            partition,
+            body_position_world_m=origin,
+            body_rotation_world=rot_wb,
+            body_linear_velocity_world_m_s=np.asarray(velocity.translational()),
+            body_linear_acceleration_world_m_s2=a_origin,
+            body_angular_velocity_world_rad_s=omega,
+            body_angular_acceleration_world_rad_s2=alpha,
+            gravity_m_s2=gravity,
+        )
+    if welded is None:
+        welded = [b.index() for b in plant.GetBodiesWeldedTo(body)]
+    spatial_inertia = plant.CalcSpatialInertia(context, body.body_frame(), welded)
+    com_b = np.asarray(spatial_inertia.get_com())
+    rot_inertia = spatial_inertia.CalcRotationalInertia()
+    inertia_com_b = rot_inertia.ShiftToCenterOfMass(
+        float(spatial_inertia.get_mass()), com_b
+    )
+    r = rot_wb @ com_b
     a_com = a_origin + np.cross(alpha, r) + np.cross(omega, np.cross(omega, r))
     inertia_w = rot_wb @ inertia_com_b.CopyToFullMatrix3() @ rot_wb.T
     return {
@@ -148,15 +168,11 @@ class FullBodyDrakeModel:
         self._wrt_v = api.JacobianWrtVariable.kV
         self.plant = api.MultibodyPlant(time_step=0.0)
         self._instance = api.Parser(self.plant).AddModelsFromString(self.xml, "urdf")[0]
-        self.plant.WeldFrames(
-            self.plant.world_frame(),
-            self.plant.GetBodyByName(
-                self.metadata["body_links"]["world"], self._instance
-            ).body_frame(),
-        )
-        self.plant.mutable_gravity_field().set_gravity_vector(
-            specification["gravity_m_s2"]
-        )
+        world_link = self.metadata["body_links"]["world"]
+        world_body = self.plant.GetBodyByName(world_link, self._instance)
+        self.plant.WeldFrames(self.plant.world_frame(), world_body.body_frame())
+        grav_field = self.plant.mutable_gravity_field()
+        grav_field.set_gravity_vector(specification["gravity_m_s2"])
 
         self.names = tuple(self.metadata["coordinate_order"])
         self._joints = {
@@ -172,8 +188,9 @@ class FullBodyDrakeModel:
         self.closing_hand_side: str = closing_side_from_closure(
             specification["closure"]
         )
-        # Holding-hand grip point: origin of the club's wrist-joint follower
-        # frame (the MuJoCo club body origin), in the club body frame.
+        self.club_partition: ClubSolidsPartition | None = (
+            club_solids_partition(specification) if "club" in specification else None
+        )
         club_joint = next(
             joint
             for joint in specification["joints"]
@@ -196,9 +213,8 @@ class FullBodyDrakeModel:
         self._last_closure: tuple[Array, Array] | None = None
         self.gravity = np.asarray(specification["gravity_m_s2"], dtype=float)
         self.mass_kg = float(self.plant.CalcTotalMass(self.context))
-        self.upper_body_coordinates: int = int(
-            specification.get("upper_body_counts", {}).get("coordinates", 0)
-        )
+        upper_counts = specification.get("upper_body_counts") or {}
+        self.upper_body_coordinates: int = int(upper_counts.get("coordinates", 0))
 
     def _init_closure_and_frames(self, spec: Mapping[str, Any], api: Any) -> None:
         closure = spec["closure"]
@@ -550,14 +566,25 @@ class FullBodyDrakeModel:
         )
         return self._as_named(acceleration), multiplier
 
-    def _club_newton_euler(self, acceleration: Array) -> dict[str, Any]:
+    def _club_newton_euler(
+        self,
+        acceleration: Array,
+        *,
+        interface: str = DEFAULT_GRIP_INTERFACE,
+    ) -> dict[str, Any]:
         """Club kinematics for the Newton-Euler keywords at the solved state."""
+        if interface not in GRIP_INTERFACES:
+            raise ValueError(
+                f"interface must be one of {GRIP_INTERFACES}, got {interface!r}"
+            )
+        partition = self.club_partition if interface == DEFAULT_GRIP_INTERFACE else None
         return club_newton_euler(
             self.plant,
             self.context,
             self._closure[1].body(),
             acceleration,
             self.gravity,
+            partition=partition,
         )
 
     def grip_analysis(
@@ -565,6 +592,8 @@ class FullBodyDrakeModel:
         coordinates: Mapping[str, float],
         rates: Mapping[str, float],
         primitive_efforts: Mapping[str, float],
+        *,
+        interface: str = DEFAULT_GRIP_INTERFACE,
     ) -> GripAnalysis:
         """Per-hand grip wrenches ON THE CLUB from the KKT multiplier (GCV-8).
 
@@ -580,28 +609,28 @@ class FullBodyDrakeModel:
         )
         frame_a, frame_b = self._closure
         plant, ctx = self.plant, self.context
-        rot_wa = (
-            plant.CalcRelativeTransform(ctx, plant.world_frame(), frame_a)
-            .rotation()
-            .matrix()
-        )
-        point_b = plant.CalcRelativeTransform(
-            ctx, plant.world_frame(), frame_b
-        ).translation()
+        world = plant.world_frame()
+        x_wa = plant.CalcRelativeTransform(ctx, world, frame_a)
+        rot_wa = x_wa.rotation().matrix()
+        x_wb = plant.CalcRelativeTransform(ctx, world, frame_b)
+        point_b = x_wb.translation()
         club_pose = plant.EvalBodyPoseInWorld(ctx, frame_b.body())
-        holding_point = (
-            club_pose.translation()
-            + club_pose.rotation().matrix() @ self._holding_point_in_club
-        )
+        club_rot = club_pose.rotation().matrix()
+        holding_point = club_pose.translation() + club_rot @ self._holding_point_in_club
+        club_kin = self._club_newton_euler(acceleration, interface=interface)
         return closure_and_club_analysis(
             closing_side=self.closing_hand_side,
             closing_point_m=point_b,
             closing_force_n=rot_wa @ multiplier[3:],
             closing_torque_nm=rot_wa @ multiplier[:3],
             holding_point_m=holding_point,
-            club=self._club_newton_euler(acceleration),
+            club=club_kin,
             split_method="constraint_multiplier",
-            metadata={"engine": "drake"},
+            interface=interface,
+            metadata={
+                "engine": "drake",
+                "club_mass_kg": float(club_kin["mass_kg"]),
+            },
         )
 
     def grip_overlay_wrenches(
@@ -609,9 +638,13 @@ class FullBodyDrakeModel:
         coordinates: Mapping[str, float],
         rates: Mapping[str, float],
         primitive_efforts: Mapping[str, float],
+        *,
+        interface: str = DEFAULT_GRIP_INTERFACE,
     ) -> list[OverlayWrench]:
         """``WrenchKind.GRIP`` overlay wrenches for the current state (ADR-0052)."""
-        analysis = self.grip_analysis(coordinates, rates, primitive_efforts)
+        analysis = self.grip_analysis(
+            coordinates, rates, primitive_efforts, interface=interface
+        )
         return to_overlay_wrenches(analysis, source="drake:kkt_multiplier")
 
     def closure_errors(self) -> tuple[Array, Array]:
