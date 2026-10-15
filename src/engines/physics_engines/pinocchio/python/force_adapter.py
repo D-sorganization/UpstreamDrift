@@ -140,6 +140,74 @@ class PinocchioForceAdapter:
             dtype=float,
         ).copy()
 
+    # -- inertial parameters (NSX-62, #12587) --------------------------------
+
+    @property
+    def n_inertial_parameters(self) -> int:
+        """Ten dynamic parameters per moving joint's body."""
+        return 10 * (self._model.njoints - 1)
+
+    def inertial_parameters(self) -> Array:
+        """Body inertias as a flat vector, ten per joint (Pinocchio layout).
+
+        ``[m, h(3), Ixx, Ixy, Iyy, Ixz, Iyz, Izz]`` per body, inertia about the
+        joint-frame origin (``Inertia.toDynamicParameters``); a copy.
+        """
+        return np.concatenate(
+            [
+                np.asarray(self._model.inertias[j].toDynamicParameters(), dtype=float)
+                for j in range(1, self._model.njoints)
+            ]
+        )
+
+    def set_inertial_parameters(self, parameters: Array) -> None:
+        """Replace the body inertias by ``parameters`` (see the getter's layout).
+
+        Only bodies whose parameters differ are rebuilt; a zero-mass body must
+        be all zeros.  Raises ``ValueError`` on a wrong size or nonfinite entry.
+        The contact spheres, closure and club split do not depend on inertias.
+        """
+        values = np.asarray(parameters, dtype=float)
+        if (
+            values.shape != (self.n_inertial_parameters,)
+            or not np.isfinite(values).all()
+        ):
+            raise ValueError(
+                f"parameters must be {self.n_inertial_parameters} finite values"
+            )
+        current = self.inertial_parameters().reshape(-1, 10)
+        for index, (new, old) in enumerate(
+            zip(values.reshape(-1, 10), current, strict=True)
+        ):
+            if np.array_equal(new, old):
+                continue
+            if new[0] == 0.0:
+                if np.any(new != 0.0):
+                    raise ValueError(f"massless body {index} has nonzero parameters")
+                self._model.inertias[index + 1] = self._pin.Inertia.Zero()
+            else:
+                self._model.inertias[index + 1] = (
+                    self._pin.Inertia.FromDynamicParameters(new)
+                )
+
+    @property
+    def club_body_index(self) -> int:
+        """Index of the club carrier among the bodies of :meth:`inertial_parameters`."""
+        return self._bare_club_in_joint_frame()[0] - 1
+
+    def torque_regressor(self, q: Array, v: Array, a: Array) -> Array:
+        """Joint-torque regressor ``Y`` with ``Y pi = rnea(q, v, a)`` (nv, n_pi)."""
+        return np.asarray(
+            self._pin.computeJointTorqueRegressor(
+                self._model,
+                self._data,
+                self._checked(q, "configuration"),
+                self._checked(v, "velocity"),
+                self._checked(a, "acceleration"),
+            ),
+            dtype=float,
+        ).copy()
+
     def compute_contact_jacobian(self, q: Array) -> Array:
         configuration = self._checked(q, "configuration")
         self._pin.computeJointJacobians(self._model, self._data, configuration)
