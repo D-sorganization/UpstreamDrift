@@ -134,9 +134,7 @@ class TestXml:
     def test_one_custom_joint_per_level_caudal_to_cranial(self) -> None:
         root = _root()
         joints = root.findall(".//JointSet/objects/CustomJoint")
-        assert [j.get("name") for j in joints] == [
-            f"{lv.name}_jnt" for lv in LUMBAR
-        ]
+        assert [j.get("name") for j in joints] == [f"{lv.name}_jnt" for lv in LUMBAR]
         assert len(root.findall(".//JointSet/objects/FreeJoint")) == 1
         assert len(root.findall(".//JointSet/objects/WeldJoint")) == 2
 
@@ -168,9 +166,7 @@ class TestXml:
         spec = FixtureSpec()
         root = _root(spec)
         joint = root.findall(".//JointSet/objects/CustomJoint")[0]
-        frames = {
-            f.get("name"): f for f in joint.findall("frames/PhysicalOffsetFrame")
-        }
+        frames = {f.get("name"): f for f in joint.findall("frames/PhysicalOffsetFrame")}
         parent = frames["L5_S1_jnt_parent_offset"]
         orient = [float(v) for v in parent.findtext("orientation").split()]
         lordosis = spec.neutral_lordosis_deg[SpinalLevel.L5_S1]
@@ -236,6 +232,7 @@ def _expected(spec: FixtureSpec, angles: np.ndarray, upto: int | None = None):
 
 
 @pytest.mark.requires_opensim
+@pytest.mark.integration
 class TestNative:
     def test_loads_and_inits(self, native_model) -> None:
         state = native_model.initSystem()
