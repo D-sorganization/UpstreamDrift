@@ -424,6 +424,11 @@
       "id": "UP-D1-analytic-muscle-replay-input-contract-inventory",
       "owner": "UpstreamDrift issue #12392",
       "resolution": "Inventory provisional chapter63 and src/shared/python/motion_matching/analytic_muscle_replay_spec.py: the strict standard-library decoder, exact schema/profile, SI unit labels, bounded record sizes, exact clock grid and raw excitation slew bounds, initial constant-moment-arm length-domain check, immutable decoded records, and syntactic-only producer metadata. Decoding proves only input conformance; there is no execution worker, force or activation evaluation, plant integration, native replay, implementation/runtime receipt, or qualification evidence. Keep calculations empty and publication blocked until the worker, complete state/output contract, independent runtime provenance, validation, and review are inventoried separately."
+    },
+    {
+      "id": "UP-NSX-loop-nullspace-exploration",
+      "owner": "UpstreamDrift epic #12593 and issues #12549, #12554",
+      "resolution": "Inventory provisional chapter 65-loop-null-space.qmd, docs/research/loop_nullspace/loop_nullspace.tex, docs/research/loop_nullspace/contract_appendix.md, docs/adr/0054-closed-loop-null-space-exploration.md, src/config/loop_nullspace_registry.json, and docs/development/planning/DV-12554.md: the general equality system A x = b with four separate dimension counts, three-case zero-side diagnostics, the invertible 6x6 grasp-map kernel at the canonical grip midpoint frame, the 0.313 kg bare-club versus 1.1082 kg welded-hand solid partition, six gated invariants, the c_+/c_- gross-power identity, constrained KKT ZTCF/ZVCF projections, static versus trajectory-coupled envelopes, and the six evidence axes. Symbolic SymPy goldens establish algebraic consistency only; external instrumented-grip and EMG validation remains deferred under DV-12554, and manual calculation coverage and publication remain blocked."
     }
   ],
   "calculations": []
