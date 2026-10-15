@@ -57,6 +57,7 @@ class EngineType(str, Enum):
     DRAKE = "drake"
     OPENSIM = "opensim"
     SIMSCAPE = "simscape"
+    MYOSUITE = "myosuite"
 
 
 @dataclass(frozen=True)
@@ -200,11 +201,7 @@ class MujocoForceAdapter:
     """MuJoCo adapter for full-body inverse dynamics and contact Jacobians."""
 
     def __init__(self, spec_bytes: bytes) -> None:
-        from src.engines.physics_engines.mujoco.python.full_body_model import (
-            NativeMujocoFullBodyModel,
-        )
-
-        self._model = NativeMujocoFullBodyModel(spec_bytes)
+        self._model = self._make_model(spec_bytes)
         self._mj = self._model._mj
         mj_model = self._model.model
         self._nq = int(mj_model.nq)
@@ -215,6 +212,14 @@ class MujocoForceAdapter:
         # State vectors use MuJoCo dof order, which need not be spec order.
         self._coordinate_order = self._model.native_coordinate_order
         self._contact_names = tuple(getattr(self._model, "_spheres", {}).keys())
+
+    def _make_model(self, spec_bytes: bytes) -> Any:
+        """Native model this adapter drives; subclasses supply another runtime."""
+        from src.engines.physics_engines.mujoco.python.full_body_model import (
+            NativeMujocoFullBodyModel,
+        )
+
+        return NativeMujocoFullBodyModel(spec_bytes)
 
     @property
     def engine_type(self) -> EngineType:
@@ -826,6 +831,13 @@ class MultiEngineTorqueAllocator:
         )
 
 
+def _resolve_spec_path(spec_path: Path | str | None, repo_root: Path) -> Path:
+    """Resolve a full-body spec path, defaulting to v1 and falling back to the
+    repository root for relative paths.  The returned path may not exist."""
+    p = Path(spec_path or "docs/development/full_body_models/full_body_spec_v1.json")
+    return p if p.is_file() else repo_root / p
+
+
 def create_engine_force_adapter(
     engine: EngineType | str,
     spec_path: Path | str | None = None,
@@ -845,11 +857,7 @@ def create_engine_force_adapter(
     if e == EngineType.PINOCCHIO:
         if spec_path is None and allow_synthetic and nv != 41:
             return PinocchioSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
-        p = Path(
-            spec_path or "docs/development/full_body_models/full_body_spec_v1.json"
-        )
-        if not p.is_file():
-            p = repo_root / p
+        p = _resolve_spec_path(spec_path, repo_root)
         if not p.is_file() and allow_synthetic:
             return PinocchioSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
         try:
@@ -865,15 +873,19 @@ def create_engine_force_adapter(
     if e == EngineType.MUJOCO:
         if spec_path is None and allow_synthetic and nv != 41:
             return MujocoSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
-        p = Path(
-            spec_path or "docs/development/full_body_models/full_body_spec_v1.json"
-        )
-        if not p.is_file():
-            p = repo_root / p
+        p = _resolve_spec_path(spec_path, repo_root)
         if not p.is_file() and allow_synthetic:
             return MujocoSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
         require(p.is_file(), f"MuJoCo specification not found: {p}")
         return MujocoForceAdapter(p.read_bytes())
+    if e == EngineType.MYOSUITE:
+        p = _resolve_spec_path(spec_path, repo_root)
+        require(p.is_file(), f"MyoSuite specification not found: {p}")
+        from src.engines.physics_engines.myosuite.python.force_adapter import (
+            MyoSuiteForceAdapter,
+        )
+
+        return MyoSuiteForceAdapter(p.read_bytes())
     if e == EngineType.DRAKE:
         if spec_path is None and allow_synthetic and nv != 41:
             return DrakeSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
