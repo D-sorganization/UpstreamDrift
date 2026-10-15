@@ -590,6 +590,15 @@
       "status": "parity",
       "tiles": [],
       "notes": "Swing Report S6 (#12329) and its web parity (#12330), epic #11419. Both dialogs list the same validated swing-report-v1 plots through the Python ReportViewModel (POST /api/swing-report/view returns its text-only rows, so a withheld quantity never reaches the browser as a number): withheld plots are disabled with a 'Not Validated' label and their reason, advertised plots show their engine-spread uncertainty, Full selects every enabled plot and Custom keeps its own selection. Export writes the S4 package (export_package) to a chosen directory on the desktop and downloads it as a zip on the web (POST /api/swing-report/export). Neither dialog is wired to a launcher tile or page yet."
+    },
+    "loop_nullspace_exploration": {
+      "title": "Closed-Loop Null-Space Exploration (NSX): invariants, feasible torque envelopes, 6-DOF grip-split coordinates, and diagnostics",
+      "pyqt": "src/tools/grip_wrench_plots/gui.py",
+      "api": "src/api/routes/analysis.py",
+      "web": "ui/src/components/analysis/LoopNullSpacePanel.tsx",
+      "status": "parity",
+      "tiles": [],
+      "notes": "NSX-43 (#12575), NSX-44 (#12576), and NSX-45 (#12577) under epic #12593. Both the PyQt6 Grip Wrench Plots tabs and the React LoopNullSpacePanel on AnalysisTools consume the framework-free NSX plot model (Invariants, Envelopes with DETERMINED_SIGN/INDETERMINATE/UNBOUNDED segments and binding hypotheses, Hand Split s1..s6, overlaid allocation representatives, and Diagnostics) with a registry-backed preset selector, cancellable background job execution, evidence badges per panel, and a link to docs/user_guide/loop_nullspace_exploration.md."
     }
   }
 }

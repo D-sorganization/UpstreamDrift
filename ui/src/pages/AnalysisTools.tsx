@@ -15,6 +15,7 @@ import { CounterfactualPanel } from '@/components/analysis/CounterfactualPanel';
 import { ImpactParametersPanel } from '@/components/analysis/ImpactParametersPanel';
 import { GripWrenchCharts } from '@/components/analysis/GripWrenchCharts';
 import { GroundReactionCharts } from '@/components/analysis/GroundReactionCharts';
+import { LoopNullSpacePanel } from '@/components/analysis/LoopNullSpacePanel';
 import { PlotsSection } from '@/components/analysis/PlotsSection';
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 export type {
@@ -191,6 +192,9 @@ export function AnalysisToolsPage() {
 
             {/* Club grip force and torque plots (GCV-10, #11716) */}
             <GripWrenchCharts />
+
+            {/* Closed-Loop Null-Space Exploration (NSX-44, #12576) */}
+            <LoopNullSpacePanel />
 
             {/* Ground reaction under the feet (GCV-5, #11711) */}
             <GroundReactionCharts />
