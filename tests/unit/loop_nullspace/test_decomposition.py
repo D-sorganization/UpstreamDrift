@@ -93,6 +93,7 @@ def test_straight_arm_rank_drop():
     assert sing.nullity == full.nullity
 
 
+@pytest.mark.requires_pinocchio
 @pytest.mark.parametrize(
     ("variant", "kwargs"),
     [
@@ -123,6 +124,7 @@ def test_spatial_dimension_accounting_equals_goldens(variant, kwargs):
     assert acc.rank_stacked == want["rank_stacked_J_c_J_g"]
 
 
+@pytest.mark.requires_pinocchio
 def test_spatial_fixed_base_decomposes_with_golden_counts():
     case = spatial_two_arm_club_snapshot()
     d = decompose(case.snapshot, weights=AllocationMetric.identity(14))
@@ -130,6 +132,7 @@ def test_spatial_fixed_base_decomposes_with_golden_counts():
     assert d.attainable_torque_variation == 6
 
 
+@pytest.mark.requires_pinocchio
 def test_floating_root_unbalanced_reports_inconsistency():
     case = spatial_two_arm_club_snapshot(floating_root=True)
     with pytest.raises(BalanceInconsistentError, match="unactuated") as exc:
@@ -189,6 +192,7 @@ def test_zero_side_explicit_indices_override_and_validation():
         zero_side_solve(snap, "trail", damping=-1.0)
 
 
+@pytest.mark.requires_pinocchio
 def test_zero_side_spatial_chain_is_overdetermined_but_rank_six():
     case = spatial_two_arm_club_snapshot()
     res = zero_side_solve(case.snapshot, "lead")
