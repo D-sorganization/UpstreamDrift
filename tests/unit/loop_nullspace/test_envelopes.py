@@ -30,6 +30,7 @@ from src.shared.python.loop_nullspace.envelopes import (  # noqa: E402
     classify_sign,
     joint_torque_quantities,
     static_envelopes,
+    x_functional_quantities,
 )
 from src.shared.python.loop_nullspace.evidence import (  # noqa: E402
     AllocationDependence,
@@ -195,7 +196,8 @@ def test_unbounded_directions_are_nan_with_status() -> None:
 
 
 def test_unbounded_set_chebyshev_is_unbounded_not_a_big_number() -> None:
-    res = chebyshev_margin(_unbounded_set())
+    half_plane = _fs([[1.0, 0.0]], [1.0], ["H0:x_upper"])
+    res = chebyshev_margin(half_plane)
     assert res.status is BoundStatus.UNBOUNDED
     assert np.isnan(res.radius)
 
@@ -249,9 +251,7 @@ def test_warm_start_equals_cold_start() -> None:
 # ---------------------------------------------------------- evidence/flags
 def test_flags_propagate_from_binding_rows_only() -> None:
     clean = FeasibleRow(np.array([1.0]), 1.0, "A:up", "A", "torque")
-    flagged = FeasibleRow(
-        np.array([-1.0]), 2.0, "B:lo", "B", "torque", (FLAG_ASSUMED,)
-    )
+    flagged = FeasibleRow(np.array([-1.0]), 2.0, "B:lo", "B", "torque", (FLAG_ASSUMED,))
     series = static_envelopes(
         [FeasibleSet.from_rows(1, (clean, flagged))],
         [EnvelopeQuantity("x", [1.0], 0.0, "N", scale=100.0)],
@@ -260,7 +260,6 @@ def test_flags_propagate_from_binding_rows_only() -> None:
     assert series.lower[0, 0] == pytest.approx(-2.0, abs=TOL)
     assert series.upper_rests_on_unverified[0][0] is False
     assert series.lower_rests_on_unverified[0][0] is True
-    assert series.rests_on_unverified[0] is False or series.rests_on_unverified[0]
     assert series.frame_rests_on_unverified == (True,)
 
 
@@ -336,13 +335,13 @@ def test_joint_torque_quantities_from_decomposition() -> None:
     big = 1.0e3
     rows = []
     for i in range(n_a):
-        rows.append(
-            FeasibleRow(dec.N[i], big - dec.x_p[i], f"T:{i}:up", "T", "torque")
-        )
+        rows.append(FeasibleRow(dec.N[i], big - dec.x_p[i], f"T:{i}:up", "T", "torque"))
         rows.append(
             FeasibleRow(-dec.N[i], big + dec.x_p[i], f"T:{i}:lo", "T", "torque")
         )
-    fs = dataclasses.replace(FeasibleSet.from_rows(dec.nullity, rows), decomposition=dec)
+    fs = dataclasses.replace(
+        FeasibleSet.from_rows(dec.nullity, rows), decomposition=dec
+    )
     quantities = joint_torque_quantities()(fs)
     assert len(quantities) == n_a
     series = static_envelopes([fs], quantities)
@@ -384,5 +383,29 @@ def test_200_frame_envelopes_time_budget_recorded(caplog) -> None:
             series.simplex_iterations,
         )
     assert series.lower.shape == (200, n_a)
-    assert np.isfinite(series.lower).all() or np.isnan(series.lower).any()
+    assert np.isfinite(series.lower).all()
+    assert np.isfinite(series.upper).all()
     print(f"\nNSX-22 benchmark: 200 frames in {elapsed:.3f} s")
+
+
+def test_x_functional_quantities_select_split_like_entries() -> None:
+    dec = _planar_decomposition()
+    sel = np.zeros((2, dec.dim_x))
+    sel[0, dec.n_actuated] = 0.5  # half of the first multiplier
+    sel[1, dec.n_actuated + 1] = -0.5
+    factory = x_functional_quantities(
+        ("s_axial", "s_shear"), sel, offsets=[1.0, 0.0], units="N", scale=100.0
+    )
+    fs = dataclasses.replace(FeasibleSet.from_rows(dec.nullity, ()), decomposition=dec)
+    q = factory(fs)
+    z = np.linspace(-1.0, 1.0, dec.nullity)
+    x = dec.x(z)
+    for k in range(2):
+        assert q[k].const + q[k].coeff @ z == pytest.approx(
+            sel[k] @ x + (1.0, 0.0)[k], abs=1e-12
+        )
+    assert q[0].units == "N" and q[0].scale == 100.0
+    with pytest.raises(ValueError, match="columns"):
+        x_functional_quantities(
+            ("a",), np.zeros((1, dec.dim_x + 1)), units="N", scale=1.0
+        )(fs)

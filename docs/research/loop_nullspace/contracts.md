@@ -420,6 +420,39 @@ sign classes; the trajectory-coupled case and unbounded cases are separate
 keys. Unbounded bound is NaN with status `UNBOUNDED`. Cold and warm solves
 return the same bounds to `1e-9`.
 
+Implementation notes (`loop_nullspace/envelopes.py`, #12565):
+
+- A quantity is an affine functional `q(z) = const + coeff . z` of the null-space
+  coordinates (`EnvelopeQuantity`); `joint_torque_quantities()` and
+  `x_functional_quantities(...)` (hand-split coordinates are rows of `Phi`
+  composed with the closing-hand map) build them per frame from the set's
+  decomposition. Each frame is one `LPSession`: a zero-cost solve decides
+  feasibility (`INFEASIBLE` is reported, never raised), then two objective swaps
+  per quantity reuse the basis, and the basis carries to the next frame when the
+  dimensions match. `warm_start=False` resets before every solve; bounds agree
+  to `1e-9`.
+- Sign tolerance: `atol = SIGN_ATOL_RTOL * scale`, `SIGN_ATOL_RTOL = 1e-9` (the
+  NSX-00 scaled balance threshold), `scale` the quantity's characteristic scale
+  (`M_c = 5 N m` for torques, `F_c = 100 N` for forces). `ZERO` when both bounds
+  lie within `atol` of 0, `POSITIVE` when `lower > atol`, `NEGATIVE` when
+  `upper < -atol`, else `INDETERMINATE`; a one-sided unbounded bound can still
+  decide a sign. An infeasible frame has no sign class (`None`).
+- Chebyshev margin: largest ball `{z : z^T W z <= r^2}` with diagonal `W`
+  (golden `weighted_diag_1_4` uses `W = diag(1, 4)`, row norm
+  `sqrt(g W^-1 g)`); `UNBOUNDED` (NaN) when balls of any size fit, radius `0`
+  when the set has no interior.
+- Cones enter through the set's declared linearisation (outer polygon: bounds
+  contain the exact-cone bounds; inner: contained); `cone_error_bound` is
+  recorded per frame. Each bound lists its active rows (slack within `1e-8`
+  relative), their hypotheses, and whether any rests on an ASSUMED slot or
+  unverified hypothesis.
+- Benchmark (recorded, not gated): 200 frames of the planar proxy fixture
+  (time-varying `x_p`, torque rows only) solve all joint-torque envelopes plus
+  the Chebyshev LP in about 3.7 s on the 4-core shared brick host. The 200-frame
+  anthropometric Pinocchio fixture is not yet available to NSX-22.
+- Non-claim: static envelopes over-approximate trajectory-feasible ranges when
+  smoothness priors are active (NSX-25).
+
 ## NSX-23 Trajectory Allocation (#12566, Strong)
 
 `allocate_trajectory(feasible_sets, objective, *, reference=None)`. Golden
