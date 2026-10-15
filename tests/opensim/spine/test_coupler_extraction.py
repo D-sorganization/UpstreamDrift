@@ -134,11 +134,11 @@ class TestLinearRoundTrip:
 
         osim = require_opensim()
         path = _write(tmp_path, edit)
-        fn = osim.MultivariatePolynomialFunction.safeDownCast(
-            osim.CoordinateCouplerConstraint.safeDownCast(
-                osim.Model(str(path)).getConstraintSet().get(0)
-            ).getFunction()
+        model = osim.Model(str(path))
+        con = osim.CoordinateCouplerConstraint.safeDownCast(
+            model.getConstraintSet().get(0)
         )
+        fn = osim.MultivariatePolynomialFunction.safeDownCast(con.getFunction())
         assert fn is not None
         got = _extract(path)
         probe = np.array([0.3, -0.2, 0.7])
@@ -197,7 +197,7 @@ class TestPolynomial:
         got = _extract(_write(tmp_path, self._all_polynomial))
         assert isinstance(got, PolynomialCouplingLaw)
         for x in (-0.3, 0.0, 0.4):
-            phi = np.array([x, 0.0, 0.0])
+            phi = np.array([x])
             for angles in got.expand(phi).values():
                 np.testing.assert_allclose(angles, [0.5 * x * x + 0.25 * x] * 3)
 
@@ -206,7 +206,7 @@ class TestPolynomial:
             xml = "<PolynomialFunction><coefficients>0.5 0.25 0</coefficients></PolynomialFunction>"
             _set_function(_couplers(root)[0], xml, PHI[0])
 
-        with pytest.raises(UnsupportedCouplerError, match="l5_s1_flex_ext_coupler"):
+        with pytest.raises(UnsupportedCouplerError, match="cannot mix"):
             _extract(_write(tmp_path, edit))
 
     def test_degree_one_polynomial_is_linear(self, tmp_path: Path) -> None:
@@ -243,7 +243,9 @@ class TestErrors:
 
     def test_affine_linear_function_rejected(self, tmp_path: Path) -> None:
         def edit(root):
-            xml = "<LinearFunction><coefficients>0.5 0.1</coefficients></LinearFunction>"
+            xml = (
+                "<LinearFunction><coefficients>0.5 0.1</coefficients></LinearFunction>"
+            )
             _set_function(_couplers(root)[0], xml, PHI[0])
 
         with pytest.raises(ValueError, match="intercept"):
