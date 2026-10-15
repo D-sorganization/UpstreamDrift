@@ -2288,6 +2288,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12608 · Correct the Club Y-Sign in Golfer Forward Kinematics, Club Jacobians and the Native Grip_Left Wrapper; Closure Is a Wrist-Pin PLANAR_POINT2 With Rank 2 on the Manifold (TB-00 Registry: 6 Independent DOFs); Planar-Model and Central-Difference Cross-Checks
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12608
+- **Branch:** merged via #12668
+- **PR:** #12668
+- **Paths:** see #12668
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`41f73696`; collated from changes/12608-correct-the-club-y-sign-in-golfer-forwar.md)
+- **Summary:** Correct the club y-sign in golfer forward kinematics, club Jacobians and the native grip_left wrapper; closure is a wrist-pin PLANAR_POINT2 with rank 2 on the manifold (TB-00 registry: 6 independent DOFs); planar-model and central-difference cross-checks
+- **Next step:** Shipped in PR #12668.
+
 ### DL-#12558 · NSX-13: Snapshot_From_Adapter With CLOSED_LOOP_SNAPSHOT Capability (Pinocchio FULL), Canonical Closure in the Torque Allocator, constraintDynamics Parity
 
 - **State:** shipped
