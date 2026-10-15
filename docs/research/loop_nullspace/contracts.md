@@ -78,12 +78,28 @@ def to_canonical_closure(
 
 ## NSX-04 Torque Capacity (#12553)
 
-`capacity_for(coordinate_order, subject) -> CapacityVector`. Preconditions:
-every actuated coordinate has an entry, otherwise `ValueError` listing the
-missing slots. Postconditions: positive finite `tau_max_nm` for every actuated
-coordinate; entries with `assumed = true` raise a warning flag. Registry
-section `torque_capacity` (empty at NSX-00; schema in the registry's
-`schema_note`).
+`capacity_for(coordinate_order, subject, actuated=None) -> CapacityVector`
+(`loop_nullspace/capacity.py`). Preconditions: non-empty, duplicate-free
+`coordinate_order`; `subject` a `CapacitySubject(mass_kg, stature_m, sex)`
+(male only; no other table is registered); every actuated coordinate has an
+entry in both directions, otherwise `ValueError` listing the missing
+`slot:direction` pairs. `actuated` defaults to all coordinates except root
+translations (forces, not torques). Postconditions: positive finite capacities
+per direction; `assumed_slots`, `verified_slots` and `warnings` surface every
+ASSUMED value, which is also logged.
+
+Registry section `torque_capacity` (schema in the registry's `schema_note`):
+one entry per coordinate and direction (`negative` or `positive` generalised
+coordinate sign). Scaling rules: `bw_height_normalized` computes
+`tau = c * mass_kg * 9.80665 * stature_m` (Anderson 2007 normalisation, body
+weight read as a force); `none` returns the population value unchanged.
+`tau_max_nm` stores the value for the reference subject (78 kg, 1.71 m).
+VERIFIED requires a number read in the cited source and a sign-to-motion mapping
+that is unambiguous from the spec; where only the axis or sign convention is
+unresolved the entry is ASSUMED even though a source number is quoted.
+Where the sign is unresolved but a flexion/extension pair is verified, the
+smaller value is applied to both directions (`basis` field). Capacities are
+male population priors, not subject measurements.
 
 ## NSX-10 Contracts (#12555)
 
