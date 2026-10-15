@@ -174,7 +174,8 @@ def test_fujii_levels_and_independent() -> None:
     )
     assert law.independent_names() == ("trunk_axial_rotation",)
     out = law.expand(np.array([math.radians(45.0)]))
-    assert out[SpinalLevel.L3_L4][1] == pytest.approx(math.radians(-3.4))
+    # Fujii -3.4 deg (bend opposite to rotation) is +3.4 deg ISB right bend.
+    assert out[SpinalLevel.L3_L4][1] == pytest.approx(math.radians(3.4))
 
 
 def test_every_literature_number_in_extraction() -> None:
@@ -186,7 +187,9 @@ def test_every_literature_number_in_extraction() -> None:
         pool = set(_numbers(blocks[(ref["source_id"], ref["table_id"])]))
         # reference rotation 45 deg is the heading of Table F1
         pool.add(45.0)
-        for number in _numbers(entry["distribution"]):
+        # isb_sign is the ADR-0055 sign convention, not a literature number
+        literature = {k: v for k, v in entry["distribution"].items() if k != "isb_sign"}
+        for number in _numbers(literature):
             assert number in pool, (entry["law_id"], number)
 
 

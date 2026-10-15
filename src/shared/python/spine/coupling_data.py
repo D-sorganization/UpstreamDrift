@@ -126,12 +126,10 @@ def _regional_matrices(dist: dict) -> dict[SpinalLevel, np.ndarray]:
 def _ratio_matrices(dist: dict) -> dict[SpinalLevel, np.ndarray]:
     ref = math.radians(float(dist["reference_trunk_rotation_deg"]))
     out = {}
+    sign = dist["isb_sign"]
+    keys = ("coupled_flexion", "coupled_lateral_bend", "axial_rotation")
     for row in dist["rows"]:
-        values = (
-            row["coupled_flexion"][0],
-            row["coupled_lateral_bend"][0],
-            row["axial_rotation"][0],
-        )
+        values = tuple(sign[key] * row[key][0] for key in keys)
         out[SpinalLevel[row["level"]]] = (
             np.array([[math.radians(v)] for v in values]) / ref
         )

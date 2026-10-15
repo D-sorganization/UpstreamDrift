@@ -29,11 +29,12 @@ per-level matrices $C_i$ of \texttt{LinearCouplingLaw} from those numbers.
   For each segment T12-L1 to L5-S1 the mean axial rotation, coupled flexion
   and coupled lateral bend measured at $45^\circ$ of trunk rotation are scaled
   to gains per degree:
-  $C_i=\bigl(\bar\theta_{\mathrm{flex}},\bar\theta_{\mathrm{lat}},
+  $C_i=\bigl(-\bar\theta_{\mathrm{flex}},-\bar\theta_{\mathrm{lat}},
   \bar\theta_{\mathrm{ax}}\bigr)^{\top}_i/45^\circ$. Linearity in rotation is
-  assumed; published signs (coupled lateral bend negative = opposite to the
-  rotation) are mapped directly to the ISB signs, which was not checked against
-  the paper. SDs are retained in the JSON but unused. Not a share law.
+  assumed. Fujii reports flexion positive and lateral bend positive in the
+  direction of the rotation; under ADR-0055 extension, right bend and left
+  rotation are positive, so for a positive (left) axial rotation both coupled
+  terms change sign (\texttt{distribution.isb\_sign} in the JSON). SDs are retained in the JSON but unused. Not a share law.
 \item[\texttt{uniform\_reference}] (citation: repo-authored reference, not
   literature). $C_i=I/17$ for all 17 levels; a synthetic baseline.
 \end{description}
