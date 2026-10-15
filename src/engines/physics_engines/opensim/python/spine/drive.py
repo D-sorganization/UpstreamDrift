@@ -73,6 +73,7 @@ from src.shared.python.spine.levels import SpinalLevel
 from src.shared.python.spine.segmental import SegmentalKinematicsSeries
 
 __all__ = [
+    "DISTRIBUTION_SOURCE_KEY",
     "FIXTURE_PELVIS",
     "GOLF_PELVIS",
     "DriveOptions",
@@ -84,6 +85,9 @@ __all__ = [
 ]
 
 _ROT_TOL = 1e-9
+
+#: ``.mot`` header key carrying the per-level ``distribution_source`` label.
+DISTRIBUTION_SOURCE_KEY = "distribution_source"
 
 
 @dataclass(frozen=True)
@@ -435,7 +439,8 @@ def export_mot(
 
     Columns are the level coordinates and the six pelvis coordinates (plus the
     law's independent coordinates when ``include_independent``); the table is
-    written natively by ``STOFileAdapter`` with ``inDegrees=no``.
+    written natively by ``STOFileAdapter`` with ``inDegrees=no`` and the
+    kinematics' ``distribution_source`` in the header (read back by SPN-9d).
 
     Raises:
         TypeError: ``result`` is not a :class:`DriveResult`.
@@ -460,6 +465,9 @@ def export_mot(
     for time, row in zip(result.time_s, matrix, strict=True):
         table.appendRow(float(time), osim.RowVector([float(v) for v in row]))
     table.addTableMetaDataString("inDegrees", "no")
+    table.addTableMetaDataString(
+        DISTRIBUTION_SOURCE_KEY, result.kinematics.distribution_source
+    )
     out.parent.mkdir(parents=True, exist_ok=True)
     osim.STOFileAdapter.write(table, str(out))
     return out

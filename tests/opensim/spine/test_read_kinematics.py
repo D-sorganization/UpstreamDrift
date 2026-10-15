@@ -58,7 +58,7 @@ def driven(tmp_path_factory):
 
 
 def _read(model: Path, mot: Path, **kw) -> SegmentalKinematicsSeries:
-    kw.setdefault("distribution_source", "drive:invented@1")
+    kw.setdefault("distribution_source", "coupling:invented@1")
     return read_segmental_kinematics(mot, model, "fixture", **kw)
 
 
@@ -78,7 +78,7 @@ def test_round_trip_recovers_level_angles(driven) -> None:
 
 def test_distribution_source_is_carried(driven) -> None:
     _spec, model, _result, mot, _tmp = driven
-    assert _read(model, mot).distribution_source == "drive:invented@1"
+    assert _read(model, mot).distribution_source == "coupling:invented@1"
 
 
 def test_header_source_must_agree(driven) -> None:
@@ -161,7 +161,9 @@ def test_missing_files_raise(driven) -> None:
     with pytest.raises(ValueError, match="model file not found"):
         _read(model.with_name("nope.osim"), mot)
     with pytest.raises(ValueError, match="unknown model_id"):
-        read_segmental_kinematics(mot, model, "nope", distribution_source="ik:x")
+        read_segmental_kinematics(
+            mot, model, "nope", distribution_source="coupling:invented@1"
+        )
 
 
 def test_native_verification_passes_on_fixture(driven) -> None:

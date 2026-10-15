@@ -1,0 +1,45 @@
+\subsection{Reading OpenSim Motions into Segmental Kinematics}
+\label{sec:spn-9d}
+
+\paragraph{Purpose.}
+The reader is the inverse of the SPN-9b export. A coordinate table (a
+\texttt{.mot} written by \texttt{export\_mot}, or the \texttt{.mot}/\texttt{.sto}
+of a marker-based inverse kinematics run) becomes a
+\texttt{SegmentalKinematicsSeries}, so inverse kinematics results enter the same
+analysis path as driven results.
+
+\paragraph{Equations.}
+For level $i$ with coordinates $q_i\in\mathbb{R}^3$ (rad) and level-map axis signs
+$s_i\in\{\pm1\}^3$:
+\begin{equation}
+  \theta_i = s_i\odot q_i,\qquad
+  T_i = T_{i0}\,T\bigl(R_{ZXY}(\theta_i),\,0\bigr),
+\end{equation}
+with $T_{i0}$ the neutral offset read natively by the inventory and
+$R_{ZXY}$ the ISB intrinsic ZXY rotation (flexion--extension, lateral bending,
+axial rotation). Tables flagged \texttt{inDegrees=yes} are converted to radians.
+The drive writes $q_i = s_i\theta_i$, so the reader recovers $\theta_i$ exactly
+because $s_i^2=1$. Level translations are zero.
+
+\paragraph{Provenance.}
+\texttt{distribution\_source} is a required, non-empty argument. Inverse
+kinematics results must be labelled as measured (for example
+\texttt{ik:<file>}) and are never coupling outputs. The export writes the
+header key \texttt{distribution\_source}; if present it must equal the argument
+or a \texttt{ValueError} is raised. All frames are marked valid: a reader cannot
+judge feasibility.
+
+\paragraph{Native Verification.}
+With \texttt{verify\_native} each frame is realised in the model and the
+terminal-in-pelvis rotation must equal $B\,\prod_i T_i\,E$ (the SPN-9b chain
+identity, $B,E$ read from the model) to $10^{-9}$.
+
+\paragraph{Limitations.}
+Pelvis coordinates are not read. Singular ISB angles (lateral bending
+$\pm90^\circ$) are not specially handled. Missing level columns raise, naming the
+column; extra columns are ignored.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/opensim/spine/test_read_kinematics.py -q -n 0
+\end{verbatim}
