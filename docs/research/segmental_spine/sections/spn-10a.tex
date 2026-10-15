@@ -1,0 +1,90 @@
+\subsection{Spinal Inverse Dynamics with External Loads}
+\label{sec:spn-10a}
+
+This section documents \texttt{inverse\_dynamics.py} (issue \#12760, epic
+\#12735). It computes the generalized effort of every spinal level, and the
+pelvis residual wrench, from a prescribed motion with OpenSim
+\texttt{InverseDynamicsSolver}.
+
+\paragraph{Observable.}
+The output is \texttt{LoadObservable.GENERALIZED\_EFFORT} (ADR-0055 item 5):
+the moment exerted on the superior body by the inferior body through the three
+rotational coordinates of a level, expressed in the inferior vertebra ISB
+frame ($X$ anterior, $Y$ cranial, $Z$ right) about the mid-disc joint centre,
+in N$\cdot$m. It is not a joint reaction. The force array is exactly zero:
+the level joints have constant zero translations, so no joint force is an
+unknown of the inverse-dynamics problem. Passive element loads and joint
+reactions are separate observables and are not mixed in.
+
+\paragraph{Couplers.}
+Couplers prescribe kinematics only and are disabled for inverse dynamics
+(ADR-0055 item 6): every constraint of the loaded model copy has
+\texttt{isEnforced} set to false, which frees every spinal coordinate. The
+provenance key \texttt{couplers} records the number disabled. A massless
+coupling driver body, if present, contributes zero generalized force.
+
+\paragraph{Generalized Force to Moment.}
+With ISB angles $\theta_k = s_k q_k$ ($s_k=\pm1$ the inventory axis sign) in
+ZXY order, the angular-velocity columns in the parent offset frame $P$ of the
+joint are
+\[
+  J(\theta) = \bigl[\,e_z,\; R_z(\theta_1)e_x,\; R_z(\theta_1)R_x(\theta_2)e_y\,\bigr],
+  \qquad \det J = \cos\theta_2 .
+\]
+Power balance $\tau_\theta = J^{\mathsf T} M_P$ with $\tau_{\theta,k}=s_k\tau_k$
+gives $M_P = J^{-\mathsf T}\tau_\theta$, and the moment in the inferior ISB
+frame is $M = R_{i0}\,M_P$ with $R_{i0}$ the neutral-offset rotation of the
+inventory. A level whose lateral bending is within $10^{-6}$ of $\pm 90^\circ$
+raises \texttt{ValueError}. Because the solver returns the generalized force
+that must act to produce the motion, a static pose yields the moment that
+supports gravity on all bodies above the level.
+
+\paragraph{Pelvis Residual.}
+The six generalized forces of the ground-pelvis joint are the residual wrench
+about the pelvis origin in the ground frame. For a free joint (quaternion
+state) OpenSim speeds are the ground-frame angular velocity and the origin
+velocity, so the generalized force is the wrench; a runtime probe verifies
+this convention for the model. For a custom joint with Euler coordinates
+$M = J^{-\mathsf T}\tau_{\mathrm{rot}}$ with $J$ of the pelvis sequence. Peak
+and RMS of the force and moment norms are reported, with
+\[
+  r_F = \frac{\max\|F\|}{m g},\qquad
+  r_M = \frac{\max\|M\|}{m g\,h},
+\]
+judged against a declared \texttt{ResidualBudget} (defaults $r_F\le 0.05$ and
+$r_M\le 0.01$). The height $h$ is the option \texttt{body\_height\_m} or, if
+absent, the vertical extent of the body origins in the first frame, which is a
+model extent and not a stature. Without external loads the residual is the
+total weight, so the budget fails by construction.
+
+\paragraph{External Loads.}
+An ExternalLoads XML is added to the model with \texttt{ModOpAddExternalLoads}
+and read at the state time of each frame. The provenance key
+\texttt{external\_loads} states exactly what was applied, or reads
+\texttt{none (excluded): gravity only}.
+
+\paragraph{Derivatives.}
+Coordinates are optionally low-passed (zero-phase Butterworth,
+\texttt{smooth\_kinematic\_trajectory}) and differentiated with a not-a-knot
+cubic spline evaluated at the sample times. Pelvis Euler rates map to
+ground-frame angular velocity and acceleration by
+$\omega = J\dot q$ and
+$\alpha = J\ddot q + \dot q_2\,\dot c_2 + \dot q_3\,\dot c_3$, with
+$\dot c_2=\dot q_1(c_1\times c_2)$ and
+$\dot c_3=\dot q_1(c_1\times c_3)+\dot q_2(c_2\times c_3)$. Spline end
+effects make the first and last samples less reliable.
+
+\paragraph{Assumptions and Limitations.}
+Pelvis parent and child offset frames are identity. The level axes are
+ISB-aligned to the inventory tolerance. The fixture parameters are invented;
+no value is transcribed from a licensed model. Residual verdicts are software
+checks, not scientific qualification.
+
+\paragraph{Verification and Reproduction.}
+The tests compare the static level moments and the pelvis wrench with an
+independent numpy rigid-body composition to $10^{-6}$~N$\cdot$m, and a dynamic
+motion with $M(q)\ddot q + C + G$ from the matter subsystem.
+\begin{verbatim}
+python -m pytest tests/opensim/spine/test_inverse_dynamics.py \
+    -q -n 0 -p no:cacheprovider -o addopts=""
+\end{verbatim}

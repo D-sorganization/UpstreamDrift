@@ -21,7 +21,7 @@ from src.engines.physics_engines.opensim.python.musculoskeletal_grf import (
 )
 from src.engines.physics_engines.opensim.python.spine.drive import (
     FIXTURE_PELVIS,
-    export_mot,
+    DriveResult,
 )
 from src.engines.physics_engines.opensim.python.spine.fixture_model import (
     FixtureSpec,
@@ -41,6 +41,11 @@ from src.engines.physics_engines.opensim.python.spine.inverse_dynamics import (
 )
 from src.shared.python.core.constants import GRAVITY_FLOAT
 from src.shared.python.engine_core.opensim_runtime import import_opensim
+from src.shared.python.spine.segmental import (
+    LevelTransform,
+    SegmentalKinematicsSeries,
+    SegmentalPose,
+)
 from src.shared.python.spine.loads import REQUIRED_PROVENANCE_KEYS, LoadObservable
 from tests.helpers.opensim_support import require_opensim
 
@@ -180,7 +185,9 @@ def test_static_level_efforts_are_analytic_gravity_moments(
         centre = poses[names.superior_body][:3, 3]
         expected_ground = _support_moment(spec, poses, above, centre)
         expected = poses[names.inferior_body][:3, :3].T @ expected_ground
-        np.testing.assert_allclose(series.moment_nm[:, k, :], expected, atol=1e-6)
+        np.testing.assert_allclose(
+            series.moment_nm[:, k, :], np.tile(expected, (8, 1)), atol=1e-6
+        )
     assert budget.generalized.shape == (8, 6)
 
 
@@ -290,24 +297,28 @@ def _u_index(model, state, name: str) -> int:
     return index
 
 
+_FWD = np.array([-25.0, 48.0, -36.0, 16.0, -3.0]) / 12.0
+
+
 def _omega_alpha(spline, t: float) -> tuple[np.ndarray, np.ndarray]:
-    """Ground-frame angular velocity/acceleration by 4th-order differences."""
-    h = 2e-3
+    """Ground-frame angular velocity/acceleration by one-sided differences.
+
+    The samples are spline knots (third derivative jumps), so only points of
+    the piece to the right of ``t`` are used (4th-order forward stencil).
+    """
+    h = 3e-4
 
     def rot(tt: float) -> np.ndarray:
         return Rotation.from_euler("XYZ", spline(tt)[15:18]).as_matrix()
 
     def omega(tt: float) -> np.ndarray:
-        dr = (
-            8.0 * (rot(tt + h) - rot(tt - h)) - (rot(tt + 2 * h) - rot(tt - 2 * h))
-        ) / (12.0 * h)
+        dr = sum(c * rot(tt + k * h) for k, c in enumerate(_FWD)) / h
         w = dr @ rot(tt).T
         return np.array([w[2, 1], w[0, 2], w[1, 0]])
 
-    alpha = (
-        8.0 * (omega(t + h) - omega(t - h)) - (omega(t + 2 * h) - omega(t - 2 * h))
-    ) / (12.0 * h)
-    return omega(t), alpha
+    omegas = [omega(t + k * h) for k in range(5)]
+    alpha = sum(c * w for c, w in zip(_FWD, omegas, strict=True)) / h
+    return omegas[0], alpha
 
 
 def test_dynamic_motion_matches_manual_mass_matrix_balance(
@@ -396,7 +407,8 @@ def test_couplers_are_disabled_in_the_run_model(spec, tmp_path) -> None:
 
     phi = ("trunk_flex_ext", "trunk_lat_bend", "trunk_axial_rot")
     mats = {
-        lv: np.diag([0.2, 0.2, 0.1]) for lv in levels_between(SpinalLevel.L5_S1, SpinalLevel.L1_L2)
+        lv: np.diag([0.2, 0.2, 0.1])
+        for lv in levels_between(SpinalLevel.L5_S1, SpinalLevel.L1_L2)
     }
     law = LinearCouplingLaw("invented", "1", mats, phi, "invented, SPN-10a test")
     path = write_fixture_osim(spec, tmp_path / "coupled.osim", coupling=law)
@@ -488,4 +500,44 @@ def test_wrong_types_raise(model_path, tmp_path) -> None:
     with pytest.raises(TypeError):
         run_spinal_inverse_dynamics(model_path, 3.0, "fixture")
     with pytest.raises(TypeError):
-        run_spinal_inverse_dynamics(model_path, tmp_path / "x.mot", "fixture", options=1)
+        run_spinal_inverse_dynamics(
+            model_path, tmp_path / "x.mot", "fixture", options=1
+        )
+
+
+def test_drive_result_input_matches_mot_input(spec, model_path, tmp_path) -> None:
+    theta = _theta(spec)
+    neutral = fixture_neutral_transforms(spec)
+    n = 8
+    times = np.linspace(0.0, 0.7, n)
+    pose = SegmentalPose(
+        tuple(
+            LevelTransform(
+                lv,
+                neutral[lv],
+                Rotation.from_euler("ZXY", theta[lv]).as_matrix(),
+                np.zeros(3),
+            )
+            for lv in theta
+        )
+    )
+    kin = SegmentalKinematicsSeries(
+        times, (pose,) * n, "invented distribution", np.ones(n, dtype=bool)
+    )
+    cols = {k: np.full(n, v) for k, v in _columns(spec, theta).items()}
+    drive = DriveResult(
+        kin,
+        np.zeros(n),
+        np.zeros((n, 0)),
+        (),
+        cols,
+        "fixture",
+        "0" * 64,
+        "invented",
+        "1",
+        {"file": "synthetic"},
+    )
+    from_drive, _ = _run(model_path, drive)
+    from_mot, _ = _run(model_path, _static_mot(spec, theta, tmp_path))
+    np.testing.assert_allclose(from_drive.moment_nm, from_mot.moment_nm, atol=1e-12)
+    assert from_drive.provenance["distribution_source"] == "invented distribution"
