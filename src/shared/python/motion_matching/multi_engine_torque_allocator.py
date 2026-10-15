@@ -831,6 +831,13 @@ class MultiEngineTorqueAllocator:
         )
 
 
+def _resolve_spec_path(spec_path: Path | str | None, repo_root: Path) -> Path:
+    """Resolve a full-body spec path, defaulting to v1 and falling back to the
+    repository root for relative paths.  The returned path may not exist."""
+    p = Path(spec_path or "docs/development/full_body_models/full_body_spec_v1.json")
+    return p if p.is_file() else repo_root / p
+
+
 def create_engine_force_adapter(
     engine: EngineType | str,
     spec_path: Path | str | None = None,
@@ -850,11 +857,7 @@ def create_engine_force_adapter(
     if e == EngineType.PINOCCHIO:
         if spec_path is None and allow_synthetic and nv != 41:
             return PinocchioSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
-        p = Path(
-            spec_path or "docs/development/full_body_models/full_body_spec_v1.json"
-        )
-        if not p.is_file():
-            p = repo_root / p
+        p = _resolve_spec_path(spec_path, repo_root)
         if not p.is_file() and allow_synthetic:
             return PinocchioSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
         try:
@@ -870,21 +873,13 @@ def create_engine_force_adapter(
     if e == EngineType.MUJOCO:
         if spec_path is None and allow_synthetic and nv != 41:
             return MujocoSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
-        p = Path(
-            spec_path or "docs/development/full_body_models/full_body_spec_v1.json"
-        )
-        if not p.is_file():
-            p = repo_root / p
+        p = _resolve_spec_path(spec_path, repo_root)
         if not p.is_file() and allow_synthetic:
             return MujocoSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
         require(p.is_file(), f"MuJoCo specification not found: {p}")
         return MujocoForceAdapter(p.read_bytes())
     if e == EngineType.MYOSUITE:
-        p = Path(
-            spec_path or "docs/development/full_body_models/full_body_spec_v1.json"
-        )
-        if not p.is_file():
-            p = repo_root / p
+        p = _resolve_spec_path(spec_path, repo_root)
         require(p.is_file(), f"MyoSuite specification not found: {p}")
         from src.engines.physics_engines.myosuite.python.force_adapter import (
             MyoSuiteForceAdapter,
