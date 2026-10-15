@@ -2741,6 +2741,10 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-15 | #12704 | Pinocchio reference adapter finite-differences the trajectory on the base Lie group (world linear, body angular via the quaternion log) and feeds the result through the NSX-50 velocity map, instead of differentiating raw native q |
+| 2026-10-15 | #12679 | Correct the club y-sign, hub direction and club Jacobians in the JAX golfer path; club points and club-angle Jacobian columns now share backend-agnostic formulas with the NumPy kinematics, pinned by NumPy-vs-JAX parity tests |
+| 2026-10-15 | #12664 | NSX-74 publication gate checklist for loop null-space results |
+| 2026-10-15 | #12638 | NSX-17 invariant quantities with validity gates |
 | 2026-10-15 | #12639 | Two-track cross-engine closed-loop conformance harness (numerical snapshot equality plus propagated scientific envelopes), registry entries per engine pair, native OpenSim adapter registered in the engine factory |
 | 2026-10-15 | #12695 | R5: one clubhead measurement point (face centre via club_face_target.face_centre_path) for the fd_phase impact split, the exporter impact detector and a new dynamics.fd_phase.clubhead_speed receipt block (simulated/reference/capture speed, % error, peak-timing offset); scripts/diagnose_clubhead_speed.py decomposition |
 | 2026-10-15 | #12694 | Pelvis wears the active outfit's pants material: body classification is order-independent (leaf segment before parent folder, exact before prefix before substring, equal-specificity ties raise), GolfSwing3D LowerTorso maps to pelvis, and check_clothing enforces pelvis garment == pants for every preset |
