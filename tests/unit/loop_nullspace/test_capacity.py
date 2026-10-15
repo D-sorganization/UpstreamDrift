@@ -65,6 +65,11 @@ def test_assumed_slots_are_surfaced_not_silent(spec: dict) -> None:
     assert not set(vec.assumed_slots) & set(vec.verified_slots)
     assert "TorsoInput" in vec.verified_slots
     assert "LEInput" in vec.verified_slots and "knee_angle_r" in vec.verified_slots
+    # Neck and sagittal spine axes resolved from the model frames (NSX-04 review).
+    for name in ("NeckInputX", "NeckInputY", "NeckInputZ", "SpineInputY", "LWInputY"):
+        assert name in vec.verified_slots, name
+    for name in ("SpineInputX", "LSInputX", "LSInputY", "LSInputZ", "LFInput"):
+        assert name in vec.assumed_slots, name
     assert "hip_rotation_r" in vec.assumed_slots
     assert vec.warnings and "ASSUMED" in vec.warnings[0]
 
@@ -156,3 +161,11 @@ def test_force_velocity_parameters_exposed_for_lower_limb() -> None:
     fv = vec.force_velocity["knee_angle_r"]
     assert fv["positive"]["omega_75pct_rad_s"] == pytest.approx(1.517)
     assert fv["negative"]["omega_50pct_rad_s"] == pytest.approx(5.233)
+
+
+def test_sagittal_spine_and_neck_signs_follow_frame_geometry() -> None:
+    """Positive rotation about +Y (left-right axis, model faces +X) is forward
+    tilt, so positive = flexion: trunk 325.0, neck 30; negative = extension."""
+    vec = capacity_for(("SpineInputY", "NeckInputY"), CapacitySubject(78.0, 1.71))
+    assert list(vec.tau_max_positive_nm) == pytest.approx([325.0, 30.0])
+    assert list(vec.tau_max_negative_nm) == pytest.approx([422.8, 52.0])

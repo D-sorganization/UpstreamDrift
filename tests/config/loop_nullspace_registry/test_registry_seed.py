@@ -77,6 +77,8 @@ def test_torque_capacity_entries_obey_schema(reg: dict) -> None:
         assert e["verification_status"] in SLOT_STATUS, key
         assert e["scaling_rule"]["rule"] in {"none", "bw_height_normalized"}, key
         assert e["population"]["description"].strip(), key
+        assert e["axis_mapping"] in {"hinge", "approximate-at-reference-pose"}, key
+        assert e["axis_evidence"].strip(), key
         if e["assumed"]:
             assert e["verification_status"] == "UNVERIFIED", key
             assert e["rationale"].strip(), key

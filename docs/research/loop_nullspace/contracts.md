@@ -97,7 +97,11 @@ weight read as a force); `none` returns the population value unchanged.
 VERIFIED requires a number read in the cited source and a sign-to-motion mapping
 that is unambiguous from the spec; where only the axis or sign convention is
 unresolved the entry is ASSUMED even though a source number is quoted.
-Where the sign is unresolved but a flexion/extension pair is verified, the
+Each entry records `axis_mapping` (`hinge`, or `approximate-at-reference-pose` for
+gimbal and universal joints) with `axis_evidence` (frame derivation or file:line).
+Shoulder axes resolve to horizontal abduction/adduction (X), flexion/extension
+(Y) and axial rotation (Z), but no readable source covers them, so they stay
+ASSUMED. Where the sign is unresolved but a flexion/extension pair is verified, the
 smaller value is applied to both directions (`basis` field). Capacities are
 male population priors, not subject measurements.
 
