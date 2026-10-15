@@ -51,6 +51,7 @@ from src.engines.physics_engines.opensim.python.spine.assets import (
 from src.engines.physics_engines.opensim.python.spine.inventory import (
     DEFAULT_LEVEL_MAP_PATH,
 )
+from src.engines.physics_engines.opensim.python.spine import study_variant
 from src.engines.physics_engines.opensim.python.spine.study_receipt import (
     FileRecord,
     SpineStudyReceipt,
@@ -63,6 +64,7 @@ from src.shared.python.engine_core.opensim_runtime import import_opensim
 from src.shared.python.pose_estimation.model_files import sha256_of
 from src.shared.python.spine.context_bands import DEFAULT_BANDS_PATH
 from src.shared.python.spine.coupling_data import DEFAULT_PATH as COUPLING_LAWS_PATH
+from src.shared.python.spine.movement_variants import DEFAULT_VARIANTS_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -139,6 +141,11 @@ class SpineStudyRequest:
         residual_force_fraction_bw / residual_moment_fraction: pelvis residual
             budget of the inverse dynamics.
         reserve_limit_nm / reserve_max_share: reserve-actuator limits.
+        variant_id / variant_parameter / variant_handedness: optional shipped
+            movement variant (SPN-13d) applied to the golf trunk input, its
+            parameter (``None`` = the variant default; checked against the
+            declared bounds) and the golfer's handedness.  ``None`` runs the
+            unvaried study, byte-identical to a request without these fields.
         output_dir: where artifacts and the receipt are written (never
             recorded in the receipt).
 
@@ -167,6 +174,9 @@ class SpineStudyRequest:
     reserve_limit_nm: float = 1.0
     reserve_max_share: float = 0.05
     restrict_law_to_model: bool = False
+    variant_id: str | None = None
+    variant_parameter: float | None = None
+    variant_handedness: str = "right"
 
     def __post_init__(self) -> None:
         if not isinstance(self.study_id, str) or not _ID_RE.fullmatch(self.study_id):
@@ -212,6 +222,9 @@ class SpineStudyRequest:
             "reserve_max_share",
         ):
             _positive(getattr(self, name), name)
+        study_variant.validate_request_variant(
+            self.variant_id, self.variant_parameter, self.variant_handedness
+        )
         object.__setattr__(self, "events", _events(self.events))
 
     def canonical_dict(self) -> dict[str, Any]:
@@ -224,7 +237,7 @@ class SpineStudyRequest:
         def base(path: Path | None) -> str | None:
             return None if path is None else path.name
 
-        return {
+        data = {
             "study_id": self.study_id,
             "motion": base(self.motion_path),
             "golf_model": base(self.golf_model_path),
@@ -246,6 +259,11 @@ class SpineStudyRequest:
             "reserve_max_share": self.reserve_max_share,
             **({"restrict_law_to_model": True} if self.restrict_law_to_model else {}),
         }
+        if self.variant_id is not None:
+            data["variant"] = study_variant.request_record(
+                self.variant_id, self.variant_parameter, self.variant_handedness
+            )
+        return data
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any], base_dir: Path) -> SpineStudyRequest:
@@ -277,6 +295,8 @@ def _config_files(request: SpineStudyRequest) -> dict[str, Path]:
     }
     if request.asset_id is not None:
         files["spine_model_assets.json"] = DEFAULT_MANIFEST_PATH
+    if request.variant_id is not None:
+        files[study_variant.VARIANTS_CONFIG_NAME] = Path(DEFAULT_VARIANTS_PATH)
     return files
 
 
@@ -394,6 +414,19 @@ def _judge(
     return ("unqualified" if reasons else "pass"), tuple(reasons)
 
 
+def _variant_record(
+    request: SpineStudyRequest, outcome: study_stages.StageOutcome
+) -> dict[str, Any] | None:
+    """Variant provenance: the outcome's record, else the request's description."""
+    if request.variant_id is None:
+        return None
+    if outcome.variant is not None:
+        return outcome.variant
+    return study_variant.request_record(
+        request.variant_id, request.variant_parameter, request.variant_handedness
+    )
+
+
 def _scrubber(request: SpineStudyRequest) -> Any:
     dirs = {request.output_dir}
     for path in (
@@ -478,6 +511,7 @@ def run_spine_study(
         residual=outcome.residual,
         reserve=outcome.reserve,
         context_comparisons=tuple(outcome.context),
+        variant=_variant_record(request, outcome),
     )
     write_receipt(receipt, out_dir / f"{request.study_id}_receipt.json")
     ensure(

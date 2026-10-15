@@ -51,6 +51,10 @@ from src.engines.physics_engines.opensim.python.spine.study_receipt import (
     StageRecord,
     round_sig,
 )
+from src.engines.physics_engines.opensim.python.spine.study_variant import (
+    apply_request_variant,
+    check_driven_ranges,
+)
 from src.shared.python.core.constants import GRAVITY_FLOAT
 from src.shared.python.pose_estimation.model_files import sha256_of
 from src.shared.python.spine.context_bands import annotate
@@ -84,6 +88,7 @@ class StageOutcome:
     reserve: dict[str, Any] = field(default_factory=dict)
     law: str = "n/a"
     distribution_source: str = "n/a"
+    variant: dict[str, Any] | None = None
     failed: bool = False
     ran: bool = False
 
@@ -125,6 +130,8 @@ def _requested_law(request: Any) -> CouplingLaw | None:
 
 def _drive(request: Any, model: Path, scrub: Any, out: StageOutcome) -> DriveResult:
     golf = read_golf_humanoid_motion(request.motion_path, request.golf_model_path)
+    if request.variant_id is not None:
+        golf = apply_request_variant(request, golf, out)
     out.stages.append(
         _record(
             "golf_input",
@@ -140,6 +147,8 @@ def _drive(request: Any, model: Path, scrub: Any, out: StageOutcome) -> DriveRes
     result = drive_segmental_model(
         golf, model_path=model, model_id=request.model_id, law=law, options=options
     )
+    if request.variant_id is not None:
+        check_driven_ranges(model, result, options.pelvis, out)
     mot = export_mot(result, request.output_dir / f"{request.study_id}_coordinates.mot")
     out.artifacts.append(FileRecord("coordinates_mot", mot.name, sha256_of(mot)))
     n_invalid = int(np.count_nonzero(~result.valid))

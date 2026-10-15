@@ -97,7 +97,9 @@ class SpineStudyReceipt:
 
     Preconditions: ``status`` is one of :data:`STATUSES`; ``request_sha256`` is
     64 hex characters.  ``asset`` is the :class:`SpineAssetReceipt` dictionary
-    or ``None`` when the study names no licensed asset.
+    or ``None`` when the study names no licensed asset.  ``variant`` is the
+    movement-variant provenance (SPN-13d) or ``None``; it is omitted from the
+    serialised receipt when ``None`` so variant-free receipts are unchanged.
     """
 
     study_id: str
@@ -120,6 +122,7 @@ class SpineStudyReceipt:
     context_comparisons: tuple[dict[str, Any], ...]
     scientific_status: str = "unqualified"
     schema_version: str = SCHEMA_VERSION
+    variant: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
         if self.status not in STATUSES:
@@ -133,7 +136,7 @@ class SpineStudyReceipt:
 
     def as_dict(self) -> dict[str, Any]:
         """JSON-compatible form (no paths, no timestamps)."""
-        return {
+        data = {
             "schema_version": self.schema_version,
             "study_id": self.study_id,
             "status": self.status,
@@ -155,6 +158,9 @@ class SpineStudyReceipt:
             "reserve": self.reserve,
             "context_comparisons": list(self.context_comparisons),
         }
+        if self.variant is not None:
+            data["variant"] = self.variant
+        return data
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> SpineStudyReceipt:
@@ -189,6 +195,7 @@ class SpineStudyReceipt:
                 reserve=data["reserve"],
                 context_comparisons=tuple(data["context_comparisons"]),
                 scientific_status=data["scientific_status"],
+                variant=data.get("variant"),
             )
         except KeyError as exc:
             raise ValueError(f"receipt lacks key {exc.args[0]!r}") from exc

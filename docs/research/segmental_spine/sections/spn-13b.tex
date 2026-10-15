@@ -120,8 +120,8 @@ Variants act on the global pelvis-to-thorax rotation only; per-level
 distribution is that of the chosen coupling law. The peak shift is quantised to
 whole samples. The bounds are assumptions. Variants are kinematic what-if
 inputs with no claim of physiological realisability beyond the model range
-check, and the study request (Section~\ref{sec:spn-13a}) does not yet accept a
-variant id (a writer of the varied golf motion file is a follow-up).
+check; the study request (Section~\ref{sec:spn-13a}) accepts a variant id
+as described below, so no varied motion file is written.
 
 \paragraph{Reproduction.}
 \begin{verbatim}
@@ -130,3 +130,28 @@ python -m pytest tests/shared/python/spine/test_movement_variants.py \
 \end{verbatim}
 The native tests need OpenSim 4.6 (\texttt{requires\_opensim}); all fixture
 numbers are invented.
+
+\paragraph{Running a Variant Through the Study.}
+A study request may name one shipped variant through \texttt{variant\_id},
+an optional \texttt{variant\_parameter} (the variant default when absent) and
+\texttt{variant\_handedness} (\texttt{right} by default).  The parameter is
+checked against the variant's declared bounds when the request is built; an
+unknown id or an out-of-bounds value raises \texttt{ValueError}.  In the
+golf-input stage the study calls the variant generator described above on the
+trunk rotation of the motion file; the window events (address, top, impact)
+are read from the \texttt{event\_*} header lines of that file, and a missing
+event fails the golf-input stage.  The coupling laws, the drive and every
+downstream stage are unchanged; the varied input reaches the drive stage with
+its \texttt{distribution\_source} string.
+
+The request fingerprint covers the variant id, version, resolved parameter and
+handedness, and the SHA-256 of the variants configuration file, which is also
+listed in the receipt inputs.  The receipt gains a \texttt{variant} record
+holding the same description, the variant \texttt{distribution\_source}, the
+target error, the term-bound flag and the model-range report.  The driven
+level coordinates are compared with the segmental model's own coordinate
+ranges; any violation, or an exceeded term bound, gives the status
+\texttt{unqualified} and is never clipped.  A request without a variant
+produces the same canonical request, fingerprint and receipt bytes as before.
+Reproduce with
+\texttt{python -m pytest tests/opensim/spine/test\_study\_variant.py -n 0}.

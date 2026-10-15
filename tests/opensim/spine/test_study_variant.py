@@ -55,7 +55,7 @@ def inputs(tmp_path_factory) -> dict[str, Path]:
     )
     _retune(model)
     narrow = root / "narrow.osim"
-    narrow.write_text(model.read_text().replace("-1.0 1.0", "-0.0001 0.0001"))
+    narrow.write_text(model.read_text().replace(">-1 1<", ">-0.0001 0.0001<"))
     return {
         "motion": _with_events(_write_motion(root / "swing.sto")),
         "model": model,
@@ -179,7 +179,9 @@ def test_variant_and_baseline_differ_and_baseline_has_no_variant(
 ) -> None:
     require_opensim()
     base = run_spine_study(_request(inputs, tmp_path / "base"), code_version="c")
-    varied = run_spine_study(_variant_request(inputs, tmp_path / "var"), code_version="c")
+    varied = run_spine_study(
+        _variant_request(inputs, tmp_path / "var"), code_version="c"
+    )
     assert base.status == "pass"
     assert base.variant is None
     assert "variant" not in base.as_dict()
