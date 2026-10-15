@@ -1,0 +1,113 @@
+\subsection{Trunk Static Optimization With a Selectable Cost Exponent}
+\label{sec:spn-10b}
+
+This section documents \texttt{spine/static\_optimization.py} and the shared
+numeric core \texttt{static\_opt\_core.py} (issue \#12761, epic \#12735). It
+resolves trunk muscle redundancy against the spinal inverse-dynamics
+generalized forces of Section~\ref{sec:spn-10a}, with the activation cost
+$\sum a^p$, $p\in\{2,3\}$, and declared reserve actuators per spinal degree of
+freedom.
+
+\paragraph{Inputs and Frames.}
+Static optimization needs the generalized force $\tau_j$ of every level
+coordinate $j$, not only the per-level moments in the inferior ISB frame.
+\texttt{spinal\_generalized\_forces} reuses the same ID solve as
+\texttt{run\_spinal\_inverse\_dynamics} (one shared private pass, no second
+solver) and returns $q$, $\dot q$ and $\tau$ per model coordinate. With
+\texttt{exclude\_muscles} (the default) every muscle is switched off in the ID
+state, so $\tau$ is the net generalized force the muscles and reserves must
+supply; a muscle-bearing model then gives the same $\tau$ as its muscle-free
+skeleton (tested to $10^{-9}$). Couplers prescribe kinematics only and are
+disabled in both the ID and the static-optimization model copies (ADR-0055
+item 6). Generalized forces are in N$\cdot$m and follow each coordinate's
+OpenSim sign; muscle forces are tendon tensions in N.
+
+\paragraph{Muscle Model.}
+Each muscle is evaluated natively with a rigid tendon
+(\texttt{ignore\_tendon\_compliance}): fibre length and velocity follow from
+the path length and lengthening speed, and the tendon force is affine in the
+activation,
+\[
+  F_m(a_m) = P_m + a_m A_m, \qquad A_m = F_{0,m} f_L f_V \cos\alpha ,
+\]
+with $P_m$ the passive and fibre-damping force from OpenSim's own Millard
+curves. $A_m$ and $P_m$ are read at $a=0.5$ and $a=1$ and extrapolated; this is
+exact above the Millard minimum activation (0.01 by default, below which
+OpenSim clamps). Activation dynamics and tendon compliance are not represented.
+Moment arms $R_{mj}$ come from \texttt{GeometryPath.computeMomentArm} at the
+frame pose. The muscle generalized force is $M(a) = R^{\mathsf T}(P + a\circ A)
+= o + G a$.
+
+\paragraph{Optimization Problem.}
+With declared reserve limits $L_j>0$ the frame problem is lexicographic. Stage
+one finds the smallest weighted remainder
+\[
+  r^\ast = \tau - o - G a_1, \qquad
+  a_1 \in \arg\min_{0\le a\le 1} \sum_j \bigl((\tau_j - o_j - (Ga)_j)/L_j\bigr)^2 ,
+\]
+a bounded linear least-squares problem (BVLS) whose remainder $r^\ast$ is
+unique even when $a_1$ is not. Stage two resolves the redundancy,
+\[
+  \min_{0\le a\le 1} \sum_m a_m^p \quad \text{s.t.}\quad G a = G a_1 ,
+\]
+by SLSQP with the analytic gradient $p\,a^{p-1}$ and the constant constraint
+Jacobian, the equality reduced to an orthonormal basis of the column space of
+$G$ so that it has full row rank. For $p=2$ stage two is a convex quadratic
+program (SLSQP is exact on it); for $p=3$ it is a smooth convex program on
+$a\ge0$. A final minimum-norm Newton step on the unbounded activations removes
+residual constraint error. This is the $w\to\infty$ limit of the penalty
+$\sum a^p + w\sum (r_j/L_j)^2$: reserves carry exactly what the muscles cannot
+produce and are zero to solver precision when $\tau$ is reachable. The leg
+static optimization (\texttt{musculoskeletal\_static\_opt}, issue \#11617)
+keeps its OpenSim-style $L_2$ penalty \texttt{solve\_frame}, which moved
+unchanged into the shared core (golden-tested to $10^{-12}$).
+
+\paragraph{Reserve Reporting and Flags.}
+Per frame the result reports activations, muscle forces, the muscle part
+$M(a)$, the reserves $r$ (with $M(a)+r=\tau$ to $10^{-9}$) and the reserve
+share $s = \sum_j |r_j| / \sum_j |\tau_j|$. A frame is flagged, never dropped,
+when $s$ exceeds the declared \texttt{max\_share} (default 0.05), when any
+$|r_j|>L_j$ (default 1 N$\cdot$m), or when an optimizer stage reports failure.
+The activation participation ratio $(\sum a)^2/\sum a^2$ measures how many
+muscles share the load.
+
+\paragraph{Runtime Contract.}
+Frames are selected at named events (address, top and impact, nearest sample)
+plus every \texttt{stride}-th sample; a selection larger than
+\texttt{max\_frames} is an error, not a silent truncation. Continuous-integration
+runs use the fixture with at most five frames.
+
+\paragraph{Fixture Design.}
+The eight lumped bilateral fixture muscles of Section SPN-7b cannot span the 15
+rotational degrees of freedom of the five-level fixture, so its ID moments
+are in general unreachable. The tests therefore use a one-level variant
+(level L3--L4 only: the muscles run pelvis to L3 to the thorax proxy and only
+the three L3--L4 coordinates lie between pelvis and L3), where eight muscles
+act on three degrees of freedom and the gravity ID moments are reachable with
+redundancy five, and the five-level fixture, where the reserves must satisfy
+the stage-one optimality (KKT) conditions and every frame is flagged
+(measured share 0.38 to 0.46). The SPN-7b tendon slack lengths leave several
+muscles slack on these geometries, so the tests set each slack length to the
+neutral path length minus the optimal fibre length. All values are invented.
+
+\paragraph{Acceptance Evidence.}
+On the one-level fixture, for $p=2$ and $p=3$, the muscle part meets the ID
+generalized forces (about 23 N$\cdot$m) to $10^{-6}$ with reserves below
+$10^{-6}$ (measured $10^{-14}$) at the three event frames; a symmetric pose
+gives left and right activations equal to $10^{-6}$; and $p=3$ spreads load
+across more muscles than $p=2$ in every frame (participation ratio 4.9 to 5.7
+against 4.4 to 5.0). The analytic gradient matches central finite differences.
+
+\paragraph{Limitations and Deferred Work.}
+The rigid-tendon affine force model is a declared approximation; activations
+below the minimum activation are a model of $a=0$, not a simulated force. The
+native run on the Bruno full-body model for three swing events with reserve
+share reported is owner-workstation work blocked on the licensed asset
+(\#12749) and is deferred; no result is claimed here. Muscle wrapping and
+via-point discontinuities are inherited from the model.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/unit/engines/opensim/test_static_opt_core.py \
+  tests/opensim/spine/test_static_optimization.py -q -n 0
+\end{verbatim}

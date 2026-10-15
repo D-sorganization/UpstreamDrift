@@ -47,6 +47,7 @@ import math
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import MappingProxyType
 
 import numpy as np
 from scipy.interpolate import CubicSpline
@@ -76,11 +77,13 @@ __all__ = [
     "PreparedModel",
     "ResidualBudget",
     "ResidualReport",
+    "SpinalGeneralizedForces",
     "SpineIDOptions",
     "euler_jacobian",
     "euler_rate_columns",
     "prepare_model_for_id",
     "run_spinal_inverse_dynamics",
+    "spinal_generalized_forces",
 ]
 
 _MIN_SAMPLES = 4
@@ -626,6 +629,80 @@ def _provenance(
     }
 
 
+@dataclass(frozen=True)
+class _Trajectory:
+    """Everything one ID pass produces (shared by the public entry points)."""
+
+    prepared: PreparedModel
+    layout: _Layout
+    inventory: SpineInventory
+    times: np.ndarray
+    q: np.ndarray
+    qd: np.ndarray
+    tau: np.ndarray  # (n, nu) by mobility index
+    provenance: dict[str, str]
+
+
+def _disable_muscles(prepared: PreparedModel) -> int:
+    """Stop every muscle applying force in the prepared state; return the count."""
+    muscles = prepared.model.getMuscles()  # type: ignore[attr-defined]
+    for i in range(muscles.getSize()):
+        muscles.get(i).setAppliesForce(prepared.state, False)
+    return int(muscles.getSize())
+
+
+def _solve_trajectory(
+    model_path: str | Path,
+    motion: DriveResult | str | Path,
+    model_id: str,
+    io: tuple[str | Path | None, float | None, bool],
+    opts: SpineIDOptions,
+    exclude_muscles: bool,
+) -> _Trajectory:
+    """Run the ID solve over every sample (``io`` = loads, filter, couplers)."""
+    external_loads, filter_hz, disable_couplers = io
+    if filter_hz is not None and not (math.isfinite(filter_hz) and filter_hz > 0):
+        raise ValueError(f"filter_hz must be positive and finite, got {filter_hz!r}")
+    prepared = prepare_model_for_id(
+        model_path, disable_couplers=disable_couplers, external_loads=external_loads
+    )
+    n_muscles = _disable_muscles(prepared) if exclude_muscles else 0
+    model = prepared.model
+    times, cols, source, _label = _motion_table(model, motion)
+    inventory = inventory_spine(model, model_id, level_map=opts.level_map)
+    pelvis = _resolve_pelvis(model, opts)
+    names = _coordinate_names(model)
+    required = [c for lv in inventory.levels for c in inventory.coordinate_names[lv]]
+    required += [*pelvis.rotation, *pelvis.translation]
+    q, qd, qdd = _derivatives(
+        times, _coordinate_matrix(names, cols, required), filter_hz
+    )
+    state = prepared.state
+    free = state.getNQ() != state.getNU()
+    if free:
+        _check_free_pelvis_speeds(model, state, pelvis)
+    layout = _Layout(names, _u_indices(model, state), pelvis, free)
+    solver = import_opensim().InverseDynamicsSolver(model)
+    tau = np.zeros((times.size, len(names)))
+    try:
+        for i in range(times.size):
+            tau[i] = _solve_frame(
+                prepared, solver, layout, float(times[i]), (q[i], qd[i], qdd[i])
+            )
+    except RuntimeError as exc:
+        raise ValueError(f"inverse dynamics failed: {exc}") from exc
+    defaulted = [x for x in names if x not in cols]
+    prov = _provenance(
+        prepared, (Path(model_path), model_id, source, filter_hz), defaulted
+    )
+    prov["muscles"] = (
+        f"excluded ({n_muscles} muscles not applying force)"
+        if exclude_muscles
+        else "as modelled (muscle forces at the default state are included)"
+    )
+    return _Trajectory(prepared, layout, inventory, times, q, qd, tau, prov)
+
+
 def run_spinal_inverse_dynamics(
     model_path: str | Path,
     motion: DriveResult | str | Path,
@@ -661,62 +738,130 @@ def run_spinal_inverse_dynamics(
     opts = SpineIDOptions() if options is None else options
     if not isinstance(opts, SpineIDOptions):
         raise TypeError("options must be a SpineIDOptions or None")
-    if filter_hz is not None and not (math.isfinite(filter_hz) and filter_hz > 0):
-        raise ValueError(f"filter_hz must be positive and finite, got {filter_hz!r}")
-    prepared = prepare_model_for_id(
-        model_path, disable_couplers=disable_couplers, external_loads=external_loads
+    run = _solve_trajectory(
+        model_path,
+        motion,
+        model_id,
+        (external_loads, filter_hz, disable_couplers),
+        opts,
+        False,
     )
-    model = prepared.model
-    times, cols, source, _label = _motion_table(model, motion)
-    inventory = inventory_spine(model, model_id, level_map=opts.level_map)
-    pelvis = _resolve_pelvis(model, opts)
-    names = _coordinate_names(model)
-    required = [c for lv in inventory.levels for c in inventory.coordinate_names[lv]]
-    required += [*pelvis.rotation, *pelvis.translation]
-    q_raw = _coordinate_matrix(names, cols, required)
-    q, qd, qdd = _derivatives(times, q_raw, filter_hz)
-    state = prepared.state
-    free = state.getNQ() != state.getNU()
-    if free:
-        _check_free_pelvis_speeds(model, state, pelvis)
-    layout = _Layout(names, _u_indices(model, state), pelvis, free)
+    inventory, layout = run.inventory, run.layout
     signs = _axis_signs(inventory, opts, model_id)
-    osim = import_opensim()
-    solver = osim.InverseDynamicsSolver(model)
-    n = times.size
+    n = run.times.size
     moments = np.zeros((n, len(inventory.levels), 3))
     generalized, res_m, res_f = np.zeros((n, 6)), np.zeros((n, 3)), np.zeros((n, 3))
-    try:
-        for i in range(n):
-            tau = _solve_frame(
-                prepared, solver, layout, float(times[i]), (q[i], qd[i], qdd[i])
-            )
-            moments[i] = _level_moments(tau, q[i], layout, inventory, signs)
-            generalized[i], res_m[i], res_f[i] = _pelvis_wrench(tau, q[i], layout)
-    except RuntimeError as exc:
-        raise ValueError(f"inverse dynamics failed: {exc}") from exc
-    defaulted = [x for x in names if x not in cols]
-    prov = _provenance(
-        prepared, (Path(model_path), model_id, source, filter_hz), defaulted
-    )
+    for i in range(n):
+        moments[i] = _level_moments(run.tau[i], run.q[i], layout, inventory, signs)
+        generalized[i], res_m[i], res_f[i] = _pelvis_wrench(
+            run.tau[i], run.q[i], layout
+        )
+    prov = {k: v for k, v in run.provenance.items() if k != "muscles"}
     series = SpinalLoadSeries(
-        time_s=times,
+        time_s=run.times,
         levels=inventory.levels,
         observable=LoadObservable.GENERALIZED_EFFORT,
         force_n=np.zeros_like(moments),
         moment_nm=moments,
         provenance=prov,
     )
+    model, state = run.prepared.model, run.prepared.state
     weight = _body_weight(model, state)
     height = opts.body_height_m or _body_extent(model, state)
     residual = PelvisResidualBudget(
-        times, generalized, res_m, res_f, weight, height, opts.budget
+        run.times, generalized, res_m, res_f, weight, height, opts.budget
     )
     ensure(
         series.observable is LoadObservable.GENERALIZED_EFFORT,
         "observable must be GENERALIZED_EFFORT",
     )
     return series, residual
+
+
+@dataclass(frozen=True)
+class SpinalGeneralizedForces:
+    """Per-coordinate ID generalized forces for static optimisation (SPN-10b).
+
+    ``model_coordinates`` are all model coordinate names; ``q`` / ``qd`` /
+    ``tau`` are ``(n, len(model_coordinates))`` in that order (rad, rad/s,
+    m, m/s; ``tau`` in N*m for rotational and N for translational
+    coordinates, OpenSim's sign of each coordinate).  ``q``/``qd`` are the
+    (optionally filtered) values the ID used.  ``levels`` and
+    ``level_coordinates`` (``3 * len(levels)``, caudal first, (flex_ext,
+    lat_bend, axial_rot) per level) come from the inventory.  Arrays are
+    read-only.
+    """
+
+    time_s: np.ndarray
+    model_coordinates: tuple[str, ...]
+    q: np.ndarray
+    qd: np.ndarray
+    tau: np.ndarray
+    levels: tuple
+    level_coordinates: tuple[str, ...]
+    model_id: str
+    provenance: Mapping[str, str]
+
+    def __post_init__(self) -> None:
+        for name in ("time_s", "q", "qd", "tau"):
+            object.__setattr__(self, name, _ro(getattr(self, name)))
+        object.__setattr__(self, "provenance", MappingProxyType(dict(self.provenance)))
+
+    def level_tau(self) -> np.ndarray:
+        """``(n, 3 L)`` generalized forces of the level coordinates [N*m]."""
+        cols = [self.model_coordinates.index(c) for c in self.level_coordinates]
+        return self.tau[:, cols]
+
+
+def spinal_generalized_forces(
+    model_path: str | Path,
+    motion: DriveResult | str | Path,
+    model_id: str,
+    *,
+    external_loads: str | Path | None = None,
+    filter_hz: float | None = None,
+    disable_couplers: bool = True,
+    options: SpineIDOptions | None = None,
+    exclude_muscles: bool = True,
+) -> SpinalGeneralizedForces:
+    """The same ID solve as :func:`run_spinal_inverse_dynamics`, per coordinate.
+
+    Static optimisation needs ``tau`` per coordinate, not the per-level ISB
+    moments.  With ``exclude_muscles`` (default) every muscle is switched off
+    in the ID state, so ``tau`` is the net generalized force the muscles (and
+    reserves) must supply; a muscle-bearing model then gives the same ``tau``
+    as its muscle-free skeleton.  Arguments and errors are those of
+    :func:`run_spinal_inverse_dynamics`; ``exclude_muscles`` must be a bool.
+    """
+    opts = SpineIDOptions() if options is None else options
+    if not isinstance(opts, SpineIDOptions):
+        raise TypeError("options must be a SpineIDOptions or None")
+    if not isinstance(exclude_muscles, bool):
+        raise TypeError("exclude_muscles must be a bool")
+    run = _solve_trajectory(
+        model_path,
+        motion,
+        model_id,
+        (external_loads, filter_hz, disable_couplers),
+        opts,
+        exclude_muscles,
+    )
+    order = [run.layout.u_index[name] for name in run.layout.names]
+    inventory = run.inventory
+    level_coords = tuple(
+        c for lv in inventory.levels for c in inventory.coordinate_names[lv]
+    )
+    return SpinalGeneralizedForces(
+        time_s=run.times,
+        model_coordinates=tuple(run.layout.names),
+        q=run.q,
+        qd=run.qd,
+        tau=run.tau[:, order],
+        levels=inventory.levels,
+        level_coordinates=level_coords,
+        model_id=model_id,
+        provenance=run.provenance,
+    )
 
 
 def _body_weight(model: object, state: object) -> float:
