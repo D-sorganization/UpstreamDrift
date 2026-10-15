@@ -70,7 +70,11 @@ def _engine(name: str) -> types.ModuleType:
         pytest.skip(f"{package} in sys.modules is a test double")
     if name == "myosuite":
         # a partial install imports the package but not the scene loader
-        pytest.importorskip("myosuite.envs.env_base")
+        from src.engines.physics_engines.myosuite.python.myosuite_runtime_compat import (
+            detect_runtime_layout,
+        )
+
+        detect_runtime_layout()  # fails loudly: present but broken (#12635)
     return import_module(module)
 
 
