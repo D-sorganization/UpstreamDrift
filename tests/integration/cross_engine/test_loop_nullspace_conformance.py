@@ -67,11 +67,15 @@ REGISTRY = DivergenceRegistry.from_yaml(
 REFERENCE = EngineType.PINOCCHIO
 OTHERS = (
     pytest.param(EngineType.MUJOCO, marks=pytest.mark.requires_mujoco, id="mujoco"),
+    pytest.param(
+        EngineType.MYOSUITE, marks=pytest.mark.requires_myosuite, id="myosuite"
+    ),
     pytest.param(EngineType.DRAKE, marks=pytest.mark.requires_drake, id="drake"),
     pytest.param(EngineType.OPENSIM, marks=pytest.mark.requires_opensim, id="opensim"),
 )
 SDK = {
     EngineType.MUJOCO: "mujoco",
+    EngineType.MYOSUITE: "myosuite",
     EngineType.DRAKE: "pydrake",
     EngineType.OPENSIM: "opensim",
 }
@@ -284,7 +288,9 @@ def test_reference_engine_is_full(reference_adapter) -> None:
     assert level is CapabilityLevel.FULL
 
 
-@pytest.mark.parametrize("engine", [e for e in EngineType if e is not REFERENCE])
+@pytest.mark.parametrize(
+    "engine", [e for e in EngineType if e not in (REFERENCE, EngineType.MYOSUITE)]
+)
 def test_synthetic_fixtures_never_claim_conformance(engine) -> None:
     """Quarantined fixtures declare NONE and refuse a snapshot (no silent skip)."""
     synthetic = create_engine_force_adapter(engine, allow_synthetic=True)

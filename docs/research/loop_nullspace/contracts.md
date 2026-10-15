@@ -513,11 +513,13 @@ same run (`kkt_bound`: `|K^-1| (|dr| + |dK||x|) / (1 - |K^-1||dK|)`; Weyl for
 singular values), never hand-widened. A perturbed-engine control proves both
 tracks discriminate.
 
-Capability per engine: Pinocchio, MuJoCo, Drake and OpenSim are FULL and are
-registered in `create_engine_force_adapter`. Simscape (no native adapter) and
-all synthetic fixtures declare NONE and are asserted to refuse a snapshot. The
-MyoSuite path (NSX-52, #12580) reuses the MuJoCo adapter and joins the
-parametrisation when it lands. Agreement between engines is not physical
+Capability per engine: Pinocchio, MuJoCo, MyoSuite, Drake and OpenSim are FULL
+and are registered in `create_engine_force_adapter`; the harness skips MyoSuite
+cleanly when `myosuite` is not importable. Simscape (no native adapter) and the
+synthetic fixtures declare NONE and are asserted to refuse a snapshot. MyoSuite
+2.12.2 agrees with Pinocchio to the same digits as MuJoCo (the adapter reuses
+the MuJoCo code); MuJoCo 3.6.0 and 3.8.0 give identical Track N errors to three
+significant digits. Agreement between engines is not physical
 validation.
 
 ## NSX-60 Lower-Body Loop (#12585, Strong)

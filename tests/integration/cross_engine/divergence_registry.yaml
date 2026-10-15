@@ -208,3 +208,50 @@ divergences:
       inverse dynamics against Pinocchio CRBA/RNEA; native coordinate
       order differs and is permuted by name; closure rows canonical after
       the NSX-02 conversion.
+
+
+
+  - id: nsx56-pinocchio-myosuite-m
+    check: closed_loop_snapshot_conformance
+    metric: M
+    engines: [pinocchio, myosuite]
+    tolerance: 1e-11
+    rationale: >
+      Same specification, same state, the MyoSuite-held MuJoCo model
+      (MyoSuiteForceAdapter reuses the MuJoCo hard-KKT snapshot code)
+      against Pinocchio CRBA/RNEA; closure rows canonical after the NSX-02
+      conversion.
+
+  - id: nsx56-pinocchio-myosuite-h
+    check: closed_loop_snapshot_conformance
+    metric: h
+    engines: [pinocchio, myosuite]
+    tolerance: 1e-11
+    rationale: >
+      Same specification, same state, the MyoSuite-held MuJoCo model
+      (MyoSuiteForceAdapter reuses the MuJoCo hard-KKT snapshot code)
+      against Pinocchio CRBA/RNEA; closure rows canonical after the NSX-02
+      conversion.
+
+  - id: nsx56-pinocchio-myosuite-j_c
+    check: closed_loop_snapshot_conformance
+    metric: J_c
+    engines: [pinocchio, myosuite]
+    tolerance: 1e-12
+    rationale: >
+      Same specification, same state, the MyoSuite-held MuJoCo model
+      (MyoSuiteForceAdapter reuses the MuJoCo hard-KKT snapshot code)
+      against Pinocchio CRBA/RNEA; closure rows canonical after the NSX-02
+      conversion.
+
+  - id: nsx56-pinocchio-myosuite-jdot_v
+    check: closed_loop_snapshot_conformance
+    metric: Jdot_v
+    engines: [pinocchio, myosuite]
+    tolerance: 1e-08
+    rationale: >
+      Same specification, same state, the MyoSuite-held MuJoCo model
+      (MyoSuiteForceAdapter reuses the MuJoCo hard-KKT snapshot code)
+      against Pinocchio CRBA/RNEA; closure rows canonical after the NSX-02
+      conversion. Jdot v is the MuJoCo second-order central finite
+      difference (step 1e-6); the registered 1e-8 is the NSX-51 limit.
