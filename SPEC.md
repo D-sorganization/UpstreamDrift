@@ -2741,6 +2741,7 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-15 | #12610 | NSX-02 canonical closure Jacobian convention (frame, row order, sign) with per-engine declared conventions, golden and cross-engine tests |
 | 2026-10-15 | #12650 | Port MyoSuite runtime loading to a version-tolerant shim (env_base removed in 3.0.0) so the myosuite extras stay unpinned |
 | 2026-10-15 | #12611 | NSX-04: per-slot torque-capacity registry and capacity_for loader with verified and assumed sources |
 | 2026-10-15 | #12603 | Hand-on-club grip wrench uses the bare club inertia (club_solids_partition); legacy composite kept as wrist_on_hands_plus_club |
