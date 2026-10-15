@@ -46,6 +46,10 @@ from src.shared.python.pose_interchange.canonical import (
     CONVENTION_TAG,
     CanonicalPose,
 )
+from src.shared.python.pose_interchange.dynamic_maps import (
+    DynamicMapsMixin,
+    NativeDynamicLayout,
+)
 from src.shared.python.pose_interchange.protocol import JointSlot
 
 _PELVIS_PREFIX = 7  # [x, y, z, qx, qy, qz, qw]
@@ -70,10 +74,17 @@ def _layout_from_model(model: Any | None) -> Mapping[str, JointSlot]:
     )
 
 
-class PinocchioAdapter:
+_DYNAMIC_LAYOUT = NativeDynamicLayout(
+    "pinocchio", "quat_xyzw", 3, 7, False, "body", "body"
+)
+"""Pinocchio free-flyer: linear and angular velocity both LOCAL, w-last quaternion."""
+
+
+class PinocchioAdapter(DynamicMapsMixin):
     """Adapter for Pinocchio (free-flyer ``q`` is ``[xyz, quat_xyzw]``)."""
 
     engine_name: str = "pinocchio"
+    dynamic_layout = _DYNAMIC_LAYOUT
 
     def joint_layout(self, model: Any | None = None) -> Mapping[str, JointSlot]:
         """Return the per-joint ``q``-vector layout for ``model``.

@@ -34,6 +34,10 @@ from src.shared.python.pose_interchange.canonical import (
     CONVENTION_TAG,
     CanonicalPose,
 )
+from src.shared.python.pose_interchange.dynamic_maps import (
+    DynamicMapsMixin,
+    NativeDynamicLayout,
+)
 from src.shared.python.pose_interchange.protocol import JointSlot
 
 _PELVIS_PREFIX = 6  # [x, y, z, rotX_deg, rotY_deg, rotZ_deg]
@@ -55,10 +59,22 @@ def _layout_from_model(model: Any | None) -> Mapping[str, JointSlot]:
     )
 
 
-class OpenSimAdapter:
+_DYNAMIC_LAYOUT = NativeDynamicLayout(
+    "opensim", "euler_xyz_deg", 3, 6, False, "world", "euler_rate"
+)
+"""OpenSim dynamic maps: translation in world, XYZ Euler *coordinate rates*.
+
+``v`` is ``dq/dt`` of the BodyKinematics coordinates (deg/s), so the angular
+block is ``S(euler)^-1`` and ``Tdot`` is non-zero.  Simbody's own FreeJoint
+speed is the parent-frame angular velocity, not ``dq/dt``; it is not mapped here.
+"""
+
+
+class OpenSimAdapter(DynamicMapsMixin):
     """Adapter for OpenSim ``.osim`` BodyKinematics (XYZ Euler in deg)."""
 
     engine_name: str = "opensim"
+    dynamic_layout = _DYNAMIC_LAYOUT
 
     def joint_layout(self, model: Any | None = None) -> Mapping[str, JointSlot]:
         return _layout_from_model(model)
