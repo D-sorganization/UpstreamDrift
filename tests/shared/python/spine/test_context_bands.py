@@ -115,7 +115,9 @@ def test_every_band_value_matches_data_extraction():
         table = tables.get(band.source_table_id)
         assert table is not None, f"{band.band_id}: no table {band.source_table_id}"
         assert band.value in _numbers(table["rows"]), band.band_id
-        assert band.verified_from_primary is table["verified_from_primary"], band.band_id
+        assert band.verified_from_primary is table["verified_from_primary"], (
+            band.band_id
+        )
         assert band.units == EXPECTED_UNITS[band.source_table_id], band.band_id
 
 
@@ -225,10 +227,14 @@ def test_annotate_compares_matching_quantity_in_band_units():
     by_id = _by_band(comparisons)
     hosea_pro = next(b for b in load_context_bands() if "professional" in b.subjects)
     lim_comp = next(
-        b for b in load_context_bands() if b.study == "Lim 2012" and b.quantity == "compression"
+        b
+        for b in load_context_bands()
+        if b.study == "Lim 2012" and b.quantity == "compression"
     )
     lim_ap = next(
-        b for b in load_context_bands() if b.study == "Lim 2012" and b.quantity == "ap_shear"
+        b
+        for b in load_context_bands()
+        if b.study == "Lim 2012" and b.quantity == "ap_shear"
     )
     assert by_id[hosea_pro.band_id].model_units == "N"
     assert by_id[hosea_pro.band_id].model_peak == pytest.approx(3792.0)
