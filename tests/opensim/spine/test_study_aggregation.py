@@ -237,7 +237,9 @@ def test_groups_split_by_distribution_source(tmp_path: Path) -> None:
 
 
 def test_order_independent(tmp_path: Path) -> None:
-    paths = [_write_study(tmp_path / s, s, scale=float(i + 1)) for i, s in enumerate("abc")]
+    paths = [
+        _write_study(tmp_path / s, s, scale=float(i + 1)) for i, s in enumerate("abc")
+    ]
     one = aggregate_receipts(paths)
     two = aggregate_receipts(list(reversed(paths)))
     assert one == two
@@ -271,11 +273,13 @@ def test_compare_against_baseline(tmp_path: Path) -> None:
     delta = next(
         d
         for d in result.deltas
-        if (d.observable, d.level, d.quantity) == ("joint_reaction", "L5_S1", "compression")
+        if (d.observable, d.level, d.quantity)
+        == ("joint_reaction", "L5_S1", "compression")
     )
     assert delta.variant == "v"
     assert delta.delta == 300.0 and delta.ratio == pytest.approx(2.0)
     assert delta.baseline_source == "law-a" and delta.variant_source == "law-b"
+    assert delta.baseline_law == delta.variant_law == "law-id"
 
 
 def test_compare_skips_ambiguous_sources(tmp_path: Path) -> None:
@@ -301,7 +305,9 @@ def test_writers_deterministic_with_units(tmp_path: Path) -> None:
     assert csv_path.read_bytes() == again.read_bytes()
     with csv_path.open(newline="", encoding="utf-8") as handle:
         header = next(csv.reader(handle))
-    quantity_cols = [h for h in header if h.startswith(("peak_", "impulse_", "t_peak_"))]
+    quantity_cols = [
+        h for h in header if h.startswith(("peak_", "impulse_", "t_peak_"))
+    ]
     assert quantity_cols and all(h.endswith("]") for h in quantity_cols)
     assert "peak_compression[N]" in header
     assert "impulse_compression[N*s]" in header
