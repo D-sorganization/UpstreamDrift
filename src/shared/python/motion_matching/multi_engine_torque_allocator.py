@@ -33,6 +33,9 @@ from src.shared.python.motion_matching.contact_force_allocator import (
     ContactForceAllocator,
 )
 from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
+from src.shared.python.loop_nullspace.closure_convention import (
+    MUJOCO_CLOSURE_CONVENTION,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -248,6 +251,8 @@ class MujocoForceAdapter:
             mj.mj_jacSite(model, data, jac_pos, None, site_id)
             j_ground[idx * 3 : (idx + 1) * 3, :] = jac_pos
         return j_ground
+
+    NATIVE_CLOSURE_CONVENTION = MUJOCO_CLOSURE_CONVENTION
 
     def compute_grip_jacobian(self, q: Array) -> Array:
         self._prepare_state(q)

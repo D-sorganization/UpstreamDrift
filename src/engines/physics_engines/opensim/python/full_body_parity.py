@@ -55,6 +55,9 @@ from src.shared.python.motion_matching.contact_law import (
     GroundPlane,
     sphere_ground_contact,
 )
+from src.shared.python.loop_nullspace.closure_convention import (
+    OPENSIM_CLOSURE_CONVENTION,
+)
 from src.shared.python.motion_matching.full_body_spec import FULL_BODY_SCHEMA_VERSION
 
 Array = NDArray[np.float64]
@@ -256,6 +259,8 @@ class OpenSimFullBodyParityAdapter:
         return jacobian[3:], jacobian[:3], bias_linear, bias_angular
 
     # -- weld closure -------------------------------------------------------
+    NATIVE_CLOSURE_CONVENTION = OPENSIM_CLOSURE_CONVENTION
+
     def _closure_blocks(self) -> tuple[Array, Array, Array]:
         """Pose residual (6), rate Jacobian (6 x nv) and rate bias (6)."""
         poses, jac_lin, jac_ang, bias_lin, bias_ang = [], [], [], [], []

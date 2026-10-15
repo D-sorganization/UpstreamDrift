@@ -41,6 +41,15 @@ from src.shared.python.pose_interchange.canonical import (
     CONVENTION_TAG,
     CanonicalPose,
 )
+from src.shared.python.pose_interchange.dynamic_transforms import (
+    BaseConvention,
+    acceleration_from_canonical,
+    acceleration_to_canonical,
+    generalized_force_from_canonical,
+    generalized_force_to_canonical,
+    velocity_from_canonical,
+    velocity_to_canonical,
+)
 from src.shared.python.pose_interchange.protocol import JointSlot
 
 _PELVIS_PREFIX = 6  # [x, y, z, roll, pitch, yaw]
@@ -353,6 +362,138 @@ class DrakeAdapter:
             "a": _canonical_tangent_from_drake(state.a, rotation),
             "t": state.t,
         }
+
+    def velocity_map(
+        self,
+        q: npt.ArrayLike,
+        v: npt.ArrayLike,
+        *,
+        to_canonical: bool = False,
+        base_mode: str = "quat_floating",
+        model: Any | None = None,
+    ) -> npt.NDArray[np.float64]:
+        """Map velocity between canonical-v2 and Drake native layouts (NSX-50)."""
+        conv, q_is_canon = _drake_base_convention(q, v, to_canonical, base_mode)
+        fn = velocity_to_canonical if to_canonical else velocity_from_canonical
+        return fn(
+            q,
+            v,
+            base_convention=conv,
+            q_is_canonical=q_is_canon,
+            layout=_layout_from_model(model),
+            base_offset=_PELVIS_PREFIX,
+        )
+
+    def velocity_to_canonical(
+        self,
+        q: npt.ArrayLike,
+        v_engine: npt.ArrayLike,
+        *,
+        base_mode: str = "quat_floating",
+        model: Any | None = None,
+    ) -> npt.NDArray[np.float64]:
+        """Decode Drake native velocity into canonical-v2 velocity."""
+        return self.velocity_map(
+            q, v_engine, to_canonical=True, base_mode=base_mode, model=model
+        )
+
+    def acceleration_map(
+        self,
+        q: npt.ArrayLike,
+        v: npt.ArrayLike,
+        a: npt.ArrayLike,
+        *,
+        to_canonical: bool = False,
+        base_mode: str = "quat_floating",
+        model: Any | None = None,
+    ) -> npt.NDArray[np.float64]:
+        """Map acceleration between canonical-v2 and Drake native layouts (NSX-50)."""
+        conv, q_is_canon = _drake_base_convention(q, v, to_canonical, base_mode)
+        fn = acceleration_to_canonical if to_canonical else acceleration_from_canonical
+        return fn(
+            q,
+            v,
+            a,
+            base_convention=conv,
+            q_is_canonical=q_is_canon,
+            layout=_layout_from_model(model),
+            base_offset=_PELVIS_PREFIX,
+        )
+
+    def acceleration_to_canonical(
+        self,
+        q: npt.ArrayLike,
+        v_engine: npt.ArrayLike,
+        a_engine: npt.ArrayLike,
+        *,
+        base_mode: str = "quat_floating",
+        model: Any | None = None,
+    ) -> npt.NDArray[np.float64]:
+        """Decode Drake native acceleration into canonical-v2 acceleration."""
+        return self.acceleration_map(
+            q,
+            v_engine,
+            a_engine,
+            to_canonical=True,
+            base_mode=base_mode,
+            model=model,
+        )
+
+    def generalized_force_map(
+        self,
+        q: npt.ArrayLike,
+        tau: npt.ArrayLike,
+        *,
+        to_canonical: bool = False,
+        base_mode: str = "quat_floating",
+        model: Any | None = None,
+    ) -> npt.NDArray[np.float64]:
+        """Dual generalized-force transform preserving virtual power tau . v (NSX-50)."""
+        conv, q_is_canon = _drake_base_convention(q, tau, to_canonical, base_mode)
+        fn = (
+            generalized_force_to_canonical
+            if to_canonical
+            else generalized_force_from_canonical
+        )
+        return fn(
+            q,
+            tau,
+            base_convention=conv,
+            q_is_canonical=q_is_canon,
+            layout=_layout_from_model(model),
+            base_offset=_PELVIS_PREFIX,
+        )
+
+    def generalized_force_to_canonical(
+        self,
+        q: npt.ArrayLike,
+        tau_engine: npt.ArrayLike,
+        *,
+        base_mode: str = "quat_floating",
+        model: Any | None = None,
+    ) -> npt.NDArray[np.float64]:
+        """Decode Drake native generalized force into canonical-v2 via T^T."""
+        return self.generalized_force_map(
+            q, tau_engine, to_canonical=True, base_mode=base_mode, model=model
+        )
+
+
+def _drake_base_convention(
+    q: npt.ArrayLike,
+    tangent: npt.ArrayLike,
+    to_canonical: bool,
+    base_mode: str,
+) -> tuple[BaseConvention, bool]:
+    if base_mode == "quat_floating":
+        return "drake_quat_floating", (not to_canonical)
+    if base_mode == "rpy":
+        q_arr = np.asarray(q, dtype=float)
+        t_arr = np.asarray(tangent, dtype=float)
+        q_is_canon = (
+            q_arr.ndim == 1 and t_arr.ndim == 1 and q_arr.shape[0] == t_arr.shape[0] + 1
+        )
+        return "euler_xyz_rad", q_is_canon
+    raise ValueError(f"base_mode must be 'quat_floating' or 'rpy', got {base_mode!r}")
 
 
 def _readonly_vector(value: object, name: str) -> npt.NDArray[np.float64]:

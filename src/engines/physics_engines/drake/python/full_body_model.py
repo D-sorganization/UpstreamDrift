@@ -31,6 +31,9 @@ from src.shared.python.biomechanics.grip_wrench import (
 )
 from src.shared.python.contracts import precondition
 from src.shared.python.force_overlay.contracts import OverlayWrench
+from src.shared.python.loop_nullspace.closure_convention import (
+    DRAKE_CLOSURE_CONVENTION,
+)
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
     ContactSample,
@@ -456,6 +459,8 @@ class FullBodyDrakeModel:
             ((jacobian @ velocity)[3:], (jacobian @ velocity)[:3])
         )
         return pos_residual, vel_residual
+
+    NATIVE_CLOSURE_CONVENTION = DRAKE_CLOSURE_CONVENTION
 
     def _closure_jacobian(self) -> tuple[Any, Any, Array]:
         a, b = self._closure

@@ -18,6 +18,7 @@ from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
     export_full_body_mjcf,
 )
 from src.engines.physics_engines.mujoco.python.native_model import (
+    NATIVE_CLOSURE_CONVENTION,
     _compute_closure_errors,
     _evaluate_weld_closure,
     _extract_frame_poses,
@@ -377,6 +378,8 @@ class NativeMujocoFullBodyModel:
         if self._errors is None:
             raise ValueError("Evaluate acceleration before closure errors")
         return self._errors[0].copy(), self._errors[1].copy()
+
+    NATIVE_CLOSURE_CONVENTION = NATIVE_CLOSURE_CONVENTION
 
     def evaluate_weld_closure(self) -> tuple[np.ndarray, np.ndarray]:
         """Evaluate weld closure Jacobian and drift for dual-grip constraint."""
