@@ -19,6 +19,7 @@ from scipy.spatial.transform import Rotation
 from src.engines.physics_engines.opensim.python.spine._osim_helpers import (
     body_transform_in,
     set_coordinate_values,
+    transform_to_matrix,
 )
 from src.engines.physics_engines.opensim.python.spine.drive import (
     FIXTURE_PELVIS,
@@ -194,7 +195,8 @@ def test_mot_columns_and_native_replay(coupled, tmp_path) -> None:
         np.testing.assert_allclose(
             thorax[:3, :3], golf.pelvis_to_thorax[frame], atol=1e-8
         )
-        pelvis = body_transform_in(model, state, "pelvis", "ground")
+        body = model.getBodySet().get("pelvis")
+        pelvis = transform_to_matrix(body.getTransformInGround(state))
         np.testing.assert_allclose(pelvis, golf.pelvis_pose_ground[frame], atol=1e-8)
 
 
