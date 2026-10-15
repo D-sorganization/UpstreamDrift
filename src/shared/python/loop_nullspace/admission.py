@@ -24,7 +24,7 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from enum import Enum
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -225,7 +225,7 @@ class AdmissionReport:
             raise ValueError(f"level must be one of {_LEVELS}, got {level!r}")
         values = np.array([getattr(f, level) for f in self.frames])
         first = self.snapshots[0]
-        common = {
+        common: dict[str, Any] = {
             "units": "1",
             "model_provenance": first.model_provenance,
             "input_provenance": first.input_provenance,
@@ -453,7 +453,8 @@ def admit(
     frames = _measure(snaps, gates, plant)
     time_sync = _check_time(t, gates)
     contact = _check_contacts(snaps, gates)
-    noise, deriv_bad = (0.0, ())
+    noise: float = 0.0
+    deriv_bad: tuple[int, ...] = ()
     if gates.derivative_method == "central_difference":
         noise, deriv_bad = _derivative_mismatch(snaps, t, gates)
 
