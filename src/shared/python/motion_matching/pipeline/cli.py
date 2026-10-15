@@ -14,6 +14,7 @@ import numpy as np
 
 from src.shared.python.contracts import precondition
 from src.shared.python.motion_matching import (
+    address_knee,
     full_body_forward_dynamics as fs,
 )
 from src.shared.python.motion_matching.club_face_target import (
@@ -34,6 +35,8 @@ from src.shared.python.motion_matching.pipeline.address import (
     AddressStageInputs,
     HipCalibrationOptions,
     add_hip_zero_twist_argument,
+    add_knee_flexion_argument,
+    build_knee_targets,
     calibrated_address_summary,
     prepare_hip_spec,
     scaled_offsets,
@@ -422,6 +425,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     add_turn_split_arguments(parser)
     add_hip_zero_twist_argument(parser)
+    add_knee_flexion_argument(parser)
     return parser
 
 
@@ -639,6 +643,7 @@ def _calibrate_and_scale(
         sim, kin, address2, lane, labels, adapter
     )
     record_foot_progression(address_report, kin, address2.q, lane.feet)
+    address_knee.record_knee_flexion(address_report, kin, address2.q, lane.knees)
     return _CalibrateAndScaleResult(
         scaled_spec,
         spec_bytes,
@@ -1276,6 +1281,7 @@ def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
     configure_lane(lane, base_spec)
     mode = getattr(args, "foot_progression", "off")
     lane.feet = build_foot_targets(lane, mode)
+    lane.knees = build_knee_targets(lane, base_spec, address_knee.requested_mode(args))
     provenance = BaseSpecProvenance.of(base_spec)  # pre-seeding hash (#12820)
     if lane.feet is not None:
         seed_kin = plant.create_ik(lane.leg_seeds())
