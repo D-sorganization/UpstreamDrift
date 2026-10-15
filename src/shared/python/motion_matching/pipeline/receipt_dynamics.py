@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -255,6 +255,109 @@ class FinishFeasibilityReceipt(BaseModel):
     )
 
 
+class ClubheadSpeedSeries(BaseModel):
+    """Face-centre speed of one swing at its own ball passage (GCV-20)."""
+
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
+    status: str = Field(
+        ...,
+        description="ok, or unavailable with a reason (never reported as zero)",
+        json_schema_extra={"unit": "text", "stage": "dynamics"},
+    )
+    reason: str | None = Field(
+        None,
+        description="Why the speed is unavailable (missing ball passage: closest approach)",
+        json_schema_extra={"unit": "text", "stage": "dynamics"},
+    )
+    impact_time_s: float | None = Field(
+        None,
+        description="Sub-sample face-centre ball passage on the swing's own clock",
+        json_schema_extra={"unit": "s", "stage": "dynamics"},
+    )
+    impact_speed_mps: float | None = Field(
+        None,
+        gt=0,
+        description="Last wholly pre-contact face-centre chord speed",
+        json_schema_extra={"unit": "m/s", "stage": "dynamics"},
+    )
+    peak_speed_mps: float | None = Field(
+        None,
+        gt=0,
+        description="Peak face-centre chord speed in the window around impact",
+        json_schema_extra={"unit": "m/s", "stage": "dynamics"},
+    )
+    peak_minus_impact_s: float | None = Field(
+        None,
+        description="Peak time minus impact time (negative: peak first)",
+        json_schema_extra={"unit": "s", "stage": "dynamics"},
+    )
+
+
+class ClubheadSpeedReceipt(BaseModel):
+    """Clubhead-speed parity at the face centre (#12682); reporting only."""
+
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
+    status: str = Field(
+        ...,
+        description="ok when simulation and capture both have a speed, else unavailable",
+        json_schema_extra={"unit": "text", "stage": "dynamics"},
+    )
+    reason: str | None = Field(
+        None,
+        description="Which side has no face-centre speed",
+        json_schema_extra={"unit": "text", "stage": "dynamics"},
+    )
+    measurement_point: Literal["face_centre"] = Field(
+        ...,
+        description="The one clubhead measurement point (club_face_target.face_centre_path)",
+        json_schema_extra={"unit": "text", "stage": "dynamics"},
+    )
+    speed_rule: str = Field(
+        ...,
+        description="Shared speed rule applied to every series",
+        json_schema_extra={"unit": "text", "stage": "dynamics"},
+    )
+    impact_speed_tol_fraction: float = Field(
+        ...,
+        gt=0,
+        description="GCV-20 impact-speed tolerance (recorded, not enforced)",
+        json_schema_extra={"unit": "fraction", "stage": "dynamics"},
+    )
+    peak_timing_tol_s: float = Field(
+        ...,
+        gt=0,
+        description="GCV-20 peak-timing tolerance (recorded, not enforced)",
+        json_schema_extra={"unit": "s", "stage": "dynamics"},
+    )
+    simulated: ClubheadSpeedSeries = Field(
+        ...,
+        description="Forward-dynamics swing on the capture clock",
+        json_schema_extra={"unit": "compound", "stage": "dynamics"},
+    )
+    reference: ClubheadSpeedSeries = Field(
+        ...,
+        description="Kinematic reference (q_ref) of the simulation on the capture clock",
+        json_schema_extra={"unit": "compound", "stage": "dynamics"},
+    )
+    capture: ClubheadSpeedSeries = Field(
+        ...,
+        description="Capture head triad through the calibrated offsets",
+        json_schema_extra={"unit": "compound", "stage": "dynamics"},
+    )
+    impact_speed_error_pct: float | None = Field(
+        None,
+        description="Simulated over capture impact speed minus one, in percent",
+        json_schema_extra={"unit": "%", "stage": "dynamics"},
+    )
+    peak_timing_offset_s: float | None = Field(
+        None,
+        description="Simulated minus capture peak_minus_impact_s (negative: early)",
+        json_schema_extra={"unit": "s", "stage": "dynamics"},
+    )
+
+
 class FdPhaseReceipt(BaseModel):
     """FD marker RMS split at the detected impact (#12042); reporting only."""
 
@@ -303,6 +406,11 @@ class FdPhaseReceipt(BaseModel):
         ge=0,
         description="Capture frames after impact",
         json_schema_extra={"unit": "count", "stage": "dynamics"},
+    )
+    clubhead_speed: ClubheadSpeedReceipt | None = Field(
+        None,
+        description="Face-centre clubhead speed of simulation, reference and capture",
+        json_schema_extra={"unit": "compound", "stage": "dynamics"},
     )
 
 

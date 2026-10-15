@@ -104,3 +104,77 @@ def test_rejects_missing_required_section() -> None:
     del doc["dynamics"]
     with pytest.raises(ValueError, match=r"dynamics"):
         validate_receipt(doc)
+
+
+def _speed_series(speed: float | None) -> dict[str, Any]:
+    if speed is None:
+        return {
+            "status": "unavailable",
+            "reason": "no calibrated head triad",
+            "impact_time_s": None,
+            "impact_speed_mps": None,
+            "peak_speed_mps": None,
+            "peak_minus_impact_s": None,
+        }
+    return {
+        "status": "ok",
+        "reason": None,
+        "impact_time_s": 1.3255,
+        "impact_speed_mps": speed,
+        "peak_speed_mps": speed + 0.4,
+        "peak_minus_impact_s": -0.0065,
+    }
+
+
+def _clubhead_speed_block() -> dict[str, Any]:
+    """``dynamics.fd_phase.clubhead_speed`` (#12682), driver fixture numbers."""
+    return {
+        "status": "ok",
+        "reason": None,
+        "measurement_point": "face_centre",
+        "speed_rule": "model_appearance.club_face.clubhead_speed_timing",
+        "impact_speed_tol_fraction": 0.03,
+        "peak_timing_tol_s": 0.005,
+        "simulated": _speed_series(50.02),
+        "reference": _speed_series(None),
+        "capture": _speed_series(51.32),
+        "impact_speed_error_pct": -2.53,
+        "peak_timing_offset_s": -0.0044,
+    }
+
+
+def test_receipt_accepts_the_face_centre_clubhead_speed_block() -> None:
+    """The fd_phase block carries the face-centre speed parity (#12682);
+    committed receipts written before it still validate without it."""
+    doc = load_json(DRIVER_RECEIPT_PATH)
+    assert validate_receipt(doc).dynamics.fd_phase.clubhead_speed is None
+    doc["dynamics"]["fd_phase"]["clubhead_speed"] = _clubhead_speed_block()
+    speed = validate_receipt(doc).dynamics.fd_phase.clubhead_speed
+    assert speed is not None
+    assert speed.measurement_point == "face_centre"
+    assert speed.simulated.impact_speed_mps == pytest.approx(50.02)
+    assert speed.reference.impact_speed_mps is None
+
+
+@pytest.mark.parametrize(
+    ("path", "value"),
+    [
+        (("measurement_point",), "clubhead_origin"),
+        (("simulated", "impact_speed_mps"), 0.0),
+        (("capture", "peak_speed_mps"), -1.0),
+    ],
+)
+def test_receipt_rejects_a_bad_clubhead_speed_block(
+    path: tuple[str, ...], value: Any
+) -> None:
+    """Only the face centre is a measurement point; an unavailable speed is
+    ``None`` with a reason, never zero."""
+    doc = load_json(DRIVER_RECEIPT_PATH)
+    block = _clubhead_speed_block()
+    target = block
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    doc["dynamics"]["fd_phase"]["clubhead_speed"] = block
+    with pytest.raises(ValueError, match=r"dynamics\.fd_phase\.clubhead_speed"):
+        validate_receipt(doc)
