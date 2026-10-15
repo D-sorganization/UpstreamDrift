@@ -45,6 +45,10 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Active Epics and Slices (One Line Each; Detail in the Archive)
 
+Closed-loop null-space exploration (NSX-00 through NSX-75; Epic #12593, PR #12634):
+
+- Consolidated `src/shared/python/loop_nullspace/` package, bare-club inertia partition (#12550), `force_nullspace` package split (#12552), canonical closure convention & dual `pose_interchange` maps (#12551, #12578), joint torque-capacity table & citation-gated registry (#12553, #12556), analytic closed-loop oracles (#12555, #12557), `snapshot_from_adapter` (#12558), admission gate (#12559), closed-loop decomposition & KKT-projected ZTCF/ZVCF (#12560, #12570), 6x6 grasp-map split & invariants (#12561, #12562), unified conic solvers & `FeasibleSet`/envelopes/restriction (#12563-#12569), lower-body loop & parameter ensemble (#12571-#12577), multi-engine closure snapshots (#12579-#12582), FastAPI/React/PyQt6 exploration surfaces & output policy (#12583-#12585), and research spikes (#12586-#12591); external validation deferred to `docs/development/planning/DV-12554.md` (#12554).
+
 Shot-pattern study (straight, draw and fade; #12409, PR #12418):
 
 - Matched phase-two study and article with 2,000-resample intervals and the clubhead-assumption band; consolidates #12278, #12410 and #12411. Start at `docs/research/shot_pattern_analysis/phase2/RESUME_HANDOFF.md`; the pre-consolidation detail is in the archive section of that name.
