@@ -635,6 +635,33 @@ the analytic infeasible case the conflict set is
 \{\texttt{H-TORQUE-CAPACITY:joint1:lower}, \texttt{H-GRIP-PRELOAD:axial\_nonpositive}\}
 with certificate $y=(0,1,1,0,0)$ and $y^{\top}h=-\tfrac14$.
 
+\subsection{Certified Affine Probes and Epsilon-Constraint Fronts}
+A \emph{probe} asks whether an affine functional $f(z)=f_0+c^{\top}z$ satisfies
+$f\ge\theta$ on the trajectory-coupled set
+$\{z=(z_1,\dots,z_T):G z\le h,\ b_j-A_jz\in\mathcal K_j\}$ (rows of the frames,
+exact cones, hard rate bounds $|q_{k+1}-q_k|\le\delta_k$).  Stack
+$A=[G;A_1;\dots]$ and $b=[h;b_1;\dots]$.  A dual vector $d$ with $d\ge0$ on the
+rows, $d_j\in\mathcal K_j$ (self-dual) and $c+A^{\top}d=0$ gives, by weak
+duality, $f(z)\ge f_0-b^{\top}d$ for every feasible $z$.  Together with a
+primal witness $w$ ($f(w)\ge\min f$) this is a zero-gap certificate that is
+re-checked with numpy alone.  An empty set has a Farkas certificate
+$A^{\top}d=0$, $b^{\top}d<0$.  With $\mathrm{atol}=\varepsilon_s\cdot\text{scale}$
+the verdict is \texttt{HOLDS} if $f_0-b^{\top}d>\theta+\mathrm{atol}$,
+\texttt{FAILS} if a feasible witness has $f<\theta-\mathrm{atol}$ and
+\texttt{UNDECIDED} otherwise (a bound that touches the threshold is
+undecided).  Certificates are exact up to the reported residuals and hold only
+under the stated hypotheses.
+
+A Pareto front over two quadratic objectives $J_a,J_b$ uses the
+epsilon-constraint $\min J_a$ subject to $J_b\le\varepsilon$, with
+$J_b=\lVert Mz+m\rVert^2$ imposed as the cone
+$(\sqrt{\varepsilon},Mz+m)\in\mathcal K$.  Strict convexity of $J_a$ on the
+retained torque space makes each solution unique and Pareto optimal; the cone
+multiplier $w_0$ gives $\mathrm{d}J_a^{*}/\mathrm{d}\varepsilon=-w_0/(2\sqrt{\varepsilon})$.
+For $z_1\ge1$, $|z_2|\le3$, effort versus torque rate over two frames the front
+is $J_a^{*}=\tfrac{\Delta t}{2s^2}\bigl(1+(1-d)^2\bigr)$ with
+$d=s\sqrt{\varepsilon\,\Delta t}<1$ and constant beyond $d=1$.
+
 \subsection{Polyhedral Approximation of Cones}
 A circular friction cone approximated by a regular $k$-gon is an inner
 approximation (polygon inside the circle) or outer one.  With inner scale
