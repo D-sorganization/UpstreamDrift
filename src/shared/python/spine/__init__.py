@@ -20,6 +20,7 @@ from src.shared.python.spine.coupling import (
     from_joint_coupling,
     level_rotations,
     regional_fraction,
+    restrict_to_levels,
 )
 from src.shared.python.spine.coupling_data import (
     available_laws,
@@ -121,6 +122,7 @@ __all__ = [
     "parse_level",
     "regional_fraction",
     "registered_terms",
+    "restrict_to_levels",
     "segmental_contributions",
     "to_tension_positive",
 ]
