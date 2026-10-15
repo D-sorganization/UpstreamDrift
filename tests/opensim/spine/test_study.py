@@ -90,6 +90,7 @@ def inputs(tmp_path_factory) -> dict[str, Path]:
     model = write_fixture_osim(
         FixtureSpec(), root / "fixture.osim", coupling=_law(), muscles=True
     )
+    _retune(model)
     return {"motion": _write_motion(root / "swing.sto"), "model": model, "root": root}
 
 
@@ -101,8 +102,8 @@ def _request(inputs, out: Path, **kw) -> SpineStudyRequest:
         "model_path": inputs["model"],
         "model_id": "fixture",
         "pelvis": "fixture",
-        "events": {"mid": 0.2},
-        "stride": 2,
+        "events": {"mid": 0.2, "late": 0.3},
+        "stride": None,
         "max_frames": 5,
         "residual_force_fraction_bw": 1e3,
         "residual_moment_fraction": 1e3,
@@ -223,7 +224,7 @@ def test_end_to_end_receipt_has_all_hashes(inputs, tmp_path) -> None:
     receipt = run_spine_study(
         _request(inputs, tmp_path / "out"), code_version="cafe1234"
     )
-    assert receipt.status == "pass", receipt.status_reasons
+    assert receipt.status == "pass", (receipt.status_reasons, receipt.reserve)
     assert receipt.code_version == "cafe1234"
     assert receipt.scientific_status == "unqualified"
     roles = {f.role for f in receipt.inputs}
@@ -332,8 +333,11 @@ def test_flagged_reserves_make_study_unqualified(inputs, tmp_path) -> None:
 def test_stage_failure_is_recorded_as_failed(inputs, tmp_path) -> None:
     require_opensim()
     bad = inputs["root"] / "no_levels.sto"
-    bad.write_text("synthetic\nversion=1\nnRows=1\nnColumns=2\ninDegrees=no\n"
-                   "endheader\ntime\tpelvis_tx\n0.0\t0.0\n", encoding="utf-8")
+    bad.write_text(
+        "synthetic\nversion=1\nnRows=1\nnColumns=2\ninDegrees=no\n"
+        "endheader\ntime\tpelvis_tx\n0.0\t0.0\n",
+        encoding="utf-8",
+    )
     receipt = run_spine_study(
         _request(inputs, tmp_path / "bad", motion_path=bad), code_version="c"
     )
