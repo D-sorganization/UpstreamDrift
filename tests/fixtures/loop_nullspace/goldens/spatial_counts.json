@@ -1,0 +1,152 @@
+{
+  "coordinate_order": "root(6, optional) | lead arm (7) | trail arm (7)",
+  "description": "Exact dimension counts for the spatial two-arm club chain, WELD6, 2 x 7-joint arms, optional 6-DOF floating root and two point feet.",
+  "foot_axis_vector": [
+    "1/2",
+    "3/10",
+    "0"
+  ],
+  "geometry_note": "generic rational geometry; counts are structural, not a golf posture",
+  "name": "spatial_two_arm_counts",
+  "schema": "loop-nullspace-golden/1",
+  "variants": {
+    "fixed_base_arms_only": {
+      "attainable_torque_variation_fg_fixed": 6,
+      "attainable_torque_variation_fg_free": 6,
+      "dim_x": 20,
+      "equality_nullity": 6,
+      "gauge_total_fg_free": 0,
+      "lead_chain_equations": 7,
+      "lead_chain_rank_J_c_T": 6,
+      "m": 6,
+      "multiplier_gauge": 0,
+      "n": 14,
+      "n_actuated": 14,
+      "n_g": 0,
+      "n_unactuated": 0,
+      "nullity_fg_fixed": 6,
+      "rank_A": 14,
+      "rank_J_c": 6,
+      "rank_J_cu_T": 0,
+      "rank_J_g": 0,
+      "rank_stacked_J_c_J_g": 6,
+      "rank_stacked_unactuated_columns": 0,
+      "trail_chain_equations": 7,
+      "trail_chain_rank_J_c_T": 6
+    },
+    "floating_root_no_feet": {
+      "attainable_torque_variation_fg_fixed": 6,
+      "attainable_torque_variation_fg_free": 6,
+      "balance_rank": 0,
+      "balance_rows": 6,
+      "consistency_conditions": 6,
+      "consistency_left_null_vectors": [
+        [
+          "1",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "1",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "1",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "1",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "1"
+        ]
+      ],
+      "dim_x": 20,
+      "equality_nullity": 6,
+      "gauge_total_fg_free": 0,
+      "lead_chain_equations": 7,
+      "lead_chain_rank_J_c_T": 6,
+      "m": 6,
+      "multiplier_gauge": 0,
+      "n": 20,
+      "n_actuated": 14,
+      "n_g": 0,
+      "n_unactuated": 6,
+      "nullity_fg_fixed": 6,
+      "rank_A": 14,
+      "rank_J_c": 6,
+      "rank_J_cu_T": 0,
+      "rank_J_g": 0,
+      "rank_stacked_J_c_J_g": 6,
+      "rank_stacked_unactuated_columns": 0,
+      "trail_chain_equations": 7,
+      "trail_chain_rank_J_c_T": 6
+    },
+    "floating_root_two_point_feet": {
+      "attainable_torque_variation_fg_fixed": 6,
+      "attainable_torque_variation_fg_free": 6,
+      "balance_rank": 5,
+      "balance_rows": 6,
+      "consistency_conditions": 1,
+      "consistency_left_null_vectors": [
+        [
+          "1",
+          "-5/3",
+          "1/30",
+          "5/3",
+          "1",
+          "0"
+        ]
+      ],
+      "dim_x": 26,
+      "equality_nullity": 7,
+      "gauge_total_fg_free": 1,
+      "lead_chain_equations": 7,
+      "lead_chain_rank_J_c_T": 6,
+      "m": 6,
+      "multiplier_gauge": 0,
+      "n": 20,
+      "n_actuated": 14,
+      "n_g": 6,
+      "n_unactuated": 6,
+      "nullity_fg_fixed": 6,
+      "rank_A": 19,
+      "rank_J_c": 6,
+      "rank_J_cu_T": 0,
+      "rank_J_g": 5,
+      "rank_stacked_J_c_J_g": 11,
+      "rank_stacked_unactuated_columns": 5,
+      "trail_chain_equations": 7,
+      "trail_chain_rank_J_c_T": 6
+    }
+  }
+}

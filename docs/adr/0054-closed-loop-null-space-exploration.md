@@ -1,108 +1,143 @@
-# ADR-0054: Closed-Loop Null-Space Exploration Architecture and Output-Policy Contract
+# ADR-0054: Closed-Loop Null-Space Exploration
 
-- Status: Accepted
+- Status: Accepted for D1 to D6 (owner-directed implementation of epic #12593, 2026-10-14). D7 (output policy) is Proposed and awaits an explicit owner decision; NSX-41 (#12573) must not start before it.
 - Date: 2026-10-14
-- Decision Makers: repository owner (recorded owner decision on output-policy integration); consolidated in the #12593 v2 review session
-- Related Issues/PRs: epic #12593 and children #12549–#12592 (`NSX-00` … `NSX-74`); ADR-0008, ADR-0026, ADR-0041, ADR-0052; GCV-7 #11713, GCV-8 #11714
+- Decision Makers: repository owner (acceptance pending); proposed in the #12593 planning session
+- Related Issues/PRs: epic #12593, NSX-00 #12549, NSX-01 #12550, NSX-02 #12551, NSX-13 #12558, NSX-24 #12567, NSX-41 #12573; ADR-0052; ADR-0041; #10382 (output policy)
 
 ## Context
 
-In a two-handed golf swing, both hands grip the club, forming a closed kinematic
-loop across the torso, lead arm, trail arm, and club handle. Motion capture and
-inverse dynamics determine the generalized load vector
-$b = M(q)a + h(q, v)$ and the net bare-club wrench $W_{\text{net}}^{\text{bare}}$,
-but leave an affine family of internal closure multipliers $\lambda$, joint
-torques $\tau$, and ground-reaction forces $f_g$ satisfying $A x = b$.
+A two-handed golf swing closes a kinematic loop through the club. The
+motion fixes the generalized load `b = M(q) a + h(q, v)`, yet many torque and
+hand-load combinations produce the same motion. Epic #12593 explores that
+family and reports what is invariant across it. The specification lives in
+`docs/research/loop_nullspace/loop_nullspace.tex`; its binding rules are R1 to
+R14 in the epic.
 
-Prior to this decision, UpstreamDrift had:
+Five questions needed one answer each before any `tier:cli` child can start.
 
-1. **Fragmented, mathematically inconsistent allocators:**
-   `ContactForceAllocator` and `MultiEngineTorqueAllocator` used `scipy.optimize.minimize(..., method="SLSQP")`, treated `"HARD_ZERO_TRAIL"` as a silently relaxed least-squares objective on overdetermined 9-DOF arms, and equated null-space dimension with $\operatorname{rank}(J_c)$ rather than accounting for unactuated base/club rows.
-2. **Composite club-body mass contamination (`#12550`):**
-   `Clubface Vector` in the full-body specification welds `LHand` ($0.5491\,\mathrm{kg}$), `LHandStandoff` ($0.010\,\mathrm{kg}$), and `RHand` ($0.5491\,\mathrm{kg}$) into the club body ($1.4212\,\mathrm{kg}$ total vs $0.313\,\mathrm{kg}$ bare club), contaminating `holding_hand_wrench` across MuJoCo, Drake, and Pinocchio.
-3. **Incompatible engine Jacobian conventions (`#12551`):**
-   Pinocchio (`LOCAL [lin;ang]`), Drake (`LOCAL [ang;lin]`), MuJoCo (`WORLD [lin;ang]`, $a - b$), and OpenSim (`WORLD [lin;ang]`, $b - a$) returned different row orders, frames, and signs from `compute_grip_jacobian`.
-4. **Unconstrained counterfactuals (`#12570`):**
-   `ztcf_zvcf.py` evaluated unconstrained $M^{-1}$ accelerations without re-solving loop reactions $\lambda$, and `motion_matching/counterfactual.py` contained an $m_{\text{eff}} = 1.0$ mock integrator.
-5. **Unresolved output-policy interaction (`#12573`):**
-   `output_policy.py` rightly withholds uncalibrated joint loads from user-facing swing reports, leaving undefined how interactive research views may display allocation-invariant quantities and feasible envelopes without misrepresenting them as validated golfer measurements.
+1. **Where does the snapshot come from?** `BaseEngineForceAdapter` already has
+   native Pinocchio and MuJoCo implementations. A parallel provider protocol
+   would create a second engine seam.
+2. **How is evidence typed?** A torque that depends on a prior must never look
+   like a measurement.
+3. **Which closure convention is canonical?** Today Pinocchio is LOCAL
+   `[lin; ang]`, Drake LOCAL `[ang; lin]`, MuJoCo WORLD `[lin; ang]` and
+   OpenSim WORLD `[lin; ang]`, with differing relative signs.
+4. **Which solver handles which problem?** `scipy.optimize.linprog` has no warm
+   start and SLSQP is not a convex solver.
+5. **What happens to the two existing allocators?** `ContactForceAllocator`
+   and `MultiEngineTorqueAllocator` both solve versions of the same problem.
+
+A sixth question is a policy question and is not an engineering one. The
+fail-closed `output_policy.py` withholds joint loads from swing reports
+unless the receipt supplies both calibration and evidence (owner ruling,
+2026-10-11). NSX research views display envelopes and invariants that carry
+neither. Whether and how they may be shown is the owner's decision (D7).
 
 ## Decision
 
-Establish one engine-agnostic **Closed-Loop Null-Space Exploration (NSX)**
-architecture in `src/shared/python/loop_nullspace/` governed by Rules R1–R14 of
-epic #12593 and the mathematical specification in
-`docs/research/loop_nullspace/loop_nullspace.tex`.
+**D1. One engine seam.** The snapshot value object, `ClosedLoopSnapshot`, is
+built from the existing `BaseEngineForceAdapter` through
+`snapshot_from_adapter()`. The adapter gains optional methods
+`compute_closure_drift`, `closure_wrench_frame` and `club_inertia_split`, gated
+by `Capability.CLOSED_LOOP_SNAPSHOT`. Pinocchio is the reference and reports
+`FULL`. Synthetic fixtures report `NONE`. No second provider protocol is
+created.
 
-### 1. Single Engine Seam Over Extended `BaseEngineForceAdapter`
+**D2. Evidence axes.** Every user-visible number is a `QuantityRecord` with
+`allocation_dependence` (`INVARIANT`, `FAMILY_DEPENDENT`, `UNAVAILABLE`),
+`model_provenance`, `input_provenance`, `conventions`, `hypotheses` and
+`validation_status`. `INVARIANT` forbids hypotheses; `FAMILY_DEPENDENT`
+requires at least one; `UNAVAILABLE` requires a reason and NaN values.
+`INVARIANT` means "identical for every admissible allocation, given model X";
+it never means "measured".
 
-Rather than introducing a parallel engine protocol, `BaseEngineForceAdapter`
-(`src/shared/python/motion_matching/multi_engine_torque_allocator.py`) is
-extended with four methods/properties gated by `Capability.CLOSED_LOOP_SNAPSHOT`:
+**D3. Canonical closure convention (R8).** `J_c` and `J̇_c v` are stored in
+the grip frame with rows `[fx fy fz tx ty tz]`, the linear rows being the
+velocity of the closing-hand grip point, and `+J_cᵀλ` acting on the human tree.
+The closing hand therefore exerts `−λ` on the club. Each engine adapter declares
+a `NativeClosureConvention` constant and one converter,
+`to_canonical_closure`, does the rest. The conversion matrix, its power
+invariance and a four-engine golden are in the specification
+(`tests/fixtures/loop_nullspace/goldens/closure_convention.json`).
 
-- `native_closure_convention -> NativeClosureConvention`
-- `compute_closure_drift(q, v) -> np.ndarray` ($\dot{J}_c v$ in native convention)
-- `closure_wrench_frame(q) -> tuple[np.ndarray, np.ndarray]` (world-from-grip rotation $R_G \in SO(3)$ and midpoint $r_M \in \mathbb{R}^3$)
-- `club_inertia_split() -> tuple[SpatialInertia, tuple[SpatialInertia, ...]]` (bare club vs welded hands per `NSX-01`)
+**D4. Solver routing (R11).** Polyhedral problems use `highspy` with a
+persistent model and basis reuse. Second-order cones use Clarabel. A
+polyhedral approximation of a circular cone declares inner or outer
+approximation, the facet count and the envelope error. A missing backend gives
+`UNAVAILABLE` with the reason. No silent fallback may change a result.
 
-`snapshot_from_adapter(adapter, q, v, a, *, input_provenance)` validates
-`Capability.CLOSED_LOOP_SNAPSHOT == CapabilityLevel.FULL`, transforms the closure
-Jacobian and drift into the canonical convention via `to_canonical_closure`, and
-returns a frozen `ClosedLoopSnapshot` value object. Synthetic fixtures report
-`CapabilityLevel.NONE` and are rejected by `snapshot_from_adapter`.
+**D5. Legacy allocators become shims.** `ContactForceAllocator` and
+`MultiEngineTorqueAllocator` keep their signatures and become adapters over the
+conic allocation core (NSX-24). `HARD_ZERO_TRAIL` maps to the three-case
+zero-side solve, so an inconsistent frame is reported and not hidden. Both emit a
+`DeprecationWarning`. No SLSQP remains on a convex allocation path.
 
-### 2. Canonical Closure Convention (Rule R8)
+**D6. No output without a stated gate.** Admission (R7) precedes allocation.
+Every invariant carries its validity gate. Replay is labelled open-loop or
+feedback-assisted (R10). Hypotheses cite sources with a verification status
+and an unverified source cannot appear in a user-facing string (R13).
 
-Every `ClosedLoopSnapshot` stores $J_c \in \mathbb{R}^{m_c \times n_v}$ and
-$\dot{J}_c v \in \mathbb{R}^{m_c}$ in the **canonical grip-midpoint frame**
-(`C-FRAME-GRIP`):
+**D7. Output policy. Proposed, awaiting owner decision.** The question is how
+NSX research views may display `INVARIANT` quantities, envelopes and
+representatives while `output_policy.py` continues to withhold joint loads from
+swing reports without calibration and evidence.
 
-- Origin at $r_M = \tfrac{1}{2}(r_L + r_R)$.
-- Axes $(\hat{u}, \hat{v}, \hat{w})$ with $\hat{u}$ along the shaft toward the
-  clubhead, $\hat{v}$ along the clubface normal projection orthogonal to
-  $\hat{u}$, and $\hat{w} = \hat{u} \times \hat{v}$.
-- Row order `[fx, fy, fz, tx, ty, tz]` (for `WELD6`).
-- Sign convention: $+J_c^\top \lambda$ acts on the human kinematic tree in
-  $M(q)a + h(q,v) = S^\top \tau + J_c^\top \lambda + J_g^\top f_g$, and the
-  closing hand exerts wrench $-\lambda$ on the club.
+*Option A (recommended): two surfaces, evidence-axis mapping.*
+`display_decision(record, surface)` returns a decision per surface.
+- Research surface (the NSX tabs and panel): `INVARIANT` quantities are shown
+  with a model-provenance badge. `FAMILY_DEPENDENT` quantities are shown only
+  as bands, or as a labelled representative overlaid on its band under a named
+  preset. `UNAVAILABLE` shows its reason.
+- Swing-report surface: nothing from NSX enters unless `output_policy.py`
+  already admits that output name with calibration and evidence. The default
+  for an unknown combination is to withhold.
 
-### 3. Six Independent Evidence Axes (Rule R1)
+*Option B: research views only.* NSX is shown in the research tabs. It is
+never exposed to the swing report or any export path, even when the policy
+would admit the output.
 
-Every user-visible quantity produced by NSX is wrapped in a frozen
-`QuantityRecord` carrying:
+*Option C: policy extension.* `output_policy.py` gains a new advertised class
+for `INVARIANT` quantities with uncertainty, so they can enter swing reports
+as well.
 
-1. `allocation_dependence`: `INVARIANT`, `FAMILY_DEPENDENT`, or `UNAVAILABLE`.
-2. `model_provenance`: `ModelProvenance` (spec SHA-256, inertial source, bare-club partition ID, engine and `kkt_regularization`).
-3. `input_provenance`: `InputProvenance` (kinematic source, derivative method, noise floor, time-sync flag).
-4. `conventions`: tuple of convention IDs (`C-FRAME-GRIP`, `C-METRIC-*`, etc.).
-5. `hypotheses`: tuple of physiological hypothesis IDs (`H-TORQUE-CAPACITY-BOX`, `H-GRIP-FRICTION-CONE`, etc.). By Design-by-Contract (`contracts.py`), `FAMILY_DEPENDENT` requires `len(hypotheses) >= 1`, whereas `INVARIANT` requires `len(hypotheses) == 0`.
-6. `validation_status`: `UNVALIDATED` (default until `DV-12554` external validation is completed).
+Option A is recommended because it keeps the owner's 2026-10-11 ruling intact
+for reports and still lets a user see what is invariant. Option B is the most
+conservative and is a strict subset of A. Option C changes the policy itself
+and needs the owner to say which invariants count as advertised outputs.
+NSX-41 (#12573) implements whichever option is accepted and must not start
+before this ADR changes status.
 
-### 4. Convex Solver Routing and Allocator Consolidation (Rules R11, NSX-20, NSX-24)
+## Alternatives Considered
 
-- **Polyhedral LPs** (static envelopes, Chebyshev center, affine probes, linearized cones) route through `highspy` with persistent model construction, objective-vector swaps, and simplex basis warm starts across frames. `scipy.optimize.linprog` is not used because it lacks warm-start basis reuse.
-- **Second-order cone programs (SOCPs)** (exact circular friction cones, quadratic capacity effort, rate smoothness, and $c_+ / c_-$ gross-power epigraphs) route through `clarabel`.
-- **Missing solver extra:** If `highspy` or `clarabel` is absent at runtime, the solver raises a clear `CapabilityUnavailable` / returns `UNAVAILABLE(reason="solver_unavailable")`; it never falls back silently to `SLSQP`.
-- **Legacy allocator consolidation (`NSX-24`):** `ContactForceAllocator` and `MultiEngineTorqueAllocator` become thin compatibility shims over `FeasibleSet` and `allocate_trajectory`. `HARD_ZERO_TRAIL` delegates to `zero_side_solve` (`NSX-15`) and explicitly reports `INCONSISTENT(residual)` rather than hiding nonzero trail torques.
-
-### 5. Owner Decision on Output-Policy Integration (`NSX-41`)
-
-The repository owner establishes the following binding rules governing how
-`output_policy.py` interacts with NSX outputs across product surfaces:
-
-1. **Customer/Golfer Swing Reports (`Surface.SWING_REPORT`):**
-   `output_policy.py` remains strictly **fail-closed**. No joint torque, hand
-   split, or internal wrench from NSX is admitted into a golfer-facing swing
-   report unless subject-specific calibration, external measurement provenance,
-   and validation gates are satisfied.
-2. **Interactive Research and Analysis Surfaces (`Surface.RESEARCH_VIEW` in PyQt6 and React):**
-   - `INVARIANT` quantities (net bare-club wrench, summed loop power within $\dot{\Phi}$ gate, base/centroidal wrench, $N_c^\top \tau$, constrained ZTCF/ZVCF total accelerations) are **permitted for display** accompanied by a mandatory `MODEL_CONDITIONED_INVARIANT` badge displaying `model_provenance` and `conventions`.
-   - `FAMILY_DEPENDENT` quantities (individual loop joint torques, lead/trail hand wrenches, grip-split coordinates $s_1 \dots s_6$, per-joint counterfactual attributions) are **permitted for display only in band-first form**:
-     - Feasible min/max envelopes (`STATIC` or `TRAJECTORY_COUPLED`) with sign-indeterminate regions shaded and binding hypothesis IDs annotated.
-     - Prior-conditioned representative trajectories (`allocate_trajectory`) may **only** be rendered overlaid atop their feasible envelope band, never as a standalone curve, and must display the active preset name and `hypotheses` list.
-   - `UNAVAILABLE` quantities render as empty/hatched regions with their explicit `reason` string, never as zero.
+- **A new provider protocol for closed-loop snapshots.** Rejected: it
+  duplicates `BaseEngineForceAdapter` and its capability levels.
+- **Storing a frame tag instead of converting.** Rejected: the row order, the
+  relative sign and the reference point all differ, so a tag cannot make a
+  Jacobian comparable across engines.
+- **Keep SLSQP for allocation.** Rejected: the problems are convex, SLSQP
+  gives no certificate of infeasibility and no warm start.
+- **Hide the allocators' duplication.** Rejected: a swing would have two
+  different "allocation" numbers.
 
 ## Consequences
 
-- **Positive:** Eliminates duplicated SLSQP allocators, fixes the $1.1082\,\mathrm{kg}$ welded-hand mass bug on the club body, guarantees cross-engine Jacobian parity by construction, and enforces a clear boundary between model-determined invariants and hypothesis-conditioned allocations.
-- **Negative / Trade-offs:** Adds `highspy` and `clarabel` to the `loop-nullspace` and `dev` extras (`requirements-dev.lock`), and requires all downstream `tier:cli` children (`NSX-10` through `NSX-62`) to construct full `QuantityRecord` metadata.
+- Children implement transcription of the specification and the contract
+  appendix (`docs/research/loop_nullspace/contracts.md`). Goldens come from the
+  sympy derivations and never from the code under test.
+- Two new runtime dependencies (`highspy`, `clarabel`) enter through a
+  `loop-nullspace` extra and `dev` (NSX-20).
+- The legacy allocators gain deprecation warnings and their documented
+  outputs may change where they were mathematically wrong.
+- NSX makes no physiological claim. External validation stays deferred
+  (NSX-05).
+
+## Validation
+
+- `python3 -m pytest tests/unit/loop_nullspace` regenerates every golden from
+  the sympy derivations and compares.
+- `python3 -m scripts.check_design_manual_governance` keeps the blocker
+  `UP-NSX-loop-nullspace-exploration` open until a calculation is registered.
+- `src/config/loop_nullspace_registry.json` is checked by the NSX-11 citation
+  gate when it lands.

@@ -1,30 +1,58 @@
-# Closed-Loop Null-Space Exploration (NSX) Research Reference
+# Closed-Loop Null-Space Exploration Reference
 
-## Overview
+Start with the [maintained LaTeX reference](loop_nullspace.tex). It is a
+separate, editable research record (see `AGENTS.md`, Modeling Reference
+Documentation); the engineering design manual source remains
+`manuals/upstreamdrift`, where the pathway is tracked by the registry blocker
+`UP-NSX-loop-nullspace-exploration` and the provisional chapter
+`65-loop-null-space.qmd`.
 
-This directory contains the standalone mathematical specification, symbolic derivations, golden test fixtures, and per-child contract appendix for **Epic #12593 (`NSX: Closed-Loop Null-Space Exploration`)**, delivered under **#12549 (`NSX-00`)**.
+The document specifies the mathematics for epic #12593 (NSX): the general
+allocation equation and its dimension counts, the three-case zero-side
+analysis, the exact grasp-map kernel on the bare club, the invariants and their
+validity gates, the gross-power identity, constrained counterfactuals, envelope
+geometry, reaction-restriction semantics, the canonical closure convention, a
+rank audit of the pendulum constraints and the citation verification table.
 
-## Contents
+| Item                         | Status                                                                  |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| Formulas and goldens         | Reproduced by exact sympy derivations; regenerated and compared by tests |
+| Citations                    | Verification table in the reference; unverified sources are not used     |
+| Scientific qualification     | None; no numerical result about any golfer                               |
+| External validation          | Deferred (NSX-05)                                                        |
 
-- [`loop_nullspace.tex`](loop_nullspace.tex): Editable standalone LaTeX mathematical reference covering:
-  1. General allocation equation $A x = b$ (R2) and the four structural dimension counts.
-  2. Zero-side three-case diagnostic analysis (`CONSISTENT_UNIQUE`, `CONSISTENT_NONUNIQUE`, `INCONSISTENT(residual)`) (R3).
-  3. Exact invertible $6 \times 6$ grasp-map kernel at the canonical grip midpoint frame (R4).
-  4. Bare-club Newton–Euler equations with welded hand solids (`LHand`, `LHandStandoff`, `RHand`, totaling $1.1082\,\mathrm{kg}$) partitioned from the composite $1.4212\,\mathrm{kg}$ `Clubface Vector` body leaving $0.313\,\mathrm{kg}$ bare club (NSX-01).
-  5. Six allocation-invariant quantities with scaled residual validity gates (R5).
-  6. The $c_+ / c_-$ asymmetric gross-power identity and strict reduced-space curvature condition (R6).
-  7. Constrained Zero-Torque and Zero-Velocity Counterfactuals (ZTCF/ZVCF) via the KKT projector (R9).
-  8. Static versus trajectory-coupled feasible envelopes, Chebyshev center/margin, and inclusion-minimal conflict sets (IIS).
-  9. Reaction-restriction sensitivity (`WELD6` $\to$ `SHAFT_FREE5` $\to$ `BALL3`) versus true closure alternatives.
-  10. Complete citation verification audit table (R13).
-  11. Explicit scientific non-claims.
-- [`contract_appendix.md`](contract_appendix.md): Per-child implementation contract appendix covering `NSX-01` through `NSX-62` (exact module paths, signatures, Design-by-Contract preconditions/postconditions, and named golden fixtures).
-- [`derivations/generate_goldens.py`](derivations/generate_goldens.py): Deterministic SymPy symbolic-to-numeric derivation generator.
-- [`derivations/golden_fixtures.json`](derivations/golden_fixtures.json): Checked-in golden values consumed by unit tests across `NSX-10` through `NSX-62`.
+## Contents of This Directory
 
-## Regeneration and Verification
+- `loop_nullspace.tex` is the reference.
+- `contracts.md` is the per-child contract appendix for NSX-02 to NSX-62:
+  signatures, preconditions, postconditions and golden names.
+- `derivations/` holds the sympy scripts. They import no repository production
+  code. `generate_goldens.py` writes the golden JSON files.
+- The golden files are in `tests/fixtures/loop_nullspace/goldens/`.
+- The seed registry of hypotheses, conventions and presets is
+  `src/config/loop_nullspace_registry.json`; the decision record is
+  `docs/adr/0054-closed-loop-null-space-exploration.md`.
+
+## Reproduce
 
 ```bash
-python3 docs/research/loop_nullspace/derivations/generate_goldens.py
-python3 -m pytest tests/unit/loop_nullspace/test_golden_derivations.py -q
+python3 docs/research/loop_nullspace/derivations/generate_goldens.py          # rewrite goldens
+python3 docs/research/loop_nullspace/derivations/generate_goldens.py --check  # fail if stale
+python3 -m pytest tests/unit/loop_nullspace -n 0 -q
 ```
+
+Requires `sympy`, `numpy` and `scipy`. The generated PDF is not committed.
+
+## Build Locally
+
+CI typesets references with a pinned Tectonic whenever a
+`docs/research/**/*.tex` file changes. To reproduce it:
+
+```bash
+tectonic -X compile --outdir build docs/research/loop_nullspace/loop_nullspace.tex
+```
+
+## Non-Claims
+
+No numerical result about any golfer. No claim that any single hand split is
+the golfer's. No stiffness or co-contraction inference from net joint torques.
