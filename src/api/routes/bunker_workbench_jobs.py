@@ -45,6 +45,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from src.api.dependencies import get_task_manager
+from src.api.job_cancellation import cancel_unsettled_job
 from src.api.routes.bunker_workbench import (
     BoundedSolve,
     BunkerWorkbenchCompareRequestV1,
@@ -353,11 +354,5 @@ def cancel_job(
             for one that already completed or failed.
     """
     view = _status_view(tm, _job_id(job_id))
-    if view["status"] in {TaskStatus.COMPLETED.value, TaskStatus.FAILED.value}:
-        raise _refuse(
-            status.HTTP_409_CONFLICT,
-            "job_not_cancellable",
-            f"the job already {view['status']}",
-        )
-    tm.cancel_task(job_id)
+    cancel_unsettled_job(tm, job_id, view["status"])
     return _status_view(tm, job_id)
