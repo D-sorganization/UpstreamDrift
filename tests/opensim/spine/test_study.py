@@ -355,3 +355,39 @@ def test_missing_input_file_raises(inputs, tmp_path) -> None:
             _request(inputs, tmp_path, motion_path=tmp_path / "absent.sto"),
             code_version="c",
         )
+
+
+@pytest.mark.unit
+def test_cli_out_supplies_missing_output_dir(tmp_path, monkeypatch) -> None:
+    """``--out`` alone satisfies ``output_dir``; the file need not carry it."""
+    from src.engines.physics_engines.opensim.python.spine import study
+
+    request_file = tmp_path / "request.json"
+    request_file.write_text(
+        json.dumps(
+            {
+                "study_id": "s",
+                "motion_path": "m.sto",
+                "golf_model_path": "g.osim",
+                "model_path": "x.osim",
+                "model_id": "fixture",
+            }
+        ),
+        encoding="utf-8",
+    )
+    seen: list[SpineStudyRequest] = []
+
+    def fake_run(request, env=None):
+        seen.append(request)
+        raise _Stop
+
+    class _Stop(Exception):
+        pass
+
+    monkeypatch.setattr(study, "run_spine_study", fake_run)
+    out = tmp_path / "results"
+    with pytest.raises(_Stop):
+        study.main(["--request", str(request_file), "--out", str(out)])
+    assert seen[0].output_dir == out.resolve()
+    with pytest.raises(ValueError, match="output_dir"):
+        study.main(["--request", str(request_file)])
