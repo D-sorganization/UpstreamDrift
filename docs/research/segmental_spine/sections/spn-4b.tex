@@ -1,0 +1,43 @@
+\subsection{Spinal Load Analyzer Golf-Term Migration (SPN-4b)}
+
+\paragraph{Scope.}
+\texttt{SpinalLoadAnalyzer.\_compute\_x\_factor} and
+\texttt{.\_compute\_crunch\_factor} in
+\texttt{src/shared/python/injury/spinal\_load\_analysis.py} no longer carry their
+own formulas. They call \texttt{spine.golf\_terms.evaluate} with the legacy
+identifiers \texttt{x\_factor\_euler\_yaw\_legacy\_v1} and
+\texttt{crunch\_factor\_legacy\_v1}. The migration is behaviour preserving:
+method names, signatures, result dataclasses and numeric outputs are unchanged.
+The spine package does not import the injury package, so no import cycle arises.
+
+\paragraph{Equations and Units.}
+With thorax and pelvis yaw $\psi_T,\psi_P$ (radians; the third Euler column, or
+the vector itself when one-dimensional),
+\begin{equation}
+  X(t) = \frac{180}{\pi}\,\bigl(\psi_T(t)-\psi_P(t)\bigr)\quad[\mathrm{deg}].
+\end{equation}
+With lateral bend $\lambda$ and axial rotation $\rho$ (radians),
+\begin{equation}
+  C(t) = \frac{1}{100}\,\Bigl|\tfrac{180}{\pi}\lambda(t)\Bigr|\,
+         \Bigl|\tfrac{180}{\pi}\rho(t)\Bigr|\quad[\mathrm{deg}^2/100].
+\end{equation}
+Peak, stretch time, separation rate, transition duration and asymmetry ratio
+remain computed in the analyzer from these series, unchanged. The legacy terms
+are sign-free in handedness; \texttt{right} is passed.
+
+\paragraph{Assumptions and Limitations.}
+The Euler-yaw X-factor is a legacy measurand, not the ISB joint-coordinate
+axial rotation (\texttt{x\_factor\_jcs\_axial}). The registry validates inputs:
+non-finite samples or mismatched lengths now raise \texttt{ValueError} where the
+inline code propagated NaN or a NumPy broadcast error. Finite, equal-length
+inputs give identical values (verified to $10^{-12}$).
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/unit/injury tests/analysis/test_spinal_load_analysis.py \
+  tests/shared/python/spine/test_golf_terms.py -q -n 0 -o addopts=""
+\end{verbatim}
+Golden values in
+\texttt{tests/unit/injury/test\_spinal\_load\_golf\_terms\_delegation.py} were
+captured from the pre-migration code on invented inputs; delegation is asserted
+by spying on \texttt{golf\_terms.evaluate}.

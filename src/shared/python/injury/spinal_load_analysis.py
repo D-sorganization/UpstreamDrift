@@ -41,6 +41,7 @@ from src.shared.python.analysis.dataclasses import (
 )
 from src.shared.python.core.constants import GRAVITY_M_S2
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.spine import golf_terms
 
 logger = get_logger(__name__)
 
@@ -385,15 +386,12 @@ class SpinalLoadAnalyzer:
         # Assuming angles are [roll, pitch, yaw] where yaw is rotation
         if pelvis_angles is None:
             raise ValueError("pelvis_angles must be provided")
-        pelvis_rotation = (
-            pelvis_angles[:, 2] if pelvis_angles.ndim > 1 else pelvis_angles
+        # Euler-yaw difference (thorax - pelvis), degrees, via the golf-term registry
+        x_factor_angle = golf_terms.evaluate(
+            "x_factor_euler_yaw_legacy_v1",
+            {"thorax_euler": thorax_angles, "pelvis_euler": pelvis_angles},
+            handedness="right",
         )
-        thorax_rotation = (
-            thorax_angles[:, 2] if thorax_angles.ndim > 1 else thorax_angles
-        )
-
-        # X-factor is thorax rotation minus pelvis rotation
-        x_factor_angle = np.degrees(thorax_rotation - pelvis_rotation)
 
         # Find peak (maximum separation)
         peak_idx = np.argmax(np.abs(x_factor_angle))
@@ -438,9 +436,12 @@ class SpinalLoadAnalyzer:
         lateral_deg = np.degrees(lateral_bend)
         rotation_deg = np.degrees(rotation)
 
-        # Crunch factor = lateral bend * rotation (simplified model)
-        # Higher values indicate more asymmetric loading
-        crunch_factor = np.abs(lateral_deg) * np.abs(rotation_deg) / 100.0
+        # |lateral| * |rotation| / 100 (legacy model) via the golf-term registry
+        crunch_factor = golf_terms.evaluate(
+            "crunch_factor_legacy_v1",
+            {"lateral_bend_rad": lateral_bend, "axial_rotation_rad": rotation},
+            handedness="right",
+        )
 
         peak_crunch = np.max(crunch_factor)
         peak_idx = np.argmax(crunch_factor)
