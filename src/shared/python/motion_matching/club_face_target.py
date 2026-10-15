@@ -90,6 +90,36 @@ def _frame_placement(spec: Mapping[str, Any], frame: str) -> tuple[str, Array]:
     raise ValueError(f"spec has no frame named {frame}")
 
 
+def require_club_assembly(spec: Mapping[str, Any]) -> tuple[Any, str]:
+    """``(assembly, club_body_name)`` of ``spec``; fail fast when it has no club.
+
+    Precondition for every face / impact target (#12702). Raises ``ValueError``
+    naming the spec source (``schema_version`` and ``provenance``), the bodies
+    carrying the club suffix and the solids found, so the caller can tell a
+    club-less document from one whose club solids are not recognised.
+    """
+    from src.shared.python.model_appearance import club_assembly as ca
+
+    assembly = ca.assembly_from_spec(spec)
+    club_body = ca.club_body_name(spec)
+    if assembly is None or club_body is None:
+        bodies = [
+            b
+            for b in spec.get("bodies", ())
+            if str(b.get("name", "")).endswith(ca.CLUB_BODY_SUFFIX)
+        ]
+        solids = [str(s.get("name")) for b in bodies for s in b.get("solids", ())]
+        raise ValueError(
+            "spec has no club body: need a body named '*"
+            f"{ca.CLUB_BODY_SUFFIX}' with a 'Grip' solid or the native "
+            f"'{ca.NATIVE_GRIP_BUTT_SOLID}' grip segment; spec source "
+            f"schema_version={spec.get('schema_version')!r}, "
+            f"provenance={str(spec.get('provenance'))[:120]!r}; "
+            f"club bodies={[b.get('name') for b in bodies]}, solids={solids}"
+        )
+    return assembly, club_body
+
+
 def face_axis_in_frame(spec: Mapping[str, Any], frame: str = FACE_FRAME) -> Array:
     """Unit rendered face normal expressed in the spec ``frame``.
 
@@ -100,10 +130,7 @@ def face_axis_in_frame(spec: Mapping[str, Any], frame: str = FACE_FRAME) -> Arra
     """
     from src.shared.python.model_appearance import club_assembly as ca
 
-    assembly = ca.assembly_from_spec(spec)
-    club_body = ca.club_body_name(spec)
-    if assembly is None or club_body is None:
-        raise ValueError("spec has no club body")
+    assembly, club_body = require_club_assembly(spec)
     body, placement = _frame_placement(spec, frame)
     if body != club_body:
         raise ValueError(f"frame {frame} is on {body}, not on the club body")
@@ -115,9 +142,7 @@ def face_centre_in_frame(spec: Mapping[str, Any], frame: str = FACE_FRAME) -> Ar
     """Rendered face-centre point expressed in the spec ``frame`` (metres)."""
     from src.shared.python.model_appearance import club_assembly as ca
 
-    assembly = ca.assembly_from_spec(spec)
-    if assembly is None:
-        raise ValueError("spec has no club body")
+    assembly, _ = require_club_assembly(spec)
     _, placement = _frame_placement(spec, frame)
     face_axis_in_frame(spec, frame)  # same club-body checks
     centre = ca.clubface_centre(assembly) - placement[:3, 3]
