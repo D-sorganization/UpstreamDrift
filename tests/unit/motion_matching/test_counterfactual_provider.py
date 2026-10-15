@@ -162,6 +162,7 @@ def test_route_returns_400_naming_the_missing_model() -> None:
     assert "model specification" in detail and "bodies" in detail
 
 
+@pytest.mark.requires_pinocchio
 def test_coordinate_order_mismatch_is_rejected(anthro) -> None:
     spec, names, q = anthro
     session = _session(spec, tuple(reversed(names)), q)
