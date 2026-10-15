@@ -465,8 +465,10 @@ MuJoCo (NSX-51): hard-KKT evaluation, drift method recorded in provenance
 (`drift=central_finite_difference` in the model provenance); stock soft-weld
 stepping is the separate divergence entry `mujoco-stock-soft-weld-vs-hard-kkt`.
 The cross-engine test holds `M`, `h`, `J_c` and `Jdot_v` to 1e-11, 1e-12 and 1e-8
-scaled (measured 2e-14, 3e-15, 3e-9). MyoSuite (NSX-52): reuses the MuJoCo path,
-records `kkt_regularization`, `FULL` only when 0. Drake (NSX-53): native
+scaled (measured 2e-14, 3e-15, 3e-9). MyoSuite (NSX-52, `MyoSuiteForceAdapter`): subclasses
+`MujocoForceAdapter` (no second implementation), records
+`kkt_regularization=<value>` in the model provenance (`name=myosuite`), and is
+`FULL` only while that value is exactly 0, else `NONE`. Drake (NSX-53): native
 adapter, explicit `from pydrake.X import Y` imports, no module-level mocks.
 OpenSim (NSX-54): delegates to `OpenSimFullBodyParityAdapter`.
 
