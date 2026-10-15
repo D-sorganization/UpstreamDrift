@@ -27,6 +27,8 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import require
+from src.shared.python.engine_core.capabilities import Capability, CapabilityLevel
+from src.shared.python.loop_nullspace.snapshot import canonical_closure_jacobian
 from src.shared.python.motion_matching.contact_force_allocator import (
     AllocationObjective,
     ContactForceAllocation,
@@ -148,6 +150,44 @@ class BaseEngineForceAdapter(Protocol):
         ...
 
 
+@runtime_checkable
+class ClosedLoopSnapshotAdapter(BaseEngineForceAdapter, Protocol):
+    """Optional closed-loop extension of the force adapter (NSX-13, #12558).
+
+    An adapter that implements these members and declares
+    ``Capability.CLOSED_LOOP_SNAPSHOT`` at ``FULL`` can feed
+    ``loop_nullspace.snapshot.snapshot_from_adapter``.  They are not part of
+    :class:`BaseEngineForceAdapter` so existing adapters stay conformant.
+    """
+
+    native_closure_convention: Any
+    """NSX-02 ``NativeClosureConvention`` of ``compute_grip_jacobian`` rows."""
+
+    def capability(self, capability: Capability) -> CapabilityLevel:
+        """Declared level for an adapter-boundary capability."""
+        ...
+
+    def compute_closure_drift(self, q: Array, v: Array) -> Array:
+        """Native ``Jdot v`` (6,) of ``compute_grip_jacobian`` at ``(q, v)``."""
+        ...
+
+    def native_closure_frame(self, q: Array) -> tuple[Array, Array]:
+        """``(R, origin)`` of the frame and point of the native closure rows."""
+        ...
+
+    def closure_wrench_frame(self, q: Array) -> tuple[Array, Array]:
+        """``(R world<-grip, origin)`` of the canonical grip frame."""
+        ...
+
+    def club_inertia_split(self) -> tuple[Any, tuple[Any, ...]]:
+        """``(bare club, welded hands)`` as ``SpatialInertia`` (NSX-01)."""
+        ...
+
+    def closure_topology(self) -> Any:
+        """The ``LoopTopology`` of the closure."""
+        ...
+
+
 class MujocoForceAdapter:
     """MuJoCo adapter for full-body inverse dynamics and contact Jacobians."""
 
@@ -169,6 +209,10 @@ class MujocoForceAdapter:
     @property
     def engine_type(self) -> EngineType:
         return EngineType.MUJOCO
+
+    def capability(self, capability: Capability) -> CapabilityLevel:
+        """``CLOSED_LOOP_SNAPSHOT`` is not yet implemented (NSX-51)."""
+        return CapabilityLevel.NONE
 
     @property
     def nv(self) -> int:
@@ -293,6 +337,10 @@ class SyntheticMultibodyFixture:
     @property
     def engine_type(self) -> EngineType:
         return getattr(self, "_engine_type", EngineType.SIMSCAPE)
+
+    def capability(self, capability: Capability) -> CapabilityLevel:
+        """Synthetic fixtures never provide ``CLOSED_LOOP_SNAPSHOT`` (NONE)."""
+        return CapabilityLevel.NONE
 
     @property
     def nv(self) -> int:
@@ -578,7 +626,7 @@ class MultiEngineTorqueAllocator:
         """Allocate dynamic forces for a single frame."""
         tau_rnea = self.adapter.compute_inverse_dynamics(q, v, a)
         j_ground = self.adapter.compute_contact_jacobian(q)
-        j_grip = self.adapter.compute_grip_jacobian(q)
+        j_grip = canonical_closure_jacobian(self.adapter, q)
 
         return self.allocator.allocate(
             tau_rnea=tau_rnea,
@@ -652,7 +700,7 @@ class MultiEngineTorqueAllocator:
                 tau_full = np.zeros(self.adapter.nv, dtype=np.float64)
                 tau_full[self.adapter.actuated_indices] = alloc.tau_actuated
                 j_g = self.adapter.compute_contact_jacobian(q_k)
-                j_w = self.adapter.compute_grip_jacobian(q_k)
+                j_w = canonical_closure_jacobian(self.adapter, q_k)
                 root_full = np.concatenate(
                     [alloc.delta_tau_root, np.zeros(self.adapter.nv - 6)]
                 )

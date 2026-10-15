@@ -65,6 +65,7 @@ class Capability(str, Enum):
     BATCHED_ROLLOUT = "batched_rollout"
     DIFFERENTIABLE_ROLLOUT = "differentiable_rollout"
     DYNAMICS_PRIMITIVES = "dynamics_primitives"
+    CLOSED_LOOP_SNAPSHOT = "closed_loop_snapshot"
 
 
 CapabilityRef: TypeAlias = Capability | str
@@ -125,6 +126,7 @@ ADAPTER_BOUNDARY_CAPABILITIES = (
     Capability.BATCHED_ROLLOUT,
     Capability.DIFFERENTIABLE_ROLLOUT,
     Capability.DYNAMICS_PRIMITIVES,
+    Capability.CLOSED_LOOP_SNAPSHOT,
 )
 """Canonical capabilities answered by narrower backend adapter descriptors."""
 
@@ -142,6 +144,15 @@ _CAPABILITY_LEVEL_RANK: Mapping[CapabilityLevel, int] = {
     CapabilityLevel.PARTIAL: 1,
     CapabilityLevel.FULL: 2,
 }
+
+
+class CapabilityUnavailable(RuntimeError):
+    """A required engine capability is absent or below the required level.
+
+    Raised instead of returning a degraded or guessed result, for example by
+    ``snapshot_from_adapter`` when an adapter does not declare
+    ``Capability.CLOSED_LOOP_SNAPSHOT`` at ``CapabilityLevel.FULL`` (NSX-13).
+    """
 
 
 def normalize_capability(capability: CapabilityRef) -> Capability:
@@ -371,6 +382,7 @@ __all__ = [
     "CapabilityLevel",
     "CapabilityQuery",
     "CapabilityRef",
+    "CapabilityUnavailable",
     "EngineCapabilities",
     "capability_level_supported",
     "normalize_capability",

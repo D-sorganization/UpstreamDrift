@@ -41,7 +41,11 @@ def test_factory_raw_equation_and_fresh_forward_parity(pair):
     mass = pin.crba(plant.model, plant.data, q).copy()
     bias = pin.nonLinearEffects(plant.model, plant.data, q, v).copy()
     effort = mass @ a + bias
-    assert adapter.verify_acceleration_parity(q, v, effort, a) < 1e-7
+    # Parity is against native constraintDynamics (#12558): the target must be
+    # the closure-consistent acceleration of the applied effort.
+    a_closed = plant.constrained_acceleration(q, v, effort)
+    assert adapter.verify_acceleration_parity(q, v, effort, a_closed) < 1e-7
+    assert adapter.verify_acceleration_parity(q, v, effort, a) > 1e-3
     np.testing.assert_allclose(
         adapter.compute_inverse_dynamics(q, v, a), effort, atol=1e-9
     )
