@@ -52,8 +52,17 @@ _POLY_TERMS = 5
 class CouplingLaw(Protocol):
     """Contract of a coupling law (angles in radians, ISB ZXY ``(FE, LB, AR)``)."""
 
-    law_id: str
-    version: str
+    @property
+    def law_id(self) -> str:
+        """Stable identifier of the law."""
+
+    @property
+    def version(self) -> str:
+        """Version string of the law."""
+
+    @property
+    def citation(self) -> str:
+        """Literature citation (DOI plus table or page)."""
 
     def independent_names(self) -> tuple[str, ...]:
         """Names of the independent coordinates, in ``phi`` order."""
@@ -430,7 +439,7 @@ def from_joint_coupling(
 
 
 def restrict_to_levels(
-    law: LinearCouplingLaw, levels: Sequence[SpinalLevel]
+    law: CouplingLaw, levels: Sequence[SpinalLevel]
 ) -> LinearCouplingLaw:
     """The sub-law of ``law`` on the contiguous range ``levels`` (SPN-14a).
 

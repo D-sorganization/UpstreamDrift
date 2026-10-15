@@ -272,6 +272,12 @@ def _level_range(
     return tuple(lv for lv in inventory.levels if min(ords) <= lv.ordinal <= max(ords))
 
 
+def _required_array(value: np.ndarray | None, name: str, what: str) -> np.ndarray:
+    if value is None:
+        raise _unsupported(name, f"coupler lacks {what}")
+    return value
+
+
 def _linear_rows(
     couplers: list[_Coupler], names: tuple[str, ...], levels: tuple[SpinalLevel, ...]
 ) -> dict[SpinalLevel, np.ndarray]:
@@ -279,7 +285,8 @@ def _linear_rows(
     for item in couplers:
         if item.kind != "linear":
             continue
-        for slope, ind in zip(item.slopes, item.independent, strict=True):
+        slopes = _required_array(item.slopes, item.name, "slopes")
+        for slope, ind in zip(slopes, item.independent, strict=True):
             mats[item.level][item.axis, names.index(ind)] = slope
     return mats
 
@@ -288,10 +295,10 @@ def _build_polynomial(couplers: list[_Coupler], names, ident: tuple) -> Coupling
     terms = []
     for item in couplers:
         if item.kind == "poly":
-            coef = item.poly
+            coef = _required_array(item.poly, item.name, "poly")
         elif len(item.independent) == 1:
             coef = np.zeros(_MAX_POLY_DEGREE + 1)
-            coef[1] = item.slopes[0]
+            coef[1] = _required_array(item.slopes, item.name, "slopes")[0]
         else:
             raise _unsupported(
                 item.name, "multivariate linear cannot mix with polynomial couplers"

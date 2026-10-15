@@ -44,6 +44,7 @@ import hashlib
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any, cast
 
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -251,6 +252,17 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def chain_bodies(entry: ModelLevelMap) -> tuple[str, str]:
+    """``(pelvis_body, terminal_body)`` of a level map.
+
+    Raises:
+        ValueError: either body name is missing.
+    """
+    if not entry.pelvis_body or not entry.terminal_body:
+        raise ValueError("level map lacks pelvis/terminal bodies")
+    return entry.pelvis_body, entry.terminal_body
+
+
 def _resolve_level_map(model_id: str, level_map: ModelLevelMap | None):
     if level_map is not None:
         entry = level_map
@@ -281,8 +293,9 @@ def _chain_offsets(model: object, entry: ModelLevelMap) -> ChainOffsets:
     _, last_superior = _joint_base_bodies(model, entry.levels[ordered[-1]].joint)
     state = model.initSystem()  # type: ignore[attr-defined]
     set_coordinate_values(model, state, {})
-    base = body_transform_in(model, state, first_inferior, entry.pelvis_body)
-    term = body_transform_in(model, state, entry.terminal_body, last_superior)
+    pelvis_body, terminal_body = chain_bodies(entry)
+    base = body_transform_in(model, state, first_inferior, pelvis_body)
+    term = body_transform_in(model, state, terminal_body, last_superior)
     return ChainOffsets(base[:3, :3], term[:3, :3])
 
 
@@ -313,7 +326,7 @@ def _law_levels(law: CouplingLaw) -> set[SpinalLevel]:
 
 
 def _pelvis_columns(poses: np.ndarray, enc: PelvisCoordinates) -> dict[str, np.ndarray]:
-    angles = Rotation.from_matrix(poses[:, :3, :3]).as_euler(enc.sequence)
+    angles = Rotation.from_matrix(poses[:, :3, :3]).as_euler(cast(Any, enc.sequence))
     angles = np.unwrap(angles, axis=0)
     out = {name: angles[:, k] for k, name in enumerate(enc.rotation)}
     out.update({name: poses[:, k, 3] for k, name in enumerate(enc.translation)})

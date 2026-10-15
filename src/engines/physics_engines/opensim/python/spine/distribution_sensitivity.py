@@ -438,7 +438,9 @@ def _kinematics(
     return levels, out
 
 
-def _check_receipt_paths(receipt_paths: Mapping[str, Path]) -> dict[str, Path]:
+def _check_receipt_paths(
+    receipt_paths: Mapping[str, str | Path],
+) -> dict[str, Path]:
     if not isinstance(receipt_paths, Mapping) or not receipt_paths:
         raise ValueError("receipt_paths must map at least one law id to a receipt")
     known = load_coupling_laws()

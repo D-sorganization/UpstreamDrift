@@ -38,6 +38,7 @@ Two solvers:
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 from scipy.optimize import lsq_linear, minimize
@@ -254,11 +255,12 @@ def _redistribute(
     reduced = basis.T @ gain  # (k, nm), full row rank
     rhs = basis.T @ target
     norm = max(float(np.max(np.abs(reduced), initial=0.0)), 1.0)
-    constraint = {
+    constraint: dict[str, Any] = {
         "type": "eq",
         "fun": lambda a: (reduced @ a - rhs) / norm,
         "jac": lambda _a: reduced / norm,
     }
+    constraints: list[Any] = [constraint] if reduced.shape[0] else []
     result = minimize(
         activation_cost,
         a_start,
@@ -266,7 +268,7 @@ def _redistribute(
         jac=True,
         method="SLSQP",
         bounds=[(0.0, 1.0)] * a_start.size,
-        constraints=[constraint] if reduced.shape[0] else [],
+        constraints=constraints,
         options={"ftol": _SLSQP_FTOL, "maxiter": _SLSQP_MAXITER},
     )
     a = _polish(np.clip(result.x, 0.0, 1.0), gain, target)

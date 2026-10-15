@@ -43,6 +43,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from types import MappingProxyType
+from typing import Any
 
 import numpy as np
 
@@ -314,29 +315,37 @@ def _rigid_z(angle_deg: float, length_m: float) -> np.ndarray:
     return out
 
 
+def _resolved(table: Mapping[Any, float] | None, name: str) -> Mapping[Any, float]:
+    """A spec table filled in by ``FixtureSpec.__post_init__`` (never ``None``)."""
+    if table is None:
+        raise ValueError(f"FixtureSpec.{name} is unresolved")
+    return table
+
+
 def fixture_neutral_transforms(spec: FixtureSpec) -> dict[SpinalLevel, np.ndarray]:
     """Neutral offset ``T_i0`` (superior in inferior frame) per level.
 
     Postcondition: each value is a (4, 4) rigid transform; use it as the
     ``neutral`` of :class:`~src.shared.python.spine.segmental.LevelTransform`.
     """
+    lordosis = _resolved(spec.neutral_lordosis_deg, "neutral_lordosis_deg")
+    lengths = _resolved(spec.segment_length_m, "segment_length_m")
     return {
-        names.level: _rigid_z(
-            spec.neutral_lordosis_deg[names.level],
-            spec.segment_length_m[names.inferior_body],
-        )
+        names.level: _rigid_z(lordosis[names.level], lengths[names.inferior_body])
         for names in fixture_level_names(spec)
     }
 
 
 def fixture_base_offset(spec: FixtureSpec) -> np.ndarray:
     """Fixed transform of the first chain body (e.g. sacrum) in the pelvis frame."""
-    return _rigid_z(spec.sacral_slope_deg, spec.segment_length_m[_PELVIS])
+    lengths = _resolved(spec.segment_length_m, "segment_length_m")
+    return _rigid_z(spec.sacral_slope_deg, lengths[_PELVIS])
 
 
 def fixture_terminal_offset(spec: FixtureSpec) -> np.ndarray:
     """Fixed transform of ``thorax_proxy`` in the last vertebra frame."""
-    return _rigid_z(spec.thorax_tilt_deg, spec.segment_length_m[spec._bodies[-1]])
+    lengths = _resolved(spec.segment_length_m, "segment_length_m")
+    return _rigid_z(spec.thorax_tilt_deg, lengths[spec._bodies[-1]])
 
 
 def _euler_z(mat: np.ndarray) -> tuple[float, float, float]:
@@ -356,10 +365,10 @@ def _add_body(objects: ET.Element, name: str, mass: float, length: float) -> Non
 def _build_bodyset(model: ET.Element, spec: FixtureSpec) -> None:
     bodyset = ET.SubElement(model, "BodySet", attrib={"name": "bodyset"})
     objects = ET.SubElement(bodyset, "objects")
+    masses = _resolved(spec.segment_mass_kg, "segment_mass_kg")
+    lengths = _resolved(spec.segment_length_m, "segment_length_m")
     for body in spec._bodies:
-        _add_body(
-            objects, body, spec.segment_mass_kg[body], spec.segment_length_m[body]
-        )
+        _add_body(objects, body, masses[body], lengths[body])
     _add_body(objects, _THORAX, spec.thorax_proxy_mass_kg, _THORAX_LENGTH_M)
 
 

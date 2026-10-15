@@ -59,6 +59,7 @@ from scipy.spatial.transform import Rotation
 
 from src.shared.python.contracts import ensure
 from src.shared.python.spine._golf_term_impl import (
+    Handedness,
     check_handedness,
     handed_sign,
     isb_spine_angles_deg,
@@ -119,7 +120,9 @@ def _text(value: object, name: str) -> str:
 
 def _pair(value: object, name: str) -> tuple[float, float]:
     try:
-        lo, hi = (float(v) for v in value)  # type: ignore[union-attr]
+        if isinstance(value, str) or not isinstance(value, Sequence):
+            raise TypeError(f"expected a 2-sequence, got {type(value).__name__}")
+        lo, hi = (float(v) for v in value)
     except (TypeError, ValueError) as exc:
         raise ValueError(f"{name} must be a pair of numbers: {exc}") from exc
     if not (math.isfinite(lo) and math.isfinite(hi)) or lo >= hi:
@@ -229,6 +232,9 @@ def _variant_from_entry(entry: object) -> MovementVariant:
         raise ValueError("parameter must be a JSON object")
     integer = bool(par.get("integer", False))
     cast = int if integer else float
+    default = par.get("default")
+    if default is None:
+        raise TypeError("parameter.default is required and must be a number")
     return MovementVariant(
         variant_id=entry["variant_id"],
         version=str(entry["version"]),
@@ -237,7 +243,7 @@ def _variant_from_entry(entry: object) -> MovementVariant:
         operation=entry["operation"],
         parameter_name=par.get("name", ""),
         parameter_units=str(par.get("units", "")),
-        parameter_default=cast(par.get("default")),
+        parameter_default=cast(default),
         parameter_bounds=_pair(par.get("bounds"), "parameter.bounds"),
         parameter_integer=integer,
         window_events=tuple(str(e) for e in entry["window_events"]),
@@ -440,8 +446,8 @@ def _input_sha256(rots: np.ndarray, times: np.ndarray) -> str:
     return digest.hexdigest()
 
 
-def _term(term_id: str, rots: np.ndarray, hand: str) -> np.ndarray:
-    return evaluate(term_id, {_ROT: rots}, handedness=hand)  # type: ignore[arg-type]
+def _term(term_id: str, rots: np.ndarray, hand: Handedness) -> np.ndarray:
+    return evaluate(term_id, {_ROT: rots}, handedness=hand)
 
 
 def _delta(
@@ -539,7 +545,7 @@ def _compose(
     rots: np.ndarray,
     angles_deg: np.ndarray,
     delta_deg: np.ndarray,
-    window: tuple[tuple[int, ...], str],
+    window: tuple[tuple[int, ...], Handedness],
 ) -> tuple[np.ndarray, np.ndarray]:
     """Return ``(varied rotations, corrections)``; identity outside the window."""
     idx, hand = window
@@ -559,7 +565,7 @@ def _compose(
     return out, corr
 
 
-def _source(variant: MovementVariant, value: float | int, hand: str) -> str:
+def _source(variant: MovementVariant, value: float | int, hand: Handedness) -> str:
     return (
         f"movement_variant:{variant.variant_id}@{variant.version};"
         f"{variant.term_id}:{variant.operation}({variant.parameter_name}={value});"
@@ -570,7 +576,7 @@ def _source(variant: MovementVariant, value: float | int, hand: str) -> str:
 def _provenance(
     variant: MovementVariant,
     value: float | int,
-    hand: str,
+    hand: Handedness,
     idx: tuple[int, ...],
     sha: str,
 ) -> dict[str, Any]:

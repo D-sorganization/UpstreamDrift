@@ -185,8 +185,16 @@ def _validate_law(law: object, spec: FixtureSpec) -> LinearCouplingLaw:
     return law
 
 
+def _objects_of(model: ET.Element, path: str) -> ET.Element:
+    """The ``objects`` element at ``path``; ``ValueError`` when absent."""
+    objects = model.find(path)
+    if objects is None:
+        raise ValueError(f"fixture model XML lacks {path!r}")
+    return objects
+
+
 def _add_driver_body(model: ET.Element) -> None:
-    objects = model.find("BodySet/objects")
+    objects = _objects_of(model, "BodySet/objects")
     body = ET.SubElement(objects, "Body", attrib={"name": DRIVER_BODY})
     ET.SubElement(body, "mass").text = "0"
     ET.SubElement(body, "mass_center").text = "0 0 0"
@@ -195,7 +203,7 @@ def _add_driver_body(model: ET.Element) -> None:
 
 
 def _add_driver_joint(model: ET.Element, independent: tuple[str, ...]) -> None:
-    objects = model.find("JointSet/objects")
+    objects = _objects_of(model, "JointSet/objects")
     joint = ET.SubElement(objects, "CustomJoint", attrib={"name": DRIVER_JOINT})
     pname, cname = f"{DRIVER_JOINT}_parent_offset", f"{DRIVER_JOINT}_child_offset"
     ET.SubElement(joint, "socket_parent_frame").text = pname
@@ -220,12 +228,12 @@ def _add_driver_joint(model: ET.Element, independent: tuple[str, ...]) -> None:
         *independent,
         *([None] * (MAX_INDEPENDENT_COORDINATES - len(independent))),
     ]
-    for idx, (axis, name) in enumerate(zip(_AXES, padded[:3], strict=True), start=1):
-        _build_transform_axis(transform, "rotation", idx, axis, name)
-    for idx, (axis, name) in enumerate(
+    for idx, (axis, driver) in enumerate(zip(_AXES, padded[:3], strict=True), start=1):
+        _build_transform_axis(transform, "rotation", idx, axis, driver)
+    for idx, (axis, driver) in enumerate(
         zip(_TRANSLATION_AXES, padded[3:], strict=True), start=1
     ):
-        _build_transform_axis(transform, "translation", idx, axis, name)
+        _build_transform_axis(transform, "translation", idx, axis, driver)
 
 
 def _add_couplers(model: ET.Element, law: LinearCouplingLaw, spec: FixtureSpec) -> None:

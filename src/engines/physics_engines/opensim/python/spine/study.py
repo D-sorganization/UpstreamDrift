@@ -34,7 +34,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
-from typing import Any, Mapping, Sequence
+from typing import Any, Iterable, Mapping, Sequence
 
 import numpy as np
 import scipy
@@ -104,9 +104,14 @@ def _optional_count(value: object, name: str) -> int | None:
 
 
 def _events(value: object) -> tuple[tuple[str, float], ...]:
-    pairs = value.items() if isinstance(value, Mapping) else value
+    if isinstance(value, Mapping):
+        pairs: Any = value.items()
+    elif isinstance(value, Iterable):
+        pairs = value
+    else:
+        raise TypeError("events must be a mapping or a sequence of pairs")
     out = []
-    for name, time in pairs:  # type: ignore[union-attr]
+    for name, time in pairs:
         if not isinstance(name, str) or not name:
             raise ValueError("events names must be non-empty strings")
         if not math.isfinite(time):

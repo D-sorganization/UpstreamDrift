@@ -48,6 +48,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from types import MappingProxyType
+from typing import Any
 
 import numpy as np
 from scipy.interpolate import CubicSpline
@@ -229,7 +230,7 @@ def euler_jacobian(q: np.ndarray, sequence: str) -> np.ndarray:
     velocity in the parent frame is ``omega = J @ qdot`` with
     ``J = [e_a, R_a e_b, R_a R_b e_c]``.  Returns a (3, 3) array.
     """
-    a, b, c = sequence
+    a, b, c = list(sequence)
     ra = _rot(a, float(q[0]))
     rab = ra @ _rot(b, float(q[1]))
     return np.column_stack([_axis(a), ra @ _axis(b), rab @ _axis(c)])
@@ -334,8 +335,8 @@ class PreparedModel:
     ``external_loads`` describes the loads applied (``_NO_LOADS`` if none).
     """
 
-    model: object
-    state: object
+    model: Any
+    state: Any
     disabled_constraints: tuple[str, ...]
     n_constraints: int
     external_loads: str
@@ -362,7 +363,7 @@ def _describe_external_loads(xml: Path) -> str:
     )
 
 
-def _load_model(model_path: Path, external_loads: Path | None) -> object:
+def _load_model(model_path: Path, external_loads: Path | None) -> Any:
     osim = import_opensim()
     if external_loads is None:
         return osim.Model(str(model_path))

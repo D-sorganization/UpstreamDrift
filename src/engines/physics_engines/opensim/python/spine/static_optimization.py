@@ -84,7 +84,7 @@ _ZERO_DEMAND_NM = 1e-12
 
 
 def _ro(array: np.ndarray, dtype: type = float) -> np.ndarray:
-    out = np.array(array, dtype=dtype, copy=True)
+    out: np.ndarray = np.array(array, dtype=dtype, copy=True)
     out.setflags(write=False)
     return out
 
@@ -130,7 +130,9 @@ class ReserveSpec:
 
     def describe(self) -> str:
         """One-line provenance text."""
-        extra = ", ".join(f"{k}={v:g}" for k, v in sorted(self.per_coordinate.items()))
+        extra = ", ".join(
+            f"{k}={v:g}" for k, v in sorted((self.per_coordinate or {}).items())
+        )
         return (
             f"limit {self.limit_nm:g} N*m per DOF"
             + (f" ({extra})" if extra else "")

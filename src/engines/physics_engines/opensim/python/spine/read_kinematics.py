@@ -33,6 +33,7 @@ from src.engines.physics_engines.opensim.python.spine._osim_helpers import (
 )
 from src.engines.physics_engines.opensim.python.spine.drive import (
     DISTRIBUTION_SOURCE_KEY,
+    chain_bodies,
     _resolve_level_map,
     chain_offsets_from_model,
 )
@@ -134,7 +135,8 @@ def _verify_native(
     worst = 0.0
     for frame, pose in enumerate(poses):
         set_coordinate_values(model, state, {n: values[n][frame] for n in names})
-        native = body_transform_in(model, state, entry.terminal_body, entry.pelvis_body)
+        pelvis_body, terminal_body = chain_bodies(entry)
+        native = body_transform_in(model, state, terminal_body, pelvis_body)
         expect = fixed.base_rotation @ pose.compose()[:3, :3] @ fixed.terminal_rotation
         worst = max(worst, float(np.max(np.abs(native[:3, :3] - expect))))
     if worst > _NATIVE_TOL:
