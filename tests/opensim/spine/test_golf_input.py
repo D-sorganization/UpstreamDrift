@@ -147,10 +147,10 @@ def test_slerp_resample_endpoints_and_no_wrap_artifacts():
     assert np.allclose(out.pelvis_pose_ground[-1], poses[-1], atol=1e-12)
     assert np.allclose(out.other_coordinates["hip_flexion_r"], 2.0 * out.time_s)
     steps = [
-        np.linalg.norm(
-            Rotation.from_matrix(a.T @ b).as_rotvec()
+        np.linalg.norm(Rotation.from_matrix(a.T @ b).as_rotvec())
+        for a, b in zip(
+            out.pelvis_to_thorax[:-1], out.pelvis_to_thorax[1:], strict=True
         )
-        for a, b in zip(out.pelvis_to_thorax[:-1], out.pelvis_to_thorax[1:])
     ]
     assert max(steps) < 0.1  # no 2*pi jump; ~0.065 rad/step expected
     assert out.events == data.events
