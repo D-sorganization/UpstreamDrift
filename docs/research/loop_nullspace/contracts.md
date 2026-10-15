@@ -478,6 +478,41 @@ all `c_minus / c_plus`; heterogeneous weights give a different minimiser.
 Curvature (golden `planar_*.curvature`): the retained-space Gram matrix
 eigenvalues are positive.
 
+Implemented in `loop_nullspace/allocation.py` (types in `allocation_spec.py`):
+
+- Unknown `w = (z_1..z_T, s)`; torques are affine, `tau = T0 + Ntil z`. Each
+  quadratic term is `|A tau - a|^2` with `S = diag(torque_scale)` (convention
+  `C-METRIC-CAPACITY`): effort `a_e sum w_k |S^-1 tau_k|^2`, rate
+  `a_r sum |S^-1 dtau|^2 / dt_k`, reference `a_ref sum w_k |S^-1 (tau - ref)|^2`
+  (`w_k` trapezoid weights over `times_s`). The gross-power epigraph
+  `s >= c+ p`, `s >= -c- p` with `p = v tau` is piecewise linear.
+- Strict convexity is checked at build time on the retained space (the
+  z-directions that change a torque): the quadratic Gram matrix must have rank
+  equal to `sum_k rank N_a,k`. Torque-invisible directions (multiplier / `f_g`
+  gauge) are reported as `gauge_dimension`, not penalised; the optimal torque
+  is unique, the gauge coordinates are not. A failure raises
+  `NotStrictlyConvexError` naming the missing term(s) (effort or reference).
+- Reduction report: `ABS_POWER_ONLY` (`c+ = c-` per joint), `UNIFORM_NET_PLUS_ABS`
+  (uniform weights and `v^T dtau/dz = 0`, so `c-/c+` is a dead parameter at fixed
+  mean), `NONE` (heterogeneous). The reduced `1/2 (c+ + c-) |p|` form is used
+  when detected (`allow_reduction=False` forces the unreduced epigraph).
+- Result: `QuantityRecord(FAMILY_DEPENDENT)` with every hypothesis (feasible-set
+  ids plus `H-EFFORT-CAPACITY`, `H-SMOOTH-TORQUE-RATE`, `H-GROSS-POWER-COST`
+  when active), row and cone duals, Clarabel KKT residuals (scaled), solve time.
+  Exact cones are used; linearised cone rows are ignored. The reference-tracking
+  term has no registry hypothesis; it is flagged by `reference_used`.
+- Solver: `solve_socp` gained an optional quadratic term `P` (objective
+  `1/2 x'Px + c'x`, stationarity residual includes `Px`) and `tol`; the
+  `P=None` behaviour is unchanged.
+- Anthro acceptance is blocked on `J_g` (NSX-60): see the NSX-22 blocker above.
+  `tests/integration/test_loop_nullspace_anthro_allocation.py` skips with that
+  reason; the planar-oracle benchmark in `tests/unit/loop_nullspace/test_allocation.py`
+  records solve time and KKT residuals meanwhile.
+- Non-claims: the optimum is a hypothesis-conditioned representative, not an
+  estimate of true hand loads; no "zero sign flips" criterion is used.
+  `force_nullspace/redistribution.py` is untouched (API-compatible); its shim
+  onto this core is NSX-24.
+
 ## NSX-24 Allocator Shims (#12567)
 
 Preserve public signatures of `ContactForceAllocator` and
