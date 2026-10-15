@@ -21,12 +21,19 @@ from numpy.typing import NDArray
 
 from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.core.contracts import require
+from src.shared.python.simulation_backends.constrained_ztcf_zvcf import (
+    constrained_acceleration_at,
+    is_constrained_provider,
+)
 from src.shared.python.simulation_backends.ztcf_zvcf import (
     drift_and_control_split,
     zvcf_acceleration,
 )
 
 if TYPE_CHECKING:
+    from numpy.typing import ArrayLike
+
+    from src.shared.python.loop_nullspace.decomposition import Decomposition
     from src.shared.python.motion_matching.candidate_session import CandidateSession
     from src.shared.python.simulation_backends.protocol import EquationsOfMotionProvider
 
@@ -34,8 +41,10 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "AccelerationDecomposition",
+    "CounterfactualDynamics",
     "CounterfactualFork",
     "CounterfactualStrategy",
+    "NullspaceExploration",
     "create_counterfactual_rollout",
 ]
 
@@ -210,6 +219,78 @@ class CounterfactualFork:
         return float(self.time_s[-1] - self.time_s[0]) if len(self.time_s) > 1 else 0.0
 
 
+@dataclass(frozen=True)
+class NullspaceExploration:
+    """Null-space sampling for ``NULLSPACE_EXPLORATION`` (NSX-15 coordinates).
+
+    ``decompositions`` holds one NSX-15 :class:`Decomposition` per rollout
+    frame (the fork frame first); ``actuated_indices`` maps its actuated
+    torques onto the session's generalised coordinates.  ``z`` are the null
+    coordinates: ``None`` samples ``N(0, scale^2)`` per frame from ``seed``;
+    a ``(nullity,)`` vector is reused every frame; a ``(T, nullity)`` array is
+    used per frame.  Every member of the family reproduces the measured
+    acceleration *at the frame state it was sampled for*, so this explores
+    allocations, not motions; the load is held across each integration step,
+    so later frames drift by O(dt).
+    """
+
+    decompositions: Sequence[Decomposition]
+    actuated_indices: tuple[int, ...]
+    z: ArrayLike | None = None
+    seed: int = 0
+    scale: float = 1.0
+
+    def __post_init__(self) -> None:
+        if len(self.decompositions) == 0:
+            raise ValueError("decompositions must not be empty")
+        if not (np.isfinite(self.scale) and self.scale >= 0.0):
+            raise ValueError(f"scale must be finite and >= 0, got {self.scale}")
+        object.__setattr__(self, "actuated_indices", tuple(self.actuated_indices))
+
+    def torques(self, base_tau: NDArray[np.float64]) -> NDArray[np.float64]:
+        """``base_tau`` with the actuated columns replaced by ``tau(x_p + N z)``."""
+        n_frames, n_dofs = base_tau.shape
+        if len(self.decompositions) != n_frames:
+            raise ValueError(
+                f"decompositions must have one entry per rollout frame "
+                f"({n_frames}), got {len(self.decompositions)}"
+            )
+        if any(not 0 <= i < n_dofs for i in self.actuated_indices):
+            raise ValueError(f"actuated_indices outside [0, {n_dofs})")
+        rng = np.random.default_rng(self.seed)
+        out = base_tau.copy()
+        for k, dec in enumerate(self.decompositions):
+            if dec.n_actuated != len(self.actuated_indices):
+                raise ValueError(
+                    f"frame {k}: decomposition has {dec.n_actuated} actuated "
+                    f"torques, actuated_indices has {len(self.actuated_indices)}"
+                )
+            out[k, list(self.actuated_indices)] = dec.torque(self._z_at(k, dec, rng))
+        return out
+
+    def _z_at(
+        self, frame: int, dec: Decomposition, rng: np.random.Generator
+    ) -> NDArray[np.float64]:
+        if self.z is None:
+            return np.asarray(rng.normal(0.0, self.scale, size=dec.nullity))
+        z = np.asarray(self.z, dtype=np.float64)
+        return z[frame] if z.ndim == 2 else z
+
+
+@dataclass(frozen=True)
+class CounterfactualDynamics:
+    """The dynamics a rollout integrates (no placeholder inertia exists).
+
+    ``provider`` is an ``EquationsOfMotionProvider``; a
+    ``ConstrainedEquationsOfMotionProvider`` is integrated on the closed loop
+    with the reaction re-solved at every step.  ``nullspace`` is required by
+    ``NULLSPACE_EXPLORATION`` only.
+    """
+
+    provider: Any
+    nullspace: NullspaceExploration | None = None
+
+
 def _compute_baseline_hash(session: CandidateSession) -> str:
     """Compute combined SHA-256 digest of session coordinate arrays to guarantee immutability."""
     hasher = hashlib.sha256()
@@ -255,6 +336,7 @@ def _alter_torques(
     control_override: NDArray[np.float64] | None,
     clamp_limits: tuple[float, float] | None,
     trail_arm_indices: Sequence[int] | None,
+    nullspace: NullspaceExploration | None = None,
 ) -> NDArray[np.float64]:
     """Compute altered torques according to chosen counterfactual intervention strategy."""
     altered = base_tau.copy()
@@ -267,8 +349,12 @@ def _alter_torques(
         c_min, c_max = clamp_limits if clamp_limits is not None else (-50.0, 50.0)
         altered = np.clip(altered, c_min, c_max)
     elif strategy == CounterfactualStrategy.NULLSPACE_EXPLORATION:
-        t = np.linspace(0.0, np.pi, len(altered))[:, np.newaxis]
-        altered = altered + 5.0 * np.sin(t)
+        if nullspace is None:
+            raise ValueError(
+                "NULLSPACE_EXPLORATION requires CounterfactualDynamics.nullspace "
+                "(per-frame NSX-15 decompositions)"
+            )
+        altered = nullspace.torques(altered)
     elif strategy == CounterfactualStrategy.CUSTOM:
         if control_override is None:
             raise ValueError("control_override must be provided for CUSTOM strategy")
@@ -280,53 +366,92 @@ def _alter_torques(
     return altered
 
 
+def _forward_acceleration(
+    provider: Any,
+    q: NDArray[np.float64],
+    v: NDArray[np.float64],
+    tau: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Acceleration under generalised load ``tau``: closed-loop if constrained."""
+    if is_constrained_provider(provider):
+        return constrained_acceleration_at(provider, q, v, tau)[0]
+    mass = np.asarray(provider.mass_matrix(q), dtype=np.float64)
+    bias = np.asarray(provider.bias_forces(q, v), dtype=np.float64)
+    return np.asarray(np.linalg.solve(mass, tau - bias))
+
+
+def _rk4_step(
+    provider: Any,
+    q: NDArray[np.float64],
+    v: NDArray[np.float64],
+    tau: NDArray[np.float64],
+    dt: float,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """One RK4 step of ``q' = v, v' = a(q, v, tau)`` with ``tau`` held."""
+    k1v = _forward_acceleration(provider, q, v, tau)
+    q2, v2 = q + 0.5 * dt * v, v + 0.5 * dt * k1v
+    k2v = _forward_acceleration(provider, q2, v2, tau)
+    q3, v3 = q + 0.5 * dt * v2, v + 0.5 * dt * k2v
+    k3v = _forward_acceleration(provider, q3, v3, tau)
+    q4, v4 = q + dt * v3, v + dt * k3v
+    k4v = _forward_acceleration(provider, q4, v4, tau)
+    q_next = q + dt / 6.0 * (v + 2.0 * v2 + 2.0 * v3 + v4)
+    v_next = v + dt / 6.0 * (k1v + 2.0 * k2v + 2.0 * k3v + k4v)
+    return q_next, v_next
+
+
 def _integrate_dynamics(
     time_s: NDArray[np.float64],
     q0: NDArray[np.float64],
     v0: NDArray[np.float64],
-    base_q: NDArray[np.float64],
-    base_v: NDArray[np.float64],
-    base_tau: NDArray[np.float64],
     altered_tau: NDArray[np.float64],
-    base_a: NDArray[np.float64] | None,
+    provider: Any,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
-    """Numerically integrate counterfactual divergence from baseline trajectory."""
-    n_frames = len(time_s)
-    n_dofs = len(q0)
+    """Forward-simulate ``provider`` from ``(q0, v0)`` under ``altered_tau``.
+
+    Each frame interval is one RK4 step with the frame's generalised load held
+    constant; ``a_cf[i]`` is the acceleration at frame ``i``'s state.  A
+    constrained provider is integrated on the closed loop (reaction re-solved
+    at every stage), an unconstrained one by ``M^-1 (tau - h)``.
+
+    Postcondition: ``q_cf[0] == q0``, ``v_cf[0] == v0``; arrays share the
+    ``(n_frames, n_dofs)`` shape.  Raises ``ValueError`` on non-increasing time
+    or a state that does not match the load width.
+    """
+    n_frames, n_dofs = len(time_s), len(q0)
+    if altered_tau.shape != (n_frames, n_dofs) or v0.shape != q0.shape:
+        raise ValueError(
+            f"altered_tau must be ({n_frames}, {n_dofs}) and v0 must match q0; "
+            f"got {altered_tau.shape} and {v0.shape}"
+        )
+    steps = np.diff(time_s)
+    if np.any(steps <= 0.0):
+        raise ValueError("time_s must be strictly increasing for integration")
     q_cf = np.zeros((n_frames, n_dofs), dtype=np.float64)
     v_cf = np.zeros((n_frames, n_dofs), dtype=np.float64)
     a_cf = np.zeros((n_frames, n_dofs), dtype=np.float64)
-
-    q_cf[0] = q0
-    v_cf[0] = v0
-
-    # Effective diagonal inertia approximation for acceleration perturbation
-    m_eff = 1.0
-
+    q_cf[0], v_cf[0] = q0, v0
     for i in range(n_frames):
-        dt = float(time_s[i + 1] - time_s[i]) if i + 1 < n_frames else 0.001
-        if dt <= 0.0:
-            dt = 0.001
-
-        # Baseline acceleration at frame i
-        if base_a is not None and i < len(base_a):
-            a_nom = base_a[i]
-        elif i + 1 < len(base_v):
-            a_nom = (base_v[i + 1] - base_v[i]) / dt
-        else:
-            a_nom = np.zeros(n_dofs, dtype=np.float64)
-
-        delta_tau = altered_tau[i] - base_tau[i]
-        delta_a = np.zeros(n_dofs, dtype=np.float64)
-        n_map = min(len(delta_tau), n_dofs)
-        delta_a[:n_map] = delta_tau[:n_map] / m_eff
-        a_cf[i] = a_nom + delta_a
-
+        a_cf[i] = _forward_acceleration(provider, q_cf[i], v_cf[i], altered_tau[i])
         if i + 1 < n_frames:
-            v_cf[i + 1] = v_cf[i] + a_cf[i] * dt
-            q_cf[i + 1] = q_cf[i] + v_cf[i + 1] * dt
-
+            q_cf[i + 1], v_cf[i + 1] = _rk4_step(
+                provider, q_cf[i], v_cf[i], altered_tau[i], float(steps[i])
+            )
     return q_cf, v_cf, a_cf
+
+
+def _closure_velocity_residual(
+    provider: Any, q: NDArray[np.float64], v: NDArray[np.float64]
+) -> float | None:
+    """``max |J_c v|`` over the rollout, or ``None`` for an unconstrained provider."""
+    if not is_constrained_provider(provider):
+        return None
+    return float(
+        max(
+            np.max(np.abs(provider.closure_jacobian(qi) @ vi), initial=0.0)
+            for qi, vi in zip(q, v, strict=True)
+        )
+    )
 
 
 def _evaluate_constraints(
@@ -379,8 +504,23 @@ def create_counterfactual_rollout(
     duration_frames: int | None = None,
     clamp_limits: tuple[float, float] | None = None,
     trail_arm_indices: Sequence[int] | None = None,
+    dynamics: CounterfactualDynamics | None = None,
 ) -> CounterfactualFork:
-    """Generate an immutable counterfactual fork guaranteeing zero mutation of baseline data."""
+    """Generate an immutable counterfactual fork guaranteeing zero mutation of baseline data.
+
+    The fork is a forward simulation of ``dynamics.provider`` from the measured
+    fork state under the altered generalised load (NSX-30): on a
+    ``ConstrainedEquationsOfMotionProvider`` the closed loop is respected and
+    the reaction is re-solved at every step.  ``dynamics`` is required; there is
+    no placeholder inertia, so a missing provider raises ``ValueError``.
+    ``constraint_status`` reports ``closure_velocity_residual_max`` for a
+    constrained provider.
+    """
+    if dynamics is None or getattr(dynamics, "provider", None) is None:
+        raise ValueError(
+            "create_counterfactual_rollout requires dynamics=CounterfactualDynamics"
+            "(provider=...): a counterfactual rollout integrates a real model"
+        )
     # Strict immutability guarantee: hash baseline state before rollout
     baseline_digest_before = _compute_baseline_hash(session)
 
@@ -402,12 +542,6 @@ def create_counterfactual_rollout(
     )
 
     base_q = session.q[fork_frame_idx:end_idx]
-    base_v = (
-        session.v[fork_frame_idx:end_idx]
-        if session.v is not None
-        else np.zeros_like(base_q)
-    )
-    base_a = session.a[fork_frame_idx:end_idx] if session.a is not None else None
     base_tau = (
         session.tau[fork_frame_idx:end_idx].copy()
         if session.tau is not None
@@ -421,17 +555,15 @@ def create_counterfactual_rollout(
         control_override=control_override,
         clamp_limits=clamp_limits,
         trail_arm_indices=trail_arm_indices,
+        nullspace=dynamics.nullspace,
     )
 
     q_cf, v_cf, a_cf = _integrate_dynamics(
         time_s=time_window,
         q0=q0,
         v0=v0,
-        base_q=base_q,
-        base_v=base_v,
-        base_tau=base_tau,
         altered_tau=altered_tau,
-        base_a=base_a,
+        provider=dynamics.provider,
     )
 
     divergence_rms = float(np.sqrt(np.mean((q_cf - base_q) ** 2)))
@@ -441,6 +573,9 @@ def create_counterfactual_rollout(
         specification=session.specification,
         coord_names=session.coordinate_names,
     )
+    closure_residual = _closure_velocity_residual(dynamics.provider, q_cf, v_cf)
+    if closure_residual is not None:
+        status["closure_velocity_residual_max"] = closure_residual
 
     # Verify zero-mutation invariant on baseline session
     baseline_digest_after = _compute_baseline_hash(session)
