@@ -444,7 +444,7 @@ def _min_metric_particular(
 def _scalar_record(
     snap: ClosedLoopSnapshot, value: float, units: str, conv: tuple[str, ...]
 ) -> QuantityRecord:
-    common = {
+    common: dict[str, Any] = {
         "units": units,
         "model_provenance": snap.model_provenance,
         "input_provenance": snap.input_provenance,
