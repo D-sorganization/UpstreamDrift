@@ -2288,6 +2288,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12554 · Add NSX-05 Deferred-Validation Record DV-12554 and External Validation Protocol
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12554
+- **Branch:** merged via #12596
+- **PR:** #12596
+- **Paths:** see #12596
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`c50ced25`; collated from changes/12554-add-nsx-05-deferred-validation-record-dv.md)
+- **Summary:** Add NSX-05 deferred-validation record DV-12554 and external validation protocol
+- **Next step:** Shipped in PR #12596.
+
+### DL-#12549 · Add NSX-00 Mathematical Specification, SymPy Golden Fixtures, ADR-0054, Hypothesis Registry Seed, and Contract Appendix
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12549
+- **Branch:** merged via #12596
+- **PR:** #12596
+- **Paths:** see #12596
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`c50ced25`; collated from changes/12549-add-nsx-00-mathematical-specification-sy.md)
+- **Summary:** Add NSX-00 mathematical specification, SymPy golden fixtures, ADR-0054, hypothesis registry seed, and contract appendix
+- **Next step:** Shipped in PR #12596.
+
 ### DL-#12536 · Complete BunkerShot3D Workbench Export Views, Save/Reload, VTK Stamped Export, and API Docs (#12536)
 
 - **State:** shipped
