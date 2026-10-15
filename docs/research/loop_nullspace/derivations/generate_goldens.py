@@ -25,6 +25,7 @@ import five_bar_goldens  # noqa: E402
 import grasp_map  # noqa: E402
 import lower_body_counts  # noqa: E402
 import planar_golfer  # noqa: E402
+import restriction_counts  # noqa: E402
 import spatial_counts  # noqa: E402
 import variability_goldens  # noqa: E402
 
@@ -33,6 +34,7 @@ GENERATORS: dict[str, Callable[[], dict[str, Any]]] = {
     "planar_two_arm_club_unactuated": planar_golfer.generate_club_unactuated,
     "planar_straight_arm_rank_deficient": planar_golfer.generate_straight_arm,
     "spatial_counts": spatial_counts.generate,
+    "restriction_counts": restriction_counts.generate,
     "lower_body_observation": lower_body_counts.generate,
     "envelope_analytic_lp": envelope_case.generate,
     "grasp_map_worked_example": grasp_map.generate,
