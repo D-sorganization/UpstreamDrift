@@ -60,9 +60,9 @@ def test_adr_worked_example_composed_angles_and_sum():
 def test_angle_sum_differs_from_relative_rotation_angles():
     pose = SegmentalPose(
         (
-            _lt(L.L3_L4, (20, 0, 0)),
-            _lt(L.L2_L3, (0, 15, 0)),
-            _lt(L.L1_L2, (0, 0, 30)),
+            _lt(L.L3_L4, (20, 10, 0)),
+            _lt(L.L2_L3, (0, 15, 10)),
+            _lt(L.L1_L2, (10, 0, 30)),
         )
     )
     rel = LevelTransform(
@@ -91,9 +91,7 @@ def test_compose_equals_explicit_product_with_neutral_offsets():
     expected = tr[0].matrix() @ tr[1].matrix() @ tr[2].matrix() @ tr[3].matrix()
     np.testing.assert_allclose(pose.compose(), expected, atol=1e-12, rtol=0)
     sub = tr[1].matrix() @ tr[2].matrix()
-    np.testing.assert_allclose(
-        pose.compose(L.L4_L5, L.L3_L4), sub, atol=1e-12, rtol=0
-    )
+    np.testing.assert_allclose(pose.compose(L.L4_L5, L.L3_L4), sub, atol=1e-12, rtol=0)
     np.testing.assert_allclose(
         pose.relative_rotation(L.L4_L5, L.L3_L4), sub[:3, :3], atol=1e-12
     )
@@ -102,9 +100,9 @@ def test_compose_equals_explicit_product_with_neutral_offsets():
     )
 
 
-_vec = st.lists(
-    st.floats(-1.5, 1.5, allow_nan=False), min_size=3, max_size=3
-).map(np.array)
+_vec = st.lists(st.floats(-1.5, 1.5, allow_nan=False), min_size=3, max_size=3).map(
+    np.array
+)
 
 
 @settings(max_examples=60, deadline=None)
@@ -118,7 +116,7 @@ def test_property_compose_matches_numpy_product(draws):
             Rotation.from_rotvec(r).as_matrix(),
             np.zeros(3),
         )
-        for lv, (r, n) in zip(levels, draws)
+        for lv, (r, n) in zip(levels, draws, strict=True)
     ]
     expected = np.eye(4)
     for t in tr:
@@ -217,12 +215,12 @@ def test_pose_preconditions():
 
 def _series(**kw):
     poses = (_worked_pose(), _worked_pose())
-    args = dict(
-        time_s=np.array([0.0, 0.1]),
-        poses=poses,
-        distribution_source="measured:synthetic",
-        valid=np.array([True, True]),
-    )
+    args = {
+        "time_s": np.array([0.0, 0.1]),
+        "poses": poses,
+        "distribution_source": "measured:synthetic",
+        "valid": np.array([True, True]),
+    }
     args.update(kw)
     return SegmentalKinematicsSeries(**args)
 
