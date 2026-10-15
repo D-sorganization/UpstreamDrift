@@ -5902,25 +5902,32 @@ lead wrist on its 35 deg bound, and is now at 41.4 mm, still on the bound.
 
 Issue \#12315 (PR \#12484) widened the golf forearm range to 0--170 deg but
 did not re-solve the calibration, so the lead forearm \texttt{pro\_sup\_l}
-stayed on the old 90 deg bound in the committed address poses (\#12777). With
-the calibration re-solved on the widened range, \texttt{pro\_sup\_l} is
-interior for every model and club: 119.5 and 54.7 deg on
-\texttt{golf\_humanoid} (driver, 7-iron), and 134.8 and 90.2 deg on
-\texttt{golf\_humanoid\_scaled}. Grip orientation errors stay at or below
-1.5 deg, and hand grip-point gaps at or below 0.8 mm. The landmark RMS is
-28.5 / 23.9 mm (\texttt{golf\_humanoid}) and 56.6 / 65.4 mm
-(\texttt{golf\_humanoid\_scaled}). The driver value on \texttt{golf\_humanoid}
-is 3.1 mm above the bounded solve (25.4 mm): freeing the forearm moves the
-least-squares fit to a different local minimum, and the solver stops on its
-function tolerance. The knee and lead-elbow bounds, and the scaled skeleton's
-wrist-deviation bounds (a recorded reason), are unchanged. Reproduce:
+stayed on the old 90 deg bound in the committed address poses (\#12777). The
+calibration is now re-solved on the widened range, warm-started from the
+committed pose of the same model and club (\texttt{initial\_guess}).
+A first cold-started re-solve (zero pose, pelvis at the hips) freed the
+forearm but fell into a different local minimum. It put the
+\texttt{golf\_humanoid} driver lead knee on its bound, with an address knee
+difference of 0.64 rad against the capture's 0.18 rad
+(\texttt{test\_msk\_address\_comparison}), and raised the landmark RMS from
+25.4 to 28.5 mm. It was discarded.
+
+With the warm start, \texttt{pro\_sup\_l} is interior for every model and
+club: 121.0 and 53.0 deg on \texttt{golf\_humanoid} (driver, 7-iron), and
+134.8 and 90.2 deg on \texttt{golf\_humanoid\_scaled}. The
+\texttt{golf\_humanoid} driver solve has no coordinate at a bound, and its
+landmark RMS falls from 25.4 to 22.4 mm. The 7-iron is unchanged at
+20.2 mm, with the lead elbow still at its bound. Grip orientation errors stay
+at or below 1.5 deg, and hand grip-point gaps at or below 0.8 mm. The scaled
+skeleton keeps its knee bounds and its wrist-deviation bounds (a recorded
+reason). Reproduce:
 \begin{verbatim}
 python3 -m src.engines.physics_engines.opensim.python.msk_club_calibration \
   src/engines/physics_engines/opensim/models/golf_humanoid.osim \
   src/engines/physics_engines/opensim/models/golf_humanoid_scaled.osim \
-  --club driver   # then --club iron7
+  --club driver   # then --club iron7; --cold-start ignores the committed pose
 # then scripts/build_humanoid_osim.py rebuild_club(<model>) on both models
-python3 -m pytest tests/opensim/test_msk_grip_palms.py tests/opensim/test_msk_club.py
+python3 -m pytest tests/opensim
 \end{verbatim}
 
 Reproduction (repository root, \texttt{MUJOCO\_GL=egl PYTHONPATH=.:src}):
