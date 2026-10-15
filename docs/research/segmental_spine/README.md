@@ -117,7 +117,9 @@ solve failed. `pass` is a software statement only; `scientific_status` is
 always `unqualified`. With the request above and gravity only, the fixture
 returns `unqualified` with the reasons "inverse-dynamics pelvis residual
 exceeds the budget" and "2 frames flagged for reserve use". That is expected:
-without external loads the pelvis residual is the whole body weight. Do not
+without external support loads the pelvis residual carries the gravitational
+support (the whole body weight when stationary) plus the whole-body inertial
+demand of the prescribed motion. Do not
 widen a budget to make a run pass; a widened budget is recorded in the
 receipt and must be justified.
 
