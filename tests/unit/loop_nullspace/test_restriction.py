@@ -131,6 +131,7 @@ def test_row_selection_matches_the_golden() -> None:
     assert restriction_rows(S5, S5) == (0, 1, 2, 3, 4)
 
 
+@pytest.mark.requires_pinocchio
 def test_restrict_selects_rows_exactly_and_changes_only_the_kind() -> None:
     snap = shaft_aligned(spatial_two_arm_club_snapshot().snapshot)
     for kind in KINDS:
@@ -148,6 +149,7 @@ def test_restrict_selects_rows_exactly_and_changes_only_the_kind() -> None:
         assert kind.value in out.input_provenance.note
 
 
+@pytest.mark.requires_pinocchio
 def test_restriction_composes_and_identity_is_a_no_op() -> None:
     snap = shaft_aligned(spatial_two_arm_club_snapshot().snapshot)
     chained = restrict(restrict(snap, S5), B3)
@@ -157,6 +159,7 @@ def test_restriction_composes_and_identity_is_a_no_op() -> None:
     assert same.topology.closure_kind is W6
 
 
+@pytest.mark.requires_pinocchio
 def test_restricted_snapshot_still_satisfies_the_closure_levels() -> None:
     snap = shaft_aligned(spatial_two_arm_club_snapshot().snapshot)
     for kind in KINDS:
@@ -190,6 +193,7 @@ def test_unknown_kind_and_wrong_types_are_refused() -> None:
     assert restrict(snap, "BALL3").topology.closure_kind is B3
 
 
+@pytest.mark.requires_pinocchio
 def test_shaft_free_needs_the_shaft_on_the_grip_x_axis() -> None:
     """The spatial fixture's club lies along grip z: row ``tx`` is not the twist."""
     raw = spatial_two_arm_club_snapshot().snapshot
