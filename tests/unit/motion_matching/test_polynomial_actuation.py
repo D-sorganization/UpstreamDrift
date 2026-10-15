@@ -181,3 +181,22 @@ def test_tiny_duration_export_rejects_nonfinite_power_conversion() -> None:
 
     with pytest.raises(ValueError, match="non-finite"):
         control.export_power_coefficients(np.ones(control.n_parameters))
+
+
+def test_actuated_coordinate_indices_skips_root() -> None:
+    from src.shared.python.motion_matching.polynomial_actuation import (
+        ROOT_COORDINATES,
+        actuated_coordinate_indices,
+    )
+
+    names = ("Knee", *ROOT_COORDINATES, "Elbow")
+    assert actuated_coordinate_indices(names) == (0, len(names) - 1)
+
+
+def test_actuated_coordinate_indices_requires_root() -> None:
+    from src.shared.python.motion_matching.polynomial_actuation import (
+        actuated_coordinate_indices,
+    )
+
+    with pytest.raises(ValueError, match="root coordinates"):
+        actuated_coordinate_indices(("Knee", "Elbow"))

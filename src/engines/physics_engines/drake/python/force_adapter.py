@@ -36,7 +36,9 @@ from src.shared.python.loop_nullspace.contracts import (
     SpatialInertia,
 )
 from src.shared.python.motion_matching.multi_engine_torque_allocator import EngineType
-from src.shared.python.motion_matching.polynomial_actuation import ROOT_COORDINATES
+from src.shared.python.motion_matching.polynomial_actuation import (
+    actuated_coordinate_indices,
+)
 
 Array: TypeAlias = NDArray[np.float64]
 
@@ -54,13 +56,7 @@ class DrakeForceAdapter:
         self._spec = json.loads(spec_bytes)
         self._model = FullBodyDrakeModel(self._spec)
         self._names = tuple(self._model.coordinate_order)
-        if not set(ROOT_COORDINATES).issubset(self._names):
-            raise ValueError(
-                "Force adapter requires the named unactuated root coordinates"
-            )
-        self._actuated = tuple(
-            i for i, name in enumerate(self._names) if name not in ROOT_COORDINATES
-        )
+        self._actuated = actuated_coordinate_indices(self._names)
         self._contact_names = tuple(s["name"] for s in self._spec["contact"]["spheres"])
 
     @property
