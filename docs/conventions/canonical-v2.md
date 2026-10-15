@@ -68,7 +68,7 @@ angular-velocity frame is wrong, those tests fail.
 
 | Engine           | Native base quaternion             | Native base layout                                                                 | Angular-velocity frame                                                                                                                                          | Notes                                                                                                                                                                                                               |
 | ---------------- | ---------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Pinocchio**    | `(x, y, z, w)` — **w-last**        | `[xyz, quat_xyzw]` free-flyer                                                      | LOCAL (body)                                                                                                                                                    | Reference engine; canonical ang-vel frame matches it. Only the quaternion order is reordered.                                                                                                                       |
+| **Pinocchio**    | `(x, y, z, w)` — **w-last**        | `[xyz, quat_xyzw]` free-flyer                                                      | LOCAL (body); free-flyer **linear** velocity is also LOCAL (`v_local = R^T v_world`)                                                                            | Reference engine; canonical ang-vel frame matches it. Quaternion reordered **and** base linear velocity/acceleration rotated through the NSX-50 `velocity_map` (§9, #12605).                                        |
 | **MuJoCo / MJX** | `(w, x, y, z)` — **w-first**       | `qpos = [xyz, quat_wxyz]` free joint                                               | MuJoCo free-joint `qvel = [linear_world, angular_body]`                                                                                                         | CC-10 chooses MuJoCo first for contact-rich forward simulation; quaternion and qvel ordering match canonical-v2. MuJoCo soft/compliant contact is documented as divergent from rigid-contact Pinocchio comparisons. |
 | **MyoSuite**     | `(w, x, y, z)` — **w-first**       | MuJoCo MJCF `qpos = [xyz, quat_wxyz]` free joint                                   | body-local free-joint `qvel` angular part, matching the canonical MyoSuite adapter                                                                              | Activation-driven; declares `MUSCLES`, `FORWARD_DYN`, `CONTACT`, and no joint-torque ID.                                                                                                                            |
 | **Drake**        | `(w, x, y, z)` — w-first           | `QuaternionFloatingJoint`: `[quat_wxyz, xyz]` (or URDF RPY floating: `[xyz, rpy]`) | `QuaternionFloatingJoint` velocity is `(w_FM, v_FM)` expressed in parent/world; CC-28 maps canonical body-local angular velocity through `R_FM` at the boundary | Base block ordering differs (quat first); RPY-floating URDFs convert via `se3` Euler path.                                                                                                                          |
@@ -238,19 +238,19 @@ acceleration is `a_n = T a_c + Tdot v_c` with `Tdot = dT/dt` along `v_c`, and th
 dual generalized force is `tau_c = T^T tau_n`, so `tau_n . v_n = tau_c . v_c`
 (power invariance, checked by `check_power_invariance`).
 
-| Engine    | Base block of `v_n`         | Linear frame | Angular frame     | `Tdot v` term         |
-| --------- | --------------------------- | ------------ | ----------------- | --------------------- |
-| Pinocchio | `[lin; ang]`                | body (`R^T`) | body              | `-[w]x R^T` (linear)  |
-| MuJoCo    | `[lin; ang]`                | world        | body              | none (T = I)          |
-| Drake     | `[ang; lin]`                | world        | world (`R`)       | none for the velocity |
-| OpenSim   | `[lin; Euler rate]` (deg/s) | world        | `S(euler)^-1`     | `d(S^-1)/dt`          |
+| Engine    | Base block of `v_n`         | Linear frame | Angular frame | `Tdot v` term         |
+| --------- | --------------------------- | ------------ | ------------- | --------------------- |
+| Pinocchio | `[lin; ang]`                | body (`R^T`) | body          | `-[w]x R^T` (linear)  |
+| MuJoCo    | `[lin; ang]`                | world        | body          | none (T = I)          |
+| Drake     | `[ang; lin]`                | world        | world (`R`)   | none for the velocity |
+| OpenSim   | `[lin; Euler rate]` (deg/s) | world        | `S(euler)^-1` | `d(S^-1)/dt`          |
 
 Joint speeds scale by the slot `sign` and by `180/pi` for degree slots. The
 Euler-rate map is singular at `cos(beta) = 0`. OpenSim's own FreeJoint speed is
 the parent-frame angular velocity, not `dq/dt`; the adapter maps coordinate
 rates. Pinocchio's free-flyer linear velocity is LOCAL (verified against
 `data.v`); the canonical linear velocity is world-frame, so the map applies
-`R^T`, which differs from the pass-through in `pinocchio_reference.py`.
+`R^T`; `pinocchio_reference.py` delegates to this map (#12605).
 Closure-row twist and wrench duals (`pose_interchange.wrench_transform`) reuse
 the NSX-02 converter. Verification: `tests/unit/pose_interchange/test_dynamic_maps.py`,
 `tests/unit/pose_interchange/test_wrench_transform.py` and the engine ground
