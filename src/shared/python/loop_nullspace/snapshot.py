@@ -185,13 +185,18 @@ def snapshot_from_adapter(
     a: ArrayLike,
     *,
     input_provenance: InputProvenance,
+    foot_contact_tol_m: float | None = None,
 ) -> ClosedLoopSnapshot:
     """Assemble a validated :class:`ClosedLoopSnapshot` at ``(q, v, a)``.
 
     ``M a + h = S^T tau + J_c^T lambda`` holds with ``M, h`` from
     ``adapter.compute_mass_and_bias`` and ``J_c, Jdot_v`` converted from the
     adapter's native closure convention to the canonical one.  ``J_g`` (ground
-    contact) is left ``None``; foot contacts are not part of this seam.
+    contact) is left ``None`` unless ``foot_contact_tol_m`` is given: then every
+    candidate from ``adapter.foot_contact_candidates(q)`` whose signed gap is at
+    most the tolerance is a rigid unilateral contact, and ``J_g`` holds its
+    world-axis point rows from ``adapter.compute_contact_jacobian(q)``
+    (``CapabilityUnavailable`` if the adapter has no such method).
 
     Preconditions: ``adapter`` declares ``CLOSED_LOOP_SNAPSHOT`` at ``FULL``
     (else :class:`CapabilityUnavailable`); ``q, v, a`` are finite vectors of
@@ -218,6 +223,7 @@ def snapshot_from_adapter(
     )
     bare, welded = adapter.club_inertia_split()
     selection = np.eye(nv)[list(topology.actuated_indices)]
+    contacts, j_g = _ground_contacts(adapter, q_arr, foot_contact_tol_m)
     return ClosedLoopSnapshot(
         q=q_arr,
         v=v_arr,
@@ -237,4 +243,27 @@ def snapshot_from_adapter(
         ),
         input_provenance=input_provenance,
         topology=topology,
+        J_g=j_g,
+        foot_contacts=contacts,
+    )
+
+
+def _ground_contacts(
+    adapter: Any, q: Array, tol_m: float | None
+) -> tuple[tuple[Any, ...], Array | None]:
+    """Active foot contacts and their ``J_g`` rows, or ``((), None)`` when off."""
+    if tol_m is None:
+        return (), None
+    from src.shared.python.loop_nullspace.ground_contact import (
+        select_active_contacts,
+    )
+
+    provider = getattr(adapter, "foot_contact_candidates", None)
+    if provider is None:
+        raise CapabilityUnavailable(
+            f"{type(adapter).__name__} has no foot_contact_candidates; "
+            "foot contacts need an adapter that exposes them"
+        )
+    return select_active_contacts(
+        provider(q), adapter.compute_contact_jacobian(q), gap_tol_m=tol_m
     )

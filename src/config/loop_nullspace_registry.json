@@ -304,6 +304,12 @@
       "conventions": ["C-FRAME-GRIP", "C-SCALE-FORCE-MOMENT", "C-RANK-TOLERANCE"]
     },
     {
+      "id": "envelope_grf_observed",
+      "label": "Envelope With Observed Ground Reaction",
+      "hypotheses": ["H-TORQUE-CAPACITY", "H-FRICTION-CONE", "H-GRIP-PRELOAD", "H-GRF-OBSERVATION"],
+      "conventions": ["C-FRAME-GRIP", "C-SCALE-FORCE-MOMENT", "C-RANK-TOLERANCE"]
+    },
+    {
       "id": "capacity_min_effort",
       "label": "Capacity-Weighted Minimum Effort",
       "hypotheses": ["H-TORQUE-CAPACITY", "H-EFFORT-CAPACITY", "H-FRICTION-CONE", "H-GRIP-PRELOAD"],
