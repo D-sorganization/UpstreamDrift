@@ -57,6 +57,7 @@ class SpinalRiskLevel(Enum):
     CAUTION = "caution"
     HIGH_RISK = "high_risk"
     CRITICAL = "critical"
+    NOT_ASSESSED = "not_assessed"  # heuristic bands do not apply (model loads)
 
 
 @dataclass
@@ -320,6 +321,11 @@ class SpinalLoadAnalyzer:
         # Assess risk levels (heuristic bands: heuristic loads only)
         if result.risk_assessed:
             result = self._assess_risk(result)
+        else:
+            result.compression_risk = SpinalRiskLevel.NOT_ASSESSED
+            result.shear_risk = SpinalRiskLevel.NOT_ASSESSED
+            result.x_factor_risk = SpinalRiskLevel.NOT_ASSESSED
+            result.overall_risk = SpinalRiskLevel.NOT_ASSESSED
 
         # Compute cumulative loads
         result = self._compute_cumulative_loads(result, time)

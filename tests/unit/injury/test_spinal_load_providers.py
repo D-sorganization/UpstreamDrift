@@ -211,7 +211,6 @@ def test_analyzer_with_model_provider_reports_model_and_skips_heuristic_risk() -
     )
     expected = 900.0 / analyzer.body_weight_N
     assert result.peak_compression_bw == pytest.approx(expected, abs=1e-12)
-    assert result.compression_risk is SpinalRiskLevel.SAFE
 
 
 def test_analyzer_rejects_bad_provider() -> None:

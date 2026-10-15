@@ -46,7 +46,7 @@ and its outputs are unchanged (golden-tested to $10^{-12}$). Results expose
 \texttt{provider\_id}, \texttt{is\_model\_based} and \texttt{risk\_assessed}.
 With a model provider the segments come from the series (torsion is
 $|M_y|$) and the heuristic risk bands are \emph{not} applied
-(\texttt{risk\_assessed = False}); the literature thresholds were derived for
+(\texttt{risk\_assessed = False}, and every risk field reads \texttt{NOT\_ASSESSED}, never \texttt{SAFE}); the literature thresholds were derived for
 the heuristic quantities. The spinal compression/shear terms in
 \texttt{optimization/\_swing\_objectives.py} are labelled heuristic
 (\texttt{SPINAL\_OBJECTIVE\_PROVIDER\_ID}); numerics are unchanged.
