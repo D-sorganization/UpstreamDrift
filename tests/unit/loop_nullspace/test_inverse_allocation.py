@@ -30,6 +30,7 @@ from src.shared.python.loop_nullspace.inverse_allocation import (  # noqa: E402
     fit_from_blocks,
     relative_torque_error,
     replay_allocation,
+    stationarity,
     term_gradients,
 )
 from src.shared.python.loop_nullspace.solvers import SolveStatus  # noqa: E402
@@ -243,6 +244,26 @@ def test_recovers_weights_with_gross_power_term() -> None:
     r = _ratios(fit)
     assert r["rate"] == pytest.approx(0.5, rel=1e-3)
     assert r["gross_power"] == pytest.approx(0.4, rel=1e-3)
+
+
+def test_only_true_kinks_are_dropped_as_nonsmooth() -> None:
+    """p = 0 from v = 0 has zero gradient for any sub-gradient: keep the frame.
+
+    A frame is non-smooth only where some joint has v != 0 and tau ~ 0 (the
+    gross-power optimum sits there: its L1 character drives torques to zero).
+    """
+    frames, vel = _trajectory(8, cap=1.0e3)
+    vel[:, 1] = 0.0
+    gp = GrossPowerSpec(0.4, np.full(N_A, 1.0), np.full(N_A, 1.0), vel)
+    tau = _generate(frames, {"effort": 1.0, "rate": 0.5}, gross=gp)
+    prob = _problem(frames, tau, gross_power=gp)
+    stat = stationarity(prob)
+    moving = np.abs(vel) > 0.0
+    kink = np.any(moving & (np.abs(stat.projected_torque * vel) < 1e-8), axis=1)
+    assert set(stat.dropped_nonsmooth) == {int(k) for k in np.flatnonzero(kink)}
+    assert len(stat.used_frames) >= 1, "zero-velocity joint must not drop every frame"
+    fit = fit_allocation_weights(prob, precomputed=stat)
+    assert fit.ratio("gross_power", "effort") == pytest.approx(0.4, rel=1e-3)
 
 
 # --------------------------------------------------- active constraints

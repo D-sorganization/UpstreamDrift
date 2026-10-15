@@ -78,6 +78,7 @@ __all__ = [
 FEATURES = ("effort", "rate", "reference", "gross_power")
 _QP_TOL = 1e-12
 _RANK_RTOL = 1e-10
+_ROW_RTOL = 1e-9  # rows shorter than this fraction of the longest carry no direction
 
 
 @dataclass(frozen=True)
@@ -297,7 +298,9 @@ def _gauge_basis(n_mat: Array) -> Array:
 
 
 def _row_system(fs: FeasibleSet, z0: Array, gauge: Array):
-    rows = [r for r in fs.rows if r.kind != "cone_linear" and np.linalg.norm(r.g) > 0.0]
+    rows = [r for r in fs.rows if r.kind != "cone_linear"]
+    top = max((float(np.linalg.norm(r.g)) for r in rows), default=0.0)
+    rows = [r for r in rows if np.linalg.norm(r.g) > _ROW_RTOL * top]
     if not rows:
         return None, None
     g = np.array([r.g for r in rows])
@@ -337,6 +340,9 @@ def _max_margin(fs: FeasibleSet, z0: Array, gauge: Array) -> float | None:
         settings=ConicSettings(tol=_QP_TOL),
     )
     if res.status is not SolveStatus.OPTIMAL or res.x is None:
+        logger.warning(
+            "margin solve inconclusive: %s (%s)", res.status.name, res.reason
+        )
         return None
     return float(res.x[n_y])
 
@@ -419,8 +425,13 @@ def _nonsmooth_frames(problem: InverseProblem, tau: Array) -> set[int]:
     gp = problem.gross_power
     if gp is None:
         return set()
-    p = np.abs(tau * gp.joint_velocity)
-    kink = p <= 1e-9 * max(float(np.max(p)), 1e-300)
+    vel = gp.joint_velocity
+    p = np.abs(tau * vel)
+    # p = 0 with v = 0 has gradient 0 for any sub-gradient; only tau ~ 0 with
+    # v != 0 is a genuine kink.
+    kink = (p <= 1e-9 * max(float(np.max(p)), 1e-300)) & (
+        np.abs(vel) > 1e-9 * max(float(np.max(np.abs(vel))), 1e-300)
+    )
     return {int(k) for k in np.flatnonzero(np.any(kink, axis=1))}
 
 

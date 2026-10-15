@@ -28,6 +28,10 @@ rank audit of the pendulum constraints and the citation verification table.
 - `contracts.md` is the per-child contract appendix for NSX-02 to NSX-62:
   signatures, preconditions, postconditions and golden names.
 - `muscle_level_view.md` is the exploratory scoping report for a muscle-redundancy layer above the envelopes (NSX-73, #12591).
+- `inverse_optimal_control_report.md` is the NSX-71 research report: inverse
+  optimal control of the allocation weights with a pre-registered held-out
+  evaluation (result: the effort-plus-rate family is rejected on the anthro
+  record; one swing, no measured torques).
 - `derivations/` holds the sympy scripts. They import no repository production
   code. `generate_goldens.py` writes the golden JSON files.
 - The golden files are in `tests/fixtures/loop_nullspace/goldens/`.
