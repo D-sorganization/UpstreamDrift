@@ -18,6 +18,7 @@ Neither observation is a measurement.  Declared uncertainties are hypotheses
 
 from __future__ import annotations
 
+import platform
 import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -32,7 +33,11 @@ from src.shared.python.loop_nullspace.contracts import (
     ClosedLoopSnapshot,
     InputProvenance,
 )
-from src.shared.python.loop_nullspace.decomposition import Decomposition, decompose
+from src.shared.python.loop_nullspace.decomposition import (
+    BalanceInconsistentError,
+    Decomposition,
+    decompose,
+)
 from src.shared.python.loop_nullspace.envelopes import (
     EnvelopeSeries,
     joint_torque_quantities,
@@ -132,9 +137,15 @@ class AnthroBench:
             tuple(c.name for c in snap.foot_contacts),
         )
 
-    def record_observation(self, frame: Frame) -> GroundObservation:
-        """Net vertical load and centre of pressure from the record."""
+    def record_observation(self, frame: Frame) -> GroundObservation | None:
+        """Net vertical load and centre of pressure from the record.
+
+        ``None`` for a flight frame and for a frame whose recorded normal load is
+        zero (the centre of pressure is undefined without load).
+        """
         i = frame.index
+        if not frame.contact_names or float(self.record["normal_force_n"][i]) <= 0.0:
+            return None
         return GroundObservation.from_normal_load_and_cop(
             frame.snapshot,
             normal_load_n=float(self.record["normal_force_n"][i]),
@@ -143,8 +154,13 @@ class AnthroBench:
             sigma_cop_m=SIGMA_COP_M,
         )
 
-    def plate_observation(self, frame: Frame) -> GroundObservation:
-        """Per-foot force sums of the compliant contact law (simulation plates)."""
+    def plate_observation(self, frame: Frame) -> GroundObservation | None:
+        """Per-foot force sums of the compliant contact law (simulation plates).
+
+        ``None`` for a flight frame (no contact, nothing to observe).
+        """
+        if not frame.contact_names:
+            return None
         samples = (
             self.adapter._plant.contact_forces(  # compliant law of the model itself
                 frame.coordinates, frame.rates
@@ -169,12 +185,12 @@ class AnthroBench:
         self, frame: Frame, observation: GroundObservation | None
     ) -> FeasibleSet:
         """Capacity, friction-cone and (optionally) observation rows."""
-        preset = "envelope_grf_observed" if observation else "envelope_only"
+        preset = "envelope_only" if observation is None else "envelope_grf_observed"
         return FeasibleSet.from_hypotheses(
             frame.decomposition,
             registry.preset(preset),
             capacity=self.capacity,
-            cones=foot_friction_cones(frame.snapshot),
+            cones=foot_friction_cones(frame.snapshot) if frame.contact_names else (),
             observation=observation,
         )
 
@@ -183,16 +199,17 @@ def accounting_table(
     bench: AnthroBench, frames: Sequence[Frame]
 ) -> dict[str, list[ObservationAccounting]]:
     """Observation accounting of both observation kinds on every frame."""
-    return {
-        "record": [
-            observation_accounting(f.decomposition, bench.record_observation(f))
+    out: dict[str, list[ObservationAccounting]] = {}
+    for kind, make in (
+        ("record", bench.record_observation),
+        ("plate", bench.plate_observation),
+    ):
+        out[kind] = [
+            observation_accounting(f.decomposition, o)
             for f in frames
-        ],
-        "plate": [
-            observation_accounting(f.decomposition, bench.plate_observation(f))
-            for f in frames
-        ],
-    }
+            if (o := make(f)) is not None
+        ]
+    return out
 
 
 def timed_envelopes(
@@ -216,8 +233,162 @@ def report_quantities(
         names = frames_by_set[id(fs)].contact_names
         ground = ground_force_quantities(
             lambda _fs: names,
-            {label: (lambda n, s=suffix: n.endswith(s)) for label, suffix in SIDES.items()},
+            {
+                label: (lambda n, s=suffix: n.endswith(s))
+                for label, suffix in SIDES.items()
+            },
         )
         return [*torques(fs), *wrench(fs), *ground(fs)]
 
     return build
+
+
+def build_frames(
+    bench: AnthroBench, indices: Sequence[int]
+) -> tuple[list[Frame], dict[int, float]]:
+    """Frames that decompose, and the scaled balance residual of those refused.
+
+    A frame is refused (never repaired, ``BALANCE_TOL`` unchanged) when its
+    unactuated rows cannot be balanced; in the benchmark that is the airborne
+    frame, which has no contact and a solver-noise residual in ``a``.
+    """
+    frames, refused = [], {}
+    for i in indices:
+        try:
+            frames.append(bench.frame(i))
+        except BalanceInconsistentError as err:
+            refused[i] = float(err.residual_scaled)
+    return frames, refused
+
+
+def _stats(values: Sequence[float]) -> dict[str, float]:
+    arr = np.asarray([v for v in values if np.isfinite(v)], dtype=float)
+    if arr.size == 0:
+        return {"n": 0}
+    return {
+        "n": int(arr.size),
+        "min": float(arr.min()),
+        "median": float(np.median(arr)),
+        "max": float(arr.max()),
+    }
+
+
+def variant_report(
+    bench: AnthroBench, frames: Sequence[Frame], kind: str
+) -> tuple[dict[str, Any], EnvelopeSeries]:
+    """Envelope series and its summary for ``kind`` in free, record, plate."""
+    make = {
+        "free": lambda f: None,
+        "record": bench.record_observation,
+        "plate": bench.plate_observation,
+    }[kind]
+    observations = [make(f) for f in frames]
+    sets = [bench.feasible_set(f, o) for f, o in zip(frames, observations, strict=True)]
+    lookup = {id(fs): f for fs, f in zip(sets, frames, strict=True)}
+    series, wall = timed_envelopes(sets, report_quantities(lookup))
+    status = [st.value for st in series.chebyshev_status]
+    infeasible = [
+        i for i, st in enumerate(series.chebyshev_status) if st.name == "INFEASIBLE"
+    ]
+    conflicts: dict[str, int] = {}
+    for i in infeasible:
+        for h in sets[i].conflict_set():
+            conflicts[h] = conflicts.get(h, 0) + 1
+    width = series.width()
+    summary = {
+        "frames": len(frames),
+        "wall_s": wall,
+        "status_counts": {s: status.count(s) for s in sorted(set(status))},
+        "infeasible_frames": [frames[i].index for i in infeasible],
+        "conflict_hypotheses": conflicts,
+        "chebyshev_margin": _stats(series.chebyshev_margin.tolist()),
+        "median_width": {
+            n: float(np.nanmedian(width[:, j]))
+            if np.isfinite(width[:, j]).any()
+            else None
+            for j, n in enumerate(series.names)
+        },
+        "simplex_iterations": series.simplex_iterations,
+    }
+    return summary, series
+
+
+def host_record() -> dict[str, str]:
+    """Where the numbers were measured."""
+    return {
+        "host": platform.node(),
+        "platform": platform.platform(),
+        "python": platform.python_version(),
+    }
+
+
+def accounting_summary(accounts: Sequence[ObservationAccounting]) -> dict[str, Any]:
+    """Distribution of the rank removed, singular values and data consistency."""
+    ranks = [a.rank_visible for a in accounts]
+    smallest_visible = [
+        float(a.singular_values_over_sigma[a.rank_visible - 1])
+        for a in accounts
+        if a.rank_visible
+    ]
+    return {
+        "frames_observed": len(accounts),
+        "rank_visible_counts": {str(r): ranks.count(r) for r in sorted(set(ranks))},
+        "nullity_free": _stats([a.nullity_free for a in accounts]),
+        "nullity_observed": _stats([a.nullity_observed for a in accounts]),
+        "weakest_visible_singular_value_over_sigma": _stats(smallest_visible),
+        "max_normalised_residual": _stats(
+            [a.max_normalised_residual for a in accounts]
+        ),
+    }
+
+
+def compare_series(free: EnvelopeSeries, observed: EnvelopeSeries) -> dict[str, Any]:
+    """Which conclusions change when the lower body is observed.
+
+    Per quantity: the median width ratio observed/free on frames bounded in
+    both, and the number of frames whose sign class differs.  A conclusion that
+    changes is a sign class that was INDETERMINATE and became decided (or a
+    bound that tightened); the rows of the observed set contain the free set's
+    rows, so a bound can only narrow.
+    """
+    out: dict[str, Any] = {}
+    free_w, obs_w = free.width(), observed.width()
+    for j, name in enumerate(free.names):
+        both = np.isfinite(free_w[:, j]) & np.isfinite(obs_w[:, j])
+        ratio = obs_w[both, j] / np.maximum(free_w[both, j], 1e-12)
+        changed = [
+            (_sign(free.sign_class[i], j), _sign(observed.sign_class[i], j))
+            for i in range(free.n_frames)
+            if _sign(free.sign_class[i], j) != _sign(observed.sign_class[i], j)
+        ]
+        out[name] = {
+            "frames_compared": int(both.sum()),
+            "median_width_ratio": float(np.median(ratio)) if ratio.size else None,
+            "min_width_ratio": float(ratio.min()) if ratio.size else None,
+            "sign_class_changes": {
+                f"{a}->{b}": changed.count((a, b)) for a, b in sorted(set(changed))
+            },
+            "widened_frames": int(np.sum(ratio > 1.0 + 1e-6)),
+        }
+    return out
+
+
+def bounded_frames(
+    frames: Sequence[Frame], free_summary: dict[str, Any]
+) -> list[Frame]:
+    """Frames whose free feasible set is non-empty.
+
+    An observation only adds rows to a set, so a frame that is infeasible
+    without it stays infeasible with it.  The observed variants therefore run on
+    the non-empty frames and inherit the others' ``INFEASIBLE`` status; the
+    solver reports an empty set of rows of mixed scale as ``NUMERICAL`` on
+    some frames (frame 342 with the plate rows), which is an inconclusive
+    status and is not recoded as infeasible by the library.
+    """
+    empty = set(free_summary["infeasible_frames"])
+    return [f for f in frames if f.index not in empty]
+
+
+def _sign(row: Any, j: int) -> str:
+    """Sign-class name of quantity ``j`` ("NONE" when the frame has none)."""
+    return "NONE" if not row or row[j] is None else str(row[j].name)
