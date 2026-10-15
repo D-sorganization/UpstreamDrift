@@ -117,45 +117,31 @@ def _solve_constrained_dynamics(
     G = gravity_vector(q, params)
 
     tau_f = friction_torque_vector(qdot, params)
-
-    # Right-hand side of unconstrained EOM
-    rhs_dyn = tau + tau_f - C - G
+    h = C + G - tau_f
 
     # Constraint terms
     Phi = constraint_vector(q, params)
     Phi_q = constraint_jacobian(q, params)
-
-    # Constraint velocity: Phi_dot = Phi_q * qdot
     Phi_dot = Phi_q @ qdot
-
-    # Gamma term: Phi_qq * qdot * qdot (computed numerically)
     gamma = _constraint_acceleration_bias(q, qdot, params)
 
-    # Baumgarte RHS
-    rhs_constraint = -gamma - 2.0 * alpha * Phi_dot - beta**2 * Phi
+    from src.shared.python.loop_nullspace.constrained_dynamics import (
+        constrained_acceleration,
+    )
 
-    # Assemble KKT system
-    n = N_DOF
-    m = N_CONSTRAINTS
-    KKT = np.zeros((n + m, n + m))
-    KKT[:n, :n] = M
-    KKT[:n, n:] = Phi_q.T
-    KKT[n:, :n] = Phi_q
-
-    rhs = np.zeros(n + m)
-    rhs[:n] = rhs_dyn
-    rhs[n:] = rhs_constraint
-
-    # Solve KKT system
-    try:
-        sol = np.linalg.solve(KKT, rhs)
-    except np.linalg.LinAlgError:
-        logger.warning("KKT system singular, falling back to least-squares solver")
-        # Fallback: use least-squares if KKT is singular
-        sol, _, _, _ = np.linalg.lstsq(KKT, rhs, rcond=None)
-
-    qddot = sol[:n]
-    lambda_forces = sol[n:]
+    qddot_ro, lambda_c = constrained_acceleration(
+        M,
+        h,
+        tau,
+        Phi_q,
+        gamma,
+        q_err=Phi,
+        v_err=Phi_dot,
+        baumgarte_alpha=alpha,
+        baumgarte_beta=beta,
+    )
+    qddot = np.array(qddot_ro, dtype=np.float64, copy=True)
+    lambda_forces = np.array(-lambda_c, dtype=np.float64, copy=True)
 
     assert np.all(np.isfinite(qddot)), f"qddot has non-finite values: {qddot}"
     assert np.all(np.isfinite(lambda_forces)), (

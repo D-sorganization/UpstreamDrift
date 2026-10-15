@@ -50,14 +50,16 @@ import numpy as np
 
 from src.shared.python.core.contracts import check_finite, require
 from src.shared.python.logging_pkg.logging_config import get_logger
-
-if TYPE_CHECKING:
-    from .protocol import EquationsOfMotionProvider
+from src.shared.python.loop_nullspace.constrained_dynamics import (
+    constrained_acceleration,
+)
+from .protocol import ConstrainedEquationsOfMotionProvider, EquationsOfMotionProvider
 
 logger = get_logger(__name__)
 
 __all__ = [
     "CanonicalDynamicsTrajectory",
+    "ConstrainedEquationsOfMotionProvider",
     "ZtcfZvcfResult",
     "drift_and_control_split",
     "evaluate_ztcf_along_trajectory",
@@ -297,6 +299,23 @@ def _require_compatible_configuration_shape(
     )
 
 
+def _eval_constrained_or_unconstrained(
+    provider: EquationsOfMotionProvider,
+    q_arr: np.ndarray,
+    v_arr: np.ndarray,
+    bias: np.ndarray,
+    tau_arr: np.ndarray,
+) -> np.ndarray:
+    """Evaluate constrained acceleration if provider is constrained, else unconstrained."""
+    if isinstance(provider, ConstrainedEquationsOfMotionProvider):
+        mass = np.asarray(provider.mass_matrix(q_arr), dtype=float)
+        j_c = np.asarray(provider.closure_jacobian(q_arr), dtype=float)
+        jdot_v = np.asarray(provider.closure_drift(q_arr, v_arr), dtype=float)
+        qddot, _ = constrained_acceleration(mass, bias, tau_arr, j_c, jdot_v)
+        return np.asarray(qddot, dtype=float)
+    return _solve_mass(provider, q_arr, tau_arr - bias)
+
+
 def ztcf_acceleration(
     provider: EquationsOfMotionProvider, q: np.ndarray, v: np.ndarray
 ) -> np.ndarray:
@@ -335,7 +354,9 @@ def ztcf_acceleration(
         f"bias_forces(q, v) must be {v_arr.shape}; got {bias.shape}",
         value=bias.shape,
     )
-    return _solve_mass(provider, q_arr, -bias)
+    return _eval_constrained_or_unconstrained(
+        provider, q_arr, v_arr, bias, np.zeros_like(v_arr)
+    )
 
 
 def zvcf_acceleration(provider: EquationsOfMotionProvider, q: np.ndarray) -> np.ndarray:
@@ -366,7 +387,9 @@ def zvcf_acceleration(provider: EquationsOfMotionProvider, q: np.ndarray) -> np.
         f"bias_forces(q, 0) must be {zero_velocity.shape}; got {bias_zero_v.shape}",
         value=bias_zero_v.shape,
     )
-    return _solve_mass(provider, q_arr, -bias_zero_v)
+    return _eval_constrained_or_unconstrained(
+        provider, q_arr, zero_velocity, bias_zero_v, zero_velocity
+    )
 
 
 def zero_velocity_control_preserved_acceleration(
@@ -383,15 +406,16 @@ def zero_velocity_control_preserved_acceleration(
     _require_compatible_configuration_shape(
         q=q_arr, tangent=tau_arr, tangent_name="tau"
     )
-    bias_zero_v = np.asarray(
-        provider.bias_forces(q_arr, np.zeros_like(tau_arr)), dtype=float
-    )
+    zero_v = np.zeros_like(tau_arr)
+    bias_zero_v = np.asarray(provider.bias_forces(q_arr, zero_v), dtype=float)
     require(
         bias_zero_v.shape == tau_arr.shape,
         f"bias_forces(q, 0) must be {tau_arr.shape}; got {bias_zero_v.shape}",
         value=bias_zero_v.shape,
     )
-    return _solve_mass(provider, q_arr, tau_arr - bias_zero_v)
+    return _eval_constrained_or_unconstrained(
+        provider, q_arr, zero_v, bias_zero_v, tau_arr
+    )
 
 
 def evaluate_ztcf_along_trajectory(
@@ -485,8 +509,16 @@ def drift_and_control_split(
     """
     drift = ztcf_acceleration(provider, q, v)
     q_arr = _as_state_vector("q", q)
+    v_arr = _as_state_vector("v", v)
     tau_arr = _as_state_vector("tau", tau)
-    control = _solve_mass(provider, q_arr, tau_arr)
+    if isinstance(provider, ConstrainedEquationsOfMotionProvider):
+        bias = np.asarray(provider.bias_forces(q_arr, v_arr), dtype=float)
+        a_total = _eval_constrained_or_unconstrained(
+            provider, q_arr, v_arr, bias, tau_arr
+        )
+        control = a_total - drift
+    else:
+        control = _solve_mass(provider, q_arr, tau_arr)
     return drift, control
 
 

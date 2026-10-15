@@ -248,15 +248,59 @@ def _resolve_trail_arm_indices(
     return tuple(matches)
 
 
+def _sample_nullspace_torques(
+    base_tau: NDArray[np.float64],
+    snapshot: Any | None = None,
+    nullspace_z: NDArray[np.float64] | Sequence[float] | None = None,
+) -> NDArray[np.float64]:
+    """Sample dynamically equivalent or null-space perturbed torques x_p + N z (NSX-15, NSX-30)."""
+    from src.shared.python.loop_nullspace.decomposition import decompose
+    from src.shared.python.motion_matching.force_nullspace import ForceNullSpace
+
+    n_frames, n_tau = base_tau.shape
+    if snapshot is not None:
+        decomp = decompose(snapshot)
+        tau_p = decomp.x_particular[:n_tau]
+        n_tau_basis = decomp.null_basis[:n_tau, :]
+        z_vec = (
+            np.ones(decomp.nullity, dtype=np.float64)
+            if nullspace_z is None
+            else np.asarray(nullspace_z, dtype=np.float64)
+        )
+        sampled = tau_p + n_tau_basis @ z_vec
+        return np.tile(sampled, (n_frames, 1))
+
+    j_c_t = np.zeros((n_tau, 1), dtype=np.float64)
+    j_c_t[0, 0] = 1.0
+    if n_tau > 1:
+        j_c_t[-1, 0] = -1.0
+    a_mat = np.hstack([np.eye(n_tau, dtype=np.float64), j_c_t])
+    out = np.zeros_like(base_tau)
+    for k in range(n_frames):
+        space = ForceNullSpace.from_balance(a_mat, base_tau[k])
+        z_k = (
+            np.ones(space.basis.shape[1], dtype=np.float64)
+            if nullspace_z is None
+            else np.asarray(nullspace_z, dtype=np.float64)
+        )
+        x_k = space.particular + space.basis @ z_k
+        out[k] = x_k[:n_tau]
+    return out
+
+
 def _alter_torques(
     base_tau: NDArray[np.float64],
     strategy: CounterfactualStrategy,
     coord_names: tuple[str, ...],
-    control_override: NDArray[np.float64] | None,
-    clamp_limits: tuple[float, float] | None,
-    trail_arm_indices: Sequence[int] | None,
+    **options: Any,
 ) -> NDArray[np.float64]:
     """Compute altered torques according to chosen counterfactual intervention strategy."""
+    control_override = options.get("control_override")
+    clamp_limits = options.get("clamp_limits")
+    trail_arm_indices = options.get("trail_arm_indices")
+    snapshot = options.get("snapshot")
+    nullspace_z = options.get("nullspace_z")
+
     altered = base_tau.copy()
     if strategy == CounterfactualStrategy.ZERO_TRAIL_ARM_TORQUE:
         arm_indices = _resolve_trail_arm_indices(coord_names, trail_arm_indices)
@@ -267,8 +311,9 @@ def _alter_torques(
         c_min, c_max = clamp_limits if clamp_limits is not None else (-50.0, 50.0)
         altered = np.clip(altered, c_min, c_max)
     elif strategy == CounterfactualStrategy.NULLSPACE_EXPLORATION:
-        t = np.linspace(0.0, np.pi, len(altered))[:, np.newaxis]
-        altered = altered + 5.0 * np.sin(t)
+        altered = _sample_nullspace_torques(
+            base_tau, snapshot=snapshot, nullspace_z=nullspace_z
+        )
     elif strategy == CounterfactualStrategy.CUSTOM:
         if control_override is None:
             raise ValueError("control_override must be provided for CUSTOM strategy")
@@ -280,17 +325,87 @@ def _alter_torques(
     return altered
 
 
+def _compute_step_acceleration(
+    q_i: NDArray[np.float64],
+    v_i: NDArray[np.float64],
+    tau_i: NDArray[np.float64],
+    delta_tau_i: NDArray[np.float64],
+    a_nom_i: NDArray[np.float64],
+    **dyn_ctx: Any,
+) -> NDArray[np.float64]:
+    """Evaluate step acceleration using constrained KKT projector or provider EOM."""
+    from src.shared.python.loop_nullspace.constrained_dynamics import (
+        ConstrainedEquationsOfMotionProvider,
+        constrained_acceleration,
+    )
+
+    provider = dyn_ctx.get("provider")
+    snapshot = dyn_ctx.get("snapshot")
+    q_ref = dyn_ctx.get("q_ref", q_i)
+    alpha = float(dyn_ctx.get("baumgarte_alpha", 10.0))
+    beta = float(dyn_ctx.get("baumgarte_beta", 10.0))
+
+    if provider is not None:
+        m_mat = np.asarray(provider.mass_matrix(q_i), dtype=np.float64)
+        h_vec = np.asarray(provider.bias_forces(q_i, v_i), dtype=np.float64)
+        if isinstance(provider, ConstrainedEquationsOfMotionProvider):
+            j_c = np.asarray(provider.closure_jacobian(q_i), dtype=np.float64)
+            jdot_v = np.asarray(provider.closure_drift(q_i, v_i), dtype=np.float64)
+            q_err = j_c @ (q_i - q_ref)
+            v_err = j_c @ v_i
+            q_ddot, _ = constrained_acceleration(
+                m_mat,
+                h_vec,
+                tau_i,
+                j_c,
+                jdot_v,
+                q_err=q_err,
+                v_err=v_err,
+                baumgarte_alpha=alpha,
+                baumgarte_beta=beta,
+            )
+            return np.asarray(q_ddot, dtype=np.float64)
+        return np.asarray(np.linalg.solve(m_mat, tau_i - h_vec), dtype=np.float64)
+
+    if snapshot is not None:
+        q_err = snapshot.J_c @ (q_i - q_ref)
+        v_err = snapshot.J_c @ v_i
+        q_ddot, _ = constrained_acceleration(
+            snapshot.M,
+            snapshot.h,
+            tau_i,
+            snapshot.J_c,
+            snapshot.Jdot_v,
+            q_err=q_err,
+            v_err=v_err,
+            baumgarte_alpha=alpha,
+            baumgarte_beta=beta,
+        )
+        return np.asarray(q_ddot, dtype=np.float64)
+
+    n_dofs = len(q_i)
+    mass_mat = dyn_ctx.get("mass_matrix")
+    m_mat = (
+        np.asarray(mass_mat, dtype=np.float64)
+        if mass_mat is not None
+        else np.eye(n_dofs, dtype=np.float64)
+    )
+    delta_rhs = np.zeros(n_dofs, dtype=np.float64)
+    n_map = min(len(delta_tau_i), n_dofs)
+    delta_rhs[:n_map] = delta_tau_i[:n_map]
+    return a_nom_i + np.linalg.solve(m_mat, delta_rhs)
+
+
 def _integrate_dynamics(
     time_s: NDArray[np.float64],
     q0: NDArray[np.float64],
     v0: NDArray[np.float64],
-    base_q: NDArray[np.float64],
     base_v: NDArray[np.float64],
     base_tau: NDArray[np.float64],
     altered_tau: NDArray[np.float64],
-    base_a: NDArray[np.float64] | None,
+    **dyn_ctx: Any,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
-    """Numerically integrate counterfactual divergence from baseline trajectory."""
+    """Numerically integrate counterfactual trajectory using provider or KKT dynamics."""
     n_frames = len(time_s)
     n_dofs = len(q0)
     q_cf = np.zeros((n_frames, n_dofs), dtype=np.float64)
@@ -299,16 +414,13 @@ def _integrate_dynamics(
 
     q_cf[0] = q0
     v_cf[0] = v0
-
-    # Effective diagonal inertia approximation for acceleration perturbation
-    m_eff = 1.0
+    base_a = dyn_ctx.get("base_a")
 
     for i in range(n_frames):
         dt = float(time_s[i + 1] - time_s[i]) if i + 1 < n_frames else 0.001
         if dt <= 0.0:
             dt = 0.001
 
-        # Baseline acceleration at frame i
         if base_a is not None and i < len(base_a):
             a_nom = base_a[i]
         elif i + 1 < len(base_v):
@@ -317,10 +429,15 @@ def _integrate_dynamics(
             a_nom = np.zeros(n_dofs, dtype=np.float64)
 
         delta_tau = altered_tau[i] - base_tau[i]
-        delta_a = np.zeros(n_dofs, dtype=np.float64)
-        n_map = min(len(delta_tau), n_dofs)
-        delta_a[:n_map] = delta_tau[:n_map] / m_eff
-        a_cf[i] = a_nom + delta_a
+        a_cf[i] = _compute_step_acceleration(
+            q_cf[i],
+            v_cf[i],
+            altered_tau[i],
+            delta_tau,
+            a_nom,
+            q_ref=q0,
+            **dyn_ctx,
+        )
 
         if i + 1 < n_frames:
             v_cf[i + 1] = v_cf[i] + a_cf[i] * dt
@@ -374,20 +491,17 @@ def create_counterfactual_rollout(
     session: CandidateSession,
     fork_frame_idx: int,
     strategy: CounterfactualStrategy = CounterfactualStrategy.ZERO_TRAIL_ARM_TORQUE,
-    *,
-    control_override: NDArray[np.float64] | None = None,
-    duration_frames: int | None = None,
-    clamp_limits: tuple[float, float] | None = None,
-    trail_arm_indices: Sequence[int] | None = None,
+    **options: Any,
 ) -> CounterfactualFork:
     """Generate an immutable counterfactual fork guaranteeing zero mutation of baseline data."""
     # Strict immutability guarantee: hash baseline state before rollout
     baseline_digest_before = _compute_baseline_hash(session)
 
+    duration_frames = options.get("duration_frames")
     end_idx = (
         session.frame_count
         if duration_frames is None
-        else min(fork_frame_idx + duration_frames, session.frame_count)
+        else min(fork_frame_idx + int(duration_frames), session.frame_count)
     )
     if end_idx <= fork_frame_idx + 1:
         raise ValueError(
@@ -418,20 +532,19 @@ def create_counterfactual_rollout(
         base_tau=base_tau,
         strategy=strategy,
         coord_names=session.coordinate_names,
-        control_override=control_override,
-        clamp_limits=clamp_limits,
-        trail_arm_indices=trail_arm_indices,
+        **options,
     )
 
     q_cf, v_cf, a_cf = _integrate_dynamics(
         time_s=time_window,
         q0=q0,
         v0=v0,
-        base_q=base_q,
         base_v=base_v,
         base_tau=base_tau,
         altered_tau=altered_tau,
         base_a=base_a,
+        mass_matrix=session.specification.get("mass_matrix"),
+        **options,
     )
 
     divergence_rms = float(np.sqrt(np.mean((q_cf - base_q) ** 2)))

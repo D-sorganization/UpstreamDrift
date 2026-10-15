@@ -438,6 +438,19 @@ class EquationsOfMotionProvider(Protocol):
 
 
 @runtime_checkable
+class ConstrainedEquationsOfMotionProvider(EquationsOfMotionProvider, Protocol):
+    """Protocol extension for closed-loop backends exposing holonomic closure terms (NSX-30)."""
+
+    def closure_jacobian(self, q: np.ndarray) -> np.ndarray:
+        """Return the closure constraint Jacobian ``J_c(q)``, shape ``(m_c, n)``."""
+        ...
+
+    def closure_drift(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        """Return the closure acceleration drift ``Jdot_c(q, v) @ v``, shape ``(m_c,)``."""
+        ...
+
+
+@runtime_checkable
 class BatchedBackend(Protocol):
     """Optional contract for backends that evaluate many rollouts in parallel."""
 
