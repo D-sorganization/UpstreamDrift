@@ -2340,6 +2340,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12792 · Bump Vendor/Ud-Tools to Tools E3cf5a43, Carrying the Corrected Golfer Club Jacobians (Tools#5627 Rust Pendulum-Core, Tools#5628 Python/JAX Forward Kinematics Y-Sign, Tools#5626); Pins and Divergence Inventory Kept in Step
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12792
+- **Branch:** merged via #12792
+- **PR:** #12792
+- **Paths:** see #12792
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`513cfff7`; collated from changes/12792-bump-vendor-ud-tools-to-tools-e3cf5a43-c.md)
+- **Summary:** Bump vendor/ud-tools to Tools e3cf5a43, carrying the corrected golfer club Jacobians (Tools#5627 Rust pendulum-core, Tools#5628 Python/JAX forward kinematics y-sign, Tools#5626); pins and divergence inventory kept in step
+- **Next step:** Shipped in PR #12792.
+
 ### DL-#12777 · Re-Solve the MSK Address Calibration on the Widened Forearm Range so the Lead Pronation Leaves Its Old 90 Deg Bound
 
 - **State:** shipped
