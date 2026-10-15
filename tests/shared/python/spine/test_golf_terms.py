@@ -485,3 +485,29 @@ def test_early_extension_positive_toward_ball() -> None:
     inputs["pelvis_position"][:, 0] = 1.2 - pelvis[:, 0]  # away from the ball
     away = evaluate("early_extension", inputs, handedness="right")
     assert away[-1] < 0
+
+
+@pytest.mark.parametrize(
+    ("term_id", "inputs"),
+    [
+        (
+            "x_factor_euler_yaw_legacy_v1",
+            {
+                "thorax_euler": np.array([[0.0, 0.0, 0.4], [0.0, 0.0, np.nan]]),
+                "pelvis_euler": np.array([[0.0, 0.0, 0.1], [0.0, 0.0, 0.2]]),
+            },
+        ),
+        (
+            "crunch_factor_legacy_v1",
+            {
+                "lateral_bend_rad": np.array([0.2, np.nan]),
+                "axial_rotation_rad": np.array([0.3, 0.1]),
+            },
+        ),
+    ],
+)
+def test_legacy_terms_propagate_nan_dropouts(term_id: str, inputs: dict) -> None:
+    """Legacy measurands keep the pre-registry NaN passthrough (SPN-4b)."""
+    out = evaluate(term_id, inputs, handedness="right")
+    assert np.isfinite(out[0])
+    assert np.isnan(out[1])
