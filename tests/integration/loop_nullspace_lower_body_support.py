@@ -392,3 +392,28 @@ def bounded_frames(
 def _sign(row: Any, j: int) -> str:
     """Sign-class name of quantity ``j`` ("NONE" when the frame has none)."""
     return "NONE" if not row or row[j] is None else str(row[j].name)
+
+
+def contiguous_runs(
+    frames: Sequence[Frame], open_flags: Sequence[bool]
+) -> list[list[Frame]]:
+    """Maximal runs of consecutive entries of ``frames`` flagged ``True``.
+
+    ``frames`` are in benchmark order, so a run is a stretch of the strided
+    record with no infeasible and no refused frame in between only if the
+    record indices are also consecutive benchmark steps.
+    """
+    runs: list[list[Frame]] = []
+    current: list[Frame] = []
+    step = BENCHMARK_FRAMES[1] - BENCHMARK_FRAMES[0]
+    for frame, ok in zip(frames, open_flags, strict=True):
+        contiguous = not current or frame.index - current[-1].index == step
+        if ok and contiguous:
+            current.append(frame)
+            continue
+        if current:
+            runs.append(current)
+        current = [frame] if ok else []
+    if current:
+        runs.append(current)
+    return runs

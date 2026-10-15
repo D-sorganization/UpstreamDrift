@@ -521,10 +521,33 @@ Implemented in `loop_nullspace/allocation.py` (types in `allocation_spec.py`):
 - Solver: `solve_socp` gained an optional quadratic term `P` (objective
   `1/2 x'Px + c'x`, stationarity residual includes `Px`) and `tol`; the
   `P=None` behaviour is unchanged.
-- Anthro acceptance is blocked on `J_g` (NSX-60): see the NSX-22 blocker above.
-  `tests/integration/test_loop_nullspace_anthro_allocation.py` skips with that
-  reason; the planar-oracle benchmark in `tests/unit/loop_nullspace/test_allocation.py`
-  records solve time and KKT residuals meanwhile.
+- Anthro acceptance (`tests/integration/test_loop_nullspace_anthro_allocation.py`,
+  marked `slow`; run with `-m slow`): the feasible sets are the NSX-60 sets
+  (`envelope_only` preset, `H-TORQUE-CAPACITY` prior unchanged, Coulomb foot
+  cones). The 199 decomposable benchmark frames split into 124 BOUNDED and 75
+  INFEASIBLE (each conflict set `H-TORQUE-CAPACITY` alone), so a trajectory
+  allocation over the full window is infeasible by construction and returns
+  `INFEASIBLE` after 3 iterations (0.21 s, no record, no relaxation). The
+  acceptance window is the longest contiguous run of BOUNDED frames at the
+  benchmark stride: record frames 96 to 339, 82 frames (0.009 s apart, so the
+  rate term differences strided frames). Objective: capacity-weighted effort
+  (weight 1.0) plus torque rate (weight 0.1), no gross-power or reference term.
+  Measured on host Brick (shared 4-core, load about 4), Clarabel:
+
+  | Window | Frames | Status | Iterations | Solve time | KKT primal | KKT dual | KKT compl. | Retained rank / gauge |
+  |---|---|---|---|---|---|---|---|---|
+  | Longest BOUNDED run (96 to 339) | 82 | OPTIMAL | 24 | 0.289 s | 2.6e-14 | 5.7e-10 | 2.2e-13 | 794 / 218 |
+  | First 10 frames of that run | 10 | OPTIMAL | 18 | 0.028 s | 1.5e-13 | 7.3e-12 | 9.8e-13 | 87 / 13 |
+  | All 199 decomposable frames | 199 | INFEASIBLE | 3 | 0.214 s | none | none | none | 1679 / 350 |
+
+  On the 82-frame run the objective terms are effort 3.00 and rate 424.3, the
+  record is `FAMILY_DEPENDENT` with `H-TORQUE-CAPACITY` and `H-FRICTION-CONE`
+  among its hypotheses, and every torque lies inside the (ASSUMED) capacity. A
+  window straddling one INFEASIBLE frame (for example 90, 93, 96) is
+  `INFEASIBLE` too. The solve time excludes building the 199 frames and sets
+  (about 36 s, the benchmark's cost). Frame 510 (airborne) is refused before
+  the window is chosen, and the window never spans it because the window must be
+  contiguous at the benchmark stride.
 - Non-claims: the optimum is a hypothesis-conditioned representative, not an
   estimate of true hand loads; no "zero sign flips" criterion is used.
   `force_nullspace/redistribution.py` is untouched (API-compatible); its shim
@@ -879,3 +902,40 @@ Preconditions: symmetric covariances, conformal shapes, finite inputs
 (`ValueError`). Postconditions: adjoint and forward variance agree to 1e-12
 (tests) and 1e-9 (runtime `ensure`); the budget parts sum to the total.
 Non-claims: linear predictions do not cover saturation, slip or missed impacts.
+Anthro ensemble report (NSX-61 acceptance;
+`tests/integration/test_loop_nullspace_anthro_ensemble.py`, `slow`). Members are
+rebuilt with the NSX-60 foot-contact rows (`foot_contact_tol_m = 0`), decomposed,
+given the unchanged `H-TORQUE-CAPACITY` prior and Coulomb cones, and enveloped
+(35 joint torques and the six closure-wrench components, 41 quantities) with
+`static_envelopes`; the nominal trajectory is member 0. Sampling is the declared
+`H-KINEMATIC-ENSEMBLE-PRIOR` with seed 12586; the host is a shared 4-core, so
+the sample is modest: three windows of three consecutive record frames (0 to 2,
+150 to 152, 300 to 302), 12 samples each, at `sigma_q = 0.001` (1 mm, 1 mrad).
+
+- Admission: all 36 samples are admitted (none rejected) at both sigmas.
+- The hypothesis perturbs the root too, so a sample can lift a foot or leave
+  fewer than three contacts. The root rows cannot then be balanced (the
+  acceleration is held at its nominal value) and `decompose` refuses the sample,
+  which is counted, not repaired. At `sigma_q = 0.001` the refused counts are 7,
+  8 and 4 of 12 (19 of 36), leaving 5, 4 and 8 enveloped members. At the
+  kinematic default `sigma_q = 0.02` only 3 of 12 samples in window 0 can be
+  balanced, which is why the envelope report uses the smaller sigma.
+- Union (interval hull, nominal included): the median width over the nominal
+  width is 1.0008, 1.0005 and 1.0008 per window (maximum 1.016, 1.486 and
+  1.026): a kinematic perturbation this small widens the envelope by well under
+  1 percent for the typical quantity and by up to 49 percent for the worst cell.
+  The union contains every member interval in every cell (asserted).
+- Intersection: empty in 15 of 123 (frame, quantity) cells in windows 0 and 150
+  (members with disjoint intervals; elsewhere the median width over nominal is
+  0.9994 and 0.9992, minimum 0.14 and 0.81). In window 300 three member frames
+  are INFEASIBLE under the capacity prior (the perturbation pushes the recorded
+  effort outside it), so the intersection is empty in all 123 cells there; the
+  union skips those members.
+- Sign classes: members disagree on the sign class in 4 of 123 cells (3 frames)
+  in window 0, none in window 150 and 9 cells (3 frames) in window 300; no decided
+  nominal sign becomes INDETERMINATE in the union in any window (0 cells, 0
+  frames). In total 13 cells in 6 of the 9 frames change class across members.
+  An infeasible member frame has no class and is reported separately.
+- Non-claims: the sampling distribution is a declared hypothesis, not measured
+  uncertainty; the hull is not a confidence set; three short windows do not
+  characterise the swing; the capacity prior is ASSUMED and unchanged.
