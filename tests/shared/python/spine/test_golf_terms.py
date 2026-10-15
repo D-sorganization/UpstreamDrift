@@ -242,7 +242,11 @@ def test_contributions_are_a_decomposition_not_an_identity() -> None:
     )[0]
     rem = contribution_remainder("trunk_extension_jcs", pose, handedness="right")
     assert sum(contrib.values()) + rem == pytest.approx(glob)
-    assert abs(rem) > 1e-3  # angles do not add
+    assert rem == pytest.approx(0.0, abs=1e-9)  # prefix differences telescope
+    own = [lt.isb_angles()[0] for lt in pose.transforms]
+    # a level's share is not its own Cardan angle: angles do not add
+    assert abs(np.degrees(sum(own)) - glob) > 1e-3
+    assert list(contrib.values()) != pytest.approx(np.degrees(own))
 
 
 def test_contributions_telescope_to_prefix_difference() -> None:
@@ -270,7 +274,9 @@ def test_contributions_reject_non_jcs_term() -> None:
         )
     with pytest.raises(TypeError):
         segmental_contributions(
-            "x_factor_jcs_axial", np.eye(3), handedness="right"  # type: ignore[arg-type]
+            "x_factor_jcs_axial",
+            np.eye(3),
+            handedness="right",  # type: ignore[arg-type]
         )
 
 
