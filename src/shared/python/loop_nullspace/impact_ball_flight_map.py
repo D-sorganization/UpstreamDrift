@@ -104,6 +104,8 @@ def _tools_vector(
     gateway: ToolsDeliveryGateway, state: RigidClubState, frame: TargetFrame
 ) -> tuple[Array, str]:
     series = state.series()
+    if series.face_normal is None:
+        raise ValueError("Tools ball-flight bridge requires an observed face normal")
     est = gateway.estimate(series.velocity_mps[1], series.face_normal[1], frame)
     vals = np.array(
         [np.nan if getattr(est, n) is None else getattr(est, n) for n in TOOLS_FIELDS]
