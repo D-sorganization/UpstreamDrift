@@ -30,7 +30,7 @@ from __future__ import annotations
 import logging
 import re
 import uuid
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -117,7 +117,9 @@ def _running(tm: TaskManager, job_id: str) -> bool:
     return task is not None and task.get("status") == TaskStatus.RUNNING.value
 
 
-def _stage_hook(tm: TaskManager, job_id: str):
+def _stage_hook(
+    tm: TaskManager, job_id: str
+) -> Callable[[str, float, Mapping[str, Any] | None], None]:
     """Record each finished stage; its partial result is shown while it runs."""
 
     def on_stage(stage: str, percent: float, partial: Mapping[str, Any] | None) -> None:
