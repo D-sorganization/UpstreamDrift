@@ -2288,6 +2288,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12605 · Pinocchio Reference Adapter Maps the Free-Flyer World Linear Velocity/Acceleration Into Pinocchio's LOCAL Frame via the NSX-50 Velocity Map
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12605
+- **Branch:** merged via #12699
+- **PR:** #12699
+- **Paths:** see #12699
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`30a72e42`; collated from changes/12605-pinocchio-ff-velocity.md)
+- **Summary:** Pinocchio reference adapter maps the free-flyer world linear velocity/acceleration into Pinocchio's LOCAL frame via the NSX-50 velocity map
+- **Next step:** Shipped in PR #12699.
+
+### DL-#12560 · NSX-15 Closed-Loop Decomposition: Dimension Accounting, Zero-Side Three-Case Solve, Minimum-Metric Torque
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12560
+- **Branch:** merged via #12631
+- **PR:** #12631
+- **Paths:** see #12631
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`a0b7f978`; collated from changes/12560-nsx-15-closed-loop-decomposition-dimensi.md)
+- **Summary:** NSX-15 closed-loop decomposition: dimension accounting, zero-side three-case solve, minimum-metric torque
+- **Next step:** Shipped in PR #12631.
+
 ### DL-#12581 · NSX-53 Native Drake Force Adapter With Closed-Loop Snapshot; Synthetic Drake Route Quarantined to Tests
 
 - **State:** shipped
