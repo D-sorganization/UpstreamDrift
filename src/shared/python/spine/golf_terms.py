@@ -151,8 +151,8 @@ def _position_proxy(inputs: Mapping[str, Any], hand: Handedness) -> np.ndarray:
 
 def _euler_yaw(inputs: Mapping[str, Any], hand: Handedness) -> np.ndarray:
     del hand  # legacy sign is as implemented
-    thorax = float_array(inputs["thorax_euler"], "thorax_euler", (1, 2))
-    pelvis = float_array(inputs["pelvis_euler"], "pelvis_euler", (1, 2))
+    thorax = float_array(inputs["thorax_euler"], "thorax_euler", (1, 2), allow_nan=True)
+    pelvis = float_array(inputs["pelvis_euler"], "pelvis_euler", (1, 2), allow_nan=True)
     yaw_t = thorax[:, 2] if thorax.ndim > 1 else thorax
     yaw_p = pelvis[:, 2] if pelvis.ndim > 1 else pelvis
     if yaw_t.shape != yaw_p.shape:
@@ -171,8 +171,10 @@ def _side_bend(inputs: Mapping[str, Any], hand: Handedness) -> np.ndarray:
 
 def _crunch_legacy(inputs: Mapping[str, Any], hand: Handedness) -> np.ndarray:
     del hand  # legacy |lat| * |rot| / 100 is sign-free
-    lat = float_array(inputs["lateral_bend_rad"], "lateral_bend_rad", 1)
-    rot = float_array(inputs["axial_rotation_rad"], "axial_rotation_rad", 1)
+    lat = float_array(inputs["lateral_bend_rad"], "lateral_bend_rad", 1, allow_nan=True)
+    rot = float_array(
+        inputs["axial_rotation_rad"], "axial_rotation_rad", 1, allow_nan=True
+    )
     if lat.shape != rot.shape:
         raise ValueError("lateral_bend_rad and axial_rotation_rad must match")
     return np.abs(np.degrees(lat)) * np.abs(np.degrees(rot)) / 100.0
