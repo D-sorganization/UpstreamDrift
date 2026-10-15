@@ -56,9 +56,11 @@ SplitMethod = Literal[
     "logged",
     "bushing",
     "contact",
+    "loop_nullspace_family",
     "unavailable",
 ]
 SPLIT_METHODS: tuple[str, ...] = get_args(SplitMethod)
+SPLITS: tuple[str, ...] = SPLIT_METHODS
 
 _BODY = "club"
 _ZERO: Vec3 = (0.0, 0.0, 0.0)
@@ -66,6 +68,7 @@ _ZERO: Vec3 = (0.0, 0.0, 0.0)
 __all__ = [
     "allocate_min_norm",
     "SPLIT_METHODS",
+    "SPLITS",
     "GripAnalysis",
     "GripSeries",
     "HandWrench",
