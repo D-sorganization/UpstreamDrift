@@ -44,6 +44,7 @@ from scipy.spatial.transform import Rotation
 from src.engines.physics_engines.drake.python.full_body_model import (
     solve_weld_acceleration,
 )
+from src.shared.python.loop_nullspace.closure_convention import NativeClosureConvention
 from src.engines.physics_engines.opensim.python.full_body_osim import (
     clean_osim_body_name,
     export_full_body_osim,
@@ -69,6 +70,16 @@ _REMOVED_SETS = (
 
 def _to_array(matrix: Any) -> Array:
     return np.array(matrix.to_numpy(), dtype=float, copy=True)
+
+
+# Convention of ``_closure_blocks`` (NSX-02, #12551).  The Jacobian is
+# station-Jacobian(body_b) - station-Jacobian(body_a), V_b - V_a, in the ground
+# (WORLD) frame at each body's weld placement origin (equal at closure).  Simbody
+# frame Jacobians are [angular; linear]; ``_station_rows`` re-splits them, so the
+# stacked closure Jacobian is [linear; angular].
+CLOSURE_CONVENTION = NativeClosureConvention(
+    row_order="lin_ang", frame="WORLD", point="placement", relative_sign=-1
+)
 
 
 class OpenSimFullBodyParityAdapter:

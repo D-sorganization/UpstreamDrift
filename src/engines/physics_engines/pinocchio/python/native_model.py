@@ -12,6 +12,7 @@ from typing import Any, NamedTuple
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from src.shared.python.loop_nullspace.closure_convention import NativeClosureConvention
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
     ContactSample,
@@ -69,6 +70,15 @@ class NativeClosurePositionLinearization(NamedTuple):
     names: tuple[str, ...]
     position: NDArray[np.float64]
     jacobian: NDArray[np.float64]
+
+
+# Convention of ``closure_force_jacobian`` (NSX-02, #12551).  Pinocchio's
+# BILATERAL CONTACT_6D constraint velocity is V_1 - V_2 (body a minus body b)
+# in the LOCAL frame of constraint placement 1 (the hand weld frame), with the
+# linear rows the velocity of that frame's origin; rows are [linear; angular].
+CLOSURE_CONVENTION = NativeClosureConvention(
+    row_order="lin_ang", frame="LOCAL", point="frame_origin", relative_sign=1
+)
 
 
 class NativeClosureForceJacobian(NamedTuple):

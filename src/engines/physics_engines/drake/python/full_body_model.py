@@ -38,6 +38,7 @@ from src.shared.python.biomechanics.grip_wrench import (
 )
 from src.shared.python.contracts import precondition
 from src.shared.python.force_overlay.contracts import OverlayWrench
+from src.shared.python.loop_nullspace.closure_convention import NativeClosureConvention
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
     ContactSample,
@@ -135,6 +136,15 @@ def club_newton_euler(
         accel_origin=np.asarray(spatial_acc.translational()),
         gravity=gravity,
     )
+
+
+# Convention of ``_closure_jacobian`` (NSX-02, #12551).  CalcJacobianSpatialVelocity
+# (frame_B=b, p_BoBp=0, frame_A=a, frame_E=a) is the spatial velocity of frame b
+# relative to frame a, V_b - V_a, expressed in frame a (LOCAL), with the linear
+# rows the velocity of frame b's origin; rows are [angular; linear].
+CLOSURE_CONVENTION = NativeClosureConvention(
+    row_order="ang_lin", frame="LOCAL", point="frame_origin", relative_sign=-1
+)
 
 
 class FullBodyDrakeModel:

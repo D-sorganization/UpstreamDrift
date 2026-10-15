@@ -13,7 +13,7 @@
   "totals": {
     "identical": 377,
     "diverged": 271,
-    "ud-only": 1734,
+    "ud-only": 1736,
     "tools-only": 839,
     "spelling-only": 121
   },
@@ -497,7 +497,7 @@
     "loop_nullspace": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 3,
+      "ud-only": 4,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -3767,7 +3767,7 @@
       "classification": "ud-only",
       "package": "biomechanics",
       "subpackage": "",
-      "ud_bytes": 9372,
+      "ud_bytes": 9416,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13487,7 +13487,19 @@
       "classification": "ud-only",
       "package": "loop_nullspace",
       "subpackage": "",
-      "ud_bytes": 7139,
+      "ud_bytes": 7156,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "loop_nullspace/closure_convention.py",
+      "classification": "ud-only",
+      "package": "loop_nullspace",
+      "subpackage": "",
+      "ud_bytes": 7305,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
