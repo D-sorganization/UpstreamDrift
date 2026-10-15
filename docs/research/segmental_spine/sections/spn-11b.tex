@@ -1,0 +1,89 @@
+\subsection{Golf Literature Context Bands}
+\label{sec:spn-11b}
+
+This section documents the literature context bands (issue \#12764, epic
+\#12735). The code is \texttt{src/shared/python/spine/context\_bands.py} and the
+data is \texttt{src/config/spine\_golf\_context\_bands.json}. The bands are
+shown beside model results for orientation. They are never acceptance criteria.
+
+\paragraph{Sources and Scope.}
+Only golf lumbar load rows from \texttt{docs/research/segmental\_spine/data\_extraction.md}
+are used. Two studies contribute:
+\begin{itemize}
+  \item Hosea, Gatt and Galli 1990, L3--L4 compression for four professionals
+        (7584 N) and four amateurs (6100 N), five iron. These numbers come from a
+        citing review, not the 1990 chapter, so \texttt{verified\_from\_primary}
+        is \texttt{false}.
+  \item Lim, Chow and Chae 2012 (DOI 10.1080/14763141.2012.670662), L4--L5 peak
+        compression greater than 6 BW, peak AP shear approximately 1.6 BW and peak
+        ML shear approximately 0.6 BW, five male collegiate golfers, EMG-assisted
+        optimisation. Values are from the abstract only, so
+        \texttt{verified\_from\_primary} is \texttt{true}.
+\end{itemize}
+Hosea's ``peak shear'' (329 N and 596 N) is not used. Its direction (AP or ML) is
+not stated, and the band quantities are restricted to \texttt{compression},
+\texttt{ap\_shear} and \texttt{ml\_shear}.
+
+\paragraph{Band Schema.}
+Each band carries \texttt{band\_id}, \texttt{study}, \texttt{doi}, \texttt{table\_or\_page},
+\texttt{source\_table\_id} (the JSON table in the extraction it was read from),
+\texttt{level}, \texttt{quantity}, \texttt{value}, \texttt{units} (N or BW),
+\texttt{body\_weight\_normalised} (true exactly when units are BW), a
+\texttt{qualifier} (\texttt{exact}, \texttt{greater\_than} or \texttt{approximately}),
+\texttt{subjects}, \texttt{club}, \texttt{method} and \texttt{verified\_from\_primary}.
+Loading rejects unknown or missing keys, non-positive values and inconsistent unit
+flags.
+
+\paragraph{Comparison.}
+For each level $\ell$ of a \texttt{SpinalLoadSeries} and each quantity $q$, the
+largest-magnitude peak is
+\[
+  P_{\ell,q} = \max_t \lvert X_{q}(t,\ell)\rvert,
+  \qquad X_{\text{compression}} = F_y,\;
+  X_{\text{AP}} = F_x,\;
+  X_{\text{ML}} = F_z,
+\]
+in the ISB frame of the inferior vertebra (compression positive $+F_y$; see
+SPN-5). The peak is converted into both N and BW with $W = m\,g$ and
+$g = 9.80665\,\mathrm{m\,s^{-2}}$:
+\[
+  P^{\mathrm{BW}} = P^{\mathrm{N}}/W.
+\]
+Each band is compared in its own units $u$:
+\[
+  \rho = \frac{P_{\ell,q}^{(u)}}{v_b},
+\]
+where $v_b$ is the band value. A series in N or in BW therefore gives identical ratios.
+Bands are matched only on level and quantity; no interpolation between levels is done.
+
+\paragraph{Acceptance Status.}
+Each \texttt{ContextComparison} has \texttt{is\_acceptance} typed
+\texttt{Literal[False]}, defaulting to \texttt{False}. Passing \texttt{True} raises
+\texttt{ValueError}. A ratio is a reported comparison, not a pass or fail gate.
+A band value is not a validation target. Scientific qualification remains in the
+design-manual governance pathway.
+
+\paragraph{Assumptions and Limitations.}
+\begin{itemize}
+  \item Hosea values are secondary and unverified against the 1990 chapter; their
+        ratios are context only.
+  \item Lim values are abstract-level, five male golfers, with EMG-assisted
+        optimisation. Tables and figures of the full paper were not read, and
+        ``approximately'' and ``greater than'' qualifiers are kept, not
+        converted into bounds.
+  \item The Hosea club is recorded as a five iron, from the extraction.
+  \item The bands describe L3--L4 and L4--L5 only. No band exists for any other
+        level, so \texttt{annotate} returns no comparison there.
+  \item Context bands are not calibration data. They must not be used to tune
+        any model parameter.
+\end{itemize}
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/shared/python/spine/test_context_bands.py -q -n 0 -p no:cacheprovider -o addopts=""
+python -m ruff check src/shared/python/spine/context_bands.py tests/shared/python/spine/test_context_bands.py
+python -m ruff format --check src/shared/python/spine/context_bands.py tests/shared/python/spine/test_context_bands.py
+\end{verbatim}
+The tests cross-check every band value and \texttt{verified\_from\_primary} flag
+against the JSON blocks in \texttt{data\_extraction.md} (table IDs
+\texttt{G1\_L3L4\_loads} and \texttt{G2\_L4L5\_loads\_abstract}).
