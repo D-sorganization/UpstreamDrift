@@ -13483,6 +13483,18 @@
       "spelling_only": false
     },
     {
+      "path": "loop_nullspace/admission.py",
+      "classification": "ud-only",
+      "package": "loop_nullspace",
+      "subpackage": "",
+      "ud_bytes": 19126,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "loop_nullspace/capacity.py",
       "classification": "ud-only",
       "package": "loop_nullspace",
