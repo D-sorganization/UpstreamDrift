@@ -1,0 +1,34 @@
+{
+  "number": 12554,
+  "html_url": "https://github.com/D-sorganization/UpstreamDrift/issues/12554",
+  "title": "[NSX-05] Deferred-Validation Record and External Validation Protocol (Instrumented Grip, EMG, Held-Out Swings)",
+  "body": "**NSX-05** \u00b7 Phase 0 Specification \u00b7 `tier:ollama` \u00b7 Parent epic: #12593\n\n### Goal\nFix the falsification target before any results exist, so validation cannot be fitted after the fact (R13).\n\n### Read first (verified on `main`)\n`docs/development/planning/catalog.json`, an example `DV-11542.md` / `source-11542.json`, `shared_scripts/deferred_validation.py`, and the AGENTS.md deferred-validation rule.\n\n### Deliverables / contract\nAdd `DV-<this issue>.md` plus a source JSON catalog entry. It states:\n- (a) **Measurands.** Bare-club hand wrenches from instrumented grips, with the interface definition per NSX-01, and EMG onset timing. EMG is an activation proxy, not a hand-wrench ground truth; its observation model is required.\n- (b) **Pre-registered predictions.** Hand-split sign and timing per window, certified by NSX-25 probes on held-out swings.\n- (c) **Acceptance criteria and analysis plan**, written before the data exist.\n- (d) **Data provenance and anonymization requirements.**\n- (e) **Status:** deferred, needs equipment.\n\n### Tests to write first\n`python3 shared_scripts/deferred_validation.py` (catalog validation) passes.\n\n### Acceptance\nThe catalog entry validates. The epic links to it.\n\n### Non-claims\nValidation remains open.\n\n### Out of scope\nCollecting data.\n\n### Depends on\n#12549 (NSX-00)\n\n---\n### Standards (binding \u2014 see epic rules R1\u2013R14)\n- **TDD:** write the listed tests first and see them fail (red), then implement (green), then refactor. Tests ship in the same PR.\n- **DbC:** public functions validate preconditions and raise `ValueError`/`TypeError` with descriptive messages; postconditions documented in docstrings; frozen dataclasses for value objects.\n- **LoD:** no chains deeper than `a.b.c()`; add delegating/accessor methods (e.g. `snapshot.closure_rows()`).\n- **DRY:** reuse the modules listed under *Read first*; never re-implement `ForceNullSpace`, `FrictionCone`, `project_to_closure`, `holding_hand_wrench` or the NSX-02 converter.\n- **Evidence:** every user-visible quantity is a `QuantityRecord` with its six evidence axes (from NSX-10 onward).\n- No tolerance widening without a `Tolerance-Change-Evidence:` trailer. No `--no-verify`. Never edit `vendor/ud-tools/`.\n\n### Gate commands\n```bash\npython3 -m ruff check .\npython3 -m ruff format --check .\npython3 -m pytest tests/unit/loop_nullspace -n auto --timeout=60\npython3 scripts/ci/check_file_size_budget.py\npython3 -m scripts.check_design_manual_governance\n```\n\n### Process\n1. Lease: `python -m scripts.check_agent_claim --repo UpstreamDrift --issue <this>` then `post_agent_lease` (Repository_Management).\n2. Branch `feat/<this>-nsx-\u2026` in your own worktree. Change fragment: `python3 shared_scripts/changes_fragment.py new --issue <this> --summary \"...\"`.\n3. PR ready-for-review with `Closes #<this>` only when **all** acceptance items are met; otherwise `Refs #<this>` plus a status comment.\n4. Specs, goldens and contracts come from NSX-00 (`docs/research/loop_nullspace/`). If the spec is ambiguous, stop and ask on the issue \u2014 do not invent math.\n",
+  "updated_at": "2026-10-15T01:36:54Z",
+  "labels": [
+    {
+      "id": "LA_kwDOQqJAi88AAAACSq51Lw",
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "id": "LA_kwDOQqJAi88AAAACfqG_Sg",
+      "name": "research",
+      "description": "P6 research lane \u2014 Friday batch merges only during stabilization windows, RM #1510",
+      "color": "5319e7"
+    },
+    {
+      "id": "LA_kwDOQqJAi88AAAACib_8pA",
+      "name": "claim:local",
+      "description": "Local human session holds an active claim on this issue.",
+      "color": "FBCA04"
+    },
+    {
+      "id": "LA_kwDOQqJAi88AAAAC4Yg6UQ",
+      "name": "tier:ollama",
+      "description": "Mechanical only (format, lint, label, typo): local Ollama models.",
+      "color": "C2E0C6"
+    }
+  ],
+  "state": "open"
+}
