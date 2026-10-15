@@ -3,152 +3,472 @@
 ## Status
 
 Evidence class: implemented software pathway, scientifically unqualified, not
-approved. This chapter consolidates the segmental-spine pathway of epic #12735
-(children SPN-0 to SPN-17) so it can be governed. No calculation is
-registered. The registry blocker `UP-D1-segmental-spine-inventory` stays open
-until UP-D1 inventories the pathway, the owner-blocked children below land,
-independent validation exists and a human approves it. Rendering this chapter
-is not approval.
+approved. This chapter is the calculation-level reference for the
+segmental-spine pathway of epic #12735 (children SPN-0 to SPN-17,
+consolidated by #12773). No calculation is registered. The registry blocker
+`UP-D1-segmental-spine-inventory` stays open until UP-D1 inventories the
+pathway, the owner-blocked work below lands, independent validation exists
+and a human approves it.
 
-Every number quoted here is either a convention check, a value transcribed in
-`docs/research/segmental_spine/data_extraction.md`, or a result on the
-synthetic fixture whose parameters are invented. No number is about a golfer,
-and no number comes from a licensed SimTK model.
+- A successful render of this chapter is not approval.
+- Owner sign-off of this text records that the text describes the code
+  accurately. It does not qualify any coupling law, distribution, load or
+  golfer result.
+- Every software-verification check below is separate from scientific
+  acceptance. No scientific acceptance exists for this pathway.
 
-The standalone research reference is
-`docs/research/segmental_spine/segmental_spine.tex` with one fragment per
-child in `docs/research/segmental_spine/sections/`. It holds the full
-derivations and the exact reproduction commands; it is editable separately
-from this manual and is not a manual artifact. The binding conventions are
-ADR-0055 (`docs/adr/0055-segmental-spine-kinematics-and-loads.md`). The user
-guide, including how to run a study, is
-`docs/research/segmental_spine/README.md`.
+The binding conventions are ADR-0055
+(`docs/adr/0055-segmental-spine-kinematics-and-loads.md`). The standalone
+research reference is `docs/research/segmental_spine/segmental_spine.tex`,
+with one fragment per child in `docs/research/segmental_spine/sections/`. It
+is editable separately and is not a manual artifact. The user guide, with a
+worked study request, is `docs/research/segmental_spine/README.md`. Published
+numbers are transcribed in `docs/research/segmental_spine/data_extraction.md`.
+
+## Scope, Units and Module Paths
+
+No repository-generated number in this chapter describes an individual golfer
+or comes from a licensed SimTK model. Fixture numbers are invented and are
+labelled so. Literature numbers describe their published cohorts and carry
+their recorded `verified_from_primary` status.
+
+Units:
+
+- Segmental, coupling and distribution angles are radians.
+- Golf-term angle outputs are degrees. Legacy golf-term inputs whose names end
+  in `_rad` are radians.
+- Forces are N, moments N·m, lengths m, time s. Body-weight normalisation uses
+  $g = 9.80665$ m/s² and gives BW and BW·m.
+
+Two packages share the name `spine`. This chapter always gives the full path:
+
+| Short Name | Path | Content |
+|---|---|---|
+| Shared `spine` | `src/shared/python/spine/` | Engine-independent levels, composition, coupling laws, distribution, golf terms, load contract, context bands, movement variants, visualization data and plots |
+| OpenSim `spine` | `src/engines/physics_engines/opensim/python/spine/` | Fixture, inventory, coupler extraction, golf input, drive, motion reader, inverse dynamics, static optimization, joint reactions, studies, aggregation and sensitivity |
+| Static-optimization core | `src/engines/physics_engines/opensim/python/static_opt_core.py` | Numeric core shared with the leg static optimization |
+| Load providers | `src/shared/python/injury/spinal_load_providers.py` | Heuristic and model spinal-load providers |
 
 ## Conventions and Frames
 
+Frames:
+
 - Every vertebra, the sacrum, the pelvis and the named terminal body carry an
-  ISB frame (Wu et al. 2002): X anterior, Y cranial, Z right.
-- A level `i` joins an inferior (caudal) and a superior (cranial) vertebra.
+  ISB-style frame: X anterior, Y cranial, Z right.
+- These are the repository's ADR-0055 conventions, implemented as profile
+  `isb_spine` of `biomechanics/joint_conventions.py`. Direct comparison with
+  Wu et al. (2002) is pending: the primary text was not read
+  (`verified_from_primary: false`, #12737).
+
+Level transform:
+
+- A level $i$ joins an inferior (caudal) and a superior (cranial) vertebra.
   Its transform maps the superior frame into the inferior frame:
   $$T_i = T_{i,0}\, T\!\left(R_{ZXY}(\theta_i),\, d_i\right), \qquad
-  R_{ZXY} = R_z(\theta_{FE})\,R_x(\theta_{LB})\,R_y(\theta_{AR}).$$
-  $T_{i,0}$ is the neutral offset (lordosis or kyphosis), read natively from
-  the model's offset frames. It is excluded from reported angles and included
-  in every composition. $d_i = 0$ for rotational models.
-- Signs: $\theta_{FE} > 0$ extension, $\theta_{LB} > 0$ right lateral bending,
-  $\theta_{AR} > 0$ left axial rotation (profile `isb_spine` of
-  `biomechanics/joint_conventions.py`). Angles are radians in code and
-  degrees in golf terms.
-- Levels are the 17 thoracolumbar disc levels L5-S1 to T1-T2
-  (`spine.levels.SpinalLevel`), ordered caudal to cranial and contiguous.
-  Cervical levels are out of scope.
-- Lab quantities take explicit `up` and `target` unit vectors. No lab axis
-  convention is assumed, because the repository holds two conflicting ones.
+  R_{ZXY}(\theta) = R_z(\theta_{FE})\,R_x(\theta_{LB})\,R_y(\theta_{AR}).$$
+- $T_{i,0}$ is the neutral offset (lordosis or kyphosis), read natively from
+  the model's offset frames. Its rotation block is $N_i$. It is excluded from
+  reported angles and included in every composition.
+- $d_i$ is the joint translation. It is zero for rotational models.
+- $\theta_{FE}$ is about Z, $\theta_{LB}$ about the floating X axis and
+  $\theta_{AR}$ about Y.
+
+Signs:
+
+- $\theta_{FE} > 0$ is extension.
+- $\theta_{LB} > 0$ is right lateral bending.
+- $\theta_{AR} > 0$ is left axial rotation.
+- The decomposition is singular at $|\theta_{LB}| = 90°$ (gimbal lock). The
+  shared extractor flags it through `OrientationResult.singular`.
+
+Levels:
+
+- The 17 thoracolumbar disc levels L5-S1 to T1-T2 are defined by
+  `SpinalLevel` in the shared `spine` package. They are ordered caudal to
+  cranial and are contiguous.
+- Cervical levels are out of scope.
+
+Lab quantities take explicit `up` and `target` unit vectors. No lab axis
+convention is assumed, because the repository holds two conflicting ones.
+
+## Synthetic Fixture
+
+All fixture values are invented. Nothing is transcribed from a SimTK model.
+The fixture is generated by ElementTree string building in
+`fixture_model.py` and `fixture_coupling.py` (OpenSim `spine`), so no OpenSim
+import is needed to write it.
+
+Topology, caudal to cranial:
+
+- `ground` → `pelvis` (FreeJoint) → `sacrum` (WeldJoint) → one CustomJoint
+  `<LEVEL>_jnt` per level → `thorax_proxy` (WeldJoint).
+- The default levels are the five lumbar levels L5-S1 to L1-L2.
+- Each level has rotation axes Z, X, Y with coordinates `<level>_flex_ext`,
+  `<level>_lat_bend` and `<level>_axial_rot`, and constant-zero translations.
+- Coordinate ranges are ±1 rad.
+- The neutral offset is $T_{i,0} = [R_z(\lambda_i) \mid (0, L_{\mathrm{inf}}, 0)]$
+  on the parent offset frame. The child frame is the identity.
+
+Invented parameters:
+
+| Parameter | Value (Invented) |
+|---|---|
+| Lordosis $\lambda_i$, L5-S1 to L1-L2 | 10, 8, 6, 4, 2 deg |
+| Sacral slope (base weld) | 30 deg |
+| Thorax tilt (terminal weld) | 5 deg |
+| Pelvis | 10 kg, 0.10 m |
+| Sacrum | 1.5 kg, 0.05 m |
+| Each vertebra | 1 kg, 0.04 m |
+| Thorax proxy | 20 kg |
+| Inertia | Uniform cylinder, radius 0.05 m along Y |
+
+Fixture variants:
+
+- **Coupled fixture.** The law's independent coordinates sit on a massless
+  driver body, `spine_coupling_driver`, attached to the pelvis. One
+  `CoordinateCouplerConstraint` per level axis prescribes
+  $q_{\mathrm{dep}} = \sum_k C_{i,r,k}\,\phi_k$. Only linear laws are
+  representable. The mass matrix is singular, so the coupled fixture is
+  kinematic only.
+- **Muscled fixture.** Eight bilateral `Millard2012EquilibriumMuscle` objects
+  run `pelvis` → `L3` (via point) → `thorax_proxy`:
+  - erector spinae, rectus abdominis, external oblique and internal oblique;
+  - maximum isometric forces 1500, 900, 700 and 600 N;
+  - optimal fibre length 0.12 m and zero pennation;
+  - tendon slack length = neutral path length minus optimal fibre length.
+- **One-level fixture.** Level L3-L4 only. Eight muscles act on three degrees
+  of freedom, so the inverse-dynamics moments are reachable with redundancy
+  five. The static-optimization acceptance tests use it.
+- **Five-level muscled fixture.** Eight lumped muscles cannot span 15 level
+  degrees of freedom. Reserves are therefore needed, and every frame is
+  flagged (measured reserve share 0.38 to 0.46).
+
+The fixture geometry is not anatomical. Passing its tests establishes
+software correctness only.
 
 ## Composition
 
 For a chain from the pelvis to a named terminal body (`T1` for Bruno,
 `thorax_proxy` for the fixture, `torso` for `golf_humanoid`):
-$$T_{\mathrm{pelvis}\to\mathrm{terminal}} = T_{\mathrm{sacrum}}\,
-T_{L5S1}\, T_{L4L5} \cdots T_{\mathrm{terminal}},$$
-caudal factor first. Per-level Cardan angles never add. The ADR-0055 worked
-example is a regression test: three levels with $(\theta_{FE}, \theta_{LB},
-\theta_{AR})$ of $(-10, 5, -15)$, $(-10, 8, -20)$ and $(-15, 10, -25)$ degrees
-sum to $(-35, 23, -60)$ but compose to $(-25.36, 31.83, -57.57)$ degrees. The
-angle sum is available only as the labelled `angle_sum_diagnostic`.
-Composition holds to $10^{-9}$ in the analytic tests, and the native fixture
-pose equals `SegmentalPose.compose()` to $10^{-9}$.
+$$T_{\mathrm{pelvis}\to\mathrm{terminal}} = T_{\mathrm{base}}\,
+T_{1}\, T_{2} \cdots T_{n}\, T_{\mathrm{term}},$$
+caudal factor first. $T_{\mathrm{base}}$ is the first chain body (for example
+the sacrum) in the pelvis frame. $T_{\mathrm{term}}$ is the terminal body in
+the last superior vertebra frame.
+
+Per-level Cardan angles never add. The ADR-0055 worked example is a
+regression test. Three levels with $(\theta_{FE}, \theta_{LB}, \theta_{AR})$
+of $(-10, 5, -15)$, $(-10, 8, -20)$ and $(-15, 10, -25)$ degrees sum to
+$(-35, 23, -60)$ but compose to $(-25.36, 31.83, -57.57)$ degrees. The angle
+sum is available only as the labelled `angle_sum_diagnostic`.
+
+The terminal body is not automatically the ISB thorax:
+
+- ADR-0055 item 2 requires a separate, model-specific calibration
+  $T_{\mathrm{terminal}\to\mathrm{thorax}}$ (thorax landmarks IJ, C7, PX, T8),
+  and says it is never assumed to be the identity.
+- No code path in this pathway estimates that calibration. The drive's
+  alignment $A$ (see Kinematic Input and Drive) defaults to the identity.
+
+Software verification:
+
+- Composition holds to $10^{-9}$ in the analytic tests.
+- The native fixture pose (thorax proxy and every intermediate vertebra in
+  the pelvis frame, random level angles within ±0.4 rad) equals
+  `SegmentalPose.compose()` to $10^{-9}$.
+- A reversed composition order differs by more than $10^{-3}$ (negative
+  control).
 
 ## Coupling Laws and Sign Maps
 
-A coupling law maps independent coordinates $\phi$ to per-level angles. It
-prescribes kinematics only. Couplers are disabled for inverse dynamics, static
-optimization and joint reaction, so constraint multipliers never enter loads.
+A coupling law maps independent coordinates $\phi \in \mathbb{R}^{n_\phi}$ to
+per-level ISB angles $\theta_i \in \mathbb{R}^3$ (rad). It prescribes
+kinematics only. For inverse dynamics, static optimization and joint
+reactions, every constraint of the model copy, couplers included, has
+`isEnforced = False`, so constraint multipliers never enter a load.
 
-- Linear: $\theta_i = C_i\,\phi$ with $C_i \in \mathbb{R}^{3 \times n_\phi}$;
-  cross-axis terms are allowed.
-- State-dependent: $\theta_i = C_i(s)\,\phi$, piecewise linear in a scheduling
-  coordinate $s$, held constant outside its breakpoints.
-- Polynomial: the adapter of MyoFullBody `JointCoupling` equalities.
+Law families (`coupling.py`, shared `spine`):
 
-Every law carries an id, a version and a citation. The shipped laws are in
-`src/config/spine_coupling_laws.json`:
-
-| Law | Source Status | Definition |
+| Family | Equation | Jacobian |
 |---|---|---|
-| `bruno2015_regional` | Verified from primary text | Lumbar/thoracic shares 51/49 (flexion), 27/73 (lateral bending), 17/83 (axial rotation), spread uniformly over 5 lumbar and 12 thoracic levels (the uniform spread is an assumption) |
-| `fujii2007_lumbar` | Verified from the PMC full text | One coordinate (trunk axial rotation); per-segment gains T12-L1 to L5-S1 from 45 degree trunk rotation, linearity assumed |
-| `uniform_reference` | Repository reference, not literature | $C_i = I/17$ |
+| Linear | $\theta_i = C_i\,\phi$, $C_i \in \mathbb{R}^{3 \times n_\phi}$, cross-axis terms allowed | $C_i$ |
+| State-dependent | $\theta_i = C_i(s)\,\phi$, $C_i$ piecewise linear in $s = \phi_k$ over strictly increasing breakpoints, held constant outside them | $C_i(s) + (\mathrm{d}C_i/\mathrm{d}s\,\phi)\,e_k^{\mathsf T}$, right-hand slope at interior breakpoints, zero slope outside |
+| Polynomial | $\theta_{i,a} = o + \sum_{k=0}^{4} c_k (\phi_d - x_0)^k$ for one driver $d$; unlisted axes are zero | Polynomial derivative in $\phi_d$ |
 
-Sign map for `fujii2007_lumbar`: Fujii reports flexion positive and lateral
-bending positive in the direction of rotation. Under ADR-0055 extension, right
-bending and left rotation are positive, so for a positive (left) axial
-rotation both coupled terms change sign; the JSON records this as
-`distribution.isb_sign`. The per-level laws `bruno2015_per_level` (Bruno
-Supplemental Table 2) and `pearcy1984_lumbar` are recorded as `pending` with
-no numbers and refuse to build.
+Every law carries an id, a version and a citation. The regional fraction of
+axis $a$ over a level set $R$ is
+$f_R(a) = \sum_{i \in R}\theta_{i,a} / \sum_{i}\theta_{i,a}$; it raises when
+the total is below $10^{-12}$ in magnitude.
 
-Couplers of an OpenSim model are read back into a law by
-`coupler_extraction.extract_coupling_law`. Linear and low-order polynomial
-couplers are exact; splines and piecewise-linear couplers become a
-state-dependent law that is exact at the knots only, which is a stated
-limitation. Unsupported function types raise.
+### Shipped Laws
+
+The shipped laws are in `src/config/spine_coupling_laws.json` and are built
+by `coupling_data.py` (shared `spine`):
+
+| Law | Construction | Source Status |
+|---|---|---|
+| `bruno2015_regional` | Diagonal $C_i = \mathrm{diag}(p_a / (100\, n_r))$ with regional shares $p$ lumbar/thoracic 51/49 (flexion), 27/73 (lateral bending), 17/83 (axial rotation), $n_L = 5$, $n_T = 12$. The uniform spread within a region is an assumption | Bruno 2015 Table B1: `verified_from_primary: true` (main text only, PMC5101035); PDF re-check recommended |
+| `fujii2007_lumbar` | One coordinate, trunk axial rotation. $C_i = \mathrm{sign} \odot \bar\theta_i / 45°$, a 3 × 1 column per level T12-L1 to L5-S1 from the mean segment angles at 45 deg of trunk rotation. Linearity in rotation is an assumption. Gains do not sum to 1 | Fujii 2007 Table F1 (n = 10): `verified_from_primary: true` (PMC2223353 full text, two agreeing extractions); PDF re-check, author list and DOI pending (#12737) |
+| `uniform_reference` | $C_i = I/17$ | Repository reference, not literature |
+
+The per-level laws `bruno2015_per_level` (Bruno Supplemental Table 2) and
+`pearcy1984_lumbar` are recorded as `pending` with no numbers and refuse to
+build (#12743).
+
+Sign map for `fujii2007_lumbar`:
+
+- Fujii reports coupled flexion positive as flexion, and coupled lateral
+  bending relative to the direction of trunk rotation.
+- The JSON field `distribution.isb_sign` maps these to ISB signs: flexion
+  $-1$, lateral bending $-1$, axial rotation $+1$.
+- For a positive (left) axial rotation, flexion is ISB-negative and a
+  same-direction (left) bend is ISB-negative.
+
+### Fujii Parity Defect
+
+`fujii2007_lumbar` is linear in one coordinate, so every coupled term is odd
+in the trunk rotation $\phi$.
+
+- **Coupled flexion.** Fujii measured flexion for rotation to either side, so
+  this term is even in $\phi$. The shipped law turns it into coupled
+  extension for a negative (right) rotation. For a right-handed backswing the
+  law therefore has the wrong flexion sign.
+- **Coupled lateral bend.** Fujii reports it relative to the rotation
+  direction, so it is correctly odd.
+
+This is a declared defect of the linear single-coordinate form, not of the
+transcription. No test covers right rotation. A fix needs an even/odd law
+form, which is a code change and is listed under Limitations.
+
+### Coupler Extraction and Restriction
+
+- `coupler_extraction.extract_coupling_law` (OpenSim `spine`) reads an OpenSim
+  model's couplers back into a law. Linear and low-order polynomial couplers
+  are exact. Spline and piecewise-linear couplers become a state-dependent
+  law that is exact at the knots only. Unsupported function types raise.
+- `coupling.restrict_to_levels` (shared `spine`) restricts a law to a model's
+  level range. It keeps $C_i$ bit-identical, tags the version
+  `<version>+levels:<first>..<last>` and marks the citation as a repository
+  operation. Per-level ratios are kept. Absolute shares are not, because the
+  distribution solve rescales $\phi$. A law covering fewer levels than the
+  model fails the drive stage.
 
 ## Distribution and Residual
 
-Distributing a pelvis-to-terminal rotation over levels is underdetermined and
-is defined through a fixed law:
-$$\phi^{*} = \arg\min_{\phi \in [\ell, u]} \left\lVert \log\!\left(
-R_{\mathrm{target}}^{\mathsf T}\, R(\phi)\right) \right\rVert,
-\qquad R(\phi) = B \Bigl[\prod_i N_i R_i(\theta_i(\phi))\Bigr] E.$$
+Distributing a pelvis-to-terminal rotation over levels is underdetermined. It
+is defined through a fixed law (`distribution.py`, shared `spine`):
+$$\phi^{*} = \arg\min_{\ell \le \phi \le u} \left\lVert r(\phi) \right\rVert_2,
+\qquad r(\phi) = \log\!\left(R_{\mathrm{target}}^{\mathsf T}\, R(\phi)\right)^{\vee},
+\qquad R(\phi) = B \Bigl[\prod_{i=1}^{n} N_i R_{ZXY}(\theta_i(\phi))\Bigr] E.$$
+
+| Symbol | Meaning |
+|---|---|
+| $R_{\mathrm{target}}$ | Target terminal-body rotation in the pelvis frame |
+| $\log(\cdot)^{\vee}$ | SO(3) logarithm as a rotation vector (rad); its norm is the geodesic residual |
+| $B$ | Base rotation: first inferior body in the pelvis frame (`ChainOffsets`, identity when omitted) |
+| $N_i$ | Neutral rotation block of $T_{i,0}$ |
+| $E$ | Terminal rotation: terminal body in the last superior vertebra frame (`ChainOffsets`, identity when omitted) |
+| $\ell, u$ | Bounds on the independent coordinates; default unbounded ($\pm\infty$). They do not enforce model coordinate ranges |
+| Product order | Caudal level first |
+
+Rules:
 
 - The law is never altered to close the residual. The geodesic residual
-  (radians) and the optimizer's convergence flag are outputs, and an
-  unreachable target is flagged, not repaired.
-- The solver is a bounded trust-region least-squares fit with an analytic
-  Jacobian, verified against finite differences to $10^{-7}$.
-- An SVD observability report gives the rank, null space and left null space;
-  laws with more than three coordinates are flagged `underdetermined`.
-- Every per-level output carries `distribution_source`:
-  `coupling:<law_id>@<version>`, `ik:<...>` or `measured:<...>`.
-- `coupling.restrict_to_levels` restricts a law to a model's level range with
-  bit-identical $C_i$ and a recorded version suffix. Per-level ratios are
-  kept; absolute shares are not, because the solve rescales $\phi$.
+  (rad) and the convergence flag are outputs. An unreachable target is
+  flagged, never repaired.
+- The residual is recomputed independently from the solved pose. It agrees
+  with the solver's value to $10^{-10}$.
+- Every per-level output carries `distribution_source`, for example
+  `coupling:<law_id>@<version>`, `ik:<...>`, `measured:<...>` or
+  `movement_variant:<...>`.
+
+### Numerical Method
+
+The solver is `scipy.optimize.least_squares` with `method="trf"`.
+
+- Defaults: `tol_rad` $= 10^{-8}$ and `max_iter` $= 200$, passed as
+  `max_nfev`.
+- Stopping tolerances: `ftol` = `xtol` = `gtol` =
+  $\max(10^{-5}\,\mathrm{tol\_rad}, 10^{-15})$.
+- Start point: zeros, clipped to the bounds. A series is warm-started from the
+  previous frame's solution, so each frame returns one local minimiser.
+- `converged` is `status > 0` of the solver.
+
+The Jacobian is analytic:
+$$\frac{\partial r}{\partial \phi} = J_r^{-1}(r)\, W, \qquad
+W = \sum_{i,k} (R_i S_i)^{\mathsf T} a_{ik}
+\left(\frac{\partial \theta_i}{\partial \phi}\right)_{k,:},$$
+$$J_r^{-1}(r) = I + \tfrac12 [r]_\times + c(\vartheta)\,[r]_\times^2, \qquad
+c(\vartheta) = \frac{1}{\vartheta^2} - \frac{1 + \cos\vartheta}{2\vartheta\sin\vartheta}.$$
+
+| Symbol | Meaning |
+|---|---|
+| $R_i$ | $R_{ZXY}(\theta_i)$ of level $i$ |
+| $S_i$ | Suffix rotation $\bigl(\prod_{j > i} N_j R_j\bigr) E$ |
+| $a_{ik}$ | Axis of angle $k$ of level $i$ in its parent frame: $e_z$, $R_z e_x$, $R_z R_x e_y$ |
+| $W$ | $3 \times n_\phi$ body-frame Jacobian |
+| $\vartheta$ | $\lVert r \rVert$; for $\vartheta < 10^{-4}$, $c = 1/12 + \vartheta^2/720$ |
+
+The analytic Jacobian matches finite differences to $10^{-7}$.
+
+### Observability
+
+An SVD of $W$ gives the observability report:
+
+- **Rank.** The rank counts singular values
+  $\sigma > \max(10^{-8}\sigma_{\max}, 10^{-12})$.
+- **Underdetermined flag.** The law is flagged `underdetermined` when
+  rank $< n_\phi$. This covers laws with more than three coordinates, and
+  also laws with dependent columns and $n_\phi \le 3$.
+- **Flagged coordinates.** The report lists the null space, and
+  `flagged_coordinates` names every coordinate whose null-space row norm
+  exceeds $10^{-6}$.
+- **Unobservable directions.** The left null space is reported as
+  `unobservable_target_directions`.
+
+## Kinematic Input and Drive
+
+### Golf Humanoid Input
+
+`read_golf_humanoid_motion(motion_path, model_path)` (`golf_input.py`,
+OpenSim `spine`) does the following:
+
+- reads a `golf_humanoid` `.sto` or `.mot` table and converts `inDegrees=yes`
+  tables to radians;
+- reads events from `event_<name>` header lines;
+- evaluates the trunk rotation natively from the `back` CustomJoint
+  (coordinates `lumbar_extension` $e$, `lumbar_bending` $b$ and
+  `lumbar_rotation` $r$ about Z, X and Y):
+  $$R_{\mathrm{pelvis}\to\mathrm{torso}} = R_{po}\, R_z(e)\, R_x(b)\, R_y(r)\, R_{to}^{\mathsf T},$$
+  where $R_{po}$ and $R_{to}$ are the joint's pelvis and torso offset-frame
+  rotations.
+
+`resample` interpolates rotations by Slerp.
+
+### Segmental Drive and Calibration
+
+`drive_segmental_model` (`drive.py`, OpenSim `spine`) distributes the trunk
+rotation frame by frame.
+
+Chain offsets:
+
+- `chain_offsets_from_model` reads $B$ and $E$ natively at zero coordinates.
+- The pelvis-to-first-body and last-vertebra-to-terminal connections are
+  assumed rigid.
+- The level map must be verified; otherwise the drive raises `ValueError`.
+
+Target and alignment:
+
+- The target is $R_\star = R_{\mathrm{pelvis}\to\mathrm{torso}}\, A$.
+- $A$ (`DriveOptions.torso_alignment`) is the segmental terminal frame
+  expressed in the `golf_humanoid` torso frame. It defaults to the identity,
+  and the pelvis body frames of the two models are assumed to coincide.
+- These are unvalidated caller assumptions, not calibration evidence. A wrong
+  $A$ biases every per-level angle without raising the geodesic residual.
+
+Law and validity:
+
+- Without a law id, the law is extracted from the model's own couplers. The
+  law must cover exactly the model's levels.
+- A frame is invalid when the solve did not converge or, if
+  `tolerance_rad` is set, when the residual exceeds it.
+- `DriveOptions.tolerance_rad` and `SpineStudyRequest.drive_tolerance_rad`
+  default to `None`. With the default, convergence alone decides validity,
+  and a converged but badly mismatched target stays valid. A study that
+  claims endpoint reproduction must declare a finite tolerance.
+- Invalid frames are kept as solved and never repaired.
+
+Coordinate table and export:
+
+- Level coordinates are $q = s\,\theta$, where $s = \pm 1$ is the level-map
+  axis sign.
+- The six pelvis coordinates are unwrapped intrinsic Euler angles of the
+  pelvis pose in ground plus the pelvis origin:
+  - `golf` encoding: sequence ZXY (`pelvis_tilt`, `pelvis_list`,
+    `pelvis_rotation`, `pelvis_tx/ty/tz`);
+  - `fixture` encoding: sequence XYZ (`pelvis_rx/ry/rz` for the free joint).
+- The ground-pelvis offset frames are assumed to be identity.
+- `export_mot` writes the table natively with `STOFileAdapter`, with
+  `inDegrees=no` and a `distribution_source` header line.
+
+### Motion Reader
+
+`read_segmental_kinematics` (`read_kinematics.py`, OpenSim `spine`) inverts
+the export.
+
+- It recovers $\theta = s\,q$ and $T_i = T_{i,0}\,T(R_{ZXY}(\theta_i), 0)$
+  into a `SegmentalKinematicsSeries`.
+- A non-empty `distribution_source` is required, and it must match the header
+  when the header has one.
+- With `verify_native=True` the realised terminal rotation is checked against
+  $B \cdot \mathrm{compose} \cdot E$ to $10^{-9}$.
+
+Software verification:
+
+- A synthetic input generated from the fixture's own law is recovered with a
+  residual below $10^{-8}$ rad.
+- The exported `.mot` replayed natively on the coupled fixture matches the
+  target to $10^{-8}$.
+- A law that cannot reach the target reports residuals above $10^{-3}$ rad and
+  is flagged invalid under a $10^{-6}$ rad tolerance.
+- A 654-frame `golf_humanoid` swing driving a 17-level fixture with
+  `bruno2015_regional` gave a maximum residual of $1.2 \times 10^{-13}$ rad
+  (SPN-9b). This shows reachability on the fixture chain, not a physiological
+  distribution.
 
 ## Golf Terms
 
-Golf-instruction quantities are versioned measurands in `spine.golf_terms`
-with named inputs, frame, sign and units. Legacy implementations keep their
-numeric meaning under legacy ids; new ids are new measurands. With $s = -1$
-for a right-handed and $s = +1$ for a left-handed golfer, applied to the
-`isb_spine` decomposition of the pelvis-to-thorax rotation:
+Golf-instruction quantities are versioned measurands in `golf_terms.py`
+(shared `spine`). Legacy implementations keep their numeric meaning under
+legacy ids; new ids are new measurands. The handedness factor is $s = -1$ for
+a right-handed and $s = +1$ for a left-handed golfer. The three JCS terms use
+the `isb_spine` decomposition of the pelvis-to-thorax rotation.
 
-| Term | Definition | Units and Sign |
-|---|---|---|
-| `x_factor_jcs_axial` | $s\,\theta_{AR}$ | deg, backswing positive |
-| `trunk_lateral_flexion_jcs` | $s\,\theta_{LB}$ | deg, lead side positive |
-| `trunk_extension_jcs` | $\theta_{FE}$ | deg, extension positive, not handed |
-| `x_factor_line_turn` | Upper-trunk minus pelvis line turn about `up` | deg |
-| `x_factor_position_proxy` | Legacy joint-coordinate difference | deg, legacy |
-| `x_factor_euler_yaw_legacy_v1` | Legacy thorax minus pelvis Euler yaw | deg, legacy |
-| `side_bend_tilt` | Trunk-axis tilt split by `up` and `target` | deg |
-| `crunch_factor_legacy_v1` | $\lvert\theta_{lat}\rvert\,\lvert\theta_{rot}\rvert/100$ | deg²/100, legacy |
-| `crunch_factor_rate` | $\theta_{lat}\,\dot\theta_{AR}$ | deg·deg/s |
-| `early_extension` | Pelvis approach to the target line from address | m, toward the ball positive |
-| `reverse_spine_angle` | Toward-target tilt at the top | deg |
+| Term | Required Inputs | Definition | Units and Sign |
+|---|---|---|---|
+| `x_factor_jcs_axial` | `pelvis_to_thorax_rotation` | $s\,\theta_{AR}$ | deg, backswing positive |
+| `trunk_lateral_flexion_jcs` | `pelvis_to_thorax_rotation` | $s\,\theta_{LB}$ | deg, lead side positive |
+| `trunk_extension_jcs` | `pelvis_to_thorax_rotation` | $\theta_{FE}$ | deg, extension positive, not handed |
+| `x_factor_line_turn` | `points`, `t`, `events`, `up` (optional `point_pairs`) | Upper-trunk line turn minus pelvis line turn about `up`; points are rotated so `up` maps to +Z | deg, positive for a right-handed backswing, negated for left-handed |
+| `x_factor_position_proxy` | `joint_positions`, `shoulder_joint_idx`, `hip_joint_idx` | deg(shoulder) − deg(hip) of radian joint coordinates | deg, legacy, not handed |
+| `x_factor_euler_yaw_legacy_v1` | `thorax_euler`, `pelvis_euler` (rad, third column is yaw) | deg(thorax yaw − pelvis yaw) | deg, legacy |
+| `side_bend_tilt` | `trunk_axis`, `up`, `target` | Trunk-axis tilt from `up`, returned as [total, toward_target, lateral]; lateral axis = forward × up | deg |
+| `crunch_factor_legacy_v1` | `lateral_bend_rad`, `axial_rotation_rad` | $\lvert\mathrm{deg}(\mathrm{lat})\rvert\,\lvert\mathrm{deg}(\mathrm{rot})\rvert/100$ | deg²/100, legacy |
+| `crunch_factor_rate` | `trunk_lateral_flexion_jcs`, `x_factor_jcs_axial`, `time_s` | $l(t)\,\mathrm{d}x/\mathrm{d}t$ | deg·deg/s |
+| `early_extension` | `pelvis_position`, `target`, `up`, `events`, `ball_position` | $d(t_{\mathrm{address}}) - d(t)$, $d$ the horizontal distance of the pelvis to the target line through the ball | m, toward the ball positive |
+| `reverse_spine_angle` | `trunk_axis`, `up`, `target`, `events` | `toward_target` tilt of `side_bend_tilt` at the top event | deg |
 
-`crunch_factor_rate` is attributed to Sugaya, Tsuchiya and Moriya (1999) via
-Cole and Grimshaw (2014); the primary source is unverified (#12737).
+Notes:
 
-Segmental contributions are path dependent, not Cardan angles. For the three
-JCS terms the contribution of level $i$ is
+- **JCS terms at gimbal lock.** At $|\theta_{LB}| = 90°$ the JCS terms return
+  NaN for FE and AR.
+- **Crunch-factor rate.** In `crunch_factor_rate`,
+  $l = s\,\theta_{LB}$ and $x = s\,\theta_{AR}$ are both handed golf terms in
+  degrees. The derivative is `numpy.gradient(x, time_s)`, which needs at
+  least two strictly increasing samples. No further handedness, smoothing or
+  unwrapping is applied. The term is attributed to Sugaya, Tsuchiya and
+  Moriya (1999) via Cole and Grimshaw (2014); the primary definition is
+  unverified (`verified_from_primary: false`, #12737).
+
+### Segmental Contributions
+
+Segmental contributions are path dependent and are not Cardan angles. For a
+JCS term $f$ the contribution of level $i$ is
 $$c_i = f\!\left(\textstyle\prod_{j \le i} T_j\right) -
 f\!\left(\textstyle\prod_{j < i} T_j\right), \qquad f(\text{empty}) = 0,$$
-with caudal-first truncation. The differences telescope, so they sum to the
-global term; `contribution_remainder` reports the rounding difference. A
-contribution depends on every level caudal to it and is not that level's own
-angle. The analyzer, swing metrics and API X-factor paths now delegate to the
-registry under their legacy ids, golden-tested to $10^{-12}$.
+with caudal-first truncation. The prefixes are `pose.relative_rotation`
+products and include each level's neutral offset, the first level's included.
+They exclude $B$, $E$ and any calibration $A$.
+
+The differences telescope to the term of the supplied `SegmentalPose` chain.
+`contribution_remainder` compares the sum against `pose.compose()`, so it
+checks internal telescoping only. It does not verify closure to a separately
+evaluated pelvis-to-thorax term. A contribution depends on every level caudal
+to it and is not that level's own angle.
+
+Software verification: the analyzer, swing metrics and API X-factor paths
+delegate to the registry under their legacy ids, golden-tested to
+$10^{-12}$.
 
 ## Load Observables and Contract
 
@@ -156,151 +476,716 @@ Three observables are produced and never conflated:
 
 | Observable | Producer | Content |
 |---|---|---|
-| `GENERALIZED_EFFORT` | Inverse dynamics | Net moment through the level coordinates; muscles, passive elements and joint lumped |
-| `JOINT_REACTION` | Joint reaction with static-optimization muscle forces | What the joint transmits after muscles carry their share |
-| `PASSIVE_ELEMENT` | Bushing, ligament and disc elements | Passive structures only; not produced by any shipped pipeline stage yet |
+| `GENERALIZED_EFFORT` | Inverse dynamics | Remaining generalized demand at the level coordinates with muscle forces excluded and every other enabled applied force retained, mapped to a level moment. The translational reaction is not solved; `force_n` is zeros by representation, not zero compression or shear |
+| `JOINT_REACTION` | Joint reaction with static-optimization muscle forces | Force and moment the joint transmits, including the reserve torque applied at the joint |
+| `PASSIVE_ELEMENT` | Bushing, ligament and disc elements | Passive structures only; not produced by any shipped stage |
 
 For every observable the wrench is exerted on the superior vertebra by the
 inferior vertebra, expressed in the inferior vertebra ISB frame, about the
 mid-disc joint centre, in N and N·m:
 $$\text{compression} = +F_y, \qquad \text{AP shear} = +F_x\ (\text{anterior}),
 \qquad \text{ML shear} = +F_z\ (\text{right}).$$
-Wrench transport uses $\mathbf M' = \mathbf M + \mathbf r \times \mathbf F$
-(`force_overlay.conversions.move_wrench_point`). Tension-positive consumers
-(`body_part_viz/axial_loads.py`) receive $T = -F_y$ through
-`SpinalAxialLoadProvider`. `spine.loads.SpinalLoadSeries` requires the
-provenance keys `model_id`, `model_sha256`, `solver`, `cost_exponent`,
-`distribution_source` and `external_loads`, and normalizes to body weight with
-$g = 9.80665$ m/s².
+Moments are $M_x$ (lateral bending axis), $M_y$ (axial) and $M_z$
+(flexion-extension axis).
 
-`SpinalLoadAnalyzer` takes a provider (`injury.spinal_load_providers`). The
-default heuristic provider (`heuristic_v1`) keeps the closed-form screening
-estimate unchanged and labels every output heuristic. A model provider returns
-a precomputed series unchanged, and the heuristic risk bands are not applied
-to it (`NOT_ASSESSED`, never `SAFE`).
+Wrench transport (`force_overlay.conversions.move_wrench_point`) moves a
+wrench from an old reference point $p_A$ to a new point $p_B$:
+$$\mathbf M_B = \mathbf M_A + (p_A - p_B) \times \mathbf F,$$
+with all vectors in the same frame. `loads.from_wrench_in_frame` (shared
+`spine`) does three things in order:
 
-## Inverse Dynamics, Static Optimization and Joint Reactions
+1. It rotates force and moment into the inferior ISB frame
+   ($v_{\mathrm{isb}} = R\,v_{\mathrm{src}}$).
+2. It moves the wrench from the reference point, given as an offset $r$ from
+   the joint centre, to the joint centre. The result is
+   $\mathbf M' = \mathbf M + r \times \mathbf F$.
+3. It assembles the series.
 
-- **Inverse dynamics** (`spine.inverse_dynamics`). Couplers are disabled and
-  muscles switched off; OpenSim `InverseDynamicsSolver` returns generalized
-  forces, converted to the level moment by
-  $M = R_{i0}\,J(\theta)^{-\mathsf T}\tau_\theta$ with
-  $\det J = \cos\theta_{LB}$; a level within $10^{-6}$ of gimbal lock raises.
-  The force array is exactly zero (no joint translation unknowns). The
-  ground-pelvis generalized forces are the residual wrench, judged against a
-  declared budget (defaults $r_F \le 0.05$ and $r_M \le 0.01$). Without
-  external loads the residual is the whole weight, so the budget fails by
-  construction.
-- **Static optimization** (`spine.static_optimization`, shared core
-  `static_opt_core`). Rigid-tendon affine muscle force $F_m = P_m + a_m A_m$,
-  activation cost $\sum a^p$ with $p \in \{2, 3\}$ recorded, and declared
-  reserve actuators. Stage one finds the smallest weighted reserve remainder
-  by bounded least squares; stage two resolves redundancy by SLSQP subject to
-  reproducing the muscle part. Frames exceeding the reserve share (default
-  0.05) or limit (default 1 N·m) are flagged, never dropped. The leg static
-  optimization keeps its own penalty solve, moved unchanged into the shared
-  core.
-- **Joint reactions** (`spine.joint_reactions`). Muscles are set to their
-  static-optimization forces; inverse dynamics returns the residual, which
-  must equal the reserve within $10^{-6}$ N·m or the result is refused; the
-  reaction from `Joint.calcReactionOnChildExpressedInGround` is rotated into
-  the inferior ISB frame. The decomposition
-  $\mathbf M^{\mathrm{ID}} = \mathbf M^{\mathrm{react}} + \mathbf M^{\mathrm{musc}}$
-  holds to $10^{-6}$ N·m on the fixture.
+Series contract (`loads.py`, shared `spine`):
 
-## Studies, Receipts and Aggregation
+- **Required provenance.** `SpinalLoadSeries` requires the provenance keys
+  `model_id`, `model_sha256`, `solver`, `cost_exponent`,
+  `distribution_source` and `external_loads`.
+- **Body-weight normalisation.** `in_body_weights(m)` divides by $m g$ with
+  $g = 9.80665$ m/s². A series can be normalised only once.
+- **Peak.** `peak()` returns the signed value at the largest absolute
+  magnitude, earliest sample on ties.
+- **Tension bridge.** Tension-positive consumers
+  (`body_part_viz/axial_loads.py`) receive $T = -F_y$ through
+  `SpinalAxialLoadProvider`. This is the only sign change.
 
-`spine.study.run_spine_study` chains golf input, segmental drive, inverse
-dynamics, static optimization and joint reactions for one
-`SpineStudyRequest`, and writes a `SpineStudyReceipt` with the SHA-256 of every
-input and configuration file, the code and library versions, per-stage
-provenance, the asset admission record and hashed `.mot` and `.npz`
-artifacts. The receipt has no timestamp and no absolute path; equal requests
-give byte-identical receipts. Status is fail-closed: `failed` on a stage
-exception; `unqualified` when a licensed asset is not `QUALIFIED`, a drive
-frame is invalid, the pelvis residual exceeds its budget, a frame uses
-reserves or a solve fails; otherwise `pass`. `pass` is a software statement;
-`scientific_status` is always `unqualified`.
+### Heuristic and Model Providers
 
-`spine.study_aggregation` reads only artifacts whose hash matches the receipt,
-pools only `pass` receipts, keeps observables and distribution laws separate
-and reports per-level signed peaks, windowed impulses and min, median and max
-across runs. Context comparisons (`spine.context_bands`) put the Hosea 1990
-L3-L4 values (7584 N professionals, 6100 N amateurs; from a citing review,
-unverified) and the Lim 2012 L4-L5 values (compression above 6 BW, AP shear
-about 1.6 BW, ML shear about 0.6 BW; abstract only) beside model peaks as
-ratios. Every comparison has `is_acceptance` fixed to false; bands are not
-calibration data.
+`SpinalLoadAnalyzer` takes a provider (`injury/spinal_load_providers.py`).
+
+- **Heuristic provider.** The default `heuristic_v1` keeps the closed-form
+  screening estimate unchanged, golden-tested to $10^{-12}$, and labels every
+  output heuristic. For level $i$ with position ratio $p_i$, body mass $m$
+  and head-arms-trunk ratio 0.678, the mass above is
+  $m_a = 0.678\, m\, (1 - p_i)$. Then:
+  - $F_y = m_a g \cos\varphi + \lvert\tau_\varphi\rvert / 0.05$;
+  - $F_x = m_a g \sin\varphi$;
+  - $F_z = m_a g \sin\lambda + \tfrac12 m_a \omega^2 L p_i$;
+  - $M_y = \lvert\tau_\rho\rvert$.
+
+  Here $\varphi$ is lumbar flexion, $\lambda$ lateral bend, $\omega$ rotation
+  rate, $L$ trunk length and 0.05 m a fixed moment arm. These are screening
+  estimates, not joint reactions.
+- **Model provider.** It returns a precomputed series unchanged.
+  - Its time base must equal the requested one to $10^{-9}$ s.
+  - The heuristic risk bands are not applied to it: `risk_assessed = False`,
+    and every risk field is `NOT_ASSESSED`, never `SAFE`.
+
+## Inverse Dynamics
+
+`run_spinal_inverse_dynamics` and `spinal_generalized_forces`
+(`inverse_dynamics.py`, OpenSim `spine`) share one private pass.
+
+Model preparation:
+
+- Every constraint, couplers included, is disabled.
+- Muscles are switched off with `setAppliesForce(False)`. Other force
+  elements stay enabled.
+- Coordinates missing from the motion default to zero and are recorded in the
+  provenance as `coordinates_defaulted_to_zero`.
+
+Derivatives:
+
+- An optional zero-phase Butterworth low-pass filter (`filter_hz`, default
+  `None`) is applied first.
+- Velocities and accelerations come from a not-a-knot `CubicSpline`. At least
+  four samples are required, and end samples are less reliable.
+- For a free pelvis, Euler rates map to angular velocity and acceleration:
+  $\omega = J\dot q$ and $\alpha = J\ddot q + \dot q_2 \dot c_2 + \dot q_3 \dot c_3$,
+  with $c_2, c_3$ the second and third Euler axis columns of $J$. The speed
+  convention is checked by a runtime probe.
+
+`InverseDynamicsSolver` returns the generalized forces $\tau_q$. Each level's
+moment is then
+$$\mathbf M = R_{i0}\, J(\theta)^{-\mathsf T}\, (s \odot \tau_q), \qquad
+\theta = s \odot q, \qquad J = [\,e_z,\; R_z e_x,\; R_z R_x e_y\,],
+\qquad \det J = \cos\theta_{LB}.$$
+
+| Symbol | Meaning |
+|---|---|
+| $s$ | Level-map axis signs ($\pm 1$) |
+| $q$, $\tau_q$ | Model coordinates and their generalized forces |
+| $J$ | ZXY angle-rate to angular-velocity map in the parent frame |
+| $R_{i0}$ | Neutral rotation of the level |
+
+Gimbal lock: a level, or an Euler-encoded pelvis, with
+$\lvert\det J\rvert < 10^{-6}$ raises. This is a determinant threshold, not an
+angle tolerance.
+
+Pelvis residual:
+
+- The ground-pelvis generalized forces give the residual force
+  $\mathbf F_{\mathrm{res}}$ and moment $\mathbf M_{\mathrm{res}}$ in ground,
+  about the pelvis origin. A custom-joint pelvis uses
+  $\mathbf M = J^{-\mathsf T}\tau_{\mathrm{rot}}$.
+- The residual is judged against a declared budget:
+  $$r_F = \frac{\max_t \lVert \mathbf F_{\mathrm{res}}(t) \rVert}{m g} \le 0.05,
+  \qquad r_M = \frac{\max_t \lVert \mathbf M_{\mathrm{res}}(t) \rVert}{m g h} \le 0.01.$$
+- $m g$ is the total model mass times $\lvert g \rvert$.
+- $h$ is `body_height_m` when supplied. Otherwise it is a model extent: the
+  ground-Y extent of the body origins, not measured stature. The code
+  evaluates it at the last processed sample, although the docstring and
+  SPN-10a say the first frame (see Limitations).
+
+Without external support loads, the pelvis residual carries gravitational
+support plus the prescribed whole-body inertial demand. For a stationary,
+unsupported model its force magnitude equals body weight. The recorded
+gravity-only fixture study exceeds the budget. That is an observation on that
+study, not an identity for every accelerating motion.
+
+Software verification:
+
+- Static level moments and the pelvis wrench match an independent numpy
+  rigid-body composition to $10^{-6}$ N·m.
+- A dynamic motion is checked against $M(q)\ddot q + C + G$ from the matter
+  subsystem.
+- A muscle-bearing model gives the same $\tau$ as its muscle-free skeleton to
+  $10^{-9}$.
+
+## Static Optimization
+
+`static_optimization.py` (OpenSim `spine`) and `static_opt_core.py` resolve
+trunk-muscle redundancy against the inverse-dynamics generalized forces
+$\tau_j$ (N·m, OpenSim coordinate sign).
+
+Muscle model (rigid tendon, `set_ignore_tendon_compliance(True)`):
+$$F_m(a_m) = P_m + a_m A_m, \qquad A_m = \max\!\left(\frac{F_m(1) - F_m(0.5)}{0.5},\, 0\right),
+\qquad P_m = F_m(1) - A_m.$$
+
+- $F_m(\cdot)$ is the native tendon force at the frame's path length and
+  lengthening speed.
+- $A_m$ is the active gain, $F_{0,m} f_L f_V \cos\alpha$, and $P_m$ the
+  passive and damping force.
+- Sampling at activations 0.5 and 1 is exact above the Millard minimum
+  activation (0.01 by default, below which OpenSim clamps).
+- Moment arms $R_{mj}$ come from `GeometryPath.computeMomentArm`.
+- The muscle generalized force is $M(a) = R^{\mathsf T}(P + a \circ A) = o + G a$.
+- Activation dynamics and tendon compliance are not represented.
+
+The frame problem is lexicographic, with declared reserve limits $L_j > 0$
+(`ReserveSpec.limit_nm`, default 1.0 N·m):
+
+1. **Stage one** (`lsq_linear`, BVLS, tol $10^{-14}$) minimises
+   $\sum_j \bigl((\tau_j - o_j - (G a)_j)/L_j\bigr)^2$ over $0 \le a \le 1$.
+   This gives $a_1$ and the unique remainder $r^* = \tau - o - G a_1$.
+2. **Stage two** (SLSQP, ftol $10^{-14}$, maxiter 500) minimises
+   $\sum_m a_m^p$ over $0 \le a \le 1$, subject to $G a = G a_1$. Here
+   $p \in \{2, 3\}$ (`exponent`, default 3), the gradient $p\,a^{p-1}$ is
+   analytic, and the constraint is reduced to an orthonormal basis of the
+   column space of $G$ ($\sigma > 10^{-10}\sigma_{\max}$).
+3. **Polish.** A minimum-norm Newton step on the free activations removes the
+   remaining constraint error.
+
+Per frame:
+
+- The reserves are $r = \tau - M(a)$. The postcondition
+  $M(a) + r = \tau$ is checked to $10^{-9}$.
+- The reserve share is $s_r = \sum_j \lvert r_j \rvert / \sum_j \lvert \tau_j \rvert$.
+  It is 0 when there is no reserve, and $\infty$ when a reserve exists while
+  the demand is at most $10^{-12}$.
+- A frame is flagged, never dropped, when any of these hold:
+  - $s_r >$ `max_share` (default 0.05);
+  - any $\lvert r_j \rvert > L_j$;
+  - a stage reports failure.
+
+  Non-zero reserves within both limits do not flag a frame.
+
+Frame selection:
+
+- Frames are the nearest sample to each named event plus every
+  `stride`-th sample.
+- `events`, `stride` and `max_frames` default to `None`. With no events and
+  no stride, every frame is used.
+- An event outside the time range raises. A selection larger than
+  `max_frames` raises rather than truncating.
+
+Software verification:
+
+- On the one-level fixture, for $p = 2$ and $p = 3$, the muscle part meets the
+  inverse-dynamics forces (about 23 N·m, invented fixture) to $10^{-6}$ with
+  reserves below $10^{-6}$ at the three event frames.
+- A symmetric pose gives equal left and right activations to $10^{-6}$.
+- $p = 3$ spreads load across more muscles than $p = 2$: the participation
+  ratio is 4.9 to 5.7 against 4.4 to 5.0.
+- The analytic gradient matches central finite differences.
+- The leg static optimization keeps its own penalty solve, moved unchanged
+  into the shared core and golden-tested to $10^{-12}$.
+
+## Joint Reactions
+
+`joint_reactions.py` (OpenSim `spine`) computes the joint reaction at the
+static-optimization frames only.
+
+Method, per frame:
+
+1. **Kinematics.** $(q, u, \dot u)$ come from the same loader, filter and
+   derivatives as inverse dynamics. `filter_hz` and the external loads must
+   equal those of the static-optimization run, and frame times must match
+   within $10^{-9}$ s; otherwise `ValueError`.
+2. **Muscle forces.** Each muscle is set to its static-optimization tendon
+   force by override actuation. Constraints, couplers included, are disabled.
+3. **Residuals.** `InverseDynamicsSolver` returns the residual generalized
+   force on every coordinate. On the level coordinates it must equal the
+   static-optimization reserve within `reserve_tolerance_nm` ($10^{-6}$ N·m);
+   otherwise the result is refused.
+4. **Reserve actuators.** The residual is applied through one
+   `CoordinateActuator` per coordinate (optimal force 1, override actuation).
+   The realised accelerations must match the measured ones within
+   `acceleration_tolerance` ($10^{-6}$, in the coordinate's angular or
+   translational acceleration units).
+5. **Reaction.** `Joint.calcReactionOnChildExpressedInGround` gives the
+   reaction. It is rotated by $R_{i0} R_{gP}^{\mathsf T}$ (with $R_{gP}$ the
+   ground orientation of the parent offset frame) into the inferior ISB
+   frame, with zero point offset.
+
+Regularisation: a massless body, such as the coupler driver, would make the
+mass matrix singular. In the run copy it gets 1e-9 kg and an isotropic
+inertia of 1e-12 kg·m², and its name is recorded in the provenance.
+
+Content of the reaction:
+
+- Muscles are external forces on the bodies and are not part of it.
+- The reserve (residual) torque is part of it, so the reaction moment is not
+  a separately identified disc or ligament moment. The provenance says so.
+- Whether an enabled passive intervertebral element appears inside the
+  reaction is unverified, because the fixtures carry none.
+
+Effort decomposition per level:
+$$\mathbf M^{\mathrm{ID}} = \mathbf M^{\mathrm{react}} + \mathbf M^{\mathrm{musc}},
+\qquad \mathbf M^{\mathrm{musc}} = \sum_{p \in \mathrm{above}} (\mathbf x_p - \mathbf c) \times \mathbf f_p,$$
+with $\mathbf c$ the joint centre, $\mathbf x_p$ the muscle path points on
+bodies above the joint and $\mathbf f_p$ the muscle force at $p$.
+
+Software verification (invented fixture values):
+
+- A vertical stack gives compression equal to the weight above each level,
+  with zero shear and moment, to $10^{-6}$ N.
+- A tilted stack matches a rigid-body sum.
+- Rotating the model about the ground vertical leaves the loads unchanged.
+- A single 100 N muscle changes the reaction by its hand-computed path-point
+  wrench.
+- The decomposition holds to $10^{-6}$ N·m on a moving trunk.
+
+## Studies, Receipts and Status
+
+`run_spine_study` (`study.py`, `study_stages.py`, `study_receipt.py`;
+OpenSim `spine`) runs the stages in a fixed order for one
+`SpineStudyRequest`:
+
+1. golf input;
+2. movement variant, when requested;
+3. segmental drive;
+4. inverse dynamics, run twice: once per level for the load series and once
+   per coordinate for static optimization;
+5. static optimization;
+6. joint reactions.
+
+Request fields, all recorded in the receipt:
+
+- `study_id`, `motion_path`, `golf_model_path`, `model_path` or `asset_id`,
+  `model_id`;
+- `coupling_law_id` (or `null`, to extract the law from the model couplers)
+  and `restrict_law_to_model` (default false);
+- `cost_exponent` (default 3);
+- `external_loads` (`null` is gravity only);
+- `events`, `stride`, `max_frames`;
+- `pelvis` (`golf` or `fixture`);
+- `drive_tolerance_rad` (default `None`) and `filter_hz` (default `None`);
+- `residual_force_fraction_bw` (0.05) and `residual_moment_fraction` (0.01);
+- `reserve_limit_nm` (1.0) and `reserve_max_share` (0.05);
+- `variant_id`, `variant_parameter` and `variant_handedness` (default
+  `right`).
+
+`output_dir` is not part of the request identity.
+
+Receipt contents:
+
+- **Hashes.** SHA-256 hashes of the motion, the golf model, the segmental
+  model when present and the ExternalLoads XML. The configuration files are
+  hashed too: coupling laws, level maps and context bands, plus the asset
+  manifest when `asset_id` is set and the movement-variant file when
+  `variant_id` is set.
+- **ExternalLoads data file.** The referenced data file is hashed only when it
+  exists beside the XML; otherwise it is omitted silently. Capturing every
+  dependency must be checked separately.
+- **Environment.** The git SHA, and the OpenSim, SciPy and NumPy versions.
+- **Run record.** The law as `id@version`, the `distribution_source`, the
+  asset admission record and per-stage provenance.
+- **Artifacts.** The hashed `<study_id>_coordinates.mot` and
+  `<study_id>_loads.npz`.
+- **Results.** Residual statistics, reserve flags, context comparisons and,
+  with a variant, a `variant` record.
+
+The receipt has no timestamp. Recorded paths are scrubbed of directories.
+Floats are rounded to ten significant digits, and JSON is written with sorted
+keys. Byte-identical receipts are expected only for identical captured
+inputs, code version, library versions and execution environment.
+
+Status is fail-closed (`_judge`):
+
+- **`failed`.** A stage raised (`ValueError`, `OSError` or `RuntimeError`).
+- **`unqualified`.** At least one of the following holds:
+  - a licensed asset is not `QUALIFIED` (missing, unpinned or hash mismatch;
+    a missing asset skips all stages);
+  - any drive frame is invalid;
+  - the pelvis residual exceeds its budget;
+  - any frame is flagged for reserve use under the share and limit rule
+    above;
+  - any static-optimization frame is unsuccessful;
+  - with a variant, a term bound is violated or a driven level coordinate
+    leaves its model range.
+- **`pass`.** None of these.
+
+`pass` is a software statement only. `scientific_status` is always
+`unqualified`, and the receipt refuses `pass` with a non-qualified asset. The
+CLI exits 0 only for `pass`.
+
+## Aggregation and Context Bands
+
+`study_aggregation.py` (OpenSim `spine`) builds per-level tables from
+receipts.
+
+- **Integrity.** An artifact is read only after its SHA-256 matches the
+  receipt.
+- **Exclusions.** Only `pass` receipts are aggregated. Other runs are listed
+  as excluded with their reasons.
+- **Signed peak.** The value at the earliest maximum of absolute magnitude
+  over the whole stored record. A window does not limit it.
+- **Impulse.** Trapezoidal integration over the window (default: the whole
+  record), with linearly interpolated values at the window ends. Joint
+  reaction impulses span only the sparse static-optimization frames and are
+  not continuous-load evidence.
+- **Groups.** Rows are grouped by observable, level, quantity, units,
+  `distribution_source` and law. Each group reports the number of runs, the
+  minimum, median and maximum signed peak, and the mean impulse.
+- **Comparison.** `compare` reports median-peak deltas and ratios. A key is
+  compared only when each side holds exactly one source and law group, so
+  sources are never pooled.
+- **Body weight.** An optional body mass gives the peak compression in BW.
+
+Context bands (`context_bands.py`, shared `spine`;
+`src/config/spine_golf_context_bands.json`) put literature values beside
+joint-reaction peaks:
+
+| Band | Level, Quantity | Value | Source Status |
+|---|---|---|---|
+| Hosea 1990 professional | L3-L4 compression | 7584 N | `verified_from_primary: false` (citing review PMC4335481; 5-iron, 4 professionals) |
+| Hosea 1990 amateur | L3-L4 compression | 6100 N | `verified_from_primary: false` (same; 4 amateurs) |
+| Lim 2012 | L4-L5 compression | greater than 6 BW (downswing) | `verified_from_primary: true`, abstract only |
+| Lim 2012 | L4-L5 anterior shear | about 1.6 BW (follow-through) | `verified_from_primary: true`, abstract only |
+| Lim 2012 | L4-L5 medial shear | about 0.6 BW (follow-through) | `verified_from_primary: true`, abstract only |
+
+Context-band rules:
+
+- **Ratio.** The ratio is $\lvert$model peak$\rvert$ / band. The sign is
+  discarded.
+- **No correspondence.** A ratio does not establish directional or event
+  correspondence. Whether Lim's "medial" matches the repository's
+  positive-right ML shear is not verified.
+- **Hosea shear.** The Hosea peak shears (329 N and 596 N) are not used as
+  bands, because their direction is unstated.
+- **Not acceptance.** Every comparison has `is_acceptance` fixed to false.
+  Bands are not calibration data.
 
 ## Movement Variants
 
-`spine.movement_variants` perturbs the pelvis-to-thorax rotation through one
-golf term by composing a rotation about that term's JCS axis, so the chosen
-coordinate shifts exactly and the other two stay unchanged; angles are never
-added to a rebuilt matrix. Operations are scale, offset and peak shift under a
-C1 raised-cosine window. Version 1 ships five variants
-(`x_factor_top_scale`, `downswing_crunch_offset`, `downswing_crunch_scale`,
-`impact_extension_offset`, `x_factor_peak_shift`); their bounds are declared
-study-design assumptions, not cited ranges of motion. Arms are held
-thorax-relative, so a variant is a perturbation, not a re-matched swing.
-`variant_inputs.check_model_ranges` reports range violations without clipping.
-The study request does not yet accept a variant id.
+`movement_variants.py` (shared `spine`, configuration
+`src/config/spine_movement_variants.json`) perturbs the pelvis-to-thorax
+rotation $R$ through one golf term. It composes a rotation about that term's
+JCS axis, so the chosen coordinate changes and the other two do not. Angles
+are never added to a rebuilt matrix. With $a = s\,\delta$ ($s = 1$ for
+extension):
+
+| Term | Composition |
+|---|---|
+| Extension | $R' = R_z(a)\, R$ |
+| Axial rotation | $R' = R\, R_y(a)$ |
+| Lateral flexion | $R' = R\, R_y(\theta_{AR})^{\mathsf T} R_x(a)\, R_y(\theta_{AR})$ |
+
+Operations:
+
+- **Scale.** $\delta = (k - 1)\,x(t)\,w(t)$.
+- **Offset.** $\delta = d\,w(t)$.
+- **Window.** For scale and offset, $w$ is a C1 raised-cosine window, and
+  frames outside it are bit-identical.
+- **Peak shift.** Moves the peak of the handed term by an integer number of
+  samples, using a piecewise-linear time warp (`np.interp`, knots
+  $[t_s, t_{\mathrm{new}}, t_e] \leftrightarrow [t_s, t_{\mathrm{peak}}, t_e]$)
+  and linear interpolation. It has no C1 guarantee.
+
+Checks:
+
+- The target term is checked with `ensure` to $10^{-6}$ deg.
+- The declared tolerance of $10^{-8}$ deg on the undeclared terms is enforced
+  in the tests only, not at runtime.
+- Gimbal lock inside the window raises. At least three samples are required.
+
+Version 1 ships five variants, all with the `thorax_relative_hold` arm
+policy:
+
+| Variant | Term, Operation | Default | Parameter Bounds | Window Events | Term Bounds |
+|---|---|---|---|---|---|
+| `x_factor_top_scale` | `x_factor_jcs_axial`, scale | 0.8 | 0.5 to 1.5 | address, top, top, impact | ±70 deg |
+| `downswing_crunch_offset` | `trunk_lateral_flexion_jcs`, offset | 5 deg | −15 to 15 deg | top, impact, impact, end | ±45 deg |
+| `downswing_crunch_scale` | `trunk_lateral_flexion_jcs`, scale | 0.0 | 0 to 2 | top, impact, impact, end | ±45 deg |
+| `impact_extension_offset` | `trunk_extension_jcs`, offset | 5 deg | −15 to 15 deg | top, impact, impact, end | −60 to 30 deg |
+| `x_factor_peak_shift` | `x_factor_jcs_axial`, peak shift | 5 samples | −20 to 20 (integer) | address, impact | ±70 deg |
+
+The bounds are declared study-design assumptions, not cited ranges of motion.
+Arms are held thorax-relative, so a variant is a perturbation, not a
+re-matched swing.
+
+In a study:
+
+- The variant parameter is validated when the request is built, and the
+  variant is applied after the golf input. A missing event raises.
+- After the drive, `check_driven_ranges` compares level coordinates with
+  `Coordinate.getRangeMin/Max` without clipping.
+- The `distribution_source` becomes
+  `movement_variant:<id>@<ver>;<term>:<op>(<param>=<v>);handedness=<h>`.
+- The receipt `variant` record holds `id@ver`, the parameter, handedness,
+  `config_sha256`, `distribution_source`, `target_error_deg`,
+  `term_bounds_ok` and `range_check`.
 
 ## Distribution Sensitivity
 
-`spine.distribution_sensitivity` runs one request once per shipped law,
-changing only the law, and refuses the report if the receipts disagree on any
-input hash. For each quantity it reports the spread
-$s(q) = \max_k p_k(q) - \min_k p_k(q)$ and the ratio
-$r(q) = s(q) / \max_k \lvert p_k(q)\rvert$, labelled robust when $r \le 0.1$
-(a declared reporting threshold, not a tolerance). On the invented five-level
-lumbar fixture with the drive tolerance set to $10^{-6}$ rad,
-`fujii2007_lumbar` cannot reproduce the three-axis target and is excluded, and
-the remaining two laws prescribe the same lumbar ratios, so the fixture cannot
-yet show which per-level quantities are robust. A discriminating answer needs
-the pending per-level laws and a model with thoracic levels.
+`distribution_sensitivity.py` (OpenSim `spine`) runs one request once per
+shipped law with `restrict_law_to_model` set. Only `study_id` and
+`coupling_law_id` change between runs. The report is refused
+(`SensitivityIntegrityError`) if the receipts disagree on any input hash or
+any other request field.
+
+For a per-level quantity $q$ with signed peak $p_k(q)$ over the record under
+law $k$:
+$$s(q) = \max_k p_k(q) - \min_k p_k(q), \qquad
+r(q) = \frac{s(q)}{\max_k \lvert p_k(q) \rvert}, \qquad r(q) = 0 \text{ if all } p_k(q) = 0.$$
+
+- **Robust label.** A quantity is robust when $r \le \tau = 0.1$. $\tau$ is
+  a declared reporting threshold, not a tolerance.
+- **Kinematic quantities.** The per-level ISB angles (rad) read back from the
+  hashed `.mot`, with the largest pairwise RMS difference of the time
+  series.
+- **Load quantities.** The aggregation median peaks, compared without
+  pooling.
+- **Included runs.** Only `pass` runs enter a spread, and at least two are
+  required; otherwise no spread is reported.
+- **Status.** `scientific_status` is always `unqualified` and `is_acceptance`
+  is always false.
+
+Fixture result (deterministic, invented five-level lumbar fixture, five-sample
+synthetic motion, $p = 3$, all three shipped laws restricted to the lumbar
+range):
+
+- **Drive tolerance unset (default).** All three runs pass. The geodesic drive
+  residual (maximum / RMS) is:
+  - `bruno2015_regional`: $5.1 \times 10^{-13}$ / $2.3 \times 10^{-13}$ rad;
+  - `uniform_reference`: $1.9 \times 10^{-16}$ / $1.5 \times 10^{-16}$ rad;
+  - `fujii2007_lumbar`: 0.89 / 0.78 rad.
+
+  Of 60 per-level quantities, 54 are labelled sensitive. Every sensitive
+  label is driven by `fujii2007_lumbar`: with one independent coordinate it
+  cannot reproduce the three-axis target. Its spread therefore mixes the
+  distribution assumption with a different realised trunk motion, and must
+  not be read as distribution sensitivity.
+- **Drive tolerance $10^{-6}$ rad.** The Fujii run is `unqualified` (five
+  invalid drive frames) and excluded. The remaining two laws give
+  $r \le 8.5 \times 10^{-11}$ for all 60 quantities, because
+  `bruno2015_regional` is uniform within the lumbar region. Restricted to a
+  lumbar-only model, it prescribes the same ratios as `uniform_reference`.
+
+The fixture therefore cannot yet show which per-level quantities are robust.
+That needs the pending per-level laws (#12743) and a model with thoracic
+levels (#12749, Bruno sensitivity table #12769).
 
 ## Visualization
 
-`spine.viz_data` turns poses into the per-level contribution stack (degrees,
-with its remainder) and load series into time-by-level heatmaps; the only sign
-change is the tested `to_tension_positive`. `spine.plots` draws static Agg
-figures whose titles always state the scientific status, so unqualified data
-is labelled `UNQUALIFIED`.
+`viz_data.py` and `plots.py` (shared `spine`):
+
+- `level_angle_stack` turns in-memory `SegmentalPose` series into the
+  per-level contribution stack (degrees, with its remainder). Receipts store
+  generalized-effort and joint-reaction loads, not poses, so the angle stack
+  cannot be rebuilt from a receipt.
+- `load_heatmap` turns load series into time-by-level heatmaps.
+- The only sign change is the tested `to_tension_positive` ($T = -F_y$).
+- Plots are static Agg figures whose titles state the scientific status, so
+  unqualified data is labelled `UNQUALIFIED`.
+
+The desktop tool `src/tools/spine_viewer/` (#12772) shows hash-verified
+joint-reaction heatmaps from a receipt in an always-visible status banner. It
+has no web counterpart yet (feature-parity gap).
+
+## Software Verification and Scientific Acceptance
+
+Three acceptance tiers are kept separate:
+
+1. **Analytic and synthetic software verification.** Every check quoted in
+   this chapter is in this tier. It shows that the code computes what the
+   equations say on invented inputs.
+2. **Reproduction of the integrated model's own published outputs.** This is
+   Bruno 2015 Table B5, `verified_from_primary: true`: correlations 0.91
+   (lumbar intradiscal pressure), 0.87 (thoracic), 0.88 (L1 load), and EMG
+   0.98, 0.98 and 0.91. The Wilke 1999 L4-L5 intradiscal pressures (Table W1,
+   `verified_from_primary: true` from the local PDF, n = 1, 70 kg male) are
+   transcribed for this tier. No code path consumes them yet. This tier is
+   blocked (#12763).
+3. **Golf context.** The bands above. They are never acceptance.
+
+No scientific acceptance exists. A `pass` receipt, a small geodesic residual,
+a passing test or a render is software evidence only.
+
+## Reproduction and Evidence
+
+Run from the repository root, headless
+(`QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg`). Native tests need OpenSim 4.6.
+Without OpenSim they skip, and a skip is not evidence.
+`UD_REQUIRE_OPENSIM=1` turns an OpenSim-absence skip under
+`tests/opensim/spine` into a failure (SPN-7c).
+
+```bash
+# Whole pathway (shared and OpenSim tests)
+python3 -m pytest tests/shared/python/spine tests/opensim/spine \
+    -q -n 4 -p no:cacheprovider -o addopts=""
+
+# Lane guard: fail instead of skip when OpenSim is absent
+UD_REQUIRE_OPENSIM=1 python3 -m pytest tests/opensim/spine -q -n 0
+
+# Static-optimization core, providers and viewer
+python3 -m pytest tests/unit/engines/opensim/test_static_opt_core.py \
+    tests/unit/injury tests/analysis/test_spinal_load_analysis.py \
+    -q -n 0 -p no:cacheprovider -o addopts=""
+QT_QPA_PLATFORM=offscreen python3 -m pytest tests/tools/spine_viewer \
+    tests/config/feature_parity -q -n 0 -o addopts=""
+
+# Invented fixture with lumped muscles (no SimTK data)
+python3 -c "from src.engines.physics_engines.opensim.python.spine.fixture_model import FixtureSpec, write_fixture_osim; write_fixture_osim(FixtureSpec(), 'study/fixture.osim', muscles=True)"
+
+# One study (request format: docs/research/segmental_spine/README.md)
+python3 -m src.engines.physics_engines.opensim.python.spine.study \
+    --request study/request.json --out study/out
+
+# Distribution sensitivity
+python3 -m src.engines.physics_engines.opensim.python.spine.distribution_sensitivity \
+    --request study/request.json --out study/sensitivity
+
+# Governance and document checks
+python3 -m scripts.check_design_manual_governance
+python3 scripts/check_document_title_case.py
+```
+
+The study needs a user-supplied `golf_humanoid` swing (`.sto` or `.mot`) and
+the golf model it was matched on. `study_aggregation.aggregate_receipts` has
+no command-line entry point.
+
+Claim-to-test map:
+
+| Claim | Test |
+|---|---|
+| Levels, composition, angle-sum example | `tests/shared/python/spine/test_levels.py`, `test_segmental.py` |
+| Coupling laws, shipped data, restriction | `tests/shared/python/spine/test_coupling.py`, `test_coupling_data.py`, `test_coupling_restriction.py` |
+| Distribution, Jacobian, observability | `tests/shared/python/spine/test_distribution.py` |
+| Golf terms and contributions | `tests/shared/python/spine/test_golf_terms.py` |
+| Load contract, context bands | `tests/shared/python/spine/test_loads.py`, `test_context_bands.py` |
+| Movement variants | `tests/shared/python/spine/test_movement_variants.py`, `tests/opensim/spine/test_variant_inputs.py`, `test_study_variant.py` |
+| Visualization | `tests/shared/python/spine/test_viz_data.py`, `test_plots.py` |
+| Fixture, couplers, inventory, coupler extraction | `tests/opensim/spine/test_fixture_model.py`, `test_fixture_coupling.py`, `test_inventory.py`, `test_coupler_extraction.py` |
+| Golf input, drive, motion reader | `tests/opensim/spine/test_golf_input.py`, `test_drive.py`, `test_read_kinematics.py` |
+| Inverse dynamics, static optimization, joint reactions | `tests/opensim/spine/test_inverse_dynamics.py`, `test_static_optimization.py`, `test_joint_reactions.py` |
+| Studies, aggregation, sensitivity, assets | `tests/opensim/spine/test_study.py`, `test_study_aggregation.py`, `test_distribution_sensitivity.py`, `test_assets.py` |
+
+## Failed and Open Experiments
+
+Open:
+
+- **Static optimization at early samples.** Static optimization does not
+  converge at the first two samples of the five-sample synthetic motion on
+  the invented fixture. The cause is not investigated. Passing study and
+  sensitivity tests select the mid and late event frames, so they do not
+  establish successful optimization across the whole motion. No tolerance
+  was changed.
+- **Fujii in the sensitivity report.** At the default drive tolerance,
+  `fujii2007_lumbar` enters the sensitivity report with a 0.89 rad residual
+  and drives every sensitive label (see Distribution Sensitivity).
+- **Gravity-only study.** The documented gravity-only fixture study exits
+  `unqualified`: the pelvis residual exceeds its budget and frames are
+  flagged for reserve use. The residual carries gravitational support plus
+  whole-body inertial demand. Budgets were not widened.
+- **Fujii parity.** The flexion parity defect of `fujii2007_lumbar` is open
+  (see Fujii Parity Defect).
+
+Corrected during development (guards in the research reference, "Failed
+Experiments"):
+
+- **Fujii sign map.** The first transcription used Fujii's flexion-positive
+  convention directly. The ISB map is now explicit in
+  `distribution.isb_sign`.
+- **Coupler closure.** At OpenSim's default assembly accuracy the coupled
+  fixture missed the $10^{-9}$ closure tolerance. The tolerance was kept,
+  and the fixture now assembles at $10^{-12}$.
+- **Muscles in generalized effort.** The first inverse-dynamics pass included
+  muscle forces. Muscles are now excluded.
+- **Fixture tendon slack.** Tests first retuned slack lengths after building
+  the fixture. The generator now sets them analytically.
+- **Legacy golf terms and NaN.** Delegating the legacy X-factor and crunch
+  terms first rejected NaN input, changing behaviour. They now propagate NaN.
+- **Model provider reporting `SAFE`.** Model-based loads without a risk
+  assessment first reported `SAFE`. They now report `NOT_ASSESSED`.
 
 ## Owner-Blocked Work
 
 The following are blocked on owner actions or licensed assets and are not
 claimed:
 
-- SimTK download, licence acceptance and hash pinning of the Bruno 2015
-  full-body OS4 v2 and Senteler 2016 models (#12749). Until then the level
-  maps of these models are `UNVERIFIED` and any study on them is
+- **Licensed models (#12749).** SimTK download, licence acceptance and hash
+  pinning of the Bruno 2015 full-body OS4 v2 and Senteler 2016 models. Until
+  then their level maps are `UNVERIFIED` and any study on them is
   `unqualified`.
-- Primary PDFs for Bruno Supplemental Table 2, Pearcy and Tibrewal (1984),
-  Hosea et al. (1990) and the crunch-factor source (#12737).
-- Inventory and coupler or stiffness extraction of the licensed models
-  (#12755); full-body Bruno driving with arms, legs and club wrench (#12758).
-- Reproduction of the Bruno 2015 published outputs (#12763) and the Bruno
-  versus Senteler cross-model comparison (#12770).
-- Native static optimization and joint-reaction runs on the Bruno model at the
-  swing events, with reserve share reported, on the owner workstation.
+- **Primary sources (#12737),** per the `data_extraction.md` Owner Action
+  list:
+  1. Bruno 2015 Supplemental Tables 1-4 and the main-text PDF re-check of
+     Tables B1-B5;
+  2. Pearcy and Tibrewal (1984) full text;
+  3. the Fujii 2007 PDF, to confirm Table F1, read Table 1 and confirm the
+     author list and DOI;
+  4. Wilke 1999: the 30 and 90 degree values quoted by Bruno, and a DOI;
+  5. the Hosea, Gatt and Galli (1990) chapter;
+  6. the Lim, Chow and Chae (2012) full text;
+  7. Sugaya et al. (1999) or the original crunch-factor paper, and Wu et
+     al. (2002) for the ISB spine axes.
+- **Pending laws (#12743).** The per-level laws `bruno2015_per_level` and
+  `pearcy1984_lumbar`.
+- **Licensed-model inventory (#12755).** Inventory and coupler or stiffness
+  extraction of the licensed models.
+- **Full-body driving (#12758).** Full-body Bruno driving with arms, legs and
+  club wrench.
+- **Reproduction and comparison.** Reproduction of the Bruno 2015 published
+  outputs (#12763), and the Bruno versus Senteler cross-model comparison
+  (#12770).
+- **Native Bruno runs.** Native static-optimization and joint-reaction runs
+  on the Bruno model at the swing events, with reserve share reported
+  (#12761), and the Bruno distribution-sensitivity table (#12769). Both run
+  on the owner workstation.
 
 ## Limitations
+
+Model assumptions:
 
 - All per-level kinematics are model assumptions produced by a coupling law,
   not measurements. Endpoint inverse kinematics does not identify individual
   vertebrae.
+- The terminal-to-thorax calibration of ADR-0055 is not estimated. The drive
+  alignment $A$ defaults to the identity, and the pelvis frames and the base
+  and terminal connections are assumed rigid and coincident. A wrong $A$
+  biases the distribution without a residual.
+- The distribution is a local solve. Bounds default to unbounded, and the
+  default drive tolerance flags only unconverged frames.
+- `fujii2007_lumbar` has the flexion parity defect described above.
+
+Loads and numerics:
+
+- Generalized effort excludes muscles and keeps every other enabled force
+  element. Its zero force array is a representation, not zero compression.
+- Static optimization uses rigid tendons and no activation dynamics.
+  Activations below the minimum activation model $a = 0$.
+- The joint reaction includes reserve torque and exists only at the
+  static-optimization frames.
+- Spline derivatives are less reliable at the record ends. Peak shift is not
+  C1.
+
+Fixture, literature and receipts:
+
 - The fixture geometry, inertia and lumped muscles are invented and not
-  anatomical; fixture results establish software correctness only.
-- Static optimization uses rigid tendons and no activation dynamics; passive
-  intervertebral elements are not modelled in the fixtures.
+  anatomical. Passive intervertebral elements are not modelled in the
+  fixtures.
 - Literature magnitudes are context bands, never acceptance.
-- Acceptance tiers stay separate: analytic and synthetic verification;
-  reproduction of the integrated model's own published outputs; golf context.
+- Receipt hashes pin bytes, not meaning.
+
+Known code-level gaps (follow-up candidates, behaviour unchanged here):
+
+- `fujii2007_lumbar` needs an even/odd law form for coupled flexion.
+- Segmental contributions exclude $B$, $E$ and $A$, so they do not close on a
+  calibrated pelvis-to-thorax term.
+- No calibration of $A$ is enforced or recorded beyond the identity default.
+- The default moment-budget height is evaluated at the last processed sample,
+  not the first frame as documented, and assumes ground Y is up.
+- The movement-variant tolerance on undeclared terms is enforced in tests
+  only, not at runtime.
+- A missing ExternalLoads data file is silently left unhashed.
+- Static optimization does not converge at the first two fixture samples.
 
 ## Non-Claims
 
-No numerical result about any golfer, no validated spine load, no qualified
-coupling law and no physiological distribution. A `pass` receipt, a small
-geodesic residual or a successful render is not scientific acceptance.
+This chapter makes none of the following claims:
+
+- a numerical result about any golfer;
+- a validated spine load;
+- a qualified coupling law;
+- a physiological distribution.
+
+A `pass` receipt, a small geodesic residual, a passing test, a successful
+render or owner sign-off of this text is not scientific acceptance. The
+registry blocker `UP-D1-segmental-spine-inventory` stays open.
