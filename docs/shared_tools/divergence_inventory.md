@@ -82,7 +82,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `lifting` | 0 | 0 | 0 | 39 | 0 | 0 |
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
-| `loop_nullspace` | 0 | 0 | 0 | 2 | 0 | 0 |
+| `loop_nullspace` | 0 | 0 | 0 | 3 | 0 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_appearance` | 0 | 0 | 0 | 16 | 0 | 0 |
 | `model_generation` | 25 | 54 | 16 | 20 | 1 | 79 |
