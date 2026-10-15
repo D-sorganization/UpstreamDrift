@@ -29,7 +29,7 @@ separated from current guidance.
 
 - [`adapters/`](adapters/authoring_guide.md) - 1 page
 - [`adr/`](adr/README.md) - 56 pages
-- [`agent_context/`](agent_context/README.md) - 9 pages
+- [`agent_context/`](agent_context/) - 8 pages
 - [`agents/`](agents/shared-infrastructure.md) - 1 page
 - [`api/`](api/README.md) - 7 pages
 - [`architecture/`](architecture/) - 22 pages
