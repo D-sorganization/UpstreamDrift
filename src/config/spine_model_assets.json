@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "policy": "Owner-provided local files only; no automated SimTK download. A null model_sha256 means UNPINNED (never qualified). Hashes are pinned in SPN-6b from the owner's files. No SimTK file content or value is committed here.",
+  "assets": {
+    "bruno2015_fullbody_os4_v2": {
+      "simtk_url": "https://simtk.org/projects/spine_ribcage",
+      "env_var": "UD_SPINE_BRUNO_SOURCE",
+      "model_sha256": null,
+      "resource_sha256": {},
+      "licence_id": {
+        "model": "simtk-mit-use-agreement-unverified",
+        "geometry": "simtk-geometry-terms-unverified"
+      },
+      "licence_text_sha256": null,
+      "citation": {
+        "text": "Bruno AG, Bouxsein ML, Anderson DE (2015) Development and validation of a musculoskeletal model of the fully articulated thoracolumbar spine and rib cage. J Biomech Eng 137(8):081001",
+        "doi": "10.1115/1.4030408",
+        "doi_verified": "Crossref 2026-10-15"
+      },
+      "owner_accepted_terms_on": null,
+      "note": "SimTK spine_ribcage, Fullbody_OS4.x_v2.0."
+    },
+    "senteler2016_lumbspine_3dof": {
+      "simtk_url": "https://simtk.org/projects/intervertebr_jr",
+      "env_var": "UD_SPINE_SENTELER3_SOURCE",
+      "model_sha256": null,
+      "resource_sha256": {},
+      "licence_id": {
+        "model": "simtk-mit-use-agreement-unverified",
+        "geometry": "simtk-geometry-terms-unverified"
+      },
+      "licence_text_sha256": null,
+      "citation": {
+        "text": "Senteler M, Weisse B, Rothenfluh DA, Snedeker JG (2016) Intervertebral reaction force prediction using an enhanced assembly of OpenSim models. Comput Methods Biomech Biomed Engin 19(5):538-548",
+        "doi": "10.1080/10255842.2015.1043906",
+        "doi_verified": "Crossref 2026-10-15"
+      },
+      "owner_accepted_terms_on": null,
+      "note": "SimTK intervertebr_jr, 3-DOF-per-level lumbar spine."
+    },
+    "senteler2016_lumbspine_30dof": {
+      "simtk_url": "https://simtk.org/projects/intervertebr_jr",
+      "env_var": "UD_SPINE_SENTELER30_SOURCE",
+      "model_sha256": null,
+      "resource_sha256": {},
+      "licence_id": {
+        "model": "simtk-mit-use-agreement-unverified",
+        "geometry": "simtk-geometry-terms-unverified"
+      },
+      "licence_text_sha256": null,
+      "citation": {
+        "text": "Senteler M, Weisse B, Rothenfluh DA, Snedeker JG (2016) Intervertebral reaction force prediction using an enhanced assembly of OpenSim models. Comput Methods Biomech Biomed Engin 19(5):538-548",
+        "doi": "10.1080/10255842.2015.1043906",
+        "doi_verified": "Crossref 2026-10-15"
+      },
+      "owner_accepted_terms_on": null,
+      "note": "SimTK intervertebr_jr, 30-DOF lumbar spine."
+    }
+  }
+}
