@@ -8,11 +8,17 @@
 from __future__ import annotations
 
 import logging
+import math
+import re
+import sys
 from pathlib import Path
 from typing import Any
 
 import numpy as np
-from humanoid_character_builder.core.body_parameters import BodyParameters
+
+from src.shared.python.humanoid_character_builder.core.body_parameters import (
+    BodyParameters,
+)
 
 from ._mesh_types import (
     GeneratedMeshResult,
@@ -21,6 +27,10 @@ from ._mesh_types import (
 )
 
 logger = logging.getLogger(__name__)
+
+#: MakeHuman modifier keys are path-like identifiers ("macrodetails/Gender").
+#: Anything else is rejected before it is embedded in a generated script.
+_MAKEHUMAN_MODIFIER_RE = re.compile(r"^[A-Za-z0-9_./-]+$")
 
 try:
     import trimesh as _trimesh_module  # type: ignore[import-untyped]
@@ -170,7 +180,7 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
 
             mesh = _trimesh_module.Trimesh(vertices=vertices, faces=faces)  # type: ignore[union-attr]
 
-            from humanoid_character_builder.core.segment_definitions import (
+            from src.shared.python.humanoid_character_builder.core.segment_definitions import (
                 HUMANOID_SEGMENTS,
             )
 
@@ -311,7 +321,7 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
         """Segment mesh into body parts using vertex groups or geometry."""
         if not (visual_dir is not None):
             raise ValueError("visual_dir must be provided")
-        from humanoid_character_builder.core.segment_definitions import (
+        from src.shared.python.humanoid_character_builder.core.segment_definitions import (
             HUMANOID_SEGMENTS,
         )
 
@@ -489,10 +499,20 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
     def _convert_params_to_makehuman(params: BodyParameters) -> dict[str, float]:
         """Convert BodyParameters to MakeHuman modifier values.
 
+        This is the single implementation of the conversion (issue #12698). It
+        is a ``staticmethod`` because it is a pure function of *params*: its
+        only production caller is :meth:`generate` (via ``self``), and the unit
+        tests call it on the class without a MakeHuman install.
+
         MakeHuman uses modifiers in range [-1, 1] or [0, 1].
         `__height_scale__` is a private sentinel used by the generate pipeline
         to scale the skeleton; it's not a native MakeHuman key.
+
+        Raises:
+            ValueError: If *params* is ``None``.
         """
+        if params is None:
+            raise ValueError("params must be provided")
         modifiers: dict[str, float] = {}
 
         # Height: MakeHuman default human is ~1.68 m.
@@ -629,12 +649,27 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
 
         Returns:
             Python source code string ready to be written to a .py file.
+
+        Raises:
+            ValueError: If *modifiers* is ``None``, a key is not a plain
+                MakeHuman modifier identifier, or a value is not a finite
+                number.  Paths are embedded via ``repr`` so quotes, backslashes
+                and newlines cannot escape the string literal.
         """
-        if not (modifiers is not None):
+        if modifiers is None:
             raise ValueError("modifiers must be provided")
-        modifiers_repr = repr(modifiers)
-        obj_path_str = str(body_obj_path).replace("\\", "/")
-        json_path_str = str(groups_json_path).replace("\\", "/")
+        for key, value in modifiers.items():
+            if not isinstance(key, str) or not _MAKEHUMAN_MODIFIER_RE.fullmatch(key):
+                raise ValueError(f"Invalid MakeHuman modifier key: {key!r}")
+            if (
+                isinstance(value, bool)
+                or not isinstance(value, int | float)
+                or not math.isfinite(float(value))
+            ):
+                raise ValueError(f"Invalid MakeHuman modifier value for {key!r}")
+        modifiers_repr = repr({key: float(value) for key, value in modifiers.items()})
+        obj_path_literal = repr(str(body_obj_path).replace("\\", "/"))
+        json_path_literal = repr(str(groups_json_path).replace("\\", "/"))
         return f"""# Auto-generated MakeHuman scripted-mode script
 import mh
 import human as mh_human
@@ -662,22 +697,26 @@ def generate_human():
             import sys
             sys.stdout.write(f'Warning: modifier {{key}}={{value}}: {{exc}}\\n')
 
-    exportOBJ(h, '{obj_path_str}')
+    exportOBJ(h, {obj_path_literal})
 
     groups = {{seg: list(range(10)) for seg in ['head', 'torso', 'pelvis']}}
     import json
-    with open('{json_path_str}', 'w') as fh:
+    with open({json_path_literal}, 'w') as fh:
         json.dump(groups, fh)
 
 generate_human()
 """  # noqa: E501
 
-    @staticmethod
     def _run_makehuman_script(
+        self,
         script_path: Path,
         timeout: int = 120,
     ) -> bool:
-        """Run a MakeHuman Python script via subprocess.
+        """Run a generated script inside MakeHuman's headless scripting mode.
+
+        The script imports MakeHuman's own ``mh``/``human`` modules, so it must
+        run through the MakeHuman entry point (``makehuman.py --nogui
+        --script``), not a bare interpreter.
 
         Args:
             script_path: Path to the .py script to execute.
@@ -685,14 +724,31 @@ generate_human()
 
         Returns:
             True if the script exited with return code 0, False otherwise.
+
+        Raises:
+            ValueError: If *script_path* is ``None`` or *timeout* is not positive.
+            RuntimeError: If no MakeHuman installation is configured.
         """
-        if not (script_path is not None):
+        if script_path is None:
             raise ValueError("script_path must be provided")
+        if timeout <= 0:
+            raise ValueError("timeout must be positive")
+        if self.makehuman_path is None:
+            raise RuntimeError("MakeHuman path not configured")
         import subprocess
 
+        mh_entry = self.makehuman_path / "makehuman.py"
+        if not mh_entry.exists():
+            mh_entry = self.makehuman_path / "makehuman"
         try:
             result = subprocess.run(
-                ["python", str(script_path)],
+                [
+                    sys.executable,
+                    str(mh_entry),
+                    "--nogui",
+                    "--script",
+                    str(script_path),
+                ],
                 capture_output=True,
                 text=True,
                 timeout=timeout,
