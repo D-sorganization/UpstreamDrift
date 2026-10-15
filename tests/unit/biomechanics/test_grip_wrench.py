@@ -191,6 +191,7 @@ def test_split_method_validated_and_recorded():
         "logged",
         "bushing",
         "contact",
+        "loop_nullspace_family",
         "unavailable",
     }
     g = _analyze(None, None, split_method="efc_force", metadata={"solver": "x"})

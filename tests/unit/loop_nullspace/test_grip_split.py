@@ -122,9 +122,7 @@ def test_phi_and_right_inverse_identities(example) -> None:
     np.testing.assert_allclose(g @ gs, np.eye(6), atol=TOL)
     np.testing.assert_allclose(phi @ gs, np.zeros((6, 6)), atol=TOL)
     stacked = np.vstack([g, phi])
-    np.testing.assert_allclose(
-        np.linalg.inv(stacked), np.hstack([gs, k]), atol=1e-11
-    )
+    np.testing.assert_allclose(np.linalg.inv(stacked), np.hstack([gs, k]), atol=1e-11)
 
 
 def test_hand_loads_match_golden_and_round_trip(gold, example) -> None:

@@ -316,8 +316,8 @@ def min_metric_torque(snapshot, W: np.ndarray | AllocationMetric) -> np.ndarray
 ```python
 def grasp_map(grip_frame: GripFrame, r_L, r_R) -> np.ndarray          # (6, 12)
 def split_basis(G: np.ndarray) -> np.ndarray                           # (12, 6)
-def net_club_wrench(snapshot) -> QuantityRecord                        # INVARIANT
-def hand_wrenches(net: np.ndarray, s: np.ndarray) -> tuple[np.ndarray, np.ndarray]
+def net_club_wrench(snapshot, club_ne) -> QuantityRecord               # INVARIANT
+def hand_wrenches(net: np.ndarray, s: np.ndarray, G: np.ndarray) -> tuple[np.ndarray, np.ndarray]
 def split_coordinates(W_L: np.ndarray, W_R: np.ndarray) -> np.ndarray
 ```
 
@@ -329,6 +329,12 @@ def split_coordinates(W_L: np.ndarray, W_R: np.ndarray) -> np.ndarray
   `Phi K = I`, `G G# = I`, round trip `s -> W -> s` exact to `1e-12`; `K` is
   independent of the origin shift; net wrench equals the golden
   bare-club Newton-Euler value (`worked_example.net_wrench_frame`).
+- The snapshot carries no club kinematics, so `net_club_wrench` takes the
+  engine's bare-club Newton-Euler keywords `club_ne`
+  (`adapter.club_newton_euler`) and checks their mass against
+  `snapshot.bare_club`; `hand_wrenches` needs `G` because `K` depends on the
+  half separation. `closing_hand_map(hand, d, net) -> (A, s0)` gives
+  `s = A lambda + s0` with `lambda = -y_hand`.
 - Scaling by `C-SCALE-FORCE-MOMENT`. Add `"loop_nullspace_family"` to
   `grip_wrench.SplitMethod`; do not duplicate `allocate_min_norm`.
 
