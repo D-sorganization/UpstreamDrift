@@ -262,15 +262,16 @@ class PinocchioForceAdapter:
     def verify_acceleration_parity(
         self, q: Array, v: Array, tau_effective: Array, a_target: Array
     ) -> float:
-        """``||a_cd - a_target||_inf`` with ``a_cd`` from ``constraintDynamics``.
+        """``||constraintDynamics(q, v, tau) - a_target||_inf`` (one semantics).
 
-        The native constrained forward acceleration is the reference (#12558);
-        the earlier unconstrained ``aba`` with ``J_c^T lambda`` added only
-        agreed because the caller had folded the multiplier in.  Here
-        ``tau_effective`` may be the applied efforts alone, or applied efforts
-        plus ``J_c^T lambda``: when the target is closure-consistent the
-        solver's own multiplier correction is then zero, so both give the same
-        acceleration.  Raises ``ValueError`` on nonfinite input or result.
+        ``tau_effective`` is the *applied* joint effort only: actuator torques
+        plus any other external generalised force (ground reaction, root
+        residual).  The closure reaction ``J_c^T lambda`` is NOT part of it;
+        Pinocchio's constrained forward dynamics supplies its own multiplier,
+        so ``a* = constraintDynamics(q, v, tau)`` is the acceleration the loop
+        really produces and the target is compared with it (#12558).  A target
+        built with an inconsistent multiplier therefore differs from ``a*``.
+        Raises ``ValueError`` on nonfinite input or result.
         """
         configuration = self._checked(q, "configuration")
         velocity = self._checked(v, "velocity")

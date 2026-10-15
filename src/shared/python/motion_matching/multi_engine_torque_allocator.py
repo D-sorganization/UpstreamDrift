@@ -28,7 +28,10 @@ from numpy.typing import NDArray
 
 from src.shared.python.contracts import require
 from src.shared.python.engine_core.capabilities import Capability, CapabilityLevel
-from src.shared.python.loop_nullspace.snapshot import canonical_closure_jacobian
+from src.shared.python.loop_nullspace.snapshot import (
+    canonical_closure_jacobian,
+    parity_effort,
+)
 from src.shared.python.motion_matching.contact_force_allocator import (
     AllocationObjective,
     ContactForceAllocation,
@@ -704,11 +707,11 @@ class MultiEngineTorqueAllocator:
                 root_full = np.concatenate(
                     [alloc.delta_tau_root, np.zeros(self.adapter.nv - 6)]
                 )
-                tau_eff = (
-                    tau_full
-                    + j_g.T @ alloc.f_ground
-                    + j_w.T @ alloc.lambda_grip
-                    + root_full
+                tau_eff = parity_effort(
+                    self.adapter,
+                    tau_full + j_g.T @ alloc.f_ground + root_full,
+                    j_w,
+                    alloc.lambda_grip,
                 )
                 parity_err = self.adapter.verify_acceleration_parity(
                     q=q_k, v=v_k, tau_effective=tau_eff, a_target=a_k

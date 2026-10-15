@@ -32,6 +32,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import postcondition, precondition, require
+from src.shared.python.loop_nullspace.snapshot import parity_effort
 from src.shared.python.motion_matching.acceptance import Horizon
 
 SCHEMA_VERSION = "pinocchio-g2-g3-continuation/1.0.0"
@@ -851,7 +852,12 @@ def _eval_step_parity_and_residual(
         else alloc.delta_tau_root
     )
     root_full = np.concatenate([root_force, np.zeros(adapter.nv - 6)])
-    tau_eff = tau_full + j_g.T @ alloc.f_ground + j_w.T @ alloc.lambda_grip + root_full
+    tau_eff = parity_effort(
+        adapter,
+        tau_full + j_g.T @ alloc.f_ground + root_full,
+        j_w,
+        alloc.lambda_grip,
+    )
     parity_err = float(
         adapter.verify_acceleration_parity(
             q=q_k, v=v_k, tau_effective=tau_eff, a_target=a_k

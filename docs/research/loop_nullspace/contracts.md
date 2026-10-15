@@ -226,9 +226,15 @@ Implementation notes (Pinocchio reference, #12558):
   closure frame (body-fixed; it coincides with the grip frame on a closed
   loop). `loop_support_indices` are the coordinates on the tree path between
   the two constrained joints.
-- `verify_acceleration_parity` compares with `constraintDynamics`. It accepts
-  the applied efforts alone or with `J_c^T lambda` folded in, since a
-  closure-consistent target leaves the solver's own correction at zero.
+- `verify_acceleration_parity` has one semantics: it takes applied joint
+  efforts only and compares the target with `constraintDynamics(q, v, tau)`.
+  A target built with an inconsistent multiplier is flagged. Legacy adapters
+  keep the raw-equation audit; `parity_effort` folds `J^T lambda` in for them
+  only.
+- Spatial fixture check: `test_snapshot_vs_spatial_fixture.py` drives the NSX-12
+  Pinocchio model through the real adapter methods and compares `M`, `h`,
+  `J_c` and `Jdot_v` at `1e-9` scaled; only the spec-driven club inertia split
+  is supplied from the fixture.
 
 ## NSX-14 Admission (#12559)
 

@@ -38,6 +38,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "canonical_closure_jacobian",
+    "parity_effort",
     "has_closed_loop_protocol",
     "snapshot_from_adapter",
 ]
@@ -99,6 +100,21 @@ def canonical_closure_jacobian(adapter: Any, q: ArrayLike) -> Array:
         return np.asarray(native, dtype=np.float64)
     j_c, _, _ = _canonicalise(adapter, q, native, np.zeros(6))
     return np.asarray(j_c, dtype=np.float64)
+
+
+def parity_effort(
+    adapter: Any, tau_applied: ArrayLike, j_grip: ArrayLike, lambda_grip: ArrayLike
+) -> Array:
+    """Effort to pass to ``verify_acceleration_parity`` for ``adapter``.
+
+    A closed-loop adapter (``has_closed_loop_protocol``) solves for the closure
+    reaction itself, so it receives the applied efforts only.  A legacy adapter
+    audits the raw equation and needs ``J^T lambda`` folded in.
+    """
+    tau = np.asarray(tau_applied, dtype=np.float64)
+    if has_closed_loop_protocol(adapter):
+        return tau
+    return tau + np.asarray(j_grip).T @ np.asarray(lambda_grip)
 
 
 def _require_full(adapter: Any) -> None:

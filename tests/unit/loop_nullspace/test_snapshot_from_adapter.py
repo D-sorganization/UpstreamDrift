@@ -287,17 +287,11 @@ def test_state_shape_is_validated(adapter, state) -> None:
 def test_verify_acceleration_parity_agrees_with_constraint_dynamics(
     adapter, state, reference
 ) -> None:
-    """Corrected parity: native ``constraintDynamics`` to 1e-9 scaled (#12558)."""
+    """One semantics: applied efforts only, against ``constraintDynamics``."""
     q, v = state
-    a = reference["a"]
-    scale = float(np.max(np.abs(a)))
-    # applied efforts only
+    a = reference["a"]  # = constraintDynamics(q, v, tau) from the raw reference
     err = adapter.verify_acceleration_parity(q, v, reference["tau"], a)
-    assert err / max(1.0, scale) < ATOL
-    # applied efforts plus the closure reaction (allocator contract): idempotent
-    full = reference["tau"] + reference["J"].T @ reference["lam"]
-    err_full = adapter.verify_acceleration_parity(q, v, full, a)
-    assert err_full / max(1.0, scale) < ATOL
+    assert err / max(1.0, float(np.max(np.abs(a)))) < ATOL
 
 
 def test_verify_acceleration_parity_detects_a_wrong_target(
@@ -307,3 +301,33 @@ def test_verify_acceleration_parity_detects_a_wrong_target(
     wrong = reference["a"].copy()
     wrong[10] += 0.5
     assert adapter.verify_acceleration_parity(q, v, reference["tau"], wrong) > 0.1
+
+
+def test_verify_acceleration_parity_flags_an_inconsistent_multiplier(
+    adapter, state, reference
+) -> None:
+    """A target built as ``M^-1 (tau + J^T (lambda + d) - h)`` is not ``a*``."""
+    q, v = state
+    mass, bias, jac = reference["M"], reference["h"], reference["J"]
+    rng = np.random.default_rng(7)
+    lam_bad = reference["lam"] + 0.05 * np.max(np.abs(reference["lam"])) * rng.normal(
+        size=6
+    )
+    a_bad = np.linalg.solve(mass, reference["tau"] + jac.T @ lam_bad - bias)
+    # sanity: the consistent multiplier reproduces a*, the perturbed one does not
+    a_good = np.linalg.solve(mass, reference["tau"] + jac.T @ reference["lam"] - bias)
+    scale = max(1.0, float(np.max(np.abs(reference["a"]))))
+    assert np.max(np.abs(a_good - reference["a"])) / scale < ATOL
+    err = adapter.verify_acceleration_parity(q, v, reference["tau"], a_bad)
+    assert err / scale > 1e-6
+
+
+def test_parity_effort_folds_grip_only_for_legacy_adapters(adapter) -> None:
+    from src.shared.python.loop_nullspace.snapshot import parity_effort
+
+    tau, jac, lam = np.ones(3), np.eye(6)[:, :3], np.arange(6.0)
+    np.testing.assert_array_equal(parity_effort(adapter, tau, jac, lam), tau)
+    legacy = create_engine_force_adapter("pinocchio", allow_synthetic=True, nv=44)
+    np.testing.assert_array_equal(
+        parity_effort(legacy, tau, jac, lam), tau + jac.T @ lam
+    )
