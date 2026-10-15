@@ -448,8 +448,23 @@ Implementation notes (`loop_nullspace/envelopes.py`, #12565):
   unverified hypothesis.
 - Benchmark (recorded, not gated): 200 frames of the planar proxy fixture
   (time-varying `x_p`, torque rows only) solve all joint-torque envelopes plus
-  the Chebyshev LP in about 3.7 s on the 4-core shared brick host. The 200-frame
-  anthropometric Pinocchio fixture is not yet available to NSX-22.
+  the Chebyshev LP in about 3.7 s on the 4-core shared brick host. The real 200-frame
+  anthropometric run is blocked (below).
+- **Real anthro benchmark: BLOCKED, not run.** The chain
+  `snapshot_from_adapter -> admit -> decompose -> FeasibleSet -> static_envelopes`
+  was exercised on `ground_support/dynamics_record.npz` with
+  `full_body_spec_hipcal_scaled.json` (Pinocchio, 41 coordinates, 35 actuated,
+  capacity rows exist for all 35). Frames 0, 150, 300, 450 and 600 (state
+  projected with `project_to_closure`, acceleration from the recorded efforts)
+  all fail at `decompose` with `BalanceInconsistentError`, scaled residual
+  92, 217, 202, 62 and 42: the six unactuated root rows are balanced by
+  foot-ground loads, and `snapshot_from_adapter` leaves `J_g` unset (foot
+  contacts are outside that seam; the run uses compliant contact spheres).
+  No substitute was made. Unblocking needs an adapter foot Jacobian `J_g` plus
+  contact cones (`H-FRICTION-CONE`) for the anthro model.
+  `tests/integration/test_loop_nullspace_anthro_envelope_blocker.py` pins this
+  and must be replaced by the 200-frame benchmark (evenly strided frames
+  `0, 3, ..., 597`) once `J_g` exists.
 - Non-claim: static envelopes over-approximate trajectory-feasible ranges when
   smoothness priors are active (NSX-25).
 
