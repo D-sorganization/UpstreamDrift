@@ -45,6 +45,17 @@ AXES = [
 P_STAR = sp.Matrix([R(3, 5), R(1, 10), R(-1, 2)])
 ROOT = sp.Matrix([0, 0, 0])
 FEET = [sp.Matrix([R(1, 5), R(1, 10), R(-1)]), sp.Matrix([R(-3, 10), R(-1, 5), R(-1)])]
+# Lower-body variant (NSX-60): a second point per foot, offset in the ground plane.
+FOOT_SECOND_OFFSET = [
+    sp.Matrix([R(1, 5), R(1, 5), 0]),
+    sp.Matrix([R(1, 5), R(-1, 10), 0]),
+]
+FEET4 = [
+    FEET[0],
+    FEET[0] + FOOT_SECOND_OFFSET[0],
+    FEET[1],
+    FEET[1] + FOOT_SECOND_OFFSET[1],
+]
 
 
 def _skew(v: sp.Matrix) -> sp.Matrix:
@@ -69,7 +80,7 @@ def _root_block(point: sp.Matrix) -> sp.Matrix:
     return sp.Matrix.vstack(top, bottom)
 
 
-def build(floating: bool, feet: bool) -> dict[str, Any]:
+def build(floating: bool, feet: bool, points_per_foot: int = 1) -> dict[str, Any]:
     lead = _arm_columns(sp.Matrix([R(-1, 10), 0, 0]), 0)
     trail = _arm_columns(sp.Matrix([R(1, 10), 0, 0]), 3)
     root = _root_block(P_STAR) if floating else sp.zeros(6, 0)
@@ -84,7 +95,7 @@ def build(floating: bool, feet: bool) -> dict[str, Any]:
                 sp.Matrix.hstack(
                     sp.Matrix.hstack(sp.eye(3), -_skew(f - ROOT)), sp.zeros(3, 14)
                 )
-                for f in FEET
+                for f in (FEET if points_per_foot == 1 else FEET4)
             ]
         )
     else:
@@ -99,8 +110,8 @@ def build(floating: bool, feet: bool) -> dict[str, Any]:
     }
 
 
-def counts(floating: bool, feet: bool) -> dict[str, Any]:
-    st = build(floating, feet)
+def counts(floating: bool, feet: bool, points_per_foot: int = 1) -> dict[str, Any]:
+    st = build(floating, feet, points_per_foot)
     j_c, j_g, n = st["J_c"], st["J_g"], st["n"]
     u = st["unactuated"]
     m, n_g = j_c.rows, j_g.rows
@@ -165,6 +176,7 @@ def generate() -> dict[str, Any]:
         "fixed_base_arms_only": counts(False, False),
         "floating_root_no_feet": counts(True, False),
         "floating_root_two_point_feet": counts(True, True),
+        "floating_root_four_point_feet": counts(True, True, 2),
     }
     foot_axis = (FEET[0] - FEET[1]).T
     return cm.dump(
