@@ -54,6 +54,13 @@ from src.shared.python.spine.loads import (
     SpinalLoadSeries,
     from_wrench_in_frame,
 )
+from src.shared.python.spine.movement_variants import (
+    MovementVariant,
+    VariantResult,
+    apply_variant,
+    load_movement_variants,
+    movement_variant,
+)
 from src.shared.python.spine.segmental import (
     LevelTransform,
     SegmentalKinematicsSeries,
@@ -80,6 +87,7 @@ __all__ = [
     "LevelTransform",
     "LinearCouplingLaw",
     "LoadObservable",
+    "MovementVariant",
     "ObservabilityReport",
     "PolynomialCouplingLaw",
     "SegmentalKinematicsSeries",
@@ -90,7 +98,9 @@ __all__ = [
     "SpinalRegion",
     "StackData",
     "StateDependentCouplingLaw",
+    "VariantResult",
     "annotate",
+    "apply_variant",
     "available_laws",
     "context_bands",
     "contribution_remainder",
@@ -103,9 +113,11 @@ __all__ = [
     "level_angle_stack",
     "level_rotations",
     "levels_between",
+    "movement_variant",
     "load_context_bands",
     "load_coupling_laws",
     "load_heatmap",
+    "load_movement_variants",
     "parse_level",
     "regional_fraction",
     "registered_terms",
