@@ -65,8 +65,10 @@ class Capability(str, Enum):
     BATCHED_ROLLOUT = "batched_rollout"
     DIFFERENTIABLE_ROLLOUT = "differentiable_rollout"
     DYNAMICS_PRIMITIVES = "dynamics_primitives"
+    CLOSED_LOOP_SNAPSHOT = "closed_loop_snapshot"
 
 
+EngineCapability = Capability
 CapabilityRef: TypeAlias = Capability | str
 
 
@@ -118,6 +120,7 @@ ENGINE_CAPABILITY_FIELDS: Mapping[Capability, str] = {
     Capability.FORCE_VISUALIZATION: "force_visualization",
     Capability.MODEL_POSITIONING: "model_positioning",
     Capability.MEASUREMENTS: "measurements",
+    Capability.CLOSED_LOOP_SNAPSHOT: "closed_loop_snapshot",
 }
 """Capabilities stored directly on :class:`EngineCapabilities`."""
 
@@ -125,6 +128,7 @@ ADAPTER_BOUNDARY_CAPABILITIES = (
     Capability.BATCHED_ROLLOUT,
     Capability.DIFFERENTIABLE_ROLLOUT,
     Capability.DYNAMICS_PRIMITIVES,
+    Capability.CLOSED_LOOP_SNAPSHOT,
 )
 """Canonical capabilities answered by narrower backend adapter descriptors."""
 
@@ -225,9 +229,15 @@ class EngineCapabilities:
     force_visualization: CapabilityLevel = CapabilityLevel.NONE
     model_positioning: CapabilityLevel = CapabilityLevel.NONE
     measurements: CapabilityLevel = CapabilityLevel.NONE
+    closed_loop_snapshot: CapabilityLevel = CapabilityLevel.NONE
 
     # Extra metadata
     extra: dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def has_closed_loop_snapshot(self) -> bool:
+        """Check if closed-loop snapshot support is available."""
+        return self.closed_loop_snapshot != CapabilityLevel.NONE
 
     @property
     def has_video_export(self) -> bool:
@@ -372,6 +382,7 @@ __all__ = [
     "CapabilityQuery",
     "CapabilityRef",
     "EngineCapabilities",
+    "EngineCapability",
     "capability_level_supported",
     "normalize_capability",
 ]
