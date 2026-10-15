@@ -26,9 +26,11 @@ divergences:
     engines: [pinocchio, mujoco]
     tolerance: 0.000001
     rationale: >
-      Pinocchio and Drake enforce spatial 6-DOF weld constraints (rank 6), while MuJoCo uses
-      weld equality constraints with finite solref/solimp compliance and MJX approximates via
-      spring-damper elements.
+      Pinocchio, Drake, OpenSim, and hard-KKT MuJoCo share a rank-6 canonical
+      closure Jacobian in the grip frame ([fx, fy, fz, tx, ty, tz] with +J_c^T lambda
+      on the tree via NSX-02 to_canonical_closure), whereas stock MuJoCo mj_step
+      uses weld equality constraints with finite solref/solimp compliance and MJX
+      approximates via spring-damper elements.
 
   - id: hunt-crossley-dissipation-clipping
     check: contact_dissipation_conformance

@@ -23,6 +23,9 @@ from src.shared.python.biomechanics.grip_extraction import (
     club_solids_partition,
 )
 from src.shared.python.biomechanics.grip_wrench import GripAnalysis
+from src.shared.python.loop_nullspace.closure_convention import (
+    PINOCCHIO_CLOSURE_CONVENTION,
+)
 from src.shared.python.motion_matching.multi_engine_torque_allocator import EngineType
 from src.shared.python.motion_matching.polynomial_actuation import ROOT_COORDINATES
 
@@ -149,6 +152,8 @@ class PinocchioForceAdapter:
             )
             result[3 * i : 3 * i + 3] = jac[:3]
         return result
+
+    NATIVE_CLOSURE_CONVENTION = PINOCCHIO_CLOSURE_CONVENTION
 
     def compute_grip_jacobian(self, q: Array) -> Array:
         configuration = self._checked(q, "configuration")

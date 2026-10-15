@@ -12,6 +12,9 @@ from typing import Any, NamedTuple
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from src.shared.python.loop_nullspace.closure_convention import (
+    PINOCCHIO_CLOSURE_CONVENTION,
+)
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
     ContactSample,
@@ -393,6 +396,8 @@ class NativePinocchioModel:
         position.setflags(write=False)
         jacobian.setflags(write=False)
         return NativeClosurePositionLinearization(names, position, jacobian)
+
+    NATIVE_CLOSURE_CONVENTION = PINOCCHIO_CLOSURE_CONVENTION
 
     def closure_force_jacobian(
         self, coordinates: Mapping[str, float]

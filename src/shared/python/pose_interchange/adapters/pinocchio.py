@@ -46,6 +46,14 @@ from src.shared.python.pose_interchange.canonical import (
     CONVENTION_TAG,
     CanonicalPose,
 )
+from src.shared.python.pose_interchange.dynamic_transforms import (
+    acceleration_from_canonical,
+    acceleration_to_canonical,
+    generalized_force_from_canonical,
+    generalized_force_to_canonical,
+    velocity_from_canonical,
+    velocity_to_canonical,
+)
 from src.shared.python.pose_interchange.protocol import JointSlot
 
 _PELVIS_PREFIX = 7  # [x, y, z, qx, qy, qz, qw]
@@ -138,6 +146,126 @@ class PinocchioAdapter:
             pelvis_rotation_xyz_deg=rotation_deg,
             joint_angles_deg=joint_angles,
         )
+
+    def velocity_map(
+        self,
+        q: npt.ArrayLike,
+        v: npt.ArrayLike,
+        *,
+        to_canonical: bool = False,
+        model: Any | None = None,
+    ) -> npt.NDArray[np.float64]:
+        """Map velocity between canonical-v2 and Pinocchio native layouts (NSX-50)."""
+        layout = _layout_from_model(model)
+        if to_canonical:
+            return velocity_to_canonical(
+                q,
+                v,
+                base_convention="free_flyer_xyzw",
+                q_is_canonical=False,
+                layout=layout,
+                base_offset=_PELVIS_PREFIX,
+            )
+        return velocity_from_canonical(
+            q,
+            v,
+            base_convention="free_flyer_xyzw",
+            q_is_canonical=True,
+            layout=layout,
+            base_offset=_PELVIS_PREFIX,
+        )
+
+    def velocity_to_canonical(
+        self,
+        q: npt.ArrayLike,
+        v_engine: npt.ArrayLike,
+        *,
+        model: Any | None = None,
+    ) -> npt.NDArray[np.float64]:
+        """Decode Pinocchio native velocity into canonical-v2 velocity."""
+        return self.velocity_map(q, v_engine, to_canonical=True, model=model)
+
+    def acceleration_map(
+        self,
+        q: npt.ArrayLike,
+        v: npt.ArrayLike,
+        a: npt.ArrayLike,
+        *,
+        to_canonical: bool = False,
+        model: Any | None = None,
+    ) -> npt.NDArray[np.float64]:
+        """Map acceleration between canonical-v2 and Pinocchio native layouts (NSX-50)."""
+        layout = _layout_from_model(model)
+        if to_canonical:
+            return acceleration_to_canonical(
+                q,
+                v,
+                a,
+                base_convention="free_flyer_xyzw",
+                q_is_canonical=False,
+                layout=layout,
+                base_offset=_PELVIS_PREFIX,
+            )
+        return acceleration_from_canonical(
+            q,
+            v,
+            a,
+            base_convention="free_flyer_xyzw",
+            q_is_canonical=True,
+            layout=layout,
+            base_offset=_PELVIS_PREFIX,
+        )
+
+    def acceleration_to_canonical(
+        self,
+        q: npt.ArrayLike,
+        v_engine: npt.ArrayLike,
+        a_engine: npt.ArrayLike,
+        *,
+        model: Any | None = None,
+    ) -> npt.NDArray[np.float64]:
+        """Decode Pinocchio native acceleration into canonical-v2 acceleration."""
+        return self.acceleration_map(
+            q, v_engine, a_engine, to_canonical=True, model=model
+        )
+
+    def generalized_force_map(
+        self,
+        q: npt.ArrayLike,
+        tau: npt.ArrayLike,
+        *,
+        to_canonical: bool = False,
+        model: Any | None = None,
+    ) -> npt.NDArray[np.float64]:
+        """Dual generalized-force transform preserving virtual power tau . v (NSX-50)."""
+        layout = _layout_from_model(model)
+        if to_canonical:
+            return generalized_force_to_canonical(
+                q,
+                tau,
+                base_convention="free_flyer_xyzw",
+                q_is_canonical=False,
+                layout=layout,
+                base_offset=_PELVIS_PREFIX,
+            )
+        return generalized_force_from_canonical(
+            q,
+            tau,
+            base_convention="free_flyer_xyzw",
+            q_is_canonical=True,
+            layout=layout,
+            base_offset=_PELVIS_PREFIX,
+        )
+
+    def generalized_force_to_canonical(
+        self,
+        q: npt.ArrayLike,
+        tau_engine: npt.ArrayLike,
+        *,
+        model: Any | None = None,
+    ) -> npt.NDArray[np.float64]:
+        """Decode Pinocchio native generalized force into canonical-v2 via T^T."""
+        return self.generalized_force_map(q, tau_engine, to_canonical=True, model=model)
 
 
 # Re-export for backwards-compat / convenience.

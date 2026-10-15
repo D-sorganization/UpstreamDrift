@@ -14,6 +14,11 @@ from scipy.spatial.transform import Rotation
 
 from src.engines.physics_engines.mujoco.python.native_mjcf import export_native_mjcf
 from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
+from src.shared.python.loop_nullspace.closure_convention import (
+    MUJOCO_CLOSURE_CONVENTION,
+)
+
+NATIVE_CLOSURE_CONVENTION = MUJOCO_CLOSURE_CONVENTION
 
 
 def _pack_vector(
@@ -154,6 +159,8 @@ def _prepare_forward_dynamics(
 
 class NativeMujocoModel:
     """Match the public native acceleration/frame protocol without feedback."""
+
+    NATIVE_CLOSURE_CONVENTION = MUJOCO_CLOSURE_CONVENTION
 
     @classmethod
     def from_native_bundle(
