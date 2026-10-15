@@ -97,13 +97,24 @@ def test_mujoco_and_drake_agree_on_per_hand_and_net_grip(plants, record, frame) 
 
 @pytest.mark.parametrize("frame", FRAMES)
 def test_net_force_matches_mujoco_recursive_newton_euler(plants, record, frame) -> None:
-    """Independent check: MuJoCo's own RNE gives the net hand force on the club."""
+    """Independent check: MuJoCo's own RNE gives the net force on club plus hands.
+
+    ``cfrc_int`` is the load on the whole welded subtree, hands included, so it
+    equals the legacy ``wrist_on_hands_plus_club`` interface.  The default
+    interface is the bare club (NSX-01, #12550), checked in
+    ``test_grip_wrench_bare_club``.  The expected value is unchanged.
+    """
     import mujoco
 
     plant = plants["mujoco"]
     adapter = plant._adapter
     q, v, tau = _state(plants, record, frame)
-    grip = _grip(plant, q, v, tau)
+    grip = adapter.grip_analysis(
+        plant._named(q),
+        plant._named(v),
+        plant._named(tau),
+        interface="wrist_on_hands_plus_club",
+    )
     accel = adapter.accelerations(plant._named(q), plant._named(v), plant._named(tau))
     model, data = adapter.model, adapter.data
     qacc = np.zeros(model.nv)

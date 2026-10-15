@@ -39,6 +39,7 @@ Vec3 = tuple[float, float, float]
 
 __all__ = [
     "allocation_grip_analysis",
+    "bare_club_closing_wrench",
     "closing_side_from_closure",
     "hand_from_arrays",
     "closure_and_club_analysis",
@@ -132,6 +133,57 @@ def holding_hand_wrench(
     return _t3(f_hold), _t3(t_hold)
 
 
+def bare_club_closing_wrench(
+    *,
+    closing_force_n: ArrayLike,
+    closing_torque_nm: ArrayLike,
+    closing_point_m: ArrayLike,
+    closing_hand_club: Mapping[str, Any],
+) -> tuple[Vec3, Vec3]:
+    """Closing-hand wrench ON THE BARE CLUB from the load on the composite body.
+
+    The closure multiplier loads the composite body, which also contains the
+    closing hand's own welded solids.  Free body of those solids: the weld load
+    ``W`` less the reaction of the club equals their Newton-Euler wrench, so
+    the hand-on-club wrench is ``W - NE(closing hand solids)``, with the
+    torque transported to ``closing_point_m``::
+
+        F = F_w - m (a_c - g)
+        T = T_w - (I alpha + omega x I omega + (c - r) x m (a_c - g))
+
+    ``closing_hand_club`` carries the :func:`holding_hand_wrench` club keywords
+    of those solids (mass, centre of mass, inertia about it, kinematics).
+
+    Raises:
+        ValueError: on missing or unknown keywords or non-finite input.
+    """
+    missing = [k for k in _CLUB_KEYS if k not in closing_hand_club]
+    unknown = sorted(set(closing_hand_club) - set(_CLUB_KEYS))
+    if missing or unknown:
+        raise ValueError(
+            f"closing_hand_club keywords missing {missing} / unknown {unknown}"
+        )
+    hand = closing_hand_club
+    inertia = np.asarray(hand["inertia_world_kg_m2"], dtype=np.float64)
+    if inertia.shape != (3, 3) or not np.isfinite(inertia).all():
+        raise ValueError("closing_hand_club inertia must be a finite 3x3 matrix")
+    omega = _v3(hand["angular_velocity_rad_s"], "angular_velocity_rad_s")
+    alpha = _v3(hand["angular_acceleration_rad_s2"], "angular_acceleration_rad_s2")
+    com = _v3(hand["com_m"], "com_m")
+    accel = _v3(hand["com_acceleration_m_s2"], "com_acceleration_m_s2")
+    gravity = _v3(hand["gravity_m_s2"], "gravity_m_s2")
+    point = _v3(closing_point_m, "closing_point_m")
+    force_ne = float(hand["mass_kg"]) * (accel - gravity)
+    torque_ne = (
+        inertia @ alpha
+        + np.cross(omega, inertia @ omega)
+        + np.cross(com - point, force_ne)
+    )
+    force = _v3(closing_force_n, "closing_force_n") - force_ne
+    torque = _v3(closing_torque_nm, "closing_torque_nm") - torque_ne
+    return _t3(force), _t3(torque)
+
+
 def net_only_analysis(
     *,
     point_m: ArrayLike,
@@ -221,14 +273,21 @@ def closure_and_club_analysis(
     *,
     closing_side: str,
     closing_point_m: ArrayLike,
-    closing_force_n: ArrayLike,
-    closing_torque_nm: ArrayLike,
+    closing_wrench: tuple[ArrayLike, ArrayLike],
     holding_point_m: ArrayLike,
     club: Mapping[str, Any],
     split_method: SplitMethod,
     metadata: Mapping[str, Any] | None = None,
+    closing_hand_club: Mapping[str, Any] | None = None,
 ) -> GripAnalysis:
     """Two-hand analysis from a closure multiplier plus club Newton-Euler.
+
+    ``closing_wrench`` is ``(force_n, torque_nm)`` of the closing hand.
+
+    With ``closing_hand_club`` (keywords of the closing hand's welded solids)
+    ``closing_*`` is the load on the composite body and is converted to the
+    hand-on-bare-club wrench by :func:`bare_club_closing_wrench`; ``club`` is
+    then the bare club.  Without it ``closing_*`` is used as given.
 
     ``club`` carries the :func:`holding_hand_wrench` club keywords
     (``mass_kg``, ``gravity_m_s2``, ``com_m``, ``com_acceleration_m_s2``,
@@ -237,6 +296,16 @@ def closure_and_club_analysis(
     """
     if closing_side not in ("L", "R"):
         raise ValueError(f"closing_side must be 'L' or 'R', got {closing_side!r}")
+    if len(closing_wrench) != 2:
+        raise ValueError("closing_wrench must be (force_n, torque_nm)")
+    closing_force_n, closing_torque_nm = closing_wrench
+    if closing_hand_club is not None:
+        closing_force_n, closing_torque_nm = bare_club_closing_wrench(
+            closing_force_n=closing_force_n,
+            closing_torque_nm=closing_torque_nm,
+            closing_point_m=closing_point_m,
+            closing_hand_club=closing_hand_club,
+        )
     f_hold, t_hold = holding_hand_wrench(
         **club,
         closing_force_n=closing_force_n,

@@ -25,6 +25,14 @@ from src.engines.physics_engines.mujoco.python.native_model import (
     _prepare_forward_dynamics,
     _solve_kkt_with_multipliers,
 )
+from src.shared.python.biomechanics.club_inertia_partition import (
+    INTERFACE_BARE_CLUB,
+    INTERFACE_LEGACY_COMPOSITE,
+    RigidInertia,
+    club_solids_partition,
+    newton_euler_keywords,
+    validate_interface,
+)
 from src.shared.python.biomechanics.grip_extraction import (
     closing_side_from_closure,
     closure_and_club_analysis,
@@ -95,6 +103,8 @@ class NativeMujocoFullBodyModel:
         }
         self._closure = [self.model.site(f"native_closure_{s}").id for s in ("a", "b")]
         self.closing_hand_side: str = closing_side_from_closure(spec["closure"])
+        self._spec_for_partition = spec
+        self._solid_groups: dict[str, RigidInertia] | None = None
 
         # Contact setup
         contact_cfg = spec["contact"]
@@ -305,33 +315,81 @@ class NativeMujocoFullBodyModel:
         )
         return self._as_named(acceleration), multiplier.copy()
 
-    def _club_newton_euler(self, acceleration: np.ndarray) -> dict[str, Any]:
-        """Club kinematics for the Newton-Euler keywords at the last solve state."""
+    def _solid_group(self, part: str) -> RigidInertia:
+        """Inertia of ``"club"`` (bare), ``"L"`` or ``"R"`` hand solids, cached.
+
+        Expressed in the MuJoCo club body frame (NSX-01, #12550).
+        """
+        if self._solid_groups is None:
+            spec = self._spec_for_partition
+            partition = club_solids_partition(spec)
+            to_body = self.body_frames[spec["closure"]["body_b"]]
+            groups = {"club": partition.bare_club, **partition.hands_by_side()}
+            self._solid_groups = {
+                name: inertia.expressed_in(to_body) for name, inertia in groups.items()
+            }
+        if part not in self._solid_groups:
+            raise ValueError(f"no welded solids for part {part!r}")
+        return self._solid_groups[part]
+
+    def _club_newton_euler(
+        self,
+        acceleration: np.ndarray,
+        interface: str = INTERFACE_BARE_CLUB,
+        part: str = "club",
+    ) -> dict[str, Any]:
+        """Club kinematics for the Newton-Euler keywords at the last solve state.
+
+        ``interface="hand_on_bare_club"`` (default) uses head, shaft and grip
+        only; ``"wrist_on_hands_plus_club"`` is the legacy composite body that
+        also carries both welded hands (NSX-01, #12550).  ``part`` ``"L"`` or
+        ``"R"`` (bare interface only) selects that hand's welded solids.
+        """
+        validate_interface(interface)
         mj, model, data = self._mj, self.model, self.data
         body = int(model.site_bodyid[self._closure[1]])
-        com = np.array(data.xipos[body])
         jacp, jacr = np.zeros((3, model.nv)), np.zeros((3, model.nv))
         dotp, dotr = np.zeros((3, model.nv)), np.zeros((3, model.nv))
-        mj.mj_jacBodyCom(model, data, jacp, jacr, body)
-        mj.mj_jacDot(model, data, dotp, dotr, com, body)
-        rot = np.array(data.ximat[body]).reshape(3, 3)
-        return {
-            "mass_kg": float(model.body_mass[body]),
-            "gravity_m_s2": np.array(model.opt.gravity),
-            "com_m": com,
-            "com_acceleration_m_s2": jacp @ acceleration + dotp @ data.qvel,
-            "inertia_world_kg_m2": rot @ np.diag(model.body_inertia[body]) @ rot.T,
-            "angular_velocity_rad_s": jacr @ data.qvel,
-            "angular_acceleration_rad_s2": jacr @ acceleration + dotr @ data.qvel,
-        }
+        if interface == INTERFACE_LEGACY_COMPOSITE:
+            rot = np.array(data.ximat[body]).reshape(3, 3)  # principal-axes frame
+            com = np.array(data.xipos[body])
+            mj.mj_jacBodyCom(model, data, jacp, jacr, body)
+            mj.mj_jacDot(model, data, dotp, dotr, com, body)
+            return {
+                "mass_kg": float(model.body_mass[body]),
+                "gravity_m_s2": np.array(model.opt.gravity),
+                "com_m": com,
+                "com_acceleration_m_s2": jacp @ acceleration + dotp @ data.qvel,
+                "inertia_world_kg_m2": rot @ np.diag(model.body_inertia[body]) @ rot.T,
+                "angular_velocity_rad_s": jacr @ data.qvel,
+                "angular_acceleration_rad_s2": jacr @ acceleration + dotr @ data.qvel,
+            }
+        origin = np.array(data.xpos[body])
+        mj.mj_jac(model, data, jacp, jacr, origin, body)
+        mj.mj_jacDot(model, data, dotp, dotr, origin, body)
+        return newton_euler_keywords(
+            self._solid_group(part),
+            rot_world_from_body=np.array(data.xmat[body]).reshape(3, 3),
+            origin_world=origin,
+            omega=jacr @ data.qvel,
+            alpha=jacr @ acceleration + dotr @ data.qvel,
+            accel_origin=jacp @ acceleration + dotp @ data.qvel,
+            gravity=np.array(model.opt.gravity),
+        )
 
     def grip_analysis(
         self,
         coordinates: Mapping[str, float],
         rates: Mapping[str, float],
         primitive_efforts: Mapping[str, float],
+        interface: str = INTERFACE_BARE_CLUB,
     ) -> GripAnalysis:
         """Per-hand grip wrenches ON THE CLUB from the KKT multiplier (GCV-8).
+
+        ``interface`` selects the club inertia (NSX-01, #12550):
+        ``"hand_on_bare_club"`` (default) excludes the welded hand solids;
+        ``"wrist_on_hands_plus_club"`` is the legacy composite value.  The
+        result records it in ``metadata["interface"]``.
 
         The closing hand (``closing_hand_side``) exerts ``-lambda`` at the
         club-side closure site.  The holding hand is carried by the kinematic
@@ -351,13 +409,18 @@ class NativeMujocoFullBodyModel:
         return closure_and_club_analysis(
             closing_side=self.closing_hand_side,
             closing_point_m=self.data.site_xpos[site_b],
-            closing_force_n=-multiplier[:3],
-            closing_torque_nm=-multiplier[3:],
+            closing_wrench=(-multiplier[:3], -multiplier[3:]),
             holding_point_m=self.data.xpos[body],
-            club=self._club_newton_euler(acceleration),
+            club=self._club_newton_euler(acceleration, interface),
+            closing_hand_club=(
+                self._club_newton_euler(acceleration, interface, self.closing_hand_side)
+                if interface == INTERFACE_BARE_CLUB
+                else None
+            ),
             split_method="constraint_multiplier",
             metadata={
                 "engine": "mujoco",
+                "interface": interface,
                 "kkt_regularization": self.kkt_regularization,
             },
         )

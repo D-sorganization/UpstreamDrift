@@ -13,6 +13,10 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.biomechanics.club_inertia_partition import (
+    club_solids_partition,
+)
+
 
 @dataclass(frozen=True)
 class ClubDynamics:
@@ -36,33 +40,12 @@ class ClubDynamics:
     def from_spec(cls, spec: Mapping[str, Any]) -> ClubDynamics:
         """Compose the club solids of ``spec`` (closure ``body_b``), hands excluded.
 
+        Delegates to :func:`club_solids_partition` (NSX-01, #12550), the one
+        place that separates the bare club from the welded hand solids.
+
         Raises:
-            ValueError: if the spec has no closure or the club body has no
-                non-hand solids.
+            ValueError: if the spec has no closure, the club body has no
+                non-hand solids or the bare mass contradicts ``club.total_mass_kg``.
         """
-        closure = spec.get("closure")
-        if not closure:
-            raise ValueError("spec has no closure")
-        body = next((b for b in spec["bodies"] if b["name"] == closure["body_b"]), None)
-        solids = [s for s in (body or {}).get("solids", []) if "Hand" not in s["name"]]
-        if not solids:
-            raise ValueError("club body has no non-hand solids")
-        placed = []
-        for s in solids:
-            t = np.asarray(s["placement"], dtype=float)
-            com = t[:3, :3] @ np.asarray(s["com_m"], dtype=float) + t[:3, 3]
-            inertia = (
-                t[:3, :3]
-                @ np.asarray(s["inertia_com_kg_m2"], dtype=float)
-                @ t[:3, :3].T
-            )
-            placed.append((float(s["mass_kg"]), com, inertia))
-        mass = sum(m for m, _, _ in placed)
-        com_tot = np.asarray(sum(m * c for m, c, _ in placed) / mass, dtype=float)
-        inertia_tot = np.zeros((3, 3))
-        for m, c, inertia in placed:
-            d = c - com_tot
-            inertia_tot += inertia + m * ((d @ d) * np.eye(3) - np.outer(d, d))
-        return cls(
-            mass, (float(com_tot[0]), float(com_tot[1]), float(com_tot[2])), inertia_tot
-        )
+        bare = club_solids_partition(spec).bare_club
+        return cls(bare.mass_kg, bare.com_m, bare.inertia_com_kg_m2)
