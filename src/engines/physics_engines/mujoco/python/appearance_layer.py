@@ -19,6 +19,11 @@ from src.shared.python.model_appearance.club_assembly import (
     PART_MATERIALS,
     ClubAssembly,
 )
+from src.shared.python.model_appearance.cross_section import (
+    BodySection,
+    body_sections,
+    width_hint_for,
+)
 from src.shared.python.model_appearance.grip_hands import assembly_meshes_with_hands
 from src.shared.python.model_appearance.schema import (
     AppearanceDocument,
@@ -173,8 +178,14 @@ def _body_meshes(
     body: str,
     capsules: list[Capsule],
     club: ClubAssembly | None = None,
+    sections: Mapping[str, BodySection] | None = None,
 ) -> list[tuple[str, geometry.Mesh, str]]:
-    """(label, mesh in spec body frame, material name) for one body."""
+    """(label, mesh in spec body frame, material name) for one body.
+
+    ``sections`` (from ``cross_section.body_sections``) orients every
+    non-round cross-section; a non-round body missing from it is rejected by
+    ``geometry.lofted_segment`` rather than defaulted to a world axis.
+    """
     rule = library.rule_for_body(doc, body)
     if rule is not None and rule.mesh == "none":
         return []
@@ -196,6 +207,7 @@ def _body_meshes(
         )
         radius = min(radius, 0.6 * cap.length_m())  # keep short links from ballooning
         aspect = library.PART_ASPECT.get(part, 1.0)
+        width = width_hint_for(sections or {}, body, start, end)
         out.append(
             (
                 f"skin{i}",
@@ -207,6 +219,7 @@ def _body_meshes(
                         aspect=aspect,
                         rings=library.LOFT_RINGS,
                         sides=library.LOFT_SIDES,
+                        width_hint=width,
                     ),
                 ),
                 base,
@@ -236,6 +249,7 @@ def _body_meshes(
                             thickness=library.GARMENT_THICKNESS,
                             rings=library.LOFT_RINGS,
                             sides=library.LOFT_SIDES,
+                            width_hint=width,
                         ),
                     ),
                     garment,
@@ -292,8 +306,13 @@ def attach_appearance(
     skeleton: VisualSkeleton,
     doc: AppearanceDocument,
     club: ClubAssembly | None = None,
+    *,
+    spec: Mapping[str, Any],
 ) -> dict[str, Any]:
     """Add materials, textures, smooth meshes and scene dressing.
+
+    ``spec`` is the document ``skeleton`` was derived from; its landmarks
+    orient the trunk, pelvis and shoe cross-sections (R1, #12680).
 
     Returns the summary (mesh and material counts, ground material name via
     ``ground_material``) merged into the exporter metadata. The caller adds
@@ -309,9 +328,10 @@ def attach_appearance(
     by_body: dict[str, list[Capsule]] = {}
     for cap in skeleton.capsules:
         by_body.setdefault(cap.body, []).append(cap)
+    sections = body_sections(spec)
     garments = 0
     for index, (body, caps) in enumerate(by_body.items()):
-        for label, mesh, material in _body_meshes(doc, body, caps, club):
+        for label, mesh, material in _body_meshes(doc, body, caps, club, sections):
             _add_mesh_visual(
                 assets,
                 elements[body],

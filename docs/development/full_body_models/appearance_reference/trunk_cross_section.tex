@@ -1,0 +1,129 @@
+% Section of golfer_appearance_reference.tex (R1, #12680). Standalone research
+% and visual reference, not the design manual.
+\section{Trunk, Pelvis and Shoe Cross-Sections (R1, \#12680)}
+
+\subsection{Defect}
+The MuJoCo appearance layer (\texttt{appearance\_layer.\_body\_meshes}) and the
+skinned glTF body (\texttt{skinned\_body.build\_skinned\_body}) lofted every
+non-round segment with \texttt{geometry.lofted\_segment} and no width axis.
+\texttt{geometry.\_frame} then defaulted the full-radius direction to body $+x$.
+In the trunk body frames ($+x$ anterior, $+y$ left, $+z$ up at the zero pose)
+that put the full radius anteroposterior (AP) and the \texttt{PART\_ASPECT}
+depth on the mediolateral (ML) axis: the chest rendered deeper than wide. In the
+OpenSim calcn frame ($+x$ forward, $+y$ up, $+z$ right) the default fell back to
+$+y$, so the shoe was taller than wide. Drake, Pinocchio, OpenSim and MyoSuite
+draw the spec \texttt{visual\_hints} ellipsoids, which were already ML $>$ AP.
+
+\subsection{Frames and Cross-Section Semantics}
+A lofted segment from $p_0$ to $p_1$ has unit axis
+$a=(p_1-p_0)/\lVert p_1-p_0\rVert$. With a width axis $w$ made perpendicular to
+$a$, $u = (w-(w\cdot a)a)/\lVert w-(w\cdot a)a\rVert$, and $v = a\times u$, the ring
+at station $s$ is
+\[
+x(s,\varphi) = p_0 + s\,a + r(s)\,\bigl(\cos\varphi\,u + \alpha\sin\varphi\,v\bigr),
+\qquad r(s) = \rho\,\tau\,\pi(s),
+\]
+with radius $\rho$ (\texttt{PART\_RADIUS\_M}), garment thickness $\tau$, aspect
+$\alpha$ = depth/width (\texttt{PART\_ASPECT}) and the spindle profile
+$\pi(s)\le 1$. The extent along $u$ is $2\rho\tau$ and along $v$ it is
+$2\alpha\rho\tau$ (checked to $10^{-9}$ relative). Precondition: for
+$\alpha\ne 1$ an explicit $w$ with $\angle(w,a)\ge 10^\circ$ is required; there is
+no world default.
+
+\subsection{Width-Axis Rule}
+\texttt{model\_appearance.cross\_section.body\_sections(spec)} is the single place
+that decides the axes, for every body whose part has $\alpha\ne 1$. Landmarks are
+evaluated at the zero pose with the spec forward kinematics
+(\texttt{skinned\_body.spec\_body\_poses}); $\hat z_{\uparrow} = -g/\lVert g\rVert$.
+\begin{itemize}
+\item Pelvis (the body that parents both hip joints): $\hat m$ is the unit vector
+  from the right to the left hip joint origin.
+\item Other trunk bodies: $\hat m$ is the unit vector between the two shoulder
+  joint origins (the children of the shoulder hubs).
+\item Trunk depth $\hat d = \hat m\times\hat z_{\uparrow}$ (AP); $\hat m$ is then
+  re-orthogonalised as $\hat z_{\uparrow}\times\hat d$.
+\item Foot (talus, calcn, toes): long axis $\hat\ell$ from the calcn origin to the
+  toe (mtp) joint; $\hat m = \hat z_{\uparrow}\times\hat\ell$ and depth
+  $\hat d=\hat z_{\uparrow}$.
+\end{itemize}
+Each vector is expressed in the body frame through the transpose of the body's
+zero-pose rotation. For each segment,
+$w = \texttt{section\_width\_axis}(a,\hat d) = (a\times\hat d)/\lVert a\times\hat d\rVert$,
+with the precondition $\angle(a,\hat d)\ge 10^\circ$. A spine segment
+($a\approx\hat z_{\uparrow}$) thus gets $w\approx\hat m$; a pelvis lobe that runs
+to a hip ($a\approx\hat m$) gets the vertical as its width; the depth is always
+$\hat d$. Missing landmarks raise an error; they never default.
+
+\subsection{Numbers}
+Both anthropometric specs (capture-A driver, capture-B 7-iron); semi-axes in
+metres, measured in the exported MJCF and mapped back to the spec body frames:
+\begin{center}
+\begin{tabular}{lcc}
+Body & Before & After \\
+\hline
+Chest (COMRod) & $0.145$ AP $\times$ $0.104$ ML & $0.145$ ML $\times$ $0.104$ AP \\
+Pelvis (LowerTorso, spine lobe) & $0.083$ AP $\times$ $0.060$ ML & $0.083$ ML $\times$ $0.060$ AP \\
+Shoe (calcn) & $0.040$ tall $\times$ $0.028$ wide & $0.040$ wide $\times$ $0.028$ tall \\
+\end{tabular}
+\end{center}
+The spec hint ellipsoid of the upper trunk is $0.103$ AP $\times$ $0.158$ ML.
+Sizing the appearance trunk from the hints is R8 (\#12685), not this change.
+
+Chest silhouette width across the trunk's image-space long axis (pixels,
+$960\times720$, camera distance 3.2~m, segmentation of the COMRod geoms):
+\begin{center}
+\begin{tabular}{lcccc}
+Capture, Frame & Before Face-On & Before DTL & After Face-On & After DTL \\
+\hline
+Driver, address & 63.7 & 76.0 & 72.6 & 64.7 \\
+7-iron, address & 64.1 & 77.4 & 71.7 & 63.8 \\
+Driver, impact & 65.1 & 72.7 & 69.1 & 70.8 \\
+7-iron, near impact & 59.7 & 81.5 & 87.6 & 62.8 \\
+\end{tabular}
+\end{center}
+At address the torso is now wider face-on than down-the-line, the reverse of the
+defect. At impact the trunk is rotated open toward the target, so the face-on
+camera sees it obliquely; the driver impact row is near parity for that reason.
+
+\subsection{Acceptance and Evidence}
+\begin{itemize}
+\item \texttt{tests/unit/model\_appearance/test\_appearance\_geometry.py}: the
+  width-axis contract, the extents, and landmark agreement within $5^\circ$ for
+  every non-round body.
+\item \texttt{tests/unit/motion\_matching/test\_mujoco\_appearance\_layer.py}: the
+  MJCF trunk, pelvis and shoe mid-length rings have ML $>$ AP with
+  AP/ML $=\alpha\pm0.02$; the bit-identical physics test is unchanged and passes.
+\item \texttt{tests/unit/model\_appearance/test\_skinned\_body.py}: the skinned
+  trunk bones.
+\item \texttt{tests/cross\_engine/test\_trunk\_visual\_cross\_section.py}: MuJoCo
+  appearance, MyoSuite (plain MJCF hint ellipsoids), Drake, Pinocchio and OpenSim
+  (spec hint shapes) are all ML $>$ AP. Simscape is R9c (\#12690).
+\item Address stills, \texttt{silhouette\_widths\_before.json} and
+  \texttt{silhouette\_widths\_after.json} in
+  \texttt{evidence/appearance/trunk\_cross\_section/}. These are visual evidence,
+  not a pixel unit test.
+\end{itemize}
+
+\subsection{Limitations}
+Visual only: mass, inertia, joint frames and dynamics are unchanged, so no
+mass/inertia frame check applies. Trunk sizes are still the fixed
+\texttt{PART\_RADIUS\_M} (R8). The 7-iron receipt records no impact time; its
+near-impact frame is the frame, within 0.15~s after the peak club-body speed,
+where the club body returns closest to its address position. The 2026-10-05
+swings (spec and forward-dynamics $q$ from the private datastore) were used
+because the 2026-10-11 inputs were deleted (\#12642). The ``before'' row is
+rendered by patching the appearance layer back to the old default width axis.
+
+\subsection{Reproduction}
+\begin{verbatim}
+QT_QPA_PLATFORM=offscreen python3 -m pytest -o addopts="" \
+  tests/unit/model_appearance/test_appearance_geometry.py \
+  tests/unit/motion_matching/test_mujoco_appearance_layer.py \
+  tests/unit/model_appearance/test_skinned_body.py \
+  tests/cross_engine/test_trunk_visual_cross_section.py
+E=docs/development/full_body_models/evidence/appearance/trunk_cross_section
+for m in before after; do
+  PYTHONPATH=. python3 $E/render_trunk_cross_section.py \
+    --datastore D:/FleetData/swing-datastore --out OUT --evidence $E --mode $m
+done
+\end{verbatim}

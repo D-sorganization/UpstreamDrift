@@ -1,0 +1,24 @@
+% Golfer Appearance Reference (master). Status: standalone research and visual
+% reference, NOT the engineering design manual (that is manuals/upstreamdrift QMD).
+% Epic #12678: each child adds only its own section file under
+% appearance_reference/; nobody edits this master again.
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\title{Golfer Appearance Reference}
+\date{Epic \#12678 (Golfer Realism and Fidelity)}
+\begin{document}
+\maketitle
+\noindent\textbf{Status.} Research and visual reference for the engine-agnostic
+golfer appearance (\texttt{src/shared/python/model\_appearance}). Appearance is
+visual only: it never feeds mass, inertia, joint frames or forward dynamics, and
+a rendered still does not qualify dynamics. The calculation-level engineering
+design manual is edited only in \texttt{manuals/upstreamdrift} QMD.
+\InputIfFileExists{appearance_reference/trunk_cross_section.tex}{}{}
+\InputIfFileExists{appearance_reference/garment_classification.tex}{}{}
+\InputIfFileExists{appearance_reference/shared_appearance_spec.tex}{}{}
+\InputIfFileExists{appearance_reference/face_and_hair.tex}{}{}
+\InputIfFileExists{appearance_reference/engine_drake_pinocchio.tex}{}{}
+\InputIfFileExists{appearance_reference/engine_opensim_myosuite.tex}{}{}
+\InputIfFileExists{appearance_reference/engine_simscape.tex}{}{}
+\end{document}

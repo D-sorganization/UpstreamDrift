@@ -4,6 +4,10 @@
 along a segment; ``ellipsoid_mesh`` builds an oriented ellipsoid (club head,
 shoe toe). Meshes carry vertices and triangle faces in the caller's frame and
 are visual only: they are never used for collision, mass or inertia.
+
+A non-round cross-section (``aspect != 1``) needs an explicit width axis: the
+direction that carries the full radius. ``section_width_axis`` is the one rule
+that turns a body's depth axis into that width axis per segment (R1, #12680).
 """
 
 from __future__ import annotations
@@ -13,6 +17,8 @@ from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
+
+from src.shared.python.core.contracts import ensure, require
 
 Array = NDArray[np.float64]
 
@@ -59,6 +65,65 @@ def _frame(axis: Array, hint: Array | None = None) -> tuple[Array, Array, Array]
     return u, np.cross(a, u), a
 
 
+# A width axis closer than this to the segment axis is ill-conditioned: its
+# projection onto the cross-section plane is dominated by the axis itself.
+MIN_WIDTH_AXIS_ANGLE_DEG = 10.0
+_MAX_AXIS_COS = math.cos(math.radians(MIN_WIDTH_AXIS_ANGLE_DEG))
+
+
+def _unit(name: str, value: Array) -> Array:
+    v = _check_finite(name, value, 3)
+    norm = float(np.linalg.norm(v))
+    require(norm > 1e-12, f"{name} must be nonzero", value)
+    return v / norm
+
+
+def section_width_axis(segment_axis: Array, depth_axis: Array) -> Array:
+    """Width axis of a segment's cross-section: ``segment x depth``, unit.
+
+    ``depth_axis`` is the body direction that gets the thin (``aspect``)
+    semi-axis: anterior for the trunk, up for the foot. The width axis then
+    carries the full radius and is perpendicular to both, so a vertical spine
+    segment gets the mediolateral width and a segment that itself runs
+    mediolaterally (pelvis to hip) gets the vertical one; depth stays depth.
+    Precondition: the two axes are at least ``MIN_WIDTH_AXIS_ANGLE_DEG`` apart.
+    Postcondition: unit, perpendicular to both inputs.
+    """
+    a = _unit("segment_axis", segment_axis)
+    d = _unit("depth_axis", depth_axis)
+    require(
+        abs(float(np.dot(a, d))) <= _MAX_AXIS_COS,
+        f"depth axis must be >= {MIN_WIDTH_AXIS_ANGLE_DEG} deg from the segment",
+        (a, d),
+    )
+    width = np.asarray(np.cross(a, d), dtype=np.float64)
+    width /= np.linalg.norm(width)
+    ensure(
+        abs(float(np.dot(width, a))) < 1e-9 and abs(float(np.dot(width, d))) < 1e-9,
+        "width axis must be perpendicular to the segment and the depth axis",
+        width,
+    )
+    return width
+
+
+def _width_frame(axis: Array, width: Array) -> tuple[Array, Array, Array]:
+    """Right-handed (u, v, a): ``u`` is ``width`` made perpendicular to ``axis``.
+
+    Unlike ``_frame`` there is no silent fallback: a width axis within
+    ``MIN_WIDTH_AXIS_ANGLE_DEG`` of the segment is a precondition violation.
+    """
+    a = axis / np.linalg.norm(axis)
+    w = _unit("width_hint", width)
+    require(
+        abs(float(np.dot(w, a))) <= _MAX_AXIS_COS,
+        f"width_hint must be >= {MIN_WIDTH_AXIS_ANGLE_DEG} deg from the segment axis",
+        w,
+    )
+    u = w - np.dot(w, a) * a
+    u /= np.linalg.norm(u)
+    return u, np.cross(a, u), a
+
+
 def _check_finite(name: str, value: Array, size: int) -> Array:
     v = np.asarray(value, dtype=float)
     if v.shape != (size,) or not np.isfinite(v).all():
@@ -93,6 +158,7 @@ class LoftOptions:
     thickness: float = 1.0
     rings: int = 14
     sides: int = 20
+    # Direction of the full-radius (width) semi-axis; required when aspect != 1.
     width_hint: Array | None = None
 
 
@@ -107,8 +173,13 @@ def lofted_segment(
     Full coverage gives a closed spindle that overshoots both ends by half a
     radius so neighbouring segments overlap at joints. A partial ``coverage``
     (fractions of the length) gives a flat-capped band, used for sleeves,
-    shorts and shoes. ``aspect`` is depth/width of the cross-section.
-    Preconditions: finite points, positive length and radius.
+    shorts and shoes. ``aspect`` is depth/width of the cross-section: the
+    extent along ``width_hint`` (made perpendicular to the segment) is
+    ``2 * radius * thickness`` and along ``segment x width`` it is ``aspect``
+    times that.
+    Preconditions: finite points, positive length and radius; when
+    ``aspect != 1`` an explicit ``width_hint`` at least
+    ``MIN_WIDTH_AXIS_ANGLE_DEG`` from the segment axis (no world default).
     """
     opts = options or LoftOptions()
     aspect, coverage, thickness = opts.aspect, opts.coverage, opts.thickness
@@ -122,7 +193,17 @@ def lofted_segment(
     length = float(np.linalg.norm(p1 - p0))
     if length <= 1e-9 or rings < 4 or sides < 6:
         raise ValueError("Segment needs positive length, rings >= 4, sides >= 6")
-    u, v, a = _frame(p1 - p0, width_hint)
+    if aspect != 1.0:
+        require(
+            width_hint is not None,
+            "a non-round cross-section (aspect != 1) needs an explicit width_hint",
+            aspect,
+        )
+    u, v, a = (
+        _frame(p1 - p0)
+        if width_hint is None
+        else _width_frame(p1 - p0, np.asarray(width_hint, float))
+    )
     over = 0.5 * radius
     half = length / 2.0 + over
     centre = length / 2.0
