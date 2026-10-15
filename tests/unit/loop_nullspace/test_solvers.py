@@ -18,9 +18,11 @@ pytest.importorskip("clarabel")
 from src.shared.python.loop_nullspace.solvers import (  # noqa: E402
     Basis,
     ConicResult,
+    ConicSettings,
     KKTResiduals,
     LPResult,
     LPSession,
+    QuadraticObjective,
     SolveStatus,
     SOCBlock,
     available_backends,
@@ -461,7 +463,7 @@ def test_socp_quadratic_objective_matches_closed_form() -> None:
     p = np.diag([2.0, 4.0])
     c = np.array([1.0, 0.0])
     a_eq = np.array([[1.0, 1.0]])
-    res = solve_socp(c, a_eq, [1.0], None, None, [], P=p)
+    res = solve_socp(QuadraticObjective(c, p), a_eq, [1.0], None, None, [])
     assert res.status is SolveStatus.OPTIMAL
     # Stationarity: Px + c = nu * 1, x1 + x2 = 1 -> x = (1/6 .. ) solved exactly.
     kkt = np.block([[p, -a_eq.T], [a_eq, np.zeros((1, 1))]])
@@ -474,8 +476,65 @@ def test_socp_quadratic_objective_matches_closed_form() -> None:
 
 def test_socp_quadratic_objective_preconditions() -> None:
     with pytest.raises(ValueError, match="P must be"):
-        solve_socp([0.0, 0.0], None, None, None, None, [], P=np.eye(3))
+        QuadraticObjective([0.0, 0.0], np.eye(3))
     with pytest.raises(ValueError, match="symmetric"):
-        solve_socp(
-            [0.0, 0.0], None, None, None, None, [], P=np.array([[1.0, 2.0], [0.0, 1.0]])
-        )
+        QuadraticObjective([0.0, 0.0], np.array([[1.0, 2.0], [0.0, 1.0]]))
+    with pytest.raises(ValueError, match="finite"):
+        QuadraticObjective([0.0, np.nan], np.eye(2))
+    with pytest.raises(ValueError, match="finite"):
+        QuadraticObjective([0.0, 0.0], np.array([[1.0, np.inf], [np.inf, 1.0]]))
+    with pytest.raises(ValueError, match="1-D"):
+        QuadraticObjective(np.eye(2), np.eye(2))
+
+
+def test_conic_settings_validation() -> None:
+    assert ConicSettings() == ConicSettings(max_iter=None, tol=None)
+    for bad in (0, -3, True):
+        with pytest.raises(ValueError, match="max_iter"):
+            ConicSettings(max_iter=bad)
+    for bad in (0.0, -1e-6, float("nan"), float("inf")):
+        with pytest.raises(ValueError, match="tol"):
+            ConicSettings(tol=bad)
+    with pytest.raises(AttributeError):
+        ConicSettings().tol = 1.0  # type: ignore[misc]
+
+
+def test_socp_linear_equals_quadratic_with_zero_p() -> None:
+    """A zero-P QuadraticObjective reproduces the linear objective exactly."""
+    a_eq = np.array([[1.0, 1.0, 1.0]])
+    cone = SOCBlock(-np.eye(3), np.zeros(3))
+    c = np.array([1.0, 0.0, 0.0])
+    lin = solve_socp(c, a_eq, [1.0], None, None, [cone])
+    quad = solve_socp(
+        QuadraticObjective(c, np.zeros((3, 3))), a_eq, [1.0], None, None, [cone]
+    )
+    assert lin.status is quad.status is SolveStatus.OPTIMAL
+    assert quad.x == pytest.approx(lin.x, abs=1e-9)
+    assert quad.objective == pytest.approx(lin.objective, abs=1e-9)
+
+
+def test_socp_settings_are_applied() -> None:
+    p = np.diag([2.0, 4.0])
+    obj = QuadraticObjective([1.0, 0.0], p)
+    a_eq = np.array([[1.0, 1.0]])
+    loose = solve_socp(
+        obj, a_eq, [1.0], None, None, [], settings=ConicSettings(tol=1e-4)
+    )
+    tight = solve_socp(
+        obj, a_eq, [1.0], None, None, [], settings=ConicSettings(tol=1e-10)
+    )
+    assert loose.status is tight.status is SolveStatus.OPTIMAL
+    cone = SOCBlock(-np.eye(3), np.zeros(3))
+    full = solve_socp([1.0, 0.0, 0.0], np.ones((1, 3)), [1.0], None, None, [cone])
+    capped = solve_socp(
+        [1.0, 0.0, 0.0],
+        np.ones((1, 3)),
+        [1.0],
+        None,
+        None,
+        [cone],
+        settings=ConicSettings(max_iter=1),
+    )
+    assert full.status is SolveStatus.OPTIMAL
+    assert capped.status is SolveStatus.NUMERICAL
+    assert capped.iterations <= 1

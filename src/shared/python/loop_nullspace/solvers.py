@@ -62,9 +62,11 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "Basis",
     "ConicResult",
+    "ConicSettings",
     "KKTResiduals",
     "LPResult",
     "LPSession",
+    "QuadraticObjective",
     "SOCBlock",
     "SolveStatus",
     "available_backends",
@@ -209,6 +211,46 @@ class SOCBlock:
         object.__setattr__(self, "A", a.tocsc())
         object.__setattr__(self, "b", _readonly(b))
         object.__setattr__(self, "dim", int(a.shape[0]))
+
+
+@dataclass(frozen=True)
+class QuadraticObjective:
+    """Convex quadratic objective ``1/2 x^T P x + q^T x`` for :func:`solve_socp`.
+
+    Preconditions: ``q`` is a finite vector and ``P`` a finite symmetric
+    ``(n, n)`` matrix (semidefiniteness is checked by the solver).
+    Postcondition: both fields are stored read-only (``P`` as sparse CSR).
+    """
+
+    q: Any
+    P: Any
+
+    def __post_init__(self) -> None:
+        q = _as_vector(self.q, "q")
+        object.__setattr__(self, "P", _quadratic(self.P, q.size))
+        object.__setattr__(self, "q", _readonly(q))
+
+
+@dataclass(frozen=True)
+class ConicSettings:
+    """Optional Clarabel controls: iteration cap and a common tolerance.
+
+    ``None`` keeps the solver default.  ``tol`` replaces the absolute/relative
+    gap and feasibility tolerances together.
+    """
+
+    max_iter: int | None = None
+    tol: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.max_iter is not None and (
+            isinstance(self.max_iter, bool) or int(self.max_iter) < 1
+        ):
+            raise ValueError(
+                f"max_iter must be a positive integer, got {self.max_iter!r}"
+            )
+        if self.tol is not None and (not np.isfinite(self.tol) or self.tol <= 0.0):
+            raise ValueError(f"tol must be positive and finite, got {self.tol!r}")
 
 
 # ----------------------------------------------------------- input checking
@@ -610,17 +652,15 @@ def solve_socp(
     cones: Sequence[SOCBlock],
     *,
     bounds: Any = None,
-    max_iter: int | None = None,
-    P: Any = None,
-    tol: float | None = None,
+    settings: ConicSettings | None = None,
 ) -> ConicResult:
     """Solve a (convex quadratic) objective over polyhedral and SOC constraints.
 
-    The objective is ``1/2 x^T P x + c^T x``; ``P=None`` means linear (NSX-20
-    behaviour, unchanged).  ``P`` must be symmetric positive semidefinite of
-    shape ``(n, n)`` (symmetry is checked here, semidefiniteness by Clarabel).
-    ``tol``, when given, replaces Clarabel's absolute/relative gap and
-    feasibility tolerances (default solver tolerances otherwise).
+    ``c`` is either a vector (linear objective, NSX-20 behaviour) or a
+    :class:`QuadraticObjective` giving ``1/2 x^T P x + q^T x``; ``P`` must be
+    symmetric positive semidefinite (semidefiniteness is checked by Clarabel).
+    ``settings`` (:class:`ConicSettings`) overrides the iteration cap and the
+    solver tolerances; ``None`` keeps Clarabel's defaults.
 
     Rows are stacked ``[A_eq; A_ub; finite bounds; SOC blocks]`` with
     ``A x + s = b``, ``s`` in zero/nonnegative/second-order cones.
@@ -632,9 +672,13 @@ def solve_socp(
     and failure statuses map to NUMERICAL with the solver status as ``reason``.
     """
     cl = _import_backend("clarabel")
-    cc = _as_vector(c, "c")
+    if isinstance(c, QuadraticObjective):
+        cc, p_mat = c.q, c.P
+    else:
+        cc = _as_vector(c, "c")
+        p_mat = _quadratic(None, cc.size)
     n = cc.size
-    p_mat = _quadratic(P, n)
+    opts = settings if settings is not None else ConicSettings()
     a_eq, be = _rows(A_eq, b_eq, n, "A_eq", "b_eq")
     a_ub, bu = _rows(A_ub, b_ub, n, "A_ub", "b_ub")
     if bounds is None:
@@ -655,16 +699,16 @@ def solve_socp(
     if bu.size + h.size:
         cone_list.append(cl.NonnegativeConeT(bu.size + h.size))
     cone_list += [cl.SecondOrderConeT(blk.dim) for blk in blocks]
-    settings = cl.DefaultSettings()
-    settings.verbose = False
-    if max_iter is not None:
-        settings.max_iter = int(max_iter)
-    if tol is not None:
-        if not np.isfinite(tol) or tol <= 0.0:
-            raise ValueError(f"tol must be positive and finite, got {tol!r}")
-        settings.tol_gap_abs = settings.tol_gap_rel = settings.tol_feas = float(tol)
+    cl_settings = cl.DefaultSettings()
+    cl_settings.verbose = False
+    if opts.max_iter is not None:
+        cl_settings.max_iter = int(opts.max_iter)
+    if opts.tol is not None:
+        tol = float(opts.tol)
+        cl_settings.tol_gap_abs = cl_settings.tol_gap_rel = tol
+        cl_settings.tol_feas = tol
     solver = cl.DefaultSolver(
-        sp.triu(p_mat).tocsc(), cc, big_a, big_b, cone_list, settings
+        sp.triu(p_mat).tocsc(), cc, big_a, big_b, cone_list, cl_settings
     )
     sol = solver.solve()
     return _conic_result(
