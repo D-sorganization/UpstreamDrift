@@ -23,13 +23,18 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
 import math
+import warnings
 from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.optimize import minimize
 
 from src.shared.python.contracts import require
+from src.shared.python.loop_nullspace.allocation import (
+    ZeroSideConsistency,
+    check_zero_side_consistency,
+    solve_equality_reduced_qp,
+)
 
 Array: TypeAlias = NDArray[np.float64]
 IntArray: TypeAlias = NDArray[np.integer[Any]]
@@ -171,7 +176,7 @@ def verify_torque_and_rate_bounds(
 
 
 class ContactForceAllocator:
-    """Rigorous QP-based contact force and actuator torque allocator."""
+    """Rigorous QP-based contact force and actuator torque allocator (shim over loop_nullspace)."""
 
     def __init__(
         self,
@@ -182,7 +187,16 @@ class ContactForceAllocator:
         regularisation_contact: float = 1e-4,
         regularisation_grip: float = 1e-4,
         root_penalty_weight: float = 1e6,
+        *,
+        warn_deprecated: bool = False,
     ) -> None:
+        if warn_deprecated:
+            warnings.warn(
+                "ContactForceAllocator is a legacy compatibility shim; prefer "
+                "src.shared.python.loop_nullspace.allocation.allocate_trajectory.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         require(nv > 6, "nv must exceed 6 floating base coordinates", nv)
         require(len(actuated_indices) > 0, "must have actuated coordinates")
         require(n_contact_spheres > 0, "must have contact spheres")
@@ -202,12 +216,10 @@ class ContactForceAllocator:
         self.root_penalty = root_penalty_weight
         self._root_dofs = 6
 
-        # S_actuated^T in Pinocchio generalized coordinates (nv, n_actuated)
         self._s_transpose = np.zeros((nv, self.n_actuated))
         for col, idx in enumerate(self.actuated_indices):
             self._s_transpose[idx, col] = 1.0
 
-        # S_root^T for ungrounded root slack (nv, 6)
         self._s_root_transpose = np.zeros((nv, 6))
         for i in range(6):
             self._s_root_transpose[i, i] = 1.0
@@ -230,6 +242,148 @@ class ContactForceAllocator:
             + self._s_root_transpose @ root_sol
         )
 
+    def _build_weights_and_bounds(
+        self,
+        obj: AllocationObjective,
+        trail_set: set[int],
+        tau_bounds: tuple[Array, Array] | None,
+        grip_bounds: tuple[Array, Array] | None,
+        mask: NDArray[np.bool_],
+        has_act_limits: bool,
+    ) -> tuple[Array, Array, Array]:
+        n_act_slack = self.n_actuated if has_act_limits else 0
+        n_total_vars = self.n_vars + n_act_slack
+        idx_ground = self.n_actuated
+        idx_grip = idx_ground + self.n_ground_vars
+        idx_root = idx_grip + self.n_grip_vars
+
+        h_diag = np.ones(n_total_vars, dtype=np.float64)
+        if obj == AllocationObjective.MINIMUM_TRAIL_ARM and len(trail_set) > 0:
+            for i, idx in enumerate(self.actuated_indices):
+                h_diag[i] = 1000.0 if idx in trail_set else 1.0
+        h_diag[idx_ground:idx_grip] = self.reg_contact
+        h_diag[idx_grip:idx_root] = self.reg_grip
+        h_diag[idx_root : idx_root + self.n_root_vars] = self.root_penalty
+        if has_act_limits:
+            h_diag[self.n_vars :] = 1e6
+
+        lb_x = np.full(n_total_vars, -np.inf)
+        ub_x = np.full(n_total_vars, np.inf)
+        if tau_bounds is not None:
+            lb_x[: self.n_actuated] = np.asarray(tau_bounds[0], dtype=np.float64)
+            ub_x[: self.n_actuated] = np.asarray(tau_bounds[1], dtype=np.float64)
+        if obj == AllocationObjective.HARD_ZERO_TRAIL and len(trail_set) > 0:
+            for i, idx in enumerate(self.actuated_indices):
+                if idx in trail_set:
+                    lb_x[i] = 0.0
+                    ub_x[i] = 0.0
+        for s in range(self.n_contact_spheres):
+            if not mask[s]:
+                s_idx = idx_ground + s * 3
+                lb_x[s_idx : s_idx + 3] = 0.0
+                ub_x[s_idx : s_idx + 3] = 0.0
+        if grip_bounds is not None:
+            lb_x[idx_grip:idx_root] = np.asarray(grip_bounds[0], dtype=np.float64)
+            ub_x[idx_grip:idx_root] = np.asarray(grip_bounds[1], dtype=np.float64)
+        return h_diag, lb_x, ub_x
+
+    def _build_friction_pyramid(
+        self,
+        n_total_vars: int,
+        mask: NDArray[np.bool_],
+        n_hat: Array,
+        t1_hat: Array,
+        t2_hat: Array,
+    ) -> Array:
+        k_facets = 8
+        scale = math.cos(math.pi / k_facets)
+        idx_ground = self.n_actuated
+        c_ineq_rows: list[Array] = []
+        for s in range(self.n_contact_spheres):
+            if not mask[s]:
+                continue
+            s_idx = idx_ground + s * 3
+            row_n = np.zeros(n_total_vars)
+            row_n[s_idx : s_idx + 3] = n_hat
+            c_ineq_rows.append(row_n)
+            for k in range(k_facets):
+                theta = 2.0 * math.pi * k / k_facets
+                facet_dir = (
+                    scale * self.mu_friction * n_hat
+                    - math.cos(theta) * t1_hat
+                    - math.sin(theta) * t2_hat
+                )
+                row_f = np.zeros(n_total_vars)
+                row_f[s_idx : s_idx + 3] = facet_dir
+                c_ineq_rows.append(row_f)
+        if not c_ineq_rows:
+            return np.zeros((0, n_total_vars), dtype=np.float64)
+        return np.array(c_ineq_rows, dtype=np.float64)
+
+    def _measure_friction_metrics(
+        self,
+        f_sol: Array,
+        mask: NDArray[np.bool_],
+        n_hat: Array,
+    ) -> tuple[float, float, float]:
+        f_reshaped = f_sol.reshape(self.n_contact_spheres, 3)
+        friction_viol_max = 0.0
+        max_friction_ratio = 0.0
+        total_fn = 0.0
+        for s in range(self.n_contact_spheres):
+            fx, fy, fz = (
+                float(f_sol[s * 3]),
+                float(f_sol[s * 3 + 1]),
+                float(f_sol[s * 3 + 2]),
+            )
+            f_tan = float(np.hypot(fx, fy))
+            if fz > 1e-4:
+                max_friction_ratio = max(max_friction_ratio, f_tan / fz)
+            if not mask[s]:
+                continue
+            fn_s = float(f_reshaped[s] @ n_hat)
+            total_fn += fn_s
+            ft_vec = f_reshaped[s] - fn_s * n_hat
+            ft_s = float(np.linalg.norm(ft_vec))
+            viol_s = max(0.0, ft_s - self.mu_friction * max(0.0, fn_s))
+            friction_viol_max = max(friction_viol_max, viol_s)
+        return friction_viol_max, max_friction_ratio, total_fn
+
+    def _classify_feasibility(
+        self,
+        obj: AllocationObjective,
+        trail_set: set[int],
+        act_slack_sol: Array,
+        act_slack_res: float,
+        root_sol: Array,
+        root_res: float,
+    ) -> tuple[bool, FeasibilityStatus]:
+        is_physically_feasible = True
+        status = FeasibilityStatus.FEASIBLE
+        if act_slack_res > 1e-3:
+            is_physically_feasible = False
+            if obj == AllocationObjective.HARD_ZERO_TRAIL and len(trail_set) > 0:
+                trail_slack = [
+                    abs(act_slack_sol[col])
+                    for col, idx in enumerate(self.actuated_indices)
+                    if idx in trail_set
+                ]
+                status = (
+                    FeasibilityStatus.INFEASIBLE_HARD_ZERO_TRAIL
+                    if (trail_slack and max(trail_slack) > 1e-3)
+                    else FeasibilityStatus.INFEASIBLE_ACTUATOR_BOUNDS
+                )
+            else:
+                status = FeasibilityStatus.INFEASIBLE_ACTUATOR_BOUNDS
+        if root_res > 0.01:
+            is_physically_feasible = False
+            if status == FeasibilityStatus.FEASIBLE:
+                if abs(root_sol[0]) > 1.0 or abs(root_sol[1]) > 1.0:
+                    status = FeasibilityStatus.INFEASIBLE_FRICTION_CONE
+                else:
+                    status = FeasibilityStatus.INFEASIBLE_ROOT_BALANCE
+        return is_physically_feasible, status
+
     def allocate(
         self,
         tau_rnea: Array,
@@ -243,206 +397,63 @@ class ContactForceAllocator:
         ground_normal: Array | None = None,
         atol: float = 1e-4,
     ) -> ContactForceAllocation:
-        """Resolve torques and contact forces matching tau_rnea exactly under constraints."""
+        """Resolve torques and contact forces matching tau_rnea via loop_nullspace conic core."""
         obj = AllocationObjective.from_string(objective)
+        require(tau_rnea.shape == (self.nv,), "tau_rnea shape mismatch")
         require(
-            tau_rnea.shape == (self.nv,),
-            "tau_rnea shape mismatch",
-            (tau_rnea.shape, self.nv),
+            j_ground.shape == (self.n_ground_vars, self.nv), "j_ground shape mismatch"
+        )
+        require(j_grip.shape == (self.n_grip_vars, self.nv), "j_grip shape mismatch")
+
+        n_hat, t1_hat, t2_hat = (
+            (
+                np.array([0.0, 0.0, 1.0]),
+                np.array([1.0, 0.0, 0.0]),
+                np.array([0.0, 1.0, 0.0]),
+            )
+            if ground_normal is None
+            else _get_tangent_basis(ground_normal)
+        )
+        mask = (
+            np.ones(self.n_contact_spheres, dtype=bool)
+            if contact_mask is None
+            else np.asarray(contact_mask, dtype=bool)
         )
         require(
-            j_ground.shape == (self.n_ground_vars, self.nv),
-            "j_ground shape mismatch",
-            (j_ground.shape, (self.n_ground_vars, self.nv)),
+            len(mask) == self.n_contact_spheres,
+            "contact_mask length must match n_contact_spheres",
         )
-        require(
-            j_grip.shape == (self.n_grip_vars, self.nv),
-            "j_grip shape mismatch",
-            (j_grip.shape, (self.n_grip_vars, self.nv)),
+
+        trail_set: set[int] = (
+            {int(i) for i in trail_arm_indices}
+            if trail_arm_indices is not None
+            else set()
+        )
+        has_act_limits = (
+            tau_bounds is not None or obj == AllocationObjective.HARD_ZERO_TRAIL
+        )
+        blocks = [self._s_transpose, j_ground.T, j_grip.T, self._s_root_transpose]
+        if has_act_limits:
+            blocks.append(self._s_transpose)
+        a_eq = np.hstack(blocks)
+
+        h_diag, lb_x, ub_x = self._build_weights_and_bounds(
+            obj, trail_set, tau_bounds, grip_bounds, mask, has_act_limits
+        )
+        c_ineq = self._build_friction_pyramid(len(h_diag), mask, n_hat, t1_hat, t2_hat)
+        x_sol, core_res = solve_equality_reduced_qp(
+            a_eq, tau_rnea, h_diag, lb_x, ub_x, c_ineq
         )
 
         idx_ground = self.n_actuated
         idx_grip = idx_ground + self.n_ground_vars
         idx_root = idx_grip + self.n_grip_vars
-
-        # Parse ground normal and tangent frame
-        if ground_normal is None:
-            n_hat = np.array([0.0, 0.0, 1.0])
-            t1_hat = np.array([1.0, 0.0, 0.0])
-            t2_hat = np.array([0.0, 1.0, 0.0])
-        else:
-            n_hat, t1_hat, t2_hat = _get_tangent_basis(ground_normal)
-
-        # Contact separation mask
-        if contact_mask is not None:
-            mask = np.asarray(contact_mask, dtype=bool)
-            require(
-                len(mask) == self.n_contact_spheres,
-                "contact_mask length must match n_contact_spheres",
-            )
-        else:
-            mask = np.ones(self.n_contact_spheres, dtype=bool)
-
-        # Check if actuator bounds or hard zero trail require actuator slack variables
-        has_act_limits = (
-            tau_bounds is not None or obj == AllocationObjective.HARD_ZERO_TRAIL
-        )
-        n_act_slack = self.n_actuated if has_act_limits else 0
-        n_total_vars = self.n_vars + n_act_slack
-
-        # Build equality matrix: A_eq @ x = tau_rnea
-        # x = [tau_actuated, f_ground, lambda_grip, delta_tau_root, (delta_tau_act)]
-        blocks = [
-            self._s_transpose,
-            j_ground.T,
-            j_grip.T,
-            self._s_root_transpose,
-        ]
-        if has_act_limits:
-            blocks.append(self._s_transpose)
-        a_eq = np.hstack(blocks)
-
-        # Objective diagonal weights H_diag
-        h_diag = np.ones(n_total_vars, dtype=np.float64)
-
-        # Actuator weighting
-        trail_set: set[int] = (
-            set(trail_arm_indices) if trail_arm_indices is not None else set()
-        )
-        if obj == AllocationObjective.MINIMUM_TRAIL_ARM and len(trail_set) > 0:
-            for i, idx in enumerate(self.actuated_indices):
-                if idx in trail_set:
-                    h_diag[i] = 1000.0
-                else:
-                    h_diag[i] = 1.0
-        else:
-            h_diag[: self.n_actuated] = 1.0
-
-        # Ground force weights
-        h_diag[idx_ground:idx_grip] = self.reg_contact
-        # Grip wrench weights
-        h_diag[idx_grip:idx_root] = self.reg_grip
-        # Root slack penalty
-        h_diag[idx_root : idx_root + self.n_root_vars] = self.root_penalty
-        # Actuator slack penalty (heavily penalize violating actuator limits)
-        if has_act_limits:
-            h_diag[self.n_vars :] = 1e6
-
-        # Variable bounds (lb, ub)
-        lb_x = np.full(n_total_vars, -np.inf)
-        ub_x = np.full(n_total_vars, np.inf)
-
-        # Apply actuator bounds
-        if tau_bounds is not None:
-            lb_x[: self.n_actuated] = np.asarray(tau_bounds[0], dtype=np.float64)
-            ub_x[: self.n_actuated] = np.asarray(tau_bounds[1], dtype=np.float64)
-
-        # Hard-zero trail mode: force trail arm coordinates to strictly 0
-        if obj == AllocationObjective.HARD_ZERO_TRAIL and len(trail_set) > 0:
-            for i, idx in enumerate(self.actuated_indices):
-                if idx in trail_set:
-                    lb_x[i] = 0.0
-                    ub_x[i] = 0.0
-
-        # Separated contacts exert strictly zero force
-        for s in range(self.n_contact_spheres):
-            if not mask[s]:
-                s_idx = idx_ground + s * 3
-                lb_x[s_idx : s_idx + 3] = 0.0
-                ub_x[s_idx : s_idx + 3] = 0.0
-
-        # Grip bounds if specified
-        if grip_bounds is not None:
-            lb_x[idx_grip:idx_root] = np.asarray(grip_bounds[0], dtype=np.float64)
-            ub_x[idx_grip:idx_root] = np.asarray(grip_bounds[1], dtype=np.float64)
-
-        # Polyhedral friction pyramid & non-negative normal constraints
-        # 8 facets: theta_k = 2 * pi * k / 8
-        k_facets = 8
-        scale = math.cos(math.pi / k_facets)
-        c_ineq_rows: list[Array] = []
-
-        for s in range(self.n_contact_spheres):
-            if not mask[s]:
-                continue
-            s_idx = idx_ground + s * 3
-            # Non-negative normal force: f_s . n_hat >= 0
-            row_n = np.zeros(n_total_vars)
-            row_n[s_idx : s_idx + 3] = n_hat
-            c_ineq_rows.append(row_n)
-
-            # Inscribed friction pyramid: scale * mu * (f_s . n) - (cos(th) t1 + sin(th) t2) . f_s >= 0
-            for k in range(k_facets):
-                theta = 2.0 * math.pi * k / k_facets
-                facet_dir = (
-                    scale * self.mu_friction * n_hat
-                    - math.cos(theta) * t1_hat
-                    - math.sin(theta) * t2_hat
-                )
-                row_f = np.zeros(n_total_vars)
-                row_f[s_idx : s_idx + 3] = facet_dir
-                c_ineq_rows.append(row_f)
-
-        c_ineq = (
-            np.array(c_ineq_rows)
-            if c_ineq_rows
-            else np.zeros((0, n_total_vars), dtype=np.float64)
-        )
-
-        # Scale variables so that quadratic Hessian becomes identity (condition number = 1.0)
-        # y = D * x  where D = sqrt(H_diag)
-        d_vec = np.sqrt(h_diag)
-        d_inv = 1.0 / d_vec
-
-        a_eq_scaled = a_eq * d_inv[np.newaxis, :]
-        c_ineq_scaled = (
-            c_ineq * d_inv[np.newaxis, :]
-            if len(c_ineq) > 0
-            else np.zeros((0, n_total_vars))
-        )
-
-        lb_y = lb_x * d_vec
-        ub_y = ub_x * d_vec
-        bounds_y = list(zip(lb_y, ub_y, strict=True))
-
-        constraints: list[dict[str, Any]] = [
-            {
-                "type": "eq",
-                "fun": lambda y: a_eq_scaled @ y - tau_rnea,
-                "jac": lambda y: a_eq_scaled,
-            }
-        ]
-        if len(c_ineq) > 0:
-            constraints.append(
-                {
-                    "type": "ineq",
-                    "fun": lambda y: c_ineq_scaled @ y,
-                    "jac": lambda y: c_ineq_scaled,
-                }
-            )
-
-        # Initial point
-        y0 = np.zeros(n_total_vars)
-
-        res = minimize(  # type: ignore[call-overload]
-            fun=lambda y: 0.5 * np.sum(y**2),
-            x0=y0,
-            jac=lambda y: y,
-            method="SLSQP",
-            bounds=bounds_y,
-            constraints=constraints,
-            options={"maxiter": 200, "ftol": 1e-8},
-        )
-
-        # Unscale solution: x = y * d_inv
-        x_sol = res.x * d_inv
         tau_sol = x_sol[: self.n_actuated]
         f_sol = x_sol[idx_ground:idx_grip]
         lambda_sol = x_sol[idx_grip:idx_root]
         root_sol = x_sol[idx_root : idx_root + self.n_root_vars]
         act_slack_sol = x_sol[self.n_vars :] if has_act_limits else np.zeros(0)
 
-        # Residuals and violations
         applied = self._compute_applied(
             tau_sol, j_ground, f_sol, j_grip, lambda_sol, root_sol
         )
@@ -451,90 +462,53 @@ class ContactForceAllocator:
         act_slack_res = (
             float(np.max(np.abs(act_slack_sol))) if len(act_slack_sol) > 0 else 0.0
         )
+        friction_viol_max, max_friction_ratio, total_fn = (
+            self._measure_friction_metrics(f_sol, mask, n_hat)
+        )
+        is_physically_feasible, feasibility_status = self._classify_feasibility(
+            obj, trail_set, act_slack_sol, act_slack_res, root_sol, root_res
+        )
+        if (
+            root_res > 0.01
+            and feasibility_status == FeasibilityStatus.INFEASIBLE_FRICTION_CONE
+            and (tau_rnea[2] < -1.0 or (total_fn < 1.0 and abs(tau_rnea[2]) > 10.0))
+        ):
+            feasibility_status = FeasibilityStatus.INFEASIBLE_ROOT_BALANCE
 
-        # Check friction cone violations and measure Coulomb friction ratio
-        f_reshaped = f_sol.reshape(self.n_contact_spheres, 3)
-        friction_viol_max = 0.0
-        max_friction_ratio = 0.0
-        for s in range(self.n_contact_spheres):
-            fx = float(f_sol[s * 3])
-            fy = float(f_sol[s * 3 + 1])
-            fz = float(f_sol[s * 3 + 2])
-            f_tan = float(np.hypot(fx, fy))
-            if fz > 1e-4:
-                ratio = f_tan / fz
-                if ratio > max_friction_ratio:
-                    max_friction_ratio = ratio
-            if not mask[s]:
-                continue
-            fn_s = float(f_reshaped[s] @ n_hat)
-            ft_vec = f_reshaped[s] - fn_s * n_hat
-            ft_s = float(np.linalg.norm(ft_vec))
-            viol_s = max(0.0, ft_s - self.mu_friction * max(0.0, fn_s))
-            if viol_s > friction_viol_max:
-                friction_viol_max = viol_s
+        if obj == AllocationObjective.HARD_ZERO_TRAIL and len(trail_set) > 0:
+            zero_check = check_zero_side_consistency(
+                tau_rnea=tau_rnea,
+                actuated_indices=self.actuated_indices,
+                zero_joint_indices=sorted(trail_set),
+                j_ground=j_ground,
+                j_grip=j_grip,
+                atol=atol,
+            )
+            if zero_check.status == ZeroSideConsistency.INCONSISTENT:
+                is_physically_feasible = False
+                feasibility_status = FeasibilityStatus.INFEASIBLE_HARD_ZERO_TRAIL
+                act_slack_res = max(act_slack_res, zero_check.residual_norm)
 
-        # Feasibility assessment
-        is_physically_feasible = True
-        feasibility_status = FeasibilityStatus.FEASIBLE
-
-        # Actuator violations
-        if act_slack_res > 1e-3:
-            is_physically_feasible = False
-            if (
-                obj == AllocationObjective.HARD_ZERO_TRAIL
-                and trail_arm_indices is not None
-            ):
-                trail_set = set(trail_arm_indices)
-                trail_slack = [
-                    abs(act_slack_sol[col])
-                    for col, idx in enumerate(self.actuated_indices)
-                    if idx in trail_set
-                ]
-                if trail_slack and max(trail_slack) > 1e-3:
-                    feasibility_status = FeasibilityStatus.INFEASIBLE_HARD_ZERO_TRAIL
-                else:
-                    feasibility_status = FeasibilityStatus.INFEASIBLE_ACTUATOR_BOUNDS
-            else:
-                feasibility_status = FeasibilityStatus.INFEASIBLE_ACTUATOR_BOUNDS
-
-        # Root balance violations (diagnostic slack cannot create physical success)
-        if root_res > 0.01:
-            is_physically_feasible = False
-            if feasibility_status == FeasibilityStatus.FEASIBLE:
-                # Determine primary cause of root ungroundedness
-                fn_vals = [
-                    float(f_reshaped[s] @ n_hat)
-                    for s in range(self.n_contact_spheres)
-                    if mask[s]
-                ]
-                total_fn = sum(fn_vals) if fn_vals else 0.0
-                if tau_rnea[2] < -1.0 or (total_fn < 1.0 and abs(tau_rnea[2]) > 10.0):
-                    feasibility_status = FeasibilityStatus.INFEASIBLE_ROOT_BALANCE
-                elif abs(root_sol[0]) > 1.0 or abs(root_sol[1]) > 1.0:
-                    feasibility_status = FeasibilityStatus.INFEASIBLE_FRICTION_CONE
-                else:
-                    feasibility_status = FeasibilityStatus.INFEASIBLE_ROOT_BALANCE
-
-        # Overall equilibrium error check
         if eq_res > 1e-3:
             is_physically_feasible = False
             if feasibility_status == FeasibilityStatus.FEASIBLE:
                 feasibility_status = FeasibilityStatus.INFEASIBLE_ROOT_BALANCE
 
-        bounds_satisfied = True
-        if tau_bounds is not None:
-            bounds_satisfied = bool(
+        bounds_satisfied = (
+            True
+            if tau_bounds is None
+            else bool(
                 np.all(tau_sol >= tau_bounds[0] - 1e-5)
                 and np.all(tau_sol <= tau_bounds[1] + 1e-5)
             )
-
-        solver_converged = bool(
-            res.success
-            or (res.status in (0, 8, 9) and eq_res < 1e-4)
-            or (eq_res < 1e-4 and friction_viol_max < 1e-3)
         )
-        success = bool(solver_converged and eq_res < 1e-4 and bounds_satisfied)
+        hard_zero_ok = not (
+            obj == AllocationObjective.HARD_ZERO_TRAIL
+            and feasibility_status == FeasibilityStatus.INFEASIBLE_HARD_ZERO_TRAIL
+        )
+        success = bool(
+            core_res.converged and eq_res < 1e-4 and bounds_satisfied and hard_zero_ok
+        )
 
         return ContactForceAllocation(
             tau_actuated=tau_sol,
@@ -547,7 +521,7 @@ class ContactForceAllocator:
             objective=obj,
             is_physically_feasible=is_physically_feasible,
             feasibility_status=feasibility_status,
-            dual_residuals=eq_res,
+            dual_residuals=float(core_res.dual_residual),
             friction_violations=friction_viol_max,
             actuator_violations=act_slack_res,
             root_slack_norm=root_res,
