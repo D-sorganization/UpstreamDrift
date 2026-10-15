@@ -80,12 +80,22 @@ def _root_block(point: sp.Matrix) -> sp.Matrix:
     return sp.Matrix.vstack(top, bottom)
 
 
-def build(floating: bool, feet: bool, points_per_foot: int = 1) -> dict[str, Any]:
+def build(
+    floating: bool,
+    feet: bool,
+    points_per_foot: int = 1,
+    rows: list[int] | None = None,
+) -> dict[str, Any]:
+    """Exact structure; ``rows`` selects closure rows (NSX-26), all six by default."""
     lead = _arm_columns(sp.Matrix([R(-1, 10), 0, 0]), 0)
     trail = _arm_columns(sp.Matrix([R(1, 10), 0, 0]), 3)
     root = _root_block(P_STAR) if floating else sp.zeros(6, 0)
     # closure: trail hand twist minus club-grip (= lead hand) twist at p*
     j_c = sp.Matrix.hstack(root - root if floating else root, -lead, trail)
+    keep = list(range(6)) if rows is None else list(rows)
+    j_c = sp.Matrix.vstack(*[j_c[r, :] for r in keep])
+    lead_block = sp.Matrix.vstack(*[(-lead)[r, :] for r in keep])
+    trail_block = sp.Matrix.vstack(*[trail[r, :] for r in keep])
     n = j_c.cols
     n_root = 6 if floating else 0
     unact = list(range(n_root))
@@ -105,13 +115,18 @@ def build(floating: bool, feet: bool, points_per_foot: int = 1) -> dict[str, Any
         "J_g": j_g,
         "n": n,
         "unactuated": unact,
-        "lead": -lead,
-        "trail": trail,
+        "lead": lead_block,
+        "trail": trail_block,
     }
 
 
-def counts(floating: bool, feet: bool, points_per_foot: int = 1) -> dict[str, Any]:
-    st = build(floating, feet, points_per_foot)
+def counts(
+    floating: bool,
+    feet: bool,
+    points_per_foot: int = 1,
+    rows: list[int] | None = None,
+) -> dict[str, Any]:
+    st = build(floating, feet, points_per_foot, rows)
     j_c, j_g, n = st["J_c"], st["J_g"], st["n"]
     u = st["unactuated"]
     m, n_g = j_c.rows, j_g.rows
