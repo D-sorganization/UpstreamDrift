@@ -189,6 +189,7 @@ def test_input_validation(pi0, regressor, basis) -> None:
         identifiability_basis(regressor, pi0, fixed_bodies=(0, 1, 2, 4))
 
 
+@pytest.mark.requires_pinocchio
 def test_layout_swap_is_an_involution_that_matches_pinocchio_order() -> None:
     pin = pytest.importorskip("pinocchio")
     inertia = pin.Inertia(
