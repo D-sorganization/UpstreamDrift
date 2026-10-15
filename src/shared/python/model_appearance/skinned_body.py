@@ -197,6 +197,13 @@ def build_skinned_body(
             continue
         capsules_by_body.setdefault(capsule.body, []).append(capsule)
 
+    # Deferred: cross_section uses this module's spec_body_poses (import cycle).
+    from src.shared.python.model_appearance.cross_section import (
+        body_sections,
+        width_hint_for,
+    )
+
+    sections = body_sections(spec)
     vertex_chunks: list[Array] = []
     face_chunks: list[NDArray[np.int64]] = []
     joint_chunks: list[NDArray[np.uint16]] = []
@@ -211,7 +218,14 @@ def build_skinned_body(
                 np.asarray(capsule.start_m, dtype=float),
                 np.asarray(capsule.end_m, dtype=float),
                 radius,
-                LoftOptions(aspect=aspect, rings=rings, sides=sides),
+                LoftOptions(
+                    aspect=aspect,
+                    rings=rings,
+                    sides=sides,
+                    width_hint=width_hint_for(
+                        sections, name, capsule.start_m, capsule.end_m
+                    ),
+                ),
             )
             world_vertices = mesh.vertices @ pose[:3, :3].T + pose[:3, 3]
             vertex_chunks.append(world_vertices)

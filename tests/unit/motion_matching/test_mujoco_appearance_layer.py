@@ -161,13 +161,13 @@ def _skin_meshes_in_spec_frames(spec_path: Path) -> tuple[dict, dict]:
     xml, _ = exporter.export_full_body_mjcf(raw, appearance=document_from_dict(DOC))
     root = ET.fromstring(xml)  # nosec B314 - trusted, generated in-process
     verts = {
-        m.get("name"): np.array(m.get("vertex").split(), float).reshape(-1, 3)
+        m.get("name"): np.array(m.get("vertex", "").split(), float).reshape(-1, 3)
         for m in root.iter("mesh")
     }
     follower = {j["child"]: np.asarray(j["child_to_follower"]) for j in spec["joints"]}
     out: dict[str, list[np.ndarray]] = {}
     for body in root.iter("body"):
-        name = body.get("name")
+        name = body.get("name", "")
         for geom in body.findall("geom"):
             mesh = geom.get("mesh") or ""
             if "_skin" not in mesh:

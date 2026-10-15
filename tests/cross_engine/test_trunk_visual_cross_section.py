@@ -86,7 +86,7 @@ def _mjcf_trunk_extents(
         xml, _ = exporter.export_full_body_mjcf(raw, visual=True)
     root = ET.fromstring(xml)  # nosec B314 - trusted, generated in-process
     meshes = {
-        m.get("name"): np.array(m.get("vertex").split(), float).reshape(-1, 3)
+        m.get("name"): np.array(m.get("vertex", "").split(), float).reshape(-1, 3)
         for m in root.iter("mesh")
     }
     follower = {j["child"]: np.asarray(j["child_to_follower"]) for j in spec["joints"]}
@@ -110,7 +110,7 @@ def _mjcf_trunk_extents(
                     )
                 )
             elif not appearance and geom.get("type") == "ellipsoid":
-                half = np.array(geom.get("size").split(), float)
+                half = np.array(geom.get("size", "").split(), float)
                 assert "quat" not in geom.attrib  # axis-aligned in the MJCF frame
                 out.append(
                     (
