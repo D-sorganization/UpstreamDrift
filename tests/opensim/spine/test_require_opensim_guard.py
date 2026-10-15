@@ -143,3 +143,23 @@ def test_unrelated_skip_stays_skipped_in_lane(
     _inner_suite(pytester, f"pytest.skip({UNRELATED_REASON!r})")
     result = pytester.runpytest("-p", "no:cacheprovider")
     result.assert_outcomes(failed=0, skipped=1)
+
+
+def test_module_level_absent_opensim_skip_becomes_error_in_lane(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv(REQUIRE_ENV_VAR, "1")
+    pytester.mkdir("spine")
+    (pytester.path / "spine" / "conftest.py").write_text(
+        CONFTEST.read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    (pytester.path / "spine" / "__init__.py").write_text("", encoding="utf-8")
+    (pytester.path / "spine" / "test_module.py").write_text(
+        "import pytest\n\n"
+        f"pytest.skip({SKIP_REASON!r}, allow_module_level=True)\n\n\n"
+        "def test_never_runs():\n    pass\n",
+        encoding="utf-8",
+    )
+    result = pytester.runpytest("-p", "no:cacheprovider")
+    result.assert_outcomes(failed=0, skipped=0, errors=1)
+    result.stdout.fnmatch_lines([f"*{REQUIRE_ENV_VAR}*"])
