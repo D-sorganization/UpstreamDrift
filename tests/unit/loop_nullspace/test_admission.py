@@ -197,7 +197,9 @@ def test_central_difference_derivative_consistency(oracle, plant):
     assert any("derivative" in r for r in bad.verdict.reasons)
 
 
+@pytest.mark.requires_pinocchio
 def test_contact_schedule_stance_velocity():
+    pytest.importorskip("pinocchio")
     case = build_case(floating_root=True, feet=True)
     snap = case.snapshot
     # remove stance foot velocity: v in the null space of [J_c; J_g]
@@ -216,7 +218,9 @@ def test_contact_schedule_stance_velocity():
     assert any("frame 1" in r and "stance" in r for r in bad.verdict.reasons)
 
 
+@pytest.mark.requires_pinocchio
 def test_contact_schedule_unknown_name_and_length():
+    pytest.importorskip("pinocchio")
     case = build_case(floating_root=True, feet=True)
     snap = case.snapshot
     gates = AdmissionGates(
