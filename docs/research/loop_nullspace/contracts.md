@@ -539,11 +539,82 @@ Golden: `planar_two_arm_full.zero_side`.
 
 ## NSX-25 Pareto and Probes (#12568)
 
-`pareto_front(feasible_sets, objectives, eps_grid)`,
-`certify(feasible_sets, predicate, window) -> Certificate`. Affine predicates
-only, rejected at construction otherwise. A `FAILS` certificate carries a
-witness satisfying every constraint. Goldens: `envelope_analytic_lp`
-(`trajectory_coupled`).
+```python
+def pareto_front(feasible_sets, objectives, eps_grid, *, references=(None, None)) -> ParetoFront
+def certify(feasible_sets, predicate, window=None, *, coupling=(), aggregation="ALL") -> Certificate
+def verify_certificate(cert, feasible_sets, *, coupling=(), predicate=None) -> VerificationReport
+def trajectory_envelope(feasible_sets, quantities, *, coupling=()) -> TrajectoryEnvelope
+```
+
+Modules: `probes.py` (public API, re-exports), `probe_certificates.py`
+(leaf certificates, numpy verifier), `trajectory_system.py` (stacked set, solver
+adapter), `trajectory_envelope.py`, `pareto.py`.
+
+**Predicates.** `AffinePredicate(quantity, sense, threshold)` with
+`sense in {ge, le}` normalises to `f(z) = s (const + coeff . z) >= s theta`.
+Only affine functionals exist: the constructor accepts an `EnvelopeQuantity`,
+a sequence of them or a quantity factory; `AffinePredicate.from_function`
+evaluates a callable at the origin and the unit vectors and tests the fit at
+random points, raising `NonAffinePredicateError` (a `ValueError`) otherwise.
+Non-convex predicates are out of scope.
+
+**Trajectory-coupled set.** The frames' sets are stacked in
+`z = (z_1, ..., z_T)` and intersected with hard rate bounds
+`|q_{k+1} - q_k| <= delta_k` on an affine quantity (`RateBound`, the
+`trajectory_coupled` oracle; hypothesis id `H-SMOOTH-TORQUE-RATE`). The
+coupled set is a subset of the static one. `certify` keeps Coulomb cones as
+exact second-order-cone blocks, so neither verdict depends on the declared
+polygon; `trajectory_envelope` uses the declared linearisation like the static
+envelopes.
+
+**What "certified" means (strongest standard notion, no new math).** For a
+normalised functional `f` and the stacked system `A z <= b` (polyhedral rows
+`G z <= h` plus cone blocks `b_j - A_j z in SOC`), a leaf carries
+
+* `LOWER_BOUND`: a primal witness `w` (feasible, value `f(w)`) and a dual `d`
+  with `d >= 0` on rows, `d_j in SOC` on cone blocks (self-dual) and
+  stationarity `c + A^T d = 0`. Weak duality gives `f(z) >= const - b . d` for
+  every feasible `z`; the witness gives `min f <= f(w)`. This is primal
+  feasibility plus a zero-duality-gap certificate checked by the verifier, not
+  a trust in the solver status.
+* `FARKAS`: `d` in the dual cone, `A^T d = 0`, `b . d < 0` (set empty).
+* `WITNESS_ONLY`: `f` is unbounded below; a feasible witness with `f` below
+  the threshold (found with the violation as an extra row) proves failure.
+
+Verdict, with `atol = SIGN_ATOL_RTOL * scale` (the NSX-22 sign tolerance, never
+a bare 0): `HOLDS` iff certified bound `> theta + atol`; `FAILS` iff a feasible
+witness has `f < theta - atol`; otherwise `UNDECIDED("BOUNDARY")` (optimum
+within `atol` of the threshold, consistent with "a bound that touches zero is
+INDETERMINATE"). An empty set gives `UNDECIDED("EMPTY_FEASIBLE_SET")` with its
+Farkas leaf, never a vacuous HOLDS. A leaf the verifier rejects is downgraded
+to `UNDECIDED("CERTIFICATE_REJECTED: ...")`. `aggregation="ALL"` asks the
+predicate of every window frame (one LP each, one persistent model);
+`"SUM"` asks it of `sum_k q_k` (one LP).
+
+`verify_certificate` rebuilds the stacked system from the sets, checks that its
+SHA-256 digest equals the certificate's, re-checks every leaf with numpy only
+(`verify_leaf`) and, if given the predicate, that the leaf functionals are its
+own. Tolerances: stationarity, cone membership and stored values to `1e-8`
+scaled; witness row violation to `1e-7` scaled (the HiGHS feasibility default).
+The certificate is therefore exact up to the reported residuals, not a
+rational-arithmetic proof. `Certificate.to_json` / `from_json` round-trip every
+array and number exactly (shortest round-trip float text).
+
+**Pareto.** `objectives = (J_a, J_b)` are two `ObjectiveSpec`s over the same
+frames (each objective is the sum of the quadratic terms its spec enables;
+`J_a` may include gross power, `J_b` may not). The solve is
+`min J_a(z) s.t. J_b(z) <= eps`, with `J_b = |M z + m|^2` imposed exactly as the
+cone `(sqrt(eps), M z + m) in SOC`; `J_a` must be strictly convex on the
+retained torque space (NSX-23), so each OPTIMAL point is unique and Pareto
+optimal in the torque objectives. The cone multiplier gives the slope
+`d J_a / d eps`. Oracle: two frames, one torque, closed form in
+`tests/unit/loop_nullspace/test_pareto.py`. An `eps` below the attainable
+`J_b` is reported `INFEASIBLE`. Every point is `FAMILY_DEPENDENT` and lists all
+hypotheses of both objectives. `explore_torque_tradeoffs` keeps its return
+shape and now emits a `FutureWarning` naming it a weight sweep.
+
+Goldens: `envelope_analytic_lp` (`trajectory_coupled`, `infeasible`,
+`unbounded`, `static`).
 
 ## NSX-26 Reaction Restriction (#12569)
 
