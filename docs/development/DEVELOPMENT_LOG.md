@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12682 · R5: One Clubhead Measurement Point (Face Centre via Club_Face_Target.Face_Centre_Path) for the Fd_Phase Impact Split, the Exporter Impact Detector and a New Dynamics.Fd_Phase.Clubhead_Speed Receipt Block (Simulated/Reference/Capture Speed, % Error, Peak-Timing Offset); Scripts/diagnose_clubhead_speed.py Decomposition
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12682
+- **Branch:** fix/12682-clubhead-speed-parity
+- **PR:** #12695
+- **Paths:** see #12695
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`0081a09b`; collated from changes/12682-r5-one-clubhead-measurement-point-face-c.md)
+- **Summary:** R5: one clubhead measurement point (face centre via club_face_target.face_centre_path) for the fd_phase impact split, the exporter impact detector and a new dynamics.fd_phase.clubhead_speed receipt block (simulated/reference/capture speed, % error, peak-timing offset); scripts/diagnose_clubhead_speed.py decomposition
+- **Next step:** Merge the PR; R10 regenerates canonical receipts with the new block; R6 sizes the shaft share (about 2 % on the 7-iron).
+
 ### DL-#12413 · \ Restore DBC Level in Test_Ud_Contract_Level_Alias_Sync to Prevent Xdist Pollution\
 
 - **State:** in_review
@@ -2287,6 +2300,45 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#12681 · Pelvis Wears the Active Outfit's Pants Material: Body Classification Is Order-Independent (Leaf Segment Before Parent Folder, Exact Before Prefix Before Substring, Equal-Specificity Ties Raise), GolfSwing3D LowerTorso Maps to Pelvis, and Check_Clothing Enforces Pelvis Garment == Pants for Every Preset
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12681
+- **Branch:** merged via #12694
+- **PR:** #12694
+- **Paths:** see #12694
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7d59de0d`; collated from changes/12681-pelvis-wears-the-active-outfit-s-pants-m.md)
+- **Summary:** Pelvis wears the active outfit's pants material: body classification is order-independent (leaf segment before parent folder, exact before prefix before substring, equal-specificity ties raise), GolfSwing3D LowerTorso maps to pelvis, and check_clothing enforces pelvis garment == pants for every preset
+- **Next step:** Shipped in PR #12694.
+
+### DL-#12580 · NSX-52: MyoSuite CLOSED_LOOP_SNAPSHOT via MuJoCo Adapter Reuse; Kkt_Regularization Recorded, FULL Only At 0
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12580
+- **Branch:** merged via #12636
+- **PR:** #12636
+- **Paths:** see #12636
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`91feef10`; collated from changes/12580-nsx-52-myosuite-closed-loop-snapshot-via.md)
+- **Summary:** NSX-52: MyoSuite CLOSED_LOOP_SNAPSHOT via MuJoCo adapter reuse; kkt_regularization recorded, FULL only at 0
+- **Next step:** Shipped in PR #12636.
+
+### DL-#12561 · NSX-16: Grip-Frame Split Coordinates, Grasp Map Kernel and Bare-Club Net Wrench
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12561
+- **Branch:** merged via #12632
+- **PR:** #12632
+- **Paths:** see #12632
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`54f33667`; collated from changes/12561-nsx-16-grip-frame-split-coordinates-gras.md)
+- **Summary:** NSX-16: grip-frame split coordinates, grasp map kernel and bare-club net wrench
+- **Next step:** Shipped in PR #12632.
 
 ### DL-#12605 · Pinocchio Reference Adapter Maps the Free-Flyer World Linear Velocity/Acceleration Into Pinocchio's LOCAL Frame via the NSX-50 Velocity Map
 
