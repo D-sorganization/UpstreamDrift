@@ -2741,6 +2741,7 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-15 | #12603 | Hand-on-club grip wrench uses the bare club inertia (club_solids_partition); legacy composite kept as wrist_on_hands_plus_club |
 | 2026-10-15 | #12595 | Split force_nullspace.py into a force_nullspace package with re-export shims and public API contract test (NSX-03, no behavior change) |
 | 2026-10-15 | #12598 | NSX-00: replace the provisional spec with the reviewed version (independent sympy derivations, 8 goldens, contracts.md, ADR-0054 D1-D6 accepted, D7 proposed) |
 | 2026-10-15 | #12547 | Stop committing the generated agent-context views (README.md, index.html); render them on demand in CI and locally; reviews, catalog and contracts stay committed |
