@@ -15,7 +15,7 @@ import scipy.sparse as sp
 pytest.importorskip("highspy")
 pytest.importorskip("clarabel")
 
-from loop_nullspace.solvers import (  # noqa: E402
+from src.shared.python.loop_nullspace.solvers import (  # noqa: E402
     Basis,
     ConicResult,
     KKTResiduals,
@@ -101,7 +101,7 @@ def test_kkt_residuals_small_and_scale_invariant() -> None:
 
 
 def test_kkt_residuals_detect_a_wrong_point() -> None:
-    from loop_nullspace.solvers import lp_kkt_residuals
+    from src.shared.python.loop_nullspace.solvers import lp_kkt_residuals
 
     c = np.array([-1.0, -2.0])
     a_ub = np.array([[1.0, 1.0]])
@@ -441,7 +441,7 @@ def test_importing_the_module_does_not_import_solvers(monkeypatch) -> None:
     import sys
 
     code = (
-        "import sys; import loop_nullspace.solvers; "
+        "import sys; import src.shared.python.loop_nullspace.solvers; "
         "assert 'highspy' not in sys.modules and 'clarabel' not in sys.modules"
     )
     import os

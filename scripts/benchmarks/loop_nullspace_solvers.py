@@ -19,10 +19,9 @@ from pathlib import Path
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(_ROOT / "src" / "shared" / "python"))
 sys.path.insert(0, str(_ROOT))
 
-from loop_nullspace.solvers import (  # noqa: E402
+from src.shared.python.loop_nullspace.solvers import (  # noqa: E402
     LPSession,
     SOCBlock,
     SolveStatus,
