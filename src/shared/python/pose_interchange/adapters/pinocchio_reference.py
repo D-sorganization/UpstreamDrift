@@ -12,7 +12,9 @@ drift term. Those maps are delegated to the NSX-50 dual dynamic maps
 rather than re-derived here. The quaternion is reordered (canonical
 ``w``-first vs Pinocchio ``w``-last). Generalized forces (``tau``) and the
 gradient blocks stay in Pinocchio native coordinates; the canonical dual is
-``tau_c = T^T tau_n``. The module runs without importing the Pinocchio wheel.
+``tau_c = T^T tau_n``. Trajectory finite differences are taken on the base
+Lie group in canonical coordinates (issue #12700) and then sent through the
+same map. The module runs without importing the Pinocchio wheel.
 """
 
 from __future__ import annotations
@@ -47,6 +49,11 @@ from src.shared.python.pose_interchange.dynamic_maps import (
     velocity_map_matrices,
 )
 from src.shared.python.pose_interchange.protocol import JointSlot
+from src.shared.python.pose_interchange.se3 import (
+    quat_conjugate,
+    quat_log,
+    quat_multiply,
+)
 
 _DEFAULT_EPS = 1.0e-6
 # Free-flyer block only: joint speeds pass through, so no joint slots are mapped.
@@ -309,11 +316,14 @@ class PinocchioReferenceAdapter:
         routes finite differencing and the frame loop through the Rust driver.
         Otherwise it uses the NumPy fallback with the same callback boundary.
 
-        Canonical ``qdot``/``qddot`` overrides are mapped per frame into the
-        Pinocchio LOCAL base frame (issue #12605) and returned unchanged; a
-        ``qddot`` override needs its ``qdot`` because the base acceleration map
-        depends on velocity. Without overrides the returned derivatives are the
-        raw native finite differences.
+        Missing derivatives are finite-differenced in canonical-v2 coordinates
+        on the base Lie group (issue #12700): WORLD linear rates from the base
+        position, BODY angular rates from the quaternion log of the relative
+        rotation, plain rates for joints. The canonical ``qdot``/``qddot``
+        (supplied overrides or estimates) are then mapped per frame into the
+        Pinocchio LOCAL base frame with the NSX-50 map (issue #12605) and
+        handed to the driver, so the drivers never differentiate raw native
+        ``q``. The returned ``qdot``/``qddot`` are always canonical-v2.
         """
 
         q_canonical = _require_matrix(np.asarray(q, dtype=np.float64), "q")
@@ -329,35 +339,29 @@ class PinocchioReferenceAdapter:
             need_qddot=qddot is None,
         )
         q_native = _map_rows(q_canonical, _canonical_q_to_pinocchio)
-        qdot_canonical = _optional_motion_matrix(qdot, "qdot", q_native.shape[0])
-        qddot_canonical = _optional_motion_matrix(qddot, "qddot", q_native.shape[0])
-        qdot_native: npt.NDArray[np.float64] | None = None
-        qddot_native: npt.NDArray[np.float64] | None = None
-        if qdot_canonical is not None:
-            qdot_native = np.vstack(
-                [
-                    _canonical_velocity_to_pinocchio(q_row, v_row)
-                    for q_row, v_row in zip(q_native, qdot_canonical, strict=True)
-                ]
-            )
-        if qddot_canonical is not None:
-            if qdot_canonical is None:
-                raise ValueError(
-                    "a qddot override requires the matching canonical qdot "
-                    "override: the Pinocchio base acceleration map depends on v"
+        qdot_override = _optional_motion_matrix(qdot, "qdot", q_native.shape[0])
+        qddot_override = _optional_motion_matrix(qddot, "qddot", q_native.shape[0])
+        qdot_canonical, qddot_canonical = _canonical_derivatives(
+            q_canonical, time_array, qdot_override, qddot_override
+        )
+        qdot_native = np.vstack(
+            [
+                _canonical_velocity_to_pinocchio(q_row, v_row)
+                for q_row, v_row in zip(q_native, qdot_canonical, strict=True)
+            ]
+        )
+        qddot_native = np.vstack(
+            [
+                _canonical_acceleration_to_pinocchio(q_row, a_row, v_row)
+                for q_row, a_row, v_row in zip(
+                    q_native, qddot_canonical, qdot_canonical, strict=True
                 )
-            qddot_native = np.vstack(
-                [
-                    _canonical_acceleration_to_pinocchio(q_row, a_row, v_row)
-                    for q_row, a_row, v_row in zip(
-                        q_native, qddot_canonical, qdot_canonical, strict=True
-                    )
-                ]
-            )
+            ]
+        )
 
         rust = _load_rust_driver()
         if rust is not None:
-            qdot_out, qddot_out, tau = rust.inverse_dynamics(
+            _, _, tau = rust.inverse_dynamics(
                 q_native,
                 time_array,
                 self._backend.rnea,
@@ -365,26 +369,23 @@ class PinocchioReferenceAdapter:
                 qddot_native,
             )
             return InverseDynamicsBatch(
-                qdot=_derivative_output(qdot_canonical, qdot_out),
-                qddot=_derivative_output(qddot_canonical, qddot_out),
+                qdot=qdot_canonical,
+                qddot=qddot_canonical,
                 tau=np.asarray(tau, dtype=np.float64),
                 backend="rust",
             )
 
-        qdot_fallback, qddot_fallback = _finite_difference(
-            q_native, time_array, qdot_native, qddot_native
-        )
-        tau = np.empty_like(qdot_fallback)
+        tau = np.empty_like(qdot_native)
         for index in range(q_native.shape[0]):
             tau[index] = _as_tau(
                 self._backend.rnea(
-                    q_native[index], qdot_fallback[index], qddot_fallback[index]
+                    q_native[index], qdot_native[index], qddot_native[index]
                 ),
-                qdot_fallback[index],
+                qdot_native[index],
             )
         return InverseDynamicsBatch(
-            qdot=_derivative_output(qdot_canonical, qdot_fallback),
-            qddot=_derivative_output(qddot_canonical, qddot_fallback),
+            qdot=qdot_canonical,
+            qddot=qddot_canonical,
             tau=tau,
             backend="numpy",
         )
@@ -546,73 +547,77 @@ def _pinocchio_acceleration_to_canonical(
     return result
 
 
-def _derivative_output(
-    canonical_override: npt.NDArray[np.float64] | None,
-    native_estimate: npt.ArrayLike,
-) -> npt.NDArray[np.float64]:
-    """Return the canonical override if supplied, else the native estimate."""
-
-    if canonical_override is not None:
-        return canonical_override.copy()
-    return np.asarray(native_estimate, dtype=np.float64)
-
-
-def _finite_difference(
+def _canonical_derivatives(
     q: npt.NDArray[np.float64],
     times: npt.NDArray[np.float64],
     qdot_override: npt.NDArray[np.float64] | None,
     qddot_override: npt.NDArray[np.float64] | None,
 ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-    qdot = (
-        qdot_override.copy()
-        if qdot_override is not None
-        else _finite_diff_qdot(q, times)
+    """Return canonical ``(qdot, qddot)``: overrides where given, else estimates."""
+
+    if qdot_override is not None and qddot_override is not None:
+        return qdot_override.copy(), qddot_override.copy()
+    qdot_estimate, qddot_estimate = _canonical_finite_difference(q, times)
+    return (
+        qdot_estimate if qdot_override is None else qdot_override.copy(),
+        qddot_estimate if qddot_override is None else qddot_override.copy(),
     )
-    qddot = (
-        qddot_override.copy()
-        if qddot_override is not None
-        else _finite_diff_qddot(q, times)
-    )
-    return qdot, qddot
 
 
-def _finite_diff_qdot(
-    q: npt.NDArray[np.float64], times: npt.NDArray[np.float64]
+def _canonical_tangent_delta(
+    q_from: npt.NDArray[np.float64], q_to: npt.NDArray[np.float64]
 ) -> npt.NDArray[np.float64]:
-    qdot = np.zeros((q.shape[0], q.shape[1] - 1), dtype=np.float64)
-    q_like = q[:, : qdot.shape[1]]
-    for index in range(1, q.shape[0] - 1):
-        dt = times[index + 1] - times[index - 1]
-        if dt > 0.0:
-            qdot[index] = (q_like[index + 1] - q_like[index - 1]) / dt
-    if q.shape[0] >= 2:
-        qdot[0] = (q_like[1] - q_like[0]) / max(times[1] - times[0], 1.0e-9)
-        qdot[-1] = (q_like[-1] - q_like[-2]) / max(times[-1] - times[-2], 1.0e-9)
-    return qdot
+    """Tangent step from ``q_from`` to ``q_to`` in canonical-v2 velocity coordinates.
+
+    Linear: the WORLD-frame position difference. Angular: the BODY-frame
+    rotation vector ``log(conj(quat_from) (x) quat_to)``, the SO(3) analogue of
+    ``pinocchio.difference``; it is the same vector in either endpoint's frame.
+    Joints: plain differences.
+    """
+
+    delta = np.empty(q_from.shape[0] - 1, dtype=np.float64)
+    delta[0:3] = q_to[0:3] - q_from[0:3]
+    delta[3:6] = quat_log(quat_multiply(quat_conjugate(q_from[3:7]), q_to[3:7]))
+    delta[6:] = q_to[7:] - q_from[7:]
+    return delta
 
 
-def _finite_diff_qddot(
+def _canonical_finite_difference(
     q: npt.NDArray[np.float64], times: npt.NDArray[np.float64]
-) -> npt.NDArray[np.float64]:
-    qddot = np.zeros((q.shape[0], q.shape[1] - 1), dtype=np.float64)
-    q_like = q[:, : qddot.shape[1]]
-    for index in range(1, q.shape[0] - 1):
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """Canonical-v2 ``(qdot, qddot)`` from a canonical ``q`` trajectory.
+
+    Interior frames use the variable-step three-point stencils on the tangent
+    chart centred at that frame (second-order velocity, exact for quadratic
+    motion in the chart); at the chart origin the BODY angular velocity and
+    acceleration equal the chart's first and second derivatives. End frames
+    use one-sided velocity steps and copy the neighbouring acceleration.
+    """
+
+    n_frames = q.shape[0]
+    qdot = np.zeros((n_frames, q.shape[1] - 1), dtype=np.float64)
+    qddot = np.zeros_like(qdot)
+    for index in range(1, n_frames - 1):
         dt_b = times[index] - times[index - 1]
         dt_f = times[index + 1] - times[index]
-        if dt_b > 0.0 and dt_f > 0.0:
-            qddot[index] = (
-                2.0
-                * (
-                    q_like[index + 1] * dt_b
-                    - q_like[index] * (dt_b + dt_f)
-                    + q_like[index - 1] * dt_f
-                )
-                / (dt_b * dt_f * (dt_b + dt_f))
-            )
-    if q.shape[0] >= 3:
+        if dt_b <= 0.0 or dt_f <= 0.0:
+            continue
+        back = _canonical_tangent_delta(q[index], q[index - 1])
+        fwd = _canonical_tangent_delta(q[index], q[index + 1])
+        denom = dt_b * dt_f * (dt_b + dt_f)
+        qdot[index] = (fwd * dt_b * dt_b - back * dt_f * dt_f) / denom
+        qddot[index] = 2.0 * (fwd * dt_b + back * dt_f) / denom
+    if n_frames >= 2:
+        qdot[0] = _canonical_tangent_delta(q[0], q[1]) / max(
+            times[1] - times[0], 1.0e-9
+        )
+        qdot[-1] = _canonical_tangent_delta(q[-2], q[-1]) / max(
+            times[-1] - times[-2], 1.0e-9
+        )
+    if n_frames >= 3:
         qddot[0] = qddot[1]
         qddot[-1] = qddot[-2]
-    return qddot
+    return qdot, qddot
 
 
 def _central_difference(
