@@ -121,12 +121,12 @@ def _stacked_problem(
     w_sq = sp.diags(np.tile(w**2, t_count))
     quad = w_sq
     if t_count > 1 and smoothness_weight > 0.0:
-        diff = sp.lil_matrix(((t_count - 1) * n, t_count * n))
+        diff_lil = sp.lil_matrix(((t_count - 1) * n, t_count * n))
         for k in range(t_count - 1):
-            rows = slice(k * n, (k + 1) * n)
-            diff[rows, k * n : (k + 1) * n] = -sp.identity(n) / dts[k]
-            diff[rows, (k + 1) * n : (k + 2) * n] = sp.identity(n) / dts[k]
-        diff = diff.tocsr()
+            row_sel = slice(k * n, (k + 1) * n)
+            diff_lil[row_sel, k * n : (k + 1) * n] = -sp.identity(n) / dts[k]
+            diff_lil[row_sel, (k + 1) * n : (k + 2) * n] = sp.identity(n) / dts[k]
+        diff = diff_lil.tocsr()
         quad = w_sq + smoothness_weight * (diff.T @ diff)
     hess = (2.0 * (b_mat.T @ quad @ b_mat)).tocsr()
     grad = 2.0 * b_mat.T @ (quad @ x0 - w_sq @ references.ravel())
@@ -163,7 +163,8 @@ def _constraint_rows(
             ub_blocks.append(g @ b_mat)
             ub_rhs.append(c.upper - g @ x0)
         for cone in c.cones:
-            idx = tuple(k * n + i for i in cone.indices)
+            i0, i1, i2 = cone.indices
+            idx = (k * n + i0, k * n + i1, k * n + i2)
             block, a_uni, b_uni = friction_cone_rows(
                 t_count * n, idx, cone.frame, cone.mu
             )
@@ -217,7 +218,9 @@ def _solve_stacked(
         max_iter=max_iterations,
     )
     if res.status is SolveStatus.OPTIMAL:
-        return res.x, True, "Optimal (conic core)"
+        if res.x is None:
+            raise ValueError("optimal solve returned no solution vector")
+        return np.asarray(res.x, dtype=np.float64), True, "Optimal (conic core)"
     message = f"{res.status.value}: {res.reason}".rstrip(": ")
     logger.warning("Force redistribution not solved (%s)", message)
     return np.zeros(total), False, message
