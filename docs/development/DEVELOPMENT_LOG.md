@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12702 · Fix the 'Spec Has No Club Body' Crash on the MuJoCo-Native Driver Run: Assembly_From_Spec Now Recognises the Native Simscape Club (Segmented 2.5in Butt Grip, No Grip Solid) so the Default V2 Spec Carries a Club Body; Lane.Set_Club_Targets Fails Fast via Club_Face_Target.Require_Club_Assembly Naming the Spec Source. the Smoke Test Now Gets Past Set_Club_Targets but Still Fails on Dynamics Marker RMS (0.51 m vs 0.15 m Bound), a Separate Regression; the Smoke Is Marked Slow and Runs in No CI Lane
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12702
+- **Branch:** fix/12702-mujoco-smoke-club-body
+- **PR:** #12776
+- **Paths:** see #12776
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`54672a6b`; collated from changes/12702-mujoco-native-smoke-club-body.md)
+- **Summary:** Fix the 'spec has no club body' crash on the MuJoCo-native driver run: assembly_from_spec now recognises the native Simscape club (segmented 2.5in Butt grip, no Grip solid) so the default v2 spec carries a club body; Lane.set_club_targets fails fast via club_face_target.require_club_assembly naming the spec source. The smoke test now gets past set_club_targets but still fails on dynamics marker RMS (0.51 m vs 0.15 m bound), a separate regression; the smoke is marked slow and runs in no CI lane
+- **Next step:** Merge the PR; triage the driver dynamics marker RMS regression (0.089 m measured 2026-09-30, 0.51 m now, independent of --face-weight) and put the slow smoke in a nightly lane.
+
 ### DL-#12683 · R3: Trail-Foot Toe-Out Owner Style Target (TRAIL_TOE_OUT_STYLE_DEG = 20 Deg, Single-Sourced From DEFAULT_TOE_OUT_DEG) via a New --Foot-Progression Style Mode, Now the Canonical Default; Capture Mode Still Lets the Measurement Win; Per-Foot Target_Source in Receipts; Driver Trail -2.9 -> 19.8 Deg, 7-Iron -9.8 -> 13.5 Deg (Hip_Rotation_R at Its -40 Deg Limit)
 
 - **State:** in_review
@@ -2313,6 +2326,19 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#12775 · OpenSim MSK Renders Draw the Wrapped-Finger Grip Hands on the Club and Hide the Flat Rajagopal Hand Bones
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12775
+- **Branch:** merged via #12779
+- **PR:** #12779
+- **Paths:** see #12779
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`cf26f3db`; collated from changes/12775-opensim-msk-renders-draw-the-wrapped-fin.md)
+- **Summary:** OpenSim MSK renders draw the wrapped-finger grip hands on the club and hide the flat Rajagopal hand bones
+- **Next step:** Shipped in PR #12779.
 
 ### DL-#12710 · NSX-81: Add Orthogonal Conditioning Axis to QuantityRecord so INVARIANT Quantities Can Declare Hypotheses They Are Conditioned On
 
