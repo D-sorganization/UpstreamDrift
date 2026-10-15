@@ -175,6 +175,7 @@ class PinocchioForceAdapter:
             raise ValueError(
                 f"parameters must be {self.n_inertial_parameters} finite values"
             )
+        inertia_type = self._pin.Inertia
         current = self.inertial_parameters().reshape(-1, 10)
         for index, (new, old) in enumerate(
             zip(values.reshape(-1, 10), current, strict=True)
@@ -184,10 +185,10 @@ class PinocchioForceAdapter:
             if new[0] == 0.0:
                 if np.any(new != 0.0):
                     raise ValueError(f"massless body {index} has nonzero parameters")
-                self._model.inertias[index + 1] = self._pin.Inertia.Zero()
+                self._model.inertias[index + 1] = inertia_type.Zero()
             else:
-                self._model.inertias[index + 1] = (
-                    self._pin.Inertia.FromDynamicParameters(new)
+                self._model.inertias[index + 1] = inertia_type.FromDynamicParameters(
+                    new
                 )
 
     @property
