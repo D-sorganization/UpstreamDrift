@@ -313,7 +313,8 @@ def test_outer_linearization_bound_holds(k: int) -> None:
     lin = [r for r in fs.rows if r.kind == "cone_linear"]
     assert len(lin) == k
     worst = 0.0
-    for phi in np.linspace(0, 2 * np.pi, 721):
+    vertex_angles = (2 * np.arange(k) + 1) * np.pi / k
+    for phi in np.concatenate([np.linspace(0, 2 * np.pi, 721), vertex_angles]):
         direction = np.array([0.0, 0.0, np.cos(phi), np.sin(phi)])
         # radius along direction: largest r with all linear rows satisfied.
         radius = np.inf
@@ -432,7 +433,7 @@ def test_assumed_capacity_slots_are_flagged_per_row() -> None:
     d = _decomp([0, 0], np.eye(2), 2)
     cap = _capacity([1, 1], [1, 1], assumed=("j1",))
     fs = FeasibleSet.from_hypotheses(d, _hset(TORQUE), capacity=cap)
-    flagged = {r.label for r in fs.flagged_rows()}
+    flagged = set(fs.flagged_rows())
     assert flagged == {f"{TORQUE}:j1:upper", f"{TORQUE}:j1:lower"}
     assert fs.assumed_slots == ("j1",)
     assert fs.rests_on_unverified
@@ -475,9 +476,7 @@ def test_real_decomposition_zero_nullcoordinate_is_feasible_with_wide_capacity()
     dec = decompose(snap, weights=np.eye(snap.topology.n_actuated))
     n_a = dec.n_actuated
     big = np.full(n_a, 1.0e6)
-    fs = FeasibleSet.from_hypotheses(
-        dec, _hset(TORQUE), capacity=_capacity(big, big)
-    )
+    fs = FeasibleSet.from_hypotheses(dec, _hset(TORQUE), capacity=_capacity(big, big))
     assert fs.n_z == dec.nullity
     assert not fs.is_empty()
     tight = np.full(n_a, 1.0e-6)
