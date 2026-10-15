@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12683 · R3: Trail-Foot Toe-Out Owner Style Target (TRAIL_TOE_OUT_STYLE_DEG = 20 Deg, Single-Sourced From DEFAULT_TOE_OUT_DEG) via a New --Foot-Progression Style Mode, Now the Canonical Default; Capture Mode Still Lets the Measurement Win; Per-Foot Target_Source in Receipts; Driver Trail -2.9 -> 19.8 Deg, 7-Iron -9.8 -> 13.5 Deg (Hip_Rotation_R at Its -40 Deg Limit)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12683
+- **Branch:** fix/12683-trail-toe-out
+- **PR:** #12731
+- **Paths:** see #12731
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`f6e69608`; collated from changes/12683-r3-trail-foot-toe-out-owner-style-target.md)
+- **Summary:** R3: trail-foot toe-out owner style target (TRAIL_TOE_OUT_STYLE_DEG = 20 deg, single-sourced from DEFAULT_TOE_OUT_DEG) via a new --foot-progression style mode, now the canonical default; capture mode still lets the measurement win; per-foot target_source in receipts; driver trail -2.9 -> 19.8 deg, 7-iron -9.8 -> 13.5 deg (hip_rotation_r at its -40 deg limit)
+- **Next step:** Owner decision on the 7-iron shortfall (hip external-rotation range vs accept ~13.5 deg), then regenerate anthro_driver_seeds/anthro_iron_seeds_zmp receipts before R4 (#12684).
+
 ### DL-#12682 · R5: One Clubhead Measurement Point (Face Centre via Club_Face_Target.Face_Centre_Path) for the Fd_Phase Impact Split, the Exporter Impact Detector and a New Dynamics.Fd_Phase.Clubhead_Speed Receipt Block (Simulated/Reference/Capture Speed, % Error, Peak-Timing Offset); Scripts/diagnose_clubhead_speed.py Decomposition
 
 - **State:** in_review
@@ -2300,6 +2313,97 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#12710 · NSX-81: Add Orthogonal Conditioning Axis to QuantityRecord so INVARIANT Quantities Can Declare Hypotheses They Are Conditioned On
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12710
+- **Branch:** merged via #12733
+- **PR:** #12733
+- **Paths:** see #12733
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`b3048176`; collated from changes/12710-nsx-81-add-orthogonal-conditioning-axis.md)
+- **Summary:** NSX-81: add orthogonal conditioning axis to QuantityRecord so INVARIANT quantities can declare hypotheses they are conditioned on
+- **Next step:** Shipped in PR #12733.
+
+### DL-#12680 · R1: Trunk, Pelvis and Shoe Appearance Cross-Sections Now Oriented From Spec Landmarks (ML > AP); Lofted_Segment Requires an Explicit Width Axis for Non-Round Sections; New Model_Appearance.Cross_Section; Cross-Engine Trunk Guard; golfer_appearance_reference.tex Master + Trunk_Cross_Section Section
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12680
+- **Branch:** merged via #12696
+- **PR:** #12696
+- **Paths:** see #12696
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`cf25212b`; collated from changes/12680-r1-trunk-pelvis-and-shoe-appearance-cros.md)
+- **Summary:** R1: trunk, pelvis and shoe appearance cross-sections now oriented from spec landmarks (ML > AP); lofted_segment requires an explicit width axis for non-round sections; new model_appearance.cross_section; cross-engine trunk guard; golfer_appearance_reference.tex master + trunk_cross_section section
+- **Next step:** Shipped in PR #12696.
+
+### DL-#12700 · Pinocchio Reference Adapter Finite-Differences the Trajectory on the Base Lie Group (World Linear, Body Angular via the Quaternion Log) and Feeds the Result Through the NSX-50 Velocity Map, Instead of Differentiating Raw Native Q
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12700
+- **Branch:** merged via #12704
+- **PR:** #12704
+- **Paths:** see #12704
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`12f14c0b`; collated from changes/12700-pinocchio-fd-frames.md)
+- **Summary:** Pinocchio reference adapter finite-differences the trajectory on the base Lie group (world linear, body angular via the quaternion log) and feeds the result through the NSX-50 velocity map, instead of differentiating raw native q
+- **Next step:** Shipped in PR #12704.
+
+### DL-#12669 · Correct the Club Y-Sign, Hub Direction and Club Jacobians in the JAX Golfer Path; Club Points and Club-Angle Jacobian Columns Now Share Backend-Agnostic Formulas With the NumPy Kinematics, Pinned by NumPy-vs-JAX Parity Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12669
+- **Branch:** merged via #12679
+- **PR:** #12679
+- **Paths:** see #12679
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`3ec138c7`; collated from changes/12669-correct-the-club-y-sign-hub-direction-an.md)
+- **Summary:** Correct the club y-sign, hub direction and club Jacobians in the JAX golfer path; club points and club-angle Jacobian columns now share backend-agnostic formulas with the NumPy kinematics, pinned by NumPy-vs-JAX parity tests
+- **Next step:** Shipped in PR #12679.
+
+### DL-#12592 · NSX-74 Publication Gate Checklist for Loop Null-Space Results
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12592
+- **Branch:** merged via #12664
+- **PR:** #12664
+- **Paths:** see #12664
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`b24d4235`; collated from changes/12592-nsx-74-publication-gate-checklist-for-lo.md)
+- **Summary:** NSX-74 publication gate checklist for loop null-space results
+- **Next step:** Shipped in PR #12664.
+
+### DL-#12562 · NSX-17 Invariant Quantities With Validity Gates
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12562
+- **Branch:** merged via #12638
+- **PR:** #12638
+- **Paths:** see #12638
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`d497012c`; collated from changes/12562-nsx-17-invariant-quantities-with-validit.md)
+- **Summary:** NSX-17 invariant quantities with validity gates
+- **Next step:** Shipped in PR #12638.
+
+### DL-#12584 · Two-Track Cross-Engine Closed-Loop Conformance Harness (Numerical Snapshot Equality Plus Propagated Scientific Envelopes), Registry Entries per Engine Pair, Native OpenSim Adapter Registered in the Engine Factory
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12584
+- **Branch:** merged via #12639
+- **PR:** #12639
+- **Paths:** see #12639
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`16e88462`; collated from changes/12584-two-track-cross-engine-closed-loop-confo.md)
+- **Summary:** Two-track cross-engine closed-loop conformance harness (numerical snapshot equality plus propagated scientific envelopes), registry entries per engine pair, native OpenSim adapter registered in the engine factory
+- **Next step:** Shipped in PR #12639.
 
 ### DL-#12681 · Pelvis Wears the Active Outfit's Pants Material: Body Classification Is Order-Independent (Leaf Segment Before Parent Folder, Exact Before Prefix Before Substring, Equal-Specificity Ties Raise), GolfSwing3D LowerTorso Maps to Pelvis, and Check_Clothing Enforces Pelvis Garment == Pants for Every Preset
 

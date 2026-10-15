@@ -129,6 +129,7 @@ class QuantityRecord:
     conventions: tuple[str, ...]; hypotheses: tuple[str, ...]
     model_provenance: ModelProvenance; input_provenance: InputProvenance
     validation_status: ValidationStatus; reason: str | None = None
+    conditioning: tuple[str, ...] = ()   # NSX-81: orthogonal to hypotheses
 
 @dataclass(frozen=True)
 class ClosedLoopSnapshot:
@@ -152,6 +153,14 @@ class ClosedLoopSnapshot:
 - `QuantityRecord`: `FAMILY_DEPENDENT` requires at least one hypothesis;
   `INVARIANT` forbids hypotheses; `UNAVAILABLE` requires a reason and all-NaN
   values.
+- `conditioning` (NSX-81, #12710) is an axis orthogonal to allocation
+  dependence: the declared hypotheses the value is conditioned on, whatever
+  its allocation dependence. `hypotheses` keeps meaning allocation priors and
+  its rules are unchanged, so an `INVARIANT` record with `hypotheses` is still
+  rejected, while `INVARIANT` with non-empty `conditioning` is legal. Default
+  is empty (old records are unchanged). Ids are free text, as for
+  `hypotheses`; registry resolution happens at display time via
+  `require_verified_for_display`. A bare string is a `TypeError`.
 - Arrays are read-only (writing raises `ValueError`).
 - Import without any physics engine installed.
 

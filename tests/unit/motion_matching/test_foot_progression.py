@@ -7,6 +7,8 @@ import pytest
 
 from src.shared.python.motion_matching.foot_progression import (
     DEFAULT_TOE_OUT_DEG,
+    TARGET_SOURCES,
+    TRAIL_TOE_OUT_STYLE_DEG,
     FootProgression,
     address_window,
     capture_foot_progression,
@@ -15,6 +17,7 @@ from src.shared.python.motion_matching.foot_progression import (
     marker_long_axis,
     model_long_axis,
     progression_angle_deg,
+    resolve_foot_target,
     resolve_toe_out_target,
 )
 
@@ -248,3 +251,100 @@ def test_resolve_target_prefers_reliable_measurement() -> None:
         **{**fp.__dict__, "reliable": False, "is_default": True, "angle_deg": 20.0}
     )
     assert resolve_toe_out_target(unreliable) == (DEFAULT_TOE_OUT_DEG, True)
+
+
+# ------------------------------------------- trail style target (R3, #12683)
+
+
+def _measured(angle: float, *, reliable: bool = True) -> FootProgression:
+    return FootProgression(
+        side="right",
+        role="trail",
+        angle_deg=angle if reliable else DEFAULT_TOE_OUT_DEG,
+        raw_angle_deg=angle - 12.0,
+        forefoot_angle_deg=angle + 3.0,
+        frames=30,
+        spread_deg=0.4 if reliable else 9.0,
+        reliable=reliable,
+        is_default=not reliable,
+        reason="measured" if reliable else "unstable",
+    )
+
+
+def test_trail_style_target_is_the_owner_value_and_single_sourced() -> None:
+    """Owner decision B (#12678, 2026-10-15): about 20 deg trail toe-out,
+    the OSV-4 documented default, so one constant backs both."""
+    assert pytest.approx(20.0) == TRAIL_TOE_OUT_STYLE_DEG
+    assert TRAIL_TOE_OUT_STYLE_DEG == DEFAULT_TOE_OUT_DEG
+    assert set(TARGET_SOURCES) == {"capture", "default", "style"}
+
+
+def test_style_mode_sets_the_trail_foot_to_the_owner_prior() -> None:
+    angle, source = resolve_foot_target(_measured(4.0), "trail", mode="style")
+    assert (angle, source) == (TRAIL_TOE_OUT_STYLE_DEG, "style")
+
+
+def test_style_mode_leaves_the_lead_foot_on_the_capture() -> None:
+    lead = FootProgression(**{**_measured(16.4).__dict__, "side": "left"})
+    lead = FootProgression(**{**lead.__dict__, "role": "lead"})
+    assert resolve_foot_target(lead, "lead", mode="style") == (16.4, "capture")
+    assert resolve_foot_target(lead, "lead", mode="capture") == (16.4, "capture")
+    assert resolve_foot_target(None, "lead", mode="style") == (
+        DEFAULT_TOE_OUT_DEG,
+        "default",
+    )
+
+
+def test_capture_mode_measurement_overrides_the_style_prior() -> None:
+    assert resolve_foot_target(_measured(4.0), "trail", mode="capture") == (
+        4.0,
+        "capture",
+    )
+    # unobserved or unstable markers: the flagged default, never a silent value
+    assert resolve_foot_target(None, "trail", mode="capture") == (
+        DEFAULT_TOE_OUT_DEG,
+        "default",
+    )
+    assert resolve_foot_target(
+        _measured(4.0, reliable=False), "trail", mode="capture"
+    ) == (DEFAULT_TOE_OUT_DEG, "default")
+
+
+def test_capture_mode_matches_the_legacy_resolver_bit_for_bit() -> None:
+    for measured in (_measured(4.0), _measured(-0.4), _measured(3.0, reliable=False)):
+        legacy_angle, legacy_default = resolve_toe_out_target(measured)
+        angle, source = resolve_foot_target(measured, "trail", mode="capture")
+        assert angle == legacy_angle
+        assert (source == "default") is legacy_default
+
+
+def test_resolve_foot_target_rejects_bad_mode_and_role() -> None:
+    with pytest.raises(ValueError, match="mode must be one of"):
+        resolve_foot_target(None, "trail", mode="off")
+    with pytest.raises(ValueError, match="role must be one of"):
+        resolve_foot_target(None, "middle", mode="style")
+
+
+@pytest.mark.parametrize("trail_deg", [-0.4, 4.0, 20.0])
+def test_three_gauges_on_a_synthetic_capture(trail_deg: float) -> None:
+    """Corrected axis and forefoot normal recover the truth; the raw
+    malleolus axis reads toe-in (the documented, uncorrected bias)."""
+    pts, valid = _capture(16.0, trail_deg)
+    trail = capture_foot_progression(pts, valid, LABELS, up=UP)["right"]
+    assert trail.angle_deg == pytest.approx(trail_deg, abs=1.0)
+    assert trail.forefoot_angle_deg == pytest.approx(trail_deg, abs=1.0)
+    assert trail.raw_angle_deg < trail_deg - 5.0
+    assert trail.reliable and trail.spread_deg <= 3.0
+
+
+def test_three_gauges_mirror_for_a_left_handed_capture() -> None:
+    pts, valid = _capture(16.0, 20.0)
+    mirrored = pts.copy()
+    mirrored[..., 1] *= -1.0  # reflect the scene through the x-z plane
+    swap = {"L": "R", "R": "L"}
+    labels = tuple(swap[n[0]] + n[1:] for n in LABELS)
+    result = capture_foot_progression(mirrored, valid, labels, up=UP, handedness="left")
+    assert result["left"].role == "trail"
+    assert result["left"].angle_deg == pytest.approx(20.0, abs=1.0)
+    assert result["left"].forefoot_angle_deg == pytest.approx(20.0, abs=1.0)
+    assert result["right"].angle_deg == pytest.approx(16.0, abs=1.0)

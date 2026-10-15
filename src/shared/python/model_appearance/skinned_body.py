@@ -161,6 +161,20 @@ class SkinnedBody:
         return self.joints[:, 0]
 
 
+def _spec_up_axis(spec: Mapping[str, Any]) -> tuple[float, float, float]:
+    """Unit up axis of the spec frame: the negated, normalised gravity vector.
+
+    Raises ``ValueError`` unless ``gravity_m_s2`` is a finite, nonzero 3-vector.
+    """
+    gravity = np.asarray(spec["gravity_m_s2"], dtype=float)
+    if gravity.shape != (3,) or not np.isfinite(gravity).all():
+        raise ValueError("gravity_m_s2 must be a finite 3-vector")
+    if np.linalg.norm(gravity) <= 0:
+        raise ValueError("Gravity must be nonzero to define the up axis")
+    up = -gravity / np.linalg.norm(gravity)
+    return (float(up[0]), float(up[1]), float(up[2]))
+
+
 def build_skinned_body(
     spec: Mapping[str, Any],
     *,
@@ -197,6 +211,13 @@ def build_skinned_body(
             continue
         capsules_by_body.setdefault(capsule.body, []).append(capsule)
 
+    # Deferred: cross_section uses this module's spec_body_poses (import cycle).
+    from src.shared.python.model_appearance.cross_section import (
+        body_sections,
+        width_hint_for,
+    )
+
+    sections = body_sections(spec)
     vertex_chunks: list[Array] = []
     face_chunks: list[NDArray[np.int64]] = []
     joint_chunks: list[NDArray[np.uint16]] = []
@@ -211,7 +232,14 @@ def build_skinned_body(
                 np.asarray(capsule.start_m, dtype=float),
                 np.asarray(capsule.end_m, dtype=float),
                 radius,
-                LoftOptions(aspect=aspect, rings=rings, sides=sides),
+                LoftOptions(
+                    aspect=aspect,
+                    rings=rings,
+                    sides=sides,
+                    width_hint=width_hint_for(
+                        sections, name, capsule.start_m, capsule.end_m
+                    ),
+                ),
             )
             world_vertices = mesh.vertices @ pose[:3, :3].T + pose[:3, 3]
             vertex_chunks.append(world_vertices)
@@ -230,12 +258,7 @@ def build_skinned_body(
     joints[:, 0] = np.concatenate(joint_chunks, axis=0)
     weights = np.zeros((n_vertices, 4), dtype=np.float32)
     weights[:, 0] = 1.0
-    gravity = np.asarray(spec["gravity_m_s2"], dtype=float)
-    if gravity.shape != (3,) or not np.isfinite(gravity).all():
-        raise ValueError("gravity_m_s2 must be a finite 3-vector")
-    if np.linalg.norm(gravity) <= 0:
-        raise ValueError("Gravity must be nonzero to define the up axis")
-    up = -gravity / np.linalg.norm(gravity)
+    up_axis = _spec_up_axis(spec)
 
     return SkinnedBody(
         bone_names=bone_names,
@@ -246,7 +269,7 @@ def build_skinned_body(
         joints=joints,
         weights=weights,
         spec_sha256=spec_sha256,
-        up_axis=(float(up[0]), float(up[1]), float(up[2])),
+        up_axis=up_axis,
     )
 
 

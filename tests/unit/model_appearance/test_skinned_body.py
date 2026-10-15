@@ -465,3 +465,30 @@ def test_export_character_gltf(compiled_character) -> None:
     doc = json.loads(text)
     assert doc["asset"]["version"] == "2.0"
     assert doc["extras"]["spec_sha256"] == compiled_character.sha256
+
+
+# --- R1 (#12680): trunk cross-section is wider (ML) than deep (AP) --------
+
+
+def test_trunk_bones_are_wider_than_deep(skinned, spec_doc) -> None:
+    from src.shared.python.model_appearance.cross_section import body_sections
+    from src.shared.python.model_appearance.library import PART_ASPECT, PART_RADIUS_M
+
+    sections = body_sections(spec_doc)
+    checked = 0
+    for index, name in enumerate(skinned.bone_names):
+        part = classify_body(name)
+        if part not in ("torso", "pelvis"):
+            continue
+        rest = skinned.rest_poses[index]
+        world = skinned.vertices[skinned.vertex_bone == index]
+        local = (world - rest[:3, 3]) @ rest[:3, :3]
+        ml = float(np.ptp(local @ sections[name].ml_axis))
+        ap = float(np.ptp(local @ sections[name].depth_axis))
+        assert ml > ap, (name, ml, ap)
+        # Every lobe keeps the library depth: AP is aspect x the full width.
+        assert ap / (2.0 * PART_RADIUS_M[part]) == pytest.approx(
+            PART_ASPECT[part], abs=0.02
+        ), name
+        checked += 1
+    assert checked >= 3  # pelvis, torso base, chest

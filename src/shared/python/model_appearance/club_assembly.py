@@ -33,6 +33,11 @@ SHAFT_TIP_RADIUS_FRACTION = 0.65
 SHAFT_BUTT_RADIUS_FRACTION = 0.95
 GRIP_TIP_RADIUS_M = 0.0105
 GRIP_BUTT_RADIUS_M = 0.0118
+#: The native Simscape export carries no single ``Grip`` solid: its grip is the
+#: segmented ``1.5" Bottom`` / ``1.5" Top`` / ``2.5" Butt`` stack, the butt
+#: segment (2.5 in long) being the one farthest from the head (#12702).
+NATIVE_GRIP_BUTT_SOLID = '2.5" Butt'
+NATIVE_GRIP_BUTT_LENGTH_M = 2.5 * 0.0254
 DRIVER_MIN_LENGTH_M = 1.05  # longer than this and the head is a driver
 #: Roll of the head about the shaft, in the club-body frame, that squares the
 #: face to the target at the captured address pose of each tour-average
@@ -91,15 +96,21 @@ def assembly_from_spec(spec: Mapping[str, Any]) -> ClubAssembly | None:
     """The club assembly a native or full-body spec describes, else ``None``.
 
     Uses ``spec["club"]`` when present (name, length); otherwise infers the
-    length from the Grip solid placement. A club longer than 1.05 m gets the
-    driver head, a shorter one the 7-iron head.
+    length from the Grip solid placement (or, for the native Simscape export
+    that has no ``Grip`` solid, from its ``2.5" Butt`` grip segment). A club
+    longer than 1.05 m gets the driver head, a shorter one the 7-iron head.
     """
     solids = _club_solids(spec)
-    if "Grip" not in solids:
-        return None
     club = spec.get("club") or {}
     grip = DEFAULT_GRIP_LENGTH_M
-    length = float(club.get("length_m") or (-solids["Grip"][1, 3] + grip / 2.0))
+    if "Grip" in solids:
+        inferred = -solids["Grip"][1, 3] + grip / 2.0
+    elif NATIVE_GRIP_BUTT_SOLID in solids:
+        butt_y = solids[NATIVE_GRIP_BUTT_SOLID][1, 3]
+        inferred = -butt_y + NATIVE_GRIP_BUTT_LENGTH_M / 2.0
+    else:
+        return None
+    length = float(club.get("length_m") or inferred)
     alias = str(
         club.get("name") or ("driver" if length > DRIVER_MIN_LENGTH_M else "iron7")
     )

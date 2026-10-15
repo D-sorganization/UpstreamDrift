@@ -1,0 +1,95 @@
+{
+  "mode": "after",
+  "camera_distance_m": 3.2,
+  "image_px": [960, 720],
+  "rows": [
+    {
+      "swing": "driver",
+      "frame": "address",
+      "view": "face_on",
+      "frame_index": 0,
+      "time_s": 0.0,
+      "impact_source": "receipt impact_time_s",
+      "chest_pixels": 7226,
+      "chest_width_across_trunk_px": 72.6,
+      "chest_length_along_trunk_px": 137.1
+    },
+    {
+      "swing": "driver",
+      "frame": "address",
+      "view": "down_the_line",
+      "frame_index": 0,
+      "time_s": 0.0,
+      "impact_source": "receipt impact_time_s",
+      "chest_pixels": 8629,
+      "chest_width_across_trunk_px": 64.7,
+      "chest_length_along_trunk_px": 159.4
+    },
+    {
+      "swing": "driver",
+      "frame": "impact",
+      "view": "face_on",
+      "frame_index": 441,
+      "time_s": 1.323,
+      "impact_source": "receipt impact_time_s",
+      "chest_pixels": 7652,
+      "chest_width_across_trunk_px": 69.1,
+      "chest_length_along_trunk_px": 149.3
+    },
+    {
+      "swing": "driver",
+      "frame": "impact",
+      "view": "down_the_line",
+      "frame_index": 441,
+      "time_s": 1.323,
+      "impact_source": "receipt impact_time_s",
+      "chest_pixels": 9615,
+      "chest_width_across_trunk_px": 70.8,
+      "chest_length_along_trunk_px": 158.2
+    },
+    {
+      "swing": "iron7",
+      "frame": "address",
+      "view": "face_on",
+      "frame_index": 0,
+      "time_s": 0.0,
+      "impact_source": "club body closest to its address position after peak speed",
+      "chest_pixels": 7017,
+      "chest_width_across_trunk_px": 71.7,
+      "chest_length_along_trunk_px": 133.4
+    },
+    {
+      "swing": "iron7",
+      "frame": "address",
+      "view": "down_the_line",
+      "frame_index": 0,
+      "time_s": 0.0,
+      "impact_source": "club body closest to its address position after peak speed",
+      "chest_pixels": 8452,
+      "chest_width_across_trunk_px": 63.8,
+      "chest_length_along_trunk_px": 159.1
+    },
+    {
+      "swing": "iron7",
+      "frame": "impact",
+      "view": "face_on",
+      "frame_index": 438,
+      "time_s": 1.314,
+      "impact_source": "club body closest to its address position after peak speed",
+      "chest_pixels": 7891,
+      "chest_width_across_trunk_px": 87.6,
+      "chest_length_along_trunk_px": 136.2
+    },
+    {
+      "swing": "iron7",
+      "frame": "impact",
+      "view": "down_the_line",
+      "frame_index": 438,
+      "time_s": 1.314,
+      "impact_source": "club body closest to its address position after peak speed",
+      "chest_pixels": 7426,
+      "chest_width_across_trunk_px": 62.8,
+      "chest_length_along_trunk_px": 158.5
+    }
+  ]
+}

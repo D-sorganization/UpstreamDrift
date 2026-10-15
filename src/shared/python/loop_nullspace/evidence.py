@@ -177,7 +177,14 @@ class FootContact:
 class QuantityRecord:
     """A user-visible quantity with its evidence axes (ADR-0054 D2).
 
+    ``hypotheses`` are allocation priors (the choice among admissible
+    allocations).  ``conditioning`` is an orthogonal axis: declared hypotheses
+    the value is conditioned on irrespective of allocation dependence, so an
+    ``INVARIANT`` record may carry it.  Ids are free text here, exactly like
+    ``hypotheses``; registry resolution happens at display time.
+
     Raises:
+        TypeError: If ``conditioning`` is a bare string.
         ValueError: If units are empty, ``INVARIANT`` carries hypotheses,
             ``FAMILY_DEPENDENT`` carries none, ``UNAVAILABLE`` lacks a reason
             or has non-NaN values, or an available quantity is non-finite.
@@ -192,6 +199,7 @@ class QuantityRecord:
     conventions: tuple[str, ...] = ()
     hypotheses: tuple[str, ...] = ()
     reason: str | None = None
+    conditioning: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.units:
@@ -212,7 +220,13 @@ class QuantityRecord:
                 raise ValueError(
                     "FAMILY_DEPENDENT QuantityRecord requires at least one hypothesis"
                 )
+        if isinstance(self.conditioning, str):
+            raise TypeError("QuantityRecord.conditioning must be a sequence of ids")
+        conditioning = tuple(self.conditioning)
+        if not all(isinstance(c, str) and c for c in conditioning):
+            raise ValueError("QuantityRecord.conditioning ids must be non-empty str")
         values.flags.writeable = False
+        object.__setattr__(self, "conditioning", conditioning)
         object.__setattr__(self, "values", values)
         object.__setattr__(self, "conventions", tuple(self.conventions))
         object.__setattr__(self, "hypotheses", tuple(self.hypotheses))

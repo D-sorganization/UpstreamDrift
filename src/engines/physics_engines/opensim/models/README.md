@@ -220,6 +220,12 @@ records the spec hash, assembly parameters and a sha256 per file.
   re-export with `--club-geometry-ref <absolute directory>`.
 - `tour_matching/club_geometry.py::attach_visual_club` applies the same three
   meshes to `golf_humanoid.osim` through a `club_visual_frame` offset frame.
+- The same directory holds the two wrapped-finger grip hands
+  (`club_<alias>_lead_hand.stl`, `club_<alias>_trail_hand.stl`, from
+  `model_appearance.grip_hands`; sha256 under `grip_hands` in
+  `provenance.json`). `msk_club.attach_grip_hands` draws them on the `Club`
+  body and hides the Rajagopal finger bones (carpals and metacarpals stay). `scripts/render_msk_club.py` uses it;
+  the committed models keep the bone hands (#12775).
 - Limitation: the visual head follows the specification solid placement; the
   head centre of mass in the dynamics model is not moved to the mesh centre.
 - Regenerate with the exporter command above; `--no-club-geometry` produces a

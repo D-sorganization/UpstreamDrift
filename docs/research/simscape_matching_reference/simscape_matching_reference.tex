@@ -6113,12 +6113,26 @@ against the local tube radius: minimum pad clearance 1.03--1.08 mm; hand
 vertex centroid 0.5--3.3 mm off the grip axis; 92--100\,\% of the 36
 ten-degree sectors around the grip covered within 3 cm of its surface. The
 same checks hold in the MuJoCo world frame after forward kinematics, against
-the grip axis fitted to the rendered grip. The committed OpenSim golf models
-still show the Rajagopal hands; replacing them is the OpenSim slice.
-Reproduce:
+the grip axis fitted to the rendered grip.
+
+In OpenSim (issue \#12775), \texttt{club\_visuals.write\_club\_assets} also
+writes both hands as binary STL (\path{club_<alias>_lead_hand.stl},
+\path{club_<alias>_trail_hand.stl}, sha256 under \texttt{grip\_hands} in
+the geometry provenance manifest). \texttt{msk\_club.attach\_grip\_hands}
+draws them on the \texttt{Club} body, whose frame is the club-body frame, in
+the library glove material, and hides the 14 Rajagopal phalanx meshes of each
+hand body by setting \texttt{visible} to false. Carpals and metacarpals stay
+visible: the glove palm is shorter than the Rajagopal hand, and hiding them
+left the trail wrist visibly short of its glove in the first renders.
+\texttt{scripts/render\_msk\_club.py} renders this copy. The committed OpenSim
+golf models are unchanged and still show the Rajagopal hands. The calibrated
+grip points on the shaft equal the shared placement origins ($d_L$, $d_T$)
+for both clubs, so the gloves sit where the welded hand grip frames hold the
+club. Reproduce:
 \texttt{python3 -m pytest tests/unit/model\_appearance/test\_grip\_hands.py
 tests/unit/motion\_matching/test\_mujoco\_club\_mesh.py
-tests/unit/tools/native\_viewer\_export/test\_club\_meshes.py}.
+tests/unit/tools/native\_viewer\_export/test\_club\_meshes.py
+tests/opensim/test\_msk\_club.py tests/scripts/test\_render\_msk\_club.py}.
 
 \paragraph{Limitations.} The hand is visual only and rigid; it carries no
 mass, inertia or contact. Finger dimensions are nominal, not fitted to a
@@ -6643,7 +6657,8 @@ and the two-hand load split is not resolved.
 \item The tour-matching evidence snapshots under
   \path{docs/development/opensim_tour_matching/evidence/} are historical
   inputs pinned by hash, and keep their original club.
-\item The Rajagopal hand meshes are unchanged.
+\item The committed models keep the Rajagopal hand meshes; the rendered copy
+  shows the wrapped grip hands instead (\#12775).
 \item By default the tracked legs are a planted-feet assumption, not a
   measurement; the capture-planted feet of the next subsection are opt-in.
 \end{itemize}

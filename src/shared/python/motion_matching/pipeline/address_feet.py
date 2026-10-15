@@ -20,18 +20,22 @@ import numpy as np
 
 from src.shared.python.motion_matching.foot_progression import (
     DEFAULT_TOE_OUT_DEG,
+    TARGET_SOURCES,
+    TRAIL_TOE_OUT_STYLE_DEG,
     FootProgression,
     capture_foot_progression,
     foot_role,
     model_long_axis,
     progression_angle_deg,
-    resolve_toe_out_target,
+    resolve_foot_target,
 )
 
 __all__ = [
+    "CANONICAL_FOOT_PROGRESSION",
     "FOOT_PRIOR_WEIGHT",
     "FOOT_TOLERANCE_DEG",
     "FootTargets",
+    "MODES",
     "NATIVE_TARGET_AXIS",
     "NATIVE_UP_AXIS",
     "build_foot_targets",
@@ -58,7 +62,13 @@ FOOT_PRIOR_WEIGHT: float = 1.0e3
 #: Convergence tolerance of the refit; the issue asks for 2 degrees.
 FOOT_TOLERANCE_DEG: float = 0.5
 MAX_REFINE_PASSES: int = 4
-MODES = ("off", "capture", "default")
+#: ``--foot-progression`` choices: ``off`` (legacy multi-start feet),
+#: ``capture`` (measured toe-out, flagged default where unobserved), ``default``
+#: (forced 20 deg per foot) and ``style`` (owner trail target, lead on capture).
+MODES: tuple[str, ...] = ("off", "capture", "default", "style")
+#: Mode the canonical address uses when no ``--foot-progression`` is passed
+#: (R3, #12683: the owner's trail toe-out style target).
+CANONICAL_FOOT_PROGRESSION: str = "style"
 _SIDE_SUFFIX = {"left": "l", "right": "r"}
 
 
@@ -67,7 +77,10 @@ class FootTargets:
     """Requested address toe-out per foot, with provenance.
 
     ``is_default`` marks a flagged default (``DEFAULT_TOE_OUT_DEG``), never a
-    measurement. ``measured`` carries the capture report when there is one.
+    measurement. ``sources`` tags each foot ``capture``, ``default`` or
+    ``style`` (owner style target, #12683); when omitted it follows
+    ``is_default`` and ``source`` exactly as before. ``measured`` carries the
+    capture report when there is one.
     """
 
     target_deg: Mapping[str, float]
@@ -77,6 +90,7 @@ class FootTargets:
     weight: float = FOOT_PRIOR_WEIGHT
     notes: str = ""
     measured: Mapping[str, FootProgression] = field(default_factory=dict)
+    sources: Mapping[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         for side in ("left", "right"):
@@ -84,6 +98,22 @@ class FootTargets:
                 raise ValueError(f"target_deg needs a '{side}' entry")
         if self.weight <= 0.0:
             raise ValueError("weight must be positive")
+        if not self.sources:
+            legacy = "default" if self.source == "default" else "capture"
+            object.__setattr__(
+                self,
+                "sources",
+                {
+                    s: "default" if self.is_default.get(s, False) else legacy
+                    for s in ("left", "right")
+                },
+            )
+        bad = {s: v for s, v in self.sources.items() if v not in TARGET_SOURCES}
+        if bad or set(self.sources) != {"left", "right"}:
+            raise ValueError(
+                f"sources must map 'left' and 'right' to one of {TARGET_SOURCES}, "
+                f"got {dict(self.sources)!r}"
+            )
 
 
 def build_foot_targets(
@@ -91,20 +121,47 @@ def build_foot_targets(
 ) -> FootTargets | None:
     """Targets for ``mode``: ``off`` -> None, ``default`` -> flagged 20 deg,
     ``capture`` -> the capture's address median, with a flagged default for any
-    foot the markers cannot measure reliably."""
+    foot the markers cannot measure reliably, ``style`` -> as ``capture`` for
+    the lead foot and the owner's ``TRAIL_TOE_OUT_STYLE_DEG`` for the trail foot
+    (R3, #12683). Postcondition: every foot's provenance is in ``sources``."""
     if mode not in MODES:
-        raise ValueError(f"foot_progression must be one of {MODES}, got {mode!r}")
+        raise ValueError(
+            f"foot_progression must be one of {MODES}, got {mode!r} "
+            f"(the canonical address uses {CANONICAL_FOOT_PROGRESSION!r})"
+        )
     if mode == "off":
         return None
-    default = {"left": DEFAULT_TOE_OUT_DEG, "right": DEFAULT_TOE_OUT_DEG}
     if mode == "default":
         return FootTargets(
-            default,
+            {"left": DEFAULT_TOE_OUT_DEG, "right": DEFAULT_TOE_OUT_DEG},
             {"left": True, "right": True},
             "default",
             handedness,
             notes="forced default, not a measurement",
         )
+    measured, unusable = _measure_capture_feet(lane, handedness)
+    chosen = {
+        side: resolve_foot_target(
+            measured.get(side), foot_role(side, handedness), mode=mode
+        )
+        for side in ("left", "right")
+    }
+    sources = {side: chosen[side][1] for side in chosen}
+    return FootTargets(
+        {side: chosen[side][0] for side in chosen},
+        {side: sources[side] == "default" for side in sources},
+        _overall_source(mode, unusable),
+        handedness,
+        notes=_targets_notes(mode, unusable),
+        measured=measured,
+        sources=sources,
+    )
+
+
+def _measure_capture_feet(
+    lane: Any, handedness: str
+) -> tuple[dict[str, FootProgression], str]:
+    """``(measured, reason)``: the capture feet, or ``({}, why)`` if unusable."""
     try:
         measured = capture_foot_progression(
             lane.points,
@@ -115,21 +172,28 @@ def build_foot_targets(
             handedness=handedness,
         )
     except ValueError as exc:
-        return FootTargets(
-            default,
-            {"left": True, "right": True},
-            "default",
-            handedness,
-            notes=f"capture foot markers unusable ({exc}); wrist or foot markers",
-        )
-    chosen = {s: resolve_toe_out_target(m) for s, m in measured.items()}
-    return FootTargets(
-        {s: v[0] for s, v in chosen.items()},
-        {s: v[1] for s, v in chosen.items()},
-        "capture",
-        handedness,
-        notes="capture address median (ankle-toe axis, malleolus-corrected)",
-        measured=measured,
+        return {}, str(exc)
+    return measured, ""
+
+
+def _overall_source(mode: str, unusable: str) -> str:
+    """Block-level source; ``capture`` mode on unusable markers is ``default``."""
+    if mode == "style":
+        return "style"
+    return "default" if unusable else "capture"
+
+
+def _targets_notes(mode: str, unusable: str) -> str:
+    """Receipt notes naming where each target came from."""
+    if unusable:
+        base = f"capture foot markers unusable ({unusable}); wrist or foot markers"
+    else:
+        base = "capture address median (ankle-toe axis, malleolus-corrected)"
+    if mode != "style":
+        return base
+    return (
+        f"trail foot: owner style target {TRAIL_TOE_OUT_STYLE_DEG:g} deg "
+        f"(#12683, owner-set, not measured); lead foot: {base}"
     )
 
 
@@ -338,6 +402,7 @@ def foot_progression_report(
             "role": foot_role(side, targets.handedness),
             "target_deg": float(targets.target_deg[side]),
             "target_is_default": bool(targets.is_default[side]),
+            "target_source": targets.sources[side],
             "model_deg": float(model[side]),
             "error_deg": float(model[side] - targets.target_deg[side]),
         }
