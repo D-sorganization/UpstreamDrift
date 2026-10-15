@@ -1,4 +1,4 @@
-# ADR-0055: Closed-Loop Null-Space Exploration
+# ADR-0054: Closed-Loop Null-Space Exploration
 
 - Status: Accepted for D1 to D6 (owner-directed implementation of epic #12593, 2026-10-14). D7 (output policy) is Proposed and awaits an explicit owner decision; NSX-41 (#12573) must not start before it.
 - Date: 2026-10-14

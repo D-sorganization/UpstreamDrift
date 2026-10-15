@@ -460,7 +460,7 @@ provenance, model provenance, registry version, preset and options.
 
 ## NSX-41 Output Policy (#12573, Strong)
 
-`display_decision(record, surface) -> DisplayDecision` per ADR-0055 decision
+`display_decision(record, surface) -> DisplayDecision` per ADR-0054 decision
 D7 once the owner accepts an option. Unknown combinations default to withhold.
 
 ## NSX-42 Plot Model (#12574)
