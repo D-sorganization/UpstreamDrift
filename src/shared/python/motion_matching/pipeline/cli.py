@@ -1083,6 +1083,46 @@ def _fd_neck(
     return mode, q_track, solve, fd_neck_feedback(mode, lane, kin, q_ref)
 
 
+def _ground_support_receipt(
+    ctx: PipelineContext,
+    cal_res: _CalibrateAndScaleResult,
+    base_spec: dict[str, Any],
+    lane: Lane,
+    kin: Any,
+    q_ref: np.ndarray,
+    ik_report: dict[str, Any],
+    dynamics_report: dict[str, Any],
+) -> dict[str, Any]:
+    """Assemble the ground-support receipt from the run's provenance and reports."""
+    args = ctx.args
+    return build_ground_support_receipt(
+        GroundSupportReceiptInputs(
+            backend=args.backend,
+            ik_backend=getattr(args, "ik_backend", "lm"),
+            tracking_backend=getattr(args, "tracking", "kkt"),
+            base_spec=base_spec,
+            spec_path=Path(args.spec),
+            scaled_path=ctx.out_dir / "full_body_spec_hipcal_scaled.json",
+            hipcal_path=ctx.out_dir / "full_body_spec_hipcal.json",
+            recalibrate_upper=args.recalibrate_upper,
+            anthropometric=args.anthropometric,
+            qualification_note=cal_res.qualification_note,
+            spec_bytes=cal_res.spec_bytes,
+            hip_report=cal_res.hip_report,
+            candidate_bytes=CANDIDATE.read_bytes(),
+            c3d_path=ctx.c3d_path,
+            capture_name=args.capture,
+            lane=lane,
+            address_report=cal_res.address_report,
+            ik_report=ik_report,
+            dynamics_report=dynamics_report,
+            kin=kin,
+            q_ref=q_ref,
+            elapsed_s=time.perf_counter() - ctx.t_start,
+        )
+    )
+
+
 def _simulate_and_receipt(
     ctx: PipelineContext,
     lane: Lane,
@@ -1142,31 +1182,8 @@ def _simulate_and_receipt(
     )
     _save_dynamics_record(ctx.out_dir, record, sim_errors, lane, q_track)
     _render_playbacks(ctx.out_dir, cal_res, kin, lane, q_ref, sim_q)
-    receipt = build_ground_support_receipt(
-        GroundSupportReceiptInputs(
-            backend=args.backend,
-            ik_backend=getattr(args, "ik_backend", "lm"),
-            tracking_backend=tracking,
-            base_spec=base_spec,
-            spec_path=Path(args.spec),
-            scaled_path=ctx.out_dir / "full_body_spec_hipcal_scaled.json",
-            hipcal_path=ctx.out_dir / "full_body_spec_hipcal.json",
-            recalibrate_upper=args.recalibrate_upper,
-            anthropometric=args.anthropometric,
-            qualification_note=cal_res.qualification_note,
-            spec_bytes=cal_res.spec_bytes,
-            hip_report=cal_res.hip_report,
-            candidate_bytes=CANDIDATE.read_bytes(),
-            c3d_path=ctx.c3d_path,
-            capture_name=args.capture,
-            lane=lane,
-            address_report=cal_res.address_report,
-            ik_report=ik_report,
-            dynamics_report=dynamics_report,
-            kin=kin,
-            q_ref=q_ref,
-            elapsed_s=time.perf_counter() - ctx.t_start,
-        )
+    receipt = _ground_support_receipt(
+        ctx, cal_res, base_spec, lane, kin, q_ref, ik_report, dynamics_report
     )
     _finalize_receipt(
         ctx,
