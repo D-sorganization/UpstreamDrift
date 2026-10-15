@@ -7,6 +7,9 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
+from src.shared.python.motion_matching.foot_progression import (
+    TRAIL_TOE_OUT_STYLE_DEG,
+)
 from src.shared.python.motion_matching.pipeline import address_feet
 from src.shared.python.motion_matching.pipeline.address_feet import (
     FootTargets,
@@ -181,11 +184,14 @@ def test_module_exports() -> None:
     assert hasattr(address_feet, "FootTargets")
 
 
-def test_cli_foot_progression_option_defaults_to_off() -> None:
+def test_cli_foot_progression_option_defaults_to_the_style_target() -> None:
+    """R3 (#12683): the canonical address turns the trail foot out by default."""
     from src.shared.python.motion_matching.pipeline.cli import build_parser
 
     parser = build_parser()
-    assert parser.parse_args([]).foot_progression == "off"
+    assert parser.parse_args([]).foot_progression == "style"
+    assert address_feet.CANONICAL_FOOT_PROGRESSION == "style"
+    assert parser.parse_args(["--foot-progression", "off"]).foot_progression == ("off")
     assert parser.parse_args(["--foot-progression", "capture"]).foot_progression == (
         "capture"
     )
@@ -328,3 +334,140 @@ def test_shared_seed_puts_both_model_feet_on_target_within_two_degrees() -> None
     angles = model_feet_deg(kin, q, targets, address_feet.MODEL_TARGET_AXIS)
     assert angles["left"] == pytest.approx(16.4, abs=2.0)
     assert angles["right"] == pytest.approx(4.0, abs=2.0)
+
+
+# ------------------------------------------- trail style target (R3, #12683)
+
+_CANONICAL = {
+    # capture key -> committed anthropometric document of the canonical run
+    "driver": "full_body_spec_anthro_driver.json",
+    "iron": "full_body_spec_anthro_iron7.json",
+}
+#: Capture trail toe-out measured by #12109 (corrected ankle-toe axis).
+_CAPTURE_TRAIL_DEG = {"driver": 4.0, "iron": -0.4}
+#: The issue's acceptance band for the prior at the canonical address.
+_PRIOR_BAND_DEG = 3.0
+
+
+def _capture_lane(capture: str):
+    """The canonical run's lane labels: the document's upper markers + legs."""
+    import json
+
+    from src.shared.python.motion_matching.pipeline.constants import (
+        REPO_ROOT,
+        capture_path,
+    )
+    from src.shared.python.motion_matching.pipeline.lane import Lane
+
+    path = REPO_ROOT / "docs/development/full_body_models" / _CANONICAL[capture]
+    spec = json.loads(path.read_text(encoding="utf-8"))
+    upper = {
+        label: a["body"]
+        for label, a in spec["marker_attachments"].items()
+        if a["offset_m"] is not None
+    }
+    return Lane(tuple({**upper, **LEG_SEEDS}), capture_path(capture))
+
+
+def test_build_foot_targets_rejects_unknown_mode_with_the_choices() -> None:
+    lane = SimpleNamespace(points=None, valid=None, labels=())
+    with pytest.raises(ValueError, match="style"):
+        build_foot_targets(lane, "toe-out")
+    assert "style" in address_feet.MODES
+
+
+def test_style_targets_without_usable_markers_keep_the_trail_prior() -> None:
+    lane = SimpleNamespace(
+        points=np.zeros((10, 6, 3)),
+        valid=np.ones((10, 6), bool),
+        labels=("LAnkleOut", "LToeIn", "LToeOut", "RAnkleOut", "RToeIn", "RToeOut"),
+    )
+    targets = build_foot_targets(lane, "style")
+    assert targets is not None
+    assert targets.target_deg["right"] == TRAIL_TOE_OUT_STYLE_DEG
+    assert targets.sources == {"left": "default", "right": "style"}
+    assert targets.is_default == {"left": True, "right": False}
+
+
+def test_foot_targets_reject_an_unknown_source() -> None:
+    with pytest.raises(ValueError, match="sources"):
+        _targets(1.0, 1.0, sources={"left": "capture", "right": "guess"})
+
+
+@pytest.mark.parametrize("capture", sorted(_CANONICAL))
+def test_style_targets_on_the_canonical_captures(capture: str) -> None:
+    """Trail -> owner prior, lead -> the capture value unchanged; the capture
+    mode still lets the measurement win for the trail foot."""
+    lane = _capture_lane(capture)
+    measured = build_foot_targets(lane, "capture")
+    style = build_foot_targets(lane, "style")
+    assert measured is not None and style is not None
+    assert measured.target_deg["right"] == pytest.approx(
+        _CAPTURE_TRAIL_DEG[capture], abs=0.5
+    )
+    assert measured.sources == {"left": "capture", "right": "capture"}
+    assert style.target_deg["right"] == TRAIL_TOE_OUT_STYLE_DEG
+    assert style.sources == {"left": "capture", "right": "style"}
+    assert style.target_deg["left"] == measured.target_deg["left"]
+    assert style.is_default == {"left": False, "right": False}
+    assert style.source == "style"
+
+
+@pytest.mark.parametrize("capture", sorted(_CANONICAL))
+def test_style_seed_turns_the_trail_foot_out_and_keeps_the_lead_foot(
+    capture: str,
+) -> None:
+    pytest.importorskip("mujoco")
+    import json
+
+    from src.shared.python.motion_matching.pipeline.constants import REPO_ROOT
+    from src.shared.python.motion_matching.pipeline.lane import document_seed
+    from src.shared.python.motion_matching.pipeline.plant import get_plant
+
+    path = REPO_ROOT / "docs/development/full_body_models" / _CANONICAL[capture]
+    document = json.loads(path.read_text(encoding="utf-8"))
+    lane = _capture_lane(capture)
+    kin = get_plant("mujoco", document).create_ik(lane.leg_seeds())
+    q_base = document_seed(document, kin)
+    seeded = {}
+    feet = {}
+    for mode in ("capture", "style"):
+        targets = build_foot_targets(lane, mode)
+        seeded[mode] = address_feet.seed_document_feet(document, kin, targets, q_base)
+        feet[mode] = model_feet_deg(
+            kin,
+            document_seed(seeded[mode], kin),
+            targets,
+            address_feet.MODEL_TARGET_AXIS,
+        )
+    assert feet["style"]["right"] == pytest.approx(
+        TRAIL_TOE_OUT_STYLE_DEG, abs=_PRIOR_BAND_DEG
+    )
+    assert feet["capture"]["right"] == pytest.approx(
+        _CAPTURE_TRAIL_DEG[capture], abs=2.0
+    )
+    # lead foot unchanged: same seed coordinate and same toe-out
+    lead_seed = {m: seeded[m]["address_seed_deg"]["hip_rotation_l"] for m in seeded}
+    assert lead_seed["style"] == pytest.approx(lead_seed["capture"], abs=1e-9)
+    assert feet["style"]["left"] == pytest.approx(feet["capture"]["left"], abs=1e-9)
+
+
+def test_report_records_the_per_foot_target_source() -> None:
+    kin = _FakeKin()
+    q = np.array([0.0, np.radians(20.0), np.radians(-16.0)])
+    targets = _targets(16.0, 20.0, sources={"left": "capture", "right": "style"})
+    block = address_feet.foot_progression_report(kin, q, targets)
+    assert block["feet"]["right"]["target_source"] == "style"
+    assert block["feet"]["left"]["target_source"] == "capture"
+    assert block["feet"]["right"]["error_deg"] == pytest.approx(0.0, abs=1e-9)
+
+
+def test_report_source_defaults_follow_the_legacy_flags() -> None:
+    """Targets built without ``sources`` (capture/default modes on main) get
+    their per-foot source from ``is_default``, so old callers are unchanged."""
+    targets = FootTargets(
+        target_deg={"left": 16.0, "right": 20.0},
+        is_default={"left": False, "right": True},
+        source="capture",
+    )
+    assert targets.sources == {"left": "capture", "right": "default"}

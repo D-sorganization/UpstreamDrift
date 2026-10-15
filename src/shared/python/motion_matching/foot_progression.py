@@ -26,6 +26,17 @@ Definitions (binding, from the issue)
 * When the capture has no reliable foot markers the value is
   ``DEFAULT_TOE_OUT_DEG``, flagged ``is_default`` (a default, not a measurement).
 
+Trail-foot style target (R3, #12683)
+------------------------------------
+The capture's own trail toe-out is small (capture-A +4.0 deg, capture-B
+-0.4 deg), and the owner decided (#12678, 2026-10-15, decision B) that the
+canonical address turns the trail foot out by about 20 deg as a *style target*,
+recorded as owner-set rather than measured. :func:`resolve_foot_target` is the
+one place that applies it: in ``style`` mode the trail foot gets
+``TRAIL_TOE_OUT_STYLE_DEG`` and the lead foot keeps the capture measurement; in
+``capture`` mode a reliable measurement wins for both feet. Every target carries
+its source (one of ``TARGET_SOURCES``) into the receipt.
+
 Estimator note
 --------------
 ``*AnkleOut`` is the lateral malleolus, about 0.04 m outside the heel centre
@@ -47,6 +58,9 @@ import numpy as np
 __all__ = [
     "ANKLE_LATERAL_OFFSET_M",
     "DEFAULT_TOE_OUT_DEG",
+    "RESOLVE_MODES",
+    "TARGET_SOURCES",
+    "TRAIL_TOE_OUT_STYLE_DEG",
     "FootProgression",
     "address_window",
     "capture_foot_progression",
@@ -55,11 +69,22 @@ __all__ = [
     "marker_long_axis",
     "model_long_axis",
     "progression_angle_deg",
+    "resolve_foot_target",
     "resolve_toe_out_target",
 ]
 
 #: Toe-out per foot used when the capture has no reliable foot markers.
 DEFAULT_TOE_OUT_DEG: float = 20.0
+#: Owner style target for the trail foot's address toe-out (R3, #12683; owner
+#: decision B on #12678, 2026-10-15: "about 20 deg"). It is the OSV-4 documented
+#: per-foot value, so it is defined from ``DEFAULT_TOE_OUT_DEG`` instead of
+#: repeating the literal; receipts tag it ``style``, never ``capture``.
+TRAIL_TOE_OUT_STYLE_DEG: float = DEFAULT_TOE_OUT_DEG
+#: Provenance of a per-foot address target: a capture measurement, the flagged
+#: no-measurement default, or the owner style target.
+TARGET_SOURCES: tuple[str, ...] = ("capture", "default", "style")
+#: Target modes :func:`resolve_foot_target` understands (``off`` sets no target).
+RESOLVE_MODES: tuple[str, ...] = ("capture", "style")
 #: Lateral malleolus to heel-centre-line distance (adult male, documented
 #: anthropometric value; the raw binding estimator uses 0).
 ANKLE_LATERAL_OFFSET_M: float = 0.04
@@ -243,6 +268,39 @@ def resolve_toe_out_target(measured: FootProgression | None) -> tuple[float, boo
     if measured is not None and measured.reliable and not measured.is_default:
         return float(measured.angle_deg), False
     return DEFAULT_TOE_OUT_DEG, True
+
+
+def resolve_foot_target(
+    measured: FootProgression | None, role: str, *, mode: str
+) -> tuple[float, str]:
+    """``(target_deg, source)`` for one foot under ``mode`` (R3, #12683).
+
+    * ``capture``: the reliable measurement (source ``capture``), else the
+      flagged default (``default``); identical to :func:`resolve_toe_out_target`.
+    * ``style``: the trail foot gets ``TRAIL_TOE_OUT_STYLE_DEG`` (``style``);
+      the lead foot resolves exactly as in ``capture`` mode.
+
+    Preconditions: ``mode`` in ``RESOLVE_MODES``, ``role`` in ``lead``/``trail``.
+    Postcondition: a finite angle in (-90, 90) deg and a ``TARGET_SOURCES`` tag.
+    """
+    if mode not in RESOLVE_MODES:
+        raise ValueError(
+            f"mode must be one of {RESOLVE_MODES}, got {mode!r} "
+            "('off' sets no foot target; do not resolve one)"
+        )
+    if role not in _ROLES:
+        raise ValueError(f"role must be one of {_ROLES}, got {role!r}")
+    if mode == "style" and role == "trail":
+        angle, source = TRAIL_TOE_OUT_STYLE_DEG, "style"
+    else:
+        angle, is_default = resolve_toe_out_target(measured)
+        source = "default" if is_default else "capture"
+    if not (np.isfinite(angle) and -90.0 < angle < 90.0):
+        raise ValueError(
+            f"{role} toe-out target {angle!r} deg is outside (-90, 90); "
+            "check the capture's foot markers"
+        )
+    return float(angle), source
 
 
 def address_window(
