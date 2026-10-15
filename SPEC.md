@@ -2741,6 +2741,7 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-15 | #12639 | Two-track cross-engine closed-loop conformance harness (numerical snapshot equality plus propagated scientific envelopes), registry entries per engine pair, native OpenSim adapter registered in the engine factory |
 | 2026-10-15 | #12695 | R5: one clubhead measurement point (face centre via club_face_target.face_centre_path) for the fd_phase impact split, the exporter impact detector and a new dynamics.fd_phase.clubhead_speed receipt block (simulated/reference/capture speed, % error, peak-timing offset); scripts/diagnose_clubhead_speed.py decomposition |
 | 2026-10-15 | #12694 | Pelvis wears the active outfit's pants material: body classification is order-independent (leaf segment before parent folder, exact before prefix before substring, equal-specificity ties raise), GolfSwing3D LowerTorso maps to pelvis, and check_clothing enforces pelvis garment == pants for every preset |
 | 2026-10-15 | #12636 | NSX-52: MyoSuite CLOSED_LOOP_SNAPSHOT via MuJoCo adapter reuse; kkt_regularization recorded, FULL only at 0 |
