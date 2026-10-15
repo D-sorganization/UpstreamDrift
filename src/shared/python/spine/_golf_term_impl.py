@@ -46,8 +46,17 @@ def require_inputs(
         raise ValueError(f"{term_id}: missing required inputs {', '.join(missing)}")
 
 
-def float_array(value: object, name: str, ndim: int | tuple[int, ...]) -> np.ndarray:
-    """Finite float array of ``ndim`` dimensions (int or tuple of allowed)."""
+def float_array(
+    value: object,
+    name: str,
+    ndim: int | tuple[int, ...],
+    *,
+    allow_nan: bool = False,
+) -> np.ndarray:
+    """Float array of ``ndim`` dimensions (int or tuple of allowed).
+
+    Finite unless ``allow_nan`` (NaN gaps pass through; infinities never do).
+    """
     try:
         arr = np.asarray(value, dtype=float)
     except (TypeError, ValueError) as exc:
@@ -55,7 +64,8 @@ def float_array(value: object, name: str, ndim: int | tuple[int, ...]) -> np.nda
     allowed = (ndim,) if isinstance(ndim, int) else ndim
     if arr.ndim not in allowed:
         raise ValueError(f"{name} must have ndim in {allowed}, got shape {arr.shape}")
-    if not np.all(np.isfinite(arr)):
+    bad = np.isinf(arr) if allow_nan else ~np.isfinite(arr)
+    if np.any(bad):
         raise ValueError(f"{name} must be finite")
     return arr
 

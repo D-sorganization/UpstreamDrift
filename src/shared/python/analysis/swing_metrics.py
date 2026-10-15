@@ -7,6 +7,7 @@ from scipy.signal import savgol_filter
 
 from src.shared.python.analysis.dataclasses import PeakInfo
 from src.shared.python.core.contracts import ensure
+from src.shared.python.spine import golf_terms
 
 
 class SwingMetricsMixin:
@@ -139,10 +140,19 @@ class SwingMetricsMixin:
         ):
             return None
 
-        shoulder_rotation = np.rad2deg(self.joint_positions[:, shoulder_joint_idx])
-        hip_rotation = np.rad2deg(self.joint_positions[:, hip_joint_idx])
-
-        return np.asarray(shoulder_rotation - hip_rotation)
+        # Shoulder - hip rotation (deg) via the golf-term registry. Only the two
+        # columns are passed so negative indices keep their legacy meaning.
+        columns = self.joint_positions[:, [shoulder_joint_idx, hip_joint_idx]]
+        x_factor = golf_terms.evaluate(
+            "x_factor_position_proxy",
+            {
+                "joint_positions": columns,
+                "shoulder_joint_idx": 0,
+                "hip_joint_idx": 1,
+            },
+            handedness="right",
+        )
+        return np.asarray(x_factor)
 
     def compute_x_factor_stretch(
         self,

@@ -140,7 +140,7 @@ def _points_array(value: object, name: str) -> np.ndarray:
 
 def _position_proxy(inputs: Mapping[str, Any], hand: Handedness) -> np.ndarray:
     del hand  # legacy sign is as implemented
-    pos = float_array(inputs["joint_positions"], "joint_positions", 2)
+    pos = float_array(inputs["joint_positions"], "joint_positions", 2, allow_nan=True)
     shoulder = index_in_range(
         inputs["shoulder_joint_idx"], pos.shape[1], "shoulder_joint_idx"
     )
