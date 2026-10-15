@@ -2288,6 +2288,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12552 · Split force_nullspace.py Into a Force_Nullspace Package With Re-Export Shims and Public API Contract Test (NSX-03, No Behavior Change)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12552
+- **Branch:** merged via #12595
+- **PR:** #12595
+- **Paths:** see #12595
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`979b12e0`; collated from changes/12552-split-force-nullspace-py-into-a-force-nu.md)
+- **Summary:** Split force_nullspace.py into a force_nullspace package with re-export shims and public API contract test (NSX-03, no behavior change)
+- **Next step:** Shipped in PR #12595.
+
+### DL-#12544 · Agent-Context Views Rendered on Demand
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #12544
+- **Branch:** fix/12544-agent-context-views-generated
+- **PR:** #12547
+- **Paths:** .gitignore; .pre-commit-config.yaml; AGENTS.md; docs/agent_context; docs/index.md; docs/README.md; scripts/generate_docs_map.py; tests/agent_context/test_generated_views_wiring.py; tests/unit/ci/test_generate_docs_map.py
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`fc47c9a9`; collated from changes/12544-stop-committing-the-generated-agent-cont.md)
+- **Summary:** Stop committing the generated agent-context views (README.md, index.html); render them on demand in CI and locally; reviews, catalog and contracts stay committed
+- **Next step:** Shipped in PR #12547.
+
 ### DL-#12563 · NSX-20: Convex Solver Backends (Highspy LP Session With Basis Reuse, Clarabel SOCP), Loop-Nullspace Extra, Benchmark
 
 - **State:** shipped
@@ -2320,10 +2346,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12549
 - **Branch:** merged via #12596
-- **PR:** #12596
+- **PR:** #12596, #12598
 - **Paths:** see #12596
 - **Started:** 2026-10-15
-- **Last verified:** 2026-10-15 (`c50ced25`; collated from changes/12549-add-nsx-00-mathematical-specification-sy.md)
+- **Last verified:** 2026-10-15 (`f6b7efb7`; collated from changes/12549-nsx-00-loop-null-space-specification-sym.md)
 - **Summary:** Add NSX-00 mathematical specification, SymPy golden fixtures, ADR-0054, hypothesis registry seed, and contract appendix
 - **Next step:** Shipped in PR #12596.
 

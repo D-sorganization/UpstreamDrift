@@ -2741,6 +2741,9 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-15 | #12595 | Split force_nullspace.py into a force_nullspace package with re-export shims and public API contract test (NSX-03, no behavior change) |
+| 2026-10-15 | #12598 | NSX-00: replace the provisional spec with the reviewed version (independent sympy derivations, 8 goldens, contracts.md, ADR-0054 D1-D6 accepted, D7 proposed) |
+| 2026-10-15 | #12547 | Stop committing the generated agent-context views (README.md, index.html); render them on demand in CI and locally; reviews, catalog and contracts stay committed |
 | 2026-10-15 | #12597 | NSX-20: convex solver backends (highspy LP session with basis reuse, Clarabel SOCP), loop-nullspace extra, benchmark |
 | 2026-10-15 | #12596 | Add NSX-00 mathematical specification, SymPy golden fixtures, ADR-0054, hypothesis registry seed, and contract appendix; Add NSX-05 deferred-validation record DV-12554 and external validation protocol |
 | 2026-10-15 | #12541 | BunkerShot3D: particle playback panel embedded in the shot viewport (Open particle trajectory action, play/pause/step, time scrubber in simulation seconds, playback time scale, camera presets, y=0 clipping toggle, visible frame stamp, reader errors shown for rejected artifacts, a stated reason for every disabled control, keyboard shortcuts and focus order). Workbench parity gap now points at follow-up #12536. |
