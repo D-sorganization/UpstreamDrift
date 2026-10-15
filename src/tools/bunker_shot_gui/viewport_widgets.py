@@ -73,6 +73,7 @@ from src.shared.python.visualization.viewport import (
 
 from .bridge import HeadBuild
 from .crosstier import CrossTierComparison
+from .particle_panel import ParticlePlaybackPanel
 from .render import RENDERER as MATPLOTLIB_RENDERER
 from .render import ViewportFallback
 from .render3d import SceneScale, ShotSceneArtists, scene_scale
@@ -192,6 +193,11 @@ class ShotViewportWidget(QWidget):
         layout.addWidget(self._note)
         self._refresh_renderer_note()
 
+        # A separate artifact on its own clock, so it keeps its own transport
+        # rather than following the shot cursor (see :mod:`.particle_panel`).
+        self._particles = ParticlePlaybackPanel(self)
+        layout.addWidget(self._particles)
+
     # ------------------------------------------------------------ accessors
 
     @property
@@ -203,6 +209,11 @@ class ShotViewportWidget(QWidget):
     def has_shot(self) -> bool:
         """Whether a scene is loaded."""
         return self._scene is not None
+
+    @property
+    def particles(self) -> ParticlePlaybackPanel:
+        """The 3-D particle playback panel embedded under the scene."""
+        return self._particles
 
     @property
     def n_frames(self) -> int:
