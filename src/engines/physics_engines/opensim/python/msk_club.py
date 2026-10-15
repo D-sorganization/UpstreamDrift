@@ -436,6 +436,55 @@ def attach_club(
     set_default_pose(model, calibration.address_q)
 
 
+#: Rajagopal finger and thumb bone meshes (``index_proximal_rvs.vtp`` ...).
+PHALANX_MESH_KEYS = ("_proximal_", "_medial_", "_distal_")
+
+
+def _is_phalanx(mesh: ET.Element) -> bool:
+    name = mesh.findtext("mesh_file") or ""
+    return any(key in name for key in PHALANX_MESH_KEYS)
+
+
+def hide_finger_bones(model: ET.Element) -> int:
+    """Hide the phalanx meshes of both hand bodies; returns how many were hidden.
+
+    The straight Rajagopal fingers never wrap a grip; :func:`attach_grip_hands`
+    draws the curled-finger gloves in their place. Carpals and metacarpals stay
+    visible: they bridge the wrist to the glove, whose palm is shorter than
+    the Rajagopal hand. Visual only.
+    """
+    count = 0
+    for body in _objects(model, "BodySet"):
+        if body.get("name") not in HAND_BODIES.values():
+            continue
+        for mesh in filter(_is_phalanx, body.iter("Mesh")):
+            appearance = mesh.find("Appearance")
+            if appearance is None:
+                appearance = ET.SubElement(mesh, "Appearance")
+            visible = appearance.find("visible")
+            if visible is None:
+                visible = ET.SubElement(appearance, "visible")
+            visible.text = "false"
+            count += 1
+    return count
+
+
+def attach_grip_hands(model: ET.Element, club: MskClub) -> int:
+    """Draw both wrapped-finger grip hands on the club and hide the finger bones.
+
+    Precondition: ``model`` holds the ``Club`` body (:func:`attach_club`), else
+    ``ValueError``. Postconditions: the club body carries exactly one lead and
+    one trail glove mesh in its own frame (the shared OSV-2 placement, as in
+    MuJoCo, Drake and Pinocchio, #12775); every phalanx mesh is hidden; no
+    mass, inertia, joint or constraint changes. Idempotent; returns 2.
+    """
+    bodies = [b for b in _objects(model, "BodySet") if b.get("name") == CLUB_BODY]
+    if len(bodies) != 1:
+        raise ValueError("model has no Club body; call attach_club first")
+    hide_finger_bones(model)
+    return club_visuals.attach_grip_hand_meshes(bodies[0], club.assembly.head_alias, "")
+
+
 def _default_pose(model: ET.Element) -> dict[str, float]:
     pose = {}
     for coord in model.iter("Coordinate"):

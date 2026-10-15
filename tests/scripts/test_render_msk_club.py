@@ -153,3 +153,18 @@ def test_hands_close_up_view_follows_the_grip_at_the_preset_distance() -> None:
     assert distance == script.DISTANCE_M
     with pytest.raises(ValueError, match="view"):
         script.view_target("sideways", lookat, hands)
+
+
+@pytest.mark.parametrize("club", ["driver", "iron7"])
+def test_club_model_draws_the_wrapped_grip_hands(tmp_path: Path, club: str) -> None:
+    from defusedxml import ElementTree as SafeET
+
+    from src.engines.physics_engines.opensim.python import club_visuals
+    from src.engines.physics_engines.opensim.python import msk_club as mc
+
+    out = _script().club_model(mc.MODELS_DIR / "golf_humanoid.osim", club, tmp_path)
+    model = SafeET.parse(str(out)).getroot().find("Model")
+    (body,) = [b for b in model.iter("Body") if b.get("name") == mc.CLUB_BODY]
+    files = {m.findtext("mesh_file") for m in body.iter("Mesh")}
+    hands = {p.name for p in club_visuals.hand_asset_paths(club).values()}
+    assert hands <= files
