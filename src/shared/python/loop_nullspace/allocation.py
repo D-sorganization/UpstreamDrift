@@ -66,6 +66,8 @@ from src.shared.python.loop_nullspace.registry import load_registry
 from src.shared.python.loop_nullspace.solvers import (
     SolveStatus,
     SOCBlock,
+    ConicSettings,
+    QuadraticObjective,
     solve_socp,
 )
 
@@ -634,14 +636,13 @@ def allocate_trajectory(
     t0 = time.perf_counter()
     has_rows = prob.a_ub.shape[0] > 0
     sol = solve_socp(
-        prob.c_vec,
+        QuadraticObjective(prob.c_vec, prob.p_mat),
         None,
         None,
         prob.a_ub if has_rows else None,
         prob.b_ub if has_rows else None,
         prob.cones,
-        P=prob.p_mat,
-        tol=SOLVER_TOL,
+        settings=ConicSettings(tol=SOLVER_TOL),
     )
     elapsed = time.perf_counter() - t0
     if sol.status is not SolveStatus.OPTIMAL or sol.x is None or sol.z is None:
