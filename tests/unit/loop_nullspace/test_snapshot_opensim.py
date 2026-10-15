@@ -19,6 +19,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from tests.helpers.opensim_support import require_opensim
+
 from src.shared.python.engine_core.capabilities import Capability, CapabilityLevel
 from src.shared.python.loop_nullspace.contracts import (
     ClosedLoopSnapshot,
@@ -65,7 +67,7 @@ def pin_adapter():
 
 @pytest.fixture(scope="module")
 def os_adapter():
-    pytest.importorskip("opensim")
+    require_opensim()
     from src.engines.physics_engines.opensim.python.force_adapter import (
         OpenSimNativeForceAdapter,
     )
