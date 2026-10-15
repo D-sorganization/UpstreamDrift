@@ -89,9 +89,7 @@ def test_round_trip_with_neutral_and_offsets() -> None:
     term = Rotation.from_euler("x", -0.1).as_matrix()
     phi_true = np.array([-0.3, 0.25, 0.2])
     target = base @ _target(law, phi_true, neutral) @ term
-    res = distribute(
-        target, law, neutral=neutral, fixed=ChainOffsets(base, term)
-    )
+    res = distribute(target, law, neutral=neutral, fixed=ChainOffsets(base, term))
     np.testing.assert_allclose(res.phi, phi_true, atol=1e-8)
     assert res.residual_rad < 1e-9
 
@@ -129,9 +127,10 @@ def test_analytic_jacobian_matches_finite_difference() -> None:
     from src.shared.python.spine.distribution import residual_and_jacobian
 
     law = _cross_law()
-    target = _target(law, [0.2, -0.1, 0.3]) @ Rotation.from_euler(
-        "xyz", [0.1, 0.05, -0.07]
-    ).as_matrix()
+    target = (
+        _target(law, [0.2, -0.1, 0.3])
+        @ Rotation.from_euler("xyz", [0.1, 0.05, -0.07]).as_matrix()
+    )
     phi = np.array([0.15, 0.05, -0.2])
     _, jac = residual_and_jacobian(phi, law, target, None, None)
     eps = 1e-6
@@ -152,9 +151,10 @@ def test_unreachable_target_reports_known_geodesic_distance() -> None:
     law = _axial_law()
     before = _snapshot(law)
     a, b = 0.6, 0.4
-    target = Rotation.from_euler("y", a).as_matrix() @ Rotation.from_euler(
-        "x", b
-    ).as_matrix()
+    target = (
+        Rotation.from_euler("y", a).as_matrix()
+        @ Rotation.from_euler("x", b).as_matrix()
+    )
     res = distribute(target, law)
     assert res.converged
     assert res.residual_rad == pytest.approx(b, abs=1e-7)
