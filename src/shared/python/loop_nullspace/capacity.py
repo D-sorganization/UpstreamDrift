@@ -171,7 +171,7 @@ def capacity_for(
         n for n in names if any(table[(n, d)]["assumed"] for d in DIRECTIONS)
     )
     verified = tuple(n for n in names if n not in assumed)
-    warnings = ()
+    warnings: tuple[str, ...] = ()
     if assumed:
         warnings = (
             f"{len(assumed)} of {len(names)} torque capacities are ASSUMED "
