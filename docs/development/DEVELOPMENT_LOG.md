@@ -2288,6 +2288,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12635 · Port MyoSuite Runtime Loading to a Version-Tolerant Shim (Env_Base Removed in 3.0.0) so the Myosuite Extras Stay Unpinned
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12635
+- **Branch:** merged via #12650
+- **PR:** #12650
+- **Paths:** see #12650
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`96b6f29c`; collated from changes/12635-port-myosuite-runtime-loading-to-a-versi.md)
+- **Summary:** Port MyoSuite runtime loading to a version-tolerant shim (env_base removed in 3.0.0) so the myosuite extras stay unpinned
+- **Next step:** Shipped in PR #12650.
+
 ### DL-#12553 · NSX-04: Per-Slot Torque-Capacity Registry and Capacity_for Loader With Verified and Assumed Sources
 
 - **State:** shipped
