@@ -375,7 +375,13 @@ def _solve_leaf(
     frame, c, const, atol = spec
     system = solver.system
     out = solver.minimize(c)
-    common = {"frame": frame, "c": c, "const": const, "threshold": thr, "atol": atol}
+    common: dict[str, Any] = {
+        "frame": frame,
+        "c": c,
+        "const": const,
+        "threshold": thr,
+        "atol": atol,
+    }
     if out.status is SolveStatus.INFEASIBLE:
         verdict, reason = leaf_verdict(KIND_FARKAS, None, None, thr, atol)
         return LeafCertificate(
