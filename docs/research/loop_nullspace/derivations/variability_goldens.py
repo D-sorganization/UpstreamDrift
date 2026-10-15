@@ -341,6 +341,19 @@ def additive_flat_case() -> dict[str, Any]:
 # --------------------------------------------------------------------------- #
 
 
+# LAPACK (SVD, eigvalsh) results differ in the last bits across BLAS builds;
+# the golden must be byte-identical on every platform, so the floating-point
+# golfer block is canonicalised to this many decimals (well below the tightest
+# test tolerance on the block, 1e-12 on symmetry, which is kept exact by
+# symmetrising before rounding).
+_FLOAT_DECIMALS = 10
+
+
+def _canon(x: float) -> float:
+    """Round to ``_FLOAT_DECIMALS`` and map ``-0.0`` to ``0.0``."""
+    return round(float(x), _FLOAT_DECIMALS) + 0.0
+
+
 def golfer_preload() -> dict[str, Any]:
     """``P^T (sum_r lambda_r H_r) P`` for two allocations of the planar golfer."""
     import planar_golfer as pg
@@ -361,7 +374,7 @@ def golfer_preload() -> dict[str, Any]:
     out: dict[str, Any] = {
         "closure_rows": 2,
         "tangent_dimension": int(p_mat.shape[1]),
-        "hessian_symmetry_error": max(float(np.abs(h - h.T).max()) for h in h_num),
+        "hessian_symmetry_error": _canon(max(np.abs(h - h.T).max() for h in h_num)),
         "allocations": [],
     }
     lam0 = np.array([4.0, -3.0])
@@ -370,16 +383,17 @@ def golfer_preload() -> dict[str, Any]:
         k_geom = sum(lam[r] * h_num[r] for r in range(2))
         proj = p_mat @ p_mat.T  # basis-independent projector onto ker J_c
         kt = proj @ k_geom @ proj
+        kt = 0.5 * (kt + kt.T)  # exact symmetry before rounding
         eig = np.sort(np.linalg.eigvalsh(p_mat.T @ k_geom @ p_mat))
         tau = b - jc.T @ lam
         out["allocations"].append(
             {
                 "label": label,
-                "lambda": [float(x) for x in lam],
-                "tau": [float(x) for x in tau],
-                "K_geom_projected": cm.mat(sp.Matrix(kt)),
-                "K_geom_tangent_eigenvalues": [float(x) for x in eig],
-                "K_geom_projected_frobenius": float(np.linalg.norm(kt)),
+                "lambda": [_canon(x) for x in lam],
+                "tau": [_canon(x) for x in tau],
+                "K_geom_projected": [[_canon(x) for x in row] for row in kt],
+                "K_geom_tangent_eigenvalues": [_canon(x) for x in eig],
+                "K_geom_projected_frobenius": _canon(np.linalg.norm(kt)),
             }
         )
     k0 = np.array(out["allocations"][0]["K_geom_projected"])
