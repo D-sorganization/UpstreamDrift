@@ -59,6 +59,13 @@ from src.shared.python.spine.segmental import (
     SegmentalKinematicsSeries,
     SegmentalPose,
 )
+from src.shared.python.spine.viz_data import (
+    HeatmapData,
+    StackData,
+    level_angle_stack,
+    load_heatmap,
+    to_tension_positive,
+)
 
 __all__ = [
     "REQUIRED_PROVENANCE_KEYS",
@@ -69,6 +76,7 @@ __all__ = [
     "DistributionResult",
     "DistributionSeriesResult",
     "GolfTermDefinition",
+    "HeatmapData",
     "LevelTransform",
     "LinearCouplingLaw",
     "LoadObservable",
@@ -80,6 +88,7 @@ __all__ = [
     "SpinalLevel",
     "SpinalLoadSeries",
     "SpinalRegion",
+    "StackData",
     "StateDependentCouplingLaw",
     "annotate",
     "available_laws",
@@ -91,12 +100,15 @@ __all__ = [
     "distribute_series_detailed",
     "from_joint_coupling",
     "from_wrench_in_frame",
+    "level_angle_stack",
     "level_rotations",
     "levels_between",
     "load_context_bands",
     "load_coupling_laws",
+    "load_heatmap",
     "parse_level",
     "regional_fraction",
     "registered_terms",
     "segmental_contributions",
+    "to_tension_positive",
 ]
