@@ -2288,6 +2288,45 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12675 · Guard MOSAIC Inertial Parameter Layouts: Audit Found No Live Pinocchio/inertial.py Mix; Tests Pin Each Module's Ordering and Block Unconverted Coupling
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12675
+- **Branch:** merged via #12676
+- **PR:** #12676
+- **Paths:** see #12676
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`f9f46844`; collated from changes/12675-guard-mosaic-inertial-parameter-layouts.md)
+- **Summary:** Guard MOSAIC inertial parameter layouts: audit found no live Pinocchio/inertial.py mix; tests pin each module's ordering and block unconverted coupling
+- **Next step:** Shipped in PR #12676.
+
+### DL-#12582 · NSX-54: OpenSim Closed-Loop Snapshot Adapter Delegating to OpenSimFullBodyParityAdapter, Equal to Pinocchio
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12582
+- **Branch:** merged via #12627
+- **PR:** #12627
+- **Paths:** see #12627
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`bb5fca69`; collated from changes/12582-nsx-54-opensim-closed-loop-snapshot-adap.md)
+- **Summary:** NSX-54: OpenSim closed-loop snapshot adapter delegating to OpenSimFullBodyParityAdapter, equal to Pinocchio
+- **Next step:** Shipped in PR #12627.
+
+### DL-#12579 · MuJoCo Closed-Loop Snapshot by Hard-KKT Evaluation (CLOSED_LOOP_SNAPSHOT FULL), Separate Stock-Soft-Weld Divergence Entry
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12579
+- **Branch:** merged via #12629
+- **PR:** #12629
+- **Paths:** see #12629
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`67eeb469`; collated from changes/12579-mujoco-closed-loop-snapshot-by-hard-kkt.md)
+- **Summary:** MuJoCo closed-loop snapshot by hard-KKT evaluation (CLOSED_LOOP_SNAPSHOT FULL), separate stock-soft-weld divergence entry
+- **Next step:** Shipped in PR #12629.
+
 ### DL-#12608 · Correct the Club Y-Sign in Golfer Forward Kinematics, Club Jacobians and the Native Grip_Left Wrapper; Closure Is a Wrist-Pin PLANAR_POINT2 With Rank 2 on the Manifold (TB-00 Registry: 6 Independent DOFs); Planar-Model and Central-Difference Cross-Checks
 
 - **State:** shipped
