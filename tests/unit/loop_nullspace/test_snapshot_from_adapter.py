@@ -123,9 +123,10 @@ def test_synthetic_adapters_declare_none_and_refuse(adapter) -> None:
             snapshot_from_adapter(synth, q, q, q, input_provenance=PROVENANCE)
 
 
-def test_mujoco_adapter_declares_none() -> None:
+def test_mujoco_adapter_declares_full_by_hard_kkt() -> None:
+    """NSX-51 (#12579): MuJoCo implements the protocol; see test_mujoco_snapshot."""
     bare = MujocoForceAdapter.__new__(MujocoForceAdapter)
-    assert bare.capability(Capability.CLOSED_LOOP_SNAPSHOT) is CapabilityLevel.NONE
+    assert bare.capability(Capability.CLOSED_LOOP_SNAPSHOT) is CapabilityLevel.FULL
 
 
 def test_adapter_without_capability_method_refuses() -> None:

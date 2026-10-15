@@ -28,6 +28,11 @@ from numpy.typing import NDArray
 
 from src.shared.python.contracts import require
 from src.shared.python.engine_core.capabilities import Capability, CapabilityLevel
+from src.shared.python.loop_nullspace.contracts import (
+    ClosureKind,
+    LoopTopology,
+    SpatialInertia,
+)
 from src.shared.python.loop_nullspace.snapshot import (
     canonical_closure_jacobian,
     parity_effort,
@@ -202,11 +207,13 @@ class MujocoForceAdapter:
         self._model = NativeMujocoFullBodyModel(spec_bytes)
         self._mj = self._model._mj
         mj_model = self._model.model
+        self._nq = int(mj_model.nq)
         self._nv = int(mj_model.nv)
         self._actuated_indices = list(range(6, self._nv))
         self._n_spheres = len(self._model._spheres)
         self._model_hash = getattr(self._model, "model_sha256", "")
-        self._coordinate_order = tuple(getattr(self._model, "coordinate_order", ()))
+        # State vectors use MuJoCo dof order, which need not be spec order.
+        self._coordinate_order = self._model.native_coordinate_order
         self._contact_names = tuple(getattr(self._model, "_spheres", {}).keys())
 
     @property
@@ -214,8 +221,78 @@ class MujocoForceAdapter:
         return EngineType.MUJOCO
 
     def capability(self, capability: Capability) -> CapabilityLevel:
-        """``CLOSED_LOOP_SNAPSHOT`` is not yet implemented (NSX-51)."""
+        """``CLOSED_LOOP_SNAPSHOT`` is FULL by hard-KKT evaluation (NSX-51).
+
+        ``M`` and ``h`` come from ``mj_fullM`` and ``qfrc_bias``, the closure
+        rows from the weld site Jacobians, and the drift from a declared
+        central finite difference (:attr:`closure_drift_method`).  Nothing is
+        read from stock soft-constraint stepping, whose solref/solimp
+        compliance has its own divergence-registry entry.  Everything else is
+        ``NONE`` at this boundary.
+        """
+        if capability is Capability.CLOSED_LOOP_SNAPSHOT:
+            return CapabilityLevel.FULL
         return CapabilityLevel.NONE
+
+    # -- closed-loop snapshot capability (NSX-51, #12579) -------------------
+
+    closure_drift_method = "central_finite_difference"
+    """How :meth:`compute_closure_drift` obtains ``Jdot v`` (recorded in provenance)."""
+
+    @property
+    def native_closure_convention(self) -> Any:
+        """Layout of :meth:`compute_grip_jacobian` rows (NSX-02 constant)."""
+        from src.engines.physics_engines.mujoco.python.native_model import (
+            CLOSURE_CONVENTION,
+        )
+
+        return CLOSURE_CONVENTION
+
+    def compute_closure_drift(self, q: Array, v: Array) -> Array:
+        """Native ``Jdot v`` (6,) of :meth:`compute_grip_jacobian` at ``(q, v)``.
+
+        Central finite difference of the weld Jacobian along ``v`` (MuJoCo has
+        no analytic derivative; ``mj_jacDot`` is a first-order difference).
+        Preconditions: finite vectors of length ``nv``.  Postcondition: finite
+        6-vector in the WORLD frame of :attr:`native_closure_convention`.
+        """
+        configuration = self._checked_vector(q, self._nq, "configuration")
+        velocity = self._checked_vector(v, self._nv, "velocity")
+        drift = self._model.closure_drift_central_difference(configuration, velocity)
+        if drift.shape != (6,) or not np.isfinite(drift).all():
+            raise ValueError("Invalid native weld velocity drift")
+        return drift
+
+    def native_closure_frame(self, q: Array) -> tuple[Array, Array]:
+        """``(R, origin)`` of the native rows: WORLD axes, point ``site_xpos``."""
+        self._prepare_state(q)
+        return np.eye(3), self._model.closure_hand_frame()[1]
+
+    def closure_wrench_frame(self, q: Array) -> tuple[Array, Array]:
+        """Canonical grip frame ``(R world<-grip, origin)``: the hand-side site.
+
+        The club-side site coincides with it on a closed loop.
+        """
+        self._prepare_state(q)
+        return self._model.closure_hand_frame()
+
+    def club_inertia_split(self) -> tuple[SpatialInertia, tuple[SpatialInertia, ...]]:
+        """``(bare club, welded hand solids)`` in the club-side closure frame."""
+        bare, hands = self._model.club_inertia_split()
+        return _spatial(bare), tuple(_spatial(h) for h in hands)
+
+    def closure_topology(self) -> LoopTopology:
+        """Weld topology: hands close the loop onto the club (NSX-13)."""
+        actuated = set(self._actuated_indices)
+        return LoopTopology(
+            closure_kind=ClosureKind.WELD6,
+            closing_side="hands",
+            holding_side="club",
+            actuated_indices=tuple(self._actuated_indices),
+            unactuated_indices=tuple(i for i in range(self._nv) if i not in actuated),
+            loop_support_indices=self._model.closure_path_dof_indices(),
+            coordinate_order=tuple(self._coordinate_order),
+        )
 
     @property
     def nv(self) -> int:
@@ -304,16 +381,39 @@ class MujocoForceAdapter:
     def verify_acceleration_parity(
         self, q: Array, v: Array, tau_effective: Array, a_target: Array
     ) -> float:
-        """Audit the raw equation at this exact state, independent of call order.
+        """``||a_hard_KKT(q, v, tau) - a_target||_inf`` (one semantics, NSX-51).
 
-        tau_effective includes every externally supplied force and reaction.
-        This algebraic audit is not constrained/contact forward replay.
+        ``tau_effective`` is the *applied* effort only (actuators, ground
+        reaction, root residual); the closure reaction ``J^T lambda`` is not
+        part of it.  The acceleration is the exact rigid-weld solve
+        ``M a - J^T lambda = tau - h``, ``J a = -Jdot v`` (zero Tikhonov term,
+        central-difference drift), independent of call order and of stock
+        soft-constraint stepping.  Raises ``ValueError`` on nonfinite input or
+        result.
         """
         effort = self._checked_vector(tau_effective, self._nv, "effective effort")
         target = self._checked_vector(a_target, self._nv, "target acceleration")
         mass, bias = self._mass_and_bias(q, v)
-        a_forward = np.linalg.solve(mass, effort - bias)
+        jac = self.compute_grip_jacobian(q)
+        drift = self.compute_closure_drift(q, v)
+        from src.engines.physics_engines.mujoco.python.native_model import (
+            _solve_kkt_with_multipliers,
+        )
+
+        a_forward, _ = _solve_kkt_with_multipliers(
+            mass, effort - bias, jac, drift, regularization=0.0
+        )
+        if not np.isfinite(a_forward).all():
+            raise ValueError("Native forward acceleration is nonfinite")
         return float(np.max(np.abs(a_forward - target)))
+
+
+def _spatial(inertia: Any) -> SpatialInertia:
+    return SpatialInertia(
+        mass=inertia.mass_kg,
+        com=np.asarray(inertia.com_m),
+        inertia=inertia.inertia_com_kg_m2,
+    )
 
 
 class SyntheticMultibodyFixture:

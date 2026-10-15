@@ -444,3 +444,105 @@ class NativeMujocoFullBodyModel:
     def evaluate_weld_closure(self) -> tuple[np.ndarray, np.ndarray]:
         """Evaluate weld closure Jacobian and drift for dual-grip constraint."""
         return _evaluate_weld_closure(self._mj, self.model, self.data, self._closure)
+
+    # -- hard-KKT closed-loop snapshot support (NSX-51, #12579) -------------
+
+    @property
+    def native_coordinate_order(self) -> tuple[str, ...]:
+        """Coordinate names in MuJoCo dof order, the order of ``qpos``/``qvel``.
+
+        ``coordinate_order`` is the specification order; the compiled tree may
+        order its dofs differently, and every native vector uses dof order.
+        """
+        return tuple(sorted(self._indices, key=self._indices.__getitem__))
+
+    def closure_hand_frame(self) -> tuple[np.ndarray, np.ndarray]:
+        """World ``(R, origin)`` of the hand-side closure site at the last state.
+
+        Postcondition: owned ``(3, 3)`` rotation and ``(3,)`` origin; valid
+        after a position stage (``mj_fwdPosition``) at the state of interest.
+        """
+        site = self._closure[0]
+        return (
+            np.array(self.data.site_xmat[site], dtype=float).reshape(3, 3),
+            np.array(self.data.site_xpos[site], dtype=float),
+        )
+
+    def closure_drift_central_difference(
+        self, q: np.ndarray, v: np.ndarray, *, step: float = 1e-6
+    ) -> np.ndarray:
+        """Native ``Jdot v`` (6,) as a central difference of the weld Jacobian.
+
+        ``Jdot v = d/dt [J(q + t v)] v`` evaluated as
+        ``(J(q + h v) - J(q - h v)) v / 2h``.  Every coordinate is a scalar
+        slide or hinge, so ``q + h v`` is a valid configuration.  The error is
+        ``O(h^2)`` (about 1e-9 relative at ``h = 1e-6``), against the
+        first-order forward difference inside ``mj_jacDot``.  Same convention
+        as :func:`_evaluate_weld_closure` (WORLD frame, each site's own point).
+
+        Preconditions: finite ``q``, ``v`` of length ``nv`` and ``step > 0``
+        (else ``ValueError``).  Postcondition: the state is restored to ``q``.
+        """
+        if not np.isfinite(step) or step <= 0.0:
+            raise ValueError(f"step must be positive and finite, got {step}")
+        q_vec, v_vec = self._finite(q, "q"), self._finite(v, "v")
+        jacobians = []
+        for sign in (1.0, -1.0):
+            self.data.qpos[:] = q_vec + sign * step * v_vec
+            self._mj.mj_fwdPosition(self.model, self.data)
+            jacobians.append(self.evaluate_weld_closure()[0])
+        self.data.qpos[:] = q_vec
+        self._mj.mj_fwdPosition(self.model, self.data)
+        return (jacobians[0] - jacobians[1]) @ v_vec / (2.0 * step)
+
+    def _finite(self, values: np.ndarray, name: str) -> np.ndarray:
+        vec = np.asarray(values, dtype=np.float64)
+        if vec.shape != (self.model.nv,) or not np.isfinite(vec).all():
+            raise ValueError(
+                f"{name} must be a finite vector of length {self.model.nv}"
+            )
+        return vec
+
+    def closure_path_dof_indices(self) -> tuple[int, ...]:
+        """Dofs on the tree path between the two closure bodies (loop support).
+
+        Dofs of the common ancestors cancel in the relative twist, so every
+        other column of the weld Jacobian is exactly zero.
+        """
+        parents = self.model.body_parentid
+
+        def chain(body: int) -> set[int]:
+            out = set()
+            while body > 0:
+                out.add(body)
+                body = int(parents[body])
+            return out
+
+        bodies = [int(self.model.site_bodyid[s]) for s in self._closure]
+        on_path = chain(bodies[0]) ^ chain(bodies[1])
+        dofs = [
+            d
+            for b in on_path
+            for d in range(
+                int(self.model.body_dofadr[b]),
+                int(self.model.body_dofadr[b]) + int(self.model.body_dofnum[b]),
+            )
+        ]
+        return tuple(sorted(dofs))
+
+    def club_inertia_split(
+        self,
+    ) -> tuple[RigidInertia, tuple[RigidInertia, ...]]:
+        """``(bare club, welded hand solids)`` in the club-side closure frame.
+
+        Body-fixed (state independent).  The closure frame is the specification
+        ``placement_b`` of the club body, so the inertias are the partition of
+        :func:`club_solids_partition` re-expressed with ``inv(placement_b)``.
+        """
+        closure = self._spec_for_partition["closure"]
+        to_frame = np.linalg.inv(np.asarray(closure["placement_b"], dtype=float))
+        partition = club_solids_partition(self._spec_for_partition)
+        return (
+            partition.bare_club.expressed_in(to_frame),
+            tuple(h.expressed_in(to_frame) for h in partition.welded_hands.values()),
+        )
