@@ -10,7 +10,8 @@ Structure (matches the NSX-00 ``spatial_counts`` golden):
 * a rigid bare club is welded to the lead hand; the trail hand closes the loop
   onto the club grip frame (WELD6).  The grip frame is placed where the trail
   hand already is at the chosen posture, so the closure holds by construction;
-* optional ground contact: two point feet rigidly attached to the root.
+* optional ground contact: two point feet (or four: two per foot) rigidly
+  attached to the root.
 
 ``J_c`` follows ``closure_convention``: rows ``[lin; ang]`` of ``V_trail -
 V_club`` in the grip frame.  Not a golf posture and not a golfer model.
@@ -61,6 +62,7 @@ _Q_LEAD = [0.3, -0.2, 0.4, -0.8, 0.5, 0.2, -0.3]
 _Q_TRAIL = [-0.4, 0.3, 0.1, -0.9, -0.4, -0.2, 0.25]
 _Q_ROOT = [0.05, -0.02, 0.01, 0.1, -0.05, 0.08]
 _FEET = [np.array([0.2, 0.1, -1.0]), np.array([-0.3, -0.2, -1.0])]
+_FOOT_SECOND_OFFSET = [np.array([0.2, 0.2, 0.0]), np.array([0.2, -0.1, 0.0])]
 _FOOT_MU = 0.8
 _CLUB_MASS, _CLUB_LENGTH, _CLUB_BUTT = 0.313, 1.0, 0.2
 _HAND_MASS = 0.4
@@ -167,7 +169,24 @@ def _club_inertia() -> pin.Inertia:
     return pin.Inertia(_CLUB_MASS, com, np.diag([side, side, 1e-4]))
 
 
-def _build(floating_root: bool, feet: bool, grip: pin.SE3 | None) -> _Spatial:
+def _foot_points(points_per_foot: int) -> list[Array]:
+    """Rigid foot points: one per foot, or a second one offset in the ground plane.
+
+    Matches ``FEET`` / ``FEET4`` of the NSX-00 ``spatial_counts`` derivation.
+    """
+    if points_per_foot == 1:
+        return list(_FEET)
+    return [
+        _FEET[0],
+        _FEET[0] + _FOOT_SECOND_OFFSET[0],
+        _FEET[1],
+        _FEET[1] + _FOOT_SECOND_OFFSET[1],
+    ]
+
+
+def _build(
+    floating_root: bool, feet: bool, grip: pin.SE3 | None, points_per_foot: int = 1
+) -> _Spatial:
     model = pin.Model()
     root = 0
     if floating_root:
@@ -199,7 +218,7 @@ def _build(floating_root: bool, feet: bool, grip: pin.SE3 | None) -> _Spatial:
     )
     feet_frames = []
     if feet:
-        for k, pos in enumerate(_FEET):
+        for k, pos in enumerate(_foot_points(points_per_foot)):
             feet_frames.append(
                 model.addFrame(
                     pin.Frame(
@@ -225,15 +244,17 @@ def _build(floating_root: bool, feet: bool, grip: pin.SE3 | None) -> _Spatial:
     )
 
 
-def _build_closed(floating_root: bool, feet: bool) -> _Spatial:
+def _build_closed(
+    floating_root: bool, feet: bool, points_per_foot: int = 1
+) -> _Spatial:
     """Two-pass build: place the grip frame where the trail hand already is."""
-    probe = _build(floating_root, feet, None)
+    probe = _build(floating_root, feet, None, points_per_foot)
     pin.forwardKinematics(probe.model, probe.data, probe.q_star)
     pin.updateFramePlacements(probe.model, probe.data)
     o_lead = probe.data.oMf[probe.lead_grip]
     o_trail = probe.data.oMf[probe.trail_grip]
     grip = o_lead.inverse() * o_trail
-    sp = _build(floating_root, feet, grip)
+    sp = _build(floating_root, feet, grip, points_per_foot)
     pin.forwardKinematics(sp.model, sp.data, sp.q_star)
     pin.updateFramePlacements(sp.model, sp.data)
     sp.rot_grip = np.array(sp.data.oMf[sp.lead_grip].rotation)
@@ -269,16 +290,21 @@ def _welded_inertias() -> tuple[SpatialInertia, ...]:
     return (hand, hand)
 
 
-def build_case(*, floating_root: bool = False, feet: bool = False) -> FixtureCase:
+def build_case(
+    *, floating_root: bool = False, feet: bool = False, foot_points: int = 1
+) -> FixtureCase:
     """Build the spatial snapshot and attach its NSX-00 ``spatial_counts`` golden.
 
     Raises:
         ValueError: If ``feet`` is requested without ``floating_root`` (the
-            feet are rigidly attached to the root).
+            feet are rigidly attached to the root), or ``foot_points`` is not
+            1 or 2 (points per foot; 2 gives the four-point NSX-60 variant).
     """
     if feet and not floating_root:
         raise ValueError("feet require floating_root=True (feet attach to the root)")
-    sp = _build_closed(floating_root, feet)
+    if foot_points not in (1, 2):
+        raise ValueError(f"foot_points must be 1 or 2, got {foot_points!r}")
+    sp = _build_closed(floating_root, feet, foot_points)
     model, data, q = sp.model, sp.data, sp.q_star
     v, a = _admissible_rates(sp, np.random.default_rng(_SEED))
     jc = sp.closure_jacobian(q)
@@ -333,7 +359,11 @@ def build_case(*, floating_root: bool = False, feet: bool = False) -> FixtureCas
         foot_contacts=contacts,
     )
     variant = (
-        "floating_root_two_point_feet"
+        (
+            "floating_root_four_point_feet"
+            if foot_points == 2
+            else "floating_root_two_point_feet"
+        )
         if feet
         else "floating_root_no_feet"
         if floating_root
