@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from defusedxml import ElementTree as ET
 
 from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter
 from src.shared.python.model_appearance import (
@@ -154,12 +155,10 @@ def _skin_meshes_in_spec_frames(spec_path: Path) -> tuple[dict, dict]:
     The MJCF body frame is the joint follower frame, so a spec-body point p
     sits at ``inv(child_to_follower) @ p`` in MJCF; invert that here.
     """
-    import xml.etree.ElementTree as ET  # nosec B405 - parsing our own export
-
     raw = spec_path.read_bytes()
     spec = json.loads(raw)
     xml, _ = exporter.export_full_body_mjcf(raw, appearance=document_from_dict(DOC))
-    root = ET.fromstring(xml)  # nosec B314 - trusted, generated in-process
+    root = ET.fromstring(xml)
     verts = {
         m.get("name"): np.array(m.get("vertex", "").split(), float).reshape(-1, 3)
         for m in root.iter("mesh")

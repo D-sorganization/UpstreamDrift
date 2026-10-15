@@ -15,12 +15,12 @@ trunk); the AP direction is ML x up.
 from __future__ import annotations
 
 import json
-import xml.etree.ElementTree as ET  # nosec B405 - parsing our own export
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pytest
+from defusedxml import ElementTree as ET
 
 from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter
 from src.shared.python.model_appearance import document_from_dict
@@ -84,7 +84,7 @@ def _mjcf_trunk_extents(
         )
     else:
         xml, _ = exporter.export_full_body_mjcf(raw, visual=True)
-    root = ET.fromstring(xml)  # nosec B314 - trusted, generated in-process
+    root = ET.fromstring(xml)
     meshes = {
         m.get("name"): np.array(m.get("vertex", "").split(), float).reshape(-1, 3)
         for m in root.iter("mesh")
