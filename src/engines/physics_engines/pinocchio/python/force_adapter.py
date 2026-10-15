@@ -15,6 +15,11 @@ from src.engines.physics_engines.pinocchio.python.native_model import (
 from src.engines.physics_engines.pinocchio.python.pinocchio_force_torque import (
     PinocchioForceTorqueSource,
 )
+from src.shared.python.biomechanics.club_inertia_partition import (
+    RigidInertia,
+    club_solids_partition,
+    newton_euler_keywords,
+)
 from src.shared.python.biomechanics.grip_wrench import GripAnalysis
 from src.shared.python.motion_matching.multi_engine_torque_allocator import EngineType
 from src.shared.python.motion_matching.polynomial_actuation import ROOT_COORDINATES
@@ -59,6 +64,8 @@ class PinocchioForceAdapter:
         self._contact_ids = tuple(
             self._model.getFrameId(name) for name in self._contact_names
         )
+        self._spec = json.loads(spec_bytes)
+        self._bare_club: RigidInertia | None = None
 
     @property
     def engine_type(self) -> EngineType:
@@ -166,6 +173,64 @@ class PinocchioForceAdapter:
             load_on="human",
             rotation_world_from_frame=rotation,
         )
+
+    def _bare_club_in_joint_frame(self) -> tuple[int, RigidInertia]:
+        """``(joint index, bare-club inertia in that joint frame)``, cached."""
+        body_b = self._spec["closure"]["body_b"]
+        joint, pose = self._plant.body_placement(body_b)
+        if self._bare_club is None:
+            bare = club_solids_partition(self._spec).bare_club
+            self._bare_club = bare.expressed_in(pose.homogeneous)
+        return joint, self._bare_club
+
+    def club_newton_euler(self, q: Array, v: Array, a: Array) -> dict:
+        """Bare-club Newton-Euler keywords at ``(q, v, a)`` (NSX-01, #12550).
+
+        Same keywords as ``holding_hand_wrench`` takes, built from head, shaft
+        and grip only; the hand solids welded into the club body are excluded.
+        ``a`` is the constrained generalised acceleration in native order.
+        """
+        configuration = self._checked(q, "configuration")
+        velocity = self._checked(v, "velocity")
+        acceleration = self._checked(a, "acceleration")
+        pin = self._pin
+        pin.forwardKinematics(
+            self._model, self._data, configuration, velocity, acceleration
+        )
+        joint, inertia = self._bare_club_in_joint_frame()
+        world_aligned = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+        placement = self._data.oMi[joint]
+        motion = pin.getVelocity(self._model, self._data, joint, world_aligned)
+        spatial_acc = pin.getAcceleration(self._model, self._data, joint, world_aligned)
+        classical = pin.getClassicalAcceleration(
+            self._model, self._data, joint, world_aligned
+        )
+        return newton_euler_keywords(
+            inertia,
+            rot_world_from_body=placement.rotation,
+            origin_world=placement.translation,
+            omega=motion.angular,
+            alpha=spatial_acc.angular,
+            accel_origin=classical.linear,
+            gravity=self._model.gravity.linear,
+        )
+
+    def bare_club_net_wrench(self, q: Array, v: Array, a: Array) -> tuple[Array, Array]:
+        """Net hand-on-club ``(force, torque about CoM)`` of the bare club.
+
+        ``F = m (a_c - g)`` and ``T = I alpha + omega x (I omega)`` in world
+        axes: the invariant (R4) the hands must supply together.
+        """
+        ne = self.club_newton_euler(q, v, a)
+        inertia = np.asarray(ne["inertia_world_kg_m2"])
+        omega = np.asarray(ne["angular_velocity_rad_s"])
+        force = ne["mass_kg"] * (
+            np.asarray(ne["com_acceleration_m_s2"]) - np.asarray(ne["gravity_m_s2"])
+        )
+        torque = inertia @ np.asarray(ne["angular_acceleration_rad_s2"]) + np.cross(
+            omega, inertia @ omega
+        )
+        return force, torque
 
     def grip_analyses_from_allocation(
         self, q_traj: Array, lambda_grip: Array

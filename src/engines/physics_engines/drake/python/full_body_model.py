@@ -21,6 +21,13 @@ from scipy.spatial.transform import Rotation
 from src.engines.physics_engines.drake.python.full_body_urdf import (
     export_full_body_urdf,
 )
+from src.shared.python.biomechanics.club_inertia_partition import (
+    INTERFACE_BARE_CLUB,
+    RigidInertia,
+    club_solids_partition,
+    newton_euler_keywords,
+    validate_interface,
+)
 from src.shared.python.biomechanics.grip_extraction import (
     closing_side_from_closure,
     closure_and_club_analysis,
@@ -90,42 +97,44 @@ def club_newton_euler(
     gravity: Array,
     *,
     welded: Sequence[Any] | None = None,
+    inertia: RigidInertia | None = None,
 ) -> dict[str, Any]:
     """Club kinematics as the ``holding_hand_wrench`` Newton-Euler keywords.
 
-    The club mass may live on solid links welded to ``body``, so by default the
-    composite inertia of everything welded to it is used; ``welded`` overrides
-    the body-index list (for a club that is itself the only club mass).
-    ``acceleration`` is the
-    generalised acceleration ``vdot`` at the state held by ``context``.
+    By default the composite inertia of everything welded to ``body`` is used
+    (``welded`` overrides the body-index list).  The full-body spec welds both
+    hands into the club body, so grip callers pass ``inertia``: the bare-club
+    :class:`RigidInertia` in the body frame (NSX-01, #12550), which replaces
+    the plant's composite entirely.  ``acceleration`` is the generalised
+    acceleration ``vdot`` at the state held by ``context``.
     """
-    rot_wb = plant.EvalBodyPoseInWorld(context, body).rotation().matrix()
-    origin = plant.EvalBodyPoseInWorld(context, body).translation()
-    if welded is None:
-        welded = [b.index() for b in plant.GetBodiesWeldedTo(body)]
-    spatial_inertia = plant.CalcSpatialInertia(context, body.body_frame(), welded)
-    com_b = np.asarray(spatial_inertia.get_com())
-    inertia_com_b = spatial_inertia.CalcRotationalInertia().ShiftToCenterOfMass(
-        float(spatial_inertia.get_mass()), com_b
-    )
-    r = rot_wb @ com_b
+    pose = plant.EvalBodyPoseInWorld(context, body)
+    rot_wb = pose.rotation().matrix()
+    if inertia is None:
+        if welded is None:
+            welded = [b.index() for b in plant.GetBodiesWeldedTo(body)]
+        spatial = plant.CalcSpatialInertia(context, body.body_frame(), welded)
+        com_b = np.asarray(spatial.get_com())
+        inertia_com_b = spatial.CalcRotationalInertia().ShiftToCenterOfMass(
+            float(spatial.get_mass()), com_b
+        )
+        inertia = RigidInertia(
+            float(spatial.get_mass()),
+            (com_b[0], com_b[1], com_b[2]),
+            inertia_com_b.CopyToFullMatrix3(),
+        )
     velocity = plant.EvalBodySpatialVelocityInWorld(context, body)
-    omega = np.asarray(velocity.rotational())
     accels = plant.CalcSpatialAccelerationsFromVdot(context, acceleration)
     spatial_acc = accels[int(body.index())]
-    alpha = np.asarray(spatial_acc.rotational())
-    a_origin = np.asarray(spatial_acc.translational())
-    a_com = a_origin + np.cross(alpha, r) + np.cross(omega, np.cross(omega, r))
-    inertia_w = rot_wb @ inertia_com_b.CopyToFullMatrix3() @ rot_wb.T
-    return {
-        "mass_kg": float(spatial_inertia.get_mass()),
-        "gravity_m_s2": gravity,
-        "com_m": origin + r,
-        "com_acceleration_m_s2": a_com,
-        "inertia_world_kg_m2": inertia_w,
-        "angular_velocity_rad_s": omega,
-        "angular_acceleration_rad_s2": alpha,
-    }
+    return newton_euler_keywords(
+        inertia,
+        rot_world_from_body=rot_wb,
+        origin_world=pose.translation(),
+        omega=np.asarray(velocity.rotational()),
+        alpha=np.asarray(spatial_acc.rotational()),
+        accel_origin=np.asarray(spatial_acc.translational()),
+        gravity=gravity,
+    )
 
 
 class FullBodyDrakeModel:
@@ -550,14 +559,26 @@ class FullBodyDrakeModel:
         )
         return self._as_named(acceleration), multiplier
 
-    def _club_newton_euler(self, acceleration: Array) -> dict[str, Any]:
-        """Club kinematics for the Newton-Euler keywords at the solved state."""
+    def _club_newton_euler(
+        self, acceleration: Array, interface: str = INTERFACE_BARE_CLUB
+    ) -> dict[str, Any]:
+        """Club kinematics for the Newton-Euler keywords at the solved state.
+
+        ``interface="hand_on_bare_club"`` (default) uses head, shaft and grip
+        only; ``"wrist_on_hands_plus_club"`` is the legacy composite of every
+        body welded to the club, hands included (NSX-01, #12550).
+        """
+        validate_interface(interface)
+        bare = None
+        if interface == INTERFACE_BARE_CLUB:
+            bare = club_solids_partition(self.specification).bare_club
         return club_newton_euler(
             self.plant,
             self.context,
             self._closure[1].body(),
             acceleration,
             self.gravity,
+            inertia=bare,
         )
 
     def grip_analysis(
@@ -565,8 +586,14 @@ class FullBodyDrakeModel:
         coordinates: Mapping[str, float],
         rates: Mapping[str, float],
         primitive_efforts: Mapping[str, float],
+        interface: str = INTERFACE_BARE_CLUB,
     ) -> GripAnalysis:
         """Per-hand grip wrenches ON THE CLUB from the KKT multiplier (GCV-8).
+
+        ``interface`` selects the club inertia (NSX-01, #12550):
+        ``"hand_on_bare_club"`` (default) excludes the welded hand solids;
+        ``"wrist_on_hands_plus_club"`` is the legacy composite value.  The
+        result records it in ``metadata["interface"]``.
 
         The closing hand exerts ``+lambda`` (rotated from frame ``a`` to world)
         at the origin of the club-side closure frame ``b``.  The holding hand
@@ -599,9 +626,9 @@ class FullBodyDrakeModel:
             closing_force_n=rot_wa @ multiplier[3:],
             closing_torque_nm=rot_wa @ multiplier[:3],
             holding_point_m=holding_point,
-            club=self._club_newton_euler(acceleration),
+            club=self._club_newton_euler(acceleration, interface),
             split_method="constraint_multiplier",
-            metadata={"engine": "drake"},
+            metadata={"engine": "drake", "interface": interface},
         )
 
     def grip_overlay_wrenches(

@@ -87,15 +87,52 @@ the API, each with an `unavailable_reason`. They are never reported as zero.
 | `to_overlay_wrenches` (labels `grip:hand_*`, `grip:net_midpoint`, `grip:couple_midpoint`, `grip:mof_*`) | `src/shared/python/biomechanics/grip_wrench.py` |
 | `holding_hand_wrench`, `net_only_analysis`, `unavailable_analysis` | `src/shared/python/biomechanics/grip_extraction.py` |
 
-Both modules are pure numpy with no engine imports. The per-engine adapters
+| `club_solids_partition`, `RigidInertia`, `newton_euler_keywords` | `src/shared/python/biomechanics/club_inertia_partition.py` |
+
+All three modules are pure numpy with no engine imports. The per-engine adapters
 supply hand points, multiplier-derived wrenches and club kinematics. They are
 outside this chapter.
+
+## Bare-Club Interface
+
+The full-body specification welds the hand solids (`LHand`, `LHandStandoff`,
+`RHand`; 1.108 kg) into the club body (`Clubface Vector`) of the tree. The club
+Newton-Euler terms above must use only the bare club, otherwise the "hand on
+club" wrench carries the inertial load of both hands (the legacy composite
+interface, 1.421 kg against 0.313 kg for the driver).
+
+`club_solids_partition(spec)` returns `(bare_club, welded_hands)` in the
+specification body frame of the closure body. A solid is a hand solid when the
+last segment of its provenance name is `LHand`, `LHandStandoff`, `RHand` or
+`RHandStandoff`. The bare club composes the remaining solids about their
+combined centre of mass with the parallel-axis theorem,
+
+$$m = \sum_i m_i, \quad c = \frac{1}{m}\sum_i m_i c_i, \quad
+I_c = \sum_i \left(R_i I_i R_i^{T} + m_i\left(\|d_i\|^2 \mathbf{1} -
+d_i d_i^{T}\right)\right), \quad d_i = c_i - c.$$
+
+When the spec carries `club.total_mass_kg`, the bare mass must equal it within
+1e-9 kg, otherwise a `ValueError` is raised. The full-body v1 and v2 specs have
+no `club` record, so only that mass check is skipped for them.
+
+Each engine moves the inertia into its own body frame (MuJoCo and Pinocchio use
+the wrist-joint follower frame, Drake uses the specification frame) and evaluates the
+centre of mass acceleration as $a_o + \alpha \times r + \omega \times (\omega
+\times r)$ with $r = R c$. Records carry `interface = "hand_on_bare_club"`. The
+legacy composite value stays available as `"wrist_on_hands_plus_club"`.
+
+The hands stay welded in the dynamics tree; only the interface at which the
+wrench is reported changes. The closing-hand wrench remains the weld
+multiplier, so the left and right split is still solver-defined. Which
+interface an instrumented grip measures is not claimed here.
 
 ## Tests and Reproduction
 
 ```bash
 python3 -m pytest tests/unit/biomechanics/test_grip_wrench.py \
-  tests/unit/biomechanics/test_grip_extraction.py -q
+  tests/unit/biomechanics/test_grip_extraction.py \
+  tests/unit/biomechanics/test_club_solids_partition.py \
+  tests/unit/motion_matching/test_grip_wrench_bare_club.py -q
 ```
 
 These tests check the algebra against hand-computed wrenches and the stated
