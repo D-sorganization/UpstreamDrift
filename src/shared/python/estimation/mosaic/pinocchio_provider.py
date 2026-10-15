@@ -2,6 +2,11 @@
 
 Exposes inverse dynamics in linear-regressor form Y(q, v, a) pi = tau using
 Pinocchio's computeJointTorqueRegressor, vectorized/batched over N nodes.
+
+Regressor columns follow Pinocchio's per-body layout
+``[m, h_x, h_y, h_z, Ixx, Ixy, Iyy, Ixz, Iyz, Izz]``, which differs from the
+``inertial.py`` layout in entries 6 and 7; convert before MOSAIC spatial
+algebra (issue #12675).
 """
 
 from __future__ import annotations
