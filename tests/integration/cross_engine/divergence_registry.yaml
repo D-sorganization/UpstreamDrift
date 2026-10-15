@@ -61,3 +61,150 @@ divergences:
       ratio exceeds 1e-3), it does not certify agreement.  Stock stepping is
       not a 1e-10 reference.  The hard-KKT side is held to the tolerances of
       the Pinocchio cross-engine snapshot test.
+
+  # NSX-56 (#12584): Track N numerical equality of the canonical closed-loop
+  # snapshot, scaled error max|x - ref| / max(1, max|ref|), Pinocchio reference.
+  # Measured on ground_support frames 0 and 400: M, h <= 1e-15, J_c <= 3e-15,
+  # Jdot_v 1.8e-12 (Drake, OpenSim) and 1.2e-10 (MuJoCo finite difference).
+  - id: nsx56-pinocchio-mujoco-m
+    check: closed_loop_snapshot_conformance
+    metric: M
+    engines: [pinocchio, mujoco]
+    tolerance: 1e-11
+    rationale: >
+      Same specification, same state, MuJoCo via composite-rigid-body
+      mj_fullM and mj_rne against Pinocchio CRBA/RNEA; the grip closure is
+      the canonical weld6 after the NSX-02 conversion (WORLD frame at the
+      site, relative sign -1 in MuJoCo; LOCAL at the weld frame in
+      Pinocchio).
+
+  - id: nsx56-pinocchio-mujoco-h
+    check: closed_loop_snapshot_conformance
+    metric: h
+    engines: [pinocchio, mujoco]
+    tolerance: 1e-11
+    rationale: >
+      Same specification, same state, MuJoCo via composite-rigid-body
+      mj_fullM and mj_rne against Pinocchio CRBA/RNEA; the grip closure is
+      the canonical weld6 after the NSX-02 conversion (WORLD frame at the
+      site, relative sign -1 in MuJoCo; LOCAL at the weld frame in
+      Pinocchio).
+
+  - id: nsx56-pinocchio-mujoco-j_c
+    check: closed_loop_snapshot_conformance
+    metric: J_c
+    engines: [pinocchio, mujoco]
+    tolerance: 1e-12
+    rationale: >
+      Same specification, same state, MuJoCo via composite-rigid-body
+      mj_fullM and mj_rne against Pinocchio CRBA/RNEA; the grip closure is
+      the canonical weld6 after the NSX-02 conversion (WORLD frame at the
+      site, relative sign -1 in MuJoCo; LOCAL at the weld frame in
+      Pinocchio).
+
+  - id: nsx56-pinocchio-mujoco-jdot_v
+    check: closed_loop_snapshot_conformance
+    metric: Jdot_v
+    engines: [pinocchio, mujoco]
+    tolerance: 1e-08
+    rationale: >
+      Same specification, same state, MuJoCo via composite-rigid-body
+      mj_fullM and mj_rne against Pinocchio CRBA/RNEA; the grip closure is
+      the canonical weld6 after the NSX-02 conversion (WORLD frame at the
+      site, relative sign -1 in MuJoCo; LOCAL at the weld frame in
+      Pinocchio). Jdot v is a second-order central finite difference (step
+      1e-6) of the weld Jacobian because MuJoCo has no analytic
+      derivative; the registered 1e-8 is the limit the NSX-51 unit tests
+      already carried, not a fit.
+
+  - id: nsx56-pinocchio-drake-m
+    check: closed_loop_snapshot_conformance
+    metric: M
+    engines: [pinocchio, drake]
+    tolerance: 1e-11
+    rationale: >
+      Same specification, same state, Drake MultibodyPlant
+      CalcMassMatrix/CalcInverseDynamics against Pinocchio CRBA/RNEA;
+      Drake exposes a different native coordinate order, permuted by name
+      before comparison; closure rows canonical after the NSX-02
+      conversion.
+
+  - id: nsx56-pinocchio-drake-h
+    check: closed_loop_snapshot_conformance
+    metric: h
+    engines: [pinocchio, drake]
+    tolerance: 1e-11
+    rationale: >
+      Same specification, same state, Drake MultibodyPlant
+      CalcMassMatrix/CalcInverseDynamics against Pinocchio CRBA/RNEA;
+      Drake exposes a different native coordinate order, permuted by name
+      before comparison; closure rows canonical after the NSX-02
+      conversion.
+
+  - id: nsx56-pinocchio-drake-j_c
+    check: closed_loop_snapshot_conformance
+    metric: J_c
+    engines: [pinocchio, drake]
+    tolerance: 1e-12
+    rationale: >
+      Same specification, same state, Drake MultibodyPlant
+      CalcMassMatrix/CalcInverseDynamics against Pinocchio CRBA/RNEA;
+      Drake exposes a different native coordinate order, permuted by name
+      before comparison; closure rows canonical after the NSX-02
+      conversion.
+
+  - id: nsx56-pinocchio-drake-jdot_v
+    check: closed_loop_snapshot_conformance
+    metric: Jdot_v
+    engines: [pinocchio, drake]
+    tolerance: 1e-10
+    rationale: >
+      Same specification, same state, Drake MultibodyPlant
+      CalcMassMatrix/CalcInverseDynamics against Pinocchio CRBA/RNEA;
+      Drake exposes a different native coordinate order, permuted by name
+      before comparison; closure rows canonical after the NSX-02
+      conversion.
+
+  - id: nsx56-pinocchio-opensim-m
+    check: closed_loop_snapshot_conformance
+    metric: M
+    engines: [pinocchio, opensim]
+    tolerance: 1e-11
+    rationale: >
+      Same specification, same state, Simbody (OpenSim) mass matrix and
+      inverse dynamics against Pinocchio CRBA/RNEA; native coordinate
+      order differs and is permuted by name; closure rows canonical after
+      the NSX-02 conversion.
+
+  - id: nsx56-pinocchio-opensim-h
+    check: closed_loop_snapshot_conformance
+    metric: h
+    engines: [pinocchio, opensim]
+    tolerance: 1e-11
+    rationale: >
+      Same specification, same state, Simbody (OpenSim) mass matrix and
+      inverse dynamics against Pinocchio CRBA/RNEA; native coordinate
+      order differs and is permuted by name; closure rows canonical after
+      the NSX-02 conversion.
+
+  - id: nsx56-pinocchio-opensim-j_c
+    check: closed_loop_snapshot_conformance
+    metric: J_c
+    engines: [pinocchio, opensim]
+    tolerance: 1e-12
+    rationale: >
+      Same specification, same state, Simbody (OpenSim) mass matrix and
+      inverse dynamics against Pinocchio CRBA/RNEA; native coordinate
+      order differs and is permuted by name; closure rows canonical after
+      the NSX-02 conversion.
+
+  - id: nsx56-pinocchio-opensim-jdot_v
+    check: closed_loop_snapshot_conformance
+    metric: Jdot_v
+    engines: [pinocchio, opensim]
+    tolerance: 1e-10
+    rationale: >
+      Same specification, same state, Simbody (OpenSim) mass matrix and
+      inverse dynamics against Pinocchio CRBA/RNEA; native coordinate
+      order differs and is permuted by name; closure rows canonical after
+      the NSX-02 conversion.
