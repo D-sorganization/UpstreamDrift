@@ -61,6 +61,7 @@ from src.shared.python.loop_nullspace.evidence import (
     ModelProvenance,
     QuantityRecord,
 )
+from src.shared.python.loop_nullspace.decomposition import Decomposition
 from src.shared.python.loop_nullspace.feasible_set import FeasibleSet
 from src.shared.python.loop_nullspace.registry import load_registry
 from src.shared.python.loop_nullspace.solvers import (
@@ -201,17 +202,24 @@ def _validated_reference(
     return ref
 
 
+def _decomposition(fs: FeasibleSet) -> Decomposition:
+    """Return the frame's decomposition, rejecting a feasible set without one."""
+    if fs.decomposition is None:
+        raise ValueError("feasible set carries no decomposition")
+    return fs.decomposition
+
+
 def _layout(frames: tuple[FeasibleSet, ...], objective: ObjectiveSpec) -> _Layout:
     n_a = objective.torque_scale.size
     sizes = [fs.n_z for fs in frames]
     offsets = np.concatenate([[0], np.cumsum(sizes)]).astype(int)
     blocks = []
     for k, fs in enumerate(frames):
-        dec = fs.decomposition
+        dec = _decomposition(fs)
         left = sp.csr_matrix((n_a, int(offsets[k])))
         right = sp.csr_matrix((n_a, int(offsets[-1] - offsets[k + 1])))
         blocks.append(sp.hstack([left, sp.csr_matrix(dec.N[:n_a]), right]))
-    t0 = np.concatenate([fs.decomposition.x_p[:n_a] for fs in frames])
+    t0 = np.concatenate([_decomposition(fs).x_p[:n_a] for fs in frames])
     return _Layout(
         frames,
         n_a,
@@ -241,7 +249,7 @@ def _rate_operator(lay: _Layout, scale: Array, weight: float) -> sp.csr_matrix |
             sel[i, k * n_a + i] = -1.0
             sel[i, (k + 1) * n_a + i] = 1.0
         rows.append(sp.diags(np.sqrt(weight / dt) / scale) @ sel.tocsr())
-    return sp.vstack(rows).tocsr()
+    return sp.csr_matrix(sp.vstack(rows))
 
 
 def _operators(
@@ -291,7 +299,7 @@ def _curvature_rank(gram: np.ndarray) -> tuple[int, float, np.ndarray]:
 def _required_rank(lay: _Layout) -> int:
     total = 0
     for fs in lay.frames:
-        n = fs.decomposition.N[: lay.n_a]
+        n = _decomposition(fs).N[: lay.n_a]
         if n.size == 0:
             continue
         sv = np.linalg.svd(n, compute_uv=False)
@@ -468,12 +476,14 @@ def _assemble(
     c_z = np.zeros(z_n)
     for name, op in ops.items():
         m = op @ lay.ntil
-        target = np.zeros(op.shape[0])
+        target: Array = np.zeros(op.shape[0])
         if name == "reference" and ref is not None:
             target = op @ ref.reshape(-1)
         p_zz = p_zz + 2.0 * (m.T @ m)
         c_z += 2.0 * (m.T @ (op @ lay.t0 - target))
-    p_full = sp.block_diag([p_zz, sp.csr_matrix((n_s, n_s))], format="csr")
+    p_full = sp.csr_matrix(
+        sp.block_diag([p_zz, sp.csr_matrix((n_s, n_s))], format="csr")
+    )
     c_vec = np.concatenate([c_z, np.zeros(n_s)])
     mats, rhs, labels, blocks, cone_labels = _frame_constraints(lay, n_var)
     if gp is not None:
@@ -567,7 +577,7 @@ def _hypotheses(lay: _Layout, objective: ObjectiveSpec) -> tuple[str, ...]:
 def _record(
     lay: _Layout, objective: ObjectiveSpec, tau: Array, hypotheses: tuple[str, ...]
 ) -> QuantityRecord:
-    recs = lay.frames[0].decomposition.records
+    recs = _decomposition(lay.frames[0]).records
     first = next(iter(recs.values()), None)
     model = (
         first.model_provenance
@@ -659,7 +669,9 @@ def allocate_trajectory(
         z_all[int(lay.offsets[k]) : int(lay.offsets[k + 1])].copy()
         for k in range(lay.t_count)
     )
-    x_list = tuple(fs.decomposition.x(z) for fs, z in zip(frames, z_list, strict=True))
+    x_list = tuple(
+        _decomposition(fs).x(z) for fs, z in zip(frames, z_list, strict=True)
+    )
     tau = np.array([x[: lay.n_a] for x in x_list])
     terms = _objective_terms(tau, objective, lay, ref)
     offset = _net_work_offset(tau, objective.gross_power, power, lay)
