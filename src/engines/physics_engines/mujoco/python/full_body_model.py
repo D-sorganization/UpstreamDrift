@@ -104,7 +104,7 @@ class NativeMujocoFullBodyModel:
         self._closure = [self.model.site(f"native_closure_{s}").id for s in ("a", "b")]
         self.closing_hand_side: str = closing_side_from_closure(spec["closure"])
         self._spec_for_partition = spec
-        self._bare_club: RigidInertia | None = None
+        self._solid_groups: dict[str, RigidInertia] | None = None
 
         # Contact setup
         contact_cfg = spec["contact"]
@@ -315,23 +315,35 @@ class NativeMujocoFullBodyModel:
         )
         return self._as_named(acceleration), multiplier.copy()
 
-    def _bare_club_in_body_frame(self) -> RigidInertia:
-        """Bare-club inertia (NSX-01) in the MuJoCo club body frame, cached."""
-        if self._bare_club is None:
+    def _solid_group(self, part: str) -> RigidInertia:
+        """Inertia of ``"club"`` (bare), ``"L"`` or ``"R"`` hand solids, cached.
+
+        Expressed in the MuJoCo club body frame (NSX-01, #12550).
+        """
+        if self._solid_groups is None:
             spec = self._spec_for_partition
-            bare = club_solids_partition(spec).bare_club
-            body_b = spec["closure"]["body_b"]
-            self._bare_club = bare.expressed_in(self.body_frames[body_b])
-        return self._bare_club
+            partition = club_solids_partition(spec)
+            to_body = self.body_frames[spec["closure"]["body_b"]]
+            groups = {"club": partition.bare_club, **partition.hands_by_side()}
+            self._solid_groups = {
+                name: inertia.expressed_in(to_body) for name, inertia in groups.items()
+            }
+        if part not in self._solid_groups:
+            raise ValueError(f"no welded solids for part {part!r}")
+        return self._solid_groups[part]
 
     def _club_newton_euler(
-        self, acceleration: np.ndarray, interface: str = INTERFACE_BARE_CLUB
+        self,
+        acceleration: np.ndarray,
+        interface: str = INTERFACE_BARE_CLUB,
+        part: str = "club",
     ) -> dict[str, Any]:
         """Club kinematics for the Newton-Euler keywords at the last solve state.
 
         ``interface="hand_on_bare_club"`` (default) uses head, shaft and grip
         only; ``"wrist_on_hands_plus_club"`` is the legacy composite body that
-        also carries both welded hands (NSX-01, #12550).
+        also carries both welded hands (NSX-01, #12550).  ``part`` ``"L"`` or
+        ``"R"`` (bare interface only) selects that hand's welded solids.
         """
         validate_interface(interface)
         mj, model, data = self._mj, self.model, self.data
@@ -356,7 +368,7 @@ class NativeMujocoFullBodyModel:
         mj.mj_jac(model, data, jacp, jacr, origin, body)
         mj.mj_jacDot(model, data, dotp, dotr, origin, body)
         return newton_euler_keywords(
-            self._bare_club_in_body_frame(),
+            self._solid_group(part),
             rot_world_from_body=np.array(data.xmat[body]).reshape(3, 3),
             origin_world=origin,
             omega=jacr @ data.qvel,
@@ -401,6 +413,11 @@ class NativeMujocoFullBodyModel:
             closing_torque_nm=-multiplier[3:],
             holding_point_m=self.data.xpos[body],
             club=self._club_newton_euler(acceleration, interface),
+            closing_hand_club=(
+                self._club_newton_euler(acceleration, interface, self.closing_hand_side)
+                if interface == INTERFACE_BARE_CLUB
+                else None
+            ),
             split_method="constraint_multiplier",
             metadata={
                 "engine": "mujoco",

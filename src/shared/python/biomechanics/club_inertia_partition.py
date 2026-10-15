@@ -34,6 +34,7 @@ __all__ = [
     "INTERFACE_LEGACY_COMPOSITE",
     "ClubSolidsPartition",
     "RigidInertia",
+    "combine_inertias",
     "club_solids_partition",
     "newton_euler_keywords",
     "validate_interface",
@@ -96,6 +97,26 @@ class ClubSolidsPartition(NamedTuple):
     bare_club: RigidInertia
     welded_hands: Mapping[str, RigidInertia]
 
+    def hands_by_side(self) -> dict[str, RigidInertia]:
+        """Welded hand solids combined per side, keys ``"L"`` and ``"R"``.
+
+        Raises:
+            ValueError: if a welded solid name does not start with ``L`` or ``R``.
+        """
+        groups: dict[str, list[RigidInertia]] = {}
+        for name, inertia in self.welded_hands.items():
+            if name[:1] not in ("L", "R"):
+                raise ValueError(f"cannot assign welded solid {name!r} to a hand side")
+            groups.setdefault(name[0], []).append(inertia)
+        return {side: combine_inertias(items) for side, items in groups.items()}
+
+
+def combine_inertias(items: Sequence[RigidInertia]) -> RigidInertia:
+    """Combine rigid inertias in one frame about their joint centre of mass."""
+    return _combine(
+        [(i.mass_kg, np.asarray(i.com_m), i.inertia_com_kg_m2) for i in items]
+    )
+
 
 def _placed(solid: Mapping[str, Any]) -> tuple[float, np.ndarray, np.ndarray]:
     t = np.asarray(solid["placement"], dtype=float)
@@ -107,7 +128,10 @@ def _placed(solid: Mapping[str, Any]) -> tuple[float, np.ndarray, np.ndarray]:
 
 def _compose(solids: Sequence[Mapping[str, Any]]) -> RigidInertia:
     """Combine solids with the parallel-axis theorem about the combined CoM."""
-    placed = [_placed(s) for s in solids]
+    return _combine([_placed(s) for s in solids])
+
+
+def _combine(placed: Sequence[tuple[float, np.ndarray, np.ndarray]]) -> RigidInertia:
     mass = sum(m for m, _, _ in placed)
     if mass <= 0.0:
         return RigidInertia(0.0, (0.0, 0.0, 0.0), np.zeros((3, 3)))

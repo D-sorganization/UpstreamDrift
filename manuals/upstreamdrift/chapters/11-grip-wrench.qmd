@@ -121,9 +121,23 @@ centre of mass acceleration as $a_o + \alpha \times r + \omega \times (\omega
 \times r)$ with $r = R c$. Records carry `interface = "hand_on_bare_club"`. The
 legacy composite value stays available as `"wrist_on_hands_plus_club"`.
 
+The weld multiplier $-\lambda$ loads the composite body, which contains the
+closing hand's own solids (for example `RHand`). Its free body gives the
+closing hand-on-bare-club wrench, with torques transported to the closing
+point $r$,
+
+$$F_c = F_w - m_h (a_h - g), \qquad
+T_c = T_w - \left(I_h \alpha + \omega \times I_h \omega + (c_h - r) \times
+m_h (a_h - g)\right),$$
+
+where $m_h$, $c_h$, $I_h$ belong to the closing side's welded solids
+(`bare_club_closing_wrench`). The holding hand then follows from the bare-club
+Newton-Euler of the previous section, with $F_c$ and $T_c$ as the closing
+wrench. Each hand is therefore a hand-on-bare-club quantity, and the sum is the
+bare-club net wrench.
+
 The hands stay welded in the dynamics tree; only the interface at which the
-wrench is reported changes. The closing-hand wrench remains the weld
-multiplier, so the left and right split is still solver-defined. Which
+wrench is reported changes. The left and right split is still solver-defined. Which
 interface an instrumented grip measures is not claimed here.
 
 ## Tests and Reproduction
@@ -132,6 +146,7 @@ interface an instrumented grip measures is not claimed here.
 python3 -m pytest tests/unit/biomechanics/test_grip_wrench.py \
   tests/unit/biomechanics/test_grip_extraction.py \
   tests/unit/biomechanics/test_club_solids_partition.py \
+  tests/unit/biomechanics/test_bare_club_closing_wrench.py \
   tests/unit/motion_matching/test_grip_wrench_bare_club.py -q
 ```
 

@@ -87,10 +87,14 @@ def _accel(plant, q, v, tau):
     return plant._adapter.accelerations(*_named(plant, q, v, tau))
 
 
-def _ne(engine: str, plants, q, v, tau, interface: str | None = None) -> dict:
+def _ne(
+    engine: str, plants, q, v, tau, interface: str | None = None, part: str = "club"
+) -> dict:
     adapter = plants[engine]._adapter
     acceleration, _ = adapter._constrained_solve(*_named(plants[engine], q, v, tau))
     kwargs = {} if interface is None else {"interface": interface}
+    if part != "club":
+        kwargs["part"] = part
     return adapter._club_newton_euler(acceleration, **kwargs)
 
 
@@ -193,3 +197,94 @@ def test_pinocchio_bare_club_newton_euler_matches_mujoco_and_drake(
     np.testing.assert_allclose(
         force, mj.net_force_n, rtol=0, atol=ATOL + RTOL * np.abs(force).max()
     )
+
+
+def _ne_wrench(ne: dict, point) -> tuple[np.ndarray, np.ndarray]:
+    """Newton-Euler force and torque about ``point`` of one solid group."""
+    inertia = np.asarray(ne["inertia_world_kg_m2"])
+    omega = np.asarray(ne["angular_velocity_rad_s"])
+    force = ne["mass_kg"] * (
+        np.asarray(ne["com_acceleration_m_s2"]) - np.asarray(ne["gravity_m_s2"])
+    )
+    torque = inertia @ np.asarray(ne["angular_acceleration_rad_s2"]) + np.cross(
+        omega, inertia @ omega
+    )
+    return force, torque + np.cross(np.asarray(ne["com_m"]) - point, force)
+
+
+def _both(plants, engine, q, v, tau):
+    plant = plants[engine]
+    args = _named(plant, q, v, tau)
+    bare = plant._adapter.grip_analysis(*args)
+    legacy = plant._adapter.grip_analysis(*args, interface=INTERFACE_LEGACY_COMPOSITE)
+    return bare, legacy
+
+
+@pytest.mark.parametrize("engine", ["mujoco", "drake"])
+@pytest.mark.parametrize("frame", FRAMES)
+def test_closing_hand_identity_wrist_load_is_hand_on_club_plus_hand_inertia(
+    plants, record, engine, frame
+) -> None:
+    """``H_closing + NE(R solids) == -lambda`` at the closing point."""
+    q, v, tau = _state(plants, record, frame)
+    bare, legacy = _both(plants, engine, q, v, tau)
+    point = np.asarray(legacy.right.point_m)
+    np.testing.assert_allclose(bare.right.point_m, point, atol=1e-12)
+    ne = _ne(engine, plants, q, v, tau, part="R")
+    force, torque = _ne_wrench(ne, point)
+    got_f = np.asarray(bare.right.force_on_club_n) + force
+    got_t = np.asarray(bare.right.torque_on_club_nm) + torque
+    want_f = np.asarray(legacy.right.force_on_club_n)  # -lambda, composite load
+    want_t = np.asarray(legacy.right.torque_on_club_nm)
+    np.testing.assert_allclose(
+        got_f, want_f, rtol=0, atol=ATOL + RTOL * abs(want_f).max()
+    )
+    np.testing.assert_allclose(
+        got_t, want_t, rtol=0, atol=ATOL + RTOL * abs(want_t).max()
+    )
+
+
+@pytest.mark.parametrize("engine", ["mujoco", "drake"])
+@pytest.mark.parametrize("frame", FRAMES)
+def test_holding_side_identity_closed_from_the_other_side(
+    plants, record, engine, frame
+) -> None:
+    """``H_holding + NE(L solids) == NE(composite) + lambda`` (holding wrist load)."""
+    q, v, tau = _state(plants, record, frame)
+    bare, legacy = _both(plants, engine, q, v, tau)
+    point = np.asarray(legacy.left.point_m)
+    force, torque = _ne_wrench(_ne(engine, plants, q, v, tau, part="L"), point)
+    got_f = np.asarray(bare.left.force_on_club_n) + force
+    got_t = np.asarray(bare.left.torque_on_club_nm) + torque
+    # legacy holding = NE(composite) - closing load, an independent code path
+    comp_f, comp_t = _ne_wrench(
+        _ne(engine, plants, q, v, tau, INTERFACE_LEGACY_COMPOSITE), point
+    )
+    close_f = np.asarray(legacy.right.force_on_club_n)
+    close_t = np.asarray(legacy.right.torque_on_club_nm) + np.cross(
+        np.asarray(legacy.right.point_m) - point, close_f
+    )
+    np.testing.assert_allclose(
+        got_f, comp_f - close_f, rtol=0, atol=ATOL + RTOL * abs(got_f).max()
+    )
+    np.testing.assert_allclose(
+        got_t, comp_t - close_t, rtol=0, atol=ATOL + RTOL * abs(got_t).max()
+    )
+
+
+@pytest.mark.parametrize("frame", FRAMES)
+def test_mujoco_and_drake_agree_per_hand(plants, record, frame) -> None:
+    q, v, tau = _state(plants, record, frame)
+    mj = _both(plants, "mujoco", q, v, tau)[0]
+    dr = _both(plants, "drake", q, v, tau)[0]
+    for side in ("left", "right"):
+        for field in ("force_on_club_n", "torque_on_club_nm"):
+            a = np.asarray(getattr(getattr(mj, side), field))
+            b = np.asarray(getattr(getattr(dr, side), field))
+            np.testing.assert_allclose(
+                a,
+                b,
+                rtol=0,
+                atol=ATOL + RTOL * np.abs(b).max(),
+                err_msg=f"{side}.{field}",
+            )

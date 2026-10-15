@@ -560,18 +560,26 @@ class FullBodyDrakeModel:
         return self._as_named(acceleration), multiplier
 
     def _club_newton_euler(
-        self, acceleration: Array, interface: str = INTERFACE_BARE_CLUB
+        self,
+        acceleration: Array,
+        interface: str = INTERFACE_BARE_CLUB,
+        part: str = "club",
     ) -> dict[str, Any]:
         """Club kinematics for the Newton-Euler keywords at the solved state.
 
         ``interface="hand_on_bare_club"`` (default) uses head, shaft and grip
         only; ``"wrist_on_hands_plus_club"`` is the legacy composite of every
-        body welded to the club, hands included (NSX-01, #12550).
+        body welded to the club, hands included (NSX-01, #12550).  ``part``
+        ``"L"`` or ``"R"`` (bare interface only) selects that hand's solids.
         """
         validate_interface(interface)
         bare = None
         if interface == INTERFACE_BARE_CLUB:
-            bare = club_solids_partition(self.specification).bare_club
+            partition = club_solids_partition(self.specification)
+            groups = {"club": partition.bare_club, **partition.hands_by_side()}
+            if part not in groups:
+                raise ValueError(f"no welded solids for part {part!r}")
+            bare = groups[part]
         return club_newton_euler(
             self.plant,
             self.context,
@@ -627,6 +635,11 @@ class FullBodyDrakeModel:
             closing_torque_nm=rot_wa @ multiplier[:3],
             holding_point_m=holding_point,
             club=self._club_newton_euler(acceleration, interface),
+            closing_hand_club=(
+                self._club_newton_euler(acceleration, interface, self.closing_hand_side)
+                if interface == INTERFACE_BARE_CLUB
+                else None
+            ),
             split_method="constraint_multiplier",
             metadata={"engine": "drake", "interface": interface},
         )
