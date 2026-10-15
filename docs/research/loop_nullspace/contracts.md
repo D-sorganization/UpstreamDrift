@@ -39,6 +39,7 @@ issue.
 | `grasp_map_worked_example` | `G`, `K`, `Phi`, `G#`, closing-hand map `Q`, bare-club Newton-Euler worked example, split coordinates | NSX-16, 17 |
 | `c_pm_identity` | `c_plus`/`c_minus` identity samples, unique uniform minimiser, heterogeneous minimiser | NSX-23 |
 | `closure_convention` | One relative twist through the Pinocchio, Drake, MuJoCo and OpenSim conventions, conversion matrices | NSX-02, 50 |
+| `variability_sensitivity` | Tangent linearization `(F_t, G_t)` with and without the geometric preload `Σ λ_r ∇²Φ_r`, saltation matrix and event projection, closed-form minimum-variance `z*`, additive-noise flat case, planar-golfer preload block | NSX-80 to NSX-89 |
 
 ## NSX-02 Canonical Closure Convention (#12551)
 
@@ -578,3 +579,32 @@ condition; observed GRF reduces nullity by its rank.
 envelope union contains every member. NSX-62 samples only along unidentified
 directions inside the pseudo-inertia constraint; identified combinations stay
 fixed.
+
+## NSX-80 Variability Sensitivity (#12709)
+
+Specification only; no production module. Section numbers in
+`loop_nullspace.tex` (Variability Sensitivity, `sec:variability`) are the
+citable contract for every variability child (epic section 5A, V1 to V8):
+
+| Section | Content | Golden keys |
+|---|---|---|
+| `sec:var-lin` | KKT linearization on the tangent bundle, reactions re-solved, `K_geom(λ) = Σ_r λ_r ∇²Φ_r`; `G_t N = 0` | `linearization`, `golfer_preload` |
+| `sec:var-salt` | Event projection `Π` and saltation matrix `S`, `S f⁻ = f⁺` | `saltation` |
+| `sec:var-cov` | Covariance recursion and adjoint form | `min_variance.model` |
+| `sec:var-mechanisms` | M1 signal-dependent noise, M2 geometric preload, M3 muscle impedance (MyoSuite/OpenSim only); `OBJECTIVE_FLAT_INVARIANT` when none is declared | `min_variance`, `additive_noise_flat` |
+| `sec:var-face` | Wrapped face-angle error, bias, SD, IQR, exceedance, miss probability; coefficient of variation banned for zero-centred outcomes | none |
+
+Registry additions (`src/config/loop_nullspace_registry.json`): hypotheses
+`H-NOISE-ADDITIVE`, `H-NOISE-SIGNAL-DEPENDENT`, `H-GEOMETRIC-PRELOAD`,
+`H-DECLARED-JOINT-IMPEDANCE`, `H-SENSORIMOTOR-DELAY`, `H-TIMING-JITTER`,
+`H-MUSCLE-SHORT-RANGE-STIFFNESS`; seven citations, all `UNVERIFIED` (no DOI was
+retrieved). Hypotheses resting on an `UNVERIFIED` source or claim are
+`UNVERIFIED`, appear in no preset and are rejected by
+`require_verified_for_display`. A later child may promote one only after a
+source is retrieved and the claim found.
+
+Preconditions for consumers: use the golden values as oracles, never as
+inputs. Postconditions: the `z`-dependence of `F_t` appears only through
+`λ(z)`; an additive-noise objective with no M2 has gradient exactly zero.
+Non-claims: noise amplitudes are declared hypotheses, not measurements; no claim
+that any golfer uses a minimum-variance allocation.

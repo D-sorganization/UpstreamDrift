@@ -1,0 +1,352 @@
+{
+  "additive_noise_flat": {
+    "gradient_no_preload": "0",
+    "gradient_no_preload_is_zero": true,
+    "gradient_with_preload": "z/20000 - 41/100000",
+    "gradient_with_preload_is_zero": false,
+    "k": [
+      "0",
+      "0"
+    ]
+  },
+  "description": "NSX-80 variability-sensitivity goldens: redundantly actuated planar pendulum (exact) and planar-golfer preload block.",
+  "golfer_preload": {
+    "allocations": [
+      {
+        "K_geom_projected": [
+          [
+            -0.1322227013052107,
+            -0.035864460237505474,
+            -0.1063220964136653,
+            -0.09393790310070783,
+            -0.2810566651331652
+          ],
+          [
+            -0.035864460237505585,
+            -0.0032533870219437016,
+            -0.08884514681827506,
+            -0.028591734099307136,
+            -0.10366605945651461
+          ],
+          [
+            -0.10632209641366532,
+            -0.0888451468182751,
+            0.48224099135647563,
+            -0.04640295155653818,
+            0.03608619053021443
+          ],
+          [
+            -0.09393790310070765,
+            -0.028591734099307122,
+            -0.0464029515565382,
+            -0.0652353828998312,
+            -0.18629426202760166
+          ],
+          [
+            -0.2810566651331653,
+            -0.10366605945651464,
+            0.036086190530214425,
+            -0.18629426202760183,
+            -0.4758845222252114
+          ]
+        ],
+        "K_geom_projected_frobenius": 0.8926502025678795,
+        "K_geom_tangent_eigenvalues": [
+          -0.7209703607010925,
+          0.00028272309559702,
+          0.5263326355097742
+        ],
+        "label": "z0",
+        "lambda": [
+          4.0,
+          -3.0
+        ],
+        "tau": [
+          7.996041705695777,
+          7.290064708599092,
+          3.702250989170168,
+          1.6566585851845792,
+          3.06897926825701
+        ]
+      },
+      {
+        "K_geom_projected": [
+          [
+            -0.22564993614933573,
+            -0.04075826606980686,
+            -0.13367215668282365,
+            -0.16412251284764945,
+            -0.40566407464389515
+          ],
+          [
+            -0.04075826606980681,
+            0.011055482559556639,
+            -0.14462459815947135,
+            -0.03722288393159069,
+            -0.11731603352934328
+          ],
+          [
+            -0.13367215668282353,
+            -0.14462459815947135,
+            0.6753703978033974,
+            -0.04850291804046501,
+            0.025071041062165896
+          ],
+          [
+            -0.16412251284764956,
+            -0.037222883931590726,
+            -0.048502918040464964,
+            -0.1162751412624864,
+            -0.27750730311694977
+          ],
+          [
+            -0.40566407464389526,
+            -0.11731603352934329,
+            0.02507104106216589,
+            -0.2775073031169498,
+            -0.6393494298354218
+          ]
+        ],
+        "K_geom_projected_frobenius": 1.258421020015353,
+        "K_geom_tangent_eigenvalues": [
+          -1.0241263061580697,
+          -0.0020120882959563133,
+          0.7312897675697361
+        ],
+        "label": "z1",
+        "lambda": [
+          6.5,
+          -1.5
+        ],
+        "tau": [
+          9.716474405714969,
+          8.219319247168691,
+          4.163041592198673,
+          0.23622588516538778,
+          2.4414644396651664
+        ]
+      }
+    ],
+    "closure_rows": 2,
+    "hessian_symmetry_error": 0.0,
+    "preload_changes_with_allocation": true,
+    "tangent_dimension": 3
+  },
+  "linearization": {
+    "F01": "1",
+    "F11": "0",
+    "G_nominal_om_row": [
+      [
+        "2/5",
+        "3/10"
+      ]
+    ],
+    "G_times_allocation_direction_is_zero": true,
+    "allocation_table": [
+      {
+        "F10_expected_omega2_plus_lambda_over_m": "-81/10",
+        "F10_with_preload": "-81/10",
+        "F10_without_preload": "1",
+        "lambda": "-91/5",
+        "u": [
+          "7",
+          "5"
+        ],
+        "z": "0"
+      },
+      {
+        "F10_expected_omega2_plus_lambda_over_m": "-157/20",
+        "F10_with_preload": "-157/20",
+        "F10_without_preload": "1",
+        "lambda": "-177/10",
+        "u": [
+          "67/10",
+          "27/5"
+        ],
+        "z": "1/2"
+      },
+      {
+        "F10_expected_omega2_plus_lambda_over_m": "-177/20",
+        "F10_with_preload": "-177/20",
+        "F10_without_preload": "1",
+        "lambda": "-197/10",
+        "u": [
+          "79/10",
+          "19/5"
+        ],
+        "z": "-3/2"
+      }
+    ],
+    "kkt_equals_reduced_coordinate_symbolic": true,
+    "lambda_particular": "-91/5",
+    "symbolic_F10_with_preload": "(L*z - g*m*cos(theta) - u1*sin(theta) + u2*cos(theta))/(L*m)"
+  },
+  "min_variance": {
+    "F10_frozen_without_preload": "1",
+    "F10_with_preload_at_lambda_p": "z/2 - 81/10",
+    "b": [
+      "1/25",
+      "3/100"
+    ],
+    "dvar_dz_coeffs_with_preload_M1_M2": [
+      "1669/12500000",
+      "-59/625000"
+    ],
+    "model": "dx1 = (I + dt F) dx0 + dt G w; y = c^T dx1; Var(z) = c^T A P0 A^T c + sum_i b_i^2 (sigma0_i^2 + k_i^2 u_i(z)^2)",
+    "second_derivative": "261/3125000",
+    "var_at_zstar": "688793/14500000",
+    "var_poly_coeffs_descending_M1": [
+      "261/6250000",
+      "789/2500000",
+      "192397/4000000"
+    ],
+    "z_star": "-1315/348",
+    "z_star_closed_form": "-1315/348",
+    "z_star_matches_closed_form": true
+  },
+  "model": {
+    "allocation": "x = (u, lambda) = x_p + N z, N = (-q, 1)",
+    "equation": "m a + h(q) = u + J(q)^T lambda; Phi = (|q|^2 - L^2)/2",
+    "noise_declared": {
+      "P0_diag": [
+        "1/100",
+        "1/25"
+      ],
+      "c_outcome": [
+        "2/5",
+        "1"
+      ],
+      "dt": "1/10",
+      "k": [
+        "1/10",
+        "1/4"
+      ],
+      "sigma0": [
+        "1/5",
+        "3/10"
+      ]
+    },
+    "parameters": {
+      "L": "1",
+      "cos_theta": "4/5",
+      "g": "10",
+      "m": "2",
+      "omega": "1",
+      "sin_theta": "3/5"
+    },
+    "u_particular": [
+      "7",
+      "5"
+    ]
+  },
+  "name": "variability_sensitivity",
+  "saltation": {
+    "cases": [
+      {
+        "S": [
+          [
+            "1",
+            "0"
+          ],
+          [
+            "0",
+            "1"
+          ]
+        ],
+        "S_differs_from_reset_jacobian": false,
+        "S_f_minus_equals_f_plus": true,
+        "f_plus": [
+          [
+            "1"
+          ],
+          [
+            "-17/10"
+          ]
+        ],
+        "kappa": "1",
+        "reset_jacobian": [
+          [
+            "1",
+            "0"
+          ],
+          [
+            "0",
+            "1"
+          ]
+        ]
+      },
+      {
+        "S": [
+          [
+            "7/10",
+            "0"
+          ],
+          [
+            "-51/100",
+            "7/10"
+          ]
+        ],
+        "S_differs_from_reset_jacobian": true,
+        "S_f_minus_equals_f_plus": true,
+        "f_plus": [
+          [
+            "7/10"
+          ],
+          [
+            "-17/10"
+          ]
+        ],
+        "kappa": "7/10",
+        "reset_jacobian": [
+          [
+            "1",
+            "0"
+          ],
+          [
+            "0",
+            "7/10"
+          ]
+        ]
+      }
+    ],
+    "event": "g = L sin(theta) - d (ball-plane crossing at x = d)",
+    "event_projection": {
+      "Pi": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "17/10",
+          "1"
+        ]
+      ],
+      "Pi_differs_from_identity": true,
+      "Pi_f_minus_is_zero": true,
+      "grad_g_T_Pi_is_zero": true
+    },
+    "f_minus": [
+      [
+        "1"
+      ],
+      [
+        "-17/10"
+      ]
+    ],
+    "grad_g": [
+      [
+        "4/5"
+      ],
+      [
+        "0"
+      ]
+    ],
+    "independent_closed_form_check": {
+      "event_state_identity_holds": true,
+      "event_state_identity_holds_fixed_time": false,
+      "identity_holds": true,
+      "identity_holds_without_timing_term": false
+    }
+  },
+  "schema": "loop-nullspace-golden/1"
+}
