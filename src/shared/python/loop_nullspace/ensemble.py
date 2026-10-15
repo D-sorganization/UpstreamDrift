@@ -121,7 +121,10 @@ class EnsembleSource:
     @property
     def effective_gates(self) -> AdmissionGates:
         """The gates used for re-admission."""
-        return self.gates if self.gates is not None else self.nominal.report.gates
+        if self.gates is not None:
+            return self.gates
+        nominal_report = self.nominal.report
+        return nominal_report.gates
 
 
 @dataclass(frozen=True)
