@@ -832,4 +832,44 @@ placeholders or revive the retired OpenSim IK backend.
 
 ## Segmental Spine
 
-- `src/shared/python/spine/` — segmental spine kinematics and loads: per-level ISB ZXY transforms, chain composition, coupling laws and intervertebral load contract. Conventions per [ADR-0055](../adr/0055-segmental-spine-kinematics-and-loads.md); research reference `docs/research/segmental_spine/segmental_spine.tex`. Couplers prescribe kinematics only.
+Epic #12735. Conventions: [ADR-0055](../adr/0055-segmental-spine-kinematics-and-loads.md)
+(ISB X anterior, Y cranial, Z right; per-level ZXY; loads on the superior body
+by the inferior body in the inferior frame, compression `+F_y`). Manual chapter
+`manuals/upstreamdrift/chapters/66-segmental-spine.qmd`; research reference
+`docs/research/segmental_spine/segmental_spine.tex`; user guide and study CLI in
+[`docs/research/segmental_spine/README.md`](../research/segmental_spine/README.md#how-to-run-a-study).
+Couplers prescribe kinematics only. Every result is scientifically unqualified.
+
+Engine-independent contract, `src/shared/python/spine/`:
+
+- `levels` — `SpinalLevel` (17 levels L5-S1 to T1-T2, caudal first), `SpinalRegion`, `levels_between`, `parse_level`.
+- `segmental` — `LevelTransform` (`T_i = T_i0 · T(R_ZXY(θ), d)`), `SegmentalPose.compose` (caudal first, angles never add), `SegmentalKinematicsSeries` with `distribution_source`.
+- `loads` — `LoadObservable`, `SpinalLoadSeries` (ADR-0055 sign contract, provenance, body-weight normalisation, peaks), `from_wrench_in_frame`, `SpinalAxialLoadProvider` (tension `= -F_y`).
+- `coupling` — linear, state-dependent and polynomial `CouplingLaw`s, `from_joint_coupling` (MyoFullBody adapter), `restrict_to_levels`, `regional_fraction`, `level_rotations`.
+- `coupling_data` — cited laws from `src/config/spine_coupling_laws.json` (`bruno2015_regional`, `fujii2007_lumbar`, `uniform_reference`; pending laws refuse to build).
+- `distribution` — geodesic least-squares distribution of a pelvis-to-terminal rotation over levels with analytic Jacobian, residual and observability report; law never altered.
+- `golf_terms` — versioned golf-term registry (`evaluate`, JCS X-factor, lateral flexion, extension, legacy ids) and path-dependent `segmental_contributions`.
+- `context_bands` — Hosea 1990 and Lim 2012 golf load bands beside model peaks; `is_acceptance` is always false.
+- `movement_variants` — rotation-space perturbations of the pelvis-to-thorax series through one golf term (five shipped variants, seeded parameter sampling).
+- `viz_data` — pure-data angle-contribution stack and load heatmap with `to_tension_positive`; `plots` — Agg-only static figures titled with the scientific status.
+
+OpenSim engine layer, `src/engines/physics_engines/opensim/python/spine/` (import OpenSim lazily):
+
+- `assets` — SHA-256 admission of owner-supplied SimTK spine models against `src/config/spine_model_assets.json`.
+- `fixture_model` — invented synthetic segmental OpenSim fixture (no SimTK data); `fixture_coupling` — fixture couplers, massless driver and lumped trunk muscles.
+- `inventory` — native level inventory, neutral offsets and ISB axis check against `src/config/spine_model_level_maps.json`.
+- `coupler_extraction` — reads a model's `CoordinateCouplerConstraint`s into a `CouplingLaw`.
+- `golf_input` — reads a matched `golf_humanoid` swing into the pelvis-to-thorax rotation (`GolfTrunkInput`, SLERP `resample`).
+- `drive` — distributes the golf trunk rotation over a segmental model's levels and exports a `.mot`; `read_kinematics` — the inverse, `.mot`/IK table to `SegmentalKinematicsSeries`.
+- `inverse_dynamics` — per-level generalized effort and pelvis residual budget (couplers and muscles off).
+- `static_optimization` — trunk static optimisation, cost exponent 2 or 3, declared reserves and flags.
+- `joint_reactions` — per-level joint reaction with static-optimisation muscle forces.
+- `study` — hash-pinned `SpineStudyRequest` to `SpineStudyReceipt` CLI; `study_stages` (stage runner) and `study_receipt` (frozen deterministic receipt records).
+- `study_aggregation` — per-level peak and impulse tables from verified `pass` receipts, variant comparison.
+- `variant_inputs` — movement variants as golf trunk inputs and model coordinate range checks.
+- `distribution_sensitivity` — one request per shipped law, spread and robust/sensitive report, CLI.
+
+Shared beside the spine packages:
+
+- `src/engines/physics_engines/opensim/python/static_opt_core.py` — model-independent static-optimisation numerics shared by the leg and trunk solvers.
+- `src/shared/python/injury/spinal_load_providers.py` — `SpinalLoadProvider` seam: labelled `heuristic_v1` screening provider and pass-through `ModelSpinalLoadProvider` (heuristic risk bands never applied to model loads).
