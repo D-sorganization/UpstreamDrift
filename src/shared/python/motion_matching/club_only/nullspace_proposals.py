@@ -13,6 +13,10 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import postcondition, precondition
+from src.shared.python.motion_matching.same_input.closure import (
+    ClosurePlant,
+    project_to_closure,
+)
 
 __all__ = [
     "NullSpaceAnalysis",
@@ -140,8 +144,40 @@ def propose_nullspace_offsets(
     return tuple(offsets)
 
 
+@dataclass(frozen=True)
+class _ScalarClosurePlant:
+    """Adapter mapping a scalar closure residual specification to ``ClosurePlant``."""
+
+    q_origin: NDArray[np.float64]
+    closure_residual_m: float
+    tol_m: float
+
+    def _unit_and_gain(self) -> tuple[NDArray[np.float64], NDArray[np.float64], float]:
+        norm = float(np.linalg.norm(self.q_origin))
+        if norm <= 1e-15 or self.closure_residual_m <= self.tol_m:
+            u = np.zeros_like(self.q_origin)
+            u[0] = 1.0
+            return u, self.q_origin, 1.0
+        u = self.q_origin / norm
+        scale = float(self.tol_m / self.closure_residual_m)
+        target = self.q_origin * scale
+        dist = max(float(np.linalg.norm(self.q_origin - target)), 1e-15)
+        return u, target, float(self.closure_residual_m / dist)
+
+    def closure_pose_residual(self, q: NDArray[np.float64]) -> NDArray[np.float64]:
+        u, target, gain = self._unit_and_gain()
+        return np.array([float(gain * (u @ (q - target)))], dtype=np.float64)
+
+    def closure_rate_matrix(self, q: NDArray[np.float64]) -> NDArray[np.float64]:
+        _ = q
+        u, _target, gain = self._unit_and_gain()
+        return (gain * u).reshape(1, -1)
+
+
 @precondition(
-    lambda q, closure_residual_m, tol_m: isinstance(q, np.ndarray),
+    lambda q, closure_residual_m=0.0, tol_m=1e-6, plant=None, v=None, max_iterations=25: (
+        isinstance(q, np.ndarray)
+    ),
     "q required",
 )
 @postcondition(
@@ -151,15 +187,13 @@ def propose_nullspace_offsets(
 def reproject_onto_closure(
     q: NDArray[np.floating],
     *,
-    closure_residual_m: float,
-    tol_m: float,
+    closure_residual_m: float = 0.0,
+    tol_m: float = 1e-6,
+    plant: ClosurePlant | None = None,
+    v: NDArray[np.floating] | None = None,
+    max_iterations: int = 25,
 ) -> NDArray[np.float64]:
-    """Reproject a proposal onto grip closure within ``tol_m``.
-
-    Software-contract reprojection: when residual already meets the tolerance,
-    return ``q`` unchanged. Large residuals are scaled toward the prior origin
-    (no invented native closure). Nonfinite inputs fail closed.
-    """
+    """Reproject a proposal ``q`` onto grip closure within ``tol_m`` via ``project_to_closure``."""
     q_arr = np.asarray(q, dtype=np.float64)
     if q_arr.ndim != 1 or q_arr.size < 1:
         raise ValueError("q must be a non-empty 1-D array")
@@ -169,11 +203,22 @@ def reproject_onto_closure(
         raise ValueError("closure_residual_m must be finite and >= 0")
     if not np.isfinite(tol_m) or tol_m <= 0.0:
         raise ValueError("tol_m must be finite and > 0")
-    if closure_residual_m <= tol_m:
-        return q_arr.copy()
-    # Soft pull toward prior without claiming physical IK success.
-    scale = float(tol_m / closure_residual_m)
-    return q_arr * scale
+
+    v_arr = np.zeros_like(q_arr) if v is None else np.asarray(v, dtype=np.float64)
+    active_plant: ClosurePlant = (
+        plant
+        if plant is not None
+        else _ScalarClosurePlant(q_arr, float(closure_residual_m), float(tol_m))
+    )
+    eff_tol = float(tol_m) if plant is not None else min(float(tol_m) * 1e-3, 1e-12)
+    projection = project_to_closure(
+        active_plant,
+        q_arr,
+        v_arr,
+        tolerance=eff_tol,
+        max_iterations=max_iterations,
+    )
+    return np.asarray(projection.q, dtype=np.float64)
 
 
 def synthetic_grip_jacobian(
