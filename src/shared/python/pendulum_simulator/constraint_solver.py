@@ -53,6 +53,45 @@ DEFAULT_ALPHA = 5.0
 DEFAULT_BETA = 5.0
 
 
+def _solve_independent_kkt(
+    M: np.ndarray,
+    Phi_q: np.ndarray,
+    rhs_dyn: np.ndarray,
+    rhs_constraint: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Solve the KKT system on the independent closure rows only (#12608).
+
+    Rows 2-3 rotate rows 0-1, so including them makes the KKT matrix
+    near-singular off the manifold and amplifies the residual without bound.
+    The massless wrist DOFs leave exact zero columns in M and Phi_q, so the
+    KKT matrix stays singular; the minimum-norm least-squares solution is
+    exact for that consistent singular system.
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        Joint accelerations (N_DOF,) and all N_CONSTRAINTS multipliers; the
+        redundant rows carry zero multiplier.
+    """
+    rows = list(INDEPENDENT_CLOSURE_ROWS)
+    n = N_DOF
+    m = len(rows)
+    KKT = np.zeros((n + m, n + m))
+    KKT[:n, :n] = M
+    KKT[:n, n:] = Phi_q[rows].T
+    KKT[n:, :n] = Phi_q[rows]
+
+    rhs = np.zeros(n + m)
+    rhs[:n] = rhs_dyn
+    rhs[n:] = rhs_constraint[rows]
+
+    sol, _, _, _ = np.linalg.lstsq(KKT, rhs, rcond=None)
+
+    lambda_forces = np.zeros(N_CONSTRAINTS)
+    lambda_forces[rows] = sol[n:]
+    return sol[:n], lambda_forces
+
+
 def _solve_constrained_dynamics(
     state: State,
     t: float,
@@ -135,30 +174,7 @@ def _solve_constrained_dynamics(
     # Baumgarte RHS
     rhs_constraint = -gamma - 2.0 * alpha * Phi_dot - beta**2 * Phi
 
-    # Assemble the KKT system on the independent closure rows only (#12608):
-    # rows 2-3 rotate rows 0-1, so including them makes the KKT matrix
-    # near-singular off the manifold and amplifies the residual without bound.
-    rows = list(INDEPENDENT_CLOSURE_ROWS)
-    n = N_DOF
-    m = len(rows)
-    KKT = np.zeros((n + m, n + m))
-    KKT[:n, :n] = M
-    KKT[:n, n:] = Phi_q[rows].T
-    KKT[n:, :n] = Phi_q[rows]
-
-    rhs = np.zeros(n + m)
-    rhs[:n] = rhs_dyn
-    rhs[n:] = rhs_constraint[rows]
-
-    # The massless wrist DOFs leave exact zero columns in M and Phi_q, so the
-    # KKT matrix stays singular; the minimum-norm least-squares solution is
-    # exact for that consistent singular system.
-    sol, _, _, _ = np.linalg.lstsq(KKT, rhs, rcond=None)
-
-    qddot = sol[:n]
-    # Report all N_CONSTRAINTS multipliers; the redundant rows carry none.
-    lambda_forces = np.zeros(N_CONSTRAINTS)
-    lambda_forces[rows] = sol[n:]
+    qddot, lambda_forces = _solve_independent_kkt(M, Phi_q, rhs_dyn, rhs_constraint)
 
     assert np.all(np.isfinite(qddot)), f"qddot has non-finite values: {qddot}"
     assert np.all(np.isfinite(lambda_forces)), (
