@@ -24,6 +24,7 @@ rank audit of the pendulum constraints and the citation verification table.
 ## Contents of This Directory
 
 - `loop_nullspace.tex` is the reference.
+- `publication_gate.md` is the checklist that must pass before any NSX result is published externally.
 - `contracts.md` is the per-child contract appendix for NSX-02 to NSX-62:
   signatures, preconditions, postconditions and golden names.
 - `derivations/` holds the sympy scripts. They import no repository production
