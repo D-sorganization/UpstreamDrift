@@ -12,8 +12,6 @@ weld KKT solve (``kkt_regularization = 0``).
 
 from __future__ import annotations
 
-import os
-import tempfile
 from collections.abc import Mapping
 from typing import Any
 
@@ -27,22 +25,16 @@ __all__ = ["MyoSuiteFullBodyModel", "build_parity_adapter", "load_myosuite_runti
 
 
 def load_myosuite_runtime(xml: str) -> Any:
-    """Load MJCF text through MyoSuite's ``MujocoEnv`` and return that env.
+    """Load MJCF text through the installed MyoSuite runtime (2.x or 3.x).
 
     Postcondition: ``env.mj_spec``, ``env.mj_model`` and ``env.mj_data`` are
     MyoSuite-held objects compiled from ``xml``.
     """
-    if not isinstance(xml, str) or not xml.strip():
-        raise ValueError("xml must be non-empty MJCF text")
-    from myosuite.envs.env_base import MujocoEnv  # imported lazily: optional dep
+    from src.engines.physics_engines.myosuite.python.myosuite_runtime_compat import (
+        load_runtime_from_xml,
+    )
 
-    handle, path = tempfile.mkstemp(suffix=".xml", prefix="myosuite_spec_")
-    try:
-        with os.fdopen(handle, "w", encoding="utf-8") as stream:
-            stream.write(xml)
-        return MujocoEnv(path)
-    finally:
-        os.unlink(path)
+    return load_runtime_from_xml(xml)
 
 
 class MyoSuiteFullBodyModel(NativeMujocoFullBodyModel):
