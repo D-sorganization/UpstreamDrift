@@ -1,0 +1,1273 @@
+{
+  "full_body_spec_anthro_driver": {
+    "calcn_l": [
+      {
+        "bbox_max": [0.034614, 0.021705, 0.022087],
+        "bbox_min": [-0.060035, -0.118953, -0.146849],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.031787, 0.020794, 0.02139],
+        "bbox_min": [-0.057208, -0.118041, -0.146153],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "calcn_r": [
+      {
+        "bbox_max": [0.034553, 0.021659, 0.148287],
+        "bbox_min": [-0.06026, -0.120018, -0.02206],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.031726, 0.020772, 0.14759],
+        "bbox_min": [-0.057433, -0.119131, -0.021364],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "femur_l": [
+      {
+        "bbox_max": [0.083836, 0.083937, 0.084222],
+        "bbox_min": [-0.083836, -0.083937, -0.084222],
+        "label": "blend0",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 338
+      },
+      {
+        "bbox_max": [0.085588, 0.088348, 0.237671],
+        "bbox_min": [-0.082938, -0.080551, -0.001271],
+        "label": "garment0",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.079332, 0.082102, 0.432192],
+        "bbox_min": [-0.076681, -0.074305, -0.038991],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "femur_r": [
+      {
+        "bbox_max": [0.083836, 0.083937, 0.084222],
+        "bbox_min": [-0.083836, -0.083937, -0.084222],
+        "label": "blend0",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 338
+      },
+      {
+        "bbox_max": [0.082899, 0.080447, 0.001263],
+        "bbox_min": [-0.085629, -0.088479, -0.244773],
+        "label": "garment0",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.076644, 0.074195, 0.038991],
+        "bbox_min": [-0.079374, -0.082228, -0.444029],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector": [
+      {
+        "bbox_max": [0.182654, 0.004289, 0.160942],
+        "bbox_min": [-0.046994, -0.033483, -0.008825],
+        "label": "grip",
+        "material": "mat_grip_rubber",
+        "n_vertices": 50
+      },
+      {
+        "bbox_max": [0.979522, -0.063642, 0.691987],
+        "bbox_min": [0.82996, -0.196144, 0.563769],
+        "label": "head",
+        "material": "mat_satin_steel",
+        "n_vertices": 948
+      },
+      {
+        "bbox_max": [0.045697, 0.023448, 0.063927],
+        "bbox_min": [-0.055698, -0.048653, -0.019558],
+        "label": "lead_hand",
+        "material": "mat_glove_white",
+        "n_vertices": 3102
+      },
+      {
+        "bbox_max": [0.836098, -0.016854, 0.615017],
+        "bbox_min": [0.173074, -0.074297, 0.147315],
+        "label": "shaft",
+        "material": "mat_satin_steel",
+        "n_vertices": 50
+      },
+      {
+        "bbox_max": [0.10787, 0.027114, 0.10132],
+        "bbox_min": [-0.031581, -0.050053, 0.026196],
+        "label": "trail_hand",
+        "material": "mat_glove_white",
+        "n_vertices": 3102
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff": [
+      {
+        "bbox_max": [0.006373, 0.009703, 0.016016],
+        "bbox_min": [-0.012338, -0.007243, -0.005077],
+        "label": "garment0",
+        "material": "mat_glove_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.005928, 0.009138, 0.01583],
+        "bbox_min": [-0.011893, -0.006678, -0.004891],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": [
+      {
+        "bbox_max": [0.112607, 0.156399, 0.535111],
+        "bbox_min": [-0.112607, -0.156399, -0.0725],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.112607, 0.156399, 0.495111],
+        "bbox_min": [-0.112607, -0.156399, -0.0725],
+        "label": "garment1",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.112607, 0.156399, 0.495111],
+        "bbox_min": [-0.112607, -0.156399, -0.0725],
+        "label": "garment2",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.104266, 0.144814, 0.535111],
+        "bbox_min": [-0.104266, -0.144814, -0.0725],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.104266, 0.144814, 0.495111],
+        "bbox_min": [-0.104266, -0.144814, -0.0725],
+        "label": "skin1",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.104266, 0.144814, 0.495111],
+        "bbox_min": [-0.104266, -0.144814, -0.0725],
+        "label": "skin2",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso": [
+      {
+        "bbox_max": [0.069753, 0.089427, 0.179637],
+        "bbox_min": [-0.069753, -0.089427, -0.041455],
+        "label": "garment0",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.044886, 0.026676, 0.057546],
+        "bbox_min": [-0.044886, -0.115596, -0.057546],
+        "label": "garment1",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.044886, 0.115596, 0.057546],
+        "bbox_min": [-0.044886, -0.026676, -0.057546],
+        "label": "garment2",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.064586, 0.082803, 0.179637],
+        "bbox_min": [-0.064586, -0.082803, -0.041455],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.041561, 0.026676, 0.053284],
+        "bbox_min": [-0.041561, -0.115596, -0.053284],
+        "label": "skin1",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.041561, 0.115596, 0.053284],
+        "bbox_min": [-0.041561, -0.026676, -0.053284],
+        "label": "skin2",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoBase": [
+      {
+        "bbox_max": [0.002796, 0.003883, 0.0078],
+        "bbox_min": [-0.002796, -0.003883, -0.0018],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.002589, 0.003595, 0.0078],
+        "bbox_min": [-0.002589, -0.003595, -0.0018],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/HubtoLS": [
+      {
+        "bbox_max": [0.053931, 0.21994, 0.053931],
+        "bbox_min": [-0.053931, -0.025, -0.053931],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.049936, 0.21994, 0.049936],
+        "bbox_min": [-0.049936, -0.025, -0.049936],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/HubtoRS": [
+      {
+        "bbox_max": [0.053931, 0.025, 0.053931],
+        "bbox_min": [-0.053931, -0.21994, -0.053931],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.049936, 0.025, 0.049936],
+        "bbox_min": [-0.049936, -0.21994, -0.049936],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/LUpperArm": [
+      {
+        "bbox_max": [0.046186, 0.046186, 0.04644],
+        "bbox_min": [-0.046186, -0.046186, -0.04644],
+        "label": "blend0",
+        "material": "mat_polo_navy",
+        "n_vertices": 338
+      },
+      {
+        "bbox_max": [0.04644, 0.04644, 0.0],
+        "bbox_min": [-0.04644, -0.04644, -0.188699],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.042945, 0.042945, 0.0215],
+        "bbox_min": [-0.042945, -0.042945, -0.325852],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid": [
+      {
+        "bbox_max": [0.035954, 0.035954, 0.018],
+        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm": [
+      {
+        "bbox_max": [0.035954, 0.035954, 0.018],
+        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/RUpperArm": [
+      {
+        "bbox_max": [0.046186, 0.046186, 0.04644],
+        "bbox_min": [-0.046186, -0.046186, -0.04644],
+        "label": "blend0",
+        "material": "mat_polo_navy",
+        "n_vertices": 338
+      },
+      {
+        "bbox_max": [0.04644, 0.04644, 0.0],
+        "bbox_min": [-0.04644, -0.04644, -0.188699],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.042945, 0.042945, 0.0215],
+        "bbox_min": [-0.042945, -0.042945, -0.325852],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1": [
+      {
+        "bbox_max": [0.035954, 0.035954, 0.018],
+        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm": [
+      {
+        "bbox_max": [0.035954, 0.035954, 0.018],
+        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "talus_l": [
+      {
+        "bbox_max": [0.022889, 0.022386, 0.032667],
+        "bbox_min": [-0.065472, -0.061482, -0.052496],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.021931, 0.021309, 0.030191],
+        "bbox_min": [-0.064514, -0.060405, -0.050019],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "talus_r": [
+      {
+        "bbox_max": [0.023013, 0.022538, 0.052783],
+        "bbox_min": [-0.066098, -0.06162, -0.032881],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.022055, 0.021429, 0.050291],
+        "bbox_min": [-0.06514, -0.060512, -0.030388],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "tibia_l": [
+      {
+        "bbox_max": [0.026018, 0.092227, 0.070518],
+        "bbox_min": [-0.451989, -0.036897, -0.041592],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "tibia_r": [
+      {
+        "bbox_max": [0.025998, 0.092664, 0.041514],
+        "bbox_min": [-0.45608, -0.036814, -0.07073],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "toes_l": [
+      {
+        "bbox_max": [0.033529, 0.014422, 0.013686],
+        "bbox_min": [-0.018705, -0.020422, -0.046279],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.032194, 0.013295, 0.013325],
+        "bbox_min": [-0.01737, -0.019295, -0.045918],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "toes_r": [
+      {
+        "bbox_max": [0.033939, 0.014564, 0.046675],
+        "bbox_min": [-0.018849, -0.020564, -0.013835],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.032594, 0.013426, 0.046308],
+        "bbox_min": [-0.017504, -0.019426, -0.013468],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ]
+  },
+  "full_body_spec_anthro_iron7": {
+    "calcn_l": [
+      {
+        "bbox_max": [0.034614, 0.021705, 0.022087],
+        "bbox_min": [-0.060035, -0.118953, -0.146849],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.031787, 0.020794, 0.02139],
+        "bbox_min": [-0.057208, -0.118041, -0.146153],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "calcn_r": [
+      {
+        "bbox_max": [0.034553, 0.021659, 0.148287],
+        "bbox_min": [-0.06026, -0.120018, -0.02206],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.031726, 0.020772, 0.14759],
+        "bbox_min": [-0.057433, -0.119131, -0.021364],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "femur_l": [
+      {
+        "bbox_max": [0.083836, 0.083937, 0.084222],
+        "bbox_min": [-0.083836, -0.083937, -0.084222],
+        "label": "blend0",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 338
+      },
+      {
+        "bbox_max": [0.085588, 0.088348, 0.237671],
+        "bbox_min": [-0.082938, -0.080551, -0.001271],
+        "label": "garment0",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.079332, 0.082102, 0.432192],
+        "bbox_min": [-0.076681, -0.074305, -0.038991],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "femur_r": [
+      {
+        "bbox_max": [0.083836, 0.083937, 0.084222],
+        "bbox_min": [-0.083836, -0.083937, -0.084222],
+        "label": "blend0",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 338
+      },
+      {
+        "bbox_max": [0.082899, 0.080447, 0.001263],
+        "bbox_min": [-0.085629, -0.088479, -0.244773],
+        "label": "garment0",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.076644, 0.074195, 0.038991],
+        "bbox_min": [-0.079374, -0.082228, -0.444029],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector": [
+      {
+        "bbox_max": [0.134481, 0.166212, 0.127034],
+        "bbox_min": [-0.02881, -0.042881, -0.001028],
+        "label": "grip",
+        "material": "mat_grip_rubber",
+        "n_vertices": 50
+      },
+      {
+        "bbox_max": [0.552868, 0.651498, 0.435385],
+        "bbox_min": [0.445038, 0.589975, 0.35343],
+        "label": "head",
+        "material": "mat_satin_steel",
+        "n_vertices": 948
+      },
+      {
+        "bbox_max": [0.04107, 0.039425, 0.06633],
+        "bbox_min": [-0.040584, -0.052603, -0.01438],
+        "label": "lead_hand",
+        "material": "mat_glove_white",
+        "n_vertices": 3102
+      },
+      {
+        "bbox_max": [0.453971, 0.597233, 0.363166],
+        "bbox_min": [0.120618, 0.154952, 0.111888],
+        "label": "shaft",
+        "material": "mat_satin_steel",
+        "n_vertices": 50
+      },
+      {
+        "bbox_max": [0.082221, 0.092789, 0.093484],
+        "bbox_min": [-0.032609, -0.033522, 0.017565],
+        "label": "trail_hand",
+        "material": "mat_glove_white",
+        "n_vertices": 3102
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff": [
+      {
+        "bbox_max": [0.006447, 0.011141, 0.015717],
+        "bbox_min": [-0.012146, -0.006733, -0.005259],
+        "label": "garment0",
+        "material": "mat_glove_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.005989, 0.01063, 0.015508],
+        "bbox_min": [-0.011688, -0.006221, -0.005051],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": [
+      {
+        "bbox_max": [0.112607, 0.156399, 0.535111],
+        "bbox_min": [-0.112607, -0.156399, -0.0725],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.112607, 0.156399, 0.495111],
+        "bbox_min": [-0.112607, -0.156399, -0.0725],
+        "label": "garment1",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.112607, 0.156399, 0.495111],
+        "bbox_min": [-0.112607, -0.156399, -0.0725],
+        "label": "garment2",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.104266, 0.144814, 0.535111],
+        "bbox_min": [-0.104266, -0.144814, -0.0725],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.104266, 0.144814, 0.495111],
+        "bbox_min": [-0.104266, -0.144814, -0.0725],
+        "label": "skin1",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.104266, 0.144814, 0.495111],
+        "bbox_min": [-0.104266, -0.144814, -0.0725],
+        "label": "skin2",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso": [
+      {
+        "bbox_max": [0.069753, 0.089427, 0.179637],
+        "bbox_min": [-0.069753, -0.089427, -0.041455],
+        "label": "garment0",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.044886, 0.026676, 0.057546],
+        "bbox_min": [-0.044886, -0.115596, -0.057546],
+        "label": "garment1",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.044886, 0.115596, 0.057546],
+        "bbox_min": [-0.044886, -0.026676, -0.057546],
+        "label": "garment2",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.064586, 0.082803, 0.179637],
+        "bbox_min": [-0.064586, -0.082803, -0.041455],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.041561, 0.026676, 0.053284],
+        "bbox_min": [-0.041561, -0.115596, -0.053284],
+        "label": "skin1",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.041561, 0.115596, 0.053284],
+        "bbox_min": [-0.041561, -0.026676, -0.053284],
+        "label": "skin2",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoBase": [
+      {
+        "bbox_max": [0.002796, 0.003883, 0.0078],
+        "bbox_min": [-0.002796, -0.003883, -0.0018],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.002589, 0.003595, 0.0078],
+        "bbox_min": [-0.002589, -0.003595, -0.0018],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/HubtoLS": [
+      {
+        "bbox_max": [0.053931, 0.21994, 0.053931],
+        "bbox_min": [-0.053931, -0.025, -0.053931],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.049936, 0.21994, 0.049936],
+        "bbox_min": [-0.049936, -0.025, -0.049936],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/HubtoRS": [
+      {
+        "bbox_max": [0.053931, 0.025, 0.053931],
+        "bbox_min": [-0.053931, -0.21994, -0.053931],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.049936, 0.025, 0.049936],
+        "bbox_min": [-0.049936, -0.21994, -0.049936],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/LUpperArm": [
+      {
+        "bbox_max": [0.046186, 0.046186, 0.04644],
+        "bbox_min": [-0.046186, -0.046186, -0.04644],
+        "label": "blend0",
+        "material": "mat_polo_navy",
+        "n_vertices": 338
+      },
+      {
+        "bbox_max": [0.04644, 0.04644, 0.0],
+        "bbox_min": [-0.04644, -0.04644, -0.188699],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.042945, 0.042945, 0.0215],
+        "bbox_min": [-0.042945, -0.042945, -0.325852],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid": [
+      {
+        "bbox_max": [0.035954, 0.035954, 0.018],
+        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm": [
+      {
+        "bbox_max": [0.035954, 0.035954, 0.018],
+        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/RUpperArm": [
+      {
+        "bbox_max": [0.046186, 0.046186, 0.04644],
+        "bbox_min": [-0.046186, -0.046186, -0.04644],
+        "label": "blend0",
+        "material": "mat_polo_navy",
+        "n_vertices": 338
+      },
+      {
+        "bbox_max": [0.04644, 0.04644, 0.0],
+        "bbox_min": [-0.04644, -0.04644, -0.188699],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.042945, 0.042945, 0.0215],
+        "bbox_min": [-0.042945, -0.042945, -0.325852],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1": [
+      {
+        "bbox_max": [0.035954, 0.035954, 0.018],
+        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm": [
+      {
+        "bbox_max": [0.035954, 0.035954, 0.018],
+        "bbox_min": [-0.035954, -0.035954, -0.163262],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "talus_l": [
+      {
+        "bbox_max": [0.022889, 0.022386, 0.032667],
+        "bbox_min": [-0.065472, -0.061482, -0.052496],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.021931, 0.021309, 0.030191],
+        "bbox_min": [-0.064514, -0.060405, -0.050019],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "talus_r": [
+      {
+        "bbox_max": [0.023013, 0.022538, 0.052783],
+        "bbox_min": [-0.066098, -0.06162, -0.032881],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.022055, 0.021429, 0.050291],
+        "bbox_min": [-0.06514, -0.060512, -0.030388],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "tibia_l": [
+      {
+        "bbox_max": [0.026018, 0.092227, 0.070518],
+        "bbox_min": [-0.451989, -0.036897, -0.041592],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "tibia_r": [
+      {
+        "bbox_max": [0.025998, 0.092664, 0.041514],
+        "bbox_min": [-0.45608, -0.036814, -0.07073],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "toes_l": [
+      {
+        "bbox_max": [0.033529, 0.014422, 0.013686],
+        "bbox_min": [-0.018705, -0.020422, -0.046279],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.032194, 0.013295, 0.013325],
+        "bbox_min": [-0.01737, -0.019295, -0.045918],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "toes_r": [
+      {
+        "bbox_max": [0.033939, 0.014564, 0.046675],
+        "bbox_min": [-0.018849, -0.020564, -0.013835],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.032594, 0.013426, 0.046308],
+        "bbox_min": [-0.017504, -0.019426, -0.013468],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ]
+  },
+  "full_body_spec_v1": {
+    "calcn_l": [
+      {
+        "bbox_max": [0.034592, 0.02164, 0.022167],
+        "bbox_min": [-0.060014, -0.118887, -0.146929],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.031767, 0.020744, 0.021464],
+        "bbox_min": [-0.057188, -0.117992, -0.146226],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "calcn_r": [
+      {
+        "bbox_max": [0.034549, 0.021689, 0.148239],
+        "bbox_min": [-0.060256, -0.120048, -0.022012],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.031722, 0.020794, 0.147546],
+        "bbox_min": [-0.057429, -0.119154, -0.021319],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "femur_l": [
+      {
+        "bbox_max": [0.084222, 0.083836, 0.083937],
+        "bbox_min": [-0.084222, -0.083836, -0.083937],
+        "label": "blend0",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 338
+      },
+      {
+        "bbox_max": [0.001271, 0.085588, 0.080551],
+        "bbox_min": [-0.237671, -0.082938, -0.088348],
+        "label": "garment0",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.038991, 0.079332, 0.074305],
+        "bbox_min": [-0.432192, -0.076681, -0.082102],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "femur_r": [
+      {
+        "bbox_max": [0.084222, 0.083836, 0.083937],
+        "bbox_min": [-0.084222, -0.083836, -0.083937],
+        "label": "blend0",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 338
+      },
+      {
+        "bbox_max": [0.001263, 0.082899, 0.080447],
+        "bbox_min": [-0.244773, -0.085629, -0.088479],
+        "label": "garment0",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.038991, 0.076644, 0.074195],
+        "bbox_min": [-0.444029, -0.079374, -0.082228],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector": [
+      {
+        "bbox_max": [0.017031, 1.08472, 0.035943],
+        "bbox_min": [-0.017031, -0.008524, -0.010543],
+        "label": "skin0",
+        "material": "mat_satin_steel",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff": [
+      {
+        "bbox_max": [0.008219, 0.008219, 0.01651],
+        "bbox_min": [-0.008219, -0.008219, -0.00381],
+        "label": "garment0",
+        "material": "mat_glove_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.00761, 0.00761, 0.01651],
+        "bbox_min": [-0.00761, -0.00761, -0.00381],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": [
+      {
+        "bbox_max": [0.156399, 0.096542, 0.07686],
+        "bbox_min": [-0.156399, -0.147342, -0.3207],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.156399, 0.096542, 0.07686],
+        "bbox_min": [-0.156399, -0.147342, -0.3207],
+        "label": "garment1",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.156399, 0.112607, 0.0725],
+        "bbox_min": [-0.156399, -0.112607, -0.57034],
+        "label": "garment2",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.144814, 0.089226, 0.076291],
+        "bbox_min": [-0.144814, -0.140026, -0.320131],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.144814, 0.089226, 0.076291],
+        "bbox_min": [-0.144814, -0.140026, -0.320131],
+        "label": "skin1",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.144814, 0.104266, 0.0725],
+        "bbox_min": [-0.144814, -0.104266, -0.57034],
+        "label": "skin2",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso": [
+      {
+        "bbox_max": [0.10881, 0.131304, 0.3673],
+        "bbox_min": [-0.10881, -0.131304, -0.0625],
+        "label": "garment0",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.032956, 0.045257, 0.081306],
+        "bbox_min": [-0.113056, -0.070732, -0.043758],
+        "label": "garment1",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.047271, 0.137848, 0.057688],
+        "bbox_min": [-0.066146, -0.037904, -0.089494],
+        "label": "garment2",
+        "material": "mat_shorts_khaki",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.10075, 0.121578, 0.3673],
+        "bbox_min": [-0.10075, -0.121578, -0.0625],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.032119, 0.041832, 0.078192],
+        "bbox_min": [-0.112219, -0.067306, -0.040644],
+        "label": "skin1",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.043585, 0.137042, 0.053323],
+        "bbox_min": [-0.06246, -0.037098, -0.08513],
+        "label": "skin2",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoBase": [
+      {
+        "bbox_max": [0.039451, 0.028405, 0.079248],
+        "bbox_min": [-0.039451, -0.028405, -0.018288],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.036529, 0.026301, 0.079248],
+        "bbox_min": [-0.036529, -0.026301, -0.018288],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/HubtoLS": [
+      {
+        "bbox_max": [0.053931, 0.053931, 0.025],
+        "bbox_min": [-0.053931, -0.053931, -0.279],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.049936, 0.049936, 0.025],
+        "bbox_min": [-0.049936, -0.049936, -0.279],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/HubtoRS": [
+      {
+        "bbox_max": [0.053931, 0.053931, 0.279],
+        "bbox_min": [-0.053931, -0.053931, -0.025],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.049936, 0.049936, 0.279],
+        "bbox_min": [-0.049936, -0.049936, -0.025],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/LUpperArm": [
+      {
+        "bbox_max": [0.04644, 0.046186, 0.046186],
+        "bbox_min": [-0.04644, -0.046186, -0.046186],
+        "label": "blend0",
+        "material": "mat_polo_navy",
+        "n_vertices": 338
+      },
+      {
+        "bbox_max": [0.228346, 0.04644, 0.04644],
+        "bbox_min": [0.0, -0.04644, -0.04644],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.3898, 0.042945, 0.042945],
+        "bbox_min": [-0.0215, -0.042945, -0.042945],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid": [
+      {
+        "bbox_max": [0.1704, 0.035954, 0.035954],
+        "bbox_min": [-0.018, -0.035954, -0.035954],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm": [
+      {
+        "bbox_max": [0.035954, 0.035954, 0.1704],
+        "bbox_min": [-0.035954, -0.035954, -0.018],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/RUpperArm": [
+      {
+        "bbox_max": [0.04644, 0.046186, 0.046186],
+        "bbox_min": [-0.04644, -0.046186, -0.046186],
+        "label": "blend0",
+        "material": "mat_polo_navy",
+        "n_vertices": 338
+      },
+      {
+        "bbox_max": [0.228346, 0.04644, 0.04644],
+        "bbox_min": [0.0, -0.04644, -0.04644],
+        "label": "garment0",
+        "material": "mat_polo_navy",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.3898, 0.042945, 0.042945],
+        "bbox_min": [-0.0215, -0.042945, -0.042945],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1": [
+      {
+        "bbox_max": [0.1704, 0.035954, 0.035954],
+        "bbox_min": [-0.018, -0.035954, -0.035954],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm": [
+      {
+        "bbox_max": [0.035954, 0.035954, 0.1704],
+        "bbox_min": [-0.035954, -0.035954, -0.018],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "talus_l": [
+      {
+        "bbox_max": [0.022439, 0.022806, 0.032721],
+        "bbox_min": [-0.065021, -0.061902, -0.052549],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.021514, 0.021648, 0.03024],
+        "bbox_min": [-0.064097, -0.060744, -0.050069],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "talus_r": [
+      {
+        "bbox_max": [0.022481, 0.023145, 0.052758],
+        "bbox_min": [-0.065566, -0.062228, -0.032855],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.021562, 0.021962, 0.050267],
+        "bbox_min": [-0.064647, -0.061045, -0.030365],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "tibia_l": [
+      {
+        "bbox_max": [0.092227, 0.070518, 0.026018],
+        "bbox_min": [-0.036897, -0.041592, -0.451989],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "tibia_r": [
+      {
+        "bbox_max": [0.036814, 0.07073, 0.025998],
+        "bbox_min": [-0.092664, -0.041514, -0.45608],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "toes_l": [
+      {
+        "bbox_max": [0.032567, 0.015601, 0.013856],
+        "bbox_min": [-0.017743, -0.021601, -0.046449],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.031303, 0.014387, 0.013471],
+        "bbox_min": [-0.016479, -0.020387, -0.046064],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ],
+    "toes_r": [
+      {
+        "bbox_max": [0.032841, 0.015892, 0.046833],
+        "bbox_min": [-0.017751, -0.021892, -0.013993],
+        "label": "garment0",
+        "material": "mat_shoe_white",
+        "n_vertices": 794
+      },
+      {
+        "bbox_max": [0.031578, 0.014656, 0.046437],
+        "bbox_min": [-0.016488, -0.020656, -0.013597],
+        "label": "skin0",
+        "material": "mat_skin_medium",
+        "n_vertices": 794
+      }
+    ]
+  }
+}
