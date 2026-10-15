@@ -381,13 +381,16 @@ def analytic_envelope_case() -> AnalyticEnvelopeCase:
 
 
 def spatial_two_arm_club_snapshot(
-    *, floating_root: bool = False, feet: bool = False
+    *, floating_root: bool = False, feet: bool = False, foot_points: int = 1
 ) -> FixtureCase:
     """Spatial 2 x 7-DOF arm chain with a rigid bare club and a WELD6 closure.
 
     Built with Pinocchio (fixture (c)); see ``spatial_fixture`` for the model.
+    ``foot_points=2`` gives two rigid points per foot (NSX-60 lower-body variant).
     Raises ``ValueError`` if ``feet`` is requested without ``floating_root``.
     """
     from src.shared.python.loop_nullspace import spatial_fixture
 
-    return spatial_fixture.build_case(floating_root=floating_root, feet=feet)
+    return spatial_fixture.build_case(
+        floating_root=floating_root, feet=feet, foot_points=foot_points
+    )
