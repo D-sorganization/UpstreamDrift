@@ -2340,6 +2340,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12777 · Re-Solve the MSK Address Calibration on the Widened Forearm Range so the Lead Pronation Leaves Its Old 90 Deg Bound
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12777
+- **Branch:** merged via #12782
+- **PR:** #12782
+- **Paths:** see #12782
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`4f24ae09`; collated from changes/12777-re-solve-the-msk-address-calibration-on.md)
+- **Summary:** Re-solve the MSK address calibration on the widened forearm range so the lead pronation leaves its old 90 deg bound
+- **Next step:** Shipped in PR #12782.
+
 ### DL-#12748 · SPN-6a: Spine Model Asset Manifest and Local-Source SHA-256 Admission
 
 - **State:** shipped
