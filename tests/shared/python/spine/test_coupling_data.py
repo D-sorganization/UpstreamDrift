@@ -34,7 +34,7 @@ SHIPPED = {"bruno2015_regional", "fujii2007_lumbar", "uniform_reference"}
 
 def _extraction_blocks() -> dict[tuple[str, str], dict]:
     text = EXTRACTION.read_text(encoding="utf-8")
-    blocks = re.findall(r"```json\s*(.*?)```", text, flags=re.S)
+    blocks = re.findall(r"```json\s*(.*?)```", text, flags=re.DOTALL)
     parsed = [json.loads(b) for b in blocks]
     return {(b["source_id"], b["table_id"]): b for b in parsed}
 
@@ -117,7 +117,7 @@ def test_bruno_within_region_uniform_assumption_recorded() -> None:
     assert "uniform" in entry["assumptions"].lower()
     law = coupling_law("bruno2015_regional")
     gains = {lv: law.matrices[lv][2, 2] for lv in LUMBAR}
-    assert len(set(round(g, 15) for g in gains.values())) == 1
+    assert len({round(g, 15) for g in gains.values()}) == 1
 
 
 @pytest.mark.parametrize("law_id", ["bruno2015_regional", "uniform_reference"])

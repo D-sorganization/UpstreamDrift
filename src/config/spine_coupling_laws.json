@@ -1,0 +1,237 @@
+{
+ "schema_version": 1,
+ "description": "Cited spinal coupling-law data (SPN-3, #12743). Literature numbers are copied from docs/research/segmental_spine/data_extraction.md; the loader derives per-level matrices from them. Pending entries carry no numbers.",
+ "laws": [
+  {
+   "law_id": "bruno2015_regional",
+   "version": "1",
+   "kind": "linear",
+   "status": "available",
+   "independent": [
+    "flexion_extension",
+    "lateral_bending",
+    "axial_rotation"
+   ],
+   "source_ref": {
+    "source_id": "bruno2015",
+    "table_id": "B1_regional_split"
+   },
+   "citation": {
+    "source": "Bruno AG, Bouxsein ML, Anderson DE. J Biomech Eng 137(8):081003 (2015), PMC5101035",
+    "doi": "10.1115/1.4030408",
+    "table": "Section 2.1 regional motion split (extraction Table B1)",
+    "page": null
+   },
+   "verified_from_primary": true,
+   "distribution": {
+    "type": "regional_split",
+    "regional_percent": {
+     "flexion_extension": {
+      "lumbar": 51,
+      "thoracic": 49
+     },
+     "lateral_bending": {
+      "lumbar": 27,
+      "thoracic": 73
+     },
+     "axial_rotation": {
+      "lumbar": 17,
+      "thoracic": 83
+     }
+    },
+    "within_region": "uniform"
+   },
+   "assumptions": "Within each region the published regional share is distributed uniformly across the region's levels (equal share per level). This within-region uniformity is an assumption of this repository, not a published per-level result. Lumbar = L5-S1..L1-L2 (5 levels); thoracic = T12-L1..T1-T2 (12 levels), following SpinalLevel.region. No cross-axis coupling terms. Independent coordinates are the global pelvis-to-thorax ISB flexion, lateral bending and axial rotation.",
+   "notes": "Regional splits from the main text of Bruno 2015 (51/49 flexion, 27/73 lateral bending, 17/83 axial). Per-level Supplemental Table 2 is not used (see bruno2015_per_level)."
+  },
+  {
+   "law_id": "fujii2007_lumbar",
+   "version": "1",
+   "kind": "linear",
+   "status": "available",
+   "independent": [
+    "trunk_axial_rotation"
+   ],
+   "source_ref": {
+    "source_id": "fujii2007",
+    "table_id": "F1_45deg_trunk_rotation"
+   },
+   "citation": {
+    "source": "Fujii R, Sakaura H, Mukai Y, et al. Eur Spine J 16(11):1867-1874 (2007), PMC2223353",
+    "doi": null,
+    "table": "Results text, per-segment motion at 45 deg trunk rotation (extraction Table F1)",
+    "page": null
+   },
+   "verified_from_primary": true,
+   "distribution": {
+    "type": "per_level_ratio",
+    "reference_trunk_rotation_deg": 45,
+    "unit": "deg",
+    "rows": [
+     {
+      "level": "L5_S1",
+      "segment": "L5/S1",
+      "axial_rotation": [
+       1.6,
+       0.7
+      ],
+      "coupled_flexion": [
+       1.9,
+       1.6
+      ],
+      "coupled_lateral_bend": [
+       0.6,
+       0.6
+      ]
+     },
+     {
+      "level": "L4_L5",
+      "segment": "L4/5",
+      "axial_rotation": [
+       1.7,
+       0.6
+      ],
+      "coupled_flexion": [
+       0.9,
+       0.6
+      ],
+      "coupled_lateral_bend": [
+       -1.6,
+       0.9
+      ]
+     },
+     {
+      "level": "L3_L4",
+      "segment": "L3/4",
+      "axial_rotation": [
+       1.7,
+       0.6
+      ],
+      "coupled_flexion": [
+       1.3,
+       0.5
+      ],
+      "coupled_lateral_bend": [
+       -3.4,
+       0.9
+      ]
+     },
+     {
+      "level": "L2_L3",
+      "segment": "L2/3",
+      "axial_rotation": [
+       1.4,
+       0.3
+      ],
+      "coupled_flexion": [
+       1.0,
+       0.8
+      ],
+      "coupled_lateral_bend": [
+       -3.0,
+       1.0
+      ]
+     },
+     {
+      "level": "L1_L2",
+      "segment": "L1/2",
+      "axial_rotation": [
+       1.3,
+       0.5
+      ],
+      "coupled_flexion": [
+       0.8,
+       0.6
+      ],
+      "coupled_lateral_bend": [
+       -1.6,
+       0.7
+      ]
+     },
+     {
+      "level": "T12_L1",
+      "segment": "T12/L1",
+      "axial_rotation": [
+       1.2,
+       0.4
+      ],
+      "coupled_flexion": [
+       -0.1,
+       0.4
+      ],
+      "coupled_lateral_bend": [
+       0.9,
+       0.3
+      ]
+     }
+    ]
+   },
+   "assumptions": "Segment angles measured at 45 deg of trunk rotation are scaled linearly to a gain per degree of trunk rotation (deg/deg); linearity in rotation is an assumption. Signs are carried as published (coupled flexion positive = flexion; coupled lateral bending negative = opposite to the trunk rotation direction) and are mapped directly onto ISB flexion and lateral-bending angle signs for a positive axial rotation; the ISB sign mapping was not verified against the paper. Per-segment SDs are kept in the rows but not used. T12/L1 is included as the cranial end of the measured range. The single independent coordinate is trunk axial rotation; this is not a share law (gains do not sum to 1).",
+   "notes": "Verified from the PMC full text (two agreeing extractions); a PDF re-check is recommended per the extraction file. DOI not retrieved."
+  },
+  {
+   "law_id": "uniform_reference",
+   "version": "1",
+   "kind": "linear",
+   "status": "available",
+   "independent": [
+    "flexion_extension",
+    "lateral_bending",
+    "axial_rotation"
+   ],
+   "source_ref": null,
+   "citation": {
+    "source": "repo-authored reference, not literature",
+    "doi": null,
+    "table": "none (synthetic equal-share reference)",
+    "page": null
+   },
+   "verified_from_primary": false,
+   "distribution": {
+    "type": "equal_share"
+   },
+   "assumptions": "Each of the 17 levels carries an equal share (1/17) of the global flexion, lateral bending and axial rotation, with no cross-axis terms. A synthetic baseline for comparison and tests only.",
+   "notes": "Labelled reference law; not a physiological claim."
+  },
+  {
+   "law_id": "bruno2015_per_level",
+   "version": "1",
+   "kind": "linear",
+   "status": "pending",
+   "independent": [
+    "flexion_extension",
+    "lateral_bending",
+    "axial_rotation"
+   ],
+   "citation": {
+    "source": "Bruno AG, Bouxsein ML, Anderson DE. J Biomech Eng 137(8):081003 (2015), Supplemental Table 2",
+    "doi": "10.1115/1.4030408",
+    "table": "Supplemental Table 2 (per-joint T1-L5 coupling ratios)",
+    "page": null
+   },
+   "verified_from_primary": false,
+   "pending_reason": "Supplemental Table 2 was not obtainable (bot check); no numbers were read. Awaiting the primary PDF (issue #12737).",
+   "notes": "Pending: no matrices shipped."
+  },
+  {
+   "law_id": "pearcy1984_lumbar",
+   "version": "1",
+   "kind": "linear",
+   "status": "pending",
+   "independent": [
+    "flexion_extension",
+    "lateral_bending",
+    "axial_rotation"
+   ],
+   "citation": {
+    "source": "Pearcy MJ, Tibrewal SB. Spine 9(6):582-587 (1984)",
+    "doi": null,
+    "table": "Per-level axial rotation and coupled lateral bend, L1-S1 (extraction Table P1)",
+    "page": null
+   },
+   "verified_from_primary": false,
+   "pending_reason": "Primary text not accessible; extraction Table P1 has no rows. Awaiting the primary PDF (issue #12737).",
+   "notes": "Pending: no matrices shipped."
+  }
+ ]
+}
