@@ -40,6 +40,10 @@ CATALOG_ROW = re.compile(
 #: Preferred landing files, in order, when a directory has an entry point.
 ENTRY_CANDIDATES = ("README.md", "index.md", "INDEX.md", "overview.md")
 
+#: Git-ignored views rendered on demand (``agent_context render``, #12544).
+#: They exist only in some checkouts, so they are never counted or linked.
+GENERATED_VIEWS = frozenset({"agent_context/README.md", "agent_context/index.html"})
+
 STABILITY_ORDER = ("stable", "draft", "archived")
 STABILITY_HEADINGS = {
     "stable": "Stable",
@@ -70,6 +74,17 @@ def read_stability() -> dict[str, str]:
     return stability
 
 
+def _is_generated_view(path: Path) -> bool:
+    """Return True for a rendered view that is never committed."""
+    return path.relative_to(DOCS_DIR).as_posix() in GENERATED_VIEWS
+
+
+def markdown_pages(directory: Path) -> list[Path]:
+    """Return the committed Markdown pages under ``directory``, sorted."""
+    pages = directory.rglob("*.md")
+    return sorted(p for p in pages if not _is_generated_view(p))
+
+
 def entry_target(directory: Path) -> str:
     """Return the best link target for ``directory``, relative to ``docs/``.
 
@@ -80,9 +95,10 @@ def entry_target(directory: Path) -> str:
     """
     name = directory.name
     for candidate in ENTRY_CANDIDATES:
-        if (directory / candidate).exists():
+        landing = directory / candidate
+        if landing.exists() and not _is_generated_view(landing):
             return f"{name}/{candidate}"
-    markdown = sorted(directory.rglob("*.md"))
+    markdown = markdown_pages(directory)
     if len(markdown) == 1:
         return markdown[0].relative_to(DOCS_DIR).as_posix()
     return f"{name}/"
@@ -90,7 +106,7 @@ def entry_target(directory: Path) -> str:
 
 def page_count(directory: Path) -> int:
     """Return the number of Markdown pages under ``directory``."""
-    return len(list(directory.rglob("*.md")))
+    return len(markdown_pages(directory))
 
 
 def describe(directory: Path) -> str:

@@ -67,7 +67,7 @@ docs/
 |-- index.md    <- catalog: owner, stability, and full map
 |-- adapters/                 # 1 page
 |-- adr/                      # 56 pages
-|-- agent_context/            # 9 pages
+|-- agent_context/            # 8 pages
 |-- agents/                   # 1 page
 |-- ai_implementation/        # 5 pages
 |-- api/                      # 7 pages

@@ -2,7 +2,7 @@
 
 ## Verified Development Context
 
-Start with [Agent Context](docs/agent_context/README.md) and its [Usage Guide](docs/agent_context/USAGE.md). Use focused CLI/MCP retrieval to find public interfaces, providers, consumers and integration tests. The generated map covers registered boundaries; inspect source for unregistered areas. Source hashes, dependency pins and boundary review must be current before relying on an integration claim.
+Start with the [Agent Context Usage Guide](docs/agent_context/USAGE.md); its `render` command generates the git-ignored component map and offline browser locally. Use focused CLI/MCP retrieval to find public interfaces, providers, consumers and integration tests. The generated map covers registered boundaries; inspect source for unregistered areas. Source hashes, dependency pins and boundary review must be current before relying on an integration claim.
 
 ## Required MATLAB Release
 

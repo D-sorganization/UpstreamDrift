@@ -19,6 +19,11 @@ UsersdieteRepositories*/
 # Codemap index (regenerated on every clone via `codemap rebuild`)
 .codemap/
 
+# Agent-context views: rendered on demand by `agent_context render` (#12544).
+# catalog.json, reviews.json, navigation.json and contracts/ stay committed.
+/docs/agent_context/README.md
+/docs/agent_context/index.html
+
 # Merge conflict artifacts
 *.ours
 *.theirs

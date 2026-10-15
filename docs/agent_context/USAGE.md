@@ -2,10 +2,13 @@
 
 ## Start Here
 
-This repository keeps component and integration context in Git. Open the
-[component map](README.md), [offline browser](index.html), or retrieve focused
-source evidence with the shared local CLI. Existing scientific and product
-registries keep their authority; this catalog adds development boundaries.
+This repository keeps component and integration context in Git: the catalog,
+contracts and boundary reviews are committed. The component map (`README.md`)
+and offline browser (`index.html`) in this directory are generated views. They
+are git-ignored and rendered on demand (#12544), so run `render` below before
+opening them, or retrieve focused source evidence with the shared local CLI.
+Existing scientific and product registries keep their authority; this catalog
+adds development boundaries.
 
 ## Setup and Retrieval
 
@@ -17,6 +20,7 @@ full application Tools package.
 
 ```bash
 git submodule update --init vendor/ud-tools
+PYTHONPATH=vendor/ud-tools/src python3 -m agent_context --root . render
 PYTHONPATH=vendor/ud-tools/src python3 -m agent_context --root . status
 PYTHONPATH=vendor/ud-tools/src python3 -m agent_context --root . search "QUERY"
 PYTHONPATH=vendor/ud-tools/src python3 -m agent_context --root . context COMPONENT --max-chars 16000
@@ -66,8 +70,12 @@ python3 -m agent_context --root . check
 python3 -m agent_context --root . evaluate
 ```
 
-Commit catalog, contract, review and generated-view changes together. Rendering
-cannot automatically renew reviews. Update the existing development-log entry
+Commit catalog, contract and review changes together. Do not commit the
+rendered `README.md` or `index.html`: they embed the source fingerprint and
+conflicted on every concurrent merge. `check` compares freshly rendered views,
+so always run `render` first; it still fails on stale boundary reviews,
+invalid contracts, missing evidence and unverified pins. CI renders the views
+before any step reads them. Rendering cannot automatically renew reviews. Update the existing development-log entry
 and handoff, and use the fleet presence/mailbox for agent coordination. A review
 record does not substitute for passing tests or scientific approval.
 

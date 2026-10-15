@@ -137,3 +137,21 @@ def test_uncatalogued_directory_is_still_listed(sandbox) -> None:
     text = index.read_text(encoding="utf-8")
     assert "### Not yet catalogued" in text
     assert "[`delta/`](delta/)" in text
+
+
+def test_generated_agent_context_views_are_not_pages(sandbox) -> None:
+    """Git-ignored rendered views must not change the map (#12544).
+
+    A local ``agent_context render`` writes ``README.md`` beside the committed
+    ``USAGE.md``; a clean checkout has no such file. The map must read the
+    same in both, so the rendered view is neither counted nor linked.
+    """
+    mod, _, _ = sandbox
+    context = mod.DOCS_DIR / "agent_context"
+    context.mkdir()
+    (context / "USAGE.md").write_text("# usage", encoding="utf-8")
+    before = (mod.entry_target(context), mod.page_count(context))
+    (context / "README.md").write_text("# rendered", encoding="utf-8")
+    (context / "index.html").write_text("<p>rendered</p>", encoding="utf-8")
+    assert (mod.entry_target(context), mod.page_count(context)) == before
+    assert before == ("agent_context/USAGE.md", 1)
