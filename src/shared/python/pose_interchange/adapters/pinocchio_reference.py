@@ -339,16 +339,11 @@ class PinocchioReferenceAdapter:
             need_qddot=qddot is None,
         )
         q_native = _map_rows(q_canonical, _canonical_q_to_pinocchio)
-        qdot_canonical = _optional_motion_matrix(qdot, "qdot", q_native.shape[0])
-        qddot_canonical = _optional_motion_matrix(qddot, "qddot", q_native.shape[0])
-        if qdot_canonical is None or qddot_canonical is None:
-            qdot_estimate, qddot_estimate = _canonical_finite_difference(
-                q_canonical, time_array
-            )
-            if qdot_canonical is None:
-                qdot_canonical = qdot_estimate
-            if qddot_canonical is None:
-                qddot_canonical = qddot_estimate
+        qdot_override = _optional_motion_matrix(qdot, "qdot", q_native.shape[0])
+        qddot_override = _optional_motion_matrix(qddot, "qddot", q_native.shape[0])
+        qdot_canonical, qddot_canonical = _canonical_derivatives(
+            q_canonical, time_array, qdot_override, qddot_override
+        )
         qdot_native = np.vstack(
             [
                 _canonical_velocity_to_pinocchio(q_row, v_row)
@@ -550,6 +545,23 @@ def _pinocchio_acceleration_to_canonical(
         t_mat, t_dot, result[:_FREE_FLYER_V], v_canonical[:_FREE_FLYER_V]
     )
     return result
+
+
+def _canonical_derivatives(
+    q: npt.NDArray[np.float64],
+    times: npt.NDArray[np.float64],
+    qdot_override: npt.NDArray[np.float64] | None,
+    qddot_override: npt.NDArray[np.float64] | None,
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """Return canonical ``(qdot, qddot)``: overrides where given, else estimates."""
+
+    if qdot_override is not None and qddot_override is not None:
+        return qdot_override.copy(), qddot_override.copy()
+    qdot_estimate, qddot_estimate = _canonical_finite_difference(q, times)
+    return (
+        qdot_estimate if qdot_override is None else qdot_override.copy(),
+        qddot_estimate if qddot_override is None else qddot_override.copy(),
+    )
 
 
 def _canonical_tangent_delta(
