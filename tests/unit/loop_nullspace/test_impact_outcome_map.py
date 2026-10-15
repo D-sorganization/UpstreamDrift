@@ -15,6 +15,9 @@ from src.shared.python.impact_parameters.tools_gateway import (
     ToolsDeliveryUnavailableError,
 )
 from src.shared.python.loop_nullspace.evidence import AllocationDependence
+from src.shared.python.loop_nullspace.impact_ball_flight_map import (
+    tools_ball_flight_map,
+)
 from src.shared.python.loop_nullspace.impact_outcome_map import (
     FACE_OUTCOMES,
     OUTCOME_NAMES,
@@ -24,7 +27,6 @@ from src.shared.python.loop_nullspace.impact_outcome_map import (
     constant_twist_flow,
     impact_outcome_map,
     rigid_kinematic_jacobian,
-    tools_ball_flight_map,
 )
 
 pytestmark = pytest.mark.unit
@@ -58,9 +60,7 @@ def make_state(
     if graze:
         vel = 40.0 * FRAME.y_t + 1.0 * FRAME.x_t - 3.0 * FRAME.z_t
     else:
-        vel = v_scale * (
-            38.0 * FRAME.x_t + 6.0 * FRAME.y_t - 4.0 * FRAME.z_t
-        )
+        vel = v_scale * (38.0 * FRAME.x_t + 6.0 * FRAME.y_t - 4.0 * FRAME.z_t)
     return RigidClubState(
         origin_m=target - centre,
         rotation=rot,
@@ -84,9 +84,7 @@ def test_event_gradient_matches_central_difference() -> None:
     for i in range(12):
         e = np.zeros(12)
         e[i] = h
-        fd = (EVENT.value(state.retract(e)) - EVENT.value(state.retract(-e))) / (
-            2 * h
-        )
+        fd = (EVENT.value(state.retract(e)) - EVENT.value(state.retract(-e))) / (2 * h)
         assert grad[i] == pytest.approx(fd, abs=1e-8)
 
 
@@ -113,7 +111,10 @@ def test_analytic_jacobian_matches_central_fd_to_1e8() -> None:
 def test_pure_time_shift_gives_zero_event_change_but_fixed_time_error() -> None:
     state = make_state()
     omap = impact_outcome_map(
-        state, EVENT, FRAME, flow=constant_twist_flow,
+        state,
+        EVENT,
+        FRAME,
+        flow=constant_twist_flow,
         kinematic_jacobian=rigid_kinematic_jacobian,
     )
     flow = constant_twist_flow(state)
@@ -125,11 +126,17 @@ def test_pure_time_shift_gives_zero_event_change_but_fixed_time_error() -> None:
     h = 1e-6
     rates = (
         impact_outcome_map(
-            advance_constant_twist(state, h), EVENT, FRAME, flow=constant_twist_flow,
+            advance_constant_twist(state, h),
+            EVENT,
+            FRAME,
+            flow=constant_twist_flow,
             check_on_event=False,
         ).values
         - impact_outcome_map(
-            advance_constant_twist(state, -h), EVENT, FRAME, flow=constant_twist_flow,
+            advance_constant_twist(state, -h),
+            EVENT,
+            FRAME,
+            flow=constant_twist_flow,
             check_on_event=False,
         ).values
     ) / (2 * h)
@@ -163,11 +170,18 @@ def _event_outcomes(state: RigidClubState, dx: np.ndarray) -> np.ndarray:
 def test_moving_event_linearization_needs_the_saltation_term() -> None:
     state = make_state()
     omap = impact_outcome_map(
-        state, EVENT, FRAME, flow=constant_twist_flow,
+        state,
+        EVENT,
+        FRAME,
+        flow=constant_twist_flow,
         kinematic_jacobian=rigid_kinematic_jacobian,
     )
     rng = np.random.default_rng(7)
-    dx = 1e-4 * rng.standard_normal(12) * np.array([1] * 3 + [1] * 3 + [30] * 3 + [30] * 3)
+    dx = (
+        1e-4
+        * rng.standard_normal(12)
+        * np.array([1] * 3 + [1] * 3 + [30] * 3 + [30] * 3)
+    )
     truth = _event_outcomes(state, dx) - omap.values
     with_term = omap.jacobian @ dx
     without_term = omap.jacobian_fixed_time @ dx  # timing term removed
@@ -197,7 +211,10 @@ def test_unobserved_rotation_makes_face_rows_unavailable() -> None:
             AllocationDependence.INVARIANT
         )
     an = impact_outcome_map(
-        make_state(reason=reason), EVENT, FRAME, flow=constant_twist_flow,
+        make_state(reason=reason),
+        EVENT,
+        FRAME,
+        flow=constant_twist_flow,
         kinematic_jacobian=rigid_kinematic_jacobian,
     )
     assert set(an.unavailable) == set(omap.unavailable)
@@ -205,7 +222,7 @@ def test_unobserved_rotation_makes_face_rows_unavailable() -> None:
 
 def test_off_event_state_and_bad_inputs_are_rejected() -> None:
     state = make_state()
-    off = state.retract(np.array([0.05, 0, 0, 0, 0, 0] + [0.0] * 6))
+    off = state.retract(np.array([0.0, 0.05, 0, 0, 0, 0] + [0.0] * 6))
     with pytest.raises(ValueError, match="event"):
         impact_outcome_map(off, EVENT, FRAME, flow=constant_twist_flow)
     with pytest.raises(TypeError):
@@ -225,9 +242,7 @@ def test_grazing_contact_is_flagged_unreliable() -> None:
 
 
 def test_section_and_flow_are_labelled() -> None:
-    omap = impact_outcome_map(
-        make_state(), EVENT, FRAME, flow=constant_twist_flow
-    )
+    omap = impact_outcome_map(make_state(), EVENT, FRAME, flow=constant_twist_flow)
     assert omap.section == "event"
     assert "diagnostic" in omap.fixed_time_label.lower()
 
@@ -265,9 +280,7 @@ def _stub_gateway() -> ToolsDeliveryGateway:
 def test_tools_ball_flight_uses_black_box_fd_and_event_projection() -> None:
     state = make_state()
     omap = impact_outcome_map(state, EVENT, FRAME, flow=constant_twist_flow)
-    bf = tools_ball_flight_map(
-        state, omap, FRAME, gateway_loader=_stub_gateway, flow=constant_twist_flow
-    )
+    bf = tools_ball_flight_map(state, omap, FRAME, gateway_loader=_stub_gateway)
     assert "spin_loft_3d_deg" in bf.names
     assert bf.unavailable.keys() == {"planar_spin_loft_deg"}
     i = bf.names.index("spin_loft_3d_deg")
@@ -284,9 +297,7 @@ def test_tools_unavailable_is_reported_not_raised() -> None:
 
     state = make_state()
     omap = impact_outcome_map(state, EVENT, FRAME, flow=constant_twist_flow)
-    bf = tools_ball_flight_map(
-        state, omap, FRAME, gateway_loader=missing, flow=constant_twist_flow
-    )
+    bf = tools_ball_flight_map(state, omap, FRAME, gateway_loader=missing)
     assert bf.available is False
     assert "Tools not installed" in bf.unavailable_reason
     for rec in bf.records.values():
@@ -296,8 +307,6 @@ def test_tools_unavailable_is_reported_not_raised() -> None:
 def test_tools_ball_flight_is_unavailable_when_face_unobserved() -> None:
     state = make_state(reason="axial rotation unobserved")
     omap = impact_outcome_map(state, EVENT, FRAME, flow=constant_twist_flow)
-    bf = tools_ball_flight_map(
-        state, omap, FRAME, gateway_loader=_stub_gateway, flow=constant_twist_flow
-    )
+    bf = tools_ball_flight_map(state, omap, FRAME, gateway_loader=_stub_gateway)
     assert bf.available is False
     assert "axial rotation unobserved" in bf.unavailable_reason
