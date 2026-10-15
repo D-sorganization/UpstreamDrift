@@ -2288,6 +2288,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12557 · NSX-12: Analytic Closed-Loop Oracle Fixtures (Planar Two-Arm Golfer, Straight Arm, Envelope, Spatial Pinocchio Chain) Reproducing NSX-00 Goldens
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12557
+- **Branch:** merged via #12614
+- **PR:** #12614
+- **Paths:** see #12614
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`3a97285d`; collated from changes/12557-nsx-12-analytic-closed-loop-oracle-fixtu.md)
+- **Summary:** NSX-12: analytic closed-loop oracle fixtures (planar two-arm golfer, straight arm, envelope, spatial Pinocchio chain) reproducing NSX-00 goldens
+- **Next step:** Shipped in PR #12614.
+
 ### DL-#12555 · NSX-10: ClosedLoopSnapshot, LoopTopology and Evidence-Axis Contracts
 
 - **State:** shipped
