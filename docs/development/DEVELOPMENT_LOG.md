@@ -1766,12 +1766,12 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Owner:** claude
 - **Issue:** #9545 (epic #9541)
 - **Branch:** claude/issue-9545-api
-- **PR:** #11516 (draft), #12449, #12495, #12440, #12506, #12515, #12519, #12522, #12535
+- **PR:** #11516 (draft), #12449, #12495, #12440, #12506, #12515, #12519, #12522, #12535, #12541
 - **Paths:** src/api/routes/bunker_workbench.py; src/tools/bunker_shot_gui/input_ranges.py; src/tools/bunker_shot_gui/design.py; src/tools/bunker_shot_gui/widgets.py; src/tools/bunker_shot_gui/report.py; src/tools/bunker_shot_gui/render.py; src/config/feature_parity.json; tests/bunkershot3d/test_bunker_workbench_api.py
 - **Started:** 2026-10-04
-- **Last verified:** 2026-10-14 (`4a813c93`; collated from changes/9545-bunkershot3d-figure-exports-carry-tier-v.md)
+- **Last verified:** 2026-10-15 (`09b41bd3`; collated from changes/9545-bunkershot3d-particle-playback-panel-emb.md)
 - **Summary:** The headless workbench API enforces request ranges, handedness and source-stamped verdicts; predictive playability is refused or reported without ranking. UI and API share input-range authority.
-- **Next step:** Merge the PR; wire a desktop Export action to export_figure in a later slice.
+- **Next step:** Merge the PR; producer (pychrono F3) stays deferred under #12536.
 
 ### DL-#9544 · Bunker Contact Regimes and Coupled Club Rotation Across Fidelity Tiers
 
