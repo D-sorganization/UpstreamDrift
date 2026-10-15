@@ -456,10 +456,12 @@ def compute_invariants(
             f"metric label {metric.label!r} does not match the decompositions' "
             f"metric {label!r}"
         )
+    admitted_report = admitted.report
+    admitted_gates = admitted_report.gates
     used = gates or dataclasses.replace(
         AdmissionGates(),
-        length_scale_m=admitted.report.gates.length_scale_m,
-        time_scale_s=admitted.report.gates.time_scale_s,
+        length_scale_m=admitted_gates.length_scale_m,
+        time_scale_s=admitted_gates.time_scale_s,
     )
     frames = tuple(
         FrameInvariants(
