@@ -351,6 +351,19 @@ GRF, else `UNAVAILABLE`), `N_c^T tau` (metric-free), `P_{c,W} tau` labelled with
 invariance under random null-space perturbations to `1e-9` scaled on the
 planar goldens.
 
+As built: `decomposition` is one `Decomposition` per frame (a lone
+`Decomposition` is a `TypeError`); optional keywords are `club_ne` (per-frame
+bare-club Newton-Euler keywords), `gates` (an `AdmissionGates`; default is the
+strict defaults with the trajectory's scales) and `metric`. Record names are
+`net_club_wrench`, `loop_power`, `base_centroidal_rows`, `tangent_pairing` and
+`min_metric_torque`. Each is `INVARIANT` or `UNAVAILABLE` with a reason:
+`Phi_ddot` gates the net wrench, `Phi_dot` gates the loop power and the tangent
+pairing, and a free ground load additionally needs stationary contacts and
+`J_g N_c = 0`. The base rows are `J_g,b^T f_obs` on the unactuated coordinates
+outside the loop support, invariant for the observed ground load held fixed, and
+require an absorbable base balance; the centroidal-momentum map is not part of
+the snapshot and is not reported.
+
 ## NSX-20 Solver Backends (#12563)
 
 ```python
