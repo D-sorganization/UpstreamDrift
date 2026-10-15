@@ -10,9 +10,11 @@ then the part is mapped to a material through the clothing preset.
 from __future__ import annotations
 
 from fnmatch import fnmatchcase
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from src.shared.python.model_appearance.schema import (
+    DEFAULT_CLOTHING,
     AppearanceDocument,
     Material,
     SegmentRule,
@@ -21,6 +23,34 @@ from src.shared.python.model_appearance.schema import (
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+
+
+# The grey "plain" palette of the un-styled capsule skeleton, its floor, the
+# centre-of-mass / frame marker spheres and the decorative ball (RGBA). One
+# source for every engine: the MuJoCo visual layer reads it here; the Drake,
+# Pinocchio and OpenSim backends adopt it in R9a/R9b (#12688, #12689).
+PLAIN_PALETTE: Mapping[str, tuple[float, float, float, float]] = MappingProxyType(
+    {
+        "capsule": (0.75, 0.78, 0.85, 1.0),
+        "shape": (0.7, 0.72, 0.8, 1.0),
+        "com": (0.9, 0.35, 0.2, 1.0),
+        "frame": (0.2, 0.6, 0.95, 1.0),
+        "floor": (0.35, 0.45, 0.3, 1.0),
+        "ball": (0.95, 0.95, 0.95, 1.0),
+    }
+)
+# Material of a body that classifies as no anatomical part ("other"): the
+# plain grey, never a skin tone, so an unrecognised body is visibly unstyled.
+PLAIN_BODY_MATERIAL = "plain_grey"
+
+
+def plain_rgba(key: str) -> tuple[float, float, float, float]:
+    """RGBA of one plain-palette entry. Precondition: ``key`` is in the palette."""
+    if key not in PLAIN_PALETTE:
+        raise ValueError(
+            f"Unknown plain palette entry {key!r}; known: {sorted(PLAIN_PALETTE)}"
+        )
+    return PLAIN_PALETTE[key]
 
 
 def _skin(rgb: tuple[float, float, float]) -> Material:
@@ -89,6 +119,7 @@ MATERIALS: dict[str, Material] = {
             repeat=8.0,
         ),
     ),
+    PLAIN_BODY_MATERIAL: Material(PLAIN_PALETTE["capsule"], 0.6),
     "studio_floor": Material(
         (0.55, 0.57, 0.60, 1.0),
         0.6,
@@ -107,6 +138,9 @@ CLUB_FINISHES = ("satin_steel", "chrome", "graphite", "black_pvd")
 
 # The lower-body garment is keyed on the thigh; the pelvis always wears it.
 PANTS_PART = "thigh"
+# Owner ruling (#12685): the default outfit is charcoal trousers, one trouser
+# token for the pelvis and both legs, hip to ankle, in every engine.
+TROUSERS_MATERIAL = "trousers_charcoal"
 
 
 def _outfit(top: str, pants: str, shoes: str, *, full_length: bool) -> dict[str, str]:
@@ -133,9 +167,11 @@ CLOTHING: dict[str, dict[str, str]] = {
         "polo_navy", "shorts_khaki", "shoe_white", full_length=False
     ),
     "golf_polo_trousers": _outfit(
-        "polo_white", "trousers_charcoal", "shoe_black", full_length=True
+        "polo_white", TROUSERS_MATERIAL, "shoe_black", full_length=True
     ),
 }
+if DEFAULT_CLOTHING not in CLOTHING:  # pragma: no cover - import-time invariant
+    raise ValueError(f"Default clothing preset {DEFAULT_CLOTHING!r} is not defined")
 
 
 def pants_material(preset: str) -> str | None:
@@ -202,6 +238,12 @@ PART_RULES: tuple[tuple[str, str], ...] = (
 # Visual-only cross-section radius per part (metres). Capsule radii from the
 # shared skeleton are mass-derived and clamped thin; a character needs a torso
 # wider than a limb. Appearance never feeds back into inertias.
+# Sizing rule (R8, #12685): limbs, hands, feet and head always use these
+# radii. The trunk (torso, pelvis) is sized from the spec's own
+# ``visual_hints`` ellipsoids (stature fractions) by
+# ``body_meshes.section_size``; the torso/pelvis entries here (and their
+# ``PART_ASPECT``) are only the documented default for a trunk body that has
+# no hint shapes (e.g. the v1 spec), reported as ``source="library_default"``.
 PART_RADIUS_M: dict[str, float] = {
     "torso": 0.145,
     "pelvis": 0.125,
@@ -217,12 +259,37 @@ PART_RADIUS_M: dict[str, float] = {
 # Depth/width aspect of the cross-section (1 = round).
 PART_ASPECT: dict[str, float] = {"torso": 0.72, "pelvis": 0.78, "foot": 0.7}
 GARMENT_THICKNESS = 1.08
-# Fractional extent of a garment along the segment: (start, end).
+# Fractional extent of a garment along the segment: (start, end). Partial
+# bands are flat-capped; (0, 1) is a closed spindle that encloses the skin.
 GARMENT_COVERAGE: dict[str, tuple[float, float]] = {
     "upper_arm": (0.0, 0.62),
     "thigh": (0.0, 0.6),
     "shin": (0.0, 1.0),
 }
+FULL_COVERAGE = (0.0, 1.0)
+LEG_PARTS = ("thigh", "shin")
+
+
+def is_full_length(preset: str) -> bool:
+    """Whether ``preset``'s pants reach the ankle (its shins wear its pants)."""
+    if preset not in CLOTHING:
+        raise ValueError(f"Unknown clothing preset: {preset}")
+    pants = CLOTHING[preset].get(PANTS_PART)
+    return pants is not None and CLOTHING[preset].get("shin") == pants
+
+
+def garment_coverage(preset: str, part: str) -> tuple[float, float]:
+    """Fractional garment extent of ``part`` under clothing ``preset``.
+
+    Full-length pants (trousers) cover every leg segment completely, hip to
+    ankle, so no skin band shows at the knee; shorts keep the partial thigh
+    band of ``GARMENT_COVERAGE``. Precondition: a known preset.
+    """
+    if is_full_length(preset) and part in LEG_PARTS:
+        return FULL_COVERAGE
+    return GARMENT_COVERAGE.get(part, FULL_COVERAGE)
+
+
 # Segment smoothness: loft resolution, and ball blends where limbs meet the trunk.
 LOFT_RINGS, LOFT_SIDES = 22, 36
 BLEND_PARTS = ("upper_arm", "thigh")
@@ -332,6 +399,8 @@ def material_name_for(doc: AppearanceDocument, body_name: str) -> str:
     part = classify_body(body_name)
     if part == "club":
         return doc.club_finish
+    if part == "other":
+        return PLAIN_BODY_MATERIAL  # never silently skin
     return doc.skin_tone  # clothing, gloves and shoes are garment layers
 
 

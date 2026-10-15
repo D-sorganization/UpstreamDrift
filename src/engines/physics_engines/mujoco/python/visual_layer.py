@@ -17,6 +17,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.model_appearance import library
 from src.shared.python.model_appearance.ball import BALL_RADIUS_M, resolve_ball_visual
 from src.shared.python.model_appearance.club_assembly import (
     ClubAssembly,
@@ -33,19 +34,22 @@ from src.shared.python.motion_matching.visual_skeleton import (
 from src.shared.python.video_timing.frame_schedule import FrameSchedule
 
 _VISUAL_CLASS = "visual"
-_CAPSULE_RGBA = "0.75 0.78 0.85 1"
-_SHAPE_RGBA = "0.7 0.72 0.8 1"
 # Centre-of-mass and frame spheres sit in a group the renderer hides by
 # default (groups 0 to 2 are shown); enable group 3 to inspect them.
 _MARKER_SPHERE_GROUP = "3"
-_COM_RGBA = "0.9 0.35 0.2 1"
-_FRAME_RGBA = "0.2 0.6 0.95 1"
-_FLOOR_RGBA = "0.35 0.45 0.3 1"
-_BALL_RGBA = "0.95 0.95 0.95 1"
 
 
 def _numbers(values: Any) -> str:
     return " ".join(format(float(v), ".9g") for v in np.asarray(values).ravel())
+
+
+def plain_rgba(key: str) -> tuple[float, float, float, float]:
+    """Plain-layer colour from the one shared palette (``library.PLAIN_PALETTE``)."""
+    return library.plain_rgba(key)
+
+
+def _rgba(key: str) -> str:
+    return _numbers(plain_rgba(key))
 
 
 def _to_mjcf_frame(offset: np.ndarray, point: np.ndarray) -> np.ndarray:
@@ -144,7 +148,7 @@ def _attach_decorative_ball(
         type="sphere",
         pos=_numbers(position),
         size=_numbers([BALL_RADIUS_M]),
-        rgba=_BALL_RGBA,
+        rgba=_rgba("ball"),
         attrib={"class": _VISUAL_CLASS},
     )
     return {"enabled": True, "position_m": position.tolist(), "source": source}
@@ -189,7 +193,6 @@ def attach_visual_layer(
             root,
             elements,
             offsets,
-            skeleton,
             appearance,
             assembly_from_spec(spec),
             spec=spec,
@@ -222,7 +225,7 @@ def attach_visual_layer(
             type="capsule",
             fromto=_numbers(np.concatenate((start, end))),
             size=_numbers([capsule.radius_m]),
-            rgba=_CAPSULE_RGBA,
+            rgba=_rgba("capsule"),
             attrib={"class": _VISUAL_CLASS},
         )
     club = assembly_from_spec(spec)
@@ -250,7 +253,7 @@ def attach_visual_layer(
                 _to_mjcf_frame(offsets[shape.body], np.asarray(shape.center_m))
             ),
             size=_numbers(shape.half_size_m),
-            rgba=_SHAPE_RGBA,
+            rgba=_rgba("shape"),
             attrib={"class": _VISUAL_CLASS},
         )
     for i, sphere in enumerate(skeleton.spheres):
@@ -263,7 +266,7 @@ def attach_visual_layer(
                 _to_mjcf_frame(offsets[sphere.body], np.asarray(sphere.center_m))
             ),
             size=_numbers([sphere.radius_m]),
-            rgba=_COM_RGBA if sphere.kind == "com" else _FRAME_RGBA,
+            rgba=_rgba("com" if sphere.kind == "com" else "frame"),
             group=_MARKER_SPHERE_GROUP,
             attrib={"class": _VISUAL_CLASS},
         )
@@ -281,7 +284,7 @@ def attach_visual_layer(
         **(
             {"material": appearance_meta["ground_material"]}
             if appearance is not None
-            else {"rgba": _FLOOR_RGBA}
+            else {"rgba": _rgba("floor")}
         ),
     )
     up = normal * 3.0

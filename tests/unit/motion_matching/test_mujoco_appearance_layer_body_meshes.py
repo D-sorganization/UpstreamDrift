@@ -140,7 +140,6 @@ def test_chest_is_wider_than_deep_in_the_world_frame(stem) -> None:
     )
     ml = shoulders - (shoulders @ up) * up
     ml /= np.linalg.norm(ml)
-    ap = np.cross(ml, up)
     chest = next(b["name"] for b in spec["bodies"] if b["name"].endswith("COMRod"))
     chest_id = model.body(chest).id
     skins = [
@@ -150,12 +149,21 @@ def test_chest_is_wider_than_deep_in_the_world_frame(stem) -> None:
     ]
     assert len(skins) == 1, "one trunk solid on the chest"
     pts = _world_mesh_points(mujoco, model, data, skins[0])
-    width, depth, height = (float(np.ptp(pts @ axis)) for axis in (ml, ap, up))
+    # The v1 zero pose leans the trunk, so its long axis (principal direction
+    # of the mesh across the world shoulder line) need not be vertical;
+    # chest-to-back is then measured perpendicular to both.
+    planar = pts - np.outer(pts @ ml, ml)
+    planar -= planar.mean(axis=0)
+    long_axis = np.linalg.eigh(planar.T @ planar)[1][:, -1]
+    ap = np.cross(ml, long_axis)
+    width, depth, height = (float(np.ptp(pts @ a)) for a in (ml, ap, long_axis))
     size = section_size(spec, chest)
     assert width == pytest.approx(2 * size.radius_m, rel=0.05), (width, size)
     assert depth == pytest.approx(2 * size.radius_m * size.aspect, rel=0.05)
     assert depth < width, ("chest-to-back must be < shoulder-to-shoulder", depth, width)
-    assert height > width, "the trunk solid's long axis is vertical in the world"
+    assert height > width, "the trunk solid is longer than it is wide"
+    tilt = np.degrees(np.arccos(abs(float(long_axis @ up))))
+    assert tilt < 45.0, ("trunk long axis is not upright in the world", tilt)
 
 
 @pytest.mark.parametrize("stem", sorted(SPECS))

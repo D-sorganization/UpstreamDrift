@@ -87,7 +87,7 @@ describe('AppearancePanel', () => {
 
     // Defaults mirror AppearanceDocument (schema.py), not the first option.
     expect((screen.getByLabelText(/Skin Tone/i) as HTMLSelectElement).value).toBe('skin_medium');
-    expect((screen.getByLabelText(/Clothing/i) as HTMLSelectElement).value).toBe('golf_polo_shorts');
+    expect((screen.getByLabelText(/Clothing/i) as HTMLSelectElement).value).toBe('golf_polo_trousers');
     expect((screen.getByLabelText(/Headwear/i) as HTMLSelectElement).value).toBe('hair');
   });
 
@@ -98,7 +98,7 @@ describe('AppearancePanel', () => {
     await screen.findByRole('option', { name: 'skin_light' });
 
     expect(onPaletteChange).toHaveBeenCalledWith(
-      expect.objectContaining({ trunk: rgbaToHex(LIBRARY.materials.polo_navy.base_color) }),
+      expect.objectContaining({ trunk: rgbaToHex(LIBRARY.materials.polo_white.base_color) }),
     );
   });
 
@@ -110,12 +110,11 @@ describe('AppearancePanel', () => {
     onPaletteChange.mockClear();
 
     const clothingSelect = screen.getByLabelText(/Clothing/i) as HTMLSelectElement;
-    fireEvent.change(clothingSelect, { target: { value: 'golf_polo_trousers' } });
+    fireEvent.change(clothingSelect, { target: { value: 'golf_polo_shorts' } });
 
     expect(onPaletteChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        trunk: rgbaToHex(LIBRARY.materials.polo_white.base_color),
-        shank: rgbaToHex(LIBRARY.materials.trousers_charcoal.base_color),
+        trunk: rgbaToHex(LIBRARY.materials.polo_navy.base_color),
       }),
     );
   });
@@ -152,7 +151,7 @@ describe('AppearancePanel', () => {
 
     const expectedBody = JSON.stringify({
       skin_tone: 'skin_medium',
-      clothing: 'golf_polo_shorts',
+      clothing: 'golf_polo_trousers',
       club_finish: 'satin_steel',
       headwear: 'hair',
       headwear_material: 'hair_brown',
@@ -213,7 +212,7 @@ describe('AppearancePanel', () => {
 
     const expectedBody = JSON.stringify({
       skin_tone: 'skin_medium',
-      clothing: 'golf_polo_shorts',
+      clothing: 'golf_polo_trousers',
       club_finish: 'satin_steel',
       headwear: 'hair',
       headwear_material: 'hair_brown',
