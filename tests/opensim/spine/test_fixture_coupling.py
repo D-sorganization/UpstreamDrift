@@ -1,7 +1,7 @@
 """Fixture coupler constraints and lumped trunk muscles (SPN-7b, #12751).
 
 Pure XML tests run without OpenSim; native tests load the coupled model,
-prescribe the massless driver coordinates ``phi`` and check, to 1e-8, that the
+prescribe the massless driver coordinates ``phi`` and check, to 1e-9, that the
 level coordinates equal ``law.expand(phi)`` and that the thorax-proxy pose
 equals the ADR-0055 composition.  Every number is invented.
 """
@@ -65,6 +65,11 @@ class TestCouplerXml:
         assert root.find(".//ConstraintSet") is None
         assert root.find(f".//Body[@name='{DRIVER_BODY}']") is None
         assert root.find(".//ForceSet") is None
+
+    def test_coupled_fixture_tightens_assembly_accuracy(self) -> None:
+        assert _root().find("Model/assembly_accuracy") is None
+        accuracy = _root(coupling=_law()).findtext("Model/assembly_accuracy")
+        assert accuracy is not None and float(accuracy) <= 1e-12
 
     def test_driver_body_is_massless_and_inertia_free(self) -> None:
         body = _root(coupling=_law()).find(
@@ -305,10 +310,10 @@ class TestNativeCoupling:
         expand = law.expand(phi)
         for lv, names in zip(LUMBAR, fixture_level_names(FixtureSpec()), strict=True):
             got = [coordinate_value(model, state, n) for n in names.coordinates]
-            np.testing.assert_allclose(got, expand[lv], atol=1e-8, rtol=0)
+            np.testing.assert_allclose(got, expand[lv], atol=1e-9, rtol=0)
         for name, value in zip(PHI_NAMES, phi, strict=True):
             assert coordinate_value(model, state, name) == pytest.approx(
-                value, abs=1e-8
+                value, abs=1e-9
             )
 
     @pytest.mark.parametrize("seed", range(3))
@@ -327,7 +332,7 @@ class TestNativeCoupling:
             fixture_base_offset(spec) @ pose.compose() @ fixture_terminal_offset(spec)
         )
         got = body_transform_in(model, state, "thorax_proxy", "pelvis")
-        np.testing.assert_allclose(got, want, atol=1e-8, rtol=0)
+        np.testing.assert_allclose(got, want, atol=1e-9, rtol=0)
 
     def test_driver_body_does_not_move_the_chain(self, coupled) -> None:
         from src.engines.physics_engines.opensim.python.spine._osim_helpers import (

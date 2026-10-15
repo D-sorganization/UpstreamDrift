@@ -235,6 +235,18 @@ def _add_muscles(model: ET.Element) -> None:
             _add_muscle(objects, mdef, side)
 
 
+#: Assembly accuracy for coupled fixtures; OpenSim's default (1e-9) leaves
+#: coupler residuals at the 1e-9 acceptance tolerance of issue #12751.
+ASSEMBLY_ACCURACY = 1e-12
+
+
+def _set_assembly_accuracy(model: ET.Element) -> None:
+    node = model.find("assembly_accuracy")
+    if node is None:
+        node = ET.SubElement(model, "assembly_accuracy")
+    node.text = repr(ASSEMBLY_ACCURACY)
+
+
 def augment_fixture_tree(
     root: ET.Element,
     spec: FixtureSpec,
@@ -261,6 +273,7 @@ def augment_fixture_tree(
     if model is None:
         raise ValueError("root has no Model element")
     if law is not None:
+        _set_assembly_accuracy(model)
         _add_driver_body(model)
         _add_driver_joint(model, law.independent)
         _add_couplers(model, law, spec)
