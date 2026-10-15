@@ -10,6 +10,7 @@ rows that do not balance) is NaN with a ``None`` or ``INFEASIBLE`` status.
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass, replace
 from enum import Enum
 from typing import Any
@@ -226,7 +227,7 @@ class KindOutcome:
     def assemble(
         cls,
         kind: ClosureKind,
-        decs: list[Decomposition | BalanceInconsistentError],
+        decs: Sequence[Decomposition | BalanceInconsistentError],
         sets: list[FeasibleSet],
         where: list[int],
         series: EnvelopeSeries | None,
@@ -239,10 +240,10 @@ class KindOutcome:
         scales = tuple(q.scale for q in table[id(sets[0])]) if sets else ()
         q = len(names)
         lower, upper = np.full((n, q), np.nan), np.full((n, q), np.nan)
-        s_lo = [[None] * q for _ in range(n)]
-        s_hi = [[None] * q for _ in range(n)]
+        s_lo: list[list[BoundStatus | None]] = [[None] * q for _ in range(n)]
+        s_hi: list[list[BoundStatus | None]] = [[None] * q for _ in range(n)]
         sign: list[list[SignClass | None]] = [[None] * q for _ in range(n)]
-        frames = [None] * n
+        frames: list[KindFrame | None] = [None] * n
         for i, dec in enumerate(decs):
             if isinstance(dec, BalanceInconsistentError):
                 frames[i] = KindFrame(
@@ -259,7 +260,10 @@ class KindOutcome:
                 list(series.status_upper[k]),
             )
             sign[i] = list(series.sign_class[k])
-            frames[i] = _decomposed_frame(kind, i, decs[i], sets[k], s_lo[i])
+            dec_i = decs[i]
+            if isinstance(dec_i, BalanceInconsistentError):
+                raise ValueError(f"frame {i} is balance-inconsistent but has a series")
+            frames[i] = _decomposed_frame(kind, i, dec_i, sets[k], s_lo[i])
         aligned = AlignedSeries(
             names,
             units,
