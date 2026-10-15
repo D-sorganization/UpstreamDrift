@@ -199,7 +199,7 @@ keep their numeric meaning under legacy ids; new ids are new measurands.
 | `trunk_lateral_flexion_jcs` | `lead_lateral_flexion` of `R_pelvis→thorax` | pelvis→thorax rotation, handedness | deg, lead-side positive |
 | `side_bend_tilt` | Lab-frame trunk-axis tilt split into components (`motion_matching/posture_metrics.py::SpineBend`) | trunk axis, `up`, `target` | deg |
 | `crunch_factor_legacy_v1` | `\|lateral°\| · \|rotation°\| / 100` (existing analyzer) | angle series | deg² / 100 |
-| `crunch_factor_rate` | Lateral flexion angle × axial rotation angular velocity (Sutcliffe et al. 2008 sense; confirmed in #12737) | `trunk_lateral_flexion_jcs`, `x_factor_jcs_axial` series | deg·deg/s |
+| `crunch_factor_rate` | Lateral flexion angle × axial rotation angular velocity (Sugaya, Tsuchiya & Moriya 1999, Science and Golf III; cited via Cole & Grimshaw 2014, primary unverified per #12737) | `trunk_lateral_flexion_jcs`, `x_factor_jcs_axial` series | deg·deg/s |
 | `early_extension` | Change in pelvis-to-target-line distance (or pelvis anterior translation) from address, with `trunk_extension_jcs` change reported alongside | pelvis position, `target`, `up`, events | m, toward the ball positive |
 | `reverse_spine_angle` | Trunk-axis tilt toward the target at the top, in the vertical plane containing the target line | trunk axis, `up`, `target`, top event | deg, toward target positive |
 
