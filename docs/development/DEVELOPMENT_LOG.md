@@ -2288,6 +2288,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12551 · NSX-02 Canonical Closure Jacobian Convention (Frame, Row Order, Sign) With Per-Engine Declared Conventions, Golden and Cross-Engine Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12551
+- **Branch:** merged via #12610
+- **PR:** #12610
+- **Paths:** see #12610
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`a3442c7d`; collated from changes/12551-nsx-02-canonical-closure-jacobian-conven.md)
+- **Summary:** NSX-02 canonical closure Jacobian convention (frame, row order, sign) with per-engine declared conventions, golden and cross-engine tests
+- **Next step:** Shipped in PR #12610.
+
 ### DL-#12635 · Port MyoSuite Runtime Loading to a Version-Tolerant Shim (Env_Base Removed in 3.0.0) so the Myosuite Extras Stay Unpinned
 
 - **State:** shipped
