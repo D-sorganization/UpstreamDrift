@@ -240,8 +240,24 @@ Implementation notes (Pinocchio reference, #12558):
 
 ```python
 def admit(trajectory: Sequence[ClosedLoopSnapshot], *, gates: AdmissionGates,
-          repair: Literal["none", "project_to_closure"] = "none") -> AdmissionReport
+          times: ArrayLike, plant: ClosurePlant | None = None,
+          repair: Literal["none", "project_to_closure"] = "none",
+          rebuild: Callable[[Array, Array, Array], ClosedLoopSnapshot] | None = None,
+          ) -> AdmissionReport
 ```
+
+`times` holds one time stamp per frame. `plant` supplies the position-level
+residual `Phi(q)` (the `ClosurePlant` of `project_to_closure`); a snapshot
+carries no position residual. Without a plant the gate rejects unless
+`gates.require_position` is `False`, an explicit and recorded skip of the
+position level. `rebuild(q, v, a)` re-creates a snapshot at a repaired state and
+is required, together with `plant`, when `repair="project_to_closure"`.
+
+Repair reuses `project_to_closure` on frames failing at the position or
+velocity level, then projects the acceleration onto the tangent set of the
+projected state, `a' = a - J_c^+ (J_c a + Jdot_v)`, and re-evaluates. Every
+correction (`dq`, `dv`, `da` norms and the before and after states) is recorded.
+A frame failing only at the acceleration level is never repaired.
 
 `AdmissionReport` carries per-frame scaled `Phi`, `Phi_dot`, `Phi_ddot`
 residuals, derivative method and noise floor, time-synchronisation result,
@@ -250,7 +266,9 @@ contact-mode consistency and a verdict `ADMITTED`, `REJECTED(reasons)` or
 time. Postcondition: `AdmittedTrajectory` is constructible only from an
 `ADMITTED` or `REPAIRED` report. Residual scaling: position `Phi` by the
 characteristic length, velocity by length over time, acceleration by length
-over time squared. Default gate: scaled residual below `1e-6` at each level.
+over time squared. Default gate: scaled residual below `1e-6` at each level. The characteristic
+scales default to `L = 1 m` and `T = 1 s` (`length_scale_m`, `time_scale_s`);
+callers should pass model scales.
 Failing frames are named by index.
 
 ## NSX-15 Decomposition (#12560)
