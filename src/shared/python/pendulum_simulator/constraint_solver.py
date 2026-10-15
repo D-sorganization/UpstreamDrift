@@ -28,6 +28,11 @@ import logging
 import math
 import numpy as np
 
+from src.shared.python.loop_nullspace.constrained_dynamics import (
+    Baumgarte,
+    constrained_acceleration,
+)
+
 from . import native_backend as _native_backend
 from .golfer_constraints import analytical_constraint_jacobian as constraint_jacobian
 from .golfer_constraints import (
@@ -51,45 +56,6 @@ logger = logging.getLogger(__name__)
 # Baumgarte stabilization gains (default values)
 DEFAULT_ALPHA = 5.0
 DEFAULT_BETA = 5.0
-
-
-def _solve_independent_kkt(
-    M: np.ndarray,
-    Phi_q: np.ndarray,
-    rhs_dyn: np.ndarray,
-    rhs_constraint: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Solve the KKT system on the independent closure rows only (#12608).
-
-    Rows 2-3 rotate rows 0-1, so including them makes the KKT matrix
-    near-singular off the manifold and amplifies the residual without bound.
-    The massless wrist DOFs leave exact zero columns in M and Phi_q, so the
-    KKT matrix stays singular; the minimum-norm least-squares solution is
-    exact for that consistent singular system.
-
-    Returns
-    -------
-    tuple[np.ndarray, np.ndarray]
-        Joint accelerations (N_DOF,) and all N_CONSTRAINTS multipliers; the
-        redundant rows carry zero multiplier.
-    """
-    rows = list(INDEPENDENT_CLOSURE_ROWS)
-    n = N_DOF
-    m = len(rows)
-    KKT = np.zeros((n + m, n + m))
-    KKT[:n, :n] = M
-    KKT[:n, n:] = Phi_q[rows].T
-    KKT[n:, :n] = Phi_q[rows]
-
-    rhs = np.zeros(n + m)
-    rhs[:n] = rhs_dyn
-    rhs[n:] = rhs_constraint[rows]
-
-    sol, _, _, _ = np.linalg.lstsq(KKT, rhs, rcond=None)
-
-    lambda_forces = np.zeros(N_CONSTRAINTS)
-    lambda_forces[rows] = sol[n:]
-    return sol[:n], lambda_forces
 
 
 def _solve_constrained_dynamics(
@@ -158,23 +124,37 @@ def _solve_constrained_dynamics(
 
     tau_f = friction_torque_vector(qdot, params)
 
-    # Right-hand side of unconstrained EOM
-    rhs_dyn = tau + tau_f - C - G
-
     # Constraint terms
     Phi = constraint_vector(q, params)
     Phi_q = constraint_jacobian(q, params)
 
-    # Constraint velocity: Phi_dot = Phi_q * qdot
-    Phi_dot = Phi_q @ qdot
-
     # Gamma term: Phi_qq * qdot * qdot (computed numerically)
     gamma = _constraint_acceleration_bias(q, qdot, params)
 
-    # Baumgarte RHS
-    rhs_constraint = -gamma - 2.0 * alpha * Phi_dot - beta**2 * Phi
-
-    qddot, lambda_forces = _solve_independent_kkt(M, Phi_q, rhs_dyn, rhs_constraint)
+    # One KKT projector for every closed-loop solve (NSX-30, #12570), on the
+    # independent closure rows only (#12608): rows 2-3 rotate rows 0-1 and make
+    # the KKT matrix near-singular off the manifold.  The pendulum convention is
+    # ``M qddot + Phi_q^T lambda = tau + tau_f - C - G``, i.e.
+    # lambda = -lambda_projector; Baumgarte terms are declared explicitly and the
+    # redundant rows carry zero multiplier.
+    rows = list(INDEPENDENT_CLOSURE_ROWS)
+    phi_q_ind = Phi_q[rows]
+    qddot, lam = constrained_acceleration(
+        M,
+        C + G,
+        tau + tau_f,
+        phi_q_ind,
+        gamma[rows],
+        baumgarte=Baumgarte(
+            alpha=alpha,
+            beta=beta,
+            position_error=Phi[rows],
+            velocity_error=phi_q_ind @ qdot,
+        ),
+        singular_mass_fallback=True,
+    )
+    lambda_forces = np.zeros(N_CONSTRAINTS)
+    lambda_forces[rows] = -lam
 
     assert np.all(np.isfinite(qddot)), f"qddot has non-finite values: {qddot}"
     assert np.all(np.isfinite(lambda_forces)), (

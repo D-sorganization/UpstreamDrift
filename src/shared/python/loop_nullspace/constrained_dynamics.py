@@ -21,12 +21,15 @@ implementation of the projector; the pendulum simulator calls it.  Pure numpy.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import ArrayLike
 
 from src.shared.python.loop_nullspace.evidence import Array
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "Baumgarte",
@@ -120,6 +123,30 @@ def _inverse_mass_products(mass: Array, jac: Array, rhs: Array) -> tuple[Array, 
     return solve(rhs), solve(jac.T)
 
 
+def _is_spd(mass: Array) -> bool:
+    try:
+        np.linalg.cholesky(0.5 * (mass + mass.T))
+    except np.linalg.LinAlgError:
+        return False
+    return True
+
+
+def _block_solve(
+    mass: Array, jac: Array, free_load: Array, drift: Array
+) -> tuple[Array, Array]:
+    """Augmented-system solve for a semi-definite ``M`` (see the caller)."""
+    n, m = mass.shape[0], jac.shape[0]
+    kkt = np.block([[mass, -jac.T], [jac, np.zeros((m, m))]])
+    rhs = np.concatenate([free_load, -drift])
+    # Minimum-norm least squares: exact for the consistent singular system a
+    # massless degree of freedom leaves (zero columns in M and J), and equal
+    # to the direct solve whenever the block matrix is nonsingular.
+    sol = np.linalg.lstsq(kkt, rhs, rcond=None)[0]
+    if not np.isfinite(sol).all():
+        raise ValueError("constrained dynamics produced non-finite values")
+    return np.asarray(sol[:n]), np.asarray(sol[n:])
+
+
 def kkt_projector(mass: ArrayLike, jac: ArrayLike) -> Array:
     """``P_c = M^-1 (I - J_c^T Lambda_c J_c M^-1)`` with ``Lambda_c`` a pinv.
 
@@ -144,6 +171,7 @@ def constrained_acceleration(
     Jdot_v: ArrayLike,  # noqa: N803 - spec name
     *,
     baumgarte: Baumgarte | None = None,
+    singular_mass_fallback: bool = False,
 ) -> tuple[Array, Array]:
     """Closure-consistent acceleration and reaction ``(a, lambda)``.
 
@@ -159,6 +187,13 @@ def constrained_acceleration(
     ``M a + h - tau - J_c^T lambda = 0`` to ``1e-9`` scaled for full-rank or
     consistent rank-deficient ``J_c``; ``lambda`` is the minimum-norm
     multiplier (unique only up to ``null(J_c^T)``).
+
+    ``singular_mass_fallback`` is for degenerate legacy models whose ``M`` is
+    only positive semi-definite (the pendulum golfer's massless club degree of
+    freedom): the projector does not exist there, so the equivalent augmented
+    block system ``[[M, -J^T], [J, 0]]`` is solved (least squares if singular),
+    which agrees with the projector whenever ``M`` is positive definite.
+    Without the flag a non-positive-definite ``M`` raises ``ValueError``.
     """
     m_arr, j_arr, drift = _checked(M, J_c, Jdot_v)
     n = m_arr.shape[0]
@@ -168,6 +203,8 @@ def constrained_acceleration(
         raise ValueError("h and tau must be finite")
     if baumgarte is not None:
         drift = baumgarte.drift(drift)
+    if singular_mass_fallback and not _is_spd(m_arr):
+        return _block_solve(m_arr, j_arr, load - bias, drift)
     free, minv_jt = _inverse_mass_products(m_arr, j_arr, load - bias)
     if j_arr.shape[0] == 0:
         return free, np.zeros(0)
