@@ -292,6 +292,18 @@ def min_metric_torque(snapshot, W: np.ndarray | AllocationMetric) -> np.ndarray
 - `min_metric_torque` returns `tau = W^-1 S J_c^T lambda`-form minimiser of
   `tau^T W tau` subject to the equality; `W = M^-1` is allowed only as the
   labelled metric `C-METRIC-MINV`.
+- Implementation notes (`loop_nullspace/decomposition.py`): `AllocationMetric`
+  is a labelled SPD matrix on the actuated torques (`identity`, `inverse_mass`
+  for `C-METRIC-MINV`; a bare matrix is recorded as `USER_DECLARED`). `x_p` is
+  the minimum-metric-torque particular solution, with minimum scaled norm among
+  those. `zero_side_solve` resolves the side from coordinate-name prefixes
+  (`lead` and `club`; `trail`; `club`) unless `indices=` is given, reports the
+  residual in physical (`residual`) and characteristic (`residual_scaled`)
+  units, and records `damping`. `dimension_accounting` gives the counts without
+  requiring a balanced state; `decompose` raises `BalanceInconsistentError`
+  (a `ValueError`) when the unactuated rows cannot be balanced.
+  `decompose_trajectory`, `zero_side_trajectory` and
+  `min_metric_torque_trajectory` accept only an `AdmittedTrajectory` (NSX-14).
 - Goldens: all four planar variants (`dimensions`, `zero_side`,
   `min_metric_torque`). Dimension identity
   `nullity = multiplier_gauge + attainable_torque_variation` holds when
