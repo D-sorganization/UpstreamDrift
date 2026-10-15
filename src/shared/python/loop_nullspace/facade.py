@@ -397,6 +397,118 @@ def _validate(trajectory: object, engine: object, options: object) -> None:
         raise TypeError("options must be an AnalysisOptions")
 
 
+def _resolve_preset(
+    reg: registry.Registry, preset: str, engine: EngineContext
+) -> registry.HypothesisSet:
+    """The preset's hypotheses, checked against what the engine supplies."""
+    try:
+        hyp_set = reg.preset(preset)
+    except KeyError as exc:
+        raise ValueError(f"unknown preset {preset!r}") from exc
+    declared = hyp_set.hypothesis_ids()
+    if "H-TORQUE-CAPACITY" in declared and engine.capacity is None:
+        raise ValueError("the preset declares H-TORQUE-CAPACITY but no capacity is set")
+    if "H-GRF-OBSERVATION" in declared and engine.observation_for is None:
+        raise ValueError(
+            "the preset declares H-GRF-OBSERVATION but the engine supplies no observation"
+        )
+    return hyp_set
+
+
+def _report_skeleton(
+    reg: registry.Registry,
+    hyp_set: registry.HypothesisSet,
+    engine: EngineContext,
+    options: AnalysisOptions,
+) -> dict[str, Any]:
+    """The report with every stage section still empty."""
+    model = engine.model_provenance
+    return {
+        "schema_version": REPORT_SCHEMA_VERSION,
+        "status": "complete",
+        "registry_version": reg.registry_version,
+        "preset": hyp_set.id,
+        "engine": {
+            "name": engine.name,
+            "model_provenance": {
+                "name": model.name,
+                "version": model.version,
+                "content_hash": model.content_hash,
+            },
+        },
+        "options": options.as_dict(),
+        "hypotheses": hypotheses_dict(reg, hyp_set),
+        "non_claims": list(NON_CLAIMS),
+        "admission": None,
+        "invariants": None,
+        "envelopes": None,
+        "allocation": None,
+        "restriction_sensitivity": None,
+    }
+
+
+def _trajectory_section(
+    trajectory: TrajectoryInput,
+    indices: Sequence[int],
+    refused: Sequence[RefusedFrame],
+) -> dict[str, Any]:
+    prov = trajectory.provenance
+    return {
+        "input_provenance": {
+            "kind": prov.kind,
+            "source": prov.source,
+            "note": prov.note,
+        },
+        "n_input_frames": len(trajectory.snapshots) + len(trajectory.refused),
+        "frame_indices": sorted(
+            [*trajectory.frame_indices, *(r.index for r in trajectory.refused)]
+        ),
+        "analyzed_frame_indices": list(indices),
+        "refused_frames": [r.as_dict() for r in sorted(refused, key=lambda r: r.index)],
+    }
+
+
+def _admission_stage(
+    report: dict[str, Any],
+    snaps: Sequence[ClosedLoopSnapshot],
+    times: Sequence[float],
+    indices: Sequence[int],
+    engine: EngineContext,
+    run: _Run,
+) -> AdmittedTrajectory | None:
+    """Admit the frames (never repairing); ``None`` when they are rejected."""
+    gates = AdmissionGates(require_position=engine.plant is not None)
+    adm_report = admit(
+        snaps, gates=gates, times=times, plant=engine.plant, repair="none"
+    )
+    report["admission"] = admission_dict(adm_report, indices)
+    run.done("admission")
+    if adm_report.verdict.kind is VerdictKind.REJECTED:
+        report["status"] = "admission_rejected"
+        report["reason"] = "; ".join(adm_report.verdict.reasons)
+        return None
+    return AdmittedTrajectory.from_report(adm_report)
+
+
+def _invariants_stage(
+    report: dict[str, Any],
+    admitted: AdmittedTrajectory,
+    decs: Sequence[Decomposition],
+    snaps: Sequence[ClosedLoopSnapshot],
+    indices: Sequence[int],
+    engine: EngineContext,
+    run: _Run,
+) -> None:
+    club = (
+        None
+        if engine.club_newton_euler is None
+        else [engine.club_newton_euler(s) for s in snaps]
+    )
+    inv = invariants_dict(compute_invariants(admitted, decs, club_ne=club), indices)
+    report["invariants"] = inv
+    run.done("invariants", {"invariants": inv})
+
+
 def analyze(
     trajectory: TrajectoryInput,
     engine: EngineContext,
@@ -427,59 +539,16 @@ def analyze(
     options = options if options is not None else AnalysisOptions()
     _validate(trajectory, engine, options)
     reg = registry.load_registry()
-    try:
-        hyp_set = reg.preset(preset)
-    except KeyError as exc:
-        raise ValueError(f"unknown preset {preset!r}") from exc
-    declared = hyp_set.hypothesis_ids()
-    if "H-TORQUE-CAPACITY" in declared and engine.capacity is None:
-        raise ValueError("the preset declares H-TORQUE-CAPACITY but no capacity is set")
-    if "H-GRF-OBSERVATION" in declared and engine.observation_for is None:
-        raise ValueError(
-            "the preset declares H-GRF-OBSERVATION but the engine supplies no observation"
-        )
+    hyp_set = _resolve_preset(reg, preset, engine)
     run = _Run(on_stage, should_cancel)
     run.check()
 
-    report: dict[str, Any] = {
-        "schema_version": REPORT_SCHEMA_VERSION,
-        "status": "complete",
-        "registry_version": reg.registry_version,
-        "preset": preset,
-        "engine": {
-            "name": engine.name,
-            "model_provenance": {
-                "name": engine.model_provenance.name,
-                "version": engine.model_provenance.version,
-                "content_hash": engine.model_provenance.content_hash,
-            },
-        },
-        "options": options.as_dict(),
-        "hypotheses": hypotheses_dict(reg, hyp_set),
-        "non_claims": list(NON_CLAIMS),
-        "admission": None,
-        "invariants": None,
-        "envelopes": None,
-        "allocation": None,
-        "restriction_sensitivity": None,
-    }
+    report = _report_skeleton(reg, hyp_set, engine, options)
     kept, decs, refused = _decompose_all(trajectory, options)
     snaps = [trajectory.snapshots[p] for p in kept]
     indices = [trajectory.frame_indices[p] for p in kept]
     times = [trajectory.times_s[p] for p in kept]
-    report["trajectory"] = {
-        "input_provenance": {
-            "kind": trajectory.provenance.kind,
-            "source": trajectory.provenance.source,
-            "note": trajectory.provenance.note,
-        },
-        "n_input_frames": len(trajectory.snapshots) + len(trajectory.refused),
-        "frame_indices": sorted(
-            [*trajectory.frame_indices, *(r.index for r in trajectory.refused)]
-        ),
-        "analyzed_frame_indices": indices,
-        "refused_frames": [r.as_dict() for r in sorted(refused, key=lambda r: r.index)],
-    }
+    report["trajectory"] = _trajectory_section(trajectory, indices, refused)
     run.done("decomposition")
     if len(snaps) < 3:
         report["status"] = "insufficient_frames"
@@ -488,26 +557,10 @@ def analyze(
         )
         return report
 
-    gates = AdmissionGates(require_position=engine.plant is not None)
-    adm_report = admit(
-        snaps, gates=gates, times=times, plant=engine.plant, repair="none"
-    )
-    report["admission"] = admission_dict(adm_report, indices)
-    run.done("admission")
-    if adm_report.verdict.kind is VerdictKind.REJECTED:
-        report["status"] = "admission_rejected"
-        report["reason"] = "; ".join(adm_report.verdict.reasons)
+    admitted = _admission_stage(report, snaps, times, indices, engine, run)
+    if admitted is None:
         return report
-
-    admitted = AdmittedTrajectory.from_report(adm_report)
-    club = (
-        None
-        if engine.club_newton_euler is None
-        else [engine.club_newton_euler(s) for s in snaps]
-    )
-    inv = invariants_dict(compute_invariants(admitted, decs, club_ne=club), indices)
-    report["invariants"] = inv
-    run.done("invariants", {"invariants": inv})
+    _invariants_stage(report, admitted, decs, snaps, indices, engine, run)
     if not options.include_envelopes:
         return report
 
