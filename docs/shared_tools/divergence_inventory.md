@@ -286,7 +286,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `contracts.py` | -1052 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-13 |
+| `contracts.py` | +55 |  | Dieter Olson 2026-10-15 | d-sorgcodexagent[bot] 2026-10-13 |
 
 ### Package `gui_launcher` (4 Diverged Files)
 
@@ -310,12 +310,12 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `humanoid_character_builder/generators/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/generators/_makehuman_generator.py` | +21 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-06-20 |
 | `humanoid_character_builder/generators/_mesh_types.py` | +1917 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/generators/_primitive_generator.py` | +25 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-06-20 |
-| `humanoid_character_builder/generators/_smplx_generator.py` | +340 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-06-20 |
+| `humanoid_character_builder/generators/_primitive_generator.py` | +83 |  | Dieter Olson 2026-10-15 | Dieter Olson 2026-06-20 |
+| `humanoid_character_builder/generators/_smplx_generator.py` | -12622 |  | Dieter Olson 2026-10-15 | Dieter Olson 2026-06-20 |
 | `humanoid_character_builder/generators/mesh_generator.py` | +380 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/generators/mesh_generator_primitive.py` | +16 | yes | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/generators/mesh_generator_smplx.py` | +16 | yes | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/generators/urdf_generator.py` | -442 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
+| `humanoid_character_builder/generators/urdf_generator.py` | -8352 |  | Dieter Olson 2026-10-15 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/interfaces/__init__.py` | +74 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/interfaces/api.py` | +36 | yes | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/mesh/__init__.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
@@ -354,7 +354,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/builders/base_builder.py` | +2068 |  | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/builders/manual_builder.py` | +20 | yes | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
 | `model_generation/builders/parametric_builder.py` | +14 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
-| `model_generation/builders/urdf_writer.py` | +1601 |  | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/builders/urdf_writer.py` | +2963 |  | Dieter Olson 2026-10-15 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/cli/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/cli/main.py` | +52 | yes | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
 | `model_generation/converters/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |

@@ -7,6 +7,8 @@ from humanoid_character_builder import CharacterBuilder
 from humanoid_character_builder.core.body_parameters import BodyParameters
 from humanoid_character_builder.presets.loader import list_available_presets
 
+pytestmark = pytest.mark.unit
+
 
 class TestSelfCollisionExclusions:
     """Test that generated URDFs include proper collision exclusions."""

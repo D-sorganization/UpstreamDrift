@@ -140,3 +140,25 @@ class TestPreconditionDecorator:
                 compute(None, -1)
         finally:
             set_contract_level(original)
+
+    @pytest.mark.unit
+    def test_named_condition_reads_defaulted_argument_not_first_positional(
+        self,
+    ) -> None:
+        """A condition naming one parameter must see that parameter (#12706).
+
+        Calling the condition with the raw positional args first fed
+        ``total_mass_kg`` to ``lambda gender_factor: ...`` whenever
+        ``gender_factor`` was left at its default.
+        """
+
+        @precondition(
+            lambda gender_factor: 0.0 <= gender_factor <= 1.0,
+            "gender_factor must be in [0, 1]",
+        )
+        def masses(total_mass_kg: float, gender_factor: float = 0.5) -> float:
+            return total_mass_kg * gender_factor
+
+        assert masses(75.0) == pytest.approx(37.5)
+        with pytest.raises(ContractViolationError, match="gender_factor"):
+            masses(75.0, gender_factor=2.0)

@@ -3,7 +3,13 @@
 # Canonical changes must be made in the Tools repository under src/shared/python/
 # and synchronized back to UpstreamDrift. Direct edits here risk being lost.
 
-"""SMPL-X mesh generator backend."""
+"""SMPL-X mesh generator backend.
+
+This is the only ``SMPLXMeshGenerator`` implementation (issue #12706).
+``_smplx_generator`` re-exports it; it used to hold a second, divergent copy
+whose measured-betas support (#8404) never reached the ``mesh_generator``
+facade. That support now lives here.
+"""
 
 from __future__ import annotations
 
@@ -12,7 +18,11 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from humanoid_character_builder.core.body_parameters import BodyParameters, GenderModel
+
+from src.shared.python.humanoid_character_builder.core.body_parameters import (
+    BodyParameters,
+    GenderModel,
+)
 
 from ._mesh_types import (
     GeneratedMeshResult,
@@ -280,7 +290,12 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
     def _convert_params_to_betas(params: BodyParameters) -> np.ndarray:
         """Convert BodyParameters to SMPL-X beta shape parameters.
 
-        SMPL-X betas control body shape (NUM_BETAS dimensions):
+        Measured betas (``params.smplx_betas``, e.g. from the 4D-Humans/HMR2
+        sidecar's ``betas.json``) are returned verbatim and take precedence
+        over the heuristic mapping below (#8404). ``BodyParameters`` already
+        rejects an empty or non-numeric ``smplx_betas`` at construction.
+
+        Otherwise SMPL-X betas control body shape (NUM_BETAS dimensions):
         - beta[0]: Height (deviation from mean 1.75 m, scaled by 0.2)
         - beta[1]: BMI (deviation from mean 22, scaled by 5)
         - beta[2]: Shoulder width (deviation from 1.0 factor)
@@ -296,8 +311,16 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             params: Body parameters to convert.
 
         Returns:
-            numpy array of shape (NUM_BETAS,).
+            numpy array of the measured betas, or of shape (NUM_BETAS,).
+
+        Raises:
+            ValueError: If *params* is None.
         """
+        if params is None:
+            raise ValueError("params must be provided")
+        if params.smplx_betas is not None:
+            return np.asarray([float(b) for b in params.smplx_betas], dtype=float)
+
         betas = np.zeros(SMPLXMeshGenerator.NUM_BETAS)
 
         # beta[0]: Height
@@ -342,7 +365,13 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         output_dir: Path,
         **kwargs: Any,
     ) -> GeneratedMeshResult:
-        """Generate meshes using SMPL-X body model."""
+        """Generate meshes using SMPL-X body model.
+
+        Raises:
+            ValueError: If *params* is None.
+        """
+        if params is None:
+            raise ValueError("params must be provided")
         # Look up flags via the public facade so test patches take effect (#4528).
         from . import mesh_generator as _mg
 
@@ -360,6 +389,19 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
                 error_message="trimesh package not installed. Install with: pip install trimesh",
             )
 
+        # Resolve the model directory instead of passing ``str(None)`` to
+        # smplx.create when none was configured (ported from the deleted copy).
+        model_dir = self._find_model_path()
+        if model_dir is None:
+            return GeneratedMeshResult(
+                success=False,
+                solver_status="failure",
+                error_message=(
+                    "SMPL-X model files not found: pass an existing model_dir "
+                    "or install them in ~/.smplx"
+                ),
+            )
+
         output_dir = Path(output_dir)
         visual_dir = output_dir / "visual"
         collision_dir = output_dir / "collision"
@@ -371,7 +413,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
 
             # Use mock-patchable module references via the public facade (#4528)
             model = _mg._smplx_module.create(  # type: ignore[union-attr]
-                str(self.model_dir),
+                str(model_dir),
                 model_type="smplx",
                 gender=gender,
                 use_pca=False,
@@ -426,9 +468,14 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             )
 
     def _find_model_path(self) -> Path | None:
-        """Find SMPL-X model files."""
-        if self.model_dir and self.model_dir.exists():
-            return self.model_dir
+        """Find SMPL-X model files.
+
+        An explicitly configured ``model_dir`` is used only if it exists; it is
+        never silently replaced by a directory found elsewhere. Without one, the
+        common install locations are searched.
+        """
+        if self.model_dir is not None:
+            return self.model_dir if self.model_dir.exists() else None
 
         # Common locations
         search_paths = [
@@ -491,7 +538,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         """
         if not (visual_dir is not None):
             raise ValueError("visual_dir must be provided")
-        from humanoid_character_builder.core.segment_definitions import (
+        from src.shared.python.humanoid_character_builder.core.segment_definitions import (
             HUMANOID_SEGMENTS,
         )
 
@@ -574,51 +621,6 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             },
         )
 
-    @staticmethod
-    def _extract_smplx_segments(
-        mesh: Any,
-        visual_dir: Path,
-        collision_dir: Path,
-        vertex_groups: dict[str, list[int]],
-        valid_segments: Any,
-    ) -> tuple[dict[str, Path], dict[str, Path]]:
-        """Extract and export individual segment meshes from SMPL-X vertex groups."""
-        if not (visual_dir is not None):
-            raise ValueError("visual_dir must be provided")
-        mesh_paths: dict[str, Path] = {}
-        collision_paths: dict[str, Path] = {}
-
-        for segment_name, vertices in vertex_groups.items():
-            if segment_name not in valid_segments or len(vertices) < 10:
-                continue
-
-            try:
-                vertex_set = set(vertices)
-                face_mask = [
-                    i
-                    for i, face in enumerate(mesh.faces)
-                    if any(v in vertex_set for v in face)
-                ]
-
-                if not face_mask:
-                    continue
-
-                submesh = mesh.submesh([face_mask], append=True)
-
-                visual_path = visual_dir / f"{segment_name}.stl"
-                submesh.export(str(visual_path))
-                mesh_paths[segment_name] = visual_path
-
-                collision_mesh = submesh.convex_hull
-                collision_path = collision_dir / f"{segment_name}.stl"
-                collision_mesh.export(str(collision_path))
-                collision_paths[segment_name] = collision_path
-
-            except (ValueError, ZeroDivisionError, OverflowError, TypeError) as e:
-                logger.warning(f"Failed to extract segment {segment_name}: {e}")
-
-        return mesh_paths, collision_paths
-
     def _fallback_z_segmentation(
         self,
         mesh: Any,
@@ -629,7 +631,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         """Fallback segmentation using z-coordinate slicing."""
         if not (visual_dir is not None):
             raise ValueError("visual_dir must be provided")
-        from humanoid_character_builder.core.segment_definitions import (
+        from src.shared.python.humanoid_character_builder.core.segment_definitions import (
             HUMANOID_SEGMENTS,
         )
 

@@ -14,6 +14,8 @@ from humanoid_character_builder.presets.loader import (
     list_available_presets,
 )  # noqa: E402
 
+pytestmark = pytest.mark.unit
+
 # URDF XML namespace and root element validation
 URDF_ROOT_TAG = "robot"
 REQUIRED_ELEMENTS = ["link", "joint"]
