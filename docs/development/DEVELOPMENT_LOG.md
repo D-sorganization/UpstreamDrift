@@ -24,12 +24,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12702
 - **Branch:** fix/12702-mujoco-smoke-club-body
-- **PR:** #12776
+- **PR:** #12776, #12783
 - **Paths:** see #12776
 - **Started:** 2026-10-15
-- **Last verified:** 2026-10-15 (`54672a6b`; collated from changes/12702-mujoco-native-smoke-club-body.md)
+- **Last verified:** 2026-10-15 (`789e583f`; collated from changes/12702-dynamics-rms-smoke-spec.md)
 - **Summary:** Fix the 'spec has no club body' crash on the MuJoCo-native driver run: assembly_from_spec now recognises the native Simscape club (segmented 2.5in Butt grip, no Grip solid) so the default v2 spec carries a club body; Lane.set_club_targets fails fast via club_face_target.require_club_assembly naming the spec source. The smoke test now gets past set_club_targets but still fails on dynamics marker RMS (0.51 m vs 0.15 m bound), a separate regression; the smoke is marked slow and runs in no CI lane
-- **Next step:** Merge the PR; triage the driver dynamics marker RMS regression (0.089 m measured 2026-09-30, 0.51 m now, independent of --face-weight) and put the slow smoke in a nightly lane.
+- **Next step:** Merge the PR; put the slow smoke in a nightly lane (it runs in no CI lane today).
 
 ### DL-#12683 · R3: Trail-Foot Toe-Out Owner Style Target (TRAIL_TOE_OUT_STYLE_DEG = 20 Deg, Single-Sourced From DEFAULT_TOE_OUT_DEG) via a New --Foot-Progression Style Mode, Now the Canonical Default; Capture Mode Still Lets the Measurement Win; Per-Foot Target_Source in Receipts; Driver Trail -2.9 -> 19.8 Deg, 7-Iron -9.8 -> 13.5 Deg (Hip_Rotation_R at Its -40 Deg Limit)
 

@@ -2741,6 +2741,7 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-15 | #12783 | Smoke test dynamics RMS 0.51 m was not a code regression: test_mujoco_native_match_smoke[driver] ran the pipeline's default native v2 spec, not the canonical anthro_driver document its 0.15 m bound and 0.089 m figure come from; the driver now passes --spec full_body_spec_anthro_driver.json (current main reproduces receipt anthro_driver: IK 0.0465, dynamics 0.0719), pinned by a fast unit test; bounds unchanged |
 | 2026-10-15 | #12779 | OpenSim MSK renders draw the wrapped-finger grip hands on the club and hide the flat Rajagopal hand bones |
 | 2026-10-15 | #12776 | Fix the 'spec has no club body' crash on the MuJoCo-native driver run: assembly_from_spec now recognises the native Simscape club (segmented 2.5in Butt grip, no Grip solid) so the default v2 spec carries a club body; Lane.set_club_targets fails fast via club_face_target.require_club_assembly naming the spec source. The smoke test now gets past set_club_targets but still fails on dynamics marker RMS (0.51 m vs 0.15 m bound), a separate regression; the smoke is marked slow and runs in no CI lane |
 | 2026-10-15 | #12733 | NSX-81: add orthogonal conditioning axis to QuantityRecord so INVARIANT quantities can declare hypotheses they are conditioned on |
