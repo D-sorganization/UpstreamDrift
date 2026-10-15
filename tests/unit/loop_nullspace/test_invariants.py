@@ -67,7 +67,9 @@ def _report(snap, metric=None, gates=STRICT, **options):
     return adm, decs, compute_invariants(adm, decs, **options)
 
 
-CASES = [(k, a) for k in ("generic", "straight_arm") for a in ("full", "club_unactuated")]
+CASES = [
+    (k, a) for k in ("generic", "straight_arm") for a in ("full", "club_unactuated")
+]
 
 
 def _scaled_err(a, b):
@@ -110,7 +112,9 @@ def test_invariants_do_not_move_under_null_space_perturbation(kind, actuation):
     rec = rep.frames[0].records
     n_a = snap.topology.n_actuated
     support = [
-        i for i in snap.topology.loop_support_indices if i in snap.topology.actuated_indices
+        i
+        for i in snap.topology.loop_support_indices
+        if i in snap.topology.actuated_indices
     ]
     pos = [snap.topology.actuated_indices.index(i) for i in support]
     basis = tangent_basis(snap, dec)
@@ -147,18 +151,22 @@ def test_min_metric_label_and_values_change_with_w():
     snap = _planar("generic", "full")
     _, _, a = _report(snap, AllocationMetric.identity(5))
     _, _, b = _report(snap, AllocationMetric.inverse_mass(snap))
-    ra, rb = a.frames[0].records["min_metric_torque"], b.frames[0].records[
-        "min_metric_torque"
-    ]
+    ra, rb = (
+        a.frames[0].records["min_metric_torque"],
+        b.frames[0].records["min_metric_torque"],
+    )
     assert "C-METRIC-IDENTITY" in ra.conventions
     assert "C-METRIC-MINV" in rb.conventions
     assert ra.conventions != rb.conventions
     assert np.max(np.abs(ra.values - rb.values)) > 1e-6
     # the metric-free quantities do not care
     for name in ("loop_power", "tangent_pairing"):
-        assert _scaled_err(
-            a.frames[0].records[name].values, b.frames[0].records[name].values
-        ) < TOL
+        assert (
+            _scaled_err(
+                a.frames[0].records[name].values, b.frames[0].records[name].values
+            )
+            < TOL
+        )
 
 
 def test_explicit_metric_must_match_decomposition_label():
@@ -224,18 +232,73 @@ def test_gate_tolerance_is_per_frame():
     assert [r.allocation_dependence for r in rep.records("loop_power")] == kinds
 
 
-def test_loop_power_unavailable_when_contact_load_reaches_outside_support():
+def _with_ground_load(column: int, speed: float):
+    """Planar snapshot with one ground-load row on ``column``.
+
+    ``speed`` is the contact velocity ``J_g v`` the row is made to have.
+    """
     snap = _planar("generic", "full")
-    # a ground load acting on an actuated coordinate that no closure row touches
-    support = set(snap.topology.loop_support_indices)
-    outside = [i for i in snap.topology.actuated_indices if i not in support]
-    if not outside:
-        pytest.skip("every actuated coordinate is in the loop support")
-    j_g = np.zeros((1, 5))
-    j_g[0, outside[0]] = 1.0
-    with_g = dataclasses.replace(snap, J_g=j_g)
-    _, _, rep = _report(with_g)
-    assert rep.frames[0].records["loop_power"].allocation_dependence is UNAV
+    other = next(i for i in range(5) if i != column and abs(snap.v[i]) > 1e-3)
+    row = np.zeros((1, 5))
+    row[0, column] = 1.0
+    row[0, other] = (speed - snap.v[column]) / snap.v[other]
+    return dataclasses.replace(snap, J_g=row)
+
+
+def test_loop_power_ground_load_gates_both_ways():
+    snap = _planar("generic", "full")
+    inside = snap.topology.loop_support_indices[0]
+    # stationary contact, load inside the support: invariant
+    ok = _with_ground_load(inside, 0.0)
+    ok_rec = _report(ok)[2].frames[0].records["loop_power"]
+    assert ok_rec.allocation_dependence is INV
+    # moving contact: contact power (J_g v)^T f_g is free, so unavailable
+    moving = _with_ground_load(inside, 1.0)
+    rec = _report(moving)[2].frames[0].records["loop_power"]
+    assert rec.allocation_dependence is UNAV
+    assert "contact power" in rec.reason
+    # stationary contact but the load acts on an actuated coordinate outside the
+    # declared loop support: the support power would depend on f_g
+    topo = dataclasses.replace(
+        ok.topology,
+        loop_support_indices=tuple(
+            i for i in ok.topology.loop_support_indices if i != inside
+        ),
+    )
+    outside = dataclasses.replace(ok, topology=topo)
+    rec = _report(outside)[2].frames[0].records["loop_power"]
+    assert rec.allocation_dependence is UNAV
+    assert "outside the loop support" in rec.reason
+
+
+def test_loop_power_is_invariant_with_free_stationary_ground_load():
+    snap = _with_ground_load(
+        _planar("generic", "full").topology.loop_support_indices[0], 0.0
+    )
+    _, decs, rep = _report(snap)
+    dec = decs[0]
+    assert dec.nullity > 0
+    inside, _ = (list(snap.topology.loop_support_indices), None)
+    rng = np.random.default_rng(3)
+    want = rep.frames[0].records["loop_power"].values[0]
+    for _ in range(5):
+        tau = dec.torque(rng.normal(size=dec.nullity))
+        got = float(tau[inside] @ snap.v[inside])
+        assert abs(got - want) <= TOL * max(1.0, abs(want))
+
+
+def test_tangent_pairing_with_ground_load_gate_both_ways():
+    snap = _planar("generic", "full")
+    basis = tangent_basis(snap, decompose(snap, weights=AllocationMetric.identity(5)))
+    loaded = _with_ground_load(0, 0.0)
+    assert np.max(np.abs(loaded.J_g @ basis)) > 1e-3
+    rec = _report(loaded)[2].frames[0].records["tangent_pairing"]
+    assert rec.allocation_dependence is UNAV
+    assert "J_g N_c" in rec.reason
+    # a ground row in the row space of J_c has J_g N_c = 0: the gate passes
+    ortho = dataclasses.replace(snap, J_g=snap.J_c[:1])
+    rec = _report(ortho)[2].frames[0].records["tangent_pairing"]
+    assert rec.allocation_dependence is INV
 
 
 def test_precondition_errors():
@@ -270,7 +333,23 @@ def test_report_is_json_serializable_and_round_trips_reasons():
 
 
 def _spatial(floating: bool, feet: bool):
-    return spatial_two_arm_club_snapshot(floating_root=floating, feet=feet).snapshot
+    """Spatial snapshot with the base rows made dynamically balanceable.
+
+    The fixture's rates are kinematically admissible but not dynamically
+    consistent for a floating base, so ``h`` on the base rows is set so that
+    ``b_u = J_cu^T lambda_0 + J_gu^T f_0`` for a random ``lambda_0, f_0``.
+    """
+    snap = spatial_two_arm_club_snapshot(floating_root=floating, feet=feet).snapshot
+    unact = list(snap.topology.unactuated_indices)
+    if not unact:
+        return snap
+    rng = np.random.default_rng(7)
+    target = snap.J_c[:, unact].T @ rng.normal(size=snap.J_c.shape[0])
+    if snap.J_g is not None:
+        target = target + snap.J_g[:, unact].T @ rng.normal(size=snap.J_g.shape[0])
+    h = np.array(snap.h)
+    h[unact] = target - (snap.M @ snap.a)[unact]
+    return dataclasses.replace(snap, h=h)
 
 
 def _with_consistent_grf(snap):
