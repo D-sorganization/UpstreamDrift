@@ -262,6 +262,13 @@
       "parameters": {"sigma": "declared per row", "coverage_k": "declared", "selector_E": "declared linear map of the contact loads", "source": "declared (force plate, or a labelled simulation standing in for one)"},
       "source": {"citation_id": null, "note": "Modelling choice; spec section Lower-Body Loop."},
       "verification_status": "NOT_APPLICABLE"
+    },
+    {
+      "id": "H-INERTIAL-PARAMETER-ENSEMBLE-PRIOR",
+      "statement": "Body inertial parameters are sampled as J' = J^(1/2) (I + Delta) J^(1/2) per body (J the nominal 4x4 pseudo-inertia), with Delta an isotropic Gaussian of declared standard deviation, orthogonally projected in the Delta metric onto the parameter changes that leave the stacked unactuated-row regressor product unchanged (the combinations the observed ground reaction and club wrench cannot identify), and kept only where every sampled body's pseudo-inertia is positive semidefinite; violating draws are counted and never projected. Massless bodies and the declared club carrier are not sampled. The distribution is a modelling choice, not a population or subject estimate.",
+      "parameters": {"sigma_rel": "declared (entries of Delta)", "subspace": "null space of the column-scaled stacked unactuated regressor, rank min(SVD, pivoted QR)", "constraint": "pseudo-inertia PSD, reject not project", "seed": "declared"},
+      "source": {"citation_id": null, "note": "Modelling choice (NSX-62, #12587); consistency cone after Wensing, Kim and Slotine 2018."},
+      "verification_status": "NOT_APPLICABLE"
     }
   ],
   "conventions": [

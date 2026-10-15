@@ -1108,7 +1108,7 @@ scientific qualification (software correctness only).
 `kinematic_ensemble(source, n, seed)`; seeded determinism, rejection counting,
 envelope union contains every member. NSX-62 samples only along unidentified
 directions inside the pseudo-inertia constraint; identified combinations stay
-fixed.
+fixed (see the NSX-62 section below).
 
 ## NSX-80 Variability Sensitivity (#12709)
 
@@ -1459,3 +1459,100 @@ pairs against the Pinocchio ANALYTIC reference, ten metrics each).
   `requires_myosuite` test enforces the per-run bound wherever it loads. The
   variance rows use declared, not measured, noise. Numerical conformance is not
   physical validation.
+- Admission: all 36 samples are admitted (none rejected) at both sigmas.
+- The hypothesis perturbs the root too, so a sample can lift a foot or leave
+  fewer than three contacts. The root rows cannot then be balanced (the
+  acceleration is held at its nominal value) and `decompose` refuses the sample,
+  which is counted, not repaired. At `sigma_q = 0.001` the refused counts are 7,
+  8 and 4 of 12 (19 of 36), leaving 5, 4 and 8 enveloped members. At the
+  kinematic default `sigma_q = 0.02` only 3 of 12 samples in window 0 can be
+  balanced, which is why the envelope report uses the smaller sigma.
+- Union (interval hull, nominal included): the median width over the nominal
+  width is 1.0008, 1.0005 and 1.0008 per window (maximum 1.016, 1.486 and
+  1.026): a kinematic perturbation this small widens the envelope by well under
+  1 percent for the typical quantity and by up to 49 percent for the worst cell.
+  The union contains every member interval in every cell (asserted).
+- Intersection: empty in 15 of 123 (frame, quantity) cells in windows 0 and 150
+  (members with disjoint intervals; elsewhere the median width over nominal is
+  0.9994 and 0.9992, minimum 0.14 and 0.81). In window 300 three member frames
+  are INFEASIBLE under the capacity prior (the perturbation pushes the recorded
+  effort outside it), so the intersection is empty in all 123 cells there; the
+  union skips those members.
+- Sign classes: members disagree on the sign class in 4 of 123 cells (3 frames)
+  in window 0, none in window 150 and 9 cells (3 frames) in window 300; no decided
+  nominal sign becomes INDETERMINATE in the union in any window (0 cells, 0
+  frames). In total 13 cells in 6 of the 9 frames change class across members.
+  An infeasible member frame has no class and is reported separately.
+- Non-claims: the sampling distribution is a declared hypothesis, not measured
+  uncertainty; the hull is not a confidence set; three short windows do not
+  characterise the swing; the capacity prior is ASSUMED and unchanged.
+
+## NSX-62 Inertial Parameter Ensemble (#12587)
+
+`parameter_ensemble.py` propagates the inertial parameters that the data do not
+identify, using the MOSAIC pseudo-inertia algebra (`estimation.mosaic.inertial`)
+rather than a learner. Model: `Y(q, v, a) pi = tau`, `pi` the ten parameters per
+body (Pinocchio layout `m, h, Ixx, Ixy, Iyy, Ixz, Iyz, Izz` about the joint
+origin; the MOSAIC LMI layout swaps `Iyy` and `Ixz`, converted by
+`swap_inertia_layout`).
+
+- Identification. The unactuated root rows of `Y`, stacked over the window
+  (`stacked_unactuated_regressor`; checked against `M a + h` of every snapshot),
+  contain no unknown input once the ground reaction and the club wrench are
+  observed, so their row space is what the window identifies. Columns are scaled
+  by `(m, m r, m r^2)` (`r` the nominal radius of gyration about the joint
+  origin). The rank is `min(SVD rank, column-pivoted QR rank)` at relative
+  tolerance `1e-8`; the QR pivots are the surviving base columns. An
+  identification claim holds only for combinations in this row space.
+- Sampled parameters. Bodies with positive mass other than the club carrier
+  (which holds the hand solids and the club, known from the specification) are
+  sampled; massless bodies and the carrier stay fixed but remain in `Y pi`.
+- Sampling (`H-INERTIAL-PARAMETER-ENSEMBLE-PRIOR`). Per body
+  `J' = J^(1/2) (I + Delta) J^(1/2)`, `Delta` Gaussian with entries of standard
+  deviation `sigma_rel`, orthogonally projected in the `Delta` metric onto the
+  parameter changes `D N z` (`N` the null basis of the scaled stacked
+  regressor), so the identified combinations are fixed by construction and the
+  whitening keeps thin bodies inside the cone for small `sigma_rel`. A draw whose
+  sampled bodies are not all positive semidefinite is rejected and counted
+  (`pseudo_inertia_not_psd`, with the offending bodies); it is never projected
+  onto the cone, because that would move the identified combinations.
+- Envelopes. Each accepted sample is written to the model, its snapshots,
+  decomposition, feasible sets (NSX-60 foot contacts, unchanged
+  `H-TORQUE-CAPACITY`, Coulomb cones) and `static_envelopes` are rebuilt at the
+  same `(q, v, a)`, and the union uses `envelope_union_intersection` of NSX-61.
+  Sensitivity per quantity: union width over nominal width, largest bound shift
+  (absolute and relative to the nominal width), sign-class disagreement and
+  decided signs lost in the union. A sample whose root rows cannot be balanced is
+  counted as refused, never repaired.
+
+Anthro report (`tests/integration/test_loop_nullspace_anthro_parameter_ensemble.py`,
+`slow`; seed 12587, `sigma_rel = 0.05`, 10 samples per window, three windows of
+three consecutive record frames 0 to 2, 150 to 152 and 300 to 302, 41
+quantities: 35 joint torques and the six closure-wrench components). Set
+`LOOP_NULLSPACE_PARAMETER_ENSEMBLE_JSON` to write the record.
+
+- Identification: 18 stacked root rows give rank 18 (SVD and QR agree) on 220
+  sampled parameters (22 bodies), so 202 directions are unidentified. The rank
+  is limited by the three-frame window; a longer window identifies more.
+- Samples: 10 of 10 requested lie inside the LMI in every window, none refused as
+  unbalanced, no nominal or member frame infeasible under the capacity prior. At
+  `sigma_rel = 0.5` (no envelopes) 0 of 100 draws per window are inside the LMI,
+  all counted as `pseudo_inertia_not_psd`.
+- Identified combinations: the largest change of any scaled identified
+  combination is `9.1e-17`, and the largest change of any unactuated row of
+  `M a + h` is `4.5e-13 N m`, over all samples.
+- Sensitivity: the actuated rows of `M a + h` change by up to 0.78, 0.67 and
+  0.76 N m. The median over quantities of the union width over the nominal width
+  is 1.0008, 1.0018 and 1.0014; over the 36 quantities with a nonzero nominal
+  width the maximum is 1.010, 1.034 and 1.019, the largest relative bound shift
+  1.4 to 2.0 percent of the nominal width and the largest absolute bound shift
+  0.78, 0.97 and 2.27 (N m, or N for the closure force). No sign class differs
+  between members and no decided nominal sign is lost in the union.
+
+Non-claims: no subject-specific inertia; the sampling law is a declared
+hypothesis, not a population or measurement distribution; identification is
+conditional on the observed ground reaction and club wrench (the fixture's
+reaction is a simulation, not a force plate); the hull is not a confidence set;
+three short windows do not characterise the swing; the capacity prior is ASSUMED
+and unchanged. Bi-level inertia learning is out of scope.
+
