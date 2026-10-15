@@ -273,8 +273,7 @@ def closure_and_club_analysis(
     *,
     closing_side: str,
     closing_point_m: ArrayLike,
-    closing_force_n: ArrayLike,
-    closing_torque_nm: ArrayLike,
+    closing_wrench: tuple[ArrayLike, ArrayLike],
     holding_point_m: ArrayLike,
     club: Mapping[str, Any],
     split_method: SplitMethod,
@@ -282,6 +281,8 @@ def closure_and_club_analysis(
     closing_hand_club: Mapping[str, Any] | None = None,
 ) -> GripAnalysis:
     """Two-hand analysis from a closure multiplier plus club Newton-Euler.
+
+    ``closing_wrench`` is ``(force_n, torque_nm)`` of the closing hand.
 
     With ``closing_hand_club`` (keywords of the closing hand's welded solids)
     ``closing_*`` is the load on the composite body and is converted to the
@@ -295,6 +296,9 @@ def closure_and_club_analysis(
     """
     if closing_side not in ("L", "R"):
         raise ValueError(f"closing_side must be 'L' or 'R', got {closing_side!r}")
+    if len(closing_wrench) != 2:
+        raise ValueError("closing_wrench must be (force_n, torque_nm)")
+    closing_force_n, closing_torque_nm = closing_wrench
     if closing_hand_club is not None:
         closing_force_n, closing_torque_nm = bare_club_closing_wrench(
             closing_force_n=closing_force_n,

@@ -631,8 +631,7 @@ class FullBodyDrakeModel:
         return closure_and_club_analysis(
             closing_side=self.closing_hand_side,
             closing_point_m=point_b,
-            closing_force_n=rot_wa @ multiplier[3:],
-            closing_torque_nm=rot_wa @ multiplier[:3],
+            closing_wrench=(rot_wa @ multiplier[3:], rot_wa @ multiplier[:3]),
             holding_point_m=holding_point,
             club=self._club_newton_euler(acceleration, interface),
             closing_hand_club=(

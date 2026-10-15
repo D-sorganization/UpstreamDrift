@@ -409,8 +409,7 @@ class NativeMujocoFullBodyModel:
         return closure_and_club_analysis(
             closing_side=self.closing_hand_side,
             closing_point_m=self.data.site_xpos[site_b],
-            closing_force_n=-multiplier[:3],
-            closing_torque_nm=-multiplier[3:],
+            closing_wrench=(-multiplier[:3], -multiplier[3:]),
             holding_point_m=self.data.xpos[body],
             club=self._club_newton_euler(acceleration, interface),
             closing_hand_club=(

@@ -39,8 +39,8 @@ def _analysis(**extra):
     return closure_and_club_analysis(
         closing_side="R",
         closing_point_m=(0.0, 0.0, 0.0),
-        closing_force_n=(0.0, 0.0, 12.0),  # weld load on the composite
-        closing_torque_nm=(0.0, 0.0, 0.0),
+        # weld load on the composite
+        closing_wrench=((0.0, 0.0, 12.0), (0.0, 0.0, 0.0)),
         holding_point_m=(1.0, 0.0, 0.0),
         club=_kw(1.0, (0.5, 0.0, 0.0)),
         split_method="constraint_multiplier",
