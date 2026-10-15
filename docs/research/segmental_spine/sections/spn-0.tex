@@ -1,0 +1,39 @@
+\subsection{Conventions (ADR-0055)}
+\label{sec:spn-0}
+
+The binding conventions are recorded in
+\texttt{docs/adr/0055-segmental-spine-kinematics-and-loads.md} (issue \#12736).
+
+\paragraph{Per-Level Transform.} Each vertebra carries an ISB frame (Wu et al.\
+2002): X anterior, Y cranial, Z right. Level $i$ maps the superior frame into the
+inferior frame,
+\begin{equation}
+  T_i = T_{i,0}\, T\!\left(R_{ZXY}(\theta_i),\, d_i\right),
+\end{equation}
+with neutral offset $T_{i,0}$ and ISB joint-coordinate angles
+$\theta_i = (\theta_{FE}, \theta_{LB}, \theta_{AR})$: extension, right lateral
+bending and left axial rotation positive.
+
+\paragraph{Composition.} For a chain to the named terminal body,
+\begin{equation}
+  T_{\mathrm{pelvis}\to\mathrm{terminal}} = T_{\mathrm{sacrum}}\, T_{L5S1}\, T_{L4L5} \cdots T_{\mathrm{terminal}},
+\end{equation}
+caudal factor first. Angles do not add: for three levels with
+$(\theta_{FE},\theta_{LB},\theta_{AR})$ of $(-10,5,-15)$, $(-10,8,-20)$ and
+$(-15,10,-25)$ degrees, the sum is $(-35, 23, -60)$ but the composed rotation
+gives $(-25.36, 31.83, -57.57)$ degrees.
+
+\paragraph{Loads.} Three observables (generalized effort, joint reaction with
+static-optimization muscle forces, passive elements) are reported as the wrench
+on the superior body by the inferior body, in the inferior ISB frame, about the
+mid-disc centre. Compression is positive $+F_y$, AP shear $F_x$ (anterior),
+ML shear $F_z$ (right).
+
+\paragraph{Distribution.} Per-level angles from a coupling law solve
+$\phi^\ast = \arg\min_\phi \lVert \log(R_{\mathrm{target}}^{\mathsf T} R(\phi))\rVert$
+without altering the law; the geodesic residual is reported, and every output
+carries its \texttt{distribution\_source}.
+
+\paragraph{Limitations.} Per-level angles produced by a coupling law are model
+assumptions, not measurements; golf literature load magnitudes are context
+bands, not acceptance criteria.

@@ -134,3 +134,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/63-analytic-muscle-replay-input.qmd >}}
 
 {{< include chapters/65-loop-null-space.qmd >}}
+
+{{< include chapters/66-segmental-spine.qmd >}}

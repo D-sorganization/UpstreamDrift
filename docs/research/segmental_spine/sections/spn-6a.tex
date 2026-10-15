@@ -1,0 +1,51 @@
+\subsection{Spine Model Asset Manifest and Local-Source Admission}
+\label{sec:spn-6a}
+
+\paragraph{Purpose.}
+Published OpenSim spine models (Bruno et al.\ 2015, DOI 10.1115/1.4030408;
+Senteler et al.\ 2016, Comput.\ Methods Biomech.\ Biomed.\ Eng.\ 19(5):538--548,
+DOI 10.1080/10255842.2015.1043906) are distributed through SimTK behind a login
+and a click-through licence. No downloader exists. The owner supplies local
+files; the code admits them by SHA-256 against
+\texttt{src/config/spine\_model\_assets.json}. No SimTK file, and no value
+transcribed from one, is committed.
+
+\paragraph{Manifest.}
+Entries \texttt{bruno2015\_fullbody\_os4\_v2}, \texttt{senteler2016\_lumbspine\_3dof}
+and \texttt{senteler2016\_lumbspine\_30dof} each carry: \texttt{simtk\_url},
+\texttt{env\_var} (\texttt{UD\_SPINE\_BRUNO\_SOURCE}, \texttt{UD\_SPINE\_SENTELER3\_SOURCE},
+\texttt{UD\_SPINE\_SENTELER30\_SOURCE}), \texttt{model\_sha256} (null until SPN-6b),
+\texttt{resource\_sha256} (map from path relative to the model directory to hash),
+a per-file \texttt{licence\_id} (separate \texttt{model} and \texttt{geometry}
+identifiers, currently marked \emph{unverified}), \texttt{licence\_text\_sha256},
+\texttt{citation} and \texttt{owner\_accepted\_terms\_on}.
+
+\paragraph{Admission.}
+Let $h_m$ be the observed hash of the model file, $\hat h_m$ its pinned hash, and
+$h_r,\hat h_r$ likewise for each pinned resource $r$. The status is the most
+severe of the per-file outcomes, in the order
+\texttt{MISSING} $>$ \texttt{HASH\_MISMATCH} $>$ \texttt{UNPINNED} $>$
+\texttt{QUALIFIED}: a file is \texttt{MISSING} if absent, \texttt{UNPINNED} if
+its pin is null, \texttt{HASH\_MISMATCH} if $h\neq\hat h$, else
+\texttt{QUALIFIED}. An unset environment variable resolves to no request, which
+callers must treat as \texttt{MISSING}. Receipts hold basenames, relative
+resource names and hashes only, never absolute paths. \texttt{QUALIFIED} is a
+byte-identity statement; receipts always carry
+\texttt{scientific\_status = "unqualified"}.
+
+\paragraph{Optional XML Facts.}
+When the OpenSim-free audit
+\texttt{tour\_matching.model\_admission.audit\_muscle\_model\_asset} is importable
+(\texttt{run\_native=False}) its status is attached for a \texttt{QUALIFIED}
+asset; otherwise the receipt records \texttt{unavailable}. Hashing never needs
+OpenSim.
+
+\paragraph{Limitations.}
+Licence identifiers are unverified placeholders until the owner records
+acceptance. Hashes are pinned only after SPN-6b. Resource closure is limited to
+the files listed in the manifest.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python3 -m pytest tests/opensim/spine/test_assets.py -q -n 0
+\end{verbatim}
