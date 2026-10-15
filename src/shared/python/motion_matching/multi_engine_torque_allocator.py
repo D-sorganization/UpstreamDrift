@@ -540,11 +540,12 @@ class SyntheticMultibodyFixture:
 _AnalyticalMultibodyBase = SyntheticMultibodyFixture
 
 
-class DrakeForceAdapter(SyntheticMultibodyFixture):
-    """Drake multibody adapter with exact spatial inverse dynamics and Jacobians.
+class DrakeSyntheticForceAdapter(SyntheticMultibodyFixture):
+    """Drake synthetic multibody adapter for test fixtures only.
 
-    QUARANTINED FIXTURE: Evaluates analytical spatial Featherstone dynamics
-    conforming to Drake spatial vector conventions for test fixtures.
+    The native adapter is ``DrakeForceAdapter`` in
+    ``engines/physics_engines/drake/python/force_adapter.py`` (NSX-53); this
+    analytical fixture is reachable only with ``allow_synthetic=True``.
     """
 
     def __init__(
@@ -556,16 +557,6 @@ class DrakeForceAdapter(SyntheticMultibodyFixture):
         super().__init__(
             nv=nv, n_spheres=n_spheres, mass_scale=mass_scale, leg_coupling=0.08
         )
-        self._has_pydrake = False
-        try:
-            import pydrake  # type: ignore[import-untyped]  # noqa: F401
-
-            self._has_pydrake = True
-            logger.info("DrakeForceAdapter initialized with live pydrake backend.")
-        except ImportError:
-            logger.info(
-                "DrakeForceAdapter running in analytical multibody mode (pydrake not installed)."
-            )
 
     @property
     def engine_type(self) -> EngineType:
@@ -884,12 +875,26 @@ def create_engine_force_adapter(
         require(p.is_file(), f"MuJoCo specification not found: {p}")
         return MujocoForceAdapter(p.read_bytes())
     if e == EngineType.DRAKE:
-        if not allow_synthetic:
-            raise RuntimeError(
-                "Native Drake MultibodyPlant force adapter is not yet registered for production; "
-                "synthetic fixture is quarantined (allow_synthetic=True required)."
+        if spec_path is None and allow_synthetic and nv != 41:
+            return DrakeSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
+        p = Path(
+            spec_path or "docs/development/full_body_models/full_body_spec_v1.json"
+        )
+        if not p.is_file():
+            p = repo_root / p
+        if not p.is_file() and allow_synthetic:
+            return DrakeSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
+        require(p.is_file(), f"Drake specification not found: {p}")
+        try:
+            from src.engines.physics_engines.drake.python.force_adapter import (
+                DrakeForceAdapter,
             )
-        return DrakeForceAdapter(nv=nv, n_spheres=n_spheres)
+
+            return DrakeForceAdapter(p.read_bytes())
+        except ImportError:
+            if allow_synthetic:
+                return DrakeSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
+            raise
     if e == EngineType.OPENSIM:
         if not allow_synthetic:
             raise RuntimeError(

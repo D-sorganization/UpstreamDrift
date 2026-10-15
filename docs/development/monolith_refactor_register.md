@@ -135,7 +135,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 916 | `src/tools/bunker_shot_gui/export.py` |
 | 914 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 913 | `src/engines/physics_engines/opensim/python/tour_matching/native_diagnostic_contract.py` |
-| 907 | `src/shared/python/motion_matching/multi_engine_torque_allocator.py` |
+| 912 | `src/shared/python/motion_matching/multi_engine_torque_allocator.py` |
+| 908 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 907 | `src/unreal_integration/mesh_loader.py` |
 | 903 | `src/shared/python/motion_matching/club_only/body_candidates.py` |
 | 902 | `src/tools/capture_rig/reference_comparison.py` |
@@ -189,7 +190,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 830 | `src/research/deformable/objects.py` |
 | 830 | `src/shared/python/motion_pipeline/preprocessing/gap_fill.py` |
 | 828 | `src/bunkershot3d/solvers/envelope.py` |
-| 823 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 822 | `src/tools/capture_rig/layout_editor.py` |
 | 819 | `src/shared/python/model_generation/converters/simscape/simscape_converter.py` |
 | 815 | `src/engines/physics_engines/mujoco/python/native_full_body_replay.py` |
