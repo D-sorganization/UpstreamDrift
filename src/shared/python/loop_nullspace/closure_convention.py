@@ -24,7 +24,7 @@ The drift ``Jdot v`` is converted with the same ``C``; that is exact only on
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, TypedDict, Unpack
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -139,15 +139,21 @@ def _frozen(array: Array) -> Array:
     return out
 
 
+class ClosureFrames(TypedDict):
+    """Keyword arguments of :func:`closure_conversion_matrix`, shared by the
+    native <-> canonical conversions so their frame inputs cannot diverge."""
+
+    native: NativeClosureConvention
+    native_frame_rotation: ArrayLike
+    grip_frame_rotation: ArrayLike
+    native_reference_point: ArrayLike
+    grip_reference_point: ArrayLike
+
+
 def to_canonical_closure(
     jacobian: ArrayLike,
     drift: ArrayLike,
-    *,
-    native: NativeClosureConvention,
-    native_frame_rotation: ArrayLike,
-    grip_frame_rotation: ArrayLike,
-    native_reference_point: ArrayLike,
-    grip_reference_point: ArrayLike,
+    **frames: Unpack[ClosureFrames],
 ) -> tuple[Array, Array]:
     """Convert a native closure ``(J, Jdot v)`` to the canonical convention.
 
@@ -159,25 +165,14 @@ def to_canonical_closure(
     only on ``J_c v = 0``.
     """
     jac, vec = _check_closure_arrays(jacobian, drift)
-    matrix = closure_conversion_matrix(
-        native=native,
-        native_frame_rotation=native_frame_rotation,
-        grip_frame_rotation=grip_frame_rotation,
-        native_reference_point=native_reference_point,
-        grip_reference_point=grip_reference_point,
-    )
+    matrix = closure_conversion_matrix(**frames)
     return _frozen(matrix @ jac), _frozen(matrix @ vec)
 
 
 def from_canonical_closure(
     jacobian: ArrayLike,
     drift: ArrayLike,
-    *,
-    native: NativeClosureConvention,
-    native_frame_rotation: ArrayLike,
-    grip_frame_rotation: ArrayLike,
-    native_reference_point: ArrayLike,
-    grip_reference_point: ArrayLike,
+    **frames: Unpack[ClosureFrames],
 ) -> tuple[Array, Array]:
     """Inverse of :func:`to_canonical_closure`.
 
@@ -185,11 +180,7 @@ def from_canonical_closure(
     **k)`` reproduces ``(J, d)`` to round-off.
     """
     jac, vec = _check_closure_arrays(jacobian, drift)
-    matrix = closure_conversion_matrix(
-        native=native,
-        native_frame_rotation=native_frame_rotation,
-        grip_frame_rotation=grip_frame_rotation,
-        native_reference_point=native_reference_point,
-        grip_reference_point=grip_reference_point,
-    )
-    return _frozen(np.linalg.solve(matrix, jac)), _frozen(np.linalg.solve(matrix, vec))
+    matrix = closure_conversion_matrix(**frames)
+    inverse_jac = np.asarray(np.linalg.solve(matrix, jac), dtype=np.float64)
+    inverse_vec = np.asarray(np.linalg.solve(matrix, vec), dtype=np.float64)
+    return _frozen(inverse_jac), _frozen(inverse_vec)
