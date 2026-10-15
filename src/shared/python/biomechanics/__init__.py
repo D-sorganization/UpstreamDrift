@@ -16,6 +16,12 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from .activation_dynamics import ActivationDynamics
     from .biomechanics_data import BiomechanicalData
+    from .club_solids_partition import (
+        ClubSolidsPartition,
+        SolidSpatialInertia,
+        bare_club_kinematics_from_body_frame,
+        club_solids_partition,
+    )
     from .drift_control_transfer import (
         AttributionShares,
         ForcePathProjection,
@@ -86,6 +92,11 @@ _UNCONDITIONAL_EXPORTS: dict[str, str] = {
     "ActivationDynamics": ".activation_dynamics",
     # biomechanics_data
     "BiomechanicalData": ".biomechanics_data",
+    # club_solids_partition
+    "ClubSolidsPartition": ".club_solids_partition",
+    "SolidSpatialInertia": ".club_solids_partition",
+    "bare_club_kinematics_from_body_frame": ".club_solids_partition",
+    "club_solids_partition": ".club_solids_partition",
     # drift_control_transfer
     "AttributionShares": ".drift_control_transfer",
     "ForcePathProjection": ".drift_control_transfer",

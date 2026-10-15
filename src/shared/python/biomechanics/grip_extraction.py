@@ -28,8 +28,18 @@ from typing import Any
 import numpy as np
 from numpy.typing import ArrayLike
 
+from src.shared.python.biomechanics.club_solids_partition import (
+    ClubSolidsPartition,
+    SolidSpatialInertia,
+    bare_club_kinematics_from_body_frame,
+    club_solids_partition,
+)
 from src.shared.python.biomechanics.grip_wrench import (
+    DEFAULT_GRIP_INTERFACE,
+    GRIP_INTERFACES,
+    LEGACY_COMPOSITE_GRIP_INTERFACE,
     GripAnalysis,
+    GripInterfaceName,
     HandWrench,
     SplitMethod,
     analyze_grip,
@@ -38,10 +48,18 @@ from src.shared.python.biomechanics.grip_wrench import (
 Vec3 = tuple[float, float, float]
 
 __all__ = [
+    "ClubSolidsPartition",
+    "DEFAULT_GRIP_INTERFACE",
+    "GRIP_INTERFACES",
+    "GripInterfaceName",
+    "LEGACY_COMPOSITE_GRIP_INTERFACE",
+    "SolidSpatialInertia",
     "allocation_grip_analysis",
+    "bare_club_kinematics_from_body_frame",
     "closing_side_from_closure",
-    "hand_from_arrays",
     "closure_and_club_analysis",
+    "club_solids_partition",
+    "hand_from_arrays",
     "holding_hand_wrench",
     "net_only_analysis",
     "unavailable_analysis",
@@ -140,6 +158,7 @@ def net_only_analysis(
     split_method: SplitMethod,
     reason: str,
     metadata: Mapping[str, Any] | None = None,
+    interface: str = DEFAULT_GRIP_INTERFACE,
 ) -> GripAnalysis:
     """Analysis carrying only the net wrench at ``point_m`` (no per-hand split).
 
@@ -163,11 +182,15 @@ def net_only_analysis(
         split_method=split_method,
         unavailable_reason=reason,
         metadata=dict(metadata or {}),
+        interface=interface,
     )
 
 
 def unavailable_analysis(
-    reason: str, metadata: Mapping[str, Any] | None = None
+    reason: str,
+    metadata: Mapping[str, Any] | None = None,
+    *,
+    interface: str = DEFAULT_GRIP_INTERFACE,
 ) -> GripAnalysis:
     """Explicitly unavailable analysis: every quantity ``None`` with a reason."""
     if not reason:
@@ -185,6 +208,7 @@ def unavailable_analysis(
         split_method="unavailable",
         unavailable_reason=reason,
         metadata=dict(metadata or {}),
+        interface=interface,
     )
 
 
@@ -226,15 +250,23 @@ def closure_and_club_analysis(
     holding_point_m: ArrayLike,
     club: Mapping[str, Any],
     split_method: SplitMethod,
-    metadata: Mapping[str, Any] | None = None,
+    **options: Any,
 ) -> GripAnalysis:
     """Two-hand analysis from a closure multiplier plus club Newton-Euler.
 
     ``club`` carries the :func:`holding_hand_wrench` club keywords
     (``mass_kg``, ``gravity_m_s2``, ``com_m``, ``com_acceleration_m_s2``,
     ``inertia_world_kg_m2``, ``angular_velocity_rad_s``,
-    ``angular_acceleration_rad_s2``).
+    ``angular_acceleration_rad_s2``). Optional keyword ``options`` accepts
+    ``metadata`` and ``interface`` (default ``"hand_on_bare_club"``).
     """
+    unknown_opts = sorted(set(options) - {"metadata", "interface"})
+    if unknown_opts:
+        raise ValueError(
+            f"Unexpected closure_and_club_analysis options: {unknown_opts}"
+        )
+    metadata = options.get("metadata")
+    interface = str(options.get("interface", DEFAULT_GRIP_INTERFACE))
     if closing_side not in ("L", "R"):
         raise ValueError(f"closing_side must be 'L' or 'R', got {closing_side!r}")
     f_hold, t_hold = holding_hand_wrench(
@@ -250,10 +282,18 @@ def closure_and_club_analysis(
     )
     holding = hand_from_arrays(holding_side, holding_point_m, f_hold, t_hold)
     by_side = {closing_side: closing, holding_side: holding}
-    meta = {"closing_hand": closing_side, "holding_hand": holding_side}
+    meta = {
+        "closing_hand": closing_side,
+        "holding_hand": holding_side,
+        "interface": interface,
+    }
     meta.update(metadata or {})
     return analyze_grip(
-        by_side["L"], by_side["R"], split_method=split_method, metadata=meta
+        by_side["L"],
+        by_side["R"],
+        split_method=split_method,
+        metadata=meta,
+        interface=interface,
     )
 
 
@@ -265,6 +305,7 @@ def allocation_grip_analysis(
     load_on: str = "human",
     rotation_world_from_frame: ArrayLike | None = None,
     metadata: Mapping[str, Any] | None = None,
+    interface: str = DEFAULT_GRIP_INTERFACE,
 ) -> GripAnalysis:
     """Net grip analysis from the allocator's single 6-D ``lambda_grip``.
 
@@ -307,5 +348,6 @@ def allocation_grip_analysis(
         torque_on_club_nm=sign * torque,
         split_method="allocation",
         reason="allocation yields one net 6-D wrench; left/right split unavailable",
-        metadata={"load_on": load_on, **dict(metadata or {})},
+        metadata={"load_on": load_on, "interface": interface, **dict(metadata or {})},
+        interface=interface,
     )
