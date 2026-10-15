@@ -30,7 +30,10 @@ from src.shared.python.loop_nullspace.contracts import (
 from src.shared.python.loop_nullspace.fixtures import load_golden
 
 CLUB = SpatialInertia(0.313, np.array([0.75, 0.0, 0.0]), np.diag([1e-4, 0.026, 0.026]))
-PROVENANCE = (ModelProvenance("restriction_oracle", "1"), InputProvenance("synthetic", "nsx-26"))
+PROVENANCE = (
+    ModelProvenance("restriction_oracle", "1"),
+    InputProvenance("synthetic", "nsx-26"),
+)
 
 
 def _snapshot(

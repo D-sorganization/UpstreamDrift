@@ -729,6 +729,54 @@ model: a true alternative grip changes the kinematics themselves and has to be
 re-derived (research item NSX-72).  Outputs carry the label
 \texttt{REACTION\_RESTRICTION\_SENSITIVITY}.
 
+\subsection{Calculation Reference}
+\paragraph{Row Selection and Shaft Axis.}
+In the canonical grip frame the closure rows are $(f_x,f_y,f_z,\tau_x,\tau_y,
+\tau_z)$.  \texttt{restrict} keeps the rows $R$ of $J_c$ and $\dot J_c v$ and
+changes nothing else ($q,v,a,M,h,S,J_g$ and the loop support are unchanged).
+Row $\tau_x$ is the twist about the shaft only if the grip $x$ axis is the
+shaft.  This holds for the anthro model (bare-club centre of mass on $x$) and
+not for the spatial fixture, whose club lies along grip $z$.  \texttt{restrict}
+therefore refuses \texttt{SHAFT\_FREE5} unless the shaft axis lies within
+$0.1$ of the grip $x$ axis.  Dropping a row fixes that multiplier at zero, so
+the restricted allocation set is $\{x:\ A_R x=b,\ \lambda_{\bar R}=0\}$.
+
+\paragraph{Hand-Split Quantities.}
+The closure multiplier is at the grip origin $P$ (the closing hand's weld
+frame).  With hand coordinates $x_L,x_R$ on the shaft, the closing hand's
+wrench about its own grip point is $-(f,\ t-x_c\hat e_x\times f)$ and the net
+wrench $(F,M_P)$ moves to the grip midpoint $o$ as $(F,\ M_P-o\times F)$.  The
+split coordinates are then the affine closing-hand map of the grip-split
+section evaluated on the embedded multiplier.
+
+\paragraph{Acceptance Evidence.}
+Exact sympy goldens (\texttt{restriction\_counts}) fix the dimension counts per
+kind; the minimum-norm torque on the exact chain equals the residual
+$(I-P_r)b$; the $J_c=I$ closed form gives the envelope.  Containment of every
+restricted envelope in the \texttt{WELD6} envelope is checked to
+$10^{-6}(\text{scale}+|\text{bound}|)$ on the anthro record.
+
+\paragraph{Anthro Result (199 Frames, Declared Prior).}
+Under the \emph{assumed} capacity prior, 75 of 199 welded frames are
+infeasible with conflict set \texttt{H-TORQUE-CAPACITY} alone.
+\texttt{SHAFT\_FREE5} leaves the feasible count unchanged (124) and narrows
+envelopes; \texttt{BALL3} loses six further frames (118 feasible, 81
+infeasible).  No frame was balance-inconsistent: the foot rows balance the
+unactuated root rows for every kind.  Sign-class changes are all
+indeterminate-to-determined, as nesting requires.  The prior is not relaxed.
+
+\paragraph{Limitations.}
+The left grip point is the left-hand solid's centre of mass, a model
+parameter and not a measurement.  The result describes the reaction set on
+welded kinematics; it is not evidence about the true grip mechanics.  The
+position level of admission was skipped (no closure plant).
+
+\paragraph{Reproduction.}
+\texttt{LOOP\_NULLSPACE\_RESTRICTION\_STRIDE=1 LOOP\_NULLSPACE\_RESTRICTION\_JSON=out.json
+python3 -m pytest tests/integration/test\_loop\_nullspace\_restriction\_anthro.py}
+writes the record kept at
+\texttt{docs/research/loop\_nullspace/records/restriction\_anthro\_stride1.json}.
+
 \section{Canonical Closure Conversion}
 \label{sec:conversion}
 

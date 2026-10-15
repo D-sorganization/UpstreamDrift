@@ -518,8 +518,22 @@ SHAFT_FREE5 drops the twist moment about the shaft axis `u` (row `tx`); BALL3
 keeps the three force rows. The set of admissible reactions for the restricted
 kind is a subset of the WELD6 set, so envelopes of the restricted kinds are
 contained in the WELD6 envelope for the same fixed welded trajectory (note the
-direction: restricting reactions shrinks the feasible set). Output label
-`REACTION_RESTRICTION_SENSITIVITY`.
+direction: restricting reactions shrinks the feasible set). Row `tx` is the
+shaft twist only when the grip x axis is the shaft; `restrict` refuses
+SHAFT_FREE5 otherwise unless `shaft_axis` is given.
+
+`restriction_sensitivity(trajectory, kinds, quantities, *, feasible_set_of, ...)
+-> RestrictionReport` takes an `AdmittedTrajectory` and snapshot-aware quantity
+builders (`snapshot_quantities` lifts an envelope factory;
+`restriction_hand_split.hand_split_quantities` gives the six hand-split
+coordinates on the embedded multiplier). `kinds[0]` is the reference. Per kind
+the report holds feasible, infeasible (with conflict set) and
+balance-inconsistent frame counts, width ratios, sign-class changes and
+containment checks. The priors live in `feasible_set_of` and are the same for
+every kind; `BALANCE_TOL` is unchanged. Output label
+`REACTION_RESTRICTION_SENSITIVITY`; the report carries its non-claims. Goldens:
+`restriction_counts` (exact sympy). Anthro record:
+`records/restriction_anthro_stride1.json` (199 frames).
 
 ## NSX-30 Constrained Counterfactuals (#12570)
 
