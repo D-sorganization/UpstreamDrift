@@ -124,6 +124,27 @@ def face_centre_in_frame(spec: Mapping[str, Any], frame: str = FACE_FRAME) -> Ar
     return np.asarray(placement[:3, :3].T @ centre, dtype=float)
 
 
+def face_centre_path(rotations: Array, origins: Array, centre_in_frame: Array) -> Array:
+    """World face-centre path of a rigid head frame: ``p_k + R_k c`` (#12682).
+
+    This is the one clubhead measurement point of the repository: every
+    clubhead speed, impact detector and receipt reads the geometric face
+    centre ``c`` (metres, expressed in the head frame, from
+    :func:`face_centre_in_frame`) carried by the frame poses, never the frame
+    origin or a marker centroid. ``rotations`` is ``(n, 3, 3)`` and
+    ``origins`` ``(n, 3)``; NaN rows (an unobserved capture frame) stay NaN.
+    Raises ``ValueError`` for mismatched shapes or a non-finite ``c``.
+    Postcondition: an ``(n, 3)`` array whose rigid-body velocity is
+    ``v_origin + omega x (R c)``.
+    """
+    rot = np.asarray(rotations, dtype=float)
+    pos = np.asarray(origins, dtype=float)
+    centre = _finite_vector(centre_in_frame, "centre_in_frame")
+    if rot.ndim != 3 or rot.shape[1:] != (3, 3) or pos.shape != (len(rot), 3):
+        raise ValueError("rotations must be (n, 3, 3) and origins (n, 3)")
+    return np.asarray(np.einsum("nij,j->ni", rot, centre) + pos, dtype=float)
+
+
 def observe_frame_rotations(
     points: Array,
     valid: NDArray[np.bool_],
@@ -295,7 +316,9 @@ def observe_capture_face(
     axis = face_axis_in_frame(spec, frame)
     centre = face_centre_in_frame(spec, frame) - local_mean
     normals = np.einsum("nij,j->ni", rotations, axis)
-    centres = np.einsum("nij,j->ni", rotations, centre) + world_mean
+    # The triad centroid stands in for the frame origin, so the face centre is
+    # carried relative to the offsets' own mean.
+    centres = face_centre_path(rotations, world_mean, centre)
     centres[~np.isfinite(normals).all(axis=1)] = np.nan
     return normals, centres
 
@@ -409,17 +432,17 @@ def model_face_centres(
 ) -> Array:
     """World rendered face centre per row of ``q`` from the IK provider's FK.
 
-    Same contract as :func:`model_face_normals` (GCV-20 clubhead speed).
+    Same contract as :func:`model_face_normals` (GCV-20 clubhead speed); the
+    point is :func:`face_centre_path` (#12682).
     """
     rows = np.asarray(q, dtype=float)
     if rows.ndim != 2:
         raise ValueError("q must be (frames, coordinates)")
     centre = face_centre_in_frame(spec, frame)
-    out = []
-    for row in rows:
-        rot, pos = kin.body_poses(row, [frame])[frame]
-        out.append(rot @ centre + pos)
-    return np.array(out)
+    poses = [kin.body_poses(row, [frame])[frame] for row in rows]
+    rotations = np.array([rot for rot, _ in poses], dtype=float).reshape(-1, 3, 3)
+    origins = np.array([pos for _, pos in poses], dtype=float).reshape(-1, 3)
+    return face_centre_path(rotations, origins, centre)
 
 
 def face_fit_summary(model_normals: Array, capture_normals: Array) -> dict[str, Any]:

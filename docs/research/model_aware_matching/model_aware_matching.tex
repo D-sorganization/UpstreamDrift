@@ -815,6 +815,15 @@ of spatial dynamic parameters:
 where $h_i = m_i c_i$ is the first moment of mass and $I$ is the rotational inertia
 about the joint frame origin.  Note that in Pinocchio $I_{yy}$ precedes $I_{xz}$,
 whereas in the internal \texttt{inertial.py} ordering $I_{xz}$ precedes $I_{yy}$.
+An audit (issue \#12675) found no MOSAIC path that passes Pinocchio-layout vectors
+to \texttt{inertial.py}: the provider is consumed only in planar mode, whose columns
+are identical in both layouts, and the MuJoCo and payload regressors use the
+\texttt{inertial.py} ordering.  The layouts are not interchangeable: a $1.2$\,kg
+forearm-like box that is physically consistent reads as inconsistent (minimum
+pseudo-inertia eigenvalue $-0.092$) when its Pinocchio vector is not converted.
+\texttt{tests/unit/estimation/mosaic/test\_inertial\_parameter\_layout.py} pins each
+module's layout and fails on any module that couples Pinocchio parameters to MOSAIC
+spatial algebra without the shared \texttt{swap\_inertia\_layout} converter.
 For planar motion in the $xy$-plane with $z$-axis revolute joints, the 4 active columns
 correspond exactly to indices $(0, 1, 2, 9) = (m, h_x, h_y, I_{zz})$, with all other 6
 columns identically zero.

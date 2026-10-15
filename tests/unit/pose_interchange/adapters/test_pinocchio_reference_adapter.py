@@ -6,6 +6,7 @@ import types
 import numpy as np
 import pytest
 
+from src.shared.python.pose_interchange import se3
 from src.shared.python.pose_interchange.adapters.pinocchio_reference import (
     CanonicalV2State,
     PinocchioReferenceAdapter,
@@ -45,7 +46,7 @@ class _ReferenceBackend:
 def _state() -> CanonicalV2State:
     return CanonicalV2State(
         q=np.array(
-            [1.0, 2.0, 3.0, 0.5, -0.5, 0.25, -0.25, 0.1],
+            [1.0, 2.0, 3.0, 0.5, -0.5, 0.5, -0.5, 0.1],
             dtype=np.float64,
         ),
         v=np.array([10.0, 20.0, 30.0, 1.0, 2.0, 3.0, 0.4], dtype=np.float64),
@@ -59,11 +60,14 @@ def test_canonical_v2_roundtrip_remaps_pinocchio_w_last_quaternion() -> None:
 
     native = adapter.from_canonical_v2(canonical)
 
-    # Only the quaternion is reordered (canonical w-first -> Pinocchio w-last).
-    np.testing.assert_allclose(native.q[:7], [1.0, 2.0, 3.0, -0.5, 0.25, -0.25, 0.5])
-    # Base motion layout is identical [linear; angular] (issue #7144).
-    np.testing.assert_allclose(native.v[:6], [10.0, 20.0, 30.0, 1.0, 2.0, 3.0])
-    np.testing.assert_allclose(native.a[:6], [0.1, 0.2, 0.3, 4.0, 5.0, 6.0])
+    # The quaternion is reordered (canonical w-first -> Pinocchio w-last).
+    np.testing.assert_allclose(native.q[:7], [1.0, 2.0, 3.0, -0.5, 0.5, -0.5, 0.5])
+    # Base motion order is [linear; angular] (issue #7144); the world linear
+    # velocity is expressed in the LOCAL frame, R^T v (issue #12605).
+    rot = se3.quat_to_matrix(canonical.q[3:7])
+    np.testing.assert_allclose(native.v[:3], rot.T @ canonical.v[:3])
+    np.testing.assert_allclose(native.v[3:], [1.0, 2.0, 3.0, 0.4])
+    np.testing.assert_allclose(native.a[3:], [4.0, 5.0, 6.0, 0.7])
 
     recovered = adapter.to_canonical_v2(native)
     np.testing.assert_allclose(recovered.q, canonical.q, atol=1.0e-12)
@@ -96,12 +100,15 @@ def test_fk_jacobian_rnea_and_aba_use_canonical_boundary() -> None:
 
     jacobian = adapter.jacobian(state, "club_head")
     native_jacobian = np.arange(36, dtype=np.float64).reshape(6, 6)
-    np.testing.assert_allclose(jacobian["linear"], native_jacobian[:3])
-    np.testing.assert_allclose(jacobian["angular"], native_jacobian[3:])
+    # Base columns act on the canonical (world) linear velocity: J_n diag(R^T, I).
+    rot = se3.quat_to_matrix(state.q[3:7])
+    base_map = np.eye(6)
+    base_map[:3, :3] = rot.T
+    expected = native_jacobian @ base_map
+    np.testing.assert_allclose(jacobian["linear"], expected[:3])
+    np.testing.assert_allclose(jacobian["angular"], expected[3:])
     # Canonical-v2 spatial order is [linear; angular] (issue #7144).
-    np.testing.assert_allclose(
-        jacobian["spatial"], np.vstack([native_jacobian[:3], native_jacobian[3:]])
-    )
+    np.testing.assert_allclose(jacobian["spatial"], expected)
 
     tau = adapter.inverse_dynamics(state)
     native = adapter.from_canonical_v2(state)
@@ -113,8 +120,22 @@ def test_fk_jacobian_rnea_and_aba_use_canonical_boundary() -> None:
 
     canonical_accel = adapter.forward_dynamics(state, tau)
     expected_native = tau - 0.2 * native.v - 0.01 * native.q[:7]
-    # Pinocchio<->canonical motion layout is identity (issue #7144).
-    np.testing.assert_allclose(canonical_accel[:6], expected_native[:6])
+    # Native LOCAL linear acceleration back to world (issue #12605):
+    # a_world = R (a_local + w x v_local); angular and joints pass through.
+    omega = state.v[3:6]
+    np.testing.assert_allclose(
+        canonical_accel[:3],
+        rot @ (expected_native[:3] + np.cross(omega, native.v[:3])),
+    )
+    np.testing.assert_allclose(canonical_accel[3:], expected_native[3:])
+
+
+def _shifted_q(offset: float) -> np.ndarray:
+    """``_state().q`` translated and joint-shifted by ``offset`` (quaternion kept unit)."""
+
+    q = _state().q.copy()
+    q[[0, 1, 2, 7]] += offset
+    return q
 
 
 def test_inverse_dynamics_trajectory_uses_numpy_fallback(
@@ -122,7 +143,7 @@ def test_inverse_dynamics_trajectory_uses_numpy_fallback(
 ) -> None:
     monkeypatch.delitem(sys.modules, "upstream_pinocchio_id", raising=False)
     adapter = PinocchioReferenceAdapter(_ReferenceBackend())
-    q = np.vstack([_state().q, _state().q + 0.01, _state().q + 0.03])
+    q = np.vstack([_shifted_q(0.0), _shifted_q(0.01), _shifted_q(0.03)])
     times = np.array([0.0, 0.1, 0.2], dtype=np.float64)
 
     result = adapter.inverse_dynamics_trajectory(q, times)
@@ -143,28 +164,32 @@ def test_inverse_dynamics_trajectory_routes_through_rust_when_available(
     def _inverse_dynamics(q, times, callback, qdot_override, qddot_override):
         calls["q"] = q.copy()
         calls["times"] = times.copy()
-        assert qdot_override is None
-        assert qddot_override is None
-        qdot = np.ones((q.shape[0], q.shape[1] - 1), dtype=np.float64)
-        qddot = np.full_like(qdot, 2.0)
+        # Issue #12700: the adapter differentiates on the base Lie group and
+        # hands the driver LOCAL-frame derivatives; it never FDs raw native q.
+        assert qdot_override is not None
+        assert qddot_override is not None
         tau = np.vstack(
             [
-                callback(q[index], qdot[index], qddot[index])
+                callback(q[index], qdot_override[index], qddot_override[index])
                 for index in range(q.shape[0])
             ]
         )
-        return qdot, qddot, tau
+        return qdot_override, qddot_override, tau
 
     rust.inverse_dynamics = _inverse_dynamics
     monkeypatch.setitem(sys.modules, "upstream_pinocchio_id", rust)
 
     adapter = PinocchioReferenceAdapter(_ReferenceBackend())
-    q = np.vstack([_state().q, _state().q + 0.01, _state().q + 0.03])
+    q = np.vstack([_shifted_q(0.0), _shifted_q(0.01), _shifted_q(0.03)])
     result = adapter.inverse_dynamics_trajectory(q, np.array([0.0, 0.1, 0.2]))
 
     assert result.backend == "rust"
-    np.testing.assert_allclose(calls["q"][0, 3:7], [-0.5, 0.25, -0.25, 0.5])
-    np.testing.assert_allclose(result.qdot[0, :6], [1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+    np.testing.assert_allclose(calls["q"][0, 3:7], [-0.5, 0.5, -0.5, 0.5])
+    # Canonical FD: WORLD linear and joint rates 0.15/s at the middle frame,
+    # zero angular rate for a fixed base orientation.
+    np.testing.assert_allclose(
+        result.qdot[1], [0.15, 0.15, 0.15, 0.0, 0.0, 0.0, 0.15], atol=1e-12
+    )
     assert result.tau.shape == (3, 7)
 
 

@@ -2741,6 +2741,18 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-15 | #12695 | R5: one clubhead measurement point (face centre via club_face_target.face_centre_path) for the fd_phase impact split, the exporter impact detector and a new dynamics.fd_phase.clubhead_speed receipt block (simulated/reference/capture speed, % error, peak-timing offset); scripts/diagnose_clubhead_speed.py decomposition |
+| 2026-10-15 | #12694 | Pelvis wears the active outfit's pants material: body classification is order-independent (leaf segment before parent folder, exact before prefix before substring, equal-specificity ties raise), GolfSwing3D LowerTorso maps to pelvis, and check_clothing enforces pelvis garment == pants for every preset |
+| 2026-10-15 | #12636 | NSX-52: MyoSuite CLOSED_LOOP_SNAPSHOT via MuJoCo adapter reuse; kkt_regularization recorded, FULL only at 0 |
+| 2026-10-15 | #12632 | NSX-16: grip-frame split coordinates, grasp map kernel and bare-club net wrench |
+| 2026-10-15 | #12699 | Pinocchio reference adapter maps the free-flyer world linear velocity/acceleration into Pinocchio's LOCAL frame via the NSX-50 velocity map |
+| 2026-10-15 | #12631 | NSX-15 closed-loop decomposition: dimension accounting, zero-side three-case solve, minimum-metric torque |
+| 2026-10-15 | #12630 | NSX-53 native Drake force adapter with closed-loop snapshot; synthetic Drake route quarantined to tests |
+| 2026-10-15 | #12625 | NSX-14 kinematic and contact admission gate (admit, AdmittedTrajectory) |
+| 2026-10-15 | #12676 | Guard MOSAIC inertial parameter layouts: audit found no live Pinocchio/inertial.py mix; tests pin each module's ordering and block unconverted coupling |
+| 2026-10-15 | #12627 | NSX-54: OpenSim closed-loop snapshot adapter delegating to OpenSimFullBodyParityAdapter, equal to Pinocchio |
+| 2026-10-15 | #12629 | MuJoCo closed-loop snapshot by hard-KKT evaluation (CLOSED_LOOP_SNAPSHOT FULL), separate stock-soft-weld divergence entry |
+| 2026-10-15 | #12668 | Correct the club y-sign in golfer forward kinematics, club Jacobians and the native grip_left wrapper; closure is a wrist-pin PLANAR_POINT2 with rank 2 on the manifold (TB-00 registry: 6 independent DOFs); planar-model and central-difference cross-checks |
 | 2026-10-15 | #12623 | NSX-13: snapshot_from_adapter with CLOSED_LOOP_SNAPSHOT capability (Pinocchio FULL), canonical closure in the torque allocator, constraintDynamics parity |
 | 2026-10-15 | #12613 | NSX-11 typed loop-nullspace registry loader with CI citation gate |
 | 2026-10-15 | #12615 | NSX-50: pose_interchange dual velocity/acceleration/force maps and closure wrench duals |

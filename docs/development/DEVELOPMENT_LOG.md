@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12682 · R5: One Clubhead Measurement Point (Face Centre via Club_Face_Target.Face_Centre_Path) for the Fd_Phase Impact Split, the Exporter Impact Detector and a New Dynamics.Fd_Phase.Clubhead_Speed Receipt Block (Simulated/Reference/Capture Speed, % Error, Peak-Timing Offset); Scripts/diagnose_clubhead_speed.py Decomposition
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12682
+- **Branch:** fix/12682-clubhead-speed-parity
+- **PR:** #12695
+- **Paths:** see #12695
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`0081a09b`; collated from changes/12682-r5-one-clubhead-measurement-point-face-c.md)
+- **Summary:** R5: one clubhead measurement point (face centre via club_face_target.face_centre_path) for the fd_phase impact split, the exporter impact detector and a new dynamics.fd_phase.clubhead_speed receipt block (simulated/reference/capture speed, % error, peak-timing offset); scripts/diagnose_clubhead_speed.py decomposition
+- **Next step:** Merge the PR; R10 regenerates canonical receipts with the new block; R6 sizes the shaft share (about 2 % on the 7-iron).
+
 ### DL-#12413 · \ Restore DBC Level in Test_Ud_Contract_Level_Alias_Sync to Prevent Xdist Pollution\
 
 - **State:** in_review
@@ -2287,6 +2300,149 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#12681 · Pelvis Wears the Active Outfit's Pants Material: Body Classification Is Order-Independent (Leaf Segment Before Parent Folder, Exact Before Prefix Before Substring, Equal-Specificity Ties Raise), GolfSwing3D LowerTorso Maps to Pelvis, and Check_Clothing Enforces Pelvis Garment == Pants for Every Preset
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12681
+- **Branch:** merged via #12694
+- **PR:** #12694
+- **Paths:** see #12694
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7d59de0d`; collated from changes/12681-pelvis-wears-the-active-outfit-s-pants-m.md)
+- **Summary:** Pelvis wears the active outfit's pants material: body classification is order-independent (leaf segment before parent folder, exact before prefix before substring, equal-specificity ties raise), GolfSwing3D LowerTorso maps to pelvis, and check_clothing enforces pelvis garment == pants for every preset
+- **Next step:** Shipped in PR #12694.
+
+### DL-#12580 · NSX-52: MyoSuite CLOSED_LOOP_SNAPSHOT via MuJoCo Adapter Reuse; Kkt_Regularization Recorded, FULL Only At 0
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12580
+- **Branch:** merged via #12636
+- **PR:** #12636
+- **Paths:** see #12636
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`91feef10`; collated from changes/12580-nsx-52-myosuite-closed-loop-snapshot-via.md)
+- **Summary:** NSX-52: MyoSuite CLOSED_LOOP_SNAPSHOT via MuJoCo adapter reuse; kkt_regularization recorded, FULL only at 0
+- **Next step:** Shipped in PR #12636.
+
+### DL-#12561 · NSX-16: Grip-Frame Split Coordinates, Grasp Map Kernel and Bare-Club Net Wrench
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12561
+- **Branch:** merged via #12632
+- **PR:** #12632
+- **Paths:** see #12632
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`54f33667`; collated from changes/12561-nsx-16-grip-frame-split-coordinates-gras.md)
+- **Summary:** NSX-16: grip-frame split coordinates, grasp map kernel and bare-club net wrench
+- **Next step:** Shipped in PR #12632.
+
+### DL-#12605 · Pinocchio Reference Adapter Maps the Free-Flyer World Linear Velocity/Acceleration Into Pinocchio's LOCAL Frame via the NSX-50 Velocity Map
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12605
+- **Branch:** merged via #12699
+- **PR:** #12699
+- **Paths:** see #12699
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`30a72e42`; collated from changes/12605-pinocchio-ff-velocity.md)
+- **Summary:** Pinocchio reference adapter maps the free-flyer world linear velocity/acceleration into Pinocchio's LOCAL frame via the NSX-50 velocity map
+- **Next step:** Shipped in PR #12699.
+
+### DL-#12560 · NSX-15 Closed-Loop Decomposition: Dimension Accounting, Zero-Side Three-Case Solve, Minimum-Metric Torque
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12560
+- **Branch:** merged via #12631
+- **PR:** #12631
+- **Paths:** see #12631
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`a0b7f978`; collated from changes/12560-nsx-15-closed-loop-decomposition-dimensi.md)
+- **Summary:** NSX-15 closed-loop decomposition: dimension accounting, zero-side three-case solve, minimum-metric torque
+- **Next step:** Shipped in PR #12631.
+
+### DL-#12581 · NSX-53 Native Drake Force Adapter With Closed-Loop Snapshot; Synthetic Drake Route Quarantined to Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12581
+- **Branch:** merged via #12630
+- **PR:** #12630
+- **Paths:** see #12630
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`3b2357c0`; collated from changes/12581-nsx-53-native-drake-force-adapter-with-c.md)
+- **Summary:** NSX-53 native Drake force adapter with closed-loop snapshot; synthetic Drake route quarantined to tests
+- **Next step:** Shipped in PR #12630.
+
+### DL-#12559 · NSX-14 Kinematic and Contact Admission Gate (Admit, AdmittedTrajectory)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12559
+- **Branch:** merged via #12625
+- **PR:** #12625
+- **Paths:** see #12625
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`caf2cfb0`; collated from changes/12559-nsx-14-kinematic-and-contact-admission-g.md)
+- **Summary:** NSX-14 kinematic and contact admission gate (admit, AdmittedTrajectory)
+- **Next step:** Shipped in PR #12625.
+
+### DL-#12675 · Guard MOSAIC Inertial Parameter Layouts: Audit Found No Live Pinocchio/inertial.py Mix; Tests Pin Each Module's Ordering and Block Unconverted Coupling
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12675
+- **Branch:** merged via #12676
+- **PR:** #12676
+- **Paths:** see #12676
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`f9f46844`; collated from changes/12675-guard-mosaic-inertial-parameter-layouts.md)
+- **Summary:** Guard MOSAIC inertial parameter layouts: audit found no live Pinocchio/inertial.py mix; tests pin each module's ordering and block unconverted coupling
+- **Next step:** Shipped in PR #12676.
+
+### DL-#12582 · NSX-54: OpenSim Closed-Loop Snapshot Adapter Delegating to OpenSimFullBodyParityAdapter, Equal to Pinocchio
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12582
+- **Branch:** merged via #12627
+- **PR:** #12627
+- **Paths:** see #12627
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`bb5fca69`; collated from changes/12582-nsx-54-opensim-closed-loop-snapshot-adap.md)
+- **Summary:** NSX-54: OpenSim closed-loop snapshot adapter delegating to OpenSimFullBodyParityAdapter, equal to Pinocchio
+- **Next step:** Shipped in PR #12627.
+
+### DL-#12579 · MuJoCo Closed-Loop Snapshot by Hard-KKT Evaluation (CLOSED_LOOP_SNAPSHOT FULL), Separate Stock-Soft-Weld Divergence Entry
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12579
+- **Branch:** merged via #12629
+- **PR:** #12629
+- **Paths:** see #12629
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`67eeb469`; collated from changes/12579-mujoco-closed-loop-snapshot-by-hard-kkt.md)
+- **Summary:** MuJoCo closed-loop snapshot by hard-KKT evaluation (CLOSED_LOOP_SNAPSHOT FULL), separate stock-soft-weld divergence entry
+- **Next step:** Shipped in PR #12629.
+
+### DL-#12608 · Correct the Club Y-Sign in Golfer Forward Kinematics, Club Jacobians and the Native Grip_Left Wrapper; Closure Is a Wrist-Pin PLANAR_POINT2 With Rank 2 on the Manifold (TB-00 Registry: 6 Independent DOFs); Planar-Model and Central-Difference Cross-Checks
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12608
+- **Branch:** merged via #12668
+- **PR:** #12668
+- **Paths:** see #12668
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`41f73696`; collated from changes/12608-correct-the-club-y-sign-in-golfer-forwar.md)
+- **Summary:** Correct the club y-sign in golfer forward kinematics, club Jacobians and the native grip_left wrapper; closure is a wrist-pin PLANAR_POINT2 with rank 2 on the manifold (TB-00 registry: 6 independent DOFs); planar-model and central-difference cross-checks
+- **Next step:** Shipped in PR #12668.
 
 ### DL-#12558 · NSX-13: Snapshot_From_Adapter With CLOSED_LOOP_SNAPSHOT Capability (Pinocchio FULL), Canonical Closure in the Torque Allocator, constraintDynamics Parity
 

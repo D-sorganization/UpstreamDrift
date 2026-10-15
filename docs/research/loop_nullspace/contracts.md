@@ -240,8 +240,24 @@ Implementation notes (Pinocchio reference, #12558):
 
 ```python
 def admit(trajectory: Sequence[ClosedLoopSnapshot], *, gates: AdmissionGates,
-          repair: Literal["none", "project_to_closure"] = "none") -> AdmissionReport
+          times: ArrayLike, plant: ClosurePlant | None = None,
+          repair: Literal["none", "project_to_closure"] = "none",
+          rebuild: Callable[[Array, Array, Array], ClosedLoopSnapshot] | None = None,
+          ) -> AdmissionReport
 ```
+
+`times` holds one time stamp per frame. `plant` supplies the position-level
+residual `Phi(q)` (the `ClosurePlant` of `project_to_closure`); a snapshot
+carries no position residual. Without a plant the gate rejects unless
+`gates.require_position` is `False`, an explicit and recorded skip of the
+position level. `rebuild(q, v, a)` re-creates a snapshot at a repaired state and
+is required, together with `plant`, when `repair="project_to_closure"`.
+
+Repair reuses `project_to_closure` on frames failing at the position or
+velocity level, then projects the acceleration onto the tangent set of the
+projected state, `a' = a - J_c^+ (J_c a + Jdot_v)`, and re-evaluates. Every
+correction (`dq`, `dv`, `da` norms and the before and after states) is recorded.
+A frame failing only at the acceleration level is never repaired.
 
 `AdmissionReport` carries per-frame scaled `Phi`, `Phi_dot`, `Phi_ddot`
 residuals, derivative method and noise floor, time-synchronisation result,
@@ -250,7 +266,9 @@ contact-mode consistency and a verdict `ADMITTED`, `REJECTED(reasons)` or
 time. Postcondition: `AdmittedTrajectory` is constructible only from an
 `ADMITTED` or `REPAIRED` report. Residual scaling: position `Phi` by the
 characteristic length, velocity by length over time, acceleration by length
-over time squared. Default gate: scaled residual below `1e-6` at each level.
+over time squared. Default gate: scaled residual below `1e-6` at each level. The characteristic
+scales default to `L = 1 m` and `T = 1 s` (`length_scale_m`, `time_scale_s`);
+callers should pass model scales.
 Failing frames are named by index.
 
 ## NSX-15 Decomposition (#12560)
@@ -274,6 +292,18 @@ def min_metric_torque(snapshot, W: np.ndarray | AllocationMetric) -> np.ndarray
 - `min_metric_torque` returns `tau = W^-1 S J_c^T lambda`-form minimiser of
   `tau^T W tau` subject to the equality; `W = M^-1` is allowed only as the
   labelled metric `C-METRIC-MINV`.
+- Implementation notes (`loop_nullspace/decomposition.py`): `AllocationMetric`
+  is a labelled SPD matrix on the actuated torques (`identity`, `inverse_mass`
+  for `C-METRIC-MINV`; a bare matrix is recorded as `USER_DECLARED`). `x_p` is
+  the minimum-metric-torque particular solution, with minimum scaled norm among
+  those. `zero_side_solve` resolves the side from coordinate-name prefixes
+  (`lead` and `club`; `trail`; `club`) unless `indices=` is given, reports the
+  residual in physical (`residual`) and characteristic (`residual_scaled`)
+  units, and records `damping`. `dimension_accounting` gives the counts without
+  requiring a balanced state; `decompose` raises `BalanceInconsistentError`
+  (a `ValueError`) when the unactuated rows cannot be balanced.
+  `decompose_trajectory`, `zero_side_trajectory` and
+  `min_metric_torque_trajectory` accept only an `AdmittedTrajectory` (NSX-14).
 - Goldens: all four planar variants (`dimensions`, `zero_side`,
   `min_metric_torque`). Dimension identity
   `nullity = multiplier_gauge + attainable_torque_variation` holds when
@@ -286,8 +316,8 @@ def min_metric_torque(snapshot, W: np.ndarray | AllocationMetric) -> np.ndarray
 ```python
 def grasp_map(grip_frame: GripFrame, r_L, r_R) -> np.ndarray          # (6, 12)
 def split_basis(G: np.ndarray) -> np.ndarray                           # (12, 6)
-def net_club_wrench(snapshot) -> QuantityRecord                        # INVARIANT
-def hand_wrenches(net: np.ndarray, s: np.ndarray) -> tuple[np.ndarray, np.ndarray]
+def net_club_wrench(snapshot, club_ne) -> QuantityRecord               # INVARIANT
+def hand_wrenches(net: np.ndarray, s: np.ndarray, G: np.ndarray) -> tuple[np.ndarray, np.ndarray]
 def split_coordinates(W_L: np.ndarray, W_R: np.ndarray) -> np.ndarray
 ```
 
@@ -299,6 +329,12 @@ def split_coordinates(W_L: np.ndarray, W_R: np.ndarray) -> np.ndarray
   `Phi K = I`, `G G# = I`, round trip `s -> W -> s` exact to `1e-12`; `K` is
   independent of the origin shift; net wrench equals the golden
   bare-club Newton-Euler value (`worked_example.net_wrench_frame`).
+- The snapshot carries no club kinematics, so `net_club_wrench` takes the
+  engine's bare-club Newton-Euler keywords `club_ne`
+  (`adapter.club_newton_euler`) and checks their mass against
+  `snapshot.bare_club`; `hand_wrenches` needs `G` because `K` depends on the
+  half separation. `closing_hand_map(hand, d, net) -> (A, s0)` gives
+  `s = A lambda + s0` with `lambda = -y_hand`.
 - Scaling by `C-SCALE-FORCE-MOMENT`. Add `"loop_nullspace_family"` to
   `grip_wrench.SplitMethod`; do not duplicate `allocate_min_norm`.
 
@@ -314,6 +350,19 @@ GRF, else `UNAVAILABLE`), `N_c^T tau` (metric-free), `P_{c,W} tau` labelled with
 `W`. Every item is `QuantityRecord(INVARIANT)` or `UNAVAILABLE`. Test:
 invariance under random null-space perturbations to `1e-9` scaled on the
 planar goldens.
+
+As built: `decomposition` is one `Decomposition` per frame (a lone
+`Decomposition` is a `TypeError`); optional keywords are `club_ne` (per-frame
+bare-club Newton-Euler keywords), `gates` (an `AdmissionGates`; default is the
+strict defaults with the trajectory's scales) and `metric`. Record names are
+`net_club_wrench`, `loop_power`, `base_centroidal_rows`, `tangent_pairing` and
+`min_metric_torque`. Each is `INVARIANT` or `UNAVAILABLE` with a reason:
+`Phi_ddot` gates the net wrench, `Phi_dot` gates the loop power and the tangent
+pairing, and a free ground load additionally needs stationary contacts and
+`J_g N_c = 0`. The base rows are `J_g,b^T f_obs` on the unactuated coordinates
+outside the loop support, invariant for the observed ground load held fixed, and
+require an absorbable base balance; the centroidal-momentum map is not part of
+the snapshot and is not reported.
 
 ## NSX-20 Solver Backends (#12563)
 
@@ -447,8 +496,10 @@ MuJoCo (NSX-51): hard-KKT evaluation, drift method recorded in provenance
 (`drift=central_finite_difference` in the model provenance); stock soft-weld
 stepping is the separate divergence entry `mujoco-stock-soft-weld-vs-hard-kkt`.
 The cross-engine test holds `M`, `h`, `J_c` and `Jdot_v` to 1e-11, 1e-12 and 1e-8
-scaled (measured 2e-14, 3e-15, 3e-9). MyoSuite (NSX-52): reuses the MuJoCo path,
-records `kkt_regularization`, `FULL` only when 0. Drake (NSX-53): native
+scaled (measured 2e-14, 3e-15, 3e-9). MyoSuite (NSX-52, `MyoSuiteForceAdapter`): subclasses
+`MujocoForceAdapter` (no second implementation), records
+`kkt_regularization=<value>` in the model provenance (`name=myosuite`), and is
+`FULL` only while that value is exactly 0, else `NONE`. Drake (NSX-53): native
 adapter, explicit `from pydrake.X import Y` imports, no module-level mocks.
 OpenSim (NSX-54): delegates to `OpenSimFullBodyParityAdapter`.
 
@@ -459,9 +510,36 @@ otherwise a deferred-validation record and capability `NONE`.
 
 ## NSX-56 Conformance (#12584)
 
-Track N compares canonical `M`, `h`, `J_c`, `Jdot_v` tightly; Track S compares
-invariants and envelopes with tolerance propagated from Track N differences.
-Never hand-widened.
+`tests/integration/cross_engine/test_loop_nullspace_conformance.py` is the one
+parametrised harness over every FULL engine (Pinocchio reference; MuJoCo, Drake,
+OpenSim). Each state is projected once with `project_to_closure`, each engine
+builds its snapshot through `snapshot_from_adapter`, and arrays are permuted to
+the reference order by coordinate name.
+
+Track N compares canonical `M`, `h`, `J_c`, `Jdot_v` tightly. Tolerances are the
+per-pair, per-metric entries (`check: closed_loop_snapshot_conformance`) in
+`tests/integration/cross_engine/divergence_registry.yaml`, with
+the rationale and the measured agreement; the grip frame, club inertia split and
+loop topology are compared in the same track. Measured: `M`, `h` below 1e-15,
+`J_c` below 3e-15, `Jdot_v` 1.8e-12 (Drake, OpenSim, analytic or exact) and
+1.2e-10 (MuJoCo central finite difference), all scaled by `max(1, |ref|)`.
+
+Track S compares quantities derived from the snapshot: the rigid KKT
+acceleration and grip-wrench multiplier, kinetic energy, power, closure singular
+values (rank 6) and the closed-form grip-wrench envelope over a unit actuator
+box. Its tolerance is propagated from the Track N differences measured in the
+same run (`kkt_bound`: `|K^-1| (|dr| + |dK||x|) / (1 - |K^-1||dK|)`; Weyl for
+singular values), never hand-widened. A perturbed-engine control proves both
+tracks discriminate.
+
+Capability per engine: Pinocchio, MuJoCo, MyoSuite, Drake and OpenSim are FULL
+and are registered in `create_engine_force_adapter`; the harness skips MyoSuite
+cleanly when `myosuite` is not importable. Simscape (no native adapter) and the
+synthetic fixtures declare NONE and are asserted to refuse a snapshot. MyoSuite
+2.12.2 agrees with Pinocchio to the same digits as MuJoCo (the adapter reuses
+the MuJoCo code); MuJoCo 3.6.0 and 3.8.0 give identical Track N errors to three
+significant digits. Agreement between engines is not physical
+validation.
 
 ## NSX-60 Lower-Body Loop (#12585, Strong)
 

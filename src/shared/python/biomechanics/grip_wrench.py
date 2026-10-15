@@ -27,6 +27,9 @@ models make the split determinate (issue #11739, OSV-7):
 * ``"bushing"``: one six-axis ``BushingForce`` per hand; each hand wrench is the
   bushing record on the club (frame2 of the force), in the world frame, with
   the torque taken about that hand's grip point.
+* ``"loop_nullspace_family"``: a hand split chosen from the NSX-16 family
+  ``y = G# w + K s`` (``loop_nullspace.grip_split``); the net wrench is
+  invariant, ``s`` is a declared choice.
 * ``"contact"``: reserved for the distributed-contact grip (summed
   ``ElasticFoundationForce`` records per hand); not produced yet.
 """
@@ -56,6 +59,7 @@ SplitMethod = Literal[
     "logged",
     "bushing",
     "contact",
+    "loop_nullspace_family",
     "unavailable",
 ]
 SPLIT_METHODS: tuple[str, ...] = get_args(SplitMethod)

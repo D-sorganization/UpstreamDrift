@@ -92,8 +92,11 @@ def test_report_is_unavailable_not_zero_without_an_impact() -> None:
     assert report["fd_rms_after_impact_m"] is None
 
 
-def test_reference_clubhead_tolerates_stand_in_kinematics() -> None:
-    assert fp.reference_clubhead(MagicMock(), np.zeros((3, 6))) is None
+def test_reference_face_path_tolerates_stand_in_kinematics() -> None:
+    """A stand-in provider cannot place the face centre: unavailable with a
+    reason, never the ``Clubhead`` frame origin (#12682)."""
+    path = fp.model_face_path(MagicMock(), np.zeros((3, 6)), np.arange(3.0), {})
+    assert path.centres is None and path.reason
 
 
 def test_receipt_schema_accepts_the_block() -> None:

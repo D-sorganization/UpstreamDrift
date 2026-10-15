@@ -5,7 +5,9 @@ body, ``pi = (m, h, I)`` with ``h = m c`` the first mass moment and ``I`` the
 rotational inertia about the body frame origin.  The set of *physically
 consistent* parameters is the convex cone of parameters whose 4x4
 pseudo-inertia ``J = [[Sigma, h], [h^T, m]]`` with ``Sigma = tr(I)/2 - I`` is
-positive semidefinite (Wensing, Kim and Slotine, RA-L 2018).  Two
+positive semidefinite (Wensing, Kim and Slotine, RA-L 2018).  The spatial
+10-vector is ordered ``[m, h_x, h_y, h_z, Ixx, Ixy, Ixz, Iyy, Iyz, Izz]``;
+Pinocchio swaps ``Ixz`` and ``Iyy`` (issue #12675).  Two
 representations are provided:
 
 * the linear 10-vector, kept inside the convex cone by Euclidean projection in

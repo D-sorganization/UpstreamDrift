@@ -324,6 +324,97 @@ class OpenSimFullBodyParityAdapter:
             result[name] = (sample, jacobian)
         return result
 
+    # -- array-API delegates for the closed-loop snapshot (NSX-54, #12582) ---
+    def _checked_vector(self, values: Any, name: str) -> Array:
+        vector = np.asarray(values, dtype=float)
+        if vector.shape != (self.nv,) or not np.isfinite(vector).all():
+            raise ValueError(f"{name} must be a finite vector of shape ({self.nv},)")
+        return vector
+
+    def mass_and_bias(self, q: Any, u: Any) -> tuple[Array, Array]:
+        """``(M(q), h(q, u))`` in spec order; ``h`` is inverse dynamics at udot=0.
+
+        Postcondition: ``M`` is ``nv x nv`` symmetric, ``h`` has length ``nv``;
+        ``M a + h`` is the unconstrained, contact-free generalized load.
+        """
+        qv, uv = self._checked_vector(q, "q"), self._checked_vector(u, "u")
+        self._set_state(qv, uv)
+        matrix = self._osim.Matrix(self.nv, self.nv)
+        self._matter.calcM(self._state, matrix)
+        mass = _to_array(matrix)[np.ix_(self._slot, self._slot)]
+        return mass, self._bias_forces()
+
+    def closure_jacobian(self, q: Any) -> Array:
+        """Native weld rate Jacobian ``(6, nv)`` in ``CLOSURE_CONVENTION``."""
+        self._set_state(self._checked_vector(q, "q"), np.zeros(self.nv))
+        return self._closure_blocks()[1]
+
+    def closure_drift(self, q: Any, u: Any) -> Array:
+        """Native ``Jdot u`` (6,): zero-udot weld relative acceleration."""
+        self._set_state(self._checked_vector(q, "q"), self._checked_vector(u, "u"))
+        return self._closure_blocks()[2]
+
+    def closure_hand_frame(self, q: Any) -> tuple[Array, Array]:
+        """World ``(rotation, origin)`` of the hand-side weld frame (body a)."""
+        self._set_state(self._checked_vector(q, "q"))
+        body, placement = self._closure[0]
+        pose = self._pose(body, self._state, placement)
+        return pose[:3, :3].copy(), pose[:3, 3].copy()
+
+    @property
+    def closure_club_placement(self) -> Array:
+        """4x4 pose of the club-side weld frame in the club body frame."""
+        return np.array(self._closure[1][1], dtype=float, copy=True)
+
+    def closure_support_names(self) -> tuple[str, ...]:
+        """Coordinates of the joints on the tree path between the weld bodies.
+
+        Joints shared by both branches cancel in the relative twist, so every
+        other column of :meth:`closure_jacobian` is exactly zero.
+        """
+        parent_of: dict[str, tuple[str, tuple[str, ...]]] = {}
+        for joint in self._model.getJointSet():
+            child = joint.getChildFrame().findBaseFrame().getName()
+            parent = joint.getParentFrame().findBaseFrame().getName()
+            coords = tuple(
+                joint.get_coordinates(i).getName()
+                for i in range(joint.numCoordinates())
+            )
+            parent_of[child] = (parent, coords)
+
+        def branch(body: Any) -> set[str]:
+            names: set[str] = set()
+            current = body.getName()
+            while current in parent_of:
+                current, coords = parent_of[current]
+                names.update(coords)
+            return names
+
+        path = branch(self._closure[0][0]) ^ branch(self._closure[1][0])
+        return tuple(name for name in self.coordinate_order if name in path)
+
+    def contact_jacobian(self, q: Any) -> Array:
+        """Stacked sphere-center world Jacobians ``(3 n_spheres, nv)``."""
+        self._set_state(self._checked_vector(q, "q"), np.zeros(self.nv))
+        return np.vstack([jac for _, jac in self._contact().values()])
+
+    @property
+    def contact_names(self) -> tuple[str, ...]:
+        """Contact sphere names in the order of :meth:`contact_jacobian`."""
+        return tuple(name for name, *_ in self._spheres)
+
+    def weld_acceleration(self, q: Any, u: Any, tau: Any) -> Array:
+        """Contact-free constrained acceleration ``(nv,)`` for applied ``tau``.
+
+        The exact weld solve of :meth:`accelerations` without ground contact,
+        matching Pinocchio's ``constraintDynamics`` semantics (the closure
+        reaction is solved for, never supplied).
+        """
+        effort = self._checked_vector(tau, "tau")
+        mass, bias = self.mass_and_bias(q, u)
+        _, jacobian, drift = self._closure_blocks()
+        return solve_weld_acceleration(mass, effort - bias, jacobian, drift)
+
     # -- dynamics -----------------------------------------------------------
     def accelerations(
         self,
