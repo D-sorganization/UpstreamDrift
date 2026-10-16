@@ -299,13 +299,24 @@ def _config_files(request: SpineStudyRequest) -> dict[str, Path]:
 
 
 def _external_load_files(path: Path) -> list[FileRecord]:
+    """Hash the ExternalLoads XML and every data file it references.
+
+    A relative ``<datafile>`` resolves against the XML's directory (OpenSim
+    semantics); an absolute one is used as written.
+
+    Raises:
+        FileNotFoundError: a referenced data file does not exist, so the
+            receipt can never claim hash-pinned inputs that are incomplete.
+    """
     records = [FileRecord("external_loads", path.name, sha256_of(path))]
     for name in _DATAFILE_RE.findall(path.read_text(encoding="utf-8")):
         data = path.parent / name
-        if data.is_file():
-            records.append(
-                FileRecord("external_loads_data", data.name, sha256_of(data))
+        if not data.is_file():
+            raise FileNotFoundError(
+                f"external loads data file not found: {name} "
+                f"(referenced by {path.name})"
             )
+        records.append(FileRecord("external_loads_data", data.name, sha256_of(data)))
     return records
 
 
