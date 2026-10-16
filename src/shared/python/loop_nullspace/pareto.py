@@ -43,11 +43,10 @@ from src.shared.python.loop_nullspace.allocation import (
     _hypotheses,
     _layout,
     _objective_terms,
-    _operators,
+    _objective_operators,
     _record,
     _validated_frames,
     _validated_reference,
-    _weights,
 )
 from src.shared.python.loop_nullspace.allocation_spec import ObjectiveSpec
 from src.shared.python.loop_nullspace.evidence import Array, QuantityRecord
@@ -303,11 +302,9 @@ def pareto_front(
     ref_b = _validated_reference(references[1], constrained, len(frames))
     eps_values = _eps_grid(eps_grid)
     lay = _layout(frames, primary)
-    ops_a = _operators(lay, primary.torque_scale, _weights(primary), primary.variance)
+    ops_a = _objective_operators(lay, primary)
     _check_convexity(lay, primary, ops_a)
-    ops_b = _operators(
-        lay, constrained.torque_scale, _weights(constrained), constrained.variance
-    )
+    ops_b = _objective_operators(lay, constrained)
     if not ops_b:
         raise ValueError(
             "the constrained objective has no enabled quadratic term (rate needs "

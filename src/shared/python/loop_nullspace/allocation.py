@@ -284,6 +284,12 @@ def _operators(
     return ops
 
 
+def _objective_operators(lay: _Layout, objective: ObjectiveSpec) -> dict[str, Any]:
+    """Operators of every quadratic term the objective enables."""
+    weights = _weights(objective)
+    return _operators(lay, objective.torque_scale, weights, objective.variance)
+
+
 def _weights(objective: ObjectiveSpec) -> dict[str, float]:
     return {
         "effort": objective.effort_weight,
@@ -662,9 +668,7 @@ def allocate_trajectory(
     frames = _validated_frames(feasible_sets, objective)
     ref = _validated_reference(reference, objective, len(frames))
     lay = _layout(frames, objective)
-    ops = _operators(
-        lay, objective.torque_scale, _weights(objective), objective.variance
-    )
+    ops = _objective_operators(lay, objective)
     convexity = _check_convexity(lay, objective, ops)
     power = _classify_power(lay, objective.gross_power)
     prob = _assemble(lay, objective, ops, ref, power)

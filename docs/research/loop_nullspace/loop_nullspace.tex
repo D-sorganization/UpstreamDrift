@@ -1180,6 +1180,99 @@ checks it against a grid minimum.  With M2 the derivative is a polynomial in
 $z$ of higher degree and has no such closed form; its coefficients are stored.
 No claim is made that any golfer uses a minimum-variance allocation.
 
+\subsection{Noise-Aware Allocation (NSX-92)}
+\label{sec:var-noise-aware}
+
+\paragraph{Model.}  For one scalar outcome $y=c^{\top}\delta x_N$ of the chain
+$\delta x_{t+1}=A_t(z)\,\delta x_t+B_t w_t$ with $A_t(z)=A_t^0+\sum_m z_m A_{t,m}^1$
+(M2, units of $A$ as in \S\ref{sec:var-cov}), initial covariance $P_0$ and white
+torque noise $w_t\sim(S+\operatorname{diag}(k^2\tau_t(z)^2))/\Delta t$ (M1; the
+$S/\Delta t$ discretization is V6), the backward kernels
+$S_x[N]=c$, $S_x[t]=S_x[t+1]A_t(z)$, $S_{\mathrm{in}}[t]=S_x[t+1]B_t$ give
+\begin{equation}
+\operatorname{Var}(y;z)=
+\underbrace{S_x[0]P_0S_x[0]^{\top}}_{\text{initial}}+
+\underbrace{\sum_t S_{\mathrm{in}}[t]\,\tfrac{S}{\Delta t}\,S_{\mathrm{in}}[t]^{\top}}_{\text{additive}}+
+\underbrace{\sum_{t,j}\tfrac{k_j^2}{\Delta t}\,S_{\mathrm{in}}[t]_j^2\,\tau_{tj}(z)^2}_{\text{signal dependent (M1)}} .
+\end{equation}
+Units: $y$ in rad, $\operatorname{Var}$ in rad$^2$, $\tau$ in N\,m, $k$ dimensionless,
+$S$ in (N\,m)$^2\,$s.  Every term is a squared residual,
+$\operatorname{Var}=\lvert r(z)\rvert^2$; the Jacobian $J=\partial r/\partial z$
+is obtained exactly by the product rule through the backward recursion
+($\partial S_x[t]/\partial z_m=\partial S_x[t+1]/\partial z_m\,A_t+S_x[t+1]A^1_{t,m}$),
+so $\nabla\operatorname{Var}=2J^{\top}r$ is exact.  Frame $t$ supplies $\tau_t$
+and the null coordinates $z_t$; $z$ stacks all frames.
+
+\paragraph{Convex Case (M1 Only).}  With $A^1=0$ the kernels are constant, the
+initial and additive terms are constants, and the signal-dependent term is the
+diagonal convex quadratic $\sum_{tj}\mathrm{coeff}_{tj}\tau_{tj}^2$ with
+$\mathrm{coeff}_{tj}=k_j^2S_{\mathrm{in}}[t]_j^2/\Delta t$.  It enters the
+NSX-23 allocation as a diagonal torque quadratic (\texttt{VarianceTerm}), is
+solved over the exact feasible sets, and the optimum is global, certified by
+the conic solver's KKT residuals.  If the term has no curvature on a retained
+torque direction the solve is refused (strict convexity, R6) unless the caller
+declares an explicit minimum-effort tie-break, which is reported and removes
+the global-optimality flag.
+
+\paragraph{Non-Convex Case (M2).}  With $A^1\neq0$ the residuals are multilinear
+in $z$ across steps, so $\operatorname{Var}$ is in general \emph{not} convex.  A
+damped Gauss--Newton sequential convex program, each step a convex SOCP over the
+same feasible sets, starts at the minimum-effort allocation (and optional extra
+starts).  Because $\operatorname{Var}=\lvert r\rvert^2$ the Gauss--Newton model
+gradient $2J^{\top}r$ equals the exact gradient, so a vanishing step together
+with a small KKT residual of the subproblem certifies a \emph{first-order
+stationary point}.  The result is labelled \texttt{LOCAL\_STATIONARY}; it is
+never described as globally optimal, and the distinct local optima found from
+several starts are listed.  Second-order optimality is not certified.
+
+\paragraph{Flat Case and Negative Control.}  If neither M1 nor M2 is active the
+Jacobian vanishes identically; the solver is skipped and returns
+\texttt{OBJECTIVE\_FLAT\_INVARIANT} (V1) with the variance typed
+\texttt{INVARIANT}, conditioned on \texttt{H-NOISE-ADDITIVE}, and the
+minimum-effort representative carries no variance claim.  Additive noise
+\emph{with} declared M2 is not flat (the initial-state term moves with $z$).
+
+\paragraph{Fronts.}  Variance against capacity effort uses the NSX-25
+$\epsilon$-constraint machinery with the strictly convex effort as the
+minimised objective and the variance as the exact cone bound, so each convex
+point is properly Pareto optimal and its multiplier is the front slope
+$\mathrm{d}(\text{effort})/\mathrm{d}(\text{variance})$.  With M2 the front is a
+sweep of effort caps whose points are certified local optima (not claimed to be
+the Pareto set).  Clubhead speed and face bias are fixed by the nominal motion
+and are allocation-invariant, so variance against CHS is evaluated over a family
+of cases at a common effort cap (V4), with the NSX-25 dominance rule on
+$(\text{variance},-\text{CHS})$.
+
+\paragraph{Verification.}  The optimum and the minimum-effort reference run on
+common random numbers in the NSX-91 campaign, the SD ranking is repeated on an
+independent hold-out seed set, and the linear-versus-Monte-Carlo gap is always
+kept; agreement is claimed only if the nonlinearity gate passed (V7).  The unit
+fixture uses the nonlinear reduced-coordinate pendulum step as the forward
+model.  With the declared test noise $k=(0.5,1.0)$, $\sigma_0=(0.1,0.1)$ and
+$3000$ trials per seed set, the optimum has predicted SD $0.645$ and hold-out
+Monte Carlo SD $0.649$, and the reference $0.920$ against $0.942$ (a $2.4\,\%$
+gap, reported, not hidden).  The planar golden reproduces
+$z^*=-1315/348$ (M1) and $z^*=1180/1669$ (M1 with M2) to $10^{-9}$.
+
+\paragraph{Failed Experiments and Limits.}  (i) In the pendulum the preload
+enters only $A_{10}$ and $B$ drives only $\omega$, so every kernel is affine in
+$z$ and the variance is convex there; the non-convex test therefore uses a
+declared synthetic two-step chain (seed fixed in the fixture) in which midpoint
+convexity fails and several local optima exist.  (ii) The first front slope
+carried the variance normalization on the wrong side (off by the square of the
+normalization weight); the dense one-dimensional grid oracle caught it.  (iii) The
+Pinocchio anthropometric model is not covered: NSX-84 supports tangent
+dimension $k=1$ only on this branch (issue \#12817), and no face-angle outcome
+map with kernels exists for the thirty-five actuated coordinates.  Results are
+conditional on the declared mechanisms and amplitudes (V8) and are not
+physiological claims.
+
+\paragraph{Reproduction.}
+\texttt{python3 -m pytest tests/unit/loop\_nullspace/test\_noise\_aware\_model.py
+tests/unit/loop\_nullspace/test\_noise\_aware\_allocation.py
+tests/unit/loop\_nullspace/test\_noise\_aware\_front.py
+tests/unit/loop\_nullspace/test\_noise\_aware\_verification.py -n 0 -o addopts=""}.
+
 \subsection{Face-Angle Statistics}
 \label{sec:var-face}
 

@@ -111,10 +111,9 @@ class VarianceEffortFront:
     def is_monotone(self, rtol: float = 1e-8) -> bool:
         """Effort non-increasing in the allowed variance (convex fronts)."""
         pts = sorted(self.solved, key=lambda p: p.target_variance)
-        eff = [p.effort for p in pts]
+        eff = [float(p.effort) for p in pts if p.effort is not None]
         return all(
-            b <= a + rtol * (1.0 + abs(a))  # type: ignore[operator]
-            for a, b in zip(eff, eff[1:], strict=False)
+            b <= a + rtol * (1.0 + abs(a)) for a, b in zip(eff, eff[1:], strict=False)
         )
 
 
@@ -151,6 +150,8 @@ def _convex_front(
                 FrontPoint(float(tgt), NoiseAwareStatus.INFEASIBLE, pt.reason)
             )
             continue
+        if pt.primary is None or pt.constrained is None:
+            raise ValueError("an optimal Pareto point must carry its objectives")
         slope = None if pt.slope is None else float(pt.slope * term.weight)
         points.append(
             FrontPoint(
@@ -168,13 +169,20 @@ def _convex_front(
     return tuple(points), front
 
 
+def _need(value: float | None) -> float:
+    """Return ``value`` as a float; raise if the solve did not provide it."""
+    if value is None:
+        raise ValueError("the allocation result lacks a required reference value")
+    return float(value)
+
+
 def _local_front(
     frames: tuple[Any, ...],
     ctx: dict[str, Any],
     targets: Array,
     floor: NoiseAwareResult,
 ) -> tuple[FrontPoint, ...]:
-    lo, hi = float(floor.effort), float(floor.reference_effort)
+    lo, hi = _need(floor.effort), _need(floor.reference_effort)
     caps = np.linspace(hi, lo, targets.size)  # large cap -> small variance
     out = []
     for tgt, cap in zip(targets, caps, strict=True):
@@ -254,7 +262,7 @@ def variance_effort_front(
         )
     if floor.variance is None:
         raise ValueError(f"cannot build a front: {floor.status.value}: {floor.reason}")
-    targets = _grid(floor.variance, float(floor.reference_variance), n_points)
+    targets = _grid(floor.variance, _need(floor.reference_variance), n_points)
     ctx = {
         "times": times,
         "scale": scale,
@@ -270,8 +278,8 @@ def variance_effort_front(
     return VarianceEffortFront(
         points=points,
         variance_floor=float(floor.variance),
-        baseline_variance=float(floor.reference_variance),
-        baseline_effort=float(floor.reference_effort),
+        baseline_variance=_need(floor.reference_variance),
+        baseline_effort=_need(floor.reference_effort),
         convex=convex,
         hypotheses=floor.hypotheses,
         pareto=raw,
