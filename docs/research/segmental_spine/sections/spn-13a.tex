@@ -29,7 +29,9 @@ licensed asset id resolved through its manifest environment variable), the
 level-map key, the coupling law id (or none, to extract the law from the model
 couplers), the cost exponent $p\in\{2,3\}$, optional external loads, the frame
 selection (events, stride, \texttt{max\_frames}), the pelvis encoding, and the
-declared tolerances: the drive residual flag $\varepsilon_{\mathrm{drive}}$
+drive torso alignment $A$ (a $3\times3$ proper rotation, \texttt{torso\_alignment})
+with a non-empty \texttt{torso\_alignment\_source} describing its calibration
+(both or neither), and the declared tolerances: the drive residual flag $\varepsilon_{\mathrm{drive}}$
 [rad], the pelvis residual budget (peak force over $W$, peak moment over
 $W\,h$), and the reserve limit [N$\cdot$m] and maximum share. The output
 directory is not part of the request identity.
@@ -42,16 +44,22 @@ and values, no directories),
   \{(\mathrm{role}_k, H(\mathrm{file}_k))\})\bigr),
 \]
 over the motion, golf model, segmental model, ExternalLoads XML (and its
-referenced data file when present) and the configuration JSON files
+referenced data file) and the configuration JSON files
 \texttt{spine\_coupling\_laws.json}, \texttt{spine\_model\_level\_maps.json},
 \texttt{spine\_golf\_context\_bands.json} (plus \texttt{spine\_model\_assets.json}
-for a licensed asset). Any changed byte changes the identity.
+for a licensed asset). A relative \texttt{datafile} resolves against the
+directory of the XML, as in OpenSim, and an absolute one is used as written; a
+referenced data file that does not exist raises \texttt{FileNotFoundError}
+before any stage runs, so the receipt never claims incomplete hash-pinned
+inputs. The canonical request carries $A$ and its provenance
+(\texttt{calibrated:<source>} or \texttt{assumed\_identity} with
+$A=I$), so both enter the hash. Any changed byte changes the identity.
 
 \paragraph{Receipt.}
-The receipt holds the schema version, the request and its identity, every
+The receipt (schema \texttt{spine-study-receipt/2}) holds the schema version, the request and its identity, every
 input hash, the code version (git SHA, injectable), the OpenSim, SciPy and
 NumPy versions, the law as \texttt{id@version}, the
-\texttt{distribution\_source}, the asset admission record, one record per
+\texttt{distribution\_source}, the asset admission record, the drive alignment $A$ with its provenance, one record per
 stage (provenance strings and rounded metrics), the output artifacts with
 their SHA-256 (\texttt{.mot} and a loads \texttt{.npz}), residual statistics,
 reserve flags and the context comparisons. It contains no timestamp and no
@@ -65,19 +73,21 @@ Status is fail-closed. \texttt{failed}: a stage raised
 (\texttt{ValueError}, \texttt{OSError} or \texttt{RuntimeError}); the failing
 stage is the last record. \texttt{unqualified}: a licensed asset is not
 \texttt{QUALIFIED} (missing, unpinned or hash mismatch; a missing asset skips
-all stages), any drive frame is invalid, the pelvis residual exceeds the
+all stages), the drive alignment $A$ was not supplied (provenance
+\texttt{assumed\_identity}), any drive frame is invalid, the pelvis residual exceeds the
 declared budget, any frame is flagged for reserve use, or any optimisation
 solve is unsuccessful. \texttt{pass}: none of these. \texttt{pass} is a
 software statement only; \texttt{scientific\_status} is always
 \texttt{unqualified}, and the receipt constructor refuses \texttt{pass} with a
-non-qualified asset.
+non-qualified asset or a provenance that is not \texttt{calibrated:}.
 
 \paragraph{Assumptions and Limitations.}
 Hashes pin bytes, not meaning: an anatomically wrong but unchanged asset still
 hashes equal. Determinism is claimed for one machine and library set, which
 the recorded versions identify; ten-digit rounding hides only sub-rounding
-solver noise. The ExternalLoads data file is hashed only when it sits beside
-the XML. The fixture used by the tests is invented, and on it the static
+solver noise. A supplied $A$ is hashed and recorded but not validated: its
+correctness rests on the cited calibration, and a wrong $A$ does not raise the
+drive residual. The fixture used by the tests is invented, and on it the static
 optimisation did not converge at the first two samples of the synthetic motion,
 so the tests select later frames; this is a property of that fixture, recorded
 here rather than hidden. Outputs are not scientific acceptance evidence.

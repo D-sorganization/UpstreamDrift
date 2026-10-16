@@ -33,6 +33,9 @@ Two solvers:
     ``sum a^p + w sum (r / R)^2``: reserves carry exactly the remainder the
     muscles cannot produce and are zero (to solver precision) when the target
     is reachable.
+
+A muscle with no force capacity at the frame (an all-zero gain column) is held
+at zero activation and excluded from stage 2 (see ``_redistribute``).
 """
 
 from __future__ import annotations
@@ -249,7 +252,27 @@ def _polish(a: np.ndarray, gain: np.ndarray, target: np.ndarray) -> np.ndarray:
 def _redistribute(
     a_start: np.ndarray, gain: np.ndarray, exponent: int
 ) -> tuple[np.ndarray, bool, str]:
-    """Stage 2: ``min sum a^p`` s.t. ``G a = G a_start`` on the unit box."""
+    """Stage 2: ``min sum a^p`` s.t. ``G a = G a_start`` on the unit box.
+
+    A muscle whose gain column is identically zero (no force at any
+    activation: slack, or shorter than its minimum fibre length) is inert: it
+    cannot change ``G a`` and its cost is minimal at 0, so it is held at 0 and
+    left out of the SLSQP problem.  Keeping the zero column made SLSQP stop
+    with "Inequality constraints incompatible" (#12827).
+    """
+    live = np.any(gain != 0.0, axis=0)
+    if not live.any():
+        return np.zeros_like(a_start), True, "no muscle has force capacity"
+    if live.all():
+        return _redistribute_live(a_start, gain, exponent)
+    a = np.zeros_like(a_start)
+    a[live], ok, message = _redistribute_live(a_start[live], gain[:, live], exponent)
+    return a, ok, message
+
+
+def _redistribute_live(
+    a_start: np.ndarray, gain: np.ndarray, exponent: int
+) -> tuple[np.ndarray, bool, str]:
     target = gain @ a_start
     basis = _range_basis(gain)
     reduced = basis.T @ gain  # (k, nm), full row rank

@@ -13,6 +13,7 @@ study ``unqualified``; they are never clipped.  Coupling laws are untouched.
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from typing import Any
 
@@ -33,6 +34,7 @@ from src.shared.python.pose_estimation.model_files import sha256_of
 from src.shared.python.spine.movement_variants import (
     DEFAULT_VARIANTS_PATH,
     MovementVariant,
+    check_undeclared_terms,
     movement_variant,
 )
 
@@ -134,7 +136,41 @@ def apply_request_variant(
     )
     if not result.term_bounds_ok:
         out.reasons.append("variant term exceeds its declared bounds")
+    _record_undeclared_terms(request, golf, made.golf_input, out)
     return made.golf_input
+
+
+def _record_undeclared_terms(
+    request: Any, base: GolfTrunkInput, varied: GolfTrunkInput, out: Any
+) -> None:
+    """Evaluate all rotation-computable golf terms before and after the variant.
+
+    Postcondition: ``out.variant["undeclared_terms"]`` holds ``ok``, the
+    tolerance, the largest change of every undeclared term (``None`` for a
+    non-finite change) and the violating terms; a violation adds a status
+    reason (the study is then ``unqualified``).
+    """
+    check = check_undeclared_terms(
+        movement_variant(request.variant_id),
+        base.pelvis_to_thorax,
+        varied.pelvis_to_thorax,
+        base.time_s,
+        handedness=request.variant_handedness,
+    )
+    out.variant["undeclared_terms"] = {
+        "ok": bool(check.ok),
+        "tolerance": check.tolerance,
+        "max_change": {
+            term: round_sig(value) if math.isfinite(value) else None
+            for term, value in check.max_change.items()
+        },
+        "violations": list(check.violations),
+    }
+    if not check.ok:
+        out.reasons.append(
+            "variant changed undeclared term(s) beyond tolerance: "
+            + ", ".join(check.violations)
+        )
 
 
 def check_driven_ranges(

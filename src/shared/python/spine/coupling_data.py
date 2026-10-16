@@ -1,7 +1,9 @@
 """Cited spinal coupling-law data and loader (SPN-3, issue #12743).
 
 Reads ``src/config/spine_coupling_laws.json`` and builds
-:class:`~src.shared.python.spine.coupling.LinearCouplingLaw` objects. The JSON
+:class:`~src.shared.python.spine.coupling.LinearCouplingLaw` objects, or a
+:class:`~src.shared.python.spine.coupling.ParityCouplingLaw` when the
+distribution declares ``even_in_rotation`` axes. The JSON
 stores only source numbers copied from
 ``docs/research/segmental_spine/data_extraction.md`` (plus labelled
 assumptions); per-level matrices are derived here, so every literature number
@@ -14,6 +16,9 @@ Distribution types:
   diagonal gain at a level is ``percent / 100 / n_levels_in_region``.
 * ``per_level_ratio``: per-level segment angles measured at a reference trunk
   rotation, scaled to a gain per degree of that rotation.
+* ``per_level_ratio`` may declare ``even_in_rotation`` (row keys such as
+  ``coupled_flexion``): those axes are even in the independent coordinate
+  (``theta = c |phi|``), built as a :class:`ParityCouplingLaw`.
 * ``equal_share``: every level carries ``1 / n_levels`` of each axis.
 
 Entries with ``status == "pending"`` carry no numbers and cannot be built.
@@ -27,10 +32,15 @@ import math
 from collections.abc import Mapping
 from pathlib import Path
 from types import MappingProxyType
+from typing import Any
 
 import numpy as np
 
-from src.shared.python.spine.coupling import CouplingLaw, LinearCouplingLaw
+from src.shared.python.spine.coupling import (
+    CouplingLaw,
+    LinearCouplingLaw,
+    ParityCouplingLaw,
+)
 from src.shared.python.spine.levels import SpinalLevel, SpinalRegion
 
 __all__ = ["available_laws", "coupling_law", "load_coupling_laws"]
@@ -39,6 +49,7 @@ DEFAULT_PATH = (
     Path(__file__).resolve().parents[3] / "config" / "spine_coupling_laws.json"
 )
 _AXES = ("flexion_extension", "lateral_bending", "axial_rotation")
+_RATIO_KEYS = ("coupled_flexion", "coupled_lateral_bend", "axial_rotation")
 _REQUIRED = ("law_id", "version", "kind", "status", "independent", "citation")
 _STATUSES = ("available", "pending")
 
@@ -127,13 +138,31 @@ def _ratio_matrices(dist: dict) -> dict[SpinalLevel, np.ndarray]:
     ref = math.radians(float(dist["reference_trunk_rotation_deg"]))
     out = {}
     sign = dist["isb_sign"]
-    keys = ("coupled_flexion", "coupled_lateral_bend", "axial_rotation")
+    keys = _RATIO_KEYS
     for row in dist["rows"]:
         values = tuple(sign[key] * row[key][0] for key in keys)
         out[SpinalLevel[row["level"]]] = (
             np.array([[math.radians(v)] for v in values]) / ref
         )
     return out
+
+
+def _parity_law(
+    matrices: dict[SpinalLevel, np.ndarray], even_keys: object, **common: Any
+) -> ParityCouplingLaw:
+    """Split ``matrices`` into odd and even parts per ``even_in_rotation``."""
+    if not isinstance(even_keys, list) or not all(k in _RATIO_KEYS for k in even_keys):
+        raise ValueError(
+            f"even_in_rotation must be a list drawn from {_RATIO_KEYS}, "
+            f"got {even_keys!r}"
+        )
+    axes = tuple(sorted(_RATIO_KEYS.index(k) for k in even_keys))
+    odd, even = {}, {}
+    for level, mat in matrices.items():
+        odd[level], even[level] = mat.copy(), np.zeros_like(mat)
+        even[level][list(axes)] = mat[list(axes)]
+        odd[level][list(axes)] = 0.0
+    return ParityCouplingLaw(matrices=odd, even_matrices=even, even_axes=axes, **common)
 
 
 def _equal_matrices(_dist: dict) -> dict[SpinalLevel, np.ndarray]:
@@ -160,7 +189,10 @@ def _citation_text(entry: dict) -> str:
 
 
 def coupling_law(law_id: str) -> CouplingLaw:
-    """Build the :class:`LinearCouplingLaw` for ``law_id``.
+    """Build the coupling law for ``law_id``.
+
+    Returns a :class:`LinearCouplingLaw`, or a :class:`ParityCouplingLaw` when
+    the distribution declares ``even_in_rotation`` axes.
 
     Postconditions: the returned law has read-only matrices, a non-empty
     citation and the independent coordinates named in the JSON.
@@ -187,10 +219,14 @@ def coupling_law(law_id: str) -> CouplingLaw:
     builder = _BUILDERS.get(dist.get("type"))
     if builder is None:
         raise ValueError(f"law {law_id!r}: unknown distribution {dist.get('type')!r}")
-    return LinearCouplingLaw(
-        law_id=law_id,
-        version=entry["version"],
-        matrices=builder(dist),
-        independent=tuple(entry["independent"]),
-        citation=_citation_text(entry),
-    )
+    matrices = builder(dist)
+    common = {
+        "law_id": law_id,
+        "version": entry["version"],
+        "independent": tuple(entry["independent"]),
+        "citation": _citation_text(entry),
+    }
+    even_keys = dist.get("even_in_rotation", [])
+    if not even_keys:
+        return LinearCouplingLaw(matrices=matrices, **common)
+    return _parity_law(matrices, even_keys, **common)
