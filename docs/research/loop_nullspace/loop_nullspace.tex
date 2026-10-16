@@ -814,6 +814,26 @@ $P^{\!\top}K_{\mathrm{geom}}(\lambda)P$, with $P$ spanning $\ker J_c$, for two
 reaction allocations; it differs between them (basis-free projector form is
 stored).
 
+\paragraph{Implementation (NSX-84).}  Perturbations are expressed in an
+orthonormal basis $P$ of $\ker J_c$ (SVD), $\delta q=P\xi$ and
+$\delta v=P\eta+O\xi$ with $O\xi=-J_c^{+}(\partial_qJ_c[P\xi])v$ the
+minimum-norm velocity offset, so $J_c\,\delta q=0$ and the velocity-level
+tangency hold by construction; the basis-free object is $\Pi=PP^{\!\top}$ with
+$J_c\Pi J_c^{\!\top}=0$.  The full-state Jacobian of the index-3 DAE is never
+formed.  Two routes yield the same derivatives: central differences of the
+single KKT solve along retractions ($q+\epsilon\,dq$ in $\mathbb R^n$,
+$\mathrm{quat}\otimes\exp$ for free joints, so $n_q\neq n_v$ is handled), and
+the assembled system of Eq.~\eqref{eq:var-kkt} with $K_{\mathrm{geom}}$ taken
+from $\partial_q(J_c^{\!\top}\lambda)$ at fixed $\lambda$.  The moving-frame
+term $(\partial_qP^{\!\top}[P\,\cdot])\,a$ turns $F_t$ into the angle
+coordinates of the worked case; it is specified here only for $k=1$.  The
+differencing refuses, rather than extrapolates, when the closure rank or the
+contact mode changes inside the step.  Engines declare analytic, autodiff,
+finite-difference or no derivatives (capability
+\texttt{closed\_loop\_derivatives}); an undeclared capability fails closed with
+its reason.  Failed experiments: none recorded.  Reproduction:
+\texttt{pytest tests/unit/loop\_nullspace/test\_tangent\_linearization.py}.
+
 \subsection{Event Section and Saltation Correction}
 \label{sec:var-salt}
 
