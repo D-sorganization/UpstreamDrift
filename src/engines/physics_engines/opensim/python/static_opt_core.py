@@ -34,6 +34,11 @@ Two solvers:
     muscles cannot produce and are zero (to solver precision) when the target
     is reachable.
 
+    From ``CONIC_MIN_MUSCLES`` muscles stage 2 uses convex QPs (Clarabel; p = 3
+    by iteratively reweighted least norm) because SLSQP does not converge on a
+    full-body frame (446 muscles); SLSQP remains below the threshold and when
+    Clarabel is not installed.
+
 A muscle with no force capacity at the frame (an all-zero gain column) is held
 at zero activation and excluded from stage 2 (see ``_redistribute``).
 """
@@ -66,7 +71,9 @@ _SLSQP_MAXITER = 500
 _BOUND_TOL = 1e-12
 CONIC_MIN_MUSCLES = 100
 _CONIC_TOL = 1e-8
-_CUBE_POWER = 1.0 / 3.0
+_WEIGHT_FLOOR = 1e-6
+_IRLS_MAXITER = 200
+_IRLS_TOL = 1e-10
 _CONIC_EQ_TOL = 1e-7
 _CONIC_OK = ("Solved", "AlmostSolved")
 
@@ -304,70 +311,74 @@ def _redistribute_live(
     return a, bool(result.success), str(result.message)
 
 
-def _conic_program(
-    gain_rows: np.ndarray, rhs: np.ndarray, n: int, exponent: int
-) -> tuple[Any, Any, np.ndarray, np.ndarray, list[Any]]:
-    """``(P, q, A, b, cones)`` of stage 2 for Clarabel (``A x + s = b``, s in K)."""
+def _weighted_qp(
+    reduced: np.ndarray, rhs: np.ndarray, weight: np.ndarray
+) -> tuple[np.ndarray, bool, str]:
+    """``min sum w_i a_i^2`` s.t. ``reduced a = rhs``, ``0 <= a <= 1`` (Clarabel)."""
     import clarabel  # lazy: optional extra
     import scipy.sparse as sp
 
+    n = weight.size
     eye = sp.identity(n, format="csc")
-    eq = sp.csc_matrix(gain_rows)
-    box = sp.vstack([eye, -eye], format="csc")
-    box_b = np.concatenate([np.ones(n), np.zeros(n)])
+    eq = sp.csc_matrix(reduced)
+    a_mat = sp.vstack([eq, eye, -eye], format="csc")
+    b = np.concatenate([rhs, np.ones(n), np.zeros(n)])
     cones: list[Any] = []
     if eq.shape[0]:
         cones.append(clarabel.ZeroConeT(eq.shape[0]))
+    else:
+        a_mat, b = a_mat[eq.shape[0] :], b[eq.shape[0] :]
     cones.append(clarabel.NonnegativeConeT(2 * n))
-    if exponent == 2:
-        a_mat = sp.vstack([eq, box], format="csc") if eq.shape[0] else box
-        b = np.concatenate([rhs, box_b]) if eq.shape[0] else box_b
-        return 2.0 * eye, np.zeros(n), a_mat, b, cones
-    # p = 3: min sum t s.t. t_i >= a_i^3, i.e. (t_i, 1, a_i) in PowerCone(1/3)
-    zero = sp.csc_matrix((eq.shape[0], n))
-    rows_eq = sp.hstack([eq, zero], format="csc")
-    rows_box = sp.hstack([box, sp.csc_matrix((2 * n, n))], format="csc")
-    power = sp.lil_matrix((3 * n, 2 * n))
-    power_b = np.zeros(3 * n)
-    for i in range(n):
-        power[3 * i, n + i] = -1.0  # s1 = t_i
-        power_b[3 * i + 1] = 1.0  # s2 = 1
-        power[3 * i + 2, i] = -1.0  # s3 = a_i
-        cones.append(clarabel.PowerConeT(_CUBE_POWER))
-    a_mat = sp.vstack([rows_eq, rows_box, power.tocsc()], format="csc")
-    b = np.concatenate([rhs, box_b, power_b])
-    q = np.concatenate([np.zeros(n), np.ones(n)])
-    return sp.csc_matrix((2 * n, 2 * n)), q, a_mat, b, cones
+    settings = clarabel.DefaultSettings()
+    settings.verbose = False
+    settings.tol_feas = settings.tol_gap_abs = settings.tol_gap_rel = _CONIC_TOL
+    result = clarabel.DefaultSolver(
+        sp.diags(2.0 * weight, format="csc"), np.zeros(n), a_mat, b, cones, settings
+    ).solve()
+    x = np.clip(np.asarray(result.x, dtype=float), 0.0, 1.0)
+    return x, str(result.status) in _CONIC_OK, str(result.status)
 
 
 def _redistribute_conic(
     a_start: np.ndarray, gain: np.ndarray, exponent: int
 ) -> tuple[np.ndarray, bool, str]:
-    """Stage 2 as a convex conic program (Clarabel): QP (p=2), power cone (p=3).
+    """Stage 2 by convex QPs (Clarabel): exact for p=2, reweighted for p=3.
 
-    Same problem as :func:`_redistribute`, solved to ``_CONIC_TOL`` in time
-    polynomial in the muscle count.  Raises ``ImportError`` without Clarabel.
+    Same problem as :func:`_redistribute`, in time polynomial in the muscle
+    count (SLSQP does not finish a full-body frame).  ``p = 3`` is solved by
+    iteratively reweighted least norm: each step minimises ``sum w_i a_i^2``
+    with ``w_i = max(a_i, _WEIGHT_FLOOR)`` from the previous iterate, whose
+    fixed point satisfies the KKT conditions of ``min sum a^3`` (stationarity
+    ``w_i a_i = a_i^2``).  Iterates are averaged with the previous one (step
+    1/2) for stability and stop when the cost change is below ``_IRLS_TOL``.
+    Raises ``ImportError`` without Clarabel.
     """
-    import clarabel
-
     n = a_start.size
     target = gain @ a_start
     basis = _range_basis(gain)
     norm = max(float(np.max(np.abs(basis.T @ gain), initial=0.0)), 1.0)
     reduced = (basis.T @ gain) / norm
     rhs = (basis.T @ target) / norm
-    p_mat, q, a_mat, b, cones = _conic_program(reduced, rhs, n, exponent)
-    settings = clarabel.DefaultSettings()
-    settings.verbose = False
-    settings.tol_feas = settings.tol_gap_abs = settings.tol_gap_rel = _CONIC_TOL
-    result = clarabel.DefaultSolver(p_mat, q, a_mat, b, cones, settings).solve()
-    x = np.clip(np.asarray(result.x, dtype=float)[:n], 0.0, 1.0)
-    a = _polish(x, gain, target)
-    # AlmostSolved (reduced-accuracy termination of the cubic cone) counts only
-    # when the equality constraint, the part that fixes the reserve, still holds.
+    a, ok, status = _weighted_qp(reduced, rhs, np.ones(n))
+    iterations = 1
+    if exponent == 3 and ok:
+        cost = float(np.sum(a**3))
+        for _step in range(2, _IRLS_MAXITER + 1):
+            iterations += 1
+            trial, ok, status = _weighted_qp(reduced, rhs, np.maximum(a, _WEIGHT_FLOOR))
+            if not ok:
+                break
+            a = 0.5 * (a + trial)  # feasible: a convex combination of feasible points
+            new_cost = float(np.sum(a**3))
+            done = abs(cost - new_cost) <= _IRLS_TOL * max(1.0, abs(new_cost))
+            cost = new_cost
+            if done:
+                break
+        else:
+            ok, status = False, "IRLS iteration limit"
+    a = _polish(np.clip(a, 0.0, 1.0), gain, target)
     held = float(np.max(np.abs(reduced @ a - rhs), initial=0.0)) <= _CONIC_EQ_TOL
-    solved = str(result.status) in _CONIC_OK and held
-    return a, solved, f"clarabel: {result.status}"
+    return a, ok and held, f"clarabel {status}, {iterations} QP solves"
 
 
 def _stage_two(
