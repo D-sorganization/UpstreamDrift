@@ -112,3 +112,92 @@ def test_retarget_rejects_missing_landmarks() -> None:
     del standing["bar"]
     with pytest.raises(ValueError, match="bar"):
         retarget_landmarks(_solution(np.zeros((2, 3))), standing, FRAME)
+
+
+# --- Hand-held bar (#11745: deadlift, clean-and-jerk pulls) ------------------
+
+_LENGTHS = (0.44, 0.44, 0.51)
+_ARM = 0.69
+
+
+def _pull(angles: np.ndarray, bar_offset_up: float) -> SagittalSolution:
+    """Solution whose bar sits ``bar_offset_up`` above the optimizer shoulder."""
+    n = angles.shape[0]
+    lengths = np.asarray(_LENGTHS)
+    shoulder = np.column_stack(
+        (
+            (lengths * np.sin(angles)).sum(axis=1),
+            (lengths * np.cos(angles)).sum(axis=1),
+        )
+    )
+    return SagittalSolution(
+        time_s=np.linspace(0.0, 1.0, n),
+        segment_angles_rad=angles,
+        bar_m=shoulder + np.array([0.0, bar_offset_up]),
+        source={"segment_lengths_m": list(_LENGTHS)},
+    )
+
+
+def test_shoulder_path_is_the_planar_chain_tip() -> None:
+    from src.shared.python.lifting.sagittal_retarget import shoulder_path
+
+    angles = np.array([[0.0, 0.0, 0.0], [0.3, -1.0, 0.8]])
+    tip = shoulder_path(_pull(angles, 0.0))
+    np.testing.assert_allclose(tip[0], [0.0, sum(_LENGTHS)], atol=1e-15)
+    expected_forward = sum(
+        length * np.sin(a) for length, a in zip(_LENGTHS, angles[1], strict=True)
+    )
+    assert tip[1, 0] == pytest.approx(expected_forward, abs=1e-15)
+
+
+def test_shoulder_path_needs_segment_lengths() -> None:
+    from src.shared.python.lifting.sagittal_retarget import shoulder_path
+
+    with pytest.raises(ValueError, match="segment_lengths_m"):
+        shoulder_path(_solution(np.zeros((2, 3))))
+    bad = SagittalSolution(
+        np.linspace(0.0, 1.0, 2),
+        np.zeros((2, 3)),
+        np.zeros((2, 2)),
+        {"segment_lengths_m": [0.4, -0.4, 0.5]},
+    )
+    with pytest.raises(ValueError, match="positive"):
+        shoulder_path(bad)
+
+
+def test_hanging_bar_is_one_arm_length_below_the_model_shoulders() -> None:
+    from src.shared.python.lifting.sagittal_retarget import retarget_bar
+
+    angles = np.array([[0.2, -0.9, 0.7], [0.1, -0.4, 0.3], [0.0, 0.0, 0.0]])
+    solution = _pull(angles, -_ARM)
+    targets = retarget_landmarks(solution, _standing(), FRAME)
+    bar = retarget_bar(solution, targets, FRAME)
+    left, right = (
+        LANDMARK_LABELS.index("shoulder_l"),
+        LANDMARK_LABELS.index("shoulder_r"),
+    )
+    mid = 0.5 * (targets[:, left] + targets[:, right])
+    np.testing.assert_allclose(bar, mid - np.array([0.0, 0.0, _ARM]), atol=1e-12)
+
+
+def test_bar_on_the_optimizer_shoulder_is_the_model_shoulder_midpoint() -> None:
+    from src.shared.python.lifting.sagittal_retarget import retarget_bar
+
+    solution = _pull(np.array([[0.1, -0.3, 0.2], [0.0, 0.0, 0.0]]), 0.0)
+    targets = retarget_landmarks(solution, _standing(), FRAME)
+    bar = retarget_bar(solution, targets, FRAME)
+    left, right = (
+        LANDMARK_LABELS.index("shoulder_l"),
+        LANDMARK_LABELS.index("shoulder_r"),
+    )
+    np.testing.assert_allclose(
+        bar, 0.5 * (targets[:, left] + targets[:, right]), atol=1e-12
+    )
+
+
+def test_retarget_bar_rejects_mismatched_targets() -> None:
+    from src.shared.python.lifting.sagittal_retarget import retarget_bar
+
+    solution = _pull(np.zeros((3, 3)), -_ARM)
+    with pytest.raises(ValueError, match="targets"):
+        retarget_bar(solution, np.zeros((2, len(LANDMARK_LABELS), 3)), FRAME)

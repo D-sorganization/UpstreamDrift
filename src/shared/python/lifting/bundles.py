@@ -23,7 +23,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Mapping
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -37,15 +37,17 @@ from src.shared.python.lifting.back_bar import (
     BackBarGeometry,
     BackBarSetup,
     BackBarStart,
+    HandBarSetup,
     apply_grip_width,
-    bar_axis_world,
     fit_bar_shelf,
+    pose_axis_world,
     standard_bar_world,
 )
 from src.shared.python.lifting.sagittal_retarget import (
     LANDMARK_LABELS,
     SagittalFrame,
     SagittalSolution,
+    retarget_bar,
     retarget_landmarks,
 )
 from src.shared.python.motion_matching.same_input import (
@@ -84,6 +86,16 @@ BACK_BAR_LIMITATIONS = (
     "bar sits at the standard's start-pose position; the golf humanoid's "
     "torso is not the standard's, so that shelf is not a measured anatomical "
     "site. The scapulae are held at the seed pose and the arm chain is solved."
+)
+HAND_BAR_LIMITATIONS = (
+    "Hand-held bar (#11745): the spec's golf club body is kept as the bar "
+    "carrier, with the left hand moved to the standard's grip width along it "
+    "(its mass travels with the hand); there is no barbell body or load, so "
+    "the bar mass enters only the planar optimizer, not the full-body "
+    "dynamics (LIFT-4, #11744). The bar centre ('Grip' frame) is tracked to "
+    "the model's shoulder midpoint plus the optimizer's bar offset from its "
+    "shoulder (arms hanging one optimizer arm length below the shoulder); the "
+    "scapulae are held at the seed pose and the arm chain is solved."
 )
 _ORIGIN = (0.0, 0.0, 0.0)
 LANDMARK_ATTACHMENTS: dict[str, tuple[str, tuple[float, float, float]]] = {
@@ -177,7 +189,7 @@ class FullBodyLift:
     q_standing: Array
     frame: SagittalFrame
     options: LiftIKOptions
-    back_bar: BackBarSetup | None = None
+    back_bar: BackBarSetup | HandBarSetup | None = None
 
     @property
     def bar_frame(self) -> str:
@@ -208,8 +220,10 @@ class FullBodyLift:
             "sagittal_forward": list(self.frame.forward),
             "q_standing": self.q_standing.tolist(),
         }
-        if self.back_bar is not None:
+        if isinstance(self.back_bar, BackBarSetup):
             record["back_bar"] = self.back_bar.to_record()
+        elif self.back_bar is not None:
+            record["hand_bar"] = self.back_bar.to_record()
         return record
 
 
@@ -217,6 +231,91 @@ def load_seed_pose(path: Path = SEED_RECORD) -> Array:
     """First recorded pose of the committed ground-support run (arms on grip)."""
     with np.load(path, allow_pickle=False) as record:
         return np.asarray(record["q"][0], dtype=float)
+
+
+def _exercise_config(exercise: str, body: Any, bar_mass_kg: float) -> tuple:
+    """The Movement Optimizer's configuration factory output for *exercise*."""
+    from movement_optimizer import exercises, models
+
+    factories = {
+        "full_squat": models.make_full_squat_config,
+        "deadlift": models.make_deadlift_config,
+        "clean": exercises.make_clean_config,
+    }
+    if exercise not in factories:
+        raise ValueError(f"exercise must be one of {sorted(factories)}: {exercise!r}")
+    return tuple(factories[exercise](body, bar_mass_kg))
+
+
+def solve_sagittal_lift(
+    exercise: str,
+    *,
+    bar_convention: str | None = None,
+    body_mass_kg: float = 80.0,
+    height_m: float = 1.78,
+    bar_mass_kg: float = 100.0,
+    duration_s: float = 3.0,
+    n_eval: int = 151,
+    n_waypoints: int = 12,
+) -> SagittalSolution:
+    """One lift from the Tools Movement Optimizer, through its public API.
+
+    Args:
+        exercise: Optimizer exercise (``full_squat``, ``deadlift``, ``clean``).
+        bar_convention: Optimizer exercise whose bar model places the bar
+            (``bar_position``); defaults to *exercise*.  A pull uses
+            ``deadlift`` (arms hanging below the shoulder).
+
+    Raises:
+        ImportError: When ``movement_optimizer`` (vendored Tools) is absent.
+        ValueError: For an exercise without a configuration factory here.
+        RuntimeError: When the optimizer reports failure.
+    """
+    import movement_optimizer
+    from movement_optimizer.models import BodyModel
+    from movement_optimizer.trajectory import TrajectoryOptimizer
+
+    convention = exercise if bar_convention is None else bar_convention
+    body = BodyModel(body_mass=body_mass_kg, height=height_m)
+    dyn, q_start, q_end, q_bounds, *via = _exercise_config(exercise, body, bar_mass_kg)
+    optimizer = TrajectoryOptimizer(
+        body,
+        dyn,
+        exercise,
+        bar_mass_kg,
+        q_start,
+        q_end,
+        q_bounds,
+        q_via=via[0] if via else None,
+        duration=duration_s,
+        n_waypoints=n_waypoints,
+        n_eval=n_eval,
+    )
+    result = optimizer.optimize()
+    if not result.success:
+        raise RuntimeError(f"movement optimizer did not converge for {exercise}")
+    angles = np.asarray(result.q, dtype=float)
+    return SagittalSolution(
+        time_s=np.asarray(result.t, dtype=float),
+        segment_angles_rad=angles,
+        bar_m=np.array([dyn.bar_position(q, convention) for q in angles]),
+        source={
+            "package": "movement_optimizer",
+            "version": movement_optimizer.__version__,
+            "exercise": exercise,
+            "bar_convention": convention,
+            "body_mass_kg": body_mass_kg,
+            "height_m": height_m,
+            "arm_length_m": float(body.L_arm),
+            "bar_mass_kg": bar_mass_kg,
+            "duration_s": duration_s,
+            "n_eval": n_eval,
+            "n_waypoints": n_waypoints,
+            "success": bool(result.success),
+            "cost": float(result.cost),
+            "segment_lengths_m": [float(x) for x in dyn.L_eff],
+        },
+    )
 
 
 def solve_sagittal_squat(
@@ -234,46 +333,14 @@ def solve_sagittal_squat(
         ImportError: When ``movement_optimizer`` (vendored Tools) is absent.
         RuntimeError: When the optimizer reports failure.
     """
-    import movement_optimizer
-    from movement_optimizer.models import BodyModel, make_full_squat_config
-    from movement_optimizer.trajectory import TrajectoryOptimizer
-
-    body = BodyModel(body_mass=body_mass_kg, height=height_m)
-    dyn, q_start, q_end, q_bounds, q_via = make_full_squat_config(body, bar_mass_kg)
-    optimizer = TrajectoryOptimizer(
-        body,
-        dyn,
+    return solve_sagittal_lift(
         "full_squat",
-        bar_mass_kg,
-        q_start,
-        q_end,
-        q_bounds,
-        q_via=q_via,
-        duration=duration_s,
-        n_waypoints=n_waypoints,
+        body_mass_kg=body_mass_kg,
+        height_m=height_m,
+        bar_mass_kg=bar_mass_kg,
+        duration_s=duration_s,
         n_eval=n_eval,
-    )
-    result = optimizer.optimize()
-    if not result.success:
-        raise RuntimeError("movement optimizer did not converge for full_squat")
-    return SagittalSolution(
-        time_s=np.asarray(result.t, dtype=float),
-        segment_angles_rad=np.asarray(result.q, dtype=float),
-        bar_m=np.asarray(result.bar, dtype=float),
-        source={
-            "package": "movement_optimizer",
-            "version": movement_optimizer.__version__,
-            "exercise": "full_squat",
-            "body_mass_kg": body_mass_kg,
-            "height_m": height_m,
-            "bar_mass_kg": bar_mass_kg,
-            "duration_s": duration_s,
-            "n_eval": n_eval,
-            "n_waypoints": n_waypoints,
-            "success": bool(result.success),
-            "cost": float(result.cost),
-            "segment_lengths_m": [float(x) for x in dyn.L_eff],
-        },
+        n_waypoints=n_waypoints,
     )
 
 
@@ -330,7 +397,7 @@ def _fit_arrays(kin: Any, fits: list[Any]) -> tuple[Array, Array, Array, Array]:
 
 
 def _attachments(
-    back_bar: BackBarSetup | None,
+    back_bar: BackBarSetup | HandBarSetup | None,
 ) -> dict[str, tuple[str, tuple[float, float, float]]]:
     """Marker attachments: the bar landmark rides the Hub, or the bar-centre frame."""
     if back_bar is None:
@@ -427,7 +494,14 @@ def _bar_axis_targets(
     points against the standard's ``+Y`` (the lifter's left) for the left hand
     to sit on the lifter's left.
     """
-    direction = tuple(float(x) for x in -bar_axis_world(geometry, frame))
+    return _axis_targets_for(geometry.bar_axis, frame)
+
+
+def _axis_targets_for(
+    bar_axis: tuple[float, float, float], frame: SagittalFrame
+) -> dict[str, tuple[tuple[float, ...], tuple[float, ...], float]]:
+    """IK axis target of the bar-centre frame for a standard bar axis."""
+    direction = tuple(float(x) for x in -pose_axis_world(bar_axis, frame))
     return {BAR_CENTRE_FRAME: (BAR_LONG_AXIS_LOCAL, direction, 1.0)}
 
 
@@ -518,10 +592,15 @@ def _track(
     q_start: Array,
     held: Mapping[str, float],
     axes: Mapping[str, Any] | None,
-    back_bar: BackBarSetup | None,
+    back_bar: BackBarSetup | HandBarSetup | None,
+    targets: Array | None = None,
 ) -> FullBodyLift:
-    """Track the retargeted landmarks of ``solution`` from ``q_start``."""
-    targets = retarget_landmarks(solution, points, standing.frame)
+    """Track the retargeted landmarks of ``solution`` from ``q_start``.
+
+    ``targets`` overrides the rigid retargeting of ``points`` when given.
+    """
+    if targets is None:
+        targets = retarget_landmarks(solution, points, standing.frame)
     locked = dict(held) | {
         n: float(q_start[standing.order.index(n)]) for n in TOE_COORDINATES
     }
@@ -604,6 +683,173 @@ def lift_to_full_body(
     )
 
 
+def lift_hands_to_full_body(
+    spec_bytes: bytes,
+    solution: SagittalSolution,
+    seed_q: Array,
+    lift: str,
+    *,
+    options: LiftIKOptions | None = None,
+) -> FullBodyLift:
+    """Full-body trajectory of a pull, the bar held in the hands (#11745).
+
+    The legs and trunk are posed as :func:`lift_to_full_body` does; the bar
+    centre is tracked to :func:`~.sagittal_retarget.retarget_bar` (the
+    model's shoulder midpoint plus the optimizer's bar offset from its
+    shoulder) with the standard's grip width for *lift* and a medio-lateral
+    bar axis.  The scapulae and toes are held, the arm chain is solved.
+
+    Postconditions: the lift refers to the derived spec
+    ``lift.back_bar.spec_bytes``; ``q`` has one row per solution sample.
+
+    Raises:
+        ValueError: For an unknown *lift* or a solution without segment
+            lengths.
+        RuntimeError: If the arms cannot hold the bar at the first sample.
+    """
+    if not isinstance(spec_bytes, bytes | bytearray):
+        raise TypeError("spec_bytes must be the raw full-body spec bytes")
+    setup = HandBarSetup.from_standard(bytes(spec_bytes), lift)
+    arm = float(solution.source.get("arm_length_m", float("nan")))
+    if not (np.isfinite(arm) and arm > 0.0):
+        raise ValueError("solution source needs a positive arm_length_m")
+    standing = _stand(spec_bytes, seed_q, options)
+    kin = _engine_kinematics(setup.spec_bytes, _attachments(setup))
+    points = standing.points
+    mid = 0.5 * (points["shoulder_l"] + points["shoulder_r"])
+    axes = _axis_targets_for(setup.bar_axis, standing.frame)
+    held = {n: v for n, v in standing.locked.items() if n in SCAPULA_COORDINATES}
+    toes = {n: float(standing.q[standing.order.index(n)]) for n in TOE_COORDINATES}
+    targets = retarget_landmarks(solution, {**points, "bar": mid}, standing.frame)
+    bar_index = LANDMARK_LABELS.index("bar")
+    body = kin.solve_pose(
+        targets[0],
+        np.arange(len(LANDMARK_LABELS)) != bar_index,
+        standing.q,
+        locked=held | toes,
+        flat_feet=STANCE_SPHERES,
+        iterations=standing.options.standing_iterations,
+        ground=standing.ground,
+        prior_weight=standing.options.prior_weight,
+        posture_prior=standing.posture,
+        axis_targets=axes,
+    )
+    hang = min(
+        _arm_hang(kin, standing, standing.q, axes),
+        _arm_hang(kin, standing, np.asarray(body.q, dtype=float), axes),
+    )
+    setup = replace(setup, arm_hang_m=hang, bar_offset_scale=hang / arm)
+    targets[:, bar_index] = retarget_bar(
+        solution, targets, standing.frame, scale=setup.bar_offset_scale
+    )
+    first = kin.solve_pose(
+        targets[0],
+        np.ones(len(LANDMARK_LABELS), dtype=bool),
+        np.asarray(body.q, dtype=float),
+        locked=held | toes,
+        flat_feet=STANCE_SPHERES,
+        iterations=standing.options.standing_iterations,
+        ground=standing.ground,
+        prior_weight=standing.options.prior_weight,
+        posture_prior=standing.posture,
+        axis_targets=axes,
+    )
+    reach = first.per_marker_m["bar"]
+    if reach > BACK_BAR_REACH_TOLERANCE_M or (
+        first.closure_error_m > BACK_BAR_CLOSURE_TOLERANCE_M
+    ):
+        raise RuntimeError(
+            f"arms cannot hold the {lift} bar at the start: bar {reach:.4f} m "
+            f"off, grip closure {first.closure_error_m:.2e} m"
+        )
+    return _track(
+        kin,
+        standing,
+        solution,
+        points=points,
+        q_start=np.asarray(first.q, dtype=float),
+        held=held,
+        axes=axes,
+        back_bar=setup,
+        targets=targets,
+    )
+
+
+#: Bracket (metres below the shoulder midpoint) and resolution of the hang search.
+_HANG_BRACKET_M = (0.3, 1.0)
+_HANG_RESOLUTION_M = 5e-4
+#: Bar-centre error below which a probed depth counts as reached, metres (the
+#: Levenberg-Marquardt arm solve settles within a few millimetres of points it
+#: can reach and centimetres away from points it cannot).
+_HANG_REACH_M = 5e-3
+
+
+def _arm_hang(
+    kin: Any, standing: _Standing, q_body: Array, axes: Mapping[str, Any]
+) -> float:
+    """Deepest bar centre straight below the shoulder midpoint of ``q_body``.
+
+    Only the arm chain moves (everything else stays at ``q_body``) and the bar
+    keeps the standard's medio-lateral axis with the grip closed; bisection
+    on the depth finds the deepest point the arms reach within
+    :data:`_HANG_REACH_M`.  This is the model's own hang at the grip width.
+    """
+    up = np.asarray(standing.frame.up)
+    markers = kin.marker_positions(q_body)
+    left, right = (
+        LANDMARK_LABELS.index("shoulder_l"),
+        LANDMARK_LABELS.index("shoulder_r"),
+    )
+    mid = 0.5 * (markers[left] + markers[right])
+    bar_index = LANDMARK_LABELS.index("bar")
+    locked = {
+        n: float(q_body[standing.order.index(n)])
+        for n in standing.order
+        if n not in ARM_CHAIN_COORDINATES
+    }
+
+    def reach(depth: float, q_start: Array) -> Array | None:
+        targets = np.array(markers, dtype=float)
+        targets[bar_index] = mid - depth * up
+        fit = kin.solve_pose(
+            targets,
+            np.ones(len(LANDMARK_LABELS), dtype=bool),
+            q_start,
+            locked=locked,
+            flat_feet=STANCE_SPHERES,
+            iterations=standing.options.standing_iterations,
+            ground=standing.ground,
+            prior_weight=standing.options.prior_weight,
+            axis_targets=axes,
+        )
+        reached = fit.per_marker_m["bar"] <= _HANG_REACH_M and (
+            fit.closure_error_m <= BACK_BAR_CLOSURE_TOLERANCE_M
+        )
+        return np.asarray(fit.q, dtype=float) if reached else None
+
+    low, high = _HANG_BRACKET_M
+    q_reached = reach(low, np.asarray(q_body, dtype=float))
+    if q_reached is None:
+        raise RuntimeError(f"arms cannot hold the bar {low} m below the shoulders")
+    while high - low > _HANG_RESOLUTION_M:
+        depth = 0.5 * (low + high)
+        q_new = reach(depth, q_reached)
+        if q_new is None:
+            high = depth
+        else:
+            low, q_reached = depth, q_new
+    return float(low)
+
+
+def _limitations(setup: BackBarSetup | HandBarSetup | None) -> str:
+    """Model limitations recorded with a bundle of this bar geometry."""
+    if setup is None:
+        return LIMITATIONS
+    if isinstance(setup, HandBarSetup):
+        return HAND_BAR_LIMITATIONS
+    return BACK_BAR_LIMITATIONS
+
+
 def bar_path(plant: VectorPlant, q_rows: Array, frame: str = BAR_FRAME) -> Array:
     """World positions of spec frame ``frame`` (default the ``Hub`` bar landmark)."""
     rows = np.asarray(q_rows, dtype=float)
@@ -662,7 +908,7 @@ def build_lift_bundle(
         "ik_bar_path_m": lift.bar_m.tolist(),
         "window": {"start_s": float(times[0]), "duration_s": float(window_s)},
         "bar_frame": lift.bar_frame,
-        "limitations": LIMITATIONS if lift.back_bar is None else BACK_BAR_LIMITATIONS,
+        "limitations": _limitations(lift.back_bar),
         **dict(provenance or {}),
     }
     bundle = generate_reference_bundle(
