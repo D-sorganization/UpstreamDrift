@@ -15,6 +15,7 @@ from src.shared.python.motion_matching.candidate import (
 )
 from src.shared.python.motion_matching.candidate_session import CandidateSession
 from src.shared.python.motion_matching.counterfactual import (
+    CounterfactualDynamics,
     CounterfactualFork,
     CounterfactualStrategy,
 )
@@ -147,6 +148,22 @@ def test_get_closure_residual_at() -> None:
     assert session_res.get_closure_residual_at(2) == 0.0015
 
 
+class _UnitInertiaProvider:
+    """Real (if simple) forward dynamics: unit inertia, no bias."""
+
+    def mass_matrix(self, q):
+        return np.eye(len(q))
+
+    def bias_forces(self, q, v):
+        return np.zeros(len(q))
+
+
+def test_create_counterfactual_fork_without_dynamics_fails_closed() -> None:
+    session = _build_test_session(has_tau=True, has_forces=True)
+    with pytest.raises(ValueError, match="dynamics"):
+        session.create_counterfactual_fork(fork_frame_idx=1, duration_frames=2)
+
+
 def test_create_counterfactual_fork_delegation() -> None:
     """Session method create_counterfactual_fork generates a valid fork."""
     session = _build_test_session(has_tau=True, has_forces=True)
@@ -154,6 +171,7 @@ def test_create_counterfactual_fork_delegation() -> None:
         fork_frame_idx=1,
         strategy=CounterfactualStrategy.CLAMPED_ACTUATOR_TORQUE,
         duration_frames=2,
+        dynamics=CounterfactualDynamics(_UnitInertiaProvider()),
     )
     assert isinstance(fork, CounterfactualFork)
     assert fork.fork_frame_idx == 1

@@ -2741,6 +2741,8 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-16 | #12800 | NSX-80: variability-sensitivity specification, symbolic goldens, hypotheses and unverified citations; NSX-83: event-triggered impact outcome map with saltation correction, face-angle availability and Tools ball-flight bridge |
+| 2026-10-16 | #12644 | NSX-55: Simscape closed-loop export format, loader and R2025b exporter (planar rig validated; golf model deferred as DV-12583) |
 | 2026-10-16 | #12812 | Fix main breakage from #12704: pinocchio JointModelRZ test lane and pinocchio_reference row typing |
 | 2026-10-16 | #12809 | Run the Prettier pre-commit hook at commit time only so rebased branches can push |
 | 2026-10-16 | #12780 | NSX-80: variability-sensitivity specification, symbolic goldens, hypotheses and unverified citations |

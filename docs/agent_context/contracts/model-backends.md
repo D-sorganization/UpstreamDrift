@@ -13,6 +13,10 @@ angle fields such as plane inclination retain their declared degrees.
 Use the shared `SimulationBackend` protocol and `Trace`/`BatchTrace` outputs.
 `EquationsOfMotionProvider` and `BatchedBackend` are optional capabilities and require
 their own capability checks. Do not infer them from a backend name.
+`ConstrainedEquationsOfMotionProvider` extends `EquationsOfMotionProvider` with
+`closure_jacobian(q)` (shape `(m, n)`) and `closure_drift(q, v)` (shape `(m,)`)
+in the canonical grip-frame convention. Counterfactual accelerations on such a
+provider re-solve the closure reaction through the KKT projector.
 
 ## Lifecycle and Failures
 
@@ -26,6 +30,7 @@ cross-engine numerical outputs with the qualified tolerances, not exact equality
 - [Parameter Authority](../../../src/shared/python/simulation_backends/model_params.py)
 - [Backend Factory](../../../src/shared/python/simulation_backends/factory.py)
 - [Both Renderers Change Together](../../../tests/unit/simulation_backends/test_foundation.py)
+- [Constrained Counterfactuals](../../../tests/unit/simulation_backends/test_constrained_ztcf_zvcf.py)
 - [Backend Usage Examples](../../simulation_backends/USER_GUIDE.md)
 
 ## Rationale
