@@ -3,12 +3,6 @@
   "max_exceptions": 10,
   "exceptions": [
     {
-      "path": "src/tools/launch_monitor_analytics/gui.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #9470 temporary exception while launch monitor analysis handlers and GUI widgets are decomposed.",
-      "expires_on": "2026-10-31"
-    },
-    {
       "path": "src/shared/python/motion_matching/full_body_forward_dynamics.py",
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "reason": "Issue #10330 temporary exception for consolidated forward dynamics and tracking during HO-1 landing; scheduled for decomposition by controller/simulation domain.",
