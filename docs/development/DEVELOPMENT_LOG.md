@@ -2340,6 +2340,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12802 · Split Full-Body HANDOFF and Anthropometry REVIEW Under the Doc-Size Budget; Renew Only the Stale Chat Child-Copy Architecture Exception for 14 Days (#12803)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12802
+- **Branch:** merged via #12804
+- **PR:** #12804
+- **Paths:** see #12804
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`3fb64eff`; collated from changes/12802-split-full-body-handoff-and-anthropometr.md)
+- **Summary:** Split full-body HANDOFF and anthropometry REVIEW under the doc-size budget; renew only the stale chat child-copy architecture exception for 14 days (#12803)
+- **Next step:** Shipped in PR #12804.
+
 ### DL-#12792 · Bump Vendor/Ud-Tools to Tools E3cf5a43, Carrying the Corrected Golfer Club Jacobians (Tools#5627 Rust Pendulum-Core, Tools#5628 Python/JAX Forward Kinematics Y-Sign, Tools#5626); Pins and Divergence Inventory Kept in Step
 
 - **State:** shipped
