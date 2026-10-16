@@ -8,12 +8,16 @@ Exercises the end-to-end wiring: ``URDFGeneratorConfig.shape_library`` ->
 
 from __future__ import annotations
 
+import pytest
+
 import defusedxml.ElementTree as ET  # nosec B405 — defusedxml is the safe parser
 from humanoid_character_builder.core.body_parameters import BodyParameters
 from humanoid_character_builder.generators.urdf_config import URDFGeneratorConfig
 from humanoid_character_builder.generators.urdf_generator import HumanoidURDFGenerator
 
 from src.shared.python.body_part_viz.asset_library import ShapeLibrary
+
+pytestmark = pytest.mark.unit
 
 
 def _strip_xml_declaration(xml_str: str) -> str:
