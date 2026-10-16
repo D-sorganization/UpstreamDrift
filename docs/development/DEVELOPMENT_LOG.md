@@ -2340,6 +2340,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12866 · Generate the User Manual TOC From Real Chapter Headings and Test That Every Manual Link Resolves
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12866
+- **Branch:** merged via #12877
+- **PR:** #12877
+- **Paths:** see #12877
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`94fb252b`; collated from changes/12866-generate-the-user-manual-toc-from-real-c.md)
+- **Summary:** Generate the user manual TOC from real chapter headings and test that every manual link resolves
+- **Next step:** Shipped in PR #12877.
+
 ### DL-#12833 · Divergence Inventory: Commit Only Stable Per-Path Facts (V2 JSONL, One Sorted Record per Line), Drop the Committed Markdown, Move Totals/Bytes/Authorship to --Report; Different-Path PRs No Longer Conflict
 
 - **State:** shipped
