@@ -161,7 +161,9 @@ class VideoExporter:
             overlay_callback: Optional function to overlay metrics on frame
         """
         # Update renderer with current data
-        self.renderer.update_scene(self.data, camera=camera_id)
+        self.renderer.update_scene(
+            self.data, camera=-1 if camera_id is None else camera_id
+        )
 
         # Render frame
         frame = self.renderer.render()
@@ -472,3 +474,92 @@ def export_simulation_video(  # noqa: PLR0913
         logger.error(f"Failed to export simulation video: {e}")
         exporter.finish_recording()
         return False
+
+
+def _recorded_states(
+    model: mj.MjModel, recorder: Any
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return ``(states, controls, times)`` arrays for a recorded swing.
+
+    Raises:
+        ValueError: nothing was recorded, or a frame does not match ``model``.
+    """
+    frames = list(getattr(recorder, "frames", []))
+    if len(frames) < 1:
+        raise ValueError(
+            "Nothing is recorded: press Start Recording, run the simulation, "
+            "stop, then export."
+        )
+    states = np.zeros((len(frames), model.nq + model.nv))
+    controls = np.zeros((len(frames), model.nu))
+    for i, frame in enumerate(frames):
+        pos = np.asarray(frame.joint_positions, dtype=float)
+        vel = np.asarray(frame.joint_velocities, dtype=float)
+        if pos.shape != (model.nq,) or vel.shape != (model.nv,):
+            raise ValueError(
+                f"Recorded frame {i} has {pos.size} joint positions and "
+                f"{vel.size} velocities, but the loaded model has "
+                f"nq={model.nq}, nv={model.nv}; record again with this model."
+            )
+        states[i] = np.concatenate([pos, vel])
+    times = np.array([f.time for f in frames], dtype=float)
+    return states, controls, times
+
+
+def _fit_to_framebuffer(model: mj.MjModel, size: tuple[int, int]) -> tuple[int, int]:
+    """Scale ``size`` down (aspect kept) to the model's offscreen framebuffer.
+
+    MuJoCo refuses an image larger than ``<visual><global offwidth/offheight>``
+    (640x480 by default), so the HD default must shrink for stock models.
+    """
+    width, height = size
+    scale = min(
+        1.0, model.vis.global_.offwidth / width, model.vis.global_.offheight / height
+    )
+    # Even dimensions: most H.264 encoders reject odd frame sizes.
+    return max(2, int(width * scale) // 2 * 2), max(2, int(height * scale) // 2 * 2)
+
+
+def export_recorded_swing_video(  # noqa: PLR0913
+    model: mj.MjModel,
+    data: mj.MjData,
+    recorder: Any,
+    output_path: str | Path,
+    *,
+    size: tuple[int, int] = (HD_WIDTH, HD_HEIGHT),
+    progress_callback: Callable[[int, int], None] | None = None,
+) -> Path:
+    """Render a ``SwingRecorder`` recording to a video file (UI export action).
+
+    The frame rate follows the recorded time step (1-60 fps), so playback is
+    real time. Postcondition: the returned file exists and is non-empty.
+
+    Raises:
+        ValueError: nothing recorded, or the recording does not fit ``model``.
+        RuntimeError: the video writer could not be opened or the render failed.
+    """
+    if model is None or data is None:
+        raise ValueError("a loaded model is required to export video")
+    states, controls, times = _recorded_states(model, recorder)
+    steps = np.diff(times)
+    step = float(np.median(steps[steps > 0])) if np.any(steps > 0) else 0.0
+    fps = int(min(60, max(1, round(1.0 / step)))) if step > 0 else DEFAULT_FPS
+    width, height = _fit_to_framebuffer(model, size)
+    target = Path(output_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    ok = export_simulation_video(
+        model,
+        data,
+        str(target),
+        states,
+        controls,
+        times,
+        width=width,
+        height=height,
+        fps=fps,
+        show_metrics=False,
+        progress_callback=progress_callback,
+    )
+    if not ok or not target.is_file() or target.stat().st_size == 0:
+        raise RuntimeError(f"video export to {target} failed; see the log for details")
+    return target

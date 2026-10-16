@@ -109,11 +109,19 @@ class _Host(QtWidgets.QWidget, _SimulationControlsMixin):
         self.recording_label = QtWidgets.QLabel("Not recording")
 
 
+@pytest.fixture(scope="module")
+def qapp() -> QtWidgets.QApplication:
+    inst = QtWidgets.QApplication.instance()
+    if isinstance(inst, QtWidgets.QApplication):
+        return inst
+    return QtWidgets.QApplication(["t"])
+
+
 @pytest.fixture
 def host(
+    qapp: QtWidgets.QApplication,
     scene: tuple[mujoco.MjModel, mujoco.MjData, SwingRecorder],
 ) -> _Host:
-    QtWidgets.QApplication.instance() or QtWidgets.QApplication(["t"])
     model, data, recorder = scene
     sim = SimpleNamespace(model=model, data=data, get_recorder=lambda: recorder)
     return _Host(sim)

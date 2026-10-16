@@ -133,6 +133,12 @@ class ControlsTab(
         buttons_layout.addWidget(self.reset_btn, 0, 1)
         buttons_layout.addWidget(self.screenshot_btn, 1, 0)
         buttons_layout.addWidget(self.record_btn, 1, 1)
+
+        self.export_video_btn = QtWidgets.QPushButton("Export Video...")
+        self.export_video_btn.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
+        self.export_video_btn.clicked.connect(self.on_export_video)
+        self.export_video_btn.setToolTip("Render the recorded swing to an MP4 file")
+        buttons_layout.addWidget(self.export_video_btn, 2, 0, 1, 2)
         main_layout.addWidget(buttons_group)
 
     def _create_recording_info(self, main_layout: QtWidgets.QVBoxLayout) -> None:

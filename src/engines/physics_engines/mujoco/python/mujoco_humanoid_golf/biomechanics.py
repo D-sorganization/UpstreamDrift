@@ -516,7 +516,9 @@ class SwingRecorder:
             return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
 
         times = np.array([f.time for f in self.frames])
-        values = [getattr(f, field_name) for f in self.frames]
+        # A channel the recorder never produces (e.g. ground_forces) is an
+        # unrecorded series, the same as an all-None one, not an error.
+        values = [getattr(f, field_name, None) for f in self.frames]
 
         if all(v is None for v in values):
             return times, np.array([], dtype=np.float64)
