@@ -1134,6 +1134,49 @@ coefficient of variation $\mathrm{SD}/\lvert\mathrm{mean}\rvert$ is banned for
 zero-centred outcomes, where it is undefined or arbitrarily large.  Face rows
 are \texttt{UNAVAILABLE} when axial club rotation is not observed.
 
+\subsection{Multi-Swing Falsification: UCM and TNC}
+\label{sec:var-ucm-tnc}
+
+Implemented in \texttt{variability\_*.py} (NSX-97).  Measured impact states
+$x_i$ from held-out sessions are split about $\ker C_{\mathrm{imp}}$, with
+$C_{\mathrm{imp}}$ the event-section Jacobian of the impact outcome map.
+With $n$ state dimensions, $d_\perp=\operatorname{rank}C_{\mathrm{imp}}$ and
+$d_\parallel=n-d_\perp$,
+\[
+V_{\mathrm{UCM}}=\tfrac{1}{N-1}\sum_i\lVert P_{\ker}(x_i-\bar x)\rVert^2,\quad
+V_{\mathrm{ORT}}=\tfrac{1}{N-1}\sum_i\lVert P_{\mathrm{row}}(x_i-\bar x)\rVert^2,
+\]
+reported per dimension ($V/d$).  The synergy index is
+$\Delta V=(V_{\mathrm{UCM}}/d_\parallel-V_{\mathrm{ORT}}/d_\perp)/(V_{\mathrm{TOT}}/n)
+\in[-n/d_\perp,\,n/d_\parallel]$ with transform
+$\Delta V_z=\tfrac12\ln\frac{n/d_\perp+\Delta V}{n/d_\parallel-\Delta V}$;
+for $d_\parallel\ne d_\perp$ an isotropic cloud gives
+$\tfrac12\ln(d_\parallel/d_\perp)$, not zero.
+
+The Müller--Sternad cost is $C(D)=\overline{\lVert w\odot(f(x_i)-y^\ast)\rVert^2}$.
+Independent per-variable permutation across trials gives $C_{\mathrm{perm}}$
+(marginals kept, covariation removed); the single translation minimising the
+permuted clouds' cost gives $C_{\mathrm{shift}}$; collapsing dispersion to the
+shifted mean gives $C_{\mathrm{floor}}$.  Then
+$T=C_{\mathrm{perm}}-C_{\mathrm{shift}}$, $N=C_{\mathrm{shift}}-C_{\mathrm{floor}}$,
+$\mathrm{Cov}=C_{\mathrm{perm}}-C_0$ and exactly
+$C_0=T+N+C_{\mathrm{floor}}-\mathrm{Cov}$.  Haar-random rotations of the
+centred cloud give an independent covariation estimate.  The seed is declared
+(\texttt{DEFAULT\_SEED}=20261016) and recorded in every result.
+
+Predicted outcome covariance $C\Sigma_xC^\top$ uses $\Sigma_x$ pooled
+within-session on \emph{training sessions only}; a test-session swing reaching
+the fit raises \texttt{LeakageError}.  It is compared with the measured
+outcome covariance by principal angles of the top-$k$ eigen-subspaces against a
+null that permutes each outcome column across swings.  Phase-registered
+(MOSAIC-10) residuals are reported \emph{together with} physical-time
+residuals about impact and the inter-event durations, so timing variability is
+not discarded.  Acceptance on anonymous captures is a deferred validation: the
+command-line entry records SHA-256 input digests in a receipt without file
+names or paths, and no capture result is claimed here.  UCM and TNC describe
+variability structure; they do not identify neural intent or show a
+co-contraction benefit.
+
 \subsection{Non-Claims for Variability Sensitivity}
 \label{sec:var-nonclaims}
 
