@@ -344,18 +344,22 @@ class PinocchioReferenceAdapter:
         qdot_canonical, qddot_canonical = _canonical_derivatives(
             q_canonical, time_array, qdot_override, qddot_override
         )
+        n_rows = q_native.shape[0]
+        if qdot_canonical.shape[0] != n_rows or qddot_canonical.shape[0] != n_rows:
+            raise ValueError("derivative rows must match q rows")
+        # Index rows explicitly: zip() over a 2-D array is typed as scalars.
         qdot_native = np.vstack(
             [
-                _canonical_velocity_to_pinocchio(q_row, v_row)
-                for q_row, v_row in zip(q_native, qdot_canonical, strict=True)
+                _canonical_velocity_to_pinocchio(q_native[i], qdot_canonical[i])
+                for i in range(n_rows)
             ]
         )
         qddot_native = np.vstack(
             [
-                _canonical_acceleration_to_pinocchio(q_row, a_row, v_row)
-                for q_row, a_row, v_row in zip(
-                    q_native, qddot_canonical, qdot_canonical, strict=True
+                _canonical_acceleration_to_pinocchio(
+                    q_native[i], qddot_canonical[i], qdot_canonical[i]
                 )
+                for i in range(n_rows)
             ]
         )
 
