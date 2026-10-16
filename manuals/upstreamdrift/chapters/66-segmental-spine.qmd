@@ -168,8 +168,9 @@ The terminal body is not automatically the ISB thorax:
 - ADR-0055 item 2 requires a separate, model-specific calibration
   $T_{\mathrm{terminal}\to\mathrm{thorax}}$ (thorax landmarks IJ, C7, PX, T8),
   and says it is never assumed to be the identity.
-- No code path in this pathway estimates that calibration. The drive's
-  alignment $A$ (see Kinematic Input and Drive) defaults to the identity.
+- No code path in this pathway estimates that calibration. A study must
+  supply the drive alignment $A$ (see Kinematic Input and Drive) with its
+  calibration source; otherwise the study is `unqualified` (#12823).
 
 Software verification:
 
@@ -371,10 +372,18 @@ Target and alignment:
 
 - The target is $R_\star = R_{\mathrm{pelvis}\to\mathrm{torso}}\, A$.
 - $A$ (`DriveOptions.torso_alignment`) is the segmental terminal frame
-  expressed in the `golf_humanoid` torso frame. It defaults to the identity,
-  and the pelvis body frames of the two models are assumed to coincide.
-- These are unvalidated caller assumptions, not calibration evidence. A wrong
-  $A$ biases every per-level angle without raising the geodesic residual.
+  expressed in the `golf_humanoid` torso frame, and the pelvis body frames of
+  the two models are assumed to coincide. `DriveOptions` itself defaults to
+  the identity, but ADR-0055 item 2 forbids assuming that offset for a
+  reported result.
+- The study layer therefore requires $A$ (a 3 × 3 proper rotation) with a
+  provenance string (#12823). The receipt records $A$ and its provenance
+  (`calibrated:<source>` or `assumed_identity`), and both enter the request
+  hash. A study without a supplied $A$ is `unqualified` with an explicit
+  reason and can never be `pass`.
+- $A$ itself is not validated: a wrong $A$ biases every per-level angle
+  without raising the geodesic residual, so its correctness rests on the
+  cited calibration.
 
 Law and validity:
 

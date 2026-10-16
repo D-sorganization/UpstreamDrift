@@ -286,6 +286,8 @@ Request fields, all recorded in the receipt:
 - `drive_tolerance_rad` (default `None`) and `filter_hz` (default `None`);
 - `residual_force_fraction_bw` (0.05) and `residual_moment_fraction` (0.01);
 - `reserve_limit_nm` (1.0) and `reserve_max_share` (0.05);
+- `torso_alignment` and `torso_alignment_source` (both or neither): the
+  drive alignment $A$ and how it was calibrated;
 - `variant_id`, `variant_parameter` and `variant_handedness` (default
   `right`).
 
@@ -298,9 +300,13 @@ Receipt contents:
   hashed too: coupling laws, level maps and context bands, plus the asset
   manifest when `asset_id` is set and the movement-variant file when
   `variant_id` is set.
-- **ExternalLoads data file.** The referenced data file is hashed only when it
-  exists beside the XML; otherwise it is omitted silently. Capturing every
-  dependency must be checked separately.
+- **ExternalLoads data file.** Every `datafile` referenced by the XML is
+  hashed (#12826). A relative path resolves against the XML's directory and
+  an absolute path is used as written. A missing data file raises
+  `FileNotFoundError` before any stage runs.
+- **Torso alignment.** The schema is `spine-study-receipt/2`; it records
+  `torso_alignment` as `matrix` and `provenance` (`calibrated:<source>` or
+  `assumed_identity`), and both enter the request hash.
 - **Environment.** The git SHA, and the OpenSim, SciPy and NumPy versions.
 - **Run record.** The law as `id@version`, the `distribution_source`, the
   asset admission record and per-stage provenance.
@@ -320,6 +326,7 @@ Status is fail-closed (`_judge`):
 - **`unqualified`.** At least one of the following holds:
   - a licensed asset is not `QUALIFIED` (missing, unpinned or hash mismatch;
     a missing asset skips all stages);
+  - the drive torso alignment was not supplied (`assumed_identity`);
   - any drive frame is invalid;
   - the pelvis residual exceeds its budget;
   - any frame is flagged for reserve use under the share and limit rule
@@ -330,8 +337,9 @@ Status is fail-closed (`_judge`):
 - **`pass`.** None of these.
 
 `pass` is a software statement only. `scientific_status` is always
-`unqualified`, and the receipt refuses `pass` with a non-qualified asset. The
-CLI exits 0 only for `pass`.
+`unqualified`, and the receipt refuses `pass` with a non-qualified asset or
+without a `calibrated:` alignment provenance. The CLI exits 0 only for
+`pass`.
 
 ## Aggregation and Context Bands
 
@@ -666,10 +674,12 @@ Model assumptions:
 - All per-level kinematics are model assumptions produced by a coupling law,
   not measurements. Endpoint inverse kinematics does not identify individual
   vertebrae.
-- The terminal-to-thorax calibration of ADR-0055 is not estimated. The drive
-  alignment $A$ defaults to the identity, and the pelvis frames and the base
-  and terminal connections are assumed rigid and coincident. A wrong $A$
-  biases the distribution without a residual.
+- The terminal-to-thorax calibration of ADR-0055 is not estimated by the
+  code. A study must supply $A$ and a calibration source; without them $A = I$
+  is assumed, recorded as `assumed_identity`, and the study is `unqualified`.
+  A supplied $A$ is hashed and recorded but not validated, and the pelvis
+  frames and the base and terminal connections remain assumed rigid and
+  coincident. A wrong $A$ biases the distribution without a residual.
 - The distribution is a local solve. Bounds default to unbounded, and the
   default drive tolerance flags only unconverged frames.
 
@@ -697,12 +707,10 @@ Known code-level gaps (follow-up candidates, behaviour unchanged here):
 - `fujii2007_lumbar` cannot be exported as OpenSim linear couplers.
 - `level_angle_stack` and `StackData` do not pass $B$, $E$ and $A$ through;
   use `segmental_contribution_breakdown` (#12822) for the full path.
-- No calibration of $A$ is enforced or recorded beyond the identity default.
 - The default moment-budget height is evaluated at the last processed sample,
   not the first frame as documented, and assumes ground Y is up.
 - The movement-variant tolerance on undeclared terms is enforced in tests
   only, not at runtime.
-- A missing ExternalLoads data file is silently left unhashed.
 - Static optimization does not converge at the first two fixture samples.
 
 ## Non-Claims
