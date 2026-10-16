@@ -343,6 +343,19 @@ def _failures(
     ]
 
 
+def open_model(model_path: str | Path | object) -> object:
+    """Return an OpenSim model from a path, or pass a model object through.
+
+    Raises:
+        ValueError: ``model_path`` is a path to a file that does not exist.
+    """
+    if isinstance(model_path, (str, Path)):
+        if not Path(model_path).is_file():
+            raise ValueError(f"model file not found: {model_path}")
+        return import_opensim().Model(str(model_path))
+    return model_path
+
+
 def inventory_spine(
     model_path: str | Path | object,
     model_id: str,
@@ -375,12 +388,7 @@ def inventory_spine(
             f"level map for {model_id!r} is UNVERIFIED (names pending asset "
             "confirmation); refusing to inventory"
         )
-    if isinstance(model_path, (str, Path)):
-        if not Path(model_path).is_file():
-            raise ValueError(f"model file not found: {model_path}")
-        model = import_opensim().Model(str(model_path))
-    else:
-        model = model_path
+    model = open_model(model_path)
     levels = _check_map(model, entry)
     neutral, angles, trans_angles, failures = {}, {}, {}, []
     trans_names: dict[SpinalLevel, tuple[str, str, str]] = {}

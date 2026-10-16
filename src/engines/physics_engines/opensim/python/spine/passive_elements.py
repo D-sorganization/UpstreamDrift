@@ -38,7 +38,10 @@ from types import MappingProxyType
 
 import numpy as np
 
-from src.engines.physics_engines.opensim.python.spine.inventory import SpineInventory
+from src.engines.physics_engines.opensim.python.spine.inventory import (
+    SpineInventory,
+    open_model,
+)
 from src.shared.python.contracts import ensure
 from src.shared.python.engine_core.opensim_runtime import import_opensim
 from src.shared.python.spine.levels import SpinalLevel
@@ -301,12 +304,7 @@ def extract_passive_elements(
         raise TypeError(
             f"inventory must be a SpineInventory, got {type(inventory).__name__}"
         )
-    if isinstance(model_path, (str, Path)):
-        if not Path(model_path).is_file():
-            raise ValueError(f"model file not found: {model_path}")
-        model = import_opensim().Model(str(model_path))
-    else:
-        model = model_path
+    model = open_model(model_path)
     pairs = _level_pairs(model, inventory)
     assigned = _assign(_bushings(model), pairs)
     missing = [lv.name for lv in inventory.levels if lv not in assigned]
