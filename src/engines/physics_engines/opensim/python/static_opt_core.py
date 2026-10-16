@@ -49,6 +49,7 @@ from scipy.optimize import lsq_linear, minimize
 from src.shared.python.contracts import ensure, require
 
 __all__ = [
+    "CONIC_MIN_MUSCLES",
     "SUPPORTED_EXPONENTS",
     "ActivationSolution",
     "FrameSolution",
@@ -63,6 +64,11 @@ _RANK_TOL = 1e-10
 _SLSQP_FTOL = 1e-14
 _SLSQP_MAXITER = 500
 _BOUND_TOL = 1e-12
+CONIC_MIN_MUSCLES = 100
+_CONIC_TOL = 1e-8
+_CUBE_POWER = 1.0 / 3.0
+_CONIC_EQ_TOL = 1e-7
+_CONIC_OK = ("Solved", "AlmostSolved")
 
 
 @dataclass(frozen=True)
@@ -298,6 +304,84 @@ def _redistribute_live(
     return a, bool(result.success), str(result.message)
 
 
+def _conic_program(
+    gain_rows: np.ndarray, rhs: np.ndarray, n: int, exponent: int
+) -> tuple[Any, Any, np.ndarray, np.ndarray, list[Any]]:
+    """``(P, q, A, b, cones)`` of stage 2 for Clarabel (``A x + s = b``, s in K)."""
+    import clarabel  # lazy: optional extra
+    import scipy.sparse as sp
+
+    eye = sp.identity(n, format="csc")
+    eq = sp.csc_matrix(gain_rows)
+    box = sp.vstack([eye, -eye], format="csc")
+    box_b = np.concatenate([np.ones(n), np.zeros(n)])
+    cones: list[Any] = []
+    if eq.shape[0]:
+        cones.append(clarabel.ZeroConeT(eq.shape[0]))
+    cones.append(clarabel.NonnegativeConeT(2 * n))
+    if exponent == 2:
+        a_mat = sp.vstack([eq, box], format="csc") if eq.shape[0] else box
+        b = np.concatenate([rhs, box_b]) if eq.shape[0] else box_b
+        return 2.0 * eye, np.zeros(n), a_mat, b, cones
+    # p = 3: min sum t s.t. t_i >= a_i^3, i.e. (t_i, 1, a_i) in PowerCone(1/3)
+    zero = sp.csc_matrix((eq.shape[0], n))
+    rows_eq = sp.hstack([eq, zero], format="csc")
+    rows_box = sp.hstack([box, sp.csc_matrix((2 * n, n))], format="csc")
+    power = sp.lil_matrix((3 * n, 2 * n))
+    power_b = np.zeros(3 * n)
+    for i in range(n):
+        power[3 * i, n + i] = -1.0  # s1 = t_i
+        power_b[3 * i + 1] = 1.0  # s2 = 1
+        power[3 * i + 2, i] = -1.0  # s3 = a_i
+        cones.append(clarabel.PowerConeT(_CUBE_POWER))
+    a_mat = sp.vstack([rows_eq, rows_box, power.tocsc()], format="csc")
+    b = np.concatenate([rhs, box_b, power_b])
+    q = np.concatenate([np.zeros(n), np.ones(n)])
+    return sp.csc_matrix((2 * n, 2 * n)), q, a_mat, b, cones
+
+
+def _redistribute_conic(
+    a_start: np.ndarray, gain: np.ndarray, exponent: int
+) -> tuple[np.ndarray, bool, str]:
+    """Stage 2 as a convex conic program (Clarabel): QP (p=2), power cone (p=3).
+
+    Same problem as :func:`_redistribute`, solved to ``_CONIC_TOL`` in time
+    polynomial in the muscle count.  Raises ``ImportError`` without Clarabel.
+    """
+    import clarabel
+
+    n = a_start.size
+    target = gain @ a_start
+    basis = _range_basis(gain)
+    norm = max(float(np.max(np.abs(basis.T @ gain), initial=0.0)), 1.0)
+    reduced = (basis.T @ gain) / norm
+    rhs = (basis.T @ target) / norm
+    p_mat, q, a_mat, b, cones = _conic_program(reduced, rhs, n, exponent)
+    settings = clarabel.DefaultSettings()
+    settings.verbose = False
+    settings.tol_feas = settings.tol_gap_abs = settings.tol_gap_rel = _CONIC_TOL
+    result = clarabel.DefaultSolver(p_mat, q, a_mat, b, cones, settings).solve()
+    x = np.clip(np.asarray(result.x, dtype=float)[:n], 0.0, 1.0)
+    a = _polish(x, gain, target)
+    # AlmostSolved (reduced-accuracy termination of the cubic cone) counts only
+    # when the equality constraint, the part that fixes the reserve, still holds.
+    held = float(np.max(np.abs(reduced @ a - rhs), initial=0.0)) <= _CONIC_EQ_TOL
+    solved = str(result.status) in _CONIC_OK and held
+    return a, solved, f"clarabel: {result.status}"
+
+
+def _stage_two(
+    a_start: np.ndarray, gain: np.ndarray, exponent: int
+) -> tuple[np.ndarray, bool, str]:
+    """Conic at full-body scale (SLSQP does not converge there), else SLSQP."""
+    if a_start.size >= CONIC_MIN_MUSCLES:
+        try:
+            return _redistribute_conic(a_start, gain, exponent)
+        except ImportError:
+            pass  # Clarabel not installed: fall back to SLSQP
+    return _redistribute(a_start, gain, exponent)
+
+
 def solve_activations(
     active: np.ndarray,
     passive: np.ndarray,
@@ -331,7 +415,7 @@ def solve_activations(
     gain = arm.T * act[None, :]
     offset = arm.T @ pas
     a1, ok1 = _min_reserve_activation(gain, req - offset, scale)
-    a, ok2, message = _redistribute(a1, gain, p)
+    a, ok2, message = _stage_two(a1, gain, p)
     muscle = offset + gain @ a
     reserve = req - muscle
     ensure(bool(np.all((a >= 0.0) & (a <= 1.0))), "activations must lie in [0, 1]")

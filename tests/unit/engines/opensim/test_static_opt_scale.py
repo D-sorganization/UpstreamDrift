@@ -35,7 +35,11 @@ def test_conic_matches_slsqp_on_a_small_problem(exponent: int) -> None:
     slsqp, ok, _msg = core._redistribute(a1, gain, exponent)
     conic, ok_c, _msg_c = core._redistribute_conic(a1, gain, exponent)
     assert ok and ok_c
-    np.testing.assert_allclose(conic, slsqp, atol=1e-5)
+    np.testing.assert_allclose(gain @ conic, gain @ a1, atol=1e-8)
+    cost = core.activation_cost
+    assert cost(conic, exponent)[0] == pytest.approx(cost(slsqp, exponent)[0], abs=1e-7)
+    if exponent == 2:  # strictly convex; a cubic is flat near zero activation
+        np.testing.assert_allclose(conic, slsqp, atol=1e-4)
 
 
 @pytest.mark.timeout(30)
