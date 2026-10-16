@@ -2,8 +2,9 @@
 
 ## Status
 
-Evidence class: implemented software pathway, scientifically unqualified, not
-approved. This chapter is the calculation-level reference for the
+Evidence class: implemented software pathway, scientifically unqualified;
+chapter text approved by the owner on 2026-10-15 after the Astra, Argon and
+Fable panel review; no result approved. This chapter is the calculation-level reference for the
 segmental-spine pathway of epic #12735 (children SPN-0 to SPN-17,
 consolidated by #12773). No calculation is registered. The registry blocker
 `UP-D1-segmental-spine-inventory` stays open until UP-D1 inventories the
