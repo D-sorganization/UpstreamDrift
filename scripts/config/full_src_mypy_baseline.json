@@ -163,14 +163,6 @@
       "code": "arg-type"
     },
     {
-      "path": "src/shared/python/pendulum_simulator/gui/perturbation_panel.py",
-      "line": 427,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"_display_summary\" of \"PerturbationPanel\" has incompatible type \"dict[str, float | ndarray[tuple[Any, ...], dtype[Any]]]\"; expected \"PerturbationSummary\"",
-      "code": "arg-type"
-    },
-    {
       "path": "src/learning/imitation/_gail.py",
       "line": 474,
       "column": null,

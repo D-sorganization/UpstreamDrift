@@ -37,7 +37,9 @@ if TYPE_CHECKING:
     from src.shared.python.loop_nullspace.evidence import Array
 
 __all__ = [
+    "canonical_closure",
     "canonical_closure_jacobian",
+    "require_closed_loop_capability",
     "parity_effort",
     "has_closed_loop_protocol",
     "snapshot_from_adapter",
@@ -102,6 +104,23 @@ def canonical_closure_jacobian(adapter: Any, q: ArrayLike) -> Array:
     return np.asarray(j_c, dtype=np.float64)
 
 
+def canonical_closure(adapter: Any, q: ArrayLike, v: ArrayLike) -> tuple[Array, Array]:
+    """Canonical ``(J_c, Jdot_v)`` of a ``FULL`` ``adapter`` at ``(q, v)`` (NSX-30).
+
+    The same NSX-02 conversion ``snapshot_from_adapter`` applies, without
+    building a snapshot.  Precondition: ``adapter`` passes
+    :func:`require_closed_loop_capability`.  Postcondition: ``(m, nv)`` and
+    ``(m,)`` finite arrays.
+    """
+    j_c, jdot_v, _ = _canonicalise(
+        adapter,
+        q,
+        adapter.compute_grip_jacobian(q),
+        adapter.compute_closure_drift(q, v),
+    )
+    return np.asarray(j_c, dtype=np.float64), np.asarray(jdot_v, dtype=np.float64)
+
+
 def parity_effort(
     adapter: Any, tau_applied: ArrayLike, j_grip: ArrayLike, lambda_grip: ArrayLike
 ) -> Array:
@@ -152,6 +171,11 @@ def _provenance_version(adapter: Any) -> str:
     if regularization is not None:
         tag += f";kkt_regularization={regularization:g}"
     return tag
+
+
+def require_closed_loop_capability(adapter: Any) -> None:
+    """Raise :class:`CapabilityUnavailable` unless ``adapter`` is ``FULL`` (NSX-13)."""
+    _require_full(adapter)
 
 
 def snapshot_from_adapter(

@@ -82,11 +82,11 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `lifting` | 0 | 0 | 0 | 39 | 0 | 0 |
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
-| `loop_nullspace` | 0 | 0 | 0 | 22 | 0 | 0 |
+| `loop_nullspace` | 0 | 0 | 0 | 24 | 0 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_appearance` | 0 | 0 | 0 | 17 | 0 | 0 |
 | `model_generation` | 25 | 54 | 16 | 20 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 313 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 314 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 60 | 0 | 0 |
 | `myofullbody` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `native_lanes` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -123,7 +123,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `sidekick` | 212 | 68 | 23 | 36 | 92 | 280 |
 | `sidekick_data_processing_bridge.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `signal_toolkit` | 0 | 0 | 0 | 1 | 27 | 0 |
-| `simulation_backends` | 0 | 0 | 0 | 21 | 0 | 0 |
+| `simulation_backends` | 0 | 0 | 0 | 22 | 0 | 0 |
 | `simulation_store` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `spatial_algebra` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `spine` | 0 | 0 | 0 | 4 | 0 | 0 |
@@ -145,7 +145,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 62 | 0 | 0 |
-| **Total** | **377** | **271** | **121** | **1761** | **839** | **648** |
+| **Total** | **377** | **271** | **121** | **1765** | **839** | **648** |
 
 ## Diverged Files by Package
 
