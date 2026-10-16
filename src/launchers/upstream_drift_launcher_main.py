@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import QApplication
 
 from src.launchers.launcher_constants import REPOS_ROOT, logger
 from src.launchers.startup_session import StartupSession
+from src.shared.python.core.process_safety import narrow_catch
 from src.launchers.ui_components import (
     ASSETS_DIR,
     AsyncStartupWorker,
@@ -69,6 +70,16 @@ def _show_error_dialog(title: str, message: str, detail_text: str) -> None:
     CriticalErrorDialog(title=title, message=message, detail_text=detail_text).exec()
 
 
+_DIALOG_FAILURES: tuple[type[Exception], ...] = (
+    RuntimeError,
+    OSError,
+    ImportError,
+    TypeError,
+    ValueError,
+    AttributeError,
+)
+
+
 def handle_uncaught_exception(
     exc_type: type[BaseException],
     exc_value: BaseException,
@@ -90,7 +101,9 @@ def handle_uncaught_exception(
         return True
     fatal = not _event_loop_running
     where = f"\n\nTraceback saved to {saved}" if saved else ""
-    try:
+    # The hook itself must never raise: a broken dialog (deleted Qt wrapper,
+    # missing dialog module, bad arguments) is logged instead.
+    with narrow_catch(*_DIALOG_FAILURES, log_message="Could not show error dialog"):
         if fatal:
             show_dialog(
                 "Application Crash",
@@ -104,8 +117,6 @@ def handle_uncaught_exception(
                 f"are unaffected.{where}",
                 err_msg,
             )
-    except Exception:  # noqa: BLE001 - the hook itself must never raise
-        logger.exception("Could not show error dialog")
     return fatal
 
 
