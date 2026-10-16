@@ -52,6 +52,9 @@ from src.engines.physics_engines.opensim.python.spine.inventory import (
     DEFAULT_LEVEL_MAP_PATH,
 )
 from src.engines.physics_engines.opensim.python.spine import study_variant
+from src.engines.physics_engines.opensim.python.spine.static_optimization import (
+    check_optional_count,
+)
 from src.engines.physics_engines.opensim.python.spine.study_receipt import (
     FileRecord,
     SpineStudyReceipt,
@@ -91,16 +94,6 @@ def _positive(value: object, name: str) -> float:
     if not math.isfinite(value) or value <= 0:
         raise ValueError(f"{name} must be finite and > 0, got {value!r}")
     return float(value)
-
-
-def _optional_count(value: object, name: str) -> int | None:
-    if value is None:
-        return None
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise TypeError(f"{name} must be an int or None")
-    if value < 1:
-        raise ValueError(f"{name} must be >= 1, got {value}")
-    return value
 
 
 def _events(value: object) -> tuple[tuple[str, float], ...]:
@@ -215,8 +208,8 @@ class SpineStudyRequest:
             )
         if self.pelvis not in _PELVIS_KINDS:
             raise ValueError(f"pelvis must be one of {_PELVIS_KINDS}")
-        _optional_count(self.stride, "stride")
-        _optional_count(self.max_frames, "max_frames")
+        check_optional_count(self.stride, "stride")
+        check_optional_count(self.max_frames, "max_frames")
         for name in ("drive_tolerance_rad", "filter_hz"):
             if getattr(self, name) is not None:
                 _positive(getattr(self, name), name)

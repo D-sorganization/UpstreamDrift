@@ -179,7 +179,13 @@ class FrameSelection:
     labels: tuple[str, ...]
 
 
-def _check_count(value: object, name: str) -> int | None:
+def check_optional_count(value: object, name: str) -> int | None:
+    """Validate an optional positive frame count (``None`` passes through).
+
+    Raises:
+        TypeError: ``value`` is neither ``None`` nor an ``int`` (bools rejected).
+        ValueError: ``value`` is an ``int`` below 1.
+    """
     if value is None:
         return None
     if isinstance(value, bool) or not isinstance(value, int):
@@ -214,8 +220,8 @@ def select_frames(
         raise ValueError("time_s must be 1-D, non-empty and strictly increasing")
     if events is not None and not isinstance(events, Mapping):
         raise TypeError(f"events must be a mapping, got {type(events).__name__}")
-    step = _check_count(stride, "stride")
-    cap = _check_count(max_frames, "max_frames")
+    step = check_optional_count(stride, "stride")
+    cap = check_optional_count(max_frames, "max_frames")
     labels: dict[int, str] = {}
     if step is not None:
         labels.update({int(i): "stride" for i in range(0, times.size, step)})
