@@ -168,7 +168,13 @@ The frame problem is lexicographic, with declared reserve limits $L_j > 0$
    $\sum_j \bigl((\tau_j - o_j - (G a)_j)/L_j\bigr)^2$ over $0 \le a \le 1$.
    This gives $a_1$ and the unique remainder $r^* = \tau - o - G a_1$.
 2. **Stage two** (SLSQP, ftol $10^{-14}$, maxiter 500) minimises
-   $\sum_m a_m^p$ over $0 \le a \le 1$, subject to $G a = G a_1$. Here
+   $\sum_m a_m^p$ over $0 \le a \le 1$, subject to $G a = G a_1$. Muscles
+   whose gain column of $G$ is identically zero at the frame (no force
+   capacity, for example a rigid-tendon muscle shorter than its minimum fibre
+   length) are held at $a_m = 0$ and left out of this step (#12827); this
+   does not change the optimum. With no capacity at all, the reserves take
+   the whole demand. Near-zero but non-zero capacities are not specially
+   handled. Here
    $p \in \{2, 3\}$ (`exponent`, default 3), the gradient $p\,a^{p-1}$ is
    analytic, and the constraint is reduced to an orthonormal basis of the
    column space of $G$ ($\sigma > 10^{-10}\sigma_{\max}$).
@@ -612,12 +618,6 @@ Claim-to-test map:
 
 Open:
 
-- **Static optimization at early samples.** Static optimization does not
-  converge at the first two samples of the five-sample synthetic motion on
-  the invented fixture. The cause is not investigated. Passing study and
-  sensitivity tests select the mid and late event frames, so they do not
-  establish successful optimization across the whole motion. No tolerance
-  was changed.
 - **Fujii in the sensitivity report.** At the default drive tolerance,
   `fujii2007_lumbar` enters the sensitivity report with a 0.89 rad residual
   and drives every sensitive label (see Distribution Sensitivity).
@@ -631,6 +631,13 @@ Open:
 
 Corrected during development (guards in the research reference, "Failed
 Experiments"):
+
+- **Static optimization at early samples.** Stage two failed at the first two
+  samples of the five-sample synthetic motion because `rectus_abdominis_r`
+  had zero force capacity there; end-sample derivatives, the initial guess,
+  bounds, reserves and solver tolerance were ruled out. Zero-capacity muscles
+  are now held at zero and all five samples converge for $p = 2$ and $3$,
+  with no tolerance change (#12827).
 
 - **Fujii sign map.** The first transcription used Fujii's flexion-positive
   convention directly. The ISB map is now explicit in
@@ -724,7 +731,6 @@ Known code-level gaps (follow-up candidates, behaviour unchanged here):
   use `segmental_contribution_breakdown` (#12822) for the full path.
 - The undeclared-term check of a movement variant does not cover lab-frame
   terms (line turn, side bend, reverse spine angle).
-- Static optimization does not converge at the first two fixture samples.
 
 ## Non-Claims
 
