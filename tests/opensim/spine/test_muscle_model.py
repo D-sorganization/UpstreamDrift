@@ -103,3 +103,37 @@ def test_basis_builds_on_thelen_model_and_matches_millard(models) -> None:
         a.evaluate(all_names, q, qd), b.evaluate(all_names, q, qd), strict=True
     ):
         np.testing.assert_allclose(x, y, atol=1e-9)
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_moment_arm_screen_never_drops_a_nonzero_native_arm() -> None:
+    """The path-length screen must keep every pair with a native moment arm.
+
+    Native ``computeMomentArm`` costs tens of milliseconds per pair on a
+    full-body model (446 muscles x 51 coordinates did not finish one frame in
+    45 minutes), so the basis evaluates only the pairs a path-length screen
+    cannot rule out.  The five-level fixture has many exact-zero pairs.
+    """
+    from src.engines.physics_engines.opensim.python.spine._osim_helpers import (
+        muscle_moment_arm,
+    )
+
+    require_opensim()
+    with_tmp = pytest.importorskip("tempfile").TemporaryDirectory()
+    with with_tmp as tmp:
+        path = write_fixture_osim(FixtureSpec(), Path(tmp) / "m.osim", muscles=True)
+        basis = SpineMuscleBasis(path, "fixture")
+        coords = basis.model.getCoordinateSet()
+        names = tuple(str(coords.get(i).getName()) for i in range(coords.getSize()))
+        q = np.linspace(0.02, 0.09, len(names))
+        qd = np.zeros(len(names))
+        mask = basis.active_pair_mask(names, q, qd)
+        assert mask.shape == (len(basis.muscle_names), len(basis.coordinate_names))
+        assert not mask.all(), "fixture must have screened-out pairs"
+        basis._pose(names, q, qd)
+        for i, muscle in enumerate(basis.muscle_names):
+            for j, coord in enumerate(basis.coordinate_names):
+                native = muscle_moment_arm(basis.model, basis.state, muscle, coord)
+                if abs(native) > 1e-9:
+                    assert mask[i, j], (muscle, coord, native)
