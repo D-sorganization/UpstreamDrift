@@ -53,7 +53,9 @@ from src.shared.python.loop_nullspace.allocation_spec import ObjectiveSpec
 from src.shared.python.loop_nullspace.evidence import Array, QuantityRecord
 from src.shared.python.loop_nullspace.feasible_set import FeasibleSet
 from src.shared.python.loop_nullspace.solvers import (
+    ConicSettings,
     KKTResiduals,
+    QuadraticObjective,
     SolveStatus,
     SOCBlock,
     solve_socp,
@@ -361,14 +363,13 @@ def _solve_point(
     block = _eps_block(cone_data[0], cone_data[1], eps, prob.n_var)
     has_rows = prob.a_ub.shape[0] > 0
     sol = solve_socp(
-        prob.c_vec,
+        QuadraticObjective(prob.c_vec, prob.p_mat),
         None,
         None,
         prob.a_ub if has_rows else None,
         prob.b_ub if has_rows else None,
         (*prob.cones, block),
-        P=prob.p_mat,
-        tol=SOLVER_TOL,
+        settings=ConicSettings(tol=SOLVER_TOL),
     )
     if sol.status is not SolveStatus.OPTIMAL or sol.x is None or sol.z is None:
         return ParetoPoint(eps, sol.status, reason=sol.reason or sol.status.name)
