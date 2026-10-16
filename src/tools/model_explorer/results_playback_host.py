@@ -29,6 +29,7 @@ class ResultsPlaybackHostMixin:
     _inner: Any
     visualization_dock: Any
     status_bar: Any
+    export_video_action: Any
 
     def open_results(self) -> None:  # provided by MainWidget
         raise NotImplementedError
