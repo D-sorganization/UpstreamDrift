@@ -1760,8 +1760,10 @@
 {"path": "perturbation/config.py", "classification": "ud-only", "package": "perturbation", "spelling_only": false}
 {"path": "perturbation/cross_engine_runner.py", "classification": "ud-only", "package": "perturbation", "spelling_only": false}
 {"path": "perturbation/cross_engine_trial_parity.py", "classification": "ud-only", "package": "perturbation", "spelling_only": false}
+{"path": "perturbation/disturbance.py", "classification": "ud-only", "package": "perturbation", "spelling_only": false}
 {"path": "perturbation/double_pendulum_trial_adapter.py", "classification": "ud-only", "package": "perturbation", "spelling_only": false}
 {"path": "perturbation/noise.py", "classification": "ud-only", "package": "perturbation", "spelling_only": false}
+{"path": "perturbation/outcome_dispersion.py", "classification": "ud-only", "package": "perturbation", "spelling_only": false}
 {"path": "perturbation/perturbation_base.py", "classification": "ud-only", "package": "perturbation", "spelling_only": false}
 {"path": "perturbation/robustness_score.py", "classification": "ud-only", "package": "perturbation", "spelling_only": false}
 {"path": "perturbation/statistics.py", "classification": "ud-only", "package": "perturbation", "spelling_only": false}
