@@ -35,6 +35,7 @@ Pure numpy; no engine imports.
 from __future__ import annotations
 
 import logging
+from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
@@ -161,7 +162,7 @@ class _Nominal:
     reaction: Array
 
 
-class _DerivativeBase:
+class _DerivativeBase(ABC):
     """Common preconditions, guards and tau columns of both routes."""
 
     scheme = ""
@@ -295,11 +296,11 @@ class _DerivativeBase:
             d_lam.append(lam - nom.reaction)
         return np.array(d_acc).T, np.array(d_lam).T.reshape(len(nom.reaction), nv)
 
+    @abstractmethod
     def _column(
         self, nom: _Nominal, ctx: Any, dq: Array, dv: Array
     ) -> tuple[Array, Array]:
         """``(delta a, delta lambda)`` for the tangent perturbation ``(dq, dv)``."""
-        raise NotImplementedError
 
     def _column_context(self, nom: _Nominal) -> Any:
         """Per-nominal data shared by every column (``None`` by default)."""
