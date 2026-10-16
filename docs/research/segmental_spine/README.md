@@ -19,8 +19,8 @@ the "Segmental Spine" section of `docs/agents/shared-infrastructure.md`.
 - `data_extraction.md` holds the published numbers transcribed from the
   sources, each table with its `verified_from_primary` flag.
 - The calculation-level engineering design manual is separate: chapter
-  `manuals/upstreamdrift/chapters/66-segmental-spine.qmd` (QMD is its only
-  editable source).
+  `manuals/upstreamdrift/chapters/66-segmental-spine.qmd`, continued in
+  `67-segmental-spine-loads-and-studies.qmd` (QMD is its only editable source).
 
 ## Compile
 
