@@ -46,7 +46,7 @@
   },
   {
    "law_id": "fujii2007_lumbar",
-   "version": "1",
+   "version": "2",
    "kind": "linear",
    "status": "available",
    "independent": [
@@ -66,6 +66,9 @@
    "distribution": {
     "type": "per_level_ratio",
     "reference_trunk_rotation_deg": 45,
+    "even_in_rotation": [
+     "coupled_flexion"
+    ],
     "unit": "deg",
     "isb_sign": {
      "coupled_flexion": -1,
@@ -171,7 +174,7 @@
      }
     ]
    },
-   "assumptions": "Segment angles measured at 45 deg of trunk rotation are scaled linearly to a gain per degree of trunk rotation (deg/deg); linearity in rotation is an assumption. Published signs (coupled flexion positive = flexion; coupled lateral bending positive = same direction as the trunk rotation) are mapped to ADR-0055 ISB signs by distribution.isb_sign: ISB flexion_extension is extension-positive (sign -1); for an ISB-positive (left) axial rotation a same-direction bend is a left bend, which is ISB-negative lateral_bending (sign -1). Per-segment SDs are kept in the rows but not used. T12/L1 is included as the cranial end of the measured range. The single independent coordinate is trunk axial rotation; this is not a share law (gains do not sum to 1). Declared parity defect: the law is linear, so every coupled term is odd in the trunk rotation. Fujii measured coupled flexion as flexion for rotation to either side (even in the rotation), so for a negative (right) rotation, as in a right-handed backswing, the shipped law gives coupled extension, the wrong flexion sign. The coupled lateral bend, reported relative to the rotation direction, is correctly odd. This is a defect of the linear single-coordinate form, not of the transcription; right rotation is not covered by a test.",
+   "assumptions": "Segment angles measured at 45 deg of trunk rotation are scaled linearly to a gain per degree of trunk rotation (deg/deg); linearity in rotation is an assumption. Published signs (coupled flexion positive = flexion; coupled lateral bending positive = same direction as the trunk rotation) are mapped to ADR-0055 ISB signs by distribution.isb_sign: ISB flexion_extension is extension-positive (sign -1); for an ISB-positive (left) axial rotation a same-direction bend is a left bend, which is ISB-negative lateral_bending (sign -1). Per-segment SDs are kept in the rows but not used. T12/L1 is included as the cranial end of the measured range. The single independent coordinate is trunk axial rotation; this is not a share law (gains do not sum to 1). Parity (version 2, issue #12821): Fujii measured coupled flexion as flexion for rotation to either side, so the flexion row is even in the trunk rotation and is declared in distribution.even_in_rotation; theta_flexion = c |phi|, with the same ISB flexion (negative flexion_extension) for left and right rotation of equal magnitude. Linearity in |rotation| is an assumption extrapolated from a single 45 deg measurement. Coupled lateral bend, reported relative to the rotation direction, and axial rotation stay odd in phi. The row numbers are unchanged from version 1. At phi = 0 the Jacobian of the even part uses the subgradient 0.",
    "notes": "Verified from the PMC full text (two agreeing extractions); a PDF re-check is recommended per the extraction file. DOI not retrieved."
   },
   {

@@ -14,6 +14,7 @@ from pathlib import Path
 
 import pytest
 
+from src.engines.physics_engines.opensim.python.spine import study_variant
 from src.engines.physics_engines.opensim.python.spine.study import (
     SpineStudyRequest,
     request_fingerprint,
@@ -222,3 +223,59 @@ def test_variant_without_events_fails_the_golf_input_stage(inputs, tmp_path) -> 
     assert receipt.stages[-1].stage == "golf_input"
     assert receipt.variant is not None
     assert "range_check" not in receipt.variant
+
+
+# ------------------------------------------- undeclared-term leakage (#12825)
+
+
+def _leaky_variant_golf_input(*args, **kwargs):
+    """The real variant plus a 2 deg rotation about the pelvis Z in every frame."""
+    import dataclasses
+
+    import numpy as np
+    from scipy.spatial.transform import Rotation
+
+    made = study_variant_golf_input(*args, **kwargs)
+    spin = Rotation.from_euler("z", 2.0, degrees=True).as_matrix()
+    leaked = spin @ np.asarray(made.golf_input.pelvis_to_thorax)
+    golf = dataclasses.replace(made.golf_input, pelvis_to_thorax=leaked)
+    return dataclasses.replace(made, golf_input=golf)
+
+
+study_variant_golf_input = study_variant.variant_golf_input
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_clean_variant_records_the_undeclared_term_check(inputs, tmp_path) -> None:
+    require_opensim()
+    receipt = run_spine_study(
+        _variant_request(inputs, tmp_path / "ok"), code_version="c"
+    )
+    check = receipt.variant["undeclared_terms"]
+    assert check["ok"] is True
+    assert check["violations"] == []
+    assert check["tolerance"] == movement_variant(VARIANT).undeclared_tolerance_deg
+    assert set(check["max_change"]) == {
+        "trunk_extension_jcs",
+        "trunk_lateral_flexion_jcs",
+    }
+    assert receipt.status == "pass", receipt.status_reasons
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_leaky_variant_makes_the_study_unqualified(
+    inputs, tmp_path, monkeypatch
+) -> None:
+    require_opensim()
+    monkeypatch.setattr(study_variant, "variant_golf_input", _leaky_variant_golf_input)
+    receipt = run_spine_study(
+        _variant_request(inputs, tmp_path / "leak"), code_version="c"
+    )
+    check = receipt.variant["undeclared_terms"]
+    assert check["ok"] is False
+    assert "trunk_extension_jcs" in check["violations"]
+    assert receipt.status == "unqualified", receipt.status_reasons
+    assert any("undeclared term" in reason for reason in receipt.status_reasons)
+    assert json.dumps(receipt.as_dict())  # still serialisable
