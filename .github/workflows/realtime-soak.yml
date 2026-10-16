@@ -135,6 +135,7 @@ jobs:
 
       - name: Run 24h soak
         id: soak
+        shell: bash
         run: |
           mkdir -p "$SOAK_ARTIFACT_DIR"
           pytest \
