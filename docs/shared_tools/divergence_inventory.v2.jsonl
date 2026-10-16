@@ -312,6 +312,9 @@
 {"path": "body_part_viz/shapes/mesh_shape.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/theme.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/urdf_bridge.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_segment_parameters/__init__.py", "classification": "ud-only", "package": "body_segment_parameters", "spelling_only": false}
+{"path": "body_segment_parameters/data/de_leva_1996_table4.json", "classification": "ud-only", "package": "body_segment_parameters", "spelling_only": false}
+{"path": "body_segment_parameters/de_leva_1996.py", "classification": "ud-only", "package": "body_segment_parameters", "spelling_only": false}
 {"path": "calc_backend/API_STANDARDIZATION.md", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/__init__.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/api/__init__.py", "classification": "diverged", "package": "calc_backend", "spelling_only": true}
