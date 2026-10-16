@@ -2340,6 +2340,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12833 · Divergence Inventory: Commit Only Stable Per-Path Facts (V2 JSONL, One Sorted Record per Line), Drop the Committed Markdown, Move Totals/Bytes/Authorship to --Report; Different-Path PRs No Longer Conflict
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12833
+- **Branch:** merged via #12835
+- **PR:** #12835
+- **Paths:** see #12835
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`aeb6b9a0`; collated from changes/12833-divergence-inventory-commit-only-stable.md)
+- **Summary:** Divergence inventory: commit only stable per-path facts (v2 JSONL, one sorted record per line), drop the committed markdown, move totals/bytes/authorship to --report; different-path PRs no longer conflict
+- **Next step:** Shipped in PR #12835.
+
 ### DL-#12850 · Split the User Manual and Functional Test Plan Into an Index Plus Chapter Files Under the Doc Size Budget; Delete Both Expiring Exceptions.
 
 - **State:** shipped
