@@ -59,7 +59,7 @@ def _resolve_accent_color(theme_provider: Any) -> str:
             if isinstance(accent, str) and accent:
                 return accent
     except Exception as exc:  # noqa: BLE001 - optional theme surface
-        _logger.debug("theme_provider.tokens() failed: %s", exc)
+        _logger.debug("theme_provider accent lookup failed: %s", exc)
 
     try:
         accent_attr = getattr(theme_provider, "accent_color", None)

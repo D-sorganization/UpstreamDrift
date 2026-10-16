@@ -39,7 +39,6 @@ import json
 import logging
 import threading
 from collections.abc import Callable
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -55,6 +54,11 @@ from PyQt6.QtWidgets import (
 )
 
 from . import chat_dock_widget as _connection_contract
+from ._chat_dock_config import (
+    ChatConnectionConfig,
+    ChatIntegrationHooks,
+    ChatPresentationConfig,
+)
 from ._qt import ai_dropdowns as _ai
 from ._qt import exports as _exports
 from ._qt import runtime as _runtime
@@ -101,75 +105,6 @@ __all__ = [
     "QWebSocket",
     "QWidget",
 ]
-
-
-def _build_default_session_manager(app_name: str) -> Any:
-    """Create the default chat session manager on demand.
-
-    The AI package still owns the concrete persistence implementation while
-    the chat dock is being disentangled for Tools #3331. Keeping this import
-    local makes the chat widget module importable without importing ``ai`` and
-    lets hosts inject a manager when they already own session persistence.
-    """
-    if not isinstance(app_name, str) or not app_name.strip():
-        raise ValueError("app_name must be a non-empty string")
-    import importlib
-
-    storage_dir = Path.home() / f".{app_name}" / "chat_sessions"
-    try:
-        module = importlib.import_module("src.shared.python.ai.gui.session_manager")
-    except ImportError:
-        module = importlib.import_module("ai.gui.session_manager")
-    return module.ChatSessionManager(storage_dir=storage_dir)
-
-
-@dataclass
-class ChatConnectionConfig:
-    """Connection + session-identity settings for :class:`ChatDockWidget`.
-
-    Groups the WebSocket connection parameters (``server_url``,
-    ``session_id``, ``ws_path_template``) with the identity/session
-    parameters (``app_context``, ``app_name``, ``project_root``) — the
-    latter travel with the former because they are baked into every
-    outgoing WS payload and the session-file path. Tools issue #4896.
-    """
-
-    server_url: str | None = None
-    session_id: str | None = None
-    ws_path_template: str = "/api/ws/chat/{session_id}"
-    app_context: str = "unknown"
-    app_name: str = "shared_chat"
-    project_root: str | Path | None = None
-
-
-@dataclass
-class ChatPresentationConfig:
-    """Presentation/theming settings for :class:`ChatDockWidget`.
-
-    Tools issue #4896.
-    """
-
-    placeholder_text: str = "Ask a question..."
-    accent_color: str = "#FF8800"
-    theme_provider: ThemeProviderProtocol | None = None
-    auto_index_on_open: bool = False
-
-
-@dataclass
-class ChatIntegrationHooks:
-    """Dependency-injection hooks for host-application integrations.
-
-    Every field is an optional collaborator the widget falls back to a
-    default implementation for when unset (terminal registry, session
-    manager, memory manager factory) or simply leaves inert (workspace
-    provider, plot request sink). Tools issue #4896.
-    """
-
-    terminal_registry: TerminalProviderRegistry | None = None
-    workspace_provider: WorkspaceContextProtocol | None = None
-    plot_request_sink: Callable[[Any], None] | None = None
-    session_manager: Any | None = None
-    memory_manager_factory: Callable[[], Any] | None = None
 
 
 def _build_default_session_manager(app_name: str) -> Any:
