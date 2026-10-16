@@ -13,7 +13,8 @@ Non-claims.  ``mjd_transitionFD`` differentiates MuJoCo's *soft* constraint
 stepping (solref/solimp compliance); it is a separately characterised registry
 entry and its sensitivities are **not** conformance evidence for this seam and
 are never used here.  Muscle activation states are not part of the differentiated
-state (:data:`UNSUPPORTED_STATE_COMPONENTS`) until NSX-94.  Agreement between
+state (:data:`UNSUPPORTED_STATE_COMPONENTS`); NSX-94 adds only quasi-static
+muscle stiffness on top (``muscle_stiffness.apply_muscle_stiffness``).  Agreement between
 engines is not physical validation.
 """
 
@@ -49,7 +50,7 @@ __all__ = [
 ]
 
 UNSUPPORTED_STATE_COMPONENTS: tuple[str, ...] = ("muscle_activation",)
-"""State components outside the derivative (listed unsupported until NSX-94)."""
+"""State components outside the derivative (listed unsupported; NSX-94 adds only quasi-static stiffness)."""
 
 
 _CACHE_SLOTS = 32

@@ -1055,6 +1055,112 @@ checks it against a grid minimum.  With M2 the derivative is a polynomial in
 $z$ of higher degree and has no such closed form; its coefficients are stored.
 No claim is made that any golfer uses a minimum-variance allocation.
 
+\subsection{Muscle-Level Co-Contraction Experiments}
+\label{sec:var-muscle}
+
+This subsection is the calculation-level reference for issue \#12723 (NSX-94).
+Code: \texttt{loop\_nullspace/muscle\_frame.py}, \texttt{muscle\_fiber.py},
+\texttt{muscle\_noise.py}, \texttt{muscle\_stiffness.py},
+\texttt{muscle\_cocontraction.py}, \texttt{muscle\_variance.py},
+\texttt{muscle\_capability.py}, and the engine providers
+\texttt{opensim/python/muscle\_mechanics.py} and
+\texttt{myosuite/python/muscle\_mechanics.py}.
+
+\paragraph{Frame, Units and Validity.}  At one posture the frame holds the
+moment-arm matrix $R=-\partial L_{MT}/\partial q\in\mathbb{R}^{m\times n}$ (m),
+the tendon tension table $f(a)$ on an activation grid (N) and, where the engine
+exposes them, the fibre stiffness $k_m$ and tendon stiffness $k_T$ (N/m).  The
+muscle law is the secant of the grid end points,
+$f=f_p+F_a a$, $\tau=R^{\top}f$, $G=R^{\top}\operatorname{diag}(F_a)$.  Two
+gates fail closed (\texttt{NOT\_QUALIFIED}): the \emph{reserve fraction}
+$\lVert\tau-\tau_{\mathrm{reach}}\rVert/\lVert\tau\rVert$, with
+$\tau_{\mathrm{reach}}$ the nearest muscle-reachable torque found by bounded
+least squares, and the \emph{linearity residual} between the engine table and
+its secant.  Both use the limit $0.10$ of \texttt{myofullbody.redundancy}; the
+linearity limit is the same number because an unmodelled torque error is
+equivalent to a reserve.  A frame whose reserves carry the load produces no
+numerical record.
+
+\paragraph{Activation Fibre.}  $\mathcal{F}(\tau)=\{a\in[0,1]^m: Ga=\tau-R^{\top}f_p\}$
+has an affine hull parallel to $\ker G$ (\texttt{ForceNullSpace.from\_balance},
+not re-implemented).  Co-contraction is a \emph{declared} linear index
+$c(a)=w^{\top}a$ (default total activation) and a declared list of levels.  The
+level range is two linear programs (\texttt{scipy.optimize.linprog}, HiGHS,
+tolerance $10^{-10}$; \texttt{highspy} is not installed, so the persistent
+sessions of rule R11 are not used).  The representative at level $c$ is
+$a^*(c)=\arg\min\tfrac12\lVert a\rVert^2$ subject to $Ga=b$, $w^{\top}a=c$,
+$0\le a\le1$, solved through the dual $a(\mu)=\operatorname{clip}(-E^{\top}\mu,0,1)$,
+$E=[G;w^{\top}]$, by a semismooth Newton iteration.  It is a declared selection
+rule, not physiology; the sub-fibre of dimension $m-\operatorname{rank}G-1$
+inside one level is explored only by hit-and-run \emph{coverage}, never as a
+probability.  Net-torque invariance holds to
+$(m+2)\varepsilon\sum_k\lvert G_k\rvert\approx10^{-13}$ N m, inside the issue's
+$10^{-12}$.
+
+\paragraph{Signal-Dependent Muscle Noise.}  Mechanism M1 at the muscle: the
+force noise of muscle $k$ has two-sided level
+$S_k(a)=\sigma_{0,k}^2+(\kappa_kF_{\max,k}a_k)^2$ (N$^2$ s), so $\kappa$ has
+units $\sqrt{\mathrm{s}}$ and the per-step covariance is $S_k/\Delta t$.
+Pushed to the joint, $\Sigma_\tau=R^{\top}\operatorname{diag}(S/\Delta t)R$, a
+sum of non-negative terms increasing in every $a_k$; the antagonist cannot
+reduce muscle-noise variance at fixed net torque.  $\kappa\equiv0$ declares no
+signal law (\texttt{H-NOISE-ADDITIVE}) and is the V1 negative control.
+
+\paragraph{Short-Range Stiffness.}  Mechanism M3.  Muscle and tendon are springs
+in series, so $k_{MTU}=k_mk_T/(k_m+k_T)$, which tends to $k_m$ for a rigid
+tendon.  The fibre stiffness is either the engine value (a negative value is the
+descending limb of the active force-length curve and fails closed) or the
+declared model $k_m=\rho f$ with $\rho$ in 1/m.  The joint stiffness is
+$K=R^{\top}\operatorname{diag}(k_{MTU})R-\sum_kf_k\,\partial R_k/\partial q$,
+the second term only when the moment-arm Jacobian is supplied and flagged
+otherwise.  A stiffness torque $-K\,\delta q$ changes the linearised loop
+through $\partial\ddot q/\partial\xi\leftarrow\partial\ddot q/\partial\xi-
+(\partial\ddot q/\partial\tau)KP$ and the same for the reaction; this lifts
+\emph{quasi-static} activation from the unsupported state components.
+Activation dynamics and fibre-length dynamics are not differentiated.
+
+\paragraph{Variance Versus Co-Contraction.}  For each level the tangent state
+space $(F,G)$ is rebuilt with $K(c)$ and the input map
+$[(\partial\ddot\xi/\partial\tau)R^{\top}\;|\;\text{external}]$, the step
+covariance is $\operatorname{blkdiag}(S(a^*(c))/\Delta t,\Sigma_{\mathrm{ext}}/\Delta t)$
+and the NSX-90 machinery returns the outcome variance with its budget.  The
+analytic fixture is an antagonist pair ($F=1000$ N, $r=0.04$ m,
+$\rho=50$ 1/m, $\kappa=0.05$ $\sqrt{\mathrm{s}}$, $I=0.1$ kg m$^2$,
+$B=4$ N m s/rad, external level $1$ N$^2$m$^2$s, net torque $8$ N m, so
+$d=\tau/(rF)=0.2$ and $c\in[0.2,1.8]$): $K=80c$ N m/rad and
+\begin{equation}
+\operatorname{Var}(\xi)=\frac{S_{\mathrm{ext}}+2(c^2+d^2)}{2B\cdot80\,c},
+\qquad c^*=\sqrt{S_{\mathrm{ext}}/2+d^2}\approx0.735 .
+\end{equation}
+The discrete explicit-Euler stationary variance equals
+\texttt{scipy.linalg.solve\_discrete\_lyapunov} to $10^{-9}$ and differs from
+this continuous formula by at most $\Delta t\,B/I$ (the leading Euler term).
+
+\paragraph{Engine Facts and Failed Attempts.}  OpenSim Millard muscles give
+$k_{MTU}$ equal to the central difference of the re-equilibrated tendon force
+against the musculotendon length to about $10^{-6}$ relative at grid
+activations; between grid nodes the table is linearly interpolated (about
+$8\times10^{-4}$ relative at activation $0.3$ on a five-node grid).  A first
+geometry with tendon slack $0.15$ m put the fibre on the descending limb and the
+stiffness correctly failed closed; the tested geometry uses $0.18$ m.  A first
+asymmetric extensor path produced a near-zero moment arm and no antagonist; the
+pair uses mirrored attachments.  MyoSuite muscles are MuJoCo muscle actuators
+with a rigid tendon and tension linear in activation, so the frame is exact for
+the secant law and the series stiffness is the $k_T\to\infty$ limit; torque-driven
+engines (Pinocchio, Drake, Simscape) have no muscle fibre and fail closed with a
+pointer to NSX-93 (\#12722) and \texttt{H-DECLARED-JOINT-IMPEDANCE}.
+
+\paragraph{Reproduction.}  \texttt{python3 -m pytest tests/unit/loop\_nullspace/test\_muscle\_*.py
+tests/unit/engines/opensim/test\_muscle\_mechanics\_opensim.py
+tests/unit/engines/mujoco/test\_muscle\_mechanics\_mujoco.py -n 0 -o addopts=""}.
+
+\paragraph{Non-Claims.}  Nothing here says what co-contraction the golfer used;
+EMG is a deferred validation.  The short-range-stiffness evidence
+(\texttt{CIT-CUI-2008}) is feline and force-dependent, not activation-dependent
+and not human; $\rho$ and $\kappa$ are declared hypotheses.  The generic engine
+muscle curves are not a golfer's muscles.  Software correctness only; no
+scientific qualification.
+
 \subsection{Face-Angle Statistics}
 \label{sec:var-face}
 

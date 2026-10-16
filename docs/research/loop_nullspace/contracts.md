@@ -703,8 +703,10 @@ step `1e-5`).
 
 * MyoSuite refuses (`DerivativeCapabilityUnavailable`) and reports `NONE`
   unless `kkt_regularization == 0`.
-* Muscle activation states are unsupported (`UNSUPPORTED_STATE_COMPONENTS`)
-  until NSX-94.
+* Muscle activation states are unsupported (`UNSUPPORTED_STATE_COMPONENTS`).
+  NSX-94 adds quasi-static muscle stiffness on top of the coordinate
+  derivatives (`apply_muscle_stiffness`); activation and fibre-length dynamics
+  remain undifferentiated.
 * Non-claim: `mjd_transitionFD` differentiates MuJoCo's soft stepping
   (solref/solimp compliance). It is a separately characterised registry entry
   and its sensitivities are not conformance evidence here.
