@@ -81,6 +81,8 @@ __all__ = [
 _A_LOW = 0.5
 _A_HIGH = 1.0
 _ZERO_DEMAND_NM = 1e-12
+_SCREEN_STEP_RAD = 1e-4
+_SCREEN_LENGTH_TOL_M = 1e-13
 
 
 def _ro(array: np.ndarray, dtype: type = float) -> np.ndarray:
@@ -352,6 +354,39 @@ class SpineMuscleBasis:
         self._pose(names, np.asarray(q, float), np.asarray(qd, float))
         return self._forces_at(activation)
 
+    def _path_lengths(self) -> np.ndarray:
+        self.model.realizePosition(self.state)  # type: ignore[attr-defined]
+        return np.array([m.getLength(self.state) for m in self._muscles])
+
+    def active_pair_mask(
+        self, names: tuple[str, ...], q: np.ndarray, qd: np.ndarray
+    ) -> np.ndarray:
+        """``(nm, c)`` bool: muscle/level-coordinate pairs worth a native arm.
+
+        Native ``computeMomentArm`` costs tens of milliseconds per pair, which
+        makes a full-body model (hundreds of muscles, ~50 level coordinates)
+        impractical.  A pair is kept when a central-difference step of the
+        coordinate changes the muscle path length, and always kept for a
+        locked coordinate (a locked value cannot be perturbed).  A pair
+        screened out has an exactly unchanged path length, so its arm is
+        reported as zero.  The pose is restored.
+        """
+        self._pose(names, np.asarray(q, float), np.asarray(qd, float))
+        mask = np.ones((len(self._muscles), len(self.coordinate_names)), dtype=bool)
+        for j, coord in enumerate(
+            _coordinate_objects(self.model, self.coordinate_names)
+        ):
+            if coord.getLocked(self.state):
+                continue
+            value = float(coord.getValue(self.state))
+            coord.setValue(self.state, value + _SCREEN_STEP_RAD, False)
+            plus = self._path_lengths()
+            coord.setValue(self.state, value - _SCREEN_STEP_RAD, False)
+            minus = self._path_lengths()
+            coord.setValue(self.state, value, False)
+            mask[:, j] = np.abs(plus - minus) > _SCREEN_LENGTH_TOL_M
+        return mask
+
     def evaluate(
         self, names: tuple[str, ...], q: np.ndarray, qd: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -359,20 +394,18 @@ class SpineMuscleBasis:
 
         ``names`` order ``q``/``qd`` (all model coordinates).  ``active`` >= 0.
         """
+        mask = self.active_pair_mask(names, q, qd)
         self._pose(names, np.asarray(q, float), np.asarray(qd, float))
         high = self._forces_at(_A_HIGH)
         low = self._forces_at(_A_LOW)
         active = np.maximum((high - low) / (_A_HIGH - _A_LOW), 0.0)
         passive = high - _A_HIGH * active
-        moment = np.array(
-            [
-                [
-                    muscle_moment_arm(self.model, self.state, m, c)
-                    for c in self.coordinate_names
-                ]
-                for m in self.muscle_names
-            ]
-        )
+        moment = np.zeros(mask.shape)
+        for i, muscle in enumerate(self.muscle_names):
+            for j in np.flatnonzero(mask[i]):
+                moment[i, j] = muscle_moment_arm(
+                    self.model, self.state, muscle, self.coordinate_names[j]
+                )
         return active, passive, moment
 
 
