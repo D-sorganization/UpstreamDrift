@@ -58,3 +58,30 @@ def test_full_body_scale_unreachable_demand_solves(exponent: int) -> None:
     # redistribution keeps the stage-1 muscle moment and cannot raise the cost
     np.testing.assert_allclose(gain @ sol.activation, gain @ a1, atol=1e-6, rtol=0.0)
     assert sol.cost <= core.activation_cost(a1, exponent)[0] + 1e-9
+
+
+@pytest.mark.timeout(30)
+@pytest.mark.parametrize("exponent", [2, 3])
+def test_full_body_scale_holds_zero_capacity_muscles_at_zero(
+    exponent: int, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """#12827 on the conic path: inert columns never reach the conic solver."""
+    nm = core.CONIC_MIN_MUSCLES + 20
+    active, passive, arms, reach = _problem(nm, 12)
+    inert = np.array([0, 7, nm - 1])
+    arms[inert, :] = 0.0
+    seen: list[int] = []
+    conic = core._redistribute_conic
+
+    def spy(a_start, gain, exponent):
+        seen.append(gain.shape[1])
+        assert np.all(np.any(gain != 0.0, axis=0))
+        return conic(a_start, gain, exponent)
+
+    monkeypatch.setattr(core, "_redistribute_conic", spy)
+    sol = core.solve_activations(
+        active, passive, arms, reach, exponent=exponent, reserve_scale=np.ones(12)
+    )
+    assert sol.success, sol.message
+    assert seen == [nm - inert.size]
+    assert np.all(sol.activation[inert] == 0.0)
