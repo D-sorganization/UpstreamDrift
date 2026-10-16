@@ -599,6 +599,6 @@ The 7-iron's left arm rose from 40 to 48 mm under the bounds, the price of
 the 25 deg radial limit; MM-2 leaves the human ranges as they are rather
 than widening them to the golfer.
 
-## 15 to 17. Downswing Dynamics, Contact-Aware Fit and MJX Optimisation
+## Sections 15–17: Downswing Dynamics, Contact-Aware Fit and MJX Optimisation
 
 Sections 15 to 17 continue in [REVIEW_DYNAMICS.md](REVIEW_DYNAMICS.md) with unchanged numbering.
