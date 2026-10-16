@@ -10,6 +10,8 @@ See issues #979 (MakeHuman) and #980 (SMPL-X).
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -21,6 +23,8 @@ from humanoid_character_builder.core.body_parameters import (
 from humanoid_character_builder.generators.mesh_generator import (
     SMPLXMeshGenerator,
 )
+
+pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # Helpers

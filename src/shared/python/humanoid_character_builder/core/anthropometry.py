@@ -501,7 +501,10 @@ def get_urdf_mass_ratios(gender_factor: float = 1.0) -> dict[str, float]:
 
 @precondition(lambda total_mass_kg: total_mass_kg > 0, "Total mass must be positive")
 @precondition(
-    lambda gender_factor: 0.0 <= gender_factor <= 1.0,
+    # Accept the leading argument too: with ``f(75.0)`` the contracts layer calls
+    # the condition with the raw positional args, so a bare ``gender_factor``
+    # parameter would receive the mass (#12706).
+    lambda total_mass_kg, gender_factor=0.5: 0.0 <= gender_factor <= 1.0,
     "Gender factor must be between 0 and 1",
 )
 def estimate_segment_masses(
@@ -539,7 +542,10 @@ def estimate_segment_masses(
     lambda total_height_m: total_height_m > 0, "Total height must be positive"
 )
 @precondition(
-    lambda gender_factor: 0.0 <= gender_factor <= 1.0,
+    # Accept the leading argument too: with ``f(1.8)`` the contracts layer calls
+    # the condition with the raw positional args, so a bare ``gender_factor``
+    # parameter would receive the height (#12706).
+    lambda total_height_m, gender_factor=0.5: 0.0 <= gender_factor <= 1.0,
     "Gender factor must be between 0 and 1",
 )
 def estimate_segment_dimensions(
