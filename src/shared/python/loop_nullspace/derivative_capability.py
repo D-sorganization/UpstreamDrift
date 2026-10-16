@@ -17,8 +17,9 @@ This module is the engine-agnostic contract every engine adapter plugs into:
   reason.  There is no silent fall-back to finite differences: an engine opts in
   by declaring ``FINITE_DIFFERENCE`` explicitly.
 
-Engine implementations are later children (NSX-85..89; Pinocchio is NSX-85).  No engine adapter is
-imported here; loaders are dotted ``module:attr`` paths resolved on demand.
+Engine implementations are later children (NSX-85..89; Pinocchio is NSX-85,
+Drake NSX-86).  No engine adapter is imported here; loaders are dotted
+``module:attr`` paths resolved on demand.
 """
 
 from __future__ import annotations
@@ -277,8 +278,6 @@ class DerivativeCapabilityRegistry:
             ) from exc
 
 
-_PENDING = "engine adapter derivatives are a later NSX child (NSX-86..89)"
-_ENGINES = ("drake",)
 _ADAPTER_FD = (
     "src.shared.python.loop_nullspace.adapter_derivatives:"
     "adapter_closed_loop_derivatives"
@@ -292,7 +291,7 @@ _SIMSCAPE_REASON = (
 
 
 def default_registry() -> DerivativeCapabilityRegistry:
-    """Registry: reference, Pinocchio analytic, FD engines ``PARTIAL``, rest ``NONE``."""
+    """Registry: reference, Pinocchio analytic, Drake AutoDiff, FD engines ``PARTIAL``."""
     reg = DerivativeCapabilityRegistry()
     reg.declare(
         "reference_fd",
@@ -323,8 +322,15 @@ def default_registry() -> DerivativeCapabilityRegistry:
             "PinocchioAnalyticDerivatives"
         ),
     )
-    for engine in _ENGINES:
-        reg.declare(engine, DerivativeMethod.NONE, reason=_PENDING)
+    # NSX-86: Drake AutoDiffXd differentiates the weld KKT solve (exact).
+    reg.declare(
+        "drake",
+        DerivativeMethod.AUTODIFF,
+        loader=(
+            "src.engines.physics_engines.drake.python.closed_loop_autodiff:"
+            "DrakeAutoDiffDerivatives"
+        ),
+    )
     reg.declare("simscape", DerivativeMethod.NONE, reason=_SIMSCAPE_REASON)
     return reg
 

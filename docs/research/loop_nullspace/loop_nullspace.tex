@@ -866,6 +866,45 @@ rows that disagree with finite differences of the twist (cause not
 investigated) and was discarded.  Reproduction:
 \texttt{pytest tests/unit/loop\_nullspace/test\_pinocchio\_derivatives.py -m requires\_pinocchio}.
 
+\paragraph{Implementation (NSX-86, Drake AutoDiff).}  The Drake route
+differentiates the same assembled system of Eq.~\eqref{eq:var-kkt} but takes
+$\partial_{q,v}(M,h,J_c,\dot J_cv)$ exactly: the \texttt{MultibodyPlant} is
+re-templated on \texttt{AutoDiffXd}, $(q,v)$ are seeded in the specification
+coordinate order, and \texttt{CalcMassMatrix}, \texttt{CalcBiasTerm} minus
+\texttt{CalcGravityGeneralizedForces}, \texttt{CalcJacobianSpatialVelocity} and
+\texttt{CalcBiasSpatialAcceleration} are evaluated on the re-templated plant.
+Then $\partial_q(M a+h)$, $\partial_q(J_ca+\dot J_cv)$, the velocity offset
+$O$ and $K_{\mathrm{geom}}=\sum_r\lambda_r\partial_qJ_{c,r}$ follow by
+contraction, with $\delta\lambda$ re-solved; nothing is differenced.  The native
+rows are mapped to the canonical closure convention by the constant NSX-02
+matrix $C$ ($J_c=CJ_{\mathrm{native}}$); $\partial_qC=0$ because the grip frame
+is the native LOCAL frame, which is checked at the state, and the route is
+refused (capability rejection) otherwise.  Scope: rigid tree and weld closure
+only, Euclidean coordinates (all joints scalar), ground contact not
+differentiated; a component AutoDiff cannot evaluate is refused, never
+finite-differenced.  Evidence: equality with the NSX-84 finite-difference
+reference on the identical problem within that reference's own measured
+step-to-step variation (its round-off floor is set by $\mathrm{cond}(M)\approx
+10^{8}$ of the finger block), and equality with the Pinocchio analytic derivatives (NSX-85) in one tangent basis, after the registered
+NSX-56 Track~N agreement of $M,h,J_c,\dot J_cv$ and the propagated Track~S bound
+on $(a,\lambda)$.  The $\partial/\partial\tau$ blocks are the effort response
+$K^{-1}[e_j;0]$ and are held to the first-order \texttt{kkt\_bound} of the
+measured Track~N differences (right-hand-side scale zero); the $\xi,\eta$ blocks
+also carry differential differences that no Track~N entry registers, so they are
+held to the resolution of the NSX-84 finite-difference reference (its own spread
+under step $\times0.5$ and $\times2$, round-off set by $\mathrm{cond}(M)\approx
+10^{8}$ of the finger block).  No derivative-level Track~N tolerance exists;
+conformance rows are NSX-98.  Failed experiments: a random configuration off the recorded
+trajectory exceeds the registered Pinocchio--Drake $\dot J_cv$ Track~N tolerance
+by a factor 3 (Pinocchio obtains $\dot J_cv$ as $-J_ca_0$ from an
+ill-conditioned forward solve), so the Pinocchio comparison uses the recorded
+golfer frames only; a unit-scale random load makes the finite-difference
+reference noise-limited at the size of the signal, so the oracle tests use a
+small load.  Reproduction:
+\texttt{pytest tests/unit/loop\_nullspace/test\_autodiff\_derivatives.py
+tests/unit/engines/drake/test\_closed\_loop\_autodiff.py
+tests/unit/engines/drake/test\_closed\_loop\_autodiff\_pinocchio.py}.
+
 \subsection{Tangent State Space for Several Degrees of Freedom}
 \label{sec:var-lin-k}
 
