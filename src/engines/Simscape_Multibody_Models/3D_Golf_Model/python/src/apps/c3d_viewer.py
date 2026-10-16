@@ -20,8 +20,8 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 
 try:
-    from src.shared.python.theme import apply_golf_suite_style
     from src.shared.python.theme.integration import ThemedWindowMixin
+    from src.shared.python.theme.launcher_compat import apply_golf_suite_style
 
     apply_golf_suite_style()
 except ImportError:

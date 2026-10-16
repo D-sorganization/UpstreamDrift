@@ -10,6 +10,7 @@ from src.api.auth.launcher_capability import LauncherCapability
 
 API_PORT_ENV = "API_PORT"
 CANONICAL_API_PORT_ENV = "GOLF_API_PORT"
+API_RELOAD_ENV = "API_RELOAD"
 DEFAULT_API_PORT = 8000
 _MIN_PORT = 1
 _MAX_PORT = 65535
@@ -108,6 +109,8 @@ class SidekickRuntimeConfig:
         port_text = str(self.port)
         environ[API_PORT_ENV] = port_text
         environ[CANONICAL_API_PORT_ENV] = port_text
+        # Issue #12901: uvicorn auto-reload triples the API import cost.
+        environ[API_RELOAD_ENV] = "0"
         self.capability.export(environ)
 
 

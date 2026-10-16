@@ -79,9 +79,8 @@ class ThemeManager:
     def _apply_theme_system(self) -> None:
         """Initialize theme manager and register for theme change callbacks."""
         try:
-            from src.shared.python.theme import (
-                ThemeManager,
-                FontManager,
+            from src.shared.python.theme import FontManager, ThemeManager
+            from src.shared.python.theme.launcher_compat import (
                 apply_golf_suite_style,
             )
 
@@ -145,7 +144,8 @@ class ThemeManager:
         from PyQt6.QtGui import QActionGroup
 
         try:
-            from src.shared.python.theme import ThemeManager, ThemePreset
+            from src.shared.python.theme import ThemeManager
+            from src.shared.python.theme.launcher_compat import ThemePreset
 
             manager = ThemeManager.instance()
 
@@ -343,7 +343,9 @@ class ThemeManager:
         # Apply immediately if matplotlib is available
         if theme_name == "follow_ui":
             try:
-                from src.shared.python.theme import apply_golf_suite_style
+                from src.shared.python.theme.launcher_compat import (
+                    apply_golf_suite_style,
+                )
 
                 apply_golf_suite_style()
             except ImportError:

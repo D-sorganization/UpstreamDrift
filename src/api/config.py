@@ -18,7 +18,11 @@ See also:
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from pydantic import ValidationError
+
+from src.shared.python.config.environment import get_environment
 
 from src.shared.python.config.typed_settings import (
     DEFAULT_ALLOWED_HOSTS as _SETTINGS_DEFAULT_ALLOWED_HOSTS,
@@ -91,6 +95,34 @@ def get_cors_origins() -> list[str]:
 # API_PORT -- see issue #2068.
 DEFAULT_SERVER_HOST = _SETTINGS_DEFAULT_SERVER_HOST
 DEFAULT_SERVER_PORT = _SETTINGS_DEFAULT_SERVER_PORT
+
+
+API_RELOAD_ENV = "API_RELOAD"
+_RELOAD_TRUE = frozenset({"1", "true", "yes", "on"})
+_RELOAD_FALSE = frozenset({"0", "false", "no", "off"})
+
+
+def api_reload_enabled(environ: Mapping[str, str]) -> bool:
+    """Return whether uvicorn auto-reload should run (issue #12901).
+
+    ``API_RELOAD`` wins when set. Otherwise reload is on only in development.
+    The launcher pins ``API_RELOAD=0`` for its API child because reload imports
+    the whole application three times before the server can answer ``/readyz``.
+
+    Raises:
+        ValueError: ``environ`` is None or ``API_RELOAD`` is not a boolean word.
+    """
+    if environ is None:
+        raise ValueError("environ must be provided")
+    raw = environ.get(API_RELOAD_ENV)
+    if raw is None or raw.strip() == "":
+        return get_environment() == "development"
+    word = raw.strip().lower()
+    if word in _RELOAD_TRUE:
+        return True
+    if word in _RELOAD_FALSE:
+        return False
+    raise ValueError(f"{API_RELOAD_ENV} must be a boolean word, got {raw!r}")
 
 
 def get_server_host() -> str:
