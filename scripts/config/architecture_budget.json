@@ -361,15 +361,6 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "src/engines/physics_engines/drake/python/motion_matching/simulate.py",
-      "symbol": "simulate_with_coefficients",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 7725,
-      "reason": "Issue #7725: pre-existing cross-engine CC-30 forward-sim kernel (plant build, actuation wiring, initial-pose, rollout, FK, postconditions) already exceeded the function-lines budget before this change. The rollout/error-handling loop was extracted to _record_rollout (#7727); fully decomposing the remaining plant-construction body is a larger cross-engine refactor shared by every engine's simulate_with_coefficients. Temporary exception until that decomposition lands.",
-      "expires_on": "2026-10-31"
-    },
-    {
       "path": "src/bunkershot3d/geometry/wedge.py",
       "symbol": "WedgeGeometry.from_millimetres",
       "rule": "parameters",
@@ -455,69 +446,6 @@
       "issue": 9762,
       "reason": "Pre-existing on origin/main: solve_swing_ddp is byte-identical to the origin/main version (162 lines, 10 parameters) and already exceeded both budgets before this change. PR #9768 (epic #9762) touched five lines elsewhere in crocoddyl_backend.py -- routing the anthropometric link inertials of #9755 into the Pinocchio model -- and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violations surfaced as if they were new. They were surfaced, not introduced, by #9768. The nine violations this PR did author were fixed by decomposition instead (options objects for solve_swing_casadi and build_max_speed_ocp, a module-level mixin for the bioptim adapter, per-backend functions in the parity benchmark); decomposing the Crocoddyl solver as well would put an unreviewed refactor of a second backend inside a bioptim-integration diff. Tracked in #9762.",
       "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py",
-      "symbol": "SimOut.__init__",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/physics-team",
-      "issue": 9967,
-      "reason": "Issue #9967: SimOut canonical dataclass coordinates 19 state and energy trajectory fields matching Simscape contract.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py",
-      "symbol": "SimOut.__init__",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/physics-team",
-      "issue": 9967,
-      "reason": "Issue #9967: SimOut coordinates all 19 kinematic, kinetic, energy, and work output fields across simulation steps.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py",
-      "symbol": "simulate_with_coefficients",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/physics-team",
-      "issue": 9967,
-      "reason": "Issue #9967: simulate_with_coefficients executes continuous Bernstein torque evaluation with RK4 internal stage integration for Pinocchio ABA.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/engines/physics_engines/drake/python/motion_matching/simulate.py",
-      "symbol": "SimOut.__init__",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/physics-team",
-      "issue": 9968,
-      "reason": "Issue #9968: SimOut.__init__ handles comprehensive backward-compatible keyword aliases and canonical Simscape fields.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/engines/physics_engines/drake/python/motion_matching/simulate.py",
-      "symbol": "SimOut.__init__",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/physics-team",
-      "issue": 9968,
-      "reason": "Issue #9968: SimOut.__init__ parameter list reflects canonical multibody states, kinetic/potential energy, and metadata.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/engines/physics_engines/drake/python/motion_matching/simulate.py",
-      "symbol": "_record_rollout",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/physics-team",
-      "issue": 9968,
-      "reason": "Issue #9968: _record_rollout coordinates Drake MultibodyPlant state logging, forward kinematics transforms, and energy accounting buffers.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/engines/physics_engines/drake/python/motion_matching/fit_swing.py",
-      "symbol": "fit_swing_drake",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/physics-team",
-      "issue": 9968,
-      "reason": "Issue #9968: fit_swing_drake coordinates optimization objective, parameter bounds, SLSQP minimize loop, and result validation.",
-      "expires_on": "2026-10-31"
     },
     {
       "path": "src/tools/model_converter/urdf_exporter.py",
