@@ -156,6 +156,8 @@ def verify_against_monte_carlo(
         NoiseAwareStatus.OBJECTIVE_FLAT_INVARIANT,
     ):
         raise ValueError(f"nothing to verify: status {result.status.value}")
+    if result.variance is None or result.reference_variance is None:
+        raise ValueError("nothing to verify: the result carries no variances")
     if not callable(make_runner):
         raise TypeError("make_runner must be callable")
     names = [o.name for o in spec.outcomes]

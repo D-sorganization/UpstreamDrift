@@ -220,7 +220,7 @@ class ActivationFiber:
                     "dual_feasibility_tolerance": _LP_TOL,
                 },
             )
-            if res.status != 0:
+            if res.status != 0 or res.fun is None:
                 raise FiberInfeasibleError(f"fibre LP failed: {res.message}")
             out.append(sign * float(res.fun))
         return out[0], out[1]
@@ -256,7 +256,7 @@ class ActivationFiber:
                 "dual_feasibility_tolerance": _LP_TOL,
             },
         )
-        if res.status != 0:
+        if res.status != 0 or res.x is None:
             raise FiberInfeasibleError(f"Chebyshev LP failed: {res.message}")
         return np.asarray(res.x[:k]), float(res.x[k])
 

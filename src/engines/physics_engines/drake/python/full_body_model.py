@@ -891,11 +891,9 @@ class FullBodyDrakeModel:
         from pydrake.autodiffutils import InitializeAutoDiff  # noqa: PLC0415
 
         n = len(self.names)
-        seeds = np.asarray(
-            InitializeAutoDiff(
-                np.concatenate((self._named_vector(q), self._named_vector(v)))
-            )
-        ).reshape(-1)
+        state = np.concatenate((self._named_vector(q), self._named_vector(v)))
+        seed_state: Any = InitializeAutoDiff  # pydrake stub types its shape wrongly
+        seeds: Array = np.asarray(seed_state(state)).reshape(-1)
         positions = np.empty(n, dtype=object)
         positions[self._q_indices] = seeds[:n]
         velocities = np.empty(n, dtype=object)

@@ -135,14 +135,14 @@ class InputSpace:
         self._blocks: list[tuple[str, Array, Array | None]] = []
         emitted: set[int] = set()
         for k, name in enumerate(self.input_names):
-            grp = grouped.get(name)
-            if grp is None:
+            member_of = grouped.get(name)
+            if member_of is None:
                 self._blocks.append((name, np.array([k]), None))
-            elif id(grp) not in emitted:
-                emitted.add(id(grp))
-                idx = np.array([position[n] for n in grp.names])
-                chol = np.linalg.cholesky(grp.correlation)
-                self._blocks.append(("+".join(grp.names), idx, chol))
+            elif id(member_of) not in emitted:
+                emitted.add(id(member_of))
+                idx = np.array([position[n] for n in member_of.names])
+                chol = np.linalg.cholesky(member_of.correlation)
+                self._blocks.append(("+".join(member_of.names), idx, chol))
         self._low = np.array([i.low for i in self.inputs])
         self._span = np.array([i.high - i.low for i in self.inputs])
 

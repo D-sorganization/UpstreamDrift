@@ -93,8 +93,8 @@ def _canonicalise(
     frames = _closure_frames(adapter, q)
     j_c, jdot_v = to_canonical_closure(jacobian, drift, **frames)
     grip = GripFrame(
-        rotation=frames["grip_frame_rotation"],
-        origin=frames["grip_reference_point"],
+        rotation=np.asarray(frames["grip_frame_rotation"], dtype=float),
+        origin=np.asarray(frames["grip_reference_point"], dtype=float),
     )
     return j_c, jdot_v, grip
 

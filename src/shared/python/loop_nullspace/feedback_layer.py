@@ -43,7 +43,6 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 from src.shared.python.loop_nullspace.evidence import Array, readonly_float
-from src.shared.python.loop_nullspace.feedback_runtime import FeedbackRun
 from src.shared.python.loop_nullspace.impedance_spec import JointImpedance
 from src.shared.python.loop_nullspace.replay_spec import ReplaySetup
 
@@ -228,7 +227,7 @@ class FeedbackLayer:
 
     def begin_run(
         self, setup: ReplaySetup, t_start: float, max_step: float
-    ) -> FeedbackRun:
+    ) -> _LayerRun:
         """A fresh run for one replay (see :mod:`feedback_runtime`).
 
         Raises:

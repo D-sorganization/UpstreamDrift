@@ -192,10 +192,11 @@ def muscle_stiffness(
     k_ten = _tendon_stiffness(frame, a)
     k_mtu = series_stiffness(k_fib, k_ten)
     joint = frame.moment_arms.T @ (k_mtu[:, None] * frame.moment_arms)
-    geometric = frame.moment_arm_jacobian is not None
-    if geometric:
+    arm_jacobian = frame.moment_arm_jacobian
+    geometric = arm_jacobian is not None
+    if arm_jacobian is not None:
         force = frame.engine_force(a)
-        joint = joint - np.einsum("k,kij->ij", force, frame.moment_arm_jacobian)
+        joint = joint - np.einsum("k,kij->ij", force, arm_jacobian)
     return MuscleStiffness(
         fiber=k_fib,
         tendon=k_ten,

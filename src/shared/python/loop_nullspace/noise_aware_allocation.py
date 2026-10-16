@@ -385,6 +385,7 @@ def _scp(
             scale_mu *= MU_GROWTH
         if not accepted:
             return z, it, math.inf, None, "no descent step at the damping limit"
+        assert z_new is not None  # accepted implies a candidate step
         step = float(np.linalg.norm(z_new - z))
         z, value = z_new, min(v_new, value)
         scale_mu = max(1.0, scale_mu / MU_GROWTH)

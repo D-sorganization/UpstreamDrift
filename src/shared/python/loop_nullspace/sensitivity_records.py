@@ -131,7 +131,7 @@ def planar_oracle_model(
         for k, lo in bounds.items()
     ]
     inputs.append(SensitivityInput("lead_shoulder_rate", 0.0, 3.0))
-    groups = ()
+    groups: tuple[InputGroup, ...] = ()
     if correlated_masses is not None:
         rho = float(correlated_masses)
         groups = (

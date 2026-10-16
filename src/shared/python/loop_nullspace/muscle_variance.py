@@ -28,6 +28,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -157,15 +158,16 @@ def _level_assessment(
     idx = model.coordinate_indices
     nv = model.derivs.nv
     derivs = model.derivs
-    declared_impedance = config.stiffness_model is not None
-    if declared_impedance:
+    stiffness_model = config.stiffness_model
+    declared_impedance = stiffness_model is not None
+    if stiffness_model is not None:
         stiff = muscle_stiffness(
-            frame, activation, config.stiffness_model, force_gain=config.force_gain
+            frame, activation, stiffness_model, force_gain=config.force_gain
         )
         derivs = apply_muscle_stiffness(derivs, stiff.joint, coordinate_indices=idx)
     r_full = np.zeros((frame.n_muscles, nv))
     r_full[:, list(idx)] = frame.moment_arms
-    common = {
+    common: dict[str, Any] = {
         "q": model.q,
         "v": model.v,
         "manifold": model.manifold,
