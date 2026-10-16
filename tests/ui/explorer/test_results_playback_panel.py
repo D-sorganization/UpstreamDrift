@@ -191,3 +191,115 @@ def test_invalid_run_reports_the_missing_field(
 
     assert explorer.playback_panel is None
     assert any("'q'" in text for text in boxes)
+
+
+# ---- playback polish (#12948) ---------------------------------------------
+
+
+@pytest.mark.unit
+def test_speed_selector_offers_quarter_half_and_real_time(
+    explorer: MainWidget, runs: dict[str, Path], boxes: list[str]
+) -> None:
+    assert explorer.load_results(runs["mujoco"]) is True, boxes
+    panel = explorer.playback_panel
+
+    items = [panel.speed_combo.itemText(i) for i in range(panel.speed_combo.count())]
+    assert items == ["0.25x", "0.5x", "1x"]
+    assert panel.speed_combo.currentText() == "1x"
+
+    panel.speed_combo.setCurrentText("0.5x")
+    assert panel.speed == 0.5
+
+
+@pytest.mark.unit
+def test_play_advances_by_wall_clock_and_skips_frames(
+    explorer: MainWidget, runs: dict[str, Path], boxes: list[str]
+) -> None:
+    assert explorer.load_results(runs["mujoco"]) is True, boxes
+    panel = explorer.playback_panel
+    times = panel._pose.time_s
+    clock = {"now": 50.0}
+    panel._now = lambda: clock["now"]  # type: ignore[method-assign]
+    panel.slider.setValue(0)
+
+    panel.play_button.setChecked(True)
+    clock["now"] += float(times[2] - times[0])
+    panel._advance()  # one late tick: frame 1 is skipped, not shown late
+    try:
+        assert panel.current_frame == 2
+    finally:
+        panel.play_button.setChecked(False)
+
+
+@pytest.mark.unit
+def test_speed_change_while_playing_keeps_the_frame(
+    explorer: MainWidget, runs: dict[str, Path], boxes: list[str]
+) -> None:
+    assert explorer.load_results(runs["mujoco"]) is True, boxes
+    panel = explorer.playback_panel
+    times = panel._pose.time_s
+    clock = {"now": 10.0}
+    panel._now = lambda: clock["now"]  # type: ignore[method-assign]
+    panel.slider.setValue(0)
+    panel.play_button.setChecked(True)
+    clock["now"] += float(times[1] - times[0])
+    panel._advance()
+    try:
+        before = panel.current_frame
+        panel.speed_combo.setCurrentText("0.25x")
+        panel._advance()
+        assert panel.current_frame == before
+    finally:
+        panel.play_button.setChecked(False)
+        panel.speed_combo.setCurrentText("1x")
+
+
+@pytest.mark.unit
+def test_plot_ylabel_stays_inside_the_figure(
+    explorer: MainWidget, runs: dict[str, Path], boxes: list[str]
+) -> None:
+    assert explorer.load_results(runs["mujoco"]) is True, boxes
+    panel = explorer.playback_panel
+    panel.select_channel(CLUB_HEAD_SPEED)
+    figure = panel.canvas.fig
+    figure.set_size_inches(
+        1100 / figure.dpi, 150 / figure.dpi
+    )  # the dock's short plot pane
+    panel.canvas.draw()
+
+    axes = figure.axes[0]
+    label, xlabel = (
+        axes.yaxis.label.get_window_extent(),
+        axes.xaxis.label.get_window_extent(),
+    )
+    box = figure.bbox
+    assert label.x0 >= box.x0 - 0.5
+    assert label.y0 >= box.y0 - 0.5 and label.y1 <= box.y1 + 0.5
+    assert xlabel.y0 >= box.y0 - 0.5
+
+
+@pytest.mark.unit
+def test_viewport_image_scales_with_the_widget(
+    explorer: MainWidget, runs: dict[str, Path], boxes: list[str]
+) -> None:
+    assert explorer.load_results(runs["mujoco"]) is True, boxes
+    panel = explorer.playback_panel
+
+    def fills_label() -> tuple[int, int]:
+        pixmap = panel.view_label.pixmap()
+        size = panel.view_label.size()
+        assert pixmap.width() == size.width() or pixmap.height() == size.height()
+        assert pixmap.width() <= size.width() and pixmap.height() <= size.height()
+        return pixmap.width(), pixmap.height()
+
+    explorer.show()  # Qt lays out and resizes only shown widgets
+    app = QApplication.instance()
+    explorer.resize(1000, 700)
+    app.processEvents()
+    small = fills_label()
+    explorer.resize(1700, 1000)
+    app.processEvents()
+    large = fills_label()
+    explorer.hide()
+
+    assert large[0] > small[0] and large[1] > small[1]
