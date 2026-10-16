@@ -2741,6 +2741,11 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-16 | #12812 | Fix main breakage from #12704: pinocchio JointModelRZ test lane and pinocchio_reference row typing |
+| 2026-10-16 | #12809 | Run the Prettier pre-commit hook at commit time only so rebased branches can push |
+| 2026-10-16 | #12780 | NSX-80: variability-sensitivity specification, symbolic goldens, hypotheses and unverified citations |
+| 2026-10-16 | #12663 | NSX-73 research report scoping a muscle-redundancy layer above NSX envelopes, with elbow null-space example test |
+| 2026-10-16 | #12637 | NSX-21: FeasibleSet with declared torque, friction-cone and grip constraints in null-space coordinates |
 | 2026-10-16 | #12798 | Fix garment_classification.tex row terminators so the golfer appearance reference compiles; latex-references CI now builds the full-body model reference masters |
 | 2026-10-16 | #12804 | Split full-body HANDOFF and anthropometry REVIEW under the doc-size budget; renew only the stale chat child-copy architecture exception for 14 days (#12803) |
 | 2026-10-15 | #12792 | Bump vendor/ud-tools to Tools e3cf5a43, carrying the corrected golfer club Jacobians (Tools#5627 Rust pendulum-core, Tools#5628 Python/JAX forward kinematics y-sign, Tools#5626); pins and divergence inventory kept in step |
