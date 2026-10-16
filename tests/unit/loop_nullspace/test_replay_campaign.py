@@ -130,8 +130,12 @@ def test_zero_noise_gives_zero_dispersion_in_both_modes() -> None:
     for name in ("open", "feedback"):
         summary = ps.summarise(spec, result.paired, name, n_boot=50, seed=1)
         assert summary.tally.failure_rate == 0.0
+        # Identical trials: the sample SD is zero up to round-off of the mean
+        # (CI's BLAS build gives one ulp of the outcome scale, not exact 0.0).
+        scale = max(1.0, float(np.abs(result.paired.outcome_matrix(name)).max()))
         for disp in summary.dispersions.values():
-            assert disp is not None and disp.sd == 0.0
+            assert disp is not None
+            assert disp.sd <= 4 * np.finfo(float).eps * scale
     nominal = pmc.run_seed_set(spec, _strategies(spec)[:1], "paired").outcome_matrix(
         "open"
     )
