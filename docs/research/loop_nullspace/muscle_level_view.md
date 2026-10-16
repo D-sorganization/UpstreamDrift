@@ -283,6 +283,15 @@ unless the reserve criterion passes in the same run.
 **Stage 6: External Validation (deferred).** EMG or measured impedance. Record
 in the deferred-validation catalog; do not close with computation.
 
+## Status Update for NSX-94
+
+Stages 1, 3 and 4 above (frame, co-contraction fibre, stiffness for a declared
+model) are implemented by issue #12723 in `src/shared/python/loop_nullspace/muscle_*.py`
+with OpenSim and MuJoCo-muscle providers; the calculation-level reference is
+`loop_nullspace.tex`, section "Muscle-Level Co-Contraction Experiments". Stage 2
+(the torque-envelope pullback) and Stage 5 (a MyoFullBody swing frame) remain
+open, and Stage 6 stays a deferred validation.
+
 ## Non-Claims
 
 - No stiffness, co-contraction level or muscle activation is inferred from
