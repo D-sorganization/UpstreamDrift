@@ -25,6 +25,7 @@ from .opensim_full_body_lifts import (
     OpenSimLiftKineticsResult,
     OpenSimLiftModelComposition,
     compose_opensim_full_body_lift,
+    opensim_lift_static_hold,
     evaluate_opensim_lift_kinetics,
 )
 
@@ -41,6 +42,7 @@ __all__ = [
     "ViaPose",
     "additional_movement_spec",
     "compose_opensim_full_body_lift",
+    "opensim_lift_static_hold",
     "evaluate_opensim_lift_kinetics",
     "is_additional_movement",
     "lift_grip",
