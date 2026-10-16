@@ -58,3 +58,14 @@ def test_launcher_theme_uses_concrete_compat_module() -> None:
     text = (_REPO / "src/launchers/launcher_theme.py").read_text(encoding="utf-8")
     assert "theme import ThemeManager, ThemePreset" not in text
     assert "theme.launcher_compat import" in text
+
+
+@pytest.mark.unit
+def test_draggable_tabs_imports_theme_manager_from_concrete_module() -> None:
+    text = (_REPO / "src/shared/python/gui_pkg/draggable_tabs.py").read_text(
+        encoding="utf-8"
+    )
+    assert "from src.shared.python.theme import get_theme_manager" not in text
+    from src.shared.python.theme.theme_manager import get_theme_manager
+
+    assert callable(get_theme_manager)

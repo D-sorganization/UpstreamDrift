@@ -431,7 +431,7 @@ class DraggableTabWidget(QTabWidget):
 
         win = DetachedTabWindow(widget, text, icon, self)
         try:
-            from src.shared.python.theme import get_theme_manager
+            from src.shared.python.theme.theme_manager import get_theme_manager
 
             mgr = get_theme_manager()
             if mgr:
