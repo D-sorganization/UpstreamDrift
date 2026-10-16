@@ -391,6 +391,8 @@ def test_end_to_end_receipt_has_all_hashes(inputs, tmp_path) -> None:
         assert (out / art.name).is_file()
         assert len(art.sha256) == _SHA_LEN
     assert receipt.residual["drive_max_rad"] >= 0.0
+    assert receipt.residual["id_body_height_source"] == "model_extent_first_frame"
+    assert receipt.residual["id_body_height_m"] > 0.0
     assert "n_flagged" in receipt.reserve
     assert receipt.context_comparisons
     assert all(c["is_acceptance"] is False for c in receipt.context_comparisons)

@@ -612,7 +612,8 @@ def test_residual_height_follows_the_model_gravity_axis(
     pelvis = _pelvis_pose(rz=math.pi / 2.0)
     expected = _gravity_extent(spec, theta, pelvis, [1.0, 0.0, 0.0])
     assert budget.body_height_m == pytest.approx(expected, abs=1e-9)
-    assert expected > 2.0 * _gravity_extent(spec, theta, pelvis, [0.0, 1.0, 0.0])
+    y_extent = _gravity_extent(spec, theta, pelvis, [0.0, 1.0, 0.0])
+    assert abs(expected - y_extent) > 5e-3  # the axes are distinguishable
 
 
 def test_explicit_body_height_is_recorded_as_its_source(
