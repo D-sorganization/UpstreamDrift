@@ -751,8 +751,7 @@ def compose_anthropometric_document(
     body mass so total subject mass equals ``mass_kg``, scaling the Rajagopal legs
     with :func:`scale_leg_mass` so body mass without the club equals ``mass_kg``
     (#12199, #12300); the legs carry what the upper body does not. Raises
-    ``ValueError`` when the upper body alone reaches ``mass_kg``.
-    ``tibial_torsion_offset_deg`` kwarg: see :func:`_apply_kwarg_tibial_torsion`.
+    ``ValueError`` when the upper body alone reaches ``mass_kg``; see :func:`_apply_kwarg_tibial_torsion`.
     """
     native_path = native_path or get_native_geometry_spec(None)
     osim_path = osim_path or get_opensim_model(None)
