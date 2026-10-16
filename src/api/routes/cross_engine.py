@@ -9,6 +9,12 @@ Design by Contract
 - ``POST /analysis/cross-engine`` requires at least one valid engine name.
 - ``GET  /analysis/cross-engine/status/{task_id}`` requires a non-empty task ID.
 - Results are JSON-serialisable; no numpy arrays survive the boundary.
+- Undefined CV policy (#12807, NSX #12593 section 5A): a metric whose
+  ``|mean| <= 1e-12`` has no CV. The result reports its ``cv`` and
+  ``robustness_score`` as ``null`` with a ``cv_reason``, and the engine
+  ``robustness_score`` as ``null`` with a ``robustness_reason``. It is never
+  scored as robust. A non-finite number that still reaches the worker fails
+  the task explicitly instead of producing an HTTP 500 on status polling.
 
 DRY
 ---
@@ -19,6 +25,7 @@ physics logic lives here.
 
 from __future__ import annotations
 
+import json
 import uuid
 from datetime import datetime
 from typing import Any
@@ -107,6 +114,17 @@ class CrossEngineStudyRequest(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+def _require_finite_json(result: dict[str, Any]) -> None:
+    """Raise ``ValueError`` if ``result`` holds NaN/inf (not strict JSON)."""
+    try:
+        json.dumps(result, allow_nan=False)
+    except ValueError as exc:
+        raise ValueError(
+            "cross-engine result contains a non-finite number; undefined "
+            "values must be reported as null with a reason (#12807)"
+        ) from exc
+
+
 def _run_study_background(
     task_id: str,
     request: CrossEngineStudyRequest,
@@ -133,6 +151,7 @@ def _run_study_background(
             sim_config,
             allow_stub_substitution=request.allow_stub_substitution,
         )
+        _require_finite_json(result)
         task_manager.mark_completed(task_id, result)
         logger.info("Cross-engine study %s completed", task_id)
     except (ValueError, RuntimeError, ImportError) as exc:
