@@ -2741,6 +2741,10 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-16 | #12903 | OpenSim loads alongside ezc3d: C3D stack imported lazily at startup, structured OpenSim probe reports the real import failure instead of Not Installed |
+| 2026-10-16 | #12900 | Fix classic launcher startup: parent contract guard, ChatService ToolRegistry identity, data_explorer launcher_embed alias (#12893, #12895) |
+| 2026-10-16 | #12876 | NSX-84: constrained tangent linearization (M2 preload) and closed-loop derivative capability seam with engine-free FD reference; NSX-84b: tangent state space for multi-DOF closed loops (k > 1), five-bar golden and gauge-law tests |
+| 2026-10-16 | #12801 | Make the vendored Tools double_pendulum_golf the canonical golfer kinematics and closure Jacobian; golfer_kinematics/golfer_constraints become thin adapters pinned by a CI parity test (ADR-0056) |
 | 2026-10-16 | #12734 | R6: opt-in flexible golf shaft as a rigid-link spring-damper chain (MuJoCo); generic STIFF profile flagged default_not_measured; rigid default byte-identical; other engines refuse chain specs |
 | 2026-10-16 | #12790 | R8: one shared appearance and anthropometry spec (model_appearance.body_meshes) - engine-neutral skin/garment/shoe meshes in the spec body frame, trunk sized from spec visual_hints as one solid, default charcoal trousers hip to ankle, one plain palette, shared OBJ export; MuJoCo is now a thin translator |
 | 2026-10-16 | #12877 | Generate the user manual TOC from real chapter headings and test that every manual link resolves |
