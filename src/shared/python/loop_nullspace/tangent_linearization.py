@@ -46,6 +46,7 @@ from src.shared.python.loop_nullspace.configuration_manifold import (
     ConfigurationManifold,
     EuclideanManifold,
     FreeFlyerManifold,
+    _vec,
 )
 from src.shared.python.loop_nullspace.constrained_dynamics import (
     constrained_acceleration,
@@ -113,15 +114,6 @@ def tangent_projector(jac: ArrayLike) -> Array:
     """
     basis = tangent_basis(jac)
     return np.asarray(basis @ basis.T)
-
-
-def _vec(value: ArrayLike, n: int, name: str) -> Array:
-    arr = np.asarray(value, dtype=np.float64)
-    if arr.shape != (n,):
-        raise ValueError(f"{name} must have shape ({n},), got {arr.shape}")
-    if not np.isfinite(arr).all():
-        raise ValueError(f"{name} must be finite")
-    return arr
 
 
 def _central(fn: Callable[[float], Array], step: float) -> Array:
@@ -303,8 +295,31 @@ class _DerivativeBase:
             d_lam.append(lam - nom.reaction)
         return np.array(d_acc).T, np.array(d_lam).T.reshape(len(nom.reaction), nv)
 
-    def _columns(self, nom: _Nominal) -> tuple[Array, Array, Array, Array]:
+    def _column(
+        self, nom: _Nominal, ctx: Any, dq: Array, dv: Array
+    ) -> tuple[Array, Array]:
+        """``(delta a, delta lambda)`` for the tangent perturbation ``(dq, dv)``."""
         raise NotImplementedError
+
+    def _column_context(self, nom: _Nominal) -> Any:
+        """Per-nominal data shared by every column (``None`` by default)."""
+        return None
+
+    def _columns(self, nom: _Nominal) -> tuple[Array, Array, Array, Array]:
+        ctx = self._column_context(nom)
+        k = nom.basis.shape[1]
+        zero = np.zeros(nom.v.shape[0])
+        xi = [
+            self._column(nom, ctx, nom.basis[:, j], nom.offset[:, j]) for j in range(k)
+        ]
+        eta = [self._column(nom, ctx, zero, nom.basis[:, j]) for j in range(k)]
+        m = len(nom.reaction)
+        return (
+            np.array([c[0] for c in xi]).T.reshape(-1, k),
+            np.array([c[0] for c in eta]).T.reshape(-1, k),
+            np.array([c[1] for c in xi]).T.reshape(m, k),
+            np.array([c[1] for c in eta]).T.reshape(m, k),
+        )
 
     def constrained_acceleration_derivatives(
         self, q: ArrayLike, v: ArrayLike, tau: ArrayLike
@@ -346,7 +361,9 @@ class FiniteDifferenceDerivatives(_DerivativeBase):
 
     scheme = "central_retraction"
 
-    def _sweep(self, nom: _Nominal, dq: Array, dv: Array) -> tuple[Array, Array]:
+    def _column(
+        self, nom: _Nominal, ctx: Any, dq: Array, dv: Array
+    ) -> tuple[Array, Array]:
         plus = self._solve(
             self._step_to(nom.q, dq, self._step), nom.v + self._step * dv, nom.tau
         )
@@ -356,19 +373,6 @@ class FiniteDifferenceDerivatives(_DerivativeBase):
         return (
             (plus[0] - minus[0]) / (2.0 * self._step),
             (plus[1] - minus[1]) / (2.0 * self._step),
-        )
-
-    def _columns(self, nom: _Nominal) -> tuple[Array, Array, Array, Array]:
-        k = nom.basis.shape[1]
-        zero = np.zeros(nom.v.shape[0])
-        xi = [self._sweep(nom, nom.basis[:, j], nom.offset[:, j]) for j in range(k)]
-        eta = [self._sweep(nom, zero, nom.basis[:, j]) for j in range(k)]
-        m = len(nom.reaction)
-        return (
-            np.array([c[0] for c in xi]).T.reshape(-1, k),
-            np.array([c[0] for c in eta]).T.reshape(-1, k),
-            np.array([c[1] for c in xi]).T.reshape(m, k),
-            np.array([c[1] for c in eta]).T.reshape(m, k),
         )
 
 
@@ -407,22 +411,13 @@ class AssembledKKTDerivatives(_DerivativeBase):
         d_acc, d_lam = solve_kkt_block(mass, nom.jac, rhs1, -rhs2)
         return d_acc, d_lam
 
-    def _columns(self, nom: _Nominal) -> tuple[Array, Array, Array, Array]:
-        k = nom.basis.shape[1]
-        k_geom = geometric_preload(self._model, self._manifold, nom.q, nom.reaction)
-        zero = np.zeros(nom.v.shape[0])
-        xi = [
-            self._perturbation(nom, k_geom, nom.basis[:, j], nom.offset[:, j])
-            for j in range(k)
-        ]
-        eta = [self._perturbation(nom, k_geom, zero, nom.basis[:, j]) for j in range(k)]
-        m = len(nom.reaction)
-        return (
-            np.array([c[0] for c in xi]).T.reshape(-1, k),
-            np.array([c[0] for c in eta]).T.reshape(-1, k),
-            np.array([c[1] for c in xi]).T.reshape(m, k),
-            np.array([c[1] for c in eta]).T.reshape(m, k),
-        )
+    def _column_context(self, nom: _Nominal) -> Array:
+        return geometric_preload(self._model, self._manifold, nom.q, nom.reaction)
+
+    def _column(
+        self, nom: _Nominal, ctx: Any, dq: Array, dv: Array
+    ) -> tuple[Array, Array]:
+        return self._perturbation(nom, ctx, dq, dv)
 
 
 @dataclass(frozen=True)
