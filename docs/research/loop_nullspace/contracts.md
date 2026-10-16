@@ -1049,3 +1049,43 @@ Preconditions: symmetric covariances, conformal shapes, finite inputs
 (`ValueError`). Postconditions: adjoint and forward variance agree to 1e-12
 (tests) and 1e-9 (runtime `ensure`); the budget parts sum to the total.
 Non-claims: linear predictions do not cover saturation, slip or missed impacts.
+
+## NSX-91 Paired Nonlinear Monte Carlo (#12720)
+
+Modules (all under `src/shared/python/loop_nullspace/`):
+
+- `paired_mc_spec.py`: `CampaignSpec` (disturbances, grid, trial counts, paired
+  and hold-out seeds, `OutcomeChannel`s, optional `GeneratorSpec`),
+  `TrialDraw` (each draw is a pure function of seed set, trial index and
+  disturbance), `IntegratorSignature`, `require_independent_integrator`
+  (R13: a replay sharing the generator's integrator name or step is an inverse
+  crime and raises) and `compare_noise` (identical generator noise is circular
+  and raises; different noise is flagged `noise_mismatched_to_generator`).
+- `paired_monte_carlo.py`: `run_campaign(spec, strategies, *, batch_size=1)`
+  and `run_seed_set`. Every `Strategy` sees the same draws (common random
+  numbers); results are identical for any `batch_size`. Rollouts are never
+  dropped: `TrialStatus` is `OK`, `FAILED`, `MISSED` (`TrialMiss`) or
+  `NON_ADMISSIBLE` (`TrialNonAdmissible`); `tally` counts them and gives a
+  Wilson interval on the failure rate. Programming errors propagate.
+- `paired_statistics.py`: `summarise` (wrapped `OutcomeDispersion` for angle
+  outcomes, `ScalarDispersion` otherwise, seeded bootstrap intervals),
+  `compare_strategies` (paired differences resampled jointly; open-loop versus
+  feedback needs `allow_cross_mode=True` and is recorded), `holdout_consistent`,
+  `cross_check_linear` (MC SD versus the NSX-90 prediction; the gap is always
+  reported, `AGREES` only if the gate ran and passed) and `sd_records`
+  (`QuantityRecord`s, `UNVALIDATED`, mode label as a convention).
+- `replay_campaign.py`: `replay_strategy(spec, name, ReplayCase, TorqueNoise,
+  outcome_fn)` runs NSX-31 `replay()` under held torque noise; the strategy
+  mode is the replay mode (R10), the integrator is RK4 at `dt / substeps`, and
+  a terminated replay is a retained failure.
+
+Preconditions raise `ValueError`/`TypeError`. Postconditions: every trial of
+every strategy appears in its tally; draws are independent of the strategy,
+order and batching; hold-out seeds differ from the paired seed.
+Declared choices (the specification fixes none): percentile bootstrap
+intervals, population SD, Wilson interval for failure rates, right-continuous
+zero-order-hold noise inside RK4 stages. Non-claims: the MC is a statement about
+the model under the declared noise; a failure rate is not a physical
+probability; replay is not physical acceptance. NSX-95 comparisons must use this
+runner.
+

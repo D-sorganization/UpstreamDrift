@@ -1085,6 +1085,36 @@ exceeds it, or whose rollout is non-finite, is \texttt{NOT\_LINEAR\_VALID}; a
 record that never ran the gate is \texttt{NOT\_ASSESSED}.  Failed experiments:
 none recorded.
 
+\paragraph{Paired Nonlinear Monte Carlo (NSX-91).}  Finite-amplitude claims
+(saturation, slip, rank or contact change, missed impacts) need a nonlinear
+check of the linear prediction (V7).  A campaign evaluates every strategy on the
+\emph{same} random draws (common random numbers) and then on independent
+hold-out seeds.  Each draw is a pure function of (seed set, trial index,
+disturbance): its seed is
+\texttt{SeedSequence([base\_seed, index, disturbance\_position])}, so it does not
+depend on the strategy, on trial order or on batching.  White torque noise of
+spectral density $S_w$ enters the NSX-31 replay as a known external generalised
+load held constant over each allocation interval with per-interval variance
+$S_w/\Delta t$ (the NSX-90 discretisation).  RK4 evaluates the load at the end of
+an interval, so the held noise is right-continuous; this smooths the noise but
+preserves its integral over the window.  Rollouts that raise a declared numerical
+error, return non-finite outcomes, miss the ball or leave the admissible set are
+retained with their status and counted; the failure rate carries a Wilson
+interval.  Face-angle dispersion uses the wrapped statistics of V3; other
+outcomes report the mean and the population standard deviation, all with seeded
+percentile bootstrap intervals.  For $N$ Gaussian outcomes the sample standard
+deviation has relative standard error $1/\sqrt{2(N-1)}$, which fixes the
+expected interval half-width $z\,s/\sqrt{2(N-1)}$ the tests compare against.
+Paired differences resample trial indices jointly, so the common draws cancel.
+The replay integrator and step must differ from the generator's (rule R13), and
+a generator whose noise is identical to the assumed noise is rejected as
+circular.  The MC standard deviation is compared with the NSX-90 prediction; the
+gap is always reported, and agreement is claimed only when the nonlinearity gate
+ran and passed for that outcome.  Failed experiments: none recorded.
+Reproduction: \texttt{pytest tests/unit/loop\_nullspace/test\_paired\_monte\_carlo.py
+tests/unit/loop\_nullspace/test\_paired\_statistics.py
+tests/unit/loop\_nullspace/test\_replay\_campaign.py}.
+
 \subsection{Mechanisms by Which the Allocation Changes Variance}
 \label{sec:var-mechanisms}
 
