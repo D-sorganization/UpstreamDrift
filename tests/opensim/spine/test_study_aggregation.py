@@ -127,6 +127,21 @@ def test_missing_artifact_fails_closed(tmp_path: Path) -> None:
         load_verified_run(path)
 
 
+@pytest.mark.parametrize(
+    "name", ["../outside/s1_loads.npz", "sub/s1_loads.npz", "/abs/s1_loads.npz"]
+)
+def test_artifact_name_must_be_a_basename(tmp_path: Path, name: str) -> None:
+    outside = tmp_path / "outside"
+    _write_study(outside)
+    inside = tmp_path / "inside"
+    inside.mkdir()
+    text = (outside / "s1_receipt.json").read_text()
+    receipt = inside / "s1_receipt.json"
+    receipt.write_text(text.replace('"s1_loads.npz"', json.dumps(name)))
+    with pytest.raises(ValueError, match="basename"):
+        load_verified_run(receipt)
+
+
 def test_peaks_and_impulse_hand_checked(tmp_path: Path) -> None:
     rows = summarize_run(load_verified_run(_write_study(tmp_path)))
     jr = {
