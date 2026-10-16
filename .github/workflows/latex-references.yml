@@ -10,6 +10,9 @@
 #          reference. proximal_distal_energy_transfer is excluded: its .tex is
 #          generated from the QMD source (non-editable) and needs a full
 #          Quarto/TeX Live toolchain, not this self-contained build.
+#          The full-body model references (#12791) are the masters
+#          docs/development/full_body_models/*_reference.tex, which pull in
+#          section fragments; a change to any .tex there rebuilds every master.
 #
 # NOT A REQUIRED CHECK: it only runs when docs/research/**/*.tex changes, so it
 #          must not be a required context, and it needs no merge_group trigger.
@@ -21,6 +24,7 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "docs/research/**/*.tex"
+      - "docs/development/full_body_models/**/*.tex"
       - ".github/workflows/latex-references.yml"
 
 concurrency:
@@ -66,6 +70,13 @@ jobs:
               echo "$main" >> references.txt
             fi
           done < changed_tex.txt
+          git diff --name-only --diff-filter=ACMR "origin/${BASE_REF}...HEAD" \
+            | grep -E '^docs/development/full_body_models/.+\.tex$' >> changed_tex.txt || true
+          if grep -q '^docs/development/full_body_models/' changed_tex.txt; then
+            for main in docs/development/full_body_models/*_reference.tex; do
+              echo "$main" >> references.txt
+            done
+          fi
           echo "Changed .tex files:"; cat changed_tex.txt
           echo "References to build:"; cat references.txt
           if [ -s references.txt ]; then
