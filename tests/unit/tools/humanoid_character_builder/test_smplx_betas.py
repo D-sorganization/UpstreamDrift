@@ -204,6 +204,7 @@ class TestGenerateForwardsBetas:
 
         assert result.success is False
         assert result.solver_status == "failure"
+        assert result.error_message is not None
         assert "model files not found" in result.error_message
         mock_smplx.create.assert_not_called()
 
