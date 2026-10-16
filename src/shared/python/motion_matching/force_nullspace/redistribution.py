@@ -16,8 +16,16 @@ from typing import Any, Sequence
 import numpy as np
 import scipy.sparse as sp
 
-from src.shared.python.loop_nullspace.qp_core import friction_cone_rows, solve_qp
-from src.shared.python.loop_nullspace.solvers import SOCBlock, SolveStatus
+from src.shared.python.loop_nullspace.qp_core import (
+    QPConstraints,
+    friction_cone_rows,
+    solve_qp,
+)
+from src.shared.python.loop_nullspace.solvers import (
+    ConicSettings,
+    SOCBlock,
+    SolveStatus,
+)
 
 from ._common import Array, _array
 from .constraints import ForceConstraints
@@ -209,13 +217,8 @@ def _solve_stacked(
     res = solve_qp(
         hess,
         grad,
-        A_eq=rows["A_eq"],
-        b_eq=rows["b_eq"],
-        A_ub=rows["A_ub"],
-        b_ub=rows["b_ub"],
-        cones=rows["cones"],
-        tol=max(tolerance, 1e-9),
-        max_iter=max_iterations,
+        QPConstraints(**rows),
+        settings=ConicSettings(max_iter=max_iterations, tol=max(tolerance, 1e-9)),
     )
     if res.status is SolveStatus.OPTIMAL:
         if res.x is None:

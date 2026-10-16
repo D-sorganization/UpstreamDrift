@@ -32,8 +32,8 @@ import scipy.sparse as sp
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import require
-from src.shared.python.loop_nullspace.qp_core import solve_qp
-from src.shared.python.loop_nullspace.solvers import SolveStatus
+from src.shared.python.loop_nullspace.qp_core import QPConstraints, solve_qp
+from src.shared.python.loop_nullspace.solvers import ConicSettings, SolveStatus
 
 logger = logging.getLogger(__name__)
 
@@ -426,13 +426,15 @@ class ContactForceAllocator:
         res = solve_qp(
             sp.identity(n_total_vars, format="csr"),
             np.zeros(n_total_vars),
-            A_eq=a_eq_scaled,
-            b_eq=tau_rnea,
-            A_ub=-c_ineq_scaled if len(c_ineq) > 0 else None,
-            b_ub=np.zeros(len(c_ineq)) if len(c_ineq) > 0 else None,
-            lo=lb_y,
-            hi=ub_y,
-            tol=_SOLVER_TOL,
+            QPConstraints(
+                A_eq=a_eq_scaled,
+                b_eq=tau_rnea,
+                A_ub=-c_ineq_scaled if len(c_ineq) > 0 else None,
+                b_ub=np.zeros(len(c_ineq)) if len(c_ineq) > 0 else None,
+                lo=lb_y,
+                hi=ub_y,
+            ),
+            settings=ConicSettings(tol=_SOLVER_TOL),
         )
         solver_converged = res.status is SolveStatus.OPTIMAL
         if not solver_converged:
