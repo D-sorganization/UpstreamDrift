@@ -13,7 +13,8 @@ Provides a PyQt6 widget for configuring and running perturbation analysis:
 Design by Contract
 ------------------
 - run_batch() must have a valid simulate_fn and extract_fn before calling.
-- All results displayed must be finite (enforced by variability_summary).
+- Displayed results come from the PerturbationSummary the worker emits;
+  an undefined (non-finite) CV is shown as "n/a (mean ~ 0)".
 
 DRY
 ---
@@ -50,7 +51,6 @@ from src.shared.python.perturbation.config import (
 )
 
 from ..pendulum_perturbation_analyzer import PendulumPerturbationAnalyzer
-from ..perturbation_analysis import variability_summary
 
 logger = logging.getLogger(__name__)
 
@@ -172,7 +172,8 @@ class PerturbationPanel(QWidget):
     ------------------
     Pre:  set_simulation_callbacks() must be called with non-None callables
           before run_batch() is invoked.
-    Post: displayed statistics are always finite (enforced by variability_summary).
+    Post: the result labels show the worker's PerturbationSummary; a
+          non-finite CV is shown as "n/a (mean ~ 0)" (NSX-82, #12711).
     """
 
     def __init__(self, parent: QWidget | None = None) -> None:
@@ -415,19 +416,25 @@ class PerturbationPanel(QWidget):
         self._progress.setValue(pct)
         self._status_label.setText(f"Trial {trial} / {n}")
 
-    def _on_finished(self, results: list) -> None:
+    def _on_finished(self, results: list[PerturbationSummary]) -> None:
+        """Render the ``[PerturbationSummary]`` emitted by ``_PerturbWorker``.
+
+        Pre:  ``results`` is a list holding at most one PerturbationSummary.
+        """
         if not (results is not None):
             raise ValueError("results must be provided")
         self._run_btn.setEnabled(True)
         self._cancel_btn.setEnabled(False)
-        if not results:
+        summary = results[0] if results else None
+        if summary is not None and not isinstance(summary, PerturbationSummary):
+            raise TypeError(
+                f"expected PerturbationSummary, got {type(summary).__name__}"
+            )
+        if summary is None or not summary.metrics:
             self._status_label.setText("No successful trials")
             return
-        summary = variability_summary(results)
         self._display_summary(summary)
-        if _HAS_MPL:
-            self._update_histogram([r["tip_speed_final"] for r in results])
-        self._status_label.setText(f"Done — {summary['n_trials']} trials completed")
+        self._status_label.setText(f"Done — {summary.config.n_trials} trials completed")
 
     def _on_error(self, msg: str) -> None:
         if not (msg is not None):
@@ -481,7 +488,9 @@ class PerturbationPanel(QWidget):
         self._result_labels["Mode"].setText(summary.config.perturb_mode)
         self._result_labels["Mean"].setText(f"{mean:.3f} m/s")
         self._result_labels["Std"].setText(f"{std:.3f} m/s")
-        self._result_labels["CV"].setText(f"{cv * 100:.2f} %")
+        self._result_labels["CV"].setText(
+            f"{cv * 100:.2f} %" if np.isfinite(cv) else "n/a (mean ~ 0)"
+        )
         self._result_labels["Min"].setText(f"{mn:.3f} m/s")
         self._result_labels["Max"].setText(f"{mx:.3f} m/s")
         self._result_labels["Score"].setText(f"{score:.3f}")

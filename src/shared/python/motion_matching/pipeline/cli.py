@@ -46,7 +46,7 @@ from src.shared.python.motion_matching.pipeline.address_feet import (
     foot_progression_series,
     model_feet_deg,
     record_foot_progression,
-    seed_document_feet,
+    seed_feet,
     split_address_coordinates,
 )
 from src.shared.python.motion_matching.pipeline.address_feet import (
@@ -113,6 +113,7 @@ from src.shared.python.motion_matching.pipeline.turn_split import (
     turn_split_report,
 )
 from src.shared.python.motion_matching.pipeline.receipt import (
+    BaseSpecProvenance,
     GroundSupportReceiptInputs,
     build_ground_support_receipt,
     log_pipeline_summary,
@@ -1125,21 +1126,27 @@ def _fd_neck(
 def _ground_support_receipt(
     ctx: PipelineContext,
     cal_res: _CalibrateAndScaleResult,
-    base_spec: dict[str, Any],
+    spec: tuple[dict[str, Any], BaseSpecProvenance | None],
     lane: Lane,
     kin: Any,
     q_ref: np.ndarray,
     ik_report: dict[str, Any],
     dynamics_report: dict[str, Any],
 ) -> dict[str, Any]:
-    """Assemble the ground-support receipt from the run's provenance and reports."""
+    """Assemble the ground-support receipt from the run's provenance and reports.
+
+    ``spec`` is the (possibly foot-seeded) base spec and the provenance of
+    the committed document it came from (#12820).
+    """
     args = ctx.args
+    base_spec, provenance = spec
     return build_ground_support_receipt(
         GroundSupportReceiptInputs(
             backend=args.backend,
             ik_backend=getattr(args, "ik_backend", "lm"),
             tracking_backend=getattr(args, "tracking", "kkt"),
             base_spec=base_spec,
+            provenance=provenance,
             spec_path=Path(args.spec),
             scaled_path=ctx.out_dir / "full_body_spec_hipcal_scaled.json",
             hipcal_path=ctx.out_dir / "full_body_spec_hipcal.json",
@@ -1173,6 +1180,7 @@ def _simulate_and_receipt(
     cal_res: _CalibrateAndScaleResult,
     base_spec: dict[str, Any],
     ik_report: dict[str, Any],
+    provenance: BaseSpecProvenance | None = None,
 ) -> dict[str, Any]:
     """Execute forward dynamics tracking replay, renders, and receipt generation."""
     args = ctx.args
@@ -1222,7 +1230,14 @@ def _simulate_and_receipt(
     _save_dynamics_record(ctx.out_dir, record, sim_errors, lane, q_track)
     render_skipped = _render_playbacks(ctx.out_dir, cal_res, kin, lane, q_ref, sim_q)
     receipt = _ground_support_receipt(
-        ctx, cal_res, base_spec, lane, kin, q_ref, ik_report, dynamics_report
+        ctx,
+        cal_res,
+        (base_spec, provenance),
+        lane,
+        kin,
+        q_ref,
+        ik_report,
+        dynamics_report,
     )
     if render_skipped:
         receipt["render_skipped"] = render_skipped
@@ -1274,6 +1289,7 @@ class CalibratedRun:
     base_spec: dict[str, Any]
     labels: tuple[str, ...]
     cal_res: _CalibrateAndScaleResult
+    provenance: BaseSpecProvenance | None = None
 
 
 @precondition(lambda args: args is not None, "args must not be None")
@@ -1292,12 +1308,16 @@ def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
     plant = get_plant(ctx.engine, base_spec)
     lane = Lane(labels, ctx.c3d_path, plant=plant)
     configure_lane(lane, base_spec)
-    lane.feet = build_foot_targets(lane, getattr(args, "foot_progression", "off"))
+    mode = getattr(args, "foot_progression", "off")
+    lane.feet = build_foot_targets(lane, mode)
+    provenance = BaseSpecProvenance.of(base_spec)  # pre-seeding hash (#12820)
     if lane.feet is not None:
         seed_kin = plant.create_ik(lane.leg_seeds())
-        base_spec = seed_document_feet(
+        seeded, seed = seed_feet(
             base_spec, seed_kin, lane.feet, document_seed(base_spec, seed_kin)
         )
+        provenance = BaseSpecProvenance.of(base_spec, mode, seed)
+        base_spec = seeded
     if args.bound_wrists and args.free_wrists:
         raise ValueError("--bound-wrists and --free-wrists exclude each other")
     if args.bound_wrists or (fitted_grip(base_spec) and not args.free_wrists):
@@ -1307,7 +1327,7 @@ def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
     lane.gaze_weight = float(getattr(args, "gaze_weight", 0.0))
 
     cal_res = _calibrate_and_scale(ctx, lane, base_spec, upper_base, upper, labels)
-    return CalibratedRun(ctx, lane, base_spec, labels, cal_res)
+    return CalibratedRun(ctx, lane, base_spec, labels, cal_res, provenance)
 
 
 def run_address_stage(args: argparse.Namespace) -> dict[str, Any]:
@@ -1417,6 +1437,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         cal_res,
         base_spec,
         ik_report,
+        run.provenance,
     )
 
 

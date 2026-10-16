@@ -50,6 +50,10 @@ import numpy as np
 
 from src.shared.python.core.contracts import check_finite, require
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.simulation_backends.constrained_ztcf_zvcf import (
+    constrained_acceleration_at,
+    is_constrained_provider,
+)
 
 if TYPE_CHECKING:
     from .protocol import EquationsOfMotionProvider
@@ -329,6 +333,10 @@ def ztcf_acceleration(
     q_arr = _as_state_vector("q", q)
     v_arr = _as_state_vector("v", v)
     _require_compatible_configuration_shape(q=q_arr, tangent=v_arr, tangent_name="v")
+    if is_constrained_provider(provider):
+        return constrained_acceleration_at(
+            provider, q_arr, v_arr, np.zeros_like(v_arr)
+        )[0]
     bias = np.asarray(provider.bias_forces(q_arr, v_arr), dtype=float)
     require(
         bias.shape == v_arr.shape,
@@ -347,7 +355,9 @@ def zvcf_acceleration(provider: EquationsOfMotionProvider, q: np.ndarray) -> np.
         qddot = solve(M(q), -bias(q, 0))
 
     Passive elements and internal states retained in the declared effective
-    plant remain in ``bias``. This is not a forward trajectory.
+    plant remain in ``bias``. This is not a forward trajectory.  On a
+    ``ConstrainedEquationsOfMotionProvider`` the closure reaction is re-solved
+    at ``v = 0`` (NSX-30).
     """
     q_arr = _as_state_vector("q", q)
     mass = np.asarray(provider.mass_matrix(q_arr), dtype=float)
@@ -360,6 +370,10 @@ def zvcf_acceleration(provider: EquationsOfMotionProvider, q: np.ndarray) -> np.
     _require_compatible_configuration_shape(
         q=q_arr, tangent=zero_velocity, tangent_name="zero velocity"
     )
+    if is_constrained_provider(provider):
+        return constrained_acceleration_at(
+            provider, q_arr, zero_velocity, zero_velocity
+        )[0]
     bias_zero_v = np.asarray(provider.bias_forces(q_arr, zero_velocity), dtype=float)
     require(
         bias_zero_v.shape == zero_velocity.shape,
@@ -383,6 +397,10 @@ def zero_velocity_control_preserved_acceleration(
     _require_compatible_configuration_shape(
         q=q_arr, tangent=tau_arr, tangent_name="tau"
     )
+    if is_constrained_provider(provider):
+        return constrained_acceleration_at(
+            provider, q_arr, np.zeros_like(tau_arr), tau_arr
+        )[0]
     bias_zero_v = np.asarray(
         provider.bias_forces(q_arr, np.zeros_like(tau_arr)), dtype=float
     )
@@ -462,6 +480,10 @@ def drift_and_control_split(
     Their sum is the actual acceleration under ``tau``, so this is the
     instantaneous ``qddot = f(x) + G(x) u`` decomposition at the measured state.
 
+    For a ``ConstrainedEquationsOfMotionProvider`` (NSX-30) the reaction is
+    re-solved by the KKT projector: ``drift`` is the constrained ZTCF and
+    ``control`` is ``P_c tau``, which is allocation-invariant.
+
     # AGENT-NOTE: Pointwise / instantaneous decomposition at a single measured
     # state -- NOT a forward-integrated counterfactual. Do not turn this into a
     # time integration (epic task M7.3).
@@ -486,6 +508,11 @@ def drift_and_control_split(
     drift = ztcf_acceleration(provider, q, v)
     q_arr = _as_state_vector("q", q)
     tau_arr = _as_state_vector("tau", tau)
+    if is_constrained_provider(provider):
+        total, _ = constrained_acceleration_at(
+            provider, q_arr, _as_state_vector("v", v), tau_arr
+        )
+        return drift, total - drift
     control = _solve_mass(provider, q_arr, tau_arr)
     return drift, control
 

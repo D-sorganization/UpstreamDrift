@@ -74,9 +74,26 @@ def _create_candidate_session(
     )
 
 
+class _UnitInertiaProvider:
+    def mass_matrix(self, q: np.ndarray) -> np.ndarray:
+        return np.eye(len(q))
+
+    def bias_forces(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        return np.zeros(len(q))
+
+
 class MockSimulationService:
-    def __init__(self, session: CandidateSession | None = None) -> None:
+    def __init__(
+        self, session: CandidateSession | None = None, *, with_dynamics: bool = True
+    ) -> None:
         self.active_candidate_session = session
+        self.dynamics: Any = None
+        if with_dynamics:
+            from src.shared.python.motion_matching.counterfactual import (
+                CounterfactualDynamics,
+            )
+
+            self.dynamics = CounterfactualDynamics(_UnitInertiaProvider())
 
     def get_candidate_forces(self) -> dict[str, Any]:
         if self.active_candidate_session is None:
@@ -128,6 +145,7 @@ class MockSimulationService:
             fork_frame_idx=fork_frame_idx,
             strategy=CounterfactualStrategy(strategy),
             duration_frames=duration_frames,
+            dynamics=self.dynamics,
         )
         return {
             "fork_id": fork.fork_id,
@@ -224,3 +242,18 @@ def test_post_candidate_counterfactual_success(app: FastAPI) -> None:
     assert data["strategy"] == "clamped_actuator_torque"
     assert data["fork_frame_idx"] == 1
     assert "divergence_rms" in data
+
+
+def test_post_candidate_counterfactual_without_dynamics_is_400(app: FastAPI) -> None:
+    """No dynamics provider: the rollout fails closed instead of using a mock inertia."""
+    session = _create_candidate_session(is_dynamic=True, has_forces=True)
+    mock_service = MockSimulationService(session=session, with_dynamics=False)
+    app.dependency_overrides[get_simulation_service] = lambda: mock_service
+    client = TestClient(app)
+
+    response = client.post(
+        "/analysis/candidate/counterfactual",
+        json={"fork_frame_idx": 1, "strategy": "clamped_actuator_torque"},
+    )
+    assert response.status_code == 400
+    assert "dynamics" in response.json()["detail"]

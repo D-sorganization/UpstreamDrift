@@ -20,10 +20,27 @@ from src.shared.python.motion_matching.counterfactual import (
     AccelerationDecomposition,
     CounterfactualFork,
     CounterfactualStrategy,
+    CounterfactualDynamics,
     create_counterfactual_rollout,
 )
 
 pytestmark = pytest.mark.unit
+
+
+class _DiagProvider:
+    """Diagonal-inertia provider with a weak bias (real forward dynamics)."""
+
+    def __init__(self, n: int) -> None:
+        self._m = np.diag(1.0 + np.arange(n))
+
+    def mass_matrix(self, q: np.ndarray) -> np.ndarray:
+        return self._m
+
+    def bias_forces(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        return 0.1 * v + 0.5 * np.sin(q)
+
+
+DYNAMICS = CounterfactualDynamics(_DiagProvider(4))
 
 
 def _create_mock_session(
@@ -137,6 +154,7 @@ def test_counterfactual_rollout_baseline_immutability() -> None:
         fork_frame_idx=20,
         strategy=CounterfactualStrategy.ZERO_TRAIL_ARM_TORQUE,
         duration_frames=30,
+        dynamics=DYNAMICS,
     )
 
     q_digest_after = hashlib.sha256(session.q.tobytes()).hexdigest()
@@ -159,6 +177,7 @@ def test_counterfactual_rollout_zero_trail_arm_divergence() -> None:
         fork_frame_idx=10,
         strategy=CounterfactualStrategy.ZERO_TRAIL_ARM_TORQUE,
         duration_frames=40,
+        dynamics=DYNAMICS,
     )
 
     assert fork.divergence_rms > 0.0
@@ -182,6 +201,7 @@ def test_counterfactual_rollout_clamped_torque() -> None:
         fork_frame_idx=5,
         strategy=CounterfactualStrategy.CLAMPED_ACTUATOR_TORQUE,
         duration_frames=20,
+        dynamics=DYNAMICS,
         clamp_limits=(-clamp_limit, clamp_limit),
     )
     assert fork.divergence_rms > 0.0

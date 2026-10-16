@@ -48,6 +48,7 @@ __all__ = [
     "planted_stance",
     "refine_foot_progression",
     "seed_document_feet",
+    "seed_feet",
     "seed_hip_rotation_deg",
 ]
 
@@ -373,10 +374,25 @@ def seed_document_feet(
     schema (no extra keys); the target provenance (measured or flagged default)
     is recorded in the receipt's ``foot_progression`` block.
     """
+    return seed_feet(document, kin, targets, q_base, target_axis)[0]
+
+
+def seed_feet(
+    document: Mapping[str, Any],
+    kin: Any,
+    targets: FootTargets,
+    q_base: np.ndarray,
+    target_axis: np.ndarray = MODEL_TARGET_AXIS,
+) -> tuple[dict[str, Any], dict[str, float]]:
+    """``seed_document_feet`` plus the seeds it merged (#12820).
+
+    The seeds are what the receipt records as ``foot_seed_deg``: the seeded
+    document is ``document`` with them merged into ``address_seed_deg``.
+    """
     seeds = seed_hip_rotation_deg(kin, q_base, targets, target_axis)
     out = dict(document)
     out["address_seed_deg"] = {**(document.get("address_seed_deg") or {}), **seeds}
-    return out
+    return out, seeds
 
 
 def foot_progression_report(
