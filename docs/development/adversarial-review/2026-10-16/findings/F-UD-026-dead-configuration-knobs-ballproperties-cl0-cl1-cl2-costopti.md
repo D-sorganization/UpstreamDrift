@@ -19,7 +19,7 @@
 - Failure scenario: a user tunes `BallProperties(cl1=0.5)` and gets identical trajectories; `CostOptions(q_orientation_repr=
 "rotmat")` promises a representation switch that does not exist, so the MATLAB-parity claim depends on which option MATLAB used.
 - Why a newer engineer misses this: frozen dataclasses with defaults look complete; nothing fails when a field is unused.
-- Proposed change: delete the fields or `raise NotImplementedError` for non-default values; add a `vulture`-style dead-attribute
+- Proposed change: delete the fields, or reject non-default values with `NotImplementedError`; add a `vulture`-style dead-attribute
   check to CI.
 - Verification: `vulture src/shared/python/physics/ball_properties.py` reports no unused attributes.
 - Effort: S
