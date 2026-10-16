@@ -34,6 +34,9 @@ from src.engines.physics_engines.opensim.python.opensim_physics_engine import ( 
     OpenSimPhysicsEngine,
 )
 from src.shared.python.engine_core.capabilities import CapabilityLevel  # noqa: E402
+from src.shared.python.engine_core.mujoco_compat import (  # noqa: E402
+    full_mass_matrix,
+)
 
 pytestmark = [
     pytest.mark.integration,
@@ -149,8 +152,7 @@ class _Reference:
         data.ctrl[:] = 0.0
         data.qfrc_applied[:] = 0.0
         mujoco.mj_forward(model, data)
-        mass = np.zeros((model.nv, model.nv))
-        mujoco.mj_fullM(model, mass, data.qM)
+        mass = full_mass_matrix(mujoco, model, data)
         # The URDF's collision shapes touch at the joints, so MuJoCo adds contact
         # forces; the unconstrained acceleration is the comparable drift.
         return {
