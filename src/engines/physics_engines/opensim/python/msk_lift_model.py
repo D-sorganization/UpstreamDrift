@@ -80,7 +80,8 @@ __all__ = [
 
 BODY_SOURCE = "RajagopalLaiUhlrich2023"
 #: Stature of the generic Rajagopal et al. (2016) adult (about 170 cm, 75 kg).
-#: Uniform height scaling is an approximation until marker scaling (OSL-3).
+#: Uniform height scaling is an approximation; OSL-3 passes measured segment
+#: factors (``segment_scales``) when it fits a same-input bundle.
 GENERIC_STATURE_M = 1.70
 BAR_BODY = "barbell"
 LEFT_WELD_JOINT = "hand_l_to_barbell"
@@ -226,10 +227,29 @@ def _solve_arm_add(model: Any, pose: HoldPose, target_m: float) -> float:
     return float(brentq(residual, low, high, xtol=_WIDTH_XTOL_M))
 
 
-def _scale_body(model: Any, scale: float, body_mass_kg: float) -> None:
+def _scale_body(
+    model: Any,
+    scale: float,
+    body_mass_kg: float,
+    segment_scales: Mapping[str, float] | None = None,
+) -> dict[str, float]:
+    """Scale every body by ``scale`` except those given in ``segment_scales``.
+
+    Raises:
+        ValueError: on an unknown body or a non-positive segment factor.
+    """
     state = model.initSystem()
     factors = {body.getName(): scale for body in model.getBodySet()}
+    for body, factor in (segment_scales or {}).items():
+        if body not in factors:
+            raise ValueError(f"segment_scales names unknown body {body!r}")
+        if not math.isfinite(factor) or factor <= 0.0:
+            raise ValueError(
+                f"segment scale of {body!r} must be positive, got {factor}"
+            )
+        factors[body] = float(factor)
     model.scale(state, _scale_set(factors), True, float(body_mass_kg))
+    return factors
 
 
 def _foot_spheres(scale: float) -> list[tuple[str, str, np.ndarray, float]]:
@@ -415,8 +435,13 @@ def build_lift_model(
     height_m: float,
     bar_mass_kg: float,
     base_model_path: str | Path | None = None,
+    segment_scales: Mapping[str, float] | None = None,
 ) -> LiftModelBuild:
     """Compose the musculoskeletal OpenSim model of one barbell lift.
+
+    ``segment_scales`` overrides the uniform ``height_m`` scale per body (the
+    measured segment scaling of OSL-3); every other body keeps the uniform
+    factor.
 
     Postconditions: the returned model passes ``initSystem``; its skeleton
     mass equals ``body_mass_kg``; the hand-centre grip width equals the
@@ -436,7 +461,7 @@ def build_lift_model(
     model = osim.Model(str(base_path))
     model.setName(f"{BODY_SOURCE}_{lift}")
     scale = float(height_m) / GENERIC_STATURE_M
-    _scale_body(model, scale, body_mass_kg)
+    factors = _scale_body(model, scale, body_mass_kg, segment_scales)
     skeleton_mass = float(sum(body.getMass() for body in model.getBodySet()))
 
     pose = HOLD_POSES[lift]
@@ -479,6 +504,9 @@ def build_lift_model(
         },
         "generic_stature_m": GENERIC_STATURE_M,
         "scale_factor": scale,
+        "segment_scale_factors": {
+            body: factor for body, factor in factors.items() if factor != scale
+        },
         "skeleton_mass_kg": skeleton_mass,
         "bar_mass_kg": float(bar_mass_kg),
         "hold_pose": {

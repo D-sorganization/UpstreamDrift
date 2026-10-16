@@ -8,9 +8,16 @@ press, bench and back) contact -- see
 :mod:`src.engines.physics_engines.opensim.python.msk_lift_model`.  Every
 count and ``barbell_attached`` is read from the built model.
 
-:func:`evaluate_opensim_lift_kinetics` (inverse dynamics, static optimization
-or CMC muscle forces, reserve-actuator share and the qualification gate) is
-not built yet: it reports ``unqualified`` on every path (OSL-3/OSL-4).
+:func:`opensim_lift_ik_id` runs OpenSim inverse kinematics and inverse
+dynamics on a lift's LIFT-5 same-input bundle with the bundle's contact-derived
+foot (GCV-1) and hand (GCV-7) wrenches and returns a residual receipt (OSL-3,
+#13041); :func:`opensim_lift_static_grf` gives the contact-derived ground
+reaction of the hold.  Only the back squat has a bundle; the other lifts are
+reported unavailable with a reason.
+
+:func:`evaluate_opensim_lift_kinetics` (static optimization or CMC muscle
+forces, reserve-actuator share and the qualification gate) is not built yet:
+it reports ``unqualified`` on every path (OSL-4).
 
 Adheres to Design by Contract (DbC) and scientific integrity:
 - Fails closed and reports explicit "unqualified" status when the native
@@ -22,6 +29,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Final
 
@@ -33,6 +41,7 @@ from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 from .additional_movements import ADDITIONAL_LIFTS
 from .barbell_bushing import Barbell
+from .bundles import SAME_INPUT_LIFT_BUNDLES
 from .pack_audit.names import LIFTS
 
 SUPPORTED_LIFTS: Final[tuple[str, ...]] = LIFTS + ADDITIONAL_LIFTS
@@ -42,6 +51,9 @@ SUPPORTED_CONTACT_MODELS: Final[tuple[str, ...]] = (
     "hunt_crossley",
 )
 DEFAULT_RESERVE_THRESHOLD: Final[float] = 0.05
+#: IK/ID sample every 5th 1 ms bundle state (41 frames over the 0.2 s window).
+IK_ID_STRIDE: Final[int] = 5
+_REPO_ROOT: Final[Path] = Path(__file__).resolve().parents[4]
 #: The shared barbell's shaft mass, the lightest bar OSL-2 composes.
 _SHAFT_MASS_KG: Final[float] = Barbell.shaft_mass_kg
 
@@ -317,6 +329,136 @@ def opensim_lift_static_hold(
         "reason": "",
         "bar_hold": bar_hold_wrench(model, state),
         "native": native_static_hold(model, left, right),
+    }
+
+
+def opensim_lift_static_grf(
+    composition: OpenSimLiftModelComposition,
+) -> dict[str, Any]:
+    """Contact-derived ground reaction of a composed lift at its hold (OSL-3).
+
+    Returns ``{"available", "reason", ...}`` with the fields of
+    :func:`~src.engines.physics_engines.opensim.python.msk_lift_ik_id.static_hold_grf`
+    when available; otherwise only the reason (unavailable is never zero).
+    """
+    if not composition.is_composed:
+        return {
+            "available": False,
+            "reason": composition.reason or "lift model is not composed",
+        }
+    from src.engines.physics_engines.opensim.python.msk_lift_ik_id import (
+        static_hold_grf,
+    )
+    from src.engines.physics_engines.opensim.python.msk_lift_model import (
+        LiftModelBuild,
+    )
+
+    build = LiftModelBuild(
+        model=composition.native_model, receipt=dict(composition.receipt)
+    )
+    try:
+        hold = static_hold_grf(build)
+    except ValueError as exc:
+        return {"available": False, "reason": f"static hold failed: {exc}"}
+    return {"available": True, "reason": "", **hold}
+
+
+def _ik_id_unavailable(spec: OpenSimFullBodyLiftSpec, reason: str) -> dict[str, Any]:
+    return {
+        "lift": spec.lift,
+        "status": "unavailable",
+        "reason": reason,
+        "bundle": None,
+        "model": None,
+        "ik": None,
+        "id": None,
+    }
+
+
+def _bundle_reason(spec: OpenSimFullBodyLiftSpec) -> str | None:
+    """Why the lift has no same-input bundle to fit, or ``None``."""
+    if SAME_INPUT_LIFT_BUNDLES.get(spec.lift) is not None:
+        return None
+    return (
+        f"no LIFT-5 same-input bundle exists for {spec.lift!r}: #11745 "
+        "committed only the back-squat bundle, so there is no input to fit"
+    )
+
+
+def opensim_lift_ik_id(
+    spec: OpenSimFullBodyLiftSpec, *, stride: int = IK_ID_STRIDE
+) -> dict[str, Any]:
+    """OpenSim IK and inverse dynamics of a lift's same-input bundle (OSL-3).
+
+    The bundle defines the lifter: the model is composed with the bundle's
+    body mass, stature and bar mass (``spec`` masses are not used) and its
+    thigh, shank and trunk are scaled to the bundle's landmarks.
+
+    Returns a receipt ``{"lift", "status", "reason", "bundle", "model", "ik",
+    "id"}``.  ``status`` is ``complete`` when IK and ID ran; otherwise it is
+    ``unavailable`` with a reason and the result sections are ``None``.
+    """
+    if not is_engine_available("opensim"):
+        return _ik_id_unavailable(
+            spec, "Native OpenSim runtime is not available in the current environment"
+        )
+    reason = _unsupported_reason(spec) or _bundle_reason(spec)
+    if reason is not None:
+        return _ik_id_unavailable(spec, reason)
+
+    from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
+    from src.engines.physics_engines.opensim.python.msk_lift_model import (
+        build_lift_model,
+    )
+    from src.engines.physics_engines.opensim.python.musculoskeletal_swing import (
+        resolve_base_model,
+    )
+
+    from .bundle_targets import lift_targets
+
+    path = SAME_INPUT_LIFT_BUNDLES[spec.lift]
+    assert path is not None  # _bundle_reason checked it
+    try:
+        targets = lift_targets(spec.lift, path, stride=stride)
+        build = build_lift_model(
+            spec.lift,
+            body_mass_kg=targets.body_mass_kg,
+            height_m=targets.height_m,
+            bar_mass_kg=targets.bar_mass_kg,
+            segment_scales=ikid.bundle_segment_scales(targets, resolve_base_model()),
+        )
+    except (FileNotFoundError, ValueError) as exc:
+        return _ik_id_unavailable(spec, f"IK/ID setup failed: {exc}")
+    ik = ikid.run_inverse_kinematics(build, targets)
+    inverse = ikid.run_inverse_dynamics(build, targets, ik)
+    return {
+        "lift": spec.lift,
+        "status": "complete",
+        "reason": "",
+        "bundle": {
+            "path": str(path.relative_to(_REPO_ROOT)),
+            "sha256": targets.sha256,
+            "frames": len(targets.indices),
+            "stride": stride,
+            "time_s": [float(targets.time_s[0]), float(targets.time_s[-1])],
+            "body_mass_kg": targets.body_mass_kg,
+            "bar_mass_kg": targets.bar_mass_kg,
+            "height_m": targets.height_m,
+            "frame": targets.frame.record(),
+            **dict(targets.provenance),
+        },
+        "model": {
+            key: build.receipt[key]
+            for key in (
+                "body_source",
+                "scale_factor",
+                "segment_scale_factors",
+                "skeleton_mass_kg",
+                "bar_mass_kg",
+            )
+        },
+        "ik": ikid.ik_receipt(targets, ik),
+        "id": ikid.id_receipt(targets, inverse),
     }
 
 

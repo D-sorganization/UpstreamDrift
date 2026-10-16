@@ -317,9 +317,11 @@ for a full-body musculoskeletal model.
 \paragraph{Status.} Only the model composition is built (OSL-2, \#13040).
 Until OSL-2 the composer created an empty \texttt{opensim.Model()} and returned
 a hard-coded joint list with \texttt{barbell\_attached=True}; that stub is
-replaced. No inverse kinematics, inverse dynamics, static optimization, CMC or
-Moco solve runs yet: \texttt{evaluate\_opensim\_lift\_kinetics} still reports
-\texttt{"unqualified"} on every path (OSL-3 and OSL-4, \#13041 and \#13042).
+replaced. OSL-3 (\#13041) adds OpenSim inverse kinematics and inverse
+dynamics of the back-squat same-input bundle (next subsection). No static
+optimization, CMC or Moco solve runs yet:
+\texttt{evaluate\_opensim\_lift\_kinetics} still reports
+\texttt{"unqualified"} on every path (OSL-4, \#13042).
 
 \paragraph{Model Topology.} \texttt{compose\_opensim\_full\_body\_lift}
 (\texttt{src/shared/python/lifting/opensim\_full\_body\_lifts.py}) calls
@@ -378,6 +380,93 @@ with the reason).
 hold poses are engineering choices, not measured postures. The hands carry
 the bar in the squat hold. MyoFullBody, Hunt--Crossley contact and the
 additional movements fail closed with a reason.
+
+\subsection{OpenSim Inverse Kinematics and Inverse Dynamics (OSL-3, Issue \#13041)}
+\paragraph{Inputs.} Only one LIFT-5 same-input bundle exists:
+\texttt{docs/development/lifting/evidence/back\_squat/back\_squat\_barbell\_bundle.npz}
+(SHA-256 \texttt{850d42b1\ldots 71430}, MuJoCo reference engine, 200 steps of
+1\,ms, the 0.2\,s back-squat window). \#11745 closed with only that bundle, so
+the deadlift, bench press, snatch and clean and jerk have no input to fit; their
+IK and ID receipts are \texttt{"unavailable"} with that reason
+(\texttt{SAME\_INPUT\_LIFT\_BUNDLES}, \texttt{src/shared/python/lifting/bundles.py}).
+No input is synthesised for them.
+
+\paragraph{Targets and Loads.} The bundle replays the golf full-body spec, not
+Rajagopal, so its coordinates do not transfer by name (its hip flexion reads
+160--171$^\circ$). \texttt{lift\_targets}
+(\texttt{src/shared/python/lifting/bundle\_targets.py}) instead takes geometry
+and load: the spec's own marker kinematics (ankle, knee and hip centres,
+shoulders), heel and forefoot points at the spec's calcaneus contact-sphere
+stations, the LIFT-4 bar centre, the GCV-1 per-foot wrench of the bundle's
+shared-law contact (\texttt{bundle\_kinetics}) and the GCV-7 per-hand bushing
+wrench (\texttt{grip\_analysis}, negated onto the hands). Everything is
+re-expressed in the OpenSim lift frame: $x$ forward (heel to forefoot), $y$ up,
+$z$ right, origin on the floor under mid-foot of the first state. The model is
+built with the bundle's masses (108.32\,kg body, 100\,kg bar, 1.78\,m) and
+per-segment scale factors from the bundle's own joint-centre distances
+(femur 0.955/0.984, shank 1.092/1.103 left/right, torso 1.148; uniform 1.047).
+
+\paragraph{Method.} \texttt{run\_inverse\_kinematics}
+(\texttt{src/engines/physics\_engines/opensim/python/msk\_lift\_ik\_id.py}) uses
+OpenSim's \texttt{InverseKinematicsSolver} (accuracy $10^{-8}$, coordinate
+clamping off, lower-limb weight 10, shoulders and bar 1) on every fifth state
+(41 frames). \texttt{run\_inverse\_dynamics} uses \texttt{InverseDynamicsSolver}
+on a copy with muscles, actuators and contact removed and gravity kept; speeds
+and accelerations come from quintic GCV splines of the IK coordinates; the
+external body forces are added by superposition
+($\tau = \mathrm{ID}(\dot u) + \mathrm{ID}_4(0, F) - \mathrm{ID}_4(0, 0)$, since
+the four-argument solve omits gravity). The bar is massless in ID because the
+GCV-7 hand wrench already carries it. The static hold
+(\texttt{static\_hold\_grf}) keeps the smooth contacts, solves the pelvis
+height at which OpenSim's own ID gives zero vertical pelvis residual (Brent,
+$10^{-12}$\,m), and reduces the \texttt{SmoothSphereHalfSpaceForce} record
+values per support through the shared GCV-1 analysis.
+
+\paragraph{Measured Evidence.} Receipts:
+\texttt{docs/development/lifting/evidence/opensim\_ik\_id/receipts.json}.
+\begin{itemize}[nosep]
+\item \textbf{Static hold, all five lifts.} The contact ground reaction equals
+  $(m_\mathrm{body} + m_\mathrm{bar})\,g$ to a relative error below
+  $3\times10^{-13}$ (80\,kg lifter, 120\,kg bar). The feet carry 980.7\,N each,
+  except the bench press (bench 846.8\,N, feet 557.3\,N each).
+\item \textbf{Squat IK.} Convention-free sagittal segment-angle RMS
+  0.0252\,rad (1.44$^\circ$; shank 0.0292, thigh 0.0084, trunk 0.0313\,rad),
+  below the 2$^\circ$ receipt threshold. Marker RMS 4.07\,cm and maximum
+  12.6\,cm (the bar); this fails the 2\,cm/4\,cm best-practice marker gate.
+\item \textbf{Squat ID.} Every joint moment is finite. Pelvis residuals (peak,
+  RMS): $t_x$ 2927, 848\,N; $t_y$ 3930, 1449\,N; $t_z$ 1177, 363\,N; tilt 1540,
+  422\,N\,m; list 580, 180\,N\,m; rotation 363, 132\,N\,m. The Hicks et
+  al.\ (2015) gate (5\,\% of the 3031\,N peak external force = 151.6\,N;
+  1\,\% of COM height times that force = 17.3\,N\,m) fails for both forces and
+  moments.
+\end{itemize}
+
+\paragraph{Failed Experiments.} A rigid-body forward settle onto the contacts
+tipped the squat hold over, since its centre of mass sits 21\,cm behind the
+feet; it was replaced by the inverse-dynamics vertical root solve. Virtual
+pelvis markers derived from the spec's hip parent frames were not added: the
+spec's hip separation (0.22\,m) lies on a different axis and length than
+Rajagopal's (0.155\,m), so no verified transform exists.
+
+\paragraph{Limitations.} Results are not physically accepted.
+\begin{itemize}[nosep]
+\item Only the back squat has an input bundle; four lifts are unavailable.
+\item Pelvis orientation is weakly observed: only the two hip centres lie on
+  the pelvis, so pelvis tilt ($-94$ to $-120^\circ$) trades off against hip
+  flexion (168--194$^\circ$, above the Rajagopal range in every frame) and
+  lumbar extension. That trade-off drives the large residuals and joint
+  moments (hip flexion 1030\,N\,m, lumbar extension 983\,N\,m), which are not
+  physiological.
+\item The MS-20 smooth contact ($k = 10^5$\,N/m) sinks 0.119\,m under the
+  200\,kg static load (0.082\,m in the bench press), far beyond a plausible
+  sole compliance.
+\item The OSL-2 hold poses are not balanced: the rotational pelvis residual at
+  the static hold is $-440.5$\,N\,m in the squat, $-153$ to $-160$\,N\,m in the
+  pulls and $-1047.5$\,N\,m in the bench press.
+\end{itemize}
+Reproduce with \texttt{python3 scripts/measure\_opensim\_lift\_ik\_id.py} and
+\texttt{python3 -m pytest -o addopts="" tests/unit/lifting/test\_opensim\_lift\_ik\_id.py}
+(OpenSim 4.6 and the Rajagopal model required; otherwise the tests skip).
 
 \section{Measured Parity Results}
 All figures below are read from the committed receipt,

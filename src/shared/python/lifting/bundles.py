@@ -25,6 +25,7 @@ import json
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any
 
 import numpy as np
@@ -62,6 +63,20 @@ LIFT_SPEC = _GROUND_SUPPORT / "full_body_spec_hipcal_scaled.json"
 SEED_RECORD = _GROUND_SUPPORT / "dynamics_record.npz"
 BACK_SQUAT_BUNDLE = (
     _REPO / "docs/development/lifting/evidence/back_squat/back_squat_bundle.npz"
+)
+#: The back-squat bundle re-tracked with the LIFT-4 barbell on hand bushings
+#: (its bar states and per-hand wrenches travel in the provenance).
+BACK_SQUAT_BARBELL_BUNDLE = BACK_SQUAT_BUNDLE.with_name("back_squat_barbell_bundle.npz")
+#: The LIFT-5 same-input bundle of each barbell lift (``None``: never built).
+#: Only the back squat exists; #11745 closed with one of its five bundles.
+SAME_INPUT_LIFT_BUNDLES: Mapping[str, Path | None] = MappingProxyType(
+    {
+        "squat": BACK_SQUAT_BARBELL_BUNDLE,
+        "deadlift": None,
+        "bench_press": None,
+        "snatch": None,
+        "clean_and_jerk": None,
+    }
 )
 
 BAR_FRAME = "Hub"
