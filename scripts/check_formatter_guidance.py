@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parent.parent
 MAKEFILE = ROOT / "Makefile"
 PRE_COMMIT = ROOT / ".pre-commit-config.yaml"
 MANUAL = ROOT / "docs" / "user_guide" / "upstream_drift_user_manual.md"
+MANUAL_PARTS_DIR = MANUAL.with_suffix("")
 CONTRIBUTING = ROOT / "docs" / "development" / "contributing.md"
 
 
@@ -81,8 +82,16 @@ def check_precommit(errors: list[str]) -> None:
         )
 
 
+def manual_paths() -> list[Path]:
+    """Return the manual index followed by its chapter files."""
+    parts = sorted(MANUAL_PARTS_DIR.glob("*.md")) if MANUAL_PARTS_DIR.is_dir() else []
+    return [MANUAL, *parts]
+
+
 def check_docs(errors: list[str]) -> None:
-    manual_lines = "\n".join(_read_lines(MANUAL))
+    manual_lines = "\n".join(
+        line for path in manual_paths() for line in _read_lines(path)
+    )
     contributing_lines = "\n".join(_read_lines(CONTRIBUTING))
 
     if "Black, Ruff" in manual_lines:

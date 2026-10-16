@@ -1,4 +1,5 @@
 from os.path import exists
+from pathlib import Path
 
 files_to_update = [
     "install.sh",
@@ -9,6 +10,11 @@ files_to_update = [
     "docs/user_guide/user_manual.md",
     "docs/tutorials/content/01_getting_started.md",
     "output/README.md",
+]
+
+files_to_update += [
+    str(path).replace("\\", "/")
+    for path in sorted(Path("docs/user_guide/upstream_drift_user_manual").glob("*.md"))
 ]
 
 for file_path in files_to_update:
