@@ -92,8 +92,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1007 | `src/launchers/launcher_ui_setup.py` |
 | 1000 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_opengl_renderer.py` |
 | 999 | `src/shared/python/estimation/dime_contracts.py` |
-| 998 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 997 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
+| 996 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 993 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
 | 990 | `src/engines/physics_engines/drake/python/motion_matching/simulate.py` |
 | 990 | `src/shared/python/estimation/map_estimator.py` |

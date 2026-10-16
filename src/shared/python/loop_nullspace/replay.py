@@ -41,8 +41,8 @@ from typing import Any, cast
 import numpy as np
 from scipy.interpolate import CubicSpline
 
-from src.engines.feedback_comparison import ReplayPolicy
 from src.shared.python.loop_nullspace.allocation_spec import AllocationResult
+from src.shared.python.loop_nullspace.replay_policy import ReplayPolicy
 from src.shared.python.loop_nullspace.constrained_dynamics import Baumgarte
 from src.shared.python.loop_nullspace.evidence import (
     AllocationDependence,

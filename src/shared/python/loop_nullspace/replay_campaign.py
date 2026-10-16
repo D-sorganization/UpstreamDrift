@@ -34,8 +34,8 @@ from typing import Any
 import numpy as np
 from numpy.typing import ArrayLike
 
-from src.engines.feedback_comparison import ReplayPolicy
 from src.shared.python.loop_nullspace.allocation_spec import AllocationResult
+from src.shared.python.loop_nullspace.replay_policy import ReplayPolicy
 from src.shared.python.loop_nullspace.evidence import Array, readonly_float
 from src.shared.python.loop_nullspace.paired_mc_spec import (
     CampaignSpec,
