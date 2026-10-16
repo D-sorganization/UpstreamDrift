@@ -1,0 +1,326 @@
+{
+  "issue": "#12689",
+  "epic": "#12678",
+  "base_commit": "9dfe5d3a0fe6e35fb03a87c8b3783cfab7c099cb",
+  "rendered_from": "this PR's worktree (base_commit plus the R9b changes)",
+  "swing": {
+    "capture": "capture-A",
+    "club": "driver",
+    "bundle_sha256": "744c87532914cc5841e5a5838fc4cfe865bc4466b1b3f19c385aedb64484df43",
+    "bundle_source": "canonical --static-seeds --fix-club-markers fit at ceffab6c07 (#12642 re-fit; private swing datastore)",
+    "frames": {
+      "address": 0,
+      "impact": 1323
+    },
+    "dt_s": 0.001,
+    "impact_split_time_s": 1.322953640157547
+  },
+  "renderers": {
+    "opensim": "opensim 4.6 simbody visualizer under xvfb-run (Linux, brick)",
+    "myosuite": "myosuite MJRenderer, mujoco 3.6.0 (separate venv via NATIVE_VIEWER_MYOSUITE_PYTHON)"
+  },
+  "settings": {
+    "size": [
+      960,
+      720
+    ],
+    "views": [
+      "face_on",
+      "down_the_line"
+    ],
+    "hud": false,
+    "overlays": false,
+    "ball": false
+  },
+  "appearance_document": {
+    "schema_version": "appearance-v1"
+  },
+  "specs": {
+    "anthro_driver": {
+      "opensim_dressed": {
+        "mesh_parts": 57,
+        "primitive_parts": 0,
+        "bodies_with_meshes": 23,
+        "colours_rgba": [
+          [
+            0.06,
+            0.06,
+            0.07,
+            1.0
+          ],
+          [
+            0.1,
+            0.07,
+            0.05,
+            1.0
+          ],
+          [
+            0.14,
+            0.09,
+            0.06,
+            1.0
+          ],
+          [
+            0.2,
+            0.13,
+            0.08,
+            1.0
+          ],
+          [
+            0.3,
+            0.32,
+            0.35,
+            1.0
+          ],
+          [
+            0.62,
+            0.3,
+            0.3,
+            1.0
+          ],
+          [
+            0.8,
+            0.6,
+            0.46,
+            1.0
+          ],
+          [
+            0.93,
+            0.93,
+            0.92,
+            1.0
+          ],
+          [
+            0.95,
+            0.95,
+            0.94,
+            1.0
+          ],
+          [
+            0.96,
+            0.96,
+            0.94,
+            1.0
+          ]
+        ],
+        "trunk_skin_spans": {
+          "LowerTorso": {
+            "ml_span_m": 0.2903,
+            "ap_span_m": 0.1964
+          },
+          "UpperTorsoBase": {
+            "ml_span_m": 0.0072,
+            "ap_span_m": 0.0052
+          },
+          "COMRod": {
+            "ml_span_m": 0.3159,
+            "ap_span_m": 0.2049
+          }
+        }
+      },
+      "opensim_plain": {
+        "mesh_parts": 13,
+        "primitive_parts": 84,
+        "colours_rgba": [
+          [
+            0.1,
+            0.07,
+            0.05,
+            1.0
+          ],
+          [
+            0.14,
+            0.09,
+            0.06,
+            1.0
+          ],
+          [
+            0.2,
+            0.13,
+            0.08,
+            1.0
+          ],
+          [
+            0.62,
+            0.3,
+            0.3,
+            1.0
+          ],
+          [
+            0.7,
+            0.72,
+            0.8,
+            1.0
+          ],
+          [
+            0.75,
+            0.78,
+            0.85,
+            1.0
+          ],
+          [
+            0.8,
+            0.6,
+            0.46,
+            1.0
+          ],
+          [
+            0.96,
+            0.96,
+            0.94,
+            1.0
+          ]
+        ]
+      },
+      "myosuite_vs_mujoco": {
+        "bodies_with_materials": 24,
+        "material_geoms": 62,
+        "identical": true
+      }
+    },
+    "anthro_iron7": {
+      "opensim_dressed": {
+        "mesh_parts": 57,
+        "primitive_parts": 0,
+        "bodies_with_meshes": 23,
+        "colours_rgba": [
+          [
+            0.06,
+            0.06,
+            0.07,
+            1.0
+          ],
+          [
+            0.1,
+            0.07,
+            0.05,
+            1.0
+          ],
+          [
+            0.14,
+            0.09,
+            0.06,
+            1.0
+          ],
+          [
+            0.2,
+            0.13,
+            0.08,
+            1.0
+          ],
+          [
+            0.3,
+            0.32,
+            0.35,
+            1.0
+          ],
+          [
+            0.62,
+            0.3,
+            0.3,
+            1.0
+          ],
+          [
+            0.8,
+            0.6,
+            0.46,
+            1.0
+          ],
+          [
+            0.93,
+            0.93,
+            0.92,
+            1.0
+          ],
+          [
+            0.95,
+            0.95,
+            0.94,
+            1.0
+          ],
+          [
+            0.96,
+            0.96,
+            0.94,
+            1.0
+          ]
+        ],
+        "trunk_skin_spans": {
+          "LowerTorso": {
+            "ml_span_m": 0.2903,
+            "ap_span_m": 0.1964
+          },
+          "UpperTorsoBase": {
+            "ml_span_m": 0.0072,
+            "ap_span_m": 0.0052
+          },
+          "COMRod": {
+            "ml_span_m": 0.3159,
+            "ap_span_m": 0.2049
+          }
+        }
+      },
+      "opensim_plain": {
+        "mesh_parts": 13,
+        "primitive_parts": 84,
+        "colours_rgba": [
+          [
+            0.1,
+            0.07,
+            0.05,
+            1.0
+          ],
+          [
+            0.14,
+            0.09,
+            0.06,
+            1.0
+          ],
+          [
+            0.2,
+            0.13,
+            0.08,
+            1.0
+          ],
+          [
+            0.62,
+            0.3,
+            0.3,
+            1.0
+          ],
+          [
+            0.7,
+            0.72,
+            0.8,
+            1.0
+          ],
+          [
+            0.75,
+            0.78,
+            0.85,
+            1.0
+          ],
+          [
+            0.8,
+            0.6,
+            0.46,
+            1.0
+          ],
+          [
+            0.96,
+            0.96,
+            0.94,
+            1.0
+          ]
+        ]
+      },
+      "myosuite_vs_mujoco": {
+        "bodies_with_materials": 24,
+        "material_geoms": 62,
+        "identical": true
+      }
+    }
+  },
+  "visual_check": "Both engines show skin, white polo, charcoal trousers, black shoes and the shared head; OpenSim keeps both feet and the clubhead in frame at address and impact in both views (#12313).",
+  "command": "PYTHONPATH=.:src NATIVE_VIEWER_MYOSUITE_PYTHON=<myosuite python> python3 docs/development/full_body_models/evidence/appearance/engines/opensim_myosuite/render_opensim_myosuite_appearance.py --bundle <capture-A driver bundle.npz> --out <dir>"
+}

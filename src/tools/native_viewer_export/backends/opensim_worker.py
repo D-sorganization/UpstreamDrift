@@ -7,6 +7,8 @@ display ``:0``. Frames are grabbed with ``xwd`` from the visualizer window.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from dataclasses import dataclass
 import json
 import os
 from pathlib import Path
@@ -21,6 +23,12 @@ import numpy as np
 
 from src.engines.physics_engines.opensim.python import club_visuals
 from src.shared.python.force_overlay.glyphs import GlyphSet
+from src.shared.python.model_appearance import library
+from src.shared.python.model_appearance.body_meshes import (
+    ResolvedAppearance,
+    resolve_appearance,
+)
+from src.shared.python.model_appearance.schema import AppearanceDocument
 from src.shared.python.golf_view_presets import (
     VIEWER_FOV_Y_RAD,
     get_view_preset,
@@ -29,6 +37,10 @@ from src.shared.python.golf_view_presets import (
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
 from src.tools.native_viewer_export.ball import BALL_RGBA, BallPlacement
+from src.tools.native_viewer_export.backends._body import (
+    body_mesh_files,
+    default_appearance,
+)
 from src.tools.native_viewer_export.backends._club import club_parts
 from src.tools.native_viewer_export.backends._opensim_framing import (
     fitted_distance_m,
@@ -50,8 +62,6 @@ from src.shared.python.engine_core.opensim_runtime import import_opensim
 UI_STRIP_PX = 40
 FOV_Y_RAD = VIEWER_FOV_Y_RAD
 SETTLE_S = 0.6
-_GREY = (0.75, 0.78, 0.85)
-_SHAPE_GREY = (0.7, 0.72, 0.8)
 BALL_RGB = BALL_RGBA[:3]
 BALL_BODY = "ud_ball"
 BALL_BODY_MASS_KG = 1e-6
@@ -100,33 +110,161 @@ def grab_window() -> np.ndarray:
     return np.ascontiguousarray(pix[:, :, [2, 1, 0]])
 
 
-def _attach(
-    osim: Any, body: Any, rot: np.ndarray, pos: Any, geom: Any, rgb: Any, n: int
-) -> None:
+@dataclass(frozen=True)
+class VisualPart:
+    """One visual geometry on one body, in the spec (= OpenSim) body frame.
+
+    ``geometry`` is ``mesh`` (``params = (obj path,)``), ``cylinder``
+    (radius, half length), ``sphere`` (radius), ``ellipsoid`` or ``brick``
+    (half sizes); ``rgba`` comes from ``model_appearance.library`` only.
+    """
+
+    body: str
+    geometry: str
+    params: tuple[Any, ...]
+    rotation: np.ndarray
+    position: tuple[float, float, float]
+    rgba: tuple[float, float, float, float]
+
+
+_ORIGIN = (0.0, 0.0, 0.0)
+
+
+def _point(v: Any) -> tuple[float, float, float]:
+    """A 3-vector as a float triple. Precondition: exactly three components."""
+    x, y, z = (float(c) for c in v)
+    return (x, y, z)
+
+
+def _plain_parts(
+    skeleton: Any, skip: set[str], club_body: str | None
+) -> list[VisualPart]:
+    """The un-styled capsule skeleton and hint shapes in the library plain palette."""
+    capsule, shape = library.plain_rgba("capsule"), library.plain_rgba("shape")
+    out = []
+    for cap in skeleton.capsules:
+        if cap.body in skip:
+            continue
+        a, b = np.array(cap.start_m), np.array(cap.end_m)
+        half = float(np.linalg.norm(b - a)) / 2
+        mid = _point((a + b) / 2)
+        out.append(
+            VisualPart(
+                cap.body,
+                "cylinder",
+                (cap.radius_m, half),
+                y_axis_rotation(b - a),
+                mid,
+                capsule,
+            )
+        )
+        for end in (a, b):
+            pos = _point(end)
+            out.append(
+                VisualPart(cap.body, "sphere", (cap.radius_m,), np.eye(3), pos, capsule)
+            )
+    for shp in skeleton.shapes:
+        if shp.body == club_body:
+            continue  # the exported model carries the club meshes instead
+        half_size = tuple(float(v) for v in shp.half_size_m)
+        pos = _point(shp.center_m)
+        out.append(VisualPart(shp.body, shp.kind, half_size, np.eye(3), pos, shape))
+    return out
+
+
+def _dressed_parts(
+    resolved: ResolvedAppearance, directory: Path, club_body: str | None
+) -> list[VisualPart]:
+    """R8's resolved body meshes as OBJ mesh geometry, untransformed.
+
+    The OpenSim exporter attaches each joint's ``child_to_follower`` as an
+    offset frame on the child body, so the OpenSim body frame IS the spec
+    body frame: the identity is the correct placement (unlike MuJoCo's
+    follower-frame body, which needs ``inv(child_to_follower)``).
+    """
+    return [
+        VisualPart(f.body, "mesh", (str(f.path),), np.eye(3), _ORIGIN, f.rgba)
+        for f in body_mesh_files(resolved, directory)
+        if f.body != club_body  # the exported model carries the club meshes
+    ]
+
+
+def visual_parts(
+    spec: Mapping[str, Any],
+    appearance: AppearanceDocument | None,
+    directory: Path,
+) -> list[VisualPart]:
+    """Every visual part of the render model: head, then body meshes or skeleton.
+
+    ``appearance`` dresses the bodies with the shared resolved meshes
+    (R9b, #12689); ``None`` is the plain mode (capsules and hint shapes in
+    the library plain palette). OBJ files are written under ``directory``.
+    Postcondition: no colour outside ``model_appearance.library``.
+    """
+    heads = head_mesh_files(dict(spec), directory / "head")
+    out = [
+        VisualPart(h.body, "mesh", (str(h.path),), np.eye(3), _ORIGIN, h.rgba)
+        for h in heads
+    ]
+    club = club_parts(dict(spec))
+    club_body = club[0] if club is not None else None
+    if appearance is None:
+        skip = {heads[0].body} if heads else set()
+        return out + _plain_parts(derive_visual_skeleton(spec), skip, club_body)
+    resolved = resolve_appearance(spec, appearance)
+    return out + _dressed_parts(resolved, directory / "body", club_body)
+
+
+def _geometry(osim: Any, part: VisualPart) -> Any:
+    """The OpenSim geometry object of one visual part."""
+    if part.geometry == "mesh":
+        return osim.Mesh(part.params[0])
+    if part.geometry == "cylinder":
+        return osim.Cylinder(*part.params)
+    if part.geometry == "sphere":
+        return osim.Sphere(*part.params)
+    if part.geometry == "ellipsoid":
+        return osim.Ellipsoid(*part.params)
+    if part.geometry == "brick":
+        return osim.Brick(osim.Vec3(*part.params))
+    raise ValueError(f"unknown visual geometry {part.geometry!r}")
+
+
+def _attach(osim: Any, body: Any, part: VisualPart, n: int) -> None:
     from scipy.spatial.transform import Rotation
 
     frame = osim.PhysicalOffsetFrame(
-        f"vf{n}", body, osim.Transform(osim.Vec3(*map(float, pos)))
+        f"vf{n}", body, osim.Transform(osim.Vec3(*map(float, part.position)))
     )
     frame.set_orientation(
-        osim.Vec3(*map(float, Rotation.from_matrix(rot).as_euler("XYZ")))
+        osim.Vec3(*map(float, Rotation.from_matrix(part.rotation).as_euler("XYZ")))
     )
-    geom.setColor(osim.Vec3(*rgb))
+    geom = _geometry(osim, part)
+    geom.setColor(osim.Vec3(*part.rgba[:3]))
+    geom.setOpacity(float(part.rgba[3]))
     frame.attachGeometry(geom)
     geom.thisown = False
     body.addComponent(frame)
     frame.thisown = False
 
 
-def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
-    """OpenSim model of the specification with the shared visual skeleton attached."""
+def build_model(
+    osim: Any,
+    spec_bytes: bytes,
+    appearance: AppearanceDocument | None = None,
+) -> tuple[Any, float]:
+    """OpenSim model of the specification with its visual parts attached.
+
+    ``appearance`` selects the dressed bodies (see :func:`visual_parts`);
+    ``None`` keeps the plain skeleton. Visual only: no mass or joint changes.
+    """
     from src.engines.physics_engines.opensim.python.full_body_osim import (
         clean_osim_body_name,
         export_full_body_osim,
     )
 
     club_visuals.register_geometry_path()
-    skeleton = derive_visual_skeleton(json.loads(spec_bytes))
+    spec = json.loads(spec_bytes)
     xml, _ = export_full_body_osim(spec_bytes)
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "m.osim"
@@ -142,56 +280,10 @@ def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
         getattr(model, clear)().clearAndDestroy()
     model.finalizeFromProperties()
     bodies = model.getBodySet()
-    n = 0
-    # The shared visual head replaces the head capsule (visual only).
-    head_dir = tempfile.mkdtemp(prefix="ud_head_")
-    heads = head_mesh_files(json.loads(spec_bytes), Path(head_dir))
-    head_body = heads[0].body if heads else None
-    for head in heads:
-        body = bodies.get(clean_osim_body_name(head.body))
-        _attach(
-            osim,
-            body,
-            np.eye(3),
-            (0.0, 0.0, 0.0),
-            osim.Mesh(str(head.path)),
-            head.rgba[:3],
-            n,
-        )
-        n += 1
-    for cap in skeleton.capsules:
-        if cap.body == head_body:
-            continue
-        body = bodies.get(clean_osim_body_name(cap.body))
-        a, b = np.array(cap.start_m), np.array(cap.end_m)
-        rot = y_axis_rotation(b - a)
-        _attach(
-            osim,
-            body,
-            rot,
-            (a + b) / 2,
-            osim.Cylinder(cap.radius_m, np.linalg.norm(b - a) / 2),
-            _GREY,
-            n,
-        )
-        for end in (a, b):
-            n += 1
-            _attach(osim, body, np.eye(3), end, osim.Sphere(cap.radius_m), _GREY, n)
-        n += 1
-    club = club_parts(json.loads(spec_bytes))
-    for shp in skeleton.shapes:
-        if club is not None and shp.body == club[0]:
-            continue  # the exported model carries the club meshes instead
-        body = bodies.get(clean_osim_body_name(shp.body))
-        half = [float(v) for v in shp.half_size_m]
-        geom = (
-            osim.Ellipsoid(*half)
-            if shp.kind == "ellipsoid"
-            else osim.Brick(osim.Vec3(*half))
-        )
-        _attach(osim, body, np.eye(3), shp.center_m, geom, _SHAPE_GREY, n)
-        n += 1
-    return model, float(skeleton.ground.height_m)
+    mesh_dir = Path(tempfile.mkdtemp(prefix="ud_visual_"))
+    for n, part in enumerate(visual_parts(spec, appearance, mesh_dir)):
+        _attach(osim, bodies.get(clean_osim_body_name(part.body)), part, n)
+    return model, float(derive_visual_skeleton(spec).ground.height_m)
 
 
 def attach_ball(osim: Any, model: Any, ball: dict[str, Any]) -> str:
@@ -292,7 +384,7 @@ def main(job_path: str) -> None:
     job = WorkerJob.load(Path(job_path))
     bundle = InputBundle.load(Path(job.bundle_path))
     q = np.load(job.q_path)
-    model, ground_h = build_model(osim, bundle.spec_bytes)
+    model, ground_h = build_model(osim, bundle.spec_bytes, default_appearance())
     ball_coord = attach_ball(osim, model, job.ball) if job.ball else None
     model.setUseVisualizer(True)
     state = model.initSystem()

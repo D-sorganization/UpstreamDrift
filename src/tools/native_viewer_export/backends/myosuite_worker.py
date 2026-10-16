@@ -1,9 +1,10 @@
 """Render worker: MyoSuite's ``MJRenderer`` arena over EGL.
 
 Runs in a Python that can import ``myosuite`` (often a separate virtual
-environment). The specification MJCF is merged with the MyoSuite arena scene
-assets (floor texture, headlight), loaded as a raw ``mujoco`` model and
-rendered with MyoSuite's ``MJRenderer`` (2.x or 3.x import path), with 3D force/torque glyphs added to the
+environment). The specification MJCF carries the shared appearance layer (the MuJoCo
+exporter's, from the same document; R9b #12689), is merged with the MyoSuite
+arena scene assets (floor texture, headlight), loaded as a raw ``mujoco``
+model and rendered with MyoSuite's ``MJRenderer`` (2.x or 3.x import path), with 3D force/torque glyphs added to the
 MuJoCo scene before each render.
 """
 
@@ -27,14 +28,30 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs
 )
 from src.shared.python.force_overlay.glyphs import GlyphSet
 from src.shared.python.golf_view_presets import mujoco_camera_params
+from src.shared.python.model_appearance.schema import AppearanceDocument
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
 from src.tools.native_viewer_export.backends._ball import draw_job_ball
+from src.tools.native_viewer_export.backends._body import default_appearance
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.backends.myosuite_compat import (
     find_scene,
     import_mj_renderer,
 )
+
+
+def build_spec_xml(
+    spec_bytes: bytes, appearance: AppearanceDocument | None
+) -> tuple[str, dict[str, Any]]:
+    """Specification MJCF with the MuJoCo appearance layer of ``appearance``.
+
+    ``None`` is the plain mode: the legacy capsule layer plus the head. No
+    MyoSuite-specific appearance code: the exporter emits the layer, so the
+    visual geoms and materials equal the MuJoCo export of the same document.
+    """
+    if appearance is None:
+        return export_full_body_mjcf(spec_bytes, visual=True, with_head=True)
+    return export_full_body_mjcf(spec_bytes, appearance=appearance)
 
 
 def arena_scene_path() -> Path:
@@ -128,7 +145,7 @@ def main(job_path: str) -> None:
     bundle = InputBundle.load(Path(job.bundle_path))
     q = np.load(job.q_path)
     skeleton = derive_visual_skeleton(json.loads(bundle.spec_bytes))
-    xml, _ = export_full_body_mjcf(bundle.spec_bytes, visual=True, with_head=True)
+    xml, _ = build_spec_xml(bundle.spec_bytes, default_appearance())
     scene_xml = merge_arena(xml, skeleton.ground.height_m, job.width, job.height)
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "scene.xml"
