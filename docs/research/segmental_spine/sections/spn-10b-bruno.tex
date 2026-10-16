@@ -1,0 +1,60 @@
+\subsection{Native Run on a Large Trunk Model}
+\label{sec:spn-10b-bruno}
+
+This section records what was needed to run the static optimization of
+Section~\ref{sec:spn-10b} on a trunk model with 446 muscles, 105 locked
+coordinates and no coupling constraints (issue \#12761). Only dimensionless
+ratios and wall times are given; the licensed model and its numbers stay out
+of the repository, and its hash is unpinned, so such a receipt is
+\texttt{unqualified} by design.
+
+\paragraph{Muscle Model Policy.}
+OpenSim~4.6 does not implement \texttt{ignore\_tendon\_compliance} for
+\texttt{Thelen2003Muscle}, so the rigid-tendon evaluation fails with an opaque
+error. The request option \texttt{muscle\_model\_policy} is \texttt{native}
+(default; the stage fails with a message naming the option) or
+\texttt{millard\_equivalent}, which rewrites the muscles as
+\texttt{Millard2012EquilibriumMuscle} carrying the same maximal force, fibre
+and tendon lengths and pennation. This is a modelling substitution: the
+muscle force--length--velocity curves differ. The policy enters the request
+hash when non-default, and the receipt records the swapped count and note.
+
+\paragraph{Locked Coordinates.}
+A locked coordinate ignores \texttt{setValue}, is held at zero acceleration in
+forward dynamics, has no moment arm, and is ignored by the inverse-dynamics
+solver. A drive that moves such a coordinate therefore makes the
+inverse-dynamics and joint-reaction accelerations disagree (a relative
+mismatch of order $10^{-2}$ against $10^{-6}$ unlocked). The default is to
+fail the drive stage and list the offending coordinates (truncated).
+\texttt{unlock\_driven\_coordinates} unlocks exactly those coordinates; the
+count and names are recorded. Holding them constant instead changes the load
+distribution and is left as a follow-up (ADR-0055).
+
+\paragraph{Solver and Screen.}
+SLSQP did not converge at 446 muscles. For 100 or more muscles stage two uses
+Clarabel: one quadratic program for $p=2$ and iteratively reweighted quadratic
+programs for $p=3$ (weights $w_m=a_m^{p-2}$, floor $10^{-6}$, tolerance
+$10^{-10}$). A path-length central-difference screen (step $10^{-4}$ rad,
+tolerance $10^{-13}$ m) drops muscle--coordinate pairs without a moment arm;
+locked coordinates are always evaluated natively. A test requires screened and
+unscreened evaluation to agree. The screen threshold and the solver
+(\texttt{slsqp}, \texttt{clarabel\_qp}, \texttt{clarabel\_irls}) are recorded
+in the stage provenance.
+
+\paragraph{Observed Behaviour and Limits.}
+Both $p=2$ and $p=3$ studies on a synthetic swing finished in about one
+minute with status \texttt{unqualified}: the asset hash is unpinned, the
+gravity-only pelvis residual exceeds its budget, and reserve shares were
+flagged on every event. The Fujii coupling law covers the lumbar levels only,
+so on a T1--L5 model the drive fails; the regional law
+\texttt{bruno2015\_regional} with \texttt{restrict\_law\_to\_model} is used
+instead, and a lumbar-only sensitivity option is not provided. In an informal
+comparison of that law with the uniform reference, compression in the lumbar
+and lower thoracic levels varied least; moments, shear and upper-thoracic
+loads did not. No scientific acceptance follows from these runs.
+
+\paragraph{Reproduction.}
+Set \texttt{UD\_SPINE\_BRUNO\_SOURCE} to the model file, build a
+\texttt{SpineStudyRequest} with \texttt{asset\_id}, the regional law,
+\texttt{muscle\_model\_policy="millard\_equivalent"} and
+\texttt{unlock\_driven\_coordinates=True}, and call \texttt{run\_spine\_study}.

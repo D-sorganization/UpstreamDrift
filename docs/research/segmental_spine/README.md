@@ -98,6 +98,7 @@ given; `--out` overrides the file's value otherwise.
 | `drive_tolerance_rad`, `filter_hz` | Drive residual flag in radians, and the inverse-dynamics low-pass cutoff |
 | `residual_force_fraction_bw`, `residual_moment_fraction` | Pelvis residual budget (defaults 0.05 and 0.01) |
 | `reserve_limit_nm`, `reserve_max_share` | Reserve-actuator limit and maximum share (defaults 1.0 N·m and 0.05) |
+| `muscle_model_policy`, `unlock_driven_coordinates` | Opt-in modelling options (defaults `native`, false); recorded in the hash and receipt only when set |
 | `output_dir` | Where artifacts and the receipt are written; never part of the request identity |
 
 ### Run One Study

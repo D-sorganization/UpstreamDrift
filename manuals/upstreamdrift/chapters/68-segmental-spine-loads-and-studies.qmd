@@ -167,17 +167,21 @@ The frame problem is lexicographic, with declared reserve limits $L_j > 0$
 1. **Stage one** (`lsq_linear`, BVLS, tol $10^{-14}$) minimises
    $\sum_j \bigl((\tau_j - o_j - (G a)_j)/L_j\bigr)^2$ over $0 \le a \le 1$.
    This gives $a_1$ and the unique remainder $r^* = \tau - o - G a_1$.
-2. **Stage two** (SLSQP, ftol $10^{-14}$, maxiter 500) minimises
-   $\sum_m a_m^p$ over $0 \le a \le 1$, subject to $G a = G a_1$. Muscles
-   whose gain column of $G$ is identically zero at the frame (no force
-   capacity, for example a rigid-tendon muscle shorter than its minimum fibre
-   length) are held at $a_m = 0$ and left out of this step (#12827); this
-   does not change the optimum. With no capacity at all, the reserves take
-   the whole demand. Near-zero but non-zero capacities are not specially
-   handled. Here
-   $p \in \{2, 3\}$ (`exponent`, default 3), the gradient $p\,a^{p-1}$ is
-   analytic, and the constraint is reduced to an orthonormal basis of the
-   column space of $G$ ($\sigma > 10^{-10}\sigma_{\max}$).
+2. **Stage two** minimises $\sum_m a_m^p$ over $0 \le a \le 1$, subject to
+   $G a = G a_1$. Muscles whose gain column of $G$ is identically zero at the
+   frame (no force capacity, for example a rigid-tendon muscle shorter than its
+   minimum fibre length) are held at $a_m = 0$ and left out of this step
+   (#12827); this does not change the optimum. With no capacity at all, the
+   reserves take the whole demand. Near-zero but non-zero capacities are not
+   specially handled. Here $p \in \{2, 3\}$ (`exponent`, default 3) and the
+   constraint is reduced to an orthonormal basis of the column space of $G$
+   ($\sigma > 10^{-10}\sigma_{\max}$). With fewer than 100 muscles the solver
+   is SLSQP (ftol $10^{-14}$, maxiter 500, analytic gradient $p\,a^{p-1}$).
+   With 100 or more muscles SLSQP did not converge on a 446-muscle trunk, so
+   the problem is solved with Clarabel: one quadratic program for $p = 2$
+   (`clarabel_qp`), and iteratively reweighted quadratic programs for $p = 3$
+   (`clarabel_irls`). The solver that ran is recorded in the stage provenance
+   as `stage2_solver`.
 3. **Polish.** A minimum-norm Newton step on the free activations removes the
    remaining constraint error.
 
@@ -301,7 +305,24 @@ Request fields, all recorded in the receipt:
 - `torso_alignment` and `torso_alignment_source` (both or neither): the
   drive alignment $A$ and how it was calibrated;
 - `variant_id`, `variant_parameter` and `variant_handedness` (default
-  `right`).
+  `right`);
+- `muscle_model_policy` (`native`, the default, or `millard_equivalent`). A
+  model with Thelen2003Muscle actuators fails static optimisation under
+  `native`, because OpenSim cannot make that muscle rigid-tendon. The
+  alternative rewrites those muscles as Millard2012EquilibriumMuscle with the
+  same parameters in a temporary copy; the swap count and note are recorded;
+- `unlock_driven_coordinates` (default false). A coordinate locked in the model
+  but moved by the drive fails the drive stage, listing the names. With
+  `true`, only those coordinates are unlocked and their count and names are
+  recorded in the drive provenance (`coordinate_locks`). Holding locked
+  coordinates constant instead would change the distribution and is a
+  follow-up (ADR-0055).
+
+Both options enter the request hash only when set to a non-default value.
+Static optimisation provenance also records `moment_arm_screen` (path-length
+central difference, step $10^{-4}$ rad, tolerance $10^{-13}$ m) and
+`stage2_solver`. The screen skips muscle-coordinate pairs with no moment arm;
+a screened and an unscreened evaluation agree.
 
 `output_dir` is not part of the request identity.
 
