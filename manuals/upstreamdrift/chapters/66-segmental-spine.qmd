@@ -459,13 +459,27 @@ $$c_i = f\!\left(\textstyle\prod_{j \le i} T_j\right) -
 f\!\left(\textstyle\prod_{j < i} T_j\right), \qquad f(\text{empty}) = 0,$$
 with caudal-first truncation. The prefixes are `pose.relative_rotation`
 products and include each level's neutral offset, the first level's included.
-They exclude $B$, $E$ and any calibration $A$.
+`segmental_contributions` attributes the supplied `SegmentalPose` chain only
+($B = E = A = I$).
 
-The differences telescope to the term of the supplied `SegmentalPose` chain.
-`contribution_remainder` compares the sum against `pose.compose()`, so it
-checks internal telescoping only. It does not verify closure to a separately
-evaluated pelvis-to-thorax term. A contribution depends on every level caudal
-to it and is not that level's own angle.
+`segmental_contribution_breakdown` (#12822) attributes the rest of the
+pelvis-to-thorax path. The global term is $f(B\,C\,E\,A)$ with
+$C=\prod_i T_i$, $B$ the base rotation (pelvis to first body), $E$ the
+terminal rotation (last vertebra to terminal body) and $A$ the drive
+alignment. With $P_0=B$, $P_k=B\prod_{j\le k}T_j$, $P_E=P_nE$ and
+$P_A=P_EA$, it returns $c_\mathrm{base}=f(B)$, $c_k=f(P_k)-f(P_{k-1})$,
+$c_\mathrm{terminal}=f(P_E)-f(P_n)$ and $c_\mathrm{alignment}=f(P_A)-f(P_E)$.
+Only the supplied rotations are reported, as named non-level entries that are
+never folded into a level. The sum telescopes to $f(P_A)$, and a
+postcondition checks closure to $10^{-9}$ degrees on finite samples;
+gimbal-locked prefixes give NaN.
+
+`contribution_remainder`, with the same optional rotations, checks internal
+telescoping only. It does not verify closure to a separately evaluated
+pelvis-to-thorax term, so callers must pass the same $B$, $E$ and $A$ they
+used for the global term. A contribution depends on $B$ and on every level
+caudal to it, and is not that level's own angle. `level_angle_stack`
+attributes the supplied chain only.
 
 Software verification: the analyzer, swing metrics and API X-factor paths
 delegate to the registry under their legacy ids, golden-tested to

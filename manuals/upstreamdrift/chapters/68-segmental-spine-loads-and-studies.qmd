@@ -695,8 +695,8 @@ Fixture, literature and receipts:
 Known code-level gaps (follow-up candidates, behaviour unchanged here):
 
 - `fujii2007_lumbar` needs an even/odd law form for coupled flexion.
-- Segmental contributions exclude $B$, $E$ and $A$, so they do not close on a
-  calibrated pelvis-to-thorax term.
+- `level_angle_stack` and `StackData` do not pass $B$, $E$ and $A$ through;
+  use `segmental_contribution_breakdown` (#12822) for the full path.
 - No calibration of $A$ is enforced or recorded beyond the identity default.
 - The default moment-budget height is evaluated at the last processed sample,
   not the first frame as documented, and assumes ground Y is up.

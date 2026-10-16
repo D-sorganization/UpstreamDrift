@@ -37,9 +37,11 @@ from src.shared.python.spine.distribution import (
     distribute_series_detailed,
 )
 from src.shared.python.spine.golf_terms import (
+    GolfTermContributions,
     GolfTermDefinition,
     contribution_remainder,
     registered_terms,
+    segmental_contribution_breakdown,
     segmental_contributions,
 )
 from src.shared.python.spine.levels import (
@@ -83,6 +85,7 @@ __all__ = [
     "CouplingLaw",
     "DistributionResult",
     "DistributionSeriesResult",
+    "GolfTermContributions",
     "GolfTermDefinition",
     "HeatmapData",
     "LevelTransform",
@@ -123,6 +126,7 @@ __all__ = [
     "regional_fraction",
     "registered_terms",
     "restrict_to_levels",
+    "segmental_contribution_breakdown",
     "segmental_contributions",
     "to_tension_positive",
 ]
