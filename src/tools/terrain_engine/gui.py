@@ -60,8 +60,7 @@ class TerrainExplorerWidget(QWidget):
 
     def _build_ui(self) -> None:
         colors = _get_theme_colors()
-        text = _color(colors, "text_primary", "#f0f3f6")
-        self._apply_stylesheet(colors)
+        text = self._apply_stylesheet(colors)
 
         root = QVBoxLayout(self)
         root.setContentsMargins(
@@ -87,8 +86,8 @@ class TerrainExplorerWidget(QWidget):
         splitter.addWidget(self._build_preview_panel())
         splitter.setSizes([360, 760])
 
-    def _apply_stylesheet(self, colors: Any) -> None:
-        """Apply the themed stylesheet to the explorer widget."""
+    def _apply_stylesheet(self, colors: Any) -> str:
+        """Apply the themed stylesheet and return the primary text colour."""
         bg = _color(colors, "surface_primary", "#1f2329")
         panel = _color(colors, "surface_secondary", "#252a31")
         border = _color(colors, "border_default", "#3a414a")
@@ -122,6 +121,7 @@ class TerrainExplorerWidget(QWidget):
                 border-radius: 6px;
             }}
         """)
+        return text
 
     def _build_controls_panel(self) -> QWidget:
         """Build the preset and query control column."""
