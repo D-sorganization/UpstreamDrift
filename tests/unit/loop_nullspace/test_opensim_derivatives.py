@@ -83,13 +83,9 @@ def test_capability_is_partial_finite_difference(os_adapter) -> None:
     assert os_adapter.capability(Capability.CLOSED_LOOP_DERIVATIVES) is (
         CapabilityLevel.PARTIAL
     )
-    dc.require_adapter_closed_loop_derivatives(
-        os_adapter, minimum=CapabilityLevel.PARTIAL
-    )
+    dc.require_adapter_derivatives(os_adapter, minimum=CapabilityLevel.PARTIAL)
     with pytest.raises(dc.DerivativeCapabilityUnavailable):
-        dc.require_adapter_closed_loop_derivatives(
-            os_adapter, minimum=CapabilityLevel.FULL
-        )
+        dc.require_adapter_derivatives(os_adapter, minimum=CapabilityLevel.FULL)
     assert os_adapter.capability(Capability.MUSCLES) is CapabilityLevel.NONE
 
 
