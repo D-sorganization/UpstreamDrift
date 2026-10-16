@@ -558,6 +558,23 @@ def _pin_width_spheres(args: Any, lane: Lane, hip_spec: dict[str, Any]) -> None:
         )
 
 
+def _record_calibrated_address(
+    address_report: dict[str, Any],
+    sim: Any,
+    kin: Any,
+    address2: Any,
+    lane: Lane,
+    labels: tuple[str, ...],
+    adapter: Any,
+) -> None:
+    """Record the calibrated-address summary plus foot and knee address diagnostics."""
+    address_report["calibrated"] = calibrated_address_summary(
+        sim, kin, address2, lane, labels, adapter
+    )
+    record_foot_progression(address_report, kin, address2.q, lane.feet)
+    address_knee.record_knee_flexion(address_report, kin, address2.q, lane.knees)
+
+
 def _calibrate_and_scale(
     ctx: PipelineContext,
     lane: Lane,
@@ -639,11 +656,9 @@ def _calibrate_and_scale(
     )
     sim = fs.FullBodySimulator(adapter)
     address2 = lane.best_address(kin, address.q)
-    address_report["calibrated"] = calibrated_address_summary(
-        sim, kin, address2, lane, labels, adapter
+    _record_calibrated_address(
+        address_report, sim, kin, address2, lane, labels, adapter
     )
-    record_foot_progression(address_report, kin, address2.q, lane.feet)
-    address_knee.record_knee_flexion(address_report, kin, address2.q, lane.knees)
     return _CalibrateAndScaleResult(
         scaled_spec,
         spec_bytes,
