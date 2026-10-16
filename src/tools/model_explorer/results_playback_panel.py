@@ -79,8 +79,7 @@ class ResultsPlaybackPanel(QWidget):
         self.title_label.setWordWrap(True)
         layout.addWidget(self.title_label)
         self.source_label = QLabel(
-            f"{self._pose.path.parent.name}/{self._pose.path.name}: "
-            f"{spec_summary(self._pose)}"
+            f"{self._pose.source_tag}: {spec_summary(self._pose)}"
         )
         self.source_label.setWordWrap(True)
         self.source_label.setToolTip(str(self._pose.path))
@@ -235,7 +234,7 @@ class ResultsPlaybackPanel(QWidget):
     def export_mp4(self) -> Path | None:
         """Ask for a destination and film the run on the golfer."""
         self.play_button.setChecked(False)
-        default = f"{self._pose.engine}_{self._pose.path.parent.name}.mp4"
+        default = f"{self._pose.engine}_{self._pose.run_name}.mp4"
         file_path, _ = QFileDialog.getSaveFileName(
             self, "Export MP4", default, "MP4 Video (*.mp4)"
         )

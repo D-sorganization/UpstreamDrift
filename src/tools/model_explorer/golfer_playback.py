@@ -52,6 +52,12 @@ class TimeSeries:
     values: NDArray[np.float64]
 
 
+def _free_camera_type(mj: Any) -> Any:
+    """Return MuJoCo's free-camera enum value from the ``mujoco`` module."""
+    camera_types = mj.mjtCamera
+    return camera_types.mjCAMERA_FREE
+
+
 def _translational(spec: dict[str, Any]) -> set[str]:
     """Coordinates driven by a prismatic primitive (``Px``/``Py``/``Pz``)."""
     names: set[str] = set()
@@ -182,7 +188,7 @@ class GolferPlayback:
 
         params = mujoco_camera_params(name, DEFAULT_LOOKAT_M)
         cam = self._camera
-        cam.type = self._mj.mjtCamera.mjCAMERA_FREE
+        cam.type = _free_camera_type(self._mj)
         cam.lookat[:] = params.lookat
         cam.distance, cam.azimuth, cam.elevation = (
             params.distance,

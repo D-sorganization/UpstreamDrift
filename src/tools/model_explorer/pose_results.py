@@ -122,6 +122,18 @@ class PoseFrameSource:
             raise ResultsSchemaError(self.path, "q", "contains NaN or inf")
 
     @property
+    def run_name(self) -> str:
+        """Name of the run directory holding the results file."""
+        path = self.path
+        return path.parent.name
+
+    @property
+    def source_tag(self) -> str:
+        """``run_dir/file`` tag identifying where the run came from."""
+        path = self.path
+        return f"{path.parent.name}/{path.name}"
+
+    @property
     def frame_count(self) -> int:
         return len(self.time_s)
 
@@ -329,9 +341,10 @@ class ResultRun:
     @property
     def label(self) -> str:
         what = "golfer" if self.kind == "pose" else "markers"
+        path = self.path
         return (
             f"{engine_title(self.engine)} [{what}]  |  {self.swing}  |  "
-            f"{self.path.parent.name}/{self.path.name}"
+            f"{path.parent.name}/{path.name}"
         )
 
 
