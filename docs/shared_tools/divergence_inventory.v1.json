@@ -13,7 +13,7 @@
   "totals": {
     "identical": 377,
     "diverged": 271,
-    "ud-only": 1757,
+    "ud-only": 1762,
     "tools-only": 839,
     "spelling-only": 121
   },
@@ -497,7 +497,7 @@
     "loop_nullspace": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 17,
+      "ud-only": 22,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -13550,6 +13550,18 @@
       "spelling_only": false
     },
     {
+      "path": "loop_nullspace/event_section.py",
+      "classification": "ud-only",
+      "package": "loop_nullspace",
+      "subpackage": "",
+      "ud_bytes": 4153,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "loop_nullspace/evidence.py",
       "classification": "ud-only",
       "package": "loop_nullspace",
@@ -13610,6 +13622,30 @@
       "spelling_only": false
     },
     {
+      "path": "loop_nullspace/impact_ball_flight_map.py",
+      "classification": "ud-only",
+      "package": "loop_nullspace",
+      "subpackage": "",
+      "ud_bytes": 5356,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "loop_nullspace/impact_outcome_map.py",
+      "classification": "ud-only",
+      "package": "loop_nullspace",
+      "subpackage": "",
+      "ud_bytes": 18197,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "loop_nullspace/invariants.py",
       "classification": "ud-only",
       "package": "loop_nullspace",
@@ -13639,6 +13675,30 @@
       "package": "loop_nullspace",
       "subpackage": "",
       "ud_bytes": 14141,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "loop_nullspace/simscape_export.py",
+      "classification": "ud-only",
+      "package": "loop_nullspace",
+      "subpackage": "",
+      "ud_bytes": 18568,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "loop_nullspace/simscape_rig_spec.py",
+      "classification": "ud-only",
+      "package": "loop_nullspace",
+      "subpackage": "",
+      "ud_bytes": 1921,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

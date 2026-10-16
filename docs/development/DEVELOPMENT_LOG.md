@@ -2340,6 +2340,71 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12811 · Fix Main Breakage From #12704: Pinocchio JointModelRZ Test Lane and Pinocchio_Reference Row Typing
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12811
+- **Branch:** merged via #12812
+- **PR:** #12812
+- **Paths:** see #12812
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`b2e2b4de`; collated from changes/12811-fix-main-breakage-from-12704-pinocchio-j.md)
+- **Summary:** Fix main breakage from #12704: pinocchio JointModelRZ test lane and pinocchio_reference row typing
+- **Next step:** Shipped in PR #12812.
+
+### DL-#12808 · Run the Prettier Pre-Commit Hook at Commit Time Only so Rebased Branches Can Push
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12808
+- **Branch:** merged via #12809
+- **PR:** #12809
+- **Paths:** see #12809
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`922922c5`; collated from changes/12808-run-the-prettier-pre-commit-hook-at-comm.md)
+- **Summary:** Run the Prettier pre-commit hook at commit time only so rebased branches can push
+- **Next step:** Shipped in PR #12809.
+
+### DL-#12709 · NSX-80: Variability-Sensitivity Specification, Symbolic Goldens, Hypotheses and Unverified Citations
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12709
+- **Branch:** merged via #12780
+- **PR:** #12780
+- **Paths:** see #12780
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`66abaac1`; collated from changes/12709-nsx-80-variability-sensitivity-specifica.md)
+- **Summary:** NSX-80: variability-sensitivity specification, symbolic goldens, hypotheses and unverified citations
+- **Next step:** Shipped in PR #12780.
+
+### DL-#12591 · NSX-73 Research Report Scoping a Muscle-Redundancy Layer Above NSX Envelopes, With Elbow Null-Space Example Test
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12591
+- **Branch:** merged via #12663
+- **PR:** #12663
+- **Paths:** see #12663
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`e6b0acd1`; collated from changes/12591-nsx-73-research-report-scoping-a-muscle.md)
+- **Summary:** NSX-73 research report scoping a muscle-redundancy layer above NSX envelopes, with elbow null-space example test
+- **Next step:** Shipped in PR #12663.
+
+### DL-#12564 · NSX-21: FeasibleSet With Declared Torque, Friction-Cone and Grip Constraints in Null-Space Coordinates
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12564
+- **Branch:** merged via #12637
+- **PR:** #12637
+- **Paths:** see #12637
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`d614bc4f`; collated from changes/12564-nsx-21-feasibleset-with-declared-torque.md)
+- **Summary:** NSX-21: FeasibleSet with declared torque, friction-cone and grip constraints in null-space coordinates
+- **Next step:** Shipped in PR #12637.
+
 ### DL-#12791 · Fix garment_classification.tex Row Terminators so the Golfer Appearance Reference Compiles; Latex-References CI Now Builds the Full-Body Model Reference Masters
 
 - **State:** shipped
