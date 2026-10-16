@@ -263,6 +263,22 @@ class _DerivativeBase(ABC):
             cols.append(-pinv @ _central(jac_v, self._step))
         return np.array(cols).T
 
+    def tangent_velocity_offset(
+        self, q: ArrayLike, v: ArrayLike
+    ) -> tuple[Array, Array]:
+        """``(P, O)``: the tangent basis and velocity offset at an admissible ``(q, v)``.
+
+        ``dq = P xi`` and ``dv = P eta + O xi`` are the tangent-bundle
+        perturbations this provider differentiates along (NSX-93 maps the
+        actuated errors through them).  Preconditions as for
+        :meth:`constrained_acceleration_derivatives`.
+        """
+        q_arr = _vec(q, self._manifold.nq, "q")
+        v_arr = _vec(v, self._manifold.nv, "v")
+        jac = np.asarray(self._model.closure_jacobian(q_arr), dtype=np.float64)
+        basis = self._basis(q_arr, jac)
+        return basis, self._velocity_offset(q_arr, v_arr, basis, jac)
+
     def _nominal(self, q: ArrayLike, v: ArrayLike, tau: ArrayLike) -> _Nominal:
         nq, nv = self._manifold.nq, self._manifold.nv
         q_arr, v_arr = _vec(q, nq, "q"), _vec(v, nv, "v")
