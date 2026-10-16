@@ -2366,6 +2366,123 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12828 · Correct the Golf-Term Evaluate Docstring for Side_Bend_Tilt Input and Output Shapes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12828
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12828-side-bend-tilt-docstring.md)
+- **Summary:** Correct the golf-term evaluate docstring for side_bend_tilt input and output shapes
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12827 · Static Optimization Holds Zero-Capacity Muscles at Zero, Fixing the Early-Sample Failure on the Synthetic Fixture
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12827
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12827-so-zero-capacity-muscles.md)
+- **Summary:** Static optimization holds zero-capacity muscles at zero, fixing the early-sample failure on the synthetic fixture
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12826 · A Missing ExternalLoads Data File Raises Before Any Study Stage Runs; Relative Datafiles Resolve Against the XML Directory
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12826
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12826-external-loads-fail-closed.md)
+- **Summary:** A missing ExternalLoads data file raises before any study stage runs; relative datafiles resolve against the XML directory
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12825 · Movement-Variant Undeclared-Term Tolerance Is Enforced at Study Run Time; a Violation Makes the Run Unqualified
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12825
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12825-variant-undeclared-runtime.md)
+- **Summary:** Movement-variant undeclared-term tolerance is enforced at study run time; a violation makes the run unqualified
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12824 · Pelvis Residual Height Is the Model Extent Along Gravity at the First Frame, With Its Source Recorded in the Budget and Receipt
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12824
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12824-residual-height-first-frame.md)
+- **Summary:** Pelvis residual height is the model extent along gravity at the first frame, with its source recorded in the budget and receipt
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12823 · Study Requests Carry the Drive Torso Alignment and Its Calibration Source; Receipts Record and Hash It, and an Unsupplied Alignment Makes the Study Unqualified
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12823
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12823-drive-alignment-receipt.md)
+- **Summary:** Study requests carry the drive torso alignment and its calibration source; receipts record and hash it, and an unsupplied alignment makes the study unqualified
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12822 · Golf-Term Contributions Attribute Base, Terminal and Alignment Rotations as Named Entries (Segmental_Contribution_Breakdown) and Close on the Full Pelvis-to-Thorax Term
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12822
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12822-contribution-breakdown.md)
+- **Summary:** Golf-term contributions attribute base, terminal and alignment rotations as named entries (segmental_contribution_breakdown) and close on the full pelvis-to-thorax term
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12821 · Fujii 2007 Coupled Flexion Is Even in Trunk Rotation: New ParityCouplingLaw, Fujii2007_Lumbar Law Version 2, Row Numbers Unchanged
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12821
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12821-fujii-parity-law.md)
+- **Summary:** Fujii 2007 coupled flexion is even in trunk rotation: new ParityCouplingLaw, fujii2007_lumbar law version 2, row numbers unchanged
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12755 · SPN-8C: Translational DOFs in SpineInventory, Extract_Passive_Elements Bushing Reader, Bruno Names-Only Level Map, Asset-Gated Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12755
+- **Branch:** merged via #12896
+- **PR:** #12896
+- **Paths:** see #12896
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`816fcac1`; collated from changes/12755-spn-8c-translational-dofs-in-spineinvent.md)
+- **Summary:** SPN-8c: translational DOFs in SpineInventory, extract_passive_elements bushing reader, Bruno names-only level map, asset-gated tests
+- **Next step:** Shipped in PR #12896.
+
 ### DL-#12749 · Pin the Bruno 2015 Full-Body Model Hash With the Owner's 2026-10-16 SimTK Licence Acceptance; Senteler Stays Unpinned
 
 - **State:** shipped

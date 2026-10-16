@@ -2741,6 +2741,8 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-16 | #12867 | Fujii 2007 coupled flexion is even in trunk rotation: new ParityCouplingLaw, fujii2007_lumbar law version 2, row numbers unchanged; Golf-term contributions attribute base, terminal and alignment rotations as named entries (segmental_contribution_breakdown) and close on the full pelvis-to-thorax term; Study requests carry the drive torso alignment and its calibration source; receipts record and hash it, and an unsupplied alignment makes the study unqualified; Pelvis residual height is the model extent along gravity at the first frame, with its source recorded in the budget and receipt; Movement-variant undeclared-term tolerance is enforced at study run time; a violation makes the run unqualified; A missing ExternalLoads data file raises before any study stage runs; relative datafiles resolve against the XML directory; Static optimization holds zero-capacity muscles at zero, fixing the early-sample failure on the synthetic fixture; Correct the golf-term evaluate docstring for side_bend_tilt input and output shapes |
+| 2026-10-16 | #12896 | SPN-8c: translational DOFs in SpineInventory, extract_passive_elements bushing reader, Bruno names-only level map, asset-gated tests |
 | 2026-10-16 | #12960 | Adversarial review 2026-10-16: 43 findings with draft PR pitches under docs/development/adversarial-review/ |
 | 2026-10-16 | #13021 | Pin the Bruno 2015 full-body model hash with the owner's 2026-10-16 SimTK licence acceptance; Senteler stays unpinned |
 | 2026-10-16 | #13020 | Confine launcher logo route to its asset directory (fixes unauthenticated arbitrary file read) |
