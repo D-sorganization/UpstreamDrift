@@ -16,8 +16,11 @@ defines the *problem* is shared with the Drake and Pinocchio adapters:
 
 The exporter's force, constraint, marker and contact-geometry sets are removed
 after loading, so the Simbody system holds only the bodies, joints and
-gravity.  Efforts are joint-conjugate generalized forces in the spec
-coordinate order.
+gravity, plus, for a chain-shaft spec (R11, #12691), the shaft's
+``SpringGeneralizedForce`` springs and dampers: those are the model, and they
+enter the bias exactly as MuJoCo's passive joint force does.  The shaft
+coordinates are unactuated.  Efforts are joint-conjugate generalized forces in
+the spec coordinate order.
 
 Weld residuals use world-frame relative velocity of the two closure frames
 (translation of the placement origins, then angular), so the rate residual is
@@ -50,6 +53,7 @@ from src.engines.physics_engines.opensim.python.full_body_osim import (
     export_full_body_osim,
 )
 from src.shared.python.engine_core.opensim_runtime import import_opensim
+from src.shared.python.motion_matching.club_shaft_chain import passive_coordinates
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
     ContactSample,
@@ -62,10 +66,11 @@ Array = NDArray[np.float64]
 
 _REMOVED_SETS = (
     "updMarkerSet",
-    "updForceSet",
     "updConstraintSet",
     "updContactGeometrySet",
 )
+#: Forces that belong to the model rather than the problem (chain shaft, #12691).
+_KEPT_FORCES = frozenset({"SpringGeneralizedForce"})
 
 
 def _to_array(matrix: Any) -> Array:
@@ -99,6 +104,11 @@ class OpenSimFullBodyParityAdapter:
         self.specification = spec
         self.coordinate_order: tuple[str, ...] = tuple(spec["coordinate_order"])
         self.nv = len(self.coordinate_order)
+        self.passive_coordinates: tuple[str, ...] = passive_coordinates(spec)
+        self._passive = np.array(
+            [self.coordinate_order.index(c) for c in self.passive_coordinates],
+            dtype=int,
+        )
         self._osim: Any = import_opensim()
         logger = self._osim.Logger
         logger.setLevelString("Warn")
@@ -117,6 +127,10 @@ class OpenSimFullBodyParityAdapter:
             path = Path(directory) / "full_body.osim"
             path.write_text(xml, encoding="utf-8")
             self._model = osim.Model(str(path))
+        forces = self._model.updForceSet()
+        for index in reversed(range(forces.getSize())):
+            if forces.get(index).getConcreteClassName() not in _KEPT_FORCES:
+                forces.remove(index)
         for remove in _REMOVED_SETS:
             getattr(self._model, remove)().clearAndDestroy()
         self._state = self._model.initSystem()
@@ -240,7 +254,11 @@ class OpenSimFullBodyParityAdapter:
         return raw[np.ix_(self._slot, self._slot)]
 
     def _bias_forces(self) -> Array:
-        """Generalized force ``C(q, u) - gravity`` (inverse dynamics at udot=0)."""
+        """Generalized force ``C(q, u) - gravity - springs`` (inverse dynamics, udot=0).
+
+        ``springs`` is the chain shaft's spring and damper force; zero for a
+        rigid club.
+        """
         zero = self._osim.Vector(self.nv, 0.0)
         raw = np.array(
             self._inverse_dynamics.solve(self._state, zero).to_numpy(), float
@@ -335,7 +353,8 @@ class OpenSimFullBodyParityAdapter:
         """``(M(q), h(q, u))`` in spec order; ``h`` is inverse dynamics at udot=0.
 
         Postcondition: ``M`` is ``nv x nv`` symmetric, ``h`` has length ``nv``;
-        ``M a + h`` is the unconstrained, contact-free generalized load.
+        ``M a + h`` is the unconstrained, contact-free generalized load (``h``
+        includes the chain shaft's springs and dampers, #12691).
         """
         qv, uv = self._checked_vector(q, "q"), self._checked_vector(u, "u")
         self._set_state(qv, uv)
@@ -410,12 +429,39 @@ class OpenSimFullBodyParityAdapter:
         matching Pinocchio's ``constraintDynamics`` semantics (the closure
         reaction is solved for, never supplied).
         """
-        effort = self._checked_vector(tau, "tau")
+        effort = self._unactuated(self._checked_vector(tau, "tau"))
         mass, bias = self.mass_and_bias(q, u)
         _, jacobian, drift = self._closure_blocks()
         return solve_weld_acceleration(mass, effort - bias, jacobian, drift)
 
+    def shaft_springs(self) -> dict[str, tuple[float, float, float]]:
+        """Chain-shaft springs as compiled: ``{coordinate: (k, rest, c)}``.
+
+        ``k`` (N m/rad), ``rest`` (rad) and ``c`` (N m s/rad) are read back
+        from the loaded model's ``SpringGeneralizedForce`` objects (#12691);
+        empty for a rigid club.
+        """
+        cast = self._osim.SpringGeneralizedForce.safeDownCast
+        forces = self._model.getForceSet()
+        springs = (cast(forces.get(i)) for i in range(forces.getSize()))
+        return {
+            spring.get_coordinate(): (
+                float(spring.getStiffness()),
+                float(spring.getRestLength()),
+                float(spring.getViscosity()),
+            )
+            for spring in springs
+            if spring is not None
+        }
+
     # -- dynamics -----------------------------------------------------------
+    def _unactuated(self, effort: Array) -> Array:
+        """``effort`` with the chain shaft coordinates zeroed (springs only)."""
+        if self._passive.size:
+            effort = effort.copy()
+            effort[self._passive] = 0.0
+        return effort
+
     def accelerations(
         self,
         coordinates: Mapping[str, float],
@@ -424,7 +470,7 @@ class OpenSimFullBodyParityAdapter:
     ) -> dict[str, float]:
         """Constrained generalized accelerations with the exact weld solve."""
         q, u = self._vector(coordinates), self._vector(rates)
-        tau = self._vector(efforts)
+        tau = self._unactuated(self._vector(efforts))
         self._set_state(q, u)
         matrix = self._osim.Matrix(self.nv, self.nv)
         self._matter.calcM(self._state, matrix)

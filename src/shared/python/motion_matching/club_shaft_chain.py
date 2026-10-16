@@ -5,8 +5,10 @@ The club of the full-body specification is one rigid body by default
 exposed shaft (grip end to head) by ``N`` rigid links joined by spring-damper
 joints: two bending axes per joint and optional torsion. This module is
 engine-neutral: it writes only specification bodies, joints and per-primitive
-spring constants, so the MuJoCo export (``native_mjcf``) and the later
-Drake, Pinocchio, OpenSim and Simscape ports (R11) read the same numbers.
+spring constants, so the MuJoCo export (``native_mjcf``), the OpenSim export
+(``full_body_osim``, ``SpringGeneralizedForce``; MyoSuite loads the MuJoCo
+export) and the later Drake, Pinocchio and Simscape ports (R11) read the same
+numbers.
 
 Profile (owner decision, #12686): a generic STIFF flex, flagged
 ``default_not_measured``. The section is a tapered tube whose wall thickens
@@ -64,8 +66,9 @@ from src.shared.python.motion_matching.club_models import (
 
 SHAFT_MODELS: tuple[str, ...] = ("rigid", "chain")
 DEFAULT_SHAFT_MODEL = "rigid"
-#: Engines whose spec adapters apply the chain's joint springs (#12686).
-CHAIN_ENGINES: frozenset[str] = frozenset({"mujoco"})
+#: Engines whose spec adapters apply the chain's joint springs and pass the
+#: chain parity gate (MuJoCo #12686; OpenSim and MyoSuite #12691).
+CHAIN_ENGINES: frozenset[str] = frozenset({"mujoco", "opensim", "myosuite"})
 PROFILE_STATUS = "default_not_measured"
 DEFAULT_FLEX = "Stiff"
 #: Links of the default chain: the smallest N whose static tip deflection and
