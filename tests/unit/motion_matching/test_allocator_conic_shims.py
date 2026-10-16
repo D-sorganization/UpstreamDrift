@@ -55,9 +55,9 @@ class _Capture:
         self.x: np.ndarray | None = None
         real = cfa.solve_qp
 
-        def spy(P, c, **kw):  # noqa: N803
-            self.kwargs = dict(kw)
-            out = real(P, c, **kw)
+        def spy(P, c, constraints, **kw):  # noqa: N803
+            self.kwargs = dict(vars(constraints))
+            out = real(P, c, constraints, **kw)
             self.x = out.x
             return out
 

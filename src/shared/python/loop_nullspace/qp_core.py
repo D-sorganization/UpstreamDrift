@@ -16,6 +16,7 @@ reported optimum without saying so (rule R11).
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -29,7 +30,25 @@ from src.shared.python.loop_nullspace.solvers import (
     solve_socp,
 )
 
-__all__ = ["friction_cone_rows", "solve_qp"]
+__all__ = ["QPConstraints", "friction_cone_rows", "solve_qp"]
+
+
+@dataclass(frozen=True)
+class QPConstraints:
+    """Feasible set of :func:`solve_qp`: rows, a box and Coulomb cones.
+
+    ``A_eq x = b_eq``, ``A_ub x <= b_ub``, ``lo <= x <= hi`` and the SOC
+    ``cones``; every part is optional (``None`` or empty means absent).
+    ``lo``/``hi`` may contain ``+-inf``.
+    """
+
+    A_eq: Any = None
+    b_eq: Any = None
+    A_ub: Any = None
+    b_ub: Any = None
+    lo: Any = None
+    hi: Any = None
+    cones: Sequence[SOCBlock] = ()
 
 
 def _fixed_rows(
@@ -54,16 +73,9 @@ def _as_rows(a: Any, b: Any, n: int) -> tuple[sp.csr_matrix, np.ndarray]:
 def solve_qp(
     P: Any,
     c: Any,
+    constraints: QPConstraints | None = None,
     *,
-    A_eq: Any = None,
-    b_eq: Any = None,
-    A_ub: Any = None,
-    b_ub: Any = None,
-    lo: Any = None,
-    hi: Any = None,
-    cones: Sequence[SOCBlock] = (),
-    tol: float | None = None,
-    max_iter: int | None = None,
+    settings: ConicSettings | None = None,
 ) -> ConicResult:
     """Minimise ``1/2 x^T P x + c^T x`` over rows, a box and Coulomb cones.
 
@@ -74,11 +86,12 @@ def solve_qp(
     ``x`` is populated iff the status is OPTIMAL; infeasible or numerically
     failed problems are returned as such and never repaired.
     """
+    con = QPConstraints() if constraints is None else constraints
     cc = np.asarray(c, dtype=float)
     n = cc.size
-    a_eq, be = _as_rows(A_eq, b_eq, n)
-    lo_v = np.full(n, -np.inf) if lo is None else np.asarray(lo, dtype=float)
-    hi_v = np.full(n, np.inf) if hi is None else np.asarray(hi, dtype=float)
+    a_eq, be = _as_rows(con.A_eq, con.b_eq, n)
+    lo_v = np.full(n, -np.inf) if con.lo is None else np.asarray(con.lo, dtype=float)
+    hi_v = np.full(n, np.inf) if con.hi is None else np.asarray(con.hi, dtype=float)
     if lo_v.shape != (n,) or hi_v.shape != (n,):
         raise ValueError(f"lo and hi must have shape ({n},)")
     fixed_a, fixed_b, box = _fixed_rows(lo_v, hi_v, n)
@@ -86,18 +99,15 @@ def solve_qp(
         a_eq = sp.vstack([a_eq, fixed_a]).tocsr()
         be = np.concatenate([be, fixed_b])
     pairs = [(None if np.isinf(a) else a, None if np.isinf(b) else b) for a, b in box]
-    a_ub, bu = _as_rows(A_ub, b_ub, n)
+    a_ub, bu = _as_rows(con.A_ub, con.b_ub, n)
     objective = cc if P is None else QuadraticObjective(cc, P)
-    settings = (
-        None if max_iter is None and tol is None else ConicSettings(max_iter, tol)
-    )
     return solve_socp(
         objective,
         a_eq if a_eq.shape[0] else None,
         be if be.size else None,
         a_ub if a_ub.shape[0] else None,
         bu if bu.size else None,
-        list(cones),
+        list(con.cones),
         bounds=pairs,
         settings=settings,
     )
