@@ -17,7 +17,7 @@ import importlib.util
 import sys
 from collections.abc import Callable
 from types import ModuleType
-from typing import Any
+from typing import Any, cast
 
 from src.shared.python.import_aliases import (
     SharedImportAliasFinder,
@@ -73,7 +73,9 @@ class UdSharedImportAliasFinder(SharedImportAliasFinder):
                 ".".join(["src", "shared", "python", *parts[2:]])
             )
             spec = importlib.util.spec_from_loader(
-                fullname, _AliasLoader(canonical), origin=canonical.__file__
+                fullname,
+                cast(Any, _AliasLoader(canonical)),
+                origin=canonical.__file__,
             )
             if spec is not None:
                 spec.submodule_search_locations = getattr(canonical, "__path__", None)
