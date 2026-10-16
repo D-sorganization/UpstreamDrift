@@ -690,7 +690,8 @@ class _StreamWorker:
         current_response: list[str] = []
         tool_calls_accumulator: dict[int, dict[str, Any]] = {}
 
-        for chunk in self._service._adapter.stream_response(  # type: ignore[union-attr]
+        adapter = self._service._adapter
+        for chunk in adapter.stream_response(  # type: ignore[union-attr]
             "",  # message already in context
             self._temp_ctx,
             self._service._tool_declarations,
@@ -759,9 +760,8 @@ class _StreamWorker:
         try:
             timeout_sec = get_tool_timeout()
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-                future = executor.submit(
-                    self._service._tool_registry.execute, tc.name, tc.arguments
-                )
+                registry = self._service._tool_registry
+                future = executor.submit(registry.execute, tc.name, tc.arguments)
                 tool_result = future.result(timeout=timeout_sec)
             result_str = (
                 str(tool_result.result)
