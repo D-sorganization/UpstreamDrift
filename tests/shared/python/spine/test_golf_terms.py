@@ -447,6 +447,33 @@ def test_side_bend_tilt_components() -> None:
     assert out == pytest.approx([10.0, 10.0, 0.0], abs=1e-9)
 
 
+def test_side_bend_tilt_accepted_shapes_and_wrong_shape_raises() -> None:
+    """SPN-D8: trunk_axis is (3,) -> (3,) or (N, 3) -> (N, 3); never a rotation."""
+    tilt = np.deg2rad(10.0)
+    axis = np.array([0.0, -np.sin(tilt), np.cos(tilt)])
+    base = {"up": UP, "target": TARGET}
+    single = evaluate("side_bend_tilt", {**base, "trunk_axis": axis}, handedness="left")
+    assert single.shape == (3,)
+    series = evaluate(
+        "side_bend_tilt",
+        {**base, "trunk_axis": np.stack([axis, UP])},
+        handedness="left",
+    )
+    assert series.shape == (2, 3)
+    assert series[0] == pytest.approx(single)
+    assert series[1] == pytest.approx([0.0, 0.0, 0.0], abs=1e-9)
+    for bad in (np.eye(3)[None], np.zeros((2, 4)), np.array([1.0, 0.0])):
+        with pytest.raises(ValueError, match="trunk_axis"):
+            evaluate("side_bend_tilt", {**base, "trunk_axis": bad}, handedness="left")
+
+
+def test_evaluate_docstring_states_side_bend_shape() -> None:
+    doc = evaluate.__doc__ or ""
+    assert "side_bend_tilt" in doc
+    assert "trunk_axis" in doc
+    assert "(N, 3)" in doc.split("side_bend_tilt", 1)[1]
+
+
 def test_reverse_spine_angle_toward_target_positive_at_top() -> None:
     n = 10
     ev = _events(n)
