@@ -38,6 +38,10 @@ from src.shared.python.biomechanics.grip_wrench import (
 )
 from src.shared.python.contracts import precondition
 from src.shared.python.force_overlay.contracts import OverlayWrench
+from src.shared.python.loop_nullspace.autodiff_derivatives import (
+    DifferentialsUnavailable,
+    ModelDifferentials,
+)
 from src.shared.python.loop_nullspace.closure_convention import NativeClosureConvention
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
@@ -51,6 +55,20 @@ from src.shared.python.motion_matching.full_body_spec import (
 )
 
 Array: TypeAlias = NDArray[np.float64]
+
+
+def _gradient(values: Any) -> Array:
+    """Derivative array ``(*shape, n_derivatives)`` of an AutoDiffXd array.
+
+    A scalar that does not depend on any seed carries an empty derivative
+    vector; it is padded with zeros to the common length.
+    """
+    flat = [entry.derivatives() for entry in np.asarray(values, dtype=object).ravel()]
+    width = max((d.size for d in flat), default=0)
+    out = np.zeros((len(flat), width))
+    for row, d in zip(out, flat, strict=True):
+        row[: d.size] = d
+    return out.reshape(np.shape(values) + (width,))
 
 
 def solve_weld_with_multipliers(
@@ -213,6 +231,7 @@ class FullBodyDrakeModel:
         self._q_indices = [self._joints[name].position_start() for name in self.names]
         self._v_indices = [self._joints[name].velocity_start() for name in self.names]
         self._last_closure: tuple[Array, Array] | None = None
+        self._autodiff: tuple[Any, Any, Any, Any] | None = None
         self.gravity = np.asarray(specification["gravity_m_s2"], dtype=float)
         self.mass_kg = float(self.plant.CalcTotalMass(self.context))
         self.upper_body_coordinates: int = int(
@@ -838,6 +857,77 @@ class FullBodyDrakeModel:
         self._set_state(q, v)
         _, _, jacobian, bias = self._closure_bias_and_jacobian()
         return self.named_columns(jacobian).copy(), np.asarray(bias, dtype=float)
+
+    # -- exact differentials of the closed-loop arrays (NSX-86, #12715) ------
+
+    def _autodiff_plant(self) -> tuple[Any, Any, Any, Any]:
+        """``(plant, context, frame a, frame b)`` re-templated on AutoDiffXd."""
+        if self._autodiff is None:
+            try:
+                plant = self.plant.ToAutoDiffXd()
+                frames = [
+                    plant.GetFrameByName(f.name(), f.model_instance())
+                    for f in self._closure
+                ]
+            except (RuntimeError, TypeError, ValueError) as exc:
+                raise DifferentialsUnavailable(
+                    f"the Drake plant has no AutoDiffXd conversion: {exc}"
+                ) from exc
+            self._autodiff = (plant, plant.CreateDefaultContext(), *frames)
+        return self._autodiff
+
+    def closed_loop_differentials(self, q: Array, v: Array) -> ModelDifferentials:
+        """Exact AutoDiff derivatives of ``M, h, J, Jdot v`` in the native convention.
+
+        Seeds ``(q, v)`` (spec order) as AutoDiffXd variables and evaluates the
+        same Drake calls as :meth:`mass_and_bias` and
+        :meth:`closure_jacobian_and_drift` on the re-templated plant.  Scope: the
+        rigid tree plus weld closure; ground contact is not part of these arrays
+        and is not differentiated.  Raises :class:`DifferentialsUnavailable` if
+        any component cannot be evaluated in AutoDiffXd (never a numeric
+        fallback).  Postcondition: arrays in spec order, closure rows in
+        :data:`CLOSURE_CONVENTION`.
+        """
+        from pydrake.autodiffutils import InitializeAutoDiff  # noqa: PLC0415
+
+        n = len(self.names)
+        seeds = np.asarray(
+            InitializeAutoDiff(
+                np.concatenate((self._named_vector(q), self._named_vector(v)))
+            )
+        ).reshape(-1)
+        positions = np.empty(n, dtype=object)
+        positions[self._q_indices] = seeds[:n]
+        velocities = np.empty(n, dtype=object)
+        velocities[self._v_indices] = seeds[n:]
+        plant, context, frame_a, frame_b = self._autodiff_plant()
+        try:
+            plant.SetPositions(context, positions)
+            plant.SetVelocities(context, velocities)
+            mass = plant.CalcMassMatrix(context)
+            bias = plant.CalcBiasTerm(context) - plant.CalcGravityGeneralizedForces(
+                context
+            )
+            args = (self._wrt_v, frame_b, np.zeros(3), frame_a, frame_a)
+            jac = plant.CalcJacobianSpatialVelocity(context, *args)
+            drift = plant.CalcBiasSpatialAcceleration(context, *args).get_coeffs()
+        except (RuntimeError, TypeError) as exc:
+            raise DifferentialsUnavailable(
+                f"AutoDiffXd evaluation of the closed-loop arrays failed: {exc}"
+            ) from exc
+        order = self._v_indices
+        d_mass = _gradient(mass)[np.ix_(order, order)]
+        d_bias = _gradient(bias)[order]
+        d_jac = _gradient(jac)[:, order]
+        d_drift = _gradient(np.asarray(drift))
+        return ModelDifferentials(
+            d_mass_dq=d_mass[..., :n],
+            d_bias_dq=d_bias[:, :n],
+            d_bias_dv=d_bias[:, n:],
+            d_jac_dq=d_jac[..., :n],
+            d_drift_dq=d_drift[:, :n],
+            d_drift_dv=d_drift[:, n:],
+        )
 
     def closure_frame_pose(self, q: Array) -> tuple[Array, Array]:
         """World rotation and origin of closure frame ``a`` (the LOCAL frame)."""

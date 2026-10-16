@@ -25,7 +25,11 @@ from src.shared.python.engine_core.capabilities import (
     CapabilityLevel,
     CapabilityUnavailable,
 )
-from src.shared.python.loop_nullspace.closure_convention import to_canonical_closure
+from src.shared.python.loop_nullspace.closure_convention import (
+    ClosureFrames,
+    closure_conversion_matrix,
+    to_canonical_closure,
+)
 from src.shared.python.loop_nullspace.contracts import (
     ClosedLoopSnapshot,
     GripFrame,
@@ -39,6 +43,7 @@ if TYPE_CHECKING:
 __all__ = [
     "canonical_closure",
     "canonical_closure_jacobian",
+    "canonical_closure_matrix",
     "require_closed_loop_capability",
     "parity_effort",
     "has_closed_loop_protocol",
@@ -70,21 +75,38 @@ def has_closed_loop_protocol(adapter: Any) -> bool:
     )
 
 
-def _canonicalise(
-    adapter: Any, q: ArrayLike, jacobian: ArrayLike, drift: ArrayLike
-) -> tuple[Array, Array, GripFrame]:
+def _closure_frames(adapter: Any, q: ArrayLike) -> ClosureFrames:
     native_rot, native_point = adapter.native_closure_frame(q)
     grip_rot, grip_point = adapter.closure_wrench_frame(q)
-    j_c, jdot_v = to_canonical_closure(
-        jacobian,
-        drift,
+    return ClosureFrames(
         native=adapter.native_closure_convention,
         native_frame_rotation=native_rot,
         grip_frame_rotation=grip_rot,
         native_reference_point=native_point,
         grip_reference_point=grip_point,
     )
-    return j_c, jdot_v, GripFrame(rotation=grip_rot, origin=grip_point)
+
+
+def _canonicalise(
+    adapter: Any, q: ArrayLike, jacobian: ArrayLike, drift: ArrayLike
+) -> tuple[Array, Array, GripFrame]:
+    frames = _closure_frames(adapter, q)
+    j_c, jdot_v = to_canonical_closure(jacobian, drift, **frames)
+    grip = GripFrame(
+        rotation=frames["grip_frame_rotation"],
+        origin=frames["grip_reference_point"],
+    )
+    return j_c, jdot_v, grip
+
+
+def canonical_closure_matrix(adapter: Any, q: ArrayLike) -> Array:
+    """The NSX-02 row map ``C`` (6 x 6) with ``J_c = C J_native`` at ``q``.
+
+    Exposed so an engine that differentiates its native closure (NSX-86) can map
+    the differentials into the canonical convention (R8) without a second
+    implementation of the conversion.  Postcondition: finite and invertible.
+    """
+    return np.asarray(closure_conversion_matrix(**_closure_frames(adapter, q)))
 
 
 def canonical_closure_jacobian(adapter: Any, q: ArrayLike) -> Array:
