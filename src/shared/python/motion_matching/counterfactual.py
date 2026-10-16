@@ -446,10 +446,12 @@ def _closure_velocity_residual(
     """``max |J_c v|`` over the rollout, or ``None`` for an unconstrained provider."""
     if not is_constrained_provider(provider):
         return None
+    if len(q) != len(v):
+        raise ValueError("q and v must have the same length")
     return float(
         max(
-            np.max(np.abs(provider.closure_jacobian(qi) @ vi), initial=0.0)
-            for qi, vi in zip(q, v, strict=True)
+            np.max(np.abs(provider.closure_jacobian(q[i]) @ v[i]), initial=0.0)
+            for i in range(len(q))
         )
     )
 
