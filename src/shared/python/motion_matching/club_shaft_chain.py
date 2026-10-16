@@ -254,7 +254,9 @@ def station_profile(properties: Any, club: ClubSpec) -> Any:
     ``G 2I`` with ``G = E / 2(1 + nu)``; the profile is flagged
     ``default_not_measured`` in its provenance.
     """
-    from src.shared.python.golf_club.shaft_profile import (
+    # Canonical spelling only: ``src.shared.python.golf_club`` is a second
+    # module tree whose import re-runs Tools' import-time variable registration.
+    from shared.python.golf_club.shaft_profile import (
         ShaftProfile,
         ShaftProfileProvenance,
         ShaftStation,

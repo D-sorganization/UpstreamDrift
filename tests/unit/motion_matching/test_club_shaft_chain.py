@@ -138,7 +138,7 @@ def test_fem_without_head_agrees_with_the_tools_modal_solver() -> None:
     profile (no head)."""
     from scipy.linalg import eigh
 
-    from src.shared.python.golf_club.shaft_dynamics import solve_shaft_bending_modes
+    from shared.python.golf_club.shaft_dynamics import solve_shaft_bending_modes
     from src.shared.python.physics.flexible_shaft import FiniteElementShaftModel
 
     properties = span_properties(DRIVER)
@@ -148,6 +148,19 @@ def test_fem_without_head_agrees_with_the_tools_modal_solver() -> None:
     tools = solve_shaft_bending_modes(station_profile(properties, DRIVER))
     assert tools.frequencies_x_hz[0] == pytest.approx(f_fem, rel=5e-3)
     assert tools.frequencies_y_hz[0] == pytest.approx(f_fem, rel=5e-3)
+
+
+def test_station_profile_uses_the_canonical_tools_golf_club_module() -> None:
+    """The profile must come from the one ``shared.python.golf_club`` tree.
+
+    Importing the ``src.shared.python.golf_club`` spelling builds a second
+    module tree whose import re-runs Tools' turf-variable registration and
+    trips the registry's duplicate-key precondition (#12686 CI).
+    """
+    import shared.python.golf_club.shaft_profile as canonical
+
+    profile = station_profile(span_properties(DRIVER), DRIVER)
+    assert type(profile) is canonical.ShaftProfile
 
 
 def test_chain_contracts() -> None:
