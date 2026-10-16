@@ -36,7 +36,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from scipy.interpolate import CubicSpline
@@ -408,7 +408,8 @@ def _make_load(
         if run is not None:
             return run.torque(t, q, v)
         q_ref, v_ref = ref.state_at(t)
-        return feedback.torque(selection @ (q_ref - q), selection @ (v_ref - v), q)
+        law = cast("FeedbackLaw | AccelerationFeedbackLaw", feedback)  # no run
+        return law.torque(selection @ (q_ref - q), selection @ (v_ref - v), q)
 
     def load(t: float, q: Array, v: Array) -> Array:
         tau = sched(t) + feedback_torque(t, q, v)
