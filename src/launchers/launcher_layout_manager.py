@@ -594,33 +594,16 @@ class LayoutManager:
                     list_mode=is_list,
                 )
 
-    def rebuild_grid(self, grid_layout: QGridLayout) -> None:  # noqa: C901
+    def rebuild_grid(self, grid_layout: QGridLayout) -> None:
         """Rebuild the grid layout based on current model order and view mode.
 
         Args:
             grid_layout: The Qt grid layout to populate.
         """
-        # Clean current layout. Reusable model cards must be hidden before
-        # detaching: on Qt, a visible parentless widget becomes a top-level
-        # window, which made search/filter rebuilds flash every tile onscreen.
         if grid_layout is None:
             raise ValueError("grid_layout must be provided")
 
-        # Clear stretch factors from previous layout
-        for c in range(grid_layout.columnCount()):
-            grid_layout.setColumnStretch(c, 0)
-
-        reusable_card_ids = {id(card) for card in self.model_cards.values()}
-        while grid_layout.count():
-            item = grid_layout.takeAt(0)
-            if item:
-                widget = item.widget()
-                if widget:
-                    if id(widget) in reusable_card_ids:
-                        widget.hide()
-                    else:
-                        widget.deleteLater()
-                    widget.setParent(None)
+        self._clear_grid(grid_layout)
 
         scale, base_cols, show_desc, is_list = view_mode_settings(
             self.current_view_mode
@@ -629,93 +612,14 @@ class LayoutManager:
         # back to the view-mode default if it matches the previous mode.
         active_scale = self.tile_scale if self.tile_scale > 0 else scale
 
-        # Dynamically determine columns based on available scroll area viewport width if not in list mode
         if is_list:
             columns = 1
         else:
-            available_width = 800  # fallback
-            container = grid_layout.parentWidget()
-            is_real_widget = (
-                container is not None
-                and not hasattr(container, "mock_add_spec")
-                and type(container).__name__
-                not in ("Mock", "MagicMock", "NonCallableMagicMock")
-            )
-            if is_real_widget:
-                viewport = container.parentWidget()
-                if viewport is not None and type(viewport).__name__ not in (
-                    "Mock",
-                    "MagicMock",
-                ):
-                    w = viewport.width()
-                    if isinstance(w, int | float) and not hasattr(w, "mock_add_spec"):
-                        available_width = w
-                    scroll_area = viewport.parentWidget()
-                    if (
-                        scroll_area is not None
-                        and type(scroll_area).__name__ not in ("Mock", "MagicMock")
-                        and hasattr(scroll_area, "viewport")
-                    ):
-                        v = scroll_area.viewport()
-                        if v is not None and type(v).__name__ not in (
-                            "Mock",
-                            "MagicMock",
-                        ):
-                            vw = v.width()
-                            if isinstance(vw, int | float) and not hasattr(
-                                vw, "mock_add_spec"
-                            ):
-                                available_width = vw
-
-            card_width = max(100, int(240 * active_scale))
-            spacing = 20
-            try:
-                s = grid_layout.spacing()
-                if (
-                    isinstance(s, (int, float))
-                    and not hasattr(s, "mock_add_spec")
-                    and s >= 0
-                ):
-                    spacing = int(s)
-            except (AttributeError, TypeError, ValueError):
-                pass
-
-            # Allow some margin on the sides (e.g. 20px total padding)
-            usable_width = available_width - 20
-            columns = max(1, (usable_width + spacing) // (card_width + spacing))
-
-        if not is_list:
+            columns = self._compute_columns(grid_layout, active_scale)
             for c in range(columns):
                 grid_layout.setColumnStretch(c, 1)
 
-        # Get filtered model order
-        filtered_order = self.get_filtered_order()
-
-        widgets_to_add = []
-        for model_id in filtered_order:
-            if model_id not in self.model_cards:
-                model = self._get_model(model_id)
-                if model:
-                    self.model_cards[model_id] = self._build_card(
-                        model,
-                        tile_scale=active_scale,
-                        show_description=show_desc,
-                        list_mode=is_list,
-                        list_compact=(self.current_view_mode == ViewMode.LIST_SMALL),
-                    )
-            else:
-                # Existing card — make sure it matches current scale/mode.
-                card = self.model_cards[model_id]
-                if hasattr(card, "set_tile_scale"):
-                    card.set_tile_scale(
-                        active_scale,
-                        show_description=show_desc,
-                        list_mode=is_list,
-                        list_compact=(self.current_view_mode == ViewMode.LIST_SMALL),
-                    )
-
-            if model_id in self.model_cards:
-                widgets_to_add.append(self.model_cards[model_id])
+        widgets_to_add = self._sync_cards(active_scale, show_desc, is_list)
 
         # Handle empty filter results with a user-friendly message
         # Only show empty state when an active filter causes zero results
@@ -732,10 +636,128 @@ class LayoutManager:
             self._empty_state_label.deleteLater()
             self._empty_state_label = None
 
-        # Add to grid as a flat, continuously wrapping list (no headers!)
+        self._place_widgets(grid_layout, widgets_to_add, columns, is_list)
+
+    def _clear_grid(self, grid_layout: QGridLayout) -> None:
+        """Detach every widget from ``grid_layout`` and reset column stretch.
+
+        Reusable model cards must be hidden before detaching: on Qt, a visible
+        parentless widget becomes a top-level window, which made search/filter
+        rebuilds flash every tile onscreen.
+        """
+        # Clear stretch factors from previous layout
+        for c in range(grid_layout.columnCount()):
+            grid_layout.setColumnStretch(c, 0)
+
+        reusable_card_ids = {id(card) for card in self.model_cards.values()}
+        while grid_layout.count():
+            item = grid_layout.takeAt(0)
+            if item:
+                widget = item.widget()
+                if widget:
+                    if id(widget) in reusable_card_ids:
+                        widget.hide()
+                    else:
+                        widget.deleteLater()
+                    widget.setParent(None)
+
+    @staticmethod
+    def _available_width(grid_layout: QGridLayout) -> int | float:
+        """Resolve the scroll viewport width for ``grid_layout`` (800 fallback)."""
+        available_width: int | float = 800  # fallback
+        container = grid_layout.parentWidget()
+        is_real_widget = (
+            container is not None
+            and not hasattr(container, "mock_add_spec")
+            and type(container).__name__
+            not in ("Mock", "MagicMock", "NonCallableMagicMock")
+        )
+        if not is_real_widget:
+            return available_width
+        viewport = container.parentWidget()
+        if viewport is None or type(viewport).__name__ in ("Mock", "MagicMock"):
+            return available_width
+        w = viewport.width()
+        if isinstance(w, int | float) and not hasattr(w, "mock_add_spec"):
+            available_width = w
+        scroll_area = viewport.parentWidget()
+        if (
+            scroll_area is not None
+            and type(scroll_area).__name__ not in ("Mock", "MagicMock")
+            and hasattr(scroll_area, "viewport")
+        ):
+            v = scroll_area.viewport()
+            if v is not None and type(v).__name__ not in ("Mock", "MagicMock"):
+                vw = v.width()
+                if isinstance(vw, int | float) and not hasattr(vw, "mock_add_spec"):
+                    available_width = vw
+        return available_width
+
+    @staticmethod
+    def _grid_spacing(grid_layout: QGridLayout) -> int:
+        """Return the grid spacing, defaulting to 20 when unavailable."""
+        spacing = 20
+        try:
+            s = grid_layout.spacing()
+            if (
+                isinstance(s, (int, float))
+                and not hasattr(s, "mock_add_spec")
+                and s >= 0
+            ):
+                spacing = int(s)
+        except (AttributeError, TypeError, ValueError):
+            pass
+        return spacing
+
+    def _compute_columns(self, grid_layout: QGridLayout, active_scale: float) -> int:
+        """Compute the tile column count that fits the available width."""
+        available_width = self._available_width(grid_layout)
+        card_width = max(100, int(240 * active_scale))
+        spacing = self._grid_spacing(grid_layout)
+        # Allow some margin on the sides (e.g. 20px total padding)
+        usable_width = available_width - 20
+        return max(1, (usable_width + spacing) // (card_width + spacing))
+
+    def _sync_cards(
+        self, active_scale: float, show_desc: bool, is_list: bool
+    ) -> list[Any]:
+        """Create missing cards, refresh existing ones, return those to show."""
+        list_compact = self.current_view_mode == ViewMode.LIST_SMALL
+        widgets_to_add = []
+        for model_id in self.get_filtered_order():
+            if model_id not in self.model_cards:
+                model = self._get_model(model_id)
+                if model:
+                    self.model_cards[model_id] = self._build_card(
+                        model,
+                        tile_scale=active_scale,
+                        show_description=show_desc,
+                        list_mode=is_list,
+                        list_compact=list_compact,
+                    )
+            else:
+                # Existing card - make sure it matches current scale/mode.
+                card = self.model_cards[model_id]
+                if hasattr(card, "set_tile_scale"):
+                    card.set_tile_scale(
+                        active_scale,
+                        show_description=show_desc,
+                        list_mode=is_list,
+                        list_compact=list_compact,
+                    )
+
+            if model_id in self.model_cards:
+                widgets_to_add.append(self.model_cards[model_id])
+        return widgets_to_add
+
+    @staticmethod
+    def _place_widgets(
+        grid_layout: QGridLayout, widgets: list[Any], columns: int, is_list: bool
+    ) -> None:
+        """Add ``widgets`` to the grid as a flat, continuously wrapping list."""
         row = 0
         col = 0
-        for widget in widgets_to_add:
+        for widget in widgets:
             if is_list:
                 # Each card occupies a full row, one card per row.
                 grid_layout.addWidget(widget, row, 0, 1, 1)
@@ -748,10 +770,6 @@ class LayoutManager:
                 if col >= columns:
                     col = 0
                     row += 1
-
-        # Final cleanup for grid layout rows
-        if not is_list and col > 0:
-            row += 1
 
     def _show_empty_state(self, grid_layout: QGridLayout) -> None:
         """Display a centered empty-state label when no models match filters.
