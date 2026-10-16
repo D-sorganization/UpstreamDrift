@@ -71,6 +71,7 @@ NAMES = [
     "planar_two_arm_club_unactuated",
     "planar_straight_arm_rank_deficient",
     "spatial_counts",
+    "restriction_counts",
     "envelope_analytic_lp",
     "grasp_map_worked_example",
     "c_pm_identity",

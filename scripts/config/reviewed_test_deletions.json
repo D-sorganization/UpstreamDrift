@@ -5,6 +5,11 @@
       "path": "tests/unit/repo_hygiene/test_no_unflagged_shared_code.py",
       "issue": "#11589",
       "reason": "Stale header test retired by #11590 with its unit-gate quarantine entry; child-copy enforcement remains in test_tools_child_copy_contract.py."
+    },
+    {
+      "path": "tests/integration/test_loop_nullspace_anthro_envelope_blocker.py",
+      "issue": "#12593",
+      "reason": "NSX-22 blocker test replaced by the 200-frame real-anthro envelope benchmark in tests/integration/test_loop_nullspace_anthro_envelope_benchmark.py (commit 3fd443839a)."
     }
   ]
 }

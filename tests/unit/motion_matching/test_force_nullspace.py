@@ -160,15 +160,19 @@ def test_cone_limits_feasible_redistribution():
     np.testing.assert_allclose(result.forces, [40.0, 80.0, 0.0, 100.0], atol=1e-6)
 
 
-def test_solver_success_does_not_override_constraint_audit(monkeypatch):
-    from types import SimpleNamespace
-    from src.shared.python.motion_matching import force_nullspace
+def _patch_core_solver(monkeypatch: pytest.MonkeyPatch, result) -> None:
+    """Replace the conic core call used by the redistribution shims (NSX-24)."""
+    from src.shared.python.motion_matching.force_nullspace import redistribution
 
-    monkeypatch.setattr(
-        force_nullspace,
-        "minimize",
-        lambda *a, **kw: SimpleNamespace(x=np.array([1e5]), success=True, message="ok"),
-    )
+    monkeypatch.setattr(redistribution, "solve_qp", lambda *a, **kw: result)
+
+
+def test_solver_success_does_not_override_constraint_audit(monkeypatch):
+    # NSX-24: the solver seam moved from scipy ``minimize`` to the conic core;
+    # the audit contract under test is unchanged.
+    from src.shared.python.loop_nullspace.solvers import ConicResult, SolveStatus
+
+    _patch_core_solver(monkeypatch, ConicResult(SolveStatus.OPTIMAL, x=np.array([1e5])))
     space = ForceNullSpace.from_balance(np.ones((1, 2)), np.array([12.0]))
     result = redistribute_forces(
         space, np.ones(2), ForceConstraints(np.zeros(2), np.full(2, 20.0))
@@ -176,19 +180,17 @@ def test_solver_success_does_not_override_constraint_audit(monkeypatch):
     assert result.converged and not result.feasible
 
 
-@pytest.mark.parametrize("status", [8, 9])
-def test_non_success_slsqp_status_is_not_converged_for_forces(
-    monkeypatch: pytest.MonkeyPatch, status: int
+@pytest.mark.parametrize("status_name", ["NUMERICAL", "INFEASIBLE"])
+def test_non_optimal_solver_status_is_not_converged_for_forces(
+    monkeypatch: pytest.MonkeyPatch, status_name: str
 ) -> None:
-    from types import SimpleNamespace
-    from src.shared.python.motion_matching import force_nullspace
+    # Was parametrised over SLSQP exit codes 8/9; the conic core reports
+    # NUMERICAL/INFEASIBLE instead.  Same contract: not converged, and the
+    # particular solution is audited as is (no repair).
+    from src.shared.python.loop_nullspace.solvers import ConicResult, SolveStatus
 
-    monkeypatch.setattr(
-        force_nullspace,
-        "minimize",
-        lambda *a, **kw: SimpleNamespace(
-            x=np.array([0.0]), success=False, status=status, message="stopped"
-        ),
+    _patch_core_solver(
+        monkeypatch, ConicResult(SolveStatus[status_name], reason="stopped")
     )
     space = ForceNullSpace.from_balance(np.ones((1, 2)), np.array([12.0]))
     result = redistribute_forces(
@@ -197,21 +199,17 @@ def test_non_success_slsqp_status_is_not_converged_for_forces(
 
     assert result.feasible
     assert not result.converged
+    assert status_name.lower() in result.message.lower()
 
 
-@pytest.mark.parametrize("status", [8, 9])
-def test_non_success_slsqp_status_is_not_converged_for_trajectory(
-    monkeypatch: pytest.MonkeyPatch, status: int
+@pytest.mark.parametrize("status_name", ["NUMERICAL", "INFEASIBLE"])
+def test_non_optimal_solver_status_is_not_converged_for_trajectory(
+    monkeypatch: pytest.MonkeyPatch, status_name: str
 ) -> None:
-    from types import SimpleNamespace
-    from src.shared.python.motion_matching import force_nullspace
+    from src.shared.python.loop_nullspace.solvers import ConicResult, SolveStatus
 
-    monkeypatch.setattr(
-        force_nullspace,
-        "minimize",
-        lambda *a, **kw: SimpleNamespace(
-            x=np.zeros(2), success=False, status=status, message="stopped"
-        ),
+    _patch_core_solver(
+        monkeypatch, ConicResult(SolveStatus[status_name], reason="stopped")
     )
     space = ForceNullSpace.from_balance(np.ones((1, 2)), np.array([12.0]))
     constraints = ForceConstraints(np.zeros(2), np.full(2, 20.0))

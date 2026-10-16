@@ -62,9 +62,11 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "Basis",
     "ConicResult",
+    "ConicSettings",
     "KKTResiduals",
     "LPResult",
     "LPSession",
+    "QuadraticObjective",
     "SOCBlock",
     "SolveStatus",
     "available_backends",
@@ -209,6 +211,46 @@ class SOCBlock:
         object.__setattr__(self, "A", a.tocsc())
         object.__setattr__(self, "b", _readonly(b))
         object.__setattr__(self, "dim", int(a.shape[0]))
+
+
+@dataclass(frozen=True)
+class QuadraticObjective:
+    """Convex quadratic objective ``1/2 x^T P x + q^T x`` for :func:`solve_socp`.
+
+    Preconditions: ``q`` is a finite vector and ``P`` a finite symmetric
+    ``(n, n)`` matrix (semidefiniteness is checked by the solver).
+    Postcondition: both fields are stored read-only (``P`` as sparse CSR).
+    """
+
+    q: Any
+    P: Any
+
+    def __post_init__(self) -> None:
+        q = _as_vector(self.q, "q")
+        object.__setattr__(self, "P", _quadratic(self.P, q.size))
+        object.__setattr__(self, "q", _readonly(q))
+
+
+@dataclass(frozen=True)
+class ConicSettings:
+    """Optional Clarabel controls: iteration cap and a common tolerance.
+
+    ``None`` keeps the solver default.  ``tol`` replaces the absolute/relative
+    gap and feasibility tolerances together.
+    """
+
+    max_iter: int | None = None
+    tol: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.max_iter is not None and (
+            isinstance(self.max_iter, bool) or int(self.max_iter) < 1
+        ):
+            raise ValueError(
+                f"max_iter must be a positive integer, got {self.max_iter!r}"
+            )
+        if self.tol is not None and (not np.isfinite(self.tol) or self.tol <= 0.0):
+            raise ValueError(f"tol must be positive and finite, got {self.tol!r}")
 
 
 # ----------------------------------------------------------- input checking
@@ -610,9 +652,15 @@ def solve_socp(
     cones: Sequence[SOCBlock],
     *,
     bounds: Any = None,
-    max_iter: int | None = None,
+    settings: ConicSettings | None = None,
 ) -> ConicResult:
-    """Solve a linear objective over polyhedral and second-order-cone constraints.
+    """Solve a (convex quadratic) objective over polyhedral and SOC constraints.
+
+    ``c`` is either a vector (linear objective, NSX-20 behaviour) or a
+    :class:`QuadraticObjective` giving ``1/2 x^T P x + q^T x``; ``P`` must be
+    symmetric positive semidefinite (semidefiniteness is checked by Clarabel).
+    ``settings`` (:class:`ConicSettings`) overrides the iteration cap and the
+    solver tolerances; ``None`` keeps Clarabel's defaults.
 
     Rows are stacked ``[A_eq; A_ub; finite bounds; SOC blocks]`` with
     ``A x + s = b``, ``s`` in zero/nonnegative/second-order cones.
@@ -624,8 +672,13 @@ def solve_socp(
     and failure statuses map to NUMERICAL with the solver status as ``reason``.
     """
     cl = _import_backend("clarabel")
-    cc = _as_vector(c, "c")
+    if isinstance(c, QuadraticObjective):
+        cc, p_mat = c.q, c.P
+    else:
+        cc = _as_vector(c, "c")
+        p_mat = _quadratic(None, cc.size)
     n = cc.size
+    opts = settings if settings is not None else ConicSettings()
     a_eq, be = _rows(A_eq, b_eq, n, "A_eq", "b_eq")
     a_ub, bu = _rows(A_ub, b_ub, n, "A_ub", "b_ub")
     if bounds is None:
@@ -646,17 +699,42 @@ def solve_socp(
     if bu.size + h.size:
         cone_list.append(cl.NonnegativeConeT(bu.size + h.size))
     cone_list += [cl.SecondOrderConeT(blk.dim) for blk in blocks]
-    settings = cl.DefaultSettings()
-    settings.verbose = False
-    if max_iter is not None:
-        settings.max_iter = int(max_iter)
+    cl_settings = cl.DefaultSettings()
+    cl_settings.verbose = False
+    if opts.max_iter is not None:
+        cl_settings.max_iter = int(opts.max_iter)
+    if opts.tol is not None:
+        tol = float(opts.tol)
+        cl_settings.tol_gap_abs = cl_settings.tol_gap_rel = tol
+        cl_settings.tol_feas = tol
     solver = cl.DefaultSolver(
-        sp.csc_matrix((n, n)), cc, big_a, big_b, cone_list, settings
+        sp.triu(p_mat).tocsc(), cc, big_a, big_b, cone_list, cl_settings
     )
     sol = solver.solve()
     return _conic_result(
-        sol, cc, big_a, big_b, n_zero=be.size, n_nonneg=bu.size + h.size, blocks=blocks
+        sol,
+        cc,
+        big_a,
+        big_b,
+        n_zero=be.size,
+        n_nonneg=bu.size + h.size,
+        blocks=blocks,
+        p_mat=p_mat,
     )
+
+
+def _quadratic(P: Any, n: int) -> sp.csr_matrix:
+    """Validated symmetric ``n x n`` quadratic term (zero when ``P`` is None)."""
+    if P is None:
+        return sp.csr_matrix((n, n))
+    mat = _as_sparse(P, "P")
+    if mat.shape != (n, n):
+        raise ValueError(f"P must be ({n}, {n}), got {mat.shape}")
+    asym = abs(mat - mat.T)
+    scale = max(1.0, float(abs(mat).max()) if mat.nnz else 1.0)
+    if asym.nnz and float(asym.max()) > 1e-12 * scale:
+        raise ValueError("P must be symmetric")
+    return mat
 
 
 def _conic_result(
@@ -668,6 +746,7 @@ def _conic_result(
     n_zero: int,
     n_nonneg: int,
     blocks: Sequence[SOCBlock],
+    p_mat: sp.csr_matrix,
 ) -> ConicResult:
     name = str(sol.status)
     status = _CLARABEL_STATUS.get(name, SolveStatus.NUMERICAL)
@@ -689,19 +768,20 @@ def _conic_result(
         float(max(0.0, -s[n_zero:off].min())) if n_nonneg else 0.0,
         max(0.0, _soc_violation(s[off:], dims)),
     )
-    dual = float(np.abs(c + a.T @ z).max()) if c.size else 0.0
+    dual = float(np.abs(p_mat @ x + c + a.T @ z).max()) if c.size else 0.0
     dual = max(
         dual,
         float(max(0.0, -z[n_zero:off].min())) if n_nonneg else 0.0,
         max(0.0, _soc_violation(z[off:], dims)),
     )
-    comp = abs(float(s @ z)) / (1.0 + abs(float(c @ x)))
+    objective = float(c @ x + 0.5 * x @ (p_mat @ x))
+    comp = abs(float(s @ z)) / (1.0 + abs(objective))
     return ConicResult(
         status,
         x=_readonly(x),
         z=_readonly(z),
         s=_readonly(s),
-        objective=float(c @ x),
+        objective=objective,
         kkt_residuals=KKTResiduals(primal / pscale, dual / dscale, comp),
         iterations=iters,
     )
