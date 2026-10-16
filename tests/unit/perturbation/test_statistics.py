@@ -91,6 +91,7 @@ class TestComputeMetricStatistics:
         stats = compute_metric_statistics(values)
         assert abs(stats.std - 1.0) < 1e-10
 
+    @pytest.mark.unit
     def test_cv_zero_mean_is_nan_with_reason(self) -> None:
         # NSX-82: a near-zero mean makes cv undefined (NaN), never 0
         values = np.array([0.0, 0.0, 0.0])
@@ -99,17 +100,20 @@ class TestComputeMetricStatistics:
         assert stats.cv_reason is not None
         assert "undefined" in stats.cv_reason
 
+    @pytest.mark.unit
     def test_symmetric_wide_distribution_does_not_report_cv_zero(self) -> None:
         values = np.array([-90.0, 90.0, -90.0, 90.0])  # mean exactly 0, SD 90
         stats = compute_metric_statistics(values)
         assert stats.std == pytest.approx(90.0)
         assert np.isnan(stats.cv)
 
+    @pytest.mark.unit
     def test_cv_defined_has_no_reason(self) -> None:
         stats = compute_metric_statistics(np.array([9.0, 11.0]))
         assert stats.cv == pytest.approx(0.1)
         assert stats.cv_reason is None
 
+    @pytest.mark.unit
     def test_cv_vector_masks_only_near_zero_columns(self) -> None:
         values = np.array([[9.0, -1.0], [11.0, 1.0]])
         stats = compute_metric_statistics(values)
@@ -117,6 +121,7 @@ class TestComputeMetricStatistics:
         assert np.isnan(stats.cv[1])
         assert stats.cv_reason is not None
 
+    @pytest.mark.unit
     def test_to_dict_serialises_undefined_cv_as_null(self) -> None:
         d = compute_metric_statistics(np.zeros(3)).to_dict()
         assert d["cv"] is None
