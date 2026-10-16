@@ -588,6 +588,7 @@ models:
       default_launch: "tab"
 
   - id: "spine_viewer"
+    help: "docs/help/spine_viewer.md"
     name: "Spine Viewer"
     description: "Read-only per-level spinal load heatmaps from hash-verified study receipts; always shows scientific status and distribution source"
     type: "special_app"
