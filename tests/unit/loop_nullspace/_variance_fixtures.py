@@ -61,7 +61,7 @@ def state_space_at(z: float, *, kind: str = "assembled") -> tl.TangentStateSpace
     prov = cls(pend, EUCLID2, basis_field=tangent_field)
     derivs = prov.constrained_acceleration_derivatives(q, v, pend.load(z))
     return tl.tangent_state_space(
-        derivs, q=q, manifold=EUCLID2, basis_field=tangent_field
+        derivs, q=q, v=v, manifold=EUCLID2, basis_field=tangent_field
     )
 
 
