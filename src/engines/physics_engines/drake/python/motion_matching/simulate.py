@@ -407,7 +407,7 @@ def _import_pydrake() -> _PydrakeApi:
     )
 
 
-def _build_plant(api: _PydrakeApi, opts: SimOptions) -> tuple[Any, Any, Path]:
+def _build_plant(api: _PydrakeApi, opts: SimOptions) -> tuple[Any, Any, Path | str]:
     """Create the builder + finalized plant with the humanoid loaded."""
     builder = api.builder_cls()
     plant, _scene_graph = api.add_plant(builder, opts.time_step_s)
@@ -460,7 +460,7 @@ def _wire_actuation_and_logger(
 def _rollout_metadata(
     plant: Any,
     n_actuators: int,
-    urdf_path: Path,
+    urdf_path: Path | str,
     opts: SimOptions,
     error: BaseException | None,
 ) -> dict[str, Any]:
