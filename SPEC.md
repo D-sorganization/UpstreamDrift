@@ -2741,6 +2741,8 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-16 | #12960 | Adversarial review 2026-10-16: 43 findings with draft PR pitches under docs/development/adversarial-review/ |
+| 2026-10-16 | #13021 | Pin the Bruno 2015 full-body model hash with the owner's 2026-10-16 SimTK licence acceptance; Senteler stays unpinned |
 | 2026-10-16 | #13020 | Confine launcher logo route to its asset directory (fixes unauthenticated arbitrary file read) |
 | 2026-10-16 | #12966 | Render the address ball at the club's own face on the ground for every club (drop the stale capture ball and the duplicate static-pose MuJoCo ball) |
 | 2026-10-16 | #12956 | CC0 short-hair head is now the default HeadSettings.model in every engine; parametric stays selectable |
