@@ -1048,6 +1048,7 @@
 {"path": "loop_nullspace/admission.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/capacity.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/closure_convention.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/constrained_dynamics.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/contracts.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/decomposition.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/event_section.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
@@ -1060,6 +1061,7 @@
 {"path": "loop_nullspace/impact_outcome_map.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/invariants.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/planar_model.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/provider.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/registry.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/simscape_export.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/simscape_rig_spec.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
@@ -1256,6 +1258,7 @@
 {"path": "motion_matching/coordinate_slice.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/cost.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/counterfactual.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/counterfactual_provider.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/crocoddyl_polynomial.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/cross_engine_replay.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/dataset/__init__.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -2561,6 +2564,7 @@
 {"path": "simulation_backends/capabilities.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/compare_cli.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/comparison.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
+{"path": "simulation_backends/constrained_ztcf_zvcf.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/exceptions.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/factory.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/jaxsim_urdf_sdf_gate.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
