@@ -777,6 +777,42 @@ def calibrated_address_summary(
     }
 
 
+def record_calibrated_address(
+    address_report: dict[str, Any],
+    sim: Any,
+    kin: FullBodyMarkerKinematics,
+    address: Any,
+    lane: Lane,
+    labels: tuple[str, ...],
+    adapter: Any,
+) -> None:
+    """Record the calibrated-address summary plus foot and knee diagnostics.
+
+    Preconditions:
+    - ``address_report`` must be a mutable mapping (it is updated in place).
+    - ``address.q`` must match the degrees of freedom of ``kin`` (enforced by
+      :func:`calibrated_address_summary`).
+    """
+    if not isinstance(address_report, dict):
+        raise TypeError("address_report must be a dict")
+    from src.shared.python.motion_matching.pipeline.address_feet import (
+        record_foot_progression,
+    )
+
+    address_report["calibrated"] = calibrated_address_summary(
+        sim, kin, address, lane, labels, adapter
+    )
+    record_foot_progression(address_report, kin, address.q, lane.feet)
+    address_knee.record_knee_flexion(address_report, kin, address.q, lane.knees)
+
+
+def knee_targets_from_args(
+    lane: Any, spec: Mapping[str, Any], args: argparse.Namespace
+) -> address_knee.KneeTargets | None:
+    """Address knee targets for the CLI-requested mode (``--knee-flexion``)."""
+    return build_knee_targets(lane, spec, address_knee.requested_mode(args))
+
+
 @dataclass(frozen=True)
 class AddressStageInputs:
     """Inputs to solve the initial address pose and optional static trial/closure."""

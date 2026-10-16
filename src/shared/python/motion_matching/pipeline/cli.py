@@ -14,7 +14,6 @@ import numpy as np
 
 from src.shared.python.contracts import precondition
 from src.shared.python.motion_matching import (
-    address_knee,
     full_body_forward_dynamics as fs,
 )
 from src.shared.python.motion_matching.club_face_target import (
@@ -36,9 +35,9 @@ from src.shared.python.motion_matching.pipeline.address import (
     HipCalibrationOptions,
     add_hip_zero_twist_argument,
     add_knee_flexion_argument,
-    build_knee_targets,
-    calibrated_address_summary,
+    knee_targets_from_args,
     prepare_hip_spec,
+    record_calibrated_address,
     scaled_offsets,
     search_segment_scales,
     solve_address_stage,
@@ -48,7 +47,6 @@ from src.shared.python.motion_matching.pipeline.address_feet import (
     build_foot_targets,
     foot_progression_series,
     model_feet_deg,
-    record_foot_progression,
     seed_feet,
     split_address_coordinates,
 )
@@ -558,23 +556,6 @@ def _pin_width_spheres(args: Any, lane: Lane, hip_spec: dict[str, Any]) -> None:
         )
 
 
-def _record_calibrated_address(
-    address_report: dict[str, Any],
-    sim: Any,
-    kin: Any,
-    address2: Any,
-    lane: Lane,
-    labels: tuple[str, ...],
-    adapter: Any,
-) -> None:
-    """Record the calibrated-address summary plus foot and knee address diagnostics."""
-    address_report["calibrated"] = calibrated_address_summary(
-        sim, kin, address2, lane, labels, adapter
-    )
-    record_foot_progression(address_report, kin, address2.q, lane.feet)
-    address_knee.record_knee_flexion(address_report, kin, address2.q, lane.knees)
-
-
 def _calibrate_and_scale(
     ctx: PipelineContext,
     lane: Lane,
@@ -656,9 +637,7 @@ def _calibrate_and_scale(
     )
     sim = fs.FullBodySimulator(adapter)
     address2 = lane.best_address(kin, address.q)
-    _record_calibrated_address(
-        address_report, sim, kin, address2, lane, labels, adapter
-    )
+    record_calibrated_address(address_report, sim, kin, address2, lane, labels, adapter)
     return _CalibrateAndScaleResult(
         scaled_spec,
         spec_bytes,
@@ -1296,7 +1275,7 @@ def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
     configure_lane(lane, base_spec)
     mode = getattr(args, "foot_progression", "off")
     lane.feet = build_foot_targets(lane, mode)
-    lane.knees = build_knee_targets(lane, base_spec, address_knee.requested_mode(args))
+    lane.knees = knee_targets_from_args(lane, base_spec, args)
     provenance = BaseSpecProvenance.of(base_spec)  # pre-seeding hash (#12820)
     if lane.feet is not None:
         seed_kin = plant.create_ik(lane.leg_seeds())
