@@ -92,6 +92,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1007 | `src/launchers/launcher_ui_setup.py` |
 | 1000 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_opengl_renderer.py` |
 | 999 | `src/shared/python/estimation/dime_contracts.py` |
+| 998 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 997 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
 | 993 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
 | 990 | `src/engines/physics_engines/drake/python/motion_matching/simulate.py` |
@@ -139,7 +140,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 914 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 913 | `src/engines/physics_engines/opensim/python/tour_matching/native_diagnostic_contract.py` |
 | 911 | `src/engines/physics_engines/opensim/python/spine/inverse_dynamics.py` |
-| 908 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 907 | `src/unreal_integration/mesh_loader.py` |
 | 903 | `src/shared/python/motion_matching/club_only/body_candidates.py` |
 | 902 | `src/tools/capture_rig/reference_comparison.py` |
