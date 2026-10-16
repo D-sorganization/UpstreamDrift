@@ -26,11 +26,11 @@ Scaling upper arm, forearm, and hub lengths on the legacy Simscape trunk topolog
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 1: How the Current Dimensions Were Determined](evidence/anthropometry/REVIEW.md#1-how-the-current-dimensions-were-determined)
-- [REVIEW.md Section 3: Model Versus Anthropometry](evidence/anthropometry/REVIEW.md#3-model-versus-anthropometry)
-- [REVIEW.md Section 5: Recommendations](evidence/anthropometry/REVIEW.md#5-recommendations-ordered-each-with-a-test)
-- [REVIEW.md Section 7: Experiment: Scaling Alone Does Not Work](evidence/anthropometry/REVIEW.md#7-experiment-scaling-alone-does-not-work)
-- [REVIEW.md Section 9: AN-1 Iteration 1](evidence/anthropometry/REVIEW.md#9-an-1-iteration-1-anthropometric-geometry-built-and-measured-10099)
+- [REVIEW.md Section 1: How the Current Dimensions Were Determined](evidence/anthropometry/review/01-baseline-and-recommendations.md#1-how-the-current-dimensions-were-determined)
+- [REVIEW.md Section 3: Model Versus Anthropometry](evidence/anthropometry/review/01-baseline-and-recommendations.md#3-model-versus-anthropometry)
+- [REVIEW.md Section 5: Recommendations](evidence/anthropometry/review/01-baseline-and-recommendations.md#5-recommendations-ordered-each-with-a-test)
+- [REVIEW.md Section 7: Experiment: Scaling Alone Does Not Work](evidence/anthropometry/review/01-baseline-and-recommendations.md#7-experiment-scaling-alone-does-not-work)
+- [REVIEW.md Section 9: AN-1 Iteration 1](evidence/anthropometry/review/02-an1-iteration-1.md#9-an-1-iteration-1-anthropometric-geometry-built-and-measured-10099)
 
 ---
 
@@ -54,7 +54,7 @@ Hanging-arm zero pose (`ARM_DOWN`), which diverged due to gimbal lock across mul
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 9: AN-1 Iteration 1](evidence/anthropometry/REVIEW.md#9-an-1-iteration-1-anthropometric-geometry-built-and-measured-10099)
+- [REVIEW.md Section 9: AN-1 Iteration 1](evidence/anthropometry/review/02-an1-iteration-1.md#9-an-1-iteration-1-anthropometric-geometry-built-and-measured-10099)
 
 ---
 
@@ -78,7 +78,7 @@ Axial clavicle roll primitives, which created a null motion direction and drove 
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 9: AN-1 Iteration 1](evidence/anthropometry/REVIEW.md#9-an-1-iteration-1-anthropometric-geometry-built-and-measured-10099)
+- [REVIEW.md Section 9: AN-1 Iteration 1](evidence/anthropometry/review/02-an1-iteration-1.md#9-an-1-iteration-1-anthropometric-geometry-built-and-measured-10099)
 
 ---
 
@@ -102,8 +102,8 @@ Running a second static-trial round using placed markers as seeds, or running un
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 9: AN-1 Iteration 1](evidence/anthropometry/REVIEW.md#9-an-1-iteration-1-anthropometric-geometry-built-and-measured-10099)
-- [REVIEW.md Section 9.2: Neck Joint and Address Arms](evidence/anthropometry/REVIEW.md#92-neck-joint-and-address-arms-user-direction-2026-09-14)
+- [REVIEW.md Section 9: AN-1 Iteration 1](evidence/anthropometry/review/02-an1-iteration-1.md#9-an-1-iteration-1-anthropometric-geometry-built-and-measured-10099)
+- [REVIEW.md Section 9.2: Neck Joint and Address Arms](evidence/anthropometry/review/02-an1-iteration-1.md#92-neck-joint-and-address-arms-user-direction-2026-09-14)
 
 ---
 
@@ -127,9 +127,9 @@ Fixed heuristic elbow pit targets (up and inward), inward humerus rotational see
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 9.2: Neck Joint and Address Arms](evidence/anthropometry/REVIEW.md#92-neck-joint-and-address-arms-user-direction-2026-09-14)
-- [REVIEW.md Section 9.3: Wrist Axis, Setup Position](evidence/anthropometry/REVIEW.md#93-wrist-axis-setup-position-cross-engine-parity-centre-of-mass-user-direction-2026-09-14)
-- [REVIEW.md Section 12: Elbow Pits from the Markers](evidence/anthropometry/REVIEW.md#12-elbow-pits-from-the-markers-grip-roll-club-mesh-epic-2026-09-14)
+- [REVIEW.md Section 9.2: Neck Joint and Address Arms](evidence/anthropometry/review/02-an1-iteration-1.md#92-neck-joint-and-address-arms-user-direction-2026-09-14)
+- [REVIEW.md Section 9.3: Wrist Axis, Setup Position](evidence/anthropometry/review/02-an1-iteration-1.md#93-wrist-axis-setup-position-cross-engine-parity-centre-of-mass-user-direction-2026-09-14)
+- [REVIEW.md Section 12: Elbow Pits from the Markers](evidence/anthropometry/review/03-clubs-wrist-closure-and-grip.md#12-elbow-pits-from-the-markers-grip-roll-club-mesh-epic-2026-09-14)
 
 ---
 
@@ -154,8 +154,8 @@ Legacy wrist frames without ulnar offset, which forced large non-zero address an
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 9.3: Wrist Axis, Setup Position](evidence/anthropometry/REVIEW.md#93-wrist-axis-setup-position-cross-engine-parity-centre-of-mass-user-direction-2026-09-14)
-- [REVIEW.md Section 11: Anatomical Wrist, Visual Realism](evidence/anthropometry/REVIEW.md#11-anatomical-wrist-visual-realism-launcher-tool-epic-10113-user-direction-2026-09-14)
+- [REVIEW.md Section 9.3: Wrist Axis, Setup Position](evidence/anthropometry/review/02-an1-iteration-1.md#93-wrist-axis-setup-position-cross-engine-parity-centre-of-mass-user-direction-2026-09-14)
+- [REVIEW.md Section 11: Anatomical Wrist, Visual Realism](evidence/anthropometry/review/03-clubs-wrist-closure-and-grip.md#11-anatomical-wrist-visual-realism-launcher-tool-epic-10113-user-direction-2026-09-14)
 
 ---
 
@@ -189,9 +189,9 @@ One-dimensional grip roll rotation scans (`scan_grip_roll.py`, tested from $-90^
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 12: Elbow Pits from the Markers](evidence/anthropometry/REVIEW.md#12-elbow-pits-from-the-markers-grip-roll-club-mesh-epic-2026-09-14)
-- [REVIEW.md Section 13: Closure Weld Fitted from the Address](evidence/anthropometry/REVIEW.md#13-closure-weld-fitted-from-the-address-mm-2-2026-09-14)
-- [REVIEW.md Section 14: Hand-to-Club Rotation Fitted from the Matches](evidence/anthropometry/REVIEW.md#14-hand-to-club-rotation-fitted-from-the-matches-wrists-bounded-mm-2-2026-09-14)
+- [REVIEW.md Section 12: Elbow Pits from the Markers](evidence/anthropometry/review/03-clubs-wrist-closure-and-grip.md#12-elbow-pits-from-the-markers-grip-roll-club-mesh-epic-2026-09-14)
+- [REVIEW.md Section 13: Closure Weld Fitted from the Address](evidence/anthropometry/review/03-clubs-wrist-closure-and-grip.md#13-closure-weld-fitted-from-the-address-mm-2-2026-09-14)
+- [REVIEW.md Section 14: Hand-to-Club Rotation Fitted from the Matches](evidence/anthropometry/review/03-clubs-wrist-closure-and-grip.md#14-hand-to-club-rotation-fitted-from-the-matches-wrists-bounded-mm-2-2026-09-14)
 
 ---
 
@@ -216,8 +216,8 @@ Enforcing wrist bounds prior to calibrating `GRIP_ROTATION_DEG`, which destroyed
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 10: Ranges of Motion](evidence/anthropometry/REVIEW.md#10-clubs-captures-torso-visuals-ranges-of-motion-balance-user-direction-2026-09-14)
-- [REVIEW.md Section 14: Hand-to-Club Rotation Fitted from the Matches](evidence/anthropometry/REVIEW.md#14-hand-to-club-rotation-fitted-from-the-matches-wrists-bounded-mm-2-2026-09-14)
+- [REVIEW.md Section 10: Ranges of Motion](evidence/anthropometry/review/03-clubs-wrist-closure-and-grip.md#10-clubs-captures-torso-visuals-ranges-of-motion-balance-user-direction-2026-09-14)
+- [REVIEW.md Section 14: Hand-to-Club Rotation Fitted from the Matches](evidence/anthropometry/review/03-clubs-wrist-closure-and-grip.md#14-hand-to-club-rotation-fitted-from-the-matches-wrists-bounded-mm-2-2026-09-14)
 
 ---
 
@@ -242,8 +242,8 @@ Hardcoding club masses and inertia values separately in individual document gene
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 10: Clubs, Captures](evidence/anthropometry/REVIEW.md#10-clubs-captures-torso-visuals-ranges-of-motion-balance-user-direction-2026-09-14)
-- [REVIEW.md Section 11: Club Specs from the Club Database](evidence/anthropometry/REVIEW.md#11-anatomical-wrist-visual-realism-launcher-tool-epic-10113-user-direction-2026-09-14)
+- [REVIEW.md Section 10: Clubs, Captures](evidence/anthropometry/review/03-clubs-wrist-closure-and-grip.md#10-clubs-captures-torso-visuals-ranges-of-motion-balance-user-direction-2026-09-14)
+- [REVIEW.md Section 11: Club Specs from the Club Database](evidence/anthropometry/review/03-clubs-wrist-closure-and-grip.md#11-anatomical-wrist-visual-realism-launcher-tool-epic-10113-user-direction-2026-09-14)
 
 ---
 
@@ -269,7 +269,7 @@ Overly soft soles ($25\text{ kN/m}$, which sank excessively, causing 169 mm root
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
+- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/review/04-downswing-dynamics.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
 
 ---
 
@@ -311,7 +311,7 @@ A full pipeline re-solve with the final code (`5f8ee41fe5`, both changes plus th
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
+- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/review/04-downswing-dynamics.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
 
 ---
 
@@ -336,7 +336,7 @@ Attempting to force root stabilization through aggressive PD control gains on th
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
+- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/review/04-downswing-dynamics.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
 
 ---
 
@@ -374,10 +374,10 @@ Documented above for each approach with concrete failure receipts.
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 12: Grip Roll](evidence/anthropometry/REVIEW.md#12-elbow-pits-from-the-markers-grip-roll-club-mesh-epic-2026-09-14)
-- [REVIEW.md Section 13: Closure Weld Fitted from the Address](evidence/anthropometry/REVIEW.md#13-closure-weld-fitted-from-the-address-mm-2-2026-09-14)
-- [REVIEW.md Section 15: Cart-Table Dynamics Filter](evidence/anthropometry/REVIEW.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
-- [REVIEW.md Section 16: Contact-Aware Shooting Fit](evidence/anthropometry/REVIEW.md#16-contact-aware-shooting-fit-fb-5-mm-7b-2026-09-14)
+- [REVIEW.md Section 12: Grip Roll](evidence/anthropometry/review/03-clubs-wrist-closure-and-grip.md#12-elbow-pits-from-the-markers-grip-roll-club-mesh-epic-2026-09-14)
+- [REVIEW.md Section 13: Closure Weld Fitted from the Address](evidence/anthropometry/review/03-clubs-wrist-closure-and-grip.md#13-closure-weld-fitted-from-the-address-mm-2-2026-09-14)
+- [REVIEW.md Section 15: Cart-Table Dynamics Filter](evidence/anthropometry/review/04-downswing-dynamics.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
+- [REVIEW.md Section 16: Contact-Aware Shooting Fit](evidence/anthropometry/review/05-shooting-fit-and-trajectory-optimisation.md#16-contact-aware-shooting-fit-fb-5-mm-7b-2026-09-14)
 
 ---
 
@@ -403,7 +403,7 @@ Large optimization learning rates ($2 \times 10^{-3}\text{ rad/knot}$), which ca
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 17: Differentiable Trajectory Optimisation with MuJoCo MJX](evidence/anthropometry/REVIEW.md#17-differentiable-trajectory-optimisation-with-mujoco-mjx-fb-5-mm-7b-2026-09-14)
+- [REVIEW.md Section 17: Differentiable Trajectory Optimisation with MuJoCo MJX](evidence/anthropometry/review/05-shooting-fit-and-trajectory-optimisation.md#17-differentiable-trajectory-optimisation-with-mujoco-mjx-fb-5-mm-7b-2026-09-14)
 
 ---
 
