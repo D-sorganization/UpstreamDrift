@@ -1,0 +1,21 @@
+# Capability Baseline Inventory: Governance
+
+<!-- Generated: python -m scripts.generate_capability_baseline -->
+
+Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
+
+| ID | Name | Entity Kind | Primary Workspace | Secondary Links | Authority | Lifecycle | Evidence | Acceptance Owner |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `aip` | AI Protocol (AIP) | `tile` | `governance` | — | `core` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
+| `chat.live_context` | Live app/engine context in chat | `feature` | `governance` | — | `core` | 🟢 active_feature | `src/launchers/launcher_sidekick_sidebar.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `chat.transport` | AI chat transport (message send/stream) | `feature` | `governance` | — | `core` | 🟢 active_feature | `src/launchers/launcher_sidekick_sidebar.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `chat_assistant` | AI Assistant | `tile` | `governance` | — | `core` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
+| `config_setup_wizard` | Setup Wizard | `tile` | `governance` | — | `core` | 🟢 active_feature | `src/tools/config_setup_wizard/_embed_adapter.py` | `tests/config/test_launcher_registry_parity.py` |
+| `docs.document_library` | Document library / project map viewer | `feature` | `governance` | — | `core` | ⚪ exempt | `src/launchers/library_widget.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `launcher.mcp_config` | MCP server configuration writer/preferences | `feature` | `governance` | — | `core` | ⚪ exempt | `src/launchers/mcp_config_writer.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `library_tool` | Library | `tile` | `governance` | — | `core` | 🟢 active_feature | `virtual/library` | `tests/config/test_launcher_registry_parity.py` |
+| `platform.aip_protocol` | AI Protocol (AIP) structured method dispatch | `feature` | `governance` | — | `core` | 🟢 active_feature | `src/api/routes/aip.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `project_map` | Project Map | `tile` | `governance` | — | `core` | 🟢 active_feature | `docs/architecture/PROJECT_MAP.md` | `tests/config/test_launcher_registry_parity.py` |
+| `sidekick` | Sidekick | `tile` | `governance` | — | `core` | 🟢 active_feature | `src/tools/sidekick/_embed_adapter.py` | `tests/config/test_launcher_registry_parity.py` |
+| `sidekick.terminal_repl_jupyter_skills` | Sidekick OS terminal / REPL / Jupyter / skills | `feature` | `governance` | — | `core` | ⚪ exempt | `src/launchers/launcher_sidekick_sidebar.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `tools.terrain_engine` | Terrain and topography configuration | `feature` | `governance` | — | `core` | 🟢 active_feature | `src/api/routes/terrain.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |

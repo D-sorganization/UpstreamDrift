@@ -329,8 +329,8 @@ def _law_levels(law: CouplingLaw) -> set[SpinalLevel]:
 def _pelvis_columns(poses: np.ndarray, enc: PelvisCoordinates) -> dict[str, np.ndarray]:
     # Copy: SciPy < 1.15 ``Rotation`` rejects the read-only pose arrays.
     rotation = Rotation.from_matrix(np.array(poses[:, :3, :3]))
-    angles = rotation.as_euler(cast(Any, enc.sequence))
-    angles = np.unwrap(angles, axis=0)
+    euler = rotation.as_euler(cast(Any, enc.sequence))
+    angles: np.ndarray = np.unwrap(euler, axis=0)
     out = {name: angles[:, k] for k, name in enumerate(enc.rotation)}
     out.update({name: poses[:, k, 3] for k, name in enumerate(enc.translation)})
     return out

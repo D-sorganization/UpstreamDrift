@@ -15,6 +15,8 @@ from src.shared.python.motion_matching.candidate import (
     MatchedSwingCandidate,
 )
 from src.shared.python.motion_matching.candidate_session import CandidateSession
+from src.shared.python.motion_matching import counterfactual_provider
+from src.shared.python.motion_matching.counterfactual import CounterfactualDynamics
 from src.tools.tour_matching_viewer.force_inspection import ForceInspectionWidget
 from src.tools.tour_matching_viewer.gui import TourMatchingViewerWidget
 
@@ -124,8 +126,25 @@ def test_force_inspection_widget_dynamic_session_telemetry(qapp: Any) -> None:
     assert "Peak |tau|: 15.0 N*m" in widget._peak_torque_label.text()
 
 
-def test_force_inspection_widget_counterfactual_signal(qapp: Any) -> None:
+class _UnitInertiaProvider:
+    """Real (if simple) forward dynamics: unit inertia, no bias."""
+
+    def mass_matrix(self, q: np.ndarray) -> np.ndarray:
+        return np.eye(len(q))
+
+    def bias_forces(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        return np.zeros(len(q))
+
+
+def test_force_inspection_widget_counterfactual_signal(
+    qapp: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Clicking fork button generates rollout and emits counterfactualForked signal."""
+    monkeypatch.setattr(
+        counterfactual_provider,
+        "resolve_session_dynamics",
+        lambda _session: CounterfactualDynamics(_UnitInertiaProvider()),
+    )
     widget = ForceInspectionWidget()
     session = _create_mock_session(has_forces=True, is_dynamic=True)
     widget.set_candidate_session(session)
@@ -140,6 +159,29 @@ def test_force_inspection_widget_counterfactual_signal(qapp: Any) -> None:
     fork = received_forks[0]
     assert fork.fork_frame_idx == 0
     assert "Forked" in widget._fork_status_label.text()
+
+
+def test_force_inspection_widget_fork_failure_emits_nothing(
+    qapp: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A fork whose dynamics cannot be resolved reports failure, emits no fork."""
+
+    def _unresolvable(_session: Any) -> CounterfactualDynamics:
+        raise ValueError("no dynamics for this session")
+
+    monkeypatch.setattr(
+        counterfactual_provider, "resolve_session_dynamics", _unresolvable
+    )
+    widget = ForceInspectionWidget()
+    widget.set_candidate_session(_create_mock_session(has_forces=True))
+    received_forks: list[Any] = []
+    widget.counterfactualForked.connect(received_forks.append)
+
+    widget.update_frame(0)
+    widget._fork_btn.click()
+
+    assert received_forks == []
+    assert "Fork failed" in widget._fork_status_label.text()
 
 
 def test_tour_matching_viewer_embeds_force_widget(qapp: Any) -> None:

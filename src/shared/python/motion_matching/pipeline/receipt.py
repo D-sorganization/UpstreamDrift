@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import hashlib
 import json
 import logging
+import math
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -14,6 +15,7 @@ import numpy as np
 
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
 from src.shared.python.motion_matching.pipeline.address import posture_summary
+from src.shared.python.motion_matching.pipeline.address_feet import MODES
 from src.shared.python.motion_matching.pipeline.constants import (
     IK_UNBOUNDED,
     RATE_HZ,
@@ -28,6 +30,61 @@ if TYPE_CHECKING:
         FullBodyMarkerKinematics,
     )
     from src.shared.python.motion_matching.pipeline.lane import Lane
+
+
+@dataclass(frozen=True)
+class BaseSpecProvenance:
+    """Receipt provenance of the committed base spec (#12820).
+
+    ``sha256`` is the canonical digest of the document as read from disk,
+    before foot-progression seeding rewrites its ``address_seed_deg``, so
+    the receipt chains to the committed file whatever the feet mode.
+    ``foot_progression_mode`` and ``foot_seed_deg`` record the seeding, so
+    the seeded document is the committed one with ``foot_seed_deg`` merged
+    into ``address_seed_deg``.
+    """
+
+    sha256: str
+    foot_progression_mode: str = "off"
+    foot_seed_deg: Mapping[str, float] | None = None
+
+    def __post_init__(self) -> None:
+        if self.foot_progression_mode not in MODES:
+            raise ValueError(
+                f"foot_progression_mode must be one of {MODES}, "
+                f"got {self.foot_progression_mode!r}"
+            )
+        if self.foot_progression_mode == "off":
+            if self.foot_seed_deg is not None:
+                raise ValueError("foot_seed_deg must be None when feet are off")
+            return
+        if not self.foot_seed_deg:
+            raise ValueError("a seeded foot-progression mode needs foot_seed_deg")
+        for name, value in self.foot_seed_deg.items():
+            if isinstance(value, bool) or not math.isfinite(float(value)):
+                raise ValueError(f"foot_seed_deg[{name!r}] must be finite")
+
+    @classmethod
+    def of(
+        cls,
+        document: Mapping[str, Any],
+        foot_progression_mode: str = "off",
+        foot_seed_deg: Mapping[str, float] | None = None,
+    ) -> BaseSpecProvenance:
+        """Provenance of the unseeded ``document`` (the one hashing helper)."""
+        if not isinstance(document, Mapping):
+            raise TypeError("document must be a mapping")
+        seed = None if foot_seed_deg is None else dict(foot_seed_deg)
+        return cls(canonical_sha256(document), foot_progression_mode, seed)
+
+    def receipt_fields(self) -> dict[str, Any]:
+        """Top-level receipt fields carrying this provenance."""
+        seed = self.foot_seed_deg
+        return {
+            "base_spec_sha256": self.sha256,
+            "foot_progression_mode": self.foot_progression_mode,
+            "foot_seed_deg": None if seed is None else dict(seed),
+        }
 
 
 @dataclass(frozen=True)
@@ -57,6 +114,7 @@ class GroundSupportReceiptInputs:
     ik_backend: str = "lm"
     tracking_backend: str = "kkt"
     validate: bool = True
+    provenance: BaseSpecProvenance | None = None
 
 
 def _spec_canonical_sha256(spec_bytes: bytes) -> str:
@@ -86,6 +144,7 @@ def build_ground_support_receipt(
     lane = inputs.lane
     kin = inputs.kin
     q_ref = inputs.q_ref
+    provenance = inputs.provenance
 
     stance_fraction = {
         name: float(np.mean([name in s for s in lane.stance]))
@@ -100,7 +159,7 @@ def build_ground_support_receipt(
         "backend": inputs.backend,
         "ik_backend": inputs.ik_backend,
         "tracking_backend": inputs.tracking_backend,
-        "base_spec_sha256": canonical_sha256(inputs.base_spec),
+        **(provenance or BaseSpecProvenance.of(inputs.base_spec)).receipt_fields(),
         "base_spec_file": inputs.spec_path.name,
         "spec_file": inputs.scaled_path.name,
         "hipcal_spec_file": inputs.hipcal_path.name,

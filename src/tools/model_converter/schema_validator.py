@@ -266,13 +266,8 @@ def _parse_joint(data: dict[str, Any], segment_name: str) -> Joint:
     return Joint(joint_type=joint_type, dofs=tuple(dofs), damping=damping)
 
 
-def validate_canonical_model(source: dict[str, Any] | Path | str) -> CanonicalModel:
-    """Validate a canonical specification dictionary or YAML file path.
-
-    Raises:
-        ValidationError: If schema or physical validity checks fail.
-        FileNotFoundError: If path does not exist.
-    """
+def _load_spec_data(source: dict[str, Any] | Path | str) -> dict[str, Any]:
+    """Load the raw specification mapping from a dict or YAML path."""
     if isinstance(source, (Path, str)):
         path = Path(source)
         if not path.exists():
@@ -288,24 +283,19 @@ def validate_canonical_model(source: dict[str, Any] | Path | str) -> CanonicalMo
 
     if not isinstance(data, dict):
         raise ValidationError("Top-level YAML structure must be a dictionary")
+    return data
 
-    # Required top-level keys
-    for req in ("root", "segments"):
-        if req not in data:
-            raise ValidationError(f"Missing required top-level section: '{req}'")
 
-    # Units check
-    units = data.get("units", {})
-    if not isinstance(units, dict):
-        raise ValidationError("'units' section must be a dictionary")
+def _require_dict_section(data: dict[str, Any], key: str) -> dict[str, Any]:
+    """Return optional top-level section ``key`` (default ``{}``), which must be a dict."""
+    section = data.get(key, {})
+    if not isinstance(section, dict):
+        raise ValidationError(f"'{key}' section must be a dictionary")
+    return section
 
-    # Coordinate system check
-    coord_sys = data.get("coordinate_system", {})
-    if not isinstance(coord_sys, dict):
-        raise ValidationError("'coordinate_system' section must be a dictionary")
 
-    # Root validation
-    root_data = data["root"]
+def _parse_root(root_data: Any) -> RootBody:
+    """Parse and validate the ``root`` section."""
     if not isinstance(root_data, dict):
         raise ValidationError("'root' section must be a dictionary")
     root_name = root_data.get("name")
@@ -321,7 +311,7 @@ def validate_canonical_model(source: dict[str, Any] | Path | str) -> CanonicalMo
     root_inertia = _parse_inertia(root_data.get("inertia", {}), root_name)
     root_geom = _parse_geometry(root_data.get("geometry", {}), root_name)
 
-    root = RootBody(
+    return RootBody(
         name=root_name,
         frame=str(root_data.get("frame", f"{root_name}_frame")),
         position=root_pos,
@@ -331,68 +321,72 @@ def validate_canonical_model(source: dict[str, Any] | Path | str) -> CanonicalMo
         geometry=root_geom,
     )
 
-    # Segments validation
-    raw_segments = data["segments"]
+
+def _parse_segment(seg_dict: Any, seen_names: set[str]) -> Segment:
+    """Parse one segment entry, registering its name in ``seen_names``."""
+    if not isinstance(seg_dict, dict):
+        raise ValidationError(
+            f"Segment entry must be a dictionary, got {type(seg_dict)}"
+        )
+    name = seg_dict.get("name")
+    if not name or not isinstance(name, str):
+        raise ValidationError("Segment missing a non-empty string 'name'")
+    if name in seen_names:
+        raise ValidationError(f"Duplicate segment name: '{name}'")
+    seen_names.add(name)
+
+    parent = seg_dict.get("parent")
+    if not parent or not isinstance(parent, str):
+        raise ValidationError(f"Segment '{name}' missing a non-empty parent name")
+
+    mass = float(seg_dict.get("mass", 0.0))
+    if mass <= 0:
+        raise ValidationError(f"Segment '{name}' mass must be positive, got {mass}")
+
+    origin_dict = seg_dict.get("origin", {})
+    origin = Transform(
+        xyz=_parse_vec3(origin_dict.get("xyz", [0.0, 0.0, 0.0])),
+        rpy=_parse_vec3(origin_dict.get("rpy", [0.0, 0.0, 0.0])),
+    )
+
+    return Segment(
+        name=name,
+        parent=parent,
+        joint=_parse_joint(seg_dict.get("joint", {}), name),
+        origin=origin,
+        mass=mass,
+        inertia=_parse_inertia(seg_dict.get("inertia", {}), name),
+        geometry=_parse_geometry(seg_dict.get("geometry", {}), name),
+    )
+
+
+def _parse_segments(raw_segments: Any, root_name: str) -> list[Segment]:
+    """Parse the ``segments`` list, rejecting duplicates of ``root_name``."""
     if not isinstance(raw_segments, list) or len(raw_segments) == 0:
         raise ValidationError(
             "'segments' must be a non-empty list of segment definitions"
         )
-
-    parsed_segments: list[Segment] = []
     seen_names: set[str] = {root_name}
+    return [_parse_segment(seg_dict, seen_names) for seg_dict in raw_segments]
 
-    for seg_dict in raw_segments:
-        if not isinstance(seg_dict, dict):
-            raise ValidationError(
-                f"Segment entry must be a dictionary, got {type(seg_dict)}"
-            )
-        name = seg_dict.get("name")
-        if not name or not isinstance(name, str):
-            raise ValidationError("Segment missing a non-empty string 'name'")
-        if name in seen_names:
-            raise ValidationError(f"Duplicate segment name: '{name}'")
-        seen_names.add(name)
 
-        parent = seg_dict.get("parent")
-        if not parent or not isinstance(parent, str):
-            raise ValidationError(f"Segment '{name}' missing a non-empty parent name")
-
-        mass = float(seg_dict.get("mass", 0.0))
-        if mass <= 0:
-            raise ValidationError(f"Segment '{name}' mass must be positive, got {mass}")
-
-        origin_dict = seg_dict.get("origin", {})
-        xyz = _parse_vec3(origin_dict.get("xyz", [0.0, 0.0, 0.0]))
-        rpy = _parse_vec3(origin_dict.get("rpy", [0.0, 0.0, 0.0]))
-        origin = Transform(xyz=xyz, rpy=rpy)
-
-        joint = _parse_joint(seg_dict.get("joint", {}), name)
-        inertia = _parse_inertia(seg_dict.get("inertia", {}), name)
-        geometry = _parse_geometry(seg_dict.get("geometry", {}), name)
-
-        parsed_segments.append(
-            Segment(
-                name=name,
-                parent=parent,
-                joint=joint,
-                origin=origin,
-                mass=mass,
-                inertia=inertia,
-                geometry=geometry,
-            )
-        )
-
-    # Topological connectivity validation (all parents must exist, no cycles)
-    all_names = {s.name for s in parsed_segments} | {root.name}
-    for seg in parsed_segments:
+def _check_parents_exist(root: RootBody, segments: list[Segment]) -> set[str]:
+    """Verify every segment parent exists; return the set of all body names."""
+    all_names = {s.name for s in segments} | {root.name}
+    for seg in segments:
         if seg.parent not in all_names:
             raise ValidationError(
                 f"Segment '{seg.name}' has nonexistent parent '{seg.parent}'"
             )
+    return all_names
 
-    # Cycle detection using depth-first search from root
+
+def _check_acyclic_and_connected(
+    root: RootBody, segments: list[Segment], all_names: set[str]
+) -> None:
+    """Depth-first search from root: reject cycles and unreachable segments."""
     adj: dict[str, list[str]] = {name: [] for name in all_names}
-    for seg in parsed_segments:
+    for seg in segments:
         adj[seg.parent].append(seg.name)
 
     visited: set[str] = set()
@@ -418,6 +412,33 @@ def validate_canonical_model(source: dict[str, Any] | Path | str) -> CanonicalMo
         raise ValidationError(
             f"Disconnected segments not reachable from root '{root.name}': {sorted(unvisited)}"
         )
+
+
+def _validate_topology(root: RootBody, segments: list[Segment]) -> None:
+    """Validate kinematic-tree connectivity (parents exist, no cycles)."""
+    all_names = _check_parents_exist(root, segments)
+    _check_acyclic_and_connected(root, segments, all_names)
+
+
+def validate_canonical_model(source: dict[str, Any] | Path | str) -> CanonicalModel:
+    """Validate a canonical specification dictionary or YAML file path.
+
+    Raises:
+        ValidationError: If schema or physical validity checks fail.
+        FileNotFoundError: If path does not exist.
+    """
+    data = _load_spec_data(source)
+
+    for req in ("root", "segments"):
+        if req not in data:
+            raise ValidationError(f"Missing required top-level section: '{req}'")
+
+    units = _require_dict_section(data, "units")
+    coord_sys = _require_dict_section(data, "coordinate_system")
+
+    root = _parse_root(data["root"])
+    parsed_segments = _parse_segments(data["segments"], root.name)
+    _validate_topology(root, parsed_segments)
 
     logger.info(
         "Successfully validated canonical model '%s' with %d segments (total mass %.2f kg)",

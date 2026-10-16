@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
+
+from src.shared.python.motion_matching.pipeline.address_feet import MODES
 
 from .receipt_components import (
     AcceptanceGateReport,
@@ -138,6 +141,22 @@ class Receipt(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
+    @field_validator("foot_progression_mode")
+    @classmethod
+    def _known_foot_progression_mode(cls, value: str | None) -> str | None:
+        if value is not None and value not in MODES:
+            raise ValueError(f"must be one of {MODES}, got {value!r}")
+        return value
+
+    @field_validator("foot_seed_deg")
+    @classmethod
+    def _finite_foot_seed(
+        cls, value: dict[str, float] | None
+    ) -> dict[str, float] | None:
+        if value is not None and not all(math.isfinite(v) for v in value.values()):
+            raise ValueError("foot_seed_deg values must be finite")
+        return value
+
     backend: str = Field(
         "mujoco",
         description="Kinematic backend engine used for tracking (mujoco or pink)",
@@ -150,13 +169,32 @@ class Receipt(BaseModel):
     )
     base_spec_sha256: str = Field(
         ...,
-        description="SHA256 hash of the initial input model specification document",
+        description=(
+            "Canonical SHA256 of the input model specification document as "
+            "committed, before foot-progression seeding (#12820)"
+        ),
         json_schema_extra={"unit": "hash", "stage": "metadata"},
     )
     base_spec_file: str | None = Field(
         None,
         description="Filename of the input model specification document",
         json_schema_extra={"unit": "filename", "stage": "metadata"},
+    )
+    foot_progression_mode: str | None = Field(
+        None,
+        description=(
+            "Address foot-progression mode the run seeded the base spec with "
+            "(#12820); absent on receipts written before it"
+        ),
+        json_schema_extra={"unit": "string", "stage": "metadata"},
+    )
+    foot_seed_deg: dict[str, float] | None = Field(
+        None,
+        description=(
+            "Hip-rotation address seeds merged into the base spec's "
+            "address_seed_deg by foot progression (#12820); None when feet are off"
+        ),
+        json_schema_extra={"unit": "deg", "stage": "metadata"},
     )
     spec_file: str = Field(
         ...,
