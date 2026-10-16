@@ -58,7 +58,8 @@ def muscle_noise_spec(
     """Declared signal-dependent white force noise, one channel per muscle.
 
     ``kappa`` (``sqrt(s)``) and ``sigma0`` (``N sqrt(s)``) are scalars or
-    per-muscle arrays.  Preconditions (``ValueError``): ``kappa`` finite and
+    per-muscle arrays.  ``kappa == 0`` everywhere declares *no* signal law
+    (additive noise only, ``H-NOISE-ADDITIVE``): the negative control of rule V1.  Preconditions (``ValueError``): ``kappa`` finite and
     ``>= 0``, ``sigma0`` finite and ``>= 0``.  Postcondition: the spec's signal
     law is active with bounds ``[0, 1]`` per channel.
     """
@@ -69,6 +70,7 @@ def muscle_noise_spec(
         raise ValueError("kappa must be finite and non-negative")
     if not (np.all(np.isfinite(sig)) and np.all(sig >= 0.0)):
         raise ValueError("sigma0 must be finite and non-negative")
+    law = bool(np.any(kap > 0.0))
     return DisturbanceSpec(
         name=name,
         stage=InjectionStage.ACTIVATION,
@@ -76,8 +78,10 @@ def muscle_noise_spec(
         units="N",
         covariance=np.diag(sig**2),
         spectrum=Spectrum.WHITE,
-        signal_gain=tuple(float(g) for g in kap * frame.max_isometric_force),
-        signal_bounds=((0.0, 1.0),) * m,
+        signal_gain=(
+            tuple(float(g) for g in kap * frame.max_isometric_force) if law else None
+        ),
+        signal_bounds=((0.0, 1.0),) * m if law else None,
     )
 
 
@@ -103,6 +107,6 @@ def joint_torque_covariance(
     if not (math.isfinite(dt) and dt > 0.0):
         raise ValueError(f"dt must be positive and finite, got {dt}")
     a = np.asarray(activation, dtype=np.float64)
-    cov = spec.discrete_covariance(dt, a)
+    cov = spec.discrete_covariance(dt, a if spec.has_signal_law else None)
     out = frame.moment_arms.T @ cov @ frame.moment_arms
     return np.asarray(0.5 * (out + out.T))
