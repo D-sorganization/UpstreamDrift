@@ -489,58 +489,111 @@ def fd_step_convergence(
 class TangentStateSpace:
     """``d x_t/dt = F x_t + G du`` in the frame coordinates ``x_t = (xi, eta)``.
 
-    ``F`` is ``(2, 2)``, ``G`` is ``(2, nu)`` for a one-dimensional tangent
-    space (the case ``sec:var-lin`` specifies).
+    ``F`` is ``(2k, 2k)`` and ``G`` is ``(2k, nu)`` for a ``k``-dimensional
+    tangent space (``loop_nullspace.tex``, ``sec:var-lin-k``).  ``connection`` is
+    the skew moving-frame connection ``Gamma_v = P^T d_q P[v]`` and
+    ``normal_offset`` the symmetric positive-semidefinite velocity-offset
+    coupling ``(d_q P[v])^T (I - P P^T) d_q P[P .] omega``; both ``(k, k)``.
     """
 
     F: Array
     G: Array
     basis: Array
+    connection: Array
+    normal_offset: Array
+
+
+def _frame_derivative_columns(
+    basis_field: Callable[[Array], Array],
+    manifold: ConfigurationManifold,
+    q: Array,
+    basis: Array,
+    step: float,
+) -> list[Array]:
+    """``d_q P [P e_j]`` for every column ``j`` (central difference), ``(nv, k)``."""
+    cols = []
+    for j in range(basis.shape[1]):
+        plus = np.asarray(basis_field(manifold.retract(q, step * basis[:, j])))
+        minus = np.asarray(basis_field(manifold.retract(q, -step * basis[:, j])))
+        cols.append((plus - minus) / (2.0 * step))
+    return cols
+
+
+def _connection_blocks(
+    basis: Array, d_cols: list[Array], omega: Array
+) -> tuple[Array, Array]:
+    """``(Gamma_v, normal offset)`` from ``d_q P[P e_j]`` and ``omega = P^T v``.
+
+    ``d_q P[v] = sum_j omega_j d_q P[P e_j]`` (linear in the direction);
+    ``Gamma_v = P^T d_q P[v]`` is skew because ``P^T P = I``.  The velocity
+    offset of the tangent bundle is the normal part of ``d_q P[P e_j] omega``,
+    so the coupling is ``(d_q P[v])^T N d_q P[P e_j] omega`` with ``N = I - P P^T``.
+    """
+    d_v = sum(w * d for w, d in zip(omega, d_cols, strict=True))
+    normal = np.eye(basis.shape[0]) - basis @ basis.T
+    offset = np.column_stack([normal @ (d @ omega) for d in d_cols])
+    return np.asarray(basis.T @ d_v), np.asarray(d_v.T @ offset)
 
 
 def tangent_state_space(
     derivs: ClosedLoopDerivatives,
     *,
     q: ArrayLike,
+    v: ArrayLike,
     manifold: ConfigurationManifold,
     basis_field: Callable[[Array], Array],
     selection: ArrayLike | None = None,
     step: float = 1e-5,
 ) -> TangentStateSpace:
-    """``(F_t, G_t)`` in the frame ``P(q)``: ``F = [[0, 1], [P^T dA/dxi + c, P^T
-    dA/deta]]`` and ``G = [[0], [P^T dA/dtau S^T]]``.
+    """``(F_t, G_t)`` in the moving tangent frame ``P(q)``, any ``k >= 1``.
 
-    ``c = (d_q P^T [P e]) a`` is the moving-frame (connection) term; for the
-    pendulum it produces the ``omega^2`` in ``F10 = omega^2 + lambda/m``.
+    With ``dq = P xi``, ``dv = P eta + O xi`` (``O`` the minimum-norm offset) and
+    ``Gamma_v = P^T d_q P[v]`` the frame rate of rotation::
+
+        xi'  = eta - Gamma_v xi
+        eta' = (P^T dA/dxi + K) xi + (P^T dA/deta - Gamma_v) eta + P^T dA/dtau du
+
+    ``K = (d_q P[v])^T N d_q P[P .] omega`` couples the velocity offset to the
+    rotating frame.  For ``k = 1`` ``Gamma_v = 0`` and ``K`` equals the scalar
+    ``(d_q P [P]) . a`` of the pendulum (``F10 = omega^2 + lambda/m``).  The
+    derivation and the frame law ``F' = T^T F T + blkdiag(dR^T R)`` under
+    ``P -> P R(q)`` are in ``loop_nullspace.tex``, ``sec:var-lin-k``.
+
     ``selection`` is the actuator map ``S`` (``nu, nv``); default identity.
-
-    Preconditions (``ValueError``): tangent dimension ``k = 1`` -- the kinematic
-    connection of ``k > 1`` frames is not specified by NSX-80 and is not
-    invented here; ``basis_field`` returns an ``(nv, 1)`` unit tangent.
+    Preconditions (``ValueError``): ``k >= 1``; ``q`` of length ``nq``; ``v`` of
+    length ``nv`` and tangent (``P P^T v = v``); ``basis_field(q)`` equal to
+    ``derivs.basis``; ``selection`` of shape ``(nu, nv)``.  Postconditions:
+    ``F`` is ``(2k, 2k)``, ``G`` is ``(2k, nu)`` and ``connection`` is skew.
     """
     k = derivs.tangent_dimension
-    if k != 1:
-        raise ValueError(
-            f"tangent dimension must be 1 for a scalar frame state space, got {k}"
-        )
+    if k < 1:
+        raise ValueError("tangent dimension must be at least 1, got 0")
     q_arr = _vec(q, manifold.nq, "q")
-    basis = np.asarray(basis_field(q_arr), dtype=np.float64).reshape(-1, 1)
-    plus = np.asarray(basis_field(manifold.retract(q_arr, step * basis[:, 0])))
-    minus = np.asarray(basis_field(manifold.retract(q_arr, -step * basis[:, 0])))
-    d_basis = (plus - minus).reshape(-1, 1) / (2.0 * step)
-    conn = float((d_basis.T @ derivs.acceleration)[0])
+    basis = np.asarray(basis_field(q_arr), dtype=np.float64)
+    if basis.shape != derivs.basis.shape or (
+        np.linalg.norm(basis - derivs.basis) > _ORTHO_TOL
+    ):
+        raise ValueError("basis_field(q) must equal the basis of the derivatives")
+    vel = _vec(v, derivs.nv, "velocity v")
+    omega = basis.T @ vel
+    if np.linalg.norm(basis @ omega - vel) > 1e-6 * (1.0 + np.linalg.norm(vel)):
+        raise ValueError("v must be tangent to the closure (P P^T v = v)")
     sel = np.eye(derivs.nv) if selection is None else np.asarray(selection, float)
     if sel.ndim != 2 or sel.shape[1] != derivs.nv:
         raise ValueError(f"selection must have shape (nu, {derivs.nv})")
-    f_mat = np.array(
+    d_cols = _frame_derivative_columns(basis_field, manifold, q_arr, basis, step)
+    gamma_v, offset = _connection_blocks(basis, d_cols, omega)
+    f_mat = np.block(
         [
-            [0.0, 1.0],
+            [-gamma_v, np.eye(k)],
             [
-                float((basis.T @ derivs.d_acc_d_xi)[0, 0]) + conn,
-                float((basis.T @ derivs.d_acc_d_eta)[0, 0]),
+                basis.T @ derivs.d_acc_d_xi + offset,
+                basis.T @ derivs.d_acc_d_eta - gamma_v,
             ],
         ]
     )
-    g_mat = np.zeros((2, sel.shape[0]))
-    g_mat[1, :] = (basis.T @ derivs.d_acc_d_tau @ sel.T)[0]
-    return TangentStateSpace(F=f_mat, G=g_mat, basis=basis)
+    g_mat = np.zeros((2 * k, sel.shape[0]))
+    g_mat[k:, :] = basis.T @ derivs.d_acc_d_tau @ sel.T
+    return TangentStateSpace(
+        F=f_mat, G=g_mat, basis=basis, connection=gamma_v, normal_offset=offset
+    )

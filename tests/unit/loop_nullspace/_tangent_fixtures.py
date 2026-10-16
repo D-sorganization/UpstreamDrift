@@ -141,3 +141,88 @@ class FreeFlyer:
         d_v[:3, 3:] = skew(vl)
         d_v[3:, 3:] = -inv_i @ (skew(w) @ self.inertia - skew(self.inertia @ w))
         return d_q, d_v
+
+
+FIVE_BAR_GOLDEN = GOLDEN.with_name("planar_five_bar_tangent_state_space.json")
+
+
+def five_bar_golden() -> dict:
+    return json.loads(FIVE_BAR_GOLDEN.read_text(encoding="utf-8"))
+
+
+class FiveBar:
+    """Planar five-bar, ``q = (a1, b1, a2, b2)``, tips coincide (NSX-84b, k = 2).
+
+    Point masses ``m1`` at the elbows and ``m2`` at the tips; the closure is
+    ``Phi = tip_1 - tip_2`` (two rows).  Parameters are read from the golden so
+    the model and its symbolic oracle cannot drift apart.
+    """
+
+    def __init__(self) -> None:
+        params = five_bar_golden()["model"]["parameters"]
+        for key, text in params.items():
+            setattr(self, key, frac(text))
+
+    # absolute angle, radius, sign of every term of Phi
+    def _terms(self, q: np.ndarray) -> list[tuple[float, float, float, int, int]]:
+        return [
+            (q[0], self.L1, 1.0, 0, -1),
+            (q[0] + q[1], self.L2, 1.0, 0, 1),
+            (q[2], self.L1, -1.0, 2, -1),
+            (q[2] + q[3], self.L2, -1.0, 2, 1),
+        ]
+
+    def mass_matrix(self, q: np.ndarray) -> np.ndarray:
+        out = np.zeros((4, 4))
+        m1, m2, l1, l2 = self.m1, self.m2, self.L1, self.L2
+        for i in (0, 2):
+            cb = np.cos(q[i + 1])
+            out[i, i] = (m1 + m2) * l1**2 + m2 * l2**2 + 2 * m2 * l1 * l2 * cb
+            out[i, i + 1] = out[i + 1, i] = m2 * l2**2 + m2 * l1 * l2 * cb
+            out[i + 1, i + 1] = m2 * l2**2
+        return out
+
+    def bias_forces(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        m1, m2, l1, l2, g = self.m1, self.m2, self.L1, self.L2, self.g
+        out = np.zeros(4)
+        for i in (0, 2):
+            a, b, ad, bd = q[i], q[i + 1], v[i], v[i + 1]
+            out[i] = -m2 * l1 * l2 * np.sin(b) * (2 * ad * bd + bd * bd) + g * (
+                (m1 + m2) * l1 * np.cos(a) + m2 * l2 * np.cos(a + b)
+            )
+            out[i + 1] = m2 * l1 * l2 * np.sin(b) * ad * ad + g * m2 * l2 * np.cos(
+                a + b
+            )
+        return out
+
+    def closure_jacobian(self, q: np.ndarray) -> np.ndarray:
+        jac = np.zeros((2, 4))
+        for ang, rad, sign, first, back in self._terms(q):
+            du = rad * sign * np.array([-np.sin(ang), np.cos(ang)])
+            jac[:, first] += du
+            if back == 1:
+                jac[:, first + 1] += du
+        return jac
+
+    def closure_drift(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        out = np.zeros(2)
+        for ang, rad, sign, first, back in self._terms(q):
+            rate = v[first] + (v[first + 1] if back == 1 else 0.0)
+            out -= rad * sign * np.array([np.cos(ang), np.sin(ang)]) * rate**2
+        return out
+
+    def frame(self, q: np.ndarray) -> np.ndarray:
+        """Ambient tangent frame: Gram-Schmidt of ``(Pi e_1, Pi e_3)`` (NSX-84b)."""
+        jac = self.closure_jacobian(q)
+        proj = np.eye(4) - jac.T @ np.linalg.solve(jac @ jac.T, jac)
+        p1 = proj[:, 0] / np.linalg.norm(proj[:, 0])
+        res = proj[:, 2] - (p1 @ proj[:, 2]) * p1
+        return np.column_stack([p1, res / np.linalg.norm(res)])
+
+    def state(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        st = five_bar_golden()["state"]
+        return (
+            np.array(st["q"]),
+            np.array(st["v"]),
+            np.array([frac(t) for t in st["tau"]]),
+        )

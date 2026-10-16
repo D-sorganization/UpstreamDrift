@@ -44,8 +44,9 @@ def _derivs(kind: str, z: float, **kw: object):
 
 def _state_space(kind: str, z: float, **kw: object):
     derivs, q = _derivs(kind, z, **kw)
+    _, v = Pendulum().state()
     return tl.tangent_state_space(
-        derivs, q=q, manifold=EUCLID2, basis_field=tangent_field
+        derivs, q=q, v=v, manifold=EUCLID2, basis_field=tangent_field
     )
 
 
@@ -241,11 +242,19 @@ def test_preconditions_raise() -> None:
         tl.FiniteDifferenceDerivatives(pend, EUCLID2, basis_field=3)
 
 
-def test_state_space_requires_scalar_tangent_dimension() -> None:
-    prov, q, v = _golfer()
-    man = tl.EuclideanManifold(5)
-    derivs = tl.FiniteDifferenceDerivatives(
-        prov, man
-    ).constrained_acceleration_derivatives(q, v, prov.bias_forces(q, v))
+def test_state_space_rejects_a_closed_chain_without_freedom() -> None:
+    """``k = 0`` has no tangent state; the precondition names the dimension."""
+    jac_rank_full = tl.FiniteDifferenceDerivatives(
+        Pendulum(), EUCLID2
+    ).constrained_acceleration_derivatives(*Pendulum().state(), Pendulum().load(0.0))
+    object.__setattr__(
+        jac_rank_full, "basis", np.zeros((2, 0))
+    )  # frozen dataclass: emulate a rigid (k = 0) closure
     with pytest.raises(ValueError, match="tangent dimension"):
-        tl.tangent_state_space(derivs, q=q, manifold=man, basis_field=lambda x: x)
+        tl.tangent_state_space(
+            jac_rank_full,
+            q=Pendulum().state()[0],
+            v=Pendulum().state()[1],
+            manifold=EUCLID2,
+            basis_field=tangent_field,
+        )
