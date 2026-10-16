@@ -950,6 +950,41 @@ $\operatorname{Var}(y)=\psi_0^{\!\top}P_0\psi_0+\sum_k b_k^{\!\top}\Sigma_{w,k}(
 Noise amplitudes are per-step variances and must be timestep-consistent (V6):
 a continuous white spectral density $S_w$ becomes $\Sigma_w=S_w/\Delta t$.
 
+\paragraph{Implementation (NSX-90).}  The recursion and the adjoint are written
+for matrices of general shape, $A_k\in\R^{n_x\times n_x}$ with $n_x=2k$ for
+tangent dimension $k$; they do not inspect $k$, and the frame connection for
+$k>1$ (issue \#12817) stays in the tangent linearization.  The adjoint is
+$S_x[N]=C$, $S_x[t]=S_x[t{+}1]A_t$, $S_{\mathrm{in}}[t]=S_x[t{+}1]B_t$; then
+$S_{\mathrm{in}}[t]_{ij}$ is the sensitivity of outcome $i$ to input channel $j$
+at step $t$ (``which joint, when'') and $S_x[0]$ is $S_{y,x_0}$.  Persistent
+parameter states $\theta$ (per-trial constants, rule R14) are appended with
+$A_{\mathrm{aug}}=\left[\begin{smallmatrix}A&E\\0&I\end{smallmatrix}\right]$ and
+enter through $P_0$; one draw acts at every step, so their variance is
+$S_\theta\Sigma_\theta S_\theta^{\!\top}$ with $S_\theta=\sum_t C\,\Phi(N,t{+}1)E_t$.
+The variance budget splits $\operatorname{Var}(y)$ by input class and step and
+requires the classes to be uncorrelated, so the parts add exactly.  Outcomes at
+the physical event use $C_{\mathrm{ev}}=C_y\Pi$ (Section~\ref{sec:var-salt}).
+Evidence typing follows NSX-81: kernels are \texttt{INVARIANT} given the model
+while $A_t$ does not depend on the allocation (neither M2 nor M3 declared);
+variance under additive noise and no M2/M3 is \texttt{INVARIANT} with the noise
+hypothesis on the \texttt{conditioning} axis; any declared M1, M2 or M3 makes
+the variance \texttt{FAMILY\_DEPENDENT}.  Reproduction:
+\texttt{pytest tests/unit/loop\_nullspace/test\_variance\_propagation.py
+tests/unit/loop\_nullspace/test\_variance\_records.py}.
+
+\paragraph{Nonlinearity Gate (NSX-90).}  The specification requires a gate but
+fixes no statistic and no threshold.  The implementation declares the statistic
+$r=\lvert D(2\epsilon)-2D(\epsilon)\rvert/\max(\lvert2D(\epsilon)\rvert,\rho)$ per
+outcome component and probe direction, with $D(a)=y(a\,d)-y(0)$ from nonlinear
+rollouts at amplitudes $\epsilon$ and $2\epsilon$ and a numerical floor $\rho$.
+Probes are the adjoint worst-case direction $d=\Sigma s^{\!\top}/\sqrt{s\Sigma
+s^{\!\top}}$ of each outcome and one standard deviation along each input
+coordinate.  The threshold is a required argument with no default: no value is
+recorded here because none has been specified.  A record whose maximum ratio
+exceeds it, or whose rollout is non-finite, is \texttt{NOT\_LINEAR\_VALID}; a
+record that never ran the gate is \texttt{NOT\_ASSESSED}.  Failed experiments:
+none recorded.
+
 \subsection{Mechanisms by Which the Allocation Changes Variance}
 \label{sec:var-mechanisms}
 
