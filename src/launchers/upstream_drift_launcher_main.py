@@ -5,8 +5,11 @@ from __future__ import annotations
 import os
 import sys
 import traceback
+from collections.abc import Callable
+from pathlib import Path
 from types import TracebackType
 
+from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication
 
@@ -32,12 +35,78 @@ def _install_global_ui_zoom(app: QApplication) -> None:
     install_global_ui_zoom(app)
 
 
-def _write_crash_traceback(err_msg: str) -> None:
+_event_loop_running = False
+
+
+def mark_event_loop_running(running: bool = True) -> None:
+    """Record that the Qt event loop is live, so errors become recoverable."""
+    global _event_loop_running
+    _event_loop_running = running
+
+
+def _crash_log_dir() -> Path:
+    from src.launchers.launcher_constants import CONFIG_DIR
+
+    return CONFIG_DIR / "logs"
+
+
+def _write_crash_traceback(err_msg: str, log_dir: Path | None = None) -> Path | None:
+    """Write the traceback under the per-user log dir (never the CWD, #12886)."""
     try:
-        with open("crash_traceback.txt", "w", encoding="utf-8") as handle:
-            handle.write(err_msg)
+        target = (log_dir if log_dir is not None else _crash_log_dir()) / (
+            "crash_traceback.txt"
+        )
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(err_msg, encoding="utf-8")
+        return target
     except OSError:
-        pass
+        return None
+
+
+def _show_error_dialog(title: str, message: str, detail_text: str) -> None:
+    from src.launchers.launcher_dialogs import CriticalErrorDialog
+
+    CriticalErrorDialog(title=title, message=message, detail_text=detail_text).exec()
+
+
+def handle_uncaught_exception(
+    exc_type: type[BaseException],
+    exc_value: BaseException,
+    exc_tb: TracebackType | None,
+    *,
+    show_dialog: Callable[[str, str, str], None] = _show_error_dialog,
+    log_dir: Path | None = None,
+) -> bool:
+    """Report an uncaught exception; return True when the app must quit.
+
+    Startup failures (before the event loop runs) are fatal. Once the loop is
+    running, an error in one slot is shown in a dialog and the launcher plus
+    its other docked tools stay alive (issue #12886).
+    """
+    err_msg = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+    logger.error("Uncaught exception:\n%s", err_msg)
+    saved = _write_crash_traceback(err_msg, log_dir)
+    if exc_type is SystemExit:
+        return True
+    fatal = not _event_loop_running
+    where = f"\n\nTraceback saved to {saved}" if saved else ""
+    try:
+        if fatal:
+            show_dialog(
+                "Application Crash",
+                "UpstreamDrift has encountered an unexpected error and must close.",
+                err_msg,
+            )
+        else:
+            show_dialog(
+                "Unexpected Error",
+                "An action failed. The launcher is still running; other tools "
+                f"are unaffected.{where}",
+                err_msg,
+            )
+    except Exception:  # noqa: BLE001 - the hook itself must never raise
+        logger.exception("Could not show error dialog")
+    return fatal
 
 
 def _install_exception_hook() -> None:
@@ -46,20 +115,8 @@ def _install_exception_hook() -> None:
         exc_value: BaseException,
         exc_tb: TracebackType | None,
     ) -> None:
-        from src.launchers.launcher_dialogs import CriticalErrorDialog
-
-        err_msg = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
-        _write_crash_traceback(err_msg)
-
-        if exc_type is not SystemExit:
-            dialog = CriticalErrorDialog(
-                title="Application Crash",
-                message="UpstreamDrift has encountered an unexpected error and must close.",
-                detail_text=err_msg,
-            )
-            dialog.exec()
-
-        QApplication.quit()
+        if handle_uncaught_exception(exc_type, exc_value, exc_tb):
+            QApplication.quit()
 
     sys.excepthook = excepthook
 
@@ -150,5 +207,6 @@ def main() -> None:
     )
     app.aboutToQuit.connect(session.shutdown)
     session.start()
+    QTimer.singleShot(0, mark_event_loop_running)
 
     sys.exit(app.exec())
