@@ -9,6 +9,8 @@ Qt-free :class:`ResultsSession`; this widget only draws it.
 
 from __future__ import annotations
 
+import time
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -38,13 +40,53 @@ from src.tools.model_explorer.golfer_playback import (
     results_time_series,
     spec_summary,
 )
+from src.tools.model_explorer.playback_clock import SPEEDS, PlaybackClock
 from src.tools.model_explorer.results_session import ResultsSession
 
 logger = get_logger(__name__)
 
 __all__ = ["ResultsPlaybackPanel"]
 
-PLAYBACK_INTERVAL_MS = 33  # ~30 fps timeline playback
+PLAYBACK_INTERVAL_MS = 33  # ~30 fps timeline playback tick (frames skip if late)
+
+
+def _speed_text(speed: float) -> str:
+    """``0.25`` -> ``"0.25x"``, ``1.0`` -> ``"1x"``."""
+    return f"{speed:g}x"
+
+
+class _ScaledPixmapLabel(QLabel):
+    """Label that keeps its pixmap scaled (aspect kept) to its own size.
+
+    ``Ignored`` size policy: the pixmap never dictates the label's size, so the
+    image grows and shrinks with the dock instead of staying at its first size.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._source: QPixmap | None = None
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setMinimumSize(320, 180)
+        self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
+
+    def set_source(self, pixmap: QPixmap) -> None:
+        self._source = pixmap
+        self._rescale()
+
+    def resizeEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
+        super().resizeEvent(event)
+        self._rescale()
+
+    def _rescale(self) -> None:
+        if self._source is None:
+            return
+        self.setPixmap(
+            self._source.scaled(
+                self.size(),
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
+        )
 
 
 class ResultsPlaybackPanel(QWidget):
@@ -62,7 +104,8 @@ class ResultsPlaybackPanel(QWidget):
         self._pose = pose
         self._playback = session.playback()
         self.series: dict[str, TimeSeries] = results_time_series(pose)
-        self._step = max(1, pose.frame_count // 300)
+        self._clock = PlaybackClock(pose.time_s)
+        self._now: Callable[[], float] = time.monotonic
         self._timer = QTimer(self)
         self._timer.setInterval(PLAYBACK_INTERVAL_MS)
         self._timer.timeout.connect(self._advance)
@@ -86,13 +129,8 @@ class ResultsPlaybackPanel(QWidget):
         layout.addWidget(self.source_label)
 
         splitter = QSplitter(Qt.Orientation.Vertical)
-        self.view_label = QLabel()
+        self.view_label = _ScaledPixmapLabel()
         self.view_label.setObjectName("ResultsPlaybackView")
-        self.view_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.view_label.setMinimumSize(320, 180)
-        self.view_label.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
-        )
         splitter.addWidget(self.view_label)
         splitter.addWidget(self._build_plot())
         splitter.setStretchFactor(0, 3)
@@ -112,6 +150,10 @@ class ResultsPlaybackPanel(QWidget):
         row.addWidget(self.channel_combo, 1)
         column.addLayout(row)
         self.canvas = MplCanvas(width=6, height=2.4, dpi=90)
+        # Constrained layout re-fits labels on every draw, so a resized dock
+        # never clips the axis labels (a one-off tight_layout did).
+        self.canvas.fig.set_layout_engine("constrained")
+        self.canvas.setMinimumHeight(140)
         self._axes = self.canvas.fig.add_subplot(111)
         self._cursor: Any = None
         column.addWidget(self.canvas, 1)
@@ -127,7 +169,7 @@ class ResultsPlaybackPanel(QWidget):
         self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setObjectName("ResultsTimeline")
         self.slider.setRange(0, self._pose.frame_count - 1)
-        self.slider.valueChanged.connect(self.show_frame)
+        self.slider.valueChanged.connect(self._on_scrub)
         row.addWidget(self.slider, 1)
         self.time_label = QLabel()
         self.time_label.setMinimumWidth(150)
@@ -137,6 +179,12 @@ class ResultsPlaybackPanel(QWidget):
         self.view_combo.addItems(list(VIEW_ORDER))
         self.view_combo.currentTextChanged.connect(self.set_view)
         row.addWidget(self.view_combo)
+        row.addWidget(QLabel("Speed:"))
+        self.speed_combo = QComboBox()
+        self.speed_combo.addItems([_speed_text(s) for s in SPEEDS])
+        self.speed_combo.setCurrentText(_speed_text(1.0))
+        self.speed_combo.currentIndexChanged.connect(self._on_speed_changed)
+        row.addWidget(self.speed_combo)
         self.export_button = QPushButton("Export MP4...")
         self.export_button.setToolTip("Render this run on the golfer to an MP4")
         self.export_button.clicked.connect(self.export_mp4)
@@ -164,13 +212,7 @@ class ResultsPlaybackPanel(QWidget):
         height, width, _ = rgb.shape
         image = QImage(rgb.data, width, height, 3 * width, QImage.Format.Format_RGB888)
         self._pixmap = QPixmap.fromImage(image.copy())
-        self.view_label.setPixmap(
-            self._pixmap.scaled(
-                self.view_label.size(),
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation,
-            )
-        )
+        self.view_label.set_source(self._pixmap)
         time_s = self.session.current_time_s
         self.time_label.setText(
             f"t = {time_s:.3f} s  ({index + 1}/{self._pose.frame_count})"
@@ -184,18 +226,33 @@ class ResultsPlaybackPanel(QWidget):
         self._playback.view = name
         self.show_frame(self.current_frame)
 
+    @property
+    def speed(self) -> float:
+        """Playback speed relative to real time (one of ``SPEEDS``)."""
+        return self._clock.speed
+
+    def _on_scrub(self, index: int) -> None:
+        """Slider moved by the user: show it and, if playing, play on from it."""
+        self.show_frame(index)
+        if self.play_button.isChecked():
+            self._clock.start(index, self._now())
+
+    def _on_speed_changed(self, position: int) -> None:
+        self._clock.set_speed(SPEEDS[position], self._now())
+
     def _on_play_toggled(self, playing: bool) -> None:
         self.play_button.setText("Pause" if playing else "Play")
         if playing:
+            self._clock.start(self.current_frame, self._now())
             self._timer.start()
         else:
             self._timer.stop()
 
     def _advance(self) -> None:
-        nxt = self.current_frame + self._step
-        if nxt >= self._pose.frame_count:
-            nxt = 0
-        self.show_frame(nxt)
+        """Timer tick: show the frame the wall clock has reached (may skip)."""
+        index = self._clock.frame_at(self._now())
+        if index != self.current_frame:
+            self.show_frame(index)
 
     # ---- plots ------------------------------------------------------------
 
@@ -208,7 +265,7 @@ class ResultsPlaybackPanel(QWidget):
             return
         axes.plot(self._pose.time_s, series.values, color="#1f77b4", linewidth=1.4)
         axes.set_xlabel("Time (s)")
-        axes.set_ylabel(f"{series.name} ({series.unit})")
+        axes.set_ylabel(f"{series.name}\n({series.unit})", fontsize=9)
         if name == CLUB_HEAD_SPEED and series.values.size:
             peak = int(np.argmax(series.values))
             axes.set_title(
@@ -220,7 +277,6 @@ class ResultsPlaybackPanel(QWidget):
         self._cursor = axes.axvline(
             self.session.current_time_s, color="#d62728", linewidth=1.0
         )
-        self.canvas.fig.tight_layout()
         self.canvas.draw_idle()
 
     def select_channel(self, name: str) -> None:
