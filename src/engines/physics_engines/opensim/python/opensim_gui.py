@@ -15,6 +15,7 @@ Subtask 5 / #4998 of EPIC #4993.
 """
 
 import sys
+from pathlib import Path
 from typing import Any
 
 import matplotlib
@@ -63,6 +64,8 @@ except ImportError:
         OpenSimModelLoadError,
         OpenSimNotInstalledError,
     )
+
+from src.engines.physics_engines.opensim.python import geometry_resolver, model_preview
 
 try:
     from src.shared.python.screw_theory.ui import (
@@ -218,6 +221,7 @@ class MainWidget(QWidget):
         self.opencap_session: Any = None
         self.result: Any = None
         self.initialization_error: str | None = None
+        self.geometry_audit: geometry_resolver.GeometryAudit | None = None
         self._opensim_available: bool = False
         self._opensim_probe: OpenSimProbe = OpenSimProbe(
             OpenSimState.MISSING, "unprobed"
@@ -227,6 +231,14 @@ class MainWidget(QWidget):
         self._check_opensim_availability()
 
         self.init_ui()
+
+        # Out of the box, show the current anthro golfer (#12919).
+        if (
+            self.model_path is None
+            and self._opensim_available
+            and geometry_resolver.DEFAULT_MODEL.is_file()
+        ):
+            self.model_path = str(geometry_resolver.DEFAULT_MODEL)
 
         # Launch in appropriate mode
         if self.model_path is not None:
@@ -246,9 +258,11 @@ class MainWidget(QWidget):
             return
 
         try:
+            geometry_resolver.register_geometry_dirs()
             self.model = GolfSwingModel(self.model_path)
             self._update_status("OpenSim Model Loaded", "green")
             self.btn_run.setEnabled(True)
+            self._refresh_geometry_view()
         except OpenSimImportFailedError as e:
             self.initialization_error = str(e)
             self._update_status("ERROR: OpenSim Cannot Load", "red")
@@ -285,6 +299,29 @@ class MainWidget(QWidget):
             self.initialization_error = str(e)
             self._update_status("No Model Loaded", "orange")
             self.btn_run.setEnabled(False)
+
+    def _refresh_geometry_view(self) -> None:
+        """Audit mesh resolution and draw the model; never leave a blank view.
+
+        Unresolved meshes raise the banner and the body is drawn from
+        primitives (capsules) instead (#12919).
+        """
+        if self.model_path is None:
+            raise ValueError("model_path is required to refresh the geometry view")
+        banner: str | None = None
+        try:
+            audit = geometry_resolver.audit_model_geometry(self.model_path)
+            self.geometry_audit = audit
+            banner = audit.banner
+            segments = model_preview.body_segments(self.model_path)
+            model_preview.draw_segments(
+                self.fig, segments, title=Path(self.model_path).name
+            )
+            self.canvas.draw_idle()
+        except Exception as exc:  # noqa: BLE001  # surfaced in the banner, not hidden
+            banner = f"{banner + '; ' if banner else ''}preview unavailable: {exc}"
+        self.lbl_geometry_banner.setText(banner or "")
+        self.lbl_geometry_banner.setVisible(banner is not None)
 
     def _show_getting_started(self) -> None:
         """Show getting started interface when no model is provided.
@@ -361,6 +398,15 @@ class MainWidget(QWidget):
         self.lbl_status = QLabel("Status: Initializing...")
         self.lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
         sim_layout.addWidget(self.lbl_status)
+
+        # Geometry banner: shown when body meshes are missing (#12919)
+        self.lbl_geometry_banner = QLabel("")
+        self.lbl_geometry_banner.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lbl_geometry_banner.setStyleSheet(
+            "background-color: #fff3cd; color: #664d03; padding: 6px;"
+        )
+        self.lbl_geometry_banner.setVisible(False)
+        sim_layout.addWidget(self.lbl_geometry_banner)
 
         # Controls
         controls = QHBoxLayout()
