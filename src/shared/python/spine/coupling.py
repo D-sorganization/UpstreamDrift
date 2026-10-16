@@ -10,6 +10,9 @@ Law families:
 
 * :class:`LinearCouplingLaw`: ``theta_i = C_i @ phi``, ``C_i`` of shape
   ``(3, n_phi)``; cross-axis terms allowed.
+* :class:`ParityCouplingLaw`: ``theta_i = C_odd_i @ phi + C_even_i @ |phi|``;
+  declared axes are even in ``phi`` (e.g. flexion coupled to rotation to
+  either side), the remaining axes stay odd.
 * :class:`StateDependentCouplingLaw`: ``theta_i = C_i(s) @ phi`` with ``C_i``
   piecewise-linear in one named scheduling coordinate ``s = phi[k]`` (clamped
   outside the breakpoints).
@@ -36,6 +39,7 @@ from src.shared.python.spine.segmental import LevelTransform, SegmentalPose
 __all__ = [
     "CouplingLaw",
     "LinearCouplingLaw",
+    "ParityCouplingLaw",
     "PolynomialCouplingLaw",
     "StateDependentCouplingLaw",
     "from_joint_coupling",
@@ -200,6 +204,106 @@ class LinearCouplingLaw:
     def jacobian(self, phi: np.ndarray) -> dict[SpinalLevel, np.ndarray]:
         _check_phi(phi, len(self.independent))
         return {lv: self.matrices[lv].copy() for lv in self.levels}
+
+
+# ------------------------------------------------------------------ parity law
+
+
+def _check_even_axes(value: object) -> tuple[int, ...]:
+    if isinstance(value, str) or not isinstance(value, Sequence):
+        raise TypeError("even_axes must be a sequence of axis indices (0, 1, 2)")
+    axes = []
+    for item in value:
+        if isinstance(item, bool) or not isinstance(item, int | np.integer):
+            raise TypeError(f"even_axes entries must be int, got {item!r}")
+        if int(item) not in (0, 1, 2):
+            raise ValueError(f"axis must be 0, 1 or 2, got {item}")
+        axes.append(int(item))
+    if not axes:
+        raise ValueError("even_axes must declare at least one even axis")
+    if len(set(axes)) != len(axes):
+        raise ValueError(f"even_axes must be unique, got {tuple(axes)}")
+    return tuple(sorted(axes))
+
+
+@dataclass(frozen=True)
+class ParityCouplingLaw:
+    """``theta_i = C_odd_i @ phi + C_even_i @ |phi|`` (issue #12821).
+
+    ``even_axes`` lists the axes (0=FE, 1=LB, 2=AR) declared even in ``phi``:
+    ``even_matrices`` is non-zero only on those rows and ``matrices`` (the odd
+    part) is zero on them, so each axis is purely even or purely odd. The
+    absolute value is element-wise on ``phi``.
+
+    The Jacobian is ``C_odd_i + C_even_i * sign(phi)`` (column-wise); at
+    ``phi_k == 0`` the even part uses the subgradient ``sign(0) = 0`` (a
+    documented choice: the law is not differentiable there).
+
+    Preconditions (``TypeError``/``ValueError``): those of
+    :class:`LinearCouplingLaw`; ``even_matrices`` covers exactly the levels of
+    ``matrices`` with the same shapes; ``even_axes`` non-empty, unique, in
+    0..2; odd rows on even axes and even rows on odd axes are zero.
+
+    Postconditions: both matrix maps are read-only copies.
+    """
+
+    law_id: str
+    version: str
+    matrices: Mapping[SpinalLevel, np.ndarray]
+    even_matrices: Mapping[SpinalLevel, np.ndarray]
+    even_axes: tuple[int, ...]
+    independent: tuple[str, ...]
+    citation: str
+
+    def __post_init__(self) -> None:
+        _text(self.law_id, "law_id")
+        _text(self.version, "version")
+        _text(self.citation, "citation")
+        names = _names(self.independent)
+        axes = _check_even_axes(self.even_axes)
+        shape = (3, len(names))
+        odd = _checked_matrices(self.matrices, shape, f"(3, {len(names)})")
+        even = _checked_matrices(self.even_matrices, shape, f"(3, {len(names)})")
+        if set(odd) != set(even):
+            raise ValueError("even_matrices must cover the same levels as matrices")
+        odd_axes = [a for a in range(3) if a not in axes]
+        for level in odd:
+            if np.any(odd[level][list(axes)] != 0.0):
+                raise ValueError(
+                    f"{level.name}: odd matrix must be zero on even axes {axes}"
+                )
+            if np.any(even[level][odd_axes] != 0.0):
+                raise ValueError(
+                    f"{level.name}: even matrix must be zero outside even axes {axes}"
+                )
+        object.__setattr__(self, "independent", names)
+        object.__setattr__(self, "even_axes", axes)
+        object.__setattr__(self, "matrices", _frozen_map(odd))
+        object.__setattr__(self, "even_matrices", _frozen_map(even))
+
+    @property
+    def levels(self) -> tuple[SpinalLevel, ...]:
+        """Covered levels, caudal to cranial."""
+        return tuple(sorted(self.matrices, key=lambda lv: lv.ordinal))
+
+    def independent_names(self) -> tuple[str, ...]:
+        return self.independent
+
+    def expand(self, phi: np.ndarray) -> dict[SpinalLevel, np.ndarray]:
+        vec = _check_phi(phi, len(self.independent))
+        mag = np.abs(vec)
+        return {
+            lv: self.matrices[lv] @ vec + self.even_matrices[lv] @ mag
+            for lv in self.levels
+        }
+
+    def jacobian(self, phi: np.ndarray) -> dict[SpinalLevel, np.ndarray]:
+        vec = _check_phi(phi, len(self.independent))
+        sgn = np.sign(vec)
+        return {
+            lv: self.matrices[lv] + self.even_matrices[lv] * sgn[None, :]
+            for lv in self.levels
+        }
 
 
 # ---------------------------------------------------------- state-dependent law
@@ -440,7 +544,7 @@ def from_joint_coupling(
 
 def restrict_to_levels(
     law: CouplingLaw, levels: Sequence[SpinalLevel]
-) -> LinearCouplingLaw:
+) -> LinearCouplingLaw | ParityCouplingLaw:
     """The sub-law of ``law`` on the contiguous range ``levels`` (SPN-14a).
 
     Used when a shipped law covers more levels than a model (e.g. a
@@ -451,7 +555,8 @@ def restrict_to_levels(
     a published result, and it is recorded in the version
     (``<version>+levels:<first>..<last>``) and the citation.
 
-    Preconditions: ``law`` is a :class:`LinearCouplingLaw` (``TypeError``);
+    Preconditions: ``law`` is a :class:`LinearCouplingLaw` or
+    :class:`ParityCouplingLaw` (``TypeError``);
     ``levels`` are :class:`SpinalLevel` (``TypeError``), non-empty, contiguous
     and covered by the law (``ValueError``).
 
@@ -459,8 +564,11 @@ def restrict_to_levels(
     read-only matrices; when ``levels`` is the law's whole range the law
     itself is returned.
     """
-    if not isinstance(law, LinearCouplingLaw):
-        raise TypeError(f"law must be a LinearCouplingLaw, got {type(law).__name__}")
+    if not isinstance(law, LinearCouplingLaw | ParityCouplingLaw):
+        raise TypeError(
+            "law must be a LinearCouplingLaw or ParityCouplingLaw, "
+            f"got {type(law).__name__}"
+        )
     if isinstance(levels, str) or not isinstance(levels, Sequence) or not levels:
         raise ValueError("levels must name at least one level")
     wanted = _check_contiguous(list(levels))
@@ -470,13 +578,21 @@ def restrict_to_levels(
     if wanted == law.levels:
         return law
     span = f"{wanted[0].name}..{wanted[-1].name}"
-    out = LinearCouplingLaw(
-        law_id=law.law_id,
-        version=f"{law.version}+levels:{span}",
-        matrices={lv: law.matrices[lv] for lv in wanted},
-        independent=law.independent,
-        citation=f"{law.citation}; restricted to {span} (repository operation)",
-    )
+    common = {
+        "law_id": law.law_id,
+        "version": f"{law.version}+levels:{span}",
+        "matrices": {lv: law.matrices[lv] for lv in wanted},
+        "independent": law.independent,
+        "citation": f"{law.citation}; restricted to {span} (repository operation)",
+    }
+    if isinstance(law, ParityCouplingLaw):
+        out: LinearCouplingLaw | ParityCouplingLaw = ParityCouplingLaw(
+            even_matrices={lv: law.even_matrices[lv] for lv in wanted},
+            even_axes=law.even_axes,
+            **common,
+        )
+    else:
+        out = LinearCouplingLaw(**common)
     ensure(out.levels == wanted, "restricted law must cover the requested levels")
     return out
 
