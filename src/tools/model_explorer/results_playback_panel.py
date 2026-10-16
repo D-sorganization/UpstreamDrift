@@ -263,7 +263,7 @@ class ResultsPlaybackPanel(QWidget):
         if series is None:
             self.canvas.draw_idle()
             return
-        axes.plot(self._pose.time_s, series.values, color="#1f77b4", linewidth=1.4)
+        axes.plot(self._pose.time_s, series.values, color="tab:blue", linewidth=1.4)
         axes.set_xlabel("Time (s)")
         axes.set_ylabel(f"{series.name}\n({series.unit})", fontsize=9)
         if name == CLUB_HEAD_SPEED and series.values.size:
@@ -275,7 +275,7 @@ class ResultsPlaybackPanel(QWidget):
             )
         axes.grid(True, alpha=0.3)
         self._cursor = axes.axvline(
-            self.session.current_time_s, color="#d62728", linewidth=1.0
+            self.session.current_time_s, color="tab:red", linewidth=1.0
         )
         self.canvas.draw_idle()
 
