@@ -264,8 +264,12 @@ def _slsqp_trajectory(spaces, cons, w, lam, time):
         np.inf,
     )
     start = np.concatenate([s.particular for s in spaces])
+    # Dividing the objective by a positive constant leaves the argmin
+    # unchanged but keeps SLSQP's line search well scaled at large ``lam``
+    # (scipy 1.15 otherwise stops with "Positive directional derivative").
+    scale = max(_trajectory_cost(list(split(start)), w, lam, time), 1.0)
     out = minimize(
-        lambda v: _trajectory_cost(list(split(v)), w, lam, time),
+        lambda v: _trajectory_cost(list(split(v)), w, lam, time) / scale,
         start,
         method="SLSQP",
         bounds=[(cons[0].lower[i], cons[0].upper_bound[i]) for i in range(n)] * t,
