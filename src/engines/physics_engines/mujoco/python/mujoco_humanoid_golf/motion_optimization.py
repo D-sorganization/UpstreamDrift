@@ -61,6 +61,8 @@ class SwingOptimizer:
         data: mujoco.MjData,
         objectives: OptimizationObjectives | None = None,
         constraints: OptimizationConstraints | None = None,
+        *,
+        require_club_head: bool = False,
     ) -> None:
         """Initialize swing optimizer.
 
@@ -69,6 +71,9 @@ class SwingOptimizer:
             data: MuJoCo data
             objectives: Optimization objectives
             constraints: Optimization constraints
+            require_club_head: When True, raise ``ValueError`` if no club-head
+                body resolves (strict mode) instead of silently dropping
+                club-head metrics.
         """
         if not (model is not None):
             raise ValueError("model must be provided")
@@ -83,7 +88,9 @@ class SwingOptimizer:
         )
 
         self.club_head_id = find_club_head_body_id(
-            self.model, owner=type(self).__name__
+            self.model,
+            owner=type(self).__name__,
+            strict=require_club_head,
         )
         self.ball_id = self._find_body_id("ball")
 
