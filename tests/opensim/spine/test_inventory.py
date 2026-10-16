@@ -141,6 +141,7 @@ def _swapped_axis_path(src: Path, dst: Path) -> Path:
 
 
 @pytest.mark.requires_opensim
+@pytest.mark.integration
 class TestNativeInventory:
     def test_fixture_maps_all_levels(self, fixture_path: Path) -> None:
         require_opensim()

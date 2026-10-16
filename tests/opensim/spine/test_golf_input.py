@@ -71,6 +71,7 @@ def _synthetic(tmp_path: Path, deg: bool = False) -> tuple[Path, np.ndarray]:
     return path, q
 
 
+@pytest.mark.unit
 def test_back_joint_rotation_is_zxy_and_proper():
     rot = back_joint_rotation(0.2, -0.1, 0.4)
     ref = Rotation.from_euler("ZXY", [0.2, -0.1, 0.4]).as_matrix()
@@ -81,6 +82,7 @@ def test_back_joint_rotation_is_zxy_and_proper():
 
 
 @pytest.mark.requires_opensim
+@pytest.mark.integration
 @pytest.mark.parametrize("deg", [False, True])
 def test_pelvis_to_thorax_matches_native_and_adr_item_4(tmp_path, deg):
     osim = require_opensim()
@@ -123,6 +125,7 @@ def test_pelvis_to_thorax_matches_native_and_adr_item_4(tmp_path, deg):
         assert np.allclose(data.pelvis_to_thorax[i], composed, atol=1e-9)
 
 
+@pytest.mark.unit
 def test_slerp_resample_endpoints_and_no_wrap_artifacts():
     # Rotation through ~2*pi total about Z, sampled coarsely: per-angle linear
     # interpolation of wrapped angles would jump; SLERP must stay smooth.
@@ -162,6 +165,7 @@ def test_slerp_resample_endpoints_and_no_wrap_artifacts():
 
 
 @pytest.mark.requires_opensim
+@pytest.mark.integration
 def test_evidence_file_loads_with_finite_rotations():
     require_opensim()
     if not (EVID_STO.exists() and EVID_OSIM.exists()):
