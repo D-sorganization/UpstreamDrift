@@ -2741,6 +2741,8 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-16 | #12881 | NSX-90 covariance propagation, adjoint sensitivity kernels and nonlinearity gate |
+| 2026-10-16 | #12645 | Kinematic ensemble (admitted samples, rejection accounting, envelope union/intersection) and reproject_onto_closure delegating to project_to_closure (NSX-61) |
 | 2026-10-16 | #12922 | Closing the launcher after a MuJoCo session releases renderers before widgets die. |
 | 2026-10-16 | #12902 | MuJoCo explorer: 3D view no longer renders black in the launcher (renderer freed under its own GL context), Side quick-camera no longer crashes, Visualization tab scrolls instead of overlapping (#12884, #12885, #12889) |
 | 2026-10-16 | #12852 | NSX-87: MuJoCo/MyoSuite hard-KKT finite-difference closed-loop derivatives (PARTIAL), reusing the NSX-84 routine; NSX-88: OpenSim closed-loop FD derivatives via NSX-84 routine, capability PARTIAL, muscle-insufficiency flag |
