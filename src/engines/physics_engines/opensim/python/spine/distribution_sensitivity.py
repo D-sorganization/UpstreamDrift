@@ -534,9 +534,7 @@ def _check_law_ids(law_ids: Sequence[str] | None) -> tuple[str, ...]:
     return tuple(sorted(chosen))
 
 
-def _report_model_path(
-    base: SpineStudyRequest, env: Mapping[str, str] | None
-) -> Path:
+def _report_model_path(base: SpineStudyRequest, env: Mapping[str, str] | None) -> Path:
     """The model whose per-level angles are read back: path, else asset env."""
     if base.model_path is not None:
         return base.model_path
