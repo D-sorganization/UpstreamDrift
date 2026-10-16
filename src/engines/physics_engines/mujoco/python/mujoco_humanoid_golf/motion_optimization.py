@@ -34,6 +34,7 @@ from ._motion_opt_types import (
     OptimizationObjectives,
     OptimizationResult,
 )
+from .club_body_names import find_club_head_body_id
 
 __all__ = [
     "MotionPrimitiveLibrary",
@@ -80,7 +81,9 @@ class SwingOptimizer:
             constraints if constraints is not None else OptimizationConstraints()
         )
 
-        self.club_head_id = self._find_body_id("club_head")
+        self.club_head_id = find_club_head_body_id(
+            self.model, owner=type(self).__name__
+        )
         self.ball_id = self._find_body_id("ball")
 
         self.num_knot_points = 10
