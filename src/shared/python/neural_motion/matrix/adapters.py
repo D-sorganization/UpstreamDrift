@@ -17,6 +17,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.engine_core.opensim_runtime import import_opensim
+from src.shared.python.tour_baselines.registry import get_golf_model
 
 logger = logging.getLogger(__name__)
 
@@ -157,7 +158,28 @@ class PlanarTriplePendulumGeneratorAdapter(GeneratorAdapterBase):
 
 
 class ConstrainedUpperBodyGeneratorAdapter(GeneratorAdapterBase):
-    """Generator adapter for 8-coord / 5-DOF constrained upper body golfer."""
+    """Generator adapter for the constrained upper body golfer.
+
+    Coordinate and control widths come from the TB-00 registry identity (the
+    single source of truth; 8 coordinates / 6 independent DOF after #12608).
+
+    Args:
+        model_id: Registered golfer model id.
+        sealed_u_dim: Optional control width recorded in a sealed record. If it
+            disagrees with the registry, ``ValueError`` is raised rather than
+            silently reshaping.
+    """
+
+    def __init__(self, model_id: str, sealed_u_dim: int | None = None) -> None:
+        super().__init__(model_id)
+        identity = get_golf_model(model_id)
+        self.q_dim: int = identity.dof
+        self.u_dim: int = identity.independent_dof
+        if sealed_u_dim is not None and sealed_u_dim != self.u_dim:
+            raise ValueError(
+                f"sealed record u_dim={sealed_u_dim} disagrees with model "
+                f"{model_id!r} u_dim={self.u_dim}"
+            )
 
     @property
     def control_basis(self) -> str:
@@ -173,12 +195,12 @@ class ConstrainedUpperBodyGeneratorAdapter(GeneratorAdapterBase):
         rng = np.random.default_rng(seed)
         n_steps = int(round(horizon_s / time_step_s)) + 1
         t = np.linspace(0.0, horizon_s, n_steps)
-        # 8 coordinates: hub, rs, re, rh, ls, le, lh, club
-        q = np.zeros((n_steps, 8), dtype=np.float64)
-        for i in range(8):
+        # Coordinates: hub, rs, re, rh, ls, le, lh, club
+        q = np.zeros((n_steps, self.q_dim), dtype=np.float64)
+        for i in range(self.q_dim):
             q[:, i] = np.sin((i + 1) * np.pi * t / horizon_s) * (0.3 / (i + 1))
         v = np.asarray(np.gradient(q, time_step_s, axis=0), dtype=np.float64)
-        u = rng.uniform(-15.0, 15.0, size=(n_steps, 5))
+        u = rng.uniform(-15.0, 15.0, size=(n_steps, self.u_dim))
         return {"t": t, "q": q, "v": v, "u": u}
 
 
