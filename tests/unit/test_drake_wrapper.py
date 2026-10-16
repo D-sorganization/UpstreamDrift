@@ -7,20 +7,21 @@ import pytest
 
 pytest.importorskip("pydrake.geometry", reason="pydrake not available")
 
-# MultibodyPlant uses undocumented Drake APIs; enumerate tested attributes.
+# Only attributes that exist on the real pydrake MultibodyPlant may be listed
+# (enforced against real pydrake by tests/engines/drake/test_drake_real_api_parity.py).
 _PLANT_SPEC_ATTRS = [
     "Finalize",
     "time_step",
     "GetMyContextFromRoot",
-    "SetDefaultPositions",
-    "SetDefaultVelocities",
+    "SetDefaultState",
+    "SetPositions",
+    "SetVelocities",
     "GetPositions",
     "GetVelocities",
     "CalcMassMatrixViaInverseDynamics",
     "CalcInverseDynamics",
     "CalcGravityGeneralizedForces",
     "num_velocities",
-    "MakeMultibodyForces",
 ]
 
 # Mock pydrake using patch.dict (auto-cleans) to allow DrakePhysicsEngine import.
