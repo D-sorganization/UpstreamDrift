@@ -116,7 +116,8 @@ def matrix_to_orientations(
     """Convert validated rotations, reporting each Euler singular frame."""
     matrices_arr = cast(np.ndarray, _rotation_matrix(matrices))
     batch = matrices_arr.shape[:-2]
-    rotations = Rotation.from_matrix(matrices_arr.reshape(-1, 3, 3))
+    # SciPy < 1.15 rejects read-only buffers (frozen dataclass arrays): copy.
+    rotations = Rotation.from_matrix(np.array(matrices_arr.reshape(-1, 3, 3)))
     singular = np.zeros(batch, dtype=bool)
     if representation == "matrix":
         values = matrices_arr.copy()

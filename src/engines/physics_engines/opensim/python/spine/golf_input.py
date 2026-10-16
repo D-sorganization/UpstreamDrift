@@ -317,10 +317,11 @@ def resample(input: GolfTrunkInput, rate_hz: float) -> GolfTrunkInput:  # noqa: 
         grid = np.append(grid, t[-1])
     grid = np.clip(grid, t[0], t[-1])
     grid[-1] = min(grid[-1], t[-1]) if grid[-1] - t[-1] < 1e-9 else grid[-1]
-    rots = Slerp(t, Rotation.from_matrix(input.pelvis_to_thorax))(grid).as_matrix()
-    pose_rot = Slerp(t, Rotation.from_matrix(input.pelvis_pose_ground[:, :3, :3]))(
-        grid
-    ).as_matrix()
+    # Copies: SciPy < 1.15 ``Rotation`` rejects the input's read-only arrays.
+    thorax = Rotation.from_matrix(np.array(input.pelvis_to_thorax))
+    rots = Slerp(t, thorax)(grid).as_matrix()
+    pelvis = Rotation.from_matrix(np.array(input.pelvis_pose_ground[:, :3, :3]))
+    pose_rot = Slerp(t, pelvis)(grid).as_matrix()
     poses = np.tile(np.eye(4), (grid.shape[0], 1, 1))
     poses[:, :3, :3] = pose_rot
     for axis in range(3):
