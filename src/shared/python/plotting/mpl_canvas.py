@@ -18,7 +18,7 @@ Teardown (``close_canvas``) addresses two distinct leaks:
 
 Ownership: UpstreamDrift. This module has no counterpart in the Tools
 repository, so it is edited here (see
-``docs/shared_tools/divergence_inventory.v1.json``).
+``docs/shared_tools/divergence_inventory.v2.jsonl``).
 """
 
 from __future__ import annotations

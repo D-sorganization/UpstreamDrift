@@ -71,3 +71,6 @@ docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_
 
 # Preserve byte-exact reconciliation evidence and source snapshots.
 docs/development/evidence/devlog_reconciliation_11935_20261011/** -text
+
+# UD #12833: generated stable-facts inventory, one record per line.
+docs/shared_tools/divergence_inventory.v2.jsonl text eol=lf linguist-generated
