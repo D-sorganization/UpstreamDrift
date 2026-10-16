@@ -1535,7 +1535,7 @@
     {
       "id": "spine_viewer",
       "title": "Spine Viewer",
-      "description": "Read-only per-level spinal load heatmaps from hash-verified study receipts; always shows scientific status and distribution source",
+      "description": "Read-only per-level spinal load heatmaps from hash-verified study receipts; always shows scientific status and distribution source. Install: pip install upstream-drift[gui-tools]",
       "path": "src/tools/spine_viewer/__main__.py",
       "launch_target": "src/tools/spine_viewer/__main__.py",
       "category": "tool",
@@ -3218,8 +3218,8 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "7a182a6dd1b3e64990303cb07e74b4d5e186d4564ef0e19e8c36654046c4308f",
-    "src/config/launcher_manifest.json": "04146b9d05296e22d833d166a6f9401d7d0a685fd0042b3c0218274ccc3ddcee",
+    "src/config/models.yaml": "64caf5311e4be2c75e742dc053b425a528f851638ca2773423fcc77d40b5d419",
+    "src/config/launcher_manifest.json": "c9844ac6e0cd9c6cc867bda7cfd44edf1199ac85a07af5b9a83bec70a65d00bc",
     "src/config/feature_parity.json": "da668063016e32a118db147aa243ab2bce703548c33f9fe1dcdb15de9153db0c",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"

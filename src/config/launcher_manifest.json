@@ -1257,7 +1257,7 @@
     {
       "id": "spine_viewer",
       "name": "Spine Viewer",
-      "description": "Read-only per-level spinal load heatmaps from hash-verified study receipts; always shows scientific status and distribution source",
+      "description": "Read-only per-level spinal load heatmaps from hash-verified study receipts; always shows scientific status and distribution source. Install: pip install upstream-drift[gui-tools]",
       "category": "tool",
       "type": "special_app",
       "path": "src/tools/spine_viewer/__main__.py",
