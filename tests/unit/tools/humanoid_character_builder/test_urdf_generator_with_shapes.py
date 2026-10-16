@@ -8,12 +8,16 @@ Exercises the end-to-end wiring: ``URDFGeneratorConfig.shape_library`` ->
 
 from __future__ import annotations
 
+import pytest
+
 import defusedxml.ElementTree as ET  # nosec B405 — defusedxml is the safe parser
 from humanoid_character_builder.core.body_parameters import BodyParameters
 from humanoid_character_builder.generators.urdf_config import URDFGeneratorConfig
 from humanoid_character_builder.generators.urdf_generator import HumanoidURDFGenerator
 
 from src.shared.python.body_part_viz.asset_library import ShapeLibrary
+
+pytestmark = pytest.mark.unit
 
 
 def _strip_xml_declaration(xml_str: str) -> str:
@@ -30,6 +34,8 @@ def _link_visual(root: ET.Element, link_name: str) -> ET.Element | None:
 
 
 def test_default_library_drives_link_visuals() -> None:
+    # ShapeLibrary.default() measures the bundled STL assets via trimesh.
+    pytest.importorskip("trimesh")
     library = ShapeLibrary.default()
     config = URDFGeneratorConfig(shape_library=library, generate_collision=False)
     generator = HumanoidURDFGenerator(config)
@@ -70,6 +76,8 @@ def test_no_shape_library_keeps_legacy_payload() -> None:
 
 
 def test_segments_without_library_entry_fall_back() -> None:
+    # ShapeLibrary.default() measures the bundled STL assets via trimesh.
+    pytest.importorskip("trimesh")
     library = ShapeLibrary.default()
     config = URDFGeneratorConfig(shape_library=library, generate_collision=False)
     generator = HumanoidURDFGenerator(config)

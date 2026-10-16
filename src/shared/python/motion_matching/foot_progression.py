@@ -35,7 +35,7 @@ recorded as owner-set rather than measured. :func:`resolve_foot_target` is the
 one place that applies it: in ``style`` mode the trail foot gets
 ``TRAIL_TOE_OUT_STYLE_DEG`` and the lead foot keeps the capture measurement; in
 ``capture`` mode a reliable measurement wins for both feet. Every target carries
-its source (one of ``TARGET_SOURCES``) into the receipt.
+its source (one of ``FOOT_TARGET_SOURCES``) into the receipt.
 
 Estimator note
 --------------
@@ -58,6 +58,7 @@ import numpy as np
 __all__ = [
     "ANKLE_LATERAL_OFFSET_M",
     "DEFAULT_TOE_OUT_DEG",
+    "FOOT_TARGET_SOURCES",
     "RESOLVE_MODES",
     "TARGET_SOURCES",
     "TRAIL_TOE_OUT_STYLE_DEG",
@@ -82,7 +83,11 @@ DEFAULT_TOE_OUT_DEG: float = 20.0
 TRAIL_TOE_OUT_STYLE_DEG: float = DEFAULT_TOE_OUT_DEG
 #: Provenance of a per-foot address target: a capture measurement, the flagged
 #: no-measurement default, or the owner style target.
-TARGET_SOURCES: tuple[str, ...] = ("capture", "default", "style")
+FOOT_TARGET_SOURCES: tuple[str, ...] = ("capture", "default", "style")
+#: Shared ``target_source`` vocabulary of every address target in a receipt: the
+#: foot sources plus ``prior``, an owner-set anatomical prior that a reliable
+#: capture overrides (R4 knee flexion, #12684; ``address_knee``).
+TARGET_SOURCES: tuple[str, ...] = (*FOOT_TARGET_SOURCES, "prior")
 #: Target modes :func:`resolve_foot_target` understands (``off`` sets no target).
 RESOLVE_MODES: tuple[str, ...] = ("capture", "style")
 #: Lateral malleolus to heel-centre-line distance (adult male, documented
@@ -281,7 +286,8 @@ def resolve_foot_target(
       the lead foot resolves exactly as in ``capture`` mode.
 
     Preconditions: ``mode`` in ``RESOLVE_MODES``, ``role`` in ``lead``/``trail``.
-    Postcondition: a finite angle in (-90, 90) deg and a ``TARGET_SOURCES`` tag.
+    Postcondition: a finite angle in (-90, 90) deg and a ``FOOT_TARGET_SOURCES``
+    tag.
     """
     if mode not in RESOLVE_MODES:
         raise ValueError(

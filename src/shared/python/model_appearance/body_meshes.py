@@ -30,8 +30,8 @@ Sizing rule
     ``docs/development/full_body_models/appearance_reference/shared_appearance_spec.tex``.
 
 Head and club meshes stay in their own shared modules (``head``,
-``club_assembly``/``grip_hands``); a head mesh reference slot is reserved for
-R7 (#12687). Visual only: nothing here touches mass, inertia or joints.
+``club_assembly``/``grip_hands``); the head mesh reference slot (R7, #12687) names the
+CC0 asset of ``model_appearance.head_mesh`` when ``head.model`` is ``cc0_mesh``. Visual only: nothing here touches mass, inertia or joints.
 """
 
 from __future__ import annotations
@@ -44,6 +44,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.model_appearance import geometry, library
+from src.shared.python.model_appearance import head_mesh as head_mesh_asset
 from src.shared.python.model_appearance.club_assembly import (
     PART_MATERIALS,
     ClubAssembly,
@@ -360,4 +361,6 @@ def resolve_appearance(
     meshes = tuple(body_meshes(spec, doc, club))
     known = library.library_materials(doc)
     materials = {m.material_name: known[m.material_name] for m in meshes}
+    if head_mesh is None and doc.head.enabled and doc.head.model == "cc0_mesh":
+        head_mesh = MeshReference(*head_mesh_asset.mesh_reference())
     return ResolvedAppearance(meshes, dict(sorted(materials.items())), head_mesh)

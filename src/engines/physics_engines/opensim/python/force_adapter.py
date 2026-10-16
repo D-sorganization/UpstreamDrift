@@ -21,8 +21,12 @@ import hashlib
 import json
 
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import ArrayLike, NDArray
 
+from src.engines.physics_engines.opensim.python.closed_loop_derivatives import (
+    OpenSimClosedLoopDerivatives,
+    opensim_closed_loop_derivatives,
+)
 from src.engines.physics_engines.opensim.python.full_body_parity import (
     CLOSURE_CONVENTION,
     OpenSimFullBodyParityAdapter,
@@ -135,10 +139,39 @@ class OpenSimNativeForceAdapter:
 
     # -- ClosedLoopSnapshotAdapter ----------------------------------------
     def capability(self, capability: Capability) -> CapabilityLevel:
-        """``FULL`` for ``CLOSED_LOOP_SNAPSHOT``; every other query is ``NONE``."""
+        """``FULL`` snapshot, ``PARTIAL`` closed-loop derivatives, else ``NONE``.
+
+        The derivatives are NSX-84 central differences
+        (``derivative_method=finite_difference``), hence ``PARTIAL`` (NSX-88).
+        """
         if capability is Capability.CLOSED_LOOP_SNAPSHOT:
             return CapabilityLevel.FULL
+        if capability is Capability.CLOSED_LOOP_DERIVATIVES:
+            return CapabilityLevel.PARTIAL
         return CapabilityLevel.NONE
+
+    @property
+    def muscle_count(self) -> int:
+        """Muscle-tendon actuators of the source model (0 for the spec model)."""
+        return self._parity.muscle_count
+
+    def constrained_acceleration_derivatives(
+        self,
+        q: ArrayLike,
+        v: ArrayLike,
+        tau: ArrayLike,
+        *,
+        step: float = 1e-5,
+        check_convergence: bool = True,
+    ) -> OpenSimClosedLoopDerivatives:
+        """Converged FD tangent derivatives of ``(a, lambda)`` (NSX-88, #12717).
+
+        See :func:`opensim_closed_loop_derivatives`; the result flags
+        coordinate-only derivatives as insufficient when muscles are present.
+        """
+        return opensim_closed_loop_derivatives(
+            self, q, v, tau, step=step, check_convergence=check_convergence
+        )
 
     @property
     def native_closure_convention(self) -> NativeClosureConvention:

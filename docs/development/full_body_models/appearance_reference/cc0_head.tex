@@ -1,0 +1,54 @@
+% Section of golfer_appearance_reference.tex (R7, #12687). Standalone research
+% and visual reference, not the design manual.
+\section{Realistic CC0 Head for the Shared Head Slot (R7, \#12687)}
+
+\subsection{Defect and Decision}
+The procedural head (skull ellipsoid, blob features, one hair dome) reads
+cartoonish. The owner chose a CC0 head mesh with short hair over a better
+procedural loft. Appearance never feeds dynamics: no mass, inertia, collision or
+degree of freedom is added.
+
+\subsection{Asset and Provenance}
+Source: the MakeHuman base mesh \texttt{hm08} (\texttt{makehuman/data/3dobjs/base.obj}),
+whose header states it was explicitly released as CC0 in September 2020
+(copyright holders at release: Data Collection AB, Joel Palmius, Jonas Hauquier);
+\texttt{LICENSE.md} section C lists the base mesh among the CC0 assets.
+\texttt{assets/head\_cc0/PROVENANCE.json} records the source URL and commit,
+source sha256, author, licence text, download date and the asset sha256.
+\texttt{build\_head\_asset.py} re-derives the asset deterministically
+(\texttt{--check} compares content).
+
+\subsection{Derivation}
+\begin{enumerate}
+\item Keep \texttt{body} faces whose centroid is above the \texttt{joint-neck}
+  height; snap the open neck ring to that plane and cap it with a fan: one
+  closed skin shell (4307 vertices, 8610 triangles).
+\item Hair: scalp faces above a hairline $y_h(z)$ (high on the forehead, above
+  the ears, low at the nape) offset along area-weighted vertex normals by
+  $t(y)=3\to7$\,mm, an inner shell with reversed winding and a stitched rim: a
+  closed shell (390 vertices, 776 triangles).
+\item Frame: MakeHuman ($y$ up, $z$ forward, $+x$ left, decimetres) to the
+  canonical head frame (origin at the neck plane, $x$ forward, $y$ left, $z$
+  up), divided by the neck-to-vertex height, so the skin vertex is exactly one
+  head length. Stored as \texttt{int16} multiples of $10^{-4}$ head lengths.
+\end{enumerate}
+
+\subsection{Placement and Scale}
+\texttt{build\_head\_parts(length, settings)} multiplies the unit vertices by
+\texttt{length}\,$\times$\,\texttt{settings.scale} (the spec's de Leva head
+segment length), then \texttt{head\_frame\_in\_body} places the frame exactly as
+for the parametric head. MuJoCo, the OBJ export and \texttt{resolve\_appearance}
+therefore share one code path.
+
+\subsection{Contracts and Budgets}
+Fail closed: missing provenance, a licence other than CC0-1.0, an asset hash
+mismatch, a non-closed or inward shell or a head outside its envelope raise
+\texttt{ValueError}. Budgets: asset $\le150$\,kB (measured 63\,kB), total
+$\le12\,000$ triangles (measured 9386).
+
+\subsection{Limitations}
+Skin is one flat colour: the base mesh has no eye, lip or brow texture, so the
+eyes and mouth read through geometry only. The hairline follows quad
+boundaries (slightly jagged); no sideburns. Hair is short only. Evidence stills
+(front, three-quarter) come from
+\texttt{evidence/appearance/cc0\_head/render\_cc0\_head.py}.

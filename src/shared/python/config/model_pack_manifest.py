@@ -40,6 +40,89 @@ def _default_provider_exercise_capabilities(
     return ["biomechanics", engine, exercise_id]
 
 
+def _v1_exercise_to_model(
+    exercise: Any,
+    *,
+    prefix: str,
+    models_root: str,
+    engine: str,
+    provider: Any,
+    fmt: str,
+) -> dict[str, Any]:
+    """Expand one provider ``exercises`` item into a strict model entry dict."""
+    require(
+        isinstance(exercise, dict),
+        "model_pack/v1 exercise entries must be mappings",
+        exercise,
+    )
+    exercise_id = str(exercise.get("id", "")).strip()
+    path = str(exercise.get("path", "")).strip()
+    if not exercise_id or not path:
+        raise ValueError(
+            "model_pack/v1 exercise entries require non-empty 'id' "
+            f"and 'path'; got {exercise!r}"
+        )
+    if models_root:
+        models_root_norm = models_root.replace("\\", "/").rstrip("/")
+        path_norm = path.replace("\\", "/").lstrip("/")
+        if models_root_norm and not path_norm.startswith(models_root_norm):
+            path = f"{models_root_norm}/{path_norm}"
+    capabilities = exercise.get("capabilities")
+    if capabilities is None:
+        capabilities = _default_provider_exercise_capabilities(engine, exercise_id)
+    return {
+        "id": f"{prefix}-{exercise_id}",
+        "name": exercise.get("name", exercise_id.replace("_", " ").title()),
+        "description": exercise.get(
+            "description", f"{engine or provider} {exercise_id} model"
+        ),
+        "type": exercise.get("type", fmt or engine or "model"),
+        "path": path,
+        "engine_type": engine or None,
+        "capabilities": capabilities,
+        **{
+            key: exercise[key]
+            for key in ("launcher", "identity", "tags")
+            if key in exercise
+        },
+    }
+
+
+def _v1_models_from_exercises(
+    data: dict[str, Any],
+    *,
+    prefix: str,
+    engine: str,
+    provider: Any,
+    fmt: str,
+) -> list[dict[str, Any]]:
+    """Expand a provider ``exercises`` list into strict model entry dicts."""
+    exercises = data["exercises"]
+    require(
+        isinstance(exercises, list),
+        "model_pack/v1 'exercises' must be a list",
+        exercises,
+    )
+    # ``models_root`` (when declared) is the provider-relative directory that
+    # contains every exercise path. Resolution later sets
+    # ``source_root=provider_root``, so the exercise ``path`` must be made
+    # relative to ``provider_root`` by prepending ``models_root`` here;
+    # otherwise ``provider_root/<path>`` misses the ``models_root`` segment
+    # and the model file cannot be found (#6886).
+    models_root = str(data.get("models_root", "")).strip()
+    return [
+        _v1_exercise_to_model(
+            exercise,
+            prefix=prefix,
+            models_root=models_root,
+            engine=engine,
+            provider=provider,
+            fmt=fmt,
+        )
+        for exercise in exercises
+    ]
+
+
 def _normalize_model_pack_v1(data: dict[str, Any]) -> dict[str, Any]:
     """Normalize a provider ``schema: model_pack/v1`` manifest to strict shape.
 
@@ -70,63 +153,13 @@ def _normalize_model_pack_v1(data: dict[str, Any]) -> dict[str, Any]:
     if "models" in data:
         models = data["models"]
     elif "exercises" in data:
-        exercises = data["exercises"]
-        require(
-            isinstance(exercises, list),
-            "model_pack/v1 'exercises' must be a list",
-            exercises,
+        models = _v1_models_from_exercises(
+            data,
+            prefix=package or repo or str(provider),
+            engine=engine,
+            provider=provider,
+            fmt=fmt,
         )
-        prefix = package or repo or str(provider)
-        # ``models_root`` (when declared) is the provider-relative directory that
-        # contains every exercise path. Resolution later sets
-        # ``source_root=provider_root``, so the exercise ``path`` must be made
-        # relative to ``provider_root`` by prepending ``models_root`` here;
-        # otherwise ``provider_root/<path>`` misses the ``models_root`` segment
-        # and the model file cannot be found (#6886).
-        models_root = str(data.get("models_root", "")).strip()
-        models = []
-        for exercise in exercises:
-            require(
-                isinstance(exercise, dict),
-                "model_pack/v1 exercise entries must be mappings",
-                exercise,
-            )
-            exercise_id = str(exercise.get("id", "")).strip()
-            path = str(exercise.get("path", "")).strip()
-            if not exercise_id or not path:
-                raise ValueError(
-                    "model_pack/v1 exercise entries require non-empty 'id' "
-                    f"and 'path'; got {exercise!r}"
-                )
-            if models_root:
-                models_root_norm = models_root.replace("\\", "/").rstrip("/")
-                path_norm = path.replace("\\", "/").lstrip("/")
-                if models_root_norm and not path_norm.startswith(models_root_norm):
-                    path = f"{models_root_norm}/{path_norm}"
-            capabilities = exercise.get("capabilities")
-            if capabilities is None:
-                capabilities = _default_provider_exercise_capabilities(
-                    engine,
-                    exercise_id,
-                )
-            models.append(
-                {
-                    "id": f"{prefix}-{exercise_id}",
-                    "name": exercise.get("name", exercise_id.replace("_", " ").title()),
-                    "description": exercise.get(
-                        "description", f"{engine or provider} {exercise_id} model"
-                    ),
-                    "type": exercise.get("type", fmt or engine or "model"),
-                    "path": path,
-                    "engine_type": engine or None,
-                    "capabilities": capabilities,
-                    **{
-                        key: exercise[key]
-                        for key in ("launcher", "identity", "tags")
-                        if key in exercise
-                    },
-                }
-            )
     else:
         raise ValueError(
             "model_pack/v1 manifest must declare either 'models' or 'exercises'."
@@ -441,6 +474,109 @@ class LauncherPresentationMetadata:
         return data
 
 
+_ENTRY_REQUIRED_FIELDS = frozenset({"id", "name", "description", "type", "path"})
+
+
+def _require_entry_required_fields(data: dict[str, Any]) -> None:
+    """Require the mandatory string fields of a model entry to be present."""
+    missing = _ENTRY_REQUIRED_FIELDS - set(data.keys())
+    if missing:
+        raise ValueError(f"Model pack entry missing required fields: {sorted(missing)}")
+
+    for field_name in _ENTRY_REQUIRED_FIELDS:
+        value = data[field_name]
+        require(isinstance(value, str), f"{field_name} must be a string", value)
+        require(value.strip() != "", f"{field_name} must be non-empty", value)
+
+
+def _optional_nonempty_str(data: dict[str, Any], key: str) -> str | None:
+    """Return ``data[key]`` stripped, or None if absent; reject blank values."""
+    value = data.get(key)
+    if value is None:
+        return None
+    require(
+        isinstance(value, str) and value.strip() != "",
+        f"{key} must be a non-empty string when provided",
+        value,
+    )
+    return value.strip()
+
+
+def _strip_or_none(value: Any) -> str | None:
+    """Strip ``value`` if it is a string, otherwise return None."""
+    return value.strip() if isinstance(value, str) else None
+
+
+def _parse_hidden_fields(
+    data: dict[str, Any],
+) -> tuple[bool, str | None, str | None]:
+    """Validate and return ``(hidden, hidden_reason, hidden_owner)``."""
+    hidden_raw = data.get("hidden", False)
+    require(
+        isinstance(hidden_raw, bool),
+        "hidden must be a boolean when provided",
+        hidden_raw,
+    )
+    hidden_reason = data.get("hidden_reason")
+    hidden_owner = data.get("hidden_owner")
+    if hidden_raw:
+        require(
+            isinstance(hidden_reason, str) and hidden_reason.strip() != "",
+            "hidden_reason must be a non-empty string when hidden is true",
+            hidden_reason,
+        )
+        require(
+            isinstance(hidden_owner, str) and hidden_owner.strip() != "",
+            "hidden_owner must be a non-empty string when hidden is true",
+            hidden_owner,
+        )
+    return bool(hidden_raw), _strip_or_none(hidden_reason), _strip_or_none(hidden_owner)
+
+
+@dataclass(frozen=True)
+class _EntryMetadata:
+    """Nested metadata objects parsed from a raw model entry."""
+
+    identity: CrossEngineIdentity | None
+    exchange_artifacts: tuple[ExchangeArtifact, ...]
+    provenance: ProvenanceMetadata | None
+    launcher: LauncherPresentationMetadata | None
+
+
+def _parse_entry_metadata(data: dict[str, Any]) -> _EntryMetadata:
+    """Parse identity, exchange artifacts, provenance and launcher metadata."""
+    identity_raw = data.get("identity")
+    identity = (
+        CrossEngineIdentity.from_dict(identity_raw)
+        if identity_raw is not None
+        else None
+    )
+
+    exchange_artifacts_raw = data.get("exchange_artifacts", [])
+    require(
+        isinstance(exchange_artifacts_raw, list),
+        "exchange_artifacts must be a list when provided",
+        exchange_artifacts_raw,
+    )
+    exchange_artifacts = tuple(
+        ExchangeArtifact.from_dict(item) for item in exchange_artifacts_raw
+    )
+
+    provenance_raw = data.get("provenance")
+    provenance = (
+        ProvenanceMetadata.from_dict(provenance_raw)
+        if provenance_raw is not None
+        else None
+    )
+    launcher_raw = data.get("launcher")
+    launcher = (
+        LauncherPresentationMetadata.from_dict(launcher_raw)
+        if launcher_raw is not None
+        else None
+    )
+    return _EntryMetadata(identity, exchange_artifacts, provenance, launcher)
+
+
 @dataclass(frozen=True)
 class ModelPackEntry:
     """A single launchable model entry inside a model pack."""
@@ -473,111 +609,20 @@ class ModelPackEntry:
     def from_dict(cls, data: dict[str, Any]) -> ModelPackEntry:
         """Build a validated entry from raw manifest data."""
         require(isinstance(data, dict), "model entry must be a mapping", data)
+        _require_entry_required_fields(data)
 
-        required = {"id", "name", "description", "type", "path"}
-        missing = required - set(data.keys())
-        if missing:
-            raise ValueError(
-                f"Model pack entry missing required fields: {sorted(missing)}"
-            )
-
-        for field_name in required:
-            value = data[field_name]
-            require(isinstance(value, str), f"{field_name} must be a string", value)
-            require(value.strip() != "", f"{field_name} must be non-empty", value)
-
-        engine_type = data.get("engine_type")
-        if engine_type is not None:
-            require(
-                isinstance(engine_type, str) and engine_type.strip() != "",
-                "engine_type must be a non-empty string when provided",
-                engine_type,
-            )
-
-        provider = data.get("provider")
-        if provider is not None:
-            require(
-                isinstance(provider, str) and provider.strip() != "",
-                "provider must be a non-empty string when provided",
-                provider,
-            )
-
-        source_root = data.get("source_root")
-        if source_root is not None:
-            require(
-                isinstance(source_root, str) and source_root.strip() != "",
-                "source_root must be a non-empty string when provided",
-                source_root,
-            )
-
-        working_dir = data.get("working_dir")
-        if working_dir is not None:
-            require(
-                isinstance(working_dir, str) and working_dir.strip() != "",
-                "working_dir must be a non-empty string when provided",
-                working_dir,
-            )
+        engine_type = _optional_nonempty_str(data, "engine_type")
+        provider = _optional_nonempty_str(data, "provider")
+        source_root = _optional_nonempty_str(data, "source_root")
+        working_dir = _optional_nonempty_str(data, "working_dir")
 
         order = data.get("order", 99)
         require(isinstance(order, int), "order must be an integer", order)
         require(order >= 0, "order must be non-negative", order)
 
-        hidden_raw = data.get("hidden", False)
-        require(
-            isinstance(hidden_raw, bool),
-            "hidden must be a boolean when provided",
-            hidden_raw,
-        )
-        hidden_reason = data.get("hidden_reason")
-        hidden_owner = data.get("hidden_owner")
-        if hidden_raw:
-            require(
-                isinstance(hidden_reason, str) and hidden_reason.strip() != "",
-                "hidden_reason must be a non-empty string when hidden is true",
-                hidden_reason,
-            )
-            require(
-                isinstance(hidden_owner, str) and hidden_owner.strip() != "",
-                "hidden_owner must be a non-empty string when hidden is true",
-                hidden_owner,
-            )
-
-        identity_raw = data.get("identity")
-        identity = (
-            CrossEngineIdentity.from_dict(identity_raw)
-            if identity_raw is not None
-            else None
-        )
-
-        exchange_artifacts_raw = data.get("exchange_artifacts", [])
-        require(
-            isinstance(exchange_artifacts_raw, list),
-            "exchange_artifacts must be a list when provided",
-            exchange_artifacts_raw,
-        )
-        exchange_artifacts = tuple(
-            ExchangeArtifact.from_dict(item) for item in exchange_artifacts_raw
-        )
-
-        provenance_raw = data.get("provenance")
-        provenance = (
-            ProvenanceMetadata.from_dict(provenance_raw)
-            if provenance_raw is not None
-            else None
-        )
-        launcher_raw = data.get("launcher")
-        launcher = (
-            LauncherPresentationMetadata.from_dict(launcher_raw)
-            if launcher_raw is not None
-            else None
-        )
-        embed_adapter = data.get("embed_adapter")
-        if embed_adapter is not None:
-            require(
-                isinstance(embed_adapter, str) and embed_adapter.strip() != "",
-                "embed_adapter must be a non-empty string when provided",
-                embed_adapter,
-            )
+        hidden, hidden_reason, hidden_owner = _parse_hidden_fields(data)
+        nested = _parse_entry_metadata(data)
+        embed_adapter = _optional_nonempty_str(data, "embed_adapter")
 
         return cls(
             id=data["id"].strip(),
@@ -585,28 +630,22 @@ class ModelPackEntry:
             description=data["description"].strip(),
             type=data["type"].strip(),
             path=data["path"].strip(),
-            engine_type=engine_type.strip() if isinstance(engine_type, str) else None,
+            engine_type=engine_type,
             capabilities=_normalize_string_sequence(data.get("capabilities")),
             tags=_normalize_string_sequence(data.get("tags")),
-            provider=provider.strip() if isinstance(provider, str) else None,
-            source_root=source_root.strip() if isinstance(source_root, str) else None,
-            working_dir=working_dir.strip() if isinstance(working_dir, str) else None,
+            provider=provider,
+            source_root=source_root,
+            working_dir=working_dir,
             python_paths=_normalize_path_sequence(data.get("python_paths")),
-            identity=identity,
-            exchange_artifacts=exchange_artifacts,
-            provenance=provenance,
-            launcher=launcher,
+            identity=nested.identity,
+            exchange_artifacts=nested.exchange_artifacts,
+            provenance=nested.provenance,
+            launcher=nested.launcher,
             order=order,
-            hidden=bool(hidden_raw),
-            hidden_reason=(
-                hidden_reason.strip() if isinstance(hidden_reason, str) else None
-            ),
-            hidden_owner=(
-                hidden_owner.strip() if isinstance(hidden_owner, str) else None
-            ),
-            embed_adapter=(
-                embed_adapter.strip() if isinstance(embed_adapter, str) else None
-            ),
+            hidden=hidden,
+            hidden_reason=hidden_reason,
+            hidden_owner=hidden_owner,
+            embed_adapter=embed_adapter,
             exercise=(
                 str(data["exercise"]).strip()
                 if "exercise" in data and data["exercise"] is not None

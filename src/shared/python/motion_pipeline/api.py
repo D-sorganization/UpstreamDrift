@@ -14,8 +14,9 @@ from __future__ import annotations
 
 import logging
 import tempfile
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import Any, NoReturn
 
 from fastapi import FastAPI, File, HTTPException, UploadFile, status, Form
 from pydantic import BaseModel, Field, ValidationError
@@ -26,6 +27,7 @@ from .orchestrator import (
     MotionPipeline,
     PipelineConfig,
     PreprocessingStep,
+    Stage,
 )
 
 logger = logging.getLogger(__name__)
@@ -178,6 +180,229 @@ def _validate_source_format(source_format: str) -> None:
         )
 
 
+_SOURCE_FORMAT_DESCRIPTION = (
+    "Source format (alphapose_json, bvh, c3d, csv, deeplabcut, hmr2, "
+    "hrnet_json, mediapipe_json, opencap_session, openpose_json, "
+    "opensim_sto_mot, trc, auto, passthrough)"
+)
+
+_RUN_DESCRIPTION = """
+Process motion capture data through the full pipeline:
+adapter → preprocessing → scaling → IK → motion-matching
+
+Accepts file uploads in registered mocap source formats or with auto-detection.
+Returns MotionMatchingResult with matched trajectory and error metrics.
+        """
+
+_RUN_CONFIG_DESCRIPTION = """
+Run motion pipeline with full configuration control.
+Accepts JSON config body plus file upload.
+        """
+
+
+def _new_request_id() -> str:
+    """Return a fresh opaque request identifier."""
+    import uuid
+
+    return f"req-{uuid.uuid4().hex[:12]}"
+
+
+async def _save_upload_to_tempfile(file: UploadFile, suffix: str) -> Path:
+    """Persist an upload to a ``delete=False`` temp file and return its path.
+
+    The caller owns the file and must unlink it.
+    """
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        content = await file.read()
+        tmp.write(content)
+        return Path(tmp.name)
+
+
+def _make_log_hook(request_id: str) -> Callable[[Any], None]:
+    """Build a per-request stage-completion logging hook."""
+
+    def log_hook(payload: Any) -> None:
+        logger.info(f"Request {request_id}: Stage {payload.stage.value} completed")
+
+    return log_hook
+
+
+def _raise_http_for_pipeline_error(
+    request_id: str, exc: ValueError | RuntimeError
+) -> NoReturn:
+    """Map a pipeline failure to the HTTP error contract.
+
+    ``ValueError`` (caller contract violation, includes InvalidInputError) ->
+    400 so clients can distinguish bad input from a bug; ``RuntimeError`` ->
+    500.
+    """
+    if isinstance(exc, ValueError):
+        logger.info(f"Request {request_id}: invalid input: {exc}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
+        ) from exc
+    logger.exception(f"Request {request_id}: internal pipeline error")
+    raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc)
+    ) from exc
+
+
+async def health_check() -> dict[str, str]:
+    """Health check endpoint."""
+    return {"status": "healthy"}
+
+
+async def run_pipeline(
+    file: UploadFile = File(..., description="Motion capture file"),
+    source_format: str = Form(..., description=_SOURCE_FORMAT_DESCRIPTION),
+    ik_backend: str = Form(default="geometric", description="IK backend"),
+    matching_backend: str = Form(default="mujoco", description="Matching backend"),
+    matching_model_urdf: str | None = Form(
+        default=None,
+        description="Production URDF path for matching backends that require one",
+    ),
+) -> PipelineResponse:
+    """
+    Run motion pipeline on uploaded file.
+
+    Args:
+        file: Uploaded motion capture file
+        source_format: Format of the source file
+        ik_backend: IK backend to use
+        matching_backend: Motion matching backend to use
+
+    Returns:
+        PipelineResponse with results or error
+    """
+    request_id = _new_request_id()
+    logger.info(f"Received pipeline request {request_id} for {file.filename}")
+
+    # Validate file
+    if not file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No filename provided"
+        )
+
+    # Validate source_format against the adapter registry up front so a
+    # typo-d/unknown format is rejected with 400 rather than silently
+    # auto-detected (issue #6930).
+    _validate_source_format(source_format)
+
+    # Save uploaded file temporarily
+    try:
+        tmp_path = await _save_upload_to_tempfile(file, Path(file.filename).suffix)
+
+        try:
+            config = PipelineConfig(
+                adapter=AdapterOverride(format=source_format),
+                ik_backend=ik_backend,
+                matching_backend=matching_backend,
+                matching_model_urdf=matching_model_urdf,
+            )
+            pipeline = MotionPipeline(config)
+
+            log_hook = _make_log_hook(request_id)
+            for stage in Stage:
+                pipeline.add_hook(stage, log_hook)
+
+            result = pipeline.run(tmp_path)
+            audit_log = pipeline.get_audit_log()
+        finally:
+            # Clean up temp file
+            tmp_path.unlink(missing_ok=True)
+
+        logger.info(
+            f"Request {request_id}: Pipeline completed success={result.success}"
+        )
+
+        return PipelineResponse.from_result(result, audit_log)
+
+    except (ValueError, RuntimeError) as e:
+        _raise_http_for_pipeline_error(request_id, e)
+
+
+async def run_pipeline_with_config(
+    file: UploadFile = File(..., description="Motion capture file"),
+    config: str = Form(..., description="Pipeline configuration (JSON string)"),
+) -> PipelineResponse:
+    """
+    Run motion pipeline with full configuration.
+
+    Args:
+        file: Uploaded motion capture file
+        config: Pipeline configuration JSON string
+
+    Returns:
+        PipelineResponse with results or error
+    """
+    request_id = _new_request_id()
+    logger.info(f"Received pipeline request {request_id} with config")
+
+    # Parse config from JSON string (malformed config -> 422).
+    try:
+        parsed_config = PipelineRequest.model_validate_json(config)
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
+        ) from e
+
+    # Reject an unknown source_format up front (issue #6930).
+    _validate_source_format(parsed_config.source_format)
+
+    try:
+        tmp_path = await _save_upload_to_tempfile(
+            file, Path(file.filename).suffix if file.filename else ".tmp"
+        )
+
+        try:
+            # Convert config and run pipeline
+            pipeline_config = parsed_config.to_pipeline_config()
+            pipeline = MotionPipeline(pipeline_config)
+
+            result = pipeline.run(tmp_path)
+            audit_log = pipeline.get_audit_log()
+        finally:
+            tmp_path.unlink(missing_ok=True)
+
+        return PipelineResponse.from_result(result, audit_log)
+
+    except (ValueError, RuntimeError) as e:
+        _raise_http_for_pipeline_error(request_id, e)
+
+
+def _register_health_routes(app: FastAPI) -> None:
+    """Register the liveness probe."""
+    app.get("/health")(health_check)
+
+
+def _register_run_routes(app: FastAPI) -> None:
+    """Register the form-field based pipeline endpoint."""
+    app.post(
+        "/api/v1/motion-pipeline/run",
+        response_model=PipelineResponse,
+        status_code=status.HTTP_200_OK,
+        summary="Run motion pipeline",
+        description=_RUN_DESCRIPTION,
+        responses={
+            200: {"description": "Processing completed", "model": PipelineResponse},
+            400: {"description": "Invalid input or configuration"},
+            422: {"description": "Validation error"},
+            500: {"description": "Internal server error"},
+        },
+    )(run_pipeline)
+
+
+def _register_run_config_routes(app: FastAPI) -> None:
+    """Register the JSON-config based pipeline endpoint."""
+    app.post(
+        "/api/v1/motion-pipeline/run-config",
+        response_model=PipelineResponse,
+        status_code=status.HTTP_200_OK,
+        summary="Run motion pipeline with full config",
+        description=_RUN_CONFIG_DESCRIPTION,
+    )(run_pipeline_with_config)
+
+
 def create_app() -> FastAPI:
     """
     Create FastAPI application with motion pipeline endpoints.
@@ -190,211 +415,9 @@ def create_app() -> FastAPI:
         description="REST API for motion capture processing",
         version="1.0.0",
     )
-
-    @app.get("/health")
-    async def health_check() -> dict[str, str]:
-        """Health check endpoint."""
-        return {"status": "healthy"}
-
-    @app.post(
-        "/api/v1/motion-pipeline/run",
-        response_model=PipelineResponse,
-        status_code=status.HTTP_200_OK,
-        summary="Run motion pipeline",
-        description="""
-Process motion capture data through the full pipeline:
-adapter → preprocessing → scaling → IK → motion-matching
-
-Accepts file uploads in registered mocap source formats or with auto-detection.
-Returns MotionMatchingResult with matched trajectory and error metrics.
-        """,
-        responses={
-            200: {"description": "Processing completed", "model": PipelineResponse},
-            400: {"description": "Invalid input or configuration"},
-            422: {"description": "Validation error"},
-            500: {"description": "Internal server error"},
-        },
-    )
-    async def run_pipeline(
-        file: UploadFile = File(..., description="Motion capture file"),
-        source_format: str = Form(
-            ...,
-            description=(
-                "Source format (alphapose_json, bvh, c3d, csv, deeplabcut, hmr2, "
-                "hrnet_json, mediapipe_json, opencap_session, openpose_json, "
-                "opensim_sto_mot, trc, auto, passthrough)"
-            ),
-        ),
-        ik_backend: str = Form(default="geometric", description="IK backend"),
-        matching_backend: str = Form(default="mujoco", description="Matching backend"),
-        matching_model_urdf: str | None = Form(
-            default=None,
-            description="Production URDF path for matching backends that require one",
-        ),
-    ) -> PipelineResponse:
-        """
-        Run motion pipeline on uploaded file.
-
-        Args:
-            file: Uploaded motion capture file
-            source_format: Format of the source file
-            ik_backend: IK backend to use
-            matching_backend: Motion matching backend to use
-
-        Returns:
-            PipelineResponse with results or error
-        """
-        import uuid
-
-        request_id = f"req-{uuid.uuid4().hex[:12]}"
-        logger.info(f"Received pipeline request {request_id} for {file.filename}")
-
-        # Validate file
-        if not file.filename:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="No filename provided"
-            )
-
-        # Validate source_format against the adapter registry up front so a
-        # typo-d/unknown format is rejected with 400 rather than silently
-        # auto-detected (issue #6930).
-        _validate_source_format(source_format)
-
-        # Save uploaded file temporarily
-        try:
-            tmp_path = None
-            with tempfile.NamedTemporaryFile(
-                delete=False, suffix=Path(file.filename).suffix
-            ) as tmp:
-                content = await file.read()
-                tmp.write(content)
-                tmp_path = Path(tmp.name)
-
-            try:
-                # Configure pipeline
-                config = PipelineConfig(
-                    adapter=AdapterOverride(format=source_format),
-                    ik_backend=ik_backend,
-                    matching_backend=matching_backend,
-                    matching_model_urdf=matching_model_urdf,
-                )
-
-                # Create and run pipeline
-                pipeline = MotionPipeline(config)
-
-                # Add logging hook
-                def log_hook(payload) -> None:
-                    logger.info(
-                        f"Request {request_id}: Stage {payload.stage.value} completed"
-                    )
-
-                from .orchestrator import Stage
-
-                for stage in Stage:
-                    pipeline.add_hook(stage, log_hook)
-
-                # Run pipeline
-                result = pipeline.run(tmp_path)
-                audit_log = pipeline.get_audit_log()
-            finally:
-                # Clean up temp file
-                if tmp_path:
-                    tmp_path.unlink(missing_ok=True)
-
-            logger.info(
-                f"Request {request_id}: Pipeline completed success={result.success}"
-            )
-
-            return PipelineResponse.from_result(result, audit_log)
-
-        except ValueError as e:
-            # Caller contract violation (InvalidInputError is a ValueError):
-            # map to 400 so clients can distinguish bad input from a bug.
-            logger.info(f"Request {request_id}: invalid input: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
-            ) from e
-        except RuntimeError as e:
-            logger.exception(f"Request {request_id}: internal pipeline error")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-            ) from e
-
-    @app.post(
-        "/api/v1/motion-pipeline/run-config",
-        response_model=PipelineResponse,
-        status_code=status.HTTP_200_OK,
-        summary="Run motion pipeline with full config",
-        description="""
-Run motion pipeline with full configuration control.
-Accepts JSON config body plus file upload.
-        """,
-    )
-    async def run_pipeline_with_config(
-        file: UploadFile = File(..., description="Motion capture file"),
-        config: str = Form(..., description="Pipeline configuration (JSON string)"),
-    ) -> PipelineResponse:
-        """
-        Run motion pipeline with full configuration.
-
-        Args:
-            file: Uploaded motion capture file
-            config: Pipeline configuration JSON string
-
-        Returns:
-            PipelineResponse with results or error
-        """
-        import uuid
-
-        request_id = f"req-{uuid.uuid4().hex[:12]}"
-        logger.info(f"Received pipeline request {request_id} with config")
-
-        # Parse config from JSON string (malformed config -> 422).
-        try:
-            parsed_config = PipelineRequest.model_validate_json(config)
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
-            ) from e
-
-        # Reject an unknown source_format up front (issue #6930).
-        _validate_source_format(parsed_config.source_format)
-
-        try:
-            tmp_path = None
-            # Save uploaded file temporarily
-            with tempfile.NamedTemporaryFile(
-                delete=False,
-                suffix=Path(file.filename).suffix if file.filename else ".tmp",
-            ) as tmp:
-                content = await file.read()
-                tmp.write(content)
-                tmp_path = Path(tmp.name)
-
-            try:
-                # Convert config and run pipeline
-                pipeline_config = parsed_config.to_pipeline_config()
-                pipeline = MotionPipeline(pipeline_config)
-
-                result = pipeline.run(tmp_path)
-                audit_log = pipeline.get_audit_log()
-            finally:
-                if tmp_path:
-                    tmp_path.unlink(missing_ok=True)
-
-            return PipelineResponse.from_result(result, audit_log)
-
-        except ValueError as e:
-            logger.info(f"Request {request_id}: invalid input: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
-            ) from e
-        except RuntimeError as e:
-            logger.exception(f"Request {request_id}: internal pipeline error")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-            ) from e
-
+    _register_health_routes(app)
+    _register_run_routes(app)
+    _register_run_config_routes(app)
     return app
 
 

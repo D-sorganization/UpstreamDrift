@@ -18,6 +18,8 @@ from src.shared.python.core.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.style_constants import Styles
 
+from ..._camera_presets import CAMERA_PRESETS, camera_preset
+
 if TYPE_CHECKING:
     from ...sim_widget import MuJoCoSimWidget
 
@@ -46,8 +48,22 @@ class VisualizationTab(QtWidgets.QWidget):
         self._setup_ui()
 
     def _setup_ui(self) -> None:
-        """Create the visualization settings UI."""
-        viz_layout = QtWidgets.QVBoxLayout(self)
+        """Create the visualization settings UI.
+
+        The group boxes live in a scroll area: in the launcher's side panel
+        there is not enough height for all of them, and without scrolling Qt
+        squeezed every box below its size hint so the controls overlapped
+        (UD #12889).
+        """
+        outer_layout = QtWidgets.QVBoxLayout(self)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+        content = QtWidgets.QWidget()
+        scroll = QtWidgets.QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
+        outer_layout.addWidget(scroll)
+
+        viz_layout = QtWidgets.QVBoxLayout(content)
         viz_layout.setContentsMargins(8, 8, 8, 8)
 
         viz_layout.addWidget(self._setup_camera_controls())
@@ -62,6 +78,7 @@ class VisualizationTab(QtWidgets.QWidget):
         viz_layout.addWidget(self._setup_body_appearance())
 
         viz_layout.addStretch(1)
+        scroll.setWidget(content)
 
     def _setup_camera_controls(self) -> QtWidgets.QGroupBox:
         """Create camera view preset and advanced camera controls."""
@@ -87,7 +104,7 @@ class VisualizationTab(QtWidgets.QWidget):
         preset_layout = QtWidgets.QHBoxLayout()
         preset_layout.addWidget(QtWidgets.QLabel("Preset:"))
         self.camera_combo = QtWidgets.QComboBox()
-        self.camera_combo.addItems(["side", "front", "top", "follow", "down-the-line"])
+        self.camera_combo.addItems(list(CAMERA_PRESETS))
         self.camera_combo.currentTextChanged.connect(self.on_camera_changed)
         preset_layout.addWidget(self.camera_combo)
         camera_layout.addLayout(preset_layout)
@@ -603,6 +620,20 @@ class VisualizationTab(QtWidgets.QWidget):
         self.sim_widget.set_camera(camera_name)
         # Update sliders to match camera preset
         self.update_camera_sliders()
+
+    def apply_camera_preset(self, camera_name: str) -> None:
+        """Apply a named preset and keep the combo and sliders in sync.
+
+        Unlike ``camera_combo.setCurrentText`` this also moves the camera when
+        the combo already shows ``camera_name`` (e.g. clicking *Side* twice).
+
+        Raises:
+            ValueError: if ``camera_name`` is not a known preset.
+        """
+        camera_preset(camera_name)  # precondition: known preset
+        with QtCore.QSignalBlocker(self.camera_combo):
+            self.camera_combo.setCurrentText(camera_name)
+        self.on_camera_changed(camera_name)
 
     def update_camera_sliders(self) -> None:
         require(self.sim_widget is not None, "sim_widget is set")

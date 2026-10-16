@@ -248,6 +248,13 @@
       "parameters": {"model": "engine muscle model"},
       "source": {"citation_id": "CIT-CUI-2008", "note": "Mechanism M3. The abstract says force-dependent, not activation, and is feline; a human arm study (Hu, Murray, Perreault 2011) is a candidate for a later check."},
       "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H-KINEMATIC-ENSEMBLE-PRIOR",
+      "statement": "Kinematic uncertainty is sampled as a time-constant joint-coordinate offset drawn from an isotropic Gaussian of declared standard deviation, restricted to the tangent null space of the closure Jacobian and then projected onto the closure manifold; samples that fail admission are counted and excluded. The distribution is a modelling choice, not an estimate of measurement error.",
+      "parameters": {"sigma_q": "declared (rad or m per coordinate)", "offset": "time-constant, tangent to the closure, then project_to_closure", "seed": "declared"},
+      "source": {"citation_id": null, "note": "Modelling choice (NSX-61, #12586)."},
+      "verification_status": "NOT_APPLICABLE"
     }
   ],
   "conventions": [

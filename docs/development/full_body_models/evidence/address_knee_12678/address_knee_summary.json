@@ -1,0 +1,275 @@
+{
+  "issue": 12684,
+  "epic": 12678,
+  "engine": "mujoco",
+  "stage": "calibrated address (IK only), measured via pipeline.cli.calibrate_run",
+  "base_commit": "b3048176eead66ad4316330e254124f8b97e271e",
+  "host": "Windows 11 workstation, Python 3.12.13, MuJoCo 3.8.0",
+  "captures": {
+    "driver": "capture-A",
+    "iron": "capture-B"
+  },
+  "commands": {
+    "driver": "--static-seeds --fix-club-markers --capture driver --spec docs/development/full_body_models/full_body_spec_anthro_driver.json --knee-flexion {off,prior,capture}",
+    "iron": "--static-seeds --zmp-filter --fix-club-markers --capture iron --spec docs/development/full_body_models/full_body_spec_anthro_iron7.json --knee-flexion {off,prior,capture}"
+  },
+  "foot_progression": "style (R3 canonical default) in every run",
+  "owner_prior_deg": 15.0,
+  "owner_band_deg": 5.0,
+  "knee_prior_weight_per_rad2": 1.0,
+  "capture_knee_flexion_deg": {
+    "driver": {
+      "right": 26.2,
+      "left": 28.6
+    },
+    "iron": {
+      "right": 24.6,
+      "left": 26.3
+    },
+    "method": "median over the address window; hip centre from the functional sphere-fit hip calibration carried by the waist-marker pelvis pose; KneeOut/AnkleOut moved medially onto the joint centres along the knee flexion axis (0.06 m / 0.056 m leg-seed offsets); all four knees reliable (IQR <= 0.7 deg)"
+  },
+  "runs": {
+    "driver_capture": {
+      "mode": "capture",
+      "model_knee_flexion_deg": {
+        "left": 28.57,
+        "right": 26.1
+      },
+      "knee_angle_coordinate_deg": {
+        "left": -27.11,
+        "right": -24.67
+      },
+      "model_toe_out_deg": {
+        "left": 16.6,
+        "right": 20.0
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -36.06,
+        "hip_rotation_l": 11.4
+      },
+      "address_marker_rms_mm": 9.08,
+      "static_trial_marker_rms_mm": 5.34,
+      "segment_rms_mm": {
+        "head": 2.98,
+        "trunk": 4.04,
+        "pelvis": 9.19,
+        "left_arm": 12.54,
+        "right_arm": 5.64,
+        "left_leg": 7.47,
+        "right_leg": 15.64,
+        "club": 5.68
+      },
+      "targets": {
+        "left": {
+          "target_deg": 28.57,
+          "target_source": "capture",
+          "within_band": true,
+          "hyperextended": false
+        },
+        "right": {
+          "target_deg": 26.2,
+          "target_source": "capture",
+          "within_band": true,
+          "hyperextended": false
+        }
+      }
+    },
+    "driver_off": {
+      "mode": "off",
+      "model_knee_flexion_deg": {
+        "left": 35.97,
+        "right": 29.49
+      },
+      "knee_angle_coordinate_deg": {
+        "left": -34.54,
+        "right": -28.07
+      },
+      "model_toe_out_deg": {
+        "left": 16.64,
+        "right": 19.8
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -34.38,
+        "hip_rotation_l": 7.83
+      },
+      "address_marker_rms_mm": 10.54,
+      "static_trial_marker_rms_mm": 7.29,
+      "segment_rms_mm": {
+        "head": 2.13,
+        "trunk": 4.27,
+        "pelvis": 5.91,
+        "left_arm": 19.17,
+        "right_arm": 4.01,
+        "left_leg": 6.38,
+        "right_leg": 16.27,
+        "club": 7.46
+      }
+    },
+    "driver_prior": {
+      "mode": "prior",
+      "model_knee_flexion_deg": {
+        "left": 15.12,
+        "right": 14.93
+      },
+      "knee_angle_coordinate_deg": {
+        "left": -13.6,
+        "right": -13.45
+      },
+      "model_toe_out_deg": {
+        "left": 16.26,
+        "right": 19.64
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -37.87,
+        "hip_rotation_l": 12.8
+      },
+      "address_marker_rms_mm": 11.14,
+      "static_trial_marker_rms_mm": 6.37,
+      "segment_rms_mm": {
+        "head": 3.7,
+        "trunk": 5.07,
+        "pelvis": 17.99,
+        "left_arm": 12.61,
+        "right_arm": 6.08,
+        "left_leg": 9.86,
+        "right_leg": 16.74,
+        "club": 6.19
+      },
+      "targets": {
+        "left": {
+          "target_deg": 15.0,
+          "target_source": "prior",
+          "within_band": true,
+          "hyperextended": false
+        },
+        "right": {
+          "target_deg": 15.0,
+          "target_source": "prior",
+          "within_band": true,
+          "hyperextended": false
+        }
+      }
+    },
+    "iron_capture": {
+      "mode": "capture",
+      "model_knee_flexion_deg": {
+        "left": 26.36,
+        "right": 24.43
+      },
+      "knee_angle_coordinate_deg": {
+        "left": -24.85,
+        "right": -22.95
+      },
+      "model_toe_out_deg": {
+        "left": 15.01,
+        "right": 13.4
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -40.0,
+        "hip_rotation_l": 17.93
+      },
+      "address_marker_rms_mm": 11.4,
+      "static_trial_marker_rms_mm": 9.43,
+      "segment_rms_mm": {
+        "head": 2.22,
+        "trunk": 4.39,
+        "pelvis": 10.1,
+        "left_arm": 8.77,
+        "right_arm": 12.54,
+        "left_leg": 9.25,
+        "right_leg": 13.98,
+        "club": 16.42
+      },
+      "targets": {
+        "left": {
+          "target_deg": 26.33,
+          "target_source": "capture",
+          "within_band": true,
+          "hyperextended": false
+        },
+        "right": {
+          "target_deg": 24.62,
+          "target_source": "capture",
+          "within_band": true,
+          "hyperextended": false
+        }
+      }
+    },
+    "iron_off": {
+      "mode": "off",
+      "model_knee_flexion_deg": {
+        "left": 32.23,
+        "right": 16.34
+      },
+      "knee_angle_coordinate_deg": {
+        "left": -30.74,
+        "right": -14.86
+      },
+      "model_toe_out_deg": {
+        "left": 15.05,
+        "right": 13.53
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -40.0,
+        "hip_rotation_l": 18.98
+      },
+      "address_marker_rms_mm": 12.19,
+      "static_trial_marker_rms_mm": 9.14,
+      "segment_rms_mm": {
+        "head": 1.38,
+        "trunk": 4.18,
+        "pelvis": 16.06,
+        "left_arm": 10.53,
+        "right_arm": 14.4,
+        "left_leg": 8.56,
+        "right_leg": 14.61,
+        "club": 14.41
+      }
+    },
+    "iron_prior": {
+      "mode": "prior",
+      "model_knee_flexion_deg": {
+        "left": 15.21,
+        "right": 15.13
+      },
+      "knee_angle_coordinate_deg": {
+        "left": -13.73,
+        "right": -13.7
+      },
+      "model_toe_out_deg": {
+        "left": 15.03,
+        "right": 13.46
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -40.0,
+        "hip_rotation_l": 20.74
+      },
+      "address_marker_rms_mm": 11.14,
+      "static_trial_marker_rms_mm": 9.57,
+      "segment_rms_mm": {
+        "head": 4.22,
+        "trunk": 4.71,
+        "pelvis": 5.76,
+        "left_arm": 11.35,
+        "right_arm": 12.84,
+        "left_leg": 11.86,
+        "right_leg": 13.99,
+        "club": 14.14
+      },
+      "targets": {
+        "left": {
+          "target_deg": 15.0,
+          "target_source": "prior",
+          "within_band": true,
+          "hyperextended": false
+        },
+        "right": {
+          "target_deg": 15.0,
+          "target_source": "prior",
+          "within_band": true,
+          "hyperextended": false
+        }
+      }
+    }
+  }
+}

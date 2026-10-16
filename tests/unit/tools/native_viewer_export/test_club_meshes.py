@@ -63,14 +63,15 @@ def test_write_obj_round_trips_vertex_and_face_counts(tmp_path: Path) -> None:
     assert np.asarray(faces, dtype=int).min() == 1
 
 
-def test_pinocchio_triangle_mesh_matches_the_head() -> None:
+@pytest.mark.requires_pinocchio
+def test_pinocchio_loads_the_head_obj_with_every_triangle(tmp_path: Path) -> None:
+    """The Pinocchio backend loads club meshes from OBJ via ``coal.MeshLoader``."""
     coal = pytest.importorskip("coal")
-    from src.tools.native_viewer_export.backends.pinocchio_meshcat import _bvh_mesh
-
     _, parts = club_parts(_spec())  # type: ignore[misc]
     head = next(p.mesh for p in parts if p.name == "club_head")
-    bvh = _bvh_mesh(coal, head)
-    assert bvh.num_tris == len(head.faces)
+    path = write_obj(head, str(tmp_path), "head")
+    loaded = coal.MeshLoader().load(path)
+    assert loaded.num_tris == len(head.faces)
 
 
 def test_club_parts_carry_both_grip_hands_for_drake_and_pinocchio() -> None:

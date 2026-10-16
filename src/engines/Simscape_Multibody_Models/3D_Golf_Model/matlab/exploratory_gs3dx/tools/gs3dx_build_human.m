@@ -228,46 +228,31 @@ function hidden = local_hide(mdl)
 end
 
 function vis = local_body_visuals(mdl, head_radii, neck_len)
-    skin = [0.93 0.76 0.63];
-    shirt = [0.22 0.33 0.62];
-    pants = [0.30 0.30 0.34];
+% Every colour and trunk size comes from the shared appearance spec
+% (GS3DX_READ_APPEARANCE reads the file scripts/export_simscape_appearance.py
+% writes, and errors when it is missing); only the placement of each
+% ellipsoid in the GS3DX frames and the head size live here.  The trunk
+% frames have z down the spine (up is -z) and each entry's radii are
+% [ML AP z] with x turned onto the hip or shoulder line by rotation_z_deg
+% (docs/HUMAN.md).
+    app = gs3dx_read_appearance();
     t = "Hips and Torso Inputs/";
-    % The trunk frames have z down the spine (up is -z).  Lower trunk: the
-    % hip joint centres are 0.213 m below its centre, their midpoint 0.038 m
-    % forward of its axis, and the hip line 46.3 deg from x toward y.  Upper
-    % trunk: the shoulder line 17 deg from x toward y at address, the
-    % shoulder centres 0.072 m above its centre (docs/HUMAN.md).
-    hip = local_rz(46.3);
-    sho = local_rz(17);
+    vis = strings(1, 0);
+    for v = app.visuals(:).'
+        vis(end + 1) = local_visual(mdl, string(v.parent), string(v.name), v.radii_m(:).', ...
+            v.offset_m(:).', local_rz(v.rotation_z_deg), v.rgb(:).'); %#ok<AGROW>
+    end
     % The neck frame sits mid-neck, the head centre at -z and the pivot (C7)
     % at +z, NECK_LEN (m) apart.  C7 is 25 mm above the chest ellipsoid's
-    % top, so the shape runs from the head centre to 50 mm past C7 and the
-    % trapezius (on the upper trunk, under C7, along the shoulder line)
+    % top, so the shape runs from the head centre to BELOW (m) past C7 and
+    % the trapezius (on the upper trunk, under C7, along the shoulder line)
     % fills the neck's base out toward the shoulders.
-    below = 0.05;
-    neck_r = [0.052 0.052 neck_len / 2 + below / 2];
-    vis = [ ...
-        local_visual(mdl, t + "LowerTorso", "Pelvis", [0.17 0.115 0.12], [-0.027 0.027 0.174], hip, pants), ...
-        local_visual(mdl, t + "LowerTorso", "Abdomen", [0.145 0.105 0.15], [-0.0135 0.0135 -0.03], hip, shirt), ...
-        local_visual(mdl, t + "UpperTorsoTop", "Chest", [0.16 0.11 0.155], [0 0 0.03], sho, shirt), ...
-        local_visual(mdl, t + "UpperTorsoTop", "Trapezius", [0.12 0.075 0.045], [0.005 -0.015 -0.125], sho, shirt), ...
-        local_visual(mdl, t + "Neck", "Neck Shape", neck_r, [0 0 below / 2], eye(3), skin), ...
-        local_visual(mdl, "HubtoLS", "L Shoulder", [0.05 0.05 0.095], [0 0 0], eye(3), shirt), ...
-        local_visual(mdl, "HubtoRS", "R Shoulder", [0.05 0.05 0.095], [0 0 0], eye(3), shirt), ...
-        local_visual(mdl, "LUpperArm", "L Upper Arm", [0.048 0.048 0.165], [0 0 0], eye(3), shirt), ...
-        local_visual(mdl, "RUpperArm", "R Upper Arm", [0.048 0.048 0.165], [0 0 0], eye(3), shirt), ...
-        local_visual(mdl, "Left Forearm/LUpperForearm", "L Forearm Upper", [0.042 0.042 0.08], [0 0 0], eye(3), skin), ...
-        local_visual(mdl, "Left Forearm/LLowerForearm", "L Forearm Lower", [0.031 0.031 0.08], [0 0 0], eye(3), skin), ...
-        local_visual(mdl, "Right Forearm/RUpperForearm", "R Forearm Upper", [0.042 0.042 0.08], [0 0 0], eye(3), skin), ...
-        local_visual(mdl, "Right Forearm/RLowerForearm", "R Forearm Lower", [0.031 0.031 0.08], [0 0 0], eye(3), skin)];
-    head = [mdl '/' char(t) 'Head'];
-    set_param(head, 'EllipsoidRadii', mat2str(head_radii), 'EllipsoidRadiiUnits', 'm', ...
-        'GraphicDiffuseColor', mat2str(skin));
-    for b = ["Grip/LHand" "Grip/RHand"]
-        set_param([mdl '/' char(b)], 'GraphicDiffuseColor', mat2str(skin));
-    end
-    for b = ["Lower Body/L Thigh" "Lower Body/R Thigh" "Lower Body/L Shank" "Lower Body/R Shank"]
-        set_param([mdl '/' char(b)], 'GraphicDiffuseColor', mat2str(pants));
+    below = app.neck.below_c7_m;
+    neck_r = [app.neck.radius_m app.neck.radius_m neck_len / 2 + below / 2];
+    vis(end + 1) = local_visual(mdl, t + "Neck", "Neck Shape", neck_r, [0 0 below / 2], eye(3), app.neck.rgb(:).');
+    set_param([mdl '/' char(t) 'Head'], 'EllipsoidRadii', mat2str(head_radii), 'EllipsoidRadiiUnits', 'm');
+    for r = app.recolour(:).'
+        set_param([mdl '/' r.block], 'GraphicDiffuseColor', mat2str(r.rgb(:).'));
     end
 end
 
@@ -347,7 +332,7 @@ function [joints, vis, forefoot] = local_midfeet(mdl, opts)
     mr = M - mf;
     Ib = mr / 12 * [W^2 + H^2, L^2 + H^2, L^2 + W^2];
     If = mf / 5 * [fore_r(2)^2 + fore_r(3)^2, fore_r(1)^2 + fore_r(3)^2, fore_r(1)^2 + fore_r(2)^2];
-    shoe = [0.12 0.12 0.12];
+    shoe = gs3dx_read_appearance().shoe_rgb(:).';
     joints = strings(1, 0);
     vis = strings(1, 0);
     forefoot = struct();

@@ -23,11 +23,17 @@ from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs import (
     add_glyphs_to_scene,
 )
+from src.shared.python.model_appearance import document_from_dict
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.tools.native_viewer_export.backends._ball import draw_job_ball
-from src.tools.native_viewer_export.backends._body import default_appearance
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.backends.myosuite_worker import make_camera
+
+#: The exporter's own decorative ball is off: it is placed from the static
+#: reference pose, not the address pose, so it landed away from the face and
+#: duplicated the worker's ball (``draw_job_ball``, the single shared
+#: placement from ``native_viewer_export.ball``; #12955).
+APPEARANCE = {"schema_version": "appearance-v1", "ball": {"enabled": False}}
 
 
 def build_scene_xml(spec_bytes: bytes) -> tuple[str, dict[str, Any]]:
@@ -36,7 +42,7 @@ def build_scene_xml(spec_bytes: bytes) -> tuple[str, dict[str, Any]]:
     Postcondition: the returned summary's ``visual_layer`` records the mesh
     count and whether the club assembly was attached.
     """
-    return export_full_body_mjcf(spec_bytes, appearance=default_appearance())
+    return export_full_body_mjcf(spec_bytes, appearance=document_from_dict(APPEARANCE))
 
 
 def grow_offscreen_buffer(model: Any, width: int, height: int) -> None:

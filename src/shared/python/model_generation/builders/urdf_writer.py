@@ -70,6 +70,10 @@ class URDFWriter:
     indent: str = URDF_INDENT
     expand_composite_joints: bool = True
     include_comments: bool = False
+    # Emit <gazebo><disable_collisions/></gazebo> for every joint's parent/child
+    # pair. Removed by #8322 while humanoid_character_builder still requested it,
+    # which broke URDF generation outright; restored for #12706.
+    add_collision_exclusions: bool = False
 
     def write(
         self,
@@ -136,6 +140,9 @@ class URDFWriter:
         # Write joints
         for joint in expanded_joints:
             lines.extend(self._write_joint(joint, 1))
+
+        if self.add_collision_exclusions:
+            lines.extend(self._write_collision_exclusions(expanded_joints, 1))
 
         lines.append("</robot>")
 
@@ -375,6 +382,28 @@ class URDFWriter:
                     materials[name] = Material.from_dict(mat_data)
 
         return materials
+
+    @staticmethod
+    def _compute_collision_exclusions(joints: list[Joint]) -> list[tuple[str, str]]:
+        """Return the sorted, de-duplicated (parent, child) pairs of *joints*."""
+        exclusions = {
+            (min(joint.parent, joint.child), max(joint.parent, joint.child))
+            for joint in joints
+        }
+        return sorted(exclusions)
+
+    def _write_collision_exclusions(self, joints: list[Joint], level: int) -> list[str]:
+        """Generate Gazebo ``disable_collisions`` elements for adjacent links."""
+        indent = self.indent * level
+        lines: list[str] = []
+        for link1, link2 in self._compute_collision_exclusions(joints):
+            lines.append(f"{indent}<gazebo>")
+            lines.append(
+                f'{indent}{self.indent}<disable_collisions link1="{self._escape(link1)}" '
+                f'link2="{self._escape(link2)}"/>'
+            )
+            lines.append(f"{indent}</gazebo>")
+        return lines
 
     def _sort_links_by_hierarchy(
         self, links: list[Link], joints: list[Joint]

@@ -1,0 +1,49 @@
+\subsection{Study Aggregation Tables}
+\label{sec:spn-13c}
+
+This section documents \texttt{spine/study\_aggregation.py} (issue \#12768,
+epic \#12735). It reduces SPN-13a receipts (Section~\ref{sec:spn-13a}) and their
+hashed \texttt{\_loads.npz} artifacts to per-level tables. It adds no model.
+
+\paragraph{Frames and Signs.}
+Loads are the force $\mathbf F$ and moment $\mathbf M$ on the superior vertebra
+by the inferior one, in the inferior ISB frame (X anterior, Y cranial, Z right).
+Compression is $+F_y$, anterior-posterior shear $F_x$, medio-lateral shear
+$F_z$; $M_x$, $M_y$, $M_z$ are lateral bending, axial and flexion moments.
+Forces are in N, moments in N$\cdot$m, time in s.
+
+\paragraph{Statistics.}
+For every run, observable and level, each component $q(t)$ yields the peak
+$q(t^\ast)$ with $t^\ast=\arg\max_t |q(t)|$ (signed, earliest tie), and the
+impulse $\int_{t_0}^{t_1} q\,dt$ by the trapezoid rule over a caller-supplied
+window $[t_0,t_1]$ (for example the downswing) with linear interpolation at the
+window edges; the default window is the whole record. With a body mass $m$ the
+peak compression is also reported as $F_y/(m g)$, $g=9.80665\,\mathrm{m/s^2}$.
+Across runs, each key (observable, level, quantity, distribution source, law
+id) reports the minimum, median and maximum peak and the mean impulse.
+
+\paragraph{Fail-Closed Rules.}
+An artifact is read only when its SHA-256 equals the receipt record; a missing
+or altered file aborts the aggregate. Only receipts with status \texttt{pass}
+enter the aggregate; \texttt{unqualified} and \texttt{failed} runs are listed
+with status and reasons and never pooled. Generalized-effort and joint-reaction
+observables stay separate (a passive-element observable is not stored by
+SPN-13a and is not reported). Every context comparison must carry
+\texttt{is\_acceptance} false. The table's scientific status is always
+\texttt{unqualified}. Input order does not change the output.
+
+\paragraph{Variant Comparison.}
+\texttt{compare} subtracts baseline median peaks from variant median peaks per
+(observable, level, quantity) only when each side holds exactly one
+(distribution source, law) group; otherwise the key is reported as unmatched,
+so distribution laws are never pooled.
+
+\paragraph{Outputs and Limitations.}
+\texttt{write\_csv} (units in every numeric header) and \texttt{write\_json}
+(sorted keys, 10 significant figures) are byte-deterministic. Peaks are not
+acceptance evidence; with few runs the median is only descriptive.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/opensim/spine/test_study_aggregation.py -q -n 0
+\end{verbatim}

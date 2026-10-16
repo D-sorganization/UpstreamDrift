@@ -1,0 +1,181 @@
+{
+  "schema_version": "simscape-appearance/v1",
+  "source": {
+    "spec": "docs/development/full_body_models/full_body_spec_anthro_driver.json",
+    "appearance": "golf_default",
+    "clothing": "golf_polo_trousers",
+    "skin_tone": "skin_medium"
+  },
+  "colours": {
+    "skin": [0.8, 0.6, 0.46],
+    "top": [0.93, 0.93, 0.92],
+    "pants": [0.3, 0.32, 0.35],
+    "shoe": [0.06, 0.06, 0.07],
+    "glove": [0.95, 0.95, 0.94]
+  },
+  "visuals": [
+    {
+      "name": "Pelvis",
+      "parent": "Hips and Torso Inputs/LowerTorso",
+      "role": "pants",
+      "rgb": [0.3, 0.32, 0.35],
+      "radii_m": [0.156978, 0.106191, 0.12],
+      "offset_m": [-0.027, 0.027, 0.174],
+      "rotation_z_deg": 46.3,
+      "sizing_source": "visual_hints"
+    },
+    {
+      "name": "Abdomen",
+      "parent": "Hips and Torso Inputs/LowerTorso",
+      "role": "top",
+      "rgb": [0.93, 0.93, 0.92],
+      "radii_m": [0.156978, 0.106191, 0.15],
+      "offset_m": [-0.0135, 0.0135, -0.03],
+      "rotation_z_deg": 46.3,
+      "sizing_source": "visual_hints"
+    },
+    {
+      "name": "Chest",
+      "parent": "Hips and Torso Inputs/UpperTorsoTop",
+      "role": "top",
+      "rgb": [0.93, 0.93, 0.92],
+      "radii_m": [0.170829, 0.110808, 0.155],
+      "offset_m": [0.0, 0.0, 0.03],
+      "rotation_z_deg": 17.0,
+      "sizing_source": "visual_hints"
+    },
+    {
+      "name": "Trapezius",
+      "parent": "Hips and Torso Inputs/UpperTorsoTop",
+      "role": "top",
+      "rgb": [0.93, 0.93, 0.92],
+      "radii_m": [0.128122, 0.083106, 0.045],
+      "offset_m": [0.005, -0.015, -0.125],
+      "rotation_z_deg": 17.0,
+      "sizing_source": "visual_hints"
+    },
+    {
+      "name": "L Shoulder",
+      "parent": "HubtoLS",
+      "role": "top",
+      "rgb": [0.93, 0.93, 0.92],
+      "radii_m": [0.054, 0.054, 0.095],
+      "offset_m": [0.0, 0.0, 0.0],
+      "rotation_z_deg": 0.0,
+      "sizing_source": "library"
+    },
+    {
+      "name": "R Shoulder",
+      "parent": "HubtoRS",
+      "role": "top",
+      "rgb": [0.93, 0.93, 0.92],
+      "radii_m": [0.054, 0.054, 0.095],
+      "offset_m": [0.0, 0.0, 0.0],
+      "rotation_z_deg": 0.0,
+      "sizing_source": "library"
+    },
+    {
+      "name": "L Upper Arm",
+      "parent": "LUpperArm",
+      "role": "top",
+      "rgb": [0.93, 0.93, 0.92],
+      "radii_m": [0.04644, 0.04644, 0.165],
+      "offset_m": [0.0, 0.0, 0.0],
+      "rotation_z_deg": 0.0,
+      "sizing_source": "library"
+    },
+    {
+      "name": "R Upper Arm",
+      "parent": "RUpperArm",
+      "role": "top",
+      "rgb": [0.93, 0.93, 0.92],
+      "radii_m": [0.04644, 0.04644, 0.165],
+      "offset_m": [0.0, 0.0, 0.0],
+      "rotation_z_deg": 0.0,
+      "sizing_source": "library"
+    },
+    {
+      "name": "L Forearm Upper",
+      "parent": "Left Forearm/LUpperForearm",
+      "role": "skin",
+      "rgb": [0.8, 0.6, 0.46],
+      "radii_m": [0.04212, 0.04212, 0.08],
+      "offset_m": [0.0, 0.0, 0.0],
+      "rotation_z_deg": 0.0,
+      "sizing_source": "library"
+    },
+    {
+      "name": "L Forearm Lower",
+      "parent": "Left Forearm/LLowerForearm",
+      "role": "skin",
+      "rgb": [0.8, 0.6, 0.46],
+      "radii_m": [0.03096, 0.03096, 0.08],
+      "offset_m": [0.0, 0.0, 0.0],
+      "rotation_z_deg": 0.0,
+      "sizing_source": "library"
+    },
+    {
+      "name": "R Forearm Upper",
+      "parent": "Right Forearm/RUpperForearm",
+      "role": "skin",
+      "rgb": [0.8, 0.6, 0.46],
+      "radii_m": [0.04212, 0.04212, 0.08],
+      "offset_m": [0.0, 0.0, 0.0],
+      "rotation_z_deg": 0.0,
+      "sizing_source": "library"
+    },
+    {
+      "name": "R Forearm Lower",
+      "parent": "Right Forearm/RLowerForearm",
+      "role": "skin",
+      "rgb": [0.8, 0.6, 0.46],
+      "radii_m": [0.03096, 0.03096, 0.08],
+      "offset_m": [0.0, 0.0, 0.0],
+      "rotation_z_deg": 0.0,
+      "sizing_source": "library"
+    }
+  ],
+  "recolour": [
+    {
+      "block": "Hips and Torso Inputs/Head",
+      "rgb": [0.8, 0.6, 0.46],
+      "role": "skin"
+    },
+    {
+      "block": "Grip/LHand",
+      "rgb": [0.95, 0.95, 0.94],
+      "role": "glove"
+    },
+    {
+      "block": "Grip/RHand",
+      "rgb": [0.95, 0.95, 0.94],
+      "role": "glove"
+    },
+    {
+      "block": "Lower Body/L Thigh",
+      "rgb": [0.3, 0.32, 0.35],
+      "role": "pants"
+    },
+    {
+      "block": "Lower Body/R Thigh",
+      "rgb": [0.3, 0.32, 0.35],
+      "role": "pants"
+    },
+    {
+      "block": "Lower Body/L Shank",
+      "rgb": [0.3, 0.32, 0.35],
+      "role": "pants"
+    },
+    {
+      "block": "Lower Body/R Shank",
+      "rgb": [0.3, 0.32, 0.35],
+      "role": "pants"
+    }
+  ],
+  "neck": {
+    "radius_m": 0.052,
+    "below_c7_m": 0.05,
+    "rgb": [0.8, 0.6, 0.46]
+  },
+  "shoe_rgb": [0.06, 0.06, 0.07]
+}

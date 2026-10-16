@@ -27,6 +27,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (
     QDockWidget,
+    QFileDialog,
     QHBoxLayout,
     QMainWindow,
     QMessageBox,
@@ -46,6 +47,8 @@ except ImportError:
     HAS_NOTEPAD = False
     logger.warning("sidekick not found, Notepad disabled")
 
+from .model_source import model_as_urdf
+from .results_session import ResultsSession
 from .segment_panel import SegmentPanel
 from .urdf_builder import URDFBuilder
 from .visualization_widget import VisualizationWidget
@@ -76,6 +79,7 @@ class MainWidget(QWidget):
         self.urdf_builder = URDFBuilder()
         self.current_file_path: Path | None = None
         self._notepad_window: Any | None = None
+        self._results: ResultsSession | None = None
 
         # Internal QMainWindow gives us QDockWidget without forcing this
         # object to *be* a top-level window. ``Qt.WindowType.Widget``
@@ -310,23 +314,20 @@ class MainWidget(QWidget):
     def _on_library_model_selected(self, category: str, model_key: str) -> None:
         logger.info(f"Model selected from library: {category}/{model_key}")
 
-    def load_model(self, file_path: str | Path) -> bool:
-        """Load URDF or OSIM model file content and refresh the viewport.
+    def load_model(self, file_path: str | Path, *, notify: bool = True) -> bool:
+        """Load a URDF, MJCF or OSIM model file and refresh the viewport.
 
         Args:
             file_path: Path to the model file to load.
+            notify: Report a failure in a modal dialog (user-initiated loads);
+                when False it goes to the status bar so startup never blocks.
 
         Returns:
             True if model loading and rendering succeed, False otherwise.
         """
         path = Path(file_path)
         try:
-            if path.suffix.lower() == ".osim":
-                from .osim_loader import OsimLoader
-
-                urdf_content = OsimLoader().to_urdf(path)
-            else:
-                urdf_content = path.read_text(encoding="utf-8")
+            urdf_content = model_as_urdf(path)
             self.visualization_widget.update_visualization(urdf_content, str(path))
             self.current_file_path = path
             self._update_window_title()
@@ -334,13 +335,14 @@ class MainWidget(QWidget):
             return True
         except (RuntimeError, TypeError, ValueError, OSError) as e:
             logger.exception("Error loading URDF file: %s", e)
-            from PyQt6.QtWidgets import QMessageBox
-
-            QMessageBox.warning(
-                self,
-                "Model Load Error",
-                f"Failed to load model file '{path.name}':\n\n{e}",
-            )
+            if notify:
+                QMessageBox.warning(
+                    self,
+                    "Model Load Error",
+                    f"Failed to load model file '{path.name}':\n\n{e}",
+                )
+            else:
+                self.status_bar.showMessage(f"Failed to load model '{path.name}': {e}")
             return False
 
     def _load_urdf_file(self, file_path: str | Path) -> bool:
@@ -461,6 +463,94 @@ class MainWidget(QWidget):
             logger.error(f"Failed to open code editor: {e}")
             QMessageBox.critical(self, "Error", f"Failed to open code editor: {e}")
 
+    # ---- results playback and video export ------------------------------
+
+    @property
+    def results_frame_count(self) -> int:
+        """Number of frames in the loaded results (0 when none are loaded)."""
+        return 0 if self._results is None else self._results.frame_count
+
+    @property
+    def current_result_frame(self) -> int:
+        """Playback cursor of the loaded results (0 when none are loaded)."""
+        return 0 if self._results is None else self._results.current_frame
+
+    def open_results(self) -> None:
+        """Ask for a results archive and load it (File > Load Results)."""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Load Results", "", "Results (*.npz);;All Files (*)"
+        )
+        if file_path:
+            self.load_results(file_path)
+
+    def load_results(self, path: str | Path, engine: str | None = None) -> bool:
+        """Load a results archive for playback and export.
+
+        Returns False, with a message naming the file and the problem, when
+        the archive is missing or has no marker trajectories to play.
+        """
+        from src.shared.python.motion_matching.video_frame_source import (
+            VideoSourceError,
+        )
+
+        results_path = Path(path)
+        try:
+            session = ResultsSession.load(results_path, engine or "engine")
+        except (OSError, VideoSourceError) as exc:
+            logger.warning("Could not load results %s: %s", results_path, exc)
+            self._results = None
+            self.export_video_action.setEnabled(False)
+            QMessageBox.warning(
+                self,
+                "Results Load Error",
+                f"Cannot play '{results_path.name}':\n\n{exc}",
+            )
+            return False
+        self._results = session
+        self.export_video_action.setEnabled(True)
+        self.status_bar.showMessage(
+            f"Loaded results {results_path.name}: {session.frame_count} frames"
+        )
+        return True
+
+    def scrub_results(self, index: int) -> None:
+        """Move the playback cursor; ``ValueError`` if out of range or unloaded."""
+        if self._results is None:
+            raise ValueError("no results loaded: no frame to scrub")
+        self._results.scrub(index)
+        self.status_bar.showMessage(
+            f"Frame {index + 1}/{self._results.frame_count} "
+            f"(t = {self._results.current_time_s:.3f} s)"
+        )
+
+    def export_results_video(self) -> Path | None:
+        """Ask for a destination and export the loaded results as video."""
+        if self._results is None:
+            QMessageBox.warning(
+                self, "Export Video", "Load results first (File > Load Results)."
+            )
+            return None
+        default = self._results.default_video_name
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Export Video", default, "MP4 Video (*.mp4);;GIF (*.gif)"
+        )
+        if not file_path:
+            return None
+        target = Path(file_path)
+        if not target.suffix:
+            target = target.with_suffix(".mp4")
+        try:
+            out = self._results.export_video(target)
+        except (OSError, RuntimeError, ValueError, KeyError) as exc:
+            logger.exception("Video export failed: %s", exc)
+            QMessageBox.critical(
+                self, "Export Error", f"Could not export video:\n\n{exc}"
+            )
+            return None
+        self.status_bar.showMessage(f"Exported video: {out}")
+        QMessageBox.information(self, "Export Video", f"Exported video to:\n{out}")
+        return out
+
     # ---- lifecycle -----------------------------------------------------
 
     def has_unsaved_changes(self) -> bool:
@@ -495,7 +585,7 @@ class MainWidget(QWidget):
                 library = ModelLibrary()
                 urdf_path = library.get_human_model(str(default_model))
                 if urdf_path and urdf_path.exists():
-                    if self.load_model(urdf_path):
+                    if self.load_model(urdf_path, notify=False):
                         self.status_bar.showMessage(
                             f"Loaded default model: {default_model}"
                         )
@@ -548,6 +638,15 @@ class MainWidget(QWidget):
         load_library_action.setShortcut("Ctrl+L")
         load_library_action.triggered.connect(self.load_from_library)
         file_menu.addAction(load_library_action)
+
+        load_results_action = QAction("Load &Results...", self)
+        load_results_action.triggered.connect(self.open_results)
+        file_menu.addAction(load_results_action)
+
+        self.export_video_action = QAction("Export &Video...", self)
+        self.export_video_action.setEnabled(False)
+        self.export_video_action.triggered.connect(self.export_results_video)
+        file_menu.addAction(self.export_video_action)
 
         file_menu.addSeparator()
 

@@ -375,6 +375,8 @@ class Lane:
         self.gaze_plan: Any = None
         #: Address toe-out targets (OSV-4); None keeps the legacy behaviour.
         self.feet: Any = None
+        #: Address knee-flexion targets (R4, #12684); None keeps the legacy fit.
+        self.knees: Any = None
         #: Per-frame club-face orientation targets (OSV-10); None: marker-only.
         self.face_targets: list[dict[str, Any] | None] | None = None
         self.face_weight = 0.0

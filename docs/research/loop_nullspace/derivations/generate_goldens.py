@@ -21,6 +21,7 @@ import _common as cm  # noqa: E402
 import c_pm_identity  # noqa: E402
 import closure_convention  # noqa: E402
 import envelope_case  # noqa: E402
+import five_bar_goldens  # noqa: E402
 import grasp_map  # noqa: E402
 import planar_golfer  # noqa: E402
 import spatial_counts  # noqa: E402
@@ -36,6 +37,7 @@ GENERATORS: dict[str, Callable[[], dict[str, Any]]] = {
     "c_pm_identity": c_pm_identity.generate,
     "closure_convention": closure_convention.generate,
     "variability_sensitivity": variability_goldens.generate,
+    "planar_five_bar_tangent_state_space": five_bar_goldens.generate,
 }
 
 

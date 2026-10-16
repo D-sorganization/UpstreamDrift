@@ -1,0 +1,110 @@
+{
+  "schema_version": "1",
+  "description": "Named, versioned perturbations of the matched pelvis->thorax rotation series (SPN-13b, issue #12767). Each variant changes one golf-term registry value by an SO(3) composition with a rotation about that term's ISB isb_spine JCS axis; the other JCS terms are invariant by construction. Parameter bounds and term_bounds_deg are declared study-design limits (assumptions), not cited ranges of motion; the target model's own coordinate ranges are checked separately (check_coordinate_ranges).",
+  "pseudo_events": {
+    "start": "first sample of the series",
+    "end": "last sample of the series"
+  },
+  "variants": [
+    {
+      "variant_id": "x_factor_top_scale",
+      "version": "1",
+      "description": "Scale the X-factor (x_factor_jcs_axial) at the top of the backswing, e.g. x0.8 or x1.2, with a smooth raised-cosine ramp from address and back to the original by impact.",
+      "term_id": "x_factor_jcs_axial",
+      "operation": "scale",
+      "parameter": {
+        "name": "factor",
+        "units": "1",
+        "default": 0.8,
+        "bounds": [0.5, 1.5],
+        "integer": false
+      },
+      "window_events": ["address", "top", "top", "impact"],
+      "term_bounds_deg": [-70.0, 70.0],
+      "undeclared_tolerance_deg": 1e-8,
+      "affected_terms": ["x_factor_jcs_axial", "crunch_factor_rate"],
+      "non_trunk_policy": "thorax_relative_hold",
+      "formula": "R'(t) = R(t) Ry(s (k-1) x(t) w(t)); x = x_factor_jcs_axial, s = handed sign (-1 right, +1 left), w = raised-cosine window equal to 1 at top"
+    },
+    {
+      "variant_id": "downswing_crunch_offset",
+      "version": "1",
+      "description": "Add (positive) or remove (negative) lead lateral flexion (trunk_lateral_flexion_jcs) during the downswing, ramping in from the top to the full offset at impact and out after impact.",
+      "term_id": "trunk_lateral_flexion_jcs",
+      "operation": "offset",
+      "parameter": {
+        "name": "offset_deg",
+        "units": "deg",
+        "default": 5.0,
+        "bounds": [-15.0, 15.0],
+        "integer": false
+      },
+      "window_events": ["top", "impact", "impact", "end"],
+      "term_bounds_deg": [-45.0, 45.0],
+      "undeclared_tolerance_deg": 1e-8,
+      "affected_terms": ["trunk_lateral_flexion_jcs", "crunch_factor_rate"],
+      "non_trunk_policy": "thorax_relative_hold",
+      "formula": "R'(t) = R(t) Ry(AR)^T Rx(s d w(t)) Ry(AR); rotation about the JCS floating axis, d = offset_deg, s = handed sign"
+    },
+    {
+      "variant_id": "downswing_crunch_scale",
+      "version": "1",
+      "description": "Scale lead lateral flexion (trunk_lateral_flexion_jcs) through the downswing; factor 0 removes it at impact, factor 2 doubles it.",
+      "term_id": "trunk_lateral_flexion_jcs",
+      "operation": "scale",
+      "parameter": {
+        "name": "factor",
+        "units": "1",
+        "default": 0.0,
+        "bounds": [0.0, 2.0],
+        "integer": false
+      },
+      "window_events": ["top", "impact", "impact", "end"],
+      "term_bounds_deg": [-45.0, 45.0],
+      "undeclared_tolerance_deg": 1e-8,
+      "affected_terms": ["trunk_lateral_flexion_jcs", "crunch_factor_rate"],
+      "non_trunk_policy": "thorax_relative_hold",
+      "formula": "R'(t) = R(t) Ry(AR)^T Rx(s (k-1) l(t) w(t)) Ry(AR); l = trunk_lateral_flexion_jcs"
+    },
+    {
+      "variant_id": "impact_extension_offset",
+      "version": "1",
+      "description": "Change trunk extension (trunk_extension_jcs) at impact, a pelvis-relative proxy for the reverse-spine-angle posture; positive adds extension.",
+      "term_id": "trunk_extension_jcs",
+      "operation": "offset",
+      "parameter": {
+        "name": "offset_deg",
+        "units": "deg",
+        "default": 5.0,
+        "bounds": [-15.0, 15.0],
+        "integer": false
+      },
+      "window_events": ["top", "impact", "impact", "end"],
+      "term_bounds_deg": [-60.0, 30.0],
+      "undeclared_tolerance_deg": 1e-8,
+      "affected_terms": ["trunk_extension_jcs"],
+      "non_trunk_policy": "thorax_relative_hold",
+      "formula": "R'(t) = Rz(d w(t)) R(t); rotation about the pelvis (proximal) Z axis, d = offset_deg, not handed"
+    },
+    {
+      "variant_id": "x_factor_peak_shift",
+      "version": "1",
+      "description": "Shift the time of peak X-factor relative to the pelvis by a whole number of samples (positive = later), keeping its peak value, by a monotone piecewise-linear time warp between address and impact.",
+      "term_id": "x_factor_jcs_axial",
+      "operation": "shift_peak",
+      "parameter": {
+        "name": "shift_frames",
+        "units": "samples",
+        "default": 5,
+        "bounds": [-20, 20],
+        "integer": true
+      },
+      "window_events": ["address", "impact"],
+      "term_bounds_deg": [-70.0, 70.0],
+      "undeclared_tolerance_deg": 1e-8,
+      "affected_terms": ["x_factor_jcs_axial", "crunch_factor_rate"],
+      "non_trunk_policy": "thorax_relative_hold",
+      "formula": "R'(t) = R(t) Ry(s (x(tau(t)) - x(t))); tau piecewise linear with tau(t_a) = t_a, tau(t_p + shift) = t_p, tau(t_i) = t_i"
+    }
+  ]
+}

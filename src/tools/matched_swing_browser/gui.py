@@ -37,6 +37,9 @@ from PyQt6.QtWidgets import (
 from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.motion_matching.ledger_schema import LedgerRow
+from src.shared.python.motion_matching.video_frame_source import (
+    video_source_blocker,
+)
 from src.tools.matched_swing_browser.model import (
     MatchedSwingBrowserModel,
     MatchedSwingFilter,
@@ -600,7 +603,11 @@ class MatchedSwingBrowserWidget(QWidget):
         has_receipt = receipt_path is not None and receipt_path.is_file()
         self._view_json_btn.setEnabled(has_receipt)
 
-        self._export_video_btn.setEnabled(has_npz)
+        blocker = video_source_blocker(npz_path) if has_npz else None
+        self._export_video_btn.setEnabled(has_npz and blocker is None)
+        self._export_video_btn.setToolTip(
+            f"Cannot export video: {blocker}" if blocker else ""
+        )
         self._export_report_btn.setEnabled(has_receipt)
 
     def _update_badge_style(self, verdict: str) -> None:

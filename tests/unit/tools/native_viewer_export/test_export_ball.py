@@ -96,9 +96,32 @@ def test_non_finite_hide_time_is_rejected() -> None:
 # --- address_ball ------------------------------------------------------------
 
 
-def test_prefers_bundle_ball_impact(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_prefers_address_geometry_over_bundle_ball_impact(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The capture's recorded ball floats at face height; never draw it (#12955)."""
+    pytest.importorskip("mujoco")
+    swing = _fixture_swing()
+    monkeypatch.setattr(
+        InputBundle,
+        "ball_impact",
+        lambda self: SimpleNamespace(ball_centre_m=[0.31, -0.12, 0.0213]),
+    )
+    ball = address_ball(swing, 0.9)
+    assert isinstance(ball, BallPlacement)
+    assert ball.source == SOURCE_ADDRESS
+    assert ball.hide_after_s == 0.9
+
+
+def test_falls_back_to_bundle_ball_impact_without_address_geometry(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     swing = _fixture_swing()
     centre = [0.31, -0.12, 0.0213]
+    monkeypatch.setattr(
+        "src.tools.native_viewer_export.ball._address_geometry_ball",
+        lambda s: "no address stance",
+    )
     monkeypatch.setattr(
         InputBundle, "ball_impact", lambda self: SimpleNamespace(ball_centre_m=centre)
     )
@@ -107,6 +130,59 @@ def test_prefers_bundle_ball_impact(monkeypatch: pytest.MonkeyPatch) -> None:
     assert ball.source == SOURCE_BUNDLE
     assert ball.position_m == tuple(centre)
     assert ball.hide_after_s == 0.9
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("club", ["driver", "iron7"])
+def test_ball_sits_at_every_clubs_face_and_on_the_ground(
+    club: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """#12955: ball within one radius of the face centre's ground projection."""
+    pytest.importorskip("mujoco")
+    from src.tools.native_viewer_export.club_pose import ClubPoseModel
+
+    swing = _fixture_swing(club)
+    # a stale recorded capture ball far from the face must not be drawn
+    monkeypatch.setattr(
+        InputBundle,
+        "ball_impact",
+        lambda self: SimpleNamespace(ball_centre_m=[0.5, 0.6, 0.0208]),
+    )
+    model = ClubPoseModel(swing.bundle.spec_bytes)
+    coords = dict(zip(swing.bundle.coordinate_order, swing.q[0], strict=True))
+    face = model.face_world(coords)
+    ball = address_ball(swing, None)
+    assert isinstance(ball, BallPlacement), ball
+    horizontal = np.asarray(ball.position_m[:2]) - face.centre_m[:2]
+    assert np.hypot(*horizontal) <= BALL_RADIUS_M
+    assert ball.position_m[2] == pytest.approx(
+        model.ground_height_m + BALL_RADIUS_M, abs=1e-9
+    )
+
+
+@pytest.mark.unit
+def test_landmark_helper_requires_a_face_centre() -> None:
+    from src.shared.python.model_appearance.ball import address_ball_from_landmarks
+
+    with pytest.raises(ValueError, match="face-centre landmark"):
+        address_ball_from_landmarks(None, [0.0, -1.0, 0.0])
+    with pytest.raises(ValueError, match="face-centre landmark"):
+        address_ball_from_landmarks([0.0, 0.0, 0.1], None)
+    ball = address_ball_from_landmarks(
+        [0.1, 0.2, 0.09], [0.0, -1.0, 0.0], ground_height_m=0.0
+    )
+    assert ball == pytest.approx([0.1, 0.2 - BALL_RADIUS_M, BALL_RADIUS_M])
+
+
+@pytest.mark.unit
+def test_mujoco_scene_has_no_second_decorative_ball() -> None:
+    """The exporter's static-pose ball duplicated the worker's (#12955)."""
+    pytest.importorskip("mujoco")
+    from src.tools.native_viewer_export.backends.mujoco_worker import build_scene_xml
+
+    swing = _fixture_swing("iron7")
+    xml, summary = build_scene_xml(swing.bundle.spec_bytes)
+    assert "visual_ball" not in xml
 
 
 def test_falls_back_to_address_geometry() -> None:

@@ -41,6 +41,11 @@ from src.shared.python.analysis.dataclasses import (
 )
 from src.shared.python.core.constants import GRAVITY_M_S2
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.injury.spinal_load_providers import (
+    HeuristicSpinalLoadProvider,
+    SpinalLoadProvider,
+)
+from src.shared.python.spine import golf_terms
 
 logger = get_logger(__name__)
 
@@ -52,6 +57,7 @@ class SpinalRiskLevel(Enum):
     CAUTION = "caution"
     HIGH_RISK = "high_risk"
     CRITICAL = "critical"
+    NOT_ASSESSED = "not_assessed"  # heuristic bands do not apply (model loads)
 
 
 @dataclass
@@ -127,6 +133,12 @@ class SpinalLoadResult:
     # Methodology citation
     methodology: MethodCitation = CITATION_SPINAL_LOAD
 
+    # Load provenance (SPN-12). Heuristic risk bands are valid for the
+    # heuristic provider only and are not applied to model-based loads.
+    provider_id: str = "heuristic_v1"
+    is_model_based: bool = False
+    risk_assessed: bool = True
+
     def get_citations(self) -> list[MethodCitation]:
         """Return all unique methodology citations for this result and its metrics."""
         citations: list[MethodCitation] = [self.methodology]
@@ -185,6 +197,7 @@ class SpinalLoadAnalyzer:
         height: float | None = None,
         trunk_length: float | None = None,
         lumbar_segments: list[str] | None = None,
+        provider: SpinalLoadProvider | None = None,
     ) -> None:
         """
         Initialize the spinal load analyzer.
@@ -194,6 +207,13 @@ class SpinalLoadAnalyzer:
             height: Height in m (optional, for estimating segment lengths)
             trunk_length: Trunk length in m (optional, overrides height estimate)
             lumbar_segments: List of segment names to analyze (default: L3-L4 to L5-S1)
+            provider: Source of per-level loads (default: the heuristic provider,
+                which reproduces the historical behaviour). A model-based
+                provider replaces the heuristic loads and skips the heuristic
+                risk bands.
+
+        Raises:
+            TypeError: if ``provider`` is not a ``SpinalLoadProvider``.
         """
         if body_weight is None:
             raise ValueError("body_weight must be provided")
@@ -212,6 +232,12 @@ class SpinalLoadAnalyzer:
             "L4-L5": 0.30,
             "L5-S1": 0.20,
         }
+
+        if provider is not None and not isinstance(provider, SpinalLoadProvider):
+            raise TypeError("provider must implement SpinalLoadProvider")
+        self.provider: SpinalLoadProvider = (
+            provider if provider is not None else HeuristicSpinalLoadProvider(self)
+        )
 
     def analyze(  # noqa: C901
         self,
@@ -239,7 +265,12 @@ class SpinalLoadAnalyzer:
         """
         if joint_angles is None:
             raise ValueError("joint_angles must be provided")
-        result = SpinalLoadResult(time=time)
+        result = SpinalLoadResult(
+            time=time,
+            provider_id=self.provider.provider_id,
+            is_model_based=self.provider.is_model_based,
+            risk_assessed=not self.provider.is_model_based,
+        )
         n_frames = len(time)
 
         # Validate input shapes
@@ -262,12 +293,11 @@ class SpinalLoadAnalyzer:
                     f"does not match time length ({n_frames})"
                 )
 
-        # Calculate loads on each spinal segment
-        for segment_name in self.lumbar_segments:
-            segment = self._compute_segment_loads(
-                segment_name, joint_angles, joint_velocities, joint_torques, time
-            )
-            result.segments[segment_name] = segment
+        # Per-level loads always come from the provider; ``is_model_based``
+        # only decides whether the heuristic risk bands apply (below).
+        result.segments = self._segments_from_provider(
+            joint_angles, joint_velocities, joint_torques, time
+        )
 
         # Calculate X-factor metrics if pelvis/thorax data available
         if pelvis_angles is not None and thorax_angles is not None:
@@ -282,15 +312,47 @@ class SpinalLoadAnalyzer:
         # Extract peak values
         result = self._compute_peak_values(result)
 
-        # Assess risk levels
-        result = self._assess_risk(result)
+        # Assess risk levels (heuristic bands: heuristic loads only)
+        if result.risk_assessed:
+            result = self._assess_risk(result)
+        else:
+            result.compression_risk = SpinalRiskLevel.NOT_ASSESSED
+            result.shear_risk = SpinalRiskLevel.NOT_ASSESSED
+            result.x_factor_risk = SpinalRiskLevel.NOT_ASSESSED
+            result.overall_risk = SpinalRiskLevel.NOT_ASSESSED
 
         # Compute cumulative loads
         result = self._compute_cumulative_loads(result, time)
 
         return result
 
-    def _compute_segment_loads(
+    def _segments_from_provider(
+        self,
+        joint_angles: dict[str, np.ndarray],
+        joint_velocities: dict[str, np.ndarray],
+        joint_torques: dict[str, np.ndarray],
+        time: np.ndarray,
+    ) -> dict[str, SpinalSegment]:
+        """Convert the provider's load series into analyzer segments."""
+        series = self.provider.loads(
+            time_s=time,
+            joint_angles=joint_angles,
+            joint_velocities=joint_velocities,
+            joint_torques=joint_torques,
+        )
+        segments: dict[str, SpinalSegment] = {}
+        for k, level in enumerate(series.levels):
+            name = level.name.replace("_", "-")
+            segments[name] = SpinalSegment(
+                name=name,
+                compression=series.compression_n()[:, k].copy(),
+                ap_shear=series.ap_shear_n()[:, k].copy(),
+                lateral_shear=series.ml_shear_n()[:, k].copy(),
+                torsion=np.abs(series.moment_nm[:, k, 1]),
+            )
+        return segments
+
+    def compute_segment_loads(
         self,
         segment_name: str,
         joint_angles: dict[str, np.ndarray],
@@ -385,15 +447,12 @@ class SpinalLoadAnalyzer:
         # Assuming angles are [roll, pitch, yaw] where yaw is rotation
         if pelvis_angles is None:
             raise ValueError("pelvis_angles must be provided")
-        pelvis_rotation = (
-            pelvis_angles[:, 2] if pelvis_angles.ndim > 1 else pelvis_angles
+        # Euler-yaw difference (thorax - pelvis), degrees, via the golf-term registry
+        x_factor_angle = golf_terms.evaluate(
+            "x_factor_euler_yaw_legacy_v1",
+            {"thorax_euler": thorax_angles, "pelvis_euler": pelvis_angles},
+            handedness="right",
         )
-        thorax_rotation = (
-            thorax_angles[:, 2] if thorax_angles.ndim > 1 else thorax_angles
-        )
-
-        # X-factor is thorax rotation minus pelvis rotation
-        x_factor_angle = np.degrees(thorax_rotation - pelvis_rotation)
 
         # Find peak (maximum separation)
         peak_idx = np.argmax(np.abs(x_factor_angle))
@@ -438,9 +497,12 @@ class SpinalLoadAnalyzer:
         lateral_deg = np.degrees(lateral_bend)
         rotation_deg = np.degrees(rotation)
 
-        # Crunch factor = lateral bend * rotation (simplified model)
-        # Higher values indicate more asymmetric loading
-        crunch_factor = np.abs(lateral_deg) * np.abs(rotation_deg) / 100.0
+        # |lateral| * |rotation| / 100 (legacy model) via the golf-term registry
+        crunch_factor = golf_terms.evaluate(
+            "crunch_factor_legacy_v1",
+            {"lateral_bend_rad": lateral_bend, "axial_rotation_rad": rotation},
+            handedness="right",
+        )
 
         peak_crunch = np.max(crunch_factor)
         peak_idx = np.argmax(crunch_factor)

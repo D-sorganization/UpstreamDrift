@@ -1,0 +1,26 @@
+{
+  "asset": "head_cc0.npz",
+  "asset_sha256": "2be51dacc6ee3ba18d1e1ef2cda922105fa277a66f4cb0e11695397ef3438244",
+  "asset_description": "Head (skull, face, ears, neck to the C7-level neck plane, neck capped) plus a short-hair shell cut from the scalp, as int16 multiples of quantum_head_lengths in the canonical head frame (x forward, y left, z up, neck plane at z=0, skin vertex at z=1 head length).",
+  "quantum_head_lengths": 0.0001,
+  "licence": "CC0-1.0",
+  "licence_file": "LICENSE.CC0.txt",
+  "licence_text": "This asset was explicitly released as CC0 in september 2020. The license text for CC0 can be found in the root of this repository. (header of makehuman/data/3dobjs/base.obj). LICENSE.md section C: 'The base mesh and proxies ... These assets have been released under CC0 1.0 Universal.' Section D: output/exports of MakeHuman carry no claim.",
+  "licence_statement_file": "SOURCE_LICENSE_STATEMENT.txt",
+  "source_name": "MakeHuman base mesh hm08 (makehuman/data/3dobjs/base.obj)",
+  "source_url": "https://github.com/makehumancommunity/makehuman/blob/3c701a8e52f09e69922e8b598d23be2d7dfc49e3/makehuman/data/3dobjs/base.obj",
+  "source_repository": "https://github.com/makehumancommunity/makehuman",
+  "source_commit": "a8bc2d54ff0ac92e78ff71431b1023eda42bf482",
+  "source_file_last_changed_commit": "3c701a8e52f09e69922e8b598d23be2d7dfc49e3",
+  "source_sha256": "8e761e6624b8f54536409135d1636da63b32486a90d4897f84e121d144f6fb4c",
+  "source_bytes": 1749303,
+  "author": "MakeHuman Team (copyright holders at the CC0 release: Data Collection AB, Joel Palmius, Jonas Hauquier)",
+  "download_date": "2026-10-16",
+  "licence_pages_read": [
+    "https://github.com/makehumancommunity/makehuman/blob/master/LICENSE.md",
+    "https://github.com/makehumancommunity/makehuman/blob/master/LICENSE.ASSETS.md",
+    "header comment of base.obj at the pinned commit"
+  ],
+  "derivation": "assets/head_cc0/build_head_asset.py (deterministic): head faces of group 'body' above joint-neck, neck capped, scalp faces above a hairline offset 3-7 mm as a closed hair shell, rescaled to one head length. The decimetre MakeHuman units are normalised away.",
+  "caveat": "The community-assets-wip README says the base mesh 'as imported by makeclothes or maketarget remains AGPL'; this predates and is superseded by LICENSE.md section C and the explicit 2020-09 CC0 header in base.obj (the asset used here). Owner may wish to confirm."
+}

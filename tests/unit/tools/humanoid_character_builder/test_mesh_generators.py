@@ -31,6 +31,10 @@ from humanoid_character_builder.generators.mesh_generator import (
     SMPLXMeshGenerator,
 )
 
+# Pure, dependency-free tests: none of them need MakeHuman, SMPL-X or torch
+# installed, so the Green-Suite Unit Gate (`-m unit`) runs them (#12698).
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -466,9 +470,9 @@ class TestMakeHumanGenerate:
     """Test the full MakeHuman generate pipeline with mocking."""
 
     @patch(
-        "humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE", True
+        "humanoid_character_builder.generators._mesh_makehuman.TRIMESH_AVAILABLE", True
     )
-    @patch("humanoid_character_builder.generators.mesh_generator._trimesh_module")
+    @patch("humanoid_character_builder.generators._mesh_makehuman._trimesh_module")
     def test_generate_with_mocked_subprocess(
         self, mock_trimesh, tmp_path: Path
     ) -> None:
@@ -711,3 +715,71 @@ class TestIssue2474MeshGeneratorScriptAndSegments:
             )
         finally:
             SMPLXMeshGenerator.SMPLX_SEGMENT_VERTEX_RANGES = original
+
+
+class TestIssue12698SingleMakeHumanImplementation:
+    """Issue #12698: one MakeHumanMeshGenerator, one parameter conversion."""
+
+    def test_all_import_paths_resolve_to_one_class(self) -> None:
+        from humanoid_character_builder.generators import (
+            _makehuman_generator,
+            _mesh_makehuman,
+            mesh_generator_makehuman,
+        )
+
+        assert _makehuman_generator.MakeHumanMeshGenerator is (
+            _mesh_makehuman.MakeHumanMeshGenerator
+        )
+        assert mesh_generator_makehuman.MakeHumanMeshGenerator is (
+            _mesh_makehuman.MakeHumanMeshGenerator
+        )
+        assert MakeHumanMeshGenerator is _mesh_makehuman.MakeHumanMeshGenerator
+
+    def test_conversion_is_static_and_matches_instance_call(self) -> None:
+        params = _default_params()
+        gen = MakeHumanMeshGenerator(makehuman_path="/nonexistent")
+        assert MakeHumanMeshGenerator._convert_params_to_makehuman(
+            params
+        ) == gen._convert_params_to_makehuman(params)
+
+    def test_conversion_rejects_none(self) -> None:
+        with pytest.raises(ValueError, match="params"):
+            MakeHumanMeshGenerator._convert_params_to_makehuman(None)  # type: ignore[arg-type]
+
+    @pytest.mark.parametrize(
+        "modifiers",
+        [
+            {"bad'key": 0.5},
+            {"macrodetails/Age\nimport os": 0.5},
+            {"macrodetails/Age": float("nan")},
+            {"macrodetails/Age": "0.5"},
+            {"macrodetails/Age": True},
+        ],
+    )
+    def test_script_rejects_unsafe_modifiers(self, modifiers: dict[str, Any]) -> None:
+        with pytest.raises(ValueError, match="Invalid MakeHuman modifier"):
+            MakeHumanMeshGenerator._build_mh_script(
+                modifiers, Path("body.obj"), Path("groups.json")
+            )
+
+    def test_script_paths_cannot_break_out_of_string_literal(self) -> None:
+        import ast
+
+        hostile = Path("out'); import os; os.system('x') #/body.obj")
+        script = MakeHumanMeshGenerator._build_mh_script(
+            {"macrodetails/Age": 0.5}, hostile, Path("groups.json")
+        )
+        tree = ast.parse(script)
+        imported = {
+            alias.name
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Import)
+            for alias in node.names
+        }
+        assert "os" not in imported
+
+    def test_run_script_requires_configured_makehuman(self, tmp_path: Path) -> None:
+        gen = MakeHumanMeshGenerator()
+        gen.makehuman_path = None
+        with pytest.raises(RuntimeError, match="MakeHuman path not configured"):
+            gen._run_makehuman_script(tmp_path / "script.py")

@@ -2,6 +2,8 @@
 Unit tests for body parameters module.
 """
 
+import pytest
+from src.shared.python.contracts import PreconditionError
 from humanoid_character_builder.core.body_parameters import (
     RGBA,
     BodyParameters,
@@ -13,6 +15,8 @@ from humanoid_character_builder.core.body_parameters import (
     create_average_body,
     create_heavy_body,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestVector3:
@@ -92,13 +96,23 @@ class TestBodyParameters:
         errors = params.validate()
         assert len(errors) == 0
 
+    # Since #8322 (b547c90a86) BodyParameters.__post_init__ rejects a
+    # non-positive height or mass at construction, matching the canonical Tools
+    # class and the in-package test. validate() still reports the same error for
+    # an instance mutated after construction.
     def test_validate_invalid_height(self) -> None:
-        params = BodyParameters(height_m=-1.0)
+        with pytest.raises(PreconditionError, match="height_m must be positive"):
+            BodyParameters(height_m=-1.0)
+        params = BodyParameters()
+        params.height_m = -1.0
         errors = params.validate()
         assert any("height_m" in e for e in errors)
 
     def test_validate_invalid_mass(self) -> None:
-        params = BodyParameters(mass_kg=-10.0)
+        with pytest.raises(PreconditionError, match="mass_kg must be positive"):
+            BodyParameters(mass_kg=-10.0)
+        params = BodyParameters()
+        params.mass_kg = -10.0
         errors = params.validate()
         assert any("mass_kg" in e for e in errors)
 

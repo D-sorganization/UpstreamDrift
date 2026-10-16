@@ -7,6 +7,7 @@ returning the same ``ParsedModel`` contract used by URDF/MJCF loaders.
 
 from __future__ import annotations
 
+import re
 import xml.etree.ElementTree as ET  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 from collections.abc import Iterable
 from dataclasses import dataclass
@@ -26,6 +27,9 @@ from src.shared.python.model_generation.core.types import (
     Origin,
 )
 
+# OpenSim serialises nested classes as ``<Outer::Inner>``; ``::`` is not legal in
+# an XML name, so standard parsers reject real .osim files that use contact sets.
+_NESTED_CLASS_TAG = re.compile(r"(</?[A-Za-z_][\w.-]*)::(?=[A-Za-z_])")
 _GROUND_LINK_NAME = "ground"
 _GROUND_MASS = 1e-6
 _MIN_INERTIA = 1e-9
@@ -111,7 +115,7 @@ class OsimLoader:
 
     def _parse_xml(self, xml_string: str) -> ET.Element:
         try:
-            return DefusedET.fromstring(xml_string)
+            return DefusedET.fromstring(_NESTED_CLASS_TAG.sub(r"\1__", xml_string))
         except ET.ParseError as exc:
             raise ValueError(f"Invalid OpenSim XML: {exc}") from exc
 

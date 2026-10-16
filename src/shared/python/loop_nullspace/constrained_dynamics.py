@@ -36,6 +36,7 @@ __all__ = [
     "closure_acceleration_residual",
     "constrained_acceleration",
     "kkt_projector",
+    "solve_kkt_block",
 ]
 
 _PINV_RTOL = 1e-12
@@ -224,3 +225,21 @@ def closure_acceleration_residual(
     j_arr = np.asarray(J_c, dtype=np.float64)
     acc = _vector(a, j_arr.shape[1], "a")
     return np.asarray(j_arr @ acc + _vector(Jdot_v, j_arr.shape[0], "Jdot_v"))
+
+
+def solve_kkt_block(
+    mass: ArrayLike, jac: ArrayLike, free_load: ArrayLike, drift: ArrayLike
+) -> tuple[Array, Array]:
+    """Solve ``[[M, -J^T], [J, 0]] [x; y] = [free_load; -drift]`` (NSX-84).
+
+    The differentiated KKT system of the tangent linearization has the same
+    block matrix as the forward solve, so it reuses the same minimum-norm
+    least-squares solve.  Preconditions (``ValueError``): ``M`` square
+    ``(n, n)``, ``J`` ``(m, n)``, ``free_load`` ``(n,)``, ``drift`` ``(m,)``,
+    everything finite.  Returns ``(x, y)``.
+    """
+    m_arr, j_arr, d_arr = _checked(mass, jac, drift)
+    load = _vector(free_load, m_arr.shape[0], "free_load")
+    if not np.isfinite(load).all():
+        raise ValueError("free_load must be finite")
+    return _block_solve(m_arr, j_arr, load, d_arr)

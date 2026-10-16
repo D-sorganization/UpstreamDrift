@@ -12,6 +12,11 @@ from src.shared.python.optimization._swing_models import (
     SwingTrajectory,
 )
 
+#: The spinal compression/shear in ``compute_metrics`` is a heuristic objective
+#: term (a linear function of peak trunk velocity), not a model joint reaction.
+#: Same identifier as ``injury.spinal_load_providers.HEURISTIC_PROVIDER_ID``.
+SPINAL_OBJECTIVE_PROVIDER_ID = "heuristic_v1"
+
 
 def compute_objective(
     x: np.ndarray,
@@ -97,6 +102,12 @@ def compute_metrics(
     club: ClubModel,
     torque_limits: dict[str, float],
 ) -> dict:
+    """Compute swing metrics.
+
+    ``spinal_compression`` / ``spinal_shear`` are heuristic objective terms
+    (provider ``SPINAL_OBJECTIVE_PROVIDER_ID``): ``4.0 + 0.2 * max_trunk_vel``
+    and ``0.3 + 0.05 * max_trunk_vel``. They are not model joint reactions.
+    """
     if not (trajectory is not None):
         raise ValueError("trajectory must be provided")
     clubhead_speed = trajectory.impact_speed

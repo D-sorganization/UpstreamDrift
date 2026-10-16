@@ -256,7 +256,7 @@ def test_resolved_spec_declares_its_frame_and_materials() -> None:
     resolved = resolve_appearance(_spec(ANTHRO[0]), _doc())
     assert resolved.frame == SPEC_BODY_FRAME == "spec_body"
     assert {m.material_name for m in resolved.meshes} <= set(resolved.materials)
-    assert resolved.head_mesh is None  # R7 (#12687) fills this slot
+    assert resolved.head_mesh is not None  # default CC0 head (#12949)
     body = resolved.meshes[0].body
     assert all(m.body == body for m in resolved.meshes_for(body))
 

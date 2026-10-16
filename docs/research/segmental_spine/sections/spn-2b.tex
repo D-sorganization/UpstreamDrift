@@ -1,0 +1,81 @@
+\subsection{Distribution of a Pelvis-to-Thorax Rotation Over Levels}
+\label{sec:spn-2b}
+
+\paragraph{Problem.}
+A measured or matched pelvis$\to$terminal rotation $R_{\mathrm{target}}$ does not
+identify the individual intervertebral rotations. The distribution is therefore
+defined through a fixed coupling law $\theta_i = f_i(\phi)$ (SPN-2a) with
+independent coordinates $\phi\in\mathbb{R}^{n}$:
+\begin{equation}
+  \phi^{*}=\arg\min_{\phi\in[\ell,u]}
+  \left\lVert \log\!\left(R_{\mathrm{target}}^{\mathsf T}\,R(\phi)\right)\right\rVert_2,
+  \qquad
+  R(\phi)=B\,\Bigl[\textstyle\prod_{i}^{\text{caudal first}} N_i R_i(\theta_i(\phi))\Bigr]\,E .
+\end{equation}
+$N_i$ is the neutral rotation block, $R_i$ the ISB ZXY rotation of
+$\theta_i=(\mathrm{FE},\mathrm{LB},\mathrm{AR})$ (rad), $B,E$ optional fixed base and
+terminal rotations, and $\log$ the SO(3) rotation vector
+(\texttt{scipy.spatial.transform.Rotation.as\_rotvec}). Composition and ZXY
+construction reuse \texttt{SegmentalPose.compose} and
+\texttt{level\_rotations}; frames are those of ADR-0055 (X anterior, Y cranial,
+Z right). Units: radians.
+
+\paragraph{Law Never Altered.}
+The law, its matrices and neutral offsets are inputs only. An unreachable target
+yields a positive geodesic residual that is reported, not repaired. The
+residual returned equals the independently recomputed geodesic distance of the
+returned pose (checked to $10^{-10}$ rad). \texttt{converged} is the optimizer's
+flag and does not imply a small residual. \texttt{DistributionResult.check\_tolerance}
+flags or raises on an acceptance tolerance without rescaling anything.
+
+\paragraph{Analytic Jacobian.}
+Let $E=R_{\mathrm{target}}^{\mathsf T}R$ and $r=\log E$. A perturbation of angle
+$k$ of level $i$ rotates $R$ by $[a_{ik}]_\times R_i$ in the parent frame, where
+the ISB ZXY axes are
+$a_{1}=(0,0,1)^{\mathsf T}$,
+$a_{2}=(\cos\alpha,\sin\alpha,0)^{\mathsf T}$,
+$a_{3}=(-\sin\alpha\cos\beta,\ \cos\alpha\cos\beta,\ \sin\beta)^{\mathsf T}$
+with $\alpha=\mathrm{FE}$, $\beta=\mathrm{LB}$. The body-frame angular
+perturbation is $w_{ik}=(R_iB_i)^{\mathsf T}a_{ik}$ with $B_i$ the product of the
+factors cranial to level $i$ (times $E$). With the right-Jacobian inverse
+\begin{equation}
+  J_r^{-1}(r)=I+\tfrac12[r]_\times+\Bigl(\tfrac1{\theta^2}-\tfrac{1+\cos\theta}{2\theta\sin\theta}\Bigr)[r]_\times^{2},\quad\theta=\lVert r\rVert,
+\end{equation}
+the residual Jacobian is $\partial r/\partial\phi=J_r^{-1}(r)\sum_{i,k}w_{ik}\,(\partial\theta_i/\partial\phi)_{k,:}$,
+with $\partial\theta_i/\partial\phi$ from \texttt{law.jacobian}. A Taylor series
+replaces the coefficient for $\theta<10^{-4}$. The solver is
+\texttt{scipy.optimize.least\_squares} (trust-region reflective, bounds as box
+constraints). A central finite-difference test oracle verifies the Jacobian to
+$10^{-7}$. The optimizer's termination tolerances are $10^{-5}\,\texttt{tol\_rad}$
+(floor $10^{-15}$), so reachable targets end far inside \texttt{tol\_rad}.
+
+\paragraph{Observability Report.}
+At $\phi^{*}$ the $3\times n$ body Jacobian $W=\sum w_{ik}(\partial\theta_i/\partial\phi)$
+is decomposed by SVD. Rank is counted above $10^{-8}\sigma_{\max}$. Reported:
+rank, singular values, the null space of $W$ (coordinate directions the target
+cannot identify, with the coordinate names carrying them), and the left-null
+directions (rotations the law cannot produce at $\phi^{*}$). A law with $n>3$
+or dependent columns is flagged \texttt{underdetermined}; the solver then
+returns one minimizer near its start, not a unique one.
+
+\paragraph{Series.}
+\texttt{distribute\_series} solves frames in order, warm-starting each from the
+previous $\phi^{*}$ (clipped to bounds); coordinates are linear so there is no
+angle wrapping. A frame is \texttt{valid} when it converged and, optionally,
+its residual is within \texttt{tolerance\_rad}. The series carries
+\texttt{distribution\_source} \texttt{coupling:<law\_id>@<version>}.
+
+\paragraph{Limitations.}
+Rotation only (level translations are zero); local minimum possible for strongly
+state-dependent laws; residuals near $\pi$ rad have a singular $\log$. Inverse
+kinematics and measured distributions use other \texttt{distribution\_source}
+prefixes (ADR-0055 item 7).
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/shared/python/spine/test_distribution.py -q -n 0
+\end{verbatim}
+Tests: identifiable round trip ($10^{-8}$ in $\phi$, residual $<10^{-9}$);
+one-DOF axial law with target $R_y(a)R_x(b)$ whose analytic minimum is $b$;
+law matrices bit-identical before and after; warm start versus cold start;
+rank-deficient law; precondition failures.

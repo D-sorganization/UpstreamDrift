@@ -40,6 +40,9 @@ class ControlsTab(
 ):
     """Tab for simulation playback and actuator control."""
 
+    #: Emitted with a camera preset name when a Quick Camera View is clicked.
+    camera_preset_requested = QtCore.pyqtSignal(str)
+
     SIMPLIFIED_ACTUATOR_THRESHOLD = 20
 
     def __init__(
@@ -133,6 +136,12 @@ class ControlsTab(
         buttons_layout.addWidget(self.reset_btn, 0, 1)
         buttons_layout.addWidget(self.screenshot_btn, 1, 0)
         buttons_layout.addWidget(self.record_btn, 1, 1)
+
+        self.export_video_btn = QtWidgets.QPushButton("Export Video...")
+        self.export_video_btn.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
+        self.export_video_btn.clicked.connect(self.on_export_video)
+        self.export_video_btn.setToolTip("Render the recorded swing to an MP4 file")
+        buttons_layout.addWidget(self.export_video_btn, 2, 0, 1, 2)
         main_layout.addWidget(buttons_group)
 
     def _create_recording_info(self, main_layout: QtWidgets.QVBoxLayout) -> None:
@@ -246,10 +255,12 @@ class ControlsTab(
         parent_layout.addWidget(camera_group)
 
     def _on_quick_camera_clicked(self, preset_name: str) -> None:
-        self.sim_widget.set_camera(preset_name)
-        if hasattr(self.main_window, "visualization_tab"):
-            self.main_window.update_visualization_camera_sliders()
-            self.main_window.set_visualization_camera_preset(preset_name)
+        """Announce the preset; the owner of the camera controls applies it.
+
+        The tab used to reach into the main window for a method that no longer
+        existed, which crashed the app (UD #12885).
+        """
+        self.camera_preset_requested.emit(preset_name)
 
     # -------- Signal Handlers (Connected by Main Window) --------
 

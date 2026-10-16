@@ -1,0 +1,57 @@
+% Section of golfer_appearance_reference.tex (R9a, #12688). Standalone
+% research and visual reference, not the design manual.
+\section{Drake and Pinocchio Draw the Shared Appearance Spec (R9a, \#12688)}
+
+\subsection{Defect}
+The Drake and Pinocchio MeshCat backends of \texttt{native\_viewer\_export}
+drew grey capsules and the spec hint ellipsoids. Each carried its own copy of
+the plain palette and a near-identical capsule/shape registration loop, so
+neither showed the MuJoCo character's skin, garments or shoes.
+
+\subsection{Design}
+One engine-neutral builder, \texttt{backends/\_meshcat\_scene.py}, reads
+\texttt{model\_appearance} and returns \texttt{SceneVisuals}, a tuple of
+\texttt{VisualItem} records (name, spec body, kind, RGBA, pose in the spec
+body frame, size or OBJ path, library material). Each backend is an adapter
+that only translates items into its own geometry API.
+\begin{itemize}
+\item \emph{Appearance mode} (the default document, as MuJoCo): the resolved
+  skin, garment, blend, shoe and club meshes of
+  \texttt{body\_meshes.resolve\_appearance} (written as OBJ by
+  \texttt{\_body.body\_mesh\_files}) plus the parametric head replace every
+  capsule and hint ellipsoid. Colours are the library materials; the floor is
+  the document ground material. The trunk is sized from the spec hints
+  (ML semi-axis, AP/ML aspect), trousers are charcoal hip to ankle, and the
+  R7 head slot (\texttt{MeshReference}) is passed through unchanged.
+\item \emph{Plain mode} (\texttt{plain=True}): the grey capsule skeleton in
+  \texttt{library.PLAIN\_PALETTE}; head and club meshes remain.
+\end{itemize}
+Frames: items are in the spec body frame. Drake's URDF links are in that
+frame, so the adapter registers the item pose directly; Pinocchio composes the
+body placement ($T_{\mathrm{body}}\,T_{\mathrm{item}}$) explicitly. Visuals are
+registered after the dynamics model exists and never enter the plant, so
+physics and kinematics are unchanged.
+
+\subsection{Contract}
+\texttt{VisualItem} rejects an unknown kind, an RGBA outside $[0,1]$, a mesh
+without a path (and vice versa) and non-positive sizes. \texttt{check\_bodies}
+fails closed when an item sits on a body the engine does not have, and
+\texttt{build\_scene\_visuals} fails closed when the document dresses no body
+or names an unknown material (\texttt{ValueError}).
+
+\subsection{Acceptance Evidence}
+Engine-free tests (\texttt{test\_meshcat\_appearance.py}) check, for both
+anthropometric specs and both backends: every dressed body has meshes; pelvis
+wears the pants material, trunk the shirt, feet the shoe; trunk ML $>$ AP and
+ML equals the spec hint semi-axis (5\,\%); RGBA equals the library; no local
+RGBA literal remains. A cross-engine test exports the MuJoCo MJCF with the
+same document and compares per-mesh colours (tolerance $10^{-5}$) and the
+rigid-motion-invariant sorted centroid-distance signature of each mesh
+(tolerance $10^{-5}$\,m; MJCF prints six significant digits).
+Reproduce:
+\texttt{python -m pytest tests/unit/tools/native\_viewer\_export/test\_meshcat\_appearance.py}.
+
+\subsection{Limitations}
+Native-render stills (address and impact, face-on and down-the-line, beside
+MuJoCo) require pydrake, pinocchio, meshcat and headless Chromium together and
+were not captured in this change; no rendering claim is made here.

@@ -39,6 +39,8 @@ EXPECTED_DECISION_TITLES = [
     "MyoSuite Retarget Map Is One-to-One: Weighted Secondary Entries Dropped (#11729)",
     "Same-Input Effort Hold Is a Bundle Parameter (#12279)",
     "OpenSim Bushing Grip Ball-Impact Transient Bounds (OSV-7, #12272)",
+    "Address Knee Flexion: Owner Prior, Capture Override, No Hyperextension "
+    "(R4, #12684)",
 ]
 
 

@@ -256,7 +256,7 @@ class StartupSession(QObject):
 
     def _continue_degraded(self) -> None:
         """Open the shell with whatever the worker managed to produce."""
-        worker = self._worker
+        worker = self._worker if is_alive(self._worker) else None
         results = worker.results if worker is not None else StartupResults()
         if not results.phases and worker is not None:
             results.phases = worker.timeline.records
@@ -272,6 +272,10 @@ class StartupSession(QObject):
         if worker is None:
             return
         self._worker = None
+        if not is_alive(worker):
+            # ``finished -> deleteLater`` already destroyed the C++ object
+            # (#12894); nothing left to interrupt or wait for.
+            return
         worker.requestInterruption()
         # Keep a reference until the thread really stops: destroying a
         # running QThread aborts the process with a Qt teardown message.

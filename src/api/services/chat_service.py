@@ -60,8 +60,11 @@ class ChatService:
         self._backend_error: str | None = None
         self._lock = threading.Lock()
 
-        from src.shared.python.ai.sample_tools import register_golf_suite_tools
-        from src.shared.python.ai.tool_registry import ToolRegistry
+        # Pinned Tools registrars type-check against the canonical Tools
+        # ``ToolRegistry``; UD's ``src.shared.python.ai`` copy is a distinct
+        # class, so build the registry from the canonical spelling (UD #12893).
+        from shared.python.ai.sample_tools import register_golf_suite_tools
+        from shared.python.ai.tool_registry import ToolRegistry
 
         self._tool_registry = ToolRegistry()
         register_golf_suite_tools(self._tool_registry)
@@ -72,7 +75,7 @@ class ChatService:
 
     def _register_canonical_core_retrieval_tool(self) -> None:
         """Register the bounded Canonical Core docs/schema Q&A tool."""
-        from src.shared.python.ai.tool_registry import ToolCategory
+        from shared.python.ai.tool_registry import ToolCategory
         from src.shared.python.canonical_core import answer_canonical_core_question
 
         self._tool_registry.register(
@@ -313,36 +316,9 @@ class ChatService:
                 yield "Session not found."
                 return
 
-        # Build engine context system message
-        from src.shared.python.ai.types import Message
-
-        temp_messages = list(ctx.messages)
-        engine = ctx.metadata.get("last_engine")
-        if engine:
-            system_hint = (
-                f"The user is currently working in the {engine} physics engine. "
-                "Tailor your responses to that context when relevant."
-            )
-            temp_messages.insert(0, Message(role="system", content=system_hint))
-
-        # Inject app state context if a provider is configured
-        app_state_msg = self._build_app_state_message()
-        if app_state_msg is not None:
-            temp_messages.insert(0, app_state_msg)
-
-        # Create a temporary context copy for the adapter
-        from src.shared.python.ai.types import ConversationContext
-
-        temp_ctx = ConversationContext(
-            session_id=ctx.session_id,
-            messages=temp_messages,
-            user_expertise=ctx.user_expertise,
-            metadata=ctx.metadata,
-        )
+        temp_ctx = self._build_adapter_context(ctx)
 
         import queue
-
-        from src.shared.python.ai.types import ToolCall
 
         chunk_queue: queue.Queue[Any] = queue.Queue()
 
@@ -354,152 +330,17 @@ class ChatService:
         stop_event = threading.Event()
         temp_ctx.metadata["stop_event"] = stop_event
 
-        def _stream_to_queue() -> None:  # noqa: C901
-            try:
-                while not stop_event.is_set():
-                    current_response = []
-                    tool_calls_accumulator = {}
-
-                    tool_declarations = self._tool_declarations
-
-                    for chunk in self._adapter.stream_response(  # type: ignore[union-attr]
-                        "",  # message already in context
-                        temp_ctx,
-                        tool_declarations,
-                    ):
-                        if stop_event.is_set():
-                            # Consumer disconnected: stop pulling and let the
-                            # adapter generator close via its own ``finally``.
-                            break
-                        if chunk.content:
-                            chunk_queue.put(chunk.content)
-                            current_response.append(chunk.content)
-
-                        if chunk.tool_call_delta:
-                            for tc in chunk.tool_call_delta.get("tool_calls", []):
-                                idx = tc.get("index", 0)
-                                if idx not in tool_calls_accumulator:
-                                    tool_calls_accumulator[idx] = {
-                                        "id": tc.get("id"),
-                                        "name": tc.get("function", {}).get("name", ""),
-                                        "arguments": tc.get("function", {}).get(
-                                            "arguments", ""
-                                        ),
-                                    }
-                                else:
-                                    if tc.get("function", {}).get("arguments"):
-                                        tool_calls_accumulator[idx]["arguments"] += tc[
-                                            "function"
-                                        ]["arguments"]
-
-                    if stop_event.is_set():
-                        # Abandoned mid-stream: do not take the lock to persist
-                        # messages for a session whose client has gone away.
-                        break
-
-                    complete_response = "".join(current_response)
-
-                    tool_calls = []
-                    for tc_data in tool_calls_accumulator.values():
-                        try:
-                            args = json.loads(tc_data["arguments"] or "{}")
-                        except json.JSONDecodeError:
-                            args = {"raw": tc_data["arguments"]}
-                        tool_calls.append(
-                            ToolCall(
-                                id=tc_data["id"], name=tc_data["name"], arguments=args
-                            )
-                        )
-
-                    if complete_response or tool_calls:
-                        with self._lock:
-                            ctx.add_assistant_message(
-                                complete_response, tool_calls=tool_calls
-                            )
-                            temp_ctx.add_assistant_message(
-                                complete_response, tool_calls=tool_calls
-                            )
-                            self._persist_session(session_id)
-
-                    get_state_logger().log_event(
-                        "chat.response_received",
-                        {
-                            "session_id": session_id,
-                            "chars": len(complete_response),
-                        },
-                    )
-
-                    if not tool_calls:
-                        break
-
-                    import concurrent.futures
-
-                    from src.shared.python.ai.config import get_tool_timeout
-
-                    for tc in tool_calls:
-                        if stop_event.is_set():
-                            result_str = (
-                                "Tool execution canceled because the stream client "
-                                "disconnected."
-                            )
-                            with self._lock:
-                                ctx.add_tool_result(tc.id, result_str)
-                                temp_ctx.add_tool_result(tc.id, result_str)
-                                self._persist_session(session_id)
-                            continue
-                        chunk_queue.put({"type": "tool_call_started", "tool": tc.name})
-
-                        try:
-                            timeout_sec = get_tool_timeout()
-                            with concurrent.futures.ThreadPoolExecutor(
-                                max_workers=1
-                            ) as executor:
-                                future = executor.submit(
-                                    self._tool_registry.execute, tc.name, tc.arguments
-                                )
-                                tool_result = future.result(timeout=timeout_sec)
-                            result_str = (
-                                str(tool_result.result)
-                                if tool_result.success
-                                else str(tool_result.error)
-                            )
-                            success = tool_result.success
-                        except concurrent.futures.TimeoutError:
-                            result_str = (
-                                f"Tool execution timed out after {timeout_sec}s"
-                            )
-                            success = False
-                        # Tool execution may raise arbitrary exceptions from user-defined
-                        # tools; catch-all prevents a single tool from crashing the session.
-                        except Exception as e:  # noqa: BLE001
-                            result_str = str(e)
-                            success = False
-
-                        chunk_queue.put(
-                            {
-                                "type": "tool_call_result" if success else "tool_error",
-                                "tool": tc.name,
-                                "detail": result_str,
-                            }
-                        )
-
-                        with self._lock:
-                            ctx.add_tool_result(tc.id, result_str)
-                            temp_ctx.add_tool_result(tc.id, result_str)
-                            self._persist_session(session_id)
-
-            # Worker thread must survive any error to send the sentinel and avoid
-            # hanging the queue consumer.
-            except Exception as e:  # noqa: BLE001
-                chunk_queue.put(f"\n[Error: {e}]")
-                get_state_logger().log_exception(
-                    e, context="ChatService.stream_response"
-                )
-            finally:
-                chunk_queue.put(None)  # Sentinel
+        worker = _StreamWorker(
+            service=self,
+            ctx=ctx,
+            temp_ctx=temp_ctx,
+            session_id=session_id,
+            chunk_queue=chunk_queue,
+            stop_event=stop_event,
+        )
 
         thread = threading.Thread(
-            target=_stream_to_queue,
+            target=worker.run,
             name=f"ChatService-StreamWorker-{session_id}",
             daemon=True,
         )
@@ -542,6 +383,31 @@ class ChatService:
                     "interruptible",
                     session_id,
                 )
+
+    def _build_adapter_context(self, ctx: ConversationContext) -> ConversationContext:
+        """Copy ``ctx`` for the adapter, prepending engine/app-state system hints."""
+        from src.shared.python.ai.types import ConversationContext, Message
+
+        temp_messages = list(ctx.messages)
+        engine = ctx.metadata.get("last_engine")
+        if engine:
+            system_hint = (
+                f"The user is currently working in the {engine} physics engine. "
+                "Tailor your responses to that context when relevant."
+            )
+            temp_messages.insert(0, Message(role="system", content=system_hint))
+
+        # Inject app state context if a provider is configured
+        app_state_msg = self._build_app_state_message()
+        if app_state_msg is not None:
+            temp_messages.insert(0, app_state_msg)
+
+        return ConversationContext(
+            session_id=ctx.session_id,
+            messages=temp_messages,
+            user_expertise=ctx.user_expertise,
+            metadata=ctx.metadata,
+        )
 
     def _cancel_adapter_stream(self) -> None:
         """Force-close the adapter's in-flight stream, if it supports it.
@@ -742,3 +608,187 @@ class ChatService:
         while len(self._sessions) > self.MAX_SESSIONS:
             oldest_sid, _ = self._sessions.popitem(last=False)
             self._timestamps.pop(oldest_sid, None)
+
+
+class _StreamWorker:
+    """Thread body that pumps adapter output (and tool calls) into a queue.
+
+    Lifted out of the former ``ChatService.stream_response`` closure; all
+    collaborators are passed explicitly. ``service`` is read lazily (adapter,
+    tool registry, lock, persistence) so late rebinding by callers/tests keeps
+    working exactly as it did with the closure.
+    """
+
+    def __init__(
+        self,
+        *,
+        service: ChatService,
+        ctx: ConversationContext,
+        temp_ctx: ConversationContext,
+        session_id: str,
+        chunk_queue: Any,
+        stop_event: threading.Event,
+    ) -> None:
+        if not session_id:
+            raise ValueError("session_id must be a non-empty string")
+        self._service = service
+        self._ctx = ctx
+        self._temp_ctx = temp_ctx
+        self._session_id = session_id
+        self._queue = chunk_queue
+        self._stop = stop_event
+
+    def run(self) -> None:
+        """Thread target: stream turns until done, always emit the sentinel."""
+        try:
+            while not self._stop.is_set():
+                if not self._run_turn():
+                    break
+        # Worker thread must survive any error to send the sentinel and avoid
+        # hanging the queue consumer.
+        except Exception as e:  # noqa: BLE001
+            self._queue.put(f"\n[Error: {e}]")
+            get_state_logger().log_exception(e, context="ChatService.stream_response")
+        finally:
+            self._queue.put(None)  # Sentinel
+
+    def _run_turn(self) -> bool:
+        """Run one adapter turn; return True if another turn should follow."""
+        current_response, tool_calls_accumulator = self._pull_adapter_chunks()
+
+        if self._stop.is_set():
+            # Abandoned mid-stream: do not take the lock to persist
+            # messages for a session whose client has gone away.
+            return False
+
+        complete_response = "".join(current_response)
+        tool_calls = self._build_tool_calls(tool_calls_accumulator)
+
+        if complete_response or tool_calls:
+            with self._service._lock:
+                self._ctx.add_assistant_message(
+                    complete_response, tool_calls=tool_calls
+                )
+                self._temp_ctx.add_assistant_message(
+                    complete_response, tool_calls=tool_calls
+                )
+                self._service._persist_session(self._session_id)
+
+        get_state_logger().log_event(
+            "chat.response_received",
+            {"session_id": self._session_id, "chars": len(complete_response)},
+        )
+
+        if not tool_calls:
+            return False
+
+        self._run_tool_calls(tool_calls)
+        return True
+
+    def _pull_adapter_chunks(self) -> tuple[list[str], dict[int, dict[str, Any]]]:
+        """Stream one adapter turn into the queue; collect text and tool deltas."""
+        current_response: list[str] = []
+        tool_calls_accumulator: dict[int, dict[str, Any]] = {}
+
+        adapter = self._service._adapter
+        for chunk in adapter.stream_response(  # type: ignore[union-attr]
+            "",  # message already in context
+            self._temp_ctx,
+            self._service._tool_declarations,
+        ):
+            if self._stop.is_set():
+                # Consumer disconnected: stop pulling and let the
+                # adapter generator close via its own ``finally``.
+                break
+            if chunk.content:
+                self._queue.put(chunk.content)
+                current_response.append(chunk.content)
+            if chunk.tool_call_delta:
+                _accumulate_tool_call_delta(
+                    tool_calls_accumulator, chunk.tool_call_delta
+                )
+        return current_response, tool_calls_accumulator
+
+    @staticmethod
+    def _build_tool_calls(accumulator: dict[int, dict[str, Any]]) -> list[Any]:
+        """Convert accumulated tool-call deltas into ``ToolCall`` objects."""
+        from src.shared.python.ai.types import ToolCall
+
+        tool_calls = []
+        for tc_data in accumulator.values():
+            try:
+                args = json.loads(tc_data["arguments"] or "{}")
+            except json.JSONDecodeError:
+                args = {"raw": tc_data["arguments"]}
+            tool_calls.append(
+                ToolCall(id=tc_data["id"], name=tc_data["name"], arguments=args)
+            )
+        return tool_calls
+
+    def _record_tool_result(self, tool_call_id: str, result_str: str) -> None:
+        with self._service._lock:
+            self._ctx.add_tool_result(tool_call_id, result_str)
+            self._temp_ctx.add_tool_result(tool_call_id, result_str)
+            self._service._persist_session(self._session_id)
+
+    def _run_tool_calls(self, tool_calls: list[Any]) -> None:
+        """Execute each requested tool, emitting progress events to the queue."""
+        for tc in tool_calls:
+            if self._stop.is_set():
+                self._record_tool_result(
+                    tc.id,
+                    "Tool execution canceled because the stream client disconnected.",
+                )
+                continue
+            self._queue.put({"type": "tool_call_started", "tool": tc.name})
+            result_str, success = self._execute_tool(tc)
+            self._queue.put(
+                {
+                    "type": "tool_call_result" if success else "tool_error",
+                    "tool": tc.name,
+                    "detail": result_str,
+                }
+            )
+            self._record_tool_result(tc.id, result_str)
+
+    def _execute_tool(self, tc: Any) -> tuple[str, bool]:
+        """Run one tool with the configured timeout; return (text, success)."""
+        import concurrent.futures
+
+        from src.shared.python.ai.config import get_tool_timeout
+
+        try:
+            timeout_sec = get_tool_timeout()
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                registry = self._service._tool_registry
+                future = executor.submit(registry.execute, tc.name, tc.arguments)
+                tool_result = future.result(timeout=timeout_sec)
+            result_str = (
+                str(tool_result.result)
+                if tool_result.success
+                else str(tool_result.error)
+            )
+            return result_str, tool_result.success
+        except concurrent.futures.TimeoutError:
+            return f"Tool execution timed out after {timeout_sec}s", False
+        # Tool execution may raise arbitrary exceptions from user-defined
+        # tools; catch-all prevents a single tool from crashing the session.
+        except Exception as e:  # noqa: BLE001
+            return str(e), False
+
+
+def _accumulate_tool_call_delta(
+    accumulator: dict[int, dict[str, Any]], delta: dict[str, Any]
+) -> None:
+    """Merge one streamed ``tool_call_delta`` payload into ``accumulator``."""
+    for tc in delta.get("tool_calls", []):
+        idx = tc.get("index", 0)
+        function = tc.get("function", {})
+        if idx not in accumulator:
+            accumulator[idx] = {
+                "id": tc.get("id"),
+                "name": function.get("name", ""),
+                "arguments": function.get("arguments", ""),
+            }
+        elif function.get("arguments"):
+            accumulator[idx]["arguments"] += function["arguments"]

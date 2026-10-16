@@ -245,7 +245,7 @@ class TestVideoExporter:
             exporter.add_frame()
 
         renderer = mock_mj.Renderer.return_value
-        renderer.update_scene.assert_called_with(data, camera=None)
+        renderer.update_scene.assert_called_with(data, camera=-1)
         renderer.render.assert_called_once()
         mock_cv2.cvtColor.assert_called_once()
         exporter.writer.write.assert_called_once()
@@ -392,11 +392,74 @@ class TestVideoExporter:
                 states,
                 controls,
                 times,
-                width=WIDTH,
-                height=HEIGHT,
-                fps=FPS,
-                show_metrics=True,
+                video_export.VideoExportOptions(
+                    width=WIDTH, height=HEIGHT, fps=FPS, show_metrics=True
+                ),
             )
 
         assert success
         mock_cv2.VideoWriter.assert_called_once()
+
+
+@pytest.mark.unit
+class TestVideoExportOptions:
+    """DbC contract of the ``export_simulation_video`` parameter object."""
+
+    def test_defaults_are_hd_with_metrics(self) -> None:
+        opts = video_export.VideoExportOptions()
+        assert (opts.width, opts.height) == (
+            video_export.HD_WIDTH,
+            video_export.HD_HEIGHT,
+        )
+        assert opts.fps == video_export.DEFAULT_FPS
+        assert opts.camera_id is None
+        assert opts.show_metrics is True
+        assert opts.progress_callback is None
+
+    def test_is_frozen(self) -> None:
+        import dataclasses
+
+        opts = video_export.VideoExportOptions()
+        with pytest.raises(dataclasses.FrozenInstanceError):
+            opts.fps = 60  # type: ignore[misc]
+
+    @pytest.mark.parametrize("field", ["width", "height", "fps"])
+    @pytest.mark.parametrize("bad", [0, -1, 2.5, True])
+    def test_rejects_non_positive_integer_sizes(self, field: str, bad: Any) -> None:
+        with pytest.raises(ValueError, match=field):
+            video_export.VideoExportOptions(**{field: bad})
+
+    def test_rejects_camera_below_free_camera(self) -> None:
+        with pytest.raises(ValueError, match="camera_id"):
+            video_export.VideoExportOptions(camera_id=-2)
+
+    def test_rejects_non_callable_progress_callback(self) -> None:
+        with pytest.raises(TypeError, match="progress_callback"):
+            video_export.VideoExportOptions(progress_callback=42)  # type: ignore[arg-type]
+
+    def test_export_reports_progress_through_options(
+        self, mock_mujoco: tuple[MagicMock, MagicMock], mock_cv2: Any
+    ) -> None:
+        model, data = mock_mujoco
+        n_frames = 4
+        calls: list[tuple[int, int]] = []
+        with (
+            _patch_video_export_mj(_make_mock_mj()),
+            _patch_video_export_flag("CV2_AVAILABLE"),
+        ):
+            ok = export_simulation_video(
+                model,
+                data,
+                "output.mp4",
+                np.zeros((n_frames, 4)),
+                np.zeros((n_frames, 1)),
+                np.linspace(0, 1, n_frames),
+                video_export.VideoExportOptions(
+                    width=WIDTH,
+                    height=HEIGHT,
+                    show_metrics=False,
+                    progress_callback=lambda i, n: calls.append((i, n)),
+                ),
+            )
+        assert ok
+        assert calls == [(i, n_frames) for i in range(1, n_frames + 1)]

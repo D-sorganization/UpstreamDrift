@@ -26,10 +26,13 @@ from src.shared.python.motion_matching.constraint_kinematics import (
 )
 from src.shared.python.motion_matching.marker_calibration import Offsets, Pose
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
+from src.shared.python.motion_matching.trajectory_ik_options import (
+    TrajectoryIkOptions,
+    resolve_trajectory_options,
+)
 
 Array: TypeAlias = NDArray[np.float64]
 PoseFn: TypeAlias = Callable[[Array], Mapping[str, Pose]]
-ClosureFn: TypeAlias = Callable[[Array], Array]
 
 
 @dataclass(frozen=True)
@@ -319,16 +322,17 @@ def solve_full_body_ik_trajectory(
     capture: TourCapture,
     initial_q: Array,
     *,
-    closure_fn: ClosureFn | None = None,
-    closure_weight: float = 10.0,
-    reg_weight: float = 1e-3,
-    max_nfev: int = 50,
-    coordinate_bounds: tuple[Array, Array] | None = None,
+    options: TrajectoryIkOptions | None = None,
+    **option_overrides: Any,
 ) -> Array:
     """Solve trajectory IK; explicit finite source bounds opt into bounded TRF.
 
     Omission preserves the original LM solver. Bounds never clip the seed or
     widen source anatomy. Finite output is not an optimization acceptance test.
+
+    Tuning is a :class:`TrajectoryIkOptions`; its fields (``closure_fn``,
+    ``closure_weight``, ``reg_weight``, ``max_nfev``, ``coordinate_bounds``)
+    may also be passed directly as keywords, overriding ``options``.
     """
     q0 = np.asarray(initial_q, dtype=float)
     if q0.ndim != 1 or not np.isfinite(q0).all():
@@ -338,10 +342,10 @@ def solve_full_body_ik_trajectory(
     missing = [label for label in capture.labels if label not in offsets]
     if missing:
         raise ValueError(f"Capture labels missing from offsets: {missing}")
-    if closure_weight < 0:
-        raise ValueError("closure_weight must be non-negative")
-    if reg_weight < 0:
-        raise ValueError("reg_weight must be non-negative")
+    opts = resolve_trajectory_options(options, option_overrides)
+    closure_fn, closure_weight = opts.closure_fn, opts.closure_weight
+    reg_weight, max_nfev = opts.reg_weight, opts.max_nfev
+    coordinate_bounds = opts.coordinate_bounds
     low, high = _trajectory_bounds(q0, coordinate_bounds)
 
     n_coords = q0.size

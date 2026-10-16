@@ -8,6 +8,9 @@ from typing import TypeAlias
 import numpy as np
 from numpy.typing import NDArray
 
+from src.engines.physics_engines.pinocchio.python.closed_loop_derivatives import (
+    PinocchioAnalyticDerivatives,
+)
 from src.engines.physics_engines.pinocchio.python.marker_kinematics import CoordinateMap
 from src.engines.physics_engines.pinocchio.python.native_model import (
     CLOSURE_CONVENTION,
@@ -30,6 +33,9 @@ from src.shared.python.loop_nullspace.contracts import (
     ClosureKind,
     LoopTopology,
     SpatialInertia,
+)
+from src.shared.python.loop_nullspace.derivative_capability import (
+    ClosedLoopDerivatives,
 )
 from src.shared.python.motion_matching.multi_engine_torque_allocator import EngineType
 from src.shared.python.motion_matching.polynomial_actuation import (
@@ -288,11 +294,36 @@ class PinocchioForceAdapter:
 
         ``CLOSED_LOOP_SNAPSHOT`` is FULL: the adapter provides the closure
         Jacobian, its drift, the wrench frame, the club inertia split and the
-        native convention.  Anything else answers ``NONE`` here.
+        native convention.  ``CLOSED_LOOP_DERIVATIVES`` is FULL (NSX-85): the
+        derivatives are Pinocchio's analytic ones, not finite differences.
+        Anything else answers ``NONE`` here.
         """
-        if capability is Capability.CLOSED_LOOP_SNAPSHOT:
+        if capability in (
+            Capability.CLOSED_LOOP_SNAPSHOT,
+            Capability.CLOSED_LOOP_DERIVATIVES,
+        ):
             return CapabilityLevel.FULL
         return CapabilityLevel.NONE
+
+    @property
+    def native_plant(self) -> FullBodyPinocchioModel:
+        """The native full-body plant behind this adapter (read access only)."""
+        return self._plant
+
+    def constrained_acceleration_derivatives(
+        self, q: Array, v: Array, tau: Array
+    ) -> ClosedLoopDerivatives:
+        """Analytic tangent-bundle derivatives of ``(a, lambda)`` (NSX-85).
+
+        ``q, v, tau`` are native-order vectors (this adapter's
+        ``coordinate_order``); ``v`` must satisfy ``J_c v = 0``.  Wraps
+        ``computeConstraintDynamicsDerivatives``; the result is tagged
+        ``derivative_method=analytic`` and expressed in the canonical closure
+        convention on the closure tangent basis of NSX-84.
+        """
+        return PinocchioAnalyticDerivatives(self).constrained_acceleration_derivatives(
+            q, v, tau
+        )
 
     @property
     def native_closure_convention(self) -> NativeClosureConvention:
