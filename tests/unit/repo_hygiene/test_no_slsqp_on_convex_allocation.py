@@ -60,6 +60,9 @@ ALLOWED_SLSQP: dict[str, str] = {
     "src/shared/python/estimation/mosaic/contact_wrenches.py": (
         "MOSAIC inner wrench solve owned by the MOSAIC epic; " + _FOLLOW_UP
     ),
+    "src/engines/physics_engines/opensim/python/static_opt_core.py": (
+        "OpenSim static-optimisation stage 2 (min sum a^p, p in {2, 3}); " + _FOLLOW_UP
+    ),
     "src/robotics/contact/grasp_analysis.py": (
         "robotics grasp force optimiser (box-relaxed cone); " + _FOLLOW_UP
     ),
@@ -79,6 +82,12 @@ def _slsqp_literals(tree: ast.AST) -> int:
     )
 
 
+def _is_scipy_optimize(node: ast.expr) -> bool:
+    if isinstance(node, ast.Name):
+        return node.id in {"optimize", "scipy", "sopt", "spo"}
+    return isinstance(node, ast.Attribute) and node.attr == "optimize"
+
+
 def _scipy_minimize_uses(tree: ast.AST) -> list[str]:
     hits: list[str] = []
     for node in ast.walk(tree):
@@ -86,7 +95,14 @@ def _scipy_minimize_uses(tree: ast.AST) -> list[str]:
             "scipy.optimize"
         ):
             hits += [a.name for a in node.names if a.name == "minimize"]
-        elif isinstance(node, ast.Attribute) and node.attr == "minimize":
+        elif (
+            isinstance(node, ast.Attribute)
+            and node.attr == "minimize"
+            and _is_scipy_optimize(node.value)
+        ):
+            # ``solver.minimize(c)`` is the conic LP wrapper's own method, not
+            # scipy; only ``optimize.minimize`` / ``scipy.optimize.minimize``
+            # count.
             hits.append("minimize")
         elif isinstance(node, ast.Name) and node.id in {"minimize", "_minimize"}:
             hits.append(node.id)
