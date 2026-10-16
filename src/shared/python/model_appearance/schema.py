@@ -141,8 +141,8 @@ class HeadSettings:
     forward_axis: str = "+x"
     up_axis: str = "+z"
     orientation_override: HeadOrientationOverride | None = None
-    #: ``parametric`` (procedural, default) or ``cc0_mesh`` (R7, #12687).
-    model: str = "parametric"
+    #: ``cc0_mesh`` (default, owner ruling #12949) or ``parametric`` (procedural).
+    model: str = "cc0_mesh"
 
 
 @dataclass(frozen=True)
@@ -207,6 +207,13 @@ def _material(raw: Mapping[str, Any]) -> Material:
     )
 
 
+def _head_model(raw: Mapping[str, Any], defaults: HeadSettings) -> str:
+    """Head model: explicit value, else the CC0 default (a cap needs parametric)."""
+    if "model" in raw:
+        return raw["model"]
+    return "parametric" if raw.get("headwear") == "cap" else defaults.model
+
+
 def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
     defaults = HeadSettings()
     ovr_raw = raw.get("orientation_override")
@@ -230,7 +237,7 @@ def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
         raw.get("forward_axis", defaults.forward_axis),
         raw.get("up_axis", defaults.up_axis),
         override,
-        raw.get("model", defaults.model),
+        _head_model(raw, defaults),
     )
 
 
@@ -242,7 +249,7 @@ def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
         "forward_axis": head.forward_axis,
         "up_axis": head.up_axis,
     }
-    if head.model != "parametric":
+    if head.model != HeadSettings().model:
         out["model"] = head.model
     if head.headwear_material is not None:
         out["headwear_material"] = head.headwear_material

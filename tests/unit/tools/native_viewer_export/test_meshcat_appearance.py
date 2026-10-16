@@ -166,11 +166,20 @@ def test_trunk_ml_extent_is_the_spec_hint_semi_axis(built) -> None:
     assert checked >= 2
 
 
-def test_head_is_the_shared_parametric_head_in_its_body_frame(built) -> None:
+def test_head_is_the_shared_cc0_head_in_its_body_frame(built) -> None:
     _, scene = built
     heads = [i for i in scene.items if i.label.startswith("head_")]
-    assert {"head_skull", "head_neck", "head_nose"} <= {i.label for i in heads}
+    assert {"head_skin_mesh", "head_hair_mesh"} == {i.label for i in heads}
     assert len({i.body for i in heads}) == 1 and heads[0].body.endswith("/Head")
+
+
+def test_parametric_head_stays_selectable(tmp_path) -> None:
+    doc = document_from_dict(
+        {"schema_version": "appearance-v1", "head": {"model": "parametric"}}
+    )
+    scene = build_scene_visuals(_spec(ANTHRO[0]), tmp_path, doc)
+    labels = {i.label for i in scene.items if i.label.startswith("head_")}
+    assert {"head_skull", "head_neck", "head_nose"} <= labels
 
 
 def test_head_disabled_leaves_the_head_body_to_the_body_meshes(tmp_path) -> None:

@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[3]
 BODIES = ROOT / "docs/development/full_body_models"
 DRIVER = BODIES / "full_body_spec_anthro_driver.json"
 HEAD = "GolfSwing3D_Kinetic/Head"
+PARAMETRIC = {"model": "parametric"}  # the default head is the CC0 mesh (#12949)
 
 
 def _export(spec: Path, head: dict | None, **kw):
@@ -81,7 +82,7 @@ def test_head_geoms_ride_the_head_body_and_are_visual_only() -> None:
 def test_head_placement_and_stature() -> None:
     mujoco = pytest.importorskip("mujoco")
     spec = json.loads(DRIVER.read_text())
-    model = mujoco.MjModel.from_xml_string(_export(DRIVER, None)[0])
+    model = mujoco.MjModel.from_xml_string(_export(DRIVER, PARAMETRIC)[0])
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     body = model.body(HEAD)
@@ -106,7 +107,7 @@ def test_head_placement_and_stature() -> None:
 
 def test_face_points_forward_with_the_body() -> None:
     mujoco = pytest.importorskip("mujoco")
-    model = mujoco.MjModel.from_xml_string(_export(DRIVER, None)[0])
+    model = mujoco.MjModel.from_xml_string(_export(DRIVER, PARAMETRIC)[0])
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     nose = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "visual_head_nose")
