@@ -2353,6 +2353,370 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12949 · CC0 Short-Hair Head Is Now the Default HeadSettings.Model in Every Engine; Parametric Stays Selectable
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12949
+- **Branch:** merged via #12956
+- **PR:** #12956
+- **Paths:** see #12956
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`5226cbd6`; collated from changes/12949-cc0-short-hair-head-is-now-the-default-h.md)
+- **Summary:** CC0 short-hair head is now the default HeadSettings.model in every engine; parametric stays selectable
+- **Next step:** Shipped in PR #12956.
+
+### DL-#12774 · Record Segmental Spine Contract Ownership; Open Tools#5630 and OpenSim_Models#464
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12774
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12774-record-segmental-spine-contract-ownershi.md)
+- **Summary:** Record segmental spine contract ownership; open Tools#5630 and OpenSim_Models#464
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12773 · Rewrite Segmental Spine Manual Chapter 66 as a Calculation-Level Reference After Panel Review; Declare the Fujii Flexion Parity Defect; Correct the Gravity-Only Residual Wording
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12773
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12773-spn-16-consolidate-segmental-spine-manua.md)
+- **Summary:** Rewrite segmental spine manual chapter 66 as a calculation-level reference after panel review; declare the Fujii flexion parity defect; correct the gravity-only residual wording
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12772 · Add PyQt6 Spine Viewer Tool With Embed Adapter, Tile and Feature-Parity Entry (SPN-15B)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12772
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12772-add-pyqt6-spine-viewer-tool-with-embed-a.md)
+- **Summary:** Add PyQt6 Spine Viewer tool with embed adapter, tile and feature-parity entry (SPN-15b)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12771 · SPN-15a: Pure-Data Spine Angle-Stack and Load-Heatmap Adapter Plus Agg Report Figures
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12771
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12771-spn-15a-pure-data-spine-angle-stack-and.md)
+- **Summary:** SPN-15a: pure-data spine angle-stack and load-heatmap adapter plus Agg report figures
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12769 · SPN-14a: Distribution Sensitivity Within One Model Across Shipped Coupling Laws, With Recorded Law Restriction to the Model's Levels
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12769
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12769-spn-14a-distribution-sensitivity-within.md)
+- **Summary:** SPN-14a: distribution sensitivity within one model across shipped coupling laws, with recorded law restriction to the model's levels
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12768 · SPN-13C: Spine Study Aggregation Tables
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12768
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12768-spn-13c-spine-study-aggregation-tables.md)
+- **Summary:** SPN-13c: spine study aggregation tables
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12767 · Spine Study Requests Can Run a Movement Variant With Fingerprint and Receipt Provenance (SPN-13D)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12767
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12767-spn-13b-movement-variant-generator-five.md)
+- **Summary:** Spine study requests can run a movement variant with fingerprint and receipt provenance (SPN-13d)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12766 · SPN-13a: Deterministic Hash-Pinned Spine Study Request -> Receipt (Spine.Study)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12766
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12766-spn-13a-deterministic-hash-pinned-spine.md)
+- **Summary:** SPN-13a: deterministic hash-pinned spine study request -> receipt (spine.study)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12765 · SPN-12: SpinalLoadAnalyzer Heuristic/Model Provider Split
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12765
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12765-spn-12-spinalloadanalyzer-heuristic-mode.md)
+- **Summary:** SPN-12: SpinalLoadAnalyzer heuristic/model provider split
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12764 · SPN-11B: Golf Literature Context Bands (Hosea 1990, Lim 2012) Annotated Beside Model Peaks, Never Acceptance
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12764
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12764-spn-11b-golf-literature-context-bands-ho.md)
+- **Summary:** SPN-11b: golf literature context bands (Hosea 1990, Lim 2012) annotated beside model peaks, never acceptance
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12762 · SPN-10C: Per-Level Joint Reactions With SO Muscle Forces as a JOINT_REACTION SpinalLoadSeries
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12762
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12762-spn-10c-per-level-joint-reactions-with-s.md)
+- **Summary:** SPN-10c: per-level joint reactions with SO muscle forces as a JOINT_REACTION SpinalLoadSeries
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12761 · SPN-10B: Trunk Static Optimisation With Cost Exponent P in {2,3}, Lexicographic Reserves With Flagging, Shared Numeric Core With the Leg SO, Per-Coordinate ID Accessor
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12761
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12761-spn-10b-trunk-static-optimisation-with-c.md)
+- **Summary:** SPN-10b: trunk static optimisation with cost exponent p in {2,3}, lexicographic reserves with flagging, shared numeric core with the leg SO, per-coordinate ID accessor
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12760 · Spinal Inverse Dynamics With External Loads: Generalized Effort per Level and Pelvis Residual Budget (SPN-10A)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12760
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12760-spinal-inverse-dynamics-with-external-lo.md)
+- **Summary:** Spinal inverse dynamics with external loads: generalized effort per level and pelvis residual budget (SPN-10a)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12759 · SPN-9D: Read OpenSim Motions Into SegmentalKinematicsSeries (Inverse of Export_Mot)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12759
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12759-spn-9d-read-opensim-motions-into-segment.md)
+- **Summary:** SPN-9d: read OpenSim motions into SegmentalKinematicsSeries (inverse of export_mot)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12757 · SPN-9B: Drive a Coupled Segmental Model From Golf Trunk Input With Per-Frame Residuals and .mot Export
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12757
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12757-spn-9b-drive-a-coupled-segmental-model-f.md)
+- **Summary:** SPN-9b: drive a coupled segmental model from golf trunk input with per-frame residuals and .mot export
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12756 · SPN-9a: Golf Humanoid Motion Reader With Native Pelvis-to-Thorax Rotation and SLERP Resampling
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12756
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12756-spn-9a-golf-humanoid-motion-reader-with.md)
+- **Summary:** SPN-9a: golf humanoid motion reader with native pelvis-to-thorax rotation and SLERP resampling
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12754 · SPN-8B: Extract OpenSim CoordinateCouplerConstraints Into a CouplingLaw
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12754
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12754-spn-8b-extract-opensim-coordinatecoupler.md)
+- **Summary:** SPN-8b: extract OpenSim CoordinateCouplerConstraints into a CouplingLaw
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12753 · SPN-8a: OpenSim Spine Inventory, Level Maps and ISB Axis Check
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12753
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12753-spn-8a-opensim-spine-inventory-level-map.md)
+- **Summary:** SPN-8a: OpenSim spine inventory, level maps and ISB axis check
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12752 · SPN-7C: OpenSim Lane Guard Turns Absent-OpenSim Spine Skips Into Failures (UD_REQUIRE_OPENSIM=1)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12752
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12752-spn-7c-opensim-lane-guard-turns-absent-o.md)
+- **Summary:** SPN-7c: OpenSim lane guard turns absent-OpenSim spine skips into failures (UD_REQUIRE_OPENSIM=1)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12751 · SPN-7B: Fixture Coupler Constraints, Massless Driver and Lumped Trunk Muscles
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12751
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12751-spn-7b-fixture-coupler-constraints-massl.md)
+- **Summary:** SPN-7b: fixture coupler constraints, massless driver and lumped trunk muscles
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12750 · SPN-7a: Synthetic Segmental Spine OpenSim Fixture Generator and Native Composition Check
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12750
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12750-spn-7a-synthetic-segmental-spine-opensim.md)
+- **Summary:** SPN-7a: synthetic segmental spine OpenSim fixture generator and native composition check
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12746 · SPN-4C: Swing-Metrics and API X-Factor Delegate to Golf-Term Registry
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12746
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12746-spn-4c-swing-metrics-and-api-x-factor-de.md)
+- **Summary:** SPN-4c: swing-metrics and API X-factor delegate to golf-term registry
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12745 · Migrate SpinalLoadAnalyzer X-Factor and Crunch Factor to the Golf-Term Registry (SPN-4B), Behaviour-Preserving
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12745
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12745-migrate-spinalloadanalyzer-x-factor-and.md)
+- **Summary:** Migrate SpinalLoadAnalyzer X-factor and crunch factor to the golf-term registry (SPN-4b), behaviour-preserving
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12744 · Add Spine.Golf_Terms Versioned Golf-Term Registry (SPN-4A)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12744
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12744-add-spine-golf-terms-versioned-golf-term.md)
+- **Summary:** Add spine.golf_terms versioned golf-term registry (SPN-4a)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12743 · SPN-3 Partial: Cited Coupling-Law Data and Loader; Verified Laws Only (Bruno2015_Regional, Fujii2007_Lumbar, Uniform_Reference); Per-Level Bruno and Pearcy Pending
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12743
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12743-spn-3-partial-cited-coupling-law-data-an.md)
+- **Summary:** SPN-3 partial: cited coupling-law data and loader; verified laws only (bruno2015_regional, fujii2007_lumbar, uniform_reference); per-level Bruno and Pearcy pending
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12742 · Spine Distribution Problem: Geodesic Least-Squares Distribution of Pelvis-Thorax Rotation Over Levels Under a Fixed Coupling Law (SPN-2B)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12742
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12742-spine-distribution-problem-geodesic-leas.md)
+- **Summary:** Spine distribution problem: geodesic least-squares distribution of pelvis-thorax rotation over levels under a fixed coupling law (SPN-2b)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12741 · Add Spine Coupling Laws (Linear, State-Dependent, MyoFullBody Adapter) and Regional Fraction (SPN-2A)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12741
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12741-add-spine-coupling-laws-linear-state-dep.md)
+- **Summary:** Add spine coupling laws (linear, state-dependent, MyoFullBody adapter) and regional fraction (SPN-2a)
+- **Next step:** Shipped in PR #12796.
+
 ### DL-#12945 · Explorer: OpenSim Plot Resolves Markers From the Model (No KeyError 'Hand'), MuJoCo Export Video Uses the Viewport Camera, App Exports Write H.264 (#12946, #12947)
 
 - **State:** shipped
@@ -2840,10 +3204,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12811
 - **Branch:** merged via #12812
-- **PR:** #12812
+- **PR:** #12812, #12796
 - **Paths:** see #12812
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`b2e2b4de`; collated from changes/12811-fix-main-breakage-from-12704-pinocchio-j.md)
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12811-fix-main-breakage-from-12704-pinocchio-j.md)
 - **Summary:** Fix main breakage from #12704: pinocchio JointModelRZ test lane and pinocchio_reference row typing
 - **Next step:** Shipped in PR #12812.
 
@@ -2853,10 +3217,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12808
 - **Branch:** merged via #12809
-- **PR:** #12809
+- **PR:** #12809, #12796
 - **Paths:** see #12809
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`922922c5`; collated from changes/12808-run-the-prettier-pre-commit-hook-at-comm.md)
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12808-run-the-prettier-pre-commit-hook-at-comm.md)
 - **Summary:** Run the Prettier pre-commit hook at commit time only so rebased branches can push
 - **Next step:** Shipped in PR #12809.
 
@@ -2879,10 +3243,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12591
 - **Branch:** merged via #12663
-- **PR:** #12663
+- **PR:** #12663, #12796
 - **Paths:** see #12663
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`e6b0acd1`; collated from changes/12591-nsx-73-research-report-scoping-a-muscle.md)
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12591-nsx-73-research-report-scoping-a-muscle.md)
 - **Summary:** NSX-73 research report scoping a muscle-redundancy layer above NSX envelopes, with elbow null-space example test
 - **Next step:** Shipped in PR #12663.
 
@@ -2892,10 +3256,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12564
 - **Branch:** merged via #12637
-- **PR:** #12637
+- **PR:** #12637, #12796
 - **Paths:** see #12637
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`d614bc4f`; collated from changes/12564-nsx-21-feasibleset-with-declared-torque.md)
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12564-nsx-21-feasibleset-with-declared-torque.md)
 - **Summary:** NSX-21: FeasibleSet with declared torque, friction-cone and grip constraints in null-space coordinates
 - **Next step:** Shipped in PR #12637.
 
