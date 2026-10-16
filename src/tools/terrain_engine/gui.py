@@ -60,6 +60,34 @@ class TerrainExplorerWidget(QWidget):
 
     def _build_ui(self) -> None:
         colors = _get_theme_colors()
+        text = self._apply_stylesheet(colors)
+
+        root = QVBoxLayout(self)
+        root.setContentsMargins(
+            LayoutMetrics.MARGIN_PAGE,
+            LayoutMetrics.MARGIN_PAGE,
+            LayoutMetrics.MARGIN_PAGE,
+            LayoutMetrics.MARGIN_PAGE,
+        )
+        root.setSpacing(LayoutMetrics.SPACING_MD)
+
+        title = QLabel("Terrain Engine")
+        title.setObjectName("TerrainTitle")
+        title.setStyleSheet(f"font-size: 18px; font-weight: 700; color: {text};")
+        root.addWidget(title)
+
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter.setChildrenCollapsible(False)
+        splitter.setHandleWidth(4)
+        root.addWidget(splitter, 1)
+
+        splitter.addWidget(self._build_controls_panel())
+        self._set_query_controls_enabled(False)
+        splitter.addWidget(self._build_preview_panel())
+        splitter.setSizes([360, 760])
+
+    def _apply_stylesheet(self, colors: Any) -> str:
+        """Apply the themed stylesheet and return the primary text colour."""
         bg = _color(colors, "surface_primary", "#1f2329")
         panel = _color(colors, "surface_secondary", "#252a31")
         border = _color(colors, "border_default", "#3a414a")
@@ -93,26 +121,10 @@ class TerrainExplorerWidget(QWidget):
                 border-radius: 6px;
             }}
         """)
+        return text
 
-        root = QVBoxLayout(self)
-        root.setContentsMargins(
-            LayoutMetrics.MARGIN_PAGE,
-            LayoutMetrics.MARGIN_PAGE,
-            LayoutMetrics.MARGIN_PAGE,
-            LayoutMetrics.MARGIN_PAGE,
-        )
-        root.setSpacing(LayoutMetrics.SPACING_MD)
-
-        title = QLabel("Terrain Engine")
-        title.setObjectName("TerrainTitle")
-        title.setStyleSheet(f"font-size: 18px; font-weight: 700; color: {text};")
-        root.addWidget(title)
-
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.setChildrenCollapsible(False)
-        splitter.setHandleWidth(4)
-        root.addWidget(splitter, 1)
-
+    def _build_controls_panel(self) -> QWidget:
+        """Build the preset and query control column."""
         controls = QWidget()
         controls_layout = QVBoxLayout(controls)
         controls_layout.setContentsMargins(0, 0, 0, 0)
@@ -154,10 +166,10 @@ class TerrainExplorerWidget(QWidget):
         query_form.addRow(self.query_result)
         controls_layout.addWidget(query_group)
         controls_layout.addStretch()
-        splitter.addWidget(controls)
+        return controls
 
-        self._set_query_controls_enabled(False)
-
+    def _build_preview_panel(self) -> QFrame:
+        """Build the summary label and sample table column."""
         preview = QFrame()
         preview_layout = QVBoxLayout(preview)
         preview_layout.setContentsMargins(0, 0, 0, 0)
@@ -174,9 +186,7 @@ class TerrainExplorerWidget(QWidget):
             QTableWidget.SelectionBehavior.SelectRows
         )
         preview_layout.addWidget(self.sample_table, 1)
-
-        splitter.addWidget(preview)
-        splitter.setSizes([360, 760])
+        return preview
 
     def _set_query_controls_enabled(self, enabled: bool) -> None:
         """Enable or disable query surface controls based on terrain loaded state."""

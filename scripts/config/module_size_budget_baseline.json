@@ -2,12 +2,6 @@
   "max_lines": 1200,
   "exceptions": [
     {
-      "path": "src/tools/launch_monitor_analytics/gui.py",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #9470 temporary exception while launch monitor analysis handlers and GUI widgets are decomposed (1646 lines).",
-      "expires_on": "2026-10-31"
-    },
-    {
       "path": "src/shared/python/motion_matching/full_body_forward_dynamics.py",
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "reason": "Issue #10330 temporary exception for consolidated forward dynamics and tracking during HO-1 landing; scheduled for decomposition by controller/simulation domain (1443 lines).",
@@ -22,7 +16,7 @@
     {
       "path": "src/shared/python/motion_matching/pipeline/cli.py",
       "owner": "@dieterolson @D-sorganization/simulation-team",
-      "reason": "Issue #12042 temporary exception while turn metrics, weld projection, and IK restart policies are decomposed from pipeline CLI (1279 lines).",
+      "reason": "Issue #12042 temporary exception while turn metrics, weld projection, and IK restart policies are decomposed from pipeline CLI (1457 lines).",
       "expires_on": "2026-11-30"
     }
   ]

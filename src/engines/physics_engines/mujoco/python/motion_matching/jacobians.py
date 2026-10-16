@@ -195,7 +195,130 @@ def _apply_ctrl_clip(
     return np.clip(ctrl, lo, hi)
 
 
-def compute_qpos_jacobian(  # noqa: C901
+@dataclass(frozen=True)
+class _RolloutContext:
+    """Immutable inputs shared by every substep of a Jacobian rollout.
+
+    ``A`` and ``B`` are the (mutable) scratch matrices owned by the
+    :class:`JacobianCache`; the context only carries references to them.
+    """
+
+    model: Any
+    theta_mat: NDArray[np.float64]
+    t0: float
+    do_clip: bool
+    eps: float
+    flg_centered: int
+    A: NDArray[np.float64]
+    B: NDArray[np.float64]
+
+
+def _coerce_theta_matrix(theta: NDArray[np.float64], nu: int) -> NDArray[np.float64]:
+    """Return ``theta`` as a finite ``(nu, 7)`` matrix or raise ``ValueError``."""
+    n_theta = nu * 7
+    flat = np.asarray(theta, dtype=np.float64)
+    if flat.ndim == 1:
+        if flat.shape[0] != n_theta:
+            raise ValueError(
+                f"flat theta must have length nu*7 = {n_theta}; got {flat.shape[0]}"
+            )
+        theta_mat: NDArray[np.float64] = flat.reshape(nu, 7)
+    elif flat.shape == (nu, 7):
+        theta_mat = flat
+    else:
+        raise ValueError(f"theta must have shape ({nu}, 7); got {flat.shape}")
+    if not np.all(np.isfinite(theta_mat)):
+        raise ValueError("theta must be finite")
+    return theta_mat
+
+
+def _saturation_masked_du_dtheta(
+    model: Any,
+    theta_mat: NDArray[np.float64],
+    t_now: float,
+    do_clip: bool,
+) -> NDArray[np.float64]:
+    """Return ``∂u/∂θ`` at ``t_now`` with saturated actuator rows zeroed.
+
+    If the unclipped ctrl would have hit the box, the row is zero (not
+    strictly true at the boundary, but a reasonable subgradient — and zero
+    measure for any well-conditioned θ on a continuous problem).
+    """
+    nu = int(model.nu)
+    J_u = polynomial_du_dtheta(nu, t_now)
+    if not do_clip:
+        return J_u
+    limited = np.asarray(model.actuator_ctrllimited).astype(bool)
+    if not np.any(limited):
+        return J_u
+    ranges = np.asarray(model.actuator_ctrlrange, dtype=np.float64)
+    raw = _evaluate_polynomial_ctrl(theta_mat, t_now)
+    saturated = (limited & (raw <= ranges[:, 0])) | (limited & (raw >= ranges[:, 1]))
+    if np.any(saturated):
+        J_u = J_u.copy()
+        J_u[saturated, :] = 0.0
+    return J_u
+
+
+def _apply_polynomial_ctrl(
+    model: Any,
+    data: Any,
+    theta_mat: NDArray[np.float64],
+    t_now: float,
+    do_clip: bool,
+) -> None:
+    """Write the (optionally clipped) polynomial torque at ``t_now`` to ``data.ctrl``."""
+    ctrl = _evaluate_polynomial_ctrl(theta_mat, t_now)
+    data.ctrl[:] = _apply_ctrl_clip(ctrl, model, do_clip)
+
+
+def _linearised_substep(
+    ctx: _RolloutContext,
+    data: Any,
+    S: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Linearise at the current ``(x, u)``, propagate ``S`` and advance one step.
+
+    ``mjd_transitionFD`` does NOT advance the simulation — it perturbs and
+    restores state to compute ``A`` and ``B``; the explicit ``mj_step``
+    afterwards advances the actual simulation to match the linearisation.
+    """
+    import mujoco
+
+    model = ctx.model
+    t_now = float(data.time) - ctx.t0
+    _apply_polynomial_ctrl(model, data, ctx.theta_mat, t_now, ctx.do_clip)
+    mujoco.mjd_transitionFD(
+        model, data, ctx.eps, ctx.flg_centered, ctx.A, ctx.B, None, None
+    )
+    J_u = _saturation_masked_du_dtheta(model, ctx.theta_mat, t_now, ctx.do_clip)
+    S = ctx.A @ S + ctx.B @ J_u
+    mujoco.mj_step(model, data)
+    return S
+
+
+def _propagate_sensitivity_to(
+    ctx: _RolloutContext,
+    data: Any,
+    S: NDArray[np.float64],
+    t_target: float,
+    max_substeps: int,
+    frame: int,
+) -> NDArray[np.float64]:
+    """Advance ``data`` to ``t_target`` propagating ``S``; raise on divergence."""
+    substeps = 0
+    while data.time + 1e-12 < t_target and substeps < max_substeps:
+        S = _linearised_substep(ctx, data, S)
+        substeps += 1
+        if not np.all(np.isfinite(data.qpos)) or not np.all(np.isfinite(data.qvel)):
+            raise ValueError(
+                f"rollout diverged at frame {frame}, substep {substeps}; "
+                "θ may be near a stiff edge of the bound box"
+            )
+    return S
+
+
+def compute_qpos_jacobian(
     theta: NDArray[np.float64],
     sim_opts: SimOptions,
     initial_pose: NDArray[np.float64] | None = None,
@@ -240,30 +363,13 @@ def compute_qpos_jacobian(  # noqa: C901
     cache.ensure_model(sim_opts)
     model = cache.model
     data = cache.data
-    A = cache.A
-    B = cache.B
     assert model is not None and data is not None
-    assert A is not None and B is not None
+    assert cache.A is not None and cache.B is not None
 
     nu = int(model.nu)
     nv = int(model.nv)
-    na = int(model.na)
-    nx = 2 * nv + na
     n_theta = nu * 7
-
-    flat = np.asarray(theta, dtype=np.float64)
-    if flat.ndim == 1:
-        if flat.shape[0] != n_theta:
-            raise ValueError(
-                f"flat theta must have length nu*7 = {n_theta}; got {flat.shape[0]}"
-            )
-        theta_mat = flat.reshape(nu, 7)
-    elif flat.shape == (nu, 7):
-        theta_mat = flat
-    else:
-        raise ValueError(f"theta must have shape ({nu}, 7); got {flat.shape}")
-    if not np.all(np.isfinite(theta_mat)):
-        raise ValueError("theta must be finite")
+    theta_mat = _coerce_theta_matrix(theta, nu)
 
     # Reset state for this rollout.
     mujoco.mj_resetData(model, data)
@@ -272,64 +378,159 @@ def compute_qpos_jacobian(  # noqa: C901
 
     t_grid = _output_grid(sim_opts.T_s, sim_opts.output_rate_hz)
     n_out = t_grid.size
+    ctx = _RolloutContext(
+        model=model,
+        theta_mat=theta_mat,
+        t0=float(sim_opts.t0),
+        do_clip=bool(sim_opts.clip_torque_to_ctrlrange),
+        eps=eps,
+        flg_centered=flg_centered,
+        A=cache.A,
+        B=cache.B,
+    )
+    max_substeps = int(np.ceil(sim_opts.T_s / model.opt.timestep) + 16)
 
     # S[k] = ∂x / ∂θ at output frame k. Initial state independent of θ.
     out_dq_dtheta = np.zeros((n_out, nv, n_theta), dtype=np.float64)
-    S = np.zeros((nx, n_theta), dtype=np.float64)
+    S: NDArray[np.float64] = np.zeros(
+        (2 * nv + int(model.na), n_theta), dtype=np.float64
+    )
     out_dq_dtheta[0] = S[:nv, :]
-
-    do_clip = bool(sim_opts.clip_torque_to_ctrlrange)
-    t0 = float(sim_opts.t0)
-    max_substeps = int(np.ceil(sim_opts.T_s / model.opt.timestep) + 16)
-
     for k in range(1, n_out):
-        t_target = float(t_grid[k])
-        substeps = 0
-        while data.time + 1e-12 < t_target and substeps < max_substeps:
-            t_now = float(data.time) - t0
-            ctrl = _evaluate_polynomial_ctrl(theta_mat, t_now)
-            ctrl = _apply_ctrl_clip(ctrl, model, do_clip)
-            data.ctrl[:] = ctrl
-
-            # Linearise around the current (x, u). mjd_transitionFD does
-            # NOT advance the simulation — it perturbs and restores state
-            # to compute A and B; we still need an explicit mj_step.
-            mujoco.mjd_transitionFD(model, data, eps, flg_centered, A, B, None, None)
-
-            # ∂u / ∂θ at the linearisation time. If the unclipped ctrl
-            # would have hit the box, the row is zero (not strictly true
-            # at the boundary, but a reasonable subgradient — and zero
-            # measure for any well-conditioned θ on a continuous problem).
-            J_u = polynomial_du_dtheta(nu, t_now)
-            if do_clip:
-                limited = np.asarray(model.actuator_ctrllimited).astype(bool)
-                if np.any(limited):
-                    ranges = np.asarray(model.actuator_ctrlrange, dtype=np.float64)
-                    raw = _evaluate_polynomial_ctrl(theta_mat, t_now)
-                    at_lo = limited & (raw <= ranges[:, 0])
-                    at_hi = limited & (raw >= ranges[:, 1])
-                    saturated = at_lo | at_hi
-                    if np.any(saturated):
-                        J_u = J_u.copy()
-                        J_u[saturated, :] = 0.0
-
-            S = A @ S + B @ J_u
-
-            # Now advance the actual simulation to match the linearisation.
-            mujoco.mj_step(model, data)
-
-            substeps += 1
-            if not np.all(np.isfinite(data.qpos)) or not np.all(np.isfinite(data.qvel)):
-                raise ValueError(
-                    f"rollout diverged at frame {k}, substep {substeps}; "
-                    "θ may be near a stiff edge of the bound box"
-                )
+        S = _propagate_sensitivity_to(ctx, data, S, float(t_grid[k]), max_substeps, k)
         out_dq_dtheta[k] = S[:nv, :]
 
     return out_dq_dtheta
 
 
 # --- Cost gradient via analytical dq/dθ -------------------------------------
+
+
+@dataclass
+class _BodyTrack:
+    """Grip / clubhead world positions and translational Jacobians per frame."""
+
+    grip_pos: NDArray[np.float64]
+    head_pos: NDArray[np.float64]
+    grip_jac_p: NDArray[np.float64]
+    head_jac_p: NDArray[np.float64]
+
+    @classmethod
+    def allocate(cls, n_out: int, nv: int) -> _BodyTrack:
+        """Allocate zeroed tracks for ``n_out`` frames and ``nv`` dofs."""
+        if n_out <= 0 or nv <= 0:
+            raise ValueError(f"n_out and nv must be > 0; got {n_out}, {nv}")
+        return cls(
+            grip_pos=np.zeros((n_out, 3), dtype=np.float64),
+            head_pos=np.zeros((n_out, 3), dtype=np.float64),
+            grip_jac_p=np.zeros((n_out, 3, nv), dtype=np.float64),
+            head_jac_p=np.zeros((n_out, 3, nv), dtype=np.float64),
+        )
+
+    def record(self, k: int, model: Any, data: Any, cache: JacobianCache) -> None:
+        """Store body positions and ``mj_jacBody`` Jacobians for frame ``k``."""
+        import mujoco
+
+        jp = np.zeros((3, int(model.nv)), dtype=np.float64)
+        self.grip_pos[k] = data.xpos[cache.grip_bid]
+        self.head_pos[k] = data.xpos[cache.head_bid]
+        mujoco.mj_jacBody(model, data, jp, None, cache.grip_bid)
+        self.grip_jac_p[k] = jp
+        mujoco.mj_jacBody(model, data, jp, None, cache.head_bid)
+        self.head_jac_p[k] = jp
+
+
+def _walk_body_track(
+    cache: JacobianCache,
+    sim_opts: SimOptions,
+    initial_pose: NDArray[np.float64] | None,
+    theta_mat: NDArray[np.float64],
+    n_out: int,
+) -> _BodyTrack:
+    """Re-walk the rollout recording body positions and Jacobians per frame.
+
+    Re-uses the cache's model and a *separate* ``MjData`` so the
+    linearisation walk is not disturbed.
+    """
+    import mujoco
+
+    model = cache.model
+    data_walk = mujoco.MjData(model)
+    _apply_initial_pose(data_walk, initial_pose, model.nq)
+    mujoco.mj_forward(model, data_walk)
+
+    track = _BodyTrack.allocate(n_out, int(model.nv))
+    track.record(0, model, data_walk, cache)
+
+    t0 = float(sim_opts.t0)
+    t_grid = _output_grid(sim_opts.T_s, sim_opts.output_rate_hz)
+    do_clip = bool(sim_opts.clip_torque_to_ctrlrange)
+    max_substeps = int(np.ceil(sim_opts.T_s / model.opt.timestep) + 16)
+
+    for k in range(1, n_out):
+        t_target = float(t_grid[k])
+        substeps = 0
+        while data_walk.time + 1e-12 < t_target and substeps < max_substeps:
+            t_now = float(data_walk.time) - t0
+            _apply_polynomial_ctrl(model, data_walk, theta_mat, t_now, do_clip)
+            mujoco.mj_step(model, data_walk)
+            substeps += 1
+        track.record(k, model, data_walk, cache)
+    return track
+
+
+def _assemble_cost_gradient(
+    track: _BodyTrack,
+    dq_dtheta: NDArray[np.float64],
+    target: Any,
+    cost_opts: Any,
+    flat_theta: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Assemble ``∂J/∂θ`` from the body tracks and ``∂q/∂θ``.
+
+    The cost is mean over frames, so the accumulator is divided by N at
+    the end.
+
+    Position term (mean over frames):
+      J_pos = w_pos / N · Σ_k (||grip - g*||^2 + ||head - h*||^2)
+      ∂J_pos / ∂θ = 2*w_pos/N · Σ_k [
+          (grip - g*)^T (Jp_grip @ dq/dθ_k)
+        + (head - h*)^T (Jp_head @ dq/dθ_k)
+      ]
+    """
+    n_out = dq_dtheta.shape[0]
+    target_grip = np.asarray(target.butt, dtype=np.float64)
+    target_head = np.asarray(target.clubhead, dtype=np.float64)
+    if target_grip.shape != (n_out, 3) or target_head.shape != (n_out, 3):
+        raise ValueError(
+            f"target shapes {target_grip.shape}/{target_head.shape} do not "
+            f"match rollout length {n_out}"
+        )
+    grad = np.zeros(flat_theta.size, dtype=np.float64)
+    w_pos = float(cost_opts.w_position)
+    for k in range(n_out):
+        # dgrip/dθ = Jp_grip @ dq/dθ  (3 x n_theta)
+        d_grip = track.grip_jac_p[k] @ dq_dtheta[k]
+        d_head = track.head_jac_p[k] @ dq_dtheta[k]
+        diff_g = track.grip_pos[k] - target_grip[k]
+        diff_h = track.head_pos[k] - target_head[k]
+        grad += diff_g @ d_grip
+        grad += diff_h @ d_head
+    grad *= 2.0 * w_pos / n_out
+
+    # Impact-anchor term (only at impact_idx-1 in 0-based):
+    #   J_anc = w_anc · ||head[k_imp] - target_head[k_imp]||^2
+    #   ∂J_anc / ∂θ = 2*w_anc · (head - target_head) · Jp_head · dq/dθ
+    k_imp = int(target.impact_idx) - 1
+    if 0 <= k_imp < n_out:
+        d_head_imp = track.head_jac_p[k_imp] @ dq_dtheta[k_imp]
+        diff_imp = track.head_pos[k_imp] - target_head[k_imp]
+        grad += 2.0 * float(cost_opts.w_anchor_impact) * (diff_imp @ d_head_imp)
+
+    # coeff_l2 regularizer: closed form. ∂(λ θ^T θ)/∂θ = 2 λ θ.
+    if getattr(cost_opts, "regularizer", "") == "coeff_l2":
+        grad += 2.0 * float(cost_opts.lambda_) * flat_theta
+    return grad
 
 
 def compute_cost_gradient_analytical(
@@ -371,17 +572,12 @@ def compute_cost_gradient_analytical(
     Returns:
         ``(n_theta,)`` gradient vector.
     """
-    import mujoco
-
     if cache is None:
         cache = JacobianCache()
     cache.ensure_model(sim_opts)
-    model = cache.model
-    data = cache.data
-    assert model is not None and data is not None
+    assert cache.model is not None and cache.data is not None
 
-    nv = int(model.nv)
-    nu = int(model.nu)
+    nu = int(cache.model.nu)
     n_theta = nu * 7
 
     flat = np.asarray(theta, dtype=np.float64).reshape(-1)
@@ -392,92 +588,11 @@ def compute_cost_gradient_analytical(
     dq_dtheta = compute_qpos_jacobian(
         flat, sim_opts, initial_pose=initial_pose, cache=cache
     )
-    n_out = dq_dtheta.shape[0]
 
-    # 2. Re-walk the rollout to evaluate body positions and the
-    # body Jacobians at each output frame. We re-use the cache's model
-    # and a *separate* mjData to avoid disturbing the linearisation walk.
-    data_walk = mujoco.MjData(model)
-    _apply_initial_pose(data_walk, initial_pose, model.nq)
-    mujoco.mj_forward(model, data_walk)
+    # 2. Re-walk the rollout for body positions and body Jacobians.
+    track = _walk_body_track(
+        cache, sim_opts, initial_pose, flat.reshape(nu, 7), dq_dtheta.shape[0]
+    )
 
-    grip_bid = cache.grip_bid
-    head_bid = cache.head_bid
-    grip_pos = np.zeros((n_out, 3), dtype=np.float64)
-    head_pos = np.zeros((n_out, 3), dtype=np.float64)
-    grip_jac_p = np.zeros((n_out, 3, nv), dtype=np.float64)
-    head_jac_p = np.zeros((n_out, 3, nv), dtype=np.float64)
-
-    grip_pos[0] = data_walk.xpos[grip_bid]
-    head_pos[0] = data_walk.xpos[head_bid]
-    jp = np.zeros((3, nv), dtype=np.float64)
-    mujoco.mj_jacBody(model, data_walk, jp, None, grip_bid)
-    grip_jac_p[0] = jp.copy()
-    mujoco.mj_jacBody(model, data_walk, jp, None, head_bid)
-    head_jac_p[0] = jp.copy()
-
-    theta_mat = flat.reshape(nu, 7)
-    t0 = float(sim_opts.t0)
-    t_grid = _output_grid(sim_opts.T_s, sim_opts.output_rate_hz)
-    do_clip = bool(sim_opts.clip_torque_to_ctrlrange)
-    max_substeps = int(np.ceil(sim_opts.T_s / model.opt.timestep) + 16)
-
-    for k in range(1, n_out):
-        t_target = float(t_grid[k])
-        substeps = 0
-        while data_walk.time + 1e-12 < t_target and substeps < max_substeps:
-            t_now = float(data_walk.time) - t0
-            ctrl = _evaluate_polynomial_ctrl(theta_mat, t_now)
-            ctrl = _apply_ctrl_clip(ctrl, model, do_clip)
-            data_walk.ctrl[:] = ctrl
-            mujoco.mj_step(model, data_walk)
-            substeps += 1
-        grip_pos[k] = data_walk.xpos[grip_bid]
-        head_pos[k] = data_walk.xpos[head_bid]
-        mujoco.mj_jacBody(model, data_walk, jp, None, grip_bid)
-        grip_jac_p[k] = jp.copy()
-        mujoco.mj_jacBody(model, data_walk, jp, None, head_bid)
-        head_jac_p[k] = jp.copy()
-
-    # 3. Assemble gradient. The cost is mean over frames, so the
-    # accumulator is divided by N at the end.
-    #
-    # Position term (mean over frames):
-    #   J_pos = w_pos / N · Σ_k (||grip - g*||^2 + ||head - h*||^2)
-    #   ∂J_pos / ∂θ = 2*w_pos/N · Σ_k [
-    #       (grip - g*)^T (Jp_grip @ dq/dθ_k)
-    #     + (head - h*)^T (Jp_head @ dq/dθ_k)
-    #   ]
-    target_grip = np.asarray(target.butt, dtype=np.float64)
-    target_head = np.asarray(target.clubhead, dtype=np.float64)
-    if target_grip.shape != (n_out, 3) or target_head.shape != (n_out, 3):
-        raise ValueError(
-            f"target shapes {target_grip.shape}/{target_head.shape} do not "
-            f"match rollout length {n_out}"
-        )
-    grad = np.zeros(n_theta, dtype=np.float64)
-    w_pos = float(cost_opts.w_position)
-    for k in range(n_out):
-        # dgrip/dθ = Jp_grip @ dq/dθ  (3 x n_theta)
-        d_grip = grip_jac_p[k] @ dq_dtheta[k]
-        d_head = head_jac_p[k] @ dq_dtheta[k]
-        diff_g = grip_pos[k] - target_grip[k]
-        diff_h = head_pos[k] - target_head[k]
-        grad += diff_g @ d_grip
-        grad += diff_h @ d_head
-    grad *= 2.0 * w_pos / n_out
-
-    # Impact-anchor term (only at impact_idx-1 in 0-based):
-    #   J_anc = w_anc · ||head[k_imp] - target_head[k_imp]||^2
-    #   ∂J_anc / ∂θ = 2*w_anc · (head - target_head) · Jp_head · dq/dθ
-    k_imp = int(target.impact_idx) - 1
-    if 0 <= k_imp < n_out:
-        d_head_imp = head_jac_p[k_imp] @ dq_dtheta[k_imp]
-        diff_imp = head_pos[k_imp] - target_head[k_imp]
-        grad += 2.0 * float(cost_opts.w_anchor_impact) * (diff_imp @ d_head_imp)
-
-    # coeff_l2 regularizer: closed form. ∂(λ θ^T θ)/∂θ = 2 λ θ.
-    if getattr(cost_opts, "regularizer", "") == "coeff_l2":
-        grad += 2.0 * float(cost_opts.lambda_) * flat
-
-    return grad
+    # 3. Assemble the gradient.
+    return _assemble_cost_gradient(track, dq_dtheta, target, cost_opts, flat)

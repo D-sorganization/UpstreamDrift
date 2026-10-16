@@ -9,6 +9,7 @@ by the GUI and analysis code.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 import numpy as np
 
@@ -33,7 +34,7 @@ from .physics import (
     net_joint_forces,
     potential_energy,
 )
-from .simulation_core import integrate_ode
+from .simulation_core import SimulationConfig, integrate_ode
 from .simulation_result_base import TrajectoryResultMixin
 from .validation import (
     require,
@@ -166,6 +167,8 @@ class SimulationResult(TrajectoryResultMixin):
 # Simulation runner
 # ---------------------------------------------------------------------------
 
+_DOUBLE_SETTINGS = frozenset({"limits", "clamp", "coeffs", "n_coeffs_per_joint"})
+
 
 def run_simulation(
     params: PendulumParams,
@@ -174,16 +177,23 @@ def run_simulation(
     torque_func: TorqueFunc,
     dt: float = 0.005,
     method: str = "RK45",
-    limits: JointLimits | None = None,
-    clamp: TorqueClamp | None = None,
-    coeffs: list[float] | None = None,
-    n_coeffs_per_joint: int | None = None,
+    config: SimulationConfig | None = None,
+    **overrides: Any,
 ) -> SimulationResult:
     """Integrate the double pendulum equations of motion.
+
+    Optional settings (``limits``, ``clamp``, ``coeffs``,
+    ``n_coeffs_per_joint``) travel in a shared :class:`SimulationConfig`;
+    they may also be passed as keyword arguments (backward compatible).
 
     Pre: initial_state shape (4,), finite. t_end > 0. dt in (0, t_end).
     Post: result has >= 2 time points, all finite.
     """
+    cfg = SimulationConfig.resolve(config, overrides, _DOUBLE_SETTINGS)
+    limits: JointLimits | None = cfg.limits
+    clamp: TorqueClamp | None = cfg.clamp
+    coeffs = cfg.coeffs
+    n_coeffs_per_joint = cfg.n_coeffs_per_joint
     require_shape("Initial state", initial_state, (4,))
     require_finite_array("Initial state", initial_state)
     require_positive("t_end", t_end)

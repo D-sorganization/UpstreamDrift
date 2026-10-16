@@ -35,7 +35,6 @@ from __future__ import annotations
 import logging
 import time as _time
 from dataclasses import dataclass, field
-from math import comb
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -43,7 +42,6 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.core.contracts.decorators import postcondition, precondition
-from src.shared.python.math_utils.quaternion import rotmat_to_quat
 from src.shared.python.motion_matching.output_time_grid import build_output_grid
 from src.shared.python.motion_matching.polynomial_torque import (
     COEFFS_PER_JOINT,
@@ -56,6 +54,22 @@ from src.shared.python.motion_matching.polynomial_torque import (
 )
 from src.shared.python.motion_matching.validate_theta import validate_theta
 
+from ._simout_build import normalize_simout_args
+from ._simulate_support import (
+    RolloutConfig,
+    allocate_logs,
+    apply_initial_pose,
+    assert_finite_on_success,
+    check_initial_pose_type,
+    check_theta_matches_actuators,
+    evaluate_bernstein_torque,
+    finite_difference_qdd,
+    normalize_theta,
+)
+from ._simulate_support import (
+    build_polynomial_torque_system as _build_polynomial_torque_system,
+)
+from ._simulate_support import record_rollout as _record_rollout
 from .humanoid_urdf import CANONICAL_URDF, load_humanoid_into_plant
 
 if TYPE_CHECKING:  # pragma: no cover - import-time only
@@ -116,47 +130,6 @@ def is_drake_available() -> bool:
 # ---------------------------------------------------------------------------
 # Polynomial & Quaternion helpers
 # ---------------------------------------------------------------------------
-
-
-def evaluate_bernstein_torque(
-    coeffs: NDArray[np.float64],
-    t: float,
-    T_s: float = 1.0,
-    t0: float = 0.0,
-) -> NDArray[np.float64]:
-    """Evaluate per-joint degree-6 torques in Bernstein polynomial basis.
-
-    tau_j(t) = sum_{k=0}^6 c_{j,k} B_{k,6}((t - t0) / T_s)
-    where B_{k,6}(s) = comb(6, k) * s^k * (1 - s)^(6 - k).
-
-    Args:
-        coeffs: 2D array of shape ``(n_joints, 7)`` containing control points.
-        t: Time in seconds.
-        T_s: Horizon duration in seconds.
-        t0: Time offset in seconds.
-
-    Returns:
-        1D array of shape ``(n_joints,)`` with applied torques at time ``t``.
-    """
-    coeffs_arr = np.asarray(coeffs, dtype=np.float64)
-    if coeffs_arr.ndim != 2:
-        raise ValueError(f"coeffs must be 2D (n_joints, 7); got ndim={coeffs_arr.ndim}")
-    if coeffs_arr.shape[1] != COEFFS_PER_JOINT:
-        raise ValueError(
-            f"coeffs must have {COEFFS_PER_JOINT} columns; got shape {coeffs_arr.shape}"
-        )
-    if not np.isfinite(t):
-        raise ValueError(f"t must be finite, got {t!r}")
-    if T_s <= 0.0:
-        raise ValueError(f"T_s must be positive, got {T_s!r}")
-
-    s = (t - t0) / T_s
-    k_vals = np.arange(COEFFS_PER_JOINT, dtype=np.float64)
-    b_weights = np.array(
-        [comb(POLY_DEGREE, k) for k in range(COEFFS_PER_JOINT)], dtype=np.float64
-    )
-    basis = b_weights * (s**k_vals) * ((1.0 - s) ** (POLY_DEGREE - k_vals))
-    return coeffs_arr @ basis
 
 
 def _quat_to_rotmat_series(quats: NDArray[np.float64]) -> NDArray[np.float64]:
@@ -278,7 +251,7 @@ class SimOptions:
         object.__setattr__(self, "gravity", g_arr)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, init=False)
 class SimOut:
     """Canonical forward-sim output (cross-engine §2.2 & Simscape contract).
 
@@ -305,138 +278,14 @@ class SimOut:
     )
     meta: dict[str, Any] = field(default_factory=dict)
 
-    def __init__(
-        self,
-        time: NDArray[np.float64] | None = None,
-        q: NDArray[np.float64] | None = None,
-        qd: NDArray[np.float64] | None = None,
-        qdd: NDArray[np.float64] | None = None,
-        tau: NDArray[np.float64] | None = None,
-        grip: NDArray[np.float64] | None = None,
-        grip_quat: NDArray[np.float64] | None = None,
-        clubhead: NDArray[np.float64] | None = None,
-        club_quat: NDArray[np.float64] | None = None,
-        solver_status: str = "success",
-        duration_s: float = 0.0,
-        kinetic_energy: NDArray[np.float64] | None = None,
-        potential_energy: NDArray[np.float64] | None = None,
-        meta: dict[str, Any] | None = None,
-        *,
-        metadata: dict[str, Any] | None = None,
-        t: NDArray[np.float64] | None = None,
-        grip_position: NDArray[np.float64] | None = None,
-        grip_rotation: NDArray[np.float64] | None = None,
-        clubhead_position: NDArray[np.float64] | None = None,
-        clubhead_rotation: NDArray[np.float64] | None = None,
-    ) -> None:
-        t_arr = time if time is not None else t
-        if t_arr is None:
-            raise ValueError("Either 'time' or 't' must be provided")
-        t_vec = np.asarray(t_arr, dtype=np.float64)
-        if t_vec.ndim != 1:
-            msg = f"SimOut.time must be 1-D; got shape {t_vec.shape}"
-            raise ValueError(msg)
-        n = t_vec.shape[0]
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Accept the canonical fields plus the legacy keyword aliases.
 
-        def _as_2d_buffer(val: Any, default_cols: int) -> NDArray[np.float64]:
-            if val is not None:
-                return np.asarray(val, dtype=np.float64)
-            return np.zeros((n, default_cols), dtype=np.float64)
-
-        q_mat = _as_2d_buffer(q, 0)
-        qd_mat = _as_2d_buffer(qd, 0)
-        nv = qd_mat.shape[1] if qd_mat.ndim == 2 else 0
-        qdd_mat = _as_2d_buffer(qdd, nv)
-        tau_mat = _as_2d_buffer(tau, nv)
-
-        grip_mat = grip if grip is not None else grip_position
-        if grip_mat is None:
-            grip_mat = np.full((n, 3), np.nan, dtype=np.float64)
-        else:
-            grip_mat = np.asarray(grip_mat, dtype=np.float64)
-
-        if grip_quat is not None:
-            g_quat = np.asarray(grip_quat, dtype=np.float64)
-        elif grip_rotation is not None:
-            g_quat = rotmat_to_quat(np.asarray(grip_rotation, dtype=np.float64))
-        else:
-            g_quat = np.full((n, 4), np.nan, dtype=np.float64)
-
-        head_mat = clubhead if clubhead is not None else clubhead_position
-        if head_mat is None:
-            head_mat = np.full((n, 3), np.nan, dtype=np.float64)
-        else:
-            head_mat = np.asarray(head_mat, dtype=np.float64)
-
-        if club_quat is not None:
-            c_quat = np.asarray(club_quat, dtype=np.float64)
-        elif clubhead_rotation is not None:
-            c_quat = rotmat_to_quat(np.asarray(clubhead_rotation, dtype=np.float64))
-        else:
-            c_quat = np.full((n, 4), np.nan, dtype=np.float64)
-
-        for name, arr, cols in [
-            ("q", q_mat, None),
-            ("qd", qd_mat, None),
-            ("qdd", qdd_mat, None),
-            ("tau", tau_mat, None),
-            ("grip", grip_mat, 3),
-            ("grip_quat", g_quat, 4),
-            ("clubhead", head_mat, 3),
-            ("club_quat", c_quat, 4),
-        ]:
-            if arr.ndim != 2 or arr.shape[0] != n:
-                msg = f"SimOut.{name} must have shape (N={n}, ...); got {arr.shape}"
-                raise ValueError(msg)
-            if cols is not None and arr.shape[1] != cols:
-                msg = f"SimOut.{name} must have shape (N, {cols}); got {arr.shape}"
-                raise ValueError(msg)
-
-        if solver_status not in {"success", "warning", "failed", "partial"}:
-            msg = (
-                "SimOut.solver_status must be 'success' / 'warning' / 'failed' / 'partial'; "
-                f"got {solver_status!r}"
-            )
-            raise ValueError(msg)
-
-        def _as_1d_energy(val: Any) -> NDArray[np.float64]:
-            if val is not None:
-                return np.asarray(val, dtype=np.float64)
-            return np.full(n, np.nan, dtype=np.float64)
-
-        ke_vec = _as_1d_energy(kinetic_energy)
-        pe_vec = _as_1d_energy(potential_energy)
-        if ke_vec.ndim != 1 or ke_vec.shape[0] != n:
-            raise ValueError(
-                f"SimOut.kinetic_energy must have shape ({n},); got {ke_vec.shape}"
-            )
-        if pe_vec.ndim != 1 or pe_vec.shape[0] != n:
-            raise ValueError(
-                f"SimOut.potential_energy must have shape ({n},); got {pe_vec.shape}"
-            )
-
-        meta_dict = (
-            meta if meta is not None else (metadata if metadata is not None else {})
-        )
-
-        sim_fields = {
-            "time": t_vec,
-            "q": q_mat,
-            "qd": qd_mat,
-            "qdd": qdd_mat,
-            "tau": tau_mat,
-            "grip": grip_mat,
-            "grip_quat": g_quat,
-            "clubhead": head_mat,
-            "club_quat": c_quat,
-            "solver_status": solver_status,
-            "duration_s": float(duration_s),
-            "kinetic_energy": ke_vec,
-            "potential_energy": pe_vec,
-            "meta": meta_dict,
-        }
-        for field_name, field_val in sim_fields.items():
-            object.__setattr__(self, field_name, field_val)
+        The accepted signature is ``_simout_build.SIMOUT_SIGNATURE``; omitted
+        pose / energy arrays are NaN-filled and every array is shape-checked.
+        """
+        for name, value in normalize_simout_args(args, kwargs).items():
+            object.__setattr__(self, name, value)
 
     @property
     def t(self) -> NDArray[np.float64]:
@@ -505,90 +354,6 @@ evaluate_polynomial_torque = evaluate_torque_polynomial
 # ---------------------------------------------------------------------------
 
 
-def _build_polynomial_torque_system(
-    theta: NDArray[np.float64],
-    n_actuators: int,
-    basis: str = "power",
-    T_s: float = 1.0,
-    t0: float = 0.0,
-) -> Any:
-    """Build a Drake ``LeafSystem`` that emits the polynomial torque."""
-    # Explicit import per CLAUDE.md.
-    from pydrake.systems.framework import BasicVector, LeafSystem  # noqa: PLC0415
-
-    coeffs = np.ascontiguousarray(theta, dtype=np.float64).reshape(
-        n_actuators, COEFFS_PER_JOINT
-    )
-
-    class _PolynomialTorqueSource(LeafSystem):
-        """Stateflow-equivalent per-joint continuous torque polynomial."""
-
-        def __init__(self) -> None:
-            LeafSystem.__init__(self)
-            self._coeffs = coeffs
-            self._n = n_actuators
-            self._basis = basis
-            self._T_s = T_s
-            self._t0 = t0
-            self.DeclareVectorOutputPort(
-                "tau",
-                BasicVector(n_actuators),
-                self._calc_output,
-            )
-
-        def _calc_output(self, context: Any, output: Any) -> None:
-            t = float(context.get_time())
-            if self._basis == "bernstein":
-                tau = evaluate_bernstein_torque(
-                    self._coeffs, t, T_s=self._T_s, t0=self._t0
-                )
-            else:
-                tau = _evaluate_polynomial_torque_matrix(self._coeffs, t - self._t0)
-            output.SetFromVector(tau)
-
-    return _PolynomialTorqueSource()
-
-
-def _resolve_world_pose(
-    plant: MultibodyPlant,
-    plant_context: Any,
-    body_name: str,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]] | None:
-    """Forward-kinematics: return ``(position, quaternion[w,x,y,z])`` for ``body_name``."""
-    target_name = body_name
-    if not hasattr(plant, "HasBodyNamed") or not bool(plant.HasBodyNamed(target_name)):
-        candidates: list[str] = []
-        if target_name in ("club_grip", "grip"):
-            candidates = ["mid_hands", "grip", "right_hand"]
-        elif target_name in ("clubhead", "club_head"):
-            candidates = ["club_head", "club_shaft"]
-        elif target_name in ("mid_hands",):
-            candidates = ["club_grip", "grip"]
-
-        found = False
-        for c in candidates:
-            if hasattr(plant, "HasBodyNamed") and bool(plant.HasBodyNamed(c)):
-                target_name = c
-                found = True
-                break
-        if not found:
-            return None
-
-    body = plant.GetBodyByName(target_name)
-    transform = plant.CalcRelativeTransform(
-        plant_context,
-        plant.world_frame(),
-        body.body_frame(),
-    )
-    pos = np.asarray(transform.translation(), dtype=np.float64)
-    quat = transform.rotation().ToQuaternion()
-    # Drake quaternion exposes w, x, y, z scalars.
-    quat_arr = np.array([quat.w(), quat.x(), quat.y(), quat.z()], dtype=np.float64)
-    if pos.shape != (3,) or quat_arr.shape != (4,):
-        return None
-    return pos, quat_arr
-
-
 def _sample_grid(
     simulation_time_s: float, sample_rate_hz: float
 ) -> NDArray[np.float64]:
@@ -607,124 +372,109 @@ def _resolve_n_actuators(plant: MultibodyPlant) -> int:
     return max(nv - 6, 0)
 
 
-@dataclass
-class _RolloutResult:
-    """Outcome of stepping the Drake simulator over the output time grid."""
+@dataclass(frozen=True)
+class _PydrakeApi:
+    """The pydrake entry points ``simulate_with_coefficients`` needs."""
 
-    solver_status: str
-    error: BaseException | None
-
-
-@dataclass
-class _RolloutLogs:
-    """Pre-allocated, NaN-filled output buffers mutated in place per step."""
-
-    q: NDArray[np.float64]
-    v: NDArray[np.float64]
-    tau: NDArray[np.float64]
-    grip: NDArray[np.float64]
-    grip_quat: NDArray[np.float64]
-    clubhead: NDArray[np.float64]
-    club_quat: NDArray[np.float64]
-    kinetic_energy: NDArray[np.float64]
-    potential_energy: NDArray[np.float64]
+    add_plant: Any
+    simulator_cls: Any
+    builder_cls: Any
+    log_sink_cls: Any
 
 
-def _record_rollout(
-    *,
-    simulator: Any,
-    plant: MultibodyPlant,
-    grid: NDArray[np.float64],
-    theta: NDArray[np.float64],
-    n_actuators: int,
-    grip_body_name: str,
-    clubhead_body_name: str,
-    logs: _RolloutLogs,
-    basis: str = "power",
-    T_s: float = 1.0,
-    t0: float = 0.0,
-    compute_energy: bool = True,
-) -> _RolloutResult:
-    """Step the simulator over ``grid`` and record state / torque / FK logs."""
-    coeffs = (
-        theta.reshape(n_actuators, COEFFS_PER_JOINT)
-        if n_actuators > 0
-        else np.zeros((0, COEFFS_PER_JOINT), dtype=np.float64)
+def _import_pydrake() -> _PydrakeApi:
+    """Lazily import pydrake (explicit ``from pydrake.X import Y`` per CLAUDE.md)."""
+    try:
+        from pydrake.multibody.plant import (  # noqa: PLC0415
+            AddMultibodyPlantSceneGraph,
+        )
+        from pydrake.systems.analysis import Simulator  # noqa: PLC0415
+        from pydrake.systems.framework import DiagramBuilder  # noqa: PLC0415
+        from pydrake.systems.primitives import (  # noqa: PLC0415
+            VectorLogSink,
+        )
+    except ImportError as exc:
+        msg = (
+            "Drake runtime (pydrake) is required for "
+            "simulate_with_coefficients. Install via pydrake or Drake container."
+        )
+        raise ImportError(msg) from exc
+    return _PydrakeApi(
+        add_plant=AddMultibodyPlantSceneGraph,
+        simulator_cls=Simulator,
+        builder_cls=DiagramBuilder,
+        log_sink_cls=VectorLogSink,
     )
-    has_partial = False
-    for idx, t_target in enumerate(grid):
-        if t_target > 0.0:
-            try:
-                simulator.AdvanceTo(float(t_target))
-            except RuntimeError as exc:
-                logger.exception(
-                    "Drake AdvanceTo diverged at t=%.6f s (step %d/%d)",
-                    float(t_target),
-                    idx,
-                    len(grid),
-                )
-                return _RolloutResult(solver_status="failed", error=exc)
 
-        ctx = simulator.get_context()
-        plant_ctx = plant.GetMyContextFromRoot(ctx)
 
-        logs.q[idx, :] = plant.GetPositions(plant_ctx)
-        logs.v[idx, :] = plant.GetVelocities(plant_ctx)
-        if n_actuators > 0:
-            if basis == "bernstein":
-                logs.tau[idx, :] = evaluate_bernstein_torque(
-                    coeffs, float(t_target), T_s=T_s, t0=t0
-                )
-            else:
-                logs.tau[idx, :] = _evaluate_polynomial_torque_matrix(
-                    coeffs, float(t_target) - t0
-                )
+def _build_plant(api: _PydrakeApi, opts: SimOptions) -> tuple[Any, Any, Path | str]:
+    """Create the builder + finalized plant with the humanoid loaded."""
+    builder = api.builder_cls()
+    plant, _scene_graph = api.add_plant(builder, opts.time_step_s)
+    if opts.gravity is not None and hasattr(plant, "mutable_gravity_field"):
+        plant.mutable_gravity_field().set_gravity_vector(
+            np.asarray(opts.gravity, dtype=np.float64)
+        )
+    urdf_path = (
+        opts.urdf_path
+        if opts.urdf_path is not None
+        else (DEFAULT_GOLFER_URDF if DEFAULT_GOLFER_URDF.exists() else CANONICAL_URDF)
+    )
+    load_humanoid_into_plant(plant, urdf_path)
+    plant.Finalize()
+    return builder, plant, urdf_path
 
-        grip_pose = _resolve_world_pose(plant, plant_ctx, grip_body_name)
-        if grip_pose is not None:
-            logs.grip[idx, :], logs.grip_quat[idx, :] = grip_pose
-        else:
-            has_partial = True
 
-        club_pose = _resolve_world_pose(plant, plant_ctx, clubhead_body_name)
-        if club_pose is not None:
-            logs.clubhead[idx, :], logs.club_quat[idx, :] = club_pose
-        else:
-            has_partial = True
+def _wire_actuation_and_logger(
+    api: _PydrakeApi,
+    builder: Any,
+    plant: Any,
+    theta: NDArray[np.float64],
+    opts: SimOptions,
+) -> None:
+    """Add the polynomial-torque source, connect it, and add the state logger."""
+    n_actuators = _resolve_n_actuators(plant)
+    torque_source = _build_polynomial_torque_system(
+        theta,
+        n_actuators,
+        basis=opts.basis,
+        T_s=opts.simulation_time_s,
+        t0=opts.t0,
+    )
+    builder.AddSystem(torque_source)
 
-        if compute_energy:
-            if hasattr(plant, "CalcKineticEnergy"):
-                try:
-                    val = float(plant.CalcKineticEnergy(plant_ctx))
-                    if np.isfinite(val):
-                        logs.kinetic_energy[idx] = val
-                    else:
-                        logs.kinetic_energy[idx] = np.nan
-                        has_partial = True
-                except (TypeError, ValueError):
-                    logs.kinetic_energy[idx] = np.nan
-                    has_partial = True
-            else:
-                logs.kinetic_energy[idx] = np.nan
-                has_partial = True
+    actuation_port = (
+        plant.get_actuation_input_port()
+        if hasattr(plant, "get_actuation_input_port")
+        else None
+    )
+    if actuation_port is not None and plant.num_actuators() == n_actuators:
+        builder.Connect(torque_source.get_output_port(0), actuation_port)
 
-            if hasattr(plant, "CalcPotentialEnergy"):
-                try:
-                    val = float(plant.CalcPotentialEnergy(plant_ctx))
-                    if np.isfinite(val):
-                        logs.potential_energy[idx] = val
-                    else:
-                        logs.potential_energy[idx] = np.nan
-                        has_partial = True
-                except (TypeError, ValueError):
-                    logs.potential_energy[idx] = np.nan
-                    has_partial = True
-            else:
-                logs.potential_energy[idx] = np.nan
-                has_partial = True
+    # State logger (for q, qd extraction)
+    log_sink = api.log_sink_cls(plant.num_multibody_states())
+    builder.AddSystem(log_sink)
+    builder.Connect(plant.get_state_output_port(), log_sink.get_input_port(0))
 
-    solver_status = "partial" if has_partial else "success"
-    return _RolloutResult(solver_status=solver_status, error=None)
+
+def _rollout_metadata(
+    plant: Any,
+    n_actuators: int,
+    urdf_path: Path | str,
+    opts: SimOptions,
+    error: BaseException | None,
+) -> dict[str, Any]:
+    """Diagnostics dictionary attached to ``SimOut.meta``."""
+    metadata: dict[str, Any] = {
+        "n_actuators": n_actuators,
+        "num_positions": plant.num_positions(),
+        "num_velocities": plant.num_velocities(),
+        "urdf_path": str(urdf_path),
+        "basis": opts.basis,
+    }
+    if error is not None:
+        metadata["error"] = repr(error)
+    return metadata
 
 
 # ---------------------------------------------------------------------------
@@ -773,196 +523,65 @@ def _record_rollout(
     ),
     "invalid solver_status",
 )
-def simulate_with_coefficients(  # noqa: C901
+def simulate_with_coefficients(
     theta: NDArray[np.float64],
     options: SimOptions | None = None,
     initial_pose: dict[str, Any] | None = None,
 ) -> SimOut:
     """Drake forward simulation from a torque-polynomial coefficient vector."""
     # ---- 0. Argument normalization -------------------------------------
-    theta = np.ascontiguousarray(theta, dtype=np.float64)
-    if theta.ndim != 1:
-        msg = f"theta must be 1-D; got shape {theta.shape}"
-        raise ValueError(msg)
-    if not np.all(np.isfinite(theta)):
-        msg = "theta must contain only finite values"
-        raise ValueError(msg)
-    if theta.shape[0] % COEFFS_PER_JOINT != 0 or theta.shape[0] == 0:
-        msg = (
-            f"theta length must be a positive multiple of {COEFFS_PER_JOINT} "
-            f"(7 coefficients per joint); got {theta.shape[0]}"
-        )
-        raise ValueError(msg)
+    theta = normalize_theta(theta)
     opts = options if options is not None else SimOptions()
-
-    if initial_pose is not None and not isinstance(initial_pose, dict):
-        msg = (
-            "initial_pose must be a dict with optional keys 'q' / 'v' or "
-            f"None; got {type(initial_pose).__name__}"
-        )
-        raise TypeError(msg)
-
-    try:
-        from pydrake.multibody.plant import (  # noqa: PLC0415
-            AddMultibodyPlantSceneGraph,
-        )
-        from pydrake.systems.analysis import Simulator  # noqa: PLC0415
-        from pydrake.systems.framework import DiagramBuilder  # noqa: PLC0415
-        from pydrake.systems.primitives import (  # noqa: PLC0415
-            VectorLogSink,
-        )
-    except ImportError as exc:
-        msg = (
-            "Drake runtime (pydrake) is required for "
-            "simulate_with_coefficients. Install via pydrake or Drake container."
-        )
-        raise ImportError(msg) from exc
+    check_initial_pose_type(initial_pose)
+    api = _import_pydrake()
 
     t_start = _time.perf_counter()
 
     # ---- 2. Build plant + load humanoid --------------------------------
-    builder = DiagramBuilder()
-    plant, _scene_graph = AddMultibodyPlantSceneGraph(builder, opts.time_step_s)
-    if opts.gravity is not None and hasattr(plant, "mutable_gravity_field"):
-        plant.mutable_gravity_field().set_gravity_vector(
-            np.asarray(opts.gravity, dtype=np.float64)
-        )
-    urdf_path = (
-        opts.urdf_path
-        if opts.urdf_path is not None
-        else (DEFAULT_GOLFER_URDF if DEFAULT_GOLFER_URDF.exists() else CANONICAL_URDF)
-    )
-    load_humanoid_into_plant(plant, urdf_path)
-    plant.Finalize()
+    builder, plant, urdf_path = _build_plant(api, opts)
 
     # ---- 3. Add the polynomial-torque source ---------------------------
     n_actuators = _resolve_n_actuators(plant)
-    expected_theta_len = n_actuators * COEFFS_PER_JOINT
-    if expected_theta_len > 0 and theta.shape[0] != expected_theta_len:
-        msg = (
-            "theta is sized for "
-            f"{theta.shape[0] // COEFFS_PER_JOINT} joint(s) "
-            f"(length {theta.shape[0]}) but the plant has {n_actuators} "
-            f"actuator(s), so it expects theta of length {expected_theta_len} "
-            f"({n_actuators} * {COEFFS_PER_JOINT}). Supplying a mismatched "
-            "theta would leave the actuation port disconnected while tau_log "
-            "still recorded nonzero torques (issue #7725). Resize theta to the "
-            "plant's actuator count."
-        )
-        raise ValueError(msg)
-
+    check_theta_matches_actuators(theta, n_actuators)
     theta = validate_theta(theta, n_joints=n_actuators)
-
-    torque_source = _build_polynomial_torque_system(
-        theta,
-        n_actuators,
-        basis=opts.basis,
-        T_s=opts.simulation_time_s,
-        t0=opts.t0,
-    )
-    builder.AddSystem(torque_source)
-
-    actuation_port = (
-        plant.get_actuation_input_port()
-        if hasattr(plant, "get_actuation_input_port")
-        else None
-    )
-    if actuation_port is not None and plant.num_actuators() == n_actuators:
-        builder.Connect(
-            torque_source.get_output_port(0),
-            actuation_port,
-        )
-
-    # State logger (for q, qd extraction)
-    log_sink = VectorLogSink(plant.num_multibody_states())
-    builder.AddSystem(log_sink)
-    builder.Connect(plant.get_state_output_port(), log_sink.get_input_port(0))
+    _wire_actuation_and_logger(api, builder, plant, theta, opts)
 
     diagram = builder.Build()
     diagram_context = diagram.CreateDefaultContext()
     plant_context = plant.GetMyMutableContextFromRoot(diagram_context)
 
     # ---- 4. Apply initial_pose overrides ------------------------------
-    if initial_pose is not None:
-        q0 = initial_pose.get("q")
-        v0 = initial_pose.get("v")
-        if q0 is not None:
-            q0_arr = np.ascontiguousarray(q0, dtype=np.float64)
-            if q0_arr.shape != (plant.num_positions(),):
-                msg = (
-                    f"initial_pose['q'] must have shape ({plant.num_positions()},); "
-                    f"got {q0_arr.shape}"
-                )
-                raise ValueError(msg)
-            plant.SetPositions(plant_context, q0_arr)
-        if v0 is not None:
-            v0_arr = np.ascontiguousarray(v0, dtype=np.float64)
-            if v0_arr.shape != (plant.num_velocities(),):
-                msg = (
-                    f"initial_pose['v'] must have shape ({plant.num_velocities()},); "
-                    f"got {v0_arr.shape}"
-                )
-                raise ValueError(msg)
-            plant.SetVelocities(plant_context, v0_arr)
+    apply_initial_pose(plant, plant_context, initial_pose)
 
     # ---- 5. Run the sim ------------------------------------------------
-    simulator = Simulator(diagram, diagram_context)
+    simulator = api.simulator_cls(diagram, diagram_context)
     simulator.set_publish_every_time_step(False)
     simulator.Initialize()
 
     grid = _sample_grid(opts.simulation_time_s, opts.sample_rate_hz)
-    n_t = grid.shape[0]
-    n_q = plant.num_positions()
-    n_v = plant.num_velocities()
-
-    logs = _RolloutLogs(
-        q=np.full((n_t, n_q), np.nan, dtype=np.float64),
-        v=np.full((n_t, n_v), np.nan, dtype=np.float64),
-        tau=np.full((n_t, n_actuators), np.nan, dtype=np.float64),
-        grip=np.full((n_t, 3), np.nan, dtype=np.float64),
-        grip_quat=np.full((n_t, 4), np.nan, dtype=np.float64),
-        clubhead=np.full((n_t, 3), np.nan, dtype=np.float64),
-        club_quat=np.full((n_t, 4), np.nan, dtype=np.float64),
-        kinetic_energy=np.full(n_t, np.nan, dtype=np.float64),
-        potential_energy=np.full(n_t, np.nan, dtype=np.float64),
+    logs = allocate_logs(
+        grid.shape[0], plant.num_positions(), plant.num_velocities(), n_actuators
     )
-
     rollout = _record_rollout(
         simulator=simulator,
         plant=plant,
         grid=grid,
         theta=theta,
-        n_actuators=n_actuators,
-        grip_body_name=opts.grip_body_name,
-        clubhead_body_name=opts.clubhead_body_name,
         logs=logs,
-        basis=opts.basis,
-        T_s=opts.simulation_time_s,
-        t0=opts.t0,
-        compute_energy=opts.compute_energy,
+        config=RolloutConfig(
+            n_actuators=n_actuators,
+            grip_body_name=opts.grip_body_name,
+            clubhead_body_name=opts.clubhead_body_name,
+            basis=opts.basis,
+            T_s=opts.simulation_time_s,
+            t0=opts.t0,
+            compute_energy=opts.compute_energy,
+        ),
     )
-    solver_status = rollout.solver_status
-    sim_error = rollout.error
 
     # ---- 6. Finite-difference qdd from v_log --------------------------
-    qdd_log = np.zeros_like(logs.v)
-    if opts.compute_qdd and n_t >= 2:
-        dt = 1.0 / opts.sample_rate_hz
-        qdd_log[1:-1, :] = (logs.v[2:, :] - logs.v[:-2, :]) / (2.0 * dt)
-        qdd_log[0, :] = (logs.v[1, :] - logs.v[0, :]) / dt
-        qdd_log[-1, :] = (logs.v[-1, :] - logs.v[-2, :]) / dt
-
+    qdd_log = finite_difference_qdd(logs.v, opts.sample_rate_hz, opts.compute_qdd)
     duration_s = _time.perf_counter() - t_start
-
-    metadata: dict[str, Any] = {
-        "n_actuators": n_actuators,
-        "num_positions": n_q,
-        "num_velocities": n_v,
-        "urdf_path": str(urdf_path),
-        "basis": opts.basis,
-    }
-    if sim_error is not None:
-        metadata["error"] = repr(sim_error)
 
     out = SimOut(
         time=grid,
@@ -974,17 +593,11 @@ def simulate_with_coefficients(  # noqa: C901
         grip_quat=logs.grip_quat,
         clubhead=logs.clubhead,
         club_quat=logs.club_quat,
-        solver_status=solver_status,
+        solver_status=rollout.solver_status,
         duration_s=duration_s,
         kinetic_energy=logs.kinetic_energy,
         potential_energy=logs.potential_energy,
-        meta=metadata,
+        meta=_rollout_metadata(plant, n_actuators, urdf_path, opts, rollout.error),
     )
-
-    # Postcondition (cross-engine §2.2): on success, signal arrays are finite.
-    if solver_status == "success":
-        for name, arr in (("q", out.q), ("qd", out.qd), ("tau", out.tau)):
-            if not np.all(np.isfinite(arr)):
-                msg = f"Postcondition: SimOut.{name} contains non-finite values"
-                raise AssertionError(msg)
+    assert_finite_on_success(rollout.solver_status, out)
     return out

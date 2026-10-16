@@ -1,12 +1,12 @@
 """Compatibility exports for the MakeHuman mesh generator.
 
-The implementation lives in ``_makehuman_generator``. This module remains for
+The implementation lives in ``_mesh_makehuman``. This module remains for
 older imports that referenced the pre-split file directly.
 """
 
 from __future__ import annotations
 
-from ._makehuman_generator import MakeHumanMeshGenerator
+from ._mesh_makehuman import MakeHumanMeshGenerator
 from ._mesh_types import (
     GeneratedMeshResult,
     MeshGeneratorBackend,

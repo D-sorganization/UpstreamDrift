@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QToolButton
 from PyQt6.QtCore import Qt, QPoint, pyqtSignal
 from PyQt6.QtGui import QMouseEvent
@@ -69,6 +71,14 @@ def _make_button_stylesheet(
     )
 
 
+@dataclass(frozen=True)
+class HoverStyle:
+    """Hover appearance for a window-control button."""
+
+    bg: str = "rgba(255, 255, 255, 0.1)"
+    text_color: str = ""
+
+
 def create_window_control_button(
     icon_name: str,
     fallback_text: str,
@@ -77,11 +87,11 @@ def create_window_control_button(
     accessible_name: str,
     object_name: str,
     color: str = "",
-    hover_bg: str = "rgba(255, 255, 255, 0.1)",
-    hover_text_color: str = "",
+    hover: HoverStyle | None = None,
     parent: QWidget | None = None,
 ) -> QToolButton:
     """Create a launcher-styled window control button."""
+    hover = hover or HoverStyle()
     button = QToolButton(parent)
 
     resolved_color = color or _get_title_bar_colors()["text"]
@@ -94,7 +104,7 @@ def create_window_control_button(
     button.setToolTip(tooltip)
     button.setAccessibleName(accessible_name)
     button.setStyleSheet(
-        _make_button_stylesheet(resolved_color, hover_bg, hover_text_color)
+        _make_button_stylesheet(resolved_color, hover.bg, hover.text_color)
     )
     return button
 
@@ -112,7 +122,32 @@ class CustomTitleBar(QWidget):
         self.style().polish(self)
         self.setAutoFillBackground(True)
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self._install_shadow()
 
+        self.drag_position = QPoint()
+
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(10, 0, 10, 0)
+        layout.setSpacing(5)
+
+        self._build_logo(layout)
+        self._build_title_label()
+
+        # Apply initial theme colors and register for live theme-change updates.
+        self._apply_title_bar_theme()
+        self._connect_theme_changes()
+
+        layout.addWidget(self.title_label)
+        layout.addStretch()
+
+        self._build_window_controls(show_close_button)
+        for btn in (self.btn_min, self.btn_max, self.btn_close):
+            if btn is None:
+                continue
+            layout.addWidget(btn)
+
+    def _install_shadow(self) -> None:
+        """Attach the drop shadow graphics effect."""
         from PyQt6.QtWidgets import QGraphicsDropShadowEffect
         from PyQt6.QtGui import QColor
 
@@ -123,13 +158,8 @@ class CustomTitleBar(QWidget):
         shadow.setColor(QColor(0, 0, 0, 80))
         self.setGraphicsEffect(shadow)
 
-        self.drag_position = QPoint()
-
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(10, 0, 10, 0)
-        layout.setSpacing(5)
-
-        # Logo/Title
+    def _build_logo(self, layout: QHBoxLayout) -> None:
+        """Create the logo label and add it to ``layout``."""
         from pathlib import Path
         from PyQt6.QtGui import QPixmap
 
@@ -151,6 +181,8 @@ class CustomTitleBar(QWidget):
         layout.addWidget(self.icon_label)
         self.icon_label.installEventFilter(self)
 
+    def _build_title_label(self) -> None:
+        """Create the rich-text title label with the resolved app version."""
         try:
             from src.launchers.about_dialog import _resolve_app_version
 
@@ -164,8 +196,8 @@ class CustomTitleBar(QWidget):
         self.title_label.setTextFormat(Qt.TextFormat.RichText)
         self.title_label.installEventFilter(self)
 
-        # Apply initial theme colors and register for live theme-change updates.
-        self._apply_title_bar_theme()
+    def _connect_theme_changes(self) -> None:
+        """Subscribe to live theme-change notifications when available."""
         try:
             from src.shared.python.theme import get_theme_manager
 
@@ -175,17 +207,16 @@ class CustomTitleBar(QWidget):
         except (ImportError, AttributeError, RuntimeError):
             pass
 
-        layout.addWidget(self.title_label)
-        layout.addStretch()
-
-        # Window controls
+    def _build_window_controls(self, show_close_button: bool) -> None:
+        """Create minimize/maximize/close buttons and wire their signals."""
+        hover = HoverStyle(bg="rgba(255, 255, 255, 0.15)")
         self.btn_min = create_window_control_button(
             "minimize",
             "-",
             tooltip="Minimize",
             accessible_name="Minimize window",
             object_name="window-control-minimize",
-            hover_bg="rgba(255, 255, 255, 0.15)",
+            hover=hover,
             parent=self,
         )
         self.btn_max = create_window_control_button(
@@ -194,7 +225,7 @@ class CustomTitleBar(QWidget):
             tooltip="Maximize",
             accessible_name="Maximize window",
             object_name="window-control-maximize",
-            hover_bg="rgba(255, 255, 255, 0.15)",
+            hover=hover,
             parent=self,
         )
         self.btn_close: QToolButton | None = None
@@ -205,8 +236,7 @@ class CustomTitleBar(QWidget):
                 tooltip="Close the launcher",
                 accessible_name="Close launcher window",
                 object_name="window-control-close",
-                hover_bg="#E81123",
-                hover_text_color="#FFFFFF",
+                hover=HoverStyle(bg="#E81123", text_color="#FFFFFF"),
                 parent=self,
             )
 
@@ -214,11 +244,6 @@ class CustomTitleBar(QWidget):
         self.btn_max.clicked.connect(self._maximize_window)
         if self.btn_close is not None:
             self.btn_close.clicked.connect(self._close_window)
-
-        for btn in (self.btn_min, self.btn_max, self.btn_close):
-            if btn is None:
-                continue
-            layout.addWidget(btn)
 
     def _apply_title_bar_theme(self) -> None:
         """Apply themed colors to the title bar widget and title label."""

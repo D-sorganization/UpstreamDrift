@@ -257,6 +257,43 @@ class UISetupManager(LauncherNavigationUIMixin, LauncherTopBarUIMixin):
         outer_vbox.setSpacing(0)
         outer_vbox.setContentsMargins(0, 0, 0, 0)
 
+        self._install_title_bar(outer_vbox)
+
+        # --- Menu Bar (immediately below the title bar) ---
+        # Postcondition: ``self.menu_bar`` is a non-null populated QMenuBar
+        # owned by ``central`` (the QMainWindow.centralWidget()), NOT by
+        # the native main-window menu strip.  Tests in
+        # tests/unit/launcher/test_layout_hierarchy.py pin this contract.
+        self.menu_bar = self._build_menu_bar_widget()
+        outer_vbox.addWidget(self.menu_bar)
+
+        main_layout = self._build_main_splitter()
+        outer_vbox.addWidget(main_layout, 1)
+
+        # Expose the splitter for downstream features that embed extra
+        # panes (e.g. ``_install_sidekick_sidebar`` in #5624 adds the
+        # Sidekick widget as the third pane instead of using
+        # ``addDockWidget``, which misbehaves on a frameless window).
+        self.main_layout = main_layout
+
+        # --- Global Sidebar ---
+        self.sidebar_widget = self._setup_global_sidebar()
+        main_layout.addWidget(self.sidebar_widget)
+
+        main_layout.addWidget(self._build_content_container())
+
+        # Sidebar should not stretch, content should take the rest.
+        main_layout.setStretchFactor(0, 0)
+        main_layout.setStretchFactor(1, 1)
+
+        # Apply dark theme
+        self.apply_styles()
+
+        # Keyboard shortcuts
+        self._setup_search_shortcuts()
+
+    def _install_title_bar(self, outer_vbox: QVBoxLayout) -> None:
+        """Create the custom title bar and add it to ``outer_vbox``."""
         try:
             from src.launchers.custom_title_bar import CustomTitleBar
 
@@ -277,15 +314,9 @@ class UISetupManager(LauncherNavigationUIMixin, LauncherTopBarUIMixin):
         except ImportError:
             pass
 
-        # --- Menu Bar (immediately below the title bar) ---
-        # Postcondition: ``self.menu_bar`` is a non-null populated QMenuBar
-        # owned by ``central`` (the QMainWindow.centralWidget()), NOT by
-        # the native main-window menu strip.  Tests in
-        # tests/unit/launcher/test_layout_hierarchy.py pin this contract.
-        self.menu_bar = self._build_menu_bar_widget()
-        outer_vbox.addWidget(self.menu_bar)
-
-        # Main layout is now a horizontal splitter to accommodate the sidebar resizably
+    def _build_main_splitter(self) -> QSplitter:
+        """Build the horizontal main splitter (sidebar | content | sidekick)."""
+        # Main layout is a horizontal splitter to accommodate the sidebar resizably
         main_layout = QSplitter(Qt.Orientation.Horizontal)
         main_layout.setProperty("class", "dark")
         main_layout.setHandleWidth(4)
@@ -306,19 +337,10 @@ class UISetupManager(LauncherNavigationUIMixin, LauncherTopBarUIMixin):
                 background-color: {_splitter_hover};
             }}
         """)
-        outer_vbox.addWidget(main_layout, 1)
+        return main_layout
 
-        # Expose the splitter for downstream features that embed extra
-        # panes (e.g. ``_install_sidekick_sidebar`` in #5624 adds the
-        # Sidekick widget as the third pane instead of using
-        # ``addDockWidget``, which misbehaves on a frameless window).
-        self.main_layout = main_layout
-
-        # --- Global Sidebar ---
-        self.sidebar_widget = self._setup_global_sidebar()
-        main_layout.addWidget(self.sidebar_widget)
-
-        # Content Container
+    def _build_content_container(self) -> QWidget:
+        """Build the content column: top bar plus the workspace tabs."""
         content_container = QWidget()
         content_container.setMinimumWidth(300)
         content_layout = QVBoxLayout(content_container)
@@ -330,7 +352,14 @@ class UISetupManager(LauncherNavigationUIMixin, LauncherTopBarUIMixin):
             LayoutMetrics.MARGIN_PAGE,
         )
 
-        # --- Top Bar ---
+        content_layout.addLayout(self._build_top_bar_with_popout())
+        self._build_content_splitter()
+        self._build_workspace_tabs()
+        content_layout.addWidget(self.workspace_tabs, 1)
+        return content_container
+
+    def _build_top_bar_with_popout(self) -> QHBoxLayout:
+        """Build the top bar and append the hidden Sidekick pop-out button."""
         top_bar = self._setup_top_bar()
 
         # Add Sidekick pop-out button as part of top-bar. It will be hidden initially.
@@ -353,9 +382,10 @@ class UISetupManager(LauncherNavigationUIMixin, LauncherTopBarUIMixin):
             }
         """)
         top_bar.insertWidget(top_bar.count(), self.btn_popout_sidekick)
+        return top_bar
 
-        content_layout.addLayout(top_bar)
-
+    def _build_content_splitter(self) -> None:
+        """Build ``self.content_splitter`` holding the launcher grid panel."""
         # --- Content area with horizontal splitter (tiles | AI chat) ---
         self.content_splitter = QSplitter(Qt.Orientation.Horizontal)
         self.content_splitter.setHandleWidth(3)
@@ -378,6 +408,8 @@ class UISetupManager(LauncherNavigationUIMixin, LauncherTopBarUIMixin):
 
         self.content_splitter.addWidget(left_panel)
 
+    def _build_workspace_tabs(self) -> None:
+        """Build the workspace tab widget and reset sidekick/library state."""
         # NOTE: The legacy right-panel AIAssistantPanel that used to be
         # spliced into ``content_splitter`` here was removed as part of the
         # deprecated-chat sweep (UpstreamDrift #5620). The canonical chat
@@ -405,20 +437,6 @@ class UISetupManager(LauncherNavigationUIMixin, LauncherTopBarUIMixin):
 
         self.library_widget = None
         self.library_window = None
-
-        content_layout.addWidget(self.workspace_tabs, 1)
-
-        main_layout.addWidget(content_container)
-
-        # Sidebar should not stretch, content should take the rest.
-        main_layout.setStretchFactor(0, 0)
-        main_layout.setStretchFactor(1, 1)
-
-        # Apply dark theme
-        self.apply_styles()
-
-        # Keyboard shortcuts
-        self._setup_search_shortcuts()
 
     def dock_widget_as_tab(self, widget: QWidget, title: str) -> None:
         """Dock a submodule/tool widget as a new tab in the workspace.
