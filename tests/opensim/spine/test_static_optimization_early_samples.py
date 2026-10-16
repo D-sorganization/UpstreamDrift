@@ -92,9 +92,7 @@ def test_every_sample_of_the_five_sample_motion_converges(
         stride=1,
         max_frames=_N_SAMPLES,
     )
-    result = run_spine_static_optimization(
-        model, efforts, "fixture", options=options
-    )
+    result = run_spine_static_optimization(model, efforts, "fixture", options=options)
     assert result.frame_index.tolist() == list(range(_N_SAMPLES))
     assert np.all(result.success), result.success
     assert not any("solver" in r for rs in result.flag_reasons for r in rs)

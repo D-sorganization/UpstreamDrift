@@ -234,3 +234,13 @@ def test_muscle_with_no_force_capacity_does_not_fail_the_solve(exponent) -> None
     np.testing.assert_allclose(sol.activation[keep], ref.activation, atol=1e-9)
     np.testing.assert_allclose(sol.reserve, ref.reserve, atol=1e-9)
     np.testing.assert_allclose(sol.muscle_moment + sol.reserve, _SLACK_TAU, atol=1e-9)
+
+
+def test_all_muscles_without_capacity_leave_the_whole_demand_to_reserves() -> None:
+    tau = np.array([1.0, -2.0])
+    sol = solve_activations(
+        np.zeros(2), np.zeros(2), np.array([[0.03, 0.01], [0.02, -0.02]]), tau
+    )
+    assert sol.success
+    np.testing.assert_array_equal(sol.activation, 0.0)
+    np.testing.assert_allclose(sol.reserve, tau, atol=1e-12)
