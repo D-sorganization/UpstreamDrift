@@ -31,6 +31,7 @@ __all__ = [
     "NotStrictlyConvexError",
     "ObjectiveSpec",
     "PowerReduction",
+    "VarianceTerm",
 ]
 
 
@@ -90,6 +91,38 @@ class GrossPowerSpec:
 
 
 @dataclass(frozen=True)
+class VarianceTerm:
+    """Signal-dependent-noise variance as a torque quadratic (NSX-92, M1).
+
+    With the outcome kernels frozen, the M1 contribution to the outcome
+    variance is ``sum_tj coeff[t, j] tau[t, j]^2`` with
+    ``coeff = k_j^2 S_in[t, j]^2 / dt`` (``loop_nullspace.tex``
+    ``sec:var-mechanisms``): a *diagonal* convex quadratic in the torque, so it
+    enters the allocation exactly like the effort term.  ``weight`` scales it;
+    allocation-invariant variance parts are constants and live outside the
+    objective.  ``hypothesis_ids`` name the mechanism it rests on.
+    """
+
+    weight: float
+    coeff: Array
+    hypothesis_ids: tuple[str, ...] = ("H-NOISE-SIGNAL-DEPENDENT",)
+
+    def __post_init__(self) -> None:
+        if not np.isfinite(self.weight) or self.weight <= 0.0:
+            raise ValueError(f"variance weight must be positive, got {self.weight!r}")
+        c = readonly_float(self.coeff, "coeff")
+        if c.ndim != 2 or c.size == 0:
+            raise ValueError(f"coeff must be a non-empty (frames, n_a), got {c.shape}")
+        if np.any(c < 0.0):
+            raise ValueError("coeff must be non-negative (a variance weight)")
+        if not self.hypothesis_ids:
+            raise ValueError("a variance term must name its hypothesis ids")
+        object.__setattr__(self, "weight", float(self.weight))
+        object.__setattr__(self, "coeff", c)
+        object.__setattr__(self, "hypothesis_ids", tuple(self.hypothesis_ids))
+
+
+@dataclass(frozen=True)
 class ObjectiveSpec:
     """Weights of the allocation objective (see the module docstring).
 
@@ -104,6 +137,7 @@ class ObjectiveSpec:
     rate_weight: float = 0.0
     reference_weight: float = 0.0
     gross_power: GrossPowerSpec | None = None
+    variance: VarianceTerm | None = None
 
     def __post_init__(self) -> None:
         t = _vector(self.times_s, "times_s")
@@ -120,6 +154,14 @@ class ObjectiveSpec:
             self.gross_power, GrossPowerSpec
         ):
             raise TypeError("gross_power must be a GrossPowerSpec or None")
+        if self.variance is not None:
+            if not isinstance(self.variance, VarianceTerm):
+                raise TypeError("variance must be a VarianceTerm or None")
+            if self.variance.coeff.shape != (t.size, s.size):
+                raise ValueError(
+                    f"variance coeff must have shape {(t.size, s.size)}, "
+                    f"got {self.variance.coeff.shape}"
+                )
 
 
 @dataclass(frozen=True)

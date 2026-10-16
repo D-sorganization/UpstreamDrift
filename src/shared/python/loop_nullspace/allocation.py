@@ -52,6 +52,7 @@ from src.shared.python.loop_nullspace.allocation_spec import (
     NotStrictlyConvexError,
     ObjectiveSpec,
     PowerReduction,
+    VarianceTerm,
 )
 from src.shared.python.loop_nullspace.capacity import CapacityVector
 from src.shared.python.loop_nullspace.evidence import (
@@ -81,6 +82,7 @@ __all__ = [
     "NotStrictlyConvexError",
     "ObjectiveSpec",
     "PowerReduction",
+    "VarianceTerm",
     "allocate_trajectory",
     "torque_scale_from_capacity",
 ]
@@ -252,11 +254,25 @@ def _rate_operator(lay: _Layout, scale: Array, weight: float) -> sp.csr_matrix |
     return sp.csr_matrix(sp.vstack(rows))
 
 
+def _variance_operator(lay: _Layout, term: VarianceTerm) -> sp.csr_matrix:
+    """Diagonal ``sqrt(weight * coeff)`` on the stacked torques (NSX-92, M1)."""
+    if term.coeff.shape != (lay.t_count, lay.n_a):
+        raise ValueError(
+            f"variance coeff must be {(lay.t_count, lay.n_a)}, got {term.coeff.shape}"
+        )
+    return sp.diags(np.sqrt(term.weight * term.coeff.reshape(-1))).tocsr()
+
+
 def _operators(
-    lay: _Layout, scale: Array, weights: dict[str, float]
+    lay: _Layout,
+    scale: Array,
+    weights: dict[str, float],
+    variance: VarianceTerm | None = None,
 ) -> dict[str, sp.csr_matrix]:
     """Residual operators ``A`` of the enabled quadratic terms (weight > 0)."""
     ops: dict[str, sp.csr_matrix] = {}
+    if variance is not None:
+        ops["variance"] = _variance_operator(lay, variance)
     if weights["effort"] > 0.0:
         ops["effort"] = _scale_diag(lay, scale, weights["effort"])
     if weights["rate"] > 0.0:
@@ -317,6 +333,8 @@ def _enabled_terms(objective: ObjectiveSpec, has_reference: bool) -> tuple[str, 
         names.append("rate")
     if objective.reference_weight > 0.0 and has_reference:
         names.append("reference")
+    if objective.variance is not None:
+        names.append("variance")
     if objective.gross_power is not None:
         names.append("gross power (piecewise linear, no curvature)")
     return tuple(names)
@@ -522,6 +540,9 @@ def _objective_terms(
         "reference": 0.0,
         "gross_power": 0.0,
     }
+    if objective.variance is not None:
+        vt = objective.variance
+        terms["variance"] = float(vt.weight * np.sum(vt.coeff * tau**2))
     if lay.t_count > 1:
         dt = np.diff(lay.times)[:, None]
         terms["rate"] = float(
@@ -571,6 +592,8 @@ def _hypotheses(lay: _Layout, objective: ObjectiveSpec) -> tuple[str, ...]:
         ids.append(RATE_ID)
     if objective.gross_power is not None:
         ids.append(GROSS_ID)
+    if objective.variance is not None:
+        ids += list(objective.variance.hypothesis_ids)
     return tuple(dict.fromkeys(ids))
 
 
@@ -639,7 +662,9 @@ def allocate_trajectory(
     frames = _validated_frames(feasible_sets, objective)
     ref = _validated_reference(reference, objective, len(frames))
     lay = _layout(frames, objective)
-    ops = _operators(lay, objective.torque_scale, _weights(objective))
+    ops = _operators(
+        lay, objective.torque_scale, _weights(objective), objective.variance
+    )
     convexity = _check_convexity(lay, objective, ops)
     power = _classify_power(lay, objective.gross_power)
     prob = _assemble(lay, objective, ops, ref, power)

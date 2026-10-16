@@ -303,9 +303,11 @@ def pareto_front(
     ref_b = _validated_reference(references[1], constrained, len(frames))
     eps_values = _eps_grid(eps_grid)
     lay = _layout(frames, primary)
-    ops_a = _operators(lay, primary.torque_scale, _weights(primary))
+    ops_a = _operators(lay, primary.torque_scale, _weights(primary), primary.variance)
     _check_convexity(lay, primary, ops_a)
-    ops_b = _operators(lay, constrained.torque_scale, _weights(constrained))
+    ops_b = _operators(
+        lay, constrained.torque_scale, _weights(constrained), constrained.variance
+    )
     if not ops_b:
         raise ValueError(
             "the constrained objective has no enabled quadratic term (rate needs "
@@ -346,6 +348,8 @@ def _term_names(spec: ObjectiveSpec, ref: Array | None) -> tuple[str, ...]:
         names.append("rate")
     if spec.reference_weight > 0 and ref is not None:
         names.append("reference")
+    if spec.variance is not None:
+        names.append("variance")
     if spec.gross_power is not None:
         names.append("gross_power")
     return tuple(names)
