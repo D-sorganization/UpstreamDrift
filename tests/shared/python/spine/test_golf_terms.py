@@ -17,6 +17,7 @@ from src.shared.python.spine.golf_terms import (
     definition,
     evaluate,
     registered_terms,
+    segmental_contribution_breakdown,
     segmental_contributions,
     contribution_remainder,
 )
@@ -538,3 +539,110 @@ def test_legacy_terms_propagate_nan_dropouts(term_id: str, inputs: dict) -> None
     out = evaluate(term_id, inputs, handedness="right")
     assert np.isfinite(out[0])
     assert np.isnan(out[1])
+
+
+# -- SPN-D2: base / terminal / alignment attribution --------------------------
+
+_JCS = ("x_factor_jcs_axial", "trunk_extension_jcs", "trunk_lateral_flexion_jcs")
+
+
+def _rot(*angles_deg: float) -> np.ndarray:
+    return Rotation.from_euler("ZXY", angles_deg, degrees=True).as_matrix()
+
+
+def _global(term_id: str, pose: SegmentalPose, b, e, a, hand: str) -> float:
+    rot = b @ pose.compose()[:3, :3] @ e @ a
+    return float(
+        evaluate(term_id, {"pelvis_to_thorax_rotation": rot}, handedness=hand)[0]
+    )
+
+
+@pytest.mark.parametrize("term_id", _JCS)
+@pytest.mark.parametrize("hand", ["right", "left"])
+def test_named_entries_close_to_global_with_nonidentity_b_e_a(
+    term_id: str, hand: str
+) -> None:
+    pose = _pose((-10, 5, -15), (-10, 8, -20), (-15, 10, -25))
+    b, e, a = _rot(6, 4, -9), _rot(-5, 7, 11), _rot(3, -6, 8)
+    got = segmental_contribution_breakdown(
+        term_id, pose, handedness=hand, base=b, terminal=e, alignment=a
+    )
+    assert list(got.levels) == list(pose.levels)
+    assert set(got.named) == {"base", "terminal", "alignment"}
+    glob = _global(term_id, pose, b, e, a, hand)
+    assert got.global_value == pytest.approx(glob, abs=1e-9)
+    assert sum(got.levels.values()) + sum(got.named.values()) == pytest.approx(
+        glob, abs=1e-9
+    )
+    assert got.remainder == pytest.approx(0.0, abs=1e-9)
+    # the level-only sum no longer equals the global term: nothing is folded
+    assert abs(sum(got.levels.values()) - glob) > 1e-3
+
+
+def test_only_supplied_entries_are_named() -> None:
+    pose = _pose((0, 0, -10.0), (0, 5.0, -20.0))
+    got = segmental_contribution_breakdown(
+        "x_factor_jcs_axial", pose, handedness="right", terminal=_rot(0, 0, 10)
+    )
+    assert set(got.named) == {"terminal"}
+
+
+def test_identity_breakdown_equals_legacy_contributions() -> None:
+    pose = _pose((-10, 5, -15), (-10, 8, -20), (-15, 10, -25))
+    legacy = segmental_contributions("trunk_extension_jcs", pose, handedness="right")
+    got = segmental_contribution_breakdown(
+        "trunk_extension_jcs", pose, handedness="right"
+    )
+    assert got.named == {}
+    assert list(got.levels.values()) == pytest.approx(list(legacy.values()), abs=0)
+    ident = np.eye(3)
+    got_id = segmental_contribution_breakdown(
+        "trunk_extension_jcs",
+        pose,
+        handedness="right",
+        base=ident,
+        terminal=ident,
+        alignment=ident,
+    )
+    assert list(got_id.levels.values()) == pytest.approx(list(legacy.values()))
+    assert [abs(v) for v in got_id.named.values()] == pytest.approx([0.0] * 3)
+
+
+def test_contribution_remainder_accepts_b_e_a() -> None:
+    pose = _pose((-10, 5, -15), (-10, 8, -20))
+    rem = contribution_remainder(
+        "x_factor_jcs_axial",
+        pose,
+        handedness="right",
+        base=_rot(6, 4, -9),
+        terminal=_rot(-5, 7, 11),
+        alignment=_rot(3, -6, 8),
+    )
+    assert rem == pytest.approx(0.0, abs=1e-9)
+
+
+def test_breakdown_rejects_bad_rotations() -> None:
+    pose = _pose((0, 0, 1.0))
+    with pytest.raises(ValueError, match="base"):
+        segmental_contribution_breakdown(
+            "x_factor_jcs_axial", pose, handedness="right", base=np.eye(3) * 2
+        )
+    with pytest.raises(ValueError, match="terminal"):
+        segmental_contribution_breakdown(
+            "x_factor_jcs_axial",
+            pose,
+            handedness="right",
+            terminal=np.stack([np.eye(3)] * 2),
+        )
+    with pytest.raises(TypeError, match="alignment"):
+        segmental_contribution_breakdown(
+            "x_factor_jcs_axial", pose, handedness="right", alignment="x"
+        )
+
+
+def test_gimbal_locked_prefix_gives_nan_not_zero() -> None:
+    pose = _pose((0, 90.0, 0.0))
+    got = segmental_contribution_breakdown(
+        "x_factor_jcs_axial", pose, handedness="right", base=_rot(5, 0, 5)
+    )
+    assert np.isnan(got.levels[pose.levels[0]])
