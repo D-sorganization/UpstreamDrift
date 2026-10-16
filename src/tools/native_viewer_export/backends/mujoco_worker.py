@@ -29,7 +29,11 @@ from src.tools.native_viewer_export.backends._ball import draw_job_ball
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.backends.myosuite_worker import make_camera
 
-APPEARANCE = {"schema_version": "appearance-v1"}
+#: The exporter's own decorative ball is off: it is placed from the static
+#: reference pose, not the address pose, so it landed away from the face and
+#: duplicated the worker's ball (``draw_job_ball``, the single shared
+#: placement from ``native_viewer_export.ball``; #12955).
+APPEARANCE = {"schema_version": "appearance-v1", "ball": {"enabled": False}}
 
 
 def build_scene_xml(spec_bytes: bytes) -> tuple[str, dict[str, Any]]:
