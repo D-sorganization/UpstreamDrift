@@ -229,6 +229,28 @@ def _spin_generalised(model: Any, root_coords: list[Any], state: Any) -> np.ndar
     return spin_gen
 
 
+def _set_frame(
+    free: Any,
+    state: Any,
+    mob: dict[str, int],
+    coords: dict[str, np.ndarray],
+    vel: dict[str, np.ndarray],
+    acc: dict[str, np.ndarray],
+    k: int,
+) -> Any:
+    """Set frame ``k`` positions and speeds, realise velocity; return ``udot``."""
+    coord_set = free.getCoordinateSet()
+    for name in mob:
+        c = coord_set.get(name)
+        c.setValue(state, float(coords[name][k]), False)
+        c.setSpeedValue(state, float(vel[name][k]))
+    udot = import_opensim().Vector(state.getNU(), 0.0)
+    for name, index in mob.items():
+        udot.set(index, float(acc[name][k]))
+    free.realizeVelocity(state)
+    return udot
+
+
 def estimate_ground_reactions(
     model: Any,
     times: np.ndarray,
@@ -293,14 +315,7 @@ def estimate_ground_reactions(
     resid = np.zeros(n)
     for k in range(n):
         state.setTime(float(times[k]))
-        for name in names:
-            c = free.getCoordinateSet().get(name)
-            c.setValue(state, float(coords[name][k]), False)
-            c.setSpeedValue(state, float(vel[name][k]))
-        udot = osim.Vector(state.getNU(), 0.0)
-        for name in names:
-            udot.set(mob[name], float(acc[name][k]))
-        free.realizeVelocity(state)
+        udot = _set_frame(free, state, mob, coords, vel, acc, k)
         tau = solver.solve(state, udot).to_numpy()
         # ID output is the root force needed to produce the motion: ground supplies it.
         required[k] = tau[root_idx]
@@ -309,8 +324,7 @@ def estimate_ground_reactions(
         jac = _root_jacobian(root_coords, state, point_positions, len(pts))
         spin_gen = _spin_generalised(free, root_coords, state)
         # sign: tau_root(F) = J^T F supplies the ground wrench.
-        world_k = base
-        active = world_k[:, 1] <= world_k[:, 1].min() + height_tol_m
+        active = base[:, 1] <= base[:, 1].min() + height_tol_m
         forces[k], spins[k], resid[k] = solve_contact_forces(
             required[k],
             jac,
