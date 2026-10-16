@@ -2366,6 +2366,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12815 · Web Spine Viewer: /Api/Tools/Spine-Viewer Routes and React Page With Always-Visible Scientific Status and Distribution Source (SPN-15C)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12815
+- **Branch:** merged via #12897
+- **PR:** #12897
+- **Paths:** see #12897
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`883e962d`; collated from changes/12815-web-spine-viewer-api-tools-spine-viewer.md)
+- **Summary:** Web spine viewer: /api/tools/spine-viewer routes and React page with always-visible scientific status and distribution source (SPN-15c)
+- **Next step:** Shipped in PR #12897.
+
 ### DL-#12828 · Correct the Golf-Term Evaluate Docstring for Side_Bend_Tilt Input and Output Shapes
 
 - **State:** shipped
