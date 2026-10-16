@@ -2741,6 +2741,9 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-16 | #12799 | Add DisturbanceSpec timestep-consistent disturbance contract, wrapped OutcomeDispersion statistics, and NaN (not 0) MetricStatistics.cv at near-zero mean (NSX-82) |
+| 2026-10-16 | #12909 | R9c: GS3DX Simscape golfer takes its colours and trunk size from the shared model_appearance spec via a versioned JSON exporter (fail-closed MATLAB reader) |
+| 2026-10-16 | #12907 | R7: realistic CC0 head for the shared parametric head slot - head.model cc0_mesh loads a MakeHuman-derived CC0 skin and short-hair mesh (assets/head_cc0, provenance + sha256 verified, fail closed) through build_head_parts, so MuJoCo and the OBJ export (R9a/b/c) get it with no per-engine code; default stays the procedural head |
 | 2026-10-16 | #12903 | OpenSim loads alongside ezc3d: C3D stack imported lazily at startup, structured OpenSim probe reports the real import failure instead of Not Installed |
 | 2026-10-16 | #12900 | Fix classic launcher startup: parent contract guard, ChatService ToolRegistry identity, data_explorer launcher_embed alias (#12893, #12895) |
 | 2026-10-16 | #12876 | NSX-84: constrained tangent linearization (M2 preload) and closed-loop derivative capability seam with engine-free FD reference; NSX-84b: tangent state space for multi-DOF closed loops (k > 1), five-bar golden and gauge-law tests |

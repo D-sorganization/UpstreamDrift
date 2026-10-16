@@ -2353,6 +2353,45 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12711 · Add DisturbanceSpec Timestep-Consistent Disturbance Contract, Wrapped OutcomeDispersion Statistics, and NaN (Not 0) MetricStatistics.Cv at Near-Zero Mean (NSX-82)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12711
+- **Branch:** merged via #12799
+- **PR:** #12799
+- **Paths:** see #12799
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`d166ace5`; collated from changes/12711-add-disturbancespec-timestep-consistent.md)
+- **Summary:** Add DisturbanceSpec timestep-consistent disturbance contract, wrapped OutcomeDispersion statistics, and NaN (not 0) MetricStatistics.cv at near-zero mean (NSX-82)
+- **Next step:** Shipped in PR #12799.
+
+### DL-#12690 · R9c: GS3DX Simscape Golfer Takes Its Colours and Trunk Size From the Shared Model_Appearance Spec via a Versioned JSON Exporter (Fail-Closed MATLAB Reader)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12690
+- **Branch:** merged via #12909
+- **PR:** #12909
+- **Paths:** see #12909
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`cf095b75`; collated from changes/12690-r9c-gs3dx-simscape-golfer-takes-its-colo.md)
+- **Summary:** R9c: GS3DX Simscape golfer takes its colours and trunk size from the shared model_appearance spec via a versioned JSON exporter (fail-closed MATLAB reader)
+- **Next step:** Shipped in PR #12909.
+
+### DL-#12687 · R7: Realistic CC0 Head for the Shared Parametric Head Slot - Head.Model Cc0_Mesh Loads a MakeHuman-Derived CC0 Skin and Short-Hair Mesh (Assets/Head_Cc0, Provenance + Sha256 Verified, Fail Closed) Through Build_Head_Parts, so MuJoCo and the OBJ Export (R9a/B/C) Get It With No Per-Engine Code; Default Stays the Procedural Head
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12687
+- **Branch:** merged via #12907
+- **PR:** #12907
+- **Paths:** see #12907
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`c5487058`; collated from changes/12687-r7-realistic-cc0-head-for-the-shared-par.md)
+- **Summary:** R7: realistic CC0 head for the shared parametric head slot - head.model cc0_mesh loads a MakeHuman-derived CC0 skin and short-hair mesh (assets/head_cc0, provenance + sha256 verified, fail closed) through build_head_parts, so MuJoCo and the OBJ export (R9a/b/c) get it with no per-engine code; default stays the procedural head
+- **Next step:** Shipped in PR #12907.
+
 ### DL-#12883 · OpenSim Loads Alongside Ezc3d: C3D Stack Imported Lazily at Startup, Structured OpenSim Probe Reports the Real Import Failure Instead of Not Installed
 
 - **State:** shipped
