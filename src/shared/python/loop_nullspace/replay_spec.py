@@ -35,6 +35,7 @@ __all__ = [
     "ReplaySettings",
     "ReplaySetup",
     "acceleration_feedback_law",
+    "check_gain",
     "feedback_budget",
 ]
 
@@ -191,7 +192,7 @@ class FeedbackLaw:
         if kp.ndim not in (1, 2) or kp.shape != kd.shape or kp.size == 0:
             raise ValueError(f"kp and kd must share a (n,) or (n, n) shape: {kp.shape}")
         for gain, label in ((kp, "kp"), (kd, "kd")):
-            _check_gain(gain, label)
+            check_gain(gain, label)
         n = kp.shape[0]
         object.__setattr__(self, "kp", kp)
         object.__setattr__(self, "kd", kd)
@@ -278,7 +279,8 @@ class AccelerationFeedbackLaw:
         return np.asarray(np.clip(raw, -self.torque_limit, self.torque_limit))
 
 
-def _check_gain(gain: Array, label: str) -> None:
+def check_gain(gain: Array, label: str) -> None:
+    """Require a gain vector ``>= 0`` or a symmetric PSD gain matrix (``ValueError``)."""
     if gain.ndim == 1:
         if np.any(gain < 0.0):
             raise ValueError(f"feedback gain entries ({label}) must be >= 0")
