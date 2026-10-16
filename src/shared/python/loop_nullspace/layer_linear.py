@@ -72,6 +72,7 @@ __all__ = [
     "impedance_state_gain",
     "frozen_delay_margin",
     "inflate_step_covariances",
+    "LayerOptions",
     "layer_variance",
     "variance_ratio_record",
     "with_layer_conditioning",
@@ -368,6 +369,18 @@ class LayerVariance:
     n_state_copies: int
 
 
+@dataclass(frozen=True)
+class LayerOptions:
+    """Optional switches of :func:`layer_variance`.
+
+    ``gate`` is the NSX-90 nonlinearity gate (``None``: ``NOT_ASSESSED``);
+    ``max_margin_steps`` bounds the delay-margin search in whole steps.
+    """
+
+    gate: GateSpec | None = None
+    max_margin_steps: int = 20
+
+
 def layer_variance(
     linearization: LayerLinearization,
     p0: ArrayLike,
@@ -377,8 +390,7 @@ def layer_variance(
     *,
     layer_hypotheses: tuple[str, ...],
     outcome_units: str,
-    gate: GateSpec | None = None,
-    max_margin_steps: int = 20,
+    options: LayerOptions = LayerOptions(),  # noqa: B008 - frozen, immutable default
 ) -> LayerVariance:
     """NSX-90 variance of the closed loop, typed with the layer's conditioning.
 
@@ -388,7 +400,7 @@ def layer_variance(
     ``FAMILY_DEPENDENT``); the kernels carry the same conditioning, because they
     depend on the declared gains; ``linear_validity`` is ``NOT_ASSESSED`` without
     a gate.  Delay margins are listed only when a feedback gain is present and
-    searched up to ``max_margin_steps`` whole steps (cost grows as
+    searched up to ``options.max_margin_steps`` whole steps (cost grows as
     ``steps * (n_x * max_margin_steps)^3``; a loop with no margin inside the
     search reports ``margin_steps=None``, i.e. "none found up to the bound").
     """
@@ -403,14 +415,14 @@ def layer_variance(
         noise_classes=(InputClass("torque_noise", tuple(range(n_w))),),
         initial_classes=(InputClass("initial_state", tuple(range(n_aug))),),
     )
-    raw = assess_variance(problem, decl, outcome_units=outcome_units, gate=gate)
+    raw = assess_variance(problem, decl, outcome_units=outcome_units, gate=options.gate)
     assessment = replace(
         raw,
         kernel_x0=replace(raw.kernel_x0, conditioning=decl.noise_hypotheses),
         kernel_input=replace(raw.kernel_input, conditioning=decl.noise_hypotheses),
     )
     margins = (
-        tuple(linearization.delay_margins(max_margin_steps))
+        tuple(linearization.delay_margins(options.max_margin_steps))
         if linearization.feedback_gain is not None
         else ()
     )
