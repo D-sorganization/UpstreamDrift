@@ -160,21 +160,11 @@ def chat_module(qapp: Any) -> Any:
     return _chat_dock_widget_qt
 
 
-def _make_dock(
-    chat_module: Any,
-    *,
-    workspace_provider: Any = None,
-    plot_request_sink: Any = None,
-) -> Any:
+def _make_dock(chat_module: Any, **kwargs: Any) -> Any:
     dock = chat_module.ChatDockWidget(
-        connection=chat_module.ChatConnectionConfig(
-            app_context="test",
-            app_name="test_workspace_bridge",
-        ),
-        integrations=chat_module.ChatIntegrationHooks(
-            workspace_provider=workspace_provider,
-            plot_request_sink=plot_request_sink,
-        ),
+        app_context="test",
+        app_name="test_workspace_bridge",
+        **kwargs,
     )
     # The dock subclasses QDockWidget; connect-on-show defers networking,
     # so simply constructing it does not hit the network.

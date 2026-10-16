@@ -98,7 +98,7 @@ class SkillsManager:
                 self.workflows[identifier] = defn
             else:
                 self.skills[identifier] = defn
-        except Exception as e:  # noqa: BLE001 - skip unreadable or malformed skill files
+        except Exception as e:
             logger.warning("Failed to parse %s: %s", md_path, e)
 
     def get_tool_schemas(self) -> list[dict[str, Any]]:

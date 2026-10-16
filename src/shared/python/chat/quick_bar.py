@@ -428,19 +428,14 @@ class ChatLauncherMixin:
         # Lazy import to avoid circular deps
         import typing
 
-        from shared.python.chat.chat_dock_widget import (
-            ChatConnectionConfig,
-            ChatDockWidget,
-        )
+        from shared.python.chat.chat_dock_widget import ChatDockWidget
 
         main_window = typing.cast(QMainWindow, self)
 
         self._chat_dock = ChatDockWidget(
-            connection=ChatConnectionConfig(
-                app_context=app_context,
-                app_name=app_name,
-                server_url=server_url,
-            ),
+            app_context=app_context,
+            app_name=app_name,
+            server_url=server_url,
             parent=main_window,
         )
         main_window.addDockWidget(
