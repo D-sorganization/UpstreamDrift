@@ -59,6 +59,9 @@ USER_GUIDE_DIR = DOCS_DIR / "user_guide"
 # index, which is what made in-app Help look empty (issue #8843).
 USER_MANUAL_PATH = USER_GUIDE_DIR / "upstream_drift_user_manual.md"
 USER_MANUAL_FALLBACK_PATH = USER_GUIDE_DIR / "user_manual.md"
+# The manual is an index at USER_MANUAL_PATH plus one file per chapter here
+# (split to stay under the documentation size budget, issue #12850).
+USER_MANUAL_PARTS_DIR = USER_MANUAL_PATH.with_suffix("")
 
 
 def get_user_manual_content() -> str:
@@ -71,7 +74,13 @@ def get_user_manual_content() -> str:
         if not candidate.exists():
             continue
         try:
-            return candidate.read_text(encoding="utf-8")
+            content = candidate.read_text(encoding="utf-8")
+            if candidate == USER_MANUAL_PATH and USER_MANUAL_PARTS_DIR.is_dir():
+                parts = sorted(USER_MANUAL_PARTS_DIR.glob("*.md"))
+                content = "\n".join(
+                    [content, *(part.read_text(encoding="utf-8") for part in parts)]
+                )
+            return content
         except (RuntimeError, ValueError, OSError) as e:
             return f"# Error Loading Manual\n\nFailed to load {candidate.name}: {e}"
     return (

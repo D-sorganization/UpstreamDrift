@@ -19,8 +19,10 @@ def _repo_root() -> Path:
 
 
 ROOT = _repo_root()
+MANUAL_INDEX = ROOT / "docs" / "user_guide" / "upstream_drift_user_manual.md"
 DOC_TARGETS = (
-    ROOT / "docs" / "user_guide" / "upstream_drift_user_manual.md",
+    MANUAL_INDEX,
+    *sorted(MANUAL_INDEX.with_suffix("").glob("*.md")),
     *sorted((ROOT / "docs" / "tutorials" / "content").glob("*.md")),
 )
 DEPRECATED_MODULE = "src.shared.python.engine_manager"
