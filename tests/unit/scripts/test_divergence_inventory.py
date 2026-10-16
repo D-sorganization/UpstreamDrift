@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import shutil
+import subprocess  # nosec B404 - fixed git invocations, no shell
 from pathlib import Path
 
 import pytest
@@ -99,10 +101,9 @@ def test_package_table_has_totals_row(fake_repo: Path) -> None:
 def test_write_then_check_roundtrip(fake_repo: Path) -> None:
     json_path = inv.DEFAULT_JSON
     assert inv.main(["--repo-root", str(fake_repo), "--write", "--no-authorship"]) == 0
-    written = json.loads((fake_repo / json_path).read_text(encoding="utf-8"))
-    assert written["schema_version"] == inv.SCHEMA_VERSION
-    assert written["totals"]["diverged"] == 1
-    assert (fake_repo / inv.DEFAULT_MARKDOWN).is_file()
+    header, records = inv.load_committed(fake_repo / json_path)
+    assert header["schema_version"] == inv.SCHEMA_VERSION
+    assert sum(1 for r in records if r["classification"] == "diverged") == 1
     assert inv.main(["--repo-root", str(fake_repo), "--check"]) == 0
 
     # A new UD-only file makes the inventory stale.
@@ -150,5 +151,147 @@ def test_spelling_only_divergence_is_flagged(tmp_path: Path) -> None:
     assert by_path["pid/__init__.py"].classification == "diverged"
     assert by_path["pid/__init__.py"].spelling_only is True
     assert by_path["pid/real.py"].spelling_only is False
-    assert inventory.to_json_dict()["totals"]["spelling-only"] == 1
+    assert sum(1 for r in inventory.files if r.spelling_only) == 1
     assert "| `pid` | 0 | 2 | 1 | 0 | 0 | 2 |" in inv.render_package_table(inventory)
+
+
+# --------------------------------------------------------------------------
+# UD #12833: the committed artifact must merge cleanly across PRs
+# --------------------------------------------------------------------------
+
+
+def _git(
+    repo: Path, *args: str, check: bool = True
+) -> subprocess.CompletedProcess[str]:
+    git = shutil.which("git")
+    assert git is not None
+    return subprocess.run(  # noqa: S603  # nosec B603 - fixed git args
+        [git, "-C", str(repo), "-c", "user.name=t", "-c", "user.email=t@t", *args],
+        check=check,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+
+
+def _commit_regenerated(repo: Path, message: str) -> None:
+    assert inv.main(["--repo-root", str(repo), "--write", "--no-authorship"]) == 0
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-q", "-m", message)
+
+
+@pytest.fixture
+def git_repo(tmp_path: Path) -> Path:
+    """A synthetic repo with a populated, committed inventory on ``main``."""
+    if shutil.which("git") is None:
+        pytest.skip("git not available")
+    ud = tmp_path / inv.DEFAULT_UD_ROOT
+    tools = tmp_path / inv.DEFAULT_TOOLS_ROOT
+    for index in range(12):
+        _write(ud / f"pkg{index:02d}/mod.py", f"v = {index}\n")
+    _write(tools / "pkg05/mod.py", "v = 5\n")
+    _write(tools / "pkg06/mod.py", "v = 600\n")
+    _git(tmp_path, "init", "-q", "-b", "main")
+    _commit_regenerated(tmp_path, "base")
+    return tmp_path
+
+
+def _branch_adding(repo: Path, branch: str, relative: str) -> None:
+    _git(repo, "checkout", "-q", "-b", branch, "main")
+    _write(repo / inv.DEFAULT_UD_ROOT / relative, "n = 1\n")
+    _commit_regenerated(repo, f"add {relative}")
+    _git(repo, "checkout", "-q", "main")
+
+
+@pytest.mark.parametrize(
+    ("first", "second"),
+    [
+        ("pkg02/new_a.py", "pkg09/new_b.py"),  # distant insertions
+        ("pkg02/a_first.py", "pkg02/z_last.py"),  # same package, split by a record
+        ("aaa/first.py", "zzz/last.py"),  # sort-order extremes (file head/tail)
+    ],
+)
+def test_two_branches_adding_different_files_merge_cleanly(
+    git_repo: Path, first: str, second: str
+) -> None:
+    _branch_adding(git_repo, "feat-a", first)
+    _branch_adding(git_repo, "feat-b", second)
+    merged = _git(
+        git_repo, "merge-tree", "--write-tree", "feat-a", "feat-b", check=False
+    )
+    assert merged.returncode == 0, merged.stdout + merged.stderr
+    assert "CONFLICT" not in merged.stdout
+
+
+def test_committed_artifacts_hold_only_stable_per_path_facts(git_repo: Path) -> None:
+    text = (git_repo / inv.DEFAULT_JSON).read_text(encoding="utf-8")
+    lines = text.splitlines()
+    records = [json.loads(line) for line in lines[1:]]
+    assert json.loads(lines[0])["schema_version"] == inv.SCHEMA_VERSION
+    assert [r["path"] for r in records] == sorted(r["path"] for r in records)
+    for record in records:
+        assert set(record) == {"path", "classification", "package", "spelling_only"}
+    # No aggregates, byte sizes or authorship anywhere in the committed file.
+    for banned in ("totals", "packages", "bytes", "authorship", "byte_delta"):
+        assert banned not in text
+    assert not (git_repo / "docs/shared_tools/divergence_inventory.md").exists()
+
+
+def test_check_catches_misclassified_path(git_repo: Path) -> None:
+    json_path = git_repo / inv.DEFAULT_JSON
+    lines = json_path.read_text(encoding="utf-8").splitlines()
+    index = next(i for i, line in enumerate(lines) if '"pkg06/mod.py"' in line)
+    record = json.loads(lines[index])
+    assert record["classification"] == "diverged"
+    record["classification"] = "identical"
+    lines[index] = json.dumps(record)
+    json_path.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+    errors = inv.check_inventory(git_repo, json_path)
+    assert any("pkg06/mod.py" in e and "identical -> diverged" in e for e in errors)
+
+
+def test_check_catches_wrong_spelling_only_flag(tmp_path: Path) -> None:
+    _write(
+        tmp_path / inv.DEFAULT_UD_ROOT / "p/a.py", "from src.shared.python.p import x\n"
+    )
+    _write(
+        tmp_path / inv.DEFAULT_TOOLS_ROOT / "p/a.py", "from shared.python.p import y\n"
+    )
+    assert inv.main(["--repo-root", str(tmp_path), "--write", "--no-authorship"]) == 0
+    json_path = tmp_path / inv.DEFAULT_JSON
+    json_path.write_text(
+        json_path.read_text(encoding="utf-8").replace(
+            '"spelling_only": false', '"spelling_only": true'
+        ),
+        encoding="utf-8",
+        newline="\n",
+    )
+    assert any("p/a.py" in e for e in inv.check_inventory(tmp_path, json_path))
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        "not json\n",
+        '{"schema_version": 1, "tools_pin": null}\n',
+        '{"schema_version": 2, "tools_pin": null, "ud_root": "a", "tools_root": "b"}\n'
+        '{"path": "x.py", "classification": "bogus", "package": "x.py", '
+        '"spelling_only": false}\n',
+        '{"schema_version": 2, "tools_pin": null, "ud_root": "a", "tools_root": "b"}\n'
+        '{"path": "x.py", "classification": "identical"}\n',
+    ],
+)
+def test_load_rejects_malformed_artifact(tmp_path: Path, body: str) -> None:
+    path = _write(tmp_path / "inv.jsonl", body)
+    with pytest.raises(inv.InventoryFormatError):
+        inv.load_committed(path)
+
+
+def test_report_carries_the_volatile_data(
+    fake_repo: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert inv.main(["--repo-root", str(fake_repo), "--report"]) == 0
+    out = capsys.readouterr().out
+    assert "# Shared Tools Divergence Inventory" in out
+    assert "Δ bytes" in out and "| **Total** |" in out
+    assert "ai/gui/panel.py" in out
