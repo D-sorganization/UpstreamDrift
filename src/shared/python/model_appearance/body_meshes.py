@@ -214,6 +214,8 @@ class _Context:
     sections: Mapping[str, BodySection]
     shapes: Mapping[str, Sequence[Shape]]
     club: ClubAssembly | None
+    #: The parametric head draws the head body (skull, face, ears, neck).
+    head_enabled: bool
 
 
 @dataclass(frozen=True)
@@ -302,7 +304,7 @@ def _meshes_for_body(
     if rule is not None and rule.mesh == "none":
         return []
     part = library.classify_body(body)
-    if part == "head" and ctx.doc.head.enabled:
+    if part == "head" and ctx.head_enabled:
         return []  # drawn by the shared head: skull, face, ears and neck
     if part == "club" and ctx.club is not None:
         finish = library.material_name_for(ctx.doc, body)
@@ -334,7 +336,7 @@ def body_meshes(
     shapes: dict[str, list[Shape]] = {}
     for shape in skeleton.shapes:
         shapes.setdefault(shape.body, []).append(shape)
-    ctx = _Context(doc, body_sections(spec), shapes, club)
+    ctx = _Context(doc, body_sections(spec), shapes, club, doc.head.enabled)
     by_body: dict[str, list[Capsule]] = {}
     for cap in skeleton.capsules:
         by_body.setdefault(cap.body, []).append(cap)
