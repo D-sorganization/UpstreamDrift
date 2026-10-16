@@ -22,16 +22,22 @@ barbell lift (``squat``, ``deadlift``, ``bench_press``, ``snatch``,
   width is solved to the standard's ``width_m`` scaled by
   ``height_m / standard_height_m``.
 * **Contact.** ``SmoothSphereHalfSpaceForce`` between a floor half-space and
-  the three MS-20 calibrated spheres per foot (heel, forefoot, toe; the
-  parameters of ``motion_matching.execution.spec_builder``).  The bench press
-  adds a bench-top half-space paired only with four back spheres placed at the
+  the three MS-20 sphere stations per foot (heel, forefoot, toe; the layout of
+  ``motion_matching.execution.spec_builder``).  The bench press adds a
+  bench-top half-space paired only with four back spheres placed at the
   model's posterior shoulder (``RPSH``/``LPSH``) and posterior iliac
-  (``RPSI``/``LPSI``) markers.
+  (``RPSI``/``LPSI``) markers.  The stiffness is OpenSim_Models PR #476's
+  ``CONTACT_STIFFNESS`` (1e7 Pa, which seats lifter plus bar 4.3 mm deep
+  there), not MS-20's 1e5 Pa (a 0.119 m sink under 200 kg, OSL-12 #13048);
+  dissipation and friction stay MS-20's.
 
 Hold pose (assumption, documented): one static pose per lift that the
 Rajagopal joint ranges admit -- squat: standing with the bar on the upper
 back; deadlift: lockout; bench press: supine, arms extended (unrack);
 snatch and clean and jerk: hang (standing, arms straight, each lift's grip).
+Standing holds are balanced (OSL-12, #13048): the body leans at the ankles,
+feet flat, until the centre of mass of body plus bar is over the centre of
+the foot spheres (:func:`_balance_lean`).
 The Rajagopal shoulder (``arm_flex`` <= 90 deg, ``arm_add`` >= -120 deg) and
 elbow (<= 150 deg) cannot reach a straight-arm overhead lockout or a front
 rack at the clean grip width, so neither is claimed.  No shoulder, back or chest contact with the bar is modelled: in the
@@ -55,7 +61,6 @@ from scipy.optimize import brentq
 from scipy.spatial.transform import Rotation
 
 from src.engines.physics_engines.opensim.python.musculoskeletal_swing import (
-    _scale_set,
     resolve_base_model,
 )
 from src.shared.python.engine_core.opensim_runtime import import_opensim
@@ -71,6 +76,8 @@ __all__ = [
     "GENERIC_STATURE_M",
     "HOLD_POSES",
     "LEFT_WELD_JOINT",
+    "LIFT_CONTACT_STIFFNESS_PA",
+    "PENETRATION_LIMIT_M",
     "RIGHT_WELD_CONSTRAINT",
     "HoldPose",
     "LiftModelBuild",
@@ -98,6 +105,17 @@ _BACK_SPHERES = (
     ("RPSI", "pelvis", 0.04),
     ("LPSI", "pelvis", 0.04),
 )
+#: Contact stiffness (Pa) of every sphere: OpenSim_Models PR #476
+#: (``shared/contact/policy.py`` ``CONTACT_STIFFNESS``), which seats an 80 kg
+#: lifter plus a 120 kg bar 4.3 mm deep on eight 0.02 m spheres.
+LIFT_CONTACT_STIFFNESS_PA = 1.0e7
+#: Largest accepted sphere penetration at a balanced hold: the 1-8 mm stance
+#: band OpenSim_Models PR #476 states for its seated feet.  Declared before
+#: measuring; never loosened.
+PENETRATION_LIMIT_M = 0.008
+#: Bracket (deg) of the ankle lean that balances a standing hold.
+_LEAN_BRACKET_DEG = 25.0
+_LEAN_XTOL_RAD = 1e-10
 #: Bracket (deg) searched either side of the nominal ``arm_add`` for the grip.
 _ADD_BRACKET_DEG = 30.0
 _WIDTH_XTOL_M = 1e-6
@@ -227,28 +245,50 @@ def _solve_arm_add(model: Any, pose: HoldPose, target_m: float) -> float:
     return float(brentq(residual, low, high, xtol=_WIDTH_XTOL_M))
 
 
+SegmentScale = float | tuple[float, float, float]
+
+
+def _axis_factors(body: str, factor: SegmentScale) -> tuple[float, float, float]:
+    """Per-axis (x, y, z) factors of one segment scale.
+
+    Raises:
+        ValueError: when a factor is not positive and finite or not 1 or 3 long.
+    """
+    axes = (factor,) * 3 if isinstance(factor, (int, float)) else tuple(factor)
+    if len(axes) != 3 or not all(math.isfinite(f) and f > 0.0 for f in axes):
+        raise ValueError(f"segment scale of {body!r} must be positive, got {factor}")
+    return (float(axes[0]), float(axes[1]), float(axes[2]))
+
+
 def _scale_body(
     model: Any,
     scale: float,
     body_mass_kg: float,
-    segment_scales: Mapping[str, float] | None = None,
-) -> dict[str, float]:
+    segment_scales: Mapping[str, SegmentScale] | None = None,
+) -> dict[str, tuple[float, float, float]]:
     """Scale every body by ``scale`` except those given in ``segment_scales``.
+
+    A segment scale is one factor or an ``(x, y, z)`` triple in the body
+    frame (OSL-12 scales the pelvis mediolaterally to the bundle hip width).
 
     Raises:
         ValueError: on an unknown body or a non-positive segment factor.
     """
+    osim = import_opensim()
     state = model.initSystem()
-    factors = {body.getName(): scale for body in model.getBodySet()}
+    factors = {body.getName(): (scale,) * 3 for body in model.getBodySet()}
     for body, factor in (segment_scales or {}).items():
         if body not in factors:
             raise ValueError(f"segment_scales names unknown body {body!r}")
-        if not math.isfinite(factor) or factor <= 0.0:
-            raise ValueError(
-                f"segment scale of {body!r} must be positive, got {factor}"
-            )
-        factors[body] = float(factor)
-    model.scale(state, _scale_set(factors), True, float(body_mass_kg))
+        factors[body] = _axis_factors(body, factor)
+    scale_set = osim.ScaleSet()
+    for body, axes in factors.items():
+        entry = osim.Scale()
+        entry.setSegmentName(body)
+        entry.setScaleFactors(osim.Vec3(*axes))
+        entry.setApply(True)
+        scale_set.cloneAndAppend(entry)
+    model.scale(state, scale_set, True, float(body_mass_kg))
     return factors
 
 
@@ -304,7 +344,7 @@ def _add_contact(
         force = osim.SmoothSphereHalfSpaceForce(
             CONTACT_PREFIX + name, sphere, half_space
         )
-        force.set_stiffness(contact_spec.CONTACT_STIFFNESS_N_M)
+        force.set_stiffness(LIFT_CONTACT_STIFFNESS_PA)
         force.set_dissipation(contact_spec.CONTACT_DISSIPATION_S_M)
         force.set_static_friction(contact_spec.CONTACT_STATIC_FRICTION)
         force.set_dynamic_friction(contact_spec.CONTACT_DYNAMIC_FRICTION)
@@ -313,6 +353,80 @@ def _add_contact(
         model.addForce(force)
         names.append(force.getName())
     return names
+
+
+def _ground_points(
+    model: Any, state: Any, spheres: list[tuple[str, str, np.ndarray, float]]
+) -> np.ndarray:
+    """Lowest point (ground frame) of each sphere, in ``spheres`` order."""
+    osim = import_opensim()
+    model.realizePosition(state)
+    bodies = model.getBodySet()
+    points = []
+    for _, body, station, radius in spheres:
+        centre = _vec3(
+            bodies.get(body).findStationLocationInGround(state, osim.Vec3(*station))
+        )
+        points.append(centre - np.array([0.0, radius, 0.0]))
+    return np.asarray(points)
+
+
+def _system_com(model: Any, state: Any, bar_mass_kg: float) -> np.ndarray:
+    """Centre of mass of body plus bar, the bar at the hand-centre midpoint.
+
+    Called before the barbell body exists, so the bar is added by hand.
+    """
+    model.realizePosition(state)
+    body_mass = float(model.getTotalMass(state))
+    body_com = _vec3(model.calcMassCenterPosition(state))
+    bar = 0.5 * (_hand_point(model, state, "l") + _hand_point(model, state, "r"))
+    return (body_mass * body_com + bar_mass_kg * bar) / (body_mass + bar_mass_kg)
+
+
+def _balance_lean(
+    model: Any,
+    coordinates: dict[str, float],
+    feet: list[tuple[str, str, np.ndarray, float]],
+    bar_mass_kg: float,
+) -> dict[str, float]:
+    """Lean a standing hold at the ankles until it balances over the feet.
+
+    Both ``ankle_angle`` coordinates change by ``lean`` and ``pelvis_tilt`` by
+    ``-lean``, which rotates everything above the ankles while the feet stay
+    flat (the oblique Rajagopal ankle axis leaves a sub-degree foot roll).
+    ``lean`` is solved so the centre of mass of body plus bar lies over the
+    mean of the foot spheres' lowest points (fore-aft).  Mutates
+    ``coordinates`` and the model defaults.
+
+    Postcondition: the returned ``com_offset_m`` is below 1e-6 m.
+
+    Raises:
+        ValueError: when no lean within +/-25 deg balances the hold.
+    """
+    state = model.initSystem()
+    coords = model.updCoordinateSet()
+    base = {
+        name: coordinates.get(name, 0.0)
+        for name in ("ankle_angle_l", "ankle_angle_r", "pelvis_tilt")
+    }
+
+    def offset(lean: float) -> float:
+        for name, value in base.items():
+            sign = -1.0 if name == "pelvis_tilt" else 1.0
+            coords.get(name).setValue(state, value + sign * lean, False)
+        com = _system_com(model, state, bar_mass_kg)
+        return float(com[0] - _ground_points(model, state, feet)[:, 0].mean())
+
+    bound = math.radians(_LEAN_BRACKET_DEG)
+    if offset(-bound) * offset(bound) > 0.0:
+        raise ValueError("no ankle lean within +/-25 deg balances the hold")
+    lean = float(brentq(offset, -bound, bound, xtol=_LEAN_XTOL_RAD))
+    residual = offset(lean)
+    for name, value in base.items():
+        sign = -1.0 if name == "pelvis_tilt" else 1.0
+        coordinates[name] = value + sign * lean
+    _apply_defaults(model, {name: coordinates[name] for name in base})
+    return {"ankle_lean_rad": lean, "com_offset_m": residual}
 
 
 def _half_space(model: Any, name: str, height_m: float) -> Any:
@@ -435,13 +549,14 @@ def build_lift_model(
     height_m: float,
     bar_mass_kg: float,
     base_model_path: str | Path | None = None,
-    segment_scales: Mapping[str, float] | None = None,
+    segment_scales: Mapping[str, SegmentScale] | None = None,
 ) -> LiftModelBuild:
     """Compose the musculoskeletal OpenSim model of one barbell lift.
 
     ``segment_scales`` overrides the uniform ``height_m`` scale per body (the
-    measured segment scaling of OSL-3); every other body keeps the uniform
-    factor.
+    measured segment scaling of OSL-3; a triple scales the body's x, y, z
+    axes separately); every other body keeps the uniform factor.  A standing
+    hold is balanced by an ankle lean (:func:`_balance_lean`).
 
     Postconditions: the returned model passes ``initSystem``; its skeleton
     mass equals ``body_mass_kg``; the hand-centre grip width equals the
@@ -472,6 +587,9 @@ def build_lift_model(
     _apply_defaults(model, coordinates)
 
     feet = _foot_spheres(scale)
+    balance = (
+        None if pose.supine else _balance_lean(model, coordinates, feet, bar_mass_kg)
+    )
     state = model.initSystem()
     lift_y = -_lowest_point(model, state, feet)
     coordinates["pelvis_ty"] = (
@@ -505,7 +623,9 @@ def build_lift_model(
         "generic_stature_m": GENERIC_STATURE_M,
         "scale_factor": scale,
         "segment_scale_factors": {
-            body: factor for body, factor in factors.items() if factor != scale
+            body: axes[0] if len(set(axes)) == 1 else list(axes)
+            for body, axes in factors.items()
+            if axes != (scale,) * 3
         },
         "skeleton_mass_kg": skeleton_mass,
         "bar_mass_kg": float(bar_mass_kg),
@@ -514,12 +634,19 @@ def build_lift_model(
             "description": pose.description,
             "supine": pose.supine,
             "coordinates_rad": coordinates,
+            "balance": balance,
         },
         "grip_width_m": grip_width,
         "grip_width_target_m": target_width,
         "bench_height_m": bench_height,
         "contact_forces": contacts,
-        "contact_parameters": contact_spec.CONTACT_RECEIPT_SHA256,
+        "contact_parameters": {
+            "stiffness_pa": LIFT_CONTACT_STIFFNESS_PA,
+            "stiffness_source": "OpenSim_Models PR #476 CONTACT_STIFFNESS",
+            "dissipation_friction_source": "MS-20 (#10335) receipt "
+            + contact_spec.CONTACT_RECEIPT_SHA256,
+            "penetration_limit_m": PENETRATION_LIMIT_M,
+        },
     }
     return LiftModelBuild(model=model, receipt=receipt)
 

@@ -4,11 +4,21 @@ Builds on the OSL-2 lift models (:mod:`.msk_lift_model`):
 
 * :func:`bundle_segment_scales` -- measured segment scaling: thigh, shank and
   trunk factors from the bundle's landmark distances over the generic
-  Rajagopal joint-centre markers (``XHJC``, ``XKJC``, ``XAJC``, ``XSJC``).
+  Rajagopal joint-centre markers (``XHJC``, ``XKJC``, ``XAJC``, ``XSJC``),
+  and (OSL-12, #13048) the pelvis scaled mediolaterally by the bundle's hip
+  width over the generic one (0.2205 m / 0.1545 m), uniformly otherwise.
+* :func:`pelvis_landmark_targets` -- virtual ASIS/PSIS targets: the model's
+  own ``RASI``/``LASI``/``RPSI``/``LPSI`` markers carried into the bundle by
+  its Rajagopal pelvis frame (``bundle_targets.bundle_pelvis_rotation``) and
+  hip-centre midpoint, with the same pelvis scaling.  They are tracked only
+  when the bundle's own hip flexion lies inside the model's range; the LIFT-5
+  squat bundle's does not (159-171 deg against 120 deg: LIFT-5 never observed
+  its pelvis either), so there they are reported, not tracked.
 * :func:`run_inverse_kinematics` -- OpenSim's ``InverseKinematicsSolver``
   (the engine of ``InverseKinematicsTool``) tracks the bundle landmarks.
-  Coordinate range clamping is switched off so the solver follows the bundle;
-  every coordinate that leaves the model's declared range is reported.
+  Coordinate ranges are clamped (OpenSim's IK default) except the arms, whose
+  clamping makes the two-hand bar weld infeasible; every coordinate that
+  leaves the model's declared range is reported.
 * :func:`run_inverse_dynamics` -- OpenSim's ``InverseDynamicsSolver`` with
   the bundle's external loads applied as body forces: the GCV-1 foot wrench
   on each calcaneus and the GCV-7 bar wrench on each hand (the barbell body is
@@ -18,10 +28,12 @@ Builds on the OSL-2 lift models (:mod:`.msk_lift_model`):
   Model forces (muscles, actuators, contact) are removed; gravity stays.
   The six pelvis generalized forces are the residuals.
 * :func:`static_hold_grf` -- the contact-derived ground reaction of a hold:
-  ``pelvis_ty`` is solved where OpenSim's own inverse dynamics (contacts on,
-  every other coordinate at the hold pose, at rest) has zero vertical
-  residual; the per-sphere contact forces are then read from the
-  ``SmoothSphereHalfSpaceForce`` record values and reduced by GCV-1.
+  ``pelvis_ty`` and the three pelvis rotations are solved where OpenSim's own
+  inverse dynamics (contacts on, every joint at the hold pose, at rest) has
+  zero vertical and rotational pelvis residual -- the hold rocks rigidly on
+  its contacts into equilibrium; the per-sphere contact forces are then read
+  from the ``SmoothSphereHalfSpaceForce`` record values and reduced by GCV-1,
+  and every sphere's penetration is checked against the declared limit.
 
 Thresholds are declared here, before any measurement, and never loosened:
 
@@ -46,11 +58,15 @@ from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.optimize import brentq
+from scipy.optimize import brentq, least_squares, root
+from scipy.spatial.transform import Rotation
 
 from src.engines.physics_engines.opensim.python.msk_lift_model import (
     BAR_BODY,
+    BENCH_TOP,
     CONTACT_PREFIX,
+    GENERIC_STATURE_M,
+    PENETRATION_LIMIT_M,
     LiftModelBuild,
 )
 from src.shared.python.biomechanics.ground_reaction import (
@@ -70,15 +86,20 @@ from src.shared.python.lifting.sagittal_retarget import (
 Array = NDArray[np.float64]
 
 __all__ = [
+    "ARM_TASK_WEIGHT",
+    "BAR_WEIGHT",
     "IK_COORDINATE_RMS_THRESHOLD_RAD",
     "IK_MARKER_MAX_THRESHOLD_M",
     "IK_MARKER_RMS_THRESHOLD_M",
     "RESIDUAL_FORCE_FRACTION",
     "RESIDUAL_MOMENT_FRACTION",
     "RESIDUAL_COORDINATES",
+    "PELVIS_LANDMARKS",
     "IKResult",
     "IDResult",
+    "PelvisLandmarks",
     "bundle_segment_scales",
+    "pelvis_landmark_targets",
     "ik_receipt",
     "id_receipt",
     "run_inverse_dynamics",
@@ -99,12 +120,17 @@ RESIDUAL_COORDINATES: tuple[str, ...] = (
     "pelvis_ty",
     "pelvis_tz",
 )
-#: Marker weights, fixed before measuring: the lower-limb joint centres and
+#: Marker weights, fixed before measuring (OSL-3): the lower-limb centres and
 #: feet are anatomically shared with the bundle (Rajagopal lower limbs); the
 #: shoulders and bar sit on a different (golf) upper body, so they weigh less.
 LOWER_LIMB_WEIGHT = 10.0
 UPPER_BODY_WEIGHT = 1.0
 _UPPER_BODY = ("shoulder_l", "shoulder_r", "bar")
+#: Bar weight (OSL-12): with the arms inside their Rajagopal ranges the hands
+#: cannot reach the bundle's bar (it sits 0.15-0.24 m away), so at weight 1
+#: the bar drags the trunk off its target (trunk-angle RMS 4.95 deg); it is
+#: tracked lightly and its error still reported.
+BAR_WEIGHT = 0.1
 _MARKER_PREFIX = "ik_"
 #: Landmark -> OpenSim body whose origin it is (feet: calcaneus stations).
 _BODY_OF = {
@@ -119,13 +145,27 @@ _BODY_OF = {
     "bar": BAR_BODY,
 }
 _IK_ACCURACY = 1e-8
+#: Virtual pelvis landmark -> the generic model's own pelvis marker.
+PELVIS_LANDMARKS: Mapping[str, str] = {
+    "asis_l": "LASI",
+    "asis_r": "RASI",
+    "psis_l": "LPSI",
+    "psis_r": "RPSI",
+}
+#: Pelvis landmark weight when tracked: same as the hip centres it joins.
+PELVIS_WEIGHT = LOWER_LIMB_WEIGHT
+#: Arm coordinates: held by weak coordinate tasks rather than clamped, since
+#: clamping them together with those tasks leaves OpenSim's assembler unable
+#: to close the two-hand bar weld (Ipopt failure at the first squat frame).
+_UNCLAMPED_PREFIXES = ("arm_", "elbow_", "pro_sup", "wrist_")
+#: Arm coordinate-task weight (marker weights are 1 and 10).
+ARM_TASK_WEIGHT = 0.01
 #: Stated limitation of the landmark set (recorded in every IK receipt).
 _PELVIS_OBSERVABILITY = (
-    "pelvis orientation is weakly observed: the only pelvis-borne landmarks "
-    "are the two hip centres, so pelvis tilt trades off against hip flexion "
-    "and lumbar extension; the bundle spec's pelvis frame does not map onto "
-    "the Rajagopal pelvis markers by a verified transform, so no virtual "
-    "pelvis markers are added"
+    "pelvis orientation is weakly observed in the bundle itself: LIFT-5 "
+    "tracked only the hip centres on the pelvis, so the bundle's pelvis tilt "
+    "is whatever its own IK left; with coordinate ranges clamped, OpenSim "
+    "resolves the hip/pelvis/lumbar trade-off inside the Rajagopal ranges"
 )
 _GCV_DEGREE = 5
 _OPENSIM_SAGITTAL = SagittalFrame(forward=(1.0, 0.0, 0.0), up=(0.0, 1.0, 0.0))
@@ -144,24 +184,62 @@ def _vec3(v: Any) -> Array:
 # --------------------------------------------------------------------------
 
 
-def _generic_marker_points(base_model_path: Path) -> dict[str, Array]:
+def _generic_marker_points(
+    base_model_path: Path, frame: str = "ground"
+) -> dict[str, Array]:
+    """Joint-centre and pelvis markers of the generic model at its default pose.
+
+    ``frame`` is ``ground`` or a body name the locations are expressed in.
+    """
     osim = import_opensim()
     model = osim.Model(str(base_model_path))
     state = model.initSystem()
     markers = model.getMarkerSet()
-    names = [f"{s}{j}JC" for s in "RL" for j in "HKAS"]
-    return {n: _vec3(markers.get(n).getLocationInGround(state)) for n in names}
+    names = [f"{s}{j}JC" for s in "RL" for j in "HKAS"] + list(
+        PELVIS_LANDMARKS.values()
+    )
+    into = model.getGround() if frame == "ground" else model.getBodySet().get(frame)
+    out = {}
+    for name in names:
+        marker = markers.get(name)
+        out[name] = _vec3(
+            marker.getParentFrame().findStationLocationInAnotherFrame(
+                state, marker.get_location(), into
+            )
+        )
+    return out
+
+
+def _hip_widths(targets: LiftTargets, generic: Mapping[str, Array]) -> tuple:
+    """(bundle, generic) hip-centre separations, metres (bundle frame 0)."""
+    bundle = targets.landmarks(0)
+    return (
+        float(np.linalg.norm(bundle["hip_r"] - bundle["hip_l"])),
+        float(np.linalg.norm(generic["RHJC"] - generic["LHJC"])),
+    )
+
+
+def _pelvis_scale(
+    targets: LiftTargets, generic: Mapping[str, Array]
+) -> tuple[float, float, float]:
+    """Pelvis (x, y, z) factors: stature-uniform, hip width mediolaterally."""
+    bundle_width, generic_width = _hip_widths(targets, generic)
+    uniform = targets.height_m / GENERIC_STATURE_M
+    return (uniform, uniform, bundle_width / generic_width)
 
 
 def bundle_segment_scales(
     targets: LiftTargets, base_model_path: str | Path
-) -> dict[str, float]:
+) -> dict[str, float | tuple[float, float, float]]:
     """Per-body scale factors fitting the generic body to the bundle (frame 0).
 
     Thigh (``femur``, ``patella``): hip-to-knee distance; shank (``tibia``,
     ``talus``, ``calcn``, ``toes``): knee-to-ankle distance; ``torso``:
-    hip-centre midpoint to shoulder-centre midpoint.  Pelvis and arms keep the
-    uniform height scale (the bundle's golf pelvis and arms are not
+    hip-centre midpoint to shoulder-centre midpoint; ``pelvis``: the triple
+    (stature, stature, bundle hip width / generic hip width) -- the bundle's
+    hip centres are 0.2205 m apart along its pelvis ``z`` against the generic
+    0.1545 m, while nothing in the bundle measures pelvis depth or height.
+    Arms keep the uniform height scale (the bundle's golf arms are not
     Rajagopal's, so their landmarks do not measure the model's segments).
 
     Postcondition: every factor is positive and finite.
@@ -186,9 +264,15 @@ def bundle_segment_scales(
     g_mid_shoulder = 0.5 * (generic["RSJC"] + generic["LSJC"])
     trunk = np.linalg.norm(mid["shoulder"] - mid["hip"])
     factors["torso"] = float(trunk / np.linalg.norm(g_mid_shoulder - g_mid_hip))
-    if not all(math.isfinite(f) and f > 0.0 for f in factors.values()):
-        raise ValueError(f"degenerate segment scales {factors}")
-    return factors
+    pelvis = _pelvis_scale(
+        targets, _generic_marker_points(Path(base_model_path), "pelvis")
+    )
+    scales: dict[str, float | tuple[float, float, float]] = dict(factors)
+    scales["pelvis"] = pelvis
+    flat = [*factors.values(), *pelvis]
+    if not all(math.isfinite(f) and f > 0.0 for f in flat):
+        raise ValueError(f"degenerate segment scales {scales}")
+    return scales
 
 
 # --------------------------------------------------------------------------
@@ -197,8 +281,118 @@ def bundle_segment_scales(
 
 
 @dataclass(frozen=True)
+class PelvisLandmarks:
+    """Virtual ASIS/PSIS targets in the OpenSim lift frame and their provenance.
+
+    ``positions_m`` maps each :data:`PELVIS_LANDMARKS` label to (N, 3) target
+    points; ``scale`` is the pelvis (x, y, z) factor triple the model uses;
+    ``tracked`` says whether IK follows them, ``reason`` why (not).
+    """
+
+    positions_m: Mapping[str, Array]
+    scale: tuple[float, float, float]
+    hip_width_bundle_m: float
+    hip_width_generic_m: float
+    source_hip_flexion_rad: tuple[float, float]
+    model_hip_flexion_range_rad: tuple[float, float]
+    bundle_pelvis_tilt_rad: tuple[float, float]
+    tracked: bool
+    reason: str
+
+    def record(self) -> dict[str, Any]:
+        return {
+            "source": "the generic RajagopalLaiUhlrich2023.osim pelvis markers "
+            + "/".join(PELVIS_LANDMARKS.values()),
+            "mapping": "bundle hip-centre midpoint + bundle Rajagopal pelvis "
+            "frame (bundle_targets.bundle_pelvis_rotation) applied to the "
+            "generic marker offsets from the generic hip-centre midpoint, "
+            "scaled by the pelvis factors",
+            "hip_width_bundle_m": self.hip_width_bundle_m,
+            "hip_width_generic_m": self.hip_width_generic_m,
+            "pelvis_scale_xyz": list(self.scale),
+            "source_hip_flexion_rad": list(self.source_hip_flexion_rad),
+            "model_hip_flexion_range_rad": list(self.model_hip_flexion_range_rad),
+            "bundle_pelvis_tilt_rad": list(self.bundle_pelvis_tilt_rad),
+            "tracked": self.tracked,
+            "reason": self.reason,
+        }
+
+
+def _span(values: Array) -> tuple[float, float]:
+    return float(np.min(values)), float(np.max(values))
+
+
+def pelvis_landmark_targets(
+    build: LiftModelBuild, targets: LiftTargets, base_model_path: str | Path
+) -> PelvisLandmarks:
+    """Virtual ASIS/PSIS targets mapped from the bundle's pelvis.
+
+    Each generic pelvis marker's offset from the generic hip-centre midpoint
+    (pelvis frame) is scaled by the pelvis factors of
+    :func:`bundle_segment_scales` and placed with the bundle's Rajagopal
+    pelvis frame at the bundle's hip-centre midpoint, so a model scaled with
+    those factors whose pelvis coincides with the bundle's carries its own
+    markers exactly onto the targets.  They are tracked only when the
+    bundle's own hip flexion lies inside the model's ``hip_flexion`` range: a
+    source pelvis that needs out-of-range hips is not a physical observation.
+
+    Postcondition: every position array is (N, 3) and finite.
+    """
+    generic = _generic_marker_points(Path(base_model_path), "pelvis")
+    scale = _pelvis_scale(targets, generic)
+    bundle_width, generic_width = _hip_widths(targets, generic)
+    mid_generic = 0.5 * (generic["RHJC"] + generic["LHJC"])
+    hips = [IK_LANDMARKS.index(x) for x in ("hip_l", "hip_r")]
+    mid_bundle = targets.positions_m[:, hips].mean(axis=1)
+    positions = {
+        label: mid_bundle
+        + np.einsum(
+            "nij,j->ni",
+            targets.pelvis_rotation,
+            np.asarray(scale) * (generic[marker] - mid_generic),
+        )
+        for label, marker in PELVIS_LANDMARKS.items()
+    }
+    if not all(np.isfinite(p).all() for p in positions.values()):
+        raise ValueError("non-finite pelvis landmark targets")
+    flexion = np.concatenate(
+        [targets.source_coordinates[f"hip_flexion_{s}"] for s in "lr"]
+    )
+    coordinate = build.model.getCoordinateSet().get("hip_flexion_r")
+    low, high = float(coordinate.getRangeMin()), float(coordinate.getRangeMax())
+    source = _span(flexion)
+    tracked = low <= source[0] and source[1] <= high
+    tilt = [Rotation.from_matrix(r).as_euler("ZXY")[0] for r in targets.pelvis_rotation]
+    reason = (
+        "the bundle's hip flexion lies inside the model range"
+        if tracked
+        else f"the bundle's own hip flexion spans {math.degrees(source[0]):.1f}"
+        f"-{math.degrees(source[1]):.1f} deg, outside the model's "
+        f"{math.degrees(low):.0f}-{math.degrees(high):.0f} deg range: its "
+        "pelvis tilt was never observed (LIFT-5 tracked only the hip centres), "
+        "so its pelvis landmarks are reported, not tracked"
+    )
+    return PelvisLandmarks(
+        positions_m=positions,
+        scale=scale,
+        hip_width_bundle_m=bundle_width,
+        hip_width_generic_m=generic_width,
+        source_hip_flexion_rad=source,
+        model_hip_flexion_range_rad=(low, high),
+        bundle_pelvis_tilt_rad=_span(np.asarray(tilt)),
+        tracked=tracked,
+        reason=reason,
+    )
+
+
+@dataclass(frozen=True)
 class IKResult:
-    """IK solution per target state (coordinate-set order, radians/metres)."""
+    """IK solution per target state (coordinate-set order, radians/metres).
+
+    ``markers`` are the tracked labels (:data:`IK_LANDMARKS`, then the pelvis
+    landmarks when tracked); ``pelvis_points_m`` (N, 4, 3) are the model's
+    own pelvis markers in :data:`PELVIS_LANDMARKS` order, tracked or not.
+    """
 
     coordinates: tuple[str, ...]
     q: Array
@@ -206,6 +400,7 @@ class IKResult:
     marker_error_m: Array
     model_points_m: Array
     range_violations: Mapping[str, dict[str, float | int]]
+    pelvis_points_m: Array
 
 
 def _station(build: LiftModelBuild, label: str, targets: LiftTargets) -> tuple:
@@ -218,31 +413,56 @@ def _station(build: LiftModelBuild, label: str, targets: LiftTargets) -> tuple:
     return body, tuple(scale * x for x in station)
 
 
-def _add_markers(build: LiftModelBuild, targets: LiftTargets) -> None:
+def _add_markers(
+    build: LiftModelBuild, targets: LiftTargets, pelvis: PelvisLandmarks
+) -> tuple[str, ...]:
+    """Add one ``ik_<label>`` marker per tracked label; return the labels."""
     osim = import_opensim()
     model = build.model
     for label in IK_LANDMARKS:
         body, station = _station(build, label, targets)
         frame = model.getBodySet().get(body)
         model.addMarker(osim.Marker(_MARKER_PREFIX + label, frame, osim.Vec3(*station)))
+    labels = IK_LANDMARKS
+    if pelvis.tracked:
+        markers = model.getMarkerSet()
+        frame = model.getBodySet().get("pelvis")
+        for label, marker in PELVIS_LANDMARKS.items():
+            location = markers.get(marker).get_location()
+            model.addMarker(osim.Marker(_MARKER_PREFIX + label, frame, location))
+        labels = IK_LANDMARKS + tuple(PELVIS_LANDMARKS)
     model.finalizeConnections()
+    return labels
 
 
-def _markers_reference(targets: LiftTargets) -> Any:
+def _marker_weight(label: str) -> float:
+    if label in PELVIS_LANDMARKS:
+        return PELVIS_WEIGHT
+    if label == "bar":
+        return BAR_WEIGHT
+    return UPPER_BODY_WEIGHT if label in _UPPER_BODY else LOWER_LIMB_WEIGHT
+
+
+def _markers_reference(
+    targets: LiftTargets, pelvis: PelvisLandmarks, labels: tuple[str, ...]
+) -> Any:
     osim = import_opensim()
-    labels = osim.StdVectorString()
-    for label in IK_LANDMARKS:
-        labels.append(_MARKER_PREFIX + label)
+    names = osim.StdVectorString()
+    for label in labels:
+        names.append(_MARKER_PREFIX + label)
+    points = {x: targets.positions_m[:, IK_LANDMARKS.index(x)] for x in IK_LANDMARKS}
+    points |= dict(pelvis.positions_m)
     table = osim.TimeSeriesTableVec3()
-    table.setColumnLabels(labels)
-    for t, row in zip(targets.time_s, targets.positions_m, strict=True):
-        vecs = [osim.Vec3(*map(float, p)) for p in row]
+    table.setColumnLabels(names)
+    for k, t in enumerate(targets.time_s):
+        vecs = [osim.Vec3(*map(float, points[x][k])) for x in labels]
         table.appendRow(float(t), osim.RowVectorVec3(vecs))
     table.addTableMetaDataString("Units", "m")
     weights = osim.SetMarkerWeights()
-    for label in IK_LANDMARKS:
-        weight = UPPER_BODY_WEIGHT if label in _UPPER_BODY else LOWER_LIMB_WEIGHT
-        weights.cloneAndAppend(osim.MarkerWeight(_MARKER_PREFIX + label, weight))
+    for label in labels:
+        weights.cloneAndAppend(
+            osim.MarkerWeight(_MARKER_PREFIX + label, _marker_weight(label))
+        )
     return osim.MarkersReference(table, weights)
 
 
@@ -264,31 +484,56 @@ def _range_violations(model: Any, names: tuple[str, ...], q: Array) -> dict:
     return out
 
 
-def run_inverse_kinematics(build: LiftModelBuild, targets: LiftTargets) -> IKResult:
+def _arm_coordinate_tasks(model: Any) -> Any:
+    """Weak coordinate tasks holding every arm coordinate at its hold value.
+
+    Only the shoulders and the bar observe the arms, so elbow, forearm and
+    wrist angles form a null space the solver otherwise wanders through
+    (OSL-12 measured elbow hyperextension to -146 deg).  The task weight
+    :data:`ARM_TASK_WEIGHT` is small against the marker weights.
+    """
+    osim = import_opensim()
+    tasks = osim.SimTKArrayCoordinateReference()
+    for coordinate in model.getCoordinateSet():
+        name = coordinate.getName()
+        if name.startswith(_UNCLAMPED_PREFIXES):
+            task = osim.CoordinateReference(
+                name, osim.Constant(coordinate.getDefaultValue())
+            )
+            task.setWeight(ARM_TASK_WEIGHT)
+            tasks.push_back(task)
+    return tasks
+
+
+def run_inverse_kinematics(
+    build: LiftModelBuild, targets: LiftTargets, pelvis: PelvisLandmarks
+) -> IKResult:
     """Track the bundle landmarks with OpenSim's ``InverseKinematicsSolver``.
 
-    Mutates ``build.model``: adds one ``ik_<landmark>`` marker per landmark
-    and leaves every coordinate unclamped.
+    Mutates ``build.model``: adds one ``ik_<label>`` marker per tracked
+    landmark and clamps every coordinate to its range except the arms
+    (``_UNCLAMPED_PREFIXES``), which weak coordinate tasks hold near the
+    hold pose instead (:func:`_arm_coordinate_tasks`).
 
     Postconditions: ``q`` is (N, coordinates); ``marker_error_m`` (N, M) and
-    ``model_points_m`` (N, M, 3) follow :data:`IK_LANDMARKS`.
+    ``model_points_m`` (N, M, 3) follow ``markers``.
     """
     osim = import_opensim()
     model = build.model
-    _add_markers(build, targets)
+    labels = _add_markers(build, targets, pelvis)
     for coordinate in model.updCoordinateSet():
-        coordinate.set_clamped(False)
+        coordinate.set_clamped(not coordinate.getName().startswith(_UNCLAMPED_PREFIXES))
     state = model.initSystem()
     solver = osim.InverseKinematicsSolver(
         model,
-        _markers_reference(targets),
-        osim.SimTKArrayCoordinateReference(),
+        _markers_reference(targets, pelvis, labels),
+        _arm_coordinate_tasks(model),
         math.inf,
     )
     solver.setAccuracy(_IK_ACCURACY)
     names = tuple(c.getName() for c in model.getCoordinateSet())
     markers = model.getMarkerSet()
-    q_rows, errors, points = [], [], []
+    q_rows, errors, points, pelvis_points = [], [], [], []
     for k, t in enumerate(targets.time_s):
         state.setTime(float(t))
         if k == 0:
@@ -298,32 +543,67 @@ def run_inverse_kinematics(build: LiftModelBuild, targets: LiftTargets) -> IKRes
         coords = model.getCoordinateSet()
         q_rows.append([coords.get(n).getValue(state) for n in names])
         errors.append(
-            [solver.computeCurrentMarkerError(_MARKER_PREFIX + x) for x in IK_LANDMARKS]
+            [solver.computeCurrentMarkerError(_MARKER_PREFIX + x) for x in labels]
         )
         model.realizePosition(state)
         points.append(
             [
                 _vec3(markers.get(_MARKER_PREFIX + x).getLocationInGround(state))
-                for x in IK_LANDMARKS
+                for x in labels
+            ]
+        )
+        pelvis_points.append(
+            [
+                _vec3(markers.get(m).getLocationInGround(state))
+                for m in PELVIS_LANDMARKS.values()
             ]
         )
     q = np.asarray(q_rows, dtype=float)
     return IKResult(
         coordinates=names,
         q=q,
-        markers=IK_LANDMARKS,
+        markers=labels,
         marker_error_m=np.asarray(errors, dtype=float),
         model_points_m=np.asarray(points, dtype=float),
         range_violations=_range_violations(model, names, q),
+        pelvis_points_m=np.asarray(pelvis_points, dtype=float),
     )
 
 
 def _segment_angles(points: Array) -> Array:
-    by_label = dict(zip(IK_LANDMARKS, points, strict=True))
+    by_label = dict(zip(IK_LANDMARKS, points[: len(IK_LANDMARKS)], strict=True))
     return segment_angles({x: by_label[x] for x in LANDMARK_LABELS}, _OPENSIM_SAGITTAL)
 
 
-def ik_receipt(targets: LiftTargets, ik: IKResult) -> dict[str, Any]:
+def _pelvis_receipt(pelvis: PelvisLandmarks, ik: IKResult) -> dict[str, Any]:
+    """Pelvis landmark provenance and the model's deviation from the targets."""
+    deviation = np.stack(
+        [
+            np.linalg.norm(ik.pelvis_points_m[:, j] - pelvis.positions_m[label], axis=1)
+            for j, label in enumerate(PELVIS_LANDMARKS)
+        ],
+        axis=1,
+    )
+    column = ik.coordinates.index("pelvis_tilt")
+    return {
+        **pelvis.record(),
+        "model_pelvis_tilt_rad": _span(ik.q[:, column]),
+        "model_deviation_rms_m": dict(
+            zip(
+                PELVIS_LANDMARKS,
+                np.sqrt(np.mean(deviation**2, axis=0)).tolist(),
+                strict=True,
+            )
+        ),
+        "model_deviation_max_m": dict(
+            zip(PELVIS_LANDMARKS, deviation.max(axis=0).tolist(), strict=True)
+        ),
+    }
+
+
+def ik_receipt(
+    targets: LiftTargets, ik: IKResult, pelvis: PelvisLandmarks
+) -> dict[str, Any]:
     """Marker and convention-free coordinate errors against the bundle."""
     err = ik.marker_error_m
     angle_error = np.array(
@@ -340,10 +620,7 @@ def ik_receipt(targets: LiftTargets, ik: IKResult) -> dict[str, Any]:
         "solver": "OpenSim InverseKinematicsSolver (engine of InverseKinematicsTool)",
         "accuracy": _IK_ACCURACY,
         "markers": list(ik.markers),
-        "weights": {
-            x: UPPER_BODY_WEIGHT if x in _UPPER_BODY else LOWER_LIMB_WEIGHT
-            for x in ik.markers
-        },
+        "weights": {x: _marker_weight(x) for x in ik.markers},
         "frames": int(err.shape[0]),
         "marker_error": {
             "rms_m": rms,
@@ -374,9 +651,13 @@ def ik_receipt(targets: LiftTargets, ik: IKResult) -> dict[str, Any]:
             ),
             "threshold_rms_rad": IK_COORDINATE_RMS_THRESHOLD_RAD,
         },
-        "clamping": "off; coordinates outside the model range are listed",
+        "clamping": "on (OpenSim IK default) except the arm coordinates "
+        + "/".join(_UNCLAMPED_PREFIXES)
+        + f", which coordinate tasks (weight {ARM_TASK_WEIGHT}) hold at the "
+        "hold pose; coordinates outside the model range are listed",
         "range_violations": dict(ik.range_violations),
         "observability": _PELVIS_OBSERVABILITY,
+        "pelvis_landmarks": _pelvis_receipt(pelvis, ik),
     }
 
 
@@ -651,36 +932,127 @@ def _contact_sets(model: Any, state: Any) -> dict[str, tuple[list, list]]:
     return sets
 
 
+def _penetrations(model: Any, state: Any) -> dict[str, float]:
+    """Depth (m, positive = into the surface) of every contact sphere."""
+    osim = import_opensim()
+    heights = {}
+    for geometry in model.getContactGeometrySet():
+        plane = osim.ContactHalfSpace.safeDownCast(geometry)
+        if plane is not None:
+            heights[plane.getName()] = float(plane.get_location().get(1))
+    model.realizePosition(state)
+    depths = {}
+    for name, sphere in _contact_spheres(model).items():
+        surface = BENCH_TOP if _support_of(sphere) == "bench" else "floor"
+        centre = _vec3(
+            sphere.getFrame().findStationLocationInGround(state, sphere.get_location())
+        )
+        depths[name] = heights[surface] - (centre[1] - float(sphere.getRadius()))
+    return depths
+
+
+#: Pelvis coordinates solved for the hold equilibrium (height, then rotations).
+_HOLD_UNKNOWNS = ("pelvis_ty", "pelvis_tilt", "pelvis_list", "pelvis_rotation")
+#: Coordinates moved by the standing ankle lean (sign applied to the lean).
+_LEAN_COORDINATES = {"ankle_angle_l": 1.0, "ankle_angle_r": 1.0, "pelvis_tilt": -1.0}
+#: Equilibrium solve tolerance on the residual vector (N and N m).
+_HOLD_RESIDUAL_TOL = 1e-6
+#: Largest settling rotation accepted as the same hold (rad, 15 deg).
+_SETTLE_BOUND_RAD = math.radians(15.0)
+
+
+def _equilibrium(
+    model: Any, state: Any, solver: Any, u_index: Mapping, *, lean: bool
+) -> Array:
+    """Settle the hold on its contacts until its pelvis residual vanishes.
+
+    The unknowns are the pelvis height, a fore-aft unknown and the pelvis
+    list and rotation.  For a standing hold (``lean``) the fore-aft unknown
+    is an extra ankle lean (both ankles ``+d``, pelvis tilt ``-d``), so the
+    feet stay flat while the body above them moves; a supine hold rocks
+    rigidly on its pelvis tilt instead.  The height is bracketed first
+    (Brent, as OSL-3); then all four are solved with Powell's hybrid method,
+    which keeps a symmetric hold symmetric (the frictionless-at-rest
+    contacts leave pelvis yaw nearly neutral).  A root whose rotations
+    leave ``_SETTLE_BOUND_RAD`` is a different posture, so the solve then
+    falls back to least squares with the rotations bounded.
+
+    Returns ``[height, fore-aft, list, rotation]`` as offsets from the
+    starting values (the height absolute).
+
+    Raises:
+        ValueError: when no height in the bracket balances the weight or the
+            joint solve leaves a residual above ``_HOLD_RESIDUAL_TOL``.
+    """
+    osim = import_opensim()
+    zero = osim.Vector(state.getNU(), 0.0)
+    coords = model.getCoordinateSet()
+    fore_aft = _LEAN_COORDINATES if lean else {"pelvis_tilt": 1.0}
+    base = {
+        n: float(coords.get(n).getValue(state))
+        for n in (*_HOLD_UNKNOWNS, *_LEAN_COORDINATES)
+    }
+
+    def residuals(x: Array) -> Array:
+        coords.get("pelvis_ty").setValue(state, float(x[0]), False)
+        for name, sign in fore_aft.items():
+            coords.get(name).setValue(state, base[name] + sign * float(x[1]), False)
+        for name, value in zip(_HOLD_UNKNOWNS[2:], x[2:], strict=True):
+            coords.get(name).setValue(state, base[name] + float(value), False)
+        tau = solver.solve(state, zero)
+        return np.array([tau.get(u_index[n]) for n in _HOLD_UNKNOWNS])
+
+    def vertical(height: float) -> float:
+        return float(residuals(np.array([height, 0.0, 0.0, 0.0]))[0])
+
+    top = base["pelvis_ty"]
+    low = top - _STATIC_BRACKET_M
+    if vertical(top) * vertical(low) > 0.0:
+        raise ValueError("no pelvis height in the bracket balances the hold")
+    height = float(brentq(vertical, low, top, xtol=_STATIC_XTOL_M))
+    guess = np.array([height, 0.0, 0.0, 0.0])
+    bound = np.r_[_STATIC_BRACKET_M, np.full(3, _SETTLE_BOUND_RAD)]
+    x = root(residuals, guess, method="hybr", options={"xtol": 1e-14}).x
+    if np.any(np.abs(x - guess) > bound):
+        x = least_squares(
+            residuals,
+            guess,
+            bounds=(guess - bound, guess + bound),
+            xtol=1e-15,
+            ftol=1e-15,
+            gtol=1e-15,
+        ).x
+    final = residuals(x)
+    if not np.all(np.abs(final) <= _HOLD_RESIDUAL_TOL):
+        raise ValueError(f"the hold does not reach equilibrium: residual {final}")
+    if np.any(np.abs(x[1:]) > _SETTLE_BOUND_RAD):
+        raise ValueError(f"the hold settles {np.degrees(x[1:])} deg from its pose")
+    return np.asarray(x, dtype=float)
+
+
 def static_hold_grf(build: LiftModelBuild) -> dict[str, Any]:
     """Contact-derived ground reaction of the lift's hold pose at equilibrium.
 
     Postconditions: ``total_grf_n`` (canonical z-up) is the sum of every
     contact force; ``relative_error`` compares its vertical component with
-    ``(skeleton mass + bar mass) * g`` from the build receipt; the remaining
-    pelvis residuals at the equilibrium are reported as ``balance_residual``.
+    ``(skeleton mass + bar mass) * g`` from the build receipt; the pelvis
+    residuals left at the equilibrium are ``balance_residual`` (zero within
+    ``_HOLD_RESIDUAL_TOL``); ``settling_rad`` is how far the hold moved to
+    get there (``fore_aft`` is the extra ankle lean of a standing hold, the
+    pelvis-tilt rocking of a supine one); ``penetration`` lists every
+    sphere's depth against :data:`PENETRATION_LIMIT_M`.
 
     Raises:
-        ValueError: when no vertical position in the bracket balances.
+        ValueError: when the hold has no equilibrium on its contacts.
     """
     osim = import_opensim()
     model = _bare_model(build.model, keep_contact=True)
     state = model.initSystem()
     solver = osim.InverseDynamicsSolver(model)
     u_index = _u_index(model, state)
-    zero = osim.Vector(state.getNU(), 0.0)
-    ty = model.getCoordinateSet().get("pelvis_ty")
-    start = float(ty.getValue(state))
-
-    def residual(value: float) -> float:
-        ty.setValue(state, value, False)
-        return float(solver.solve(state, zero).get(u_index["pelvis_ty"]))
-
-    low = start - _STATIC_BRACKET_M
-    if residual(start) * residual(low) > 0.0:
-        raise ValueError("no pelvis height in the bracket balances the hold")
-    root = float(brentq(residual, low, start, xtol=_STATIC_XTOL_M))
-    ty.setValue(state, root, False)
-    tau = solver.solve(state, zero)
+    balance = build.receipt["hold_pose"].get("balance")
+    solution = _equilibrium(model, state, solver, u_index, lean=balance is not None)
+    tau = solver.solve(state, osim.Vector(state.getNU(), 0.0))
     gravity = float(np.linalg.norm(_vec3(model.getGravity())))
     breakdowns = {}
     for support, (forces, points) in _contact_sets(model, state).items():
@@ -693,12 +1065,23 @@ def static_hold_grf(build: LiftModelBuild) -> dict[str, Any]:
     expected = (
         build.receipt["skeleton_mass_kg"] + build.receipt["bar_mass_kg"]
     ) * gravity
+    depths = _penetrations(model, state)
+    deepest = max(depths.values())
+    com = to_canonical(
+        OPENSIM_Y_UP, _vec3(model.calcMassCenterPosition(state)).tolist()
+    )
     return {
-        "method": "pelvis_ty solved where OpenSim inverse dynamics (contacts on, "
-        "at rest, hold pose) has zero vertical residual; contact forces from "
-        "SmoothSphereHalfSpaceForce record values, reduced by GCV-1",
-        "pelvis_ty_m": root,
-        "penetration_drop_m": start - root,
+        "method": "pelvis height, a fore-aft unknown (standing: extra ankle "
+        "lean with the feet flat; supine: pelvis-tilt rocking) and the pelvis "
+        "list and rotation solved where OpenSim inverse dynamics (contacts on, "
+        "at rest) has zero vertical and rotational pelvis residual; contact "
+        "forces from SmoothSphereHalfSpaceForce record values, reduced by GCV-1",
+        "pelvis_ty_m": float(solution[0]),
+        "settling_rad": {
+            "fore_aft": float(solution[1]),
+            "pelvis_list": float(solution[2]),
+            "pelvis_rotation": float(solution[3]),
+        },
         "gravity_m_s2": gravity,
         "expected_weight_n": float(expected),
         "total_grf_n": total.tolist(),
@@ -708,6 +1091,14 @@ def static_hold_grf(build: LiftModelBuild) -> dict[str, Any]:
             k: None if r.cop_m is None else r.cop_m.tolist()
             for k, r in breakdowns.items()
         },
+        "com_m": com.tolist(),
+        "penetration": {
+            "per_sphere_m": depths,
+            "max_m": deepest,
+            "limit_m": PENETRATION_LIMIT_M,
+            "within_limit": bool(deepest <= PENETRATION_LIMIT_M),
+        },
+        "balance": balance,
         "balance_residual": {
             n: float(tau.get(u_index[n]))
             for n in RESIDUAL_COORDINATES

@@ -344,8 +344,10 @@ as thin discs). The LIFT-4 hand interface holds it: a
 \texttt{WeldConstraint hand\_r\_to\_barbell} on the right, both at the hands'
 centres of mass (the palm-centre grip of the parity standard). Each foot has
 three \texttt{SmoothSphereHalfSpaceForce} spheres (heel, forefoot, toe) with
-the MS-20 calibrated parameters ($k = 10^5$\,N/m, $c = 0.5$\,s/m,
-$\mu_s = 0.6$, $\mu_d = 0.4$) against a floor half-space. The bench press
+the MS-20 calibrated damping and friction ($c = 0.5$\,s/m,
+$\mu_s = 0.6$, $\mu_d = 0.4$) against a floor half-space; the stiffness
+was the MS-20 $10^5$ until OSL-12 raised it to $10^7$ (see the OSL-12
+subsection). The bench press
 adds a bench-top half-space paired only with four back spheres at the
 posterior shoulder and posterior iliac markers.
 
@@ -467,6 +469,128 @@ Rajagopal's (0.155\,m), so no verified transform exists.
 Reproduce with \texttt{python3 scripts/measure\_opensim\_lift\_ik\_id.py} and
 \texttt{python3 -m pytest -o addopts="" tests/unit/lifting/test\_opensim\_lift\_ik\_id.py}
 (OpenSim 4.6 and the Rajagopal model required; otherwise the tests skip).
+
+\subsection{Physically Credible Lift IK/ID (OSL-12, Issue \#13048)}
+\paragraph{Scope.} OSL-12 addresses three OSL-3 limitations (pelvis
+observability, contact sinkage, unbalanced holds) on the same back-squat
+bundle and the same 80\,kg/1.78\,m/120\,kg hold specification. Receipts:
+\texttt{docs/development/lifting/evidence/opensim\_ik\_id/receipts.json};
+tests: \texttt{tests/unit/lifting/test\_opensim\_lift\_credibility.py}.
+
+\paragraph{Pelvis Frame and Width.} The bundle spec grafts the Rajagopal lower
+limbs onto the golf \texttt{LowerTorso}; both hip joints hang from it with one
+shared \texttt{parent\_to\_base} orientation $R_b$. The Rajagopal pelvis axes
+in \texttt{LowerTorso} are therefore $P = R_b\,\Pi^\top$, with $\Pi$ the spec's
+hip axis permutation (\texttt{bundle\_pelvis\_rotation},
+\texttt{bundle\_targets.py}). This is verified, not assumed: for every squat
+state, each femur pose times the transposed Rajagopal hip rotation
+($R_z(\text{flexion})R_x(\text{adduction})R_y(\text{rotation})$) reproduces
+$P$ to $10^{-9}$ for both legs, and the hip axis lies along $P$'s $z$. The
+bundle's hip centres are 0.2205\,m apart against the generic 0.1545\,m, so the
+pelvis is scaled per axis by $(s, s, 0.2205/0.1545) = (1.047, 1.047, 1.427)$;
+nothing in the bundle measures pelvis depth or height, so those keep the
+stature factor $s = h/1.70$\,m.
+
+\paragraph{Virtual ASIS/PSIS Landmarks.} The source is the generic model's own
+RASI/LASI/RPSI/LPSI markers (\texttt{RajagopalLaiUhlrich2023.osim}); their
+offsets from the generic hip-centre midpoint, scaled by the pelvis factors and
+placed with $P$ at the bundle's hip-centre midpoint, give the targets
+(\texttt{pelvis\_landmark\_targets}). A model scaled with those factors whose
+pelvis coincides with the bundle's carries its markers onto the targets to
+$10^{-9}$\,m (test). The mapping is exact, but the bundle's pelvis is not a
+physical observation: LIFT-5 tracked only the hip centres, its own pelvis tilt
+spans $-101.6$ to $-72.9^\circ$, and its hip flexion 158.9--171.5$^\circ$ lies
+outside the Rajagopal $-30$ to $120^\circ$ range. The landmarks are therefore
+reported, not tracked (the receipt records the reason); the solved model's
+pelvis sits 10.1--13.4\,cm RMS from them, with tilt $-55.3$ to $-33.1^\circ$.
+
+\paragraph{Contact Stiffness.} The lift contacts use
+$k = 10^7$\,Pa, the \texttt{CONTACT\_STIFFNESS} of OpenSim\_Models PR \#476
+(4.35\,mm under 1961\,N with eight foot spheres; stance band 1--8\,mm), with the
+MS-20 damping and friction kept. The limit is that band's 8\,mm
+(\texttt{PENETRATION\_LIMIT\_M}). Hertz scaling,
+$F \approx \tfrac{4}{3}\,0.5^{1.5}\,k\sqrt{R}\,d^{1.5}$, puts the per-sphere
+load of the six-sphere layout at a few millimetres.
+
+\paragraph{Balanced Holds.} \texttt{build\_lift\_model} leans each standing
+hold at the ankles (both \texttt{ankle\_angle} $+\delta$, \texttt{pelvis\_tilt}
+$-\delta$, so the feet stay flat) until the centre of mass of body and bar lies
+over the mean of the foot spheres' lowest points (Brent, $|\Delta x| <
+10^{-6}$\,m): $\delta = 10.72^\circ$ (squat), $6.03^\circ$ (deadlift),
+$5.99^\circ$ (snatch), $6.03^\circ$ (clean and jerk). \texttt{static\_hold\_grf}
+then solves the pelvis height, a fore-aft unknown (standing: a further ankle
+lean; supine: pelvis-tilt rocking) and the pelvis list and rotation for zero
+vertical and rotational pelvis residual from OpenSim's own inverse dynamics with
+the contacts on (Brent on height, then Powell's hybrid method; a root that
+rotates more than $15^\circ$ is rejected in favour of a bounded least-squares
+solve). The settling lean is $-2.79^\circ$ (squat) and $-4.33$ to $-4.54^\circ$
+(pulls); the bench press rocks $0.77^\circ$ in tilt, $-0.36^\circ$ in list and
+$-1.40^\circ$ in rotation.
+
+\paragraph{IK Setup Changes.} Coordinate clamping is on (OpenSim's default).
+The arms, observed only through the shoulders and the welded bar, carry weak
+coordinate tasks (weight 0.01) holding them at the hold pose; with the arms in
+range the hands cannot reach the bundle's bar, so the bar marker weight drops
+from 1 to 0.1 and its error is still reported.
+
+\paragraph{Measured Evidence (Before $\rightarrow$ After).}
+\begin{itemize}[nosep]
+\item \textbf{Static holds.} Maximum sphere penetration 0.119\,m (bench
+  0.082\,m) $\rightarrow$ 7.32\,mm (squat), 7.52\,mm (deadlift, snatch, clean
+  and jerk), 7.83\,mm (bench press), all within 8\,mm. Rotational pelvis
+  residual $-440.5$ (squat), $-153$ to $-160$ (pulls), $-1047.5$\,N\,m (bench)
+  $\rightarrow$ 0 within $10^{-6}$ in every lift, with the centre of mass over
+  the feet's centre of pressure. Total ground reaction equals
+  $(m_\mathrm{body} + m_\mathrm{bar})\,g$ to below $10^{-13}$ relative error;
+  the bench press now loads the bench with 1806.0\,N and the feet with 112.1 and
+  43.2\,N.
+\item \textbf{Squat IK ranges.} Hip flexion 168--194$^\circ$, pelvis tilt
+  $-120$ to $-94^\circ$ and \texttt{arm\_rot\_l} $-90.9^\circ$ out of range
+  $\rightarrow$ every coordinate within its range in all 41 frames.
+\item \textbf{Squat IK markers.} RMS 4.07\,cm, maximum 12.6\,cm $\rightarrow$
+  RMS 7.54\,cm, maximum 24.6\,cm. Hip centres 3.1 $\rightarrow$ 0.7--0.9\,cm;
+  ankles 2.6 $\rightarrow$ 2.4\,cm; heels 1.8 $\rightarrow$ 1.5\,cm; forefeet
+  4.2 $\rightarrow$ 3.7\,cm; shoulders 4.7/5.8 $\rightarrow$ 5.4/12.0\,cm; bar
+  8.9 $\rightarrow$ 22.7\,cm. The 2\,cm/4\,cm best-practice gate still fails.
+\item \textbf{Squat segment angles.} RMS 1.44 $\rightarrow$ 1.52$^\circ$ (shank
+  2.37, thigh 0.52, trunk 1.02$^\circ$), inside the 2$^\circ$ receipt threshold.
+\item \textbf{Squat ID.} Pelvis residual peaks $t_x$ 2927 $\rightarrow$ 1107\,N,
+  $t_y$ 3930 $\rightarrow$ 1922\,N, $t_z$ 1177 $\rightarrow$ 208\,N, tilt 1540
+  $\rightarrow$ 593\,N\,m, list 580 $\rightarrow$ 99\,N\,m, rotation 363
+  $\rightarrow$ 122\,N\,m. The Hicks et al.\ (2015) gate (151.6\,N,
+  17.9\,N\,m) still fails. Lumbar extension peak 983 $\rightarrow$ 638\,N\,m;
+  right hip flexion stays 1022\,N\,m.
+\end{itemize}
+
+\paragraph{Failed Experiments.}
+\begin{itemize}[nosep]
+\item Tracking the virtual pelvis landmarks (weight 10, unclamped) followed
+  them to 0.3--0.7\,cm but reproduced the bundle's out-of-range posture (tilt
+  $-74$ to $-103^\circ$, hip flexion 160--172$^\circ$).
+\item A lumbar-extension coordinate task (weight 1) overwhelmed the markers
+  (shoulder error 26\,cm; arms diverged).
+\item Unclamped arms without coordinate tasks wandered: elbow
+  hyperextension to $-146^\circ$, pronation to $-179^\circ$, whole-turn
+  windings and, after re-wrapping, residuals of $10^9$.
+\item All coordinates clamped without arm tasks: marker RMS 7.26\,cm with the
+  arms asymmetric at their limits; clamped arms together with the tasks failed
+  to assemble.
+\item Arm tasks with the bar at weight 1: the bar dragged the trunk (trunk RMS
+  4.95$^\circ$, segment RMS 3.29$^\circ$, above the 2$^\circ$ threshold).
+\item Rigid pelvis-tilt rocking of the standing holds: the squat has no
+  equilibrium that way (least squares stalls at 17.9\,N\,m); Powell's method
+  on the supine bench press wandered to a 630$^\circ$ list, and bounded least
+  squares settled the pulls with an asymmetric 11$^\circ$ yaw.
+\end{itemize}
+
+\paragraph{Limitations.} Not physically accepted: the marker and residual
+gates fail. The shoulder and bar mismatch is structural (the bundle's golf
+upper body and scapulae against Rajagopal's rigid torso), and the pelvis stays
+unobserved until a bundle tracks a pelvis landmark. The balanced hold poses
+are engineered, not measured. The contact limit comes from \#476's stance band,
+not from a sole-compliance measurement.
+Reproduce with \texttt{python3 scripts/measure\_opensim\_lift\_ik\_id.py} and
+\texttt{python3 -m pytest -o addopts="" tests/unit/lifting/test\_opensim\_lift\_credibility.py}.
 
 \section{Measured Parity Results}
 All figures below are read from the committed receipt,

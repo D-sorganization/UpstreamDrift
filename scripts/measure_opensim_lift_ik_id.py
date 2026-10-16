@@ -1,4 +1,4 @@
-"""Measure OpenSim IK and inverse dynamics of the barbell lifts (OSL-3, #13041).
+"""Measure OpenSim IK and inverse dynamics of the barbell lifts (OSL-3, OSL-12).
 
 Usage (headless, from the repository root, real OpenSim 4.6 and the
 ``opensim-models`` submodule or ``$UPSTREAMDRIFT_MSK_BASE_MODEL``)::
@@ -84,7 +84,7 @@ def measure(stride: int) -> dict[str, Any]:
             "ik_id": opensim_lift_ik_id(OpenSimFullBodyLiftSpec(lift), stride=stride),
         }
     return {
-        "issue": "#13041 (OSL-3)",
+        "issue": "#13048 (OSL-12, on #13041 OSL-3)",
         "source_commit": _git("rev-parse", "HEAD"),
         "generator": "scripts/measure_opensim_lift_ik_id.py",
         "stride": stride,

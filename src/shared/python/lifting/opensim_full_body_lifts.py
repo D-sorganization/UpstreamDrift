@@ -392,7 +392,8 @@ def opensim_lift_ik_id(
 
     The bundle defines the lifter: the model is composed with the bundle's
     body mass, stature and bar mass (``spec`` masses are not used) and its
-    thigh, shank and trunk are scaled to the bundle's landmarks.
+    thigh, shank, trunk and pelvis width are scaled to the bundle's landmarks
+    (OSL-12 adds the pelvis and the virtual ASIS/PSIS landmark receipt).
 
     Returns a receipt ``{"lift", "status", "reason", "bundle", "model", "ik",
     "id"}``.  ``status`` is ``complete`` when IK and ID ran; otherwise it is
@@ -420,16 +421,18 @@ def opensim_lift_ik_id(
     assert path is not None  # _bundle_reason checked it
     try:
         targets = lift_targets(spec.lift, path, stride=stride)
+        base_model = resolve_base_model()
         build = build_lift_model(
             spec.lift,
             body_mass_kg=targets.body_mass_kg,
             height_m=targets.height_m,
             bar_mass_kg=targets.bar_mass_kg,
-            segment_scales=ikid.bundle_segment_scales(targets, resolve_base_model()),
+            segment_scales=ikid.bundle_segment_scales(targets, base_model),
         )
+        pelvis = ikid.pelvis_landmark_targets(build, targets, base_model)
     except (FileNotFoundError, ValueError) as exc:
         return _ik_id_unavailable(spec, f"IK/ID setup failed: {exc}")
-    ik = ikid.run_inverse_kinematics(build, targets)
+    ik = ikid.run_inverse_kinematics(build, targets, pelvis)
     inverse = ikid.run_inverse_dynamics(build, targets, ik)
     return {
         "lift": spec.lift,
@@ -457,7 +460,7 @@ def opensim_lift_ik_id(
                 "bar_mass_kg",
             )
         },
-        "ik": ikid.ik_receipt(targets, ik),
+        "ik": ikid.ik_receipt(targets, ik, pelvis),
         "id": ikid.id_receipt(targets, inverse),
     }
 

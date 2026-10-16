@@ -16,6 +16,12 @@ What does transfer is geometry and load:
   :func:`~src.shared.python.lifting.kinetics_parity.bundle_kinetics`.
 * **Hand wrench (GCV-7, #11713).**  The per-hand bushing wrench on the bar
   (:meth:`BushingSample.grip_analysis`); the hands carry its negative.
+* **Pelvis frame (OSL-12, #13048).**  The spec grafts Rajagopal lower limbs
+  onto the golf ``LowerTorso``; both hip joints share one parent orientation,
+  and that orientation, with the spec's hip axis permutation
+  (``spec_builder.HIP_PERMUTATION``), is the Rajagopal pelvis frame:
+  :func:`bundle_pelvis_rotation`.  Its source hip coordinates are kept so a
+  caller can check them against a model's range.
 
 Everything is re-expressed in the OpenSim lift frame: ``x`` forward (the
 bundle's stance direction, heel to forefoot), ``y`` up, ``z`` to the
@@ -46,6 +52,9 @@ Array = NDArray[np.float64]
 
 __all__ = [
     "FOOT_LANDMARKS",
+    "PELVIS_BODY",
+    "SOURCE_HIP_COORDINATES",
+    "bundle_pelvis_rotation",
     "IK_LANDMARKS",
     "LiftTargets",
     "LiftFrame",
@@ -56,6 +65,18 @@ __all__ = [
 FOOT_LANDMARKS: tuple[str, ...] = ("heel_l", "heel_r", "forefoot_l", "forefoot_r")
 IK_LANDMARKS: tuple[str, ...] = LANDMARK_LABELS + FOOT_LANDMARKS
 _FEET = {"left": "l", "right": "r"}
+#: The spec body the Rajagopal hips are grafted onto (the golf pelvis).
+PELVIS_BODY = "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso"
+#: Source hip coordinates kept per state (Rajagopal names and conventions).
+SOURCE_HIP_COORDINATES: tuple[str, ...] = (
+    "hip_flexion_l",
+    "hip_flexion_r",
+    "hip_adduction_l",
+    "hip_adduction_r",
+    "hip_rotation_l",
+    "hip_rotation_r",
+)
+_HIP_JOINTS = ("hip_l", "hip_r")
 _HANDS = ("L", "R")
 
 
@@ -100,7 +121,10 @@ class LiftTargets:
     :data:`IK_LANDMARKS` order; ``grf_force_n`` / ``grf_moment_nm`` map
     ``left``/``right`` to (N, 3) foot force and moment about the OpenSim
     origin; ``hand_force_n`` / ``hand_torque_nm`` map ``L``/``R`` to the
-    (N, 3) force and free torque the bar exerts on each hand.
+    (N, 3) force and free torque the bar exerts on each hand;
+    ``pelvis_rotation`` (N, 3, 3) holds the bundle's Rajagopal pelvis axes
+    (columns) in the OpenSim frame; ``source_coordinates`` maps each
+    :data:`SOURCE_HIP_COORDINATES` name to its (N,) bundle values (radians).
     """
 
     lift: str
@@ -114,6 +138,8 @@ class LiftTargets:
     grf_moment_nm: Mapping[str, Array]
     hand_force_n: Mapping[str, Array]
     hand_torque_nm: Mapping[str, Array]
+    pelvis_rotation: Array
+    source_coordinates: Mapping[str, Array]
     body_mass_kg: float
     bar_mass_kg: float
     height_m: float
@@ -135,6 +161,41 @@ def _foot_stations(spec: Mapping[str, Any]) -> dict[str, tuple[str, tuple]]:
         sphere = spheres[label]
         stations[label] = (str(sphere["body"]), tuple(map(float, sphere["position_m"])))
     return stations
+
+
+def bundle_pelvis_rotation(spec: Mapping[str, Any]) -> Array:
+    """Rajagopal pelvis axes expressed in the spec's pelvis body frame.
+
+    The two hip joints of the spec must share one parent orientation (they
+    hang from one pelvis); its base frame is the Rajagopal hip frame with the
+    spec's axis permutation, so ``R_base @ HIP_PERMUTATION.T`` gives the
+    pelvis axes (columns) in :data:`PELVIS_BODY` coordinates.
+
+    Postcondition: the result is a proper rotation (orthonormal, det +1).
+
+    Raises:
+        ValueError: when a hip joint is missing, hangs from another body, or
+            the two hip parent orientations differ.
+    """
+    from src.shared.python.motion_matching.execution.spec_builder import (
+        HIP_PERMUTATION,
+    )
+
+    joints = {j["name"]: j for j in spec["joints"]}
+    bases = []
+    for name in _HIP_JOINTS:
+        joint = joints.get(name)
+        if joint is None or joint["parent"] != PELVIS_BODY:
+            raise ValueError(f"spec joint {name!r} does not hang from the pelvis")
+        bases.append(np.asarray(joint["parent_to_base"], dtype=float)[:3, :3])
+    if not np.allclose(bases[0], bases[1], atol=1e-12):
+        raise ValueError("the spec's hip joints do not share a pelvis orientation")
+    rotation = bases[0] @ HIP_PERMUTATION.T
+    if not np.allclose(rotation.T @ rotation, np.eye(3), atol=1e-9) or (
+        np.linalg.det(rotation) <= 0.0
+    ):
+        raise ValueError("the spec's hip parent frame is not a proper rotation")
+    return rotation
 
 
 def _kinematics(spec_bytes: bytes, attachments: Mapping[str, Any]) -> tuple[Any, float]:
@@ -245,6 +306,20 @@ def lift_targets(lift: str, path: Path, *, stride: int = 1) -> LiftTargets:
     order = tuple(attachments)
     points = np.array([kin.marker_positions(bundle.reference_q[k]) for k in indices])
     positions = frame.point(points[:, [order.index(x) for x in IK_LANDMARKS]])
+    in_pelvis = bundle_pelvis_rotation(spec)
+    pelvis = np.array(
+        [
+            frame.rotation
+            @ kin.body_poses(bundle.reference_q[k], [PELVIS_BODY])[PELVIS_BODY][0]
+            @ in_pelvis
+            for k in indices
+        ]
+    )
+    order_q = list(spec["coordinate_order"])
+    source = {
+        name: np.array([bundle.reference_q[k][order_q.index(name)] for k in indices])
+        for name in SOURCE_HIP_COORDINATES
+    }
     hand_force, hand_torque, bar = _hand_loads(bundle, indices, frame)
     positions[:, IK_LANDMARKS.index("bar")] = bar
     grf_force, grf_moment = _foot_loads(bundle, indices, frame)
@@ -260,6 +335,8 @@ def lift_targets(lift: str, path: Path, *, stride: int = 1) -> LiftTargets:
         grf_moment_nm=grf_moment,
         hand_force_n=hand_force,
         hand_torque_nm=hand_torque,
+        pelvis_rotation=pelvis,
+        source_coordinates=source,
         body_mass_kg=body_mass,
         bar_mass_kg=float(record["bar_mass_kg"]),
         height_m=float(bundle.provenance["optimizer"]["height_m"]),
