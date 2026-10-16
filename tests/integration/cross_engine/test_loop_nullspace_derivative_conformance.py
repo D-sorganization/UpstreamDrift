@@ -47,6 +47,7 @@ from tests.integration.cross_engine.loop_nullspace_conformance_support import (
     SPEC_PATH,
     NamedSnapshot,
     build_snapshot,
+    require_real_module,
     scaled_error,
     seeded_effort,
     to_reference_order,
@@ -395,7 +396,7 @@ def test_every_engine_is_reported_with_its_capability(engine) -> None:
 def test_adapter_declarations_match_the_registry() -> None:
     reg = default_registry()
     for engine in (EngineType.PINOCCHIO, EngineType.MUJOCO):
-        pytest.importorskip(SDK.get(engine, "pinocchio"))
+        require_real_module(SDK.get(engine, "pinocchio"))
         adapter = create_engine_force_adapter(engine, SPEC_PATH, allow_synthetic=False)
         level = adapter.capability(Capability.CLOSED_LOOP_DERIVATIVES)
         assert level is reg.require(engine.value, minimum=CapabilityLevel.NONE).level
