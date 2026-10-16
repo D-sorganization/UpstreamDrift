@@ -210,7 +210,8 @@ class DriveResult:
     input_source: Mapping[str, str]
 
     def __post_init__(self) -> None:
-        n = self.kinematics.time_s.shape[0]
+        time_s = self.kinematics.time_s
+        n = time_s.shape[0]
         resid = _frozen(self.residual_rad)
         if resid.shape != (n,):
             raise ValueError(f"residual_rad must have shape ({n},)")
@@ -440,8 +441,9 @@ def drive_segmental_model(
         law_version=detailed.results[0].law_version,
         input_source=golf_input.source,
     )
+    source = result.kinematics.distribution_source
     ensure(
-        result.kinematics.distribution_source.strip() != "",
+        source.strip() != "",
         "distribution_source must be non-empty",
     )
     return result

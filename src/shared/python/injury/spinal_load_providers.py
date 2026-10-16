@@ -194,7 +194,8 @@ class ModelSpinalLoadProvider:
         missing = [lv.name for lv in levels if lv not in self._series.levels]
         if missing:
             raise ValueError(f"levels not in the model series: {missing}")
-        idx = [self._series.levels.index(lv) for lv in levels]
+        stored_levels = self._series.levels
+        idx = [stored_levels.index(lv) for lv in levels]
         return SpinalLoadSeries(
             time_s=stored,
             levels=tuple(levels),

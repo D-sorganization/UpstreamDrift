@@ -318,7 +318,8 @@ def load_verified_run(
         joint_reaction_force_n=_readonly(arrays["joint_reaction_force_n"]),
         joint_reaction_moment_nm=_readonly(arrays["joint_reaction_moment_nm"]),
     )
-    ensure(not run.time_s.flags.writeable, "run arrays must be read-only", run)
+    time_s = run.time_s
+    ensure(not time_s.flags.writeable, "run arrays must be read-only", run)
     return run
 
 

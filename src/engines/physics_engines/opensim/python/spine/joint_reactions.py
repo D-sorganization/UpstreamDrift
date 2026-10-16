@@ -259,7 +259,8 @@ def _check_frames(kin: _Kinematics, so: SpineStaticOptimizationResult) -> None:
         raise ValueError("SO frame indices fall outside the motion samples")
     if not np.allclose(kin.times[index], so.time_s, rtol=0.0, atol=_TIME_MATCH_TOL_S):
         raise ValueError("SO frame times do not match the motion sample times")
-    cols = [kin.layout.names.index(c) for c in so.coordinate_names]
+    names = kin.layout.names
+    cols = [names.index(c) for c in so.coordinate_names]
     expected = [
         c for lv in kin.inventory.levels for c in kin.inventory.coordinate_names[lv]
     ]
