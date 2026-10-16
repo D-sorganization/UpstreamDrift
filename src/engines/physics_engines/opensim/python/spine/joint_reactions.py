@@ -227,7 +227,10 @@ def _prepare(
 ) -> tuple[PreparedModel, tuple[str, ...]]:
     """Load the model: couplers off, rigid tendons, a residual actuator per DOF."""
     prepared = prepare_model_for_id(
-        model_path, disable_couplers=True, external_loads=opts.external_loads
+        model_path,
+        disable_couplers=True,
+        external_loads=opts.external_loads,
+        millard_muscles=True,
     )
     loads = so.provenance.get("external_loads", "n/a")
     if prepared.external_loads != loads:

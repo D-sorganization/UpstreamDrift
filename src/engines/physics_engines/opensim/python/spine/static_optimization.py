@@ -315,7 +315,7 @@ class SpineMuscleBasis:
         *,
         level_map: ModelLevelMap | None = None,
     ) -> None:
-        prepared = prepare_model_for_id(model_path)
+        prepared = prepare_model_for_id(model_path, millard_muscles=True)
         self.model = prepared.model
         self._muscles = _muscle_list(self.model)
         if not self._muscles:
@@ -460,7 +460,8 @@ def _provenance(
         "id_model_sha256": efforts.provenance.get("model_sha256", "n/a"),
         "id_muscles": efforts.provenance.get("muscles", "n/a"),
         "muscle_model": (
-            "native Millard curves, rigid tendon (ignore_tendon_compliance), "
+            "native Millard curves, rigid tendon (ignore_tendon_compliance; "
+            "Thelen muscles swapped for Millard, see muscle_model), "
             f"affine in activation from a={_A_LOW:g} and a={_A_HIGH:g}"
         ),
         "couplers": "disabled",

@@ -99,5 +99,7 @@ def test_basis_builds_on_thelen_model_and_matches_millard(models) -> None:
     q = np.zeros(names.getSize())
     qd = np.zeros(names.getSize())
     all_names = tuple(str(names.get(i).getName()) for i in range(names.getSize()))
-    for x, y in zip(a.evaluate(all_names, q, qd), b.evaluate(all_names, q, qd)):
+    for x, y in zip(
+        a.evaluate(all_names, q, qd), b.evaluate(all_names, q, qd), strict=True
+    ):
         np.testing.assert_allclose(x, y, atol=1e-9)

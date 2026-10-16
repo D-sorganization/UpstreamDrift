@@ -51,6 +51,7 @@ import math
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
+import tempfile
 from types import MappingProxyType
 from typing import Any
 
@@ -63,6 +64,9 @@ from src.engines.physics_engines.opensim.python.spine.drive import (
     GOLF_PELVIS,
     DriveResult,
     PelvisCoordinates,
+)
+from src.engines.physics_engines.opensim.python.spine.muscle_model import (
+    millard_equivalent_model,
 )
 from src.engines.physics_engines.opensim.python.spine.inventory import (
     ModelLevelMap,
@@ -396,8 +400,12 @@ def prepare_model_for_id(
     *,
     disable_couplers: bool = True,
     external_loads: str | Path | None = None,
+    millard_muscles: bool = False,
 ) -> PreparedModel:
     """Load ``model_path`` for ID: disable constraints, add external loads.
+
+    ``millard_muscles`` swaps ``Thelen2003Muscle`` elements for Millard muscles
+    before loading (rigid-tendon solves; see ``muscle_model``).
 
     Preconditions: the model file exists; ``external_loads`` is ``None`` or an
     existing ExternalLoads XML.  Postconditions: with ``disable_couplers`` every
@@ -416,7 +424,12 @@ def prepare_model_for_id(
     xml = None if external_loads is None else Path(external_loads)
     if xml is not None and not xml.is_file():
         raise ValueError(f"external loads file not found: {xml}")
-    model = _load_model(path, xml)
+    if millard_muscles:
+        with tempfile.TemporaryDirectory() as tmp:
+            swapped = millard_equivalent_model(path, Path(tmp) / path.name)
+            model = _load_model(swapped or path, xml)
+    else:
+        model = _load_model(path, xml)
     constraints = model.getConstraintSet()
     disabled = []
     for i in range(constraints.getSize()):
