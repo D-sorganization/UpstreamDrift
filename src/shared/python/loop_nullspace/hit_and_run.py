@@ -291,7 +291,7 @@ def hit_and_run(
         raise ValueError(f"n_draws must be >= 1, got {n_draws}")
     if thin < 1 or burn_in < 0:
         raise ValueError(f"thin must be >= 1 and burn_in >= 0, got {thin}, {burn_in}")
-    x = np.array(domain._coeff(start), dtype=np.float64).ravel()
+    x: Array = np.array(domain._coeff(start), dtype=np.float64).ravel()
     if domain.min_slack(x) <= 0.0:
         raise ValueError("start must be strictly inside the domain")
     scale = _validated_scale(direction_scale, domain.dimension)

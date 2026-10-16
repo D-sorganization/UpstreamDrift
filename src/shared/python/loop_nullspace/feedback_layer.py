@@ -286,8 +286,8 @@ class _LayerRun:
         ref = setup.reference
         assert ref is not None  # checked in begin_run
         n_a = setup.n_actuated
-        imp = np.zeros(n_a)
-        fb = np.zeros(n_a)
+        imp: Array = np.zeros(n_a)
+        fb: Array = np.zeros(n_a)
         q_ref, v_ref = ref.state_at(t)
         if layer.impedance is not None:
             imp = layer.impedance.torque(

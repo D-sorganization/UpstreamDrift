@@ -179,7 +179,7 @@ class JointImpedance:
         return all(not (np.any(w.stiffness) or np.any(w.damping)) for w in self.windows)
 
     def _sum(self, t: float, attr: str) -> Array:
-        total = np.zeros((self._n, self._n))
+        total: Array = np.zeros((self._n, self._n))
         for window in self.windows:
             weight = window.weight(t)
             if weight != 0.0:

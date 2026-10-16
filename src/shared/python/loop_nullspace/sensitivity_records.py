@@ -167,7 +167,9 @@ def basis_response_model(
     """
     if n_coefficients < 2 or n_frames < n_coefficients:
         raise ValueError("need n_coefficients >= 2 and n_frames >= n_coefficients")
-    basis = bspline_temporal_basis(np.linspace(0.0, 1.0, n_frames), n_coefficients)
+    basis = bspline_temporal_basis(
+        np.asarray(np.linspace(0.0, 1.0, n_frames), dtype=np.float64), n_coefficients
+    )
     weight = 1.0 + np.sin(np.linspace(0.0, np.pi, n_frames))
     loading = basis.T @ weight / n_frames
 

@@ -53,6 +53,11 @@ def principal_angles_deg(u1: ArrayLike, u2: ArrayLike) -> Array:
     return np.asarray(np.sort(np.degrees(np.arccos(sv))))
 
 
+def _cov(samples: Array) -> Array:
+    """Sample covariance with variables in columns, as a float64 matrix."""
+    return np.asarray(np.cov(samples, rowvar=False), dtype=np.float64)
+
+
 def _top_basis(cov: Array, k: int) -> Array:
     _, vecs = np.linalg.eigh(0.5 * (cov + cov.T))
     return np.asarray(vecs[:, ::-1][:, :k])
@@ -86,20 +91,18 @@ def compare_outcome_directions(
             raise ValueError("outcome_scale must be a positive vector of length m")
         y, pred = y / s, pred / np.outer(s, s)
     u_pred = _top_basis(pred, k)
-    obs = float(
-        principal_angles_deg(u_pred, _top_basis(np.cov(y, rowvar=False), k)).mean()
-    )
+    obs = float(principal_angles_deg(u_pred, _top_basis(_cov(y), k)).mean())
     rng = np.random.default_rng(seed)
     null = np.array(
         [
             principal_angles_deg(
                 u_pred,
-                _top_basis(np.cov(permute_across_trials(y, rng), rowvar=False), k),
+                _top_basis(_cov(permute_across_trials(y, rng)), k),
             ).mean()
             for _ in range(n_permutations)
         ]
     )
-    angles = principal_angles_deg(u_pred, _top_basis(np.cov(y, rowvar=False), k))
+    angles = principal_angles_deg(u_pred, _top_basis(_cov(y), k))
     return DirectionComparison(
         k=k,
         angles_deg=tuple(float(a) for a in angles),

@@ -126,7 +126,7 @@ def _stacked_problem(
         basis[k * n : (k + 1) * n, offsets[k] : offsets[k + 1]] = s.basis
     b_mat = basis.tocsr()
     x0 = np.concatenate([s.particular for s in spaces])
-    w_sq = sp.diags(np.tile(w**2, t_count))
+    w_sq = sp.diags(np.tile(w**2, t_count).ravel()).tocsr()
     quad = w_sq
     if t_count > 1 and smoothness_weight > 0.0:
         diff_lil = sp.lil_matrix(((t_count - 1) * n, t_count * n))

@@ -30,7 +30,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
 import numpy as np
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, NDArray
 from scipy import stats
 from scipy.special import ndtr, ndtri
 from scipy.stats import qmc
@@ -132,16 +132,18 @@ class InputSpace:
                     raise ValueError(f"input {name!r} appears twice in groups")
                 seen.add(name)
                 grouped[name] = grp
-        self._blocks: list[tuple[str, Array, Array | None]] = []
+        self._blocks: list[tuple[str, NDArray[np.intp], Array | None]] = []
         emitted: set[int] = set()
         for k, name in enumerate(self.input_names):
             member_of = grouped.get(name)
             if member_of is None:
-                self._blocks.append((name, np.array([k]), None))
+                self._blocks.append((name, np.array([k], dtype=np.intp), None))
             elif id(member_of) not in emitted:
                 emitted.add(id(member_of))
-                idx = np.array([position[n] for n in member_of.names])
-                chol = np.linalg.cholesky(member_of.correlation)
+                idx = np.array([position[n] for n in member_of.names], dtype=np.intp)
+                chol = np.asarray(
+                    np.linalg.cholesky(member_of.correlation), dtype=np.float64
+                )
                 self._blocks.append(("+".join(member_of.names), idx, chol))
         self._low = np.array([i.low for i in self.inputs])
         self._span = np.array([i.high - i.low for i in self.inputs])
@@ -161,10 +163,13 @@ class InputSpace:
         """Block names (a singleton input is its own block)."""
         return tuple(b[0] for b in self._blocks)
 
-    def blocks(self, level: str) -> list[tuple[str, Array]]:
+    def blocks(self, level: str) -> list[tuple[str, NDArray[np.intp]]]:
         """``(name, column indices)`` units that are varied together."""
         if level == "inputs":
-            return [(n, np.array([k])) for k, n in enumerate(self.input_names)]
+            return [
+                (n, np.array([k], dtype=np.intp))
+                for k, n in enumerate(self.input_names)
+            ]
         return [(n, idx) for n, idx, _ in self._blocks]
 
     def to_physical(self, unit: Array) -> Array:

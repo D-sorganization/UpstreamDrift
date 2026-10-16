@@ -236,7 +236,7 @@ def _layout(frames: tuple[FeasibleSet, ...], objective: ObjectiveSpec) -> _Layou
 # ------------------------------------------------------- quadratic terms
 def _scale_diag(lay: _Layout, scale: Array, weight: float) -> sp.csr_matrix:
     root = np.sqrt(weight * np.repeat(lay.omega, lay.n_a)) / np.tile(scale, lay.t_count)
-    return sp.diags(root).tocsr()
+    return sp.diags(root.ravel()).tocsr()
 
 
 def _rate_operator(lay: _Layout, scale: Array, weight: float) -> sp.csr_matrix | None:
@@ -250,7 +250,7 @@ def _rate_operator(lay: _Layout, scale: Array, weight: float) -> sp.csr_matrix |
         for i in range(n_a):
             sel[i, k * n_a + i] = -1.0
             sel[i, (k + 1) * n_a + i] = 1.0
-        rows.append(sp.diags(np.sqrt(weight / dt) / scale) @ sel.tocsr())
+        rows.append(sp.diags((np.sqrt(weight / dt) / scale).ravel()) @ sel.tocsr())
     return sp.csr_matrix(sp.vstack(rows))
 
 
@@ -260,7 +260,7 @@ def _variance_operator(lay: _Layout, term: VarianceTerm) -> sp.csr_matrix:
         raise ValueError(
             f"variance coeff must be {(lay.t_count, lay.n_a)}, got {term.coeff.shape}"
         )
-    return sp.diags(np.sqrt(term.weight * term.coeff.reshape(-1))).tocsr()
+    return sp.diags(np.sqrt(term.weight * term.coeff.reshape(-1)).ravel()).tocsr()
 
 
 def _operators(
@@ -437,8 +437,8 @@ def _epigraph_rows(
     coef_lo = -np.tile(cm, t_count) * vel
     n_s = t_count * n_a
     eye = -sp.identity(n_s, format="csr")
-    up = sp.hstack([sp.diags(coef_up) @ lay.ntil, eye])
-    lo = sp.hstack([sp.diags(coef_lo) @ lay.ntil, eye])
+    up = sp.hstack([sp.diags(coef_up.ravel()) @ lay.ntil, eye])
+    lo = sp.hstack([sp.diags(coef_lo.ravel()) @ lay.ntil, eye])
     rhs = np.concatenate([-coef_up * lay.t0, -coef_lo * lay.t0])
     return sp.vstack([up, lo]).tocsr(), rhs
 

@@ -60,7 +60,7 @@ def registration_residual_report(
     lo, hi = max(float(r[0]) for r in rel), min(float(r[-1]) for r in rel)
     if not hi > lo:
         raise ValueError("trials share no common physical-time window about impact")
-    grid = np.linspace(lo, hi, n_bins)
+    grid = np.asarray(np.linspace(lo, hi, n_bins), dtype=np.float64)
     resampled = []
     for r, trial in zip(rel, trials, strict=True):
         flat = trial.trajectories[trajectory_key].reshape(r.size, -1)

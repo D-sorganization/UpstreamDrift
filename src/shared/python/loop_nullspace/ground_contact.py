@@ -467,7 +467,7 @@ def observation_accounting(
     keep = min(obs.n_rows, dec.nullity)
     return ObservationAccounting(
         n_rows=obs.n_rows,
-        rank_selector=_rank(sel_sv, rank_rtol),
+        rank_selector=_rank(np.asarray(sel_sv, dtype=np.float64), rank_rtol),
         nullity_free=dec.nullity,
         rank_visible=fit.rank,
         nullity_observed=dec.nullity - fit.rank,

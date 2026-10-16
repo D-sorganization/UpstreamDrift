@@ -373,7 +373,7 @@ def _project(problem: InverseProblem) -> tuple[Array, Array, list[tuple[Array, A
         n_mat = dec.N[:n_a]
         z0 = np.linalg.lstsq(n_mat, problem.observed_torque[k] - t0, rcond=None)[0]
         proj[k] = t0 + n_mat @ z0
-        den = np.linalg.norm(problem.observed_torque[k] / s)
+        den = float(np.linalg.norm(problem.observed_torque[k] / s))
         resid[k] = np.linalg.norm((problem.observed_torque[k] - proj[k]) / s) / max(
             den, 1e-300
         )
