@@ -316,32 +316,7 @@ class ChatService:
                 yield "Session not found."
                 return
 
-        # Build engine context system message
-        from src.shared.python.ai.types import Message
-
-        temp_messages = list(ctx.messages)
-        engine = ctx.metadata.get("last_engine")
-        if engine:
-            system_hint = (
-                f"The user is currently working in the {engine} physics engine. "
-                "Tailor your responses to that context when relevant."
-            )
-            temp_messages.insert(0, Message(role="system", content=system_hint))
-
-        # Inject app state context if a provider is configured
-        app_state_msg = self._build_app_state_message()
-        if app_state_msg is not None:
-            temp_messages.insert(0, app_state_msg)
-
-        # Create a temporary context copy for the adapter
-        from src.shared.python.ai.types import ConversationContext
-
-        temp_ctx = ConversationContext(
-            session_id=ctx.session_id,
-            messages=temp_messages,
-            user_expertise=ctx.user_expertise,
-            metadata=ctx.metadata,
-        )
+        temp_ctx = self._build_adapter_context(ctx)
 
         import queue
 
@@ -408,6 +383,31 @@ class ChatService:
                     "interruptible",
                     session_id,
                 )
+
+    def _build_adapter_context(self, ctx: ConversationContext) -> ConversationContext:
+        """Copy ``ctx`` for the adapter, prepending engine/app-state system hints."""
+        from src.shared.python.ai.types import ConversationContext, Message
+
+        temp_messages = list(ctx.messages)
+        engine = ctx.metadata.get("last_engine")
+        if engine:
+            system_hint = (
+                f"The user is currently working in the {engine} physics engine. "
+                "Tailor your responses to that context when relevant."
+            )
+            temp_messages.insert(0, Message(role="system", content=system_hint))
+
+        # Inject app state context if a provider is configured
+        app_state_msg = self._build_app_state_message()
+        if app_state_msg is not None:
+            temp_messages.insert(0, app_state_msg)
+
+        return ConversationContext(
+            session_id=ctx.session_id,
+            messages=temp_messages,
+            user_expertise=ctx.user_expertise,
+            metadata=ctx.metadata,
+        )
 
     def _cancel_adapter_stream(self) -> None:
         """Force-close the adapter's in-flight stream, if it supports it.
