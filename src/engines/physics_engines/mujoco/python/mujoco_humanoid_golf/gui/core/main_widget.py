@@ -113,5 +113,11 @@ class MainWidget(QWidget):
                     sim_widget.stop_simulation()
                 except Exception:  # pragma: no cover - defensive  # noqa: BLE001
                     logger.debug("sim_widget.stop_simulation raised", exc_info=True)
+                # Free GL resources while the widget/context is still alive;
+                # leaving it to GC crashes at exit (UD#12914).
+                try:
+                    sim_widget.release_resources()
+                except Exception:  # pragma: no cover - defensive  # noqa: BLE001
+                    logger.debug("sim_widget.release_resources raised", exc_info=True)
         except Exception:  # pragma: no cover - defensive
             logger.exception("MuJoCo MainWidget cleanup raised")
