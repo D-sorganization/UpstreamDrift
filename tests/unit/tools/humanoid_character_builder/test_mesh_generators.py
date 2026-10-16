@@ -470,9 +470,9 @@ class TestMakeHumanGenerate:
     """Test the full MakeHuman generate pipeline with mocking."""
 
     @patch(
-        "humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE", True
+        "humanoid_character_builder.generators._mesh_makehuman.TRIMESH_AVAILABLE", True
     )
-    @patch("humanoid_character_builder.generators.mesh_generator._trimesh_module")
+    @patch("humanoid_character_builder.generators._mesh_makehuman._trimesh_module")
     def test_generate_with_mocked_subprocess(
         self, mock_trimesh, tmp_path: Path
     ) -> None:
