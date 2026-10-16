@@ -530,10 +530,8 @@ class PreferencesDialog(QDialog):
     def _preview_theme(self, theme_name: str) -> None:
         """Live-preview theme when combo selection changes."""
         try:
-            from src.shared.python.theme import (  # type: ignore[attr-defined]
-                ThemeManager,
-                ThemePreset,
-            )
+            from src.shared.python.theme import ThemeManager  # type: ignore[attr-defined]
+            from src.shared.python.theme.launcher_compat import ThemePreset
 
             manager = ThemeManager.instance()
 

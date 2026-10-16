@@ -94,6 +94,9 @@ class DraggableTabWidget(QTabWidget):
     tab_moved = pyqtSignal(int, int)
     tab_backgrounded = pyqtSignal(str)
     tab_restored = pyqtSignal(str)
+    # Emitted with the tab title once a tab is closed, whether it was destroyed
+    # or backgrounded (#12962); lets owners reset per-tab status.
+    tab_closed = pyqtSignal(str)
 
     def __init__(
         self,
@@ -277,6 +280,7 @@ class DraggableTabWidget(QTabWidget):
         # flag into a single, generic lifecycle (DRY).
         if widget is not None and self._is_background_eligible(widget):
             self._background_tab(index, tab_text, widget)
+            self.tab_closed.emit(tab_text)
             return
 
         if tab_text in self.tab_factories:
@@ -285,6 +289,7 @@ class DraggableTabWidget(QTabWidget):
         self.removeTab(index)
         if widget:
             widget.deleteLater()
+        self.tab_closed.emit(tab_text)
 
     # ── Background (keep-running-hidden) lifecycle ──────────────────
 

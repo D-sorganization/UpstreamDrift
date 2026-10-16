@@ -103,6 +103,7 @@ class ProcessOutputRelay(QObject):
 
 
 from typing import Protocol
+from src.launchers.engine_status import reset_status_if_engine_closed
 from PyQt6.QtWidgets import QTabWidget, QDialog
 import contextlib
 
@@ -400,6 +401,12 @@ class UISetupManager(LauncherNavigationUIMixin, LauncherTopBarUIMixin):
         self.workspace_tabs = DraggableTabWidget(core_tabs={"Home"})
         self.workspace_tabs.setDocumentMode(True)
         self.workspace_tabs.currentChanged.connect(self._sync_console_button_states)
+        # #12962: closing an engine tab must not leave "<engine> Running" behind.
+        self.workspace_tabs.tab_closed.connect(
+            lambda title: reset_status_if_engine_closed(
+                self.lbl_status, title, self._restore_idle_status
+            )
+        )
 
         self.workspace_tabs.addTab(self.content_splitter, "Home")
 

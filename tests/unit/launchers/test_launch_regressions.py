@@ -27,24 +27,24 @@ class TestThemeBackwardCompat:
     """PR #2086: ThemePreset and apply_golf_suite_style must be importable."""
 
     def test_theme_preset_importable(self) -> None:
-        from src.shared.python.theme import ThemePreset
+        from src.shared.python.theme.launcher_compat import ThemePreset
 
         assert issubclass(ThemePreset, enum.Enum)
 
     def test_theme_preset_has_dark_light(self) -> None:
-        from src.shared.python.theme import ThemePreset
+        from src.shared.python.theme.launcher_compat import ThemePreset
 
         assert ThemePreset.DARK.value == "Dark"
         assert ThemePreset.LIGHT.value == "Light"
         assert ThemePreset.HIGH_CONTRAST.value == "High Contrast"
 
     def test_apply_golf_suite_style_importable(self) -> None:
-        from src.shared.python.theme import apply_golf_suite_style
+        from src.shared.python.theme.launcher_compat import apply_golf_suite_style
 
         assert callable(apply_golf_suite_style)
 
     def test_apply_golf_suite_style_no_error(self) -> None:
-        from src.shared.python.theme import apply_golf_suite_style
+        from src.shared.python.theme.launcher_compat import apply_golf_suite_style
 
         apply_golf_suite_style()  # Must not raise
 

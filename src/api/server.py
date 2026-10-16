@@ -40,6 +40,7 @@ from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 
 from .config import (
+    api_reload_enabled,
     get_allowed_hosts,
     get_cors_origins,
     get_server_host,
@@ -374,13 +375,16 @@ if __name__ == "__main__":
     # SECURITY FIX: Only enable auto-reload in development mode
     # Auto-reload in production can enable code injection attacks
     # Use canonical get_environment() from shared config (normalises "dev", "prod", etc.)
-    enable_reload = get_environment() == "development"
+    enable_reload = api_reload_enabled(os.environ)
 
     if enable_reload:
         logger.warning("Running with auto-reload enabled (development mode)")
 
+    # Issue #12901: reload needs an import string (parent + reloader + worker
+    # each import the app). Without reload, hand uvicorn the already-imported
+    # app object so startup pays the import cost exactly once.
     uvicorn.run(
-        "src.api.server:app",
+        "src.api.server:app" if enable_reload else app,
         host=get_server_host(),
         port=get_server_port(),
         reload=enable_reload,

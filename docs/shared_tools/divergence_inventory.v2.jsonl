@@ -3086,6 +3086,7 @@
 {"path": "theme/font_manager.py", "classification": "tools-only", "package": "theme", "spelling_only": false}
 {"path": "theme/icon_utils.py", "classification": "tools-only", "package": "theme", "spelling_only": false}
 {"path": "theme/integration.py", "classification": "tools-only", "package": "theme", "spelling_only": false}
+{"path": "theme/launcher_compat.py", "classification": "ud-only", "package": "theme", "spelling_only": false}
 {"path": "theme/layout_metrics.py", "classification": "ud-only", "package": "theme", "spelling_only": false}
 {"path": "theme/matplotlib_style.py", "classification": "tools-only", "package": "theme", "spelling_only": false}
 {"path": "theme/palette.py", "classification": "tools-only", "package": "theme", "spelling_only": false}

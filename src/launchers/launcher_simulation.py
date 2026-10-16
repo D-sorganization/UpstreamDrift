@@ -27,6 +27,7 @@ from src.launchers.launcher_constants import (
     CREATE_NO_WINDOW,
     REPOS_ROOT,
 )
+from src.launchers.engine_status import engine_running_text
 from src.launchers.engine_availability import engine_for_model, install_hint
 from src.launchers.launcher_model_sources import (
     get_model_source_root,
@@ -574,7 +575,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
             )
 
         if available:
-            self.lbl_status.setText(f"* {model.name} Running")
+            self.lbl_status.setText(engine_running_text(model.name))
             self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
         else:
             self.lbl_status.setText("* Launch Error")
@@ -618,7 +619,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
             if success:
                 self.show_toast(f"{model.name} Launched", "success")
-                self.lbl_status.setText(f"* {model.name} Running")
+                self.lbl_status.setText(engine_running_text(model.name))
                 self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
             else:
                 reason = None
@@ -697,7 +698,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 self.popout_widget(widget, model.name)
                 self.show_toast(f"{model.name} Popped Out", "success")
 
-            self.lbl_status.setText(f"* {model.name} Running")
+            self.lbl_status.setText(engine_running_text(model.name))
             self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
             return
 
@@ -810,7 +811,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 # Route Docker output through the unified console
                 self.process_manager.attach_process(model.name, process)
                 self.show_toast(f"{model.name} Launched (Docker)", "success")
-                self.lbl_status.setText(f"* {model.name} Running (Docker)")
+                self.lbl_status.setText(engine_running_text(model.name, "Docker"))
                 self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
             else:
                 self.lbl_status.setText("* Docker Error")
@@ -853,7 +854,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
         if use_wsl:
             success = self.process_manager.launch_in_wsl(str(script_path))
             if success:
-                self.lbl_status.setText(f"* {name} Running (WSL)")
+                self.lbl_status.setText(engine_running_text(name, "WSL"))
                 self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
                 self.show_toast(f"{name} Launched in WSL", "success")
             else:
@@ -869,7 +870,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
         if process:
             self.show_toast(f"{name} Launched", "success")
-            self.lbl_status.setText(f"* {name} Running")
+            self.lbl_status.setText(engine_running_text(name))
             self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
         else:
             QMessageBox.critical(
@@ -900,7 +901,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
         if use_wsl:
             success = self.process_manager.launch_module_in_wsl(module_name, cwd)
             if success:
-                self.lbl_status.setText(f"* {name} Running (WSL)")
+                self.lbl_status.setText(engine_running_text(name, "WSL"))
                 self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
                 self.show_toast(f"{name} Launched in WSL", "success")
             else:
@@ -916,7 +917,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
         if process:
             self.show_toast(f"{name} Launched", "success")
-            self.lbl_status.setText(f"* {name} Running")
+            self.lbl_status.setText(engine_running_text(name))
             self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
         else:
             QMessageBox.critical(
