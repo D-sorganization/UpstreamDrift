@@ -10,10 +10,12 @@ Issue #5213 — native C3D / BVH / TRC adapters via Rust.
 
 from __future__ import annotations
 
+import importlib.util
 import math
 import logging
 from collections.abc import Iterable, Mapping
 from pathlib import Path
+from typing import Any
 
 from src.shared.python.data_io.native_dll_guard import import_ezc3d
 from src.shared.python.motion_pipeline.contracts import (
@@ -47,13 +49,16 @@ except ImportError:  # pragma: no cover
     _rust_io = None  # type: ignore[assignment]
     _HAS_RUST = False
 
-try:  # pragma: no cover - exercised only when ezc3d is installed
-    _ezc3d = import_ezc3d()
+# ezc3d is probed, never imported, at module load (#12883): importing it here
+# would claim ``ezc3d.dll`` at launcher startup and break the native OpenSim SDK.
+# ``find_spec`` only locates the package; ``_load_ezc3d`` imports it on first read.
+_HAS_EZC3D = importlib.util.find_spec("ezc3d") is not None
 
-    _HAS_EZC3D = True
-except ImportError:  # pragma: no cover
-    _ezc3d = None  # type: ignore[assignment]
-    _HAS_EZC3D = False
+
+def _load_ezc3d() -> Any:
+    """Import ``ezc3d`` on first use; a DLL clash raises ``NativeDllConflictError``."""
+    return import_ezc3d()
+
 
 _HAS_C3D_BACKEND = _HAS_RUST or _HAS_EZC3D
 
@@ -180,7 +185,7 @@ class C3DAdapter(MocapSourceAdapter):
                 "No C3D backend available (install upstream-mocap-io or ezc3d)"
             )
         try:
-            c = _ezc3d.c3d(str(path))
+            c = _load_ezc3d().c3d(str(path))
         except OSError as e:
             raise AdapterContractError(
                 f"Failed to read C3D metadata from {path}: {e}"
@@ -311,7 +316,7 @@ class C3DAdapter(MocapSourceAdapter):
         calibration: Calibration | None,
     ) -> MarkerTrajectory:
         try:
-            c = _ezc3d.c3d(str(p))
+            c = _load_ezc3d().c3d(str(p))
         except OSError as e:
             raise AdapterContractError(f"Failed to load C3D file {p}: {e}") from e
         params = c["parameters"]
