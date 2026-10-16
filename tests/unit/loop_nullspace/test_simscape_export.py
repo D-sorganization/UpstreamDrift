@@ -43,8 +43,32 @@ SHA = "a" * 64
 INPUT = InputProvenance("test", "unit")
 
 
+# The analytic snapshot is computed with numpy/LAPACK, whose results differ in
+# the last bit across BLAS builds (CI measured 4.4e-16 abs / 2.1e-16 rel, one
+# ulp); floats are compared to a few ulps, everything else exactly.
+_RTOL = 1e-12
+_ATOL = 1e-14
+
+
 def _fixture() -> dict[str, Any]:
     return json.loads(FIXTURE.read_text(encoding="utf-8"))
+
+
+def _assert_tree_close(actual: Any, expected: Any, path: str = "$") -> None:
+    """Exact structure and non-float leaves; floats within a few ulps."""
+    if isinstance(expected, dict):
+        assert isinstance(actual, dict) and actual.keys() == expected.keys(), path
+        for key in expected:
+            _assert_tree_close(actual[key], expected[key], f"{path}.{key}")
+    elif isinstance(expected, list):
+        assert isinstance(actual, list) and len(actual) == len(expected), path
+        for i, (a, e) in enumerate(zip(actual, expected, strict=True)):
+            _assert_tree_close(a, e, f"{path}[{i}]")
+    elif isinstance(expected, float) and not isinstance(expected, bool):
+        assert isinstance(actual, (int, float)), path
+        assert np.isclose(actual, expected, rtol=_RTOL, atol=_ATOL), path
+    else:
+        assert actual == expected, path
 
 
 def _matlab_doc(**prov: Any) -> dict[str, Any]:
@@ -84,13 +108,27 @@ def test_fixture_matches_analytic_planar_snapshot() -> None:
     ref = planar_golfer_snapshot().snapshot
     snap = snapshot_from_export(export, 0, input_provenance=INPUT, test_only=True)
     for name in ("q", "v", "a", "M", "h", "J_c", "Jdot_v", "S"):
-        np.testing.assert_array_equal(getattr(snap, name), getattr(ref, name))
+        np.testing.assert_allclose(
+            getattr(snap, name), getattr(ref, name), rtol=_RTOL, atol=_ATOL
+        )
     assert snap.topology == ref.topology
 
 
 def test_fixture_is_regenerated_exactly_from_the_analytic_model() -> None:
     expected = export_to_dict(export_from_snapshot(planar_golfer_snapshot().snapshot))
-    assert _fixture() == expected
+    _assert_tree_close(_fixture(), expected)
+
+
+def test_tree_comparison_rejects_a_real_difference() -> None:
+    doc = _fixture()
+    bumped = copy.deepcopy(doc)
+    bumped["states"][0]["q"][0] += 1e-9
+    with pytest.raises(AssertionError):
+        _assert_tree_close(bumped, doc)
+    renamed = copy.deepcopy(doc)
+    renamed["provenance"]["provenance_kind"] = "matlab_export"
+    with pytest.raises(AssertionError):
+        _assert_tree_close(renamed, doc)
 
 
 def test_snapshot_refused_without_test_only_for_synthetic() -> None:
