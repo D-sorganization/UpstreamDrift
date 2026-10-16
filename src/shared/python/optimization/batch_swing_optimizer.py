@@ -19,8 +19,8 @@ identical on the CPU path, which is what CI exercises.
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
-from typing import Literal
+from dataclasses import dataclass, fields, replace
+from typing import Any, Literal
 
 import numpy as np
 
@@ -33,6 +33,7 @@ from src.shared.python.simulation_backends.model_params import GolfModelParams
 from src.shared.python.simulation_backends.protocol import BatchTrace
 
 __all__ = [
+    "BatchSwingConfig",
     "BatchSwingObjectiveWeights",
     "BatchSwingOptimizer",
     "BatchSwingResult",
@@ -63,6 +64,67 @@ class BatchSwingObjectiveWeights:
             value = getattr(self, name)
             if not np.isfinite(value) or value < 0:
                 raise ValueError(f"{name} must be finite and non-negative")
+
+
+@dataclass(frozen=True)
+class BatchSwingConfig:
+    """Hyperparameters for :class:`BatchSwingOptimizer` (parameter object).
+
+    Attributes:
+        method: ``"cem"`` (elite refit) or ``"mppi"`` (softmax reweighting).
+        n_candidates: Population size per iteration (> 1).
+        n_iterations: Optimization iterations (> 0).
+        elite_fraction: CEM elite quantile (0, 1].
+        temperature: MPPI softmax temperature (> 0).
+        tau_max: Torque sampling bound [N*m] (> 0).
+        seed: RNG seed for reproducibility.
+        weights: Objective weights (``None`` -> defaults).
+        max_batch: Optional per-launch env budget for batched backends.
+
+    Design by Contract: the dataclass is immutable and validates every
+    hyperparameter at construction, raising ``ValueError``.
+    """
+
+    method: Literal["cem", "mppi"] = "cem"
+    n_candidates: int = 64
+    n_iterations: int = 10
+    elite_fraction: float = 0.2
+    temperature: float = 1.0
+    tau_max: float = 100.0
+    seed: int = 0
+    weights: BatchSwingObjectiveWeights | None = None
+    max_batch: int | None = None
+
+    def __post_init__(self) -> None:
+        if self.method not in {"cem", "mppi"}:
+            raise ValueError(f"method must be 'cem' or 'mppi', got {self.method!r}")
+        if self.n_candidates < 2:
+            raise ValueError("n_candidates must be at least 2")
+        if self.n_iterations < 1:
+            raise ValueError("n_iterations must be positive")
+        if not 0.0 < self.elite_fraction <= 1.0:
+            raise ValueError("elite_fraction must be in (0, 1]")
+        if self.temperature <= 0.0:
+            raise ValueError("temperature must be positive")
+        if self.tau_max <= 0.0:
+            raise ValueError("tau_max must be positive")
+
+    @classmethod
+    def resolve(
+        cls, config: BatchSwingConfig | None, overrides: dict[str, Any]
+    ) -> BatchSwingConfig:
+        """Merge keyword ``overrides`` onto ``config``.
+
+        Pre: every override name is a ``BatchSwingConfig`` field
+        (``TypeError`` otherwise, like an unexpected keyword argument).
+        """
+        known = {f.name for f in fields(cls)}
+        for name in overrides:
+            if name not in known:
+                raise TypeError(
+                    f"BatchSwingOptimizer() got unexpected keyword {name!r}"
+                )
+        return replace(config or cls(), **overrides)
 
 
 @dataclass(frozen=True)
@@ -144,6 +206,8 @@ class BatchSwingOptimizer:
             backends (MJX/MJWarp) go through :func:`run_batched`, single-env
             backends through :func:`cpu_batch_rollout`.
         params: Canonical golf model parameters.
+        config: :class:`BatchSwingConfig` hyperparameters. The same fields
+            may be passed as keyword arguments and override ``config``.
         method: ``"cem"`` (elite refit) or ``"mppi"`` (softmax reweighting).
         n_candidates: Population size per iteration (> 1).
         n_iterations: Optimization iterations (> 0).
@@ -159,40 +223,22 @@ class BatchSwingOptimizer:
         self,
         backend_name: str = "ode",
         params: GolfModelParams | None = None,
-        *,
-        method: Literal["cem", "mppi"] = "cem",
-        n_candidates: int = 64,
-        n_iterations: int = 10,
-        elite_fraction: float = 0.2,
-        temperature: float = 1.0,
-        tau_max: float = 100.0,
-        seed: int = 0,
-        weights: BatchSwingObjectiveWeights | None = None,
-        max_batch: int | None = None,
+        config: BatchSwingConfig | None = None,
+        **overrides: Any,
     ) -> None:
-        if method not in {"cem", "mppi"}:
-            raise ValueError(f"method must be 'cem' or 'mppi', got {method!r}")
-        if n_candidates < 2:
-            raise ValueError("n_candidates must be at least 2")
-        if n_iterations < 1:
-            raise ValueError("n_iterations must be positive")
-        if not 0.0 < elite_fraction <= 1.0:
-            raise ValueError("elite_fraction must be in (0, 1]")
-        if temperature <= 0.0:
-            raise ValueError("temperature must be positive")
-        if tau_max <= 0.0:
-            raise ValueError("tau_max must be positive")
+        cfg = BatchSwingConfig.resolve(config, overrides)
+        self.config = cfg
         self.backend_name = backend_name
         self.params = params or GolfModelParams.default()
-        self.method = method
-        self.n_candidates = n_candidates
-        self.n_iterations = n_iterations
-        self.elite_fraction = elite_fraction
-        self.temperature = temperature
-        self.tau_max = tau_max
-        self.seed = seed
-        self.weights = weights or BatchSwingObjectiveWeights()
-        self.max_batch = max_batch
+        self.method = cfg.method
+        self.n_candidates = cfg.n_candidates
+        self.n_iterations = cfg.n_iterations
+        self.elite_fraction = cfg.elite_fraction
+        self.temperature = cfg.temperature
+        self.tau_max = cfg.tau_max
+        self.seed = cfg.seed
+        self.weights = cfg.weights or BatchSwingObjectiveWeights()
+        self.max_batch = cfg.max_batch
 
     # ------------------------------------------------------------------
 

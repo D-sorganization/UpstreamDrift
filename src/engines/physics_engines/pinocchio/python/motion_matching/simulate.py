@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import collections
 import threading
+import time
 from dataclasses import dataclass, field
 from math import comb
 from pathlib import Path
@@ -60,6 +61,8 @@ from src.shared.python.motion_matching.polynomial_torque import (
     POLY_DEGREE as _POLY_DEGREE,
 )
 from src.shared.python.motion_matching.validate_theta import validate_theta
+
+from ._simout_build import normalize_simout_args
 
 POLY_DEGREE: int = _POLY_DEGREE
 
@@ -253,7 +256,7 @@ class SimOptions:
                 raise ValueError(msg)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, init=False)
 class SimOut:
     """Canonical forward-simulation output matching Simscape contract.
 
@@ -305,110 +308,14 @@ class SimOut:
     )
     meta: dict[str, Any] = field(default_factory=dict)
 
-    def __init__(
-        self,
-        time: npt.NDArray[np.float64] | None = None,
-        q: npt.NDArray[np.float64] | None = None,
-        qd: npt.NDArray[np.float64] | None = None,
-        qdd: npt.NDArray[np.float64] | None = None,
-        tau: npt.NDArray[np.float64] | None = None,
-        grip: npt.NDArray[np.float64] | None = None,
-        grip_quat: npt.NDArray[np.float64] | None = None,
-        clubhead: npt.NDArray[np.float64] | None = None,
-        club_quat: npt.NDArray[np.float64] | None = None,
-        solver_status: str = "success",
-        duration_s: float = 0.0,
-        kinetic_energy: npt.NDArray[np.float64] | None = None,
-        potential_energy: npt.NDArray[np.float64] | None = None,
-        meta: dict[str, Any] | None = None,
-        *,
-        t: npt.NDArray[np.float64] | None = None,
-        grip_position: npt.NDArray[np.float64] | None = None,
-        grip_rotation: npt.NDArray[np.float64] | None = None,
-        clubhead_position: npt.NDArray[np.float64] | None = None,
-        clubhead_rotation: npt.NDArray[np.float64] | None = None,
-    ) -> None:
-        t_arr = time if time is not None else t
-        if t_arr is None:
-            raise ValueError("Either 'time' or 't' must be provided")
-        t_vec = np.asarray(t_arr, dtype=np.float64)
-        n = t_vec.shape[0]
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Accept the canonical fields plus the legacy keyword aliases.
 
-        q_mat = (
-            np.asarray(q, dtype=np.float64)
-            if q is not None
-            else np.zeros((n, 0), dtype=np.float64)
-        )
-        qd_mat = (
-            np.asarray(qd, dtype=np.float64)
-            if qd is not None
-            else np.zeros((n, 0), dtype=np.float64)
-        )
-        nv = qd_mat.shape[1] if qd_mat.ndim == 2 else 0
-
-        qdd_mat = (
-            np.asarray(qdd, dtype=np.float64)
-            if qdd is not None
-            else np.zeros((n, nv), dtype=np.float64)
-        )
-        tau_mat = (
-            np.asarray(tau, dtype=np.float64)
-            if tau is not None
-            else np.zeros((n, nv), dtype=np.float64)
-        )
-
-        grip_mat = grip if grip is not None else grip_position
-        if grip_mat is None:
-            grip_mat = np.zeros((n, 3), dtype=np.float64)
-        else:
-            grip_mat = np.asarray(grip_mat, dtype=np.float64)
-
-        if grip_quat is not None:
-            g_quat = np.asarray(grip_quat, dtype=np.float64)
-        elif grip_rotation is not None:
-            g_quat = rotmat_to_quat(grip_rotation)
-        else:
-            g_quat = np.zeros((n, 4), dtype=np.float64)
-
-        head_mat = clubhead if clubhead is not None else clubhead_position
-        if head_mat is None:
-            head_mat = np.zeros((n, 3), dtype=np.float64)
-        else:
-            head_mat = np.asarray(head_mat, dtype=np.float64)
-
-        if club_quat is not None:
-            c_quat = np.asarray(club_quat, dtype=np.float64)
-        elif clubhead_rotation is not None:
-            c_quat = rotmat_to_quat(clubhead_rotation)
-        else:
-            c_quat = np.zeros((n, 4), dtype=np.float64)
-
-        ke_vec = (
-            np.asarray(kinetic_energy, dtype=np.float64)
-            if kinetic_energy is not None
-            else np.zeros(n, dtype=np.float64)
-        )
-        pe_vec = (
-            np.asarray(potential_energy, dtype=np.float64)
-            if potential_energy is not None
-            else np.zeros(n, dtype=np.float64)
-        )
-        meta_dict = meta if meta is not None else {}
-
-        object.__setattr__(self, "time", t_vec)
-        object.__setattr__(self, "q", q_mat)
-        object.__setattr__(self, "qd", qd_mat)
-        object.__setattr__(self, "qdd", qdd_mat)
-        object.__setattr__(self, "tau", tau_mat)
-        object.__setattr__(self, "grip", grip_mat)
-        object.__setattr__(self, "grip_quat", g_quat)
-        object.__setattr__(self, "clubhead", head_mat)
-        object.__setattr__(self, "club_quat", c_quat)
-        object.__setattr__(self, "solver_status", solver_status)
-        object.__setattr__(self, "duration_s", float(duration_s))
-        object.__setattr__(self, "kinetic_energy", ke_vec)
-        object.__setattr__(self, "potential_energy", pe_vec)
-        object.__setattr__(self, "meta", meta_dict)
+        The accepted signature is ``_simout_build.SIMOUT_SIGNATURE``; omitted
+        arrays are zero-filled to the length of ``time``.
+        """
+        for name, value in normalize_simout_args(args, kwargs).items():
+            object.__setattr__(self, name, value)
 
     @property
     def t(self) -> npt.NDArray[np.float64]:
@@ -554,12 +461,233 @@ def _rk4_step(
     return q_next, qd_next, tau1, k1_qdd
 
 
+@dataclass(frozen=True)
+class _Dynamics:
+    """Bundle of the pinocchio module, model and per-call data (one hop)."""
+
+    pin: Any
+    model: Any
+    data: Any
+
+
+@dataclass(frozen=True)
+class _Trajectory:
+    """Integrated joint-space trajectory plus the integration wall time."""
+
+    q: npt.NDArray[np.float64]
+    qd: npt.NDArray[np.float64]
+    qdd: npt.NDArray[np.float64]
+    tau: npt.NDArray[np.float64]
+    integrate_s: float
+
+
+@dataclass(frozen=True)
+class _KinematicsLog:
+    """Cartesian poses (rotation matrices) and energies from the FK re-walk."""
+
+    grip_pos: npt.NDArray[np.float64]
+    grip_rot: npt.NDArray[np.float64]
+    clubhead_pos: npt.NDArray[np.float64]
+    clubhead_rot: npt.NDArray[np.float64]
+    kinetic: npt.NDArray[np.float64]
+    potential: npt.NDArray[np.float64]
+    fk_s: float
+
+
+def _require_runtime() -> None:
+    """Raise ``ImportError`` unless a functional pinocchio runtime exists."""
+    if not is_pinocchio_available():
+        msg = (
+            "Pinocchio C++ runtime (with buildModelFromUrdf) is required for "
+            "simulate_with_coefficients. Install via conda or python bindings."
+        )
+        raise ImportError(msg)
+
+
+def _load_model(opts: SimOptions) -> tuple[Any, Path]:
+    """Return the (possibly gravity-overridden) model and its URDF path."""
+    urdf_path = _resolve_urdf_path(opts.urdf_path)
+    model = _get_cached_model(urdf_path)
+    if opts.gravity is not None:
+        model = model.copy()
+        model.gravity.linear = np.asarray(opts.gravity, dtype=np.float64)
+    return model, urdf_path
+
+
+def _rk4_coefficients(
+    coeffs: npt.NDArray[np.float64], opts: SimOptions
+) -> npt.NDArray[np.float64]:
+    """Return power-basis coefficients ready for Horner evaluation in RK4."""
+    if opts.basis != "bernstein":
+        return coeffs
+    # Convert Bernstein control points to the equivalent power basis.
+    p_coeffs = coeffs @ bernstein_to_power_matrix(POLY_DEGREE)
+    t_span = opts.T_s if opts.T_s is not None else opts.t_final
+    scale_powers = t_span ** np.arange(COEFFS_PER_JOINT, dtype=np.float64)
+    return p_coeffs / scale_powers[None, :]
+
+
+def _initial_state(
+    pin_mod: Any, model: Any, initial_pose: dict[str, Any] | None
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """Resolve and shape-check the initial ``(q0, qd0)``."""
+    n_joints = int(model.nv)
+    pose = initial_pose if initial_pose is not None else {}
+    q0_in = pose.get("q")
+    qd0_in = pose.get("qd")
+    q0 = (
+        np.asarray(q0_in, dtype=np.float64).reshape(-1).copy()
+        if q0_in is not None
+        else pin_mod.neutral(model)
+    )
+    qd0 = (
+        np.asarray(qd0_in, dtype=np.float64).reshape(-1).copy()
+        if qd0_in is not None
+        else np.zeros(n_joints, dtype=np.float64)
+    )
+    if q0.shape != (model.nq,):
+        msg = f"initial_pose['q'] has shape {q0.shape}; expected ({model.nq},)"
+        raise ValueError(msg)
+    if qd0.shape != (n_joints,):
+        msg = f"initial_pose['qd'] has shape {qd0.shape}; expected ({n_joints},)"
+        raise ValueError(msg)
+    return q0, qd0
+
+
+def _step_count(opts: SimOptions) -> int:
+    """Number of fixed integration steps covering ``[0, t_final]``."""
+    n_steps = int(round(opts.t_final / opts.dt))
+    if not np.isclose(n_steps * opts.dt, opts.t_final, rtol=1e-9, atol=1e-12):
+        n_steps = int(np.ceil(opts.t_final / opts.dt))
+    return n_steps
+
+
+def _integrate(
+    dyn: _Dynamics,
+    rk4_coeffs: npt.NDArray[np.float64],
+    q0: npt.NDArray[np.float64],
+    qd0: npt.NDArray[np.float64],
+    t_grid: npt.NDArray[np.float64],
+    opts: SimOptions,
+) -> _Trajectory:
+    """Run fixed-step RK4 over ``t_grid`` and return the joint trajectory.
+
+    Raises:
+        ValueError: If ``q`` or ``qd`` becomes non-finite.
+    """
+    n_samples = t_grid.shape[0]
+    n_joints = qd0.shape[0]
+    q_traj = np.empty((n_samples, q0.shape[0]), dtype=np.float64)
+    qd_traj = np.empty((n_samples, n_joints), dtype=np.float64)
+    qdd_traj = np.empty((n_samples, n_joints), dtype=np.float64)
+    tau_traj = np.empty((n_samples, n_joints), dtype=np.float64)
+    q_traj[0] = q0
+    qd_traj[0] = qd0
+    tau_traj[0] = evaluate_polynomial_torque(rk4_coeffs, 0.0)
+
+    t_start = time.perf_counter()
+    q = q0.copy()
+    qd: npt.NDArray[np.float64] = qd0.copy()
+    for i in range(1, n_samples):
+        t_i = t_grid[i - 1] - opts.t0
+        q, qd, tau_i, k1_qdd = _rk4_step(
+            dyn.pin, dyn.model, dyn.data, rk4_coeffs, q, qd, t_i, opts.dt
+        )
+        if not (np.all(np.isfinite(q)) and np.all(np.isfinite(qd))):
+            msg = (
+                f"Integration diverged at step {i} (t={t_grid[i]:.4f}); "
+                "non-finite q/qd. Reduce dt, damp the polynomial, or "
+                "tighten initial_pose."
+            )
+            raise ValueError(msg)
+        q_traj[i] = q
+        qd_traj[i] = qd
+        tau_traj[i] = tau_i
+        qdd_traj[i - 1] = k1_qdd
+    qdd_traj[-1] = _aba_qdd(dyn.pin, dyn.model, dyn.data, q, qd, tau_traj[-1])
+    return _Trajectory(
+        q_traj, qd_traj, qdd_traj, tau_traj, time.perf_counter() - t_start
+    )
+
+
+def _walk_kinematics(
+    dyn: _Dynamics,
+    traj: _Trajectory,
+    frame_ids: tuple[int, int],
+    compute_energy: bool,
+) -> _KinematicsLog:
+    """Re-walk the trajectory for grip/clubhead poses and (optional) energy."""
+    pin_mod, model, data = dyn.pin, dyn.model, dyn.data
+    grip_id, clubhead_id = frame_ids
+    n = traj.q.shape[0]
+    grip_pos = np.empty((n, 3), dtype=np.float64)
+    grip_rot = np.empty((n, 3, 3), dtype=np.float64)
+    clubhead_pos = np.empty((n, 3), dtype=np.float64)
+    clubhead_rot = np.empty((n, 3, 3), dtype=np.float64)
+    alloc = np.empty if compute_energy else np.zeros
+    ke = alloc((n,), dtype=np.float64)
+    pe = alloc((n,), dtype=np.float64)
+
+    fk_start = time.perf_counter()
+    for i in range(n):
+        q_i = traj.q[i]
+        pin_mod.forwardKinematics(model, data, q_i, traj.qd[i])
+        pin_mod.updateFramePlacements(model, data)
+        grip_pos[i] = data.oMf[grip_id].translation
+        grip_rot[i] = data.oMf[grip_id].rotation
+        clubhead_pos[i] = data.oMf[clubhead_id].translation
+        clubhead_rot[i] = data.oMf[clubhead_id].rotation
+        if compute_energy:
+            # CLAUDE.md gotcha: NEVER use pin.computeTotalEnergy.
+            ke[i] = float(pin_mod.computeKineticEnergy(model, data, q_i, traj.qd[i]))
+            pe[i] = float(pin_mod.computePotentialEnergy(model, data, q_i))
+    return _KinematicsLog(
+        grip_pos,
+        grip_rot,
+        clubhead_pos,
+        clubhead_rot,
+        ke,
+        pe,
+        time.perf_counter() - fk_start,
+    )
+
+
+def _build_meta(
+    dyn: _Dynamics,
+    opts: SimOptions,
+    urdf_path: Path,
+    frame_ids: tuple[int, int],
+    timings: tuple[float, float, int],
+) -> dict[str, Any]:
+    """Diagnostics dictionary attached to ``SimOut.meta``."""
+    integrate_secs, fk_secs, n_steps = timings
+    return {
+        "n_joints": int(dyn.model.nv),
+        "model_nq": int(dyn.model.nq),
+        "model_nv": int(dyn.model.nv),
+        "grip_frame": GRIP_FRAME_NAME,
+        "clubhead_frame": CLUBHEAD_FRAME_NAME,
+        "grip_frame_id": int(frame_ids[0]),
+        "clubhead_frame_id": int(frame_ids[1]),
+        "urdf_path": str(urdf_path),
+        "integrator": opts.integrator,
+        "dt": float(opts.dt),
+        "t_final": float(opts.t_final),
+        "n_steps": int(n_steps),
+        "wallclock_integrate_s": float(integrate_secs),
+        "wallclock_fk_s": float(fk_secs),
+        "wallclock_total_s": float(integrate_secs + fk_secs),
+        "compute_energy": bool(opts.compute_energy),
+        "basis": str(opts.basis),
+    }
+
+
 # --------------------------------------------------------------------------- #
 # Public entry point
 # --------------------------------------------------------------------------- #
 
 
-def simulate_with_coefficients(  # noqa: C901
+def simulate_with_coefficients(
     theta: npt.NDArray[np.float64],
     options: SimOptions | None = None,
     initial_pose: dict[str, Any] | None = None,
@@ -595,176 +723,46 @@ def simulate_with_coefficients(  # noqa: C901
             or ``club_head`` frames.
         ImportError: If functional ``pinocchio`` C++ runtime is not installed.
     """
-    import time as _time  # noqa: PLC0415
-
-    if not is_pinocchio_available():
-        msg = (
-            "Pinocchio C++ runtime (with buildModelFromUrdf) is required for "
-            "simulate_with_coefficients. Install via conda or python bindings."
-        )
-        raise ImportError(msg)
+    _require_runtime()
 
     import pinocchio as pin  # noqa: PLC0415
 
     opts = options if options is not None else SimOptions()
-    urdf_path = _resolve_urdf_path(opts.urdf_path)
-    model = _get_cached_model(urdf_path)
-
-    if opts.gravity is not None:
-        model = model.copy()
-        model.gravity.linear = np.asarray(opts.gravity, dtype=np.float64)
-
-    data = model.createData()
+    model, urdf_path = _load_model(opts)
+    dyn = _Dynamics(pin, model, model.createData())
 
     # ----- Validate theta shape (CROSS_ENGINE_PARITY_SPEC.md §2.2) ----- #
     n_joints = int(model.nv)
     theta_arr = validate_theta(theta, n_joints=n_joints)
     coeffs = theta_arr.reshape(n_joints, COEFFS_PER_JOINT)
+    rk4_coeffs = _rk4_coefficients(coeffs, opts)
+    q0, qd0 = _initial_state(pin, model, initial_pose)
 
-    # Convert Bernstein control points to equivalent power basis for fast Horner RK4 evaluation
-    if opts.basis == "bernstein":
-        m_bern = bernstein_to_power_matrix(POLY_DEGREE)
-        p_coeffs = coeffs @ m_bern
-        t_span = opts.T_s if opts.T_s is not None else opts.t_final
-        scale_powers = t_span ** np.arange(COEFFS_PER_JOINT, dtype=np.float64)
-        rk4_coeffs = p_coeffs / scale_powers[None, :]
-    else:
-        rk4_coeffs = coeffs
-
-    # ----- Initial state ----------------------------------------------- #
-    q0: npt.NDArray[np.float64]
-    qd0: npt.NDArray[np.float64]
-    if initial_pose is None:
-        q0 = pin.neutral(model)
-        qd0 = np.zeros(n_joints, dtype=np.float64)
-    else:
-        q0_in = initial_pose.get("q")
-        qd0_in = initial_pose.get("qd")
-        q0 = (
-            np.asarray(q0_in, dtype=np.float64).reshape(-1).copy()
-            if q0_in is not None
-            else pin.neutral(model)
-        )
-        qd0 = (
-            np.asarray(qd0_in, dtype=np.float64).reshape(-1).copy()
-            if qd0_in is not None
-            else np.zeros(n_joints, dtype=np.float64)
-        )
-    if q0.shape != (model.nq,):
-        msg = f"initial_pose['q'] has shape {q0.shape}; expected ({model.nq},)"
-        raise ValueError(msg)
-    if qd0.shape != (n_joints,):
-        msg = f"initial_pose['qd'] has shape {qd0.shape}; expected ({n_joints},)"
-        raise ValueError(msg)
-
-    # ----- Allocate output buffers ------------------------------------- #
-    # Pinocchio keeps a fixed-step *integration clock*, not an output grid:
-    n_steps = int(round(opts.t_final / opts.dt))
-    if not np.isclose(n_steps * opts.dt, opts.t_final, rtol=1e-9, atol=1e-12):
-        n_steps = int(np.ceil(opts.t_final / opts.dt))
+    # Pinocchio keeps a fixed-step *integration clock*, not an output grid.
+    n_steps = _step_count(opts)
     n_samples = n_steps + 1
-
     t_grid = np.arange(n_samples, dtype=np.float64) * opts.dt
-    q_traj = np.empty((n_samples, model.nq), dtype=np.float64)
-    qd_traj = np.empty((n_samples, n_joints), dtype=np.float64)
-    qdd_traj = np.empty((n_samples, n_joints), dtype=np.float64)
-    tau_traj = np.empty((n_samples, n_joints), dtype=np.float64)
+    traj = _integrate(dyn, rk4_coeffs, q0, qd0, t_grid, opts)
 
-    grip_pos = np.empty((n_samples, 3), dtype=np.float64)
-    grip_rot = np.empty((n_samples, 3, 3), dtype=np.float64)
-    clubhead_pos = np.empty((n_samples, 3), dtype=np.float64)
-    clubhead_rot = np.empty((n_samples, 3, 3), dtype=np.float64)
-    if opts.compute_energy:
-        ke = np.empty((n_samples,), dtype=np.float64)
-        pe = np.empty((n_samples,), dtype=np.float64)
-    else:
-        ke = np.zeros((n_samples,), dtype=np.float64)
-        pe = np.zeros((n_samples,), dtype=np.float64)
-
-    # ----- Integrate ---------------------------------------------------- #
-    q_traj[0] = q0
-    qd_traj[0] = qd0
-    tau_traj[0] = evaluate_polynomial_torque(rk4_coeffs, 0.0)
-
-    t_start = _time.perf_counter()
-
-    q = q0.copy()
-    qd: npt.NDArray[np.float64] = qd0.copy()
-    for i in range(1, n_samples):
-        t_i = t_grid[i - 1] - opts.t0
-        q_next, qd_next, tau_i, k1_qdd = _rk4_step(
-            pin, model, data, rk4_coeffs, q, qd, t_i, opts.dt
-        )
-        q = q_next
-        qd = qd_next
-        if not (np.all(np.isfinite(q)) and np.all(np.isfinite(qd))):
-            msg = (
-                f"Integration diverged at step {i} (t={t_grid[i]:.4f}); "
-                "non-finite q/qd. Reduce dt, damp the polynomial, or "
-                "tighten initial_pose."
-            )
-            raise ValueError(msg)
-        q_traj[i] = q
-        qd_traj[i] = qd
-        tau_traj[i] = tau_i
-        qdd_traj[i - 1] = k1_qdd
-
-    qdd_traj[-1] = _aba_qdd(pin, model, data, q, qd, tau_traj[-1])
-
-    integrate_secs = _time.perf_counter() - t_start
-
-    # ----- Re-walk for FK + energy ------------------------------------- #
-    grip_id = _frame_id(model, GRIP_FRAME_NAME)
-    clubhead_id = _frame_id(model, CLUBHEAD_FRAME_NAME)
-
-    fk_start = _time.perf_counter()
-    for i in range(n_samples):
-        q_i = q_traj[i]
-        pin.forwardKinematics(model, data, q_i, qd_traj[i])
-        pin.updateFramePlacements(model, data)
-        grip_pos[i] = data.oMf[grip_id].translation
-        grip_rot[i] = data.oMf[grip_id].rotation
-        clubhead_pos[i] = data.oMf[clubhead_id].translation
-        clubhead_rot[i] = data.oMf[clubhead_id].rotation
-        if opts.compute_energy:
-            # CLAUDE.md gotcha: NEVER use pin.computeTotalEnergy.
-            ke[i] = float(pin.computeKineticEnergy(model, data, q_i, qd_traj[i]))
-            pe[i] = float(pin.computePotentialEnergy(model, data, q_i))
-    fk_secs = _time.perf_counter() - fk_start
-
-    meta = {
-        "n_joints": n_joints,
-        "model_nq": int(model.nq),
-        "model_nv": int(model.nv),
-        "grip_frame": GRIP_FRAME_NAME,
-        "clubhead_frame": CLUBHEAD_FRAME_NAME,
-        "grip_frame_id": int(grip_id),
-        "clubhead_frame_id": int(clubhead_id),
-        "urdf_path": str(urdf_path),
-        "integrator": opts.integrator,
-        "dt": float(opts.dt),
-        "t_final": float(opts.t_final),
-        "n_steps": int(n_steps),
-        "wallclock_integrate_s": float(integrate_secs),
-        "wallclock_fk_s": float(fk_secs),
-        "wallclock_total_s": float(integrate_secs + fk_secs),
-        "compute_energy": bool(opts.compute_energy),
-        "basis": str(opts.basis),
-    }
-
+    frame_ids = (
+        _frame_id(model, GRIP_FRAME_NAME),
+        _frame_id(model, CLUBHEAD_FRAME_NAME),
+    )
+    kin = _walk_kinematics(dyn, traj, frame_ids, opts.compute_energy)
+    timings = (traj.integrate_s, kin.fk_s, n_steps)
     return SimOut(
         time=t_grid,
-        q=q_traj,
-        qd=qd_traj,
-        qdd=qdd_traj,
-        tau=tau_traj,
-        grip=grip_pos,
-        grip_quat=rotmat_to_quat(grip_rot),
-        clubhead=clubhead_pos,
-        club_quat=rotmat_to_quat(clubhead_rot),
+        q=traj.q,
+        qd=traj.qd,
+        qdd=traj.qdd,
+        tau=traj.tau,
+        grip=kin.grip_pos,
+        grip_quat=rotmat_to_quat(kin.grip_rot),
+        clubhead=kin.clubhead_pos,
+        club_quat=rotmat_to_quat(kin.clubhead_rot),
         solver_status="success",
-        duration_s=float(integrate_secs + fk_secs),
-        kinetic_energy=ke,
-        potential_energy=pe,
-        meta=meta,
+        duration_s=float(traj.integrate_s + kin.fk_s),
+        kinetic_energy=kin.kinetic,
+        potential_energy=kin.potential,
+        meta=_build_meta(dyn, opts, urdf_path, frame_ids, timings),
     )
