@@ -105,6 +105,7 @@ class BallSettings:
 
 HEAD_AXES = ("+x", "-x", "+y", "-y", "+z", "-z")
 HEADWEAR = ("none", "hair", "cap")
+HEAD_MODELS = ("parametric", "cc0_mesh")
 BODY_MODELS = ("ellipsoid", "meshes")
 HEAD_OVERRIDE_FRAMES = ("parent", "world")
 
@@ -140,6 +141,8 @@ class HeadSettings:
     forward_axis: str = "+x"
     up_axis: str = "+z"
     orientation_override: HeadOrientationOverride | None = None
+    #: ``parametric`` (procedural, default) or ``cc0_mesh`` (R7, #12687).
+    model: str = "parametric"
 
 
 @dataclass(frozen=True)
@@ -227,6 +230,7 @@ def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
         raw.get("forward_axis", defaults.forward_axis),
         raw.get("up_axis", defaults.up_axis),
         override,
+        raw.get("model", defaults.model),
     )
 
 
@@ -238,6 +242,8 @@ def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
         "forward_axis": head.forward_axis,
         "up_axis": head.up_axis,
     }
+    if head.model != "parametric":
+        out["model"] = head.model
     if head.headwear_material is not None:
         out["headwear_material"] = head.headwear_material
     ovr = head.orientation_override
