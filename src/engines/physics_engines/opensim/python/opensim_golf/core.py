@@ -163,6 +163,24 @@ class GolfSwingModel:
         """
         return self._run_opensim_simulation()
 
+    def _advance_state(self, t_start: float, t_final: float) -> None:
+        """Integrate ``self._state`` from ``t_start`` to ``t_final`` (OpenSim 4.x).
+
+        ``Manager.setInitialTime``/``setFinalTime`` were removed in OpenSim 4.x.
+        The 4.x contract is: set the state time, ``initialize(state)``, then
+        ``integrate(t_final)`` which returns the advanced state.
+
+        Raises:
+            ValueError: If ``t_final`` is not after ``t_start``.
+        """
+        if t_final <= t_start:
+            raise ValueError(
+                f"t_final ({t_final}) must be greater than t_start ({t_start})"
+            )
+        self._state.setTime(t_start)
+        self._manager.initialize(self._state)
+        self._state = self._manager.integrate(t_final)
+
     def _run_opensim_simulation(self) -> SimulationResult:
         """Run simulation using OpenSim."""
 
@@ -192,10 +210,7 @@ class GolfSwingModel:
         self._state = self._opensim_model.initializeState()
         self._opensim_model.equilibrateMuscles(self._state)
 
-        if hasattr(self._manager, "initialize"):
-            self._manager.initialize(self._state)
-        else:
-            self._manager.setSessionTime(0.0)
+        self._manager.initialize(self._state)
 
         # Integration loop
         current_time = 0.0
@@ -234,9 +249,7 @@ class GolfSwingModel:
                 )
 
             # Step simulation
-            self._manager.setInitialTime(current_time)
-            self._manager.setFinalTime(current_time + self.dt)
-            self._manager.integrate(current_time + self.dt)
+            self._advance_state(current_time, current_time + self.dt)
             current_time += self.dt
 
         return SimulationResult(
