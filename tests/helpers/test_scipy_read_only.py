@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+import scipy
 from scipy.spatial.transform import Rotation
 
 from tests.helpers.scipy_read_only import (
     READ_ONLY_MESSAGE,
+    natively_strict,
     strict_rotation_constructors,
 )
 
@@ -20,14 +22,22 @@ def _frozen(value: np.ndarray) -> np.ndarray:
     return value
 
 
+def _require_strict(monkeypatch: pytest.MonkeyPatch, name: str) -> None:
+    if not strict_rotation_constructors(monkeypatch) and not natively_strict(name):
+        pytest.skip(
+            f"SciPy {scipy.__version__}: immutable Rotation accepts a read-only "
+            f"{name} input, so the SciPy 1.14 behaviour cannot be emulated here"
+        )
+
+
 def test_read_only_matrix_is_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
-    strict_rotation_constructors(monkeypatch)
+    _require_strict(monkeypatch, "from_matrix")
     with pytest.raises(ValueError, match=READ_ONLY_MESSAGE):
         Rotation.from_matrix(_frozen(np.eye(3)))
 
 
 def test_read_only_rotvec_is_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
-    strict_rotation_constructors(monkeypatch)
+    _require_strict(monkeypatch, "from_rotvec")
     with pytest.raises(ValueError, match=READ_ONLY_MESSAGE):
         Rotation.from_rotvec(_frozen(np.zeros(3)))
 
@@ -70,8 +80,8 @@ class _ImmutableRotation(metaclass=_ImmutableMeta):
 def test_immutable_rotation_type_is_left_native(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    # The Cython Rotation of SciPy < 1.15 is immutable and already rejects
-    # read-only matrices natively, so the helper must not try to patch it.
+    # The Cython Rotation of SciPy 1.14/1.15 is immutable, so the helper must
+    # not try to patch it (whether it is natively strict varies by version).
     original = _ImmutableRotation.__dict__["from_matrix"]
     assert not strict_rotation_constructors(monkeypatch, _ImmutableRotation)
     assert _ImmutableRotation.__dict__["from_matrix"] is original
@@ -87,3 +97,20 @@ def test_non_type_rotation_argument_is_rejected(
 def test_non_monkeypatch_argument_is_rejected() -> None:
     with pytest.raises(TypeError, match="MonkeyPatch"):
         strict_rotation_constructors(object())  # type: ignore[arg-type]
+
+
+def test_natively_strict_reports_the_unpatched_constructor() -> None:
+    class _Lenient:
+        @staticmethod
+        def from_matrix(matrix: np.ndarray) -> np.ndarray:
+            return matrix
+
+    class _Strict:
+        @staticmethod
+        def from_rotvec(rotvec: np.ndarray) -> np.ndarray:
+            raise ValueError(READ_ONLY_MESSAGE)
+
+    assert not natively_strict("from_matrix", _Lenient)
+    assert natively_strict("from_rotvec", _Strict)
+    with pytest.raises(ValueError, match="name must be one of"):
+        natively_strict("from_euler")

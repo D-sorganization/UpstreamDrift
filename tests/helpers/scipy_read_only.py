@@ -10,9 +10,12 @@ spine contracts freeze their arrays (``setflags(write=False)``), which made the
 cross-engine lane (SciPy 1.14.1) fail while local runs passed.
 
 :func:`strict_rotation_constructors` patches the constructors to raise exactly
-as the old SciPy did, so a test reproduces the CI behaviour on any SciPy. On
-SciPy < 1.15 ``Rotation`` is an immutable Cython type that already behaves
-this way, so it is left untouched.
+as the old SciPy did, so a test reproduces the CI behaviour on any SciPy whose ``Rotation`` type can
+be patched. Where ``Rotation`` is an immutable Cython type it is left
+untouched. That type is natively strict on SciPy 1.14.1, but SciPy 1.15.3 is
+immutable and already accepts a read-only ``from_matrix`` input (its
+``from_rotvec`` still rejects one), so callers that need the emulation must
+check :func:`natively_strict` when the patch was not applied.
 """
 
 from __future__ import annotations
@@ -48,6 +51,30 @@ def _is_mutable(rotation_type: type) -> bool:
     return True
 
 
+def natively_strict(name: str, rotation_type: type = Rotation) -> bool:
+    """Return whether ``rotation_type.<name>`` rejects a read-only input itself.
+
+    Preconditions:
+        ``name`` is ``"from_matrix"`` or ``"from_rotvec"``.
+
+    Postconditions:
+        ``True`` iff the unpatched constructor raises the read-only
+        ``ValueError`` for a frozen identity input.
+
+    Raises:
+        ValueError: ``name`` is not one of the emulated constructors.
+    """
+    if name not in _CONSTRUCTORS:
+        raise ValueError(f"name must be one of {_CONSTRUCTORS}, got {name!r}")
+    probe = np.eye(3) if name == "from_matrix" else np.zeros(3)
+    probe.setflags(write=False)
+    try:
+        getattr(rotation_type, name)(probe)
+    except ValueError as exc:
+        return READ_ONLY_MESSAGE in str(exc)
+    return False
+
+
 def strict_rotation_constructors(
     monkeypatch: pytest.MonkeyPatch, rotation_type: type = Rotation
 ) -> bool:
@@ -59,8 +86,8 @@ def strict_rotation_constructors(
 
     Postconditions:
         Returns ``True`` when the constructors were patched, ``False`` when
-        ``rotation_type`` is immutable (SciPy < 1.15, already strict natively)
-        and was left unchanged.
+        ``rotation_type`` is immutable and was left unchanged. An unchanged
+        type is not necessarily strict; see :func:`natively_strict`.
 
     Raises:
         TypeError: ``monkeypatch`` is not a ``pytest.MonkeyPatch`` or
