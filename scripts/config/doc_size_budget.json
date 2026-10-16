@@ -8,12 +8,6 @@
       "expires_on": "2026-10-31"
     },
     {
-      "path": "docs/development/ARCHITECTURE_IMPLEMENTATION_PLAN.md",
-      "owner": "@architecture-team",
-      "reason": "Legacy implementation plan above the documentation budget; staged for topic split or archival.",
-      "expires_on": "2026-10-31"
-    },
-    {
       "path": "SPEC.md",
       "owner": "@maintainers",
       "reason": "Root repository specification is governed separately and updated by feature PRs. Capped at about 350 KB (previously 300 KB, tests/unit/repo_hygiene/test_spec_archive.py) after change-log history moved to docs/spec/CHANGELOG_ARCHIVE.md (issue #9415, owner ruling 2026-10-12); renewed 2027-01-31 pending the section split.",
@@ -41,12 +35,6 @@
       "path": "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
       "owner": "@physics-team",
       "reason": "Falsification matrix tracking model-tier and empirical completion gates for proximal distal energy transfer; staged for decomposition.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "docs/development/full_body_models/DESIGN_DECISIONS.md",
-      "owner": "@simulation-team",
-      "reason": "Issue #11767 (GCV-20): the committed design-decision log was already 61 bytes under the budget on main before this change recorded the full re-solve result and the pre-contact release cutoff / weld-projection amendment; staged for topic decomposition.",
       "expires_on": "2026-10-31"
     },
     {
@@ -84,18 +72,6 @@
       "owner": "@maintainers",
       "reason": "Root Claude instructions include fleet-managed sections synced from Repository_Management.",
       "expires_on": "2026-12-31"
-    },
-    {
-      "path": "docs/agents/shared-infrastructure.md",
-      "owner": "@maintainers",
-      "reason": "Shared agent infrastructure documentation temporarily exceeds budget; staged for decomposition.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "docs/development/necromatcher-turnover.md",
-      "owner": "@maintainers",
-      "reason": "Necromatcher native fit turnover log for issue #11235; staged for archival or section decomposition.",
-      "expires_on": "2026-10-31"
     }
   ]
 }
