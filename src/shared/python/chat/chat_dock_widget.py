@@ -157,7 +157,13 @@ def _native_websocket_connection(
     )
 
 
-_QT_EXPORTS = {"ChatDockWidget", "ChatMessageBubble"}
+_QT_EXPORTS = {
+    "ChatDockWidget",
+    "ChatMessageBubble",
+    "ChatConnectionConfig",
+    "ChatPresentationConfig",
+    "ChatIntegrationHooks",
+}
 
 # Tools issue #2753: serialize all reads/writes of the shared session ID
 # file across threads. The lock guards both the in-memory holder and the
@@ -251,6 +257,9 @@ def __getattr__(name: str) -> Any:
 __all__ = [
     "ChatDockWidget",
     "ChatMessageBubble",
+    "ChatConnectionConfig",
+    "ChatPresentationConfig",
+    "ChatIntegrationHooks",
     "ChatQtUnavailableError",
     "chat_qt_runtime_diagnostic",
     "_session_file_path",

@@ -6,9 +6,6 @@ Connects to a FastAPI server's WebSocket chat endpoint and provides a
 minimal streaming chat interface. Shares conversation context across
 all windows via a common session ID persisted to disk.
 
-This widget keeps application-specific integrations behind injectable or
-lazy-loaded collaborators so the chat package can be imported independently.
-
 This module historically held the entire dock widget implementation in
 one file. To stay under the repo's 1,200-line per-file budget the
 non-class helpers and large method bodies now live in the private
@@ -19,12 +16,14 @@ point and re-exports every name external code or tests reference
 
 Usage::
 
-    from chat import ChatDockWidget
+    from chat import ChatDockWidget, ChatConnectionConfig, ChatPresentationConfig
 
     dock = ChatDockWidget(
-        app_context="gasification",
-        app_name="integrated_process_simulator",
-        accent_color="#3498db",
+        connection=ChatConnectionConfig(
+            app_context="gasification",
+            app_name="integrated_process_simulator",
+        ),
+        presentation=ChatPresentationConfig(accent_color="#3498db"),
         parent=main_window,
     )
     main_window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
@@ -37,6 +36,7 @@ import json
 import logging
 import threading
 from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -88,13 +88,65 @@ logger = logging.getLogger(__name__)
 # Re-exports kept for backwards compatibility — test suites and
 # downstream code patch these on the ``_chat_dock_widget_qt`` namespace.
 __all__ = [
+    "ChatConnectionConfig",
     "ChatDockWidget",
+    "ChatIntegrationHooks",
     "ChatMessageBubble",
+    "ChatPresentationConfig",
     "HistorySidebar",
     "QFileDialog",
     "QWebSocket",
     "QWidget",
 ]
+
+
+@dataclass
+class ChatConnectionConfig:
+    """Connection + session-identity settings for :class:`ChatDockWidget`.
+
+    Groups the WebSocket connection parameters (``server_url``,
+    ``session_id``, ``ws_path_template``) with the identity/session
+    parameters (``app_context``, ``app_name``, ``project_root``) — the
+    latter travel with the former because they are baked into every
+    outgoing WS payload and the session-file path. Tools issue #4896.
+    """
+
+    server_url: str | None = None
+    session_id: str | None = None
+    ws_path_template: str = "/api/ws/chat/{session_id}"
+    app_context: str = "unknown"
+    app_name: str = "shared_chat"
+    project_root: str | Path | None = None
+
+
+@dataclass
+class ChatPresentationConfig:
+    """Presentation/theming settings for :class:`ChatDockWidget`.
+
+    Tools issue #4896.
+    """
+
+    placeholder_text: str = "Ask a question..."
+    accent_color: str = "#FF8800"
+    theme_provider: ThemeProviderProtocol | None = None
+    auto_index_on_open: bool = False
+
+
+@dataclass
+class ChatIntegrationHooks:
+    """Dependency-injection hooks for host-application integrations.
+
+    Every field is an optional collaborator the widget falls back to a
+    default implementation for when unset (terminal registry, session
+    manager, memory manager factory) or simply leaves inert (workspace
+    provider, plot request sink). Tools issue #4896.
+    """
+
+    terminal_registry: TerminalProviderRegistry | None = None
+    workspace_provider: WorkspaceContextProtocol | None = None
+    plot_request_sink: Callable[[Any], None] | None = None
+    session_manager: Any | None = None
+    memory_manager_factory: Callable[[], Any] | None = None
 
 
 def _build_default_session_manager(app_name: str) -> Any:
@@ -152,48 +204,44 @@ class ChatDockWidget(QDockWidget):
 
     def __init__(
         self,
-        app_context: str = "unknown",
-        app_name: str = "shared_chat",
-        server_url: str | None = None,
-        session_id: str | None = None,
-        ws_path_template: str = "/api/ws/chat/{session_id}",
-        placeholder_text: str = "Ask a question...",
-        accent_color: str = "#FF8800",
-        auto_index_on_open: bool = False,
-        project_root: str | Path | None = None,
-        terminal_registry: TerminalProviderRegistry | None = None,
-        theme_provider: ThemeProviderProtocol | None = None,
-        workspace_provider: WorkspaceContextProtocol | None = None,
-        plot_request_sink: Callable[[Any], None] | None = None,
+        connection: ChatConnectionConfig | None = None,
+        presentation: ChatPresentationConfig | None = None,
+        integrations: ChatIntegrationHooks | None = None,
         parent: QWidget | None = None,
-        *,
-        session_manager: Any | None = None,
-        memory_manager_factory: Callable[[], Any] | None = None,
     ) -> None:
-        if app_context is None:
+        connection = connection or ChatConnectionConfig()
+        presentation = presentation or ChatPresentationConfig()
+        integrations = integrations or ChatIntegrationHooks()
+        if connection.app_context is None:
             raise ValueError("app_context must be provided")
         super().__init__("AI Chat", parent)
-        self._app_context = app_context
-        self._app_name = app_name
-        resolved_server_url = server_url or _resolve_default_server()
+        self._app_context = connection.app_context
+        self._app_name = connection.app_name
+        resolved_server_url = connection.server_url or _resolve_default_server()
         self._server_url = resolved_server_url.rstrip("/")
-        self._ws_path_template = ws_path_template
-        self._accent_color = accent_color
-        self._placeholder_text = placeholder_text
-        self._auto_index_on_open = bool(auto_index_on_open)
+        self._ws_path_template = connection.ws_path_template
+        self._accent_color = presentation.accent_color
+        self._placeholder_text = presentation.placeholder_text
+        self._auto_index_on_open = bool(presentation.auto_index_on_open)
         self._project_root = (
-            Path(project_root).resolve() if project_root else Path.cwd()
+            Path(connection.project_root).resolve()
+            if connection.project_root
+            else Path.cwd()
         )
         self._terminal_registry = (
-            terminal_registry or build_default_terminal_provider_registry()
+            integrations.terminal_registry or build_default_terminal_provider_registry()
         )
         self._theme_provider: ThemeProviderProtocol = (
-            theme_provider or _DefaultDarkTheme()
+            presentation.theme_provider or _DefaultDarkTheme()
         )
-        self._workspace_provider: WorkspaceContextProtocol | None = workspace_provider
-        self._plot_request_sink: Callable[[Any], None] | None = plot_request_sink
+        self._workspace_provider: WorkspaceContextProtocol | None = (
+            integrations.workspace_provider
+        )
+        self._plot_request_sink: Callable[[Any], None] | None = (
+            integrations.plot_request_sink
+        )
         self._memory_manager_factory = (
-            memory_manager_factory or self._default_memory_manager_factory
+            integrations.memory_manager_factory or self._default_memory_manager_factory
         )
         _runtime.initialize_streaming_state(self, timer_factory=QTimer)
         # Tools issue #2871: mid-thread provider/model/thinking state.
@@ -214,11 +262,12 @@ class ChatDockWidget(QDockWidget):
         self._terminal_start_pending = False
         self._terminal_runtime_available = False
         self._socket: QWebSocket | None = None
-        self._session_file = _session_file_path(app_name)
+        self._session_file = _session_file_path(self._app_name)
         # Tools issue #2872: conversation-management state.
         self._loaded_context_sessions: list[str] = []
-        self._session_manager = session_manager or _build_default_session_manager(
-            self._app_name
+        self._session_manager = (
+            integrations.session_manager
+            or _build_default_session_manager(self._app_name)
         )
         self._breadcrumb_widget: Any | None = None
         self._reconnect_timer = QTimer(self)
@@ -226,8 +275,8 @@ class ChatDockWidget(QDockWidget):
         self._reconnect_timer.timeout.connect(self._connect)
 
         # Resolve session ID: explicit > class-level > file > "new"
-        if session_id:
-            ChatDockWidget._set_shared_session_id(session_id)
+        if connection.session_id:
+            ChatDockWidget._set_shared_session_id(connection.session_id)
         elif not ChatDockWidget._get_shared_session_id():
             ChatDockWidget._set_shared_session_id(
                 _read_shared_session_id(self._session_file)
