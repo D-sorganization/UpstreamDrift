@@ -125,6 +125,15 @@ def _find_right_weld_constraint(model: Any) -> Any | None:
     return None
 
 
+def hand_bar_attachment(model: Any) -> tuple[Any | None, Any | None]:
+    """The left hand-bar ``WeldJoint`` and right ``WeldConstraint`` of *model*.
+
+    Either entry is ``None`` when the model lacks that half of the LIFT-4
+    two-hand attachment (see the module docstring for the topology).
+    """
+    return _find_left_weld_joint(model), _find_right_weld_constraint(model)
+
+
 def _bar_mass_and_world_com(model: Any, state: Any) -> tuple[float, np.ndarray]:
     """Bar mass and canonical-frame world centre of mass.
 

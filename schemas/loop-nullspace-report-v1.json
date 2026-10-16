@@ -1,0 +1,866 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://upstreamdrift.dev/schemas/loop_nullspace/loop-nullspace-report-v1.json",
+  "title": "UpstreamDrift Loop Nullspace Report (v1)",
+  "description": "One backend contract for PyQt and React (NSX-40, #12572). Every quantity carries the six evidence axes of QuantityRecord. Refused, rejected and infeasible frames appear in the report; nothing is repaired. Conditional on the registry version embedded in the report.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "status",
+    "registry_version",
+    "preset",
+    "engine",
+    "options",
+    "trajectory",
+    "hypotheses",
+    "admission",
+    "invariants",
+    "envelopes",
+    "allocation",
+    "restriction_sensitivity",
+    "non_claims"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$"
+    },
+    "status": {
+      "enum": [
+        "complete",
+        "insufficient_frames",
+        "admission_rejected"
+      ],
+      "description": "complete: every requested stage ran; the others stop honestly before the numbers they would gate."
+    },
+    "reason": {
+      "type": "string"
+    },
+    "registry_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "preset": {
+      "type": "string",
+      "minLength": 1
+    },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "model_provenance"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model_provenance": {
+          "$ref": "#/$defs/modelProvenance"
+        }
+      }
+    },
+    "options": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metric",
+        "include_envelopes",
+        "include_allocation",
+        "effort_weight",
+        "rate_weight"
+      ],
+      "properties": {
+        "metric": {
+          "enum": [
+            "identity",
+            "inverse_mass"
+          ]
+        },
+        "include_envelopes": {
+          "type": "boolean"
+        },
+        "include_allocation": {
+          "type": "boolean"
+        },
+        "effort_weight": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rate_weight": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "trajectory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input_provenance",
+        "n_input_frames",
+        "frame_indices",
+        "analyzed_frame_indices",
+        "refused_frames"
+      ],
+      "properties": {
+        "input_provenance": {
+          "$ref": "#/$defs/inputProvenance"
+        },
+        "n_input_frames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "frame_indices": {
+          "$ref": "#/$defs/frameIndexList"
+        },
+        "analyzed_frame_indices": {
+          "$ref": "#/$defs/frameIndexList"
+        },
+        "refused_frames": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/refusedFrame"
+          }
+        }
+      }
+    },
+    "hypotheses": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registry_version",
+        "preset",
+        "preset_label",
+        "hypotheses",
+        "conventions"
+      ],
+      "properties": {
+        "registry_version": {
+          "type": "string"
+        },
+        "preset": {
+          "type": "string"
+        },
+        "preset_label": {
+          "type": "string"
+        },
+        "hypotheses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "statement",
+              "verification_status",
+              "citation_id",
+              "source_note"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "statement": {
+                "type": "string"
+              },
+              "verification_status": {
+                "type": "string"
+              },
+              "citation_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "source_note": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "conventions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "statement"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "statement": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "admission": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "description": "Admission verdict; null only when no frame survived decomposition.",
+      "required": [
+        "verdict",
+        "reasons",
+        "failing_frames",
+        "repaired",
+        "derivative_method",
+        "noise_floor",
+        "position_evaluated",
+        "gates",
+        "residuals"
+      ],
+      "properties": {
+        "verdict": {
+          "enum": [
+            "ADMITTED",
+            "REJECTED",
+            "REPAIRED"
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "failing_frames": {
+          "$ref": "#/$defs/frameIndexList"
+        },
+        "repaired": {
+          "type": "boolean"
+        },
+        "derivative_method": {
+          "type": "string"
+        },
+        "noise_floor": {
+          "$ref": "#/$defs/number"
+        },
+        "position_evaluated": {
+          "type": "boolean"
+        },
+        "gates": {
+          "type": "object"
+        },
+        "residuals": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "phi",
+            "phi_dot",
+            "phi_ddot"
+          ],
+          "properties": {
+            "phi": {
+              "$ref": "#/$defs/quantity"
+            },
+            "phi_dot": {
+              "$ref": "#/$defs/quantity"
+            },
+            "phi_ddot": {
+              "$ref": "#/$defs/quantity"
+            }
+          }
+        }
+      }
+    },
+    "invariants": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "description": "Invariant quantities per analysed frame, each behind its validity gate.",
+      "required": [
+        "metric_label",
+        "gates",
+        "frames"
+      ],
+      "properties": {
+        "metric_label": {
+          "type": "string"
+        },
+        "gates": {
+          "type": "object"
+        },
+        "frames": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "index",
+              "quantities"
+            ],
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "quantities": {
+                "$ref": "#/$defs/quantityMap"
+              }
+            }
+          }
+        }
+      }
+    },
+    "envelopes": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "description": "Static per-frame envelopes of the declared feasible sets; infeasible frames are listed, never dropped.",
+      "required": [
+        "label",
+        "chebyshev_metric",
+        "quantities",
+        "bounds",
+        "frames",
+        "simplex_iterations",
+        "warm_started",
+        "non_claims"
+      ],
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "chebyshev_metric": {
+          "type": "string"
+        },
+        "quantities": {
+          "$ref": "#/$defs/quantityMap"
+        },
+        "bounds": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "units",
+              "lower",
+              "upper",
+              "status_lower",
+              "status_upper"
+            ],
+            "properties": {
+              "units": {
+                "type": "string"
+              },
+              "lower": {
+                "$ref": "#/$defs/tensor"
+              },
+              "upper": {
+                "$ref": "#/$defs/tensor"
+              },
+              "status_lower": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "status_upper": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "frames": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "index",
+              "chebyshev_status",
+              "chebyshev_margin",
+              "feasible",
+              "conflict_hypotheses",
+              "hypothesis_ids",
+              "rests_on_unverified"
+            ],
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "chebyshev_status": {
+                "type": "string"
+              },
+              "chebyshev_margin": {
+                "$ref": "#/$defs/number"
+              },
+              "feasible": {
+                "type": "boolean"
+              },
+              "conflict_hypotheses": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "hypothesis_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "rests_on_unverified": {
+                "type": "boolean"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "feasible": {
+                      "const": false
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "conflict_hypotheses": {
+                      "minItems": 1
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "simplex_iterations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "warm_started": {
+          "type": "boolean"
+        },
+        "non_claims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "allocation": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Optional hypothesis-conditioned representative; status 'not_run' when no frame was feasible.",
+      "required": [
+        "status",
+        "frame_indices",
+        "excluded_frames"
+      ],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "frame_indices": {
+          "$ref": "#/$defs/frameIndexList"
+        },
+        "excluded_frames": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "index",
+              "reason"
+            ],
+            "properties": {
+              "index": {
+                "type": "integer"
+              },
+              "reason": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "torque": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/quantity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "objective_terms": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/number"
+          }
+        },
+        "objective_total": {
+          "$ref": "#/$defs/number"
+        },
+        "kkt_residuals": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "iterations": {
+          "type": "integer"
+        },
+        "solve_time_s": {
+          "$ref": "#/$defs/number"
+        },
+        "non_claim": {
+          "type": "string"
+        },
+        "unverified_hypothesis_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "power_reduction": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "convexity": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      }
+    },
+    "restriction_sensitivity": {
+      "type": "null",
+      "description": "Reserved: not computed by v1.0; always null."
+    },
+    "non_claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "service": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Added by the service layer around the facade report.",
+      "required": [
+        "cache_key",
+        "source_id"
+      ],
+      "properties": {
+        "cache_key": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "source_id": {
+          "type": "string"
+        },
+        "frames": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "modelProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version",
+        "content_hash"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_hash": {
+          "type": "string"
+        }
+      }
+    },
+    "inputProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "source",
+        "note"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "number": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "tensor": {
+      "description": "Nested arrays of finite numbers; a non-finite entry is null.",
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tensor"
+          }
+        }
+      ]
+    },
+    "quantity": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A user-visible quantity with its units and the six evidence axes of QuantityRecord (ADR-0054 D2).",
+      "required": [
+        "values",
+        "units",
+        "allocation_dependence",
+        "validation_status",
+        "model_provenance",
+        "input_provenance",
+        "conventions",
+        "hypotheses",
+        "reason"
+      ],
+      "properties": {
+        "values": {
+          "$ref": "#/$defs/tensor"
+        },
+        "units": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allocation_dependence": {
+          "enum": [
+            "INVARIANT",
+            "FAMILY_DEPENDENT",
+            "UNAVAILABLE"
+          ]
+        },
+        "validation_status": {
+          "enum": [
+            "UNVALIDATED",
+            "VALIDATED"
+          ]
+        },
+        "model_provenance": {
+          "$ref": "#/$defs/modelProvenance"
+        },
+        "input_provenance": {
+          "$ref": "#/$defs/inputProvenance"
+        },
+        "conventions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hypotheses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "allocation_dependence": {
+                "const": "UNAVAILABLE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "values": {
+                "type": "null"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "values": {
+                "not": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "allocation_dependence": {
+                "const": "INVARIANT"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "hypotheses": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "allocation_dependence": {
+                "const": "FAMILY_DEPENDENT"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "hypotheses": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "quantityMap": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/quantity"
+      }
+    },
+    "gates": {
+      "type": "object"
+    },
+    "refusedFrame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "index",
+        "stage",
+        "reason",
+        "residual_scaled"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "stage": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "residual_scaled": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    },
+    "frameIndexList": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "complete"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "admission": {
+            "type": "object"
+          },
+          "invariants": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "not": {
+              "const": "complete"
+            }
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "reason"
+        ]
+      }
+    }
+  ]
+}

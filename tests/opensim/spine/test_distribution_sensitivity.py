@@ -200,7 +200,30 @@ def test_run_preconditions(tmp_path) -> None:
     with pytest.raises(ValueError, match="pending"):
         run_distribution_sensitivity(base, ("uniform_reference", "pearcy1984_lumbar"))
     with pytest.raises(ValueError, match="model_path"):
-        run_distribution_sensitivity(replace(base, model_path=None, asset_id="a"), LAWS)
+        run_distribution_sensitivity(
+            replace(base, model_path=None, asset_id="bruno2015_fullbody_os4_v2"),
+            LAWS,
+            env={},
+        )
+
+
+@pytest.mark.unit
+def test_report_model_path_resolves_the_asset_environment(tmp_path) -> None:
+    from src.engines.physics_engines.opensim.python.spine import (
+        distribution_sensitivity as ds,
+    )
+
+    base = SpineStudyRequest(
+        study_id="s",
+        motion_path=tmp_path / "m.sto",
+        golf_model_path=GOLF_MODEL,
+        model_path=None,
+        asset_id="bruno2015_fullbody_os4_v2",
+        model_id="fixture",
+        output_dir=tmp_path,
+    )
+    env = {"UD_SPINE_BRUNO_SOURCE": str(tmp_path / "m.osim")}
+    assert ds._report_model_path(base, env) == tmp_path / "m.osim"
 
 
 # ------------------------------------------------------------ native pipeline

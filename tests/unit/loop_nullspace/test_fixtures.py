@@ -207,6 +207,10 @@ def test_envelope_case_closed_form_bounds() -> None:
         ("fixed_base_arms_only", {}),
         ("floating_root_no_feet", {"floating_root": True}),
         ("floating_root_two_point_feet", {"floating_root": True, "feet": True}),
+        (
+            "floating_root_four_point_feet",
+            {"floating_root": True, "feet": True, "foot_points": 2},
+        ),
     ],
 )
 def test_spatial_snapshot_counts_match_golden(variant: str, kwargs: dict) -> None:

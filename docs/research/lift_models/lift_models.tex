@@ -314,28 +314,70 @@ distribute load across named muscles and is not a muscle-redundancy solver
 for a full-body musculoskeletal model.
 
 \subsection{OpenSim Full-Body Musculoskeletal Lifts (LIFT-6, Issue \#11746)}
-The OpenSim full-body musculoskeletal lift formulation (\texttt{opensim\_full\_body\_lifts.py})
-drives a validated full-body musculoskeletal model (\texttt{Rajagopal2015} or \texttt{MyoFullBody})
-with full-body lift trajectories. The barbell is coupled via rigid zero-DOF weld joints and constraints
-to the hands (for deadlift, snatch, clean and jerk, presses, and split jerk) or to the thoracic shelf/rack
-(for back squat and front squat).
+\paragraph{Status.} Only the model composition is built (OSL-2, \#13040).
+Until OSL-2 the composer created an empty \texttt{opensim.Model()} and returned
+a hard-coded joint list with \texttt{barbell\_attached=True}; that stub is
+replaced. No inverse kinematics, inverse dynamics, static optimization, CMC or
+Moco solve runs yet: \texttt{evaluate\_opensim\_lift\_kinetics} still reports
+\texttt{"unqualified"} on every path (OSL-3 and OSL-4, \#13041 and \#13042).
 
-Foot--ground contact interfaces employ contact spheres with smooth sphere-halfspace
-(\texttt{SmoothSphereHalfSpaceForce}) or Hunt--Crossley compliant contact laws. Bench press adds a
-rigid bench surface and thoracic back contact.
+\paragraph{Model Topology.} \texttt{compose\_opensim\_full\_body\_lift}
+(\texttt{src/shared/python/lifting/opensim\_full\_body\_lifts.py}) calls
+\texttt{build\_lift\_model}
+(\texttt{src/engines/physics\_engines/opensim/python/msk\_lift\_model.py}) for
+the five barbell lifts. The body is the muscle-bearing
+\texttt{RajagopalLaiUhlrich2023.osim} (22 bodies, 22 joints, two knee coupler
+constraints, 80 Millard lower-limb muscles and 17 upper-body
+\texttt{CoordinateActuator} stand-ins), resolved at run time from the
+\texttt{opensim-org/opensim-models} submodule or
+\texttt{\$UPSTREAMDRIFT\_MSK\_BASE\_MODEL} and never copied into the
+repository. The receipt records its path and SHA-256. The model is scaled
+uniformly by $s = h / 1.70\,\mathrm{m}$ (the nominal stature of the generic
+Rajagopal et al.\ (2016) adult) and to the spec body mass with
+\texttt{Model.scale} (mass distribution preserved). A single
+\texttt{barbell} body of the spec mass carries the shared
+\texttt{Barbell} inertia (axial: the shaft only; transverse: rod plus plates
+as thin discs). The LIFT-4 hand interface holds it: a
+\texttt{WeldJoint hand\_l\_to\_barbell} on the left and a
+\texttt{WeldConstraint hand\_r\_to\_barbell} on the right, both at the hands'
+centres of mass (the palm-centre grip of the parity standard). Each foot has
+three \texttt{SmoothSphereHalfSpaceForce} spheres (heel, forefoot, toe) with
+the MS-20 calibrated parameters ($k = 10^5$\,N/m, $c = 0.5$\,s/m,
+$\mu_s = 0.6$, $\mu_d = 0.4$) against a floor half-space. The bench press
+adds a bench-top half-space paired only with four back spheres at the
+posterior shoulder and posterior iliac markers.
 
-The inverse-dynamics and muscle redundancy pipeline evaluates:
-\begin{enumerate}[noitemsep]
-\item Generalized joint moments via inverse dynamics under ground reaction and hand-barbell external wrenches.
-\item Static optimization or Computed Muscle Control (CMC) allocating joint moments to individual muscle actuators.
-\item Per-hand bar wrench decomposition reusing the shared GCV-7 minimum-norm allocation contract.
-\item Ground-reaction breakdown reusing the shared GCV-1 contract (per-foot forces, net GRF, and CoP).
-\item L5/S1 spinal joint loading for posture cross-validation against Movement Optimizer.
-\end{enumerate}
-In accordance with Design by Contract and scientific integrity principles, the evaluator fails closed:
-any evaluation where native OpenSim is uninstalled or where reserve actuator contributions exceed
-the 5\% threshold ($\epsilon_{\text{reserve}} \le 0.05$) is marked with an explicit \texttt{"unqualified"}
-status and descriptive diagnostic reason string, never returning falsified zero residuals.
+\paragraph{Hold Pose (Assumption).} One static pose per lift that the
+Rajagopal joint ranges admit: squat, standing with the hands at the
+upper-back bar position; deadlift, lockout; bench press, supine with the arms
+extended; snatch and clean and jerk, the hang with each lift's grip. The
+shoulder ($\texttt{arm\_flex} \le 90^\circ$, $\texttt{arm\_add} \ge
+-120^\circ$) and elbow ($\le 150^\circ$) ranges cannot reach a straight-arm
+overhead lockout or a front rack at the clean grip, so neither is claimed.
+\texttt{arm\_add} is solved (Brent's method) so the hand-centre grip width
+equals the standard's \texttt{width\_m} scaled by $h / 1.75$\,m. No shoulder,
+back or chest contact with the bar is modelled; the hands carry the whole
+bar. The standard's via-poses are not retargeted (OSL-3).
+
+\paragraph{Acceptance and Measured Evidence.} For each lift the model passes
+\texttt{initSystem}; its counts are read from the model (23 bodies, 23 joints,
+3 constraints, 80 muscles; 103 forces, or 107 for the bench press); the bar is
+held by both hands. In the static hold (80\,kg, 1.78\,m lifter, 120\,kg bar,
+$W = 1176.80$\,N), the shared LIFT-4 bar-hold wrench meets the \#11744
+acceptance (hand forces sum to $W$ within 1\,\%, measured relative error 0,
+an even 588.40\,N split, trail-weld residual below $10^{-15}$\,m). With every
+coordinate locked, OpenSim's own \texttt{WeldJoint} reaction plus
+\texttt{WeldConstraint} force on the bar sum to $W$ within $2 \times
+10^{-11}$; that split is the solver's choice for a statically indeterminate
+hold and is not interpreted. Reproduce with
+\texttt{python3 -m pytest -o addopts="" tests/unit/lifting/test\_opensim\_full\_body\_lift\_models.py}
+(requires OpenSim 4.6 and the initialised submodule; otherwise the tests skip
+with the reason).
+
+\paragraph{Limitations.} Uniform height scaling, not marker scaling. The
+hold poses are engineering choices, not measured postures. The hands carry
+the bar in the squat hold. MyoFullBody, Hunt--Crossley contact and the
+additional movements fail closed with a reason.
 
 \section{Measured Parity Results}
 All figures below are read from the committed receipt,
