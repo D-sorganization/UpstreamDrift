@@ -346,7 +346,7 @@ def _weighted_qp(
     settings.verbose = False
     settings.tol_feas = settings.tol_gap_abs = settings.tol_gap_rel = _CONIC_TOL
     result = clarabel.DefaultSolver(
-        sp.diags_array(2.0 * weight, format="csc"),
+        sp.csc_matrix(np.diag(2.0 * weight)),
         np.zeros(n),
         a_mat,
         b,
