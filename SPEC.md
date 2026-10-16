@@ -2741,6 +2741,9 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-16 | #12798 | Fix garment_classification.tex row terminators so the golfer appearance reference compiles; latex-references CI now builds the full-body model reference masters |
+| 2026-10-16 | #12804 | Split full-body HANDOFF and anthropometry REVIEW under the doc-size budget; renew only the stale chat child-copy architecture exception for 14 days (#12803) |
+| 2026-10-15 | #12792 | Bump vendor/ud-tools to Tools e3cf5a43, carrying the corrected golfer club Jacobians (Tools#5627 Rust pendulum-core, Tools#5628 Python/JAX forward kinematics y-sign, Tools#5626); pins and divergence inventory kept in step |
 | 2026-10-15 | #12782 | Re-solve the MSK address calibration on the widened forearm range so the lead pronation leaves its old 90 deg bound |
 | 2026-10-15 | #12786 | Nightly motion-matching-smoke.yml runs tests/integration/motion_matching (slow, --timeout=0) via scripts/ci/run_motion_matching_smoke.sh on the fleet; a failure opens or updates an issue and the red scheduled run reaches fleet-main-health; not coupled to heavy-tests-opt-in parity |
 | 2026-10-15 | #12781 | ADR-0055: segmental spine kinematics, load observables and golf-term definitions (SPN-0); Primary data extraction for segmental spine (Bruno, Fujii, Wilke, golf loads) with provenance flags; Segmental spine research reference scaffold, provisional manual chapter 66 and registry blocker; SPN-1a: spinal level enumeration, regions and adjacency (spine.levels); SPN-1b: segmental spine per-level transforms and ordered composition (spine.segmental); SPN-5 spinal load series, sign conventions and tension-positive axial bridge; SPN-6a: spine model asset manifest and local-source SHA-256 admission |

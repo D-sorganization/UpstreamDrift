@@ -2340,6 +2340,45 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12791 · Fix garment_classification.tex Row Terminators so the Golfer Appearance Reference Compiles; Latex-References CI Now Builds the Full-Body Model Reference Masters
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12791
+- **Branch:** merged via #12798
+- **PR:** #12798
+- **Paths:** see #12798
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`59556187`; collated from changes/12791-fix-garment-classification-tex-row-termi.md)
+- **Summary:** Fix garment_classification.tex row terminators so the golfer appearance reference compiles; latex-references CI now builds the full-body model reference masters
+- **Next step:** Shipped in PR #12798.
+
+### DL-#12802 · Split Full-Body HANDOFF and Anthropometry REVIEW Under the Doc-Size Budget; Renew Only the Stale Chat Child-Copy Architecture Exception for 14 Days (#12803)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12802
+- **Branch:** merged via #12804
+- **PR:** #12804
+- **Paths:** see #12804
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`3fb64eff`; collated from changes/12802-split-full-body-handoff-and-anthropometr.md)
+- **Summary:** Split full-body HANDOFF and anthropometry REVIEW under the doc-size budget; renew only the stale chat child-copy architecture exception for 14 days (#12803)
+- **Next step:** Shipped in PR #12804.
+
+### DL-#12792 · Bump Vendor/Ud-Tools to Tools E3cf5a43, Carrying the Corrected Golfer Club Jacobians (Tools#5627 Rust Pendulum-Core, Tools#5628 Python/JAX Forward Kinematics Y-Sign, Tools#5626); Pins and Divergence Inventory Kept in Step
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12792
+- **Branch:** merged via #12792
+- **PR:** #12792
+- **Paths:** see #12792
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`513cfff7`; collated from changes/12792-bump-vendor-ud-tools-to-tools-e3cf5a43-c.md)
+- **Summary:** Bump vendor/ud-tools to Tools e3cf5a43, carrying the corrected golfer club Jacobians (Tools#5627 Rust pendulum-core, Tools#5628 Python/JAX forward kinematics y-sign, Tools#5626); pins and divergence inventory kept in step
+- **Next step:** Shipped in PR #12792.
+
 ### DL-#12777 · Re-Solve the MSK Address Calibration on the Widened Forearm Range so the Lead Pronation Leaves Its Old 90 Deg Bound
 
 - **State:** shipped

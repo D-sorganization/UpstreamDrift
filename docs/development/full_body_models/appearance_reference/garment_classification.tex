@@ -11,8 +11,8 @@ pattern $p$ over \emph{one} component and an anatomical part $\pi$. The
 specificity of $p$ is
 \[
   s(p) = \begin{cases}
-    0 & \text{no wildcard (exact segment name)},\
-    1 & \text{single trailing wildcard (prefix)},\
+    0 & \text{no wildcard (exact segment name)},\\
+    1 & \text{single trailing wildcard (prefix)},\\
     2 & \text{otherwise (substring)}.
   \end{cases}
 \]
@@ -33,19 +33,19 @@ the pelvis and the torso, so the three trunk segments are named exactly.
 
 \subsection{Golden Table}
 \begin{tabular}{ll}
-  Body (leaf) & Part \ \hline
-  \texttt{LowerTorso} & pelvis \
-  \texttt{UpperTorsoBase}, \texttt{COMRod} & torso \
-  \texttt{Head} & head \
-  \texttt{HubtoLS}, \texttt{HubtoRS} & shoulder \
-  \texttt{LUpperArm}, \texttt{RUpperArm} & upper\_arm \
-  \texttt{Left/Right Elbow Joint/Spherical Solid(1)} & forearm (folder) \
-  \texttt{LLowerForearm}, \texttt{RLowerForearm} & forearm \
-  \texttt{Clubface Vector} & club \
-  \texttt{RHandStandoff} & hand \
-  \texttt{femur\_\{l,r\}} & thigh \
-  \texttt{tibia\_\{l,r\}} & shin \
-  \texttt{talus\_*}, \texttt{calcn\_*}, \texttt{toes\_*} & foot \
+  Body (leaf) & Part \\ \hline
+  \texttt{LowerTorso} & pelvis \\
+  \texttt{UpperTorsoBase}, \texttt{COMRod} & torso \\
+  \texttt{Head} & head \\
+  \texttt{HubtoLS}, \texttt{HubtoRS} & shoulder \\
+  \texttt{LUpperArm}, \texttt{RUpperArm} & upper\_arm \\
+  \texttt{Left/Right Elbow Joint/Spherical Solid(1)} & forearm (folder) \\
+  \texttt{LLowerForearm}, \texttt{RLowerForearm} & forearm \\
+  \texttt{Clubface Vector} & club \\
+  \texttt{RHandStandoff} & hand \\
+  \texttt{femur\_\{l,r\}} & thigh \\
+  \texttt{tibia\_\{l,r\}} & shin \\
+  \texttt{talus\_*}, \texttt{calcn\_*}, \texttt{toes\_*} & foot \\
 \end{tabular}
 
 Across all 26 spec files in the repository, \texttt{LowerTorso} was the only
@@ -61,9 +61,9 @@ material $m_{\mathrm{pants}}$; with $P$ the pants part (\texttt{thigh}),
 for every preset that dresses $P$. \texttt{check\_clothing} raises on any
 violation, and \texttt{check\_references} applies it to the active preset.
 \begin{tabular}{lll}
-  Preset & Shirt & Pants (pelvis, thigh) \ \hline
-  \texttt{golf\_polo\_shorts} (default) & \texttt{polo\_navy} & \texttt{shorts\_khaki} \
-  \texttt{golf\_polo\_trousers} & \texttt{polo\_white} & \texttt{trousers\_charcoal} (also shin) \
+  Preset & Shirt & Pants (pelvis, thigh) \\ \hline
+  \texttt{golf\_polo\_shorts} (default) & \texttt{polo\_navy} & \texttt{shorts\_khaki} \\
+  \texttt{golf\_polo\_trousers} & \texttt{polo\_white} & \texttt{trousers\_charcoal} (also shin) \\
 \end{tabular}
 
 The pelvis now also takes the pelvis cross-section entries of
