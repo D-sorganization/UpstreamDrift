@@ -26,10 +26,12 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import Any, Literal
 
 import numpy as np
 
+from src.shared.python.contracts import ensure
 from src.shared.python.spine._golf_term_impl import (
     Handedness,
     axis_series,
@@ -40,6 +42,7 @@ from src.shared.python.spine._golf_term_impl import (
     index_in_range,
     isb_spine_angles_deg,
     require_inputs,
+    single_rotation,
     rotate_to_z_up,
     tilt_components,
     unit_vector,
@@ -49,11 +52,13 @@ from src.shared.python.spine.segmental import SegmentalPose
 from src.shared.python.swing_comparison.turn import MARKER_PAIRS, compute_turn_lines
 
 __all__ = [
+    "GolfTermContributions",
     "GolfTermDefinition",
     "contribution_remainder",
     "definition",
     "evaluate",
     "registered_terms",
+    "segmental_contribution_breakdown",
     "segmental_contributions",
 ]
 
@@ -438,14 +443,6 @@ def _jcs_value(term_id: str, rot: np.ndarray, hand: Handedness) -> float:
     return float(_TERMS[term_id].fn({_ROT: rot}, hand)[0])
 
 
-def _prefix_values(term_id: str, pose: SegmentalPose, hand: Handedness) -> list[float]:
-    first = pose.levels[0]
-    return [
-        _jcs_value(term_id, pose.relative_rotation(first, lv), hand)
-        for lv in pose.levels
-    ]
-
-
 def _check_jcs_request(term_id: str, pose: object, handedness: object) -> Handedness:
     if term_id not in _JCS_TERMS:
         raise ValueError(
@@ -457,6 +454,142 @@ def _check_jcs_request(term_id: str, pose: object, handedness: object) -> Handed
     return check_handedness(handedness)
 
 
+_CLOSURE_TOL_DEG = 1e-9
+
+
+@dataclass(frozen=True)
+class GolfTermContributions:
+    """Per-level and named non-level contributions of one JCS golf term.
+
+    ``levels`` maps each :class:`SpinalLevel` of the pose (caudal to cranial)
+    to its decomposition share. ``named`` holds the shares of the fixed
+    rotations that lie outside the level chain, keyed ``"base"`` (``B``,
+    pelvis to first body), ``"terminal"`` (``E``, last vertebra to terminal
+    body) and ``"alignment"`` (``A``, ``R_target = R_pelvis->torso @ A``); only
+    the rotations the caller supplied appear, and none is folded into a level.
+    ``global_value`` is the term of ``B @ chain @ E @ A``. Degrees. Mappings
+    are read-only.
+    """
+
+    levels: Mapping[SpinalLevel, float]
+    named: Mapping[str, float]
+    global_value: float
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "levels", MappingProxyType(dict(self.levels)))
+        object.__setattr__(self, "named", MappingProxyType(dict(self.named)))
+
+    @property
+    def total(self) -> float:
+        """Sum of the level shares plus the named entries (degrees)."""
+        return float(sum(self.levels.values()) + sum(self.named.values()))
+
+    @property
+    def remainder(self) -> float:
+        """``global_value - total``: ~0 up to rounding (NaN if gimbal-locked)."""
+        return self.global_value - self.total
+
+
+def _prefix_chain(
+    term_id: str,
+    pose: SegmentalPose,
+    hand: Handedness,
+    base: np.ndarray | None,
+    terminal: np.ndarray | None,
+    alignment: np.ndarray | None,
+) -> tuple[list[float], dict[str, float], float]:
+    """Cumulative term values: level prefixes, named steps, final global value.
+
+    The cumulative rotation is ``B``, then ``B @ chain_1..k``, then
+    ``... @ E``, then ``... @ A`` (each factor present only if supplied); the
+    term of the empty chain is 0, so with all of ``B``, ``E``, ``A`` absent the
+    level values equal the legacy chain-only prefixes.
+    """
+    lead = np.eye(3) if base is None else base
+    first = pose.levels[0]
+    prefix = [
+        _jcs_value(term_id, lead @ pose.relative_rotation(first, lv), hand)
+        for lv in pose.levels
+    ]
+    cumulative = lead @ pose.compose()[:3, :3]
+    named: dict[str, float] = {}
+    previous = prefix[-1]
+    if base is not None:
+        named["base"] = _jcs_value(term_id, base, hand)
+    for key, rot in (("terminal", terminal), ("alignment", alignment)):
+        if rot is None:
+            continue
+        cumulative = cumulative @ rot
+        value = _jcs_value(term_id, cumulative, hand)
+        named[key] = value - previous
+        previous = value
+    return prefix, named, previous
+
+
+def segmental_contribution_breakdown(
+    term_id: str,
+    pose: SegmentalPose,
+    *,
+    handedness: Literal["right", "left"],
+    base: object | None = None,
+    terminal: object | None = None,
+    alignment: object | None = None,
+) -> GolfTermContributions:
+    """Per-level plus named non-level contributions that close on the global term.
+
+    The global term is ``f(B @ chain @ E @ A)`` where ``chain`` is
+    ``pose.compose()``. With cumulative rotations ``P_0 = B``,
+    ``P_k = B @ chain_1..k``, ``P_E = P_n @ E`` and ``P_A = P_E @ A`` (factors
+    omitted when not supplied; the empty chain has term 0)::
+
+        base      = f(B)                    (only if base supplied)
+        level k   = f(P_k) - f(P_{k-1})     (f(P_0) = f(B), or 0 without B)
+        terminal  = f(P_E) - f(P_n)         (only if terminal supplied)
+        alignment = f(P_A) - f(P_E or P_n)  (only if alignment supplied)
+
+    These telescope to ``f(P_A)`` exactly, so
+    ``sum(levels) + sum(named) == global_value`` up to rounding. When none of
+    ``base``/``terminal``/``alignment`` is given, ``levels`` equals
+    :func:`segmental_contributions` and ``named`` is empty. As there, the shares
+    are path dependent, not Cardan angles of the levels.
+
+    Preconditions: as :func:`segmental_contributions`; each of ``base``,
+    ``terminal``, ``alignment`` is ``None`` or a single finite proper
+    ``(3, 3)`` rotation (``TypeError`` if not numeric, ``ValueError`` for wrong
+    shape or a non-rotation, naming the argument).
+
+    Postconditions: ``levels`` keys are ``pose.levels``; ``named`` keys are a
+    subset of ``base``, ``terminal``, ``alignment``; when all values are finite
+    the closure ``|remainder| <= 1e-9`` deg holds (``ensure``). Samples that
+    are gimbal-locked give NaN shares, never zero.
+    """
+    hand = _check_jcs_request(term_id, pose, handedness)
+    rots = [
+        None if r is None else single_rotation(r, name)
+        for name, r in (
+            ("base", base),
+            ("terminal", terminal),
+            ("alignment", alignment),
+        )
+    ]
+    prefix, named, glob = _prefix_chain(term_id, pose, hand, *rots)
+    start = named.get("base", 0.0) if rots[0] is not None else 0.0
+    levels = {
+        lv: cur - prev
+        for lv, cur, prev in zip(
+            pose.levels, prefix, [start, *prefix[:-1]], strict=True
+        )
+    }
+    result = GolfTermContributions(levels=levels, named=named, global_value=glob)
+    if np.isfinite(result.total) and np.isfinite(glob):
+        ensure(
+            abs(result.remainder) <= _CLOSURE_TOL_DEG,
+            "level shares plus named entries must sum to the global term",
+            result.remainder,
+        )
+    return result
+
+
 def segmental_contributions(
     term_id: str, pose: SegmentalPose, *, handedness: Literal["right", "left"]
 ) -> dict[SpinalLevel, float]:
@@ -466,13 +599,18 @@ def segmental_contributions(
     term(chain truncated before i)``, with the chain composed caudal factor
     first (``pose.relative_rotation``) and the term of the empty chain taken as
     0 (so the first level carries its neutral offset). The values telescope to
-    the global term exactly (the prefix differences telescope), but they are
-    NOT the level's own Cardan angle and NOT additive in angle space: a level's
-    share depends on the levels caudal to it (``angle_sum_diagnostic`` differs
-    from the global value). :func:`contribution_remainder` reports the
-    numerical shortfall against the global value, which is ~0 by construction
-    and is non-zero only through float rounding (NaN if a prefix is
-    gimbal-locked).
+    the term of the supplied chain exactly (the prefix differences telescope),
+    but they are NOT the level's own Cardan angle and NOT additive in angle
+    space: a level's share depends on the levels caudal to it
+    (``angle_sum_diagnostic`` differs from the global value).
+    :func:`contribution_remainder` reports the numerical shortfall against the
+    term of the chain, which is ~0 by construction and is non-zero only through
+    float rounding (NaN if a prefix is gimbal-locked).
+
+    This function attributes the supplied chain only (``B = E = A = I``). When a
+    fixed base rotation ``B``, terminal rotation ``E`` or drive alignment ``A``
+    is not the identity, use :func:`segmental_contribution_breakdown`, which
+    also returns them as named non-level entries.
 
     Preconditions: ``term_id`` in ``x_factor_jcs_axial``,
     ``trunk_extension_jcs``, ``trunk_lateral_flexion_jcs``; ``pose`` is a
@@ -485,25 +623,32 @@ def segmental_contributions(
         TypeError: if ``pose`` is not a :class:`SegmentalPose`.
         ValueError: for a non-JCS term or bad handedness.
     """
-    hand = _check_jcs_request(term_id, pose, handedness)
-    prefix = _prefix_values(term_id, pose, hand)
-    return {
-        lv: cur - prev
-        for lv, cur, prev in zip(pose.levels, prefix, [0.0, *prefix[:-1]], strict=True)
-    }
+    breakdown = segmental_contribution_breakdown(term_id, pose, handedness=handedness)
+    return dict(breakdown.levels)
 
 
 def contribution_remainder(
-    term_id: str, pose: SegmentalPose, *, handedness: Literal["right", "left"]
+    term_id: str,
+    pose: SegmentalPose,
+    *,
+    handedness: Literal["right", "left"],
+    base: object | None = None,
+    terminal: object | None = None,
+    alignment: object | None = None,
 ) -> float:
-    """Global term value minus the sum of :func:`segmental_contributions`.
+    """Global term value minus the sum of level and named contributions.
 
-    Degrees. The contributions telescope over the cumulative prefixes, so this
-    is ~0 up to rounding; it is reported (not asserted) so a consumer can see
+    Degrees. The global term is ``f(B @ chain @ E @ A)`` (``B``, ``E``, ``A``
+    default to the identity). Contributions telescope over the cumulative
+    prefixes, so this is ~0 up to rounding; it is reported so a consumer can see
     the decomposition closes. Same preconditions and errors as
-    :func:`segmental_contributions`.
+    :func:`segmental_contribution_breakdown`.
     """
-    hand = _check_jcs_request(term_id, pose, handedness)
-    contrib = segmental_contributions(term_id, pose, handedness=hand)
-    glob = _jcs_value(term_id, pose.compose()[:3, :3], hand)
-    return glob - float(sum(contrib.values()))
+    return segmental_contribution_breakdown(
+        term_id,
+        pose,
+        handedness=handedness,
+        base=base,
+        terminal=terminal,
+        alignment=alignment,
+    ).remainder

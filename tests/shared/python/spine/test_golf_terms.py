@@ -17,9 +17,9 @@ from src.shared.python.spine.golf_terms import (
     definition,
     evaluate,
     registered_terms,
+    contribution_remainder,
     segmental_contribution_breakdown,
     segmental_contributions,
-    contribution_remainder,
 )
 from src.shared.python.spine.levels import SpinalLevel
 from src.shared.python.spine.segmental import LevelTransform, SegmentalPose
@@ -643,6 +643,6 @@ def test_breakdown_rejects_bad_rotations() -> None:
 def test_gimbal_locked_prefix_gives_nan_not_zero() -> None:
     pose = _pose((0, 90.0, 0.0))
     got = segmental_contribution_breakdown(
-        "x_factor_jcs_axial", pose, handedness="right", base=_rot(5, 0, 5)
+        "x_factor_jcs_axial", pose, handedness="right", base=_rot(5, 0, 0)
     )
     assert np.isnan(got.levels[pose.levels[0]])

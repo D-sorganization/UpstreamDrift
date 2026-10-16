@@ -96,7 +96,10 @@ class StackData:
 
     ``values_deg`` has shape ``(n, L)``; ``remainder_deg`` (shape ``(n,)``) is
     the global term minus the row sum (~0 by construction, NaN where a prefix
-    is gimbal-locked). Arrays are read-only.
+    is gimbal-locked). Arrays are read-only. The stack attributes the supplied
+    chain only (``B = E = A = I``); use
+    :func:`~src.shared.python.spine.golf_terms.segmental_contribution_breakdown`
+    when a base, terminal or alignment rotation must be attributed.
     """
 
     time_s: np.ndarray
