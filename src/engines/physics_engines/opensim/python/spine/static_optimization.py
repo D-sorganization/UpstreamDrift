@@ -540,6 +540,36 @@ def _run_provenance(basis: SpineMuscleBasis, solvers: set[str]) -> dict[str, str
     }
 
 
+def _open_basis(
+    model_path: str | Path,
+    efforts: SpinalGeneralizedForces,
+    model_id: str,
+    options: SpineSOOptions | None,
+) -> tuple[SpineSOOptions, FrameSelection, SpineMuscleBasis]:
+    """Validate the inputs and open the muscle basis for the chosen frames."""
+    if not isinstance(efforts, SpinalGeneralizedForces):
+        raise TypeError(
+            f"efforts must be a SpinalGeneralizedForces, got {type(efforts).__name__}"
+        )
+    opts = SpineSOOptions() if options is None else options
+    if not isinstance(opts, SpineSOOptions):
+        raise TypeError("options must be a SpineSOOptions or None")
+    selection = select_frames(efforts.time_s, opts.events, opts.stride, opts.max_frames)
+    basis = SpineMuscleBasis(
+        model_path,
+        model_id,
+        level_map=opts.level_map,
+        muscle_model_policy=opts.muscle_model_policy,
+        unlock_coordinates=opts.unlock_coordinates,
+    )
+    if basis.coordinate_names != efforts.level_coordinates:
+        raise ValueError(
+            f"level coordinates differ: model {basis.coordinate_names} vs "
+            f"efforts {efforts.level_coordinates}"
+        )
+    return opts, selection, basis
+
+
 def run_spine_static_optimization(
     model_path: str | Path,
     efforts: SpinalGeneralizedForces,
@@ -566,26 +596,7 @@ def run_spine_static_optimization(
         ValueError: a missing file or coordinate, a level mismatch between
             ``efforts`` and the model, or the frame contract is violated.
     """
-    if not isinstance(efforts, SpinalGeneralizedForces):
-        raise TypeError(
-            f"efforts must be a SpinalGeneralizedForces, got {type(efforts).__name__}"
-        )
-    opts = SpineSOOptions() if options is None else options
-    if not isinstance(opts, SpineSOOptions):
-        raise TypeError("options must be a SpineSOOptions or None")
-    selection = select_frames(efforts.time_s, opts.events, opts.stride, opts.max_frames)
-    basis = SpineMuscleBasis(
-        model_path,
-        model_id,
-        level_map=opts.level_map,
-        muscle_model_policy=opts.muscle_model_policy,
-        unlock_coordinates=opts.unlock_coordinates,
-    )
-    if basis.coordinate_names != efforts.level_coordinates:
-        raise ValueError(
-            f"level coordinates differ: model {basis.coordinate_names} vs "
-            f"efforts {efforts.level_coordinates}"
-        )
+    opts, selection, basis = _open_basis(model_path, efforts, model_id, options)
     limits = opts.reserves.limits(basis.coordinate_names)
     tau_all = efforts.level_tau()
     k, nm, nc = selection.indices.size, len(basis.muscle_names), limits.size
