@@ -32,13 +32,26 @@ def test_apps_package_relative_imports_reach_src() -> None:
 
 
 @pytest.mark.unit
-def test_embedded_c3d_viewer_creates_widget(qapp_or_skip) -> None:
+def test_embedded_c3d_viewer_creates_widget(qapp_or_skip, monkeypatch) -> None:
     """``create_main_widget`` returns a QWidget instead of raising ImportError."""
+    import sys
+
     from PyQt6.QtWidgets import QWidget
 
-    from src.launchers.adapters.simscape_embed import load_simscape_apps_package
-    from src.shared.python.launcher_embed import get_embeddable_tool
+    from src.launchers.adapters.simscape_embed import (
+        APPS_PACKAGE_NAME,
+        TOOL_ID,
+        load_simscape_apps_package,
+    )
+    from src.shared.python.launcher_embed import (
+        EMBEDDABLE_TOOL_REGISTRY,
+        get_embeddable_tool,
+    )
 
+    # Another test in the same worker may have registered the adapter from a
+    # different import path; exercise the launcher's own loader in isolation.
+    monkeypatch.delitem(EMBEDDABLE_TOOL_REGISTRY, TOOL_ID, raising=False)
+    monkeypatch.delitem(sys.modules, APPS_PACKAGE_NAME, raising=False)
     load_simscape_apps_package()
     tool = get_embeddable_tool("c3d_viewer")
     assert tool is not None

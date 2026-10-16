@@ -9,6 +9,7 @@ import pytest
 from src.engines.physics_engines.opensim.python.opensim_golf.core import (
     GolfSwingModel,
 )
+from tests.helpers.opensim_support import require_opensim
 
 MODEL = (
     Path(__file__).resolve().parents[3]
@@ -58,8 +59,9 @@ def test_advance_state_rejects_non_increasing_interval() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.requires_opensim
 def test_run_simulation_real_opensim_golf_humanoid() -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     model = GolfSwingModel(str(MODEL))
     model.duration = 0.03
     model.dt = 0.01

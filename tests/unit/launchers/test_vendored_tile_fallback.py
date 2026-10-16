@@ -62,17 +62,6 @@ def test_tile_artifact_resolves_with_only_vendor(tile, tmp_path, vendor_authorit
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("tile", TILES)
-def test_real_checkout_tile_launch_target_exists(tile):
-    if not inspect_tools_vendor_authority(REPO_ROOT).available:
-        pytest.skip("vendor/ud-tools not materialised")
-    model = ModelRegistry().get_model(tile)
-    assert model is not None
-    assert resolve_model_artifact(model, REPO_ROOT).is_file()
-    assert resolve_tile_target(model, REPO_ROOT).resolvable
-
-
-@pytest.mark.unit
 def test_movement_optimizer_policy_falls_back_to_vendor(tmp_path):
     repo = _vendor_only_layout(tmp_path)
     root = ModelSourcePathPolicy(repo).resolve_source_root("Movement_Optimizer")

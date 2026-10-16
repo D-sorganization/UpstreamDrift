@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from src.engines.physics_engines.opensim.python import geometry_resolver, model_preview
+from tests.helpers.opensim_support import require_opensim
 
 Z_UP_GRAVITY = (0.0, 0.0, -9.81)
 Y_UP_GRAVITY = (0.0, -9.81, 0.0)
@@ -32,8 +33,9 @@ def test_z_up_points_are_left_alone() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.requires_opensim
 def test_default_anthro_pelvis_is_above_ankles() -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     segments = model_preview.body_segments(geometry_resolver.DEFAULT_MODEL)
     by_name = {s.name: s for s in segments}
     pelvis_z = by_name["joint_femur_r"].start[2]
@@ -42,8 +44,9 @@ def test_default_anthro_pelvis_is_above_ankles() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.requires_opensim
 def test_capsules_only_for_bodies_with_missing_meshes() -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     everything = model_preview.body_segments(geometry_resolver.DEFAULT_MODEL)
     assert everything
     none_missing = model_preview.body_segments(
@@ -58,8 +61,9 @@ def test_capsules_only_for_bodies_with_missing_meshes() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.requires_opensim
 def test_drawn_golfer_stands_upright() -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     matplotlib = pytest.importorskip("matplotlib")
     matplotlib.use("Agg")
     from matplotlib.figure import Figure

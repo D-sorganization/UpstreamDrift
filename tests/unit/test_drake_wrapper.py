@@ -7,8 +7,7 @@ import pytest
 
 pytest.importorskip("pydrake.geometry", reason="pydrake not available")
 
-# Only attributes that exist on the real pydrake MultibodyPlant may be listed
-# (enforced against real pydrake by tests/engines/drake/test_drake_real_api_parity.py).
+# Real pydrake MultibodyPlant attributes only (see test_drake_real_api_parity.py).
 _PLANT_SPEC_ATTRS = [
     "Finalize",
     "time_step",

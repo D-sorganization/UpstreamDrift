@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from src.engines.physics_engines.opensim.python import club_visuals, geometry_resolver
+from tests.helpers.opensim_support import require_opensim
 
 MODEL_TEMPLATE = (
     '<?xml version="1.0"?><OpenSimDocument Version="40500"><Model name="m">'
@@ -108,9 +109,10 @@ def test_default_model_is_the_anthro_golfer() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.requires_opensim
 def test_gui_banner_and_default_model(qapp, monkeypatch, tmp_path: Path) -> None:
     pytest.importorskip("PyQt6")
-    pytest.importorskip("opensim")
+    require_opensim()
     gui_mod = importlib.import_module(
         "src.engines.physics_engines.opensim.python.opensim_gui"
     )

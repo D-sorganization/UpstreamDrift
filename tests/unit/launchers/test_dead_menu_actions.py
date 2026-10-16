@@ -44,7 +44,15 @@ def _walk(menu, out):
 
 
 @pytest.fixture
-def launcher(qapp_or_skip):
+def launcher(qapp_or_skip, monkeypatch):
+    from src.launchers.launcher_sidekick_sidebar import SidekickSidebarManager
+
+    # Sidekick extension activation is process-global and refuses to run once
+    # another test in the worker imported the extension modules; these tests
+    # only exercise the menus, so keep the import-path install out of it.
+    monkeypatch.setattr(
+        SidekickSidebarManager, "_install_sidekick_import_paths", lambda self: None
+    )
     win = upstream_drift_launcher.UpstreamDriftLauncher()
     yield win
     pm = getattr(win, "process_manager", None)
