@@ -41,7 +41,7 @@ Part of the [Golf Modeling Suite - Modern Architecture Implementation Plan](../A
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 3.2 PyPI Package with Bundled UI
+### 3.2 PyPI Package With Bundled UI
 
 **File: `pyproject.toml`** (updated build section)
 
@@ -334,7 +334,7 @@ echo "║                                                               ║"
 echo "╚═══════════════════════════════════════════════════════════════╝"
 ```
 
-### 3.5 GitHub Releases with Pre-built Binaries
+### 3.5 GitHub Releases With Pre-Built Binaries
 
 **File: `.github/workflows/release.yml`**
 
@@ -461,7 +461,7 @@ jobs:
 **Duration: 4-6 weeks (optional, can defer)**
 **Goal: Add cloud conveniences without making them required**
 
-### 4.1 Cloud Architecture (Optional Add-on)
+### 4.1 Cloud Architecture (Optional Add-On)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐

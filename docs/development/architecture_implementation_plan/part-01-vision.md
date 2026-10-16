@@ -874,7 +874,7 @@ export function EngineSelector({ value, onChange, disabled }: Props) {
 }
 ```
 
-### 2.4 3D Visualization with Three.js
+### 2.4 3D Visualization With Three.Js
 
 ```tsx
 // ui/src/components/visualization/Scene3D.tsx
