@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12960 · Adversarial Review 2026-10-16: 43 Findings With Draft PR Pitches Under Docs/Development/Adversarial-Review/
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12960
+- **Branch:** claude/adversarial-review-2026-10-16
+- **PR:** #12960
+- **Paths:** docs/development/adversarial-review/2026-10-16
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`f249f9c5`; collated from changes/12960-adversarial-review-2026-10-16.md)
+- **Summary:** Adversarial review 2026-10-16: 43 findings with draft PR pitches under docs/development/adversarial-review/
+- **Next step:** Triage Critical/High finding pages; each carries a paste-ready PR body.
+
 ### DL-#12686 · R6: Opt-In Flexible Golf Shaft as a Rigid-Link Spring-Damper Chain (MuJoCo); Generic STIFF Profile Flagged Default_Not_Measured; Rigid Default Byte-Identical; Other Engines Refuse Chain Specs
 
 - **State:** in_review
@@ -2352,6 +2365,19 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#12749 · Pin the Bruno 2015 Full-Body Model Hash With the Owner's 2026-10-16 SimTK Licence Acceptance; Senteler Stays Unpinned
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12749
+- **Branch:** merged via #13021
+- **PR:** #13021
+- **Paths:** see #13021
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`fa509032`; collated from changes/12749-pin-the-bruno-2015-full-body-model-hash.md)
+- **Summary:** Pin the Bruno 2015 full-body model hash with the owner's 2026-10-16 SimTK licence acceptance; Senteler stays unpinned
+- **Next step:** Shipped in PR #13021.
 
 ### DL-#12964 · Confine Launcher Logo Route to Its Asset Directory (Fixes Unauthenticated Arbitrary File Read)
 
