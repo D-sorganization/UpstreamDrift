@@ -19,7 +19,7 @@ import math
 from pathlib import Path
 from typing import Any, Literal
 
-SCHEMA_VERSION = "spine-study-receipt/3"
+SCHEMA_VERSION = "spine-study-receipt/2"
 STATUSES = ("pass", "unqualified", "failed")
 STAGE_STATUSES = ("ok", "failed")
 

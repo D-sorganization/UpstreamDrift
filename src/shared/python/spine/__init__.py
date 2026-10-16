@@ -60,8 +60,11 @@ from src.shared.python.spine.loads import (
 )
 from src.shared.python.spine.movement_variants import (
     MovementVariant,
+    UndeclaredTermCheck,
     VariantResult,
     apply_variant,
+    check_undeclared_terms,
+    evaluate_rotation_terms,
     load_movement_variants,
     movement_variant,
 )
@@ -104,9 +107,12 @@ __all__ = [
     "SpinalRegion",
     "StackData",
     "StateDependentCouplingLaw",
+    "UndeclaredTermCheck",
     "VariantResult",
     "annotate",
     "apply_variant",
+    "check_undeclared_terms",
+    "evaluate_rotation_terms",
     "available_laws",
     "context_bands",
     "contribution_remainder",
