@@ -297,9 +297,14 @@ class SettingsWidget(SettingsCloseContract, SettingsAuxiliaryTabsMixin, QWidget)
             layout_action.toggled.connect(self._sync_layout_lock_state)
             self._btn_edit_tiles.clicked.connect(launcher.open_layout_manager)
 
+            state_getter = getattr(launcher, "get_layout_view_state", None)
+            view_state = state_getter() if callable(state_getter) else None
+            if not isinstance(view_state, tuple):
+                view_state = None
+
             # Sync view mode
-            if hasattr(launcher, "layout_manager"):
-                current_mode = launcher.layout_manager.view_mode
+            if view_state is not None:
+                current_mode, scale = view_state
                 index = self.combo_view_mode.findData(current_mode)
                 if index >= 0:
                     self.combo_view_mode.setCurrentIndex(index)
@@ -311,8 +316,7 @@ class SettingsWidget(SettingsCloseContract, SettingsAuxiliaryTabsMixin, QWidget)
                 )
 
             # Sync zoom
-            if hasattr(launcher, "layout_manager"):
-                scale = launcher.layout_manager.tile_scale
+            if view_state is not None:
                 val = (
                     launcher._scale_to_slider(scale)
                     if hasattr(launcher, "_scale_to_slider")

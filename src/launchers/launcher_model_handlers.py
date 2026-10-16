@@ -335,7 +335,13 @@ class SpecialAppHandler:
         model_name = getattr(model, "name", model_path)
 
         if not script_path.exists():
-            logger.warning("SpecialAppHandler: script not found: %s", script_path)
+            logger.warning(
+                "SpecialAppHandler: script not found: %s (searched source_root "
+                "%r; clone the sibling repo or run 'git submodule update "
+                "--init vendor/ud-tools')",
+                script_path,
+                getattr(model, "source_root", None),
+            )
             return False
 
         working_directory = get_model_working_directory(model, repo_path)

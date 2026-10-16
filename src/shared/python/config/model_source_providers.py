@@ -38,6 +38,47 @@ the ``vendor/ud-tools`` vendor root, never the repository root (issue
 """
 
 
+class SourceRootNotFoundError(FileNotFoundError):
+    """A declared ``source_root`` exists in none of the searched locations."""
+
+
+def normalize_dir_name(name: str) -> str:
+    """Canonical form for comparing directory names across naming styles.
+
+    ``Movement_Optimizer``, ``Movement-Optimizer`` and ``movement optimizer``
+    all normalise to ``movementoptimizer``.
+    """
+    return "".join(ch for ch in name.lower() if ch.isalnum())
+
+
+def _match_dir_tolerant(parent: Path, name: str) -> Path | None:
+    """Return the child directory of *parent* whose normalised name matches."""
+    wanted = normalize_dir_name(name)
+    if not wanted or not parent.is_dir():
+        return None
+    try:
+        children = sorted(parent.iterdir())
+    except OSError:
+        return None
+    for child in children:
+        if child.is_dir() and normalize_dir_name(child.name) == wanted:
+            return child
+    return None
+
+
+def tools_subproject_from_source_root(source_root: str | None) -> str:
+    """Return the Tools-relative subproject of a legacy ``../Tools/...`` root.
+
+    ``"../Tools/src/pendulum_simulator"`` -> ``"src/pendulum_simulator"``.
+    Returns ``""`` when no ``Tools/`` marker is present.
+    """
+    normalized = (source_root or "").replace("\\", "/")
+    marker = "Tools/"
+    if marker in normalized:
+        return normalized.split(marker, 1)[1].strip("/")
+    return ""
+
+
 def strip_tools_scheme(path: str | None) -> str | None:
     """Return *path* with the :data:`TOOLS_PATH_SCHEME` prefix removed."""
     if isinstance(path, str) and path.startswith(TOOLS_PATH_SCHEME):
@@ -149,24 +190,67 @@ class ModelSourcePathPolicy:
             root_path = self._resolve_relative_source_root(root_path)
         return self._canonicalize(root_path, field_name="source_root")
 
+    def source_root_candidates(self, declared: Path) -> tuple[Path, ...]:
+        """Return every location searched for a relative ``source_root``.
+
+        Order: inside the repo, beside the repo (sibling checkout), then the
+        vendored ``vendor/ud-tools`` tree when it ships a tool of that name.
+        Directory names are compared through :func:`normalize_dir_name`, so
+        ``Movement_Optimizer`` also matches ``Movement-Optimizer``.
+        """
+        candidates: list[Path] = []
+        for base in (self.default_root, self.default_root.parent):
+            candidates.append(base / declared)
+            matched = _match_dir_tolerant(base, declared.name)
+            if matched is not None:
+                candidates.append(matched)
+        vendor = self.default_root / "vendor" / "ud-tools"
+        if _match_dir_tolerant(vendor / "src", declared.name) is not None:
+            candidates.append(vendor)
+        return tuple(dict.fromkeys(candidates))
+
     def _resolve_relative_source_root(self, declared: Path) -> Path:
-        """Resolve a relative ``source_root`` against the repo, then its siblings.
+        """Resolve a relative ``source_root``; fall back to the repo-local path.
+
+        Lenient lookup used by path computation (callers may legitimately ask
+        about an absent sibling). Launch-time callers that need the checkout
+        to exist use :meth:`require_source_root`.
+        """
+        for candidate in self.source_root_candidates(declared):
+            if candidate.exists():
+                return candidate
+        return self.default_root / declared
+
+    def require_source_root(self, declared: str) -> Path:
+        """Resolve a relative ``source_root`` that must exist.
+
+        Searches repo, sibling checkout, then the vendored ``vendor/ud-tools``
+        tree (issue #12993).
 
         A declared root such as ``Movement_Optimizer`` names a *sibling
-        checkout*, not a directory inside UpstreamDrift. Resolving it only
-        against ``default_root`` produced
-        ``<UpstreamDrift>/Movement_Optimizer/...``, which never exists, so the
-        Movement Optimizer tile could not launch (issue #7984). The sibling
-        directory (``default_root.parent``) is already an approved root, so
-        falling back to it is safe.
+        checkout* (issue #7984); when no checkout exists the pinned
+        ``vendor/ud-tools`` tree, which ships the same package under
+        ``src/<name>``, is used instead (issue #12993).
+
+        Raises:
+            SourceRootNotFoundError: if no candidate exists. The message
+                lists every searched path and the remedy.
         """
-        in_repo = self.default_root / declared
-        if in_repo.exists():
-            return in_repo
-        sibling = self.default_root.parent / declared
-        if sibling.exists():
-            return sibling
-        return in_repo
+        declared_path = Path(declared)
+        candidates = (
+            (declared_path,)
+            if declared_path.is_absolute()
+            else self.source_root_candidates(declared_path)
+        )
+        for candidate in candidates:
+            if candidate.exists():
+                return candidate
+        searched = "\n".join(f"  - {c}" for c in candidates)
+        raise SourceRootNotFoundError(
+            f"source_root {declared!r} not found. Searched:\n{searched}\n"
+            "Fix: clone the sibling repository next to UpstreamDrift or run "
+            "'git submodule update --init vendor/ud-tools'."
+        )
 
     def resolve_path(
         self,
@@ -313,24 +397,31 @@ class ToolsVendorModelSourceProvider:
         fallback_relative: str | Path | None = None,
     ) -> ResolvedModelSource:
         source_root = self.source_root(path_policy)
+        # A legacy ``../Tools/src/<tool>`` source_root nests the tile's paths
+        # under a subproject of the vendored tree (issue #12993); the reported
+        # source_root stays the vendor root (the authority boundary).
+        subproject = tools_subproject_from_source_root(
+            _get_optional_string_attr(model, "source_root")
+        )
+        base = source_root / subproject if subproject else source_root
         strict_policy = ModelSourcePathPolicy(source_root, allow_parent=False)
         try:
             return ResolvedModelSource(
                 provider_id=self.provider_id,
                 source_root=source_root,
                 artifact_path=strict_policy.resolve_path(
-                    source_root,
+                    base,
                     strip_tools_scheme(_get_optional_string_attr(model, "path")),
                     field_name="path",
                 ),
                 working_directory=strict_policy.resolve_optional_path(
-                    source_root,
+                    base,
                     _get_optional_string_attr(model, "working_dir"),
                     fallback_path=fallback_relative,
                     field_name="working_dir",
                 ),
                 python_paths=strict_policy.resolve_python_paths(
-                    source_root,
+                    base,
                     _iter_python_path_values(model),
                 ),
             )

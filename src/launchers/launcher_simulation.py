@@ -1043,6 +1043,10 @@ except (RuntimeError, TypeError, AttributeError) as e:
                     return
         except Exception as e:
             logger.exception("Failed to launch C3D Viewer embedded: %s", e)
+            self.show_toast(
+                "C3D Viewer could not be embedded; opening in a separate window.",
+                "warning",
+            )
 
         # Fallback to subprocess if not registered or failed
         candidates = [

@@ -441,9 +441,10 @@ def test_layout_tab_zoom_slider_calls_on_zoom_slider_changed(
     from src.launchers.launcher_layout_manager import LayoutManager
 
     layout_manager = MagicMock(spec=LayoutManager)
-    layout_manager.view_mode = ViewMode.LIST_LARGE
-    layout_manager.tile_scale = 1.0
     parent_launcher.layout_manager = layout_manager
+    parent_launcher.get_layout_view_state = MagicMock(
+        return_value=(ViewMode.LIST_LARGE, 1.0)
+    )
     parent_launcher._scale_to_slider = MagicMock(return_value=50)
     parent_launcher._slider_to_scale = MagicMock(return_value=0.75)
     # The real method name is _on_zoom_slider_changed (not _zoom_slider_changed)
