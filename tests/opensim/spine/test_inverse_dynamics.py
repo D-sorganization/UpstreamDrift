@@ -553,3 +553,77 @@ def test_generalized_effort_excludes_muscle_forces(spec, model_path, tmp_path) -
         with_muscles.moment_nm, bare.moment_nm, atol=1e-9, rtol=0
     )
     assert with_muscles.provenance["muscles"].startswith("excluded")
+
+
+# ------------------------------------------- residual height reference (#12824)
+
+
+def _ramp_mot(first: dict, last: dict, tmp_path, name: str = "ramp.mot"):
+    """Straight-line motion from ``first`` to ``last`` column values (8 samples)."""
+    times = np.linspace(0.0, 0.7, 8)
+    a, b = first, last
+    cols = {k: np.linspace(a[k], b[k], times.size) for k in a}
+    return _write_mot(tmp_path / name, times, cols)
+
+
+def _gravity_extent(spec, theta, pelvis, direction) -> float:
+    """Spread of the fixture body origins along ``direction`` (independent)."""
+    poses = _body_poses(spec, theta, pelvis)
+    unit = np.asarray(direction, dtype=float)
+    proj = [float(unit @ poses[b][:3, 3]) for b in fixture_body_names(spec)]
+    return max(proj) - min(proj)
+
+
+def _pelvis_pose(rx=0.0, ry=0.0, rz=0.0) -> np.ndarray:
+    pose = np.eye(4)
+    pose[:3, :3] = Rotation.from_euler("XYZ", [rx, ry, rz]).as_matrix()
+    return pose
+
+
+def test_residual_height_uses_first_frame_not_last(spec, model_path, tmp_path) -> None:
+    upright = _theta(spec)
+    crouched = {k: v + np.array([0.9, 0.3, 0.2]) for k, v in upright.items()}
+    first = _columns(spec, upright)
+    last = _columns(spec, crouched)
+    last["pelvis_rx"] = 1.1  # the last pose is also tipped over
+    _s, ramp = _run(model_path, _ramp_mot(first, last, tmp_path))
+    _s, still = _run(model_path, _static_mot(spec, upright, tmp_path))
+    expected = _gravity_extent(spec, upright, np.eye(4), [0.0, 1.0, 0.0])
+    assert still.body_height_m == pytest.approx(expected, abs=1e-9)
+    assert ramp.body_height_m == pytest.approx(still.body_height_m, abs=1e-9)
+    assert ramp.body_height_source == "model_extent_first_frame"
+
+
+def test_residual_height_follows_the_model_gravity_axis(
+    spec, model_path, tmp_path
+) -> None:
+    sideways = tmp_path / "gravity_x.osim"
+    text = model_path.read_text()
+    assert "0 -9.80665 0" in text
+    sideways.write_text(text.replace("0 -9.80665 0", "-9.80665 0 0"))
+    theta = _theta(spec)
+    cols = _columns(spec, theta)
+    cols["pelvis_rz"] = math.pi / 2.0  # the chain now points along ground -X
+    times = np.linspace(0.0, 0.7, 8)
+    mot = _write_mot(
+        tmp_path / "side.mot", times, {k: np.full(8, v) for k, v in cols.items()}
+    )
+    _s, budget = _run(sideways, mot)
+    pelvis = _pelvis_pose(rz=math.pi / 2.0)
+    expected = _gravity_extent(spec, theta, pelvis, [1.0, 0.0, 0.0])
+    assert budget.body_height_m == pytest.approx(expected, abs=1e-9)
+    assert expected > 2.0 * _gravity_extent(spec, theta, pelvis, [0.0, 1.0, 0.0])
+
+
+def test_explicit_body_height_is_recorded_as_its_source(
+    spec, model_path, tmp_path
+) -> None:
+    mot = _static_mot(spec, _theta(spec), tmp_path)
+    _s, budget = run_spinal_inverse_dynamics(
+        model_path,
+        mot,
+        "fixture",
+        options=SpineIDOptions(pelvis=FIXTURE_PELVIS, body_height_m=1.7),
+    )
+    assert budget.body_height_m == 1.7
+    assert budget.body_height_source == "body_height_m"
