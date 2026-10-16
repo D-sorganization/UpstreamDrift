@@ -203,6 +203,10 @@ def _receipt(fullbody: dict | None) -> SpineStudyReceipt:
         law="n/a",
         distribution_source="n/a",
         asset=None,
+        torso_alignment={
+            "matrix": [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+            "provenance": "assumed_identity",
+        },
         stages=(),
         artifacts=(),
         residual={},
