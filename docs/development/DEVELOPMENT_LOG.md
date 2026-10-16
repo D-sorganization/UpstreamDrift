@@ -2353,6 +2353,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12688 · Drake and Pinocchio MeshCat Backends Draw the Shared Model_Appearance Spec Through One Engine-Neutral Scene Builder; Local Grey Palettes Removed (R9a)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12688
+- **Branch:** merged via #12908
+- **PR:** #12908
+- **Paths:** see #12908
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`29cacd85`; collated from changes/12688-drake-and-pinocchio-meshcat-backends-dra.md)
+- **Summary:** Drake and Pinocchio MeshCat backends draw the shared model_appearance spec through one engine-neutral scene builder; local grey palettes removed (R9a)
+- **Next step:** Shipped in PR #12908.
+
 ### DL-#12711 · Add DisturbanceSpec Timestep-Consistent Disturbance Contract, Wrapped OutcomeDispersion Statistics, and NaN (Not 0) MetricStatistics.Cv at Near-Zero Mean (NSX-82)
 
 - **State:** shipped
