@@ -142,7 +142,14 @@ def test_opensim_full_body_lift_spec_validation() -> None:
         OpenSimFullBodyLiftSpec(lift="squat", reserve_actuator_threshold=1.5)
 
 
-def test_opensim_composition_fails_closed_when_runtime_unavailable() -> None:
+def test_opensim_composition_fails_closed_when_runtime_unavailable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.shared.python.lifting import opensim_full_body_lifts
+
+    monkeypatch.setattr(
+        opensim_full_body_lifts, "is_engine_available", lambda _name: False
+    )
     spec = OpenSimFullBodyLiftSpec(lift="squat")
     composition = compose_opensim_full_body_lift(spec)
     assert isinstance(composition, OpenSimLiftModelComposition)

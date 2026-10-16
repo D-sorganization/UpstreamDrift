@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -230,3 +231,41 @@ class QuantityRecord:
         object.__setattr__(self, "values", values)
         object.__setattr__(self, "conventions", tuple(self.conventions))
         object.__setattr__(self, "hypotheses", tuple(self.hypotheses))
+
+
+def family_range_record(
+    values: Array,
+    *,
+    unavailable_reason: str | None,
+    hypotheses: tuple[str, ...],
+    units: str,
+    model: ModelProvenance,
+    source: InputProvenance,
+    label: str,
+) -> QuantityRecord:
+    """A ``FAMILY_DEPENDENT`` range record, or ``UNAVAILABLE`` with a reason.
+
+    ``values`` is the ``(frames, 2)`` ``[lower, upper]`` array.  When
+    ``unavailable_reason`` is given the record carries all-NaN values of the
+    same shape and that reason; otherwise it carries ``values`` and
+    ``hypotheses``.  ``label`` is recorded as the record's convention.
+    """
+    common: dict[str, Any] = {
+        "units": units,
+        "model_provenance": model,
+        "input_provenance": source,
+        "conventions": (label,),
+    }
+    if unavailable_reason is not None:
+        return QuantityRecord(
+            values=np.full(values.shape, np.nan),
+            allocation_dependence=AllocationDependence.UNAVAILABLE,
+            reason=unavailable_reason,
+            **common,
+        )
+    return QuantityRecord(
+        values=values,
+        allocation_dependence=AllocationDependence.FAMILY_DEPENDENT,
+        hypotheses=hypotheses,
+        **common,
+    )

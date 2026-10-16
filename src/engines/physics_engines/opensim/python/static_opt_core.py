@@ -34,12 +34,18 @@ Two solvers:
     muscles cannot produce and are zero (to solver precision) when the target
     is reachable.
 
+    From ``CONIC_MIN_MUSCLES`` muscles stage 2 uses convex QPs (Clarabel; p = 3
+    by iteratively reweighted least norm) because SLSQP does not converge on a
+    full-body frame (446 muscles); SLSQP remains below the threshold and when
+    Clarabel is not installed.
+
 A muscle with no force capacity at the frame (an all-zero gain column) is held
 at zero activation and excluded from stage 2 (see ``_redistribute``).
 """
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -49,6 +55,7 @@ from scipy.optimize import lsq_linear, minimize
 from src.shared.python.contracts import ensure, require
 
 __all__ = [
+    "CONIC_MIN_MUSCLES",
     "SUPPORTED_EXPONENTS",
     "ActivationSolution",
     "FrameSolution",
@@ -63,6 +70,13 @@ _RANK_TOL = 1e-10
 _SLSQP_FTOL = 1e-14
 _SLSQP_MAXITER = 500
 _BOUND_TOL = 1e-12
+CONIC_MIN_MUSCLES = 100
+_CONIC_TOL = 1e-8
+_WEIGHT_FLOOR = 1e-6
+_IRLS_MAXITER = 200
+_IRLS_TOL = 1e-10
+_CONIC_EQ_TOL = 1e-7
+_CONIC_OK = ("Solved", "AlmostSolved")
 
 
 @dataclass(frozen=True)
@@ -167,7 +181,8 @@ class ActivationSolution:
     ``activation`` ``(nm,)`` in [0, 1]; ``muscle_moment`` ``(nc,)`` the muscle
     generalised force ``offset + G a``; ``reserve`` ``(nc,)`` equal to
     ``tau - muscle_moment``; ``cost`` is ``sum a^p``; ``success`` combines both
-    stages; ``message`` is the stage-2 optimiser message.
+    stages; ``message`` is the stage-2 optimiser message; ``solver`` names the
+    stage-2 solver (``slsqp``, ``clarabel_qp`` or ``clarabel_irls``).
     """
 
     activation: np.ndarray
@@ -176,6 +191,7 @@ class ActivationSolution:
     cost: float
     success: bool
     message: str
+    solver: str = "slsqp"
 
 
 def _as_float_array(name: str, value: object, ndim: int) -> np.ndarray:
@@ -260,13 +276,23 @@ def _redistribute(
     left out of the SLSQP problem.  Keeping the zero column made SLSQP stop
     with "Inequality constraints incompatible" (#12827).
     """
+    return _without_inert(a_start, gain, exponent, _redistribute_live)
+
+
+def _without_inert(
+    a_start: np.ndarray,
+    gain: np.ndarray,
+    exponent: int,
+    solve: Callable[[np.ndarray, np.ndarray, int], tuple[np.ndarray, bool, str]],
+) -> tuple[np.ndarray, bool, str]:
+    """Run ``solve`` on the live columns only; inert muscles stay at exactly 0."""
     live = np.any(gain != 0.0, axis=0)
     if not live.any():
         return np.zeros_like(a_start), True, "no muscle has force capacity"
     if live.all():
-        return _redistribute_live(a_start, gain, exponent)
+        return solve(a_start, gain, exponent)
     a = np.zeros_like(a_start)
-    a[live], ok, message = _redistribute_live(a_start[live], gain[:, live], exponent)
+    a[live], ok, message = solve(a_start[live], gain[:, live], exponent)
     return a, ok, message
 
 
@@ -296,6 +322,103 @@ def _redistribute_live(
     )
     a = _polish(np.clip(result.x, 0.0, 1.0), gain, target)
     return a, bool(result.success), str(result.message)
+
+
+def _weighted_qp(
+    reduced: np.ndarray, rhs: np.ndarray, weight: np.ndarray
+) -> tuple[np.ndarray, bool, str]:
+    """``min sum w_i a_i^2`` s.t. ``reduced a = rhs``, ``0 <= a <= 1`` (Clarabel)."""
+    import clarabel  # lazy: optional extra
+    import scipy.sparse as sp
+
+    n = weight.size
+    eye = sp.identity(n, format="csc")
+    eq = sp.csc_matrix(reduced)
+    a_mat = sp.vstack([eq, eye, -eye], format="csc")
+    b = np.concatenate([rhs, np.ones(n), np.zeros(n)])
+    cones: list[Any] = []
+    if eq.shape[0]:
+        cones.append(clarabel.ZeroConeT(eq.shape[0]))
+    else:
+        a_mat, b = a_mat[eq.shape[0] :], b[eq.shape[0] :]
+    cones.append(clarabel.NonnegativeConeT(2 * n))
+    settings = clarabel.DefaultSettings()
+    settings.verbose = False
+    settings.tol_feas = settings.tol_gap_abs = settings.tol_gap_rel = _CONIC_TOL
+    result = clarabel.DefaultSolver(
+        sp.csc_matrix(np.diag(2.0 * weight)),
+        np.zeros(n),
+        a_mat,
+        b,
+        cones,
+        settings,
+    ).solve()
+    x = np.clip(np.asarray(result.x, dtype=float), 0.0, 1.0)
+    return x, str(result.status) in _CONIC_OK, str(result.status)
+
+
+def _redistribute_conic(
+    a_start: np.ndarray, gain: np.ndarray, exponent: int
+) -> tuple[np.ndarray, bool, str]:
+    """Stage 2 by convex QPs (Clarabel): exact for p=2, reweighted for p=3.
+
+    Same problem as :func:`_redistribute`, in time polynomial in the muscle
+    count (SLSQP does not finish a full-body frame).  ``p = 3`` is solved by
+    iteratively reweighted least norm: each step minimises ``sum w_i a_i^2``
+    with ``w_i = max(a_i, _WEIGHT_FLOOR)`` from the previous iterate, whose
+    fixed point satisfies the KKT conditions of ``min sum a^3`` (stationarity
+    ``w_i a_i = a_i^2``).  Iterates are averaged with the previous one (step
+    1/2) for stability and stop when the cost change is below ``_IRLS_TOL``.
+    Raises ``ImportError`` without Clarabel.
+    """
+    n = a_start.size
+    target = gain @ a_start
+    basis = _range_basis(gain)
+    norm = max(float(np.max(np.abs(basis.T @ gain), initial=0.0)), 1.0)
+    reduced = (basis.T @ gain) / norm
+    rhs = (basis.T @ target) / norm
+    a, ok, status = _weighted_qp(reduced, rhs, np.ones(n))
+    iterations = 1
+    if exponent == 3 and ok:
+        cost = float(np.sum(a**3))
+        for _step in range(2, _IRLS_MAXITER + 1):
+            iterations += 1
+            trial, ok, status = _weighted_qp(reduced, rhs, np.maximum(a, _WEIGHT_FLOOR))
+            if not ok:
+                break
+            a = 0.5 * (a + trial)  # feasible: a convex combination of feasible points
+            new_cost = float(np.sum(a**3))
+            done = abs(cost - new_cost) <= _IRLS_TOL * max(1.0, abs(new_cost))
+            cost = new_cost
+            if done:
+                break
+        else:
+            ok, status = False, "IRLS iteration limit"
+    a = _polish(np.clip(a, 0.0, 1.0), gain, target)
+    held = float(np.max(np.abs(reduced @ a - rhs), initial=0.0)) <= _CONIC_EQ_TOL
+    return a, ok and held, f"clarabel {status}, {iterations} QP solves"
+
+
+def _stage_two(
+    a_start: np.ndarray, gain: np.ndarray, exponent: int
+) -> tuple[np.ndarray, bool, str]:
+    """Conic at full-body scale (SLSQP does not converge there), else SLSQP.
+
+    Either way inert (zero-capacity) muscles are held at 0 and left out
+    (#12827); the size threshold counts the live muscles.
+    """
+    return _without_inert(a_start, gain, exponent, _solve_live)
+
+
+def _solve_live(
+    a_start: np.ndarray, gain: np.ndarray, exponent: int
+) -> tuple[np.ndarray, bool, str]:
+    if a_start.size >= CONIC_MIN_MUSCLES:
+        try:
+            return _redistribute_conic(a_start, gain, exponent)
+        except ImportError:
+            pass  # Clarabel not installed: fall back to SLSQP
+    return _redistribute_live(a_start, gain, exponent)
 
 
 def solve_activations(
@@ -331,7 +454,12 @@ def solve_activations(
     gain = arm.T * act[None, :]
     offset = arm.T @ pas
     a1, ok1 = _min_reserve_activation(gain, req - offset, scale)
-    a, ok2, message = _redistribute(a1, gain, p)
+    a, ok2, message = _stage_two(a1, gain, p)
+    solver = (
+        ("clarabel_irls" if p == 3 else "clarabel_qp")
+        if message.startswith("clarabel")
+        else "slsqp"
+    )
     muscle = offset + gain @ a
     reserve = req - muscle
     ensure(bool(np.all((a >= 0.0) & (a <= 1.0))), "activations must lie in [0, 1]")
@@ -342,4 +470,5 @@ def solve_activations(
         cost=activation_cost(a, p)[0],
         success=ok1 and ok2,
         message=message,
+        solver=solver,
     )

@@ -25,9 +25,21 @@ rank audit of the pendulum constraints and the citation verification table.
 
 - `loop_nullspace.tex` is the reference.
 - `publication_gate.md` is the checklist that must pass before any NSX result is published externally.
+- `hit_and_run_sampling.md` is the NSX-70 research spike (hit-and-run on a
+  low-rank temporal basis); `hit_and_run_spike.py` reproduces it and
+  `hit_and_run_results.json` holds the measured diagnostics. Exploratory.
 - `contracts.md` is the per-child contract appendix for NSX-02 to NSX-62:
-  signatures, preconditions, postconditions and golden names.
+  signatures, preconditions, postconditions and golden names. It is split into
+  `contracts_trajectory.md` (NSX-23 to NSX-61 and NSX-62 Ensembles) and
+  `contracts_variability.md` (NSX-80 to NSX-98 and NSX-62 Inertial Parameter
+  Ensemble) to stay under the documentation size budget.
 - `muscle_level_view.md` is the exploratory scoping report for a muscle-redundancy layer above the envelopes (NSX-73, #12591).
+- `closure_alternatives_report.md` compares grip models that each have their own
+  closure kinematics (NSX-72); its records are in `records/`.
+- `inverse_optimal_control_report.md` is the NSX-71 research report: inverse
+  optimal control of the allocation weights with a pre-registered held-out
+  evaluation (result: the effort-plus-rate family is rejected on the anthro
+  record; one swing, no measured torques).
 - `derivations/` holds the sympy scripts. They import no repository production
   code. `generate_goldens.py` writes the golden JSON files.
 - The golden files are in `tests/fixtures/loop_nullspace/goldens/`.

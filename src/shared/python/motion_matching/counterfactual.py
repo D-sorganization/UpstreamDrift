@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import hashlib
 import logging
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Any, Callable, Sequence
 import uuid
 
 import numpy as np
@@ -46,6 +46,7 @@ __all__ = [
     "CounterfactualStrategy",
     "NullspaceExploration",
     "create_counterfactual_rollout",
+    "rk4_step_with_load",
 ]
 
 
@@ -380,6 +381,34 @@ def _forward_acceleration(
     return np.asarray(np.linalg.solve(mass, tau - bias))
 
 
+def rk4_step_with_load(
+    provider: Any,
+    q: NDArray[np.float64],
+    v: NDArray[np.float64],
+    load: Callable[[float, NDArray[np.float64], NDArray[np.float64]], Any],
+    t: float,
+    dt: float,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """One RK4 step of ``q' = v, v' = a(q, v, load(t, q, v))``.
+
+    ``load(t_stage, q_stage, v_stage)`` is the generalised load evaluated at
+    each of the four stages, so a time-varying or state-dependent load (an
+    interpolated allocation, a declared feedback law) is integrated at fourth
+    order.  This is the single RK4 step of the counterfactual and replay paths;
+    a constrained provider is stepped on the closed loop.
+    """
+    k1v = _forward_acceleration(provider, q, v, load(t, q, v))
+    q2, v2 = q + 0.5 * dt * v, v + 0.5 * dt * k1v
+    k2v = _forward_acceleration(provider, q2, v2, load(t + 0.5 * dt, q2, v2))
+    q3, v3 = q + 0.5 * dt * v2, v + 0.5 * dt * k2v
+    k3v = _forward_acceleration(provider, q3, v3, load(t + 0.5 * dt, q3, v3))
+    q4, v4 = q + dt * v3, v + dt * k3v
+    k4v = _forward_acceleration(provider, q4, v4, load(t + dt, q4, v4))
+    q_next = q + dt / 6.0 * (v + 2.0 * v2 + 2.0 * v3 + v4)
+    v_next = v + dt / 6.0 * (k1v + 2.0 * k2v + 2.0 * k3v + k4v)
+    return q_next, v_next
+
+
 def _rk4_step(
     provider: Any,
     q: NDArray[np.float64],
@@ -388,16 +417,7 @@ def _rk4_step(
     dt: float,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """One RK4 step of ``q' = v, v' = a(q, v, tau)`` with ``tau`` held."""
-    k1v = _forward_acceleration(provider, q, v, tau)
-    q2, v2 = q + 0.5 * dt * v, v + 0.5 * dt * k1v
-    k2v = _forward_acceleration(provider, q2, v2, tau)
-    q3, v3 = q + 0.5 * dt * v2, v + 0.5 * dt * k2v
-    k3v = _forward_acceleration(provider, q3, v3, tau)
-    q4, v4 = q + dt * v3, v + dt * k3v
-    k4v = _forward_acceleration(provider, q4, v4, tau)
-    q_next = q + dt / 6.0 * (v + 2.0 * v2 + 2.0 * v3 + v4)
-    v_next = v + dt / 6.0 * (k1v + 2.0 * k2v + 2.0 * k3v + k4v)
-    return q_next, v_next
+    return rk4_step_with_load(provider, q, v, lambda _t, _q, _v: tau, 0.0, dt)
 
 
 def _integrate_dynamics(

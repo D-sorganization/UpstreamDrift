@@ -46,6 +46,7 @@ from src.shared.python.loop_nullspace.evidence import (
     InputProvenance,
     ModelProvenance,
     QuantityRecord,
+    family_range_record,
 )
 from src.shared.python.motion_matching.club_only.nullspace_proposals import (
     analyze_grip_jacobian_nullspace,
@@ -324,24 +325,16 @@ class EnsembleEnvelope:
         source: InputProvenance,
     ) -> QuantityRecord:
         vals = np.stack([lower, upper], axis=1)
-        common: dict[str, Any] = {
-            "units": self.units[j],
-            "model_provenance": model,
-            "input_provenance": source,
-            "conventions": (self.label,),
-        }
-        if not bounded:
-            return QuantityRecord(
-                values=np.full(vals.shape, np.nan),
-                allocation_dependence=AllocationDependence.UNAVAILABLE,
-                reason=f"{key}: unbounded or empty in some frames",
-                **common,
-            )
-        return QuantityRecord(
-            values=vals,
-            allocation_dependence=AllocationDependence.FAMILY_DEPENDENT,
+        return family_range_record(
+            vals,
+            unavailable_reason=(
+                None if bounded else f"{key}: unbounded or empty in some frames"
+            ),
             hypotheses=self.hypotheses,
-            **common,
+            units=self.units[j],
+            model=model,
+            source=source,
+            label=self.label,
         )
 
 

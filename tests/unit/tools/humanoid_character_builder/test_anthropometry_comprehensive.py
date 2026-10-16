@@ -29,6 +29,10 @@ from humanoid_character_builder.core.anthropometry import (
 
 pytestmark = pytest.mark.unit
 
+#: de Leva Table 4 closes to its printed precision (female 99.99 %); segment
+#: masses are the published fractions, not rescaled to the body (#13010).
+_TABLE4_CLOSURE = 2e-4
+
 # ── de Leva Data Loading ────────────────────────────────────────────────────
 
 
@@ -131,7 +135,7 @@ class TestSegmentMasses:
     def test_total_mass_preserved(self) -> None:
         total = 75.0
         masses = estimate_segment_masses(total)
-        assert abs(sum(masses.values()) - total) < 1e-6
+        assert sum(masses.values()) == pytest.approx(total, rel=_TABLE4_CLOSURE)
 
     def test_all_segments_present(self) -> None:
         masses = estimate_segment_masses(75.0)
@@ -152,11 +156,11 @@ class TestSegmentMasses:
 
     def test_heavy_person(self) -> None:
         masses = estimate_segment_masses(150.0)
-        assert abs(sum(masses.values()) - 150.0) < 1e-6
+        assert sum(masses.values()) == pytest.approx(150.0, rel=_TABLE4_CLOSURE)
 
     def test_light_person(self) -> None:
         masses = estimate_segment_masses(30.0)
-        assert abs(sum(masses.values()) - 30.0) < 1e-6
+        assert sum(masses.values()) == pytest.approx(30.0, rel=_TABLE4_CLOSURE)
         assert all(m > 0 for m in masses.values())
 
 
@@ -298,10 +302,10 @@ class TestExtremeValues:
 
     def test_very_heavy_person(self) -> None:
         masses = estimate_segment_masses(300.0)
-        assert abs(sum(masses.values()) - 300.0) < 1e-4
+        assert sum(masses.values()) == pytest.approx(300.0, rel=_TABLE4_CLOSURE)
         assert all(m > 0 for m in masses.values())
 
     def test_very_light_person(self) -> None:
         masses = estimate_segment_masses(1.0)
-        assert abs(sum(masses.values()) - 1.0) < 1e-6
+        assert sum(masses.values()) == pytest.approx(1.0, rel=_TABLE4_CLOSURE)
         assert all(m > 0 for m in masses.values())
