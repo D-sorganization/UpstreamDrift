@@ -106,7 +106,7 @@ def test_pendulum_matches_nsx80_golden_exactly() -> None:
         prov = ad.AutoDiffKKTDerivatives(pend, EUCLID2, basis_field=tangent_field)
         res = prov.constrained_acceleration_derivatives(q, v, pend.load(frac(row["z"])))
         ss = tl.tangent_state_space(
-            res, q=q, manifold=EUCLID2, basis_field=tangent_field
+            res, q=q, v=v, manifold=EUCLID2, basis_field=tangent_field
         )
         assert ss.F[1, 0] == pytest.approx(frac(row["F10_with_preload"]), abs=1e-9)
         assert ss.F[1, 1] == pytest.approx(frac(gold["F11"]), abs=1e-9)
