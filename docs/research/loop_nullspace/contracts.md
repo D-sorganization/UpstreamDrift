@@ -1089,3 +1089,86 @@ the model under the declared noise; a failure rate is not a physical
 probability; replay is not physical acceptance. NSX-95 comparisons must use this
 runner.
 
+
+## NSX-93 Declared Impedance and Delayed Feedback Layer (#12722)
+
+Modules (all under `src/shared/python/loop_nullspace/`):
+
+- `impedance_spec.py`: `JointImpedance` of `ImpedanceWindow`s,
+  `H-DECLARED-JOINT-IMPEDANCE`. Each window is a symmetric PSD stiffness `K`
+  [N m/rad] and damping `D` [N m s/rad] over `[t_start, t_end]` with a
+  raised-cosine ramp; off-diagonal entries are biarticular coupling;
+  overlapping windows add. `noise_scale = 1 + kappa_i K_ii(t)` is the declared
+  noise-inflation penalty (`kappa` is an input with no source, a declared
+  hypothesis). The impedance is declared, never inferred from net torque (V5).
+- `feedback_runtime.py` and `feedback_layer.py`: `FeedbackLayer` is a
+  run-scoped feedback law that `replay()` starts per run through
+  `begin_run`. The impedance acts on the current error `K e + D de`; the
+  `GainSchedule` feedback acts on the delayed error (`DelayedFeedback`,
+  whole-step delay, Hermite history, initial state held before the start;
+  `0 < delay < max_step` is rejected). The replay reports the layer's torque on
+  the feedback line, separate from the allocated torque (R10).
+- `minimum_intervention.py`: `minimum_intervention_design` is TVLQR with
+  `Q = 0` and terminal weight `C_imp^T W_y C_imp` (`face_only_weights` for the
+  face-only case). The gain annihilates `ker(W^(1/2) C Phi)`, so it corrects
+  only outcome-relevant deviations; `task_irrelevant_gain_norm` reports the
+  residual (1e-15 observed, tested to 1e-10). `joint_space_gains` maps the
+  tangent gain to joint coordinates with `Kq = (K_xi - K_eta P^T O) P^T`,
+  `Kv = K_eta P^T`; `tangent_velocity_offset` (NSX-84) supplies `(P, O)`.
+- `layer_linear.py`: `LayerLinearization` folds the impedance into the
+  continuous closed-loop `F - G_u K_imp` before the (zero-order-hold) matrix
+  exponential and appends `m` delayed copies of the state for the feedback;
+  `layer_variance` reuses NSX-90 `assess_variance` unchanged and puts the
+  layer hypotheses on the `conditioning` axis (NSX-81). `frozen_delay_margin`
+  and `LayerLinearization.delay_margins` give the first destabilising delay.
+  `variance_ratio_record` is `UNAVAILABLE` (reason: co-contraction is not
+  identifiable from net torque) unless the impedance is declared.
+- `layer_accounting.py`: `account_layer` splits a replay into the allocated,
+  impedance, feedback and total lines. Each carries its `FeedbackBudget`
+  (peak, energy and absolute-work ratios), an `EffortCost` (`int tau^2 dt`,
+  positive and negative joint work) and, for the impedance, the dissipated and
+  peak elastic energy. Effort is bookkeeping of the declared model, not a
+  physiological cost.
+- `replay_campaign.py`: `TorqueNoise.scale` `(n_steps, n_channels)` multiplies
+  the draw interval by interval (the noise-inflation penalty); `None` and ones
+  are the same trial exactly.
+
+Equations and frames. Tangent state `x = (xi, eta)`, `dq = P xi`,
+`dv = P eta + O xi`. Actuated errors `e = S P xi`, `de = S P eta + S O xi`.
+Impedance `K_imp = K S P + D S O` (position block), `D S P` (velocity block);
+`u = -K_imp dx`. Delayed feedback `u_t = -K_fb,t dx_(t-m)` with
+`z_t = (x_t, ..., x_(t-m))`, `P0_aug = T P0 T^T`, `T = [I; ...; I]`. Units: N m,
+rad, s; outcomes in the units of their rows.
+
+Tolerances (derived, none tuned). The oscillator oracle `var = S/(2 d k)`
+differs from held noise by a sinc factor of order `(omega_n dt)^2 / 12`, so the
+test tolerance is `(10 dt)^2 / 6`. The PD delay margin on a double integrator is
+`tau_c = atan(kd w_c / kp) / w_c` with `w_c^2 = (a + sqrt(a^2 + 4 b)) / 2`,
+`a = (kd/m)^2`, `b = (kp/m)^2`; the discrete margin is tested to +-1.5 dt and
+the replay is stable at 0.7 and unstable at 1.3 times it. The Monte Carlo
+cross-check uses the SD sampling half-width `Z99 / sqrt(2 (N - 1))` of NSX-91.
+The zero-layer negative control is exact (`assert_array_equal`) in replay and
+`rtol 1e-13` in the linear chain.
+
+Failed or revised experiments. A threshold of 0.01 times the open-loop variance
+for a stiff joint failed (ratio 0.15) and was replaced by the analytic base
+variance; the first stationary-variance tolerance was loosened to the observed
+`-(omega_n dt)^2/12` bias and then tightened to the derived bound; a Monte
+Carlo of the delay margin over 100 steps was too slow (eigenvalues of a
+`202`-square companion per step), so the default search is 20 steps.
+
+Reproduce:
+`python3 -m pytest tests/unit/loop_nullspace/test_impedance_spec.py
+test_feedback_layer.py test_minimum_intervention.py test_layer_linear.py
+test_layer_nonlinear.py test_layer_seam.py test_layer_accounting.py -n 0
+-o addopts=""`.
+
+Non-claims. Impedance, noise inflation and delay are declared hypotheses; no
+stiffness is inferred from net torque and no co-contraction effect is claimed
+without the declaration (`UNAVAILABLE`). Burdet 2001 supports selective control
+of impedance geometry, not co-contraction. The feedback is uncompensated delayed
+state feedback (no predictor). The frozen delay margin is a first-loss
+diagnostic, not a time-varying stability proof. The tangent chain is `k = 1`
+(NSX-84). `H-TIMING-JITTER` is not implemented here. Engine coverage is the
+analytic point mass, pendulum and planar-golfer oracles through the provider
+seam, not every engine adapter.
