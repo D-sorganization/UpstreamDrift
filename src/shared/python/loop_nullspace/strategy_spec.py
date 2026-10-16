@@ -253,9 +253,9 @@ _UNDEFINED = CostDeclaration(
 )
 
 
-def _catalogue() -> dict[StrategyId, StrategyEntry]:
+def _entries_s1_to_s6() -> list[StrategyEntry]:
     s = StrategyId
-    entries = [
+    return [
         _entry(
             s.S1,
             "Null-space redistribution",
@@ -337,6 +337,12 @@ def _catalogue() -> dict[StrategyId, StrategyEntry]:
             ),
             _UNDEFINED,
         ),
+    ]
+
+
+def _entries_s7_to_s12() -> list[StrategyEntry]:
+    s = StrategyId
+    return [
         _entry(
             s.S7,
             "Delayed feedback",
@@ -417,6 +423,10 @@ def _catalogue() -> dict[StrategyId, StrategyEntry]:
             _UNDEFINED,
         ),
     ]
+
+
+def _catalogue() -> dict[StrategyId, StrategyEntry]:
+    entries = _entries_s1_to_s6() + _entries_s7_to_s12()
     return {e.id: e for e in entries}
 
 
