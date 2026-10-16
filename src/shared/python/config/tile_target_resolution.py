@@ -25,7 +25,10 @@ from typing import Any
 
 from src.shared.python.config.model_source_providers import (
     TOOLS_PATH_SCHEME,
+    ModelSourcePathPolicy,
+    SourceRootNotFoundError,
     strip_tools_scheme,
+    tools_subproject_from_source_root,
 )
 from src.shared.python.config.tools_vendor_authority import (
     ToolsVendorAuthority,
@@ -146,10 +149,9 @@ def _resolve_tools_vendor(
     # A source_root like "../Tools/src/pendulum_simulator" nests the tile's
     # path under a subproject of the Tools checkout; mirror that nesting
     # inside the vendored gitlink so resolution matches the launch handler.
-    normalized = source_root.replace("\\", "/")
-    marker = "Tools/"
-    if marker in normalized:
-        base = base / normalized.split(marker, 1)[1]
+    subproject = tools_subproject_from_source_root(source_root)
+    if subproject:
+        base = base / subproject
     target = base / path
     if target.exists():
         return TileTargetResolution(True, KIND_TOOLS_VENDOR, target)
@@ -166,8 +168,14 @@ def _resolve_sibling(
 ) -> TileTargetResolution:
     root = Path(source_root)
     if not root.is_absolute():
-        in_repo = repo_root / root
-        root = in_repo if in_repo.exists() else repo_root.parent / root
+        try:
+            root = ModelSourcePathPolicy(repo_root).require_source_root(source_root)
+        except SourceRootNotFoundError as exc:
+            return TileTargetResolution(
+                resolvable=False,
+                kind=KIND_SIBLING,
+                reason=str(exc),
+            )
     if not root.exists():
         return TileTargetResolution(
             resolvable=False,

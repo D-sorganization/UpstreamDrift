@@ -574,6 +574,17 @@ class LauncherTopBarUIMixin:
                     mode = ViewMode[mode.name]
         self._apply_view_mode(mode, sync_combo=False)
 
+    def get_layout_view_state(self) -> tuple[ViewMode, float] | None:
+        """Return ``(view_mode, tile_scale)`` or ``None`` before layout exists.
+
+        Read-only query so collaborators (e.g. the settings widget) never
+        reach into ``layout_manager`` internals (Law of Demeter, #12992).
+        """
+        lm = getattr(self, "layout_manager", None)
+        if lm is None:
+            return None
+        return lm.current_view_mode, lm.tile_scale
+
     def _set_view_mode_from_menu(self, mode: ViewMode) -> None:
         """Drive the view-mode change from the View menu's submenu."""
         self._apply_view_mode(mode, sync_combo=True)
