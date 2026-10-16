@@ -308,7 +308,7 @@ def opensim_lift_static_hold(
         hand_bar_attachment,
     )
 
-    model = composition.native_model
+    model: Any = composition.native_model  # not None: is_composed checked above
     state = model.initSystem()
     model.realizePosition(state)
     left, right = hand_bar_attachment(model)
