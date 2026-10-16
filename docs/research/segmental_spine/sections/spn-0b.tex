@@ -1,0 +1,48 @@
+\subsection{Primary Data Extraction}
+
+This subsection summarises \texttt{docs/research/segmental\_spine/data\_extraction.md},
+which transcribes published numbers that later work packages cross-check
+against. Each table carries a \texttt{verified\_from\_primary} flag and a
+machine-readable JSON block (keys \texttt{source\_id}, \texttt{table\_id},
+\texttt{verified\_from\_primary}, \texttt{rows}). A flag is true only when the
+number was read in the primary paper text; no value was estimated.
+
+\paragraph{Verified From Primary Text.}
+\begin{itemize}
+\item Bruno, Bouxsein and Anderson (2015): regional splits (flexion $51/49$\,\%,
+  lateral bending $27/73$\,\%, axial rotation $17/83$\,\% lumbar/thoracic), the
+  validation task list, and the reported IDP, vertebral-load and EMG
+  correlations ($r=0.91$ lumbar IDP, $0.87$ thoracic IDP, $0.88$ L1 load,
+  $0.98/0.98/0.91$ EMG).
+\item Fujii et al.\ (2007): per-segment axial rotation ($1.2$--$1.7^\circ$ per
+  side), coupled flexion (positive from L1/2 to L5/S1) and coupled lateral
+  bending (opposite to the rotation from L1/2 to L4/5, same direction at
+  T12/L1 and L5/S1) at $45^\circ$ trunk rotation, $n=10$. Angles are in degrees;
+  the signs follow the paper's convention and must be mapped to the ISB
+  $ZXY$ convention (X anterior, Y cranial, Z right) before use.
+\item Wilke et al.\ (1999): L4--L5 intradiscal pressure in MPa for 28 postures
+  and tasks (single volunteer, 70\,kg), e.g.\ relaxed standing $0.50$,
+  standing flexed $1.10$, lifting 20\,kg with round back $2.30$.
+\item Lim, Chow and Chae (2012), abstract only: L4--L5 peak compression above
+  $6$ body weights, anterior shear about $1.6$ and medial shear about $0.6$ body
+  weights.
+\end{itemize}
+
+\paragraph{Not Verified.}
+Bruno Supplemental Table 2 (per-joint T1--L5 coupling ratios), Pearcy and
+Tibrewal (1984), Hosea et al.\ (1990) L3--L4 loads (seen only in a citing
+review) and the crunch-factor definition (seen in a citing paper) are flagged
+\texttt{false}, and the per-level coupling ratios needed by SPN-3 remain an
+open owner action. The brief's ``Sutcliffe 2008'' crunch-factor source could not
+be located; the term is attributed to Sugaya et al.
+
+\paragraph{Limitations.}
+Fujii's motions are small MRI-derived supine values at one trunk angle, not
+a dynamic distribution; Wilke is $n=1$; none of these values establish forward
+dynamics or scientific qualification.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python3 scripts/check_document_title_case.py
+\end{verbatim}
+The primary Wilke PDF text was extracted with \texttt{pdftotext -layout}.

@@ -8,6 +8,7 @@ skip without it.
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import math
@@ -26,6 +27,7 @@ from src.engines.physics_engines.opensim.python.full_body_osim import (
     _aggregate_body_inertia,
 )
 from src.shared.python.model_appearance import club_assembly as ca
+from src.shared.python.model_appearance.grip_hands import grip_hand_meshes
 from src.shared.python.model_appearance.mesh_io import read_stl_bytes
 from src.shared.python.motion_matching.club_models import DRIVER, club_solids
 
@@ -400,3 +402,74 @@ def test_muscle_model_holds_the_golf_humanoid_club(osim) -> None:  # noqa: ANN00
 
     face = face_angle_deg(model, state, mc.load_msk_club())
     assert abs(face) <= SQUARE_TOL_DEG
+
+
+# ------------------------------------------------------------ grip hands (#12775)
+@pytest.mark.parametrize("club", ["driver", "iron7"])
+def test_grip_hand_assets_are_the_shared_wrapped_hands_on_disk(club: str) -> None:
+    meshes = grip_hand_meshes(mc.load_msk_club(club).assembly)
+    paths = club_visuals.hand_asset_paths(club)
+    assert set(paths) == set(club_visuals.HAND_PARTS) == set(meshes)
+    manifest = json.loads(
+        (club_visuals.GEOMETRY_DIR / club_visuals.PROVENANCE_NAME).read_text()
+    )
+    entry = manifest["clubs"][club]["grip_hands"]
+    for part, path in paths.items():
+        payload = path.read_bytes()
+        assert entry["files"][part] == path.name
+        assert hashlib.sha256(payload).hexdigest() == entry["sha256"][part]
+        triangles = meshes[part].vertices[meshes[part].faces].reshape(-1, 3)
+        np.testing.assert_allclose(
+            read_stl_bytes(payload).vertices, triangles, atol=1e-6
+        )
+
+
+def _hand_bone_meshes(model):  # noqa: ANN001, ANN202
+    bodies = [b for b in model.iter("Body") if b.get("name") in mc.HAND_BODIES.values()]
+    assert len(bodies) == 2
+    return [m for b in bodies for m in b.iter("Mesh")]
+
+
+def _hidden(mesh) -> bool:  # noqa: ANN001
+    return mesh.findtext("Appearance/visible") == "false"
+
+
+def test_attach_grip_hands_draws_gloved_hands_and_hides_the_fingers() -> None:
+    model = _model("golf_humanoid")
+    club = mc.load_msk_club("iron7")
+    mc.attach_club(model, club, mc.load_calibration("golf_humanoid", "iron7"))
+    mass = _club_body(model).findtext("mass")
+    assert mc.attach_grip_hands(model, club) == 2
+    assert mc.attach_grip_hands(model, club) == 2  # idempotent
+    body = _club_body(model)
+    hands = [
+        m for m in body.iter("Mesh") if m.findtext("mesh_file").endswith("hand.stl")
+    ]
+    assert sorted(m.findtext("mesh_file") for m in hands) == sorted(
+        p.name for p in club_visuals.hand_asset_paths("iron7").values()
+    )
+    assert {m.findtext("socket_frame") for m in hands} == {".."}
+    assert body.findtext("mass") == mass
+    bones = _hand_bone_meshes(model)
+    assert len(bones) == 54
+    hidden = [m.findtext("mesh_file") for m in bones if _hidden(m)]
+    assert len(hidden) == 28  # 14 phalanges per hand: 4 x 3 fingers + 2 thumb
+    assert all(any(k in f for k in mc.PHALANX_MESH_KEYS) for f in hidden)
+    # carpals and metacarpals bridge the wrist to the glove
+    assert any("metacarpal" in m.findtext("mesh_file") for m in bones)
+    assert not [
+        m for m in bones if "metacarpal" in m.findtext("mesh_file") and _hidden(m)
+    ]
+
+
+def test_attach_grip_hands_requires_the_club_body() -> None:
+    model = _model("golf_humanoid")
+    mc.strip_club(model)
+    with pytest.raises(ValueError, match="no Club body"):
+        mc.attach_grip_hands(model, mc.load_msk_club("driver"))
+
+
+def test_committed_models_keep_their_hand_bones_visible() -> None:
+    for name in MODELS:
+        meshes = _hand_bone_meshes(_model(name))
+        assert "false" not in {m.findtext("Appearance/visible") for m in meshes}

@@ -186,7 +186,13 @@ def attach_visual_layer(
         )
 
         appearance_meta = attach_appearance(
-            root, elements, offsets, skeleton, appearance, assembly_from_spec(spec)
+            root,
+            elements,
+            offsets,
+            skeleton,
+            appearance,
+            assembly_from_spec(spec),
+            spec=spec,
         )
     head_doc = appearance or (AppearanceDocument() if with_head else None)
     if head_doc is not None:  # visible head and neck, visual only (GCV-12)

@@ -18,6 +18,58 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12784 · Nightly motion-matching-smoke.yml Runs Tests/Integration/Motion_Matching (Slow, --Timeout=0) via Scripts/Ci/Run_Motion_Matching_Smoke.Sh on the Fleet; a Failure Opens or Updates an Issue and the Red Scheduled Run Reaches Fleet-Main-Health; Not Coupled to Heavy-Tests-Opt-In Parity
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12784
+- **Branch:** ci/12784-motion-matching-smoke-lane
+- **PR:** #12786
+- **Paths:** see #12786
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`c4b15957`; collated from changes/12784-motion-matching-smoke-lane.md)
+- **Summary:** Nightly motion-matching-smoke.yml runs tests/integration/motion_matching (slow, --timeout=0) via scripts/ci/run_motion_matching_smoke.sh on the fleet; a failure opens or updates an issue and the red scheduled run reaches fleet-main-health; not coupled to heavy-tests-opt-in parity
+- **Next step:** Merge the PR; the first scheduled run needs #12776 and #12783 on main to be green.
+
+### DL-#12702 · Fix the 'Spec Has No Club Body' Crash on the MuJoCo-Native Driver Run: Assembly_From_Spec Now Recognises the Native Simscape Club (Segmented 2.5in Butt Grip, No Grip Solid) so the Default V2 Spec Carries a Club Body; Lane.Set_Club_Targets Fails Fast via Club_Face_Target.Require_Club_Assembly Naming the Spec Source. the Smoke Test Now Gets Past Set_Club_Targets but Still Fails on Dynamics Marker RMS (0.51 m vs 0.15 m Bound), a Separate Regression; the Smoke Is Marked Slow and Runs in No CI Lane
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12702
+- **Branch:** fix/12702-mujoco-smoke-club-body
+- **PR:** #12776, #12783
+- **Paths:** see #12776
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`789e583f`; collated from changes/12702-dynamics-rms-smoke-spec.md)
+- **Summary:** Fix the 'spec has no club body' crash on the MuJoCo-native driver run: assembly_from_spec now recognises the native Simscape club (segmented 2.5in Butt grip, no Grip solid) so the default v2 spec carries a club body; Lane.set_club_targets fails fast via club_face_target.require_club_assembly naming the spec source. The smoke test now gets past set_club_targets but still fails on dynamics marker RMS (0.51 m vs 0.15 m bound), a separate regression; the smoke is marked slow and runs in no CI lane
+- **Next step:** Merge the PR; put the slow smoke in a nightly lane (it runs in no CI lane today).
+
+### DL-#12683 · R3: Trail-Foot Toe-Out Owner Style Target (TRAIL_TOE_OUT_STYLE_DEG = 20 Deg, Single-Sourced From DEFAULT_TOE_OUT_DEG) via a New --Foot-Progression Style Mode, Now the Canonical Default; Capture Mode Still Lets the Measurement Win; Per-Foot Target_Source in Receipts; Driver Trail -2.9 -> 19.8 Deg, 7-Iron -9.8 -> 13.5 Deg (Hip_Rotation_R at Its -40 Deg Limit)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12683
+- **Branch:** fix/12683-trail-toe-out
+- **PR:** #12731
+- **Paths:** see #12731
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`f6e69608`; collated from changes/12683-r3-trail-foot-toe-out-owner-style-target.md)
+- **Summary:** R3: trail-foot toe-out owner style target (TRAIL_TOE_OUT_STYLE_DEG = 20 deg, single-sourced from DEFAULT_TOE_OUT_DEG) via a new --foot-progression style mode, now the canonical default; capture mode still lets the measurement win; per-foot target_source in receipts; driver trail -2.9 -> 19.8 deg, 7-iron -9.8 -> 13.5 deg (hip_rotation_r at its -40 deg limit)
+- **Next step:** Owner decision on the 7-iron shortfall (hip external-rotation range vs accept ~13.5 deg), then regenerate anthro_driver_seeds/anthro_iron_seeds_zmp receipts before R4 (#12684).
+
+### DL-#12682 · R5: One Clubhead Measurement Point (Face Centre via Club_Face_Target.Face_Centre_Path) for the Fd_Phase Impact Split, the Exporter Impact Detector and a New Dynamics.Fd_Phase.Clubhead_Speed Receipt Block (Simulated/Reference/Capture Speed, % Error, Peak-Timing Offset); Scripts/diagnose_clubhead_speed.py Decomposition
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12682
+- **Branch:** fix/12682-clubhead-speed-parity
+- **PR:** #12695
+- **Paths:** see #12695
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`0081a09b`; collated from changes/12682-r5-one-clubhead-measurement-point-face-c.md)
+- **Summary:** R5: one clubhead measurement point (face centre via club_face_target.face_centre_path) for the fd_phase impact split, the exporter impact detector and a new dynamics.fd_phase.clubhead_speed receipt block (simulated/reference/capture speed, % error, peak-timing offset); scripts/diagnose_clubhead_speed.py decomposition
+- **Next step:** Merge the PR; R10 regenerates canonical receipts with the new block; R6 sizes the shaft share (about 2 % on the 7-iron).
+
 ### DL-#12413 · \ Restore DBC Level in Test_Ud_Contract_Level_Alias_Sync to Prevent Xdist Pollution\
 
 - **State:** in_review
@@ -2287,6 +2339,370 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#12583 · NSX-55: Simscape Closed-Loop Export Format, Loader and R2025b Exporter (Planar Rig Validated; Golf Model Deferred as DV-12583)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12583
+- **Branch:** merged via #12644
+- **PR:** #12644
+- **Paths:** see #12644
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`efe8489a`; collated from changes/12583-nsx-55-simscape-closed-loop-export-forma.md)
+- **Summary:** NSX-55: Simscape closed-loop export format, loader and R2025b exporter (planar rig validated; golf model deferred as DV-12583)
+- **Next step:** Shipped in PR #12644.
+
+### DL-#12811 · Fix Main Breakage From #12704: Pinocchio JointModelRZ Test Lane and Pinocchio_Reference Row Typing
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12811
+- **Branch:** merged via #12812
+- **PR:** #12812
+- **Paths:** see #12812
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`b2e2b4de`; collated from changes/12811-fix-main-breakage-from-12704-pinocchio-j.md)
+- **Summary:** Fix main breakage from #12704: pinocchio JointModelRZ test lane and pinocchio_reference row typing
+- **Next step:** Shipped in PR #12812.
+
+### DL-#12808 · Run the Prettier Pre-Commit Hook at Commit Time Only so Rebased Branches Can Push
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12808
+- **Branch:** merged via #12809
+- **PR:** #12809
+- **Paths:** see #12809
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`922922c5`; collated from changes/12808-run-the-prettier-pre-commit-hook-at-comm.md)
+- **Summary:** Run the Prettier pre-commit hook at commit time only so rebased branches can push
+- **Next step:** Shipped in PR #12809.
+
+### DL-#12709 · NSX-80: Variability-Sensitivity Specification, Symbolic Goldens, Hypotheses and Unverified Citations
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12709
+- **Branch:** merged via #12780
+- **PR:** #12780
+- **Paths:** see #12780
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`66abaac1`; collated from changes/12709-nsx-80-variability-sensitivity-specifica.md)
+- **Summary:** NSX-80: variability-sensitivity specification, symbolic goldens, hypotheses and unverified citations
+- **Next step:** Shipped in PR #12780.
+
+### DL-#12591 · NSX-73 Research Report Scoping a Muscle-Redundancy Layer Above NSX Envelopes, With Elbow Null-Space Example Test
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12591
+- **Branch:** merged via #12663
+- **PR:** #12663
+- **Paths:** see #12663
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`e6b0acd1`; collated from changes/12591-nsx-73-research-report-scoping-a-muscle.md)
+- **Summary:** NSX-73 research report scoping a muscle-redundancy layer above NSX envelopes, with elbow null-space example test
+- **Next step:** Shipped in PR #12663.
+
+### DL-#12564 · NSX-21: FeasibleSet With Declared Torque, Friction-Cone and Grip Constraints in Null-Space Coordinates
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12564
+- **Branch:** merged via #12637
+- **PR:** #12637
+- **Paths:** see #12637
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`d614bc4f`; collated from changes/12564-nsx-21-feasibleset-with-declared-torque.md)
+- **Summary:** NSX-21: FeasibleSet with declared torque, friction-cone and grip constraints in null-space coordinates
+- **Next step:** Shipped in PR #12637.
+
+### DL-#12791 · Fix garment_classification.tex Row Terminators so the Golfer Appearance Reference Compiles; Latex-References CI Now Builds the Full-Body Model Reference Masters
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12791
+- **Branch:** merged via #12798
+- **PR:** #12798
+- **Paths:** see #12798
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`59556187`; collated from changes/12791-fix-garment-classification-tex-row-termi.md)
+- **Summary:** Fix garment_classification.tex row terminators so the golfer appearance reference compiles; latex-references CI now builds the full-body model reference masters
+- **Next step:** Shipped in PR #12798.
+
+### DL-#12802 · Split Full-Body HANDOFF and Anthropometry REVIEW Under the Doc-Size Budget; Renew Only the Stale Chat Child-Copy Architecture Exception for 14 Days (#12803)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12802
+- **Branch:** merged via #12804
+- **PR:** #12804
+- **Paths:** see #12804
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`3fb64eff`; collated from changes/12802-split-full-body-handoff-and-anthropometr.md)
+- **Summary:** Split full-body HANDOFF and anthropometry REVIEW under the doc-size budget; renew only the stale chat child-copy architecture exception for 14 days (#12803)
+- **Next step:** Shipped in PR #12804.
+
+### DL-#12792 · Bump Vendor/Ud-Tools to Tools E3cf5a43, Carrying the Corrected Golfer Club Jacobians (Tools#5627 Rust Pendulum-Core, Tools#5628 Python/JAX Forward Kinematics Y-Sign, Tools#5626); Pins and Divergence Inventory Kept in Step
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12792
+- **Branch:** merged via #12792
+- **PR:** #12792
+- **Paths:** see #12792
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`513cfff7`; collated from changes/12792-bump-vendor-ud-tools-to-tools-e3cf5a43-c.md)
+- **Summary:** Bump vendor/ud-tools to Tools e3cf5a43, carrying the corrected golfer club Jacobians (Tools#5627 Rust pendulum-core, Tools#5628 Python/JAX forward kinematics y-sign, Tools#5626); pins and divergence inventory kept in step
+- **Next step:** Shipped in PR #12792.
+
+### DL-#12777 · Re-Solve the MSK Address Calibration on the Widened Forearm Range so the Lead Pronation Leaves Its Old 90 Deg Bound
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12777
+- **Branch:** merged via #12782
+- **PR:** #12782
+- **Paths:** see #12782
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`4f24ae09`; collated from changes/12777-re-solve-the-msk-address-calibration-on.md)
+- **Summary:** Re-solve the MSK address calibration on the widened forearm range so the lead pronation leaves its old 90 deg bound
+- **Next step:** Shipped in PR #12782.
+
+### DL-#12748 · SPN-6a: Spine Model Asset Manifest and Local-Source SHA-256 Admission
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12748
+- **Branch:** merged via #12781
+- **PR:** #12781
+- **Paths:** see #12781
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7dea9b22`; collated from changes/12748-spn-6a-spine-model-asset-manifest-and-lo.md)
+- **Summary:** SPN-6a: spine model asset manifest and local-source SHA-256 admission
+- **Next step:** Shipped in PR #12781.
+
+### DL-#12747 · SPN-5 Spinal Load Series, Sign Conventions and Tension-Positive Axial Bridge
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12747
+- **Branch:** merged via #12781
+- **PR:** #12781
+- **Paths:** see #12781
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7dea9b22`; collated from changes/12747-spn-5-spinal-load-series-sign-convention.md)
+- **Summary:** SPN-5 spinal load series, sign conventions and tension-positive axial bridge
+- **Next step:** Shipped in PR #12781.
+
+### DL-#12740 · SPN-1B: Segmental Spine Per-Level Transforms and Ordered Composition (Spine.Segmental)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12740
+- **Branch:** merged via #12781
+- **PR:** #12781
+- **Paths:** see #12781
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7dea9b22`; collated from changes/12740-spn-1b-segmental-spine-per-level-transfo.md)
+- **Summary:** SPN-1b: segmental spine per-level transforms and ordered composition (spine.segmental)
+- **Next step:** Shipped in PR #12781.
+
+### DL-#12739 · SPN-1a: Spinal Level Enumeration, Regions and Adjacency (Spine.Levels)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12739
+- **Branch:** merged via #12781
+- **PR:** #12781
+- **Paths:** see #12781
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7dea9b22`; collated from changes/12739-spn-1a-spinal-level-enumeration-regions.md)
+- **Summary:** SPN-1a: spinal level enumeration, regions and adjacency (spine.levels)
+- **Next step:** Shipped in PR #12781.
+
+### DL-#12738 · Segmental Spine Research Reference Scaffold, Provisional Manual Chapter 66 and Registry Blocker
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12738
+- **Branch:** merged via #12781
+- **PR:** #12781
+- **Paths:** see #12781
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7dea9b22`; collated from changes/12738-segmental-spine-research-reference-scaff.md)
+- **Summary:** Segmental spine research reference scaffold, provisional manual chapter 66 and registry blocker
+- **Next step:** Shipped in PR #12781.
+
+### DL-#12737 · Primary Data Extraction for Segmental Spine (Bruno, Fujii, Wilke, Golf Loads) With Provenance Flags
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12737
+- **Branch:** merged via #12781
+- **PR:** #12781
+- **Paths:** see #12781
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7dea9b22`; collated from changes/12737-primary-data-extraction-for-segmental-sp.md)
+- **Summary:** Primary data extraction for segmental spine (Bruno, Fujii, Wilke, golf loads) with provenance flags
+- **Next step:** Shipped in PR #12781.
+
+### DL-#12736 · ADR-0055: Segmental Spine Kinematics, Load Observables and Golf-Term Definitions (SPN-0)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12736
+- **Branch:** merged via #12781
+- **PR:** #12781
+- **Paths:** see #12781
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7dea9b22`; collated from changes/12736-adr-0055-segmental-spine-kinematics-load.md)
+- **Summary:** ADR-0055: segmental spine kinematics, load observables and golf-term definitions (SPN-0)
+- **Next step:** Shipped in PR #12781.
+
+### DL-#12775 · OpenSim MSK Renders Draw the Wrapped-Finger Grip Hands on the Club and Hide the Flat Rajagopal Hand Bones
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12775
+- **Branch:** merged via #12779
+- **PR:** #12779
+- **Paths:** see #12779
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`cf26f3db`; collated from changes/12775-opensim-msk-renders-draw-the-wrapped-fin.md)
+- **Summary:** OpenSim MSK renders draw the wrapped-finger grip hands on the club and hide the flat Rajagopal hand bones
+- **Next step:** Shipped in PR #12779.
+
+### DL-#12710 · NSX-81: Add Orthogonal Conditioning Axis to QuantityRecord so INVARIANT Quantities Can Declare Hypotheses They Are Conditioned On
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12710
+- **Branch:** merged via #12733
+- **PR:** #12733
+- **Paths:** see #12733
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`b3048176`; collated from changes/12710-nsx-81-add-orthogonal-conditioning-axis.md)
+- **Summary:** NSX-81: add orthogonal conditioning axis to QuantityRecord so INVARIANT quantities can declare hypotheses they are conditioned on
+- **Next step:** Shipped in PR #12733.
+
+### DL-#12680 · R1: Trunk, Pelvis and Shoe Appearance Cross-Sections Now Oriented From Spec Landmarks (ML > AP); Lofted_Segment Requires an Explicit Width Axis for Non-Round Sections; New Model_Appearance.Cross_Section; Cross-Engine Trunk Guard; golfer_appearance_reference.tex Master + Trunk_Cross_Section Section
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12680
+- **Branch:** merged via #12696
+- **PR:** #12696
+- **Paths:** see #12696
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`cf25212b`; collated from changes/12680-r1-trunk-pelvis-and-shoe-appearance-cros.md)
+- **Summary:** R1: trunk, pelvis and shoe appearance cross-sections now oriented from spec landmarks (ML > AP); lofted_segment requires an explicit width axis for non-round sections; new model_appearance.cross_section; cross-engine trunk guard; golfer_appearance_reference.tex master + trunk_cross_section section
+- **Next step:** Shipped in PR #12696.
+
+### DL-#12700 · Pinocchio Reference Adapter Finite-Differences the Trajectory on the Base Lie Group (World Linear, Body Angular via the Quaternion Log) and Feeds the Result Through the NSX-50 Velocity Map, Instead of Differentiating Raw Native Q
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12700
+- **Branch:** merged via #12704
+- **PR:** #12704
+- **Paths:** see #12704
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`12f14c0b`; collated from changes/12700-pinocchio-fd-frames.md)
+- **Summary:** Pinocchio reference adapter finite-differences the trajectory on the base Lie group (world linear, body angular via the quaternion log) and feeds the result through the NSX-50 velocity map, instead of differentiating raw native q
+- **Next step:** Shipped in PR #12704.
+
+### DL-#12669 · Correct the Club Y-Sign, Hub Direction and Club Jacobians in the JAX Golfer Path; Club Points and Club-Angle Jacobian Columns Now Share Backend-Agnostic Formulas With the NumPy Kinematics, Pinned by NumPy-vs-JAX Parity Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12669
+- **Branch:** merged via #12679
+- **PR:** #12679
+- **Paths:** see #12679
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`3ec138c7`; collated from changes/12669-correct-the-club-y-sign-hub-direction-an.md)
+- **Summary:** Correct the club y-sign, hub direction and club Jacobians in the JAX golfer path; club points and club-angle Jacobian columns now share backend-agnostic formulas with the NumPy kinematics, pinned by NumPy-vs-JAX parity tests
+- **Next step:** Shipped in PR #12679.
+
+### DL-#12592 · NSX-74 Publication Gate Checklist for Loop Null-Space Results
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12592
+- **Branch:** merged via #12664
+- **PR:** #12664
+- **Paths:** see #12664
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`b24d4235`; collated from changes/12592-nsx-74-publication-gate-checklist-for-lo.md)
+- **Summary:** NSX-74 publication gate checklist for loop null-space results
+- **Next step:** Shipped in PR #12664.
+
+### DL-#12562 · NSX-17 Invariant Quantities With Validity Gates
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12562
+- **Branch:** merged via #12638
+- **PR:** #12638
+- **Paths:** see #12638
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`d497012c`; collated from changes/12562-nsx-17-invariant-quantities-with-validit.md)
+- **Summary:** NSX-17 invariant quantities with validity gates
+- **Next step:** Shipped in PR #12638.
+
+### DL-#12584 · Two-Track Cross-Engine Closed-Loop Conformance Harness (Numerical Snapshot Equality Plus Propagated Scientific Envelopes), Registry Entries per Engine Pair, Native OpenSim Adapter Registered in the Engine Factory
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12584
+- **Branch:** merged via #12639
+- **PR:** #12639
+- **Paths:** see #12639
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`16e88462`; collated from changes/12584-two-track-cross-engine-closed-loop-confo.md)
+- **Summary:** Two-track cross-engine closed-loop conformance harness (numerical snapshot equality plus propagated scientific envelopes), registry entries per engine pair, native OpenSim adapter registered in the engine factory
+- **Next step:** Shipped in PR #12639.
+
+### DL-#12681 · Pelvis Wears the Active Outfit's Pants Material: Body Classification Is Order-Independent (Leaf Segment Before Parent Folder, Exact Before Prefix Before Substring, Equal-Specificity Ties Raise), GolfSwing3D LowerTorso Maps to Pelvis, and Check_Clothing Enforces Pelvis Garment == Pants for Every Preset
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12681
+- **Branch:** merged via #12694
+- **PR:** #12694
+- **Paths:** see #12694
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`7d59de0d`; collated from changes/12681-pelvis-wears-the-active-outfit-s-pants-m.md)
+- **Summary:** Pelvis wears the active outfit's pants material: body classification is order-independent (leaf segment before parent folder, exact before prefix before substring, equal-specificity ties raise), GolfSwing3D LowerTorso maps to pelvis, and check_clothing enforces pelvis garment == pants for every preset
+- **Next step:** Shipped in PR #12694.
+
+### DL-#12580 · NSX-52: MyoSuite CLOSED_LOOP_SNAPSHOT via MuJoCo Adapter Reuse; Kkt_Regularization Recorded, FULL Only At 0
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12580
+- **Branch:** merged via #12636
+- **PR:** #12636
+- **Paths:** see #12636
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`91feef10`; collated from changes/12580-nsx-52-myosuite-closed-loop-snapshot-via.md)
+- **Summary:** NSX-52: MyoSuite CLOSED_LOOP_SNAPSHOT via MuJoCo adapter reuse; kkt_regularization recorded, FULL only at 0
+- **Next step:** Shipped in PR #12636.
+
+### DL-#12561 · NSX-16: Grip-Frame Split Coordinates, Grasp Map Kernel and Bare-Club Net Wrench
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12561
+- **Branch:** merged via #12632
+- **PR:** #12632
+- **Paths:** see #12632
+- **Started:** 2026-10-15
+- **Last verified:** 2026-10-15 (`54f33667`; collated from changes/12561-nsx-16-grip-frame-split-coordinates-gras.md)
+- **Summary:** NSX-16: grip-frame split coordinates, grasp map kernel and bare-club net wrench
+- **Next step:** Shipped in PR #12632.
 
 ### DL-#12605 · Pinocchio Reference Adapter Maps the Free-Flyer World Linear Velocity/Acceleration Into Pinocchio's LOCAL Frame via the NSX-50 Velocity Map
 

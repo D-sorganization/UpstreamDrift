@@ -908,12 +908,26 @@ def create_engine_force_adapter(
                 return DrakeSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
             raise
     if e == EngineType.OPENSIM:
-        if not allow_synthetic:
-            raise RuntimeError(
-                "Native OpenSim Simbody force adapter is not yet registered for production; "
-                "synthetic fixture is quarantined (allow_synthetic=True required)."
+        if spec_path is None and allow_synthetic and nv != 41:
+            return OpenSimForceAdapter(nv=nv, n_spheres=n_spheres)
+        p = Path(
+            spec_path or "docs/development/full_body_models/full_body_spec_v1.json"
+        )
+        if not p.is_file():
+            p = repo_root / p
+        if not p.is_file() and allow_synthetic:
+            return OpenSimForceAdapter(nv=nv, n_spheres=n_spheres)
+        require(p.is_file(), f"OpenSim specification not found: {p}")
+        try:
+            from src.engines.physics_engines.opensim.python.force_adapter import (
+                OpenSimNativeForceAdapter,
             )
-        return OpenSimForceAdapter(nv=nv, n_spheres=n_spheres)
+
+            return OpenSimNativeForceAdapter(p.read_bytes())
+        except ImportError:
+            if allow_synthetic:
+                return OpenSimForceAdapter(nv=nv, n_spheres=n_spheres)
+            raise
     if e == EngineType.SIMSCAPE:
         if not allow_synthetic:
             raise RuntimeError(

@@ -1,0 +1,146 @@
+{
+  "issue": 12683,
+  "epic": 12678,
+  "engine": "mujoco",
+  "stage": "calibrated address (IK), scripts measure via pipeline.cli.calibrate_run",
+  "base_commit": "16e884622925d2df8d96d9b604e8b3f379e2ddd6",
+  "host": "Windows 11 workstation, Python 3.14.3, MuJoCo 3.8.0",
+  "captures": {
+    "driver": "capture-A",
+    "iron": "capture-B"
+  },
+  "commands": {
+    "driver": "--static-seeds --fix-club-markers --capture driver --spec docs/development/full_body_models/full_body_spec_anthro_driver.json",
+    "iron": "--static-seeds --zmp-filter --fix-club-markers --capture iron --spec docs/development/full_body_models/full_body_spec_anthro_iron7.json"
+  },
+  "runs": {
+    "before_driver": {
+      "mode": "main default (--foot-progression off)",
+      "model_toe_out_deg": {
+        "left": 29.08,
+        "right": -2.93
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": 10.21,
+        "hip_rotation_l": 9.82
+      },
+      "address_marker_rms_mm": 10.95
+    },
+    "before_iron": {
+      "mode": "main default (--foot-progression off)",
+      "model_toe_out_deg": {
+        "left": 33.46,
+        "right": -9.81
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": 3.17,
+        "hip_rotation_l": 13.05
+      },
+      "address_marker_rms_mm": 8.42
+    },
+    "capture_driver": {
+      "mode": "--foot-progression capture",
+      "model_toe_out_deg": {
+        "left": 16.52,
+        "right": 3.74
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -18.2,
+        "hip_rotation_l": 8.36
+      },
+      "address_marker_rms_mm": 9.62,
+      "targets": {
+        "left": {
+          "role": "lead",
+          "target_deg": 16.37,
+          "target_source": "capture",
+          "error_deg": 0.15
+        },
+        "right": {
+          "role": "trail",
+          "target_deg": 4.03,
+          "target_source": "capture",
+          "error_deg": -0.29
+        }
+      }
+    },
+    "capture_iron": {
+      "mode": "--foot-progression capture",
+      "model_toe_out_deg": {
+        "left": 15.28,
+        "right": -0.81
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -23.32,
+        "hip_rotation_l": 15.35
+      },
+      "address_marker_rms_mm": 9.71,
+      "targets": {
+        "left": {
+          "role": "lead",
+          "target_deg": 15.0,
+          "target_source": "capture",
+          "error_deg": 0.28
+        },
+        "right": {
+          "role": "trail",
+          "target_deg": -0.37,
+          "target_source": "capture",
+          "error_deg": -0.44
+        }
+      }
+    },
+    "after_driver": {
+      "mode": "new default (--foot-progression style)",
+      "model_toe_out_deg": {
+        "left": 16.64,
+        "right": 19.8
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -34.38,
+        "hip_rotation_l": 7.83
+      },
+      "address_marker_rms_mm": 10.54,
+      "targets": {
+        "left": {
+          "role": "lead",
+          "target_deg": 16.37,
+          "target_source": "capture",
+          "error_deg": 0.27
+        },
+        "right": {
+          "role": "trail",
+          "target_deg": 20.0,
+          "target_source": "style",
+          "error_deg": -0.2
+        }
+      }
+    },
+    "after_iron": {
+      "mode": "new default (--foot-progression style)",
+      "model_toe_out_deg": {
+        "left": 15.05,
+        "right": 13.53
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -40.0,
+        "hip_rotation_l": 18.98
+      },
+      "address_marker_rms_mm": 12.19,
+      "targets": {
+        "left": {
+          "role": "lead",
+          "target_deg": 15.0,
+          "target_source": "capture",
+          "error_deg": 0.05
+        },
+        "right": {
+          "role": "trail",
+          "target_deg": 20.0,
+          "target_source": "style",
+          "error_deg": -6.47
+        }
+      }
+    }
+  }
+}

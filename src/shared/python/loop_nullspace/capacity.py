@@ -10,27 +10,20 @@ not read from a source are reported in ``CapacityVector.assumed_slots`` and
 
 from __future__ import annotations
 
-import json
 import logging
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from functools import lru_cache
-from pathlib import Path
 from typing import Any
 
 import numpy as np
 
 from src.shared.python.core.constants import GRAVITY_FLOAT
+from src.shared.python.loop_nullspace.registry import load_raw_registry
 
 logger = logging.getLogger(__name__)
 
-REGISTRY_PATH = (
-    Path(__file__).resolve().parents[4]
-    / "src"
-    / "config"
-    / "loop_nullspace_registry.json"
-)
 #: Root translations carry forces (N), not joint torques (N m).
 NON_TORQUE_PREFIXES: tuple[str, ...] = ("Translation",)
 DIRECTIONS: tuple[str, str] = ("negative", "positive")
@@ -96,8 +89,7 @@ class CapacityVector:
 
 @lru_cache(maxsize=1)
 def _entries() -> dict[tuple[str, str], dict[str, Any]]:
-    with REGISTRY_PATH.open(encoding="utf-8") as handle:
-        registry = json.load(handle)
+    registry = load_raw_registry()
     table: dict[tuple[str, str], dict[str, Any]] = {}
     for entry in registry["torque_capacity"]:
         table[(entry["joint_slot"], entry["direction"])] = entry

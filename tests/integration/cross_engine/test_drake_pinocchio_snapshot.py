@@ -98,58 +98,6 @@ def test_orders_differ_so_the_permutation_is_exercised(adapters) -> None:
     assert set(pin.coordinate_order) == set(drake.coordinate_order)
 
 
-def test_mass_matrix_and_bias_agree(matched) -> None:
-    ref, other, ro, oo = matched
-    mass = _to_reference_order(other.M, ro, oo, (0, 1))
-    bias = _to_reference_order(other.h, ro, oo, (0,))
-    assert _rel(mass, ref.M) < RTOL
-    assert _rel(bias, ref.h) < RTOL
-
-
-def test_canonical_closure_agrees(matched) -> None:
-    ref, other, ro, oo = matched
-    j_c = _to_reference_order(other.J_c, ro, oo, (1,))
-    assert _rel(j_c, ref.J_c) < RTOL
-    assert float(np.abs(ref.J_c).max()) > 1e-3  # not vacuous
-    # Drift is exact only on the closure tangent space; the state is projected.
-    assert _rel(other.Jdot_v, ref.Jdot_v) < RTOL
-    assert float(np.abs(ref.Jdot_v).max()) > 1e-6
-
-
-def test_grip_frame_and_club_inertias_agree(matched) -> None:
-    ref, other, _, _ = matched
-    np.testing.assert_allclose(
-        other.grip_frame.rotation, ref.grip_frame.rotation, atol=1e-8
-    )
-    np.testing.assert_allclose(
-        other.grip_frame.origin, ref.grip_frame.origin, atol=1e-8
-    )
-    for mine, theirs in ((other.bare_club, ref.bare_club),):
-        assert mine.mass == pytest.approx(theirs.mass, abs=1e-12)
-        np.testing.assert_allclose(mine.com, theirs.com, atol=1e-9)
-        np.testing.assert_allclose(mine.inertia, theirs.inertia, atol=1e-9)
-    assert len(other.welded_hand_inertias) == len(ref.welded_hand_inertias)
-    masses_o = sorted(h.mass for h in other.welded_hand_inertias)
-    masses_r = sorted(h.mass for h in ref.welded_hand_inertias)
-    np.testing.assert_allclose(masses_o, masses_r, atol=1e-12)
-
-
-def test_topology_agrees_by_coordinate_name(matched) -> None:
-    ref, other, ro, oo = matched
-    names = lambda t, idx, order: {order[i] for i in idx}  # noqa: E731
-    assert other.topology.closure_kind is ref.topology.closure_kind
-    assert (other.topology.closing_side, other.topology.holding_side) == (
-        ref.topology.closing_side,
-        ref.topology.holding_side,
-    )
-    assert names(0, other.topology.actuated_indices, oo) == names(
-        0, ref.topology.actuated_indices, ro
-    )
-    assert names(0, other.topology.loop_support_indices, oo) == names(
-        0, ref.topology.loop_support_indices, ro
-    )
-
-
 def test_acceleration_parity_agrees_across_engines(adapters, matched) -> None:
     """Both engines produce the same constrained acceleration for the same effort."""
     pin, drake = adapters

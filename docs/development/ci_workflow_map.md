@@ -64,6 +64,7 @@ PR-quality signal.
 | `docker-security-scan.yml`    | Container vulnerability scan on image-related changes, schedule, or manual dispatch. |
 | `heavy-tests-opt-in.yml`      | Long-running integration tests on schedule or manual dispatch.                       |
 | `nightly-cross-engine.yml`    | Scheduled cross-engine physics validation.                                           |
+| `motion-matching-smoke.yml`   | Nightly slow motion-matching smokes (`tests/integration/motion_matching`).           |
 | `stale-cleanup.yml`           | Stale issue and PR maintenance.                                                      |
 | `vendor-freshness.yml`        | Vendored submodule freshness checks and optional bumping.                            |
 | `Bot-CI-Trigger.yml`          | Scheduled/manual CI retrigger support for bot-authored PRs.                          |

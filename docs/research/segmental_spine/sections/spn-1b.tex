@@ -1,0 +1,70 @@
+\subsection{Segmental Kinematics: Per-Level Transforms and Ordered Composition}
+\label{sec:spn-1b}
+
+This section documents \texttt{src/shared/python/spine/segmental.py} (issue
+\#12740, epic \#12735), which implements items 1--3 of ADR-0055. It is pure
+NumPy/SciPy kinematics; no dynamics, inertia or OpenSim model is involved.
+
+\paragraph{Frames and Units.}
+Every vertebral frame is an ISB frame with X anterior, Y cranial and Z right.
+Angles are radians, translations metres. A level $i$ joins an inferior and a
+superior vertebra; its transform maps coordinates in the superior frame into
+the inferior frame:
+\[
+  T_i = T_{i0}\,\begin{bmatrix} R(\theta_i) & d_i \\ 0 & 1 \end{bmatrix},
+  \qquad \theta_i = (\theta_{FE},\theta_{LB},\theta_{AR}),
+\]
+where $T_{i0}$ is the neutral offset (lordosis or kyphosis and inter-centre
+offset), $d_i = 0$ for rotational models, and $R(\theta_i)$ is the intrinsic
+ZXY rotation, i.e.\ the \texttt{isb\_spine} profile of
+\texttt{biomechanics/joint\_conventions.py}:
+$R = R_Z(\theta_{FE})\,R_X(\theta_{LB})\,R_Y(\theta_{AR})$. Angle extraction
+(\texttt{LevelTransform.isb\_angles}) applies \texttt{anatomical\_joint\_angles}
+to $R$ alone, so the neutral offset is excluded from reported angles and
+included in every composition. \texttt{from\_isb\_angles} builds $R$ with the
+same convention, so the two round-trip away from gimbal lock. At gimbal lock
+($|\theta_{LB}|=\pi/2$) the \texttt{singular} flag of
+\texttt{isb\_angles\_result()} is set and $\theta_{FE}$, $\theta_{AR}$ are not
+individually identifiable; the triple still reconstructs $R$.
+
+\paragraph{Composition Invariant.}
+For a contiguous caudal-to-cranial run of levels $a,\dots,b$,
+\[
+  T_{a\to b} = T_a\,T_{a+1}\cdots T_b ,
+\]
+caudal factor first (\texttt{SegmentalPose.compose}); \texttt{relative\_rotation}
+is the upper-left $3\times3$ block. Matrix multiplication does not commute,
+so per-level Cardan angles never add. The worked example of ADR-0055 item 3
+(L3\_L4 $(-10,5,-15)^\circ$, L2\_L3 $(-10,8,-20)^\circ$, L1\_L2
+$(-15,10,-25)^\circ$, in $(FE,LB,AR)$) composes to
+$(-25.362,\,31.832,\,-57.573)^\circ$, whereas the sum is
+$(-35,\,23,\,-60)^\circ$. \texttt{angle\_sum\_diagnostic} returns the sum and is
+a labelled diagnostic, not a definition of global trunk motion.
+
+\paragraph{Series and Provenance.}
+\texttt{SegmentalKinematicsSeries} holds strictly increasing finite
+\texttt{time\_s}, one pose per sample with an identical level set, a boolean
+\texttt{valid} mask for missing frames, and a non-empty
+\texttt{distribution\_source} (ADR-0055 item 7). \texttt{relative\_rotations}
+returns an $(n,3,3)$ read-only array. Invalid frames are retained, not
+interpolated; consumers must honour \texttt{valid}.
+
+\paragraph{Preconditions.}
+Rotations must be orthonormal with $\det=+1$ to $10^{-9}$ (no silent repair);
+all arrays finite with the stated shapes; the neutral transform has bottom row
+$[0,0,0,1]$; levels are unique, contiguous and caudal first. Violations raise
+\texttt{TypeError} or \texttt{ValueError}. Stored arrays are read-only copies.
+
+\paragraph{Limitations.}
+The module does not distribute a target rotation over levels (that is the
+distribution problem of ADR-0055 item 7), does not model coupling, and does
+not validate anatomical plausibility of the angles.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/shared/python/spine/test_segmental.py -q -n 0
+\end{verbatim}
+Tests cover the ADR worked example, a Hypothesis property test that
+\texttt{compose} equals the explicit NumPy product to $10^{-12}$ for random
+rotations with random neutral offsets, round trip, gimbal lock, neutral
+handling and every precondition.

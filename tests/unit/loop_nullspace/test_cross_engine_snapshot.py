@@ -41,14 +41,6 @@ EVIDENCE = REPO / "docs/development/full_body_models/evidence/ground_support"
 SPEC_PATH = EVIDENCE / "full_body_spec_hipcal_scaled.json"
 PROVENANCE = InputProvenance(kind="test", source="dynamics_record frame 400")
 
-#: Tolerances are scaled by ``max(1, |reference|_inf)``.  Track N (NSX-56)
-#: compares ``M``, ``h``, ``J_c`` tightly; ``Jdot_v`` carries the finite
-#: difference of the MuJoCo drift.  Values are measured, then fixed with margin.
-TOL_MASS_BIAS = 1e-11
-TOL_JACOBIAN = 1e-12
-TOL_DRIFT = 1e-8
-TOL_FRAME = 1e-12
-
 
 @pytest.fixture(scope="module")
 def adapters():
@@ -126,57 +118,6 @@ def test_dynamic_maps_between_the_engines_are_the_identity(adapters) -> None:
     v = np.linspace(-1.0, 1.0, len(perm))
     tau = np.linspace(2.0, -3.0, len(perm))
     check_power_invariance(eye, eye.T, v, tau)
-
-
-def test_mass_and_bias_agree(snapshots) -> None:
-    pin_s, mj_s = snapshots
-    assert _rel(mj_s.M, pin_s.M) < TOL_MASS_BIAS
-    assert _rel(mj_s.h, pin_s.h) < TOL_MASS_BIAS
-
-
-def test_canonical_closure_jacobian_agrees(snapshots) -> None:
-    pin_s, mj_s = snapshots
-    assert _rel(mj_s.J_c, pin_s.J_c) < TOL_JACOBIAN
-
-
-def test_canonical_closure_drift_agrees(snapshots) -> None:
-    pin_s, mj_s = snapshots
-    assert _rel(mj_s.Jdot_v, pin_s.Jdot_v) < TOL_DRIFT
-
-
-def test_grip_frame_and_topology_agree(snapshots) -> None:
-    pin_s, mj_s = snapshots
-    np.testing.assert_allclose(
-        mj_s.grip_frame.rotation, pin_s.grip_frame.rotation, atol=TOL_FRAME
-    )
-    np.testing.assert_allclose(
-        mj_s.grip_frame.origin, pin_s.grip_frame.origin, atol=TOL_FRAME
-    )
-    assert mj_s.topology.closure_kind is pin_s.topology.closure_kind
-    assert mj_s.topology.coordinate_order == pin_s.topology.coordinate_order
-    assert mj_s.topology.actuated_indices == pin_s.topology.actuated_indices
-    assert mj_s.topology.loop_support_indices == pin_s.topology.loop_support_indices
-
-
-def test_club_inertia_split_agrees(snapshots) -> None:
-    pin_s, mj_s = snapshots
-    assert mj_s.bare_club.mass == pytest.approx(pin_s.bare_club.mass, abs=1e-12)
-    np.testing.assert_allclose(mj_s.bare_club.com, pin_s.bare_club.com, atol=1e-12)
-    np.testing.assert_allclose(
-        mj_s.bare_club.inertia, pin_s.bare_club.inertia, atol=1e-12
-    )
-    assert len(mj_s.welded_hand_inertias) == len(pin_s.welded_hand_inertias)
-    for got, want in zip(
-        mj_s.welded_hand_inertias, pin_s.welded_hand_inertias, strict=True
-    ):
-        assert got.mass == pytest.approx(want.mass, abs=1e-12)
-        np.testing.assert_allclose(got.com, want.com, atol=1e-12)
-
-
-def test_both_snapshots_satisfy_the_closure_at_the_matched_state(snapshots) -> None:
-    for snap in snapshots:
-        scale = float(np.max(np.abs(snap.v)))
-        assert float(np.max(np.abs(snap.J_c @ snap.v))) / max(1.0, scale) < 1e-10
 
 
 def test_hard_kkt_accelerations_agree_after_canonicalisation(

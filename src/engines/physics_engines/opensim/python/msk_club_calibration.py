@@ -386,10 +386,46 @@ def _address_range(probe: PoseProbe, name: str) -> tuple[float, float]:
     return max(low, limit[0]), min(high, limit[1])
 
 
+_PELVIS_AXES = {"pelvis_tx": 0, "pelvis_ty": 1, "pelvis_tz": 2}
+
+
+def initial_guess(
+    names: Sequence[str],
+    bounds: np.ndarray,
+    hips: np.ndarray,
+    previous: Mapping[str, float] | None = None,
+) -> np.ndarray:
+    """Start point of the address IK, inside ``bounds``.
+
+    Zero pose with the pelvis at ``hips``, overridden by ``previous`` (an
+    earlier solve of the same model and club) where it names a coordinate. A
+    warm start keeps a re-solve after a range change in the basin of the
+    accepted pose instead of a far local minimum (#12777). Raises
+    ``ValueError`` when ``bounds`` is not one ``(low, high)`` row per name.
+    """
+    lims = np.asarray(bounds, dtype=float)
+    if lims.shape != (len(names), 2):
+        raise ValueError(f"bounds must be {(len(names), 2)}, got {lims.shape}")
+    q0 = np.zeros(len(names))
+    for name, axis in _PELVIS_AXES.items():
+        if name in names:
+            q0[list(names).index(name)] = hips[axis]
+    for i, name in enumerate(names):
+        if previous is not None and name in previous:
+            q0[i] = float(previous[name])
+    return np.clip(q0, lims[:, 0], lims[:, 1])
+
+
 def solve_address(
-    skeleton_path: Path, targets: AddressTargets, club: mc.MskClub
+    skeleton_path: Path,
+    targets: AddressTargets,
+    club: mc.MskClub,
+    previous: Mapping[str, float] | None = None,
 ) -> tuple[dict[str, float], dict[str, np.ndarray], dict[str, Any]]:
-    """IK of the club-less skeleton; returns ``(q, hand_frames, report)``."""
+    """IK of the club-less skeleton; returns ``(q, hand_frames, report)``.
+
+    ``previous`` warm-starts the solve (:func:`initial_guess`).
+    """
     from scipy.optimize import least_squares
 
     from defusedxml import ElementTree as SafeET
@@ -399,11 +435,8 @@ def solve_address(
     bounds = np.array([_address_range(probe, n) for n in names])
     grips = grip_frames(club, targets.club_in_ground)
     residual = _Residual(probe, names, targets, grips)
-    q0 = np.clip(np.zeros(len(names)), bounds[:, 0], bounds[:, 1])
-    pelvis = {"pelvis_tx": 0, "pelvis_ty": 1, "pelvis_tz": 2}
     hips = 0.5 * (targets.landmarks["femur_r"] + targets.landmarks["femur_l"])
-    for name, axis in pelvis.items():
-        q0[names.index(name)] = hips[axis]
+    q0 = initial_guess(names, bounds, hips, previous)
     fit = least_squares(
         residual, q0, bounds=(bounds[:, 0], bounds[:, 1]), x_scale="jac", max_nfev=4000
     )
@@ -458,13 +491,25 @@ def skeleton_without_club(model_path: Path, out_dir: Path) -> Path:
     return out
 
 
-def calibrate(model_path: Path, club: str = "driver") -> mc.GripCalibration:
-    """Grip calibration of the Rajagopal model at ``model_path`` for ``club``."""
+def calibrate(
+    model_path: Path, club: str = "driver", *, warm_start: bool = True
+) -> mc.GripCalibration:
+    """Grip calibration of the Rajagopal model at ``model_path`` for ``club``.
+
+    With ``warm_start`` the solve starts from the committed calibration of the
+    same model and club when there is one.
+    """
     shared = mc.load_msk_club(club)
     targets = generated_address_targets(club)
+    previous = None
+    if warm_start:
+        try:
+            previous = mc.load_calibration(Path(model_path).stem, club).address_q
+        except KeyError:
+            previous = None
     with tempfile.TemporaryDirectory() as tmp:
         skeleton = skeleton_without_club(Path(model_path), Path(tmp))
-        q, frames, report = solve_address(skeleton, targets, shared)
+        q, frames, report = solve_address(skeleton, targets, shared, previous)
     return mc.GripCalibration(
         model=Path(model_path).stem,
         club=club,
@@ -494,10 +539,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("models", nargs="+", type=Path, help="Rajagopal .osim files")
     parser.add_argument("--club", default="driver", choices=("driver", "iron7"))
     parser.add_argument("--out", type=Path, default=mc.CALIBRATION_PATH)
+    parser.add_argument(
+        "--cold-start", action="store_true", help="ignore the committed calibration"
+    )
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO)
     for path in args.models:
-        calibration = calibrate(path, args.club)
+        calibration = calibrate(path, args.club, warm_start=not args.cold_start)
         mc.store_calibration(calibration, args.out)
         logger.info("%s %s: %s", calibration.model, args.club, calibration.report)
     return 0

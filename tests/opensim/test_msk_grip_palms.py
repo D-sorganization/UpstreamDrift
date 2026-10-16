@@ -158,3 +158,25 @@ def test_opensim_hand_orientation_comes_from_the_shared_grip_pose(side: str) -> 
     np.testing.assert_allclose(module.THUMB_AXIS[side], expected, atol=1e-12)
     assert module.PALM_FACING[side] == DEFAULT_GRIP_POSE.palm_target_sign(hand)
     assert not hasattr(module, "GRIP_DIAGONAL_DEG")
+
+
+# ------------------------------------------------------------ warm start (#12777)
+def test_initial_guess_without_warm_start_is_zero_pose_at_the_hips() -> None:
+    names = ["pelvis_tx", "pelvis_ty", "pelvis_tz", "knee_angle_l"]
+    bounds = np.array([[-5, 5], [-5, 5], [-5, 5], [0.1, 2.0]])
+    q0 = _spec().initial_guess(names, bounds, np.array([1.0, 0.9, -0.2]))
+    np.testing.assert_allclose(q0, [1.0, 0.9, -0.2, 0.1])
+
+
+def test_initial_guess_warm_starts_from_a_previous_solve_inside_the_bounds() -> None:
+    names = ["pelvis_tx", "pelvis_ty", "pelvis_tz", "knee_angle_l", "pro_sup_l"]
+    bounds = np.array([[-5, 5], [-5, 5], [-5, 5], [0.0, 2.0], [0.0, 2.9]])
+    previous = {"knee_angle_l": 0.4, "pro_sup_l": 3.5, "pelvis_tx": 0.3}
+    q0 = _spec().initial_guess(names, bounds, np.zeros(3), previous)
+    # previous values win over the hip seed; out-of-range values are clipped
+    np.testing.assert_allclose(q0, [0.3, 0.0, 0.0, 0.4, 2.9])
+
+
+def test_initial_guess_rejects_mismatched_bounds() -> None:
+    with pytest.raises(ValueError, match="bounds"):
+        _spec().initial_guess(["a", "b"], np.zeros((3, 2)), np.zeros(3))
