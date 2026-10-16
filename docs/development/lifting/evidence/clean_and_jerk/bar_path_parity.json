@@ -1,0 +1,132 @@
+{
+  "lift": "clean_and_jerk",
+  "bundle": "docs/development/lifting/evidence/clean_and_jerk/clean_and_jerk_bundle.npz",
+  "bundle_spec_sha256": "81a9edf3ad70e8022973be46900a1d902a268725641f3b6e566ce939ba6ed535",
+  "bundle_steps": 200,
+  "dt_s": 0.001,
+  "reference": "window_bar_path_m (MuJoCo, recorded at bundle generation)",
+  "source_commit": "37aaf45983518c791db508c7857c026151e497b2",
+  "generator": "scripts/measure_lift_bar_path_parity.py",
+  "engines": {
+    "mujoco": {
+      "engine": "mujoco",
+      "steps": 200,
+      "duration_s": 0.2,
+      "failure": null,
+      "max_bar_deviation_m": 0.0,
+      "final_bar_deviation_m": 0.0,
+      "max_coordinate_error_rad": 0.0,
+      "worst_final_coordinate": "TranslationInputX",
+      "segmented": {
+        "segment_steps": 20,
+        "segments": 10,
+        "max_coordinate_error_rad": 0.0,
+        "max_frame_error_m": 0.0,
+        "worst_segment_start_s": 0.0,
+        "coordinate_error_rad_by_segment": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "wall_time_s": 72.5
+    },
+    "drake": {
+      "engine": "drake",
+      "steps": 200,
+      "duration_s": 0.2,
+      "failure": null,
+      "max_bar_deviation_m": 1.2136746562939178e-12,
+      "final_bar_deviation_m": 1.2136746562939178e-12,
+      "max_coordinate_error_rad": 3.4204017396177733e-10,
+      "worst_final_coordinate": "LSInputX",
+      "segmented": {
+        "segment_steps": 20,
+        "segments": 10,
+        "max_coordinate_error_rad": 1.2931877790833823e-12,
+        "max_frame_error_m": 3.884194229483362e-15,
+        "worst_segment_start_s": 0.18,
+        "coordinate_error_rad_by_segment": [
+          3.9968028886505635e-15,
+          9.547918011776346e-15,
+          1.180349221141519e-14,
+          2.01349353856628e-14,
+          2.784925068333166e-14,
+          1.029037965949442e-13,
+          2.4973079160162115e-14,
+          4.741346204539809e-14,
+          1.7985612998927536e-14,
+          1.2931877790833823e-12
+        ]
+      },
+      "wall_time_s": 46.8
+    },
+    "pinocchio": {
+      "engine": "pinocchio",
+      "steps": 200,
+      "duration_s": 0.2,
+      "failure": null,
+      "max_bar_deviation_m": 4.5406938941181726e-13,
+      "final_bar_deviation_m": 4.5406938941181726e-13,
+      "max_coordinate_error_rad": 1.236887259281616e-10,
+      "worst_final_coordinate": "LSInputX",
+      "segmented": {
+        "segment_steps": 20,
+        "segments": 10,
+        "max_coordinate_error_rad": 3.0375701953744283e-13,
+        "max_frame_error_m": 2.848582188796671e-14,
+        "worst_segment_start_s": 0.18,
+        "coordinate_error_rad_by_segment": [
+          5.0844745080880216e-15,
+          9.103828801926284e-15,
+          1.1546319456101628e-14,
+          1.918343955908952e-14,
+          2.671474153004283e-14,
+          1.319985787340272e-13,
+          2.6423307986078726e-14,
+          5.084821452783217e-14,
+          1.68962066560141e-14,
+          3.0375701953744283e-13
+        ]
+      },
+      "wall_time_s": 37.3
+    },
+    "opensim": {
+      "engine": "opensim",
+      "steps": 200,
+      "duration_s": 0.2,
+      "failure": null,
+      "max_bar_deviation_m": 7.191929913491342e-13,
+      "final_bar_deviation_m": 7.191929913491342e-13,
+      "max_coordinate_error_rad": 2.0483026386131087e-10,
+      "worst_final_coordinate": "LSInputX",
+      "segmented": {
+        "segment_steps": 20,
+        "segments": 10,
+        "max_coordinate_error_rad": 6.128431095930864e-14,
+        "max_frame_error_m": 2.9955454923751383e-15,
+        "worst_segment_start_s": 0.18,
+        "coordinate_error_rad_by_segment": [
+          1.7763568394002505e-15,
+          3.8354736053847205e-15,
+          7.105427357601002e-15,
+          3.4416913763379853e-15,
+          5.540706782269922e-15,
+          4.978656376053436e-15,
+          4.440892098500626e-15,
+          3.1086244689504383e-15,
+          2.220446049250313e-15,
+          6.128431095930864e-14
+        ]
+      },
+      "wall_time_s": 88.7
+    }
+  }
+}
