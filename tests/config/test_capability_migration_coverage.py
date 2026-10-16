@@ -362,10 +362,14 @@ class TestCapabilityMigrationCoverageGreenCases:
         self, inventory: CapabilityMigrationInventory
     ) -> None:
         """The committed markdown document docs/development/ORG01_CAPABILITY_BASELINE.md must document all capabilities."""
-        from scripts.generate_capability_baseline import BASELINE_PATH
+        from scripts.generate_capability_baseline import BASELINE_PATH, PARTS_DIR
 
         assert BASELINE_PATH.is_file(), f"Missing {BASELINE_PATH}"
-        content = BASELINE_PATH.read_text(encoding="utf-8")
+        # The inventory table is split into linked parts (doc size budget, #12848).
+        content = "\n".join(
+            p.read_text(encoding="utf-8")
+            for p in [BASELINE_PATH, *sorted(PARTS_DIR.glob("*.md"))]
+        )
 
         assert (
             "# ORG-01: Baseline Capability Inventory & Entity Identity Preservation"
