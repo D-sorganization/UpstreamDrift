@@ -188,3 +188,30 @@ The excess is a physical ball-contact collision transient: as clubhead speed inc
 
 - Tests: [`tests/unit/motion_matching/test_grip_bushing_opensim.py`](../../../tests/unit/motion_matching/test_grip_bushing_opensim.py) (`test_full_swing_deflection_within_limits[driver|iron7]`, `test_full_swing_internal_force_is_physical[driver|iron7]` and the waiver contract `test_impact_waiver_is_limited_to_its_window_and_ceiling`).
 - Reference: issues #12272, #12279, #12221, #11767, #11739.
+
+## 22. Address Knee Flexion: Owner Prior, Capture Override, No Hyperextension (R4, #12684)
+
+### What
+
+`src/shared/python/motion_matching/address_knee.py` defines, measures and resolves the address knee flexion: the geometric angle between the hip→knee and knee→ankle joint-centre vectors (model: `femur_*`, `tibia_*`, `talus_*` origins; capture: functional hip centre carried by the waist-marker pelvis pose, `*KneeOut`/`*AnkleOut` moved medially onto the joint centres along the knee flexion axis, median over the address window). `--knee-flexion {off,prior,capture}` (default `capture`) sets `lane.knees`; with it on, `best_address` cuts each knee coordinate's extension side at the anatomical zero (hard bound, sign found from forward kinematics), adds a solve-pose `posture_prior` (weight `KNEE_FLEXION_PRIOR_WEIGHT` = 1 per rad²) pulling each knee to the coordinate whose flexion equals its target, and asserts no hyperextension on the result. The receipt's `address.knee_flexion_deg` block records mode, prior, band, weight and, per knee, target, `target_source` (`capture` or `prior`, from the shared `foot_progression.TARGET_SOURCES`), model flexion, coordinate, error, `within_band`, `hyperextended` and the capture measurement.
+
+### Decision (Owner Ruling 2026-10-15)
+
+Prior of about 15 deg with a ±5 deg band for both knees (`KNEE_FLEX_PRIOR_DEG`, `KNEE_FLEX_BAND_DEG`, owner-set); a reliable capture measurement wins; hyperextension is forbidden as a hard bound, never a soft penalty; each knee's target source is receipted with R3's vocabulary.
+
+### Why
+
+The address stage had no knee target and the lower-limb range allows +10 deg of hyperextension: a single-seed frame-0 solve with the option off puts the trail knee on that bound on both captures, and the 10-05 canonical runs read 2 deg (the pre-#12113 sign bug). The capture itself measures 26.2 / 28.6 deg (capture-A trail / lead) and 24.6 / 26.3 deg (capture-B), all reliable (IQR ≤ 0.7 deg), so the canonical `capture` mode uses them. Calibrated address (MuJoCo, `style` feet): `capture` lands every knee within 0.2 deg of its target and lowers the address RMS 10.54 → 9.08 mm (driver) and 12.19 → 11.40 mm (7-iron); `prior` lands 14.9 to 15.2 deg at 11.14 mm on both. Knee flexion does not move the 7-iron trail toe-out (13.53 → 13.40 deg, `hip_rotation_r` still on its -40 deg limit), so the R3 shortfall is not a knee-coupling effect.
+
+### What Was Tried and Rejected
+
+- A soft penalty on hyperextension: rejected by the ruling; it can be violated.
+- Tightening the swing-wide `range_of_motion` knee range to 0: not done without capture evidence through impact and the finish; the hard bound applies at the address only.
+- Treating the owner prior as R3's `style` source: the knee value is an anatomical prior that a reliable capture overrides, not a style override, so it is tagged `prior`; the feet keep `FOOT_TARGET_SOURCES` so `prior` is not a valid foot source.
+- A pelvis-marker regression for the capture hip centre: the functional hip calibration already gives a capture-derived centre without an external regression.
+
+### Evidence Receipt
+
+- [`evidence/address_knee_12678/README.md`](evidence/address_knee_12678/README.md) and [`address_knee_summary.json`](evidence/address_knee_12678/address_knee_summary.json).
+- Tests: [`tests/unit/motion_matching/pipeline/test_address_knee_flexion.py`](../../../tests/unit/motion_matching/pipeline/test_address_knee_flexion.py).
+- Not yet done (R10, #12692): canonical receipt regeneration, the knee through the swing and forward dynamics, and the cross-engine replays.

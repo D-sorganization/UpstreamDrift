@@ -13,6 +13,9 @@ from pathlib import Path
 
 import numpy as np
 
+from src.shared.python.motion_matching.address_knee import (
+    KNEE_FLEXION_PRIOR_WEIGHT as KNEE_FLEXION_PRIOR_WEIGHT,
+)
 from src.shared.python.motion_matching.range_of_motion import (
     HUMAN_RANGES_DEG,
     LOWER_LIMB_RANGES_DEG,

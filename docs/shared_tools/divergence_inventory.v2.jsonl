@@ -1199,6 +1199,7 @@
 {"path": "motion_matching/_geodesic.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/_series_interp.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/acceptance.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/address_knee.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/align_to_simulation_grid.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/analytic_muscle_replay_spec.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/anatomical_meshes.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
