@@ -51,15 +51,15 @@
       "rationale": "Reviewed NSX-30 (#12570) addition of ConstrainedEquationsOfMotionProvider to protocol.py: a runtime_checkable sub-protocol of EquationsOfMotionProvider adding closure_jacobian(q) (m x n) and closure_drift(q, v) (m,) in the NSX-02 grip-frame convention. Parent protocol signatures, factory, mjcf and model_params are unchanged; the contract now documents the new optional capability. Verified by tests/unit/simulation_backends including test_constrained_ztcf_zvcf.py and test_foundation.py. No scientific approval is implied."
     },
     "pipeline-api": {
-      "fingerprint": "bb81e316001c42322cf9628984c7044a5431ad7d27f3b9b0b901ad0a4c023546",
+      "fingerprint": "0a1fb7629b24b708518046ef3c3a4f9285047abb3688b642f2bd65d18dc8df5e",
       "inputs": {
         "docs/agent_context/contracts/pipeline-api.md": "f9402d270806ae313e121d36387e396302ffd5484a593f071ed3b0f042921079",
-        "src/shared/python/motion_pipeline/api.py": "7c3aecd590c1b49bf839d846370697d071ca3fa81ca9673811fdbcde159d7f9e",
+        "src/shared/python/motion_pipeline/api.py": "b59c3943cad230dab987b033b97b1957c39fd6019a03186a6c807b71518b1a83",
         "src/shared/python/motion_pipeline/contracts.py": "9c8a9ac26c0d63b174e43093e3c53e1dea6422b82918c7ef79be05cf2097837c",
         "src/shared/python/motion_pipeline/orchestrator.py": "a99ef34d57df202ad4bc5e2f4b7a04b974e80d559e47f9c97b0dece57ca9b1b8",
         "tests/unit/motion_pipeline/orchestrator/test_api.py": "5d059d69c720182436454c0ec45efe567aa45b9b5aa527caab991fd782bd984d"
       },
-      "rationale": "Mark orchestrator test_api with unit marker (#8875)"
+      "rationale": "Reviewed #12846 behaviour-preserving refactor of motion_pipeline/api.py: create_app nested route closures lifted to module-level handlers (health_check, run_pipeline, run_pipeline_with_config) registered via _register_*_routes helpers. Routes, response models, status codes, error mapping (ValueError 400, RuntimeError 500), temp-file cleanup and OpenAPI schema are unchanged; verified by tests/unit/motion_pipeline/orchestrator (test_api.py and new test_api_routes_characterization.py) and an identical openapi.json before and after. No scientific approval is implied."
     },
     "pose-conventions": {
       "fingerprint": "a967be96dead4f816e7e2046cc950985d5da2d007ac1eded50915a8fbb9db15c",
