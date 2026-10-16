@@ -2353,6 +2353,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12719 · NSX-90 Covariance Propagation, Adjoint Sensitivity Kernels and Nonlinearity Gate
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12719
+- **Branch:** merged via #12881
+- **PR:** #12881
+- **Paths:** see #12881
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`b6600a30`; collated from changes/12719-nsx-90-covariance-propagation-adjoint-se.md)
+- **Summary:** NSX-90 covariance propagation, adjoint sensitivity kernels and nonlinearity gate
+- **Next step:** Shipped in PR #12881.
+
+### DL-#12586 · Kinematic Ensemble (Admitted Samples, Rejection Accounting, Envelope Union/Intersection) and Reproject_Onto_Closure Delegating to Project_to_Closure (NSX-61)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12586
+- **Branch:** merged via #12645
+- **PR:** #12645
+- **Paths:** see #12645
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`a934b4aa`; collated from changes/12586-kinematic-ensemble-admitted-samples-reje.md)
+- **Summary:** Kinematic ensemble (admitted samples, rejection accounting, envelope union/intersection) and reproject_onto_closure delegating to project_to_closure (NSX-61)
+- **Next step:** Shipped in PR #12645.
+
 ### DL-#12914 · Closing the Launcher After a MuJoCo Session Releases Renderers Before Widgets Die.
 
 - **State:** shipped
