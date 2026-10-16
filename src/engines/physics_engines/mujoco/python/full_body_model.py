@@ -43,6 +43,7 @@ from src.shared.python.biomechanics.grip_wrench import (
 )
 from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.force_overlay.contracts import OverlayWrench
+from src.shared.python.motion_matching.club_shaft_chain import passive_coordinates
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
     ContactSample,
@@ -96,6 +97,14 @@ class NativeMujocoFullBodyModel:
 
         if self.model.nq != len(self._indices) or self.model.nv != len(self._indices):
             raise ValueError("All coordinates must be scalar 1-DOF joints")
+
+        # Chain-shaft springs (#12686): unactuated coordinates whose joint
+        # stiffness and damping enter as MuJoCo's passive force.  Empty for
+        # the rigid club, which then takes exactly the original arithmetic.
+        self.passive_coordinates: tuple[str, ...] = passive_coordinates(spec)
+        self._passive_dofs = np.array(
+            [self._indices[name] for name in self.passive_coordinates], dtype=int
+        )
 
         self._sites = {
             name: self.model.site(site).id
@@ -212,7 +221,8 @@ class NativeMujocoFullBodyModel:
     ) -> tuple[np.ndarray, np.ndarray, dict[str, ContactSample]]:
         """Return (bias, contact, samples) so that ``M a = effort + contact - bias``.
 
-        ``bias`` is MuJoCo's Coriolis, centrifugal and gravity term; ``contact``
+        ``bias`` is MuJoCo's Coriolis, centrifugal and gravity term (minus the
+        passive joint springs and dampers of a chain shaft, #12686); ``contact``
         is the shared law's spatial forces mapped through the sphere Jacobians.
         Postcondition: the model state is left at ``(coordinates, rates)`` with
         position and velocity stages computed.
@@ -252,7 +262,10 @@ class NativeMujocoFullBodyModel:
                 )
                 data.xfrc_applied[body_id, 3:] += moment
                 tau_contact += jac_rot.T @ moment
-        return data.qfrc_bias.copy(), tau_contact, samples
+        bias = data.qfrc_bias.copy()
+        if self._passive_dofs.size:
+            bias -= data.qfrc_passive  # shaft springs and dampers
+        return bias, tau_contact, samples
 
     def _constrained_solve(
         self,
@@ -263,6 +276,8 @@ class NativeMujocoFullBodyModel:
         """Shared KKT solve: dense ``(qacc, lambda)``; leaves ``data`` at the state."""
         mj, model, data = self._mj, self.model, self.data
         effort = self._vector(primitive_efforts)
+        if self._passive_dofs.size:
+            effort[self._passive_dofs] = 0.0  # shaft joints are unactuated
         bias, tau_contact, _ = self.generalized_forces(coordinates, rates)
 
         mass = full_mass_matrix(mj, model, data)

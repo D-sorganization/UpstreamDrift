@@ -82,6 +82,18 @@ class TestAdrIndex:
 
     def test_adr_index_marks_0020_accepted(self) -> None:
         text = _read("docs", "adr", "README.md")
-        assert "[0020](0020-canonical-urdf-subsystem.md)" in text
-        assert "Canonical URDF subsystem" in text
-        assert "Accepted | 2026-05-08" in text
+        # Parse the row's cells: Prettier re-pads the table whenever a wider
+        # Status value is added, so exact-spacing substrings are unstable.
+        rows = [
+            [cell.strip() for cell in line.strip().strip("|").split("|")]
+            for line in text.splitlines()
+            if line.startswith("| [0020](0020-canonical-urdf-subsystem.md)")
+        ]
+        assert rows == [
+            [
+                "[0020](0020-canonical-urdf-subsystem.md)",
+                "Canonical URDF subsystem",
+                "Accepted",
+                "2026-05-08",
+            ]
+        ]

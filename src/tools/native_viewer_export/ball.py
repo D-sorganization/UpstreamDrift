@@ -7,11 +7,15 @@ adds it to a dynamics model. The ball is visible from the start until impact
 
 Placement policy, in order:
 
-1. the bundle's recorded ball impact (``bundle.ball_impact().ball_centre_m``) --
-   the ball every engine replay actually strikes, used verbatim;
-2. the address geometry: MuJoCo forward kinematics of the first state, the
+1. the address geometry: MuJoCo forward kinematics of the first state, the
    club face centre and normal in world, then
-   :func:`model_appearance.ball.ball_position_at_address`.
+   :func:`model_appearance.ball.address_ball_from_landmarks`. This is the
+   only placement that is guaranteed to sit at the *rendered* face and rest
+   on the ground for every club (#12955);
+2. the bundle's recorded ball impact (``bundle.ball_impact().ball_centre_m``)
+   -- only when the address geometry is unavailable. It is the capture's
+   physics ball (face-centre height, capture frame), so it can float or sit
+   away from the fitted model's face and is never preferred for drawing.
 
 ``address_ball`` returns a reason string instead of a placement when neither is
 available -- it never invents a zero position.
@@ -127,6 +131,34 @@ def _address_face(swing: SwingInput) -> tuple[np.ndarray, np.ndarray, float] | s
     return face.centre_m, face.normal, model.ground_height_m
 
 
+def _address_geometry_ball(swing: SwingInput) -> tuple[np.ndarray, str] | str:
+    """Ball resting on the ground at the address face, or why it is unavailable."""
+    try:
+        face = _address_face(swing)
+    except (KeyError, IndexError, ValueError, TypeError, RuntimeError) as exc:
+        return f"address geometry unavailable: {exc!r}"
+    if isinstance(face, str):
+        return face
+    centre, normal, ground = face
+    height = abs(float(centre[2]) - ground)
+    if height > MAX_ADDRESS_HEIGHT_M:
+        return (
+            f"first state is not an address stance (face centre {height:.3f} m "
+            "above ground) and the bundle records no ball impact"
+        )
+    resolved = resolve_ball_visual(
+        enabled=True,
+        position_m=None,
+        source=SOURCE_ADDRESS,
+        face_centre_m=centre,
+        face_normal=normal,
+        ground_height_m=ground,
+    )
+    if resolved is None:  # pragma: no cover - enabled=True always resolves
+        return "ball placement unavailable"
+    return resolved
+
+
 def address_ball(swing: SwingInput, impact_time_s: float | None) -> BallPlacement | str:
     """The decorative ball for ``swing``, or the reason it is unavailable.
 
@@ -137,34 +169,14 @@ def address_ball(swing: SwingInput, impact_time_s: float | None) -> BallPlacemen
         raise TypeError(f"swing must be a SwingInput, got {type(swing).__name__}")
     if impact_time_s is not None and not math.isfinite(impact_time_s):
         raise ValueError("impact_time_s must be finite or None")
-    recorded = _bundle_ball_centre(swing)
-    if recorded is not None:
+    placed = _address_geometry_ball(swing)
+    if isinstance(placed, str):
+        recorded = _bundle_ball_centre(swing)
+        if recorded is None:
+            return placed
         pos, source = recorded, SOURCE_BUNDLE
     else:
-        try:
-            face = _address_face(swing)
-        except (KeyError, IndexError, ValueError, TypeError, RuntimeError) as exc:
-            return f"address geometry unavailable: {exc!r}"
-        if isinstance(face, str):
-            return face
-        centre, normal, ground = face
-        height = abs(float(centre[2]) - ground)
-        if height > MAX_ADDRESS_HEIGHT_M:
-            return (
-                f"first state is not an address stance (face centre {height:.3f} m "
-                "above ground) and the bundle records no ball impact"
-            )
-        resolved = resolve_ball_visual(
-            enabled=True,
-            position_m=None,
-            source=SOURCE_ADDRESS,
-            face_centre_m=centre,
-            face_normal=normal,
-            ground_height_m=ground,
-        )
-        if resolved is None:  # pragma: no cover - enabled=True always resolves
-            return "ball placement unavailable"
-        pos, source = resolved
+        pos, source = placed
     return BallPlacement(
         (float(pos[0]), float(pos[1]), float(pos[2])),
         BALL_RADIUS_M,

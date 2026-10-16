@@ -46,7 +46,7 @@ def test_build_appearance_with_no_choices_validates_and_uses_defaults() -> None:
     doc_dict = build_appearance({}, None)
     doc = document_from_dict(doc_dict)
     assert doc.skin_tone == "skin_medium"
-    assert doc.clothing == "golf_polo_shorts"
+    assert doc.clothing == "golf_polo_trousers"  # owner ruling, #12685
     assert doc.club_finish == "satin_steel"
     assert doc.spec_sha256 is None
 

@@ -208,9 +208,11 @@ rotations alone. Their extra inputs are mandatory and missing inputs raise.
 
 For JCS terms, the registry also provides a per-level decomposition: the
 contribution of level `i` is the change in the term when the chain is
-truncated after level `i` versus before it. This is a decomposition, not an
-additive identity; it sums to the global value only to first order, and the
-remainder is reported.
+truncated after level `i` versus before it. The prefix differences telescope,
+so they sum to the global value exactly (the reported remainder is a numerical
+check). The decomposition is path-dependent (caudal-first truncation): a
+level's contribution is not its own Cardan angle, and per-level angles still do
+not add.
 
 ### 9. Scope of Claims
 

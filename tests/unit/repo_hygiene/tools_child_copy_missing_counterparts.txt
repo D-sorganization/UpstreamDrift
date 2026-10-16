@@ -44,7 +44,6 @@ humanoid_character_builder/generators/_inertia_helpers.py
 humanoid_character_builder/generators/_joint_generation.py
 humanoid_character_builder/generators/_link_generation.py
 humanoid_character_builder/generators/_mesh_makehuman.py
-humanoid_character_builder/generators/_mesh_primitives.py
 humanoid_character_builder/generators/_mesh_smplx.py
 humanoid_character_builder/generators/_urdf_model_builder.py
 humanoid_character_builder/generators/_xml_builder.py

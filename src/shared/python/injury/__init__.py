@@ -27,12 +27,22 @@ References:
 from .injury_risk import InjuryRiskReport, InjuryRiskScorer, RiskLevel
 from .joint_stress import JointStressAnalyzer, JointStressResult
 from .spinal_load_analysis import SpinalLoadAnalyzer, SpinalLoadResult, SpinalRiskLevel
+from .spinal_load_providers import (
+    HEURISTIC_PROVIDER_ID,
+    HeuristicSpinalLoadProvider,
+    ModelSpinalLoadProvider,
+    SpinalLoadProvider,
+)
 from .swing_modifications import SwingModification, SwingModificationRecommender
 
 __all__ = [
     "SpinalLoadAnalyzer",
     "SpinalLoadResult",
     "SpinalRiskLevel",
+    "SpinalLoadProvider",
+    "HeuristicSpinalLoadProvider",
+    "ModelSpinalLoadProvider",
+    "HEURISTIC_PROVIDER_ID",
     "JointStressAnalyzer",
     "JointStressResult",
     "InjuryRiskScorer",

@@ -1,0 +1,129 @@
+\subsection{Full-Body Driving of the Bruno Model}
+\label{sec:spn-9c}
+
+\paragraph{Purpose.}
+SPN-9a drives only the pelvis and the intervertebral levels. This work package
+(\#12758) maps the rest of the matched swing onto a full-body target model: the
+legs and elbows by coordinate, the shoulders by segment orientation, and the club
+and the ground as external loads. The target is the Bruno full-body model
+(\texttt{bruno2015\_fullbody\_os4\_v2}); a synthetic identity map on the in-repo
+golf humanoid exercises the same code path without any licensed file. The pelvis
+residual of the inverse dynamics with these loads is a software check, never a
+qualification of the swing.
+
+\paragraph{Frames and Units.}
+Ground axes: $X$ anterior, $Y$ up, $Z$ right. Rotations are proper matrices
+$R_{\mathrm{world,body}}$. Angles are in radians, lengths in metres, forces in
+newtons, moments in newton metres, time in seconds. Both the golf humanoid and the
+Bruno model use the same ground-pelvis joint encoding (tilt $Z$, list $X$,
+rotation $Y$, then the three translations), so the pelvis pose of the golf input
+is carried unchanged.
+
+\paragraph{Coordinate Map Policy.}
+\texttt{src/config/spine\_fullbody\_coordinate\_maps.json} classifies every
+coordinate of both models; \texttt{fullbody\_map.py} validates it and refuses an
+unclassified coordinate. Golf coordinates are \texttt{direct}, \texttt{pelvis\_pose},
+\texttt{orientation\_match}, \texttt{spine\_drive} or \texttt{excluded} (with a
+recorded reason: knee-translation helper, subtalar, MTP, forearm pronation and
+wrist). Target coordinates are driven by the pelvis pose, the spine drive, a
+direct transfer, an orientation match, held at zero (\texttt{held\_neutral}) or
+\texttt{locked\_in\_asset}. For the Bruno file this is 6 pelvis, 29 spine-drive,
+12 direct, 6 orientation-matched, 7 held-neutral and 105 locked coordinates; the
+lateral-bending and axial-rotation coordinates of the thoracic levels $T_1$--$T_2$
+to $T_{11}$--$T_{12}$ are locked in the asset, so the drive cannot move them. The
+file stores names, topology and signs only, no licensed value.
+
+Signs are observed, not assumed. For every direct entry the native probe
+(\texttt{probe\_axis\_dots}) moves the golf and the target coordinate by a small
+step at the all-zero pose and takes the cosine between the two child-segment
+motions; the map records the sign and a floor on $\mathrm{sign}\cdot\cos$, and the
+asset-gated test fails if the observed value falls below the floor. The hip,
+ankle and elbow signs are $+1$ and the knee sign is $-1$; the knee axes are not
+collinear (about $17^\circ$ apart), so a knee flexion carries a small cross term
+that is not modelled.
+
+\paragraph{Shoulder Orientation Match.}
+The golf shoulder is an intrinsic ZXY sequence (flexion, adduction, rotation) and
+the Bruno shoulder a different sequence, so the coordinates cannot be copied.
+With $R_g(t)$ the world rotation of the golf humerus and
+$K=R_g(0)^{\!\top}R_T(0)$ the neutral alignment of the two humerus frames (both
+models at the all-zero pose), the target humerus is asked to reach
+\begin{equation}
+  R_T^{\star}(t)=R_g(t)\,K ,
+\end{equation}
+and the three target shoulder coordinates solve
+$\min_{q}\bigl\|\log\bigl(R_T(q)^{\top}R_T^{\star}\bigr)\bigr\|$ per frame by
+bounded least squares inside the coordinate ranges (warm start from the previous
+frame plus deterministic restarts). The geodesic residual is reported per frame
+and never repaired; an out-of-range request gives the closest in-range solution and
+a positive residual. The solve assumes the two zero poses are anatomically
+equivalent; any posture difference there becomes a constant orientation offset.
+
+\paragraph{Club and Ground Loads.}
+The target has no club. Two options were weighed: add a club body to the licensed
+model, or apply the club's reaction as external loads on the hand bodies. The
+second leaves the licensed file untouched (its hash stays valid), needs no
+grip-closure model and carries the quantity spinal loading needs, the wrench the
+club exchanges with the hands, so the loads are applied to the hands rather than to
+a club body. For the rigid club of mass $m$, centre of mass $c$ and inertia $I$,
+\begin{align}
+  F &= m\,(a_c - g), & g&=(0,-9.80665,0)^{\top},\\
+  M_c &= I_w\alpha + \omega\times(I_w\omega), & I_w &= R\,I\,R^{\top},
+\end{align}
+where $F$ and $M_c$ are the force and the moment about the centre of mass that the
+hands exert on the club. The derivatives come from cubic splines of $c(t)$ and of
+the entries of $R(t)$ with $\omega^{\wedge}=\dot R R^{\top}$ and
+$\alpha^{\wedge}=\ddot R R^{\top}-(\omega^{\wedge})^{2}$, after the same optional
+zero-phase low-pass as the inverse dynamics. The split between the hands is
+statically indeterminate; equal weights $w_i=1/2$ are an assumption. Hand $i$
+exerts $w_iF$ at its grip point $p_i$ and the couple
+$\tau_i=w_i\bigl(M_c-\sum_j(p_j-c)\times w_jF\bigr)$, which reproduces $M_c$
+exactly. The club acts on the hand with the opposite wrench, transported to the
+hand body origin $o_i$ as the force $-w_iF$ and the torque
+$-\tau_i-(p_i-o_i)\times w_iF$, both expressed in ground. The lever arm $p_i-o_i$
+comes from the golf geometry (the shared grip point in the golf hand frame), not
+from the target.
+
+The ground reaction reuses the force-free estimator: inverse dynamics with every
+force element off but the hand loads gives the six pelvis generalised forces the
+ground must supply, and non-negative friction-limited forces on the sole points of
+the mapped foot bodies reproduce them (regularised non-negative least squares).
+The foot and heel distribution is an assumption, not a measurement. The sole point
+offsets are those of the golf humanoid applied in each foot frame.
+
+\paragraph{Study Option and Receipt.}
+\texttt{SpineStudyRequest} accepts \texttt{fullbody\_map} and
+\texttt{external\_loads\_policy} (\texttt{none}, \texttt{supplied},
+\texttt{grf\_only}, \texttt{club\_and\_grf}); the default policy is
+\texttt{supplied} with an \texttt{external\_loads} file and \texttt{none}
+otherwise. The option cannot be combined with a movement variant. The
+\texttt{fullbody} stage follows the drive; its merged coordinates feed the inverse
+dynamics, the static optimisation and the joint reactions. The receipt gains an
+optional \texttt{fullbody} record (omitted without the option, so the schema is
+unchanged) that lists every included load by name, body, kind and frame, lists the
+excluded classes with their reasons, states in words when the club or the ground
+reaction is excluded or only gravity acts, and carries the map summary and the
+orientation residual.
+
+\paragraph{Assumptions and Limitations.}
+Forearm pronation and wrist are locked in the Bruno file and excluded on the golf
+side, so the hands follow the forearm only. The head and neck are held neutral.
+Equal hand weights, the foot distribution, the zero-pose equivalence and the
+unmodelled knee cross term are assumptions. The club wrench is a rigid-body
+reaction, not a grip model. Shoulder elevation is bounded below by its range, so
+swings that ask for a negative elevation show a positive residual. Real-capture
+acceptance on the owner workstation (anonymised capture identifier) is still
+pending; a synthetic swing proves only that the software path runs. Pelvis
+residuals are reported by the run and committed nowhere.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python3 -m pytest tests/opensim/spine/test_fullbody_map.py \
+  tests/opensim/spine/test_fullbody_loads.py \
+  tests/opensim/spine/test_fullbody_orientation.py \
+  tests/opensim/spine/test_study_fullbody.py -q
+UD_SPINE_BRUNO_SOURCE=<local MaleFullBody.osim> \
+  python3 -m pytest tests/opensim/spine/test_fullbody_licensed.py -q -s
+\end{verbatim}
+Without the environment variable the licensed tests skip with the reason
+\texttt{UNQUALIFIED: bruno2015\_fullbody\_os4\_v2}; a skip is never acceptance.

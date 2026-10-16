@@ -1,0 +1,123 @@
+\subsection{Per-Level Joint Reactions With Muscle Forces}
+\label{sec:spn-10c}
+
+This section documents \texttt{spine/joint\_reactions.py} (issue \#12762, epic
+\#12735). It turns the muscle forces of the trunk static optimization
+(Section~\ref{sec:spn-10b}) into the intervertebral joint reaction wrench of
+every mapped level, as a \texttt{SpinalLoadSeries} with observable
+\texttt{JOINT\_REACTION}. It is the third of the three load observables of
+ADR-0055 item 5 and is never conflated with the generalized effort of
+Section~\ref{sec:spn-10a}.
+
+\paragraph{Observable and Frame.}
+The wrench is the force $\mathbf F$ and moment $\mathbf M$ exerted on the
+superior vertebra by the inferior vertebra through the joint, expressed in the
+inferior vertebra ISB frame ($X$ anterior, $Y$ cranial, $Z$ right) about the
+mid-disc joint centre, in N and N$\cdot$m. Compression is $+F_y$, anterior
+shear $+F_x$, right shear $+F_z$. The joint centre is the origin of the joint
+child frame, which coincides with the origin of the parent offset frame for
+every level because the translations of a level are constant zero; the
+reference-point offset passed to the shared transport is therefore zero. With
+$R_{gP}$ the ground orientation of the parent offset frame and $R_{i0}$ the
+neutral rotation from the inventory (the convention of the ID moments),
+\[
+  \mathbf F_{\mathrm{isb}} = R_{i0} R_{gP}^{\mathsf T}\,\mathbf F_g , \qquad
+  \mathbf M_{\mathrm{isb}} = R_{i0} R_{gP}^{\mathsf T}\,\mathbf M_g ,
+\]
+where $(\mathbf F_g,\mathbf M_g)$ is the output of
+\texttt{Joint.calcReactionOnChildExpressedInGround}, the call behind the
+OpenSim \texttt{JointReaction} analysis with \texttt{apply\_on\_bodies=child}.
+
+\paragraph{What the Reaction Contains.}
+Muscles are external forces on the bodies and are not part of the reaction.
+The reaction is what the joint transmits: the translational constraint force
+plus the torque of the residual (reserve) actuation at the joint, because a
+reserve is a generalized force acting at the joint and not a muscle. Hence for
+each level the generalized effort $\tau^{\mathrm{ID}}$ of
+Section~\ref{sec:spn-10a} decomposes exactly as
+\[
+  \mathbf M^{\mathrm{ID}} = \mathbf M^{\mathrm{react}} + \mathbf M^{\mathrm{musc}},
+  \qquad
+  \mathbf M^{\mathrm{musc}} = \sum_{p\in\text{above}} (\mathbf x_p - \mathbf c)
+  \times \mathbf f_p ,
+\]
+with $\mathbf c$ the joint centre, $\mathbf x_p$ the path points attached to the
+bodies above the joint and $\mathbf f_p$ the muscle force on point $p$. Where
+the muscles fully explain the effort the reserve is zero and the reaction
+moment vanishes, because the three joint rotations are free.
+
+\paragraph{Method.}
+Per frame selected by the static optimization:
+\begin{enumerate}
+  \item Coordinates, speeds and accelerations $(q,u,\dot u)$ come from the same
+        motion, derivatives and mobility layout as the inverse dynamics
+        (one shared private loader). The optional low-pass cutoff must equal
+        the one used for the SO input and the sample times must match the SO
+        frame times; otherwise a \texttt{ValueError} is raised.
+  \item Each muscle is set to its SO tendon force $F_m$ with
+        \texttt{overrideActuation} (rigid tendon, so no fibre equilibrium is
+        solved). The model copy has couplers disabled (ADR-0055 item 6).
+  \item \texttt{InverseDynamicsSolver} returns the residual generalized force
+        $r$ on every coordinate that, together with gravity, external loads
+        and the muscles, produces the measured $\dot u$. On the level
+        coordinates $r$ is the reserve and must equal the SO reserve within
+        \texttt{reserve\_tolerance\_nm} ($10^{-6}$\,N$\cdot$m); a larger
+        mismatch means the SO result does not belong to this model, motion or
+        filter and is refused. On the six ground-pelvis coordinates $r$ is the
+        pelvis residual wrench (recorded, not part of a spine reaction).
+  \item $r$ is applied through one unit-optimal-force
+        \texttt{CoordinateActuator} per coordinate with override actuation.
+        Forward dynamics at the state then gives accelerations equal to the
+        measured ones; $\max|\dot u-\dot u_{\mathrm{meas}}|$ is verified
+        against \texttt{acceleration\_tolerance} ($10^{-6}$) and recorded. This
+        is the semantics of the OpenSim \texttt{JointReaction} analysis driven
+        by CMC or static-optimization actuators plus residuals.
+  \item The reaction at every level joint is read, rotated into the inferior
+        ISB frame and assembled by \texttt{spine.loads.from\_wrench\_in\_frame}.
+\end{enumerate}
+A body with zero mass (the coupler driver body of the fixtures) makes the mass
+matrix singular and the accelerations NaN, so such a body is given
+$10^{-9}$\,kg and an isotropic inertia of $10^{-12}$\,kg\,m$^2$ in the run
+copy; its weight is below $10^{-8}$\,N, negligible against the $10^{-6}$\,N
+test accuracy, and the names are recorded in the provenance.
+
+\paragraph{Provenance.}
+The series carries \texttt{model\_id}, \texttt{model\_sha256}, \texttt{solver}
+(JointReaction semantics), \texttt{cost\_exponent} (copied from the SO result),
+\texttt{distribution\_source} and \texttt{external\_loads} (copied from the SO
+result; the loads of the run must be the same ones, else a \texttt{ValueError}
+is raised), plus \texttt{couplers}, \texttt{muscles}, \texttt{reserves},
+\texttt{acceleration\_consistency}, \texttt{pelvis\_residual},
+\texttt{massless\_bodies}, \texttt{filter\_hz}, \texttt{units}, \texttt{frame}
+and \texttt{sign}.
+
+\paragraph{Assumptions and Limitations.}
+\begin{itemize}
+  \item Rigid-tendon muscles at the SO force; compliant-tendon equilibrium and
+        activation dynamics are not represented.
+  \item The output is defined only on the SO frames; no interpolation.
+  \item Passive intervertebral elements (disc, ligaments) are not modelled in
+        the fixtures and, when a model carries them, appear inside the
+        reaction; they are not separated (the \texttt{PASSIVE\_ELEMENT}
+        observable is a separate series).
+  \item The exact pelvis residual shares of the golf humanoid and the native
+        Bruno run on the owner workstation are deferred on \#12749.
+\end{itemize}
+
+\paragraph{Acceptance Tests.}
+All fixture values are invented. A vertical stack (zero lordosis, sacral slope
+and thorax tilt) gives compression equal to the weight above each level, zero
+shear and zero moment to $10^{-6}$\,N. A tilted stack matches a rigid-body
+sum built from the model body poses and mass centres. Rotating the whole model
+about the ground vertical leaves the loads unchanged. A single muscle of
+100\,N changes the reaction by the force and moment of its path points above
+the joint, computed by hand from the path geometry. The effort decomposition
+above holds to $10^{-6}$\,N$\cdot$m on a moving trunk with a real SO result.
+An inconsistent reserve is refused, couplers are disabled, and the provenance
+is complete.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/opensim/spine/test_joint_reactions.py \
+    -q -n 0 -rfE -p no:cacheprovider -o addopts=""
+\end{verbatim}

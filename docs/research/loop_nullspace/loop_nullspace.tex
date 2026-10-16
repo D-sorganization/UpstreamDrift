@@ -253,6 +253,74 @@ vector.  Without feet, all six root rows are conditions ($b_{root}=0$ is
 required).  The gauge of $1$ in the two-foot row is the contact force pair
 along the line $p_1p_2$ (a squeeze that produces no net wrench).
 
+\subsection{Lower-Body Loop: Ground Contact and Observations}
+\label{sec:lowerbody}
+
+With rigid unilateral feet the balance is $A\,x=b$ with
+$A=[S^{\top}\;J_c^{\top}\;J_g^{\top}]$ and
+$x=(\tau,\lambda,f_g)$, where $f_g$ stacks a world-axis three-vector for every
+contact point and $J_g$ is the stacked point Jacobian.  A point is a contact
+when its signed gap to the ground is at most a declared tolerance; the load of
+a contact lies in a Coulomb cone $\sqrt{f_{t1}^2+f_{t2}^2}\le\mu f_n$ in the
+frame $(t_1,t_2,n)$ of its normal, with $\mu$ a declared coefficient
+(hypothesis \texttt{H-FRICTION-CONE}), never a measurement.  The foot contact
+cones share the constraint class of the grip cones.
+
+A ground-reaction observation is a linear map of the contact loads,
+$E\,f_g=g$, with a declared one-sigma uncertainty $\sigma_i$ for every row
+(hypothesis \texttt{H-GRF-OBSERVATION}).  Embedding $E_x=[0\;0\;E]$ and writing
+$x=x_p+Nz$,
+\begin{equation}
+\text{nullity after observation}=\text{nullity}(A)-\rank(E_xN),
+\end{equation}
+the exact limit of vanishing measurement uncertainty.  The rank counts the
+null directions the data can see; a net ground wrench is already fixed by the
+unactuated root rows, so it contributes rank $0$.  With finite uncertainty the
+observation is the two-sided band
+\begin{equation}
+\bigl|E_x(x_p+Nz)-g\bigr|_i\le k\,\sigma_i,
+\end{equation}
+with coverage factor $k$ (default $3$), added to the feasible set as rows of
+kind \texttt{grf}; the null dimension is unchanged.  The accounting reports the
+singular values of $\operatorname{diag}(1/\sigma)E_xN$: a value below one means
+a unit scaled null step moves the prediction by less than the declared
+uncertainty, so that direction is not resolved by the data.  The restriction
+routine moves $x_p$ to the weighted least-squares member of the family and
+drops the visible directions; it refuses (never absorbs) data that disagree
+with the balance by more than $k\sigma$.
+
+\begin{table}[ht]
+\centering
+\caption{Observation Rank Against the Exact Golden (Point Feet)}
+\label{tab:lowerbody}
+\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Observation $E$ & 2 points (1 per foot) & 4 points (2 per foot) \\
+\midrule
+Nullity before observation        & 7 & 12 \\
+Net force and moment              & 0 & 0 \\
+Net force                         & 0 & 0 \\
+Vertical load of each foot        & 0 & 1 \\
+Force of each foot                & 1 & 3 \\
+Every point force                 & 1 & 6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The table lists $\rank(E_xN)$, computed exactly over the rationals by
+\texttt{derivations/lower\_body\_counts.py} (golden
+\texttt{lower\_body\_observation}); the numeric fixture at zero root pose
+reproduces every entry.  With two point feet the contact map has rank $5$, so
+the vertical loads of the two feet are already fixed by the balance and the
+only visible direction of the per-foot force is the horizontal squeeze along
+the line $p_1p_2$.
+
+Non-claims: contacts are rigid and unilateral (no compliance, no slip
+dynamics); a friction coefficient is a declared hypothesis; an observation
+produced by a simulation standing in for a force plate is a simulation record,
+not a measurement; contact loads are not physiological quantities.
+
 \section{Zero-Side Three-Case Analysis}
 \label{sec:zeroside}
 
@@ -635,6 +703,33 @@ the analytic infeasible case the conflict set is
 \{\texttt{H-TORQUE-CAPACITY:joint1:lower}, \texttt{H-GRIP-PRELOAD:axial\_nonpositive}\}
 with certificate $y=(0,1,1,0,0)$ and $y^{\top}h=-\tfrac14$.
 
+\subsection{Certified Affine Probes and Epsilon-Constraint Fronts}
+A \emph{probe} asks whether an affine functional $f(z)=f_0+c^{\top}z$ satisfies
+$f\ge\theta$ on the trajectory-coupled set
+$\{z=(z_1,\dots,z_T):G z\le h,\ b_j-A_jz\in\mathcal K_j\}$ (rows of the frames,
+exact cones, hard rate bounds $|q_{k+1}-q_k|\le\delta_k$).  Stack
+$A=[G;A_1;\dots]$ and $b=[h;b_1;\dots]$.  A dual vector $d$ with $d\ge0$ on the
+rows, $d_j\in\mathcal K_j$ (self-dual) and $c+A^{\top}d=0$ gives, by weak
+duality, $f(z)\ge f_0-b^{\top}d$ for every feasible $z$.  Together with a
+primal witness $w$ ($f(w)\ge\min f$) this is a zero-gap certificate that is
+re-checked with numpy alone.  An empty set has a Farkas certificate
+$A^{\top}d=0$, $b^{\top}d<0$.  With $\mathrm{atol}=\varepsilon_s\cdot\text{scale}$
+the verdict is \texttt{HOLDS} if $f_0-b^{\top}d>\theta+\mathrm{atol}$,
+\texttt{FAILS} if a feasible witness has $f<\theta-\mathrm{atol}$ and
+\texttt{UNDECIDED} otherwise (a bound that touches the threshold is
+undecided).  Certificates are exact up to the reported residuals and hold only
+under the stated hypotheses.
+
+A Pareto front over two quadratic objectives $J_a,J_b$ uses the
+epsilon-constraint $\min J_a$ subject to $J_b\le\varepsilon$, with
+$J_b=\lVert Mz+m\rVert^2$ imposed as the cone
+$(\sqrt{\varepsilon},Mz+m)\in\mathcal K$.  Strict convexity of $J_a$ on the
+retained torque space makes each solution unique and Pareto optimal; the cone
+multiplier $w_0$ gives $\mathrm{d}J_a^{*}/\mathrm{d}\varepsilon=-w_0/(2\sqrt{\varepsilon})$.
+For $z_1\ge1$, $|z_2|\le3$, effort versus torque rate over two frames the front
+is $J_a^{*}=\tfrac{\Delta t}{2s^2}\bigl(1+(1-d)^2\bigr)$ with
+$d=s\sqrt{\varepsilon\,\Delta t}<1$ and constant beyond $d=1$.
+
 \subsection{Polyhedral Approximation of Cones}
 A circular friction cone approximated by a regular $k$-gon is an inner
 approximation (polygon inside the circle) or outer one.  With inner scale
@@ -658,8 +753,79 @@ Envelopes of the restricted kinds are contained in the \texttt{WELD6}
 envelope, and a restricted set can be empty.  This is a \emph{restriction of
 the reaction set on the welded kinematics}.  It is not a different closure
 model: a true alternative grip changes the kinematics themselves and has to be
-re-derived (research item NSX-72).  Outputs carry the label
+re-derived (research item NSX-72, Section~\ref{sec:alternatives}).  Outputs carry the label
 \texttt{REACTION\_RESTRICTION\_SENSITIVITY}.
+
+\subsection{Calculation Reference}
+\paragraph{Row Selection and Shaft Axis.}
+In the canonical grip frame the closure rows are $(f_x,f_y,f_z,\tau_x,\tau_y,
+\tau_z)$.  \texttt{restrict} keeps the rows $R$ of $J_c$ and $\dot J_c v$ and
+changes nothing else ($q,v,a,M,h,S,J_g$ and the loop support are unchanged).
+Row $\tau_x$ is the twist about the shaft only if the grip $x$ axis is the
+shaft.  This holds for the anthro model (bare-club centre of mass on $x$) and
+not for the spatial fixture, whose club lies along grip $z$.  \texttt{restrict}
+therefore refuses \texttt{SHAFT\_FREE5} unless the shaft axis lies within
+$0.1$ of the grip $x$ axis.  Dropping a row fixes that multiplier at zero, so
+the restricted allocation set is $\{x:\ A_R x=b,\ \lambda_{\bar R}=0\}$.
+
+\paragraph{Hand-Split Quantities.}
+The closure multiplier is at the grip origin $P$ (the closing hand's weld
+frame).  With hand coordinates $x_L,x_R$ on the shaft, the closing hand's
+wrench about its own grip point is $-(f,\ t-x_c\hat e_x\times f)$ and the net
+wrench $(F,M_P)$ moves to the grip midpoint $o$ as $(F,\ M_P-o\times F)$.  The
+split coordinates are then the affine closing-hand map of the grip-split
+section evaluated on the embedded multiplier.
+
+\paragraph{Acceptance Evidence.}
+Exact sympy goldens (\texttt{restriction\_counts}) fix the dimension counts per
+kind; the minimum-norm torque on the exact chain equals the residual
+$(I-P_r)b$; the $J_c=I$ closed form gives the envelope.  Containment of every
+restricted envelope in the \texttt{WELD6} envelope is checked to
+$10^{-6}(\text{scale}+|\text{bound}|)$ on the anthro record.
+
+\paragraph{Anthro Result (199 Frames, Declared Prior).}
+Under the \emph{assumed} capacity prior, 75 of 199 welded frames are
+infeasible with conflict set \texttt{H-TORQUE-CAPACITY} alone.
+\texttt{SHAFT\_FREE5} leaves the feasible count unchanged (124) and narrows
+envelopes; \texttt{BALL3} loses six further frames (118 feasible, 81
+infeasible).  No frame was balance-inconsistent: the foot rows balance the
+unactuated root rows for every kind.  Sign-class changes are all
+indeterminate-to-determined, as nesting requires.  The prior is not relaxed.
+
+\paragraph{Limitations.}
+The left grip point is the left-hand solid's centre of mass, a model
+parameter and not a measurement.  The result describes the reaction set on
+welded kinematics; it is not evidence about the true grip mechanics.  The
+position level of admission was skipped (no closure plant).
+
+\paragraph{Reproduction.}
+\texttt{LOOP\_NULLSPACE\_RESTRICTION\_STRIDE=1 LOOP\_NULLSPACE\_RESTRICTION\_JSON=out.json
+python3 -m pytest tests/integration/test\_loop\_nullspace\_restriction\_anthro.py}
+writes the record kept at
+\texttt{docs/research/loop\_nullspace/records/restriction\_anthro\_stride1.json}.
+
+\subsection{Closure Alternatives With Re-Derived Kinematics}
+\label{sec:alternatives}
+A grip model is a closure with its \emph{own} rows, hence its own admitted
+motions (research item NSX-72).  Write the weld closure as
+$\Phi_6(q)=\log_6(T_{\mathrm{lead}}^{-1}T_{\mathrm{trail}})$ in the shaft-first
+grip frame, rows $(f_x,f_y,f_z,\tau_x,\tau_y,\tau_z)$ with $x$ along the club.
+The shaft-twist revolute drops the twist component, $\Phi_5=(\Phi_6)_{\{0,1,2,4,5\}}$;
+the trail ball keeps the position part, $\Phi_3=(\Phi_6)_{\{0,1,2\}}$; the lead
+ball hangs the club on three extra unactuated coordinates $\beta$ (a $z$-$y$-$x$
+ball at the grip point) and keeps six rows, $\Phi_6(q,\beta)$.  Each model has
+$J_c=\partial\Phi/\partial q$ and $\dot J_c v$ of its own rows, checked here
+against a central difference of its own residual, and admission is evaluated
+at position ($\Phi/L$), velocity ($J_c v\,T/L$) and acceleration
+($(J_c a+\dot J_c v)T^2/L$) with the gate $10^{-6}$ unchanged.  The admitted
+velocity space has dimension $n-\operatorname{rank}J_c$, which grows as rows
+drop; the dynamics $Ma+h=S^\top\tau+J_c^\top\lambda$ use the same rows.  On a
+trajectory the weld also admits, the rows-only models give exactly the NSX-26
+restriction; they differ in which other trajectories they admit.  The lead ball
+changes the unactuated rows and therefore the allocation nullity.  The record
+of numbers and every limitation is
+\texttt{docs/research/loop\_nullspace/closure\_alternatives\_report.md}; the
+synthetic fixture and the declared torque box are not a golfer.
 
 \section{Canonical Closure Conversion}
 \label{sec:conversion}
@@ -814,6 +980,172 @@ $P^{\!\top}K_{\mathrm{geom}}(\lambda)P$, with $P$ spanning $\ker J_c$, for two
 reaction allocations; it differs between them (basis-free projector form is
 stored).
 
+\paragraph{Implementation (NSX-84).}  Perturbations are expressed in an
+orthonormal basis $P$ of $\ker J_c$ (SVD), $\delta q=P\xi$ and
+$\delta v=P\eta+O\xi$ with $O\xi=-J_c^{+}(\partial_qJ_c[P\xi])v$ the
+minimum-norm velocity offset, so $J_c\,\delta q=0$ and the velocity-level
+tangency hold by construction; the basis-free object is $\Pi=PP^{\!\top}$ with
+$J_c\Pi J_c^{\!\top}=0$.  The full-state Jacobian of the index-3 DAE is never
+formed.  Two routes yield the same derivatives: central differences of the
+single KKT solve along retractions ($q+\epsilon\,dq$ in $\mathbb R^n$,
+$\mathrm{quat}\otimes\exp$ for free joints, so $n_q\neq n_v$ is handled), and
+the assembled system of Eq.~\eqref{eq:var-kkt} with $K_{\mathrm{geom}}$ taken
+from $\partial_q(J_c^{\!\top}\lambda)$ at fixed $\lambda$.  The moving-frame
+connection turns $F_t$ into the angle coordinates of the worked case; for
+general $k$ it is specified in Section~\ref{sec:var-lin-k}.  The
+differencing refuses, rather than extrapolates, when the closure rank or the
+contact mode changes inside the step.  Engines declare analytic, autodiff,
+finite-difference or no derivatives (capability
+\texttt{closed\_loop\_derivatives}); an undeclared capability fails closed with
+its reason.  Failed experiments: none recorded.  Reproduction:
+\texttt{pytest tests/unit/loop\_nullspace/test\_tangent\_linearization.py}.
+
+\paragraph{Pinocchio Analytic Derivatives (NSX-85).}  The Pinocchio adapter
+returns the same tangent-bundle object without differencing.  The partials
+$(\partial_qa,\partial_va,\partial_\tau a)$ and
+$(\partial_q\lambda,\partial_v\lambda,\partial_\tau\lambda)$ are those of
+\texttt{computeConstraintDynamicsDerivatives}, total derivatives of
+\texttt{constraintDynamics} with $\lambda$ re-solved, hence they contain
+$K_{\mathrm{geom}}$; they enter as
+$\partial a/\partial\xi=\partial_qa\,P+\partial_va\,O$ and
+$\partial a/\partial\eta=\partial_va\,P$.  The offset $O$ needs
+$\partial_qJ_c[w]\,v$, obtained from the analytic LOCAL joint-velocity partials
+of the two weld frames (hand frame minus club frame, constant offset
+$\mathrm{d}v=R^{\!\top}(\mathrm{d}v_j+\mathrm{d}\omega_j\times p)$); the pose-rate
+and transport terms multiply $J_cw$ or $J_cv$ and vanish for tangent $w$ and
+admissible $v$.  Convention (rule R8): the native rows are the constraint
+LOCAL frame, linear then angular, sign $+1$, and the canonical grip frame is
+that frame, so $C=I$ and neither $a$ nor $\lambda$ needs conversion; the identity
+is checked at every evaluation and a model that broke it is refused because the
+$\partial_qC$ term of $\lambda_c=C^{-\top}\lambda_n$ is not implemented.
+Provenance is \texttt{derivative\_method=analytic} with no step.  Evidence: on
+the anthro fixture at projected states the result equals the NSX-84
+finite-difference reference to a scaled $10^{-6}$, with the reference step chosen
+per block.  The default step $10^{-5}$ cannot serve as oracle: accelerations are
+about $6\times10^{4}$ and the native drift solve carries about $10^{-7}$ relative
+noise, so the default-step reference has a round-off floor of about
+$10^{-4}$ scaled.  The $\eta$ blocks are exactly quadratic in $v$ (large
+step, no truncation); the $\xi$ blocks use a Richardson combination of central
+differences at $3.2\times10^{-3}$.  Failed experiments: evaluating the
+world-aligned joint-velocity partials instead of the LOCAL ones gave linear
+rows that disagree with finite differences of the twist (cause not
+investigated) and was discarded.  Reproduction:
+\texttt{pytest tests/unit/loop\_nullspace/test\_pinocchio\_derivatives.py -m requires\_pinocchio}.
+
+\paragraph{Implementation (NSX-86, Drake AutoDiff).}  The Drake route
+differentiates the same assembled system of Eq.~\eqref{eq:var-kkt} but takes
+$\partial_{q,v}(M,h,J_c,\dot J_cv)$ exactly: the \texttt{MultibodyPlant} is
+re-templated on \texttt{AutoDiffXd}, $(q,v)$ are seeded in the specification
+coordinate order, and \texttt{CalcMassMatrix}, \texttt{CalcBiasTerm} minus
+\texttt{CalcGravityGeneralizedForces}, \texttt{CalcJacobianSpatialVelocity} and
+\texttt{CalcBiasSpatialAcceleration} are evaluated on the re-templated plant.
+Then $\partial_q(M a+h)$, $\partial_q(J_ca+\dot J_cv)$, the velocity offset
+$O$ and $K_{\mathrm{geom}}=\sum_r\lambda_r\partial_qJ_{c,r}$ follow by
+contraction, with $\delta\lambda$ re-solved; nothing is differenced.  The native
+rows are mapped to the canonical closure convention by the constant NSX-02
+matrix $C$ ($J_c=CJ_{\mathrm{native}}$); $\partial_qC=0$ because the grip frame
+is the native LOCAL frame, which is checked at the state, and the route is
+refused (capability rejection) otherwise.  Scope: rigid tree and weld closure
+only, Euclidean coordinates (all joints scalar), ground contact not
+differentiated; a component AutoDiff cannot evaluate is refused, never
+finite-differenced.  Evidence: equality with the NSX-84 finite-difference
+reference on the identical problem within that reference's own measured
+step-to-step variation (its round-off floor is set by $\mathrm{cond}(M)\approx
+10^{8}$ of the finger block), and equality with the Pinocchio analytic derivatives (NSX-85) in one tangent basis, after the registered
+NSX-56 Track~N agreement of $M,h,J_c,\dot J_cv$ and the propagated Track~S bound
+on $(a,\lambda)$.  The $\partial/\partial\tau$ blocks are the effort response
+$K^{-1}[e_j;0]$ and are held to the first-order \texttt{kkt\_bound} of the
+measured Track~N differences (right-hand-side scale zero); the $\xi,\eta$ blocks
+also carry differential differences that no Track~N entry registers, so they are
+held to the resolution of the NSX-84 finite-difference reference (its own spread
+under step $\times0.5$ and $\times2$, round-off set by $\mathrm{cond}(M)\approx
+10^{8}$ of the finger block).  No derivative-level Track~N tolerance exists;
+conformance rows are NSX-98.  Failed experiments: a random configuration off the recorded
+trajectory exceeds the registered Pinocchio--Drake $\dot J_cv$ Track~N tolerance
+by a factor 3 (Pinocchio obtains $\dot J_cv$ as $-J_ca_0$ from an
+ill-conditioned forward solve), so the Pinocchio comparison uses the recorded
+golfer frames only; a unit-scale random load makes the finite-difference
+reference noise-limited at the size of the signal, so the oracle tests use a
+small load.  Reproduction:
+\texttt{pytest tests/unit/loop\_nullspace/test\_autodiff\_derivatives.py
+tests/unit/engines/drake/test\_closed\_loop\_autodiff.py
+tests/unit/engines/drake/test\_closed\_loop\_autodiff\_pinocchio.py}.
+
+\subsection{Tangent State Space for Several Degrees of Freedom}
+\label{sec:var-lin-k}
+
+Let $P(q)\in\R^{n_v\times k}$ be a smooth orthonormal frame of $\ker J_c$,
+$N=I-PP^{\!\top}$, $\omega=P^{\!\top}v$ (so $v=P\omega$) and
+$\Gamma_w=P^{\!\top}\partial_qP[w]$.  Because $P^{\!\top}P=I$, $\Gamma_w$ is
+skew.  Write $\delta q=P\xi$ and $\delta v=P\eta+O\xi$ with $O\xi\in
+\range J_c^{\!\top}$ (minimum norm), so $P^{\!\top}O=0$ and
+$\xi=P^{\!\top}\delta q$, $\eta=P^{\!\top}\delta v$.  A perturbed trajectory
+obeys $\delta q'=\delta v$ and $\delta v'=\delta a=A_\xi\xi+A_\eta\eta+A_\tau\delta u$,
+where $A_\bullet$ are the derivatives of Section~\ref{sec:var-lin}.
+
+\paragraph{Derivation.}  Differentiating $\xi=P^{\!\top}\delta q$ along the
+nominal motion ($P'=\partial_qP[v]$) gives
+$\xi'=\partial_qP[v]^{\!\top}P\,\xi+P^{\!\top}\delta v=\eta-\Gamma_v\xi$,
+since $\partial_qP[v]^{\!\top}P=\Gamma_v^{\!\top}=-\Gamma_v$ and $P^{\!\top}O=0$.
+Likewise $\eta'=\partial_qP[v]^{\!\top}(P\eta+O\xi)+P^{\!\top}\delta a$.  The
+offset is not stored: a tangent velocity keeps its frame components, so
+$v(q+\varepsilon P\xi)=P(q+\varepsilon P\xi)\,\omega$ and its normal part gives
+$O\,e_j=N\,\partial_qP[Pe_j]\,\omega$.  Collecting terms,
+\begin{equation}
+F_t=\begin{bmatrix}-\Gamma_v & I_k\\[2pt]
+P^{\!\top}A_\xi+K & P^{\!\top}A_\eta-\Gamma_v\end{bmatrix},\quad
+G_t=\begin{bmatrix}0\\ P^{\!\top}A_\tau S^{\!\top}\end{bmatrix},\quad
+K_{ij}=\partial_qP_i[v]^{\!\top}\,N\,\partial_qP[Pe_j]\,\omega .
+\label{eq:var-lin-k}
+\end{equation}
+$K$ is the $k\times k$ block ``$\partial_qP^{\!\top}$ contracted with
+$Pe_j$'' of the specification, taken in the \emph{normal} projection: with
+$B(x,y)=\Phi_{qq}[x,y]$, $W=(J_cJ_c^{\!\top})^{-1}$ and $J_c\,\partial_qP_i[w]=
+-B(w,P_i)$ one finds $K_{ij}=u_i^{\!\top}Wu_j$ with $u_i=B(v,P_i)$, a Gram
+matrix: symmetric and positive semidefinite for any $k$ (rank at most the
+number of closure rows).  $\Gamma_v$, in contrast, is skew; the two never
+mix.
+
+\paragraph{Reduction to $k=1$.}  For $k=1$, $\Gamma_v=0$ and $N\partial_qP$
+is the whole of $\partial_qP$.  Using $a=P\alpha+a_n$ with
+$a_n=-J_c^{\!\top}WB(v,v)$ and $\partial_qP[P]^{\!\top}P=0$, the earlier
+scalar connection $\partial_qP[P]^{\!\top}a$ equals
+$\omega^2B(P,P)^{\!\top}WB(P,P)=K$; the pendulum golden
+$F_{10}=\omega^2+\lambda/m$ is reproduced exactly.  The literal extension
+$C_{ij}=(\partial_qP_i[Pe_j])\cdot a$ is \emph{not} the $k>1$ connection: it
+adds the tangential term $\sum_l\alpha_l(\Gamma_{Pe_j})_{li}$, replaces the
+Gram matrix by $B(P_j,P_i)^{\!\top}WB(v,v)$ (not symmetric in general) and
+omits $-\Gamma_v$ on the diagonal blocks.  The five-bar golden shows an
+entry error of $8.1$ against entries of size up to $53$ (failed experiment,
+kept as a regression test).
+
+\paragraph{Frame Invariance.}  Let $P\to PR$.  For a constant orthogonal $R$
+and $T=\mathrm{blkdiag}(R,R)$, $\Gamma_v\to R^{\!\top}\Gamma_vR$,
+$K\to R^{\!\top}KR$ and $A_\bullet P\to A_\bullet PR$, so
+$F_t\to T^{\!\top}F_tT$ and $G_t\to T^{\!\top}G_t$: a similarity transform,
+with identical eigenvalues.  For a position-dependent $R(q)$ the coordinates
+rotate in time and
+$F_t\to T^{\!\top}F_tT+\mathrm{blkdiag}(\dot R^{\!\top}R,\dot R^{\!\top}R)$,
+$\dot R=\partial_qR[v]$ (a gauge law, not a similarity); eigenvalues of the
+\emph{frozen} matrix then change by the frame's rotation rate, which is a
+property of the chosen frame, not of the dynamics.  Both laws are tested.
+
+\paragraph{Golden and Reproduction.}  A planar five-bar ($n_v=4$, two closure
+rows, $k=2$, point masses, all four joints actuated) is derived by an
+independent route: reduced Euler--Lagrange equations in the actuated angles
+$s=(a_1,a_2)$, closed-form two-circle intersection for the passive angles,
+linearisation in $(\delta s,\delta s')$ and the time-dependent map
+$\zeta=T(s,s')(\delta s,\delta s')$, $\zeta'=(TF_rT^{-1}+\dot TT^{-1})\zeta$ in
+40-digit arithmetic (outer derivatives by \texttt{mpmath}; truncation below
+$10^{-25}$).  No KKT system and no repository code are used.  Golden:
+\texttt{planar\_five\_bar\_tangent\_state\_space}; script:
+\texttt{derivations/five\_bar\_goldens.py}.  Non-claims: this is a local
+linearisation at one configuration; a smooth frame field is required, and
+the frame $P(q)$ is the Gram--Schmidt frame of
+$(\Pi e_1,\Pi e_3)$, $\Pi=I-J_c^{\!\top}(J_cJ_c^{\!\top})^{-1}J_c$, which is
+singular where $\operatorname{rank}J_c$ drops.  Reproduction:
+\texttt{pytest tests/unit/loop\_nullspace/test\_tangent\_state\_space\_k2.py}.
+
 \subsection{Event Section and Saltation Correction}
 \label{sec:var-salt}
 
@@ -855,6 +1187,71 @@ $\operatorname{Var}(y)=\psi_0^{\!\top}P_0\psi_0+\sum_k b_k^{\!\top}\Sigma_{w,k}(
 Noise amplitudes are per-step variances and must be timestep-consistent (V6):
 a continuous white spectral density $S_w$ becomes $\Sigma_w=S_w/\Delta t$.
 
+\paragraph{Implementation (NSX-90).}  The recursion and the adjoint are written
+for matrices of general shape, $A_k\in\R^{n_x\times n_x}$ with $n_x=2k$ for
+tangent dimension $k$; they do not inspect $k$, and the frame connection for
+$k>1$ (issue \#12817) stays in the tangent linearization.  The adjoint is
+$S_x[N]=C$, $S_x[t]=S_x[t{+}1]A_t$, $S_{\mathrm{in}}[t]=S_x[t{+}1]B_t$; then
+$S_{\mathrm{in}}[t]_{ij}$ is the sensitivity of outcome $i$ to input channel $j$
+at step $t$ (``which joint, when'') and $S_x[0]$ is $S_{y,x_0}$.  Persistent
+parameter states $\theta$ (per-trial constants, rule R14) are appended with
+$A_{\mathrm{aug}}=\left[\begin{smallmatrix}A&E\\0&I\end{smallmatrix}\right]$ and
+enter through $P_0$; one draw acts at every step, so their variance is
+$S_\theta\Sigma_\theta S_\theta^{\!\top}$ with $S_\theta=\sum_t C\,\Phi(N,t{+}1)E_t$.
+The variance budget splits $\operatorname{Var}(y)$ by input class and step and
+requires the classes to be uncorrelated, so the parts add exactly.  Outcomes at
+the physical event use $C_{\mathrm{ev}}=C_y\Pi$ (Section~\ref{sec:var-salt}).
+Evidence typing follows NSX-81: kernels are \texttt{INVARIANT} given the model
+while $A_t$ does not depend on the allocation (neither M2 nor M3 declared);
+variance under additive noise and no M2/M3 is \texttt{INVARIANT} with the noise
+hypothesis on the \texttt{conditioning} axis; any declared M1, M2 or M3 makes
+the variance \texttt{FAMILY\_DEPENDENT}.  Reproduction:
+\texttt{pytest tests/unit/loop\_nullspace/test\_variance\_propagation.py
+tests/unit/loop\_nullspace/test\_variance\_records.py}.
+
+\paragraph{Nonlinearity Gate (NSX-90).}  The specification requires a gate but
+fixes no statistic and no threshold.  The implementation declares the statistic
+$r=\lvert D(2\epsilon)-2D(\epsilon)\rvert/\max(\lvert2D(\epsilon)\rvert,\rho)$ per
+outcome component and probe direction, with $D(a)=y(a\,d)-y(0)$ from nonlinear
+rollouts at amplitudes $\epsilon$ and $2\epsilon$ and a numerical floor $\rho$.
+Probes are the adjoint worst-case direction $d=\Sigma s^{\!\top}/\sqrt{s\Sigma
+s^{\!\top}}$ of each outcome and one standard deviation along each input
+coordinate.  The threshold is a required argument with no default: no value is
+recorded here because none has been specified.  A record whose maximum ratio
+exceeds it, or whose rollout is non-finite, is \texttt{NOT\_LINEAR\_VALID}; a
+record that never ran the gate is \texttt{NOT\_ASSESSED}.  Failed experiments:
+none recorded.
+
+\paragraph{Paired Nonlinear Monte Carlo (NSX-91).}  Finite-amplitude claims
+(saturation, slip, rank or contact change, missed impacts) need a nonlinear
+check of the linear prediction (V7).  A campaign evaluates every strategy on the
+\emph{same} random draws (common random numbers) and then on independent
+hold-out seeds.  Each draw is a pure function of (seed set, trial index,
+disturbance): its seed is
+\texttt{SeedSequence([base\_seed, index, disturbance\_position])}, so it does not
+depend on the strategy, on trial order or on batching.  White torque noise of
+spectral density $S_w$ enters the NSX-31 replay as a known external generalised
+load held constant over each allocation interval with per-interval variance
+$S_w/\Delta t$ (the NSX-90 discretisation).  RK4 evaluates the load at the end of
+an interval, so the held noise is right-continuous; this smooths the noise but
+preserves its integral over the window.  Rollouts that raise a declared numerical
+error, return non-finite outcomes, miss the ball or leave the admissible set are
+retained with their status and counted; the failure rate carries a Wilson
+interval.  Face-angle dispersion uses the wrapped statistics of V3; other
+outcomes report the mean and the population standard deviation, all with seeded
+percentile bootstrap intervals.  For $N$ Gaussian outcomes the sample standard
+deviation has relative standard error $1/\sqrt{2(N-1)}$, which fixes the
+expected interval half-width $z\,s/\sqrt{2(N-1)}$ the tests compare against.
+Paired differences resample trial indices jointly, so the common draws cancel.
+The replay integrator and step must differ from the generator's (rule R13), and
+a generator whose noise is identical to the assumed noise is rejected as
+circular.  The MC standard deviation is compared with the NSX-90 prediction; the
+gap is always reported, and agreement is claimed only when the nonlinearity gate
+ran and passed for that outcome.  Failed experiments: none recorded.
+Reproduction: \texttt{pytest tests/unit/loop\_nullspace/test\_paired\_monte\_carlo.py
+tests/unit/loop\_nullspace/test\_paired\_statistics.py
+tests/unit/loop\_nullspace/test\_replay\_campaign.py}.
+
 \subsection{Mechanisms by Which the Allocation Changes Variance}
 \label{sec:var-mechanisms}
 
@@ -893,6 +1290,205 @@ checks it against a grid minimum.  With M2 the derivative is a polynomial in
 $z$ of higher degree and has no such closed form; its coefficients are stored.
 No claim is made that any golfer uses a minimum-variance allocation.
 
+\subsection{Muscle-Level Co-Contraction Experiments}
+\label{sec:var-muscle}
+
+This subsection is the calculation-level reference for issue \#12723 (NSX-94).
+Code: \texttt{loop\_nullspace/muscle\_frame.py}, \texttt{muscle\_fiber.py},
+\texttt{muscle\_noise.py}, \texttt{muscle\_stiffness.py},
+\texttt{muscle\_cocontraction.py}, \texttt{muscle\_variance.py},
+\texttt{muscle\_capability.py}, and the engine providers
+\texttt{opensim/python/muscle\_mechanics.py} and
+\texttt{myosuite/python/muscle\_mechanics.py}.
+
+\paragraph{Frame, Units and Validity.}  At one posture the frame holds the
+moment-arm matrix $R=-\partial L_{MT}/\partial q\in\mathbb{R}^{m\times n}$ (m),
+the tendon tension table $f(a)$ on an activation grid (N) and, where the engine
+exposes them, the fibre stiffness $k_m$ and tendon stiffness $k_T$ (N/m).  The
+muscle law is the secant of the grid end points,
+$f=f_p+F_a a$, $\tau=R^{\top}f$, $G=R^{\top}\operatorname{diag}(F_a)$.  Two
+gates fail closed (\texttt{NOT\_QUALIFIED}): the \emph{reserve fraction}
+$\lVert\tau-\tau_{\mathrm{reach}}\rVert/\lVert\tau\rVert$, with
+$\tau_{\mathrm{reach}}$ the nearest muscle-reachable torque found by bounded
+least squares, and the \emph{linearity residual} between the engine table and
+its secant.  Both use the limit $0.10$ of \texttt{myofullbody.redundancy}; the
+linearity limit is the same number because an unmodelled torque error is
+equivalent to a reserve.  A frame whose reserves carry the load produces no
+numerical record.
+
+\paragraph{Activation Fibre.}  $\mathcal{F}(\tau)=\{a\in[0,1]^m: Ga=\tau-R^{\top}f_p\}$
+has an affine hull parallel to $\ker G$ (\texttt{ForceNullSpace.from\_balance},
+not re-implemented).  Co-contraction is a \emph{declared} linear index
+$c(a)=w^{\top}a$ (default total activation) and a declared list of levels.  The
+level range is two linear programs (\texttt{scipy.optimize.linprog}, HiGHS,
+tolerance $10^{-10}$; \texttt{highspy} is not installed, so the persistent
+sessions of rule R11 are not used).  The representative at level $c$ is
+$a^*(c)=\arg\min\tfrac12\lVert a\rVert^2$ subject to $Ga=b$, $w^{\top}a=c$,
+$0\le a\le1$, solved through the dual $a(\mu)=\operatorname{clip}(-E^{\top}\mu,0,1)$,
+$E=[G;w^{\top}]$, by a semismooth Newton iteration.  It is a declared selection
+rule, not physiology; the sub-fibre of dimension $m-\operatorname{rank}G-1$
+inside one level is explored only by hit-and-run \emph{coverage}, never as a
+probability.  Net-torque invariance holds to
+$(m+2)\varepsilon\sum_k\lvert G_k\rvert\approx10^{-13}$ N m, inside the issue's
+$10^{-12}$.
+
+\paragraph{Signal-Dependent Muscle Noise.}  Mechanism M1 at the muscle: the
+force noise of muscle $k$ has two-sided level
+$S_k(a)=\sigma_{0,k}^2+(\kappa_kF_{\max,k}a_k)^2$ (N$^2$ s), so $\kappa$ has
+units $\sqrt{\mathrm{s}}$ and the per-step covariance is $S_k/\Delta t$.
+Pushed to the joint, $\Sigma_\tau=R^{\top}\operatorname{diag}(S/\Delta t)R$, a
+sum of non-negative terms increasing in every $a_k$; the antagonist cannot
+reduce muscle-noise variance at fixed net torque.  $\kappa\equiv0$ declares no
+signal law (\texttt{H-NOISE-ADDITIVE}) and is the V1 negative control.
+
+\paragraph{Short-Range Stiffness.}  Mechanism M3.  Muscle and tendon are springs
+in series, so $k_{MTU}=k_mk_T/(k_m+k_T)$, which tends to $k_m$ for a rigid
+tendon.  The fibre stiffness is either the engine value (a negative value is the
+descending limb of the active force-length curve and fails closed) or the
+declared model $k_m=\rho f$ with $\rho$ in 1/m.  The joint stiffness is
+$K=R^{\top}\operatorname{diag}(k_{MTU})R-\sum_kf_k\,\partial R_k/\partial q$,
+the second term only when the moment-arm Jacobian is supplied and flagged
+otherwise.  A stiffness torque $-K\,\delta q$ changes the linearised loop
+through $\partial\ddot q/\partial\xi\leftarrow\partial\ddot q/\partial\xi-
+(\partial\ddot q/\partial\tau)KP$ and the same for the reaction; this lifts
+\emph{quasi-static} activation from the unsupported state components.
+Activation dynamics and fibre-length dynamics are not differentiated.
+
+\paragraph{Variance Versus Co-Contraction.}  For each level the tangent state
+space $(F,G)$ is rebuilt with $K(c)$ and the input map
+$[(\partial\ddot\xi/\partial\tau)R^{\top}\;|\;\text{external}]$, the step
+covariance is $\operatorname{blkdiag}(S(a^*(c))/\Delta t,\Sigma_{\mathrm{ext}}/\Delta t)$
+and the NSX-90 machinery returns the outcome variance with its budget.  The
+analytic fixture is an antagonist pair ($F=1000$ N, $r=0.04$ m,
+$\rho=50$ 1/m, $\kappa=0.05$ $\sqrt{\mathrm{s}}$, $I=0.1$ kg m$^2$,
+$B=4$ N m s/rad, external level $1$ N$^2$m$^2$s, net torque $8$ N m, so
+$d=\tau/(rF)=0.2$ and $c\in[0.2,1.8]$): $K=80c$ N m/rad and
+\begin{equation}
+\operatorname{Var}(\xi)=\frac{S_{\mathrm{ext}}+2(c^2+d^2)}{2B\cdot80\,c},
+\qquad c^*=\sqrt{S_{\mathrm{ext}}/2+d^2}\approx0.735 .
+\end{equation}
+The discrete explicit-Euler stationary variance equals
+\texttt{scipy.linalg.solve\_discrete\_lyapunov} to $10^{-9}$ and differs from
+this continuous formula by at most $\Delta t\,B/I$ (the leading Euler term).
+
+\paragraph{Engine Facts and Failed Attempts.}  OpenSim Millard muscles give
+$k_{MTU}$ equal to the central difference of the re-equilibrated tendon force
+against the musculotendon length to about $10^{-6}$ relative at grid
+activations; between grid nodes the table is linearly interpolated (about
+$8\times10^{-4}$ relative at activation $0.3$ on a five-node grid).  A first
+geometry with tendon slack $0.15$ m put the fibre on the descending limb and the
+stiffness correctly failed closed; the tested geometry uses $0.18$ m.  A first
+asymmetric extensor path produced a near-zero moment arm and no antagonist; the
+pair uses mirrored attachments.  MyoSuite muscles are MuJoCo muscle actuators
+with a rigid tendon and tension linear in activation, so the frame is exact for
+the secant law and the series stiffness is the $k_T\to\infty$ limit; torque-driven
+engines (Pinocchio, Drake, Simscape) have no muscle fibre and fail closed with a
+pointer to NSX-93 (\#12722) and \texttt{H-DECLARED-JOINT-IMPEDANCE}.
+
+\paragraph{Reproduction.}  \texttt{python3 -m pytest tests/unit/loop\_nullspace/test\_muscle\_*.py
+tests/unit/engines/opensim/test\_muscle\_mechanics\_opensim.py
+tests/unit/engines/mujoco/test\_muscle\_mechanics\_mujoco.py -n 0 -o addopts=""}.
+
+\paragraph{Non-Claims.}  Nothing here says what co-contraction the golfer used;
+EMG is a deferred validation.  The short-range-stiffness evidence
+(\texttt{CIT-CUI-2008}) is feline and force-dependent, not activation-dependent
+and not human; $\rho$ and $\kappa$ are declared hypotheses.  The generic engine
+muscle curves are not a golfer's muscles.  Software correctness only; no
+scientific qualification.
+
+\subsection{Noise-Aware Allocation (NSX-92)}
+\label{sec:var-noise-aware}
+
+\paragraph{Model.}  For one scalar outcome $y=c^{\top}\delta x_N$ of the chain
+$\delta x_{t+1}=A_t(z)\,\delta x_t+B_t w_t$ with $A_t(z)=A_t^0+\sum_m z_m A_{t,m}^1$
+(M2, units of $A$ as in \S\ref{sec:var-cov}), initial covariance $P_0$ and white
+torque noise $w_t\sim(S+\operatorname{diag}(k^2\tau_t(z)^2))/\Delta t$ (M1; the
+$S/\Delta t$ discretization is V6), the backward kernels
+$S_x[N]=c$, $S_x[t]=S_x[t+1]A_t(z)$, $S_{\mathrm{in}}[t]=S_x[t+1]B_t$ give
+\begin{equation}
+\operatorname{Var}(y;z)=
+\underbrace{S_x[0]P_0S_x[0]^{\top}}_{\text{initial}}+
+\underbrace{\sum_t S_{\mathrm{in}}[t]\,\tfrac{S}{\Delta t}\,S_{\mathrm{in}}[t]^{\top}}_{\text{additive}}+
+\underbrace{\sum_{t,j}\tfrac{k_j^2}{\Delta t}\,S_{\mathrm{in}}[t]_j^2\,\tau_{tj}(z)^2}_{\text{signal dependent (M1)}} .
+\end{equation}
+Units: $y$ in rad, $\operatorname{Var}$ in rad$^2$, $\tau$ in N\,m, $k$ dimensionless,
+$S$ in (N\,m)$^2\,$s.  Every term is a squared residual,
+$\operatorname{Var}=\lvert r(z)\rvert^2$; the Jacobian $J=\partial r/\partial z$
+is obtained exactly by the product rule through the backward recursion
+($\partial S_x[t]/\partial z_m=\partial S_x[t+1]/\partial z_m\,A_t+S_x[t+1]A^1_{t,m}$),
+so $\nabla\operatorname{Var}=2J^{\top}r$ is exact.  Frame $t$ supplies $\tau_t$
+and the null coordinates $z_t$; $z$ stacks all frames.
+
+\paragraph{Convex Case (M1 Only).}  With $A^1=0$ the kernels are constant, the
+initial and additive terms are constants, and the signal-dependent term is the
+diagonal convex quadratic $\sum_{tj}\mathrm{coeff}_{tj}\tau_{tj}^2$ with
+$\mathrm{coeff}_{tj}=k_j^2S_{\mathrm{in}}[t]_j^2/\Delta t$.  It enters the
+NSX-23 allocation as a diagonal torque quadratic (\texttt{VarianceTerm}), is
+solved over the exact feasible sets, and the optimum is global, certified by
+the conic solver's KKT residuals.  If the term has no curvature on a retained
+torque direction the solve is refused (strict convexity, R6) unless the caller
+declares an explicit minimum-effort tie-break, which is reported and removes
+the global-optimality flag.
+
+\paragraph{Non-Convex Case (M2).}  With $A^1\neq0$ the residuals are multilinear
+in $z$ across steps, so $\operatorname{Var}$ is in general \emph{not} convex.  A
+damped Gauss--Newton sequential convex program, each step a convex SOCP over the
+same feasible sets, starts at the minimum-effort allocation (and optional extra
+starts).  Because $\operatorname{Var}=\lvert r\rvert^2$ the Gauss--Newton model
+gradient $2J^{\top}r$ equals the exact gradient, so a vanishing step together
+with a small KKT residual of the subproblem certifies a \emph{first-order
+stationary point}.  The result is labelled \texttt{LOCAL\_STATIONARY}; it is
+never described as globally optimal, and the distinct local optima found from
+several starts are listed.  Second-order optimality is not certified.
+
+\paragraph{Flat Case and Negative Control.}  If neither M1 nor M2 is active the
+Jacobian vanishes identically; the solver is skipped and returns
+\texttt{OBJECTIVE\_FLAT\_INVARIANT} (V1) with the variance typed
+\texttt{INVARIANT}, conditioned on \texttt{H-NOISE-ADDITIVE}, and the
+minimum-effort representative carries no variance claim.  Additive noise
+\emph{with} declared M2 is not flat (the initial-state term moves with $z$).
+
+\paragraph{Fronts.}  Variance against capacity effort uses the NSX-25
+$\epsilon$-constraint machinery with the strictly convex effort as the
+minimised objective and the variance as the exact cone bound, so each convex
+point is properly Pareto optimal and its multiplier is the front slope
+$\mathrm{d}(\text{effort})/\mathrm{d}(\text{variance})$.  With M2 the front is a
+sweep of effort caps whose points are certified local optima (not claimed to be
+the Pareto set).  Clubhead speed and face bias are fixed by the nominal motion
+and are allocation-invariant, so variance against CHS is evaluated over a family
+of cases at a common effort cap (V4), with the NSX-25 dominance rule on
+$(\text{variance},-\text{CHS})$.
+
+\paragraph{Verification.}  The optimum and the minimum-effort reference run on
+common random numbers in the NSX-91 campaign, the SD ranking is repeated on an
+independent hold-out seed set, and the linear-versus-Monte-Carlo gap is always
+kept; agreement is claimed only if the nonlinearity gate passed (V7).  The unit
+fixture uses the nonlinear reduced-coordinate pendulum step as the forward
+model.  With the declared test noise $k=(0.5,1.0)$, $\sigma_0=(0.1,0.1)$ and
+$3000$ trials per seed set, the optimum has predicted SD $0.645$ and hold-out
+Monte Carlo SD $0.649$, and the reference $0.920$ against $0.942$ (a $2.4\,\%$
+gap, reported, not hidden).  The planar golden reproduces
+$z^*=-1315/348$ (M1) and $z^*=1180/1669$ (M1 with M2) to $10^{-9}$.
+
+\paragraph{Failed Experiments and Limits.}  (i) In the pendulum the preload
+enters only $A_{10}$ and $B$ drives only $\omega$, so every kernel is affine in
+$z$ and the variance is convex there; the non-convex test therefore uses a
+declared synthetic two-step chain (seed fixed in the fixture) in which midpoint
+convexity fails and several local optima exist.  (ii) The first front slope
+carried the variance normalization on the wrong side (off by the square of the
+normalization weight); the dense one-dimensional grid oracle caught it.  (iii) The
+Pinocchio anthropometric model is not covered: NSX-84 supports tangent
+dimension $k=1$ only on this branch (issue \#12817), and no face-angle outcome
+map with kernels exists for the thirty-five actuated coordinates.  Results are
+conditional on the declared mechanisms and amplitudes (V8) and are not
+physiological claims.
+
+\paragraph{Reproduction.}
+\texttt{python3 -m pytest tests/unit/loop\_nullspace/test\_noise\_aware\_model.py
+tests/unit/loop\_nullspace/test\_noise\_aware\_allocation.py
+tests/unit/loop\_nullspace/test\_noise\_aware\_front.py
+tests/unit/loop\_nullspace/test\_noise\_aware\_verification.py -n 0 -o addopts=""}.
+
 \subsection{Face-Angle Statistics}
 \label{sec:var-face}
 
@@ -903,6 +1499,123 @@ tolerance exceedance $P(\lvert e\rvert>\epsilon)$ and miss probability.  The
 coefficient of variation $\mathrm{SD}/\lvert\mathrm{mean}\rvert$ is banned for
 zero-centred outcomes, where it is undefined or arbitrarily large.  Face rows
 are \texttt{UNAVAILABLE} when axial club rotation is not observed.
+
+\subsection{Multi-Swing Falsification: UCM and TNC}
+\label{sec:var-ucm-tnc}
+
+Implemented in \texttt{variability\_*.py} (NSX-97).  Measured impact states
+$x_i$ from held-out sessions are split about $\ker C_{\mathrm{imp}}$, with
+$C_{\mathrm{imp}}$ the event-section Jacobian of the impact outcome map.
+With $n$ state dimensions, $d_\perp=\operatorname{rank}C_{\mathrm{imp}}$ and
+$d_\parallel=n-d_\perp$,
+\[
+V_{\mathrm{UCM}}=\tfrac{1}{N-1}\sum_i\lVert P_{\ker}(x_i-\bar x)\rVert^2,\quad
+V_{\mathrm{ORT}}=\tfrac{1}{N-1}\sum_i\lVert P_{\mathrm{row}}(x_i-\bar x)\rVert^2,
+\]
+reported per dimension ($V/d$).  The synergy index is
+$\Delta V=(V_{\mathrm{UCM}}/d_\parallel-V_{\mathrm{ORT}}/d_\perp)/(V_{\mathrm{TOT}}/n)
+\in[-n/d_\perp,\,n/d_\parallel]$ with transform
+$\Delta V_z=\tfrac12\ln\frac{n/d_\perp+\Delta V}{n/d_\parallel-\Delta V}$;
+for $d_\parallel\ne d_\perp$ an isotropic cloud gives
+$\tfrac12\ln(d_\parallel/d_\perp)$, not zero.
+
+The Müller--Sternad cost is $C(D)=\overline{\lVert w\odot(f(x_i)-y^\ast)\rVert^2}$.
+Independent per-variable permutation across trials gives $C_{\mathrm{perm}}$
+(marginals kept, covariation removed); the single translation minimising the
+permuted clouds' cost gives $C_{\mathrm{shift}}$; collapsing dispersion to the
+shifted mean gives $C_{\mathrm{floor}}$.  Then
+$T=C_{\mathrm{perm}}-C_{\mathrm{shift}}$, $N=C_{\mathrm{shift}}-C_{\mathrm{floor}}$,
+$\mathrm{Cov}=C_{\mathrm{perm}}-C_0$ and exactly
+$C_0=T+N+C_{\mathrm{floor}}-\mathrm{Cov}$.  Haar-random rotations of the
+centred cloud give an independent covariation estimate.  The seed is declared
+(\texttt{DEFAULT\_SEED}=20261016) and recorded in every result.
+
+Predicted outcome covariance $C\Sigma_xC^\top$ uses $\Sigma_x$ pooled
+within-session on \emph{training sessions only}; a test-session swing reaching
+the fit raises \texttt{LeakageError}.  It is compared with the measured
+outcome covariance by principal angles of the top-$k$ eigen-subspaces against a
+null that permutes each outcome column across swings.  Phase-registered
+(MOSAIC-10) residuals are reported \emph{together with} physical-time
+residuals about impact and the inter-event durations, so timing variability is
+not discarded.  Acceptance on anonymous captures is a deferred validation: the
+command-line entry records SHA-256 input digests in a receipt without file
+names or paths, and no capture result is claimed here.  UCM and TNC describe
+variability structure; they do not identify neural intent or show a
+co-contraction benefit.
+
+\subsection{Global Sensitivity Screening}
+\label{sec:global-sensitivity}
+
+\paragraph{Estimators (NSX-96).}  Inputs are uniform on declared ranges and
+mapped from one scrambled Sobol sequence (\texttt{scipy.stats.qmc}) split into
+halves $A$ and $B$; $AB_i$ is $A$ with the columns of unit $i$ taken from $B$.
+The first-order index is the Saltelli (2010) form
+$S_i=\mathrm{E}[f(B)(f(AB_i)-f(A))]/V$ and the total index is the Jansen form
+$S_{T,i}=\mathrm{E}[(f(A)-f(AB_i))^2]/(2V)$, with $V$ the sample variance of
+$f(A)$ and $f(B)$ together.  Intervals are percentile bootstrap over the $N$
+base rows.  The PRCC tier rank-transforms a Latin hypercube sample and takes
+the partial correlation of each input with the output given the others, from
+the inverse of the rank correlation matrix.
+
+\paragraph{Correlated Inputs.}  Ordinary independent indices are refused, with
+an error, whenever a correlation is declared.  The routes are grouped indices,
+where each correlated group moves as one block through a Gaussian copula with
+the declared correlation, or a declared transformation to independent inputs.
+
+\paragraph{Convergence and Oracle.}  \texttt{sobol\_convergence} reports each
+index with its interval against $N$ on nested prefixes of one sequence.  The
+analytic Ishigami function ($a=7$, $b=0.1$) is recovered within $0.02$ at
+$N=2048$ with a fixed seed; runs use the planar oracle and the low-rank basis
+only.
+
+\paragraph{Non-Claims.}  Outputs are \texttt{QuantityRecord}s labelled
+\texttt{EVIDENCE:SCREENING} and \texttt{UNVALIDATED}.  They rank a model under
+declared ranges; they are not a validated ranking and say nothing about golfers.
+PRCC is a monotonicity screen, not a variance decomposition.
+
+\paragraph{Reproduction Commands.}
+\begin{verbatim}
+python3 -m pytest tests/unit/loop_nullspace/test_global_sensitivity.py \
+    -n 0 -q --timeout=300
+\end{verbatim}
+
+\subsection{Declared Impedance and Delayed Minimum-Intervention Feedback}
+\label{sec:var-layer}
+
+Two declared controllers act on the tangent deviation
+$\delta x=(\xi,\eta)$, with $\delta q=P\xi$ and $\delta v=P\eta+O\xi$.  The
+\emph{impedance} (hypothesis \texttt{H-DECLARED-JOINT-IMPEDANCE}) is
+$u=-(K\,e+D\,\dot e)$ with $e=SP\xi$ and $\dot e=SP\eta+SO\xi$, i.e.\
+$K_{\mathrm{imp}}=K\,SP+D\,SO$ on $\xi$ and $D\,SP$ on $\eta$; $K$ and $D$ are
+symmetric positive semidefinite, windowed in time, and off-diagonal entries
+are biarticular coupling.  It is folded into the continuous closed loop
+$F-G_uK_{\mathrm{imp}}$ before zero-order-hold discretization.  The
+\emph{delayed feedback} (\texttt{H-SENSORIMOTOR-DELAY}) is
+$u_t=-K_t\,\delta x_{t-m}$ with $m$ whole steps, represented by the augmented
+state $z_t=(x_t,\dots,x_{t-m})$ and $P_0^{\mathrm{aug}}=TP_0T^{\top}$,
+$T=[I;\dots;I]$, so NSX-90 applies unchanged.
+
+The minimum-intervention design is time-varying LQR with $Q=0$ and terminal
+weight $C_{\mathrm{imp}}^{\top}W_yC_{\mathrm{imp}}$.  The resulting gain
+annihilates $\ker\!\big(W_y^{1/2}C_{\mathrm{imp}}\Phi\big)$ (an identity, not an
+approximation), so only outcome-relevant deviations are corrected.  The
+frozen discrete delay margin is the first $m$ at which the companion matrix of
+$x_{k+1}=Ax_k-BKx_{k-m}$ has spectral radius above one; for a PD law on a
+double integrator it matches the closed form
+$\tau_c=\operatorname{atan}(k_d\omega_c/k_p)/\omega_c$ with
+$\omega_c^2=\tfrac12\big(a+\sqrt{a^2+4b}\big)$, $a=(k_d/m)^2$, $b=(k_p/m)^2$.
+A stiffened joint also scales its noise by the declared factor
+$1+\kappa_iK_{ii}$; $\kappa$ is an input without a source.
+
+Verification: the stationary oscillator variance $S/(2dk)$, the closed-form
+delay margin, an explicit delayed recursion, exact zero-layer negative
+controls, and a nonlinear paired Monte Carlo of a hanging pendulum whose
+standard deviations agree with the linear prediction within the sampling
+half-width.  Effort and energy are accounted on separate lines
+(allocated, impedance, feedback).  Non-claims: nothing is inferred from net
+torque, a torque-only co-contraction effect is \texttt{UNAVAILABLE} without the
+declaration, the feedback is uncompensated for delay, the frozen margin is not
+a time-varying stability proof, and the chain is limited to $k=1$.
 
 \subsection{Non-Claims for Variability Sensitivity}
 \label{sec:var-nonclaims}

@@ -14,18 +14,33 @@ unit-optimal-force reserve actuators on the leg coordinates)::
 state and ``R`` are the muscle moment arms.  The AnalyzeTool route is not used
 because it differences accelerations itself and cannot represent the grip
 loop-closure reaction that acts on the arm coordinates of the reference.
+
+The model-independent numerics (``FrameSolution``, ``solve_frame``) live in
+``static_opt_core`` (SPN-10b, #12761), shared with the trunk static
+optimisation; they are re-exported here unchanged.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
-from scipy.optimize import lsq_linear
 
 from src.engines.physics_engines.opensim.python import musculoskeletal_graft as graft
+from src.engines.physics_engines.opensim.python.static_opt_core import (
+    FrameSolution,
+    solve_frame,
+)
 from src.shared.python.contracts import require
+
+__all__ = [
+    "LEG_JOINTS",
+    "FrameSolution",
+    "MuscleBasis",
+    "leg_coordinates",
+    "optimal_forces",
+    "solve_frame",
+]
 
 LEG_JOINTS: tuple[str, ...] = (
     "hip_flexion",
@@ -42,65 +57,6 @@ def leg_coordinates(side: str | None = None) -> tuple[str, ...]:
     """Spec leg coordinate names (both sides, or one side)."""
     sides = graft.SIDES if side is None else (side,)
     return tuple(f"{j}_{s}" for s in sides for j in LEG_JOINTS)
-
-
-@dataclass(frozen=True)
-class FrameSolution:
-    """Result of one frame: activations, reserves and the optimiser status."""
-
-    activation: np.ndarray
-    reserve: np.ndarray
-    cost: float
-    success: bool
-
-
-def solve_frame(
-    active: np.ndarray,
-    passive: np.ndarray,
-    moment: np.ndarray,
-    tau: np.ndarray,
-    *,
-    reserve_weight: float = 1.0,
-) -> FrameSolution:
-    """Resolve muscle redundancy for one frame.
-
-    Args:
-        active: ``(nm,)`` force per unit activation (N), >= 0.
-        passive: ``(nm,)`` force at zero activation (N), >= 0.
-        moment: ``(nm, nc)`` moment arms (m); ``moment[m, c] * F_m`` is the
-            generalised force of muscle ``m`` on coordinate ``c``.
-        tau: ``(nc,)`` required generalised forces (N m).
-        reserve_weight: relative weight of the squared reserve in the cost.
-
-    Returns:
-        The minimiser.  Postconditions: ``0 <= activation <= 1`` and
-        ``reserve = tau - moment.T @ (passive + activation * active)``.
-
-    Raises:
-        ValueError: on shape mismatch, non-finite input or a non-positive weight.
-    """
-    nm = active.shape[0]
-    require(passive.shape == (nm,), "passive must be (nm,)")
-    require(moment.ndim == 2 and moment.shape[0] == nm, "moment must be (nm, nc)")
-    require(tau.shape == (moment.shape[1],), "tau must be (nc,)")
-    require(reserve_weight > 0.0, "reserve_weight must be positive")
-    for name, array in (
-        ("active", active),
-        ("passive", passive),
-        ("moment", moment),
-        ("tau", tau),
-    ):
-        require(bool(np.isfinite(array).all()), f"{name} must be finite")
-    gain = moment.T * active[None, :]  # (nc, nm)
-    offset = moment.T @ passive
-    root = np.sqrt(reserve_weight)
-    design = np.vstack([np.eye(nm), root * gain])
-    target = np.concatenate([np.zeros(nm), root * (tau - offset)])
-    result = lsq_linear(design, target, bounds=(0.0, 1.0), method="bvls")
-    a = np.clip(result.x, 0.0, 1.0)
-    reserve = tau - offset - gain @ a
-    cost = float(a @ a + reserve_weight * (reserve @ reserve))
-    return FrameSolution(a, reserve, cost, bool(result.success))
 
 
 class MuscleBasis:

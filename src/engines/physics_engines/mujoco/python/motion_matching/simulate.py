@@ -301,6 +301,247 @@ def _output_grid(T_s: float, output_rate_hz: float) -> NDArray[np.float64]:
     return build_output_grid(T_s, output_rate_hz)
 
 
+# --- Forward-sim helpers (extracted from simulate_with_coefficients) --------
+
+
+def _compile_model(options: SimOptions) -> Any:
+    """Compile the MJCF model and apply the ``dt`` / energy-flag options."""
+    import mujoco
+
+    if options.xml_path is not None:
+        xml_p = Path(options.xml_path)
+        if not xml_p.exists():
+            raise FileNotFoundError(f"model XML not found at {xml_p}")
+        model = mujoco.MjModel.from_xml_path(str(xml_p))
+    else:
+        model = mujoco.MjModel.from_xml_string(_load_model_xml(options.variant))
+
+    # Optional override of the model timestep.
+    if options.dt is not None:
+        if options.dt <= 0:
+            raise ValueError(f"dt must be > 0; got {options.dt}")
+        model.opt.timestep = float(options.dt)
+
+    if options.compute_energy:
+        model.opt.enableflags |= mujoco.mjtEnableBit.mjENBL_ENERGY
+    return model
+
+
+@dataclass(frozen=True)
+class _Anchors:
+    """Resolved grip / clubhead site and body ids (``-1`` when absent)."""
+
+    grip_site_id: int
+    club_site_id: int
+    grip_bid: int
+    head_bid: int
+
+
+def _first_body_id(model: Any, primary: str, alternatives: tuple[str, ...]) -> int:
+    """Return the id of ``primary`` or the first present alternative, else -1."""
+    import mujoco
+
+    try:
+        return _resolve_body_id(model, primary)
+    except RuntimeError:
+        for alt in alternatives:
+            bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, alt)
+            if bid >= 0:
+                return int(bid)
+    return -1
+
+
+def _resolve_anchors(model: Any, variant: str) -> _Anchors:
+    """Resolve grip and clubhead anchors.
+
+    Prefers the canonical sites ``mid_hands`` and ``clubhead``; falls back
+    to candidate bodies per variant or general names.
+    """
+    import mujoco
+
+    grip_site_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "mid_hands")
+    club_site_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "clubhead")
+
+    grip_bid = -1
+    head_bid = -1
+    if grip_site_id < 0 or club_site_id < 0:
+        variant_key = variant if variant in _GRIP_BODY_BY_VARIANT else "full"
+        grip_bid = _first_body_id(
+            model,
+            _GRIP_BODY_BY_VARIANT.get(variant_key, "club"),
+            ("club_grip", "hand_right", "hand_left"),
+        )
+        head_bid = _first_body_id(
+            model,
+            _CLUBHEAD_BODY_BY_VARIANT.get(variant_key, "clubhead"),
+            ("club_head", "clubhead", "club_shaft"),
+        )
+    return _Anchors(int(grip_site_id), int(club_site_id), grip_bid, head_bid)
+
+
+@dataclass
+class _RolloutBuffers:
+    """Pre-allocated per-frame output arrays for one rollout."""
+
+    q: NDArray[np.float64]
+    qd: NDArray[np.float64]
+    qdd: NDArray[np.float64]
+    tau: NDArray[np.float64]
+    grip: NDArray[np.float64]
+    grip_quat: NDArray[np.float64]
+    head: NDArray[np.float64]
+    head_quat: NDArray[np.float64]
+    ke: NDArray[np.float64]
+    pe: NDArray[np.float64]
+
+    @classmethod
+    def allocate(cls, model: Any, n_out: int) -> _RolloutBuffers:
+        """Allocate zeroed buffers sized for ``n_out`` frames of ``model``."""
+        if n_out <= 0:
+            raise ValueError(f"n_out must be > 0; got {n_out}")
+
+        def zeros(*shape: int) -> NDArray[np.float64]:
+            return np.zeros(shape, dtype=np.float64)
+
+        nq, nv, nu = int(model.nq), int(model.nv), int(model.nu)
+        return cls(
+            q=zeros(n_out, nq),
+            qd=zeros(n_out, nv),
+            qdd=zeros(n_out, nv),
+            tau=zeros(n_out, nu),
+            grip=zeros(n_out, 3),
+            grip_quat=zeros(n_out, 4),
+            head=zeros(n_out, 3),
+            head_quat=zeros(n_out, 4),
+            ke=zeros(n_out),
+            pe=zeros(n_out),
+        )
+
+
+def _sample_kinematics(
+    model: Any,
+    data: Any,
+    buf: _RolloutBuffers,
+    anchors: _Anchors,
+    compute_energy: bool,
+    idx: int,
+) -> None:
+    """Write grip / clubhead pose (and optional energy) for frame ``idx``."""
+    import mujoco
+
+    if anchors.grip_site_id >= 0:
+        buf.grip[idx] = data.site_xpos[anchors.grip_site_id]
+        mujoco.mju_mat2Quat(buf.grip_quat[idx], data.site_xmat[anchors.grip_site_id])
+    elif anchors.grip_bid >= 0:
+        buf.grip[idx] = data.xpos[anchors.grip_bid]
+        buf.grip_quat[idx] = data.xquat[anchors.grip_bid]
+
+    if anchors.club_site_id >= 0:
+        buf.head[idx] = data.site_xpos[anchors.club_site_id]
+        mujoco.mju_mat2Quat(buf.head_quat[idx], data.site_xmat[anchors.club_site_id])
+    elif anchors.head_bid >= 0:
+        buf.head[idx] = data.xpos[anchors.head_bid]
+        buf.head_quat[idx] = data.xquat[anchors.head_bid]
+
+    if compute_energy:
+        mujoco.mj_energyPos(model, data)
+        mujoco.mj_energyVel(model, data)
+        buf.pe[idx] = data.energy[0]
+        buf.ke[idx] = data.energy[1]
+
+
+def _record_frame(
+    model: Any,
+    data: Any,
+    buf: _RolloutBuffers,
+    anchors: _Anchors,
+    options: SimOptions,
+    idx: int,
+) -> None:
+    """Record state and kinematics for frame ``idx`` (everything but ``tau``)."""
+    buf.q[idx] = data.qpos
+    buf.qd[idx] = data.qvel
+    if options.compute_qdd:
+        buf.qdd[idx] = data.qacc
+    _sample_kinematics(model, data, buf, anchors, options.compute_energy, idx)
+
+
+def _initial_tau(
+    model: Any, driver: PolynomialTorqueDriver, clip: bool
+) -> NDArray[np.float64]:
+    """Return the frame-0 torque, clipped to ``ctrlrange`` when requested."""
+    tau0 = np.array(driver.evaluate(0.0))
+    if clip:
+        limited = model.actuator_ctrllimited.astype(bool)
+        np.clip(
+            tau0,
+            np.where(limited, model.actuator_ctrlrange[:, 0], -np.inf),
+            np.where(limited, model.actuator_ctrlrange[:, 1], np.inf),
+            out=tau0,
+        )
+    return tau0
+
+
+def _advance_to(model: Any, data: Any, t_target: float, max_substeps: int) -> bool:
+    """Step until ``data.time`` reaches ``t_target``; return False on divergence."""
+    import mujoco
+
+    substeps = 0
+    while data.time + 1e-12 < t_target and substeps < max_substeps:
+        mujoco.mj_step(model, data)
+        substeps += 1
+        if not np.all(np.isfinite(data.qpos)) or not np.all(np.isfinite(data.qvel)):
+            return False
+    return True
+
+
+def _run_rollout(
+    model: Any,
+    data: Any,
+    driver: PolynomialTorqueDriver,
+    buf: _RolloutBuffers,
+    anchors: _Anchors,
+    options: SimOptions,
+    t_grid: NDArray[np.float64],
+) -> str:
+    """Integrate across ``t_grid`` recording frames 1..N-1; return solver status."""
+    solver_status = "success"
+    max_substeps = int(np.ceil(options.T_s / model.opt.timestep) + 16)
+    try:
+        with driver:
+            for i in range(1, t_grid.size):
+                if not _advance_to(model, data, float(t_grid[i]), max_substeps):
+                    solver_status = "failed"
+                    break
+                _record_frame(model, data, buf, anchors, options, i)
+                buf.tau[i] = data.ctrl
+    finally:
+        driver.uninstall()
+    return solver_status
+
+
+def _build_meta(
+    model: Any, options: SimOptions, anchors: _Anchors, duration_s: float
+) -> dict[str, Any]:
+    """Assemble the diagnostics dictionary attached to ``SimOut.meta``."""
+    return {
+        "n_joints": int(model.nu),
+        "model_nq": int(model.nq),
+        "model_nv": int(model.nv),
+        "model_nu": int(model.nu),
+        "variant": options.variant if options.xml_path is None else "custom",
+        "xml_path": str(options.xml_path) if options.xml_path is not None else None,
+        "grip_site_id": anchors.grip_site_id,
+        "club_site_id": anchors.club_site_id,
+        "grip_body_id": anchors.grip_bid,
+        "head_body_id": anchors.head_bid,
+        "timestep": float(model.opt.timestep),
+        "compute_energy": bool(options.compute_energy),
+        "basis": str(options.basis),
+        "duration_s": float(duration_s),
+    }
+
+
 # --- Entry point ------------------------------------------------------------
 
 
@@ -348,7 +589,7 @@ def _output_grid(T_s: float, output_rate_hz: float) -> NDArray[np.float64]:
     lambda result: bool(result.solver_status in ("success", "warning", "failed")),
     "invalid solver_status",
 )
-def simulate_with_coefficients(  # noqa: C901
+def simulate_with_coefficients(
     theta: NDArray[np.float64],
     options: SimOptions | None = None,
     initial_pose: NDArray[np.float64] | None = None,
@@ -383,23 +624,7 @@ def simulate_with_coefficients(  # noqa: C901
 
     import mujoco
 
-    if options.xml_path is not None:
-        xml_p = Path(options.xml_path)
-        if not xml_p.exists():
-            raise FileNotFoundError(f"model XML not found at {xml_p}")
-        model = mujoco.MjModel.from_xml_path(str(xml_p))
-    else:
-        xml = _load_model_xml(options.variant)
-        model = mujoco.MjModel.from_xml_string(xml)
-
-    # Optional override of the model timestep.
-    if options.dt is not None:
-        if options.dt <= 0:
-            raise ValueError(f"dt must be > 0; got {options.dt}")
-        model.opt.timestep = float(options.dt)
-
-    if options.compute_energy:
-        model.opt.enableflags |= mujoco.mjtEnableBit.mjENBL_ENERGY
+    model = _compile_model(options)
 
     # Spec §2.2: enforce length + finiteness against the compiled model's
     # actuator count (``nu``). Bounds are enforced separately by the
@@ -411,81 +636,10 @@ def simulate_with_coefficients(  # noqa: C901
     _apply_initial_pose(data, initial_pose, model.nq)
     mujoco.mj_forward(model, data)
 
-    # Resolve grip and clubhead: prefer canonical sites 'mid_hands' and 'clubhead',
-    # falling back to candidate bodies per variant or general names.
-    grip_site_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "mid_hands")
-    club_site_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "clubhead")
-
-    grip_bid = -1
-    head_bid = -1
-    if grip_site_id < 0 or club_site_id < 0:
-        variant_key = (
-            options.variant if options.variant in _GRIP_BODY_BY_VARIANT else "full"
-        )
-        grip_body_name = _GRIP_BODY_BY_VARIANT.get(variant_key, "club")
-        head_body_name = _CLUBHEAD_BODY_BY_VARIANT.get(variant_key, "clubhead")
-        try:
-            grip_bid = _resolve_body_id(model, grip_body_name)
-        except RuntimeError:
-            for alt in ("club_grip", "hand_right", "hand_left"):
-                bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, alt)
-                if bid >= 0:
-                    grip_bid = bid
-                    break
-        try:
-            head_bid = _resolve_body_id(model, head_body_name)
-        except RuntimeError:
-            for alt in ("club_head", "clubhead", "club_shaft"):
-                bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, alt)
-                if bid >= 0:
-                    head_bid = bid
-                    break
-
-    # Output grid + per-frame sample stride.
+    anchors = _resolve_anchors(model, options.variant)
     t_grid = _output_grid(options.T_s, options.output_rate_hz)
-    n_out = t_grid.size
-    nq = int(model.nq)
-    nv = int(model.nv)
-    nu = int(model.nu)
-
-    out_q = np.zeros((n_out, nq), dtype=np.float64)
-    out_qd = np.zeros((n_out, nv), dtype=np.float64)
-    out_qdd = np.zeros((n_out, nv), dtype=np.float64)
-    out_tau = np.zeros((n_out, nu), dtype=np.float64)
-    out_grip = np.zeros((n_out, 3), dtype=np.float64)
-    out_grip_q = np.zeros((n_out, 4), dtype=np.float64)
-    out_head = np.zeros((n_out, 3), dtype=np.float64)
-    out_head_q = np.zeros((n_out, 4), dtype=np.float64)
-    out_ke = np.zeros(n_out, dtype=np.float64)
-    out_pe = np.zeros(n_out, dtype=np.float64)
-
-    def _sample_kinematics(dest_idx: int) -> None:
-        if grip_site_id >= 0:
-            out_grip[dest_idx] = data.site_xpos[grip_site_id]
-            mujoco.mju_mat2Quat(out_grip_q[dest_idx], data.site_xmat[grip_site_id])
-        elif grip_bid >= 0:
-            out_grip[dest_idx] = data.xpos[grip_bid]
-            out_grip_q[dest_idx] = data.xquat[grip_bid]
-
-        if club_site_id >= 0:
-            out_head[dest_idx] = data.site_xpos[club_site_id]
-            mujoco.mju_mat2Quat(out_head_q[dest_idx], data.site_xmat[club_site_id])
-        elif head_bid >= 0:
-            out_head[dest_idx] = data.xpos[head_bid]
-            out_head_q[dest_idx] = data.xquat[head_bid]
-
-        if options.compute_energy:
-            mujoco.mj_energyPos(model, data)
-            mujoco.mj_energyVel(model, data)
-            out_pe[dest_idx] = data.energy[0]
-            out_ke[dest_idx] = data.energy[1]
-
-    # Capture frame 0 (post mj_forward, pre any mj_step).
-    out_q[0] = data.qpos
-    out_qd[0] = data.qvel
-    if options.compute_qdd:
-        out_qdd[0] = data.qacc
-    _sample_kinematics(0)
+    buf = _RolloutBuffers.allocate(model, t_grid.size)
+    _record_frame(model, data, buf, anchors, options, 0)
 
     driver = PolynomialTorqueDriver(
         model,
@@ -495,84 +649,27 @@ def simulate_with_coefficients(  # noqa: C901
         basis=options.basis,
         T_s=options.T_s,
     )
-    out_tau[0] = driver.evaluate(0.0)
-    if options.clip_torque_to_ctrlrange:
-        np.clip(
-            out_tau[0],
-            np.where(
-                model.actuator_ctrllimited.astype(bool),
-                model.actuator_ctrlrange[:, 0],
-                -np.inf,
-            ),
-            np.where(
-                model.actuator_ctrllimited.astype(bool),
-                model.actuator_ctrlrange[:, 1],
-                np.inf,
-            ),
-            out=out_tau[0],
-        )
+    buf.tau[0] = _initial_tau(model, driver, options.clip_torque_to_ctrlrange)
 
-    solver_status = "success"
     t_start = time.perf_counter()
-    try:
-        with driver:
-            for i in range(1, n_out):
-                t_target = float(t_grid[i])
-                max_substeps = int(np.ceil(options.T_s / model.opt.timestep) + 16)
-                substeps = 0
-                while data.time + 1e-12 < t_target and substeps < max_substeps:
-                    mujoco.mj_step(model, data)
-                    substeps += 1
-                    if not np.all(np.isfinite(data.qpos)) or not np.all(
-                        np.isfinite(data.qvel)
-                    ):
-                        solver_status = "failed"
-                        break
-                if solver_status != "success":
-                    break
-                out_q[i] = data.qpos
-                out_qd[i] = data.qvel
-                if options.compute_qdd:
-                    out_qdd[i] = data.qacc
-                out_tau[i] = data.ctrl
-                _sample_kinematics(i)
-    finally:
-        driver.uninstall()
-
+    solver_status = _run_rollout(model, data, driver, buf, anchors, options, t_grid)
     duration_s = time.perf_counter() - t_start
-
-    meta = {
-        "n_joints": nu,
-        "model_nq": nq,
-        "model_nv": nv,
-        "model_nu": nu,
-        "variant": options.variant if options.xml_path is None else "custom",
-        "xml_path": str(options.xml_path) if options.xml_path is not None else None,
-        "grip_site_id": int(grip_site_id),
-        "club_site_id": int(club_site_id),
-        "grip_body_id": int(grip_bid),
-        "head_body_id": int(head_bid),
-        "timestep": float(model.opt.timestep),
-        "compute_energy": bool(options.compute_energy),
-        "basis": str(options.basis),
-        "duration_s": float(duration_s),
-    }
 
     return SimOut(
         time=t_grid,
-        q=out_q,
-        qd=out_qd,
-        qdd=out_qdd,
-        tau=out_tau,
-        grip=out_grip,
-        grip_quat=out_grip_q,
-        clubhead=out_head,
-        club_quat=out_head_q,
+        q=buf.q,
+        qd=buf.qd,
+        qdd=buf.qdd,
+        tau=buf.tau,
+        grip=buf.grip,
+        grip_quat=buf.grip_quat,
+        clubhead=buf.head,
+        club_quat=buf.head_quat,
         solver_status=solver_status,
         duration_s=duration_s,
-        kinetic_energy=out_ke,
-        potential_energy=out_pe,
-        meta=meta,
+        kinetic_energy=buf.ke,
+        potential_energy=buf.pe,
+        meta=_build_meta(model, options, anchors, duration_s),
     )
 
 

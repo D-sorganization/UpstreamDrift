@@ -1,0 +1,60 @@
+\subsection{Desktop Spine Viewer Tool}
+\label{sec:spn-15b}
+
+This section documents the read-only PyQt6 tool in \texttt{src/tools/spine\_viewer/}
+(issue \#12772, epic \#12735). It displays quantities already produced and
+verified elsewhere; it computes no new physical quantity and applies no
+filtering, scaling or sign change other than the tested one below.
+
+\paragraph{Data Path and Frames}
+\texttt{core.open\_study} calls \texttt{study\_aggregation.load\_verified\_run},
+which recomputes the SHA-256 of the \texttt{loads\_npz} artifact and refuses a
+missing, tampered or inconsistent file. The stored joint-reaction force and
+moment arrays (shape $(n,L,3)$, newtons and newton-metres) are wrapped without
+modification in a \texttt{SpinalLoadSeries} with observable
+\texttt{joint\_reaction}. Per ADR-0055 the wrench acts on the superior vertebra
+through the inferior one, is expressed in the inferior ISB frame (X anterior,
+Y cranial, Z right) about the mid-disc centre, and compression is $+F_y$,
+anteroposterior shear $+F_x$, mediolateral shear $+F_z$. The tension view is the
+single sign boundary $T=-F_y$ of \texttt{viz\_data.to\_tension\_positive}.
+Model identity and external-load text are copied from the receipt request, or
+the literal ``not recorded in receipt'' when absent.
+
+\paragraph{Scientific Status}
+The status is fail-closed:
+\begin{equation}
+  \text{status} =
+  \begin{cases}
+    \text{qualified} & s_{\mathrm{declared}}=\text{qualified}\ \wedge\ v=\text{pass},\\
+    \text{unqualified} & \text{otherwise,}
+  \end{cases}
+\end{equation}
+with $s_{\mathrm{declared}}$ the receipt's \texttt{scientific\_status} and $v$
+the run verdict. A passing run alone never yields ``qualified''. The widget
+shows the status word, the run verdict, the receipt \texttt{distribution\_source}
+and any reasons in a banner that is always visible (red for unqualified, green
+only for qualified, grey with ``NO STUDY LOADED'' when empty); figure titles
+carry the status through \texttt{plots.plot\_load\_heatmap}. A failed load clears
+the plot and shows ``ERROR'' instead of stale data.
+
+\paragraph{Embedding and Lifecycle}
+\texttt{\_embed\_adapter.py} registers tool id \texttt{spine\_viewer} at import
+without importing PyQt6; the widget is imported inside
+\texttt{create\_main\_widget}. \texttt{cleanup} swaps the widget list out before
+tearing down and is idempotent. Registration surfaces: the
+\texttt{upstream\_drift.embeddable\_tools} entry point, the \texttt{models.yaml}
+and \texttt{launcher\_manifest.json} tiles (category tool, status beta), and the
+feature-parity entry \texttt{tools.spine\_viewer} (gap, issue \#12772: no
+React or Tauri counterpart yet).
+
+\paragraph{Limitations}
+Only the loads heatmap is wired to a GUI control; \texttt{core.view\_angle\_stack}
+exists for later use but receipts do not store poses. The viewer is a display
+aid; it does not establish physical or scientific acceptance. Fixture numbers in
+the tests are invented.
+
+\paragraph{Reproduction}
+\begin{verbatim}
+QT_QPA_PLATFORM=offscreen python3 -m pytest tests/tools/spine_viewer \
+    tests/config/feature_parity -q -n 0 -o addopts=""
+\end{verbatim}

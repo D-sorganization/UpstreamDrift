@@ -27,6 +27,7 @@ from src.launchers.launcher_constants import (
     CREATE_NO_WINDOW,
     REPOS_ROOT,
 )
+from src.launchers.engine_availability import engine_for_model, install_hint
 from src.launchers.launcher_model_sources import (
     get_model_source_root,
     resolve_model_artifact_path,
@@ -155,6 +156,17 @@ DEPENDENCY_MAP: dict[str, dict[str, str]] = {
 }
 
 
+def _apply_engine_install_hints() -> None:
+    """Overwrite engine install commands from the single hint table (#12891)."""
+    for key, info in DEPENDENCY_MAP.items():
+        engine = engine_for_model(key)
+        if engine is not None:
+            info["install_cmd"] = install_hint(engine)
+
+
+_apply_engine_install_hints()
+
+
 def dependency_cache_key(model: Any) -> str:
     """Return the stable cache key shared by selection and launch paths."""
     model_id = getattr(model, "id", None)
@@ -281,6 +293,9 @@ class SimulationManager:
         """Record an async dependency probe and refresh selected-model UI."""
         launcher = self._launcher_ref()
         self._dependency_cache()[model_id] = (deps_ok, deps_error)
+        pending = getattr(launcher, "_pending_launch_model_id", None) == model_id
+        if pending:
+            launcher._pending_launch_model_id = None
         if getattr(launcher, "selected_model", None) != model_id:
             return
 
@@ -293,6 +308,8 @@ class SimulationManager:
                 launcher._set_dependency_success_status()
             if hasattr(launcher, "update_launch_button"):
                 launcher.update_launch_button(getattr(model, "name", model_id))
+            if pending:
+                self.launch_simulation()
             return
 
         if hasattr(launcher, "_set_dependency_error_status"):
@@ -468,6 +485,8 @@ except (RuntimeError, TypeError, AttributeError) as e:
             self.lbl_status.setStyleSheet(Styles.STATUS_WARNING)
             if hasattr(self, "btn_launch"):
                 self.btn_launch.setEnabled(False)
+            # Remember the click so the probe result resumes it (#12892).
+            self._launcher_ref()._pending_launch_model_id = model_id
             self._start_dependency_probe(model_id, model)
             return False
 

@@ -1,0 +1,62 @@
+\subsection{Spinal Coupling Laws}
+\label{sec:spn-2a}
+
+This section documents \texttt{src/shared/python/spine/coupling.py} (issue
+\#12741, epic \#12735), which implements item 6 of ADR-0055. Couplings
+prescribe kinematics only; they are disabled for inverse dynamics, static
+optimization and joint reaction, so constraint multipliers never enter disc
+loads.
+
+\paragraph{Definitions and Units.}
+Independent coordinates $\phi \in \mathbb{R}^{n_\phi}$ map to per-level ISB ZXY
+angles $\theta_i = (\mathrm{FE}, \mathrm{LB}, \mathrm{AR})$ in radians
+(frames: X anterior, Y cranial, Z right). Linear law:
+$\theta_i = C_i\,\phi$, $C_i \in \mathbb{R}^{3\times n_\phi}$, cross-axis terms
+allowed (for example axial rotation inducing lateral bending with a sign flip
+at L5-S1). State-dependent law: $\theta_i = C_i(s)\,\phi$, with $C_i$
+piecewise-linear in the scheduling coordinate $s=\phi_k$ over breakpoints
+$s_0<\dots<s_m$ and held constant outside $[s_0,s_m]$. The Jacobian is
+\[
+  \frac{\partial\theta_i}{\partial\phi} = C_i(s)
+  + \Bigl(\tfrac{dC_i}{ds}\,\phi\Bigr)e_k^{\top},
+\]
+using the right-hand slope at interior breakpoints and zero slope outside the
+range. The regional fraction of axis $a$ over a level set $R$ is
+\[
+  f_R = \frac{\sum_{i\in R}\theta_i[a]}{\sum_{i\in\mathrm{all}}\theta_i[a]},
+\]
+undefined (\texttt{ValueError}) when the denominator magnitude is below
+$10^{-12}$.
+
+\paragraph{MyoFullBody Adapter.}
+\texttt{from\_joint\_coupling} expresses single-driver
+\texttt{JointCoupling} equalities as a \texttt{PolynomialCouplingLaw}:
+$\theta[a] = q_{0,\mathrm{dep}} + \sum_k c_k (q_{\mathrm{drv}}-q_{0,\mathrm{drv}})^k$,
+which reproduces \texttt{JointCoupling.expand} exactly for the mapped dependent
+joints. A \texttt{level\_map} sends qpos addresses to independent names
+(\texttt{str}) or to \texttt{(SpinalLevel, axis)}. Chained drivers, unmapped
+drivers, an independent name given to two drivers, duplicate level and axis
+pairs and non-contiguous level sets raise \texttt{ValueError}. The module
+\texttt{myofullbody} is unmodified and does not import \texttt{spine}.
+\texttt{level\_rotations} builds a \texttt{SegmentalPose} through
+\texttt{LevelTransform.from\_isb\_angles}.
+
+\paragraph{Preconditions and Provenance.}
+Every law needs non-empty id, version and citation (DOI plus table or page),
+finite matrices of the stated shape, and a contiguous level set (checked with
+the ordinal adjacency of \texttt{SpinalLevel}). Coefficients in the tests are
+invented fixtures, not transcribed from any model or paper.
+
+\paragraph{Limitations.}
+The laws are kinematic maps only: no stiffness, no limits, no muscle effects.
+Linear interpolation in $s$ is $C^0$ in $C_i(s)$, so the Jacobian is
+discontinuous at breakpoints. Angles are not summed across levels
+(ADR-0055 item 3).
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/shared/python/spine/test_coupling.py -q -n 0
+\end{verbatim}
+Checks: regional fraction 0.17 for a lumbar axial example, cross-axis sign flip,
+Jacobians against central differences ($10^{-7}$), adapter versus
+\texttt{JointCoupling.expand}, and all preconditions.

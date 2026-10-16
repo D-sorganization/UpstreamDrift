@@ -85,6 +85,7 @@ Optional Rust extensions built via Maturin for performance-critical paths.
 - `src/shared/python/realtime/` — file + WebSocket pub-sub IPC
 - `src/launchers/embedded_host.py` — in-launcher tool host (tabs + docks)
 - `src/tools/pose_studio/` — interactive cross-engine pose editor (launcher tile: `pose_studio`)
+- `src/shared/python/model_appearance/body_meshes.py` — engine-neutral body meshes, the one shared appearance and anthropometry spec every engine emitter translates (see [Model Appearance → Body meshes](docs/agents/shared-infrastructure.md#model-appearance-engine-agnostic-visuals))
 - `tests/` — pytest suite (unit, integration, live simulation)
 - `scripts/` — CI helpers including `check_file_size_budget.py`
 - `scripts/config/file_size_budget.json` — per-file size exceptions

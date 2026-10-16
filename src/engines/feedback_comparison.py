@@ -19,6 +19,7 @@ from src.engines.model_inventory import (
     PackageStatus,
     sha256_file,
 )
+from src.shared.python.loop_nullspace.replay_policy import ReplayPolicy
 
 REPLAY_COMPARISON_CONTRACT_VERSION = "feedback-comparison/1.2.0"
 _SUPPORTED_REPLAY_COMPARISON_CONTRACTS = frozenset(
@@ -64,11 +65,6 @@ class InputKind(str, enum.Enum):
     MUSCLE_EXCITATION = "muscle_excitation"
     MUSCLE_ACTIVATION = "muscle_activation"
     EXTERNAL_LOAD = "external_load"
-
-
-class ReplayPolicy(str, enum.Enum):
-    INDEPENDENT_TIME_ONLY = "independent_time_only"
-    STATE_FEEDBACK = "state_feedback"
 
 
 class EvidenceMode(str, enum.Enum):

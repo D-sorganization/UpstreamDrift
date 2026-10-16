@@ -1,0 +1,57 @@
+\subsection{Golf Humanoid Input Reader}
+\label{sec:spn-9a}
+
+This section documents \texttt{golf\_input.py} (issue \#12756, epic \#12735),
+which reads a matched golf swing and produces the global pelvis-to-thorax
+rotation that later stages distribute over the spinal levels.
+
+\paragraph{Model Mapping.}
+The \texttt{golf\_humanoid} \texttt{back} joint is an OpenSim
+\texttt{CustomJoint} between the offset frames \texttt{pelvis\_offset} (on the
+pelvis) and \texttt{torso\_offset} (on the child body \texttt{torso}). Its
+rotational transform axes are $(0,0,1)$, $(1,0,0)$, $(0,1,0)$ on
+\texttt{lumbar\_extension} $e$, \texttt{lumbar\_bending} $b$ and
+\texttt{lumbar\_rotation} $r$ (ADR-0055 item 4). With the offset-frame
+rotations $R_{po}$ and $R_{to}$,
+\[
+  R_{\mathrm{pelvis}\to\mathrm{torso}}
+  = R_{po}\,R_z(e)\,R_x(b)\,R_y(r)\,R_{to}^{\mathsf T}.
+\]
+The pure function \texttt{back\_joint\_rotation(e, b, r)} returns
+$R_z(e)R_x(b)R_y(r)$ (intrinsic ZXY, radians) without OpenSim.
+
+\paragraph{Native Evaluation.}
+\texttt{read\_golf\_humanoid\_motion} loads the \texttt{.sto}/\texttt{.mot} with
+\texttt{TimeSeriesTable}, matches columns to model coordinates by name or by a
+\texttt{/\ldots/<name>/value} state path, converts rotational columns to
+radians when \texttt{inDegrees=yes}, sets each row into an OpenSim state,
+realises positions, and records
+\[
+  R_{\mathrm{pt}} = R_{\mathrm{pelvis}}^{\mathsf T} R_{\mathrm{torso}},\qquad
+  T_{\mathrm{pelvis}}\in\mathbb{R}^{4\times4},
+\]
+both in ground. Remaining coordinates (arms, legs) are passed through
+unchanged; the six pelvis coordinates are represented by the pelvis pose.
+Coordinates absent from the file keep their model defaults. Events are read
+from \texttt{event\_<name>} table metadata and are empty otherwise. The
+\texttt{source} mapping holds the file basename and SHA-256 only.
+
+\paragraph{Resampling.}
+\texttt{resample} builds the grid $t_0 + k/f$ (final time appended when off the
+grid), applies SLERP to $R_{\mathrm{pt}}$ and to the pelvis rotation block,
+and linear interpolation to translations and other coordinates. Rotations are
+therefore never interpolated per angle, so no $2\pi$ wrap artefacts arise.
+
+\paragraph{Assumptions and Limitations.}
+Model body axes are assumed ISB-aligned within the inventory tolerance of
+ADR-0055; the offset frames are included natively rather than removed. The
+reader covers kinematics only; no dynamics, loads or distribution rules.
+Clamped coordinates follow OpenSim \texttt{setValue} semantics.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/opensim/spine/test_golf_input.py -q -n 0
+\end{verbatim}
+The evidence test pins SHA-256 values of
+\texttt{os7\_moco\_g1/inputs/ik\_states\_full.sto} and the scaled
+\texttt{.osim} and skips with a reason when they are absent.

@@ -75,7 +75,7 @@ function pickDefault(options: string[], preferred: string): string {
  */
 function defaultPicks(library: AppearanceLibrary): AppearancePicks {
   const skin_tone = pickDefault(library.skin_tones, 'skin_medium');
-  const clothing = pickDefault(Object.keys(library.clothing), 'golf_polo_shorts');
+  const clothing = pickDefault(Object.keys(library.clothing), 'golf_polo_trousers');
   const club_finish = pickDefault(library.club_finishes, 'satin_steel');
   const headwear = pickDefault(library.headwear, 'hair');
   const ground_material = pickDefault(library.ground_materials, 'turf');

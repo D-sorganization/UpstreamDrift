@@ -193,6 +193,15 @@
       "tiles": [],
       "notes": "FTO-10 (#11295): the PyQt6 MuJoCo GUI renders shaded 3D force arrows and torque arcs from the engine provider through add_glyphs_to_scene and MeshcatGlyphRenderer. The web Three.js ForceOverlay draws the same provider GlyphSet over /api/force-overlays and the simulation WebSocket (FTO-22 #11307, FTO-23 #11308, closed with Playwright evidence). GCV-4 (#11710): the Visualization tab and the web ForceOverlayPanel share scale-mode (fixed, body weight, peak), reference-length and group controls; clamped arrows draw a distinct tip."
     },
+    "tools.spine_viewer": {
+      "title": "Segmental spine viewer (per-level load heatmaps from study receipts)",
+      "pyqt": "src/tools/spine_viewer/gui.py",
+      "api": "src/api/routes/spine_viewer.py",
+      "web": "ui/src/pages/SpineViewer.tsx",
+      "status": "parity",
+      "tiles": ["spine_viewer"],
+      "notes": "SPN-15c (#12815): GET /api/tools/spine-viewer/study opens a receipt under the allowed study root, verifies the loads artifact SHA-256 server-side through study_aggregation.load_verified_run and returns the src/tools/spine_viewer/core.py view model (view_to_dict). The web heatmap and status banner always show scientific_status and distribution_source; anything but the exact status qualified reads UNQUALIFIED. Angle-stack plots are not part of the web view."
+    },
     "analysis.grip_wrench": {
       "title": "Per-hand grip wrench on the club (weld multipliers and efc_force): overlay glyphs and force/couple plots",
       "pyqt": "src/tools/grip_wrench_plots/gui.py",

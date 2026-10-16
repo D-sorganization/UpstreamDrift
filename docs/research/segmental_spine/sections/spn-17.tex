@@ -1,0 +1,24 @@
+\subsection{Associated Repositories and Contract Ownership}
+\label{sec:spn-17}
+
+Two sibling repositories model the lumbar spine with simpler representations
+(issue \#12774).
+
+\paragraph{Tools.} \texttt{movement\_optimizer/spine\_loads.py} estimates L5/S1
+compression and anterior--posterior shear from a sagittal three-link model.
+Tools issue \#5630 asks that it be labelled a planar ergonomic estimate and
+that its signs be documented against this contract: compression positive
+($+F_y$), anterior shear positive ($+F_x$).
+
+\paragraph{OpenSim\_Models.} \texttt{axial\_skeleton.\_add\_lumbar\_joint} builds
+a single three-degree-of-freedom lumbar joint. OpenSim\_Models issue \#464
+proposes an optional five-level lumbar chain in the ADR-0055 axis order,
+driven by a cited coupling law, with the default model left unchanged.
+
+\paragraph{Decision.} The engine-agnostic contract (\texttt{SpinalLevel},
+\texttt{LevelTransform}, \texttt{SegmentalPose}, \texttt{CouplingLaw},
+\texttt{SpinalLoadSeries}) stays in UpstreamDrift
+\texttt{src/shared/python/spine/} while UpstreamDrift is its only consumer.
+When a second repository adopts it, it moves to a shared Tools package that
+UpstreamDrift consumes through \texttt{vendor/ud-tools}; it is never copied.
+No consumer-side adapter is needed in UpstreamDrift today.

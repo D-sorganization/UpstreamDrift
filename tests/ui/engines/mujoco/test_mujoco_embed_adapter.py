@@ -199,7 +199,7 @@ def test_apply_styling_uses_theme_manager_when_available(qapp) -> None:  # noqa:
     with patch.dict(
         "sys.modules",
         {
-            "src.shared.python.theme": type(
+            "src.shared.python.theme.integration": type(
                 "m",
                 (),
                 {"apply_theme_to_window": mock_apply},

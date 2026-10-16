@@ -23,7 +23,10 @@ This guide describes the major professional enhancements added to the Golf Swing
 ### Usage
 
 ```python
-from mujoco_golf_pendulum.video_export import export_simulation_video
+from mujoco_golf_pendulum.video_export import (
+    VideoExportOptions,
+    export_simulation_video,
+)
 
 # Export recorded simulation as MP4
 success = export_simulation_video(
@@ -33,10 +36,7 @@ success = export_simulation_video(
     recorded_states=states,
     recorded_controls=controls,
     times=times,
-    width=1920,
-    height=1080,
-    fps=60,
-    show_metrics=True
+    options=VideoExportOptions(width=1920, height=1080, fps=60, show_metrics=True),
 )
 ```
 
@@ -571,7 +571,7 @@ Driver Specification:
 from mujoco_golf_pendulum.telemetry import TelemetryRecorder
 from mujoco_golf_pendulum.statistical_analysis import StatisticalAnalyzer
 from mujoco_golf_pendulum.recording_library import RecordingLibrary, create_metadata_from_recording
-from mujoco_golf_pendulum.video_export import export_simulation_video
+from mujoco_golf_pendulum.video_export import VideoExportOptions, export_simulation_video
 
 # 1. Record simulation
 recorder = TelemetryRecorder(model, data)
@@ -614,8 +614,7 @@ export_simulation_video(
     data_dict['states'],
     data_dict['controls'],
     data_dict['times'],
-    width=1920, height=1080, fps=60,
-    show_metrics=True
+    VideoExportOptions(width=1920, height=1080, fps=60, show_metrics=True),
 )
 
 print("Analysis complete!")

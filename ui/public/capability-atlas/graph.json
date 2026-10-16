@@ -922,6 +922,22 @@
       "id": "tools.shot_pattern_analysis"
     },
     {
+      "feature_id": "tools.spine_viewer",
+      "title": "Segmental spine viewer (per-level load heatmaps from study receipts)",
+      "status": "parity",
+      "pyqt": "src/tools/spine_viewer/gui.py",
+      "api": "src/api/routes/spine_viewer.py",
+      "web": "ui/src/pages/SpineViewer.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "spine_viewer"
+      ],
+      "notes": "SPN-15c (#12815): GET /api/tools/spine-viewer/study opens a receipt under the allowed study root, verifies the loads artifact SHA-256 server-side through study_aggregation.load_verified_run and returns the src/tools/spine_viewer/core.py view model (view_to_dict). The web heatmap and status banner always show scientific_status and distribution_source; anything but the exact status qualified reads UNQUALIFIED. Angle-stack plots are not part of the web view.",
+      "id": "tools.spine_viewer"
+    },
+    {
       "feature_id": "tools.terrain_engine",
       "title": "Terrain and topography configuration",
       "status": "parity",
@@ -1515,6 +1531,20 @@
       "category": "tool",
       "status": "beta",
       "capabilities": []
+    },
+    {
+      "id": "spine_viewer",
+      "title": "Spine Viewer",
+      "description": "Read-only per-level spinal load heatmaps from hash-verified study receipts; always shows scientific status and distribution source. Install: pip install upstream-drift[gui-tools]",
+      "path": "src/tools/spine_viewer/__main__.py",
+      "launch_target": "src/tools/spine_viewer/__main__.py",
+      "category": "tool",
+      "status": "beta",
+      "capabilities": [
+        "spine",
+        "joint_reaction",
+        "study_receipt"
+      ]
     },
     {
       "id": "necromatcher",
@@ -3188,9 +3218,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "2a2e303aa92f6dda0ef3868fcc881ccbdbc54cf362ac3aae931333163969b90f",
-    "src/config/launcher_manifest.json": "abc9913955858006e7bb6b8e9dca8c9693313e62d48d90dcc1ace33e632a79dc",
-    "src/config/feature_parity.json": "46e831b130702aaa9025deb465debb9f78dc5160091bdf9ad48e795bf90ce984",
+    "src/config/models.yaml": "64caf5311e4be2c75e742dc053b425a528f851638ca2773423fcc77d40b5d419",
+    "src/config/launcher_manifest.json": "c9844ac6e0cd9c6cc867bda7cfd44edf1199ac85a07af5b9a83bec70a65d00bc",
+    "src/config/feature_parity.json": "fd1807c860396ddeee885d98fae36643e873b31a3e15f1096bb5f4770143c326",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

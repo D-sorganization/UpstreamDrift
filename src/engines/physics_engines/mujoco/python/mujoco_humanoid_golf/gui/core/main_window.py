@@ -75,7 +75,9 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
 
     def _apply_qss_stylesheet(self) -> None:
         try:
-            from src.shared.python.theme import ThemeManager as SharedThemeManager
+            from src.shared.python.theme.theme_manager import (
+                ThemeManager as SharedThemeManager,
+            )
 
             theme_mgr = SharedThemeManager.instance()
             self.setStyleSheet(theme_mgr.get_current_stylesheet())
@@ -96,7 +98,9 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
     def _on_shared_theme_changed(self, colors: dict[str, str]) -> None:
         """Update stylesheet dynamically when the shared theme changes."""
         try:
-            from src.shared.python.theme import ThemeManager as SharedThemeManager
+            from src.shared.python.theme.theme_manager import (
+                ThemeManager as SharedThemeManager,
+            )
 
             theme_mgr = SharedThemeManager.instance()
             self.setStyleSheet(theme_mgr.get_current_stylesheet())
@@ -165,6 +169,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         self.physics_tab.model_changed.connect(self.controls_tab.on_model_loaded)
         self.physics_tab.model_changed.connect(self.on_model_changed_signal)
         self.physics_tab.mode_changed.connect(self.controls_tab.on_mode_changed)
+        self.controls_tab.camera_preset_requested.connect(self._on_quick_camera_clicked)
 
         if hasattr(self.controls_tab, "chk_live_analysis"):
             self.controls_tab.chk_live_analysis.toggled.connect(
@@ -216,9 +221,9 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         self._update_status_bar()
 
     def _on_quick_camera_clicked(self, preset_name: str) -> None:
-        """Handle quick camera button click."""
+        """Route a quick-camera request to the Visualization tab (UD #12885)."""
         if hasattr(self, "visualization_tab"):
-            self.visualization_tab.camera_combo.setCurrentText(preset_name)
+            self.visualization_tab.apply_camera_preset(preset_name)
 
     def on_reset_camera(self) -> None:
         """Reset camera to default position."""
@@ -385,7 +390,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
     def _apply_styling(self) -> None:
         """Apply professional styling to the application."""
         try:
-            from src.shared.python.theme import apply_theme_to_window
+            from src.shared.python.theme.integration import apply_theme_to_window
 
             if callable(apply_theme_to_window):
                 apply_theme_to_window(self)

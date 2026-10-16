@@ -1,0 +1,63 @@
+{
+  "camera_distance_m": 3.2,
+  "swings": {
+    "driver": {
+      "clothing": "golf_polo_trousers",
+      "trunk": {
+        "LowerTorso": {
+          "source": "visual_hints",
+          "ml_semi_axis_m": 0.1453,
+          "ap_over_ml": 0.6769
+        },
+        "UpperTorsoBase": {
+          "source": "library_default",
+          "ml_semi_axis_m": 0.145,
+          "ap_over_ml": 0.72
+        },
+        "COMRod": {
+          "source": "visual_hints",
+          "ml_semi_axis_m": 0.1582,
+          "ap_over_ml": 0.6486
+        }
+      },
+      "lower_garments": {
+        "LowerTorso": "trousers_charcoal",
+        "femur_r": "trousers_charcoal",
+        "tibia_r": "trousers_charcoal",
+        "femur_l": "trousers_charcoal",
+        "tibia_l": "trousers_charcoal"
+      },
+      "thigh_coverage": [0.0, 1.0],
+      "shin_coverage": [0.0, 1.0]
+    },
+    "iron7": {
+      "clothing": "golf_polo_trousers",
+      "trunk": {
+        "LowerTorso": {
+          "source": "visual_hints",
+          "ml_semi_axis_m": 0.1453,
+          "ap_over_ml": 0.6765
+        },
+        "UpperTorsoBase": {
+          "source": "library_default",
+          "ml_semi_axis_m": 0.145,
+          "ap_over_ml": 0.72
+        },
+        "COMRod": {
+          "source": "visual_hints",
+          "ml_semi_axis_m": 0.1582,
+          "ap_over_ml": 0.6486
+        }
+      },
+      "lower_garments": {
+        "LowerTorso": "trousers_charcoal",
+        "femur_r": "trousers_charcoal",
+        "tibia_r": "trousers_charcoal",
+        "femur_l": "trousers_charcoal",
+        "tibia_l": "trousers_charcoal"
+      },
+      "thigh_coverage": [0.0, 1.0],
+      "shin_coverage": [0.0, 1.0]
+    }
+  }
+}

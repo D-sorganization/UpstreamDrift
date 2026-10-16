@@ -7,6 +7,8 @@ nose, a mouth, ears and a neck are separate parts so each can take its own
 material; hair or a cap with a visor is optional. The geometry is procedural
 (a deformed ellipsoid grid), so there is no third-party mesh and nothing to
 license beyond this repository (CC0-1.0 like ``assets/body_part_shapes``).
+``HeadSettings.model == "cc0_mesh"`` swaps in the realistic CC0 head of
+:mod:`head_mesh` through the same :func:`build_head_parts` entry point.
 
 Everything here is visual only: no mass, inertia, collision or degree of
 freedom. :func:`head_override_rotation` defines the visual-only orientation
@@ -320,6 +322,13 @@ def build_head_parts(
         raise ValueError("Head length must be a positive finite number")
     cfg = settings or HeadSettings()
     length = length_m * cfg.scale
+    if cfg.model == "cc0_mesh":  # R7 (#12687): the shared CC0 mesh head slot
+        from src.shared.python.model_appearance import head_mesh
+
+        return [
+            HeadPart(name, mesh, material)
+            for name, mesh, material in head_mesh.build_mesh_parts(length, cfg.headwear)
+        ]
     parts = [_neck(length), HeadPart("skull", _skull(length), "skin")]
     parts += _face_parts(length) + _ears(length)
     if cfg.headwear != "none":

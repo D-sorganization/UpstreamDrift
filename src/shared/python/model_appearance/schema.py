@@ -27,6 +27,9 @@ SCHEMA_PATH = Path(__file__).with_name("appearance_v1.schema.json")
 APPEARANCE_SUFFIX = ".appearance.json"
 # Spec keys that only ever affect pictures; excluded from the physics hash.
 VISUAL_ONLY_SPEC_KEYS = ("visual_hints", "appearance")
+# Owner ruling (#12685): the default outfit is charcoal trousers. The preset
+# itself is defined in ``library.CLOTHING``, which checks this name exists.
+DEFAULT_CLOTHING = "golf_polo_trousers"
 
 
 @dataclass(frozen=True)
@@ -102,6 +105,7 @@ class BallSettings:
 
 HEAD_AXES = ("+x", "-x", "+y", "-y", "+z", "-z")
 HEADWEAR = ("none", "hair", "cap")
+HEAD_MODELS = ("parametric", "cc0_mesh")
 BODY_MODELS = ("ellipsoid", "meshes")
 HEAD_OVERRIDE_FRAMES = ("parent", "world")
 
@@ -137,13 +141,15 @@ class HeadSettings:
     forward_axis: str = "+x"
     up_axis: str = "+z"
     orientation_override: HeadOrientationOverride | None = None
+    #: ``cc0_mesh`` (default, owner ruling #12949) or ``parametric`` (procedural).
+    model: str = "cc0_mesh"
 
 
 @dataclass(frozen=True)
 class AppearanceDocument:
     name: str = "default"
     skin_tone: str = "skin_medium"
-    clothing: str = "golf_polo_shorts"
+    clothing: str = DEFAULT_CLOTHING
     club_finish: str = "satin_steel"
     materials: dict[str, Material] = field(default_factory=dict)
     segments: tuple[SegmentRule, ...] = ()
@@ -201,6 +207,13 @@ def _material(raw: Mapping[str, Any]) -> Material:
     )
 
 
+def _head_model(raw: Mapping[str, Any], defaults: HeadSettings) -> str:
+    """Head model: explicit value, else the CC0 default (a cap needs parametric)."""
+    if "model" in raw:
+        return raw["model"]
+    return "parametric" if raw.get("headwear") == "cap" else defaults.model
+
+
 def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
     defaults = HeadSettings()
     ovr_raw = raw.get("orientation_override")
@@ -224,6 +237,7 @@ def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
         raw.get("forward_axis", defaults.forward_axis),
         raw.get("up_axis", defaults.up_axis),
         override,
+        _head_model(raw, defaults),
     )
 
 
@@ -235,6 +249,8 @@ def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
         "forward_axis": head.forward_axis,
         "up_axis": head.up_axis,
     }
+    if head.model != HeadSettings().model:
+        out["model"] = head.model
     if head.headwear_material is not None:
         out["headwear_material"] = head.headwear_material
     ovr = head.orientation_override
@@ -285,7 +301,7 @@ def document_from_dict(data: Mapping[str, Any]) -> AppearanceDocument:
     doc = AppearanceDocument(
         name=data.get("name", "default"),
         skin_tone=data.get("skin_tone", "skin_medium"),
-        clothing=data.get("clothing", "golf_polo_shorts"),
+        clothing=data.get("clothing", DEFAULT_CLOTHING),
         club_finish=data.get("club_finish", "satin_steel"),
         materials=materials,
         segments=tuple(

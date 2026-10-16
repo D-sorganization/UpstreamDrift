@@ -22,12 +22,17 @@ import json
 import logging
 from pathlib import Path
 from typing import Any, Protocol, TypeAlias, runtime_checkable
+import warnings
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import require
 from src.shared.python.engine_core.capabilities import Capability, CapabilityLevel
+from src.shared.python.loop_nullspace.adapter_derivatives import (
+    UNSUPPORTED_STATE_COMPONENTS,
+    adapter_closed_loop_derivatives,
+)
 from src.shared.python.loop_nullspace.contracts import (
     ClosureKind,
     LoopTopology,
@@ -228,6 +233,8 @@ class MujocoForceAdapter:
     def capability(self, capability: Capability) -> CapabilityLevel:
         """``CLOSED_LOOP_SNAPSHOT`` is FULL by hard-KKT evaluation (NSX-51).
 
+        ``CLOSED_LOOP_DERIVATIVES`` is PARTIAL (finite difference, NSX-87).
+
         ``M`` and ``h`` come from ``mj_fullM`` and ``qfrc_bias``, the closure
         rows from the weld site Jacobians, and the drift from a declared
         central finite difference (:attr:`closure_drift_method`).  Nothing is
@@ -237,7 +244,29 @@ class MujocoForceAdapter:
         """
         if capability is Capability.CLOSED_LOOP_SNAPSHOT:
             return CapabilityLevel.FULL
+        if capability is Capability.CLOSED_LOOP_DERIVATIVES:
+            return CapabilityLevel.PARTIAL
         return CapabilityLevel.NONE
+
+    # -- closed-loop derivatives (NSX-87, #12716) ---------------------------
+
+    derivative_unsupported_states = UNSUPPORTED_STATE_COMPONENTS
+    """State components outside the derivatives (muscle activation until NSX-94)."""
+
+    def constrained_acceleration_derivatives(
+        self, q: Array, v: Array, tau: Array, *, step: float = 1e-5
+    ) -> Any:
+        """Hard-KKT finite-difference derivatives of ``(a, lambda)`` (PARTIAL).
+
+        Drives the NSX-84 routine with this adapter's canonical snapshot model
+        functions, so the derivatives are those of the rigid weld solve with
+        the reaction re-solved (``derivative_method=finite_difference``).
+        ``mjd_transitionFD`` differentiates soft stepping and is a separate
+        registry entry; its sensitivities are not conformance evidence.
+        Preconditions and postconditions: see
+        :func:`adapter_closed_loop_derivatives`.
+        """
+        return adapter_closed_loop_derivatives(self, q, v, tau, step=step)
 
     # -- closed-loop snapshot capability (NSX-51, #12579) -------------------
 
@@ -703,16 +732,26 @@ class MultiEngineTorqueAllocator:
         regularisation_grip: float = 1e-4,
         root_penalty_weight: float = 1e4,
     ) -> None:
-        self.adapter = adapter
-        self.allocator = ContactForceAllocator(
-            nv=adapter.nv,
-            actuated_indices=adapter.actuated_indices,
-            n_contact_spheres=adapter.n_contact_spheres,
-            mu_friction=mu_friction,
-            regularisation_contact=regularisation_contact,
-            regularisation_grip=regularisation_grip,
-            root_penalty_weight=root_penalty_weight,
+        warnings.warn(
+            "MultiEngineTorqueAllocator is a compatibility shim over the conic "
+            "core; use src.shared.python.loop_nullspace (allocate_trajectory) "
+            "for new code (NSX-24, #12567).",
+            DeprecationWarning,
+            stacklevel=2,
         )
+        self.adapter = adapter
+        with warnings.catch_warnings():
+            # One notice per construction, not one per layer.
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.allocator = ContactForceAllocator(
+                nv=adapter.nv,
+                actuated_indices=adapter.actuated_indices,
+                n_contact_spheres=adapter.n_contact_spheres,
+                mu_friction=mu_friction,
+                regularisation_contact=regularisation_contact,
+                regularisation_grip=regularisation_grip,
+                root_penalty_weight=root_penalty_weight,
+            )
 
     def allocate_frame(
         self,

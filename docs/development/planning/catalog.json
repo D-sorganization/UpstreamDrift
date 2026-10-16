@@ -356,6 +356,41 @@
         "evidence": null
       },
       "activation_issue": null
+    },
+    {
+      "id": "DV-12718",
+      "title": "NSX-89: Simscape Per-Frame Linearization Export in MATLAB R2025b",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/12718",
+      "source_snapshot": "source-12718.json",
+      "record": "DV-12718.md",
+      "disposition": "split",
+      "kind": "research-idea",
+      "status": "deferred",
+      "rationale": "The NSX-55 Simscape export is a snapshot grid and cannot be re-evaluated at perturbed states, so closed-loop derivatives are unavailable until a per-frame MATLAB R2025b linearize A/B export (model hash, solver settings, state mapping) of the golf probe variant exists; the Simscape derivative capability stays NONE meanwhile.",
+      "prerequisites": [
+        {
+          "name": "Probe-capable open-tree golf variant built and saved in MATLAB R2025b (DV-12583 prerequisite)",
+          "evidence": null
+        },
+        {
+          "name": "R2025b host whose licence admits the variant and Simulink Control Design linearize (untested)",
+          "evidence": null
+        },
+        {
+          "name": "Same-topology independent reference tangent linearization to compare against within registry tolerances",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Run a per-frame linearize export in MATLAB R2025b on the golf probe variant and store a simscape-trajectory-linearization/v1 file with model_sha256, solver_settings and state_mapping that passes parse_simscape_linearization.",
+        "Show A and B agree with the same-topology reference tangent linearization within the registry tolerances before moving the simscape derivative capability off NONE.",
+        "Never accept a synthetic_test_fixture, a planar-rig export or an R2026a result as golf-model acceptance evidence."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
     }
   ]
 }

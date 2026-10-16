@@ -45,6 +45,10 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Active Epics and Slices (One Line Each; Detail in the Archive)
 
+Segmental spine (Epic #12735, ADR-0055):
+
+- Software pathway landed and consolidated by SPN-16 #12773: manual chapter 66, `docs/research/segmental_spine/README.md#how-to-run-a-study`; all results unqualified, owner-blocked on #12749, #12737, #12755, #12758, #12763, #12770.
+
 Shot-pattern study (straight, draw and fade; #12409, PR #12418):
 
 - Matched phase-two study and article with 2,000-resample intervals and the clubhead-assumption band; consolidates #12278, #12410 and #12411. Start at `docs/research/shot_pattern_analysis/phase2/RESUME_HANDOFF.md`; the pre-consolidation detail is in the archive section of that name.

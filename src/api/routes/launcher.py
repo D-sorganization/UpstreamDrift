@@ -23,6 +23,7 @@ from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ..models.responses import LauncherManifestResponse
+from ..utils.path_validation import LOGO_SUFFIXES, resolve_file_within
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/launcher", tags=["launcher"])
@@ -180,12 +181,11 @@ async def get_logo(filename: str) -> FileResponse:
     Raises:
         HTTPException: If logo not found or invalid filename.
     """
-    # DBC Precondition: prevent path traversal
-    if ".." in filename:
-        raise HTTPException(status_code=400, detail="Invalid filename")
-
-    logo_path = ASSETS_DIR / filename
-    if not logo_path.exists():
+    # DBC Precondition: the served file must resolve inside ASSETS_DIR
+    # (rejects absolute paths, "..", backslash traversal and symlink escape;
+    # issue #12964).
+    logo_path = resolve_file_within(ASSETS_DIR, filename, LOGO_SUFFIXES)
+    if logo_path is None:
         manifest = await _get_manifest_async()
         for tile in manifest.tiles:
             if (
@@ -193,11 +193,14 @@ async def get_logo(filename: str) -> FileResponse:
                 or Path(tile.logo).name == filename
                 or tile.logo_path.name == filename
             ) and tile.logo_exists:
-                logo_path = tile.logo_path
-                break
+                logo_path = resolve_file_within(
+                    tile.logo_path.parent, tile.logo_path.name, LOGO_SUFFIXES
+                )
+                if logo_path is not None:
+                    break
 
-    if not logo_path.exists():
-        raise HTTPException(status_code=404, detail=f"Logo not found: {filename}")
+    if logo_path is None:
+        raise HTTPException(status_code=404, detail="Logo not found")
 
     # Determine media type
     suffix = logo_path.suffix.lower()
@@ -206,6 +209,7 @@ async def get_logo(filename: str) -> FileResponse:
         ".png": "image/png",
         ".jpg": "image/jpeg",
         ".jpeg": "image/jpeg",
+        ".ico": "image/x-icon",
     }
     media_type = media_types.get(suffix, "application/octet-stream")
 

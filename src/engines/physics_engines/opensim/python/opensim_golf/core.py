@@ -24,6 +24,10 @@ class OpenSimNotInstalledError(Exception):
     """Raised when OpenSim is not installed but is required."""
 
 
+class OpenSimImportFailedError(OpenSimNotInstalledError):
+    """OpenSim is installed but cannot load in this process (e.g. DLL clash)."""
+
+
 class OpenSimModelLoadError(Exception):
     """Raised when an OpenSim model fails to load."""
 
@@ -106,7 +110,7 @@ class GolfSwingModel:
         """
         try:
             opensim = import_opensim()
-        except ImportError as e:
+        except ModuleNotFoundError as e:
             raise OpenSimNotInstalledError(
                 "OpenSim is not installed.\n"
                 "\n"
@@ -120,6 +124,10 @@ class GolfSwingModel:
                 "  - Pinocchio: pip install pin\n"
                 "\n"
                 "Select the engine in the launcher settings or use the engine selector."
+            ) from e
+        except ImportError as e:
+            raise OpenSimImportFailedError(
+                f"OpenSim is installed but cannot load in this process: {e}"
             ) from e
 
         try:

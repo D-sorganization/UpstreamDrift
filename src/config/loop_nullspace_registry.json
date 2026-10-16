@@ -248,6 +248,27 @@
       "parameters": {"model": "engine muscle model"},
       "source": {"citation_id": "CIT-CUI-2008", "note": "Mechanism M3. The abstract says force-dependent, not activation, and is feline; a human arm study (Hu, Murray, Perreault 2011) is a candidate for a later check."},
       "verification_status": "VERIFIED"
+    },
+    {
+      "id": "H-KINEMATIC-ENSEMBLE-PRIOR",
+      "statement": "Kinematic uncertainty is sampled as a time-constant joint-coordinate offset drawn from an isotropic Gaussian of declared standard deviation, restricted to the tangent null space of the closure Jacobian and then projected onto the closure manifold; samples that fail admission are counted and excluded. The distribution is a modelling choice, not an estimate of measurement error.",
+      "parameters": {"sigma_q": "declared (rad or m per coordinate)", "offset": "time-constant, tangent to the closure, then project_to_closure", "seed": "declared"},
+      "source": {"citation_id": null, "note": "Modelling choice (NSX-61, #12586)."},
+      "verification_status": "NOT_APPLICABLE"
+    },
+    {
+      "id": "H-GRF-OBSERVATION",
+      "statement": "Observed ground-reaction data E f_g = g enter as two-sided bands |E f_g - g| <= k sigma with a declared per-row 1-sigma measurement uncertainty and coverage factor k; in the zero-uncertainty limit they are equality rows that remove rank(E_x N) null directions. The data are a hypothesis about the measurement, not a correction of the balance.",
+      "parameters": {"sigma": "declared per row", "coverage_k": "declared", "selector_E": "declared linear map of the contact loads", "source": "declared (force plate, or a labelled simulation standing in for one)"},
+      "source": {"citation_id": null, "note": "Modelling choice; spec section Lower-Body Loop."},
+      "verification_status": "NOT_APPLICABLE"
+    },
+    {
+      "id": "H-INERTIAL-PARAMETER-ENSEMBLE-PRIOR",
+      "statement": "Body inertial parameters are sampled as J' = J^(1/2) (I + Delta) J^(1/2) per body (J the nominal 4x4 pseudo-inertia), with Delta an isotropic Gaussian of declared standard deviation, orthogonally projected in the Delta metric onto the parameter changes that leave the stacked unactuated-row regressor product unchanged (the combinations the observed ground reaction and club wrench cannot identify), and kept only where every sampled body's pseudo-inertia is positive semidefinite; violating draws are counted and never projected. Massless bodies and the declared club carrier are not sampled. The distribution is a modelling choice, not a population or subject estimate.",
+      "parameters": {"sigma_rel": "declared (entries of Delta)", "subspace": "null space of the column-scaled stacked unactuated regressor, rank min(SVD, pivoted QR)", "constraint": "pseudo-inertia PSD, reject not project", "seed": "declared"},
+      "source": {"citation_id": null, "note": "Modelling choice (NSX-62, #12587); consistency cone after Wensing, Kim and Slotine 2018."},
+      "verification_status": "NOT_APPLICABLE"
     }
   ],
   "conventions": [
@@ -287,6 +308,12 @@
       "id": "envelope_only",
       "label": "Envelope Only",
       "hypotheses": ["H-TORQUE-CAPACITY", "H-FRICTION-CONE", "H-GRIP-PRELOAD"],
+      "conventions": ["C-FRAME-GRIP", "C-SCALE-FORCE-MOMENT", "C-RANK-TOLERANCE"]
+    },
+    {
+      "id": "envelope_grf_observed",
+      "label": "Envelope With Observed Ground Reaction",
+      "hypotheses": ["H-TORQUE-CAPACITY", "H-FRICTION-CONE", "H-GRIP-PRELOAD", "H-GRF-OBSERVATION"],
       "conventions": ["C-FRAME-GRIP", "C-SCALE-FORCE-MOMENT", "C-RANK-TOLERANCE"]
     },
     {

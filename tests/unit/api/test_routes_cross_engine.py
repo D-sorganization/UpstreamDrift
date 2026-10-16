@@ -260,3 +260,86 @@ class TestRunStudyBackground:
         assert data is not None
         assert data["status"] == "failed"
         assert "simulated failure" in data["error"]
+
+
+# ---------------------------------------------------------------------------
+# Tests — undefined CV at near-zero mean (#12807, NSX §5A)
+# ---------------------------------------------------------------------------
+
+
+class TestUndefinedCvPolicy:
+    """A zero-centred metric is reported undefined, never perfectly robust."""
+
+    @staticmethod
+    def _zero_mean_results() -> dict[str, Any]:
+        from src.shared.python.pendulum_simulator.cross_engine_perturbation import (
+            CrossEngineRunResult,
+        )
+
+        return {
+            "pendulum_stub": CrossEngineRunResult(
+                engine_name="pendulum_stub",
+                mean_total_energy_final=0.0,
+                std_total_energy_final=0.3,
+                mean_end_effector_speed_final=1.0,
+                std_end_effector_speed_final=0.1,
+                mean_peak_end_effector_speed=2.0,
+                std_peak_end_effector_speed=0.2,
+            )
+        }
+
+    def test_status_returns_null_with_reason(
+        self, client: TestClient, task_manager: TaskManager
+    ) -> None:
+        from src.api.routes.cross_engine import (
+            CrossEnginePerturbationConfig,
+            CrossEngineStudyRequest,
+            _run_study_background,
+        )
+        from src.shared.python.analysis import cross_engine as ce
+
+        provenance = (
+            self._zero_mean_results(),
+            {"cv_total_energy_final": 0.1},
+            {"pendulum_stub": ce.BACKEND_STUB},
+        )
+        request = CrossEngineStudyRequest(
+            engines=["pendulum_stub"],
+            config=CrossEnginePerturbationConfig(t_end=0.1, n_trials=2),
+        )
+        task_manager.set("cv-task-001", {"status": "started"})
+        with patch.object(
+            ce, "run_comparison_with_provenance", return_value=provenance
+        ):
+            _run_study_background("cv-task-001", request, task_manager)
+
+        response = client.get("/analysis/cross-engine/status/cv-task-001")
+        assert response.status_code == 200, response.text
+        engine = response.json()["result"]["engines"]["pendulum_stub"]
+        metric = engine["metrics"]["total_energy_final"]
+        assert metric["cv"] is None
+        assert metric["robustness_score"] is None
+        assert metric["cv_reason"] == ce.CV_UNDEFINED_REASON
+        assert engine["robustness_score"] is None
+        assert engine["robustness_reason"]
+
+    def test_non_finite_result_marks_task_failed(self) -> None:
+        """A NaN that escapes the service fails the task instead of a 500."""
+        from src.api.routes.cross_engine import (
+            CrossEngineStudyRequest,
+            _run_study_background,
+        )
+
+        tm = TaskManager()
+        tm.set("cv-task-002", {"status": "started"})
+        bad = {**_STUB_RESULT, "robustness_overall": float("nan")}
+        with patch(
+            "src.shared.python.analysis.cross_engine.run_cross_engine_study",
+            return_value=bad,
+        ):
+            _run_study_background("cv-task-002", CrossEngineStudyRequest(), tm)
+
+        data = tm.get("cv-task-002")
+        assert data is not None
+        assert data["status"] == "failed"
+        assert "non-finite" in data["error"]

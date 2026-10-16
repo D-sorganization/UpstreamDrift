@@ -136,7 +136,7 @@ def _attach_joint_element(
         if kind not in ("Px", "Py", "Pz", "Rx", "Ry", "Rz") or name in coordinates:
             raise ValueError(f"Duplicate or unsupported coordinate: {name}")
         coordinates.append(name)
-        ET.SubElement(
+        joint_element = ET.SubElement(
             element,
             "joint",
             name=name,
@@ -148,8 +148,28 @@ def _attach_joint_element(
             frictionloss="0",
             stiffness="0",
         )
+        _set_joint_spring(joint_element, primitive)
     ET.SubElement(element, "inertial", _inertia(child_body, offset))
     return element, offset
+
+
+_SPRING_ATTRIBUTES = (
+    ("stiffness_n_m_rad", "stiffness"),
+    ("damping_n_m_s_rad", "damping"),
+    ("springref_rad", "springref"),
+)
+
+
+def _set_joint_spring(joint: ET.Element, primitive: Mapping[str, Any]) -> None:
+    """Emit a primitive's spring-damper (chain shaft, #12686) as MuJoCo joint
+    ``stiffness``/``damping``/``springref``. Primitives without spring keys
+    (every rigid-model joint) keep the zero defaults, byte for byte."""
+    for key, attribute in _SPRING_ATTRIBUTES:
+        if key in primitive:
+            value = float(primitive[key])
+            if not np.isfinite(value) or (attribute != "springref" and value < 0):
+                raise ValueError(f"Invalid joint {attribute}: {value}")
+            joint.set(attribute, _numbers([value]))
 
 
 def _attach_frame_site(

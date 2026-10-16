@@ -14,6 +14,7 @@ The standalone ``main()`` entry point continues to use
 Subtask 5 / #4998 of EPIC #4993.
 """
 
+import logging
 import sys
 from typing import Any
 
@@ -34,7 +35,11 @@ from PyQt6.QtWidgets import (
 )
 
 import contextlib
-from src.shared.python.engine_core.opensim_runtime import import_opensim
+from src.shared.python.engine_core.opensim_runtime import (
+    OpenSimProbe,
+    OpenSimState,
+    probe_opensim,
+)
 
 with contextlib.suppress(Exception):
     matplotlib.use("QtAgg")
@@ -46,14 +51,23 @@ except ImportError:
 from matplotlib.figure import Figure
 
 try:
+    from src.engines.physics_engines.opensim.python.opensim_golf.marker_tracks import (
+        resolve_trajectory_markers,
+    )
+except ImportError:
+    from .opensim_golf.marker_tracks import resolve_trajectory_markers
+
+try:
     from src.engines.physics_engines.opensim.python.opensim_golf.core import (
         GolfSwingModel,
+        OpenSimImportFailedError,
         OpenSimModelLoadError,
         OpenSimNotInstalledError,
     )
 except ImportError:
     from .opensim_golf.core import (
         GolfSwingModel,
+        OpenSimImportFailedError,
         OpenSimModelLoadError,
         OpenSimNotInstalledError,
     )
@@ -67,6 +81,8 @@ try:
 except ImportError:
     _ScrewVisualizationTab = None  # type: ignore[assignment, misc]
     _SCREW_VIZ_AVAILABLE = False
+
+logger = logging.getLogger(__name__)
 
 
 class OpenSimGolfGUI(QMainWindow):
@@ -213,6 +229,9 @@ class MainWidget(QWidget):
         self.result: Any = None
         self.initialization_error: str | None = None
         self._opensim_available: bool = False
+        self._opensim_probe: OpenSimProbe = OpenSimProbe(
+            OpenSimState.MISSING, "unprobed"
+        )
 
         # Check OpenSim availability first
         self._check_opensim_availability()
@@ -226,13 +245,9 @@ class MainWidget(QWidget):
             self._show_getting_started()
 
     def _check_opensim_availability(self) -> None:
-        """Check if OpenSim library is available."""
-        try:
-            import_opensim()
-
-            self._opensim_available = True
-        except ImportError:
-            self._opensim_available = False
+        """Probe OpenSim, keeping the real reason when it cannot load (#12883)."""
+        self._opensim_probe = probe_opensim()
+        self._opensim_available = self._opensim_probe.available
 
     def _try_load_model(self) -> None:
         """Attempt to load the OpenSim model if a path was provided."""
@@ -244,6 +259,11 @@ class MainWidget(QWidget):
             self.model = GolfSwingModel(self.model_path)
             self._update_status("OpenSim Model Loaded", "green")
             self.btn_run.setEnabled(True)
+        except OpenSimImportFailedError as e:
+            self.initialization_error = str(e)
+            self._update_status("ERROR: OpenSim Cannot Load", "red")
+            self.btn_run.setEnabled(False)
+            QMessageBox.critical(self, "OpenSim Cannot Load", str(e))
         except OpenSimNotInstalledError as e:
             self.initialization_error = str(e)
             self._update_status("ERROR: OpenSim Not Installed", "red")
@@ -284,6 +304,8 @@ class MainWidget(QWidget):
         """
         if self._opensim_available:
             self._update_status("Ready - Load or Create a Model", "#17a2b8")
+        elif self._opensim_probe.state is OpenSimState.IMPORT_FAILED:
+            self._update_status("OpenSim Cannot Load - See Details", "red")
         else:
             self._update_status("OpenSim Not Installed - Setup Required", "orange")
 
@@ -302,7 +324,12 @@ class MainWidget(QWidget):
             "   Check 'shared/models/opensim/' for example files\n\n"
         )
 
-        if not self._opensim_available:
+        if self._opensim_probe.state is OpenSimState.IMPORT_FAILED:
+            getting_started_text += (
+                "OpenSim is installed but cannot load in this process:\n"
+                f"  {self._opensim_probe.reason}\n"
+            )
+        elif not self._opensim_available:
             getting_started_text += (
                 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                 "⚠️  OpenSim Installation Required:\n"
@@ -432,7 +459,11 @@ class MainWidget(QWidget):
             if self._opensim_available:
                 self._try_load_model()
             else:
-                self.initialization_error = "OpenSim library is not installed"
+                self.initialization_error = (
+                    f"OpenSim cannot load: {self._opensim_probe.reason}"
+                    if self._opensim_probe.state is OpenSimState.IMPORT_FAILED
+                    else "OpenSim library is not installed"
+                )
         self._update_status(f"OpenCap Session Loaded ({session.trial})", "green")
         details = (
             f"OpenCap Session: {session.trial}\n"
@@ -460,14 +491,17 @@ class MainWidget(QWidget):
         self.lbl_details.setText("Running...")
         QApplication.processEvents()
 
+        status = "Simulation stopped unexpectedly - see the log."
         try:
             self.result = self.model.run_simulation()
             self.plot_results()
             if self.result:
-                self.lbl_details.setText(
+                status = (
                     f"Simulation Complete. Duration: {self.result.time[-1]:.2f}s, "
                     f"Steps: {len(self.result.time)}"
                 )
+            else:
+                status = "Simulation produced no result."
         except NotImplementedError as e:
             # Clear, informative error - not a silent fallback
             QMessageBox.warning(
@@ -475,11 +509,13 @@ class MainWidget(QWidget):
                 "Simulation Not Available",
                 f"OpenSim simulation is not yet fully implemented.\n\n{e}",
             )
-            self.lbl_details.setText("Simulation not available - see error message.")
+            status = "Simulation not available - see error message."
         except (RuntimeError, ValueError, OSError) as e:
             QMessageBox.critical(self, "Simulation Error", str(e))
-            self.lbl_details.setText("Error occurred - see error message.")
+            status = "Error occurred - see error message."
         finally:
+            # Never leave "Running..." behind, even for an unexpected error.
+            self.lbl_details.setText(status)
             self.btn_run.setEnabled(True)
 
     def plot_results(self) -> None:
@@ -511,17 +547,28 @@ class MainWidget(QWidget):
 
         # Plot 3: 2D Trajectory
         ax3 = self.fig.add_subplot(212)
-        hand = self.result.marker_positions["Hand"]
-        club = self.result.marker_positions["ClubHead"]
-        ax3.plot(hand[:, 0], hand[:, 1], "b-", label="Hand Path")
-        ax3.plot(club[:, 0], club[:, 1], "r-", label="Clubhead Path")
-        ax3.set_title("Swing Trajectory (XZ Plane)")
-        ax3.set_aspect("equal")
-        ax3.legend()
-        ax3.grid(True)
+        self._plot_marker_trajectories(ax3)
 
         self.fig.tight_layout()
         self.canvas.draw()
+
+    def _plot_marker_trajectories(self, ax: Any) -> None:
+        """Plot the model's own markers, or say why there is nothing to plot."""
+        markers = self.result.marker_positions
+        names = resolve_trajectory_markers(markers)
+        ax.set_title("Marker Trajectories (X-Y)")
+        if not names:
+            message = "No markers in this model - trajectory plot skipped."
+            logger.info(message)
+            ax.text(0.5, 0.5, message, ha="center", va="center", transform=ax.transAxes)
+            ax.set_axis_off()
+            return
+        for name, style in zip(names, ("b-", "r-"), strict=False):
+            track = markers[name]
+            ax.plot(track[:, 0], track[:, 1], style, label=f"{name} path")
+        ax.set_aspect("equal")
+        ax.legend()
+        ax.grid(True)
 
     def _show_help_dialog(self) -> None:
         """Show the Getting Started help dialog."""

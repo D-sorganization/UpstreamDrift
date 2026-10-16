@@ -53,6 +53,13 @@ repos:
         pass_filenames: false
         always_run: true
 
+      - id: manual-toc-check
+        name: "user manual TOC matches chapter headings"
+        entry: python scripts/docs/build_manual_toc.py --check
+        language: system
+        pass_filenames: false
+        files: ^docs/user_guide/upstream_drift_user_manual(\.md|/.*\.md)$
+
   # -------------------------------------------------------------------------
   # Stage 2: Quick Quality Checks - PYTHON FILES ONLY
   # -------------------------------------------------------------------------

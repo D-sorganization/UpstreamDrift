@@ -1,0 +1,53 @@
+\subsection{OpenSim Lane Guard for Spine Tests}
+\label{sec:spn-7c}
+
+Spine tests that need the OpenSim SDK are marked \texttt{requires\_opensim} and
+obtain the module through \texttt{require\_opensim()}, which skips when
+\texttt{opensim} is absent. In a CI lane that is meant to run OpenSim, such a
+skip is a silent false pass. The guard turns that specific skip into a failure
+when the lane declares itself with \texttt{UD\_REQUIRE\_OPENSIM=1}. This is a
+software-correctness gate only; it does not assess any model or result.
+
+\paragraph{Decision Rule.} Let $E$ be the environment, $r$ the skip reason and
+$D$ the test directory. A report is converted from skipped to failed if and only if
+\begin{equation}
+  \mathrm{lane}(E) \land \mathrm{absent}(r) \land \mathrm{inside}(D),
+\end{equation}
+where $\mathrm{lane}(E)$ holds when \texttt{UD\_REQUIRE\_OPENSIM} is one of
+\texttt{1}, \texttt{true}, \texttt{yes}, \texttt{on} (case-insensitive, outer
+whitespace ignored); $\mathrm{absent}(r)$ holds when $r$ contains the
+\texttt{require\_opensim} skip text or the \texttt{importorskip} message
+\texttt{could not import 'opensim'}; and $\mathrm{inside}(D)$ holds when the
+report's path resolves to a descendant of \texttt{tests/opensim/spine}. Boundary
+skips, asset skips and any other reason are never converted.
+
+\paragraph{Hooks.} The conftest in \texttt{tests/opensim/spine} wraps
+\texttt{pytest\_make\_collect\_report} (module-level skips at import time) and
+\texttt{pytest\_runtest\_makereport} (in-test skips). Both mutate the report in
+place and return it. The failure text names the environment variable and quotes
+the original skip reason. Pure decision functions live in
+\texttt{tests/helpers/opensim\_lane\_guard.py}; they raise \texttt{TypeError}
+for non-mapping environments and non-string reasons.
+
+\paragraph{Lane Wiring.} The nightly cross-engine workflow installs the
+\texttt{opensim} extra and runs a step with \texttt{UD\_REQUIRE\_OPENSIM=1}
+over \texttt{tests/opensim/spine}, gated on the dependency install having
+succeeded. No new job or runner is added and \texttt{merge\_group} triggers are
+unchanged. The other OpenSim-touching workflows are not modified.
+
+\paragraph{Assumptions and Limitations.} The guard only detects absence of the
+module. A broken SDK install that raises a non-absence \texttt{ImportError} is
+already a real failure under \texttt{require\_opensim()}. A licensed-asset test
+that skips for a missing environment variable is not converted; it must print
+its \texttt{UNQUALIFIED} marker and is never acceptance evidence. The guard
+does not cover \texttt{tests/opensim} outside \texttt{spine}.
+
+\paragraph{Reproduction.} Guard unit and \texttt{pytester} tests (no network,
+no licensed assets):
+\begin{verbatim}
+python -m pytest tests/opensim/spine/test_require_opensim_guard.py -q -n 0
+\end{verbatim}
+Spine lane as run in the nightly job, with OpenSim installed:
+\begin{verbatim}
+UD_REQUIRE_OPENSIM=1 python -m pytest tests/opensim/spine -v -p pytest_timeout
+\end{verbatim}

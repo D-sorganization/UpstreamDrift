@@ -1,7 +1,8 @@
 """Primitive shape mesh generator for humanoid character builder.
 
-Internal submodule extracted from mesh_generator.py to keep file size
-within the line budget. Import via ``mesh_generator`` (the public module).
+This is the only ``PrimitiveMeshGenerator`` implementation (issue #12706);
+``_mesh_primitives`` re-exports it. Import via ``mesh_generator`` (the public
+module).
 """
 
 from __future__ import annotations
@@ -52,6 +53,7 @@ class PrimitiveMeshGenerator(MeshGeneratorInterface):
         if not self.is_available:
             return GeneratedMeshResult(
                 success=False,
+                solver_status="failure",
                 error_message="trimesh not available for primitive mesh generation",
             )
 

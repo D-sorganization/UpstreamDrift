@@ -45,6 +45,11 @@ class LinearizedDynamics:
     def n_steps(self) -> int:
         return int(self.a.shape[0])
 
+    @property
+    def n_state(self) -> int:
+        """State dimension ``nx`` (``A`` is ``(T, nx, nx)``)."""
+        return int(self.a.shape[1])
+
 
 @dataclass(frozen=True)
 class ReplayReport:

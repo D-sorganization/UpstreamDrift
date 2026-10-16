@@ -13,6 +13,10 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import postcondition, precondition
+from src.shared.python.motion_matching.same_input.closure import (
+    ClosurePlant,
+    project_to_closure,
+)
 
 __all__ = [
     "NullSpaceAnalysis",
@@ -141,7 +145,7 @@ def propose_nullspace_offsets(
 
 
 @precondition(
-    lambda q, closure_residual_m, tol_m: isinstance(q, np.ndarray),
+    lambda q, closure_residual_m, tol_m, plant=None: isinstance(q, np.ndarray),
     "q required",
 )
 @postcondition(
@@ -153,12 +157,23 @@ def reproject_onto_closure(
     *,
     closure_residual_m: float,
     tol_m: float,
+    plant: ClosurePlant | None = None,
 ) -> NDArray[np.float64]:
-    """Reproject a proposal onto grip closure within ``tol_m``.
+    """Reproject a proposal onto the closure manifold within ``tol_m``.
 
-    Software-contract reprojection: when residual already meets the tolerance,
-    return ``q`` unchanged. Large residuals are scaled toward the prior origin
-    (no invented native closure). Nonfinite inputs fail closed.
+    When the residual already meets the tolerance, ``q`` is returned
+    unchanged.  Otherwise the projection is ``project_to_closure`` on the
+    supplied ``plant`` (NSX-61, #12586): the nearest closure-satisfying
+    configuration, with the pose residual at most the projection tolerance.
+    The former stub rescaled ``q`` toward the origin, which is not a
+    projection, and is gone: a residual above tolerance without a ``plant``
+    raises ``ValueError`` (fail closed) instead of inventing a closure.
+
+    Raises:
+        ValueError: ``q`` empty, non-1-D or non-finite; the residual negative
+            or non-finite; ``tol_m`` non-positive; or no ``plant`` supplied
+            while the residual exceeds ``tol_m``.
+        ArithmeticError: The projection did not converge.
     """
     q_arr = np.asarray(q, dtype=np.float64)
     if q_arr.ndim != 1 or q_arr.size < 1:
@@ -171,9 +186,13 @@ def reproject_onto_closure(
         raise ValueError("tol_m must be finite and > 0")
     if closure_residual_m <= tol_m:
         return q_arr.copy()
-    # Soft pull toward prior without claiming physical IK success.
-    scale = float(tol_m / closure_residual_m)
-    return q_arr * scale
+    if plant is None:
+        raise ValueError(
+            "reprojection needs a closure plant when the residual exceeds tol_m"
+        )
+    return np.array(
+        project_to_closure(plant, q_arr, np.zeros_like(q_arr)).q, dtype=np.float64
+    )
 
 
 def synthetic_grip_jacobian(

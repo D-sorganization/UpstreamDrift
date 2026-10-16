@@ -55,6 +55,7 @@ from src.launchers.launcher_model_handlers import ModelHandlerRegistry
 from src.launchers.launcher_orchestrator import LauncherOrchestrator
 from src.launchers.launcher_process_cleanup_worker import ProcessCleanupWorker
 from src.launchers.launcher_process_manager import ProcessManager
+from src.launchers.launcher_shutdown import cleanup_embedded_tools
 from src.launchers.launcher_simulation import (
     DEPENDENCY_MAP,
     dependency_cache_key,
@@ -1155,6 +1156,8 @@ class UpstreamDriftLauncher(QMainWindow):
         self._save_layout()
         self._save_settings_on_close()
         self._stop_background_threads()
+        # Ordered teardown while widgets/GL contexts are alive (UD#12914).
+        cleanup_embedded_tools()
         self._shutdown_sidekick_sidebar()
         self._terminate_all_processes()
 

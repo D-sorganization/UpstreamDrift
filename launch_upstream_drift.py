@@ -150,15 +150,27 @@ def _load_parent_contracts() -> ModuleType | None:
     }
     if not any(candidate.is_file() for candidate in expected_paths):
         return None
-    module = importlib.import_module("contracts")
-    module_path = Path(str(getattr(module, "__file__", ""))).resolve()
-    if module_path not in expected_paths:
-        expected_text = ", ".join(str(path) for path in sorted(expected_paths))
-        raise RuntimeError(
-            "Parent Tools contract resolution failed: "
-            f"expected one of [{expected_text}], resolved {module_path}"
-        )
-    return module
+    # ``contracts`` is also an alias spelling that the import-alias layer
+    # coalesces onto UD's own ``src.shared.python.contracts`` once that module is
+    # loaded (UD #12882). Resolve via the canonical Tools spelling first so the
+    # guard sees the Tools-owned file; ``contracts`` is only a fallback for
+    # Tools trees that ship the module at ``src/contracts.py``.
+    resolved_paths: list[Path] = []
+    for spelling in ("shared.python.contracts", "contracts"):
+        try:
+            module = importlib.import_module(spelling)
+        except ImportError:
+            continue
+        module_path = Path(str(getattr(module, "__file__", ""))).resolve()
+        if module_path in expected_paths:
+            return module
+        resolved_paths.append(module_path)
+    expected_text = ", ".join(str(path) for path in sorted(expected_paths))
+    resolved_text = ", ".join(str(path) for path in resolved_paths) or "<unresolved>"
+    raise RuntimeError(
+        "Parent Tools contract resolution failed: "
+        f"expected one of [{expected_text}], resolved {resolved_text}"
+    )
 
 
 def _restore_parent_contract_aliases(parent_contracts: ModuleType | None) -> None:

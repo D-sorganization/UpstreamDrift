@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import json
 from pathlib import Path
+import warnings
 from typing import Any, Sequence
 
 import numpy as np
@@ -137,7 +138,22 @@ def explore_torque_tradeoffs(
     joint_velocities: Array | None = None,
     tolerance: float = 1e-8,
 ) -> TorqueDistributionTradeoff:
-    """Explore feasible force null spaces and generate torque distribution tradeoffs."""
+    """Explore feasible force null spaces and generate torque distribution tradeoffs.
+
+    This is a **weight sweep** over a few fixed strategies, not a Pareto front
+    (a weighted sum cannot reach the non-convex part of a front and its weights
+    are not a coordinate on it).  The result type is unchanged; for a true
+    epsilon-constraint front use
+    ``src.shared.python.loop_nullspace.probes.pareto_front`` (NSX-25, #12568).
+    """
+    warnings.warn(
+        "explore_torque_tradeoffs is a weight sweep, not a Pareto front; its "
+        "'Pareto' table lists a few weighted strategies. Use "
+        "loop_nullspace.probes.pareto_front for an epsilon-constraint front "
+        "(NSX-25).",
+        FutureWarning,
+        stacklevel=2,
+    )
     n = space.particular.size
     lead_idx = list(lead_indices)
     trail_idx = list(trail_indices)

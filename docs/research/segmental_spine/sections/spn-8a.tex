@@ -1,0 +1,52 @@
+\subsection{OpenSim Spine Inventory}
+
+\paragraph{Purpose.} Before any OpenSim spine model is driven, each level's
+joint, coordinates, neutral offset and axis orientation are read natively and
+compared with the ADR-0055 conventions. Implemented in
+\texttt{src/engines/physics\_engines/opensim/python/spine/inventory.py} with the
+level maps in \texttt{src/config/spine\_model\_level\_maps.json}.
+
+\paragraph{Frames and Neutral Offset.} Vertebral frames follow ISB: $X$
+anterior, $Y$ cranial, $Z$ right. For level $i$, with joint parent frame on the
+inferior body and child frame on the superior body, the neutral offset (pose
+of the superior frame in the inferior frame at zero coordinates, metres) is
+\begin{equation}
+  T_{i0} = X_{\mathrm{parent}\to\mathrm{base}}\; X_{\mathrm{child}\to\mathrm{base}}^{-1},
+\end{equation}
+where each factor is the frame transform in its base body
+(\texttt{findTransformInBaseFrame}). Matrices are $4\times4$ and read-only.
+Assumption: the joint parent frame lies on the inferior body; a model built
+with the opposite orientation needs an explicit map change before use.
+
+\paragraph{ISB Axis Check.} The coordinates $(\mathrm{flex\_ext},
+\mathrm{lat\_bend}, \mathrm{axial\_rot})$ must drive the \texttt{CustomJoint}
+rotation axes aligned with the ISB $ZXY$ axes $(\hat z,\hat x,\hat y)$. With a
+per-coordinate sign $s_k\in\{-1,+1\}$ (the explicit axis transform in the map)
+and model axis $a_k$ (normalised), the misalignment is
+\begin{equation}
+  \alpha_k = \arccos\!\big(\mathrm{clip}(s_k\,\hat a_k\cdot \hat e_k,-1,1)\big),
+\end{equation}
+accepted when $\alpha_k\le 1^\circ$. A coordinate not driving a rotation axis
+gets $180^\circ$. Failures are listed in \texttt{axis\_failures}; with
+\texttt{strict=True} they raise \texttt{ValueError}. This is a nominal-axis
+check only: it does not test the intrinsic composition (see the SPN-7a
+composition test) nor the sign of physical motion.
+
+\paragraph{Level Maps and Licensing.} The \texttt{fixture} entry is complete
+and verified (invented names, SPN-7a). Entries for
+\texttt{bruno2015\_fullbody\_os4\_v2} and the two Senteler lumbar models carry
+\texttt{verified: false}, status \texttt{UNVERIFIED} and no levels: no joint
+name is asserted until assets (\#12749) are present; \texttt{inventory\_spine}
+refuses them. No model file or transcribed number is committed.
+
+\paragraph{Deviation.} \texttt{observe\_native\_model} reports coordinate and
+constraint facts only, not offset frames or transform axes, so single-hop
+adapters were added here rather than extending it.
+
+\paragraph{Limitations.} Only \texttt{CustomJoint} rotations are checked;
+translation axes, couplers and range limits are out of scope.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/opensim/spine/test_inventory.py -q -n 0 -o addopts=""
+\end{verbatim}

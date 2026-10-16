@@ -17,11 +17,12 @@ from __future__ import annotations
 
 import math
 import time
+from typing import Any, cast
 
 import mujoco
 import numpy as np
 from scipy.interpolate import CubicSpline
-from scipy.optimize import differential_evolution, minimize
+from scipy.optimize import OptimizeResult, differential_evolution, minimize
 
 from ._motion_opt_simulation import (
     evaluate_objective,
@@ -34,6 +35,7 @@ from ._motion_opt_types import (
     OptimizationObjectives,
     OptimizationResult,
 )
+from .club_body_names import find_club_head_body_id
 
 __all__ = [
     "MotionPrimitiveLibrary",
@@ -80,7 +82,9 @@ class SwingOptimizer:
             constraints if constraints is not None else OptimizationConstraints()
         )
 
-        self.club_head_id = self._find_body_id("club_head")
+        self.club_head_id = find_club_head_body_id(
+            self.model, owner=type(self).__name__
+        )
         self.ball_id = self._find_body_id("ball")
 
         self.num_knot_points = 10
@@ -136,6 +140,7 @@ class SwingOptimizer:
                 self.num_knot_points,
             )
 
+        result: OptimizeResult
         if method == "differential_evolution":
             result = differential_evolution(
                 objective,
@@ -149,7 +154,7 @@ class SwingOptimizer:
             result = minimize(
                 objective,
                 x0,
-                method=method,
+                method=cast(Any, method),
                 bounds=bounds,
                 constraints=constraints_list,
                 options={"maxiter": 200, "disp": True},
@@ -579,7 +584,7 @@ class SwingOptimizer:
         """
         if num_swings is None:
             raise ValueError("num_swings must be provided")
-        swings = []
+        swings: list[OptimizationResult] = []
 
         if variation == "speed":
             speeds = np.linspace(30.0, 55.0, num_swings)

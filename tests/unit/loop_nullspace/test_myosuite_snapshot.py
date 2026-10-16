@@ -129,7 +129,8 @@ def test_provenance_records_regularisation_and_drift_method(adapter, state) -> N
 
 
 def test_other_capabilities_stay_none(adapter) -> None:
-    others = [c for c in Capability if c is not Capability.CLOSED_LOOP_SNAPSHOT]
+    kept = {Capability.CLOSED_LOOP_SNAPSHOT, Capability.CLOSED_LOOP_DERIVATIVES}
+    others = [c for c in Capability if c not in kept]
     assert all(adapter.capability(c) is CapabilityLevel.NONE for c in others)
 
 

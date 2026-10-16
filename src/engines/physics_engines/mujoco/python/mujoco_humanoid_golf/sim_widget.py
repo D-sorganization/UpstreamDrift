@@ -26,6 +26,8 @@ from src.shared.python.biomechanics.swing_plane_visualization import (
 from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.logging_pkg.logging_config import get_logger
 
+from ._camera_presets import CAMERA_PRESETS
+from ._renderer_lifecycle import release_renderer
 from .biomechanics import BiomechanicalAnalyzer, SwingRecorder
 from .control_system import ControlSystem, ControlType
 from .interactive_manipulation import InteractiveManipulator
@@ -283,6 +285,10 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def _finalize_model_load(self, new_model: Any, new_data: Any) -> None:
         """Finalize setup on main thread after model/data creation."""
+        # Free the old renderer *before* the new GL context exists and becomes
+        # current; letting GC free it later blanks the new one (UD #12884).
+        release_renderer(self.renderer)
+        self.renderer = None
         new_renderer = mujoco.Renderer(
             new_model,
             width=self.frame_width,
@@ -304,6 +310,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.data = new_data
         self.renderer = new_renderer
         self.scene = new_scene
+        self._verify_next_frame = True
 
         mujoco.mjv_defaultFreeCamera(self.model, self.camera)
         self._auto_position_camera()
@@ -625,6 +632,21 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         if timer is not None:
             timer.stop()
 
+    def release_resources(self) -> None:
+        """Stop the sim, join the loader thread and free the GL renderer.
+
+        Must run while the widget (and its GL context) is still alive, i.e.
+        before Qt destroys it; otherwise the renderer is freed after its
+        context and the process dies with an access violation (UD #12914).
+        Idempotent. Postcondition: ``self.renderer is None``.
+        """
+        self.stop_simulation()
+        thread = getattr(self, "loader_thread", None)
+        if thread is not None and thread.isRunning():
+            thread.wait(5000)
+        release_renderer(self.renderer)
+        self.renderer = None
+
     def closeEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
         """Release the simulation timer when the widget is closed.
 
@@ -641,18 +663,11 @@ class MuJoCoSimWidget(  # type: ignore[misc]
     def set_camera(self, camera_name: str) -> None:
         """Set the active camera view."""
         self.camera_name = camera_name
-        presets = {
-            "side": (90.0, -20.0, 3.0),
-            "front": (0.0, -20.0, 3.0),
-            "top": (90.0, -90.0, 4.0),
-            "follow": (135.0, -15.0, 2.5),
-            "down-the-line": (180.0, -10.0, 3.5),
-        }
-        if camera_name in presets:
-            az, el, dist = presets[camera_name]
-            self.camera.azimuth = az
-            self.camera.elevation = el
-            self.camera.distance = dist
+        preset = CAMERA_PRESETS.get(camera_name)
+        if preset is not None:
+            self.camera.azimuth = preset.azimuth
+            self.camera.elevation = preset.elevation
+            self.camera.distance = preset.distance
             self.camera.lookat[:] = [0, 0, 1]
 
         self._render_once()

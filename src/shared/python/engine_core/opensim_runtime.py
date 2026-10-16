@@ -26,11 +26,13 @@ import through here adds no import-time weight.
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
+from enum import Enum
 import logging
 import sys
 from typing import Any
 
-__all__ = ["import_opensim"]
+__all__ = ["OpenSimProbe", "OpenSimState", "import_opensim", "probe_opensim"]
 
 logger = logging.getLogger(__name__)
 
@@ -115,3 +117,57 @@ def import_opensim(
         if owner is None and "ezc3d" not in sys.modules:
             raise
         raise _conflict_error(module, exc, owner) from exc
+
+
+class OpenSimState(Enum):
+    """Outcome of probing the OpenSim SDK (#12883)."""
+
+    INSTALLED = "installed"
+    IMPORT_FAILED = "import_failed"  # present, but cannot load in this process
+    MISSING = "missing"  # not installed
+
+
+@dataclass(frozen=True)
+class OpenSimProbe:
+    """Structured probe result; ``reason`` is the real import message.
+
+    Invariant: ``reason`` is ``None`` exactly when ``state`` is INSTALLED.
+    ``dll_conflict`` is True when the failure is the ezc3d/OpenSim DLL clash.
+    """
+
+    state: OpenSimState
+    reason: str | None = None
+    dll_conflict: bool = False
+
+    def __post_init__(self) -> None:
+        if (self.state is OpenSimState.INSTALLED) != (self.reason is None):
+            raise ValueError("reason must be set iff state is not INSTALLED")
+
+    @property
+    def available(self) -> bool:
+        return self.state is OpenSimState.INSTALLED
+
+
+def probe_opensim(
+    importer: Callable[[], Any] = import_opensim,
+) -> OpenSimProbe:
+    """Probe OpenSim without hiding why it failed.
+
+    Never raises ``ImportError``: absence is MISSING, a DLL clash or any other
+    load failure is IMPORT_FAILED carrying the real message (not "not installed").
+    """
+    from src.shared.python.data_io.native_dll_guard import (  # noqa: PLC0415 - failure path only
+        NativeDllConflictError,
+    )
+
+    try:
+        importer()
+    except ModuleNotFoundError as exc:
+        return OpenSimProbe(OpenSimState.MISSING, str(exc))
+    except ImportError as exc:
+        return OpenSimProbe(
+            OpenSimState.IMPORT_FAILED,
+            str(exc) or type(exc).__name__,
+            dll_conflict=isinstance(exc, NativeDllConflictError),
+        )
+    return OpenSimProbe(OpenSimState.INSTALLED)

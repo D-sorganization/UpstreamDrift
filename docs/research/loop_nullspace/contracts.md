@@ -10,6 +10,17 @@ postconditions and named golden fixtures. Formulas are in
 not change a golden value to pass; if the specification is ambiguous, ask on the
 issue.
 
+## Contract Parts
+
+This appendix is split to stay under the documentation size budget. The
+remaining per-child contracts are in these parts:
+
+- [`contracts_trajectory.md`](contracts_trajectory.md): NSX-23 through the
+  NSX-61 and NSX-62 Ensembles (trajectory allocation, replay, engine snapshots
+  and the lower-body loop).
+- [`contracts_variability.md`](contracts_variability.md): NSX-80 through NSX-98
+  and the NSX-62 Inertial Parameter Ensemble (variability and sensitivity).
+
 ## Shared Conventions
 
 - Import through the canonical root, for example
@@ -34,7 +45,8 @@ issue.
 | `planar_two_arm_full` | 5-DOF planar two-arm golfer, all coordinates actuated: `M`, `h`, `S`, `J_c`, `Jdot_v`, dimension counts, three-case zero-side classification with residual, minimum-metric torque | NSX-12, 15, 17, 22, 23, 30 |
 | `planar_two_arm_club_unactuated` | Same configuration, club angle unactuated | NSX-12, 15, 17, 30 |
 | `planar_straight_arm_rank_deficient` | Collinear configuration (rank `J_c` = 1), both actuation variants, exact rational data | NSX-12, 15, 26 |
-| `spatial_counts` | Dimension counts for fixed base, floating root, floating root with two point feet (counts only, no numeric state) | NSX-12, 15, 60 |
+| `spatial_counts` | Dimension counts for fixed base, floating root, floating root with two point feet and with four point feet (counts only, no numeric state) | NSX-12, 15, 60 |
+| `lower_body_observation` | Exact (sympy) nullity and `rank(E_x N)` of five ground-reaction observation maps for two-point and four-point feet | NSX-60 |
 | `envelope_analytic_lp` | Closed-form envelope, Chebyshev centre, trajectory coupling, infeasible and unbounded certificates, sign classes | NSX-12, 20, 21, 22, 25 |
 | `grasp_map_worked_example` | `G`, `K`, `Phi`, `G#`, closing-hand map `Q`, bare-club Newton-Euler worked example, split coordinates | NSX-16, 17 |
 | `c_pm_identity` | `c_plus`/`c_minus` identity samples, unique uniform minimiser, heterogeneous minimiser | NSX-23 |
@@ -420,225 +432,67 @@ sign classes; the trajectory-coupled case and unbounded cases are separate
 keys. Unbounded bound is NaN with status `UNBOUNDED`. Cold and warm solves
 return the same bounds to `1e-9`.
 
-## NSX-23 Trajectory Allocation (#12566, Strong)
+Implementation notes (`loop_nullspace/envelopes.py`, #12565):
 
-`allocate_trajectory(feasible_sets, objective, *, reference=None)`. Golden
-`c_pm_identity`: with uniform `c_plus`, `c_minus` the cost is
-`1/2 (c_plus + c_minus) sum|p| + 1/2 (c_plus - c_minus) P_net` and `P_net` is
-constant on `J_c v = 0`; the uniform-weight minimiser is unique and equal for
-all `c_minus / c_plus`; heterogeneous weights give a different minimiser.
-Curvature (golden `planar_*.curvature`): the retained-space Gram matrix
-eigenvalues are positive.
+- A quantity is an affine functional `q(z) = const + coeff . z` of the null-space
+  coordinates (`EnvelopeQuantity`); `joint_torque_quantities()` and
+  `x_functional_quantities(...)` (hand-split coordinates are rows of `Phi`
+  composed with the closing-hand map) build them per frame from the set's
+  decomposition. Each frame is one `LPSession`: a zero-cost solve decides
+  feasibility (`INFEASIBLE` is reported, never raised), then two objective swaps
+  per quantity reuse the basis, and the basis carries to the next frame when the
+  dimensions match. `warm_start=False` resets before every solve; bounds agree
+  to `1e-9`.
+- Sign tolerance: `atol = SIGN_ATOL_RTOL * scale`, `SIGN_ATOL_RTOL = 1e-9` (the
+  NSX-00 scaled balance threshold), `scale` the quantity's characteristic scale
+  (`M_c = 5 N m` for torques, `F_c = 100 N` for forces). `ZERO` when both bounds
+  lie within `atol` of 0, `POSITIVE` when `lower > atol`, `NEGATIVE` when
+  `upper < -atol`, else `INDETERMINATE`; a one-sided unbounded bound can still
+  decide a sign. An infeasible frame has no sign class (`None`).
+- Chebyshev margin: largest ball `{z : z^T W z <= r^2}` with diagonal `W`
+  (golden `weighted_diag_1_4` uses `W = diag(1, 4)`, row norm
+  `sqrt(g W^-1 g)`); `UNBOUNDED` (NaN) when balls of any size fit, radius `0`
+  when the set has no interior.
+- Cones enter through the set's declared linearisation (outer polygon: bounds
+  contain the exact-cone bounds; inner: contained); `cone_error_bound` is
+  recorded per frame. Each bound lists its active rows (slack within `1e-8`
+  relative), their hypotheses, and whether any rests on an ASSUMED slot or
+  unverified hypothesis.
+- Benchmark (recorded, not gated): 200 frames of the planar proxy fixture
+  (time-varying `x_p`, torque rows only) solve all joint-torque envelopes plus
+  the Chebyshev LP in about 3.7 s on the 4-core shared brick host. The real 200-frame
+  anthropometric run is blocked (below).
+- **Real anthro benchmark (run in NSX-60, #12585).** Chain:
+  `snapshot_from_adapter(foot_contact_tol_m=0.0) -> decompose -> FeasibleSet
+  (envelope_only, capacity, foot cones) -> static_envelopes` on the 200 strided
+  frames `0, 3, ..., 597` of `ground_support/dynamics_record.npz` with
+  `full_body_spec_hipcal_scaled.json` (Pinocchio, 41 coordinates, 35 actuated;
+  23 of 35 capacity slots are ASSUMED). Quantities: 35 joint torques, the six
+  closure multipliers, the net ground force and the two foot loads (46 per
+  frame). Measured on host `Brick` (Linux 7.0.0-38 x86_64, Python 3.12.13,
+  4-core shared machine, load about 2):
 
-## NSX-24 Allocator Shims (#12567)
+  | Item | Result |
+  |---|---|
+  | Frames decomposed | 199 of 200 |
+  | Frame refused | 510 (airborne, no sphere within the tolerance): `BalanceInconsistentError`, scaled residual `1.89e-8` against `BALANCE_TOL = 1e-9`; not repaired, tolerance unchanged |
+  | Flight frames that decompose with no contact | 18 (471, 474, 489-507, 540-564 stride 3) |
+  | Snapshot, closure projection and decomposition, 199 frames | 57 to 84 s over three runs |
+  | `static_envelopes` wall time, 199 frames x 46 quantities | 19.5 s (73 513 simplex iterations) |
+  | Status | 124 BOUNDED, 75 INFEASIBLE |
+  | Conflict set of every INFEASIBLE frame | `H-TORQUE-CAPACITY` only |
+  | Chebyshev margin, BOUNDED frames | min 0.0059, median 1.19, max 3.30 |
 
-Preserve public signatures of `ContactForceAllocator` and
-`MultiEngineTorqueAllocator`; map `HARD_ZERO_TRAIL` to the NSX-15 trail
-`zero_side_solve`. An `INCONSISTENT` frame is reported with its residual.
-Golden: `planar_two_arm_full.zero_side`.
+  The INFEASIBLE frames are the recorded efforts exceeding the ASSUMED
+  capacities (the deletion filter names no contact or cone hypothesis); they
+  are a statement about the capacity prior, not about the contacts. Contact set:
+  a sphere is a rigid contact when its gap to the ground is at most
+  `foot_contact_tol_m = 0.0`, the set the compliant law penetrates; friction
+  coefficient `0.9` is the spec's static friction, a declared hypothesis
+  (`H-FRICTION-CONE`). The benchmark is recorded, not gated:
+  `tests/integration/test_loop_nullspace_anthro_envelope_benchmark.py`
+  (`slow`, `requires_pinocchio`; `LOOP_NULLSPACE_BENCH_JSON=<path>` writes the
+  measured record). It replaces the former blocker test.
+- Non-claim: static envelopes over-approximate trajectory-feasible ranges when
+  smoothness priors are active (NSX-25).
 
-## NSX-25 Pareto and Probes (#12568)
-
-`pareto_front(feasible_sets, objectives, eps_grid)`,
-`certify(feasible_sets, predicate, window) -> Certificate`. Affine predicates
-only, rejected at construction otherwise. A `FAILS` certificate carries a
-witness satisfying every constraint. Goldens: `envelope_analytic_lp`
-(`trajectory_coupled`).
-
-## NSX-26 Reaction Restriction (#12569)
-
-`restrict(snapshot, kind) -> ClosedLoopSnapshot`. Admissible restrictions are
-the nesting `WELD6 -> SHAFT_FREE5 -> BALL3` by row selection in the grip frame:
-SHAFT_FREE5 drops the twist moment about the shaft axis `u` (row `tx`); BALL3
-keeps the three force rows. The set of admissible reactions for the restricted
-kind is a subset of the WELD6 set, so envelopes of the restricted kinds are
-contained in the WELD6 envelope for the same fixed welded trajectory (note the
-direction: restricting reactions shrinks the feasible set). Output label
-`REACTION_RESTRICTION_SENSITIVITY`.
-
-## NSX-30 Constrained Counterfactuals (#12570)
-
-```python
-def constrained_acceleration(M, h, tau, J_c, Jdot_v, *, baumgarte=None) -> tuple[np.ndarray, np.ndarray]  # (qdd, lambda)
-```
-
-KKT projector `M^-1 (I - J_c^T Lambda_c J_c M^-1)` with
-`Lambda_c = (J_c M^-1 J_c^T)^-1`. Postconditions: `J_c qdd + Jdot_v = 0` to
-`1e-9` scaled; the total control-induced acceleration is independent of the
-chosen `lambda` family. Planar goldens provide `M`, `h`, `J_c`, `Jdot_v`.
-
-Implementation (NSX-30): `loop_nullspace/constrained_dynamics.py` holds the single
-projector (`constrained_acceleration`, `kkt_projector`, declared `Baumgarte`
-terms, `closure_acceleration_residual`); `tau` is the generalised load
-`S^T tau_a`. The pendulum solver calls it with
-`singular_mass_fallback=True` because its massless club coordinate makes `M`
-only semi-definite; the fallback solves the equivalent augmented block system
-and is an error without the flag. `simulation_backends.protocol` adds
-`ConstrainedEquationsOfMotionProvider` (`closure_jacobian`, `closure_drift`);
-`ztcf_acceleration`, `zvcf_acceleration`, `drift_and_control_split` and
-`zero_velocity_control_preserved_acceleration` dispatch to the projector for such a
-provider. `constrained_counterfactual_report` returns ZTCF, ZVCF, the control
-total (`INVARIANT`) and the per-actuator split (`FAMILY_DEPENDENT`).
-`loop_nullspace.provider.AdapterConstrainedProvider` exposes any `FULL`
-NSX-13 adapter as such a provider. `create_counterfactual_rollout` requires
-`dynamics=CounterfactualDynamics(provider, nullspace=...)`, integrates the
-provider with RK4 (load held per step), and `NULLSPACE_EXPLORATION` samples `z`
-through `NullspaceExploration` (NSX-15 decompositions); the `m_eff = 1.0` mock
-and the `5 sin(t)` placeholder are removed.
-Without an explicit `dynamics`, `motion_matching/counterfactual_provider.py`
-builds the provider from the session's own model specification (Pinocchio
-adapter, `AdapterConstrainedProvider`, re-expressed in the session coordinate
-order by `ReorderedProvider`) and caches it by `model_sha256`. A specification
-missing `bodies`/`joints`/`coordinate_order`, with a mismatched coordinate
-order, or without a `closure` fails closed with a `ValueError` naming the
-input, which the route returns as 400; the Pinocchio model needs a closure,
-so no unconstrained provider is built from a specification. Achieved evidence
-on the 41-coordinate anthro model against raw `constraintDynamics`: ZTCF
-8.4e-12 and ZVCF 3.9e-13 scaled; ZTCF + control total under a random actuated
-load (reference magnitude 9.5e3) 2.5e-12 scaled.
-`ztcf_zvcf` keeps its naming: ZTCF removes the control torque, ZVCF sets
-`v = 0` and `u = 0`; on a loop both use the projector with the reaction
-re-solved, never a held `lambda`.
-
-## NSX-31 Replay (#12571)
-
-`replay(allocation, provider, *, policy) -> ReplayReport`. Mode label
-`OPEN_LOOP` or `FEEDBACK` is mandatory; feedback torque is reported as its
-own series with a norm budget. Exact allocation on the oracle gives open-loop
-drift within the integration tolerance.
-
-## NSX-40 Report, Service and Routes (#12572)
-
-`schemas/loop-nullspace-report-v1.json`; `loop_nullspace.analyze(trajectory,
-engine, preset, options)`; routes `POST /analysis/loop-nullspace/jobs`,
-`GET .../jobs/{id}`, `DELETE .../jobs/{id}`. Cache key is a hash of input
-provenance, model provenance, registry version, preset and options.
-
-## NSX-41 Output Policy (#12573, Strong)
-
-`display_decision(record, surface) -> DisplayDecision` per ADR-0054 decision
-D7 once the owner accepts an option. Unknown combinations default to withhold.
-
-## NSX-42 Plot Model (#12574)
-
-`build_plot_model(report, display_decisions) -> NSXPlotModel`. Panels:
-`invariants`, `envelopes`, `hand_split`, `allocation`, `diagnostics`.
-Envelope segments carry `display_class` in `DETERMINED_SIGN`, `INDETERMINATE`,
-`UNBOUNDED`. A representative never appears without its band. The golden JSON
-plot model is checked in by NSX-42 and consumed by NSX-43 and NSX-44.
-
-## NSX-43 PyQt Tabs (#12575) and NSX-44 React Panel (#12576)
-
-Render only from `NSXPlotModel`; no math in either UI. Parity entry
-`loop_nullspace_exploration` in `src/config/feature_parity.json`; regenerate the
-matrix with `python3 -m scripts.generate_feature_parity_matrix`. NSX-43 uses
-a lazy embed adapter (PyQt6 imports inside `create_main_widget`). Both assert
-use of `display_decision`.
-
-## NSX-50 Dynamic Dual Transforms (#12578)
-
-`velocity_map`, `acceleration_map` (with the `Tdot v` term for nonlinear
-coordinate maps) and `generalized_force_map = T^T`. Postcondition: power
-`tau . v` equal across maps to `1e-12` relative. Closure conversion uses the
-golden `closure_convention`.
-
-## NSX-51 to NSX-54 Engine Snapshots (#12579, #12580, #12581, #12582)
-
-Each implements the NSX-13 adapter methods and passes canonical equality with
-Pinocchio on states projected by `project_to_closure` to `1e-6` scaled.
-MuJoCo (NSX-51): hard-KKT evaluation, drift method recorded in provenance
-(finite difference declared). MuJoCo declares `CLOSED_LOOP_SNAPSHOT` FULL from `mj_fullM`,
-`qfrc_bias`, the weld site Jacobians and a central-difference drift
-(`drift=central_finite_difference` in the model provenance); stock soft-weld
-stepping is the separate divergence entry `mujoco-stock-soft-weld-vs-hard-kkt`.
-The cross-engine test holds `M`, `h`, `J_c` and `Jdot_v` to 1e-11, 1e-12 and 1e-8
-scaled (measured 2e-14, 3e-15, 3e-9). MyoSuite (NSX-52, `MyoSuiteForceAdapter`): subclasses
-`MujocoForceAdapter` (no second implementation), records
-`kkt_regularization=<value>` in the model provenance (`name=myosuite`), and is
-`FULL` only while that value is exactly 0, else `NONE`. Drake (NSX-53): native
-adapter, explicit `from pydrake.X import Y` imports, no module-level mocks.
-OpenSim (NSX-54): delegates to `OpenSimFullBodyParityAdapter`.
-
-## NSX-55 Simscape (#12583, Strong)
-
-R2025b only (AGENTS.md), versioned export file with release and model checksum;
-otherwise a deferred-validation record and capability `NONE`.
-
-## NSX-56 Conformance (#12584)
-
-`tests/integration/cross_engine/test_loop_nullspace_conformance.py` is the one
-parametrised harness over every FULL engine (Pinocchio reference; MuJoCo, Drake,
-OpenSim). Each state is projected once with `project_to_closure`, each engine
-builds its snapshot through `snapshot_from_adapter`, and arrays are permuted to
-the reference order by coordinate name.
-
-Track N compares canonical `M`, `h`, `J_c`, `Jdot_v` tightly. Tolerances are the
-per-pair, per-metric entries (`check: closed_loop_snapshot_conformance`) in
-`tests/integration/cross_engine/divergence_registry.yaml`, with
-the rationale and the measured agreement; the grip frame, club inertia split and
-loop topology are compared in the same track. Measured: `M`, `h` below 1e-15,
-`J_c` below 3e-15, `Jdot_v` 1.8e-12 (Drake, OpenSim, analytic or exact) and
-1.2e-10 (MuJoCo central finite difference), all scaled by `max(1, |ref|)`.
-
-Track S compares quantities derived from the snapshot: the rigid KKT
-acceleration and grip-wrench multiplier, kinetic energy, power, closure singular
-values (rank 6) and the closed-form grip-wrench envelope over a unit actuator
-box. Its tolerance is propagated from the Track N differences measured in the
-same run (`kkt_bound`: `|K^-1| (|dr| + |dK||x|) / (1 - |K^-1||dK|)`; Weyl for
-singular values), never hand-widened. A perturbed-engine control proves both
-tracks discriminate.
-
-Capability per engine: Pinocchio, MuJoCo, MyoSuite, Drake and OpenSim are FULL
-and are registered in `create_engine_force_adapter`; the harness skips MyoSuite
-cleanly when `myosuite` is not importable. Simscape (no native adapter) and the
-synthetic fixtures declare NONE and are asserted to refuse a snapshot. MyoSuite
-2.12.2 agrees with Pinocchio to the same digits as MuJoCo (the adapter reuses
-the MuJoCo code); MuJoCo 3.6.0 and 3.8.0 give identical Track N errors to three
-significant digits. Agreement between engines is not physical
-validation.
-
-## NSX-60 Lower-Body Loop (#12585, Strong)
-
-Golden `spatial_counts` variant `floating_root_two_point_feet`: contact-map
-rank is 5 for two point feet, so the balance equations carry one consistency
-condition; observed GRF reduces nullity by its rank.
-
-## NSX-61 and NSX-62 Ensembles (#12586, #12587)
-
-`kinematic_ensemble(source, n, seed)`; seeded determinism, rejection counting,
-envelope union contains every member. NSX-62 samples only along unidentified
-directions inside the pseudo-inertia constraint; identified combinations stay
-fixed.
-
-## NSX-80 Variability Sensitivity (#12709)
-
-Specification only; no production module. Section numbers in
-`loop_nullspace.tex` (Variability Sensitivity, `sec:variability`) are the
-citable contract for every variability child (epic section 5A, V1 to V8):
-
-| Section | Content | Golden keys |
-|---|---|---|
-| `sec:var-lin` | KKT linearization on the tangent bundle, reactions re-solved, `K_geom(λ) = Σ_r λ_r ∇²Φ_r`; `G_t N = 0` | `linearization`, `golfer_preload` |
-| `sec:var-salt` | Event projection `Π` and saltation matrix `S`, `S f⁻ = f⁺` | `saltation` |
-| `sec:var-cov` | Covariance recursion and adjoint form | `min_variance.model` |
-| `sec:var-mechanisms` | M1 signal-dependent noise, M2 geometric preload, M3 muscle impedance (MyoSuite/OpenSim only); `OBJECTIVE_FLAT_INVARIANT` when none is declared | `min_variance`, `additive_noise_flat` |
-| `sec:var-face` | Wrapped face-angle error, bias, SD, IQR, exceedance, miss probability; coefficient of variation banned for zero-centred outcomes | none |
-
-Registry additions (`src/config/loop_nullspace_registry.json`): hypotheses
-`H-NOISE-ADDITIVE`, `H-NOISE-SIGNAL-DEPENDENT`, `H-GEOMETRIC-PRELOAD`,
-`H-DECLARED-JOINT-IMPEDANCE`, `H-SENSORIMOTOR-DELAY`, `H-TIMING-JITTER`,
-`H-MUSCLE-SHORT-RANGE-STIFFNESS`; eight citations, all `VERIFIED` against
-retrieved abstracts (Harris and Wolpert 1998, Jones et al. 2002, Todorov and
-Jordan 2002, Scholz and Schoener 1999, Mueller and Sternad 2004, Burdet et al.
-2001, Cusumano and Dingwell 2013, Cui et al. 2008). Partial-support caveats are
-kept in each `claim_checked`: Scholz and Schoener (variance partition not in the
-abstract), Burdet (impedance geometry, not co-contraction) and Cui (feline,
-force-dependent rather than activation). Hypothesis statements claim only what
-the abstract supports; impedance values and noise amplitudes are declared by the
-user, not measured.
-
-Preconditions for consumers: use the golden values as oracles, never as
-inputs. Postconditions: the `z`-dependence of `F_t` appears only through
-`λ(z)`; an additive-noise objective with no M2 has gradient exactly zero.
-Non-claims: noise amplitudes are declared hypotheses, not measurements; no claim
-that any golfer uses a minimum-variance allocation.

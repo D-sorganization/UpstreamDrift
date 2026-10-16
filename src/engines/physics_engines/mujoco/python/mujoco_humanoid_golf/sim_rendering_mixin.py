@@ -21,6 +21,7 @@ from src.shared.python.force_overlay.glyphs import GlyphSet
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import legend_text
 from src.shared.python.logging_pkg.logging_config import get_logger
 
+from ._frame_check import frame_stats, is_blank_frame
 from .force_glyph_overlay import build_overlay_glyphs
 from .force_glyphs import add_glyphs_to_scene
 
@@ -120,6 +121,7 @@ class SimRenderingMixin:
         except MemoryError as exc:
             logger.error("MemoryError during renderer.render(): %s", exc)
             raise
+        self._check_first_frame(rgb)
 
         rgb = self._add_acceleration_overlays(rgb)
 
@@ -178,6 +180,28 @@ class SimRenderingMixin:
         pixmap = QtGui.QPixmap.fromImage(image)
 
         self.label.setPixmap(pixmap)
+
+    def _check_first_frame(self: Any, rgb: Any) -> None:
+        """Post-condition on the first frame after a model load (UD #12884).
+
+        A blank (black or featureless) frame means the GL renderer is broken,
+        not that the scene is empty; say so loudly instead of showing a silent
+        black viewport.
+        """
+        if not getattr(self, "_verify_next_frame", False):
+            return
+        self._verify_next_frame = False
+        try:
+            blank = is_blank_frame(rgb)
+        except (TypeError, ValueError) as exc:  # not an image: nothing to verify
+            logger.debug("First-frame check skipped: %s", exc)
+            return
+        if blank:
+            logger.error(
+                "MuJoCo renderer produced a blank first frame (%s); the 3D view "
+                "will be black. The GL context is likely invalid.",
+                frame_stats(rgb),
+            )
 
     def _apply_axial_scene_colors(self: Any) -> tuple[Any, Any]:
         """Sample the optional force capability once for native and web renderers."""

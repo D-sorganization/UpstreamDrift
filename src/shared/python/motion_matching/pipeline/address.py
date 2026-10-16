@@ -15,6 +15,7 @@ if TYPE_CHECKING:
         FullBodyMarkerKinematics,
     )
 
+from src.shared.python.motion_matching import address_knee
 from src.shared.python.motion_matching.anthropometric_candidate import (
     anthropometric_candidate,
 )
@@ -52,6 +53,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
     ELBOW_PIT_WEIGHT,
     ELBOW_PIT_WEIGHTS_NEUTRAL,
     FORWARD_AXIS,
+    KNEE_FLEXION_PRIOR_WEIGHT,
     NEUTRAL_BOUNDS_DEG,
     NEUTRAL_LOCKS,
     PRIOR,
@@ -129,6 +131,82 @@ def posture_summary(kin: Any, q: np.ndarray) -> dict[str, Any]:
     }
 
 
+def pelvis_marker_offsets(spec: Mapping[str, Any]) -> dict[str, Any]:
+    """Pelvis-frame offsets of the document's waist (pelvis) markers.
+
+    Precondition: ``spec`` attaches every ``MARKER_SEGMENTS["pelvis"]`` marker
+    (``KeyError`` otherwise).
+    """
+    return {
+        label: spec["marker_attachments"][label]["offset_m"]
+        for label in MARKER_SEGMENTS["pelvis"]
+    }
+
+
+def build_knee_targets(
+    lane: Any, spec: Mapping[str, Any], mode: str, *, handedness: str = "right"
+) -> address_knee.KneeTargets | None:
+    """Address knee targets for ``mode`` (R4, #12684): ``off`` -> None,
+    ``prior`` -> the owner prior for both knees, ``capture`` -> each knee's
+    reliable capture measurement, the prior where the markers cannot measure it
+    (``capture_knee_flexion`` failing for the whole capture falls back to the
+    prior with the reason in ``notes``). Postcondition: every knee's provenance
+    is in ``sources``."""
+    if mode not in address_knee.MODES:
+        raise ValueError(
+            f"knee_flexion must be one of {address_knee.MODES}, got {mode!r}"
+        )
+    if mode == "off":
+        return None
+    measured: dict[str, address_knee.KneeFlexion] = {}
+    notes = f"owner prior {address_knee.KNEE_FLEX_PRIOR_DEG:g} deg (#12684)"
+    if mode == "capture":
+        try:
+            measured = address_knee.capture_knee_flexion(
+                lane.points,
+                lane.valid,
+                tuple(lane.labels),
+                pelvis_marker_offsets(spec),
+                handedness=handedness,
+            )
+            notes = "capture address median where reliable; " + notes + " elsewhere"
+        except (KeyError, ValueError) as exc:
+            notes = f"capture knee markers unusable ({exc}); " + notes
+    chosen = {
+        side: address_knee.resolve_knee_target(measured.get(side), mode=mode)
+        for side in ("left", "right")
+    }
+    return address_knee.KneeTargets(
+        {side: chosen[side][0] for side in chosen},
+        {side: chosen[side][1] for side in chosen},
+        mode,
+        handedness,
+        KNEE_FLEXION_PRIOR_WEIGHT,
+        notes,
+        measured,
+    )
+
+
+def _knee_terms(
+    lane: Lane,
+    kin: FullBodyMarkerKinematics,
+    base: np.ndarray,
+    bounds: dict[str, tuple[float, float]],
+) -> tuple[dict[str, tuple[float, float]], dict[str, Any]]:
+    """Address-solve terms of the knee targets (R4, #12684).
+
+    Off (``lane.knees`` None): ``bounds`` unchanged and no extra keyword, so the
+    legacy solve is bit-identical. On: the knee ranges stop at straight (hard
+    bound) and a ``posture_prior`` pulls each knee to its target flexion.
+    """
+    knees = getattr(lane, "knees", None)
+    if knees is None:
+        return bounds, {}
+    return address_knee.no_hyperextension_bounds(kin, base, bounds), {
+        "posture_prior": address_knee.knee_posture_prior(kin, base, knees)
+    }
+
+
 def best_address(
     lane: Lane,
     kin: FullBodyMarkerKinematics,
@@ -156,6 +234,7 @@ def best_address(
             for name, (lo, hi) in ADDRESS_ELBOW_BOUNDS_DEG.items()
         }
         axis_targets = lane.pit_targets_for(list(range(STATIC_FRAMES)), pit_weight)
+    bounds, knee_terms = _knee_terms(lane, kin, base, bounds)
 
     def solve(q0: np.ndarray, extra_prior: Mapping[str, float] | None) -> Any:
         return kin.solve_pose(
@@ -172,6 +251,7 @@ def best_address(
             prior_weights={**lane.prior_weights, **(extra_prior or {})},
             axis_targets=axis_targets,
             balance_weight=balance,
+            **knee_terms,
         )
 
     best = None
@@ -212,6 +292,8 @@ def best_address(
         best = refine_foot_progression(kin, best, feet, solve)
     if best is None:
         raise RuntimeError("No viable address fit found across multi-start seeds")
+    if knee_terms:
+        address_knee.assert_no_hyperextension(kin, best.q)
     return best
 
 
@@ -514,6 +596,23 @@ def add_hip_zero_twist_argument(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def add_knee_flexion_argument(parser: argparse.ArgumentParser) -> None:
+    """Add ``--knee-flexion`` (R4, #12684) to a parser."""
+    parser.add_argument(
+        "--knee-flexion",
+        choices=address_knee.MODES,
+        default=address_knee.CANONICAL_KNEE_FLEXION,
+        help=(
+            "address knee flexion (R4, #12684): 'capture' (default) pulls each "
+            "knee to the capture's reliable address flexion and to the owner "
+            f"prior ({address_knee.KNEE_FLEX_PRIOR_DEG:g} deg) where the markers "
+            "cannot measure it; 'prior' uses the owner prior for both knees; "
+            "both forbid hyperextension with a hard bound. 'off' keeps the "
+            "legacy address. The receipt records each knee's target source."
+        ),
+    )
+
+
 def _calibrate_ground_height(
     hip_spec: dict[str, Any], ground_height_m: float
 ) -> dict[str, Any]:
@@ -563,10 +662,7 @@ def prepare_hip_spec(
     - ``(hip_spec, qualification_note, hip_report, fixed, seeds_all)``
     """
     opts = options or HipCalibrationOptions()
-    waist_offsets = {
-        label: base_spec["marker_attachments"][label]["offset_m"]
-        for label in MARKER_SEGMENTS["pelvis"]
-    }
+    waist_offsets = pelvis_marker_offsets(base_spec)
     hip_cal = functional_hip_calibration(lane.points, lane.valid, labels, waist_offsets)
     # Foot progression on: remove the lateral-marker tilt from the zero twist
     # (#11737). Off: the legacy plane the canonical receipts were made with.
@@ -679,6 +775,42 @@ def calibrated_address_summary(
         },
         "posture": posture_summary(kin, address.q),
     }
+
+
+def record_calibrated_address(
+    address_report: dict[str, Any],
+    sim: Any,
+    kin: FullBodyMarkerKinematics,
+    address: Any,
+    lane: Lane,
+    labels: tuple[str, ...],
+    adapter: Any,
+) -> None:
+    """Record the calibrated-address summary plus foot and knee diagnostics.
+
+    Preconditions:
+    - ``address_report`` must be a mutable mapping (it is updated in place).
+    - ``address.q`` must match the degrees of freedom of ``kin`` (enforced by
+      :func:`calibrated_address_summary`).
+    """
+    if not isinstance(address_report, dict):
+        raise TypeError("address_report must be a dict")
+    from src.shared.python.motion_matching.pipeline.address_feet import (
+        record_foot_progression,
+    )
+
+    address_report["calibrated"] = calibrated_address_summary(
+        sim, kin, address, lane, labels, adapter
+    )
+    record_foot_progression(address_report, kin, address.q, lane.feet)
+    address_knee.record_knee_flexion(address_report, kin, address.q, lane.knees)
+
+
+def knee_targets_from_args(
+    lane: Any, spec: Mapping[str, Any], args: argparse.Namespace
+) -> address_knee.KneeTargets | None:
+    """Address knee targets for the CLI-requested mode (``--knee-flexion``)."""
+    return build_knee_targets(lane, spec, address_knee.requested_mode(args))
 
 
 @dataclass(frozen=True)
@@ -831,6 +963,9 @@ def solve_address_stage(inputs: AddressStageInputs) -> AddressStageResult:
             )
 
     record_foot_progression(address_report, kin, address.q, lane.feet)
+    address_knee.record_knee_flexion(
+        address_report, kin, address.q, getattr(lane, "knees", None)
+    )
 
     return AddressStageResult(
         address=address,

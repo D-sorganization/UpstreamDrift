@@ -14,7 +14,12 @@ SPECS = Path(__file__).resolve().parents[4] / "docs/development/full_body_models
 
 def test_head_obj_files_are_written_in_the_head_body_frame(tmp_path: Path) -> None:
     spec = json.loads((SPECS / "full_body_spec_anthro_driver.json").read_text())
-    files = head_mesh_files(spec, tmp_path)
+    from src.shared.python.model_appearance import document_from_dict
+
+    doc = document_from_dict(
+        {"schema_version": "appearance-v1", "head": {"model": "parametric"}}
+    )
+    files = head_mesh_files(spec, tmp_path, doc)
     names = {f.name for f in files}
     assert {"skull", "neck", "nose", "eye_l", "eye_r", "ear_l", "ear_r"} <= names
     assert all(f.body.endswith("/Head") and f.path.is_file() for f in files)
@@ -37,3 +42,46 @@ def test_opensim_model_gets_head_meshes_and_no_head_capsule() -> None:
     head = model.getBodySet().get("Head")
     names = [c.getName() for c in head.getComponentsList()]
     assert sum(n.startswith("vf") for n in names) >= 12  # meshes, not 3 capsule parts
+
+
+def test_cc0_mesh_head_obj_export_carries_skin_and_hair(tmp_path: Path) -> None:
+    """R7 (#12687): the OBJ export follows the shared slot (R9a/b/c consume it)."""
+    from src.shared.python.model_appearance import document_from_dict
+
+    spec = json.loads((SPECS / "full_body_spec_anthro_driver.json").read_text())
+    doc = document_from_dict(
+        {"schema_version": "appearance-v1", "head": {"model": "cc0_mesh"}}
+    )
+    files = head_mesh_files(spec, tmp_path, doc)
+    assert {f.name for f in files} == {"skin_mesh", "hair_mesh"}
+    assert all(f.body.endswith("/Head") and f.path.is_file() for f in files)
+    colours = {f.name: f.rgba for f in files}
+    assert colours["skin_mesh"] != colours["hair_mesh"]
+
+
+@pytest.mark.unit
+def test_mujoco_default_appearance_resolves_cc0_head() -> None:
+    """#12949: the MuJoCo worker's default document draws the CC0 head."""
+    from src.shared.python.model_appearance import build_head_parts, document_from_dict
+    from src.tools.native_viewer_export.backends.mujoco_worker import APPEARANCE
+
+    doc = document_from_dict(APPEARANCE)
+    names = {p.name for p in build_head_parts(0.2429, doc.head)}
+    assert names == {"skin_mesh", "hair_mesh"}
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("engine", ["drake_meshcat", "pinocchio_meshcat"])
+def test_meshcat_engines_default_appearance_resolves_cc0_head(engine: str) -> None:
+    """#12949: Drake and Pinocchio MeshCat share ``default_appearance``."""
+    import importlib
+
+    from src.shared.python.model_appearance import build_head_parts
+
+    module = importlib.import_module(
+        f"src.tools.native_viewer_export.backends.{engine}"
+    )
+    assert module.default_appearance is not None
+    doc = module.default_appearance()
+    names = {p.name for p in build_head_parts(0.2429, doc.head)}
+    assert names == {"skin_mesh", "hair_mesh"}
