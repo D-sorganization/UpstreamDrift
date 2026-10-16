@@ -319,16 +319,19 @@ def test_finite_difference_qdot_with_qddot_override_only(
     _assert_fd_matches_analytic(result.qdot, qddot, backend, adapter, states)
 
 
+@pytest.mark.requires_pinocchio
 def test_pinocchio_difference_agrees_with_canonical_finite_difference(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     pin = pytest.importorskip("pinocchio")
     if type(pin).__module__ == "unittest.mock":
         pytest.skip("tests/unit/conftest.py stubs pinocchio with a MagicMock")
+    if not hasattr(pin, "JointModelRZ"):
+        pytest.skip("pinocchio is a lightweight stand-in without joint models")
     monkeypatch.delitem(sys.modules, "upstream_pinocchio_id", raising=False)
     model = pin.Model()
     joint = model.addJoint(0, pin.JointModelFreeFlyer(), pin.SE3.Identity(), "base")
-    model.addJoint(joint, pin.JointModelRevoluteZ(), pin.SE3.Identity(), "j1")
+    model.addJoint(joint, pin.JointModelRZ(), pin.SE3.Identity(), "j1")
     backend = _RecordingBackend()
     adapter = PinocchioReferenceAdapter(backend)
     q, times, _ = _fd_trajectory()
