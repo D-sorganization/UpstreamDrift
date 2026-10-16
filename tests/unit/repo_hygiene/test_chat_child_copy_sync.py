@@ -10,10 +10,8 @@ silently fall behind again:
   (or the UD path is retired and re-exports the pinned module), and
 * the dock's constructor and config dataclasses have the canonical shape.
 
-``_chat_dock_widget_qt.py`` and ``_qt/runtime.py`` are the only waived paths:
-Tools' dock is 1,5xx lines, over this repository's 1,200-line file budget, so UD
-keeps its ``_qt/runtime.py`` extraction (UD-owned, #8687) and is compared by
-contract instead of by text.
+``_chat_dock_widget_qt.py`` is now byte-identical to Tools (#12803); the former
+UD-only ``_qt/runtime.py`` extraction was retired with the re-sync.
 """
 
 from __future__ import annotations

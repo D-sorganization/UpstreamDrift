@@ -379,7 +379,6 @@
 {"path": "chat/_qt/input.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/messaging.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/queue_panel.py", "classification": "identical", "package": "chat", "spelling_only": false}
-{"path": "chat/_qt/runtime.py", "classification": "ud-only", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/sessions.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/streaming.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/styling.py", "classification": "identical", "package": "chat", "spelling_only": false}
