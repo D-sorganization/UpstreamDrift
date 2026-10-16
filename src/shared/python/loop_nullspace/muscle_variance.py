@@ -82,7 +82,8 @@ __all__ = [
 class VarianceModel:
     """The loop the variance is propagated through (all declared inputs).
 
-    ``derivs`` are the closed-loop derivatives at the nominal ``(q, v, tau)``;
+    ``derivs`` are the closed-loop derivatives at the nominal ``(q, v, tau)``,
+    whose ``q`` and ``v`` are also declared here;
     ``coordinate_indices`` places the muscle coordinates among the ``nv``
     velocity coordinates; ``external`` is a white torque disturbance with one
     channel per muscle coordinate; the state is the scalar tangent frame
@@ -92,6 +93,7 @@ class VarianceModel:
 
     derivs: ClosedLoopDerivatives
     q: ArrayLike
+    v: ArrayLike
     manifold: ConfigurationManifold
     basis_field: Callable[[Array], Array]
     coordinate_indices: tuple[int, ...]
@@ -165,6 +167,7 @@ def _level_assessment(
     r_full[:, list(idx)] = frame.moment_arms
     common = {
         "q": model.q,
+        "v": model.v,
         "manifold": model.manifold,
         "basis_field": model.basis_field,
     }

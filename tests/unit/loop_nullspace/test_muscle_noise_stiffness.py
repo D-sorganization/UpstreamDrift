@@ -282,8 +282,10 @@ def test_stiffness_moves_the_scalar_tangent_state_space_entry() -> None:
     k = 80.0
     loaded = apply_muscle_stiffness(base, np.array([[k]]), coordinate_indices=(0,))
     field = lambda _q: np.array([[1.0]])  # noqa: E731
-    f0 = tl.tangent_state_space(base, q=q, manifold=manifold, basis_field=field).F
-    f1 = tl.tangent_state_space(loaded, q=q, manifold=manifold, basis_field=field).F
+    f0 = tl.tangent_state_space(base, q=q, v=v, manifold=manifold, basis_field=field).F
+    f1 = tl.tangent_state_space(
+        loaded, q=q, v=v, manifold=manifold, basis_field=field
+    ).F
     inertia = float(model.mass_matrix(q)[0, 0])
     assert f0[1, 0] == pytest.approx(0.0, abs=FD_TOL)
     assert f1[1, 0] == pytest.approx(-k / inertia, rel=1e-8)

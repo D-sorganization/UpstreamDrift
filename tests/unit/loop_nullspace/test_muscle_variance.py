@@ -82,6 +82,7 @@ def _model() -> VarianceModel:
     return VarianceModel(
         derivs=routine.constrained_acceleration_derivatives(q, v, tau),
         q=q,
+        v=v,
         manifold=manifold,
         basis_field=lambda _q: np.array([[1.0]]),
         coordinate_indices=(0,),
