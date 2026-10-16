@@ -269,7 +269,7 @@ Overly soft soles ($25\text{ kN/m}$, which sank excessively, causing 169 mm root
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
+- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW_DYNAMICS.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
 
 ---
 
@@ -311,7 +311,7 @@ A full pipeline re-solve with the final code (`5f8ee41fe5`, both changes plus th
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
+- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW_DYNAMICS.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
 
 ---
 
@@ -336,7 +336,7 @@ Attempting to force root stabilization through aggressive PD control gains on th
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
+- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW_DYNAMICS.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
 
 ---
 
@@ -376,8 +376,8 @@ Documented above for each approach with concrete failure receipts.
 
 - [REVIEW.md Section 12: Grip Roll](evidence/anthropometry/REVIEW.md#12-elbow-pits-from-the-markers-grip-roll-club-mesh-epic-2026-09-14)
 - [REVIEW.md Section 13: Closure Weld Fitted from the Address](evidence/anthropometry/REVIEW.md#13-closure-weld-fitted-from-the-address-mm-2-2026-09-14)
-- [REVIEW.md Section 15: Cart-Table Dynamics Filter](evidence/anthropometry/REVIEW.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
-- [REVIEW.md Section 16: Contact-Aware Shooting Fit](evidence/anthropometry/REVIEW.md#16-contact-aware-shooting-fit-fb-5-mm-7b-2026-09-14)
+- [REVIEW.md Section 15: Cart-Table Dynamics Filter](evidence/anthropometry/REVIEW_DYNAMICS.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
+- [REVIEW.md Section 16: Contact-Aware Shooting Fit](evidence/anthropometry/REVIEW_DYNAMICS.md#16-contact-aware-shooting-fit-fb-5-mm-7b-2026-09-14)
 
 ---
 
@@ -403,7 +403,7 @@ Large optimization learning rates ($2 \times 10^{-3}\text{ rad/knot}$), which ca
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 17: Differentiable Trajectory Optimisation with MuJoCo MJX](evidence/anthropometry/REVIEW.md#17-differentiable-trajectory-optimisation-with-mujoco-mjx-fb-5-mm-7b-2026-09-14)
+- [REVIEW.md Section 17: Differentiable Trajectory Optimisation with MuJoCo MJX](evidence/anthropometry/REVIEW_DYNAMICS.md#17-differentiable-trajectory-optimisation-with-mujoco-mjx-fb-5-mm-7b-2026-09-14)
 
 ---
 
