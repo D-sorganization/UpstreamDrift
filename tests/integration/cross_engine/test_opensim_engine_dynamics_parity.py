@@ -20,7 +20,9 @@ import pytest
 from tests.helpers.opensim_support import require_opensim
 
 osim = require_opensim()
-if not hasattr(osim, "Model"):
+# A MagicMock stand-in (the core lane has no OpenSim) answers hasattr(); only
+# the real SDK is an on-disk module.
+if not isinstance(getattr(osim, "__file__", None), str) or not hasattr(osim, "Model"):
     pytest.skip("real opensim is unavailable", allow_module_level=True)
 mujoco = pytest.importorskip("mujoco")
 pinocchio = pytest.importorskip("pinocchio")
