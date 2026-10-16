@@ -361,6 +361,16 @@
       "tiles": ["model_explorer"],
       "notes": "#7448 (F4, closed by #7496) replaced the stub endpoints: the routes parse real URDF trees and joints with validated 4xx errors, and the web page consumes them."
     },
+    "tools.model_explorer.results_playback": {
+      "title": "Model Explorer results playback on the shared-appearance golfer",
+      "pyqt": "src/tools/model_explorer/results_playback_panel.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 12878,
+      "tiles": [],
+      "notes": "File > Open Swing Result... lists swing-datastore runs (MuJoCo fit records and same-input closed-loop rollouts for Drake, OpenSim, Pinocchio and MyoSuite) and plays them on the MuJoCo golfer built from the run's own specification, with a timeline, joint-angle and club-head-speed plots and MP4 export (#12915). Non-MuJoCo results are labelled as playback of that engine's result. No web equivalent yet; tracked under epic #12878."
+    },
     "tools.model_explorer.frankenstein_assembly": {
       "title": "Frankenstein drag-and-drop assembly with typed attachment ports",
       "pyqt": "src/tools/model_explorer/frankenstein_editor/assembly_panel.py",
