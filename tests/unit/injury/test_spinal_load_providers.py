@@ -224,3 +224,38 @@ def test_swing_objective_spinal_compression_is_labelled_heuristic() -> None:
     assert _swing_objectives.SPINAL_OBJECTIVE_PROVIDER_ID == "heuristic_v1"
     doc = _swing_objectives.compute_metrics.__doc__ or ""
     assert "heuristic" in doc.lower()
+
+
+class _InjectedHeuristicProvider:
+    """A non-model provider that is not the analyzer's own heuristic."""
+
+    provider_id = "custom_heuristic"
+    is_model_based = False
+
+    def __init__(self, series: SpinalLoadSeries) -> None:
+        self._series = series
+        self.calls = 0
+
+    def loads(self, *, time_s, **kwargs) -> SpinalLoadSeries:
+        self.calls += 1
+        return self._series
+
+
+def test_injected_non_model_provider_loads_are_used() -> None:
+    series = _model_series()
+    provider = _InjectedHeuristicProvider(series)
+    analyzer = SpinalLoadAnalyzer(body_weight=80.0, provider=provider)
+    inputs = {
+        "joint_angles": {"lumbar_flexion": np.zeros(series.time_s.size)},
+        "joint_velocities": {},
+        "joint_torques": {},
+        "time": series.time_s,
+    }
+    result = analyzer.analyze(**inputs)
+    assert provider.calls == 1
+    assert result.provider_id == "custom_heuristic"
+    assert result.risk_assessed is True
+    assert set(result.segments) == {"L5-S1", "L4-L5"}
+    np.testing.assert_allclose(
+        result.segments["L4-L5"].compression, series.compression_n()[:, 1], atol=1e-12
+    )
