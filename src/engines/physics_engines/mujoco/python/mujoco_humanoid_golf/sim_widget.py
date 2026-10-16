@@ -632,6 +632,21 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         if timer is not None:
             timer.stop()
 
+    def release_resources(self) -> None:
+        """Stop the sim, join the loader thread and free the GL renderer.
+
+        Must run while the widget (and its GL context) is still alive, i.e.
+        before Qt destroys it; otherwise the renderer is freed after its
+        context and the process dies with an access violation (UD #12914).
+        Idempotent. Postcondition: ``self.renderer is None``.
+        """
+        self.stop_simulation()
+        thread = getattr(self, "loader_thread", None)
+        if thread is not None and thread.isRunning():
+            thread.wait(5000)
+        release_renderer(self.renderer)
+        self.renderer = None
+
     def closeEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
         """Release the simulation timer when the widget is closed.
 
