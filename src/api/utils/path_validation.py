@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from fastapi import HTTPException
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]
+
+#: Image extensions the launcher logo routes may serve (issue #12964).
+LOGO_SUFFIXES = (".svg", ".png", ".jpg", ".jpeg", ".ico")
 
 ALLOWED_MODEL_DIRS = [
     (_PROJECT_ROOT / "shared/models").resolve(),
@@ -184,3 +187,52 @@ def validate_model_path(model_path: str) -> str:
         status_code=404,
         detail="Model file not found in allowed directories",
     )
+
+
+def resolve_file_within(
+    base_dir: Path,
+    filename: str,
+    allowed_suffixes: Iterable[str] | None = None,
+) -> Path | None:
+    """Resolve a caller-supplied ``filename`` to a regular file inside ``base_dir``.
+
+    Single shared guard for routes that serve files by a user-supplied path
+    (issue #12964). ``..`` alone is not enough: an absolute path such as
+    ``C:/Windows/win.ini`` or ``/etc/passwd`` replaces ``base_dir`` entirely
+    when joined, so the final resolved path is checked for containment.
+
+    Args:
+        base_dir: Trusted directory the file must live under.
+        filename: Caller-supplied path fragment (URL-decoded by the framework).
+        allowed_suffixes: Optional case-insensitive extension allow-list
+            (e.g. ``(".svg", ".png")``). ``None`` means any extension.
+
+    Returns:
+        The resolved path, or ``None`` if the request is unsafe, escapes
+        ``base_dir`` (``..``, absolute path, backslash traversal, symlink),
+        is not a regular file, or has a disallowed extension.
+    """
+    if not isinstance(filename, str) or not filename.strip() or "\x00" in filename:
+        return None
+    # Backslashes are separators on Windows; normalise so the same input is
+    # rejected identically on every platform.
+    normalised = filename.replace("\\", "/")
+    # Reject absolute requests outright, including a Windows drive/root form
+    # that POSIX hosts would not flag as absolute.
+    parsed = PurePosixPath(normalised)
+    if parsed.is_absolute() or PureWindowsPath(normalised).drive:
+        return None
+    try:
+        resolved_base = base_dir.resolve()
+        resolved = (resolved_base / normalised).resolve()
+    except (OSError, RuntimeError, ValueError):
+        return None
+    if not resolved.is_relative_to(resolved_base):
+        return None
+    if not resolved.is_file():
+        return None
+    if allowed_suffixes is not None:
+        allowed = {s.lower() for s in allowed_suffixes}
+        if resolved.suffix.lower() not in allowed:
+            return None
+    return resolved
