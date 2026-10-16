@@ -11,11 +11,22 @@ from __future__ import annotations
 
 import logging
 
+from src.shared.python.core.process_safety import narrow_catch
 from src.shared.python.launcher_embed import EMBEDDABLE_TOOL_REGISTRY
 
 logger = logging.getLogger(__name__)
 
 __all__ = ["cleanup_embedded_tools"]
+
+# What a tool's teardown can plausibly raise (deleted Qt wrappers, GL and
+# file handles, half-initialised state); anything else still propagates.
+_CLEANUP_FAILURES: tuple[type[Exception], ...] = (
+    RuntimeError,
+    OSError,
+    AttributeError,
+    TypeError,
+    ValueError,
+)
 
 
 def cleanup_embedded_tools() -> None:
@@ -28,7 +39,7 @@ def cleanup_embedded_tools() -> None:
         cleanup = getattr(tool, "cleanup", None)
         if not callable(cleanup):
             continue
-        try:
+        with narrow_catch(
+            *_CLEANUP_FAILURES, log_message=f"Embedded tool {tool_id!r} cleanup raised"
+        ):
             cleanup()
-        except Exception:  # noqa: BLE001 - shutdown must not raise
-            logger.exception("Embedded tool %r cleanup raised", tool_id)
