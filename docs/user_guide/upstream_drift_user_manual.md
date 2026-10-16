@@ -29,7 +29,7 @@ Inline equations use `$...$` delimiters and display equations use `$$...$$` deli
 
 ## Table of Contents
 
-### Part I: Getting Started
+<!-- manual-toc:start -->
 
 - **[Chapter 1: Introduction](upstream_drift_user_manual/ch01_introduction.md#chapter-1-introduction)**
 
@@ -63,6 +63,7 @@ Inline equations use `$...$` delimiters and display equations use `$$...$$` deli
   - [3.9 Troubleshooting Installation Issues](upstream_drift_user_manual/ch03_installation_and_setup.md#39-troubleshooting-installation-issues)
 
 - **[Chapter 4: Quick Start Guide](upstream_drift_user_manual/ch04_quick_start_guide.md#chapter-4-quick-start-guide)**
+
   - [4.1 Running Your First Simulation](upstream_drift_user_manual/ch04_quick_start_guide.md#41-running-your-first-simulation)
   - [4.2 Launching the GUI (PyQt6 Classic Launcher)](upstream_drift_user_manual/ch04_quick_start_guide.md#42-launching-the-gui-pyqt6-classic-launcher)
   - [4.3 Launching the Web UI (Tauri/React)](upstream_drift_user_manual/ch04_quick_start_guide.md#43-launching-the-web-ui-taurireact)
@@ -71,252 +72,253 @@ Inline equations use `$...$` delimiters and display equations use `$$...$$` deli
   - [4.6 Exploring the Example Scripts](upstream_drift_user_manual/ch04_quick_start_guide.md#46-exploring-the-example-scripts)
   - [4.7 Understanding Output and Results](upstream_drift_user_manual/ch04_quick_start_guide.md#47-understanding-output-and-results)
 
-### Part II: Physics Engines
+- **[Chapter 5: Physics Engine Framework](upstream_drift_user_manual/ch05_physics_engine_framework.md#chapter-5-physics-engine-framework)**
 
-- **[Chapter 5: MuJoCo Engine](#chapter-5-mujoco-engine)**
+  - [5.1 Overview](upstream_drift_user_manual/ch05_physics_engine_framework.md#51-overview)
+  - [5.2 The `PhysicsEngine` Protocol](upstream_drift_user_manual/ch05_physics_engine_framework.md#52-the-physicsengine-protocol)
+  - [5.3 Design by Contract -- `contracts.py`](upstream_drift_user_manual/ch05_physics_engine_framework.md#53-design-by-contract----contractspy)
+  - [5.4 `BasePhysicsEngine`](upstream_drift_user_manual/ch05_physics_engine_framework.md#54-basephysicsengine)
+  - [5.5 Engine Registry](upstream_drift_user_manual/ch05_physics_engine_framework.md#55-engine-registry)
+  - [5.6 Engine Manager](upstream_drift_user_manual/ch05_physics_engine_framework.md#56-engine-manager)
+  - [5.7 Engine Probes](upstream_drift_user_manual/ch05_physics_engine_framework.md#57-engine-probes)
 
-  - [5.1 Overview and Capabilities](#51-overview-and-capabilities-mujoco)
-  - [5.2 Model Library (2 DOF to 28 DOF)](#52-model-library-2-dof-to-28-dof)
-  - [5.3 Contact Dynamics and Ground Interaction](#53-contact-dynamics-and-ground-interaction)
-  - [5.4 Flexible Shaft Modeling](#54-flexible-shaft-modeling)
-  - [5.5 Humanoid Golf Simulation](#55-humanoid-golf-simulation)
-  - [5.6 MyoSuite Integration (Musculoskeletal)](#56-myosuite-integration-musculoskeletal)
-  - [5.7 Motion Capture Workflow](#57-motion-capture-workflow)
-  - [5.8 MuJoCo-Specific Configuration](#58-mujoco-specific-configuration)
+- **[Chapter 6: MuJoCo Physics Engine](upstream_drift_user_manual/ch06_mujoco_physics_engine.md#chapter-6-mujoco-physics-engine)**
 
-- **[Chapter 6: Drake Engine](#chapter-6-drake-engine)**
+  - [6.1 Overview](upstream_drift_user_manual/ch06_mujoco_physics_engine.md#61-overview)
+  - [6.2 `MuJoCoPhysicsEngine`](upstream_drift_user_manual/ch06_mujoco_physics_engine.md#62-mujocophysicsengine)
+  - [6.3 Model Hierarchy](upstream_drift_user_manual/ch06_mujoco_physics_engine.md#63-model-hierarchy)
+  - [6.4 Simulation and Controllers](upstream_drift_user_manual/ch06_mujoco_physics_engine.md#64-simulation-and-controllers)
+  - [6.5 Advanced Kinematics](upstream_drift_user_manual/ch06_mujoco_physics_engine.md#65-advanced-kinematics)
+  - [6.6 Advanced Control](upstream_drift_user_manual/ch06_mujoco_physics_engine.md#66-advanced-control)
+  - [6.7 Kinematic Forces Analysis](upstream_drift_user_manual/ch06_mujoco_physics_engine.md#67-kinematic-forces-analysis)
+  - [6.8 Inverse Dynamics](upstream_drift_user_manual/ch06_mujoco_physics_engine.md#68-inverse-dynamics)
+  - [6.9 Motion Capture](upstream_drift_user_manual/ch06_mujoco_physics_engine.md#69-motion-capture)
+  - [6.10 Motion Optimization](upstream_drift_user_manual/ch06_mujoco_physics_engine.md#610-motion-optimization)
 
-  - [6.1 Overview and Capabilities](#61-overview-and-capabilities-drake)
-  - [6.2 Trajectory Optimization](#62-trajectory-optimization)
-  - [6.3 Contact Modeling in Drake](#63-contact-modeling-in-drake)
-  - [6.4 System Analysis Tools](#64-system-analysis-tools)
-  - [6.5 URDF Support and Model Loading](#65-urdf-support-and-model-loading)
-  - [6.6 Drake Dashboard](#66-drake-dashboard)
+- **[Chapter 7: Rigid Body Dynamics Algorithms](upstream_drift_user_manual/ch07_rigid_body_dynamics_algorithms.md#chapter-7-rigid-body-dynamics-algorithms)**
 
-- **[Chapter 7: Pinocchio Engine](#chapter-7-pinocchio-engine)**
+  - [7.1 Overview](upstream_drift_user_manual/ch07_rigid_body_dynamics_algorithms.md#71-overview)
+  - [7.2 Recursive Newton-Euler Algorithm (RNEA)](upstream_drift_user_manual/ch07_rigid_body_dynamics_algorithms.md#72-recursive-newton-euler-algorithm-rnea)
+  - [7.3 Composite Rigid Body Algorithm (CRBA)](upstream_drift_user_manual/ch07_rigid_body_dynamics_algorithms.md#73-composite-rigid-body-algorithm-crba)
+  - [7.4 Articulated Body Algorithm (ABA)](upstream_drift_user_manual/ch07_rigid_body_dynamics_algorithms.md#74-articulated-body-algorithm-aba)
+  - [7.5 Induced Acceleration Analysis](upstream_drift_user_manual/ch07_rigid_body_dynamics_algorithms.md#75-induced-acceleration-analysis)
 
-  - [7.1 Overview and Capabilities](#71-overview-and-capabilities-pinocchio)
-  - [7.2 Rigid Body Algorithms](#72-rigid-body-algorithms)
-  - [7.3 Analytical Inverse Kinematics](#73-analytical-inverse-kinematics)
-  - [7.4 Inverse Dynamics Computation](#74-inverse-dynamics-computation)
-  - [7.5 Meshcat Visualization](#75-meshcat-visualization)
-  - [7.6 Pinocchio Dashboard](#76-pinocchio-dashboard)
+- **[Chapter 8: Drake Physics Engine](upstream_drift_user_manual/ch08_drake_physics_engine.md#chapter-8-drake-physics-engine)**
 
-- **[Chapter 8: OpenSim Engine](#chapter-8-opensim-engine)**
+  - [8.1 Overview](upstream_drift_user_manual/ch08_drake_physics_engine.md#81-overview)
+  - [8.2 `DrakePhysicsEngine`](upstream_drift_user_manual/ch08_drake_physics_engine.md#82-drakephysicsengine)
+  - [8.3 Motion Optimization](upstream_drift_user_manual/ch08_drake_physics_engine.md#83-motion-optimization)
+  - [8.4 Swing Plane Integration](upstream_drift_user_manual/ch08_drake_physics_engine.md#84-swing-plane-integration)
+  - [8.5 Direct Collocation (Drake Integration Notes)](upstream_drift_user_manual/ch08_drake_physics_engine.md#85-direct-collocation-drake-integration-notes)
+  - [8.6 LQR Control in Drake Context](upstream_drift_user_manual/ch08_drake_physics_engine.md#86-lqr-control-in-drake-context)
+  - [8.7 Contact Modeling](upstream_drift_user_manual/ch08_drake_physics_engine.md#87-contact-modeling)
+  - [8.8 Engine Comparison: MuJoCo vs. Drake](upstream_drift_user_manual/ch08_drake_physics_engine.md#88-engine-comparison-mujoco-vs-drake)
 
-  - [8.1 Overview and Capabilities](#81-overview-and-capabilities-opensim)
-  - [8.2 Musculoskeletal Model Library](#82-musculoskeletal-model-library)
-  - [8.3 Muscle Dynamics and Activation](#83-muscle-dynamics-and-activation)
-  - [8.4 Model Validation Against Literature](#84-model-validation-against-literature)
-  - [8.5 OpenSim Tutorials](#85-opensim-tutorials)
+- **[Chapter 9: Pinocchio Physics Engine](upstream_drift_user_manual/ch09_pinocchio_physics_engine.md#chapter-9-pinocchio-physics-engine)**
 
-- **[Chapter 9: MyoSuite Engine](#chapter-9-myosuite-engine)**
+  - [9.1 Overview](upstream_drift_user_manual/ch09_pinocchio_physics_engine.md#91-overview)
+  - [9.2 Core Algorithms](upstream_drift_user_manual/ch09_pinocchio_physics_engine.md#92-core-algorithms)
+  - [9.3 Fast Analytical Jacobians and Derivatives](upstream_drift_user_manual/ch09_pinocchio_physics_engine.md#93-fast-analytical-jacobians-and-derivatives)
+  - [9.4 Drift-Control Decomposition (Section F)](upstream_drift_user_manual/ch09_pinocchio_physics_engine.md#94-drift-control-decomposition-section-f)
+  - [9.5 Counterfactual Experiments (Section G)](upstream_drift_user_manual/ch09_pinocchio_physics_engine.md#95-counterfactual-experiments-section-g)
+  - [9.6 URDF Model Loading and Joint Configuration](upstream_drift_user_manual/ch09_pinocchio_physics_engine.md#96-urdf-model-loading-and-joint-configuration)
+  - [9.7 MuJoCo-Pinocchio Bridge](upstream_drift_user_manual/ch09_pinocchio_physics_engine.md#97-mujoco-pinocchio-bridge)
+  - [9.8 PinocchioBackend for Standalone Usage](upstream_drift_user_manual/ch09_pinocchio_physics_engine.md#98-pinocchiobackend-for-standalone-usage)
+  - [9.9 PINK Inverse Kinematics Integration](upstream_drift_user_manual/ch09_pinocchio_physics_engine.md#99-pink-inverse-kinematics-integration)
+  - [9.10 Performance Comparison With MuJoCo](upstream_drift_user_manual/ch09_pinocchio_physics_engine.md#910-performance-comparison-with-mujoco)
+  - [9.11 Complete Workflow Example](upstream_drift_user_manual/ch09_pinocchio_physics_engine.md#911-complete-workflow-example)
 
-  - [9.1 Overview and Capabilities](#91-overview-and-capabilities-myosuite)
-  - [9.2 Hill-Type Muscle Models](#92-hill-type-muscle-models)
-  - [9.3 290-Muscle Full-Body Model](#93-290-muscle-full-body-model)
-  - [9.4 Muscle Activation Dynamics](#94-muscle-activation-dynamics)
-  - [9.5 Force-Length-Velocity Relationships](#95-force-length-velocity-relationships)
-  - [9.6 Research-Grade Model Validation](#96-research-grade-model-validation)
+- **[Chapter 10: OpenSim Physics Engine](upstream_drift_user_manual/ch10_opensim_physics_engine.md#chapter-10-opensim-physics-engine)**
 
-- **[Chapter 10: Pendulum and Educational Models](#chapter-10-pendulum-and-educational-models)**
+  - [10.1 Overview](upstream_drift_user_manual/ch10_opensim_physics_engine.md#101-overview)
+  - [10.2 Engine Initialization and Model Loading](upstream_drift_user_manual/ch10_opensim_physics_engine.md#102-engine-initialization-and-model-loading)
+  - [10.3 Simulation and Integration](upstream_drift_user_manual/ch10_opensim_physics_engine.md#103-simulation-and-integration)
+  - [10.4 Dynamics Computations](upstream_drift_user_manual/ch10_opensim_physics_engine.md#104-dynamics-computations)
+  - [10.5 Drift-Control Decomposition (Section F)](upstream_drift_user_manual/ch10_opensim_physics_engine.md#105-drift-control-decomposition-section-f)
+  - [10.6 Counterfactual Experiments (Section G)](upstream_drift_user_manual/ch10_opensim_physics_engine.md#106-counterfactual-experiments-section-g)
+  - [10.7 Muscle Model Integration (Section J)](upstream_drift_user_manual/ch10_opensim_physics_engine.md#107-muscle-model-integration-section-j)
+  - [10.8 Grip Modeling (Section J1)](upstream_drift_user_manual/ch10_opensim_physics_engine.md#108-grip-modeling-section-j1)
+  - [10.9 Musculoskeletal Model Validation Workflows](upstream_drift_user_manual/ch10_opensim_physics_engine.md#109-musculoskeletal-model-validation-workflows)
+  - [10.10 Complete Workflow Example](upstream_drift_user_manual/ch10_opensim_physics_engine.md#1010-complete-workflow-example)
 
-  - [10.1 Simple Pendulum (1 DOF)](#101-simple-pendulum-1-dof)
-  - [10.2 Double Pendulum (2 DOF)](#102-double-pendulum-2-dof)
-  - [10.3 Parametric Studies with Pendulum Models](#103-parametric-studies-with-pendulum-models)
-  - [10.4 MATLAB Simscape Multibody Models](#104-matlab-simscape-multibody-models)
+- **[Chapter 11: MyoSuite Musculoskeletal Engine](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#chapter-11-myosuite-musculoskeletal-engine)**
 
-- **[Chapter 11: Cross-Engine Comparison and Validation](#chapter-11-cross-engine-comparison-and-validation)**
-  - [11.1 Unified Engine Interface](#111-unified-engine-interface)
-  - [11.2 Cross-Engine Validation Framework](#112-cross-engine-validation-framework)
-  - [11.3 Benchmark Methodology](#113-benchmark-methodology)
-  - [11.4 Comparative Analysis Tools](#114-comparative-analysis-tools)
-  - [11.5 Engine Selection Guide](#115-engine-selection-guide)
+  - [11.1 Overview](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#111-overview)
+  - [11.2 Model Configurations](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#112-model-configurations)
+  - [11.3 Engine Initialization](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#113-engine-initialization)
+  - [11.4 Hill-Type Muscle Model](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#114-hill-type-muscle-model)
+  - [11.5 Muscle Analysis Module](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#115-muscle-analysis-module)
+  - [11.6 Moment Arm Analysis](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#116-moment-arm-analysis)
+  - [11.7 Muscle-Generated Joint Torques](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#117-muscle-generated-joint-torques)
+  - [11.8 Muscle-Induced Accelerations](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#118-muscle-induced-accelerations)
+  - [11.9 Muscle Co-Contraction Analysis](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#119-muscle-co-contraction-analysis)
+  - [11.10 Power Analysis](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#1110-power-analysis)
+  - [11.11 Muscle Recruitment Optimization](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#1111-muscle-recruitment-optimization)
+  - [11.12 Comprehensive Analysis](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#1112-comprehensive-analysis)
+  - [11.13 Grip Modeling (Section K1)](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#1113-grip-modeling-section-k1)
+  - [11.14 Drift-Control Decomposition and Counterfactuals](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#1114-drift-control-decomposition-and-counterfactuals)
+  - [11.15 RL Adapter: MuscleDrivenEnv](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#1115-rl-adapter-muscledrivenenv)
+  - [11.16 Cross-Validation With OpenSim](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#1116-cross-validation-with-opensim)
+  - [11.17 Complete Workflow Example](upstream_drift_user_manual/ch11_myosuite_musculoskeletal_engine.md#1117-complete-workflow-example)
 
-### Part III: Analysis and Simulation
+- **[Chapter 12: Biomechanical Analysis Suite](upstream_drift_user_manual/ch12_biomechanical_analysis_suite.md#chapter-12-biomechanical-analysis-suite)**
 
-- **[Chapter 12: Biomechanical Analysis](#chapter-12-biomechanical-analysis)**
+  - [12.1 Overview](upstream_drift_user_manual/ch12_biomechanical_analysis_suite.md#121-overview)
+  - [12.2 Swing Metrics (`swing_metrics.py`)](upstream_drift_user_manual/ch12_biomechanical_analysis_suite.md#122-swing-metrics-swing_metricspy)
+  - [12.3 Energy Metrics (`energy_metrics.py`)](upstream_drift_user_manual/ch12_biomechanical_analysis_suite.md#123-energy-metrics-energy_metricspy)
+  - [12.4 Ground Reaction Force Metrics (`grf_metrics.py`)](upstream_drift_user_manual/ch12_biomechanical_analysis_suite.md#124-ground-reaction-force-metrics-grf_metricspy)
+  - [12.5 Angular Momentum (`angular_momentum.py`)](upstream_drift_user_manual/ch12_biomechanical_analysis_suite.md#125-angular-momentum-angular_momentumpy)
+  - [12.6 Phase Detection (`phase_detection.py`)](upstream_drift_user_manual/ch12_biomechanical_analysis_suite.md#126-phase-detection-phase_detectionpy)
+  - [12.7 Stability Metrics (`stability_metrics.py`)](upstream_drift_user_manual/ch12_biomechanical_analysis_suite.md#127-stability-metrics-stability_metricspy)
+  - [12.8 Shared Dataclasses](upstream_drift_user_manual/ch12_biomechanical_analysis_suite.md#128-shared-dataclasses)
+  - [12.9 Muscle Synergy Analysis](upstream_drift_user_manual/ch12_biomechanical_analysis_suite.md#129-muscle-synergy-analysis)
+  - [12.10 Complete Analysis Workflow](upstream_drift_user_manual/ch12_biomechanical_analysis_suite.md#1210-complete-analysis-workflow)
+  - [12.11 Summary of Equations](upstream_drift_user_manual/ch12_biomechanical_analysis_suite.md#1211-summary-of-equations)
 
-  - [12.1 Kinematic Analysis](#121-kinematic-analysis)
-  - [12.2 Inverse Kinematics Solver](#122-inverse-kinematics-solver)
-  - [12.3 Inverse Dynamics and Torque Computation](#123-inverse-dynamics-and-torque-computation)
-  - [12.4 Kinematic Sequence Analysis](#124-kinematic-sequence-analysis)
-  - [12.5 Swing Plane Analysis and Visualization](#125-swing-plane-analysis-and-visualization)
-  - [12.6 Grip Contact Force Analysis](#126-grip-contact-force-analysis)
-  - [12.7 Ground Reaction Force Processing](#127-ground-reaction-force-processing)
-  - [12.8 Energy Monitoring and Conservation](#128-energy-monitoring-and-conservation)
-  - [12.9 Manipulability Analysis](#129-manipulability-analysis)
-  - [12.10 Injury Risk Assessment](#1210-injury-risk-assessment)
+- **[Chapter 13: Contact Dynamics](upstream_drift_user_manual/ch13_contact_dynamics.md#chapter-13-contact-dynamics)**
 
-- **[Chapter 13: Ball Flight Physics](#chapter-13-ball-flight-physics)**
+  - [13.1 Core Types and Protocols](upstream_drift_user_manual/ch13_contact_dynamics.md#131-core-types-and-protocols)
+  - [13.2 Friction Cone Analysis](upstream_drift_user_manual/ch13_contact_dynamics.md#132-friction-cone-analysis)
+  - [13.3 Contact Management](upstream_drift_user_manual/ch13_contact_dynamics.md#133-contact-management)
+  - [13.4 Grasp Analysis](upstream_drift_user_manual/ch13_contact_dynamics.md#134-grasp-analysis)
 
-  - [13.1 Aerodynamic Models](#131-aerodynamic-models)
-  - [13.2 Impact Mechanics](#132-impact-mechanics)
-  - [13.3 Spin Dynamics](#133-spin-dynamics)
-  - [13.4 Environmental Effects](#134-environmental-effects)
-  - [13.5 Terrain Interaction](#135-terrain-interaction)
-  - [13.6 Shot Tracing and Visualization](#136-shot-tracing-and-visualization)
+- **[Chapter 14: Whole-Body Control](upstream_drift_user_manual/ch14_whole_body_control.md#chapter-14-whole-body-control)**
 
-- **[Chapter 14: Muscle and Tissue Modeling](#chapter-14-muscle-and-tissue-modeling)**
+  - [14.1 Task-Based Control](upstream_drift_user_manual/ch14_whole_body_control.md#141-task-based-control)
+  - [14.2 QP Solver](upstream_drift_user_manual/ch14_whole_body_control.md#142-qp-solver)
+  - [14.3 Control Modes](upstream_drift_user_manual/ch14_whole_body_control.md#143-control-modes)
 
-  - [14.1 Hill-Type Muscle Model Theory](#141-hill-type-muscle-model-theory)
-  - [14.2 Multi-Muscle Coordination](#142-multi-muscle-coordination)
-  - [14.3 Muscle Equilibrium Solver](#143-muscle-equilibrium-solver)
-  - [14.4 Activation Dynamics](#144-activation-dynamics)
-  - [14.5 Spinal Load Analysis](#145-spinal-load-analysis)
-  - [14.6 Joint Stress Computation](#146-joint-stress-computation)
+- **[Chapter 15: Locomotion](upstream_drift_user_manual/ch15_locomotion.md#chapter-15-locomotion)**
 
-- **[Chapter 15: Motion Capture and Pose Estimation](#chapter-15-motion-capture-and-pose-estimation)**
-  - [15.1 Video Pose Pipeline](#151-video-pose-pipeline)
-  - [15.2 OpenPose Integration](#152-openpose-integration)
-  - [15.3 MediaPipe Integration](#153-mediapipe-integration)
-  - [15.4 C3D File Support](#154-c3d-file-support)
-  - [15.5 Motion Retargeting](#155-motion-retargeting)
-  - [15.6 Marker Mapping and Calibration](#156-marker-mapping-and-calibration)
+  - [15.1 Gait Types and Parameters](upstream_drift_user_manual/ch15_locomotion.md#151-gait-types-and-parameters)
+  - [15.2 Gait State Machine](upstream_drift_user_manual/ch15_locomotion.md#152-gait-state-machine)
+  - [15.3 Footstep Planning](upstream_drift_user_manual/ch15_locomotion.md#153-footstep-planning)
+  - [15.4 Zero Moment Point](upstream_drift_user_manual/ch15_locomotion.md#154-zero-moment-point)
 
-### Part IV: Robotics and Control
+- **[Chapter 16: Sensing](upstream_drift_user_manual/ch16_sensing.md#chapter-16-sensing)**
 
-- **[Chapter 16: Control Systems](#chapter-16-control-systems)**
+  - [16.1 Noise Models](upstream_drift_user_manual/ch16_sensing.md#161-noise-models)
+  - [16.2 IMU Sensor](upstream_drift_user_manual/ch16_sensing.md#162-imu-sensor)
+  - [16.3 Force-Torque Sensor](upstream_drift_user_manual/ch16_sensing.md#163-force-torque-sensor)
+  - [Summary of Key Imports](upstream_drift_user_manual/ch16_sensing.md#summary-of-key-imports)
 
-  - [16.1 Impedance Control](#161-impedance-control)
-  - [16.2 Admittance Control](#162-admittance-control)
-  - [16.3 Hybrid Force-Position Control](#163-hybrid-force-position-control)
-  - [16.4 Operational Space Control](#164-operational-space-control)
-  - [16.5 Task-Space Control with Redundancy Resolution](#165-task-space-control-with-redundancy-resolution)
-  - [16.6 Contact and Constraint Handling](#166-contact-and-constraint-handling)
+- **[Chapter 17: Reinforcement Learning](upstream_drift_user_manual/ch17_reinforcement_learning.md#chapter-17-reinforcement-learning)**
 
-- **[Chapter 17: Learning and Optimization](#chapter-17-learning-and-optimization)**
+  - [17.1 Configuration System](upstream_drift_user_manual/ch17_reinforcement_learning.md#171-configuration-system)
+  - [17.2 Gymnasium Environment Base](upstream_drift_user_manual/ch17_reinforcement_learning.md#172-gymnasium-environment-base)
+  - [17.3 Humanoid Environments](upstream_drift_user_manual/ch17_reinforcement_learning.md#173-humanoid-environments)
+  - [17.4 Manipulation Environments](upstream_drift_user_manual/ch17_reinforcement_learning.md#174-manipulation-environments)
 
-  - [17.1 Reinforcement Learning for Swing Optimization](#171-reinforcement-learning-for-swing-optimization)
-  - [17.2 Imitation Learning from Motion Capture](#172-imitation-learning-from-motion-capture)
-  - [17.3 Sim-to-Real Transfer](#173-sim-to-real-transfer)
-  - [17.4 Motion Retargeting Algorithms](#174-motion-retargeting-algorithms)
-  - [17.5 Trajectory Optimization](#175-trajectory-optimization)
-  - [17.6 Parameter Sweeps and Sensitivity Analysis](#176-parameter-sweeps-and-sensitivity-analysis)
+- **[Chapter 18: Imitation Learning](upstream_drift_user_manual/ch18_imitation_learning.md#chapter-18-imitation-learning)**
 
-- **[Chapter 18: Deployment and Real-Time Systems](#chapter-18-deployment-and-real-time-systems)**
-  - [18.1 Real-Time Controller](#181-real-time-controller)
-  - [18.2 Digital Twin Framework](#182-digital-twin-framework)
-  - [18.3 Safety Monitoring and Collision Detection](#183-safety-monitoring-and-collision-detection)
-  - [18.4 Teleoperation Interface](#184-teleoperation-interface)
+  - [18.1 Demonstration Dataset](upstream_drift_user_manual/ch18_imitation_learning.md#181-demonstration-dataset)
+  - [18.2 Behavior Cloning](upstream_drift_user_manual/ch18_imitation_learning.md#182-behavior-cloning)
+  - [18.3 DAgger (Dataset Aggregation)](upstream_drift_user_manual/ch18_imitation_learning.md#183-dagger-dataset-aggregation)
+  - [18.4 GAIL (Generative Adversarial Imitation Learning)](upstream_drift_user_manual/ch18_imitation_learning.md#184-gail-generative-adversarial-imitation-learning)
 
-### Part V: Research Tools
+- **[Chapter 19: Sim-to-Real Transfer](upstream_drift_user_manual/ch19_sim_to_real_transfer.md#chapter-19-sim-to-real-transfer)**
 
-- **[Chapter 19: Advanced Research Modules](#chapter-19-advanced-research-modules)**
-  - [19.1 Model Predictive Control (MPC)](#191-model-predictive-control-mpc)
-  - [19.2 Differentiable Physics](#192-differentiable-physics)
-  - [19.3 Deformable Object Simulation](#193-deformable-object-simulation)
-  - [19.4 Multi-Robot Coordination](#194-multi-robot-coordination)
-  - [19.5 Locomotion Planning](#195-locomotion-planning)
-  - [19.6 Sensing and State Estimation](#196-sensing-and-state-estimation)
+  - [19.1 Domain Randomization](upstream_drift_user_manual/ch19_sim_to_real_transfer.md#191-domain-randomization)
+  - [19.2 System Identification](upstream_drift_user_manual/ch19_sim_to_real_transfer.md#192-system-identification)
 
-### Part VI: API and Integration
+- **[Chapter 20: Deployment Infrastructure](upstream_drift_user_manual/ch20_deployment_infrastructure.md#chapter-20-deployment-infrastructure)**
 
-- **[Chapter 20: REST API Reference](#chapter-20-rest-api-reference)**
+  - [20.1 Real-Time Control](upstream_drift_user_manual/ch20_deployment_infrastructure.md#201-real-time-control)
+  - [20.2 Digital Twin](upstream_drift_user_manual/ch20_deployment_infrastructure.md#202-digital-twin)
+  - [20.3 Safety System](upstream_drift_user_manual/ch20_deployment_infrastructure.md#203-safety-system)
+  - [20.4 Teleoperation](upstream_drift_user_manual/ch20_deployment_infrastructure.md#204-teleoperation)
+  - [Summary](upstream_drift_user_manual/ch20_deployment_infrastructure.md#summary)
 
-  - [20.1 API Architecture and Design](#201-api-architecture-and-design)
-  - [20.2 Authentication and Authorization (JWT)](#202-authentication-and-authorization-jwt)
-  - [20.3 Core Endpoints](#203-core-endpoints)
-  - [20.4 Simulation Endpoints](#204-simulation-endpoints)
-  - [20.5 Analysis Endpoints](#205-analysis-endpoints)
-  - [20.6 Engine Management Endpoints](#206-engine-management-endpoints)
-  - [20.7 Video Processing Endpoints](#207-video-processing-endpoints)
-  - [20.8 Export Endpoints](#208-export-endpoints)
-  - [20.9 WebSocket Endpoints](#209-websocket-endpoints)
-  - [20.10 Rate Limiting and Security Middleware](#2010-rate-limiting-and-security-middleware)
-  - [20.11 Error Codes and Response Formats](#2011-error-codes-and-response-formats)
+- **[Chapter 21: Research Modules](upstream_drift_user_manual/ch21_research_modules.md#chapter-21-research-modules)**
 
-- **[Chapter 21: Database and Data Management](#chapter-21-database-and-data-management)**
+  - [21.1 Model Predictive Control (MPC)](upstream_drift_user_manual/ch21_research_modules.md#211-model-predictive-control-mpc)
+  - [21.2 Differentiable Physics](upstream_drift_user_manual/ch21_research_modules.md#212-differentiable-physics)
+  - [21.3 Deformable Objects](upstream_drift_user_manual/ch21_research_modules.md#213-deformable-objects)
+  - [21.4 Multi-Robot Systems](upstream_drift_user_manual/ch21_research_modules.md#214-multi-robot-systems)
 
-  - [21.1 SQLite Database Schema](#211-sqlite-database-schema)
-  - [21.2 Data Models and ORM](#212-data-models-and-orm)
-  - [21.3 Migration and Versioning](#213-migration-and-versioning)
-  - [21.4 Data Export Formats (CSV, JSON)](#214-data-export-formats-csv-json)
-  - [21.5 Backup and Recovery](#215-backup-and-recovery)
+- **[Chapter 22: Visualization System](upstream_drift_user_manual/ch22_visualization_system.md#chapter-22-visualization-system)**
 
-- **[Chapter 22: GUI and Visualization](#chapter-22-gui-and-visualization)**
-  - [22.1 PyQt6 Classic Launcher](#221-pyqt6-classic-launcher)
-  - [22.2 Tauri/React Web Desktop Application](#222-taurireact-web-desktop-application)
-  - [22.3 Engine Dashboards (MuJoCo, Drake, Pinocchio)](#223-engine-dashboards-mujoco-drake-pinocchio)
-  - [22.4 Model Explorer](#224-model-explorer)
-  - [22.5 Pose Editor](#225-pose-editor)
-  - [22.6 Plotting and Chart Library](#226-plotting-and-chart-library)
-  - [22.7 3D Visualization and Rendering](#227-3d-visualization-and-rendering)
-  - [22.8 Ellipsoid Visualization (Manipulability)](#228-ellipsoid-visualization-manipulability)
-  - [22.9 Theme and Appearance Customization](#229-theme-and-appearance-customization)
+  - [22.1 MuJoCo 3-D Visualization](upstream_drift_user_manual/ch22_visualization_system.md#221-mujoco-3-d-visualization)
+  - [22.2 Matplotlib Plotting Framework](upstream_drift_user_manual/ch22_visualization_system.md#222-matplotlib-plotting-framework)
+  - [22.3 Animation System](upstream_drift_user_manual/ch22_visualization_system.md#223-animation-system)
+  - [22.4 Export System](upstream_drift_user_manual/ch22_visualization_system.md#224-export-system)
+  - [22.5 Dashboard](upstream_drift_user_manual/ch22_visualization_system.md#225-dashboard)
 
-### Part VII: Development and Operations
+- **[Chapter 23: REST API Reference](upstream_drift_user_manual/ch23_rest_api_reference.md#chapter-23-rest-api-reference)**
 
-- **[Chapter 23: Testing and Quality Assurance](#chapter-23-testing-and-quality-assurance)**
+  - [23.1 Server Architecture](upstream_drift_user_manual/ch23_rest_api_reference.md#231-server-architecture)
+  - [23.2 Core Endpoints](upstream_drift_user_manual/ch23_rest_api_reference.md#232-core-endpoints)
+  - [23.3 Authentication](upstream_drift_user_manual/ch23_rest_api_reference.md#233-authentication)
+  - [23.4 Request/Response Models](upstream_drift_user_manual/ch23_rest_api_reference.md#234-requestresponse-models)
 
-  - [23.1 Test Architecture and Categories](#231-test-architecture-and-categories)
-  - [23.2 Unit Testing](#232-unit-testing)
-  - [23.3 Integration Testing](#233-integration-testing)
-  - [23.4 Cross-Engine Validation Tests](#234-cross-engine-validation-tests)
-  - [23.5 Physics Validation Tests](#235-physics-validation-tests)
-  - [23.6 Security Tests](#236-security-tests)
-  - [23.7 Performance Benchmarks](#237-performance-benchmarks)
-  - [23.8 Headless Testing and CI](#238-headless-testing-and-ci)
-  - [23.9 Running Tests with pytest](#239-running-tests-with-pytest)
-  - [23.10 Test Coverage and Reporting](#2310-test-coverage-and-reporting)
+- **[Chapter 24: Motion Retargeting](upstream_drift_user_manual/ch24_motion_retargeting.md#chapter-24-motion-retargeting)**
 
-- **[Chapter 24: Contributing and Development Workflow](#chapter-24-contributing-and-development-workflow)**
+  - [24.1 Skeleton Configuration](upstream_drift_user_manual/ch24_motion_retargeting.md#241-skeleton-configuration)
+  - [24.2 Retargeting Methods](upstream_drift_user_manual/ch24_motion_retargeting.md#242-retargeting-methods)
+  - [24.3 Motion Capture Integration](upstream_drift_user_manual/ch24_motion_retargeting.md#243-motion-capture-integration)
 
-  - [24.1 Development Philosophy](#241-development-philosophy)
-  - [24.2 Code Style and Formatting (Ruff)](#242-code-style-and-formatting-ruff)
-  - [24.3 Type Checking (mypy)](#243-type-checking-mypy)
-  - [24.4 Pre-Commit Hooks](#244-pre-commit-hooks)
-  - [24.5 Branch Strategy and Pull Requests](#245-branch-strategy-and-pull-requests)
-  - [24.6 CI/CD Pipeline](#246-cicd-pipeline)
-  - [24.7 Makefile Targets Reference](#247-makefile-targets-reference)
+- **[Chapter 25: Tools and Utilities](upstream_drift_user_manual/ch25_tools_and_utilities.md#chapter-25-tools-and-utilities)**
 
-- **[Chapter 25: Deployment and Operations](#chapter-25-deployment-and-operations)**
-  - [25.1 Production Deployment](#251-production-deployment)
-  - [25.2 Docker Compose and Orchestration](#252-docker-compose-and-orchestration)
-  - [25.3 Environment Variables Reference](#253-environment-variables-reference)
-  - [25.4 Logging and Observability (structlog)](#254-logging-and-observability-structlog)
-  - [25.5 Health Checks and Monitoring](#255-health-checks-and-monitoring)
-  - [25.6 Security Hardening](#256-security-hardening)
-  - [25.7 Backup and Disaster Recovery](#257-backup-and-disaster-recovery)
+  - [25.1 Model Generation](upstream_drift_user_manual/ch25_tools_and_utilities.md#251-model-generation)
+  - [25.2 Model Explorer](upstream_drift_user_manual/ch25_tools_and_utilities.md#252-model-explorer)
+  - [25.3 Video Analyzer](upstream_drift_user_manual/ch25_tools_and_utilities.md#253-video-analyzer)
+  - [25.4 Injury Risk Assessment](upstream_drift_user_manual/ch25_tools_and_utilities.md#254-injury-risk-assessment)
+  - [25.5 Signal Processing Toolkit](upstream_drift_user_manual/ch25_tools_and_utilities.md#255-signal-processing-toolkit)
+  - [25.6 Spatial Algebra](upstream_drift_user_manual/ch25_tools_and_utilities.md#256-spatial-algebra)
+  - [Summary of Key File Paths](upstream_drift_user_manual/ch25_tools_and_utilities.md#summary-of-key-file-paths)
 
-### Part VIII: Appendices
+- **[Appendix A: Mathematical Reference](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#appendix-a-mathematical-reference)**
 
-- **[Appendix A: Configuration Reference](#appendix-a-configuration-reference)**
+  - [A.1 Notation Conventions](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#a1-notation-conventions)
+  - [A.2 Equations of Motion](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#a2-equations-of-motion)
+  - [A.3 Spatial Algebra](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#a3-spatial-algebra)
+  - [A.4 Rotation Representations](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#a4-rotation-representations)
+  - [A.5 Optimization Methods](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#a5-optimization-methods)
+  - [A.6 Hill-Type Muscle Model -- Complete Derivation](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#a6-hill-type-muscle-model----complete-derivation)
+  - [A.7 Numerical Integration Methods](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#a7-numerical-integration-methods)
 
-  - [A.1 pyproject.toml Options](#a1-pyprojecttoml-options)
-  - [A.2 environment.yml Specification](#a2-environmentyml-specification)
-  - [A.3 Environment Variable Catalog](#a3-environment-variable-catalog)
-  - [A.4 Makefile Target Reference](#a4-makefile-target-reference)
+- **[Appendix B: Model Specifications](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#appendix-b-model-specifications)**
 
-- **[Appendix B: Physics and Mathematics Reference](#appendix-b-physics-and-mathematics-reference)**
+  - [B.1 Double Pendulum (2 DOF)](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#b1-double-pendulum-2-dof)
+  - [B.2 Triple Pendulum (3 DOF)](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#b2-triple-pendulum-3-dof)
+  - [B.3 Upper Body Model (10 DOF)](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#b3-upper-body-model-10-dof)
+  - [B.4 Full Body Model (15 DOF)](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#b4-full-body-model-15-dof)
+  - [B.5 Advanced Model (28 DOF)](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#b5-advanced-model-28-dof)
+  - [B.6 MyoSuite Full Body (52 DOF, 290 Muscles)](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#b6-myosuite-full-body-52-dof-290-muscles)
+  - [B.7 Standard Humanoid (66 DOF)](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#b7-standard-humanoid-66-dof)
 
-  - [B.1 Equations of Motion](#b1-equations-of-motion)
-  - [B.2 Muscle Model Equations](#b2-muscle-model-equations)
-  - [B.3 Aerodynamic Equations](#b3-aerodynamic-equations)
-  - [B.4 Contact Mechanics](#b4-contact-mechanics)
-  - [B.5 Coordinate Systems and Conventions](#b5-coordinate-systems-and-conventions)
+- **[Appendix C: Golf Ball Physics](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#appendix-c-golf-ball-physics)**
 
-- **[Appendix C: URDF Model Specifications](#appendix-c-urdf-model-specifications)**
+  - [C.1 USGA Ball Specifications](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#c1-usga-ball-specifications)
+  - [C.2 Ball Flight Model](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#c2-ball-flight-model)
+  - [C.3 Impact Model](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#c3-impact-model)
+  - [C.4 Typical Ball Flight Parameters](upstream_drift_user_manual/x_appendix_a-c_mathematical_reference.md#c4-typical-ball-flight-parameters)
 
-  - [C.1 URDF File Format](#c1-urdf-file-format)
-  - [C.2 Model Catalog](#c2-model-catalog)
-  - [C.3 Custom Model Creation](#c3-custom-model-creation)
+- **[Appendix D: Configuration Reference](upstream_drift_user_manual/x_appendix_d-e_configuration_reference.md#appendix-d-configuration-reference)**
 
-- **[Appendix D: Troubleshooting Guide](#appendix-d-troubleshooting-guide)**
+  - [D.1 `pyproject.toml`](upstream_drift_user_manual/x_appendix_d-e_configuration_reference.md#d1-pyprojecttoml)
+  - [D.2 environment.yml](upstream_drift_user_manual/x_appendix_d-e_configuration_reference.md#d2-environmentyml)
+  - [D.3 Makefile Targets](upstream_drift_user_manual/x_appendix_d-e_configuration_reference.md#d3-makefile-targets)
+  - [D.4 Docker Configuration](upstream_drift_user_manual/x_appendix_d-e_configuration_reference.md#d4-docker-configuration)
+  - [D.5 Logging Configuration](upstream_drift_user_manual/x_appendix_d-e_configuration_reference.md#d5-logging-configuration)
+  - [D.6 Numerical Constants](upstream_drift_user_manual/x_appendix_d-e_configuration_reference.md#d6-numerical-constants)
 
-  - [D.1 Common Installation Issues](#d1-common-installation-issues)
-  - [D.2 Engine-Specific Problems](#d2-engine-specific-problems)
-  - [D.3 GUI and Display Issues](#d3-gui-and-display-issues)
-  - [D.4 API Server Issues](#d4-api-server-issues)
-  - [D.5 Performance Optimization](#d5-performance-optimization)
+- **[Appendix E: Error Codes Reference](upstream_drift_user_manual/x_appendix_d-e_configuration_reference.md#appendix-e-error-codes-reference)**
 
-- **[Appendix E: Glossary](#appendix-e-glossary)**
+  - [E.1 Error Code Format](upstream_drift_user_manual/x_appendix_d-e_configuration_reference.md#e1-error-code-format)
+  - [E.2 Complete Error Code Table](upstream_drift_user_manual/x_appendix_d-e_configuration_reference.md#e2-complete-error-code-table)
+  - [E.3 Error Response Format](upstream_drift_user_manual/x_appendix_d-e_configuration_reference.md#e3-error-response-format)
+  - [E.4 Exception Hierarchy](upstream_drift_user_manual/x_appendix_d-e_configuration_reference.md#e4-exception-hierarchy)
+  - [E.5 Contract Violation Errors](upstream_drift_user_manual/x_appendix_d-e_configuration_reference.md#e5-contract-violation-errors)
 
-- **[Appendix F: References and Further Reading](#appendix-f-references-and-further-reading)**
+- **[Appendix F: Glossary](upstream_drift_user_manual/x_appendix_f_glossary.md#appendix-f-glossary)**
 
-- **[Appendix G: License](#appendix-g-license)**
+  - [Acronyms](upstream_drift_user_manual/x_appendix_f_glossary.md#acronyms)
+  - [Technical Terms](upstream_drift_user_manual/x_appendix_f_glossary.md#technical-terms)
+  - [Model Format Terms](upstream_drift_user_manual/x_appendix_f_glossary.md#model-format-terms)
+  - [Software Engineering Terms](upstream_drift_user_manual/x_appendix_f_glossary.md#software-engineering-terms)
 
----
+<!-- manual-toc:end -->
 
 ---
 
