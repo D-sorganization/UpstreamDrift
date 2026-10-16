@@ -33,6 +33,7 @@ from src.shared.python.loop_nullspace.evidence import (
     InputProvenance,
     ModelProvenance,
     QuantityRecord,
+    family_range_record,
 )
 from src.shared.python.loop_nullspace.feasible_set import FeasibleSet
 from src.shared.python.loop_nullspace.solvers import SolveStatus
@@ -98,27 +99,19 @@ class TrajectoryEnvelope:
         out = {}
         for j, name in enumerate(self.names):
             vals = np.stack([self.lower[:, j], self.upper[:, j]], axis=1)
-            common: dict[str, Any] = {
-                "units": self.units[j],
-                "model_provenance": model,
-                "input_provenance": source,
-                "conventions": (self.label,),
-            }
-            if np.isnan(vals).any():
-                out[name] = QuantityRecord(
-                    values=np.full(vals.shape, np.nan),
-                    allocation_dependence=AllocationDependence.UNAVAILABLE,
-                    reason=f"{name}: non-bounded range in some frames",
-                    **common,
-                )
-            else:
-                out[name] = QuantityRecord(
-                    values=vals,
-                    allocation_dependence=AllocationDependence.FAMILY_DEPENDENT,
-                    hypotheses=self.hypotheses
-                    or ("feasible set without declared rows",),
-                    **common,
-                )
+            out[name] = family_range_record(
+                vals,
+                unavailable_reason=(
+                    f"{name}: non-bounded range in some frames"
+                    if np.isnan(vals).any()
+                    else None
+                ),
+                hypotheses=self.hypotheses or ("feasible set without declared rows",),
+                units=self.units[j],
+                model=model,
+                source=source,
+                label=self.label,
+            )
         return out
 
 
