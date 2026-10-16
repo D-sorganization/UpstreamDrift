@@ -60,8 +60,11 @@ class ChatService:
         self._backend_error: str | None = None
         self._lock = threading.Lock()
 
-        from src.shared.python.ai.sample_tools import register_golf_suite_tools
-        from src.shared.python.ai.tool_registry import ToolRegistry
+        # Pinned Tools registrars type-check against the canonical Tools
+        # ``ToolRegistry``; UD's ``src.shared.python.ai`` copy is a distinct
+        # class, so build the registry from the canonical spelling (UD #12893).
+        from shared.python.ai.sample_tools import register_golf_suite_tools
+        from shared.python.ai.tool_registry import ToolRegistry
 
         self._tool_registry = ToolRegistry()
         register_golf_suite_tools(self._tool_registry)
@@ -72,7 +75,7 @@ class ChatService:
 
     def _register_canonical_core_retrieval_tool(self) -> None:
         """Register the bounded Canonical Core docs/schema Q&A tool."""
-        from src.shared.python.ai.tool_registry import ToolCategory
+        from shared.python.ai.tool_registry import ToolCategory
         from src.shared.python.canonical_core import answer_canonical_core_question
 
         self._tool_registry.register(
