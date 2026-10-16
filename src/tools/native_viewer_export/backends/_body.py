@@ -14,13 +14,22 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from src.shared.python.model_appearance import document_from_dict
 from src.shared.python.model_appearance.body_meshes import (
     SPEC_BODY_FRAME,
     ResolvedAppearance,
 )
+from src.shared.python.model_appearance.schema import AppearanceDocument
 from src.tools.native_viewer_export.backends._head import write_obj
 
 _UNSAFE = re.compile(r"[^A-Za-z0-9_.-]+")
+#: The default appearance document every native-viewer backend renders.
+DEFAULT_APPEARANCE = {"schema_version": "appearance-v1"}
+
+
+def default_appearance() -> AppearanceDocument:
+    """The shared default appearance document (one source for every backend)."""
+    return document_from_dict(DEFAULT_APPEARANCE)
 
 
 @dataclass(frozen=True)
