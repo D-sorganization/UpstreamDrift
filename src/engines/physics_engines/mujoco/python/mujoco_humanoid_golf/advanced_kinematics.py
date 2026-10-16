@@ -22,6 +22,8 @@ from scipy.linalg import null_space, pinv, svd
 
 from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 
+from .club_body_names import find_club_head_body_id
+
 
 @dataclass
 class ManipulabilityMetrics:
@@ -77,7 +79,9 @@ class AdvancedKinematicsAnalyzer:
         self.ik_tolerance = 1e-4
 
         # Find important bodies
-        self.club_head_id = self._find_body_id("club_head")
+        self.club_head_id = find_club_head_body_id(
+            self.model, owner=type(self).__name__
+        )
         self.left_hand_id = self._find_body_id("left_hand")
         self.right_hand_id = self._find_body_id("right_hand")
 

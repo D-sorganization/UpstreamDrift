@@ -21,6 +21,8 @@ import numpy as np
 from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
 from src.shared.python.core.contracts import precondition
 
+from .club_body_names import find_club_head_body_id
+
 logger = logging.getLogger(__name__)
 
 
@@ -55,7 +57,9 @@ class BiomechanicalAnalyzer:
         self._prev_club_time: float = 0.0
 
         # Find important body IDs
-        self.club_head_id = self._find_body_id("club_head")
+        self.club_head_id = find_club_head_body_id(
+            self.model, owner=type(self).__name__
+        )
         self.left_foot_id = self._find_body_id("left_foot")
         self.right_foot_id = self._find_body_id("right_foot")
 
