@@ -53,6 +53,9 @@ from typing import Any
 
 import numpy as np
 
+from src.engines.physics_engines.opensim.python.spine.assets import (
+    resolve_spine_asset,
+)
 from src.engines.physics_engines.opensim.python.spine.read_kinematics import (
     read_segmental_kinematics,
 )
@@ -531,6 +534,22 @@ def _check_law_ids(law_ids: Sequence[str] | None) -> tuple[str, ...]:
     return tuple(sorted(chosen))
 
 
+def _report_model_path(
+    base: SpineStudyRequest, env: Mapping[str, str] | None
+) -> Path:
+    """The model whose per-level angles are read back: path, else asset env."""
+    if base.model_path is not None:
+        return base.model_path
+    if base.asset_id is not None:
+        resolved = resolve_spine_asset(base.asset_id, env)
+        if resolved is not None:
+            return resolved.source_path
+    raise ValueError(
+        "base.model_path is required to read per-level angles (or an asset_id "
+        "whose environment variable names the model file)"
+    )
+
+
 def run_distribution_sensitivity(
     base: SpineStudyRequest,
     law_ids: Sequence[str] | None = None,
@@ -548,7 +567,8 @@ def run_distribution_sensitivity(
 
     Preconditions: ``base`` is a :class:`SpineStudyRequest` (``TypeError``);
     at least two distinct shipped law ids; ``base.model_path`` is given
-    (``ValueError``) so the per-level angles can be read back.
+    (``ValueError``) so the per-level angles can be read back, or ``asset_id``
+    resolved through its environment variable like the study does.
 
     Returns:
         The :class:`SensitivityReport` (see :func:`build_sensitivity_report`).
@@ -556,8 +576,7 @@ def run_distribution_sensitivity(
     if not isinstance(base, SpineStudyRequest):
         raise TypeError(f"base must be a SpineStudyRequest, got {type(base).__name__}")
     chosen = _check_law_ids(law_ids)
-    if base.model_path is None:
-        raise ValueError("base.model_path is required to read per-level angles")
+    model_path = _report_model_path(base, env)
     receipts = {}
     for law_id in chosen:
         request = replace(
@@ -569,7 +588,7 @@ def run_distribution_sensitivity(
         run_spine_study(request, code_version=code_version, env=env)
         receipts[law_id] = base.output_dir / f"{request.study_id}_receipt.json"
     return build_sensitivity_report(
-        base.study_id, receipts, base.model_path, base.model_id, robust_threshold
+        base.study_id, receipts, model_path, base.model_id, robust_threshold
     )
 
 
