@@ -497,7 +497,7 @@ def _provenance(
             "Thelen muscles swapped for Millard, see muscle_model), "
             f"affine in activation from a={_A_LOW:g} and a={_A_HIGH:g}"
         ),
-        "couplers": "disabled",
+        "couplers": "disabled (coordinate locks cleared)",
         "reserves": opts.reserves.describe(),
         "units": "N*m (generalized forces), N (tendon forces)",
     }

@@ -395,6 +395,17 @@ def _load_model(model_path: Path, external_loads: Path | None) -> Any:
     return processor.process()
 
 
+def _clear_coordinate_locks(model: Any) -> None:
+    """Unlock every coordinate: the drive moves them, locks only corrupt ID/SO/JR.
+
+    A locked coordinate has zero acceleration in forward dynamics and no
+    moment arm in OpenSim, while the inverse-dynamics solver ignores the lock.
+    """
+    coords = model.getCoordinateSet()
+    for i in range(coords.getSize()):
+        coords.get(i).set_locked(False)
+
+
 def prepare_model_for_id(
     model_path: str | Path,
     *,
@@ -410,7 +421,8 @@ def prepare_model_for_id(
     Preconditions: the model file exists; ``external_loads`` is ``None`` or an
     existing ExternalLoads XML.  Postconditions: with ``disable_couplers`` every
     constraint of the model has ``isEnforced == False`` (couplers prescribe
-    kinematics only, ADR-0055 item 6); the returned state is initialised.
+    kinematics only, ADR-0055 item 6) and no coordinate is locked; the returned
+    state is initialised.
 
     Raises:
         TypeError: ``disable_couplers`` is not a bool.
@@ -430,6 +442,8 @@ def prepare_model_for_id(
             model = _load_model(swapped or path, xml)
     else:
         model = _load_model(path, xml)
+    if disable_couplers:
+        _clear_coordinate_locks(model)
     constraints = model.getConstraintSet()
     disabled = []
     for i in range(constraints.getSize()):
