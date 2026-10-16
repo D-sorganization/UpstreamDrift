@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import math
 
@@ -18,12 +19,11 @@ import numpy as np
 import pandas as pd
 
 from src.shared.python.core.contracts import postcondition, precondition
-from src.shared.python.sidekick.lab.bio.c3d_reader import C3DDataReader
-from src.shared.python.sidekick.lab.bio._c3d_marker_set import (
-    MarkerSet,
-    MarkerSetMismatchError,
-)
-from src.shared.python.sidekick.lab.bio._c3d_models import C3DEvent
+from src.shared.python.data_io.c3d_loader import c3d_reader_class, marker_set_types
+
+if TYPE_CHECKING:
+    from src.shared.python.sidekick.lab.bio._c3d_marker_set import MarkerSet
+    from src.shared.python.sidekick.lab.bio._c3d_models import C3DEvent
 
 from ..club_target import AlignOptions, ClubTarget, SourceProvenance
 from ._align import detect_impact_index, resample_target
@@ -119,7 +119,8 @@ def load_club_target_c3d(
             events, ``ValueError`` is raised listing the available labels.
     """
     path = Path(path)
-    reader = C3DDataReader(path)
+    MarkerSet, MarkerSetMismatchError = marker_set_types()
+    reader = c3d_reader_class()(path)
     metadata = reader.get_metadata()
     df = reader.points_dataframe(include_time=True, target_units="m")
     labels = list(metadata.marker_labels)

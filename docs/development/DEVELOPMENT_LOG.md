@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12686 · R6: Opt-In Flexible Golf Shaft as a Rigid-Link Spring-Damper Chain (MuJoCo); Generic STIFF Profile Flagged Default_Not_Measured; Rigid Default Byte-Identical; Other Engines Refuse Chain Specs
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12686
+- **Branch:** feat/12686-flexible-shaft-mujoco
+- **PR:** #12734
+- **Paths:** see #12734
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`9dfe5d3a`; collated from changes/12686-r6-opt-in-flexible-golf-shaft-as-a-rigid.md)
+- **Summary:** R6: opt-in flexible golf shaft as a rigid-link spring-damper chain (MuJoCo); generic STIFF profile flagged default_not_measured; rigid default byte-identical; other engines refuse chain specs
+- **Next step:** Criterion 6 (deflected-shaft render) and criterion 7 (dynamic clubhead-speed study); R11 engine ports
+
 ### DL-#12784 · Nightly motion-matching-smoke.yml Runs Tests/Integration/Motion_Matching (Slow, --Timeout=0) via Scripts/Ci/Run_Motion_Matching_Smoke.Sh on the Fleet; a Failure Opens or Updates an Issue and the Red Scheduled Run Reaches Fleet-Main-Health; Not Coupled to Heavy-Tests-Opt-In Parity
 
 - **State:** in_review
@@ -2340,6 +2353,695 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12949 · CC0 Short-Hair Head Is Now the Default HeadSettings.Model in Every Engine; Parametric Stays Selectable
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12949
+- **Branch:** merged via #12956
+- **PR:** #12956
+- **Paths:** see #12956
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`5226cbd6`; collated from changes/12949-cc0-short-hair-head-is-now-the-default-h.md)
+- **Summary:** CC0 short-hair head is now the default HeadSettings.model in every engine; parametric stays selectable
+- **Next step:** Shipped in PR #12956.
+
+### DL-#12774 · Record Segmental Spine Contract Ownership; Open Tools#5630 and OpenSim_Models#464
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12774
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12774-record-segmental-spine-contract-ownershi.md)
+- **Summary:** Record segmental spine contract ownership; open Tools#5630 and OpenSim_Models#464
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12773 · Rewrite Segmental Spine Manual Chapter 66 as a Calculation-Level Reference After Panel Review; Declare the Fujii Flexion Parity Defect; Correct the Gravity-Only Residual Wording
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12773
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12773-spn-16-consolidate-segmental-spine-manua.md)
+- **Summary:** Rewrite segmental spine manual chapter 66 as a calculation-level reference after panel review; declare the Fujii flexion parity defect; correct the gravity-only residual wording
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12772 · Add PyQt6 Spine Viewer Tool With Embed Adapter, Tile and Feature-Parity Entry (SPN-15B)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12772
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12772-add-pyqt6-spine-viewer-tool-with-embed-a.md)
+- **Summary:** Add PyQt6 Spine Viewer tool with embed adapter, tile and feature-parity entry (SPN-15b)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12771 · SPN-15a: Pure-Data Spine Angle-Stack and Load-Heatmap Adapter Plus Agg Report Figures
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12771
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12771-spn-15a-pure-data-spine-angle-stack-and.md)
+- **Summary:** SPN-15a: pure-data spine angle-stack and load-heatmap adapter plus Agg report figures
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12769 · SPN-14a: Distribution Sensitivity Within One Model Across Shipped Coupling Laws, With Recorded Law Restriction to the Model's Levels
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12769
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12769-spn-14a-distribution-sensitivity-within.md)
+- **Summary:** SPN-14a: distribution sensitivity within one model across shipped coupling laws, with recorded law restriction to the model's levels
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12768 · SPN-13C: Spine Study Aggregation Tables
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12768
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12768-spn-13c-spine-study-aggregation-tables.md)
+- **Summary:** SPN-13c: spine study aggregation tables
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12767 · Spine Study Requests Can Run a Movement Variant With Fingerprint and Receipt Provenance (SPN-13D)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12767
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12767-spn-13b-movement-variant-generator-five.md)
+- **Summary:** Spine study requests can run a movement variant with fingerprint and receipt provenance (SPN-13d)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12766 · SPN-13a: Deterministic Hash-Pinned Spine Study Request -> Receipt (Spine.Study)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12766
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12766-spn-13a-deterministic-hash-pinned-spine.md)
+- **Summary:** SPN-13a: deterministic hash-pinned spine study request -> receipt (spine.study)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12765 · SPN-12: SpinalLoadAnalyzer Heuristic/Model Provider Split
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12765
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12765-spn-12-spinalloadanalyzer-heuristic-mode.md)
+- **Summary:** SPN-12: SpinalLoadAnalyzer heuristic/model provider split
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12764 · SPN-11B: Golf Literature Context Bands (Hosea 1990, Lim 2012) Annotated Beside Model Peaks, Never Acceptance
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12764
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12764-spn-11b-golf-literature-context-bands-ho.md)
+- **Summary:** SPN-11b: golf literature context bands (Hosea 1990, Lim 2012) annotated beside model peaks, never acceptance
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12762 · SPN-10C: Per-Level Joint Reactions With SO Muscle Forces as a JOINT_REACTION SpinalLoadSeries
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12762
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12762-spn-10c-per-level-joint-reactions-with-s.md)
+- **Summary:** SPN-10c: per-level joint reactions with SO muscle forces as a JOINT_REACTION SpinalLoadSeries
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12761 · SPN-10B: Trunk Static Optimisation With Cost Exponent P in {2,3}, Lexicographic Reserves With Flagging, Shared Numeric Core With the Leg SO, Per-Coordinate ID Accessor
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12761
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12761-spn-10b-trunk-static-optimisation-with-c.md)
+- **Summary:** SPN-10b: trunk static optimisation with cost exponent p in {2,3}, lexicographic reserves with flagging, shared numeric core with the leg SO, per-coordinate ID accessor
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12760 · Spinal Inverse Dynamics With External Loads: Generalized Effort per Level and Pelvis Residual Budget (SPN-10A)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12760
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12760-spinal-inverse-dynamics-with-external-lo.md)
+- **Summary:** Spinal inverse dynamics with external loads: generalized effort per level and pelvis residual budget (SPN-10a)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12759 · SPN-9D: Read OpenSim Motions Into SegmentalKinematicsSeries (Inverse of Export_Mot)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12759
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12759-spn-9d-read-opensim-motions-into-segment.md)
+- **Summary:** SPN-9d: read OpenSim motions into SegmentalKinematicsSeries (inverse of export_mot)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12757 · SPN-9B: Drive a Coupled Segmental Model From Golf Trunk Input With Per-Frame Residuals and .mot Export
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12757
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12757-spn-9b-drive-a-coupled-segmental-model-f.md)
+- **Summary:** SPN-9b: drive a coupled segmental model from golf trunk input with per-frame residuals and .mot export
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12756 · SPN-9a: Golf Humanoid Motion Reader With Native Pelvis-to-Thorax Rotation and SLERP Resampling
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12756
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12756-spn-9a-golf-humanoid-motion-reader-with.md)
+- **Summary:** SPN-9a: golf humanoid motion reader with native pelvis-to-thorax rotation and SLERP resampling
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12754 · SPN-8B: Extract OpenSim CoordinateCouplerConstraints Into a CouplingLaw
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12754
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12754-spn-8b-extract-opensim-coordinatecoupler.md)
+- **Summary:** SPN-8b: extract OpenSim CoordinateCouplerConstraints into a CouplingLaw
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12753 · SPN-8a: OpenSim Spine Inventory, Level Maps and ISB Axis Check
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12753
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12753-spn-8a-opensim-spine-inventory-level-map.md)
+- **Summary:** SPN-8a: OpenSim spine inventory, level maps and ISB axis check
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12752 · SPN-7C: OpenSim Lane Guard Turns Absent-OpenSim Spine Skips Into Failures (UD_REQUIRE_OPENSIM=1)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12752
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12752-spn-7c-opensim-lane-guard-turns-absent-o.md)
+- **Summary:** SPN-7c: OpenSim lane guard turns absent-OpenSim spine skips into failures (UD_REQUIRE_OPENSIM=1)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12751 · SPN-7B: Fixture Coupler Constraints, Massless Driver and Lumped Trunk Muscles
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12751
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12751-spn-7b-fixture-coupler-constraints-massl.md)
+- **Summary:** SPN-7b: fixture coupler constraints, massless driver and lumped trunk muscles
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12750 · SPN-7a: Synthetic Segmental Spine OpenSim Fixture Generator and Native Composition Check
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12750
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12750-spn-7a-synthetic-segmental-spine-opensim.md)
+- **Summary:** SPN-7a: synthetic segmental spine OpenSim fixture generator and native composition check
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12746 · SPN-4C: Swing-Metrics and API X-Factor Delegate to Golf-Term Registry
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12746
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12746-spn-4c-swing-metrics-and-api-x-factor-de.md)
+- **Summary:** SPN-4c: swing-metrics and API X-factor delegate to golf-term registry
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12745 · Migrate SpinalLoadAnalyzer X-Factor and Crunch Factor to the Golf-Term Registry (SPN-4B), Behaviour-Preserving
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12745
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12745-migrate-spinalloadanalyzer-x-factor-and.md)
+- **Summary:** Migrate SpinalLoadAnalyzer X-factor and crunch factor to the golf-term registry (SPN-4b), behaviour-preserving
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12744 · Add Spine.Golf_Terms Versioned Golf-Term Registry (SPN-4A)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12744
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12744-add-spine-golf-terms-versioned-golf-term.md)
+- **Summary:** Add spine.golf_terms versioned golf-term registry (SPN-4a)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12743 · SPN-3 Partial: Cited Coupling-Law Data and Loader; Verified Laws Only (Bruno2015_Regional, Fujii2007_Lumbar, Uniform_Reference); Per-Level Bruno and Pearcy Pending
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12743
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12743-spn-3-partial-cited-coupling-law-data-an.md)
+- **Summary:** SPN-3 partial: cited coupling-law data and loader; verified laws only (bruno2015_regional, fujii2007_lumbar, uniform_reference); per-level Bruno and Pearcy pending
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12742 · Spine Distribution Problem: Geodesic Least-Squares Distribution of Pelvis-Thorax Rotation Over Levels Under a Fixed Coupling Law (SPN-2B)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12742
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12742-spine-distribution-problem-geodesic-leas.md)
+- **Summary:** Spine distribution problem: geodesic least-squares distribution of pelvis-thorax rotation over levels under a fixed coupling law (SPN-2b)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12741 · Add Spine Coupling Laws (Linear, State-Dependent, MyoFullBody Adapter) and Regional Fraction (SPN-2A)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12741
+- **Branch:** merged via #12796
+- **PR:** #12796
+- **Paths:** see #12796
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12741-add-spine-coupling-laws-linear-state-dep.md)
+- **Summary:** Add spine coupling laws (linear, state-dependent, MyoFullBody adapter) and regional fraction (SPN-2a)
+- **Next step:** Shipped in PR #12796.
+
+### DL-#12945 · Explorer: OpenSim Plot Resolves Markers From the Model (No KeyError 'Hand'), MuJoCo Export Video Uses the Viewport Camera, App Exports Write H.264 (#12946, #12947)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12945
+- **Branch:** merged via #12950
+- **PR:** #12950
+- **Paths:** see #12950
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`2be01520`; collated from changes/12945-explorer-opensim-plot-resolves-markers-f.md)
+- **Summary:** Explorer: OpenSim plot resolves markers from the model (no KeyError 'Hand'), MuJoCo Export Video uses the viewport camera, app exports write H.264 (#12946, #12947)
+- **Next step:** Shipped in PR #12950.
+
+### DL-#12718 · NSX-89: Simscape Closed-Loop Derivative Capability NONE With UNAVAILABLE Reason, R2025b-Only Linearization Payload Gate, DV-12718 Deferred Record
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12718
+- **Branch:** merged via #12880
+- **PR:** #12880
+- **Paths:** see #12880
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`9455bfa1`; collated from changes/12718-nsx-89-simscape-closed-loop-derivative-c.md)
+- **Summary:** NSX-89: Simscape closed-loop derivative capability NONE with UNAVAILABLE reason, R2025b-only linearization payload gate, DV-12718 deferred record
+- **Next step:** Shipped in PR #12880.
+
+### DL-#12714 · NSX-85: Pinocchio Analytic Closed-Loop Derivatives, FULL Reference for CLOSED_LOOP_DERIVATIVES
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12714
+- **Branch:** merged via #12853
+- **PR:** #12853
+- **Paths:** see #12853
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`cd1a8e6c`; collated from changes/12714-nsx-85-pinocchio-analytic-closed-loop-de.md)
+- **Summary:** NSX-85: Pinocchio analytic closed-loop derivatives, FULL reference for CLOSED_LOOP_DERIVATIVES
+- **Next step:** Shipped in PR #12853.
+
+### DL-#12719 · NSX-90 Covariance Propagation, Adjoint Sensitivity Kernels and Nonlinearity Gate
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12719
+- **Branch:** merged via #12881
+- **PR:** #12881
+- **Paths:** see #12881
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`b6600a30`; collated from changes/12719-nsx-90-covariance-propagation-adjoint-se.md)
+- **Summary:** NSX-90 covariance propagation, adjoint sensitivity kernels and nonlinearity gate
+- **Next step:** Shipped in PR #12881.
+
+### DL-#12586 · Kinematic Ensemble (Admitted Samples, Rejection Accounting, Envelope Union/Intersection) and Reproject_Onto_Closure Delegating to Project_to_Closure (NSX-61)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12586
+- **Branch:** merged via #12645
+- **PR:** #12645
+- **Paths:** see #12645
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`a934b4aa`; collated from changes/12586-kinematic-ensemble-admitted-samples-reje.md)
+- **Summary:** Kinematic ensemble (admitted samples, rejection accounting, envelope union/intersection) and reproject_onto_closure delegating to project_to_closure (NSX-61)
+- **Next step:** Shipped in PR #12645.
+
+### DL-#12914 · Closing the Launcher After a MuJoCo Session Releases Renderers Before Widgets Die.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12914
+- **Branch:** merged via #12922
+- **PR:** #12922
+- **Paths:** see #12922
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`bd1fa54e`; collated from changes/12914-closing-the-launcher-after-a-mujoco-sess.md)
+- **Summary:** Closing the launcher after a MuJoCo session releases renderers before widgets die.
+- **Next step:** Shipped in PR #12922.
+
+### DL-#12884 · MuJoCo Explorer: 3D View No Longer Renders Black in the Launcher (Renderer Freed Under Its Own GL Context), Side Quick-Camera No Longer Crashes, Visualization Tab Scrolls Instead of Overlapping (#12884, #12885, #12889)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12884
+- **Branch:** merged via #12902
+- **PR:** #12902
+- **Paths:** see #12902
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`a4333859`; collated from changes/12884-mujoco-explorer-3d-view-no-longer-render.md)
+- **Summary:** MuJoCo explorer: 3D view no longer renders black in the launcher (renderer freed under its own GL context), Side quick-camera no longer crashes, Visualization tab scrolls instead of overlapping (#12884, #12885, #12889)
+- **Next step:** Shipped in PR #12902.
+
+### DL-#12717 · NSX-88: OpenSim Closed-Loop FD Derivatives via NSX-84 Routine, Capability PARTIAL, Muscle-Insufficiency Flag
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12717
+- **Branch:** merged via #12852
+- **PR:** #12852
+- **Paths:** see #12852
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`43baeba2`; collated from changes/12717-nsx-88-opensim-closed-loop-fd-derivative.md)
+- **Summary:** NSX-88: OpenSim closed-loop FD derivatives via NSX-84 routine, capability PARTIAL, muscle-insufficiency flag
+- **Next step:** Shipped in PR #12852.
+
+### DL-#12716 · NSX-87: MuJoCo/MyoSuite Hard-KKT Finite-Difference Closed-Loop Derivatives (PARTIAL), Reusing the NSX-84 Routine
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12716
+- **Branch:** merged via #12852
+- **PR:** #12852
+- **Paths:** see #12852
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`43baeba2`; collated from changes/12716-nsx-87-mujoco-myosuite-hard-kkt-finite-d.md)
+- **Summary:** NSX-87: MuJoCo/MyoSuite hard-KKT finite-difference closed-loop derivatives (PARTIAL), reusing the NSX-84 routine
+- **Next step:** Shipped in PR #12852.
+
+### DL-#12565 · NSX-22 Static Torque and Hand-Split Envelopes With Chebyshev Margin and Sign Classes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12565
+- **Branch:** merged via #12640
+- **PR:** #12640
+- **Paths:** see #12640
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`66c8da74`; collated from changes/12565-nsx-22-static-torque-and-hand-split-enve.md)
+- **Summary:** NSX-22 static torque and hand-split envelopes with Chebyshev margin and sign classes
+- **Next step:** Shipped in PR #12640.
+
+### DL-#12913 · Club Head Speed No Longer Reads 0.0 for Models Naming the Body Clubhead.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12913
+- **Branch:** merged via #12921
+- **PR:** #12921
+- **Paths:** see #12921
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`1e013045`; collated from changes/12913-club-head-speed-no-longer-reads-0-0-for.md)
+- **Summary:** Club Head Speed no longer reads 0.0 for models naming the body clubhead.
+- **Next step:** Shipped in PR #12921.
+
+### DL-#12886 · Launcher Survives Slot Errors, Accurate Engine Status/Hints, Shutdown and First-Click Launch Fixes (#12890 #12891 #12892 #12894)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12886
+- **Branch:** merged via #12904
+- **PR:** #12904
+- **Paths:** see #12904
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`fc12df4c`; collated from changes/12886-launcher-survives-slot-errors-accurate-e.md)
+- **Summary:** Launcher survives slot errors, accurate engine status/hints, shutdown and first-click launch fixes (#12890 #12891 #12892 #12894)
+- **Next step:** Shipped in PR #12904.
+
+### DL-#12878 · Offscreen Per-Engine Explorer Contract Tests; Explorer Opens MJCF, Keeps Every MJCF DOF, Loads Results, Scrubs and Exports MP4 via One Shared Frame Source; OSIM Loader Accepts Class::Nested Tags; Results Browser Export Button Follows Playability; MuJoCo GUI Gains Export Video (#12888) and Plots No Longer Crash on Unrecorded Channels (#12887)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12878
+- **Branch:** merged via #12899
+- **PR:** #12899
+- **Paths:** see #12899
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`e34e5955`; collated from changes/12878-offscreen-per-engine-explorer-contract-t.md)
+- **Summary:** Offscreen per-engine explorer contract tests; explorer opens MJCF, keeps every MJCF DOF, loads results, scrubs and exports MP4 via one shared frame source; OSIM loader accepts Class::Nested tags; results browser Export button follows playability; MuJoCo GUI gains Export Video (#12888) and plots no longer crash on unrecorded channels (#12887)
+- **Next step:** Shipped in PR #12899.
+
+### DL-#12846 · Refactor Chat_Service Stream Worker, Motion_Pipeline API Routes and Model-Pack Manifest Parsing Under the Architecture Budget; Remove Six Expiring Exceptions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12846
+- **Branch:** merged via #12869
+- **PR:** #12869
+- **Paths:** see #12869
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`3c347de9`; collated from changes/12846-refactor-chat-service-stream-worker-moti.md)
+- **Summary:** Refactor chat_service stream worker, motion_pipeline API routes and model-pack manifest parsing under the architecture budget; remove six expiring exceptions
+- **Next step:** Shipped in PR #12869.
+
+### DL-#12684 · R4: Address Knee Flexion (Owner 15 +-5 Deg Prior, Reliable Capture Wins, Hard No-Hyperextension Bound, Per-Knee Target_Source in the Receipt; --Knee-Flexion Defaults to Capture)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12684
+- **Branch:** merged via #12788
+- **PR:** #12788
+- **Paths:** see #12788
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`3fd79f6c`; collated from changes/12684-r4-address-knee-flexion-owner-15-5-deg-p.md)
+- **Summary:** R4: address knee flexion (owner 15 +-5 deg prior, reliable capture wins, hard no-hyperextension bound, per-knee target_source in the receipt; --knee-flexion defaults to capture)
+- **Next step:** Shipped in PR #12788.
+
+### DL-#12688 · Drake and Pinocchio MeshCat Backends Draw the Shared Model_Appearance Spec Through One Engine-Neutral Scene Builder; Local Grey Palettes Removed (R9a)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12688
+- **Branch:** merged via #12908
+- **PR:** #12908
+- **Paths:** see #12908
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`29cacd85`; collated from changes/12688-drake-and-pinocchio-meshcat-backends-dra.md)
+- **Summary:** Drake and Pinocchio MeshCat backends draw the shared model_appearance spec through one engine-neutral scene builder; local grey palettes removed (R9a)
+- **Next step:** Shipped in PR #12908.
+
+### DL-#12711 · Add DisturbanceSpec Timestep-Consistent Disturbance Contract, Wrapped OutcomeDispersion Statistics, and NaN (Not 0) MetricStatistics.Cv at Near-Zero Mean (NSX-82)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12711
+- **Branch:** merged via #12799
+- **PR:** #12799
+- **Paths:** see #12799
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`d166ace5`; collated from changes/12711-add-disturbancespec-timestep-consistent.md)
+- **Summary:** Add DisturbanceSpec timestep-consistent disturbance contract, wrapped OutcomeDispersion statistics, and NaN (not 0) MetricStatistics.cv at near-zero mean (NSX-82)
+- **Next step:** Shipped in PR #12799.
+
+### DL-#12690 · R9c: GS3DX Simscape Golfer Takes Its Colours and Trunk Size From the Shared Model_Appearance Spec via a Versioned JSON Exporter (Fail-Closed MATLAB Reader)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12690
+- **Branch:** merged via #12909
+- **PR:** #12909
+- **Paths:** see #12909
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`cf095b75`; collated from changes/12690-r9c-gs3dx-simscape-golfer-takes-its-colo.md)
+- **Summary:** R9c: GS3DX Simscape golfer takes its colours and trunk size from the shared model_appearance spec via a versioned JSON exporter (fail-closed MATLAB reader)
+- **Next step:** Shipped in PR #12909.
+
+### DL-#12687 · R7: Realistic CC0 Head for the Shared Parametric Head Slot - Head.Model Cc0_Mesh Loads a MakeHuman-Derived CC0 Skin and Short-Hair Mesh (Assets/Head_Cc0, Provenance + Sha256 Verified, Fail Closed) Through Build_Head_Parts, so MuJoCo and the OBJ Export (R9a/B/C) Get It With No Per-Engine Code; Default Stays the Procedural Head
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12687
+- **Branch:** merged via #12907
+- **PR:** #12907
+- **Paths:** see #12907
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`c5487058`; collated from changes/12687-r7-realistic-cc0-head-for-the-shared-par.md)
+- **Summary:** R7: realistic CC0 head for the shared parametric head slot - head.model cc0_mesh loads a MakeHuman-derived CC0 skin and short-hair mesh (assets/head_cc0, provenance + sha256 verified, fail closed) through build_head_parts, so MuJoCo and the OBJ export (R9a/b/c) get it with no per-engine code; default stays the procedural head
+- **Next step:** Shipped in PR #12907.
+
+### DL-#12883 · OpenSim Loads Alongside Ezc3d: C3D Stack Imported Lazily at Startup, Structured OpenSim Probe Reports the Real Import Failure Instead of Not Installed
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12883
+- **Branch:** merged via #12903
+- **PR:** #12903
+- **Paths:** see #12903
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`155bcc47`; collated from changes/12883-opensim-loads-alongside-ezc3d-c3d-stack.md)
+- **Summary:** OpenSim loads alongside ezc3d: C3D stack imported lazily at startup, structured OpenSim probe reports the real import failure instead of Not Installed
+- **Next step:** Shipped in PR #12903.
+
+### DL-#12882 · Fix Classic Launcher Startup: Parent Contract Guard, ChatService ToolRegistry Identity, Data_Explorer Launcher_Embed Alias (#12893, #12895)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12882
+- **Branch:** merged via #12900
+- **PR:** #12900
+- **Paths:** see #12900
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`d03af3a0`; collated from changes/12882-fix-classic-launcher-startup-parent-cont.md)
+- **Summary:** Fix classic launcher startup: parent contract guard, ChatService ToolRegistry identity, data_explorer launcher_embed alias (#12893, #12895)
+- **Next step:** Shipped in PR #12900.
+
+### DL-#12817 · NSX-84B: Tangent State Space for Multi-DOF Closed Loops (K > 1), Five-Bar Golden and Gauge-Law Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12817
+- **Branch:** merged via #12876
+- **PR:** #12876
+- **Paths:** see #12876
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`a26b27f9`; collated from changes/12817-nsx-84b-tangent-state-space-for-multi-do.md)
+- **Summary:** NSX-84b: tangent state space for multi-DOF closed loops (k > 1), five-bar golden and gauge-law tests
+- **Next step:** Shipped in PR #12876.
+
+### DL-#12713 · NSX-84: Constrained Tangent Linearization (M2 Preload) and Closed-Loop Derivative Capability Seam With Engine-Free FD Reference
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12713
+- **Branch:** merged via #12876
+- **PR:** #12876
+- **Paths:** see #12876
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`a26b27f9`; collated from changes/12713-nsx-84-constrained-tangent-linearization.md)
+- **Summary:** NSX-84: constrained tangent linearization (M2 preload) and closed-loop derivative capability seam with engine-free FD reference
+- **Next step:** Shipped in PR #12876.
+
+### DL-#12671 · Make the Vendored Tools Double_Pendulum_Golf the Canonical Golfer Kinematics and Closure Jacobian; Golfer_Kinematics/Golfer_Constraints Become Thin Adapters Pinned by a CI Parity Test (ADR-0056)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12671
+- **Branch:** merged via #12801
+- **PR:** #12801
+- **Paths:** see #12801
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`ef956604`; collated from changes/12671-make-the-vendored-tools-double-pendulum.md)
+- **Summary:** Make the vendored Tools double_pendulum_golf the canonical golfer kinematics and closure Jacobian; golfer_kinematics/golfer_constraints become thin adapters pinned by a CI parity test (ADR-0056)
+- **Next step:** Shipped in PR #12801.
+
+### DL-#12685 · R8: One Shared Appearance and Anthropometry Spec (Model_Appearance.Body_Meshes) - Engine-Neutral Skin/Garment/Shoe Meshes in the Spec Body Frame, Trunk Sized From Spec Visual_Hints as One Solid, Default Charcoal Trousers Hip to Ankle, One Plain Palette, Shared OBJ Export; MuJoCo Is Now a Thin Translator
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12685
+- **Branch:** merged via #12790
+- **PR:** #12790
+- **Paths:** see #12790
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`24fc23a8`; collated from changes/12685-r8-one-shared-appearance-and-anthropomet.md)
+- **Summary:** R8: one shared appearance and anthropometry spec (model_appearance.body_meshes) - engine-neutral skin/garment/shoe meshes in the spec body frame, trunk sized from spec visual_hints as one solid, default charcoal trousers hip to ankle, one plain palette, shared OBJ export; MuJoCo is now a thin translator
+- **Next step:** Shipped in PR #12790.
+
 ### DL-#12866 · Generate the User Manual TOC From Real Chapter Headings and Test That Every Manual Link Resolves
 
 - **State:** shipped
@@ -2502,10 +3204,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12811
 - **Branch:** merged via #12812
-- **PR:** #12812
+- **PR:** #12812, #12796
 - **Paths:** see #12812
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`b2e2b4de`; collated from changes/12811-fix-main-breakage-from-12704-pinocchio-j.md)
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12811-fix-main-breakage-from-12704-pinocchio-j.md)
 - **Summary:** Fix main breakage from #12704: pinocchio JointModelRZ test lane and pinocchio_reference row typing
 - **Next step:** Shipped in PR #12812.
 
@@ -2515,10 +3217,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12808
 - **Branch:** merged via #12809
-- **PR:** #12809
+- **PR:** #12809, #12796
 - **Paths:** see #12809
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`922922c5`; collated from changes/12808-run-the-prettier-pre-commit-hook-at-comm.md)
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12808-run-the-prettier-pre-commit-hook-at-comm.md)
 - **Summary:** Run the Prettier pre-commit hook at commit time only so rebased branches can push
 - **Next step:** Shipped in PR #12809.
 
@@ -2541,10 +3243,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12591
 - **Branch:** merged via #12663
-- **PR:** #12663
+- **PR:** #12663, #12796
 - **Paths:** see #12663
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`e6b0acd1`; collated from changes/12591-nsx-73-research-report-scoping-a-muscle.md)
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12591-nsx-73-research-report-scoping-a-muscle.md)
 - **Summary:** NSX-73 research report scoping a muscle-redundancy layer above NSX envelopes, with elbow null-space example test
 - **Next step:** Shipped in PR #12663.
 
@@ -2554,10 +3256,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12564
 - **Branch:** merged via #12637
-- **PR:** #12637
+- **PR:** #12637, #12796
 - **Paths:** see #12637
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`d614bc4f`; collated from changes/12564-nsx-21-feasibleset-with-declared-torque.md)
+- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12564-nsx-21-feasibleset-with-declared-torque.md)
 - **Summary:** NSX-21: FeasibleSet with declared torque, friction-cone and grip constraints in null-space coordinates
 - **Next step:** Shipped in PR #12637.
 

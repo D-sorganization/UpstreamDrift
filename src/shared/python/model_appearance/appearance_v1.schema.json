@@ -62,6 +62,7 @@
       "properties": {
         "enabled": { "type": "boolean" },
         "headwear": { "enum": ["none", "hair", "cap"] },
+        "model": { "enum": ["parametric", "cc0_mesh"] },
         "headwear_material": { "$ref": "#/$defs/name" },
         "scale": { "type": "number", "minimum": 0.5, "maximum": 2 },
         "forward_axis": { "enum": ["+x", "-x", "+y", "-y", "+z", "-z"] },

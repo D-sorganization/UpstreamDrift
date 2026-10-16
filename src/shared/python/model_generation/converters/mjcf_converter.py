@@ -82,6 +82,14 @@ class MJCFConfig:
     default_damping: float = 0.5
 
 
+_WORLD_LINK = "world"
+
+
+def _virtual_link(name: str) -> Link:
+    """Massless link joining the hinges of a multi-joint MJCF body."""
+    return Link(name=name, inertia=Inertia(ixx=1e-9, iyy=1e-9, izz=1e-9, mass=1e-9))
+
+
 class MJCFConverter:
     """
     Convert between URDF and MJCF formats.
@@ -537,8 +545,13 @@ class MJCFConverter:
         parent_name: str,
         body_name: str,
         pos: tuple[float, ...],
+        joint_elem: ET.Element | None = None,
     ) -> Joint:
-        """Parse joint elements and create a URDF joint connecting to parent."""
+        """Parse joint elements and create a URDF joint connecting to parent.
+
+        ``joint_elem`` selects one specific ``<joint>`` of the body (used to
+        unroll multi-joint bodies); by default the first non-free joint wins.
+        """
         if body_elem is None:
             raise ValueError("body_elem must be provided")
         from src.shared.python.model_generation.core.types import (
@@ -556,12 +569,13 @@ class MJCFConverter:
                 origin=Origin(xyz=pos),
             )
 
-        # Use the first non-free joint, or the first joint
-        primary_joint = joint_elems[0]
-        for je in joint_elems:
-            if je.get("type", "hinge") != "free":
-                primary_joint = je
-                break
+        # Use the requested joint, else the first non-free joint, else the first
+        primary_joint = joint_elem if joint_elem is not None else joint_elems[0]
+        if joint_elem is None:
+            for je in joint_elems:
+                if je.get("type", "hinge") != "free":
+                    primary_joint = je
+                    break
 
         joint_name = primary_joint.get("name", f"{parent_name}_to_{body_name}")
         mjcf_type = primary_joint.get("type", "hinge")
@@ -619,12 +633,54 @@ class MJCFConverter:
             )
             links.append(link)
 
-            if parent_name:
-                joints.append(
-                    self._parse_body_joint(body_elem, parent_name, body_name, pos)
+            root_dofs = parent_name is None and any(
+                j.get("type") != "free" for j in body_elem.findall("joint")
+            )
+            if root_dofs and not any(link.name == _WORLD_LINK for link in links):
+                links.insert(len(links) - 1, _virtual_link(_WORLD_LINK))
+            attach_to = _WORLD_LINK if root_dofs else parent_name
+            if attach_to:
+                self._append_body_joints(
+                    body_elem, attach_to, body_name, pos, links, joints
                 )
 
             self._parse_mjcf_body(body_elem, body_name, links, joints)
+
+    def _append_body_joints(
+        self,
+        body_elem: ET.Element,
+        parent_name: str,
+        body_name: str,
+        pos: tuple[float, ...],
+        links: list[Link],
+        joints: list[Joint],
+    ) -> None:
+        """Append the joint(s) between ``parent_name`` and ``body_name``.
+
+        URDF allows one joint per child link, but an MJCF body may carry
+        several (a 3-DOF shoulder is three hinges). Every non-free joint is
+        kept: all but the last end on a massless intermediate link, so no
+        degree of freedom is silently dropped from the explored model.
+        """
+        dofs = [j for j in body_elem.findall("joint") if j.get("type") != "free"]
+        if len(dofs) < 2:
+            joints.append(
+                self._parse_body_joint(body_elem, parent_name, body_name, pos)
+            )
+            return
+        current_parent, origin = parent_name, pos
+        for index, joint_elem in enumerate(dofs):
+            child = body_name
+            if index < len(dofs) - 1:
+                joint_label = joint_elem.get("name", f"{body_name}_dof{index}")
+                child = f"{body_name}__{joint_label}"
+                links.insert(len(links) - 1, _virtual_link(child))
+            joints.append(
+                self._parse_body_joint(
+                    body_elem, current_parent, child, origin, joint_elem=joint_elem
+                )
+            )
+            current_parent, origin = child, (0.0, 0.0, 0.0)
 
     def _parse_mjcf_geom(self, geom_elem: ET.Element) -> tuple[Geometry | None, Origin]:
         """Parse a MuJoCo geom element into a Geometry and Origin."""

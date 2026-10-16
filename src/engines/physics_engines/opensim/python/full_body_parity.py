@@ -127,6 +127,10 @@ class OpenSimFullBodyParityAdapter:
             path = Path(directory) / "full_body.osim"
             path.write_text(xml, encoding="utf-8")
             self._model = osim.Model(str(path))
+        # Recorded before the forces are removed: coordinate-only closed-loop
+        # derivatives are insufficient when muscle-tendon actuators are present
+        # (NSX-88, #12717).
+        self.muscle_count = int(self._model.getMuscles().getSize())
         forces = self._model.updForceSet()
         for index in reversed(range(forces.getSize())):
             if forces.get(index).getConcreteClassName() not in _KEPT_FORCES:

@@ -20,7 +20,7 @@ import numpy as np
 
 from src.shared.python.motion_matching.foot_progression import (
     DEFAULT_TOE_OUT_DEG,
-    TARGET_SOURCES,
+    FOOT_TARGET_SOURCES,
     TRAIL_TOE_OUT_STYLE_DEG,
     FootProgression,
     capture_foot_progression,
@@ -109,10 +109,10 @@ class FootTargets:
                     for s in ("left", "right")
                 },
             )
-        bad = {s: v for s, v in self.sources.items() if v not in TARGET_SOURCES}
+        bad = {s: v for s, v in self.sources.items() if v not in FOOT_TARGET_SOURCES}
         if bad or set(self.sources) != {"left", "right"}:
             raise ValueError(
-                f"sources must map 'left' and 'right' to one of {TARGET_SOURCES}, "
+                f"sources must map 'left' and 'right' to one of {FOOT_TARGET_SOURCES}, "
                 f"got {dict(self.sources)!r}"
             )
 

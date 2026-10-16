@@ -11,15 +11,17 @@ This module is UD-owned so we do not edit the Tools child copy
 
 from __future__ import annotations
 
-import importlib
 import enum
+import importlib
+import importlib.util
 import sys
 from collections.abc import Callable
 from types import ModuleType
-from typing import Any
+from typing import Any, cast
 
 from src.shared.python.import_aliases import (
     SharedImportAliasFinder,
+    _AliasLoader,
     _bind_legacy_src_namespaces,
     _coalesce_loaded_aliases,
     _DOWNSTREAM_SRC_ALIAS_ROOTS,
@@ -31,6 +33,7 @@ from src.shared.python._contracts_level import (
 
 __all__ = [
     "UD_CANONICAL_SRC_ROOTS",
+    "UD_OWNED_SHARED_PYTHON_ROOTS",
     "UdSharedImportAliasFinder",
     "install_contract_level_alias_sync",
     "install_ud_canonical_shared_import_aliases",
@@ -45,9 +48,39 @@ _CONTRACT_MODULE_NAMES = frozenset(
 
 UD_CANONICAL_SRC_ROOTS = frozenset({"humanoid_character_builder", "model_generation"})
 
+# Packages UD owns that pinned Tools code nevertheless imports as
+# ``shared.python.<root>`` (e.g. ``data_explorer._embed_adapter`` imports
+# ``shared.python.launcher_embed``; UD #12895). Tools has no such module, so the
+# spelling is served from UD's single copy instead of failing or loading a twin.
+UD_OWNED_SHARED_PYTHON_ROOTS = frozenset({"launcher_embed"})
+
 
 class UdSharedImportAliasFinder(SharedImportAliasFinder):
-    """Decline ``src.shared.python`` aliasing for ud-canonical package roots."""
+    """Decline ``src.shared.python`` aliasing for ud-canonical package roots.
+
+    Also serves ``shared.python.<ud-owned root>`` from UD's ``src.shared.python``
+    copy so Tools adapters that import the bare spelling bind to one module.
+    """
+
+    def find_spec(self, fullname: str, path: Any = None, target: Any = None) -> Any:
+        parts = fullname.split(".")
+        if (
+            len(parts) >= 3
+            and parts[:2] == ["shared", "python"]
+            and parts[2] in UD_OWNED_SHARED_PYTHON_ROOTS
+        ):
+            canonical = importlib.import_module(
+                ".".join(["src", "shared", "python", *parts[2:]])
+            )
+            spec = importlib.util.spec_from_loader(
+                fullname,
+                cast(Any, _AliasLoader(canonical)),
+                origin=canonical.__file__,
+            )
+            if spec is not None:
+                spec.submodule_search_locations = getattr(canonical, "__path__", None)
+            return spec
+        return super().find_spec(fullname, path, target)
 
     def _parse(self, fullname: str) -> tuple[str | None, str]:
         parts = fullname.split(".")

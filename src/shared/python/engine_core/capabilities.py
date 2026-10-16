@@ -66,6 +66,7 @@ class Capability(str, Enum):
     DIFFERENTIABLE_ROLLOUT = "differentiable_rollout"
     DYNAMICS_PRIMITIVES = "dynamics_primitives"
     CLOSED_LOOP_SNAPSHOT = "closed_loop_snapshot"
+    CLOSED_LOOP_DERIVATIVES = "closed_loop_derivatives"
 
 
 CapabilityRef: TypeAlias = Capability | str
@@ -127,6 +128,7 @@ ADAPTER_BOUNDARY_CAPABILITIES = (
     Capability.DIFFERENTIABLE_ROLLOUT,
     Capability.DYNAMICS_PRIMITIVES,
     Capability.CLOSED_LOOP_SNAPSHOT,
+    Capability.CLOSED_LOOP_DERIVATIVES,
 )
 """Canonical capabilities answered by narrower backend adapter descriptors."""
 

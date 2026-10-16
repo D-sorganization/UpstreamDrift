@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QHBoxLayout, QWidget
 
+from src.shared.python.core.process_safety import narrow_catch
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .main_window import AdvancedGolfAnalysisWindow
@@ -113,5 +114,14 @@ class MainWidget(QWidget):
                     sim_widget.stop_simulation()
                 except Exception:  # pragma: no cover - defensive  # noqa: BLE001
                     logger.debug("sim_widget.stop_simulation raised", exc_info=True)
+                # Free GL resources while the widget/context is still alive;
+                # leaving it to GC crashes at exit (UD#12914).
+                with narrow_catch(
+                    RuntimeError,
+                    OSError,
+                    AttributeError,
+                    log_message="sim_widget.release_resources raised",
+                ):
+                    sim_widget.release_resources()
         except Exception:  # pragma: no cover - defensive
             logger.exception("MuJoCo MainWidget cleanup raised")

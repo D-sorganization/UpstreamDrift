@@ -1,0 +1,85 @@
+\subsection{Golf-Term Registry}
+
+\paragraph{Scope.}
+\texttt{src/shared/python/spine/golf\_terms.py} registers every golf-instruction
+quantity as a versioned measurand with named inputs, a frame, a sign convention,
+units and a reference (ADR-0055 items 4 and 8). Existing implementations keep
+their numeric meaning under legacy identifiers; new identifiers are new
+measurands. \texttt{evaluate(term\_id, inputs, *, handedness)} raises
+\texttt{ValueError} for an unknown term, for missing inputs (each is named) and
+for a handedness other than \texttt{right} or \texttt{left}. Unavailable samples
+are NaN, never zero.
+
+\paragraph{Frames and Sign Map.}
+Vertebral and body frames are ISB: $X$ anterior, $Y$ cranial, $Z$ right. The
+pelvis-to-thorax rotation $R$ is decomposed with the \texttt{isb\_spine} profile
+(intrinsic ZXY) into $(\theta_{FE},\theta_{LB},\theta_{AR})$, in degrees:
+$\theta_{FE}>0$ extension, $\theta_{LB}>0$ right lateral bending, $\theta_{AR}>0$
+left axial rotation (the same sense as the \texttt{left\_axial\_rotation} angle of
+\texttt{isb\_thorax}). With $s=-1$ for a right-handed and $s=+1$ for a
+left-handed golfer,
+\begin{align}
+  \text{x\_factor\_jcs\_axial} &= s\,\theta_{AR}, \\
+  \text{trunk\_lateral\_flexion\_jcs} &= s\,\theta_{LB}, \\
+  \text{trunk\_extension\_jcs} &= \theta_{FE}.
+\end{align}
+Backswing trunk rotation is positive for both hands; extension is not handed. A
+gimbal-locked sample ($|\theta_{LB}|=90^\circ$) cannot separate $\theta_{FE}$ from
+$\theta_{AR}$ and yields NaN for those two terms.
+
+\paragraph{Registered Terms.}
+\begin{itemize}
+  \item \texttt{x\_factor\_line\_turn}: upper-trunk minus pelvis line turn
+    (\texttt{swing\_comparison.turn.compute\_turn\_lines}). The points are
+    rotated so that the explicit \texttt{up} vector is $+Z$ (the module is
+    $Z$-up); the result is negated for a left-handed golfer. Optional input
+    \texttt{point\_pairs} selects marker or model point names.
+  \item \texttt{x\_factor\_position\_proxy}: $\mathrm{deg}(q_{\mathrm{shoulder}}-q_{\mathrm{hip}})$
+    of two generalized coordinates (\texttt{SwingMetricsMixin.compute\_x\_factor});
+    not handed.
+  \item \texttt{x\_factor\_euler\_yaw\_legacy\_v1}:
+    $\mathrm{deg}(\psi_{\mathrm{thorax}}-\psi_{\mathrm{pelvis}})$ from the third
+    Euler column (\texttt{SpinalLoadAnalyzer}); not handed.
+  \item \texttt{side\_bend\_tilt}: $[\text{total},\text{toward target},\text{lateral}]$
+    tilt of the trunk axis from \texttt{up} (\texttt{posture\_metrics.segment\_tilt}),
+    with forward the horizontal projection of \texttt{target} and lateral
+    $=\mathrm{forward}\times\mathrm{up}$.
+  \item \texttt{crunch\_factor\_legacy\_v1}: $|\theta_{lat}^\circ|\,|\theta_{rot}^\circ|/100$,
+    inputs in radians, reproducing the analyzer.
+  \item \texttt{crunch\_factor\_rate}: $\theta_{lat}(t)\,\dot\theta_{AR}(t)$ in
+    $\mathrm{deg}\cdot\mathrm{deg/s}$ with $\dot\theta_{AR}$ from
+    \texttt{numpy.gradient} on the supplied time base. Attribution: Sugaya,
+    Tsuchiya and Moriya (1999), \emph{Science and Golf III}, cited via Cole and
+    Grimshaw (2014); the primary source is unverified (issue \#12737).
+  \item \texttt{early\_extension}: $d_0-d(t)$ in metres, where $d$ is the
+    horizontal distance of the pelvis from the target line through
+    \texttt{ball\_position} (along-target and vertical motion removed);
+    positive toward the ball. \texttt{ball\_position} is an input added to the
+    ADR list because a line needs a point.
+  \item \texttt{reverse\_spine\_angle}: the toward-target tilt component at
+    \texttt{events.top\_idx}, in degrees.
+\end{itemize}
+
+\paragraph{Segmental Contributions.}
+For the three JCS terms, the contribution of level $i$ is
+$c_i = f\!\left(\prod_{j\le i}T_j\right)-f\!\left(\prod_{j<i}T_j\right)$, with
+$f$ the term and $f(\text{empty chain})=0$ (the first level carries its neutral
+offset). This is a decomposition, not an additive angle identity: $c_i$ is not
+the level's own Cardan angle and depends on the levels caudal to it. Because the
+prefix differences telescope, $\sum_i c_i$ equals the global value up to rounding;
+\texttt{contribution\_remainder} reports the difference. This is stronger than the
+``first order'' remark of ADR item 8, which holds for a leave-one-out
+decomposition that this child does not implement.
+
+\paragraph{Assumptions and Limitations.}
+Inputs are calibrated pelvis and thorax frames; the terminal-to-thorax calibration
+offset is the caller's responsibility. Legacy terms are pinned numerically to
+their legacy implementations; they are not claimed to be valid measurands.
+\texttt{early\_extension} does not report the accompanying
+\texttt{trunk\_extension\_jcs} change; the caller evaluates both. Software
+correctness only, not scientific qualification.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/shared/python/spine/test_golf_terms.py -q -n 0
+\end{verbatim}

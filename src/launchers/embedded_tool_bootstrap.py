@@ -58,6 +58,7 @@ FALLBACK_ADAPTER_MODULES = (
     "src.tools.grip_wrench_plots._embed_adapter",
     "src.tools.ground_reaction_plots._embed_adapter",
     "src.tools.necromatcher._embed_adapter",
+    "src.tools.spine_viewer._embed_adapter",
     # Physics-engine adapters (issue #8857): these self-register the
     # mujoco_unified / drake_golf / pinocchio_golf / opensim_golf /
     # myosim_suite tool ids used by the launcher tiles.

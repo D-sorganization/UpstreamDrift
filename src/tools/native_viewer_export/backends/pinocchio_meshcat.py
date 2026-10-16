@@ -20,19 +20,21 @@ from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
     MeshcatPythonSink,
 )
 from src.shared.python.golf_view_presets import meshcat_camera
-from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
 from src.tools.native_viewer_export.backends._ball import (
     MeshcatBall,
     PythonMeshcatBallSink,
     update_meshcat_frame,
 )
-from src.tools.native_viewer_export.backends._club import club_parts
-from src.tools.native_viewer_export.backends._head import head_mesh_files
+from src.tools.native_viewer_export.backends._meshcat_scene import (
+    VisualItem,
+    build_scene_visuals,
+    check_bodies,
+    default_appearance,
+)
 from src.tools.native_viewer_export.backends._meshcat_page import (
     MeshcatPage,
     playwright_unavailable_reason,
 )
-from src.tools.native_viewer_export.backends._scene import z_axis_frame
 from src.tools.native_viewer_export.core import (
     ExportSettings,
     Image8,
@@ -41,26 +43,24 @@ from src.tools.native_viewer_export.core import (
     view_lookats,
 )
 
-_CAPSULE_RGBA = [0.75, 0.78, 0.85, 1.0]
-_SHAPE_RGBA = [0.7, 0.72, 0.8, 1.0]
-_FLOOR_RGBA = [0.35, 0.45, 0.3, 1.0]
 
-
-def _bvh_mesh(coal: Any, mesh: Any) -> Any:
-    """A coal triangle mesh for a closed ``Mesh`` (club-body frame)."""
-    bvh = coal.BVHModelOBBRSS()
-    bvh.beginModel(0, 0)
-    for face in mesh.faces:
-        a, b, c = (np.asarray(mesh.vertices[i], dtype=float) for i in face)
-        bvh.addTriangle(a, b, c)
-    bvh.endModel()
-    return bvh
+def _primitive(coal: Any, item: VisualItem) -> Any:
+    """The coal primitive of a non-mesh scene item (capsule, ellipsoid, box)."""
+    if item.kind == "capsule":
+        return coal.Capsule(*item.size)
+    if item.kind == "ellipsoid":
+        return coal.Ellipsoid(*item.size)
+    return coal.Box(*item.size)
 
 
 class PinocchioMeshcatBackend:
     """Pinocchio ``MeshcatVisualizer`` captured with headless Chromium."""
 
     engine = "pinocchio"
+
+    def __init__(self, plain: bool = False) -> None:
+        """``plain`` draws the grey library skeleton instead of the appearance."""
+        self._appearance = None if plain else default_appearance()
 
     def unavailable_reason(self) -> str | None:
         for module in ("pinocchio", "meshcat", "coal"):
@@ -69,7 +69,6 @@ class PinocchioMeshcatBackend:
         return playwright_unavailable_reason()
 
     def _build(self, swing: SwingInput) -> tuple[Any, Any, Any]:
-
         import coal
         import meshcat
         import pinocchio as pin
@@ -80,81 +79,34 @@ class PinocchioMeshcatBackend:
         )
 
         spec = json.loads(swing.bundle.spec_bytes)
-        skeleton = derive_visual_skeleton(spec)
         adapter = FullBodyPinocchioModel(spec)
         geometry = pin.GeometryModel()
-
-        def add(
-            name: str, body: str, rot: Any, pos: Any, shape: Any, rgba: list[float]
-        ) -> None:
-            joint, body_pose = adapter._bodies[body]  # noqa: SLF001 - adapter exposes no public accessor
-            obj = pin.GeometryObject(name, joint, body_pose * pin.SE3(rot, pos), shape)  # type: ignore[attr-defined]
-            obj.meshColor = np.array(rgba)
-            geometry.addGeometryObject(obj)  # type: ignore[attr-defined]
-
-        n = 0
-        # The shared visual head replaces the head capsule (visual only).
-        self._head_dir = tempfile.mkdtemp(prefix="ud_head_")
-        heads = head_mesh_files(spec, Path(self._head_dir))
-        head_body = heads[0].body if heads else None
-        for head in heads:
-            joint, body_pose = adapter._bodies[head.body]  # noqa: SLF001
-            shape = coal.MeshLoader().load(str(head.path))
-            obj = pin.GeometryObject(  # type: ignore[attr-defined]
-                f"head_{head.name}", joint, body_pose, shape, str(head.path)
-            )
-            obj.meshColor = np.array(head.rgba)
-            obj.overrideMaterial = True
-            geometry.addGeometryObject(obj)  # type: ignore[attr-defined]
-        for cap in skeleton.capsules:
-            if cap.body == head_body:
-                continue
-            rot, centre, length = z_axis_frame(cap.start_m, cap.end_m)
-            add(
-                f"cap{n}",
-                cap.body,
-                rot,
-                centre,
-                coal.Capsule(cap.radius_m, length),
-                _CAPSULE_RGBA,
-            )
-            n += 1
-        club = club_parts(spec)
-        if club is not None:
-            club_body, parts = club
-            for part in parts:
-                add(
-                    part.name,
-                    club_body,
-                    np.eye(3),
-                    np.zeros(3),
-                    _bvh_mesh(coal, part.mesh),
-                    list(part.rgba),
+        self._mesh_dir = tempfile.TemporaryDirectory(prefix="ud_visuals_")
+        scene = build_scene_visuals(spec, Path(self._mesh_dir.name), self._appearance)
+        bodies = adapter._bodies  # noqa: SLF001 - adapter exposes no public accessor
+        check_bodies(scene, bodies)
+        for item in scene.items:
+            joint, body_pose = bodies[item.body]
+            pose = body_pose * pin.SE3(item.rotation, item.translation)
+            if item.kind == "mesh":
+                path = str(item.mesh_path)
+                obj = pin.GeometryObject(  # type: ignore[attr-defined]
+                    item.name, joint, pose, coal.MeshLoader().load(path), path
                 )
-        for shp in skeleton.shapes:
-            if club is not None and shp.body == club[0]:
-                continue  # the mesh head replaces the ellipsoid hint
-            shape = (
-                coal.Ellipsoid(*shp.half_size_m)
-                if shp.kind == "ellipsoid"
-                else coal.Box(*(2.0 * np.asarray(shp.half_size_m)))
-            )
-            add(
-                f"shp{n}",
-                shp.body,
-                np.eye(3),
-                np.array(shp.center_m),
-                shape,
-                _SHAPE_RGBA,
-            )
-            n += 1
+                obj.overrideMaterial = True
+            else:
+                obj = pin.GeometryObject(  # type: ignore[attr-defined]
+                    item.name, joint, pose, _primitive(coal, item)
+                )
+            obj.meshColor = np.array(item.rgba)
+            geometry.addGeometryObject(obj)  # type: ignore[attr-defined]
         floor = pin.GeometryObject(  # type: ignore[attr-defined]
             "floor",
             0,
-            pin.SE3(np.eye(3), np.array([1.0, 0.0, skeleton.ground.height_m - 0.005])),
+            pin.SE3(np.eye(3), np.array([1.0, 0.0, scene.ground_height_m - 0.005])),
             coal.Box(6.0, 6.0, 0.01),
         )
-        floor.meshColor = np.array(_FLOOR_RGBA)
+        floor.meshColor = np.array(scene.floor_rgba)
         geometry.addGeometryObject(floor)  # type: ignore[attr-defined]
         viz = MeshcatVisualizer(adapter.model, geometry, geometry)
         viz.initViewer(viewer=meshcat.Visualizer(), open=False, loadModel=False)

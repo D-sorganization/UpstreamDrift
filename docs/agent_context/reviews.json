@@ -19,24 +19,24 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "bb33da3bafb57fe6c3ecd2c40b6d56b9cac7982dae05cccbf51299f95fb12dd0",
+      "fingerprint": "235b466aed61f2e9f7658094f065ae872cce9126541c7716ad2d4bc46c3d24d1",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "46e831b130702aaa9025deb465debb9f78dc5160091bdf9ad48e795bf90ce984",
-        "src/config/launcher_manifest.json": "abc9913955858006e7bb6b8e9dca8c9693313e62d48d90dcc1ace33e632a79dc",
+        "src/config/feature_parity.json": "da668063016e32a118db147aa243ab2bce703548c33f9fe1dcdb15de9153db0c",
+        "src/config/launcher_manifest.json": "c9844ac6e0cd9c6cc867bda7cfd44edf1199ac85a07af5b9a83bec70a65d00bc",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
-        "src/config/models.yaml": "2a2e303aa92f6dda0ef3868fcc881ccbdbc54cf362ac3aae931333163969b90f",
+        "src/config/models.yaml": "64caf5311e4be2c75e742dc053b425a528f851638ca2773423fcc77d40b5d419",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Rebase of UD#12537 (#9545 slice 9) onto #12535: the only atlas input change versus main is feature_parity.json tools.bunkershot3d_workbench issue pointer 9545 -> 12536 (open follow-up; #9545 closed). Status stays gap; no tile, route or connection changed. Inspected the diff; generator --check and capability-atlas tests run below."
+      "rationale": "Only input change is the spine_viewer tile description text (install extra named, Codex review on #12796); no boundary or interface change."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",
@@ -51,15 +51,15 @@
       "rationale": "Reviewed NSX-30 (#12570) addition of ConstrainedEquationsOfMotionProvider to protocol.py: a runtime_checkable sub-protocol of EquationsOfMotionProvider adding closure_jacobian(q) (m x n) and closure_drift(q, v) (m,) in the NSX-02 grip-frame convention. Parent protocol signatures, factory, mjcf and model_params are unchanged; the contract now documents the new optional capability. Verified by tests/unit/simulation_backends including test_constrained_ztcf_zvcf.py and test_foundation.py. No scientific approval is implied."
     },
     "pipeline-api": {
-      "fingerprint": "bb81e316001c42322cf9628984c7044a5431ad7d27f3b9b0b901ad0a4c023546",
+      "fingerprint": "0a1fb7629b24b708518046ef3c3a4f9285047abb3688b642f2bd65d18dc8df5e",
       "inputs": {
         "docs/agent_context/contracts/pipeline-api.md": "f9402d270806ae313e121d36387e396302ffd5484a593f071ed3b0f042921079",
-        "src/shared/python/motion_pipeline/api.py": "7c3aecd590c1b49bf839d846370697d071ca3fa81ca9673811fdbcde159d7f9e",
+        "src/shared/python/motion_pipeline/api.py": "b59c3943cad230dab987b033b97b1957c39fd6019a03186a6c807b71518b1a83",
         "src/shared/python/motion_pipeline/contracts.py": "9c8a9ac26c0d63b174e43093e3c53e1dea6422b82918c7ef79be05cf2097837c",
         "src/shared/python/motion_pipeline/orchestrator.py": "a99ef34d57df202ad4bc5e2f4b7a04b974e80d559e47f9c97b0dece57ca9b1b8",
         "tests/unit/motion_pipeline/orchestrator/test_api.py": "5d059d69c720182436454c0ec45efe567aa45b9b5aa527caab991fd782bd984d"
       },
-      "rationale": "Mark orchestrator test_api with unit marker (#8875)"
+      "rationale": "Reviewed #12846 behaviour-preserving refactor of motion_pipeline/api.py: create_app nested route closures lifted to module-level handlers (health_check, run_pipeline, run_pipeline_with_config) registered via _register_*_routes helpers. Routes, response models, status codes, error mapping (ValueError 400, RuntimeError 500), temp-file cleanup and OpenAPI schema are unchanged; verified by tests/unit/motion_pipeline/orchestrator (test_api.py and new test_api_routes_characterization.py) and an identical openapi.json before and after. No scientific approval is implied."
     },
     "pose-conventions": {
       "fingerprint": "a967be96dead4f816e7e2046cc950985d5da2d007ac1eded50915a8fbb9db15c",

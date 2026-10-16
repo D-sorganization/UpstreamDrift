@@ -61,6 +61,7 @@ class _SimulationControlsMixin:
                     style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaStop)
                 )
             recorder.start_recording()
+            self.recording_label.setText("Recording...")
         else:
             self.record_btn.setText("Start Recording")
             if style := self.style():  # type: ignore[attr-defined]
@@ -70,6 +71,9 @@ class _SimulationControlsMixin:
                     )
                 )
             recorder.stop_recording()
+            self.recording_label.setText(
+                f"Stopped: {recorder.get_num_frames()} frames recorded"
+            )
 
     def on_take_screenshot(self) -> None:
         """Save the current simulation view as a PNG screenshot."""
@@ -89,6 +93,50 @@ class _SimulationControlsMixin:
             self.main_window.statusBar().showMessage(
                 f"Screenshot saved: {filename}", 3000
             )
+
+    def _dialog_parent(self) -> QtWidgets.QWidget | None:
+        """Return this host as a dialog parent when it is a widget."""
+        return self if isinstance(self, QtWidgets.QWidget) else None
+
+    def on_export_video(self) -> None:
+        """Render the recorded swing to a video file chosen by the user."""
+        from ...video_export import export_recorded_swing_video
+
+        parent = self._dialog_parent()
+        recorder = self.sim_widget.get_recorder()
+        if recorder.get_num_frames() == 0:
+            QtWidgets.QMessageBox.warning(
+                parent,
+                "Export Video",
+                "Nothing is recorded: press Start Recording, run the "
+                "simulation, stop, then export.",
+            )
+            return
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            parent, "Export Video", "swing.mp4", "MP4 Video (*.mp4)"
+        )
+        if not filename:
+            return
+        target = Path(filename)
+        if not target.suffix:
+            target = target.with_suffix(".mp4")
+        try:
+            out = export_recorded_swing_video(
+                self.sim_widget.model,
+                self.sim_widget.data,
+                recorder,
+                target,
+                camera=self.sim_widget.camera,
+            )
+        except (ValueError, RuntimeError, OSError) as exc:
+            logger.exception("Video export failed: %s", exc)
+            QtWidgets.QMessageBox.critical(
+                parent, "Export Video", f"Could not export video: {exc}"
+            )
+            return
+        QtWidgets.QMessageBox.information(
+            parent, "Export Video", f"Exported video to: {out}"
+        )
 
     def on_export_data(self) -> None:
         """Delegate data export to the main window handler."""

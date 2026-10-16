@@ -8,6 +8,7 @@ from src.shared.python.core.numerical_constants import (
     EPSILON_SINGULARITY_DETECTION,
 )
 
+from ..club_body_names import find_club_head_body_id
 from ..jacobian_utils import (
     check_jacobian_rank,
     check_mass_matrix_conditioning,
@@ -42,7 +43,9 @@ class KinematicForceAnalyzer:
         self.data = data
 
         # Find important bodies
-        self.club_head_id = self._find_body_id("club_head")
+        self.club_head_id = find_club_head_body_id(
+            self.model, owner=type(self).__name__
+        )
         self.club_grip_id = self._find_body_id("club") or self._find_body_id("grip")
 
         self._perturb_data = mujoco.MjData(model)

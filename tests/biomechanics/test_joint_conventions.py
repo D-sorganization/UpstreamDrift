@@ -14,6 +14,7 @@ from src.shared.python.biomechanics.joint_conventions import (
     matrix_to_orientations,
     orientations_to_matrix,
 )
+from tests.helpers.scipy_read_only import strict_rotation_constructors
 
 pytestmark = pytest.mark.unit
 
@@ -157,3 +158,13 @@ def test_orientation_series_preserves_missing_frames_and_reports_validity():
     assert np.isnan(result.values[1]).all()
     with pytest.raises(ValueError):
         convert_orientation_series([[0, np.nan, 0]], "euler", "matrix")
+
+
+def test_read_only_matrices_convert_under_old_scipy(monkeypatch):
+    """SciPy < 1.15 rejects read-only buffers; frozen spine arrays must still work."""
+    strict_rotation_constructors(monkeypatch)
+    matrix = Rotation.from_rotvec([0.2, -0.1, 0.3]).as_matrix()
+    matrix.setflags(write=False)
+    result = matrix_to_orientations(matrix, "euler", RotationConvention("ZXY"))
+    rebuilt = orientations_to_matrix(result.values, "euler", RotationConvention("ZXY"))
+    np.testing.assert_allclose(rebuilt, matrix, atol=1e-12)

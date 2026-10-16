@@ -34,7 +34,13 @@ from .double_pendulum_trial_adapter import (
     DoublePendulumTrialConfig,
     DoublePendulumTrialResult,
 )
+from .disturbance import DisturbanceSpec, InjectionStage, Spectrum
 from .noise import generate_noise
+from .outcome_dispersion import (
+    OutcomeDispersion,
+    compute_outcome_dispersion,
+    wrap_angle,
+)
 from .perturbation_base import CanonicalPerturbationBatch
 from .robustness_score import compute_robustness_score
 from .statistics import MetricStatistics, compute_metric_statistics
@@ -71,6 +77,12 @@ __all__ = [
     "MujocoVariationBinding",
     "NamedJointTorque",
     "generate_noise",
+    "DisturbanceSpec",
+    "InjectionStage",
+    "Spectrum",
+    "OutcomeDispersion",
+    "compute_outcome_dispersion",
+    "wrap_angle",
     "compute_robustness_score",
     "MetricStatistics",
     "compute_metric_statistics",

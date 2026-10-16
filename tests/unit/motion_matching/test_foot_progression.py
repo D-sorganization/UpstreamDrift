@@ -7,6 +7,7 @@ import pytest
 
 from src.shared.python.motion_matching.foot_progression import (
     DEFAULT_TOE_OUT_DEG,
+    FOOT_TARGET_SOURCES,
     TARGET_SOURCES,
     TRAIL_TOE_OUT_STYLE_DEG,
     FootProgression,
@@ -276,7 +277,9 @@ def test_trail_style_target_is_the_owner_value_and_single_sourced() -> None:
     the OSV-4 documented default, so one constant backs both."""
     assert pytest.approx(20.0) == TRAIL_TOE_OUT_STYLE_DEG
     assert TRAIL_TOE_OUT_STYLE_DEG == DEFAULT_TOE_OUT_DEG
-    assert set(TARGET_SOURCES) == {"capture", "default", "style"}
+    assert set(FOOT_TARGET_SOURCES) == {"capture", "default", "style"}
+    # the shared receipt vocabulary adds only the R4 knee prior (#12684)
+    assert set(TARGET_SOURCES) == set(FOOT_TARGET_SOURCES) | {"prior"}
 
 
 def test_style_mode_sets_the_trail_foot_to_the_owner_prior() -> None:

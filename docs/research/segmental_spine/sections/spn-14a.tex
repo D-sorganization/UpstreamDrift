@@ -1,0 +1,129 @@
+\subsection{Distribution Sensitivity Within One Model}
+\label{sec:spn-14a}
+
+This section documents \texttt{spine/distribution\_sensitivity.py} and the
+law restriction \texttt{coupling.restrict\_to\_levels} (issue \#12769, epic
+\#12735). Per-level angles and loads depend on the assumed distribution
+(coupling) law; this study quantifies that dependence inside one model before
+any cross-model comparison, which would confound the law with geometry,
+stiffness and muscles. Its scientific status is \emph{unqualified}; no spread
+below is acceptance evidence.
+
+\paragraph{Design.}
+One SPN-13a request (Section~\ref{sec:spn-13a}) is run once per shipped law
+$k\in K$ (default: every non-pending law in
+\texttt{src/config/spine\_coupling\_laws.json}). Between runs only
+\texttt{study\_id} and \texttt{coupling\_law\_id} change; motion, golf model,
+segmental model, external loads, cost exponent, frame selection, residual and
+reserve budgets are identical. After the runs the receipts must agree on every
+input SHA-256 and on every other request field, otherwise the report is
+refused (\texttt{SensitivityIntegrityError}). Couplers prescribe kinematics
+only and are disabled for inverse dynamics, static optimisation and joint
+reactions (ADR-0055), so the law enters the loads solely through the
+prescribed per-level kinematics.
+
+\paragraph{Law Restriction.}
+A shipped law may cover more levels than a model. With
+\texttt{restrict\_law\_to\_model} the study keeps the law's matrices $C_i$ for
+the model's mapped levels $i\in\mathcal L$ only:
+$\theta_i = C_i\,\varphi$ for $i\in\mathcal L$, bit-identical $C_i$, version
+tagged \texttt{<version>+levels:<first>..<last>} and the citation marked as a
+repository operation. Per-level ratios within $\mathcal L$ are preserved;
+absolute shares are not, because the distribution solve
+$\varphi^\ast=\arg\min_\varphi\|\log(R_{\mathrm{target}}^{\mathsf T}R(\varphi))\|$
+rescales $\varphi$ until the composed range reaches the target. A law covering
+fewer levels than the model fails the drive stage and is excluded. A request
+without the flag hashes exactly as before.
+
+\paragraph{Spread Definitions.}
+With $p_k(q)$ the signed peak (value of largest magnitude over the record) of
+quantity $q$ under law $k$,
+\begin{equation}
+  s(q)=\max_{k\in K}p_k(q)-\min_{k\in K}p_k(q),\qquad
+  r(q)=\frac{s(q)}{\max_{k\in K}|p_k(q)|}\quad(r=0\text{ if all }p_k=0).
+\end{equation}
+Kinematic quantities are the per-level ISB ZXY angles
+$(\theta_{FE},\theta_{LB},\theta_{AR})$ in rad, read back from the hashed
+\texttt{.mot} artifact (Section~\ref{sec:spn-9d}); they also carry the largest
+pairwise RMS difference $\max_{k<l}\sqrt{\overline{(\theta_k-\theta_l)^2}}$ of
+the time series. Load quantities are the SPN-13c median peaks per observable
+(generalized effort, joint reaction), level and component in the ADR-0055
+frame (compression $+F_y$ in N, shears $F_x$, $F_z$ in N, moments in
+N$\cdot$m), compared through \texttt{study\_aggregation.compare} so laws are
+never pooled (Section~\ref{sec:spn-13c}). A quantity is labelled
+\emph{robust} if $r(q)\le\tau$ and \emph{sensitive} otherwise; $\tau=0.1$ is a
+declared reporting threshold, not a tolerance. Each law row carries its id,
+version, citation, \texttt{verified\_from\_primary}, distribution source and
+the drive's geodesic residual (maximum and RMS, rad).
+
+\paragraph{Fail-Closed Rules.}
+Only receipts with status \texttt{pass} enter a spread; \texttt{unqualified}
+and \texttt{failed} runs are listed as excluded with their reasons and are
+never tuned into passing. With fewer than two qualified laws no spread is
+reported and the note says why. Static optimisation does not converge on the
+first two samples of the SPN-13a synthetic motion on the invented fixture, so
+the CI request uses the mid and late event frames exactly as the SPN-13a tests
+do; no tolerance was changed.
+
+\paragraph{Fixture Result (Deterministic, Invented).}
+Five-level lumbar fixture (L5--S1 to L1--L2), five-sample synthetic motion,
+cost exponent 3, all three shipped laws restricted to the lumbar range, drive
+tolerance unset. All three runs pass. Geodesic drive residual (max/RMS, rad):
+\texttt{bruno2015\_regional} $5.1\times10^{-13}/2.3\times10^{-13}$;
+\texttt{uniform\_reference} $1.9\times10^{-16}/1.5\times10^{-16}$;
+\texttt{fujii2007\_lumbar} $0.89/0.78$. Selected peaks:
+
+\begin{center}
+\begin{tabular}{llrrrr}
+\hline
+Level & Quantity & Bruno & Fujii & Uniform & $r$ \\
+\hline
+L5--S1 & $\theta_{FE}$ [rad] & $-0.216$ & $-0.097$ & $-0.216$ & 0.55 \\
+L5--S1 & $\theta_{AR}$ [rad] & $0.0845$ & $0.0819$ & $0.0845$ & 0.03 \\
+L3--L4 & $\theta_{LB}$ [rad] & $0.024$ & $0.174$ & $0.024$ & 0.86 \\
+L5--S1 & JR compression [N] & 938 & 729 & 938 & 0.22 \\
+L1--L2 & JR compression [N] & 888 & 676 & 888 & 0.24 \\
+L5--S1 & ID $M_z$ [N$\cdot$m] & 34.4 & 1.87 & 34.4 & 0.95 \\
+\hline
+\end{tabular}
+\end{center}
+
+Of the 60 per-level quantities, 3 axial-rotation angles (L5--S1 to L3--L4) and
+3 load components are robust at $\tau=0.1$; the rest are sensitive. Every
+sensitive entry is driven by \texttt{fujii2007\_lumbar}, which has a single
+independent coordinate (trunk axial rotation) and therefore cannot reproduce
+the three-axis golf target (residual 0.89 rad): its spread mixes the
+distribution assumption with a different realised trunk motion and must not be
+read as distribution sensitivity alone. With the drive tolerance set to
+$10^{-6}$ rad the Fujii run is \texttt{unqualified} (five invalid drive frames)
+and excluded; the two remaining laws give $r\le 8.5\times10^{-11}$ for all 60
+quantities, because \texttt{bruno2015\_regional} is uniform within the lumbar
+region and, restricted to a lumbar-only model, prescribes the same per-level
+ratios as \texttt{uniform\_reference}.
+
+\paragraph{Conclusion and Limitations.}
+On the invented lumbar fixture no shipped pair of laws that reproduces the
+input distributes it differently, so the fixture cannot yet show which
+per-level quantities are robust to the assumption; the per-level ratio laws
+that would discriminate (\texttt{bruno2015\_per\_level},
+\texttt{pearcy1984\_lumbar}) are pending (\#12743). Axial rotation was the only
+angle that stayed within $\tau$ even under the non-reproducing Fujii law.
+Thoracic-versus-lumbar sensitivity requires a model with thoracic levels; the
+owner-workstation run on the licensed Bruno model is blocked on the SimTK
+download (\#12749), and its table is not yet available. Spreads are
+descriptive, from five synthetic samples and invented inertia and muscles; they
+are not physiological and not acceptance.
+
+\paragraph{Failed Attempts.}
+Running the shipped laws unchanged on the fixture fails in the drive stage:
+every shipped law covers more levels than the five-level fixture (Bruno and
+uniform: L5--S1 to T1--T2; Fujii: L5--S1 to T12--L1). This motivated the
+explicit, recorded restriction instead of a silent truncation.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/shared/python/spine/test_coupling_restriction.py \
+  tests/opensim/spine/test_distribution_sensitivity.py -q -n 0
+python3 -m src.engines.physics_engines.opensim.python.spine.\
+distribution_sensitivity --request base.json --out out/
+\end{verbatim}

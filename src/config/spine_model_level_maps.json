@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "note": "Joint and coordinate names for licensed models are UNVERIFIED until the assets are present (#12749) and confirmed by inventory (SPN-8c). Empty levels are deliberate: no name is asserted as fact.",
+  "models": {
+    "fixture": {
+      "verified": true,
+      "names_status": "synthetic fixture (invented, see fixture_model.py)",
+      "source": "src/engines/physics_engines/opensim/python/spine/fixture_model.py",
+      "pelvis_body": "pelvis",
+      "terminal_body": "thorax_proxy",
+      "levels": {
+        "L5_S1": {
+          "joint": "L5_S1_jnt",
+          "coordinates": [
+            "l5_s1_flex_ext",
+            "l5_s1_lat_bend",
+            "l5_s1_axial_rot"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "L4_L5": {
+          "joint": "L4_L5_jnt",
+          "coordinates": [
+            "l4_l5_flex_ext",
+            "l4_l5_lat_bend",
+            "l4_l5_axial_rot"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "L3_L4": {
+          "joint": "L3_L4_jnt",
+          "coordinates": [
+            "l3_l4_flex_ext",
+            "l3_l4_lat_bend",
+            "l3_l4_axial_rot"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "L2_L3": {
+          "joint": "L2_L3_jnt",
+          "coordinates": [
+            "l2_l3_flex_ext",
+            "l2_l3_lat_bend",
+            "l2_l3_axial_rot"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "L1_L2": {
+          "joint": "L1_L2_jnt",
+          "coordinates": [
+            "l1_l2_flex_ext",
+            "l1_l2_lat_bend",
+            "l1_l2_axial_rot"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    },
+    "bruno2015_fullbody_os4_v2": {
+      "verified": false,
+      "names_status": "UNVERIFIED",
+      "source": "Bruno et al. 2015 full-body OpenSim 4 model (licensed asset)",
+      "pelvis_body": null,
+      "terminal_body": null,
+      "levels": {}
+    },
+    "senteler2016_lumbspine_3dof": {
+      "verified": false,
+      "names_status": "UNVERIFIED",
+      "source": "Senteler et al. 2016 lumbar spine model, 3-DOF (licensed asset)",
+      "pelvis_body": null,
+      "terminal_body": null,
+      "levels": {}
+    },
+    "senteler2016_lumbspine_30dof": {
+      "verified": false,
+      "names_status": "UNVERIFIED",
+      "source": "Senteler et al. 2016 lumbar spine model, 30-DOF (licensed asset)",
+      "pelvis_body": null,
+      "terminal_body": null,
+      "levels": {}
+    }
+  }
+}

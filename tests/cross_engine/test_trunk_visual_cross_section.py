@@ -38,9 +38,13 @@ SPECS = (
 TRUNK_PARTS = ("torso", "pelvis")
 # Backends that draw ``skeleton.shapes`` (the spec hint ellipsoids) as the trunk.
 HINT_SHAPE_BACKENDS = {
+    "opensim": "src/tools/native_viewer_export/backends/opensim_worker.py",
+}
+# Backends that render the shared appearance document (same trunk lofts as the
+# MuJoCo appearance layer, #12688) via the common MeshCat scene builder.
+APPEARANCE_BACKENDS = {
     "drake": "src/tools/native_viewer_export/backends/drake_meshcat.py",
     "pinocchio": "src/tools/native_viewer_export/backends/pinocchio_meshcat.py",
-    "opensim": "src/tools/native_viewer_export/backends/opensim_worker.py",
 }
 
 
@@ -129,6 +133,10 @@ def _extents(engine: str, spec_path: Path) -> list[tuple[str, float, float]]:
         return _mjcf_trunk_extents(spec, raw, appearance=True)
     if engine == "myosuite":  # visual=True MJCF with the hint ellipsoids
         return _mjcf_trunk_extents(spec, raw, appearance=False)
+    if engine in APPEARANCE_BACKENDS:
+        source = (ROOT / APPEARANCE_BACKENDS[engine]).read_text(encoding="utf-8")
+        assert "default_appearance" in source, f"{engine} no longer uses the appearance"
+        return _mjcf_trunk_extents(spec, raw, appearance=True)
     source = (ROOT / HINT_SHAPE_BACKENDS[engine]).read_text(encoding="utf-8")
     assert "skeleton.shapes" in source, f"{engine} no longer draws the hint shapes"
     return _trunk_hint_extents(spec)

@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[3]
 BODIES = ROOT / "docs/development/full_body_models"
 DRIVER = BODIES / "full_body_spec_anthro_driver.json"
 HEAD = "GolfSwing3D_Kinetic/Head"
+PARAMETRIC = {"model": "parametric"}  # the default head is the CC0 mesh (#12949)
 
 
 def _export(spec: Path, head: dict | None, **kw):
@@ -81,7 +82,7 @@ def test_head_geoms_ride_the_head_body_and_are_visual_only() -> None:
 def test_head_placement_and_stature() -> None:
     mujoco = pytest.importorskip("mujoco")
     spec = json.loads(DRIVER.read_text())
-    model = mujoco.MjModel.from_xml_string(_export(DRIVER, None)[0])
+    model = mujoco.MjModel.from_xml_string(_export(DRIVER, PARAMETRIC)[0])
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     body = model.body(HEAD)
@@ -106,7 +107,7 @@ def test_head_placement_and_stature() -> None:
 
 def test_face_points_forward_with_the_body() -> None:
     mujoco = pytest.importorskip("mujoco")
-    model = mujoco.MjModel.from_xml_string(_export(DRIVER, None)[0])
+    model = mujoco.MjModel.from_xml_string(_export(DRIVER, PARAMETRIC)[0])
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     nose = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "visual_head_nose")
@@ -177,3 +178,38 @@ def test_blend_balls_are_no_larger_than_the_adjoining_limb() -> None:
             extent = np.ptp(verts, axis=0).max() / 2.0
             assert extent <= 1.1 * library.PART_RADIUS_M[part] + 1e-9
     assert seen >= 4  # both shoulders and both hips
+
+
+def test_cc0_mesh_head_loads_renders_and_keeps_physics_identical() -> None:
+    """R7 (#12687): the shared mesh slot reaches MuJoCo without engine code."""
+    mujoco = pytest.importorskip("mujoco")
+    xml, meta = _export(DRIVER, {"model": "cc0_mesh"})
+    model = mujoco.MjModel.from_xml_string(xml)
+    head = meta["visual_layer"]["head"]
+    assert head["parts"] == ["skin_mesh", "hair_mesh"] and head["mode"] == "body"
+    plain = mujoco.MjModel.from_xml_string(
+        exporter.export_full_body_mjcf(DRIVER.read_bytes())[0]
+    )
+    for attr in ("body_mass", "body_inertia", "body_ipos", "body_subtreemass"):
+        np.testing.assert_array_equal(getattr(model, attr), getattr(plain, attr))
+    data = _state(mujoco, model)
+    body_id = model.body(HEAD).id
+    for part in head["parts"]:
+        gid = model.geom(f"visual_head_{part}").id
+        assert model.geom_bodyid[gid] == body_id
+        assert model.geom_contype[gid] == 0 and model.geom_conaffinity[gid] == 0
+    skin = model.geom("visual_head_skin_mesh").id
+    assert model.geom_rbound[skin] == pytest.approx(0.2429, abs=0.08)
+    try:
+        renderer = mujoco.Renderer(model, 96, 96)
+    except (RuntimeError, ImportError, mujoco.FatalError) as exc:  # no GL
+        pytest.skip(f"no offscreen GL: {exc}")
+    try:
+        cam = mujoco.MjvCamera()
+        cam.lookat[:] = data.xpos[body_id] + np.array([0.0, 0.0, 0.12])
+        cam.distance = 0.8
+        renderer.update_scene(data, camera=cam)
+        image = renderer.render()
+    finally:
+        renderer.close()
+    assert image.shape == (96, 96, 3) and image.std() > 1.0  # not a blank frame

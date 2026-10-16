@@ -420,6 +420,54 @@ sign classes; the trajectory-coupled case and unbounded cases are separate
 keys. Unbounded bound is NaN with status `UNBOUNDED`. Cold and warm solves
 return the same bounds to `1e-9`.
 
+Implementation notes (`loop_nullspace/envelopes.py`, #12565):
+
+- A quantity is an affine functional `q(z) = const + coeff . z` of the null-space
+  coordinates (`EnvelopeQuantity`); `joint_torque_quantities()` and
+  `x_functional_quantities(...)` (hand-split coordinates are rows of `Phi`
+  composed with the closing-hand map) build them per frame from the set's
+  decomposition. Each frame is one `LPSession`: a zero-cost solve decides
+  feasibility (`INFEASIBLE` is reported, never raised), then two objective swaps
+  per quantity reuse the basis, and the basis carries to the next frame when the
+  dimensions match. `warm_start=False` resets before every solve; bounds agree
+  to `1e-9`.
+- Sign tolerance: `atol = SIGN_ATOL_RTOL * scale`, `SIGN_ATOL_RTOL = 1e-9` (the
+  NSX-00 scaled balance threshold), `scale` the quantity's characteristic scale
+  (`M_c = 5 N m` for torques, `F_c = 100 N` for forces). `ZERO` when both bounds
+  lie within `atol` of 0, `POSITIVE` when `lower > atol`, `NEGATIVE` when
+  `upper < -atol`, else `INDETERMINATE`; a one-sided unbounded bound can still
+  decide a sign. An infeasible frame has no sign class (`None`).
+- Chebyshev margin: largest ball `{z : z^T W z <= r^2}` with diagonal `W`
+  (golden `weighted_diag_1_4` uses `W = diag(1, 4)`, row norm
+  `sqrt(g W^-1 g)`); `UNBOUNDED` (NaN) when balls of any size fit, radius `0`
+  when the set has no interior.
+- Cones enter through the set's declared linearisation (outer polygon: bounds
+  contain the exact-cone bounds; inner: contained); `cone_error_bound` is
+  recorded per frame. Each bound lists its active rows (slack within `1e-8`
+  relative), their hypotheses, and whether any rests on an ASSUMED slot or
+  unverified hypothesis.
+- Benchmark (recorded, not gated): 200 frames of the planar proxy fixture
+  (time-varying `x_p`, torque rows only) solve all joint-torque envelopes plus
+  the Chebyshev LP in about 3.7 s on the 4-core shared brick host. The real 200-frame
+  anthropometric run is blocked (below).
+- **Real anthro benchmark: BLOCKED, not run.** The chain
+  `snapshot_from_adapter -> admit -> decompose -> FeasibleSet -> static_envelopes`
+  was exercised on `ground_support/dynamics_record.npz` with
+  `full_body_spec_hipcal_scaled.json` (Pinocchio, 41 coordinates, 35 actuated,
+  capacity rows exist for all 35). Frames 0, 150, 300, 450 and 600 (state
+  projected with `project_to_closure`, acceleration from the recorded efforts)
+  all fail at `decompose` with `BalanceInconsistentError`, scaled residual
+  92, 217, 202, 62 and 42: the six unactuated root rows are balanced by
+  foot-ground loads, and `snapshot_from_adapter` leaves `J_g` unset (foot
+  contacts are outside that seam; the run uses compliant contact spheres).
+  No substitute was made. Unblocking needs an adapter foot Jacobian `J_g` plus
+  contact cones (`H-FRICTION-CONE`) for the anthro model.
+  `tests/integration/test_loop_nullspace_anthro_envelope_blocker.py` pins this
+  and must be replaced by the 200-frame benchmark (evenly strided frames
+  `0, 3, ..., 597`) once `J_g` exists.
+- Non-claim: static envelopes over-approximate trajectory-feasible ranges when
+  smoothness priors are active (NSX-25).
+
 ## NSX-23 Trajectory Allocation (#12566, Strong)
 
 `allocate_trajectory(feasible_sets, objective, *, reference=None)`. Golden
@@ -642,3 +690,56 @@ inputs. Postconditions: the `z`-dependence of `F_t` appears only through
 `λ(z)`; an additive-noise objective with no M2 has gradient exactly zero.
 Non-claims: noise amplitudes are declared hypotheses, not measurements; no claim
 that any golfer uses a minimum-variance allocation.
+
+## NSX-87 MuJoCo and MyoSuite Derivatives (#12716)
+
+`MujocoForceAdapter.constrained_acceleration_derivatives(q, v, tau)` (and the
+MyoSuite subclass) drive the single NSX-84 `FiniteDifferenceDerivatives`
+routine with the adapter's canonical `M`, `h`, `J_c`, `Jdot_v` through
+`loop_nullspace/adapter_derivatives.py`. The derivatives are those of the rigid
+hard-KKT solve with the reaction re-solved; capability is `PARTIAL` with
+`derivative_method=finite_difference` (central differences along retractions,
+step `1e-5`).
+
+* MyoSuite refuses (`DerivativeCapabilityUnavailable`) and reports `NONE`
+  unless `kkt_regularization == 0`.
+* Muscle activation states are unsupported (`UNSUPPORTED_STATE_COMPONENTS`)
+  until NSX-94.
+* Non-claim: `mjd_transitionFD` differentiates MuJoCo's soft stepping
+  (solref/solimp compliance). It is a separately characterised registry entry
+  and its sensitivities are not conformance evidence here.
+* Pinocchio agreement (same specification, state and load; basis-independent
+  operators `D P^T`): the bound is the registered NSX-56 Track N tolerance
+  propagated through the differencing step, `max(1e-11, 1e-11, 1e-12, 1e-8) /
+  1e-5 = 1e-3` (scaled). Measured: acceleration `7e-12`, reaction `1e-10`,
+  `d a/d tau` `4e-12`, `d a/d xi` `9e-7`, `d a/d eta` `6e-5`, `d lambda/d xi`
+  `1e-5`, `d lambda/d eta` `7e-5`. Agreement between engines is not physical
+  validation.
+
+## NSX-90 Variance Propagation (#12719)
+
+Modules (all under `src/shared/python/loop_nullspace/`):
+
+- `variance_propagation.py`: `propagate_covariance(dyn, p0, sigma)` (forward
+  `P_{t+1} = A P Aᵀ + B Σ Bᵀ`), `adjoint_kernels(dyn, C)` ->
+  `AdjointKernels` with `s_y_x0` (`S_{y,x0}`) and `s_y_tau(t)`
+  (`S_{y,τ}(t)`), `adjoint_covariance`, `variance_budget` (by input class and
+  step), `augment_persistent` (per-trial parameter states),
+  `euler_dynamics` (`A = I + dt F`, `B = dt G`, any tangent dimension),
+  `step_covariances` (from `DisturbanceSpec`, timestep consistent) and
+  `event_outcome_rows` (`C Π`, NSX-83). `LinearizedDynamics` is reused from
+  `estimation/mosaic/local_policy.py`.
+- `nonlinearity_gate.py`: `assess_nonlinearity(rollout, directions, *,
+  amplitude, gate_threshold)`. **`gate_threshold` has no default**: NSX-80
+  specifies a gate but no number, so the caller supplies it.
+  `LinearValidity` is `LINEAR_VALID`, `NOT_LINEAR_VALID` or `NOT_ASSESSED`.
+- `variance_records.py`: `assess_variance(problem, declaration, *,
+  outcome_units, gate=None)` returning typed `QuantityRecord`s. Kernels are
+  `INVARIANT` unless M2 or M3 is declared; variance is `INVARIANT` with the
+  noise hypothesis in `conditioning` when no mechanism is declared and
+  `FAMILY_DEPENDENT` otherwise.
+
+Preconditions: symmetric covariances, conformal shapes, finite inputs
+(`ValueError`). Postconditions: adjoint and forward variance agree to 1e-12
+(tests) and 1e-9 (runtime `ensure`); the budget parts sum to the total.
+Non-claims: linear predictions do not cover saturation, slip or missed impacts.
