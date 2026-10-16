@@ -272,3 +272,37 @@ def test_load_urdf_file_backward_compatibility_alias(valid_urdf_file: Path) -> N
 
     assert widget._load_urdf_file(valid_urdf_file) is True
     assert widget.current_file_path == valid_urdf_file
+
+
+def test_unloadable_default_model_never_blocks_startup_with_a_dialog(
+    tmp_path: Path,
+) -> None:
+    """A default model that fails to load is reported in the status bar.
+
+    A modal warning at construction time hangs an offscreen or headless start
+    (the explorer window never appears), so startup must not raise one.
+    """
+    _ensure_qapp()
+    broken = tmp_path / "model.xml"
+    broken.write_text("<robot name='empty'/>", encoding="utf-8")
+    widget = MainWidget()
+
+    with (
+        patch(
+            "src.tools.model_explorer.model_library.ModelLibrary.get_human_model",
+            return_value=broken,
+        ),
+        patch.object(QMessageBox, "warning") as warn,
+    ):
+        widget.load_default_model()
+
+    warn.assert_not_called()
+    assert "model.xml" in widget.status_bar.currentMessage()
+
+
+def test_user_initiated_load_failure_still_shows_a_dialog(tmp_path: Path) -> None:
+    _ensure_qapp()
+    widget = MainWidget()
+    with patch.object(QMessageBox, "warning") as warn:
+        assert widget.load_model(tmp_path / "absent.urdf") is False
+    warn.assert_called_once()
