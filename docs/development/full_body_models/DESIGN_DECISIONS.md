@@ -269,7 +269,7 @@ Overly soft soles ($25\text{ kN/m}$, which sank excessively, causing 169 mm root
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
+- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW_DYNAMICS.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
 
 ---
 
@@ -311,7 +311,7 @@ A full pipeline re-solve with the final code (`5f8ee41fe5`, both changes plus th
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
+- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW_DYNAMICS.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
 
 ---
 
@@ -336,7 +336,7 @@ Attempting to force root stabilization through aggressive PD control gains on th
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
+- [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW_DYNAMICS.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
 
 ---
 
@@ -376,8 +376,8 @@ Documented above for each approach with concrete failure receipts.
 
 - [REVIEW.md Section 12: Grip Roll](evidence/anthropometry/REVIEW.md#12-elbow-pits-from-the-markers-grip-roll-club-mesh-epic-2026-09-14)
 - [REVIEW.md Section 13: Closure Weld Fitted from the Address](evidence/anthropometry/REVIEW.md#13-closure-weld-fitted-from-the-address-mm-2-2026-09-14)
-- [REVIEW.md Section 15: Cart-Table Dynamics Filter](evidence/anthropometry/REVIEW.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
-- [REVIEW.md Section 16: Contact-Aware Shooting Fit](evidence/anthropometry/REVIEW.md#16-contact-aware-shooting-fit-fb-5-mm-7b-2026-09-14)
+- [REVIEW.md Section 15: Cart-Table Dynamics Filter](evidence/anthropometry/REVIEW_DYNAMICS.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
+- [REVIEW.md Section 16: Contact-Aware Shooting Fit](evidence/anthropometry/REVIEW_DYNAMICS.md#16-contact-aware-shooting-fit-fb-5-mm-7b-2026-09-14)
 
 ---
 
@@ -403,7 +403,7 @@ Large optimization learning rates ($2 \times 10^{-3}\text{ rad/knot}$), which ca
 
 ### REVIEW.md Sections
 
-- [REVIEW.md Section 17: Differentiable Trajectory Optimisation with MuJoCo MJX](evidence/anthropometry/REVIEW.md#17-differentiable-trajectory-optimisation-with-mujoco-mjx-fb-5-mm-7b-2026-09-14)
+- [REVIEW.md Section 17: Differentiable Trajectory Optimisation with MuJoCo MJX](evidence/anthropometry/REVIEW_DYNAMICS.md#17-differentiable-trajectory-optimisation-with-mujoco-mjx-fb-5-mm-7b-2026-09-14)
 
 ---
 
@@ -413,7 +413,7 @@ Large optimization learning rates ($2 \times 10^{-3}\text{ rad/knot}$), which ca
 
 Foot yaw has no coordinate of its own: it is pelvis yaw plus `hip_rotation_*` (plus a little hip-flexion and knee coupling). `src/shared/python/motion_matching/foot_progression.py` defines the one toe-out angle every report quotes: the signed angle about the up axis from golfer-forward `f = x_t x up` (toward the ball) to the foot long axis, positive = toes turned out (lead foot toward the target, trail foot away), reported per foot. A left-handed golfer mirrors `f` and swaps which foot leads. The marker long axis is the ground projection of `AnkleOut` to the `ToeIn`/`ToeOut` midpoint; a model foot uses calcn to toes. The capture value is the median over the first static window before takeaway (wrist markers stay within 0.03 m of their opening pose). The issue text writes `f = up x x_t`; with the lead foot on the target side that points behind the golfer in both the capture world (toes toward -X, target -Y) and the spec world (toes toward +X, target +Y), so the code uses `x_t x up` ("toward the ball").
 
-`python3 -m scripts.foot_progression_report` prints the capture values. `--foot-progression {off,capture,default}` on the ground-support pipeline (`pipeline/cli.py`) makes the choice explicit: `off` (default) keeps every existing receipt reproducible, `capture` seeds and refits each foot to its measured toe-out (a foot whose markers are missing or unstable gets the 20 degree default, flagged `is_default`), and `default` forces 20 degrees per foot. The receipt's `address.foot_progression` block holds, per foot, target, model angle, error, the capture measurement (headline, raw binding definition, forefoot cross-check, window frames, spread) and a decimated model time series with the finish value.
+`python3 -m scripts.foot_progression_report` prints the capture values. `--foot-progression {off,capture,default,style}` on the ground-support pipeline (`pipeline/cli.py`) makes the choice explicit: `style` is the default since R3 (#12683; see below), `off` keeps the legacy multi-start feet, `capture` seeds and refits each foot to its measured toe-out (a foot whose markers are missing or unstable gets the 20 degree default, flagged `is_default`), and `default` forces 20 degrees per foot. The receipt's `address.foot_progression` block holds, per foot, target, model angle, error, the capture measurement (headline, raw binding definition, forefoot cross-check, window frames, spread) and a decimated model time series with the finish value.
 
 **How It Works**
 
@@ -447,9 +447,26 @@ While a foot is in stance, its yaw is held at the address value (step 4). Once i
 
 **Club-Face Fixtures (#12222).** `scripts/regenerate_club_face_fixtures.py` runs with `--foot-progression capture`. It commits each run's hip-calibrated, scaled document as `tests/fixtures/club_face/spec_<club>.json`, because the calibrated hip frames set the foot yaw: the raw document's FK of the same pose turns the lead foot 29–30 degrees and lifts it 10–11 cm off the floor. Fixture frame 0 against the capture (MuJoCo FK): driver 16.64 / 3.57 against 16.37 / 4.03 degrees, 7-iron 15.43 / −0.96 against 15.00 / −0.37 degrees. `tests/unit/motion_matching/test_club_face_fixture_feet.py` holds them to 2 degrees and the feet to 5 cm.
 
+**Trail-Foot Style Target (R3, #12683).** The owner chose decision B on #12678 (2026-10-15): about 20 degrees of trail toe-out at address, as a style target recorded as owner-set, not measured. `foot_progression.TRAIL_TOE_OUT_STYLE_DEG` holds it. It is defined from `DEFAULT_TOE_OUT_DEG`, so there is one literal. `resolve_foot_target` applies it:
+
+- In `style` mode, the trail foot gets the style target and the lead foot resolves exactly as in `capture` mode.
+- In `capture` mode, a reliable measurement wins for both feet. This is bit-for-bit the previous resolver.
+- Each receipt foot entry carries `target_source` (`capture`, `default` or `style`).
+- `--foot-progression` now defaults to `style` (`address_feet.CANONICAL_FOOT_PROGRESSION`), so the canonical commands turn the trail foot out.
+
+Measured calibrated address, trail toe-out, before (`off`) / after (`style`):
+
+| Capture | Before (`off`) | After (`style`) | Note |
+| --- | --- | --- | --- |
+| capture-A driver | -2.93 deg | **19.80 deg** | Address RMS 10.95 → 10.54 mm |
+| capture-B 7-iron | -9.81 deg | **13.53 deg** | `hip_rotation_r` on its -40 deg limit; address RMS 8.42 → 12.19 mm |
+
+The 7-iron therefore misses the target by 6.5 degrees. The hip range was not widened. Reaching 20 degrees there needs an owner decision: widen the range, accept the shortfall, or take the yaw from elsewhere in the leg chain, re-measured after R4's knee flex. The lead foot matches the `capture`-mode lead within 0.25 degrees on both captures. The evidence is in [`evidence/foot_progression/trail_toe_out_12678/README.md`](evidence/foot_progression/trail_toe_out_12678/README.md). The upstreamdrift design manual has no address-stage chapter or registered calculation, so this section remains the calculation-level reference.
+
 ### Evidence Receipt
 
 - [`evidence/foot_progression/capture_report.json`](evidence/foot_progression/capture_report.json)
+- [`evidence/foot_progression/trail_toe_out_12678/address_toe_out_summary.json`](evidence/foot_progression/trail_toe_out_12678/address_toe_out_summary.json)
 - Tests: `tests/unit/motion_matching/test_foot_progression.py`, `tests/unit/motion_matching/pipeline/test_address_feet.py`, `tests/opensim/test_golf_address.py`, `tests/unit/motion_matching/test_club_face_fixture_feet.py`, `tests/unit/motion_matching/test_full_body_markers.py::test_stance_anchored_at_the_start_pose_holds_the_first_frame`.
 
 ## 16. Compliant Bushing Grip Model (OSV-7 Phase 1)

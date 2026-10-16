@@ -169,6 +169,9 @@ def load_capture_inputs(capture_path: Path | None) -> CaptureInputs | None:
 def club_model(model_path: Path, club: str, out_dir: Path) -> Path:
     """Copy of ``model_path`` holding ``club`` at its grip calibration.
 
+    The copy draws the wrapped-finger grip hands on the club in place of the
+    flat hand bones (#12775).
+
     The committed models carry the driver, so the viewer draws this copy (same
     file name, written to ``out_dir``) to show the club that was tracked.
     Raises ``ValueError`` for an unknown club and ``KeyError`` when the model
@@ -183,7 +186,9 @@ def club_model(model_path: Path, club: str, out_dir: Path) -> Path:
     if model is None:
         raise ValueError(f"{model_path} has no <Model>")
     calibration = mc.load_calibration(model_path.stem, club)
-    mc.attach_club(model, mc.load_msk_club(club), calibration)
+    held = mc.load_msk_club(club)
+    mc.attach_club(model, held, calibration)
+    mc.attach_grip_hands(model, held)
     out = Path(out_dir) / model_path.name
     tree.write(out, encoding="utf-8", xml_declaration=True)
     return out

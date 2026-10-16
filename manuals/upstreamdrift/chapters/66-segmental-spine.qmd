@@ -1,0 +1,29 @@
+# Segmental Spine Kinematics and Loads
+
+## Status
+
+Evidence class: scaffold only, not approved. This provisional chapter
+inventories the segmental-spine pathway of epic #12735 so it can be governed.
+No calculation is registered. The registry blocker
+`UP-D1-segmental-spine-inventory` stays open until the implementing children
+land, UP-D1 inventories the pathway and a human reviews it.
+
+The standalone research reference is
+`docs/research/segmental_spine/segmental_spine.tex`. It is editable separately
+from this manual and is not a manual artifact.
+
+## Conventions
+
+- Per-level transform maps the superior vertebra frame into the inferior frame;
+  the chain composes caudal factor first and angles never add.
+- Vertebral axes follow ISB: X anterior, Y cranial, Z right; joint angles use
+  the ZXY sequence.
+- Loads are the force and moment exerted on the superior body by the inferior
+  body, expressed in the inferior vertebra frame; compression is positive F_y.
+
+The binding record is ADR-0055.
+
+## Non-Claims
+
+No numerical result about any golfer, no validated spine load, and no
+qualified coupling law. Couplers prescribe kinematics only.

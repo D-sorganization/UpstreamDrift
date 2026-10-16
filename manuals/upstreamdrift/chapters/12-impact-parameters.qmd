@@ -112,6 +112,84 @@ cannot be imported, `tools_estimates` is unavailable with the reason.
 Each unavailable field is `None` in the result and `null` over the API, with
 its reason in `unavailable`. It is never reported as zero.
 
+## Clubhead Measurement Point and Speed Parity
+
+Every clubhead speed, impact detector and receipt in the repository measures
+one point (R5, #12682): the geometric face centre of the rendered club
+assembly, carried rigidly by the `Clubhead` frame. With $R_k$ and $o_k$ the
+frame's world rotation and origin at sample $k$ and $c$ the face centre in
+that frame (`club_face_target.face_centre_in_frame`, metres):
+
+$$p_k = o_k + R_k c, \qquad v = \dot o + \omega \times (R c),$$
+
+where $\omega$ is the frame's world angular velocity
+(`club_face_target.face_centre_path`). The `Clubhead` frame origin and the raw
+head-marker centroid are not measurement points. For the capture, $R_k$ is the
+Kabsch rotation of the calibrated head triad and $o_k$ its centroid, with $c$
+taken relative to the triad offsets' mean; capture gaps are interpolated.
+
+Speed rule (`model_appearance.club_face.clubhead_speed_timing`, GCV-20,
+#11767): impact is the sub-sample ball passage of $p$ (OSV-10); the impact
+speed is the chord speed $|p_{k+1} - p_k| / (t_{k+1} - t_k)$ of the last
+segment ending at or before the passage; the peak is the fastest chord in
+$[-60, +20]$ ms around impact. Each swing is measured on its own clock
+relative to its own impact. Parity tolerances (#11767, unchanged): impact
+speed within 3 % of the capture's and $t_\text{peak} - t_\text{impact}$
+within 5 ms of the capture's.
+
+Receipt block `dynamics.fd_phase.clubhead_speed` (`ClubheadSpeedReceipt`):
+`measurement_point = "face_centre"`, the speed rule, both tolerances, and for
+the `simulated` (forward dynamics), `reference` (`q_ref`) and `capture` series
+`impact_time_s`, `impact_speed_mps`, `peak_speed_mps` and
+`peak_minus_impact_s`, each with `status` and `reason`;
+`impact_speed_error_pct` $= 100 (v_\text{sim}/v_\text{cap} - 1)$ and
+`peak_timing_offset_s` (simulated minus capture `peak_minus_impact_s`). An
+unavailable speed is `null` with a reason, never zero; a path that never
+passes the ball states its closest approach. The block reports and does not
+gate. The `fd_phase` impact split uses the reference face centre too.
+
+Decomposition (capture-A driver, capture-B 7-iron; impact speed in m/s and
+percentage against the capture face centre; peak lead is the model's
+`peak_minus_impact_s` minus the capture's):
+
+| Series | Driver | 7-iron |
+| --- | --- | --- |
+| Capture, face centre | 51.32 | 41.26 |
+| Capture, head-cluster centroid | 51.03 (-0.6 %) | 39.58 (-4.1 %) |
+| 10-05 canonical IK, frame origin, at capture impact | 45.82 (-10.7 %) | 39.48 (-4.3 %) |
+| 10-05 canonical FD, frame origin | 41.53 (-19.1 %), lead -24.3 ms | 33.34 (-19.2 %), lead -24.9 ms |
+| Fixture tracked reference, face centre | not committed | 40.46 (-2.0 %), lead -0.1 ms |
+| Fixture FD, frame origin | 49.08 (-4.4 %), lead -4.2 ms | 39.35 (-4.6 %), lead -7.0 ms |
+| Fixture FD, face centre | 50.02 (-2.5 %), lead -4.4 ms | 40.20 (-2.6 %), lead -7.2 ms |
+
+The 10-05 rows are triage diagnostics (#12682); their run inputs predate the
+GCV-20 re-solve, and the 10-11 render inputs were deleted (#12642), so those
+rows cannot be re-measured at the face centre. The fixture rows come from
+`scripts/diagnose_clubhead_speed.py --fixture driver|iron7` on the committed
+fixtures. Shares of the canonical-render deficit:
+
+- (a) Measurement point: about 2 percentage points (frame origin against face
+  centre on the same fixture swing: 1.9 driver, 2.0 7-iron). The capture
+  centroid against the face centre adds 0.6 (driver) and 4.1 (7-iron) points
+  where a centroid is used.
+- (b) Inverse kinematics: about 9 points on the 10-05 driver (its IK misses the
+  ball by 63 mm) and 2-4 points on the 7-iron. On the current 7-iron the
+  tracked reference is 2.0 % slow and peaks on time (0.1 ms).
+- (c) Forward-dynamics tracking: about 8 (driver) and 15 (7-iron) points on the
+  10-05 runs, with the 24-25 ms early peak (GCV-20 #11767, #11961); on the
+  current 7-iron fixture 0.6 points and the whole 7.2 ms early peak.
+- (d) Unexplained: the 2.0 % that the rigid tracked reference still lacks on
+  the 7-iron at the right timing. It is the candidate share for a missing
+  shaft deflection (R6, #12686): in the captures the head cluster turns 8-10
+  degrees relative to the second club cluster within the last 20 ms before
+  impact and their separation changes by 14 mm (driver) and 3 mm (7-iron),
+  which a rigid club cannot follow. This is non-rigidity evidence, not a
+  measured kick; R6 sizes it.
+
+The early peak is therefore a tracking (fit) defect, not a shaft effect: the
+rigid kinematic reference peaks with the capture. Re-fitting belongs to R10
+(#12692); the 7-iron peak-timing miss stays a strict expected failure.
+
 ## Implementation
 
 | Symbol | Location |
@@ -122,6 +200,11 @@ its reason in `unavailable`. It is never reported as zero.
 | `ToolsDeliveryGateway`, `ToolsDeliveryEstimate` | `src/shared/python/impact_parameters/tools_gateway.py` |
 | `select_impact_index` (GCV-16 integration point) | `src/shared/python/impact_parameters/adapters/impact_time.py` |
 | Per-engine clubhead series adapters | `src/shared/python/impact_parameters/adapters/` |
+| `face_centre_path`, `face_centre_in_frame` (measurement point) | `src/shared/python/motion_matching/club_face_target.py` |
+| `clubhead_speed_report`, `speed_series`, `model_face_path`, `capture_face_path` | `src/shared/python/motion_matching/pipeline/fd_phase.py` |
+| `ClubheadSpeedReceipt`, `ClubheadSpeedSeries` | `src/shared/python/motion_matching/pipeline/receipt_dynamics.py` |
+| `detect_impact_time_s` (exporter impact) | `src/tools/native_viewer_export/overlay.py` |
+| Speed decomposition | `scripts/diagnose_clubhead_speed.py` |
 
 The extractor is engine-agnostic numpy. The per-engine adapters, the API
 service and the Impact Parameters panel consume it and are outside this
@@ -141,6 +224,22 @@ reasons, the fail-closed Tools gateway and agreement of the Tools mapping with
 these definitions within 0.01°. They do not check any
 engine's clubhead kinematics, impact detection on a real swing, or agreement
 with a launch monitor.
+
+The measurement point and the speed parity (#12682):
+
+```bash
+python3 -m pytest tests/unit/motion_matching/pipeline/test_fd_phase_clubhead_speed.py \
+  tests/unit/tools/native_viewer_export/test_overlay_impact_point.py \
+  tests/unit/motion_matching/pipeline/test_receipt_schema.py -q
+MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.diagnose_clubhead_speed --fixture iron7
+```
+
+These check $v = \dot o + \omega \times (R c)$ on an analytic rigid body, the
+face-centre rather than frame-origin impact speed on a synthetic swing, the
+receipt block and its schema, the exporter impact at the face centre (within
+one sample of the fixture's) and the fixture parity against the capture with
+the #11767 tolerances (capture-A passes; capture-B is a strict expected
+failure on peak timing).
 
 ## Assumptions and Limitations
 

@@ -39,6 +39,7 @@ issue.
 | `grasp_map_worked_example` | `G`, `K`, `Phi`, `G#`, closing-hand map `Q`, bare-club Newton-Euler worked example, split coordinates | NSX-16, 17 |
 | `c_pm_identity` | `c_plus`/`c_minus` identity samples, unique uniform minimiser, heterogeneous minimiser | NSX-23 |
 | `closure_convention` | One relative twist through the Pinocchio, Drake, MuJoCo and OpenSim conventions, conversion matrices | NSX-02, 50 |
+| `variability_sensitivity` | Tangent linearization `(F_t, G_t)` with and without the geometric preload `Σ λ_r ∇²Φ_r`, saltation matrix and event projection, closed-form minimum-variance `z*`, additive-noise flat case, planar-golfer preload block | NSX-80 to NSX-89 |
 
 ## NSX-02 Canonical Closure Convention (#12551)
 
@@ -129,6 +130,7 @@ class QuantityRecord:
     conventions: tuple[str, ...]; hypotheses: tuple[str, ...]
     model_provenance: ModelProvenance; input_provenance: InputProvenance
     validation_status: ValidationStatus; reason: str | None = None
+    conditioning: tuple[str, ...] = ()   # NSX-81: orthogonal to hypotheses
 
 @dataclass(frozen=True)
 class ClosedLoopSnapshot:
@@ -152,6 +154,14 @@ class ClosedLoopSnapshot:
 - `QuantityRecord`: `FAMILY_DEPENDENT` requires at least one hypothesis;
   `INVARIANT` forbids hypotheses; `UNAVAILABLE` requires a reason and all-NaN
   values.
+- `conditioning` (NSX-81, #12710) is an axis orthogonal to allocation
+  dependence: the declared hypotheses the value is conditioned on, whatever
+  its allocation dependence. `hypotheses` keeps meaning allocation priors and
+  its rules are unchanged, so an `INVARIANT` record with `hypotheses` is still
+  rejected, while `INVARIANT` with non-empty `conditioning` is legal. Default
+  is empty (old records are unchanged). Ids are free text, as for
+  `hypotheses`; registry resolution happens at display time via
+  `require_verified_for_display`. A bare string is a `TypeError`.
 - Arrays are read-only (writing raises `ValueError`).
 - Import without any physics engine installed.
 
@@ -316,8 +326,8 @@ def min_metric_torque(snapshot, W: np.ndarray | AllocationMetric) -> np.ndarray
 ```python
 def grasp_map(grip_frame: GripFrame, r_L, r_R) -> np.ndarray          # (6, 12)
 def split_basis(G: np.ndarray) -> np.ndarray                           # (12, 6)
-def net_club_wrench(snapshot) -> QuantityRecord                        # INVARIANT
-def hand_wrenches(net: np.ndarray, s: np.ndarray) -> tuple[np.ndarray, np.ndarray]
+def net_club_wrench(snapshot, club_ne) -> QuantityRecord               # INVARIANT
+def hand_wrenches(net: np.ndarray, s: np.ndarray, G: np.ndarray) -> tuple[np.ndarray, np.ndarray]
 def split_coordinates(W_L: np.ndarray, W_R: np.ndarray) -> np.ndarray
 ```
 
@@ -329,6 +339,12 @@ def split_coordinates(W_L: np.ndarray, W_R: np.ndarray) -> np.ndarray
   `Phi K = I`, `G G# = I`, round trip `s -> W -> s` exact to `1e-12`; `K` is
   independent of the origin shift; net wrench equals the golden
   bare-club Newton-Euler value (`worked_example.net_wrench_frame`).
+- The snapshot carries no club kinematics, so `net_club_wrench` takes the
+  engine's bare-club Newton-Euler keywords `club_ne`
+  (`adapter.club_newton_euler`) and checks their mass against
+  `snapshot.bare_club`; `hand_wrenches` needs `G` because `K` depends on the
+  half separation. `closing_hand_map(hand, d, net) -> (A, s0)` gives
+  `s = A lambda + s0` with `lambda = -y_hand`.
 - Scaling by `C-SCALE-FORCE-MOMENT`. Add `"loop_nullspace_family"` to
   `grip_wrench.SplitMethod`; do not duplicate `allocate_min_norm`.
 
@@ -344,6 +360,19 @@ GRF, else `UNAVAILABLE`), `N_c^T tau` (metric-free), `P_{c,W} tau` labelled with
 `W`. Every item is `QuantityRecord(INVARIANT)` or `UNAVAILABLE`. Test:
 invariance under random null-space perturbations to `1e-9` scaled on the
 planar goldens.
+
+As built: `decomposition` is one `Decomposition` per frame (a lone
+`Decomposition` is a `TypeError`); optional keywords are `club_ne` (per-frame
+bare-club Newton-Euler keywords), `gates` (an `AdmissionGates`; default is the
+strict defaults with the trajectory's scales) and `metric`. Record names are
+`net_club_wrench`, `loop_power`, `base_centroidal_rows`, `tangent_pairing` and
+`min_metric_torque`. Each is `INVARIANT` or `UNAVAILABLE` with a reason:
+`Phi_ddot` gates the net wrench, `Phi_dot` gates the loop power and the tangent
+pairing, and a free ground load additionally needs stationary contacts and
+`J_g N_c = 0`. The base rows are `J_g,b^T f_obs` on the unactuated coordinates
+outside the loop support, invariant for the observed ground load held fixed, and
+require an absorbable base balance; the centroidal-momentum map is not part of
+the snapshot and is not reported.
 
 ## NSX-20 Solver Backends (#12563)
 
@@ -366,6 +395,22 @@ hypothesis id. `conflict_set()` returns an inclusion-minimal set of ids
 (IIS); golden `envelope_analytic_lp.infeasible` names the expected minimal
 set. Circular cones: declared facet count `k` and error bound
 `1/cos(pi/k) - 1` for the outer polygon (inner polygon scale `cos(pi/k)`).
+
+Implementation (`feasible_set.py`, `feasible_rows.py`): `x = x_p + N z` with
+`x = (tau, lambda, f_g)`; rows are `g . z <= h` with labels
+`<hypothesis id>:<item>:<side>` and the declaring hypothesis id. Torque rows
+use the `CapacityVector` (actuated order must match the decomposition). Each
+`FrictionCone` (indices into `x`) gives a unilateral normal row, `k` linear
+facets (outer or inner, declared `k` and bound `1/cos(pi/k) - 1` or
+`1 - cos(pi/k)`) and one exact SOC block `(mu n, t1, t2)`. A hand squeeze
+floor is `selector . x + offset >= minimum` (sign convention of NSX-16: `s1`
+negative is squeeze). `is_empty()` and the conflict queries use the exact
+cones; `to_lp()` uses the linearisation; `to_socp()` uses the exact cones.
+`conflict_set()` is minimal at hypothesis level (deletion filter);
+`conflict_rows()` is a row-level IIS (elastic filter, then deletion filter).
+Rows resting on an ASSUMED capacity slot or on a hypothesis that fails the
+display gate carry flags (`flagged_rows()`, `rests_on_unverified`). Cone
+data is accepted only when `H-FRICTION-CONE` is declared, likewise for grip.
 
 ## NSX-22 Static Envelopes (#12565)
 
@@ -477,8 +522,10 @@ MuJoCo (NSX-51): hard-KKT evaluation, drift method recorded in provenance
 (`drift=central_finite_difference` in the model provenance); stock soft-weld
 stepping is the separate divergence entry `mujoco-stock-soft-weld-vs-hard-kkt`.
 The cross-engine test holds `M`, `h`, `J_c` and `Jdot_v` to 1e-11, 1e-12 and 1e-8
-scaled (measured 2e-14, 3e-15, 3e-9). MyoSuite (NSX-52): reuses the MuJoCo path,
-records `kkt_regularization`, `FULL` only when 0. Drake (NSX-53): native
+scaled (measured 2e-14, 3e-15, 3e-9). MyoSuite (NSX-52, `MyoSuiteForceAdapter`): subclasses
+`MujocoForceAdapter` (no second implementation), records
+`kkt_regularization=<value>` in the model provenance (`name=myosuite`), and is
+`FULL` only while that value is exactly 0, else `NONE`. Drake (NSX-53): native
 adapter, explicit `from pydrake.X import Y` imports, no module-level mocks.
 OpenSim (NSX-54): delegates to `OpenSimFullBodyParityAdapter`.
 
@@ -489,9 +536,36 @@ otherwise a deferred-validation record and capability `NONE`.
 
 ## NSX-56 Conformance (#12584)
 
-Track N compares canonical `M`, `h`, `J_c`, `Jdot_v` tightly; Track S compares
-invariants and envelopes with tolerance propagated from Track N differences.
-Never hand-widened.
+`tests/integration/cross_engine/test_loop_nullspace_conformance.py` is the one
+parametrised harness over every FULL engine (Pinocchio reference; MuJoCo, Drake,
+OpenSim). Each state is projected once with `project_to_closure`, each engine
+builds its snapshot through `snapshot_from_adapter`, and arrays are permuted to
+the reference order by coordinate name.
+
+Track N compares canonical `M`, `h`, `J_c`, `Jdot_v` tightly. Tolerances are the
+per-pair, per-metric entries (`check: closed_loop_snapshot_conformance`) in
+`tests/integration/cross_engine/divergence_registry.yaml`, with
+the rationale and the measured agreement; the grip frame, club inertia split and
+loop topology are compared in the same track. Measured: `M`, `h` below 1e-15,
+`J_c` below 3e-15, `Jdot_v` 1.8e-12 (Drake, OpenSim, analytic or exact) and
+1.2e-10 (MuJoCo central finite difference), all scaled by `max(1, |ref|)`.
+
+Track S compares quantities derived from the snapshot: the rigid KKT
+acceleration and grip-wrench multiplier, kinetic energy, power, closure singular
+values (rank 6) and the closed-form grip-wrench envelope over a unit actuator
+box. Its tolerance is propagated from the Track N differences measured in the
+same run (`kkt_bound`: `|K^-1| (|dr| + |dK||x|) / (1 - |K^-1||dK|)`; Weyl for
+singular values), never hand-widened. A perturbed-engine control proves both
+tracks discriminate.
+
+Capability per engine: Pinocchio, MuJoCo, MyoSuite, Drake and OpenSim are FULL
+and are registered in `create_engine_force_adapter`; the harness skips MyoSuite
+cleanly when `myosuite` is not importable. Simscape (no native adapter) and the
+synthetic fixtures declare NONE and are asserted to refuse a snapshot. MyoSuite
+2.12.2 agrees with Pinocchio to the same digits as MuJoCo (the adapter reuses
+the MuJoCo code); MuJoCo 3.6.0 and 3.8.0 give identical Track N errors to three
+significant digits. Agreement between engines is not physical
+validation.
 
 ## NSX-60 Lower-Body Loop (#12585, Strong)
 
@@ -505,3 +579,36 @@ condition; observed GRF reduces nullity by its rank.
 envelope union contains every member. NSX-62 samples only along unidentified
 directions inside the pseudo-inertia constraint; identified combinations stay
 fixed.
+
+## NSX-80 Variability Sensitivity (#12709)
+
+Specification only; no production module. Section numbers in
+`loop_nullspace.tex` (Variability Sensitivity, `sec:variability`) are the
+citable contract for every variability child (epic section 5A, V1 to V8):
+
+| Section | Content | Golden keys |
+|---|---|---|
+| `sec:var-lin` | KKT linearization on the tangent bundle, reactions re-solved, `K_geom(λ) = Σ_r λ_r ∇²Φ_r`; `G_t N = 0` | `linearization`, `golfer_preload` |
+| `sec:var-salt` | Event projection `Π` and saltation matrix `S`, `S f⁻ = f⁺` | `saltation` |
+| `sec:var-cov` | Covariance recursion and adjoint form | `min_variance.model` |
+| `sec:var-mechanisms` | M1 signal-dependent noise, M2 geometric preload, M3 muscle impedance (MyoSuite/OpenSim only); `OBJECTIVE_FLAT_INVARIANT` when none is declared | `min_variance`, `additive_noise_flat` |
+| `sec:var-face` | Wrapped face-angle error, bias, SD, IQR, exceedance, miss probability; coefficient of variation banned for zero-centred outcomes | none |
+
+Registry additions (`src/config/loop_nullspace_registry.json`): hypotheses
+`H-NOISE-ADDITIVE`, `H-NOISE-SIGNAL-DEPENDENT`, `H-GEOMETRIC-PRELOAD`,
+`H-DECLARED-JOINT-IMPEDANCE`, `H-SENSORIMOTOR-DELAY`, `H-TIMING-JITTER`,
+`H-MUSCLE-SHORT-RANGE-STIFFNESS`; eight citations, all `VERIFIED` against
+retrieved abstracts (Harris and Wolpert 1998, Jones et al. 2002, Todorov and
+Jordan 2002, Scholz and Schoener 1999, Mueller and Sternad 2004, Burdet et al.
+2001, Cusumano and Dingwell 2013, Cui et al. 2008). Partial-support caveats are
+kept in each `claim_checked`: Scholz and Schoener (variance partition not in the
+abstract), Burdet (impedance geometry, not co-contraction) and Cui (feline,
+force-dependent rather than activation). Hypothesis statements claim only what
+the abstract supports; impedance values and noise amplitudes are declared by the
+user, not measured.
+
+Preconditions for consumers: use the golden values as oracles, never as
+inputs. Postconditions: the `z`-dependence of `F_t` appears only through
+`λ(z)`; an additive-noise objective with no M2 has gradient exactly zero.
+Non-claims: noise amplitudes are declared hypotheses, not measurements; no claim
+that any golfer uses a minimum-variance allocation.

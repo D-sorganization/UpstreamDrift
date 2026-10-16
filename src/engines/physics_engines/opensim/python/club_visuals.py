@@ -1,5 +1,9 @@
 """Visible club for OpenSim models: generated shaft, grip and head meshes (OSV-1).
 
+The two curled-finger grip hands (``model_appearance.grip_hands``, OSV-2,
+#12775) are written alongside, in the same club-body frame, so a model can draw
+them on the ``Club`` body exactly as MuJoCo, Drake and Pinocchio do.
+
 The three meshes come from the shared club assembly
 (``model_appearance.club_assembly``: Tools parametric head with a committed
 STL fallback, tapered shaft and grip), are written once as binary STL under
@@ -24,6 +28,7 @@ from src.shared.python.model_appearance.club_assembly import (
     ClubAssembly,
     assembly_meshes,
 )
+from src.shared.python.model_appearance.grip_hands import grip_hand_meshes
 from src.shared.python.model_appearance.club_head_mesh import load_club_head
 from src.shared.python.model_appearance.mesh_io import stl_bytes
 from src.shared.python.engine_core.opensim_runtime import import_opensim
@@ -32,14 +37,17 @@ OPENSIM_DIR = Path(__file__).resolve().parents[1]
 GEOMETRY_DIR = OPENSIM_DIR / "models" / "geometry" / "club"
 PROVENANCE_NAME = "provenance.json"
 PARTS = ("shaft", "grip", "head")
+HAND_PARTS = ("lead_hand", "trail_hand")
 DEFAULT_FINISH = "satin_steel"
 SCHEMA = "opensim-club-visuals-v1"
 
 
 def asset_filename(alias: str, part: str) -> str:
     """STL file name for ``part`` of the club with head alias ``alias``."""
-    if part not in PARTS:
-        raise ValueError(f"unknown club part {part!r}; expected one of {PARTS}")
+    if part not in PARTS + HAND_PARTS:
+        raise ValueError(
+            f"unknown club part {part!r}; expected one of {PARTS + HAND_PARTS}"
+        )
     if not alias or not alias.replace("_", "").isalnum():
         raise ValueError(f"club alias {alias!r} must be alphanumeric")
     return f"club_{alias}_{part}.stl"
@@ -50,24 +58,40 @@ def asset_paths(alias: str, directory: Path = GEOMETRY_DIR) -> dict[str, Path]:
     return {part: Path(directory) / asset_filename(alias, part) for part in PARTS}
 
 
+def hand_asset_paths(alias: str, directory: Path = GEOMETRY_DIR) -> dict[str, Path]:
+    """Absolute path of each grip hand's STL in ``directory``."""
+    return {p: Path(directory) / asset_filename(alias, p) for p in HAND_PARTS}
+
+
+def _write_stls(
+    meshes: Mapping[str, Any], alias: str, paths: Mapping[str, Path]
+) -> dict[str, str]:
+    """Write each mesh to its path; returns the sha256 of every file."""
+    digests: dict[str, str] = {}
+    for part, mesh in meshes.items():
+        payload = stl_bytes(mesh, f"{alias} {part}; club frame; units=m")
+        paths[part].write_bytes(payload)
+        digests[part] = hashlib.sha256(payload).hexdigest()
+    return digests
+
+
 def write_club_assets(
     club: ClubAssembly, directory: Path = GEOMETRY_DIR
 ) -> dict[str, Path]:
     """Write the club's STLs and merge their provenance into the manifest.
 
-    Postconditions: three files exist; the manifest entry for the club records
-    the generator, head source, head library name, assembly parameters and the
-    sha256 of every file.
+    Postconditions: three club files and two grip-hand files exist; the
+    manifest entry for the club records the generator, head source, head
+    library name, assembly parameters and the sha256 of every file (the hands
+    under ``grip_hands``).
     """
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)
     head = load_club_head(club.head_alias)
     paths = asset_paths(club.head_alias, out)
-    digests: dict[str, str] = {}
-    for part, mesh in assembly_meshes(club).items():
-        payload = stl_bytes(mesh, f"{club.head_alias} {part}; club frame; units=m")
-        paths[part].write_bytes(payload)
-        digests[part] = hashlib.sha256(payload).hexdigest()
+    digests = _write_stls(assembly_meshes(club), club.head_alias, paths)
+    hand_paths = hand_asset_paths(club.head_alias, out)
+    hand_digests = _write_stls(grip_hand_meshes(club), club.head_alias, hand_paths)
     params = {
         "head_alias": club.head_alias,
         "length_m": club.length_m,
@@ -97,6 +121,11 @@ def write_club_assets(
         "head_source": head.source,
         "files": {p: asset_filename(club.head_alias, p) for p in PARTS},
         "sha256": digests,
+        "grip_hands": {
+            "generator": "src.shared.python.model_appearance.grip_hands",
+            "files": {p: path.name for p, path in hand_paths.items()},
+            "sha256": hand_digests,
+        },
     }
     manifest_path.write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -127,6 +156,7 @@ def club_mesh_elements(
     finish: str = DEFAULT_FINISH,
     materials: Mapping[str, Material] | None = None,
     socket_frame: str = "..",
+    parts: tuple[str, ...] = PARTS,
 ) -> list[ET.Element]:
     """``<Mesh>`` elements for shaft, grip and head, files under ``mesh_dir_ref``.
 
@@ -134,13 +164,14 @@ def club_mesh_elements(
     (absolute, or ``""`` for bare file names). OpenSim 4.6 does not resolve
     relative paths containing ``..``, so committed models use bare names and
     loaders call :func:`register_geometry_path`. Colours follow the appearance
-    library: club finish for shaft and head, ``grip_rubber`` for the grip.
+    library: club finish for shaft and head, ``grip_rubber`` for the grip and
+    the golf glove for the grip hands (``parts=HAND_PARTS``).
     """
     table = materials if materials is not None else library.MATERIALS
     if finish not in table:
         raise ValueError(f"unknown club finish {finish!r}")
     elements = []
-    for part in PARTS:
+    for part in parts:
         material = table[PART_MATERIALS[part] or finish]
         rgb = (material.rgba[0], material.rgba[1], material.rgba[2])
         name = asset_filename(alias, part)
@@ -162,6 +193,22 @@ def attach_club_meshes(
     for old in [m for m in geom if str(m.get("name", "")).startswith("club_")]:
         geom.remove(old)
     new = club_mesh_elements(alias, mesh_dir_ref, finish)
+    geom.extend(new)
+    return len(new)
+
+
+def attach_grip_hand_meshes(body: ET.Element, alias: str, mesh_dir_ref: str) -> int:
+    """Replace ``body``'s grip-hand meshes by both wrapped hands; returns 2.
+
+    ``body`` must be the club body: the hand meshes are in its frame.
+    """
+    geom = body.find("attached_geometry")
+    if geom is None:
+        geom = ET.SubElement(body, "attached_geometry")
+    names = {f"club_{part}_geom" for part in HAND_PARTS}
+    for old in [m for m in geom if m.get("name") in names]:
+        geom.remove(old)
+    new = club_mesh_elements(alias, mesh_dir_ref, parts=HAND_PARTS)
     geom.extend(new)
     return len(new)
 

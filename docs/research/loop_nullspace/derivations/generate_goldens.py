@@ -24,6 +24,7 @@ import envelope_case  # noqa: E402
 import grasp_map  # noqa: E402
 import planar_golfer  # noqa: E402
 import spatial_counts  # noqa: E402
+import variability_goldens  # noqa: E402
 
 GENERATORS: dict[str, Callable[[], dict[str, Any]]] = {
     "planar_two_arm_full": planar_golfer.generate_full,
@@ -34,6 +35,7 @@ GENERATORS: dict[str, Callable[[], dict[str, Any]]] = {
     "grasp_map_worked_example": grasp_map.generate,
     "c_pm_identity": c_pm_identity.generate,
     "closure_convention": closure_convention.generate,
+    "variability_sensitivity": variability_goldens.generate,
 }
 
 

@@ -90,6 +90,36 @@ def _frame_placement(spec: Mapping[str, Any], frame: str) -> tuple[str, Array]:
     raise ValueError(f"spec has no frame named {frame}")
 
 
+def require_club_assembly(spec: Mapping[str, Any]) -> tuple[Any, str]:
+    """``(assembly, club_body_name)`` of ``spec``; fail fast when it has no club.
+
+    Precondition for every face / impact target (#12702). Raises ``ValueError``
+    naming the spec source (``schema_version`` and ``provenance``), the bodies
+    carrying the club suffix and the solids found, so the caller can tell a
+    club-less document from one whose club solids are not recognised.
+    """
+    from src.shared.python.model_appearance import club_assembly as ca
+
+    assembly = ca.assembly_from_spec(spec)
+    club_body = ca.club_body_name(spec)
+    if assembly is None or club_body is None:
+        bodies = [
+            b
+            for b in spec.get("bodies", ())
+            if str(b.get("name", "")).endswith(ca.CLUB_BODY_SUFFIX)
+        ]
+        solids = [str(s.get("name")) for b in bodies for s in b.get("solids", ())]
+        raise ValueError(
+            "spec has no club body: need a body named '*"
+            f"{ca.CLUB_BODY_SUFFIX}' with a 'Grip' solid or the native "
+            f"'{ca.NATIVE_GRIP_BUTT_SOLID}' grip segment; spec source "
+            f"schema_version={spec.get('schema_version')!r}, "
+            f"provenance={str(spec.get('provenance'))[:120]!r}; "
+            f"club bodies={[b.get('name') for b in bodies]}, solids={solids}"
+        )
+    return assembly, club_body
+
+
 def face_axis_in_frame(spec: Mapping[str, Any], frame: str = FACE_FRAME) -> Array:
     """Unit rendered face normal expressed in the spec ``frame``.
 
@@ -100,10 +130,7 @@ def face_axis_in_frame(spec: Mapping[str, Any], frame: str = FACE_FRAME) -> Arra
     """
     from src.shared.python.model_appearance import club_assembly as ca
 
-    assembly = ca.assembly_from_spec(spec)
-    club_body = ca.club_body_name(spec)
-    if assembly is None or club_body is None:
-        raise ValueError("spec has no club body")
+    assembly, club_body = require_club_assembly(spec)
     body, placement = _frame_placement(spec, frame)
     if body != club_body:
         raise ValueError(f"frame {frame} is on {body}, not on the club body")
@@ -115,13 +142,32 @@ def face_centre_in_frame(spec: Mapping[str, Any], frame: str = FACE_FRAME) -> Ar
     """Rendered face-centre point expressed in the spec ``frame`` (metres)."""
     from src.shared.python.model_appearance import club_assembly as ca
 
-    assembly = ca.assembly_from_spec(spec)
-    if assembly is None:
-        raise ValueError("spec has no club body")
+    assembly, _ = require_club_assembly(spec)
     _, placement = _frame_placement(spec, frame)
     face_axis_in_frame(spec, frame)  # same club-body checks
     centre = ca.clubface_centre(assembly) - placement[:3, 3]
     return np.asarray(placement[:3, :3].T @ centre, dtype=float)
+
+
+def face_centre_path(rotations: Array, origins: Array, centre_in_frame: Array) -> Array:
+    """World face-centre path of a rigid head frame: ``p_k + R_k c`` (#12682).
+
+    This is the one clubhead measurement point of the repository: every
+    clubhead speed, impact detector and receipt reads the geometric face
+    centre ``c`` (metres, expressed in the head frame, from
+    :func:`face_centre_in_frame`) carried by the frame poses, never the frame
+    origin or a marker centroid. ``rotations`` is ``(n, 3, 3)`` and
+    ``origins`` ``(n, 3)``; NaN rows (an unobserved capture frame) stay NaN.
+    Raises ``ValueError`` for mismatched shapes or a non-finite ``c``.
+    Postcondition: an ``(n, 3)`` array whose rigid-body velocity is
+    ``v_origin + omega x (R c)``.
+    """
+    rot = np.asarray(rotations, dtype=float)
+    pos = np.asarray(origins, dtype=float)
+    centre = _finite_vector(centre_in_frame, "centre_in_frame")
+    if rot.ndim != 3 or rot.shape[1:] != (3, 3) or pos.shape != (len(rot), 3):
+        raise ValueError("rotations must be (n, 3, 3) and origins (n, 3)")
+    return np.asarray(np.einsum("nij,j->ni", rot, centre) + pos, dtype=float)
 
 
 def observe_frame_rotations(
@@ -295,7 +341,9 @@ def observe_capture_face(
     axis = face_axis_in_frame(spec, frame)
     centre = face_centre_in_frame(spec, frame) - local_mean
     normals = np.einsum("nij,j->ni", rotations, axis)
-    centres = np.einsum("nij,j->ni", rotations, centre) + world_mean
+    # The triad centroid stands in for the frame origin, so the face centre is
+    # carried relative to the offsets' own mean.
+    centres = face_centre_path(rotations, world_mean, centre)
     centres[~np.isfinite(normals).all(axis=1)] = np.nan
     return normals, centres
 
@@ -409,17 +457,17 @@ def model_face_centres(
 ) -> Array:
     """World rendered face centre per row of ``q`` from the IK provider's FK.
 
-    Same contract as :func:`model_face_normals` (GCV-20 clubhead speed).
+    Same contract as :func:`model_face_normals` (GCV-20 clubhead speed); the
+    point is :func:`face_centre_path` (#12682).
     """
     rows = np.asarray(q, dtype=float)
     if rows.ndim != 2:
         raise ValueError("q must be (frames, coordinates)")
     centre = face_centre_in_frame(spec, frame)
-    out = []
-    for row in rows:
-        rot, pos = kin.body_poses(row, [frame])[frame]
-        out.append(rot @ centre + pos)
-    return np.array(out)
+    poses = [kin.body_poses(row, [frame])[frame] for row in rows]
+    rotations = np.array([rot for rot, _ in poses], dtype=float).reshape(-1, 3, 3)
+    origins = np.array([pos for _, pos in poses], dtype=float).reshape(-1, 3)
+    return face_centre_path(rotations, origins, centre)
 
 
 def face_fit_summary(model_normals: Array, capture_normals: Array) -> dict[str, Any]:

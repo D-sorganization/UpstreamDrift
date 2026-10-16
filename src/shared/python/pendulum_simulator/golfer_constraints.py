@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 
 from .golfer_dynamics import analytical_fk_jacobians
-from .golfer_kinematics import forward_kinematics
+from .golfer_kinematics import club_shaft_offset_derivative, forward_kinematics
 from .physics_golfer import N_DOF, GolferParams
 
 # Rows of ``constraint_vector`` that form an independent closure (#12608): the
@@ -163,8 +163,11 @@ def analytical_constraint_jacobian(q: np.ndarray, p: GolferParams) -> np.ndarray
 
     # grip_left = rh + (grip_left - grip_right) * (sin, -cos)(th_club), so
     # d(grip_left)/dq_7 = (grip_left - grip_right) * (cos, sin)(th_club)
-    Phi_q[0, 7] -= (p.grip_left - p.grip_right) * cos_club
-    Phi_q[1, 7] -= (p.grip_left - p.grip_right) * sin_club
+    d_grip_x, d_grip_y = club_shaft_offset_derivative(
+        th_club, p.grip_left - p.grip_right
+    )
+    Phi_q[0, 7] -= d_grip_x
+    Phi_q[1, 7] -= d_grip_y
 
     # Constraint 3: perpendicular distance = 0
     # Phi[2] = (lh - rh) · club_perp = lh_x * club_perp_x + lh_y * club_perp_y

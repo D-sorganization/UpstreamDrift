@@ -91,18 +91,20 @@ def build_overlay_feed(
 def detect_impact_time_s(swing: SwingInput) -> float:
     """Impact time of ``swing`` from the shared checked rule (one detector).
 
-    The head trajectory is the ``Clubhead`` frame of the specification export
-    placed by MuJoCo forward kinematics at every state of ``swing.q``; impact
-    is ``model_appearance.club_face.ball_passage`` (OSV-10), the sub-sample
-    instant the path comes closest to the address position, with its height
-    and ball-radius checks. This uses the ``Clubhead`` frame origin rather
-    than the true face-centre point (``club_assembly.clubface_centre``):
-    deriving the face centre here would need the club spec resolved from
-    ``swing.bundle.spec_bytes`` into a ``ClubAssembly`` and composed with the
-    frame's rotation, which is a larger change than this fix (GCV-14, #11720).
+    The head trajectory is the face centre, the one clubhead measurement
+    point (#12682): the ``Clubhead`` frame of the specification export placed
+    by MuJoCo forward kinematics at every state of ``swing.q``, carrying the
+    rendered face centre of the club assembly
+    (``club_face_target.face_centre_in_frame``) through
+    ``club_face_target.face_centre_path``. Impact is
+    ``model_appearance.club_face.ball_passage`` (OSV-10), the sub-sample
+    instant the face centre comes closest to its address position, with its
+    height and ball-radius checks; the receipt (``fd_phase``) and the fixture
+    speed timing use the same point.
 
-    Raises ``BackendUnavailable`` without MuJoCo and ``ValueError`` when no
-    frame is a valid impact.
+    Raises ``BackendUnavailable`` without MuJoCo and ``ValueError`` when the
+    specification has no club on the ``Clubhead`` frame or no frame is a
+    valid impact.
     """
     try:
         from src.engines.physics_engines.mujoco.python.overlay_source import (
@@ -111,17 +113,25 @@ def detect_impact_time_s(swing: SwingInput) -> float:
     except ImportError as exc:
         raise BackendUnavailable(f"mujoco is not available: {exc}") from exc
     from src.shared.python.model_appearance.club_face import ball_passage
+    from src.shared.python.motion_matching.club_face_target import (
+        FACE_FRAME,
+        face_centre_in_frame,
+        face_centre_path,
+    )
 
+    centre = face_centre_in_frame(json.loads(swing.bundle.spec_bytes))
     source = MujocoOverlaySource(swing.bundle.spec_bytes)
     names = swing.bundle.coordinate_order
-    head = np.array(
+    poses = np.array(
         [
             source.frame_poses(dict(zip(names, map(float, row), strict=True)))[
-                "Clubhead"
-            ][:3, 3]
+                FACE_FRAME
+            ]
             for row in swing.q
-        ]
-    )
+        ],
+        dtype=float,
+    ).reshape(-1, 4, 4)
+    head = face_centre_path(poses[:, :3, :3], poses[:, :3, 3], centre)
     times = np.asarray(swing.source_times_s, dtype=float)
     t_impact, _, _ = ball_passage(times, head)
     return t_impact

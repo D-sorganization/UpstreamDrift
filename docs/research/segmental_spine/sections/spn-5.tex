@@ -1,0 +1,77 @@
+\subsection{Spinal Load Series and Sign Conventions}
+\label{sec:spn-5}
+
+This section documents the load container and the tension-positive bridge of
+the segmental spine (issue \#12747, epic \#12735, ADR-0055 item 5). The code is
+\texttt{src/shared/python/spine/loads.py}; it performs no dynamics, only
+bookkeeping, frame rotation and wrench transport of loads produced elsewhere.
+
+\paragraph{Observables.}
+Three observables are carried and never conflated: \texttt{GENERALIZED\_EFFORT}
+(inverse-dynamics generalized force, all structures lumped),
+\texttt{JOINT\_REACTION} (OpenSim \texttt{JointReaction} with static-optimization
+muscle forces applied) and \texttt{PASSIVE\_ELEMENT} (bushing, ligament and disc
+stiffness elements only).
+
+\paragraph{Frames and Signs.}
+For every observable the wrench $(\mathbf F,\mathbf M)$ is that exerted
+\emph{on the superior vertebra by the inferior vertebra}, expressed in the
+inferior vertebra ISB frame ($X$ anterior, $Y$ cranial, $Z$ right), about the
+mid-disc joint centre. Units are N and N\,m.
+\begin{align}
+  \text{compression} &= +F_y, &
+  \text{AP shear} &= +F_x\ (\text{anterior}), &
+  \text{ML shear} &= +F_z\ (\text{right}).
+\end{align}
+A superior body of mass $m$ at rest is supported by $F_y=+mg$ (compression
+positive). Tension-positive consumers
+(\texttt{body\_part\_viz/axial\_loads.py}) receive
+$T=-F_y$.
+
+\paragraph{Wrench Transport.}
+Given source-frame samples $(\mathbf F_s,\mathbf M_s)$ applied at a reference
+point displaced by $\mathbf r$ from the joint centre ($\mathbf r$ expressed in
+the inferior ISB frame) and a rotation $R$ with $\mathbf v_{\mathrm{ISB}}=R\,\mathbf v_s$,
+\begin{equation}
+  \mathbf F = R\mathbf F_s,\qquad
+  \mathbf M = R\mathbf M_s + \mathbf r\times\mathbf F ,
+\end{equation}
+evaluated through \texttt{move\_wrench\_point}. Worked check: $\mathbf F=(0,100,0)$\,N
+at $\mathbf r=(0.05,0,0)$\,m gives $\mathbf M=(0,0,5)$\,N\,m.
+
+\paragraph{Normalisation.}
+\texttt{in\_body\_weights} divides forces by $mg$ with $g=9.80665$\,m/s$^2$
+(\texttt{GRAVITY\_FLOAT}) and moments by $mg$ (units BW\,m). The series then
+reports \texttt{force\_unit="BW"} and records the mass in provenance; it cannot
+feed the newton-valued axial bridge.
+
+\paragraph{Peaks.}
+\texttt{peak(q)} returns, per level, the signed value of largest magnitude and
+its time; ties resolve to the earliest sample.
+
+\paragraph{Provenance.}
+Every series requires non-empty string values for \texttt{model\_id},
+\texttt{model\_sha256}, \texttt{solver}, \texttt{cost\_exponent} (\texttt{n/a}
+when unused), \texttt{distribution\_source} and \texttt{external\_loads}.
+Missing or blank keys raise \texttt{ValueError}.
+
+\paragraph{Preconditions.}
+Finite, strictly increasing 1-D time; distinct levels; force and moment of
+shape $(n,L,3)$ and finite; rotations proper ($R^\top R=I$, $\det R=1$,
+tolerance $10^{-6}$). Arrays are stored read-only.
+
+\paragraph{Axial Bridge.}
+\texttt{SpinalAxialLoadProvider(series, time\_s)} satisfies the
+\texttt{AxialLoadProvider} protocol at one sample time (no interpolation; the
+time must match a sample within $10^{-9}$\,s) and returns tension $=-$compression
+per level name.
+
+\paragraph{Limitations.}
+No load values are computed or qualified here; accuracy depends on the
+producing analysis, and a successful container build is not physical
+acceptance. Cervical levels are out of scope.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/shared/python/spine/test_loads.py -q -n 0
+\end{verbatim}

@@ -1,0 +1,76 @@
+% Section fragment: garment classification (R2, #12681). Pulled into the
+% golfer appearance master with \InputIfFileExists; no preamble here.
+\section{Garment Classification}
+\label{sec:garment-classification}
+
+\subsection{Rule}
+A body name $n$ is split on ``/'' into path components $c_1, \dots, c_k$
+($c_k$ is the leaf segment). Each rule $(p, \pi)$ in
+\texttt{model\_appearance.library.PART\_RULES} is a lowercased \texttt{fnmatch}
+pattern $p$ over \emph{one} component and an anatomical part $\pi$. The
+specificity of $p$ is
+\[
+  s(p) = \begin{cases}
+    0 & \text{no wildcard (exact segment name)},\\
+    1 & \text{single trailing wildcard (prefix)},\\
+    2 & \text{otherwise (substring)}.
+  \end{cases}
+\]
+For component $c$ let $H(c) = \{(s(p), \pi) : p \text{ matches } c\}$ and
+$s^\ast = \min s$ over $H(c)$. The component's part is the unique $\pi$ with
+$(s^\ast, \pi) \in H(c)$; two different parts at $s^\ast$ raise
+\texttt{ValueError} (no silent first match). The body's part is that of the
+first component, scanning $c_k, c_{k-1}, \dots, c_1$, that matches any rule,
+else ``other''. Hence the leaf segment always beats its parent subsystem, and
+the result is invariant under any permutation of \texttt{PART\_RULES}.
+
+\subsection{Root Cause of the Navy Pelvis}
+The previous rule list was first-match over the whole lowercased path with
+\texttt{*torso*} before \texttt{*pelvis*}/\texttt{*hips*}. The GolfSwing3D
+pelvis \texttt{.../Hips and Torso Inputs/LowerTorso} therefore classified as
+\emph{torso} and wore the shirt (\texttt{polo\_navy}). Its folder names both
+the pelvis and the torso, so the three trunk segments are named exactly.
+
+\subsection{Golden Table}
+\begin{tabular}{ll}
+  Body (leaf) & Part \\ \hline
+  \texttt{LowerTorso} & pelvis \\
+  \texttt{UpperTorsoBase}, \texttt{COMRod} & torso \\
+  \texttt{Head} & head \\
+  \texttt{HubtoLS}, \texttt{HubtoRS} & shoulder \\
+  \texttt{LUpperArm}, \texttt{RUpperArm} & upper\_arm \\
+  \texttt{Left/Right Elbow Joint/Spherical Solid(1)} & forearm (folder) \\
+  \texttt{LLowerForearm}, \texttt{RLowerForearm} & forearm \\
+  \texttt{Clubface Vector} & club \\
+  \texttt{RHandStandoff} & hand \\
+  \texttt{femur\_\{l,r\}} & thigh \\
+  \texttt{tibia\_\{l,r\}} & shin \\
+  \texttt{talus\_*}, \texttt{calcn\_*}, \texttt{toes\_*} & foot \\
+\end{tabular}
+
+Across all 26 spec files in the repository, \texttt{LowerTorso} was the only
+mis-classified body. The elbow ``Spherical Solid'' leaves match no rule and are
+classified by their nearest folder.
+
+\subsection{Pants Rule (Presets)}
+Each outfit is built from one shirt material $m_{\mathrm{top}}$ and one pants
+material $m_{\mathrm{pants}}$; with $P$ the pants part (\texttt{thigh}),
+\[
+  \mathrm{garment}(\text{pelvis}) = \mathrm{garment}(P) = m_{\mathrm{pants}}
+\]
+for every preset that dresses $P$. \texttt{check\_clothing} raises on any
+violation, and \texttt{check\_references} applies it to the active preset.
+\begin{tabular}{lll}
+  Preset & Shirt & Pants (pelvis, thigh) \\ \hline
+  \texttt{golf\_polo\_shorts} (default) & \texttt{polo\_navy} & \texttt{shorts\_khaki} \\
+  \texttt{golf\_polo\_trousers} & \texttt{polo\_white} & \texttt{trousers\_charcoal} (also shin) \\
+\end{tabular}
+
+The pelvis now also takes the pelvis cross-section entries of
+\texttt{PART\_RADIUS\_M} and \texttt{PART\_ASPECT}, which were never reached
+for the anthropometric golfer. Appearance only: physics is bit-identical.
+
+\subsection{Owner Decision}
+The default outfit stays \texttt{golf\_polo\_shorts}. Whether the default
+switches to \texttt{golf\_polo\_trousers} is an open owner decision; either
+way the pelvis wears the active outfit's pants, with no colour hard-coded.

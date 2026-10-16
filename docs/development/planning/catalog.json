@@ -321,6 +321,41 @@
         "evidence": null
       },
       "activation_issue": null
+    },
+    {
+      "id": "DV-12583",
+      "title": "NSX-55: Golf-Model Simscape Closed-Loop Export in MATLAB R2025b",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/12583",
+      "source_snapshot": "source-12583.json",
+      "record": "DV-12583.md",
+      "disposition": "split",
+      "kind": "research-idea",
+      "status": "deferred",
+      "rationale": "No existing golf Simscape model exposes joint actuation, state targets or a cut-loop closure sensor, so M, h, J_c and Jdot_v of the golf model cannot be exported until a probe-capable open-tree variant is built and validated in R2025b; the exporter, format and loader are validated on a planar rig only.",
+      "prerequisites": [
+        {
+          "name": "Probe-capable open-tree variant of a GS3DX golf model (joint torque inputs, position/velocity targets, acceleration outputs, cut-loop closure Transform Sensor) built and saved in MATLAB R2025b",
+          "evidence": null
+        },
+        {
+          "name": "R2025b host whose licence admits the non-virtual block count of the probe variant (the probed host prints a Home licence banner; the limit for this variant is untested)",
+          "evidence": null
+        },
+        {
+          "name": "Independent reference on the same topology and coordinate order (Pinocchio/MuJoCo/Drake/OpenSim full-body snapshot) to compare against within registry tolerances",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Run the NSX-55 exporter in MATLAB R2025b on the golf probe variant and store a matlab_export file whose model_sha256 matches the saved model.",
+        "Show M, h, J_c and Jdot_v agree with the same-topology reference within the registry tolerances before declaring CLOSED_LOOP_SNAPSHOT FULL for the golf model.",
+        "Never accept a synthetic_test_fixture, a planar-rig export or an R2026a result as golf-model acceptance evidence."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
     }
   ]
 }

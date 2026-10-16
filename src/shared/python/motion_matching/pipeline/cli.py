@@ -41,12 +41,16 @@ from src.shared.python.motion_matching.pipeline.address import (
     solve_address_stage,
 )
 from src.shared.python.motion_matching.pipeline.address_feet import (
+    CANONICAL_FOOT_PROGRESSION,
     build_foot_targets,
     foot_progression_series,
     model_feet_deg,
     record_foot_progression,
     seed_document_feet,
     split_address_coordinates,
+)
+from src.shared.python.motion_matching.pipeline.address_feet import (
+    MODES as FOOT_PROGRESSION_MODES,
 )
 from src.shared.python.motion_matching.pipeline.constants import (
     CANDIDATE,
@@ -371,14 +375,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--foot-progression",
-        choices=("off", "capture", "default"),
-        default="off",
+        choices=FOOT_PROGRESSION_MODES,
+        default=CANONICAL_FOOT_PROGRESSION,
         help=(
-            "address foot toe-out (OSV-4, #11730): 'capture' sets each foot to the "
-            "capture's measured toe-out (flagged 20 deg default where the markers "
-            "are unreliable), 'default' forces 20 deg per foot, 'off' (default) "
-            "keeps the legacy multi-start result. Also squares the forefoot marker "
-            "seeds and records model vs capture angles in the receipt."
+            "address foot toe-out (OSV-4, #11730): 'style' (default, R3 #12683) "
+            "turns the trail foot out to the owner's style target and keeps the "
+            "lead foot on the capture; 'capture' sets each foot to the capture's "
+            "measured toe-out (flagged 20 deg default where the markers are "
+            "unreliable); 'default' forces 20 deg per foot; 'off' keeps the "
+            "legacy multi-start result. Also squares the forefoot marker seeds "
+            "and records model vs target angles and each target's source in "
+            "the receipt."
         ),
     )
     parser.add_argument(
@@ -1083,6 +1090,46 @@ def _fd_neck(
     return mode, q_track, solve, fd_neck_feedback(mode, lane, kin, q_ref)
 
 
+def _ground_support_receipt(
+    ctx: PipelineContext,
+    cal_res: _CalibrateAndScaleResult,
+    base_spec: dict[str, Any],
+    lane: Lane,
+    kin: Any,
+    q_ref: np.ndarray,
+    ik_report: dict[str, Any],
+    dynamics_report: dict[str, Any],
+) -> dict[str, Any]:
+    """Assemble the ground-support receipt from the run's provenance and reports."""
+    args = ctx.args
+    return build_ground_support_receipt(
+        GroundSupportReceiptInputs(
+            backend=args.backend,
+            ik_backend=getattr(args, "ik_backend", "lm"),
+            tracking_backend=getattr(args, "tracking", "kkt"),
+            base_spec=base_spec,
+            spec_path=Path(args.spec),
+            scaled_path=ctx.out_dir / "full_body_spec_hipcal_scaled.json",
+            hipcal_path=ctx.out_dir / "full_body_spec_hipcal.json",
+            recalibrate_upper=args.recalibrate_upper,
+            anthropometric=args.anthropometric,
+            qualification_note=cal_res.qualification_note,
+            spec_bytes=cal_res.spec_bytes,
+            hip_report=cal_res.hip_report,
+            candidate_bytes=CANDIDATE.read_bytes(),
+            c3d_path=ctx.c3d_path,
+            capture_name=args.capture,
+            lane=lane,
+            address_report=cal_res.address_report,
+            ik_report=ik_report,
+            dynamics_report=dynamics_report,
+            kin=kin,
+            q_ref=q_ref,
+            elapsed_s=time.perf_counter() - ctx.t_start,
+        )
+    )
+
+
 def _simulate_and_receipt(
     ctx: PipelineContext,
     lane: Lane,
@@ -1136,35 +1183,14 @@ def _simulate_and_receipt(
             shooting_report=shooting_report,
             tracking_backend=tracking,
             finish_feasibility=finish,
+            club_spec=cal_res.scaled_spec,
+            club_attachments=cal_res.attachments,
         )
     )
     _save_dynamics_record(ctx.out_dir, record, sim_errors, lane, q_track)
     _render_playbacks(ctx.out_dir, cal_res, kin, lane, q_ref, sim_q)
-    receipt = build_ground_support_receipt(
-        GroundSupportReceiptInputs(
-            backend=args.backend,
-            ik_backend=getattr(args, "ik_backend", "lm"),
-            tracking_backend=tracking,
-            base_spec=base_spec,
-            spec_path=Path(args.spec),
-            scaled_path=ctx.out_dir / "full_body_spec_hipcal_scaled.json",
-            hipcal_path=ctx.out_dir / "full_body_spec_hipcal.json",
-            recalibrate_upper=args.recalibrate_upper,
-            anthropometric=args.anthropometric,
-            qualification_note=cal_res.qualification_note,
-            spec_bytes=cal_res.spec_bytes,
-            hip_report=cal_res.hip_report,
-            candidate_bytes=CANDIDATE.read_bytes(),
-            c3d_path=ctx.c3d_path,
-            capture_name=args.capture,
-            lane=lane,
-            address_report=cal_res.address_report,
-            ik_report=ik_report,
-            dynamics_report=dynamics_report,
-            kin=kin,
-            q_ref=q_ref,
-            elapsed_s=time.perf_counter() - ctx.t_start,
-        )
+    receipt = _ground_support_receipt(
+        ctx, cal_res, base_spec, lane, kin, q_ref, ik_report, dynamics_report
     )
     _finalize_receipt(
         ctx,

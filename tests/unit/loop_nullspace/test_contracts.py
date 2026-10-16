@@ -367,3 +367,44 @@ def test_import_pulls_no_physics_engine() -> None:
         [sys.executable, "-c", code], cwd=root, capture_output=True, text=True
     )
     assert res.returncode == 0, res.stderr
+
+
+# --- QuantityRecord conditioning axis (NSX-81, #12710) ----------------------
+
+
+def test_record_conditioning_defaults_empty_and_old_records_unchanged() -> None:
+    inv = _record()
+    assert inv.conditioning == ()
+    fam = _record(
+        allocation_dependence=AllocationDependence.FAMILY_DEPENDENT,
+        hypotheses=["min_metric_torque"],
+    )
+    assert fam.conditioning == ()
+    assert fam.hypotheses == ("min_metric_torque",)
+
+
+def test_invariant_record_may_be_conditioned_on_hypotheses() -> None:
+    # Ids here are free text, as for ``hypotheses``; no registry lookup occurs.
+    rec = _record(conditioning=["H-TORQUE-CAPACITY"])
+    assert rec.allocation_dependence is AllocationDependence.INVARIANT
+    assert rec.conditioning == ("H-TORQUE-CAPACITY",)
+    assert rec.hypotheses == ()
+
+
+def test_conditioning_is_orthogonal_to_allocation_hypotheses() -> None:
+    fam = _record(
+        allocation_dependence=AllocationDependence.FAMILY_DEPENDENT,
+        hypotheses=["min_metric_torque"],
+        conditioning=("H-TORQUE-CAPACITY",),
+    )
+    assert fam.hypotheses == ("min_metric_torque",)
+    assert fam.conditioning == ("H-TORQUE-CAPACITY",)
+    with pytest.raises(ValueError, match="INVARIANT"):
+        _record(hypotheses=("h",), conditioning=("H-TORQUE-CAPACITY",))
+
+
+def test_conditioning_rejects_bare_string_and_empty_ids() -> None:
+    with pytest.raises(TypeError, match="conditioning"):
+        _record(conditioning="H-TORQUE-CAPACITY")
+    with pytest.raises(ValueError, match="conditioning"):
+        _record(conditioning=("",))

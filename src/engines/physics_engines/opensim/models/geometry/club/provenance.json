@@ -14,6 +14,17 @@
         "head": "club_driver_head.stl",
         "shaft": "club_driver_shaft.stl"
       },
+      "grip_hands": {
+        "files": {
+          "lead_hand": "club_driver_lead_hand.stl",
+          "trail_hand": "club_driver_trail_hand.stl"
+        },
+        "generator": "src.shared.python.model_appearance.grip_hands",
+        "sha256": {
+          "lead_hand": "12af41a695db1e46ccb999d13463338d5a4263c24c41bab1deaa1dd13097fe88",
+          "trail_hand": "1c41ab5593e951d5ca4406adcbd1c6e9d174da6917e889a135f032a260e746f2"
+        }
+      },
       "head_library_name": "Driver 10.5\u00b0",
       "head_source": "tools_parametric",
       "sha256": {
@@ -36,6 +47,17 @@
         "grip": "club_iron7_grip.stl",
         "head": "club_iron7_head.stl",
         "shaft": "club_iron7_shaft.stl"
+      },
+      "grip_hands": {
+        "files": {
+          "lead_hand": "club_iron7_lead_hand.stl",
+          "trail_hand": "club_iron7_trail_hand.stl"
+        },
+        "generator": "src.shared.python.model_appearance.grip_hands",
+        "sha256": {
+          "lead_hand": "e5fc5ccdcadf41fc74e2e9c7ae9b2932c04995381b353e472b6fa31297a56c11",
+          "trail_hand": "a6c3a3ae9c25412d4cf51680d8a4c67902f7554db1c72797acd688cfe6716f43"
+        }
       },
       "head_library_name": "7-Iron",
       "head_source": "tools_parametric",
