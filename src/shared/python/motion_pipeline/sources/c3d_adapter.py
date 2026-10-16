@@ -55,9 +55,15 @@ except ImportError:  # pragma: no cover
 _HAS_EZC3D = importlib.util.find_spec("ezc3d") is not None
 
 
+_ezc3d: Any = None  # populated on first use (tests may inject a double)
+
+
 def _load_ezc3d() -> Any:
     """Import ``ezc3d`` on first use; a DLL clash raises ``NativeDllConflictError``."""
-    return import_ezc3d()
+    global _ezc3d
+    if _ezc3d is None:
+        _ezc3d = import_ezc3d()
+    return _ezc3d
 
 
 _HAS_C3D_BACKEND = _HAS_RUST or _HAS_EZC3D
