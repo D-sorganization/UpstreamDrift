@@ -474,7 +474,8 @@ class VarianceProblem:
 
     def __post_init__(self) -> None:
         _check_chain(self.dynamics, self.initial_covariance, self.step_covariance)
-        n_x = self.dynamics.a.shape[1]
+        a_mat = self.dynamics.a
+        n_x = a_mat.shape[1]
         c_mat = _matrix(self.outcome_rows, "outcome_rows")
         if c_mat.shape[1] != n_x:
             _fail(f"outcome_rows must have {n_x} columns, got {c_mat.shape}")
