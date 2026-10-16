@@ -21,6 +21,108 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+# Images the explorer launcher must verify (and rebuild) before every run.
+EXPLORER_REQUIRED_IMAGES = (
+    "upstream-drift:explorer-headless",
+    "upstream-drift:explorer-gui",
+    "ud-sim:latest",
+    "upstream-drift:full",
+)
+EXPLORER_STAGES = ("explorer-base", "explorer-headless", "explorer-gui")
+# service -> env/volume fragments its block must contain (issue #12878 D).
+EXPLORER_SERVICE_REQUIRES: dict[str, tuple[str, ...]] = {
+    "explorer-headless": ("QT_QPA_PLATFORM=offscreen", "MUJOCO_GL="),
+    "explorer-gui": (
+        "QT_QPA_PLATFORM=xcb",
+        "MUJOCO_GL=",
+        "DISPLAY=:99",
+        "NOVNC_PORT=6080",
+        "VNC_PORT=5900",
+    ),
+    "explorer-gui-wslg": ("DISPLAY=", "/tmp/.X11-unix:/tmp/.X11-unix"),
+}
+# Display / GL prerequisites the entrypoint must refuse to start without (DbC).
+EXPLORER_ENTRYPOINT_GUARDS = ("QT_QPA_PLATFORM", "MUJOCO_GL", "DISPLAY")
+
+
+def _service_block(compose: str, name: str) -> str | None:
+    """Return the text of one top-level compose service, or None if absent."""
+    match = re.search(
+        rf"^  {re.escape(name)}:\n(.*?)(?=^  [A-Za-z0-9_-]+:\n|^[A-Za-z]|\Z)",
+        compose,
+        re.MULTILINE | re.DOTALL,
+    )
+    return match.group(1) if match else None
+
+
+def explorer_contract_failures(root: Path) -> list[str]:
+    """Check the model-explorer Docker surface: stages, services, entrypoint."""
+    failures: list[str] = []
+    modular = _read(root / "Dockerfile.modular")
+    for stage in EXPLORER_STAGES:
+        if not re.search(rf"^FROM\s+\S+\s+AS\s+{stage}\s*$", modular, re.MULTILINE):
+            failures.append(f"Dockerfile.modular is missing the {stage} stage")
+    for stage in ("explorer-headless", "explorer-gui"):
+        if not re.search(
+            rf"^FROM\s+explorer-base\s+AS\s+{stage}\s*$", modular, re.MULTILINE
+        ):
+            failures.append(
+                f"{stage} must derive from the shared explorer-base stage (DRY)"
+            )
+
+    compose = _read(root / "docker-compose.yml")
+    for service, needles in EXPLORER_SERVICE_REQUIRES.items():
+        block = _service_block(compose, service)
+        if block is None:
+            failures.append(f"docker-compose.yml is missing the {service} service")
+            continue
+        failures.extend(
+            f"docker-compose {service} must set {needle.split('=')[0]} ({needle})"
+            for needle in needles
+            if needle not in block
+        )
+        for port in re.findall(r'-\s*"((?:[\d.]+:)?\d+:\d+)"', block):
+            if not port.startswith("127.0.0.1:"):
+                failures.append(
+                    f"docker-compose {service} port {port} must bind loopback only"
+                )
+
+    for build_arg in ("TOOLS_GITLINK_SHA", "TOOLS_SOURCE_SHA256"):
+        if build_arg not in compose:
+            failures.append(
+                f"docker-compose explorer build must pass {build_arg} "
+                "(pinned Tools provenance, see scripts/docker/explorer.sh)"
+            )
+    if not re.search(r"labels:\s*\n\s+keep:", compose):
+        failures.append(
+            "docker-compose explorer images must carry label keep (host prune jobs "
+            "spare it)"
+        )
+    launcher = root / "scripts" / "docker" / "explorer.sh"
+    if not launcher.exists():
+        failures.append("scripts/docker/explorer.sh launcher is missing")
+    else:
+        script = _read(launcher)
+        for image in EXPLORER_REQUIRED_IMAGES:
+            if image not in script or "docker image inspect" not in script:
+                failures.append(
+                    f"explorer.sh must health-check image {image} with "
+                    "docker image inspect and rebuild it if missing"
+                )
+
+    entrypoint = root / "docker" / "explorer" / "entrypoint.sh"
+    if not entrypoint.exists():
+        failures.append("docker/explorer/entrypoint.sh is missing")
+    else:
+        script = _read(entrypoint)
+        for variable in EXPLORER_ENTRYPOINT_GUARDS:
+            if f'[ -n "${{{variable}:-}}" ]' not in script:
+                failures.append(
+                    f"docker/explorer/entrypoint.sh must fail fast without {variable}"
+                )
+    return failures
+
+
 def docker_contract_failures(root: Path = Path(".")) -> list[str]:
     failures: list[str] = []
     pin_by_file: dict[str, set[str]] = {}
@@ -87,6 +189,7 @@ def docker_contract_failures(root: Path = Path(".")) -> list[str]:
     compose = _read(root / "docker-compose.yml")
     if "condition: service_healthy" not in compose:
         failures.append("docker-compose frontend must wait for backend health")
+    failures.extend(explorer_contract_failures(root))
     return failures
 
 

@@ -185,3 +185,80 @@ CMD ["python3", "-m", "uvicorn", "src.api.server:app", \
      "--proxy-headers", \
      "--forwarded-allow-ips", "${FORWARDED_ALLOW_IPS:-127.0.0.1}", \
      "--access-log"]
+
+# ---- Stage 3: explorer-builder ---------------------------------------------
+# Model-explorer (UD #12878 D) adds the PyQt6 GUI stack on top of the profile
+# venv. Built from the SAME builder stage as `runtime` (so a PROFILE=full build
+# shares every pip layer) and copied over, like the training stage in Dockerfile.
+FROM builder AS explorer-builder
+RUN pip install \
+    "PyQt6==6.11.0" \
+    "pyqtgraph==0.13.7" \
+    "PyOpenGL==3.1.9"
+
+# ---- Stage 4: explorer-base ------------------------------------------------
+# One base for BOTH explorer targets (DRY): Qt xcb + Mesa EGL/OSMesa runtime
+# libs, the headless/GUI entrypoint, and the pinned Tools roots. The two final
+# targets below differ only in ENV defaults.
+FROM runtime AS explorer-base
+
+ARG USER_NAME=golfer
+
+USER root
+
+# Qt6 xcb plugin deps, software GL (Mesa EGL + OSMesa), a tiny window manager,
+# and the Xvfb -> x11vnc -> websockify/noVNC chain used by the GUI target.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libegl1 libegl-mesa0 libgbm1 libgl1-mesa-dri libglx-mesa0 libgles2 \
+    libxkbcommon0 libxkbcommon-x11-0 libdbus-1-3 libfontconfig1 libfreetype6 \
+    libx11-xcb1 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+    libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 libxcb-xkb1 \
+    fonts-dejavu-core x11-utils xauth \
+    xvfb x11vnc openbox novnc websockify \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=explorer-builder /opt/venv /opt/venv
+RUN /opt/venv/bin/python -m pip uninstall -y pip
+
+# Pinned Tools roots (same five as the legacy Dockerfile) so the explorer imports
+# the same shared code the tests verify.
+COPY --chown=${USER_NAME}:${USER_NAME} vendor/ud-tools/src/shared/ ./vendor/ud-tools/src/shared/
+COPY --chown=${USER_NAME}:${USER_NAME} vendor/ud-tools/src/sidekick/ ./vendor/ud-tools/src/sidekick/
+COPY --chown=${USER_NAME}:${USER_NAME} vendor/ud-tools/src/chat/ ./vendor/ud-tools/src/chat/
+COPY --chown=${USER_NAME}:${USER_NAME} vendor/ud-tools/src/python/src/utils/ ./vendor/ud-tools/src/python/src/utils/
+COPY --chown=${USER_NAME}:${USER_NAME} vendor/ud-tools/src/contracts.py ./vendor/ud-tools/src/contracts.py
+COPY --chown=${USER_NAME}:${USER_NAME} scripts/docker/explorer_cli.py ./scripts/docker/explorer_cli.py
+COPY docker/explorer/entrypoint.sh /usr/local/bin/explorer-entrypoint.sh
+RUN chmod +x /usr/local/bin/explorer-entrypoint.sh && \
+    mkdir -p /out && chown ${USER_NAME}:${USER_NAME} /out
+
+ENV PYTHONPATH="/workspace/vendor/ud-tools/src/shared/python:/workspace/vendor/ud-tools/src:/workspace/vendor/ud-tools/src/python/src:/workspace" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    MPLBACKEND=Agg \
+    NOVNC_PORT=6080 \
+    VNC_PORT=5900
+
+USER ${USER_NAME}
+
+# Slow, WAN-bound rebuild: tell host prune jobs (runner-cleanup, docker-cache-prune,
+# which skip label keep) to leave this image alone. See DOCKER_SETUP.md.
+LABEL keep="true"
+# The runtime stage's API healthcheck does not apply to the explorer.
+HEALTHCHECK NONE
+ENTRYPOINT ["/usr/local/bin/explorer-entrypoint.sh"]
+CMD ["engines"]
+
+# ---- Stage 5a: explorer-headless -------------------------------------------
+# No display: Qt offscreen + EGL rendering. `docker compose run` exports an MP4.
+FROM explorer-base AS explorer-headless
+ENV QT_QPA_PLATFORM=offscreen \
+    MUJOCO_GL=egl
+
+# ---- Stage 5b: explorer-gui ------------------------------------------------
+# Visible PyQt6 app: Xvfb :99 + x11vnc + noVNC (default), or the host's WSLg X11
+# socket (UD_EXPLORER_DISPLAY_MODE=host).
+FROM explorer-base AS explorer-gui
+ENV QT_QPA_PLATFORM=xcb \
+    MUJOCO_GL=egl \
+    DISPLAY=:99
+EXPOSE 6080
