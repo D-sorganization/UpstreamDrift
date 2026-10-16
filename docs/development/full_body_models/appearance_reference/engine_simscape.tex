@@ -1,0 +1,52 @@
+% Section of golfer_appearance_reference.tex (R9c, #12690). Standalone research
+% and visual reference, not the design manual.
+\section{Simscape (GS3DX) Appearance From the Shared Spec (R9c, \#12690)}
+
+\subsection{Defect}
+The GS3DX golfer was a third appearance source. \texttt{gs3dx\_build\_human.m}
+hard-coded a blue shirt, grey pants (neither matches the shared default outfit,
+white polo over \texttt{trousers\_charcoal}) and absolute trunk radii
+(pelvis $[0.17, 0.115, 0.12]$, abdomen $[0.145, 0.105, 0.15]$, chest
+$[0.16, 0.11, 0.155]$ m) that did not follow the shared trunk sizing.
+
+\subsection{Contract}
+\texttt{scripts/export\_simscape\_appearance.py} is the only bridge. It calls
+the R8 API only (\texttt{resolve\_appearance}, \texttt{section\_size}) and
+writes \texttt{exploratory\_gs3dx/appearance/gs3dx\_appearance.v1.json}
+(\texttt{schema\_version} \texttt{simscape-appearance/v1}):
+role colours (skin, top, pants, shoe, glove) read from the resolved meshes, and
+per ellipsoid the RGB, the radii \texttt{[ML, AP, z]} (m), the placement in the
+GS3DX frame and \texttt{rotation\_z\_deg}.
+
+\begin{itemize}
+\item Trunk ML semi-axis and AP/ML aspect come from \texttt{section\_size}
+  (chest from \texttt{COMRod}, pelvis and abdomen from \texttt{LowerTorso});
+  clothed ellipsoids use \texttt{library.GARMENT\_THICKNESS}, as the shared
+  garment meshes do. Round limb radii are \texttt{library.PART\_RADIUS\_M}.
+\item Frame: the GS3DX trunk frames have $z$ down the spine. Each ellipsoid is
+  $[ML, AP, z]$ with its $x$ axis turned onto the hip line (46.3 deg) or the
+  shoulder line (17 deg) by a rotation about $z$, so $x$ is mediolateral and
+  $y$ anteroposterior. Placement (offset, $z$ half length, the two line
+  angles) is GS3DX layout, the only per-model data left in the exporter.
+\item \texttt{gs3dx\_read\_appearance} fails closed: a missing file, an unknown
+  version, a colour outside $[0,1]$ or a non-positive radius raises
+  \texttt{gs3dx:appearance}. \texttt{gs3dx\_build\_human} holds no colour or
+  trunk-radius literal. \texttt{gs3dx\_apply\_appearance} restyles an already
+  built model (radii and colour only; mass, inertia, frames and joints are
+  untouched).
+\end{itemize}
+
+\subsection{Limitations}
+Neck width has no spec source (layout constant); its length is the model's
+\texttt{NeckLength}. Hands now wear the spec glove. The saved
+\texttt{GS3DX\_Human.slx} is not re-saved: rebuild it with
+\texttt{gs3dx\_build\_human(overwrite=true)} in MATLAB R2025b to bake the
+spec in. Appearance does not qualify dynamics.
+
+\subsection{Reproduction}
+\begin{verbatim}
+PYTHONPATH=.:vendor/ud-tools/src python3 scripts/export_simscape_appearance.py
+python -m pytest -o addopts="" tests/unit/scripts/test_export_simscape_appearance.py
+"C:/Program Files/MATLAB/R2025b/bin/matlab.exe" -batch \
+  "runtests('exploratory_gs3dx/tests/test_gs3dx_appearance.m')"
+\end{verbatim}
