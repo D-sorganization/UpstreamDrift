@@ -1068,9 +1068,11 @@
 {"path": "loop_nullspace/grip_split.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/ground_contact.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/ground_envelopes.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/hit_and_run.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/impact_ball_flight_map.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/impact_outcome_map.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/invariants.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/mixing_diagnostics.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/nonlinearity_gate.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/paired_mc_spec.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/paired_monte_carlo.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
@@ -1085,6 +1087,7 @@
 {"path": "loop_nullspace/replay_campaign.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/replay_ground.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/replay_spec.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/sampled_marginals.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/simscape_export.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/simscape_linearization.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/simscape_rig_spec.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
