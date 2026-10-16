@@ -4262,8 +4262,8 @@
   },
   "local_artifacts": {
     ".github/workflows/ci-optional-stack.yml": {
-      "sha256": "df379620d9fc8a5a64573fd87e4835e21f11415e61167626301dcd0cba4b8e9c",
-      "bytes": 34152,
+      "sha256": "e6a2781b3abf3ef95464f3aa66c12656f461d8b59682e8fea857907176594328",
+      "bytes": 34525,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",
