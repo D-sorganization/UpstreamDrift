@@ -715,3 +715,31 @@ step `1e-5`).
   `d a/d tau` `4e-12`, `d a/d xi` `9e-7`, `d a/d eta` `6e-5`, `d lambda/d xi`
   `1e-5`, `d lambda/d eta` `7e-5`. Agreement between engines is not physical
   validation.
+
+## NSX-90 Variance Propagation (#12719)
+
+Modules (all under `src/shared/python/loop_nullspace/`):
+
+- `variance_propagation.py`: `propagate_covariance(dyn, p0, sigma)` (forward
+  `P_{t+1} = A P Aᵀ + B Σ Bᵀ`), `adjoint_kernels(dyn, C)` ->
+  `AdjointKernels` with `s_y_x0` (`S_{y,x0}`) and `s_y_tau(t)`
+  (`S_{y,τ}(t)`), `adjoint_covariance`, `variance_budget` (by input class and
+  step), `augment_persistent` (per-trial parameter states),
+  `euler_dynamics` (`A = I + dt F`, `B = dt G`, any tangent dimension),
+  `step_covariances` (from `DisturbanceSpec`, timestep consistent) and
+  `event_outcome_rows` (`C Π`, NSX-83). `LinearizedDynamics` is reused from
+  `estimation/mosaic/local_policy.py`.
+- `nonlinearity_gate.py`: `assess_nonlinearity(rollout, directions, *,
+  amplitude, gate_threshold)`. **`gate_threshold` has no default**: NSX-80
+  specifies a gate but no number, so the caller supplies it.
+  `LinearValidity` is `LINEAR_VALID`, `NOT_LINEAR_VALID` or `NOT_ASSESSED`.
+- `variance_records.py`: `assess_variance(problem, declaration, *,
+  outcome_units, gate=None)` returning typed `QuantityRecord`s. Kernels are
+  `INVARIANT` unless M2 or M3 is declared; variance is `INVARIANT` with the
+  noise hypothesis in `conditioning` when no mechanism is declared and
+  `FAMILY_DEPENDENT` otherwise.
+
+Preconditions: symmetric covariances, conformal shapes, finite inputs
+(`ValueError`). Postconditions: adjoint and forward variance agree to 1e-12
+(tests) and 1e-9 (runtime `ensure`); the budget parts sum to the total.
+Non-claims: linear predictions do not cover saturation, slip or missed impacts.

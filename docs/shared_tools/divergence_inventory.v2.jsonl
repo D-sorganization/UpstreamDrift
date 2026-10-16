@@ -1066,6 +1066,7 @@
 {"path": "loop_nullspace/impact_ball_flight_map.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/impact_outcome_map.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/invariants.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/nonlinearity_gate.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/planar_model.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/provider.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/registry.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
@@ -1075,6 +1076,8 @@
 {"path": "loop_nullspace/solvers.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/spatial_fixture.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/tangent_linearization.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/variance_propagation.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/variance_records.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "math_utils/__init__.py", "classification": "ud-only", "package": "math_utils", "spelling_only": false}
 {"path": "math_utils/quaternion.py", "classification": "ud-only", "package": "math_utils", "spelling_only": false}
 {"path": "model_appearance/__init__.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
