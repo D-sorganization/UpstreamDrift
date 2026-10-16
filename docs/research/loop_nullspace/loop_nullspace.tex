@@ -1284,6 +1284,44 @@ coefficient of variation $\mathrm{SD}/\lvert\mathrm{mean}\rvert$ is banned for
 zero-centred outcomes, where it is undefined or arbitrarily large.  Face rows
 are \texttt{UNAVAILABLE} when axial club rotation is not observed.
 
+\subsection{Declared Impedance and Delayed Minimum-Intervention Feedback}
+\label{sec:var-layer}
+
+Two declared controllers act on the tangent deviation
+$\delta x=(\xi,\eta)$, with $\delta q=P\xi$ and $\delta v=P\eta+O\xi$.  The
+\emph{impedance} (hypothesis \texttt{H-DECLARED-JOINT-IMPEDANCE}) is
+$u=-(K\,e+D\,\dot e)$ with $e=SP\xi$ and $\dot e=SP\eta+SO\xi$, i.e.\
+$K_{\mathrm{imp}}=K\,SP+D\,SO$ on $\xi$ and $D\,SP$ on $\eta$; $K$ and $D$ are
+symmetric positive semidefinite, windowed in time, and off-diagonal entries
+are biarticular coupling.  It is folded into the continuous closed loop
+$F-G_uK_{\mathrm{imp}}$ before zero-order-hold discretization.  The
+\emph{delayed feedback} (\texttt{H-SENSORIMOTOR-DELAY}) is
+$u_t=-K_t\,\delta x_{t-m}$ with $m$ whole steps, represented by the augmented
+state $z_t=(x_t,\dots,x_{t-m})$ and $P_0^{\mathrm{aug}}=TP_0T^{\top}$,
+$T=[I;\dots;I]$, so NSX-90 applies unchanged.
+
+The minimum-intervention design is time-varying LQR with $Q=0$ and terminal
+weight $C_{\mathrm{imp}}^{\top}W_yC_{\mathrm{imp}}$.  The resulting gain
+annihilates $\ker\!\big(W_y^{1/2}C_{\mathrm{imp}}\Phi\big)$ (an identity, not an
+approximation), so only outcome-relevant deviations are corrected.  The
+frozen discrete delay margin is the first $m$ at which the companion matrix of
+$x_{k+1}=Ax_k-BKx_{k-m}$ has spectral radius above one; for a PD law on a
+double integrator it matches the closed form
+$\tau_c=\operatorname{atan}(k_d\omega_c/k_p)/\omega_c$ with
+$\omega_c^2=\tfrac12\big(a+\sqrt{a^2+4b}\big)$, $a=(k_d/m)^2$, $b=(k_p/m)^2$.
+A stiffened joint also scales its noise by the declared factor
+$1+\kappa_iK_{ii}$; $\kappa$ is an input without a source.
+
+Verification: the stationary oscillator variance $S/(2dk)$, the closed-form
+delay margin, an explicit delayed recursion, exact zero-layer negative
+controls, and a nonlinear paired Monte Carlo of a hanging pendulum whose
+standard deviations agree with the linear prediction within the sampling
+half-width.  Effort and energy are accounted on separate lines
+(allocated, impedance, feedback).  Non-claims: nothing is inferred from net
+torque, a torque-only co-contraction effect is \texttt{UNAVAILABLE} without the
+declaration, the feedback is uncompensated for delay, the frozen margin is not
+a time-varying stability proof, and the chain is limited to $k=1$.
+
 \subsection{Non-Claims for Variability Sensitivity}
 \label{sec:var-nonclaims}
 
