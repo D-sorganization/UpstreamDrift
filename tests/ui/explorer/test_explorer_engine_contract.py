@@ -32,6 +32,7 @@ pytest.importorskip("PyQt6", reason="Model Explorer contract needs PyQt6")
 
 from PyQt6.QtWidgets import QApplication, QFileDialog, QMessageBox  # noqa: E402
 
+from tests.support.real_engines import real_module  # noqa: E402
 from src.tools.matched_swing_browser.model import (  # noqa: E402
     MatchedSwingBrowserModel,
 )
@@ -214,7 +215,7 @@ def test_native_engine_loads_canonical_model(
     case = CASES[engine]
     if case.native_package is None or case.export is None:
         pytest.skip(case.skip_reason or f"{engine}: no native model contract")
-    pytest.importorskip(case.native_package, reason=f"{engine} is not installed")
+    real_module(case.native_package)
     spec: dict[str, Any] = json.loads(spec_bytes)
 
     if engine == "mujoco":
@@ -256,7 +257,7 @@ def test_load_results_and_scrub(
 ) -> None:
     npz = _results_for(engine)
 
-    assert explorer.load_results(npz) is True, warnings_box
+    assert explorer.load_results(npz, engine) is True, warnings_box
     frames = explorer.results_frame_count
     assert frames >= 2
 
@@ -275,7 +276,7 @@ def test_export_mp4_through_the_app_action(
 ) -> None:
     import cv2
 
-    assert explorer.load_results(_results_for(engine)) is True
+    assert explorer.load_results(_results_for(engine), engine) is True
     out = tmp_path / f"{engine}.mp4"
 
     with patch.object(QFileDialog, "getSaveFileName", return_value=(str(out), "MP4")):
@@ -347,7 +348,7 @@ def test_matched_browser_export_button_follows_playability(
             widget.engine_combo.setCurrentIndex(widget.engine_combo.findText(engine))
             for row_index in range(widget.table.rowCount()):
                 widget.table.selectRow(row_index)
-                npz = widget._get_selected_npz_path()
+                npz = widget._model.resolve_artifact_path(widget._selected_row, "npz")
                 playable = npz is not None and _has_marker_playback(npz)
                 assert widget.export_video_button.isEnabled() is playable, (
                     f"{engine} row {row_index}: export enabled="

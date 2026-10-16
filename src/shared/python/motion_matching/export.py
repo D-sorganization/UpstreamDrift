@@ -35,6 +35,10 @@ from src.shared.python.video_timing.frame_schedule import (
     FrameSchedule,
     speed_suffix,
 )
+from src.shared.python.motion_matching.video_frame_source import (
+    MarkerFrameSource,
+    load_marker_frame_source,
+)
 from src.shared.python.motion_matching.provenance import (
     engine_package_version,
     git_commit_short,
@@ -51,14 +55,31 @@ _SUPPORTED_VIDEO_EXTS = {".gif", ".mp4"}
 _SUPPORTED_REPORT_EXTS = {".md", ".pdf"}
 
 
+def _is_candidate_package(path: Path) -> bool:
+    """True when ``path`` is a checksummed ``MatchedSwingCandidate`` NPZ."""
+    try:
+        with np.load(path, allow_pickle=False) as data:
+            return "manifest_json" in data.files
+    except (OSError, ValueError):
+        return False
+
+
 def _validate_candidate_for_video(
-    candidate: MatchedSwingCandidate | Path | str,
-) -> MatchedSwingCandidate:
-    """Load and validate candidate has required marker trajectories."""
+    candidate: MatchedSwingCandidate | MarkerFrameSource | Path | str,
+) -> MarkerFrameSource:
+    """Load and validate that ``candidate`` can supply marker frames.
+
+    Candidate packages are checksum-verified by ``load_candidate``; replay
+    records (``markers_m`` / ``target_m``) go through the shared frame source.
+    """
+    if isinstance(candidate, MarkerFrameSource):
+        return candidate
     if isinstance(candidate, (str, Path)):
         cand_path = Path(candidate)
         if not cand_path.is_file():
             raise FileNotFoundError(f"Candidate file not found: {cand_path}")
+        if not _is_candidate_package(cand_path):
+            return load_marker_frame_source(cand_path)
         cand = load_candidate(cand_path)
     elif isinstance(candidate, MatchedSwingCandidate):
         cand = candidate
@@ -75,11 +96,11 @@ def _validate_candidate_for_video(
         raise ValueError(
             f"Candidate time_s has insufficient frames: {len(cand.time_s)}"
         )
-    return cand
+    return load_marker_frame_source(cand)
 
 
 def _render_video_frames(
-    candidate: MatchedSwingCandidate,
+    candidate: MarkerFrameSource,
     engine: str,
     stride: int,
     size_px: tuple[int, int] = (480, 480),
@@ -157,7 +178,7 @@ def _write_mp4(frames: list[np.ndarray], path: Path, fps: int) -> Path:
     "exported video file must exist and be non-empty",
 )
 def export_video(
-    candidate: MatchedSwingCandidate | Path | str,
+    candidate: MatchedSwingCandidate | MarkerFrameSource | Path | str,
     engine: str,
     path: Path | str,
     *,
