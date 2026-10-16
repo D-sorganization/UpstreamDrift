@@ -45,6 +45,7 @@ at zero activation and excluded from stage 2 (see ``_redistribute``).
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -275,13 +276,23 @@ def _redistribute(
     left out of the SLSQP problem.  Keeping the zero column made SLSQP stop
     with "Inequality constraints incompatible" (#12827).
     """
+    return _without_inert(a_start, gain, exponent, _redistribute_live)
+
+
+def _without_inert(
+    a_start: np.ndarray,
+    gain: np.ndarray,
+    exponent: int,
+    solve: Callable[[np.ndarray, np.ndarray, int], tuple[np.ndarray, bool, str]],
+) -> tuple[np.ndarray, bool, str]:
+    """Run ``solve`` on the live columns only; inert muscles stay at exactly 0."""
     live = np.any(gain != 0.0, axis=0)
     if not live.any():
         return np.zeros_like(a_start), True, "no muscle has force capacity"
     if live.all():
-        return _redistribute_live(a_start, gain, exponent)
+        return solve(a_start, gain, exponent)
     a = np.zeros_like(a_start)
-    a[live], ok, message = _redistribute_live(a_start[live], gain[:, live], exponent)
+    a[live], ok, message = solve(a_start[live], gain[:, live], exponent)
     return a, ok, message
 
 
@@ -386,13 +397,23 @@ def _redistribute_conic(
 def _stage_two(
     a_start: np.ndarray, gain: np.ndarray, exponent: int
 ) -> tuple[np.ndarray, bool, str]:
-    """Conic at full-body scale (SLSQP does not converge there), else SLSQP."""
+    """Conic at full-body scale (SLSQP does not converge there), else SLSQP.
+
+    Either way inert (zero-capacity) muscles are held at 0 and left out
+    (#12827); the size threshold counts the live muscles.
+    """
+    return _without_inert(a_start, gain, exponent, _solve_live)
+
+
+def _solve_live(
+    a_start: np.ndarray, gain: np.ndarray, exponent: int
+) -> tuple[np.ndarray, bool, str]:
     if a_start.size >= CONIC_MIN_MUSCLES:
         try:
             return _redistribute_conic(a_start, gain, exponent)
         except ImportError:
             pass  # Clarabel not installed: fall back to SLSQP
-    return _redistribute(a_start, gain, exponent)
+    return _redistribute_live(a_start, gain, exponent)
 
 
 def solve_activations(
