@@ -53,6 +53,7 @@ from tests.integration.cross_engine.loop_nullspace_conformance_support import (
     effort_response,
     kkt_bound,
     kkt_solve,
+    require_real_pinocchio,
     multiplier_envelope,
     seeded_effort,
     to_reference_order,
@@ -86,13 +87,13 @@ INFORMATIVE = 1e-6
 
 @pytest.fixture(scope="module")
 def reference_adapter():
-    pytest.importorskip("pinocchio")
+    require_real_pinocchio()
     return create_engine_force_adapter(REFERENCE, SPEC_PATH, allow_synthetic=False)
 
 
 @pytest.fixture(scope="module")
 def plant():
-    pytest.importorskip("pinocchio")
+    require_real_pinocchio()
     return VectorPlant("pinocchio", SPEC_PATH.read_bytes())
 
 
