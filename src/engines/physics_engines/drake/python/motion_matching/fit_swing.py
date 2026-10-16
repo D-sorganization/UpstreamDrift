@@ -184,6 +184,47 @@ def _final_rmse_m(
     return float(np.sqrt((np.vdot(db, db) + np.vdot(dc, dc)) / db.shape[0]))
 
 
+def _initial_theta(
+    opts: FitOptions, lb: NDArray[np.float64], ub: NDArray[np.float64]
+) -> NDArray[np.float64]:
+    """Warm start clipped to the bound box, or the canonical zero vector.
+
+    Raises:
+        ValueError: If ``opts.theta0`` has the wrong length.
+    """
+    n_dim = opts.n_joints * COEFFS_PER_JOINT
+    if opts.theta0 is None:
+        return np.zeros(n_dim, dtype=np.float64)
+    theta0 = np.ascontiguousarray(opts.theta0, dtype=np.float64).reshape(-1)
+    if theta0.size != n_dim:
+        msg = (
+            f"theta0 has length {theta0.size}, expected {n_dim} "
+            f"(= n_joints * {COEFFS_PER_JOINT})"
+        )
+        raise ValueError(msg)
+    # Clip to the bound box defensively so SLSQP starts feasible.
+    return np.clip(theta0, lb, ub).astype(np.float64).reshape(-1)
+
+
+def _validated_optimum(x: Any, n_joints: int) -> NDArray[np.float64]:
+    """Validate the recovered ``theta_optimal`` (spec section 2.2).
+
+    Out-of-bounds is the bigger risk for SLSQP (it can step outside the
+    feasible region on a hard failure), so the per-letter bounds the
+    optimizer was told to use are enforced here too.
+    """
+    bound_table = {
+        chr(ord("A") + col): (-_PER_COEFF_ABS_BOUND[col], _PER_COEFF_ABS_BOUND[col])
+        for col in range(COEFFS_PER_JOINT)
+    }
+    return validate_theta(
+        np.ascontiguousarray(x, dtype=np.float64),
+        n_joints=n_joints,
+        bounds=bound_table,
+        name="theta_optimal",
+    )
+
+
 def fit_swing_drake(
     target: ClubTarget,
     options: FitOptions | None = None,
@@ -219,21 +260,8 @@ def fit_swing_drake(
     if opts.n_joints <= 0:
         raise ValueError(f"n_joints must be positive; got {opts.n_joints}")
 
-    n_dim = opts.n_joints * COEFFS_PER_JOINT
     lb, ub = polynomial_parameter_bounds(opts.n_joints)
-
-    if opts.theta0 is not None:
-        theta0 = np.ascontiguousarray(opts.theta0, dtype=np.float64).reshape(-1)
-        if theta0.size != n_dim:
-            msg = (
-                f"theta0 has length {theta0.size}, expected {n_dim} "
-                f"(= n_joints * {COEFFS_PER_JOINT})"
-            )
-            raise ValueError(msg)
-        # Clip to the bound box defensively so SLSQP starts feasible.
-        theta0 = np.clip(theta0, lb, ub).astype(np.float64).reshape(-1)
-    else:
-        theta0 = np.zeros(n_dim, dtype=np.float64)
+    theta0 = _initial_theta(opts, lb, ub)
 
     sim_fn: SimulateFn = (
         simulate_fn
@@ -265,20 +293,7 @@ def fit_swing_drake(
     )
     wall_clock_s = time.perf_counter() - t_start
 
-    # Spec §2.2: validate the recovered ``theta_optimal`` before we
-    # advertise it as a fit. Out-of-bounds is the bigger risk for SLSQP
-    # (it can step outside the feasible region on a hard failure), so we
-    # also enforce the per-letter bounds the optimizer was told to use.
-    bound_table = {
-        chr(ord("A") + col): (-_PER_COEFF_ABS_BOUND[col], _PER_COEFF_ABS_BOUND[col])
-        for col in range(COEFFS_PER_JOINT)
-    }
-    theta_opt = validate_theta(
-        np.ascontiguousarray(res.x, dtype=np.float64),
-        n_joints=opts.n_joints,
-        bounds=bound_table,
-        name="theta_optimal",
-    )
+    theta_opt = _validated_optimum(res.x, opts.n_joints)
     try:
         rmse_m = _final_rmse_m(theta_opt, target, sim_fn)
     except Exception:  # pragma: no cover - defensive  # noqa: BLE001

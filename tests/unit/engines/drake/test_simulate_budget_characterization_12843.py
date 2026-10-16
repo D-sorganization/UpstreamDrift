@@ -20,6 +20,9 @@ import pytest
 from src.engines.physics_engines.drake.python.motion_matching import (
     simulate as sim_mod,
 )
+from src.engines.physics_engines.drake.python.motion_matching import (
+    _simulate_support as support,
+)
 from src.shared.python.core.contracts.exceptions import PreconditionError
 from src.engines.physics_engines.drake.python.motion_matching.simulate import (
     COEFFS_PER_JOINT,
@@ -478,18 +481,7 @@ def test_simulate_without_pydrake_raises_import_error() -> None:
 
 
 def _logs(n: int, n_act: int) -> Any:
-    nan = np.nan
-    return sim_mod._RolloutLogs(
-        q=np.full((n, _N_Q), nan),
-        v=np.full((n, _N_V), nan),
-        tau=np.full((n, n_act), nan),
-        grip=np.full((n, 3), nan),
-        grip_quat=np.full((n, 4), nan),
-        clubhead=np.full((n, 3), nan),
-        club_quat=np.full((n, 4), nan),
-        kinetic_energy=np.full(n, nan),
-        potential_energy=np.full(n, nan),
-    )
+    return support.allocate_logs(n, _N_Q, _N_V, n_act)
 
 
 def _roll(plant: Any, simulator: Any, grid: np.ndarray, logs: Any, **kw: Any) -> Any:
@@ -498,11 +490,13 @@ def _roll(plant: Any, simulator: Any, grid: np.ndarray, logs: Any, **kw: Any) ->
         plant=plant,
         grid=grid,
         theta=kw.pop("theta", _theta()),
-        n_actuators=kw.pop("n_actuators", _N_ACT),
-        grip_body_name=kw.pop("grip_body_name", "club_grip"),
-        clubhead_body_name=kw.pop("clubhead_body_name", "clubhead"),
         logs=logs,
-        **kw,
+        config=support.RolloutConfig(
+            n_actuators=kw.pop("n_actuators", _N_ACT),
+            grip_body_name=kw.pop("grip_body_name", "club_grip"),
+            clubhead_body_name=kw.pop("clubhead_body_name", "clubhead"),
+            **kw,
+        ),
     )
 
 

@@ -740,7 +740,8 @@ def simulate_with_coefficients(
 
     # Pinocchio keeps a fixed-step *integration clock*, not an output grid.
     n_steps = _step_count(opts)
-    t_grid = np.arange(n_steps + 1, dtype=np.float64) * opts.dt
+    n_samples = n_steps + 1
+    t_grid = np.arange(n_samples, dtype=np.float64) * opts.dt
     traj = _integrate(dyn, rk4_coeffs, q0, qd0, t_grid, opts)
 
     frame_ids = (
