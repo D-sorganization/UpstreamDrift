@@ -849,6 +849,23 @@ def _save_dynamics_record(
     )
 
 
+def _render_backend_errors() -> tuple[type[BaseException], ...]:
+    """Exception types that mean "no usable OpenGL/render backend".
+
+    ``mujoco.FatalError`` is what ``mujoco.Renderer`` raises on a headless host
+    without a GL platform library (#12855). ``ImportError`` covers a missing
+    optional renderer dependency.
+    """
+    errors: list[type[BaseException]] = [ImportError]
+    try:
+        import mujoco  # noqa: PLC0415
+
+        errors.append(mujoco.FatalError)
+    except (ImportError, AttributeError):
+        pass
+    return tuple(errors)
+
+
 def _render_playbacks(
     out_dir: Path,
     cal_res: _CalibrateAndScaleResult,
@@ -856,23 +873,38 @@ def _render_playbacks(
     lane: Lane,
     q_ref: np.ndarray,
     sim_q: np.ndarray,
-) -> None:
-    """Render IK and tracking playback GIFs.
+) -> str | None:
+    """Render IK and tracking playback GIFs (best-effort diagnostics).
 
     The playback looks at the capture's first-frame marker centroid and runs
-    at the capture's own rate.
+    at the capture's own rate. GIFs are diagnostics, not the match result, so
+    a missing OpenGL context (headless host, #12855) skips rendering instead of
+    aborting the pipeline. Only render-backend errors are caught.
+
+    Returns:
+        ``None`` when both GIFs were rendered, otherwise the skip reason.
     """
     lookat = np.nanmean(lane.points[0], axis=0)
     names = tuple(kin.coordinate_order)
-    for q, name in ((q_ref, "ik_playback.gif"), (sim_q, "tracking_playback.gif")):
-        render_playback(
-            cal_res.spec_bytes,
-            names,
-            q,
-            lookat,
-            out_dir / name,
-            rate_hz=lane.rate_hz,
+    try:
+        for q, name in ((q_ref, "ik_playback.gif"), (sim_q, "tracking_playback.gif")):
+            render_playback(
+                cal_res.spec_bytes,
+                names,
+                q,
+                lookat,
+                out_dir / name,
+                rate_hz=lane.rate_hz,
+            )
+    except _render_backend_errors() as exc:
+        reason = f"{type(exc).__name__}: {exc}"
+        logger.warning(
+            "playback GIFs skipped: no usable OpenGL context "
+            "(set MUJOCO_GL=egl|osmesa or run under xvfb-run): %s",
+            reason,
         )
+        return reason
+    return None
 
 
 def _write_receipt(out_dir: Path, receipt: dict[str, Any]) -> None:
@@ -1188,10 +1220,12 @@ def _simulate_and_receipt(
         )
     )
     _save_dynamics_record(ctx.out_dir, record, sim_errors, lane, q_track)
-    _render_playbacks(ctx.out_dir, cal_res, kin, lane, q_ref, sim_q)
+    render_skipped = _render_playbacks(ctx.out_dir, cal_res, kin, lane, q_ref, sim_q)
     receipt = _ground_support_receipt(
         ctx, cal_res, base_spec, lane, kin, q_ref, ik_report, dynamics_report
     )
+    if render_skipped:
+        receipt["render_skipped"] = render_skipped
     _finalize_receipt(
         ctx,
         receipt,
