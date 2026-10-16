@@ -5,13 +5,17 @@ from __future__ import annotations
 import os
 import sys
 import traceback
+from collections.abc import Callable
+from pathlib import Path
 from types import TracebackType
 
+from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication
 
 from src.launchers.launcher_constants import REPOS_ROOT, logger
 from src.launchers.startup_session import StartupSession
+from src.shared.python.core.process_safety import narrow_catch
 from src.launchers.ui_components import (
     ASSETS_DIR,
     AsyncStartupWorker,
@@ -32,12 +36,88 @@ def _install_global_ui_zoom(app: QApplication) -> None:
     install_global_ui_zoom(app)
 
 
-def _write_crash_traceback(err_msg: str) -> None:
+_event_loop_running = False
+
+
+def mark_event_loop_running(running: bool = True) -> None:
+    """Record that the Qt event loop is live, so errors become recoverable."""
+    global _event_loop_running
+    _event_loop_running = running
+
+
+def _crash_log_dir() -> Path:
+    from src.launchers.launcher_constants import CONFIG_DIR
+
+    return CONFIG_DIR / "logs"
+
+
+def _write_crash_traceback(err_msg: str, log_dir: Path | None = None) -> Path | None:
+    """Write the traceback under the per-user log dir (never the CWD, #12886)."""
     try:
-        with open("crash_traceback.txt", "w", encoding="utf-8") as handle:
-            handle.write(err_msg)
+        target = (log_dir if log_dir is not None else _crash_log_dir()) / (
+            "crash_traceback.txt"
+        )
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(err_msg, encoding="utf-8")
+        return target
     except OSError:
-        pass
+        return None
+
+
+def _show_error_dialog(title: str, message: str, detail_text: str) -> None:
+    from src.launchers.launcher_dialogs import CriticalErrorDialog
+
+    CriticalErrorDialog(title=title, message=message, detail_text=detail_text).exec()
+
+
+_DIALOG_FAILURES: tuple[type[Exception], ...] = (
+    RuntimeError,
+    OSError,
+    ImportError,
+    TypeError,
+    ValueError,
+    AttributeError,
+)
+
+
+def handle_uncaught_exception(
+    exc_type: type[BaseException],
+    exc_value: BaseException,
+    exc_tb: TracebackType | None,
+    *,
+    show_dialog: Callable[[str, str, str], None] = _show_error_dialog,
+    log_dir: Path | None = None,
+) -> bool:
+    """Report an uncaught exception; return True when the app must quit.
+
+    Startup failures (before the event loop runs) are fatal. Once the loop is
+    running, an error in one slot is shown in a dialog and the launcher plus
+    its other docked tools stay alive (issue #12886).
+    """
+    err_msg = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+    logger.error("Uncaught exception:\n%s", err_msg)
+    saved = _write_crash_traceback(err_msg, log_dir)
+    if exc_type is SystemExit:
+        return True
+    fatal = not _event_loop_running
+    where = f"\n\nTraceback saved to {saved}" if saved else ""
+    # The hook itself must never raise: a broken dialog (deleted Qt wrapper,
+    # missing dialog module, bad arguments) is logged instead.
+    with narrow_catch(*_DIALOG_FAILURES, log_message="Could not show error dialog"):
+        if fatal:
+            show_dialog(
+                "Application Crash",
+                "UpstreamDrift has encountered an unexpected error and must close.",
+                err_msg,
+            )
+        else:
+            show_dialog(
+                "Unexpected Error",
+                "An action failed. The launcher is still running; other tools "
+                f"are unaffected.{where}",
+                err_msg,
+            )
+    return fatal
 
 
 def _install_exception_hook() -> None:
@@ -46,20 +126,8 @@ def _install_exception_hook() -> None:
         exc_value: BaseException,
         exc_tb: TracebackType | None,
     ) -> None:
-        from src.launchers.launcher_dialogs import CriticalErrorDialog
-
-        err_msg = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
-        _write_crash_traceback(err_msg)
-
-        if exc_type is not SystemExit:
-            dialog = CriticalErrorDialog(
-                title="Application Crash",
-                message="UpstreamDrift has encountered an unexpected error and must close.",
-                detail_text=err_msg,
-            )
-            dialog.exec()
-
-        QApplication.quit()
+        if handle_uncaught_exception(exc_type, exc_value, exc_tb):
+            QApplication.quit()
 
     sys.excepthook = excepthook
 
@@ -150,5 +218,6 @@ def main() -> None:
     )
     app.aboutToQuit.connect(session.shutdown)
     session.start()
+    QTimer.singleShot(0, mark_event_loop_running)
 
     sys.exit(app.exec())

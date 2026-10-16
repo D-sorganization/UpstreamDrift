@@ -46,6 +46,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.launchers.engine_availability import probe_engine, probe_model_engine
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.style_constants import Styles
 from src.shared.python.theme.typography import Weights, get_display_font, get_qfont
@@ -924,6 +925,12 @@ class DraggableModelCard(QFrame):
         #    target does not resolve renders "Unavailable" regardless of the
         #    optimistic status declared in YAML.
         if not self._target_is_resolvable():
+            return self._STATUS_STRINGS["unavailable"]
+
+        # 0b. Engine runtime probe (#12890): one source of truth shared with
+        #     the launch action; models.yaml status never overrides it.
+        availability = probe_model_engine(self.model, probe_engine)
+        if availability is not None and not availability.available:
             return self._STATUS_STRINGS["unavailable"]
 
         # 1. Prefer an explicit model.status or launcher.status — that is the
