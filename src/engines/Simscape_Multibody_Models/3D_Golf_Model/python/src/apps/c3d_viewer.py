@@ -22,13 +22,14 @@ from PyQt6.QtCore import Qt
 try:
     from src.shared.python.theme.integration import ThemedWindowMixin
     from src.shared.python.theme.launcher_compat import apply_golf_suite_style
-
-    apply_golf_suite_style()
 except ImportError:
 
     class ThemedWindowMixin:
         def setup_theme_support(self, *args, **kwargs) -> None:
             pass
+
+    def apply_golf_suite_style() -> None:
+        """No-op when the suite theme package is unavailable."""
 
 
 from .core.models import C3DDataModel
@@ -723,6 +724,9 @@ def get_dockable_ui() -> QtWidgets.QMainWindow:
 
 def main() -> None:
     """Launch the C3D motion analysis viewer application."""
+    # Global matplotlib defaults are applied by the process owner (here, or the
+    # launcher's theme setup when embedded), never as an import side effect.
+    apply_golf_suite_style()
     app = QtWidgets.QApplication(sys.argv)
     window = C3DViewerMainWindow()
     window.show()
