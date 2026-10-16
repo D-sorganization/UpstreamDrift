@@ -2353,6 +2353,71 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12913 · Club Head Speed No Longer Reads 0.0 for Models Naming the Body Clubhead.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12913
+- **Branch:** merged via #12921
+- **PR:** #12921
+- **Paths:** see #12921
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`1e013045`; collated from changes/12913-club-head-speed-no-longer-reads-0-0-for.md)
+- **Summary:** Club Head Speed no longer reads 0.0 for models naming the body clubhead.
+- **Next step:** Shipped in PR #12921.
+
+### DL-#12886 · Launcher Survives Slot Errors, Accurate Engine Status/Hints, Shutdown and First-Click Launch Fixes (#12890 #12891 #12892 #12894)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12886
+- **Branch:** merged via #12904
+- **PR:** #12904
+- **Paths:** see #12904
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`fc12df4c`; collated from changes/12886-launcher-survives-slot-errors-accurate-e.md)
+- **Summary:** Launcher survives slot errors, accurate engine status/hints, shutdown and first-click launch fixes (#12890 #12891 #12892 #12894)
+- **Next step:** Shipped in PR #12904.
+
+### DL-#12878 · Offscreen Per-Engine Explorer Contract Tests; Explorer Opens MJCF, Keeps Every MJCF DOF, Loads Results, Scrubs and Exports MP4 via One Shared Frame Source; OSIM Loader Accepts Class::Nested Tags; Results Browser Export Button Follows Playability; MuJoCo GUI Gains Export Video (#12888) and Plots No Longer Crash on Unrecorded Channels (#12887)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12878
+- **Branch:** merged via #12899
+- **PR:** #12899
+- **Paths:** see #12899
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`e34e5955`; collated from changes/12878-offscreen-per-engine-explorer-contract-t.md)
+- **Summary:** Offscreen per-engine explorer contract tests; explorer opens MJCF, keeps every MJCF DOF, loads results, scrubs and exports MP4 via one shared frame source; OSIM loader accepts Class::Nested tags; results browser Export button follows playability; MuJoCo GUI gains Export Video (#12888) and plots no longer crash on unrecorded channels (#12887)
+- **Next step:** Shipped in PR #12899.
+
+### DL-#12846 · Refactor Chat_Service Stream Worker, Motion_Pipeline API Routes and Model-Pack Manifest Parsing Under the Architecture Budget; Remove Six Expiring Exceptions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12846
+- **Branch:** merged via #12869
+- **PR:** #12869
+- **Paths:** see #12869
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`3c347de9`; collated from changes/12846-refactor-chat-service-stream-worker-moti.md)
+- **Summary:** Refactor chat_service stream worker, motion_pipeline API routes and model-pack manifest parsing under the architecture budget; remove six expiring exceptions
+- **Next step:** Shipped in PR #12869.
+
+### DL-#12684 · R4: Address Knee Flexion (Owner 15 +-5 Deg Prior, Reliable Capture Wins, Hard No-Hyperextension Bound, Per-Knee Target_Source in the Receipt; --Knee-Flexion Defaults to Capture)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12684
+- **Branch:** merged via #12788
+- **PR:** #12788
+- **Paths:** see #12788
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`3fd79f6c`; collated from changes/12684-r4-address-knee-flexion-owner-15-5-deg-p.md)
+- **Summary:** R4: address knee flexion (owner 15 +-5 deg prior, reliable capture wins, hard no-hyperextension bound, per-knee target_source in the receipt; --knee-flexion defaults to capture)
+- **Next step:** Shipped in PR #12788.
+
 ### DL-#12688 · Drake and Pinocchio MeshCat Backends Draw the Shared Model_Appearance Spec Through One Engine-Neutral Scene Builder; Local Grey Palettes Removed (R9a)
 
 - **State:** shipped
