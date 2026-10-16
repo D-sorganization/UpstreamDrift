@@ -151,12 +151,15 @@ def test_variant_hits_target_and_leaves_undeclared_terms(
     np.testing.assert_allclose(
         after[variant.term_id][idx], result.target_values_deg, atol=TARGET_TOL_DEG
     )
-    for term, values in before.items():
-        if term in variant.affected_terms:
-            continue
-        np.testing.assert_allclose(
-            after[term], values, atol=variant.undeclared_tolerance_deg, rtol=0
-        )
+    check = check_undeclared_terms(
+        variant, base, np.asarray(result.rotations), TIME, handedness=hand
+    )
+    assert check.ok, check.max_change
+    for term, values in before.items():  # independent per-sample cross-check
+        if term not in variant.affected_terms:
+            np.testing.assert_allclose(
+                after[term], values, atol=variant.undeclared_tolerance_deg, rtol=0
+            )
 
 
 @pytest.mark.parametrize("factor", [0.8, 1.2, 0.5])
@@ -474,7 +477,8 @@ def test_check_undeclared_terms_treats_lost_samples_as_a_change() -> None:
     gimbal[5] = Rotation.from_euler("ZXY", [0.0, 90.0, 0.0], degrees=True).as_matrix()
     check = check_undeclared_terms(variant, base, gimbal, TIME, handedness="right")
     assert check.ok is False
-    assert np.isinf(check.max_change["trunk_lateral_flexion_jcs"])
+    assert np.isinf(check.max_change["x_factor_jcs_axial"])  # AR lost at gimbal
+    assert "trunk_lateral_flexion_jcs" in check.violations
 
 
 def test_check_undeclared_terms_validates_arguments() -> None:

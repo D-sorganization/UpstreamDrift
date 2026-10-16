@@ -59,8 +59,16 @@ and RMS of the force and moment norms are reported, with
 \]
 judged against a declared \texttt{ResidualBudget} (defaults $r_F\le 0.05$ and
 $r_M\le 0.01$). The height $h$ is the option \texttt{body\_height\_m} or, if
-absent, the vertical extent of the body origins in the first frame, which is a
-model extent and not a stature. Without external loads the residual is the
+absent, the extent of the body origins along the model's own gravity direction
+$\hat g = g/\|g\|$ at the \emph{first} frame of the motion,
+$h=\max_b \hat g\!\cdot\!p_b - \min_b \hat g\!\cdot\!p_b$, which is a model
+extent and not a stature. The model is posed with the first row of the
+coordinate matrix before the extent is read, so $h$ does not depend on the
+pose in which the run ends or on the model's up axis. The source of $h$ is
+recorded as \texttt{body\_height\_source} (\texttt{body\_height\_m} or
+\texttt{model\_extent\_first\_frame}) in the residual budget and, with $h$, in
+the study receipt (\texttt{id\_body\_height\_m}, \texttt{id\_body\_height\_source};
+receipt schema \texttt{spine-study-receipt/3}). Without external loads the residual is the
 total weight, so the budget fails by construction.
 
 \paragraph{External Loads.}
