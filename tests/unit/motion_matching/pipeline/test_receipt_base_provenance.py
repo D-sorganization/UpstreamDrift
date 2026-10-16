@@ -89,6 +89,7 @@ def _receipt(base_spec: dict[str, Any], **kwargs: Any) -> dict[str, Any]:
         )
 
 
+@pytest.mark.unit
 def test_style_seeded_receipt_chains_to_the_committed_spec(tmp_path: Path) -> None:
     """Acceptance 1: a style-feet receipt passes the provenance chain."""
     committed = _committed()
@@ -120,6 +121,7 @@ def test_style_seeded_receipt_chains_to_the_committed_spec(tmp_path: Path) -> No
     )
 
 
+@pytest.mark.unit
 def test_seeding_is_reproducible_from_the_receipt_fields() -> None:
     """Acceptance 2: committed spec + recorded seed rebuild the seeded document."""
     committed = _committed()
@@ -134,6 +136,7 @@ def test_seeding_is_reproducible_from_the_receipt_fields() -> None:
     assert canonical_sha256(rebuilt) == canonical_sha256(_seeded(committed))
 
 
+@pytest.mark.unit
 def test_without_provenance_the_receipt_hashes_its_base_spec() -> None:
     """Legacy callers keep today's behaviour and record feet off."""
     committed = _committed()
@@ -143,6 +146,7 @@ def test_without_provenance_the_receipt_hashes_its_base_spec() -> None:
     assert receipt["foot_seed_deg"] is None
 
 
+@pytest.mark.unit
 def test_off_provenance_matches_the_legacy_hash() -> None:
     """Feet off: no seeding, so committed receipts keep their hash."""
     committed = _committed()
@@ -154,6 +158,7 @@ def test_off_provenance_matches_the_legacy_hash() -> None:
     }
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     ("mode", "seed", "match"),
     [
@@ -172,11 +177,13 @@ def test_provenance_rejects_inconsistent_fields(
         BaseSpecProvenance.of(_committed(), mode, seed)
 
 
+@pytest.mark.unit
 def test_provenance_rejects_a_non_mapping_document() -> None:
     with pytest.raises(TypeError, match="document"):
         BaseSpecProvenance.of([1, 2])  # type: ignore[arg-type]
 
 
+@pytest.mark.unit
 def test_committed_receipts_without_the_fields_still_validate() -> None:
     """Acceptance 3: receipts written before #12820 still validate."""
     doc = json.loads(DRIVER_RECEIPT.read_text(encoding="utf-8"))
@@ -187,6 +194,7 @@ def test_committed_receipts_without_the_fields_still_validate() -> None:
     assert receipt.foot_seed_deg is None
 
 
+@pytest.mark.unit
 def test_schema_accepts_and_checks_the_new_fields() -> None:
     doc = json.loads(DRIVER_RECEIPT.read_text(encoding="utf-8"))
     doc["foot_progression_mode"] = "style"
@@ -199,6 +207,7 @@ def test_schema_accepts_and_checks_the_new_fields() -> None:
         validate_receipt(doc)
 
 
+@pytest.mark.integration
 @pytest.mark.slow
 @pytest.mark.live_simulation
 @pytest.mark.timeout(900)
