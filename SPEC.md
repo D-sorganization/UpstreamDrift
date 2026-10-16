@@ -2741,6 +2741,10 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-16 | #12922 | Closing the launcher after a MuJoCo session releases renderers before widgets die. |
+| 2026-10-16 | #12902 | MuJoCo explorer: 3D view no longer renders black in the launcher (renderer freed under its own GL context), Side quick-camera no longer crashes, Visualization tab scrolls instead of overlapping (#12884, #12885, #12889) |
+| 2026-10-16 | #12852 | NSX-87: MuJoCo/MyoSuite hard-KKT finite-difference closed-loop derivatives (PARTIAL), reusing the NSX-84 routine; NSX-88: OpenSim closed-loop FD derivatives via NSX-84 routine, capability PARTIAL, muscle-insufficiency flag |
+| 2026-10-16 | #12640 | NSX-22 static torque and hand-split envelopes with Chebyshev margin and sign classes |
 | 2026-10-16 | #12921 | Club Head Speed no longer reads 0.0 for models naming the body clubhead. |
 | 2026-10-16 | #12904 | Launcher survives slot errors, accurate engine status/hints, shutdown and first-click launch fixes (#12890 #12891 #12892 #12894) |
 | 2026-10-16 | #12899 | Offscreen per-engine explorer contract tests; explorer opens MJCF, keeps every MJCF DOF, loads results, scrubs and exports MP4 via one shared frame source; OSIM loader accepts Class::Nested tags; results browser Export button follows playability; MuJoCo GUI gains Export Video (#12888) and plots no longer crash on unrecorded channels (#12887) |
