@@ -258,7 +258,11 @@ class DerivativeCapabilityRegistry:
 
 
 _PENDING = "engine adapter derivatives are a later NSX child (NSX-85..89)"
-_ENGINES = ("pinocchio", "mujoco", "drake", "opensim", "myosuite")
+_ENGINES = ("pinocchio", "drake", "opensim")
+_ADAPTER_FD = (
+    "src.shared.python.loop_nullspace.adapter_derivatives:"
+    "adapter_closed_loop_derivatives"
+)
 
 
 def default_registry() -> DerivativeCapabilityRegistry:
@@ -272,6 +276,10 @@ def default_registry() -> DerivativeCapabilityRegistry:
             "FiniteDifferenceDerivatives"
         ),
     )
+    # NSX-87: hard-KKT finite differences.  ``mjd_transitionFD`` (soft stepping)
+    # is a separately characterised entry and is never conformance evidence.
+    for engine in ("mujoco", "myosuite"):
+        reg.declare(engine, DerivativeMethod.FINITE_DIFFERENCE, loader=_ADAPTER_FD)
     for engine in _ENGINES:
         reg.declare(engine, DerivativeMethod.NONE, reason=_PENDING)
     return reg

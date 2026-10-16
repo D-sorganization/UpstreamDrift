@@ -642,3 +642,28 @@ inputs. Postconditions: the `z`-dependence of `F_t` appears only through
 `λ(z)`; an additive-noise objective with no M2 has gradient exactly zero.
 Non-claims: noise amplitudes are declared hypotheses, not measurements; no claim
 that any golfer uses a minimum-variance allocation.
+
+## NSX-87 MuJoCo and MyoSuite Derivatives (#12716)
+
+`MujocoForceAdapter.constrained_acceleration_derivatives(q, v, tau)` (and the
+MyoSuite subclass) drive the single NSX-84 `FiniteDifferenceDerivatives`
+routine with the adapter's canonical `M`, `h`, `J_c`, `Jdot_v` through
+`loop_nullspace/adapter_derivatives.py`. The derivatives are those of the rigid
+hard-KKT solve with the reaction re-solved; capability is `PARTIAL` with
+`derivative_method=finite_difference` (central differences along retractions,
+step `1e-5`).
+
+* MyoSuite refuses (`DerivativeCapabilityUnavailable`) and reports `NONE`
+  unless `kkt_regularization == 0`.
+* Muscle activation states are unsupported (`UNSUPPORTED_STATE_COMPONENTS`)
+  until NSX-94.
+* Non-claim: `mjd_transitionFD` differentiates MuJoCo's soft stepping
+  (solref/solimp compliance). It is a separately characterised registry entry
+  and its sensitivities are not conformance evidence here.
+* Pinocchio agreement (same specification, state and load; basis-independent
+  operators `D P^T`): the bound is the registered NSX-56 Track N tolerance
+  propagated through the differencing step, `max(1e-11, 1e-11, 1e-12, 1e-8) /
+  1e-5 = 1e-3` (scaled). Measured: acceleration `7e-12`, reaction `1e-10`,
+  `d a/d tau` `4e-12`, `d a/d xi` `9e-7`, `d a/d eta` `6e-5`, `d lambda/d xi`
+  `1e-5`, `d lambda/d eta` `7e-5`. Agreement between engines is not physical
+  validation.
