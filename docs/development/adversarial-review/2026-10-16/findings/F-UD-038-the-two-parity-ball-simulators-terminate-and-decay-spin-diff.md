@@ -55,7 +55,12 @@ Low to medium: Monte Carlo outputs will shift slightly. Rollback is a revert.
 
 ## Handoff
 
-None
+- **Branch, commit, and pull request:** `<branch>` @ `<commit>` — PR #<n> (fill in when opened)
+- **Validation:** the command(s) under _Verification_ above, run locally and green; plus the repo's fast gates
+  (`ruff check`, `ruff format --check`, the relevant `-m unit` subset)
+- **Blockers:** none known at drafting time — record any that appear
+- **Next step:** open the PR against `main`, arm auto-merge with `scripts/automerge_guard.py`, end the session
+- **Follow-ups:** none
 
 Refs: adversarial review 2026-10-16, F-UD-038
 

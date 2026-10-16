@@ -59,7 +59,12 @@ Medium: removing a gate removes a guard; do it after the real defects are fixed 
 
 ## Handoff
 
-Follow-ups: F-UD-004, F-UD-005, F-UD-006, F-UD-010, F-UD-014.
+- **Branch, commit, and pull request:** `<branch>` @ `<commit>` — PR #<n> (fill in when opened)
+- **Validation:** the command(s) under _Verification_ above, run locally and green; plus the repo's fast gates
+  (`ruff check`, `ruff format --check`, the relevant `-m unit` subset)
+- **Blockers:** none known at drafting time — record any that appear
+- **Next step:** open the PR against `main`, arm auto-merge with `scripts/automerge_guard.py`, end the session
+- **Follow-ups:** Follow-ups: F-UD-004, F-UD-005, F-UD-006, F-UD-010, F-UD-014.
 
 Refs: adversarial review 2026-10-16, F-UD-040
 

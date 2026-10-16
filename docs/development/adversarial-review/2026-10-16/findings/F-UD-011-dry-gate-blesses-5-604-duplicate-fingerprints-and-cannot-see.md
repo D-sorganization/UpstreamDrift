@@ -60,7 +60,12 @@ Medium: sign-convention differences between copies may surface during consolidat
 
 ## Handoff
 
-Follow-ups: F-UD-038 (ball-simulator integrator parity).
+- **Branch, commit, and pull request:** `<branch>` @ `<commit>` — PR #<n> (fill in when opened)
+- **Validation:** the command(s) under _Verification_ above, run locally and green; plus the repo's fast gates
+  (`ruff check`, `ruff format --check`, the relevant `-m unit` subset)
+- **Blockers:** none known at drafting time — record any that appear
+- **Next step:** open the PR against `main`, arm auto-merge with `scripts/automerge_guard.py`, end the session
+- **Follow-ups:** Follow-ups: F-UD-038 (ball-simulator integrator parity).
 
 Refs: adversarial review 2026-10-16, F-UD-011
 
