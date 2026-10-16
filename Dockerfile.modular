@@ -262,3 +262,10 @@ ENV QT_QPA_PLATFORM=xcb \
     MUJOCO_GL=egl \
     DISPLAY=:99
 EXPOSE 6080
+
+# ---- Final stage: default build target ------------------------------------
+# Untargeted builds (docker-size-gates profile matrix, docker-smoke,
+# docker-compose.profiles.yml, the README examples) must keep producing the API
+# `runtime` image: Docker builds the LAST stage when no --target is given. The
+# explorer images above are opt-in via `--target explorer-headless|explorer-gui`.
+FROM runtime AS runtime-default
