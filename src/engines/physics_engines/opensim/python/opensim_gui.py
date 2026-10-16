@@ -34,7 +34,11 @@ from PyQt6.QtWidgets import (
 )
 
 import contextlib
-from src.shared.python.engine_core.opensim_runtime import import_opensim
+from src.shared.python.engine_core.opensim_runtime import (
+    OpenSimProbe,
+    OpenSimState,
+    probe_opensim,
+)
 
 with contextlib.suppress(Exception):
     matplotlib.use("QtAgg")
@@ -48,12 +52,14 @@ from matplotlib.figure import Figure
 try:
     from src.engines.physics_engines.opensim.python.opensim_golf.core import (
         GolfSwingModel,
+        OpenSimImportFailedError,
         OpenSimModelLoadError,
         OpenSimNotInstalledError,
     )
 except ImportError:
     from .opensim_golf.core import (
         GolfSwingModel,
+        OpenSimImportFailedError,
         OpenSimModelLoadError,
         OpenSimNotInstalledError,
     )
@@ -213,6 +219,9 @@ class MainWidget(QWidget):
         self.result: Any = None
         self.initialization_error: str | None = None
         self._opensim_available: bool = False
+        self._opensim_probe: OpenSimProbe = OpenSimProbe(
+            OpenSimState.MISSING, "unprobed"
+        )
 
         # Check OpenSim availability first
         self._check_opensim_availability()
@@ -226,13 +235,9 @@ class MainWidget(QWidget):
             self._show_getting_started()
 
     def _check_opensim_availability(self) -> None:
-        """Check if OpenSim library is available."""
-        try:
-            import_opensim()
-
-            self._opensim_available = True
-        except ImportError:
-            self._opensim_available = False
+        """Probe OpenSim, keeping the real reason when it cannot load (#12883)."""
+        self._opensim_probe = probe_opensim()
+        self._opensim_available = self._opensim_probe.available
 
     def _try_load_model(self) -> None:
         """Attempt to load the OpenSim model if a path was provided."""
@@ -244,6 +249,11 @@ class MainWidget(QWidget):
             self.model = GolfSwingModel(self.model_path)
             self._update_status("OpenSim Model Loaded", "green")
             self.btn_run.setEnabled(True)
+        except OpenSimImportFailedError as e:
+            self.initialization_error = str(e)
+            self._update_status("ERROR: OpenSim Cannot Load", "red")
+            self.btn_run.setEnabled(False)
+            QMessageBox.critical(self, "OpenSim Cannot Load", str(e))
         except OpenSimNotInstalledError as e:
             self.initialization_error = str(e)
             self._update_status("ERROR: OpenSim Not Installed", "red")
@@ -284,6 +294,8 @@ class MainWidget(QWidget):
         """
         if self._opensim_available:
             self._update_status("Ready - Load or Create a Model", "#17a2b8")
+        elif self._opensim_probe.state is OpenSimState.IMPORT_FAILED:
+            self._update_status("OpenSim Cannot Load - See Details", "red")
         else:
             self._update_status("OpenSim Not Installed - Setup Required", "orange")
 
@@ -302,7 +314,12 @@ class MainWidget(QWidget):
             "   Check 'shared/models/opensim/' for example files\n\n"
         )
 
-        if not self._opensim_available:
+        if self._opensim_probe.state is OpenSimState.IMPORT_FAILED:
+            getting_started_text += (
+                "OpenSim is installed but cannot load in this process:\n"
+                f"  {self._opensim_probe.reason}\n"
+            )
+        elif not self._opensim_available:
             getting_started_text += (
                 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                 "⚠️  OpenSim Installation Required:\n"
@@ -432,7 +449,11 @@ class MainWidget(QWidget):
             if self._opensim_available:
                 self._try_load_model()
             else:
-                self.initialization_error = "OpenSim library is not installed"
+                self.initialization_error = (
+                    f"OpenSim cannot load: {self._opensim_probe.reason}"
+                    if self._opensim_probe.state is OpenSimState.IMPORT_FAILED
+                    else "OpenSim library is not installed"
+                )
         self._update_status(f"OpenCap Session Loaded ({session.trial})", "green")
         details = (
             f"OpenCap Session: {session.trial}\n"
