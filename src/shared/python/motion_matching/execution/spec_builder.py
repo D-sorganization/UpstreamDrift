@@ -31,6 +31,12 @@ from src.shared.python.motion_matching.anthropometry import (
     de_leva_table_sha256,
 )
 from src.shared.python.motion_matching.club_models import CLUBS
+from src.shared.python.motion_matching.club_shaft_chain import (
+    DEFAULT_SHAFT_MODEL,
+    SHAFT_MODELS,
+    apply_shaft_chain,
+    build_shaft_chain,
+)
 from src.shared.python.motion_matching.execution.assets import (
     get_candidate_geometry_spec,
     get_club_markers,
@@ -670,6 +676,26 @@ def _annotate_document(document: dict[str, Any], upper: dict[str, Any]) -> None:
     )
 
 
+def with_shaft_model(
+    document: dict[str, Any], club: str, shaft_model: str | None
+) -> dict[str, Any]:
+    """Apply the ``club.shaft.model`` flag (#12686); ``"rigid"`` is the default.
+
+    ``"rigid"`` (or ``None``) returns ``document`` itself, unchanged, so the
+    default spec stays byte-identical; ``"chain"`` returns the flexible-shaft
+    copy built by :func:`club_shaft_chain.apply_shaft_chain`.
+
+    Raises:
+        ValueError: ``shaft_model`` is not one of ``SHAFT_MODELS``.
+    """
+    model = DEFAULT_SHAFT_MODEL if shaft_model is None else shaft_model
+    if model not in SHAFT_MODELS:
+        raise ValueError(f"shaft_model must be one of {SHAFT_MODELS}, got {model!r}")
+    if model == "rigid":
+        return document
+    return apply_shaft_chain(document, build_shaft_chain(CLUBS[club]))
+
+
 @dataclass(frozen=True)
 class AnthropometricDocument:
     """A composed candidate document plus the values its receipt records."""
@@ -772,6 +798,7 @@ def compose_anthropometric_document(
         ),
     )
     _annotate_document(document, upper)
+    document = with_shaft_model(document, club, kwargs.get("shaft_model"))
     return AnthropometricDocument(
         document=document,
         subject=upper["subject"],
@@ -853,6 +880,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--name", default=None, help="default full_body_spec_anthro_<club>"
     )
     parser.add_argument(
+        "--shaft-model",
+        choices=SHAFT_MODELS,
+        default=DEFAULT_SHAFT_MODEL,
+        help="club.shaft.model: rigid (default) or the chain flexible shaft (#12686)",
+    )
+    parser.add_argument(
         "--club-markers",
         type=Path,
         default=None,
@@ -884,6 +917,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
         name=args.name,
         club_markers_path=args.club_markers,
+        shaft_model=args.shaft_model,
     )
     return 0
 
