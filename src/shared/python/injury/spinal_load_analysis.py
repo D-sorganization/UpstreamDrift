@@ -293,17 +293,11 @@ class SpinalLoadAnalyzer:
                     f"does not match time length ({n_frames})"
                 )
 
-        # Per-level loads: heuristic (unchanged) or from a model-based provider
-        if self.provider.is_model_based:
-            result.segments = self._segments_from_provider(
-                joint_angles, joint_velocities, joint_torques, time
-            )
-        else:
-            for segment_name in self.lumbar_segments:
-                segment = self.compute_segment_loads(
-                    segment_name, joint_angles, joint_velocities, joint_torques, time
-                )
-                result.segments[segment_name] = segment
+        # Per-level loads always come from the provider; ``is_model_based``
+        # only decides whether the heuristic risk bands apply (below).
+        result.segments = self._segments_from_provider(
+            joint_angles, joint_velocities, joint_torques, time
+        )
 
         # Calculate X-factor metrics if pelvis/thorax data available
         if pelvis_angles is not None and thorax_angles is not None:

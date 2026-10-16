@@ -66,13 +66,15 @@ logger = logging.getLogger(__name__)
 _PELVIS = {"golf": GOLF_PELVIS, "fixture": FIXTURE_PELVIS}
 _STAGE_ERRORS = (ValueError, OSError, RuntimeError)
 _MAX_ERROR_CHARS = 400
-#: Stage order; the failing stage is the first one without a record.
+#: Stage order; ``StageOutcome.active`` always names one of these.
 STAGE_NAMES = (
     "golf_input",
     "drive",
     "inverse_dynamics",
     "static_optimization",
     "joint_reactions",
+    "loads_export",
+    "context_bands",
 )
 
 
@@ -91,6 +93,8 @@ class StageOutcome:
     variant: dict[str, Any] | None = None
     failed: bool = False
     ran: bool = False
+    #: Stage currently executing; a failure is recorded under this name.
+    active: str = STAGE_NAMES[0]
 
     @classmethod
     def skipped(cls, reason: str) -> StageOutcome:
@@ -140,6 +144,7 @@ def _drive(request: Any, model: Path, scrub: Any, out: StageOutcome) -> DriveRes
             scrub,
         )
     )
+    out.active = "drive"
     law = _requested_law(request)
     options = DriveOptions(
         tolerance_rad=request.drive_tolerance_rad, pelvis=_PELVIS[request.pelvis]
@@ -325,19 +330,24 @@ def _run_chain(
     request: Any, model: Path, scrub: Callable[[str], str], out: Any
 ) -> None:
     drive = _drive(request, model, scrub, out)
+    out.active = "inverse_dynamics"
     id_series, efforts, budget = _inverse_dynamics(request, model, drive, scrub, out)
+    out.active = "static_optimization"
     so = _static_optimization(request, model, efforts, scrub, out)
+    out.active = "joint_reactions"
     jr = _joint_reactions(request, model, drive, so, scrub, out)
+    out.active = "loads_export"
     _write_loads(request, id_series, so, jr, out)
+    out.active = "context_bands"
     _context(jr, budget.body_weight_n, out)
 
 
 def run_stages(request: Any, model: Path, scrub: Callable[[str], str]) -> StageOutcome:
-    """Run the five stages; a failing stage is recorded last and sets ``failed``.
+    """Run the stages; a failing stage is recorded last and sets ``failed``.
 
     ``scrub`` removes private directory names from every recorded text.
     Postcondition: ``stages`` lists the stages that ran, in order, the last
-    one ``failed`` iff ``outcome.failed``.
+    one ``failed`` (named by ``outcome.active``) iff ``outcome.failed``.
     """
     out = StageOutcome(ran=True)
     request.output_dir.mkdir(parents=True, exist_ok=True)
@@ -345,7 +355,7 @@ def run_stages(request: Any, model: Path, scrub: Callable[[str], str]) -> StageO
         _run_chain(request, model, scrub, out)
     except _STAGE_ERRORS as exc:
         logger.exception("spine study stage failed")
-        stage = STAGE_NAMES[len(out.stages)]
+        stage = out.active
         message = scrub(f"{type(exc).__name__}: {exc}")[:_MAX_ERROR_CHARS]
         out.stages.append(StageRecord(stage=stage, status="failed", error=message))
         out.failed = True
