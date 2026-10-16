@@ -2353,6 +2353,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12964 · Confine Launcher Logo Route to Its Asset Directory (Fixes Unauthenticated Arbitrary File Read)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12964
+- **Branch:** merged via #13020
+- **PR:** #13020
+- **Paths:** see #13020
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`286f7191`; collated from changes/12964-confine-launcher-logo-route-to-its-asset.md)
+- **Summary:** Confine launcher logo route to its asset directory (fixes unauthenticated arbitrary file read)
+- **Next step:** Shipped in PR #13020.
+
+### DL-#12955 · Render the Address Ball at the Club's Own Face on the Ground for Every Club (Drop the Stale Capture Ball and the Duplicate Static-Pose MuJoCo Ball)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12955
+- **Branch:** merged via #12966
+- **PR:** #12966
+- **Paths:** see #12966
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`c9a8612e`; collated from changes/12955-render-the-address-ball-at-the-club-s-ow.md)
+- **Summary:** Render the address ball at the club's own face on the ground for every club (drop the stale capture ball and the duplicate static-pose MuJoCo ball)
+- **Next step:** Shipped in PR #12966.
+
 ### DL-#12949 · CC0 Short-Hair Head Is Now the Default HeadSettings.Model in Every Engine; Parametric Stays Selectable
 
 - **State:** shipped
