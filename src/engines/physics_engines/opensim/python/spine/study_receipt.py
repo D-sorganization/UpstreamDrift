@@ -102,6 +102,9 @@ class SpineStudyReceipt:
     or ``None`` when the study names no licensed asset.  ``variant`` is the
     movement-variant provenance (SPN-13d) or ``None``; it is omitted from the
     serialised receipt when ``None`` so variant-free receipts are unchanged.
+    ``fullbody`` (SPN-9c) records the full-body option: map id, which external
+    loads were included or excluded and the map summary; likewise omitted when
+    ``None``, so receipts without the option are unchanged (no schema bump).
     """
 
     study_id: str
@@ -126,6 +129,7 @@ class SpineStudyReceipt:
     scientific_status: str = "unqualified"
     schema_version: str = SCHEMA_VERSION
     variant: dict[str, Any] | None = None
+    fullbody: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
         if self.status not in STATUSES:
@@ -170,6 +174,8 @@ class SpineStudyReceipt:
         }
         if self.variant is not None:
             data["variant"] = self.variant
+        if self.fullbody is not None:
+            data["fullbody"] = self.fullbody
         return data
 
     @classmethod
@@ -207,6 +213,7 @@ class SpineStudyReceipt:
                 context_comparisons=tuple(data["context_comparisons"]),
                 scientific_status=data["scientific_status"],
                 variant=data.get("variant"),
+                fullbody=data.get("fullbody"),
             )
         except KeyError as exc:
             raise ValueError(f"receipt lacks key {exc.args[0]!r}") from exc

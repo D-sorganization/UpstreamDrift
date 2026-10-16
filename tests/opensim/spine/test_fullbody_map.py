@@ -36,6 +36,10 @@ def _entry(raw: dict) -> dict:
     return raw["maps"][BRUNO]
 
 
+def _first(entry: dict, treatment: str) -> dict:
+    return next(c for c in entry["golf_coordinates"] if c["treatment"] == treatment)
+
+
 def test_committed_map_loads_and_accounts_for_every_coordinate() -> None:
     fmap = get_fullbody_map(BRUNO)
     assert fmap.verified
@@ -142,7 +146,7 @@ def test_loader_rejects_bad_documents() -> None:
             "twice",
         ),
         (
-            lambda e: e["golf_coordinates"][0].update(target="hip_flexion_l"),
+            lambda e: _first(e, "direct").update(target="hip_flexion_l"),
             "duplicate target",
         ),
         (

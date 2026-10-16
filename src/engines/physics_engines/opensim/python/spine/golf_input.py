@@ -34,6 +34,7 @@ from src.shared.python.engine_core.opensim_runtime import import_opensim
 __all__ = [
     "GolfTrunkInput",
     "back_joint_rotation",
+    "read_golf_coordinates",
     "read_golf_humanoid_motion",
     "resample",
 ]
@@ -237,6 +238,41 @@ def _evaluate_frames(
         poses[row] = pelvis_pose
         rots[row] = pelvis_pose[:3, :3].T @ torso_pose[:3, :3]
     return rots, poses
+
+
+def read_golf_coordinates(
+    motion_path: Path, model_path: Path
+) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+    """Every model coordinate series of a golf ``.sto``/``.mot`` (radians, metres).
+
+    Same name matching and degree conversion as
+    :func:`read_golf_humanoid_motion`, without the trunk evaluation; the full
+    coordinate table the full-body map transfers from (SPN-9c).
+
+    Preconditions: both files exist, the motion is ``.sto``/``.mot``
+    (``FileNotFoundError``/``ValueError``).  Postcondition: ``(time_s,
+    {name: (n,)})`` with strictly increasing time and finite values.
+    """
+    motion, model_file = Path(motion_path), Path(model_path)
+    for path in (motion, model_file):
+        if not path.is_file():
+            raise FileNotFoundError(f"input file not found: {path.name}")
+    if motion.suffix.lower() not in (".sto", ".mot"):
+        raise ValueError(f"motion file must be .sto or .mot, got {motion.suffix!r}")
+    osim = import_opensim()
+    model = osim.Model(str(model_file))
+    coord_set = model.getCoordinateSet()
+    names = {coord_set.get(i).getName() for i in range(coord_set.getSize())}
+    time_s, values, in_degrees, _events = _read_table(motion, names)
+    if in_degrees:
+        for name, series in values.items():
+            if _is_rotational(coord_set.get(name), osim):
+                values[name] = np.radians(series)
+    if time_s.size < 2 or not np.all(np.diff(time_s) > 0.0):
+        raise ValueError("motion time must be strictly increasing")
+    if not all(np.all(np.isfinite(v)) for v in values.values()):
+        raise ValueError("motion coordinates must be finite")
+    return time_s, values
 
 
 def read_golf_humanoid_motion(motion_path: Path, model_path: Path) -> GolfTrunkInput:

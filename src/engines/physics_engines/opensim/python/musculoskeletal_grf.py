@@ -174,11 +174,25 @@ def _pelvis_rotation(model: Any, state: Any) -> np.ndarray:
     return np.array([[mat.get(i, j) for j in range(3)] for i in range(3)])
 
 
-def _force_free_copy(model: Any) -> Any:
+def _force_free_copy(model: Any, *, keep_external: bool = False) -> Any:
+    """Copy of ``model`` with every force disabled.
+
+    ``keep_external`` leaves ``ExternalForce`` elements (e.g. the club hand
+    wrench) applied, so a ground-reaction estimate sees them.
+    """
     osim = import_opensim()
     free = osim.Model(model)
-    for i in range(free.getForceSet().getSize()):
-        free.updForceSet().get(i).set_appliesForce(False)
+    forces = free.updForceSet()
+    for i in range(forces.getSize()):
+        force = forces.get(i)
+        if keep_external and force.getConcreteClassName() == "ExternalForce":
+            continue
+        force.set_appliesForce(False)
+    if not keep_external:
+        free.finalizeFromProperties()
+        for comp in free.getComponentsList():
+            if comp.getConcreteClassName() == "ExternalForce":
+                osim.ExternalForce.safeDownCast(comp).set_appliesForce(False)
     free.initSystem()
     return free
 
@@ -224,6 +238,7 @@ def estimate_ground_reactions(
     mu: float = DEFAULT_FRICTION,
     height_tol_m: float = DEFAULT_CONTACT_HEIGHT_TOL_M,
     ridge: float = DEFAULT_RIDGE,
+    keep_external: bool = False,
 ) -> dict[str, Any]:
     """Estimate point ground-reaction forces from prescribed kinematics.
 
@@ -235,6 +250,9 @@ def estimate_ground_reactions(
         mu: friction coefficient.
         height_tol_m: a point is in contact when within this of the floor.
         ridge: min-norm weight spreading force over the available sole points.
+        keep_external: leave ``ExternalForce`` elements already in ``model``
+            (e.g. a club hand wrench) applied, so the ground supplies only
+            what they do not; the state time is then set per frame.
 
     Returns:
         dict with ``forces (N, P, 3)``, ``spins (N, P)``, ``points_world (N, P, 3)``, ``floor_y``,
@@ -244,7 +262,7 @@ def estimate_ground_reactions(
     pts = points or default_contact_points()
     n = len(times)
     require(n > 12, "need at least 13 frames")
-    free = _force_free_copy(model)
+    free = _force_free_copy(model, keep_external=keep_external)
     state = free.initSystem()
     names = [c.getName() for c in free.getCoordinateSet()]
     require(all(k in coords for k in names), "coords must cover every model coordinate")
@@ -274,6 +292,7 @@ def estimate_ground_reactions(
     required = np.zeros((n, 6))
     resid = np.zeros(n)
     for k in range(n):
+        state.setTime(float(times[k]))
         for name in names:
             c = free.getCoordinateSet().get(name)
             c.setValue(state, float(coords[name][k]), False)
@@ -322,10 +341,17 @@ def write_external_loads(
     points: tuple[ContactPoint, ...],
     stem: str = "grf_estimated",
     spins: np.ndarray | None = None,
+    torques: np.ndarray | None = None,
 ) -> Path:
-    """Write ``<stem>.sto`` and ``<stem>.xml`` (ExternalLoads); return the XML path."""
+    """Write ``<stem>.sto`` and ``<stem>.xml`` (ExternalLoads); return the XML path.
+
+    ``torques`` ``(n, P, 3)`` gives a full ground-frame torque per point and
+    takes precedence over ``spins`` (vertical torque only).
+    """
     osim = import_opensim()
     require(forces.shape[:2] == (len(times), len(points)), "forces/points mismatch")
+    if torques is not None:
+        require(torques.shape == forces.shape, "torques/forces mismatch")
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)
     cols: dict[str, np.ndarray] = {}
@@ -337,10 +363,14 @@ def write_external_loads(
             cols[f"{tag}_force_v{ax}"] = forces[:, j, comp]
         for ax, val in zip("xyz", pt.local, strict=True):
             cols[f"{tag}_point_p{ax}"] = np.full(len(times), float(val))
-        spin = np.zeros(len(times)) if spins is None else spins[:, j]
-        cols[f"{tag}_torque_x"] = np.zeros(len(times))
-        cols[f"{tag}_torque_y"] = spin
-        cols[f"{tag}_torque_z"] = np.zeros(len(times))
+        if torques is not None:
+            tq = torques[:, j, :]
+        else:
+            tq = np.zeros((len(times), 3))
+            if spins is not None:
+                tq[:, 1] = spins[:, j]
+        for ax, comp in zip("xyz", range(3), strict=True):
+            cols[f"{tag}_torque_{ax}"] = tq[:, comp]
         ef = osim.ExternalForce()
         ef.set_torque_identifier(f"{tag}_torque_")
         ef.setName(tag)

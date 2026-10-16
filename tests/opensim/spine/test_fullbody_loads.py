@@ -261,11 +261,10 @@ def test_force_free_copy_keeps_external_forces_only_on_request(tmp_path: Path) -
     prepared = prepare_model_for_id(model, external_loads=xml)
 
     def applying(copy) -> list[bool]:
-        forces = copy.getForceSet()
         return [
-            bool(forces.get(i).get_appliesForce())
-            for i in range(forces.getSize())
-            if forces.get(i).getConcreteClassName() == "ExternalForce"
+            bool(osim.ExternalForce.safeDownCast(c).get_appliesForce())
+            for c in copy.getComponentsList()
+            if c.getConcreteClassName() == "ExternalForce"
         ]
 
     assert applying(_force_free_copy(prepared.model)) == [False, False]
@@ -273,4 +272,3 @@ def test_force_free_copy_keeps_external_forces_only_on_request(tmp_path: Path) -
         True,
         True,
     ]
-    assert osim is not None
