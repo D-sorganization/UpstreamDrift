@@ -2340,6 +2340,97 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12866 · Generate the User Manual TOC From Real Chapter Headings and Test That Every Manual Link Resolves
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12866
+- **Branch:** merged via #12877
+- **PR:** #12877
+- **Paths:** see #12877
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`94fb252b`; collated from changes/12866-generate-the-user-manual-toc-from-real-c.md)
+- **Summary:** Generate the user manual TOC from real chapter headings and test that every manual link resolves
+- **Next step:** Shipped in PR #12877.
+
+### DL-#12833 · Divergence Inventory: Commit Only Stable Per-Path Facts (V2 JSONL, One Sorted Record per Line), Drop the Committed Markdown, Move Totals/Bytes/Authorship to --Report; Different-Path PRs No Longer Conflict
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12833
+- **Branch:** merged via #12835
+- **PR:** #12835
+- **Paths:** see #12835
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`aeb6b9a0`; collated from changes/12833-divergence-inventory-commit-only-stable.md)
+- **Summary:** Divergence inventory: commit only stable per-path facts (v2 JSONL, one sorted record per line), drop the committed markdown, move totals/bytes/authorship to --report; different-path PRs no longer conflict
+- **Next step:** Shipped in PR #12835.
+
+### DL-#12850 · Split the User Manual and Functional Test Plan Into an Index Plus Chapter Files Under the Doc Size Budget; Delete Both Expiring Exceptions.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12850
+- **Branch:** merged via #12865
+- **PR:** #12865
+- **Paths:** see #12865
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`227e255c`; collated from changes/12850-split-the-user-manual-and-functional-tes.md)
+- **Summary:** Split the user manual and functional test plan into an index plus chapter files under the doc size budget; delete both expiring exceptions.
+- **Next step:** Shipped in PR #12865.
+
+### DL-#12848 · Split Generated ORG-01 Capability Baseline Into Index Plus Linked Parts; Drop Three Doc-Size Exceptions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12848
+- **Branch:** merged via #12854
+- **PR:** #12854
+- **Paths:** see #12854
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`fb3fbfb3`; collated from changes/12848-split-generated-org-01-capability-baseli.md)
+- **Summary:** Split generated ORG-01 capability baseline into index plus linked parts; drop three doc-size exceptions
+- **Next step:** Shipped in PR #12854.
+
+### DL-#12847 · Split Scripts/_urdf_campaign_issues.py Into a Domain Package and Drop the Stale/Expiring File-Size Exceptions; Research Scripts Left Pinned.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12847
+- **Branch:** merged via #12863
+- **PR:** #12863
+- **Paths:** see #12863
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`73527918`; collated from changes/12847-split-scripts-urdf-campaign-issues-py-in.md)
+- **Summary:** Split scripts/_urdf_campaign_issues.py into a domain package and drop the stale/expiring file-size exceptions; research scripts left pinned.
+- **Next step:** Shipped in PR #12863.
+
+### DL-#12841 · Refactor Model_Converter Exporters and Schema Validator Under the Architecture Budget; Delete 5 Expiring Exceptions; Add Golden-Output Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12841
+- **Branch:** merged via #12857
+- **PR:** #12857
+- **Paths:** see #12857
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`cd3227b3`; collated from changes/12841-refactor-model-converter-exporters-and-s.md)
+- **Summary:** Refactor model_converter exporters and schema validator under the architecture budget; delete 5 expiring exceptions; add golden-output tests
+- **Next step:** Shipped in PR #12857.
+
+### DL-#12670 · Golfer Generator Adapter Derives Coordinate and Control Widths From the TB-00 Registry (U_Dim=6) Instead of a Literal 5, and Rejects a Sealed U_Dim That Disagrees; Sealed NM-01/NM-09 Records Untouched Pending Owner Decision
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12670
+- **Branch:** merged via #12834
+- **PR:** #12834
+- **Paths:** see #12834
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`bf347e0e`; collated from changes/12670-golfer-generator-adapter-derives-coordin.md)
+- **Summary:** Golfer generator adapter derives coordinate and control widths from the TB-00 registry (u_dim=6) instead of a literal 5, and rejects a sealed u_dim that disagrees; sealed NM-01/NM-09 records untouched pending owner decision
+- **Next step:** Shipped in PR #12834.
+
 ### DL-#12829 · Perturbation Panel Renders the Worker's PerturbationSummary on Batch Finish and Shows an Undefined CV as N/A
 
 - **State:** shipped

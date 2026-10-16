@@ -17,6 +17,10 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.motion_matching.club_shaft_chain import (
+    require_engine_support,
+)
+
 Array = NDArray[np.float64]
 
 PARITY_ENGINES: tuple[str, ...] = ("mujoco", "drake", "pinocchio")
@@ -67,6 +71,11 @@ class VectorPlant:
         kkt_regularization: MuJoCo weld-KKT Tikhonov term; 0 gives the exact
             solve used by Drake and Pinocchio.  Ignored by the other engines.
 
+    Raises:
+        ShaftChainUnsupportedError: a chain-shaft spec (``club.shaft.model =
+            "chain"``) for an engine without chain support; never a silent
+            rigid replay (#12686).
+
     Postcondition: ``coordinate_order`` equals the spec ``coordinate_order``.
     """
 
@@ -79,6 +88,7 @@ class VectorPlant:
             raise TypeError("spec_bytes must be the raw spec document bytes")
         if not np.isfinite(kkt_regularization) or kkt_regularization < 0.0:
             raise ValueError("kkt_regularization must be finite and non-negative")
+        require_engine_support(bytes(spec_bytes), engine)  # DbC, #12686
         self.engine = engine
         self.kkt_regularization = float(kkt_regularization)
         self.coordinate_order: tuple[str, ...] = tuple(

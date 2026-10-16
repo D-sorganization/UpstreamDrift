@@ -904,8 +904,13 @@ class FullBodySimulator:
         self.names = names
         self.nv = len(names)
         self.root = np.arange(6)
-        self.actuated = np.arange(6, self.nv)
-        self.lower_limb = np.arange(adapter.upper_body_coordinates, self.nv)
+        self.actuated: np.ndarray = np.arange(6, self.nv)
+        self.lower_limb: np.ndarray = np.arange(adapter.upper_body_coordinates, self.nv)
+        passive = getattr(adapter, "passive_coordinates", ())
+        if passive:  # chain-shaft springs are neither actuated nor legs (#12686)
+            idle = [names.index(name) for name in passive]
+            self.actuated = np.setdiff1d(self.actuated, idle)
+            self.lower_limb = np.setdiff1d(self.lower_limb, idle)
         if hasattr(adapter, "mass_kg"):
             self.mass_kg = float(adapter.mass_kg)
             self.gravity = np.asarray(

@@ -1,0 +1,183 @@
+# Flexible Golf Shaft as a Rigid-Link Chain
+
+## Status
+
+Evidence class: implemented and unit tested, not approved. Issue #12686
+(epic #12678, R6) adds an opt-in flexible shaft to the full-body
+specification and the MuJoCo export. No calculation is registered. The
+registry blocker `UP-R6-flexible-shaft-chain` stays open until UP-D1
+inventories the pathway, a measured shaft profile replaces the generic one
+and a human reviews it.
+
+The rigid club stays the default (`club.shaft.model = "rigid"`). Its
+specification and MJCF are byte-identical to the model before #12686. The
+chain (`club.shaft.model = "chain"`) is opt-in through
+`compose_anthropometric_document(..., shaft_model="chain")` or the
+`--shaft-model chain` flag of the specification builder.
+
+## Purpose
+
+Let the clubhead lag, lead and droop relative to the grip during a swing, so
+that the influence of shaft bending on clubhead delivery can be studied with
+the same full-body model and the same same-input replay as the rigid club.
+
+## Model Topology
+
+- The club body keeps the grip, the hand solids and the shaft piece from the
+  grip end to the first joint.
+- The exposed shaft (grip end to head, span $L = \ell_{club} - \ell_{grip}$)
+  is cut into $N$ links. Link $i$ hangs from joint $i$; the last link carries
+  the head solid and the `Clubhead` frame.
+- Each joint has two bending primitives, `Rx` and `Rz` (about the club-frame
+  $x$ and $z$ axes), and an optional torsion primitive `Ry` (about the shaft).
+  Torsion is off by default.
+- Every link uses the club-body frame. At zero deflection all link frames
+  coincide with the club frame, so solid and frame placements keep their
+  rigid values.
+- Chain coordinates `shaft_bend_x_i`, `shaft_bend_z_i` (and `shaft_twist_i`)
+  are appended after all other coordinates. They are passive: the native
+  MuJoCo model zeroes their efforts and the forward-dynamics simulator does
+  not actuate them.
+- Lead/lag and droop are projections of the tip deflection for reporting
+  only. The joint axes are named by the club frame.
+
+## Profile
+
+The default profile is a generic STIFF flex, flagged `default_not_measured`
+in the specification (`club.shaft.profile_status`) and in every receipt with
+shaft-dependent results. It is not a measured shaft; the capture clubs'
+shafts are unknown.
+
+- Section: tapered tube, outer diameter linear from 15.2 mm at the butt to
+  8.4 mm (driver) or 9.4 mm (7-iron) at the tip. The wall thickens toward the
+  tip so the section area is constant:
+  $$A = \frac{m_{shaft}}{L\,\rho},$$
+  which keeps the linear density, and so the chain mass, equal to the rigid
+  club's. Density $\rho$ is 1750 kg/m³ (graphite driver) or 7850 kg/m³
+  (steel 7-iron).
+- Modulus: calibrated so that the shaft clamped 5 in (0.127 m) from the butt
+  with the head as a tip point mass vibrates at the `SHAFT_FLEX_DATA`
+  frequency of the flex (STIFF: 280 cpm). Frequencies scale with
+  $\sqrt{E}$, so one finite-element solve at a trial modulus fixes
+  $$E = E_{trial}\left(\frac{f_{flex}}{f_{trial}}\right)^2.$$
+  The result is 95.26 GPa (driver) and 112.79 GPa (7-iron).
+- Torsion: $GJ = G \cdot 2I$ with $G = E / 2(1 + \nu)$, $\nu = 0.3$.
+- The stations are the vendored Tools `ShaftStation` records.
+
+## Lumping Rule
+
+With $\Delta s = L / N$ and $s$ measured from the grip end, joint $i$ sits at
+the segment midpoint
+$$s_i = \left(i + \tfrac{1}{2}\right)\Delta s, \qquad
+k_i = \frac{EI(s_i)}{\Delta s}, \qquad k^{t}_i = \frac{GJ(s_i)}{\Delta s}.$$
+The cantilever compliance $\int_0^L (L - s)^2 / EI\,ds$ is then integrated
+by the midpoint rule, which is second order in $\Delta s$. The rigid
+cylinder of the shaft is partitioned exactly, so mass, centre of mass and
+inertia at zero deflection equal the rigid club's.
+
+Damping is stiffness proportional, $c_i = \beta k_i$ with
+$\beta = 2\zeta / \omega_1$, $\zeta = 0.02$ and $\omega_1$ the first bending
+frequency of the grip-clamped span with the head (finite-element model).
+For the rigid-limit check the springs are scaled by $\kappa$ and $\beta$ by
+$1 / \sqrt{\kappa}$, which keeps the modal damping ratios.
+
+## Engine Mapping
+
+- MuJoCo: each primitive's `stiffness_n_m_rad`, `damping_n_m_s_rad` and
+  `springref_rad` are emitted as the joint `stiffness`, `damping` and
+  `springref` attributes. Rigid joints carry none of these keys and keep the
+  zero defaults byte for byte. The native full-body model subtracts
+  `qfrc_passive` from the bias when the specification has chain
+  coordinates.
+- Drake, Pinocchio, OpenSim and Simscape: not supported yet. `VectorPlant`
+  raises `ShaftChainUnsupportedError` for a chain specification on these
+  engines instead of replaying the shaft as free or rigid joints.
+
+## Acceptance Evidence
+
+The reference is the Euler-Bernoulli finite-element model
+`FiniteElementShaftModel` (64 elements, consistent mass), clamped at the grip
+end with the head mass on the tip translation and the head's rotary inertia
+about the bending axis on the tip slope. Static load: 1 N at the tip along
+the club $z$ axis. The chain values come from the emitted MJCF (MuJoCo mass
+matrix, joint stiffness and tip-site Jacobian).
+
+| Club | $N$ | Tip deflection (mm) | vs FEM | $f_{1,x}$ (Hz) | vs FEM | $f_{1,z}$ (Hz) | vs FEM |
+|---|---|---|---|---|---|---|---|
+| driver | FEM | 3.9306 | | 5.4973 | | 5.4935 | |
+| driver | 2 | 3.8503 | −2.04 % | 5.5617 | +1.17 % | 5.5574 | +1.16 % |
+| driver | 4 | 3.9065 | −0.61 % | 5.5155 | +0.33 % | 5.5115 | +0.33 % |
+| driver | 8 | 3.9240 | −0.17 % | 5.5022 | +0.09 % | 5.4983 | +0.09 % |
+| driver | 16 | 3.9288 | −0.05 % | 5.4987 | +0.02 % | 5.4949 | +0.02 % |
+| 7-iron | FEM | 2.4805 | | 5.8936 | | 5.8936 | |
+| 7-iron | 2 | 2.4005 | −3.23 % | 6.0013 | +1.83 % | 6.0013 | +1.83 % |
+| 7-iron | 4 | 2.4594 | −0.85 % | 5.9208 | +0.46 % | 5.9208 | +0.46 % |
+| 7-iron | 8 | 2.4751 | −0.22 % | 5.9005 | +0.12 % | 5.9005 | +0.12 % |
+| 7-iron | 16 | 2.4791 | −0.06 % | 5.8954 | +0.03 % | 5.8954 | +0.03 % |
+
+$N = 4$ (the default) is the smallest $N$ whose tip deflection and first
+frequency both change by less than 1 % from $N$ to $2N$ (static +0.45 % and
++0.64 %, frequency −0.24 % and −0.34 %). $N = 8$ also passes, but its stiff
+damped modes leave the stability region of the classical RK4 integrator at
+the 0.125 ms same-input substep.
+
+Further checks:
+
+- Mass, centre of mass and inertia of the chain club equal the rigid club to
+  $10^{-9}$, both in the specification and in the compiled MuJoCo model.
+- The rigid default reproduces the specification and MJCF hashes of the model
+  before #12686 (driver, 7-iron and the evidence specification).
+- Rigid limit: with springs $\times 10^{6}$, from row 450 of the canonical
+  driver record (downswing) and identical efforts, a 0.1 ms window integrated
+  with RK4 at 0.25 µs steps without projection keeps the shared coordinates
+  within $10^{-6}$ rad and the clubhead within 0.1 µm of the rigid model
+  (measured $1.7 \times 10^{-7}$ rad and 12 nm). The tolerance covers the
+  residual compliance of the stiff springs (deflection proportional to
+  load over stiffness) and the stiff oscillation started by the zero initial
+  deflection; the deviation at $\times 10^{4}$ is more than 20 times larger.
+  The short window and small step are needed because $\times 10^{6}$ raises
+  the shaft eigenvalues a thousandfold (about $7 \times 10^{6}$ s⁻¹).
+
+## Reproduction
+
+```bash
+QT_QPA_PLATFORM=offscreen python -m pytest -o addopts="" \
+  tests/unit/motion_matching/test_club_shaft_chain.py \
+  tests/unit/motion_matching/test_full_body_mujoco_flex_shaft.py -q
+```
+
+Code: `src/shared/python/motion_matching/club_shaft_chain.py` (engine-neutral
+parameters and specification transform),
+`src/engines/physics_engines/mujoco/python/native_mjcf.py` (spring emission)
+and `src/engines/physics_engines/mujoco/python/shaft_chain_mjcf.py` (clamped
+reference model).
+
+## Limitations
+
+- The profile is generic and not measured. The bend profile, kick point and
+  torque of real shafts differ.
+- Small-deflection linear springs; geometric stiffening and large-deflection
+  effects are not modelled.
+- The head's centre of mass is on the shaft line, so the chain does not
+  produce the bending caused by an offset head centre of mass.
+- Only MuJoCo applies the chain. The other engines refuse a chain
+  specification (R11 ports them).
+- The bare-club inertia partition (`club_solids_partition`) rejects a chain
+  specification; grip-wrench analysis is rigid-club only.
+- Not done in #12686: the deflected-shaft render (criterion 6) and the
+  dynamic study of clubhead speed and face delivery (criterion 7).
+
+## Sources
+
+- Milne R.D., Davis J.P. (1992) The role of the shaft in the golf swing.
+  J. Biomech. 25(9):975–983.
+- MacKenzie S.J., Sprigings E.J. (2009) Understanding the role of shaft
+  stiffness in the golf swing. Proc. IMechE Part P 223:13–19.
+- MuJoCo XML reference: joint `stiffness`, `springref` and `damping`.
+
+These sources motivate the model. No numerical result is taken from them.
+
+## Non-Claims
+
+No claim about any golfer's shaft or about how much clubhead speed shaft
+flexibility adds or removes. No measured shaft profile.

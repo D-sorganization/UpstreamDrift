@@ -2741,6 +2741,13 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-16 | #12877 | Generate the user manual TOC from real chapter headings and test that every manual link resolves |
+| 2026-10-16 | #12835 | Divergence inventory: commit only stable per-path facts (v2 JSONL, one sorted record per line), drop the committed markdown, move totals/bytes/authorship to --report; different-path PRs no longer conflict |
+| 2026-10-16 | #12865 | Split the user manual and functional test plan into an index plus chapter files under the doc size budget; delete both expiring exceptions. |
+| 2026-10-16 | #12854 | Split generated ORG-01 capability baseline into index plus linked parts; drop three doc-size exceptions |
+| 2026-10-16 | #12863 | Split scripts/_urdf_campaign_issues.py into a domain package and drop the stale/expiring file-size exceptions; research scripts left pinned. |
+| 2026-10-16 | #12857 | Refactor model_converter exporters and schema validator under the architecture budget; delete 5 expiring exceptions; add golden-output tests |
+| 2026-10-16 | #12834 | Golfer generator adapter derives coordinate and control widths from the TB-00 registry (u_dim=6) instead of a literal 5, and rejects a sealed u_dim that disagrees; sealed NM-01/NM-09 records untouched pending owner decision |
 | 2026-10-16 | #12837 | Perturbation panel renders the worker's PerturbationSummary on batch finish and shows an undefined CV as n/a |
 | 2026-10-16 | #12830 | Receipt base_spec_sha256 hashes the committed spec before foot-progression seeding; foot_progression_mode and foot_seed_deg recorded as explicit receipt fields so style-feet canonical receipts chain to the committed spec |
 | 2026-10-16 | #12641 | Constrained ZTCF/ZVCF via the KKT projector, ConstrainedEquationsOfMotionProvider; counterfactual rollouts integrate real dynamics (m_eff mock removed) |

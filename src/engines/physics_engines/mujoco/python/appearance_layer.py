@@ -4,6 +4,12 @@ Emits ``<asset>`` textures/materials/meshes, smooth visual-only mesh geoms
 (skin, garments, shoes, club shaft, grip, mesh head and grip hands), a skybox, a textured ground, shadowed
 studio lights and a 960x720 offscreen buffer. Every geom is class ``visual``
 (group 1, no contacts, zero mass), so inertias and dynamics are untouched.
+
+The body meshes themselves come resolved from the shared, engine-neutral
+``model_appearance.body_meshes`` (R8, #12685); this module only translates
+them. They are in the SPEC body frame, and the MJCF body is the joint
+follower frame, so every vertex is mapped explicitly through the exporter's
+``offsets[body]`` (``inv(child_to_follower)``) before it is written.
 """
 
 from __future__ import annotations
@@ -15,25 +21,18 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.model_appearance import geometry, library
-from src.shared.python.model_appearance.club_assembly import (
-    PART_MATERIALS,
-    ClubAssembly,
+from src.shared.python.model_appearance.body_meshes import (
+    SPEC_BODY_FRAME,
+    ResolvedAppearance,
+    club_meshes,
+    resolve_appearance,
 )
-from src.shared.python.model_appearance.cross_section import (
-    BodySection,
-    body_sections,
-    width_hint_for,
-)
-from src.shared.python.model_appearance.grip_hands import assembly_meshes_with_hands
+from src.shared.python.model_appearance.club_assembly import ClubAssembly
 from src.shared.python.model_appearance.schema import (
     AppearanceDocument,
     Material,
     Texture,
     document_from_dict,
-)
-from src.shared.python.motion_matching.visual_skeleton import (
-    Capsule,
-    VisualSkeleton,
 )
 
 OFFSCREEN_SIZE = (960, 720)
@@ -163,101 +162,6 @@ def _mesh_to_mjcf(offset: np.ndarray, mesh: geometry.Mesh) -> geometry.Mesh:
     return geometry.Mesh(_world_points(offset, mesh.vertices), mesh.faces)
 
 
-def _club_meshes(
-    club: ClubAssembly, finish: str
-) -> list[tuple[str, geometry.Mesh, str]]:
-    """Shaft, grip, mesh head (GCV-11) and both grip hands (OSV-2), club frame."""
-    return [
-        (label, mesh, PART_MATERIALS[label] or finish)
-        for label, mesh in assembly_meshes_with_hands(club).items()
-    ]
-
-
-def _body_meshes(
-    doc: AppearanceDocument,
-    body: str,
-    capsules: list[Capsule],
-    club: ClubAssembly | None = None,
-    sections: Mapping[str, BodySection] | None = None,
-) -> list[tuple[str, geometry.Mesh, str]]:
-    """(label, mesh in spec body frame, material name) for one body.
-
-    ``sections`` (from ``cross_section.body_sections``) orients every
-    non-round cross-section; a non-round body missing from it is rejected by
-    ``geometry.lofted_segment`` rather than defaulted to a world axis.
-    """
-    rule = library.rule_for_body(doc, body)
-    if rule is not None and rule.mesh == "none":
-        return []
-    part = library.classify_body(body)
-    if part == "head" and doc.head.enabled:
-        return []  # drawn by head_visual: skull, face, ears and neck
-    base = library.material_name_for(doc, body)
-    if part == "club" and club is not None:
-        return _club_meshes(club, base)
-    garment = library.garment_name_for(doc, body)
-    scale = 1.0 if rule is None else rule.radius_scale
-    out: list[tuple[str, geometry.Mesh, str]] = []
-    for i, cap in enumerate(capsules):
-        start, end = np.asarray(cap.start_m), np.asarray(cap.end_m)
-        radius = scale * (
-            cap.radius_m
-            if part in ("club", "other")
-            else library.PART_RADIUS_M.get(part, cap.radius_m)
-        )
-        radius = min(radius, 0.6 * cap.length_m())  # keep short links from ballooning
-        aspect = library.PART_ASPECT.get(part, 1.0)
-        width = width_hint_for(sections or {}, body, start, end)
-        out.append(
-            (
-                f"skin{i}",
-                geometry.lofted_segment(
-                    start,
-                    end,
-                    radius,
-                    geometry.LoftOptions(
-                        aspect=aspect,
-                        rings=library.LOFT_RINGS,
-                        sides=library.LOFT_SIDES,
-                        width_hint=width,
-                    ),
-                ),
-                base,
-            )
-        )
-        if part in library.BLEND_PARTS:  # ball joint hides the segment seam
-            ball = geometry.ellipsoid_mesh(
-                start,
-                np.full(3, radius * library.blend_scale(garment is not None)),
-                end - start,
-                rings=14,
-                sides=24,
-            )
-            out.append((f"blend{i}", ball, garment or base))
-        if garment is not None:
-            band = library.GARMENT_COVERAGE.get(part, (0.0, 1.0))
-            out.append(
-                (
-                    f"garment{i}",
-                    geometry.lofted_segment(
-                        start,
-                        end,
-                        radius,
-                        geometry.LoftOptions(
-                            aspect=aspect,
-                            coverage=band,
-                            thickness=library.GARMENT_THICKNESS,
-                            rings=library.LOFT_RINGS,
-                            sides=library.LOFT_SIDES,
-                            width_hint=width,
-                        ),
-                    ),
-                    garment,
-                )
-            )
-    return out
-
-
 def _add_environment(
     root: ET.Element,
     assets: _Assets,
@@ -299,11 +203,39 @@ def _add_environment(
     return assets.material(env.ground_material, plane=True)
 
 
+def _attach_body_meshes(
+    assets: _Assets,
+    elements: Mapping[str, ET.Element],
+    offsets: Mapping[str, np.ndarray],
+    resolved: ResolvedAppearance,
+) -> int:
+    """Translate every resolved body mesh into an MJCF mesh geom; garment count.
+
+    Precondition: the resolution is in the spec body frame (DbC); each mesh is
+    mapped into the MJCF body frame with ``offsets[body]``.
+    """
+    if resolved.frame != SPEC_BODY_FRAME:
+        raise ValueError(f"expected spec-body-frame meshes, got {resolved.frame!r}")
+    index_of: dict[str, int] = {}
+    garments = 0
+    for item in resolved.meshes:
+        index = index_of.setdefault(item.body, len(index_of))
+        _add_mesh_visual(
+            assets,
+            elements[item.body],
+            f"vmesh_{index}_{item.label}",
+            offsets[item.body],
+            item.mesh_in_body_frame,
+            item.material_name,
+        )
+        garments += item.label.startswith("garment")
+    return garments
+
+
 def attach_appearance(
     root: ET.Element,
     elements: Mapping[str, ET.Element],
     offsets: Mapping[str, np.ndarray],
-    skeleton: VisualSkeleton,
     doc: AppearanceDocument,
     club: ClubAssembly | None = None,
     *,
@@ -311,8 +243,9 @@ def attach_appearance(
 ) -> dict[str, Any]:
     """Add materials, textures, smooth meshes and scene dressing.
 
-    ``spec`` is the document ``skeleton`` was derived from; its landmarks
-    orient the trunk, pelvis and shoe cross-sections (R1, #12680).
+    ``spec`` is the body/joint document; ``model_appearance.body_meshes``
+    resolves its meshes (trunk sized from its ``visual_hints``, R8 #12685)
+    and its landmarks orient the trunk, pelvis and shoe cross-sections (R1).
 
     Returns the summary (mesh and material counts, ground material name via
     ``ground_material``) merged into the exporter metadata. The caller adds
@@ -325,22 +258,9 @@ def attach_appearance(
         )
     assets = _Assets(root, doc)
     ground_material = _add_environment(root, assets, doc)
-    by_body: dict[str, list[Capsule]] = {}
-    for cap in skeleton.capsules:
-        by_body.setdefault(cap.body, []).append(cap)
-    sections = body_sections(spec)
-    garments = 0
-    for index, (body, caps) in enumerate(by_body.items()):
-        for label, mesh, material in _body_meshes(doc, body, caps, club, sections):
-            _add_mesh_visual(
-                assets,
-                elements[body],
-                f"vmesh_{index}_{label}",
-                offsets[body],
-                mesh,
-                material,
-            )
-            garments += label.startswith("garment")
+    garments = _attach_body_meshes(
+        assets, elements, offsets, resolve_appearance(spec, doc, club)
+    )
     return {
         "appearance": doc.name,
         "meshes": assets.n_meshes,
@@ -382,7 +302,7 @@ def attach_club_meshes(
     """
     doc = document_from_dict({"schema_version": "appearance-v1"})
     assets = _Assets(root, doc)
-    for label, mesh, material in _club_meshes(club, finish):
+    for label, mesh, material in club_meshes(club, finish):
         _add_mesh_visual(
             assets, elements[body], f"vmesh_club_{label}", offsets[body], mesh, material
         )
