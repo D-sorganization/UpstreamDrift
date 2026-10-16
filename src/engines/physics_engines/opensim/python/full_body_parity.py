@@ -112,7 +112,9 @@ class OpenSimFullBodyParityAdapter:
     # -- construction -------------------------------------------------------
     def _build_model(self, spec_bytes: bytes) -> None:
         osim = self._osim
-        xml, _ = export_full_body_osim(spec_bytes)
+        # Physics only: no club meshes, which a temporary directory could not
+        # resolve anyway (#13016).
+        xml, _ = export_full_body_osim(spec_bytes, club_geometry_ref=None)
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "full_body.osim"
             path.write_text(xml, encoding="utf-8")

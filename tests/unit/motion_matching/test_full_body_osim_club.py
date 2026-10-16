@@ -69,7 +69,7 @@ def test_geometry_is_visual_only_masses_and_inertias_unchanged(club) -> None:
 @pytest.mark.parametrize("club", sorted(CLUBS))
 def test_committed_models_reference_existing_assets_with_provenance(club) -> None:
     root = _parse((MODELS / f"full_body_anthro_{club}.osim").read_text())
-    files = [m.findtext("mesh_file") for m in root.iter("Mesh")]
+    files = [Path(m.findtext("mesh_file")).name for m in root.iter("Mesh")]
     assert len(files) == 3
     manifest = json.loads(
         (club_visuals.GEOMETRY_DIR / club_visuals.PROVENANCE_NAME).read_text()
@@ -123,3 +123,35 @@ def test_club_is_jointed_to_the_lead_hand_and_welded_to_the_trail_hand(key) -> N
     assert weld.findtext("isEnforced") == "true"
     parents = {e.text for e in weld.iter("socket_parent")}
     assert parents == {"/bodyset/Grip", "/bodyset/Clubhead"}
+
+
+@pytest.mark.parametrize("club", sorted(CLUBS))
+def test_committed_model_meshes_resolve_beside_the_model(club) -> None:
+    """OpenSim resolves mesh_file in the model's directory (#13016).
+
+    It does not follow ``..``, so the exporter writes the meshes to ``club/``
+    beside the models; they must equal the canonical ``geometry/club`` assets.
+    """
+    osim = MODELS / f"full_body_anthro_{club}.osim"
+    files = [m.findtext("mesh_file") for m in _parse(osim.read_text()).iter("Mesh")]
+    assert files
+    for mesh_file in files:
+        assert ".." not in Path(mesh_file).parts
+        resolved = osim.parent / mesh_file
+        assert resolved.is_file(), mesh_file
+        canonical = club_visuals.GEOMETRY_DIR / resolved.name
+        assert resolved.read_bytes() == canonical.read_bytes(), mesh_file
+
+
+@pytest.mark.parametrize("club", sorted(CLUBS))
+def test_every_committed_model_has_a_matching_receipt(club) -> None:
+    """Each committed model has a receipt with its hash and mesh directory."""
+    name = f"full_body_anthro_{club}"
+    osim = MODELS / f"{name}.osim"
+    receipt = json.loads((MODELS / f"{name}.receipt.json").read_text())
+    assert receipt["osim_sha256"] == hashlib.sha256(osim.read_bytes()).hexdigest()
+    spec = SPEC_DIR / f"full_body_spec_anthro_{club}.json"
+    assert receipt["model_sha256"] == hashlib.sha256(spec.read_bytes()).hexdigest()
+    geometry = receipt["club_geometry"]
+    assert geometry["directory"] == "club"
+    assert geometry["head_alias"] == club

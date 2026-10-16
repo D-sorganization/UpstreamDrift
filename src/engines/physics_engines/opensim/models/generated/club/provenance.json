@@ -1,0 +1,76 @@
+{
+  "clubs": {
+    "driver": {
+      "assembly": {
+        "axis_offset_m": 0.064,
+        "face_roll_deg": -37.92,
+        "grip_length_m": 0.265,
+        "head_alias": "driver",
+        "length_m": 1.156,
+        "shaft_radius_m": 0.0065
+      },
+      "files": {
+        "grip": "club_driver_grip.stl",
+        "head": "club_driver_head.stl",
+        "shaft": "club_driver_shaft.stl"
+      },
+      "grip_hands": {
+        "files": {
+          "lead_hand": "club_driver_lead_hand.stl",
+          "trail_hand": "club_driver_trail_hand.stl"
+        },
+        "generator": "src.shared.python.model_appearance.grip_hands",
+        "sha256": {
+          "lead_hand": "12af41a695db1e46ccb999d13463338d5a4263c24c41bab1deaa1dd13097fe88",
+          "trail_hand": "1c41ab5593e951d5ca4406adcbd1c6e9d174da6917e889a135f032a260e746f2"
+        }
+      },
+      "head_library_name": "Driver 10.5\u00b0",
+      "head_source": "tools_parametric",
+      "sha256": {
+        "grip": "3d3497e3c6920fc697f39789b44e494322466415e13a9e505d1bb7ca0803e4dc",
+        "head": "f171d4d8d47a516bdf4485d4e926bf9c4f2c180893b65a50aa58f37d872e37b4",
+        "shaft": "54ff22636c0e443c544107c22b42f852381690feeac59dc694268d678fcbeeea"
+      },
+      "spec_sha256": "9f15a045b588770c8e3eb6e8ce37f480f10a9e755fc6daf0a8b6d50edfcdea01"
+    },
+    "iron7": {
+      "assembly": {
+        "axis_offset_m": 0.064,
+        "face_roll_deg": -48.99,
+        "grip_length_m": 0.265,
+        "head_alias": "iron7",
+        "length_m": 0.94,
+        "shaft_radius_m": 0.0065
+      },
+      "files": {
+        "grip": "club_iron7_grip.stl",
+        "head": "club_iron7_head.stl",
+        "shaft": "club_iron7_shaft.stl"
+      },
+      "grip_hands": {
+        "files": {
+          "lead_hand": "club_iron7_lead_hand.stl",
+          "trail_hand": "club_iron7_trail_hand.stl"
+        },
+        "generator": "src.shared.python.model_appearance.grip_hands",
+        "sha256": {
+          "lead_hand": "e5fc5ccdcadf41fc74e2e9c7ae9b2932c04995381b353e472b6fa31297a56c11",
+          "trail_hand": "a6c3a3ae9c25412d4cf51680d8a4c67902f7554db1c72797acd688cfe6716f43"
+        }
+      },
+      "head_library_name": "7-Iron",
+      "head_source": "tools_parametric",
+      "sha256": {
+        "grip": "b2793b4abb56d89491dcb367f810993eb1b049ce3d9a36bdadd6635599a3ef6d",
+        "head": "55caa4004a6b1089f860a968053fb4b5f3ee281fac42356638d41246686dd9d0",
+        "shaft": "9bbe857b20acc00dd3ab138c3c732aa9516fefaadaa0bb0e04b7da21b485d5ff"
+      },
+      "spec_sha256": "9a14c1ecd38e71add368371d5f7085c9104130c239073f207722f0938bbd594f"
+    }
+  },
+  "frame": "club body: origin at sole point on shaft axis, shaft -y",
+  "generator": "src.engines.physics_engines.opensim.python.club_visuals.write_club_assets",
+  "schema": "opensim-club-visuals-v1",
+  "units": "m"
+}
