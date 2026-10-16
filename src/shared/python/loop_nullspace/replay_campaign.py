@@ -43,15 +43,14 @@ from src.shared.python.loop_nullspace.paired_mc_spec import (
     TrialDraw,
 )
 from src.shared.python.loop_nullspace.paired_monte_carlo import Strategy
+from src.shared.python.loop_nullspace.feedback_runtime import AnyFeedbackLaw
 from src.shared.python.loop_nullspace.replay import (
-    FeedbackLaw,
     ReplayReport,
     ReplaySettings,
     ReplaySetup,
     mode_for_policy,
     replay,
 )
-from src.shared.python.loop_nullspace.replay_spec import AccelerationFeedbackLaw
 from src.shared.python.perturbation.disturbance import Spectrum
 
 __all__ = ["ReplayCase", "TorqueNoise", "replay_integrator", "replay_strategy"]
@@ -68,7 +67,7 @@ class ReplayCase:
     provider: Any
     setup: ReplaySetup
     policy: ReplayPolicy
-    feedback: FeedbackLaw | AccelerationFeedbackLaw | None = None
+    feedback: AnyFeedbackLaw | None = None
     settings: ReplaySettings | None = None
 
     @property
@@ -89,17 +88,27 @@ class TorqueNoise:
     ``signal_from_torque`` feeds the allocation's actuated torque at the frame
     opening each interval (zero-order hold) to a signal-dependent (M1)
     disturbance, so the noise level follows the allocation under test (NSX-92);
-    it must be set exactly when the disturbance declares a signal law.
+    it must be set exactly when the disturbance declares a signal law.  ``scale``
+    ``(n_steps, n_channels)``, when given, multiplies each trial's draw
+    interval by interval: the declared noise-inflation penalty of a stiffened
+    joint (NSX-93), the same factor the linear prediction applies to its
+    covariance (``scale^2``).
     """
 
     disturbance: str
     load_map: Array
     signal_from_torque: bool = False
+    scale: Array | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "load_map", readonly_float(self.load_map, "load_map"))
         if self.load_map.ndim != 2:
             raise ValueError(f"load_map must be 2-D, got shape {self.load_map.shape}")
+        if self.scale is not None:
+            scale = readonly_float(self.scale, "scale")
+            if scale.ndim != 2 or np.any(scale < 0.0):
+                raise ValueError("scale must be a non-negative (n_steps, n_channels)")
+            object.__setattr__(self, "scale", scale)
 
 
 def replay_integrator(case: ReplayCase, dt: float) -> IntegratorSignature:
@@ -135,6 +144,10 @@ def _check_grid(spec: CampaignSpec, case: ReplayCase, noise: TorqueNoise) -> Non
         raise ValueError(
             f"spec.dt={spec.dt} must equal every allocation interval "
             f"(got {steps.min()}..{steps.max()})"
+        )
+    if noise.scale is not None and noise.scale.shape != (steps.size, dist.n_channels):
+        raise ValueError(
+            f"scale must be ({steps.size}, {dist.n_channels}), got {noise.scale.shape}"
         )
     n = case.setup.n
     if noise.load_map.shape != (n, dist.n_channels):
@@ -196,6 +209,8 @@ def replay_strategy(
 
     def runner(draw: TrialDraw) -> ArrayLike:
         w = draw.realise(noise.disturbance, signal=signal)
+        if noise.scale is not None:
+            w = w * noise.scale
         setup = replace(
             case.setup,
             external_load=_held_load(
