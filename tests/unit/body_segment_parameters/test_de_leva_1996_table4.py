@@ -47,7 +47,9 @@ def test_every_printed_row_is_transcribed_for_both_sexes() -> None:
 def test_whole_body_mass_is_one_hundred_percent() -> None:
     """Head, trunk and two of each limb segment make up the body (paper p. 1229)."""
     for sex in SEXES:
-        total = _primary("head", sex).mass_fraction + _primary("trunk", sex).mass_fraction
+        total = (
+            _primary("head", sex).mass_fraction + _primary("trunk", sex).mass_fraction
+        )
         total += 2 * sum(_primary(s, sex).mass_fraction for s in LIMBS)
         assert total == pytest.approx(1.0, abs=2e-4), sex
 
@@ -141,4 +143,7 @@ def test_match_row_finds_only_whole_rows() -> None:
     )
     # CM of the cervicale row with the radii of the mid-gonion row: no row.
     midg = table4.table4_row("head_vert_midg", "male")
-    assert table4.match_row("male", row.mass_fraction, row.com_fraction, midg.radii) is None
+    assert (
+        table4.match_row("male", row.mass_fraction, row.com_fraction, midg.radii)
+        is None
+    )

@@ -6,8 +6,10 @@ mass estimate with the adjusted Zatsiorsky-Seluyanov parameters published by
 de Leva (J. Biomech. 29(9), 1996, Table 4, males; reference subject 1.741 m,
 73.0 kg). Lengths scale linearly with stature, masses with body mass, and
 inertia tensors follow ``m (k L)^2`` with the tabulated radii of gyration.
-The table below was transcribed for this module; before any qualification
-claim it must be checked line by line against the paper.
+The table below was transcribed for this module. Its trunk, upper_trunk and
+shank rows mix values from two Table 4 endpoint rows; correcting them changes
+the golfer geometry and requires a refit (#13037). The paper's full table is
+``body_segment_parameters.de_leva_1996``.
 """
 
 from __future__ import annotations

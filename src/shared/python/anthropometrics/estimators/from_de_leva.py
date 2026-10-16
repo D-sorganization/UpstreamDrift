@@ -123,4 +123,7 @@ class DeLevaEstimator:
             method_name=self.method_name,
             segment_classes=_segment_classes_for_sex(sex),
             segment_name_map=dict(_SEGMENT_NAME_MAP),
+            # The table closes to the body mass by construction (checked on
+            # import, #13010), so the published fractions are reported as is.
+            normalize_mass=False,
         )

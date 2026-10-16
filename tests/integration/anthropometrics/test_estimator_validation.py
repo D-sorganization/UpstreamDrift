@@ -46,7 +46,9 @@ def _segment_dict(record):
         ("upper_arm", 0.0271, 0.186, 0.5772),
         ("forearm", 0.0162, 0.146, 0.4574),
         ("thigh", 0.1416, 0.245, 0.4095),
-        ("shin", 0.0433, 0.246, 0.4459),
+        # Knee to ankle joint centre row (KJC-AJC); 0.4459 is the row to the
+        # lateral malleolus and was mixed into the shin before #13010.
+        ("shin", 0.0433, 0.246, 0.4395),
     ],
 )
 def test_de_leva_male_published_ratios(

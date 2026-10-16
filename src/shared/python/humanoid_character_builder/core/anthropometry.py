@@ -18,6 +18,10 @@ from __future__ import annotations  # noqa: E402, F404
 
 from dataclasses import dataclass  # noqa: E402
 
+from src.shared.python.body_segment_parameters.de_leva_1996 import (  # noqa: E402
+    Sex,
+    table4_row,
+)
 from src.shared.python.humanoid_character_builder.contracts import (
     precondition,  # noqa: E402
 )
@@ -140,279 +144,6 @@ def _get_default_segment() -> SegmentAnthropometry:
 # de Leva (1996) Anthropometric Data
 # =============================================================================
 
-# Male segment data
-_MALE_SEGMENTS = {
-    "head": SegmentAnthropometry(
-        mass_ratio=0.0694,
-        length_ratio=0.1395,
-        com_proximal_ratio=0.5976,
-        gyration_sagittal=0.362,
-        gyration_transverse=0.376,
-        gyration_longitudinal=0.312,
-        width_ratio=0.5,
-        depth_ratio=0.6,
-    ),
-    "neck": SegmentAnthropometry(
-        mass_ratio=0.0240,
-        length_ratio=0.052,
-        com_proximal_ratio=0.50,
-        gyration_sagittal=0.38,
-        gyration_transverse=0.38,
-        gyration_longitudinal=0.20,
-        width_ratio=0.6,
-        depth_ratio=0.5,
-    ),
-    "thorax": SegmentAnthropometry(
-        mass_ratio=0.2160,
-        length_ratio=0.170,
-        com_proximal_ratio=0.4486,
-        gyration_sagittal=0.372,
-        gyration_transverse=0.347,
-        gyration_longitudinal=0.191,
-        width_ratio=0.8,
-        depth_ratio=0.5,
-    ),
-    "lumbar": SegmentAnthropometry(
-        mass_ratio=0.1390,
-        length_ratio=0.108,
-        com_proximal_ratio=0.45,
-        gyration_sagittal=0.35,
-        gyration_transverse=0.33,
-        gyration_longitudinal=0.18,
-        width_ratio=0.7,
-        depth_ratio=0.5,
-    ),
-    "pelvis": SegmentAnthropometry(
-        mass_ratio=0.1117,
-        length_ratio=0.078,
-        com_proximal_ratio=0.61,
-        gyration_sagittal=0.615,
-        gyration_transverse=0.551,
-        gyration_longitudinal=0.587,
-        width_ratio=1.5,
-        depth_ratio=0.6,
-    ),
-    "upper_arm": SegmentAnthropometry(
-        mass_ratio=0.0271,
-        length_ratio=0.186,
-        com_proximal_ratio=0.5772,
-        gyration_sagittal=0.285,
-        gyration_transverse=0.269,
-        gyration_longitudinal=0.158,
-        width_ratio=0.18,
-        depth_ratio=0.18,
-    ),
-    "forearm": SegmentAnthropometry(
-        mass_ratio=0.0162,
-        length_ratio=0.146,
-        com_proximal_ratio=0.4574,
-        gyration_sagittal=0.276,
-        gyration_transverse=0.265,
-        gyration_longitudinal=0.121,
-        width_ratio=0.16,
-        depth_ratio=0.14,
-    ),
-    "hand": SegmentAnthropometry(
-        mass_ratio=0.0061,
-        length_ratio=0.108,
-        com_proximal_ratio=0.7900,
-        gyration_sagittal=0.628,
-        gyration_transverse=0.513,
-        gyration_longitudinal=0.401,
-        width_ratio=0.5,
-        depth_ratio=0.15,
-    ),
-    "thigh": SegmentAnthropometry(
-        mass_ratio=0.1416,
-        length_ratio=0.245,
-        com_proximal_ratio=0.4095,
-        gyration_sagittal=0.329,
-        gyration_transverse=0.329,
-        gyration_longitudinal=0.149,
-        width_ratio=0.25,
-        depth_ratio=0.22,
-    ),
-    "shin": SegmentAnthropometry(
-        mass_ratio=0.0433,
-        length_ratio=0.246,
-        com_proximal_ratio=0.4459,
-        gyration_sagittal=0.255,
-        gyration_transverse=0.249,
-        gyration_longitudinal=0.103,
-        width_ratio=0.16,
-        depth_ratio=0.14,
-    ),
-    "foot": SegmentAnthropometry(
-        mass_ratio=0.0137,
-        length_ratio=0.152,
-        com_proximal_ratio=0.4415,
-        gyration_sagittal=0.257,
-        gyration_transverse=0.245,
-        gyration_longitudinal=0.124,
-        width_ratio=0.35,
-        depth_ratio=0.25,
-    ),
-    # Virtual segments (minimal mass)
-    "shoulder": SegmentAnthropometry(
-        mass_ratio=0.0050,
-        length_ratio=0.040,
-        com_proximal_ratio=0.50,
-        gyration_sagittal=0.30,
-        gyration_transverse=0.30,
-        gyration_longitudinal=0.15,
-        width_ratio=0.5,
-        depth_ratio=0.4,
-    ),
-    "hip": SegmentAnthropometry(
-        mass_ratio=0.0010,
-        length_ratio=0.02,  # Small non-zero length for inertia
-        com_proximal_ratio=0.50,
-        gyration_sagittal=0.30,
-        gyration_transverse=0.30,
-        gyration_longitudinal=0.30,
-        width_ratio=0.5,
-        depth_ratio=0.5,
-    ),
-}
-
-# Female segment data (adjusted from de Leva)
-_FEMALE_SEGMENTS = {
-    "head": SegmentAnthropometry(
-        mass_ratio=0.0668,
-        length_ratio=0.1395,
-        com_proximal_ratio=0.5894,
-        gyration_sagittal=0.330,
-        gyration_transverse=0.359,
-        gyration_longitudinal=0.318,
-        width_ratio=0.48,
-        depth_ratio=0.55,
-    ),
-    "neck": SegmentAnthropometry(
-        mass_ratio=0.0220,
-        length_ratio=0.052,
-        com_proximal_ratio=0.50,
-        gyration_sagittal=0.36,
-        gyration_transverse=0.36,
-        gyration_longitudinal=0.18,
-        width_ratio=0.55,
-        depth_ratio=0.45,
-    ),
-    "thorax": SegmentAnthropometry(
-        mass_ratio=0.2040,
-        length_ratio=0.160,
-        com_proximal_ratio=0.4430,
-        gyration_sagittal=0.357,
-        gyration_transverse=0.339,
-        gyration_longitudinal=0.186,
-        width_ratio=0.75,
-        depth_ratio=0.48,
-    ),
-    "lumbar": SegmentAnthropometry(
-        mass_ratio=0.1380,
-        length_ratio=0.100,
-        com_proximal_ratio=0.46,
-        gyration_sagittal=0.34,
-        gyration_transverse=0.32,
-        gyration_longitudinal=0.17,
-        width_ratio=0.65,
-        depth_ratio=0.48,
-    ),
-    "pelvis": SegmentAnthropometry(
-        mass_ratio=0.1220,
-        length_ratio=0.078,
-        com_proximal_ratio=0.63,
-        gyration_sagittal=0.640,
-        gyration_transverse=0.580,
-        gyration_longitudinal=0.620,
-        width_ratio=1.6,
-        depth_ratio=0.62,
-    ),
-    "upper_arm": SegmentAnthropometry(
-        mass_ratio=0.0255,
-        length_ratio=0.173,
-        com_proximal_ratio=0.5754,
-        gyration_sagittal=0.278,
-        gyration_transverse=0.260,
-        gyration_longitudinal=0.148,
-        width_ratio=0.16,
-        depth_ratio=0.16,
-    ),
-    "forearm": SegmentAnthropometry(
-        mass_ratio=0.0138,
-        length_ratio=0.138,
-        com_proximal_ratio=0.4559,
-        gyration_sagittal=0.261,
-        gyration_transverse=0.257,
-        gyration_longitudinal=0.094,
-        width_ratio=0.14,
-        depth_ratio=0.12,
-    ),
-    "hand": SegmentAnthropometry(
-        mass_ratio=0.0056,
-        length_ratio=0.100,
-        com_proximal_ratio=0.7474,
-        gyration_sagittal=0.531,
-        gyration_transverse=0.454,
-        gyration_longitudinal=0.335,
-        width_ratio=0.45,
-        depth_ratio=0.14,
-    ),
-    "thigh": SegmentAnthropometry(
-        mass_ratio=0.1478,
-        length_ratio=0.249,
-        com_proximal_ratio=0.3612,
-        gyration_sagittal=0.364,
-        gyration_transverse=0.369,
-        gyration_longitudinal=0.162,
-        width_ratio=0.28,
-        depth_ratio=0.24,
-    ),
-    "shin": SegmentAnthropometry(
-        mass_ratio=0.0481,
-        length_ratio=0.257,
-        com_proximal_ratio=0.4352,
-        gyration_sagittal=0.271,
-        gyration_transverse=0.267,
-        gyration_longitudinal=0.093,
-        width_ratio=0.14,
-        depth_ratio=0.12,
-    ),
-    "foot": SegmentAnthropometry(
-        mass_ratio=0.0129,
-        length_ratio=0.143,
-        com_proximal_ratio=0.4014,
-        gyration_sagittal=0.299,
-        gyration_transverse=0.279,
-        gyration_longitudinal=0.139,
-        width_ratio=0.32,
-        depth_ratio=0.22,
-    ),
-    # Virtual segments
-    "shoulder": SegmentAnthropometry(
-        mass_ratio=0.0045,
-        length_ratio=0.035,
-        com_proximal_ratio=0.50,
-        gyration_sagittal=0.28,
-        gyration_transverse=0.28,
-        gyration_longitudinal=0.14,
-        width_ratio=0.45,
-        depth_ratio=0.38,
-    ),
-    "hip": SegmentAnthropometry(
-        mass_ratio=0.0010,
-        length_ratio=0.02,  # Small non-zero length for inertia
-        com_proximal_ratio=0.50,
-        gyration_sagittal=0.30,
-        gyration_transverse=0.30,
-        gyration_longitudinal=0.30,
-        width_ratio=0.5,
-        depth_ratio=0.5,
-    ),
-}
-
-# Create the global anthropometry data
-DE_LEVA_DATA = AnthropometryData(male=_MALE_SEGMENTS, female=_FEMALE_SEGMENTS)
-
 # Mapping from full segment names to anthropometry keys
 _SEGMENT_NAME_MAP = {
     "head": "head",
@@ -437,6 +168,146 @@ _SEGMENT_NAME_MAP = {
     "left_foot": "foot",
     "right_foot": "foot",
 }
+
+#: Table 4 row (de Leva 1996) behind each model segment. Mass, CM position and
+#: radii come from that one row; CM is measured from the row's origin landmark
+#: (cranial for head and trunk parts, proximal for limbs). The head spans
+#: vertex to cervicale, so it is the head-and-neck row; the thorax, lumbar and
+#: pelvis are the upper, middle and lower trunk measured from the cervicale; the
+#: hand reaches the third fingertip; the shin ends at the ankle joint centre.
+DE_LEVA_SOURCE_ROWS: dict[str, str] = {
+    "head": "head_vert_cerv",
+    "thorax": "upt_cerv_xyph",
+    "lumbar": "mpt_xyph_omph",
+    "pelvis": "lpt_omph_midh",
+    "upper_arm": "upper_arm_sjc_ejc",
+    "forearm": "forearm_ejc_wjc",
+    "hand": "hand_wjc_dac3",
+    "thigh": "thigh_hjc_kjc",
+    "shin": "shank_kjc_ajc",
+    "foot": "foot_heel_ttip",
+}
+
+#: Model-only segments de Leva does not list: ``(parent, mass ratio each)``.
+#: Their mass is carved out of the parent's row so the body still sums to one.
+VIRTUAL_SEGMENTS: dict[str, tuple[str, float]] = {
+    "neck": ("head", 0.005),
+    "shoulder": ("thorax", 0.005),
+    "hip": ("pelvis", 0.001),
+}
+
+#: Placeholder CM and radii of the virtual segments (not de Leva values).
+_VIRTUAL_INERTIA: dict[str, tuple[float, float, float, float]] = {
+    "neck": (0.50, 0.38, 0.38, 0.20),
+    "shoulder": (0.50, 0.30, 0.30, 0.15),
+    "hip": (0.50, 0.30, 0.30, 0.30),
+}
+
+#: Model geometry, not de Leva: (length/stature, width/length, depth/length).
+#: Lengths are the builder's skeleton proportions; the de Leva CM and radii
+#: fractions are applied to them.
+_GEOMETRY: dict[str, dict[str, tuple[float, float, float]]] = {
+    "male": {
+        "head": (0.1395, 0.5, 0.6),
+        "neck": (0.052, 0.6, 0.5),
+        "thorax": (0.170, 0.8, 0.5),
+        "lumbar": (0.108, 0.7, 0.5),
+        "pelvis": (0.078, 1.5, 0.6),
+        "upper_arm": (0.186, 0.18, 0.18),
+        "forearm": (0.146, 0.16, 0.14),
+        "hand": (0.108, 0.5, 0.15),
+        "thigh": (0.245, 0.25, 0.22),
+        "shin": (0.246, 0.16, 0.14),
+        "foot": (0.152, 0.35, 0.25),
+        "shoulder": (0.040, 0.5, 0.4),
+        "hip": (0.02, 0.5, 0.5),
+    },
+    "female": {
+        "head": (0.1395, 0.48, 0.55),
+        "neck": (0.052, 0.55, 0.45),
+        "thorax": (0.16, 0.75, 0.48),
+        "lumbar": (0.10, 0.65, 0.48),
+        "pelvis": (0.078, 1.6, 0.62),
+        "upper_arm": (0.173, 0.16, 0.16),
+        "forearm": (0.138, 0.14, 0.12),
+        "hand": (0.10, 0.45, 0.14),
+        "thigh": (0.249, 0.28, 0.24),
+        "shin": (0.257, 0.14, 0.12),
+        "foot": (0.143, 0.32, 0.22),
+        "shoulder": (0.035, 0.45, 0.38),
+        "hip": (0.02, 0.5, 0.5),
+    },
+}
+
+#: Whole-body mass closure tolerance: Table 4 prints two decimals of a percent.
+_MASS_SUM_TOL = 2e-4
+
+
+def virtual_segment_count(key: str) -> int:
+    """Number of model segments that use anthropometry ``key`` (2 for bilateral)."""
+    return sum(1 for value in _SEGMENT_NAME_MAP.values() if value == key)
+
+
+def _carved_mass(parent: str) -> float:
+    return sum(
+        share * virtual_segment_count(virtual)
+        for virtual, (owner, share) in VIRTUAL_SEGMENTS.items()
+        if owner == parent
+    )
+
+
+def _build_segments(sex: Sex) -> dict[str, SegmentAnthropometry]:
+    """Model segments for ``sex``, each a whole Table 4 row on model geometry."""
+    geometry = _GEOMETRY[sex]
+    segments: dict[str, SegmentAnthropometry] = {}
+    for key, row_id in DE_LEVA_SOURCE_ROWS.items():
+        row = table4_row(row_id, sex)
+        length, width, depth = geometry[key]
+        segments[key] = SegmentAnthropometry(
+            mass_ratio=row.mass_fraction - _carved_mass(key),
+            length_ratio=length,
+            com_proximal_ratio=row.com_fraction,
+            gyration_sagittal=row.radii[0],
+            gyration_transverse=row.radii[1],
+            gyration_longitudinal=row.radii[2],
+            width_ratio=width,
+            depth_ratio=depth,
+        )
+    for key, (_parent, share) in VIRTUAL_SEGMENTS.items():
+        length, width, depth = geometry[key]
+        com, sagittal, transverse, longitudinal = _VIRTUAL_INERTIA[key]
+        segments[key] = SegmentAnthropometry(
+            mass_ratio=share,
+            length_ratio=length,
+            com_proximal_ratio=com,
+            gyration_sagittal=sagittal,
+            gyration_transverse=transverse,
+            gyration_longitudinal=longitudinal,
+            width_ratio=width,
+            depth_ratio=depth,
+        )
+    check_mass_closure(segments, sex)
+    return segments
+
+
+def check_mass_closure(segments: dict[str, SegmentAnthropometry], label: str) -> None:
+    """Raise ``ValueError`` unless the model's segment masses sum to the body.
+
+    Every named model segment counts once, so bilateral keys count twice.
+    """
+    total = sum(segments[key].mass_ratio for key in _SEGMENT_NAME_MAP.values())
+    if abs(total - 1.0) > _MASS_SUM_TOL:
+        raise ValueError(
+            f"{label} segment mass ratios sum to {total:.5f}, not 1 "
+            f"(tolerance {_MASS_SUM_TOL})"
+        )
+
+
+_MALE_SEGMENTS = _build_segments("male")
+_FEMALE_SEGMENTS = _build_segments("female")
+
+# Create the global anthropometry data
+DE_LEVA_DATA = AnthropometryData(male=_MALE_SEGMENTS, female=_FEMALE_SEGMENTS)
 
 
 def get_anthropometry_key(segment_name: str) -> str:
@@ -518,24 +389,20 @@ def estimate_segment_masses(
         gender_factor: 0.0 = female, 1.0 = male
 
     Returns:
-        Dict mapping segment name to mass in kg
+        Dict mapping segment name to mass in kg. Postcondition: the masses are
+        the table fractions of total_mass_kg and sum to it within the
+        table's printed precision; a table that does not close raises
+        ValueError rather than being rescaled (#13010).
     """
     if total_mass_kg is None:
         raise ValueError("total_mass_kg must be provided")
-    masses = {}
-    total_ratio = 0.0
-    for segment_name in _SEGMENT_NAME_MAP.keys():
-        ratio = get_segment_mass_ratio(segment_name, gender_factor)
-        masses[segment_name] = total_mass_kg * ratio
-        total_ratio += ratio
-
-    # Normalize to ensure total mass matches input
-    if total_ratio > 0:
-        normalization = 1.0 / total_ratio
-        for name in masses:
-            masses[name] *= normalization
-
-    return masses
+    for table, label in ((DE_LEVA_DATA.male, "male"), (DE_LEVA_DATA.female, "female")):
+        check_mass_closure(table, label)
+    return {
+        segment_name: total_mass_kg
+        * get_segment_mass_ratio(segment_name, gender_factor)
+        for segment_name in _SEGMENT_NAME_MAP
+    }
 
 
 @precondition(

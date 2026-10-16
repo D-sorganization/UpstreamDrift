@@ -1,0 +1,34 @@
+{
+  "paper": {
+    "citation": "de Leva, P. (1996). Adjustments to Zatsiorsky-Seluyanov's segment inertia parameters. Journal of Biomechanics, 29(9), 1223-1230.",
+    "doi": "10.1016/0021-9290(95)00178-6",
+    "table": "Table 4, page 1228, both parts (21 rows), female and male",
+    "copy_checked": {
+      "sha256": "db58e482760d5dbdab78c42045c29330799c23af1eb4337a6de802323018e2e9",
+      "pages": 8,
+      "note": "Scanned journal PDF; not committed."
+    }
+  },
+  "transcription": {
+    "file": "src/shared/python/body_segment_parameters/data/de_leva_1996_table4.json",
+    "module": "src/shared/python/body_segment_parameters/de_leva_1996.py",
+    "canonical_sha256": "c04fbc4f4dc8d77ffa3c7daa7d6b3f80df991413bff8335dacdd44c1a46e8f4f"
+  },
+  "verification": {
+    "date": "2026-10-16",
+    "agent": "claude",
+    "issue": 13010,
+    "method": [
+      "Text layer extracted with pdftotext -layout; every cell read from it.",
+      "Page 1228 rendered at 200 dpi and every row compared visually with the transcription.",
+      "Arithmetic identities checked on load and in tests: whole-body mass 100 % (female 99.99 %, male 100.00 %); upper, middle and lower trunk masses add to the trunk; both trunk length chains (SUPR and CERV) add to the trunk length; segment mass constant across endpoint alternatives; mass-weighted trunk CM from the parts within 1 % of length (female 0.01 %, male 0.55 %, as derived separately in the paper)."
+    ],
+    "text_layer_corrections": [
+      "Female trunk MIDS-MIDH mass reads 42.51 in the text layer; the printed page shows 42.57.",
+      "Upper arm origin reads 'SK' in the text layer; the printed page shows SJC."
+    ],
+    "test_suite": "tests/unit/body_segment_parameters/",
+    "status": "verified_exact",
+    "rows_checked": 42
+  }
+}

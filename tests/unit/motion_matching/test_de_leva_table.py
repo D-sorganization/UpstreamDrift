@@ -1,4 +1,9 @@
-"""Unit test pinning the de Leva 1996 male table against the published paper.
+"""Unit test pinning the fit-path de Leva 1996 male table as committed.
+
+The trunk, upper_trunk and shank rows mix values from two Table 4 endpoint rows
+(#13037); the paper itself is checked in
+``tests/unit/body_segment_parameters/``, and the mixed rows are ratcheted in
+``test_consumer_tables_are_whole_rows.py``.
 
 Reference:
 de Leva, P. (1996). Adjustments to Zatsiorsky-Seluyanov's segment inertia parameters.
@@ -28,7 +33,8 @@ from src.shared.python.motion_matching.anthropometry import DE_LEVA_MALE
 
 pytestmark = pytest.mark.unit
 
-# Literal values from de Leva (1996) Table 4 (males):
+# Committed fit-path values (de Leva 1996 Table 4, males; trunk, upper_trunk and
+# shank mix endpoint rows, #13037):
 # (length_m for 1.741m reference subject, mass_fraction, com_fraction_from_proximal, (r_sag, r_tra, r_lon))
 PAPER_DE_LEVA_MALE = {
     "head": (0.2429, 0.0694, 0.5002, (0.303, 0.315, 0.261)),
