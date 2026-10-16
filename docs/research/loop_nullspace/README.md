@@ -29,7 +29,10 @@ rank audit of the pendulum constraints and the citation verification table.
   low-rank temporal basis); `hit_and_run_spike.py` reproduces it and
   `hit_and_run_results.json` holds the measured diagnostics. Exploratory.
 - `contracts.md` is the per-child contract appendix for NSX-02 to NSX-62:
-  signatures, preconditions, postconditions and golden names.
+  signatures, preconditions, postconditions and golden names. It is split into
+  `contracts_trajectory.md` (NSX-23 to NSX-61 and NSX-62 Ensembles) and
+  `contracts_variability.md` (NSX-80 to NSX-98 and NSX-62 Inertial Parameter
+  Ensemble) to stay under the documentation size budget.
 - `muscle_level_view.md` is the exploratory scoping report for a muscle-redundancy layer above the envelopes (NSX-73, #12591).
 - `closure_alternatives_report.md` compares grip models that each have their own
   closure kinematics (NSX-72); its records are in `records/`.

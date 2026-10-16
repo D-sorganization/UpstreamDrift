@@ -142,7 +142,7 @@ Authority).
   `docs/development/planning/DV-12583.md` and its `catalog.json` entry, neither
   of which is on this branch yet.
 - [ ] Agreement between engines is stated as numerical conformance only, not
-  physical validation (`docs/research/loop_nullspace/contracts.md`, section
+  physical validation (`docs/research/loop_nullspace/contracts_trajectory.md`, section
   `NSX-56 Conformance`).
 - [ ] Results from differing anatomies are not described as equivalent envelopes
   (epic rule R12, Scientific comparison track). Check (manual).
@@ -241,7 +241,7 @@ Authority).
   schema (#12572) is the intended place for it.
 - [ ] Every stochastic output records its seed. Check (manual). The seeded
   ensembles for NSX-61 and NSX-62 are not yet implemented
-  (`docs/research/loop_nullspace/contracts.md`, section `NSX-61 and NSX-62
+  (`docs/research/loop_nullspace/contracts_trajectory.md`, section `NSX-61 and NSX-62
   Ensembles`).
 - [ ] Private captures are anonymised. Participants are replaced by salted
   SHA-256 subject tokens at ingest (`DV-12554.md`, section `Data Provenance and

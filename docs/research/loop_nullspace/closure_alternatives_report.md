@@ -4,7 +4,7 @@ Research report for NSX-72 ([#12590](https://github.com/D-sorganization/Upstream
 epic #12593). Exploratory. Label `CLOSURE_ALTERNATIVE_COMPARISON`. The
 calculation-level statement is Section "Closure Alternatives With Re-Derived
 Kinematics" of [`loop_nullspace.tex`](loop_nullspace.tex); the contract is the
-NSX-72 section of [`contracts.md`](contracts.md).
+NSX-72 section of [`contracts_trajectory.md`](contracts_trajectory.md).
 
 ## Question
 
