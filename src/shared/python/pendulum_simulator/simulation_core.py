@@ -18,12 +18,77 @@ Single integration function replaces three near-identical solve_ivp calls.
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, Collection, Mapping, Sequence
+from dataclasses import dataclass, fields, replace
+from typing import Any
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class SimulationConfig:
+    """Optional run settings shared by the double/triple/golfer runners.
+
+    Every field defaults to ``None`` meaning "use the runner's own default",
+    so one parameter object serves all three ``run_simulation`` variants
+    (DRY, #12844). Runners only accept the subset they understand; see
+    :meth:`resolve`.
+
+    Design by Contract
+    ------------------
+    - Immutable: a config can be shared safely between runs and threads.
+    - ``resolve`` raises ``TypeError`` for unknown names or for settings the
+      calling runner does not support (matching the old keyword signatures).
+    """
+
+    rtol: float | None = None
+    atol: float | None = None
+    alpha: float | None = None
+    beta: float | None = None
+    torque_limits: Any = None
+    limits: Any = None
+    clamp: Any = None
+    coeffs: Sequence[float] | None = None
+    n_coeffs_per_joint: int | None = None
+
+    @classmethod
+    def resolve(
+        cls,
+        config: SimulationConfig | None,
+        overrides: Mapping[str, Any],
+        supported: Collection[str],
+    ) -> SimulationConfig:
+        """Merge keyword ``overrides`` onto ``config`` and validate them.
+
+        Pre: every override name is a ``SimulationConfig`` field, and every
+        non-``None`` setting is in ``supported``.
+        """
+        known = {f.name for f in fields(cls)}
+        unknown = sorted(set(overrides) - known)
+        if unknown:
+            raise TypeError(f"run_simulation() got unexpected keyword {unknown[0]!r}")
+        if config is not None and not isinstance(config, SimulationConfig):
+            raise TypeError("config must be a SimulationConfig or None")
+        merged = replace(config or cls(), **overrides)
+        for name in sorted(known - set(supported)):
+            if getattr(merged, name) is not None:
+                raise TypeError(f"run_simulation() got unexpected keyword {name!r}")
+        return merged
+
+    @property
+    def effective_torque_limits(self) -> Any:
+        """``torque_limits`` if given, else the legacy ``clamp`` alias."""
+        return self.torque_limits if self.torque_limits is not None else self.clamp
+
+    def solver_tolerances(self, rtol: float, atol: float) -> tuple[float, float]:
+        """Return ``(rtol, atol)`` with this config's overrides applied."""
+        return (
+            rtol if self.rtol is None else self.rtol,
+            atol if self.atol is None else self.atol,
+        )
 
 
 def integrate_ode(
