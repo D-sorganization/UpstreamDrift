@@ -2340,6 +2340,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12791 · Fix garment_classification.tex Row Terminators so the Golfer Appearance Reference Compiles; Latex-References CI Now Builds the Full-Body Model Reference Masters
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12791
+- **Branch:** merged via #12798
+- **PR:** #12798
+- **Paths:** see #12798
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`59556187`; collated from changes/12791-fix-garment-classification-tex-row-termi.md)
+- **Summary:** Fix garment_classification.tex row terminators so the golfer appearance reference compiles; latex-references CI now builds the full-body model reference masters
+- **Next step:** Shipped in PR #12798.
+
 ### DL-#12802 · Split Full-Body HANDOFF and Anthropometry REVIEW Under the Doc-Size Budget; Renew Only the Stale Chat Child-Copy Architecture Exception for 14 Days (#12803)
 
 - **State:** shipped
