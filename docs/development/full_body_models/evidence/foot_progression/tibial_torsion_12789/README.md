@@ -79,10 +79,13 @@ with the engines (R10).
 ## Not Done Here
 
 - The canonical ground-support receipts (`anthro_driver`, `anthro_iron`,
-  `anthro_driver_seeds`, `anthro_iron_seeds_zmp`) chain to the base document
-  hash, which this change alters. They are regenerated on ControlTower with
-  R10 (#12692), after R4 (#12684). Until then
-  `test_current_baseline_receipts_have_intact_provenance_chain` fails for them.
+  `anthro_driver_seeds`, `anthro_iron_seeds_zmp`) were regenerated in this
+  change on ControlTower with their documented commands plus
+  `--foot-progression off` (see `ground_support/CANONICAL_RUN.md` §2A for the
+  control and the deltas). The calibrated 7-iron dynamics replay regresses with
+  the legacy feet (78.9 to 142.4 mm); the style-feet runs (64.4 mm) cannot be
+  committed until the provenance hash is taken before foot seeding. The
+  engine re-render stays with R10 (#12692).
 - The club-face fixtures (`tests/fixtures/club_face/spec_<club>.json`) are
   calibrated snapshots and were not regenerated.
 - Re-render in every engine (R10).

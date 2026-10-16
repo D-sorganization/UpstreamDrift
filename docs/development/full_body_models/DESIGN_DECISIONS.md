@@ -478,7 +478,7 @@ Measured calibrated address (MuJoCo, canonical commands, Windows workstation), t
 | driver `style` | 19.80 / 16.64 deg, -34.38 deg, 10.54 mm | 19.74 / 16.51 deg, -26.58 deg, 9.28 mm |
 | driver `capture` | 3.74 / 16.52 deg, -18.20 deg, 9.62 mm | 3.79 / 16.43 deg, -8.86 deg, 9.83 mm |
 
-The 7-iron now reaches the style target with 3.4 degrees of hip range to spare. The lead foot keeps its capture target on both captures (lead `hip_rotation_l` rises by 7–12 degrees, to 17.3–26.4 degrees, inside the ±40 degree range). The 7-iron `capture`-mode address RMS rises by 1.0 mm. The canonical ground-support receipts chain to the base document hash, so they must be regenerated for this document change (R10, #12692). Evidence: [`evidence/foot_progression/tibial_torsion_12789/README.md`](evidence/foot_progression/tibial_torsion_12789/README.md).
+The 7-iron now reaches the style target with 3.4 degrees of hip range to spare. The lead foot keeps its capture target on both captures (lead `hip_rotation_l` rises by 7–12 degrees, to 17.3–26.4 degrees, inside the ±40 degree range). The 7-iron `capture`-mode address RMS rises by 1.0 mm. The canonical ground-support receipts chain to the base document hash, so all four were regenerated with this change (`--foot-progression off`; `evidence/ground_support/CANONICAL_RUN.md` §2A). With the legacy feet the calibrated 7-iron dynamics replay regresses from 78.9 to 142.4 mm. Evidence: [`evidence/foot_progression/tibial_torsion_12789/README.md`](evidence/foot_progression/tibial_torsion_12789/README.md).
 
 ### Evidence Receipt
 
