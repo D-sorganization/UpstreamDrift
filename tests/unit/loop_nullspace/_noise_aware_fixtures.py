@@ -236,3 +236,68 @@ def m1_model_2d(sp: DisturbanceSpec) -> NoiseAwareModel:
     return NoiseAwareModel(
         frozen_dynamics(), b_matrix(), noise()["c"], noise()["p0"], sp, DT, 2
     )
+
+
+# ----------------------------------------------------- independent MC forward model
+def strong_spec() -> DisturbanceSpec:
+    """Larger declared noise so the M1/M2 effect is resolvable by a campaign."""
+    return spec((0.5, 1.0), (0.1, 0.1), golden_units=False)
+
+
+def mc_campaign_spec(sp: DisturbanceSpec, n_trials: int, n_holdout: int):
+    """One torque step plus a persistent initial-state disturbance."""
+    from src.shared.python.loop_nullspace.paired_mc_spec import (
+        CampaignSpec,
+        OutcomeChannel,
+        OutcomeKind,
+    )
+
+    x0 = DisturbanceSpec(
+        name="x0",
+        stage=InjectionStage.INITIAL_STATE,
+        channels=("theta", "omega"),
+        units="rad",
+        covariance=noise()["p0"],
+        persistent=True,
+    )
+    return CampaignSpec(
+        disturbances=(sp, x0),
+        n_steps=1,
+        dt=DT,
+        n_trials=n_trials,
+        n_holdout=n_holdout,
+        paired_seed=101,
+        holdout_seed=202,
+        outcomes=(OutcomeChannel("y", "rad", OutcomeKind.ANGLE, tolerance=0.1),),
+    )
+
+
+def mc_runner_factory(sp: DisturbanceSpec):
+    """``(torque, z) -> runner`` using the NONLINEAR reduced pendulum step.
+
+    The linear model never enters: the outcome is ``c.(x1 - x1_nominal)`` with
+    ``x1`` from the exact reduced-coordinate step of ``_variance_fixtures``
+    driven by ``u(z)`` (so the geometric preload is physical, not assumed).
+    """
+    from tests.unit.loop_nullspace._variance_fixtures import (
+        nominal_angle,
+        pendulum_nonlinear_step,
+    )
+
+    c = noise()["c"]
+    x_nom = np.array([nominal_angle(), Pendulum.omega])
+
+    def factory(torque, z):
+        u_ff = np.asarray(torque)[0]
+        nominal = pendulum_nonlinear_step(x_nom, np.zeros(2), u_ff, DT)
+
+        def runner(draw):
+            d0 = draw.realise("x0")
+            signal = np.asarray(torque) if sp.has_signal_law else None
+            w = draw.realise("torque", signal=signal)
+            x1 = pendulum_nonlinear_step(x_nom + d0, w[0], u_ff, DT)
+            return [float(c @ (x1 - nominal))]
+
+        return runner
+
+    return factory

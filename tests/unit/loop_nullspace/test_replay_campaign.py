@@ -239,3 +239,69 @@ def test_strategy_construction_checks_the_grid_and_the_noise_map() -> None:
             noise,
             _outcomes,
         )
+
+
+def _sdn_noise(gain: float, name: str = "joint_torque") -> DisturbanceSpec:
+    """Purely signal-dependent torque noise (no additive part): sd = gain * |tau|."""
+    return DisturbanceSpec(
+        name=name,
+        stage=InjectionStage.TORQUE,
+        channels=tuple(f"tau{i}" for i in range(N)),
+        units="N m",
+        covariance=np.zeros((N, N)),
+        spectrum=Spectrum.WHITE,
+        signal_gain=(gain * np.sqrt(DT),) * N,  # per-step variance = gain^2 tau^2
+        signal_bounds=((-1e4, 1e4),) * N,
+    )
+
+
+def _sdn_spec(gain: float, n_trials: int = 8) -> CampaignSpec:
+    base = _spec(0.0, n_trials=n_trials)
+    return CampaignSpec(
+        disturbances=(_sdn_noise(gain),),
+        n_steps=base.n_steps,
+        dt=base.dt,
+        n_trials=n_trials,
+        n_holdout=n_trials,
+        paired_seed=5,
+        holdout_seed=6,
+        outcomes=base.outcomes,
+    )
+
+
+def test_signal_from_torque_must_match_the_declared_signal_law() -> None:
+    case = _case(ReplayPolicy.INDEPENDENT_TIME_ONLY)
+    with pytest.raises(ValueError, match="signal_from_torque"):
+        replay_strategy(
+            _sdn_spec(0.01),
+            "open",
+            case,
+            TorqueNoise("joint_torque", np.eye(N)),
+            _outcomes,
+        )
+    with pytest.raises(ValueError, match="signal_from_torque"):
+        replay_strategy(
+            _spec(1.0),
+            "open",
+            case,
+            TorqueNoise("joint_torque", np.eye(N), signal_from_torque=True),
+            _outcomes,
+        )
+
+
+def test_signal_dependent_replay_noise_follows_the_allocation_torque() -> None:
+    """Small-noise replay is linear in the noise, so SD scales with the gain."""
+    case = _case(ReplayPolicy.INDEPENDENT_TIME_ONLY)
+    sds = {}
+    for gain in (0.005, 0.010):
+        spec = _sdn_spec(gain)
+        noise = TorqueNoise("joint_torque", np.eye(N), signal_from_torque=True)
+        strat = replay_strategy(spec, "open", case, noise, _outcomes)
+        result = pmc.run_seed_set(spec, [strat], "paired")
+        sds[gain] = ps.summarise(spec, result, "open", n_boot=50, seed=1)
+        assert sds[gain].tally.failure_rate == 0.0
+    sd_a = sds[0.005].dispersions["v1_final"].sd
+    sd_b = sds[0.010].dispersions["v1_final"].sd
+    assert sd_a > 0.0
+    # common random numbers: the deviation is linear in the gain up to O(gain^2)
+    assert sd_b / sd_a == pytest.approx(2.0, rel=2e-2)

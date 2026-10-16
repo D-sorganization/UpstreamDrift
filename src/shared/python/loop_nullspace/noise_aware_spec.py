@@ -128,6 +128,7 @@ class NoiseAwareResult:
     variance_parts: dict[str, float] = field(default_factory=dict)
     reference_variance: float | None = None
     reference_torque: Array | None = None
+    reference_z: tuple[Array, ...] = ()
     effort: float | None = None
     reference_effort: float | None = None
     gradient_norm: float | None = None

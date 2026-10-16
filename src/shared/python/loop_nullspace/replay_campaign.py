@@ -86,10 +86,15 @@ class TorqueNoise:
 
     ``load_map`` is ``(n, n_channels)``: the generalised load per unit of each
     channel (an identity block for noise added to joint torques).
+    ``signal_from_torque`` feeds the allocation's actuated torque at the frame
+    opening each interval (zero-order hold) to a signal-dependent (M1)
+    disturbance, so the noise level follows the allocation under test (NSX-92);
+    it must be set exactly when the disturbance declares a signal law.
     """
 
     disturbance: str
     load_map: Array
+    signal_from_torque: bool = False
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "load_map", readonly_float(self.load_map, "load_map"))
@@ -113,6 +118,12 @@ def _check_grid(spec: CampaignSpec, case: ReplayCase, noise: TorqueNoise) -> Non
         raise ValueError(
             "torque noise must be a white per-step disturbance (a persistent "
             "or coloured one has no zero-order-hold interval covariance S / dt)"
+        )
+    if dist.has_signal_law != noise.signal_from_torque:
+        raise ValueError(
+            "signal_from_torque must be set exactly when the disturbance "
+            f"declares a signal-dependent law (law={dist.has_signal_law}, "
+            f"signal_from_torque={noise.signal_from_torque})"
         )
     times = case.frame_times()
     steps = np.diff(times)
@@ -149,6 +160,14 @@ def _held_load(
     return load
 
 
+def _interval_signal(case: ReplayCase) -> Array:
+    """Actuated torque at the frame opening each interval, ``(n_steps, n_a)``."""
+    torque = case.allocation.torque
+    if torque is None:
+        raise ValueError("the allocation carries no torque to drive the signal law")
+    return np.asarray(torque, dtype=np.float64)[:-1]
+
+
 def replay_strategy(
     spec: CampaignSpec,
     name: str,
@@ -173,8 +192,10 @@ def replay_strategy(
         tuple(case.allocation.record.hypotheses) if case.allocation.record else ()
     )
 
+    signal = _interval_signal(case) if noise.signal_from_torque else None
+
     def runner(draw: TrialDraw) -> ArrayLike:
-        w = draw.realise(noise.disturbance)
+        w = draw.realise(noise.disturbance, signal=signal)
         setup = replace(
             case.setup,
             external_load=_held_load(

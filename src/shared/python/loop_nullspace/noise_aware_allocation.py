@@ -221,6 +221,7 @@ def _assemble_result(
         variance_parts=parts,
         reference_variance=model.variance(ctx["ref_z"], ref_tau),
         reference_torque=ref_tau,
+        reference_z=_split(lay, ctx["ref_z"]),
         effort=effort_of(frames, ctx["times"], ctx["scale"], tau),
         reference_effort=effort_of(frames, ctx["times"], ctx["scale"], ref_tau),
         gradient_norm=grad,
