@@ -214,6 +214,69 @@ def test_request_fingerprint_uses_basenames_and_hashes(tmp_path) -> None:
     assert str(tmp_path) not in json.dumps(one.canonical_dict())
 
 
+def _loads_request(tmp_path, xml: Path) -> SpineStudyRequest:
+    return SpineStudyRequest(
+        study_id="loads",
+        motion_path=_write_motion(tmp_path / "swing.sto"),
+        golf_model_path=GOLF_MODEL,
+        model_id="bruno2015_fullbody_os4_v2",
+        asset_id="bruno2015_fullbody_os4_v2",
+        external_loads=xml,
+        output_dir=tmp_path / "out",
+    )
+
+
+def _loads_xml(path: Path, datafile: str) -> Path:
+    path.write_text(
+        f"<OpenSimDocument><ExternalLoads><datafile>{datafile}</datafile>"
+        "</ExternalLoads></OpenSimDocument>",
+        encoding="utf-8",
+    )
+    return path
+
+
+@pytest.mark.unit
+def test_missing_external_loads_datafile_raises(tmp_path) -> None:
+    xml = _loads_xml(tmp_path / "loads.xml", "absent_grf.mot")
+    request = _loads_request(tmp_path, xml)
+    with pytest.raises(FileNotFoundError, match="external loads data"):
+        request_fingerprint(request)
+    with pytest.raises(FileNotFoundError, match="absent_grf.mot"):
+        run_spine_study(request, code_version="c", env={})
+    assert not (tmp_path / "out").exists()
+
+
+@pytest.mark.unit
+def test_relative_datafile_resolves_against_xml_directory(
+    tmp_path, monkeypatch
+) -> None:
+    (tmp_path / "xml" / "data").mkdir(parents=True)
+    (tmp_path / "elsewhere").mkdir()
+    data = tmp_path / "xml" / "data" / "grf.mot"
+    data.write_text("one", encoding="utf-8")
+    xml = _loads_xml(tmp_path / "xml" / "loads.xml", "data/grf.mot")
+    monkeypatch.chdir(tmp_path / "elsewhere")
+    request = _loads_request(tmp_path, xml)
+    before = request_fingerprint(request)
+    data.write_text("two", encoding="utf-8")
+    assert request_fingerprint(request) != before
+
+
+@pytest.mark.unit
+def test_absolute_datafile_is_hashed(tmp_path) -> None:
+    (tmp_path / "xml").mkdir()
+    data = tmp_path / "grf_abs.mot"
+    data.write_text("one", encoding="utf-8")
+    xml = _loads_xml(tmp_path / "xml" / "loads.xml", str(data))
+    request = _loads_request(tmp_path, xml)
+    before = request_fingerprint(request)
+    data.write_text("two", encoding="utf-8")
+    assert request_fingerprint(request) != before
+    data.unlink()
+    with pytest.raises(FileNotFoundError, match="external loads data"):
+        request_fingerprint(request)
+
+
 # ------------------------------------------------------------ native pipeline
 
 
