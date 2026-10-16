@@ -946,11 +946,39 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector": [
       {
-        "bbox_max": [0.017031, 1.08472, 0.035943],
-        "bbox_min": [-0.017031, -0.008524, -0.010543],
-        "label": "skin0",
+        "bbox_max": [0.011755, 0.2015, 0.037155],
+        "bbox_min": [-0.011755, -0.0635, 0.013645],
+        "label": "grip",
+        "material": "mat_grip_rubber",
+        "n_vertices": 50
+      },
+      {
+        "bbox_max": [0.134152, 1.12789, 0.070017],
+        "bbox_min": [-0.007195, 0.988192, -0.053639],
+        "label": "head",
         "material": "mat_satin_steel",
-        "n_vertices": 794
+        "n_vertices": 948
+      },
+      {
+        "bbox_max": [0.036731, 0.024, 0.061266],
+        "bbox_min": [-0.030015, -0.06275, -0.005877],
+        "label": "lead_hand",
+        "material": "mat_glove_white",
+        "n_vertices": 3102
+      },
+      {
+        "bbox_max": [0.006152, 0.988192, 0.031552],
+        "bbox_min": [-0.006152, 0.2015, 0.019248],
+        "label": "shaft",
+        "material": "mat_satin_steel",
+        "n_vertices": 50
+      },
+      {
+        "bbox_max": [0.029938, 0.1002, 0.069571],
+        "bbox_min": [-0.045184, -0.0233, -0.00549],
+        "label": "trail_hand",
+        "material": "mat_glove_white",
+        "n_vertices": 3102
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff": [
