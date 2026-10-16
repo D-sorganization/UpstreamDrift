@@ -7,6 +7,30 @@
 #   - Remove --reload from the uvicorn command.
 version: "3.8"
 
+# Shared by the three model-explorer services (UpstreamDrift #12878 D). See
+# docs/development/DOCKER_SETUP.md ("Model Explorer in Docker").
+x-explorer-common: &explorer-common
+  build: &explorer-build
+    context: .
+    dockerfile: Dockerfile.modular
+    # Host prune jobs skip images labelled keep (they take 25+ min to rebuild
+    # over the ControlTower WAN).
+    labels:
+      keep: "true"
+    args:
+      PROFILE: ${EXPLORER_PROFILE:-full}
+      # Required by the pinned-Tools provenance check in the image build;
+      # scripts/docker/explorer.sh computes them.
+      TOOLS_GITLINK_SHA: ${TOOLS_GITLINK_SHA:-}
+      TOOLS_SOURCE_SHA256: ${TOOLS_SOURCE_SHA256:-}
+  volumes:
+    # Read-only models/evidence for --model docs/... ; exports land in ./output.
+    - ./docs:/workspace/docs:ro
+    - ./shared:/workspace/shared:ro
+    - ./output/explorer:/out
+  networks:
+    - upstream-drift
+
 services:
   # Backend API server with all physics engines
   backend:
@@ -106,6 +130,100 @@ services:
     command: /bin/bash
     stdin_open: true
     tty: true
+    networks:
+      - upstream-drift
+
+  # --- Model Explorer (PyQt6 app + headless export) -------------------------
+  # Headless: `docker compose --profile explorer-headless run --rm explorer-headless`
+  # exports an MP4 to ./output/explorer with no display (Qt offscreen + EGL).
+  explorer-headless:
+    <<: *explorer-common
+    profiles: ["explorer-headless"]
+    build:
+      <<: *explorer-build
+      target: explorer-headless
+    image: upstream-drift:explorer-headless
+    container_name: upstream-drift-explorer-headless
+    environment:
+      - QT_QPA_PLATFORM=offscreen
+      - MUJOCO_GL=${MUJOCO_GL:-egl}
+    command: >-
+      export --model canonical-humanoid --out /out/explorer_headless.mp4
+      --duration 2 --fps 30 --width 1280 --height 720
+
+  # GUI over noVNC: `docker compose --profile explorer-gui up explorer-gui`,
+  # then open http://localhost:6080/vnc.html . Works from any client machine.
+  explorer-gui:
+    <<: *explorer-common
+    profiles: ["explorer-gui"]
+    build:
+      <<: *explorer-build
+      target: explorer-gui
+    image: upstream-drift:explorer-gui
+    container_name: upstream-drift-explorer-gui
+    ports:
+      # Loopback only: the VNC session has no password.
+      - "127.0.0.1:6080:6080"
+    environment:
+      - QT_QPA_PLATFORM=xcb
+      - MUJOCO_GL=${MUJOCO_GL:-egl}
+      - DISPLAY=:99
+      - NOVNC_PORT=6080
+      - VNC_PORT=5900
+    command: ["gui"]
+    shm_size: "1gb"
+
+  # GUI as a native window on the Windows desktop via WSLg (X11 socket
+  # passthrough). Requires the Docker daemon to run inside WSL2.
+  explorer-gui-wslg:
+    <<: *explorer-common
+    profiles: ["explorer-gui-wslg"]
+    build:
+      <<: *explorer-build
+      target: explorer-gui
+    image: upstream-drift:explorer-gui
+    container_name: upstream-drift-explorer-gui-wslg
+    volumes:
+      - ./docs:/workspace/docs:ro
+      - ./shared:/workspace/shared:ro
+      - ./output/explorer:/out
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /mnt/wslg:/mnt/wslg
+    environment:
+      - QT_QPA_PLATFORM=xcb
+      - MUJOCO_GL=${MUJOCO_GL:-egl}
+      - DISPLAY=${DISPLAY:-:0}
+      - UD_EXPLORER_DISPLAY_MODE=host
+      - XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir
+      - WAYLAND_DISPLAY=wayland-0
+    command: ["gui"]
+    shm_size: "1gb"
+
+  # --- Images other ControlTower jobs expect (ct-run.sh) ---------------------
+  # `build:` as well as `image:`, so a pruned image is rebuilt on demand and never
+  # becomes a failed pull. `scripts/docker/explorer.sh ensure` does this for you.
+  # ud-sim:latest = the explorer base (all engines + Qt + EGL + ffmpeg); its
+  # entrypoint execs any command it is given, so `docker run ud-sim python ...`
+  # behaves as before.
+  ud-sim:
+    <<: *explorer-common
+    profiles: ["explorer-images"]
+    build:
+      <<: *explorer-build
+      target: explorer-headless
+    image: ud-sim:latest
+    container_name: upstream-drift-ud-sim
+    environment:
+      - QT_QPA_PLATFORM=offscreen
+      - MUJOCO_GL=${MUJOCO_GL:-egl}
+
+  upstream-drift-full:
+    profiles: ["explorer-images"]
+    build:
+      <<: *explorer-build
+      target: runtime
+    image: upstream-drift:full
+    container_name: upstream-drift-full
     networks:
       - upstream-drift
 

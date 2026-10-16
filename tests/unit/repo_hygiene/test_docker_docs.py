@@ -74,3 +74,28 @@ class TestDockerfileHeaders:
         content = (_REPO_ROOT / relative_path).read_text(encoding="utf-8")
         assert "docker/README.md" in content
         assert "0021-container-strategy" in content
+
+
+class TestModelExplorerDockerDocs:
+    """DOCKER_SETUP.md must document the explorer launch commands (#12878 D)."""
+
+    def _read(self) -> str:
+        path = _REPO_ROOT / "docs" / "development" / "DOCKER_SETUP.md"
+        return path.read_text(encoding="utf-8")
+
+    @pytest.mark.parametrize(
+        "needle",
+        [
+            "docker compose --profile explorer-headless run --rm explorer-headless",
+            "docker compose --profile explorer-gui up explorer-gui",
+            "docker compose --profile explorer-gui-wslg up explorer-gui-wslg",
+            "http://localhost:6080/vnc.html",
+            "MUJOCO_GL",
+            "### Troubleshooting",
+        ],
+    )
+    def test_documents_launch_command(self, needle: str) -> None:
+        assert needle in self._read()
+
+    def test_stays_under_doc_size_limit(self) -> None:
+        assert len(self._read().encode("utf-8")) < 51_200
