@@ -201,9 +201,8 @@ def replay_strategy(
     _check_grid(spec, case, noise)
     times = case.frame_times()
     mode = mode_for_policy(case.policy)
-    hypotheses = (
-        tuple(case.allocation.record.hypotheses) if case.allocation.record else ()
-    )
+    record = case.allocation.record
+    hypotheses = tuple(record.hypotheses) if record else ()
 
     signal = _interval_signal(case) if noise.signal_from_torque else None
 

@@ -177,6 +177,12 @@ def _assess(
     )
 
 
+def _first_variance(result: LayerVariance) -> float:
+    """Variance of the first outcome row of a layer assessment."""
+    variance = result.assessment.variance
+    return float(variance.values[0])
+
+
 def _delay_verdict(result: LayerVariance) -> tuple[float, str]:
     """``(smallest margin in s or inf, failure reason or "")``."""
     found = [m for m in result.delay_margins if m.margin_steps is not None]
@@ -217,7 +223,7 @@ def evaluate_layer_arm(spec: ArmSpec, context: ComparisonContext) -> ArmResult:
         "strategy": spec.strategy,
         "label": spec.label,
         "chs_mps": context.chs_mps,
-        "baseline_variance": float(base.assessment.variance.values[0]),
+        "baseline_variance": _first_variance(base),
         "baseline_effort": 0.0,
         "effort_basis": EFFORT_LAYER,
         "hypotheses": tuple(dict.fromkeys(hyps)),
@@ -225,7 +231,7 @@ def evaluate_layer_arm(spec: ArmSpec, context: ComparisonContext) -> ArmResult:
     }
     if why:
         return ArmResult(status=ArmStatus.UNSTABLE, reason=why, **common)
-    var = float(ctrl.assessment.variance.values[0])
+    var = _first_variance(ctrl)
     diagnostics = {} if spec.feedback_gain is None else {"delay_margin_s": margin_s}
     return ArmResult(
         status=ArmStatus.NO_MECHANISM if zero else ArmStatus.OK,

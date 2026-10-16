@@ -157,10 +157,11 @@ class ObjectiveSpec:
         if self.variance is not None:
             if not isinstance(self.variance, VarianceTerm):
                 raise TypeError("variance must be a VarianceTerm or None")
-            if self.variance.coeff.shape != (t.size, s.size):
+            coeff = self.variance.coeff
+            if coeff.shape != (t.size, s.size):
                 raise ValueError(
                     f"variance coeff must have shape {(t.size, s.size)}, "
-                    f"got {self.variance.coeff.shape}"
+                    f"got {coeff.shape}"
                 )
 
 
