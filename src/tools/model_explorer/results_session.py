@@ -52,6 +52,11 @@ class ResultsSession:
         return self._current_frame
 
     @property
+    def default_video_name(self) -> str:
+        """Suggested export file name: the archive stem with ``.mp4``."""
+        return f"{self.path.stem}.mp4"
+
+    @property
     def current_time_s(self) -> float:
         return float(self._source.time_s[self._current_frame])
 

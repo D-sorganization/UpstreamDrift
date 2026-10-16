@@ -47,6 +47,7 @@ except ImportError:
     HAS_NOTEPAD = False
     logger.warning("sidekick not found, Notepad disabled")
 
+from .model_source import model_as_urdf
 from .results_session import ResultsSession
 from .segment_panel import SegmentPanel
 from .urdf_builder import URDFBuilder
@@ -313,47 +314,20 @@ class MainWidget(QWidget):
     def _on_library_model_selected(self, category: str, model_key: str) -> None:
         logger.info(f"Model selected from library: {category}/{model_key}")
 
-    @staticmethod
-    def _model_as_urdf(path: Path) -> str:
-        """Return URDF text for a URDF, MJCF or OSIM file.
-
-        Raises:
-            ValueError: the file is not a loadable model or defines no bodies.
-        """
-        suffix = path.suffix.lower()
-        if suffix == ".osim":
-            from .osim_loader import OsimLoader
-
-            urdf_content = OsimLoader().to_urdf(path)
-        elif suffix in (".xml", ".mjcf") and "<mujoco" in path.read_text(
-            encoding="utf-8", errors="replace"
-        ):
-            from src.shared.python.model_generation.library.unified_loader import (
-                UnifiedModelLoader,
-            )
-
-            result = UnifiedModelLoader().load_file(path)
-            if not result.success or result.model is None:
-                raise ValueError(result.error or f"cannot parse MJCF '{path.name}'")
-            urdf_content = result.model.to_urdf()
-        else:
-            urdf_content = path.read_text(encoding="utf-8")
-        if "<link" not in urdf_content:
-            raise ValueError(f"'{path.name}' defines no bodies, nothing to explore")
-        return urdf_content
-
-    def load_model(self, file_path: str | Path) -> bool:
+    def load_model(self, file_path: str | Path, *, notify: bool = True) -> bool:
         """Load a URDF, MJCF or OSIM model file and refresh the viewport.
 
         Args:
             file_path: Path to the model file to load.
+            notify: Report a failure in a modal dialog (user-initiated loads);
+                when False it goes to the status bar so startup never blocks.
 
         Returns:
             True if model loading and rendering succeed, False otherwise.
         """
         path = Path(file_path)
         try:
-            urdf_content = self._model_as_urdf(path)
+            urdf_content = model_as_urdf(path)
             self.visualization_widget.update_visualization(urdf_content, str(path))
             self.current_file_path = path
             self._update_window_title()
@@ -361,11 +335,14 @@ class MainWidget(QWidget):
             return True
         except (RuntimeError, TypeError, ValueError, OSError) as e:
             logger.exception("Error loading URDF file: %s", e)
-            QMessageBox.warning(
-                self,
-                "Model Load Error",
-                f"Failed to load model file '{path.name}':\n\n{e}",
-            )
+            if notify:
+                QMessageBox.warning(
+                    self,
+                    "Model Load Error",
+                    f"Failed to load model file '{path.name}':\n\n{e}",
+                )
+            else:
+                self.status_bar.showMessage(f"Failed to load model '{path.name}': {e}")
             return False
 
     def _load_urdf_file(self, file_path: str | Path) -> bool:
@@ -553,7 +530,7 @@ class MainWidget(QWidget):
                 self, "Export Video", "Load results first (File > Load Results)."
             )
             return None
-        default = f"{self._results.path.stem}.mp4"
+        default = self._results.default_video_name
         file_path, _ = QFileDialog.getSaveFileName(
             self, "Export Video", default, "MP4 Video (*.mp4);;GIF (*.gif)"
         )
@@ -608,7 +585,7 @@ class MainWidget(QWidget):
                 library = ModelLibrary()
                 urdf_path = library.get_human_model(str(default_model))
                 if urdf_path and urdf_path.exists():
-                    if self.load_model(urdf_path):
+                    if self.load_model(urdf_path, notify=False):
                         self.status_bar.showMessage(
                             f"Loaded default model: {default_model}"
                         )

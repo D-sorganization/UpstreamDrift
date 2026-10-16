@@ -10,6 +10,7 @@ This module provides professional video export capabilities:
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any  # noqa: ICN003
@@ -131,6 +132,8 @@ class VideoExporter:
                     msg = "opencv-python required for video export"
                     raise ImportError(msg)
 
+                if codec is None:
+                    raise ValueError(f"no default codec for {self.format.value}")
                 fourcc = cv2.VideoWriter_fourcc(*codec)  # type: ignore[attr-defined]
                 self.writer = cv2.VideoWriter(
                     str(output_path_obj),
@@ -391,19 +394,41 @@ def _build_frame_metrics(
     return metrics
 
 
-def export_simulation_video(  # noqa: PLR0913
+@dataclass(frozen=True)
+class VideoExportOptions:
+    """Rendering options for :func:`export_simulation_video`.
+
+    Invariant (checked on construction): ``width``, ``height`` and ``fps`` are
+    positive integers, ``camera_id`` is ``None`` (free camera) or ``>= -1``,
+    and ``progress_callback`` is ``None`` or callable.
+    """
+
+    width: int = HD_WIDTH
+    height: int = HD_HEIGHT
+    fps: int = DEFAULT_FPS
+    camera_id: int | None = None
+    show_metrics: bool = True
+    progress_callback: Callable[[int, int], None] | None = None
+
+    def __post_init__(self) -> None:
+        for name in ("width", "height", "fps"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+                raise ValueError(f"{name} must be a positive integer, got {value!r}")
+        if self.camera_id is not None and self.camera_id < -1:
+            raise ValueError(f"camera_id must be None or >= -1, got {self.camera_id}")
+        if self.progress_callback is not None and not callable(self.progress_callback):
+            raise TypeError("progress_callback must be callable or None")
+
+
+def export_simulation_video(
     model: mj.MjModel,
     data: mj.MjData,
     output_path: str,
     recorded_states: np.ndarray,
     recorded_controls: np.ndarray,
     times: np.ndarray,
-    width: int = HD_WIDTH,
-    height: int = HD_HEIGHT,
-    fps: int = DEFAULT_FPS,
-    camera_id: int | None = None,
-    show_metrics: bool = True,
-    progress_callback: Callable[[int, int], None] | None = None,
+    options: VideoExportOptions | None = None,
 ) -> bool:
     """Export a recorded simulation as video.
 
@@ -414,20 +439,17 @@ def export_simulation_video(  # noqa: PLR0913
         recorded_states: Array of states (N x (nq+nv))
         recorded_controls: Array of controls (N x nu)
         times: Array of timestamps (N,)
-        width: Video width
-        height: Video height
-        fps: Frames per second
-        camera_id: Camera for rendering
-        show_metrics: Whether to overlay metrics
-        progress_callback: Progress callback function
+        options: Size, frame rate, camera, overlay and progress settings
+            (defaults to :class:`VideoExportOptions`).
 
     Returns:
         True if successful
     """
     if model is None:
         raise ValueError("model must be provided")
+    opts = VideoExportOptions() if options is None else options
     format = _detect_video_format(output_path)
-    exporter = VideoExporter(model, data, width, height, fps, format)
+    exporter = VideoExporter(model, data, opts.width, opts.height, opts.fps, format)
 
     if not exporter.start_recording(output_path):
         return False
@@ -443,7 +465,7 @@ def export_simulation_video(  # noqa: PLR0913
             mj.mj_forward(model, data)
 
             overlay_fn = None
-            if show_metrics:
+            if opts.show_metrics:
                 t = times[i]
                 metrics = _build_frame_metrics(model, data, i)
 
@@ -462,10 +484,10 @@ def export_simulation_video(  # noqa: PLR0913
                         font_scale=0.8,
                     )
 
-            exporter.add_frame(camera_id, overlay_fn)
+            exporter.add_frame(opts.camera_id, overlay_fn)
 
-            if progress_callback:
-                progress_callback(i + 1, total_frames)
+            if opts.progress_callback:
+                opts.progress_callback(i + 1, total_frames)
 
         exporter.finish_recording(output_path)
         return True
@@ -513,14 +535,13 @@ def _fit_to_framebuffer(model: mj.MjModel, size: tuple[int, int]) -> tuple[int, 
     (640x480 by default), so the HD default must shrink for stock models.
     """
     width, height = size
-    scale = min(
-        1.0, model.vis.global_.offwidth / width, model.vis.global_.offheight / height
-    )
+    offscreen = model.vis.global_
+    scale = min(1.0, offscreen.offwidth / width, offscreen.offheight / height)
     # Even dimensions: most H.264 encoders reject odd frame sizes.
     return max(2, int(width * scale) // 2 * 2), max(2, int(height * scale) // 2 * 2)
 
 
-def export_recorded_swing_video(  # noqa: PLR0913
+def export_recorded_swing_video(
     model: mj.MjModel,
     data: mj.MjData,
     recorder: Any,
@@ -554,11 +575,13 @@ def export_recorded_swing_video(  # noqa: PLR0913
         states,
         controls,
         times,
-        width=width,
-        height=height,
-        fps=fps,
-        show_metrics=False,
-        progress_callback=progress_callback,
+        VideoExportOptions(
+            width=width,
+            height=height,
+            fps=fps,
+            show_metrics=False,
+            progress_callback=progress_callback,
+        ),
     )
     if not ok or not target.is_file() or target.stat().st_size == 0:
         raise RuntimeError(f"video export to {target} failed; see the log for details")

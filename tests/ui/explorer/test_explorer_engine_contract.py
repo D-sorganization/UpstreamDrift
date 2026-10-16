@@ -237,8 +237,9 @@ def test_native_engine_loads_canonical_model(
 
         assert build_full_body_pinocchio_model(spec) is not None
     elif engine == "opensim":
-        import opensim
+        from tests.helpers.opensim_support import require_opensim
 
+        opensim = require_opensim()
         path = _model_artifact(case, spec_bytes, tmp_path)
         model = opensim.Model(str(path))
         model.initSystem()
