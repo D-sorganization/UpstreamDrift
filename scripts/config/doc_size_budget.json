@@ -44,18 +44,6 @@
       "expires_on": "2026-10-31"
     },
     {
-      "path": "docs/development/full_body_models/evidence/anthropometry/REVIEW.md",
-      "owner": "@simulation-team",
-      "reason": "Comprehensive anthropometry and posture review evidence document for AN-1 and ground support program; staged for section decomposition under epic #10162.",
-      "expires_on": "2026-10-15"
-    },
-    {
-      "path": "docs/development/full_body_models/HANDOFF.md",
-      "owner": "@simulation-team",
-      "reason": "Active multi-agent full-body program turnover document tracking Visuals, FB-4/5/6, and ground support lane reconciliation.",
-      "expires_on": "2026-10-15"
-    },
-    {
       "path": "docs/development/full_body_models/DESIGN_DECISIONS.md",
       "owner": "@simulation-team",
       "reason": "Issue #11767 (GCV-20): the committed design-decision log was already 61 bytes under the budget on main before this change recorded the full re-solve result and the pre-contact release cutoff / weld-projection amendment; staged for topic decomposition.",
