@@ -1,0 +1,153 @@
+% Section of golfer_appearance_reference.tex (R8, #12685). Standalone research
+% and visual reference, not the design manual.
+\section{One Shared Appearance and Anthropometry Spec (R8, \#12685)}
+
+\subsection{Defect}
+Skin, garment, blend-ball and shoe meshes were built only inside the MuJoCo
+appearance layer (\texttt{appearance\_layer.\_body\_meshes}), so every other
+engine drew grey capsules. The trunk had three independent size sources: the
+spec \texttt{visual\_hints} ellipsoids (stature fractions
+\texttt{TORSO\_WIDTH\_FRACTION}/\texttt{TORSO\_DEPTH\_FRACTION}), the fixed
+\texttt{library.PART\_RADIUS\_M} metres with \texttt{PART\_ASPECT}, and the
+GS3DX absolute radii. The MuJoCo trunk therefore did not scale with the
+subject, and the trunk body carried three nearly identical overlapping lofts
+(to the cervicale and both shoulder hubs). The grey ``plain'' palette was
+copied into four modules. The default outfit was navy polo over khaki shorts
+whose thigh band covered only 60\,\% of the thigh, leaving a bare-knee band.
+
+\subsection{Contract}
+\texttt{model\_appearance.body\_meshes} is pure data plus pure functions:
+\begin{itemize}
+\item \texttt{body\_meshes(spec, doc, club=None)} $\to$
+  \texttt{list[BodyMesh(body, label, mesh\_in\_body\_frame, material\_name)]}:
+  skin (\texttt{skin}$i$), garment (\texttt{garment}$i$), blend ball
+  (\texttt{blend}$i$) and shoe meshes, plus the club parts when an assembly is
+  given. Deterministic; bodies in visual-skeleton order; the head body is
+  omitted while the parametric head (\texttt{model\_appearance.head}) is on.
+\item \texttt{resolve\_appearance(spec, doc, club=None, head\_mesh=None)} $\to$
+  \texttt{ResolvedAppearance(meshes, materials, head\_mesh, frame)}: the only
+  object an engine emitter receives (Law of Demeter). \texttt{materials} maps
+  every referenced name to its PBR \texttt{Material};
+  \texttt{rgba(name)} and \texttt{meshes\_for(body)} delegate.
+\item \texttt{section\_size(spec, body)} $\to$
+  \texttt{SectionSize(radius\_m, aspect, source)} for a trunk body.
+\item \texttt{MeshReference(path, licence, provenance)}: the reserved head
+  slot for R7 (\#12687); every field must be non-empty.
+\end{itemize}
+Preconditions raise \texttt{ValueError}: an unknown material name (document
+segment rule, clothing preset or a produced mesh), a hinted trunk body without
+landmark axes, a trunk aspect outside $(0,1]$ (a trunk deeper than wide is a
+spec error). A body that matches no part rule classifies as \texttt{other} and
+gets the plain grey material \texttt{plain\_grey}, never a skin tone.
+
+\subsection{Frames}
+Every \texttt{mesh\_in\_body\_frame} vertex is in the \emph{spec body frame}
+(\texttt{SPEC\_BODY\_FRAME = "spec\_body"}): the frame the spec joints,
+\texttt{visual\_skeleton} capsules and \texttt{visual\_hints} shapes use. An
+engine whose body frame differs transforms explicitly. The MuJoCo exporter's
+body is the joint follower frame, so the emitter maps a spec point $p$ to
+$T_b\,p$ with $T_b = (\texttt{child\_to\_follower})^{-1}$ (the exporter's
+\texttt{offsets[body]}). The v1 chest body \texttt{COMRod} has
+$R_{\mathrm{c2f}} = \left(\begin{smallmatrix}0&0&1\\1&0&0\\0&1&0\end{smallmatrix}\right)$;
+attaching spec-frame geometry without $T_b$ misorients the chest. The
+regression test compiles the MJCF in MuJoCo and checks the chest mesh in the
+\emph{world} frame (\texttt{geom\_xpos} $+$ \texttt{geom\_xmat}$\cdot$
+\texttt{mesh\_vert}) against the world shoulder line; replacing $T_b$ by a
+pure translation fails it for v1.
+
+\subsection{Sizing Rule}
+Limbs, hands, feet and the head keep \texttt{PART\_RADIUS\_M} (with the
+short-link clamp $\rho\le 0.6\,\ell$). The trunk (torso, pelvis) is one lofted
+solid per body along its longest capsule (joint origin to the farthest child
+joint). With the body's landmark axes $\hat m$ (ML) and $\hat d$ (AP) from
+\texttt{cross\_section.body\_sections} and its hint ellipsoids
+$\{h_k\}$ (axis-aligned half sizes in the spec body frame), the semi-axis of
+an ellipsoid along a unit $\hat e$ is $r_k(\hat e) = \bigl(\sum_i (e_i/h_{k,i})^2\bigr)^{-1/2}$
+(a box uses $\sum_i |e_i| h_{k,i}$), and
+\[
+\rho = \max_k r_k(\hat m), \qquad \alpha = \frac{\max_k r_k(\hat d)}{\rho},
+\qquad \texttt{source} = \texttt{visual\_hints}.
+\]
+The loft extents are then $2\rho$ along $\hat m$ and $2\alpha\rho$ along
+$\hat d$ (the R1 ring formula). Hint sizes are anthropometric, so no
+length clamp applies. A trunk body without hint shapes (the v1 spec; the
+anthro \texttt{UpperTorsoBase} stub) uses $\rho=\texttt{PART\_RADIUS\_M}$,
+$\alpha=\texttt{PART\_ASPECT}$, \texttt{source = library\_default}, with the
+clamp. For the anthropometric captures (stature $1.71$\,m) the thorax hint
+gives $\rho = 0.185\times1.71/2 = 0.1582$\,m (a \emph{half} width; full
+shoulder-line chest width $0.316$\,m) and $\alpha = 0.6486$.
+
+\subsection{Outfit and Coverage}
+Owner ruling (\#12685): the default outfit is charcoal trousers.
+\texttt{schema.DEFAULT\_CLOTHING = "golf\_polo\_trousers"} (white polo, black
+shoes) and \texttt{library.TROUSERS\_MATERIAL = "trousers\_charcoal"} is the one
+trouser token the pelvis and both thighs and shins wear. Coverage is per
+outfit: \texttt{garment\_coverage(preset, part)} returns $(0,1)$ for every leg
+segment of a full-length preset (its shins wear its pants), so each thigh and
+shin garment is a closed spindle that encloses the skin spindle; shorts keep
+the $(0,0.6)$ thigh band. The test checks, at the zero pose in world
+coordinates, that every leg skin vertex lies inside its garment hull and that
+the vertical garment spans pelvis $\to$ thigh $\to$ shin $\to$ shoe overlap.
+
+\subsection{One Plain Palette}
+\texttt{library.PLAIN\_PALETTE} holds the capsule, hint-shape, COM, frame,
+floor and ball RGBA; \texttt{plain\_rgba(key)} validates the key. The MuJoCo
+\texttt{visual\_layer} reads it; Drake, Pinocchio and OpenSim adopt it in
+R9a/R9b.
+
+\subsection{Engine Hooks}
+MuJoCo (\texttt{appearance\_layer.attach\_appearance}) is the reference
+consumer: it calls \texttt{resolve\_appearance} and only writes MJCF assets and
+geoms. \texttt{native\_viewer\_export.backends.\_body.body\_mesh\_files(resolved,
+directory)} writes one OBJ per \texttt{BodyMesh} in its spec body frame with
+its library RGBA (\texttt{BodyMeshFile(body, label, path, material\_name,
+rgba)}), mirroring \texttt{\_head.py}; the MeshCat and OpenSim backends register
+these files in R9a/R9b (\#12688, \#12689), and Simscape reads the same
+resolution in R9c (\#12690).
+
+\subsection{Before and After}
+Spec-frame skin extents (ML $\times$ AP, metres) for both anthropometric captures
+(identical trunk geometry):
+\begin{center}
+\begin{tabular}{lll}
+Body & Before (main after R1/R2) & After (R8) \\ \hline
+\texttt{COMRod} (chest) & 3 lofts, $0.290\times0.209$ & 1 solid, $0.316\times0.205$ \\
+\texttt{LowerTorso} (pelvis) & 3 lofts, $0.166\times0.129$ (clamped) & 1 solid, $0.290\times0.196$ \\
+Hint target $2\rho\times2\alpha\rho$ & & $0.316\times0.205$; $0.291\times0.197$ \\
+\end{tabular}
+\end{center}
+Every non-trunk body is unchanged: a golden per-body summary (material, vertex
+count, MJCF-frame bounding box) captured from the pre-refactor layer with the
+shorts preset matches to $2\times10^{-6}$\,m. Physics is bit-identical (masses,
+inertias, body positions, joint axes). Address stills face-on and
+down-the-line, capture-A driver and capture-B 7-iron, are in
+\texttt{evidence/appearance/shared\_appearance\_spec/} (after) beside the R1
+stills in \texttt{evidence/appearance/trunk\_cross\_section/} (before, navy
+polo over khaki shorts with a bare knee): the after stills show charcoal
+trousers hip to ankle, a white polo, no blue segment and a chest wider than
+deep. \texttt{trunk\_and\_outfit.json} records the sizing source and garment
+of each trunk and leg body. Stills are visual evidence and do not qualify
+dynamics.
+
+\subsection{Limitations}
+\begin{itemize}
+\item The skinned glTF body (\texttt{skinned\_body}) still sizes its trunk from
+  \texttt{PART\_RADIUS\_M}; migrating it to \texttt{section\_size} is follow-up
+  work outside this change's file set.
+\item The anthro \texttt{UpperTorsoBase} is a $6$\,mm stub without hints; its
+  library-default solid is clamped to $\rho = 0.6\,\ell$ and is invisible.
+\item GS3DX absolute radii are unchanged until R9c reads this resolution.
+\item The trunk solid follows the longest capsule, so a spec whose spine is
+  not its longest trunk capsule would need an explicit spine landmark.
+\end{itemize}
+
+\subsection{Reproduction}
+\begin{verbatim}
+python -m pytest -o addopts="" tests/unit/model_appearance/test_body_meshes.py \
+  tests/unit/motion_matching/test_mujoco_appearance_layer_body_meshes.py \
+  tests/unit/tools/native_viewer_export/test_body_mesh_files.py -q
+PYTHONPATH=. python3 docs/development/full_body_models/evidence/appearance/\
+shared_appearance_spec/render_shared_appearance_spec.py \
+  --datastore D:/FleetData/swing-datastore --out OUT --evidence \
+  docs/development/full_body_models/evidence/appearance/shared_appearance_spec
+\end{verbatim}

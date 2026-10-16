@@ -27,6 +27,9 @@ SCHEMA_PATH = Path(__file__).with_name("appearance_v1.schema.json")
 APPEARANCE_SUFFIX = ".appearance.json"
 # Spec keys that only ever affect pictures; excluded from the physics hash.
 VISUAL_ONLY_SPEC_KEYS = ("visual_hints", "appearance")
+# Owner ruling (#12685): the default outfit is charcoal trousers. The preset
+# itself is defined in ``library.CLOTHING``, which checks this name exists.
+DEFAULT_CLOTHING = "golf_polo_trousers"
 
 
 @dataclass(frozen=True)
@@ -143,7 +146,7 @@ class HeadSettings:
 class AppearanceDocument:
     name: str = "default"
     skin_tone: str = "skin_medium"
-    clothing: str = "golf_polo_shorts"
+    clothing: str = DEFAULT_CLOTHING
     club_finish: str = "satin_steel"
     materials: dict[str, Material] = field(default_factory=dict)
     segments: tuple[SegmentRule, ...] = ()
@@ -285,7 +288,7 @@ def document_from_dict(data: Mapping[str, Any]) -> AppearanceDocument:
     doc = AppearanceDocument(
         name=data.get("name", "default"),
         skin_tone=data.get("skin_tone", "skin_medium"),
-        clothing=data.get("clothing", "golf_polo_shorts"),
+        clothing=data.get("clothing", DEFAULT_CLOTHING),
         club_finish=data.get("club_finish", "satin_steel"),
         materials=materials,
         segments=tuple(

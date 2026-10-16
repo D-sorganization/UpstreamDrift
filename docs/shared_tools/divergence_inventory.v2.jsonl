@@ -1073,6 +1073,7 @@
 {"path": "model_appearance/__init__.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/appearance_v1.schema.json", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/ball.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/body_meshes.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_assembly.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_face.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_head_mesh.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}

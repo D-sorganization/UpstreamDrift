@@ -398,6 +398,21 @@ forward-dynamics matching. Design reference:
 - `library` — named PBR materials, skin tones, clothing presets, club finishes,
   `classify_body` (body name to anatomical part).
 - `geometry` — `lofted_segment` / `ellipsoid_mesh` smooth meshes.
+- `body_meshes` — **Body meshes** (R8, #12685): the one shared appearance and
+  anthropometry spec. `resolve_appearance(spec, doc, club=None, head_mesh=None)`
+  returns a `ResolvedAppearance` (`meshes`: one `BodyMesh` per mesh with
+  `body`, `label`, `mesh_in_body_frame` in the SPEC body frame and
+  `material_name`; `materials`;
+  `head_mesh` slot for R7 #12687); `body_meshes(...)` is the list alone and
+  `section_size(spec, body)` the trunk sizing (spec `visual_hints` ML/AP
+  semi-axes; `library_default` only without hints). Emitters translate it and
+  never read `PART_RULES`/`PART_RADIUS_M`/coverage tables; an engine whose body
+  frame differs (MuJoCo follower frame) transforms explicitly. OBJ export for
+  MeshCat/OpenSim: `native_viewer_export.backends._body.body_mesh_files`.
+  Default outfit `golf_polo_trousers` (`library.TROUSERS_MATERIAL` on pelvis
+  and legs, hip to ankle via `garment_coverage`); grey plain palette:
+  `library.PLAIN_PALETTE` / `plain_rgba`. Reference:
+  `docs/development/full_body_models/appearance_reference/shared_appearance_spec.tex`.
 - `grip_pose` — the one two-hand grip definition (`DEFAULT_GRIP_POSE`, lead above trail, positions mirroring the spec `GripInterface`, spacing, V angles, overlap/interlock/ten-finger, `HAND_GRIP_ANCHOR_IN_HAND_M`). Engines import it; never keep per-engine hand offsets. Residual series: `grip_contact.closure_series` (`GripClosureSeries`, unavailable is `None`, never zero); report: `python3 -m scripts.grip_closure_report`.
 - `grip_hand_mesh` / `grip_hands` — curled-finger hand meshes wrapped on the grip
   (`build_grip_hand_mesh`, hand-grip frame) and their placement on a `ClubAssembly`
