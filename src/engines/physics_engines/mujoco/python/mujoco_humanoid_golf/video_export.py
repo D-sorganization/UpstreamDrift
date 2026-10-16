@@ -20,6 +20,7 @@ import numpy as np
 
 from src.shared.python.core.constants import DEFAULT_FPS, HD_HEIGHT, HD_WIDTH
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.video_codec import Mp4Writer
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -115,7 +116,7 @@ class VideoExporter:
         # Auto-detect codec if not specified
         if codec is None:
             if self.format == VideoFormat.MP4:
-                codec = "mp4v"  # or 'avc1' for H.264
+                codec = None  # Mp4Writer: H.264 first, mp4v fallback (#12947)
             elif self.format == VideoFormat.AVI:
                 codec = "XVID"
 
@@ -132,15 +133,16 @@ class VideoExporter:
                     msg = "opencv-python required for video export"
                     raise ImportError(msg)
 
-                if codec is None:
-                    raise ValueError(f"no default codec for {self.format.value}")
-                fourcc = cv2.VideoWriter_fourcc(*codec)  # type: ignore[attr-defined]
-                self.writer = cv2.VideoWriter(
-                    str(output_path_obj),
-                    fourcc,
-                    self.fps,
-                    (self.width, self.height),
-                )
+                size = (self.width, self.height)
+                if codec is None and self.format == VideoFormat.MP4:
+                    self.writer = Mp4Writer(output_path_obj, self.fps, size)
+                else:
+                    if codec is None:
+                        raise ValueError(f"no default codec for {self.format.value}")
+                    fourcc = cv2.VideoWriter_fourcc(*codec)  # type: ignore[attr-defined]
+                    self.writer = cv2.VideoWriter(
+                        str(output_path_obj), fourcc, self.fps, size
+                    )
 
                 if self.writer is not None and not self.writer.isOpened():
                     return False
@@ -156,17 +158,20 @@ class VideoExporter:
         self,
         camera_id: int | None = None,
         overlay_callback: Callable[[np.ndarray], np.ndarray] | None = None,
+        camera: mj.MjvCamera | None = None,
     ) -> None:
         """Add a frame to the video.
 
         Args:
             camera_id: Camera ID to render (None = default)
             overlay_callback: Optional function to overlay metrics on frame
+            camera: Free camera to render from (wins over ``camera_id``)
         """
         # Update renderer with current data
-        self.renderer.update_scene(
-            self.data, camera=-1 if camera_id is None else camera_id
+        view: Any = (
+            camera if camera is not None else (-1 if camera_id is None else camera_id)
         )
+        self.renderer.update_scene(self.data, camera=view)
 
         # Render frame
         frame = self.renderer.render()
@@ -407,6 +412,7 @@ class VideoExportOptions:
     height: int = HD_HEIGHT
     fps: int = DEFAULT_FPS
     camera_id: int | None = None
+    camera: mj.MjvCamera | None = None
     show_metrics: bool = True
     progress_callback: Callable[[int, int], None] | None = None
 
@@ -417,6 +423,10 @@ class VideoExportOptions:
                 raise ValueError(f"{name} must be a positive integer, got {value!r}")
         if self.camera_id is not None and self.camera_id < -1:
             raise ValueError(f"camera_id must be None or >= -1, got {self.camera_id}")
+        if self.camera is not None and not isinstance(self.camera, mj.MjvCamera):
+            raise TypeError(
+                f"camera must be an MjvCamera or None, got {type(self.camera).__name__}"
+            )
         if self.progress_callback is not None and not callable(self.progress_callback):
             raise TypeError("progress_callback must be callable or None")
 
@@ -484,7 +494,7 @@ def export_simulation_video(
                         font_scale=0.8,
                     )
 
-            exporter.add_frame(opts.camera_id, overlay_fn)
+            exporter.add_frame(opts.camera_id, overlay_fn, opts.camera)
 
             if opts.progress_callback:
                 opts.progress_callback(i + 1, total_frames)
@@ -549,8 +559,12 @@ def export_recorded_swing_video(
     *,
     size: tuple[int, int] = (HD_WIDTH, HD_HEIGHT),
     progress_callback: Callable[[int, int], None] | None = None,
+    camera: mj.MjvCamera | None = None,
 ) -> Path:
     """Render a ``SwingRecorder`` recording to a video file (UI export action).
+
+    ``camera`` is the viewport's active camera (None = MuJoCo's default free
+    camera); passing it makes the video match what the user saw (#12946).
 
     The frame rate follows the recorded time step (1-60 fps), so playback is
     real time. Postcondition: the returned file exists and is non-empty.
@@ -579,6 +593,7 @@ def export_recorded_swing_video(
             width=width,
             height=height,
             fps=fps,
+            camera=camera,
             show_metrics=False,
             progress_callback=progress_callback,
         ),

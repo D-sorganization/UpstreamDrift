@@ -123,7 +123,11 @@ def host(
     scene: tuple[mujoco.MjModel, mujoco.MjData, SwingRecorder],
 ) -> _Host:
     model, data, recorder = scene
-    sim = SimpleNamespace(model=model, data=data, get_recorder=lambda: recorder)
+    camera = mujoco.MjvCamera()
+    mujoco.mjv_defaultCamera(camera)
+    sim = SimpleNamespace(
+        model=model, data=data, get_recorder=lambda: recorder, camera=camera
+    )
     return _Host(sim)
 
 
@@ -162,3 +166,120 @@ def test_recording_label_follows_the_record_button(host: _Host) -> None:
 
     host.on_record_toggled(False)
     assert "stopped" in host.recording_label.text().lower()
+
+
+def _first_frame(path: Path) -> np.ndarray:
+    import cv2
+
+    capture = cv2.VideoCapture(str(path))
+    try:
+        ok, frame = capture.read()
+        assert ok
+        return frame.astype(float)
+    finally:
+        capture.release()
+
+
+def _camera(azimuth: float, elevation: float) -> mujoco.MjvCamera:
+    camera = mujoco.MjvCamera()
+    mujoco.mjv_defaultCamera(camera)
+    camera.azimuth, camera.elevation, camera.distance = azimuth, elevation, 3.0
+    camera.lookat[:] = [0, 0, 1]
+    return camera
+
+
+@pytest.mark.unit
+def test_export_renders_from_the_given_camera(
+    scene: tuple[mujoco.MjModel, mujoco.MjData, SwingRecorder], tmp_path: Path
+) -> None:
+    model, data, recorder = scene
+    side = export_recorded_swing_video(
+        model,
+        data,
+        recorder,
+        tmp_path / "side.mp4",
+        size=(96, 64),
+        camera=_camera(90.0, -5.0),
+    )
+    top = export_recorded_swing_video(
+        model,
+        data,
+        recorder,
+        tmp_path / "top.mp4",
+        size=(96, 64),
+        camera=_camera(90.0, -90.0),
+    )
+
+    assert np.abs(_first_frame(side) - _first_frame(top)).mean() > 0.1
+
+
+@pytest.mark.unit
+def test_export_without_a_camera_keeps_the_default_view(
+    scene: tuple[mujoco.MjModel, mujoco.MjData, SwingRecorder], tmp_path: Path
+) -> None:
+    model, data, recorder = scene
+    first = export_recorded_swing_video(model, data, recorder, tmp_path / "a.mp4")
+    second = export_recorded_swing_video(model, data, recorder, tmp_path / "b.mp4")
+
+    assert np.abs(_first_frame(first) - _first_frame(second)).mean() < 0.05
+
+
+@pytest.mark.unit
+def test_export_rejects_a_non_camera_object(
+    scene: tuple[mujoco.MjModel, mujoco.MjData, SwingRecorder], tmp_path: Path
+) -> None:
+    model, data, recorder = scene
+
+    with pytest.raises(TypeError, match="camera"):
+        export_recorded_swing_video(
+            model,
+            data,
+            recorder,
+            tmp_path / "x.mp4",
+            camera="side",  # type: ignore[arg-type]
+        )
+
+
+@pytest.mark.unit
+def test_export_video_action_passes_the_viewport_camera(
+    host: _Host, tmp_path: Path
+) -> None:
+    with (
+        patch.object(
+            QtWidgets.QFileDialog,
+            "getSaveFileName",
+            return_value=(str(tmp_path / "v.mp4"), ""),
+        ),
+        patch.object(QtWidgets.QMessageBox, "information"),
+        patch(
+            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf."
+            "video_export.export_recorded_swing_video",
+            return_value=tmp_path / "v.mp4",
+        ) as export,
+    ):
+        host.on_export_video()
+
+    assert export.call_args.kwargs["camera"] is host.sim_widget.camera
+
+
+@pytest.mark.unit
+def test_export_is_h264_when_ffmpeg_is_available(
+    scene: tuple[mujoco.MjModel, mujoco.MjData, SwingRecorder], tmp_path: Path
+) -> None:
+    import subprocess
+
+    from src.shared.python.video_codec import find_ffmpeg
+
+    ffmpeg = find_ffmpeg()
+    if ffmpeg is None:
+        pytest.skip("no ffmpeg available")
+    model, data, recorder = scene
+    out = export_recorded_swing_video(model, data, recorder, tmp_path / "h.mp4")
+
+    banner = subprocess.run(  # noqa: S603
+        [ffmpeg, "-hide_banner", "-i", str(out)],
+        capture_output=True,
+        text=True,
+        check=False,
+    ).stderr
+    assert "Video: h264" in banner

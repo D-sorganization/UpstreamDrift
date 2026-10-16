@@ -30,6 +30,7 @@ from src.shared.python.motion_matching.output_policy import (
     render_face_observability_markdown,
     render_output_policy_markdown,
 )
+from src.shared.python.video_codec import Mp4Writer
 from src.shared.python.video_timing.frame_schedule import (
     SPEED_VARIANTS,
     FrameSchedule,
@@ -151,8 +152,7 @@ def _write_mp4(frames: list[np.ndarray], path: Path, fps: int) -> Path:
         raise ValueError("Cannot write empty frames list to MP4")
 
     h, w = frames[0].shape[:2]
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")  # type: ignore[attr-defined]
-    writer = cv2.VideoWriter(str(path), fourcc, float(fps), (w, h))
+    writer = Mp4Writer(path, float(fps), (w, h))  # H.264 first (#12947)
     if not writer.isOpened():
         raise RuntimeError(f"Failed to open OpenCV VideoWriter for {path}")
 
