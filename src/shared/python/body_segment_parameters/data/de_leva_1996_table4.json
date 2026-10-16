@@ -1,0 +1,548 @@
+{
+  "source": {
+    "citation": "de Leva, P. (1996). Adjustments to Zatsiorsky-Seluyanov's segment inertia parameters. Journal of Biomechanics, 29(9), 1223-1230.",
+    "doi": "10.1016/0021-9290(95)00178-6",
+    "table": "Table 4 (page 1228), both parts: easy-to-use endpoints and alternative endpoints",
+    "conventions": "Values exactly as printed: lengths in mm for the reference subject; mass in percent of body mass; CM position in percent of segment length from the origin (proximal or cranial) endpoint; radii of gyration in percent of segment length about the sagittal, transverse and longitudinal axes.",
+    "adjusted_false_means": "Row marked '*' in the paper: not adjusted values (taken from Zatsiorsky et al.).",
+    "endpoint_abbreviations": {
+      "VERT": "vertex",
+      "MIDG": "mid-gonion",
+      "CERV": "cervicale",
+      "SUPR": "suprasternale",
+      "MIDS": "mid-shoulder (midpoint of the shoulder joint centres)",
+      "XYPH": "xiphion",
+      "OMPH": "omphalion",
+      "MIDH": "mid-hip (midpoint of the hip joint centres)",
+      "SJC": "shoulder joint centre",
+      "EJC": "elbow joint centre",
+      "WJC": "wrist joint centre",
+      "STYL": "stylion",
+      "MET3": "third metacarpale",
+      "DAC3": "tip of the third digit",
+      "HJC": "hip joint centre",
+      "KJC": "knee joint centre",
+      "AJC": "ankle joint centre",
+      "LMAL": "lateral malleolus",
+      "SPHY": "sphyrion",
+      "HEEL": "heel",
+      "TTIP": "tip of the longest toe"
+    }
+  },
+  "reference_subjects": {
+    "female": {
+      "stature_m": 1.735,
+      "mass_kg": 61.9
+    },
+    "male": {
+      "stature_m": 1.741,
+      "mass_kg": 73.0
+    }
+  },
+  "rows": [
+    {
+      "id": "head_vert_midg",
+      "segment": "head",
+      "origin": "VERT",
+      "other": "MIDG",
+      "table_part": "primary",
+      "adjusted": true,
+      "female": {
+        "length_mm": 200.2,
+        "mass_pct": 6.68,
+        "com_pct": 58.94,
+        "r_sagittal_pct": 33.0,
+        "r_transverse_pct": 35.9,
+        "r_longitudinal_pct": 31.8
+      },
+      "male": {
+        "length_mm": 203.3,
+        "mass_pct": 6.94,
+        "com_pct": 59.76,
+        "r_sagittal_pct": 36.2,
+        "r_transverse_pct": 37.6,
+        "r_longitudinal_pct": 31.2
+      }
+    },
+    {
+      "id": "trunk_supr_midh",
+      "segment": "trunk",
+      "origin": "SUPR",
+      "other": "MIDH",
+      "table_part": "primary",
+      "adjusted": true,
+      "female": {
+        "length_mm": 529.3,
+        "mass_pct": 42.57,
+        "com_pct": 41.51,
+        "r_sagittal_pct": 35.7,
+        "r_transverse_pct": 33.9,
+        "r_longitudinal_pct": 17.1
+      },
+      "male": {
+        "length_mm": 531.9,
+        "mass_pct": 43.46,
+        "com_pct": 44.86,
+        "r_sagittal_pct": 37.2,
+        "r_transverse_pct": 34.7,
+        "r_longitudinal_pct": 19.1
+      }
+    },
+    {
+      "id": "upt_supr_xyph",
+      "segment": "upper_trunk",
+      "origin": "SUPR",
+      "other": "XYPH",
+      "table_part": "primary",
+      "adjusted": true,
+      "female": {
+        "length_mm": 142.5,
+        "mass_pct": 15.45,
+        "com_pct": 20.77,
+        "r_sagittal_pct": 74.6,
+        "r_transverse_pct": 50.2,
+        "r_longitudinal_pct": 71.8
+      },
+      "male": {
+        "length_mm": 170.7,
+        "mass_pct": 15.96,
+        "com_pct": 29.99,
+        "r_sagittal_pct": 71.6,
+        "r_transverse_pct": 45.4,
+        "r_longitudinal_pct": 65.9
+      }
+    },
+    {
+      "id": "mpt_xyph_omph",
+      "segment": "middle_trunk",
+      "origin": "XYPH",
+      "other": "OMPH",
+      "table_part": "primary",
+      "adjusted": false,
+      "female": {
+        "length_mm": 205.3,
+        "mass_pct": 14.65,
+        "com_pct": 45.12,
+        "r_sagittal_pct": 43.3,
+        "r_transverse_pct": 35.4,
+        "r_longitudinal_pct": 41.5
+      },
+      "male": {
+        "length_mm": 215.5,
+        "mass_pct": 16.33,
+        "com_pct": 45.02,
+        "r_sagittal_pct": 48.2,
+        "r_transverse_pct": 38.3,
+        "r_longitudinal_pct": 46.8
+      }
+    },
+    {
+      "id": "lpt_omph_midh",
+      "segment": "lower_trunk",
+      "origin": "OMPH",
+      "other": "MIDH",
+      "table_part": "primary",
+      "adjusted": true,
+      "female": {
+        "length_mm": 181.5,
+        "mass_pct": 12.47,
+        "com_pct": 49.2,
+        "r_sagittal_pct": 43.3,
+        "r_transverse_pct": 40.2,
+        "r_longitudinal_pct": 44.4
+      },
+      "male": {
+        "length_mm": 145.7,
+        "mass_pct": 11.17,
+        "com_pct": 61.15,
+        "r_sagittal_pct": 61.5,
+        "r_transverse_pct": 55.1,
+        "r_longitudinal_pct": 58.7
+      }
+    },
+    {
+      "id": "upper_arm_sjc_ejc",
+      "segment": "upper_arm",
+      "origin": "SJC",
+      "other": "EJC",
+      "table_part": "primary",
+      "adjusted": true,
+      "female": {
+        "length_mm": 275.1,
+        "mass_pct": 2.55,
+        "com_pct": 57.54,
+        "r_sagittal_pct": 27.8,
+        "r_transverse_pct": 26.0,
+        "r_longitudinal_pct": 14.8
+      },
+      "male": {
+        "length_mm": 281.7,
+        "mass_pct": 2.71,
+        "com_pct": 57.72,
+        "r_sagittal_pct": 28.5,
+        "r_transverse_pct": 26.9,
+        "r_longitudinal_pct": 15.8
+      }
+    },
+    {
+      "id": "forearm_ejc_wjc",
+      "segment": "forearm",
+      "origin": "EJC",
+      "other": "WJC",
+      "table_part": "primary",
+      "adjusted": true,
+      "female": {
+        "length_mm": 264.3,
+        "mass_pct": 1.38,
+        "com_pct": 45.59,
+        "r_sagittal_pct": 26.1,
+        "r_transverse_pct": 25.7,
+        "r_longitudinal_pct": 9.4
+      },
+      "male": {
+        "length_mm": 268.9,
+        "mass_pct": 1.62,
+        "com_pct": 45.74,
+        "r_sagittal_pct": 27.6,
+        "r_transverse_pct": 26.5,
+        "r_longitudinal_pct": 12.1
+      }
+    },
+    {
+      "id": "hand_wjc_met3",
+      "segment": "hand",
+      "origin": "WJC",
+      "other": "MET3",
+      "table_part": "primary",
+      "adjusted": true,
+      "female": {
+        "length_mm": 78.0,
+        "mass_pct": 0.56,
+        "com_pct": 74.74,
+        "r_sagittal_pct": 53.1,
+        "r_transverse_pct": 45.4,
+        "r_longitudinal_pct": 33.5
+      },
+      "male": {
+        "length_mm": 86.2,
+        "mass_pct": 0.61,
+        "com_pct": 79.0,
+        "r_sagittal_pct": 62.8,
+        "r_transverse_pct": 51.3,
+        "r_longitudinal_pct": 40.1
+      }
+    },
+    {
+      "id": "thigh_hjc_kjc",
+      "segment": "thigh",
+      "origin": "HJC",
+      "other": "KJC",
+      "table_part": "primary",
+      "adjusted": true,
+      "female": {
+        "length_mm": 368.5,
+        "mass_pct": 14.78,
+        "com_pct": 36.12,
+        "r_sagittal_pct": 36.9,
+        "r_transverse_pct": 36.4,
+        "r_longitudinal_pct": 16.2
+      },
+      "male": {
+        "length_mm": 422.2,
+        "mass_pct": 14.16,
+        "com_pct": 40.95,
+        "r_sagittal_pct": 32.9,
+        "r_transverse_pct": 32.9,
+        "r_longitudinal_pct": 14.9
+      }
+    },
+    {
+      "id": "shank_kjc_lmal",
+      "segment": "shank",
+      "origin": "KJC",
+      "other": "LMAL",
+      "table_part": "primary",
+      "adjusted": true,
+      "female": {
+        "length_mm": 432.3,
+        "mass_pct": 4.81,
+        "com_pct": 44.16,
+        "r_sagittal_pct": 27.1,
+        "r_transverse_pct": 26.7,
+        "r_longitudinal_pct": 9.3
+      },
+      "male": {
+        "length_mm": 434.0,
+        "mass_pct": 4.33,
+        "com_pct": 44.59,
+        "r_sagittal_pct": 25.5,
+        "r_transverse_pct": 24.9,
+        "r_longitudinal_pct": 10.3
+      }
+    },
+    {
+      "id": "foot_heel_ttip",
+      "segment": "foot",
+      "origin": "HEEL",
+      "other": "TTIP",
+      "table_part": "primary",
+      "adjusted": false,
+      "female": {
+        "length_mm": 228.3,
+        "mass_pct": 1.29,
+        "com_pct": 40.14,
+        "r_sagittal_pct": 29.9,
+        "r_transverse_pct": 27.9,
+        "r_longitudinal_pct": 13.9
+      },
+      "male": {
+        "length_mm": 258.1,
+        "mass_pct": 1.37,
+        "com_pct": 44.15,
+        "r_sagittal_pct": 25.7,
+        "r_transverse_pct": 24.5,
+        "r_longitudinal_pct": 12.4
+      }
+    },
+    {
+      "id": "head_vert_cerv",
+      "segment": "head",
+      "origin": "VERT",
+      "other": "CERV",
+      "table_part": "alternative",
+      "adjusted": false,
+      "female": {
+        "length_mm": 243.7,
+        "mass_pct": 6.68,
+        "com_pct": 48.41,
+        "r_sagittal_pct": 27.1,
+        "r_transverse_pct": 29.5,
+        "r_longitudinal_pct": 26.1
+      },
+      "male": {
+        "length_mm": 242.9,
+        "mass_pct": 6.94,
+        "com_pct": 50.02,
+        "r_sagittal_pct": 30.3,
+        "r_transverse_pct": 31.5,
+        "r_longitudinal_pct": 26.1
+      }
+    },
+    {
+      "id": "trunk_cerv_midh",
+      "segment": "trunk",
+      "origin": "CERV",
+      "other": "MIDH",
+      "table_part": "alternative",
+      "adjusted": true,
+      "female": {
+        "length_mm": 614.8,
+        "mass_pct": 42.57,
+        "com_pct": 49.64,
+        "r_sagittal_pct": 30.7,
+        "r_transverse_pct": 29.2,
+        "r_longitudinal_pct": 14.7
+      },
+      "male": {
+        "length_mm": 603.3,
+        "mass_pct": 43.46,
+        "com_pct": 51.38,
+        "r_sagittal_pct": 32.8,
+        "r_transverse_pct": 30.6,
+        "r_longitudinal_pct": 16.9
+      }
+    },
+    {
+      "id": "trunk_mids_midh",
+      "segment": "trunk",
+      "origin": "MIDS",
+      "other": "MIDH",
+      "table_part": "alternative",
+      "adjusted": true,
+      "female": {
+        "length_mm": 497.9,
+        "mass_pct": 42.57,
+        "com_pct": 37.82,
+        "r_sagittal_pct": 37.9,
+        "r_transverse_pct": 36.1,
+        "r_longitudinal_pct": 18.2
+      },
+      "male": {
+        "length_mm": 515.5,
+        "mass_pct": 43.46,
+        "com_pct": 43.1,
+        "r_sagittal_pct": 38.4,
+        "r_transverse_pct": 35.8,
+        "r_longitudinal_pct": 19.7
+      }
+    },
+    {
+      "id": "upt_cerv_xyph",
+      "segment": "upper_trunk",
+      "origin": "CERV",
+      "other": "XYPH",
+      "table_part": "alternative",
+      "adjusted": false,
+      "female": {
+        "length_mm": 228.0,
+        "mass_pct": 15.45,
+        "com_pct": 50.5,
+        "r_sagittal_pct": 46.6,
+        "r_transverse_pct": 31.4,
+        "r_longitudinal_pct": 44.9
+      },
+      "male": {
+        "length_mm": 242.1,
+        "mass_pct": 15.96,
+        "com_pct": 50.66,
+        "r_sagittal_pct": 50.5,
+        "r_transverse_pct": 32.0,
+        "r_longitudinal_pct": 46.5
+      }
+    },
+    {
+      "id": "forearm_ejc_styl",
+      "segment": "forearm",
+      "origin": "EJC",
+      "other": "STYL",
+      "table_part": "alternative",
+      "adjusted": true,
+      "female": {
+        "length_mm": 262.4,
+        "mass_pct": 1.38,
+        "com_pct": 45.92,
+        "r_sagittal_pct": 26.3,
+        "r_transverse_pct": 25.9,
+        "r_longitudinal_pct": 9.5
+      },
+      "male": {
+        "length_mm": 266.9,
+        "mass_pct": 1.62,
+        "com_pct": 46.08,
+        "r_sagittal_pct": 27.8,
+        "r_transverse_pct": 26.7,
+        "r_longitudinal_pct": 12.2
+      }
+    },
+    {
+      "id": "hand_wjc_dac3",
+      "segment": "hand",
+      "origin": "WJC",
+      "other": "DAC3",
+      "table_part": "alternative",
+      "adjusted": true,
+      "female": {
+        "length_mm": 170.1,
+        "mass_pct": 0.56,
+        "com_pct": 34.27,
+        "r_sagittal_pct": 24.4,
+        "r_transverse_pct": 20.8,
+        "r_longitudinal_pct": 15.4
+      },
+      "male": {
+        "length_mm": 187.9,
+        "mass_pct": 0.61,
+        "com_pct": 36.24,
+        "r_sagittal_pct": 28.8,
+        "r_transverse_pct": 23.5,
+        "r_longitudinal_pct": 18.4
+      }
+    },
+    {
+      "id": "hand_styl_dac3",
+      "segment": "hand",
+      "origin": "STYL",
+      "other": "DAC3",
+      "table_part": "alternative",
+      "adjusted": false,
+      "female": {
+        "length_mm": 172.0,
+        "mass_pct": 0.56,
+        "com_pct": 35.02,
+        "r_sagittal_pct": 24.1,
+        "r_transverse_pct": 20.6,
+        "r_longitudinal_pct": 15.2
+      },
+      "male": {
+        "length_mm": 189.9,
+        "mass_pct": 0.61,
+        "com_pct": 36.91,
+        "r_sagittal_pct": 28.5,
+        "r_transverse_pct": 23.3,
+        "r_longitudinal_pct": 18.2
+      }
+    },
+    {
+      "id": "hand_styl_met3",
+      "segment": "hand",
+      "origin": "STYL",
+      "other": "MET3",
+      "table_part": "alternative",
+      "adjusted": true,
+      "female": {
+        "length_mm": 79.9,
+        "mass_pct": 0.56,
+        "com_pct": 75.34,
+        "r_sagittal_pct": 51.9,
+        "r_transverse_pct": 44.3,
+        "r_longitudinal_pct": 32.7
+      },
+      "male": {
+        "length_mm": 88.2,
+        "mass_pct": 0.61,
+        "com_pct": 79.48,
+        "r_sagittal_pct": 61.4,
+        "r_transverse_pct": 50.2,
+        "r_longitudinal_pct": 39.2
+      }
+    },
+    {
+      "id": "shank_kjc_ajc",
+      "segment": "shank",
+      "origin": "KJC",
+      "other": "AJC",
+      "table_part": "alternative",
+      "adjusted": true,
+      "female": {
+        "length_mm": 438.6,
+        "mass_pct": 4.81,
+        "com_pct": 43.52,
+        "r_sagittal_pct": 26.7,
+        "r_transverse_pct": 26.3,
+        "r_longitudinal_pct": 9.2
+      },
+      "male": {
+        "length_mm": 440.3,
+        "mass_pct": 4.33,
+        "com_pct": 43.95,
+        "r_sagittal_pct": 25.1,
+        "r_transverse_pct": 24.6,
+        "r_longitudinal_pct": 10.2
+      }
+    },
+    {
+      "id": "shank_kjc_sphy",
+      "segment": "shank",
+      "origin": "KJC",
+      "other": "SPHY",
+      "table_part": "alternative",
+      "adjusted": true,
+      "female": {
+        "length_mm": 426.0,
+        "mass_pct": 4.81,
+        "com_pct": 44.81,
+        "r_sagittal_pct": 27.5,
+        "r_transverse_pct": 27.1,
+        "r_longitudinal_pct": 9.4
+      },
+      "male": {
+        "length_mm": 427.7,
+        "mass_pct": 4.33,
+        "com_pct": 45.24,
+        "r_sagittal_pct": 25.8,
+        "r_transverse_pct": 25.3,
+        "r_longitudinal_pct": 10.5
+      }
+    }
+  ]
+}
