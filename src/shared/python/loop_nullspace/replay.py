@@ -509,7 +509,6 @@ def replay(
         )
     times, torque = _validated_allocation(allocation, setup, cfg)
     _check_mode_inputs(mode, feedback, setup, (float(times[0]), float(times[-1])))
-    physics = provider
     dynamics = (
         provider
         if cfg.baumgarte is None
@@ -527,7 +526,7 @@ def replay(
     ref_q = ref_v = None
     if setup.reference is not None:
         ref_q, ref_v = setup.reference.states_at(nodes)
-    drift = _closure_drift(physics, q, v)
+    drift = _closure_drift(provider, q, v)
     budget = None
     if fb_series is not None:
         if feedback is None:
@@ -554,7 +553,7 @@ def replay(
         closure_drift=drift,
         stabilisation=cfg.baumgarte,
         stabilisation_acceleration_peak=_stabilisation_peak(
-            physics, cfg.baumgarte, q, v
+            provider, cfg.baumgarte, q, v
         ),
         time_to_divergence_s=(
             None
