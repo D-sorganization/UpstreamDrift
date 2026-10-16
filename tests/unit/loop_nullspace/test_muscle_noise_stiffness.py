@@ -311,3 +311,14 @@ def test_apply_stiffness_validates_inputs() -> None:
         base.d_acc_d_xi - base.d_acc_d_tau @ full @ base.basis,
         atol=1e-12,
     )
+
+
+def test_zero_kappa_declares_no_signal_law_and_is_activation_independent() -> None:
+    frame = pair_frame()
+    spec = muscle_noise_spec(frame, kappa=0.0, sigma0=0.5)
+    assert not spec.has_signal_law
+    low = joint_torque_covariance(frame, spec, [0.1, 0.1], dt=1e-3)
+    high = joint_torque_covariance(frame, spec, [0.9, 0.9], dt=1e-3)
+    np.testing.assert_allclose(low, high, rtol=0.0, atol=0.0)
+    expected = 2 * PAIR_ARM**2 * 0.5**2 / 1e-3
+    np.testing.assert_allclose(low, [[expected]], rtol=1e-12)
