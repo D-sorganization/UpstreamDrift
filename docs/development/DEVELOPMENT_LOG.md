@@ -2353,6 +2353,45 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12945 · Explorer: OpenSim Plot Resolves Markers From the Model (No KeyError 'Hand'), MuJoCo Export Video Uses the Viewport Camera, App Exports Write H.264 (#12946, #12947)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12945
+- **Branch:** merged via #12950
+- **PR:** #12950
+- **Paths:** see #12950
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`2be01520`; collated from changes/12945-explorer-opensim-plot-resolves-markers-f.md)
+- **Summary:** Explorer: OpenSim plot resolves markers from the model (no KeyError 'Hand'), MuJoCo Export Video uses the viewport camera, app exports write H.264 (#12946, #12947)
+- **Next step:** Shipped in PR #12950.
+
+### DL-#12718 · NSX-89: Simscape Closed-Loop Derivative Capability NONE With UNAVAILABLE Reason, R2025b-Only Linearization Payload Gate, DV-12718 Deferred Record
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12718
+- **Branch:** merged via #12880
+- **PR:** #12880
+- **Paths:** see #12880
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`9455bfa1`; collated from changes/12718-nsx-89-simscape-closed-loop-derivative-c.md)
+- **Summary:** NSX-89: Simscape closed-loop derivative capability NONE with UNAVAILABLE reason, R2025b-only linearization payload gate, DV-12718 deferred record
+- **Next step:** Shipped in PR #12880.
+
+### DL-#12714 · NSX-85: Pinocchio Analytic Closed-Loop Derivatives, FULL Reference for CLOSED_LOOP_DERIVATIVES
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12714
+- **Branch:** merged via #12853
+- **PR:** #12853
+- **Paths:** see #12853
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`cd1a8e6c`; collated from changes/12714-nsx-85-pinocchio-analytic-closed-loop-de.md)
+- **Summary:** NSX-85: Pinocchio analytic closed-loop derivatives, FULL reference for CLOSED_LOOP_DERIVATIVES
+- **Next step:** Shipped in PR #12853.
+
 ### DL-#12719 · NSX-90 Covariance Propagation, Adjoint Sensitivity Kernels and Nonlinearity Gate
 
 - **State:** shipped
