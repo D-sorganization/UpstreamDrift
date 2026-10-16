@@ -30,6 +30,10 @@ from src.engines.physics_engines.opensim.python.full_body_grip_contact import (
     ContactGripConfig,
     build_contact_grip,
 )
+from src.shared.python.club_body_names import (
+    CANONICAL_CLUB_HEAD_NAME,
+    SPEC_CLUB_HEAD_BODY_NAME,
+)
 from src.shared.python.grip_contact import GripInterface
 from src.shared.python.model_appearance.club_assembly import assembly_from_spec
 
@@ -37,9 +41,7 @@ logger = logging.getLogger(__name__)
 
 SUPPORTED_SCHEMA_VERSIONS = {"full-body-v1"}
 DEFAULT_CLOSURE_TYPE = "weld"
-CLUB_BODY = (
-    "Clubhead"  # OpenSim name of the spec's club body (head, shaft, grip solids)
-)
+CLUB_BODY = CANONICAL_CLUB_HEAD_NAME  # OpenSim name of the spec's club body
 DEFAULT_CLUB_GEOMETRY_REF = ""  # bare names; loaders register models/geometry/club
 GRIP_MODELS = ("weld", "bushing", "contact")
 DEFAULT_GRIP_MODEL = "weld"
@@ -193,7 +195,7 @@ OPENSIM_BODY_MAP: dict[str, str] = {
     "solid_reference:GolfSwing3D_Kinetic/RUpperArm": "RS",
     "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1": "RE",
     "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm": "RF",
-    "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector": "Clubhead",
+    SPEC_CLUB_HEAD_BODY_NAME: CANONICAL_CLUB_HEAD_NAME,
     "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff": "Grip",
     "solid_reference:GolfSwing3D_Kinetic/Grip/LHandBody": "LGrip",
 }

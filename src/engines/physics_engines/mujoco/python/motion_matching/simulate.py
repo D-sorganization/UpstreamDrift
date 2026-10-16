@@ -27,6 +27,7 @@ from typing import Any, Literal
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.club_body_names import CLUB_HEAD_BODY_ALIASES
 from src.shared.python.core.contracts.decorators import postcondition, precondition
 from src.shared.python.motion_matching.output_time_grid import build_output_grid
 from src.shared.python.motion_matching.validate_theta import validate_theta
@@ -435,7 +436,7 @@ def simulate_with_coefficients(  # noqa: C901
         try:
             head_bid = _resolve_body_id(model, head_body_name)
         except RuntimeError:
-            for alt in ("club_head", "clubhead", "club_shaft"):
+            for alt in (*CLUB_HEAD_BODY_ALIASES, "club_shaft"):
                 bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, alt)
                 if bid >= 0:
                     head_bid = bid

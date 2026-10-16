@@ -429,6 +429,7 @@
 {"path": "chat_contracts/credentials.py", "classification": "tools-only", "package": "chat_contracts", "spelling_only": false}
 {"path": "chat_contracts/models.py", "classification": "tools-only", "package": "chat_contracts", "spelling_only": false}
 {"path": "cli_utils.py", "classification": "ud-only", "package": "cli_utils.py", "spelling_only": false}
+{"path": "club_body_names.py", "classification": "ud-only", "package": "club_body_names.py", "spelling_only": false}
 {"path": "club_data/__init__.py", "classification": "ud-only", "package": "club_data", "spelling_only": false}
 {"path": "club_data/catalog.py", "classification": "ud-only", "package": "club_data", "spelling_only": false}
 {"path": "club_data/catalog_io.py", "classification": "ud-only", "package": "club_data", "spelling_only": false}

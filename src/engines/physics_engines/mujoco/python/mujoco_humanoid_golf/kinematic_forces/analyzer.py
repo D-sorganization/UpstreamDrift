@@ -30,12 +30,21 @@ class KinematicForceAnalyzer:
     inverse dynamics.
     """
 
-    def __init__(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
+    def __init__(
+        self,
+        model: mujoco.MjModel,
+        data: mujoco.MjData,
+        *,
+        require_club_head: bool = False,
+    ) -> None:
         """Initialize kinematic force analyzer.
 
         Args:
             model: MuJoCo model
             data: MuJoCo data (shared reference, not modified by compute methods)
+            require_club_head: When True, raise ``ValueError`` if no club-head
+                body resolves (strict mode) instead of silently dropping
+                club-head metrics.
         """
         if model is None:
             raise ValueError("model must be provided")
@@ -44,7 +53,9 @@ class KinematicForceAnalyzer:
 
         # Find important bodies
         self.club_head_id = find_club_head_body_id(
-            self.model, owner=type(self).__name__
+            self.model,
+            owner=type(self).__name__,
+            strict=require_club_head,
         )
         self.club_grip_id = self._find_body_id("club") or self._find_body_id("grip")
 
