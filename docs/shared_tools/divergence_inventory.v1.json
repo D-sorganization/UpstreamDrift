@@ -11,8 +11,8 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 377,
-    "diverged": 271,
+    "identical": 378,
+    "diverged": 270,
     "ud-only": 1754,
     "tools-only": 839,
     "spelling-only": 121
@@ -173,8 +173,8 @@
       "spelling-only": 0
     },
     "chat": {
-      "identical": 40,
-      "diverged": 17,
+      "identical": 41,
+      "diverged": 16,
       "ud-only": 1,
       "tools-only": 0,
       "spelling-only": 10
@@ -5346,9 +5346,9 @@
       "classification": "diverged",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 4634,
+      "ud_bytes": 4923,
       "tools_bytes": 4716,
-      "byte_delta": -82,
+      "byte_delta": 207,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -5358,9 +5358,9 @@
       "classification": "diverged",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 45741,
+      "ud_bytes": 48474,
       "tools_bytes": 62406,
-      "byte_delta": -16665,
+      "byte_delta": -13932,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -5586,9 +5586,9 @@
       "classification": "diverged",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 9066,
+      "ud_bytes": 9249,
       "tools_bytes": 9260,
-      "byte_delta": -194,
+      "byte_delta": -11,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -5811,13 +5811,13 @@
     },
     {
       "path": "chat/quick_bar.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 14879,
+      "ud_bytes": 15010,
       "tools_bytes": 15010,
-      "byte_delta": -131,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -5994,9 +5994,9 @@
       "classification": "diverged",
       "package": "chat",
       "subpackage": "tests",
-      "ud_bytes": 12646,
+      "ud_bytes": 12763,
       "tools_bytes": 12936,
-      "byte_delta": -290,
+      "byte_delta": -173,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -7062,7 +7062,7 @@
       "classification": "ud-only",
       "package": "dashboard",
       "subpackage": "",
-      "ud_bytes": 4018,
+      "ud_bytes": 4108,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -30438,9 +30438,9 @@
       "classification": "diverged",
       "package": "sidekick",
       "subpackage": "ui",
-      "ud_bytes": 17447,
+      "ud_bytes": 17685,
       "tools_bytes": 17751,
-      "byte_delta": -304,
+      "byte_delta": -66,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -41155,19 +41155,6 @@
         "author": "d-sorgcodexagent[bot]",
         "date": "2026-06-16",
         "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "chat/quick_bar.py",
-      "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-10-12",
-        "commit": "9d9e05d6a05c95aea72d80c387ce1d0f23d37eb0"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "9b347bd6caaa497e60bf5f53aead841147999798"
       }
     },
     {

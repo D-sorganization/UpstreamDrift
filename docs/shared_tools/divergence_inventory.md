@@ -36,7 +36,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `camera` | 0 | 0 | 0 | 0 | 4 | 0 |
 | `canonical_core` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `capabilities.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `chat` | 40 | 17 | 10 | 1 | 0 | 57 |
+| `chat` | 41 | 16 | 10 | 1 | 0 | 57 |
 | `chat_contracts` | 0 | 0 | 0 | 0 | 4 | 0 |
 | `cli_utils.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `club_data` | 0 | 0 | 0 | 11 | 0 | 0 |
@@ -145,7 +145,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 62 | 0 | 0 |
-| **Total** | **377** | **271** | **121** | **1754** | **839** | **648** |
+| **Total** | **378** | **270** | **121** | **1754** | **839** | **648** |
 
 ## Diverged Files by Package
 
@@ -254,13 +254,13 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `calc_backend/tests/test_calc_backend_gaps.py` | +256 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-08-20 |
 | `calc_backend/tests/test_symbolic_solver.py` | +12378 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-05-15 |
 
-### Package `chat` (17 Diverged Files)
+### Package `chat` (16 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `chat/__init__.py` | -82 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-09-02 |
-| `chat/_chat_dock_widget_qt.py` | -16665 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-09-02 |
-| `chat/chat_dock_widget.py` | -194 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-09-02 |
+| `chat/__init__.py` | +207 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-09-02 |
+| `chat/_chat_dock_widget_qt.py` | -13932 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-09-02 |
+| `chat/chat_dock_widget.py` | -11 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-09-02 |
 | `chat/condensation/condenser.py` | +4 | yes | d-sorgclaudeagent[bot] 2026-10-12 | d-sorgcodexagent[bot] 2026-06-16 |
 | `chat/condensation/strategy.py` | +4 | yes | d-sorgclaudeagent[bot] 2026-10-12 | d-sorgcodexagent[bot] 2026-06-16 |
 | `chat/credentials.py` | +4 | yes | d-sorgclaudeagent[bot] 2026-10-12 | d-sorgcodexagent[bot] 2026-06-16 |
@@ -270,11 +270,10 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `chat/export/secret_redactor.py` | +4 | yes | d-sorgclaudeagent[bot] 2026-10-12 | d-sorgcodexagent[bot] 2026-06-16 |
 | `chat/export/text_exporter.py` | +4 | yes | d-sorgclaudeagent[bot] 2026-10-12 | d-sorgcodexagent[bot] 2026-06-16 |
 | `chat/models.py` | +4 | yes | d-sorgclaudeagent[bot] 2026-10-12 | d-sorgcodexagent[bot] 2026-06-16 |
-| `chat/quick_bar.py` | -131 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-09-02 |
 | `chat/service_base.py` | +4 | yes | d-sorgclaudeagent[bot] 2026-10-12 | d-sorgcodexagent[bot] 2026-06-16 |
 | `chat/skills_manager.py` | -59 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-08-25 |
 | `chat/tests/test_chat_drift.py` | +0 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-09-02 |
-| `chat/tests/test_workspace_bridge.py` | -290 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-09-02 |
+| `chat/tests/test_workspace_bridge.py` | -173 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-09-02 |
 
 ### Package `config` (2 Diverged Files)
 
@@ -472,7 +471,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `sidekick/ui/catppuccin_theme.py` | +8 | yes | d-sorgclaudeagent[bot] 2026-10-12 | codex-scheduled-tasks[bot] 2026-06-12 |
 | `sidekick/ui/mixins/calculator_state_mixin.py` | -2276 |  | d-sorgclaudeagent[bot] 2026-10-12 | d-sorgclaudeagent[bot] 2026-10-12 |
 | `sidekick/ui/tools_sidebar/calculator_plotting.py` | +8 | yes | d-sorgclaudeagent[bot] 2026-10-12 | d-sorgcodexagent[bot] 2026-06-16 |
-| `sidekick/ui/tools_sidebar/chat_tab.py` | -304 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/tools_sidebar/chat_tab.py` | -66 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-09-04 |
 | `sidekick/ui/tools_sidebar/jupyter_tab/notebook_session.py` | +4 | yes | d-sorgclaudeagent[bot] 2026-10-12 | d-sorgcodexagent[bot] 2026-06-16 |
 | `sidekick/ui/tools_sidebar/jupyter_tab/widget.py` | -10 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-05-22 |
 | `sidekick/ui/tools_sidebar/notes_tab.py` | -1304 |  | d-sorgclaudeagent[bot] 2026-10-12 | d-sorgclaudeagent[bot] 2026-09-05 |

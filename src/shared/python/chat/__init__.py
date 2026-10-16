@@ -7,11 +7,13 @@ and a reusable WebSocket router factory.
 
 Usage::
 
-    from chat import ChatDockWidget
+    from chat import ChatConnectionConfig, ChatDockWidget
 
     dock = ChatDockWidget(
-        app_context="gasification",
-        app_name="integrated_process_simulator",
+        connection=ChatConnectionConfig(
+            app_context="gasification",
+            app_name="integrated_process_simulator",
+        ),
         parent=main_window,
     )
     main_window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
@@ -86,7 +88,13 @@ _PYQT6_AVAILABLE = None
 
 
 def __getattr__(name: str) -> Any:
-    if name in {"ChatDockWidget", "ChatMessageBubble"}:
+    if name in {
+        "ChatDockWidget",
+        "ChatMessageBubble",
+        "ChatConnectionConfig",
+        "ChatPresentationConfig",
+        "ChatIntegrationHooks",
+    }:
         from . import chat_dock_widget
 
         return getattr(chat_dock_widget, name)
@@ -110,8 +118,11 @@ def __getattr__(name: str) -> Any:
 
 
 __all__ = [
+    "ChatConnectionConfig",
     "ChatDockWidget",
+    "ChatIntegrationHooks",
     "ChatMessageBubble",
+    "ChatPresentationConfig",
     "VoiceInputManager",
     "ChatMessageRequest",
     "ChatChunkResponse",

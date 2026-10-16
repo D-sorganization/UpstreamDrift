@@ -100,3 +100,59 @@ def test_terminal_start_preserves_runtime_payload_contract() -> None:
             "app_context": "test-app",
         }
     ]
+
+
+# ---------------------------------------------------------------------------
+# Constructor contract (Tools #4896 / UD #9357): config objects, not 16 kwargs
+# ---------------------------------------------------------------------------
+
+
+def test_chat_dock_constructor_takes_config_objects_only() -> None:
+    import inspect
+
+    from chat import _chat_dock_widget_qt as qt_module
+
+    params = inspect.signature(qt_module.ChatDockWidget.__init__).parameters
+    assert list(params) == [
+        "self",
+        "connection",
+        "presentation",
+        "integrations",
+        "parent",
+    ]
+    assert all(p.default is None for n, p in params.items() if n != "self")
+
+
+def test_chat_config_defaults_preserve_legacy_defaults() -> None:
+    from chat import ChatConnectionConfig, ChatIntegrationHooks
+    from chat import ChatPresentationConfig
+
+    connection = ChatConnectionConfig()
+    assert connection.app_context == "unknown"
+    assert connection.app_name == "shared_chat"
+    assert connection.server_url is None
+    assert connection.session_id is None
+    assert connection.ws_path_template == "/api/ws/chat/{session_id}"
+    assert connection.project_root is None
+
+    presentation = ChatPresentationConfig()
+    assert presentation.placeholder_text == "Ask a question..."
+    assert presentation.accent_color == "#FF8800"
+    assert presentation.theme_provider is None
+    assert presentation.auto_index_on_open is False
+
+    hooks = ChatIntegrationHooks()
+    assert hooks.terminal_registry is None
+    assert hooks.workspace_provider is None
+    assert hooks.plot_request_sink is None
+    assert hooks.session_manager is None
+    assert hooks.memory_manager_factory is None
+
+
+def test_chat_dock_rejects_missing_app_context() -> None:
+    from chat import _chat_dock_widget_qt as qt_module
+
+    with pytest.raises(ValueError, match="app_context"):
+        qt_module.ChatDockWidget(
+            connection=qt_module.ChatConnectionConfig(app_context=None)  # type: ignore[arg-type]
+        )

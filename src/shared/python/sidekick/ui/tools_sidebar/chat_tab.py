@@ -271,16 +271,22 @@ def _build_pyqt_chat_dock(sidebar: Any) -> QtWidgets.QWidget | None:
     # constructor params. Each value has a safe default so a bare sidebar
     # still builds the dock identically to today.
     dock = chat_module.ChatDockWidget(
-        app_context="sidekick",
-        app_name="sidekick",
-        session_id=getattr(sidebar, "chat_session_id", None),
-        accent_color=_resolve_accent_color(theme_provider),
-        auto_index_on_open=bool(getattr(sidebar, "auto_index_on_open", False)),
-        project_root=sidebar.project_root,
-        terminal_registry=getattr(sidebar, "terminal_registry", None),
-        theme_provider=theme_provider,
-        workspace_provider=workspace_provider,
-        plot_request_sink=plot_request_sink,
+        connection=chat_module.ChatConnectionConfig(
+            app_context="sidekick",
+            app_name="sidekick",
+            session_id=getattr(sidebar, "chat_session_id", None),
+            project_root=sidebar.project_root,
+        ),
+        presentation=chat_module.ChatPresentationConfig(
+            accent_color=_resolve_accent_color(theme_provider),
+            theme_provider=theme_provider,
+            auto_index_on_open=bool(getattr(sidebar, "auto_index_on_open", False)),
+        ),
+        integrations=chat_module.ChatIntegrationHooks(
+            terminal_registry=getattr(sidebar, "terminal_registry", None),
+            workspace_provider=workspace_provider,
+            plot_request_sink=plot_request_sink,
+        ),
         parent=sidebar,
     )
     dock.setObjectName(SIDEKICK_CHAT_RUNTIME_OBJECT_NAME)
