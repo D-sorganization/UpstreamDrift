@@ -84,6 +84,10 @@ from src.api.routes import (  # noqa: E402
 )
 from src.api.services.chat_service import ChatService  # noqa: E402
 from src.api.task_manager import TaskManager  # noqa: E402
+from src.api.utils.path_validation import (  # noqa: E402
+    LOGO_SUFFIXES,
+    resolve_file_within,
+)
 from src.api.services.chat_app_context import make_app_state_provider  # noqa: E402
 from src.shared.python.app_state import get_state_logger  # noqa: E402
 from src.shared.python.config.environment import is_production  # noqa: E402
@@ -409,8 +413,8 @@ def _find_logo_file(logo_name: str) -> Path | None:
         Path(__file__).parent.parent.parent / "assets" / "logos",
         Path(__file__).parent.parent / "launchers" / "assets",
     ):
-        resolved = _safe_join(root, logo_name)
-        if resolved is not None and resolved.exists() and resolved.is_file():
+        resolved = resolve_file_within(root, logo_name, LOGO_SUFFIXES)
+        if resolved is not None:
             return resolved
     return None
 
