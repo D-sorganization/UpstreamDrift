@@ -14,6 +14,7 @@ The standalone ``main()`` entry point continues to use
 Subtask 5 / #4998 of EPIC #4993.
 """
 
+import logging
 import sys
 from typing import Any
 
@@ -50,6 +51,13 @@ except ImportError:
 from matplotlib.figure import Figure
 
 try:
+    from src.engines.physics_engines.opensim.python.opensim_golf.marker_tracks import (
+        resolve_trajectory_markers,
+    )
+except ImportError:
+    from .opensim_golf.marker_tracks import resolve_trajectory_markers
+
+try:
     from src.engines.physics_engines.opensim.python.opensim_golf.core import (
         GolfSwingModel,
         OpenSimImportFailedError,
@@ -73,6 +81,8 @@ try:
 except ImportError:
     _ScrewVisualizationTab = None  # type: ignore[assignment, misc]
     _SCREW_VIZ_AVAILABLE = False
+
+logger = logging.getLogger(__name__)
 
 
 class OpenSimGolfGUI(QMainWindow):
@@ -481,14 +491,17 @@ class MainWidget(QWidget):
         self.lbl_details.setText("Running...")
         QApplication.processEvents()
 
+        status = "Simulation stopped unexpectedly - see the log."
         try:
             self.result = self.model.run_simulation()
             self.plot_results()
             if self.result:
-                self.lbl_details.setText(
+                status = (
                     f"Simulation Complete. Duration: {self.result.time[-1]:.2f}s, "
                     f"Steps: {len(self.result.time)}"
                 )
+            else:
+                status = "Simulation produced no result."
         except NotImplementedError as e:
             # Clear, informative error - not a silent fallback
             QMessageBox.warning(
@@ -496,11 +509,13 @@ class MainWidget(QWidget):
                 "Simulation Not Available",
                 f"OpenSim simulation is not yet fully implemented.\n\n{e}",
             )
-            self.lbl_details.setText("Simulation not available - see error message.")
+            status = "Simulation not available - see error message."
         except (RuntimeError, ValueError, OSError) as e:
             QMessageBox.critical(self, "Simulation Error", str(e))
-            self.lbl_details.setText("Error occurred - see error message.")
+            status = "Error occurred - see error message."
         finally:
+            # Never leave "Running..." behind, even for an unexpected error.
+            self.lbl_details.setText(status)
             self.btn_run.setEnabled(True)
 
     def plot_results(self) -> None:
@@ -532,17 +547,28 @@ class MainWidget(QWidget):
 
         # Plot 3: 2D Trajectory
         ax3 = self.fig.add_subplot(212)
-        hand = self.result.marker_positions["Hand"]
-        club = self.result.marker_positions["ClubHead"]
-        ax3.plot(hand[:, 0], hand[:, 1], "b-", label="Hand Path")
-        ax3.plot(club[:, 0], club[:, 1], "r-", label="Clubhead Path")
-        ax3.set_title("Swing Trajectory (XZ Plane)")
-        ax3.set_aspect("equal")
-        ax3.legend()
-        ax3.grid(True)
+        self._plot_marker_trajectories(ax3)
 
         self.fig.tight_layout()
         self.canvas.draw()
+
+    def _plot_marker_trajectories(self, ax: Any) -> None:
+        """Plot the model's own markers, or say why there is nothing to plot."""
+        markers = self.result.marker_positions
+        names = resolve_trajectory_markers(markers)
+        ax.set_title("Marker Trajectories (X-Y)")
+        if not names:
+            message = "No markers in this model - trajectory plot skipped."
+            logger.info(message)
+            ax.text(0.5, 0.5, message, ha="center", va="center", transform=ax.transAxes)
+            ax.set_axis_off()
+            return
+        for name, style in zip(names, ("b-", "r-"), strict=False):
+            track = markers[name]
+            ax.plot(track[:, 0], track[:, 1], style, label=f"{name} path")
+        ax.set_aspect("equal")
+        ax.legend()
+        ax.grid(True)
 
     def _show_help_dialog(self) -> None:
         """Show the Getting Started help dialog."""

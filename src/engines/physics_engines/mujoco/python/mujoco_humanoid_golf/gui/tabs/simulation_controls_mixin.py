@@ -122,7 +122,11 @@ class _SimulationControlsMixin:
             target = target.with_suffix(".mp4")
         try:
             out = export_recorded_swing_video(
-                self.sim_widget.model, self.sim_widget.data, recorder, target
+                self.sim_widget.model,
+                self.sim_widget.data,
+                recorder,
+                target,
+                camera=self.sim_widget.camera,
             )
         except (ValueError, RuntimeError, OSError) as exc:
             logger.exception("Video export failed: %s", exc)
