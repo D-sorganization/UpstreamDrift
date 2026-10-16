@@ -37,3 +37,18 @@ def test_opensim_model_gets_head_meshes_and_no_head_capsule() -> None:
     head = model.getBodySet().get("Head")
     names = [c.getName() for c in head.getComponentsList()]
     assert sum(n.startswith("vf") for n in names) >= 12  # meshes, not 3 capsule parts
+
+
+def test_cc0_mesh_head_obj_export_carries_skin_and_hair(tmp_path: Path) -> None:
+    """R7 (#12687): the OBJ export follows the shared slot (R9a/b/c consume it)."""
+    from src.shared.python.model_appearance import document_from_dict
+
+    spec = json.loads((SPECS / "full_body_spec_anthro_driver.json").read_text())
+    doc = document_from_dict(
+        {"schema_version": "appearance-v1", "head": {"model": "cc0_mesh"}}
+    )
+    files = head_mesh_files(spec, tmp_path, doc)
+    assert {f.name for f in files} == {"skin_mesh", "hair_mesh"}
+    assert all(f.body.endswith("/Head") and f.path.is_file() for f in files)
+    colours = {f.name: f.rgba for f in files}
+    assert colours["skin_mesh"] != colours["hair_mesh"]

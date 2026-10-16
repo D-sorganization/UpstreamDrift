@@ -424,6 +424,14 @@ forward-dynamics matching. Design reference:
   optional hair or cap), `build_head_parts`, `resolve_head_anchor` (the spec
   `Head` body on the neck at the cervicale; head length from de Leva), and
   `head_override_rotation`. Licence: procedural geometry, CC0-1.0, no third-party mesh.
+- `head_mesh` (R7 #12687) — the realistic head behind the same slot: document field
+  `head.model = "cc0_mesh"` (default `parametric`) makes `build_head_parts` return
+  `skin_mesh` and (`headwear: hair`) `hair_mesh` from `assets/head_cc0/head_cc0.npz`,
+  a MakeHuman-derived CC0 asset with `PROVENANCE.json` (source URL, author, licence
+  text, sha256). `load_head_asset` fails closed on a hash, licence or geometry
+  mismatch; `headwear: cap` is refused. Engines need no code: MuJoCo `head_visual`,
+  the OBJ export `_head` and the `ResolvedAppearance.head_mesh` reference all
+  follow the slot. Reference: `appearance_reference/cc0_head.tex`.
 - Document fields `head` (`enabled`, `headwear` none/hair/cap, `scale`,
   `forward_axis`/`up_axis`, `orientation_override`) and `body_model`
   (`ellipsoid`; `meshes` is rejected until CMB-6 #11657 lands).

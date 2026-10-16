@@ -177,3 +177,38 @@ def test_blend_balls_are_no_larger_than_the_adjoining_limb() -> None:
             extent = np.ptp(verts, axis=0).max() / 2.0
             assert extent <= 1.1 * library.PART_RADIUS_M[part] + 1e-9
     assert seen >= 4  # both shoulders and both hips
+
+
+def test_cc0_mesh_head_loads_renders_and_keeps_physics_identical() -> None:
+    """R7 (#12687): the shared mesh slot reaches MuJoCo without engine code."""
+    mujoco = pytest.importorskip("mujoco")
+    xml, meta = _export(DRIVER, {"model": "cc0_mesh"})
+    model = mujoco.MjModel.from_xml_string(xml)
+    head = meta["visual_layer"]["head"]
+    assert head["parts"] == ["skin_mesh", "hair_mesh"] and head["mode"] == "body"
+    plain = mujoco.MjModel.from_xml_string(
+        exporter.export_full_body_mjcf(DRIVER.read_bytes())[0]
+    )
+    for attr in ("body_mass", "body_inertia", "body_ipos", "body_subtreemass"):
+        np.testing.assert_array_equal(getattr(model, attr), getattr(plain, attr))
+    data = _state(mujoco, model)
+    body_id = model.body(HEAD).id
+    for part in head["parts"]:
+        gid = model.geom(f"visual_head_{part}").id
+        assert model.geom_bodyid[gid] == body_id
+        assert model.geom_contype[gid] == 0 and model.geom_conaffinity[gid] == 0
+    skin = model.geom("visual_head_skin_mesh").id
+    assert model.geom_rbound[skin] == pytest.approx(0.2429, abs=0.08)
+    try:
+        renderer = mujoco.Renderer(model, 96, 96)
+    except (RuntimeError, ImportError, mujoco.FatalError) as exc:  # no GL
+        pytest.skip(f"no offscreen GL: {exc}")
+    try:
+        cam = mujoco.MjvCamera()
+        cam.lookat[:] = data.xpos[body_id] + np.array([0.0, 0.0, 0.12])
+        cam.distance = 0.8
+        renderer.update_scene(data, camera=cam)
+        image = renderer.render()
+    finally:
+        renderer.close()
+    assert image.shape == (96, 96, 3) and image.std() > 1.0  # not a blank frame
