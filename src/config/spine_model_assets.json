@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "policy": "Owner-provided local files only; no automated SimTK download. A null model_sha256 means UNPINNED (never qualified). Hashes are pinned in SPN-6b from the owner's files. No SimTK file content or value is committed here.",
+  "policy": "Owner-provided local files only; no automated SimTK download. A null model_sha256 means UNPINNED (never qualified). Hashes are pinned in SPN-6b from the owner's files, only with the owner's licence acceptance date. No SimTK file content or value is committed here.",
   "assets": {
     "bruno2015_fullbody_os4_v2": {
       "simtk_url": "https://simtk.org/projects/spine_ribcage",
       "env_var": "UD_SPINE_BRUNO_SOURCE",
-      "model_sha256": null,
+      "model_sha256": "e488ae2cf67be3de36f569cab514e181bfa89d5186d998f1627b461b4498fd47",
       "resource_sha256": {},
       "licence_id": {
         "model": "simtk-mit-use-agreement-unverified",
@@ -17,8 +17,8 @@
         "doi": "10.1115/1.4030408",
         "doi_verified": "Crossref 2026-10-15"
       },
-      "owner_accepted_terms_on": null,
-      "note": "SimTK spine_ribcage, Fullbody_OS4.x_v2.0."
+      "owner_accepted_terms_on": "2026-10-16",
+      "note": "SimTK spine_ribcage. Pinned file: MaleFullBody.osim from the owner's 2026-10-15 download Base_models-latest.zip (nested Pers_fbm_spine_Models.zip; credits Bruno, Anderson, Bouxsein 2015; OpenSim 4 format). The archive carried no licence file, so licence ids stay unverified and licence_text_sha256 is null. Geometry is not pinned (it does not enter the dynamics). Stored privately in D-sorganization/OpenSim_Models_Private, never in this repository."
     },
     "senteler2016_lumbspine_3dof": {
       "simtk_url": "https://simtk.org/projects/intervertebr_jr",
