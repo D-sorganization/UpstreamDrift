@@ -86,7 +86,7 @@ def orientations_to_matrix(
     width = 4 if representation.startswith("quaternion_") else 3
     a = _array(values, (width,), representation)
     batch = a.shape[:-1]
-    flat = a.reshape(-1, width)
+    flat: np.ndarray = a.reshape(-1, width)
     if representation in ("quaternion_xyzw", "quaternion_wxyz"):
         norms = np.sqrt(
             np.einsum("ij,ij->i", flat, flat)
