@@ -22,9 +22,9 @@ def _make_service(tmp_path) -> Any:
         svc = ChatService()
         svc.PERSIST_DIR = tmp_path / "chat_sessions"
         svc._adapter = MagicMock()
-        # ctx.metadata is shared with the worker's temp ctx (holds a stop_event),
-        # which is not JSON serialisable; persistence is covered elsewhere.
-        svc._persist_session = MagicMock()
+        # Real persistence runs (spied): the stop_event no longer leaks into
+        # the persisted metadata (#12872).
+        svc._persist_session = MagicMock(wraps=svc._persist_session)
         return svc
 
 
