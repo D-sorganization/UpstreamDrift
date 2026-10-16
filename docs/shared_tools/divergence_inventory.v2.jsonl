@@ -366,7 +366,7 @@
 {"path": "canonical_core/__init__.py", "classification": "ud-only", "package": "canonical_core", "spelling_only": false}
 {"path": "canonical_core/sidekick_retrieval_qa.py", "classification": "ud-only", "package": "canonical_core", "spelling_only": false}
 {"path": "capabilities.py", "classification": "ud-only", "package": "capabilities.py", "spelling_only": false}
-{"path": "chat/__init__.py", "classification": "diverged", "package": "chat", "spelling_only": false}
+{"path": "chat/__init__.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_chat_dock_widget_qt.py", "classification": "diverged", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/__init__.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/ai_dropdowns.py", "classification": "identical", "package": "chat", "spelling_only": false}
@@ -405,10 +405,10 @@
 {"path": "chat/memory_panel.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/models.py", "classification": "diverged", "package": "chat", "spelling_only": true}
 {"path": "chat/qt_diagnostics.py", "classification": "identical", "package": "chat", "spelling_only": false}
-{"path": "chat/quick_bar.py", "classification": "diverged", "package": "chat", "spelling_only": false}
+{"path": "chat/quick_bar.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/router_factory.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/service_base.py", "classification": "diverged", "package": "chat", "spelling_only": true}
-{"path": "chat/skills_manager.py", "classification": "diverged", "package": "chat", "spelling_only": false}
+{"path": "chat/skills_manager.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/terminal_contracts.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/terminal_providers.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/terminal_runtime.py", "classification": "identical", "package": "chat", "spelling_only": false}
@@ -420,7 +420,7 @@
 {"path": "chat/tests/test_credentials.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_service_base.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_voice_input.py", "classification": "identical", "package": "chat", "spelling_only": false}
-{"path": "chat/tests/test_workspace_bridge.py", "classification": "diverged", "package": "chat", "spelling_only": false}
+{"path": "chat/tests/test_workspace_bridge.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/voice_input_manager.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/websocket_protocol.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/workspace_command_handler.py", "classification": "identical", "package": "chat", "spelling_only": false}
@@ -2467,7 +2467,7 @@
 {"path": "sidekick/ui/tools_sidebar/calculator_workspace_facade.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/tools_sidebar/chat_settings.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/tools_sidebar/chat_settings_contract.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/ui/tools_sidebar/chat_tab.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/ui/tools_sidebar/chat_tab.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/tools_sidebar/command_history.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/tools_sidebar/data_explorer_service.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/tools_sidebar/data_explorer_tab.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
