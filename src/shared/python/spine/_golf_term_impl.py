@@ -164,3 +164,17 @@ def rotate_to_z_up(points: np.ndarray, up: np.ndarray) -> np.ndarray:
     kx = np.array([[0, -k[2], k[1]], [k[2], 0, -k[0]], [-k[1], k[0], 0]])
     rot = np.eye(3) + s * kx + (1.0 - c) * (kx @ kx)
     return points @ rot.T
+
+
+def single_rotation(value: object, name: str) -> np.ndarray:
+    """One proper ``(3, 3)`` rotation (a series or non-rotation raises)."""
+    try:
+        arr = np.asarray(value, dtype=float)
+    except (TypeError, ValueError) as exc:
+        raise TypeError(f"{name} must be a numeric (3, 3) rotation: {exc}") from exc
+    if arr.shape != (3, 3):
+        raise ValueError(f"{name} must have shape (3, 3), got {arr.shape}")
+    try:
+        return rotation_series(arr, name)[0]
+    except ValueError as exc:
+        raise ValueError(f"{name}: {exc}") from exc

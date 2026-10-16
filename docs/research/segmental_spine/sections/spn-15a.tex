@@ -19,7 +19,7 @@ with $R_{1:i}$ the caudal-first composition of the first $i$ levels, computed by
 \texttt{golf\_terms.segmental\_contributions}. The shares telescope to the
 global term; the residual $g(R_{1:n}) - \sum_i c_i$ is returned per sample as
 \texttt{remainder\_deg} (zero up to rounding). A share is not the level's own
-Cardan angle and does not add in angle space. Units are degrees; columns run
+Cardan angle and does not add in angle space. The stack covers the supplied chain only ($B=E=A=I$); callers with non-identity $B$, $E$ or $A$ use \texttt{golf\_terms.segmental\_contribution\_breakdown} (Section on the golf-term registry). Units are degrees; columns run
 caudal to cranial.
 
 \paragraph{Load Heatmap and Sign Boundary}

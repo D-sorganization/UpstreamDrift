@@ -52,6 +52,33 @@ def ball_position_at_address(
     return ball
 
 
+def address_ball_from_landmarks(
+    face_centre_m: Sequence[float] | NDArray[np.float64] | None,
+    face_normal: Sequence[float] | NDArray[np.float64] | None,
+    *,
+    ground_height_m: float = 0.0,
+    radius_m: float = BALL_RADIUS_M,
+) -> NDArray[np.float64]:
+    """The one placement helper every renderer uses for the address ball (#12955).
+
+    The ball sits at the club's own face centre at address (whatever the
+    club: driver or 7-iron), resting on the ground. Never a recorded capture
+    ball and never a stale measurement-point offset.
+
+    Raises ``ValueError`` when the club spec yields no face-centre landmark
+    (``face_centre_m`` or ``face_normal`` is ``None``); otherwise delegates to
+    :func:`ball_position_at_address` and inherits its contract.
+    """
+    if face_centre_m is None or face_normal is None:
+        raise ValueError(
+            "club spec has no face-centre landmark (face centre and face "
+            "normal are required to place the address ball)"
+        )
+    return ball_position_at_address(
+        face_centre_m, face_normal, ground_height_m=ground_height_m, radius_m=radius_m
+    )
+
+
 def resolve_ball_visual(
     *,
     enabled: bool,
@@ -88,7 +115,7 @@ def resolve_ball_visual(
             "resolve_ball_visual needs either position_m or both "
             "face_centre_m and face_normal"
         )
-    pos = ball_position_at_address(
+    pos = address_ball_from_landmarks(
         face_centre_m, face_normal, ground_height_m=ground_height_m, radius_m=radius_m
     )
     return pos, source

@@ -19,7 +19,7 @@ import math
 from pathlib import Path
 from typing import Any, Literal
 
-SCHEMA_VERSION = "spine-study-receipt/1"
+SCHEMA_VERSION = "spine-study-receipt/2"
 STATUSES = ("pass", "unqualified", "failed")
 STAGE_STATUSES = ("ok", "failed")
 
@@ -96,7 +96,9 @@ class SpineStudyReceipt:
     """Request -> receipt record; see the module docstring.
 
     Preconditions: ``status`` is one of :data:`STATUSES`; ``request_sha256`` is
-    64 hex characters.  ``asset`` is the :class:`SpineAssetReceipt` dictionary
+    64 hex characters; ``torso_alignment`` is the ``{"matrix", "provenance"}``
+    record of the drive alignment and ``pass`` requires a ``calibrated:``
+    provenance.  ``asset`` is the :class:`SpineAssetReceipt` dictionary
     or ``None`` when the study names no licensed asset.  ``variant`` is the
     movement-variant provenance (SPN-13d) or ``None``; it is omitted from the
     serialised receipt when ``None`` so variant-free receipts are unchanged.
@@ -115,6 +117,7 @@ class SpineStudyReceipt:
     law: str
     distribution_source: str
     asset: dict[str, Any] | None
+    torso_alignment: dict[str, Any]
     stages: tuple[StageRecord, ...]
     artifacts: tuple[FileRecord, ...]
     residual: dict[str, Any]
@@ -129,6 +132,12 @@ class SpineStudyReceipt:
             raise ValueError(f"status must be one of {STATUSES}, got {self.status!r}")
         if len(self.request_sha256) != 64:
             raise ValueError("request_sha256 must be 64 hex characters")
+        provenance = str(self.torso_alignment.get("provenance", ""))
+        if self.status == "pass" and not provenance.startswith("calibrated:"):
+            raise ValueError(
+                "a receipt without a calibrated torso alignment cannot pass "
+                f"(provenance {provenance!r})"
+            )
         if self.status == "pass" and (self.asset or {}).get("status", "qualified") != (
             "qualified"
         ):
@@ -152,6 +161,7 @@ class SpineStudyReceipt:
             "law": self.law,
             "distribution_source": self.distribution_source,
             "asset": self.asset,
+            "torso_alignment": self.torso_alignment,
             "stages": [s.as_dict() for s in self.stages],
             "artifacts": [a.as_dict() for a in self.artifacts],
             "residual": self.residual,
@@ -189,6 +199,7 @@ class SpineStudyReceipt:
                 law=data["law"],
                 distribution_source=data["distribution_source"],
                 asset=data["asset"],
+                torso_alignment=data["torso_alignment"],
                 stages=tuple(StageRecord(**s) for s in data["stages"]),
                 artifacts=tuple(FileRecord(**a) for a in data["artifacts"]),
                 residual=data["residual"],
