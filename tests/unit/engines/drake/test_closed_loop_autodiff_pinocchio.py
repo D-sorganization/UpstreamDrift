@@ -8,10 +8,9 @@ coordinate order (permuted by name) and the canonical closure convention.
   (``divergence_registry.yaml``); nothing is widened here.
 * The constrained acceleration and reaction must agree within the Track S bound
   propagated from the Track N differences measured at this state (``kkt_bound``).
-* The Drake exact derivatives must then equal Pinocchio's finite-difference
-  reference, run in the same closure tangent basis, within that reference's
-  own measured step-to-step variation.  Pinocchio supplies no exact closed-loop
-  derivatives of its own yet (NSX-85), so its reference is the NSX-84 route.
+* The Drake exact derivatives must then equal Pinocchio's ANALYTIC derivatives
+  (NSX-85), evaluated in the same closure tangent basis; the tolerances are
+  derived in :func:`test_autodiff_equals_pinocchio_analytic_derivatives`.
 
 Track N tolerances apply to the arrays, not to derivatives; no derivative-level
 Track N entry exists (conformance rows are NSX-98).  Agreement between engines is
@@ -28,7 +27,8 @@ import pytest
 
 from src.shared.python.engine_core.cross_engine_validator import DivergenceRegistry
 from src.shared.python.loop_nullspace import tangent_linearization as tl
-from src.shared.python.loop_nullspace.adapter_model import AdapterClosedLoopModel
+from src.shared.python.loop_nullspace.adapter_derivatives import AdapterClosedLoopModel
+from src.shared.python.loop_nullspace.derivative_capability import DerivativeMethod
 from src.shared.python.loop_nullspace.constrained_dynamics import (
     constrained_acceleration,
 )
@@ -55,14 +55,6 @@ REGISTRY = DivergenceRegistry.from_yaml(
 )
 FD_STEP = 1e-3
 FLOOR = 1e-9
-ARRAYS = (
-    "d_acc_d_xi",
-    "d_acc_d_eta",
-    "d_acc_d_tau",
-    "d_lambda_d_xi",
-    "d_lambda_d_eta",
-    "d_lambda_d_tau",
-)
 
 
 @pytest.fixture(scope="module")
@@ -164,32 +156,77 @@ def test_nominal_solution_agrees_within_the_propagated_track_s_bound(
     assert float(np.linalg.norm(solved[1] - solved[0])) <= bound
 
 
-def test_autodiff_equals_pinocchio_finite_difference_in_one_tangent_basis(
+def _pinocchio_analytic(pin_adapter, drake_names, basis, q, v, tau):
+    """Pinocchio's ANALYTIC derivatives in Drake's order and tangent basis."""
+    from src.engines.physics_engines.pinocchio.python.closed_loop_derivatives import (
+        PinocchioAnalyticDerivatives,
+    )
+
+    pin_names = tuple(pin_adapter.coordinate_order)
+    to_pin = np.array([drake_names.index(n) for n in pin_names])
+    to_drake = np.array([pin_names.index(n) for n in drake_names])
+    pin_basis = basis[to_pin]
+    res = PinocchioAnalyticDerivatives(
+        pin_adapter, basis_field=lambda _q: pin_basis
+    ).constrained_acceleration_derivatives(q[to_pin], v[to_pin], tau[to_pin])
+    assert res.method is DerivativeMethod.ANALYTIC
+    return SimpleNamespace(
+        d_acc_d_xi=res.d_acc_d_xi[to_drake],
+        d_acc_d_eta=res.d_acc_d_eta[to_drake],
+        d_acc_d_tau=res.d_acc_d_tau[np.ix_(to_drake, to_drake)],
+        d_lambda_d_xi=res.d_lambda_d_xi,
+        d_lambda_d_eta=res.d_lambda_d_eta,
+        d_lambda_d_tau=res.d_lambda_d_tau[:, to_drake],
+    )
+
+
+def test_autodiff_equals_pinocchio_analytic_derivatives(
     adapters, models, state
 ) -> None:
-    _, drake_adapter = adapters
-    pin, _ = models
+    """Drake AutoDiff vs Pinocchio ANALYTIC, one tangent basis, Drake order.
+
+    Tolerance derivation (nothing invented):
+
+    * ``d/dtau`` blocks are the KKT effort response ``K^-1 [e_j; 0]``; the two
+      engines' arrays differ by the measured Track N amounts, so the first-order
+      bound is NSX-56's ``kkt_bound`` with ``rhs_scale = 0`` and the response
+      norm as the solution norm (the same use as the NSX-56 effort test).
+    * ``d/dxi, d/deta`` blocks also carry the engines' differential
+      differences (``dM/dq`` ...), which no Track N entry registers.  They are
+      held to the resolution of the independent NSX-84 finite-difference
+      reference (its own spread under step x0.5 and x2): a difference below
+      that is not detectable, and none is claimed beyond it.
+    """
+    pin_adapter, drake_adapter = adapters
+    pin, drake = models
     q, v, tau = state
     exact = drake_adapter.constrained_acceleration_derivatives(q, v, tau)
-    basis = exact.basis  # Drake's closure tangent basis, spec order
+    analytic = _pinocchio_analytic(
+        pin_adapter, tuple(drake_adapter.coordinate_order), exact.basis, q, v, tau
+    )
 
-    def pin_fd(step: float):
+    def drake_fd(step: float):
         return tl.FiniteDifferenceDerivatives(
-            pin,
-            tl.EuclideanManifold(pin.nv),
+            drake,
+            tl.EuclideanManifold(drake.nv),
             step=step,
-            basis_field=lambda _q: basis,
+            basis_field=lambda _q: exact.basis,
         ).constrained_acceleration_derivatives(q, v, tau)
 
-    ref = pin_fd(FD_STEP)
-    others = [pin_fd(FD_STEP * f) for f in (0.5, 2.0)]
-    for name in ARRAYS:
-        bound = max(
+    ref = drake_fd(FD_STEP)
+    others = [drake_fd(FD_STEP * f) for f in (0.5, 2.0)]
+    for name in ("d_acc_d_xi", "d_acc_d_eta", "d_lambda_d_xi", "d_lambda_d_eta"):
+        resolution = max(
             *(scaled_error(getattr(o, name), getattr(ref, name)) for o in others),
             FLOOR,
         )
-        err = scaled_error(getattr(exact, name), getattr(ref, name))
-        assert err <= bound, (
-            f"{name}: {err:.3g} exceeds the reference spread {bound:.3g}"
-        )
+        err = scaled_error(getattr(exact, name), getattr(analytic, name))
+        assert err <= resolution, f"{name}: {err:.3g} > resolution {resolution:.3g}"
+    ref_arrays, other_arrays = _arrays(pin, q, v), _arrays(drake, q, v)
+    stack_exact = np.vstack((exact.d_acc_d_tau, exact.d_lambda_d_tau))
+    stack_pin = np.vstack((analytic.d_acc_d_tau, analytic.d_lambda_d_tau))
+    bound = kkt_bound(
+        ref_arrays, other_arrays, float(np.linalg.norm(stack_pin, 2)), 0.0
+    )
+    assert float(np.linalg.norm(stack_exact - stack_pin, 2)) <= bound
     assert float(np.abs(exact.d_acc_d_xi).max()) > 1e-3

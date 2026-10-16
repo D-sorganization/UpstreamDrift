@@ -27,7 +27,7 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.loop_nullspace.adapter_model import AdapterClosedLoopModel
+from src.shared.python.loop_nullspace.adapter_derivatives import AdapterClosedLoopModel
 from src.shared.python.loop_nullspace.autodiff_derivatives import (
     AutoDiffKKTDerivatives,
     ModelDifferentials,
@@ -55,7 +55,7 @@ class DrakeClosedLoopModel(AdapterClosedLoopModel):
         from the native closure frame (the row map would then vary with ``q``) or
         if AutoDiffXd cannot evaluate a component.
         """
-        q_arr, v_arr = self._own(q, "q"), self._own(v, "v")
+        q_arr, v_arr = np.asarray(q, dtype=float), np.asarray(v, dtype=float)
         adapter = self.adapter
         self._require_constant_row_map(q_arr)
         native = adapter.closed_loop_differentials(q_arr, v_arr)
