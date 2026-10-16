@@ -445,7 +445,8 @@ class OpenSimFullBodyParityAdapter:
         from the loaded model's ``SpringGeneralizedForce`` objects (#12691);
         empty for a rigid club.
         """
-        cast = self._osim.SpringGeneralizedForce.safeDownCast
+        spring_type = self._osim.SpringGeneralizedForce
+        cast = spring_type.safeDownCast
         forces = self._model.getForceSet()
         springs = (cast(forces.get(i)) for i in range(forces.getSize()))
         return {
