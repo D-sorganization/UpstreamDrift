@@ -51,6 +51,11 @@ from src.shared.python.loop_nullspace.evidence import (
     QuantityRecord,
     readonly_float,
 )
+from src.shared.python.loop_nullspace.feedback_runtime import (
+    AnyFeedbackLaw,
+    FeedbackRun,
+    begin_feedback_run,
+)
 from src.shared.python.loop_nullspace.replay_spec import (
     AccelerationFeedbackLaw,
     BaumgarteGains,
@@ -140,7 +145,7 @@ class ReplayReport:
     allocated_torque: Array
     feedback_torque: Array | None
     applied_torque: Array
-    feedback_law: FeedbackLaw | AccelerationFeedbackLaw | None
+    feedback_law: AnyFeedbackLaw | None
     feedback_budget: FeedbackBudget | None
     closure_drift: ClosureDrift
     stabilisation: BaumgarteGains | None
@@ -273,7 +278,7 @@ def _validated_allocation(
 
 def _check_mode_inputs(
     mode: ReplayMode,
-    feedback: FeedbackLaw | AccelerationFeedbackLaw | None,
+    feedback: AnyFeedbackLaw | None,
     setup: ReplaySetup,
     window: tuple[float, float],
 ) -> None:
@@ -322,6 +327,7 @@ def _integrate(
     nodes: Array,
     load: Any,
     setup: ReplaySetup,
+    run: FeedbackRun | None = None,
 ) -> _Trace:
     trace = _Trace([setup.q0.copy()], [setup.v0.copy()])
     for i in range(nodes.size - 1):
@@ -345,6 +351,8 @@ def _integrate(
             break
         trace.q.append(q_next)
         trace.v.append(v_next)
+        if run is not None:
+            run.observe(float(nodes[i + 1]), q_next, v_next)
     if trace.reason:
         logger.warning("replay terminated early: %s", trace.reason)
     return trace
@@ -389,13 +397,16 @@ def _stabilisation_peak(
 def _make_load(
     sched: _TorqueSchedule,
     setup: ReplaySetup,
-    feedback: FeedbackLaw | AccelerationFeedbackLaw | None,
+    feedback: AnyFeedbackLaw | None,
+    run: FeedbackRun | None = None,
 ):
     selection, ref = setup.actuation, setup.reference
 
     def feedback_torque(t: float, q: Array, v: Array) -> Array:
         if feedback is None or ref is None:
             return np.zeros(setup.n_actuated)
+        if run is not None:
+            return run.torque(t, q, v)
         q_ref, v_ref = ref.state_at(t)
         return feedback.torque(selection @ (q_ref - q), selection @ (v_ref - v), q)
 
@@ -471,7 +482,7 @@ def replay(
     *,
     policy: ReplayPolicy,
     setup: ReplaySetup,
-    feedback: FeedbackLaw | AccelerationFeedbackLaw | None = None,
+    feedback: AnyFeedbackLaw | None = None,
     settings: ReplaySettings | None = None,
 ) -> ReplayReport:
     """Replay ``allocation`` through ``provider`` in the mode ``policy`` names.
@@ -515,11 +526,11 @@ def replay(
         else _StabilisedProvider(provider, cfg.baumgarte)
     )
     sched = _TorqueSchedule(times, torque, cfg.interpolation)
-    load, feedback_at = _make_load(sched, setup, feedback)
     nodes = _node_times(times, cfg.substeps)
-    trace = _integrate(dynamics, nodes, load, setup)
-    k = len(trace.q)
-    nodes, q, v = nodes[:k], np.array(trace.q), np.array(trace.v)
+    run = begin_feedback_run(feedback, setup, nodes)
+    load, feedback_at = _make_load(sched, setup, feedback, run)
+    trace = _integrate(dynamics, nodes, load, setup, run)
+    nodes, q, v = nodes[: len(trace.q)], np.array(trace.q), np.array(trace.v)
     allocated = np.array([sched(t) for t in nodes])
     fb_series = _feedback_series(feedback, feedback_at, nodes, q, v)
     applied = allocated if fb_series is None else allocated + fb_series
@@ -540,7 +551,7 @@ def replay(
         mode=mode,
         policy=policy,
         times_s=nodes,
-        frame_node_index=frame_index[frame_index < k],
+        frame_node_index=frame_index[frame_index < nodes.size],
         q=q,
         v=v,
         reference_q=ref_q,
