@@ -51,8 +51,9 @@ def test_driver_receipt_validates_and_has_expected_zmp() -> None:
     receipt = validate_receipt(doc)
     assert isinstance(receipt, Receipt)
     assert receipt.dynamics.reference_zmp is not None
-    # 160/180 since the receipt was regenerated on the 10 deg static tibial
-    # torsion (#12789; a parent-commit control reproduces 158/180);
+    # 145/180 since the receipt was regenerated on the 10 deg static tibial
+    # torsion with the default style feet (#12789, hashed before seeding by
+    # #12820; a style-feet control on main gives 156/180, feet off 158/180);
     # 158/180 since the receipt was regenerated on the per-capture grip
     # rotation (#12221, fit on the fixed club cluster);
     # 140/180 since the receipt was regenerated on the measured driver club
@@ -64,7 +65,7 @@ def test_driver_receipt_validates_and_has_expected_zmp() -> None:
     # left hip alone (#11737), and the pre-OSV-6 receipt under
     # anthro_driver_pre_osv6/ recorded 2/3.
     assert receipt.dynamics.reference_zmp.outside_fraction_1s_to_1_5s == pytest.approx(
-        160 / 180, rel=1e-5
+        145 / 180, rel=1e-5
     )
 
 
