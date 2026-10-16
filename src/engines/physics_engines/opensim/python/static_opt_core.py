@@ -346,7 +346,12 @@ def _weighted_qp(
     settings.verbose = False
     settings.tol_feas = settings.tol_gap_abs = settings.tol_gap_rel = _CONIC_TOL
     result = clarabel.DefaultSolver(
-        sp.diags(2.0 * weight, format="csc"), np.zeros(n), a_mat, b, cones, settings
+        sp.diags_array(2.0 * weight, format="csc"),
+        np.zeros(n),
+        a_mat,
+        b,
+        cones,
+        settings,
     ).solve()
     x = np.clip(np.asarray(result.x, dtype=float), 0.0, 1.0)
     return x, str(result.status) in _CONIC_OK, str(result.status)

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from pathlib import Path
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 
 import numpy as np
 import pytest
@@ -42,8 +42,10 @@ def _retag_thelen(src: Path, dst: Path) -> Path:
     tree = ET.parse(src)
     for node in tree.iter("Millard2012EquilibriumMuscle"):
         node.tag = "Thelen2003Muscle"
-        ET.SubElement(node, "FmaxTendonStrain").text = "0.04"
-        ET.SubElement(node, "KshapeActive").text = "0.5"
+        for tag, text in (("FmaxTendonStrain", "0.04"), ("KshapeActive", "0.5")):
+            child = node.makeelement(tag, {})
+            child.text = text
+            node.append(child)
     tree.write(dst)
     return dst
 

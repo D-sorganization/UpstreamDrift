@@ -17,7 +17,7 @@ receipts must state it (see :data:`SWAP_NOTE`).
 from __future__ import annotations
 
 from pathlib import Path
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 
 __all__ = [
     "MUSCLE_MODEL_POLICIES",
