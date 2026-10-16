@@ -2,12 +2,6 @@
   "max_bytes": 51200,
   "exceptions": [
     {
-      "path": "docs/user_guide/upstream_drift_user_manual.md",
-      "owner": "@docs-team",
-      "reason": "Legacy monolithic user manual tracked by issue #3839; staged for Sphinx chapter decomposition.",
-      "expires_on": "2026-10-31"
-    },
-    {
       "path": "docs/development/ARCHITECTURE_IMPLEMENTATION_PLAN.md",
       "owner": "@architecture-team",
       "reason": "Legacy implementation plan above the documentation budget; staged for topic split or archival.",
@@ -18,12 +12,6 @@
       "owner": "@maintainers",
       "reason": "Root repository specification is governed separately and updated by feature PRs. Capped at about 350 KB (previously 300 KB, tests/unit/repo_hygiene/test_spec_archive.py) after change-log history moved to docs/spec/CHANGELOG_ARCHIVE.md (issue #9415, owner ruling 2026-10-12); renewed 2027-01-31 pending the section split.",
       "expires_on": "2027-01-31"
-    },
-    {
-      "path": "docs/testing/functional-test-plan.md",
-      "owner": "@docs-team",
-      "reason": "Expanded functional test matrix tracked by consolidation commit #8129; split or archive after the backlog recovery window.",
-      "expires_on": "2026-10-31"
     },
     {
       "path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
@@ -54,24 +42,6 @@
       "owner": "@maintainers",
       "reason": "Active repository development log tracking feature states across the project; pending topic decomposition.",
       "expires_on": "2026-11-30"
-    },
-    {
-      "path": "docs/development/HANDOFF.md",
-      "owner": "@maintainers",
-      "reason": "Active development turnover document tracking across workstreams; pending topic decomposition.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "docs/development/ORG01_CAPABILITY_BASELINE.md",
-      "owner": "@maintainers",
-      "reason": "Generated comprehensive 104-tile capability inventory and disposition table for ORG-01 (#10510).",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "docs/development/feature_parity_matrix.md",
-      "owner": "@maintainers",
-      "reason": "Generated feature parity matrix table from feature_parity.json; pending topic decomposition.",
-      "expires_on": "2026-10-31"
     },
     {
       "path": "AGENTS.md",

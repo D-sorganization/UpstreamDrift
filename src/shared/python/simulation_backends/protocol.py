@@ -438,6 +438,26 @@ class EquationsOfMotionProvider(Protocol):
 
 
 @runtime_checkable
+class ConstrainedEquationsOfMotionProvider(EquationsOfMotionProvider, Protocol):
+    """Equations of motion on a closed loop (NSX-30, #12570).
+
+    Adds the closure rows in the canonical grip-frame convention (NSX-02):
+    ``M a + h = tau + J_c^T lambda`` with ``J_c a + Jdot_v = 0``.  ``mass_matrix``
+    and ``bias_forces`` keep their meaning from the parent protocol.  Counterfactual
+    accelerations on such a provider re-solve the reaction through the KKT
+    projector instead of dropping or holding it.
+    """
+
+    def closure_jacobian(self, q: np.ndarray) -> np.ndarray:
+        """Return the closure Jacobian ``J_c(q)``, shape ``(m, n)``."""
+        ...
+
+    def closure_drift(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        """Return ``Jdot_c(q, v) v``, shape ``(m,)``."""
+        ...
+
+
+@runtime_checkable
 class BatchedBackend(Protocol):
     """Optional contract for backends that evaluate many rollouts in parallel."""
 

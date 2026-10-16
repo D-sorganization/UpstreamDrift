@@ -1,0 +1,79 @@
+<?xml version="1.0" ?>
+<mujoco model="golfer">
+  <compiler angle="radian" coordinate="local" inertiafromgeom="false"/>
+  <option timestep="0.002" gravity="0 0 -9.80665" integrator="RK4"/>
+  <visual>
+    <global offwidth="1024" offheight="1024"/>
+    <map znear="0.01" zfar="50"/>
+    <headlight diffuse="0.8 0.8 0.8" ambient="0.3 0.3 0.3"/>
+  </visual>
+  <asset>
+    <material name="ground_mat" rgba="0.4 0.6 0.3 1.0"/>
+  </asset>
+  <worldbody>
+    <geom name="floor" type="plane" size="10 10 0.1" material="ground_mat"/>
+    <light directional="true" pos="0 0 3" dir="0 0 -1"/>
+    <camera name="side" pos="-5 -2 1.5" euler="0.15 0 0.35" mode="fixed"/>
+    <camera name="front" pos="0 -5 1.5" euler="0.15 0 1.57" mode="fixed"/>
+    <body name="pelvis" pos="0 0 0.9" euler="0 0 0.1">
+      <freejoint name="pelvis_free"/>
+      <inertial pos="0 0 0" mass="10" diaginertia="0.22 0.2 0.1"/>
+      <geom name="pelvis_geom" type="capsule" size="0.1 0.3" rgba="0.7 0.5 0.3 1" contype="2" conaffinity="1"/>
+      <body name="thorax" pos="0 0 0.2" euler="0 0.1 0">
+        <joint name="thorax" type="hinge" axis="0 0 1" range="-1 1" damping="1.5"/>
+        <inertial pos="0 0 0" mass="2" diaginertia="0.22 0.2 0.1"/>
+        <geom name="thorax_geom" type="capsule" size="0.1 0.3" rgba="0.7 0.5 0.3 1" contype="2" conaffinity="1"/>
+        <body name="neck" pos="0 0 0.2" euler="0 0.1 0">
+          <joint name="neck_dof0" type="hinge" axis="0 0 1" range="-1 1" damping="0.5"/>
+          <joint name="neck_dof1" type="hinge" axis="0 1 0" range="-0.5 0.5" damping="0.5"/>
+          <inertial pos="0 0 0" mass="2" diaginertia="0.22 0.2 0.1"/>
+          <geom name="neck_geom" type="capsule" size="0.1 0.3" rgba="0.7 0.5 0.3 1" contype="2" conaffinity="1"/>
+        </body>
+        <body name="shoulder" pos="0 0 0.2" euler="0 0.1 0">
+          <joint name="shoulder_dof0" type="hinge" axis="0 0 1" range="-1 1"/>
+          <joint name="shoulder_dof1" type="hinge" axis="0 1 0" range="-0.5 0.5"/>
+          <joint name="shoulder_dof2" type="hinge" axis="1 0 0" range="-3.14159 3.14159"/>
+          <inertial pos="0 0 0" mass="2" diaginertia="0.22 0.2 0.1"/>
+          <geom name="shoulder_geom" type="capsule" size="0.1 0.3" rgba="0.7 0.5 0.3 1" contype="2" conaffinity="1"/>
+          <body name="hand_left" pos="0 0 0.2" euler="0 0.1 0">
+            <inertial pos="0 0 0" mass="2" diaginertia="0.22 0.2 0.1"/>
+            <geom name="hand_left_geom" type="capsule" size="0.1 0.3" rgba="0.7 0.5 0.3 1" contype="2" conaffinity="1"/>
+            <site name="hand_left_grip" pos="0 0 -0.05" size="0.01"/>
+          </body>
+          <body name="hand_right" pos="0 0 0.2" euler="0 0.1 0">
+            <joint name="hand_right" type="hinge" axis="1 0 0" range="-3.14159 3.14159"/>
+            <inertial pos="0 0 0" mass="2" diaginertia="0.22 0.2 0.1"/>
+            <geom name="hand_right_geom" type="capsule" size="0.1 0.3" rgba="0.7 0.5 0.3 1" contype="2" conaffinity="1"/>
+            <site name="hand_right_grip" pos="0 0 -0.05" size="0.01"/>
+            <body name="club_shaft" pos="0 0 0.2" euler="0 0.1 0">
+              <inertial pos="0 0 0" mass="2" diaginertia="0.22 0.2 0.1"/>
+              <geom name="club_shaft_geom" type="capsule" size="0.1 0.3" rgba="0.7 0.5 0.3 1" contype="2" conaffinity="1"/>
+              <site name="mid_hands" pos="0 0 0.05" size="0.01"/>
+              <body name="club_head" pos="0 0 0.2" euler="0 0.1 0">
+                <inertial pos="0 0 0" mass="2" diaginertia="0.22 0.2 0.1"/>
+                <geom name="club_head_geom" type="capsule" size="0.1 0.3" rgba="0.7 0.5 0.3 1" contype="2" conaffinity="1"/>
+                <site name="clubhead" pos="0 0 0" size="0.01"/>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="slider" pos="0 0 0.2" euler="0 0.1 0">
+        <inertial pos="0 0 0" mass="2" diaginertia="0.22 0.2 0.1"/>
+        <geom name="slider_geom" type="capsule" size="0.1 0.3" rgba="0.7 0.5 0.3 1" contype="2" conaffinity="1"/>
+      </body>
+    </body>
+  </worldbody>
+  <equality>
+    <weld name="right_hand_grip_weld" body1="hand_right" body2="club_shaft" relpose="0 0 0 1 0 0 0" active="true"/>
+  </equality>
+  <actuator>
+    <motor name="act_thorax" joint="thorax" gear="1"/>
+    <motor name="act_neck_dof0" joint="neck_dof0" gear="1"/>
+    <motor name="act_neck_dof1" joint="neck_dof1" gear="1"/>
+    <motor name="act_shoulder_dof0" joint="shoulder_dof0" gear="1"/>
+    <motor name="act_shoulder_dof1" joint="shoulder_dof1" gear="1"/>
+    <motor name="act_shoulder_dof2" joint="shoulder_dof2" gear="1"/>
+    <motor name="act_hand_right" joint="hand_right" gear="1"/>
+  </actuator>
+</mujoco>

@@ -12,6 +12,7 @@ preserving all required invariants:
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from pathlib import Path
 import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only
 
@@ -150,56 +151,73 @@ def _add_joint_element(
     return joint
 
 
-def _add_revolute_joint(
-    robot: ET.Element,
-    *,
-    name: str,
-    parent: str,
-    child: str,
-    origin_xyz: tuple[float, float, float] | str,
-    origin_rpy: tuple[float, float, float] | str,
-    dof: JointDofSpec,
-    damping: float,
-    effort: float = 1000.0,
-    velocity: float = 10.0,
-) -> ET.Element:
+@dataclass(frozen=True)
+class RevoluteJointSpec:
+    """Parameters of one URDF revolute joint (parameter object).
+
+    Preconditions (checked on construction):
+        - ``name``, ``parent`` and ``child`` are non-empty strings
+        - ``damping`` >= 0.0
+    """
+
+    name: str
+    parent: str
+    child: str
+    origin_xyz: tuple[float, float, float] | str
+    origin_rpy: tuple[float, float, float] | str
+    dof: JointDofSpec
+    damping: float
+    effort: float = 1000.0
+    velocity: float = 10.0
+
+    def __post_init__(self) -> None:
+        for field_name in ("name", "parent", "child"):
+            value = getattr(self, field_name)
+            if not isinstance(value, str) or not value:
+                raise ValueError(
+                    f"RevoluteJointSpec.{field_name} must be a non-empty string"
+                )
+        if self.damping < 0.0:
+            raise ValueError(
+                f"RevoluteJointSpec.damping must be >= 0.0, got {self.damping}"
+            )
+
+
+def _format_limit(value: float) -> str:
+    """Format an effort/velocity limit (one decimal when integral)."""
+    return f"{value:.1f}" if value == int(value) else f"{value:g}"
+
+
+def _add_revolute_joint(robot: ET.Element, spec: RevoluteJointSpec) -> ET.Element:
     """Add a revolute joint to the URDF robot element.
 
     Preconditions:
         - robot is a valid ElementTree Element
-        - name, parent, and child are non-empty strings
-        - dof is a valid JointDofSpec instance
-        - damping >= 0.0
+        - spec is a valid RevoluteJointSpec
     Postconditions:
         - Revolute joint element appended to robot with origin, axis, limit, and dynamics
     """
     joint = _add_joint_element(
         robot,
-        name=name,
+        name=spec.name,
         joint_type="revolute",
-        parent=parent,
-        child=child,
-        origin_xyz=origin_xyz,
-        origin_rpy=origin_rpy,
+        parent=spec.parent,
+        child=spec.child,
+        origin_xyz=spec.origin_xyz,
+        origin_rpy=spec.origin_rpy,
     )
 
     ax = ET.SubElement(joint, "axis")
-    ax.set("xyz", _format_floats(dof.axis))
+    ax.set("xyz", _format_floats(spec.dof.axis))
 
     lim = ET.SubElement(joint, "limit")
-    lim.set("lower", f"{dof.limits[0]:g}")
-    lim.set("upper", f"{dof.limits[1]:g}")
-    lim.set(
-        "effort",
-        f"{effort:.1f}" if effort == int(effort) else f"{effort:g}",
-    )
-    lim.set(
-        "velocity",
-        f"{velocity:.1f}" if velocity == int(velocity) else f"{velocity:g}",
-    )
+    lim.set("lower", f"{spec.dof.limits[0]:g}")
+    lim.set("upper", f"{spec.dof.limits[1]:g}")
+    lim.set("effort", _format_limit(spec.effort))
+    lim.set("velocity", _format_limit(spec.velocity))
 
     dyn = ET.SubElement(joint, "dynamics")
-    dyn.set("damping", f"{damping:g}")
+    dyn.set("damping", f"{spec.damping:g}")
 
     return joint
 
@@ -360,6 +378,33 @@ def export_urdf(model: CanonicalModel, out_path: Path | None = None) -> str:
     return xml_content
 
 
+def _add_chain_joint(
+    robot: ET.Element,
+    seg: Segment,
+    parent: str,
+    child: str,
+    dof_index: int,
+) -> None:
+    """Add one revolute joint of ``seg``'s (possibly decomposed) joint chain.
+
+    The first joint of a chain (``parent == seg.parent``) carries the segment
+    origin; intermediate joints sit at the zero offset.
+    """
+    first = parent == seg.parent
+    _add_revolute_joint(
+        robot,
+        RevoluteJointSpec(
+            name=f"{parent}_to_{child}",
+            parent=parent,
+            child=child,
+            origin_xyz=seg.origin.xyz if first else "0.0 0.0 0.0",
+            origin_rpy=seg.origin.rpy if first else "0.0 0.0 0.0",
+            dof=seg.joint.dofs[dof_index],
+            damping=seg.joint.damping,
+        ),
+    )
+
+
 def _export_segment(robot: ET.Element, seg: Segment) -> None:
     """Export a standard segment and its joint(s) to URDF.
 
@@ -372,76 +417,22 @@ def _export_segment(robot: ET.Element, seg: Segment) -> None:
     jt = seg.joint.joint_type
 
     if jt == "revolute":
-        _add_revolute_joint(
-            robot,
-            name=f"{seg.parent}_to_{seg.name}",
-            parent=seg.parent,
-            child=seg.name,
-            origin_xyz=seg.origin.xyz,
-            origin_rpy=seg.origin.rpy,
-            dof=seg.joint.dofs[0],
-            damping=seg.joint.damping,
-        )
+        _add_chain_joint(robot, seg, seg.parent, seg.name, 0)
     elif jt == "universal":
         # Decompose into 2 revolute joints with 1 intermediate dummy link
         inter_name = f"{seg.name}_intermediate"
-        _add_revolute_joint(
-            robot,
-            name=f"{seg.parent}_to_{inter_name}",
-            parent=seg.parent,
-            child=inter_name,
-            origin_xyz=seg.origin.xyz,
-            origin_rpy=seg.origin.rpy,
-            dof=seg.joint.dofs[0],
-            damping=seg.joint.damping,
-        )
+        _add_chain_joint(robot, seg, seg.parent, inter_name, 0)
         _add_dummy_link(robot, inter_name)
-        _add_revolute_joint(
-            robot,
-            name=f"{inter_name}_to_{seg.name}",
-            parent=inter_name,
-            child=seg.name,
-            origin_xyz="0.0 0.0 0.0",
-            origin_rpy="0.0 0.0 0.0",
-            dof=seg.joint.dofs[1],
-            damping=seg.joint.damping,
-        )
+        _add_chain_joint(robot, seg, inter_name, seg.name, 1)
     elif jt == "gimbal":
         # Decompose into 3 revolute joints with 2 intermediate dummy links
         gz_name = f"{seg.name}_gimbal_z"
         gy_name = f"{seg.name}_gimbal_y"
-        _add_revolute_joint(
-            robot,
-            name=f"{seg.parent}_to_{gz_name}",
-            parent=seg.parent,
-            child=gz_name,
-            origin_xyz=seg.origin.xyz,
-            origin_rpy=seg.origin.rpy,
-            dof=seg.joint.dofs[0],
-            damping=seg.joint.damping,
-        )
+        _add_chain_joint(robot, seg, seg.parent, gz_name, 0)
         _add_dummy_link(robot, gz_name)
-        _add_revolute_joint(
-            robot,
-            name=f"{gz_name}_to_{gy_name}",
-            parent=gz_name,
-            child=gy_name,
-            origin_xyz="0.0 0.0 0.0",
-            origin_rpy="0.0 0.0 0.0",
-            dof=seg.joint.dofs[1],
-            damping=seg.joint.damping,
-        )
+        _add_chain_joint(robot, seg, gz_name, gy_name, 1)
         _add_dummy_link(robot, gy_name)
-        _add_revolute_joint(
-            robot,
-            name=f"{gy_name}_to_{seg.name}",
-            parent=gy_name,
-            child=seg.name,
-            origin_xyz="0.0 0.0 0.0",
-            origin_rpy="0.0 0.0 0.0",
-            dof=seg.joint.dofs[2],
-            damping=seg.joint.damping,
-        )
+        _add_chain_joint(robot, seg, gy_name, seg.name, 2)
     elif jt == "fixed":
         _add_fixed_joint(
             robot,
