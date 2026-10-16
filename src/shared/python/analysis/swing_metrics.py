@@ -7,7 +7,6 @@ from scipy.signal import savgol_filter
 
 from src.shared.python.analysis.dataclasses import PeakInfo
 from src.shared.python.core.contracts import ensure
-from src.shared.python.spine import golf_terms
 
 
 class SwingMetricsMixin:
@@ -139,6 +138,10 @@ class SwingMetricsMixin:
             or hip_joint_idx >= self.joint_positions.shape[1]
         ):
             return None
+
+        # Imported lazily: the spine package pulls in plot styling (matplotlib),
+        # and the analysis orchestrator must stay Qt- and matplotlib-free.
+        from src.shared.python.spine import golf_terms
 
         # Shoulder - hip rotation (deg) via the golf-term registry. Only the two
         # columns are passed so negative indices keep their legacy meaning.
