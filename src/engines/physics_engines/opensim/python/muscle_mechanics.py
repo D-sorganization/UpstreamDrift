@@ -27,6 +27,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 from src.shared.python.loop_nullspace.evidence import (
     Array,
     InputProvenance,
@@ -130,7 +131,7 @@ def opensim_muscle_frame(
     is ``COMPLIANT`` unless every selected muscle ignores tendon compliance;
     ``moment_arm_jacobian`` is carried only when ``with_geometry`` is set.
     """
-    import opensim as osim  # lazy: optional engine
+    osim = import_opensim()  # lazy: optional engine
 
     work = osim.State(state)
     mus = _muscles(model, muscles)
