@@ -33,6 +33,11 @@ from src.shared.python.spine.levels import SpinalLevel
 from tests.helpers.opensim_support import require_opensim
 
 
+def _one_level_map():
+    full = load_level_maps()["fixture"]
+    return replace(full, levels={SpinalLevel.L3_L4: full.levels[SpinalLevel.L3_L4]})
+
+
 def _retag_thelen(src: Path, dst: Path) -> Path:
     tree = ET.parse(src)
     for node in tree.iter("Millard2012EquilibriumMuscle"):
@@ -93,7 +98,9 @@ def test_basis_builds_on_thelen_model_and_matches_millard(models) -> None:
         full, levels={SpinalLevel.L3_L4: full.levels[SpinalLevel.L3_L4]}
     )
     a = SpineMuscleBasis(millard, "fixture", level_map=level_map)
-    b = SpineMuscleBasis(thelen, "fixture", level_map=level_map)
+    b = SpineMuscleBasis(
+        thelen, "fixture", level_map=level_map, muscle_model_policy="millard_equivalent"
+    )
     assert a.muscle_names == b.muscle_names
     names = a.model.getCoordinateSet()
     q = np.zeros(names.getSize())
@@ -143,36 +150,105 @@ def test_moment_arm_screen_never_drops_a_nonzero_native_arm() -> None:
 
 @pytest.mark.requires_opensim
 @pytest.mark.integration
-def test_prepared_model_clears_coordinate_locks(tmp_path) -> None:
-    """Locked level coordinates make ID, SO and JR disagree; they are cleared.
+def test_native_policy_refuses_thelen_naming_the_option(models) -> None:
+    _millard, thelen, _tmp = models
+    with pytest.raises(ValueError, match="muscle_model_policy"):
+        SpineMuscleBasis(thelen, "fixture", level_map=_one_level_map())
 
-    The licensed Bruno model locks 105 coordinates (including thoracic
-    lateral-bending and axial-rotation levels) that the segmental drive moves.
-    A locked coordinate has zero acceleration in forward dynamics but not in
-    the inverse-dynamics solver, which broke the joint-reaction acceleration
-    check, and OpenSim reports no moment arm about it.
-    """
-    from src.engines.physics_engines.opensim.python.spine.inverse_dynamics import (
-        prepare_model_for_id,
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_native_policy_accepts_millard_and_reports_no_swap(models) -> None:
+    millard, _thelen, _tmp = models
+    basis = SpineMuscleBasis(millard, "fixture", level_map=_one_level_map())
+    assert basis.swapped_muscles == 0
+    swapped = SpineMuscleBasis(
+        _thelen,
+        "fixture",
+        level_map=_one_level_map(),
+        muscle_model_policy="millard_equivalent",
+    )
+    assert swapped.swapped_muscles == len(swapped.muscle_names) > 0
+
+
+@pytest.mark.unit
+def test_policy_validation() -> None:
+    from src.engines.physics_engines.opensim.python.spine.muscle_model import (
+        check_muscle_model_policy,
     )
 
+    assert check_muscle_model_policy("native") == "native"
+    with pytest.raises(ValueError, match="muscle_model_policy"):
+        check_muscle_model_policy("thelen")
+    with pytest.raises(TypeError):
+        check_muscle_model_policy(1)
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_screened_basis_equals_unscreened_basis(tmp_path) -> None:
+    """The screened moment-arm matrix equals the full native matrix."""
+    from src.engines.physics_engines.opensim.python.spine._osim_helpers import (
+        muscle_moment_arm,
+    )
+
+    require_opensim()
+    path = write_fixture_osim(FixtureSpec(), tmp_path / "m.osim", muscles=True)
+    basis = SpineMuscleBasis(path, "fixture")
+    coords = basis.model.getCoordinateSet()
+    names = tuple(str(coords.get(i).getName()) for i in range(coords.getSize()))
+    q = np.linspace(0.02, 0.09, len(names))
+    qd = np.zeros(len(names))
+    _active, _passive, screened = basis.evaluate(names, q, qd)
+    basis._pose(names, q, qd)
+    full = np.array(
+        [
+            [
+                muscle_moment_arm(basis.model, basis.state, m, c)
+                for c in basis.coordinate_names
+            ]
+            for m in basis.muscle_names
+        ]
+    )
+    np.testing.assert_allclose(screened, full, atol=1e-12, rtol=0.0)
+
+
+def _locked_fixture(tmp_path: Path) -> tuple[Path, str]:
     osim = require_opensim()
     spec = FixtureSpec(levels=(SpinalLevel.L3_L4,))
     path = write_fixture_osim(spec, tmp_path / "locked.osim", muscles=True)
     model = osim.Model(str(path))
     coords = model.getCoordinateSet()
-    for i in range(coords.getSize()):
-        coords.get(i).set_locked(True)
+    name = str(coords.get(coords.getSize() - 1).getName())
+    coords.get(name).set_locked(True)
+    other = str(coords.get(0).getName())
+    coords.get(other).set_locked(True)
     model.printToXML(str(path))
-    prepared = prepare_model_for_id(path)
-    coords = prepared.model.getCoordinateSet()
-    locked = [
-        str(coords.get(i).getName())
-        for i in range(coords.getSize())
-        if coords.get(i).get_locked()
-    ]
-    assert locked == []
-    assert not any(
-        prepared.model.getCoordinateSet().get(i).getLocked(prepared.state)
-        for i in range(coords.getSize())
+    return path, name
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_prepare_unlocks_only_the_named_coordinates(tmp_path) -> None:
+    from src.engines.physics_engines.opensim.python.spine.inverse_dynamics import (
+        prepare_model_for_id,
     )
+
+    path, name = _locked_fixture(tmp_path)
+
+    def locked(prepared) -> set[str]:
+        coords = prepared.model.getCoordinateSet()
+        return {
+            str(coords.get(i).getName())
+            for i in range(coords.getSize())
+            if coords.get(i).get_locked()
+        }
+
+    default = prepare_model_for_id(path)
+    assert name in locked(default) and default.unlocked_coordinates == ()
+    chosen = prepare_model_for_id(path, unlock_coordinates=(name,))
+    assert name not in locked(chosen)
+    assert len(locked(chosen)) == len(locked(default)) - 1
+    assert chosen.unlocked_coordinates == (name,)
+    with pytest.raises(ValueError, match="unknown coordinates"):
+        prepare_model_for_id(path, unlock_coordinates=("nope",))
