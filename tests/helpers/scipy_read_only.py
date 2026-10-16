@@ -24,6 +24,7 @@ from scipy.spatial.transform import Rotation
 READ_ONLY_MESSAGE = "buffer source array is read-only"
 
 _CONSTRUCTORS = ("from_matrix", "from_euler", "from_rotvec", "from_quat")
+_IMMUTABLE_TYPE_FLAG = 1 << 8  # Py_TPFLAGS_IMMUTABLETYPE
 
 
 def _strict(original: Callable[..., Any], name: str) -> Callable[..., Any]:
@@ -50,6 +51,11 @@ def strict_rotation_constructors(monkeypatch: pytest.MonkeyPatch) -> None:
         raise TypeError(
             f"monkeypatch must be a pytest.MonkeyPatch, got {type(monkeypatch).__name__}"
         )
+    if Rotation.__flags__ & _IMMUTABLE_TYPE_FLAG:
+        # SciPy >= 1.15 makes ``Rotation`` an immutable extension type, so it
+        # cannot be patched. Those releases accept read-only arrays themselves,
+        # so there is no defect left to emulate.
+        return
     for name in _CONSTRUCTORS:
         original = getattr(Rotation, name)
         monkeypatch.setattr(Rotation, name, staticmethod(_strict(original, name)))
