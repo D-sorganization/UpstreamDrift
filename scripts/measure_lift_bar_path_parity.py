@@ -1,9 +1,13 @@
-"""Measure cross-engine bar-path parity of the back-squat bundle (LIFT-5, #11745).
+"""Measure cross-engine bar-path parity of a lift bundle (LIFT-5, #11745).
 
 Usage (headless, from the repository root)::
 
-    MUJOCO_GL=egl python3 scripts/measure_lift_bar_path_parity.py \
-        --out docs/development/lifting/evidence/back_squat/bar_path_parity.json
+    MUJOCO_GL=egl python3 scripts/measure_lift_bar_path_parity.py --lift squat
+    MUJOCO_GL=egl python3 scripts/measure_lift_bar_path_parity.py --lift deadlift
+
+``--lift`` reads the bundle and writes the record at the lift recipe's
+evidence paths (``src/shared/python/lifting/lift_recipes.py``); ``--bundle``
+and ``--out`` override them.
 
 Each engine replays the whole committed bundle open loop; an engine whose
 Python package is not importable is recorded as unavailable with the reason,
@@ -28,12 +32,17 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+TOOLS_SRC = ROOT / "vendor" / "ud-tools" / "src"
+if str(TOOLS_SRC) not in sys.path:
+    # Ahead of site-packages so the pinned Tools tree resolves the retired
+    # shared roots (sidekick utils) imported by the same-input pipeline.
+    sys.path.insert(1, str(TOOLS_SRC))
 
-from src.shared.python.lifting.bar_path_parity import (  # noqa: E402
-    BAR_PATH_PARITY_RECORD,
-    replay_bar_path,
+from src.shared.python.lifting.bar_path_parity import replay_bar_path  # noqa: E402
+from src.shared.python.lifting.lift_recipes import (  # noqa: E402
+    bundle_lifts,
+    recipe,
 )
-from src.shared.python.lifting.bundles import BACK_SQUAT_BUNDLE  # noqa: E402
 from src.shared.python.motion_matching.same_input import (  # noqa: E402
     InputBundle,
     VectorPlant,
@@ -91,8 +100,9 @@ def _measure(engine: str, bundle: InputBundle, segment_steps: int) -> dict[str, 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--bundle", type=Path, default=BACK_SQUAT_BUNDLE)
-    parser.add_argument("--out", type=Path, default=BAR_PATH_PARITY_RECORD)
+    parser.add_argument("--lift", choices=bundle_lifts(), default="squat")
+    parser.add_argument("--bundle", type=Path, default=None, help="default: recipe")
+    parser.add_argument("--out", type=Path, default=None, help="default: recipe")
     parser.add_argument(
         "--source-commit",
         default=None,
@@ -113,14 +123,16 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     args = build_parser().parse_args(argv)
-    bundle = InputBundle.load(args.bundle)
+    lift = recipe(args.lift)
+    bundle_path: Path = args.bundle or lift.bundle_path
+    bundle = InputBundle.load(bundle_path)
     engines: dict[str, Any] = {}
     for engine in args.engines.split(","):
         engines[engine] = _measure(engine, bundle, args.segment_steps)
         logger.info("%s %s", engine, json.dumps(engines[engine]))
     record = {
         "lift": bundle.provenance.get("lift"),
-        "bundle": str(args.bundle.resolve().relative_to(ROOT)),
+        "bundle": str(bundle_path.resolve().relative_to(ROOT)),
         "bundle_spec_sha256": bundle.spec_sha256,
         "bundle_steps": bundle.steps,
         "dt_s": bundle.dt_s,
@@ -129,7 +141,7 @@ def main(argv: list[str] | None = None) -> int:
         "generator": "scripts/measure_lift_bar_path_parity.py",
         "engines": engines,
     }
-    out: Path = args.out
+    out: Path = args.out or lift.parity_record_path
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
     logger.info("wrote %s", out)

@@ -1021,6 +1021,7 @@
 {"path": "lifting/baseline_view.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/bundles.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/kinetics_parity.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
+{"path": "lifting/lift_recipes.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/lift_spec.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/opensim_full_body_lifts.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/pack_audit/__init__.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
