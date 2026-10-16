@@ -1,3 +1,14 @@
+# Pragmatic Programmer Weekly Review — 2026-10-16
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `staff/pragmatic-programmer-task-e4180d`; draft PR opened from this branch.
+- Role: fleet Pragmatic Programmer, portfolio-rotation week 1 (`work`). Scope: merged commits on `main` from 2026-10-09 to 2026-10-16 (nearly all landed on 2026-10-16 in a dense merge-queue burst).
+- Objective: qualitative review against *The Pragmatic Programmer* principles (DRY, orthogonality, reversibility, tracer bullets, DbC, broken windows, good-enough software, plain text, shell, transforming programming); no code changes, no issues filed, no leases taken.
+- Completed: `docs/assessments/pragmatic/2026-10-16-work.md` (full report) and `docs/assessments/pragmatic/index.md` (new historical archive index). Findings: DRY violation in duplicate `MakeHumanMeshGenerator` implementations (#12698, broke 18 tests, already fixed); Orthogonality/Tracer-Bullets tension from merge-queue consolidation commits landing 224-file/48k-line single diffs; Broken-Windows debt (LOD/error-handling/suite-marker ratchet baselines) paid down in bursts rather than continuously. Commendations: the SPEC.md change-fragment workflow and the characterization-tests-before-refactor pattern (#12842, #12844).
+- Not done: no Board Meeting packet entry (`docs/board-meetings/` does not exist in this repository; the Board archive lives centrally per the playbook). No fixes applied — this role is advisory only per its playbook.
+- Next steps: Board Meeting consensus process decides whether to act on the improvement pathways in the report; a future rotation should revisit the `infra`/`golf`/`personal` portfolios per the rotation schedule.
+
+---
+
 # GCV-13 Slice 3: Decorative Address Ball in the MuJoCo, OpenSim and MyoSuite Native Export — #11719
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree `UpstreamDrift-wt/g13c`; branch `claude/gcv-13c-native-ball-backends`; PR: not created (committed locally only, by request; the owner reviews and pushes). Stacked on PR #12114 (`claude/gcv-13b-meshcat-ball`, slice 2), itself stacked on #11992 (slice 1).
