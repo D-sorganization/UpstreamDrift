@@ -9,17 +9,29 @@ the model source, the engine identity and the capability gating differ.
 from __future__ import annotations
 
 import math
+from typing import Any
 
+import numpy as np
+from numpy.typing import NDArray
 from src.engines.physics_engines.myosuite.python.full_body_parity import (
     MyoSuiteFullBodyModel,
 )
 from src.shared.python.engine_core.capabilities import Capability, CapabilityLevel
+from src.shared.python.loop_nullspace.derivative_capability import (
+    DerivativeCapabilityUnavailable,
+)
 from src.shared.python.motion_matching.multi_engine_torque_allocator import (
     EngineType,
     MujocoForceAdapter,
 )
 
 __all__ = ["MyoSuiteForceAdapter"]
+
+Array = NDArray[np.float64]
+_REGULARISATION_GATED = (
+    Capability.CLOSED_LOOP_SNAPSHOT,
+    Capability.CLOSED_LOOP_DERIVATIVES,
+)
 
 
 class MyoSuiteForceAdapter(MujocoForceAdapter):
@@ -53,9 +65,27 @@ class MyoSuiteForceAdapter(MujocoForceAdapter):
         self._model.kkt_regularization = number
 
     def capability(self, capability: Capability) -> CapabilityLevel:
-        """``FULL`` snapshot iff ``kkt_regularization == 0``; else ``NONE``."""
-        if capability is Capability.CLOSED_LOOP_SNAPSHOT and (
-            self.kkt_regularization != 0.0
-        ):
+        """Snapshot ``FULL`` / derivatives ``PARTIAL`` iff ``kkt_regularization == 0``.
+
+        Otherwise ``NONE``: a Tikhonov term makes the engine a different system.
+        """
+        if capability in _REGULARISATION_GATED and self.kkt_regularization != 0.0:
             return CapabilityLevel.NONE
         return super().capability(capability)
+
+    def constrained_acceleration_derivatives(
+        self, q: Array, v: Array, tau: Array, *, step: float = 1e-5
+    ) -> Any:
+        """Hard-KKT finite-difference derivatives; refuses unless regularisation is 0.
+
+        Raises :class:`DerivativeCapabilityUnavailable` when
+        ``kkt_regularization != 0`` (the derivatives would be of a regularised
+        solve, not of the rigid closure).  Muscle activation states are
+        unsupported until NSX-94.  Otherwise identical to the MuJoCo adapter.
+        """
+        if self.kkt_regularization != 0.0:
+            raise DerivativeCapabilityUnavailable(
+                "MyoSuite closed-loop derivatives require kkt_regularization == 0 "
+                f"(exact rigid weld solve); got {self.kkt_regularization:g}"
+            )
+        return super().constrained_acceleration_derivatives(q, v, tau, step=step)

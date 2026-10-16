@@ -1046,6 +1046,7 @@
 {"path": "logging_pkg/logger_utils.py", "classification": "tools-only", "package": "logging_pkg", "spelling_only": false}
 {"path": "logging_pkg/logging_config.py", "classification": "tools-only", "package": "logging_pkg", "spelling_only": false}
 {"path": "loop_nullspace/__init__.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/adapter_derivatives.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/admission.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/capacity.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/closure_convention.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
