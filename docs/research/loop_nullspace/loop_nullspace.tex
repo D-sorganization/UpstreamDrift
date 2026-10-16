@@ -569,6 +569,25 @@ $\tau_i$, which vary across the family, and is \texttt{FAMILY\_DEPENDENT}.
 Measured-state diagnostics, replay-state diagnostics and counterfactual
 rollouts are three different things and are labelled separately.
 
+\paragraph{Implementation and Reproduction.}
+\texttt{loop\_nullspace/constrained\_dynamics.py} evaluates the projector with a
+Cholesky factor of $M$ and a Hermitian pseudo-inverse of $J_cM^{-1}J_c^{\top}$
+(relative cut-off $10^{-12}$); the Baumgarte terms are declared, replacing
+$\dot J_cv$ by $\dot J_cv+2\alpha\dot e+\beta^2e$ with $e=\Phi(q)$ and
+$\dot e=J_cv$.  The legacy pendulum golfer has a massless club coordinate, so
+its $M$ is only semi-definite and $J_c$ is rank deficient; it uses the
+equivalent augmented block system $[[M,-J_c^{\top}],[J_c,0]]$ (least squares if
+singular), and its multiplier has the opposite sign convention.  A rollout
+integrates $\dot q=v$, $\dot v=a(q,v,\tau)$ with one RK4 step per sample and the
+load held over the step; a null-space torque is a family member only at the
+state it was sampled for, so later samples drift by $O(\Delta t)$.  Evidence
+against Pinocchio \texttt{constraintDynamics} on the 41-coordinate anthro model
+(zero torques for ZTCF, zero velocities and torques for ZVCF) gives scaled
+agreement $8.4\times10^{-12}$ and $3.9\times10^{-13}$.  Reproduce with
+\texttt{python3 -m pytest tests/unit/simulation\_backends/test\_constrained\_ztcf\_zvcf.py
+tests/unit/motion\_matching/test\_counterfactual\_constrained.py -n 0}.
+This is software-correctness evidence only; it is not scientific qualification.
+
 \section{Envelope Geometry}
 \label{sec:envelope}
 
