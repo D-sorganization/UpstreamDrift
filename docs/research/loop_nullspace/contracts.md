@@ -1408,3 +1408,54 @@ linear tangent model at the nominal motion; they compare mechanisms inside a
 model, not golfers, and are not coaching advice until externally validated. The
 ledger records software correctness only; scientific qualification stays in the
 design-manual governance pathway.
+
+## NSX-98 Sensitivity and Variance Conformance (#12727)
+
+`tests/integration/cross_engine/test_loop_nullspace_derivative_conformance.py`
+extends the NSX-56 harness from the snapshot arrays to the derivatives of the
+rigid closed-loop solve. The registry check is
+`closed_loop_derivative_conformance` in
+`tests/integration/cross_engine/divergence_registry.yaml` (40 rows: four engine
+pairs against the Pinocchio ANALYTIC reference, ten metrics each).
+
+* **Track N** compares `d a/d tau`, `d a/d xi`, `d a/d eta` and the three
+  `d lambda` blocks as basis-independent operators (`D P^T` for state blocks) in
+  the Pinocchio coordinate order, at the NSX-56 projected states (frames 0 and
+  400), one seeded actuated load and one closure tangent space.
+* **Track S** (scientific comparison, not a measured noise level) compares the
+  first-order covariance maps the sensitivities induce under a *declared* unit
+  isotropic noise: `acc_load_variance = A S A^T`, `acc_state_variance = D_xi
+  D_xi^T + D_eta D_eta^T` and the two reaction analogues. Face-angle kernels and
+  minimum-variance allocations (NSX-89 to NSX-92) are not in this stack, so they
+  are **not** compared here.
+* **Tolerances are derived, then registered.** Load blocks: `kkt_bound` with a
+  zero right-hand side times `sqrt(nv)`. State blocks of a finite-difference
+  engine (MuJoCo, MyoSuite, OpenSim): the Track N differences propagated with
+  `kkt_bound`, divided by the step, times `sqrt(k)` (NSX-88). State blocks of an
+  exact engine (Drake): the spread of the engine-free NSX-84 finite-difference
+  reference under step x0.5 and x2 (NSX-86). Covariances: `d (2|B| + d)`. The
+  registry value is the larger bound over the two frames rounded up to two
+  significant digits; a test requires every registered value to cover the
+  per-run derived bound, and another that the measured difference stays inside it.
+* **Capability matrix.** Pinocchio ANALYTIC and Drake AUTODIFF are `FULL`;
+  MuJoCo, MyoSuite and OpenSim are `PARTIAL` (finite difference). Simscape has no
+  native adapter and is declared `NONE` in `default_registry()` with its reason.
+* **Planted errors fail.** A sign flip, a swap of the force and torque halves of
+  the grip wrench, a two-name coordinate swap and a 0.1 percent load-block error
+  are each caught. Derivatives whose scheme marks soft stepping
+  (`mjd_transition`, `solref`, `solimp`) are refused: soft and hard dynamics are
+  never mixed.
+* **Measured versus bound** (scaled, worst of the two frames; the registered
+  value is the bound). All measurements are inside their bounds; no divergence
+  is registered. Load blocks: measured 2e-11 or better against bounds near 1e-9
+  (`d a`) and 6e-7 (`d lambda`). State blocks, finite-difference engines:
+  measured up to 7e-3 (`d a/d eta`, OpenSim, frame 0) against bounds up to 0.7
+  (`d lambda/d eta` up to 1.8): the propagated bound is sound but loose by two
+  to four orders for the state blocks. Drake: measured 7.5e-11 or better against
+  resolution-limited bounds from below 1e-9 up to 3.4e-4.
+* **Non-claims.** The MyoSuite rows inherit the MuJoCo derivation (the adapter
+  drives the same routine) and were not measured on the authoring host, where
+  the installed `myosuite` exposes no supported runtime layout (#12635); the
+  `requires_myosuite` test enforces the per-run bound wherever it loads. The
+  variance rows use declared, not measured, noise. Numerical conformance is not
+  physical validation.
