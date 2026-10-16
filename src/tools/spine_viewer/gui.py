@@ -44,6 +44,8 @@ class SpineViewerWidget(QtWidgets.QWidget):
         self._combo.addItems(core.LOAD_QUANTITIES)
         self._combo.currentTextChanged.connect(self._redraw)
         open_button = QtWidgets.QPushButton("Open Study Receipt...")
+        # noqa: gui-thread/ok - opens a modal file dialog, then reads one receipt
+        # and hashes one small per-level loads artifact; nothing is simulated.
         open_button.clicked.connect(self._choose_file)
         controls = QtWidgets.QHBoxLayout()
         controls.addWidget(open_button)
