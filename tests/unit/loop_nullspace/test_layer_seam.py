@@ -61,7 +61,7 @@ def test_impedance_closes_the_pendulum_tangent_chain_in_closed_form(cls) -> None
     prov = cls(pend, EUCLID2, basis_field=tangent_field)
     derivs = prov.constrained_acceleration_derivatives(q, v, pend.load(0.0))
     ss = tl.tangent_state_space(
-        derivs, q=q, manifold=EUCLID2, basis_field=tangent_field
+        derivs, q=q, v=v, manifold=EUCLID2, basis_field=tangent_field
     )
     basis, offset = prov.tangent_velocity_offset(q, v)
     k, d = 40.0, 6.0
