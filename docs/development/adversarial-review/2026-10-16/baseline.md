@@ -3,7 +3,7 @@
 Every tracked Python file was scanned. This page is evidence for the review, not a finding list; the reviewer
 decided which of these matter and wrote those up as findings.
 
-## The Repo's Own Ruff Check (as CI Would Run It)
+## The Repo's Own Ruff Check
 
 Command: `ruff check .`
 
