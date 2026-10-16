@@ -192,3 +192,35 @@ def planar_dynamics(q: Array, v: Array, params: PlanarGolferParams) -> dict[str,
         "grip": pos_g,
     }
     return out
+
+
+class PlanarGolferProvider:
+    """``ConstrainedEquationsOfMotionProvider`` over :func:`planar_dynamics`.
+
+    The independent planar oracle as a state-dependent provider (``M(q)``,
+    ``h(q, v)``, ``J_c(q)``, ``Jdot_v(q, v)``), used by the NSX-30 constrained
+    counterfactual tests.  Test fixture, not a golfer model.
+    """
+
+    def __init__(self, params: PlanarGolferParams) -> None:
+        self._params = params
+
+    def mass_matrix(self, q: Array) -> Array:
+        """``M(q)`` of the planar golfer."""
+        return planar_dynamics(q, np.zeros(N_Q), self._params)["M"]
+
+    def bias_forces(self, q: Array, v: Array) -> Array:
+        """``h(q, v)`` including gravity."""
+        return planar_dynamics(q, v, self._params)["h"]
+
+    def closure_jacobian(self, q: Array) -> Array:
+        """``J_c(q)``, shape ``(2, 5)``."""
+        return planar_dynamics(q, np.zeros(N_Q), self._params)["Jc"]
+
+    def closure_drift(self, q: Array, v: Array) -> Array:
+        """``Jdot_v(q, v)``, shape ``(2,)``."""
+        return planar_dynamics(q, v, self._params)["Jdot_v"]
+
+    def closure_error(self, q: Array) -> Array:
+        """Position-level closure error ``Phi(q)``, shape ``(2,)``."""
+        return planar_dynamics(q, np.zeros(N_Q), self._params)["phi"]
