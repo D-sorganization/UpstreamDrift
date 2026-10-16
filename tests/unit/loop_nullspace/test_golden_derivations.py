@@ -75,6 +75,7 @@ NAMES = [
     "grasp_map_worked_example",
     "c_pm_identity",
     "closure_convention",
+    "variability_sensitivity",
 ]
 
 
