@@ -1,0 +1,157 @@
+\subsection{Movement Variants of the Matched Swing}
+\label{sec:spn-13b}
+
+This section documents \texttt{spine/movement\_variants.py} (shared, pure
+NumPy), the definitions in \texttt{src/config/spine\_movement\_variants.json}
+and the OpenSim adapter \texttt{opensim/python/spine/variant\_inputs.py}
+(issue \#12767, epic \#12735). A movement variant is a named, versioned and
+reproducible perturbation of the pelvis-to-thorax rotation series $R(t)$ of a
+matched swing, expressed through one golf-term registry id
+(Section~\ref{sec:spn-4a}). It produces inputs for the existing pipeline
+(drive, inverse dynamics, static optimisation, joint reactions); it changes no
+coupling law and adds no load model.
+
+\paragraph{Frames and Angles.}
+$R(t)$ is the thorax frame expressed in the pelvis frame (ADR-0055: X
+anterior, Y cranial, Z right). Its \texttt{isb\_spine} intrinsic ZXY
+decomposition is $R = R_z(\mathrm{FE})\,R_x(\mathrm{LB})\,R_y(\mathrm{AR})$.
+The registry terms are $x = s\,\mathrm{AR}$
+(\texttt{x\_factor\_jcs\_axial}), $l = s\,\mathrm{LB}$
+(\texttt{trunk\_lateral\_flexion\_jcs}) and $e = \mathrm{FE}$
+(\texttt{trunk\_extension\_jcs}), with the handed sign $s=-1$ for a
+right-handed and $s=+1$ for a left-handed golfer (ADR-0055 item 4). Terms and
+parameters are in degrees, time in seconds.
+
+\paragraph{Rotation-Space Operation.}
+A variant changes its term by $\delta(t)$ degrees through a composition with a
+rotation about that term's joint-coordinate-system axis, with
+$a(t) = s\,\delta(t)$ ($s=1$ for extension):
+\begin{align}
+  e:&\quad R' = R_z(a)\,R, \\
+  x:&\quad R' = R\,R_y(a), \\
+  l:&\quad R' = R\,R_y(\mathrm{AR})^{\mathsf T} R_x(a)\, R_y(\mathrm{AR}).
+\end{align}
+The extension axis is the proximal (pelvis) Z axis, the axial axis the distal
+(thorax) Y axis and the lateral-flexion axis the floating axis. Because these
+are the axes of the Cardan factors, $R'$ has the declared coordinate shifted by
+exactly $a$ and the two others unchanged; angles are never added to a rebuilt
+matrix. Frames with $|\mathrm{LB}| = 90^\circ$ (gimbal lock) inside the window
+make FE and AR inseparable and raise an error.
+
+\paragraph{Time Profiles.}
+With window event times $t_0 < t_1 \le t_2 < t_3$ the C1 raised-cosine window is
+$w=0$ outside $[t_0,t_3]$, $w = \tfrac12(1-\cos\pi u)$ on $[t_0,t_1]$ with
+$u=(t-t_0)/(t_1-t_0)$, $w=1$ on $[t_1,t_2]$ and
+$w = \tfrac12(1+\cos\pi u)$ on $[t_2,t_3]$ with $u=(t-t_2)/(t_3-t_2)$. The
+operations are
+\begin{align}
+  \text{scale } (k):&\quad \delta(t) = (k-1)\,q(t)\,w(t), \\
+  \text{offset } (d):&\quad \delta(t) = d\,w(t), \\
+  \text{shift\_peak } (m):&\quad \delta(t) = q(\tau(t)) - q(t),
+\end{align}
+where $q$ is the term and $\tau$ the monotone piecewise-linear warp with
+$\tau(t_s)=t_s$, $\tau(t_{p+m}) = t_p$, $\tau(t_e)=t_e$ on the window
+$[t_s,t_e]$ and $p$ the index of the term's maximum inside it. Frames outside
+the window are returned bit-identical. The pseudo-events \texttt{start} and
+\texttt{end} denote the first and last sample.
+
+\paragraph{Shipped Variants.}
+Version 1 of the definitions holds five variants. Parameter bounds and the
+term bounds are declared study-design limits (assumptions), not cited ranges of
+motion.
+\begin{center}
+\begin{tabular}{llll}
+\hline
+Id & Term, Operation & Window & Parameter (Default, Bounds) \\
+\hline
+\texttt{x\_factor\_top\_scale} & $x$, scale & address, top, top, impact & $k$ (0.8, [0.5, 1.5]) \\
+\texttt{downswing\_crunch\_offset} & $l$, offset & top, impact, impact, end & $d$ (5, [$-15$, 15]) deg \\
+\texttt{downswing\_crunch\_scale} & $l$, scale & top, impact, impact, end & $k$ (0, [0, 2]) \\
+\texttt{impact\_extension\_offset} & $e$, offset & top, impact, impact, end & $d$ (5, [$-15$, 15]) deg \\
+\texttt{x\_factor\_peak\_shift} & $x$, shift\_peak & address, impact & $m$ (5, [$-20$, 20]) samples \\
+\hline
+\end{tabular}
+\end{center}
+The X-factor at the top of the backswing is scaled ($k=0.8$ or $1.2$ as in the
+issue); lead lateral flexion (crunch) is added or removed through the
+downswing with the full change at impact; trunk extension at impact is a
+pelvis-relative proxy of the reverse-spine-angle posture; the peak X-factor is
+moved relative to the pelvis by whole samples, keeping its value.
+
+\paragraph{Targets and Undeclared Terms.}
+The target of scale and offset variants is $q'(t)=k\,q(t)$ or $q(t)+d$ at
+the plateau samples; that of the peak shift is $q'(t_{p+m}) = q(t_p)$ with the
+maximum at $p+m$. \texttt{apply\_variant} re-evaluates the term with the
+registry on the varied rotations and asserts the target to $10^{-6}$ deg.
+Each variant lists its \texttt{affected\_terms} (its term and
+\texttt{crunch\_factor\_rate} when it depends on it); every other term
+computable from $R(t)$ and $t$ is unchanged within
+\texttt{undeclared\_tolerance\_deg} $=10^{-8}$ in that term's units.
+Lab-frame terms (line turn, side bend, reverse spine angle) follow the thorax
+orientation in ground and are not held. \texttt{early\_extension} uses only
+the pelvis position, which no variant changes.
+
+\paragraph{Non-Trunk Segments and Range Checks.}
+All shipped variants use \texttt{thorax\_relative\_hold}: arm and head
+coordinates are thorax-relative and are held, so the arms follow the thorax;
+the pelvis and legs are unchanged. The club path in ground therefore changes:
+a variant is a perturbation, not a re-matched swing. \texttt{variant\_golf\_input}
+replaces only the trunk rotation of a \texttt{GolfTrunkInput}, maps event times
+to their nearest samples and records the variant source in
+\texttt{source["variant"]}, which the drive stage carries into
+\texttt{DriveResult.input\_source}. \texttt{check\_model\_ranges} compares the
+driven level coordinates with the target model's coordinate ranges
+($[\min, \max]$ read natively); violations are reported, never clipped, and
+the coupling law is untouched.
+
+\paragraph{Provenance and Seeds.}
+Every result records the variant id and version, operation, term, parameter
+name, units and value (the default when not given), handedness, window events
+and indices, the non-trunk policy and the SHA-256 of the input rotations and
+times, and carries
+\texttt{distribution\_source} $=$
+\texttt{movement\_variant:<id>@<version>;<term>:<operation>(<name>=<value>);handedness=<h>}.
+\texttt{sample\_variant\_parameters(variant, seed, count)} draws parameters
+uniformly inside the bounds with \texttt{numpy.random.default\_rng(seed)}; there
+is no global random state.
+
+\paragraph{Limitations.}
+Variants act on the global pelvis-to-thorax rotation only; per-level
+distribution is that of the chosen coupling law. The peak shift is quantised to
+whole samples. The bounds are assumptions. Variants are kinematic what-if
+inputs with no claim of physiological realisability beyond the model range
+check; the study request (Section~\ref{sec:spn-13a}) accepts a variant id
+as described below, so no varied motion file is written.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/shared/python/spine/test_movement_variants.py \
+    tests/opensim/spine/test_variant_inputs.py -q -n 0
+\end{verbatim}
+The native tests need OpenSim 4.6 (\texttt{requires\_opensim}); all fixture
+numbers are invented.
+
+\paragraph{Running a Variant Through the Study.}
+A study request may name one shipped variant through \texttt{variant\_id},
+an optional \texttt{variant\_parameter} (the variant default when absent) and
+\texttt{variant\_handedness} (\texttt{right} by default).  The parameter is
+checked against the variant's declared bounds when the request is built; an
+unknown id or an out-of-bounds value raises \texttt{ValueError}.  In the
+golf-input stage the study calls the variant generator described above on the
+trunk rotation of the motion file; the window events (address, top, impact)
+are read from the \texttt{event\_*} header lines of that file, and a missing
+event fails the golf-input stage.  The coupling laws, the drive and every
+downstream stage are unchanged; the varied input reaches the drive stage with
+its \texttt{distribution\_source} string.
+
+The request fingerprint covers the variant id, version, resolved parameter and
+handedness, and the SHA-256 of the variants configuration file, which is also
+listed in the receipt inputs.  The receipt gains a \texttt{variant} record
+holding the same description, the variant \texttt{distribution\_source}, the
+target error, the term-bound flag and the model-range report.  The driven
+level coordinates are compared with the segmental model's own coordinate
+ranges; any violation, or an exceeded term bound, gives the status
+\texttt{unqualified} and is never clipped.  A request without a variant
+produces the same canonical request, fingerprint and receipt bytes as before.
+Reproduce with
+\texttt{python -m pytest tests/opensim/spine/test\_study\_variant.py -n 0}.

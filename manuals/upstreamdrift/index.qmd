@@ -138,3 +138,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/66-segmental-spine.qmd >}}
 
 {{< include chapters/67-flexible-golf-shaft.qmd >}}
+
+{{< include chapters/68-segmental-spine-loads-and-studies.qmd >}}

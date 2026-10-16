@@ -1,0 +1,90 @@
+\subsection{Driving a Coupled Segmental Model}
+\label{sec:spn-9b}
+
+This section documents \texttt{drive.py} (issue \#12757, epic \#12735), which
+distributes the golf trunk rotation of \S\ref{sec:spn-9a} over the spinal
+levels of a segmental OpenSim model, frame by frame, and exports the result as
+a coordinate \texttt{.mot}.
+
+\paragraph{Chain Identity.}
+For levels $1,\dots,n$ (caudal first) with neutral offsets $T_{i0}$ (from the
+native inventory) and ISB ZXY angles $\theta_i$, the terminal body rotation in
+the pelvis frame is
+\[
+  R(\varphi) = B\,R_1\cdots R_n\,E,\qquad
+  R_i = R_{i0}\,R_z(\theta_{i,1})R_x(\theta_{i,2})R_y(\theta_{i,3}),\qquad
+  \theta = \mathrm{law}(\varphi).
+\]
+$B$ is the first inferior body in the pelvis body frame and $E$ the terminal
+body in the last superior vertebra frame, both read natively at zero
+coordinates (\texttt{chain\_offsets\_from\_model}); they enter the solver as
+\texttt{ChainOffsets}. The connections pelvis to first body and last vertebra
+to terminal body are assumed rigid.
+
+\paragraph{Per-Frame Distribution.}
+With target $R_\star = R_{\mathrm{pelvis}\to\mathrm{torso}}\,A$ each frame solves
+\[
+  \varphi^\ast = \arg\min_\varphi \bigl\| \log\!\bigl(R_\star^{\mathsf T}
+  R(\varphi)\bigr) \bigr\|
+\]
+by \texttt{distribute\_series\_detailed} (warm-started analytic-Jacobian
+trust-region solve). The law is never altered. The geodesic residual
+$\|\log(R_\star^{\mathsf T}R(\varphi^\ast))\|$ is stored per frame; a frame is
+flagged invalid when the solve did not converge or the residual exceeds the
+optional \texttt{tolerance\_rad}. Invalid frames are kept as solved and are
+never repaired or rescaled. When no law is given it is extracted from the
+model's own \texttt{CoordinateCouplerConstraint}s. The law must cover exactly
+the model's levels.
+
+\paragraph{Frame Alignment.}
+The segmental terminal frame is assumed to coincide with the
+\texttt{golf\_humanoid} torso frame ($A=I$ by default), and the pelvis body
+frames likewise. A known fixed rotation $A$ (terminal frame expressed in the
+golf torso frame) can be supplied as \texttt{torso\_alignment}. This
+assumption is not validated by the code; a wrong $A$ biases the distribution
+without raising the residual.
+
+\paragraph{Coordinate Table.}
+Level coordinates are named by the inventory and equal
+$s_k\,\theta_{i,k}$ with $s_k=\pm1$ the level-map axis sign. The six pelvis
+coordinates are intrinsic Euler angles (sequence \texttt{ZXY} for
+\texttt{golf\_humanoid}, \texttt{XYZ} for the fixture free joint; unwrapped
+over time) of the pelvis pose in ground plus the pelvis origin position; the
+ground-pelvis offset frames are assumed to be identity. Units are radians and
+metres. Arm and leg coordinates of the golf model are not part of the
+segmental model and are not exported.
+
+\paragraph{Export.}
+\texttt{export\_mot} writes the table natively with \texttt{STOFileAdapter}
+and \texttt{inDegrees=no}; the independent coordinates of the law can be added
+on request. \texttt{DriveResult} carries the kinematics series
+(\texttt{distribution\_source}, validity mask), residual and independent
+coordinate series, the coordinate table, the law id and version, the model
+SHA-256 and the input source (basename and SHA-256 only).
+
+\paragraph{Verification.}
+A synthetic input generated from the fixture's own law and a known
+$\varphi(t)$ is recovered with residual below $10^{-8}$~rad. The exported
+\texttt{.mot} is replayed natively on the coupled fixture, and the
+thorax-proxy rotation in the pelvis frame and the pelvis pose agree with the
+target to $10^{-8}$. A law that cannot reach the target yields reported
+residuals above $10^{-3}$~rad and invalid flags under a $10^{-6}$~rad
+tolerance. Evidence: the 654-frame swing
+\texttt{os7\_moco\_g1/inputs/ik\_states\_full.sto} (model
+\texttt{golf\_humanoid\_scaled\_tour\_markers.osim}) driving a 17-level
+fixture with the \texttt{bruno2015\_regional} law gives a maximum residual of
+$1.2\times10^{-13}$~rad with a maximum $|\varphi|$ of about 2.3~rad on the
+largest axis. A small residual shows that the three-parameter law reaches this
+swing's rotations on the fixture chain; it is not evidence that the
+distribution is physiologically correct.
+
+\paragraph{Limitations.}
+Rotations only; no dynamics. Axis signs come from the level-map registry, not
+from the inventory object. Models whose pelvis-to-first-body or
+last-vertebra-to-terminal connection is not rigid are not supported by the
+native offset reader.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/opensim/spine/test_drive.py -q -n 0
+\end{verbatim}

@@ -138,6 +138,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 916 | `src/tools/bunker_shot_gui/export.py` |
 | 914 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 913 | `src/engines/physics_engines/opensim/python/tour_matching/native_diagnostic_contract.py` |
+| 911 | `src/engines/physics_engines/opensim/python/spine/inverse_dynamics.py` |
 | 908 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 907 | `src/unreal_integration/mesh_loader.py` |
 | 903 | `src/shared/python/motion_matching/club_only/body_candidates.py` |
@@ -185,6 +186,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 836 | `src/shared/python/perturbation/cross_engine_runner.py` |
 | 835 | `src/shared/python/engine_core/engine_probes.py` |
 | 833 | `src/shared/python/ui/qt/widgets/signal_toolkit_ui_mixin.py` |
+| 832 | `src/shared/python/injury/spinal_load_analysis.py` |
 | 831 | `src/bunkershot3d/solvers/mpm/constitutive.py` |
 | 831 | `src/tools/starting_pose_matcher/gui_builders_mixin.py` |
 | 830 | `src/research/deformable/objects.py` |

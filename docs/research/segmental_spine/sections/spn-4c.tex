@@ -1,0 +1,41 @@
+\subsection{Swing Metrics and API X-Factor Golf-Term Migration}
+
+\paragraph{Scope.}
+\texttt{SwingMetricsMixin.compute\_x\_factor} in
+\texttt{src/shared/python/analysis/swing\_metrics.py} no longer carries its own
+formula. It calls \texttt{spine.golf\_terms.evaluate} with the term
+\texttt{x\_factor\_position\_proxy}, which now holds the formula. The API
+service \texttt{AnalysisService.\_compute\_x\_factor}
+(\texttt{src/api/services/analysis\_service.py}) obtains its X-factor series and
+stretch rate through that mixin, so it selects the same term without a second
+copy; its response payload is unchanged. The registry never imports the
+analysis or API packages, so no import cycle arises.
+
+\paragraph{Equations and Units.}
+With generalised coordinates $q_s,q_h$ (radians) of the shoulder and hip
+rotation columns,
+\begin{equation}
+  X(t) = \frac{180}{\pi}\bigl(q_s(t)-q_h(t)\bigr)\quad[\mathrm{deg}].
+\end{equation}
+The stretch rate $\dot X=\mathrm{d}X/\mathrm{d}t$ (central differences,
+\texttt{numpy.gradient}) and its peak are still computed in the mixin.
+
+\paragraph{Assumptions and Limitations.}
+The term is a legacy joint-coordinate proxy, not the ISB joint-coordinate axial
+rotation, and is not handed. The mixin passes only the two selected columns, so
+negative indices keep their legacy meaning; out-of-range indices still return
+\texttt{None}. NaN gaps still propagate (the registry term now accepts NaN in
+\texttt{joint\_positions}); infinities are rejected with \texttt{ValueError}
+where the inline code propagated them. The optimiser spinal-compression
+heuristic (\texttt{optimization/\_swing\_objectives.py}) is not a golf term and
+is handled by SPN-12.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/unit/analysis tests/unit/api/test_analysis_service.py \
+  tests/shared/python/spine/test_golf_terms.py -q -n 0 -o addopts=""
+\end{verbatim}
+Golden values in
+\texttt{tests/unit/analysis/test\_x\_factor\_golf\_terms\_delegation.py} were
+captured from the pre-migration code on invented inputs and hold to
+$10^{-12}$; delegation is asserted by spying on \texttt{golf\_terms.evaluate}.

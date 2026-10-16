@@ -1,0 +1,90 @@
+\subsection{Spine Study Execution and Receipts}
+\label{sec:spn-13a}
+
+This section documents \texttt{spine/study.py}, \texttt{spine/study\_stages.py}
+and \texttt{spine/study\_receipt.py} (issue \#12766, epic \#12735). They chain
+the merged pipeline of Sections~\ref{sec:spn-9a}, \ref{sec:spn-9b},
+\ref{sec:spn-10a}, \ref{sec:spn-10b} and~\ref{sec:spn-10c} into one
+deterministic, hash-pinned run that maps a \texttt{SpineStudyRequest} to a
+\texttt{SpineStudyReceipt}. The module adds no model and no equation of its
+own; it is the record of which bytes, code and settings produced which numbers.
+
+\paragraph{Pipeline.}
+The stages run in a fixed order: golf input (trunk rotation $R_{pt}$ of the
+golf humanoid), segmental drive (level coordinates and the \texttt{.mot}),
+spinal inverse dynamics (generalized effort $\tau$ and the pelvis residual
+wrench), trunk static optimisation (muscle forces and reserves $r$, with
+$\tau = \tau_{\mathrm{muscle}} + r$), and joint reactions (force $\mathbf F$
+and moment $\mathbf M$ on the superior vertebra by the inferior one, in the
+inferior ISB frame, compression $+F_y$). The inverse dynamics solve runs twice
+(per level for the load series and per coordinate for the static
+optimisation), by design of the merged API. Context-band comparisons
+(Section~\ref{sec:spn-11b}) use the joint reaction series and the model body
+mass $m = W/g$ with $W$ the model weight in N; they are reported with
+\texttt{is\_acceptance} equal to false.
+
+\paragraph{Request.}
+A request names the motion, the golf model, the segmental model (a path, or a
+licensed asset id resolved through its manifest environment variable), the
+level-map key, the coupling law id (or none, to extract the law from the model
+couplers), the cost exponent $p\in\{2,3\}$, optional external loads, the frame
+selection (events, stride, \texttt{max\_frames}), the pelvis encoding, and the
+declared tolerances: the drive residual flag $\varepsilon_{\mathrm{drive}}$
+[rad], the pelvis residual budget (peak force over $W$, peak moment over
+$W\,h$), and the reserve limit [N$\cdot$m] and maximum share. The output
+directory is not part of the request identity.
+
+\paragraph{Request Identity.}
+With $H(\cdot)$ the SHA-256 and $\mathcal{C}$ the canonical request (basenames
+and values, no directories),
+\[
+  \mathtt{request\_sha256} = H\bigl(\mathrm{json}(\mathcal{C},\;
+  \{(\mathrm{role}_k, H(\mathrm{file}_k))\})\bigr),
+\]
+over the motion, golf model, segmental model, ExternalLoads XML (and its
+referenced data file when present) and the configuration JSON files
+\texttt{spine\_coupling\_laws.json}, \texttt{spine\_model\_level\_maps.json},
+\texttt{spine\_golf\_context\_bands.json} (plus \texttt{spine\_model\_assets.json}
+for a licensed asset). Any changed byte changes the identity.
+
+\paragraph{Receipt.}
+The receipt holds the schema version, the request and its identity, every
+input hash, the code version (git SHA, injectable), the OpenSim, SciPy and
+NumPy versions, the law as \texttt{id@version}, the
+\texttt{distribution\_source}, the asset admission record, one record per
+stage (provenance strings and rounded metrics), the output artifacts with
+their SHA-256 (\texttt{.mot} and a loads \texttt{.npz}), residual statistics,
+reserve flags and the context comparisons. It contains no timestamp and no
+absolute path (recorded texts are scrubbed of input and output directories).
+Floats are rounded to ten significant digits; JSON is written with sorted keys
+and a trailing newline, so equal requests on equal inputs give byte-identical
+receipts and artifacts.
+
+\paragraph{Status.}
+Status is fail-closed. \texttt{failed}: a stage raised
+(\texttt{ValueError}, \texttt{OSError} or \texttt{RuntimeError}); the failing
+stage is the last record. \texttt{unqualified}: a licensed asset is not
+\texttt{QUALIFIED} (missing, unpinned or hash mismatch; a missing asset skips
+all stages), any drive frame is invalid, the pelvis residual exceeds the
+declared budget, any frame is flagged for reserve use, or any optimisation
+solve is unsuccessful. \texttt{pass}: none of these. \texttt{pass} is a
+software statement only; \texttt{scientific\_status} is always
+\texttt{unqualified}, and the receipt constructor refuses \texttt{pass} with a
+non-qualified asset.
+
+\paragraph{Assumptions and Limitations.}
+Hashes pin bytes, not meaning: an anatomically wrong but unchanged asset still
+hashes equal. Determinism is claimed for one machine and library set, which
+the recorded versions identify; ten-digit rounding hides only sub-rounding
+solver noise. The ExternalLoads data file is hashed only when it sits beside
+the XML. The fixture used by the tests is invented, and on it the static
+optimisation did not converge at the first two samples of the synthetic motion,
+so the tests select later frames; this is a property of that fixture, recorded
+here rather than hidden. Outputs are not scientific acceptance evidence.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/opensim/spine/test_study.py -q -n 0 -o addopts=""
+python3 -m src.engines.physics_engines.opensim.python.spine.study \
+    --request request.json --out out/
+\end{verbatim}

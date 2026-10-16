@@ -1,0 +1,65 @@
+\subsection{Cited Coupling-Law Data}
+\label{sec:spn-3}
+
+This section documents \texttt{src/config/spine\_coupling\_laws.json} and the
+loader \texttt{src/shared/python/spine/coupling\_data.py} (issue \#12743, epic
+\#12735). This delivery is partial: only laws verified from primary text, plus
+one labelled reference law, are shipped. Every literature number in the JSON is
+copied from a block of \texttt{data\_extraction.md}; the loader derives the
+per-level matrices $C_i$ of \texttt{LinearCouplingLaw} from those numbers.
+
+\paragraph{Shipped Laws.}
+\begin{description}
+\item[\texttt{bruno2015\_regional}] (verified). Independent coordinates
+  $\phi=(\mathrm{FE},\mathrm{LB},\mathrm{AR})$, global pelvis-to-thorax ISB
+  angles. Regional shares of the spine contribution (Bruno et al.\ 2015, main
+  text Section 2.1): lumbar/thoracic $51/49$ (flexion), $27/73$ (lateral
+  bending), $17/83$ (axial rotation). With $n_L=5$ lumbar levels
+  (L5-S1 to L1-L2) and $n_T=12$ thoracic levels (T12-L1 to T1-T2, following
+  \texttt{SpinalLevel.region}),
+  \[
+    C_i=\mathrm{diag}\bigl(p^{a}_{r(i)}/(100\,n_{r(i)})\bigr)_{a},
+  \]
+  so $\sum_i C_i=I$ and $f_{\mathrm{lumbar}}$ of \texttt{regional\_fraction}
+  reproduces the published split to $10^{-12}$.
+  \emph{Assumption:} the share of a region is spread uniformly over its
+  levels; this is not a published per-level result.
+\item[\texttt{fujii2007\_lumbar}] (verified from the PMC full text; a PDF
+  re-check is recommended). Single coordinate $\phi$ = trunk axial rotation.
+  For each segment T12-L1 to L5-S1 the mean axial rotation, coupled flexion
+  and coupled lateral bend measured at $45^\circ$ of trunk rotation are scaled
+  to gains per degree:
+  $C_i=\bigl(-\bar\theta_{\mathrm{flex}},-\bar\theta_{\mathrm{lat}},
+  \bar\theta_{\mathrm{ax}}\bigr)^{\top}_i/45^\circ$. Linearity in rotation is
+  assumed. Fujii reports flexion positive and lateral bend positive in the
+  direction of the rotation; under ADR-0055 extension, right bend and left
+  rotation are positive, so for a positive (left) axial rotation both coupled
+  terms change sign (\texttt{distribution.isb\_sign} in the JSON). SDs are retained in the JSON but unused. Not a share law.
+\item[\texttt{uniform\_reference}] (citation: repo-authored reference, not
+  literature). $C_i=I/17$ for all 17 levels; a synthetic baseline.
+\end{description}
+
+\paragraph{Pending Laws.}
+\texttt{bruno2015\_per\_level} (Bruno Supplemental Table 2) and
+\texttt{pearcy1984\_lumbar} (Pearcy and Tibrewal 1984) are recorded with
+\texttt{status = pending}, a reason and no numbers. The loader raises
+\texttt{ValueError} if asked to build them. They remain blocked on the primary
+PDFs (issue \#12737). The Fujii per-segment values are not a substitute for
+Pearcy's table.
+
+\paragraph{Loader.}
+\texttt{load\_coupling\_laws(path=None)} returns a read-only mapping from law
+id to entry metadata (citation, \texttt{verified\_from\_primary}, assumptions);
+\texttt{coupling\_law(law\_id)} returns a \texttt{LinearCouplingLaw};
+\texttt{available\_laws(include\_pending=False)} lists ids. Unknown ids, pending
+laws, duplicate ids and malformed entries raise \texttt{ValueError}.
+
+\paragraph{Limitations.}
+Static linear gains only; no state dependence. Regional shares apply to the
+total spine contribution as published and ignore pelvis-hip motion. Scientific
+qualification is outside this ledger.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python3 -m pytest tests/shared/python/spine/test_coupling_data.py -q
+\end{verbatim}

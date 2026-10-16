@@ -1,0 +1,43 @@
+\subsection{Documentation Consolidation and Governance}
+\label{sec:spn-16}
+
+This section records the consolidation of the epic's documentation (issue
+\#12773, epic \#12735). It adds no model, equation or number.
+
+\paragraph{Surfaces.}
+\begin{itemize}
+  \item The design-manual chapter
+        \texttt{manuals/upstreamdrift/chapters/66-segmental-spine.qmd} (continued in
+        \texttt{68-segmental-spine-loads-and-studies.qmd})
+        summarises conventions, composition, coupling laws and their sign maps,
+        distribution, golf terms, the load contract, inverse dynamics, static
+        optimisation, joint reactions, studies, aggregation, movement variants,
+        distribution sensitivity, visualisation, owner-blocked work and
+        limitations. QMD is its only editable source.
+  \item The calculation-registry blocker
+        \texttt{UP-D1-segmental-spine-inventory} describes the implemented
+        pathway and stays open; no calculation is registered.
+  \item \texttt{docs/agents/shared-infrastructure.md} lists every public module
+        of \texttt{src/shared/python/spine/} and
+        \texttt{src/engines/physics\_engines/opensim/python/spine/}, plus
+        \texttt{static\_opt\_core.py} and
+        \texttt{injury/spinal\_load\_providers.py}.
+  \item \texttt{docs/research/segmental\_spine/README.md} gives the study and
+        distribution-sensitivity commands and a minimal request.
+\end{itemize}
+
+\paragraph{Status.}
+Every result of the pathway is scientifically unqualified. The licensed SimTK
+models (\#12749), primary PDFs (\#12737), licensed-model inventory (\#12755),
+full-body Bruno driving (\#12758), Bruno reproduction (\#12763) and the
+cross-model comparison (\#12770) are owner-blocked. A rendered chapter is not
+approval.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python3 -m scripts.check_design_manual_governance
+python3 scripts/check_document_title_case.py
+\end{verbatim}
+The README example was executed on the invented fixture with a five-sample
+synthetic swing: the study returned \texttt{unqualified} (pelvis residual over
+budget without external loads, two frames using reserves), as documented.

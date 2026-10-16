@@ -1,0 +1,63 @@
+\subsection{Spinal Load Provider Split}
+\label{sec:spn-12}
+
+This section documents the separation of heuristic and model-based spinal
+loads (issue \#12765, epic \#12735). Code:
+\texttt{src/shared/python/injury/spinal\_load\_providers.py} and the provider
+seam in \texttt{src/shared/python/injury/spinal\_load\_analysis.py}. The
+\texttt{spine} package does not import \texttt{injury}.
+
+\paragraph{Interface.}
+\texttt{SpinalLoadProvider} exposes \texttt{provider\_id}, \texttt{is\_model\_based}
+and \texttt{loads(time\_s, joint\_angles, joint\_velocities, joint\_torques,
+levels)}, returning a \texttt{SpinalLoadSeries} in the ADR-0055 convention
+(wrench on the superior vertebra by the inferior one, inferior ISB frame,
+compression $+F_y$, AP shear $+F_x$, ML shear $+F_z$; N and N\,m).
+
+\paragraph{Heuristic Provider.}
+\texttt{HeuristicSpinalLoadProvider} (\texttt{provider\_id = heuristic\_v1},
+\texttt{is\_model\_based = False}) wraps the unchanged analyzer closed forms.
+For level $i$ with position ratio $p_i$, body mass $m$ and head-arms-trunk
+ratio $0.678$, the mass above is $m_a = 0.678\,m\,(1-p_i)$ and
+\begin{align}
+  F_y &= m_a g\cos\phi + |\tau_\phi|/0.05, &
+  F_x &= m_a g\sin\phi, \\
+  F_z &= m_a g\sin\lambda + \tfrac12 m_a \omega^2 L p_i, &
+  M_y &= |\tau_\rho|,
+\end{align}
+with lumbar flexion $\phi$, lateral bend $\lambda$, rotation rate $\omega$,
+trunk length $L$ and the fixed 5\,cm moment arm. These are screening
+estimates, not joint reactions. Every heuristic series carries
+\texttt{solver = heuristic\_v1}, a \texttt{distribution\_source} stating
+``heuristic'', \texttt{provider\_label = heuristic} and \texttt{model\_id =
+n/a (heuristic)}, so it cannot be mistaken for a model load.
+
+\paragraph{Model Provider.}
+\texttt{ModelSpinalLoadProvider} wraps a precomputed series (the OpenSim
+pipeline output, delivered only through the \texttt{SpinalLoadSeries} contract)
+and returns it unchanged with provenance intact. A requested time base must
+equal the series time base to $10^{-9}$\,s and requested levels must be present;
+otherwise \texttt{ValueError}. Its \texttt{provider\_id} may not equal
+\texttt{heuristic\_v1}.
+
+\paragraph{Analyzer Behaviour.}
+\texttt{SpinalLoadAnalyzer(provider=None)} defaults to the heuristic provider
+and its outputs are unchanged (golden-tested to $10^{-12}$). Results expose
+\texttt{provider\_id}, \texttt{is\_model\_based} and \texttt{risk\_assessed}.
+With a model provider the segments come from the series (torsion is
+$|M_y|$) and the heuristic risk bands are \emph{not} applied
+(\texttt{risk\_assessed = False}, and every risk field reads \texttt{NOT\_ASSESSED}, never \texttt{SAFE}); the literature thresholds were derived for
+the heuristic quantities. The spinal compression/shear terms in
+\texttt{optimization/\_swing\_objectives.py} are labelled heuristic
+(\texttt{SPINAL\_OBJECTIVE\_PROVIDER\_ID}); numerics are unchanged.
+
+\paragraph{Limitations.}
+The heuristic series maps only analyzed segment names that are valid spinal
+levels; custom names raise from \texttt{loads()} but not from the default
+\texttt{analyze()} path. No OpenSim computation occurs here.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/unit/injury tests/analysis/test_spinal_load_analysis.py \
+  -q -n 0 -p no:cacheprovider -o addopts=""
+\end{verbatim}

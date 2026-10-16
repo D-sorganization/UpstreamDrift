@@ -86,7 +86,7 @@ def orientations_to_matrix(
     width = 4 if representation.startswith("quaternion_") else 3
     a = _array(values, (width,), representation)
     batch = a.shape[:-1]
-    flat = a.reshape(-1, width)
+    flat: np.ndarray = a.reshape(-1, width)
     if representation in ("quaternion_xyzw", "quaternion_wxyz"):
         norms = np.sqrt(
             np.einsum("ij,ij->i", flat, flat)
@@ -116,7 +116,8 @@ def matrix_to_orientations(
     """Convert validated rotations, reporting each Euler singular frame."""
     matrices_arr = cast(np.ndarray, _rotation_matrix(matrices))
     batch = matrices_arr.shape[:-2]
-    rotations = Rotation.from_matrix(matrices_arr.reshape(-1, 3, 3))
+    # SciPy < 1.15 rejects read-only buffers (frozen dataclass arrays): copy.
+    rotations = Rotation.from_matrix(np.array(matrices_arr.reshape(-1, 3, 3)))
     singular = np.zeros(batch, dtype=bool)
     if representation == "matrix":
         values = matrices_arr.copy()

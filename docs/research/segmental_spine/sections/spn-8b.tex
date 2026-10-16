@@ -1,0 +1,65 @@
+\subsection{Coupler Extraction From OpenSim Models}
+
+\paragraph{Purpose.} Each integrated OpenSim spine model carries its own
+kinematic assumptions as \texttt{CoordinateCouplerConstraint} elements.
+\texttt{extract\_coupling\_law} (module \texttt{coupler\_extraction.py} in
+\texttt{src/engines/physics\_engines/opensim/python/spine/}) reads them into a
+\texttt{CouplingLaw} so a study can report them next to the repository laws.
+Issue SPN-8b, \#12754.
+
+\paragraph{Mapping.} For an enforced coupler $q_{\mathrm{dep}} = f(q_{\mathrm{ind}})$
+the dependent coordinate is looked up in the \texttt{SpineInventory} level map
+and becomes row $a\in\{0,1,2\}$ (flexion-extension, lateral bending, axial
+rotation; ISB $ZXY$, radians) of level $i$. The independent names of the law
+are the union of the couplers' independent coordinates in first-use order.
+Constraints with \texttt{isEnforced} false prescribe nothing and are skipped;
+the law spans the contiguous level range of the enforced couplers and
+uncoupled coordinates are zero rows. Units are radians (and metres for
+translational independents); a coupler written by the fixture is read back
+exactly because the coefficients are serialised with 17 significant digits.
+
+\paragraph{Supported Functions.}
+\begin{itemize}
+  \item \texttt{LinearFunction}, degree-$\le 1$ \texttt{PolynomialFunction} and
+    order-$\le 1$ \texttt{MultivariatePolynomialFunction}:
+    $\theta_{i,a}=c^{\top}\phi$ with zero intercept (a nonzero intercept raises
+    \texttt{ValueError}); the multivariate form is read by evaluating the
+    function at the origin and the unit vectors. Result:
+    \texttt{LinearCouplingLaw}, exact.
+  \item \texttt{PolynomialFunction} of degree 2 to 4 in one variable (OpenSim
+    stores the highest power first):
+    $\theta=\sum_k c_k\,\phi_j^k$. Result: \texttt{PolynomialCouplingLaw}; it
+    cannot be mixed with multivariate or tabulated couplers.
+  \item \texttt{SimmSpline} and \texttt{PiecewiseLinearFunction} of one
+    variable $s$: result \texttt{StateDependentCouplingLaw} scheduled on $s$.
+    The law has the form $\theta=C(s)\phi$, so a coupler must satisfy $f(0)=0$
+    (otherwise \texttt{ValueError}). The breakpoints are the union of all
+    knots; at a knot $s_j$ the entry is $f(s_j)/s_j$, or $f'(0)$ at $s_j=0$.
+    The law is exact at the knots. Between knots $C$ is linearly interpolated,
+    so $\theta$ differs from the spline (a cubic through the knots) by an
+    interpolation error, and outside the knot range $C$ is held constant
+    whereas OpenSim extrapolates linearly; neither is reproduced and both are
+    stated limitations, not hidden approximations.
+\end{itemize}
+Any other function type, or a mixture that no single law family represents,
+raises \texttt{UnsupportedCouplerError} naming the constraint. That class
+derives from both \texttt{NotImplementedError} (the issue contract) and
+\texttt{ValueError}. A model without enforced couplers raises
+\texttt{ValueError} (\emph{no CoordinateCouplerConstraint}): a law with zero
+dependents cannot be constructed, because \texttt{CouplingLaw} requires at
+least one level and one independent coordinate.
+
+\paragraph{Assumptions and Limitations.} The \texttt{scale\_factor} element
+emitted by the fixture generator is not an OpenSim property and is ignored.
+Inverse-kinematics weights, coordinate ranges and the dynamics treatment of
+couplers are not extracted. Extraction describes kinematic prescription only;
+it supports no scientific claim about any licensed model.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/opensim/spine/test_coupler_extraction.py \
+    -q -n 0 -o addopts=""
+\end{verbatim}
+The tests round-trip a fixture law (matrices equal to $10^{-12}$, equal
+\texttt{expand} for random $\phi$) and edit the generated XML for spline,
+piecewise-linear, polynomial, disabled, unmapped and unsupported couplers.

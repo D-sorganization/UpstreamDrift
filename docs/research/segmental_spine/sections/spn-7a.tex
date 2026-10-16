@@ -1,0 +1,60 @@
+\subsection{Synthetic Segmental Spine OpenSim Fixture}
+\label{sec:spn-7a}
+
+The fixture is a CI-safe stand-in for the licensed spine models. Every number
+is invented or a plain geometric convention; nothing is transcribed from a
+SimTK model. Generation is pure ElementTree string building and needs no
+OpenSim import.
+
+\paragraph{Topology.} Caudal to cranial:
+\texttt{ground} $\to$ \texttt{pelvis} (FreeJoint) $\to$ first chain body
+(WeldJoint, \texttt{sacrum} for the default levels) $\to$ one
+\texttt{CustomJoint} \texttt{<LEVEL>\_jnt} per level $\to$ \texttt{thorax\_proxy}
+(WeldJoint). The default is the five lumbar levels L5--S1 to L1--L2. Bodies are
+named after the superior vertebra of the level that ends in them. There are no
+muscles.
+
+\paragraph{Joint Parametrisation.} Frames: $X$ anterior, $Y$ cranial, $Z$ right.
+The transform of the superior frame in the inferior frame is
+\begin{equation}
+  T_i = T_{i0}\,\mathrm{T}\!\left(R(\theta_i),\,0\right),\qquad
+  R = R_z(\mathrm{FE})\,R_x(\mathrm{LB})\,R_y(\mathrm{AR}),
+\end{equation}
+realised by the \texttt{SpatialTransform} axes \texttt{rotation1/2/3} about
+$(0,0,1)$, $(1,0,0)$, $(0,1,0)$ with coordinates
+\texttt{<level>\_flex\_ext}, \texttt{<level>\_lat\_bend},
+\texttt{<level>\_axial\_rot} (lowercase level name) and constant-zero
+translations. The neutral offset is carried by the parent
+\texttt{PhysicalOffsetFrame} on the inferior body,
+$T_{i0}=[R_z(\lambda_i)\,|\,(0,L_{\mathrm{inf}},0)]$, and the child frame is the
+identity on the superior body. Coordinate ranges are $\pm 1$ rad, far from the
+lateral-bending gimbal lock.
+
+\paragraph{Composition Invariant.} With the base weld
+$T_{\mathrm{base}}=[R_z(\text{sacral slope})\,|\,(0,L_{\mathrm{pelvis}},0)]$ and
+the terminal weld $T_{\mathrm{term}}=[R_z(\text{thorax tilt})\,|\,(0,L_{\mathrm{last}},0)]$,
+\begin{equation}
+  T_{\mathrm{pelvis}\to\mathrm{thorax}}
+  = T_{\mathrm{base}}\,T_1\,T_2\cdots T_n\,T_{\mathrm{term}},
+\end{equation}
+caudal factor first. Angles never add.
+
+\paragraph{Invented Parameters.} Lordosis $\lambda_i$: 10, 8, 6, 4, 2 deg
+(L5--S1 to L1--L2); sacral slope 30 deg; thorax tilt 5 deg; pelvis 10 kg and
+0.10 m; sacrum 1.5 kg and 0.05 m; vertebrae 1 kg and 0.04 m; thorax proxy 20 kg.
+Inertia is a uniform cylinder of radius 0.05 m along $Y$ (positive definite).
+
+\paragraph{Verification.} The native tests load the model, call
+\texttt{initSystem}, set random level angles in $\pm 0.4$ rad, and compare the
+pose of \texttt{thorax\_proxy} (and every intermediate vertebra) in the pelvis
+frame with \texttt{SegmentalPose.compose()} to $10^{-9}$. A negative control
+shows that reversed composition order differs by more than $10^{-3}$.
+
+\paragraph{Limitations.} The geometry is not anatomical, no stiffness or muscles
+are modelled, and passing the test establishes kinematic composition only, not
+scientific qualification.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+python -m pytest tests/opensim/spine/test_fixture_model.py -q -n 0
+\end{verbatim}

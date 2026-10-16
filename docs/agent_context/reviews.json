@@ -19,24 +19,24 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "bb33da3bafb57fe6c3ecd2c40b6d56b9cac7982dae05cccbf51299f95fb12dd0",
+      "fingerprint": "235b466aed61f2e9f7658094f065ae872cce9126541c7716ad2d4bc46c3d24d1",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "46e831b130702aaa9025deb465debb9f78dc5160091bdf9ad48e795bf90ce984",
-        "src/config/launcher_manifest.json": "abc9913955858006e7bb6b8e9dca8c9693313e62d48d90dcc1ace33e632a79dc",
+        "src/config/feature_parity.json": "da668063016e32a118db147aa243ab2bce703548c33f9fe1dcdb15de9153db0c",
+        "src/config/launcher_manifest.json": "c9844ac6e0cd9c6cc867bda7cfd44edf1199ac85a07af5b9a83bec70a65d00bc",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
-        "src/config/models.yaml": "2a2e303aa92f6dda0ef3868fcc881ccbdbc54cf362ac3aae931333163969b90f",
+        "src/config/models.yaml": "64caf5311e4be2c75e742dc053b425a528f851638ca2773423fcc77d40b5d419",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Rebase of UD#12537 (#9545 slice 9) onto #12535: the only atlas input change versus main is feature_parity.json tools.bunkershot3d_workbench issue pointer 9545 -> 12536 (open follow-up; #9545 closed). Status stays gap; no tile, route or connection changed. Inspected the diff; generator --check and capability-atlas tests run below."
+      "rationale": "Only input change is the spine_viewer tile description text (install extra named, Codex review on #12796); no boundary or interface change."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",

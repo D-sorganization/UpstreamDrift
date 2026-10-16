@@ -966,6 +966,7 @@
 {"path": "injury/injury_risk.py", "classification": "ud-only", "package": "injury", "spelling_only": false}
 {"path": "injury/joint_stress.py", "classification": "ud-only", "package": "injury", "spelling_only": false}
 {"path": "injury/spinal_load_analysis.py", "classification": "ud-only", "package": "injury", "spelling_only": false}
+{"path": "injury/spinal_load_providers.py", "classification": "ud-only", "package": "injury", "spelling_only": false}
 {"path": "injury/swing_modifications.py", "classification": "ud-only", "package": "injury", "spelling_only": false}
 {"path": "interfaces.py", "classification": "ud-only", "package": "interfaces.py", "spelling_only": false}
 {"path": "launch_monitor/__init__.py", "classification": "tools-only", "package": "launch_monitor", "spelling_only": false}
@@ -2616,9 +2617,18 @@
 {"path": "spatial_algebra/tests/__init__.py", "classification": "ud-only", "package": "spatial_algebra", "spelling_only": false}
 {"path": "spatial_algebra/transforms.py", "classification": "ud-only", "package": "spatial_algebra", "spelling_only": false}
 {"path": "spine/__init__.py", "classification": "ud-only", "package": "spine", "spelling_only": false}
+{"path": "spine/_golf_term_impl.py", "classification": "ud-only", "package": "spine", "spelling_only": false}
+{"path": "spine/context_bands.py", "classification": "ud-only", "package": "spine", "spelling_only": false}
+{"path": "spine/coupling.py", "classification": "ud-only", "package": "spine", "spelling_only": false}
+{"path": "spine/coupling_data.py", "classification": "ud-only", "package": "spine", "spelling_only": false}
+{"path": "spine/distribution.py", "classification": "ud-only", "package": "spine", "spelling_only": false}
+{"path": "spine/golf_terms.py", "classification": "ud-only", "package": "spine", "spelling_only": false}
 {"path": "spine/levels.py", "classification": "ud-only", "package": "spine", "spelling_only": false}
 {"path": "spine/loads.py", "classification": "ud-only", "package": "spine", "spelling_only": false}
+{"path": "spine/movement_variants.py", "classification": "ud-only", "package": "spine", "spelling_only": false}
+{"path": "spine/plots.py", "classification": "ud-only", "package": "spine", "spelling_only": false}
 {"path": "spine/segmental.py", "classification": "ud-only", "package": "spine", "spelling_only": false}
+{"path": "spine/viz_data.py", "classification": "ud-only", "package": "spine", "spelling_only": false}
 {"path": "swing_comparison/__init__.py", "classification": "ud-only", "package": "swing_comparison", "spelling_only": false}
 {"path": "swing_comparison/events.py", "classification": "ud-only", "package": "swing_comparison", "spelling_only": false}
 {"path": "swing_comparison/metrics.py", "classification": "ud-only", "package": "swing_comparison", "spelling_only": false}

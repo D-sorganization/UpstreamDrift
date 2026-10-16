@@ -1,0 +1,62 @@
+\subsection{Read-Only Visualization Adapter}
+\label{sec:spn-15a}
+
+This section documents the pure-data adapter
+\texttt{src/shared/python/spine/viz\_data.py} and the static report figures in
+\texttt{src/shared/python/spine/plots.py} (issue \#12771, epic \#12735). The
+adapter imports no plotting or GUI library; the graphical front end is a
+separate child (\#12772). Nothing here computes a new physical quantity.
+
+\paragraph{Per-Level Angle Stack}
+For a sequence of poses $P_k$ at times $t_k$ and a joint-coordinate-system term
+$g$ (axial rotation, trunk extension or trunk lateral flexion), the stack
+column of level $i$ is the existing decomposition share
+\begin{equation}
+  c_i(t_k) = g\!\left(R_{1:i}(t_k)\right) - g\!\left(R_{1:i-1}(t_k)\right),
+  \qquad g(R_{1:0}) \equiv 0,
+\end{equation}
+with $R_{1:i}$ the caudal-first composition of the first $i$ levels, computed by
+\texttt{golf\_terms.segmental\_contributions}. The shares telescope to the
+global term; the residual $g(R_{1:n}) - \sum_i c_i$ is returned per sample as
+\texttt{remainder\_deg} (zero up to rounding). A share is not the level's own
+Cardan angle and does not add in angle space. Units are degrees; columns run
+caudal to cranial.
+
+\paragraph{Load Heatmap and Sign Boundary}
+Loads follow ADR-0055: the wrench on the superior vertebra by the inferior one,
+in the inferior ISB frame, compression $=+F_y$, anteroposterior shear $=+F_x$,
+mediolateral shear $=+F_z$. The heatmap exposes one component as an
+$(n,L)$ array in newtons, or body weights for a normalised series. The only
+sign change is the tested function \texttt{to\_tension\_positive},
+\begin{equation}
+  T = -F_y,
+\end{equation}
+matching \texttt{SpinalAxialLoadProvider}; the array carries its
+\texttt{sign\_convention} (\texttt{compression-positive},
+\texttt{tension-positive}, \texttt{anterior-positive}, \texttt{right-positive}).
+
+\paragraph{Provenance and Status}
+Every product carries \texttt{distribution\_source} (non-empty) and
+\texttt{scientific\_status}. Status is fail-closed: it defaults to
+\texttt{unqualified}, only \texttt{unqualified} and \texttt{qualified} are
+accepted, nothing promotes one to the other, and every figure title states the
+status, so unqualified data is always drawn labelled \texttt{UNQUALIFIED}.
+Callers pass the status of the originating receipt explicitly.
+
+\paragraph{Figures}
+Figures use the object-oriented matplotlib \texttt{Figure} with an Agg canvas
+(no \texttt{pyplot}); \texttt{save\_png} writes PNG only. Stacked bars separate
+positive and negative shares; the heatmap uses a symmetric diverging colour
+scale about zero.
+
+\paragraph{Limitations}
+Gimbal-locked prefixes yield NaN shares (drawn as zero height in the stack,
+visible in the remainder). The adapter reads time series only; it does not load
+receipts, so a caller must supply poses and a \texttt{SpinalLoadSeries}.
+Interpolation between samples is not performed.
+
+\paragraph{Reproduction}
+\begin{verbatim}
+python -m pytest tests/shared/python/spine/test_viz_data.py \
+  tests/shared/python/spine/test_plots.py -q -n 0 -o addopts=""
+\end{verbatim}
