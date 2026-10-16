@@ -37,12 +37,15 @@ model's own \texttt{CoordinateCouplerConstraint}s. The law must cover exactly
 the model's levels.
 
 \paragraph{Frame Alignment.}
-The segmental terminal frame is assumed to coincide with the
-\texttt{golf\_humanoid} torso frame ($A=I$ by default), and the pelvis body
-frames likewise. A known fixed rotation $A$ (terminal frame expressed in the
-golf torso frame) can be supplied as \texttt{torso\_alignment}. This
-assumption is not validated by the code; a wrong $A$ biases the distribution
-without raising the residual.
+The segmental terminal frame is related to the \texttt{golf\_humanoid} torso
+frame by a fixed rotation $A$ (terminal frame expressed in the golf torso
+frame), supplied as \texttt{torso\_alignment}; the pelvis body frames are
+assumed to coincide. \texttt{DriveOptions} defaults to $A=I$, but ADR-0055
+item~2 forbids assuming that offset, so the study layer
+(Section~\ref{sec:spn-13a}) requires a calibrated $A$ with a provenance string
+and records an unsupplied $A$ as \texttt{assumed\_identity}, which can never
+give a \texttt{pass}. The code does not validate $A$; a wrong $A$ biases the
+distribution without raising the residual.
 
 \paragraph{Coordinate Table.}
 Level coordinates are named by the inventory and equal

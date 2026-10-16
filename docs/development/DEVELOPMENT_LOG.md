@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12960 · Adversarial Review 2026-10-16: 43 Findings With Draft PR Pitches Under Docs/Development/Adversarial-Review/
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12960
+- **Branch:** claude/adversarial-review-2026-10-16
+- **PR:** #12960
+- **Paths:** docs/development/adversarial-review/2026-10-16
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`f249f9c5`; collated from changes/12960-adversarial-review-2026-10-16.md)
+- **Summary:** Adversarial review 2026-10-16: 43 findings with draft PR pitches under docs/development/adversarial-review/
+- **Next step:** Triage Critical/High finding pages; each carries a paste-ready PR body.
+
 ### DL-#12686 · R6: Opt-In Flexible Golf Shaft as a Rigid-Link Spring-Damper Chain (MuJoCo); Generic STIFF Profile Flagged Default_Not_Measured; Rigid Default Byte-Identical; Other Engines Refuse Chain Specs
 
 - **State:** in_review
@@ -2352,6 +2365,162 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#12828 · Correct the Golf-Term Evaluate Docstring for Side_Bend_Tilt Input and Output Shapes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12828
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12828-side-bend-tilt-docstring.md)
+- **Summary:** Correct the golf-term evaluate docstring for side_bend_tilt input and output shapes
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12827 · Static Optimization Holds Zero-Capacity Muscles at Zero, Fixing the Early-Sample Failure on the Synthetic Fixture
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12827
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12827-so-zero-capacity-muscles.md)
+- **Summary:** Static optimization holds zero-capacity muscles at zero, fixing the early-sample failure on the synthetic fixture
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12826 · A Missing ExternalLoads Data File Raises Before Any Study Stage Runs; Relative Datafiles Resolve Against the XML Directory
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12826
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12826-external-loads-fail-closed.md)
+- **Summary:** A missing ExternalLoads data file raises before any study stage runs; relative datafiles resolve against the XML directory
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12825 · Movement-Variant Undeclared-Term Tolerance Is Enforced at Study Run Time; a Violation Makes the Run Unqualified
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12825
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12825-variant-undeclared-runtime.md)
+- **Summary:** Movement-variant undeclared-term tolerance is enforced at study run time; a violation makes the run unqualified
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12824 · Pelvis Residual Height Is the Model Extent Along Gravity at the First Frame, With Its Source Recorded in the Budget and Receipt
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12824
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12824-residual-height-first-frame.md)
+- **Summary:** Pelvis residual height is the model extent along gravity at the first frame, with its source recorded in the budget and receipt
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12823 · Study Requests Carry the Drive Torso Alignment and Its Calibration Source; Receipts Record and Hash It, and an Unsupplied Alignment Makes the Study Unqualified
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12823
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12823-drive-alignment-receipt.md)
+- **Summary:** Study requests carry the drive torso alignment and its calibration source; receipts record and hash it, and an unsupplied alignment makes the study unqualified
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12822 · Golf-Term Contributions Attribute Base, Terminal and Alignment Rotations as Named Entries (Segmental_Contribution_Breakdown) and Close on the Full Pelvis-to-Thorax Term
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12822
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12822-contribution-breakdown.md)
+- **Summary:** Golf-term contributions attribute base, terminal and alignment rotations as named entries (segmental_contribution_breakdown) and close on the full pelvis-to-thorax term
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12821 · Fujii 2007 Coupled Flexion Is Even in Trunk Rotation: New ParityCouplingLaw, Fujii2007_Lumbar Law Version 2, Row Numbers Unchanged
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12821
+- **Branch:** merged via #12867
+- **PR:** #12867
+- **Paths:** see #12867
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`303a81b6`; collated from changes/12821-fujii-parity-law.md)
+- **Summary:** Fujii 2007 coupled flexion is even in trunk rotation: new ParityCouplingLaw, fujii2007_lumbar law version 2, row numbers unchanged
+- **Next step:** Shipped in PR #12867.
+
+### DL-#12755 · SPN-8C: Translational DOFs in SpineInventory, Extract_Passive_Elements Bushing Reader, Bruno Names-Only Level Map, Asset-Gated Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12755
+- **Branch:** merged via #12896
+- **PR:** #12896
+- **Paths:** see #12896
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`816fcac1`; collated from changes/12755-spn-8c-translational-dofs-in-spineinvent.md)
+- **Summary:** SPN-8c: translational DOFs in SpineInventory, extract_passive_elements bushing reader, Bruno names-only level map, asset-gated tests
+- **Next step:** Shipped in PR #12896.
+
+### DL-#12749 · Pin the Bruno 2015 Full-Body Model Hash With the Owner's 2026-10-16 SimTK Licence Acceptance; Senteler Stays Unpinned
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12749
+- **Branch:** merged via #13021
+- **PR:** #13021
+- **Paths:** see #13021
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`fa509032`; collated from changes/12749-pin-the-bruno-2015-full-body-model-hash.md)
+- **Summary:** Pin the Bruno 2015 full-body model hash with the owner's 2026-10-16 SimTK licence acceptance; Senteler stays unpinned
+- **Next step:** Shipped in PR #13021.
+
+### DL-#12964 · Confine Launcher Logo Route to Its Asset Directory (Fixes Unauthenticated Arbitrary File Read)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12964
+- **Branch:** merged via #13020
+- **PR:** #13020
+- **Paths:** see #13020
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`286f7191`; collated from changes/12964-confine-launcher-logo-route-to-its-asset.md)
+- **Summary:** Confine launcher logo route to its asset directory (fixes unauthenticated arbitrary file read)
+- **Next step:** Shipped in PR #13020.
+
+### DL-#12955 · Render the Address Ball at the Club's Own Face on the Ground for Every Club (Drop the Stale Capture Ball and the Duplicate Static-Pose MuJoCo Ball)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12955
+- **Branch:** merged via #12966
+- **PR:** #12966
+- **Paths:** see #12966
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`c9a8612e`; collated from changes/12955-render-the-address-ball-at-the-club-s-ow.md)
+- **Summary:** Render the address ball at the club's own face on the ground for every club (drop the stale capture ball and the duplicate static-pose MuJoCo ball)
+- **Next step:** Shipped in PR #12966.
 
 ### DL-#12949 · CC0 Short-Hair Head Is Now the Default HeadSettings.Model in Every Engine; Parametric Stays Selectable
 

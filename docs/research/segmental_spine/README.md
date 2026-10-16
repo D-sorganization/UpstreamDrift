@@ -75,6 +75,8 @@ given; `--out` overrides the file's value otherwise.
   "pelvis": "fixture",
   "events": {"mid": 0.2, "late": 0.3},
   "max_frames": 5,
+  "torso_alignment": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+  "torso_alignment_source": "fixture: identity by construction",
   "output_dir": "out"
 }
 ```
@@ -92,6 +94,7 @@ given; `--out` overrides the file's value otherwise.
 | `external_loads` | ExternalLoads XML, or `null` for gravity only |
 | `events`, `stride`, `max_frames` | Static-optimisation frames: named event times in seconds, every `stride`-th sample, and a hard cap (exceeding it is an error) |
 | `pelvis` | Ground-pelvis encoding of the segmental model: `golf` (ZXY, default) or `fixture` (free joint, XYZ) |
+| `torso_alignment`, `torso_alignment_source` | Drive alignment $A$ (3 × 3 proper rotation, terminal frame in the golf torso frame) and how it was calibrated; both or neither. Without them the study is `unqualified` (`assumed_identity`) |
 | `drive_tolerance_rad`, `filter_hz` | Drive residual flag in radians, and the inverse-dynamics low-pass cutoff |
 | `residual_force_fraction_bw`, `residual_moment_fraction` | Pelvis residual budget (defaults 0.05 and 0.01) |
 | `reserve_limit_nm`, `reserve_max_share` | Reserve-actuator limit and maximum share (defaults 1.0 N·m and 0.05) |

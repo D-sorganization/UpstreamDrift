@@ -115,10 +115,16 @@ Pelvis residual:
   $$r_F = \frac{\max_t \lVert \mathbf F_{\mathrm{res}}(t) \rVert}{m g} \le 0.05,
   \qquad r_M = \frac{\max_t \lVert \mathbf M_{\mathrm{res}}(t) \rVert}{m g h} \le 0.01.$$
 - $m g$ is the total model mass times $\lvert g \rvert$.
-- $h$ is `body_height_m` when supplied. Otherwise it is a model extent: the
-  ground-Y extent of the body origins, not measured stature. The code
-  evaluates it at the last processed sample, although the docstring and
-  SPN-10a say the first frame (see Limitations).
+- $h$ is `body_height_m` when supplied. Otherwise it is a model extent, not
+  measured stature: with the model posed at the first frame of the motion,
+  $h = \max_b \hat g \cdot \mathbf p_b - \min_b \hat g \cdot \mathbf p_b$
+  over the body origins $\mathbf p_b$, along the model's own gravity
+  direction $\hat g = \mathbf g / \lVert \mathbf g \rVert$ (#12824). It is
+  independent of the final pose and of the model's up axis.
+- The source of $h$ (`body_height_m` or `model_extent_first_frame`) and its
+  value are recorded in the residual budget and in the receipt
+  (`id_body_height_source`, `id_body_height_m`). Because $r_M$ scales with
+  $1/h$, results with different $h$ sources are not comparable.
 
 Without external support loads, the pelvis residual carries gravitational
 support plus the prescribed whole-body inertial demand. For a stationary,
@@ -162,7 +168,13 @@ The frame problem is lexicographic, with declared reserve limits $L_j > 0$
    $\sum_j \bigl((\tau_j - o_j - (G a)_j)/L_j\bigr)^2$ over $0 \le a \le 1$.
    This gives $a_1$ and the unique remainder $r^* = \tau - o - G a_1$.
 2. **Stage two** (SLSQP, ftol $10^{-14}$, maxiter 500) minimises
-   $\sum_m a_m^p$ over $0 \le a \le 1$, subject to $G a = G a_1$. Here
+   $\sum_m a_m^p$ over $0 \le a \le 1$, subject to $G a = G a_1$. Muscles
+   whose gain column of $G$ is identically zero at the frame (no force
+   capacity, for example a rigid-tendon muscle shorter than its minimum fibre
+   length) are held at $a_m = 0$ and left out of this step (#12827); this
+   does not change the optimum. With no capacity at all, the reserves take
+   the whole demand. Near-zero but non-zero capacities are not specially
+   handled. Here
    $p \in \{2, 3\}$ (`exponent`, default 3), the gradient $p\,a^{p-1}$ is
    analytic, and the constraint is reduced to an orthonormal basis of the
    column space of $G$ ($\sigma > 10^{-10}\sigma_{\max}$).
@@ -286,6 +298,8 @@ Request fields, all recorded in the receipt:
 - `drive_tolerance_rad` (default `None`) and `filter_hz` (default `None`);
 - `residual_force_fraction_bw` (0.05) and `residual_moment_fraction` (0.01);
 - `reserve_limit_nm` (1.0) and `reserve_max_share` (0.05);
+- `torso_alignment` and `torso_alignment_source` (both or neither): the
+  drive alignment $A$ and how it was calibrated;
 - `variant_id`, `variant_parameter` and `variant_handedness` (default
   `right`).
 
@@ -298,9 +312,13 @@ Receipt contents:
   hashed too: coupling laws, level maps and context bands, plus the asset
   manifest when `asset_id` is set and the movement-variant file when
   `variant_id` is set.
-- **ExternalLoads data file.** The referenced data file is hashed only when it
-  exists beside the XML; otherwise it is omitted silently. Capturing every
-  dependency must be checked separately.
+- **ExternalLoads data file.** Every `datafile` referenced by the XML is
+  hashed (#12826). A relative path resolves against the XML's directory and
+  an absolute path is used as written. A missing data file raises
+  `FileNotFoundError` before any stage runs.
+- **Torso alignment.** The schema is `spine-study-receipt/2`; it records
+  `torso_alignment` as `matrix` and `provenance` (`calibrated:<source>` or
+  `assumed_identity`), and both enter the request hash.
 - **Environment.** The git SHA, and the OpenSim, SciPy and NumPy versions.
 - **Run record.** The law as `id@version`, the `distribution_source`, the
   asset admission record and per-stage provenance.
@@ -320,18 +338,21 @@ Status is fail-closed (`_judge`):
 - **`unqualified`.** At least one of the following holds:
   - a licensed asset is not `QUALIFIED` (missing, unpinned or hash mismatch;
     a missing asset skips all stages);
+  - the drive torso alignment was not supplied (`assumed_identity`);
   - any drive frame is invalid;
   - the pelvis residual exceeds its budget;
   - any frame is flagged for reserve use under the share and limit rule
     above;
   - any static-optimization frame is unsuccessful;
-  - with a variant, a term bound is violated or a driven level coordinate
-    leaves its model range.
+  - with a variant, a term bound is violated, a driven level coordinate
+    leaves its model range, or an undeclared term changes beyond its
+    tolerance.
 - **`pass`.** None of these.
 
 `pass` is a software statement only. `scientific_status` is always
-`unqualified`, and the receipt refuses `pass` with a non-qualified asset. The
-CLI exits 0 only for `pass`.
+`unqualified`, and the receipt refuses `pass` with a non-qualified asset or
+without a `calibrated:` alignment provenance. The CLI exits 0 only for
+`pass`.
 
 ## Aggregation and Context Bands
 
@@ -409,8 +430,16 @@ Operations:
 Checks:
 
 - The target term is checked with `ensure` to $10^{-6}$ deg.
-- The declared tolerance of $10^{-8}$ deg on the undeclared terms is enforced
-  in the tests only, not at runtime.
+- The declared tolerance of $10^{-8}$ deg on the undeclared terms is
+  enforced at runtime (#12825) by `check_undeclared_terms`. Every term
+  computable from the pelvis-to-thorax rotation and time (the three JCS terms
+  and `crunch_factor_rate`) is evaluated before and after the variant, in
+  each term's own units. A sample lost in only one of the two series (gimbal
+  lock) counts as an infinite change. Lab-frame and marker terms are not
+  covered.
+- In a study, a violation makes the run `unqualified`; the receipt lists the
+  result as `variant.undeclared_terms` (`ok`, `tolerance`, `max_change`,
+  `violations`).
 - Gimbal lock inside the window raises. At least three samples are required.
 
 Version 1 ships five variants, all with the `thorax_relative_hold` arm
@@ -589,12 +618,6 @@ Claim-to-test map:
 
 Open:
 
-- **Static optimization at early samples.** Static optimization does not
-  converge at the first two samples of the five-sample synthetic motion on
-  the invented fixture. The cause is not investigated. Passing study and
-  sensitivity tests select the mid and late event frames, so they do not
-  establish successful optimization across the whole motion. No tolerance
-  was changed.
 - **Fujii in the sensitivity report.** At the default drive tolerance,
   `fujii2007_lumbar` enters the sensitivity report with a 0.89 rad residual
   and drives every sensitive label (see Distribution Sensitivity).
@@ -602,11 +625,19 @@ Open:
   `unqualified`: the pelvis residual exceeds its budget and frames are
   flagged for reserve use. The residual carries gravitational support plus
   whole-body inertial demand. Budgets were not widened.
-- **Fujii parity.** The flexion parity defect of `fujii2007_lumbar` is open
-  (see Fujii Parity Defect).
+- **Fujii flexion form.** Coupled flexion of `fujii2007_lumbar` is even in
+  rotation since #12821 (see Fujii Parity) and is assumed linear in
+  $\lvert\phi\rvert$ from a single 45 deg measurement.
 
 Corrected during development (guards in the research reference, "Failed
 Experiments"):
+
+- **Static optimization at early samples.** Stage two failed at the first two
+  samples of the five-sample synthetic motion because `rectus_abdominis_r`
+  had zero force capacity there; end-sample derivatives, the initial guess,
+  bounds, reserves and solver tolerance were ruled out. Zero-capacity muscles
+  are now held at zero and all five samples converge for $p = 2$ and $3$,
+  with no tolerance change (#12827).
 
 - **Fujii sign map.** The first transcription used Fujii's flexion-positive
   convention directly. The ISB map is now explicit in
@@ -665,13 +696,14 @@ Model assumptions:
 - All per-level kinematics are model assumptions produced by a coupling law,
   not measurements. Endpoint inverse kinematics does not identify individual
   vertebrae.
-- The terminal-to-thorax calibration of ADR-0055 is not estimated. The drive
-  alignment $A$ defaults to the identity, and the pelvis frames and the base
-  and terminal connections are assumed rigid and coincident. A wrong $A$
-  biases the distribution without a residual.
+- The terminal-to-thorax calibration of ADR-0055 is not estimated by the
+  code. A study must supply $A$ and a calibration source; without them $A = I$
+  is assumed, recorded as `assumed_identity`, and the study is `unqualified`.
+  A supplied $A$ is hashed and recorded but not validated, and the pelvis
+  frames and the base and terminal connections remain assumed rigid and
+  coincident. A wrong $A$ biases the distribution without a residual.
 - The distribution is a local solve. Bounds default to unbounded, and the
   default drive tolerance flags only unconverged frames.
-- `fujii2007_lumbar` has the flexion parity defect described above.
 
 Loads and numerics:
 
@@ -694,16 +726,11 @@ Fixture, literature and receipts:
 
 Known code-level gaps (follow-up candidates, behaviour unchanged here):
 
-- `fujii2007_lumbar` needs an even/odd law form for coupled flexion.
-- Segmental contributions exclude $B$, $E$ and $A$, so they do not close on a
-  calibrated pelvis-to-thorax term.
-- No calibration of $A$ is enforced or recorded beyond the identity default.
-- The default moment-budget height is evaluated at the last processed sample,
-  not the first frame as documented, and assumes ground Y is up.
-- The movement-variant tolerance on undeclared terms is enforced in tests
-  only, not at runtime.
-- A missing ExternalLoads data file is silently left unhashed.
-- Static optimization does not converge at the first two fixture samples.
+- `fujii2007_lumbar` cannot be exported as OpenSim linear couplers.
+- `level_angle_stack` and `StackData` do not pass $B$, $E$ and $A$ through;
+  use `segmental_contribution_breakdown` (#12822) for the full path.
+- The undeclared-term check of a movement variant does not cover lab-frame
+  terms (line turn, side bend, reverse spine angle).
 
 ## Non-Claims
 

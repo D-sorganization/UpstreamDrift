@@ -58,8 +58,8 @@ class TestConfigSchema:
 
     def test_licensed_entries_unverified_without_invented_names(self) -> None:
         for model_id, entry in load_level_maps().items():
-            if model_id == "fixture":
-                continue
+            if model_id in ("fixture", "bruno2015_fullbody_os4_v2"):
+                continue  # Bruno names observed on the owner's asset (SPN-8c)
             assert entry.verified is False
             assert entry.levels == {}
 
@@ -237,7 +237,7 @@ class TestNativeInventory:
     def test_unverified_model_refused(self, fixture_path: Path) -> None:
         require_opensim()
         with pytest.raises(ValueError, match="UNVERIFIED|unverified"):
-            inventory_spine(fixture_path, "bruno2015_fullbody_os4_v2")
+            inventory_spine(fixture_path, "senteler2016_lumbspine_30dof")
 
     def test_unknown_model_id(self, fixture_path: Path) -> None:
         require_opensim()
