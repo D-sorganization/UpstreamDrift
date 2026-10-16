@@ -75,7 +75,9 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
 
     def _apply_qss_stylesheet(self) -> None:
         try:
-            from src.shared.python.theme import ThemeManager as SharedThemeManager
+            from src.shared.python.theme.theme_manager import (
+                ThemeManager as SharedThemeManager,
+            )
 
             theme_mgr = SharedThemeManager.instance()
             self.setStyleSheet(theme_mgr.get_current_stylesheet())
@@ -96,7 +98,9 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
     def _on_shared_theme_changed(self, colors: dict[str, str]) -> None:
         """Update stylesheet dynamically when the shared theme changes."""
         try:
-            from src.shared.python.theme import ThemeManager as SharedThemeManager
+            from src.shared.python.theme.theme_manager import (
+                ThemeManager as SharedThemeManager,
+            )
 
             theme_mgr = SharedThemeManager.instance()
             self.setStyleSheet(theme_mgr.get_current_stylesheet())
@@ -386,7 +390,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
     def _apply_styling(self) -> None:
         """Apply professional styling to the application."""
         try:
-            from src.shared.python.theme import apply_theme_to_window
+            from src.shared.python.theme.integration import apply_theme_to_window
 
             if callable(apply_theme_to_window):
                 apply_theme_to_window(self)
