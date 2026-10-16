@@ -88,6 +88,10 @@ def _write_study(
         law="law-id",
         distribution_source=source,
         asset=None,
+        torso_alignment={
+            "matrix": [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+            "provenance": "calibrated:test fixture: identity by construction",
+        },
         stages=(StageRecord("drive", "ok"),),
         artifacts=(FileRecord("loads_npz", npz.name, _sha(npz)),),
         residual={},

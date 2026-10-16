@@ -48,6 +48,7 @@ from src.engines.physics_engines.opensim.python.spine.assets import (
     admit_spine_asset,
     resolve_spine_asset,
 )
+from src.engines.physics_engines.opensim.python.spine.drive import DriveOptions
 from src.engines.physics_engines.opensim.python.spine.inventory import (
     DEFAULT_LEVEL_MAP_PATH,
 )
@@ -86,6 +87,19 @@ _DATAFILE_RE = re.compile(r"<datafile>\s*([^<]+?)\s*</datafile>")
 _EXPONENTS = (2, 3)
 _PELVIS_KINDS = ("golf", "fixture")
 _OPTIONAL_PATHS = ("model_path", "external_loads")
+_IDENTITY = ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0))
+ASSUMED_IDENTITY = "assumed_identity"
+UNSET_ALIGNMENT_REASON = (
+    "torso alignment not supplied: drive assumed the identity (assumed_identity); "
+    "a wrong alignment biases every per-level angle without raising the residual"
+)
+
+
+def _alignment_matrix(value: object) -> tuple[tuple[float, ...], ...]:
+    """Validated 3x3 proper rotation as nested tuples (``ValueError`` if not)."""
+    options = DriveOptions(torso_alignment=np.asarray(value, dtype=float))
+    rot = options.torso_alignment
+    return tuple(tuple(float(x) for x in row) for row in rot)  # type: ignore[union-attr]
 
 
 def _positive(value: object, name: str) -> float:
@@ -144,6 +158,12 @@ class SpineStudyRequest:
             parameter (``None`` = the variant default; checked against the
             declared bounds) and the golfer's handedness.  ``None`` runs the
             unvaried study, byte-identical to a request without these fields.
+        torso_alignment / torso_alignment_source: the drive alignment ``A`` in
+            ``R_target = R_pelvis->torso @ A`` (3x3 proper rotation, terminal
+            frame in the golf torso frame) and a non-empty description of how
+            it was calibrated.  Both or neither: a request without them
+            assumes the identity, is recorded as ``assumed_identity`` and can
+            never be ``pass`` (ADR-0055 item 2).  Both enter the request hash.
         output_dir: where artifacts and the receipt are written (never
             recorded in the receipt).
 
@@ -175,6 +195,8 @@ class SpineStudyRequest:
     variant_id: str | None = None
     variant_parameter: float | None = None
     variant_handedness: str = "right"
+    torso_alignment: Any = None
+    torso_alignment_source: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.study_id, str) or not _ID_RE.fullmatch(self.study_id):
@@ -224,6 +246,40 @@ class SpineStudyRequest:
             self.variant_id, self.variant_parameter, self.variant_handedness
         )
         object.__setattr__(self, "events", _events(self.events))
+        self._check_alignment()
+
+    def _check_alignment(self) -> None:
+        source = self.torso_alignment_source
+        if self.torso_alignment is None:
+            if source is not None:
+                raise ValueError(
+                    "torso_alignment_source given without a torso_alignment matrix"
+                )
+            return
+        if not isinstance(source, str) or not source.strip():
+            raise ValueError(
+                "torso_alignment_source must be a non-empty string describing "
+                "how torso_alignment was calibrated"
+            )
+        object.__setattr__(
+            self, "torso_alignment", _alignment_matrix(self.torso_alignment)
+        )
+
+    def alignment_record(self) -> dict[str, Any]:
+        """JSON-compatible ``{"matrix", "provenance"}`` of the drive alignment.
+
+        ``provenance`` is ``calibrated:<source>`` when a matrix was supplied,
+        else ``assumed_identity`` with the identity matrix.
+        """
+        if self.torso_alignment is None:
+            return {
+                "matrix": [list(row) for row in _IDENTITY],
+                "provenance": ASSUMED_IDENTITY,
+            }
+        return {
+            "matrix": [list(row) for row in self.torso_alignment],
+            "provenance": f"calibrated:{self.torso_alignment_source}",
+        }
 
     def canonical_dict(self) -> dict[str, Any]:
         """Path-free, JSON-compatible definition (basenames, no output_dir).
@@ -255,6 +311,7 @@ class SpineStudyRequest:
             "residual_moment_fraction": self.residual_moment_fraction,
             "reserve_limit_nm": self.reserve_limit_nm,
             "reserve_max_share": self.reserve_max_share,
+            "torso_alignment": self.alignment_record(),
             **({"restrict_law_to_model": True} if self.restrict_law_to_model else {}),
         }
         if self.variant_id is not None:
@@ -412,9 +469,13 @@ def _admit(
 
 
 def _judge(
-    asset: SpineAssetReceipt | None, outcome: study_stages.StageOutcome
+    request: SpineStudyRequest,
+    asset: SpineAssetReceipt | None,
+    outcome: study_stages.StageOutcome,
 ) -> tuple[str, tuple[str, ...]]:
     reasons = []
+    if request.torso_alignment is None:
+        reasons.append(UNSET_ALIGNMENT_REASON)
     if asset is not None and asset.status is not SpineAssetStatus.QUALIFIED:
         reasons.append(f"asset {asset.asset_id} is {asset.status.value}")
     if outcome.failed:
@@ -498,7 +559,7 @@ def run_spine_study(
         outcome = study_stages.StageOutcome.skipped("segmental model asset is absent")
     else:
         outcome = study_stages.run_stages(request, model, _scrubber(request))
-    status, reasons = _judge(asset, outcome)
+    status, reasons = _judge(request, asset, outcome)
     receipt = SpineStudyReceipt(
         study_id=request.study_id,
         status=status,  # type: ignore[arg-type]
@@ -515,6 +576,7 @@ def run_spine_study(
         law=outcome.law,
         distribution_source=outcome.distribution_source,
         asset=None if asset is None else json.loads(json.dumps(asset.as_dict())),
+        torso_alignment=request.alignment_record(),
         stages=tuple(outcome.stages),
         artifacts=tuple(outcome.artifacts),
         residual=outcome.residual,

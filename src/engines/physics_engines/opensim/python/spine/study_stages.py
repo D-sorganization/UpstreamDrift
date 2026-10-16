@@ -147,7 +147,9 @@ def _drive(request: Any, model: Path, scrub: Any, out: StageOutcome) -> DriveRes
     out.active = "drive"
     law = _requested_law(request)
     options = DriveOptions(
-        tolerance_rad=request.drive_tolerance_rad, pelvis=_PELVIS[request.pelvis]
+        tolerance_rad=request.drive_tolerance_rad,
+        pelvis=_PELVIS[request.pelvis],
+        torso_alignment=request.torso_alignment,
     )
     result = drive_segmental_model(
         golf, model_path=model, model_id=request.model_id, law=law, options=options
