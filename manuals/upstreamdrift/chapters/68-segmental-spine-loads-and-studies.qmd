@@ -602,8 +602,9 @@ Open:
   `unqualified`: the pelvis residual exceeds its budget and frames are
   flagged for reserve use. The residual carries gravitational support plus
   whole-body inertial demand. Budgets were not widened.
-- **Fujii parity.** The flexion parity defect of `fujii2007_lumbar` is open
-  (see Fujii Parity Defect).
+- **Fujii flexion form.** Coupled flexion of `fujii2007_lumbar` is even in
+  rotation since #12821 (see Fujii Parity) and is assumed linear in
+  $\lvert\phi\rvert$ from a single 45 deg measurement.
 
 Corrected during development (guards in the research reference, "Failed
 Experiments"):
@@ -671,7 +672,6 @@ Model assumptions:
   biases the distribution without a residual.
 - The distribution is a local solve. Bounds default to unbounded, and the
   default drive tolerance flags only unconverged frames.
-- `fujii2007_lumbar` has the flexion parity defect described above.
 
 Loads and numerics:
 
@@ -694,7 +694,7 @@ Fixture, literature and receipts:
 
 Known code-level gaps (follow-up candidates, behaviour unchanged here):
 
-- `fujii2007_lumbar` needs an even/odd law form for coupled flexion.
+- `fujii2007_lumbar` cannot be exported as OpenSim linear couplers.
 - `level_angle_stack` and `StackData` do not pass $B$, $E$ and $A$ through;
   use `segmental_contribution_breakdown` (#12822) for the full path.
 - No calibration of $A$ is enforced or recorded beyond the identity default.

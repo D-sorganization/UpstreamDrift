@@ -1,7 +1,9 @@
 """Cited spinal coupling-law data and loader (SPN-3, issue #12743).
 
 Reads ``src/config/spine_coupling_laws.json`` and builds
-:class:`~src.shared.python.spine.coupling.LinearCouplingLaw` objects. The JSON
+:class:`~src.shared.python.spine.coupling.LinearCouplingLaw` objects, or a
+:class:`~src.shared.python.spine.coupling.ParityCouplingLaw` when the
+distribution declares ``even_in_rotation`` axes. The JSON
 stores only source numbers copied from
 ``docs/research/segmental_spine/data_extraction.md`` (plus labelled
 assumptions); per-level matrices are derived here, so every literature number
@@ -186,7 +188,10 @@ def _citation_text(entry: dict) -> str:
 
 
 def coupling_law(law_id: str) -> CouplingLaw:
-    """Build the :class:`LinearCouplingLaw` for ``law_id``.
+    """Build the coupling law for ``law_id``.
+
+    Returns a :class:`LinearCouplingLaw`, or a :class:`ParityCouplingLaw` when
+    the distribution declares ``even_in_rotation`` axes.
 
     Postconditions: the returned law has read-only matrices, a non-empty
     citation and the independent coordinates named in the JSON.

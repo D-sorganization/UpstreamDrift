@@ -15,6 +15,7 @@ from src.shared.python.spine.context_bands import (
 from src.shared.python.spine.coupling import (
     CouplingLaw,
     LinearCouplingLaw,
+    ParityCouplingLaw,
     PolynomialCouplingLaw,
     StateDependentCouplingLaw,
     from_joint_coupling,
@@ -90,6 +91,7 @@ __all__ = [
     "HeatmapData",
     "LevelTransform",
     "LinearCouplingLaw",
+    "ParityCouplingLaw",
     "LoadObservable",
     "MovementVariant",
     "ObservabilityReport",
