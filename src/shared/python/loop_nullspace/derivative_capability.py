@@ -37,7 +37,13 @@ from src.shared.python.engine_core.capabilities import (
     CapabilityUnavailable,
     capability_level_supported,
 )
-from src.shared.python.loop_nullspace.evidence import Array
+from src.shared.python.loop_nullspace.evidence import (
+    AllocationDependence,
+    Array,
+    InputProvenance,
+    ModelProvenance,
+    QuantityRecord,
+)
 
 __all__ = [
     "ClosedLoopDerivativeProvider",
@@ -48,6 +54,7 @@ __all__ = [
     "DerivativeMethod",
     "default_registry",
     "require_adapter_derivatives",
+    "unavailable_derivative_record",
 ]
 
 
@@ -220,6 +227,19 @@ class DerivativeCapabilityRegistry:
         self._entries[engine] = decl
         return decl
 
+    def declaration(self, engine: str) -> DerivativeCapabilityDeclaration:
+        """Return the declaration of ``engine`` whatever its level.
+
+        Raises:
+            DerivativeCapabilityUnavailable: ``engine`` is not declared.
+        """
+        decl = self._entries.get(engine)
+        if decl is None:
+            raise DerivativeCapabilityUnavailable(
+                f"closed-loop derivatives for {engine!r} are not declared"
+            )
+        return decl
+
     def require(
         self, engine: str, *, minimum: CapabilityLevel = CapabilityLevel.PARTIAL
     ) -> DerivativeCapabilityDeclaration:
@@ -263,6 +283,12 @@ _ADAPTER_FD = (
     "src.shared.python.loop_nullspace.adapter_derivatives:"
     "adapter_closed_loop_derivatives"
 )
+_SIMSCAPE_REASON = (
+    "the NSX-55 Simscape export is a snapshot grid and cannot be re-evaluated at "
+    "perturbed states; a per-frame MATLAB R2025b linearize A/B export (model hash, "
+    "solver settings, state mapping) is the deferred path, recorded in DV-12718 "
+    "(R2026a is never acceptance evidence)"
+)
 
 
 def default_registry() -> DerivativeCapabilityRegistry:
@@ -299,7 +325,40 @@ def default_registry() -> DerivativeCapabilityRegistry:
     )
     for engine in _ENGINES:
         reg.declare(engine, DerivativeMethod.NONE, reason=_PENDING)
+    reg.declare("simscape", DerivativeMethod.NONE, reason=_SIMSCAPE_REASON)
     return reg
+
+
+def unavailable_derivative_record(
+    engine: str,
+    *,
+    shape: tuple[int, ...],
+    units: str,
+    model_provenance: ModelProvenance,
+    input_provenance: InputProvenance,
+    registry: DerivativeCapabilityRegistry | None = None,
+    minimum: CapabilityLevel = CapabilityLevel.PARTIAL,
+) -> QuantityRecord | None:
+    """``UNAVAILABLE`` record for a derivative-based output, or ``None``.
+
+    The one place a variability output asks the capability seam whether
+    ``engine`` can supply derivatives.  When it cannot (undeclared, or below
+    ``minimum``), the result is an all-NaN ``UNAVAILABLE`` :class:`QuantityRecord`
+    whose reason is the registry's text; when it can, ``None`` so the caller
+    computes the real quantity.  Never a zero or an interpolated stand-in.
+    """
+    try:
+        (registry or default_registry()).require(engine, minimum=minimum)
+    except DerivativeCapabilityUnavailable as exc:
+        return QuantityRecord(
+            values=np.full(shape, np.nan),
+            units=units,
+            allocation_dependence=AllocationDependence.UNAVAILABLE,
+            model_provenance=model_provenance,
+            input_provenance=input_provenance,
+            reason=str(exc),
+        )
+    return None
 
 
 def require_adapter_derivatives(
