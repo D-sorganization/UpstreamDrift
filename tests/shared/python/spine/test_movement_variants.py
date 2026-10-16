@@ -23,6 +23,7 @@ from src.shared.python.spine.movement_variants import (
     RangeCheck,
     VariantResult,
     apply_variant,
+    check_undeclared_terms,
     check_coordinate_ranges,
     load_movement_variants,
     movement_variant,
@@ -423,3 +424,63 @@ def test_check_coordinate_ranges_contracts() -> None:
         check_coordinate_ranges({"a": np.zeros(2)}, {"a": (1.0, -1.0)})
     with pytest.raises(TypeError):
         check_coordinate_ranges([1, 2], {"a": (-1.0, 1.0)})  # type: ignore[arg-type]
+
+
+# ------------------------------------------------ undeclared-term check (#12825)
+
+
+def _leak(rotations: np.ndarray, degrees: float) -> np.ndarray:
+    """Rotate every frame about the pelvis Z axis: leaks into trunk extension."""
+    spin = Rotation.from_euler("z", degrees, degrees=True).as_matrix()
+    return spin @ rotations
+
+
+@pytest.mark.parametrize("hand", ["right", "left"])
+@pytest.mark.parametrize("variant_id", sorted(EXPECTED_IDS))
+def test_check_undeclared_terms_accepts_every_shipped_variant(
+    variant_id: str, hand: str
+) -> None:
+    variant = movement_variant(variant_id)
+    result = _apply(variant_id, hand)
+    check = check_undeclared_terms(
+        variant, _rotations(hand), result.rotations, TIME, handedness=hand
+    )
+    assert check.ok is True
+    assert check.violations == ()
+    assert check.tolerance == variant.undeclared_tolerance_deg
+    assert set(check.max_change) == (set(JCS_TERMS) | {"crunch_factor_rate"}) - set(
+        variant.affected_terms
+    )
+    assert all(v <= check.tolerance for v in check.max_change.values())
+
+
+def test_check_undeclared_terms_flags_a_leaky_variant() -> None:
+    variant = movement_variant("x_factor_top_scale")
+    result = _apply("x_factor_top_scale")
+    leaky = _leak(np.asarray(result.rotations), 2.0)
+    check = check_undeclared_terms(
+        variant, _rotations(), leaky, TIME, handedness="right"
+    )
+    assert check.ok is False
+    assert "trunk_extension_jcs" in check.violations
+    assert check.max_change["trunk_extension_jcs"] > 0.5  # degrees
+    assert "x_factor_jcs_axial" not in check.max_change  # declared, not judged
+
+
+def test_check_undeclared_terms_treats_lost_samples_as_a_change() -> None:
+    variant = movement_variant("impact_extension_offset")
+    base = _rotations()
+    gimbal = base.copy()
+    gimbal[5] = Rotation.from_euler("ZXY", [0.0, 90.0, 0.0], degrees=True).as_matrix()
+    check = check_undeclared_terms(variant, base, gimbal, TIME, handedness="right")
+    assert check.ok is False
+    assert np.isinf(check.max_change["trunk_lateral_flexion_jcs"])
+
+
+def test_check_undeclared_terms_validates_arguments() -> None:
+    variant = movement_variant("x_factor_top_scale")
+    rots = _rotations()
+    with pytest.raises(TypeError):
+        check_undeclared_terms("x", rots, rots, TIME, handedness="right")  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="same shape"):
+        check_undeclared_terms(variant, rots, rots[:-1], TIME, handedness="right")
