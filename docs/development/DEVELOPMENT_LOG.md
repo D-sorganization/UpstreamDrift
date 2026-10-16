@@ -2353,6 +2353,71 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12914 · Closing the Launcher After a MuJoCo Session Releases Renderers Before Widgets Die.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12914
+- **Branch:** merged via #12922
+- **PR:** #12922
+- **Paths:** see #12922
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`bd1fa54e`; collated from changes/12914-closing-the-launcher-after-a-mujoco-sess.md)
+- **Summary:** Closing the launcher after a MuJoCo session releases renderers before widgets die.
+- **Next step:** Shipped in PR #12922.
+
+### DL-#12884 · MuJoCo Explorer: 3D View No Longer Renders Black in the Launcher (Renderer Freed Under Its Own GL Context), Side Quick-Camera No Longer Crashes, Visualization Tab Scrolls Instead of Overlapping (#12884, #12885, #12889)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12884
+- **Branch:** merged via #12902
+- **PR:** #12902
+- **Paths:** see #12902
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`a4333859`; collated from changes/12884-mujoco-explorer-3d-view-no-longer-render.md)
+- **Summary:** MuJoCo explorer: 3D view no longer renders black in the launcher (renderer freed under its own GL context), Side quick-camera no longer crashes, Visualization tab scrolls instead of overlapping (#12884, #12885, #12889)
+- **Next step:** Shipped in PR #12902.
+
+### DL-#12717 · NSX-88: OpenSim Closed-Loop FD Derivatives via NSX-84 Routine, Capability PARTIAL, Muscle-Insufficiency Flag
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12717
+- **Branch:** merged via #12852
+- **PR:** #12852
+- **Paths:** see #12852
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`43baeba2`; collated from changes/12717-nsx-88-opensim-closed-loop-fd-derivative.md)
+- **Summary:** NSX-88: OpenSim closed-loop FD derivatives via NSX-84 routine, capability PARTIAL, muscle-insufficiency flag
+- **Next step:** Shipped in PR #12852.
+
+### DL-#12716 · NSX-87: MuJoCo/MyoSuite Hard-KKT Finite-Difference Closed-Loop Derivatives (PARTIAL), Reusing the NSX-84 Routine
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12716
+- **Branch:** merged via #12852
+- **PR:** #12852
+- **Paths:** see #12852
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`43baeba2`; collated from changes/12716-nsx-87-mujoco-myosuite-hard-kkt-finite-d.md)
+- **Summary:** NSX-87: MuJoCo/MyoSuite hard-KKT finite-difference closed-loop derivatives (PARTIAL), reusing the NSX-84 routine
+- **Next step:** Shipped in PR #12852.
+
+### DL-#12565 · NSX-22 Static Torque and Hand-Split Envelopes With Chebyshev Margin and Sign Classes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12565
+- **Branch:** merged via #12640
+- **PR:** #12640
+- **Paths:** see #12640
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`66c8da74`; collated from changes/12565-nsx-22-static-torque-and-hand-split-enve.md)
+- **Summary:** NSX-22 static torque and hand-split envelopes with Chebyshev margin and sign classes
+- **Next step:** Shipped in PR #12640.
+
 ### DL-#12913 · Club Head Speed No Longer Reads 0.0 for Models Naming the Body Clubhead.
 
 - **State:** shipped
