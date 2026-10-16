@@ -255,3 +255,797 @@ divergences:
       against Pinocchio CRBA/RNEA; closure rows canonical after the NSX-02
       conversion. Jdot v is the MuJoCo second-order central finite
       difference (step 1e-6); the registered 1e-8 is the NSX-51 limit.
+
+  - id: nsx98-pinocchio-mujoco-d-acc-d-tau
+    check: closed_loop_derivative_conformance
+    metric: d_acc_d_tau
+    engines: [pinocchio, mujoco]
+    tolerance: 8.6e-10
+    rationale: >
+      MuJoCo hard-KKT central finite differences (step 1e-5) against Pinocchio
+      ANALYTIC (NSX-85). Same specification, projected state (frames 0 and 400 of
+      the ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: Track N snapshot differences propagated
+      with kkt_bound, divided by the step and multiplied by sqrt(k) per state
+      column (NSX-88 derivation); load blocks use kkt_bound with a zero right-hand
+      side times sqrt(nv). Measured 1.7e-11 (max over the two frames); registered
+      value is the derived bound rounded up to two significant digits. Agreement
+      is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-mujoco-d-acc-d-xi
+    check: closed_loop_derivative_conformance
+    metric: d_acc_d_xi
+    engines: [pinocchio, mujoco]
+    tolerance: 0.0022
+    rationale: >
+      MuJoCo hard-KKT central finite differences (step 1e-5) against Pinocchio
+      ANALYTIC (NSX-85). Same specification, projected state (frames 0 and 400 of
+      the ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: Track N snapshot differences propagated
+      with kkt_bound, divided by the step and multiplied by sqrt(k) per state
+      column (NSX-88 derivation); load blocks use kkt_bound with a zero right-hand
+      side times sqrt(nv). Measured 4.8e-06 (max over the two frames); registered
+      value is the derived bound rounded up to two significant digits. Agreement
+      is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-mujoco-d-acc-d-eta
+    check: closed_loop_derivative_conformance
+    metric: d_acc_d_eta
+    engines: [pinocchio, mujoco]
+    tolerance: 0.68
+    rationale: >
+      MuJoCo hard-KKT central finite differences (step 1e-5) against Pinocchio
+      ANALYTIC (NSX-85). Same specification, projected state (frames 0 and 400 of
+      the ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: Track N snapshot differences propagated
+      with kkt_bound, divided by the step and multiplied by sqrt(k) per state
+      column (NSX-88 derivation); load blocks use kkt_bound with a zero right-hand
+      side times sqrt(nv). Measured 0.0049 (max over the two frames); registered
+      value is the derived bound rounded up to two significant digits. Agreement
+      is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-mujoco-d-lambda-d-tau
+    check: closed_loop_derivative_conformance
+    metric: d_lambda_d_tau
+    engines: [pinocchio, mujoco]
+    tolerance: 5.6e-07
+    rationale: >
+      MuJoCo hard-KKT central finite differences (step 1e-5) against Pinocchio
+      ANALYTIC (NSX-85). Same specification, projected state (frames 0 and 400 of
+      the ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: Track N snapshot differences propagated
+      with kkt_bound, divided by the step and multiplied by sqrt(k) per state
+      column (NSX-88 derivation); load blocks use kkt_bound with a zero right-hand
+      side times sqrt(nv). Measured 7.4e-11 (max over the two frames); registered
+      value is the derived bound rounded up to two significant digits. Agreement
+      is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-mujoco-d-lambda-d-xi
+    check: closed_loop_derivative_conformance
+    metric: d_lambda_d_xi
+    engines: [pinocchio, mujoco]
+    tolerance: 0.23
+    rationale: >
+      MuJoCo hard-KKT central finite differences (step 1e-5) against Pinocchio
+      ANALYTIC (NSX-85). Same specification, projected state (frames 0 and 400 of
+      the ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: Track N snapshot differences propagated
+      with kkt_bound, divided by the step and multiplied by sqrt(k) per state
+      column (NSX-88 derivation); load blocks use kkt_bound with a zero right-hand
+      side times sqrt(nv). Measured 1.5e-05 (max over the two frames); registered
+      value is the derived bound rounded up to two significant digits. Agreement
+      is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-mujoco-d-lambda-d-eta
+    check: closed_loop_derivative_conformance
+    metric: d_lambda_d_eta
+    engines: [pinocchio, mujoco]
+    tolerance: 1.8
+    rationale: >
+      MuJoCo hard-KKT central finite differences (step 1e-5) against Pinocchio
+      ANALYTIC (NSX-85). Same specification, projected state (frames 0 and 400 of
+      the ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: Track N snapshot differences propagated
+      with kkt_bound, divided by the step and multiplied by sqrt(k) per state
+      column (NSX-88 derivation); load blocks use kkt_bound with a zero right-hand
+      side times sqrt(nv). Measured 4.7e-05 (max over the two frames); registered
+      value is the derived bound rounded up to two significant digits. Agreement
+      is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-mujoco-acc-load-variance
+    check: closed_loop_derivative_conformance
+    metric: acc_load_variance
+    engines: [pinocchio, mujoco]
+    tolerance: 1.8e-09
+    rationale: >
+      MuJoCo hard-KKT central finite differences (step 1e-5) against Pinocchio
+      ANALYTIC (NSX-85). Same specification, projected state (frames 0 and 400 of
+      the ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: Track N snapshot differences propagated with kkt_bound, divided by
+      the step and multiplied by sqrt(k) per state column (NSX-88 derivation);
+      load blocks use kkt_bound with a zero right-hand side times sqrt(nv).
+      Measured 3.4e-12 (max over the two frames); registered value is the derived
+      bound rounded up to two significant digits. Agreement is software
+      conformance, not physical validation.
+
+  - id: nsx98-pinocchio-mujoco-lambda-load-variance
+    check: closed_loop_derivative_conformance
+    metric: lambda_load_variance
+    engines: [pinocchio, mujoco]
+    tolerance: 5.5e-07
+    rationale: >
+      MuJoCo hard-KKT central finite differences (step 1e-5) against Pinocchio
+      ANALYTIC (NSX-85). Same specification, projected state (frames 0 and 400 of
+      the ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: Track N snapshot differences propagated with kkt_bound, divided by
+      the step and multiplied by sqrt(k) per state column (NSX-88 derivation);
+      load blocks use kkt_bound with a zero right-hand side times sqrt(nv).
+      Measured 1.4e-10 (max over the two frames); registered value is the derived
+      bound rounded up to two significant digits. Agreement is software
+      conformance, not physical validation.
+
+  - id: nsx98-pinocchio-mujoco-acc-state-variance
+    check: closed_loop_derivative_conformance
+    metric: acc_state_variance
+    engines: [pinocchio, mujoco]
+    tolerance: 0.0042
+    rationale: >
+      MuJoCo hard-KKT central finite differences (step 1e-5) against Pinocchio
+      ANALYTIC (NSX-85). Same specification, projected state (frames 0 and 400 of
+      the ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: Track N snapshot differences propagated with kkt_bound, divided by
+      the step and multiplied by sqrt(k) per state column (NSX-88 derivation);
+      load blocks use kkt_bound with a zero right-hand side times sqrt(nv).
+      Measured 1.6e-06 (max over the two frames); registered value is the derived
+      bound rounded up to two significant digits. Agreement is software
+      conformance, not physical validation.
+
+  - id: nsx98-pinocchio-mujoco-lambda-state-variance
+    check: closed_loop_derivative_conformance
+    metric: lambda_state_variance
+    engines: [pinocchio, mujoco]
+    tolerance: 0.32
+    rationale: >
+      MuJoCo hard-KKT central finite differences (step 1e-5) against Pinocchio
+      ANALYTIC (NSX-85). Same specification, projected state (frames 0 and 400 of
+      the ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: Track N snapshot differences propagated with kkt_bound, divided by
+      the step and multiplied by sqrt(k) per state column (NSX-88 derivation);
+      load blocks use kkt_bound with a zero right-hand side times sqrt(nv).
+      Measured 9.9e-06 (max over the two frames); registered value is the derived
+      bound rounded up to two significant digits. Agreement is software
+      conformance, not physical validation.
+
+  - id: nsx98-pinocchio-myosuite-d-acc-d-tau
+    check: closed_loop_derivative_conformance
+    metric: d_acc_d_tau
+    engines: [pinocchio, myosuite]
+    tolerance: 8.6e-10
+    rationale: >
+      MyoSuite-held MuJoCo hard-KKT finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: identical derivation to the MuJoCo rows,
+      which are inherited because MyoSuiteForceAdapter drives the same NSX-87
+      routine; NOT measured on the host that wrote this row (the installed
+      myosuite exposes no supported runtime layout, #12635) -- the
+      requires_myosuite test enforces the per-run bound wherever myosuite loads.
+      Measured 1.7e-11 (max over the two frames on MuJoCo); registered value is
+      the derived bound rounded up to two significant digits. Agreement is
+      software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-myosuite-d-acc-d-xi
+    check: closed_loop_derivative_conformance
+    metric: d_acc_d_xi
+    engines: [pinocchio, myosuite]
+    tolerance: 0.0022
+    rationale: >
+      MyoSuite-held MuJoCo hard-KKT finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: identical derivation to the MuJoCo rows,
+      which are inherited because MyoSuiteForceAdapter drives the same NSX-87
+      routine; NOT measured on the host that wrote this row (the installed
+      myosuite exposes no supported runtime layout, #12635) -- the
+      requires_myosuite test enforces the per-run bound wherever myosuite loads.
+      Measured 4.8e-06 (max over the two frames on MuJoCo); registered value is
+      the derived bound rounded up to two significant digits. Agreement is
+      software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-myosuite-d-acc-d-eta
+    check: closed_loop_derivative_conformance
+    metric: d_acc_d_eta
+    engines: [pinocchio, myosuite]
+    tolerance: 0.68
+    rationale: >
+      MyoSuite-held MuJoCo hard-KKT finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: identical derivation to the MuJoCo rows,
+      which are inherited because MyoSuiteForceAdapter drives the same NSX-87
+      routine; NOT measured on the host that wrote this row (the installed
+      myosuite exposes no supported runtime layout, #12635) -- the
+      requires_myosuite test enforces the per-run bound wherever myosuite loads.
+      Measured 0.0049 (max over the two frames on MuJoCo); registered value is the
+      derived bound rounded up to two significant digits. Agreement is software
+      conformance, not physical validation.
+
+  - id: nsx98-pinocchio-myosuite-d-lambda-d-tau
+    check: closed_loop_derivative_conformance
+    metric: d_lambda_d_tau
+    engines: [pinocchio, myosuite]
+    tolerance: 5.6e-07
+    rationale: >
+      MyoSuite-held MuJoCo hard-KKT finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: identical derivation to the MuJoCo rows,
+      which are inherited because MyoSuiteForceAdapter drives the same NSX-87
+      routine; NOT measured on the host that wrote this row (the installed
+      myosuite exposes no supported runtime layout, #12635) -- the
+      requires_myosuite test enforces the per-run bound wherever myosuite loads.
+      Measured 7.4e-11 (max over the two frames on MuJoCo); registered value is
+      the derived bound rounded up to two significant digits. Agreement is
+      software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-myosuite-d-lambda-d-xi
+    check: closed_loop_derivative_conformance
+    metric: d_lambda_d_xi
+    engines: [pinocchio, myosuite]
+    tolerance: 0.23
+    rationale: >
+      MyoSuite-held MuJoCo hard-KKT finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: identical derivation to the MuJoCo rows,
+      which are inherited because MyoSuiteForceAdapter drives the same NSX-87
+      routine; NOT measured on the host that wrote this row (the installed
+      myosuite exposes no supported runtime layout, #12635) -- the
+      requires_myosuite test enforces the per-run bound wherever myosuite loads.
+      Measured 1.5e-05 (max over the two frames on MuJoCo); registered value is
+      the derived bound rounded up to two significant digits. Agreement is
+      software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-myosuite-d-lambda-d-eta
+    check: closed_loop_derivative_conformance
+    metric: d_lambda_d_eta
+    engines: [pinocchio, myosuite]
+    tolerance: 1.8
+    rationale: >
+      MyoSuite-held MuJoCo hard-KKT finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: identical derivation to the MuJoCo rows,
+      which are inherited because MyoSuiteForceAdapter drives the same NSX-87
+      routine; NOT measured on the host that wrote this row (the installed
+      myosuite exposes no supported runtime layout, #12635) -- the
+      requires_myosuite test enforces the per-run bound wherever myosuite loads.
+      Measured 4.7e-05 (max over the two frames on MuJoCo); registered value is
+      the derived bound rounded up to two significant digits. Agreement is
+      software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-myosuite-acc-load-variance
+    check: closed_loop_derivative_conformance
+    metric: acc_load_variance
+    engines: [pinocchio, myosuite]
+    tolerance: 1.8e-09
+    rationale: >
+      MyoSuite-held MuJoCo hard-KKT finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: identical derivation to the MuJoCo rows, which are inherited because
+      MyoSuiteForceAdapter drives the same NSX-87 routine; NOT measured on the
+      host that wrote this row (the installed myosuite exposes no supported
+      runtime layout, #12635) -- the requires_myosuite test enforces the per-run
+      bound wherever myosuite loads. Measured 3.4e-12 (max over the two frames on
+      MuJoCo); registered value is the derived bound rounded up to two significant
+      digits. Agreement is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-myosuite-lambda-load-variance
+    check: closed_loop_derivative_conformance
+    metric: lambda_load_variance
+    engines: [pinocchio, myosuite]
+    tolerance: 5.5e-07
+    rationale: >
+      MyoSuite-held MuJoCo hard-KKT finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: identical derivation to the MuJoCo rows, which are inherited because
+      MyoSuiteForceAdapter drives the same NSX-87 routine; NOT measured on the
+      host that wrote this row (the installed myosuite exposes no supported
+      runtime layout, #12635) -- the requires_myosuite test enforces the per-run
+      bound wherever myosuite loads. Measured 1.4e-10 (max over the two frames on
+      MuJoCo); registered value is the derived bound rounded up to two significant
+      digits. Agreement is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-myosuite-acc-state-variance
+    check: closed_loop_derivative_conformance
+    metric: acc_state_variance
+    engines: [pinocchio, myosuite]
+    tolerance: 0.0042
+    rationale: >
+      MyoSuite-held MuJoCo hard-KKT finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: identical derivation to the MuJoCo rows, which are inherited because
+      MyoSuiteForceAdapter drives the same NSX-87 routine; NOT measured on the
+      host that wrote this row (the installed myosuite exposes no supported
+      runtime layout, #12635) -- the requires_myosuite test enforces the per-run
+      bound wherever myosuite loads. Measured 1.6e-06 (max over the two frames on
+      MuJoCo); registered value is the derived bound rounded up to two significant
+      digits. Agreement is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-myosuite-lambda-state-variance
+    check: closed_loop_derivative_conformance
+    metric: lambda_state_variance
+    engines: [pinocchio, myosuite]
+    tolerance: 0.32
+    rationale: >
+      MyoSuite-held MuJoCo hard-KKT finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: identical derivation to the MuJoCo rows, which are inherited because
+      MyoSuiteForceAdapter drives the same NSX-87 routine; NOT measured on the
+      host that wrote this row (the installed myosuite exposes no supported
+      runtime layout, #12635) -- the requires_myosuite test enforces the per-run
+      bound wherever myosuite loads. Measured 9.9e-06 (max over the two frames on
+      MuJoCo); registered value is the derived bound rounded up to two significant
+      digits. Agreement is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-drake-d-acc-d-tau
+    check: closed_loop_derivative_conformance
+    metric: d_acc_d_tau
+    engines: [pinocchio, drake]
+    tolerance: 7.7e-10
+    rationale: >
+      Drake AutoDiffXd exact derivatives (NSX-86) against Pinocchio ANALYTIC
+      (NSX-85). Same specification, projected state (frames 0 and 400 of the
+      ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: load blocks use kkt_bound with a zero
+      right-hand side times sqrt(nv); state blocks are held to the spread of the
+      engine-free NSX-84 finite-difference reference under step x0.5 and x2 (step
+      1e-3), the smallest difference between two exact routes it can resolve
+      (NSX-86). Measured 2e-11 (max over the two frames); registered value is the
+      derived bound rounded up to two significant digits. Agreement is software
+      conformance, not physical validation.
+
+  - id: nsx98-pinocchio-drake-d-acc-d-xi
+    check: closed_loop_derivative_conformance
+    metric: d_acc_d_xi
+    engines: [pinocchio, drake]
+    tolerance: 6.3e-05
+    rationale: >
+      Drake AutoDiffXd exact derivatives (NSX-86) against Pinocchio ANALYTIC
+      (NSX-85). Same specification, projected state (frames 0 and 400 of the
+      ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: load blocks use kkt_bound with a zero
+      right-hand side times sqrt(nv); state blocks are held to the spread of the
+      engine-free NSX-84 finite-difference reference under step x0.5 and x2 (step
+      1e-3), the smallest difference between two exact routes it can resolve
+      (NSX-86). Measured 7.5e-11 (max over the two frames); registered value is
+      the derived bound rounded up to two significant digits. Agreement is
+      software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-drake-d-acc-d-eta
+    check: closed_loop_derivative_conformance
+    metric: d_acc_d_eta
+    engines: [pinocchio, drake]
+    tolerance: 0.00034
+    rationale: >
+      Drake AutoDiffXd exact derivatives (NSX-86) against Pinocchio ANALYTIC
+      (NSX-85). Same specification, projected state (frames 0 and 400 of the
+      ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: load blocks use kkt_bound with a zero
+      right-hand side times sqrt(nv); state blocks are held to the spread of the
+      engine-free NSX-84 finite-difference reference under step x0.5 and x2 (step
+      1e-3), the smallest difference between two exact routes it can resolve
+      (NSX-86). Measured 6.5e-12 (max over the two frames); registered value is
+      the derived bound rounded up to two significant digits. Agreement is
+      software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-drake-d-lambda-d-tau
+    check: closed_loop_derivative_conformance
+    metric: d_lambda_d_tau
+    engines: [pinocchio, drake]
+    tolerance: 5.5e-07
+    rationale: >
+      Drake AutoDiffXd exact derivatives (NSX-86) against Pinocchio ANALYTIC
+      (NSX-85). Same specification, projected state (frames 0 and 400 of the
+      ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: load blocks use kkt_bound with a zero
+      right-hand side times sqrt(nv); state blocks are held to the spread of the
+      engine-free NSX-84 finite-difference reference under step x0.5 and x2 (step
+      1e-3), the smallest difference between two exact routes it can resolve
+      (NSX-86). Measured 6.1e-11 (max over the two frames); registered value is
+      the derived bound rounded up to two significant digits. Agreement is
+      software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-drake-d-lambda-d-xi
+    check: closed_loop_derivative_conformance
+    metric: d_lambda_d_xi
+    engines: [pinocchio, drake]
+    tolerance: 1.1e-05
+    rationale: >
+      Drake AutoDiffXd exact derivatives (NSX-86) against Pinocchio ANALYTIC
+      (NSX-85). Same specification, projected state (frames 0 and 400 of the
+      ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: load blocks use kkt_bound with a zero
+      right-hand side times sqrt(nv); state blocks are held to the spread of the
+      engine-free NSX-84 finite-difference reference under step x0.5 and x2 (step
+      1e-3), the smallest difference between two exact routes it can resolve
+      (NSX-86). Measured 2.8e-11 (max over the two frames); registered value is
+      the derived bound rounded up to two significant digits. Agreement is
+      software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-drake-d-lambda-d-eta
+    check: closed_loop_derivative_conformance
+    metric: d_lambda_d_eta
+    engines: [pinocchio, drake]
+    tolerance: 3.7e-08
+    rationale: >
+      Drake AutoDiffXd exact derivatives (NSX-86) against Pinocchio ANALYTIC
+      (NSX-85). Same specification, projected state (frames 0 and 400 of the
+      ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: load blocks use kkt_bound with a zero
+      right-hand side times sqrt(nv); state blocks are held to the spread of the
+      engine-free NSX-84 finite-difference reference under step x0.5 and x2 (step
+      1e-3), the smallest difference between two exact routes it can resolve
+      (NSX-86). Measured 1.2e-12 (max over the two frames); registered value is
+      the derived bound rounded up to two significant digits. Agreement is
+      software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-drake-acc-load-variance
+    check: closed_loop_derivative_conformance
+    metric: acc_load_variance
+    engines: [pinocchio, drake]
+    tolerance: 1.6e-09
+    rationale: >
+      Drake AutoDiffXd exact derivatives (NSX-86) against Pinocchio ANALYTIC
+      (NSX-85). Same specification, projected state (frames 0 and 400 of the
+      ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: load blocks use kkt_bound with a zero right-hand side times sqrt(nv);
+      state blocks are held to the spread of the engine-free NSX-84 finite-
+      difference reference under step x0.5 and x2 (step 1e-3), the smallest
+      difference between two exact routes it can resolve (NSX-86). Measured
+      1.4e-11 (max over the two frames); registered value is the derived bound
+      rounded up to two significant digits. Agreement is software conformance, not
+      physical validation.
+
+  - id: nsx98-pinocchio-drake-lambda-load-variance
+    check: closed_loop_derivative_conformance
+    metric: lambda_load_variance
+    engines: [pinocchio, drake]
+    tolerance: 5.4e-07
+    rationale: >
+      Drake AutoDiffXd exact derivatives (NSX-86) against Pinocchio ANALYTIC
+      (NSX-85). Same specification, projected state (frames 0 and 400 of the
+      ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: load blocks use kkt_bound with a zero right-hand side times sqrt(nv);
+      state blocks are held to the spread of the engine-free NSX-84 finite-
+      difference reference under step x0.5 and x2 (step 1e-3), the smallest
+      difference between two exact routes it can resolve (NSX-86). Measured
+      1.3e-10 (max over the two frames); registered value is the derived bound
+      rounded up to two significant digits. Agreement is software conformance, not
+      physical validation.
+
+  - id: nsx98-pinocchio-drake-acc-state-variance
+    check: closed_loop_derivative_conformance
+    metric: acc_state_variance
+    engines: [pinocchio, drake]
+    tolerance: 0.00012
+    rationale: >
+      Drake AutoDiffXd exact derivatives (NSX-86) against Pinocchio ANALYTIC
+      (NSX-85). Same specification, projected state (frames 0 and 400 of the
+      ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: load blocks use kkt_bound with a zero right-hand side times sqrt(nv);
+      state blocks are held to the spread of the engine-free NSX-84 finite-
+      difference reference under step x0.5 and x2 (step 1e-3), the smallest
+      difference between two exact routes it can resolve (NSX-86). Measured
+      3.3e-11 (max over the two frames); registered value is the derived bound
+      rounded up to two significant digits. Agreement is software conformance, not
+      physical validation.
+
+  - id: nsx98-pinocchio-drake-lambda-state-variance
+    check: closed_loop_derivative_conformance
+    metric: lambda_state_variance
+    engines: [pinocchio, drake]
+    tolerance: 1.2e-05
+    rationale: >
+      Drake AutoDiffXd exact derivatives (NSX-86) against Pinocchio ANALYTIC
+      (NSX-85). Same specification, projected state (frames 0 and 400 of the
+      ground-support dynamics record), seeded actuated load and one closure
+      tangent space; operators compared in the Pinocchio coordinate order as D P^T
+      (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: load blocks use kkt_bound with a zero right-hand side times sqrt(nv);
+      state blocks are held to the spread of the engine-free NSX-84 finite-
+      difference reference under step x0.5 and x2 (step 1e-3), the smallest
+      difference between two exact routes it can resolve (NSX-86). Measured
+      3.4e-11 (max over the two frames); registered value is the derived bound
+      rounded up to two significant digits. Agreement is software conformance, not
+      physical validation.
+
+  - id: nsx98-pinocchio-opensim-d-acc-d-tau
+    check: closed_loop_derivative_conformance
+    metric: d_acc_d_tau
+    engines: [pinocchio, opensim]
+    tolerance: 1.3e-09
+    rationale: >
+      OpenSim Simbody hard-KKT central finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: Track N snapshot differences propagated
+      with kkt_bound, divided by the step and multiplied by sqrt(k) per state
+      column (NSX-88 derivation); load blocks use kkt_bound with a zero right-hand
+      side times sqrt(nv). Measured 1.5e-11 (max over the two frames); registered
+      value is the derived bound rounded up to two significant digits. Agreement
+      is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-opensim-d-acc-d-xi
+    check: closed_loop_derivative_conformance
+    metric: d_acc_d_xi
+    engines: [pinocchio, opensim]
+    tolerance: 0.00025
+    rationale: >
+      OpenSim Simbody hard-KKT central finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: Track N snapshot differences propagated
+      with kkt_bound, divided by the step and multiplied by sqrt(k) per state
+      column (NSX-88 derivation); load blocks use kkt_bound with a zero right-hand
+      side times sqrt(nv). Measured 5.9e-06 (max over the two frames); registered
+      value is the derived bound rounded up to two significant digits. Agreement
+      is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-opensim-d-acc-d-eta
+    check: closed_loop_derivative_conformance
+    metric: d_acc_d_eta
+    engines: [pinocchio, opensim]
+    tolerance: 0.31
+    rationale: >
+      OpenSim Simbody hard-KKT central finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: Track N snapshot differences propagated
+      with kkt_bound, divided by the step and multiplied by sqrt(k) per state
+      column (NSX-88 derivation); load blocks use kkt_bound with a zero right-hand
+      side times sqrt(nv). Measured 0.0071 (max over the two frames); registered
+      value is the derived bound rounded up to two significant digits. Agreement
+      is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-opensim-d-lambda-d-tau
+    check: closed_loop_derivative_conformance
+    metric: d_lambda_d_tau
+    engines: [pinocchio, opensim]
+    tolerance: 6e-07
+    rationale: >
+      OpenSim Simbody hard-KKT central finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: Track N snapshot differences propagated
+      with kkt_bound, divided by the step and multiplied by sqrt(k) per state
+      column (NSX-88 derivation); load blocks use kkt_bound with a zero right-hand
+      side times sqrt(nv). Measured 9.5e-11 (max over the two frames); registered
+      value is the derived bound rounded up to two significant digits. Agreement
+      is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-opensim-d-lambda-d-xi
+    check: closed_loop_derivative_conformance
+    metric: d_lambda_d_xi
+    engines: [pinocchio, opensim]
+    tolerance: 0.028
+    rationale: >
+      OpenSim Simbody hard-KKT central finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: Track N snapshot differences propagated
+      with kkt_bound, divided by the step and multiplied by sqrt(k) per state
+      column (NSX-88 derivation); load blocks use kkt_bound with a zero right-hand
+      side times sqrt(nv). Measured 1.9e-05 (max over the two frames); registered
+      value is the derived bound rounded up to two significant digits. Agreement
+      is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-opensim-d-lambda-d-eta
+    check: closed_loop_derivative_conformance
+    metric: d_lambda_d_eta
+    engines: [pinocchio, opensim]
+    tolerance: 0.32
+    rationale: >
+      OpenSim Simbody hard-KKT central finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Bound: Track N snapshot differences propagated
+      with kkt_bound, divided by the step and multiplied by sqrt(k) per state
+      column (NSX-88 derivation); load blocks use kkt_bound with a zero right-hand
+      side times sqrt(nv). Measured 7.5e-07 (max over the two frames); registered
+      value is the derived bound rounded up to two significant digits. Agreement
+      is software conformance, not physical validation.
+
+  - id: nsx98-pinocchio-opensim-acc-load-variance
+    check: closed_loop_derivative_conformance
+    metric: acc_load_variance
+    engines: [pinocchio, opensim]
+    tolerance: 2.5e-09
+    rationale: >
+      OpenSim Simbody hard-KKT central finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: Track N snapshot differences propagated with kkt_bound, divided by
+      the step and multiplied by sqrt(k) per state column (NSX-88 derivation);
+      load blocks use kkt_bound with a zero right-hand side times sqrt(nv).
+      Measured 1.2e-11 (max over the two frames); registered value is the derived
+      bound rounded up to two significant digits. Agreement is software
+      conformance, not physical validation.
+
+  - id: nsx98-pinocchio-opensim-lambda-load-variance
+    check: closed_loop_derivative_conformance
+    metric: lambda_load_variance
+    engines: [pinocchio, opensim]
+    tolerance: 5.8e-07
+    rationale: >
+      OpenSim Simbody hard-KKT central finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: Track N snapshot differences propagated with kkt_bound, divided by
+      the step and multiplied by sqrt(k) per state column (NSX-88 derivation);
+      load blocks use kkt_bound with a zero right-hand side times sqrt(nv).
+      Measured 1.9e-10 (max over the two frames); registered value is the derived
+      bound rounded up to two significant digits. Agreement is software
+      conformance, not physical validation.
+
+  - id: nsx98-pinocchio-opensim-acc-state-variance
+    check: closed_loop_derivative_conformance
+    metric: acc_state_variance
+    engines: [pinocchio, opensim]
+    tolerance: 0.00048
+    rationale: >
+      OpenSim Simbody hard-KKT central finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: Track N snapshot differences propagated with kkt_bound, divided by
+      the step and multiplied by sqrt(k) per state column (NSX-88 derivation);
+      load blocks use kkt_bound with a zero right-hand side times sqrt(nv).
+      Measured 1.6e-06 (max over the two frames); registered value is the derived
+      bound rounded up to two significant digits. Agreement is software
+      conformance, not physical validation.
+
+  - id: nsx98-pinocchio-opensim-lambda-state-variance
+    check: closed_loop_derivative_conformance
+    metric: lambda_state_variance
+    engines: [pinocchio, opensim]
+    tolerance: 0.045
+    rationale: >
+      OpenSim Simbody hard-KKT central finite differences (step 1e-5) against
+      Pinocchio ANALYTIC (NSX-85). Same specification, projected state (frames 0
+      and 400 of the ground-support dynamics record), seeded actuated load and one
+      closure tangent space; operators compared in the Pinocchio coordinate order
+      as D P^T (state blocks) or the plain matrix (load blocks); scaled error
+      max|x-ref|/max(1,max|ref|). Track S (scientific comparison, declared unit
+      isotropic noise, not a measured noise level): first-order covariance map
+      built from the sensitivities; bound = d(2|B|+d) from the operator bounds.
+      Bound: Track N snapshot differences propagated with kkt_bound, divided by
+      the step and multiplied by sqrt(k) per state column (NSX-88 derivation);
+      load blocks use kkt_bound with a zero right-hand side times sqrt(nv).
+      Measured 1.6e-06 (max over the two frames); registered value is the derived
+      bound rounded up to two significant digits. Agreement is software
+      conformance, not physical validation.
