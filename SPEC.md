@@ -2741,6 +2741,11 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-16 | #12921 | Club Head Speed no longer reads 0.0 for models naming the body clubhead. |
+| 2026-10-16 | #12904 | Launcher survives slot errors, accurate engine status/hints, shutdown and first-click launch fixes (#12890 #12891 #12892 #12894) |
+| 2026-10-16 | #12899 | Offscreen per-engine explorer contract tests; explorer opens MJCF, keeps every MJCF DOF, loads results, scrubs and exports MP4 via one shared frame source; OSIM loader accepts Class::Nested tags; results browser Export button follows playability; MuJoCo GUI gains Export Video (#12888) and plots no longer crash on unrecorded channels (#12887) |
+| 2026-10-16 | #12869 | Refactor chat_service stream worker, motion_pipeline API routes and model-pack manifest parsing under the architecture budget; remove six expiring exceptions |
+| 2026-10-16 | #12788 | R4: address knee flexion (owner 15 +-5 deg prior, reliable capture wins, hard no-hyperextension bound, per-knee target_source in the receipt; --knee-flexion defaults to capture) |
 | 2026-10-16 | #12908 | Drake and Pinocchio MeshCat backends draw the shared model_appearance spec through one engine-neutral scene builder; local grey palettes removed (R9a) |
 | 2026-10-16 | #12799 | Add DisturbanceSpec timestep-consistent disturbance contract, wrapped OutcomeDispersion statistics, and NaN (not 0) MetricStatistics.cv at near-zero mean (NSX-82) |
 | 2026-10-16 | #12909 | R9c: GS3DX Simscape golfer takes its colours and trunk size from the shared model_appearance spec via a versioned JSON exporter (fail-closed MATLAB reader) |
