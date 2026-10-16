@@ -17,7 +17,7 @@ This module is the engine-agnostic contract every engine adapter plugs into:
   reason.  There is no silent fall-back to finite differences: an engine opts in
   by declaring ``FINITE_DIFFERENCE`` explicitly.
 
-Engine implementations are later children (NSX-85..89).  No engine adapter is
+Engine implementations are later children (NSX-85..89; Pinocchio is NSX-85).  No engine adapter is
 imported here; loaders are dotted ``module:attr`` paths resolved on demand.
 """
 
@@ -257,8 +257,8 @@ class DerivativeCapabilityRegistry:
             ) from exc
 
 
-_PENDING = "engine adapter derivatives are a later NSX child (NSX-85..89)"
-_ENGINES = ("pinocchio", "drake")
+_PENDING = "engine adapter derivatives are a later NSX child (NSX-86..89)"
+_ENGINES = ("drake",)
 _ADAPTER_FD = (
     "src.shared.python.loop_nullspace.adapter_derivatives:"
     "adapter_closed_loop_derivatives"
@@ -266,7 +266,7 @@ _ADAPTER_FD = (
 
 
 def default_registry() -> DerivativeCapabilityRegistry:
-    """Registry: reference, MuJoCo/MyoSuite/OpenSim ``PARTIAL``, rest ``NONE``."""
+    """Registry: reference, Pinocchio analytic, FD engines ``PARTIAL``, rest ``NONE``."""
     reg = DerivativeCapabilityRegistry()
     reg.declare(
         "reference_fd",
@@ -287,6 +287,14 @@ def default_registry() -> DerivativeCapabilityRegistry:
         loader=(
             "src.engines.physics_engines.opensim.python.force_adapter:"
             "OpenSimNativeForceAdapter"
+        ),
+    )
+    reg.declare(
+        "pinocchio",
+        DerivativeMethod.ANALYTIC,
+        loader=(
+            "src.engines.physics_engines.pinocchio.python.closed_loop_derivatives:"
+            "PinocchioAnalyticDerivatives"
         ),
     )
     for engine in _ENGINES:

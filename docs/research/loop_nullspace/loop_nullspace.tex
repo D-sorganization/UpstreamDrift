@@ -834,6 +834,38 @@ finite-difference or no derivatives (capability
 its reason.  Failed experiments: none recorded.  Reproduction:
 \texttt{pytest tests/unit/loop\_nullspace/test\_tangent\_linearization.py}.
 
+\paragraph{Pinocchio Analytic Derivatives (NSX-85).}  The Pinocchio adapter
+returns the same tangent-bundle object without differencing.  The partials
+$(\partial_qa,\partial_va,\partial_\tau a)$ and
+$(\partial_q\lambda,\partial_v\lambda,\partial_\tau\lambda)$ are those of
+\texttt{computeConstraintDynamicsDerivatives}, total derivatives of
+\texttt{constraintDynamics} with $\lambda$ re-solved, hence they contain
+$K_{\mathrm{geom}}$; they enter as
+$\partial a/\partial\xi=\partial_qa\,P+\partial_va\,O$ and
+$\partial a/\partial\eta=\partial_va\,P$.  The offset $O$ needs
+$\partial_qJ_c[w]\,v$, obtained from the analytic LOCAL joint-velocity partials
+of the two weld frames (hand frame minus club frame, constant offset
+$\mathrm{d}v=R^{\!\top}(\mathrm{d}v_j+\mathrm{d}\omega_j\times p)$); the pose-rate
+and transport terms multiply $J_cw$ or $J_cv$ and vanish for tangent $w$ and
+admissible $v$.  Convention (rule R8): the native rows are the constraint
+LOCAL frame, linear then angular, sign $+1$, and the canonical grip frame is
+that frame, so $C=I$ and neither $a$ nor $\lambda$ needs conversion; the identity
+is checked at every evaluation and a model that broke it is refused because the
+$\partial_qC$ term of $\lambda_c=C^{-\top}\lambda_n$ is not implemented.
+Provenance is \texttt{derivative\_method=analytic} with no step.  Evidence: on
+the anthro fixture at projected states the result equals the NSX-84
+finite-difference reference to a scaled $10^{-6}$, with the reference step chosen
+per block.  The default step $10^{-5}$ cannot serve as oracle: accelerations are
+about $6\times10^{4}$ and the native drift solve carries about $10^{-7}$ relative
+noise, so the default-step reference has a round-off floor of about
+$10^{-4}$ scaled.  The $\eta$ blocks are exactly quadratic in $v$ (large
+step, no truncation); the $\xi$ blocks use a Richardson combination of central
+differences at $3.2\times10^{-3}$.  Failed experiments: evaluating the
+world-aligned joint-velocity partials instead of the LOCAL ones gave linear
+rows that disagree with finite differences of the twist (cause not
+investigated) and was discarded.  Reproduction:
+\texttt{pytest tests/unit/loop\_nullspace/test\_pinocchio\_derivatives.py -m requires\_pinocchio}.
+
 \subsection{Tangent State Space for Several Degrees of Freedom}
 \label{sec:var-lin-k}
 

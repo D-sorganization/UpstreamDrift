@@ -105,7 +105,8 @@ def test_default_registry_declares_the_reference_and_pending_engines() -> None:
     reg = dc.default_registry()
     assert reg.require("reference_fd").method is dc.DerivativeMethod.FINITE_DIFFERENCE
     assert reg.require("opensim").level is CapabilityLevel.PARTIAL
-    for engine in ("pinocchio", "drake"):
+    assert reg.require("pinocchio").method is dc.DerivativeMethod.ANALYTIC
+    for engine in ("drake",):
         with pytest.raises(dc.DerivativeCapabilityUnavailable):
             reg.require(engine)
 
