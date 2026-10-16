@@ -68,6 +68,7 @@ __all__ = [
     "EuclideanManifold",
     "FiniteDifferenceDerivatives",
     "FreeFlyerManifold",
+    "KKTContext",
     "StepConvergence",
     "TangentStateSpace",
     "closure_rank",
@@ -166,6 +167,9 @@ class _DerivativeBase(ABC):
     """Common preconditions, guards and tau columns of both routes."""
 
     scheme = ""
+    method = DerivativeMethod.FINITE_DIFFERENCE
+    #: ``False`` for exact (analytic/autodiff) routes: the result records no step.
+    reports_step = True
 
     def __init__(
         self,
@@ -263,6 +267,22 @@ class _DerivativeBase(ABC):
             cols.append(-pinv @ _central(jac_v, self._step))
         return np.array(cols).T
 
+    def tangent_velocity_offset(
+        self, q: ArrayLike, v: ArrayLike
+    ) -> tuple[Array, Array]:
+        """``(P, O)``: the tangent basis and velocity offset at an admissible ``(q, v)``.
+
+        ``dq = P xi`` and ``dv = P eta + O xi`` are the tangent-bundle
+        perturbations this provider differentiates along (NSX-93 maps the
+        actuated errors through them).  Preconditions as for
+        :meth:`constrained_acceleration_derivatives`.
+        """
+        q_arr = _vec(q, self._manifold.nq, "q")
+        v_arr = _vec(v, self._manifold.nv, "v")
+        jac = np.asarray(self._model.closure_jacobian(q_arr), dtype=np.float64)
+        basis = self._basis(q_arr, jac)
+        return basis, self._velocity_offset(q_arr, v_arr, basis, jac)
+
     def _nominal(self, q: ArrayLike, v: ArrayLike, tau: ArrayLike) -> _Nominal:
         nq, nv = self._manifold.nq, self._manifold.nv
         q_arr, v_arr = _vec(q, nq, "q"), _vec(v, nv, "v")
@@ -346,9 +366,9 @@ class _DerivativeBase(ABC):
             d_lambda_d_xi=d_lxi,
             d_lambda_d_eta=d_leta,
             d_lambda_d_tau=d_ltau,
-            method=DerivativeMethod.FINITE_DIFFERENCE,
+            method=self.method,
             scheme=self.scheme,
-            step=self._step,
+            step=self._step if self.reports_step else None,
         )
 
 
@@ -377,6 +397,15 @@ class FiniteDifferenceDerivatives(_DerivativeBase):
         )
 
 
+@dataclass(frozen=True)
+class KKTContext:
+    """Per-nominal data of the assembled KKT route: ``K_geom`` and, for exact
+    routes, the model differentials evaluated once at the nominal state."""
+
+    k_geom: Array
+    differentials: Any = None
+
+
 class AssembledKKTDerivatives(_DerivativeBase):
     """The differentiated KKT system ``eq:var-kkt`` with the M2 preload term.
 
@@ -395,9 +424,10 @@ class AssembledKKTDerivatives(_DerivativeBase):
             lambda e: fn(self._step_to(nom.q, dq, e), nom.v + e * dv), self._step
         )
 
-    def _perturbation(
-        self, nom: _Nominal, k_geom: Array, dq: Array, dv: Array
+    def _source_derivatives(
+        self, nom: _Nominal, ctx: KKTContext, dq: Array, dv: Array
     ) -> tuple[Array, Array]:
+        """``(d(M a + h), d(J_c a + Jdot_v))`` along ``(dq, dv)`` at fixed ``a``."""
         model, acc = self._model, nom.acceleration
 
         def dyn(q: Array, v: Array) -> Array:
@@ -406,14 +436,19 @@ class AssembledKKTDerivatives(_DerivativeBase):
         def clo(q: Array, v: Array) -> Array:
             return model.closure_jacobian(q) @ acc + model.closure_drift(q, v)
 
-        rhs1 = -self._ddir(dyn, nom, dq, dv) + k_geom @ dq
-        rhs2 = -self._ddir(clo, nom, dq, dv)
-        mass = model.mass_matrix(nom.q)
-        d_acc, d_lam = solve_kkt_block(mass, nom.jac, rhs1, -rhs2)
-        return d_acc, d_lam
+        return self._ddir(dyn, nom, dq, dv), self._ddir(clo, nom, dq, dv)
 
-    def _column_context(self, nom: _Nominal) -> Array:
-        return geometric_preload(self._model, self._manifold, nom.q, nom.reaction)
+    def _perturbation(
+        self, nom: _Nominal, ctx: KKTContext, dq: Array, dv: Array
+    ) -> tuple[Array, Array]:
+        d_dyn, d_clo = self._source_derivatives(nom, ctx, dq, dv)
+        mass = self._model.mass_matrix(nom.q)
+        return solve_kkt_block(mass, nom.jac, -d_dyn + ctx.k_geom @ dq, d_clo)
+
+    def _column_context(self, nom: _Nominal) -> KKTContext:
+        return KKTContext(
+            geometric_preload(self._model, self._manifold, nom.q, nom.reaction)
+        )
 
     def _column(
         self, nom: _Nominal, ctx: Any, dq: Array, dv: Array

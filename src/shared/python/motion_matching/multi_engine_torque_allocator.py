@@ -22,6 +22,7 @@ import json
 import logging
 from pathlib import Path
 from typing import Any, Protocol, TypeAlias, runtime_checkable
+import warnings
 
 import numpy as np
 from numpy.typing import NDArray
@@ -731,16 +732,26 @@ class MultiEngineTorqueAllocator:
         regularisation_grip: float = 1e-4,
         root_penalty_weight: float = 1e4,
     ) -> None:
-        self.adapter = adapter
-        self.allocator = ContactForceAllocator(
-            nv=adapter.nv,
-            actuated_indices=adapter.actuated_indices,
-            n_contact_spheres=adapter.n_contact_spheres,
-            mu_friction=mu_friction,
-            regularisation_contact=regularisation_contact,
-            regularisation_grip=regularisation_grip,
-            root_penalty_weight=root_penalty_weight,
+        warnings.warn(
+            "MultiEngineTorqueAllocator is a compatibility shim over the conic "
+            "core; use src.shared.python.loop_nullspace (allocate_trajectory) "
+            "for new code (NSX-24, #12567).",
+            DeprecationWarning,
+            stacklevel=2,
         )
+        self.adapter = adapter
+        with warnings.catch_warnings():
+            # One notice per construction, not one per layer.
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.allocator = ContactForceAllocator(
+                nv=adapter.nv,
+                actuated_indices=adapter.actuated_indices,
+                n_contact_spheres=adapter.n_contact_spheres,
+                mu_friction=mu_friction,
+                regularisation_contact=regularisation_contact,
+                regularisation_grip=regularisation_grip,
+                root_penalty_weight=root_penalty_weight,
+            )
 
     def allocate_frame(
         self,

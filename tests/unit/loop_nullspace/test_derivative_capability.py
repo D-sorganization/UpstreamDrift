@@ -101,14 +101,15 @@ def test_loader_resolves_dotted_path() -> None:
         reg.load("noloader")
 
 
-def test_default_registry_declares_the_reference_and_pending_engines() -> None:
+def test_default_registry_declares_every_engine() -> None:
     reg = dc.default_registry()
     assert reg.require("reference_fd").method is dc.DerivativeMethod.FINITE_DIFFERENCE
     assert reg.require("opensim").level is CapabilityLevel.PARTIAL
     assert reg.require("pinocchio").method is dc.DerivativeMethod.ANALYTIC
-    for engine in ("drake",):
-        with pytest.raises(dc.DerivativeCapabilityUnavailable):
-            reg.require(engine)
+    drake = reg.require("drake")
+    assert drake.method is dc.DerivativeMethod.AUTODIFF
+    assert drake.level is CapabilityLevel.FULL
+    assert str(drake.loader).endswith(":DrakeAutoDiffDerivatives")
 
 
 class _Adapter:

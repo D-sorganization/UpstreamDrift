@@ -38,8 +38,9 @@ __all__ = [
 TORQUE_ID = "H-TORQUE-CAPACITY"
 CONE_ID = "H-FRICTION-CONE"
 GRIP_ID = "H-GRIP-PRELOAD"
+GRF_ID = "H-GRF-OBSERVATION"
 DEFAULT_CONE_FACETS = 8
-ROW_KINDS = ("torque", "cone_normal", "cone_linear", "grip")
+ROW_KINDS = ("torque", "cone_normal", "cone_linear", "grip", "grf")
 FLAG_ASSUMED = "ASSUMED_CAPACITY"
 FLAG_UNVERIFIED = "UNVERIFIED_HYPOTHESIS"
 

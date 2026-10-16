@@ -36,7 +36,7 @@ def stubbed(monkeypatch, tmp_path):
         out.stages.append(StageRecord(stage="drive", status="ok"))
         return SimpleNamespace()
 
-    def inv(request, model, drive_result, scrub, out):
+    def inv(request, model, drive_result, loads, scrub, out):
         out.stages.append(StageRecord(stage="inverse_dynamics", status="ok"))
         return SimpleNamespace(), SimpleNamespace(), SimpleNamespace(body_weight_n=1.0)
 
@@ -46,7 +46,9 @@ def stubbed(monkeypatch, tmp_path):
     monkeypatch.setattr(ss, "_joint_reactions", _ok("joint_reactions"))
     monkeypatch.setattr(ss, "_write_loads", lambda *a, **k: None)
     monkeypatch.setattr(ss, "_context", lambda *a, **k: None)
-    return SimpleNamespace(output_dir=tmp_path / "out")
+    return SimpleNamespace(
+        output_dir=tmp_path / "out", external_loads=None, fullbody_map=None
+    )
 
 
 def test_all_stages_ok_is_not_failed(stubbed) -> None:
@@ -88,4 +90,16 @@ def test_failure_in_drive_after_golf_input_is_attributed_to_drive(
     monkeypatch.setattr(ss, "_drive", partial)
     out = ss.run_stages(stubbed, Path("m.osim"), str)
     assert [s.stage for s in out.stages] == ["golf_input", "drive"]
+    assert out.stages[-1].status == "failed"
+
+
+def test_fullbody_stage_failure_is_attributed(stubbed, monkeypatch) -> None:
+    def broken_fullbody(*args, **kwargs):
+        raise ValueError("invented full-body failure")
+
+    monkeypatch.setattr(ss, "_fullbody", broken_fullbody)
+    stubbed.fullbody_map = "invented_map"
+    out = ss.run_stages(stubbed, Path("m.osim"), str)
+    assert out.failed is True
+    assert out.stages[-1].stage == "fullbody"
     assert out.stages[-1].status == "failed"

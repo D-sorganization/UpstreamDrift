@@ -20,6 +20,9 @@ from typing import TypeAlias
 import numpy as np
 from numpy.typing import NDArray
 
+from src.engines.physics_engines.drake.python.closed_loop_autodiff import (
+    DrakeAutoDiffDerivatives,
+)
 from src.engines.physics_engines.drake.python.full_body_model import (
     CLOSURE_CONVENTION,
     FullBodyDrakeModel,
@@ -27,6 +30,7 @@ from src.engines.physics_engines.drake.python.full_body_model import (
 )
 from src.shared.python.biomechanics.club_inertia_partition import RigidInertia
 from src.shared.python.engine_core.capabilities import Capability, CapabilityLevel
+from src.shared.python.loop_nullspace.autodiff_derivatives import ModelDifferentials
 from src.shared.python.loop_nullspace.closure_convention import (
     NativeClosureConvention,
 )
@@ -35,12 +39,18 @@ from src.shared.python.loop_nullspace.contracts import (
     LoopTopology,
     SpatialInertia,
 )
+from src.shared.python.loop_nullspace.derivative_capability import (
+    ClosedLoopDerivatives,
+)
 from src.shared.python.motion_matching.multi_engine_torque_allocator import EngineType
 from src.shared.python.motion_matching.polynomial_actuation import (
     actuated_coordinate_indices,
 )
 
 Array: TypeAlias = NDArray[np.float64]
+
+
+_FULL = frozenset({Capability.CLOSED_LOOP_SNAPSHOT, Capability.CLOSED_LOOP_DERIVATIVES})
 
 
 class DrakeForceAdapter:
@@ -58,6 +68,7 @@ class DrakeForceAdapter:
         self._names = tuple(self._model.coordinate_order)
         self._actuated = actuated_coordinate_indices(self._names)
         self._contact_names = tuple(s["name"] for s in self._spec["contact"]["spheres"])
+        self._derivatives: DrakeAutoDiffDerivatives | None = None
 
     @property
     def engine_type(self) -> EngineType:
@@ -143,10 +154,30 @@ class DrakeForceAdapter:
     # -- closed-loop snapshot capability (NSX-53, builds on NSX-13) ---------
 
     def capability(self, capability: Capability) -> CapabilityLevel:
-        """``CLOSED_LOOP_SNAPSHOT`` is FULL; every other capability is NONE here."""
-        if capability is Capability.CLOSED_LOOP_SNAPSHOT:
-            return CapabilityLevel.FULL
-        return CapabilityLevel.NONE
+        """Snapshot and AutoDiff derivatives are FULL; everything else is NONE."""
+        return CapabilityLevel.FULL if capability in _FULL else CapabilityLevel.NONE
+
+    def closed_loop_differentials(self, q: Array, v: Array) -> ModelDifferentials:
+        """AutoDiffXd differentials of the native ``M, h, J, Jdot v`` (NSX-86)."""
+        return self._model.closed_loop_differentials(
+            self._checked(q, "configuration"), self._checked(v, "velocity")
+        )
+
+    def constrained_acceleration_derivatives(
+        self, q: Array, v: Array, tau: Array
+    ) -> ClosedLoopDerivatives:
+        """Exact tangent-bundle derivatives of ``(a, lambda)`` by AutoDiff (NSX-86).
+
+        ``tau`` is the generalised applied load in spec order.  Result: method
+        ``AUTODIFF``, closure tangent basis, canonical closure convention (R8).
+        Raises ``ValueError`` on bad input (including a non-tangent ``v``),
+        ``ClosureRankChangeError`` at a rank change and
+        ``DerivativeCapabilityUnavailable`` for a component AutoDiff cannot
+        differentiate; it never falls back to finite differences.
+        """
+        if self._derivatives is None:
+            self._derivatives = DrakeAutoDiffDerivatives(self)
+        return self._derivatives.constrained_acceleration_derivatives(q, v, tau)
 
     @property
     def native_closure_convention(self) -> NativeClosureConvention:

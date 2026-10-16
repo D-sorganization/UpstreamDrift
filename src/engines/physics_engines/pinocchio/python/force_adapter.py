@@ -37,6 +37,8 @@ from src.shared.python.loop_nullspace.contracts import (
 from src.shared.python.loop_nullspace.derivative_capability import (
     ClosedLoopDerivatives,
 )
+from src.shared.python.loop_nullspace.evidence import FootContact
+from src.shared.python.loop_nullspace.ground_contact import ContactCandidate
 from src.shared.python.motion_matching.multi_engine_torque_allocator import EngineType
 from src.shared.python.motion_matching.polynomial_actuation import (
     actuated_coordinate_indices,
@@ -138,6 +140,75 @@ class PinocchioForceAdapter:
             dtype=float,
         ).copy()
 
+    # -- inertial parameters (NSX-62, #12587) --------------------------------
+
+    @property
+    def n_inertial_parameters(self) -> int:
+        """Ten dynamic parameters per moving joint's body."""
+        return 10 * (self._model.njoints - 1)
+
+    def inertial_parameters(self) -> Array:
+        """Body inertias as a flat vector, ten per joint (Pinocchio layout).
+
+        ``[m, h(3), Ixx, Ixy, Iyy, Ixz, Iyz, Izz]`` per body, inertia about the
+        joint-frame origin (``Inertia.toDynamicParameters``); a copy.
+        """
+        return np.concatenate(
+            [
+                np.asarray(self._model.inertias[j].toDynamicParameters(), dtype=float)
+                for j in range(1, self._model.njoints)
+            ]
+        )
+
+    def set_inertial_parameters(self, parameters: Array) -> None:
+        """Replace the body inertias by ``parameters`` (see the getter's layout).
+
+        Only bodies whose parameters differ are rebuilt; a zero-mass body must
+        be all zeros.  Raises ``ValueError`` on a wrong size or nonfinite entry.
+        The contact spheres, closure and club split do not depend on inertias.
+        """
+        values = np.asarray(parameters, dtype=float)
+        if (
+            values.shape != (self.n_inertial_parameters,)
+            or not np.isfinite(values).all()
+        ):
+            raise ValueError(
+                f"parameters must be {self.n_inertial_parameters} finite values"
+            )
+        inertia_type = self._pin.Inertia
+        current = self.inertial_parameters().reshape(-1, 10)
+        for index, (new, old) in enumerate(
+            zip(values.reshape(-1, 10), current, strict=True)
+        ):
+            if np.array_equal(new, old):
+                continue
+            if new[0] == 0.0:
+                if np.any(new != 0.0):
+                    raise ValueError(f"massless body {index} has nonzero parameters")
+                self._model.inertias[index + 1] = inertia_type.Zero()
+            else:
+                self._model.inertias[index + 1] = inertia_type.FromDynamicParameters(
+                    new
+                )
+
+    @property
+    def club_body_index(self) -> int:
+        """Index of the club carrier among the bodies of :meth:`inertial_parameters`."""
+        return self._bare_club_in_joint_frame()[0] - 1
+
+    def torque_regressor(self, q: Array, v: Array, a: Array) -> Array:
+        """Joint-torque regressor ``Y`` with ``Y pi = rnea(q, v, a)`` (nv, n_pi)."""
+        return np.asarray(
+            self._pin.computeJointTorqueRegressor(
+                self._model,
+                self._data,
+                self._checked(q, "configuration"),
+                self._checked(v, "velocity"),
+                self._checked(a, "acceleration"),
+            ),
+            dtype=float,
+        ).copy()
+
     def compute_contact_jacobian(self, q: Array) -> Array:
         configuration = self._checked(q, "configuration")
         self._pin.computeJointJacobians(self._model, self._data, configuration)
@@ -153,6 +224,33 @@ class PinocchioForceAdapter:
             )
             result[3 * i : 3 * i + 3] = jac[:3]
         return result
+
+    def foot_contact_candidates(self, q: Array) -> tuple[ContactCandidate, ...]:
+        """Contact spheres as candidates, in ``contact_names`` order (NSX-60).
+
+        Each candidate sits at the sphere centre (where
+        :meth:`compute_contact_jacobian` evaluates its rows), with the ground
+        normal and the spec's static friction coefficient (a declared
+        hypothesis, ``H-FRICTION-CONE``).  ``gap_m`` is the signed distance
+        from the sphere surface to the ground plane (negative when the compliant
+        contact law penetrates).
+        """
+        configuration = self._checked(q, "configuration")
+        self._pin.forwardKinematics(self._model, self._data, configuration)
+        self._pin.updateFramePlacements(self._model, self._data)
+        ground = self._plant.ground
+        normal = np.asarray(ground.normal, dtype=float)
+        mu = float(self._spec["contact"]["parameters"]["static_friction"])
+        out = []
+        for sphere, frame in zip(
+            self._plant.contact_spheres, self._contact_ids, strict=True
+        ):
+            center = np.asarray(self._data.oMf[frame].translation, dtype=float).copy()
+            gap = float(normal @ center) - ground.height_m - sphere.radius_m
+            out.append(
+                ContactCandidate(FootContact(sphere.name, center, normal, mu), gap)
+            )
+        return tuple(out)
 
     def compute_grip_jacobian(self, q: Array) -> Array:
         configuration = self._checked(q, "configuration")
@@ -340,6 +438,16 @@ class PinocchioForceAdapter:
                 self._named_state(q, "configuration"), self._named_state(v, "velocity")
             )
         )
+
+    def closure_position_error(self, q: Array) -> Array:
+        """Native weld pose error (6,) at ``q`` (NSX-31 replay drift report).
+
+        The Pinocchio ``contact_placement_error`` (linear then angular, LOCAL, in
+        m and rad), the same row convention as :meth:`compute_grip_jacobian`.  It
+        is a diagnostic: nothing here projects or corrects the state.
+        """
+        pose, _ = self._plant.closure_residuals(self._named_state(q, "configuration"))
+        return np.array(pose)
 
     def native_closure_frame(self, q: Array) -> tuple[Array, Array]:
         """World rotation and origin of the frame the native rows use (LOCAL)."""
