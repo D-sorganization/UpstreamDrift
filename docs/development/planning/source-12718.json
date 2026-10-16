@@ -1,0 +1,40 @@
+{
+  "number": 12718,
+  "html_url": "https://github.com/D-sorganization/UpstreamDrift/issues/12718",
+  "title": "[NSX-89] Simscape (MATLAB R2025b) Trajectory Linearization Export or Fail-Closed Deferred Record",
+  "body": "**NSX-89** \u00b7 Phase 8 Variability sensitivity \u00b7 `tier:strong` \u00b7 Parent epic: #12593\n\n### Goal\nSimscape's NSX-55 export is a snapshot grid and cannot be re-evaluated at perturbed states.\n\n### Read first\nNSX-55 (#12583) `simscape_export.py`, `DV-12583.md`; AGENTS.md R2025b rule.\n\n### Deliverables / contract\nEither:\n- extend the R2025b export with per-frame `linearize` A/B (model hash, solver settings, state mapping); or\n- assert capability `NONE`, with an `UNAVAILABLE` reason and a deferred-validation record.\n\nR2026a must never be accepted as evidence.\n\n### Tests to write first\nThe loader refuses a mismatched release. With the capability `NONE`, every variability output for Simscape is `UNAVAILABLE` with its reason.\n\n### Acceptance\nOne of the two paths merged, and the parity entry records which.\n\n### Non-claims\n\u2014\n\n### Depends on\n#12713 (NSX-84), #12583 (NSX-55)\n\n---\n### Standards (binding \u2014 see epic rules R1\u2013R14)\n- **TDD:** write the listed tests first and see them fail (red), then implement (green), then refactor. Tests ship in the same PR.\n- **DbC:** public functions validate preconditions and raise `ValueError`/`TypeError` with descriptive messages; postconditions documented in docstrings; frozen dataclasses for value objects.\n- **LoD:** no chains deeper than `a.b.c()`; add delegating/accessor methods (e.g. `snapshot.closure_rows()`).\n- **DRY:** reuse the modules listed under *Read first*; never re-implement `ForceNullSpace`, `FrictionCone`, `project_to_closure`, `holding_hand_wrench` or the NSX-02 converter.\n- **Evidence:** every user-visible quantity is a `QuantityRecord` with its six evidence axes (from NSX-10 onward).\n- No tolerance widening without a `Tolerance-Change-Evidence:` trailer. No `--no-verify`. Never edit `vendor/ud-tools/`.\n\n### Gate commands\n```bash\npython3 -m ruff check .\npython3 -m ruff format --check .\npython3 -m pytest tests/unit/loop_nullspace -n auto --timeout=60\npython3 scripts/ci/check_file_size_budget.py\npython3 -m scripts.check_design_manual_governance\n```\n\n### Process\n1. Lease: `python -m scripts.check_agent_claim --repo UpstreamDrift --issue <this>` then `post_agent_lease` (Repository_Management).\n2. Branch `feat/<this>-nsx-\u2026` in your own worktree. Change fragment: `python3 shared_scripts/changes_fragment.py new --issue <this> --summary \"...\"`.\n3. PR ready-for-review with `Closes #<this>` only when **all** acceptance items are met; otherwise `Refs #<this>` plus a status comment.\n4. Specs, goldens and contracts come from NSX-00 (`docs/research/loop_nullspace/`). If the spec is ambiguous, stop and ask on the issue \u2014 do not invent math.\n\n",
+  "updated_at": "2026-10-16T02:44:26Z",
+  "labels": [
+    {
+      "id": 10467292018,
+      "name": "physics-engine",
+      "description": "Physics engine implementation",
+      "color": "1D76DB"
+    },
+    {
+      "id": 10616486023,
+      "name": "TDD",
+      "description": "Test-driven development required",
+      "color": "bfd4f2"
+    },
+    {
+      "id": 10875053685,
+      "name": "motion-matching",
+      "description": "Simscape forward-dynamics motion matching effort",
+      "color": "5319E7"
+    },
+    {
+      "id": 10900995007,
+      "name": "claim:claude",
+      "description": "Claude Code holds an active claim on this issue.",
+      "color": "FBCA04"
+    },
+    {
+      "id": 12373735844,
+      "name": "tier:strong",
+      "description": "Architecture, research and complex implementation",
+      "color": "8B0000"
+    }
+  ],
+  "state": "open"
+}
