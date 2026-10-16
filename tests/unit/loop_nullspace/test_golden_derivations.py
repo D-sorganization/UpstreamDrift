@@ -76,6 +76,7 @@ NAMES = [
     "c_pm_identity",
     "closure_convention",
     "variability_sensitivity",
+    "planar_five_bar_tangent_state_space",
 ]
 
 
