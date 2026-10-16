@@ -17,6 +17,7 @@ import numpy as np
 
 from src.engines.tiers import warn_if_experimental
 from src.shared.python.core.contracts import (
+    StateError,
     check_finite,
     postcondition,
     precondition,
@@ -48,6 +49,20 @@ else:
     )
 
 
+def _simtk_vector(values: np.ndarray) -> Any:
+    """Return ``values`` as a ``SimTK::Vector``.
+
+    OpenSim 4.x only binds Vector(), Vector(Vector), Vector(int, double) and
+    Vector(list): there is no single-argument size constructor (#12983).
+    """
+    return opensim.Vector([float(x) for x in values])
+
+
+def _numpy_vector(vector: Any, size: int) -> np.ndarray:
+    """Return the first ``size`` entries of a ``SimTK::Vector`` as an array."""
+    return np.array([vector.get(i) for i in range(size)])
+
+
 class OpenSimPhysicsEngine(BasePhysicsEngine):
     """OpenSim Physics Engine Implementation.
 
@@ -69,6 +84,7 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         self._force_torque_source: OpenSimForceTorqueSource | None = None
         self._kinematics: Any = None
         self._opencap_session: Any = None
+        self._joint_names: list[str] | None = None
 
         if opensim is None:
             logger.error("OpenSim library is not installed.")
@@ -86,7 +102,11 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         dynamics (``InverseDynamicsSolver``), the analytic station Jacobian
         (``calcStationJacobian``, wired in #7051), muscle-driven forward
         dynamics, and a drift counterfactual. OpenSim's strength is muscle
-        actuation, so ``muscles`` is ``FULL``. Joint-torque ZVCF and native
+        actuation, so ``muscles`` is ``FULL``. Mass matrix, inverse dynamics,
+        bias and gravity match MuJoCo and Pinocchio to 1e-10 on OpenSim 4.6
+        (``tests/integration/cross_engine/test_opensim_engine_dynamics_parity.py``,
+        #12983). Drift is ``PARTIAL``: it removes controls but keeps the model's
+        forces at the state's muscle activations. Joint-torque ZVCF and native
         contact-force reporting are not first-class engine methods, so they
         stay ``NONE``. Contact forces and force overlays come from the state-based
         provider (FTO-15, #11300) and are ``PARTIAL``: only sphere/half-space
@@ -220,14 +240,19 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def reset(self) -> None:
-        """Reinitialize the model state and equilibrate muscles."""
+        """Reinitialize the model state and equilibrate muscles.
+
+        Postconditions:
+            The state holds the model defaults at time 0, set_control values are
+            cleared and a fresh ``Manager`` integrates from it. OpenSim 4.x has
+            no ``Manager.setSessionTime``; ``step`` seeds the new manager with
+            ``Manager.initialize`` (#12983).
+        """
         if self._model and self._state:
-            # Re-initialize the system to defaults
             self._state = self._model.initializeState()
             self._controls = None
             self._model.equilibrateMuscles(self._state)
-            self._manager.setSessionTime(0.0)
-            self._manager.setIntegrator(opensim.RungeKuttaMersonIntegrator(self._model))
+            self._manager = opensim.Manager(self._model)
 
     @precondition(
         lambda self, dt=None: self.is_initialized, "Engine must be initialized"
@@ -263,16 +288,8 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         if not self._model or not self._state:
             return np.array([]), np.array([])
 
-        # Q (Coordinates)
-        n_q = self._model.getNumCoordinates()
-        q_vec = self._state.getQ()
-        q = np.array([q_vec.get(i) for i in range(n_q)])
-
-        # U (Speeds)
-        n_u = self._model.getNumSpeeds()
-        u_vec = self._state.getU()
-        v = np.array([u_vec.get(i) for i in range(n_u)])
-
+        q = _numpy_vector(self._state.getQ(), self._model.getNumCoordinates())
+        v = _numpy_vector(self._state.getU(), self._model.getNumSpeeds())
         return q, v
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
@@ -301,10 +318,8 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         if len(v) != n_u:
             raise ValueError(f"v must have {n_u} entries, got {len(v)}")
 
-        # OpenSim 4.x only binds Vector(), Vector(Vector), Vector(int, double)
-        # and Vector(list): there is no single-argument size constructor.
-        self._state.setQ(opensim.Vector([float(x) for x in q]))
-        self._state.setU(opensim.Vector([float(x) for x in v]))
+        self._state.setQ(_simtk_vector(q))
+        self._state.setU(_simtk_vector(v))
         # Changing q or u drops controls already realized on the state, so put
         # back the ones set_control wrote.
         self._apply_controls()
@@ -320,9 +335,7 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         # updControls + markControlsAsValid does not. It requires the state to
         # be realized at least to Position.
         self._model.realizePosition(self._state)
-        self._model.setControls(
-            self._state, opensim.Vector([float(x) for x in self._controls])
-        )
+        self._model.setControls(self._state, _simtk_vector(self._controls))
 
     def _restore_controls(self, saved: np.ndarray | None) -> None:
         """Re-establish the controls captured before a counterfactual."""
@@ -377,6 +390,40 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
             return self._state.getTime()
         return 0.0
 
+    def get_joint_names(self) -> list[str]:
+        """Return the coordinate names in state order: entry k names ``q[k]``.
+
+        The CoordinateSet is in declaration order, which generally differs from
+        the multibody-tree order of the state's Q, so each coordinate's Q index
+        is found by writing it on a scratch state. Empty when no model is
+        loaded.
+        """
+        if self._model is None or self._state is None:
+            return []
+        if self._joint_names is None:
+            self._joint_names = self._coordinate_names_in_q_order()
+        return list(self._joint_names)
+
+    def _coordinate_names_in_q_order(self) -> list[str]:
+        model, state = self._loaded()
+        scratch = opensim.State(state)
+        n_q = scratch.getNQ()
+        coordinates = model.getCoordinateSet()
+        names: list[str | None] = [None] * n_q
+        for i in range(coordinates.getSize()):
+            scratch.setQ(opensim.Vector(n_q, 0.0))
+            coordinates.get(i).setValue(scratch, 1.0, False)
+            moved = np.flatnonzero(_numpy_vector(scratch.getQ(), n_q))
+            if moved.size != 1:
+                raise ValueError(
+                    f"coordinate {coordinates.get(i).getName()!r} does not map to "
+                    f"exactly one generalized coordinate (moved {moved.tolist()})"
+                )
+            names[int(moved[0])] = coordinates.get(i).getName()
+        if any(name is None for name in names):
+            raise ValueError("OpenSim state has generalized coordinates without names")
+        return [str(name) for name in names]
+
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Mass matrix must contain finite values")
     def compute_mass_matrix(self) -> np.ndarray:
@@ -398,100 +445,68 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
                 res[r, c] = m_mat.get(r, c)
         return res
 
+    def _loaded(self) -> tuple[Any, Any]:
+        """Return the model and state, raising when no model is loaded."""
+        if self._model is None or self._state is None:
+            raise StateError(
+                "OpenSim model is not loaded",
+                current_state="uninitialized",
+                required_state="initialized",
+            )
+        return self._model, self._state
+
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Bias forces must contain finite values")
     def compute_bias_forces(self) -> np.ndarray:
-        """Compute C(q,u) + G(q).
+        """Compute C(q,u) + G(q), shape ``(nv,)``.
 
-        Uses inverse dynamics with zero acceleration to get bias forces.
+        Inverse dynamics at zero acceleration: ``ID(q, u, 0) = C + G`` less the
+        model's own forces (springs, passive muscle forces) at the state.
         """
-        if not self._model or not self._state:
-            return np.array([])
-
-        try:
-            # Bias forces = ID(q, v, 0) = M*0 + C + g = C + g
-            n_u = self._model.getNumSpeeds()
-            zero_acc = np.zeros(n_u)
-            bias = self.compute_inverse_dynamics(zero_acc)
-            return bias
-        except (ValueError, TypeError, RuntimeError) as e:
-            logger.error(f"Failed to compute bias forces: {e}")
-            return np.array([])
+        model, _ = self._loaded()
+        return self.compute_inverse_dynamics(np.zeros(model.getNumSpeeds()))
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Gravity forces must contain finite values")
     def compute_gravity_forces(self) -> np.ndarray:
-        """Compute gravity forces g(q).
+        """Compute gravity forces g(q), shape ``(nv,)``.
 
-        Sets velocities to zero temporarily, then computes bias (which becomes pure gravity).
+        The bias at zero velocity; the caller's velocities are restored even if
+        the computation raises.
         """
-        if not self._model or not self._state:
-            return np.array([])
-
+        model, _ = self._loaded()
+        q, v = self.get_state()
+        self.set_state(q, np.zeros(model.getNumSpeeds()))
         try:
-            # Save current velocities
-            _, v_saved = self.get_state()
-
-            # Set velocities to zero
-            n_u = self._model.getNumSpeeds()
-            zero_vel = np.zeros(n_u)
-            q_current, _ = self.get_state()
-            self.set_state(q_current, zero_vel)
-
-            # With v=0, bias forces become pure gravity
-            gravity = self.compute_bias_forces()
-
-            # Restore velocities
-            self.set_state(q_current, v_saved)
-
-            return gravity
-        except (ValueError, TypeError, RuntimeError) as e:
-            logger.error(f"Failed to compute gravity forces: {e}")
-            return np.array([])
+            return self.compute_bias_forces()
+        finally:
+            self.set_state(q, v)
 
     @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Inverse dynamics torques must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
-        """Compute required torques for the given joint accelerations."""
+        """Compute the generalized forces that produce ``qacc`` at the state.
+
+        Uses ``InverseDynamicsSolver``, which includes the model's own forces.
+
+        Preconditions:
+            ``qacc`` has one entry per speed.
+        Postconditions:
+            Returns a finite array of shape ``(nv,)``.
+
+        Raises:
+            ValueError: If ``qacc`` is missing or has the wrong length.
+        """
         if qacc is None:
             raise ValueError("qacc must be provided")
-        if not self._model or not self._state:
-            return np.array([])
-
-        # Use an InverseDynamicsSolver
-        n_u = self._model.getNumSpeeds()
-
+        model, state = self._loaded()
+        n_u = model.getNumSpeeds()
         if len(qacc) != n_u:
-            return np.array([])
+            raise ValueError(f"qacc must have {n_u} entries, got {len(qacc)}")
 
-        udot = opensim.Vector(n_u)
-        for i in range(n_u):
-            udot.set(i, float(qacc[i]))
-
-        # We need realized Acceleration
-        # But we can't just 'set' acceleration in state for ID. Use Solver.
-        # ID Solver takes (model, state, udot) -> tau
-
-        try:
-            # Ensure state realized to Velocity
-            self._model.realizeVelocity(self._state)
-
-            solver = opensim.InverseDynamicsSolver(self._model)
-            # Some versions use solve(state, udot, applied_loads, tau_out)
-            # applied_loads can be empty
-            # tau = solver.solve(self._state, udot) # if wrapper is friendly
-
-            # Standard C++ wrapping often returns Vector
-            tau = solver.solve(self._state, udot)
-
-            res = np.zeros(n_u)
-            for i in range(n_u):
-                res[i] = tau.get(i)
-
-            return res
-        except (ValueError, TypeError, RuntimeError) as e:
-            logger.error(f"OpenSim ID failed: {e}")
-            return np.array([])
+        model.realizeVelocity(state)
+        tau = opensim.InverseDynamicsSolver(model).solve(state, _simtk_vector(qacc))
+        return _numpy_vector(tau, n_u)
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute the spatial Jacobian for a body in OpenSim (#7051).
@@ -746,11 +761,7 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         Returns:
             q_ddot_drift: Drift acceleration vector (nv,) [rad/s² or m/s²]
         """
-        if not self._model or not self._state:
-            logger.warning("Model or state not initialized")
-            return np.array([])
-
-        # Get mass matrix and bias forces
+        self._loaded()
         M = self.compute_mass_matrix()
         bias = self.compute_bias_forces()
 
@@ -775,11 +786,7 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         """
         if tau is None:
             raise ValueError("tau must be provided")
-        if not self._model or not self._state:
-            logger.warning("Model or state not initialized")
-            return np.array([])
-
-        # Get mass matrix
+        self._loaded()
         M = self.compute_mass_matrix()
 
         # Control component: M^-1 * tau
@@ -975,14 +982,7 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         """
         if q is None:
             raise ValueError("q must be provided")
-        if not self._model or not self._state:
-            return np.array([])
-
-        try:
-            return self._zero_control_udot(q, v)
-        except (ValueError, TypeError, RuntimeError) as e:
-            logger.error(f"Failed to compute ZTCF: {e}")
-            return np.array([])
+        return self._zero_control_udot(q, v)
 
     def _zero_control_udot(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         """Return udot at (q, v) with zero control, always restoring the caller's state.
@@ -990,18 +990,16 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         Restoration runs in ``finally`` so a failure mid-counterfactual cannot
         leave the temporary state or zeroed controls installed.
         """
-        model, state = self._model, self._state
-        if model is None or state is None:
-            raise RuntimeError("OpenSim model is not loaded")
+        model, state = self._loaded()
         q_saved, v_saved = self.get_state()
         controls_saved = None if self._controls is None else self._controls.copy()
         try:
             self.set_state(q, v)
             self.set_control(np.zeros(model.getNumControls()))
-            # realizeDynamics computes accelerations (udot) in the state
-            model.realizeDynamics(state)
-            udot = state.getUDot()
-            return np.array([udot.get(i) for i in range(model.getNumSpeeds())])
+            # udot is computed at the Acceleration stage; after realizeDynamics
+            # it still holds stale (initially zero) values (#12983).
+            model.realizeAcceleration(state)
+            return _numpy_vector(state.getUDot(), model.getNumSpeeds())
         finally:
             self.set_state(q_saved, v_saved)
             self._restore_controls(controls_saved)
@@ -1020,11 +1018,5 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         """
         if q is None:
             raise ValueError("q must be provided")
-        if not self._model or not self._state:
-            return np.array([])
-
-        try:
-            return self._zero_control_udot(q, np.zeros(self._model.getNumSpeeds()))
-        except (ValueError, TypeError, RuntimeError) as e:
-            logger.error(f"Failed to compute ZVCF: {e}")
-            return np.array([])
+        model, _ = self._loaded()
+        return self._zero_control_udot(q, np.zeros(model.getNumSpeeds()))

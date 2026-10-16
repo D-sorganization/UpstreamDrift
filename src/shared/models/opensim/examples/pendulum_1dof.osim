@@ -1,125 +1,123 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<OpenSimDocument Version="40500">
-    <Model name="pendulum_1dof">
-        <!--
-        Simple 1-DOF Pendulum Model for Cross-Engine Validation
-        
-        Use case: Ground truth comparison between OpenSim, MuJoCo, Drake, Pinocchio
-        
-        Properties:
-        - Single revolute joint (pin)
-        - Point mass at end of massless rod
-        - Gravity: -9.80665 m/s² (NIST standard)
-        - No damping or friction
-        
-        Expected small-angle period: T = 2π√(L/g) ≈ 2.006s for L=1m
-        Note: Uses small-angle approximation (θ << 1); actual period varies with amplitude.
-        -->
-        
-        <!-- Credits -->
-        <credits>Golf Modeling Suite - Cross-Engine Validation Model</credits>
-        <publications />
-        
-        <!-- Gravity -->
-        <gravity>0 -9.80665 0</gravity>
-        
-        <!-- Ground -->
-        <Ground name="ground">
-            <WrapObjectSet>
-                <objects />
-                <groups />
-            </WrapObjectSet>
-            <VisibleObject>
-                <GeometrySet>
-                    <objects />
-                    <groups />
-                </GeometrySet>
-            </VisibleObject>
-        </Ground>
-        
-        <!-- Body Set -->
-        <BodySet>
-            <objects>
-                <Body name="pendulum_link">
-                    <mass>1.0</mass>
-                    <mass_center>0 -0.5 0</mass_center>
-                    <inertia>0.0833333 0 0 0 0.0833333 0</inertia>
-                    <WrapObjectSet>
-                        <objects />
-                        <groups />
-                    </WrapObjectSet>
-                    <VisibleObject>
-                        <geometry_files>pendulum_link.vtp</geometry_files>
-                        <VisibleProperties>
-                            <display_preference>4</display_preference>
-                            <show_normals>false</show_normals>
-                            <show_axes>false</show_axes>
-                            <material_name>DEFAULT</material_name>
-                        </VisibleProperties>
-                    </VisibleObject>
-                </Body>
-            </objects>
-            <groups />
-        </BodySet>
-        
-        <!-- Joint Set -->
-        <JointSet>
-            <objects>
-                <PinJoint name="pin_joint">
-                    <parent_body>ground</parent_body>
-                    <location_in_parent>0 0 0</location_in_parent>
-                    <orientation_in_parent>0 0 0</orientation_in_parent>
-                    <location>0 0 0</location>
-                    <orientation>0 0 0</orientation>
-                    <CoordinateSet>
-                        <objects>
-                            <Coordinate name="angle">
-                                <motion_type>rotational</motion_type>
-                                <default_value>0.1</default_value>
-                                <default_speed_value>0</default_speed_value>
-                                <range>-3.14159 3.14159</range>
-                                <clamped>false</clamped>
-                                <locked>false</locked>
-                            </Coordinate>
-                        </objects>
-                        <groups />
-                    </CoordinateSet>
-                    <reverse>false</reverse>
-                    <body>pendulum_link</body>
-                </PinJoint>
-            </objects>
-            <groups />
-        </JointSet>
-        
-        <!-- Constraint Set (empty) -->
-        <ConstraintSet>
-            <objects />
-            <groups />
-        </ConstraintSet>
-        
-        <!-- Force Set (no muscles, no damping) -->
-        <ForceSet>
-            <objects />
-            <groups />
-        </ForceSet>
-        
-        <!-- Marker Set (optional) -->
-        <MarkerSet>
-            <objects>
-                <Marker name="end_effector">
-                    <body>pendulum_link</body>
-                    <location>0 -1.0 0</location>
-                    <fixed>true</fixed>
-                </Marker>
-            </objects>
-            <groups />
-        </MarkerSet>
-        
-        <!-- Contact Geometry Set (empty) -->
-        <ContactGeometrySet>
-            <objects />
-            <groups />
-        </ContactGeometrySet>
-        
-    </Model>
+<OpenSimDocument Version="40600">
+	<Model name="pendulum_1dof">
+		<!--
+		Simple 1-DOF pendulum for cross-engine validation, in OpenSim 4.x format
+		(the previous OpenSim 3.x file no longer loaded, #12983).
+
+		- One PinJoint about the ground z axis; gravity -9.80665 m/s^2 along y.
+		- Uniform 1 kg rod of length 1 m: mass centre 0.5 m below the pivot and
+		  Izz = 1/12 kg m^2 about it, so the pivot inertia is 1/3 kg m^2.
+		- No damping, friction or actuators.
+		-->
+		<!--The model's ground reference frame.-->
+		<Ground name="ground">
+			<!--The geometry used to display the axes of this Frame.-->
+			<FrameGeometry name="frame_geometry">
+				<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+				<socket_frame>..</socket_frame>
+				<!--Scale factors in X, Y, Z directions respectively.-->
+				<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+			</FrameGeometry>
+		</Ground>
+		<!--Acceleration due to gravity, expressed in ground.-->
+		<gravity>0 -9.8066499999999994 0</gravity>
+		<!--List of bodies that make up this model.-->
+		<BodySet name="bodyset">
+			<objects>
+				<Body name="pendulum_link">
+					<!--The geometry used to display the axes of this Frame.-->
+					<FrameGeometry name="frame_geometry">
+						<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+						<socket_frame>..</socket_frame>
+						<!--Scale factors in X, Y, Z directions respectively.-->
+						<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+					</FrameGeometry>
+					<!--The mass of the body (kg)-->
+					<mass>1</mass>
+					<!--The location (Vec3) of the mass center in the body frame.-->
+					<mass_center>0 -0.5 0</mass_center>
+					<!--The elements of the inertia tensor (Vec6) as [Ixx Iyy Izz Ixy Ixz Iyz] measured about the mass_center and not the body origin.-->
+					<inertia>0.083333299999999999 0 0.083333299999999999 0 0 0</inertia>
+				</Body>
+			</objects>
+			<groups />
+		</BodySet>
+		<!--List of joints that connect the bodies.-->
+		<JointSet name="jointset">
+			<objects>
+				<PinJoint name="pin_joint">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
+					<socket_parent_frame>ground_offset</socket_parent_frame>
+					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
+					<socket_child_frame>pendulum_link_offset</socket_child_frame>
+					<!--List containing the generalized coordinates (q's) that parameterize this joint.-->
+					<coordinates>
+						<Coordinate name="angle">
+							<!--The value of this coordinate before any value has been set. Rotational coordinate value is in radians and Translational in meters.-->
+							<default_value>0.10000000000000001</default_value>
+							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
+							<range>-3.1415899999999999 3.1415899999999999</range>
+						</Coordinate>
+					</coordinates>
+					<!--Physical offset frames owned by the Joint that are typically used to satisfy the owning Joint's parent and child frame connections (sockets). PhysicalOffsetFrames are often used to describe the fixed transformation from a Body's origin to another location of interest on the Body (e.g., the joint center). When the joint is deleted, so are the PhysicalOffsetFrame components in this list.-->
+					<frames>
+						<PhysicalOffsetFrame name="ground_offset">
+							<!--The geometry used to display the axes of this Frame.-->
+							<FrameGeometry name="frame_geometry">
+								<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+								<socket_frame>..</socket_frame>
+								<!--Scale factors in X, Y, Z directions respectively.-->
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
+							<socket_parent>/ground</socket_parent>
+							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
+							<translation>0 0 0</translation>
+							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
+							<orientation>0 0 0</orientation>
+						</PhysicalOffsetFrame>
+						<PhysicalOffsetFrame name="pendulum_link_offset">
+							<!--The geometry used to display the axes of this Frame.-->
+							<FrameGeometry name="frame_geometry">
+								<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+								<socket_frame>..</socket_frame>
+								<!--Scale factors in X, Y, Z directions respectively.-->
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
+							<socket_parent>/bodyset/pendulum_link</socket_parent>
+							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
+							<translation>0 0 0</translation>
+							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
+							<orientation>0 0 0</orientation>
+						</PhysicalOffsetFrame>
+					</frames>
+				</PinJoint>
+			</objects>
+			<groups />
+		</JointSet>
+		<!--Controllers that provide the control inputs for Actuators.-->
+		<ControllerSet name="controllerset">
+			<objects />
+			<groups />
+		</ControllerSet>
+		<!--Forces in the model (includes Actuators).-->
+		<ForceSet name="forceset">
+			<objects />
+			<groups />
+		</ForceSet>
+		<!--Markers in the model.-->
+		<MarkerSet name="markerset">
+			<objects>
+				<Marker name="end_effector">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
+					<socket_parent_frame>/bodyset/pendulum_link</socket_parent_frame>
+					<!--The fixed location of the station expressed in its parent frame.-->
+					<location>0 -1 0</location>
+				</Marker>
+			</objects>
+			<groups />
+		</MarkerSet>
+	</Model>
 </OpenSimDocument>
