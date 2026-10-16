@@ -535,24 +535,21 @@ class DrakePhysicsEngine(BasePhysicsEngine):
         if not self.plant_context:
             return np.array([])
 
-        # Get mass matrix
-        M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
+        return self._passive_acceleration()
 
-        # Get bias forces (C(q,v)v + g(q))
-        nv = self.plant.num_velocities()
-        vdot_zero = np.zeros(nv)
+    def _passive_acceleration(self) -> np.ndarray:
+        """Return -M(q)^-1 (C(q,v)v + g(q)) at the current plant context.
+
+        With tau = 0, M*a + C + g = 0, so a = -M^-1 * bias, where the bias is
+        inverse dynamics at zero acceleration under the gravity forces.
+        """
+        M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
         bias = self.plant.CalcInverseDynamics(
             self.plant_context,
-            vdot_zero,
+            np.zeros(self.plant.num_velocities()),
             self._gravity_external_forces(),
         )
-
-        # Drift = -M^-1 * bias
-        # (Since bias = M*0 + C + g, we have C + g = bias, and drift acc = -M^-1*(C+g))
-        # Actually: tau = M*a + C + g, so if tau=0: 0 = M*a + C + g → a = -M^-1*(C+g)
-        a_drift = -np.linalg.solve(M, bias)
-
-        return cast(np.ndarray, a_drift)
+        return cast(np.ndarray, -np.linalg.solve(M, bias))
 
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute control-attributed acceleration from applied torques only.
@@ -610,22 +607,8 @@ class DrakePhysicsEngine(BasePhysicsEngine):
             self.plant.SetPositions(self.plant_context, q)
             self.plant.SetVelocities(self.plant_context, v)
 
-            # Compute mass matrix at counterfactual state
-            M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
-
-            # Compute bias forces at counterfactual state (C(q,v) + g(q))
-            nv = self.plant.num_velocities()
-            vdot_zero = np.zeros(nv)
-            bias = self.plant.CalcInverseDynamics(
-                self.plant_context,
-                vdot_zero,
-                self._gravity_external_forces(),
-            )
-
             # ZTCF: τ = 0, so M*a + bias = 0 → a = -M^-1 * bias
-            a_ztcf = -np.linalg.solve(M, bias)
-
-            return cast(np.ndarray, a_ztcf)
+            return self._passive_acceleration()
 
         finally:
             # Restore original state

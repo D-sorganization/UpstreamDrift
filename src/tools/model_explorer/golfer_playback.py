@@ -189,12 +189,7 @@ class GolferPlayback:
         params = mujoco_camera_params(name, DEFAULT_LOOKAT_M)
         cam = self._camera
         cam.type = _free_camera_type(self._mj)
-        cam.lookat[:] = params.lookat
-        cam.distance, cam.azimuth, cam.elevation = (
-            params.distance,
-            params.azimuth,
-            params.elevation,
-        )
+        params.apply_to(cam)
         self._view = name
 
     def render(self, index: int) -> NDArray[np.uint8]:

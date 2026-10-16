@@ -7,11 +7,18 @@ panel, so ``gui.py`` stays under the monolith line limit.
 from __future__ import annotations
 
 import contextlib
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QApplication, QDockWidget, QInputDialog, QMessageBox
+from PyQt6.QtWidgets import (
+    QApplication,
+    QDockWidget,
+    QInputDialog,
+    QMessageBox,
+    QWidget,
+)
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -31,8 +38,12 @@ class ResultsPlaybackHostMixin:
     status_bar: Any
     export_video_action: Any
 
-    def open_results(self) -> None:  # provided by MainWidget
-        raise NotImplementedError
+    # Provided by MainWidget (the File > Open Swing Result handler).
+    open_results: Callable[[], None]
+
+    def _dialog_parent(self) -> QWidget | None:
+        """The host widget (``MainWidget``) as a dialog parent, if it is one."""
+        return self if isinstance(self, QWidget) else None
 
     def load_results(self, path: str | Path, engine: str | None = None) -> bool:
         """Load a results archive for playback and export.
@@ -60,7 +71,7 @@ class ResultsPlaybackHostMixin:
             self._discard_results()
             self.export_video_action.setEnabled(False)
             QMessageBox.warning(
-                self,
+                self._dialog_parent(),
                 "Results Load Error",
                 f"Cannot play '{results_path.name}':\n\n{exc}",
             )
@@ -93,7 +104,12 @@ class ResultsPlaybackHostMixin:
             return
         labels = [run.label for run in runs]
         choice, ok = QInputDialog.getItem(
-            self, "Open Swing Result", f"Runs in {root}:", labels, 0, False
+            self._dialog_parent(),
+            "Open Swing Result",
+            f"Runs in {root}:",
+            labels,
+            0,
+            False,
         )
         if ok and choice:
             run = runs[labels.index(choice)]

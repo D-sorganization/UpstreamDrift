@@ -853,14 +853,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
         if use_wsl:
             success = self.process_manager.launch_in_wsl(str(script_path))
-            if success:
-                self.lbl_status.setText(engine_running_text(name, "WSL"))
-                self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
-                self.show_toast(f"{name} Launched in WSL", "success")
-            else:
-                QMessageBox.critical(
-                    self.launcher, "Launch Error", f"Failed to launch {name} in WSL"
-                )
+            self._report_wsl_launch(name, success)
             return
 
         # Delegate to ProcessManager with keep_terminal_open=True for error visibility
@@ -868,7 +861,22 @@ except (RuntimeError, TypeError, AttributeError) as e:
             name, script_path, cwd, keep_terminal_open=True
         )
 
-        if process:
+        self._report_native_launch(name, bool(process))
+
+    def _report_wsl_launch(self, name: str, success: bool) -> None:
+        """Show the status/toast for a WSL launch, or an error dialog."""
+        if success:
+            self.lbl_status.setText(engine_running_text(name, "WSL"))
+            self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+            self.show_toast(f"{name} Launched in WSL", "success")
+        else:
+            QMessageBox.critical(
+                self.launcher, "Launch Error", f"Failed to launch {name} in WSL"
+            )
+
+    def _report_native_launch(self, name: str, launched: bool) -> None:
+        """Show the status/toast for a native launch, or an error dialog."""
+        if launched:
             self.show_toast(f"{name} Launched", "success")
             self.lbl_status.setText(engine_running_text(name))
             self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
@@ -900,14 +908,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
         if use_wsl:
             success = self.process_manager.launch_module_in_wsl(module_name, cwd)
-            if success:
-                self.lbl_status.setText(engine_running_text(name, "WSL"))
-                self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
-                self.show_toast(f"{name} Launched in WSL", "success")
-            else:
-                QMessageBox.critical(
-                    self.launcher, "Launch Error", f"Failed to launch {name} in WSL"
-                )
+            self._report_wsl_launch(name, success)
             return
 
         # Delegate to ProcessManager with keep_terminal_open=True for error visibility
@@ -915,14 +916,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
             name, module_name, cwd, keep_terminal_open=True
         )
 
-        if process:
-            self.show_toast(f"{name} Launched", "success")
-            self.lbl_status.setText(engine_running_text(name))
-            self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
-        else:
-            QMessageBox.critical(
-                self.launcher, "Launch Error", f"Failed to launch {name}"
-            )
+        self._report_native_launch(name, bool(process))
 
     def _launch_urdf_generator(self) -> None:
         """Launch the URDF generator / Model Explorer application."""

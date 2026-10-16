@@ -39,7 +39,8 @@ EXPLORER_SERVICE_REQUIRES: dict[str, tuple[str, ...]] = {
         "NOVNC_PORT=6080",
         "VNC_PORT=5900",
     ),
-    "explorer-gui-wslg": ("DISPLAY=", "/tmp/.X11-unix:/tmp/.X11-unix"),
+    # Match the compose volume list entry itself, not a bare path substring.
+    "explorer-gui-wslg": ("DISPLAY=", "- /tmp/.X11-unix:/tmp/.X11-unix"),
 }
 # Display / GL prerequisites the entrypoint must refuse to start without (DbC).
 EXPLORER_ENTRYPOINT_GUARDS = ("QT_QPA_PLATFORM", "MUJOCO_GL", "DISPLAY")
