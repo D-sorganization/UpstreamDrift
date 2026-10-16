@@ -90,9 +90,10 @@ class TestFixtureBushingPure:
         lmap = fixture_level_map(TRANS_SPEC)
         assert lmap.verified
         assert lmap.levels[SpinalLevel.L5_S1].translations is not None
-        assert fixture_level_map(FixtureSpec()).levels[
-            SpinalLevel.L5_S1
-        ].translations is None
+        assert (
+            fixture_level_map(FixtureSpec()).levels[SpinalLevel.L5_S1].translations
+            is None
+        )
 
 
 @pytest.mark.unit
@@ -144,9 +145,7 @@ class TestPassiveElementSpecPure:
         assert spec.translational_stiffness is None
         with pytest.raises(ValueError, match="expressions"):
             PassiveElementSpec(
-                **self._kw(
-                    translational_stiffness=None, rotational_stiffness=None
-                )
+                **self._kw(translational_stiffness=None, rotational_stiffness=None)
             )
 
 
@@ -252,9 +251,7 @@ class TestExtractPassiveElements:
             )
             assert not spec.translational_stiffness.flags.writeable
 
-    def test_reversed_frame_order_is_flagged_not_swapped(
-        self, tmp_path: Path
-    ) -> None:
+    def test_reversed_frame_order_is_flagged_not_swapped(self, tmp_path: Path) -> None:
         require_opensim()
         path = write_fixture_osim(
             TRANS_SPEC,
@@ -274,7 +271,7 @@ class TestExtractPassiveElements:
     def test_expression_based_bushing(self, tmp_path: Path) -> None:
         require_opensim()
         expr = {k: f"{i + 1}*{k}" for i, k in enumerate(("Fx", "Fy", "Fz"))}
-        expr.update({k: "0.5*theta" for k in ("Mx", "My", "Mz")})
+        expr.update(dict.fromkeys(("Mx", "My", "Mz"), "0.5*theta"))
         path = write_fixture_osim(
             TRANS_SPEC,
             tmp_path / "f.osim",
@@ -302,9 +299,7 @@ class TestExtractPassiveElements:
             tmp_path / "f.osim",
             bushings={SpinalLevel.L5_S1: FixtureBushing()},
         )
-        assert tuple(extract_passive_elements(path, inventory)) == (
-            SpinalLevel.L5_S1,
-        )
+        assert tuple(extract_passive_elements(path, inventory)) == (SpinalLevel.L5_S1,)
         with pytest.raises(ValueError, match="L4_L5"):
             extract_passive_elements(path, inventory, require_all=True)
 
@@ -383,20 +378,32 @@ class TestExtractPassiveElements:
         path = write_fixture_osim(TRANS_SPEC, tmp_path / "f.osim")
         model = osim.Model(str(path))
         model.addForce(
-            osim.FunctionBasedBushingForce("fb", "/bodyset/L5", "/bodyset/L4")
+            osim.FunctionBasedBushingForce(
+                "fb",
+                model.getBodySet().get("L5"),
+                osim.Vec3(0),
+                osim.Vec3(0),
+                model.getBodySet().get("L4"),
+                osim.Vec3(0),
+                osim.Vec3(0),
+            )
         )
         model.finalizeConnections()
         with pytest.raises(ValueError, match="FunctionBasedBushingForce"):
             extract_passive_elements(model, inventory)
 
-    def test_rejects_wrong_types_and_missing_file(self, tmp_path: Path, inventory) -> None:
+    def test_rejects_wrong_types_and_missing_file(
+        self, tmp_path: Path, inventory
+    ) -> None:
         require_opensim()
         with pytest.raises(TypeError, match="SpineInventory"):
             extract_passive_elements(tmp_path / "x.osim", object())  # type: ignore[arg-type]
         with pytest.raises(ValueError, match="not found"):
             extract_passive_elements(tmp_path / "absent.osim", inventory)
 
-    def test_levels_missing_from_model_bodies_raise(self, tmp_path: Path, inventory) -> None:
+    def test_levels_missing_from_model_bodies_raise(
+        self, tmp_path: Path, inventory
+    ) -> None:
         require_opensim()
         small = FixtureSpec(levels=(SpinalLevel.L5_S1, SpinalLevel.L4_L5))
         path = write_fixture_osim(small, tmp_path / "s.osim")

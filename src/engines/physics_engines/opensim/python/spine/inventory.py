@@ -16,6 +16,11 @@ with the joint parent frame on the inferior body (translation in metres).
 ``axis_sign`` is an explicit per-coordinate axis transform: a model axis ``a``
 with sign ``s`` is aligned when ``angle(s * a, ISB axis) <= 1 deg``.
 
+Optional per-level translational coordinates (SPN-8c, Senteler-style models)
+are ordered ``(antero_posterior, cranio_caudal, medio_lateral)`` and drive the
+ISB axes ``(X, Y, Z)`` of the inferior frame (metres); they are checked with
+the same 1 deg tolerance and no sign flip.
+
 ``observe_native_model`` (tour_matching) reports coordinate and constraint
 facts but not joint offset frames or transform axes, so this module adds the
 single-hop adapters it needs instead of a second model walker.
@@ -26,7 +31,7 @@ from __future__ import annotations
 import json
 import math
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from types import MappingProxyType
 
@@ -42,6 +47,7 @@ __all__ = [
     "AXIS_TOLERANCE_DEG",
     "DEFAULT_LEVEL_MAP_PATH",
     "ISB_AXES",
+    "ISB_TRANSLATION_AXES",
     "LevelMapEntry",
     "ModelLevelMap",
     "SpineInventory",
@@ -63,6 +69,12 @@ ISB_AXES = (
     np.array([1.0, 0.0, 0.0]),
     np.array([0.0, 1.0, 0.0]),
 )
+#: ISB axes of (antero_posterior, cranio_caudal, medio_lateral) translations.
+ISB_TRANSLATION_AXES = (
+    np.array([1.0, 0.0, 0.0]),
+    np.array([0.0, 1.0, 0.0]),
+    np.array([0.0, 0.0, 1.0]),
+)
 
 
 @dataclass(frozen=True)
@@ -70,12 +82,16 @@ class LevelMapEntry:
     """Joint and coordinate names (and axis signs) of one level.
 
     Preconditions: non-empty ``joint``; three distinct non-empty coordinate
-    names in (flex_ext, lat_bend, axial_rot) order; ``axis_sign`` in {-1, 1}.
+    names in (flex_ext, lat_bend, axial_rot) order; ``axis_sign`` in {-1, 1};
+    ``translations`` is None or three distinct non-empty names in
+    (antero_posterior, cranio_caudal, medio_lateral) order that do not repeat
+    a rotational name.
     """
 
     joint: str
     coordinates: tuple[str, str, str]
     axis_sign: tuple[int, int, int] = (1, 1, 1)
+    translations: tuple[str, str, str] | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.joint, str) or not self.joint:
@@ -92,6 +108,18 @@ class LevelMapEntry:
             raise ValueError(f"axis_sign must be three of +-1, got {signs!r}")
         object.__setattr__(self, "coordinates", coords)
         object.__setattr__(self, "axis_sign", signs)
+        if self.translations is not None:
+            trans = tuple(self.translations)
+            if len(trans) != 3 or not all(isinstance(c, str) and c for c in trans):
+                raise ValueError(
+                    f"translations must be 3 non-empty names, got {trans!r}"
+                )
+            if len(set(trans) | set(coords)) != 6:
+                raise ValueError(
+                    f"translations must be distinct from each other and from "
+                    f"the rotations, got {trans!r}"
+                )
+            object.__setattr__(self, "translations", trans)
 
 
 @dataclass(frozen=True)
@@ -119,8 +147,12 @@ def _parse_entry(model_id: str, body: Mapping) -> ModelLevelMap:
             level = parse_level(name)
         except ValueError as exc:
             raise ValueError(f"{model_id}: bad level {name!r}") from exc
+        trans = raw.get("translations")
         levels[level] = LevelMapEntry(
-            raw["joint"], tuple(raw["coordinates"]), tuple(raw["axis_sign"])
+            raw["joint"],
+            tuple(raw["coordinates"]),
+            tuple(raw["axis_sign"]),
+            None if trans is None else tuple(trans),
         )
     return ModelLevelMap(
         verified=bool(body["verified"]),
@@ -152,7 +184,10 @@ class SpineInventory:
     ``neutral`` are read-only (4, 4) ``T_i0``; ``axis_alignment_deg`` holds the
     angle (deg) between ``axis_sign * model axis`` and the ISB axis for each
     of (flex_ext, lat_bend, axial_rot); ``axis_failures`` lists levels/axes
-    above :data:`AXIS_TOLERANCE_DEG`.
+    above :data:`AXIS_TOLERANCE_DEG`.  ``translation_names`` and
+    ``translation_alignment_deg`` (read-only (3,) angles to the ISB X, Y, Z
+    axes) hold only the levels whose map entry declares translational
+    coordinates; both are empty for rotation-only maps.
     """
 
     model_id: str
@@ -162,6 +197,12 @@ class SpineInventory:
     coordinate_names: Mapping[SpinalLevel, tuple[str, str, str]]
     axis_alignment_deg: Mapping[SpinalLevel, np.ndarray]
     axis_failures: tuple[str, ...] = ()
+    translation_names: Mapping[SpinalLevel, tuple[str, str, str]] = field(
+        default_factory=lambda: MappingProxyType({})
+    )
+    translation_alignment_deg: Mapping[SpinalLevel, np.ndarray] = field(
+        default_factory=lambda: MappingProxyType({})
+    )
 
     @property
     def axis_ok(self) -> bool:
@@ -200,15 +241,18 @@ def _neutral_offset(joint: object) -> np.ndarray:
     return parent @ np.linalg.inv(child)
 
 
-def _rotation_axes(joint: object) -> dict[str, np.ndarray]:
-    """Unit axis of each coordinate driving one of rotation1..3."""
+def _transform_axes(joint: object, first: int) -> dict[str, np.ndarray]:
+    """Unit axis of each coordinate driving transform axes ``first..first+2``.
+
+    ``first`` is 0 for rotation1..3 and 3 for translation1..3.
+    """
     osim = import_opensim()
     custom = osim.CustomJoint.safeDownCast(joint)
     if custom is None:
         raise ValueError(f"joint {joint.getName()!r} is not a CustomJoint")  # type: ignore[attr-defined]
     spatial = custom.getSpatialTransform()
     out: dict[str, np.ndarray] = {}
-    for idx in range(3):
+    for idx in range(first, first + 3):
         axis = spatial.getTransformAxis(idx)
         names = axis.getCoordinateNames()
         vec = axis.getAxis()
@@ -216,6 +260,11 @@ def _rotation_axes(joint: object) -> dict[str, np.ndarray]:
         if names.size() == 1 and np.linalg.norm(v) > 0.0:
             out[names.getValue(0)] = v / np.linalg.norm(v)
     return out
+
+
+def _rotation_axes(joint: object) -> dict[str, np.ndarray]:
+    """Unit axis of each coordinate driving one of rotation1..3."""
+    return _transform_axes(joint, 0)
 
 
 # --------------------------------------------------------------- inventory --
@@ -238,25 +287,60 @@ def _check_map(model: object, entry: ModelLevelMap) -> tuple[SpinalLevel, ...]:
     return levels
 
 
-def _inventory_level(
-    model: object, level: SpinalLevel, lm: LevelMapEntry
-) -> tuple[np.ndarray, np.ndarray]:
-    joint = _joint(model, lm.joint)
-    present = _joint_coordinate_names(joint)
-    for coord in lm.coordinates:
+def _alignment(
+    names: tuple[str, str, str],
+    axes: Mapping[str, np.ndarray],
+    targets: tuple[np.ndarray, ...],
+    signs: tuple[int, int, int] = (1, 1, 1),
+) -> np.ndarray:
+    """Read-only (3,) angles (deg) of ``sign * axis`` to each ISB target.
+
+    A coordinate that does not drive a single transform axis gets 180 deg.
+    """
+    angles = np.full(3, 180.0)
+    for k, coord in enumerate(names):
+        if coord in axes:
+            angles[k] = _angle_deg(signs[k] * axes[coord], targets[k])
+    angles.setflags(write=False)
+    return angles
+
+
+def _require_coordinates(
+    present: set[str], level: SpinalLevel, lm: LevelMapEntry
+) -> None:
+    wanted = (*lm.coordinates, *(lm.translations or ()))
+    for coord in wanted:
         if coord not in present:
             raise ValueError(
                 f"level {level.name}: joint {lm.joint!r} has no coordinate {coord!r}"
             )
-    axes = _rotation_axes(joint)
-    angles = np.full(3, 180.0)
-    for k, coord in enumerate(lm.coordinates):
-        if coord in axes:
-            angles[k] = _angle_deg(lm.axis_sign[k] * axes[coord], ISB_AXES[k])
+
+
+def _inventory_level(
+    model: object, level: SpinalLevel, lm: LevelMapEntry
+) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
+    """Neutral offset, rotation alignment and (optional) translation alignment."""
+    joint = _joint(model, lm.joint)
+    _require_coordinates(_joint_coordinate_names(joint), level, lm)
+    angles = _alignment(lm.coordinates, _rotation_axes(joint), ISB_AXES, lm.axis_sign)
+    trans = None
+    if lm.translations is not None:
+        trans = _alignment(
+            lm.translations, _transform_axes(joint, 3), ISB_TRANSLATION_AXES
+        )
     neutral = _neutral_offset(joint)
     neutral.setflags(write=False)
-    angles.setflags(write=False)
-    return neutral, angles
+    return neutral, angles, trans
+
+
+def _failures(
+    level: SpinalLevel, names: tuple[str, ...], angles: np.ndarray
+) -> list[str]:
+    return [
+        f"{level.name} {names[k]}: axis {deg:.3f} deg from ISB"
+        for k, deg in enumerate(angles)
+        if deg > AXIS_TOLERANCE_DEG
+    ]
 
 
 def inventory_spine(
@@ -272,7 +356,8 @@ def inventory_spine(
     given); a path exists; every mapped joint, coordinate and body exists;
     mapped levels are contiguous.  Postconditions: ``neutral`` matrices are
     read-only (4, 4); misaligned axes are listed in ``axis_failures``
-    (> 1 deg) and, when ``strict``, raised instead.
+    (> 1 deg) and, when ``strict``, raised instead.  Declared translational
+    coordinates (optional) are checked like the rotations.
 
     Raises:
         ValueError: unknown or unverified ``model_id``, missing file, joint,
@@ -297,17 +382,16 @@ def inventory_spine(
     else:
         model = model_path
     levels = _check_map(model, entry)
-    neutral, angles, failures = {}, {}, []
+    neutral, angles, trans_angles, failures = {}, {}, {}, []
+    trans_names: dict[SpinalLevel, tuple[str, str, str]] = {}
     for level in levels:
-        neutral[level], angles[level] = _inventory_level(
-            model, level, entry.levels[level]
-        )
-        for k, deg in enumerate(angles[level]):
-            if deg > AXIS_TOLERANCE_DEG:
-                failures.append(
-                    f"{level.name} {entry.levels[level].coordinates[k]}: "
-                    f"axis {deg:.3f} deg from ISB"
-                )
+        lm = entry.levels[level]
+        neutral[level], angles[level], trans = _inventory_level(model, level, lm)
+        failures += _failures(level, lm.coordinates, angles[level])
+        if trans is not None and lm.translations is not None:
+            trans_angles[level] = trans
+            trans_names[level] = lm.translations
+            failures += _failures(level, lm.translations, trans)
     if strict and failures:
         raise ValueError("axes not ISB-aligned: " + "; ".join(failures))
     return SpineInventory(
@@ -320,6 +404,8 @@ def inventory_spine(
         ),
         axis_alignment_deg=MappingProxyType(angles),
         axis_failures=tuple(failures),
+        translation_names=MappingProxyType(trans_names),
+        translation_alignment_deg=MappingProxyType(trans_angles),
     )
 
 
