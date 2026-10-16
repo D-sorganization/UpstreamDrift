@@ -258,7 +258,7 @@ class DerivativeCapabilityRegistry:
 
 
 _PENDING = "engine adapter derivatives are a later NSX child (NSX-85..89)"
-_ENGINES = ("pinocchio", "drake", "opensim")
+_ENGINES = ("pinocchio", "drake")
 _ADAPTER_FD = (
     "src.shared.python.loop_nullspace.adapter_derivatives:"
     "adapter_closed_loop_derivatives"
@@ -266,7 +266,7 @@ _ADAPTER_FD = (
 
 
 def default_registry() -> DerivativeCapabilityRegistry:
-    """Registry with the engine-free reference and every engine still ``NONE``."""
+    """Registry: reference, MuJoCo/MyoSuite/OpenSim ``PARTIAL``, rest ``NONE``."""
     reg = DerivativeCapabilityRegistry()
     reg.declare(
         "reference_fd",
@@ -280,6 +280,15 @@ def default_registry() -> DerivativeCapabilityRegistry:
     # is a separately characterised entry and is never conformance evidence.
     for engine in ("mujoco", "myosuite"):
         reg.declare(engine, DerivativeMethod.FINITE_DIFFERENCE, loader=_ADAPTER_FD)
+    # NSX-88: OpenSim, the adapter itself exposes the derivative method.
+    reg.declare(
+        "opensim",
+        DerivativeMethod.FINITE_DIFFERENCE,
+        loader=(
+            "src.engines.physics_engines.opensim.python.force_adapter:"
+            "OpenSimNativeForceAdapter"
+        ),
+    )
     for engine in _ENGINES:
         reg.declare(engine, DerivativeMethod.NONE, reason=_PENDING)
     return reg

@@ -19,6 +19,7 @@ engines is not physical validation.
 
 from __future__ import annotations
 
+from collections import OrderedDict
 from typing import Any
 
 import numpy as np
@@ -36,16 +37,26 @@ from src.shared.python.loop_nullspace.snapshot import (
 )
 from src.shared.python.loop_nullspace.tangent_linearization import (
     FiniteDifferenceDerivatives,
+    StepConvergence,
+    fd_step_convergence,
 )
 
 __all__ = [
     "UNSUPPORTED_STATE_COMPONENTS",
     "AdapterClosedLoopModel",
     "adapter_closed_loop_derivatives",
+    "adapter_step_convergence",
 ]
 
 UNSUPPORTED_STATE_COMPONENTS: tuple[str, ...] = ("muscle_activation",)
 """State components outside the derivative (listed unsupported until NSX-94)."""
+
+
+_CACHE_SLOTS = 32
+
+
+def _key(*arrays: ArrayLike) -> bytes:
+    return b"|".join(np.asarray(a, dtype=np.float64).tobytes() for a in arrays)
 
 
 class AdapterClosedLoopModel:
@@ -53,36 +64,60 @@ class AdapterClosedLoopModel:
 
     The model-function view the NSX-84 routine differences.  Closure rows are
     converted by the NSX-02 converter (``snapshot.canonical_closure``), never
-    re-derived.  Preconditions: ``adapter`` passes
-    :func:`require_closed_loop_capability` (``CapabilityUnavailable`` otherwise).
+    re-derived.  Evaluations are memoised on the exact state bytes in a small
+    LRU (``_CACHE_SLOTS`` entries) so the ``nv`` load-column solves, which share
+    one ``(q, v)``, hit the engine once (NSX-88).  Preconditions: ``adapter``
+    passes :func:`require_closed_loop_capability` (``CapabilityUnavailable``
+    otherwise).
     """
 
     def __init__(self, adapter: Any) -> None:
         require_closed_loop_capability(adapter)
         self._adapter = adapter
+        self._cache: OrderedDict[tuple[str, bytes], Any] = OrderedDict()
 
     @property
     def nv(self) -> int:
         """Number of velocity coordinates."""
         return int(self._adapter.nv)
 
+    def _memo(self, tag: str, key: bytes, compute: Any) -> Any:
+        slot = (tag, key)
+        if slot in self._cache:
+            self._cache.move_to_end(slot)
+            return self._cache[slot]
+        value = compute()
+        self._cache[slot] = value
+        if len(self._cache) > _CACHE_SLOTS:
+            self._cache.popitem(last=False)
+        return value
+
+    def _mass_bias(self, q: Array, v: Array) -> tuple[Array, Array]:
+        return self._memo(
+            "mb", _key(q, v), lambda: self._adapter.compute_mass_and_bias(q, v)
+        )
+
     def mass_matrix(self, q: Array) -> Array:
         """``M(q)``, shape ``(nv, nv)``."""
-        mass, _ = self._adapter.compute_mass_and_bias(q, np.zeros(self.nv))
-        return mass
+        return self._memo(
+            "m", _key(q), lambda: self._mass_bias(q, np.zeros(self.nv))[0]
+        )
 
     def bias_forces(self, q: Array, v: Array) -> Array:
         """``h(q, v)``, shape ``(nv,)``."""
-        _, bias = self._adapter.compute_mass_and_bias(q, v)
-        return bias
+        return self._mass_bias(q, v)[1]
 
     def closure_jacobian(self, q: Array) -> Array:
         """Canonical ``J_c(q)``, shape ``(m, nv)``."""
-        return canonical_closure_jacobian(self._adapter, q)
+        return self._memo(
+            "j", _key(q), lambda: canonical_closure_jacobian(self._adapter, q)
+        )
 
     def closure_drift(self, q: Array, v: Array) -> Array:
         """Canonical ``Jdot_v(q, v)``, shape ``(m,)``."""
-        return canonical_closure(self._adapter, q, v)[1]
+        return self._memo(
+            "d", _key(q, v), lambda: canonical_closure(self._adapter, q, v)[1]
+        )
 
 
 def adapter_closed_loop_derivatives(
@@ -107,3 +142,18 @@ def adapter_closed_loop_derivatives(
     model = AdapterClosedLoopModel(adapter)
     routine = FiniteDifferenceDerivatives(model, EuclideanManifold(model.nv), step=step)
     return routine.constrained_acceleration_derivatives(q, v, tau)
+
+
+def adapter_step_convergence(
+    adapter: Any,
+    q: ArrayLike,
+    v: ArrayLike,
+    tau: ArrayLike,
+    *,
+    steps: tuple[float, ...] = (1e-3, 5e-4, 2.5e-4),
+) -> StepConvergence:
+    """NSX-84 step-convergence report of the adapter's finite differences (NSX-88)."""
+    model = AdapterClosedLoopModel(adapter)
+    return fd_step_convergence(
+        model, EuclideanManifold(model.nv), q, v, tau, steps=steps
+    )

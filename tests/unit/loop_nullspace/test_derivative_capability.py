@@ -104,7 +104,8 @@ def test_loader_resolves_dotted_path() -> None:
 def test_default_registry_declares_the_reference_and_pending_engines() -> None:
     reg = dc.default_registry()
     assert reg.require("reference_fd").method is dc.DerivativeMethod.FINITE_DIFFERENCE
-    for engine in ("pinocchio", "drake", "opensim"):
+    assert reg.require("opensim").level is CapabilityLevel.PARTIAL
+    for engine in ("pinocchio", "drake"):
         with pytest.raises(dc.DerivativeCapabilityUnavailable):
             reg.require(engine)
 
