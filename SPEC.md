@@ -2741,6 +2741,7 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-16 | #12835 | Divergence inventory: commit only stable per-path facts (v2 JSONL, one sorted record per line), drop the committed markdown, move totals/bytes/authorship to --report; different-path PRs no longer conflict |
 | 2026-10-16 | #12865 | Split the user manual and functional test plan into an index plus chapter files under the doc size budget; delete both expiring exceptions. |
 | 2026-10-16 | #12854 | Split generated ORG-01 capability baseline into index plus linked parts; drop three doc-size exceptions |
 | 2026-10-16 | #12863 | Split scripts/_urdf_campaign_issues.py into a domain package and drop the stale/expiring file-size exceptions; research scripts left pinned. |
