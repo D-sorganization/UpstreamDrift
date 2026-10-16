@@ -47,6 +47,7 @@ from src.shared.python.loop_nullspace.evidence import (
 from src.shared.python.loop_nullspace.feasible_set import FeasibleSet
 from src.shared.python.loop_nullspace.registry import load_registry
 from src.shared.python.loop_nullspace.solvers import (
+    ConicSettings,
     LPSession,
     SolveStatus,
     SOCBlock,
@@ -456,7 +457,7 @@ class SystemSolver:
             sp.csr_matrix(s.G) if has else None,
             s.h if has else None,
             blocks,
-            tol=SOLVER_TOL,
+            settings=ConicSettings(tol=SOLVER_TOL),
         )
         if res.status is SolveStatus.OPTIMAL and res.x is not None:
             return MinOutcome(
