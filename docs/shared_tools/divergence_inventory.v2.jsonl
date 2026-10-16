@@ -1242,6 +1242,7 @@
 {"path": "motion_matching/club_only/topology_mapping.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/ui_integration.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/workbook_identity.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/club_shaft_chain.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_target.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/compute_total_work.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/constrained_ik.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
