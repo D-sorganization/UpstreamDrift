@@ -254,65 +254,33 @@ def _evaluate_precondition(
     args: tuple[Any, ...],
     kwargs: dict[str, Any],
 ) -> bool:
-    """Evaluate a precondition against the arguments provided to a function.
+    """Try to evaluate a precondition, using argument-name binding as a fallback.
 
-    Binding by parameter name (with defaults applied) is tried first, as in the
-    canonical Tools implementation. Calling the condition with the raw positional
-    ``args`` first silently fed the wrong value to single-argument conditions:
-    ``@precondition(lambda gender_factor: ...)`` on ``f(total_mass_kg,
-    gender_factor=0.5)`` received ``total_mass_kg`` for ``f(75.0)`` (#12706).
+    First attempts to call *condition* with the same ``(args, kwargs)`` that
+    the decorated function received.  If that produces a ``TypeError`` (e.g.
+    the condition only accepts a subset of arguments by name), it falls back
+    to matching parameters by name from the decorated function's signature.
 
     Raises:
-        PreconditionEvaluationError: If evaluating the condition raises.
+        PreconditionEvaluationError: If the condition evaluation fails with an error
+            other than a simple argument-matching TypeError.
     """
     if condition is None:
         raise ValueError("condition must be provided")
-
-    can_call_by_name = False
-    call_args: dict[str, Any] = {}
-    try:
-        func_sig = inspect.signature(func)
-        bound = func_sig.bind(*args, **kwargs)
-        bound.apply_defaults()
-        all_arguments: dict[str, Any] = dict(bound.arguments)
-
-        cond_sig = inspect.signature(condition)
-        param_names = list(cond_sig.parameters.keys())
-        if param_names and all(name in all_arguments for name in param_names):
-            call_args = {name: all_arguments[name] for name in param_names}
-            cond_sig.bind(**call_args)
-            can_call_by_name = True
-    except (TypeError, ValueError):
-        can_call_by_name = False
-
-    if can_call_by_name:
-        try:
-            return bool(condition(**call_args))
-        except PreconditionEvaluationError:
-            raise
-        except Exception as exc:
-            raise PreconditionEvaluationError(
-                f"Failed to evaluate precondition for {func.__qualname__}: {exc!r}", exc
-            ) from exc
-
-    can_call_directly = False
     try:
         inspect.signature(condition).bind(*args, **kwargs)
-        can_call_directly = True
-    except (TypeError, ValueError):
-        can_call_directly = False
+    except TypeError:
+        return _evaluate_precondition_by_name(condition, func, args, kwargs)
+    except ValueError:
+        pass
 
-    if can_call_directly:
-        try:
-            return bool(condition(*args, **kwargs))
-        except PreconditionEvaluationError:
-            raise
-        except Exception as exc:
-            raise PreconditionEvaluationError(
-                f"Failed to evaluate precondition for {func.__qualname__}: {exc!r}", exc
-            ) from exc
-
-    return _evaluate_precondition_by_name(condition, func, args, kwargs)
+    try:
+        return bool(condition(*args, **kwargs))
+    except Exception as exc:
+        # Preserve the original exception type and chain for predicate body errors.
+        raise PreconditionEvaluationError(
+            f"Failed to evaluate precondition for {func.__qualname__}: {exc!r}", exc
+        ) from exc
 
 
 def _evaluate_precondition_by_name(
