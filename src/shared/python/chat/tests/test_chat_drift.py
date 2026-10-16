@@ -20,14 +20,14 @@ REPO_ROOT = Path(__file__).resolve().parents[5 if "tests" in __file__ else 4]
 TOOLS_BASELINE_HASHES: dict[str, str] = {
     "src/shared/python/chat/_chat_dock_widget_qt.py": "".join(
         (
-            "6cb29814",
-            "9dc3f377",
-            "84687465",
-            "211950a2",
-            "2825d146",
-            "8efd729e",
-            "8199b4a0",
-            "8bbf9caf",
+            "b0c6bc58",
+            "21dd5f23",
+            "01ed4964",
+            "d6c5fd1c",
+            "6f70ae35",
+            "95799133",
+            "b4a3b65b",
+            "dc579fcf",
         )
     ),
     "src/shared/python/chat/models.py": "".join(

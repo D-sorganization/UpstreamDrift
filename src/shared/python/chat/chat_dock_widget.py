@@ -105,7 +105,7 @@ def _is_loopback_websocket_server(parsed: SplitResult) -> bool:
 def _resolve_launcher_token() -> str | None:
     """Return the ephemeral host capability without persisting or logging it."""
     token = os.environ.get(_LAUNCHER_TOKEN_ENV)
-    return token or None
+    return token if token else None
 
 
 def _build_native_websocket_url(
