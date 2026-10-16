@@ -81,14 +81,23 @@ def _lim7() -> JointLimitsNDOF:
     )
 
 
+# The stiff penalty joint-limit cases amplify last-bit libm/BLAS differences
+# across platforms: the pre-refactor code (commit 1d4c14fa0e) run on Linux
+# misses the Windows-generated pins by ~2e-8 absolute, exactly as the
+# refactored code does. Those two cases use an absolute tolerance sized to
+# that platform noise; every other case keeps the tight tolerance.
+_PLATFORM_SENSITIVE = {"t_limits", "g_limits"}
+
+
 def _check(result: object, key: str) -> None:
     steps, final = GOLD[key]
     assert result.n_steps == steps  # type: ignore[attr-defined]
+    rtol, atol = (1e-6, 1e-7) if key in _PLATFORM_SENSITIVE else (1e-9, 1e-12)
     np.testing.assert_allclose(
-        result.states[-1],
+        result.states[-1],  # type: ignore[attr-defined]
         np.array(final),
-        rtol=1e-9,
-        atol=1e-12,  # type: ignore[attr-defined]
+        rtol=rtol,
+        atol=atol,
     )
 
 

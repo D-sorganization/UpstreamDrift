@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from src.shared.python.estimation.mosaic.local_policy import LinearizedDynamics
+
+pytestmark = pytest.mark.unit
 
 
 def test_n_state_equals_a_second_axis() -> None:
