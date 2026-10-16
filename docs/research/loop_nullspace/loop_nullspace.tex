@@ -1500,6 +1500,42 @@ coefficient of variation $\mathrm{SD}/\lvert\mathrm{mean}\rvert$ is banned for
 zero-centred outcomes, where it is undefined or arbitrarily large.  Face rows
 are \texttt{UNAVAILABLE} when axial club rotation is not observed.
 
+\subsection{Global Sensitivity Screening}
+\label{sec:global-sensitivity}
+
+\paragraph{Estimators (NSX-96).}  Inputs are uniform on declared ranges and
+mapped from one scrambled Sobol sequence (\texttt{scipy.stats.qmc}) split into
+halves $A$ and $B$; $AB_i$ is $A$ with the columns of unit $i$ taken from $B$.
+The first-order index is the Saltelli (2010) form
+$S_i=\mathrm{E}[f(B)(f(AB_i)-f(A))]/V$ and the total index is the Jansen form
+$S_{T,i}=\mathrm{E}[(f(A)-f(AB_i))^2]/(2V)$, with $V$ the sample variance of
+$f(A)$ and $f(B)$ together.  Intervals are percentile bootstrap over the $N$
+base rows.  The PRCC tier rank-transforms a Latin hypercube sample and takes
+the partial correlation of each input with the output given the others, from
+the inverse of the rank correlation matrix.
+
+\paragraph{Correlated Inputs.}  Ordinary independent indices are refused, with
+an error, whenever a correlation is declared.  The routes are grouped indices,
+where each correlated group moves as one block through a Gaussian copula with
+the declared correlation, or a declared transformation to independent inputs.
+
+\paragraph{Convergence and Oracle.}  \texttt{sobol\_convergence} reports each
+index with its interval against $N$ on nested prefixes of one sequence.  The
+analytic Ishigami function ($a=7$, $b=0.1$) is recovered within $0.02$ at
+$N=2048$ with a fixed seed; runs use the planar oracle and the low-rank basis
+only.
+
+\paragraph{Non-Claims.}  Outputs are \texttt{QuantityRecord}s labelled
+\texttt{EVIDENCE:SCREENING} and \texttt{UNVALIDATED}.  They rank a model under
+declared ranges; they are not a validated ranking and say nothing about golfers.
+PRCC is a monotonicity screen, not a variance decomposition.
+
+\paragraph{Reproduction Commands.}
+\begin{verbatim}
+python3 -m pytest tests/unit/loop_nullspace/test_global_sensitivity.py \
+    -n 0 -q --timeout=300
+\end{verbatim}
+
 \subsection{Declared Impedance and Delayed Minimum-Intervention Feedback}
 \label{sec:var-layer}
 
