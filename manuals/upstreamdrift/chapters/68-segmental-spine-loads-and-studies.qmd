@@ -115,10 +115,16 @@ Pelvis residual:
   $$r_F = \frac{\max_t \lVert \mathbf F_{\mathrm{res}}(t) \rVert}{m g} \le 0.05,
   \qquad r_M = \frac{\max_t \lVert \mathbf M_{\mathrm{res}}(t) \rVert}{m g h} \le 0.01.$$
 - $m g$ is the total model mass times $\lvert g \rvert$.
-- $h$ is `body_height_m` when supplied. Otherwise it is a model extent: the
-  ground-Y extent of the body origins, not measured stature. The code
-  evaluates it at the last processed sample, although the docstring and
-  SPN-10a say the first frame (see Limitations).
+- $h$ is `body_height_m` when supplied. Otherwise it is a model extent, not
+  measured stature: with the model posed at the first frame of the motion,
+  $h = \max_b \hat g \cdot \mathbf p_b - \min_b \hat g \cdot \mathbf p_b$
+  over the body origins $\mathbf p_b$, along the model's own gravity
+  direction $\hat g = \mathbf g / \lVert \mathbf g \rVert$ (#12824). It is
+  independent of the final pose and of the model's up axis.
+- The source of $h$ (`body_height_m` or `model_extent_first_frame`) and its
+  value are recorded in the residual budget and in the receipt
+  (`id_body_height_source`, `id_body_height_m`). Because $r_M$ scales with
+  $1/h$, results with different $h$ sources are not comparable.
 
 Without external support loads, the pelvis residual carries gravitational
 support plus the prescribed whole-body inertial demand. For a stationary,
@@ -332,8 +338,9 @@ Status is fail-closed (`_judge`):
   - any frame is flagged for reserve use under the share and limit rule
     above;
   - any static-optimization frame is unsuccessful;
-  - with a variant, a term bound is violated or a driven level coordinate
-    leaves its model range.
+  - with a variant, a term bound is violated, a driven level coordinate
+    leaves its model range, or an undeclared term changes beyond its
+    tolerance.
 - **`pass`.** None of these.
 
 `pass` is a software statement only. `scientific_status` is always
@@ -417,8 +424,16 @@ Operations:
 Checks:
 
 - The target term is checked with `ensure` to $10^{-6}$ deg.
-- The declared tolerance of $10^{-8}$ deg on the undeclared terms is enforced
-  in the tests only, not at runtime.
+- The declared tolerance of $10^{-8}$ deg on the undeclared terms is
+  enforced at runtime (#12825) by `check_undeclared_terms`. Every term
+  computable from the pelvis-to-thorax rotation and time (the three JCS terms
+  and `crunch_factor_rate`) is evaluated before and after the variant, in
+  each term's own units. A sample lost in only one of the two series (gimbal
+  lock) counts as an infinite change. Lab-frame and marker terms are not
+  covered.
+- In a study, a violation makes the run `unqualified`; the receipt lists the
+  result as `variant.undeclared_terms` (`ok`, `tolerance`, `max_change`,
+  `violations`).
 - Gimbal lock inside the window raises. At least three samples are required.
 
 Version 1 ships five variants, all with the `thorax_relative_hold` arm
@@ -707,10 +722,8 @@ Known code-level gaps (follow-up candidates, behaviour unchanged here):
 - `fujii2007_lumbar` cannot be exported as OpenSim linear couplers.
 - `level_angle_stack` and `StackData` do not pass $B$, $E$ and $A$ through;
   use `segmental_contribution_breakdown` (#12822) for the full path.
-- The default moment-budget height is evaluated at the last processed sample,
-  not the first frame as documented, and assumes ground Y is up.
-- The movement-variant tolerance on undeclared terms is enforced in tests
-  only, not at runtime.
+- The undeclared-term check of a movement variant does not cover lab-frame
+  terms (line turn, side bend, reverse spine angle).
 - Static optimization does not converge at the first two fixture samples.
 
 ## Non-Claims
