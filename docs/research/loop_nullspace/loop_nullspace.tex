@@ -814,6 +814,101 @@ $P^{\!\top}K_{\mathrm{geom}}(\lambda)P$, with $P$ spanning $\ker J_c$, for two
 reaction allocations; it differs between them (basis-free projector form is
 stored).
 
+\paragraph{Implementation (NSX-84).}  Perturbations are expressed in an
+orthonormal basis $P$ of $\ker J_c$ (SVD), $\delta q=P\xi$ and
+$\delta v=P\eta+O\xi$ with $O\xi=-J_c^{+}(\partial_qJ_c[P\xi])v$ the
+minimum-norm velocity offset, so $J_c\,\delta q=0$ and the velocity-level
+tangency hold by construction; the basis-free object is $\Pi=PP^{\!\top}$ with
+$J_c\Pi J_c^{\!\top}=0$.  The full-state Jacobian of the index-3 DAE is never
+formed.  Two routes yield the same derivatives: central differences of the
+single KKT solve along retractions ($q+\epsilon\,dq$ in $\mathbb R^n$,
+$\mathrm{quat}\otimes\exp$ for free joints, so $n_q\neq n_v$ is handled), and
+the assembled system of Eq.~\eqref{eq:var-kkt} with $K_{\mathrm{geom}}$ taken
+from $\partial_q(J_c^{\!\top}\lambda)$ at fixed $\lambda$.  The moving-frame
+connection turns $F_t$ into the angle coordinates of the worked case; for
+general $k$ it is specified in Section~\ref{sec:var-lin-k}.  The
+differencing refuses, rather than extrapolates, when the closure rank or the
+contact mode changes inside the step.  Engines declare analytic, autodiff,
+finite-difference or no derivatives (capability
+\texttt{closed\_loop\_derivatives}); an undeclared capability fails closed with
+its reason.  Failed experiments: none recorded.  Reproduction:
+\texttt{pytest tests/unit/loop\_nullspace/test\_tangent\_linearization.py}.
+
+\subsection{Tangent State Space for Several Degrees of Freedom}
+\label{sec:var-lin-k}
+
+Let $P(q)\in\R^{n_v\times k}$ be a smooth orthonormal frame of $\ker J_c$,
+$N=I-PP^{\!\top}$, $\omega=P^{\!\top}v$ (so $v=P\omega$) and
+$\Gamma_w=P^{\!\top}\partial_qP[w]$.  Because $P^{\!\top}P=I$, $\Gamma_w$ is
+skew.  Write $\delta q=P\xi$ and $\delta v=P\eta+O\xi$ with $O\xi\in
+\range J_c^{\!\top}$ (minimum norm), so $P^{\!\top}O=0$ and
+$\xi=P^{\!\top}\delta q$, $\eta=P^{\!\top}\delta v$.  A perturbed trajectory
+obeys $\delta q'=\delta v$ and $\delta v'=\delta a=A_\xi\xi+A_\eta\eta+A_\tau\delta u$,
+where $A_\bullet$ are the derivatives of Section~\ref{sec:var-lin}.
+
+\paragraph{Derivation.}  Differentiating $\xi=P^{\!\top}\delta q$ along the
+nominal motion ($P'=\partial_qP[v]$) gives
+$\xi'=\partial_qP[v]^{\!\top}P\,\xi+P^{\!\top}\delta v=\eta-\Gamma_v\xi$,
+since $\partial_qP[v]^{\!\top}P=\Gamma_v^{\!\top}=-\Gamma_v$ and $P^{\!\top}O=0$.
+Likewise $\eta'=\partial_qP[v]^{\!\top}(P\eta+O\xi)+P^{\!\top}\delta a$.  The
+offset is not stored: a tangent velocity keeps its frame components, so
+$v(q+\varepsilon P\xi)=P(q+\varepsilon P\xi)\,\omega$ and its normal part gives
+$O\,e_j=N\,\partial_qP[Pe_j]\,\omega$.  Collecting terms,
+\begin{equation}
+F_t=\begin{bmatrix}-\Gamma_v & I_k\\[2pt]
+P^{\!\top}A_\xi+K & P^{\!\top}A_\eta-\Gamma_v\end{bmatrix},\quad
+G_t=\begin{bmatrix}0\\ P^{\!\top}A_\tau S^{\!\top}\end{bmatrix},\quad
+K_{ij}=\partial_qP_i[v]^{\!\top}\,N\,\partial_qP[Pe_j]\,\omega .
+\label{eq:var-lin-k}
+\end{equation}
+$K$ is the $k\times k$ block ``$\partial_qP^{\!\top}$ contracted with
+$Pe_j$'' of the specification, taken in the \emph{normal} projection: with
+$B(x,y)=\Phi_{qq}[x,y]$, $W=(J_cJ_c^{\!\top})^{-1}$ and $J_c\,\partial_qP_i[w]=
+-B(w,P_i)$ one finds $K_{ij}=u_i^{\!\top}Wu_j$ with $u_i=B(v,P_i)$, a Gram
+matrix: symmetric and positive semidefinite for any $k$ (rank at most the
+number of closure rows).  $\Gamma_v$, in contrast, is skew; the two never
+mix.
+
+\paragraph{Reduction to $k=1$.}  For $k=1$, $\Gamma_v=0$ and $N\partial_qP$
+is the whole of $\partial_qP$.  Using $a=P\alpha+a_n$ with
+$a_n=-J_c^{\!\top}WB(v,v)$ and $\partial_qP[P]^{\!\top}P=0$, the earlier
+scalar connection $\partial_qP[P]^{\!\top}a$ equals
+$\omega^2B(P,P)^{\!\top}WB(P,P)=K$; the pendulum golden
+$F_{10}=\omega^2+\lambda/m$ is reproduced exactly.  The literal extension
+$C_{ij}=(\partial_qP_i[Pe_j])\cdot a$ is \emph{not} the $k>1$ connection: it
+adds the tangential term $\sum_l\alpha_l(\Gamma_{Pe_j})_{li}$, replaces the
+Gram matrix by $B(P_j,P_i)^{\!\top}WB(v,v)$ (not symmetric in general) and
+omits $-\Gamma_v$ on the diagonal blocks.  The five-bar golden shows an
+entry error of $8.1$ against entries of size up to $53$ (failed experiment,
+kept as a regression test).
+
+\paragraph{Frame Invariance.}  Let $P\to PR$.  For a constant orthogonal $R$
+and $T=\mathrm{blkdiag}(R,R)$, $\Gamma_v\to R^{\!\top}\Gamma_vR$,
+$K\to R^{\!\top}KR$ and $A_\bullet P\to A_\bullet PR$, so
+$F_t\to T^{\!\top}F_tT$ and $G_t\to T^{\!\top}G_t$: a similarity transform,
+with identical eigenvalues.  For a position-dependent $R(q)$ the coordinates
+rotate in time and
+$F_t\to T^{\!\top}F_tT+\mathrm{blkdiag}(\dot R^{\!\top}R,\dot R^{\!\top}R)$,
+$\dot R=\partial_qR[v]$ (a gauge law, not a similarity); eigenvalues of the
+\emph{frozen} matrix then change by the frame's rotation rate, which is a
+property of the chosen frame, not of the dynamics.  Both laws are tested.
+
+\paragraph{Golden and Reproduction.}  A planar five-bar ($n_v=4$, two closure
+rows, $k=2$, point masses, all four joints actuated) is derived by an
+independent route: reduced Euler--Lagrange equations in the actuated angles
+$s=(a_1,a_2)$, closed-form two-circle intersection for the passive angles,
+linearisation in $(\delta s,\delta s')$ and the time-dependent map
+$\zeta=T(s,s')(\delta s,\delta s')$, $\zeta'=(TF_rT^{-1}+\dot TT^{-1})\zeta$ in
+40-digit arithmetic (outer derivatives by \texttt{mpmath}; truncation below
+$10^{-25}$).  No KKT system and no repository code are used.  Golden:
+\texttt{planar\_five\_bar\_tangent\_state\_space}; script:
+\texttt{derivations/five\_bar\_goldens.py}.  Non-claims: this is a local
+linearisation at one configuration; a smooth frame field is required, and
+the frame $P(q)$ is the Gram--Schmidt frame of
+$(\Pi e_1,\Pi e_3)$, $\Pi=I-J_c^{\!\top}(J_cJ_c^{\!\top})^{-1}J_c$, which is
+singular where $\operatorname{rank}J_c$ drops.  Reproduction:
+\texttt{pytest tests/unit/loop\_nullspace/test\_tangent\_state\_space\_k2.py}.
+
 \subsection{Event Section and Saltation Correction}
 \label{sec:var-salt}
 

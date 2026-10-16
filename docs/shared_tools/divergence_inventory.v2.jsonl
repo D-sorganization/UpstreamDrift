@@ -1048,9 +1048,11 @@
 {"path": "loop_nullspace/admission.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/capacity.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/closure_convention.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/configuration_manifold.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/constrained_dynamics.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/contracts.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/decomposition.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/derivative_capability.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/event_section.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/evidence.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/feasible_rows.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
@@ -1068,6 +1070,7 @@
 {"path": "loop_nullspace/snapshot.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/solvers.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/spatial_fixture.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/tangent_linearization.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "math_utils/__init__.py", "classification": "ud-only", "package": "math_utils", "spelling_only": false}
 {"path": "math_utils/quaternion.py", "classification": "ud-only", "package": "math_utils", "spelling_only": false}
 {"path": "model_appearance/__init__.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
