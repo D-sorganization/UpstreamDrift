@@ -49,6 +49,9 @@ _MAX_LINES = 100
 
 def _norm(text: str) -> str:
     text = text.replace("\r\n", "\n")
+    # Allowed differences: import-prefix spelling, and the one expression that
+    # UD's ruff (SIM210) rewrites in chat_dock_widget.py.
+    text = text.replace("return token if token else None", "return token or None")
     return text.replace("src.shared.python", "shared.python")
 
 
