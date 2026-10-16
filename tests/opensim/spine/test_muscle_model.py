@@ -139,3 +139,40 @@ def test_moment_arm_screen_never_drops_a_nonzero_native_arm() -> None:
                 native = muscle_moment_arm(basis.model, basis.state, muscle, coord)
                 if abs(native) > 1e-9:
                     assert mask[i, j], (muscle, coord, native)
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_prepared_model_clears_coordinate_locks(tmp_path) -> None:
+    """Locked level coordinates make ID, SO and JR disagree; they are cleared.
+
+    The licensed Bruno model locks 105 coordinates (including thoracic
+    lateral-bending and axial-rotation levels) that the segmental drive moves.
+    A locked coordinate has zero acceleration in forward dynamics but not in
+    the inverse-dynamics solver, which broke the joint-reaction acceleration
+    check, and OpenSim reports no moment arm about it.
+    """
+    from src.engines.physics_engines.opensim.python.spine.inverse_dynamics import (
+        prepare_model_for_id,
+    )
+
+    osim = require_opensim()
+    spec = FixtureSpec(levels=(SpinalLevel.L3_L4,))
+    path = write_fixture_osim(spec, tmp_path / "locked.osim", muscles=True)
+    model = osim.Model(str(path))
+    coords = model.getCoordinateSet()
+    for i in range(coords.getSize()):
+        coords.get(i).set_locked(True)
+    model.printToXML(str(path))
+    prepared = prepare_model_for_id(path)
+    coords = prepared.model.getCoordinateSet()
+    locked = [
+        str(coords.get(i).getName())
+        for i in range(coords.getSize())
+        if coords.get(i).get_locked()
+    ]
+    assert locked == []
+    assert not any(
+        prepared.model.getCoordinateSet().get(i).getLocked(prepared.state)
+        for i in range(coords.getSize())
+    )
