@@ -1245,3 +1245,91 @@ diagnostic, not a time-varying stability proof. The tangent chain is `k = 1`
 (NSX-84). `H-TIMING-JITTER` is not implemented here. Engine coverage is the
 analytic point mass, pendulum and planar-golfer oracles through the provider
 seam, not every engine adapter.
+
+
+## NSX-95 Consistency Strategy Catalogue and Comparison Campaigns (#12724)
+
+The owner's question is which strategies make a golfer more consistent, under
+which disturbances and at what cost. The primary outcome is the face-angle
+variance. The catalogue is data; the evaluators *compose* NSX-91/92/93/94/25 and
+add no new dynamics. Modules (all under `src/shared/python/loop_nullspace/`):
+
+- `strategy_spec.py`: frozen registry `CATALOGUE` of S1-S12. Each entry declares
+  its mechanism, the mechanism ids that must be in force for any effect, a
+  representation per model class (`rigid_joint_torque`, `muscle_driven`), its cost
+  basis and its evaluator (dotted paths, resolved by `resolve_evaluators`).
+  Availability is `IMPLEMENTED`, `NOT_IMPLEMENTED` or `UNAVAILABLE`; the
+  constructor refuses an implemented entry without an evaluator, an unimplemented
+  entry with one or without a reason, and an entry whose availability disagrees
+  with its representations.
+- `strategy_arms.py`: `ArmSpec` (a strategy at a declared setting),
+  `ComparisonContext` (one swing in up to three representations) and `ArmResult`.
+- `strategy_evaluators.py`, `strategy_layer_eval.py`: the adapters.
+- `strategy_campaign.py`: `run_comparison` (matched-CHS, matched-effort,
+  unconstrained fronts), ranking, failure rate and `variance_budget_table`.
+- `strategy_stability.py`: `rank_under_priors` (reversals between priors) and
+  `heldout_stability` (linear ranking against the NSX-91 paired and hold-out
+  Monte Carlo).
+
+Catalogue status.
+
+| Id  | Strategy                    | Status          | Evaluator composed                                   |
+| --- | --------------------------- | --------------- | ---------------------------------------------------- |
+| S1  | Null-space redistribution   | implemented     | NSX-92 `minimise_face_variance`, M1 channel only     |
+| S2  | Co-contraction / impedance  | implemented     | NSX-93 `layer_variance`; NSX-94 co-contraction curve |
+| S3  | Distal stabilization        | implemented     | NSX-93 impedance window ending at impact             |
+| S4  | Proximal-distal effort      | not implemented | no per-joint effort-share parameterisation           |
+| S5  | Grip / hand-split preload   | implemented     | NSX-92, M2 (geometric preload) channel only          |
+| S6  | Kinematic redundancy (UCM)  | not implemented | no UCM computation exists in the repository          |
+| S7  | Delayed feedback            | implemented     | NSX-93 delayed feedback and frozen delay margin      |
+| S8  | Speed-accuracy              | implemented     | NSX-92 `chs_variance_front`                          |
+| S9  | Biarticular coupling        | not implemented | no biarticular comparison on the NSX-94 frame        |
+| S10 | Shaft-flex phase matching   | unavailable     | rigid club has no shaft flexibility                  |
+| S11 | Timing / sequencing         | not implemented | no timing-disturbance variance evaluator            |
+| S12 | Address-state consistency   | not implemented | no address-consistency cost model                    |
+
+A not-implemented or unavailable arm returns its reason and no numbers; the
+campaign lists it under `not_attempted` and excludes it from the failure rate.
+
+Declared choices (ambiguities resolved conservatively).
+
+- One mechanism at a time. S1 keeps the signal-dependent noise (M1) and freezes
+  the geometric preload at the nominal motion; S5 keeps the preload (M2) with
+  additive noise. Effects are attributable and not additive when both channels
+  act (that combined arm is the NSX-92 problem itself).
+- Ranking basis. Arms are ordered by the face-angle variance ratio to the
+  strategy-off baseline of their own representation; S8 cases use the reference
+  case's baseline. Absolute variances are reported but not compared across
+  representations. An arm whose ratio is not below one cannot win.
+- Matched CHS. Clubhead speed is an input of each case. An arm outside
+  `chs_rel_tol` of the reference (slower *or* faster, or of unknown speed) is
+  excluded with `SPEED_MISMATCH`; the speed-for-consistency trade belongs to the
+  unconstrained fronts. Matched effort adds a common cap *within one effort
+  basis* (allocated torque, expected layer torque, muscle activation are separate
+  lines, R10); an arm over the cap is excluded, never relaxed.
+- Negative controls. A flat NSX-92 objective, a zero impedance, a zero feedback
+  gain, a missing preload for S5 or a curve with no declared mechanism returns
+  `NO_MECHANISM` with ratio exactly one and effect zero.
+- Co-contraction baseline is the lowest level of the NSX-94 sweep (the least
+  co-contraction that still produces the net torque), not zero co-contraction.
+- Delay verdict. A feedback arm is `UNSTABLE` (a failure) when the frozen delay
+  margin of any step is at or below the declared delay.
+- Expected layer effort is `sum_t dt tr(G_t P_t G_t^T)` of the declared torque
+  `u = -G z`; it is an accounting of the declared model, not a physiological cost.
+- Priors are whole contexts. A reversal is a pair strictly ordered one way in one
+  prior and the other way in another. Hold-out status is `CONFIRMED` only when the
+  hold-out SD difference reproduces the order with an interval excluding zero,
+  `REVERSED` when it contradicts it the same way, else `INCONCLUSIVE`.
+
+Fixtures used in the tests (invented demonstrations, none a golfer measurement):
+the NSX-92 pendulum for S1/S5/S8, the NSX-93 double integrator for S2/S3/S7 and
+the NSX-94 antagonist pair for co-contraction. Observed results of those
+fixtures are not claims about golfers; a late impedance window helped less than
+full-horizon stiffness and needed *more* expected effort, because early
+regulation keeps the feedback torque small.
+
+Non-claims. Rankings are conditional on the declared priors, mechanisms and the
+linear tangent model at the nominal motion; they compare mechanisms inside a
+model, not golfers, and are not coaching advice until externally validated. The
+ledger records software correctness only; scientific qualification stays in the
+design-manual governance pathway.
