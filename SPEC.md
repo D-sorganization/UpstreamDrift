@@ -2741,6 +2741,9 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-16 | #12950 | Explorer: OpenSim plot resolves markers from the model (no KeyError 'Hand'), MuJoCo Export Video uses the viewport camera, app exports write H.264 (#12946, #12947) |
+| 2026-10-16 | #12880 | NSX-89: Simscape closed-loop derivative capability NONE with UNAVAILABLE reason, R2025b-only linearization payload gate, DV-12718 deferred record |
+| 2026-10-16 | #12853 | NSX-85: Pinocchio analytic closed-loop derivatives, FULL reference for CLOSED_LOOP_DERIVATIVES |
 | 2026-10-16 | #12881 | NSX-90 covariance propagation, adjoint sensitivity kernels and nonlinearity gate |
 | 2026-10-16 | #12645 | Kinematic ensemble (admitted samples, rejection accounting, envelope union/intersection) and reproject_onto_closure delegating to project_to_closure (NSX-61) |
 | 2026-10-16 | #12922 | Closing the launcher after a MuJoCo session releases renderers before widgets die. |
