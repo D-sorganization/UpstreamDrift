@@ -137,5 +137,5 @@ class Mp4Writer:
     def __del__(self) -> None:
         try:
             self.release()
-        except Exception:  # noqa: BLE001 - never raise from a finalizer
+        except (OSError, RuntimeError, ValueError):  # never raise from a finalizer
             pass
