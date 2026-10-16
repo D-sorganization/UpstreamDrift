@@ -309,15 +309,6 @@
       "expires_on": "2026-11-30"
     },
     {
-      "path": "src/launchers/launcher_layout_manager.py",
-      "symbol": "LayoutManager.rebuild_grid",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 9481,
-      "reason": "Issue #9481: pre-existing layout manager rebuild_grid method exceeds function-lines budget; PR #9481 only reconciled tile category derivation without altering grid layout logic.",
-      "expires_on": "2026-10-31"
-    },
-    {
       "path": "src/shared/python/config/model_pack_manifest.py",
       "symbol": "_normalize_model_pack_v1",
       "rule": "function-lines",
@@ -426,24 +417,6 @@
       "expires_on": "2026-10-31"
     },
     {
-      "path": "src/launchers/upstream_drift_launcher.py",
-      "symbol": "UpstreamDriftLauncher.select_model",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #7217 legacy launcher decomposition: select_model remains over the function-lines budget until the launcher is split by responsibility.",
-      "expires_on": "2026-10-31",
-      "issue": 11103
-    },
-    {
-      "path": "src/launchers/upstream_drift_launcher.py",
-      "symbol": "main",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #7217 legacy launcher decomposition: main remains over the function-lines budget until startup and window orchestration move into focused launcher modules.",
-      "expires_on": "2026-10-31",
-      "issue": 11103
-    },
-    {
       "path": "src/shared/python/chat/_chat_dock_widget_qt.py",
       "symbol": "ChatDockWidget.__init__",
       "rule": "parameters",
@@ -451,14 +424,6 @@
       "issue": 12803,
       "reason": "Audited 2026-09-01: the prior justification cited issue #7362, which is unrelated (import-layering) and already closed, so this had been renewed on autopilot without real review. Re-reviewed: the 16 keyword params group naturally into connection/presentation/integration-hooks config objects (see #9357), so unlike an irreducible-parameter case this genuinely should be split, but it is a breaking constructor-signature change across 5 in-repo call sites and is out of scope for the current pass. Tracked in #9357. Renewed 2026-10-16 by #12802 with owner approval for 14 days only: the split already landed canonically in Tools PR #4897 (closing #9357) but this Tools-owned child copy was never re-synced; re-sync or retirement is tracked in #12803.",
       "expires_on": "2026-10-29"
-    },
-    {
-      "path": "src/launchers/launcher_ui_setup.py",
-      "symbol": "UISetupManager.init_ui",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "reason": "Issue #8490 records the independent launcher bootstrap follow-up: init_ui remains over the function-lines budget until its widget orchestration is split without changing startup order.",
-      "expires_on": "2026-10-31"
     },
     {
       "path": "src/shared/python/motion_matching/loaders/c3d.py",
@@ -580,33 +545,6 @@
       "owner": "@dieterolson",
       "reason": "Issue #8959 Bolt micro-optimization caused budget validation to fail. Requires decomposition later.",
       "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/launchers/custom_title_bar.py",
-      "symbol": "create_window_control_button",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8965,
-      "reason": "Pre-existing on origin/main: this function is byte-identical to the origin/main version; PR #8976 (EPIC #8965) only re-pointed a theme/metrics import in the same file after relocating UD-owned symbols out of the Tools child-copy tree, and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violation surfaced as if it were new. It was surfaced, not introduced, by #8976; decomposition is follow-up work.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/launchers/custom_title_bar.py",
-      "symbol": "CustomTitleBar.__init__",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8965,
-      "reason": "Pre-existing on origin/main: this function is byte-identical to the origin/main version; PR #8976 (EPIC #8965) only re-pointed a theme/metrics import in the same file after relocating UD-owned symbols out of the Tools child-copy tree, and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violation surfaced as if it were new. It was surfaced, not introduced, by #8976; decomposition is follow-up work.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/launchers/library_widget.py",
-      "symbol": "LibraryWidget._setup_ui",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8965,
-      "reason": "Pre-existing on origin/main: this function is byte-identical to the origin/main version; PR #8976 (EPIC #8965) only re-pointed a theme/metrics import in the same file after relocating UD-owned symbols out of the Tools child-copy tree, and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violation surfaced as if it were new. It was surfaced, not introduced, by #8976; decomposition is follow-up work.",
-      "expires_on": "2026-10-31"
     },
     {
       "path": "src/tools/terrain_engine/gui.py",

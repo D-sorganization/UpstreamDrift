@@ -180,6 +180,23 @@ class LibraryWidget(QWidget):
         layout.setSpacing(LayoutMetrics.SPACING_MD)
         self.setObjectName("LibraryWidget")
 
+        layout.addWidget(self._build_toolbar())
+
+        # Main Splitter
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter.setHandleWidth(4)
+        splitter.setChildrenCollapsible(False)
+        splitter.setObjectName("LibrarySplitter")
+
+        splitter.addWidget(self._build_list_pane())
+        splitter.addWidget(self._build_preview_pane())
+        splitter.setSizes([400, 600])
+
+        layout.addWidget(splitter)
+        self._apply_theme()
+
+    def _build_toolbar(self) -> QWidget:
+        """Build the title/search/import toolbar."""
         # Toolbar
         toolbar = QWidget()
         toolbar.setObjectName("LibraryToolbar")
@@ -205,14 +222,10 @@ class LibraryWidget(QWidget):
         btn_import.clicked.connect(self._on_import_clicked)
         toolbar_layout.addWidget(btn_import)
 
-        layout.addWidget(toolbar)
+        return toolbar
 
-        # Main Splitter
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.setHandleWidth(4)
-        splitter.setChildrenCollapsible(False)
-        splitter.setObjectName("LibrarySplitter")
-
+    def _build_list_pane(self) -> QWidget:
+        """Build the left-hand document table pane."""
         # Left panel: Document List
         list_container = QWidget()
         list_container.setObjectName("LibraryListPane")
@@ -233,8 +246,10 @@ class LibraryWidget(QWidget):
         self.table.itemSelectionChanged.connect(self._on_document_selected)
         list_layout.addWidget(self.table)
 
-        splitter.addWidget(list_container)
+        return list_container
 
+    def _build_preview_pane(self) -> QWidget:
+        """Build the right-hand preview and document-chat pane."""
         # Right panel: Preview and AI Query
         preview_container = QWidget()
         preview_container.setObjectName("LibraryPreviewPane")
@@ -272,12 +287,7 @@ class LibraryWidget(QWidget):
         ai_layout.addWidget(self.chat_input)
 
         preview_layout.addWidget(ai_panel, stretch=1)
-
-        splitter.addWidget(preview_container)
-        splitter.setSizes([400, 600])
-
-        layout.addWidget(splitter)
-        self._apply_theme()
+        return preview_container
 
     def _apply_theme(self) -> None:
         """Apply the launcher theme to the Library tab."""
