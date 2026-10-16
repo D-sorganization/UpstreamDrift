@@ -851,7 +851,7 @@ Epic #12735. Conventions: [ADR-0055](../adr/0055-segmental-spine-kinematics-and-
 (ISB X anterior, Y cranial, Z right; per-level ZXY; loads on the superior body
 by the inferior body in the inferior frame, compression `+F_y`). Manual chapter
 `manuals/upstreamdrift/chapters/66-segmental-spine.qmd` (continued in
-`67-segmental-spine-loads-and-studies.qmd`); research reference
+`68-segmental-spine-loads-and-studies.qmd`); research reference
 `docs/research/segmental_spine/segmental_spine.tex`; user guide and study CLI in
 [`docs/research/segmental_spine/README.md`](../research/segmental_spine/README.md#how-to-run-a-study).
 Couplers prescribe kinematics only. Every result is scientifically unqualified.
