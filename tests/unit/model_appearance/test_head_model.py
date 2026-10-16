@@ -17,6 +17,8 @@ from src.shared.python.model_appearance import (
 )
 from src.shared.python.model_appearance.schema import HeadSettings
 
+PARAMETRIC = HeadSettings(model="parametric")
+
 pytestmark = pytest.mark.unit
 SPECS = Path(__file__).resolve().parents[3] / "docs/development/full_body_models"
 LENGTH = 0.2429
@@ -69,7 +71,10 @@ def test_default_document_round_trips_unchanged() -> None:
 @pytest.mark.parametrize("headwear", ["none", "hair", "cap"])
 def test_head_meshes_are_closed_and_have_a_face(headwear: str) -> None:
     parts = {
-        p.name: p for p in build_head_parts(LENGTH, HeadSettings(headwear=headwear))
+        p.name: p
+        for p in build_head_parts(
+            LENGTH, HeadSettings(headwear=headwear, model="parametric")
+        )
     }
     for part in parts.values():
         assert part.mesh.volume() > 0, part.name
@@ -98,7 +103,9 @@ def test_head_meshes_are_closed_and_have_a_face(headwear: str) -> None:
 
 
 def test_neck_base_is_at_the_neck_point_within_5_mm() -> None:
-    neck = {p.name: p for p in build_head_parts(LENGTH)}["neck"].mesh.vertices
+    neck = {p.name: p for p in build_head_parts(LENGTH, PARAMETRIC)}[
+        "neck"
+    ].mesh.vertices
     assert abs(neck[:, 2].min()) < 0.005
     assert np.hypot(*neck[neck[:, 2] < 0.0].mean(axis=0)[:2]) < 0.005
 
@@ -108,7 +115,7 @@ def test_orientation_follows_forward_axis() -> None:
         json.loads((SPECS / "full_body_spec_anthro_driver.json").read_text())
     )
     assert anchor is not None
-    cfg = HeadSettings(forward_axis="+y", up_axis="+z")
+    cfg = HeadSettings(forward_axis="+y", up_axis="+z", model="parametric")
     parts = place_parts(
         build_head_parts(anchor.length_m, cfg), head_frame_in_body(anchor, cfg)
     )

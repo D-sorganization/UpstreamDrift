@@ -145,7 +145,9 @@ def test_chest_is_wider_than_deep_in_the_world_frame(stem) -> None:
     skins = [
         g
         for g in range(model.ngeom)
-        if model.geom_bodyid[g] == chest_id and "_skin" in model.geom(g).name
+        if model.geom_bodyid[g] == chest_id
+        and "_skin" in model.geom(g).name
+        and not model.geom(g).name.startswith("visual_head_")  # CC0 head (#12949)
     ]
     assert len(skins) == 1, "one trunk solid on the chest"
     pts = _world_mesh_points(mujoco, model, data, skins[0])

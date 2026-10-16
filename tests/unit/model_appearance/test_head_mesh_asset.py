@@ -147,9 +147,9 @@ def test_deterministic() -> None:
         np.testing.assert_array_equal(p.mesh.vertices, q.mesh.vertices)
 
 
-def test_default_head_is_the_unchanged_parametric_head() -> None:
-    assert HeadSettings().model == "parametric"
-    names = [p.name for p in build_head_parts(LENGTH, HeadSettings())]
+def test_parametric_head_stays_selectable_and_unchanged() -> None:
+    cfg = HeadSettings(model="parametric")
+    names = [p.name for p in build_head_parts(LENGTH, cfg)]
     assert names[:2] == ["neck", "skull"] and "nose" in names and "hair" in names
     assert not any(n.endswith("_mesh") for n in names)
 
@@ -160,7 +160,7 @@ def test_schema_round_trip_and_invalid_model() -> None:
     )
     assert doc.head.model == "cc0_mesh"
     assert document_from_dict(document_to_dict(doc)) == doc
-    # The default stays out of the document so existing files are unchanged.
+    # The default (cc0_mesh, #12949) stays out of the document.
     plain = document_to_dict(document_from_dict({"schema_version": "appearance-v1"}))
     assert "model" not in plain["head"]
     with pytest.raises(ValueError):
@@ -179,9 +179,16 @@ def test_resolved_appearance_carries_the_head_mesh_reference() -> None:
     assert on.head_mesh.licence == "CC0-1.0"
     assert on.head_mesh.path.endswith("head_cc0.npz")
     off = resolve_appearance(
-        spec, document_from_dict({"schema_version": "appearance-v1"})
+        spec,
+        document_from_dict(
+            {"schema_version": "appearance-v1", "head": {"model": "parametric"}}
+        ),
     )
     assert off.head_mesh is None
+    default = resolve_appearance(
+        spec, document_from_dict({"schema_version": "appearance-v1"})
+    )
+    assert default.head_mesh == on.head_mesh
 
 
 def test_head_disabled_keeps_the_old_primitive_head_exactly() -> None:
