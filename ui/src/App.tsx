@@ -64,6 +64,9 @@ const AnalysisToolsPage = lazy(() =>
     default: m.AnalysisToolsPage,
   })),
 );
+const SpineViewerPage = lazy(() =>
+  import("./pages/SpineViewer").then((m) => ({ default: m.SpineViewerPage })),
+);
 const CharacterBuilderPage = lazy(() =>
   import("./pages/CharacterBuilder").then((m) => ({
     default: m.CharacterBuilderPage,
@@ -186,6 +189,7 @@ export function RoutedContent() {
           <Route path="/tools/terrain" element={<TerrainPage />} />
           <Route path="/tools/dataset" element={<DatasetGeneratorPage />} />
           <Route path="/tools/analysis" element={<AnalysisToolsPage />} />
+          <Route path="/tools/spine-viewer" element={<SpineViewerPage />} />
           <Route
             path="/tools/character-builder"
             element={<CharacterBuilderPage />}
