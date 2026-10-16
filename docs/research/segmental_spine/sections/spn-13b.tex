@@ -91,6 +91,18 @@ Lab-frame terms (line turn, side bend, reverse spine angle) follow the thorax
 orientation in ground and are not held. \texttt{early\_extension} uses only
 the pelvis position, which no variant changes.
 
+The bound is enforced in the study, not only in the tests.
+\texttt{check\_undeclared\_terms} evaluates every term computable from
+$R(t)$ and $t$ (the three JCS terms and \texttt{crunch\_factor\_rate}) on the
+base series and on the varied series, and compares each term outside
+\texttt{affected\_terms} with \texttt{undeclared\_tolerance\_deg} (deg for the
+JCS terms, deg$\cdot$deg/s for the crunch rate); a sample available in only one
+series (for example a gimbal-locked sample) is an infinite change. The study
+variant stage records \texttt{undeclared\_terms} (\texttt{ok}, the tolerance, the
+largest change per term, the violating terms) in the receipt; a violation adds
+the status reason ``variant changed undeclared term(s) beyond tolerance'' and
+the study is \texttt{unqualified}. Nothing is clipped or repaired.
+
 \paragraph{Non-Trunk Segments and Range Checks.}
 All shipped variants use \texttt{thorax\_relative\_hold}: arm and head
 coordinates are thorax-relative and are held, so the arms follow the thorax;
@@ -126,7 +138,8 @@ as described below, so no varied motion file is written.
 \paragraph{Reproduction.}
 \begin{verbatim}
 python -m pytest tests/shared/python/spine/test_movement_variants.py \
-    tests/opensim/spine/test_variant_inputs.py -q -n 0
+    tests/opensim/spine/test_variant_inputs.py \
+    tests/opensim/spine/test_study_variant.py -q -n 0
 \end{verbatim}
 The native tests need OpenSim 4.6 (\texttt{requires\_opensim}); all fixture
 numbers are invented.

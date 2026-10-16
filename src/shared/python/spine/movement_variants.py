@@ -73,9 +73,12 @@ __all__ = [
     "MovementVariant",
     "RangeCheck",
     "RangeViolation",
+    "UndeclaredTermCheck",
     "VariantResult",
     "apply_variant",
     "check_coordinate_ranges",
+    "check_undeclared_terms",
+    "evaluate_rotation_terms",
     "load_movement_variants",
     "movement_variant",
     "sample_variant_parameters",
@@ -679,4 +682,123 @@ def check_coordinate_ranges(
             )
     result = RangeCheck(not violations, tuple(violations), tuple(sorted(coordinates)))
     ensure(result.ok == (not result.violations), "ok iff no violations")
+    return result
+
+
+# ---------------------------------------------------- undeclared-term check
+
+
+@dataclass(frozen=True)
+class UndeclaredTermCheck:
+    """Change of the terms a variant did not declare (see the checker).
+
+    ``tolerance`` is ``variant.undeclared_tolerance_deg`` (in each term's own
+    units); ``max_change`` maps every checked undeclared term to its largest
+    absolute change between the base and the varied series (``inf`` when a
+    sample is available in only one of them); ``violations`` lists the terms
+    above the tolerance, in term order. ``ok`` is true exactly when
+    ``violations`` is empty.
+    """
+
+    tolerance: float
+    max_change: Mapping[str, float]
+    violations: tuple[str, ...]
+
+    @property
+    def ok(self) -> bool:
+        """True when no undeclared term changed beyond the tolerance."""
+        return not self.violations
+
+
+def evaluate_rotation_terms(
+    rotations: np.ndarray,
+    time_s: np.ndarray,
+    handedness: Literal["right", "left"],
+) -> dict[str, np.ndarray]:
+    """Every registered golf term computable from ``R(t)`` and ``t`` alone.
+
+    These are the :data:`JCS_TERMS` and ``crunch_factor_rate`` (units per
+    term: deg, deg, deg, deg*deg/s). Lab-frame and marker terms need inputs a
+    pelvis-to-thorax rotation does not carry and are not evaluated.
+    Postcondition: each value is a 1-D array of ``len(rotations)`` samples,
+    NaN where the term is unavailable (never zero); ``crunch_factor_rate`` is
+    all NaN when a JCS input has a gimbal-locked sample.
+    """
+    hand = check_handedness(handedness)
+    rots = rotation_series(rotations, "rotations")
+    times = _check_time(time_s, rots.shape[0])
+    out = {t: _term(t, rots, hand) for t in JCS_TERMS}
+    inputs = {
+        "trunk_lateral_flexion_jcs": out["trunk_lateral_flexion_jcs"],
+        "x_factor_jcs_axial": out["x_factor_jcs_axial"],
+        "time_s": times,
+    }
+    if all(np.all(np.isfinite(inputs[k])) for k in list(inputs)[:2]):
+        out["crunch_factor_rate"] = evaluate(
+            "crunch_factor_rate", inputs, handedness=hand
+        )
+    else:  # a gimbal-locked sample: the rate is undefined for the series
+        out["crunch_factor_rate"] = np.full(times.shape, np.nan)
+    return out
+
+
+def _max_abs_change(before: np.ndarray, after: np.ndarray) -> float:
+    lost = np.isfinite(before) != np.isfinite(after)
+    if np.any(lost):
+        return math.inf
+    both = np.isfinite(before)
+    if not np.any(both):
+        return 0.0
+    return float(np.max(np.abs(after[both] - before[both])))
+
+
+def check_undeclared_terms(
+    variant: MovementVariant,
+    before: np.ndarray,
+    after: np.ndarray,
+    time_s: np.ndarray,
+    *,
+    handedness: Literal["right", "left"],
+) -> UndeclaredTermCheck:
+    """Check that terms other than the declared ones did not change.
+
+    Evaluates :func:`evaluate_rotation_terms` on the base series ``before``
+    and the varied series ``after`` and compares every term not in
+    ``variant.affected_terms`` against ``variant.undeclared_tolerance_deg``.
+
+    Preconditions: ``variant`` is a :class:`MovementVariant` (``TypeError``);
+    ``before`` and ``after`` are proper-rotation series of the same shape
+    (``ValueError``); ``time_s`` and ``handedness`` as for :func:`apply_variant`.
+    Postconditions: ``ok`` is false exactly when some undeclared term changed
+    by more than the tolerance, or became available/unavailable in only one
+    series; nothing is clipped or repaired.
+    """
+    if not isinstance(variant, MovementVariant):
+        raise TypeError(
+            f"variant must be a MovementVariant, got {type(variant).__name__}"
+        )
+    base = np.asarray(before, dtype=float)
+    varied = np.asarray(after, dtype=float)
+    if base.shape != varied.shape:
+        raise ValueError(
+            f"before and after must have the same shape, got {base.shape} "
+            f"and {varied.shape}"
+        )
+    terms_before = evaluate_rotation_terms(base, time_s, handedness)
+    terms_after = evaluate_rotation_terms(varied, time_s, handedness)
+    change = {
+        term: _max_abs_change(terms_before[term], terms_after[term])
+        for term in terms_before
+        if term not in variant.affected_terms
+    }
+    tol = variant.undeclared_tolerance_deg
+    result = UndeclaredTermCheck(
+        tolerance=tol,
+        max_change=MappingProxyType(change),
+        violations=tuple(t for t, v in change.items() if not v <= tol),
+    )
+    ensure(
+        result.ok == all(v <= tol for v in change.values()),
+        "ok iff every undeclared term is within tolerance",
+    )
     return result

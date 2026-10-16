@@ -13,7 +13,11 @@ Design by Contract
 - ``run_cross_engine_study`` additionally requires every engine name to be
   one of :data:`ENGINE_NAMES` (the API surface must not silently fall back
   to a stub for an unknown engine).
-- ``robustness_score`` post: result is clamped to [0, 1].
+- ``robustness_score`` post: result is clamped to [0, 1], or NaN when any
+  input CV is undefined (fail-closed policy, #12807).
+- ``_safe_cv`` post: NaN when ``|mean| <= CV_NEAR_ZERO_MEAN``. A zero-centred
+  metric has no meaningful CV; it is never reported as perfectly robust
+  (NSX epic #12593 section 5A, mirrors NSX-82 / #12711).
 
 DRY
 ---
@@ -24,6 +28,7 @@ or statistics code.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable
 from typing import Any
 
@@ -37,6 +42,15 @@ from src.shared.python.pendulum_simulator.cross_engine_perturbation import (
 )
 
 logger = get_logger(__name__)
+
+#: ``|mean|`` at or below which the CV is undefined (same as NSX-82, #12711).
+CV_NEAR_ZERO_MEAN = 1e-12
+
+#: Reason attached to an undefined (``None``/NaN) CV in study payloads.
+CV_UNDEFINED_REASON = (
+    "cv undefined: |mean| <= 1e-12, so SD/|mean| is undefined or arbitrarily "
+    "large for a zero-centred metric; robustness is not scored (NSX #12593 5A)"
+)
 
 #: Engine names selectable for a cross-engine comparison. ``pendulum_stub``
 #: is always available; the real engines fall back to a deterministic stub
@@ -271,21 +285,41 @@ def cv_values(cv_summary: dict[str, float]) -> list[float]:
 def robustness_score(values: list[float]) -> float:
     """Convert aggregate CV values into the displayed robustness score.
 
-    Post: result is clamped to [0, 1].
+    Policy (#12807): fail closed. If any CV is undefined (NaN, a near-zero
+    mean), the score is NaN, which means undefined. It is never imputed as
+    robust, and the undefined metric is never silently dropped from the mean.
+
+    Post: result is clamped to [0, 1], or NaN when any value is NaN.
     """
+    if any(math.isnan(v) for v in values):
+        return math.nan
     mean_cv = float(np.mean(values)) if values else 0.0
     return max(0.0, min(1.0, 1.0 - mean_cv))
 
 
 def _safe_cv(mean: float, std: float) -> float:
-    """Coefficient of variation, 0.0 when the mean is near zero."""
-    if abs(mean) < 1e-12:
-        return 0.0
+    """Coefficient of variation ``std / |mean|``.
+
+    Post: NaN (undefined, see :data:`CV_UNDEFINED_REASON`) when
+    ``|mean| <= CV_NEAR_ZERO_MEAN``. It used to return 0.0, the best possible
+    CV, which scored a zero-centred metric as perfectly robust.
+    """
+    if not abs(mean) > CV_NEAR_ZERO_MEAN:
+        return math.nan
     return std / abs(mean)
 
 
-def _engine_metric_stats(result: CrossEngineRunResult) -> dict[str, dict[str, float]]:
-    """Per-metric {mean, std, cv, robustness_score} for one engine result."""
+def _finite_or_none(value: float) -> float | None:
+    """JSON-safe float: NaN (undefined) becomes ``None``."""
+    return None if math.isnan(value) else value
+
+
+def _engine_metric_stats(result: CrossEngineRunResult) -> dict[str, dict[str, Any]]:
+    """Per-metric {mean, std, cv, cv_reason, robustness_score} for one engine.
+
+    ``cv`` and ``robustness_score`` are NaN when the CV is undefined, and
+    ``cv_reason`` is then :data:`CV_UNDEFINED_REASON` (else ``None``).
+    """
     pairs: dict[str, tuple[float, float]] = {
         "total_energy_final": (
             result.mean_total_energy_final,
@@ -300,13 +334,14 @@ def _engine_metric_stats(result: CrossEngineRunResult) -> dict[str, dict[str, fl
             result.std_peak_end_effector_speed,
         ),
     }
-    stats: dict[str, dict[str, float]] = {}
+    stats: dict[str, dict[str, Any]] = {}
     for metric, (mean, std) in pairs.items():
         cv = _safe_cv(mean, std)
         stats[metric] = {
             "mean": mean,
             "std": std,
             "cv": cv,
+            "cv_reason": CV_UNDEFINED_REASON if math.isnan(cv) else None,
             "robustness_score": robustness_score([cv]),
         }
     return stats
@@ -317,13 +352,39 @@ def per_engine_robustness(
 ) -> dict[str, float]:
     """Genuine per-engine robustness: 1 − mean per-metric CV across trials.
 
-    Post: every value is clamped to [0, 1]; one entry per engine result.
+    Post: one entry per engine result; each value is clamped to [0, 1], or
+    NaN when any of that engine's metric CVs is undefined (see
+    :func:`robustness_score`).
     """
     return {
         name: robustness_score(
             [stats["cv"] for stats in _engine_metric_stats(result).values()]
         )
         for name, result in results.items()
+    }
+
+
+def _engine_payload(backend: str, result: CrossEngineRunResult) -> dict[str, Any]:
+    """JSON-safe per-engine entry; undefined values become ``None`` + reason."""
+    stats = _engine_metric_stats(result)
+    undefined = [name for name, metric in stats.items() if metric["cv_reason"]]
+    score = robustness_score([metric["cv"] for metric in stats.values()])
+    return {
+        "backend": backend,
+        "robustness_score": _finite_or_none(score),
+        "robustness_reason": (
+            f"robustness undefined: cv undefined for {', '.join(undefined)}"
+            if undefined
+            else None
+        ),
+        "metrics": {
+            name: {
+                **metric,
+                "cv": _finite_or_none(metric["cv"]),
+                "robustness_score": _finite_or_none(metric["robustness_score"]),
+            }
+            for name, metric in stats.items()
+        },
     }
 
 
@@ -352,8 +413,13 @@ def run_cross_engine_study(
     -------
     dict with keys:
         ``engines``  — per-engine ``{backend, robustness_score,
-        metrics: {name: {mean, std, cv, robustness_score}}}`` where
-        ``backend`` is :data:`BACKEND_REAL` or :data:`BACKEND_STUB`
+        robustness_reason, metrics: {name: {mean, std, cv, cv_reason,
+        robustness_score}}}`` where ``backend`` is :data:`BACKEND_REAL` or
+        :data:`BACKEND_STUB`. A metric whose ``|mean| <= 1e-12`` has an
+        undefined CV: ``cv`` and its ``robustness_score`` are ``None`` with
+        ``cv_reason`` set, and the engine's ``robustness_score`` is ``None``
+        with ``robustness_reason`` naming the metrics (#12807). Undefined is
+        never reported as robust.
         ``cv_summary`` — cross-engine CV per metric (identical to the
         desktop ``--no-gui`` CLI output)
         ``robustness_overall`` — 1 − mean(CV), clamped to [0, 1]
@@ -381,19 +447,14 @@ def run_cross_engine_study(
             "is disallowed (allow_stub_substitution=False); install the "
             "engine(s) or drop them from the request"
         )
-    robustness_by_engine = per_engine_robustness(results)
     overall = robustness_score(cv_values(cv_summary))
     return {
         "engines": {
-            name: {
-                "backend": backends[name],
-                "robustness_score": robustness_by_engine[name],
-                "metrics": _engine_metric_stats(result),
-            }
+            name: _engine_payload(backends[name], result)
             for name, result in results.items()
         },
         "cv_summary": dict(cv_summary),
-        "robustness_overall": overall,
+        "robustness_overall": _finite_or_none(overall),
         "stubbed_engines": substituted,
         "config": {
             "t_end": config.t_end,

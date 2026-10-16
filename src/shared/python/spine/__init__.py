@@ -15,6 +15,7 @@ from src.shared.python.spine.context_bands import (
 from src.shared.python.spine.coupling import (
     CouplingLaw,
     LinearCouplingLaw,
+    ParityCouplingLaw,
     PolynomialCouplingLaw,
     StateDependentCouplingLaw,
     from_joint_coupling,
@@ -37,9 +38,11 @@ from src.shared.python.spine.distribution import (
     distribute_series_detailed,
 )
 from src.shared.python.spine.golf_terms import (
+    GolfTermContributions,
     GolfTermDefinition,
     contribution_remainder,
     registered_terms,
+    segmental_contribution_breakdown,
     segmental_contributions,
 )
 from src.shared.python.spine.levels import (
@@ -57,8 +60,11 @@ from src.shared.python.spine.loads import (
 )
 from src.shared.python.spine.movement_variants import (
     MovementVariant,
+    UndeclaredTermCheck,
     VariantResult,
     apply_variant,
+    check_undeclared_terms,
+    evaluate_rotation_terms,
     load_movement_variants,
     movement_variant,
 )
@@ -83,10 +89,12 @@ __all__ = [
     "CouplingLaw",
     "DistributionResult",
     "DistributionSeriesResult",
+    "GolfTermContributions",
     "GolfTermDefinition",
     "HeatmapData",
     "LevelTransform",
     "LinearCouplingLaw",
+    "ParityCouplingLaw",
     "LoadObservable",
     "MovementVariant",
     "ObservabilityReport",
@@ -99,9 +107,12 @@ __all__ = [
     "SpinalRegion",
     "StackData",
     "StateDependentCouplingLaw",
+    "UndeclaredTermCheck",
     "VariantResult",
     "annotate",
     "apply_variant",
+    "check_undeclared_terms",
+    "evaluate_rotation_terms",
     "available_laws",
     "context_bands",
     "contribution_remainder",
@@ -123,6 +134,7 @@ __all__ = [
     "regional_fraction",
     "registered_terms",
     "restrict_to_levels",
+    "segmental_contribution_breakdown",
     "segmental_contributions",
     "to_tension_positive",
 ]

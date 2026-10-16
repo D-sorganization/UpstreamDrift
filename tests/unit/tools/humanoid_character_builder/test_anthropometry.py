@@ -1,6 +1,9 @@
 """Tests for humanoid anthropometry helpers."""
 
+import pytest
 from humanoid_character_builder.core.anthropometry import estimate_segment_masses
+
+pytestmark = pytest.mark.unit
 
 
 def test_estimate_segment_masses_normalized_total() -> None:

@@ -4,11 +4,20 @@
 ``betas.json``) must flow verbatim into the SMPL-X mesh generator's
 forward pass, while absence of betas preserves the legacy heuristic
 anthropometric mapping. External dependencies (smplx, torch, trimesh)
-are mocked via ``patch.dict("sys.modules", ...)`` per repo convention.
+are mocked: ``torch`` via ``patch.dict("sys.modules", ...)`` per repo
+convention, and ``smplx``/``trimesh`` through the ``mesh_generator`` facade
+attributes the generator reads (#4528).
+
+Since #12706 these tests run against the single ``SMPLXMeshGenerator`` in
+``_mesh_smplx``, the class the ``mesh_generator`` facade has always exported.
+They used to exercise a second copy in ``_smplx_generator`` that production
+never reached, so measured betas never got into a real build.
 """
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -19,7 +28,10 @@ import pytest
 from src.shared.python.humanoid_character_builder.core.body_parameters import (
     BodyParameters,
 )
-from src.shared.python.humanoid_character_builder.generators._smplx_generator import (
+from src.shared.python.humanoid_character_builder.generators import (
+    mesh_generator,
+)
+from src.shared.python.humanoid_character_builder.generators._mesh_smplx import (
     SMPLXMeshGenerator,
 )
 
@@ -34,30 +46,39 @@ def _default_params(**overrides: Any) -> BodyParameters:
     return BodyParameters(**kwargs)
 
 
+_to_betas = SMPLXMeshGenerator._convert_params_to_betas
+
+
 class TestParamsToBetas:
     def test_measured_betas_returned_verbatim(self) -> None:
-        gen = SMPLXMeshGenerator()
         params = _default_params(smplx_betas=list(_MEASURED_BETAS))
-        assert gen._params_to_betas(params) == _MEASURED_BETAS
+        np.testing.assert_array_equal(_to_betas(params), _MEASURED_BETAS)
 
     def test_legacy_mapping_unchanged_without_betas(self) -> None:
-        """Absence of measured betas keeps the heuristic mapping intact."""
-        gen = SMPLXMeshGenerator()
+        """Absence of measured betas keeps the facade's heuristic mapping.
+
+        The expected values are the ``_mesh_smplx`` mapping that the
+        ``mesh_generator`` facade has always used (height about a 1.75 m mean,
+        BMI about 22), not the unused ``_smplx_generator`` copy's mapping.
+        """
         params = _default_params()
-        betas = gen._params_to_betas(params)
-        assert len(betas) == 10
-        # betas[0] encodes height deviation: (1.80 - 1.7) / 0.2 = 0.5
-        assert betas[0] == pytest.approx(0.5)
-        # betas[1] encodes weight deviation: (80 - 70) / 20 * 0.5 = 0.25
-        assert betas[1] == pytest.approx(0.25)
-        # Unused trailing dimensions stay zero
-        assert betas[7:] == [0.0, 0.0, 0.0]
+        betas = _to_betas(params)
+        assert betas.shape == (SMPLXMeshGenerator.NUM_BETAS,)
+        # betas[0] encodes height deviation: (1.80 - 1.75) / 0.2 = 0.25
+        assert betas[0] == pytest.approx(0.25)
+        # betas[1] encodes BMI deviation: (80 / 1.80**2 - 22) / 5
+        assert betas[1] == pytest.approx((80.0 / 1.80**2 - 22.0) / 5.0)
+        # The reserved last dimension stays zero
+        assert betas[9] == 0.0
 
     def test_measured_betas_do_not_depend_on_height(self) -> None:
-        gen = SMPLXMeshGenerator()
         short = _default_params(height_m=1.50, smplx_betas=list(_MEASURED_BETAS))
         tall = _default_params(height_m=2.00, smplx_betas=list(_MEASURED_BETAS))
-        assert gen._params_to_betas(short) == gen._params_to_betas(tall)
+        np.testing.assert_array_equal(_to_betas(short), _to_betas(tall))
+
+    def test_none_params_rejected(self) -> None:
+        with pytest.raises(ValueError, match="params must be provided"):
+            _to_betas(None)  # type: ignore[arg-type]
 
 
 class _FakeTrimesh:
@@ -80,6 +101,21 @@ class _FakeTrimesh:
     @property
     def convex_hull(self) -> _FakeTrimesh:
         return self
+
+
+@contextmanager
+def _facade_patched(
+    mock_smplx: MagicMock, mock_torch: MagicMock, mock_trimesh: MagicMock
+) -> Iterator[None]:
+    """Stand in smplx/trimesh where the generator reads them, and torch."""
+    with (
+        patch.object(mesh_generator, "SMPLX_AVAILABLE", True),
+        patch.object(mesh_generator, "TRIMESH_AVAILABLE", True),
+        patch.object(mesh_generator, "_smplx_module", mock_smplx),
+        patch.object(mesh_generator, "_trimesh_module", mock_trimesh),
+        patch.dict("sys.modules", {"torch": mock_torch}),
+    ):
+        yield
 
 
 class TestGenerateForwardsBetas:
@@ -122,14 +158,13 @@ class TestGenerateForwardsBetas:
         gen = SMPLXMeshGenerator(model_path=model_dir)
         params = _default_params(smplx_betas=list(_MEASURED_BETAS))
 
-        with patch.dict(
-            "sys.modules",
-            {"smplx": mock_smplx, "torch": mock_torch, "trimesh": mock_trimesh},
-        ):
+        with _facade_patched(mock_smplx, mock_torch, mock_trimesh):
             result = gen.generate(params, tmp_path / "out")
 
         # The betas tensor was built from the measured betas verbatim...
-        assert mock_torch.tensor.call_args[0][0] == _MEASURED_BETAS
+        np.testing.assert_array_equal(
+            mock_torch.tensor.call_args[0][0], _MEASURED_BETAS
+        )
         # ...and that tensor is what the smplx forward pass received.
         expected_tensor = mock_torch.tensor.return_value.unsqueeze.return_value
         assert mock_model.call_args.kwargs["betas"] is expected_tensor
@@ -150,12 +185,32 @@ class TestGenerateForwardsBetas:
         gen = SMPLXMeshGenerator(model_path=model_dir)
         params = _default_params()  # no smplx_betas
 
-        with patch.dict(
-            "sys.modules",
-            {"smplx": mock_smplx, "torch": mock_torch, "trimesh": mock_trimesh},
-        ):
+        with _facade_patched(mock_smplx, mock_torch, mock_trimesh):
             gen.generate(params, tmp_path / "out")
 
         passed = mock_torch.tensor.call_args[0][0]
-        assert passed == gen._params_to_betas(params)
-        assert passed != _MEASURED_BETAS
+        np.testing.assert_array_equal(passed, _to_betas(params))
+        assert not np.array_equal(passed, _MEASURED_BETAS)
+
+    def test_missing_model_dir_fails_instead_of_passing_none(
+        self, tmp_path: Path
+    ) -> None:
+        """A configured but absent model_dir is a failure, not str(None)."""
+        mock_smplx, mock_torch, _mock_model, mock_trimesh = self._mock_modules()
+        gen = SMPLXMeshGenerator(model_dir=tmp_path / "absent")
+
+        with _facade_patched(mock_smplx, mock_torch, mock_trimesh):
+            result = gen.generate(_default_params(), tmp_path / "out")
+
+        assert result.success is False
+        assert result.solver_status == "failure"
+        assert result.error_message is not None
+        assert "model files not found" in result.error_message
+        mock_smplx.create.assert_not_called()
+
+    def test_none_params_rejected(self, tmp_path: Path) -> None:
+        with pytest.raises(ValueError, match="params must be provided"):
+            SMPLXMeshGenerator(model_dir=tmp_path).generate(
+                None,  # type: ignore[arg-type]
+                tmp_path / "out",
+            )

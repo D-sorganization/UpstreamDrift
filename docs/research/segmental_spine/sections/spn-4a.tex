@@ -66,10 +66,36 @@ $c_i = f\!\left(\prod_{j\le i}T_j\right)-f\!\left(\prod_{j<i}T_j\right)$, with
 $f$ the term and $f(\text{empty chain})=0$ (the first level carries its neutral
 offset). This is a decomposition, not an additive angle identity: $c_i$ is not
 the level's own Cardan angle and depends on the levels caudal to it. Because the
-prefix differences telescope, $\sum_i c_i$ equals the global value up to rounding;
-\texttt{contribution\_remainder} reports the difference. This is stronger than the
-``first order'' remark of ADR item 8, which holds for a leave-one-out
-decomposition that this child does not implement.
+prefix differences telescope, $\sum_i c_i$ equals the term of the supplied chain
+up to rounding; \texttt{contribution\_remainder} reports the difference. This is
+stronger than the ``first order'' remark of ADR item 8, which holds for a
+leave-one-out decomposition that this child does not implement.
+
+\paragraph{Base, Terminal and Alignment Entries.}
+The global term is $f(B\,C\,E\,A)$ with $C=\prod_i T_i$ the chain, $B$ the fixed
+base rotation (pelvis to first body), $E$ the fixed terminal rotation (last
+vertebra to terminal body) and $A$ the drive alignment
+($R_\mathrm{target}=R_{\mathrm{pelvis}\to\mathrm{torso}}A$, \texttt{DriveOptions.torso\_alignment}).
+\texttt{segmental\_contribution\_breakdown} takes optional \texttt{base},
+\texttt{terminal} and \texttt{alignment} rotations ($3\times3$, proper) and
+returns, with $P_0=B$, $P_k=B\prod_{j\le k}T_j$, $P_E=P_nE$, $P_A=P_EA$:
+\begin{align*}
+  c_\mathrm{base} &= f(B), &
+  c_k &= f(P_k)-f(P_{k-1}), \\
+  c_\mathrm{terminal} &= f(P_E)-f(P_n), &
+  c_\mathrm{alignment} &= f(P_A)-f(P_E),
+\end{align*}
+with $f(P_0)=0$ when $B$ is absent and $P_E=P_n$ when $E$ is absent. The base,
+terminal and alignment shares are returned as separately named non-level entries
+(\texttt{named}); they are never folded into a level. The sum telescopes, so
+$\sum_k c_k+\sum c_\mathrm{named}=f(P_A)$, the global term, and a
+postcondition checks closure to $10^{-9}$ degrees when all samples are finite
+(gimbal-locked prefixes give NaN, not zero). Omitted rotations are the identity,
+so \texttt{segmental\_contributions} (chain only) and the unsupplied breakdown
+are unchanged. Guard:
+\path{tests/shared/python/spine/test_golf_terms.py}, non-identity $B$, $E$, $A$
+closure for all three terms and both handednesses. A level's share still depends
+on $B$ (it enters every prefix), so level shares change when $B$ is supplied.
 
 \paragraph{Assumptions and Limitations.}
 Inputs are calibrated pelvis and thorax frames; the terminal-to-thorax calibration

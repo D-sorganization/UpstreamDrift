@@ -77,12 +77,234 @@
       }
     },
     "bruno2015_fullbody_os4_v2": {
-      "verified": false,
-      "names_status": "UNVERIFIED",
-      "source": "Bruno et al. 2015 full-body OpenSim 4 model (licensed asset)",
-      "pelvis_body": null,
-      "terminal_body": null,
-      "levels": {}
+      "verified": true,
+      "names_status": "observed by inventory_spine on the owner's MaleFullBody.osim (names and topology only; no numeric value stored)",
+      "source": "Bruno et al. 2015 full-body OpenSim 4 model (licensed asset, not committed)",
+      "pelvis_body": "pelvis",
+      "terminal_body": "thoracic1",
+      "levels": {
+        "L5_S1": {
+          "joint": "L5_S1_IVDjnt",
+          "coordinates": [
+            "L5_S1_FE",
+            "L5_S1_LB",
+            "L5_S1_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "L4_L5": {
+          "joint": "L4_L5_IVDjnt",
+          "coordinates": [
+            "L4_L5_FE",
+            "L4_L5_LB",
+            "L4_L5_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "L3_L4": {
+          "joint": "L3_L4_IVDjnt",
+          "coordinates": [
+            "L3_L4_FE",
+            "L3_L4_LB",
+            "L3_L4_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "L2_L3": {
+          "joint": "L2_L3_IVDjnt",
+          "coordinates": [
+            "L2_L3_FE",
+            "L2_L3_LB",
+            "L2_L3_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "L1_L2": {
+          "joint": "L1_L2_IVDjnt",
+          "coordinates": [
+            "L1_L2_FE",
+            "L1_L2_LB",
+            "L1_L2_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "T12_L1": {
+          "joint": "T12_L1_IVDjnt",
+          "coordinates": [
+            "T12_L1_FE",
+            "T12_L1_LB",
+            "T12_L1_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "T11_T12": {
+          "joint": "T11_T12_IVDjnt",
+          "coordinates": [
+            "T11_T12_FE",
+            "T11_T12_LB",
+            "T11_T12_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "T10_T11": {
+          "joint": "T10_T11_IVDjnt",
+          "coordinates": [
+            "T10_T11_FE",
+            "T10_T11_LB",
+            "T10_T11_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "T9_T10": {
+          "joint": "T9_T10_IVDjnt",
+          "coordinates": [
+            "T9_T10_FE",
+            "T9_T10_LB",
+            "T9_T10_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "T8_T9": {
+          "joint": "T8_T9_IVDjnt",
+          "coordinates": [
+            "T8_T9_FE",
+            "T8_T9_LB",
+            "T8_T9_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "T7_T8": {
+          "joint": "T7_T8_IVDjnt",
+          "coordinates": [
+            "T7_T8_FE",
+            "T7_T8_LB",
+            "T7_T8_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "T6_T7": {
+          "joint": "T6_T7_IVDjnt",
+          "coordinates": [
+            "T6_T7_FE",
+            "T6_T7_LB",
+            "T6_T7_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "T5_T6": {
+          "joint": "T5_T6_IVDjnt",
+          "coordinates": [
+            "T5_T6_FE",
+            "T5_T6_LB",
+            "T5_T6_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "T4_T5": {
+          "joint": "T4_T5_IVDjnt",
+          "coordinates": [
+            "T4_T5_FE",
+            "T4_T5_LB",
+            "T4_T5_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "T3_T4": {
+          "joint": "T3_T4_IVDjnt",
+          "coordinates": [
+            "T3_T4_FE",
+            "T3_T4_LB",
+            "T3_T4_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "T2_T3": {
+          "joint": "T2_T3_IVDjnt",
+          "coordinates": [
+            "T2_T3_FE",
+            "T2_T3_LB",
+            "T2_T3_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        },
+        "T1_T2": {
+          "joint": "T1_T2_IVDjnt",
+          "coordinates": [
+            "T1_T2_FE",
+            "T1_T2_LB",
+            "T1_T2_AR"
+          ],
+          "axis_sign": [
+            1,
+            1,
+            1
+          ]
+        }
+      }
     },
     "senteler2016_lumbspine_3dof": {
       "verified": false,

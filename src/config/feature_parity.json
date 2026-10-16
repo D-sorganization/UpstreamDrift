@@ -196,12 +196,11 @@
     "tools.spine_viewer": {
       "title": "Segmental spine viewer (per-level load heatmaps from study receipts)",
       "pyqt": "src/tools/spine_viewer/gui.py",
-      "api": null,
-      "web": null,
-      "status": "gap",
-      "issue": 12815,
+      "api": "src/api/routes/spine_viewer.py",
+      "web": "ui/src/pages/SpineViewer.tsx",
+      "status": "parity",
       "tiles": ["spine_viewer"],
-      "notes": "PyQt6 SPN-15b viewer of hash-verified study receipts with always-visible scientific status and distribution source. No React/Tauri equivalent exists yet; the web counterpart is tracked in #12815 under epic #12735."
+      "notes": "SPN-15c (#12815): GET /api/tools/spine-viewer/study opens a receipt under the allowed study root, verifies the loads artifact SHA-256 server-side through study_aggregation.load_verified_run and returns the src/tools/spine_viewer/core.py view model (view_to_dict). The web heatmap and status banner always show scientific_status and distribution_source; anything but the exact status qualified reads UNQUALIFIED. Angle-stack plots are not part of the web view."
     },
     "analysis.grip_wrench": {
       "title": "Per-hand grip wrench on the club (weld multipliers and efc_force): overlay glyphs and force/couple plots",

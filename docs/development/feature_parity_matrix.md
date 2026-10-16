@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 42 parity · 5 gap · 16 exempt (12 pending decision in #7460).
+**Summary:** 43 parity · 4 gap · 16 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -70,7 +70,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.putting_green`<br>Putting green simulation | ✅ parity | `src/engines/physics_engines/putting_green/python/simulator.py` | `src/api/routes/putting_green.py` | `ui/src/pages/PuttingGreen.tsx` | — |
 | `tools.rate_of_closure`<br>Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite) | 🔴 gap | `vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py` | `src/api/local_server.py` | `ui/src/pages/ImpactExplorer.tsx` | #11987 |
 | `tools.shot_pattern_analysis`<br>Shot Pattern Analysis Workbench | ⚪ exempt | `src/tools/shot_pattern_analysis/gui.py` | — | — | The current product surface is a local PyQt6 launcher and headless CLI for deterministic physics simulation and local CSV, JSON, and PNG exports. There is no API route or React page, so browser parity is not claimed. |
-| `tools.spine_viewer`<br>Segmental spine viewer (per-level load heatmaps from study receipts) | 🔴 gap | `src/tools/spine_viewer/gui.py` | — | — | #12815 |
+| `tools.spine_viewer`<br>Segmental spine viewer (per-level load heatmaps from study receipts) | ✅ parity | `src/tools/spine_viewer/gui.py` | `src/api/routes/spine_viewer.py` | `ui/src/pages/SpineViewer.tsx` | — |
 | `tools.terrain_engine`<br>Terrain and topography configuration | ✅ parity | — | `src/api/routes/terrain.py` | `ui/src/pages/Terrain.tsx` | — |
 | `tools.video_analyzer`<br>Video Analyzer (pose tracking and force/torque overlay) | ✅ parity | `src/tools/video_analyzer/gui.py` | `src/api/routes/video_overlays.py` | `ui/src/pages/VideoAnalyzer.tsx` | — |
 | `visualization.force_color_controls`<br>Shared Segment Force Color Controls | ✅ parity | `src/shared/python/body_part_viz/force_color_controls.py` | — | `ui/src/components/visualization/ForceColorControls.tsx` | — |

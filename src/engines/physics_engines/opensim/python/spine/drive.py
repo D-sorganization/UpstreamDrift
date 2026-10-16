@@ -26,7 +26,10 @@ terminal frame is rotated by a known fixed amount ``A`` (the terminal frame
 expressed in the golf torso frame) pass it as ``DriveOptions.torso_alignment``.
 The pelvis body frames are assumed to coincide the same way.  The
 alignment is a modelling choice and is not validated here: a wrong ``A`` shows
-up only as a biased distribution, not as a residual.
+up only as a biased distribution, not as a residual.  ADR-0055 item 2 forbids
+assuming ``A = I`` for a reported result, so the study layer
+(:mod:`spine.study`) requires a calibrated ``A`` with a provenance string and
+records an unsupplied one as ``assumed_identity``, never ``pass``.
 
 Pelvis coordinates.  The pelvis pose in ground is encoded as intrinsic Euler
 angles of the model's ground-pelvis joint (``PelvisCoordinates.sequence``,
