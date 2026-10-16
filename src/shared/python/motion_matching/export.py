@@ -224,14 +224,36 @@ def export_video(
         rendered = _render_video_frames(cand, engine, 1, size_px, unique.tolist())
         frames = [rendered[i] for i in expand]
 
+    duration_ms = (
+        float(1000.0 / fps) if speed is not None else float(1000.0 * stride_safe * dt_s)
+    )
+    return write_video_frames(frames, out_p, fps, gif_duration_ms=duration_ms)
+
+
+def write_video_frames(
+    frames: list[np.ndarray],
+    path: Path | str,
+    fps: int,
+    *,
+    gif_duration_ms: float | None = None,
+) -> Path:
+    """Write RGB ``frames`` to ``path`` as ``.mp4`` or ``.gif`` (one writer).
+
+    Every explorer export (marker overlays and posed-model playback) ends
+    here, so the container, codec and frame-rate handling stay in one place.
+
+    Raises:
+        ValueError: ``frames`` is empty, ``fps`` is not positive or the suffix
+            is neither ``.mp4`` nor ``.gif``.
+    """
+    if not frames:
+        raise ValueError("Cannot write an empty frames list to video")
+    if fps <= 0:
+        raise ValueError(f"fps must be positive, got {fps}")
+    out_p = Path(path)
     ext = out_p.suffix.lower()
     if ext == ".gif":
-        duration_ms = (
-            float(1000.0 / fps)
-            if speed is not None
-            else float(1000.0 * stride_safe * dt_s)
-        )
-        return _write_gif(frames, out_p, fps, duration_ms=duration_ms)
+        return _write_gif(frames, out_p, fps, duration_ms=gif_duration_ms)
     if ext == ".mp4":
         return _write_mp4(frames, out_p, fps)
     raise ValueError(f"Unsupported video format '{ext}', expected .gif or .mp4")
