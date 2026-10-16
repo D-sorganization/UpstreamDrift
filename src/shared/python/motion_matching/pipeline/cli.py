@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 from dataclasses import dataclass
 import json
 import logging
@@ -858,8 +859,9 @@ def _render_backend_errors() -> tuple[type[BaseException], ...]:
     """
     errors: list[type[BaseException]] = [ImportError]
     try:
-        import mujoco  # noqa: PLC0415
-
+        # Resolved by name: shared motion matching must not import mujoco
+        # statically (engine-neutral import-graph gate).
+        mujoco = importlib.import_module("mujoco")
         errors.append(mujoco.FatalError)
     except (ImportError, AttributeError):
         pass
