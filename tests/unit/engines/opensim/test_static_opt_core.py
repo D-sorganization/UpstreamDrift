@@ -191,3 +191,46 @@ def test_solve_activations_validates_inputs() -> None:
         solve_activations(active, passive, moment, np.array([np.nan, 0.0]))
     with pytest.raises(TypeError, match="ndarray"):
         solve_activations(list(active), passive, moment, tau)  # type: ignore[arg-type]
+
+
+# ------------------------------------------------- zero-capacity muscle (#12827)
+
+_SLACK_ACTIVE = np.array([28.6, 19.0, 0.0, 45.0, 47.0])
+_SLACK_PASSIVE = np.array([0.7, 1.1, 0.0, 1.2, 0.7])
+_SLACK_MOMENT = np.array(
+    [
+        [-0.011, 0.039, -0.027, 0.012],
+        [-0.042, 0.033, 0.029, -0.026],
+        [0.038, -0.044, -0.016, -0.035],
+        [-0.005, 0.030, -0.027, -0.045],
+        [-0.010, -0.030, -0.041, 0.008],
+    ]
+)
+_SLACK_TAU = np.array([-1.2, 1.0, -1.8, 2.7])
+_SLACK_COLUMN = 2
+
+
+@pytest.mark.parametrize("exponent", SUPPORTED_EXPONENTS)
+def test_muscle_with_no_force_capacity_does_not_fail_the_solve(exponent) -> None:
+    """A muscle whose force is zero at every activation (slack, or at its
+    minimum fibre length) must be inert, not an optimiser failure (#12827).
+    The target is unreachable (reserves carry the remainder); the solve must
+    still report success and give the same answer as the model without it.
+    """
+    sol = solve_activations(
+        _SLACK_ACTIVE, _SLACK_PASSIVE, _SLACK_MOMENT, _SLACK_TAU, exponent=exponent
+    )
+    keep = [i for i in range(_SLACK_ACTIVE.size) if i != _SLACK_COLUMN]
+    ref = solve_activations(
+        _SLACK_ACTIVE[keep],
+        _SLACK_PASSIVE[keep],
+        _SLACK_MOMENT[keep],
+        _SLACK_TAU,
+        exponent=exponent,
+    )
+    assert ref.success
+    assert sol.success, sol.message
+    assert sol.activation[_SLACK_COLUMN] == 0.0
+    np.testing.assert_allclose(sol.activation[keep], ref.activation, atol=1e-9)
+    np.testing.assert_allclose(sol.reserve, ref.reserve, atol=1e-9)
+    np.testing.assert_allclose(sol.muscle_moment + sol.reserve, _SLACK_TAU, atol=1e-9)
