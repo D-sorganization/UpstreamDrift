@@ -12,6 +12,7 @@ Closes issue #4138.
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np  # noqa: TID253
@@ -32,6 +33,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 __all__ = [
     "PINOCCHIO_AVAILABLE",
+    "DualFrameIkOptions",
     "differential_ik",
     "lm_step",
     "se3_log6",
@@ -201,6 +203,44 @@ def differential_ik(
 # ---------------------------------------------------------------------------
 
 
+@dataclass(frozen=True)
+class DualFrameIkOptions:
+    """Solver tuning for :func:`solve_dual_frame_ik`.
+
+    Attributes:
+        max_iters: Hard iteration cap.
+        damping: Levenberg-Marquardt damping.
+        tol: Convergence tolerance on the stacked error norm.
+        weight_a: Scalar weight applied to ``frame_a`` rows.
+        weight_b: Scalar weight applied to ``frame_b`` rows.
+    """
+
+    max_iters: int = 200
+    damping: float = 1e-5
+    tol: float = 1e-4
+    weight_a: float = 1.0
+    weight_b: float = 1.0
+
+    def __post_init__(self) -> None:
+        if self.weight_a <= 0.0 or self.weight_b <= 0.0:
+            raise ValueError("frame weights must be positive")
+
+
+def _validate_dual_frame_inputs(
+    model: pin.Model, frame_a: str, frame_b: str, q0: np.ndarray
+) -> np.ndarray:
+    """Check frames and seed shape; return a float64 copy of ``q0``."""
+    for frame in (frame_a, frame_b):
+        if not model.existFrame(frame):
+            raise ValueError(f"frame {frame!r} not found")
+    q = np.asarray(q0, dtype=np.float64).copy()
+    if q.shape != (model.nq,):
+        raise ValueError(
+            f"q0 has shape {q.shape}, expected ({model.nq},)",
+        )
+    return q
+
+
 def solve_dual_frame_ik(
     model: pin.Model,
     data: pin.Data,
@@ -209,12 +249,7 @@ def solve_dual_frame_ik(
     frame_b: str,
     target_b: pin.SE3,
     q0: np.ndarray,
-    *,
-    max_iters: int = 200,
-    damping: float = 1e-5,
-    tol: float = 1e-4,
-    weight_a: float = 1.0,
-    weight_b: float = 1.0,
+    **solver_options: float,
 ) -> tuple[np.ndarray, bool]:
     """Solve a two-frame damped-pseudo-inverse IK problem.
 
@@ -230,34 +265,24 @@ def solve_dual_frame_ik(
         frame_b: Second target frame name.
         target_b: Desired SE3 for ``frame_b`` in world frame.
         q0: Initial configuration of length ``model.nq``.
-        max_iters: Hard iteration cap.
-        damping: Levenberg-Marquardt damping.
-        tol: Convergence tolerance on the stacked error norm.
-        weight_a: Scalar weight applied to ``frame_a`` rows.
-        weight_b: Scalar weight applied to ``frame_b`` rows.
+        **solver_options: Keyword fields of :class:`DualFrameIkOptions`
+            (``max_iters``, ``damping``, ``tol``, ``weight_a``,
+            ``weight_b``); unknown names raise ``TypeError``.
 
     Returns:
         ``(q_solution, converged)``.
     """
     if not PINOCCHIO_AVAILABLE:
         raise ImportError("pinocchio is required for solve_dual_frame_ik")
-    if weight_a <= 0.0 or weight_b <= 0.0:
-        raise ValueError("frame weights must be positive")
-    if not model.existFrame(frame_a):
-        raise ValueError(f"frame {frame_a!r} not found")
-    if not model.existFrame(frame_b):
-        raise ValueError(f"frame {frame_b!r} not found")
-    q = np.asarray(q0, dtype=np.float64).copy()
-    if q.shape != (model.nq,):
-        raise ValueError(
-            f"q0 has shape {q.shape}, expected ({model.nq},)",
-        )
+    opts = DualFrameIkOptions(**solver_options)  # type: ignore[arg-type]
+    q = _validate_dual_frame_inputs(model, frame_a, frame_b, q0)
 
     fid_a = model.getFrameId(frame_a)
     fid_b = model.getFrameId(frame_b)
+    weight_a, weight_b = opts.weight_a, opts.weight_b
 
     converged = False
-    for _ in range(max_iters):
+    for _ in range(opts.max_iters):
         pin.forwardKinematics(model, data, q)
         pin.updateFramePlacement(model, data, fid_a)
         pin.updateFramePlacement(model, data, fid_b)
@@ -265,14 +290,14 @@ def solve_dual_frame_ik(
         err_b = weight_b * se3_log6(target_b, data.oMf[fid_b])
         err = np.concatenate([err_a, err_b])
         # ⚡ Bolt: math.sqrt(np.vdot) avoids array allocation overhead and is ~1.8x faster
-        if math.sqrt(np.vdot(err, err)) < tol:
+        if math.sqrt(np.vdot(err, err)) < opts.tol:
             converged = True
             break
         pin.computeJointJacobians(model, data, q)
         ja = weight_a * pin.getFrameJacobian(model, data, fid_a, pin.LOCAL)
         jb = weight_b * pin.getFrameJacobian(model, data, fid_b, pin.LOCAL)
         jac = np.vstack([ja, jb])
-        dq = lm_step(jac, err, damping)
+        dq = lm_step(jac, err, opts.damping)
         q = pin.integrate(model, q, dq)
 
     return np.asarray(q, dtype=np.float64), converged

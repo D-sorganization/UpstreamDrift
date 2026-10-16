@@ -13,7 +13,7 @@ import logging
 import math
 from datetime import UTC
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 import numpy as np
 import pandas as pd
@@ -635,6 +635,22 @@ def _summary_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+class EvaluationOptions(NamedTuple):
+    """Immutable tuning and optional-input options for :func:`evaluate`.
+
+    ``impact_time``, ``impact_window_s``, ``effort_weight`` and
+    ``smoothness_weight`` are required (no defaults), as they were when they
+    were separate parameters.
+    """
+
+    impact_time: float | None
+    impact_window_s: float
+    effort_weight: float
+    smoothness_weight: float
+    body_state_csv: Path | None = None
+    joint_velocity_csv: Path | None = None
+
+
 def evaluate(
     target_csv: Path | None,
     sim_csv: Path | None,
@@ -642,13 +658,18 @@ def evaluate(
     output_dir: Path,
     scenario: str,
     run_label: str,
-    impact_time: float | None,
-    impact_window_s: float,
-    effort_weight: float,
-    smoothness_weight: float,
-    body_state_csv: Path | None = None,
-    joint_velocity_csv: Path | None = None,
+    **options: Any,
 ) -> dict[str, Any]:
+    """Write matching diagnostics and return the report.
+
+    ``options`` are the keyword fields of :class:`EvaluationOptions`; missing
+    required fields or unknown names raise ``TypeError``.
+    """
+    opts = EvaluationOptions(**options)
+    impact_time, impact_window_s = opts.impact_time, opts.impact_window_s
+    effort_weight, smoothness_weight = opts.effort_weight, opts.smoothness_weight
+    body_state_csv = opts.body_state_csv
+    joint_velocity_csv = opts.joint_velocity_csv
     output_dir.mkdir(parents=True, exist_ok=True)
     matching: dict[str, Any] | None = None
     plots: dict[str, str] = {}
