@@ -583,24 +583,30 @@ def solve_back_bar_standing(
     return BackBarStart(setup=setup, q=q, frame=standing.frame)
 
 
-def _track(
-    kin: Any,
-    standing: _Standing,
-    solution: SagittalSolution,
-    *,
-    points: Mapping[str, Array],
-    q_start: Array,
-    held: Mapping[str, float],
-    axes: Mapping[str, Any] | None,
-    back_bar: BackBarSetup | HandBarSetup | None,
-    targets: Array | None = None,
-) -> FullBodyLift:
-    """Track the retargeted landmarks of ``solution`` from ``q_start``.
+@dataclass(frozen=True)
+class _TrackSetup:
+    """What :func:`_track` tracks: the kinematics, landmarks and start pose.
 
     ``targets`` overrides the rigid retargeting of ``points`` when given.
     """
+
+    kin: Any
+    points: Mapping[str, Array]
+    q_start: Array
+    held: Mapping[str, float]
+    axes: Mapping[str, Any] | None
+    back_bar: BackBarSetup | HandBarSetup | None
+    targets: Array | None = None
+
+
+def _track(
+    standing: _Standing, solution: SagittalSolution, setup: _TrackSetup
+) -> FullBodyLift:
+    """Track the retargeted landmarks of ``solution`` from ``setup.q_start``."""
+    kin, q_start, held, axes = setup.kin, setup.q_start, setup.held, setup.axes
+    targets = setup.targets
     if targets is None:
-        targets = retarget_landmarks(solution, points, standing.frame)
+        targets = retarget_landmarks(solution, setup.points, standing.frame)
     locked = dict(held) | {
         n: float(q_start[standing.order.index(n)]) for n in TOE_COORDINATES
     }
@@ -629,7 +635,7 @@ def _track(
         q_standing=q_start,
         frame=standing.frame,
         options=standing.options,
-        back_bar=back_bar,
+        back_bar=setup.back_bar,
     )
 
 
@@ -661,25 +667,29 @@ def lift_to_full_body(
     standing = _stand(spec_bytes, seed_q, options)
     if geometry is None:
         return _track(
-            standing.kin,
             standing,
             solution,
-            points=standing.points,
-            q_start=standing.q,
-            held=standing.locked,
-            axes=None,
-            back_bar=None,
+            _TrackSetup(
+                kin=standing.kin,
+                points=standing.points,
+                q_start=standing.q,
+                held=standing.locked,
+                axes=None,
+                back_bar=None,
+            ),
         )
     setup, arm_kin, q_start = _back_bar_pose(standing, spec_bytes, geometry)
     return _track(
-        arm_kin,
         standing,
         solution,
-        points={**standing.points, "bar": setup.bar_target_m},
-        q_start=q_start,
-        held={n: v for n, v in standing.locked.items() if n in SCAPULA_COORDINATES},
-        axes=_bar_axis_targets(geometry, standing.frame),
-        back_bar=setup,
+        _TrackSetup(
+            kin=arm_kin,
+            points={**standing.points, "bar": setup.bar_target_m},
+            q_start=q_start,
+            held={n: v for n, v in standing.locked.items() if n in SCAPULA_COORDINATES},
+            axes=_bar_axis_targets(geometry, standing.frame),
+            back_bar=setup,
+        ),
     )
 
 
@@ -763,15 +773,17 @@ def lift_hands_to_full_body(
             f"off, grip closure {first.closure_error_m:.2e} m"
         )
     return _track(
-        kin,
         standing,
         solution,
-        points=points,
-        q_start=np.asarray(first.q, dtype=float),
-        held=held,
-        axes=axes,
-        back_bar=setup,
-        targets=targets,
+        _TrackSetup(
+            kin=kin,
+            points=points,
+            q_start=np.asarray(first.q, dtype=float),
+            held=held,
+            axes=axes,
+            back_bar=setup,
+            targets=targets,
+        ),
     )
 
 
