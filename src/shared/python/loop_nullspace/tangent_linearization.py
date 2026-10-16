@@ -529,7 +529,7 @@ def _connection_blocks(
     offset of the tangent bundle is the normal part of ``d_q P[P e_j] omega``,
     so the coupling is ``(d_q P[v])^T N d_q P[P e_j] omega`` with ``N = I - P P^T``.
     """
-    d_v = sum(w * d for w, d in zip(omega, d_cols, strict=True))
+    d_v = np.asarray(sum(w * d for w, d in zip(omega, d_cols, strict=True)))
     normal = np.eye(basis.shape[0]) - basis @ basis.T
     offset = np.column_stack([normal @ (d @ omega) for d in d_cols])
     return np.asarray(basis.T @ d_v), np.asarray(d_v.T @ offset)
