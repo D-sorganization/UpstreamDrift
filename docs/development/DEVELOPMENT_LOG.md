@@ -2353,6 +2353,71 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12883 · OpenSim Loads Alongside Ezc3d: C3D Stack Imported Lazily at Startup, Structured OpenSim Probe Reports the Real Import Failure Instead of Not Installed
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12883
+- **Branch:** merged via #12903
+- **PR:** #12903
+- **Paths:** see #12903
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`155bcc47`; collated from changes/12883-opensim-loads-alongside-ezc3d-c3d-stack.md)
+- **Summary:** OpenSim loads alongside ezc3d: C3D stack imported lazily at startup, structured OpenSim probe reports the real import failure instead of Not Installed
+- **Next step:** Shipped in PR #12903.
+
+### DL-#12882 · Fix Classic Launcher Startup: Parent Contract Guard, ChatService ToolRegistry Identity, Data_Explorer Launcher_Embed Alias (#12893, #12895)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12882
+- **Branch:** merged via #12900
+- **PR:** #12900
+- **Paths:** see #12900
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`d03af3a0`; collated from changes/12882-fix-classic-launcher-startup-parent-cont.md)
+- **Summary:** Fix classic launcher startup: parent contract guard, ChatService ToolRegistry identity, data_explorer launcher_embed alias (#12893, #12895)
+- **Next step:** Shipped in PR #12900.
+
+### DL-#12817 · NSX-84B: Tangent State Space for Multi-DOF Closed Loops (K > 1), Five-Bar Golden and Gauge-Law Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12817
+- **Branch:** merged via #12876
+- **PR:** #12876
+- **Paths:** see #12876
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`a26b27f9`; collated from changes/12817-nsx-84b-tangent-state-space-for-multi-do.md)
+- **Summary:** NSX-84b: tangent state space for multi-DOF closed loops (k > 1), five-bar golden and gauge-law tests
+- **Next step:** Shipped in PR #12876.
+
+### DL-#12713 · NSX-84: Constrained Tangent Linearization (M2 Preload) and Closed-Loop Derivative Capability Seam With Engine-Free FD Reference
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12713
+- **Branch:** merged via #12876
+- **PR:** #12876
+- **Paths:** see #12876
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`a26b27f9`; collated from changes/12713-nsx-84-constrained-tangent-linearization.md)
+- **Summary:** NSX-84: constrained tangent linearization (M2 preload) and closed-loop derivative capability seam with engine-free FD reference
+- **Next step:** Shipped in PR #12876.
+
+### DL-#12671 · Make the Vendored Tools Double_Pendulum_Golf the Canonical Golfer Kinematics and Closure Jacobian; Golfer_Kinematics/Golfer_Constraints Become Thin Adapters Pinned by a CI Parity Test (ADR-0056)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12671
+- **Branch:** merged via #12801
+- **PR:** #12801
+- **Paths:** see #12801
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`ef956604`; collated from changes/12671-make-the-vendored-tools-double-pendulum.md)
+- **Summary:** Make the vendored Tools double_pendulum_golf the canonical golfer kinematics and closure Jacobian; golfer_kinematics/golfer_constraints become thin adapters pinned by a CI parity test (ADR-0056)
+- **Next step:** Shipped in PR #12801.
+
 ### DL-#12685 · R8: One Shared Appearance and Anthropometry Spec (Model_Appearance.Body_Meshes) - Engine-Neutral Skin/Garment/Shoe Meshes in the Spec Body Frame, Trunk Sized From Spec Visual_Hints as One Solid, Default Charcoal Trousers Hip to Ankle, One Plain Palette, Shared OBJ Export; MuJoCo Is Now a Thin Translator
 
 - **State:** shipped
