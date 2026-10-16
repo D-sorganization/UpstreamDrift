@@ -928,13 +928,13 @@
       "pyqt": "src/tools/spine_viewer/gui.py",
       "api": null,
       "web": null,
-      "issue": 12772,
+      "issue": 12815,
       "reason": null,
       "pending_decision": false,
       "tiles": [
         "spine_viewer"
       ],
-      "notes": "PyQt6 SPN-15b viewer of hash-verified study receipts with always-visible scientific status and distribution source. No React/Tauri equivalent exists yet; the web counterpart is tracked under epic #12735.",
+      "notes": "PyQt6 SPN-15b viewer of hash-verified study receipts with always-visible scientific status and distribution source. No React/Tauri equivalent exists yet; the web counterpart is tracked in #12815 under epic #12735.",
       "id": "tools.spine_viewer"
     },
     {
@@ -3220,7 +3220,7 @@
   "inputs": {
     "src/config/models.yaml": "7a182a6dd1b3e64990303cb07e74b4d5e186d4564ef0e19e8c36654046c4308f",
     "src/config/launcher_manifest.json": "04146b9d05296e22d833d166a6f9401d7d0a685fd0042b3c0218274ccc3ddcee",
-    "src/config/feature_parity.json": "260606cf6e2b65e1069d9d085e1dc57d436e8ba12bee009d0acc381f6bed9bc9",
+    "src/config/feature_parity.json": "da668063016e32a118db147aa243ab2bce703548c33f9fe1dcdb15de9153db0c",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

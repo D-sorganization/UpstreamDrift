@@ -19,14 +19,14 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "efa8099781e9f2757f28f8f05376eb808268081303f269dfc9bc654b9d71ce20",
+      "fingerprint": "28ae5c7a664d3ee1cd223a97fb44161cd1c25d877afe1d58268375a4fa813aaf",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "260606cf6e2b65e1069d9d085e1dc57d436e8ba12bee009d0acc381f6bed9bc9",
+        "src/config/feature_parity.json": "da668063016e32a118db147aa243ab2bce703548c33f9fe1dcdb15de9153db0c",
         "src/config/launcher_manifest.json": "04146b9d05296e22d833d166a6f9401d7d0a685fd0042b3c0218274ccc3ddcee",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
         "src/config/models.yaml": "7a182a6dd1b3e64990303cb07e74b4d5e186d4564ef0e19e8c36654046c4308f",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Segmental spine part 2 (#12735, SPN-15b #12772) adds one tile: models.yaml spine_viewer (beta, tab, help docs/help/spine_viewer.md), launcher_manifest spine_viewer (web mode unavailable with reason) and feature_parity tools.spine_viewer (gap, issue 12772, pyqt only). Inspected all three diffs: ids preserved, gap/parity/exempt distinctions kept, no connection, goal or builder change; the contract is unchanged. Regenerated the atlas (69 tiles, 63 features); generate_capability_atlas --check, test_capability_atlas, capture_rig goal tests and tests/config/feature_parity pass."
+      "rationale": "Segmental spine part 2 (#12735): feature_parity tools.spine_viewer gap re-pointed from issue 12772 to 12815 (the dedicated web-parity child) with notes updated; the merge of origin/main changed no other input. Inspected the regenerated graph.json diff: only that entry's issue/notes and the input hash moved; ids, gap/parity/exempt distinctions, connections, goals and builders are unchanged, so the contract holds. generate_capability_atlas --check, test_capability_atlas and tests/config/feature_parity pass."
     },
     "model-backends": {
       "fingerprint": "da739fcd3c56f6c4a3923b4f31202e515023487a49d54ca449090d33186a9685",
