@@ -17,11 +17,12 @@ from __future__ import annotations
 
 import math
 import time
+from typing import Any, cast
 
 import mujoco
 import numpy as np
 from scipy.interpolate import CubicSpline
-from scipy.optimize import differential_evolution, minimize
+from scipy.optimize import OptimizeResult, differential_evolution, minimize
 
 from ._motion_opt_simulation import (
     evaluate_objective,
@@ -139,6 +140,7 @@ class SwingOptimizer:
                 self.num_knot_points,
             )
 
+        result: OptimizeResult
         if method == "differential_evolution":
             result = differential_evolution(
                 objective,
@@ -152,7 +154,7 @@ class SwingOptimizer:
             result = minimize(
                 objective,
                 x0,
-                method=method,
+                method=cast(Any, method),
                 bounds=bounds,
                 constraints=constraints_list,
                 options={"maxiter": 200, "disp": True},
@@ -582,7 +584,7 @@ class SwingOptimizer:
         """
         if num_swings is None:
             raise ValueError("num_swings must be provided")
-        swings = []
+        swings: list[OptimizationResult] = []
 
         if variation == "speed":
             speeds = np.linspace(30.0, 55.0, num_swings)
