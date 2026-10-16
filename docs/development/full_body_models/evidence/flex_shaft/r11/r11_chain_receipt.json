@@ -1,0 +1,98 @@
+{
+  "schema": "r11-chain-shaft-evidence/v1",
+  "issue": 12691,
+  "code_commit": "c2e65a2246ba70d3d46ce7e3186a947d4d03e42c",
+  "run": "docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds",
+  "bundle": {
+    "command": "scripts.same_input_bundle export --duration 1.330 --shaft-model chain",
+    "sha256_brick": "90ded301b109cb7c3bf95c94a796a55dc4a3a3d4b87e7e3948a77926aaecd13e",
+    "note": "bundle hashes depend on the platform; compare metrics",
+    "steps": 1330,
+    "dt_s": 0.001,
+    "impact_split_time_s": 1.322953640157547,
+    "max_pose_drift_m": 2.7976454328554823e-06
+  },
+  "full_horizon_open_loop": {
+    "opensim": {
+      "full_horizon": {
+        "failure": null,
+        "duration_s": 1.33,
+        "max_coordinate_error_rad": 564.3701584102129,
+        "max_frame_error_m": 2.0130632504327735,
+        "growth_rate_per_s": 40.120306351004665,
+        "horizon_s": 0.67
+      },
+      "max_pose_drift_m": 1.6574546873758488e-05,
+      "segment_steps": 50,
+      "worst_segment": {
+        "coordinate_error_rad": 0.00010603502975847778,
+        "frame_error_m": 5.155873755154908e-07
+      }
+    },
+    "myosuite": {
+      "full_horizon": {
+        "failure": null,
+        "duration_s": 1.33,
+        "max_coordinate_error_rad": 0.0,
+        "max_frame_error_m": 0.0,
+        "growth_rate_per_s": null,
+        "horizon_s": 1.33
+      },
+      "max_pose_drift_m": 2.7976454328554823e-06,
+      "segment_steps": 50,
+      "worst_segment": {
+        "coordinate_error_rad": 1.6214049547436105e-10,
+        "frame_error_m": 1.2438679338537708e-11
+      }
+    }
+  },
+  "impact_window": {
+    "window_s_from_impact": [
+      -0.07995364015754691,
+      0.005046359842453052
+    ],
+    "replay": "open loop from the reference state at the window start, bundle efforts and ball force",
+    "max_clubhead_deflection_m": 0.18899837979094386,
+    "clubhead_deflection_at_impact_m": [
+      0.007378702914981235,
+      -0.0012017466128521816,
+      0.0417043547318577
+    ],
+    "max_abs_shaft_q_rad": 0.13375295232091264,
+    "engines": {
+      "mujoco": {
+        "max_coordinate_error_vs_reference_rad": 1.4160894679093872e-13,
+        "max_deflection_difference_vs_mujoco_m": 0.0
+      },
+      "opensim": {
+        "max_coordinate_error_vs_reference_rad": 7.683992331308787e-13,
+        "max_deflection_difference_vs_mujoco_m": 8.450184996178223e-14
+      },
+      "myosuite": {
+        "max_coordinate_error_vs_reference_rad": 1.4160894679093872e-13,
+        "max_deflection_difference_vs_mujoco_m": 0.0
+      }
+    },
+    "frame": "club body frame of the straight shaft (shaft along -y)"
+  },
+  "findings": [
+    "MuJoCo chain reference diverges at t = 1.335 s, 10 ms after impact (closure projection SVD fails); a 1.40 s export fails, so the bundle stops at 1.330 s.",
+    "Clubhead deflection reaches 0.19 m 60-80 ms before impact (shaft joint angles to 0.13 rad), beyond the chain's small-deflection assumption."
+  ],
+  "refusal": "drake replay of the chain bundle raises ShaftChainUnsupportedError (expected)",
+  "rigid_baseline_opensim": {
+    "full_horizon": {
+      "failure": null,
+      "duration_s": 1.33,
+      "max_coordinate_error_rad": 685.7155403276109,
+      "max_frame_error_m": 1.5574175981876632,
+      "growth_rate_per_s": 42.284994582043716,
+      "horizon_s": 0.67
+    },
+    "worst_segment": {
+      "coordinate_error_rad": 6.130998692327472e-05,
+      "frame_error_m": 2.663561196314463e-07
+    },
+    "bundle_sha256_brick": "58312dcfb324d252393d5f917d94f145fe83efed0829216cb2f6bb6e51955d4d"
+  }
+}
