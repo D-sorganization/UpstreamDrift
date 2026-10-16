@@ -12,6 +12,7 @@ from src.shared.python.tour_baselines.registry import get_golf_model
 MODEL_ID = "constrained_upper_body_golfer"
 
 
+@pytest.mark.unit
 def test_sampled_controls_match_registry_u_dim() -> None:
     identity = get_golf_model(MODEL_ID)
     traj = ConstrainedUpperBodyGeneratorAdapter(
@@ -23,11 +24,13 @@ def test_sampled_controls_match_registry_u_dim() -> None:
     assert traj["v"].shape[1] == identity.dof
 
 
+@pytest.mark.unit
 def test_sealed_u_dim_disagreeing_with_model_raises() -> None:
     with pytest.raises(ValueError, match="u_dim"):
         ConstrainedUpperBodyGeneratorAdapter(MODEL_ID, sealed_u_dim=5)
 
 
+@pytest.mark.unit
 def test_sealed_u_dim_agreeing_with_model_is_accepted() -> None:
     adapter = ConstrainedUpperBodyGeneratorAdapter(MODEL_ID, sealed_u_dim=6)
     assert adapter.u_dim == 6
