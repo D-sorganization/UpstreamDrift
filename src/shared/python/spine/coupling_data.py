@@ -32,6 +32,7 @@ import math
 from collections.abc import Mapping
 from pathlib import Path
 from types import MappingProxyType
+from typing import Any
 
 import numpy as np
 
@@ -147,7 +148,7 @@ def _ratio_matrices(dist: dict) -> dict[SpinalLevel, np.ndarray]:
 
 
 def _parity_law(
-    matrices: dict[SpinalLevel, np.ndarray], even_keys: object, **common: object
+    matrices: dict[SpinalLevel, np.ndarray], even_keys: object, **common: Any
 ) -> ParityCouplingLaw:
     """Split ``matrices`` into odd and even parts per ``even_in_rotation``."""
     if not isinstance(even_keys, list) or not all(k in _RATIO_KEYS for k in even_keys):

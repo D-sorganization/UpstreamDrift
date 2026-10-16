@@ -27,7 +27,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
 
@@ -578,7 +578,7 @@ def restrict_to_levels(
     if wanted == law.levels:
         return law
     span = f"{wanted[0].name}..{wanted[-1].name}"
-    common = {
+    common: dict[str, Any] = {
         "law_id": law.law_id,
         "version": f"{law.version}+levels:{span}",
         "matrices": {lv: law.matrices[lv] for lv in wanted},
