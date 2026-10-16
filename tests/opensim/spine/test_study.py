@@ -94,8 +94,14 @@ def inputs(tmp_path_factory) -> dict[str, Path]:
     return {"motion": _write_motion(root / "swing.sto"), "model": model, "root": root}
 
 
+IDENTITY = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+FIXTURE_SOURCE = "test fixture: identity by construction"
+
+
 def _request(inputs, out: Path, **kw) -> SpineStudyRequest:
     base = {
+        "torso_alignment": IDENTITY,
+        "torso_alignment_source": FIXTURE_SOURCE,
         "study_id": "unit_study",
         "motion_path": inputs["motion"],
         "golf_model_path": GOLF_MODEL,
@@ -277,6 +283,75 @@ def test_absolute_datafile_is_hashed(tmp_path) -> None:
         request_fingerprint(request)
 
 
+def _asset_request(tmp_path, **extra) -> SpineStudyRequest:
+    return SpineStudyRequest(
+        study_id="align",
+        motion_path=_write_motion(tmp_path / "swing.sto"),
+        golf_model_path=GOLF_MODEL,
+        model_id="bruno2015_fullbody_os4_v2",
+        asset_id="bruno2015_fullbody_os4_v2",
+        output_dir=tmp_path / "out",
+        **extra,
+    )
+
+
+@pytest.mark.unit
+def test_alignment_enters_request_hash_and_canonical_form(tmp_path) -> None:
+    rot_z = [[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]]
+    none = _asset_request(tmp_path)
+    ident = _asset_request(
+        tmp_path, torso_alignment=IDENTITY, torso_alignment_source="cal-a"
+    )
+    turned = _asset_request(
+        tmp_path, torso_alignment=rot_z, torso_alignment_source="cal-a"
+    )
+    renamed = _asset_request(
+        tmp_path, torso_alignment=rot_z, torso_alignment_source="cal-b"
+    )
+    prints = {request_fingerprint(r) for r in (none, ident, turned, renamed)}
+    assert len(prints) == 4
+    record = turned.canonical_dict()["torso_alignment"]
+    assert record["matrix"] == rot_z
+    assert record["provenance"] == "calibrated:cal-a"
+    unset = none.canonical_dict()["torso_alignment"]
+    assert unset["provenance"] == "assumed_identity"
+    assert unset["matrix"] == IDENTITY
+
+
+@pytest.mark.unit
+def test_alignment_preconditions(tmp_path) -> None:
+    with pytest.raises(ValueError, match="torso_alignment"):
+        _asset_request(
+            tmp_path, torso_alignment=[[1, 1, 0]] * 3, torso_alignment_source="s"
+        )
+    with pytest.raises(ValueError, match="torso_alignment_source"):
+        _asset_request(tmp_path, torso_alignment=IDENTITY)
+    with pytest.raises(ValueError, match="torso_alignment_source"):
+        _asset_request(tmp_path, torso_alignment=IDENTITY, torso_alignment_source=" ")
+    with pytest.raises(ValueError, match="torso_alignment"):
+        _asset_request(tmp_path, torso_alignment_source="orphan source")
+
+
+@pytest.mark.unit
+def test_unsupplied_alignment_is_recorded_and_unqualified(tmp_path) -> None:
+    receipt = run_spine_study(_asset_request(tmp_path), code_version="c", env={})
+    assert receipt.torso_alignment["provenance"] == "assumed_identity"
+    assert receipt.torso_alignment["matrix"] == IDENTITY
+    assert any("torso alignment" in r for r in receipt.status_reasons)
+    assert receipt.schema_version == "spine-study-receipt/2"
+    again = load_receipt(write_receipt(receipt, tmp_path / "r.json"))
+    assert again == receipt
+
+
+@pytest.mark.unit
+def test_receipt_refuses_pass_with_assumed_identity(tmp_path) -> None:
+    from dataclasses import replace
+
+    receipt = run_spine_study(_asset_request(tmp_path), code_version="c", env={})
+    with pytest.raises(ValueError, match="alignment"):
+        replace(receipt, status="pass", asset=None)
+
+
 # ------------------------------------------------------------ native pipeline
 
 
@@ -454,3 +529,35 @@ def test_cli_out_supplies_missing_output_dir(tmp_path, monkeypatch) -> None:
     assert seen[0].output_dir == out.resolve()
     with pytest.raises(ValueError, match="output_dir"):
         study.main(["--request", str(request_file)])
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_supplied_alignment_passes_and_is_recorded(inputs, tmp_path) -> None:
+    require_opensim()
+    receipt = run_spine_study(_request(inputs, tmp_path / "cal"), code_version="c")
+    assert receipt.status == "pass", receipt.status_reasons
+    assert receipt.torso_alignment == {
+        "matrix": IDENTITY,
+        "provenance": f"calibrated:{FIXTURE_SOURCE}",
+    }
+    assert receipt.request["torso_alignment"] == receipt.torso_alignment
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_omitted_alignment_is_unqualified_never_pass(inputs, tmp_path) -> None:
+    require_opensim()
+    receipt = run_spine_study(
+        _request(
+            inputs,
+            tmp_path / "unset",
+            torso_alignment=None,
+            torso_alignment_source=None,
+        ),
+        code_version="c",
+    )
+    assert receipt.status == "unqualified"
+    assert receipt.torso_alignment["provenance"] == "assumed_identity"
+    assert any("torso alignment" in r for r in receipt.status_reasons)
+    assert all(s.status == "ok" for s in receipt.stages)
