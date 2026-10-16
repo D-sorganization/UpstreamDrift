@@ -2741,6 +2741,8 @@ Rows added before 2026-10-12 (about 1,100 of them), the per-pull-request section
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-16 | #12734 | R6: opt-in flexible golf shaft as a rigid-link spring-damper chain (MuJoCo); generic STIFF profile flagged default_not_measured; rigid default byte-identical; other engines refuse chain specs |
+| 2026-10-16 | #12790 | R8: one shared appearance and anthropometry spec (model_appearance.body_meshes) - engine-neutral skin/garment/shoe meshes in the spec body frame, trunk sized from spec visual_hints as one solid, default charcoal trousers hip to ankle, one plain palette, shared OBJ export; MuJoCo is now a thin translator |
 | 2026-10-16 | #12877 | Generate the user manual TOC from real chapter headings and test that every manual link resolves |
 | 2026-10-16 | #12835 | Divergence inventory: commit only stable per-path facts (v2 JSONL, one sorted record per line), drop the committed markdown, move totals/bytes/authorship to --report; different-path PRs no longer conflict |
 | 2026-10-16 | #12865 | Split the user manual and functional test plan into an index plus chapter files under the doc size budget; delete both expiring exceptions. |

@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12686 · R6: Opt-In Flexible Golf Shaft as a Rigid-Link Spring-Damper Chain (MuJoCo); Generic STIFF Profile Flagged Default_Not_Measured; Rigid Default Byte-Identical; Other Engines Refuse Chain Specs
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12686
+- **Branch:** feat/12686-flexible-shaft-mujoco
+- **PR:** #12734
+- **Paths:** see #12734
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`9dfe5d3a`; collated from changes/12686-r6-opt-in-flexible-golf-shaft-as-a-rigid.md)
+- **Summary:** R6: opt-in flexible golf shaft as a rigid-link spring-damper chain (MuJoCo); generic STIFF profile flagged default_not_measured; rigid default byte-identical; other engines refuse chain specs
+- **Next step:** Criterion 6 (deflected-shaft render) and criterion 7 (dynamic clubhead-speed study); R11 engine ports
+
 ### DL-#12784 · Nightly motion-matching-smoke.yml Runs Tests/Integration/Motion_Matching (Slow, --Timeout=0) via Scripts/Ci/Run_Motion_Matching_Smoke.Sh on the Fleet; a Failure Opens or Updates an Issue and the Red Scheduled Run Reaches Fleet-Main-Health; Not Coupled to Heavy-Tests-Opt-In Parity
 
 - **State:** in_review
@@ -2339,6 +2352,19 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#12685 · R8: One Shared Appearance and Anthropometry Spec (Model_Appearance.Body_Meshes) - Engine-Neutral Skin/Garment/Shoe Meshes in the Spec Body Frame, Trunk Sized From Spec Visual_Hints as One Solid, Default Charcoal Trousers Hip to Ankle, One Plain Palette, Shared OBJ Export; MuJoCo Is Now a Thin Translator
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12685
+- **Branch:** merged via #12790
+- **PR:** #12790
+- **Paths:** see #12790
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`24fc23a8`; collated from changes/12685-r8-one-shared-appearance-and-anthropomet.md)
+- **Summary:** R8: one shared appearance and anthropometry spec (model_appearance.body_meshes) - engine-neutral skin/garment/shoe meshes in the spec body frame, trunk sized from spec visual_hints as one solid, default charcoal trousers hip to ankle, one plain palette, shared OBJ export; MuJoCo is now a thin translator
+- **Next step:** Shipped in PR #12790.
 
 ### DL-#12866 · Generate the User Manual TOC From Real Chapter Headings and Test That Every Manual Link Resolves
 
