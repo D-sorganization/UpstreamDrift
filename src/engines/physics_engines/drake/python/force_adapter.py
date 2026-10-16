@@ -50,6 +50,9 @@ from src.shared.python.motion_matching.polynomial_actuation import (
 Array: TypeAlias = NDArray[np.float64]
 
 
+_FULL = frozenset({Capability.CLOSED_LOOP_SNAPSHOT, Capability.CLOSED_LOOP_DERIVATIVES})
+
+
 class DrakeForceAdapter:
     """Raw Drake equations in spec coordinate order.
 
@@ -152,12 +155,7 @@ class DrakeForceAdapter:
 
     def capability(self, capability: Capability) -> CapabilityLevel:
         """Snapshot and AutoDiff derivatives are FULL; everything else is NONE."""
-        if capability in (
-            Capability.CLOSED_LOOP_SNAPSHOT,
-            Capability.CLOSED_LOOP_DERIVATIVES,
-        ):
-            return CapabilityLevel.FULL
-        return CapabilityLevel.NONE
+        return CapabilityLevel.FULL if capability in _FULL else CapabilityLevel.NONE
 
     def closed_loop_differentials(self, q: Array, v: Array) -> ModelDifferentials:
         """AutoDiffXd differentials of the native ``M, h, J, Jdot v`` (NSX-86)."""
