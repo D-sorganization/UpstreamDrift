@@ -413,3 +413,48 @@ def test_runner_rejects_unknown_keyword(runner, args) -> None:
 def test_runner_rejects_dt_not_below_t_end(runner, args) -> None:
     with pytest.raises(ValueError):
         runner(*args, dt=0.5)
+
+
+@pytest.mark.unit
+def test_config_object_matches_keyword_form_for_all_runners() -> None:
+    from src.shared.python.pendulum_simulator.simulation_core import SimulationConfig
+
+    cfg = SimulationConfig(limits=JointLimits(), clamp=TorqueClamp(1.0, 0.5))
+    _check(run_d(DP, Y2, 0.2, _td, dt=0.01, config=cfg), "d_lim_clamp")
+    cfg3 = SimulationConfig(rtol=1e-9, atol=1e-11)
+    _check(run_t(TP, Y3, 0.2, _tt, 0.01, "RK45", config=cfg3), "t_tol")
+    cfgg = SimulationConfig(alpha=2.0, beta=3.0, rtol=1e-8, atol=1e-10)
+    _check(run_g(GP, YG, 0.05, _tg, 0.01, "RK45", config=cfgg), "g_ab")
+
+
+@pytest.mark.unit
+def test_keyword_overrides_win_over_config() -> None:
+    from src.shared.python.pendulum_simulator.simulation_core import SimulationConfig
+
+    cfg = SimulationConfig(clamp=np.full(3, 9.0))
+    _check(
+        run_t(TP, Y3, 0.2, _tt, dt=0.01, config=cfg, clamp=np.full(3, 0.5)), "t_clamp"
+    )
+
+
+@pytest.mark.unit
+def test_config_rejects_setting_the_runner_does_not_support() -> None:
+    from src.shared.python.pendulum_simulator.simulation_core import SimulationConfig
+
+    with pytest.raises(TypeError, match="alpha"):
+        run_t(TP, Y3, 0.2, _tt, dt=0.01, config=SimulationConfig(alpha=1.0))
+    with pytest.raises(TypeError, match="rtol"):
+        run_d(DP, Y2, 0.2, _td, dt=0.01, rtol=1e-9)
+    with pytest.raises(TypeError, match="SimulationConfig"):
+        run_d(DP, Y2, 0.2, _td, dt=0.01, config={"limits": None})  # type: ignore[arg-type]
+
+
+@pytest.mark.unit
+def test_simulation_config_is_frozen() -> None:
+    import dataclasses
+
+    from src.shared.python.pendulum_simulator.simulation_core import SimulationConfig
+
+    cfg = SimulationConfig()
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        cfg.rtol = 1.0  # type: ignore[misc]

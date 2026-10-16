@@ -87,3 +87,21 @@ def test_invalid_hyperparameters_raise_value_error(kwargs, match) -> None:
 def test_unknown_keyword_raises_type_error() -> None:
     with pytest.raises(TypeError):
         BatchSwingOptimizer(not_an_option=1)  # type: ignore[call-arg]
+
+
+@pytest.mark.unit
+def test_config_object_and_keyword_override() -> None:
+    from src.shared.python.optimization.batch_swing_optimizer import BatchSwingConfig
+
+    cfg = BatchSwingConfig(method="mppi", n_candidates=8, seed=3)
+    opt = BatchSwingOptimizer(config=cfg, seed=4)
+    assert (opt.method, opt.n_candidates, opt.seed) == ("mppi", 8, 4)
+    assert opt.config.seed == 4
+
+
+@pytest.mark.unit
+def test_config_validates_on_construction() -> None:
+    from src.shared.python.optimization.batch_swing_optimizer import BatchSwingConfig
+
+    with pytest.raises(ValueError, match="tau_max"):
+        BatchSwingConfig(tau_max=0.0)

@@ -9,7 +9,7 @@ by the GUI and analysis code.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -30,7 +30,7 @@ from .physics_triple import (
     net_joint_forces,
     potential_energy,
 )
-from .simulation_core import integrate_ode
+from .simulation_core import SimulationConfig, integrate_ode
 from .simulation_result_base import TrajectoryResultMixin
 from .validation import (
     require,
@@ -118,6 +118,8 @@ class TripleSimulationResult(TrajectoryResultMixin):
 # Simulation runner
 # ---------------------------------------------------------------------------
 
+_TRIPLE_SETTINGS = frozenset({"rtol", "atol", "torque_limits", "limits", "clamp"})
+
 
 def run_simulation(
     params: TriplePendulumParams,
@@ -126,13 +128,14 @@ def run_simulation(
     torque_func: TorqueFunc,
     dt: float = 0.005,
     method: str = "DOP853",
-    rtol: float = 1e-6,
-    atol: float = 1e-8,
-    torque_limits: np.ndarray | None = None,
-    limits: JointLimitsNDOF | None = None,
-    clamp: np.ndarray | None = None,
+    config: SimulationConfig | None = None,
+    **overrides: Any,
 ) -> TripleSimulationResult:
     """Integrate the triple pendulum equations of motion.
+
+    Optional settings (``rtol``, ``atol``, ``torque_limits``, ``limits``,
+    ``clamp``) travel in a shared :class:`SimulationConfig`; they may also
+    be passed as keyword arguments (backward compatible).
 
     Parameters
     ----------
@@ -159,8 +162,11 @@ def run_simulation(
     require_positive("t_end", t_end)
     require_dt(dt, t_end)
 
+    cfg = SimulationConfig.resolve(config, overrides, _TRIPLE_SETTINGS)
+    rtol, atol = cfg.solver_tolerances(1e-6, 1e-8)
+    limits: JointLimitsNDOF | None = cfg.limits
     # Merge clamp kwarg (from SimulationPanel) with torque_limits (legacy)
-    effective_torque_limits = torque_limits if torque_limits is not None else clamp
+    effective_torque_limits = cfg.effective_torque_limits
 
     def ode_rhs(t: float, y: np.ndarray) -> np.ndarray:
         require(t is not None, "t must be provided")
