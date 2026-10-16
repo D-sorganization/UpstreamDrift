@@ -43,7 +43,9 @@ def test_payload_qualified_only_when_receipt_earned_it(study_factory) -> None:
     )
     assert ok["scientific_status"] == "qualified"
     bad = core.view_to_dict(
-        core.open_study(study_factory(status="unqualified", scientific_status="qualified"))
+        core.open_study(
+            study_factory(status="unqualified", scientific_status="qualified")
+        )
     )
     assert bad["scientific_status"] == "unqualified"
     assert bad["status_reasons"] == ["invented reason"]

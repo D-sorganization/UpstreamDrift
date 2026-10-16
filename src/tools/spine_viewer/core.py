@@ -46,6 +46,7 @@ __all__ = [
     "resolve_scientific_status",
     "status_banner",
     "view_angle_stack",
+    "view_to_dict",
     "view_heatmap",
 ]
 
@@ -158,6 +159,47 @@ def view_heatmap(view: SpineStudyView, quantity: str) -> HeatmapData:
     if quantity not in LOAD_QUANTITIES:
         raise ValueError(f"quantity must be one of {LOAD_QUANTITIES}, got {quantity!r}")
     return load_heatmap(view.series, quantity, scientific_status=view.scientific_status)
+
+
+def _heatmap_dict(view: SpineStudyView, quantity: str) -> dict[str, object]:
+    heat = view_heatmap(view, quantity)
+    return {
+        "quantity": heat.quantity,
+        "units": heat.units,
+        "sign_convention": heat.sign_convention,
+        "observable": heat.observable,
+        "distribution_source": heat.distribution_source,
+        "scientific_status": heat.scientific_status,
+        "status_label": heat.status_label(),
+        "time_s": heat.time_s.tolist(),
+        "values": heat.values.tolist(),
+    }
+
+
+def view_to_dict(view: SpineStudyView) -> dict[str, object]:
+    """JSON-serialisable form of a verified study for the web viewer.
+
+    Reuses :func:`status_banner` and :func:`view_heatmap`; nothing is
+    recomputed. Postconditions: ``scientific_status`` and
+    ``distribution_source`` are always present, and the dict survives
+    ``json.dumps(..., allow_nan=False)`` (arrays are finite by the
+    verified-run contract).
+
+    Raises:
+        TypeError: ``view`` is not a :class:`SpineStudyView`.
+    """
+    _check_view(view)
+    return {
+        "study_id": view.study_id,
+        "receipt_status": view.receipt_status,
+        "status_reasons": list(view.status_reasons),
+        "scientific_status": view.scientific_status,
+        "distribution_source": view.distribution_source,
+        "banner": status_banner(view),
+        "levels": [level.name for level in view.levels],
+        "quantities": list(LOAD_QUANTITIES),
+        "heatmaps": {q: _heatmap_dict(view, q) for q in LOAD_QUANTITIES},
+    }
 
 
 def heatmap_figure(view: SpineStudyView, quantity: str) -> Figure:

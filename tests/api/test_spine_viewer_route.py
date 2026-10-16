@@ -90,7 +90,9 @@ def test_missing_receipt_is_404(client: TestClient, root: Path) -> None:
     assert resp.status_code == 404
 
 
-def test_receipts_listing_is_relative_and_sorted(client: TestClient, root: Path) -> None:
+def test_receipts_listing_is_relative_and_sorted(
+    client: TestClient, root: Path
+) -> None:
     write_study(root / "b")
     write_study(root / "a")
     resp = client.get("/api/tools/spine-viewer/receipts")
