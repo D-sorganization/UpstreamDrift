@@ -249,3 +249,17 @@ def test_validator_rejects_wrong_source_type() -> None:
 def test_validator_accepts_str_path() -> None:
     model = validate_canonical_model(str(CANONICAL_YAML))
     assert model.root.name == "pelvis"
+
+
+@pytest.mark.unit
+def test_revolute_joint_spec_contracts() -> None:
+    from tools.model_converter.schema_validator import JointDof
+    from tools.model_converter.urdf_exporter import RevoluteJointSpec
+
+    dof = JointDof(axis=(0.0, 0.0, 1.0), limits=(-1.0, 1.0))
+    spec = RevoluteJointSpec("j", "a", "b", "0 0 0", "0 0 0", dof, 0.0)
+    assert (spec.effort, spec.velocity) == (1000.0, 10.0)
+    with pytest.raises(ValueError, match="name"):
+        RevoluteJointSpec("", "a", "b", "0 0 0", "0 0 0", dof, 0.0)
+    with pytest.raises(ValueError, match="damping"):
+        RevoluteJointSpec("j", "a", "b", "0 0 0", "0 0 0", dof, -0.1)
