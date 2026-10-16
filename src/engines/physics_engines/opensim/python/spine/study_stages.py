@@ -17,6 +17,10 @@ from typing import Any, Callable, Mapping
 
 import numpy as np
 
+from src.engines.physics_engines.opensim.python.spine.coordinate_locks import (
+    driven_locked_coordinates,
+    unlock_error,
+)
 from src.engines.physics_engines.opensim.python.spine.drive import (
     FIXTURE_PELVIS,
     GOLF_PELVIS,
@@ -91,6 +95,7 @@ class StageOutcome:
     law: str = "n/a"
     distribution_source: str = "n/a"
     variant: dict[str, Any] | None = None
+    unlocked: tuple[str, ...] = ()
     failed: bool = False
     ran: bool = False
     #: Stage currently executing; a failure is recorded under this name.
@@ -158,6 +163,10 @@ def _drive(request: Any, model: Path, scrub: Any, out: StageOutcome) -> DriveRes
         check_driven_ranges(model, result, options.pelvis, out)
     mot = export_mot(result, request.output_dir / f"{request.study_id}_coordinates.mot")
     out.artifacts.append(FileRecord("coordinates_mot", mot.name, sha256_of(mot)))
+    locked = driven_locked_coordinates(model, result.coordinates)
+    if locked and not request.unlock_driven_coordinates:
+        raise unlock_error(locked)
+    out.unlocked = locked
     n_invalid = int(np.count_nonzero(~result.valid))
     out.law = f"{result.law_id}@{result.law_version}"
     out.distribution_source = result.kinematics.distribution_source
@@ -173,6 +182,11 @@ def _drive(request: Any, model: Path, scrub: Any, out: StageOutcome) -> DriveRes
         "model_sha256": result.model_sha256,
         "law": out.law,
         "distribution_source": out.distribution_source,
+        "coordinate_locks": (
+            f"{len(locked)} driven-and-locked coordinates unlocked: {', '.join(locked)}"
+            if locked
+            else "no driven-and-locked coordinates"
+        ),
         **{f"input_{k}": v for k, v in result.input_source.items()},
     }
     out.stages.append(
@@ -186,12 +200,16 @@ def _drive(request: Any, model: Path, scrub: Any, out: StageOutcome) -> DriveRes
     return result
 
 
-def _id_options(request: Any) -> SpineIDOptions:
+def _id_options(request: Any, unlocked: tuple[str, ...]) -> SpineIDOptions:
     budget = ResidualBudget(
         force_fraction_bw=request.residual_force_fraction_bw,
         moment_fraction_bw_height=request.residual_moment_fraction,
     )
-    return SpineIDOptions(pelvis=_PELVIS[request.pelvis], budget=budget)
+    return SpineIDOptions(
+        pelvis=_PELVIS[request.pelvis],
+        budget=budget,
+        unlock_coordinates=unlocked,
+    )
 
 
 def _inverse_dynamics(
@@ -200,7 +218,7 @@ def _inverse_dynamics(
     common = {
         "external_loads": request.external_loads,
         "filter_hz": request.filter_hz,
-        "options": _id_options(request),
+        "options": _id_options(request, out.unlocked),
     }
     series, budget = run_spinal_inverse_dynamics(
         model, drive, request.model_id, **common
@@ -237,6 +255,8 @@ def _static_optimization(
         events=dict(request.events) or None,
         stride=request.stride,
         max_frames=request.max_frames,
+        muscle_model_policy=request.muscle_model_policy,
+        unlock_coordinates=out.unlocked,
     )
     so = run_spine_static_optimization(
         model, efforts, request.model_id, options=options
@@ -276,6 +296,8 @@ def _joint_reactions(
         pelvis=_PELVIS[request.pelvis],
         external_loads=request.external_loads,
         filter_hz=request.filter_hz,
+        muscle_model_policy=request.muscle_model_policy,
+        unlock_coordinates=out.unlocked,
     )
     series = compute_joint_reactions(
         model, drive, so, request.model_id, options=options

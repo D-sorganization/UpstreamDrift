@@ -48,7 +48,7 @@ from __future__ import annotations
 
 import hashlib
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 import tempfile
@@ -66,7 +66,9 @@ from src.engines.physics_engines.opensim.python.spine.drive import (
     PelvisCoordinates,
 )
 from src.engines.physics_engines.opensim.python.spine.muscle_model import (
+    check_muscle_model_policy,
     millard_equivalent_model,
+    thelen_muscle_count,
 )
 from src.engines.physics_engines.opensim.python.spine.inventory import (
     ModelLevelMap,
@@ -134,13 +136,15 @@ class SpineIDOptions:
     ``budget``: declared residual limits; ``body_height_m``: height used in the
     moment ratio (``None`` uses the extent of the body origins along the model
     gravity direction in the first frame, which is a model extent and not a
-    stature).
+    stature); ``unlock_coordinates``: locked coordinates to unlock so the drive
+    moves them.
     """
 
     pelvis: PelvisCoordinates | None = None
     level_map: ModelLevelMap | None = None
     budget: ResidualBudget = field(default_factory=ResidualBudget)
     body_height_m: float | None = None
+    unlock_coordinates: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.pelvis is not None and not isinstance(self.pelvis, PelvisCoordinates):
@@ -363,6 +367,8 @@ class PreparedModel:
     disabled_constraints: tuple[str, ...]
     n_constraints: int
     external_loads: str
+    swapped_muscles: int = 0
+    unlocked_coordinates: tuple[str, ...] = ()
 
     def enforced_flags(self) -> list[bool]:
         """``isEnforced`` of every constraint of the prepared model."""
@@ -395,15 +401,42 @@ def _load_model(model_path: Path, external_loads: Path | None) -> Any:
     return processor.process()
 
 
-def _clear_coordinate_locks(model: Any) -> None:
-    """Unlock every coordinate: the drive moves them, locks only corrupt ID/SO/JR.
-
-    A locked coordinate has zero acceleration in forward dynamics and no
-    moment arm in OpenSim, while the inverse-dynamics solver ignores the lock.
-    """
+def _unlock_coordinates(model: Any, names: Sequence[str]) -> tuple[str, ...]:
+    """Unlock exactly ``names`` (a locked coordinate cannot follow the drive)."""
     coords = model.getCoordinateSet()
-    for i in range(coords.getSize()):
-        coords.get(i).set_locked(False)
+    missing = [n for n in names if coords.getIndex(n) < 0]
+    if missing:
+        raise ValueError(f"cannot unlock unknown coordinates {missing}")
+    for name in names:
+        coords.get(name).set_locked(False)
+    return tuple(names)
+
+
+def _load_with_muscle_policy(
+    path: Path, xml: Path | None, policy: str | None
+) -> tuple[Any, int]:
+    """Load ``path``; for a rigid-tendon policy handle Thelen muscles.
+
+    ``policy`` ``None`` loads unchanged (muscles do not apply force);
+    ``"native"`` refuses a model with Thelen muscles; ``"millard_equivalent"``
+    swaps them.  Returns ``(model, number of swapped muscles)``.
+    """
+    if policy is None:
+        return _load_model(path, xml), 0
+    check_muscle_model_policy(policy)
+    n_thelen = thelen_muscle_count(path)
+    if n_thelen == 0:
+        return _load_model(path, xml), 0
+    if policy == "native":
+        raise ValueError(
+            f"model {path.name} has {n_thelen} Thelen2003Muscle actuators, for "
+            "which OpenSim 4.6 does not implement the rigid tendon the static "
+            'optimisation needs. Set muscle_model_policy="millard_equivalent" '
+            "to swap them for Millard muscles (see muscle_model.SWAP_NOTE)."
+        )
+    with tempfile.TemporaryDirectory() as tmp:
+        swapped = millard_equivalent_model(path, Path(tmp) / path.name)
+        return _load_model(swapped or path, xml), n_thelen
 
 
 def prepare_model_for_id(
@@ -411,12 +444,14 @@ def prepare_model_for_id(
     *,
     disable_couplers: bool = True,
     external_loads: str | Path | None = None,
-    millard_muscles: bool = False,
+    muscle_policy: str | None = None,
+    unlock_coordinates: Sequence[str] = (),
 ) -> PreparedModel:
     """Load ``model_path`` for ID: disable constraints, add external loads.
 
-    ``millard_muscles`` swaps ``Thelen2003Muscle`` elements for Millard muscles
-    before loading (rigid-tendon solves; see ``muscle_model``).
+    ``muscle_policy`` (``None``, ``"native"`` or ``"millard_equivalent"``) is
+    the rigid-tendon muscle handling (see ``muscle_model``); ``unlock_coordinates``
+    names the coordinates unlocked so the drive can move them.
 
     Preconditions: the model file exists; ``external_loads`` is ``None`` or an
     existing ExternalLoads XML.  Postconditions: with ``disable_couplers`` every
@@ -436,14 +471,8 @@ def prepare_model_for_id(
     xml = None if external_loads is None else Path(external_loads)
     if xml is not None and not xml.is_file():
         raise ValueError(f"external loads file not found: {xml}")
-    if millard_muscles:
-        with tempfile.TemporaryDirectory() as tmp:
-            swapped = millard_equivalent_model(path, Path(tmp) / path.name)
-            model = _load_model(swapped or path, xml)
-    else:
-        model = _load_model(path, xml)
-    if disable_couplers:
-        _clear_coordinate_locks(model)
+    model, swapped = _load_with_muscle_policy(path, xml, muscle_policy)
+    unlocked = _unlock_coordinates(model, tuple(unlock_coordinates))
     constraints = model.getConstraintSet()
     disabled = []
     for i in range(constraints.getSize()):
@@ -454,7 +483,13 @@ def prepare_model_for_id(
     state = model.initSystem()
     note = _NO_LOADS if xml is None else _describe_external_loads(xml)
     prepared = PreparedModel(
-        model, state, tuple(disabled), int(constraints.getSize()), note
+        model,
+        state,
+        tuple(disabled),
+        int(constraints.getSize()),
+        note,
+        swapped_muscles=swapped,
+        unlocked_coordinates=unlocked,
     )
     ensure(
         not disable_couplers or not any(prepared.enforced_flags()),
@@ -785,7 +820,10 @@ def _solve_trajectory(
     if filter_hz is not None and not (math.isfinite(filter_hz) and filter_hz > 0):
         raise ValueError(f"filter_hz must be positive and finite, got {filter_hz!r}")
     prepared = prepare_model_for_id(
-        model_path, disable_couplers=disable_couplers, external_loads=external_loads
+        model_path,
+        disable_couplers=disable_couplers,
+        external_loads=external_loads,
+        unlock_coordinates=opts.unlock_coordinates,
     )
     n_muscles = _disable_muscles(prepared) if exclude_muscles else 0
     model = prepared.model

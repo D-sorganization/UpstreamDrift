@@ -180,7 +180,8 @@ class ActivationSolution:
     ``activation`` ``(nm,)`` in [0, 1]; ``muscle_moment`` ``(nc,)`` the muscle
     generalised force ``offset + G a``; ``reserve`` ``(nc,)`` equal to
     ``tau - muscle_moment``; ``cost`` is ``sum a^p``; ``success`` combines both
-    stages; ``message`` is the stage-2 optimiser message.
+    stages; ``message`` is the stage-2 optimiser message; ``solver`` names the
+    stage-2 solver (``slsqp``, ``clarabel_qp`` or ``clarabel_irls``).
     """
 
     activation: np.ndarray
@@ -189,6 +190,7 @@ class ActivationSolution:
     cost: float
     success: bool
     message: str
+    solver: str = "slsqp"
 
 
 def _as_float_array(name: str, value: object, ndim: int) -> np.ndarray:
@@ -427,6 +429,11 @@ def solve_activations(
     offset = arm.T @ pas
     a1, ok1 = _min_reserve_activation(gain, req - offset, scale)
     a, ok2, message = _stage_two(a1, gain, p)
+    solver = (
+        ("clarabel_irls" if p == 3 else "clarabel_qp")
+        if message.startswith("clarabel")
+        else "slsqp"
+    )
     muscle = offset + gain @ a
     reserve = req - muscle
     ensure(bool(np.all((a >= 0.0) & (a <= 1.0))), "activations must lie in [0, 1]")
@@ -437,4 +444,5 @@ def solve_activations(
         cost=activation_cost(a, p)[0],
         success=ok1 and ok2,
         message=message,
+        solver=solver,
     )

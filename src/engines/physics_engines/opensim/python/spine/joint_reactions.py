@@ -66,6 +66,9 @@ from src.engines.physics_engines.opensim.python.spine._osim_helpers import (
     transform_to_matrix,
 )
 from src.engines.physics_engines.opensim.python.spine.drive import PelvisCoordinates
+from src.engines.physics_engines.opensim.python.spine.muscle_model import (
+    check_muscle_model_policy,
+)
 from src.engines.physics_engines.opensim.python.spine.inventory import (
     ModelLevelMap,
     SpineInventory,
@@ -106,7 +109,8 @@ class JointReactionOptions:
     ``pelvis`` / ``level_map``: as for :class:`SpineIDOptions`;
     ``external_loads``: ExternalLoads XML (must be the one the SO input used);
     ``filter_hz``: low-pass cutoff [Hz] (must equal the SO input's);
-    ``reserve_tolerance_nm``: largest accepted ``|measured level residual - SO
+    ``muscle_model_policy`` / ``unlock_coordinates``: as for the static
+    optimisation (must match it); ``reserve_tolerance_nm``: largest accepted ``|measured level residual - SO
     reserve|`` [N*m]; ``acceleration_tolerance``: largest accepted
     ``|udot - udot_measured|`` [rad/s^2 or m/s^2].
     """
@@ -115,12 +119,15 @@ class JointReactionOptions:
     level_map: ModelLevelMap | None = None
     external_loads: str | Path | None = None
     filter_hz: float | None = None
+    muscle_model_policy: str = "native"
+    unlock_coordinates: tuple[str, ...] = ()
     reserve_tolerance_nm: float = 1e-6
     acceleration_tolerance: float = 1e-6
 
     def __post_init__(self) -> None:
         if self.pelvis is not None and not isinstance(self.pelvis, PelvisCoordinates):
             raise TypeError("pelvis must be a PelvisCoordinates or None")
+        check_muscle_model_policy(self.muscle_model_policy)
         for name in ("reserve_tolerance_nm", "acceleration_tolerance"):
             value = getattr(self, name)
             if not math.isfinite(value) or value <= 0:
@@ -230,7 +237,8 @@ def _prepare(
         model_path,
         disable_couplers=True,
         external_loads=opts.external_loads,
-        millard_muscles=True,
+        muscle_policy=opts.muscle_model_policy,
+        unlock_coordinates=opts.unlock_coordinates,
     )
     loads = so.provenance.get("external_loads", "n/a")
     if prepared.external_loads != loads:

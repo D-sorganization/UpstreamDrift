@@ -19,7 +19,17 @@ from __future__ import annotations
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
-__all__ = ["SWAP_NOTE", "millard_equivalent_model"]
+__all__ = [
+    "MUSCLE_MODEL_POLICIES",
+    "SWAP_NOTE",
+    "check_muscle_model_policy",
+    "millard_equivalent_model",
+    "thelen_muscle_count",
+]
+
+#: ``native`` keeps the model's muscles (a Thelen model then cannot run the
+#: rigid-tendon solves); ``millard_equivalent`` applies the swap below.
+MUSCLE_MODEL_POLICIES = ("native", "millard_equivalent")
 
 SWAP_NOTE = (
     "Thelen2003Muscle swapped for Millard2012EquilibriumMuscle "
@@ -75,3 +85,28 @@ def millard_equivalent_model(
     out = Path(out_path)
     tree.write(out, encoding="utf-8", xml_declaration=True)
     return out
+
+
+def thelen_muscle_count(model_path: str | Path) -> int:
+    """Number of ``Thelen2003Muscle`` elements in the ``.osim`` file."""
+    src = Path(model_path)
+    if not src.is_file():
+        raise ValueError(f"model file not found: {src}")
+    return sum(1 for _ in ET.parse(src).iter(_THELEN))
+
+
+def check_muscle_model_policy(policy: object) -> str:
+    """Return ``policy`` if it is a known muscle-model policy.
+
+    Raises:
+        TypeError: ``policy`` is not a str.
+        ValueError: ``policy`` is not in :data:`MUSCLE_MODEL_POLICIES`.
+    """
+    if not isinstance(policy, str):
+        raise TypeError("muscle_model_policy must be a str")
+    if policy not in MUSCLE_MODEL_POLICIES:
+        raise ValueError(
+            f"muscle_model_policy must be one of {MUSCLE_MODEL_POLICIES}, "
+            f"got {policy!r}"
+        )
+    return policy

@@ -55,6 +55,10 @@ from src.engines.physics_engines.opensim.python.spine.inventory import (
     ModelLevelMap,
     inventory_spine,
 )
+from src.engines.physics_engines.opensim.python.spine.muscle_model import (
+    SWAP_NOTE,
+    check_muscle_model_policy,
+)
 from src.engines.physics_engines.opensim.python.spine.inverse_dynamics import (
     SpinalGeneralizedForces,
     prepare_model_for_id,
@@ -149,7 +153,10 @@ class SpineSOOptions:
     ``exponent``: cost exponent p (2 or 3; Bruno 2015 uses 3);
     ``reserves``: :class:`ReserveSpec`; ``events``: name -> time [s];
     ``stride``: every ``stride``-th sample; ``max_frames``: refuse a larger
-    selection; ``level_map``: explicit level map for the inventory.
+    selection; ``level_map``: explicit level map for the inventory;
+    ``muscle_model_policy``: ``native`` (a Thelen model is refused) or
+    ``millard_equivalent`` (see ``muscle_model``); ``unlock_coordinates``:
+    locked coordinates to unlock.
     """
 
     exponent: int = 3
@@ -158,8 +165,11 @@ class SpineSOOptions:
     stride: int | None = None
     max_frames: int | None = None
     level_map: ModelLevelMap | None = None
+    muscle_model_policy: str = "native"
+    unlock_coordinates: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
+        check_muscle_model_policy(self.muscle_model_policy)
         if not isinstance(self.exponent, int) or isinstance(self.exponent, bool):
             raise TypeError("exponent must be an int")
         if self.exponent not in SUPPORTED_EXPONENTS:
@@ -316,8 +326,16 @@ class SpineMuscleBasis:
         model_id: str,
         *,
         level_map: ModelLevelMap | None = None,
+        muscle_model_policy: str = "native",
+        unlock_coordinates: tuple[str, ...] = (),
     ) -> None:
-        prepared = prepare_model_for_id(model_path, millard_muscles=True)
+        prepared = prepare_model_for_id(
+            model_path,
+            muscle_policy=check_muscle_model_policy(muscle_model_policy),
+            unlock_coordinates=unlock_coordinates,
+        )
+        self.muscle_model_policy = muscle_model_policy
+        self.swapped_muscles = prepared.swapped_muscles
         self.model = prepared.model
         self._muscles = _muscle_list(self.model)
         if not self._muscles:
@@ -478,14 +496,18 @@ def _sha256(path: Path) -> str:
 
 
 def _provenance(
-    path: Path, efforts: SpinalGeneralizedForces, opts: SpineSOOptions, model_id: str
+    path: Path,
+    efforts: SpinalGeneralizedForces,
+    opts: SpineSOOptions,
+    model_id: str,
+    extra: Mapping[str, str],
 ) -> dict[str, str]:
     return {
         "model_id": model_id,
         "model_sha256": _sha256(path),
         "solver": (
-            "static optimisation: lexicographic reserves (BVLS) then SLSQP "
-            "min sum a^p with analytic gradient"
+            "static optimisation: lexicographic reserves (BVLS) then min sum a^p "
+            "(stage-2 solver per frame in stage2_solver)"
         ),
         "cost_exponent": str(opts.exponent),
         "distribution_source": efforts.provenance.get("distribution_source", "n/a"),
@@ -493,13 +515,28 @@ def _provenance(
         "id_model_sha256": efforts.provenance.get("model_sha256", "n/a"),
         "id_muscles": efforts.provenance.get("muscles", "n/a"),
         "muscle_model": (
-            "native Millard curves, rigid tendon (ignore_tendon_compliance; "
-            "Thelen muscles swapped for Millard, see muscle_model), "
+            "native Millard curves, rigid tendon (ignore_tendon_compliance), "
             f"affine in activation from a={_A_LOW:g} and a={_A_HIGH:g}"
         ),
-        "couplers": "disabled (coordinate locks cleared)",
+        "muscle_model_policy": opts.muscle_model_policy,
+        "couplers": "disabled",
+        **extra,
         "reserves": opts.reserves.describe(),
         "units": "N*m (generalized forces), N (tendon forces)",
+    }
+
+
+def _run_provenance(basis: SpineMuscleBasis, solvers: set[str]) -> dict[str, str]:
+    swapped = basis.swapped_muscles
+    return {
+        "stage2_solver": ",".join(sorted(solvers)),
+        "moment_arm_screen": (
+            f"path-length central difference, step {_SCREEN_STEP_RAD:g} rad, "
+            f"length threshold {_SCREEN_LENGTH_TOL_M:g} m; locked coordinates "
+            "always evaluated natively"
+        ),
+        "muscles_swapped": str(swapped),
+        "muscle_swap_note": SWAP_NOTE if swapped else "none",
     }
 
 
@@ -537,7 +574,13 @@ def run_spine_static_optimization(
     if not isinstance(opts, SpineSOOptions):
         raise TypeError("options must be a SpineSOOptions or None")
     selection = select_frames(efforts.time_s, opts.events, opts.stride, opts.max_frames)
-    basis = SpineMuscleBasis(model_path, model_id, level_map=opts.level_map)
+    basis = SpineMuscleBasis(
+        model_path,
+        model_id,
+        level_map=opts.level_map,
+        muscle_model_policy=opts.muscle_model_policy,
+        unlock_coordinates=opts.unlock_coordinates,
+    )
     if basis.coordinate_names != efforts.level_coordinates:
         raise ValueError(
             f"level coordinates differ: model {basis.coordinate_names} vs "
@@ -549,6 +592,7 @@ def run_spine_static_optimization(
     act, force = np.zeros((k, nm)), np.zeros((k, nm))
     muscle, reserve = np.zeros((k, nc)), np.zeros((k, nc))
     share, success, reasons = np.zeros(k), np.zeros(k, bool), []
+    solvers: set[str] = set()
     for row, frame in enumerate(selection.indices):
         active, passive, arms = basis.evaluate(
             efforts.model_coordinates, efforts.q[frame], efforts.qd[frame]
@@ -562,6 +606,7 @@ def run_spine_static_optimization(
             reserve_scale=limits,
         )
         act[row], force[row] = sol.activation, passive + sol.activation * active
+        solvers.add(sol.solver)
         muscle[row], reserve[row], success[row] = (
             sol.muscle_moment,
             sol.reserve,
@@ -600,5 +645,11 @@ def run_spine_static_optimization(
         success=success,
         reserve_limits_nm=limits,
         cost_exponent=opts.exponent,
-        provenance=_provenance(Path(model_path), efforts, opts, model_id),
+        provenance=_provenance(
+            Path(model_path),
+            efforts,
+            opts,
+            model_id,
+            _run_provenance(basis, solvers),
+        ),
     )
