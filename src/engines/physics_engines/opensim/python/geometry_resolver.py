@@ -26,6 +26,7 @@ __all__ = [
     "DEFAULT_MODEL",
     "GEOMETRY_ENV_VAR",
     "GeometryAudit",
+    "mesh_resolves",
     "audit_model_geometry",
     "candidate_geometry_dirs",
     "referenced_meshes",
@@ -105,7 +106,7 @@ def referenced_meshes(model_path: Path | str) -> tuple[str, ...]:
     return tuple(names)
 
 
-def _resolves(name: str, model_dir: Path, search_dirs: Iterable[Path]) -> bool:
+def mesh_resolves(name: str, model_dir: Path, search_dirs: Iterable[Path]) -> bool:
     candidate = Path(name)
     if candidate.is_absolute():
         return candidate.is_file()
@@ -146,6 +147,6 @@ def audit_model_geometry(
     dirs = candidate_geometry_dirs() if search_dirs is None else tuple(search_dirs)
     referenced = referenced_meshes(path)
     missing = tuple(
-        name for name in referenced if not _resolves(name, path.parent, dirs)
+        name for name in referenced if not mesh_resolves(name, path.parent, dirs)
     )
     return GeometryAudit(path, referenced, missing)
