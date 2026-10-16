@@ -2340,6 +2340,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12583 · NSX-55: Simscape Closed-Loop Export Format, Loader and R2025b Exporter (Planar Rig Validated; Golf Model Deferred as DV-12583)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12583
+- **Branch:** merged via #12644
+- **PR:** #12644
+- **Paths:** see #12644
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`efe8489a`; collated from changes/12583-nsx-55-simscape-closed-loop-export-forma.md)
+- **Summary:** NSX-55: Simscape closed-loop export format, loader and R2025b exporter (planar rig validated; golf model deferred as DV-12583)
+- **Next step:** Shipped in PR #12644.
+
 ### DL-#12811 · Fix Main Breakage From #12704: Pinocchio JointModelRZ Test Lane and Pinocchio_Reference Row Typing
 
 - **State:** shipped
