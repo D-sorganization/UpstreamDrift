@@ -871,7 +871,7 @@
 {"path": "humanoid_character_builder/__main__.py", "classification": "ud-only", "package": "humanoid_character_builder", "spelling_only": false}
 {"path": "humanoid_character_builder/contracts.py", "classification": "diverged", "package": "humanoid_character_builder", "spelling_only": true}
 {"path": "humanoid_character_builder/core/__init__.py", "classification": "diverged", "package": "humanoid_character_builder", "spelling_only": true}
-{"path": "humanoid_character_builder/core/anthropometry.py", "classification": "diverged", "package": "humanoid_character_builder", "spelling_only": true}
+{"path": "humanoid_character_builder/core/anthropometry.py", "classification": "diverged", "package": "humanoid_character_builder", "spelling_only": false}
 {"path": "humanoid_character_builder/core/body_parameters.py", "classification": "diverged", "package": "humanoid_character_builder", "spelling_only": false}
 {"path": "humanoid_character_builder/core/model.py", "classification": "diverged", "package": "humanoid_character_builder", "spelling_only": false}
 {"path": "humanoid_character_builder/core/segment_definitions.py", "classification": "identical", "package": "humanoid_character_builder", "spelling_only": false}
@@ -892,7 +892,7 @@
 {"path": "humanoid_character_builder/generators/_xml_builder.py", "classification": "ud-only", "package": "humanoid_character_builder", "spelling_only": false}
 {"path": "humanoid_character_builder/generators/mesh_generator.py", "classification": "diverged", "package": "humanoid_character_builder", "spelling_only": false}
 {"path": "humanoid_character_builder/generators/mesh_generator_factory.py", "classification": "ud-only", "package": "humanoid_character_builder", "spelling_only": false}
-{"path": "humanoid_character_builder/generators/mesh_generator_makehuman.py", "classification": "identical", "package": "humanoid_character_builder", "spelling_only": false}
+{"path": "humanoid_character_builder/generators/mesh_generator_makehuman.py", "classification": "diverged", "package": "humanoid_character_builder", "spelling_only": false}
 {"path": "humanoid_character_builder/generators/mesh_generator_models.py", "classification": "ud-only", "package": "humanoid_character_builder", "spelling_only": false}
 {"path": "humanoid_character_builder/generators/mesh_generator_primitive.py", "classification": "diverged", "package": "humanoid_character_builder", "spelling_only": true}
 {"path": "humanoid_character_builder/generators/mesh_generator_smplx.py", "classification": "diverged", "package": "humanoid_character_builder", "spelling_only": true}
