@@ -2340,6 +2340,45 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12829 · Perturbation Panel Renders the Worker's PerturbationSummary on Batch Finish and Shows an Undefined CV as N/A
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12829
+- **Branch:** merged via #12837
+- **PR:** #12837
+- **Paths:** see #12837
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`0267bb78`; collated from changes/12829-perturbation-panel-renders-the-worker-s.md)
+- **Summary:** Perturbation panel renders the worker's PerturbationSummary on batch finish and shows an undefined CV as n/a
+- **Next step:** Shipped in PR #12837.
+
+### DL-#12820 · Receipt Base_Spec_Sha256 Hashes the Committed Spec Before Foot-Progression Seeding; Foot_Progression_Mode and Foot_Seed_Deg Recorded as Explicit Receipt Fields so Style-Feet Canonical Receipts Chain to the Committed Spec
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12820
+- **Branch:** merged via #12830
+- **PR:** #12830
+- **Paths:** see #12830
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`2247317e`; collated from changes/12820-receipt-base-spec-sha256-hashes-the-comm.md)
+- **Summary:** Receipt base_spec_sha256 hashes the committed spec before foot-progression seeding; foot_progression_mode and foot_seed_deg recorded as explicit receipt fields so style-feet canonical receipts chain to the committed spec
+- **Next step:** Shipped in PR #12830.
+
+### DL-#12570 · Constrained ZTCF/ZVCF via the KKT Projector, ConstrainedEquationsOfMotionProvider; Counterfactual Rollouts Integrate Real Dynamics (m_Eff Mock Removed)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12570
+- **Branch:** merged via #12641
+- **PR:** #12641
+- **Paths:** see #12641
+- **Started:** 2026-10-16
+- **Last verified:** 2026-10-16 (`8e7782a4`; collated from changes/12570-constrained-ztcf-zvcf-via-the-kkt-projec.md)
+- **Summary:** Constrained ZTCF/ZVCF via the KKT projector, ConstrainedEquationsOfMotionProvider; counterfactual rollouts integrate real dynamics (m_eff mock removed)
+- **Next step:** Shipped in PR #12641.
+
 ### DL-#12712 · NSX-83: Event-Triggered Impact Outcome Map With Saltation Correction, Face-Angle Availability and Tools Ball-Flight Bridge
 
 - **State:** shipped
