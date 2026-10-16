@@ -23,7 +23,7 @@ import pytest
 
 from src.shared.python.engine_core.capabilities import Capability, CapabilityLevel
 from src.shared.python.loop_nullspace import tangent_linearization as tl
-from src.shared.python.loop_nullspace.adapter_model import AdapterClosedLoopModel
+from src.shared.python.loop_nullspace.adapter_derivatives import AdapterClosedLoopModel
 from src.shared.python.loop_nullspace.constrained_dynamics import (
     constrained_acceleration,
 )
