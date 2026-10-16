@@ -400,7 +400,8 @@ def run_fullbody(
         ensure(bool(np.all(np.isfinite(series))), f"{name} must be finite")
     loads, extra = _build_loads(spec, golf, golf_q, coords, time)
     metrics.update(extra)
-    xml, artifacts = None, ()
+    xml: Path | None = None
+    artifacts: tuple[FileRecord, ...] = ()
     if loads is not None:
         spec.output_dir.mkdir(parents=True, exist_ok=True)
         xml = write_load_set(

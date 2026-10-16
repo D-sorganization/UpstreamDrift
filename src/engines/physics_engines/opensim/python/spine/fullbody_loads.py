@@ -102,7 +102,7 @@ class ClubInertia:
     """
 
     mass_kg: float
-    com_local: Sequence[float]
+    com_local: Any
     inertia_local: Any
 
     def __post_init__(self) -> None:
