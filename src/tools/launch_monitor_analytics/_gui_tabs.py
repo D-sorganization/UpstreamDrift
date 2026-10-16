@@ -74,7 +74,7 @@ class _MainWidgetTabsMixin:
         )
         self.status_label.setWordWrap(True)
 
-        layout = QtWidgets.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout(cast("QtWidgets.QWidget", self))
         layout.addWidget(title)
         layout.addWidget(subtitle)
         layout.addWidget(self.scientific_boundary)

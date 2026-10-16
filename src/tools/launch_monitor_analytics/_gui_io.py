@@ -7,7 +7,7 @@ import uuid
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from PyQt6 import QtWidgets
 
@@ -36,9 +36,13 @@ class _ImportExportMixin:
         # Host attributes/methods live on ``MainWidget`` (composed mixins).
         def __getattr__(self, name: str) -> Any: ...
 
+    def _host_widget(self) -> QtWidgets.QWidget:
+        """Return this mixin's host ``MainWidget`` typed as a ``QWidget``."""
+        return cast("QtWidgets.QWidget", self)
+
     def _on_import_files(self) -> None:
         paths, _ = QtWidgets.QFileDialog.getOpenFileNames(
-            self,
+            self._host_widget(),
             "Import Launch Monitor Exports",
             "",
             "Data Files (*.csv *.tsv *.txt *.xlsx *.xls *.json);;All Files (*)",
@@ -46,7 +50,7 @@ class _ImportExportMixin:
         for raw_path in paths:
             path = Path(raw_path)
             try:
-                dialog = ImportMappingDialog(path, self)
+                dialog = ImportMappingDialog(path, self._host_widget())
                 if dialog.exec() != QtWidgets.QDialog.DialogCode.Accepted:
                     continue
                 self.import_file(path, dialog.import_options())
@@ -57,7 +61,7 @@ class _ImportExportMixin:
         if not self._confirm_discard_unsaved("opening another project"):
             return
         path, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self,
+            self._host_widget(),
             "Open Launch Monitor Project",
             "",
             "Launch Monitor Projects (*.lmproject);;All Files (*)",
@@ -70,7 +74,7 @@ class _ImportExportMixin:
 
     def _on_save_project(self) -> None:
         path, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self,
+            self._host_widget(),
             "Save Launch Monitor Project",
             "study.lmproject",
             "Launch Monitor Projects (*.lmproject)",
@@ -119,7 +123,7 @@ class _ImportExportMixin:
 
     def _on_export_data(self) -> None:
         path, selected_filter = QtWidgets.QFileDialog.getSaveFileName(
-            self,
+            self._host_widget(),
             "Export Canonical Analysis View",
             "launch_monitor_data.csv",
             "CSV (*.csv);;Parquet (*.parquet)",
@@ -155,7 +159,7 @@ class _ImportExportMixin:
 
     def _on_export_manifest(self) -> None:
         path, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self,
+            self._host_widget(),
             "Export Reproducibility Manifest",
             "launch_monitor_manifest.json",
             "JSON (*.json)",
@@ -176,7 +180,7 @@ class _ImportExportMixin:
         """Surface a synchronous failure with a modal warning."""
         logger.warning("%s: %s", title, exc)
         self.status_label.setText(f"{title}: {exc}")
-        QtWidgets.QMessageBox.warning(self, title, str(exc))
+        QtWidgets.QMessageBox.warning(self._host_widget(), title, str(exc))
 
     def _add_filter_row(self) -> None:
         row = self.filter_table.rowCount()

@@ -108,13 +108,12 @@ def _pose_arrays(
     args: Mapping[str, Any], n: int
 ) -> tuple[npt.NDArray[np.float64], ...]:
     """Return ``(grip, grip_quat, clubhead, club_quat)``."""
-    spec = (
-        ("grip", "grip_position", None, (n, 3)),
-        ("grip_quat", None, "grip_rotation", (n, 4)),
-        ("clubhead", "clubhead_position", None, (n, 3)),
-        ("club_quat", None, "clubhead_rotation", (n, 4)),
+    return (
+        _pose_array(args, "grip", "grip_position", None, (n, 3)),
+        _pose_array(args, "grip_quat", None, "grip_rotation", (n, 4)),
+        _pose_array(args, "clubhead", "clubhead_position", None, (n, 3)),
+        _pose_array(args, "club_quat", None, "clubhead_rotation", (n, 4)),
     )
-    return tuple(_pose_array(args, *row) for row in spec)
 
 
 def _energy_vector(value: Any, n: int) -> npt.NDArray[np.float64]:

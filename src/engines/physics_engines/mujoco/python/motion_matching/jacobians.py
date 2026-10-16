@@ -222,7 +222,7 @@ def _coerce_theta_matrix(theta: NDArray[np.float64], nu: int) -> NDArray[np.floa
             raise ValueError(
                 f"flat theta must have length nu*7 = {n_theta}; got {flat.shape[0]}"
             )
-        theta_mat = flat.reshape(nu, 7)
+        theta_mat: NDArray[np.float64] = flat.reshape(nu, 7)
     elif flat.shape == (nu, 7):
         theta_mat = flat
     else:
@@ -392,7 +392,9 @@ def compute_qpos_jacobian(
 
     # S[k] = ∂x / ∂θ at output frame k. Initial state independent of θ.
     out_dq_dtheta = np.zeros((n_out, nv, n_theta), dtype=np.float64)
-    S = np.zeros((2 * nv + int(model.na), n_theta), dtype=np.float64)
+    S: NDArray[np.float64] = np.zeros(
+        (2 * nv + int(model.na), n_theta), dtype=np.float64
+    )
     out_dq_dtheta[0] = S[:nv, :]
     for k in range(1, n_out):
         S = _propagate_sensitivity_to(ctx, data, S, float(t_grid[k]), max_substeps, k)

@@ -112,8 +112,8 @@ def se3_log6(target: pin.SE3, current: pin.SE3) -> np.ndarray:
     """
     if not PINOCCHIO_AVAILABLE:
         raise ImportError("pinocchio is required for se3_log6")
-    err_se3 = current.actInv(target)
-    return np.asarray(pin.log6(err_se3).vector, dtype=np.float64)
+    err_se3 = current.actInv(target)  # type: ignore[attr-defined]
+    return np.asarray(pin.log6(err_se3).vector, dtype=np.float64)  # type: ignore[attr-defined]
 
 
 # ---------------------------------------------------------------------------
@@ -191,7 +191,7 @@ def differential_ik(
             break
 
         pin.computeJointJacobians(model, data, q)
-        jac = pin.getFrameJacobian(model, data, frame_id, pin.LOCAL)
+        jac = pin.getFrameJacobian(model, data, frame_id, pin.LOCAL)  # type: ignore[attr-defined]
         dq = lm_step(jac, err, damping)
         q = pin.integrate(model, q, dq)
 
@@ -294,8 +294,8 @@ def solve_dual_frame_ik(
             converged = True
             break
         pin.computeJointJacobians(model, data, q)
-        ja = weight_a * pin.getFrameJacobian(model, data, fid_a, pin.LOCAL)
-        jb = weight_b * pin.getFrameJacobian(model, data, fid_b, pin.LOCAL)
+        ja = weight_a * pin.getFrameJacobian(model, data, fid_a, pin.LOCAL)  # type: ignore[attr-defined]
+        jb = weight_b * pin.getFrameJacobian(model, data, fid_b, pin.LOCAL)  # type: ignore[attr-defined]
         jac = np.vstack([ja, jb])
         dq = lm_step(jac, err, opts.damping)
         q = pin.integrate(model, q, dq)
