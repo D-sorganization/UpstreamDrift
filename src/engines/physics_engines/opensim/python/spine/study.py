@@ -53,6 +53,9 @@ from src.engines.physics_engines.opensim.python.spine.inventory import (
     DEFAULT_LEVEL_MAP_PATH,
 )
 from src.engines.physics_engines.opensim.python.spine import study_variant
+from src.engines.physics_engines.opensim.python.spine.muscle_model import (
+    check_muscle_model_policy,
+)
 from src.engines.physics_engines.opensim.python.spine.static_optimization import (
     check_optional_count,
 )
@@ -164,6 +167,13 @@ class SpineStudyRequest:
             it was calibrated.  Both or neither: a request without them
             assumes the identity, is recorded as ``assumed_identity`` and can
             never be ``pass`` (ADR-0055 item 2).  Both enter the request hash.
+        muscle_model_policy: ``native`` (default; a Thelen model fails the
+            static optimisation naming this option) or ``millard_equivalent``
+            (Thelen muscles swapped for Millard, recorded in the receipt).
+        unlock_driven_coordinates: unlock exactly the coordinates that are
+            locked in the model and moved by the drive; by default such a
+            coordinate fails the drive stage with the list.  Both fields enter
+            the request hash only when set.
         output_dir: where artifacts and the receipt are written (never
             recorded in the receipt).
 
@@ -197,6 +207,8 @@ class SpineStudyRequest:
     variant_handedness: str = "right"
     torso_alignment: Any = None
     torso_alignment_source: str | None = None
+    muscle_model_policy: str = "native"
+    unlock_driven_coordinates: bool = False
 
     def __post_init__(self) -> None:
         if not isinstance(self.study_id, str) or not _ID_RE.fullmatch(self.study_id):
@@ -220,6 +232,9 @@ class SpineStudyRequest:
             self.coupling_law_id, str
         ):
             raise TypeError("coupling_law_id must be a str or None")
+        check_muscle_model_policy(self.muscle_model_policy)
+        if not isinstance(self.unlock_driven_coordinates, bool):
+            raise TypeError("unlock_driven_coordinates must be a bool")
         if not isinstance(self.restrict_law_to_model, bool):
             raise TypeError("restrict_law_to_model must be a bool")
         if self.restrict_law_to_model and self.coupling_law_id is None:
@@ -313,6 +328,16 @@ class SpineStudyRequest:
             "reserve_max_share": self.reserve_max_share,
             "torso_alignment": self.alignment_record(),
             **({"restrict_law_to_model": True} if self.restrict_law_to_model else {}),
+            **(
+                {"muscle_model_policy": self.muscle_model_policy}
+                if self.muscle_model_policy != "native"
+                else {}
+            ),
+            **(
+                {"unlock_driven_coordinates": True}
+                if self.unlock_driven_coordinates
+                else {}
+            ),
         }
         if self.variant_id is not None:
             data["variant"] = study_variant.request_record(
