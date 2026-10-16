@@ -23,6 +23,8 @@ import scipy.sparse as sp
 
 from src.shared.python.loop_nullspace.solvers import (
     ConicResult,
+    ConicSettings,
+    QuadraticObjective,
     SOCBlock,
     solve_socp,
 )
@@ -85,17 +87,19 @@ def solve_qp(
         be = np.concatenate([be, fixed_b])
     pairs = [(None if np.isinf(a) else a, None if np.isinf(b) else b) for a, b in box]
     a_ub, bu = _as_rows(A_ub, b_ub, n)
+    objective = cc if P is None else QuadraticObjective(cc, P)
+    settings = (
+        None if max_iter is None and tol is None else ConicSettings(max_iter, tol)
+    )
     return solve_socp(
-        cc,
+        objective,
         a_eq if a_eq.shape[0] else None,
         be if be.size else None,
         a_ub if a_ub.shape[0] else None,
         bu if bu.size else None,
         list(cones),
         bounds=pairs,
-        max_iter=max_iter,
-        P=P,
-        tol=tol,
+        settings=settings,
     )
 
 
