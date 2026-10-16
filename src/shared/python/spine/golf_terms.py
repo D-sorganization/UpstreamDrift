@@ -408,12 +408,19 @@ def evaluate(
     Preconditions: ``term_id`` is registered; ``inputs`` holds every name in
     ``definition(term_id).required_inputs``; ``handedness`` is ``"right"`` or
     ``"left"`` (validated for every term, applied only where the term is
-    handed). Rotation inputs are ``(3, 3)`` or ``(N, 3, 3)`` proper rotations.
+    handed). Rotation inputs (the JCS terms) are ``(3, 3)`` or ``(N, 3, 3)``
+    proper rotations. ``side_bend_tilt`` takes no rotation: ``trunk_axis`` is a
+    nonzero 3-vector ``(3,)`` or a series ``(N, 3)`` of them, with unit-normalised
+    ``up`` and ``target`` vectors of shape ``(3,)``; any other shape raises
+    ``ValueError``.
 
-    Postconditions: returns a new 1-D float array in the units of the
-    definition (length N, or 1 for a single rotation); unavailable samples are
-    NaN, never zero (e.g. gimbal-locked JCS samples, marker dropouts).
-    ``reverse_spine_angle`` returns the single value at ``events.top_idx``.
+    Postconditions: returns a new float array in the units of the definition.
+    Every term is 1-D (length N, or 1 for a single rotation) except
+    ``side_bend_tilt``, which returns ``[total, toward_target, lateral]`` as
+    shape ``(3,)`` for a ``(3,)`` axis and ``(N, 3)`` for an ``(N, 3)`` series.
+    Unavailable samples are NaN, never zero (e.g. gimbal-locked JCS samples,
+    marker dropouts). ``reverse_spine_angle`` returns the single value at
+    ``events.top_idx``.
 
     Raises:
         TypeError: for wrongly typed inputs.
