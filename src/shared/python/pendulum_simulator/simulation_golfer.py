@@ -8,8 +8,9 @@ in a GolferSimulationResult for GUI and analysis access.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -38,7 +39,7 @@ from .physics_golfer import (
     net_joint_forces,
     potential_energy,
 )
-from .simulation_core import integrate_ode
+from .simulation_core import SimulationConfig, integrate_ode
 from .simulation_result_base import TrajectoryResultMixin
 from .validation import (
     require,
@@ -168,6 +169,91 @@ class GolferSimulationResult(TrajectoryResultMixin):
 # ---------------------------------------------------------------------------
 
 
+_GOLFER_SETTINGS = frozenset(
+    {"rtol", "atol", "alpha", "beta", "torque_limits", "limits", "clamp"}
+)
+
+
+def _joint_limit_correction(
+    y: np.ndarray, params: GolferParams, limits: JointLimitsNDOF
+) -> np.ndarray:
+    """Return the qddot correction (M^-1 * tau_limit) from joint-limit penalties.
+
+    Only the 7 actuated DOFs (not the club theta) carry limit torques; the
+    correction uses the full 8-DOF mass matrix.
+    """
+    from .physics import joint_limit_torque_ndof
+
+    q = y[:N_DOF]
+    qdot = y[N_DOF:]
+    tau_limit = joint_limit_torque_ndof(q[:7], qdot[:7], limits)
+    M = mass_matrix(q, params)
+    tau_full = np.zeros(N_DOF)
+    tau_full[:7] = tau_limit
+    try:
+        return np.linalg.solve(M, tau_full)  # type: ignore[no-any-return]
+    except np.linalg.LinAlgError:
+        return np.linalg.lstsq(M, tau_full, rcond=None)[0]  # type: ignore[no-any-return]
+
+
+class _ConstraintDriftMonitor:
+    """Tracks the worst Baumgarte constraint violation seen during a run."""
+
+    def __init__(self) -> None:
+        self.max_violation = 0.0
+
+    def observe(self, y: np.ndarray, t: float, params: GolferParams) -> None:
+        viol = constraint_violation(y, params)
+        if viol > self.max_violation:
+            self.max_violation = viol
+        if viol > _CONSTRAINT_WARN_TOL:
+            _log.warning(
+                "Constraint violation %.3e at t=%.4f (warn threshold=%.3e)",
+                viol,
+                t,
+                _CONSTRAINT_WARN_TOL,
+            )
+
+    def report(self) -> None:
+        """Postcondition: log if constraint drift left the bounded range."""
+        max_viol = self.max_violation
+        if max_viol > _CONSTRAINT_ABORT_TOL:
+            _log.error(
+                "Excessive constraint drift: max violation=%.3e > abort threshold=%.3e",
+                max_viol,
+                _CONSTRAINT_ABORT_TOL,
+            )
+        elif max_viol > _CONSTRAINT_WARN_TOL:
+            _log.warning("Max constraint violation=%.3e during simulation", max_viol)
+
+
+def _make_golfer_rhs(
+    params: GolferParams,
+    torque_func: TorqueFunc,
+    cfg: SimulationConfig,
+    monitor: _ConstraintDriftMonitor,
+) -> Callable[[float, np.ndarray], np.ndarray]:
+    """Build the constrained golfer ODE right-hand side for ``integrate_ode``."""
+    alpha = 5.0 if cfg.alpha is None else cfg.alpha
+    beta = 5.0 if cfg.beta is None else cfg.beta
+    torque_limits = cfg.effective_torque_limits
+    limits: JointLimitsNDOF | None = cfg.limits
+
+    def ode_rhs(t: float, y: np.ndarray) -> np.ndarray:
+        require(t is not None, "t must be provided")
+        dydt = equations_of_motion(
+            y, t, params, torque_func, alpha, beta, torque_limits
+        )
+        # Apply joint limit penalty torques if enabled
+        if limits is not None:
+            dydt[N_DOF:] += _joint_limit_correction(y, params, limits)
+        # Monitor constraint drift (Baumgarte stabilization postcondition).
+        monitor.observe(y, t, params)
+        return dydt
+
+    return ode_rhs
+
+
 def run_simulation(
     params: GolferParams,
     initial_state: State,
@@ -175,13 +261,8 @@ def run_simulation(
     torque_func: TorqueFunc,
     dt: float = 0.005,
     method: str = "RK45",
-    rtol: float = 1e-6,
-    atol: float = 1e-8,
-    alpha: float = 5.0,
-    beta: float = 5.0,
-    torque_limits: np.ndarray | None = None,
-    limits: JointLimitsNDOF | None = None,
-    clamp: np.ndarray | None = None,
+    config: SimulationConfig | None = None,
+    **overrides: Any,
 ) -> GolferSimulationResult:
     """Integrate the constrained golfer equations of motion.
 
@@ -191,14 +272,15 @@ def run_simulation(
     initial_state : np.ndarray, shape (16,)
     t_end : float
     torque_func : callable
-    dt : float â€” output time step
-    method : str â€” ODE solver method
-    rtol, atol : float â€” solver tolerances
-    alpha, beta : float â€” Baumgarte stabilization gains
-    torque_limits : np.ndarray, shape (7,), optional
-        Per-joint torque saturation limits.
-    limits : JointLimitsNDOF, optional
-        Joint angle limits with penalty stiffness.
+    dt : float - output time step
+    method : str - ODE solver method
+    config : SimulationConfig, optional
+        Shared optional settings: ``rtol``/``atol`` (solver tolerances),
+        ``alpha``/``beta`` (Baumgarte stabilization gains),
+        ``torque_limits`` (shape (7,) per-joint saturation; ``clamp`` is the
+        legacy alias used by SimulationPanel) and ``limits``
+        (``JointLimitsNDOF`` joint angle limits with penalty stiffness).
+        The same names may be passed as keyword arguments.
 
     Returns
     -------
@@ -209,54 +291,16 @@ def run_simulation(
     require_positive("t_end", t_end)
     require_dt(dt, t_end)
 
-    # Merge clamp kwarg (from SimulationPanel) with torque_limits (legacy)
-    effective_torque_limits = torque_limits if torque_limits is not None else clamp
+    cfg = SimulationConfig.resolve(config, overrides, _GOLFER_SETTINGS)
+    rtol, atol = cfg.solver_tolerances(1e-6, 1e-8)
 
     # Project initial conditions onto constraint manifold
     q0 = project_to_constraints(initial_state[:N_DOF], params)
     qdot0 = project_velocity(q0, initial_state[N_DOF:], params)
     y0 = np.concatenate([q0, qdot0])
 
-    # Track constraint drift for postcondition check.
-    _max_violation: list[float] = [0.0]
-
-    def ode_rhs(t: float, y: np.ndarray) -> np.ndarray:
-        require(t is not None, "t must be provided")
-        dydt = equations_of_motion(
-            y, t, params, torque_func, alpha, beta, effective_torque_limits
-        )
-        # Apply joint limit penalty torques if enabled
-        if limits is not None:
-            from .physics import joint_limit_torque_ndof
-
-            q = y[:N_DOF]
-            qdot = y[N_DOF:]
-            # Only apply limits to the 7 actuated DOFs (not club theta)
-            q_actuated = q[:7]
-            qdot_actuated = qdot[:7]
-            tau_limit = joint_limit_torque_ndof(q_actuated, qdot_actuated, limits)
-            # Add penalty via M^-1 * tau_limit (full 8-DOF mass matrix)
-            M = mass_matrix(q, params)
-            tau_full = np.zeros(N_DOF)
-            tau_full[:7] = tau_limit
-            try:
-                qddot_correction = np.linalg.solve(M, tau_full)
-            except np.linalg.LinAlgError:
-                qddot_correction = np.linalg.lstsq(M, tau_full, rcond=None)[0]
-            dydt[N_DOF:] += qddot_correction
-
-        # Monitor constraint drift (Baumgarte stabilization postcondition).
-        viol = constraint_violation(y, params)
-        if viol > _max_violation[0]:
-            _max_violation[0] = viol
-        if viol > _CONSTRAINT_WARN_TOL:
-            _log.warning(
-                "Constraint violation %.3e at t=%.4f (warn threshold=%.3e)",
-                viol,
-                t,
-                _CONSTRAINT_WARN_TOL,
-            )
-        return dydt
+    monitor = _ConstraintDriftMonitor()
+    ode_rhs = _make_golfer_rhs(params, torque_func, cfg, monitor)
 
     t, states = integrate_ode(
         ode_rhs,
@@ -276,16 +320,5 @@ def run_simulation(
     )
 
     require(result.n_steps >= 2, "Simulation must produce at least 2 time points")
-
-    # Postcondition: constraint drift must remain bounded.
-    max_viol = _max_violation[0]
-    if max_viol > _CONSTRAINT_ABORT_TOL:
-        _log.error(
-            "Excessive constraint drift: max violation=%.3e > abort threshold=%.3e",
-            max_viol,
-            _CONSTRAINT_ABORT_TOL,
-        )
-    elif max_viol > _CONSTRAINT_WARN_TOL:
-        _log.warning("Max constraint violation=%.3e during simulation", max_viol)
-
+    monitor.report()
     return result

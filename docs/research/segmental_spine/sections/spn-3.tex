@@ -24,17 +24,38 @@ per-level matrices $C_i$ of \texttt{LinearCouplingLaw} from those numbers.
   reproduces the published split to $10^{-12}$.
   \emph{Assumption:} the share of a region is spread uniformly over its
   levels; this is not a published per-level result.
-\item[\texttt{fujii2007\_lumbar}] (verified from the PMC full text; a PDF
-  re-check is recommended). Single coordinate $\phi$ = trunk axial rotation.
-  For each segment T12-L1 to L5-S1 the mean axial rotation, coupled flexion
-  and coupled lateral bend measured at $45^\circ$ of trunk rotation are scaled
-  to gains per degree:
-  $C_i=\bigl(-\bar\theta_{\mathrm{flex}},-\bar\theta_{\mathrm{lat}},
-  \bar\theta_{\mathrm{ax}}\bigr)^{\top}_i/45^\circ$. Linearity in rotation is
-  assumed. Fujii reports flexion positive and lateral bend positive in the
-  direction of the rotation; under ADR-0055 extension, right bend and left
-  rotation are positive, so for a positive (left) axial rotation both coupled
-  terms change sign (\texttt{distribution.isb\_sign} in the JSON). SDs are retained in the JSON but unused. Not a share law.
+\item[\texttt{fujii2007\_lumbar}] (version 2; verified from the PMC full
+  text; a PDF re-check is recommended). Single coordinate $\phi$ = trunk
+  axial rotation. For each segment T12-L1 to L5-S1 the mean axial rotation,
+  coupled flexion and coupled lateral bend measured at $45^\circ$ of trunk
+  rotation are scaled to gains per degree, with ISB signs
+  $s=(-1,-1,+1)$ for (flexion, lateral bend, axial rotation):
+  \[
+    \bigl(\theta^{\mathrm{FE}}_i,\theta^{\mathrm{LB}}_i,\theta^{\mathrm{AR}}_i\bigr)
+    = \Bigl(-\tfrac{\bar\theta_{\mathrm{flex}}}{45^\circ}\,|\phi|,\;
+            -\tfrac{\bar\theta_{\mathrm{lat}}}{45^\circ}\,\phi,\;
+            \tfrac{\bar\theta_{\mathrm{ax}}}{45^\circ}\,\phi\Bigr)_i .
+  \]
+  Fujii measured coupled flexion for rotation to either side, so the
+  flexion row is \emph{even} in $\phi$ (a \texttt{ParityCouplingLaw} with
+  \texttt{even\_in\_rotation} $=$ \texttt{coupled\_flexion}); the same ISB
+  flexion (negative \texttt{flexion\_extension}, which is extension-positive)
+  results for left and right rotation of equal magnitude. Coupled lateral
+  bend (reported relative to the rotation direction) and axial rotation stay
+  odd. The Jacobian is $C_{\mathrm{odd}}+C_{\mathrm{even}}\operatorname{sign}\phi$;
+  at $\phi=0$ the subgradient $\operatorname{sign}0=0$ is used, which is a
+  choice because the law is not differentiable there. \emph{Assumption:}
+  flexion is linear in $|\phi|$, extrapolated from a single $45^\circ$
+  measurement; the row numbers are unchanged from version 1. Version 1 was a
+  purely linear law, odd in every axis, and gave coupled extension for right
+  (negative) rotation (defect \#12821). Under ADR-0055 extension, right bend
+  and left rotation are positive, so for a positive (left) rotation the bend
+  sign is mapped by \texttt{distribution.isb\_sign} in the JSON. SDs are
+  retained in the JSON but unused. Not a share law. The law is not a
+  \texttt{LinearCouplingLaw}, so it cannot be written as OpenSim linear
+  couplers (the fixture path rejects it with \texttt{TypeError}); it is
+  consumed through the \texttt{CouplingLaw} protocol only.
+  Tests: \texttt{tests/shared/python/spine/test\_coupling\_parity.py}.
 \item[\texttt{uniform\_reference}] (citation: repo-authored reference, not
   literature). $C_i=I/17$ for all 17 levels; a synthetic baseline.
 \end{description}

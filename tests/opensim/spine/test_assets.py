@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import date
+import re
 from pathlib import Path
 
 import pytest
@@ -151,7 +153,14 @@ def test_committed_manifest_schema() -> None:
         "senteler2016_lumbspine_30dof",
     }
     for asset_id, entry in data["assets"].items():
-        assert entry["model_sha256"] is None, asset_id  # pinned in SPN-6b
+        pinned = entry["model_sha256"]
+        accepted = entry["owner_accepted_terms_on"]
+        if pinned is None:
+            assert accepted is None, asset_id  # no acceptance without a pin
+        else:
+            # SPN-6b: a pin needs the owner's licence acceptance date.
+            assert re.fullmatch(r"[0-9a-f]{64}", pinned), asset_id
+            assert date.fromisoformat(accepted), asset_id
         assert entry["env_var"].startswith("UD_SPINE_")
         assert entry["simtk_url"].startswith("https://simtk.org/")
         assert entry["citation"]["text"] and entry["citation"]["doi"]
@@ -165,3 +174,28 @@ def test_committed_manifest_schema() -> None:
 def test_committed_manifest_resolves_without_env() -> None:
     for asset_id in ("bruno2015_fullbody_os4_v2", "senteler2016_lumbspine_3dof"):
         assert resolve_spine_asset(asset_id, {}) is None
+
+
+#: Pinned in SPN-6b (#12749) from the owner's local file; terms accepted
+#: 2026-10-16. Senteler models were not supplied and stay unpinned.
+BRUNO_SHA256 = "e488ae2cf67be3de36f569cab514e181bfa89d5186d998f1627b461b4498fd47"
+
+
+def test_bruno_pinned_and_senteler_unpinned() -> None:
+    assets = json.loads(DEFAULT_MANIFEST_PATH.read_text())["assets"]
+    bruno = assets["bruno2015_fullbody_os4_v2"]
+    assert bruno["model_sha256"] == BRUNO_SHA256
+    assert bruno["owner_accepted_terms_on"] == "2026-10-16"
+    for asset_id in ("senteler2016_lumbspine_3dof", "senteler2016_lumbspine_30dof"):
+        assert assets[asset_id]["model_sha256"] is None
+
+
+def test_owner_bruno_file_is_qualified() -> None:
+    request = resolve_spine_asset("bruno2015_fullbody_os4_v2")
+    if request is None:
+        pytest.skip(
+            "UNQUALIFIED: bruno2015_fullbody_os4_v2 (UD_SPINE_BRUNO_SOURCE unset)"
+        )
+    receipt = admit_spine_asset(request)
+    assert receipt.status is SpineAssetStatus.QUALIFIED
+    assert receipt.model_sha256 == BRUNO_SHA256

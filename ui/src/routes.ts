@@ -18,6 +18,7 @@ export const KNOWN_APP_ROUTES = [
     '/tools/bunker-workbench',
     '/tools/dataset',
     '/tools/analysis',
+    '/tools/spine-viewer',
     '/tools/character-builder',
     '/tools/canonical-core/estimation',
     '/tools/canonical-core/comparison',

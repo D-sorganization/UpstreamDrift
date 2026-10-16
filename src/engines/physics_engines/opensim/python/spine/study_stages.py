@@ -147,7 +147,9 @@ def _drive(request: Any, model: Path, scrub: Any, out: StageOutcome) -> DriveRes
     out.active = "drive"
     law = _requested_law(request)
     options = DriveOptions(
-        tolerance_rad=request.drive_tolerance_rad, pelvis=_PELVIS[request.pelvis]
+        tolerance_rad=request.drive_tolerance_rad,
+        pelvis=_PELVIS[request.pelvis],
+        torso_alignment=request.torso_alignment,
     )
     result = drive_segmental_model(
         golf, model_path=model, model_id=request.model_id, law=law, options=options
@@ -210,6 +212,8 @@ def _inverse_dynamics(
         id_peak_force_n=_num(budget.peak_force_n),
         id_peak_moment_nm=_num(budget.peak_moment_nm),
         id_budget_passed=bool(budget.passed),
+        id_body_height_m=_num(budget.body_height_m),
+        id_body_height_source=budget.body_height_source,
     )
     if not budget.passed:
         out.reasons.append("inverse-dynamics pelvis residual exceeds the budget")

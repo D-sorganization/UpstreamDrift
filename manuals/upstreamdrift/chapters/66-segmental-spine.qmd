@@ -168,8 +168,9 @@ The terminal body is not automatically the ISB thorax:
 - ADR-0055 item 2 requires a separate, model-specific calibration
   $T_{\mathrm{terminal}\to\mathrm{thorax}}$ (thorax landmarks IJ, C7, PX, T8),
   and says it is never assumed to be the identity.
-- No code path in this pathway estimates that calibration. The drive's
-  alignment $A$ (see Kinematic Input and Drive) defaults to the identity.
+- No code path in this pathway estimates that calibration. A study must
+  supply the drive alignment $A$ (see Kinematic Input and Drive) with its
+  calibration source; otherwise the study is `unqualified` (#12823).
 
 Software verification:
 
@@ -195,6 +196,7 @@ Law families (`coupling.py`, shared `spine`):
 | Linear | $\theta_i = C_i\,\phi$, $C_i \in \mathbb{R}^{3 \times n_\phi}$, cross-axis terms allowed | $C_i$ |
 | State-dependent | $\theta_i = C_i(s)\,\phi$, $C_i$ piecewise linear in $s = \phi_k$ over strictly increasing breakpoints, held constant outside them | $C_i(s) + (\mathrm{d}C_i/\mathrm{d}s\,\phi)\,e_k^{\mathsf T}$, right-hand slope at interior breakpoints, zero slope outside |
 | Polynomial | $\theta_{i,a} = o + \sum_{k=0}^{4} c_k (\phi_d - x_0)^k$ for one driver $d$; unlisted axes are zero | Polynomial derivative in $\phi_d$ |
+| Parity | $\theta_i = C^{\mathrm{odd}}_i\,\phi + C^{\mathrm{even}}_i\,\lvert\phi\rvert$, $C^{\mathrm{even}}_i$ non-zero only on declared even axes | $C^{\mathrm{odd}}_i + C^{\mathrm{even}}_i\,\mathrm{sign}(\phi)$, subgradient $\mathrm{sign}(0) = 0$ |
 
 Every law carries an id, a version and a citation. The regional fraction of
 axis $a$ over a level set $R$ is
@@ -209,7 +211,7 @@ by `coupling_data.py` (shared `spine`):
 | Law | Construction | Source Status |
 |---|---|---|
 | `bruno2015_regional` | Diagonal $C_i = \mathrm{diag}(p_a / (100\, n_r))$ with regional shares $p$ lumbar/thoracic 51/49 (flexion), 27/73 (lateral bending), 17/83 (axial rotation), $n_L = 5$, $n_T = 12$. The uniform spread within a region is an assumption | Bruno 2015 Table B1: `verified_from_primary: true` (main text only, PMC5101035); PDF re-check recommended |
-| `fujii2007_lumbar` | One coordinate, trunk axial rotation. $C_i = \mathrm{sign} \odot \bar\theta_i / 45°$, a 3 × 1 column per level T12-L1 to L5-S1 from the mean segment angles at 45 deg of trunk rotation. Linearity in rotation is an assumption. Gains do not sum to 1 | Fujii 2007 Table F1 (n = 10): `verified_from_primary: true` (PMC2223353 full text, two agreeing extractions); PDF re-check, author list and DOI pending (#12737) |
+| `fujii2007_lumbar` | Version 2, a parity law with one coordinate, trunk axial rotation $\phi$. Per level T12-L1 to L5-S1 from the mean segment angles $\bar\theta_i$ at 45 deg of trunk rotation: lateral bend and axial rotation $\mathrm{sign} \odot \bar\theta_i\,\phi / 45°$ (odd in $\phi$); coupled flexion $-\bar\theta_{\mathrm{flex},i}\,\lvert\phi\rvert / 45°$ (even in $\phi$, declared by `distribution.even_in_rotation`). Linearity in $\lvert\phi\rvert$ is an assumption from a single 45 deg measurement. Gains do not sum to 1 | Fujii 2007 Table F1 (n = 10): `verified_from_primary: true` (PMC2223353 full text, two agreeing extractions); PDF re-check, author list and DOI pending (#12737) |
 | `uniform_reference` | $C_i = I/17$ | Repository reference, not literature |
 
 The per-level laws `bruno2015_per_level` (Bruno Supplemental Table 2) and
@@ -222,24 +224,32 @@ Sign map for `fujii2007_lumbar`:
   bending relative to the direction of trunk rotation.
 - The JSON field `distribution.isb_sign` maps these to ISB signs: flexion
   $-1$, lateral bending $-1$, axial rotation $+1$.
-- For a positive (left) axial rotation, flexion is ISB-negative and a
-  same-direction (left) bend is ISB-negative.
+- Coupled flexion is ISB-negative for rotation to either side. For a
+  positive (left) rotation a same-direction (left) bend is ISB-negative.
 
-### Fujii Parity Defect
+### Fujii Parity
 
-`fujii2007_lumbar` is linear in one coordinate, so every coupled term is odd
-in the trunk rotation $\phi$.
+`fujii2007_lumbar` (version 2) is a `ParityCouplingLaw`,
+$\theta_i = C^{\mathrm{odd}}_i \phi + C^{\mathrm{even}}_i \lvert\phi\rvert$.
 
 - **Coupled flexion.** Fujii measured flexion for rotation to either side, so
-  this term is even in $\phi$. The shipped law turns it into coupled
-  extension for a negative (right) rotation. For a right-handed backswing the
-  law therefore has the wrong flexion sign.
-- **Coupled lateral bend.** Fujii reports it relative to the rotation
-  direction, so it is correctly odd.
+  this term is even in $\phi$: left and right rotation of equal magnitude give
+  the same ISB flexion. Linearity in $\lvert\phi\rvert$ is an assumption
+  extrapolated from a single 45 deg measurement.
+- **Coupled lateral bend and axial rotation.** Fujii reports lateral bend
+  relative to the rotation direction, so it is odd in $\phi$, as is axial
+  rotation.
+- **Jacobian.** The law is not differentiable at $\phi = 0$; the subgradient
+  $\mathrm{sign}(0) = 0$ is used there.
+- **Scope.** A parity law is not a `LinearCouplingLaw`, so it cannot be
+  written as OpenSim linear couplers (`fixture_coupling` raises `TypeError`);
+  it is used through the `CouplingLaw` protocol only.
 
-This is a declared defect of the linear single-coordinate form, not of the
-transcription. No test covers right rotation. A fix needs an even/odd law
-form, which is a code change and is listed under Limitations.
+Version 1 was linear in $\phi$ and gave coupled extension for a negative
+(right) rotation, the wrong flexion sign for a right-handed backswing. The
+defect was in the law form, not the transcription; it was fixed in #12821
+with the row numbers unchanged. Guard:
+`tests/shared/python/spine/test_coupling_parity.py`.
 
 ### Coupler Extraction and Restriction
 
@@ -362,10 +372,18 @@ Target and alignment:
 
 - The target is $R_\star = R_{\mathrm{pelvis}\to\mathrm{torso}}\, A$.
 - $A$ (`DriveOptions.torso_alignment`) is the segmental terminal frame
-  expressed in the `golf_humanoid` torso frame. It defaults to the identity,
-  and the pelvis body frames of the two models are assumed to coincide.
-- These are unvalidated caller assumptions, not calibration evidence. A wrong
-  $A$ biases every per-level angle without raising the geodesic residual.
+  expressed in the `golf_humanoid` torso frame, and the pelvis body frames of
+  the two models are assumed to coincide. `DriveOptions` itself defaults to
+  the identity, but ADR-0055 item 2 forbids assuming that offset for a
+  reported result.
+- The study layer therefore requires $A$ (a 3 × 3 proper rotation) with a
+  provenance string (#12823). The receipt records $A$ and its provenance
+  (`calibrated:<source>` or `assumed_identity`), and both enter the request
+  hash. A study without a supplied $A$ is `unqualified` with an explicit
+  reason and can never be `pass`.
+- $A$ itself is not validated: a wrong $A$ biases every per-level angle
+  without raising the geodesic residual, so its correctness rests on the
+  cited calibration.
 
 Law and validity:
 
@@ -459,13 +477,27 @@ $$c_i = f\!\left(\textstyle\prod_{j \le i} T_j\right) -
 f\!\left(\textstyle\prod_{j < i} T_j\right), \qquad f(\text{empty}) = 0,$$
 with caudal-first truncation. The prefixes are `pose.relative_rotation`
 products and include each level's neutral offset, the first level's included.
-They exclude $B$, $E$ and any calibration $A$.
+`segmental_contributions` attributes the supplied `SegmentalPose` chain only
+($B = E = A = I$).
 
-The differences telescope to the term of the supplied `SegmentalPose` chain.
-`contribution_remainder` compares the sum against `pose.compose()`, so it
-checks internal telescoping only. It does not verify closure to a separately
-evaluated pelvis-to-thorax term. A contribution depends on every level caudal
-to it and is not that level's own angle.
+`segmental_contribution_breakdown` (#12822) attributes the rest of the
+pelvis-to-thorax path. The global term is $f(B\,C\,E\,A)$ with
+$C=\prod_i T_i$, $B$ the base rotation (pelvis to first body), $E$ the
+terminal rotation (last vertebra to terminal body) and $A$ the drive
+alignment. With $P_0=B$, $P_k=B\prod_{j\le k}T_j$, $P_E=P_nE$ and
+$P_A=P_EA$, it returns $c_\mathrm{base}=f(B)$, $c_k=f(P_k)-f(P_{k-1})$,
+$c_\mathrm{terminal}=f(P_E)-f(P_n)$ and $c_\mathrm{alignment}=f(P_A)-f(P_E)$.
+Only the supplied rotations are reported, as named non-level entries that are
+never folded into a level. The sum telescopes to $f(P_A)$, and a
+postcondition checks closure to $10^{-9}$ degrees on finite samples;
+gimbal-locked prefixes give NaN.
+
+`contribution_remainder`, with the same optional rotations, checks internal
+telescoping only. It does not verify closure to a separately evaluated
+pelvis-to-thorax term, so callers must pass the same $B$, $E$ and $A$ they
+used for the global term. A contribution depends on $B$ and on every level
+caudal to it, and is not that level's own angle. `level_angle_stack`
+attributes the supplied chain only.
 
 Software verification: the analyzer, swing metrics and API X-factor paths
 delegate to the registry under their legacy ids, golden-tested to

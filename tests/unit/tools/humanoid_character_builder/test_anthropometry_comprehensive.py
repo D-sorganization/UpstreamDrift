@@ -27,6 +27,8 @@ from humanoid_character_builder.core.anthropometry import (
     get_segment_mass_ratio,
 )
 
+pytestmark = pytest.mark.unit
+
 # ── de Leva Data Loading ────────────────────────────────────────────────────
 
 

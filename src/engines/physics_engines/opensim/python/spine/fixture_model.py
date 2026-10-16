@@ -30,7 +30,10 @@ the expected thorax-proxy transform in the pelvis frame is
 
     T_base @ T_1 @ ... @ T_n @ T_terminal
 
-(caudal factor first; angles never add).  Units: metres, kilograms, radians
+(caudal factor first; angles never add).  Optionally (``FixtureSpec.translational_dofs``) each
+level joint also drives its three translation axes (X, Y, Z of the inferior
+frame) from coordinates ``<level>_ant_post``, ``_cran_caud``, ``_med_lat``
+(SPN-8c, invented range +-0.02 m).  Units: metres, kilograms, radians
 in the model; degrees in :class:`FixtureSpec`.  Rigid-body inertia is a
 uniform cylinder of radius ``_RADIUS_M`` along Y, which is positive definite.
 """
@@ -92,6 +95,8 @@ _THORAX_LENGTH_M = 0.25  # inertia only; invented
 _RADIUS_M = 0.05  # inertia only; invented
 _COORD_RANGE_RAD = 1.0  # keeps lateral bending far from the +-90 deg gimbal lock
 _MAX_ANGLE_DEG = 89.0
+_TRANS_SUFFIXES = ("ant_post", "cran_caud", "med_lat")
+_TRANS_RANGE_M = 0.02  # invented
 _SUFFIXES = ("flex_ext", "lat_bend", "axial_rot")
 _AXES = ("0 0 1", "1 0 0", "0 1 0")  # ISB ZXY: rotation1, rotation2, rotation3
 _PELVIS = "pelvis"
@@ -191,6 +196,9 @@ class FixtureSpec:
     first and non-empty; mapping keys exactly cover the levels / bodies;
     masses and lengths finite and > 0; angles finite with |angle| <= 89 deg.
 
+    ``translational_dofs`` (bool) adds three invented-range translation
+    coordinates per level joint (SPN-8c); default false.
+
     Postconditions: mappings are replaced by read-only copies.
     """
 
@@ -207,6 +215,7 @@ class FixtureSpec:
     thorax_proxy_mass_kg: float = _DEFAULT_THORAX_MASS_KG
     sacral_slope_deg: float = 30.0
     thorax_tilt_deg: float = 5.0
+    translational_dofs: bool = False
     _bodies: tuple[str, ...] = field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
@@ -257,6 +266,8 @@ class FixtureSpec:
         object.__setattr__(
             self, "thorax_tilt_deg", _angle_deg(self.thorax_tilt_deg, "tilt")
         )
+        if not isinstance(self.translational_dofs, bool):
+            raise TypeError("translational_dofs must be a bool")
         object.__setattr__(self, "_bodies", bodies)
 
 
@@ -271,6 +282,7 @@ class FixtureLevelNames:
     axial_rot: str
     inferior_body: str
     superior_body: str
+    translations: tuple[str, str, str] | None = None
 
     @property
     def coordinates(self) -> tuple[str, str, str]:
@@ -287,7 +299,8 @@ def fixture_level_names(spec: FixtureSpec) -> tuple[FixtureLevelNames, ...]:
     """Joint/coordinate/body names per level, caudal to cranial.
 
     Joint ``<LEVEL>_jnt``; coordinates ``<level>_flex_ext``, ``_lat_bend``,
-    ``_axial_rot`` with the lowercase level name.
+    ``_axial_rot`` with the lowercase level name; ``translations`` is
+    ``<level>_ant_post``, ``_cran_caud``, ``_med_lat`` or None.
     """
     out = []
     for level in spec.levels:
@@ -301,6 +314,11 @@ def fixture_level_names(spec: FixtureSpec) -> tuple[FixtureLevelNames, ...]:
                 axial_rot=f"{stem}_axial_rot",
                 inferior_body=_body_name(level.inferior),
                 superior_body=_body_name(level.superior),
+                translations=(
+                    tuple(f"{stem}_{s}" for s in _TRANS_SUFFIXES)  # type: ignore[arg-type]
+                    if spec.translational_dofs
+                    else None
+                ),
             )
         )
     return tuple(out)
@@ -396,11 +414,14 @@ def _add_level_joint(
     ET.SubElement(joint, "socket_parent_frame").text = pname
     ET.SubElement(joint, "socket_child_frame").text = cname
     coords = ET.SubElement(joint, "coordinates")
-    for coord_name in names.coordinates:
+    ranged = [(c, _COORD_RANGE_RAD) for c in names.coordinates] + [
+        (c, _TRANS_RANGE_M) for c in names.translations or ()
+    ]
+    for coord_name, bound in ranged:
         coord = ET.SubElement(coords, "Coordinate", attrib={"name": coord_name})
         ET.SubElement(coord, "default_value").text = "0"
         ET.SubElement(coord, "default_speed_value").text = "0"
-        ET.SubElement(coord, "range").text = f"{-_COORD_RANGE_RAD} {_COORD_RANGE_RAD}"
+        ET.SubElement(coord, "range").text = f"{-bound} {bound}"
         ET.SubElement(coord, "clamped").text = "false"
         ET.SubElement(coord, "locked").text = "false"
     frames = ET.SubElement(joint, "frames")
@@ -420,8 +441,11 @@ def _add_level_joint(
         zip(_AXES, names.coordinates, strict=True), start=1
     ):
         _build_transform_axis(transform, "rotation", idx, axis, coord_name)
-    for idx, axis in enumerate(("1 0 0", "0 1 0", "0 0 1"), start=1):
-        _build_transform_axis(transform, "translation", idx, axis, None)
+    trans_names: tuple[str | None, ...] = names.translations or (None, None, None)
+    for idx, (axis, trans_name) in enumerate(
+        zip(("1 0 0", "0 1 0", "0 0 1"), trans_names, strict=True), start=1
+    ):
+        _build_transform_axis(transform, "translation", idx, axis, trans_name)
 
 
 def _build_jointset(model: ET.Element, spec: FixtureSpec) -> None:
@@ -488,6 +512,7 @@ def build_fixture_osim(
     spec: FixtureSpec,
     coupling: LinearCouplingLaw | None = None,
     muscles: bool = False,
+    bushings: Mapping[SpinalLevel, Any] | None = None,
 ) -> str:
     """Return the ``.osim`` XML text (OpenSim 4 format) for ``spec``.
 
@@ -498,6 +523,9 @@ def build_fixture_osim(
             ``CoordinateCouplerConstraint`` per dependent level coordinate
             (SPN-7b, see ``fixture_coupling``).
         muscles: if true, add 8 bilateral lumped trunk muscles (SPN-7b).
+        bushings: optional invented ``FixtureBushing`` per level (SPN-8c, see
+            ``fixture_passive``); adds one bushing force across the level's
+            joint frames.
 
     Preconditions: ``spec`` is a :class:`FixtureSpec`; ``muscles`` is a bool.
     Postconditions: the text is deterministic for equal arguments, has one
@@ -518,6 +546,12 @@ def build_fixture_osim(
         )
 
         augment_fixture_tree(root, spec, coupling, muscles)
+    if bushings is not None:
+        from src.engines.physics_engines.opensim.python.spine.fixture_passive import (
+            add_fixture_bushings,
+        )
+
+        add_fixture_bushings(root, spec, bushings)
     return ET.tostring(root, encoding="utf-8").decode("utf-8")
 
 
@@ -526,16 +560,17 @@ def write_fixture_osim(
     path: str | Path,
     coupling: LinearCouplingLaw | None = None,
     muscles: bool = False,
+    bushings: Mapping[SpinalLevel, Any] | None = None,
 ) -> Path:
     """Write the fixture to ``path`` (must end in ``.osim``) and return it.
 
-    ``coupling`` and ``muscles`` are forwarded to :func:`build_fixture_osim`.
+    ``coupling``, ``muscles`` and ``bushings`` are forwarded to :func:`build_fixture_osim`.
     Parent directories are created.  Raises ``ValueError`` for another suffix.
     """
     out = Path(path)
     if out.suffix != ".osim":
         raise ValueError(f"fixture path must end in .osim, got {out.name!r}")
-    text = build_fixture_osim(spec, coupling, muscles)
+    text = build_fixture_osim(spec, coupling, muscles, bushings)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(text, encoding="utf-8")
     return out

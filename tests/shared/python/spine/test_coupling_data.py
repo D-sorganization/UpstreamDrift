@@ -159,7 +159,11 @@ def test_fujii_matches_extraction_rows() -> None:
                 [math.radians(src["axial_rotation"][0])],
             ]
         ) / math.radians(rot)
-        np.testing.assert_allclose(law.matrices[level], expected, atol=1e-15)
+        # Version 2 (#12821): the flexion row is even in the rotation, so it
+        # lives in even_matrices; the odd matrices carry LB and AR only.
+        np.testing.assert_allclose(law.matrices[level][1:], expected[1:], atol=1e-15)
+        np.testing.assert_allclose(law.even_matrices[level][0], expected[0], atol=1e-15)
+        assert not law.matrices[level][0].any()
 
 
 def test_fujii_levels_and_independent() -> None:
@@ -259,7 +263,8 @@ def test_returned_law_is_independent_copy() -> None:
 def test_fujii_isb_signs_follow_adr_0055() -> None:
     """Left (ISB-positive) trunk rotation flexes L3/4 and bends it right."""
     law = coupling_law("fujii2007_lumbar")
-    gains = law.matrices[SpinalLevel.L3_L4][:, 0]
+    gains = law.matrices[SpinalLevel.L3_L4][:, 0].copy()
+    gains[0] = law.even_matrices[SpinalLevel.L3_L4][0, 0]  # even flexion row
     assert gains[0] < 0.0  # coupled flexion is negative ISB flexion_extension
     assert gains[1] > 0.0  # bend opposite to a left rotation is a right bend
     assert gains[2] > 0.0

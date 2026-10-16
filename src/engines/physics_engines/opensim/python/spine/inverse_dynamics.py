@@ -37,7 +37,11 @@ Residual budget.  :class:`PelvisResidualBudget` reports peak and RMS of the
 pelvis residual force and moment and their ratios to body weight and to body
 weight times body height, judged against a declared :class:`ResidualBudget`.
 With no external loads the residual is the whole weight and the budget fails
-by construction; that is the correct statement, not a defect.
+by construction; that is the correct statement, not a defect.  The body
+height of the moment ratio is the extent of the body origins along the model's
+gravity direction at the FIRST frame of the motion (``body_height_source =
+model_extent_first_frame``) unless the caller gives ``body_height_m``; it does
+not depend on the pose the run ends in or on the model's up axis.
 """
 
 from __future__ import annotations
@@ -74,6 +78,9 @@ from src.shared.python.motion_matching.kinematic_smoothing import (
 from src.shared.python.spine.loads import LoadObservable, SpinalLoadSeries
 
 __all__ = [
+    "HEIGHT_SOURCES",
+    "HEIGHT_SOURCE_GIVEN",
+    "HEIGHT_SOURCE_MODEL_EXTENT",
     "PelvisResidualBudget",
     "PreparedModel",
     "ResidualBudget",
@@ -121,8 +128,9 @@ class SpineIDOptions:
     names when the model has ``pelvis_rx`` and the golf humanoid otherwise);
     ``level_map``: explicit level map (else the registry entry of ``model_id``);
     ``budget``: declared residual limits; ``body_height_m``: height used in the
-    moment ratio (``None`` uses the vertical extent of the body origins in the
-    first frame, which is a model extent and not a stature).
+    moment ratio (``None`` uses the extent of the body origins along the model
+    gravity direction in the first frame, which is a model extent and not a
+    stature).
     """
 
     pelvis: PelvisCoordinates | None = None
@@ -146,6 +154,11 @@ def _ro(array: np.ndarray) -> np.ndarray:
     return out
 
 
+HEIGHT_SOURCE_GIVEN = "body_height_m"
+HEIGHT_SOURCE_MODEL_EXTENT = "model_extent_first_frame"
+HEIGHT_SOURCES = (HEIGHT_SOURCE_GIVEN, HEIGHT_SOURCE_MODEL_EXTENT)
+
+
 @dataclass(frozen=True)
 class PelvisResidualBudget:
     """Pelvis residual wrench per frame and its budget verdict (read-only).
@@ -165,8 +178,14 @@ class PelvisResidualBudget:
     body_weight_n: float
     body_height_m: float
     budget: ResidualBudget
+    body_height_source: str = HEIGHT_SOURCE_MODEL_EXTENT
 
     def __post_init__(self) -> None:
+        if self.body_height_source not in HEIGHT_SOURCES:
+            raise ValueError(
+                f"body_height_source must be one of {HEIGHT_SOURCES}, "
+                f"got {self.body_height_source!r}"
+            )
         for name in ("time_s", "generalized", "moment_nm", "force_n"):
             object.__setattr__(self, name, _ro(getattr(self, name)))
 
@@ -522,8 +541,7 @@ def _solve_frame(
     q, qd, qdd = row
     u, udot = _frame_speeds(layout, q, qd, qdd)
     state.setTime(time_s)  # type: ignore[attr-defined]
-    for j, name in enumerate(layout.names):
-        _coordinate(model, name).setValue(state, float(q[j]), False)  # type: ignore[attr-defined]
+    _set_positions(model, state, layout, q)
     for j, name in enumerate(layout.names):
         _coordinate(model, name).setSpeedValue(state, float(u[j]))  # type: ignore[attr-defined]
     model.realizeDynamics(state)  # type: ignore[attr-defined]
@@ -574,13 +592,44 @@ def _pelvis_wrench(
     return np.concatenate([rot, trans]), moment, trans
 
 
-def _body_extent(model: object, state: object) -> float:
-    """Vertical extent of the body origins in ground [m]."""
+def _gravity_direction(model: object) -> np.ndarray:
+    """Unit vector of the model gravity in ground (the "down" direction)."""
+    gravity = model.getGravity()  # type: ignore[attr-defined]
+    vec = np.array([gravity.get(i) for i in range(3)], dtype=float)
+    norm = float(np.linalg.norm(vec))
+    if not math.isfinite(norm) or norm <= 0.0:
+        raise ValueError("model gravity must be a finite non-zero vector")
+    return vec / norm
+
+
+def _body_origin(bodies: object, index: int, state: object) -> np.ndarray:
+    pos = bodies.get(index).getTransformInGround(state).p()  # type: ignore[attr-defined]
+    return np.array([pos.get(i) for i in range(3)], dtype=float)
+
+
+def _set_positions(
+    model: object, state: object, layout: _Layout, q: np.ndarray
+) -> None:
+    """Set every coordinate value of ``state`` to ``q`` (layout order)."""
+    for j, name in enumerate(layout.names):
+        _coordinate(model, name).setValue(state, float(q[j]), False)  # type: ignore[attr-defined]
+
+
+def _body_extent(
+    model: object, state: object, layout: _Layout, q0: np.ndarray
+) -> float:
+    """Extent of the body origins along the gravity direction at ``q0`` [m].
+
+    Evaluated at the first frame of the motion (``q0``), not at the state the
+    run leaves behind.  The projection is on the model's own gravity direction,
+    so the model's up axis is not assumed.  Mutates ``state`` (positions only).
+    """
+    _set_positions(model, state, layout, q0)
     model.realizePosition(state)  # type: ignore[attr-defined]
     bodies = model.getBodySet()  # type: ignore[attr-defined]
+    down = _gravity_direction(model)
     heights = [
-        bodies.get(i).getTransformInGround(state).p().get(1)
-        for i in range(bodies.getSize())
+        float(down @ _body_origin(bodies, i, state)) for i in range(bodies.getSize())
     ]
     return float(max(heights) - min(heights))
 
@@ -802,9 +851,13 @@ def run_spinal_inverse_dynamics(
     )
     model, state = run.prepared.model, run.prepared.state
     weight = _body_weight(model, state)
-    height = opts.body_height_m or _body_extent(model, state)
+    if opts.body_height_m is None:
+        height = _body_extent(model, state, layout, run.q[0])
+        source = HEIGHT_SOURCE_MODEL_EXTENT
+    else:
+        height, source = opts.body_height_m, HEIGHT_SOURCE_GIVEN
     residual = PelvisResidualBudget(
-        run.times, generalized, res_m, res_f, weight, height, opts.budget
+        run.times, generalized, res_m, res_f, weight, height, opts.budget, source
     )
     ensure(
         series.observable is LoadObservable.GENERALIZED_EFFORT,

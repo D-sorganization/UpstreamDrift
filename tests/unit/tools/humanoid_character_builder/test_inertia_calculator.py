@@ -2,6 +2,7 @@
 Unit tests for inertia calculation modules.
 """
 
+import pytest
 import math
 
 import numpy as np
@@ -16,6 +17,8 @@ from humanoid_character_builder.mesh.primitive_inertia import (
     PrimitiveShape,
     estimate_segment_primitive,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestInertiaResult:
@@ -153,7 +156,13 @@ class TestPrimitiveInertiaCalculator:
         assert result.ixx > 0.0
         assert result.iyy > 0.0
         assert result.izz > 0.0
-        assert result.volume > 0.0
+        assert result.validate_positive_definite()
+        # Since #4600/#4665 (09347b58d0) a zero-volume capsule falls back to the
+        # documented small-positive default inertia instead of clamping its
+        # dimensions to 1e-9 m. The geometry genuinely has no volume, so the
+        # result reports volume 0 rather than a fabricated positive volume.
+        assert result == InertiaResult.create_default(1.0)
+        assert result.volume == 0.0
 
     def test_ellipsoid_inertia(self) -> None:
         calc = PrimitiveInertiaCalculator()

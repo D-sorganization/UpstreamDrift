@@ -96,6 +96,66 @@ gives left and right activations equal to $10^{-6}$; and $p=3$ spreads load
 across more muscles than $p=2$ in every frame (participation ratio 4.9 to 5.7
 against 4.4 to 5.0). The analytic gradient matches central finite differences.
 
+\paragraph{Early-Sample Failure: Diagnosis and Fix.}
+Issue \#12827. On the five-sample synthetic study motion (times 0 to 0.4 s,
+invented fixture of Section SPN-13a, reserve limits $10^{6}$ N$\cdot$m, $p=2$
+and $p=3$) the solver reported failure at the first two samples ("Inequality
+constraints incompatible") and success at the other three. Per-frame record
+before the fix: the demands are 20 to 30 N$\cdot$m with a weighted reserve
+remainder of 3.5 to 5.2 N$\cdot$m (the eight muscles cannot reach 15
+degrees of freedom, as designed); stage one (bounded least squares) succeeds in
+every frame; stage two (SLSQP) stops after one iteration at the stage-one point
+in frames~0 and~1, with the equality-constraint violation already $10^{-16}$,
+all activations below 0.16 (none at the upper bound), five of eight at zero.
+Hypotheses, tested one at a time:
+\begin{enumerate}
+  \item \emph{End-sample derivative error (rejected).} The motion was
+    resampled at 5, 9, 21 and 81 samples and the generalized forces and speeds
+    at $t=0$ and $t=0.1$ s compared with the 81-sample run. The not-a-knot
+    spline error is real but small: maximum $|\Delta\tau|$ of 0.053, 0.015 and
+    0.0023 N$\cdot$m and $|\Delta\dot q|$ of $3.3\times10^{-4}$,
+    $4.6\times10^{-5}$ and $3.0\times10^{-6}$ rad/s for 5, 9 and 21 samples
+    (at $t=0.1$ s: 0.0066, 0.0027, 0.00025 N$\cdot$m). The failure persists at
+    81 samples, where the error is zero by construction, and at the same two
+    times, so derivative quality is not the cause.
+  \item \emph{Initial guess (rejected).} Restarting stage two from
+    $0.5\,a_1$, from $a_1$ plus $10^{-3}$ and from the all-0.5 point gave the
+    same status in every case but one (all-0.5 at the 81-sample $t=0.08$ s
+    frame converged), so the start point is not the primary cause.
+  \item \emph{Activation bounds and reserve sizing (rejected).} The reserve
+    limit was set to 1 and to $10^{6}$ N$\cdot$m: identical failures, identical
+    activations. No activation reaches 0.16 in the failing frames, so the
+    upper bound is inactive.
+  \item \emph{Solver options (reported, not changed).} Tightening or relaxing
+    the SLSQP function tolerance ($10^{-14}$, $10^{-10}$, $10^{-8}$) does not
+    change the failure. No tolerance was altered in the fix.
+  \item \emph{A muscle with no force capacity (confirmed).} In the failing
+    frames the active-force gain of \texttt{rectus\_abdominis\_r} is exactly
+    zero. Natively, its path length minus the tendon slack length (0.0476 m
+    at the first sample) is below the minimum fibre length (0.0533 m), so the
+    rigid-tendon Millard muscle is clamped and its force is zero at every
+    activation; the length grows with the motion and the muscle develops
+    21.8, 129.7 and 212.9 N per unit activation at samples~3 to~5. The zero
+    column of the activation gain breaks SLSQP: on 150 random invented
+    problems with one all-zero column, 98 failed and every one of them
+    succeeded with the column removed; giving the column a gain of 0.001 (or
+    1) in the fixture frames also cured it, while $10^{-6}$ did not at
+    sample~1.
+\end{enumerate}
+\emph{Fix.} A muscle whose gain column is identically zero cannot change the
+muscle generalized force and its cost is minimal at zero, so
+\texttt{static\_opt\_core.\_redistribute} holds it at zero activation and
+leaves it out of the stage-two problem; if no muscle has capacity the
+activations are zero and the whole demand is a reserve. The optimum is
+unchanged (the muscle contributes nothing either way); only the degenerate
+variable is removed. No tolerance, budget or option changed. After the fix all
+five samples succeed for $p=2$ and $p=3$ with the muscle at zero activation in
+the first two. Near-zero (not exactly zero) capacities are not handled
+specially; the $10^{-6}$ experiment above shows that fragility remains
+possible for capacities of that order, which the fixture does not produce.
+The reserve share in these frames stays high by design of the fixture and the
+frames remain \texttt{unqualified}.
+
 \paragraph{Limitations and Deferred Work.}
 The rigid-tendon affine force model is a declared approximation; activations
 below the minimum activation are a model of $a=0$, not a simulated force. The
@@ -107,5 +167,6 @@ via-point discontinuities are inherited from the model.
 \paragraph{Reproduction.}
 \begin{verbatim}
 python -m pytest tests/unit/engines/opensim/test_static_opt_core.py \
-  tests/opensim/spine/test_static_optimization.py -q -n 0
+  tests/opensim/spine/test_static_optimization.py \
+  tests/opensim/spine/test_static_optimization_early_samples.py -q -n 0
 \end{verbatim}
