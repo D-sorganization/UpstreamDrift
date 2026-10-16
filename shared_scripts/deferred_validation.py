@@ -185,13 +185,16 @@ def _validate_enum(
     ]
 
 
-def _validate_record_shape(
+def _check_field_presence(
     record: dict[str, Any], path: Path, pointer: str
 ) -> list[CatalogFinding]:
-    """Required fields, unknown fields, and closed value sets."""
+    """Unknown fields first (sorted), then missing required fields.
+
+    Contract: ``record`` is a mapping; a non-empty result means every later
+    check must be skipped because required keys may be absent.
+    """
     findings: list[CatalogFinding] = []
     known = set(REQUIRED_RECORD_FIELDS) | set(OPTIONAL_RECORD_FIELDS)
-
     for field in sorted(set(record) - known):
         findings.append(
             _finding(
@@ -214,9 +217,17 @@ def _validate_record_shape(
                     f"Add {field}; write null where the schema allows it.",
                 )
             )
-    if findings:
-        return findings
+    return findings
 
+
+def _check_identity(
+    record: dict[str, Any], path: Path, pointer: str
+) -> list[CatalogFinding]:
+    """Record id, title and origin issue URL.
+
+    Contract: every key in ``REQUIRED_RECORD_FIELDS`` is present in ``record``.
+    """
+    findings: list[CatalogFinding] = []
     record_id = record["id"]
     if not (isinstance(record_id, str) and RECORD_ID.match(record_id)):
         findings.append(
@@ -249,16 +260,29 @@ def _validate_record_shape(
                 "Preserve the original issue URL in full; it is the audit trail.",
             )
         )
+    return findings
 
-    findings.extend(_validate_enum(record, "disposition", DISPOSITIONS, path, pointer))
-    findings.extend(
-        _validate_enum(record, "origin_state", ORIGIN_STATES, path, pointer)
-    )
-    findings.extend(
-        _validate_enum(record, "validation_state", VALIDATION_STATES, path, pointer)
-    )
-    findings.extend(_validate_enum(record, "discovery", DISCOVERY_MODES, path, pointer))
 
+def _check_enums(
+    record: dict[str, Any], path: Path, pointer: str
+) -> list[CatalogFinding]:
+    """The four closed value sets, in schema order."""
+    findings: list[CatalogFinding] = []
+    for field, allowed in (
+        ("disposition", DISPOSITIONS),
+        ("origin_state", ORIGIN_STATES),
+        ("validation_state", VALIDATION_STATES),
+        ("discovery", DISCOVERY_MODES),
+    ):
+        findings.extend(_validate_enum(record, field, allowed, path, pointer))
+    return findings
+
+
+def _check_obligation_lists(
+    record: dict[str, Any], path: Path, pointer: str
+) -> list[CatalogFinding]:
+    """Each obligation field must be a non-empty list of non-empty strings."""
+    findings: list[CatalogFinding] = []
     for field in NON_EMPTY_LIST_FIELDS:
         value = record[field]
         if not isinstance(value, list) or not value:
@@ -284,70 +308,102 @@ def _validate_record_shape(
                         f"Write each {field} entry as text.",
                     )
                 )
+    return findings
 
+
+def _check_blockers(
+    record: dict[str, Any], path: Path, pointer: str
+) -> list[CatalogFinding]:
+    """Every blocker must name a physical-world reason."""
+    findings: list[CatalogFinding] = []
     blockers = record["blocked_on"]
-    if isinstance(blockers, list):
-        for index, item in enumerate(blockers):
-            if isinstance(item, str) and item in EXTERNAL_BLOCKERS:
-                continue
-            findings.append(
-                _finding(
-                    path,
-                    f"{pointer}/blocked_on/{index}",
-                    "bad_value",
-                    f"blocked_on[{index}] is {item!r}; allowed values are "
-                    f"{', '.join(sorted(EXTERNAL_BLOCKERS))}.",
-                    "A deferral is for work blocked on the physical world, not "
-                    "for work that is merely hard or unscheduled.",
-                )
+    if not isinstance(blockers, list):
+        return findings
+    for index, item in enumerate(blockers):
+        if isinstance(item, str) and item in EXTERNAL_BLOCKERS:
+            continue
+        findings.append(
+            _finding(
+                path,
+                f"{pointer}/blocked_on/{index}",
+                "bad_value",
+                f"blocked_on[{index}] is {item!r}; allowed values are "
+                f"{', '.join(sorted(EXTERNAL_BLOCKERS))}.",
+                "A deferral is for work blocked on the physical world, not "
+                "for work that is merely hard or unscheduled.",
             )
+        )
+    return findings
 
+
+def _check_evidence(
+    record: dict[str, Any], path: Path, pointer: str
+) -> list[CatalogFinding]:
+    """Evidence entries must be URLs or repo-relative paths, never prose."""
+    findings: list[CatalogFinding] = []
     evidence = record["evidence"]
-    if isinstance(evidence, list):
-        for index, item in enumerate(evidence):
-            if isinstance(item, str) and _is_checkable_reference(item):
-                continue
-            findings.append(
-                _finding(
-                    path,
-                    f"{pointer}/evidence/{index}",
-                    "unverifiable_evidence",
-                    f"evidence[{index}] is not a URL or repo-relative path.",
-                    "Cite something a reader can open. Prose is not evidence, "
-                    "and a measurement that was never taken is not evidence.",
-                )
+    if not isinstance(evidence, list):
+        return findings
+    for index, item in enumerate(evidence):
+        if isinstance(item, str) and _is_checkable_reference(item):
+            continue
+        findings.append(
+            _finding(
+                path,
+                f"{pointer}/evidence/{index}",
+                "unverifiable_evidence",
+                f"evidence[{index}] is not a URL or repo-relative path.",
+                "Cite something a reader can open. Prose is not evidence, "
+                "and a measurement that was never taken is not evidence.",
             )
+        )
+    return findings
 
+
+def _check_justification(
+    record: dict[str, Any], path: Path, pointer: str
+) -> list[CatalogFinding]:
+    """The justification must be long enough to carry a real reason."""
     justification = record["justification"]
     if (
-        not isinstance(justification, str)
-        or len(justification.strip()) < MIN_JUSTIFICATION_CHARS
+        isinstance(justification, str)
+        and len(justification.strip()) >= MIN_JUSTIFICATION_CHARS
+    ):
+        return []
+    return [
+        _finding(
+            path,
+            f"{pointer}/justification",
+            "thin_justification",
+            f"justification is shorter than {MIN_JUSTIFICATION_CHARS} characters.",
+            "State why no coding agent can finish this work.",
+        )
+    ]
+
+
+def _check_dates_and_urls(
+    record: dict[str, Any], path: Path, pointer: str
+) -> list[CatalogFinding]:
+    """``reviewed_on`` is an ISO date or null; the URL fields are URLs or null."""
+    findings: list[CatalogFinding] = []
+    reviewed_on = record["reviewed_on"]
+    if reviewed_on is not None and not (
+        isinstance(reviewed_on, str) and ISO_DATE.match(reviewed_on)
     ):
         findings.append(
             _finding(
                 path,
-                f"{pointer}/justification",
-                "thin_justification",
-                f"justification is shorter than {MIN_JUSTIFICATION_CHARS} characters.",
-                "State why no coding agent can finish this work.",
+                f"{pointer}/reviewed_on",
+                "bad_value",
+                f"reviewed_on {reviewed_on!r} is not an ISO date (YYYY-MM-DD) or null.",
+                "Write reviewed_on as YYYY-MM-DD.",
             )
         )
-
-    for field in ("reviewed_on",):
+    for field, pattern in (
+        ("retained_issue_url", ISSUE_URL),
+        ("record_url", HTTPS_URL),
+    ):
         value = record[field]
-        if value is not None and not (isinstance(value, str) and ISO_DATE.match(value)):
-            findings.append(
-                _finding(
-                    path,
-                    f"{pointer}/{field}",
-                    "bad_value",
-                    f"{field} {value!r} is not an ISO date (YYYY-MM-DD) or null.",
-                    f"Write {field} as YYYY-MM-DD.",
-                )
-            )
-    for field in ("retained_issue_url", "record_url"):
-        value = record[field]
-        pattern = ISSUE_URL if field == "retained_issue_url" else HTTPS_URL
         if value is not None and not (isinstance(value, str) and pattern.match(value)):
             findings.append(
                 _finding(
@@ -358,6 +414,26 @@ def _validate_record_shape(
                     f"Write {field} as a full https URL, or null.",
                 )
             )
+    return findings
+
+
+def _validate_record_shape(
+    record: dict[str, Any], path: Path, pointer: str
+) -> list[CatalogFinding]:
+    """Required fields, unknown fields, and closed value sets."""
+    findings = _check_field_presence(record, path, pointer)
+    if findings:
+        return findings
+    for check in (
+        _check_identity,
+        _check_enums,
+        _check_obligation_lists,
+        _check_blockers,
+        _check_evidence,
+        _check_justification,
+        _check_dates_and_urls,
+    ):
+        findings.extend(check(record, path, pointer))
     return findings
 
 
@@ -445,19 +521,12 @@ def _scan_secrets(value: Any, path: Path, pointer: str) -> list[CatalogFinding]:
     return findings
 
 
-def validate_catalog(data: Any, path: Path) -> list[CatalogFinding]:
-    """Validate a parsed catalog against the published schema and safeguards."""
-    if not isinstance(data, dict):
-        return [
-            _finding(
-                path,
-                "",
-                "bad_value",
-                "The catalog root is not a JSON object.",
-                "See docs/planning/deferred-validation.schema.json.",
-            )
-        ]
+def _check_top_level_fields(data: dict[str, Any], path: Path) -> list[CatalogFinding]:
+    """Unknown top-level fields first (sorted), then missing required fields.
 
+    Contract: ``data`` is the parsed catalog root; a non-empty result means the
+    caller must stop, because required keys may be absent.
+    """
     findings: list[CatalogFinding] = []
     for field in sorted(set(data) - set(REQUIRED_TOP_LEVEL_FIELDS)):
         findings.append(
@@ -480,9 +549,15 @@ def validate_catalog(data: Any, path: Path) -> list[CatalogFinding]:
                     f"Add {field} to the catalog.",
                 )
             )
-    if findings:
-        return findings
+    return findings
 
+
+def _check_catalog_header(data: dict[str, Any], path: Path) -> list[CatalogFinding]:
+    """``schema_version``, ``repository`` and ``updated``.
+
+    Contract: every key in ``REQUIRED_TOP_LEVEL_FIELDS`` is present in ``data``.
+    """
+    findings: list[CatalogFinding] = []
     if data["schema_version"] != SCHEMA_VERSION:
         findings.append(
             _finding(
@@ -514,7 +589,79 @@ def validate_catalog(data: Any, path: Path) -> list[CatalogFinding]:
                 "Refresh `updated` whenever a record changes.",
             )
         )
+    return findings
 
+
+def _check_record(record: Any, path: Path, pointer: str) -> list[CatalogFinding]:
+    """Shape, then (only when the shape is clean) the publish-then-close rules."""
+    if not isinstance(record, dict):
+        return [
+            _finding(
+                path,
+                pointer,
+                "bad_value",
+                "Record is not a JSON object.",
+                "See docs/planning/deferred-validation.schema.json.",
+            )
+        ]
+    shape = _validate_record_shape(record, path, pointer)
+    if shape:
+        return shape
+    return _validate_record_safeguards(record, path, pointer)
+
+
+def _check_duplicate_id(
+    record: Any, seen: set[str], path: Path, pointer: str
+) -> list[CatalogFinding]:
+    """Flag a repeated record id and remember every string id in ``seen``.
+
+    Postcondition: ``seen`` contains the record's id when it is a string.
+    """
+    record_id = record.get("id") if isinstance(record, dict) else None
+    if not isinstance(record_id, str):
+        return []
+    findings: list[CatalogFinding] = []
+    if record_id in seen:
+        findings.append(
+            _finding(
+                path,
+                f"{pointer}/id",
+                "duplicate_id",
+                f"Record id {record_id} appears more than once.",
+                "One record per deferred task, updated in place.",
+            )
+        )
+    seen.add(record_id)
+    return findings
+
+
+def _check_records(records: list[Any], path: Path) -> list[CatalogFinding]:
+    """Validate each record in order, then report duplicate ids per record."""
+    findings: list[CatalogFinding] = []
+    seen: set[str] = set()
+    for index, record in enumerate(records):
+        pointer = f"/records/{index}"
+        findings.extend(_check_record(record, path, pointer))
+        findings.extend(_check_duplicate_id(record, seen, path, pointer))
+    return findings
+
+
+def validate_catalog(data: Any, path: Path) -> list[CatalogFinding]:
+    """Validate a parsed catalog against the published schema and safeguards."""
+    if not isinstance(data, dict):
+        return [
+            _finding(
+                path,
+                "",
+                "bad_value",
+                "The catalog root is not a JSON object.",
+                "See docs/planning/deferred-validation.schema.json.",
+            )
+        ]
+    findings = _check_top_level_fields(data, path)
+    if findings:
+        return findings
+    findings.extend(_check_catalog_header(data, path))
     records = data["records"]
     if not isinstance(records, list):
         findings.append(
@@ -527,39 +674,7 @@ def validate_catalog(data: Any, path: Path) -> list[CatalogFinding]:
             )
         )
         return findings
-
-    seen: set[str] = set()
-    for index, record in enumerate(records):
-        pointer = f"/records/{index}"
-        if not isinstance(record, dict):
-            findings.append(
-                _finding(
-                    path,
-                    pointer,
-                    "bad_value",
-                    "Record is not a JSON object.",
-                    "See docs/planning/deferred-validation.schema.json.",
-                )
-            )
-            continue
-        shape = _validate_record_shape(record, path, pointer)
-        findings.extend(shape)
-        if not shape:
-            findings.extend(_validate_record_safeguards(record, path, pointer))
-        record_id = record.get("id")
-        if isinstance(record_id, str):
-            if record_id in seen:
-                findings.append(
-                    _finding(
-                        path,
-                        f"{pointer}/id",
-                        "duplicate_id",
-                        f"Record id {record_id} appears more than once.",
-                        "One record per deferred task, updated in place.",
-                    )
-                )
-            seen.add(record_id)
-
+    findings.extend(_check_records(records, path))
     findings.extend(_scan_secrets(data, path, ""))
     return findings
 

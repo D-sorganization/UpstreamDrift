@@ -100,11 +100,13 @@ def test_deferred_catalog_bundle_contains_nv8_and_validates() -> None:
     assert data.get("source_repository") == "D-sorganization/Repository_Management"
     assert "source_commit" in data
     assert "files" in data
-    assert len(data["files"]) == 3
+    assert len(data["files"]) == 5
     for rel_path in [
         "shared_scripts/deferred_validation.py",
         "shared_scripts/deferred_planning.py",
         "shared_scripts/handoff_validator.py",
+        "shared_scripts/handoff_schema.py",
+        "shared_scripts/archive_policy.py",
     ]:
         assert rel_path in data["files"]
 

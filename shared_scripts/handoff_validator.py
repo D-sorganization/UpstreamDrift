@@ -4,227 +4,270 @@
 Ensures implementation state survives agent replacement and context exhaustion
 by validating canonical handoff schema, detecting unedited placeholders, ensuring
 implementation commits update continuation state, and protecting against secrets.
+
+Part of Repository_Management#1938: partitioned into ``handoff_schema.py`` and
+``handoff_validator.py``.
+Portable: standard library only, copied fleet-wide next to ``development_log.py``.
 """
 
 from __future__ import annotations
 
 import argparse
+import importlib
+import importlib.util
 import os
 import re
-import subprocess
 import sys
-from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
+from collections.abc import Sequence
 from pathlib import Path
-
-REQUIRED_HEADINGS = (
-    ("## Identity", re.compile(r"^##\s+Identity\s*$", re.MULTILINE)),
-    (
-        "## Objective and status",
-        re.compile(
-            r"^##\s+Objective\s+and\s+status\s*$",
-            re.MULTILINE | re.IGNORECASE,
-        ),
-    ),
-    (
-        "## Files and decisions",
-        re.compile(
-            r"^##\s+Files\s+and\s+decisions\s*$",
-            re.MULTILINE | re.IGNORECASE,
-        ),
-    ),
-    ("## Validation", re.compile(r"^##\s+Validation\s*$", re.MULTILINE)),
-    (
-        "## Blockers and risks",
-        re.compile(
-            r"^##\s+Blockers\s+and\s+risks\s*$",
-            re.MULTILINE | re.IGNORECASE,
-        ),
-    ),
-    (
-        "## Next steps",
-        re.compile(
-            r"^##\s+Next\s+steps\s*$",
-            re.MULTILINE | re.IGNORECASE,
-        ),
-    ),
-    (
-        "## Change log",
-        re.compile(
-            r"^##\s+Change\s*log\s*$",
-            re.MULTILINE | re.IGNORECASE,
-        ),
-    ),
-)
-
-REQUIRED_IDENTITY_FIELDS = (
-    "Repository",
-    "Working directory",
-    "Branch",
-    "Baseline commit",
-    "Implementation commit",
-    "Pull request",
-    "Governing issue/epic",
-)
-
-PLACEHOLDER_PATTERN = re.compile(r"<[^>\n]+>")
-HEX_COMMIT_PATTERN = re.compile(r"^[0-9a-fA-F]{7,40}$")
-
-SECRET_PATTERNS = (
-    (re.compile(r"(?:ghp|gho|ghu|ghs|ghr)_[a-zA-Z0-9]{36}"), "GitHub token"),
-    (re.compile(r"github_pat_[a-zA-Z0-9_]{82}"), "GitHub fine-grained PAT"),
-    (re.compile(r"\bsk-[a-zA-Z0-9]{20,}\b"), "API secret key"),
-    (
-        re.compile(r"-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----"),
-        "Private cryptographic key",
-    ),
-)
-
-IMPLEMENTATION_SUFFIXES = {
-    ".c",
-    ".cc",
-    ".cpp",
-    ".cs",
-    ".go",
-    ".h",
-    ".hpp",
-    ".js",
-    ".jsx",
-    ".m",
-    ".ps1",
-    ".py",
-    ".rs",
-    ".sh",
-    ".ts",
-    ".tsx",
-    ".yaml",
-    ".yml",
-    ".toml",
-}
-
-IMPLEMENTATION_PREFIXES = (
-    "src/",
-    "app/",
-    "backend/",
-    "frontend/",
-    "scripts/",
-    "shared_scripts/",
-    "conductor/",
-    "forgejo/",
-    ".github/workflows/",
-    "tests/",
-)
-
-SAFE_EXEMPT_SUFFIXES = {
-    ".md",
-    ".rst",
-    ".txt",
-    ".lock",
-    ".json",
-    ".log",
-    ".tmp",
-    ".bak",
-    ".svg",
-    ".png",
-    ".jpg",
-    ".jpeg",
-    ".gif",
-}
-
-SAFE_EXEMPT_PATHS = {
-    ".gitignore",
-    ".gitattributes",
-    ".claudeignore",
-    ".prettierignore",
-    "LICENSE",
-    "SPEC.md",
-    "AGENTS.md",
-    "CLAUDE.md",
-    "AGENT_HANDOFF.md",
-    "requirements-lock.txt",
-}
-
-OVERRIDE_PATTERN = re.compile(
-    r"Canonical handoff(?:\s+location)?\s+is\s+[`\"']?([a-zA-Z0-9_\-./\\]+\.md)[`\"']?",
-    re.IGNORECASE,
-)
+from types import ModuleType
+from typing import TYPE_CHECKING
 
 
-@dataclass(frozen=True)
-class HandoffFinding:
-    """A single governance finding against a handoff document or repository."""
-
-    path: Path
-    line: int | None
-    kind: str
-    message: str
-    remediation: str
-
-
-def resolve_canonical_handoff_path(repo_root: Path) -> Path:
-    """Resolve canonical handoff path, defaulting to docs/development/HANDOFF.md."""
-    agents_path = repo_root / "AGENTS.md"
-    if agents_path.is_file():
-        try:
-            agents_text = agents_path.read_text(encoding="utf-8", errors="ignore")
-            explicit_marker = re.search(
-                r"<!--\s*CANONICAL-HANDOFF:\s*([^\s>]+)\s*-->",
-                agents_text,
-            )
-            if explicit_marker:
-                override_rel = explicit_marker.group(1).strip()
-                return repo_root / override_rel
-
-            override_match = OVERRIDE_PATTERN.search(agents_text)
-            if override_match:
-                override_rel = override_match.group(1).strip()
-                return repo_root / override_rel
-        except OSError:
-            pass
-
-    return repo_root / "docs" / "development" / "HANDOFF.md"
+def sibling(name: str) -> ModuleType:
+    """Import a sibling fleet module by package, else by file path."""
+    try:
+        return importlib.import_module(f"shared_scripts.{name}")
+    except ImportError:
+        cached = sys.modules.get(f"_fleet_{name}")
+        if cached is not None:
+            return cached
+        path = Path(__file__).with_name(f"{name}.py")
+        spec = importlib.util.spec_from_file_location(f"_fleet_{name}", path)
+        if spec is None or spec.loader is None:  # pragma: no cover - defensive
+            raise
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        return module
 
 
-def is_implementation_file(path_str: str) -> bool:
-    """Return True if path_str is a source, workflow, or configuration file."""
-    posix = path_str.replace("\\", "/").strip()
-    if not posix:
-        return False
+_schema = sibling("handoff_schema")
 
-    name = Path(posix).name
-    if name in SAFE_EXEMPT_PATHS:
-        return False
-    if name == "HANDOFF.md" or posix.endswith("/HANDOFF.md"):
-        return False
+# Re-export schema symbols
+HEX_COMMIT_PATTERN = _schema.HEX_COMMIT_PATTERN
+IMPLEMENTATION_PREFIXES = _schema.IMPLEMENTATION_PREFIXES
+IMPLEMENTATION_SUFFIXES = _schema.IMPLEMENTATION_SUFFIXES
 
-    if any(
-        posix.startswith(prefix)
-        for prefix in (
-            ".codemap/",
-            ".jules/",
-            "docs/",
-            "reports/",
-            "archive/",
-            "node_modules/",
-            ".venv/",
-            "venv/",
+if TYPE_CHECKING:
+    from shared_scripts.handoff_schema import HandoffFinding
+else:
+    HandoffFinding = _schema.HandoffFinding
+OVERRIDE_PATTERN = _schema.OVERRIDE_PATTERN
+PLACEHOLDER_PATTERN = _schema.PLACEHOLDER_PATTERN
+REQUIRED_HEADINGS = _schema.REQUIRED_HEADINGS
+REQUIRED_IDENTITY_FIELDS = _schema.REQUIRED_IDENTITY_FIELDS
+SAFE_EXEMPT_PATHS = _schema.SAFE_EXEMPT_PATHS
+SAFE_EXEMPT_SUFFIXES = _schema.SAFE_EXEMPT_SUFFIXES
+SECRET_PATTERNS = _schema.SECRET_PATTERNS
+_archive_policy = sibling("archive_policy")
+check_handoff_freshness = _schema.check_handoff_freshness
+get_git_head = _schema.get_git_head
+is_implementation_file = _schema.is_implementation_file
+requires_handoff_update = _schema.requires_handoff_update
+resolve_canonical_handoff_path = _schema.resolve_canonical_handoff_path
+
+__all__ = [
+    "HEX_COMMIT_PATTERN",
+    "HandoffFinding",
+    "IMPLEMENTATION_PREFIXES",
+    "IMPLEMENTATION_SUFFIXES",
+    "OVERRIDE_PATTERN",
+    "PLACEHOLDER_PATTERN",
+    "REQUIRED_HEADINGS",
+    "REQUIRED_IDENTITY_FIELDS",
+    "SAFE_EXEMPT_PATHS",
+    "SAFE_EXEMPT_SUFFIXES",
+    "SECRET_PATTERNS",
+    "check_handoff_freshness",
+    "get_git_head",
+    "is_implementation_file",
+    "main",
+    "requires_handoff_update",
+    "resolve_canonical_handoff_path",
+    "sibling",
+    "validate_handoff_content",
+    "validate_repository_handoff",
+]
+
+
+def _finding(
+    path: Path, line: int | None, kind: str, message: str, remediation: str
+) -> HandoffFinding:
+    """Build one handoff finding (the single construction point for helpers)."""
+    return HandoffFinding(
+        path=path, line=line, kind=kind, message=message, remediation=remediation
+    )
+
+
+def _check_title(content: str, path: Path) -> list[HandoffFinding]:
+    """Level 1 title check.
+
+    Contract: callers skip this check for archive files (RM#1893).
+    """
+    if content.startswith("# ") or re.search(r"^#\s+.*Handoff", content, re.MULTILINE):
+        return []
+    return [
+        _finding(
+            path,
+            1,
+            "missing_title",
+            "Document must start with '# Implementation Handoff'.",
+            "Add '# Implementation Handoff' as the first heading.",
         )
-    ):
-        return False
-
-    suffix = Path(posix).suffix.lower()
-    if suffix in SAFE_EXEMPT_SUFFIXES:
-        return False
-
-    if suffix in IMPLEMENTATION_SUFFIXES:
-        return True
-
-    return any(posix.startswith(prefix) for prefix in IMPLEMENTATION_PREFIXES)
+    ]
 
 
-def requires_handoff_update(changed_paths: Iterable[str]) -> bool:
-    """Return True if any changed path is an implementation file."""
-    return any(is_implementation_file(path) for path in changed_paths)
+def _check_required_sections(content: str, path: Path) -> list[HandoffFinding]:
+    """One finding per missing required section heading, in schema order."""
+    return [
+        _finding(
+            path,
+            None,
+            "missing_section",
+            f"Missing required section '{heading_title}'.",
+            f"Add '{heading_title}' section per docs/templates/HANDOFF.md.",
+        )
+        for heading_title, pattern in REQUIRED_HEADINGS
+        if not pattern.search(content)
+    ]
+
+
+def _check_identity_fields(identity_text: str, path: Path) -> list[HandoffFinding]:
+    """One finding per required ``## Identity`` field that is absent."""
+    findings: list[HandoffFinding] = []
+    for field in REQUIRED_IDENTITY_FIELDS:
+        field_re = re.compile(
+            rf"^-\s+{re.escape(field)}:", re.MULTILINE | re.IGNORECASE
+        )
+        if not field_re.search(identity_text):
+            findings.append(
+                _finding(
+                    path,
+                    None,
+                    "missing_field",
+                    f"Missing required Identity field '- {field}:'.",
+                    f"Add '- {field}: <value>' under '## Identity'.",
+                )
+            )
+    return findings
+
+
+def _check_implementation_commit(
+    identity_text: str, path: Path
+) -> list[HandoffFinding]:
+    """The implementation commit must be ``SELF`` or a hex SHA."""
+    commit_match = re.search(
+        r"^-\s+Implementation commit:\s*([^\n]+)",
+        identity_text,
+        re.MULTILINE | re.IGNORECASE,
+    )
+    if not commit_match:
+        return []
+    commit_val = commit_match.group(1).strip()
+    first_token = commit_val.split()[0].strip("`'\",")
+    if first_token == "SELF" or HEX_COMMIT_PATTERN.match(first_token):
+        return []
+    return [
+        _finding(
+            path,
+            None,
+            "invalid_commit",
+            f"Implementation commit '{first_token}' is not 'SELF' or a valid SHA.",
+            "Set 'Implementation commit: `SELF`' or the exact SHA.",
+        )
+    ]
+
+
+def _check_identity(
+    content: str, path: Path, is_template: bool
+) -> list[HandoffFinding]:
+    """Required identity fields, then the commit value (skipped for templates).
+
+    Contract: callers skip this check for archive files (RM#1893).
+    """
+    identity_match = re.search(
+        r"^##\s+Identity\s*\n(.*?)(?=\n##|\Z)", content, re.DOTALL | re.MULTILINE
+    )
+    if not identity_match:
+        return []
+    identity_text = identity_match.group(1)
+    findings = _check_identity_fields(identity_text, path)
+    if not is_template:
+        findings.extend(_check_implementation_commit(identity_text, path))
+    return findings
+
+
+def _check_placeholders(lines: list[str], path: Path) -> list[HandoffFinding]:
+    """Unedited ``<...>`` template placeholders outside comments and fences.
+
+    Contract: callers skip this check for templates and archive files.
+    """
+    findings: list[HandoffFinding] = []
+    for idx, line in enumerate(lines, start=1):
+        if line.strip().startswith("<!--") or line.strip().startswith("```"):
+            continue
+        for match in PLACEHOLDER_PATTERN.finditer(line):
+            placeholder = match.group(0)
+            findings.append(
+                _finding(
+                    path,
+                    idx,
+                    "placeholder",
+                    f"Unedited template placeholder: {placeholder}",
+                    f"Replace '{placeholder}' on line {idx} with evidence.",
+                )
+            )
+    return findings
+
+
+def _check_changelog(content: str, path: Path) -> list[HandoffFinding]:
+    """The ``## Change log`` section needs at least one bullet entry.
+
+    Contract: callers skip this check for archive files (RM#1893).
+    """
+    changelog_match = re.search(
+        r"^##\s+Change\s*log\s*\n(.*?)(?=\n##|\Z)",
+        content,
+        re.DOTALL | re.MULTILINE | re.IGNORECASE,
+    )
+    if not changelog_match:
+        return []
+    changelog_text = changelog_match.group(1).strip()
+    has_bullet = any(
+        line.strip().startswith("- ") or line.strip().startswith("* ")
+        for line in changelog_text.splitlines()
+    )
+    if has_bullet:
+        return []
+    return [
+        _finding(
+            path,
+            None,
+            "invalid_changelog",
+            "Change log must contain at least one bullet entry.",
+            "Add '- `SELF` — <changes>' or "
+            "'- `SELF` — No material handoff change — <reason>'.",
+        )
+    ]
+
+
+def _check_secrets(lines: list[str], path: Path) -> list[HandoffFinding]:
+    """Secret scan; the only check that also applies to archive files."""
+    findings: list[HandoffFinding] = []
+    for idx, line in enumerate(lines, start=1):
+        for pattern, secret_type in SECRET_PATTERNS:
+            if pattern.search(line):
+                findings.append(
+                    _finding(
+                        path,
+                        idx,
+                        "secret_detected",
+                        f"Potential {secret_type} detected in handoff.",
+                        "Remove credentials, tokens, or secret keys from handoff.",
+                    )
+                )
+    return findings
 
 
 def validate_handoff_content(
@@ -235,216 +278,17 @@ def validate_handoff_content(
     """Validate handoff content against the canonical schema."""
     findings: list[HandoffFinding] = []
     lines = content.splitlines()
-
-    # 1. Level 1 title check
-    if not content.startswith("# ") and not re.search(
-        r"^#\s+.*Handoff", content, re.MULTILINE
-    ):
-        findings.append(
-            HandoffFinding(
-                path=path,
-                line=1,
-                kind="missing_title",
-                message="Document must start with '# Implementation Handoff'.",
-                remediation="Add '# Implementation Handoff' as the first heading.",
-            )
-        )
-
-    # 2. Required section headings
-    for heading_title, pattern in REQUIRED_HEADINGS:
-        if not pattern.search(content):
-            findings.append(
-                HandoffFinding(
-                    path=path,
-                    line=None,
-                    kind="missing_section",
-                    message=f"Missing required section '{heading_title}'.",
-                    remediation=(
-                        f"Add '{heading_title}' section per docs/templates/HANDOFF.md."
-                    ),
-                )
-            )
-
-    # 3. Required identity fields under ## Identity
-    identity_match = re.search(
-        r"^##\s+Identity\s*\n(.*?)(?=\n##|\Z)", content, re.DOTALL | re.MULTILINE
-    )
-    if identity_match:
-        identity_text = identity_match.group(1)
-        for field in REQUIRED_IDENTITY_FIELDS:
-            field_re = re.compile(
-                rf"^-\s+{re.escape(field)}:", re.MULTILINE | re.IGNORECASE
-            )
-            if not field_re.search(identity_text):
-                findings.append(
-                    HandoffFinding(
-                        path=path,
-                        line=None,
-                        kind="missing_field",
-                        message=f"Missing required Identity field '- {field}:'.",
-                        remediation=f"Add '- {field}: <value>' under '## Identity'.",
-                    )
-                )
-
-        # Validate Implementation commit value
-        commit_match = re.search(
-            r"^-\s+Implementation commit:\s*([^\n]+)",
-            identity_text,
-            re.MULTILINE | re.IGNORECASE,
-        )
-        if commit_match and not is_template:
-            commit_val = commit_match.group(1).strip()
-            first_token = commit_val.split()[0].strip("`'\",")
-            if first_token != "SELF" and not HEX_COMMIT_PATTERN.match(first_token):
-                findings.append(
-                    HandoffFinding(
-                        path=path,
-                        line=None,
-                        kind="invalid_commit",
-                        message=(
-                            f"Implementation commit '{first_token}' is not "
-                            "'SELF' or a valid SHA."
-                        ),
-                        remediation=(
-                            "Set 'Implementation commit: `SELF`' or the exact SHA."
-                        ),
-                    )
-                )
-
-    # 4. Check for unedited placeholders when not validating the template itself
-    if not is_template:
-        for idx, line in enumerate(lines, start=1):
-            if line.strip().startswith("<!--") or line.strip().startswith("```"):
-                continue
-            for match in PLACEHOLDER_PATTERN.finditer(line):
-                placeholder = match.group(0)
-                findings.append(
-                    HandoffFinding(
-                        path=path,
-                        line=idx,
-                        kind="placeholder",
-                        message=f"Unedited template placeholder: {placeholder}",
-                        remediation=(
-                            f"Replace '{placeholder}' on line {idx} with evidence."
-                        ),
-                    )
-                )
-
-    # 5. Validate Change log section
-    changelog_match = re.search(
-        r"^##\s+Change\s*log\s*\n(.*?)(?=\n##|\Z)",
-        content,
-        re.DOTALL | re.MULTILINE | re.IGNORECASE,
-    )
-    if changelog_match:
-        changelog_text = changelog_match.group(1).strip()
-        bullet_items = [
-            line.strip()
-            for line in changelog_text.splitlines()
-            if line.strip().startswith("- ") or line.strip().startswith("* ")
-        ]
-        if not bullet_items:
-            findings.append(
-                HandoffFinding(
-                    path=path,
-                    line=None,
-                    kind="invalid_changelog",
-                    message="Change log must contain at least one bullet entry.",
-                    remediation=(
-                        "Add '- `SELF` — <changes>' or "
-                        "'- `SELF` — No material handoff change — <reason>'."
-                    ),
-                )
-            )
-
-    # 6. Secret scanning
-    for idx, line in enumerate(lines, start=1):
-        for pattern, secret_type in SECRET_PATTERNS:
-            if pattern.search(line):
-                findings.append(
-                    HandoffFinding(
-                        path=path,
-                        line=idx,
-                        kind="secret_detected",
-                        message=f"Potential {secret_type} detected in handoff.",
-                        remediation=(
-                            "Remove credentials, tokens, or secret keys from handoff."
-                        ),
-                    )
-                )
-
+    # Archive files are exempt from the format budgets (RM#1893); only the
+    # secret scan below still applies to them.
+    if not _archive_policy.is_archive_path(path):
+        findings.extend(_check_title(content, path))
+        findings.extend(_check_required_sections(content, path))
+        findings.extend(_check_identity(content, path, is_template))
+        if not is_template:
+            findings.extend(_check_placeholders(lines, path))
+        findings.extend(_check_changelog(content, path))
+    findings.extend(_check_secrets(lines, path))
     return findings
-
-
-def get_git_head(repo_root: Path) -> str | None:
-    """Resolve git HEAD commit SHA for the given repository root, if available."""
-    try:
-        proc = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            cwd=repo_root,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        if proc.returncode == 0:
-            return proc.stdout.strip()
-    except (OSError, subprocess.SubprocessError):
-        pass
-    return None
-
-
-def check_handoff_freshness(
-    repo_root: Path,
-    handoff_path: Path,
-    content: str,
-    head_commit: str | None = None,
-) -> list[HandoffFinding]:
-    """O7: check that HANDOFF.md Implementation commit is not behind HEAD.
-
-    When Implementation commit is 'SELF', it represents in-progress work and passes.
-    When it is a SHA, it must match HEAD in a git repository. If git is unavailable
-    or the directory is not a git repository, the check passes gracefully.
-    """
-    commit_match = re.search(
-        r"^-\s+Implementation commit:\s*([^\n]+)",
-        content,
-        re.MULTILINE | re.IGNORECASE,
-    )
-    if not commit_match:
-        return []
-
-    raw_val = commit_match.group(1).strip()
-    first_token = raw_val.split()[0].strip("`'\",")
-    if first_token == "SELF":
-        return []
-    if not HEX_COMMIT_PATTERN.match(first_token):
-        return []
-
-    head = head_commit if head_commit is not None else get_git_head(repo_root)
-    if not head:
-        return []
-
-    norm_head = head.strip().lower()
-    norm_tok = first_token.lower()
-    if norm_head.startswith(norm_tok) or norm_tok.startswith(norm_head):
-        return []
-
-    line_number = content[: commit_match.start()].count("\n") + 1
-    return [
-        HandoffFinding(
-            path=handoff_path,
-            line=line_number,
-            kind="stale_turnover",
-            message=(
-                f"HANDOFF.md Implementation commit '{first_token}' is "
-                f"behind HEAD '{head[:10]}'."
-            ),
-            remediation=(
-                "Update 'Implementation commit' to 'SELF' (for in-progress work) "
-                "or to the current HEAD commit SHA."
-            ),
-        )
-    ]
 
 
 def validate_repository_handoff(
@@ -491,6 +335,25 @@ def validate_repository_handoff(
             )
         )
         return findings
+
+    for archive_file in _archive_policy.archive_files(repo_root):
+        for line, kind, message in _archive_policy.check_archive_file(archive_file):
+            findings.append(
+                HandoffFinding(
+                    path=archive_file,
+                    line=line,
+                    kind=kind,
+                    message=message,
+                    remediation="Archive files must be valid UTF-8 Markdown.",
+                )
+            )
+        if archive_file.suffix.lower() == ".md":
+            findings.extend(
+                validate_handoff_content(
+                    archive_file.read_text(encoding="utf-8", errors="replace"),
+                    path=archive_file,
+                )
+            )
 
     # Check commit-level enforcement if changed_files are supplied
     if changed_files:

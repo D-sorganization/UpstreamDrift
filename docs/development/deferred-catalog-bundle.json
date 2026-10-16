@@ -1,10 +1,12 @@
 {
   "source_repository": "D-sorganization/Repository_Management",
-  "source_commit": "0a1041018e737173e49ff97ed4b82283e3cb672f",
+  "source_commit": "3afa90e1f561bd91adabbdbebda7b2ef786a9bcf",
   "files": {
-    "shared_scripts/deferred_validation.py": "152ab473b23daf5b3a32618563ef0cddcdb957d71580cf09aeeb03c17f9d5ee5",
+    "shared_scripts/deferred_validation.py": "48bbefb185287279c42aac3561c6589b441eab78a21f9421b2139b237d54df9b",
     "shared_scripts/deferred_planning.py": "521f1a98fecf36990f1f31696144163c85d023be34a465dfbde9aacf81f33f94",
-    "shared_scripts/handoff_validator.py": "eac9039b72c2a2d7f5708b0cb098f84d2a1e78568ed1ec6d17f6756ca6274cd5"
+    "shared_scripts/handoff_validator.py": "d66468c708ef55912bfb7f7f031fb35388e442c69cda9b8594420a6bbb02bba4",
+    "shared_scripts/handoff_schema.py": "7941d78cc4d664202af32d2524b086b9eff86481d02d80490ecd5ec2e8f3ba52",
+    "shared_scripts/archive_policy.py": "e8a33a466d7b71fd6f374355a4786ef962c9b2fc5feed4c0a145314fbd371478"
   },
   "deferred_items": [
     {
