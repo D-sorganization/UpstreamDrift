@@ -56,6 +56,13 @@ from src.engines.physics_engines.opensim.python.spine import study_variant
 from src.engines.physics_engines.opensim.python.spine.muscle_model import (
     check_muscle_model_policy,
 )
+from src.engines.physics_engines.opensim.python.spine.fullbody_loads import POLICIES
+from src.engines.physics_engines.opensim.python.spine.fullbody_map import (
+    get_fullbody_map,
+)
+from src.engines.physics_engines.opensim.python.spine.fullbody_study import (
+    unrun_record,
+)
 from src.engines.physics_engines.opensim.python.spine.static_optimization import (
     check_optional_count,
 )
@@ -174,6 +181,12 @@ class SpineStudyRequest:
             locked in the model and moved by the drive; by default such a
             coordinate fails the drive stage with the list.  Both fields enter
             the request hash only when set.
+        fullbody_map / external_loads_policy: optional full-body driving
+            (SPN-9c): the id of a ``spine_fullbody_coordinate_maps.json`` map
+            and the load policy (``none``, ``supplied``, ``grf_only``,
+            ``club_and_grf``; default ``supplied`` with ``external_loads``,
+            else ``none``).  Cannot be combined with a movement variant;
+            generated policies cannot be combined with ``external_loads``.
         output_dir: where artifacts and the receipt are written (never
             recorded in the receipt).
 
@@ -209,6 +222,8 @@ class SpineStudyRequest:
     torso_alignment_source: str | None = None
     muscle_model_policy: str = "native"
     unlock_driven_coordinates: bool = False
+    fullbody_map: str | None = None
+    external_loads_policy: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.study_id, str) or not _ID_RE.fullmatch(self.study_id):
@@ -257,6 +272,7 @@ class SpineStudyRequest:
             "reserve_max_share",
         ):
             _positive(getattr(self, name), name)
+        self._check_fullbody()
         study_variant.validate_request_variant(
             self.variant_id, self.variant_parameter, self.variant_handedness
         )
@@ -295,6 +311,40 @@ class SpineStudyRequest:
             "matrix": [list(row) for row in self.torso_alignment],
             "provenance": f"calibrated:{self.torso_alignment_source}",
         }
+
+    def _check_fullbody(self) -> None:
+        """Validate the full-body option (SPN-9c); see the class docstring."""
+        if self.fullbody_map is not None:
+            if not isinstance(self.fullbody_map, str):
+                raise TypeError("fullbody_map must be a str or None")
+            try:
+                get_fullbody_map(self.fullbody_map)
+            except ValueError as exc:
+                raise ValueError(f"unknown fullbody_map: {exc}") from exc
+            if self.variant_id is not None:
+                raise ValueError(
+                    "fullbody_map cannot be combined with a movement variant"
+                )
+        policy = self.external_loads_policy
+        if policy is None:
+            return
+        if policy not in POLICIES:
+            raise ValueError(f"external_loads_policy must be one of {POLICIES}")
+        if self.fullbody_map is None:
+            raise ValueError("external_loads_policy requires a fullbody_map")
+        if policy == "supplied" and self.external_loads is None:
+            raise ValueError("policy supplied requires external_loads")
+        if policy != "supplied" and self.external_loads is not None:
+            raise ValueError(
+                f"policy {policy} generates its own loads; drop external_loads"
+            )
+
+    @property
+    def resolved_loads_policy(self) -> str:
+        """Explicit policy, else ``supplied`` with a loads file, else ``none``."""
+        if self.external_loads_policy is not None:
+            return self.external_loads_policy
+        return "none" if self.external_loads is None else "supplied"
 
     def canonical_dict(self) -> dict[str, Any]:
         """Path-free, JSON-compatible definition (basenames, no output_dir).
@@ -339,6 +389,9 @@ class SpineStudyRequest:
                 else {}
             ),
         }
+        if self.fullbody_map is not None:
+            data["fullbody_map"] = self.fullbody_map
+            data["external_loads_policy"] = self.resolved_loads_policy
         if self.variant_id is not None:
             data["variant"] = study_variant.request_record(
                 self.variant_id, self.variant_parameter, self.variant_handedness
@@ -522,6 +575,17 @@ def _variant_record(
     )
 
 
+def _fullbody_record(
+    request: SpineStudyRequest, outcome: study_stages.StageOutcome
+) -> dict[str, Any] | None:
+    """Full-body provenance: the stage's record, else a stage-not-run statement."""
+    if request.fullbody_map is None:
+        return None
+    if outcome.fullbody is not None:
+        return outcome.fullbody
+    return unrun_record(request.fullbody_map, request.resolved_loads_policy)
+
+
 def _scrubber(request: SpineStudyRequest) -> Any:
     dirs = {request.output_dir}
     for path in (
@@ -608,6 +672,7 @@ def run_spine_study(
         reserve=outcome.reserve,
         context_comparisons=tuple(outcome.context),
         variant=_variant_record(request, outcome),
+        fullbody=_fullbody_record(request, outcome),
     )
     write_receipt(receipt, out_dir / f"{request.study_id}_receipt.json")
     ensure(

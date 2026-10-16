@@ -29,6 +29,14 @@ from src.engines.physics_engines.opensim.python.spine.drive import (
     drive_segmental_model,
     export_mot,
 )
+from src.engines.physics_engines.opensim.python.spine.fullbody_map import (
+    get_fullbody_map,
+)
+from src.engines.physics_engines.opensim.python.spine.fullbody_study import (
+    FullbodySpec,
+    run_fullbody,
+    with_coordinates,
+)
 from src.engines.physics_engines.opensim.python.spine.golf_input import (
     read_golf_humanoid_motion,
 )
@@ -82,6 +90,13 @@ STAGE_NAMES = (
 )
 
 
+def stage_names(request: Any) -> tuple[str, ...]:
+    """Stage order of ``request``: the full-body stage follows the drive."""
+    if getattr(request, "fullbody_map", None) is None:
+        return STAGE_NAMES
+    return (*STAGE_NAMES[:2], "fullbody", *STAGE_NAMES[2:])
+
+
 @dataclass
 class StageOutcome:
     """Mutable accumulator of one run; see :func:`run_stages`."""
@@ -96,6 +111,7 @@ class StageOutcome:
     distribution_source: str = "n/a"
     variant: dict[str, Any] | None = None
     unlocked: tuple[str, ...] = ()
+    fullbody: dict[str, Any] | None = None
     failed: bool = False
     ran: bool = False
     #: Stage currently executing; a failure is recorded under this name.
@@ -212,11 +228,50 @@ def _id_options(request: Any, unlocked: tuple[str, ...]) -> SpineIDOptions:
     )
 
 
-def _inverse_dynamics(
+def _fullbody(
     request: Any, model: Path, drive: DriveResult, scrub: Any, out: StageOutcome
+) -> tuple[DriveResult, Path | None]:
+    """Full-body stage: arms and legs from the golf swing, plus the loads.
+
+    Returns the drive with the full-body coordinates merged and the
+    ExternalLoads file the later stages use (generated, else the request's).
+    """
+    fmap = get_fullbody_map(request.fullbody_map)
+    loads = request.external_loads
+    spec = FullbodySpec(
+        fmap=fmap,
+        golf_model_path=request.golf_model_path,
+        motion_path=request.motion_path,
+        target_model_path=model,
+        policy=request.resolved_loads_policy,
+        output_dir=request.output_dir,
+        stem=request.study_id,
+        filter_hz=request.filter_hz,
+        supplied_name=None if loads is None else loads.name,
+    )
+    result = run_fullbody(spec, drive.time_s, drive.coordinates)
+    out.artifacts.extend(result.artifacts)
+    out.fullbody = {
+        **result.record,
+        "arms_driven": bool(fmap.groups),
+        "map": fmap.summary(),
+        "metrics": {k: _num(v) for k, v in sorted(result.metrics.items())},
+    }
+    provenance = {"map_id": fmap.map_id, "policy": spec.policy}
+    out.stages.append(_record("fullbody", provenance, result.metrics, scrub))
+    return with_coordinates(drive, result.coordinates), result.load_xml or loads
+
+
+def _inverse_dynamics(
+    request: Any,
+    model: Path,
+    drive: DriveResult,
+    loads: Path | None,
+    scrub: Any,
+    out: StageOutcome,
 ) -> Any:
     common = {
-        "external_loads": request.external_loads,
+        "external_loads": loads,
         "filter_hz": request.filter_hz,
         "options": _id_options(request, out.unlocked),
     }
@@ -289,12 +344,13 @@ def _joint_reactions(
     model: Path,
     drive: DriveResult,
     so: Any,
+    loads: Path | None,
     scrub: Any,
     out: StageOutcome,
 ) -> Any:
     options = JointReactionOptions(
         pelvis=_PELVIS[request.pelvis],
-        external_loads=request.external_loads,
+        external_loads=loads,
         filter_hz=request.filter_hz,
         muscle_model_policy=request.muscle_model_policy,
         unlock_coordinates=out.unlocked,
@@ -356,12 +412,18 @@ def _run_chain(
     request: Any, model: Path, scrub: Callable[[str], str], out: Any
 ) -> None:
     drive = _drive(request, model, scrub, out)
+    loads = request.external_loads
+    if request.fullbody_map is not None:
+        out.active = "fullbody"
+        drive, loads = _fullbody(request, model, drive, scrub, out)
     out.active = "inverse_dynamics"
-    id_series, efforts, budget = _inverse_dynamics(request, model, drive, scrub, out)
+    id_series, efforts, budget = _inverse_dynamics(
+        request, model, drive, loads, scrub, out
+    )
     out.active = "static_optimization"
     so = _static_optimization(request, model, efforts, scrub, out)
     out.active = "joint_reactions"
-    jr = _joint_reactions(request, model, drive, so, scrub, out)
+    jr = _joint_reactions(request, model, drive, so, loads, scrub, out)
     out.active = "loads_export"
     _write_loads(request, id_series, so, jr, out)
     out.active = "context_bands"

@@ -1,0 +1,482 @@
+{
+  "schema_version": 1,
+  "note": "Names, topology and signs only: no value, offset, mass or geometry of any licensed model is stored here. A sign is the observed direction of the target axis relative to the golf axis at the all-zero pose (native probe, checked by the asset-gated test); it is never assumed. See docs/research/segmental_spine/sections/spn-9c.tex.",
+  "treatments": {
+    "golf": {
+      "direct": "target = sign * golf (one coordinate to one coordinate, no offset)",
+      "pelvis_pose": "carried by the pelvis pose of the golf input (same ground-pelvis encoding in both models); sign is checked, not applied",
+      "orientation_match": "the golf coordinates and the target coordinates parametrise one segment orientation with different Euler sequences; solved natively per frame (group in orientation_groups)",
+      "spine_drive": "consumed by the segmental spine drive as the global pelvis-to-torso rotation",
+      "excluded": "no driven target; reason recorded per coordinate"
+    },
+    "target": {
+      "driven_by_pelvis_pose": "written from the golf pelvis pose",
+      "driven_by_spine_drive": "written by the segmental spine drive",
+      "driven_direct": "written from a golf coordinate with the recorded sign",
+      "driven_orientation_match": "written by the per-frame segment-orientation solve",
+      "held_neutral": "free in the asset, prescribed at the neutral value (zero) for the whole motion",
+      "locked_in_asset": "locked in the asset file; never driven (rib coordinates, forearm and wrist, sternum translations, thoracic lateral-bending and axial-rotation levels T1_T2 to T11_T12, head-neck lateral and axial)"
+    }
+  },
+  "maps": {
+    "bruno2015_fullbody_os4_v2": {
+      "source_model": "golf_humanoid",
+      "verified": true,
+      "names_status": "observed against the owner's local file (names, joint topology and locked flags only)",
+      "orientation_groups": {
+        "shoulder_r": {
+          "golf_body": "humerus_r",
+          "golf_coordinates": [
+            "arm_flex_r",
+            "arm_add_r",
+            "arm_rot_r"
+          ],
+          "target_body": "humerus_R",
+          "target_coordinates": [
+            "elv_angle_r",
+            "shoulder_elv_r",
+            "shoulder_rot_r"
+          ],
+          "reference": "world orientation of the humerus, neutral-calibrated at the all-zero pose of both models"
+        },
+        "shoulder_l": {
+          "golf_body": "humerus_l",
+          "golf_coordinates": [
+            "arm_flex_l",
+            "arm_add_l",
+            "arm_rot_l"
+          ],
+          "target_body": "humerus_L",
+          "target_coordinates": [
+            "elv_angle_l",
+            "shoulder_elv_l",
+            "shoulder_rot_l"
+          ],
+          "reference": "world orientation of the humerus, neutral-calibrated at the all-zero pose of both models"
+        }
+      },
+      "hand_bodies": {
+        "hand_r": "hand_R",
+        "hand_l": "hand_L"
+      },
+      "foot_bodies": [
+        "calcn_r",
+        "toes_r",
+        "calcn_l",
+        "toes_l"
+      ],
+      "golf_coordinates": [
+        {
+          "golf": "pelvis_tilt",
+          "treatment": "pelvis_pose",
+          "target": "pelvis_tilt",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "pelvis_list",
+          "treatment": "pelvis_pose",
+          "target": "pelvis_list",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "pelvis_rotation",
+          "treatment": "pelvis_pose",
+          "target": "pelvis_rotation",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "pelvis_tx",
+          "treatment": "pelvis_pose",
+          "target": "pelvis_tx",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "pelvis_ty",
+          "treatment": "pelvis_pose",
+          "target": "pelvis_ty",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "pelvis_tz",
+          "treatment": "pelvis_pose",
+          "target": "pelvis_tz",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "lumbar_extension",
+          "treatment": "spine_drive",
+          "reason": "enters as the pelvis-to-torso rotation that the segmental spine drive distributes over the levels"
+        },
+        {
+          "golf": "lumbar_bending",
+          "treatment": "spine_drive",
+          "reason": "enters as the pelvis-to-torso rotation that the segmental spine drive distributes over the levels"
+        },
+        {
+          "golf": "lumbar_rotation",
+          "treatment": "spine_drive",
+          "reason": "enters as the pelvis-to-torso rotation that the segmental spine drive distributes over the levels"
+        },
+        {
+          "golf": "hip_flexion_r",
+          "treatment": "direct",
+          "target": "hip_flexion_r",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "hip_adduction_r",
+          "treatment": "direct",
+          "target": "hip_adduction_r",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "hip_rotation_r",
+          "treatment": "direct",
+          "target": "hip_rotation_r",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "knee_angle_r",
+          "treatment": "direct",
+          "target": "knee_angle_r",
+          "sign": -1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "knee_angle_r_beta",
+          "treatment": "excluded",
+          "reason": "dependent patella coordinate of the golf model; the target has no patella coordinate"
+        },
+        {
+          "golf": "ankle_angle_r",
+          "treatment": "direct",
+          "target": "ankle_angle_r",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "subtalar_angle_r",
+          "treatment": "excluded",
+          "reason": "the target subtalar joint is a weld"
+        },
+        {
+          "golf": "mtp_angle_r",
+          "treatment": "excluded",
+          "reason": "the target toe joint is a weld"
+        },
+        {
+          "golf": "arm_flex_r",
+          "treatment": "orientation_match",
+          "group": "shoulder_r"
+        },
+        {
+          "golf": "arm_add_r",
+          "treatment": "orientation_match",
+          "group": "shoulder_r"
+        },
+        {
+          "golf": "arm_rot_r",
+          "treatment": "orientation_match",
+          "group": "shoulder_r"
+        },
+        {
+          "golf": "elbow_flex_r",
+          "treatment": "direct",
+          "target": "elbow_flexion_r",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "pro_sup_r",
+          "treatment": "excluded",
+          "reason": "the target forearm rotation coordinate is locked in the asset"
+        },
+        {
+          "golf": "wrist_flex_r",
+          "treatment": "excluded",
+          "reason": "the target wrist coordinates are locked in the asset"
+        },
+        {
+          "golf": "wrist_dev_r",
+          "treatment": "excluded",
+          "reason": "the target wrist coordinates are locked in the asset"
+        },
+        {
+          "golf": "hip_flexion_l",
+          "treatment": "direct",
+          "target": "hip_flexion_l",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "hip_adduction_l",
+          "treatment": "direct",
+          "target": "hip_adduction_l",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "hip_rotation_l",
+          "treatment": "direct",
+          "target": "hip_rotation_l",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "knee_angle_l",
+          "treatment": "direct",
+          "target": "knee_angle_l",
+          "sign": -1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "knee_angle_l_beta",
+          "treatment": "excluded",
+          "reason": "dependent patella coordinate of the golf model; the target has no patella coordinate"
+        },
+        {
+          "golf": "ankle_angle_l",
+          "treatment": "direct",
+          "target": "ankle_angle_l",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "subtalar_angle_l",
+          "treatment": "excluded",
+          "reason": "the target subtalar joint is a weld"
+        },
+        {
+          "golf": "mtp_angle_l",
+          "treatment": "excluded",
+          "reason": "the target toe joint is a weld"
+        },
+        {
+          "golf": "arm_flex_l",
+          "treatment": "orientation_match",
+          "group": "shoulder_l"
+        },
+        {
+          "golf": "arm_add_l",
+          "treatment": "orientation_match",
+          "group": "shoulder_l"
+        },
+        {
+          "golf": "arm_rot_l",
+          "treatment": "orientation_match",
+          "group": "shoulder_l"
+        },
+        {
+          "golf": "elbow_flex_l",
+          "treatment": "direct",
+          "target": "elbow_flexion_l",
+          "sign": 1,
+          "min_axis_dot": 0.9
+        },
+        {
+          "golf": "pro_sup_l",
+          "treatment": "excluded",
+          "reason": "the target forearm rotation coordinate is locked in the asset"
+        },
+        {
+          "golf": "wrist_flex_l",
+          "treatment": "excluded",
+          "reason": "the target wrist coordinates are locked in the asset"
+        },
+        {
+          "golf": "wrist_dev_l",
+          "treatment": "excluded",
+          "reason": "the target wrist coordinates are locked in the asset"
+        }
+      ],
+      "target_coordinates": {
+        "driven_by_pelvis_pose": [
+          "pelvis_tilt",
+          "pelvis_list",
+          "pelvis_rotation",
+          "pelvis_tx",
+          "pelvis_ty",
+          "pelvis_tz"
+        ],
+        "driven_by_spine_drive": [
+          "L5_S1_FE",
+          "L5_S1_LB",
+          "L5_S1_AR",
+          "L4_L5_FE",
+          "L4_L5_LB",
+          "L4_L5_AR",
+          "L3_L4_FE",
+          "L3_L4_LB",
+          "L3_L4_AR",
+          "L2_L3_FE",
+          "L2_L3_LB",
+          "L2_L3_AR",
+          "L1_L2_FE",
+          "L1_L2_LB",
+          "L1_L2_AR",
+          "T12_L1_FE",
+          "T11_T12_FE",
+          "T10_T11_FE",
+          "T9_T10_FE",
+          "T8_T9_FE",
+          "T7_T8_FE",
+          "T6_T7_FE",
+          "T5_T6_FE",
+          "T4_T5_FE",
+          "T3_T4_FE",
+          "T2_T3_FE",
+          "T1_T2_FE",
+          "T12_L1_LB",
+          "T12_L1_AR"
+        ],
+        "driven_direct": [
+          "hip_flexion_r",
+          "hip_adduction_r",
+          "hip_rotation_r",
+          "knee_angle_r",
+          "ankle_angle_r",
+          "hip_flexion_l",
+          "hip_adduction_l",
+          "hip_rotation_l",
+          "knee_angle_l",
+          "ankle_angle_l",
+          "elbow_flexion_r",
+          "elbow_flexion_l"
+        ],
+        "driven_orientation_match": [
+          "shoulder_elv_r",
+          "shoulder_rot_r",
+          "elv_angle_r",
+          "shoulder_elv_l",
+          "shoulder_rot_l",
+          "elv_angle_l"
+        ],
+        "held_neutral": [
+          "Abs_FE",
+          "Abs_LB",
+          "Abs_AR",
+          "T1_head_neck_FE",
+          "SternumRotZ",
+          "SternumRotX",
+          "SternumRotY"
+        ],
+        "locked_in_asset": [
+          "T1_head_neck_LB",
+          "T1_head_neck_AR",
+          "T12_r12R_X",
+          "T12_r12R_Y",
+          "T12_r12R_Z",
+          "T11_r11R_X",
+          "T11_r11R_Y",
+          "T11_r11R_Z",
+          "T10_r10R_X",
+          "T10_r10R_Y",
+          "T10_r10R_Z",
+          "T9_r9R_X",
+          "T9_r9R_Y",
+          "T9_r9R_Z",
+          "T8_r8R_X",
+          "T8_r8R_Y",
+          "T8_r8R_Z",
+          "T7_r7R_X",
+          "T7_r7R_Y",
+          "T7_r7R_Z",
+          "T6_r6R_X",
+          "T6_r6R_Y",
+          "T6_r6R_Z",
+          "T5_r5R_X",
+          "T5_r5R_Y",
+          "T5_r5R_Z",
+          "T4_r4R_X",
+          "T4_r4R_Y",
+          "T4_r4R_Z",
+          "T3_r3R_X",
+          "T3_r3R_Y",
+          "T3_r3R_Z",
+          "T2_r2R_X",
+          "T2_r2R_Y",
+          "T2_r2R_Z",
+          "T1_r1R_X",
+          "T1_r1R_Y",
+          "T1_r1R_Z",
+          "T12_r12L_X",
+          "T12_r12L_Y",
+          "T12_r12L_Z",
+          "T11_r11L_X",
+          "T11_r11L_Y",
+          "T11_r11L_Z",
+          "T10_r10L_X",
+          "T10_r10L_Y",
+          "T10_r10L_Z",
+          "T9_r9L_X",
+          "T9_r9L_Y",
+          "T9_r9L_Z",
+          "T8_r8L_X",
+          "T8_r8L_Y",
+          "T8_r8L_Z",
+          "T7_r7L_X",
+          "T7_r7L_Y",
+          "T7_r7L_Z",
+          "T6_r6L_X",
+          "T6_r6L_Y",
+          "T6_r6L_Z",
+          "T5_r5L_X",
+          "T5_r5L_Y",
+          "T5_r5L_Z",
+          "T4_r4L_X",
+          "T4_r4L_Y",
+          "T4_r4L_Z",
+          "T3_r3L_X",
+          "T3_r3L_Y",
+          "T3_r3L_Z",
+          "T2_r2L_X",
+          "T2_r2L_Y",
+          "T2_r2L_Z",
+          "T1_r1L_X",
+          "T1_r1L_Y",
+          "T1_r1L_Z",
+          "SternumX",
+          "SternumY",
+          "SternumZ",
+          "pro_sup_r",
+          "wrist_dev_r",
+          "wrist_flex_r",
+          "pro_sup_l",
+          "wrist_dev_l",
+          "wrist_flex_l",
+          "T11_T12_LB",
+          "T11_T12_AR",
+          "T10_T11_LB",
+          "T10_T11_AR",
+          "T9_T10_LB",
+          "T9_T10_AR",
+          "T8_T9_LB",
+          "T8_T9_AR",
+          "T7_T8_LB",
+          "T7_T8_AR",
+          "T6_T7_LB",
+          "T6_T7_AR",
+          "T5_T6_LB",
+          "T5_T6_AR",
+          "T4_T5_LB",
+          "T4_T5_AR",
+          "T3_T4_LB",
+          "T3_T4_AR",
+          "T2_T3_LB",
+          "T2_T3_AR",
+          "T1_T2_LB",
+          "T1_T2_AR"
+        ]
+      }
+    }
+  }
+}
