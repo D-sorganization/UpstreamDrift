@@ -22,6 +22,10 @@ from humanoid_character_builder.generators.mesh_generator import (
     SMPLXMeshGenerator,
 )
 
+# Pure, dependency-free tests: none of them need MakeHuman, SMPL-X or torch
+# installed, so the Green-Suite Unit Gate (`-m unit`) runs them (#12698).
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

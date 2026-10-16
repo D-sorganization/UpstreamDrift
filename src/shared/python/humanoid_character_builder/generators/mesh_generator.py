@@ -18,7 +18,7 @@ to comply with the line budget:
     _mesh_types          — MeshGeneratorBackend, GeneratedMeshResult,
                            MeshGeneratorInterface
     _primitive_generator — PrimitiveMeshGenerator
-    _makehuman_generator — MakeHumanMeshGenerator
+    _mesh_makehuman      — MakeHumanMeshGenerator
     _smplx_generator     — SMPLXMeshGenerator
 
 All public symbols remain importable from this module.
@@ -34,7 +34,7 @@ from src.shared.python.humanoid_character_builder.core.body_parameters import (
 )
 
 # Re-export sub-module symbols (public API unchanged)
-from ._makehuman_generator import MakeHumanMeshGenerator  # noqa: F401
+from ._mesh_makehuman import MakeHumanMeshGenerator  # noqa: F401
 from ._mesh_types import (  # noqa: F401
     GeneratedMeshResult,
     MeshGeneratorBackend,
