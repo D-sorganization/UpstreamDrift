@@ -634,7 +634,9 @@ inside exactly; the MuJoCo-tracked reference overshoots a bound by at most
 Squat:
 \begin{itemize}[nosep]
 \item Hip flexion reaches its 120$^\circ$ bound at the bottom.
-\item Lumbar flexion 31--39$^\circ$.
+\item Lumbar flexion (\texttt{SpineInputY}) 0.05--0.09$^\circ$ in the committed
+  window. The 31--39$^\circ$ given here before was stale: it does not match
+  the committed window before or after the \#13037 regeneration.
 \item Knee $-115$ to $-110^\circ$ and ankle 26--28$^\circ$.
 \end{itemize}
 
@@ -1430,10 +1432,10 @@ and the tests fail until that is decided.
   than the bound allows is not yet diagnosed. The range check in
   \texttt{test\_opensim\_lift\_bar\_reach.py} asserts no violation, so it
   fails.
-\item \textbf{Lumbar flexion.} The OSL-14 text above gives squat lumbar
+\item \textbf{Lumbar flexion.} The OSL-14 text above gave squat lumbar
   flexion 31--39$^\circ$. In the committed window \texttt{SpineInputY} is
-  0.05--0.09$^\circ$ both before and after this regeneration, so that
-  statement predates the OSL-15 balanced source; it is left as history.
+  0.05--0.09$^\circ$ both before and after this regeneration, so that figure
+  was stale and is corrected there.
 \end{itemize}
 
 \section{Measured Parity Results}
