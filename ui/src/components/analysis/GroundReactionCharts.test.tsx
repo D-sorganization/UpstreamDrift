@@ -73,6 +73,19 @@ describe('GroundReactionCharts', () => {
     expect(screen.getByTestId('ground-reaction-event-vertical_force-impact')).toBeInTheDocument();
   });
 
+  it('keeps the force namespace on force event labels', async () => {
+    vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue({
+      ...base,
+      events: { impact: 0.02, 'force.max_trail': 0.01 },
+    });
+    render(<GroundReactionCharts runId="r1" />);
+    const marker = await screen.findByTestId(
+      'ground-reaction-event-vertical_force-force.max_trail',
+    );
+    expect(marker).toHaveTextContent('force.max_trail');
+    expect(marker).not.toHaveTextContent(/^max_trail$/);
+  });
+
   it('draws unavailable samples as gaps, never zero', async () => {
     const gappy: GroundReactionResponse = {
       ...base,
