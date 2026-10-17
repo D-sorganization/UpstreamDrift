@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
 import numpy as np
@@ -60,9 +60,26 @@ Controller = Callable[[float, Array, Array], Array]
 PROVENANCE_KEY = "barbell"
 #: Solid name of the bar in :func:`rigid_bar_spec`.
 RIGID_BAR_SOLID = "barbell_rigid_controller_model"
+#: Key of the club record under which :func:`rigid_bar_spec` keeps the
+#: unloaded club mass, so :func:`bushing_body_spec` restores it exactly.
+UNLOADED_CLUB_MASS_KEY = "unloaded_total_mass_kg"
 #: Provenance key of :func:`retrack_landmark_deviation` (#13072).
 RETRACK_DEVIATION_KEY = "retrack_landmark_deviation_m"
 SAMPLE_EVERY = 10
+#: Step policy of every bar-loaded tracking run (OSL-16, #13104): 64 RK4
+#: substeps (15.6 us) per 1 ms step and the controller held 0.25 ms.  With
+#: the bar on the hands the foot contact's stiffest open-loop mode grows with
+#: the ground force to 1.3e5 1/s in the squat window (the Coulomb
+#: regularisation slope mu f_n / v_t on the light foot segments), so the
+#: default eight 0.125 ms substeps give |lambda h| above RK4's real stability
+#: limit 2.785 and the toe, subtalar and ankle run away; 32 substeps reach
+#: 2.80 and leave the converged trajectory by 2e-3 rad.  64 substeps give at
+#: most 2.03 and agree with 128 to 1.7e-8 rad
+#: (:func:`~src.shared.python.motion_matching.same_input.stiffness.substeps_for`).
+#: The 0.25 ms hold bounds the first-order error of holding the computed
+#: torque while the ~35 us contact re-equilibrates (measurements in
+#: ``scripts/measure_loaded_foot_tracking.py``).
+LOADED_TRACKING_POLICY = StepPolicy(substeps=64, effort_holds=4)
 
 __all__ = [
     "HoldResult",
@@ -70,6 +87,7 @@ __all__ = [
     "build_barbell_bundle",
     "bushing_body_spec",
     "instantaneous_parity",
+    "LOADED_TRACKING_POLICY",
     "loaded_effort_source",
     "quasi_static_hold",
     "retrack_landmark_deviation",
@@ -111,10 +129,13 @@ def rigid_bar_spec(spec_bytes: bytes, barbell: Barbell) -> bytes:
     its tracking run both see the bar load, and :func:`bushing_body_spec`
     recovers the body the LIFT-4 bushings attach to.
 
-    Postcondition: the spec's total mass rises by ``barbell.load_kg``; every
-    other field is unchanged; ``bushing_body_spec`` of the result returns a
-    compact (``","``/``":"``) spec equal to ``spec_bytes`` when that was
-    compact.
+    Postcondition: the spec's total mass rises by ``barbell.load_kg``.  A
+    ``club`` record's ``total_mass_kg`` rises by the same load (the bar is
+    part of the club body the hands hold, so the grip partition sees club plus
+    bar, OSL-16, #13104) and its unloaded value is kept under
+    :data:`UNLOADED_CLUB_MASS_KEY`; every other field is unchanged;
+    ``bushing_body_spec`` of the result returns a compact (``","``/``":"``)
+    spec equal to ``spec_bytes`` when that was compact.
 
     Raises:
         ValueError: If the spec has no closure club body or already carries
@@ -141,6 +162,11 @@ def rigid_bar_spec(spec_bytes: bytes, barbell: Barbell) -> bytes:
             "placement": np.eye(4).tolist(),
         }
     )
+    club_record = spec.get("club")
+    if isinstance(club_record, dict) and "total_mass_kg" in club_record:
+        unloaded = club_record["total_mass_kg"]
+        club_record["total_mass_kg"] = float(unloaded) + float(dynamics.mass_kg)
+        club_record[UNLOADED_CLUB_MASS_KEY] = unloaded
     return json.dumps(spec, separators=(",", ":")).encode()
 
 
@@ -167,6 +193,9 @@ def bushing_body_spec(spec_bytes: bytes) -> bytes:
     if body is None:
         return bytes(spec_bytes)
     body["solids"] = [s for s in body["solids"] if s["name"] != RIGID_BAR_SOLID]
+    club_record = spec.get("club")
+    if isinstance(club_record, dict) and UNLOADED_CLUB_MASS_KEY in club_record:
+        club_record["total_mass_kg"] = club_record.pop(UNLOADED_CLUB_MASS_KEY)
     return json.dumps(spec, separators=(",", ":")).encode()
 
 
@@ -259,8 +288,9 @@ def quasi_static_hold(
 
     The feet are preloaded for body plus bar; the bar starts undeflected and
     at rest.  A bar-loaded spec is reduced to its body first
-    (:func:`bushing_body_spec`).  Postcondition: samples every
-    :data:`SAMPLE_EVERY` steps.
+    (:func:`bushing_body_spec`).  The run uses :data:`LOADED_TRACKING_POLICY`
+    and stops on failure.  Postcondition: samples every :data:`SAMPLE_EVERY`
+    steps.
     """
     spec_bytes = bushing_body_spec(spec_bytes)
     pose = np.asarray(q_hold, dtype=float)
@@ -277,7 +307,7 @@ def quasi_static_hold(
         loaded_effort_source(loaded, controller),
         steps=steps,
         dt_s=float(duration_s) / steps,
-        policy=StepPolicy(stop_on_failure=True),
+        policy=replace(LOADED_TRACKING_POLICY, stop_on_failure=True),
     )
     rows = range(0, rollout.q.shape[0], SAMPLE_EVERY)
     nv, names = loaded.nv_body, loaded.body_order
@@ -405,7 +435,8 @@ def build_barbell_bundle(source: InputBundle, barbell: Barbell) -> InputBundle:
 
     A bar-loaded source (#13093) is re-tracked on its body
     (:func:`bushing_body_spec`): the bushing bar replaces the rigid one, and
-    the returned bundle carries the body spec.
+    the returned bundle carries the body spec.  The re-track integrates
+    with ``source``'s step policy (substeps and effort holds) and records it.
     """
     body = bushing_body_spec(source.spec_bytes)
     times = np.arange(source.reference_q.shape[0], dtype=float) * source.dt_s
@@ -425,8 +456,9 @@ def build_barbell_bundle(source: InputBundle, barbell: Barbell) -> InputBundle:
         loaded_effort_source(loaded, controller),
         steps=steps,
         dt_s=source.dt_s,
+        policy=source.step_policy(),
     )
-    nv = loaded.nv_body
+    nv, holds = loaded.nv_body, source.effort_holds
     record = {
         **loaded.record(),
         "attach_q": q_aug[:nv].tolist(),
@@ -448,11 +480,14 @@ def build_barbell_bundle(source: InputBundle, barbell: Barbell) -> InputBundle:
         dt_s=source.dt_s,
         q0=rollout.q[0, :nv],
         v0=rollout.v[0, :nv],
-        efforts=rollout.efforts[:, :nv],
+        efforts=rollout.efforts[::holds, :nv],
         reference_q=rollout.q[:, :nv],
         reference_v=rollout.v[:, :nv],
         reference_engine="mujoco",
         provenance=provenance,
+        effort_holds=holds,
+        hold_efforts=None if holds == 1 else rollout.efforts[:, :nv],
+        substeps=source.substeps,
     )
 
 

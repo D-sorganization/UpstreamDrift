@@ -35,19 +35,31 @@ pytestmark = pytest.mark.unit
 # widened entries (golf body: knee_r 0.0110, hip_l 0.0149, shoulders 0.0098,
 # penetration 5.4e-4) and their physical reasons are recorded on #13057
 # (issuecomment-6229479012); the #13072 re-track fix does not change them.
+# OSL-16 (#13104): the committed source is now the bar-balanced IK (#13093),
+# whose more upright trunk moves the right ankle to 3.59 mm and the right hip
+# to 9.13 mm (were 3.08 and 6.32 mm), so those two bounds are widened with the
+# evidence on #13104; every other landmark fell (ankle_l 4.37, knee_l 3.15,
+# knee_r 11.68, hip_l 8.07, shoulder_l 3.65, shoulder_r 3.04 mm, bar 0.01 mm)
+# and keeps its earlier bound.
 IK_RESIDUAL_THRESHOLDS_M = {
     "ankle_l": 0.0057,
-    "ankle_r": 0.0031,
+    "ankle_r": 0.0036,
     "knee_l": 0.0152,
     "knee_r": 0.0225,
     "hip_l": 0.0178,
-    "hip_r": 0.0064,
+    "hip_r": 0.0092,
     "shoulder_l": 0.0196,
     "shoulder_r": 0.0151,
     "bar": 0.0001,
 }
 CLOSURE_THRESHOLD_M = 6.4e-8
 FOOT_PENETRATION_THRESHOLD_M = 7.0e-4
+#: Committed bar-loaded bundle size bound (bytes).  OSL-16 (#13104): a loaded
+#: bundle records its 0.25 ms hold efforts (``hold_efforts``, 4 per step) so
+#: a replay reproduces it exactly; at 200 steps that table is 281,728 raw
+#: bytes (about 233 KB compressed, full-precision torques).  The earlier
+#: 300,000 byte bound plus that raw table, rounded up; evidence on #13104.
+LOADED_BUNDLE_MAX_BYTES = 600_000
 
 
 @pytest.fixture(scope="module")
@@ -56,7 +68,7 @@ def bundle() -> InputBundle:
 
 
 def test_committed_bundle_is_small(bundle: InputBundle) -> None:
-    assert BACK_SQUAT_BUNDLE.stat().st_size <= 300_000
+    assert BACK_SQUAT_BUNDLE.stat().st_size <= LOADED_BUNDLE_MAX_BYTES
     assert bundle.reference_engine == "mujoco"
 
 
@@ -164,7 +176,12 @@ def test_mujoco_replay_reproduces_the_bar_path(bundle: InputBundle) -> None:
     steps = 10
     plant = VectorPlant("mujoco", bundle.spec_bytes)
     rollout = open_loop(
-        plant, bundle.q0, bundle.v0, bundle.efforts[:steps], dt_s=bundle.dt_s
+        plant,
+        bundle.q0,
+        bundle.v0,
+        bundle.replay_efforts(steps),
+        dt_s=bundle.dt_s,
+        policy=bundle.step_policy(),
     )
     np.testing.assert_array_equal(rollout.q, bundle.reference_q[: steps + 1])
     recorded = np.asarray(bundle.provenance["window_bar_path_m"], dtype=float)

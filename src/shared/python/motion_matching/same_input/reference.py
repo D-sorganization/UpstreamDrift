@@ -7,9 +7,12 @@ the exact-KKT MuJoCo plant and per-step closure projection, so the logged
 efforts reproduce the reference motion when replayed open loop.
 
 The hold is a bundle parameter (#12279): the default 1 ms hold is the
-original contract; ``effort_hold_s = 0.125e-3`` (owner ruling 2026-10-11,
+original contract; an effort hold of 0.125 ms (owner ruling 2026-10-11,
 opt-in for the club-face fixtures) re-evaluates the controller at every RK4
-substep while the closure projection stays once per 1 ms step.
+substep while the closure projection stays once per 1 ms step.  The RK4
+substep count is a bundle parameter too (OSL-16, #13104): a stiff plant
+records more than the default eight.  Both arrive as one ``StepPolicy``
+(:func:`hold_policy` builds it).
 """
 
 from __future__ import annotations
@@ -26,6 +29,7 @@ from src.shared.python.motion_matching.same_input.bundle import InputBundle
 from src.shared.python.motion_matching.same_input.closure import project_to_closure
 from src.shared.python.motion_matching.same_input.integrator import (
     DEFAULT_POLICY,
+    DEFAULT_SUBSTEPS,
     Rollout,
     StepPolicy,
     effort_holds_for,
@@ -36,6 +40,19 @@ from src.shared.python.motion_matching.same_input.plant import VectorPlant
 Array = NDArray[np.float64]
 # The original bundle contract: one controller sample held per pipeline step.
 DEFAULT_EFFORT_HOLD_S = DT_S
+
+
+def hold_policy(
+    effort_hold_s: float = DEFAULT_EFFORT_HOLD_S, substeps: int = DEFAULT_SUBSTEPS
+) -> StepPolicy:
+    """Step policy holding each controller sample ``effort_hold_s`` over
+    ``substeps`` RK4 substeps per 1 ms step.
+
+    Raises ``ValueError`` if the hold does not split the step into a whole
+    number of holds dividing ``substeps`` (see :func:`effort_holds_for`).
+    """
+    holds = effort_holds_for(effort_hold_s, DT_S, substeps)
+    return StepPolicy(substeps=substeps, effort_holds=holds)
 
 
 def _tracking_setup(
@@ -122,7 +139,7 @@ def generate_reference_bundle(
     provenance: dict[str, Any] | None = None,
     impact: ImpactForce | None = None,
     split_time_s: float | None = None,
-    effort_hold_s: float = DEFAULT_EFFORT_HOLD_S,
+    policy: StepPolicy = DEFAULT_POLICY,
 ) -> InputBundle:
     """Track ``q_track`` in MuJoCo with the pipeline controller held per step.
 
@@ -137,16 +154,13 @@ def generate_reference_bundle(
             engine's replay applies it identically (GCV-20).
         split_time_s: Reference impact time on the bundle clock, splitting
             the controller's reference rates (recorded in the provenance).
-        effort_hold_s: How long each controller sample is held (#12279);
-            must split the 1 ms step into a whole number of holds that
-            divides the eight RK4 substeps (1, 0.5, 0.25 or 0.125 ms).  The
-            default keeps the original 1 ms contract; the manifest records it.
-
-    Raises:
-        ValueError: If ``effort_hold_s`` does not split the step evenly.
+        policy: RK4 substeps and controller holds per 1 ms step (#12279,
+            #13104), from :func:`hold_policy`; the default keeps the original
+            contract (eight substeps, one 1 ms hold).  The manifest records
+            both, and the run always projects and raises on failure.
     """
-    holds = effort_holds_for(effort_hold_s, DT_S)
-    policy = StepPolicy(effort_holds=holds)
+    policy = StepPolicy(substeps=policy.substeps, effort_holds=policy.effort_holds)
+    holds = policy.effort_holds
     rollout = closed_loop(
         "mujoco",
         spec_bytes,
@@ -176,4 +190,5 @@ def generate_reference_bundle(
         },
         effort_holds=holds,
         hold_efforts=None if holds == 1 else rollout.efforts,
+        substeps=policy.substeps,
     )

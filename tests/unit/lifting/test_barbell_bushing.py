@@ -364,3 +364,26 @@ def test_bushing_body_spec_strips_only_the_rigid_bar(bundle: InputBundle) -> Non
     assert bushing_body_spec(body) == body
     with pytest.raises(TypeError, match="spec_bytes"):
         bushing_body_spec("not bytes")  # type: ignore[arg-type]
+
+
+def test_rigid_bar_spec_counts_the_bar_as_club_mass(bundle: InputBundle) -> None:
+    """OSL-16 (#13104): the bar is welded to the club body, so the grip
+    partition's club record carries it (the hands hold club plus bar), and
+    the unloaded club mass is restored exactly by ``bushing_body_spec``."""
+    import json
+
+    from src.shared.python.biomechanics.club_inertia_partition import (
+        club_solids_partition,
+    )
+    from src.shared.python.lifting.barbell_runs import (
+        UNLOADED_CLUB_MASS_KEY,
+        rigid_bar_spec,
+    )
+
+    body = json.loads(bundle.spec_bytes)
+    rigid = json.loads(rigid_bar_spec(bundle.spec_bytes, Barbell(100.0)))
+    club_mass = body["club"]["total_mass_kg"]
+    assert rigid["club"][UNLOADED_CLUB_MASS_KEY] == club_mass
+    assert rigid["club"]["total_mass_kg"] == pytest.approx(club_mass + 100.0)
+    bare = club_solids_partition(rigid).bare_club
+    assert bare.mass_kg == pytest.approx(club_mass + 100.0, abs=1e-9)

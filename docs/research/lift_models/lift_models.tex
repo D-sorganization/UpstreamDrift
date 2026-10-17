@@ -831,7 +831,7 @@ the support (heel $-0.048$, toe 0.176\,m), with vertical force up to 1.59
 body-plus-bar weights at the bottom: the balanced trajectory is dynamically
 feasible.
 
-\paragraph{Tracking Result (Open).} The bundle window is the pipeline
+\paragraph{Tracking Result (Open in OSL-15; Resolved in OSL-16).} The bundle window is the pipeline
 computed-torque (kkt) MuJoCo tracking of the IK, and that tracking does not
 hold the feet under the bar load. Window 1.4--1.6\,s, errors against the IK:
 \begin{itemize}[nosep]
@@ -886,6 +886,175 @@ checks are strict xfails until a balanced source is tracked.
 \item The balanced source tracked with bodyweight dynamics: it tips backward
   (above), so a balanced source must carry the bar in its tracking.
 \item Effort holds of 0.5 and 0.125\,ms, and wider foot spheres (above).
+\end{itemize}
+
+\subsection{Loaded Foot Stability (OSL-16, Issue \#13104)}
+
+\paragraph{Root Cause.} The foot joints ran away because of the integrator,
+not the controller or the posture. The same-input step is zero-order-hold RK4
+with eight 0.125\,ms substeps per 1\,ms step. Classical RK4 multiplies a real
+mode $\dot x=\lambda x$ by
+$R(z)=1+z+z^2/2+z^3/6+z^4/24$ per substep, $z=\lambda h$, and
+$|R(z)|\le 1$ on the real axis only for $-2.785\le z\le 0$. The open-loop
+state Jacobian of the rigid-bar plant (central differences, the effort held)
+has real foot modes (\texttt{mtp}, subtalar, ankle) whose rate is the
+Coulomb regularisation slope $\mu f_n/v_t$ of the stance spheres
+($\mu_s=0.6$, $v_t=0.01$\,m/s, Hunt--Crossley $k=10^5$\,N/m) acting on the
+light foot segments. It scales with the sphere normal force: halving $k$ at a
+fixed state halves it, doubling $v_t$ lowers it. The bar raises the stance
+force, so along the committed loaded window the stiffest rate grows from
+$1.2\times10^4$ to $1.30\times10^5$\,s$^{-1}$ (at the window end, where each
+heel and toe sphere carries 440--510\,N). At the default substep that is
+$|z|$ up to 16. The mode is amplified instead of damped, and the toes, then
+the ankles and subtalars, leave the IK. The bodyweight bundle reaches
+$3.4\times10^4$\,s$^{-1}$ only briefly and stays stable, which is why the
+fault appeared with the bar. A second, first-order error remains at any
+stable substep: the computed torque is held over the effort hold while the
+contact (time constant about 35\,$\mu$s) re-equilibrates. At step 50 of the
+1\,ms-hold run the commanded \texttt{mtp} acceleration was $-126$\,rad/s$^2$
+and the realised one $-25$\,rad/s$^2$.
+
+\paragraph{Fix.} A same-input bundle now records its RK4 substep count
+(\texttt{InputBundle.substeps}, manifest \texttt{policy.substeps}; legacy
+bundles load the original eight), and every replay reads it through
+\texttt{step\_policy()}. \texttt{stiffness.substeps\_for} picks the smallest
+power of two that keeps the measured stiffest rate inside the RK4 real
+stability limit. Bar-loaded lift bundles, the barbell hold and the re-track
+use \texttt{LOADED\_TRACKING\_POLICY}: 64 substeps (15.6\,$\mu$s) and a
+0.25\,ms effort hold. The committed source records its own margin,
+\texttt{rk4\_stability}: largest rate $1.30\times10^5$\,s$^{-1}$ over 40
+sampled states, $|z|=2.03$, $|R|=0.34$. No physical parameter changed: the
+contact law, gains and body are those of OSL-15.
+
+\paragraph{Measured Result.} The source squat is regenerated with
+\texttt{--load-balance}. \texttt{scripts/measure\_loaded\_foot\_tracking.py}
+tracks the balanced IK window (1.4--1.6\,s) on the committed rigid-bar spec
+for each policy (\texttt{loaded\_foot\_tracking.json}). The foot deviation is
+the largest distance, over the window, of each foot point (the side's three
+contact-sphere centres and a toe-tip point 6\,cm along the toes) from its IK
+position, both in the side's tibia frame, so root and leg errors cancel. Its
+bound is the side's LIFT-5 ankle IK threshold (3.6 and 5.7\,mm).
+\begin{center}\small
+\begin{tabular}{rrrrrr}
+\toprule
+Substeps & Hold (ms) & Max $|z|$ & Foot r/l (mm) & \texttt{mtp} r (rad) & Ankle r (rad)\\
+\midrule
+8 & 1 & 5.14 & 225.6 / 17.2 & 2.801 & 1.275\\
+8 & 0.125 & 9.33 & 63.7 / 130.5 & 0.462 & 0.176\\
+16 & 0.25 & 2.91 & 2.02 / 3.46 & 0.034 & 0.011\\
+32 & 0.25 & 2.80 & 1.81 / 1.82 & 0.030 & 0.010\\
+64 & 0.25 & 2.03 & 1.81 / 1.79 & 0.030 & 0.010\\
+128 & 0.25 & 1.01 & 1.81 / 1.79 & 0.030 & 0.010\\
+64 & 1 & 1.39 & 4.51 / 4.50 & 0.081 & 0.025\\
+64 & 0.5 & 1.79 & 3.01 / 2.99 & 0.052 & 0.017\\
+64 & 0.125 & 2.14 & 1.51 / 1.38 & 0.016 & 0.005\\
+\bottomrule
+\end{tabular}
+\end{center}
+Each $|z|$ is evaluated on that run's own states, so a diverging run reports
+the rate of the state it reached. Convergence is measured on the whole
+trajectory at the 0.25\,ms hold. Doubling 64 to 128 substeps moves no
+coordinate by more than $1.7\times10^{-8}$\,rad and the root by
+$9\times10^{-10}$\,m, inside the $10^{-6}$ L2 coordinate bound. Halving to 32
+moves them by $2.0\times10^{-3}$\,rad, and 16 by $1.4\times10^{-2}$\,rad: at
+32 substeps the stiffest mode reaches $|z|=2.80$, just past the limit, after
+about 150\,ms. At 64 substeps the foot error falls monotonically as the hold
+halves (4.51, 3.01, 1.81, 1.51\,mm), the expected first-order hold error.
+The committed 0.25\,ms hold is the first that meets both bounds, and its
+\texttt{mtp}, ankle and subtalar errors are 0.030, 0.010 and 0.011\,rad. The
+64-substep, 0.25\,ms run reproduces the committed bundle bit for bit.
+
+\paragraph{IK Thresholds.} The committed source is now the balanced IK, so
+the LIFT-5 IK thresholds are the OSL-15 residuals: right ankle 3.59\,mm and
+right hip 9.13\,mm exceed their OSL-14 bounds (3.1 and 6.4\,mm). Both bounds
+are widened to 3.6 and 9.2\,mm (\texttt{Tolerance-Change-Evidence: \#13104}).
+The cause is the more upright trunk that balances the bar, not the tracking.
+Every other landmark fell (ankle\_l 4.37, knee\_l 3.15, knee\_r 11.68,
+hip\_l 8.07, shoulder\_l 3.65, shoulder\_r 3.04, bar 0.01\,mm) and keeps its
+earlier bound.
+
+\paragraph{Downstream Evidence.} Every record below was regenerated on the
+bar-balanced, 64-substep source.
+\begin{itemize}[nosep]
+\item \textbf{Bar-path parity} (\texttt{bar\_path\_parity.json}): over the
+  full 200\,ms window the four engines replay the MuJoCo reference within
+  $2.2\times10^{-9}$\,rad and the bar within $4.3\times10^{-12}$\,m. The
+  OSL-15 full-window gap was $4.5\times10^{-3}$\,rad. The strict xfails of
+  \texttt{test\_bar\_path\_parity} and \texttt{test\_loaded\_balance} are now
+  plain tests.
+\item \textbf{Bushing re-track} (\texttt{back\_squat\_barbell\_bundle.npz}):
+  integrated with the source's step policy. The generator used to save it with
+  the original eight-substep contract and drop the hold efforts; it now keeps
+  them. Its landmarks stay within the LIFT-5 bounds of the source's: ankles
+  0.97/0.98, knees 1.18/1.21, hips 1.39/1.39, shoulders 1.83/1.58 and bar
+  2.03\,mm. OSL-15 had the shoulders 13.2\,cm off. Its cross-engine
+  instantaneous parity holds, with a largest difference of
+  $5.8\times10^{-7}$ (body acceleration, scale $1.1\times10^{3}$) against
+  $10^{-6}+10^{-8}\max|X|$.
+\item \textbf{Bar landmark bound.} The 0.1\,mm bar threshold bounds how
+  exactly the IK seats the bar on the back-bar geometry (residual 0.01\,mm).
+  It is a constraint precision, not a tracking scale. In a dynamic reference
+  the bar landmark (the hand-held bar-centre frame) rides on a body standing
+  on the loaded penalty contact. The source reference sits 6.2--6.4\,mm
+  below its IK at every landmark, almost all of it vertical: that is the
+  loaded foot sink. The re-track sinks a further 0.93\,mm at the ankles. A
+  common-mode sink moves every landmark alike, and the re-track bar moves
+  only 0.45\,mm relative to the shoulder midpoint. So for a re-track the bar
+  is bounded by the tightest body-landmark bound (\texttt{ankle\_r},
+  3.6\,mm). The IK's own bar bound stays 0.1\,mm.
+\item \textbf{Bundle size.} An exact replay of a loaded bundle needs its
+  0.25\,ms hold efforts: 281{,}728 raw bytes at 200 steps. The committed size
+  bound rises from 300{,}000 to 600{,}000 bytes
+  (\texttt{LOADED\_BUNDLE\_MAX\_BYTES}). The source is 463{,}303 bytes and the
+  re-track 496{,}080 bytes.
+\item \textbf{OpenSim IK/ID} (\texttt{opensim\_ik\_id/receipts.json}):
+  marker RMS 8.56 $\to$ 6.81\,cm and maximum 30.27 $\to$ 27.56\,cm. Every
+  body marker is within 2.3\,cm; the maximum is the bar marker, which the
+  Rajagopal hands cannot reach inside their joint ranges (OSL-12, weight
+  0.1). The \#13093 marker gate (RMS $<2$\,cm, maximum $<4$\,cm) therefore
+  stays open. Pelvis residuals fell from 316.7\,N and 688.5\,N\,m to
+  214.8\,N and 546.4\,N\,m, but stay above the Hicks et al.\ limits of 5\,\%
+  of peak external force (167.2\,N) and 1\,\% of it times the centre-of-mass
+  height (21.9\,N\,m). The cause is the same: the hand loads act at a grip the
+  model's hands do not reach. The OpenSim static hold carries body plus bar
+  exactly (1961.33\,N).
+\item \textbf{Barbell hold} (\texttt{barbell\_hold.json}, 1.5\,s at the
+  loaded policy): vertical ground force over body plus bar rose from 0.455
+  to 0.988, and hand force over bar weight from 0.298 to 0.986. The left-hand
+  share is 0.493 and the peak deflection 0.63\,mm, both within their bounds.
+  Body plus bar is carried exactly at 0.75--1.0\,s (1.000); the hold then
+  sags to 0.982 by 1.5\,s under a steady $-102$\,N net horizontal ground
+  force, so the last-0.5\,s means still miss the 1\,\% bands. The hold xfails
+  stay strict, thresholds unchanged. This drift was present at eight
+  substeps too ($-100$\,N), so it is a hold-balance gap of \#13093, not the
+  foot instability.
+\end{itemize}
+
+\paragraph{Failed Experiments.}
+\begin{itemize}[nosep]
+\item Finer effort holds at eight substeps (0.5, 0.25, 0.125\,ms): worse
+  (0.125\,ms: foot 63.7/130.5\,mm), because the integration stays unstable.
+  This is the apparent non-monotonic hold effect of OSL-15.
+\item Turning off the centre-of-mass balance term: smaller errors at eight
+  substeps and a 1\,ms hold (right \texttt{mtp} 0.34\,rad), but no change
+  once the substep is stable (16 substeps: \texttt{mtp} 0.082 with, 0.084\,rad
+  without).
+\item Foot gains raised from $\omega=30$ to 100\,rad/s on subtalar and
+  \texttt{mtp} (16 substeps): \texttt{mtp} improves to 0.011\,rad, but
+  subtalar worsens to 0.024--0.030\,rad; $\omega=300$ is unstable (0.35\,rad).
+\item A planted-contact computed torque (stance spheres held as constraints
+  in the controller's KKT, SVD-truncated contact rows): it diverged at step 6
+  with a minimum singular value of 0.01, diverged at 0.1, and at 1 was worse
+  than the free-contact law (\texttt{mtp} 0.09\,rad at 30 steps).
+\item 32 substeps with a 1\,ms hold: foot 4.51/4.50\,mm, which exceeds the
+  right bound. The first sweep chose 32 substeps from an early-window rate
+  of $2.9\times10^4$\,s$^{-1}$; a dense scan found $8.95\times10^4$\,s$^{-1}$
+  later in the window ($|z|=2.80$), so 32 was rejected.
+\item A substep target at RK4's point of maximum damping ($|z|\le1.596$)
+  would need 128 substeps. The 64-substep trajectory already agrees with 128
+  to $1.7\times10^{-8}$\,rad, so the stability limit is the target.
+\item No controller--plant mismatch was found: the controller's inverse
+  dynamics cut only the six closure null directions.
 \end{itemize}
 
 \section{Measured Parity Results}
