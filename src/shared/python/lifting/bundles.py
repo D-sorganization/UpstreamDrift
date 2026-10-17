@@ -103,7 +103,7 @@ SAME_INPUT_LIFT_BUNDLES: Mapping[str, Path | None] = MappingProxyType(
 
 BAR_FRAME = "Hub"
 #: Reference steps between the states sampled for ``rk4_stability``.
-STABILITY_SAMPLE_EVERY = 10
+STABILITY_SAMPLE_EVERY = 5
 LIMITATIONS = (
     "The only spec the same-input harness replays in every engine is the golf "
     "full-body spec, so the lifter keeps that spec's arms and dual-grip club; "

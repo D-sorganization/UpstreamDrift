@@ -21,11 +21,19 @@ The penalty contact's static sink under body plus bar moves the whole lifter
 from __future__ import annotations
 
 from collections.abc import Sequence
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
 
 Array = NDArray[np.float64]
+_REPO = Path(__file__).resolve().parents[4]
+#: Substep and hold sweep of the committed squat's loaded tracking, written by
+#: ``scripts/measure_loaded_foot_tracking.py``.
+LOADED_FOOT_RECORD = (
+    _REPO / "docs/development/lifting/evidence/back_squat/loaded_foot_tracking.json"
+)
 
 SIDES = ("r", "l")
 FOOT_JOINTS: tuple[str, ...] = tuple(
@@ -41,7 +49,10 @@ TOE_TIP_M = (0.06, 0.0, 0.0)
 
 __all__ = [
     "FOOT_JOINTS",
+    "LOADED_FOOT_RECORD",
     "TOE_TIP_M",
+    "balanced_ik_window",
+    "window_reference",
     "foot_joint_error_rad",
     "foot_point_deviation_m",
 ]
@@ -123,3 +134,49 @@ def foot_point_deviation_m(
             gap = float(np.linalg.norm(a[side] - b[side], axis=1).max())
             peak[side] = max(peak[side], gap)
     return peak
+
+
+def balanced_ik_window(bundle: Any) -> tuple[Array, Array, float]:
+    """Sample times, IK joint trajectory and length of ``bundle``'s window.
+
+    The bar-balanced IK (#13093) is rebuilt from the bundle provenance on the
+    lift body, as ``scripts/generate_lift_bundle.py --load-balance`` built it.
+
+    Raises:
+        ValueError: If the bundle's IK did not balance a bar load.
+    """
+    from src.shared.python.lifting.back_bar import BackBarGeometry
+    from src.shared.python.lifting.bundles import (
+        LIFT_SPEC,
+        lift_to_full_body,
+        load_seed_pose,
+    )
+    from src.shared.python.lifting.loaded_balance import load_balance_from_record
+    from src.shared.python.lifting.sagittal_retarget import SagittalSolution
+
+    prov = bundle.provenance
+    balance = prov.get("ik", {}).get("balance")
+    if balance is None:
+        raise ValueError("bundle is not bar-load balanced (#13093)")
+    geom = prov["ik"]["back_bar"]["geometry"]
+    solution = SagittalSolution.from_record(prov["sagittal_solution"])
+    lift = lift_to_full_body(
+        LIFT_SPEC.read_bytes(),
+        solution,
+        load_seed_pose(),
+        geometry=BackBarGeometry.from_standard(geom["lift"], height_m=geom["height_m"]),
+        load=load_balance_from_record(balance["load"]),
+    )
+    window = prov["window"]
+    start = int(np.searchsorted(solution.time_s, window["start_s"] - 1e-12))
+    return solution.time_s[start:], lift.q[start:], float(window["duration_s"])
+
+
+def window_reference(time_s: Array, track: Array, run_time_s: Array) -> Array:
+    """``track`` (sampled at ``time_s``) interpolated linearly at
+    ``run_time_s`` on the window clock (time zero at ``time_s[0]``)."""
+    clock = np.asarray(time_s, dtype=float) - float(time_s[0])
+    track = np.asarray(track, dtype=float)
+    return np.column_stack(
+        [np.interp(run_time_s, clock, track[:, k]) for k in range(track.shape[1])]
+    )

@@ -125,9 +125,15 @@ def test_barbell_bundle_replays_in_mujoco() -> None:
     bundle = InputBundle.load(BARBELL_BUNDLE)
     plant = barbell_plant("mujoco", bundle)
     q_ref, v_ref = augmented_reference(bundle)
-    efforts = np.hstack([bundle.efforts, np.zeros((bundle.steps, 6))])
+    held = bundle.replay_efforts(REPLAY_STEPS)
+    efforts = np.hstack([held, np.zeros((held.shape[0], 6))])
     rollout = open_loop(
-        plant, q_ref[0], v_ref[0], efforts[:REPLAY_STEPS], dt_s=bundle.dt_s
+        plant,
+        q_ref[0],
+        v_ref[0],
+        efforts,
+        dt_s=bundle.dt_s,
+        policy=bundle.step_policy(),
     )
     assert np.abs(rollout.q - q_ref[: REPLAY_STEPS + 1]).max() <= REPLAY_TOL
 

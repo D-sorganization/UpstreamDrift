@@ -63,18 +63,20 @@ RIGID_BAR_SOLID = "barbell_rigid_controller_model"
 #: Provenance key of :func:`retrack_landmark_deviation` (#13072).
 RETRACK_DEVIATION_KEY = "retrack_landmark_deviation_m"
 SAMPLE_EVERY = 10
-#: Step policy of every bar-loaded tracking run (OSL-16, #13104): 32 RK4
-#: substeps (31.25 us) per 1 ms step and the controller held 0.25 ms.  With
+#: Step policy of every bar-loaded tracking run (OSL-16, #13104): 64 RK4
+#: substeps (15.6 us) per 1 ms step and the controller held 0.25 ms.  With
 #: the bar on the hands the foot contact's stiffest open-loop mode reaches
-#: about 2.9e4 1/s (the Coulomb regularisation slope mu f_n / v_t on the light
-#: foot segments, f_n raised ~2.25x by the bar), so the default eight 0.125 ms
-#: substeps give |lambda h| = 3.6, outside RK4's real stability limit 2.785,
-#: and the toe, subtalar and ankle run away.  32 substeps give |lambda h| =
-#: 0.90 (converged: 64 substeps change no foot joint); the 0.25 ms hold
-#: bounds the first-order error of holding the computed torque while the
-#: ~35 us contact re-equilibrates (measurements in
+#: 8.95e4 1/s at the squat bottom (the Coulomb regularisation slope
+#: mu f_n / v_t on the light foot segments, f_n raised by the bar), so the
+#: default eight 0.125 ms substeps give |lambda h| up to 11, far outside
+#: RK4's real stability limit 2.785, and the toe, subtalar and ankle run
+#: away; 32 substeps give 2.80, still at the limit.  64 substeps give 1.40,
+#: inside RK4's maximum-damping point 1.596
+#: (:func:`~src.shared.python.motion_matching.same_input.stiffness.substeps_for`).
+#: The 0.25 ms hold bounds the first-order error of holding the computed
+#: torque while the ~35 us contact re-equilibrates (measurements in
 #: ``scripts/measure_loaded_foot_tracking.py``).
-LOADED_TRACKING_POLICY = StepPolicy(substeps=32, effort_holds=4)
+LOADED_TRACKING_POLICY = StepPolicy(substeps=64, effort_holds=4)
 
 __all__ = [
     "HoldResult",

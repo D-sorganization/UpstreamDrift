@@ -40,11 +40,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.shared.python.lifting.bundles import (  # noqa: E402
-    BACK_SQUAT_BUNDLE,
-    LIFT_SPEC,
-    lift_to_full_body,
-    load_seed_pose,
+from src.shared.python.lifting.bundles import BACK_SQUAT_BUNDLE  # noqa: E402
+from src.shared.python.lifting.loaded_foot import (  # noqa: E402
+    LOADED_FOOT_RECORD,
+    balanced_ik_window,
 )
 from src.shared.python.motion_matching.same_input import (  # noqa: E402
     InputBundle,
@@ -52,45 +51,21 @@ from src.shared.python.motion_matching.same_input import (  # noqa: E402
 )
 
 logger = logging.getLogger(__name__)
-RECORD = BACK_SQUAT_BUNDLE.with_name("loaded_foot_tracking.json")
 #: (RK4 substeps per 1 ms step, effort hold in s).  The first is the original
-#: contract; the substep column at a 1 ms hold isolates RK4 stability, the
-#: 32-substep row isolates the hold.
+#: contract; the substep column at the 0.25 ms hold isolates RK4 stability
+#: and convergence, the 64-substep row the hold.
 GRID: tuple[tuple[int, float], ...] = (
     (8, 1e-3),
     (8, 1.25e-4),
-    (16, 1e-3),
-    (32, 1e-3),
-    (32, 5e-4),
-    (64, 5e-4),
+    (16, 2.5e-4),
     (32, 2.5e-4),
-    (32, 1.25e-4),
+    (64, 2.5e-4),
+    (128, 2.5e-4),
+    (64, 1e-3),
+    (64, 5e-4),
+    (64, 1.25e-4),
 )
-STABILITY_EVERY = 20
-
-
-def bundle_window(bundle: InputBundle) -> tuple[np.ndarray, np.ndarray, float]:
-    """Times and IK joint trajectory of ``bundle``'s window, rebuilt from its
-    provenance (bar-balanced IK on the lift body), and the window length."""
-    from src.shared.python.lifting.back_bar import BackBarGeometry
-    from src.shared.python.lifting.loaded_balance import load_balance_from_record
-    from src.shared.python.lifting.sagittal_retarget import SagittalSolution
-
-    prov = bundle.provenance
-    balance = prov["ik"].get("balance")
-    if balance is None:
-        raise ValueError("bundle is not bar-load balanced (#13093)")
-    geom = prov["ik"]["back_bar"]["geometry"]
-    solution = SagittalSolution.from_record(prov["sagittal_solution"])
-    lift = lift_to_full_body(
-        LIFT_SPEC.read_bytes(),
-        solution,
-        load_seed_pose(),
-        geometry=BackBarGeometry.from_standard(geom["lift"], height_m=geom["height_m"]),
-        load=load_balance_from_record(balance["load"]),
-    )
-    start = int(np.searchsorted(solution.time_s, prov["window"]["start_s"] - 1e-12))
-    return solution.time_s[start:], lift.q[start:], float(prov["window"]["duration_s"])
+STABILITY_EVERY = 10
 
 
 def measure(args: tuple[bytes, list[str], np.ndarray, np.ndarray, float, int, float]):
@@ -98,6 +73,7 @@ def measure(args: tuple[bytes, list[str], np.ndarray, np.ndarray, float, int, fl
     from src.shared.python.lifting.loaded_foot import (
         foot_joint_error_rad,
         foot_point_deviation_m,
+        window_reference,
     )
     from src.shared.python.motion_matching.same_input import (
         VectorPlant,
@@ -123,10 +99,7 @@ def measure(args: tuple[bytes, list[str], np.ndarray, np.ndarray, float, int, fl
             stop_on_failure=True,
         ),
     )
-    clock = times - times[0]
-    ref = np.column_stack(
-        [np.interp(rollout.time_s, clock, track[:, k]) for k in range(track.shape[1])]
-    )
+    ref = window_reference(times, track, rollout.time_s)
     rows = np.arange(0, rollout.efforts.shape[0], STABILITY_EVERY * policy.effort_holds)
     steps = rows // policy.effort_holds
     return {
@@ -151,11 +124,11 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--bundle", type=Path, default=BACK_SQUAT_BUNDLE)
-    parser.add_argument("--out", type=Path, default=RECORD)
+    parser.add_argument("--out", type=Path, default=LOADED_FOOT_RECORD)
     parser.add_argument("--jobs", type=int, default=4)
     args = parser.parse_args(argv)
     bundle = InputBundle.load(args.bundle)
-    times, track, window = bundle_window(bundle)
+    times, track, window = balanced_ik_window(bundle)
     shared = (bytes(bundle.spec_bytes), list(bundle.coordinate_order), times, track)
     jobs = [(*shared, window, substeps, hold) for substeps, hold in GRID]
     with ProcessPoolExecutor(max_workers=max(1, args.jobs)) as pool:

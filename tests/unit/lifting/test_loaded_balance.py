@@ -8,10 +8,11 @@ on the toes.  The lift IK can now carry the bar load
 the trunk angle frame by frame until the combined centre of mass lies over
 mid-foot.  The tolerance below is fixed before the run.
 
-The committed source bundle is not regenerated with the balance: tracking the
-balanced IK with the bar load loses the feet inside the window (the mtp and
-ankle tracking errors grow to 2.3 and 1.2 rad by the window end), so the
-committed-bundle checks stay strict xfails until that tracking gap closes.
+Tracking the balanced IK with the bar load first lost the feet inside the
+window (mtp and ankle errors of 2.8 and 1.3 rad): the loaded foot contact's
+stiffest mode lay outside RK4's stability region at eight substeps.  OSL-16
+(#13104) tracks bar-loaded lifts at 32 substeps with a 0.25 ms effort hold,
+and the committed source bundle is now the balanced, bar-loaded one.
 """
 
 from __future__ import annotations
@@ -175,13 +176,7 @@ def test_ik_balances_the_bar_load_over_mid_foot_at_the_bottom(source) -> None:  
     assert lift_bundle_spec(lift) != lift.back_bar.spec_bytes
 
 
-# -- the committed source bundle (OSL-15 gap) ---------------------------------
-
-LOADED_TRACKING_GAP = (
-    "OSL-15 (#13093): the committed source is the unbalanced bodyweight "
-    "bundle; tracking the balanced IK with the bar load loses the feet "
-    "(lift_models.tex, OSL-15), so it is not regenerated yet"
-)
+# -- the committed source bundle (balanced since OSL-16, #13104) -------------
 
 
 @pytest.fixture(scope="module")
@@ -191,7 +186,6 @@ def source():  # type: ignore[no-untyped-def]
     return InputBundle.load(BACK_SQUAT_BUNDLE)
 
 
-@pytest.mark.xfail(strict=True, raises=KeyError, reason=LOADED_TRACKING_GAP)
 def test_source_ik_records_the_bar_load_balance(source) -> None:  # type: ignore[no-untyped-def]
     balance = source.provenance["ik"]["balance"]
     load = load_balance_from_record(balance["load"])
@@ -200,7 +194,6 @@ def test_source_ik_records_the_bar_load_balance(source) -> None:  # type: ignore
     assert len(balance["correction_rad"]) == source.provenance["ik"]["frames"]
 
 
-@pytest.mark.xfail(strict=True, raises=KeyError, reason=LOADED_TRACKING_GAP)
 def test_source_dynamics_carry_the_bar_load(source) -> None:  # type: ignore[no-untyped-def]
     """A balanced source is tracked with the bar welded to the hands.
 

@@ -3,12 +3,16 @@
 Classical RK4 on a real decaying mode ``x' = lambda x`` multiplies the state
 by ``R(z) = 1 + z + z^2/2 + z^3/6 + z^4/24`` per substep, with
 ``z = lambda * h``.  ``|R(z)| <= 1`` only for ``-2.785 <= z <= 0`` on the
-real axis.  The penalty foot contact under a 100 kg bar has an open-loop
-mode near ``-2.9e4 1/s`` (the Coulomb regularisation slope
-``mu f_n / v_t`` on the light foot segments), so eight 0.125 ms substeps
-give ``|z| = 3.6`` and the foot joints run away.  The rule here measures the
-stiffest rate with a finite-difference Jacobian and picks the smallest
-power-of-two substep count that keeps ``|z|`` at or below ``target``.
+real axis.  The penalty foot contact under a 100 kg bar has open-loop
+foot modes of ``-1.2e4`` to ``-9.0e4 1/s`` over the squat window (the
+Coulomb regularisation slope ``mu f_n / v_t`` on the light foot segments),
+so eight 0.125 ms substeps give ``|z|`` up to 11 and the foot joints run
+away.  The rule here measures the stiffest rate with a finite-difference
+Jacobian and picks the smallest power-of-two substep count that keeps
+``|z|`` at or below ``target``.  The default target is RK4's point of
+maximum damping on the real axis, ``z* = -1.596`` (``R'(z*) = 0``,
+``|R(z*)| = 0.270``): beyond it a longer substep damps a stiff mode less,
+until it is neutral at the stability limit.
 """
 
 from __future__ import annotations
@@ -26,9 +30,11 @@ Array = NDArray[np.float64]
 
 #: Real-axis extent of the classical RK4 stability region (|R(-x)| = 1).
 RK4_REAL_STABILITY_LIMIT = 2.785293563405282
-#: Default ``|lambda| h`` target: well inside the region, where RK4 is also
-#: accurate (|R(z) - exp(z)| < 1e-2 for |z| <= 1).
-DEFAULT_TARGET = 1.0
+#: RK4's point of maximum damping on the real axis: the real root of
+#: ``R'(z) = 1 + z + z^2/2 + z^3/6``, where ``|R| = 0.270``.
+RK4_MAX_DAMPING_Z = 1.5960716379833215
+#: Default ``|lambda| h`` target of :func:`substeps_for`.
+DEFAULT_TARGET = RK4_MAX_DAMPING_Z
 MAX_SUBSTEPS = 1024
 
 
