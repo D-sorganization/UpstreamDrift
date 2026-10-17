@@ -250,8 +250,18 @@ class JourneyPanel(QFrame):
         layout.addWidget(feedback)
         layout.addWidget(browser)
         self._help = dialog
-        dialog.destroyed.connect(lambda: setattr(self, "_help", None))
+        dialog.destroyed.connect(self._forget_help)
         dialog.show()
+
+    # Bound methods, not lambdas: PyQt disconnects a QObject's bound-method
+    # slots when it is destroyed, but a lambda closing over ``self`` would
+    # still run as the child dialogs are torn down after this panel, raise on
+    # the deleted wrapper and abort the process.
+    def _forget_help(self) -> None:
+        self._help = None
+
+    def _forget_details(self) -> None:
+        self._details = None
 
     def show_details(self) -> None:
         """Show view/estimator and model variant associations for this capture."""
@@ -262,11 +272,11 @@ class JourneyPanel(QFrame):
         dialog, layout = self._dialog(f"Capture Status — {media.root.name}")
         if self._details is not None:
             dialog.restoreGeometry(self._details.saveGeometry())
+            # The replaced dialog must not clear its successor when it dies.
+            self._details.destroyed.disconnect(self._forget_details)
             self._details.close()
         self._details = dialog
-        dialog.destroyed.connect(
-            lambda: setattr(self, "_details", None) if self._details is dialog else None
-        )
+        dialog.destroyed.connect(self._forget_details)
         title = QLabel(self.identity.text())
         title.setTextFormat(Qt.TextFormat.PlainText)
         title.setWordWrap(True)

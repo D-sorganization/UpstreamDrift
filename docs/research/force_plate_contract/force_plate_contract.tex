@@ -85,6 +85,28 @@ either foot does. An explicit observability record (only $F_z$ and CoP
 observed) travels with the series, so plots and comparisons show only
 observed components.
 
+\section{Placement From a Model Target Frame (OF-03, \#13083)}
+
+\path{model_frame.py} derives the placement from a model's declared
+\texttt{TargetFrame} instead of assuming a world convention. The repository
+has two: the ADR-0041 native world, with the target along $-Y$, and the
+full-body spec world, with the target along $+Y$. In the stance frame the
+target lies along $-x$ for a right-handed golfer and $+x$ for a left-handed
+one. The yaw
+\begin{equation}
+  \psi = \operatorname{atan2}(t_y, t_x) - \operatorname{atan2}(s_y, s_x)
+\end{equation}
+turns that stance direction $s$ onto the horizontal target direction $t$. It
+is always a proper rotation, so anatomical left and right are preserved. A
+trial whose handedness disagrees with the target frame is refused, never
+mirrored. The target frame's up direction must be world $+Z$ within
+$10^{-9}$. The world origin of the stance frame is a required calibration
+input. The result records the target frame id, so that a comparison
+(OF-08) can refuse to mix worlds. Hand-derived goldens: right-handed native
+$+90^\circ$ (facing $-X$), left-handed native $-90^\circ$ (facing $+X$),
+right-handed spec $-90^\circ$ (facing $+X$), with hand-computed world points
+(\path{tests/unit/force_plates/test_model_frame.py}).
+
 \section{Acceptance Evidence}
 
 Unit tests in \path{tests/unit/force_plates/test_contracts.py} and

@@ -96,8 +96,9 @@ class MuJoCoViewerWidget(QWidget):
         self._setup_ui()
         self._setup_renderer()
 
-        # Render timer
-        self._render_timer = QTimer()
+        # Render timer, parented so it dies with the widget: an orphan timer
+        # would keep firing _update_render on an already-deleted viewport.
+        self._render_timer = QTimer(self)
         self._render_timer.timeout.connect(self._update_render)
         self._render_timer.start(50)  # 20 FPS
 
