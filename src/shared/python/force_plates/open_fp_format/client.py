@@ -38,6 +38,7 @@ from src.shared.python.force_plates.contracts import (
 )
 from src.shared.python.force_plates.open_fp_format import _files, _json_arrays, _meta
 from src.shared.python.force_plates.open_fp_format import format as fmt
+from src.shared.python.force_plates.open_fp_format._rounding import widen_for_rounding
 from src.shared.python.force_plates.open_fp_format._arrays import (
     HTTP_LEAD_CHECK,
     check_lead_pct,
@@ -71,10 +72,6 @@ _MM_PER_M = fmt.MM_PER_M
 _CHUNK_BYTES = 65536
 _STATUS_OK = 200
 _STATUS_NOT_FOUND = 404
-#: Std. deviation of a uniform error of half-width ``h`` is ``h / sqrt(3)``.
-_SQRT3 = math.sqrt(3.0)
-_COP_HALF_WIDTH_M = 0.5 * fmt.HTTP_COP_QUANTUM_MM / _MM_PER_M
-_FORCE_HALF_WIDTH_N = 0.5 * fmt.HTTP_FORCE_QUANTUM_N
 
 
 class OpenFpClientError(RuntimeError):
@@ -90,21 +87,16 @@ class UnknownSwingError(LookupError):
 
 
 def widen_for_http_rounding(uncertainty: PlateUncertainty) -> PlateUncertainty:
-    """Add the JSON form's declared rounding to ``uncertainty`` in quadrature.
+    """Add the JSON form's declared rounding (0.1 N, 0.1 mm) to ``uncertainty``.
 
-    CoP: ``hypot(cop_m, 5e-5 m / sqrt(3))`` and force floor:
-    ``hypot(force_floor_n, 0.05 N / sqrt(3))`` (uniform quantisation error of
-    half-width half a quantum).  Other fields are kept; ``source`` is amended.
+    See :func:`._rounding.widen_for_rounding`: CoP becomes
+    ``hypot(cop_m, 5e-5 m / sqrt(3))`` and the force floor
+    ``hypot(force_floor_n, 0.05 N / sqrt(3))``.
     """
-    if not isinstance(uncertainty, PlateUncertainty):
-        raise TypeError("uncertainty must be a PlateUncertainty")
-    return dataclasses.replace(
+    return widen_for_rounding(
         uncertainty,
-        cop_m=math.hypot(uncertainty.cop_m, _COP_HALF_WIDTH_M / _SQRT3),
-        force_floor_n=math.hypot(
-            uncertainty.force_floor_n, _FORCE_HALF_WIDTH_N / _SQRT3
-        ),
-        source=f"{uncertainty.source} + open-fp JSON rounding (0.1 N, 0.1 mm)",
+        force_quantum_n=fmt.HTTP_FORCE_QUANTUM_N,
+        cop_quantum_mm=fmt.HTTP_COP_QUANTUM_MM,
     )
 
 

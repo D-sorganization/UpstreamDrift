@@ -692,6 +692,7 @@
 {"path": "force_plates/open_fp_format/_json_arrays.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/open_fp_format/_live_payload.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/open_fp_format/_meta.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
+{"path": "force_plates/open_fp_format/_rounding.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/open_fp_format/client.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/open_fp_format/format.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/open_fp_format/live.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
