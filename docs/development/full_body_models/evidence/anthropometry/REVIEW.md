@@ -240,6 +240,32 @@ canonical document uses trunk 1.15, arm 1.10, shoulder 1.00: the only
 scanned point whose address meets the posture acceptance (bend 9.3 deg
 forward, 6.9 deg lateral, links within 3 deg of horizontal).
 
+Correction (#13037): these trunk scales multiply the 0.5319 suprasternale-to-
+mid-hip length that the hand-copied table paired with the cervicale-to-mid-hip
+CM and radii; the builder uses the length from the hips to the cervicale. On
+the whole cervicale-to-mid-hip row (0.6033) the scanned trunk scales 1.05 to
+1.35 are 0.93 to 1.19, so the capture places the trunk at -7 to +19 % of the
+de Leva mean rather than 5 to 25 % longer, and the canonical 1.15 is 1.0139.
+The documents keep the same trunk length with that rescaled factor
+(`de_leva_whole_rows_receipt.json`); the scan itself was not re-run.
+
+CM origin (#13037): de Leva measures every CM fraction from the row's origin
+landmark, which is cranial for the head (vertex) and the trunk parts
+(cervicale, xiphion, omphalion). The builder took the head, upper-, middle-
+and lower-trunk CMs from the caudal end of each link, so each of those CMs sat
+at (1 - f) instead of f of its length. On the canonical documents the pelvis (lower-trunk row)
+CM moves from 0.0845 to 0.0537 m (f = 0.6115) and the middle-trunk CM from
+0.0951 to 0.1162 m (f = 0.4502) in their link frames; the upper trunk
+(0.3184 to 0.3156 m, f = 0.5066) and head (0.1193 to 0.1192 m, f = 0.5002)
+barely move because their fractions are close to one half. Masses and
+inertias about the CM are unchanged.
+`anthropometric_geometry._segment_solid` now takes the row origin as its
+first endpoint, `test_every_solid_has_its_com_measured_from_the_row_origin`
+checks every solid against its Table 4 row, and
+`scripts/apply_de_leva_whole_rows.py` rebuilt the pelvis, middle-trunk,
+upper-trunk and head solids of both documents with zero joint, frame or marker
+change (same receipt).
+
 Against the acceptance in section 8 and #10099: posture met; whole-swing
 body-marker RMS 28.9 mm (24.6 at the flat-basin best) against the
 qualified geometry's 26.2 mm body-only (28.8 mm with its head at 47 mm);
@@ -373,7 +399,8 @@ other arm.
   `frame_poses` takes that mapping; nothing is indexed by position.
 - **Mass and dimensions.** The document carries 79.4 kg (de Leva
   segments at 78 kg plus the native club and hand solids) at 1.71 m with
-  trunk 1.15, arm 1.10 and shoulder 1.00 scale factors from the swing;
+  trunk 1.15 (1.0139 on the whole-row trunk since #13037), arm 1.10 and
+  shoulder 1.00 scale factors from the swing;
   an average male golfer is 1.75 to 1.80 m and 80 to 85 kg, so this
   subject is short and light of that mean and the table is a subject
   estimate, not a population default; the stature and mass are explicit

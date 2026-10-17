@@ -2042,6 +2042,10 @@ export interface GroundReactionResponse {
   load_share?: Record<string, (number | null)[]>;
   /** Per-trace x/y/z/magnitude lists; null marks unavailable samples */
   traces?: Record<string, Record<string, (number | null)[]>>;
+  /** Set when a plate trial is overlaid; false means the measurement has no device qualification */
+  measured_qualified?: boolean | null;
+  /** Which components the overlaid plates observe */
+  observability?: Record<string, boolean> | null;
 }
 
 export interface GroupSummaryV1 {
@@ -2781,6 +2785,52 @@ export interface PipelineResponse {
   audit_log?: Record<string, unknown>[];
   /** Additional metadata */
   metadata?: Record<string, unknown>;
+}
+
+/**
+ * Mapping ``model_time = trial_time + offset_s`` with its provenance.
+ */
+export interface PlateAlignmentModel {
+  offset_s: number;
+  sigma_offset_s: number;
+  kind: "absolute_utc" | "shot_impact" | "manual" | "cross_correlation";
+  note: string;
+  derived_from_model?: string | null;
+}
+
+/**
+ * Declared plate facts (see ``PlateDeclarations``).
+ */
+export interface PlateDeclarationsModel {
+  force_floor_n: number;
+  force_fraction: number;
+  cop_m: number;
+  sensing_depth_sigma_m: number;
+  uncertainty_source: string;
+  sensing_depth_m: number;
+  capacity_n: number;
+  device?: string | null;
+}
+
+/**
+ * Overlay one plate trial on a run's ground reaction.
+ */
+export interface PlateOverlayRequest {
+  /** Run id; defaults to the active run */
+  run_id?: string | null;
+  /** Impact event marker (s) */
+  impact_time_s?: number | null;
+  /** Swing '<id>.json' relative to the plate-trial root */
+  trial: string;
+  handedness: "RH" | "LH";
+  /** Stance origin in the world (m) */
+  origin_m: number[];
+  /** Horizontal unit vector toward the target (default ADR-0041 -Y) */
+  target_dir?: number[];
+  declared: PlateDeclarationsModel;
+  alignment: PlateAlignmentModel;
+  /** Band factor for the interpolation bias */
+  coverage: number;
 }
 
 /**

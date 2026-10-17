@@ -14,10 +14,9 @@ from src.shared.python.motion_matching.anthropometry import DE_LEVA_MALE
 
 pytestmark = pytest.mark.unit
 
-#: Rows of the fit-path table known to mix endpoint rows; correcting them
-#: changes the golfer geometry and the receipt hash, so they are fixed with a
-#: refit in #13037. This set must equal the mixed rows: it can only shrink.
-KNOWN_MIXED = {"trunk", "upper_trunk", "shank"}
+#: Rows of the fit-path table known to mix endpoint rows. #13037 derived the
+#: table from whole rows, so none remain; the set can only stay empty.
+KNOWN_MIXED: set[str] = set()
 
 
 def _whole_row(sex: str, length_m: float, mass: float, com: float, radii) -> bool:

@@ -34,9 +34,21 @@ from src.shared.python.force_plates.conversion import (
     observability,
     to_ground_reaction_series,
 )
+from src.shared.python.force_plates.events import (
+    FORCE_EVENT_PREFIX,
+    force_event_markers,
+    impact_anchor,
+    merge_event_markers,
+)
 from src.shared.python.force_plates.model_frame import (
     TargetedPlacement,
     placement_for_target,
+)
+from src.shared.python.force_plates.overlay import (
+    MeasuredOverlay,
+    attach_measured_overlay,
+    measured_overlay,
+    overlay_on_series,
 )
 from src.shared.python.force_plates.placement import ROTATION_ATOL, PlatePlacement
 from src.shared.python.force_plates.readings import (
@@ -49,6 +61,7 @@ from src.shared.python.force_plates.readings import (
 )
 
 __all__ = [
+    "FORCE_EVENT_PREFIX",
     "FOOT_LABELS",
     "NEGATIVE_LOAD_SIGMAS",
     "NET_COP_TOL_M",
@@ -58,6 +71,7 @@ __all__ = [
     "AlignmentKind",
     "FootSample",
     "Handedness",
+    "MeasuredOverlay",
     "ObservedGroundReaction",
     "PlacedTrial",
     "PlatePlacement",
@@ -67,12 +81,18 @@ __all__ = [
     "PlateUncertainty",
     "ReadingOptions",
     "TargetedPlacement",
-    "VerticalComparison",
     "VerticalPlateTrial",
+    "attach_measured_overlay",
+    "force_event_markers",
+    "impact_anchor",
+    "VerticalComparison",
     "compare_vertical",
     "covers",
     "loaded_net_cop",
+    "measured_overlay",
+    "merge_event_markers",
     "observability",
+    "overlay_on_series",
     "placement_for_target",
     "reading_at",
     "to_ground_reaction_series",

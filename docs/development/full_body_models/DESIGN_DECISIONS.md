@@ -8,7 +8,7 @@ Authoritative record of architectural and biomechanical decisions for the full-b
 
 ### What
 
-Replace Simscape default geometric constants and masses with subject-specific segment dimensions, masses, centres of mass, and inertia tensors derived from de Leva (1996) body-segment parameter proportions via `src/shared/python/motion_matching/anthropometry.py` and `build_anthropometric_spec.py`. For the tour capture subject (stature 1.71 m, mass 78 kg), segment dimensions use trunk scale 1.15, arm scale 1.10, and shoulder scale 1.00, reducing total body mass from 108.3 kg to 78.0 kg (79.4 kg including club and hands).
+Replace Simscape default geometric constants and masses with subject-specific segment dimensions, masses, centres of mass, and inertia tensors derived from de Leva (1996) body-segment parameter proportions via `src/shared/python/motion_matching/anthropometry.py` and `build_anthropometric_spec.py`. For the tour capture subject (stature 1.71 m, mass 78 kg), segment dimensions use trunk scale 1.15, arm scale 1.10, and shoulder scale 1.00 (the trunk scale was chosen on the suprasternale-to-mid-hip length 0.5319 that the hand-copied table mixed into its cervicale-to-mid-hip row; since #13037 the table uses the whole 0.6033 row and the same capture-identified trunk length is trunk scale 1.15 × 0.5319 / 0.6033 = 1.0139, and the head and trunk-part centres of mass are measured from the cranial de Leva row origin as the table defines them), reducing total body mass from 108.3 kg to 78.0 kg (79.4 kg including club and hands).
 
 ### Why
 

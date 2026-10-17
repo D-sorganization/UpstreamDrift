@@ -18,16 +18,120 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13106 · Src-Pivot Hygiene Test Accepts the Pivot's Documented Parent Healing, Removing an Order-Dependent Unit-Test-Gate Failure
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13106
+- **Branch:** fix/13106-src-pivot-healed-parent
+- **PR:** #13107
+- **Paths:** see #13107
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`f3fdae33`; collated from changes/13106-src-pivot-hygiene-test-accepts-the-pivot.md)
+- **Summary:** Src-pivot hygiene test accepts the pivot's documented parent healing, removing an order-dependent unit-test-gate failure
+- **Next step:** Review and merge; then the force-plate PRs blocked by it can re-queue
+
+### DL-#13089 · Add Research Proposal for Measured Plate Rows in the Contact-Wrench QP (OF-10)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13089
+- **Branch:** docs/13089-of-10-contact-qp-proposal
+- **PR:** #13098
+- **Paths:** see #13098
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`2bcc5df8`; collated from changes/13089-add-research-proposal-for-measured-plate.md)
+- **Summary:** Add research proposal for measured plate rows in the contact-wrench QP (OF-10)
+- **Next step:** Owner review; implementation gated on #13086 and #13082.
+
+### DL-#13086 · Add Model-Versus-Measured Vertical Comparison in Sigma Units (OF-08)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13086
+- **Branch:** feat/13086-of-08-vertical-comparison
+- **PR:** #13096
+- **Paths:** see #13096
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`ca442c6e`; collated from changes/13086-add-model-versus-measured-vertical-compa.md)
+- **Summary:** Add model-versus-measured vertical comparison in sigma units (OF-08)
+- **Next step:** Review and merge after #13069; OF-07 shows the results.
+
+### DL-#13083 · Derive Plate Placement From a Model Target Frame Without Mirroring (OF-03)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13083
+- **Branch:** feat/13083-of-03-model-frame-placement
+- **PR:** #13090
+- **Paths:** see #13090
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`cb63d205`; collated from changes/13083-derive-plate-placement-from-a-model-targ.md)
+- **Summary:** Derive plate placement from a model target frame without mirroring (OF-03)
+- **Next step:** Review and merge after #13065; OF-07 and OF-08 consume it.
+
+### DL-#13069 · Add Plate Readings at Model Time With an Interpolation Bias Estimate, Skew Term, World-Axis CoP Uncertainty and Common-Mode Clock-Offset Alignment (OF-05)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13069
+- **Branch:** feat/13069-of-05-plate-readings
+- **PR:** #13096
+- **Paths:** see #13096
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`ca442c6e`; collated from changes/13069-add-plate-readings-at-model-time-with-in.md)
+- **Summary:** Add plate readings at model time with an interpolation bias estimate, skew term, world-axis CoP uncertainty and common-mode clock-offset alignment (OF-05)
+- **Next step:** Review and merge after #13065; OF-12 consumes reading_at.
+
+### DL-#13067 · Add Per-Foot Vertical-Cell Force-Plate Observation Rows With the Exact Sensing-Plane Shear Lever to the Ground Null Space, With Sympy Goldens and Spec (OF-11)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13067
+- **Branch:** feat/13067-of-11-vertical-plate-rows
+- **PR:** #13077
+- **Paths:** see #13077
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`4aa8f701`; collated from changes/13067-add-per-foot-vertical-cell-force-plate-o.md)
+- **Summary:** Add per-foot vertical-cell force-plate observation rows with the exact sensing-plane shear lever to the ground null space, with sympy goldens and spec (OF-11)
+- **Next step:** Review and merge; OF-12 builds the family-wise elimination screen on it.
+
+### DL-#13066 · Add Fail-Closed Open-Fp Swing File Reader (JSON+NPZ, CSV) Producing VerticalPlateTrial (OF-02)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13066
+- **Branch:** feat/13066-of-02-open-fp-reader
+- **PR:** #13096
+- **Paths:** see #13096
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`ca442c6e`; collated from changes/13066-add-fail-closed-open-fp-swing-file-reade.md)
+- **Summary:** Add fail-closed open-fp swing file reader (JSON+NPZ, CSV) producing VerticalPlateTrial (OF-02)
+- **Next step:** Review and merge after #13065.
+
+### DL-#13065 · Add Force_Plates Package: Vertical-Only Two-Plate Trial Contract, Ground-Aligned Placement and Observed Ground-Reaction View (OF-01)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13065
+- **Branch:** feat/13065-of-01-vertical-plate-trial
+- **PR:** #13090
+- **Paths:** see #13090
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`cb63d205`; collated from changes/13065-add-force-plates-package-vertical-only-t.md)
+- **Summary:** Add force_plates package: vertical-only two-plate trial contract, ground-aligned placement and observed ground-reaction view (OF-01)
+- **Next step:** Review and merge; OF-02 reader and OF-05 readings build on it.
+
 ### DL-#13061 · Evaluate Open-Fp Force Plates and Add the Vertical-Only Integration Plan (Licence Boundary, Data Contract, Frames, Timing, Backlog)
 
 - **State:** in_review
 - **Owner:** unassigned
 - **Issue:** #13061
 - **Branch:** claude/upstreamdrift-integration-plans-nlivq0
-- **PR:** #13062
+- **PR:** #13062, #13080
 - **Paths:** see #13062
 - **Started:** 2026-10-17
-- **Last verified:** 2026-10-17 (`c5367240`; collated from changes/13061-evaluate-open-fp-force-plates-and-add-th.md)
+- **Last verified:** 2026-10-17 (`73a62ea5`; collated from changes/13061-of-plan-update.md)
 - **Summary:** Evaluate open-fp force plates and add the vertical-only integration plan (licence boundary, data contract, frames, timing, backlog)
 - **Next step:** Owner confirms the AGPL arm's-length boundary and files OF-01/OF-02.
 

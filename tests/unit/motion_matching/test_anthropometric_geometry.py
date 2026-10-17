@@ -105,9 +105,45 @@ def test_zero_pose_lengths_follow_the_subject(upper: dict) -> None:
     assert length("Spherical Solid", "LLowerForearm") + length(
         "LLowerForearm", "Clubface Vector"
     ) == pytest.approx(segment_parameters(STATURE, MASS, "forearm").length_m)
-    # Standing zero pose: hips to shoulder centre is about the trunk length.
+    # Standing zero pose: the shoulder centre sits on the trunk axis, a fixed
+    # offset below the cervicale (hips to cervicale is the trunk length).
     hub = anchors[names["HubtoLS"]]
-    assert 0.44 < hub[2] < 0.50 and abs(hub[0]) < 1e-9 and abs(hub[1]) < 1e-9
+    assert hub[2] == pytest.approx(trunk - module.SHOULDER_BELOW_CERVICALE_M)
+    assert abs(hub[0]) < 1e-9 and abs(hub[1]) < 1e-9
+
+
+@pytest.mark.parametrize("trunk_scale", [1.0, 1.15])
+def test_head_and_trunk_span_vertex_to_mid_hip(trunk_scale: float) -> None:
+    """The chain counts the de Leva trunk and head once each (#13037).
+
+    The trunk row is cervicale to mid-hip and the head row vertex to
+    cervicale, so the neck joint sits one trunk length above the hip-centre
+    midpoint and the head solid ends one head length above it: hips to vertex
+    is head plus trunk, with no neck or upper-trunk length added on top.
+    """
+    upper = module.build_upper_body(
+        json.loads(NATIVE.read_text()),
+        stature_m=STATURE,
+        mass_kg=MASS,
+        trunk_scale=trunk_scale,
+    )
+    anchors = zero_pose_joint_positions(upper)
+    names = {j["child"].rsplit("/", 1)[-1]: j["name"] for j in upper["joints"]}
+    hip, neck = anchors[names["LowerTorso"]], anchors[module.NECK_JOINT]
+    trunk = segment_parameters(STATURE, MASS, "trunk").length_m * trunk_scale
+    head = segment_parameters(STATURE, MASS, "head").length_m
+    assert float(np.linalg.norm(neck - hip)) == pytest.approx(trunk, abs=1e-12)
+    head_body = next(b for b in upper["bodies"] if b["name"] == module.HEAD_BODY)
+    (solid,) = head_body["solids"]
+    com_fraction = module.DE_LEVA_MALE["head"].com_fraction  # from the vertex
+    assert solid["com_m"][2] == pytest.approx((1 - com_fraction) * head, abs=1e-12)
+    rows, k = module.DE_LEVA_MALE, STATURE / 1.741
+    vertex_to_mid_hip = (
+        rows["head"].length_m + trunk_scale * rows["trunk"].length_m
+    ) * k
+    assert head + float(np.linalg.norm(neck - hip)) == pytest.approx(
+        vertex_to_mid_hip, abs=1e-12
+    )
 
 
 def test_masses_and_inertias(upper: dict) -> None:
@@ -304,3 +340,61 @@ def test_grip_roll_turns_the_hands_about_the_shaft_only() -> None:
         40.0, abs=0.1
     )
     assert rolled["subject"]["grip_roll_deg"] == 40.0
+
+
+def _solid_landmarks(upper: dict) -> dict[str, tuple[str, dict[str, np.ndarray]]]:
+    """Body-frame position of each de Leva landmark that bounds each solid.
+
+    The model stands in for some landmarks with its own joints: L5/S1 for
+    the omphalion, the trunk midpoint for the xiphion and the shoulder
+    centre for the cervicale (the solids span hips to shoulder centre). The
+    clavicle link and the two forearm halves borrow the upper-arm and forearm
+    rows, so their row origin (SJC, EJC) plays the link's proximal end.
+    """
+    trunk = segment_parameters(STATURE, MASS, "trunk").length_m
+    pelvis_h = module.PELVIS_HEIGHT_FRACTION * trunk
+    hub_h = trunk - module.SHOULDER_BELOW_CERVICALE_M - pelvis_h
+    head = segment_parameters(STATURE, MASS, "head").length_m
+    arm = segment_parameters(STATURE, MASS, "upper_arm").length_m
+    fore = segment_parameters(STATURE, MASS, "forearm").length_m
+    clav = module.BIACROMIAL_FRACTION_OF_STATURE * STATURE / 2
+
+    def z(h: float) -> np.ndarray:
+        return np.array([0.0, 0.0, h])
+
+    out = {
+        "/pelvis": ("lower_trunk", {"OMPH": z(pelvis_h), "MIDH": z(0.0)}),
+        "/middle_trunk": ("middle_trunk", {"XYPH": z(hub_h / 2), "OMPH": z(0.0)}),
+        "/upper_trunk": ("upper_trunk", {"CERV": z(hub_h), "XYPH": z(hub_h / 2)}),
+        "/head": ("head", {"VERT": z(head), "CERV": z(0.0)}),
+    }
+    for side, sign in (("L", 1.0), ("R", -1.0)):
+        link = np.array([0.0, sign * clav, 0.0])
+        out[f"Hubto{side}S/clavicle"] = ("upper_arm", {"SJC": z(0), "EJC": link})
+        out[f"{side}UpperArm/upper_arm"] = ("upper_arm", {"SJC": z(0), "EJC": z(-arm)})
+    half = {"EJC": z(0.0), "WJC": z(-fore / 2)}
+    out["/forearm_proximal"] = ("forearm", half)
+    out["/forearm_distal"] = ("forearm", half)
+    return out
+
+
+def test_every_solid_has_its_com_measured_from_the_row_origin(upper: dict) -> None:
+    """de Leva gives the CM as a fraction of length from the row's ``origin``
+    landmark (the cranial end for the head and trunk parts, #13037)."""
+    from src.shared.python.body_segment_parameters.de_leva_1996 import table4_row
+    from src.shared.python.motion_matching.anthropometry import DE_LEVA_ROWS
+
+    landmarks = _solid_landmarks(upper)
+    solids = {s["name"]: s for b in upper["bodies"] for s in b["solids"]}
+    checked = set()
+    for name, solid in solids.items():
+        match = [k for k in landmarks if name.endswith(k)]
+        if not match:
+            continue
+        segment, points = landmarks[match[0]]
+        row = table4_row(DE_LEVA_ROWS[segment], "male")
+        origin, other = points[row.origin], points[row.other]
+        expected = origin + row.com_fraction * (other - origin)
+        assert np.allclose(solid["com_m"], expected, atol=1e-12), (name, row.row_id)
+        checked.add(match[0])
+    assert checked == set(landmarks)

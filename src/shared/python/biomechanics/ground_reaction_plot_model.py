@@ -63,6 +63,8 @@ class GroundReactionPlotSeries:
     available: bool
     reason: str = ""
     events: Mapping[str, float] = field(default_factory=dict)
+    measured_qualified: bool | None = None
+    observability: Mapping[str, bool] | None = None
 
     @property
     def labels(self) -> dict[str, str]:
@@ -75,7 +77,19 @@ class GroundReactionPlotSeries:
         return {name: _describe(name)[1] for name in self.traces}
 
     def to_dict(self) -> dict[str, Any]:
-        """JSON-safe mapping (``None`` for unavailable samples, no NaN)."""
+        """JSON-safe mapping (``None`` for unavailable samples, no NaN).
+
+        ``measured_qualified`` and ``observability`` are present only when a
+        measured overlay is attached, so plain payloads are unchanged.
+        """
+        payload = self._base_dict()
+        if self.measured_qualified is not None:
+            payload["measured_qualified"] = self.measured_qualified
+        if self.observability is not None:
+            payload["observability"] = dict(self.observability)
+        return payload
+
+    def _base_dict(self) -> dict[str, Any]:
         return {
             "available": self.available,
             "reason": self.reason or None,
@@ -197,6 +211,21 @@ def _checked_lists(
     return {c: list(v) for c, v in values.items()}
 
 
+def _optional_bool(value: Any) -> bool | None:
+    if value is not None and not isinstance(value, bool):
+        raise ValueError(f"measured_qualified must be a boolean, got {value!r}")
+    return value
+
+
+def _optional_flags(value: Any) -> dict[str, bool] | None:
+    if value is None:
+        return None
+    flags = dict(value)
+    if not all(isinstance(v, bool) for v in flags.values()):
+        raise ValueError("observability must map names to booleans")
+    return {str(k): v for k, v in flags.items()}
+
+
 def series_from_payload(payload: Mapping[str, Any]) -> GroundReactionPlotSeries:
     """Rebuild a :class:`GroundReactionPlotSeries` from its ``to_dict`` / API form.
 
@@ -221,4 +250,6 @@ def series_from_payload(payload: Mapping[str, Any]) -> GroundReactionPlotSeries:
         available=bool(payload.get("available", True)),
         reason=str(payload.get("reason") or ""),
         events=_validated_events(payload.get("events")),
+        measured_qualified=_optional_bool(payload.get("measured_qualified")),
+        observability=_optional_flags(payload.get("observability")),
     )

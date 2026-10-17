@@ -72,6 +72,14 @@ class PlateTimeAlignment:
         shift = finite_real(shift_s, "shift_s")
         return model - self.offset_s - shift
 
+    def model_time(self, trial_time_s: float) -> float:
+        """Model-clock time [s] of ``trial_time_s``: ``trial + offset``.
+
+        Exact inverse of :meth:`trial_time` with no shift.  Input must be finite.
+        """
+        trial = finite_real(trial_time_s, "trial_time_s")
+        return trial + self.offset_s
+
     def validates(self, model_identity: str) -> bool:
         """False iff this alignment was derived from ``model_identity``.
 
