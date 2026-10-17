@@ -22,7 +22,12 @@ from src.shared.python.plotting.renderers.time_panels import (
     mark_unavailable,
 )
 
-__all__ = ["PANEL_TITLES", "UNQUALIFIED_BANNER", "plot_ground_reaction"]
+__all__ = [
+    "PANEL_TITLES",
+    "SIGMA_BAND_SUFFIX",
+    "UNQUALIFIED_BANNER",
+    "plot_ground_reaction",
+]
 
 PANEL_TITLES: tuple[str, ...] = (
     "Vertical Ground Reaction Force",
@@ -114,6 +119,9 @@ def _cop_path(ax: Axes, series: GroundReactionPlotSeries) -> None:
 #: Banner shown whenever the overlaid plate trial has no device qualification.
 UNQUALIFIED_BANNER = "Unqualified measurement"
 _MEASURED_STYLE = {"linestyle": "--", "linewidth": 1.4, "alpha": 0.9}
+#: Legend suffix of the shaded 1-sigma band around a measured load.
+SIGMA_BAND_SUFFIX = "\u00b11\u03c3"
+_BAND_ALPHA = 0.2
 
 
 def _measured_keys(series: GroundReactionPlotSeries) -> list[tuple[str, str, str]]:
@@ -124,16 +132,41 @@ def _measured_keys(series: GroundReactionPlotSeries) -> list[tuple[str, str, str
     ]
 
 
+def _draw_band(
+    ax: Axes, series: GroundReactionPlotSeries, key: str, label: str, color: str
+) -> bool:
+    """Shade ``load +/- sigma`` for ``key``; False when it has no sigma trace."""
+    load = _component(series, f"{key}_force_n", "z")
+    sigma = _component(series, f"{key}_force_sigma_n", "z")
+    if load is None or sigma is None:
+        return False
+    ax.fill_between(
+        series.time_s,
+        load - sigma,
+        load + sigma,
+        color=color,
+        alpha=_BAND_ALPHA,
+        linewidth=0,
+        label=f"{label} {SIGMA_BAND_SUFFIX}",
+    )
+    return True
+
+
 def _draw_measured(
     axes: np.ndarray, series: GroundReactionPlotSeries, in_bw: bool
-) -> None:
-    """Dashed measured load (N panels only) and measured CoP path."""
+) -> bool:
+    """Dashed measured load with its 1-sigma band (N panels only) and CoP path.
+
+    Returns True when at least one band was drawn.
+    """
+    banded = False
     for key, label, color in _measured_keys(series):
         if not in_bw:
             load = _component(series, f"{key}_force_n", "z")
             axes[0].plot(
                 series.time_s, load, color=color, label=label, **_MEASURED_STYLE
             )
+            banded = _draw_band(axes[0], series, key, label, color) or banded
         x = _component(series, f"{key}_cop_m", "x")
         y = _component(series, f"{key}_cop_m", "y")
         if x is not None and y is not None:
@@ -141,11 +174,22 @@ def _draw_measured(
     if _measured_keys(series):
         axes[0].legend(fontsize=7, loc="upper left")
         axes[3].legend(fontsize=7, loc="upper left")
+    return banded
 
 
-def _draw_banner(fig: Figure, series: GroundReactionPlotSeries) -> None:
+def _band_caption(series: GroundReactionPlotSeries) -> str:
+    source = series.measured_uncertainty_source or "not stated"
+    return f"Shaded: measured load {SIGMA_BAND_SUFFIX} (declared uncertainty: {source})"
+
+
+def _draw_banner(fig: Figure, series: GroundReactionPlotSeries, banded: bool) -> None:
+    lines = []
     if series.measured_qualified is False:
-        fig.text(0.01, 0.99, UNQUALIFIED_BANNER, color="#B45309", fontsize=9, va="top")
+        lines.append((UNQUALIFIED_BANNER, "#B45309"))
+    if banded:
+        lines.append((_band_caption(series), "#4B5563"))
+    for row, (text, color) in enumerate(lines):
+        fig.text(0.01, 0.99 - 0.03 * row, text, color=color, fontsize=8, va="top")
 
 
 def plot_ground_reaction(fig: Figure, series: GroundReactionPlotSeries) -> None:
@@ -186,9 +230,9 @@ def plot_ground_reaction(fig: Figure, series: GroundReactionPlotSeries) -> None:
             reason=reason,
         )
     _cop_path(axes[3], series)
-    _draw_measured(axes, series, in_bw)
+    banded = _draw_measured(axes, series, in_bw)
     for ax in axes[4:]:
         ax.set_xlabel("Time (s)", fontsize=8)
     fig.suptitle("Ground Reaction (on the body, world axes)", fontsize=9)
-    _draw_banner(fig, series)
+    _draw_banner(fig, series, banded)
     fig.tight_layout(rect=(0, 0, 1, 0.95))

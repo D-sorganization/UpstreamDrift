@@ -12,7 +12,7 @@
 import { apiFetch } from './fetch';
 import type { GroundReactionResponse } from './generated/types';
 
-export { availableRange, pathSegments } from './traceGeometry';
+export { availableRange, bandSegments, pathSegments } from './traceGeometry';
 
 export type { GroundReactionResponse };
 

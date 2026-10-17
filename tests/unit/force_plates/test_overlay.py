@@ -156,3 +156,41 @@ def test_force_namespace_cannot_clobber_model_events() -> None:
     overlay = measured_overlay(_placed(), _align(), (0.0,), _opts())
     with pytest.raises(ValueError, match="force namespace"):
         attach_measured_overlay(series, overlay)
+
+
+def test_load_sigma_is_the_readings_own_one_sigma() -> None:
+    from src.shared.python.force_plates import reading_at
+
+    placed, times = _placed(), (0.0, 0.005)
+    overlay = measured_overlay(placed, _align(), times, _opts())
+    sigma = overlay.traces["measured_left_force_sigma_n"]
+    expected = [
+        reading_at(placed, t, _align(), _opts()).feet["left"].sigma_load_n
+        for t in times
+    ]
+    assert sigma["z"] == pytest.approx(expected)
+    assert sigma["x"] == sigma["y"] == sigma["magnitude"] == [None, None]
+    assert all(s > 0.0 for s in sigma["z"])
+
+
+def test_load_sigma_is_none_outside_the_trial() -> None:
+    overlay = measured_overlay(_placed(), _align(), (-1.0, 0.0), _opts())
+    assert overlay.traces["measured_left_force_sigma_n"]["z"][0] is None
+
+
+def test_uncertainty_source_travels_with_the_overlay() -> None:
+    placed = _placed()
+    series = overlay_on_series(_model_series((0.0, 0.005)), placed, _align(), _opts())
+    source = placed.trial.uncertainty.source
+    assert series.measured_uncertainty_source == source
+    payload = json.loads(json.dumps(series.to_dict(), allow_nan=False))
+    assert payload["measured_uncertainty_source"] == source
+    assert series_from_payload(payload).measured_uncertainty_source == source
+    assert series.labels["measured_left_force_sigma_n"] == (
+        "Measured Left Force Uncertainty (1 Sigma)"
+    )
+    assert series.units["measured_left_force_sigma_n"] == "N"
+
+
+def test_plain_payload_has_no_uncertainty_source() -> None:
+    assert "measured_uncertainty_source" not in _model_series((0.0,)).to_dict()

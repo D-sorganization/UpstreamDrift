@@ -136,3 +136,74 @@ def test_measured_overlay_is_dashed_and_unqualified_banner_is_drawn() -> None:
     assert "Unqualified measurement" in [t.get_text() for t in fig.texts]
     plot_ground_reaction(fig, replace(series, measured_qualified=True))
     assert "Unqualified measurement" not in [t.get_text() for t in fig.texts]
+
+
+def _measured_series(**changes):
+    base = _plot()
+    unobserved = {a: [None] * 3 for a in ("x", "y", "z", "magnitude")}
+    series = replace(
+        base,
+        traces={
+            **base.traces,
+            "measured_left_force_n": {**unobserved, "z": [400.0, 600.0, None]},
+            "measured_left_force_sigma_n": {**unobserved, "z": [10.0, 20.0, None]},
+        },
+        measured_qualified=False,
+        measured_uncertainty_source="datasheet rev 3",
+    )
+    return replace(series, **changes)
+
+
+def _bands(fig):
+    from matplotlib.collections import PolyCollection
+
+    return [
+        c
+        for c in fig.axes[0].collections
+        if isinstance(c, PolyCollection) and c.get_label().startswith("Measured")
+    ]
+
+
+def test_measured_load_carries_a_one_sigma_band() -> None:
+    fig = Figure()
+    plot_ground_reaction(fig, _measured_series())
+    (band,) = _bands(fig)
+    assert band.get_label() == "Measured Left ±1σ"
+    ys = np.concatenate([p.vertices[:, 1] for p in band.get_paths()])
+    assert ys.min() == pytest.approx(390.0)
+    assert ys.max() == pytest.approx(620.0)
+
+
+def test_the_band_names_its_declared_uncertainty_source() -> None:
+    fig = Figure()
+    plot_ground_reaction(fig, _measured_series())
+    texts = [t.get_text() for t in fig.texts]
+    assert any("datasheet rev 3" in t and "±1σ" in t for t in texts)
+
+
+def test_no_band_or_caption_without_a_sigma_trace() -> None:
+    series = _measured_series(measured_uncertainty_source=None)
+    traces = dict(series.traces)
+    traces.pop("measured_left_force_sigma_n")
+    fig = Figure()
+    plot_ground_reaction(fig, replace(series, traces=traces))
+    assert _bands(fig) == []
+    assert not any("±1σ" in t.get_text() for t in fig.texts)
+
+
+def test_web_chart_uses_the_same_band_suffix_and_caption() -> None:
+    from pathlib import Path
+
+    from src.shared.python.plotting.renderers.ground_reaction import (
+        SIGMA_BAND_SUFFIX,
+    )
+
+    chart = Path(__file__).resolve().parents[3] / (
+        "ui/src/components/analysis/GroundReactionCharts.tsx"
+    )
+    source = chart.read_text(encoding="utf-8")
+    escaped = "".join(
+        c if c.isascii() else f"\\u{ord(c):04x}" for c in SIGMA_BAND_SUFFIX
+    )
+    assert f"const SIGMA_BAND_SUFFIX = '{escaped}';" in source
+    assert "Shaded: measured load {SIGMA_BAND_SUFFIX} (declared uncertainty:" in source

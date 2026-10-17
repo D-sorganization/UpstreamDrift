@@ -179,6 +179,35 @@ describe('GroundReactionCharts', () => {
       expect(cop.getAttribute('stroke-dasharray')).toBe('4 2');
     });
 
+    const withBand = (): GroundReactionResponse => ({
+      ...withOverlay(false),
+      measured_uncertainty_source: 'datasheet rev 3',
+      traces: {
+        ...withOverlay(false).traces,
+        measured_left_force_sigma_n: measured([1, 2, null]),
+      },
+    });
+
+    it('shades the measured load by its 1-sigma uncertainty and names the source', async () => {
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(withBand());
+      render(<GroundReactionCharts runId="r1" />);
+      const band = await screen.findByTestId('ground-reaction-band-vertical_force-Measured Left');
+      expect(band.getAttribute('d')).toMatch(/Z$/);
+      expect(band.getAttribute('fill-opacity')).toBe('0.2');
+      expect(screen.getByTestId('ground-reaction-uncertainty-caption')).toHaveTextContent(
+        'Shaded: measured load \u00b11\u03c3 (declared uncertainty: datasheet rev 3)',
+      );
+      expect(screen.getByText('Measured Left \u00b11\u03c3')).toBeInTheDocument();
+    });
+
+    it('draws no band or caption when the overlay carries no sigma trace', async () => {
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(withOverlay(false));
+      render(<GroundReactionCharts runId="r1" />);
+      await screen.findByTestId('ground-reaction-line-vertical_force-Measured Left');
+      expect(screen.queryByTestId('ground-reaction-band-vertical_force-Measured Left')).toBeNull();
+      expect(screen.queryByTestId('ground-reaction-uncertainty-caption')).toBeNull();
+    });
+
     it('hides the banner for a qualified measurement and for plain runs', async () => {
       vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(withOverlay(true));
       const { unmount } = render(<GroundReactionCharts runId="r1" />);
