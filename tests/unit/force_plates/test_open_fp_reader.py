@@ -136,7 +136,7 @@ def test_integer_array_refused(tmp_path: Path) -> None:
 def test_non_increasing_time_rejected(tmp_path: Path) -> None:
     arrays = w.default_arrays()
     arrays["t"][3] = arrays["t"][2]
-    with pytest.raises(ValueError, match="strictly increasing"):
+    with pytest.raises(ValueError, match="times_s"):
         read(w.write_swing(tmp_path, arrays=arrays))
 
 
@@ -254,7 +254,8 @@ def test_bad_stem_refused(tmp_path: Path) -> None:
         )
 
 
-def test_path_traversal_refused(tmp_path: Path) -> None:
+def test_stem_that_is_not_a_swing_id_is_refused_even_with_dotdot(tmp_path: Path) -> None:
+    # Only the stem is validated: callers pass trusted directories (documented).
     w.write_swing(tmp_path)
     with pytest.raises(ValueError, match="stem"):
         read(tmp_path / ".." / "x.json")
@@ -484,6 +485,128 @@ def test_declarations_validate() -> None:
             device=" ",
         )
     assert base.device == "open-fp"
+
+
+def test_hand_oracle_values(tmp_path: Path) -> None:
+    # Sample 1: L = 300 N at (-180, 0) mm, R = 500 N at (190, 10) mm.
+    # net x = (300*-180 + 500*190)/800 = 51.25 mm, y = 5000/800 = 6.25 mm.
+    trial = read(w.write_swing(tmp_path))
+    np.testing.assert_allclose(trial.cop_m["net"][1], [0.05125, 0.00625], atol=1e-12)
+    assert trial.lead_fraction()[1] == pytest.approx(0.375)
+    assert w.default_arrays("RH")["lead_pct"][1] == 37.5
+
+
+def test_tz_aware_created_refused(tmp_path: Path) -> None:
+    meta = meta_with(created="2026-01-01T12:00:00+00:00")
+    with pytest.raises(ValueError, match="created"):
+        read(w.write_swing(tmp_path, meta=meta))
+
+
+# --------------------------------------------- hostile npz / json / csv input --
+def _replace_npz(json_path: Path, members: dict[str, bytes], **kwargs: Any) -> Path:
+    w.write_npz_members(json_path.with_suffix(".npz"), members, **kwargs)
+    return json_path
+
+
+def test_corrupted_member_crc_is_a_value_error(tmp_path: Path) -> None:
+    json_path = w.write_swing(tmp_path)
+    npz = json_path.with_suffix(".npz")
+    blob = bytearray(npz.read_bytes())
+    marker = blob.rfind(b"\x93NUMPY")  # start of the last member's data
+    blob[marker + 130] ^= 0xFF
+    npz.write_bytes(bytes(blob))
+    with pytest.raises(ValueError, match="npz"):
+        read(json_path)
+
+
+def test_unsupported_compression_refused(tmp_path: Path) -> None:
+    import zipfile
+
+    json_path = w.write_swing(tmp_path)
+    _replace_npz(json_path, w.default_members(), compression=zipfile.ZIP_BZIP2)
+    with pytest.raises(ValueError, match="compression"):
+        read(json_path)
+
+
+def test_encrypted_member_refused(tmp_path: Path) -> None:
+    json_path = w.write_swing(tmp_path)
+    _replace_npz(json_path, w.default_members(), flag_bits=0x1)
+    with pytest.raises(ValueError, match="encrypted"):
+        read(json_path)
+
+
+def test_member_that_is_not_npy_refused(tmp_path: Path) -> None:
+    json_path = w.write_swing(tmp_path)
+    members = {**w.default_members(), "t": b"this is not an npy file"}
+    _replace_npz(json_path, members)
+    with pytest.raises(ValueError, match="npz"):
+        read(json_path)
+
+
+def test_lying_npy_header_is_refused_before_allocation(tmp_path: Path) -> None:
+    json_path = w.write_swing(tmp_path)
+    members = {**w.default_members(), "t": w.lying_npy_bytes((10**12,))}
+    _replace_npz(json_path, members)
+    with pytest.raises(ValueError, match="header"):
+        read(json_path)
+
+
+def test_npy_header_shape_must_match_member_size(tmp_path: Path) -> None:
+    json_path = w.write_swing(tmp_path)
+    members = {**w.default_members(), "t": w.lying_npy_bytes((600,))}
+    _replace_npz(json_path, members)
+    with pytest.raises(ValueError, match="header"):
+        read(json_path)
+
+
+def test_deeply_nested_json_is_a_value_error(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="nest"):
+        read(w.write_swing(tmp_path, raw_json="[" * 200_000))
+
+
+def test_huge_integer_literal_is_a_value_error(tmp_path: Path) -> None:
+    huge = "1" + "0" * 400
+    text = json.dumps(w.default_meta()).replace('"bw_n": 800.0', f'"bw_n": {huge}')
+    with pytest.raises(ValueError, match="bw_n"):
+        read(w.write_swing(tmp_path, raw_json=text))
+    events = json.dumps(w.default_meta()).replace('"finish": 0.025', f'"finish": {huge}')
+    with pytest.raises(ValueError, match="finish"):
+        read(w.write_swing(tmp_path, raw_json=events))
+
+
+def test_giant_csv_field_is_a_value_error(tmp_path: Path) -> None:
+    path = w.write_csv(tmp_path)
+    text = path.read_text(encoding="utf-8").replace("400.00", "1" * 200_000, 1)
+    path.write_text(text, encoding="utf-8")
+    with pytest.raises(ValueError, match="row"):
+        read_swing_csv(path, handedness="RH", body_weight_n=800.0, declared=declared())
+
+
+@pytest.mark.parametrize("cell", ["1e3", " 5", "+5", ".5", "0x10", "1_0"])
+def test_csv_numeric_syntax_is_strict(tmp_path: Path, cell: str) -> None:
+    path = w.write_csv(tmp_path)
+    path.write_text(
+        path.read_text(encoding="utf-8").replace("400.00", cell, 1), encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="row"):
+        read_swing_csv(path, handedness="RH", body_weight_n=800.0, declared=declared())
+
+
+def test_csv_lead_pct_nan_pattern_mismatch_refused(tmp_path: Path) -> None:
+    path = w.write_csv(tmp_path)
+    lines = path.read_text(encoding="utf-8").splitlines()
+    cells = lines[2].split(",")
+    cells[1] = ""
+    lines[2] = ",".join(cells)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="lead_pct"):
+        read_swing_csv(path, handedness="RH", body_weight_n=800.0, declared=declared())
+
+
+def test_csv_oversized_header_refused(tmp_path: Path) -> None:
+    path = w.write_csv(tmp_path, header=w.CSV_HEADER + "," + "x" * 200_000)
+    with pytest.raises(ValueError, match="header"):
+        read_swing_csv(path, handedness="RH", body_weight_n=800.0, declared=declared())
 
 
 def test_read_swing_rejects_wrong_declared_type(tmp_path: Path) -> None:

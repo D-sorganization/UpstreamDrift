@@ -8,7 +8,9 @@ net CoP switches from a two-foot to a one-foot value.
 from __future__ import annotations
 
 import csv
+import io
 import json
+import zipfile
 from pathlib import Path
 from typing import Any
 
@@ -149,3 +151,40 @@ def write_csv(
                 row.append("" if np.isnan(col[i]) else f"{col[i]:.{decimals}f}")
             writer.writerow(row)
     return path
+
+
+def npy_bytes(array: np.ndarray) -> bytes:
+    """The ``.npy`` serialisation of ``array``."""
+    buffer = io.BytesIO()
+    np.lib.format.write_array(buffer, array, allow_pickle=False)
+    return buffer.getvalue()
+
+
+def lying_npy_bytes(shape: tuple[int, ...]) -> bytes:
+    """A ``.npy`` whose header claims ``shape`` but that holds no data."""
+    buffer = io.BytesIO()
+    np.lib.format.write_array_header_1_0(
+        buffer, {"descr": "<f8", "fortran_order": False, "shape": shape}
+    )
+    return buffer.getvalue()
+
+
+def write_npz_members(
+    path: Path,
+    members: dict[str, bytes],
+    *,
+    compression: int = zipfile.ZIP_STORED,
+    flag_bits: int = 0,
+) -> None:
+    """Write a zip of raw ``members`` (``<key>.npy`` entries) at ``path``."""
+    with zipfile.ZipFile(path, "w", compression) as archive:
+        for key, payload in members.items():
+            info = zipfile.ZipInfo(f"{key}.npy")
+            info.compress_type = compression
+            info.flag_bits |= flag_bits
+            archive.writestr(info, payload)
+
+
+def default_members() -> dict[str, bytes]:
+    """The default arrays as raw ``.npy`` members."""
+    return {key: npy_bytes(value) for key, value in default_arrays().items()}
