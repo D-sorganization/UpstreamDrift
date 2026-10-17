@@ -587,7 +587,10 @@ Implementation (`loop_nullspace/ground_contact.py`, `ground_envelopes.py`):
   they enter `FeasibleSet.from_hypotheses(cones=...)` under `H-FRICTION-CONE`.
 - Observation: `GroundObservation(selector, values, sigma, labels, source,
   coverage=3)` with mandatory positive per-row `sigma` and constructors
-  `from_point_loads`, `from_contact_groups`, `from_normal_load_and_cop`.
+  `from_point_loads`, `from_contact_groups`, `from_normal_load_and_cop` and
+  `from_vertical_plates` (OF-11, #13067: per-foot `FootLoadReading` load and
+  CoP rows about the plate's force-sensing plane, with the exact shear lever
+  arm; shear is never assigned a value).
   `observation_accounting` reports `rank(E_x N)`, the observed nullity, the
   singular values of `diag(1/sigma) E_x N` and the chi-square disagreement with
   the balance; `restrict_to_observation` is the zero-uncertainty limit (drops the

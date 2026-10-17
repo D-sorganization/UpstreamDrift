@@ -30,7 +30,12 @@ direct transfer, an orientation match, held at zero (\texttt{held\_neutral}) or
 \texttt{locked\_in\_asset}. For the Bruno file this is 6 pelvis, 29 spine-drive,
 12 direct, 6 orientation-matched, 7 held-neutral and 105 locked coordinates; the
 lateral-bending and axial-rotation coordinates of the thoracic levels $T_1$--$T_2$
-to $T_{11}$--$T_{12}$ are locked in the asset, so the drive cannot move them. The
+to $T_{11}$--$T_{12}$ are locked in the asset, so the drive cannot move them
+unless the study sets \texttt{unlock\_driven\_coordinates}. The full-body stage
+then unlocks the same coordinates in the target it poses for the shoulder
+orientation match and the ground-reaction estimate, and carries the drive's
+series for them (\#13056); a drive-unlocked coordinate without a trunk series
+is an error. The
 file stores names, topology and signs only, no licensed value.
 
 Signs are observed, not assumed. For every direct entry the native probe
