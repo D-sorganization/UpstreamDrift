@@ -163,7 +163,9 @@ def test_cop_threshold_rule_propagates_from_contract(tmp_path: Path) -> None:
 
 
 # ------------------------------------------------------------ json checks --
-def test_oversized_json_refused(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_oversized_json_refused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     path = w.write_swing(tmp_path)
     monkeypatch.setattr(fmt, "MAX_JSON_BYTES", 10)
     with pytest.raises(ValueError, match="too large"):
@@ -230,7 +232,11 @@ def test_id_mismatch_refused(tmp_path: Path) -> None:
 
 def test_bad_stem_refused(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="stem"):
-        read(w.write_swing(tmp_path, swing_id="not-an-id", meta=meta_with(id="not-an-id")))
+        read(
+            w.write_swing(
+                tmp_path, swing_id="not-an-id", meta=meta_with(id="not-an-id")
+            )
+        )
 
 
 def test_path_traversal_refused(tmp_path: Path) -> None:
@@ -349,9 +355,10 @@ def test_csv_round_trip(tmp_path: Path) -> None:
     assert np.isnan(trial.cop_m["left"][4:]).all()
     assert dict(trial.events_s) == {}
     assert trial.handedness == "RH"
-    assert trial.provenance.file_sha256["csv"] == hashlib.sha256(
-        csv_path.read_bytes()
-    ).hexdigest()
+    assert (
+        trial.provenance.file_sha256["csv"]
+        == hashlib.sha256(csv_path.read_bytes()).hexdigest()
+    )
 
 
 def test_csv_other_handedness_is_checked_against_lead_pct(tmp_path: Path) -> None:
@@ -377,7 +384,9 @@ def test_csv_requires_handedness_and_body_weight(tmp_path: Path) -> None:
 
 def test_csv_ragged_row_refused(tmp_path: Path) -> None:
     path = w.write_csv(tmp_path)
-    path.write_text(path.read_text(encoding="utf-8") + "0.0300,1.00\n", encoding="utf-8")
+    path.write_text(
+        path.read_text(encoding="utf-8") + "0.0300,1.00\n", encoding="utf-8"
+    )
     with pytest.raises(ValueError, match="row"):
         read_swing_csv(path, handedness="RH", body_weight_n=800.0, declared=declared())
 
