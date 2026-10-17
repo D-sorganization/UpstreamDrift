@@ -5,6 +5,8 @@ Files are produced by ``_open_fp_writer`` from the documented format only.
 
 from __future__ import annotations
 
+import math
+
 import hashlib
 import json
 import os
@@ -377,6 +379,25 @@ def test_csv_round_trip(tmp_path: Path) -> None:
         trial.provenance.file_sha256["csv"]
         == hashlib.sha256(csv_path.read_bytes()).hexdigest()
     )
+
+
+def test_csv_uncertainty_includes_its_rounding(tmp_path: Path) -> None:
+    # The CSV export rounds loads to 0.01 N and CoP to 0.01 mm: a uniform error
+    # of half-width q/2 has sigma (q/2)/sqrt(3), added in quadrature.
+    trial = read_swing_csv(
+        w.write_csv(tmp_path), handedness="RH", body_weight_n=800.0, declared=declared()
+    )
+    got = trial.uncertainty
+    assert got.cop_m == pytest.approx(math.hypot(0.010, 0.005e-3 / math.sqrt(3.0)))
+    assert got.force_floor_n == pytest.approx(math.hypot(2.0, 0.005 / math.sqrt(3.0)))
+    assert got.force_fraction == 0.01
+    assert "rounding" in got.source
+
+
+def test_npz_uncertainty_is_the_declared_one(tmp_path: Path) -> None:
+    # The NPZ arrays are float64 from the source: no serialisation rounding.
+    trial = read_swing(w.write_swing(tmp_path), declared=declared())
+    assert trial.uncertainty == declared().uncertainty
 
 
 def test_csv_other_handedness_is_checked_against_lead_pct(tmp_path: Path) -> None:
