@@ -48,7 +48,6 @@ from src.shared.python.lifting.back_bar import (  # noqa: E402
 )
 from src.shared.python.lifting.bundles import (  # noqa: E402
     LIFT_SPEC,
-    SEED_RECORD,
     build_lift_bundle,
     lift_hands_to_full_body,
     lift_to_full_body,
@@ -150,9 +149,10 @@ def main(argv: list[str] | None = None) -> int:
             "source_commit": _git("rev-parse", "HEAD"),
             "tools_pin": tools_pin,
             "seed": {
-                "path": str(SEED_RECORD.relative_to(ROOT)),
-                "sha256": _sha256(SEED_RECORD),
-                "row": 0,
+                "source": "address_seed_deg of the lift-body spec, root raised "
+                "(lift_body.lift_seed_pose)",
+                "path": str(LIFT_SPEC.relative_to(ROOT)),
+                "sha256": _sha256(LIFT_SPEC),
             },
             "spec_path": str(LIFT_SPEC.relative_to(ROOT)),
             "generator": "scripts/generate_lift_bundle.py",

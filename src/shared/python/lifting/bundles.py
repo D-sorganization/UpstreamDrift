@@ -44,6 +44,12 @@ from src.shared.python.lifting.back_bar import (
     pose_axis_world,
     standard_bar_world,
 )
+from src.shared.python.lifting.lift_body import (
+    HEAD_COORDINATES,
+    LIFT_BODY_SPEC,
+    lift_bounds,
+    lift_seed_pose,
+)
 from src.shared.python.lifting.sagittal_retarget import (
     LANDMARK_LABELS,
     SagittalFrame,
@@ -60,9 +66,9 @@ from src.shared.python.motion_matching.same_input import (
 Array = NDArray[np.float64]
 
 _REPO = Path(__file__).resolve().parents[4]
-_GROUND_SUPPORT = _REPO / "docs/development/full_body_models/evidence/ground_support"
-LIFT_SPEC = _GROUND_SUPPORT / "full_body_spec_hipcal_scaled.json"
-SEED_RECORD = _GROUND_SUPPORT / "dynamics_record.npz"
+#: The lifter body (OSL-14, #13057): AN-1 de Leva body with a lumbar joint,
+#: cited ranges and a barbell grip (:mod:`.lift_body`).
+LIFT_SPEC = LIFT_BODY_SPEC
 BACK_SQUAT_BUNDLE = (
     _REPO / "docs/development/lifting/evidence/back_squat/back_squat_bundle.npz"
 )
@@ -158,6 +164,8 @@ ARM_CHAIN_COORDINATES: tuple[str, ...] = tuple(
 BACK_BAR_REACH_TOLERANCE_M = 0.02
 BACK_BAR_CLOSURE_TOLERANCE_M = 1e-3
 TOE_COORDINATES: tuple[str, ...] = ("mtp_angle_l", "mtp_angle_r")
+#: Held at the standing pose while a bar lift's arm chain is solved.
+_HELD_IN_BAR_LIFTS: tuple[str, ...] = SCAPULA_COORDINATES + HEAD_COORDINATES
 POSTURE_COORDINATES: tuple[str, ...] = (
     "hip_adduction_l",
     "hip_adduction_r",
@@ -176,12 +184,18 @@ class LiftIKOptions:
     standing_iterations: int = 300
     prior_weight: float = 1e-4
     posture_weight: float = 1e-2
+    #: ``"trf"`` honours the spec's cited ranges as hard bounds (OSL-14,
+    #: #13057); bounded Levenberg-Marquardt (``"lm"``) only clips, and its
+    #: hip/lumbar split drifted between descent and ascent.
+    solver: str = "trf"
 
     def __post_init__(self) -> None:
         if min(self.iterations, self.standing_iterations) < 1:
             raise ValueError("IK iterations must be positive")
         if not (self.prior_weight >= 0.0 and self.posture_weight >= 0.0):
             raise ValueError("IK weights must be non-negative")
+        if self.solver not in ("lm", "trf"):
+            raise ValueError(f"unknown IK solver {self.solver!r}")
 
 
 @dataclass(frozen=True)
@@ -220,9 +234,11 @@ class FullBodyLift:
         """Provenance record of the IK solve."""
         attachments = _attachments(self.back_bar)
         held = UPPER_LIMB_COORDINATES if self.back_bar is None else SCAPULA_COORDINATES
-        locked = held + TOE_COORDINATES
+        locked = held + HEAD_COORDINATES + TOE_COORDINATES
+        method = {"lm": "Levenberg-Marquardt", "trf": "bounded trust-region (TRF)"}
         record: dict[str, Any] = {
-            "solver": "FullBodyMarkerKinematics (MuJoCo), Levenberg-Marquardt",
+            "solver": f"FullBodyMarkerKinematics (MuJoCo), {method[self.options.solver]}",
+            "bounds": "spec coordinate_ranges_deg (cited human ranges)",
             "landmarks": {k: v[0] for k, v in attachments.items()},
             "locked": list(locked),
             "flat_feet": list(STANCE_SPHERES),
@@ -242,10 +258,9 @@ class FullBodyLift:
         return record
 
 
-def load_seed_pose(path: Path = SEED_RECORD) -> Array:
-    """First recorded pose of the committed ground-support run (arms on grip)."""
-    with np.load(path, allow_pickle=False) as record:
-        return np.asarray(record["q"][0], dtype=float)
+def load_seed_pose(path: Path = LIFT_SPEC) -> Array:
+    """Seed pose of the lift-body document (its address seed, root raised)."""
+    return lift_seed_pose(json.loads(Path(path).read_bytes()))
 
 
 def _exercise_config(exercise: str, body: Any, bar_mass_kg: float) -> tuple:
@@ -430,9 +445,14 @@ class _Standing:
     locked: dict[str, float]
     posture: dict[str, tuple[float, float]]
     options: LiftIKOptions
+    bounds: dict[str, tuple[float, float]]
     q: Array
     frame: SagittalFrame
     points: dict[str, Array]
+
+    def limits(self) -> dict[str, Any]:
+        """Bounds and solver every solve of this lift shares (OSL-14)."""
+        return {"bounds": self.bounds, "solver": self.options.solver}
 
 
 def _engine_kinematics(spec_bytes: bytes, attachments: Mapping[str, Any]) -> Any:
@@ -454,7 +474,8 @@ def _stand(
     """Validate inputs and solve the upright pose with the upper limbs held."""
     if not isinstance(spec_bytes, bytes | bytearray):
         raise TypeError("spec_bytes must be the raw full-body spec bytes")
-    order = tuple(json.loads(spec_bytes)["coordinate_order"])
+    document = json.loads(spec_bytes)
+    order = tuple(document["coordinate_order"])
     seed = np.asarray(seed_q, dtype=float)
     if seed.shape != (len(order),) or not np.isfinite(seed).all():
         raise ValueError(f"seed_q must be {len(order)} finite values in spec order")
@@ -464,8 +485,13 @@ def _stand(
 
     kin = _engine_kinematics(spec_bytes, LANDMARK_ATTACHMENTS)
     ground = GroundPlane(normal=(0.0, 0.0, 1.0), height_m=0.0)
-    locked = {n: float(seed[order.index(n)]) for n in UPPER_LIMB_COORDINATES}
+    locked = {
+        n: float(seed[order.index(n)])
+        for n in UPPER_LIMB_COORDINATES + HEAD_COORDINATES
+        if n in order
+    }
     posture = dict.fromkeys(POSTURE_COORDINATES, (0.0, opts.posture_weight))
+    bounds = lift_bounds(document)
     seed_positions = kin.marker_positions(seed)
     seed_points: dict[str, Array] = {
         name: np.asarray(pos, dtype=float)
@@ -482,6 +508,8 @@ def _stand(
         ground=ground,
         prior_weight=opts.prior_weight,
         posture_prior=posture,
+        bounds=bounds,
+        solver=opts.solver,
     ).q
     standing_positions = kin.marker_positions(standing)
     return _Standing(
@@ -491,6 +519,7 @@ def _stand(
         locked=locked,
         posture=posture,
         options=opts,
+        bounds=bounds,
         q=standing,
         frame=stance_frame(kin, standing, ground),
         points={
@@ -562,6 +591,7 @@ def _back_bar_pose(
         iterations=standing.options.standing_iterations,
         ground=standing.ground,
         prior_weight=standing.options.prior_weight,
+        **standing.limits(),
         axis_targets=_bar_axis_targets(geometry, standing.frame),
     )
     reach = fit.per_marker_m["bar"]
@@ -635,6 +665,7 @@ def _track(
         iterations=standing.options.iterations,
         ground=standing.ground,
         prior_weight=standing.options.prior_weight,
+        **standing.limits(),
         posture_prior=standing.posture,
         **extra,
     )
@@ -701,7 +732,7 @@ def lift_to_full_body(
             kin=arm_kin,
             points={**standing.points, "bar": setup.bar_target_m},
             q_start=q_start,
-            held={n: v for n, v in standing.locked.items() if n in SCAPULA_COORDINATES},
+            held={n: v for n, v in standing.locked.items() if n in _HELD_IN_BAR_LIFTS},
             axes=_bar_axis_targets(geometry, standing.frame),
             back_bar=setup,
         ),
@@ -743,7 +774,7 @@ def lift_hands_to_full_body(
     points = standing.points
     mid = 0.5 * (points["shoulder_l"] + points["shoulder_r"])
     axes = _axis_targets_for(setup.bar_axis, standing.frame)
-    held = {n: v for n, v in standing.locked.items() if n in SCAPULA_COORDINATES}
+    held = {n: v for n, v in standing.locked.items() if n in _HELD_IN_BAR_LIFTS}
     toes = {n: float(standing.q[standing.order.index(n)]) for n in TOE_COORDINATES}
     targets = retarget_landmarks(solution, {**points, "bar": mid}, standing.frame)
     bar_index = LANDMARK_LABELS.index("bar")
@@ -756,6 +787,7 @@ def lift_hands_to_full_body(
         iterations=standing.options.standing_iterations,
         ground=standing.ground,
         prior_weight=standing.options.prior_weight,
+        **standing.limits(),
         posture_prior=standing.posture,
         axis_targets=axes,
     )
@@ -776,6 +808,7 @@ def lift_hands_to_full_body(
         iterations=standing.options.standing_iterations,
         ground=standing.ground,
         prior_weight=standing.options.prior_weight,
+        **standing.limits(),
         posture_prior=standing.posture,
         axis_targets=axes,
     )
@@ -847,6 +880,7 @@ def _arm_hang(
             iterations=standing.options.standing_iterations,
             ground=standing.ground,
             prior_weight=standing.options.prior_weight,
+            **standing.limits(),
             axis_targets=axes,
         )
         reached = fit.per_marker_m["bar"] <= _HANG_REACH_M and (

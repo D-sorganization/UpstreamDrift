@@ -166,18 +166,22 @@ def _foot_stations(spec: Mapping[str, Any]) -> dict[str, tuple[str, tuple]]:
 def bundle_pelvis_rotation(spec: Mapping[str, Any]) -> Array:
     """Rajagopal pelvis axes expressed in the spec's pelvis body frame.
 
-    The two hip joints of the spec must share one parent orientation (they
-    hang from one pelvis); its base frame is the Rajagopal hip frame with the
-    spec's axis permutation, so ``R_base @ HIP_PERMUTATION.T`` gives the
-    pelvis axes (columns) in :data:`PELVIS_BODY` coordinates.
+    Both hip joints hang from one pelvis.  The right hip's base frame is the
+    Rajagopal hip frame with the spec's axis permutation, so
+    ``R_base @ HIP_PERMUTATION.T`` gives the pelvis axes (columns) in
+    :data:`PELVIS_BODY` coordinates.  The left hip's base must be the same
+    orientation, or (the AN-1 lift body, OSL-14 #13057) that orientation
+    conjugated by ``spec_builder.HIP_MIRROR``, which mirrors the left leg while
+    keeping OpenSim's coordinate signs.
 
     Postcondition: the result is a proper rotation (orthonormal, det +1).
 
     Raises:
         ValueError: when a hip joint is missing, hangs from another body, or
-            the two hip parent orientations differ.
+            the left hip base is neither the right one nor its mirror.
     """
     from src.shared.python.motion_matching.execution.spec_builder import (
+        HIP_MIRROR,
         HIP_PERMUTATION,
     )
 
@@ -188,9 +192,14 @@ def bundle_pelvis_rotation(spec: Mapping[str, Any]) -> Array:
         if joint is None or joint["parent"] != PELVIS_BODY:
             raise ValueError(f"spec joint {name!r} does not hang from the pelvis")
         bases.append(np.asarray(joint["parent_to_base"], dtype=float)[:3, :3])
-    if not np.allclose(bases[0], bases[1], atol=1e-12):
+    left, right = bases
+    mirror = np.asarray(HIP_MIRROR, dtype=float)[:3, :3]
+    if not (
+        np.allclose(left, right, atol=1e-12)
+        or np.allclose(left, right @ mirror, atol=1e-12)
+    ):
         raise ValueError("the spec's hip joints do not share a pelvis orientation")
-    rotation = bases[0] @ HIP_PERMUTATION.T
+    rotation = right @ HIP_PERMUTATION.T
     if not np.allclose(rotation.T @ rotation, np.eye(3), atol=1e-9) or (
         np.linalg.det(rotation) <= 0.0
     ):
