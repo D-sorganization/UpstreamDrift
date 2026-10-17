@@ -45,6 +45,7 @@ from src.shared.python.motion_matching.visual_skeleton import derive_visual_skel
 Array = NDArray[np.float64]
 
 __all__ = [
+    "CANONICAL_DECIMALS",
     "CANONICAL_NOISE_FLOOR",
     "SkinnedBody",
     "canonical_components",
@@ -422,24 +423,30 @@ def _local_poses(parents: tuple[int, ...], global_poses: Array) -> Array:
 
 #: Components smaller than this are float noise from ``inv(parent) @ child``.
 CANONICAL_NOISE_FLOOR = 1e-12
+#: Decimal places kept in emitted node transform components.
+CANONICAL_DECIMALS = 12
 
 
 def canonical_components(values: Any) -> list[float]:
-    """``values`` as floats with noise-level components snapped to exactly +0.0.
+    """``values`` rounded to ``CANONICAL_DECIMALS`` places, noise snapped to +0.0.
 
-    Postcondition (DbC): every returned component ``x`` has ``x == 0.0`` with a
-    positive sign or ``abs(x) >= CANONICAL_NOISE_FLOOR``. The rest transforms
-    are derived through ``np.linalg.inv`` and matmul, whose ~1e-18 residues
-    differ in their last bits between BLAS/SIMD paths and so print with a
-    CPU-dependent digit count; snapping them (and ``-0.0``) makes the emitted
-    document byte-stable across platforms (#12789). No geometry changes: the
-    floor is far below any representable spec dimension.
+    Postcondition (DbC): every returned component ``x`` equals
+    ``round(x, CANONICAL_DECIMALS)``, and is exactly +0.0 (never -0.0) when
+    its input was below ``CANONICAL_NOISE_FLOOR`` in magnitude. The rest
+    transforms come from ``np.linalg.inv`` and matmul, whose last bits differ
+    between BLAS/SIMD paths and change the printed digits; rounding (Python's
+    correctly rounded ``round``), the noise snap and the -0.0 normalisation
+    make the emitted document byte-stable across platforms (#12789). 1e-12 m
+    or rad is far below any spec dimension, so no geometry changes.
     """
     arr = np.asarray(values, dtype=float).ravel()
     if not np.isfinite(arr).all():
         raise ValueError("transform components must be finite")
-    snapped = np.where(np.abs(arr) < CANONICAL_NOISE_FLOOR, 0.0, arr) + 0.0
-    return [float(x) for x in snapped]
+    out = []
+    for x in arr.tolist():
+        y = 0.0 if abs(x) < CANONICAL_NOISE_FLOOR else round(x, CANONICAL_DECIMALS)
+        out.append(y + 0.0)
+    return out
 
 
 def _bone_nodes(

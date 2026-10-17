@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import dataclasses
 import json
 import math
 
@@ -533,6 +534,7 @@ def test_rest_node_transforms_have_no_float_noise(torsioned_nodes) -> None:
 def test_canonical_components_snaps_noise_and_negative_zero() -> None:
     out = canonical_components(np.array([1e-18, -1e-13, -0.0, 0.5, -2e-12]))
     assert out == [0.0, 0.0, 0.0, 0.5, -2e-12]
+    assert canonical_components([0.1234567890123456]) == [0.123456789012]
     assert all(math.copysign(1.0, x) == 1.0 for x in out[:3])
 
 
@@ -540,3 +542,35 @@ def test_canonical_components_snaps_noise_and_negative_zero() -> None:
 def test_canonical_components_rejects_non_finite() -> None:
     with pytest.raises(ValueError, match="finite"):
         canonical_components([0.0, float("nan")])
+
+
+@pytest.fixture(scope="module")
+def torsioned_body():
+    compiled = compile_character("tour_average_male", {"mass_kg": 90.0})
+    return build_skinned_body(compiled.document, spec_sha256=compiled.sha256)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("direction", [np.inf, -np.inf])
+def test_export_bytes_survive_one_ulp_pose_perturbation(
+    torsioned_body, direction
+) -> None:
+    """A 1-ulp change in every rest transform leaves the node JSON unchanged.
+
+    This is the cross-runner failure mode: BLAS/SIMD paths differ in the last
+    bit of the composed transforms, which used to change the glTF byte count.
+    """
+    base = json.loads(skinned_body_gltf_text(torsioned_body))["nodes"]
+    nudged_poses = np.nextafter(torsioned_body.rest_poses, direction)
+    assert not np.array_equal(nudged_poses, torsioned_body.rest_poses)
+    nudged = dataclasses.replace(torsioned_body, rest_poses=nudged_poses)
+    assert json.loads(skinned_body_gltf_text(nudged))["nodes"] == base
+
+
+@pytest.mark.unit
+def test_rest_node_components_are_rounded_to_twelve_places(torsioned_nodes) -> None:
+    for node in torsioned_nodes:
+        for key in ("translation", "rotation"):
+            for x in node[key]:
+                assert x == round(x, 12), (node["name"], key, x)
+                assert math.copysign(1.0, x) == 1.0 or x != 0.0
