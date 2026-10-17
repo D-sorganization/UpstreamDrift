@@ -112,3 +112,14 @@ def test_validates_requires_text() -> None:
 def test_alignment_is_frozen() -> None:
     with pytest.raises(AttributeError):
         _alignment().offset_s = 2.0  # type: ignore[misc]
+
+
+def test_model_time_is_the_inverse_of_trial_time() -> None:
+    alignment = _alignment(offset_s=1.25)
+    assert alignment.model_time(0.007) == pytest.approx(1.257)
+    assert alignment.trial_time(alignment.model_time(0.007)) == pytest.approx(0.007)
+
+
+def test_model_time_rejects_non_finite() -> None:
+    with pytest.raises(ValueError):
+        _alignment().model_time(math.nan)

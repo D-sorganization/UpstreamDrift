@@ -979,3 +979,11 @@ class GroundReactionResponse(BaseModel):
         default_factory=dict,
         description="Per-trace x/y/z/magnitude lists; null marks unavailable samples",
     )
+    measured_qualified: bool | None = Field(
+        None,
+        description="Set when a plate trial is overlaid; false means the "
+        "measurement has no device qualification",
+    )
+    observability: dict[str, bool] | None = Field(
+        None, description="Which components the overlaid plates observe"
+    )

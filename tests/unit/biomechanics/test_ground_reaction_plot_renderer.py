@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 from matplotlib.figure import Figure
 import numpy as np
 import pytest
@@ -107,3 +109,30 @@ def test_time_panel_draws_gaps_and_unavailable_text() -> None:
         draw_time_panel(
             ax, [0.0], [(y, "A", "#000000")], title="T", unit="N", events={}
         )
+
+
+def test_measured_overlay_is_dashed_and_unqualified_banner_is_drawn() -> None:
+    base = _plot()
+    unobserved = {a: [None] * 3 for a in ("x", "y", "z", "magnitude")}
+    cop = {a: [0.01, 0.02, 0.03] for a in ("x", "y", "z", "magnitude")}
+    series = replace(
+        base,
+        traces={
+            **base.traces,
+            "measured_left_force_n": {**unobserved, "z": [400.0, 600.0, 800.0]},
+            "measured_left_cop_m": cop,
+        },
+        measured_qualified=False,
+    )
+    fig = Figure()
+    plot_ground_reaction(fig, series)
+    dashed = [
+        line
+        for ax in fig.axes
+        for line in ax.get_lines()
+        if line.get_linestyle() == "--" and line.get_label().startswith("Measured")
+    ]
+    assert len(dashed) == 2
+    assert "Unqualified measurement" in [t.get_text() for t in fig.texts]
+    plot_ground_reaction(fig, replace(series, measured_qualified=True))
+    assert "Unqualified measurement" not in [t.get_text() for t in fig.texts]

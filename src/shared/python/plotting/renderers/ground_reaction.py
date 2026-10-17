@@ -22,7 +22,7 @@ from src.shared.python.plotting.renderers.time_panels import (
     mark_unavailable,
 )
 
-__all__ = ["PANEL_TITLES", "plot_ground_reaction"]
+__all__ = ["PANEL_TITLES", "UNQUALIFIED_BANNER", "plot_ground_reaction"]
 
 PANEL_TITLES: tuple[str, ...] = (
     "Vertical Ground Reaction Force",
@@ -111,6 +111,43 @@ def _cop_path(ax: Axes, series: GroundReactionPlotSeries) -> None:
     ax.tick_params(labelsize=7)
 
 
+#: Banner shown whenever the overlaid plate trial has no device qualification.
+UNQUALIFIED_BANNER = "Unqualified measurement"
+_MEASURED_STYLE = {"linestyle": "--", "linewidth": 1.4, "alpha": 0.9}
+
+
+def _measured_keys(series: GroundReactionPlotSeries) -> list[tuple[str, str, str]]:
+    return [
+        (f"measured_{key}", f"Measured {label}", color)
+        for key, label, color in _keys(series)
+        if f"measured_{key}_force_n" in series.traces
+    ]
+
+
+def _draw_measured(
+    axes: np.ndarray, series: GroundReactionPlotSeries, in_bw: bool
+) -> None:
+    """Dashed measured load (N panels only) and measured CoP path."""
+    for key, label, color in _measured_keys(series):
+        if not in_bw:
+            load = _component(series, f"{key}_force_n", "z")
+            axes[0].plot(
+                series.time_s, load, color=color, label=label, **_MEASURED_STYLE
+            )
+        x = _component(series, f"{key}_cop_m", "x")
+        y = _component(series, f"{key}_cop_m", "y")
+        if x is not None and y is not None:
+            axes[3].plot(x, y, color=color, label=label, **_MEASURED_STYLE)
+    if _measured_keys(series):
+        axes[0].legend(fontsize=7, loc="upper left")
+        axes[3].legend(fontsize=7, loc="upper left")
+
+
+def _draw_banner(fig: Figure, series: GroundReactionPlotSeries) -> None:
+    if series.measured_qualified is False:
+        fig.text(0.01, 0.99, UNQUALIFIED_BANNER, color="#B45309", fontsize=9, va="top")
+
+
 def plot_ground_reaction(fig: Figure, series: GroundReactionPlotSeries) -> None:
     """Draw the six ground-reaction panels onto ``fig`` (cleared first).
 
@@ -149,7 +186,9 @@ def plot_ground_reaction(fig: Figure, series: GroundReactionPlotSeries) -> None:
             reason=reason,
         )
     _cop_path(axes[3], series)
+    _draw_measured(axes, series, in_bw)
     for ax in axes[4:]:
         ax.set_xlabel("Time (s)", fontsize=8)
     fig.suptitle("Ground Reaction (on the body, world axes)", fontsize=9)
+    _draw_banner(fig, series)
     fig.tight_layout(rect=(0, 0, 1, 0.95))
