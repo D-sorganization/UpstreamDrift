@@ -1,50 +1,34 @@
-"""Single canonical resolver for the golf club-head body (UD#12913).
+"""Single canonical resolver for the golf club-head body (UD#12913, UD#13015).
 
-Swing models name the body ``clubhead`` while a few generated models use
-``club_head``. Analyzers previously did a substring match for ``club_head``
-only, so ``clubhead`` models silently reported a 0.0 mph club speed.
+The alias table lives in :mod:`src.shared.python.club_body_names` so every
+engine shares it; this module adapts it to ``mujoco.MjModel``.
 """
 
 from __future__ import annotations
 
-import logging
-
 import mujoco
 
-logger = logging.getLogger(__name__)
+from src.shared.python.club_body_names import (
+    CLUB_HEAD_BODY_ALIASES,
+    find_club_head_index,
+)
 
-#: Canonical name first, then accepted aliases (exact, case-insensitive).
-CLUB_HEAD_BODY_ALIASES: tuple[str, ...] = ("clubhead", "club_head")
-
-
-def _normalise(name: str) -> str:
-    return name.lower().replace("_", "").replace("-", "")
+__all__ = ["CLUB_HEAD_BODY_ALIASES", "find_club_head_body_id"]
 
 
-def find_club_head_body_id(model: mujoco.MjModel, *, owner: str = "") -> int | None:
-    """Return the club-head body id, or ``None`` (with a WARNING) if absent.
+def find_club_head_body_id(
+    model: mujoco.MjModel, *, owner: str = "", strict: bool = False
+) -> int | None:
+    """Return the club-head body id.
 
-    Exact alias matches win; otherwise the first body whose normalised name
-    contains ``clubhead`` is used (e.g. ``club_head_link``).
+    With ``strict=False`` a missing body logs a WARNING and returns ``None``.
+    With ``strict=True`` it raises ``ValueError`` listing the candidate names,
+    so callers computing club-head metrics never silently drop them.
     """
     if model is None:
         raise ValueError("model must be provided")
-    names: list[tuple[int, str]] = []
-    for i in range(model.nbody):
-        body_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i)
-        if body_name:
-            names.append((i, body_name))
-    for alias in CLUB_HEAD_BODY_ALIASES:
-        for i, body_name in names:
-            if body_name.lower() == alias:
-                return i
-    for i, body_name in names:
-        if "clubhead" in _normalise(body_name):
-            return i
-    logger.warning(
-        "%s: no club-head body found (tried aliases %s); club-head speed and "
-        "club metrics will be unavailable for this model.",
-        owner or "club-head lookup",
-        ", ".join(CLUB_HEAD_BODY_ALIASES),
-    )
-    return None
+    names = [
+        mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i)
+        for i in range(model.nbody)
+    ]
+    return find_club_head_index(names, owner=owner, strict=strict)

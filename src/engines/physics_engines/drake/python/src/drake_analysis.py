@@ -17,6 +17,9 @@ if TYPE_CHECKING:
     with contextlib.suppress(ImportError):
         from pydrake.all import Context, MultibodyPlant
 
+from src.engines.physics_engines.drake.python.drake_forces import (
+    gravity_external_forces,
+)
 from src.shared.python.logging_pkg.logging_config import configure_gui_logging
 
 logger = logging.getLogger(__name__)
@@ -40,7 +43,7 @@ class DrakeInducedAccelerationAnalyzer:
         return self.plant.CalcInverseDynamics(
             context,
             vdot_zero,
-            self.plant.MakeMultibodyForces(self.plant),  # type: ignore[attr-defined]
+            gravity_external_forces(self.plant, context),
         )
 
     def compute_components(

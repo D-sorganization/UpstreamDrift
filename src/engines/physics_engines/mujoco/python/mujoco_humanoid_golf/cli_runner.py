@@ -123,7 +123,7 @@ def run_simulation(
     """Simulate the provided model for the requested duration."""
     if model is None:
         raise ValueError("model must be provided")
-    analyzer = BiomechanicalAnalyzer(model, data)
+    analyzer = BiomechanicalAnalyzer(model, data, require_club_head=True)
     recorder = SwingRecorder()
     recorder.start_recording()
 

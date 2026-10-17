@@ -25,6 +25,7 @@ from typing import Any, cast
 import numpy as np
 
 from src.shared.python.core.contracts import (
+    StateError,
     check_finite,
     invariant,
     postcondition,
@@ -54,6 +55,9 @@ if DRAKE_AVAILABLE:
     )
     from pydrake.multibody.tree import JointActuatorIndex
 
+from src.engines.physics_engines.drake.python.drake_forces import (
+    gravity_external_forces,
+)
 from src.shared.python.core import constants
 from src.shared.python.engine_core.base_physics_engine import BasePhysicsEngine
 from src.shared.python.engine_core.capabilities import (
@@ -173,23 +177,23 @@ class DrakePhysicsEngine(BasePhysicsEngine):
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def reset(self) -> None:
-        """Reset the simulation to its initial state."""
-        if self.context and self.plant_context and self.simulator:
-            # Reset time to zero
-            self.context.SetTime(0.0)
+        """Reset the simulation to its initial (post-load default) state.
 
-            # Reset to default state (positions and velocities)
-            # pydrake stubs expect (context, positions) but the single-arg overload
-            # resets to defaults; suppress the type checker mismatch.
-            self.plant.SetDefaultPositions(self.plant_context)  # type: ignore[call-overload]
-            self.plant.SetDefaultVelocities(self.plant_context)  # type: ignore[attr-defined]
+        Raises:
+            StateError: If the simulator/contexts have not been created.
+        """
+        if not (self.context and self.plant_context and self.simulator):
+            raise StateError("Cannot reset Drake engine: simulator not initialized")
 
-            # Re-initialize the simulator with the reset state
-            self.simulator.Initialize()
-
-            logger.debug("Drake engine reset to initial state")
-        else:
-            logger.warning("Attempted to reset Drake engine before initialization.")
+        self.context.SetTime(0.0)
+        # ``SetDefaultState(context, state)`` is the real pydrake API; the
+        # ``SetDefaultPositions`` overloads take positions, never a context.
+        self.plant.SetDefaultState(
+            self.plant_context, self.plant_context.get_mutable_state()
+        )
+        # Re-initialize the simulator with the reset state
+        self.simulator.Initialize()
+        logger.debug("Drake engine reset to initial state")
 
     @precondition(
         lambda self, dt=None: self.is_initialized, "Engine must be initialized"
@@ -199,8 +203,7 @@ class DrakePhysicsEngine(BasePhysicsEngine):
         self._ensure_finalized()
 
         if not self.simulator or not self.context:
-            logger.error("Cannot step: Simulator not initialized.")
-            return
+            raise StateError("Cannot step Drake engine: simulator not initialized")
 
         current_time = self.context.get_time()
         step_size = dt if dt is not None else self.plant.time_step()
@@ -229,7 +232,7 @@ class DrakePhysicsEngine(BasePhysicsEngine):
                 _ = self.plant.CalcInverseDynamics(
                     self.plant_context,
                     vdot_zero,
-                    self.plant.MakeMultibodyForces(self.plant),  # type: ignore[attr-defined]  # pydrake stub gap,
+                    self._gravity_external_forces(),
                 )
 
             logger.debug("Drake forward dynamics computation completed")
@@ -380,21 +383,26 @@ class DrakePhysicsEngine(BasePhysicsEngine):
         forces = self.plant.CalcInverseDynamics(
             self.plant_context,
             vdot_zero,
-            self.plant.MakeMultibodyForces(self.plant),  # type: ignore[attr-defined]  # pydrake stub gap
+            self._gravity_external_forces(),
         )
         return cast(np.ndarray, forces)
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Gravity forces must contain finite values")
     def compute_gravity_forces(self) -> np.ndarray:
-        """Compute gravity forces g(q)."""
+        """Compute gravity forces g(q) with ``bias = C(q,v) + g(q)``.
+
+        Drake's ``CalcGravityGeneralizedForces`` returns the generalized force
+        *applied by* gravity (right-hand side of ``M a + C = tau_g + tau``),
+        i.e. ``-g(q)``; it is negated here so the sign matches MuJoCo and
+        Pinocchio.
+        """
         if not self.plant_context:
             return np.array([])
 
-        # g(q) = GravityForces(context)
-        return cast(
+        return -cast(
             np.ndarray, self.plant.CalcGravityGeneralizedForces(self.plant_context)
-        )  # noqa: E501
+        )
 
     @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Inverse dynamics must contain finite values")
@@ -408,9 +416,16 @@ class DrakePhysicsEngine(BasePhysicsEngine):
         forces = self.plant.CalcInverseDynamics(
             self.plant_context,
             qacc,
-            self.plant.MakeMultibodyForces(self.plant),  # type: ignore[attr-defined]  # pydrake stub gap
+            self._gravity_external_forces(),
         )
         return cast(np.ndarray, forces)
+
+    def _gravity_external_forces(self) -> Any:
+        """Return ``MultibodyForces`` carrying gravity at the current state.
+
+        See :func:`drake_forces.gravity_external_forces`.
+        """
+        return gravity_external_forces(self.plant, self.plant_context)
 
     def _get_force_torque_source(self) -> Any:
         """Return the cached ``DrakeForceTorqueSource`` for the current diagram."""
@@ -520,24 +535,21 @@ class DrakePhysicsEngine(BasePhysicsEngine):
         if not self.plant_context:
             return np.array([])
 
-        # Get mass matrix
-        M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
+        return self._passive_acceleration()
 
-        # Get bias forces (C(q,v)v + g(q))
-        nv = self.plant.num_velocities()
-        vdot_zero = np.zeros(nv)
+    def _passive_acceleration(self) -> np.ndarray:
+        """Return -M(q)^-1 (C(q,v)v + g(q)) at the current plant context.
+
+        With tau = 0, M*a + C + g = 0, so a = -M^-1 * bias, where the bias is
+        inverse dynamics at zero acceleration under the gravity forces.
+        """
+        M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
         bias = self.plant.CalcInverseDynamics(
             self.plant_context,
-            vdot_zero,
-            self.plant.MakeMultibodyForces(self.plant),  # type: ignore[attr-defined]  # pydrake stub gap
+            np.zeros(self.plant.num_velocities()),
+            self._gravity_external_forces(),
         )
-
-        # Drift = -M^-1 * bias
-        # (Since bias = M*0 + C + g, we have C + g = bias, and drift acc = -M^-1*(C+g))
-        # Actually: tau = M*a + C + g, so if tau=0: 0 = M*a + C + g → a = -M^-1*(C+g)
-        a_drift = -np.linalg.solve(M, bias)
-
-        return cast(np.ndarray, a_drift)
+        return cast(np.ndarray, -np.linalg.solve(M, bias))
 
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute control-attributed acceleration from applied torques only.
@@ -595,22 +607,8 @@ class DrakePhysicsEngine(BasePhysicsEngine):
             self.plant.SetPositions(self.plant_context, q)
             self.plant.SetVelocities(self.plant_context, v)
 
-            # Compute mass matrix at counterfactual state
-            M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
-
-            # Compute bias forces at counterfactual state (C(q,v) + g(q))
-            nv = self.plant.num_velocities()
-            vdot_zero = np.zeros(nv)
-            bias = self.plant.CalcInverseDynamics(
-                self.plant_context,
-                vdot_zero,
-                self.plant.MakeMultibodyForces(self.plant),  # type: ignore[attr-defined]  # pydrake stub gap,
-            )
-
             # ZTCF: τ = 0, so M*a + bias = 0 → a = -M^-1 * bias
-            a_ztcf = -np.linalg.solve(M, bias)
-
-            return cast(np.ndarray, a_ztcf)
+            return self._passive_acceleration()
 
         finally:
             # Restore original state
@@ -693,11 +691,11 @@ class DrakePhysicsEngine(BasePhysicsEngine):
 
             # With v=0, bias = g(q) only (no Coriolis terms)
             # Use gravity forces directly
-            g = self.plant.CalcGravityGeneralizedForces(self.plant_context)
+            # CalcGravityGeneralizedForces returns -g(q) (force applied by
+            # gravity); negate to get g(q) in M*a + C + g = tau (#12982).
+            g = -self.plant.CalcGravityGeneralizedForces(self.plant_context)
 
             # Canonical ZVCF: M*a + g = 0 → a = M^-1 * (-g)
-            # Note: g is the gravity force vector, not gravity generalized force
-            # CalcGravityGeneralizedForces returns -g in the equation M*a + c + g = τ
             a_zvcf = np.linalg.solve(M, -g)
 
             return cast(np.ndarray, a_zvcf)

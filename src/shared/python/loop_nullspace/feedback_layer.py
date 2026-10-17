@@ -262,9 +262,10 @@ class FeedbackLayer:
         run = self.begin_run(setup, float(times[0]), float(np.max(np.diff(times))))
         imp, fb = [], []
         for k, (t, qi, vi) in enumerate(zip(times, q, v, strict=True)):
+            qk, vk = np.asarray(qi), np.asarray(vi)
             if k > 0:
-                run.observe(float(t), qi, vi)
-            a, b = run.components(float(t), qi, vi)
+                run.observe(float(t), qk, vk)
+            a, b = run.components(float(t), qk, vk)
             imp.append(a)
             fb.append(b)
         return np.array(imp), np.array(fb)
