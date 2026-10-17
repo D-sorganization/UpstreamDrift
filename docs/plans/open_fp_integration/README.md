@@ -58,8 +58,9 @@ metrics plus `<id>.npz` arrays), a REST API (`/api/swings`,
 3. **Hardware is not yet qualified.** At the reviewed commit, four of eight
    cells read on the bench; production firmware, end-to-end calibration
    (M4: total force within 1 %, CoP within 10 mm) and swing capture on real
-   plates (M6) are not done. Until a device record shows those acceptance
-   checks, imported data is **unqualified measurement** and may be shown
+   plates (M6) are not done. Until a device passes both M4 and M6 on
+   production firmware, as recorded in deferred-validation record
+   [DV-13061](../../development/planning/DV-13061.md), imported data is **unqualified measurement** and may be shown
    and compared, but must not serve as acceptance evidence for any model.
 
 ## Integration Value, Ranked
