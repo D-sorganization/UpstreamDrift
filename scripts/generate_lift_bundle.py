@@ -5,6 +5,7 @@ Usage (headless, from the repository root)::
     MUJOCO_GL=egl python3 scripts/generate_lift_bundle.py --lift squat
     MUJOCO_GL=egl python3 scripts/generate_lift_bundle.py --lift deadlift
     MUJOCO_GL=egl python3 scripts/generate_lift_bundle.py --lift clean_and_jerk
+    MUJOCO_GL=egl python3 scripts/generate_lift_bundle.py --lift bench_press
 
 Each lift's optimizer exercise, bar model, duration and window event come
 from its recipe (``src/shared/python/lifting/lift_recipes.py``); the bundle is
@@ -13,7 +14,10 @@ Optimizer is consumed from the vendored Tools tree (``vendor/ud-tools/src``);
 the source commit and Tools pin are recorded in the bundle provenance.  The
 squat window is centred on the bottom (lowest bar sample); the pulls'
 windows on the knee pass (bar at knee height), with the bar held in the hands
-at the standard's grip width (:func:`lift_hands_to_full_body`).
+at the standard's grip width (:func:`lift_hands_to_full_body`).  The bench
+press lies supine on a bench contact body and is centred on the chest touch
+(:func:`~src.shared.python.lifting.bench_press.lift_bench_to_full_body`); its
+bench record and limitations go into the provenance.
 
 ``--geometry back_bar`` (#12347) carries the bar on the torso shelf with the
 parity standard's grip width and a medio-lateral axis, and writes the derived
@@ -54,6 +58,10 @@ from src.shared.python.lifting.back_bar import (  # noqa: E402
     BackBarGeometry,
 )
 from src.shared.python.lifting.barbell_bushing import Barbell  # noqa: E402
+from src.shared.python.lifting.bench_press import (  # noqa: E402
+    BenchLift,
+    lift_bench_to_full_body,
+)
 from src.shared.python.lifting.bundles import (  # noqa: E402
     LIFT_SPEC,
     build_lift_bundle,
@@ -118,12 +126,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _full_body(args: argparse.Namespace, lift: LiftRecipe, solution: Any) -> Any:
-    """Full-body IK of *solution*: back bar (squat) or bar in the hands.
+    """Full-body IK of *solution*: back bar (squat), hands or bench press.
 
     The back bar is balanced with the optimizer's bar load over mid-foot
     (#13093) when ``--load-balance`` is given.
     """
     spec = LIFT_SPEC.read_bytes()
+    if lift.supine:
+        return lift_bench_to_full_body(spec, solution, load_seed_pose())
     if lift.hand_held:
         return lift_hands_to_full_body(spec, solution, load_seed_pose(), lift.lift)
     if args.geometry != "back_bar":
@@ -154,6 +164,10 @@ def main(argv: list[str] | None = None) -> int:
         n_eval=args.n_eval,
     )
     lift = _full_body(args, lift_recipe, solution)
+    extra: dict[str, Any] = {}
+    if isinstance(lift, BenchLift):
+        extra = {"bench": dict(lift.bench), "limitations": lift.limitations}
+        lift = lift.lift
     spec = lift_bundle_spec(lift) or LIFT_SPEC.read_bytes()
     for label, value in lift.max_residual_by_landmark().items():
         logger.info("IK max residual %-10s %.5f m", label, value)
@@ -193,6 +207,7 @@ def main(argv: list[str] | None = None) -> int:
                 "phase": lift_recipe.phase,
                 "rationale": lift_recipe.rationale,
             },
+            **extra,
         },
     )
     out.parent.mkdir(parents=True, exist_ok=True)

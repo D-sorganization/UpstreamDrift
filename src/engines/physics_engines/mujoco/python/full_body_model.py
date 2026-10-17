@@ -49,6 +49,7 @@ from src.shared.python.motion_matching.contact_law import (
     ContactSample,
     GroundPlane,
     sphere_ground_contact,
+    support_planes,
     torsional_friction_moment,
 )
 
@@ -129,6 +130,8 @@ class NativeMujocoFullBodyModel:
             ground_cfg["height_m"] if ground_cfg["height_m"] is not None else 0.0
         )
         self.ground_plane = GroundPlane(normal=ground_normal, height_m=ground_height)
+        # Raised supports (a bench top, #11745); other spheres use the ground.
+        self._support_planes = support_planes(contact_cfg, self.ground_plane)
 
         # Optional spin-friction patch (#11671); absent means point contacts.
         torsion = contact_cfg.get("torsion") or {}
@@ -207,8 +210,9 @@ class NativeMujocoFullBodyModel:
             self._mj.mj_jacSite(self.model, self.data, jac_pos, None, site_id)
             vel = jac_pos @ self.data.qvel
 
+            plane = self._support_planes.get(s_name, self.ground_plane)
             sample = sphere_ground_contact(
-                pos, vel, radius, self.ground_plane, self.contact_parameters
+                pos, vel, radius, plane, self.contact_parameters
             )
             samples[s_name] = sample
 
