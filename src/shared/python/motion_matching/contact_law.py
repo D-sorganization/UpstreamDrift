@@ -91,6 +91,46 @@ class GroundPlane:
         )
 
 
+def support_planes(
+    contact: Mapping[str, Any], ground: GroundPlane
+) -> dict[str, GroundPlane]:
+    """Raised support plane of each sphere named by ``contact["supports"]``.
+
+    A support (a bench top, #11745) is a plane parallel to ``ground`` at its
+    own ``height_m`` along the ground normal.  The spheres it names press on
+    it instead of on the ground; every other sphere keeps the ground, so a
+    spec without ``supports`` maps to ``{}`` and nothing changes.  Engines
+    look the plane up per sphere (``planes.get(name, ground)``) and apply the
+    shared law unchanged.
+
+    Raises:
+        TypeError: When ``supports`` is not a list.
+        ValueError: For an unnamed support, a non-finite height, a support
+            without spheres, an unknown sphere or a sphere on two supports.
+    """
+    supports = contact.get("supports") or []
+    if not isinstance(supports, list):
+        raise TypeError("contact supports must be a list of support planes")
+    known = {sphere["name"] for sphere in contact.get("spheres", [])}
+    planes: dict[str, GroundPlane] = {}
+    for support in supports:
+        if not support.get("name"):
+            raise ValueError("every contact support needs a name")
+        height = float(support.get("height_m", math.nan))
+        if not math.isfinite(height):
+            raise ValueError(f"support {support['name']!r} height must be finite")
+        names = list(support.get("spheres") or [])
+        if not names:
+            raise ValueError(f"support {support['name']!r} needs at least one sphere")
+        for name in names:
+            if name not in known:
+                raise ValueError(f"support {support['name']!r}: unknown sphere {name}")
+            if name in planes:
+                raise ValueError(f"sphere {name} is on more than one support")
+            planes[name] = GroundPlane(normal=ground.normal, height_m=height)
+    return planes
+
+
 class ContactSample(NamedTuple):
     """Per-sphere contact outcome in world coordinates."""
 

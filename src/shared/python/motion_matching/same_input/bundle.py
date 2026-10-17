@@ -42,8 +42,11 @@ class InputBundle:
 
     Postconditions: ``efforts`` is (steps, nv); ``reference_q`` and
     ``reference_v`` are (steps + 1, nv) and start at ``q0``/``v0``;
-    ``effort_holds`` divides the policy substeps, and ``hold_efforts`` is
+    ``effort_holds`` divides ``substeps``, and ``hold_efforts`` is
     (steps * effort_holds, nv) when ``effort_holds > 1``, else ``None``.
+    ``substeps`` is the RK4 substep count per step (default the policy's
+    eight); a stiff plant records more (OSL-16, #13104) and every replay reads
+    it back through :meth:`step_policy`.
     """
 
     spec_bytes: bytes
@@ -59,6 +62,7 @@ class InputBundle:
     effort_holds: int = 1
     hold_efforts: Array | None = None
     effort_hold_dt_s: float | None = None
+    substeps: int = int(POLICY["substeps"])
 
     def __post_init__(self) -> None:
         nv = len(self.coordinate_order)
@@ -82,6 +86,8 @@ class InputBundle:
         arrays = (self.q0, self.v0, self.efforts, self.reference_q, self.reference_v)
         if not all(np.isfinite(a).all() for a in arrays):
             raise ValueError("bundle arrays must be finite")
+        if isinstance(self.substeps, bool) or not isinstance(self.substeps, int):
+            raise TypeError("substeps must be an int")
         self._reconcile_effort_holds()
         self._check_hold_efforts()
 
@@ -92,7 +98,9 @@ class InputBundle:
                 effort_holds_for,
             )
 
-            computed_holds = effort_holds_for(self.effort_hold_dt_s, self.dt_s)
+            computed_holds = effort_holds_for(
+                self.effort_hold_dt_s, self.dt_s, self.substeps
+            )
             if self.effort_holds != 1 and self.effort_holds != computed_holds:
                 raise ValueError("effort_holds must match effort_hold_dt_s")
             object.__setattr__(self, "effort_holds", computed_holds)
@@ -106,7 +114,7 @@ class InputBundle:
             StepPolicy,
         )
 
-        StepPolicy(substeps=int(POLICY["substeps"]), effort_holds=self.effort_holds)
+        StepPolicy(substeps=self.substeps, effort_holds=self.effort_holds)
         holds, table = self.effort_holds, self.hold_efforts
         if holds == 1:
             if table is not None:
@@ -137,8 +145,7 @@ class InputBundle:
     @property
     def effort_substeps(self) -> int:
         """RK4 substeps per effort hold sample (#12279)."""
-        substeps = int(POLICY.get("substeps", 8))
-        return substeps // self.effort_holds
+        return self.substeps // self.effort_holds
 
     @property
     def projection_dt_s(self) -> float:
@@ -174,7 +181,7 @@ class InputBundle:
         )
 
         return StepPolicy(
-            substeps=int(POLICY["substeps"]),
+            substeps=self.substeps,
             effort_holds=self.effort_holds,
             **overrides,
         )
@@ -190,6 +197,7 @@ class InputBundle:
             "duration_s": self.steps * self.dt_s,
             "policy": {
                 **POLICY,
+                "substeps": self.substeps,
                 "effort_holds_per_step": self.effort_holds,
                 "effort_hold_s": self.effort_hold_s,
                 "effort_hold_dt_s": float(self.effort_hold_dt_s or self.effort_hold_s),
@@ -255,6 +263,9 @@ class InputBundle:
                     float(manifest["policy"]["effort_hold_dt_s"])
                     if "policy" in manifest and "effort_hold_dt_s" in manifest["policy"]
                     else None
+                ),
+                substeps=int(
+                    manifest.get("policy", {}).get("substeps", POLICY["substeps"])
                 ),
             )
         if bundle.spec_sha256 != manifest["spec_sha256"]:

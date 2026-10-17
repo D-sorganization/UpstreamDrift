@@ -20,6 +20,7 @@ import argparse
 import json
 import logging
 import sys
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -71,7 +72,10 @@ def run_hold(source: InputBundle, commit: str) -> None:
     )
     record = {
         "lift": "back_squat",
-        "pose": "IK standing pose (provenance ik.q_standing)",
+        "pose": (
+            "IK standing pose (provenance ik.q_standing), root in contact "
+            "equilibrium for body plus bar (barbell_runs.hold_start, #11744)"
+        ),
         "source_commit": commit,
         "bundle_spec_sha256": source.spec_sha256,
         "generator": "scripts/generate_barbell_squat_evidence.py --part hold",
@@ -79,6 +83,7 @@ def run_hold(source: InputBundle, commit: str) -> None:
         "series": {
             "time_s": result.time_s.tolist(),
             "grf_vertical_n": result.grf_n[:, 2].tolist(),
+            "grf_forward_n": result.grf_n[:, 0].tolist(),
             "hand_vertical_on_bar_n": {
                 s: result.hand_force_n[s][:, 2].tolist() for s in ("L", "R")
             },
@@ -92,18 +97,9 @@ def run_bundle(source: InputBundle, commit: str) -> None:
     bundle = build_barbell_bundle(source, Barbell(_bar_mass(source)))
     provenance = dict(bundle.provenance)
     provenance["barbell_source_commit"] = commit
-    InputBundle(
-        spec_bytes=bundle.spec_bytes,
-        coordinate_order=bundle.coordinate_order,
-        dt_s=bundle.dt_s,
-        q0=bundle.q0,
-        v0=bundle.v0,
-        efforts=bundle.efforts,
-        reference_q=bundle.reference_q,
-        reference_v=bundle.reference_v,
-        reference_engine=bundle.reference_engine,
-        provenance=provenance,
-    ).save(BARBELL_BUNDLE)
+    # replace() keeps the step policy (substeps, effort holds and the hold
+    # efforts) the re-track was integrated with (#13104).
+    replace(bundle, provenance=provenance).save(BARBELL_BUNDLE)
     logger.info("wrote %s", BARBELL_BUNDLE)
 
 

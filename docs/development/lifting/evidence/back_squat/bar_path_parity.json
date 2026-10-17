@@ -1,11 +1,11 @@
 {
   "lift": "back_squat",
   "bundle": "docs/development/lifting/evidence/back_squat/back_squat_bundle.npz",
-  "bundle_spec_sha256": "81a9edf3ad70e8022973be46900a1d902a268725641f3b6e566ce939ba6ed535",
+  "bundle_spec_sha256": "a474d797ae80dfd0c4a62f94e89721243c2a9faa0458d4a1c51b49f83fc213a7",
   "bundle_steps": 200,
   "dt_s": 0.001,
   "reference": "window_bar_path_m (MuJoCo, recorded at bundle generation)",
-  "source_commit": "a7debec5984a92d2408cb6e2221379d392d6d054",
+  "source_commit": "c85c0a0f44362028cc59847263913ae79ec25370",
   "generator": "scripts/measure_lift_bar_path_parity.py",
   "engines": {
     "mujoco": {
@@ -36,97 +36,97 @@
           0.0
         ]
       },
-      "wall_time_s": 66.5
+      "wall_time_s": 321.4
     },
     "drake": {
       "engine": "drake",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 4.851965034461442e-06,
-      "final_bar_deviation_m": 4.851965034461442e-06,
-      "max_coordinate_error_rad": 0.004372198592260901,
-      "worst_final_coordinate": "subtalar_angle_r",
+      "max_bar_deviation_m": 3.0207307025371545e-13,
+      "final_bar_deviation_m": 3.0207307025371545e-13,
+      "max_coordinate_error_rad": 1.9359630565318753e-10,
+      "worst_final_coordinate": "RSInputZ",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 0.00018397559503507965,
-        "max_frame_error_m": 1.9856234363175717e-07,
-        "worst_segment_start_s": 0.08,
+        "max_coordinate_error_rad": 2.185751579730777e-13,
+        "max_frame_error_m": 1.4869555842843943e-14,
+        "worst_segment_start_s": 0.06,
         "coordinate_error_rad_by_segment": [
-          3.599551212651875e-15,
-          2.6645352591003757e-15,
-          5.10702591327572e-15,
-          4.350686477749832e-15,
-          0.00018397559503507965,
-          1.1514458841954678e-07,
-          1.5881689199859217e-08,
-          1.1474707295455744e-08,
-          1.5514478590716863e-11,
-          6.661338147750939e-15
+          3.7386760354252146e-14,
+          1.0938472350119355e-13,
+          1.5390466678866233e-13,
+          2.185751579730777e-13,
+          1.8768320231288271e-13,
+          1.1587952819525071e-13,
+          5.187517082561044e-14,
+          8.637535131583718e-14,
+          1.1898815266420115e-13,
+          8.112954752448331e-14
         ]
       },
-      "wall_time_s": 35.4
+      "wall_time_s": 692.1
     },
     "pinocchio": {
       "engine": "pinocchio",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 5.021595996173692e-06,
-      "final_bar_deviation_m": 5.021595996173692e-06,
-      "max_coordinate_error_rad": 0.0044935016850151666,
-      "worst_final_coordinate": "subtalar_angle_r",
+      "max_bar_deviation_m": 4.327425814370648e-12,
+      "final_bar_deviation_m": 4.327425814370648e-12,
+      "max_coordinate_error_rad": 2.1639843805765224e-09,
+      "worst_final_coordinate": "LSInputY",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 0.0001922889104008646,
-        "max_frame_error_m": 2.070286232933934e-07,
-        "worst_segment_start_s": 0.08,
+        "max_coordinate_error_rad": 2.0336510253571305e-13,
+        "max_frame_error_m": 2.676525577964812e-14,
+        "worst_segment_start_s": 0.06,
         "coordinate_error_rad_by_segment": [
-          1.7763568394002505e-15,
-          2.942091015256665e-15,
-          2.7200464103316335e-15,
-          3.941291737419306e-15,
-          0.0001922889104008646,
-          5.4961556639199216e-08,
-          7.403644738945836e-09,
-          1.5336709541236004e-08,
-          4.3598985532966594e-11,
-          9.658940314238862e-15
+          2.4730217873525362e-14,
+          9.120482147295661e-14,
+          1.3936074516607277e-13,
+          2.0336510253571305e-13,
+          1.5520917884259688e-13,
+          1.0200174038743626e-13,
+          3.577693696854567e-14,
+          7.457923167919489e-14,
+          8.881784197001252e-14,
+          5.284661597215745e-14
         ]
       },
-      "wall_time_s": 32.7
+      "wall_time_s": 145.9
     },
     "opensim": {
       "engine": "opensim",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 4.8980137126476085e-06,
-      "final_bar_deviation_m": 4.8980137126476085e-06,
-      "max_coordinate_error_rad": 0.004405177993613618,
-      "worst_final_coordinate": "subtalar_angle_r",
+      "max_bar_deviation_m": 6.536424385930127e-13,
+      "final_bar_deviation_m": 6.536424385930127e-13,
+      "max_coordinate_error_rad": 3.3376179597865985e-10,
+      "worst_final_coordinate": "RSInputZ",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 0.0002032342754050287,
-        "max_frame_error_m": 2.1894217667860397e-07,
-        "worst_segment_start_s": 0.08,
+        "max_coordinate_error_rad": 4.088396288182139e-14,
+        "max_frame_error_m": 9.775165401813212e-15,
+        "worst_segment_start_s": 0.04,
         "coordinate_error_rad_by_segment": [
-          4.7340603659407066e-15,
-          2.6645352591003757e-15,
-          5.10702591327572e-15,
-          5.23192600354605e-15,
-          0.0002032342754050287,
-          2.2746855532496113e-07,
-          9.672381709457945e-08,
-          2.2464432231084075e-08,
-          3.5685843169375175e-11,
-          7.16093850883226e-15
+          5.051514762044462e-15,
+          1.4710455076283324e-14,
+          4.088396288182139e-14,
+          1.3787582187063663e-14,
+          1.2573275753879898e-14,
+          1.7291723608536813e-14,
+          8.625045122556685e-15,
+          2.310651670001107e-14,
+          1.2184697695261093e-14,
+          7.93809462606987e-15
         ]
       },
-      "wall_time_s": 66.8
+      "wall_time_s": 482.7
     }
   }
 }

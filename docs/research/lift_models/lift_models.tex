@@ -317,9 +317,11 @@ for a full-body musculoskeletal model.
 \paragraph{Status.} Only the model composition is built (OSL-2, \#13040).
 Until OSL-2 the composer created an empty \texttt{opensim.Model()} and returned
 a hard-coded joint list with \texttt{barbell\_attached=True}; that stub is
-replaced. No inverse kinematics, inverse dynamics, static optimization, CMC or
-Moco solve runs yet: \texttt{evaluate\_opensim\_lift\_kinetics} still reports
-\texttt{"unqualified"} on every path (OSL-3 and OSL-4, \#13041 and \#13042).
+replaced. OSL-3 (\#13041) adds OpenSim inverse kinematics and inverse
+dynamics of the back-squat same-input bundle (next subsection). No static
+optimization, CMC or Moco solve runs yet:
+\texttt{evaluate\_opensim\_lift\_kinetics} still reports
+\texttt{"unqualified"} on every path (OSL-4, \#13042).
 
 \paragraph{Model Topology.} \texttt{compose\_opensim\_full\_body\_lift}
 (\texttt{src/shared/python/lifting/opensim\_full\_body\_lifts.py}) calls
@@ -342,8 +344,10 @@ as thin discs). The LIFT-4 hand interface holds it: a
 \texttt{WeldConstraint hand\_r\_to\_barbell} on the right, both at the hands'
 centres of mass (the palm-centre grip of the parity standard). Each foot has
 three \texttt{SmoothSphereHalfSpaceForce} spheres (heel, forefoot, toe) with
-the MS-20 calibrated parameters ($k = 10^5$\,N/m, $c = 0.5$\,s/m,
-$\mu_s = 0.6$, $\mu_d = 0.4$) against a floor half-space. The bench press
+the MS-20 calibrated damping and friction ($c = 0.5$\,s/m,
+$\mu_s = 0.6$, $\mu_d = 0.4$) against a floor half-space; the stiffness
+was the MS-20 $10^5$ until OSL-12 raised it to $10^7$ (see the OSL-12
+subsection). The bench press
 adds a bench-top half-space paired only with four back spheres at the
 posterior shoulder and posterior iliac markers.
 
@@ -378,6 +382,945 @@ with the reason).
 hold poses are engineering choices, not measured postures. The hands carry
 the bar in the squat hold. MyoFullBody, Hunt--Crossley contact and the
 additional movements fail closed with a reason.
+
+\subsection{OpenSim Inverse Kinematics and Inverse Dynamics (OSL-3, Issue \#13041)}
+\paragraph{Inputs.} Only one LIFT-5 same-input bundle exists:
+\texttt{docs/development/lifting/evidence/back\_squat/back\_squat\_barbell\_bundle.npz}
+(SHA-256 \texttt{850d42b1\ldots 71430}, MuJoCo reference engine, 200 steps of
+1\,ms, the 0.2\,s back-squat window). \#11745 closed with only that bundle, so
+the deadlift, bench press, snatch and clean and jerk have no input to fit; their
+IK and ID receipts are \texttt{"unavailable"} with that reason
+(\texttt{SAME\_INPUT\_LIFT\_BUNDLES}, \texttt{src/shared/python/lifting/bundles.py}).
+No input is synthesised for them.
+
+\paragraph{Targets and Loads.} The bundle replays the golf full-body spec, not
+Rajagopal, so its coordinates do not transfer by name (its hip flexion reads
+160--171$^\circ$). \texttt{lift\_targets}
+(\texttt{src/shared/python/lifting/bundle\_targets.py}) instead takes geometry
+and load: the spec's own marker kinematics (ankle, knee and hip centres,
+shoulders), heel and forefoot points at the spec's calcaneus contact-sphere
+stations, the LIFT-4 bar centre, the GCV-1 per-foot wrench of the bundle's
+shared-law contact (\texttt{bundle\_kinetics}) and the GCV-7 per-hand bushing
+wrench (\texttt{grip\_analysis}, negated onto the hands). Everything is
+re-expressed in the OpenSim lift frame: $x$ forward (heel to forefoot), $y$ up,
+$z$ right, origin on the floor under mid-foot of the first state. The model is
+built with the bundle's masses (108.32\,kg body, 100\,kg bar, 1.78\,m) and
+per-segment scale factors from the bundle's own joint-centre distances
+(femur 0.955/0.984, shank 1.092/1.103 left/right, torso 1.148; uniform 1.047).
+
+\paragraph{Method.} \texttt{run\_inverse\_kinematics}
+(\texttt{src/engines/physics\_engines/opensim/python/msk\_lift\_ik\_id.py}) uses
+OpenSim's \texttt{InverseKinematicsSolver} (accuracy $10^{-8}$, coordinate
+clamping off, lower-limb weight 10, shoulders and bar 1) on every fifth state
+(41 frames). \texttt{run\_inverse\_dynamics} uses \texttt{InverseDynamicsSolver}
+on a copy with muscles, actuators and contact removed and gravity kept; speeds
+and accelerations come from quintic GCV splines of the IK coordinates; the
+external body forces are added by superposition
+($\tau = \mathrm{ID}(\dot u) + \mathrm{ID}_4(0, F) - \mathrm{ID}_4(0, 0)$, since
+the four-argument solve omits gravity). The bar is massless in ID because the
+GCV-7 hand wrench already carries it. The static hold
+(\texttt{static\_hold\_grf}) keeps the smooth contacts, solves the pelvis
+height at which OpenSim's own ID gives zero vertical pelvis residual (Brent,
+$10^{-12}$\,m), and reduces the \texttt{SmoothSphereHalfSpaceForce} record
+values per support through the shared GCV-1 analysis.
+
+\paragraph{Measured Evidence.} Receipts:
+\texttt{docs/development/lifting/evidence/opensim\_ik\_id/receipts.json}.
+\begin{itemize}[nosep]
+\item \textbf{Static hold, all five lifts.} The contact ground reaction equals
+  $(m_\mathrm{body} + m_\mathrm{bar})\,g$ to a relative error below
+  $3\times10^{-13}$ (80\,kg lifter, 120\,kg bar). The feet carry 980.7\,N each,
+  except the bench press (bench 846.8\,N, feet 557.3\,N each).
+\item \textbf{Squat IK.} Convention-free sagittal segment-angle RMS
+  0.0252\,rad (1.44$^\circ$; shank 0.0292, thigh 0.0084, trunk 0.0313\,rad),
+  below the 2$^\circ$ receipt threshold. Marker RMS 4.07\,cm and maximum
+  12.6\,cm (the bar); this fails the 2\,cm/4\,cm best-practice marker gate.
+\item \textbf{Squat ID.} Every joint moment is finite. Pelvis residuals (peak,
+  RMS): $t_x$ 2927, 848\,N; $t_y$ 3930, 1449\,N; $t_z$ 1177, 363\,N; tilt 1540,
+  422\,N\,m; list 580, 180\,N\,m; rotation 363, 132\,N\,m. The Hicks et
+  al.\ (2015) gate (5\,\% of the 3031\,N peak external force = 151.6\,N;
+  1\,\% of COM height times that force = 17.3\,N\,m) fails for both forces and
+  moments.
+\end{itemize}
+
+\paragraph{Failed Experiments.} A rigid-body forward settle onto the contacts
+tipped the squat hold over, since its centre of mass sits 21\,cm behind the
+feet; it was replaced by the inverse-dynamics vertical root solve. Virtual
+pelvis markers derived from the spec's hip parent frames were not added: the
+spec's hip separation (0.22\,m) lies on a different axis and length than
+Rajagopal's (0.155\,m), so no verified transform exists.
+
+\paragraph{Limitations.} Results are not physically accepted.
+\begin{itemize}[nosep]
+\item Only the back squat has an input bundle; four lifts are unavailable.
+\item Pelvis orientation is weakly observed: only the two hip centres lie on
+  the pelvis, so pelvis tilt ($-94$ to $-120^\circ$) trades off against hip
+  flexion (168--194$^\circ$, above the Rajagopal range in every frame) and
+  lumbar extension. That trade-off drives the large residuals and joint
+  moments (hip flexion 1030\,N\,m, lumbar extension 983\,N\,m), which are not
+  physiological.
+\item The MS-20 smooth contact ($k = 10^5$\,N/m) sinks 0.119\,m under the
+  200\,kg static load (0.082\,m in the bench press), far beyond a plausible
+  sole compliance.
+\item The OSL-2 hold poses are not balanced: the rotational pelvis residual at
+  the static hold is $-440.5$\,N\,m in the squat, $-153$ to $-160$\,N\,m in the
+  pulls and $-1047.5$\,N\,m in the bench press.
+\end{itemize}
+Reproduce with \texttt{python3 scripts/measure\_opensim\_lift\_ik\_id.py} and
+\texttt{python3 -m pytest -o addopts="" tests/unit/lifting/test\_opensim\_lift\_ik\_id.py}
+(OpenSim 4.6 and the Rajagopal model required; otherwise the tests skip).
+
+\subsection{Physically Credible Lift IK/ID (OSL-12, Issue \#13048)}
+\paragraph{Scope.} OSL-12 addresses three OSL-3 limitations (pelvis
+observability, contact sinkage, unbalanced holds) on the same back-squat
+bundle and the same 80\,kg/1.78\,m/120\,kg hold specification. Receipts:
+\texttt{docs/development/lifting/evidence/opensim\_ik\_id/receipts.json};
+tests: \texttt{tests/unit/lifting/test\_opensim\_lift\_credibility.py}.
+
+\paragraph{Pelvis Frame and Width.} The bundle spec grafts the Rajagopal lower
+limbs onto the golf \texttt{LowerTorso}; both hip joints hang from it with one
+shared \texttt{parent\_to\_base} orientation $R_b$. The Rajagopal pelvis axes
+in \texttt{LowerTorso} are therefore $P = R_b\,\Pi^\top$, with $\Pi$ the spec's
+hip axis permutation (\texttt{bundle\_pelvis\_rotation},
+\texttt{bundle\_targets.py}). This is verified, not assumed: for every squat
+state, each femur pose times the transposed Rajagopal hip rotation
+($R_z(\text{flexion})R_x(\text{adduction})R_y(\text{rotation})$) reproduces
+$P$ to $10^{-9}$ for both legs, and the hip axis lies along $P$'s $z$. The
+bundle's hip centres are 0.2205\,m apart against the generic 0.1545\,m, so the
+pelvis is scaled per axis by $(s, s, 0.2205/0.1545) = (1.047, 1.047, 1.427)$;
+nothing in the bundle measures pelvis depth or height, so those keep the
+stature factor $s = h/1.70$\,m.
+
+\paragraph{Virtual ASIS/PSIS Landmarks.} The source is the generic model's own
+RASI/LASI/RPSI/LPSI markers (\texttt{RajagopalLaiUhlrich2023.osim}); their
+offsets from the generic hip-centre midpoint, scaled by the pelvis factors and
+placed with $P$ at the bundle's hip-centre midpoint, give the targets
+(\texttt{pelvis\_landmark\_targets}). A model scaled with those factors whose
+pelvis coincides with the bundle's carries its markers onto the targets to
+$10^{-9}$\,m (test). The mapping is exact, but the bundle's pelvis is not a
+physical observation: LIFT-5 tracked only the hip centres, its own pelvis tilt
+spans $-101.6$ to $-72.9^\circ$, and its hip flexion 158.9--171.5$^\circ$ lies
+outside the Rajagopal $-30$ to $120^\circ$ range. The landmarks are therefore
+reported, not tracked (the receipt records the reason); the solved model's
+pelvis sits 10.1--13.4\,cm RMS from them, with tilt $-55.3$ to $-33.1^\circ$.
+
+\paragraph{Contact Stiffness.} The lift contacts use
+$k = 10^7$\,Pa, the \texttt{CONTACT\_STIFFNESS} of OpenSim\_Models PR \#476
+(4.35\,mm under 1961\,N with eight foot spheres; stance band 1--8\,mm), with the
+MS-20 damping and friction kept. The limit is that band's 8\,mm
+(\texttt{PENETRATION\_LIMIT\_M}). Hertz scaling,
+$F \approx \tfrac{4}{3}\,0.5^{1.5}\,k\sqrt{R}\,d^{1.5}$, puts the per-sphere
+load of the six-sphere layout at a few millimetres.
+
+\paragraph{Balanced Holds.} \texttt{build\_lift\_model} leans each standing
+hold at the ankles (both \texttt{ankle\_angle} $+\delta$, \texttt{pelvis\_tilt}
+$-\delta$, so the feet stay flat) until the centre of mass of body and bar lies
+over the mean of the foot spheres' lowest points (Brent, $|\Delta x| <
+10^{-6}$\,m): $\delta = 10.72^\circ$ (squat), $6.03^\circ$ (deadlift),
+$5.99^\circ$ (snatch), $6.03^\circ$ (clean and jerk). \texttt{static\_hold\_grf}
+then solves the pelvis height, a fore-aft unknown (standing: a further ankle
+lean; supine: pelvis-tilt rocking) and the pelvis list and rotation for zero
+vertical and rotational pelvis residual from OpenSim's own inverse dynamics with
+the contacts on (Brent on height, then Powell's hybrid method; a root that
+rotates more than $15^\circ$ is rejected in favour of a bounded least-squares
+solve). The settling lean is $-2.79^\circ$ (squat) and $-4.33$ to $-4.54^\circ$
+(pulls); the bench press rocks $0.77^\circ$ in tilt, $-0.36^\circ$ in list and
+$-1.40^\circ$ in rotation.
+
+\paragraph{IK Setup Changes.} Coordinate clamping is on (OpenSim's default).
+The arms, observed only through the shoulders and the welded bar, carry weak
+coordinate tasks (weight 0.01) holding them at the hold pose; with the arms in
+range the hands cannot reach the bundle's bar, so the bar marker weight drops
+from 1 to 0.1 and its error is still reported.
+
+\paragraph{Measured Evidence (Before $\rightarrow$ After).}
+\begin{itemize}[nosep]
+\item \textbf{Static holds.} Maximum sphere penetration 0.119\,m (bench
+  0.082\,m) $\rightarrow$ 7.32\,mm (squat), 7.52\,mm (deadlift, snatch, clean
+  and jerk), 7.83\,mm (bench press), all within 8\,mm. Rotational pelvis
+  residual $-440.5$ (squat), $-153$ to $-160$ (pulls), $-1047.5$\,N\,m (bench)
+  $\rightarrow$ 0 within $10^{-6}$ in every lift, with the centre of mass over
+  the feet's centre of pressure. Total ground reaction equals
+  $(m_\mathrm{body} + m_\mathrm{bar})\,g$ to below $10^{-13}$ relative error;
+  the bench press now loads the bench with 1806.0\,N and the feet with 112.1 and
+  43.2\,N.
+\item \textbf{Squat IK ranges.} Hip flexion 168--194$^\circ$, pelvis tilt
+  $-120$ to $-94^\circ$ and \texttt{arm\_rot\_l} $-90.9^\circ$ out of range
+  $\rightarrow$ every coordinate within its range in all 41 frames.
+\item \textbf{Squat IK markers.} RMS 4.07\,cm, maximum 12.6\,cm $\rightarrow$
+  RMS 7.54\,cm, maximum 24.6\,cm. Hip centres 3.1 $\rightarrow$ 0.7--0.9\,cm;
+  ankles 2.6 $\rightarrow$ 2.4\,cm; heels 1.8 $\rightarrow$ 1.5\,cm; forefeet
+  4.2 $\rightarrow$ 3.7\,cm; shoulders 4.7/5.8 $\rightarrow$ 5.4/12.0\,cm; bar
+  8.9 $\rightarrow$ 22.7\,cm. The 2\,cm/4\,cm best-practice gate still fails.
+\item \textbf{Squat segment angles.} RMS 1.44 $\rightarrow$ 1.52$^\circ$ (shank
+  2.37, thigh 0.52, trunk 1.02$^\circ$), inside the 2$^\circ$ receipt threshold.
+\item \textbf{Squat ID.} Pelvis residual peaks $t_x$ 2927 $\rightarrow$ 1107\,N,
+  $t_y$ 3930 $\rightarrow$ 1922\,N, $t_z$ 1177 $\rightarrow$ 208\,N, tilt 1540
+  $\rightarrow$ 593\,N\,m, list 580 $\rightarrow$ 99\,N\,m, rotation 363
+  $\rightarrow$ 122\,N\,m. The Hicks et al.\ (2015) gate (151.6\,N,
+  17.9\,N\,m) still fails. Lumbar extension peak 983 $\rightarrow$ 638\,N\,m;
+  right hip flexion stays 1022\,N\,m.
+\end{itemize}
+
+\paragraph{Failed Experiments.}
+\begin{itemize}[nosep]
+\item Tracking the virtual pelvis landmarks (weight 10, unclamped) followed
+  them to 0.3--0.7\,cm but reproduced the bundle's out-of-range posture (tilt
+  $-74$ to $-103^\circ$, hip flexion 160--172$^\circ$).
+\item A lumbar-extension coordinate task (weight 1) overwhelmed the markers
+  (shoulder error 26\,cm; arms diverged).
+\item Unclamped arms without coordinate tasks wandered: elbow
+  hyperextension to $-146^\circ$, pronation to $-179^\circ$, whole-turn
+  windings and, after re-wrapping, residuals of $10^9$.
+\item All coordinates clamped without arm tasks: marker RMS 7.26\,cm with the
+  arms asymmetric at their limits; clamped arms together with the tasks failed
+  to assemble.
+\item Arm tasks with the bar at weight 1: the bar dragged the trunk (trunk RMS
+  4.95$^\circ$, segment RMS 3.29$^\circ$, above the 2$^\circ$ threshold).
+\item Rigid pelvis-tilt rocking of the standing holds: the squat has no
+  equilibrium that way (least squares stalls at 17.9\,N\,m); Powell's method
+  on the supine bench press wandered to a 630$^\circ$ list, and bounded least
+  squares settled the pulls with an asymmetric 11$^\circ$ yaw.
+\end{itemize}
+
+\paragraph{Limitations.} Not physically accepted: the marker and residual
+gates fail. The shoulder and bar mismatch is structural (the bundle's golf
+upper body and scapulae against Rajagopal's rigid torso), and the pelvis stays
+unobserved until a bundle tracks a pelvis landmark. The balanced hold poses
+are engineered, not measured. The contact limit comes from \#476's stance band,
+not from a sole-compliance measurement.
+Reproduce with \texttt{python3 scripts/measure\_opensim\_lift\_ik\_id.py} and
+\texttt{python3 -m pytest -o addopts="" tests/unit/lifting/test\_opensim\_lift\_credibility.py}.
+
+\subsection{Lift Body With a Lumbar Joint and Cited Ranges (OSL-14, Issue \#13057)}
+\paragraph{Diagnostic.} The 159--172$^\circ$ bundle hip flexion of OSL-12 is a
+real angle, not a convention offset. The golf hip-calibrated spec has no
+lumbar joint (its spine universal sits at the shoulders), so the whole
+trunk-thigh fold of the squat lands on the hip. The OSL-12 pelvis-frame test
+already shows that the femur pose and the Rajagopal hip rotation agree to
+$10^{-9}$, which rules out an axis or sign offset.
+
+\paragraph{Method.} The bundles now replay the AN-1 anthropometric body
+(\texttt{src/shared/python/lifting/lift\_body.py}, committed at
+\texttt{docs/development/lifting/evidence/lift\_body/lift\_body\_spec.json}):
+\begin{itemize}[nosep]
+\item de Leva segments at 1.78\,m and 80\,kg.
+\item A lumbar universal joint at L5/S1 (\texttt{SpineInputX} lateral bend,
+  \texttt{SpineInputY} flexion).
+\item Hip centres $2\times0.052\,h = 0.1851$\,m apart.
+\item Cited ranges (\texttt{HUMAN\_RANGES\_DEG}: Kapandji, with Rajagopal 2016
+  for the legs).
+\end{itemize}
+The lift IK runs a bounded trust-region (TRF) solve with those ranges as
+bounds. The head, which no landmark observes, and the subtalar joints, which
+Rajagopal locks, are held. Two further changes:
+\begin{itemize}[nosep]
+\item \texttt{apply\_grip\_width} now also moves the left wrist joint's
+  club-side placement. Before, the real left hand stayed at the golf grip, so
+  the bar centre sat about 0.33\,m lateral.
+\item On the OpenSim side, the torso is scaled per axis by
+  (trunk, trunk, shoulder width): the lift body's shoulders are 0.406\,m apart
+  against the generic 0.340\,m.
+\item The pelvis gate accepts a source hip flexion within the shared 0.5$^\circ$
+  range-flag tolerance. This choice was made after seeing the result: the
+  tracked reference overshoots the 120$^\circ$ bound by 0.012$^\circ$.
+\end{itemize}
+
+\paragraph{Bundles.} Every coordinate of the squat, deadlift and clean
+first-pull bundles lies inside its cited range. The bundle IK solutions are
+inside exactly; the MuJoCo-tracked reference overshoots a bound by at most
+0.012$^\circ$.
+
+Squat:
+\begin{itemize}[nosep]
+\item Hip flexion reaches its 120$^\circ$ bound at the bottom.
+\item Lumbar flexion 31--39$^\circ$.
+\item Knee $-115$ to $-110^\circ$ and ankle 26--28$^\circ$.
+\end{itemize}
+
+Pulls:
+\begin{itemize}[nosep]
+\item Hip flexion 82--94$^\circ$ (deadlift) and 75--101$^\circ$ (clean).
+\item The elbows sit at their 5$^\circ$ extension bound, which raises the
+  grip-closure residual to $7.7\times10^{-5}$ (deadlift) and
+  $2.8\times10^{-5}$\,m (clean). These were $1.7\times10^{-7}$ and
+  $6.5\times10^{-7}$\,m with unbounded arms.
+\end{itemize}
+
+The squat foot-penetration bound in \texttt{test\_lift\_bundles.py} rises from
+0.54 to 0.70\,mm. Both this bound and the closure bounds were set after the
+measurement.
+
+\paragraph{Cross-Engine Bar Path.} The CI replay stays within $10^{-9}$\,m.
+Full-window open-loop bar deviation:
+\begin{itemize}[nosep]
+\item Squat: $4.9\times10^{-6}$ falls to $2.1\times10^{-7}$\,m in Drake and
+  Pinocchio, and to $4.1\times10^{-8}$\,m in OpenSim. The segmented frame
+  error falls from $2.2\times10^{-7}$ to $6.9\times10^{-9}$\,m.
+\item Deadlift: at most $8.1\times10^{-10}$\,m.
+\item Clean: at most $2.7\times10^{-14}$\,m.
+\end{itemize}
+
+\paragraph{OpenSim Squat IK/ID.} The committed receipt is measured on the
+LIFT-4 barbell re-track (\texttt{back\_squat\_barbell\_bundle.npz}), and that
+re-track diverges (see Failed Experiments). The receipt is therefore not
+evidence of IK quality.
+\begin{itemize}[nosep]
+\item Before (OSL-12): RMS 7.54\,cm, maximum 24.6\,cm, pelvis untracked.
+  Residual peaks: $t_x$ 1107\,N, tilt 593\,N\,m.
+\item After: RMS 5.04\,cm, maximum 29.7\,cm. The source hip flexion of the
+  diverged states reaches 267$^\circ$, so the pelvis is not tracked and the arms
+  leave their ranges.
+\end{itemize}
+
+A diagnostic run fitted the valid bodyweight squat bundle with the same
+weights and no hand loads (scratch, not committed):
+\begin{itemize}[nosep]
+\item The pelvis landmarks are tracked to 2.3--3.2\,mm.
+\item Marker RMS is 1.78\,cm and the maximum 4.15\,cm (right shoulder),
+  excluding the bar. That bundle's bar target is the shoulder-girdle centre,
+  which the welded hands cannot reach (19.4\,cm).
+\item Segment-angle RMS is 1.35$^\circ$.
+\item Hicks residuals: forces peak at 52.4\,N against the 75.2\,N limit
+  (within); moments peak at 36.8\,N\,m against 8.7\,N\,m (pelvis tilt, not
+  within).
+\end{itemize}
+Before the torso width scaling, shoulder error was 6.0\,cm and the no-bar RMS
+2.42\,cm.
+
+\paragraph{Failed Experiments.}
+\begin{itemize}[nosep]
+\item Levenberg--Marquardt with clipping (the earlier lift IK) showed hip and
+  lumbar hysteresis at the bounds; it was replaced by TRF.
+\item A fitted lead-grip rotation ($-88, 0, 90^\circ$) only compensated for the
+  phantom left hand. It was dropped once the wrist joint moved with the grip.
+\item The pull bundles failed (``arms cannot hold the bar 0.3\,m below the
+  shoulders'') until the wrist fix.
+\item With subtalar free, the dynamic reference left its $\pm20^\circ$ range by
+  0.65$^\circ$.
+\item \textbf{LIFT-4 barbell re-track diverges (pre-existing).}
+  \texttt{build\_barbell\_bundle} does not follow its source in either body:
+  \begin{itemize}[nosep]
+  \item Golf body (committed before OSL-14): \texttt{HipInputZ} error 0.91,
+    14.8 and 39.4$^\circ$ at steps 10, 50 and 100; \texttt{RWInputY}
+    85.8$^\circ$ at step 200.
+  \item Lift body: \texttt{SpineInputY} error passes 1$^\circ$ by step 3 and
+    grows quadratically; the hip then reaches 267$^\circ$.
+  \item Doubling the RK4 substeps (8 to 16) changes nothing.
+  \item Removing the bar-weight feedforward lets the spine track but the left
+    wrist sags.
+  \end{itemize}
+  OSL-12's receipts were therefore also measured on diverged states
+  (follow-up \#13072).
+\end{itemize}
+
+\paragraph{Limitations.} Acceptance is not met on the committed receipt: it
+waits on a non-diverging LIFT-4 re-track. The pelvis is now tracked on the
+bodyweight bundle, but the moment residual still fails Hicks. The AN-1 trunk
+bends only at L5/S1 against Rajagopal's lumbar joint, and the arms are not
+Rajagopal's.
+
+\subsection{LIFT-4 Barbell Re-Track Drift (Issue \#13072)}
+
+\paragraph{Root Cause A: Bar Load Missing From the Controller Model (Fixed).}
+\texttt{build\_barbell\_bundle} tracked the loaded plant with the pipeline
+computed-torque controller (kkt) built on the body-only spec. It then added the
+bar weight as a joint-space feedforward on the actuated rows only. On a floating
+base the root rows carry part of that load, so the controller's predicted
+acceleration was wrong from the first step, and the error compounded.
+\texttt{SpineInputY} error was $0.99^\circ$ at step 3 and $9.76^\circ$ at
+step 10. The fix is \texttt{rigid\_bar\_spec}, which appends the bar as a rigid
+solid on the hand body so the controller's mass matrix and bias include the bar
+on every row. The feet are preloaded for body plus bar, and the feedforward is
+removed. After the fix the error is $2\times10^{-4}$ and $1\times10^{-4}$\,deg
+at steps 3 and 10, and the wrist no longer sags. A unit test checks that the
+rigid-bar gravity bias minus the body-only bias equals the hand weight's
+generalized force on every row, root rows included (each above 500).
+
+\paragraph{Root Cause B: Combined Centre of Mass Beyond the Support (Open).}
+The source squat was generated without the bar. With the bar added on the back
+shelf, the combined centre of mass sits 0.15--0.17\,m ahead of the forefoot
+spheres. The tracked body tips forward about the toes (pelvis pitch
+$11.8^\circ$, shoulders 13.2\,cm), and no joint-space tracker can hold it.
+Maximum landmark deviation of the re-track from its source, with the first
+step past the LIFT-5 IK bound (old bundle in brackets):
+\begin{itemize}[nosep]
+\item Ankles: 13.3\,mm (step 80, left) and 12.0\,mm (step 58, right)
+  [245 and 302\,mm].
+\item Knees: 73.0 and 74.0\,mm (steps 95 and 114).
+\item Hips: 88.1 and 90.1\,mm (steps 113 and 77) [right hip 272\,mm].
+\item Shoulders: 132\,mm each (steps 85 and 73) [left shoulder 346\,mm].
+\item Bar: 159\,mm (from step 0, see cause C).
+\end{itemize}
+A real fix needs the source squat regenerated with the bar over mid-foot, from
+the shelf geometry or a balance constraint in the IK. That follow-up is outside
+\texttt{build\_barbell\_bundle}. The bundle records the per-landmark deviation
+as \texttt{retrack\_landmark\_deviation\_m}, and the bound test is a strict
+xfail until it passes.
+
+\paragraph{Root Cause C: Target and Sink (Open).} The re-track follows the
+reference rollout, not the IK target, and the bar landmark of the bodyweight
+source is the shoulder-girdle centre, not the bar. The loaded feet also sink
+1.63\,mm further, so a 0.1\,mm bar bound cannot be met by any loaded re-track.
+
+\paragraph{OpenSim Squat Receipt After the Fix.}
+\begin{itemize}[nosep]
+\item Range violations: before, \texttt{arm\_flex}, \texttt{arm\_rot} and
+  \texttt{pro\_sup} (6); after, none.
+\item Marker RMS: 5.04\,cm before, 8.56\,cm after. Maximum: 29.7 before,
+  30.3\,cm after (bar marker). The rise is cause B, not a regression of IK.
+\item Shoulder RMS 4.1--4.2\,cm. Segment-angle RMS 0.0243\,rad.
+\item Pelvis untracked: the hip runs 120.0--120.9$^\circ$, past the cited
+  $120^\circ$ bound.
+\item Hicks limits 176.3\,N and 20.1\,N\,m; residual peaks $t_y$ 316.7\,N and
+  tilt 688.5\,N\,m (fails).
+\end{itemize}
+
+\paragraph{Tolerances.} The pelvis-range gate tolerance goes from
+$0.5^\circ$ back to 0. The OSL-14 IK-residual, penetration and closure
+thresholds measure the bodyweight bundles, which this fix does not change. They
+stay at their measured AN-1 maxima, with the physical reasons recorded on
+\#13057.
+
+\paragraph{Failed Experiments.}
+\begin{itemize}[nosep]
+\item Static KKT feedforward on all rows (root included): shoulders drift
+  21\,cm and the arm $53^\circ$.
+\item Feedforward from the measured load: shoulders 13\,cm.
+\item Control re-track with no bar load: bar 8.8\,mm and mtp $2.4^\circ$.
+  This shows the tracker itself is sound and the load is the cause.
+\item A 20\,kg bar: shoulders 7.8\,cm, still past the bounds, consistent with
+  cause B scaling with the bar mass.
+\end{itemize}
+
+\subsection{Bar-Load Balance of the Source Squat (OSL-15, Issue \#13093)}
+
+\paragraph{Method.} The Movement Optimizer balances its planar
+\texttt{full\_squat} with the bar at its shoulder joint: the Tools
+\texttt{BodyModel} accepts only \texttt{squat\_bar\_depth} and
+\texttt{squat\_bar\_height} $\ge 0$ (bar behind or below the shoulder), so it
+cannot express the back-bar shelf, which sits 0.20\,m above and 0.06\,m in
+front of the shoulder joints. That gap is reported to Tools; it is not
+patched here. \texttt{loaded\_balance.balance\_lift} closes it in the IK. The
+lift is solved as before; the body-plus-bar centre of mass is evaluated on the
+lift body with the bar welded to the hands (\texttt{rigid\_bar\_spec}, the
+model the LIFT-4 re-track controller uses), and each frame's sagittal trunk
+angle is corrected by a per-frame secant iteration (first step a 0.05\,rad
+probe, steps clipped to 0.25\,rad) until the combined centre of mass lies
+within 0.5\,mm of mid-foot (the mean floor point of the contact spheres, the
+origin the shelf was fitted from). The bar stays on the shelf and rides the
+corrected trunk. This is the optimizer's own squat-bottom rule
+(\texttt{balance\_pose(..., adjust\_joint=2)}) applied with the full-body
+masses and the bar where the shelf holds it. The generator applies it with
+\texttt{--load-balance}; \texttt{lift\_bundle\_spec} then makes the bundle's
+spec the rigid-bar spec, and \texttt{bushing\_body\_spec} recovers the body
+the LIFT-4 bushings attach to.
+
+\paragraph{IK Result.} On the committed planar solution (100\,kg bar) the
+largest offset of the combined centre of mass from mid-foot falls from
+0.190\,m to $6.4\times10^{-5}$\,m in 5 corrections. The trunk correction
+runs from $-0.155$\,rad at the ends to $-0.554$\,rad ($31.7^\circ$ more
+upright) at the bottom. Maximum IK residuals (mm): ankles 4.37 and 3.59,
+knees 3.15 and 11.68, hips 8.07 and 9.13, shoulders 3.65 and 3.04, bar 0.01;
+closure $5.0\times10^{-8}$\,m; lowest foot sphere $-0.69$\,mm. The right ankle
+and right hip exceed the OSL-14 thresholds (3.1 and 6.4\,mm). The thresholds
+are not widened, because the balanced bundle is not committed (below). The
+zero-moment point of the balanced trajectory, from the centroidal momentum
+of the rigid-bar body, stays at 0.074--0.089\,m on the forward axis, inside
+the support (heel $-0.048$, toe 0.176\,m), with vertical force up to 1.59
+body-plus-bar weights at the bottom: the balanced trajectory is dynamically
+feasible.
+
+\paragraph{Tracking Result (Open in OSL-15; Resolved in OSL-16).} The bundle window is the pipeline
+computed-torque (kkt) MuJoCo tracking of the IK, and that tracking does not
+hold the feet under the bar load. Window 1.4--1.6\,s, errors against the IK:
+\begin{itemize}[nosep]
+\item Rigid-bar spec, 1\,ms hold: the combined centre of mass stays over
+  mid-foot (0.072--0.077\,m), but the foot joints diverge. Right
+  \texttt{mtp} error 0.12\,rad at step 60 and 2.26\,rad at step 200; right
+  ankle 1.18\,rad. The left calcaneus lifts 9.5\,cm and the right sinks
+  3.4\,cm.
+\item Rigid-bar spec, 0.5\,ms hold: the feet stay within about 5\,mm, but the
+  left subtalar error reaches 0.117\,rad. A 0.125\,ms hold is worse (left
+  \texttt{mtp} 0.81\,rad, subtalar 0.55\,rad), so this is not a monotone
+  sample-and-hold effect.
+\item Rigid-bar spec with each heel and forefoot sphere split $\pm3$\,cm
+  medio-laterally (scratch experiment): the \texttt{mtp} errors reach
+  2.6\,rad by step 100. A knife-edge foot in roll is not the cause.
+\item Bodyweight spec (as before \#13093): the feet stay planted, but the
+  body-plus-bar centre of mass drifts 4.1\,cm behind mid-foot by the window
+  end, because the body alone is balanced behind the heels. The LIFT-4
+  re-track of that source loses the feet. Deviations from the source (mm):
+  ankles 140 and 248, knees 115 and 104, hips 142 and 135, shoulders 45 and
+  50, bar 93. These are worse than the unbalanced \#13072 re-track (ankles
+  13.3 and 12.0, shoulders 132).
+\item The quasi-static barbell hold of the committed bundle (0.6\,s
+  diagnostic run): vertical ground force 1.007 of body plus bar; hands
+  501.8\,N (left) and 484.2\,N (right). Its subtalar and \texttt{mtp}
+  coordinates diverge in the same way: left subtalar $-46.8^\circ$ at
+  0.6\,s.
+\item OpenSim IK/ID (OSL-12 pipeline, committed stride) of the
+  bodyweight-source re-track above: marker RMS 6.88\,cm and maximum 27.6\,cm (bar marker; the largest
+  non-bar maximum is the left forefoot, 9.1\,cm), against the 2 and 4\,cm
+  acceptance (committed after \#13072: 8.56 and 30.3\,cm). Segment-angle RMS
+  0.034\,rad. Hicks limits 181.6\,N and 24.1\,N\,m; residual peaks $t_y$
+  602\,N and tilt 477\,N\,m (fails).
+\end{itemize}
+In every bar-loaded run the foot joints (\texttt{mtp}, subtalar, ankle)
+diverge first, while the centre of mass is held. The open problem is the
+foot-joint stability of the kkt tracker under a body-plus-bar load. It is not
+the posture. The committed source bundle therefore stays the unbalanced
+\#13072 one. The barbell hold, re-track and cross-engine parity receipts are
+not regenerated, and their strict xfails, the OpenSim squat receipt and the
+OSL-14 thresholds are unchanged. \texttt{test\_loaded\_balance.py} checks the
+balance on three bottom frames of the real lift body. Its committed-bundle
+checks are strict xfails until a balanced source is tracked.
+
+\paragraph{Failed Experiments.}
+\begin{itemize}[nosep]
+\item A per-frame mid-foot target for the rigid-bar centre of mass in the
+  trajectory IK cost (\texttt{com\_targets\_per\_frame}), with no trunk
+  correction: at weights 10 and 1000 the largest offset is 49.6 and 14.5\,mm
+  (0.190\,m without it), still far above the 0.5\,mm tolerance, because the
+  landmark terms hold the optimizer's trunk.
+\item The balanced source tracked with bodyweight dynamics: it tips backward
+  (above), so a balanced source must carry the bar in its tracking.
+\item Effort holds of 0.5 and 0.125\,ms, and wider foot spheres (above).
+\end{itemize}
+
+\subsection{Loaded Foot Stability (OSL-16, Issue \#13104)}
+
+\paragraph{Root Cause.} The foot joints ran away because of the integrator,
+not the controller or the posture. The same-input step is zero-order-hold RK4
+with eight 0.125\,ms substeps per 1\,ms step. Classical RK4 multiplies a real
+mode $\dot x=\lambda x$ by
+$R(z)=1+z+z^2/2+z^3/6+z^4/24$ per substep, $z=\lambda h$, and
+$|R(z)|\le 1$ on the real axis only for $-2.785\le z\le 0$. The open-loop
+state Jacobian of the rigid-bar plant (central differences, the effort held)
+has real foot modes (\texttt{mtp}, subtalar, ankle) whose rate is the
+Coulomb regularisation slope $\mu f_n/v_t$ of the stance spheres
+($\mu_s=0.6$, $v_t=0.01$\,m/s, Hunt--Crossley $k=10^5$\,N/m) acting on the
+light foot segments. It scales with the sphere normal force: halving $k$ at a
+fixed state halves it, doubling $v_t$ lowers it. The bar raises the stance
+force, so along the committed loaded window the stiffest rate grows from
+$1.2\times10^4$ to $1.30\times10^5$\,s$^{-1}$ (at the window end, where each
+heel and toe sphere carries 440--510\,N). At the default substep that is
+$|z|$ up to 16. The mode is amplified instead of damped, and the toes, then
+the ankles and subtalars, leave the IK. The bodyweight bundle reaches
+$3.4\times10^4$\,s$^{-1}$ only briefly and stays stable, which is why the
+fault appeared with the bar. A second, first-order error remains at any
+stable substep: the computed torque is held over the effort hold while the
+contact (time constant about 35\,$\mu$s) re-equilibrates. At step 50 of the
+1\,ms-hold run the commanded \texttt{mtp} acceleration was $-126$\,rad/s$^2$
+and the realised one $-25$\,rad/s$^2$.
+
+\paragraph{Fix.} A same-input bundle now records its RK4 substep count
+(\texttt{InputBundle.substeps}, manifest \texttt{policy.substeps}; legacy
+bundles load the original eight), and every replay reads it through
+\texttt{step\_policy()}. \texttt{stiffness.substeps\_for} picks the smallest
+power of two that keeps the measured stiffest rate inside the RK4 real
+stability limit. Bar-loaded lift bundles, the barbell hold and the re-track
+use \texttt{LOADED\_TRACKING\_POLICY}: 64 substeps (15.6\,$\mu$s) and a
+0.25\,ms effort hold. The committed source records its own margin,
+\texttt{rk4\_stability}: largest rate $1.30\times10^5$\,s$^{-1}$ over 40
+sampled states, $|z|=2.03$, $|R|=0.34$. No physical parameter changed: the
+contact law, gains and body are those of OSL-15.
+
+\paragraph{Measured Result.} The source squat is regenerated with
+\texttt{--load-balance}. \texttt{scripts/measure\_loaded\_foot\_tracking.py}
+tracks the balanced IK window (1.4--1.6\,s) on the committed rigid-bar spec
+for each policy (\texttt{loaded\_foot\_tracking.json}). The foot deviation is
+the largest distance, over the window, of each foot point (the side's three
+contact-sphere centres and a toe-tip point 6\,cm along the toes) from its IK
+position, both in the side's tibia frame, so root and leg errors cancel. Its
+bound is the side's LIFT-5 ankle IK threshold (3.6 and 5.7\,mm).
+\begin{center}\small
+\begin{tabular}{rrrrrr}
+\toprule
+Substeps & Hold (ms) & Max $|z|$ & Foot r/l (mm) & \texttt{mtp} r (rad) & Ankle r (rad)\\
+\midrule
+8 & 1 & 5.14 & 225.6 / 17.2 & 2.801 & 1.275\\
+8 & 0.125 & 9.33 & 63.7 / 130.5 & 0.462 & 0.176\\
+16 & 0.25 & 2.91 & 2.02 / 3.46 & 0.034 & 0.011\\
+32 & 0.25 & 2.80 & 1.81 / 1.82 & 0.030 & 0.010\\
+64 & 0.25 & 2.03 & 1.81 / 1.79 & 0.030 & 0.010\\
+128 & 0.25 & 1.01 & 1.81 / 1.79 & 0.030 & 0.010\\
+64 & 1 & 1.39 & 4.51 / 4.50 & 0.081 & 0.025\\
+64 & 0.5 & 1.79 & 3.01 / 2.99 & 0.052 & 0.017\\
+64 & 0.125 & 2.14 & 1.51 / 1.38 & 0.016 & 0.005\\
+\bottomrule
+\end{tabular}
+\end{center}
+Each $|z|$ is evaluated on that run's own states, so a diverging run reports
+the rate of the state it reached. Convergence is measured on the whole
+trajectory at the 0.25\,ms hold. Doubling 64 to 128 substeps moves no
+coordinate by more than $1.7\times10^{-8}$\,rad and the root by
+$9\times10^{-10}$\,m, inside the $10^{-6}$ L2 coordinate bound. Halving to 32
+moves them by $2.0\times10^{-3}$\,rad, and 16 by $1.4\times10^{-2}$\,rad: at
+32 substeps the stiffest mode reaches $|z|=2.80$, just past the limit, after
+about 150\,ms. At 64 substeps the foot error falls monotonically as the hold
+halves (4.51, 3.01, 1.81, 1.51\,mm), the expected first-order hold error.
+The committed 0.25\,ms hold is the first that meets both bounds, and its
+\texttt{mtp}, ankle and subtalar errors are 0.030, 0.010 and 0.011\,rad. The
+64-substep, 0.25\,ms run reproduces the committed bundle bit for bit.
+
+\paragraph{IK Thresholds.} The committed source is now the balanced IK, so
+the LIFT-5 IK thresholds are the OSL-15 residuals: right ankle 3.59\,mm and
+right hip 9.13\,mm exceed their OSL-14 bounds (3.1 and 6.4\,mm). Both bounds
+are widened to 3.6 and 9.2\,mm (\texttt{Tolerance-Change-Evidence: \#13104}).
+The cause is the more upright trunk that balances the bar, not the tracking.
+Every other landmark fell (ankle\_l 4.37, knee\_l 3.15, knee\_r 11.68,
+hip\_l 8.07, shoulder\_l 3.65, shoulder\_r 3.04, bar 0.01\,mm) and keeps its
+earlier bound.
+
+\paragraph{Downstream Evidence.} Every record below was regenerated on the
+bar-balanced, 64-substep source.
+\begin{itemize}[nosep]
+\item \textbf{Bar-path parity} (\texttt{bar\_path\_parity.json}): over the
+  full 200\,ms window the four engines replay the MuJoCo reference within
+  $2.2\times10^{-9}$\,rad and the bar within $4.3\times10^{-12}$\,m. The
+  OSL-15 full-window gap was $4.5\times10^{-3}$\,rad. The strict xfails of
+  \texttt{test\_bar\_path\_parity} and \texttt{test\_loaded\_balance} are now
+  plain tests.
+\item \textbf{Bushing re-track} (\texttt{back\_squat\_barbell\_bundle.npz}):
+  integrated with the source's step policy. The generator used to save it with
+  the original eight-substep contract and drop the hold efforts; it now keeps
+  them. Its landmarks stay within the LIFT-5 bounds of the source's: ankles
+  0.97/0.98, knees 1.18/1.21, hips 1.39/1.39, shoulders 1.83/1.58 and bar
+  2.03\,mm. OSL-15 had the shoulders 13.2\,cm off. Its cross-engine
+  instantaneous parity holds, with a largest difference of
+  $5.8\times10^{-7}$ (body acceleration, scale $1.1\times10^{3}$) against
+  $10^{-6}+10^{-8}\max|X|$.
+\item \textbf{Bar landmark bound.} The 0.1\,mm bar threshold bounds how
+  exactly the IK seats the bar on the back-bar geometry (residual 0.01\,mm).
+  It is a constraint precision, not a tracking scale. In a dynamic reference
+  the bar landmark (the hand-held bar-centre frame) rides on a body standing
+  on the loaded penalty contact. The source reference sits 6.2--6.4\,mm
+  below its IK at every landmark, almost all of it vertical: that is the
+  loaded foot sink. The re-track sinks a further 0.93\,mm at the ankles. A
+  common-mode sink moves every landmark alike, and the re-track bar moves
+  only 0.45\,mm relative to the shoulder midpoint. So for a re-track the bar
+  is bounded by the tightest body-landmark bound (\texttt{ankle\_r},
+  3.6\,mm). The IK's own bar bound stays 0.1\,mm.
+\item \textbf{Bundle size.} An exact replay of a loaded bundle needs its
+  0.25\,ms hold efforts: 281{,}728 raw bytes at 200 steps. The committed size
+  bound rises from 300{,}000 to 600{,}000 bytes
+  (\texttt{LOADED\_BUNDLE\_MAX\_BYTES}). The source is 463{,}303 bytes and the
+  re-track 496{,}080 bytes.
+\item \textbf{OpenSim IK/ID} (\texttt{opensim\_ik\_id/receipts.json}):
+  marker RMS 8.56 $\to$ 6.81\,cm and maximum 30.27 $\to$ 27.56\,cm. Every
+  body marker is within 2.3\,cm; the maximum is the bar marker, which the
+  Rajagopal hands did not reach (OSL-12, weight 0.1; the cause is the
+  back-rack hold seed, resolved in the next subsection). The \#13093 marker gate (RMS $<2$\,cm, maximum $<4$\,cm) therefore
+  stays open. Pelvis residuals fell from 316.7\,N and 688.5\,N\,m to
+  214.8\,N and 546.4\,N\,m, but stay above the Hicks et al.\ limits of 5\,\%
+  of peak external force (167.2\,N) and 1\,\% of it times the centre-of-mass
+  height (21.9\,N\,m). The cause is the same: the hand loads act at a grip the
+  model's hands do not reach. The OpenSim static hold carries body plus bar
+  exactly (1961.33\,N).
+\item \textbf{Barbell hold} (\texttt{barbell\_hold.json}, 1.5\,s at the
+  loaded policy): vertical ground force over body plus bar rose from 0.455
+  to 0.988, and hand force over bar weight from 0.298 to 0.986. The left-hand
+  share is 0.493 and the peak deflection 0.63\,mm, both within their bounds.
+  Body plus bar is carried exactly at 0.75--1.0\,s (1.000); the hold then
+  sags to 0.982 by 1.5\,s under a $-102$\,N mean horizontal ground force.
+  The cause was a start outside contact equilibrium, resolved in the
+  LIFT-4 hold subsection below (\#11744).
+\end{itemize}
+
+\paragraph{Failed Experiments.}
+\begin{itemize}[nosep]
+\item Finer effort holds at eight substeps (0.5, 0.25, 0.125\,ms): worse
+  (0.125\,ms: foot 63.7/130.5\,mm), because the integration stays unstable.
+  This is the apparent non-monotonic hold effect of OSL-15.
+\item Turning off the centre-of-mass balance term: smaller errors at eight
+  substeps and a 1\,ms hold (right \texttt{mtp} 0.34\,rad), but no change
+  once the substep is stable (16 substeps: \texttt{mtp} 0.082 with, 0.084\,rad
+  without).
+\item Foot gains raised from $\omega=30$ to 100\,rad/s on subtalar and
+  \texttt{mtp} (16 substeps): \texttt{mtp} improves to 0.011\,rad, but
+  subtalar worsens to 0.024--0.030\,rad; $\omega=300$ is unstable (0.35\,rad).
+\item A planted-contact computed torque (stance spheres held as constraints
+  in the controller's KKT, SVD-truncated contact rows): it diverged at step 6
+  with a minimum singular value of 0.01, diverged at 0.1, and at 1 was worse
+  than the free-contact law (\texttt{mtp} 0.09\,rad at 30 steps).
+\item 32 substeps with a 1\,ms hold: foot 4.51/4.50\,mm, which exceeds the
+  right bound. The first sweep chose 32 substeps from an early-window rate
+  of $2.9\times10^4$\,s$^{-1}$; a dense scan found $8.95\times10^4$\,s$^{-1}$
+  later in the window ($|z|=2.80$), so 32 was rejected.
+\item A substep target at RK4's point of maximum damping ($|z|\le1.596$)
+  would need 128 substeps. The 64-substep trajectory already agrees with 128
+  to $1.7\times10^{-8}$\,rad, so the stability limit is the target.
+\item No controller--plant mismatch was found: the controller's inverse
+  dynamics cut only the six closure null directions.
+\end{itemize}
+
+\subsection{Barbell Hold in Contact Equilibrium (LIFT-4, Issue \#11744)}
+\paragraph{Diagnosis.} After OSL-16 the 1.5\,s hold carried body plus bar
+exactly at 0.75--1.0\,s, then sagged to 0.988 (ground) and 0.986 (hands)
+over the last 0.5\,s, under a mean horizontal ground force of $-102$\,N.
+Each candidate cause was measured on the committed back-squat bundle
+(old-body baseline reproduced to the last digit: ground 0.98799, hands
+0.98627, left share 0.49258, deflection 0.629\,mm):
+\begin{itemize}[nosep]
+\item \textbf{Start not in contact equilibrium: the cause.} The hold
+  started from \texttt{preload\_feet}, which translates the IK standing
+  pose down until its lowest sphere (the toes) sinks to the equal-share
+  depth $W/(6k)$. At that state the feet carried 0.595 of body plus bar
+  and their centre of pressure lay 6.7\,cm ahead of the combined centre of
+  mass. The rigid posture rotated back toward its contact equilibrium
+  (root pitch from 0.07 to $-2.06^\circ$ by about 0.55\,s), arrived with
+  momentum (CoM velocity about $-0.14$\,m/s), and overshot. The CoP pinned
+  at the heel edge ($-0.046$\,m) at 0.75--0.8\,s and the body toppled
+  backwards: CoM $-0.204$\,m and pitch $-9.15^\circ$ at 1.5\,s, horizontal
+  force $-190$\,N. The ``steady $-102$\,N'' was the mean of this topple
+  over 1.0--1.5\,s.
+\item \textbf{Balance controller: does not arrest it, does not cause it.}
+  The horizontal CoM error reached $-0.24$\,m; the balance gains (60, 15)
+  are small against the posture's $\omega^2=900$, so a large initial
+  imbalance is not corrected. From an equilibrium start the term is idle.
+\item \textbf{Friction or tangential creep: not the cause.} Heel slip
+  stayed below 2.5\,mm and comes from rolling about the heel edge.
+\item \textbf{Bushing pre-load direction: not the cause.} At $t=0$ each
+  hand bushing pulls exactly vertically (490.33\,N per hand).
+\item \textbf{Asymmetric feet: not the cause.} Lateral foot offsets are
+  symmetric within 1.5\,mm and the lateral CoP is $-4.2$\,mm. The internal
+  lateral friction during the fall (about $\pm300$\,N) cancelled between
+  the feet. The equilibrium foot loads (850 and 918\,N) are harmless.
+\end{itemize}
+
+\paragraph{Fix.} \texttt{barbell\_runs.hold\_start} projects the hold pose
+onto the closure, then solves for the contact equilibrium on the
+rigid-bar model (\texttt{contact\_equilibrium\_pose}): a minimum-norm
+Gauss--Newton over the root's normal translation and its three angles,
+with residuals $F_n/W-1$ and the tangential contact moment about the
+combined CoM over $W$, to $10^{-12}$. The actuated coordinates and the
+root's horizontal position are unchanged. The bushing plant starts from
+that state with the bar hanging still. The bushing hand Jacobian now reads
+the single hand frame (\texttt{VectorPlant.kinematic\_frame}), bit-identical
+to the full frame map and 3.9 times faster.
+
+\paragraph{Result.} \texttt{barbell\_hold.json} (old body, see below): over
+the whole 1.5\,s, vertical ground force over body plus bar 1.000000
+(1768.2665\,N, range $4\times10^{-11}$\,N), hand force over bar weight
+1.000000, left share 0.500, peak deflection 0.49\,mm, horizontal force
+below $10^{-8}$\,N. The hold xfails are now plain tests with unchanged
+thresholds (1\,\%, 0.01, 3\,mm), held at every sample, not only the last
+0.5\,s.
+
+\paragraph{Robustness.} From the equilibrium with $+0.25^\circ$ root pitch
+the hold stays bounded: CoM error at most 1.1\,cm, horizontal force at
+most 10\,N, heel slip below 0.1\,mm, a slow sway, no failure in 1.5\,s.
+A large initial imbalance (the old 6.7\,cm) is not recovered, so the
+balance controller's authority remains a limitation.
+
+\paragraph{Failed Experiments.}
+\begin{itemize}[nosep]
+\item The first equilibrium solve used \texttt{attached\_state}'s bar
+  position, which is the fixed attach point, not the current hand. It
+  balanced the wrong CoM; the solve now runs on the rigid-bar model whose
+  bar moves with the hands.
+\item Routing the hand pose through a per-call dictionary of all frames
+  gave only a small speed-up; the dictionary-free single-site kinematics
+  was needed.
+\end{itemize}
+
+\paragraph{Evidence Status.} The hold evidence was generated on the
+pre-\#13102 lift body (old de Leva trunk). It must be regenerated with
+the lift-body refresh on the base; the cause and fix do not depend on the
+segment lengths.
+
+\subsection{Hands That Reach the Bundle Bar (OSL-12, Issue \#13048)}
+\paragraph{Diagnosis.} After OSL-16 every body marker of the OpenSim squat
+IK was within 2.3\,cm, but the bar marker was 27.6\,cm off (RMS 6.81\,cm,
+maximum 27.56\,cm). Each candidate cause was measured on the committed
+back-squat bundle (stride 5, 41 states):
+\begin{itemize}[nosep]
+\item \textbf{Arm segment lengths: not the cause.} The scaled Rajagopal arm
+  (humerus 0.300\,m, forearm 0.264\,m, wrist to hand centre 0.071\,m)
+  reaches 0.636\,m from the shoulder. The bundle's arm is 0.288 and
+  0.275\,m long, and its grips lie only 0.252 and 0.235\,m (left, right)
+  from the shoulder centres.
+\item \textbf{Shoulder and elbow ranges: not the cause.} A bounded solve
+  inside the Rajagopal ranges puts each hand centre on its bundle grip to
+  $3.4\times10^{-6}$ and $3.5\times10^{-6}$\,m. The solved arms are
+  \texttt{arm\_flex} 50.8/50.2$^\circ$, \texttt{arm\_add}
+  $-68.0/-62.2^\circ$, \texttt{arm\_rot} $-44.5/-46.6^\circ$ and
+  \texttt{elbow\_flex} 143.0/145.8$^\circ$ (left/right).
+\item \textbf{Bar position relative to the hold: the cause.} Relative to
+  the shoulder-centre midpoint, the bundle's hands hold the bar 0.157\,m
+  forward and 0.159\,m up (constant to 1\,mm through the window). The OSL-2
+  back-rack hold puts it 0.194\,m behind and 0.073\,m above. The IK
+  assembles from that hold, and its arm tasks (weight 0.01) hold the arms
+  there. So the hands stay behind the shoulders, 0.28\,m from the bundle's
+  grips at the first state.
+\item \textbf{Weld frame placement: not the cause.} The bar body's origin is
+  the midpoint of the two hand centres. The bundle's bar centre is the
+  midpoint of its two grip points to $10^{-9}$\,m (test).
+\item \textbf{Bar weight 0.1: a symptom.} At weight 1 with the back-rack
+  seed, the bar stays 17.8\,cm off and drags the trunk (trunk RMS
+  11.6$^\circ$; marker RMS 5.54\,cm).
+\end{itemize}
+The bundle's bar sits on a fitted torso shelf (\texttt{back\_bar}), not on
+an anatomical site. Along the trunk it is 0.215\,m above the shoulder centres
+and 0.06\,m anterior to them, which is in front of the face rather than on the
+upper back. That is a property of the bundle, recorded here as a limitation,
+not changed by this fix.
+
+\paragraph{Method.} \texttt{reaching\_lift\_build}
+(\texttt{src/engines/physics\_engines/opensim/python/msk\_lift\_arm\_reach.py})
+runs two passes:
+\begin{enumerate}[nosep]
+\item \textbf{Seed pass.} It runs the IK of the hold-pose model with the bar
+  marker at weight 0, so the bar cannot pull the trunk.
+\item \textbf{Reach solve.} With the seed's first-state body held and the arm
+  chain at the hold, a bounded least-squares solve (scipy TRF, the model
+  ranges as bounds) moves \texttt{arm\_flex}, \texttt{arm\_add},
+  \texttt{arm\_rot} and \texttt{elbow\_flex} on each side until the hand's
+  centre of mass, which is the weld's grip point, lies on that hand's bundle
+  grip (\texttt{LiftTargets.grip\_m}). A prior of $10^{-3}$\,m/rad towards
+  the hold picks among the solutions. The forearm and wrist stay at the hold.
+\end{enumerate}
+The model is then rebuilt with those arms as its hold
+(\texttt{build\_lift\_model(arm\_coordinates=\ldots)}). The bar weld is
+therefore placed at the reaching pose, the grip width is the one those arms
+give (0.600\,m in the bundle, not a solved target), and the arm tasks hold the
+reaching arms. The bar marker weight is restored from 0.1 to 1, the same as
+the shoulders. No threshold changed.
+
+\paragraph{Measured Evidence (Before $\rightarrow$ After).} Receipts:
+\texttt{docs/development/lifting/evidence/opensim\_ik\_id/receipts.json};
+tests: \texttt{tests/unit/lifting/test\_opensim\_lift\_bar\_reach.py}.
+\begin{itemize}[nosep]
+\item \textbf{Markers.} RMS 6.81 $\rightarrow$ 1.18\,cm and maximum 27.56
+  $\rightarrow$ 2.32\,cm (right forefoot). This meets the 2\,cm/4\,cm gate.
+  The bar marker goes from 27.56\,cm to 0.29\,mm, and the shoulders from
+  2.09/1.95 to 1.18/0.93\,cm.
+\item \textbf{Ranges and pelvis.} Every coordinate is in range in all 41
+  states. The pelvis landmarks are tracked (ASIS 5.0--5.1\,mm, PSIS
+  1.9--2.0\,mm).
+\item \textbf{Segment angles.} RMS 1.92 $\rightarrow$ 1.22$^\circ$ (trunk
+  2.67 $\rightarrow$ 0.75$^\circ$), inside the 2$^\circ$ threshold.
+\item \textbf{Pelvis residuals (peak).} $t_y$ 214.8 $\rightarrow$ 214.2\,N,
+  $t_x$ 143.0 $\rightarrow$ 144.2\,N, tilt 546.4 $\rightarrow$ 153.8\,N\,m,
+  rotation 21.1 $\rightarrow$ 4.3\,N\,m and list 8.7 $\rightarrow$
+  4.7\,N\,m. The Hicks et al.\ gate (167.2\,N, 21.9\,N\,m) still fails for
+  $t_y$ and tilt.
+\item \textbf{Joint moments (peak).} Lumbar extension 772.9\,N\,m, hip
+  flexion 454.9/443.6\,N\,m, \texttt{arm\_flex} 147.6/139.7\,N\,m.
+\end{itemize}
+
+\paragraph{Residual Breakdown.} The ID residual was split per term
+($M\dot u$; Coriolis; gravity; foot wrench; hand wrench) at every state
+(scratch script, not committed). Both failing peaks occur only at the first
+state of the window:
+\begin{itemize}[nosep]
+\item At state 0, the hands carry exactly the bar weight (980.7\,N) and the
+  feet only 1347.2\,N, against the 1768.3\,N weight of body plus bar. The
+  bundle body therefore accelerates downwards, with net external vertical
+  force $-421.1$\,N, as it settles onto the loaded foot contact. The IK
+  motion's inertial term there is only $-207.6$\,N: the quintic GCV spline
+  has no data before $t=0$, so it does not reproduce that acceleration.
+  The remainder, 214.2\,N, is the $t_y$ peak.
+\item The tilt peak at the same state (153.8\,N\,m) is the moment of the
+  same imbalance: foot term $-199.9$, hand term $+301.9$, gravity $+78.9$
+  and inertial $-25.2$\,N\,m.
+\item Over states 1--40, the peaks are $t_y$ 24.4\,N (limit 167.2) and
+  tilt 20.7\,N\,m (limit 21.9). These are within the gate.
+  This is a diagnostic only: the gate is evaluated on every state, and no
+  state is excluded.
+\end{itemize}
+
+\paragraph{Failed Experiments.}
+\begin{itemize}[nosep]
+\item The bar at weight 1 with the back-rack seed (above): 17.8\,cm bar
+  error, with the trunk dragged 11.6$^\circ$ RMS.
+\item Every bundle state (stride 1, 201 states) instead of every fifth: the
+  state-0 peaks are not removed ($t_y$ 266.6\,N, tilt 133.2\,N\,m), and the
+  unsmoothed spline amplifies the 1\,ms IK noise (pelvis rotation
+  91.7\,N\,m, $t_z$ 75.0\,N, both from the inertial term).
+\item A first unregularised reach with seven arm coordinates per side
+  (adding \texttt{pro\_sup} and both wrist angles) and several starts also
+  reached the grips to $3\times10^{-6}$\,m. It gave asymmetric arms
+  (\texttt{arm\_flex} 67.2/88.9$^\circ$, pronation 30.7/55.0$^\circ$), so the
+  committed solve moves only the four shoulder and elbow coordinates, with
+  the hold prior.
+\end{itemize}
+
+\paragraph{Limitations.} The marker gate is met. The Hicks residual gate is
+not, because of the state-0 settling transient, and stays open on \#13048.
+Closing it needs either a bundle window that starts at rest on its contact,
+or derivatives that use the bundle's own states before the window. The
+bundle's bar position is a fitted shelf in front of the face, not a
+back-squat rack, so these arm poses are not a back-squat technique. The
+reaching arms are fitted at the first state only; the IK then tracks the bar.
+Reproduce with \texttt{MUJOCO\_GL=egl python3 scripts/measure\_opensim\_lift\_ik\_id.py}
+and \texttt{python3 -m pytest -o addopts="" tests/unit/lifting/test\_opensim\_lift\_bar\_reach.py}.
+
+\subsection{Bench Press Same-Input Bundle (LIFT-5, Issue \#11745)}
+\paragraph{Contact Model.} The same-input full-body spec had contact spheres
+on the feet only, so a supine trunk fell. The shared Hunt--Crossley law
+(\texttt{motion\_matching/contact\_law.py}) now accepts raised supports:
+\texttt{contact.supports} names spheres that press on a plane parallel to the
+ground at the support height $h$, with penetration
+$\delta = \max(0, r - (\mathbf{n}\cdot\mathbf{c} - h))$ for a sphere of radius $r$
+and centre $\mathbf{c}$. The MuJoCo, Drake, Pinocchio and OpenSim adapters
+resolve the plane per sphere through one helper (\texttt{support\_planes}),
+so the force law is not duplicated. The bench adds four back spheres that
+mirror OSL-2 (\texttt{msk\_lift\_model.\_BACK\_SPHERES}): posterior shoulder
+(RPSH, LPSH) and posterior iliac (RPSI, LPSI) sites, radius
+$0.04\,\mathrm{m}\times 1.78/1.70 = 0.0419$\,m, one radius anterior of each
+skin marker. Stiffness stays at the spec's $10^5$\,N/m.
+
+\paragraph{Hold and Bench Height.} The supine hold
+(\texttt{lifting/bench\_press.py}, \texttt{solve\_bench\_hold}) rotates the
+standing trunk until the back-sphere line is level, applies the parity
+standard's bench-start leg angles (hip extension 0.27\,rad, knee flexion
+1.65\,rad), and fits the body with the feet flat on the floor and the
+back-sphere centres weighted $10\times$. As in OSL-2, the bench top is the
+lowest back-sphere point of the fit: 0.501\,m, which is 5--8\,cm above the
+IPF 0.42--0.45\,m rule (IPF Technical Rules Book 2026). The other spheres
+clear it by 0.21--1.00\,mm. An earlier attempt pitched the root with
+$\texttt{HipInputY}=-90^\circ$; that is the gimbal lock of the root's
+$R_xR_yR_z$ chain and left 1--2\,cm residuals and up to 11\,mm sphere
+clearance. The hold now lies along $y$
+($\texttt{HipInputX}=\texttt{HipInputZ}=-90^\circ$). Without the sphere
+weights the clearances were up to 7.1\,mm.
+
+\paragraph{Press.} The Movement Optimizer's bench model is an arm chain on a
+fixed shoulder (80\,kg, 1.78\,m, 100\,kg bar, 2.0\,s): the bar offset runs from
+$(0, 0.696)$\,m at lockout to $(0.081, 0.021)$\,m at the chest (1.0\,s), with a
+peak vertical speed of 1.42\,m/s. Only the arm chain moves. The bar centre
+is tracked to the model's shoulder midpoint plus that offset, scaled by
+0.792 (the model's 0.551\,m straight-up reach at the 0.75\,m grip, divided by
+the optimizer's lockout offset). The bar residual is 4.9\,mm at lockout and
+14.7\,mm at the chest, where the arms cannot fold to the optimizer's point.
+That point is only 0.021\,m above the shoulder joint centre, i.e. inside
+the chest, and the chest has no contact. The model's bar travels 0.527\,m
+vertically. Larsen, Gomo and van den Tillaar (2021, \emph{Front.\ Sports
+Act.\ Living} 2:637066, Table~1) report about 0.35\,m for a 1-RM medium grip,
+and Gonz\'alez-Badillo and S\'anchez-Medina (2010, \emph{Int.\ J.\ Sports
+Med.} 31(5):347--352) report $0.16\pm0.04$\,m/s mean velocity at 1RM. The optimizer's lift is a faster
+submaximal press. These are evidence, not tuning targets.
+
+\paragraph{Bundle and Parity.} The 0.2\,s window, centred on the chest touch,
+starts at 0.893\,s (200 steps at 1\,ms; 229\,kB). MuJoCo tracking keeps the
+trunk on the bench: by mid-window the back spheres carry 462--732\,N at
+0.9--2.6\,mm penetration, and the floating root drifts at most 1.8\,mm and
+$0.21^\circ$. In open-loop replay over the full window, the bar agrees with
+MuJoCo to $1.0\times10^{-11}$\,m (Drake), $1.2\times10^{-11}$\,m (Pinocchio)
+and $1.5\times10^{-13}$\,m (OpenSim). The coordinates agree to
+$1.9\times10^{-9}$, $2.2\times10^{-9}$ and $2.6\times10^{-11}$\,rad, inside the
+$10^{-6}$\,rad L2 bound, and MuJoCo is bit exact
+(\texttt{docs/development/lifting/evidence/bench\_press/}).
+
+\paragraph{Limitations.} The trunk, legs, scapulae and head are held, so
+there is no leg drive or arch. The chest has no contact. The bar mass is
+absent from the full-body dynamics (LIFT-4, \#11744). The bench is an
+unbounded plane. Pinocchio's analytic contact derivatives raise for a spec
+with supports. Reproduce with
+\texttt{MUJOCO\_GL=egl python3 scripts/generate\_lift\_bundle.py --lift bench\_press}
+then \texttt{scripts/measure\_lift\_bar\_path\_parity.py --lift bench\_press}.
 
 \section{Measured Parity Results}
 All figures below are read from the committed receipt,

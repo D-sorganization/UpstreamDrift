@@ -34,29 +34,33 @@ MAX_BUNDLE_BYTES = 300_000
 # Measured maxima over all 151 frames (metres); see the module docstring.
 IK_RESIDUAL_THRESHOLDS_M: dict[str, dict[str, float]] = {
     "deadlift": {
-        "ankle_l": 0.0080,
-        "ankle_r": 0.0040,
-        "knee_l": 0.0227,
-        "knee_r": 0.0100,
-        "hip_l": 0.0149,
-        "hip_r": 0.0144,
-        "shoulder_l": 0.0096,
-        "shoulder_r": 0.0078,
-        "bar": 0.0040,
+        "ankle_l": 0.0032,
+        "ankle_r": 0.0030,
+        "knee_l": 0.0031,
+        "knee_r": 0.0109,
+        "hip_l": 0.0084,
+        "hip_r": 0.0060,
+        "shoulder_l": 0.0040,
+        "shoulder_r": 0.0045,
+        "bar": 0.0029,
     },
     "clean_and_jerk": {
-        "ankle_l": 0.0078,
-        "ankle_r": 0.0037,
-        "knee_l": 0.0227,
-        "knee_r": 0.0101,
-        "hip_l": 0.0094,
-        "hip_r": 0.0139,
-        "shoulder_l": 0.0087,
-        "shoulder_r": 0.0078,
-        "bar": 0.0045,
+        "ankle_l": 0.0032,
+        "ankle_r": 0.0019,
+        "knee_l": 0.0031,
+        "knee_r": 0.0109,
+        "hip_l": 0.0084,
+        "hip_r": 0.0060,
+        "shoulder_l": 0.0040,
+        "shoulder_r": 0.0030,
+        "bar": 0.0012,
     },
 }
-CLOSURE_THRESHOLD_M: dict[str, float] = {"deadlift": 1.7e-7, "clean_and_jerk": 6.5e-7}
+# OSL-14 (#13057): the bounded arm solve ends with the hanging arm at its
+# cited elbow-extension limit, so the grip weld closes to tens of microns
+# (the unbounded golf-body solve closed to 1e-7 m with out-of-range joints).
+# Before/after numbers: #13057 (issuecomment-6229479012).
+CLOSURE_THRESHOLD_M: dict[str, float] = {"deadlift": 7.7e-5, "clean_and_jerk": 2.8e-5}
 FOOT_PENETRATION_THRESHOLD_M: dict[str, float] = {
     "deadlift": 7.0e-4,
     "clean_and_jerk": 7.0e-4,

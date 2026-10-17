@@ -67,6 +67,16 @@ def test_pull_recipes_hang_the_bar_and_centre_on_the_knee_pass(lift: str) -> Non
     assert pull.parity_record_path.parent == pull.bundle_path.parent
 
 
+def test_bench_press_recipe_lies_supine_and_centres_on_the_chest() -> None:
+    bench = recipe("bench_press")
+    assert bench.supine and not bench.hand_held
+    assert bench.exercise == bench.bar_convention == "bench_press"
+    assert bench.window_event == "bottom"
+    assert bench.phase == "chest_touch"
+    assert "bench_press" not in DEFERRED_LIFTS
+    assert not recipe("squat").supine
+
+
 def test_recipe_names_the_reason_for_a_deferred_lift() -> None:
     for lift in DEFERRED_LIFTS:
         with pytest.raises(ValueError, match="no bundle"):

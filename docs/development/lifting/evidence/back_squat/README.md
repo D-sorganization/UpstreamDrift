@@ -107,6 +107,41 @@ MUJOCO_GL=egl python3 scripts/measure_lift_bar_path_parity.py
   recorded: TODO(#11745) add cited reference values as evidence, not tuning
   targets.
 
+## Lift Body (OSL-14, #13057)
+
+The bundles now replay the AN-1 lift body
+(`docs/development/lifting/evidence/lift_body/lift_body_spec.json`, from
+`src/shared/python/lifting/lift_body.py`), not the golf spec. The limitation
+text above, which describes the golf spec, is kept for the bundle provenance.
+The lift body has:
+
+- a lumbar joint at L5/S1;
+- de Leva hips 0.1851 m apart;
+- cited ranges, solved as bounded (TRF) IK.
+
+The grip-width shift also moves the left wrist joint. Every coordinate of the
+squat bundle stays inside its cited range.
+
+The LIFT-4 barbell re-track (`back_squat_barbell_bundle.npz`) still leaves its
+source (#13072). The controller is now built on the rigid-bar spec
+(`barbell_runs.rigid_bar_spec`), which removed the fast divergence. Before that,
+the bar-weight feedforward left out the bar's load on the floating base. The
+SpineInputY error went from 0.99 deg to 0.0002 deg at step 3, and from
+9.76 deg to 0.0001 deg at step 10.
+
+The loaded body still pivots forward on its toes. With the bar in the hands,
+the source kinematics put the combined centre of mass 0.15-0.17 m ahead of the
+forefoot spheres, while the body alone sits 0.039 m inside them. By step 200:
+
+- pelvis pitch is 11.8 deg off the source;
+- the shoulder landmarks are 13.2 cm off;
+- the LIFT-5 bounds are crossed from step 58 (ankle) onwards.
+
+The deviation per landmark is recorded in the provenance under
+`retrack_landmark_deviation_m`. The bound test is a strict xfail in
+`tests/unit/lifting/test_barbell_evidence.py`. See `lift_models.tex`, #13072
+subsection.
+
 ## Regenerate
 
 ```bash
@@ -141,3 +176,31 @@ committed: it changes the bundle spec hash recorded in the bar-path, kinetics
 and barbell evidence (#12340, #12341, #12345) and exceeds two recorded IK
 thresholds (`hip_r` 0.0153 m against 0.0138 m, closure 1.9e-6 m against
 1.5e-6 m), so it lands with that evidence in the next slice.
+
+## Loaded Foot Stability (OSL-16, #13104)
+
+The committed bundles are the bar-balanced source (#13093,
+`--load-balance`) tracked at 64 RK4 substeps with a 0.25 ms effort hold
+(`barbell_runs.LOADED_TRACKING_POLICY`). At the original eight substeps the
+stiffest loaded foot-contact mode (1.3e5 1/s) left the RK4 stability region,
+and the right foot points ran 0.23 m from the IK. The sweep is in
+`loaded_foot_tracking.json` (`scripts/measure_loaded_foot_tracking.py`), and
+`lift_models.tex` (OSL-16 subsection) holds the full account. The earlier
+sections above describe the eight-substep records. They stay for history; the
+records now read:
+
+- **Feet:** foot points within 1.81/1.79 mm of the IK, against the ankle
+  bounds 3.6/5.7 mm.
+- **Bar-path parity:** over the full window the engines agree within 2.2e-9
+  rad and the bar within 4.3e-12 m. The coordinate xfails are now plain
+  tests.
+- **Re-track:** every landmark is within its LIFT-5 bound. Ankles 0.97,
+  knees 1.21, hips 1.39, shoulders 1.83 and bar 2.03 mm. The bar is bounded
+  by the tightest body-landmark bound (3.6 mm), not the IK's 0.1 mm
+  constraint precision.
+- **Hold:** the hold starts in contact equilibrium (`barbell_runs.hold_start`,
+  #11744), with the CoP under the combined CoM. Body plus bar is carried over the
+  whole 1.5 s: ground 1.000, hands 1.000, left share 0.500, deflection 0.49 mm.
+  The old start sat 6.7 cm out of balance and toppled backwards. This evidence
+  is on the pre-#13102 lift body.
+- **Size:** loaded bundles carry their hold efforts, up to 600,000 bytes.

@@ -178,10 +178,12 @@ def _frame(spec: dict[str, Any], name: str) -> dict[str, Any]:
 def apply_grip_width(spec_bytes: bytes, width_m: float) -> bytes:
     """Full-body spec whose palms are ``width_m`` apart along the club axis.
 
-    The closure keeps the right hand where it is; the left-hand frame, its hand
-    solids (mass and inertia travel with the hand) and the bar-centre frame
-    move along the bar's long axis so the bar centre stays midway between the
-    palms.  Only ``frames`` and ``bodies`` change; the result depends on
+    The closure keeps the right hand where it is; the left-hand frame, the
+    left wrist joint that carries the club (OSL-14, #13057: moving the frame
+    alone left the real left hand at the golf grip), its hand solids (mass and
+    inertia travel with the hand) and the bar-centre frame move along the
+    bar's long axis so the bar centre stays midway between the palms.  Only
+    ``frames``, ``bodies`` and that joint change; the result depends on
     ``width_m`` alone (applying it twice equals applying the last width).
 
     Raises:
@@ -210,6 +212,12 @@ def apply_grip_width(spec_bytes: bytes, width_m: float) -> bytes:
     centre["placement"] = _with_placement_y(
         centre["placement"], 0.5 * (right_y + new_y)
     )
+    for joint in spec.get("joints", []):
+        if joint["child"] == left["body"] and "child_to_follower" in joint:
+            joint["child_to_follower"] = _with_placement_y(
+                joint["child_to_follower"],
+                _placement_y(joint["child_to_follower"]) + shift,
+            )
     for body in spec["bodies"]:
         for solid in body["solids"]:
             if solid["name"] in _LEFT_HAND_SOLIDS:
