@@ -18,6 +18,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13087 · Overlay Measured Plate Trials on the Ground Reaction Tile (OF-07)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13087
+- **Branch:** feat/13087-of-07-plate-overlay
+- **PR:** #13100
+- **Paths:** see #13100
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`181406be`; collated from changes/13087-overlay-measured-plate-trials-on-the-gro.md)
+- **Summary:** Overlay measured plate trials on the ground reaction tile (OF-07)
+- **Next step:** Review and merge after #13090, #13091
+
+### DL-#13085 · Open-Fp LAN Client
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #13085
+- **Branch:** feat/13085-of-06-lan-client
+- **PR:** #13094
+- **Paths:** `src/shared/python/force_plates/open_fp_format/client.py`
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`b0c20bdc`; collated from changes/13085-add-read-only-open-fp-lan-client-of-06.md)
+- **Summary:** Add read-only open-fp LAN client (OF-06)
+- **Next step:** Review and merge after #13066
+
+### DL-#13084 · Add Force-Event Namespace and Sourced Impact Anchor (OF-04)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13084
+- **Branch:** feat/13084-of-04-force-events
+- **PR:** #13100
+- **Paths:** see #13100
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`181406be`; collated from changes/13084-add-force-event-namespace-and-sourced-im.md)
+- **Summary:** Add force-event namespace and sourced impact anchor (OF-04)
+- **Next step:** Review and merge after #13069
+
 ### DL-#13106 · Src-Pivot Hygiene Test Accepts the Pivot's Documented Parent Healing, Removing an Order-Dependent Unit-Test-Gate Failure
 
 - **State:** in_review
@@ -2495,6 +2534,32 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13110 · Sidekick Smoke-Test Checks Fixtures Out Into an Isolated Path so the Shared Self-Hosted Workspace Is Never Left a Sparse Partial Clone
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13110
+- **Branch:** merged via #13111
+- **PR:** #13111
+- **Paths:** see #13111
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`9fd898a6`; collated from changes/13110-sidekick-smoke-test-checks-fixtures-out.md)
+- **Summary:** Sidekick smoke-test checks fixtures out into an isolated path so the shared self-hosted workspace is never left a sparse partial clone
+- **Next step:** Shipped in PR #13111.
+
+### DL-#13037 · Derive the Fit-Path de Leva Table From Whole Table 4 Rows, Keep the Capture Trunk Length by Rescaling Trunk_Scale, and Measure the Head and Trunk-Part CM From the Cranial Row Origin; Canonical Receipts Regenerated
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13037
+- **Branch:** merged via #13102
+- **PR:** #13102
+- **Paths:** see #13102
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`66d3c25a`; collated from changes/13037-derive-the-fit-path-de-leva-table-from-w.md)
+- **Summary:** Derive the fit-path de Leva table from whole Table 4 rows, keep the capture trunk length by rescaling trunk_scale, and measure the head and trunk-part CM from the cranial row origin; canonical receipts regenerated
+- **Next step:** Shipped in PR #13102.
 
 ### DL-#12789 · Static 10 Deg External Tibial-Torsion Offset in the Shared Full-Body Spec (Ankle Base Frames, Cited Seber 2000 Range); 7-Iron Trail Toe-Out Reaches 19.97 Deg With Hip_Rotation_R Off Its Limit; the Four Canonical Ground-Support Receipts Are Regenerated on the Default Style Feet (Calibrated 7-Iron Dynamics 64.35 mm, G3 Passes)
 

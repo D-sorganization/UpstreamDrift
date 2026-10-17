@@ -2741,6 +2741,10 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-17 | #13111 | Sidekick smoke-test checks fixtures out into an isolated path so the shared self-hosted workspace is never left a sparse partial clone |
+| 2026-10-17 | #13094 | Add read-only open-fp LAN client (OF-06) |
+| 2026-10-17 | #13100 | Add force-event namespace and sourced impact anchor (OF-04); Overlay measured plate trials on the ground reaction tile (OF-07) |
+| 2026-10-17 | #13102 | Derive the fit-path de Leva table from whole Table 4 rows, keep the capture trunk length by rescaling trunk_scale, and measure the head and trunk-part CM from the cranial row origin; canonical receipts regenerated |
 | 2026-10-17 | #13107 | Src-pivot hygiene test accepts the pivot's documented parent healing, removing an order-dependent unit-test-gate failure |
 | 2026-10-17 | #13098 | Add research proposal for measured plate rows in the contact-wrench QP (OF-10) |
 | 2026-10-17 | #13077 | Add per-foot vertical-cell force-plate observation rows with the exact sensing-plane shear lever to the ground null space, with sympy goldens and spec (OF-11) |
