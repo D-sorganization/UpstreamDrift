@@ -616,3 +616,32 @@ def test_csv_oversized_header_refused(tmp_path: Path) -> None:
 def test_read_swing_rejects_wrong_declared_type(tmp_path: Path) -> None:
     with pytest.raises(TypeError, match="declared"):
         read_swing(w.write_swing(tmp_path), declared=object())  # type: ignore[arg-type]
+
+
+# ------------------------------------------------------ duplicate entries --
+@pytest.mark.parametrize("field", ['"bw_n": 800.0', '"impact": null'])
+def test_duplicate_json_member_refused(tmp_path: Path, field: str) -> None:
+    text = json.dumps(w.default_meta(), allow_nan=False)
+    if field.startswith('"impact"'):
+        text = text.replace('"impact": ', field + ', "impact": ', 1)
+    else:
+        text = text.replace("{", "{" + field + ", ", 1)
+    with pytest.raises(ValueError, match="duplicate"):
+        read(w.write_swing(tmp_path, raw_json=text))
+
+
+def test_duplicate_npz_member_refused(tmp_path: Path) -> None:
+    import warnings
+    import zipfile
+
+    json_path = w.write_swing(tmp_path)
+    npz_path = json_path.with_suffix(".npz")
+    members = w.default_members()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")  # zipfile warns about the duplicate name
+        with zipfile.ZipFile(npz_path, "w") as archive:
+            for key, payload in members.items():
+                archive.writestr(f"{key}.npy", payload)
+            archive.writestr("t.npy", members["t"])
+    with pytest.raises(ValueError, match="duplicate"):
+        read(json_path)

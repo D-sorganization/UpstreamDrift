@@ -118,6 +118,9 @@ def _open_npz(data: bytes, path: Path) -> np.lib.npyio.NpzFile:
     try:
         with zipfile.ZipFile(io.BytesIO(data)) as archive:
             infos = archive.infolist()
+            names = [info.filename for info in infos]
+            if len(set(names)) != len(names):
+                raise _Refused(f"{path}: npz has duplicate members")
             if sum(info.file_size for info in infos) > fmt.MAX_NPZ_BYTES:
                 raise _Refused(f"{path}: npz expands to more than the size limit")
             for info in infos:

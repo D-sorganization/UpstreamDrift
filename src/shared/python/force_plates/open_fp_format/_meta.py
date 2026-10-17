@@ -43,11 +43,24 @@ def _number(value: object, where: str) -> float:
     return number
 
 
+def _unique_object(name: str, pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """A JSON object, refusing a repeated member name at any level."""
+    keys = [key for key, _ in pairs]
+    if len(set(keys)) != len(keys):
+        repeated = sorted({k for k in keys if keys.count(k) > 1})
+        raise ValueError(f"{name}: duplicate JSON members {repeated}")
+    return dict(pairs)
+
+
 def _load_object(data: bytes, path: Path) -> dict[str, Any]:
     name = str(path)
     try:
         text = data.decode("utf-8")
-        obj = json.loads(text, parse_constant=lambda c: _reject_constant(name, c))
+        obj = json.loads(
+            text,
+            parse_constant=lambda c: _reject_constant(name, c),
+            object_pairs_hook=lambda pairs: _unique_object(name, pairs),
+        )
     except UnicodeDecodeError as exc:
         raise ValueError(f"{name}: not valid UTF-8 JSON ({exc})") from exc
     except json.JSONDecodeError as exc:
