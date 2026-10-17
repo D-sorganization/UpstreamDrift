@@ -149,7 +149,7 @@ def constant_marker_set(
     groups = [[labels.index(m) for m in g] for g in policy.rigid_groups]
     rigid = _rigid_fill(points, valid, groups)
     spline = _spline_fill(points, valid, policy.max_spline_gap)
-    complete = valid.all(axis=1)
+    complete = np.asarray(valid.all(axis=1), dtype=bool)
     if not complete.any():
         raise ValueError("no frame has every kept marker after filling")
     end = int(np.flatnonzero(complete)[-1]) + 1
