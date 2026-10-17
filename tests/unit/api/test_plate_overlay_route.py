@@ -54,7 +54,9 @@ def _client(data: dict[str, Any] | None = None) -> TestClient:
     run = SimpleNamespace(
         run_id="r1",
         engine_type="mujoco",
-        simulation_data=data if data is not None else {"ground_reaction_series": _series()},
+        simulation_data=data
+        if data is not None
+        else {"ground_reaction_series": _series()},
         engine=None,
     )
     app = FastAPI()

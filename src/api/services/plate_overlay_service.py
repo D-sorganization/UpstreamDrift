@@ -59,7 +59,12 @@ def _configured_root(root: str | Path | None) -> Path:
 
 
 def _relative_parts(trial: str) -> tuple[str, ...]:
-    if not isinstance(trial, str) or not trial.strip() or "\\" in trial or "\0" in trial:
+    if (
+        not isinstance(trial, str)
+        or not trial.strip()
+        or "\\" in trial
+        or "\0" in trial
+    ):
         raise ValueError("trial must be a relative POSIX path")
     path = PurePosixPath(trial)
     if path.is_absolute() or ".." in path.parts or "." in path.parts:

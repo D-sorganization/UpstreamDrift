@@ -124,12 +124,16 @@ def _measured_keys(series: GroundReactionPlotSeries) -> list[tuple[str, str, str
     ]
 
 
-def _draw_measured(axes: np.ndarray, series: GroundReactionPlotSeries, in_bw: bool) -> None:
+def _draw_measured(
+    axes: np.ndarray, series: GroundReactionPlotSeries, in_bw: bool
+) -> None:
     """Dashed measured load (N panels only) and measured CoP path."""
     for key, label, color in _measured_keys(series):
         if not in_bw:
             load = _component(series, f"{key}_force_n", "z")
-            axes[0].plot(series.time_s, load, color=color, label=label, **_MEASURED_STYLE)
+            axes[0].plot(
+                series.time_s, load, color=color, label=label, **_MEASURED_STYLE
+            )
         x = _component(series, f"{key}_cop_m", "x")
         y = _component(series, f"{key}_cop_m", "y")
         if x is not None and y is not None:

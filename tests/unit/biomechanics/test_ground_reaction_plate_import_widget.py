@@ -73,9 +73,7 @@ def test_unqualified_trial_shows_the_banner(tmp_path) -> None:
     alignment = PlateTimeAlignment(
         offset_s=0.0, sigma_offset_s=0.001, kind="manual", note="test clock"
     )
-    placement = placement_for_target(
-        "RH", TargetFrame(), origin_m=(0.0, 0.0, 0.0)
-    )
+    placement = placement_for_target("RH", TargetFrame(), origin_m=(0.0, 0.0, 0.0))
     widget.load_plate_trial(w.write_swing(tmp_path), _declared(), placement, alignment)
     assert not widget.banner_label.isHidden()
     assert widget.banner_label.text() == "Unqualified measurement"
@@ -94,9 +92,7 @@ def test_import_without_a_model_series_is_refused(tmp_path) -> None:
     alignment = PlateTimeAlignment(
         offset_s=0.0, sigma_offset_s=0.001, kind="manual", note="test clock"
     )
-    placement = placement_for_target(
-        "RH", TargetFrame(), origin_m=(0.0, 0.0, 0.0)
-    )
+    placement = placement_for_target("RH", TargetFrame(), origin_m=(0.0, 0.0, 0.0))
     with pytest.raises(ValueError, match="model ground reaction"):
         widget.load_plate_trial(
             w.write_swing(tmp_path), _declared(), placement, alignment
