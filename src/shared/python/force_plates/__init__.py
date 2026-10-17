@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from src.shared.python.force_plates.contracts import (
     FOOT_LABELS,
+    NEGATIVE_LOAD_SIGMAS,
     NET_COP_TOL_M,
     NET_LABEL,
     Handedness,
@@ -28,6 +29,7 @@ from src.shared.python.force_plates.placement import ROTATION_ATOL, PlatePlaceme
 
 __all__ = [
     "FOOT_LABELS",
+    "NEGATIVE_LOAD_SIGMAS",
     "NET_COP_TOL_M",
     "NET_LABEL",
     "ROTATION_ATOL",

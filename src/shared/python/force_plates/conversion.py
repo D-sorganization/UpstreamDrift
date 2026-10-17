@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 
 import numpy as np
+from numpy.typing import NDArray
 
 from src.shared.python.biomechanics.ground_reaction import (
     NET_LABEL,
@@ -52,7 +53,14 @@ class ObservedGroundReaction:
     def __post_init__(self) -> None:
         if not isinstance(self.series, GroundReactionSeries):
             raise TypeError("series must be a GroundReactionSeries")
-        object.__setattr__(self, "observed", MappingProxyType(dict(self.observed)))
+        observed = dict(self.observed)
+        if set(observed) != set(_OBSERVED) or not all(
+            isinstance(v, bool) for v in observed.values()
+        ):
+            raise ValueError(
+                f"observed must map exactly {tuple(_OBSERVED)} to booleans, got {observed}"
+            )
+        object.__setattr__(self, "observed", MappingProxyType(observed))
 
     def is_observed(self, component: str) -> bool:
         """Whether ``component`` (``fx``, ``fy``, ``fz``, ``cop``, ``free_moment``) was observed."""
@@ -61,6 +69,12 @@ class ObservedGroundReaction:
                 f"unknown component {component!r}; expected one of {tuple(self.observed)}"
             )
         return bool(self.observed[component])
+
+
+def _contact(trial: VerticalPlateTrial) -> dict[str, NDArray[np.bool_]]:
+    """Per-foot contact at the CoP threshold; net contact is any foot in contact."""
+    feet = {k: trial.load_n[k] >= trial.cop_min_load_n for k in FOOT_LABELS}
+    return {**feet, NET_LABEL: feet["left"] | feet["right"]}
 
 
 def _vertical(load_n: Array) -> Array:
@@ -77,7 +91,9 @@ def to_ground_reaction_series(
     Keys are the anatomical feet and ``"net"``.  Postconditions: shear, free
     moment, CoM moments and ``com_m`` are NaN (unobserved, see
     :func:`observability`); ``in_contact`` is true where the load reaches the
-    trial's CoP threshold; CoPs lie on the plate top surface.
+    trial's CoP threshold for a foot and where either foot is for ``"net"``;
+    CoPs lie on the plate top surface.  The series arrays are a fresh, mutable
+    snapshot (as from :meth:`GroundReactionSeries.from_breakdowns`).
     """
     if not isinstance(trial, VerticalPlateTrial):
         raise TypeError(
@@ -97,9 +113,7 @@ def to_ground_reaction_series(
         free_moment_nm=MappingProxyType(dict(unobserved)),
         moment_about_com_nm=MappingProxyType(dict(unobserved)),
         force_moment_about_com_nm=MappingProxyType(dict(unobserved)),
-        in_contact=MappingProxyType(
-            {k: v >= trial.cop_min_load_n for k, v in loads.items()}
-        ),
+        in_contact=MappingProxyType(_contact(trial)),
         com_m=np.full((n, 3), np.nan),
         ground_height_m=np.full(n, placement.surface_height_m),
     )

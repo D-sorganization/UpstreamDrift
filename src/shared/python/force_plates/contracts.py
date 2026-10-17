@@ -26,6 +26,7 @@ Pure numpy; no engine or file imports.
 from __future__ import annotations
 
 import math
+import numbers
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
@@ -56,21 +57,35 @@ NET_LABEL = "net"
 #: Tolerance on the net-CoP identity [m]: source rounding (0.01 mm in a CSV
 #: export) plus float error, far below any physical CoP uncertainty.
 NET_COP_TOL_M = 1e-4
+#: How far below zero a load may read [multiples of ``force_floor_n``].  An
+#: unloaded plate reads slightly negative from noise; the value is kept
+#: unclamped (clamping biases it) unless it is beyond this many floor sigmas,
+#: which signals a tare or sign error rather than noise.
+NEGATIVE_LOAD_SIGMAS = 3.0
 
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _LEAD = {"RH": "left", "LH": "right"}
 
 
-def _finite_positive(value: float, name: str) -> float:
-    if not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0.0:
+def _real(value: object, name: str) -> float:
+    """``value`` as a float; ``TypeError`` for a bool or a non-real type."""
+    if isinstance(value, bool) or not isinstance(value, numbers.Real):
+        raise TypeError(f"{name} must be a real number, got {value!r}")
+    return float(value)
+
+
+def _finite_positive(value: object, name: str) -> float:
+    number = _real(value, name)
+    if not math.isfinite(number) or number <= 0.0:
         raise ValueError(f"{name} must be positive and finite, got {value!r}")
-    return float(value)
+    return number
 
 
-def _finite_non_negative(value: float, name: str) -> float:
-    if not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0.0:
+def _finite_non_negative(value: object, name: str) -> float:
+    number = _real(value, name)
+    if not math.isfinite(number) or number < 0.0:
         raise ValueError(f"{name} must be finite and non-negative, got {value!r}")
-    return float(value)
+    return number
 
 
 def _text(value: object, name: str) -> str:
@@ -97,8 +112,7 @@ def loaded_net_cop(
     NaN where no foot has a CoP.  This is the source definition of the net CoP
     of a vertical plate pair.
     """
-    loads = [np.asarray(load_n[k], dtype=np.float64) for k in FOOT_LABELS]
-    cops = [np.asarray(cop_m[k], dtype=np.float64) for k in FOOT_LABELS]
+    loads, cops = _foot_arrays(load_n, cop_m)
     weights = [
         np.where(np.isnan(c[:, 0]), 0.0, w) for w, c in zip(loads, cops, strict=True)
     ]
@@ -110,6 +124,23 @@ def loaded_net_cop(
         net = weighted / total[:, None]
     net[total <= 0.0] = np.nan
     return net
+
+
+def _foot_arrays(
+    load_n: Mapping[str, ArrayLike], cop_m: Mapping[str, ArrayLike]
+) -> tuple[list[Array], list[Array]]:
+    """Per-foot ``(T,)`` loads and ``(T, 2)`` CoPs, checked for keys and shapes."""
+    for name, table in (("load_n", load_n), ("cop_m", cop_m)):
+        missing = set(FOOT_LABELS) - set(table)
+        if missing:
+            raise ValueError(f"{name} is missing feet {sorted(missing)}")
+    loads = [np.asarray(load_n[k], dtype=np.float64) for k in FOOT_LABELS]
+    cops = [np.asarray(cop_m[k], dtype=np.float64) for k in FOOT_LABELS]
+    n = loads[0].shape[0] if loads[0].ndim == 1 else -1
+    for load, cop in zip(loads, cops, strict=True):
+        if load.shape != (n,) or cop.shape != (n, 2):
+            raise ValueError("loads must have shape (T,) and CoPs (T, 2) with one T")
+    return loads, cops
 
 
 @dataclass(frozen=True)
@@ -262,8 +293,12 @@ class VerticalPlateTrial:
                 raise ValueError(
                     f"load_n[{key!r}] must have shape ({n},), times_s length"
                 )
-            if not np.isfinite(load).all() or np.any(load < 0.0):
-                raise ValueError(f"load_n[{key!r}] must be finite and non-negative")
+            floor = -NEGATIVE_LOAD_SIGMAS * self.uncertainty.force_floor_n
+            if not np.isfinite(load).all() or np.any(load < floor):
+                raise ValueError(
+                    f"load_n[{key!r}] must be finite and not below {floor} N "
+                    f"({NEGATIVE_LOAD_SIGMAS:g} force-floor sigmas)"
+                )
         if np.any(loads["left"] + loads["right"] > self.capacity_n):
             raise ValueError(
                 f"total load exceeds the declared capacity {self.capacity_n} N"
@@ -309,6 +344,8 @@ class VerticalPlateTrial:
                 raise ValueError("events_s names must be non-empty strings")
             if value is None:
                 continue
+            if isinstance(value, bool) or not isinstance(value, numbers.Real):
+                raise ValueError(f"events_s[{name!r}] must be a number or None")
             if not math.isfinite(value) or not span[0] <= value <= span[1]:
                 raise ValueError(f"events_s[{name!r}] = {value!r} lies outside {span}")
 

@@ -170,8 +170,16 @@ def test_feet_must_be_exactly_left_and_right() -> None:
         )
 
 
-@pytest.mark.parametrize("bad", [-1.0, np.nan, np.inf])
-def test_load_must_be_finite_and_non_negative(bad) -> None:
+def test_small_negative_noise_is_kept_unclamped_within_three_floor_sigmas() -> None:
+    # An unloaded plate reads slightly negative from noise; clamping would bias it.
+    trial = tf.make_trial(
+        load_n={"left": np.array([400.0, 300.0, -5.9]), "right": np.array(tf.RIGHT_N)}
+    )
+    assert trial.load_n["left"][2] == -5.9
+
+
+@pytest.mark.parametrize("bad", [-6.1, -1000.0, np.nan, np.inf])
+def test_load_must_be_finite_and_not_below_the_noise_floor(bad) -> None:
     with pytest.raises(ValueError, match="load_n"):
         tf.make_trial(
             load_n={"left": np.array([400.0, bad, 5.0]), "right": np.array(tf.RIGHT_N)}
@@ -267,6 +275,72 @@ def test_corner_forces_must_be_eight_finite_channels() -> None:
         tf.make_trial(corner_forces_n=bad)
 
 
+def test_net_cop_of_the_fixture_is_hand_computed() -> None:
+    trial = tf.make_trial()
+    # (300 * -0.18 + 500 * 0.19) / 800 and (300 * 0 + 500 * 0.01) / 800
+    np.testing.assert_allclose(trial.cop_m["net"][1], [0.05125, 0.00625])
+    np.testing.assert_allclose(trial.cop_m["net"][0], [0.0, 0.0], atol=1e-12)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("cop_min_load_n", 0.0),
+        ("capacity_n", -1.0),
+        ("body_weight_n", True),
+        ("body_weight_n", "800"),
+    ],
+)
+def test_scalar_declarations_are_validated(field, value) -> None:
+    with pytest.raises((ValueError, TypeError), match=field):
+        tf.make_trial(**{field: value})
+
+
+def test_numpy_scalars_are_accepted() -> None:
+    assert tf.make_trial(body_weight_n=np.float32(800.0)).body_weight_n == 800.0
+
+
+def test_event_values_must_be_numbers() -> None:
+    with pytest.raises(ValueError, match="events_s"):
+        tf.make_trial(events_s={"impact": "0.005"})
+    with pytest.raises(ValueError, match="events_s"):
+        tf.make_trial(events_s={"impact": True})
+
+
+def test_infinite_cop_and_two_dimensional_times_are_refused() -> None:
+    cop = np.array(tf.RIGHT_COP_M)
+    cop[0, 0] = np.inf
+    with pytest.raises(ValueError, match="infinity"):
+        tf.make_trial(
+            cop_m={"left": np.array(tf.LEFT_COP_M), "right": cop, "net": tf._net_cop()}
+        )
+    with pytest.raises(ValueError, match="times_s"):
+        tf.make_trial(times_s=np.array([tf.TIMES_S]))
+
+
+def test_load_sigma_is_only_defined_per_foot() -> None:
+    with pytest.raises(ValueError, match="foot"):
+        tf.make_trial().load_sigma_n("net")
+
+
+def test_provenance_rejects_an_empty_calibration_id() -> None:
+    with pytest.raises(ValueError, match="calibration_id"):
+        PlateProvenance(
+            device="d",
+            source_format="f",
+            source_revision="r",
+            file_sha256={},
+            calibration_id="",
+        )
+
+
+def test_replace_re_runs_the_invariants() -> None:
+    import dataclasses
+
+    with pytest.raises(ValueError, match="handedness"):
+        dataclasses.replace(tf.make_trial(), handedness="X")
+
+
 def test_types_are_checked() -> None:
     with pytest.raises(TypeError, match="provenance"):
         tf.make_trial(provenance="open-fp")
@@ -275,6 +349,24 @@ def test_types_are_checked() -> None:
 
 
 # ------------------------------------------------------------ net CoP rule --
+@pytest.mark.parametrize(
+    ("loads", "cops", "match"),
+    [
+        ({"left": [1.0]}, {"left": [[0, 0]], "right": [[0, 0]]}, "load_n"),
+        ({"left": [1.0], "right": [1.0]}, {"left": [[0, 0]]}, "cop_m"),
+        (
+            {"left": [1.0, 2.0], "right": [1.0]},
+            {"left": [[0, 0]], "right": [[0, 0]]},
+            "shape",
+        ),
+        ({"left": [1.0], "right": [1.0]}, {"left": [0, 0], "right": [[0, 0]]}, "shape"),
+    ],
+)
+def test_loaded_net_cop_validates_its_inputs(loads, cops, match) -> None:
+    with pytest.raises(ValueError, match=match):
+        loaded_net_cop(loads, cops)
+
+
 def test_loaded_net_cop_ignores_feet_without_a_cop() -> None:
     net = loaded_net_cop(
         {"left": [400.0, 5.0, 5.0], "right": [400.0, 795.0, 5.0]},

@@ -6,7 +6,6 @@ samples, loads in N and centres of pressure in the stance frame in metres.
 
 from __future__ import annotations
 
-import dataclasses
 from typing import Any
 
 import numpy as np
@@ -82,7 +81,3 @@ def trial_kwargs(**overrides: Any) -> dict[str, Any]:
 
 def make_trial(**overrides: Any) -> VerticalPlateTrial:
     return VerticalPlateTrial(**trial_kwargs(**overrides))
-
-
-def replace(trial: VerticalPlateTrial, **changes: Any) -> VerticalPlateTrial:
-    return dataclasses.replace(trial, **changes)

@@ -76,6 +76,23 @@ class PlatePlacement:
         rot = np.array([[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]])
         return cls(rotation=rot, origin_m=np.asarray(origin_m, dtype=np.float64))
 
+    @classmethod
+    def facing(cls, facing_xy: ArrayLike, *, origin_m: ArrayLike) -> PlatePlacement:
+        """Placement that turns stance ``+y`` (where the golfer faces) onto ``facing_xy``.
+
+        ``facing_xy`` is a non-zero horizontal world direction.  Under ADR-0041
+        (golfer faces world ``-X``) pass ``(-1, 0)``: stance ``+x`` then lies
+        along world ``+Y``, so a right-handed golfer's target is ``-Y``.  The
+        placement never mirrors, so a left-handed golfer standing on the same
+        plates keeps its own target direction; mirroring a swing is a separate,
+        explicit model decision.
+        """
+        xy = np.asarray(facing_xy, dtype=np.float64)
+        if xy.shape != (2,) or not np.isfinite(xy).all() or not np.any(xy):
+            raise ValueError(f"facing_xy must be a finite non-zero 2-vector, got {xy}")
+        yaw = math.atan2(float(xy[1]), float(xy[0])) - math.pi / 2
+        return cls.from_yaw(yaw, origin_m=origin_m)
+
     @property
     def surface_height_m(self) -> float:
         """World height of the plate top surface [m]."""
