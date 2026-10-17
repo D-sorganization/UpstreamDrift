@@ -203,7 +203,32 @@ move to Tools (`sidekick.lab.bio`, next to the C3D force-plate code) if a
 second repository needs it. Start in UpstreamDrift, which is the only
 consumer, and move it only when a second consumer appears.
 
-## 9. Engineering Contract Checks
+## 9. Plates as Constraints on Swing-Matching Solutions
+
+Implemented by OF-11 (#13067) and OF-12 (#13070); the calculation-level
+reference is `docs/research/loop_nullspace/loop_nullspace.tex`
+(`sec:lowerbody`).
+
+- **Sensing-plane lever.** Vertical cells balance moments about the plane
+  where the plate's horizontal reactions act, a depth `h` below the foot. A
+  reported CoP therefore mixes vertical load with shear times `h`; the
+  observation rows model this exactly with a declared depth and never assign
+  shear a value. With `h = 0` shear stays entirely free. On the spatial
+  fixture, `h = 2 cm` reduces the shear rank from 1 to 0 (point feet) and
+  from 5 to 3 (two-point feet). Section 3's `(NaN, NaN, Fz)` display view is
+  unchanged: shear is still never _reported_.
+- **Two roles.** Most plate rows are already fixed by the rigid-body balance,
+  so they **falsify** candidates (motion plus model) rather than narrow the
+  family. The rest **restrict** internal contact-load directions. Neither
+  role selects a unique solution.
+- **Family-wise elimination.** Bonferroni coverage over every tested row,
+  the clock offset profiled as one common-mode unknown, and the joint
+  feasible-set verdict deciding. A correct candidate is eliminated with
+  probability at most `alpha` under the stated conditions (true loads in the
+  family, declared Gaussian sigma, bias budgeted at the same `k`, true offset
+  on the grid).
+
+## 10. Engineering Contract Checks
 
 - **DbC:** validate at the file and network boundary; reject unknown
   structure; keep validation active under `python -O` (raise, do not

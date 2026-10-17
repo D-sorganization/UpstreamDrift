@@ -2,9 +2,9 @@
 
 ## Decision and Delivery Status
 
-**Epic:** [#13061](https://github.com/D-sorganization/UpstreamDrift/issues/13061); children proposed in [BACKLOG.md](BACKLOG.md).
-**Status:** evaluation and proposed integration plan. No open-fp reader,
-client or UI has been implemented by this change.
+**Epic:** [#13061](https://github.com/D-sorganization/UpstreamDrift/issues/13061); children in [BACKLOG.md](BACKLOG.md). In review: OF-01, OF-02, OF-05, OF-11 and OF-12 (PRs #13074, #13075, #13078, #13077, #13079).
+**Status:** contract, reader, readings and the null-space screen are in
+review; LAN client, UI, live bridge and hardware qualification remain.
 **Reviewed:** 2026-10-17, against `open-flight/open-fp` commit
 `53d682ce70b34bd2d85918b210ebdc81937e33f8` and UpstreamDrift commit
 `aa0c176b`.
@@ -65,14 +65,15 @@ metrics plus `<id>.npz` arrays), a REST API (`/api/swings`,
 
 ## Integration Value, Ranked
 
-| Rank | Use in UpstreamDrift                                                                | Needs                                 |
-| ---- | ----------------------------------------------------------------------------------- | ------------------------------------- |
-| 1    | Import and plot measured vertical GRF, CoP and lead % in the ground reaction tile   | File reader, frame mapping            |
-| 2    | Overlay measured against model-predicted per-foot Fz and CoP for a matched swing    | Time alignment, event mapping         |
-| 3    | Weight-shift section in swing reports and tour-baseline comparisons                 | Units in %BW, provenance labels       |
-| 4    | Pull swings from the board over the LAN                                             | Read-only HTTP client                 |
-| 5    | Live weight-shift stream into the realtime IPC layer                                | Socket.IO bridge, optional extra      |
-| 6    | Research: measured vertical wrench as a nominal target in contact-wrench allocation | Qualified hardware, sync error budget |
+| Rank | Use in UpstreamDrift                                                                | Needs                                   |
+| ---- | ----------------------------------------------------------------------------------- | --------------------------------------- |
+| 1    | Import and plot measured vertical GRF, CoP and lead % in the ground reaction tile   | File reader, frame mapping              |
+| 2    | Overlay measured against model-predicted per-foot Fz and CoP for a matched swing    | Time alignment, event mapping           |
+| 3    | Weight-shift section in swing reports and tour-baseline comparisons                 | Units in %BW, provenance labels         |
+| 4    | Pull swings from the board over the LAN                                             | Read-only HTTP client                   |
+| 5    | Live weight-shift stream into the realtime IPC layer                                | Socket.IO bridge, optional extra        |
+| 6    | Research: measured vertical wrench as a nominal target in contact-wrench allocation | Qualified hardware, sync error budget   |
+| 7    | Eliminate candidate swing solutions in the closed-loop null space (OF-11, OF-12)    | Implemented; unqualified until DV-13061 |
 
 ## Reading Order
 
