@@ -24,14 +24,14 @@
 
 ## Measured Numbers
 
-| Quantity                                           | Value                |
-| -------------------------------------------------- | -------------------- |
-| Optimizer bar height above the ankle, setup → end  | 0.201 → 0.680 m      |
-| Optimizer peak vertical bar velocity               | 0.56 m/s at 0.12 s   |
-| Model bar height (world), setup → lockout          | 0.456 → 0.935 m      |
-| Window bar rise, mean vertical velocity            | 0.066 m, 0.33 m/s    |
-| Window bar drift forward / lateral                 | 4.3 mm / −1.2 mm     |
-| Bundle size                                        | 213,783 bytes        |
+| Quantity                                          | Value              |
+| ------------------------------------------------- | ------------------ |
+| Optimizer bar height above the ankle, setup → end | 0.201 → 0.680 m    |
+| Optimizer peak vertical bar velocity              | 0.56 m/s at 0.12 s |
+| Model bar height (world), setup → lockout         | 0.456 → 0.935 m    |
+| Window bar rise, mean vertical velocity           | 0.066 m, 0.33 m/s  |
+| Window bar drift forward / lateral                | 4.3 mm / −1.2 mm   |
+| Bundle size                                       | 213,783 bytes      |
 
 IK residuals (maximum over all 151 frames, metres, rounded up to 0.1 mm;
 asserted in `tests/unit/lifting/test_pull_bundles.py`): ankle_l 0.0080,
@@ -60,6 +60,37 @@ as the back squat. The coordinate gate is a strict xfail in
 `tests/unit/lifting/test_pull_bar_path_parity.py`; the bound is not
 loosened.
 
+## Current Records (Whole-Row Lift Body, #13037)
+
+The sections above were measured on earlier bodies and stay for history. The
+bundle is now built on the AN-1 lift body regenerated on the whole de Leva
+Table 4 rows (#13102) with the default 10 deg tibial torsion (#12814), and
+every number below is read from the committed bundle and
+`bar_path_parity.json` (source commit `858f4c03`).
+
+IK residuals (maximum over all 151 frames, mm): ankle_l 3.78, ankle_r 3.11,
+knee_l 3.44, knee_r 10.96, hip_l 8.30, hip_r 5.90, shoulder_l 4.11,
+shoulder_r 4.58, bar 2.65. Grip closure at most 8.9e-5 m, lowest foot sphere
+0.69 mm into the ground, bundle 230,973 bytes. Against the unchanged bounds
+in `tests/unit/lifting/test_pull_bundles.py`, both ankles, knee_l, knee_r,
+both shoulders and the closure (7.7e-5 m) now fail; no bound is widened.
+
+| Engine    | Full Window Bar Max (m) | Full Window Coordinate Max (rad) | 20-Step Segments Coordinate Max (rad) | 20-Step Segments Frame Max (m) |
+| --------- | ----------------------- | -------------------------------- | ------------------------------------- | ------------------------------ |
+| MuJoCo    | 0 (bit exact)           | 0                                | 0                                     | 0                              |
+| Drake     | 2.8e-8                  | 9.5e-5                           | 4.4e-5                                | 1.2e-8                         |
+| Pinocchio | 2.9e-8                  | 9.9e-5                           | 4.5e-5                                | 1.3e-8                         |
+| OpenSim   | 7.2e-9                  | 4.6e-5                           | 6.3e-6                                | 1.7e-9                         |
+
+The worst segment is again 120 to 140 ms and the worst final coordinate
+`subtalar_angle_r` (`subtalar_angle_l` in OpenSim); the other nine segments
+end within 8.2e-13 rad. The coordinate gate stays a strict xfail. The
+bundle's own `rk4_stability` record shows why the foot coordinates drift:
+at the hand-held eight-substep policy its stiffest foot mode
+(3.4e4 1/s) gives |z| = 4.24, outside the RK4 real stability limit 2.785
+(amplification 6.5). The pull bundles do not use the loaded 64-substep
+policy; changing that is a follow-up, not part of this regeneration.
+
 ## Literature Comparison (Evidence, Not Tuning Targets)
 
 Indicative ranges, quoted from the cited sources as recalled for this record
@@ -72,12 +103,12 @@ Indicative ranges, quoted from the cited sources as recalled for this record
   from knee height than a floor pull.
 - **Bar path.** In conventional deadlifts the bar moves close to vertically,
   within a few centimetres forward/back (Escamilla et al., 2000,
-  *Med Sci Sports Exerc* 32(7):1265-1275). The optimizer path moves 0.06 m
+  _Med Sci Sports Exerc_ 32(7):1265-1275). The optimizer path moves 0.06 m
   forward overall; inside the window the model bar moves 4.3 mm forward.
 - **Bar velocity.** Mean concentric bar velocities fall from about 0.6-0.8 m/s
   at light loads to about 0.15-0.25 m/s near one repetition maximum
   (load-velocity studies summarised by Garhammer, 1993,
-  *J Strength Cond Res* 7(2):76-89, for power output; deadlift-specific
+  _J Strength Cond Res_ 7(2):76-89, for power output; deadlift-specific
   load-velocity profiles report similar ranges). A 100 kg bar for an 80 kg
   lifter is submaximal for a trained lifter; the window's 0.33 m/s mean is
   inside this range, but the optimizer's velocity peaks at 0.12 s rather

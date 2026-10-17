@@ -23,14 +23,14 @@ overhead phase are not in this bundle.
 
 ## Measured Numbers
 
-| Quantity                                          | Value               |
-| ------------------------------------------------- | ------------------- |
-| Optimizer bar height above the ankle, setup → end | 0.201 → 0.658 m     |
-| Optimizer peak vertical bar velocity              | 1.29 m/s at 0.06 s  |
-| Model bar height (world), setup → end             | 0.505 → 0.957 m     |
-| Window bar rise, mean vertical velocity           | 0.150 m, 0.75 m/s   |
-| Window bar drift forward / lateral                | 18.4 mm / −6.0 mm   |
-| Bundle size                                       | 214,502 bytes       |
+| Quantity                                          | Value              |
+| ------------------------------------------------- | ------------------ |
+| Optimizer bar height above the ankle, setup → end | 0.201 → 0.658 m    |
+| Optimizer peak vertical bar velocity              | 1.29 m/s at 0.06 s |
+| Model bar height (world), setup → end             | 0.505 → 0.957 m    |
+| Window bar rise, mean vertical velocity           | 0.150 m, 0.75 m/s  |
+| Window bar drift forward / lateral                | 18.4 mm / −6.0 mm  |
+| Bundle size                                       | 214,502 bytes      |
 
 IK residuals (maximum over all 151 frames, metres, rounded up to 0.1 mm;
 asserted in `tests/unit/lifting/test_pull_bundles.py`): ankle_l 0.0078,
@@ -54,6 +54,31 @@ Every engine meets both L2 bounds (1e-3 m frames, 1e-6 rad coordinates) over
 the full open-loop window and the re-anchored segments; no foot-contact
 event occurs in this window.
 
+## Current Records (Whole-Row Lift Body, #13037)
+
+The sections above were measured on earlier bodies and stay for history. The
+bundle is now built on the AN-1 lift body regenerated on the whole de Leva
+Table 4 rows (#13102) with the default 10 deg tibial torsion (#12814), and
+every number below is read from the committed bundle and
+`bar_path_parity.json` (source commit `858f4c03`).
+
+IK residuals (maximum over all 151 frames, mm): ankle_l 3.78, ankle_r 2.83,
+knee_l 3.43, knee_r 10.98, hip_l 8.32, hip_r 5.92, shoulder_l 4.10,
+shoulder_r 3.06, bar 1.15. Grip closure at most 3.3e-5 m, lowest foot sphere
+0.69 mm into the ground, bundle 231,160 bytes. Against the unchanged bounds
+in `tests/unit/lifting/test_pull_bundles.py`, both ankles, knee_l, knee_r,
+both shoulders and the closure (2.8e-5 m) now fail; no bound is widened.
+
+| Engine    | Full Window Bar Max (m) | Full Window Coordinate Max (rad) | 20-Step Segments Coordinate Max (rad) | 20-Step Segments Frame Max (m) |
+| --------- | ----------------------- | -------------------------------- | ------------------------------------- | ------------------------------ |
+| MuJoCo    | 0 (bit exact)           | 0                                | 0                                     | 0                              |
+| Drake     | 1.1e-14                 | 5.1e-13                          | 1.2e-14                               | 1.3e-15                        |
+| Pinocchio | 2.0e-14                 | 4.1e-13                          | 1.2e-14                               | 2.6e-15                        |
+| OpenSim   | 1.7e-15                 | 8.4e-14                          | 5.0e-15                               | 8.1e-16                        |
+
+Every engine meets both L2 bounds. RK4 stability: |z| = 2.24, amplification
+0.44.
+
 ## Literature Comparison (Evidence, Not Tuning Targets)
 
 Indicative ranges, quoted from the cited sources as recalled for this record
@@ -62,8 +87,8 @@ Indicative ranges, quoted from the cited sources as recalled for this record
 - **First-pull timing and velocity.** In competition cleans the first pull
   (lift-off to knee height) takes about 0.4-0.6 s, and the bar reaches about
   0.9-1.2 m/s near the knee before the second pull accelerates it to a peak
-  of about 1.6-2.0 m/s (Garhammer, 1993, *J Strength Cond Res* 7(2):76-89;
-  Kipp, Harris and Sabick, 2011, *J Strength Cond Res* 25(5):1229-1234).
+  of about 1.6-2.0 m/s (Garhammer, 1993, _J Strength Cond Res_ 7(2):76-89;
+  Kipp, Harris and Sabick, 2011, _J Strength Cond Res_ 25(5):1229-1234).
   The optimizer reaches the knee at 0.24 s with its peak velocity of
   1.29 m/s at 0.06 s, then slows: its first pull is about twice as fast as
   the literature range and front-loaded, with no second-pull acceleration.

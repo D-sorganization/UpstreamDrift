@@ -94,6 +94,33 @@ coordinate xfail. (The squat and the deadlift windows miss that bound on
 their foot-sphere coordinates; why the bench window does not was not
 investigated.)
 
+## Current Records (Whole-Row Lift Body, #13037)
+
+The sections above were measured on earlier bodies and stay for history. The
+bundle is now built on the AN-1 lift body regenerated on the whole de Leva
+Table 4 rows (#13102) with the default 10 deg tibial torsion (#12814), and
+every number below is read from the committed bundle and
+`bar_path_parity.json` (source commit `858f4c03`).
+
+Bench top 0.500 m. Held landmarks 0 by construction, bar residual 14.59 mm
+(bound 14.8 mm). Grip closure at most 3.0e-5 m (2.998e-5), which exceeds the
+unchanged 2.9e-5 m bound in `tests/unit/lifting/test_bench_press_bundle.py`;
+the bound is not widened. Lowest foot sphere 0.68 mm, RK4 amplification
+0.85, bundle 229,631 bytes. The supine fit leaves 0.70-1.20 mm on the back
+spheres, 1.37-2.66 mm on the hips and shoulders and 2.11-12.36 mm on the
+knees and ankles. The support forces, penetration and root drift rows above
+were not re-measured.
+
+| Engine    | Full Window Bar Max (m) | Full Window Coordinate Max (rad) | 20-Step Segments Coordinate Max (rad) | 20-Step Segments Frame Max (m) |
+| --------- | ----------------------- | -------------------------------- | ------------------------------------- | ------------------------------ |
+| MuJoCo    | 0 (bit exact)           | 0                                | 0                                     | 0                              |
+| Drake     | 5.4e-12                 | 7.6e-10                          | 8.2e-13                               | 2.4e-13                        |
+| Pinocchio | 6.4e-12                 | 9.2e-10                          | 8.3e-13                               | 2.4e-13                        |
+| OpenSim   | 4.2e-13                 | 5.2e-11                          | 2.7e-14                               | 1.1e-13                        |
+
+Every coordinate is inside the 1e-6 rad L2 bound (worst final coordinate
+`LSInputX`).
+
 ## Literature Comparison (Evidence, Not Tuning Targets)
 
 These sources were checked on 2026-10-17. Each entry says how.
