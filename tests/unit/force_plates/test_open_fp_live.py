@@ -354,3 +354,86 @@ def test_force_floor_must_be_declared_and_positive() -> None:
     for bad in (0.0, -1.0, math.nan):
         with pytest.raises(ValueError):
             LiveBridge("http://h", lambda c, m: None, max_queue=1, force_floor_n=bad)
+
+
+def test_default_publish_uses_the_channel_hinted_transport(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.shared.python.realtime import api
+
+    register_live_channel()
+    calls: list[tuple[str, Any, Any]] = []
+    monkeypatch.setattr(
+        api, "publish", lambda c, p, transport=None: calls.append((c, p, transport))
+    )
+    sock = FakeSocket()
+    bridge = LiveBridge(
+        "http://127.0.0.1:8000",
+        max_queue=4,
+        force_floor_n=FLOOR_N,
+        socket_factory=lambda: sock,
+    )
+    assert bridge.start()
+    _push(sock, _batch())
+    assert bridge.pump() == 1
+    assert [(c, t) for c, _, t in calls] == [(LIVE_CHANNEL, "ws")]
+
+
+class _FakeSocketIoError(Exception):
+    """Stands in for ``socketio.exceptions.ConnectionError`` (not an OSError)."""
+
+
+class _FakeSocketIoClient:
+    def __init__(self, **_kw: Any) -> None:
+        self.handlers: dict[str, Any] = {}
+
+    def connect(self, url: str) -> None:
+        raise _FakeSocketIoError(f"refused {url}")
+
+    def on(self, event: str, handler: Any) -> None:
+        self.handlers[event] = handler
+
+    def disconnect(self) -> None:
+        return None
+
+
+def test_default_factory_maps_socketio_failures_to_connection_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fake = type(sys)("socketio")
+    fake.Client = _FakeSocketIoClient  # type: ignore[attr-defined]
+    exceptions = type(sys)("socketio.exceptions")
+    exceptions.ConnectionError = _FakeSocketIoError  # type: ignore[attr-defined]
+    fake.exceptions = exceptions  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "socketio", fake)
+    monkeypatch.setitem(sys.modules, "socketio.exceptions", exceptions)
+    sock = default_socket_factory()
+    with pytest.raises(ConnectionError, match="refused"):
+        sock.connect("http://127.0.0.1:8000")
+    bridge = LiveBridge(
+        "http://127.0.0.1:8000",
+        lambda *_a: None,
+        max_queue=4,
+        force_floor_n=FLOOR_N,
+        socket_factory=default_socket_factory,
+        sleep=lambda _s: None,
+    )
+    assert bridge.start(max_attempts=2) is False
+
+
+def test_unexpected_connect_errors_are_not_swallowed() -> None:
+    sock = FakeSocket()
+
+    def boom(_url: str) -> None:
+        raise RuntimeError("bug, not a transport failure")
+
+    sock.connect = boom  # type: ignore[method-assign]
+    bridge = LiveBridge(
+        "http://127.0.0.1:8000",
+        lambda *_a: None,
+        max_queue=4,
+        force_floor_n=FLOOR_N,
+        socket_factory=lambda: sock,
+    )
+    with pytest.raises(RuntimeError, match="bug"):
+        bridge.start(max_attempts=1)

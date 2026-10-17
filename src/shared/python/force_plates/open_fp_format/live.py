@@ -19,8 +19,9 @@ only; open-fp is AGPL-3.0 and none of its code is imported or copied.
 The bridge is strictly receive-only: it registers a ``live`` handler and never
 emits anything to the board.  Valid batches are converted to SI units and queued
 in a bounded queue (oldest dropped on overflow); :meth:`LiveBridge.pump` hands
-the queued messages to the injected ``publish`` callable on
-:data:`LIVE_CHANNEL`.  The ``python-socketio`` client is an optional extra
+the queued messages to the ``publish`` callable on :data:`LIVE_CHANNEL`; by
+default :func:`hinted_publish`, which sends on the transport the channel's
+frequency hint selects (WebSocket for this channel).  The ``python-socketio`` client is an optional extra
 (``force-plate-live``) imported lazily, so importing this module needs no
 network library.
 """
@@ -50,6 +51,7 @@ __all__ = [
     "LiveSocket",
     "backoff_delays",
     "default_socket_factory",
+    "hinted_publish",
     "register_live_channel",
 ]
 
@@ -76,16 +78,56 @@ class LiveSocket(Protocol):
     def disconnect(self) -> Any: ...
 
 
+class _SocketIoSocket:
+    """A ``socketio.Client`` whose connection failures are ``ConnectionError``.
+
+    The library's own ``ConnectionError`` is not an ``OSError``; mapping it
+    here lets the bridge retry on transport failures only and let any other
+    exception (a bug) propagate.
+    """
+
+    def __init__(self, client: Any, errors: tuple[type[BaseException], ...]) -> None:
+        self._client = client
+        self._errors = errors
+
+    def connect(self, url: str) -> Any:
+        try:
+            return self._client.connect(url)
+        except self._errors as exc:
+            raise ConnectionError(str(exc)) from exc
+
+    def on(self, event: str, handler: Callable[..., Any]) -> Any:
+        return self._client.on(event, handler)
+
+    def disconnect(self) -> Any:
+        return self._client.disconnect()
+
+
 def default_socket_factory() -> LiveSocket:
     """A ``socketio.Client``; ``ImportError`` names the extra when it is absent."""
     try:
         import socketio
+        from socketio.exceptions import ConnectionError as SocketIoConnectionError
     except ImportError as exc:
         raise ImportError(
             "the live open-fp bridge needs python-socketio; install the "
             "'force-plate-live' extra (pip install 'upstream-drift[force-plate-live]')"
         ) from exc
-    return socketio.Client(reconnection=False)
+    return _SocketIoSocket(
+        socketio.Client(reconnection=False), (SocketIoConnectionError,)
+    )
+
+
+def hinted_publish(channel: str, message: dict[str, Any]) -> None:
+    """Publish on the transport the channel's registered frequency hint selects.
+
+    ``realtime.api.publish`` alone ignores the hint and falls back to the file
+    transport, which adds disk latency to a 30 Hz stream.
+    """
+    from src.shared.python.realtime import api
+    from src.shared.python.realtime.channels import get_channel_transport
+
+    api.publish(channel, message, transport=get_channel_transport(channel))
 
 
 def _positive_int(value: object, name: str) -> int:
@@ -143,7 +185,8 @@ def register_live_channel() -> None:
 class LiveBridge:
     """Receive-only bridge: validate ``live`` batches, queue them, publish them.
 
-    ``publish(channel, message)`` receives plain-dict messages.
+    ``publish(channel, message)`` receives plain-dict messages; it defaults
+    to :func:`hinted_publish`.
     ``force_floor_n`` is the plates' declared 1-sigma force floor [N]; loads
     down to ``-3`` floor sigmas are noise and are kept unclamped, as in the
     trial contract, and lower loads make a batch malformed.  Counters:
@@ -155,7 +198,7 @@ class LiveBridge:
     def __init__(
         self,
         base_url: str,
-        publish: Callable[[str, dict[str, Any]], object],
+        publish: Callable[[str, dict[str, Any]], object] | None = None,
         *,
         max_queue: int,
         force_floor_n: float,
@@ -164,6 +207,7 @@ class LiveBridge:
         sleep: Callable[[float], object] = time.sleep,
     ) -> None:
         self._url = validated_base(base_url)
+        publish = hinted_publish if publish is None else publish
         if not callable(publish):
             raise TypeError("publish must be callable")
         self._publish = publish
@@ -218,7 +262,7 @@ class LiveBridge:
         sock.on(DISCONNECT_EVENT, self._on_disconnect)
         try:
             sock.connect(self._url)
-        except Exception as exc:  # noqa: BLE001 - any transport failure means retry
+        except OSError as exc:  # includes ConnectionError; anything else is a bug
             logger.warning("open-fp live: connect to %s failed: %s", self._url, exc)
             return False
         self._socket = sock
