@@ -63,6 +63,14 @@ class PlateDeclarations:
 
 
 @dataclass(frozen=True)
+class _Source:
+    """Where a trial's bytes came from: format label and per-role digests."""
+
+    source_format: str
+    digests: Mapping[str, str]
+
+
+@dataclass(frozen=True)
 class _Header:
     """Per-trial scalars not held in the arrays."""
 
@@ -78,13 +86,19 @@ def _require_declared(declared: object) -> PlateDeclarations:
 
 
 def _events_on_time_axis(
-    rel: Mapping[str, float | None], t: np.ndarray, path: Path
+    rel: Mapping[str, float | None],
+    t: np.ndarray,
+    path: Path | str,
+    edge_tol_s: float = fmt.EVENT_EDGE_TOL_S,
 ) -> dict[str, float | None]:
-    """Shift events (seconds from ``t[0]``) onto the ``t`` clock, checking range."""
+    """Shift events (seconds from ``t[0]``) onto the ``t`` clock, checking range.
+
+    ``edge_tol_s`` is the slack past the trial end (larger for rounded sources).
+    """
     start, span = float(t[0]), float(t[-1] - t[0])
     out: dict[str, float | None] = {}
     for name, value in rel.items():
-        if value is not None and not 0.0 <= value <= span + fmt.EVENT_EDGE_TOL_S:
+        if value is not None and not 0.0 <= value <= span + edge_tol_s:
             raise ValueError(
                 f"{path}: events[{name!r}] = {value} lies outside the trial [0, {span}] s"
             )
@@ -96,14 +110,14 @@ def _build_trial(
     arrays: _arrays.SwingArrays,
     header: _Header,
     declared: PlateDeclarations,
-    digests: Mapping[str, str],
+    source: _Source,
 ) -> VerticalPlateTrial:
     per_m = fmt.MM_PER_M
     provenance = PlateProvenance(
         device=declared.device,
-        source_format=fmt.SOURCE_FORMAT,
+        source_format=source.source_format,
         source_revision=fmt.SOURCE_REVISION,
-        file_sha256=digests,
+        file_sha256=source.digests,
         calibration_id=None,
         qualification=None,
     )
@@ -162,11 +176,11 @@ def read_swing(
         meta.body_weight_n,
         _events_on_time_axis(meta.events_rel_s, arrays.t, json_file),
     )
-    digests = {
-        "json": _files.sha256_hex(json_bytes),
-        "npz": _files.sha256_hex(npz_bytes),
-    }
-    return _build_trial(arrays, header, decl, digests)
+    source = _Source(
+        fmt.SOURCE_FORMAT,
+        {"json": _files.sha256_hex(json_bytes), "npz": _files.sha256_hex(npz_bytes)},
+    )
+    return _build_trial(arrays, header, decl, source)
 
 
 # ------------------------------------------------------------------- CSV --
@@ -257,7 +271,8 @@ def read_swing_csv(
     _arrays.validate_arrays(arrays, path)
     _arrays.check_lead_pct(arrays, handedness, _arrays.CSV_LEAD_CHECK, path)
     header = _Header(handedness, float(body_weight_n), {})
-    return _build_trial(arrays, header, decl, {"csv": _files.sha256_hex(data)})
+    source = _Source(fmt.SOURCE_FORMAT, {"csv": _files.sha256_hex(data)})
+    return _build_trial(arrays, header, decl, source)
 
 
 def list_swings(directory: str | Path) -> tuple[str, ...]:

@@ -17,9 +17,11 @@ from src.shared.python.force_plates.open_fp_format import format as fmt
 
 __all__ = [
     "CSV_LEAD_CHECK",
+    "HTTP_LEAD_CHECK",
     "NPZ_LEAD_CHECK",
     "LeadCheck",
     "SwingArrays",
+    "build_swing_arrays",
     "check_lead_pct",
     "load_npz",
     "validate_arrays",
@@ -52,6 +54,7 @@ class LeadCheck:
 
 NPZ_LEAD_CHECK = LeadCheck(fmt.LEAD_PCT_TOL, fmt.LOAD_SLACK_N)
 CSV_LEAD_CHECK = LeadCheck(fmt.LEAD_PCT_TOL_CSV, fmt.LOAD_SLACK_N_CSV)
+HTTP_LEAD_CHECK = LeadCheck(fmt.LEAD_PCT_TOL_HTTP, fmt.LOAD_SLACK_N_HTTP)
 
 _FULL_SCALE_PCT = 100.0
 _MAX_NDIM = 2
@@ -142,7 +145,7 @@ def _member(archive: np.lib.npyio.NpzFile, key: str, path: Path) -> Array:
     return raw.astype(np.float64)
 
 
-def _check_shapes(arrays: dict[str, Array], path: Path) -> None:
+def _check_shapes(arrays: dict[str, Array], path: Path | str) -> None:
     t = arrays["t"]
     if t.ndim != 1 or t.shape[0] < 2:
         raise ValueError(f"{path}: array 't' must be 1-D with at least 2 samples")
@@ -152,6 +155,29 @@ def _check_shapes(arrays: dict[str, Array], path: Path) -> None:
             raise ValueError(
                 f"{path}: array {key!r} has shape {arrays[key].shape}, expected {expected}"
             )
+
+
+def build_swing_arrays(arrays: dict[str, Array], path: Path | str) -> SwingArrays:
+    """Check shapes/values of ``arrays`` (keyed as the documented npz) and wrap them.
+
+    ``arrays`` must hold exactly the :data:`format.ARRAY_KEYS` as float64 arrays;
+    the source (npz or HTTP JSON) is named by ``path`` in errors.  Raises
+    ``ValueError`` for inconsistent shapes or values failing
+    :func:`validate_arrays`.
+    """
+    _check_shapes(arrays, path)
+    swing = SwingArrays(
+        t=arrays["t"],
+        forces=arrays["forces"],
+        fz_left=arrays["fz_L"],
+        fz_right=arrays["fz_R"],
+        cop_left=arrays["cop_L"],
+        cop_right=arrays["cop_R"],
+        cop_combined=arrays["cop_C"],
+        lead_pct=arrays["lead_pct"],
+    )
+    validate_arrays(swing, path)
+    return swing
 
 
 def load_npz(data: bytes, path: Path) -> SwingArrays:
@@ -169,22 +195,10 @@ def load_npz(data: bytes, path: Path) -> SwingArrays:
                 f"{path}: npz missing arrays {missing}, unexpected {extra}"
             )
         arrays = {key: _member(archive, key, path) for key in fmt.ARRAY_KEYS}
-    _check_shapes(arrays, path)
-    swing = SwingArrays(
-        t=arrays["t"],
-        forces=arrays["forces"],
-        fz_left=arrays["fz_L"],
-        fz_right=arrays["fz_R"],
-        cop_left=arrays["cop_L"],
-        cop_right=arrays["cop_R"],
-        cop_combined=arrays["cop_C"],
-        lead_pct=arrays["lead_pct"],
-    )
-    validate_arrays(swing, path)
-    return swing
+    return build_swing_arrays(arrays, path)
 
 
-def validate_arrays(arrays: SwingArrays, path: Path) -> None:
+def validate_arrays(arrays: SwingArrays, path: Path | str) -> None:
     """Check time, load and corner-force values (shared by NPZ and CSV).
 
     Time, loads and corner forces must be finite (the check_lead_pct and
@@ -201,7 +215,7 @@ def validate_arrays(arrays: SwingArrays, path: Path) -> None:
 
 
 def check_lead_pct(
-    arrays: SwingArrays, handedness: Handedness, check: LeadCheck, path: Path
+    arrays: SwingArrays, handedness: Handedness, check: LeadCheck, path: Path | str
 ) -> None:
     """Cross-check ``lead_pct`` against the loads and ``handedness``.
 
