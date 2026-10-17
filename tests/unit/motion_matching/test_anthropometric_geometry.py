@@ -105,9 +105,45 @@ def test_zero_pose_lengths_follow_the_subject(upper: dict) -> None:
     assert length("Spherical Solid", "LLowerForearm") + length(
         "LLowerForearm", "Clubface Vector"
     ) == pytest.approx(segment_parameters(STATURE, MASS, "forearm").length_m)
-    # Standing zero pose: hips to shoulder centre is about the trunk length.
+    # Standing zero pose: the shoulder centre sits on the trunk axis, a fixed
+    # offset below the cervicale (hips to cervicale is the trunk length).
     hub = anchors[names["HubtoLS"]]
-    assert 0.44 < hub[2] < 0.50 and abs(hub[0]) < 1e-9 and abs(hub[1]) < 1e-9
+    assert hub[2] == pytest.approx(trunk - module.SHOULDER_BELOW_CERVICALE_M)
+    assert abs(hub[0]) < 1e-9 and abs(hub[1]) < 1e-9
+
+
+@pytest.mark.parametrize("trunk_scale", [1.0, 1.15])
+def test_head_and_trunk_span_vertex_to_mid_hip(trunk_scale: float) -> None:
+    """The chain counts the de Leva trunk and head once each (#13037).
+
+    The trunk row is cervicale to mid-hip and the head row vertex to
+    cervicale, so the neck joint sits one trunk length above the hip-centre
+    midpoint and the head solid ends one head length above it: hips to vertex
+    is head plus trunk, with no neck or upper-trunk length added on top.
+    """
+    upper = module.build_upper_body(
+        json.loads(NATIVE.read_text()),
+        stature_m=STATURE,
+        mass_kg=MASS,
+        trunk_scale=trunk_scale,
+    )
+    anchors = zero_pose_joint_positions(upper)
+    names = {j["child"].rsplit("/", 1)[-1]: j["name"] for j in upper["joints"]}
+    hip, neck = anchors[names["LowerTorso"]], anchors[module.NECK_JOINT]
+    trunk = segment_parameters(STATURE, MASS, "trunk").length_m * trunk_scale
+    head = segment_parameters(STATURE, MASS, "head").length_m
+    assert float(np.linalg.norm(neck - hip)) == pytest.approx(trunk, abs=1e-12)
+    head_body = next(b for b in upper["bodies"] if b["name"] == module.HEAD_BODY)
+    (solid,) = head_body["solids"]
+    com_fraction = module.DE_LEVA_MALE["head"].com_fraction
+    assert solid["com_m"][2] == pytest.approx(com_fraction * head, abs=1e-12)
+    rows, k = module.DE_LEVA_MALE, STATURE / 1.741
+    vertex_to_mid_hip = (
+        rows["head"].length_m + trunk_scale * rows["trunk"].length_m
+    ) * k
+    assert head + float(np.linalg.norm(neck - hip)) == pytest.approx(
+        vertex_to_mid_hip, abs=1e-12
+    )
 
 
 def test_masses_and_inertias(upper: dict) -> None:

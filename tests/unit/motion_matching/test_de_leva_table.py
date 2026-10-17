@@ -1,9 +1,8 @@
-"""Unit test pinning the fit-path de Leva 1996 male table as committed.
+"""Unit test pinning the fit-path de Leva 1996 male table to the paper.
 
-The trunk, upper_trunk and shank rows mix values from two Table 4 endpoint rows
-(#13037); the paper itself is checked in
-``tests/unit/body_segment_parameters/``, and the mixed rows are ratcheted in
-``test_consumer_tables_are_whole_rows.py``.
+Every row is one whole Table 4 row (#13037; the trunk, upper_trunk and shank
+rows mixed two endpoint rows before). The paper itself is checked in
+``tests/unit/body_segment_parameters/``.
 
 Reference:
 de Leva, P. (1996). Adjustments to Zatsiorsky-Seluyanov's segment inertia parameters.
@@ -13,7 +12,7 @@ and radii of gyration about center of mass (sagittal, transverse, longitudinal).
 
 Segment name mapping between paper and anthropometry module:
 - head: "Head and neck" (vertex to cervicale)
-- trunk: "Trunk" composite (cervicale to hip joint centre)
+- trunk: "Trunk" composite (cervicale to mid-hip, CERV-MIDH)
 - upper_trunk: "Thorax" (cervicale to xiphion)
 - middle_trunk: "Abdomen" (xiphion to omphalion)
 - lower_trunk: "Pelvis" (omphalion to hip joint centre)
@@ -21,7 +20,7 @@ Segment name mapping between paper and anthropometry module:
 - forearm: "Forearm" (elbow to wrist joint centres)
 - hand: "Hand" (wrist joint centre to metacarpale III)
 - thigh: "Thigh" (hip to knee joint centres)
-- shank: "Shank" / "Calf" (knee to ankle joint centres)
+- shank: "Shank" / "Calf" (knee to ankle joint centres, KJC-AJC)
 - foot: "Foot" (heel to toe tip)
 """
 
@@ -33,20 +32,20 @@ from src.shared.python.motion_matching.anthropometry import DE_LEVA_MALE
 
 pytestmark = pytest.mark.unit
 
-# Committed fit-path values (de Leva 1996 Table 4, males; trunk, upper_trunk and
-# shank mix endpoint rows, #13037):
+# de Leva 1996 Table 4 (males, p. 1228), typed from the paper independently of
+# the transcription the module derives from:
 # (length_m for 1.741m reference subject, mass_fraction, com_fraction_from_proximal, (r_sag, r_tra, r_lon))
 PAPER_DE_LEVA_MALE = {
     "head": (0.2429, 0.0694, 0.5002, (0.303, 0.315, 0.261)),
-    "trunk": (0.5319, 0.4346, 0.5138, (0.328, 0.306, 0.169)),
-    "upper_trunk": (0.1707, 0.1596, 0.2999, (0.505, 0.465, 0.418)),
+    "trunk": (0.6033, 0.4346, 0.5138, (0.328, 0.306, 0.169)),
+    "upper_trunk": (0.2421, 0.1596, 0.5066, (0.505, 0.320, 0.465)),
     "middle_trunk": (0.2155, 0.1633, 0.4502, (0.482, 0.383, 0.468)),
     "lower_trunk": (0.1457, 0.1117, 0.6115, (0.615, 0.551, 0.587)),
     "upper_arm": (0.2817, 0.0271, 0.5772, (0.285, 0.269, 0.158)),
     "forearm": (0.2689, 0.0162, 0.4574, (0.276, 0.265, 0.121)),
     "hand": (0.0862, 0.0061, 0.7900, (0.628, 0.513, 0.401)),
     "thigh": (0.4222, 0.1416, 0.4095, (0.329, 0.329, 0.149)),
-    "shank": (0.4340, 0.0433, 0.4395, (0.251, 0.246, 0.102)),
+    "shank": (0.4403, 0.0433, 0.4395, (0.251, 0.246, 0.102)),
     "foot": (0.2581, 0.0137, 0.4415, (0.257, 0.245, 0.124)),
 }
 
@@ -76,3 +75,29 @@ def test_de_leva_male_table_entry(segment: str) -> None:
         assert actual == pytest.approx(expected, abs=1e-4), (
             f"{segment} {axis} radius mismatch: {actual} != {expected}"
         )
+
+
+def test_every_row_is_derived_from_its_named_table4_row() -> None:
+    """Each segment carries exactly the values of the Table 4 row it names."""
+    from src.shared.python.body_segment_parameters.de_leva_1996 import table4_row
+    from src.shared.python.motion_matching.anthropometry import DE_LEVA_ROWS
+
+    assert set(DE_LEVA_ROWS) == set(DE_LEVA_MALE)
+    for name, row_id in DE_LEVA_ROWS.items():
+        row = table4_row(row_id, "male")
+        values = DE_LEVA_MALE[name]
+        assert (values.length_m, values.mass_fraction, values.com_fraction) == (
+            row.length_m,
+            row.mass_fraction,
+            row.com_fraction,
+        )
+        assert values.radii == row.radii
+
+
+def test_trunk_parts_add_up_to_the_trunk() -> None:
+    """Upper, middle and lower trunk span cervicale to mid-hip like the trunk."""
+    parts = ("upper_trunk", "middle_trunk", "lower_trunk")
+    length = sum(DE_LEVA_MALE[p].length_m for p in parts)
+    mass = sum(DE_LEVA_MALE[p].mass_fraction for p in parts)
+    assert length == pytest.approx(DE_LEVA_MALE["trunk"].length_m, abs=1e-9)
+    assert mass == pytest.approx(DE_LEVA_MALE["trunk"].mass_fraction, abs=1e-9)
