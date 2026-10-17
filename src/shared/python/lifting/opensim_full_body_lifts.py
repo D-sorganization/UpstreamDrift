@@ -380,8 +380,8 @@ def _bundle_reason(spec: OpenSimFullBodyLiftSpec) -> str | None:
     if SAME_INPUT_LIFT_BUNDLES.get(spec.lift) is not None:
         return None
     return (
-        f"no LIFT-5 same-input bundle exists for {spec.lift!r}: #11745 "
-        "committed only the back-squat bundle, so there is no input to fit"
+        f"no LIFT-5 same-input bundle is registered for {spec.lift!r} in "
+        "SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit"
     )
 
 
@@ -401,13 +401,14 @@ def opensim_lift_ik_id(
     "id"}``.  ``status`` is ``complete`` when IK and ID ran; otherwise it is
     ``unavailable`` with a reason and the result sections are ``None``.
     """
+    # Input-level reasons first: they hold whether or not OpenSim is installed.
+    reason = _unsupported_reason(spec) or _bundle_reason(spec)
+    if reason is not None:
+        return _ik_id_unavailable(spec, reason)
     if not is_engine_available("opensim"):
         return _ik_id_unavailable(
             spec, "Native OpenSim runtime is not available in the current environment"
         )
-    reason = _unsupported_reason(spec) or _bundle_reason(spec)
-    if reason is not None:
-        return _ik_id_unavailable(spec, reason)
 
     from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
     from src.engines.physics_engines.opensim.python.msk_lift_arm_reach import (

@@ -347,7 +347,8 @@ def bench_frame(hold: BenchHold) -> SagittalFrame:
     points = hold.points
     hips = 0.5 * (points["hip_l"] + points["hip_r"])
     shoulders = 0.5 * (points["shoulder_l"] + points["shoulder_r"])
-    up = np.asarray(hold.standing.frame.up)
+    frame = hold.standing.frame
+    up = np.asarray(frame.up)
     toward_feet = hips - shoulders
     toward_feet -= (toward_feet @ up) * up
     toward_feet /= np.linalg.norm(toward_feet)
