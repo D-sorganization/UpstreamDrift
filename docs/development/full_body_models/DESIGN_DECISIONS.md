@@ -8,7 +8,7 @@ Authoritative record of architectural and biomechanical decisions for the full-b
 
 ### What
 
-Replace Simscape default geometric constants and masses with subject-specific segment dimensions, masses, centres of mass, and inertia tensors derived from de Leva (1996) body-segment parameter proportions via `src/shared/python/motion_matching/anthropometry.py` and `build_anthropometric_spec.py`. For the tour capture subject (stature 1.71 m, mass 78 kg), segment dimensions use trunk scale 1.15, arm scale 1.10, and shoulder scale 1.00, reducing total body mass from 108.3 kg to 78.0 kg (79.4 kg including club and hands).
+Replace Simscape default geometric constants and masses with subject-specific segment dimensions, masses, centres of mass, and inertia tensors derived from de Leva (1996) body-segment parameter proportions via `src/shared/python/motion_matching/anthropometry.py` and `build_anthropometric_spec.py`. For the tour capture subject (stature 1.71 m, mass 78 kg), segment dimensions use trunk scale 1.15, arm scale 1.10, and shoulder scale 1.00 (the trunk scale was chosen on the suprasternale-to-mid-hip length 0.5319 that the hand-copied table mixed into its cervicale-to-mid-hip row; since #13037 the table uses the whole 0.6033 row and the same capture-identified trunk length is trunk scale 1.15 × 0.5319 / 0.6033 = 1.0139, and the head and trunk-part centres of mass are measured from the cranial de Leva row origin as the table defines them), reducing total body mass from 108.3 kg to 78.0 kg (79.4 kg including club and hands).
 
 ### Why
 
@@ -463,10 +463,28 @@ Measured calibrated address, trail toe-out, before (`off`) / after (`style`):
 
 The 7-iron therefore misses the target by 6.5 degrees. The hip range was not widened. Reaching 20 degrees there needs an owner decision: widen the range, accept the shortfall, or take the yaw from elsewhere in the leg chain, re-measured after R4's knee flex. The lead foot matches the `capture`-mode lead within 0.25 degrees on both captures. The evidence is in [`evidence/foot_progression/trail_toe_out_12678/README.md`](evidence/foot_progression/trail_toe_out_12678/README.md). The upstreamdrift design manual has no address-stage chapter or registered calculation, so this section remains the calculation-level reference.
 
+**Static Tibial Torsion (R3b, #12789).** Following the ruling on #12683 (do not widen the hip limit), the missing 7-iron yaw is taken from the shank. The leg chain has no shank or foot yaw coordinate, and the generic Rajagopal leg encodes only 6.06 degrees of external torsion: the angle about the shank (knee centre to ankle centre) between the knee and ankle hinge axes, `tibial_torsion.GENERIC_LEG_TORSION_DEG`, pinned against the spec by a test. CT measurements of 50 adult men give 16–50 degrees of tibiofibular torsion (Seber et al. 2000, Arch Orthop Trauma Surg 120:255–258, doi:10.1007/s004020050459).
+
+- `tibial_torsion.apply_tibial_torsion` turns each ankle's base frame (`joints[ankle_<side>].parent_to_base`) about the shank axis through the ankle centre. Talus, calcaneus, toes, their markers and contact spheres turn with it. It adds no coordinate, and the ankle centre does not move.
+- The default offset `DEFAULT_TIBIAL_TORSION_OFFSET_DEG = 10` degrees is applied to both legs. It is the smallest round value that puts the model's total torsion (16.06 degrees) inside the documented adult range. DbC: the offset must be finite and within `OFFSET_RANGE_DEG = [0, 43.94]` degrees, so the total stays at or below 50. A document records it as `tibial_torsion_deg` with its source, and `validate_full_body_spec` rejects an out-of-range or unsourced record. An offset of 0 returns the document unchanged, without the key.
+- The spec is the single source. `spec_builder.compose_anthropometric_document` applies the default (`--tibial-torsion`), and `scripts/apply_tibial_torsion.py` applied it to the committed driver and 7-iron documents without rebuilding them. Every engine emitter already builds the ankle from the spec placement, so no engine code changed.
+
+Measured calibrated address (MuJoCo, canonical commands, Windows workstation), trail / lead toe-out, `hip_rotation_r`, address marker RMS:
+
+| Run | Before | After |
+| --- | --- | --- |
+| 7-iron `style` | 13.53 / 15.05 deg, -40.00 deg (limit), 12.19 mm | **19.97** / 15.07 deg, -36.57 deg, 12.18 mm |
+| 7-iron `capture` | -0.81 / 15.28 deg, -23.32 deg, 9.71 mm | -0.43 / 15.06 deg, -14.92 deg, 10.71 mm |
+| driver `style` | 19.80 / 16.64 deg, -34.38 deg, 10.54 mm | 19.74 / 16.51 deg, -26.58 deg, 9.28 mm |
+| driver `capture` | 3.74 / 16.52 deg, -18.20 deg, 9.62 mm | 3.79 / 16.43 deg, -8.86 deg, 9.83 mm |
+
+The 7-iron now reaches the style target with 3.4 degrees of hip range to spare. The lead foot keeps its capture target on both captures (lead `hip_rotation_l` rises by 7–12 degrees, to 17.3–26.4 degrees, inside the ±40 degree range). The 7-iron `capture`-mode address RMS rises by 1.0 mm. The canonical ground-support receipts chain to the base document hash, so all four were regenerated with this change on the default style feet, hashed before seeding since #12820 (`evidence/ground_support/CANONICAL_RUN.md` §2A): calibrated 7-iron dynamics 67.89 to 64.35 mm against a style-feet control; with the feet off the torsion regressed it to 142.40 mm. Evidence: [`evidence/foot_progression/tibial_torsion_12789/README.md`](evidence/foot_progression/tibial_torsion_12789/README.md).
+
 ### Evidence Receipt
 
 - [`evidence/foot_progression/capture_report.json`](evidence/foot_progression/capture_report.json)
 - [`evidence/foot_progression/trail_toe_out_12678/address_toe_out_summary.json`](evidence/foot_progression/trail_toe_out_12678/address_toe_out_summary.json)
-- Tests: `tests/unit/motion_matching/test_foot_progression.py`, `tests/unit/motion_matching/pipeline/test_address_feet.py`, `tests/opensim/test_golf_address.py`, `tests/unit/motion_matching/test_club_face_fixture_feet.py`, `tests/unit/motion_matching/test_full_body_markers.py::test_stance_anchored_at_the_start_pose_holds_the_first_frame`.
+- [`evidence/foot_progression/tibial_torsion_12789/address_tibial_torsion_summary.json`](evidence/foot_progression/tibial_torsion_12789/address_tibial_torsion_summary.json)
+- Tests: `tests/unit/motion_matching/test_foot_progression.py`, `tests/unit/motion_matching/test_tibial_torsion.py`, `tests/unit/motion_matching/pipeline/test_address_feet.py`, `tests/opensim/test_golf_address.py`, `tests/unit/motion_matching/test_club_face_fixture_feet.py`, `tests/unit/motion_matching/test_full_body_markers.py::test_stance_anchored_at_the_start_pose_holds_the_first_frame`.
 
 Section 16 on: [volume 2](DESIGN_DECISIONS_2.md).

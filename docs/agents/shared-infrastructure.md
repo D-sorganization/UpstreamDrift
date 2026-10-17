@@ -34,7 +34,7 @@ This document is split into 2 parts under [`shared-infrastructure/`](shared-infr
    - Launcher Base
    - Launcher Embedding + Cross-Tool IPC
    - Tools Sidebar (Optional)
-2. [Part 2: Sidekick (AI Chat / Agentic Assistant)](shared-infrastructure/part-02-sidekick-ai-chat-agentic-assistant.md) through Segmental Spine
+2. [Part 2: Sidekick (AI Chat / Agentic Assistant)](shared-infrastructure/part-02-sidekick-ai-chat-agentic-assistant.md) through Vertical Force Plates
    - Sidekick (AI Chat / Agentic Assistant)
    - Rust Kernels
    - Shared Model and Video Analysis
@@ -54,3 +54,4 @@ This document is split into 2 parts under [`shared-infrastructure/`](shared-infr
    - Lift Pack Parity Audit
    - Native OpenSim Marker Geometry
    - Segmental Spine
+   - Vertical Force Plates

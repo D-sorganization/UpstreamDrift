@@ -75,7 +75,7 @@ def test_load_returns_parameters_and_metadata() -> None:
     assert preset.parameters == SpecCharacterParameters(
         stature_m=1.71,
         mass_kg=78.0,
-        trunk_scale=1.15,
+        trunk_scale=1.0138985579313775,  # 1.15 on the pre-#13037 trunk row
         arm_scale=1.1,
         shoulder_scale=1.0,
         club="driver",

@@ -10,6 +10,7 @@ say "unavailable" with the reason.
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -24,14 +25,41 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.theme.sidekick_tokens import get_current_sidekick_tokens
 from src.shared.python.biomechanics.ground_reaction_plot_model import (
     GroundReactionPlotSeries,
     series_from_payload,
 )
-from src.shared.python.plotting.renderers.ground_reaction import plot_ground_reaction
+from src.shared.python.force_plates import (
+    PlateTimeAlignment,
+    ReadingOptions,
+    TargetedPlacement,
+)
+from src.shared.python.force_plates.open_fp_format import PlateDeclarations
+from src.shared.python.force_plates.open_fp_format.overlay_file import (
+    overlay_swing_file,
+)
+from src.shared.python.plotting.renderers.ground_reaction import (
+    UNQUALIFIED_BANNER,
+    plot_ground_reaction,
+)
 
 UNAVAILABLE_TEXT = "unavailable"
 _NOTHING_LOADED = f"{UNAVAILABLE_TEXT}: no ground reaction loaded"
+
+
+@dataclass(frozen=True)
+class PlateImportContext:
+    """Facts a plate trial file cannot carry: set by the host before importing.
+
+    ``declared`` is the plate uncertainty and geometry, ``placement`` the
+    stance frame in the model's world, ``alignment`` the clock mapping.
+    """
+
+    declared: PlateDeclarations
+    placement: TargetedPlacement
+    alignment: PlateTimeAlignment
+    options: ReadingOptions | None = None
 
 
 class GroundReactionPlotWidget(QWidget):
@@ -40,12 +68,21 @@ class GroundReactionPlotWidget(QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._series: GroundReactionPlotSeries | None = None
+        self._model_series: GroundReactionPlotSeries | None = None
+        self._plate_context: PlateImportContext | None = None
         root = QVBoxLayout(self)
         controls = QHBoxLayout()
         self.open_button = QPushButton("Open Ground Reaction JSON...")
+        self.plate_button = QPushButton("Import Plate Trial...")
         controls.addStretch(1)
+        controls.addWidget(self.plate_button)
         controls.addWidget(self.open_button)
         root.addLayout(controls)
+        self.banner_label = QLabel(UNQUALIFIED_BANNER)
+        warning = get_current_sidekick_tokens()["sidekick.color.warning"]
+        self.banner_label.setStyleSheet(f"color: {warning}; font-weight: bold;")
+        self.banner_label.setVisible(False)
+        root.addWidget(self.banner_label)
         self.status_label = QLabel(_NOTHING_LOADED)
         root.addWidget(self.status_label)
         self.figure = Figure(figsize=(9.0, 7.5))
@@ -53,11 +90,64 @@ class GroundReactionPlotWidget(QWidget):
         root.addWidget(self.canvas, 1)
         # noqa: gui-thread/ok - opens a modal file dialog; the JSON is small.
         self.open_button.clicked.connect(self._choose_file)
+        # noqa: gui-thread/ok - modal file dialog; the swing pair is size-capped.
+        self.plate_button.clicked.connect(self._choose_plate_trial)
 
     def set_series(self, series: GroundReactionPlotSeries | None) -> None:
-        """Show ``series`` (``None`` clears to unavailable)."""
+        """Show ``series`` (``None`` clears to unavailable).
+
+        The series is also the base that plate trials are overlaid on.
+        """
+        self._model_series = series
         self._series = series
         self._redraw()
+
+    def set_plate_context(self, context: PlateImportContext | None) -> None:
+        """Declare how plate trials are placed, aligned and qualified."""
+        if context is not None and not isinstance(context, PlateImportContext):
+            raise TypeError("context must be a PlateImportContext or None")
+        self._plate_context = context
+
+    def load_plate_trial(self, path: str | Path, context: PlateImportContext) -> None:
+        """Overlay the measured swing at ``path`` on the model ground reaction.
+
+        ``context`` supplies the declarations, placement, clock alignment and
+        reading options (``None`` options use the reader defaults).  Shows the "Unqualified measurement" banner when the trial carries no
+        device qualification.  Replaces any earlier overlay.
+
+        Raises:
+            ValueError: if no model series is loaded or the trial is refused.
+        """
+        if not isinstance(context, PlateImportContext):
+            raise TypeError("context must be a PlateImportContext")
+        if self._model_series is None:
+            raise ValueError("load a model ground reaction before importing a trial")
+        self._series = overlay_swing_file(
+            self._model_series,
+            path,
+            declared=context.declared,
+            placement=context.placement,
+            alignment=context.alignment,
+            options=context.options,
+        )
+        self._redraw()
+
+    def _choose_plate_trial(self) -> None:
+        context = self._plate_context
+        if context is None:
+            self.status_label.setText(f"{UNAVAILABLE_TEXT}: no plate context declared")
+            return
+        name, _ = QFileDialog.getOpenFileName(
+            self, "Import Plate Trial", "", "open-fp swing (*.json)"
+        )
+        if name:
+            self._import_with_context(name, context)
+
+    def _import_with_context(self, name: str, context: PlateImportContext) -> None:
+        try:
+            self.load_plate_trial(name, context)
+        except (ValueError, TypeError, OSError) as exc:
+            self.status_label.setText(f"{UNAVAILABLE_TEXT}: {exc}")
 
     def load_json(self, path: str | Path) -> None:
         """Load an API payload JSON file.
@@ -82,6 +172,9 @@ class GroundReactionPlotWidget(QWidget):
 
     def _redraw(self) -> None:
         series = self._series
+        self.banner_label.setVisible(
+            series is not None and series.measured_qualified is False
+        )
         if series is None:
             self.figure.clear()
             self.status_label.setText(_NOTHING_LOADED)
@@ -99,3 +192,5 @@ class GroundReactionPlotWidget(QWidget):
     def cleanup(self) -> None:
         """Release data references; safe to call repeatedly."""
         self._series = None
+        self._model_series = None
+        self._plate_context = None

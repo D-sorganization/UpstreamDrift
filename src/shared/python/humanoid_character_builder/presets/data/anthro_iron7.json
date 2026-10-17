@@ -7,12 +7,12 @@
   "parameters": {
     "stature_m": 1.71,
     "mass_kg": 78.0,
-    "trunk_scale": 1.15,
+    "trunk_scale": 1.0138985579313775,
     "arm_scale": 1.1,
     "shoulder_scale": 1.0,
     "grip_roll_deg": 0.0,
     "club": "iron7"
   },
-  "provenance": "docs/development/full_body_models/build_receipt_anthro_iron7.json subject block.",
+  "provenance": "docs/development/full_body_models/full_body_spec_anthro_iron7.json subject block (trunk_scale rescaled to the whole-row trunk length, #13037; build_receipt_anthro_iron7.json records the original build).",
   "limitations": "Subject anonymised; proportion scales were set by the capture match and are unqualified. Compiles on the De Leva 1996 male table and the Rajagopal lower limbs; only stature, mass and the proportion scales change."
 }
