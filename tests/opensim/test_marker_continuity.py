@@ -83,7 +83,8 @@ def test_spline_bridges_a_short_gap_and_reports_it() -> None:
 def test_drops_listed_markers_and_trims_an_incomplete_tail() -> None:
     truth = _rigid_capture()
     gapped = _with_gaps(
-        truth, {"waist": range(0, 30), **{m: range(37, 40) for m in (*_TRIO_A, *_TRIO_B)}}
+        truth,
+        {"waist": range(30), **{m: range(37, 40) for m in (*_TRIO_A, *_TRIO_B)}},
     )
     out, report = constant_marker_set(gapped, _policy(dropped=("waist",)))
     assert "waist" not in out.labels
@@ -112,10 +113,12 @@ def test_policy_labels_must_exist_in_the_capture() -> None:
 
 def test_largest_steps_ignore_translations_and_rank_by_size() -> None:
     q = np.zeros((5, 3))
-    q[3, 0] = 0.5  # rotational jump into frame 3
-    q[2, 1] = 0.3  # rotational jump into frame 2
-    q[4, 2] = 9.0  # translation: ignored
-    steps = largest_coordinate_steps(q, ["rx", "ry", "tx"], [True, True, False], count=2)
+    q[3:, 0] = 0.5  # rotational step into frame 3
+    q[2:, 1] = 0.3  # rotational step into frame 2
+    q[4:, 2] = 9.0  # translation: ignored
+    steps = largest_coordinate_steps(
+        q, ["rx", "ry", "tx"], [True, True, False], count=2
+    )
     assert steps[0] == {"frame": 3, "coordinate": "rx", "step_rad": pytest.approx(0.5)}
     assert steps[1]["coordinate"] == "ry"
     assert len(steps) == 2
