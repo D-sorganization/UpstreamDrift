@@ -140,6 +140,97 @@ describe('GroundReactionCharts', () => {
     );
   });
 
+  describe('measured plate overlay', () => {
+    const unobserved = [null, null, null];
+    const measured = (z: Array<number | null>) => ({
+      x: unobserved,
+      y: unobserved,
+      z,
+      magnitude: unobserved,
+    });
+    const withOverlay = (qualified: boolean | null): GroundReactionResponse => ({
+      ...base,
+      measured_qualified: qualified,
+      observability: { fx: false, fy: false, fz: true, cop: true, free_moment: false },
+      traces: {
+        ...base.traces,
+        measured_left_force_n: measured([5, 15, 25]),
+        measured_left_cop_m: {
+          x: [0, 0.01, null],
+          y: [0, 0.02, null],
+          z: unobserved,
+          magnitude: unobserved,
+        },
+      },
+    });
+
+    it('draws measured series dashed beside the model with the unqualified banner', async () => {
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(withOverlay(false));
+      render(<GroundReactionCharts runId="r1" />);
+      expect(await screen.findByTestId('ground-reaction-unqualified-banner')).toHaveTextContent(
+        'Unqualified measurement',
+      );
+      const line = screen.getByTestId('ground-reaction-line-vertical_force-Measured Left');
+      expect(line.getAttribute('stroke-dasharray')).toBe('4 2');
+      const model = screen.getByTestId('ground-reaction-line-vertical_force-Left');
+      expect(model.getAttribute('stroke-dasharray')).toBeNull();
+      const cop = screen.getByTestId('ground-reaction-line-cop_path-Measured Left');
+      expect(cop.getAttribute('stroke-dasharray')).toBe('4 2');
+    });
+
+    it('hides the banner for a qualified measurement and for plain runs', async () => {
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(withOverlay(true));
+      const { unmount } = render(<GroundReactionCharts runId="r1" />);
+      await screen.findByTestId('ground-reaction-line-vertical_force-Measured Left');
+      expect(screen.queryByTestId('ground-reaction-unqualified-banner')).toBeNull();
+      unmount();
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(base);
+      render(<GroundReactionCharts runId="r1" />);
+      await screen.findByTestId('ground-reaction-chart-vertical_force');
+      expect(screen.queryByTestId('ground-reaction-unqualified-banner')).toBeNull();
+      expect(screen.queryByTestId('ground-reaction-line-vertical_force-Measured Left')).toBeNull();
+    });
+
+    it('posts the overlay request when an overlay is given', async () => {
+      const post = vi
+        .spyOn(api, 'fetchGroundReactionOverlay')
+        .mockResolvedValue(withOverlay(false));
+      const get = vi.spyOn(api, 'fetchGroundReaction');
+      const request: api.PlateOverlayRequest = {
+        trial: '20260101-120000-123.json',
+        handedness: 'RH',
+        origin_m: [0, 0, 0],
+        declared: {
+          force_floor_n: 2,
+          force_fraction: 0.01,
+          cop_m: 0.01,
+          sensing_depth_sigma_m: 0.002,
+          uncertainty_source: 'declared',
+          sensing_depth_m: 0.015,
+          capacity_n: 3923,
+        },
+        alignment: { offset_s: 0, sigma_offset_s: 0.001, kind: 'manual', note: 'clock' },
+      };
+      render(<GroundReactionCharts runId="r1" overlay={request} />);
+      await screen.findByTestId('ground-reaction-unqualified-banner');
+      expect(post).toHaveBeenCalledWith({ ...request, run_id: 'r1' }, expect.any(AbortSignal));
+      expect(get).not.toHaveBeenCalled();
+    });
+
+    it('does not draw measured load in BW mode (the plate has no model body weight)', async () => {
+      const bw = withOverlay(false);
+      bw.traces = {
+        ...bw.traces,
+        net_force_bw: trace([0, 1, 2]),
+        left_force_bw: trace([0, 1, 2]),
+      };
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(bw);
+      render(<GroundReactionCharts runId="r1" />);
+      await screen.findByTestId('ground-reaction-unqualified-banner');
+      expect(screen.queryByTestId('ground-reaction-line-vertical_force-Measured Left')).toBeNull();
+    });
+  });
+
   it('builds the request path', () => {
     expect(api.buildGroundReactionPath({ runId: 'r1', impactTimeS: 0.9 })).toBe(
       '/api/analysis/ground-reaction?run_id=r1&impact_time_s=0.9',

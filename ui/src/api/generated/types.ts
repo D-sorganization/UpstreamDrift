@@ -2042,6 +2042,10 @@ export interface GroundReactionResponse {
   load_share?: Record<string, (number | null)[]>;
   /** Per-trace x/y/z/magnitude lists; null marks unavailable samples */
   traces?: Record<string, Record<string, (number | null)[]>>;
+  /** Set when a plate trial is overlaid; false means the measurement has no device qualification */
+  measured_qualified?: boolean | null;
+  /** Which components the overlaid plates observe */
+  observability?: Record<string, boolean> | null;
 }
 
 export interface GroupSummaryV1 {
