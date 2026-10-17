@@ -391,6 +391,46 @@
         "evidence": null
       },
       "activation_issue": null
+    },
+    {
+      "id": "DV-13061",
+      "title": "Open-FP Force Plate Hardware Qualification for Measured Vertical GRF",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/13061",
+      "source_snapshot": "source-13061.json",
+      "record": "DV-13061.md",
+      "disposition": "split",
+      "kind": "physical-measurement",
+      "status": "deferred",
+      "rationale": "Imported open-fp vertical force and centre of pressure can be displayed and compared, but may not support model acceptance until a physical device passes open-fp's M4 static calibration and M6 real-swing capture checks with production firmware; no plates exist for this repository to measure, so the hardware gate is parked while software children OF-01 to OF-09 stay active under epic #13061.",
+      "prerequisites": [
+        {
+          "name": "Assembled open-fp plate pair with all eight load cells reading and production MCU firmware (open-fp M2/M3)",
+          "evidence": null
+        },
+        {
+          "name": "Per-device calibration file with gains, tares, date and residuals (open-fp M4 wizard)",
+          "evidence": null
+        },
+        {
+          "name": "Reference masses and a bathroom or reference scale for the M4 static checks",
+          "evidence": null
+        },
+        {
+          "name": "Golfer and capture session for M6 real-swing capture and false-trigger checks",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Record a per-device calibration file and show open-fp M4 static checks on that device: total force within 1 %, CoP within 10 mm at marked spots, body weight within 1 % of a reference scale.",
+        "Show open-fp M6 on the same device and production firmware: 20 real swings captured with none missed and no false triggers during 2 minutes of quiet standing, plus M3 200 Hz frames with no sequence gaps over 10 minutes.",
+        "Record temperature, auto-zero drift and tare movement over a session, and the open-fp commit, firmware and calibration ids used.",
+        "Only then may OF-08 drop the unqualified label or OF-10 use measured wrenches; bench-only, simulator or synthetic data is never acceptance evidence."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
     }
   ]
 }
