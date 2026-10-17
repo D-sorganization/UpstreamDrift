@@ -341,6 +341,25 @@ def contact_equilibrium_pose(
     )
 
 
+def hold_pose(source: InputBundle) -> Array:
+    """Standing pose the quasi-static hold of ``source`` starts from.
+
+    The balanced first IK frame (``ik.q_balanced_standing``, OSL-17, #13131)
+    when the source balanced its bar load, else ``ik.q_standing``.  With the
+    bar on the high-bar rack the unbalanced standing pose puts the
+    body-plus-bar centre of mass 18.6 cm behind the centre of pressure,
+    outside the feet, so no contact equilibrium exists for it.
+
+    Raises:
+        ValueError: If the provenance records no standing pose.
+    """
+    ik = source.provenance.get("ik", {})
+    pose = ik.get("q_balanced_standing", ik.get("q_standing"))
+    if pose is None:
+        raise ValueError("source provenance records no IK standing pose")
+    return np.asarray(pose, dtype=float)
+
+
 @dataclass(frozen=True)
 class HoldStart:
     """Start of the quasi-static hold: the loaded plant and its rest state."""

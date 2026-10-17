@@ -300,6 +300,9 @@ class FullBodyLift:
         }
         if self.balance is not None:
             record["balance"] = dict(self.balance)
+            # OSL-17 (#13131): the balanced first frame (the lift starts
+            # standing); q_standing is the pose before the bar-load balance.
+            record["q_balanced_standing"] = self.q[0].tolist()
         if isinstance(self.back_bar, BackBarSetup):
             record["back_bar"] = self.back_bar.to_record()
         elif self.back_bar is not None:

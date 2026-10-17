@@ -85,11 +85,14 @@ def test_hold_balance_geometry_is_stable() -> None:
     """Body alone and body plus bar both balance over the feet."""
     pytest.importorskip("mujoco")
     from src.shared.python.lifting.barbell_bushing import Barbell
-    from src.shared.python.lifting.barbell_runs import hold_balance_geometry
+    from src.shared.python.lifting.barbell_runs import (
+        hold_balance_geometry,
+        hold_pose,
+    )
     from src.shared.python.motion_matching.same_input import InputBundle
 
     source = InputBundle.load(BACK_SQUAT_BUNDLE)
-    q_hold = np.asarray(source.provenance["ik"]["q_standing"], dtype=float)
+    q_hold = hold_pose(source)
     geometry = hold_balance_geometry(source.spec_bytes, q_hold, Barbell(100.0))
     forward = geometry["forward_axis"]
     forefoot = max(p @ forward for p in geometry["forefoot_m"].values())

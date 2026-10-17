@@ -45,6 +45,7 @@ def setting():  # type: ignore[no-untyped-def]
     from src.shared.python.lifting.barbell_bushing import Barbell
     from src.shared.python.lifting.barbell_runs import (
         bushing_body_spec,
+        hold_pose,
         rigid_bar_spec,
     )
     from src.shared.python.motion_matching import full_body_forward_dynamics as fs
@@ -56,7 +57,7 @@ def setting():  # type: ignore[no-untyped-def]
     simulator = fs.FullBodySimulator(
         NativeMujocoFullBodyModel(rigid_bar_spec(body, barbell))
     )
-    q_hold = np.asarray(source.provenance["ik"]["q_standing"], dtype=float)
+    q_hold = hold_pose(source)
     return simulator, q_hold, body, barbell
 
 
