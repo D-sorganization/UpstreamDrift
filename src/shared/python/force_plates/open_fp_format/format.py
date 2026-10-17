@@ -109,6 +109,9 @@ CSV_HEADER = (
     "cop_C_x_mm,cop_C_y_mm,L1_n,L2_n,L3_n,L4_n,R1_n,R2_n,R3_n,R4_n"
 )
 CSV_LOAD_DECIMALS = 2
+#: Rounding quantum of CSV loads [N] and CoP [mm] (both to CSV_LOAD_DECIMALS).
+CSV_FORCE_QUANTUM_N = 10.0**-CSV_LOAD_DECIMALS
+CSV_COP_QUANTUM_MM = 10.0**-CSV_LOAD_DECIMALS
 
 #: ``lead_pct`` cross-check tolerance in percentage points for NPZ data: float
 #: round-off only (the source stores float64 computed from the same loads).
