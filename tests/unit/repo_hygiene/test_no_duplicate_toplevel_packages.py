@@ -26,8 +26,9 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 
 pytestmark = pytest.mark.unit
 
-# Roots that pytest adds implicitly because they contain a package whose parent
-# has no __init__.py (rootdir of a test package under importmode=prepend).
+# Candidate roots that pytest prepends to sys.path under importmode=prepend: a
+# directory holding test packages becomes a root when it has no __init__.py of
+# its own. ``_pythonpath_roots`` keeps only the candidates that currently are.
 _IMPLICIT_TEST_ROOTS = ("tests/tools",)
 
 # Directory names that are never importable packages.
@@ -141,7 +142,11 @@ def _pythonpath_roots() -> list[Path]:
     config = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     entries = config["tool"]["pytest"]["ini_options"]["pythonpath"]
     roots = [REPO_ROOT / entry for entry in entries]
-    roots += [REPO_ROOT / entry for entry in _IMPLICIT_TEST_ROOTS]
+    roots += [
+        REPO_ROOT / entry
+        for entry in _IMPLICIT_TEST_ROOTS
+        if not (REPO_ROOT / entry / "__init__.py").exists()
+    ]
     return [root for root in roots if root.is_dir()]
 
 
@@ -165,36 +170,22 @@ def _toplevel_names(root: Path) -> set[str]:
 # Deliberately NOT a blanket exemption — every pair is named so removing one is
 # a one-line diff.
 _KNOWN_COLLISIONS: dict[str, tuple[str, ...]] = {
-    "ball_flight_gui": ("src/tools", "tests/tools"),
-    "bunker_shot_gui": ("src/tools", "tests/tools"),
     "canonical_core": ("src/shared/python", "src/tools"),
-    "capture_rig": ("src/tools", "tests/tools"),
     "config": ("src", "src/shared/python"),
     "core": ("src", "src/shared/python"),
     "examples": (".", "src/engines/physics_engines/mujoco/python"),
-    "freemocap_sidecar": ("src/tools", "tests/tools"),
-    "golf_environment": ("src/tools", "tests/tools"),
-    "golf_simulation_suite": ("src/tools", "tests/tools"),
     "golf_simulator": ("src/shared/python", "src/tools"),
-    "matlab_utilities": ("src/tools", "tests/tools"),
-    "model_explorer": ("src/tools", "tests/tools"),
     "motion_matching": (
         "src/engines/physics_engines/mujoco/python",
         "src/shared/python",
         "src/tools",
     ),
     "perturbation": ("src/engines/physics_engines/mujoco/python", "src/shared/python"),
-    "pose_studio": ("src/tools", "tests/tools"),
-    "putting_green_gui": ("src/tools", "tests/tools"),
     "sg_optimizer": ("src/shared/python", "src/tools"),
     "shadow_tracker": ("src/shared/python", "src/tools"),
     "sidekick": ("src/shared/python", "src/tools"),
-    "starting_pose_matcher": ("src/tools", "tests/tools"),
-    "swing_flight_pipeline": ("src/tools", "tests/tools"),
-    "terrain_engine": ("src/tools", "tests/tools"),
     "tests": (".", "src/engines/physics_engines/mujoco/python"),
     "tools": ("src", "src/shared/python"),
-    "training_controller": ("src/tools", "tests/tools"),
 }
 
 
@@ -279,6 +270,20 @@ def test_root_tools_package_collision_is_gone() -> None:
         "src",
         "src/shared/python",
     ), "The 'tools' collision changed shape; re-verify #7995 has not regressed."
+
+
+def test_tests_tools_test_packages_are_namespaced() -> None:
+    """Test packages under tests/tools must not claim src/tools package names.
+
+    Without ``tests/tools/__init__.py`` pytest prepends ``tests/tools`` to
+    sys.path, so ``tests/tools/spine_viewer`` is imported as top-level
+    ``spine_viewer`` and shadows ``src/tools/spine_viewer`` (#7995).
+    """
+    assert (REPO_ROOT / "tests" / "tools" / "__init__.py").is_file(), (
+        "tests/tools must be a regular package so its test packages import as "
+        "tests.tools.<name>, not as top-level names that shadow src/tools."
+    )
+    assert REPO_ROOT / "tests" / "tools" not in _pythonpath_roots()
 
 
 def test_canonical_alias_root_order_independence() -> None:

@@ -68,3 +68,35 @@ def test_full_body_anthro_iron7_opensim_instantiation() -> None:
     assert model.getNumCoordinates() == 44
     assert model.getNumBodies() == 24
     assert model.getMarkerSet().getSize() == 34
+
+
+@pytest.mark.parametrize("osim_path", [DRIVER_OSIM, IRON_OSIM], ids=["driver", "iron7"])
+def test_committed_model_loads_without_missing_geometry(osim_path: Path) -> None:
+    """Loading a committed model finds its club meshes (#13016)."""
+    opensim = require_opensim()
+    sink = opensim.StringLogSink()
+    opensim.Logger.addSink(sink)
+    try:
+        opensim.Model(str(osim_path)).initSystem()
+    finally:
+        opensim.Logger.removeSink(sink)
+    log = sink.getString()
+    assert "Couldn't find file" not in log, log
+
+
+def test_parity_adapter_builds_without_missing_geometry() -> None:
+    """The physics-only parity adapter exports no club meshes to look up (#13016)."""
+    opensim = require_opensim()
+    from src.engines.physics_engines.opensim.python.full_body_parity import (
+        build_parity_adapter,
+    )
+
+    spec = ROOT / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+    sink = opensim.StringLogSink()
+    opensim.Logger.addSink(sink)
+    try:
+        build_parity_adapter(spec.read_bytes())
+    finally:
+        opensim.Logger.removeSink(sink)
+    log = sink.getString()
+    assert "Couldn't find file" not in log, log

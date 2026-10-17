@@ -116,7 +116,9 @@ def test_opensim_physics_engine_reset(engine) -> None:
 
     engine._model.initializeState.assert_called_once()
     engine._model.equilibrateMuscles.assert_called_once()
-    engine._manager.setSessionTime.assert_called_with(0.0)
+    # OpenSim 4.x Manager has no setSessionTime: reset builds a new one (#12983).
+    mock_opensim.Manager.assert_called_once_with(engine._model)
+    assert engine._manager is mock_opensim.Manager.return_value
 
 
 def test_opensim_physics_engine_step(engine) -> None:

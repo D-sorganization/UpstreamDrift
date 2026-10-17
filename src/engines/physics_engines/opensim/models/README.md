@@ -190,15 +190,20 @@ specifications (`full_body_spec_anthro_driver.json` and `full_body_spec_anthro_i
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `generated/full_body_anthro_driver.osim` | Full-body golfer with driver club, 44 coordinates, weld grip closure, foot Hunt-Crossley contact spheres, 34 tour markers |
 | `generated/full_body_anthro_iron7.osim`  | Full-body golfer with 7-iron club, 44 coordinates, weld grip closure, foot Hunt-Crossley contact spheres, 34 tour markers |
-| `generated/export_receipt.json`          | Hash provenance receipt linking spec sha256 to osim sha256 and topology metadata                                          |
+| `generated/<model>.receipt.json`         | Per-model hash provenance receipt linking spec sha256 to osim sha256 and topology metadata                               |
+| `generated/club/`                        | Exporter-written club meshes and `provenance.json` the generated models load (byte-identical to `geometry/club/`)         |
 
 ### Exporter Command
+
+Run once per club (`driver`, `iron7`):
 
 ```bash
 python -m src.engines.physics_engines.opensim.python.full_body_osim \
   --spec docs/development/full_body_models/full_body_spec_anthro_driver.json \
   --out src/engines/physics_engines/opensim/models/generated/full_body_anthro_driver.osim \
-  --receipt src/engines/physics_engines/opensim/models/generated/export_receipt.json
+  --receipt src/engines/physics_engines/opensim/models/generated/full_body_anthro_driver.receipt.json \
+  --club-geometry-ref club \
+  --club-geometry-dir src/engines/physics_engines/opensim/models/generated/club
 ```
 
 ### Club Visuals (OSV-1 #11727, GCV-11 #11717)
@@ -213,11 +218,14 @@ records the spec hash, assembly parameters and a sha256 per file.
 - Visual only: the meshes add no mass, inertia or contact. The `Clubhead`
   body mass properties are identical to a bare export (checked by
   `tests/unit/motion_matching/test_full_body_osim_club.py`).
-- The saved models reference the files by bare name. OpenSim 4.6 does not
-  resolve relative paths containing `..`, so loaders call
-  `club_visuals.register_geometry_path()` first. In the OpenSim GUI, add
-  `models/geometry/club` to File > Preferences > Geometry Search Path, or
-  re-export with `--club-geometry-ref <absolute directory>`.
+- The committed models reference `club/<file>.stl`, which the exporter
+  writes beside them, so they open with their club in OpenSim and the GUI
+  with no search-path setup (#13016). OpenSim 4.6 does not resolve relative
+  paths containing `..`, so the models cannot point at `geometry/club/`
+  directly; a test keeps `generated/club/` byte-identical to it. Library
+  exports default to bare names, for which loaders call
+  `club_visuals.register_geometry_path()` first. The same-input parity
+  adapter exports without club meshes.
 - `tour_matching/club_geometry.py::attach_visual_club` applies the same three
   meshes to `golf_humanoid.osim` through a `club_visual_frame` offset frame.
 - The same directory holds the two wrapped-finger grip hands

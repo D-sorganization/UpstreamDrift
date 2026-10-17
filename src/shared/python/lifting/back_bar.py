@@ -141,7 +141,12 @@ def standard_bar_world(
 
 def bar_axis_world(geometry: BackBarGeometry, frame: SagittalFrame) -> Array:
     """The standard's bar axis (``+Y``: lifter's left) in world coordinates."""
-    ax, ay, az = geometry.bar_axis
+    return pose_axis_world(geometry.bar_axis, frame)
+
+
+def pose_axis_world(axis: tuple[float, float, float], frame: SagittalFrame) -> Array:
+    """A direction of the standard's pose frame in world coordinates."""
+    ax, ay, az = axis
     return ax * np.asarray(frame.forward) + ay * frame.left + az * np.asarray(frame.up)
 
 
@@ -301,3 +306,51 @@ class BackBarStart:
     @property
     def spec_bytes(self) -> bytes:
         return self.setup.spec_bytes
+
+
+@dataclass(frozen=True)
+class HandBarSetup:
+    """Inputs of a lift whose bar hangs in the hands (pulls, #11745).
+
+    ``spec_bytes`` is the derived spec with the standard's grip width for
+    ``lift``; the bar centre (:data:`BAR_CENTRE_FRAME`) is tracked to the
+    bar path and its long axis to the standard's bar axis.  ``arm_hang_m`` is
+    the measured depth of the bar centre below the shoulder midpoint with the
+    arms hanging straight at that grip, and ``bar_offset_scale`` the factor
+    applied to the optimizer's bar offset from its shoulder (model hang over
+    optimizer arm length).
+    """
+
+    spec_bytes: bytes
+    lift: str
+    grip_width_m: float
+    bar_axis: tuple[float, float, float]
+    arm_hang_m: float | None = None
+    bar_offset_scale: float = 1.0
+
+    @classmethod
+    def from_standard(cls, spec_bytes: bytes, lift: str) -> HandBarSetup:
+        """Derive the spec for *lift* with the standard's grip width.
+
+        Raises:
+            TypeError: If *spec_bytes* is not bytes.
+            ValueError: If *lift* is not a lift of the standard.
+        """
+        width = lift_spec.lift_grip(lift).width_m
+        return cls(
+            spec_bytes=apply_grip_width(spec_bytes, width),
+            lift=lift,
+            grip_width_m=width,
+            bar_axis=lift_spec.bar_axis(),
+        )
+
+    def to_record(self) -> dict[str, Any]:
+        """JSON-serialisable provenance (the spec itself is the bundle's)."""
+        return {
+            "lift": self.lift,
+            "standard_version": lift_spec.standard_version(),
+            "grip_width_m": self.grip_width_m,
+            "bar_axis": list(self.bar_axis),
+            "arm_hang_m": self.arm_hang_m,
+            "bar_offset_scale": self.bar_offset_scale,
+        }
