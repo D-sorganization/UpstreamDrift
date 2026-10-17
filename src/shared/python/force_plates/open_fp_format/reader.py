@@ -13,6 +13,7 @@ open-fp is AGPL-3.0; this code is written from the documented file format only.
 
 from __future__ import annotations
 
+import dataclasses
 import math
 import re
 from collections.abc import Iterable, Mapping
@@ -32,6 +33,7 @@ from src.shared.python.force_plates.contracts import (
 )
 from src.shared.python.force_plates.open_fp_format import _arrays, _files, _meta
 from src.shared.python.force_plates.open_fp_format import format as fmt
+from src.shared.python.force_plates.open_fp_format._rounding import widen_for_rounding
 
 __all__ = ["PlateDeclarations", "list_swings", "read_swing", "read_swing_csv"]
 
@@ -239,7 +241,8 @@ def read_swing_csv(
 
     The export carries neither handedness, body weight nor events, so the first
     two are required arguments (``handedness`` is verified against ``lead_pct``)
-    and the events mapping is empty.  Values are rounded in the file (0.01 N,
+    and the events mapping is empty.  The returned uncertainty is ``declared``
+    widened by the CSV rounding (:func:`._rounding.widen_for_rounding`).  Values are rounded in the file (0.01 N,
     0.01 mm, 0.0001 s); the CSV cross-check tolerances in
     :mod:`~src.shared.python.force_plates.open_fp_format.format` cover that, and
     the contract's net-CoP tolerance (0.1 mm) covers the CoP rounding.  A load
@@ -257,7 +260,15 @@ def read_swing_csv(
     _arrays.validate_arrays(arrays, path)
     _arrays.check_lead_pct(arrays, handedness, _arrays.CSV_LEAD_CHECK, path)
     header = _Header(handedness, float(body_weight_n), {})
-    return _build_trial(arrays, header, decl, {"csv": _files.sha256_hex(data)})
+    rounded = dataclasses.replace(
+        decl,
+        uncertainty=widen_for_rounding(
+            decl.uncertainty,
+            force_quantum_n=fmt.CSV_FORCE_QUANTUM_N,
+            cop_quantum_mm=fmt.CSV_COP_QUANTUM_MM,
+        ),
+    )
+    return _build_trial(arrays, header, rounded, {"csv": _files.sha256_hex(data)})
 
 
 def list_swings(directory: str | Path) -> tuple[str, ...]:

@@ -341,7 +341,7 @@ Shared beside the spine packages:
 
 ## Vertical Force Plates
 
-`src/shared/python/force_plates/` (epic #13061, OF-01 #13065) holds engine-neutral contracts for vertical-only two-plate force data, such as the open-fp plates.
+`src/shared/python/force_plates/` (epic #13061, OF-01 #13065) holds engine-neutral contracts for vertical-only two-plate force data, such as the open-fp plates. Calculation reference: `docs/research/force_plate_contract/force_plate_contract.tex`.
 
 - `VerticalPlateTrial` stores per-foot normal load, per-foot and net centre of pressure in the stance frame (metres) and handedness. It also carries force events, the declared sensing-plane depth, `PlateProvenance` and a declared `PlateUncertainty` with no defaults. It checks the source rules on construction: CoP is NaN exactly below threshold, and the net CoP equals `loaded_net_cop`.
 - `PlatePlacement` is the ground-aligned (yaw-only) stance-to-world transform. It rejects tilt and reflection.

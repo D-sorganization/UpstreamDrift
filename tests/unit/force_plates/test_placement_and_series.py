@@ -55,6 +55,14 @@ def test_placement_keeps_nan_rows_nan() -> None:
         [[-1, 0, 0], [0, 1, 0], [0, 0, 1]],
         # not orthonormal
         [[2, 0, 0], [0, 1, 0], [0, 0, 1]],
+        # scaled by 4e-6: inside NumPy's default rtol, outside ROTATION_ATOL
+        [[1.000004, 0, 0], [0, 1, 0], [0, 0, 1]],
+        # tilted by 2e-6 rad: likewise hidden by a relative tolerance
+        [
+            [1, 0, 0],
+            [0, math.cos(2e-6), -math.sin(2e-6)],
+            [0, math.sin(2e-6), math.cos(2e-6)],
+        ],
     ],
 )
 def test_placement_rejects_tilt_mirror_and_scale(rotation) -> None:
