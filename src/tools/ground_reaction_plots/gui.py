@@ -10,7 +10,6 @@ say "unavailable" with the reason.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -30,12 +29,6 @@ from src.shared.python.biomechanics.ground_reaction_plot_model import (
     GroundReactionPlotSeries,
     series_from_payload,
 )
-from src.shared.python.force_plates import (
-    PlateTimeAlignment,
-    ReadingOptions,
-    TargetedPlacement,
-)
-from src.shared.python.force_plates.open_fp_format import PlateDeclarations
 from src.shared.python.force_plates.open_fp_format.overlay_file import (
     overlay_swing_file,
 )
@@ -43,23 +36,13 @@ from src.shared.python.plotting.renderers.ground_reaction import (
     UNQUALIFIED_BANNER,
     plot_ground_reaction,
 )
+from src.tools.ground_reaction_plots.plate_import_dialog import PlateImportDialog
+from src.tools.ground_reaction_plots.plate_import_form import PlateImportContext
+
+__all__ = ["GroundReactionPlotWidget", "PlateImportContext", "UNAVAILABLE_TEXT"]
 
 UNAVAILABLE_TEXT = "unavailable"
 _NOTHING_LOADED = f"{UNAVAILABLE_TEXT}: no ground reaction loaded"
-
-
-@dataclass(frozen=True)
-class PlateImportContext:
-    """Facts a plate trial file cannot carry: set by the host before importing.
-
-    ``declared`` is the plate uncertainty and geometry, ``placement`` the
-    stance frame in the model's world, ``alignment`` the clock mapping.
-    """
-
-    declared: PlateDeclarations
-    placement: TargetedPlacement
-    alignment: PlateTimeAlignment
-    options: ReadingOptions | None = None
 
 
 class GroundReactionPlotWidget(QWidget):
@@ -70,6 +53,7 @@ class GroundReactionPlotWidget(QWidget):
         self._series: GroundReactionPlotSeries | None = None
         self._model_series: GroundReactionPlotSeries | None = None
         self._plate_context: PlateImportContext | None = None
+        self._declared_texts: dict[str, str] | None = None
         root = QVBoxLayout(self)
         controls = QHBoxLayout()
         self.open_button = QPushButton("Open Ground Reaction JSON...")
@@ -103,7 +87,11 @@ class GroundReactionPlotWidget(QWidget):
         self._redraw()
 
     def set_plate_context(self, context: PlateImportContext | None) -> None:
-        """Declare how plate trials are placed, aligned and qualified."""
+        """Declare how plate trials are placed, aligned and qualified.
+
+        With no host context, "Import Plate Trial..." asks the user for the
+        declarations instead.
+        """
         if context is not None and not isinstance(context, PlateImportContext):
             raise TypeError("context must be a PlateImportContext or None")
         self._plate_context = context
@@ -112,8 +100,9 @@ class GroundReactionPlotWidget(QWidget):
         """Overlay the measured swing at ``path`` on the model ground reaction.
 
         ``context`` supplies the declarations, placement, clock alignment and
-        reading options (``None`` options use the reader defaults).  Shows the "Unqualified measurement" banner when the trial carries no
-        device qualification.  Replaces any earlier overlay.
+        reading options (``None`` options use the reader defaults).  Shows the
+        "Unqualified measurement" banner when the trial carries no device
+        qualification.  Replaces any earlier overlay.
 
         Raises:
             ValueError: if no model series is loaded or the trial is refused.
@@ -133,15 +122,22 @@ class GroundReactionPlotWidget(QWidget):
         self._redraw()
 
     def _choose_plate_trial(self) -> None:
-        context = self._plate_context
+        context = self._plate_context or self._ask_declarations()
         if context is None:
-            self.status_label.setText(f"{UNAVAILABLE_TEXT}: no plate context declared")
             return
         name, _ = QFileDialog.getOpenFileName(
             self, "Import Plate Trial", "", "open-fp swing (*.json)"
         )
         if name:
             self._import_with_context(name, context)
+
+    def _ask_declarations(self) -> PlateImportContext | None:
+        """The user's declarations, prefilled with the last ones entered."""
+        dialog = PlateImportDialog(self, texts=self._declared_texts)
+        context = dialog.ask()
+        if context is not None:
+            self._declared_texts = dialog.texts()
+        return context
 
     def _import_with_context(self, name: str, context: PlateImportContext) -> None:
         try:
@@ -194,3 +190,4 @@ class GroundReactionPlotWidget(QWidget):
         self._series = None
         self._model_series = None
         self._plate_context = None
+        self._declared_texts = None
