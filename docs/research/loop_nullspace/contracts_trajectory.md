@@ -591,6 +591,14 @@ Implementation (`loop_nullspace/ground_contact.py`, `ground_envelopes.py`):
   `from_vertical_plates` (OF-11, #13067: per-foot `FootLoadReading` load and
   CoP rows about the plate's force-sensing plane, with the exact shear lever
   arm; shear is never assigned a value).
+- Plate screen (OF-12, #13070): `plate_screen.plate_consistency(frames,
+  providers, setup)` screens a candidate's `ScreenFrame`s with a Bonferroni
+  `FamilyWiseRule`, profiles the common-mode clock offset over
+  `ScreenSetup.offsets_s` and decides on the joint feasible-set verdict
+  (observation-only verdict reported beside it);
+  `plate_provider.PlateObservationProvider` is the `ObservationProvider` that
+  reads a `VerticalPlateTrial` at each frame's time, and `screen_with_plates`
+  refuses an alignment derived from the model under test.
   `observation_accounting` reports `rank(E_x N)`, the observed nullity, the
   singular values of `diag(1/sigma) E_x N` and the chi-square disagreement with
   the balance; `restrict_to_observation` is the zero-uncertainty limit (drops the
