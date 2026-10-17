@@ -245,8 +245,11 @@ def test_fingerprint_depends_on_the_option(tmp_path: Path) -> None:
 # ------------------------------------------------- identity-map stage on golf
 
 
-def _identity_map() -> FullbodyMap:
-    """golf_humanoid -> golf_humanoid: invented identity map (no licensed data)."""
+def _identity_map(locked: tuple[str, ...] = ()) -> FullbodyMap:
+    """golf_humanoid -> golf_humanoid: invented identity map (no licensed data).
+
+    ``locked`` target coordinates are classified ``locked_in_asset``.
+    """
     osim = require_opensim()
     model = osim.Model(str(GOLF_MODEL))
     names = [
@@ -312,6 +315,11 @@ def _identity_map() -> FullbodyMap:
                 {"golf": name, "treatment": "excluded", "reason": "identity test map"}
             )
             targets["held_neutral"].append(name)
+    for name in locked:
+        for bucket in targets.values():
+            if name in bucket:
+                bucket.remove(name)
+        targets["locked_in_asset"].append(name)
     raw = {
         "schema_version": 1,
         "maps": {
@@ -454,3 +462,79 @@ def test_identity_stage_is_deterministic_and_rejects_short_motions(
         run_fullbody(spec, t[:10], {k: v[:10] for k, v in trunk.items()})
     with pytest.raises(ValueError, match="time grid"):
         run_fullbody(spec, t + 1.0, trunk)
+
+
+def _locked_copy(path: Path, name: str) -> Path:
+    """The golf humanoid with ``name`` locked in the file."""
+    text = GOLF_MODEL.read_text(encoding="utf-8")
+    start = text.index(f'<Coordinate name="{name}">')
+    end = text.index("</Coordinate>", start)
+    block = text[start:end].replace("<locked>false</locked>", "<locked>true</locked>")
+    path.write_text(text[:start] + block + text[end:], encoding="utf-8")
+    return path
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_unlocked_drive_coordinates_reach_the_arm_solve_and_the_grf_model(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """#13056: a coordinate locked in the file but unlocked for the drive.
+
+    The arm orientation solve and the ground-reaction model must see its
+    driven value. Frozen at the file default, the trunk the arms hang from is
+    not the driven trunk, so the arm angles are wrong and can flip branch.
+    """
+    from src.engines.physics_engines.opensim.python.spine import fullbody_study
+
+    locked = "lumbar_rotation"
+    target = _locked_copy(tmp_path / "target.osim", locked)
+    fmap = _identity_map(locked=(locked,))
+    motion, cols = _golf_motion(tmp_path / "swing.sto")
+    t = np.linspace(0.0, 0.3, 31)
+    trunk = {k: cols[k] for k in cols if k.startswith(("pelvis_", "lumbar_"))}
+    seen: list[tuple[str, ...]] = []
+    real = fullbody_study.prepare_model_for_id
+
+    def spy(*args, **kwargs):
+        seen.append(tuple(kwargs.get("unlock_coordinates", ())))
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(fullbody_study, "prepare_model_for_id", spy)
+    spec = FullbodySpec(
+        fmap=fmap,
+        golf_model_path=GOLF_MODEL,
+        motion_path=motion,
+        target_model_path=target,
+        policy="grf_only",
+        output_dir=tmp_path / "out",
+        stem="unlocked",
+        unlock_coordinates=(locked,),
+    )
+    result = run_fullbody(spec, t, trunk)
+    np.testing.assert_allclose(result.coordinates[locked], cols[locked], atol=1e-12)
+    for group in fmap.groups:
+        for name in group.target_coordinates:
+            np.testing.assert_allclose(result.coordinates[name], cols[name], atol=1e-5)
+    assert seen and all(locked in names for names in seen)
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_unlock_coordinates_must_be_driven_by_the_trunk(tmp_path: Path) -> None:
+    fmap = _identity_map(locked=("lumbar_rotation",))
+    motion, cols = _golf_motion(tmp_path / "swing.sto")
+    t = np.linspace(0.0, 0.3, 31)
+    trunk = {k: cols[k] for k in cols if k.startswith("pelvis_")}
+    spec = FullbodySpec(
+        fmap,
+        GOLF_MODEL,
+        motion,
+        GOLF_MODEL,
+        "none",
+        tmp_path / "o",
+        "u",
+        unlock_coordinates=("lumbar_rotation",),
+    )
+    with pytest.raises(ValueError, match="unlocked coordinates lack a trunk series"):
+        run_fullbody(spec, t, trunk)
