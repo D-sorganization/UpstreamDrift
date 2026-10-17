@@ -1,11 +1,11 @@
 {
   "lift": "deadlift",
   "bundle": "docs/development/lifting/evidence/deadlift/deadlift_bundle.npz",
-  "bundle_spec_sha256": "03ade594a5ab46bbd2e0268fe84188b9ad443e836690c663aadfd38a9fee2b3b",
+  "bundle_spec_sha256": "97c9c5f2565abc0747ea1b73ae9f245f2d1126644fce0649401da1521d81b804",
   "bundle_steps": 200,
   "dt_s": 0.001,
   "reference": "window_bar_path_m (MuJoCo, recorded at bundle generation)",
-  "source_commit": "9fece273597826917242b0c347c331c68fe7193f",
+  "source_commit": "858f4c03ed48dd8293d6831b1eb1661c8ee07b7f",
   "generator": "scripts/measure_lift_bar_path_parity.py",
   "engines": {
     "mujoco": {
@@ -24,109 +24,82 @@
         "max_frame_error_m": 0.0,
         "worst_segment_start_s": 0.0,
         "coordinate_error_rad_by_segment": [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         ]
       },
-      "wall_time_s": 142.5
+      "wall_time_s": 112.0
     },
     "drake": {
       "engine": "drake",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 8.116358831066484e-10,
-      "final_bar_deviation_m": 8.116358831066484e-10,
-      "max_coordinate_error_rad": 1.0106873367067212e-06,
-      "worst_final_coordinate": "subtalar_angle_l",
+      "max_bar_deviation_m": 2.795095970103624e-8,
+      "final_bar_deviation_m": 2.795095970103624e-8,
+      "max_coordinate_error_rad": 9.546138577754427e-5,
+      "worst_final_coordinate": "subtalar_angle_r",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 1.3763904946340055e-10,
-        "max_frame_error_m": 1.6306393110868958e-13,
+        "max_coordinate_error_rad": 4.426172875552931e-5,
+        "max_frame_error_m": 1.2424348648968923e-8,
         "worst_segment_start_s": 0.12,
         "coordinate_error_rad_by_segment": [
-          2.8720678179466885e-14,
-          9.690876990849431e-11,
-          5.2284565565940966e-15,
-          4.747938153748521e-15,
-          6.90289839178071e-15,
-          5.472944146489578e-15,
-          1.3763904946340055e-10,
-          9.693634783758398e-15,
-          4.6351811278100286e-15,
-          7.491403331005841e-15
+          1.2022999783256605e-13, 2.6542461804834883e-13, 2.55351295663786e-15,
+          6.350822645551091e-15, 8.962448838634174e-15, 7.9432987964978e-15,
+          4.426172875552931e-5, 4.440892098500626e-14, 3.852473895449293e-14,
+          3.26405569239796e-14
         ]
       },
-      "wall_time_s": 139.7
+      "wall_time_s": 67.9
     },
     "pinocchio": {
       "engine": "pinocchio",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 6.113879716899977e-10,
-      "final_bar_deviation_m": 6.113879716899977e-10,
-      "max_coordinate_error_rad": 8.751604677228846e-07,
-      "worst_final_coordinate": "subtalar_angle_l",
+      "max_bar_deviation_m": 2.8876903192873713e-8,
+      "final_bar_deviation_m": 2.8876903192873713e-8,
+      "max_coordinate_error_rad": 9.871387657980468e-5,
+      "worst_final_coordinate": "subtalar_angle_r",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 1.4473503472112181e-10,
-        "max_frame_error_m": 1.3254307723168613e-13,
+        "max_coordinate_error_rad": 4.544747570384925e-5,
+        "max_frame_error_m": 1.280579295270509e-8,
         "worst_segment_start_s": 0.12,
         "coordinate_error_rad_by_segment": [
-          1.9632556756514485e-14,
-          7.876622043403309e-11,
-          3.3861802251067274e-15,
-          6.369037242048847e-15,
-          6.437558819349931e-15,
-          4.300216866620632e-15,
-          1.4473503472112181e-10,
-          4.8411795405822744e-15,
-          5.384581669432009e-15,
-          2.1649348980190553e-15
+          3.340901773979388e-13, 7.993529883149053e-14, 1.0304257447302234e-15,
+          3.290770433928003e-15, 5.383714307694021e-15, 3.896188927043909e-15,
+          4.544747570384925e-5, 4.318767565791859e-14, 3.7636560534792807e-14,
+          3.197442310920451e-14
         ]
       },
-      "wall_time_s": 111.1
+      "wall_time_s": 53.5
     },
     "opensim": {
       "engine": "opensim",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 4.770993157865465e-10,
-      "final_bar_deviation_m": 4.770993157865465e-10,
-      "max_coordinate_error_rad": 7.662067323249699e-07,
+      "max_bar_deviation_m": 7.2085394244021645e-9,
+      "final_bar_deviation_m": 7.2085394244021645e-9,
+      "max_coordinate_error_rad": 4.6416600438764326e-5,
       "worst_final_coordinate": "subtalar_angle_l",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 4.816216089137404e-11,
-        "max_frame_error_m": 3.543298493019584e-14,
+        "max_coordinate_error_rad": 6.258004429190826e-6,
+        "max_frame_error_m": 1.6736195373672052e-9,
         "worst_segment_start_s": 0.12,
         "coordinate_error_rad_by_segment": [
-          8.948801443788013e-15,
-          2.1068295816707022e-11,
-          3.0600522116230877e-15,
-          4.0419056990259605e-15,
-          5.701710804884019e-15,
-          5.185413730346422e-15,
-          4.816216089137404e-11,
-          4.0718296789865605e-15,
-          8.881784197001252e-16,
-          5.776629175002768e-15
+          6.52008151245595e-13, 8.234773540144458e-13, 1.3877787807814457e-15,
+          1.9012569296705806e-15, 3.891852118353967e-15, 3.316791286067655e-15,
+          6.258004429190826e-6, 2.779027008514845e-15, 2.6558616417204917e-15,
+          1.4988010832439613e-15
         ]
       },
-      "wall_time_s": 201.9
+      "wall_time_s": 112.6
     }
   }
 }

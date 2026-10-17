@@ -42,11 +42,13 @@ _ENGINE_MODULE = {
 _DEADLIFT_COORDINATES = pytest.mark.xfail(
     strict=True,
     reason=(
-        "Measured deadlift window: the 140-160 ms re-anchored segment ends "
-        "4.4e-5 (Drake), 4.3e-5 (Pinocchio) and 4.2e-5 rad (OpenSim) from "
-        "MuJoCo, and the full 0.2 s window 2.0e-4 to 2.1e-4 rad (worst final "
-        "coordinate subtalar_angle_r), above the 1e-6 rad L2 coordinate bound; the other nine "
-        "segments stay within 6.2e-10 rad and the bar within 1.2e-8 m.  "
+        "Measured deadlift window (whole-row de Leva lift body, #13037): the "
+        "120-140 ms re-anchored segment ends 4.4e-5 (Drake), 4.5e-5 "
+        "(Pinocchio) and 6.3e-6 rad (OpenSim) from MuJoCo, and the full 0.2 s "
+        "window 9.5e-5, 9.9e-5 and 4.6e-5 rad (worst final coordinate "
+        "subtalar_angle_r; subtalar_angle_l in OpenSim), above the 1e-6 rad "
+        "L2 coordinate bound; the other "
+        "nine segments stay within 8.2e-13 rad and the bar within 2.9e-8 m.  "
         "Same foot-contact signature as the back squat; tracked on #11745, "
         "the bound is not loosened."
     ),
