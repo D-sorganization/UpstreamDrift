@@ -50,10 +50,11 @@ describe('plate import form', () => {
   });
 
   it('refuses a cross-correlation without its model, and a model without one', () => {
-    for (const changes of [
+    const refused: Record<string, string>[] = [
       { alignment_kind: 'cross_correlation' },
       { derived_from_model: 'model-a' },
-    ]) {
+    ];
+    for (const changes of refused) {
       expect(requestFromPlateForm(complete(changes)).error?.key).toBe('derived_from_model');
     }
   });
