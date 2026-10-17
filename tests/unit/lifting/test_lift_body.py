@@ -27,8 +27,19 @@ from src.shared.python.lifting.lift_body import (
     LIFT_BODY_STATURE_M,
     lift_bounds,
 )
+from src.shared.python.motion_matching.anthropometric_candidate import (
+    zero_pose_joint_positions,
+)
 from src.shared.python.motion_matching.anthropometric_geometry import (
+    HEAD_BODY,
     HIP_HALF_WIDTH_FRACTION_OF_STATURE,
+    NECK_JOINT,
+)
+from src.shared.python.motion_matching.anthropometry import (
+    DE_LEVA_MALE,
+    DE_LEVA_ROWS,
+    REFERENCE_STATURE_M,
+    de_leva_table_sha256,
 )
 from src.shared.python.motion_matching.range_of_motion import (
     HUMAN_RANGES_DEG,
@@ -76,6 +87,32 @@ def test_hip_spacing_is_de_leva_scaled(spec: dict) -> None:
     right = np.asarray(_hip(spec, "r")["parent_to_base"], dtype=float)[:3, 3]
     expected = 2.0 * HIP_HALF_WIDTH_FRACTION_OF_STATURE * LIFT_BODY_STATURE_M
     assert np.linalg.norm(left - right) == pytest.approx(expected, abs=1e-6)
+
+
+def test_lift_body_spans_vertex_to_mid_hip_on_whole_rows(spec: dict) -> None:
+    """Head plus trunk is vertex to mid-hip, nothing counted twice (#13037).
+
+    The lift body takes the whole-row de Leva table as it stands: no
+    ``trunk_scale`` compensates for the superseded short trunk (the golf
+    documents keep their capture-identified trunk that way; the lift body has
+    no capture to keep).  The neck joint sits one cervicale-to-mid-hip trunk
+    above the hip-centre midpoint and the head solid spans one
+    vertex-to-cervicale head length above it.
+    """
+    assert DE_LEVA_ROWS["trunk"] == "trunk_cerv_midh"
+    assert DE_LEVA_ROWS["head"] == "head_vert_cerv"
+    assert spec["subject"]["trunk_scale"] == 1.0
+    assert spec["de_leva_table_sha256"] == de_leva_table_sha256()
+    k = LIFT_BODY_STATURE_M / REFERENCE_STATURE_M
+    trunk, head = DE_LEVA_MALE["trunk"].length_m * k, DE_LEVA_MALE["head"].length_m * k
+    anchors = zero_pose_joint_positions(spec)
+    pelvis = next(j for j in spec["joints"] if j["parent"] == "world")
+    neck_above_hip = anchors[NECK_JOINT] - anchors[pelvis["name"]]
+    assert float(np.linalg.norm(neck_above_hip)) == pytest.approx(trunk, abs=1e-9)
+    head_body = next(b for b in spec["bodies"] if b["name"] == HEAD_BODY)
+    (solid,) = head_body["solids"]
+    com_from_vertex = DE_LEVA_MALE["head"].com_fraction * head
+    assert solid["com_m"][2] == pytest.approx(head - com_from_vertex, abs=1e-9)
 
 
 def test_cited_ranges_become_radian_bounds(spec: dict) -> None:
