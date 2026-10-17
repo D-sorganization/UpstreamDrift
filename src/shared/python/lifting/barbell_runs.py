@@ -68,6 +68,7 @@ __all__ = [
     "HoldResult",
     "barbell_plant",
     "build_barbell_bundle",
+    "bushing_body_spec",
     "instantaneous_parity",
     "loaded_effort_source",
     "quasi_static_hold",
@@ -106,14 +107,26 @@ def rigid_bar_spec(spec_bytes: bytes, barbell: Barbell) -> bytes:
     the floating base as well as on the arms, and its foot preload carries
     body plus bar.  The bushing compliance is the only bar dynamics it omits.
 
+    Since #13093 the back-squat source bundle carries this spec: its IK and
+    its tracking run both see the bar load, and :func:`bushing_body_spec`
+    recovers the body the LIFT-4 bushings attach to.
+
     Postcondition: the spec's total mass rises by ``barbell.load_kg``; every
-    other field is unchanged.
+    other field is unchanged; ``bushing_body_spec`` of the result returns a
+    compact (``","``/``":"``) spec equal to ``spec_bytes`` when that was
+    compact.
+
+    Raises:
+        ValueError: If the spec has no closure club body or already carries
+            the rigid bar (the load would count twice).
     """
     if not isinstance(spec_bytes, bytes | bytearray):
         raise TypeError("spec_bytes must be the raw spec document bytes")
     if not isinstance(barbell, Barbell):
         raise TypeError("barbell must be a Barbell")
     spec = json.loads(spec_bytes)
+    if _rigid_bar_body(spec) is not None:
+        raise ValueError("spec already carries the rigid bar; it would count twice")
     dynamics = barbell_dynamics(barbell, barbell_interface(spec, barbell))
     club = spec["closure"]["body_b"]
     body = next((b for b in spec["bodies"] if b["name"] == club), None)
@@ -128,7 +141,33 @@ def rigid_bar_spec(spec_bytes: bytes, barbell: Barbell) -> bytes:
             "placement": np.eye(4).tolist(),
         }
     )
-    return json.dumps(spec).encode()
+    return json.dumps(spec, separators=(",", ":")).encode()
+
+
+def _rigid_bar_body(spec: Mapping[str, Any]) -> dict[str, Any] | None:
+    """The body carrying the :data:`RIGID_BAR_SOLID`, if any."""
+    for body in spec["bodies"]:
+        if any(s["name"] == RIGID_BAR_SOLID for s in body["solids"]):
+            found: dict[str, Any] = body
+            return found
+    return None
+
+
+def bushing_body_spec(spec_bytes: bytes) -> bytes:
+    """The lifter body the bushings attach to: ``spec_bytes`` without the rigid bar.
+
+    A bar-loaded source bundle (#13093) carries :func:`rigid_bar_spec`; the
+    LIFT-4 plant needs the body alone.  A spec without the rigid bar is
+    returned unchanged (same bytes).
+    """
+    if not isinstance(spec_bytes, bytes | bytearray):
+        raise TypeError("spec_bytes must be the raw spec document bytes")
+    spec = json.loads(spec_bytes)
+    body = _rigid_bar_body(spec)
+    if body is None:
+        return bytes(spec_bytes)
+    body["solids"] = [s for s in body["solids"] if s["name"] != RIGID_BAR_SOLID]
+    return json.dumps(spec, separators=(",", ":")).encode()
 
 
 def _tracking(
@@ -219,8 +258,11 @@ def quasi_static_hold(
     """Hold ``q_hold`` in MuJoCo with the bar on both hands for ``duration_s``.
 
     The feet are preloaded for body plus bar; the bar starts undeflected and
-    at rest.  Postcondition: samples every :data:`SAMPLE_EVERY` steps.
+    at rest.  A bar-loaded spec is reduced to its body first
+    (:func:`bushing_body_spec`).  Postcondition: samples every
+    :data:`SAMPLE_EVERY` steps.
     """
+    spec_bytes = bushing_body_spec(spec_bytes)
     pose = np.asarray(q_hold, dtype=float)
     track = np.vstack([pose, pose])
     times = np.array([0.0, float(duration_s)])
@@ -270,8 +312,9 @@ def hold_balance_geometry(
     heel contact-sphere centres (by sphere name) and the horizontal unit
     ``forward_axis`` from the mean heel to the mean forefoot, all in metres in
     the world frame, so a caller can see on which side of the feet each
-    centre of mass falls.
+    centre of mass falls.  A bar-loaded spec is reduced to its body first.
     """
+    spec_bytes = bushing_body_spec(spec_bytes)
     pose = np.asarray(q_hold, dtype=float)
     _, q0, v0, _, simulator = _tracking(
         spec_bytes, barbell, np.array([0.0, 1.0]), np.vstack([pose, pose]), 1.0
@@ -359,17 +402,22 @@ def build_barbell_bundle(source: InputBundle, barbell: Barbell) -> InputBundle:
     ordinary same-input bundle); the bar's reference states, the bar and
     bushing parameters and the attachment pose are under
     ``provenance["barbell"]``.  Replay it with :func:`barbell_plant`.
+
+    A bar-loaded source (#13093) is re-tracked on its body
+    (:func:`bushing_body_spec`): the bushing bar replaces the rigid one, and
+    the returned bundle carries the body spec.
     """
+    body = bushing_body_spec(source.spec_bytes)
     times = np.arange(source.reference_q.shape[0], dtype=float) * source.dt_s
     duration = source.steps * source.dt_s
     controller, q0, v0, steps, _ = _tracking(
-        source.spec_bytes,
+        body,
         barbell,
         times,
         np.asarray(source.reference_q, dtype=float),
         duration,
     )
-    loaded, q_aug, v_aug = _attached_start(source.spec_bytes, q0, v0, barbell)
+    loaded, q_aug, v_aug = _attached_start(body, q0, v0, barbell)
     rollout = integrate(
         loaded,
         q_aug,
@@ -395,7 +443,7 @@ def build_barbell_bundle(source: InputBundle, barbell: Barbell) -> InputBundle:
         "source_bundle_spec_sha256": source.spec_sha256,
     }
     return InputBundle(
-        spec_bytes=source.spec_bytes,
+        spec_bytes=body,
         coordinate_order=source.coordinate_order,
         dt_s=source.dt_s,
         q0=rollout.q[0, :nv],

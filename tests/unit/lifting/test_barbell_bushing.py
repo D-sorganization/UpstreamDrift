@@ -50,7 +50,17 @@ def l1_tolerance(scale: float) -> float:
 
 @pytest.fixture(scope="module")
 def bundle() -> InputBundle:
-    return InputBundle.load(BACK_SQUAT_BUNDLE)
+    """The source squat on the lifter body alone (the bushings' body).
+
+    Since #13093 the committed source carries the rigid bar
+    (``rigid_bar_spec``); the bushing plant attaches to the body without it.
+    """
+    from dataclasses import replace
+
+    from src.shared.python.lifting.barbell_runs import bushing_body_spec
+
+    source = InputBundle.load(BACK_SQUAT_BUNDLE)
+    return replace(source, spec_bytes=bushing_body_spec(source.spec_bytes))
 
 
 @pytest.fixture(scope="module")
@@ -341,3 +351,16 @@ def test_rigid_bar_spec_rejects_bad_inputs(bundle: InputBundle) -> None:
         rigid_bar_spec("not bytes", Barbell(100.0))  # type: ignore[arg-type]
     with pytest.raises(TypeError, match="Barbell"):
         rigid_bar_spec(bundle.spec_bytes, 100.0)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="already carries"):
+        rigid_bar_spec(rigid_bar_spec(bundle.spec_bytes, Barbell(100.0)), Barbell(60.0))
+
+
+def test_bushing_body_spec_strips_only_the_rigid_bar(bundle: InputBundle) -> None:
+    """#13093: the bar-loaded source spec reduces to the body it was built on."""
+    from src.shared.python.lifting.barbell_runs import bushing_body_spec, rigid_bar_spec
+
+    body = bundle.spec_bytes
+    assert bushing_body_spec(rigid_bar_spec(body, Barbell(100.0))) == body
+    assert bushing_body_spec(body) == body
+    with pytest.raises(TypeError, match="spec_bytes"):
+        bushing_body_spec("not bytes")  # type: ignore[arg-type]

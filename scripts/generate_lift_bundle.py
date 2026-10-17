@@ -21,6 +21,13 @@ spec into the bundle.  The committed bundle is still ``legacy`` (the golf club
 grip): regenerating it with ``back_bar`` changes the inputs of the bar-path,
 kinetics and barbell evidence (#12340, #12341, #12345), so that happens
 together with their regeneration, not before.
+
+Since #13093 the back-bar squat IK balances the optimizer's bar load over
+mid-foot with ``--load-balance`` (opt-in), and the bundle's spec then carries
+that bar as a rigid solid on the hands (:func:`lift_bundle_spec`).  The
+committed squat bundle is not balanced: tracking the balanced IK with the bar
+load loses the feet within the window (OSL-15 measurements in
+``docs/research/lift_models/lift_models.tex``).
 """
 
 from __future__ import annotations
@@ -46,14 +53,17 @@ from src.shared.python.lifting.back_bar import (  # noqa: E402
     BACK_SQUAT,
     BackBarGeometry,
 )
+from src.shared.python.lifting.barbell_bushing import Barbell  # noqa: E402
 from src.shared.python.lifting.bundles import (  # noqa: E402
     LIFT_SPEC,
     build_lift_bundle,
+    lift_bundle_spec,
     lift_hands_to_full_body,
     lift_to_full_body,
     load_seed_pose,
     solve_sagittal_lift,
 )
+from src.shared.python.lifting.loaded_balance import LoadBalance  # noqa: E402
 from src.shared.python.lifting.lift_recipes import (  # noqa: E402
     LiftRecipe,
     bundle_lifts,
@@ -99,20 +109,34 @@ def build_parser() -> argparse.ArgumentParser:
         default="back_bar",
         help="squat only. back_bar: #12347 geometry (committed); legacy: golf grip",
     )
+    parser.add_argument(
+        "--load-balance",
+        action="store_true",
+        help="back_bar only: balance the bar load over mid-foot (#13093, opt-in)",
+    )
     return parser
 
 
 def _full_body(args: argparse.Namespace, lift: LiftRecipe, solution: Any) -> Any:
-    """Full-body IK of *solution*: back bar (squat) or bar in the hands."""
+    """Full-body IK of *solution*: back bar (squat) or bar in the hands.
+
+    The back bar is balanced with the optimizer's bar load over mid-foot
+    (#13093) when ``--load-balance`` is given.
+    """
     spec = LIFT_SPEC.read_bytes()
     if lift.hand_held:
         return lift_hands_to_full_body(spec, solution, load_seed_pose(), lift.lift)
-    geometry = (
-        BackBarGeometry.from_standard(BACK_SQUAT, height_m=args.height)
-        if args.geometry == "back_bar"
+    if args.geometry != "back_bar":
+        return lift_to_full_body(spec, solution, load_seed_pose())
+    geometry = BackBarGeometry.from_standard(BACK_SQUAT, height_m=args.height)
+    load = (
+        LoadBalance(Barbell(float(solution.source["bar_mass_kg"])))
+        if args.load_balance
         else None
     )
-    return lift_to_full_body(spec, solution, load_seed_pose(), geometry=geometry)
+    return lift_to_full_body(
+        spec, solution, load_seed_pose(), geometry=geometry, load=load
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -130,11 +154,18 @@ def main(argv: list[str] | None = None) -> int:
         n_eval=args.n_eval,
     )
     lift = _full_body(args, lift_recipe, solution)
-    spec = LIFT_SPEC.read_bytes() if lift.back_bar is None else lift.back_bar.spec_bytes
+    spec = lift_bundle_spec(lift) or LIFT_SPEC.read_bytes()
     for label, value in lift.max_residual_by_landmark().items():
         logger.info("IK max residual %-10s %.5f m", label, value)
     logger.info("IK max closure %.3e m", lift.closure_m.max())
     logger.info("IK min foot-sphere height %.3e m", lift.lowest_sphere_m.min())
+    if lift.balance is not None:
+        logger.info(
+            "IK bar-load balance: %.4f m -> %.2e m in %d corrections",
+            lift.balance["unbalanced_max_offset_m"],
+            lift.balance["max_offset_m"],
+            lift.balance["iterations"],
+        )
 
     start = window_start_time(solution, lift_recipe.window_event, args.window)
     tools_pin = _git("ls-tree", "HEAD", "vendor/ud-tools").split()[2]

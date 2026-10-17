@@ -87,7 +87,17 @@ def test_bundle_carries_provenance(bundle: InputBundle) -> None:
         from src.shared.python.lifting.back_bar import apply_grip_width
 
         width = ik["back_bar"]["geometry"]["grip_width_m"]
-        assert bundle.spec_bytes == apply_grip_width(LIFT_SPEC.read_bytes(), width)
+        derived = apply_grip_width(LIFT_SPEC.read_bytes(), width)
+        if "balance" in ik:
+            # #13093: the balanced source's dynamics carry the bar load.
+            from src.shared.python.lifting.barbell_runs import rigid_bar_spec
+            from src.shared.python.lifting.loaded_balance import (
+                load_balance_from_record,
+            )
+
+            load = load_balance_from_record(ik["balance"]["load"])
+            derived = rigid_bar_spec(derived, load.barbell)
+        assert bundle.spec_bytes == derived
     else:
         assert bundle.spec_bytes == LIFT_SPEC.read_bytes()
 
@@ -115,9 +125,23 @@ def test_ik_from_the_recorded_solution_meets_thresholds(
         geometry = BackBarGeometry.from_standard(
             geom_rec["lift"], height_m=geom_rec["height_m"]
         )
+    balance = bundle.provenance["ik"].get("balance")
+    load = None
+    if balance is not None:
+        from src.shared.python.lifting.loaded_balance import load_balance_from_record
+
+        load = load_balance_from_record(balance["load"])
+    # The generator solves the back bar from the lift-body spec (it derives
+    # the grip-width spec itself); a legacy bundle carries that spec.
+    body = bundle.spec_bytes if geometry is None else LIFT_SPEC.read_bytes()
     lift = lift_to_full_body(
-        bundle.spec_bytes, solution, load_seed_pose(), geometry=geometry
+        body, solution, load_seed_pose(), geometry=geometry, load=load
     )
+    if balance is not None:
+        assert lift.balance is not None
+        np.testing.assert_allclose(
+            lift.balance["correction_rad"], balance["correction_rad"], atol=1e-9
+        )
     residual = lift.max_residual_by_landmark()
     for label, limit in IK_RESIDUAL_THRESHOLDS_M.items():
         assert residual[label] <= limit, (label, residual[label])

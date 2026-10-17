@@ -66,6 +66,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1098 | `src/tools/shot_pattern_analysis/matched_supplement_pipeline.py` |
 | 1096 | `src/learning/retargeting/retargeter.py` |
 | 1089 | `src/shared/python/motion_pipeline/contracts.py` |
+| 1078 | `src/shared/python/lifting/bundles.py` |
 | 1073 | `src/shared/python/sidekick/calculators/thermo/steam_engine.py` |
 | 1068 | `src/shared/python/swing_comparison/metrics.py` |
 | 1066 | `src/tools/bunker_shot_gui/crosstier.py` |
@@ -91,7 +92,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1017 | `src/shared/python/shadow_tracker/contracts.py` |
 | 1015 | `src/shared/python/motion_matching/gs3dx_variants.py` |
 | 1000 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_opengl_renderer.py` |
-| 1000 | `src/shared/python/lifting/bundles.py` |
 | 999 | `src/shared/python/estimation/dime_contracts.py` |
 | 997 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
 | 996 | `src/engines/physics_engines/drake/python/full_body_model.py` |
