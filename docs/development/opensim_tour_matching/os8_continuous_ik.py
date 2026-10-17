@@ -224,7 +224,7 @@ def write_sto(
     path.write_text("\n".join(header + rows) + "\n")
 
 
-def main() -> int:
+def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--osim", type=Path, default=DEFAULT_MODEL)
     parser.add_argument("--trc", type=Path, default=DEFAULT_TRC)
@@ -239,7 +239,11 @@ def main() -> int:
         default=None,
         help="last frame the continuity verdict covers (default: --last)",
     )
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = _parse_args()
     logging.basicConfig(level=logging.INFO)
     args.output.mkdir(parents=True, exist_ok=True)
 
