@@ -104,6 +104,21 @@ class TestTheViewportDegradesOutLoud:
         assert not fallback.degraded
         assert fallback.reason == ""
 
+    def test_an_available_provider_does_not_hide_the_plan_view_renderer(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The sole-field view draws with matplotlib whatever is installed."""
+        monkeypatch.setattr(
+            render_module,
+            "select_viewport_provider",
+            lambda: select_viewport_provider(
+                import_checker=lambda module: module == "meshcat"
+            ),
+        )
+        note = viewport_fallback().describe()
+        assert "MeshCat" in note
+        assert "matplotlib" in note.lower()
+
 
 class TestTheStampIsInTheFrame:
     """A caption beside a figure does not travel with a screenshot."""

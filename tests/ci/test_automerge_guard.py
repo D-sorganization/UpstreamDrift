@@ -59,6 +59,9 @@ class FakeGh:
         labels: Sequence[str] = (),
         body: str = "",
         disarms: Sequence[str] = (),
+        enables: Sequence[str] = (),
+        closes: Sequence[str] = (),
+        timeline_fails: bool = False,
         removed: Sequence[str] = (),
         head_date: str = HEAD_DATE,
         committer_date: str = HEAD_DATE,
@@ -79,6 +82,9 @@ class FakeGh:
             "node_id": "PR_node7",
         }
         self.disarms = list(disarms)
+        self.enables = list(enables)
+        self.closes = list(closes)
+        self.timeline_fails = timeline_fails
         self.removed = list(removed)
         self.head_date = head_date
         self.committer_date = committer_date
@@ -101,7 +107,9 @@ class FakeGh:
                 return _completed(returncode=1, stderr="timeline boom")
             return _completed("\n".join(self.force_pushes))
         if "/timeline" in joined:
-            return _completed("\n".join(self.disarms))
+            if self.timeline_fails:
+                return _completed(returncode=1, stderr="timeline boom")
+            return _completed(self._arm_events())
         if "/check-suites" in joined:
             return _completed(self.head_date)
         if "/commits/" in joined:
@@ -111,6 +119,13 @@ class FakeGh:
         if "/pulls/" in joined:
             return _completed(json.dumps(self.pull))
         raise AssertionError(f"unexpected gh call: {joined}")
+
+    def _arm_events(self) -> str:
+        """Timeline lines in the guard's ``<created_at>TAB<event>`` jq output."""
+        rows = [(t, "auto_merge_disabled") for t in self.disarms]
+        rows += [(t, "auto_merge_enabled") for t in self.enables]
+        rows += [(t, "closed") for t in self.closes]
+        return "\n".join(f"{t}\t{event}" for t, event in sorted(rows))
 
     @property
     def armed(self) -> bool:
@@ -230,6 +245,69 @@ def test_latest_disarm_wins_when_several_exist() -> None:
         runner=FakeGh(disarms=["2026-08-01T00:00:00Z", "2026-08-14T04:14:21Z"]),
     )
     assert verdict.held is True
+
+
+def test_disarm_followed_by_a_re_enable_is_still_held() -> None:
+    """A re-arm never cancels a reviewer hold: owner-token agents re-arm within
+    seconds of any disarm (#4709 class); only a new push supersedes it."""
+    verdict = automerge_guard.evaluate_hold(
+        "o/r",
+        1,
+        runner=FakeGh(
+            disarms=["2026-08-14T04:14:21Z"], enables=["2026-08-14T04:14:31Z"]
+        ),
+    )
+    assert verdict.held is True
+
+
+def test_disarm_caused_by_a_pr_close_is_not_held() -> None:
+    verdict = automerge_guard.evaluate_hold(
+        "o/r",
+        1,
+        runner=FakeGh(
+            disarms=["2026-08-14T04:14:21Z"], closes=["2026-08-14T04:14:21Z"]
+        ),
+    )
+    assert verdict.held is False
+
+
+def test_disarm_a_few_seconds_after_a_close_is_not_held() -> None:
+    verdict = automerge_guard.evaluate_hold(
+        "o/r",
+        1,
+        runner=FakeGh(
+            disarms=["2026-08-14T04:14:23Z"], closes=["2026-08-14T04:14:21Z"]
+        ),
+    )
+    assert verdict.held is False
+
+
+def test_disarm_long_after_a_close_is_still_held() -> None:
+    verdict = automerge_guard.evaluate_hold(
+        "o/r",
+        1,
+        runner=FakeGh(
+            disarms=["2026-08-14T05:14:21Z"], closes=["2026-08-14T04:14:21Z"]
+        ),
+    )
+    assert verdict.held is True
+
+
+def test_genuine_disarm_after_a_close_driven_one_is_held() -> None:
+    verdict = automerge_guard.evaluate_hold(
+        "o/r",
+        1,
+        runner=FakeGh(
+            disarms=["2026-08-14T04:14:21Z", "2026-08-14T06:00:00Z"],
+            closes=["2026-08-14T04:14:21Z"],
+        ),
+    )
+    assert verdict.held is True
+
+
+def test_unreadable_timeline_raises_so_callers_fail_closed() -> None:
+    with pytest.raises(RuntimeError):
+        automerge_guard._disarm_reasons(FakeGh(timeline_fails=True), "o/r", 1, HEAD_SHA)
 
 
 def test_deleted_tracked_files_block_arming() -> None:
@@ -629,7 +707,7 @@ def test_cli_reports_clear_with_zero_exit(
     assert "no hold in effect" in capsys.readouterr().out
 
 
-# --- GOV-1 (#1917): warn when the active token is a personal/user token ---
+# --- GOV-1 (#1917): personal/user tokens are owner-approved (2026-10-10) ---
 
 
 @pytest.mark.parametrize(
@@ -686,13 +764,24 @@ def test_active_token_is_none_when_gh_is_unauthenticated_or_missing() -> None:
     assert automerge_guard.active_token_kind({}, runner=missing) == "none"
 
 
-def test_identity_check_warns_on_user_token_without_leaking_it(
+def test_identity_check_accepts_user_token_silently(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
+    # Owner decision 2026-10-10: the personal token is an approved identity.
     env = {"GH_TOKEN": FAKE_CLASSIC_PAT}
     with caplog.at_level("WARNING"):
         ok = automerge_guard.check_token_identity(env=env, require_app_token=False)
     assert ok is True
+    assert caplog.text == ""
+
+
+def test_identity_check_require_app_refuses_user_token_without_leaking_it(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    env = {"GH_TOKEN": FAKE_CLASSIC_PAT}
+    with caplog.at_level("WARNING"):
+        ok = automerge_guard.check_token_identity(env=env, require_app_token=True)
+    assert ok is False
     assert "personal/user token" in caplog.text
     assert FAKE_CLASSIC_PAT not in caplog.text
     assert "B" * 20 not in caplog.text
@@ -736,7 +825,7 @@ def test_cli_require_app_token_refuses_user_token(
     assert FAKE_CLASSIC_PAT not in captured.out + captured.err
 
 
-def test_cli_user_token_without_flag_warns_but_proceeds(
+def test_cli_user_token_without_flag_proceeds_silently(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
     caplog: pytest.LogCaptureFixture,
@@ -749,8 +838,7 @@ def test_cli_user_token_without_flag_warns_but_proceeds(
     )
     with caplog.at_level("WARNING"):
         assert automerge_guard.main(["o/r", "1"]) == 0
-    # main() logs through logging.basicConfig, whose handler writes to stderr.
-    assert "personal/user token" in caplog.text
+    assert "GOV-1" not in caplog.text
     captured = capsys.readouterr()
     assert FAKE_CLASSIC_PAT not in captured.out + captured.err + caplog.text
 

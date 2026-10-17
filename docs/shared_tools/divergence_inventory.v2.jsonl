@@ -685,6 +685,7 @@
 {"path": "force_overlay/series.py", "classification": "ud-only", "package": "force_overlay", "spelling_only": false}
 {"path": "force_plates/__init__.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/alignment.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
+{"path": "force_plates/comparison.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/contracts.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/conversion.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/events.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
@@ -1592,6 +1593,7 @@
 {"path": "motion_matching/swing_evaluator.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/synthesize_target_from_coefficients.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/target.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/tibial_torsion.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/tour_baselines.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/tour_capture_contract.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/tour_metrics.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}

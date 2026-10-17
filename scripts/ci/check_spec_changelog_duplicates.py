@@ -66,6 +66,11 @@ ARCHIVE_PATH = REPO_ROOT / "docs" / "spec" / "CHANGELOG_ARCHIVE.md"
 _ARCHIVED_KEY_RE = re.compile(
     r"^\| (?P<date>\d{4}-\d{2}-\d{2}) \| (?P<key>#\d+) \|", re.MULTILINE
 )
+_ARCHIVED_ROWS_BLOCK_RE = re.compile(
+    r"^<!-- archive:(?P<name>change-log-rows[\w-]*):begin -->\n"
+    r"(?P<body>.*?)^<!-- archive:(?P=name):end -->$",
+    re.MULTILINE | re.DOTALL,
+)
 BASELINE_PATH = (
     REPO_ROOT / "scripts" / "config" / "spec_changelog_duplicate_baseline.json"
 )
@@ -113,15 +118,30 @@ def _duplicate_bodies(rows: list[Any]) -> dict[str, list[str]]:
     return {digest: sorted(keys) for digest, keys in groups.items() if len(keys) > 1}
 
 
+def _archive_row_tables(text: str) -> list[str]:
+    """Each archived row table, one per ``change-log-rows*`` marked block.
+
+    Every rotation wave (#9415, #13095) is its own marked block with its own
+    table, so parsing only the first table would hide later waves from the
+    gate. An archive without markers is read as a single table.
+    """
+    blocks = [match["body"] for match in _ARCHIVED_ROWS_BLOCK_RE.finditer(text)]
+    if not blocks:
+        return [text]
+    return [f"## Change Log\n\n{block}" for block in blocks]
+
+
 def _load_archive_rows(module: ModuleType) -> list[Any]:
-    """Rows of the archive's change-log table, or none when it is absent."""
+    """Rows of every archived change-log table, or none when it is absent."""
     if not ARCHIVE_PATH.is_file():
         return []
-    try:
-        parsed = module.parse_changelog(ARCHIVE_PATH.read_text(encoding="utf-8"))
-    except module.SpecChangelogError:
-        return []
-    return list(parsed.rows)
+    rows: list[Any] = []
+    for table in _archive_row_tables(ARCHIVE_PATH.read_text(encoding="utf-8")):
+        try:
+            rows.extend(module.parse_changelog(table).rows)
+        except module.SpecChangelogError:
+            continue
+    return rows
 
 
 def _reused_archive_keys(module: ModuleType, live_rows: list[Any]) -> list[str]:

@@ -13,6 +13,11 @@ reverse.
 from __future__ import annotations
 
 from src.shared.python.force_plates.alignment import AlignmentKind, PlateTimeAlignment
+from src.shared.python.force_plates.comparison import (
+    ComparisonOptions,
+    VerticalComparison,
+    compare_vertical,
+)
 from src.shared.python.force_plates.contracts import (
     FOOT_LABELS,
     NEGATIVE_LOAD_SIGMAS,
@@ -51,6 +56,7 @@ from src.shared.python.force_plates.readings import (
     PlacedTrial,
     PlateReading,
     ReadingOptions,
+    covers,
     reading_at,
 )
 
@@ -61,6 +67,7 @@ __all__ = [
     "NET_COP_TOL_M",
     "NET_LABEL",
     "ROTATION_ATOL",
+    "ComparisonOptions",
     "AlignmentKind",
     "FootSample",
     "Handedness",
@@ -78,12 +85,15 @@ __all__ = [
     "attach_measured_overlay",
     "force_event_markers",
     "impact_anchor",
+    "VerticalComparison",
+    "compare_vertical",
+    "covers",
     "loaded_net_cop",
     "measured_overlay",
     "merge_event_markers",
     "observability",
     "overlay_on_series",
-    "reading_at",
     "placement_for_target",
+    "reading_at",
     "to_ground_reaction_series",
 ]

@@ -3,7 +3,9 @@
     "LEInput": -20.0,
     "LSInputY": 45.0,
     "REInput": -20.0,
-    "RSInputY": 45.0
+    "RSInputY": 45.0,
+    "hip_rotation_l": -4.6027308924966395,
+    "hip_rotation_r": -9.607738447471068
   },
   "anthropometry": {
     "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
@@ -480,11 +482,11 @@
       "name": "femur_r",
       "solids": [
         {
-          "com_m": [0.0, -0.16371950999999998, 0.0],
+          "com_m": [0.0, -0.168783, 0.0],
           "inertia_com_kg_m2": [
-            [0.130850963, 0.0, 0.0],
-            [0.0, 0.03430069768, 0.0],
-            [0.0, 0.0, 0.1379848668]
+            [0.13907, 0.0, 0.0],
+            [0.0, 0.0364552, 0.0],
+            [0.0, 0.0, 0.146652]
           ],
           "mass_kg": 9.80040405351952,
           "name": "femur_r",
@@ -501,11 +503,11 @@
       "name": "tibia_r",
       "solids": [
         {
-          "com_m": [0.0, -0.204691, 0.0],
+          "com_m": [0.0, -0.19855027, 0.0],
           "inertia_com_kg_m2": [
-            [0.0634325, 0.0, 0.0],
-            [0.0, 0.0056617, 0.0],
-            [0.0, 0.0, 0.0634325]
+            [0.05968363925, 0.0, 0.0],
+            [0.0, 0.00532709353, 0.0],
+            [0.0, 0.0, 0.05968363925]
           ],
           "mass_kg": 3.90640097495255,
           "name": "tibia_r",
@@ -585,11 +587,11 @@
       "name": "femur_l",
       "solids": [
         {
-          "com_m": [0.0, -0.15893449999999998, 0.0],
+          "com_m": [0.0, -0.16385, 0.0],
           "inertia_com_kg_m2": [
-            [0.123314354, 0.0, 0.0],
-            [0.0, 0.03232508995, 0.0],
-            [0.0, 0.0, 0.13003708449999998]
+            [0.13106, 0.0, 0.0],
+            [0.0, 0.0343555, 0.0],
+            [0.0, 0.0, 0.138205]
           ],
           "mass_kg": 9.80040405351952,
           "name": "femur_l",
@@ -606,11 +608,11 @@
       "name": "tibia_l",
       "solids": [
         {
-          "com_m": [0.0, -0.202735, 0.0],
+          "com_m": [0.0, -0.19665295, 0.0],
           "inertia_com_kg_m2": [
-            [0.0622653, 0.0, 0.0],
-            [0.0, 0.00563255, 0.0],
-            [0.0, 0.0, 0.0622653]
+            [0.05858542077, 0.0, 0.0],
+            [0.0, 0.005299666295, 0.0],
+            [0.0, 0.0, 0.05858542077]
           ],
           "mass_kg": 3.90640097495255,
           "name": "tibia_l",
@@ -1436,16 +1438,16 @@
       "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
       "parent_to_base": [
         [
-          -0.37559496913740403, 0.9267837442602018, 0.0005572555192807342,
-          -0.005010614545413017
+          -0.02880660762391599, 0.9995848482362506, 0.0005572555192805302,
+          -0.005010614545412944
         ],
         [
-          -0.8948543267171662, -0.3628113631183045, 0.2600070167280208,
-          -0.10510059317219117
+          -0.9652018188748285, -0.02796068834842407, 0.2600070167280206,
+          -0.10510059317219156
         ],
         [
-          0.24117245513167543, 0.09715866491095405, 0.965606566215496,
-          -0.024975960967052294
+          0.2599146556043438, 0.006952056069561446, 0.965606566215496,
+          -0.024975960967052332
         ],
         [0.0, 0.0, 0.0, 1.0]
       ],
@@ -1486,15 +1488,15 @@
       "parent_to_base": [
         [
           -0.12429404455826688, -0.9922454285544172, 4.5655751879009243e-7,
-          -0.007791098200000001
+          -0.00803206
         ],
         [
           0.9897616899776521, -0.12398288545581986, 0.07071096921009314,
-          -0.39288686
+          -0.405038
         ],
         [
           -0.07016257934204852, 0.008789404240898925, 0.997496846527928,
-          -0.0026484007
+          -0.00273031
         ],
         [0.0, 0.0, 0.0, 1.0]
       ],
@@ -1517,14 +1519,14 @@
       "parent": "tibia_r",
       "parent_to_base": [
         [
-          0.9942975703750765, -0.018557934606193413, -0.10501402101325395,
-          -0.0102646
+          0.9606744933938294, -0.04885385617842596, -0.27334560263338276,
+          -0.009956662
         ],
         [
-          4.12693463669788e-8, 0.9847417938081873, -0.1740218363523156,
-          -0.438544
+          0.0007514106500190886, 0.9848550721970922, -0.17337797481138043,
+          -0.42538768
         ],
-        [0.10664118128667834, 0.17302948474345656, 0.9791263737961489, 0.0],
+        [0.27767598586219977, 0.16635440332061638, 0.9461618568571115, 0.0],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "primitives": [
@@ -1610,16 +1612,16 @@
       "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
       "parent_to_base": [
         [
-          0.7261865690144209, -0.6874974592311962, -0.0005572555192807342,
-          -0.004559604579806553
+          0.442494152196875, -0.8967712164971928, -0.0005572555192805302,
+          -0.004559604579806644
         ],
         [
-          -0.6639574844939052, -0.7011111253123292, -0.2600070167280208,
-          0.10533385137723622
+          -0.8659925570930592, -0.427145458025272, -0.2600070167280206,
+          0.10533385137723617
         ],
         [
-          0.178363465338588, 0.1891835973701985, -0.965606566215496,
-          -0.08163949804960413
+          0.2329287795249728, 0.11553416356440013, -0.965606566215496,
+          -0.08163949804960423
         ],
         [0.0, 0.0, 0.0, 1.0]
       ],
@@ -1660,15 +1662,15 @@
       "parent_to_base": [
         [
           -0.12429404455826688, -0.9922454285544172, -4.5655751879009243e-7,
-          -0.0075634004
+          -0.00779732
         ],
         [
           0.9897616899776521, -0.12398288545581986, -0.07071096921009314,
-          -0.38140497
+          -0.393201
         ],
         [
           0.07016257934204852, -0.008789404240898925, 0.997496846527928,
-          0.0025709947
+          0.00265051
         ],
         [0.0, 0.0, 0.0, 1.0]
       ],
@@ -1691,13 +1693,14 @@
       "parent": "tibia_l",
       "parent_to_base": [
         [
-          0.9942975703750765, -0.018557934606193413, 0.10501402101325395,
-          -0.0102381
+          0.9606745016284401, -0.04885759847845805, 0.2733449048214841,
+          -0.009930956999999999
         ],
         [
-          4.12693463669788e-8, 0.9847417938081873, 0.1740218363523156, -0.434354
+          0.0007566989339442371, 0.9848558635571361, 0.17337345651469113,
+          -0.42132338
         ],
-        [-0.10664118128667834, -0.17302948474345656, 0.9791263737961489, 0.0],
+        [-0.27767594301212306, -0.1663486191347734, 0.9461628863912821, 0.0],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "primitives": [
@@ -1922,7 +1925,7 @@
       "offset_m": [0.02, -0.15, 0.08]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from iron7.json (#12210); grip rotation refitted per capture from docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_iron7.json (#12221) | hip joints relocated to functional centres from the capture (radii 0.4278/0.3952 m, sphere sd 2.1/1.9 mm over 649 frames) with zero twist calibrated (R: -21.94 deg, L: 46.69 deg) | toe contact spheres added on calcanei; stiffness 5e+04 N/m | segments scaled femur_l x0.9700, femur_r x0.9700, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from iron7.json (#12210); grip rotation refitted per capture from docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_iron7.json (#12221); static external tibial-torsion offset 10 deg per ankle (#12789) | hip joints relocated to functional centres from the capture (radii 0.4278/0.3952 m, sphere sd 2.1/1.9 mm over 649 frames) with zero twist calibrated (R: -1.53 deg, L: 26.38 deg) | toe contact spheres added on calcanei; stiffness 5e+04 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x0.9700, tibia_r x0.9700 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
@@ -1934,14 +1937,19 @@
       "R": [37.035, 49.131, 121.189]
     },
     "hip_zero_twist_deg": {
-      "l": 46.69,
-      "r": -21.94
+      "l": 26.38,
+      "r": -1.53
     },
     "mass_kg": 78.0,
     "shoulder_scale": 1.0,
     "source": "de Leva 1996 male table",
     "stature_m": 1.71,
     "trunk_scale": 1.15
+  },
+  "tibial_torsion_deg": {
+    "l": 10.0,
+    "r": 10.0,
+    "source": "Seber et al. 2000, Arch Orthop Trauma Surg 120:255-258 (doi:10.1007/s004020050459): CT tibiofibular torsion of 50 male adults, range 16-50 deg"
   },
   "upper_body_counts": {
     "bodies": 15,

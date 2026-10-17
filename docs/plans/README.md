@@ -20,6 +20,10 @@ This directory contains implementation plans, roadmaps, and strategic documentat
 - [priority_improvements_jan_2026.md](priority_improvements_jan_2026.md) - High-priority improvements for January 2026
 - [IMPLEMENTATION_CHECKLIST.md](IMPLEMENTATION_CHECKLIST.md) - Implementation task checklist
 
+### Hardware Integrations
+
+- [open_fp_integration/](open_fp_integration/README.md) - Evaluation and plan for open-fp vertical force plates (epic #13061)
+
 ## Reviews and Analysis
 
 ### Adversarial Reviews
