@@ -52,7 +52,10 @@ $E_k w_k = g_k$ with
   g_k = (N_k, 0, 0)^\top .
 \end{equation}
 Shear $t_i^\top f_k$ and free moment $n^\top M_k$ are not observed. They
-receive \textbf{no target and no prior}. Shear enters only through the lever
+receive \textbf{no measurement target and no new prior}. They remain
+regularised, as today, by the plant prior $\|w-w^0\|^2_{W_w}$, which weights
+all six wrench components; the proposal does not remove that term, so their
+values stay the plant's, not the plates'. Shear also enters through the lever
 arm $h$ inside $r_k$, exactly as the plate physics dictates.
 
 \section{Question 2: Weighting and the Clock Offset}
@@ -69,8 +72,11 @@ transient are excluded from targeting.
 
 The clock offset is one common-mode unknown, never independent per-frame
 noise. It is \emph{profiled}, as in OF-12. The QP is run at each grid shift
-that OF-12 left consistent, and the shift is chosen on held-out frames only
-(Question 4), never on the frames that are being tracked.
+that OF-12 left consistent. The shift is chosen on a separate
+\emph{calibration} partition of time blocks, disjoint from both the tracked
+blocks and the validation blocks of Question 4, or fixed by an external timing
+anchor (the sourced impact, OF-04). It is then locked before any validation
+block is scored, so validation outcomes never feed model selection.
 
 \section{Question 3: Conflict With the Dynamics}
 
@@ -97,8 +103,10 @@ A run that tracks the plates cannot then be validated against the same
 plates. The design is:
 \begin{itemize}
   \item \textbf{Held-out frames.} Split each trial into contiguous time
-        blocks longer than the load autocorrelation time. Track on some
-        blocks and compute OF-08 residuals on the others.
+        blocks longer than the load autocorrelation time, in three disjoint
+        roles: tracked, calibration (clock shift only, Question 2) and
+        validation. Compute OF-08 residuals on the validation blocks only,
+        after the shift is locked.
   \item \textbf{Held-out trials.} Track on some swings and compare on others
         by the same golfer, captured with the same qualified device.
   \item \textbf{Alignment.} An alignment cross-correlated against the

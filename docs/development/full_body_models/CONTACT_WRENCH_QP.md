@@ -43,3 +43,7 @@ python3 -m src.shared.python.motion_matching.pipeline.cli \
   --spec docs/development/full_body_models/full_body_spec_anthro_driver.json \
   --skip-hip-calibration --static-seeds --capture driver --tracking wrench-qp --out <dir>
 ```
+
+## Related Proposal
+
+Adding measured open-fp vertical-plate rows to this QP is proposed, not implemented, in [`docs/research/open_fp_contact_qp/proposal.tex`](../../research/open_fp_contact_qp/proposal.tex) (OF-10, #13089).
