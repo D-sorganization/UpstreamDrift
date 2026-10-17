@@ -310,16 +310,23 @@ def test_spec_left_hip_rotation_axis_is_mirrored_like_opensim() -> None:
 
     Before the fix +hip_rotation_l turned the left foot OUT, so equal-sign seeds
     splayed the feet and the left hip saturated at its -40 deg limit.
+
+    Measured against the zero pose, since the spec's static tibial torsion
+    (#12789) turns both neutral feet out by the same offset.
     """
     document, kin = _spec_kin()
     targets = _targets(0.0, 0.0)
     names = list(kin.coordinate_order)
+    neutral = model_feet_deg(
+        kin, np.zeros(len(names)), targets, address_feet.MODEL_TARGET_AXIS
+    )
     for side, expected_sign in (("right", -1.0), ("left", -1.0)):
         q = np.zeros(len(names))
         q[names.index(f"hip_rotation_{side[0]}")] = np.radians(10.0)
         angle = model_feet_deg(kin, q, targets, address_feet.MODEL_TARGET_AXIS)[side]
-        assert np.sign(angle) == expected_sign
-        assert abs(angle) == pytest.approx(10.0, abs=1.0)
+        turn = angle - neutral[side]
+        assert np.sign(turn) == expected_sign
+        assert abs(turn) == pytest.approx(10.0, abs=1.0)
 
 
 def test_shared_seed_puts_both_model_feet_on_target_within_two_degrees() -> None:

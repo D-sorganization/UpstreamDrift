@@ -24,6 +24,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.body_part_viz.fitters._kabsch import kabsch_rotation
+from src.shared.python.motion_matching.tibial_torsion import validate_tibial_torsion
 from src.shared.python.motion_matching.tour_capture_contract import tracked_labels
 
 
@@ -451,6 +452,7 @@ def validate_full_body_spec(
         or not str(document.get("lower_limb_provenance", "")).strip()
     ):
         raise ValueError("Provenance is required")
+    validate_tibial_torsion(document)
 
 
 def save_full_body_spec(document: Mapping[str, Any], path: Path) -> Path:
