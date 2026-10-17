@@ -50,10 +50,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13087
 - **Branch:** feat/13087-of-07-plate-overlay
-- **PR:** #13100
+- **PR:** #13100, #13124
 - **Paths:** see #13100
 - **Started:** 2026-10-17
-- **Last verified:** 2026-10-17 (`181406be`; collated from changes/13087-overlay-measured-plate-trials-on-the-gro.md)
+- **Last verified:** 2026-10-17 (`c1e4d044`; collated from changes/13087-ground-reaction-tile-asks-for-plate-decl.md)
 - **Summary:** Overlay measured plate trials on the ground reaction tile (OF-07)
 - **Next step:** Review and merge after #13090, #13091
 
