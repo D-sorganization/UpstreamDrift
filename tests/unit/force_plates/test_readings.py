@@ -59,9 +59,7 @@ def _hand_trial(
     loads = {"left": np.array(left), "right": np.array(right)}
     cops: dict[str, Any] = {"left": np.array(left_cop), "right": np.array(right_cop)}
     cops["net"] = loaded_net_cop(loads, cops)
-    return tf.make_trial(
-        times_s=np.array(times), load_n=loads, cop_m=cops, events_s={}
-    )
+    return tf.make_trial(times_s=np.array(times), load_n=loads, cop_m=cops, events_s={})
 
 
 NONUNIFORM = [0.0, 0.004, 0.010, 0.015]
@@ -280,9 +278,7 @@ def test_out_of_range_time_is_refused_not_extrapolated(model_time: float) -> Non
 
 def test_shift_can_push_a_valid_time_out_of_range() -> None:
     with pytest.raises(ValueError, match="outside the trial"):
-        reading_at(
-            _placed(_linear_trial()), 0.0, _align(), _opts(offset_shift_s=0.001)
-        )
+        reading_at(_placed(_linear_trial()), 0.0, _align(), _opts(offset_shift_s=0.001))
 
 
 def test_reading_at_input_validation() -> None:
