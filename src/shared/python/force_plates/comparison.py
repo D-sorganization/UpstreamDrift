@@ -94,6 +94,10 @@ class ComparisonOptions:
             isinstance(v, str) and v for v in mapping.values()
         ):
             raise ValueError(f"foot_map must map exactly {FOOT_LABELS} to model keys")
+        if len(set(mapping.values())) != len(mapping):
+            raise ValueError(
+                "foot_map must map each plate foot to a distinct model key"
+            )
         non_empty_text(self.frame_id, "frame_id")
         non_empty_text(self.model_identity, "model_identity")
         if self.purpose not in get_args(Purpose):

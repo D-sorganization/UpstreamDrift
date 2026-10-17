@@ -279,6 +279,7 @@ def test_model_ground_must_match_the_plate_surface() -> None:
     [
         ({"foot_map": {"left": "L"}}, "foot_map"),
         ({"foot_map": {"left": "L", "right": "X"}}, "model"),
+        ({"foot_map": {"left": "L", "right": "L"}}, "distinct"),
         ({"purpose": "acceptance"}, "purpose"),
         ({"frame_id": ""}, "frame_id"),
     ],
