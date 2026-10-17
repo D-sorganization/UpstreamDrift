@@ -382,22 +382,36 @@ coverage
 k=\Phi^{-1}\!\Bigl(1-\frac{\alpha}{2M}\Bigr),
 \label{eq:plate_bonferroni}
 \end{equation}
-which bounds the probability of eliminating a correct candidate by $\alpha$
-for Gaussian rows at their declared sigma, whatever the dependence between
-frames and rows.  The clock offset between plate and model is one unknown
-shared by every frame, so it is profiled rather than folded into the per-row
-sigma: the screen repeats the test at each shift of a grid spanning
-$\pm r\,\sigma_{\Delta t}$ (step no larger than the plate's sample interval),
-and a candidate survives when any shift leaves every frame consistent.  For a
-true offset on the grid the bound $\alpha$ holds; an offset outside it adds
-$2\Phi(-r)$.  A frame is consistent when the candidate's \emph{joint} feasible
-set (the declared hypotheses, friction cones and torque capacity when
-declared, and the observation bands) is non-empty; the observation-only
-verdict (weighted least squares over the whole null space) is reported beside
-it.  An alignment derived by cross-correlating the plates against a model is
+with the plates read at this same $k$, so that a deterministic bias folded
+into a row's sigma as $\mathrm{bias}/k$ is budgeted exactly.  The guarantee is
+an implication: if the candidate's family contains the true contact loads,
+those loads satisfy every other declared hypothesis, each row error is
+Gaussian at its declared sigma and the true clock offset is a grid shift, then
+the true member lies in every band unless some row error exceeds $k\sigma$, so
+the probability of eliminating a correct candidate is at most $\alpha$ by the
+union bound, whatever the dependence between frames and rows.  The clock
+offset between plate and model is one unknown shared by every frame, so it is
+profiled rather than folded into the per-row sigma: the screen repeats the
+test at each shift of a grid spanning $\pm r\,\sigma_{\Delta t}$ (step no
+larger than the plate's sample interval), and a candidate survives when any
+data-bearing shift leaves every tested frame consistent.  Profiling can only
+lower the false-elimination rate, so $M$ is counted per shift and is not
+multiplied by the number of shifts.  A true offset beyond the grid adds
+$2\Phi(-r)$; a true offset between grid points is covered by widening the
+reading skew by half the grid step, which adds at least the
+$\dot F\,\Delta/2$ reading error to the band.  A shift at which no frame has
+data tests nothing: it is reported but never rescues a candidate, so the grid
+must stay within the trial.  A frame is consistent when the candidate's
+\emph{joint} feasible set (the declared hypotheses, friction cones and torque
+capacity when declared, and the observation bands) is non-empty; the
+weighted least-squares residual check reported beside it is a diagnostic with
+no error-rate guarantee.  An alignment derived by cross-correlating the plates against a model is
 refused as evidence about that same model.  On the spatial fixture a seeded
 200-run Monte Carlo keeps a correct candidate within $\alpha=0.05$ plus a
-three-sigma binomial margin, and a model whose mass is $5\,\%$ low is
+three-sigma binomial margin, a single fixed load row is an exact two-sided
+$z$-test whose 400-run elimination rate matches $\alpha$ within that margin
+from both sides, a load offset of $0.95\,k\sigma$ survives and one of
+$1.05\,k\sigma$ is eliminated, and a model whose mass is $5\,\%$ low is
 eliminated at every frame because its point-foot loads, fixed by the balance,
 miss the data by more than $k\sigma$.  Elimination is conditional on the
 declared model, inertial parameters, friction coefficient, uncertainties,

@@ -35,8 +35,11 @@ from src.shared.python.loop_nullspace.plate_screen import (
     ScreenFrame,
     ScreenSetup,
 )
-from tests.unit.loop_nullspace._ground_fixtures import make_consistent
-from tests.unit.loop_nullspace.test_plate_screen import _hypotheses, _light_model
+from tests.unit.loop_nullspace._ground_fixtures import (
+    hypothesis_set,
+    make_consistent,
+    scaled_mass_model,
+)
 
 pytestmark = [pytest.mark.unit, pytest.mark.requires_pinocchio]
 
@@ -129,7 +132,7 @@ def _provider(snap, dec, **changes) -> PlateObservationProvider:
 def _setup() -> ScreenSetup:
     return ScreenSetup(
         rule=FamilyWiseRule(alpha=0.05),
-        hypotheses=_hypotheses(GRF_ID),
+        hypotheses=hypothesis_set(GRF_ID),
         offsets_s=(0.0,),
     )
 
@@ -163,7 +166,26 @@ def test_with_shift_moves_the_trial_time(truth) -> None:
     snap, dec = truth
     provider = _provider(snap, dec, frame_times_s={0: 0.049})
     assert provider(0, snap) is not None
-    assert provider.with_shift(-0.002)(0, snap) is None  # 0.051 s is past the end
+    assert provider.with_shift(-0.002, 3.0)(0, snap) is None  # 0.051 s is past the end
+
+
+def test_with_shift_reads_at_the_requested_coverage(truth) -> None:
+    snap, dec = truth
+    obs = _provider(snap, dec).with_shift(0.0, 4.5)(0, snap)
+    assert obs.coverage == 4.5
+
+
+def test_profiling_half_step_widens_the_skew(truth) -> None:
+    snap, dec = truth
+    provider = _provider(snap, dec)
+    widened = provider.with_shift(0.0, 3.0, half_step_s=0.0025)
+    assert widened.options.skew_s == pytest.approx(provider.options.skew_s + 0.0025)
+
+
+def test_frame_keys_must_be_integers(truth) -> None:
+    snap, dec = truth
+    with pytest.raises(TypeError):
+        _provider(snap, dec, frame_times_s={1.7: 0.01})
 
 
 def test_ground_groups_must_name_both_feet(truth) -> None:
@@ -201,7 +223,7 @@ def test_true_candidate_survives_the_full_plate_path(truth) -> None:
 
 def test_light_model_is_eliminated_through_the_full_plate_path(truth) -> None:
     snap, dec = truth
-    light, light_dec = _light_model(snap, 0.95)
+    light, light_dec = scaled_mass_model(snap, 0.95)
     report = screen_with_plates(
         _frames(light, light_dec), _provider(snap, dec), _setup(), model_identity=MODEL
     )
@@ -275,7 +297,7 @@ def test_shipped_grf_preset_with_cones_and_capacity_keeps_the_truth(truth) -> No
         _frames(snap, dec), _provider(snap, dec), setup, model_identity=MODEL
     )
     assert report.tested and not report.eliminated
-    light, light_dec = _light_model(snap, 0.95)
+    light, light_dec = scaled_mass_model(snap, 0.95)
     light_report = screen_with_plates(
         _frames(light, light_dec), _provider(snap, dec), setup, model_identity=MODEL
     )

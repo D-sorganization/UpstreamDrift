@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import dataclasses
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -66,6 +66,7 @@ __all__ = [
     "GroundObservation",
     "ObservationAccounting",
     "ObservationInconsistentError",
+    "ObservationProvider",
     "contact_frame",
     "foot_friction_cones",
     "observation_accounting",
@@ -567,6 +568,11 @@ def _plate_rows(
         (reading.sigma_force_n, sig_m, sig_m),
         ("normal_load", "cop_moment_t1", "cop_moment_t2"),
     )
+
+
+#: Supplies a frame's ground observation, or ``None`` when no data cover it
+#: (the facade's ``EngineContext.observation_for`` and the OF-12 plate screen).
+ObservationProvider = Callable[[int, ClosedLoopSnapshot], GroundObservation | None]
 
 
 def _positive(value: float, name: str) -> float:

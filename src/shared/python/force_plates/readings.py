@@ -187,6 +187,10 @@ class PlacedTrial:
         times = self.trial.times_s
         return float(times[0]), float(times[-1])
 
+    def min_sample_interval_s(self) -> float:
+        """Smallest interval between consecutive samples [s]."""
+        return float(np.min(np.diff(self.trial.times_s)))
+
 
 # ------------------------------------------------------------ readings --
 @dataclass(frozen=True)

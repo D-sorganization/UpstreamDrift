@@ -8,7 +8,13 @@ import numpy as np
 
 from src.shared.python.loop_nullspace.contracts import ClosedLoopSnapshot
 
-__all__ = ["SPATIAL_VARIANT", "VARIANTS", "make_consistent"]
+__all__ = [
+    "SPATIAL_VARIANT",
+    "VARIANTS",
+    "hypothesis_set",
+    "make_consistent",
+    "scaled_mass_model",
+]
 
 VARIANTS = {
     "two_point_feet": {"foot_points": 1},
@@ -40,3 +46,29 @@ def make_consistent(snap: ClosedLoopSnapshot) -> ClosedLoopSnapshot:
     a = np.array(snap.a)
     a[u] += alpha * np.linalg.solve(snap.M[np.ix_(u, u)], ell)
     return dataclasses.replace(snap, a=a)
+
+
+def hypothesis_set(*ids: str):
+    """A test preset declaring exactly ``ids``."""
+    from src.shared.python.loop_nullspace.registry import (
+        Hypothesis,
+        HypothesisSet,
+        Source,
+    )
+
+    return HypothesisSet(
+        "t",
+        "Test preset",
+        tuple(Hypothesis(i, "t", Source(None, "t"), "NOT_APPLICABLE") for i in ids),
+        (),
+    )
+
+
+def scaled_mass_model(snap: ClosedLoopSnapshot, scale: float):
+    """``snap`` with every inertia scaled by ``scale`` (balance made consistent)."""
+    from src.shared.python.loop_nullspace.decomposition import decompose
+
+    light = make_consistent(
+        dataclasses.replace(snap, M=scale * snap.M, h=scale * snap.h)
+    )
+    return light, decompose(light, weights=np.eye(light.topology.n_actuated))

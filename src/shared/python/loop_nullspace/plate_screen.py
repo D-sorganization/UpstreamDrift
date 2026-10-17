@@ -11,20 +11,30 @@ Statistics (binding, epic #13061):
 
 * **Family-wise control.**  Every tested row of every frame is one test.  With
   ``M`` rows the per-row band is the Bonferroni coverage
-  ``k = Phi^-1(1 - alpha / (2 M))``, so a candidate that is right is eliminated
-  with probability at most ``alpha`` (Gaussian rows at the declared sigma),
+  ``k = Phi^-1(1 - alpha / (2 M))``.  The precise guarantee: if the candidate's
+  family contains the true contact loads, those loads satisfy every other
+  declared hypothesis (cones, capacity), each row's error is Gaussian at its
+  declared sigma, any deterministic bias is budgeted at this same ``k`` (the
+  provider is called with ``k``), and the true clock offset is a grid shift,
+  then the true member lies in every band unless some row error exceeds
+  ``k sigma``, so ``P(false elimination) <= alpha`` by the union bound,
   whatever the dependence between frames and rows.
-* **Common-mode clock offset.**  The offset between the plate clock and the
-  model clock is one unknown shared by every frame.  It is *profiled*: the
-  screen evaluates each declared shift and the candidate survives when **any**
-  shift makes every frame consistent.  The false-elimination bound then holds
-  for a true offset on the grid; a grid spanning ``r`` offset sigmas adds
-  ``2 Phi(-r)`` for an offset outside it.
+* **Common-mode clock offset.**  The offset is one unknown shared by every
+  frame.  It is *profiled*: the candidate survives when **any** data-bearing
+  shift makes every tested frame consistent.  Profiling can only lower the
+  false-elimination rate (the guarantee needs only the true shift), so ``M``
+  is counted per shift and is **not** multiplied by the number of shifts.  A
+  true offset beyond a grid spanning ``r`` offset sigmas adds ``2 Phi(-r)``; a
+  true offset between grid points is covered by widening the reading skew by
+  half the grid step (:func:`~src.shared.python.loop_nullspace.plate_provider.screen_with_plates`).
+* **No vacuous rescue.**  A shift at which no frame has data tests nothing; it
+  is reported (``vacuous_shifts_s``) but never rescues a candidate, so the
+  offset grid must stay within the trial.
 * **Joint verdict decides.**  A frame is consistent when the candidate's full
   feasible set (declared hypotheses, friction cones when declared, and the
-  observation bands) is non-empty.  The observation-only verdict (weighted
-  least squares over the whole null space, ignoring cones and capacity) is
-  reported beside it for diagnosis.
+  observation bands) is non-empty.  The weighted least-squares residual check
+  is reported beside it for diagnosis only; it carries no error-rate
+  guarantee.
 
 Non-claims: elimination is conditional on the declared model, inertial
 parameters, friction coefficient, uncertainties, coverage and alignment.  A
@@ -46,8 +56,10 @@ from src.shared.python.loop_nullspace.contracts import ClosedLoopSnapshot
 from src.shared.python.loop_nullspace.decomposition import Decomposition
 from src.shared.python.loop_nullspace.feasible_set import FeasibleSet
 from src.shared.python.loop_nullspace.ground_contact import (
+    DEFAULT_COVERAGE,
     GRF_ID,
     GroundObservation,
+    ObservationProvider,
     foot_friction_cones,
     observation_accounting,
 )
@@ -66,10 +78,10 @@ __all__ = [
     "plate_consistency",
 ]
 
-#: Supplies a frame's ground observation, or ``None`` when no data cover it.
-ObservationProvider = Callable[[int, ClosedLoopSnapshot], "GroundObservation | None"]
-#: Builds the provider for one profiled clock-offset shift [s].
-ProviderFactory = Callable[[float], ObservationProvider]
+#: Builds the provider for one profiled clock-offset shift [s] that reads the
+#: plates at the given per-row coverage ``k`` (so a bias budgeted as
+#: ``bias / k`` in sigma is exact for the band actually used).
+ProviderFactory = Callable[[float, float], ObservationProvider]
 
 _CONE_ID = "H-FRICTION-CONE"
 _CAPACITY_ID = "H-TORQUE-CAPACITY"
@@ -149,7 +161,13 @@ class ScreenSetup:
 
 @dataclass(frozen=True)
 class FrameVerdict:
-    """One frame at one shift.  ``tested`` is false when no data covered it."""
+    """One frame at one shift.  ``tested`` is false when no data covered it.
+
+    ``joint_feasible`` is the deciding verdict.  ``wls_within_band`` reports
+    whether the weighted least-squares member's largest normalised residual is
+    within ``k``; it is a diagnostic with no error-rate guarantee (least
+    squares does not minimise the largest residual).
+    """
 
     index: int
     tested: bool
@@ -157,7 +175,7 @@ class FrameVerdict:
     rank_visible: int = 0
     chi2: float = 0.0
     max_normalised_residual: float = 0.0
-    observation_consistent: bool = True
+    wls_within_band: bool = True
     joint_feasible: bool = True
     conflict: tuple[str, ...] = ()
 
@@ -176,9 +194,14 @@ class OffsetVerdict:
     frames: tuple[FrameVerdict, ...]
 
     @property
+    def vacuous(self) -> bool:
+        """True when no frame had data at this shift (nothing was tested)."""
+        return self.n_rows == 0
+
+    @property
     def consistent(self) -> bool:
-        """True when every tested frame is jointly feasible."""
-        return all(f.joint_feasible for f in self.frames)
+        """True when data were tested and every tested frame is jointly feasible."""
+        return not self.vacuous and all(f.joint_feasible for f in self.frames)
 
     @property
     def first_eliminating_index(self) -> int | None:
@@ -201,8 +224,9 @@ class OffsetVerdict:
 class PlateConsistencyReport:
     """The screen's answer for one candidate.
 
-    ``eliminated`` is true only when data were tested and no profiled shift
-    leaves every frame jointly feasible.  ``deciding_verdict`` is ``"joint"``.
+    ``eliminated`` is true when data were tested and no data-bearing profiled
+    shift leaves every tested frame jointly feasible; a vacuous shift (no data)
+    never rescues a candidate.  ``deciding_verdict`` is ``"joint"``.
     """
 
     alpha: float
@@ -216,13 +240,18 @@ class PlateConsistencyReport:
 
     @property
     def eliminated(self) -> bool:
-        """True when the data rule the candidate out at every profiled shift."""
-        return self.tested and not any(o.consistent for o in self.offsets)
+        """True when the data rule the candidate out at every data-bearing shift."""
+        return self.tested and not self.surviving_shifts_s
 
     @property
     def surviving_shifts_s(self) -> tuple[float, ...]:
-        """Shifts at which every tested frame is jointly feasible."""
-        return tuple(o.shift_s for o in self.offsets if o.consistent and o.n_rows)
+        """Data-bearing shifts at which every tested frame is jointly feasible."""
+        return tuple(o.shift_s for o in self.offsets if o.consistent)
+
+    @property
+    def vacuous_shifts_s(self) -> tuple[float, ...]:
+        """Shifts at which no frame had data (they test nothing)."""
+        return tuple(o.shift_s for o in self.offsets if o.vacuous)
 
     def to_dict(self) -> dict[str, Any]:
         """JSON-compatible form."""
@@ -232,6 +261,7 @@ class PlateConsistencyReport:
             "tested": self.tested,
             "eliminated": self.eliminated,
             "surviving_shifts_s": list(self.surviving_shifts_s),
+            "vacuous_shifts_s": list(self.vacuous_shifts_s),
             "offsets": [o.to_dict() for o in self.offsets],
         }
 
@@ -273,11 +303,12 @@ def plate_consistency(
     untested, never fabricated.
     """
     _check_frames(frames)
+    if not callable(providers):
+        raise TypeError("providers must be a callable (shift_s, coverage) -> provider")
     if not isinstance(setup, ScreenSetup):
         raise TypeError("setup must be a ScreenSetup")
     verdicts = tuple(
-        _offset_verdict(frames, providers(shift), setup, shift)
-        for shift in setup.offsets_s
+        _offset_verdict(frames, providers, setup, shift) for shift in setup.offsets_s
     )
     return PlateConsistencyReport(alpha=setup.rule.alpha, offsets=verdicts)
 
@@ -294,18 +325,42 @@ def _check_frames(frames: Sequence[ScreenFrame]) -> None:
 
 def _offset_verdict(
     frames: Sequence[ScreenFrame],
-    provider: ObservationProvider,
+    providers: ProviderFactory,
     setup: ScreenSetup,
     shift_s: float,
 ) -> OffsetVerdict:
-    observations = {f.index: provider(f.index, f.snapshot) for f in frames}
-    n_rows = sum(o.n_rows for o in observations.values() if o is not None)
-    coverage = setup.rule.coverage(n_rows) if n_rows else math.inf
+    """Two passes: count the tested rows, then read the plates at the Bonferroni ``k``."""
+    n_rows = _count_rows(frames, providers(shift_s, DEFAULT_COVERAGE))
+    if n_rows == 0:
+        untested = tuple(FrameVerdict(f.index, tested=False) for f in frames)
+        return OffsetVerdict(shift_s, math.inf, 0, untested)
+    coverage = setup.rule.coverage(n_rows)
+    provider = providers(shift_s, coverage)
+    observations = {f.index: _observe(provider, f) for f in frames}
+    if sum(o.n_rows for o in observations.values() if o is not None) != n_rows:
+        raise ValueError("the provider changed the tested rows between passes")
     verdicts = tuple(
         _frame_verdict(frame, observations[frame.index], setup, coverage)
         for frame in frames
     )
     return OffsetVerdict(shift_s, coverage, n_rows, verdicts)
+
+
+def _observe(
+    provider: ObservationProvider, frame: ScreenFrame
+) -> GroundObservation | None:
+    observation = provider(frame.index, frame.snapshot)
+    if observation is not None and not isinstance(observation, GroundObservation):
+        raise TypeError(
+            f"provider returned {type(observation).__name__}; expected a "
+            "GroundObservation or None"
+        )
+    return observation
+
+
+def _count_rows(frames: Sequence[ScreenFrame], provider: ObservationProvider) -> int:
+    observations = (_observe(provider, f) for f in frames)
+    return sum(o.n_rows for o in observations if o is not None)
 
 
 def _frame_verdict(
@@ -327,7 +382,7 @@ def _frame_verdict(
         rank_visible=accounting.rank_visible,
         chi2=accounting.chi2,
         max_normalised_residual=accounting.max_normalised_residual,
-        observation_consistent=accounting.max_normalised_residual <= coverage,
+        wls_within_band=accounting.max_normalised_residual <= coverage,
         joint_feasible=not empty,
         conflict=feasible.conflict_set() if empty else (),
     )

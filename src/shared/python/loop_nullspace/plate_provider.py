@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import dataclasses
 import math
+import operator
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -80,7 +81,7 @@ class PlateObservationProvider:
         ):
             if not isinstance(getattr(self, name), kind):
                 raise TypeError(f"{name} must be a {kind.__name__}")
-        times = {int(k): float(v) for k, v in self.frame_times_s.items()}
+        times = {operator.index(k): float(v) for k, v in self.frame_times_s.items()}
         if not all(math.isfinite(t) for t in times.values()):
             raise ValueError("frame_times_s must be finite")
         groups = dict(self.ground_groups)
@@ -101,17 +102,36 @@ class PlateObservationProvider:
         reading = reading_at(self.placed, model_time, self.alignment, self.options)
         readings = {foot: _foot_reading(reading.feet[foot]) for foot in FOOT_LABELS}
         return GroundObservation.from_vertical_plates(
-            snapshot, readings, self._groups(snapshot)
+            snapshot,
+            readings,
+            self._groups(snapshot),
+            coverage=self.options.coverage,
         )
 
-    def with_shift(self, shift_s: float) -> PlateObservationProvider:
-        """This provider with the common-mode offset shifted by ``shift_s``."""
-        options = dataclasses.replace(self.options, offset_shift_s=shift_s)
+    def with_shift(
+        self, shift_s: float, coverage: float, *, half_step_s: float = 0.0
+    ) -> PlateObservationProvider:
+        """This provider at offset shift ``shift_s``, read at per-row ``coverage``.
+
+        ``half_step_s`` (half the profiling grid step) is added to the reading
+        skew, so a true offset between grid points is covered: the band then
+        widens by ``k * rate * half_step >= rate * half_step`` (conservative).
+        """
+        if not math.isfinite(half_step_s) or half_step_s < 0.0:
+            raise ValueError(
+                f"half_step_s must be finite and >= 0, got {half_step_s!r}"
+            )
+        options = dataclasses.replace(
+            self.options,
+            offset_shift_s=shift_s,
+            coverage=coverage,
+            skew_s=self.options.skew_s + half_step_s,
+        )
         return dataclasses.replace(self, options=options)
 
     def profile_offsets(self, *, reach_sigmas: float) -> tuple[float, ...]:
         """Shifts spanning ``+/- reach_sigmas`` offset sigmas, step <= sample interval."""
-        step = float(np.min(np.diff(self.placed.trial.times_s)))
+        step = self.placed.min_sample_interval_s()
         return offset_grid(
             sigma_offset_s=self.alignment.sigma_offset_s,
             reach_sigmas=reach_sigmas,
@@ -156,8 +176,11 @@ def screen_with_plates(
 ) -> PlateConsistencyReport:
     """Screen a candidate named ``model_identity`` against ``provider``'s trial.
 
-    Raises ``ValueError`` when the provider's alignment was derived from the
-    same model (an offset fitted to a model cannot then test that model).
+    The plates are read at the screen's Bonferroni coverage, and the reading
+    skew is widened by half the largest gap of ``setup.offsets_s`` so that a
+    true offset between grid points is covered.  Raises ``ValueError`` when
+    the provider's alignment was derived from the same model (an offset
+    fitted to a model cannot then test that model).
     """
     if not isinstance(provider, PlateObservationProvider):
         raise TypeError("provider must be a PlateObservationProvider")
@@ -165,4 +188,16 @@ def screen_with_plates(
         raise ValueError(
             f"the alignment was derived from {model_identity!r}; it cannot test it"
         )
-    return plate_consistency(frames, provider.with_shift, setup)
+    half_step = _half_grid_step(setup.offsets_s)
+
+    def factory(shift_s: float, coverage: float) -> PlateObservationProvider:
+        return provider.with_shift(shift_s, coverage, half_step_s=half_step)
+
+    return plate_consistency(frames, factory, setup)
+
+
+def _half_grid_step(shifts: Sequence[float]) -> float:
+    """Half the largest gap between neighbouring profiled shifts (0 for one shift)."""
+    ordered = sorted(shifts)
+    gaps = [b - a for a, b in zip(ordered, ordered[1:], strict=False)]
+    return 0.5 * max(gaps, default=0.0)
