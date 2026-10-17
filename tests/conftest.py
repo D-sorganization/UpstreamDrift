@@ -725,6 +725,27 @@ def _matches_protected(name: str) -> bool:
 
 
 @pytest.fixture(autouse=True)
+def _restore_matplotlib_rcparams() -> Generator[None, None, None]:
+    """Undo global matplotlib ``rcParams`` changes made during a test.
+
+    Building the launcher applies the suite-wide matplotlib style
+    (``apply_golf_suite_style`` sets ``savefig.bbox="tight"`` and
+    ``savefig.dpi=150``). Left in place, that leaks into later tests on the
+    same xdist worker and changes exported figure sizes. Only acts when
+    matplotlib is already imported, so tests that never touch it pay nothing.
+    """
+    mpl = sys.modules.get("matplotlib")
+    saved = dict(mpl.rcParams) if mpl is not None else None
+    yield
+    if saved is not None:
+        mpl.rcParams.update(saved)
+        return
+    mpl_after = sys.modules.get("matplotlib")
+    if mpl_after is not None:
+        mpl_after.rcdefaults()
+
+
+@pytest.fixture(autouse=True)
 def _protect_engine_modules() -> Generator[None, None, None]:
     """Prevent engine module state corruption from leaking between tests.
 

@@ -128,12 +128,7 @@ def make_camera(mujoco: Any, view: str, job: WorkerJob) -> Any:
     params = mujoco_camera_params(view, job.lookat_m, job.distance_m)
     cam = mujoco.MjvCamera()
     cam.type = mujoco.mjtCamera.mjCAMERA_FREE
-    cam.lookat[:] = params.lookat
-    cam.distance, cam.azimuth, cam.elevation = (
-        params.distance,
-        params.azimuth,
-        params.elevation,
-    )
+    params.apply_to(cam)
     return cam
 
 

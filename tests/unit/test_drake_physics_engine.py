@@ -33,20 +33,21 @@ try:
 except ImportError:
     pass
 
-# MultibodyPlant uses undocumented Drake APIs; enumerate tested attributes.
+# Only attributes that exist on the real pydrake MultibodyPlant may be listed
+# (enforced against real pydrake by tests/engines/drake/test_drake_real_api_parity.py).
 _PLANT_SPEC_ATTRS = [
     "Finalize",
     "time_step",
     "GetMyContextFromRoot",
-    "SetDefaultPositions",
-    "SetDefaultVelocities",
+    "SetDefaultState",
+    "SetPositions",
+    "SetVelocities",
     "GetPositions",
     "GetVelocities",
     "CalcMassMatrixViaInverseDynamics",
     "CalcInverseDynamics",
     "CalcGravityGeneralizedForces",
     "num_velocities",
-    "MakeMultibodyForces",
 ]
 
 
@@ -206,9 +207,14 @@ def test_drake_physics_engine_compute_inverse_dynamics(initialized_engine) -> No
     expected_tau = np.array([10.0, 10.0])
     engine.plant.CalcInverseDynamics.return_value = expected_tau
 
-    tau = engine.compute_inverse_dynamics(qacc)
+    with patch(
+        "src.engines.physics_engines.drake.python.drake_forces.MultibodyForces"
+    ) as mock_forces_cls:
+        tau = engine.compute_inverse_dynamics(qacc)
 
     np.testing.assert_array_equal(tau, expected_tau)
+    mock_forces_cls.assert_called_once_with(engine.plant)
+    mock_forces_cls.return_value.mutable_generalized_forces.assert_called_once()
     engine.plant.CalcInverseDynamics.assert_called_with(
-        engine.plant_context, qacc, engine.plant.MakeMultibodyForces(engine.plant)
+        engine.plant_context, qacc, mock_forces_cls.return_value
     )

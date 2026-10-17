@@ -812,6 +812,20 @@
       "id": "tools.model_explorer.frankenstein_assembly"
     },
     {
+      "feature_id": "tools.model_explorer.results_playback",
+      "title": "Model Explorer results playback on the shared-appearance golfer",
+      "status": "gap",
+      "pyqt": "src/tools/model_explorer/results_playback_panel.py",
+      "api": null,
+      "web": null,
+      "issue": 12878,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "File > Open Swing Result... lists swing-datastore runs (MuJoCo fit records and same-input closed-loop rollouts for Drake, OpenSim, Pinocchio and MyoSuite) and plays them on the MuJoCo golfer built from the run's own specification, with a timeline, joint-angle and club-head-speed plots and MP4 export (#12915). Non-MuJoCo results are labelled as playback of that engine's result. No web equivalent yet; tracked under epic #12878.",
+      "id": "tools.model_explorer.results_playback"
+    },
+    {
       "feature_id": "tools.motion_matching",
       "title": "Motion Matching tour-average and club-only Excel matching",
       "status": "parity",
@@ -3220,7 +3234,7 @@
   "inputs": {
     "src/config/models.yaml": "64caf5311e4be2c75e742dc053b425a528f851638ca2773423fcc77d40b5d419",
     "src/config/launcher_manifest.json": "c9844ac6e0cd9c6cc867bda7cfd44edf1199ac85a07af5b9a83bec70a65d00bc",
-    "src/config/feature_parity.json": "fd1807c860396ddeee885d98fae36643e873b31a3e15f1096bb5f4770143c326",
+    "src/config/feature_parity.json": "0df5724ce6ac3cbb35603c4fe9d6d8d1a26be037d38dbae0daabd26f7c33a7dc",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
