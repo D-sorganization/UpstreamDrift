@@ -12,6 +12,7 @@ from src.shared.python.biomechanics.ground_reaction_plot_model import (
 from src.shared.python.force_plates import (
     PlateTimeAlignment,
     PlateUncertainty,
+    ReadingOptions,
     placement_for_target,
 )
 from src.shared.python.force_plates.open_fp_format import PlateDeclarations
@@ -65,7 +66,10 @@ def _declared() -> PlateDeclarations:
 
 def test_unqualified_trial_shows_the_banner(tmp_path) -> None:
     app = _qt()
-    from src.tools.ground_reaction_plots.gui import GroundReactionPlotWidget
+    from src.tools.ground_reaction_plots.gui import (
+        GroundReactionPlotWidget,
+        PlateImportContext,
+    )
 
     widget = GroundReactionPlotWidget()
     widget.set_series(_model_series())
@@ -74,7 +78,9 @@ def test_unqualified_trial_shows_the_banner(tmp_path) -> None:
         offset_s=0.0, sigma_offset_s=0.001, kind="manual", note="test clock"
     )
     placement = placement_for_target("RH", TargetFrame(), origin_m=(0.0, 0.0, 0.0))
-    widget.load_plate_trial(w.write_swing(tmp_path), _declared(), placement, alignment)
+    widget.load_plate_trial(
+        w.write_swing(tmp_path), PlateImportContext(_declared(), placement, alignment)
+    )
     assert not widget.banner_label.isHidden()
     assert widget.banner_label.text() == "Unqualified measurement"
     assert "Measured Left Force" in widget._series.labels.values()
@@ -86,7 +92,10 @@ def test_unqualified_trial_shows_the_banner(tmp_path) -> None:
 
 def test_import_without_a_model_series_is_refused(tmp_path) -> None:
     _qt()
-    from src.tools.ground_reaction_plots.gui import GroundReactionPlotWidget
+    from src.tools.ground_reaction_plots.gui import (
+        GroundReactionPlotWidget,
+        PlateImportContext,
+    )
 
     widget = GroundReactionPlotWidget()
     alignment = PlateTimeAlignment(
@@ -95,6 +104,34 @@ def test_import_without_a_model_series_is_refused(tmp_path) -> None:
     placement = placement_for_target("RH", TargetFrame(), origin_m=(0.0, 0.0, 0.0))
     with pytest.raises(ValueError, match="model ground reaction"):
         widget.load_plate_trial(
-            w.write_swing(tmp_path), _declared(), placement, alignment
+            w.write_swing(tmp_path),
+            PlateImportContext(_declared(), placement, alignment),
         )
+    widget.cleanup()
+
+
+def test_import_forwards_the_context_reading_options(tmp_path, monkeypatch) -> None:
+    _qt()
+    from src.tools.ground_reaction_plots import gui
+    from src.tools.ground_reaction_plots.gui import PlateImportContext
+
+    seen: dict[str, object] = {}
+
+    def fake_overlay(series, path, **kw):
+        seen.update(kw)
+        return series
+
+    monkeypatch.setattr(gui, "overlay_swing_file", fake_overlay)
+    widget = gui.GroundReactionPlotWidget()
+    widget.set_series(_model_series())
+    alignment = PlateTimeAlignment(
+        offset_s=0.0, sigma_offset_s=0.001, kind="manual", note="test clock"
+    )
+    placement = placement_for_target("RH", TargetFrame(), origin_m=(0.0, 0.0, 0.0))
+    options = ReadingOptions(coverage=3.0)
+    widget.load_plate_trial(
+        w.write_swing(tmp_path),
+        PlateImportContext(_declared(), placement, alignment, options),
+    )
+    assert seen["options"] is options
     widget.cleanup()

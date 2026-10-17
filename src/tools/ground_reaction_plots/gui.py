@@ -106,29 +106,27 @@ class GroundReactionPlotWidget(QWidget):
             raise TypeError("context must be a PlateImportContext or None")
         self._plate_context = context
 
-    def load_plate_trial(
-        self,
-        path: str | Path,
-        declared: PlateDeclarations,
-        placement: TargetedPlacement,
-        alignment: PlateTimeAlignment,
-    ) -> None:
+    def load_plate_trial(self, path: str | Path, context: PlateImportContext) -> None:
         """Overlay the measured swing at ``path`` on the model ground reaction.
 
-        Shows the "Unqualified measurement" banner when the trial carries no
+        ``context`` supplies the declarations, placement, clock alignment and
+        reading options (``None`` options use the reader defaults).  Shows the "Unqualified measurement" banner when the trial carries no
         device qualification.  Replaces any earlier overlay.
 
         Raises:
             ValueError: if no model series is loaded or the trial is refused.
         """
+        if not isinstance(context, PlateImportContext):
+            raise TypeError("context must be a PlateImportContext")
         if self._model_series is None:
             raise ValueError("load a model ground reaction before importing a trial")
         self._series = overlay_swing_file(
             self._model_series,
             path,
-            declared=declared,
-            placement=placement,
-            alignment=alignment,
+            declared=context.declared,
+            placement=context.placement,
+            alignment=context.alignment,
+            options=context.options,
         )
         self._redraw()
 
@@ -145,9 +143,7 @@ class GroundReactionPlotWidget(QWidget):
 
     def _import_with_context(self, name: str, context: PlateImportContext) -> None:
         try:
-            self.load_plate_trial(
-                name, context.declared, context.placement, context.alignment
-            )
+            self.load_plate_trial(name, context)
         except (ValueError, TypeError, OSError) as exc:
             self.status_label.setText(f"{UNAVAILABLE_TEXT}: {exc}")
 
