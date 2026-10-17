@@ -200,6 +200,27 @@ describe('GroundReactionCharts', () => {
       expect(screen.getByText('Measured Left \u00b11\u03c3')).toBeInTheDocument();
     });
 
+    it('rings sampled measured CoP points with their 1-sigma per axis', async () => {
+      const data = withBand();
+      data.traces = {
+        ...data.traces,
+        measured_left_cop_sigma_m: measured([0.005, 0.005, null]),
+      };
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(data);
+      render(<GroundReactionCharts runId="r1" />);
+      // Frames 0 and 1 have both a CoP and a sigma; frame 2 has neither.
+      const first = await screen.findByTestId('ground-reaction-cop-sigma-Measured Left-0');
+      expect(first.tagName.toLowerCase()).toBe('ellipse');
+      expect(Number(first.getAttribute('rx'))).toBeGreaterThan(0);
+      expect(Number(first.getAttribute('ry'))).toBeGreaterThan(0);
+      expect(screen.getByTestId('ground-reaction-cop-sigma-Measured Left-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('ground-reaction-cop-sigma-Measured Left-2')).toBeNull();
+      expect(screen.getByText('Measured Left \u00b11\u03c3 per axis')).toBeInTheDocument();
+      expect(screen.getByTestId('ground-reaction-uncertainty-caption')).toHaveTextContent(
+        'circles: measured CoP \u00b11\u03c3 per axis',
+      );
+    });
+
     it('draws no band or caption when the overlay carries no sigma trace', async () => {
       vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(withOverlay(false));
       render(<GroundReactionCharts runId="r1" />);
