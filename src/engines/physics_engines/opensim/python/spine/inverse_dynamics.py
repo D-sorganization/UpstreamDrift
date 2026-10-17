@@ -398,7 +398,12 @@ def _load_model(model_path: Path, external_loads: Path | None) -> Any:
         return osim.Model(str(model_path))
     processor = osim.ModelProcessor(str(model_path))
     processor.append(osim.ModOpAddExternalLoads(str(external_loads.resolve())))
-    return processor.process()
+    model = processor.process()
+    # The processed model's sets are detached until finalized: without this,
+    # unlocking a coordinate edits a stale copy and initSystem re-locks it,
+    # so setValue silently keeps the locked pose (#13056).
+    model.finalizeFromProperties()
+    return model
 
 
 def _unlock_coordinates(model: Any, names: Sequence[str]) -> tuple[str, ...]:
