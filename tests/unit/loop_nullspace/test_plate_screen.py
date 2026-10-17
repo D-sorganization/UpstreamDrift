@@ -36,7 +36,7 @@ from src.shared.python.loop_nullspace.registry import (
     HypothesisSet,
     Source,
 )
-from tests.unit.loop_nullspace.test_ground_contact import _consistent
+from tests.unit.loop_nullspace._ground_fixtures import make_consistent
 
 pytestmark = [pytest.mark.unit, pytest.mark.requires_pinocchio]
 
@@ -60,7 +60,7 @@ def truth():
     snap, _ = spatial_two_arm_club_snapshot(
         floating_root=True, feet=True, zero_root_pose=True, foot_points=1
     )
-    snap = _consistent(snap)
+    snap = make_consistent(snap)
     dec = decompose(snap, weights=np.eye(snap.topology.n_actuated))
     return snap, dec
 
@@ -201,7 +201,9 @@ def test_noise_free_truth_is_consistent_in_both_verdicts(truth) -> None:
 
 # ---------------------------------------------------------- falsification --
 def _light_model(snap: ClosedLoopSnapshot, scale: float) -> tuple:
-    light = _consistent(dataclasses.replace(snap, M=scale * snap.M, h=scale * snap.h))
+    light = make_consistent(
+        dataclasses.replace(snap, M=scale * snap.M, h=scale * snap.h)
+    )
     return light, decompose(light, weights=np.eye(light.topology.n_actuated))
 
 

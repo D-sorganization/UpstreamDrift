@@ -367,6 +367,45 @@ bound; it is not a calibrated test.  The family-wise screen over a whole
 trajectory, with a profiled clock offset, is OF-12 (\#13070).  Neither role
 selects a unique solution.
 
+\paragraph{Family-Wise Plate Screen (OF-12).}
+A candidate is a motion and a model, sampled as frames with decompositions
+$x=x_p+Nz$.  A measured vertical-plate trial supplies each frame's observation
+(\eqref{eq:vertical_plate}) through \texttt{PlateObservationProvider}: the
+trial is read at the frame's model time with linear interpolation on its own
+time stamps, and the reading's sigma carries the declared measurement
+uncertainty, a within-sample skew term and an interpolation bias estimate
+(OF-05).  A frame without data is untested, never fabricated.  The screen
+treats every tested row of every frame as one test.  With $M$ rows and a
+declared family-wise level $\alpha$ the per-row band is the Bonferroni
+coverage
+\begin{equation}
+k=\Phi^{-1}\!\Bigl(1-\frac{\alpha}{2M}\Bigr),
+\label{eq:plate_bonferroni}
+\end{equation}
+which bounds the probability of eliminating a correct candidate by $\alpha$
+for Gaussian rows at their declared sigma, whatever the dependence between
+frames and rows.  The clock offset between plate and model is one unknown
+shared by every frame, so it is profiled rather than folded into the per-row
+sigma: the screen repeats the test at each shift of a grid spanning
+$\pm r\,\sigma_{\Delta t}$ (step no larger than the plate's sample interval),
+and a candidate survives when any shift leaves every frame consistent.  For a
+true offset on the grid the bound $\alpha$ holds; an offset outside it adds
+$2\Phi(-r)$.  A frame is consistent when the candidate's \emph{joint} feasible
+set (the declared hypotheses, friction cones and torque capacity when
+declared, and the observation bands) is non-empty; the observation-only
+verdict (weighted least squares over the whole null space) is reported beside
+it.  An alignment derived by cross-correlating the plates against a model is
+refused as evidence about that same model.  On the spatial fixture a seeded
+200-run Monte Carlo keeps a correct candidate within $\alpha=0.05$ plus a
+three-sigma binomial margin, and a model whose mass is $5\,\%$ low is
+eliminated at every frame because its point-foot loads, fixed by the balance,
+miss the data by more than $k\sigma$.  Elimination is conditional on the
+declared model, inertial parameters, friction coefficient, uncertainties,
+coverage and alignment; a surviving candidate is not certified, and
+infinitely many solutions may remain.  The interpolation bias is an estimate
+that is valid only for signals band-limited well below the sample rate; an
+under-sampled impact transient is not bounded by it.
+
 Non-claims: contacts are rigid and unilateral (no compliance, no slip
 dynamics); a friction coefficient is a declared hypothesis; an observation
 produced by a simulation standing in for a force plate is a simulation record,
