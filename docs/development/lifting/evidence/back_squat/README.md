@@ -198,6 +198,9 @@ records now read:
   knees 1.21, hips 1.39, shoulders 1.83 and bar 2.03 mm. The bar is bounded
   by the tightest body-landmark bound (3.6 mm), not the IK's 0.1 mm
   constraint precision.
-- **Hold:** body plus bar is carried at 0.75-1.0 s, then sags. The 1 % bands
-  over the last 0.5 s still fail narrowly: ground 0.988, hands 0.986.
+- **Hold:** the hold starts in contact equilibrium (`barbell_runs.hold_start`,
+  #11744), with the CoP under the combined CoM. Body plus bar is carried over the
+  whole 1.5 s: ground 1.000, hands 1.000, left share 0.500, deflection 0.49 mm.
+  The old start sat 6.7 cm out of balance and toppled backwards. This evidence
+  is on the pre-#13102 lift body.
 - **Size:** loaded bundles carry their hold efforts, up to 600,000 bytes.

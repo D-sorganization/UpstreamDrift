@@ -6,12 +6,13 @@ thresholds are fixed before the runs and are not loosened:
 * Quasi-static hold, means over the last 0.5 s of a 1.5 s hold: vertical
   ground reaction equals body plus bar weight within 1 %; the hand forces
   carry the bar weight within 1 %; the left hand carries 0.5 +- 0.01 of it;
-  peak bushing deflection at most 3 mm over the whole hold.  On the
-  64-substep loaded policy (OSL-16, #13104) the split and the deflection
-  pass, but the 1 % bands still FAIL narrowly (ground 0.988, hands 0.986 of
-  their loads): the hold carries body plus bar at 0.75-1.0 s (1.000) and then
-  sags.  They are kept as strict expected failures with the thresholds
-  unchanged (:data:`HOLD_GAP`).
+  peak bushing deflection at most 3 mm over the whole hold.  The same 1 %
+  bands and split band hold at every sample of the whole hold
+  (:func:`test_hold_carries_body_plus_bar_over_the_whole_window`).  Since
+  #11744 the hold starts at the contact equilibrium of the held joint angles
+  (``barbell_runs.hold_start``); from the old ``preload_feet`` start (feet
+  carrying 0.595 of the load, centre of pressure 6.7 cm ahead of the centre
+  of mass) a lightly damped fore-aft sway sagged the last 0.5 s to 0.988.
 * Loaded bundle: same-engine open-loop replay of the first steps reproduces
   the reference within 1e-8 (determinism of the coupled plant).
 * Loaded re-track (#13072): every LIFT-5 body landmark stays within the
@@ -49,15 +50,6 @@ def _load(path: Path) -> dict:
     return json.loads(path.read_text())
 
 
-HOLD_GAP = (
-    "#13093 gap: at 64 RK4 substeps (#13104) the hold carries body plus bar "
-    "(1.000 at 0.75-1.0 s; was 0.455 overall at 8 substeps), then sags to "
-    "0.982 by 1.5 s under a steady -102 N net horizontal ground force, so "
-    "the last-0.5 s means miss the 1 % bands (ground 0.988, hands 0.986)"
-)
-
-
-@pytest.mark.xfail(strict=True, reason=HOLD_GAP)
 def test_hold_ground_reaction_carries_body_plus_bar() -> None:
     summary = _load(HOLD_JSON)["summary"]
     assert summary["failure"] is None
@@ -66,7 +58,6 @@ def test_hold_ground_reaction_carries_body_plus_bar() -> None:
     assert abs(summary["grf_vertical_over_total_weight"] - 1.0) <= WEIGHT_FRACTION
 
 
-@pytest.mark.xfail(strict=True, reason=HOLD_GAP)
 def test_hold_hands_carry_the_bar_symmetrically() -> None:
     summary = _load(HOLD_JSON)["summary"]
     assert abs(summary["hand_vertical_sum_over_bar_weight"] - 1.0) <= WEIGHT_FRACTION
@@ -74,17 +65,20 @@ def test_hold_hands_carry_the_bar_symmetrically() -> None:
     assert summary["peak_deflection_m"] <= MAX_DEFLECTION_M
 
 
-def test_hold_starts_supported_then_fails() -> None:
-    """The start carries body plus bar; the last 0.5 s miss the 1 % band."""
+def test_hold_carries_body_plus_bar_over_the_whole_window() -> None:
+    """Every sample, not only the last-0.5 s means, meets the hold bands."""
     record = _load(HOLD_JSON)
     series, summary = record["series"], record["summary"]
-    time = np.asarray(series["time_s"])
-    grf = np.asarray(series["grf_vertical_n"])
     total = summary["body_weight_n"] + summary["bar_weight_n"]
-    early = (time >= 0.15) & (time <= 0.3)
-    assert abs(grf[early].mean() / total - 1.0) <= 0.05
-    assert summary["failure"] is None
-    assert abs(summary["grf_vertical_over_total_weight"] - 1.0) > WEIGHT_FRACTION
+    bar = summary["bar_weight_n"]
+    grf = np.asarray(series["grf_vertical_n"])
+    left = np.asarray(series["hand_vertical_on_bar_n"]["L"])
+    right = np.asarray(series["hand_vertical_on_bar_n"]["R"])
+    assert np.asarray(series["time_s"])[-1] == pytest.approx(1.5)
+    assert np.abs(grf / total - 1.0).max() <= WEIGHT_FRACTION
+    assert np.abs((left + right) / bar - 1.0).max() <= WEIGHT_FRACTION
+    assert np.abs(left / (left + right) - 0.5).max() <= SPLIT_BAND
+    assert max(series["max_deflection_m"]) <= MAX_DEFLECTION_M
 
 
 def test_hold_balance_geometry_is_stable() -> None:
@@ -102,6 +96,10 @@ def test_hold_balance_geometry_is_stable() -> None:
     heel = min(p @ forward for p in geometry["heel_m"].values())
     assert heel < geometry["body_com_m"] @ forward < forefoot
     assert heel < geometry["combined_com_m"] @ forward < forefoot
+    # The hold starts in contact equilibrium: the centre of pressure lies
+    # under the body-plus-bar centre of mass (#11744).
+    offset = geometry["centre_of_pressure_m"] - geometry["combined_com_m"]
+    assert np.abs(offset[:2]).max() <= 1e-6
 
 
 def test_barbell_bundle_carries_the_bar_record() -> None:
