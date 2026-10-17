@@ -686,6 +686,7 @@
 {"path": "force_plates/__init__.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/contracts.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/conversion.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
+{"path": "force_plates/model_frame.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/placement.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "golf_club/AGENT_HANDOFF.md", "classification": "tools-only", "package": "golf_club", "spelling_only": false}
 {"path": "golf_club/__init__.py", "classification": "tools-only", "package": "golf_club", "spelling_only": false}

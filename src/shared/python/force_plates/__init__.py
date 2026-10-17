@@ -2,7 +2,8 @@
 
 Public façade: the vertical plate trial and its declared uncertainty and
 provenance (:mod:`.contracts`), the stance-to-world placement
-(:mod:`.placement`), and the view as a shared ground-reaction series
+(:mod:`.placement`) and its derivation from a model's target frame
+(:mod:`.model_frame`), and the view as a shared ground-reaction series
 (:mod:`.conversion`).  Device readers live in subpackages and depend on this
 package, never the reverse.
 """
@@ -25,6 +26,10 @@ from src.shared.python.force_plates.conversion import (
     observability,
     to_ground_reaction_series,
 )
+from src.shared.python.force_plates.model_frame import (
+    TargetedPlacement,
+    placement_for_target,
+)
 from src.shared.python.force_plates.placement import ROTATION_ATOL, PlatePlacement
 
 __all__ = [
@@ -38,8 +43,10 @@ __all__ = [
     "PlatePlacement",
     "PlateProvenance",
     "PlateUncertainty",
+    "TargetedPlacement",
     "VerticalPlateTrial",
     "loaded_net_cop",
     "observability",
+    "placement_for_target",
     "to_ground_reaction_series",
 ]
