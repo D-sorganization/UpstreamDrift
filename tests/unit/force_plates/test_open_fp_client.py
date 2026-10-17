@@ -444,3 +444,48 @@ def test_client_source_issues_no_method_but_get() -> None:
     for verb in ("post", "put", "delete", "patch", "request", "send"):
         assert f".{verb}(" not in text
     assert text.count('.stream("GET"') == 1
+
+
+# ------------------------------------------ JSON rounding reconciliation --
+def _with_threshold_rounding(body: dict[str, Any]) -> dict[str, Any]:
+    # Sample 4: the true left load lay just below 20 N (CoP null), but the
+    # server's 0.1 N rounding reports exactly 20.0 N.
+    body["arrays"]["fz_L"][4] = 20.0
+    total = 20.0 + body["arrays"]["fz_R"][4]
+    body["arrays"]["lead_pct"][4] = round(100.0 * 20.0 / total, 2)
+    return body
+
+
+def test_load_rounded_onto_the_threshold_follows_the_source_cop_flag() -> None:
+    trial = fetch(_with_threshold_rounding(payload()))
+    left = trial.load_n["left"][4]
+    assert left < trial.cop_min_load_n
+    assert left == pytest.approx(20.0, abs=0.05)
+    assert np.isnan(trial.cop_m["left"][4]).all()
+
+
+def test_load_beyond_half_a_quantum_from_the_threshold_is_still_refused() -> None:
+    body = _with_threshold_rounding(payload())
+    body["arrays"]["fz_L"][4] = 20.2
+    body["arrays"]["lead_pct"][4] = round(
+        100.0 * 20.2 / (20.2 + body["arrays"]["fz_R"][4]), 2
+    )
+    with pytest.raises(ValueError, match="threshold"):
+        fetch(body)
+
+
+def test_net_cop_within_the_rounding_bound_is_recomputed_from_the_feet() -> None:
+    body = payload()
+    body["arrays"]["cop_C"][0][0] += 0.11  # mm: past 0.1 mm, inside the bound
+    trial = fetch(body)
+    from src.shared.python.force_plates import loaded_net_cop
+
+    expected = loaded_net_cop(trial.load_n, trial.cop_m)
+    np.testing.assert_allclose(trial.cop_m["net"], expected, atol=1e-12)
+
+
+def test_net_cop_beyond_the_rounding_bound_is_refused() -> None:
+    body = payload()
+    body["arrays"]["cop_C"][0][0] += 1.0  # mm
+    with pytest.raises(ValueError, match="net CoP"):
+        fetch(body)

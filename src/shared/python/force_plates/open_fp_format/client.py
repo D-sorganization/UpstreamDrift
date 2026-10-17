@@ -204,7 +204,9 @@ def _parse_swing(
     meta = _meta.parse_meta_object(
         {k: v for k, v in obj.items() if k != "arrays"}, where, swing_id
     )
-    arrays = _json_arrays.arrays_from_json(obj["arrays"], where)
+    arrays = _json_arrays.reconcile_rounding(
+        _json_arrays.arrays_from_json(obj["arrays"], where), where
+    )
     check_lead_pct(arrays, meta.handedness, HTTP_LEAD_CHECK, where)
     events = _events_on_time_axis(
         meta.events_rel_s, arrays.t, where, fmt.HTTP_EVENT_EDGE_TOL_S
