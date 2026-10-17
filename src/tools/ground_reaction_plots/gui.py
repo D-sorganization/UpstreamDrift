@@ -25,6 +25,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.theme.sidekick_tokens import get_current_sidekick_tokens
 from src.shared.python.biomechanics.ground_reaction_plot_model import (
     GroundReactionPlotSeries,
     series_from_payload,
@@ -78,7 +79,8 @@ class GroundReactionPlotWidget(QWidget):
         controls.addWidget(self.open_button)
         root.addLayout(controls)
         self.banner_label = QLabel(UNQUALIFIED_BANNER)
-        self.banner_label.setStyleSheet("color: #B45309; font-weight: bold;")
+        warning = get_current_sidekick_tokens()["sidekick.color.warning"]
+        self.banner_label.setStyleSheet(f"color: {warning}; font-weight: bold;")
         self.banner_label.setVisible(False)
         root.addWidget(self.banner_label)
         self.status_label = QLabel(_NOTHING_LOADED)
