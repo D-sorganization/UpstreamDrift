@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13088 · Add Optional Live Open-Fp Bridge to Realtime IPC (OF-09)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13088
+- **Branch:** feat/13088-of-09-live-bridge
+- **PR:** #13097
+- **Paths:** see #13097
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`cd301b48`; collated from changes/13088-add-optional-live-open-fp-bridge-to-real.md)
+- **Summary:** Add optional live open-fp bridge to realtime IPC (OF-09)
+- **Next step:** Review and merge after #13085
+
 ### DL-#13087 · Overlay Measured Plate Trials on the Ground Reaction Tile (OF-07)
 
 - **State:** in_review
@@ -63,10 +76,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13106
 - **Branch:** fix/13106-src-pivot-healed-parent
-- **PR:** #13107
+- **PR:** #13107, #13118
 - **Paths:** see #13107
 - **Started:** 2026-10-17
-- **Last verified:** 2026-10-17 (`f3fdae33`; collated from changes/13106-src-pivot-hygiene-test-accepts-the-pivot.md)
+- **Last verified:** 2026-10-17 (`2c2b6698`; collated from changes/13106-fix-order-dependent-keyerror-in-the-pivo.md)
 - **Summary:** Src-pivot hygiene test accepts the pivot's documented parent healing, removing an order-dependent unit-test-gate failure
 - **Next step:** Review and merge; then the force-plate PRs blocked by it can re-queue
 
@@ -5362,10 +5375,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12347
 - **Branch:** merged via #12488
-- **PR:** #12488, #12534
+- **PR:** #12488, #12534, #13063
 - **Paths:** see #12488
 - **Started:** 2026-10-14
-- **Last verified:** 2026-10-14 (`aca30fca`; collated from changes/12347-back-squat-lift-body.md)
+- **Last verified:** 2026-10-17 (`3b1ef961`; collated from changes/12347-prettier-format-the-back-squat-barbell-h.md)
 - **Summary:** Back-squat bar geometry slice 1: torso bar shelf, standard grip width and medio-lateral bar axis from the parity standard (back_bar.py, lift_to_full_body geometry option, generate_lift_bundle --geometry back_bar); committed bundle and evidence not regenerated
 - **Next step:** Shipped in PR #12488.
 

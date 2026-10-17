@@ -64,6 +64,7 @@ from src.shared.python.loop_nullspace.envelopes import (
 from src.shared.python.loop_nullspace.feasible_set import FeasibleSet
 from src.shared.python.loop_nullspace.ground_contact import (
     GroundObservation,
+    ObservationProvider,
     foot_friction_cones,
 )
 from src.shared.python.loop_nullspace.ground_envelopes import (
@@ -124,7 +125,6 @@ NON_CLAIMS = (
 
 StageHook = Callable[[str, float, "Mapping[str, Any] | None"], None]
 CancelCheck = Callable[[], bool]
-ObservationProvider = Callable[[int, ClosedLoopSnapshot], "GroundObservation | None"]
 ClubNewtonEuler = Callable[[ClosedLoopSnapshot], Mapping[str, Any]]
 
 
