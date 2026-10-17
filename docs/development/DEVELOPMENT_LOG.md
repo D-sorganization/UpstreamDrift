@@ -2561,6 +2561,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13134 · Plate Declarations Dialog and Web Form Offer the Cross_Correlation Alignment and Require the Model It Was Fitted Against
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13134
+- **Branch:** merged via #13134
+- **PR:** #13134
+- **Paths:** see #13134
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`2f95b7c6`; collated from changes/13134-plate-declarations-dialog-and-web-form-o.md)
+- **Summary:** Plate declarations dialog and web form offer the cross_correlation alignment and require the model it was fitted against
+- **Next step:** Shipped in PR #13134.
+
 ### DL-#13122 · Web Analysis Tools Ground Reaction Charts Gain the Plate Declarations Form (Same Fields as the PyQt6 Dialog, Guarded by a Cross-Language Parity Test); Analysis.Ground_Reaction Back to Parity
 
 - **State:** shipped
