@@ -51,6 +51,8 @@ def test_driver_receipt_validates_and_has_expected_zmp() -> None:
     receipt = validate_receipt(doc)
     assert isinstance(receipt, Receipt)
     assert receipt.dynamics.reference_zmp is not None
+    # 145/180 since the receipt was regenerated on the whole-row de Leva
+    # table (#13037; a same-session control on main gives 150/180);
     # 158/180 since the receipt was regenerated on the per-capture grip
     # rotation (#12221, fit on the fixed club cluster);
     # 140/180 since the receipt was regenerated on the measured driver club
@@ -62,7 +64,7 @@ def test_driver_receipt_validates_and_has_expected_zmp() -> None:
     # left hip alone (#11737), and the pre-OSV-6 receipt under
     # anthro_driver_pre_osv6/ recorded 2/3.
     assert receipt.dynamics.reference_zmp.outside_fraction_1s_to_1_5s == pytest.approx(
-        158 / 180, rel=1e-5
+        145 / 180, rel=1e-5
     )
 
 
@@ -147,6 +149,10 @@ def test_receipt_accepts_the_face_centre_clubhead_speed_block() -> None:
     """The fd_phase block carries the face-centre speed parity (#12682);
     committed receipts written before it still validate without it."""
     doc = load_json(DRIVER_RECEIPT_PATH)
+    # The canonical receipt carries the block since #13037; drop it to check
+    # that a receipt written before #12682 still validates.
+    assert validate_receipt(doc).dynamics.fd_phase.clubhead_speed is not None
+    del doc["dynamics"]["fd_phase"]["clubhead_speed"]
     assert validate_receipt(doc).dynamics.fd_phase.clubhead_speed is None
     doc["dynamics"]["fd_phase"]["clubhead_speed"] = _clubhead_speed_block()
     speed = validate_receipt(doc).dynamics.fd_phase.clubhead_speed
