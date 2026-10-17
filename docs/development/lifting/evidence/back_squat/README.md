@@ -227,3 +227,22 @@ python3 scripts/generate_lift_bundle.py --lift squat --load-balance --lead-in 0.
 python3 scripts/generate_barbell_squat_evidence.py --part bundle --source-commit <sha>
 python3 scripts/generate_barbell_squat_evidence.py --part parity --source-commit <sha>
 ```
+
+The barbell hold starts from the balanced IK standing pose
+(`barbell_runs.hold_pose`, recorded as `provenance["ik"]["q_balanced_standing"]`):
+at the pre-balance `q_standing` the body-plus-bar centre of mass lies 18.6 cm
+behind the centre of pressure and no contact equilibrium exists.
+
+Open regressions on the rack bundle, recorded as strict xfails with the bounds
+unchanged (#13131):
+
+- Full-window cross-engine coordinates: 6.0e-5 rad (Drake), 2.0e-5 rad
+  (Pinocchio) and 1.4e-5 rad (OpenSim) against 1e-6 rad; before, 2e-10 rad.
+  The bar stays within 8.0e-7 m and every 20-step segment within 4.8e-13 rad.
+- Re-track bar deviation: 6.79 mm against the 3.6 mm LIFT-5 bound; before,
+  2.03 mm.
+- Body-alone centre of mass: 11.9 cm forward, ahead of the forefoot spheres
+  (10.4 cm); body plus bar is over the feet.
+
+All numbers here are on the lift body before the de Leva whole-row fix
+(#13102).
