@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from src.shared.python.loop_nullspace.contracts import (
     ClosedLoopSnapshot,
@@ -166,3 +167,21 @@ def multiplier_envelope(
     centre = kkt_solve(snap, tau)[n:]
     spread = ENVELOPE_EFFORT * np.abs(effort_response(snap, actuated_idx)[n:]).sum(1)
     return centre - spread, centre + spread
+
+
+def require_real_module(name: str) -> None:
+    """Skip unless the real ``name`` bindings are importable (not a mock).
+
+    The suite's conftest may inject a ``MagicMock`` as ``sys.modules[name]`` so
+    that import-only tests collect where a C extension is absent (a CI runner
+    without ``pin``). ``pytest.importorskip`` accepts that mock, and the adapter
+    then fails inside its constructor on mock arithmetic.
+    """
+    module = pytest.importorskip(name)
+    if type(module).__module__ == "unittest.mock":
+        pytest.skip(f"real {name} is not installed (mocked module in sys.modules)")
+
+
+def require_real_pinocchio() -> None:
+    """Skip unless the real Pinocchio bindings are importable."""
+    require_real_module("pinocchio")

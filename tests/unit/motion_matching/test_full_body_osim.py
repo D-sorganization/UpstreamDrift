@@ -209,6 +209,10 @@ def test_cli_export_full_body_osim(tmp_path: Path) -> None:
         str(out_file),
         "--receipt",
         str(receipt_file),
+        # Never rewrite the committed club STLs: regenerating them here left
+        # geometry/club differing from generated/club in the same CI worker.
+        "--club-geometry-dir",
+        str(tmp_path / "club"),
     ]
     res = subprocess.run(
         cmd,

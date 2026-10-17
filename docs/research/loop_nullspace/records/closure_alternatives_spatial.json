@@ -1,0 +1,1130 @@
+{
+  "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+  "non_claims": [
+    "exploratory; not evidence about the true grip mechanics",
+    "each grip model is a declared alternative, none is validated against a golfer",
+    "capacities and priors are declared hypotheses and are identical for every model",
+    "a refused or balance-inconsistent trajectory is a finding, never repaired"
+  ],
+  "fixture": "spatial_two_arm_club fixed base, seed 7, 20 frames",
+  "gates": "1e-6 at position, velocity and acceleration",
+  "caps_nm": [
+    6.0,
+    8.0,
+    12.0
+  ],
+  "models": {
+    "WELD": {
+      "closure_kind": "WELD6",
+      "rows": [
+        "fx",
+        "fy",
+        "fz",
+        "tx",
+        "ty",
+        "tz"
+      ],
+      "n_coordinates": 14,
+      "kinematic_nullity": 8,
+      "summary": "both hands rigid on the club: six closure rows",
+      "limitation": "assumes no hand-club slip or compliance; the grip is not measured",
+      "admission": {
+        "WELDED": {
+          "admitted": true,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.4988010832439613e-15,
+          "max_phi_ddot": 1.9984014443252818e-15,
+          "first_reason": null
+        },
+        "TWIST": {
+          "admitted": false,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.3167605632472512,
+          "max_phi_ddot": 1.694578149793851,
+          "first_reason": "frame 0: velocity closure residual 8.933e-01 exceeds 1.0e-06"
+        },
+        "TILT": {
+          "admitted": false,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.5848264922189494,
+          "max_phi_ddot": 2.9355876222416297,
+          "first_reason": "frame 0: velocity closure residual 1.388e+00 exceeds 1.0e-06"
+        },
+        "OWN": {
+          "admitted": true,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.4988010832439613e-15,
+          "max_phi_ddot": 1.9984014443252818e-15,
+          "first_reason": null
+        }
+      },
+      "position_probe": {
+        "TWIST": {
+          "admitted": false,
+          "max_phi": 0.00019999536305212497
+        },
+        "TILT": {
+          "admitted": false,
+          "max_phi": 0.00019182137389953287
+        }
+      },
+      "dynamics": {
+        "WELDED@6Nm": {
+          "model": "WELD",
+          "closure_kind": "WELD6",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "tx",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.4988010832439613e-15,
+          "max_phi_ddot": 1.9984014443252818e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            8,
+            8
+          ],
+          "allocation_nullity": [
+            6,
+            6
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 6.25753458734137,
+          "median_force_multiplier_width_n": 25.54834178314716,
+          "median_moment_multiplier_width_nm": 8.595743646786733,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": 1.0
+        },
+        "OWN@6Nm": {
+          "model": "WELD",
+          "closure_kind": "WELD6",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "tx",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.4988010832439613e-15,
+          "max_phi_ddot": 1.9984014443252818e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            8,
+            8
+          ],
+          "allocation_nullity": [
+            6,
+            6
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 6.25753458734137,
+          "median_force_multiplier_width_n": 25.54834178314716,
+          "median_moment_multiplier_width_nm": 8.595743646786733,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": null
+        },
+        "WELDED@8Nm": {
+          "model": "WELD",
+          "closure_kind": "WELD6",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "tx",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.4988010832439613e-15,
+          "max_phi_ddot": 1.9984014443252818e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            8,
+            8
+          ],
+          "allocation_nullity": [
+            6,
+            6
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 15.999999999999996,
+          "median_force_multiplier_width_n": 75.90372834914163,
+          "median_moment_multiplier_width_nm": 25.791264120823158,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": 1.0
+        },
+        "OWN@8Nm": {
+          "model": "WELD",
+          "closure_kind": "WELD6",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "tx",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.4988010832439613e-15,
+          "max_phi_ddot": 1.9984014443252818e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            8,
+            8
+          ],
+          "allocation_nullity": [
+            6,
+            6
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 15.999999999999996,
+          "median_force_multiplier_width_n": 75.90372834914163,
+          "median_moment_multiplier_width_nm": 25.791264120823158,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": null
+        },
+        "WELDED@12Nm": {
+          "model": "WELD",
+          "closure_kind": "WELD6",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "tx",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.4988010832439613e-15,
+          "max_phi_ddot": 1.9984014443252818e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            8,
+            8
+          ],
+          "allocation_nullity": [
+            6,
+            6
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 23.999999999999996,
+          "median_force_multiplier_width_n": 130.49789207772068,
+          "median_moment_multiplier_width_nm": 47.70973529907235,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": 1.0
+        },
+        "OWN@12Nm": {
+          "model": "WELD",
+          "closure_kind": "WELD6",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "tx",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.4988010832439613e-15,
+          "max_phi_ddot": 1.9984014443252818e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            8,
+            8
+          ],
+          "allocation_nullity": [
+            6,
+            6
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 23.999999999999996,
+          "median_force_multiplier_width_n": 130.49789207772068,
+          "median_moment_multiplier_width_nm": 47.70973529907235,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": null
+        }
+      }
+    },
+    "SHAFT_TWIST_REVOLUTE": {
+      "closure_kind": "SHAFT_FREE5",
+      "rows": [
+        "fx",
+        "fy",
+        "fz",
+        "ty",
+        "tz"
+      ],
+      "n_coordinates": 14,
+      "kinematic_nullity": 9,
+      "summary": "the trail hand turns freely about the shaft: five closure rows",
+      "limitation": "free twist with no friction or limit; whether a real grip turns about the shaft needs the golfer's hand-club torque data, which is not available",
+      "admission": {
+        "WELDED": {
+          "admitted": true,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.4710455076283324e-15,
+          "max_phi_ddot": 2.1094237467877974e-15,
+          "first_reason": null
+        },
+        "TWIST": {
+          "admitted": true,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.27675647831893e-15,
+          "max_phi_ddot": 1.609823385706477e-15,
+          "first_reason": null
+        },
+        "TILT": {
+          "admitted": false,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.367172828074414,
+          "max_phi_ddot": 2.275383569412618,
+          "first_reason": "frame 0: velocity closure residual 3.859e-01 exceeds 1.0e-06"
+        },
+        "OWN": {
+          "admitted": true,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.27675647831893e-15,
+          "max_phi_ddot": 1.609823385706477e-15,
+          "first_reason": null
+        }
+      },
+      "position_probe": {
+        "TWIST": {
+          "admitted": true,
+          "max_phi": 9.31778313685383e-09
+        },
+        "TILT": {
+          "admitted": false,
+          "max_phi": 4.716037264952711e-05
+        }
+      },
+      "dynamics": {
+        "WELDED@6Nm": {
+          "model": "SHAFT_TWIST_REVOLUTE",
+          "closure_kind": "SHAFT_FREE5",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.4710455076283324e-15,
+          "max_phi_ddot": 2.1094237467877974e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            9,
+            9
+          ],
+          "allocation_nullity": [
+            5,
+            5
+          ],
+          "counts": {
+            "feasible": 16,
+            "infeasible": 4,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 3.764068719550238,
+          "median_force_multiplier_width_n": 11.654847196706204,
+          "median_moment_multiplier_width_nm": 8.463249098017805,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": 0.49208942513303994
+        },
+        "OWN@6Nm": {
+          "model": "SHAFT_TWIST_REVOLUTE",
+          "closure_kind": "SHAFT_FREE5",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.27675647831893e-15,
+          "max_phi_ddot": 1.609823385706477e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            9,
+            9
+          ],
+          "allocation_nullity": [
+            5,
+            5
+          ],
+          "counts": {
+            "feasible": 16,
+            "infeasible": 4,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 4.337495241010098,
+          "median_force_multiplier_width_n": 12.89810386792669,
+          "median_moment_multiplier_width_nm": 8.700953073195393,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": null
+        },
+        "WELDED@8Nm": {
+          "model": "SHAFT_TWIST_REVOLUTE",
+          "closure_kind": "SHAFT_FREE5",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.4710455076283324e-15,
+          "max_phi_ddot": 2.1094237467877974e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            9,
+            9
+          ],
+          "allocation_nullity": [
+            5,
+            5
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 14.680480177793513,
+          "median_force_multiplier_width_n": 72.74717450077573,
+          "median_moment_multiplier_width_nm": 29.502395422656278,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": 0.963446520697257
+        },
+        "OWN@8Nm": {
+          "model": "SHAFT_TWIST_REVOLUTE",
+          "closure_kind": "SHAFT_FREE5",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.27675647831893e-15,
+          "max_phi_ddot": 1.609823385706477e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            9,
+            9
+          ],
+          "allocation_nullity": [
+            5,
+            5
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 14.699446552300627,
+          "median_force_multiplier_width_n": 72.90476500114947,
+          "median_moment_multiplier_width_nm": 29.576502027795595,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": null
+        },
+        "WELDED@12Nm": {
+          "model": "SHAFT_TWIST_REVOLUTE",
+          "closure_kind": "SHAFT_FREE5",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.4710455076283324e-15,
+          "max_phi_ddot": 2.1094237467877974e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            9,
+            9
+          ],
+          "allocation_nullity": [
+            5,
+            5
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 23.999999999999986,
+          "median_force_multiplier_width_n": 120.52904424850307,
+          "median_moment_multiplier_width_nm": 49.97120539291566,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": 0.9999999999999991
+        },
+        "OWN@12Nm": {
+          "model": "SHAFT_TWIST_REVOLUTE",
+          "closure_kind": "SHAFT_FREE5",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.27675647831893e-15,
+          "max_phi_ddot": 1.609823385706477e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            9,
+            9
+          ],
+          "allocation_nullity": [
+            5,
+            5
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 23.999999999999986,
+          "median_force_multiplier_width_n": 120.51569882138313,
+          "median_moment_multiplier_width_nm": 49.9298416870663,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": null
+        }
+      }
+    },
+    "TRAIL_BALL": {
+      "closure_kind": "BALL3",
+      "rows": [
+        "fx",
+        "fy",
+        "fz"
+      ],
+      "n_coordinates": 14,
+      "kinematic_nullity": 11,
+      "summary": "the trail hand is a ball joint on the club: three force rows",
+      "limitation": "a ball joint transmits no moment; a real palm and fingers do, and the size of the moment is not measured",
+      "admission": {
+        "WELDED": {
+          "admitted": true,
+          "max_phi": 1.1102230246251565e-16,
+          "max_phi_dot": 1.4849232954361469e-15,
+          "max_phi_ddot": 1.0547118733938987e-15,
+          "first_reason": null
+        },
+        "TWIST": {
+          "admitted": true,
+          "max_phi": 1.1102230246251565e-16,
+          "max_phi_dot": 9.575673587391975e-16,
+          "max_phi_ddot": 9.298117831235686e-16,
+          "first_reason": null
+        },
+        "TILT": {
+          "admitted": true,
+          "max_phi": 1.1102230246251565e-16,
+          "max_phi_dot": 9.020562075079397e-16,
+          "max_phi_ddot": 8.98586760555986e-16,
+          "first_reason": null
+        },
+        "OWN": {
+          "admitted": true,
+          "max_phi": 1.1102230246251565e-16,
+          "max_phi_dot": 9.020562075079397e-16,
+          "max_phi_ddot": 8.98586760555986e-16,
+          "first_reason": null
+        }
+      },
+      "position_probe": {
+        "TWIST": {
+          "admitted": true,
+          "max_phi": 1.6729073693563625e-09
+        },
+        "TILT": {
+          "admitted": true,
+          "max_phi": 4.4874078883325654e-09
+        }
+      },
+      "dynamics": {
+        "WELDED@6Nm": {
+          "model": "TRAIL_BALL",
+          "closure_kind": "BALL3",
+          "rows": [
+            "fx",
+            "fy",
+            "fz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.1102230246251565e-16,
+          "max_phi_dot": 1.4849232954361469e-15,
+          "max_phi_ddot": 1.0547118733938987e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            11,
+            11
+          ],
+          "allocation_nullity": [
+            3,
+            3
+          ],
+          "counts": {
+            "feasible": 0,
+            "infeasible": 20,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": null,
+          "median_force_multiplier_width_n": null,
+          "median_moment_multiplier_width_nm": null,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": null
+        },
+        "OWN@6Nm": {
+          "model": "TRAIL_BALL",
+          "closure_kind": "BALL3",
+          "rows": [
+            "fx",
+            "fy",
+            "fz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.1102230246251565e-16,
+          "max_phi_dot": 9.020562075079397e-16,
+          "max_phi_ddot": 8.98586760555986e-16,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            11,
+            11
+          ],
+          "allocation_nullity": [
+            3,
+            3
+          ],
+          "counts": {
+            "feasible": 0,
+            "infeasible": 20,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": null,
+          "median_force_multiplier_width_n": null,
+          "median_moment_multiplier_width_nm": null,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": null
+        },
+        "WELDED@8Nm": {
+          "model": "TRAIL_BALL",
+          "closure_kind": "BALL3",
+          "rows": [
+            "fx",
+            "fy",
+            "fz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.1102230246251565e-16,
+          "max_phi_dot": 1.4849232954361469e-15,
+          "max_phi_ddot": 1.0547118733938987e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            11,
+            11
+          ],
+          "allocation_nullity": [
+            3,
+            3
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 2.1827185568692404,
+          "median_force_multiplier_width_n": 13.061456722071346,
+          "median_moment_multiplier_width_nm": null,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": 0.18234234751649264
+        },
+        "OWN@8Nm": {
+          "model": "TRAIL_BALL",
+          "closure_kind": "BALL3",
+          "rows": [
+            "fx",
+            "fy",
+            "fz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.1102230246251565e-16,
+          "max_phi_dot": 9.020562075079397e-16,
+          "max_phi_ddot": 8.98586760555986e-16,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            11,
+            11
+          ],
+          "allocation_nullity": [
+            3,
+            3
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 2.2788354438316363,
+          "median_force_multiplier_width_n": 13.24820504346835,
+          "median_moment_multiplier_width_nm": null,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": null
+        },
+        "WELDED@12Nm": {
+          "model": "TRAIL_BALL",
+          "closure_kind": "BALL3",
+          "rows": [
+            "fx",
+            "fy",
+            "fz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.1102230246251565e-16,
+          "max_phi_dot": 1.4849232954361469e-15,
+          "max_phi_ddot": 1.0547118733938987e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            11,
+            11
+          ],
+          "allocation_nullity": [
+            3,
+            3
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 12.310889744222926,
+          "median_force_multiplier_width_n": 43.98004097751191,
+          "median_moment_multiplier_width_nm": null,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": 0.5563840228306691
+        },
+        "OWN@12Nm": {
+          "model": "TRAIL_BALL",
+          "closure_kind": "BALL3",
+          "rows": [
+            "fx",
+            "fy",
+            "fz"
+          ],
+          "n_coordinates": 14,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.1102230246251565e-16,
+          "max_phi_dot": 9.020562075079397e-16,
+          "max_phi_ddot": 8.98586760555986e-16,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            11,
+            11
+          ],
+          "allocation_nullity": [
+            3,
+            3
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 12.238184030901884,
+          "median_force_multiplier_width_n": 43.94976332801157,
+          "median_moment_multiplier_width_nm": null,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": null
+        }
+      }
+    },
+    "LEAD_BALL": {
+      "closure_kind": "WELD6",
+      "rows": [
+        "fx",
+        "fy",
+        "fz",
+        "tx",
+        "ty",
+        "tz"
+      ],
+      "n_coordinates": 17,
+      "kinematic_nullity": 11,
+      "summary": "the club hangs on a 3-DOF ball at the lead hand; the trail hand welds to the club: six rows, three extra unactuated coordinates",
+      "limitation": "adds a topology (three coordinates) the full-body spec builder does not support, so it exists only on the synthetic spatial fixture",
+      "admission": {
+        "WELDED": {
+          "admitted": true,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.5543122344752192e-15,
+          "max_phi_ddot": 2.220446049250313e-15,
+          "first_reason": null
+        },
+        "TWIST": {
+          "admitted": false,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.3167605632472514,
+          "max_phi_ddot": 1.694578149793851,
+          "first_reason": "frame 0: velocity closure residual 8.933e-01 exceeds 1.0e-06"
+        },
+        "TILT": {
+          "admitted": false,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.5848264922189492,
+          "max_phi_ddot": 2.9355876222416293,
+          "first_reason": "frame 0: velocity closure residual 1.388e+00 exceeds 1.0e-06"
+        },
+        "OWN": {
+          "admitted": true,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 2.2199256506279875e-15,
+          "max_phi_ddot": 2.4424906541753444e-15,
+          "first_reason": null
+        }
+      },
+      "position_probe": {
+        "TWIST": {
+          "admitted": false,
+          "max_phi": 0.00019999536305212497
+        },
+        "TILT": {
+          "admitted": false,
+          "max_phi": 0.00019182137389953287
+        }
+      },
+      "dynamics": {
+        "WELDED@6Nm": {
+          "model": "LEAD_BALL",
+          "closure_kind": "WELD6",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "tx",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 17,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.5543122344752192e-15,
+          "max_phi_ddot": 2.220446049250313e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            11,
+            11
+          ],
+          "allocation_nullity": [
+            3,
+            3
+          ],
+          "counts": {
+            "feasible": 0,
+            "infeasible": 20,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": null,
+          "median_force_multiplier_width_n": null,
+          "median_moment_multiplier_width_nm": null,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": null
+        },
+        "OWN@6Nm": {
+          "model": "LEAD_BALL",
+          "closure_kind": "WELD6",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "tx",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 17,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 2.2199256506279875e-15,
+          "max_phi_ddot": 2.4424906541753444e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            11,
+            11
+          ],
+          "allocation_nullity": [
+            3,
+            3
+          ],
+          "counts": {
+            "feasible": 0,
+            "infeasible": 20,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": null,
+          "median_force_multiplier_width_n": null,
+          "median_moment_multiplier_width_nm": null,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": null
+        },
+        "WELDED@8Nm": {
+          "model": "LEAD_BALL",
+          "closure_kind": "WELD6",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "tx",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 17,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.5543122344752192e-15,
+          "max_phi_ddot": 2.220446049250313e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            11,
+            11
+          ],
+          "allocation_nullity": [
+            3,
+            3
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 2.7309183674580413,
+          "median_force_multiplier_width_n": 17.62293863040613,
+          "median_moment_multiplier_width_nm": 0.0,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": 0.22892482740786727
+        },
+        "OWN@8Nm": {
+          "model": "LEAD_BALL",
+          "closure_kind": "WELD6",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "tx",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 17,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 2.2199256506279875e-15,
+          "max_phi_ddot": 2.4424906541753444e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            11,
+            11
+          ],
+          "allocation_nullity": [
+            3,
+            3
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 2.5686255470730046,
+          "median_force_multiplier_width_n": 16.618040600818492,
+          "median_moment_multiplier_width_nm": 0.0,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": null
+        },
+        "WELDED@12Nm": {
+          "model": "LEAD_BALL",
+          "closure_kind": "WELD6",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "tx",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 17,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 1.5543122344752192e-15,
+          "max_phi_ddot": 2.220446049250313e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            11,
+            11
+          ],
+          "allocation_nullity": [
+            3,
+            3
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 12.533651774630336,
+          "median_force_multiplier_width_n": 44.04396749798754,
+          "median_moment_multiplier_width_nm": 0.0,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": 0.5744041661549486
+        },
+        "OWN@12Nm": {
+          "model": "LEAD_BALL",
+          "closure_kind": "WELD6",
+          "rows": [
+            "fx",
+            "fy",
+            "fz",
+            "tx",
+            "ty",
+            "tz"
+          ],
+          "n_coordinates": 17,
+          "admitted": true,
+          "n_frames": 20,
+          "max_phi": 1.6653345369377348e-16,
+          "max_phi_dot": 2.2199256506279875e-15,
+          "max_phi_ddot": 2.4424906541753444e-15,
+          "reasons": [],
+          "failing_frames": [],
+          "kinematic_nullity": [
+            11,
+            11
+          ],
+          "allocation_nullity": [
+            3,
+            3
+          ],
+          "counts": {
+            "feasible": 20,
+            "infeasible": 0,
+            "balance_inconsistent": 0
+          },
+          "median_torque_width_nm": 12.437465565762349,
+          "median_force_multiplier_width_n": 44.014236453461706,
+          "median_moment_multiplier_width_nm": 0.0,
+          "label": "CLOSURE_ALTERNATIVE_COMPARISON",
+          "torque_width_ratio_vs_weld": null
+        }
+      }
+    }
+  }
+}

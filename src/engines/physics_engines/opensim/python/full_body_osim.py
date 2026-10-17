@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import logging
+import re
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 import sys
@@ -26,9 +27,14 @@ from src.engines.physics_engines.opensim.python.full_body_grip_topology import (
     build_bushing_spec,
 )
 from src.shared.python.contracts import precondition
+from src.shared.python.motion_matching.club_shaft_chain import passive_coordinates
 from src.engines.physics_engines.opensim.python.full_body_grip_contact import (
     ContactGripConfig,
     build_contact_grip,
+)
+from src.shared.python.club_body_names import (
+    CANONICAL_CLUB_HEAD_NAME,
+    SPEC_CLUB_HEAD_BODY_NAME,
 )
 from src.shared.python.grip_contact import GripInterface
 from src.shared.python.model_appearance.club_assembly import assembly_from_spec
@@ -37,11 +43,10 @@ logger = logging.getLogger(__name__)
 
 SUPPORTED_SCHEMA_VERSIONS = {"full-body-v1"}
 DEFAULT_CLOSURE_TYPE = "weld"
-CLUB_BODY = (
-    "Clubhead"  # OpenSim name of the spec's club body (head, shaft, grip solids)
-)
+CLUB_BODY = CANONICAL_CLUB_HEAD_NAME  # OpenSim name of the spec's club body
 DEFAULT_CLUB_GEOMETRY_REF = ""  # bare names; loaders register models/geometry/club
 GRIP_MODELS = ("weld", "bushing", "contact")
+_SHAFT_LINK = re.compile(r"/Shaft Link (\d+)$")
 DEFAULT_GRIP_MODEL = "weld"
 
 
@@ -193,14 +198,21 @@ OPENSIM_BODY_MAP: dict[str, str] = {
     "solid_reference:GolfSwing3D_Kinetic/RUpperArm": "RS",
     "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1": "RE",
     "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm": "RF",
-    "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector": "Clubhead",
+    SPEC_CLUB_HEAD_BODY_NAME: CANONICAL_CLUB_HEAD_NAME,
     "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff": "Grip",
     "solid_reference:GolfSwing3D_Kinetic/Grip/LHandBody": "LGrip",
 }
 
 
 def clean_osim_body_name(name: str) -> str:
-    """Map Simscape solid reference path to clean OpenSim body name."""
+    """Map Simscape solid reference path to clean OpenSim body name.
+
+    Chain-shaft links (``<club>/Shaft Link <i>``, R6 #12686) become
+    ``ShaftLink<i>``: OpenSim component names may not contain ``/`` or spaces.
+    """
+    link = _SHAFT_LINK.search(name)
+    if link is not None and name not in OPENSIM_BODY_MAP:
+        return f"ShaftLink{link.group(1)}"
     return OPENSIM_BODY_MAP.get(name, name)
 
 
@@ -571,9 +583,11 @@ def _build_forceset(
 
         ET.SubElement(hc, "transition_velocity").text = format(v_trans, ".17g")
 
-    # Coordinate Actuators
+    _build_shaft_springs(objects, spec)
+
+    # Coordinate Actuators (chain-shaft coordinates are unactuated springs)
     actuated = coordinates if actuate_root else coordinates[6:]
-    passive = set(spec.get("passive_coordinates", ()))
+    passive = set(spec.get("passive_coordinates", ())) | set(passive_coordinates(spec))
     for coord in (c for c in actuated if c not in passive):
         act = ET.SubElement(
             objects, "CoordinateActuator", attrib={"name": f"tau_{coord}"}
@@ -583,6 +597,33 @@ def _build_forceset(
         ET.SubElement(act, "max_control").text = "Inf"
         ET.SubElement(act, "coordinate").text = coord
         ET.SubElement(act, "optimal_force").text = "1"
+
+
+def _build_shaft_springs(objects: ET.Element, spec: Mapping[str, Any]) -> None:
+    """One ``SpringGeneralizedForce`` per chain-shaft primitive (R11, #12691).
+
+    OpenSim applies ``-stiffness (q - rest_length) - viscosity qdot`` to the
+    coordinate, which is the spec primitive's ``stiffness_n_m_rad``,
+    ``springref_rad`` and ``damping_n_m_s_rad`` exactly as the MuJoCo joint
+    ``stiffness``, ``springref`` and ``damping`` (R6, #12686).  A rigid-shaft
+    spec has no chain coordinates and gets no spring.
+    """
+    shaft = set(passive_coordinates(spec))
+    for joint in spec["joints"]:
+        for prim in (p for p in joint["primitives"] if p["coordinate"] in shaft):
+            force = ET.SubElement(
+                objects,
+                "SpringGeneralizedForce",
+                attrib={"name": f"spring_{prim['coordinate']}"},
+            )
+            ET.SubElement(force, "appliesForce").text = "true"
+            ET.SubElement(force, "coordinate").text = prim["coordinate"]
+            for tag, key in (
+                ("stiffness", "stiffness_n_m_rad"),
+                ("rest_length", "springref_rad"),
+                ("viscosity", "damping_n_m_s_rad"),
+            ):
+                ET.SubElement(force, tag).text = format(float(prim[key]), ".17g")
 
 
 def _build_bushing_forces(

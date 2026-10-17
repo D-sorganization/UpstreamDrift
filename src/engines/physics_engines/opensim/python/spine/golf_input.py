@@ -34,6 +34,7 @@ from src.shared.python.engine_core.opensim_runtime import import_opensim
 __all__ = [
     "GolfTrunkInput",
     "back_joint_rotation",
+    "read_golf_coordinates",
     "read_golf_humanoid_motion",
     "resample",
 ]
@@ -239,6 +240,53 @@ def _evaluate_frames(
     return rots, poses
 
 
+def _open_motion(
+    motion_path: Path, model_path: Path
+) -> tuple[Any, np.ndarray, dict[str, np.ndarray], dict[str, float]]:
+    """Check both files, load the model and read its coordinates from the motion.
+
+    Returns ``(model, time_s, values, events)``; rotational ``inDegrees=yes``
+    columns are already in radians.
+    """
+    motion, model_file = Path(motion_path), Path(model_path)
+    for path in (motion, model_file):
+        if not path.is_file():
+            raise FileNotFoundError(f"input file not found: {path.name}")
+    if motion.suffix.lower() not in (".sto", ".mot"):
+        raise ValueError(f"motion file must be .sto or .mot, got {motion.suffix!r}")
+    osim = import_opensim()
+    model = osim.Model(str(model_file))
+    coord_set = model.getCoordinateSet()
+    names = {coord_set.get(i).getName() for i in range(coord_set.getSize())}
+    time_s, values, in_degrees, events = _read_table(motion, names)
+    if in_degrees:
+        for name, series in values.items():
+            if _is_rotational(coord_set.get(name), osim):
+                values[name] = np.radians(series)
+    return model, time_s, values, events
+
+
+def read_golf_coordinates(
+    motion_path: Path, model_path: Path
+) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+    """Every model coordinate series of a golf ``.sto``/``.mot`` (radians, metres).
+
+    Same name matching and degree conversion as
+    :func:`read_golf_humanoid_motion`, without the trunk evaluation; the full
+    coordinate table the full-body map transfers from (SPN-9c).
+
+    Preconditions: both files exist, the motion is ``.sto``/``.mot``
+    (``FileNotFoundError``/``ValueError``).  Postcondition: ``(time_s,
+    {name: (n,)})`` with strictly increasing time and finite values.
+    """
+    _model, time_s, values, _events = _open_motion(motion_path, model_path)
+    if time_s.size < 2 or not np.all(np.diff(time_s) > 0.0):
+        raise ValueError("motion time must be strictly increasing")
+    if not all(np.all(np.isfinite(v)) for v in values.values()):
+        raise ValueError("motion coordinates must be finite")
+    return time_s, values
+
+
 def read_golf_humanoid_motion(motion_path: Path, model_path: Path) -> GolfTrunkInput:
     """Read a ``.sto``/``.mot`` golf swing and evaluate the trunk natively.
 
@@ -254,24 +302,10 @@ def read_golf_humanoid_motion(motion_path: Path, model_path: Path) -> GolfTrunkI
     Postconditions: ``pelvis_to_thorax`` is the torso frame in the pelvis frame
     including offset frames; ``source`` has the basename and SHA-256 only.
     """
-    motion, model_file = Path(motion_path), Path(model_path)
-    for path in (motion, model_file):
-        if not path.is_file():
-            raise FileNotFoundError(f"input file not found: {path.name}")
-    if motion.suffix.lower() not in (".sto", ".mot"):
-        raise ValueError(f"motion file must be .sto or .mot, got {motion.suffix!r}")
-    osim = import_opensim()
-    model = osim.Model(str(model_file))
-    coord_set = model.getCoordinateSet()
-    names = {coord_set.get(i).getName() for i in range(coord_set.getSize())}
-    time_s, values, in_degrees, events = _read_table(motion, names)
+    model, time_s, values, events = _open_motion(motion_path, model_path)
     missing = [n for n in _LUMBAR if n not in values]
     if missing:
         raise ValueError(f"motion file lacks lumbar coordinates: {missing}")
-    if in_degrees:
-        for name, series in values.items():
-            if _is_rotational(coord_set.get(name), osim):
-                values[name] = np.radians(series)
     rots, poses = _evaluate_frames(model, values, time_s.shape[0])
     skip = set(_LUMBAR) | set(_PELVIS)
     others = {k: v for k, v in values.items() if k not in skip}
@@ -281,7 +315,7 @@ def read_golf_humanoid_motion(motion_path: Path, model_path: Path) -> GolfTrunkI
         pelvis_pose_ground=poses,
         other_coordinates=others,
         events=events,
-        source={"file": motion.name, "sha256": _sha256(motion)},
+        source={"file": Path(motion_path).name, "sha256": _sha256(Path(motion_path))},
     )
     ensure(
         result.pelvis_to_thorax.shape[0] == time_s.shape[0],

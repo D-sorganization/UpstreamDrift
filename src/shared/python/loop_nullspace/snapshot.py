@@ -25,7 +25,11 @@ from src.shared.python.engine_core.capabilities import (
     CapabilityLevel,
     CapabilityUnavailable,
 )
-from src.shared.python.loop_nullspace.closure_convention import to_canonical_closure
+from src.shared.python.loop_nullspace.closure_convention import (
+    ClosureFrames,
+    closure_conversion_matrix,
+    to_canonical_closure,
+)
 from src.shared.python.loop_nullspace.contracts import (
     ClosedLoopSnapshot,
     GripFrame,
@@ -39,6 +43,7 @@ if TYPE_CHECKING:
 __all__ = [
     "canonical_closure",
     "canonical_closure_jacobian",
+    "canonical_closure_matrix",
     "require_closed_loop_capability",
     "parity_effort",
     "has_closed_loop_protocol",
@@ -70,21 +75,38 @@ def has_closed_loop_protocol(adapter: Any) -> bool:
     )
 
 
-def _canonicalise(
-    adapter: Any, q: ArrayLike, jacobian: ArrayLike, drift: ArrayLike
-) -> tuple[Array, Array, GripFrame]:
+def _closure_frames(adapter: Any, q: ArrayLike) -> ClosureFrames:
     native_rot, native_point = adapter.native_closure_frame(q)
     grip_rot, grip_point = adapter.closure_wrench_frame(q)
-    j_c, jdot_v = to_canonical_closure(
-        jacobian,
-        drift,
+    return ClosureFrames(
         native=adapter.native_closure_convention,
         native_frame_rotation=native_rot,
         grip_frame_rotation=grip_rot,
         native_reference_point=native_point,
         grip_reference_point=grip_point,
     )
-    return j_c, jdot_v, GripFrame(rotation=grip_rot, origin=grip_point)
+
+
+def _canonicalise(
+    adapter: Any, q: ArrayLike, jacobian: ArrayLike, drift: ArrayLike
+) -> tuple[Array, Array, GripFrame]:
+    frames = _closure_frames(adapter, q)
+    j_c, jdot_v = to_canonical_closure(jacobian, drift, **frames)
+    grip = GripFrame(
+        rotation=np.asarray(frames["grip_frame_rotation"], dtype=float),
+        origin=np.asarray(frames["grip_reference_point"], dtype=float),
+    )
+    return j_c, jdot_v, grip
+
+
+def canonical_closure_matrix(adapter: Any, q: ArrayLike) -> Array:
+    """The NSX-02 row map ``C`` (6 x 6) with ``J_c = C J_native`` at ``q``.
+
+    Exposed so an engine that differentiates its native closure (NSX-86) can map
+    the differentials into the canonical convention (R8) without a second
+    implementation of the conversion.  Postcondition: finite and invertible.
+    """
+    return np.asarray(closure_conversion_matrix(**_closure_frames(adapter, q)))
 
 
 def canonical_closure_jacobian(adapter: Any, q: ArrayLike) -> Array:
@@ -185,13 +207,18 @@ def snapshot_from_adapter(
     a: ArrayLike,
     *,
     input_provenance: InputProvenance,
+    foot_contact_tol_m: float | None = None,
 ) -> ClosedLoopSnapshot:
     """Assemble a validated :class:`ClosedLoopSnapshot` at ``(q, v, a)``.
 
     ``M a + h = S^T tau + J_c^T lambda`` holds with ``M, h`` from
     ``adapter.compute_mass_and_bias`` and ``J_c, Jdot_v`` converted from the
     adapter's native closure convention to the canonical one.  ``J_g`` (ground
-    contact) is left ``None``; foot contacts are not part of this seam.
+    contact) is left ``None`` unless ``foot_contact_tol_m`` is given: then every
+    candidate from ``adapter.foot_contact_candidates(q)`` whose signed gap is at
+    most the tolerance is a rigid unilateral contact, and ``J_g`` holds its
+    world-axis point rows from ``adapter.compute_contact_jacobian(q)``
+    (``CapabilityUnavailable`` if the adapter has no such method).
 
     Preconditions: ``adapter`` declares ``CLOSED_LOOP_SNAPSHOT`` at ``FULL``
     (else :class:`CapabilityUnavailable`); ``q, v, a`` are finite vectors of
@@ -218,6 +245,7 @@ def snapshot_from_adapter(
     )
     bare, welded = adapter.club_inertia_split()
     selection = np.eye(nv)[list(topology.actuated_indices)]
+    contacts, j_g = _ground_contacts(adapter, q_arr, foot_contact_tol_m)
     return ClosedLoopSnapshot(
         q=q_arr,
         v=v_arr,
@@ -237,4 +265,27 @@ def snapshot_from_adapter(
         ),
         input_provenance=input_provenance,
         topology=topology,
+        J_g=j_g,
+        foot_contacts=contacts,
+    )
+
+
+def _ground_contacts(
+    adapter: Any, q: Array, tol_m: float | None
+) -> tuple[tuple[Any, ...], Array | None]:
+    """Active foot contacts and their ``J_g`` rows, or ``((), None)`` when off."""
+    if tol_m is None:
+        return (), None
+    from src.shared.python.loop_nullspace.ground_contact import (
+        select_active_contacts,
+    )
+
+    provider = getattr(adapter, "foot_contact_candidates", None)
+    if provider is None:
+        raise CapabilityUnavailable(
+            f"{type(adapter).__name__} has no foot_contact_candidates; "
+            "foot contacts need an adapter that exposes them"
+        )
+    return select_active_contacts(
+        provider(q), adapter.compute_contact_jacobian(q), gap_tol_m=tol_m
     )

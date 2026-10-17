@@ -48,6 +48,7 @@ except ImportError:
     logger.warning("sidekick not found, Notepad disabled")
 
 from .model_source import model_as_urdf
+from .results_playback_host import ResultsPlaybackHostMixin
 from .results_session import ResultsSession
 from .segment_panel import SegmentPanel
 from .urdf_builder import URDFBuilder
@@ -56,7 +57,7 @@ from .visualization_widget import VisualizationWidget
 __all__ = ["MainWidget"]
 
 
-class MainWidget(QWidget):
+class MainWidget(ResultsPlaybackHostMixin, QWidget):
     """Embeddable Model Explorer widget.
 
     Owns the segments panel, 3D visualization, and properties dock that
@@ -80,6 +81,8 @@ class MainWidget(QWidget):
         self.current_file_path: Path | None = None
         self._notepad_window: Any | None = None
         self._results: ResultsSession | None = None
+        self.playback_panel: Any | None = None
+        self.playback_dock: QDockWidget | None = None
 
         # Internal QMainWindow gives us QDockWidget without forcing this
         # object to *be* a top-level window. ``Qt.WindowType.Widget``
@@ -483,36 +486,6 @@ class MainWidget(QWidget):
         if file_path:
             self.load_results(file_path)
 
-    def load_results(self, path: str | Path, engine: str | None = None) -> bool:
-        """Load a results archive for playback and export.
-
-        Returns False, with a message naming the file and the problem, when
-        the archive is missing or has no marker trajectories to play.
-        """
-        from src.shared.python.motion_matching.video_frame_source import (
-            VideoSourceError,
-        )
-
-        results_path = Path(path)
-        try:
-            session = ResultsSession.load(results_path, engine or "engine")
-        except (OSError, VideoSourceError) as exc:
-            logger.warning("Could not load results %s: %s", results_path, exc)
-            self._results = None
-            self.export_video_action.setEnabled(False)
-            QMessageBox.warning(
-                self,
-                "Results Load Error",
-                f"Cannot play '{results_path.name}':\n\n{exc}",
-            )
-            return False
-        self._results = session
-        self.export_video_action.setEnabled(True)
-        self.status_bar.showMessage(
-            f"Loaded results {results_path.name}: {session.frame_count} frames"
-        )
-        return True
-
     def scrub_results(self, index: int) -> None:
         """Move the playback cursor; ``ValueError`` if out of range or unloaded."""
         if self._results is None:
@@ -564,6 +537,7 @@ class MainWidget(QWidget):
 
     def cleanup(self) -> None:
         """Release any resources held by the widget. Idempotent."""
+        self._discard_results()
         # No long-lived background resources today; the visualization
         # widget owns its own GL context which Qt tears down with the
         # widget itself. The hook exists so the embed adapter can call
@@ -638,6 +612,12 @@ class MainWidget(QWidget):
         load_library_action.setShortcut("Ctrl+L")
         load_library_action.triggered.connect(self.load_from_library)
         file_menu.addAction(load_library_action)
+
+        open_swing_action = QAction("Open Swing Res&ult...", self)
+        open_swing_action.setShortcut("Ctrl+Shift+O")
+        open_swing_action.setToolTip("Play a run from the swing datastore")
+        open_swing_action.triggered.connect(self.open_swing_result)
+        file_menu.addAction(open_swing_action)
 
         load_results_action = QAction("Load &Results...", self)
         load_results_action.triggered.connect(self.open_results)

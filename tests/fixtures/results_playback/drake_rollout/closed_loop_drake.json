@@ -1,0 +1,7 @@
+{
+  "schema": "same-input-closed-loop/v1",
+  "engine": "drake",
+  "bundle": {
+    "spec_sha256": "153b6766e0f7a0eda9b457e0d88e81e50fd627640b40b0675534a0d9102c48f4"
+  }
+}

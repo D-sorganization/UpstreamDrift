@@ -7,11 +7,13 @@ and a reusable WebSocket router factory.
 
 Usage::
 
-    from chat import ChatDockWidget
+    from chat import ChatDockWidget, ChatConnectionConfig
 
     dock = ChatDockWidget(
-        app_context="gasification",
-        app_name="integrated_process_simulator",
+        connection=ChatConnectionConfig(
+            app_context="gasification",
+            app_name="integrated_process_simulator",
+        ),
         parent=main_window,
     )
     main_window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)

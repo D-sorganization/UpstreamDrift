@@ -167,7 +167,8 @@ def assess_nonlinearity(
         raise ValueError("the nominal rollout (theta = 0) must be finite")
     ratios = np.full((dirs.shape[0], nominal.size), np.inf)
     n_failed = 0
-    for i, direction in enumerate(dirs):
+    for i in range(dirs.shape[0]):
+        direction: np.ndarray = dirs[i]
         one = _evaluate(rollout, eps * direction)
         two = _evaluate(rollout, 2.0 * eps * direction)
         if one is None or two is None or one.size != nominal.size:

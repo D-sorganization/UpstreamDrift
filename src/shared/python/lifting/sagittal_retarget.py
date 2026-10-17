@@ -209,3 +209,60 @@ def retarget_landmarks(
             target[label] = hip_k + rotate_sagittal(points[label] - hip, d_trunk, frame)
         frames.append([target[label] for label in LANDMARK_LABELS])
     return np.asarray(frames, dtype=float)
+
+
+def shoulder_path(solution: SagittalSolution) -> Array:
+    """Optimizer shoulder (forward, up) relative to the ankle, (N, 2) metres.
+
+    Forward kinematics of the planar chain with the segment lengths the
+    optimizer recorded in ``solution.source["segment_lengths_m"]``.
+
+    Raises:
+        ValueError: If the source has no three finite positive segment lengths.
+    """
+    raw = solution.source.get("segment_lengths_m")
+    if raw is None:
+        raise ValueError("solution source has no segment_lengths_m")
+    lengths = _finite(raw, "segment_lengths_m")
+    if lengths.shape != (len(SEGMENTS),) or np.any(lengths <= 0.0):
+        raise ValueError("segment_lengths_m must be three positive lengths")
+    angles = solution.segment_angles_rad
+    return np.column_stack(
+        ((lengths * np.sin(angles)).sum(axis=1), (lengths * np.cos(angles)).sum(axis=1))
+    )
+
+
+def retarget_bar(
+    solution: SagittalSolution,
+    targets: Array,
+    frame: SagittalFrame,
+    *,
+    scale: float = 1.0,
+) -> Array:
+    """Bar targets (N, 3) for a bar held in the hands (#11745).
+
+    The bar keeps the optimizer's own offset from its shoulder (for a pull,
+    the arms hang: one arm length straight down), scaled by ``scale`` (the
+    model's arm over the optimizer's) and applied to the midpoint of the
+    model's retargeted shoulder targets, so the bar follows the model's trunk
+    without inheriting the optimizer's segment lengths.
+
+    Args:
+        solution: Planar lift solution with ``segment_lengths_m`` provenance.
+        targets: Retargeted landmarks (N, len(LANDMARK_LABELS), 3).
+        frame: Sagittal plane of the standing pose.
+
+    Postcondition: where the optimizer bar sits on its shoulder, the bar
+    target is the model's shoulder midpoint.
+    """
+    points = _finite(targets, "targets")
+    if points.shape != (solution.time_s.size, len(LANDMARK_LABELS), 3):
+        raise ValueError("targets must be (N, len(LANDMARK_LABELS), 3) for solution")
+    if not (np.isfinite(scale) and scale > 0.0):
+        raise ValueError(f"scale must be positive and finite: {scale!r}")
+    offset = scale * (solution.bar_m - shoulder_path(solution))
+    left = LANDMARK_LABELS.index("shoulder_l")
+    right = LANDMARK_LABELS.index("shoulder_r")
+    mid = 0.5 * (points[:, left] + points[:, right])
+    forward, up = np.asarray(frame.forward), np.asarray(frame.up)
+    return np.asarray(mid + offset[:, :1] * forward + offset[:, 1:] * up, dtype=float)

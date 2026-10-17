@@ -547,6 +547,9 @@ max-complexity = 10
 # fork from the byte-identical copy.
 "shared_scripts/**" = ["T201", "BLE001", "FURB167", "FURB188", "SIM114"]
 "tests/**" = ["T201"]
+# Tools-owned chat child copy kept byte-identical to the pinned Tools source (#12803);
+# a local FURB110 --fix would fork it from canonical.
+"src/shared/python/chat/chat_dock_widget.py" = ["FURB110"]
 "examples/**" = ["T201"]
 # Benchmark CLIs report their tables on stdout, like scripts/** above.
 "benchmarks/**" = ["T201"]

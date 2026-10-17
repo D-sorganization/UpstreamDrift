@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -45,6 +46,18 @@ class MujocoFreeCamera:
     elevation: float
     distance: float
     lookat: Vec3
+
+    def apply_to(self, cam: Any) -> None:
+        """Copy lookat/distance/azimuth/elevation onto a ``MjvCamera``.
+
+        The caller sets ``cam.type`` (free camera) itself.
+        """
+        cam.lookat[:] = self.lookat
+        cam.distance, cam.azimuth, cam.elevation = (
+            self.distance,
+            self.azimuth,
+            self.elevation,
+        )
 
 
 def mujoco_camera_params(
