@@ -6,7 +6,7 @@
     "RSInputY": 45.0
   },
   "anthropometry": {
-    "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
+    "de_leva_table_sha256": "f3aff01daf746bd965d888622d74461563a4b7ef2331ae03cdc75f87a18f524b",
     "segments": {
       "foot": {
         "com_fraction": 0.4415,
@@ -46,7 +46,7 @@
       },
       "shank": {
         "com_fraction": 0.4395,
-        "length_m": 0.434,
+        "length_m": 0.4403,
         "mass_fraction": 0.0433,
         "radii": [0.251, 0.246, 0.102]
       },
@@ -58,7 +58,7 @@
       },
       "trunk": {
         "com_fraction": 0.5138,
-        "length_m": 0.5319,
+        "length_m": 0.6033,
         "mass_fraction": 0.4346,
         "radii": [0.328, 0.306, 0.169]
       },
@@ -69,10 +69,10 @@
         "radii": [0.285, 0.269, 0.158]
       },
       "upper_trunk": {
-        "com_fraction": 0.2999,
-        "length_m": 0.1707,
+        "com_fraction": 0.5066,
+        "length_m": 0.2421,
         "mass_fraction": 0.1596,
-        "radii": [0.505, 0.465, 0.418]
+        "radii": [0.505, 0.32, 0.465]
       }
     },
     "table": "de_leva_1996_male"
@@ -144,11 +144,11 @@
           ]
         },
         {
-          "com_m": [0.0, 0.0, 0.27467597782482767],
+          "com_m": [0.0, 0.0, 0.3183528180559161],
           "inertia_com_kg_m2": [
-            [0.12018627262359642, 0.0, 0.0],
+            [0.05691790642458678, 0.0, 0.0],
             [0.0, 0.1417528231047875, 0.0],
-            [0.0, 0.0, 0.09711840119267087]
+            [0.0, 0.0, 0.12018627262359642]
           ],
           "mass_kg": 12.448799999999999,
           "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/upper_trunk",
@@ -848,7 +848,7 @@
     "subtalar_angle_l": [-20.0, 20.0],
     "subtalar_angle_r": [-20.0, 20.0]
   },
-  "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
+  "de_leva_table_sha256": "f3aff01daf746bd965d888622d74461563a4b7ef2331ae03cdc75f87a18f524b",
   "frames": [
     {
       "body": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
@@ -1904,12 +1904,12 @@
       "offset_m": [0.02, -0.15, 0.08]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210); grip rotation refitted per capture from docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_driver.json (#12221)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210); grip rotation refitted per capture from docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_driver.json (#12221); de Leva table derived from whole Table 4 rows, trunk length kept by rescaling trunk_scale and upper-trunk solid rebuilt (#13037)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
     "arm_scale": 1.1,
-    "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
+    "de_leva_table_sha256": "f3aff01daf746bd965d888622d74461563a4b7ef2331ae03cdc75f87a18f524b",
     "grip_roll_deg": 0.0,
     "grip_rotation_deg": {
       "L": [-36.864, 57.315, 70.926],
@@ -1919,7 +1919,7 @@
     "shoulder_scale": 1.0,
     "source": "de Leva 1996 male table",
     "stature_m": 1.71,
-    "trunk_scale": 1.15
+    "trunk_scale": 1.0138985579313775
   },
   "upper_body_counts": {
     "bodies": 15,
