@@ -324,6 +324,8 @@ OBSERVATIONS = (
     "normal_load_per_foot",
     "force_per_foot",
     "all_point_forces",
+    "vertical_per_foot",
+    "vertical_per_foot_sensing_depth",
 )
 
 

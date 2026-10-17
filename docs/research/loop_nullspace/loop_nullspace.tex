@@ -304,6 +304,8 @@ Net force                         & 0 & 0 \\
 Vertical load of each foot        & 0 & 1 \\
 Force of each foot                & 1 & 3 \\
 Every point force                 & 1 & 6 \\
+Vertical-cell plate per foot, $h=0$        & 0 & 1 \\
+Vertical-cell plate per foot, $h=1/50$     & 1 & 3 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -316,10 +318,54 @@ the vertical loads of the two feet are already fixed by the balance and the
 only visible direction of the per-foot force is the horizontal squeeze along
 the line $p_1p_2$.
 
+\paragraph{Per-Foot Vertical-Cell Force Plates (OF-11).}
+A vertical-cell plate under foot $F$ (epic \#13061; contacts $k\in F$ at
+$p_k$) reports the foot's normal load $N_F$ and the centre of pressure $c'_F$
+at which its cells' vertical reactions balance.  The cells sit in a
+force-sensing plane a depth $h$ below the contacts, and a massless rigid plate
+balances the moment of the foot's loads about $c'_F$ in that plane.  With
+$r_k=p_k-c'_F$ and the contact frame $(t_1,t_2,n)$ the observation rows are
+\begin{equation}
+\sum_{k\in F} n^{\top}f_k=N_F,\qquad
+\sum_{k\in F}\bigl[(r_k^{\top}t_i)(n^{\top}f_k)-(r_k^{\top}n)(t_i^{\top}f_k)\bigr]=0,
+\quad i=1,2 .
+\label{eq:vertical_plate}
+\end{equation}
+The second term is the shear lever arm about the sensing plane; it vanishes
+when $h=0$, which reduces the rows to the per-foot form of the total
+normal-load-and-CoP observation.  Shear is never assigned a value: it enters
+only through the declared depth.  The free moment is a derived property of the
+shear split and is not observed.  The declared uncertainties are $\sigma_{N,F}$
+for the load row and
+$\sigma_{M,F}=N_F\sqrt{\sigma_{c,F}^2+(\mu_F\,\sigma_h)^2}$ for the moment
+rows, where $\mu_F$ is the largest declared friction coefficient of the foot;
+because $|t_i^{\top}f_k|\le\mu\,n^{\top}f_k$ this bounds the effect of an
+uncertain depth.  A foot below the plate's CoP threshold contributes only its
+load row.  A foot whose model has no active contact contributes a zero load
+row, so a measured load there is tested rather than ignored.  The measured
+load is kept as read, including small negative noise on an unloaded plate.
+
+On the spatial fixture the exact ranks (golden selectors
+\texttt{vertical\_per\_foot} and \texttt{vertical\_per\_foot\_sensing\_depth},
+with physically realisable CoPs) are in Table~\ref{tab:lowerbody}; the rank of
+the tangential rows of the null basis drops from $1$ to $0$ (point feet) and
+from $5$ to $3$ (two-point feet) when $h=1/50$, and is unchanged when $h=0$.
+The plates therefore play two roles.  \emph{Restriction}: the visible rank
+removes internal contact-load directions (the split between the feet, the
+distribution within a foot and, through $h$, part of the shear).
+\emph{Falsification}: the remaining
+$\rank E-\rank(E_xN)$ rows (two of two with point feet and $h=0$) are already
+fixed by the balance, so they cannot narrow the family; they test it, and the
+restriction routine refuses a candidate motion and model whose implied loads
+disagree with the data by more than $k\sigma$.  Neither role selects a unique
+solution.
+
 Non-claims: contacts are rigid and unilateral (no compliance, no slip
 dynamics); a friction coefficient is a declared hypothesis; an observation
 produced by a simulation standing in for a force plate is a simulation record,
-not a measurement; contact loads are not physiological quantities.
+not a measurement; contact loads are not physiological quantities; the plate
+is massless and rigid; plate uncertainties are declared hypotheses until a
+device is qualified (deferred-validation record DV-13061).
 
 \section{Zero-Side Three-Case Analysis}
 \label{sec:zeroside}
