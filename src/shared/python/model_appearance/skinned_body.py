@@ -45,7 +45,9 @@ from src.shared.python.motion_matching.visual_skeleton import derive_visual_skel
 Array = NDArray[np.float64]
 
 __all__ = [
+    "CANONICAL_NOISE_FLOOR",
     "SkinnedBody",
+    "canonical_components",
     "build_skinned_body",
     "gltf_up_rotation",
     "pose_skinned_vertices",
@@ -418,6 +420,28 @@ def _local_poses(parents: tuple[int, ...], global_poses: Array) -> Array:
     return local
 
 
+#: Components smaller than this are float noise from ``inv(parent) @ child``.
+CANONICAL_NOISE_FLOOR = 1e-12
+
+
+def canonical_components(values: Any) -> list[float]:
+    """``values`` as floats with noise-level components snapped to exactly +0.0.
+
+    Postcondition (DbC): every returned component ``x`` has ``x == 0.0`` with a
+    positive sign or ``abs(x) >= CANONICAL_NOISE_FLOOR``. The rest transforms
+    are derived through ``np.linalg.inv`` and matmul, whose ~1e-18 residues
+    differ in their last bits between BLAS/SIMD paths and so print with a
+    CPU-dependent digit count; snapping them (and ``-0.0``) makes the emitted
+    document byte-stable across platforms (#12789). No geometry changes: the
+    floor is far below any representable spec dimension.
+    """
+    arr = np.asarray(values, dtype=float).ravel()
+    if not np.isfinite(arr).all():
+        raise ValueError("transform components must be finite")
+    snapped = np.where(np.abs(arr) < CANONICAL_NOISE_FLOOR, 0.0, arr) + 0.0
+    return [float(x) for x in snapped]
+
+
 def _bone_nodes(
     names: tuple[str, ...], parents: tuple[int, ...], rest_poses: Array
 ) -> list[dict[str, Any]]:
@@ -431,8 +455,8 @@ def _bone_nodes(
     for i, name in enumerate(names):
         node: dict[str, Any] = {
             "name": name,
-            "translation": local[i, :3, 3].tolist(),
-            "rotation": quaternion_xyzw(local[i, :3, :3]).tolist(),
+            "translation": canonical_components(local[i, :3, 3]),
+            "rotation": canonical_components(quaternion_xyzw(local[i, :3, :3])),
         }
         children = [j for j, p in enumerate(parents) if p == i]
         if children:

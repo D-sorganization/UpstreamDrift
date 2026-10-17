@@ -191,13 +191,13 @@ with open(filename, "w", encoding="utf-8") as f:
 
 doc = json.loads(text)
 print(filename, len(text), media_type)
-# tour_average_male_b199fdbd.gltf 334665 model/gltf+json
+# tour_average_male_b199fdbd.gltf 334286 model/gltf+json
 print(len(doc["skins"][0]["joints"]))      # 24 bones
 print(doc["accessors"][0]["count"])        # 3416 vertices
 print(doc["extras"]["spec_sha256"][:8])    # b199fdbd
 ```
 
-For the driver character from Step 1, this wrote a 334665-byte document
+For the driver character from Step 1, this wrote a 334286-byte document
 with 24 bones and 3416 vertices. The bytes are identical on every run for
 the same spec. `extras.spec_sha256` ties the mesh back to Step 1's spec
 `b199fdbd...`. The mesh is visual only and never changes mass, inertia or

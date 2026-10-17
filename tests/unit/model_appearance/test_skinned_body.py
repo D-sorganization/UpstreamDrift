@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import json
+import math
 
 import numpy as np
 import pytest
@@ -18,6 +19,7 @@ from src.shared.python.humanoid_character_builder.spec_export import (
 from src.shared.python.model_appearance.library import classify_body
 from src.shared.python.model_appearance.skinned_body import (
     build_skinned_body,
+    canonical_components,
     gltf_up_rotation,
     pose_skinned_vertices,
     quaternion_xyzw,
@@ -492,3 +494,49 @@ def test_trunk_bones_are_wider_than_deep(skinned, spec_doc) -> None:
         ), name
         checked += 1
     assert checked >= 3  # pelvis, torso base, chest
+
+
+# --- canonical rest transforms (#12789) --------------------------------
+
+
+@pytest.fixture(scope="module")
+def torsioned_nodes() -> list[dict]:
+    """glTF bone nodes of the tutorial character, whose feet carry the torsion."""
+    compiled = compile_character("tour_average_male", {"mass_kg": 90.0})
+    text, _, _ = export_character(compiled, "gltf")
+    return [n for n in json.loads(text)["nodes"] if "name" in n]
+
+
+@pytest.mark.unit
+def test_rest_node_transforms_have_no_float_noise(torsioned_nodes) -> None:
+    """Noise-level components are exactly +0.0, so the export is byte-stable.
+
+    The parent-relative rest transforms come from ``inv(parent) @ child``;
+    without snapping, their ~1e-18 residues print with a CPU-dependent digit
+    count and the glTF byte length differs between runners.
+    """
+    names = {n["name"] for n in torsioned_nodes}
+    for bone in ("tibia_r", "tibia_l", "calcn_r", "calcn_l", "toes_r", "toes_l"):
+        assert bone in names
+    for node in torsioned_nodes:
+        for key in ("translation", "rotation"):
+            for x in node[key]:
+                if abs(x) < 1e-12:
+                    assert x == 0.0 and math.copysign(1.0, x) == 1.0, (
+                        node["name"],
+                        key,
+                        node[key],
+                    )
+
+
+@pytest.mark.unit
+def test_canonical_components_snaps_noise_and_negative_zero() -> None:
+    out = canonical_components(np.array([1e-18, -1e-13, -0.0, 0.5, -2e-12]))
+    assert out == [0.0, 0.0, 0.0, 0.5, -2e-12]
+    assert all(math.copysign(1.0, x) == 1.0 for x in out[:3])
+
+
+@pytest.mark.unit
+def test_canonical_components_rejects_non_finite() -> None:
+    with pytest.raises(ValueError, match="finite"):
+        canonical_components([0.0, float("nan")])
