@@ -14,7 +14,7 @@
   "root_efforts": "zero",
   "substeps": 64
  },
- "bundle_spec_sha256": "994a6e9a3274c44eaa49ec5ca4b270890e7dcfb6067f48b42e7d2abb0ca6c208",
+ "bundle_spec_sha256": "a474d797ae80dfd0c4a62f94e89721243c2a9faa0458d4a1c51b49f83fc213a7",
  "committed_policy_run_reproduces_bundle": true,
  "generator": "scripts/measure_loaded_foot_tracking.py",
  "issue": 13104,
@@ -44,7 +44,7 @@
     "substep_s": 0.000125
    },
    "substeps": 8,
-   "wall_s": 169.2349938209518
+   "wall_s": 140.85880955000175
   },
   {
    "effort_hold_s": 0.000125,
@@ -71,7 +71,7 @@
     "substep_s": 0.000125
    },
    "substeps": 8,
-   "wall_s": 271.3668956310139
+   "wall_s": 250.46271798899397
   },
   {
    "effort_hold_s": 0.00025,
@@ -98,7 +98,7 @@
     "substep_s": 6.25e-05
    },
    "substeps": 16,
-   "wall_s": 262.96035488904454
+   "wall_s": 221.93204435997177
   },
   {
    "effort_hold_s": 0.00025,
@@ -125,7 +125,7 @@
     "substep_s": 3.125e-05
    },
    "substeps": 32,
-   "wall_s": 296.00175141898217
+   "wall_s": 259.7944036060362
   },
   {
    "effort_hold_s": 0.00025,
@@ -152,7 +152,7 @@
     "substep_s": 1.5625e-05
    },
    "substeps": 64,
-   "wall_s": 470.9473360759439
+   "wall_s": 352.2017100779922
   },
   {
    "effort_hold_s": 0.00025,
@@ -179,7 +179,7 @@
     "substep_s": 7.8125e-06
    },
    "substeps": 128,
-   "wall_s": 614.5056772970129
+   "wall_s": 517.0587604810135
   },
   {
    "effort_hold_s": 0.001,
@@ -206,7 +206,7 @@
     "substep_s": 1.5625e-05
    },
    "substeps": 64,
-   "wall_s": 397.1606850340031
+   "wall_s": 282.46148151595844
   },
   {
    "effort_hold_s": 0.0005,
@@ -233,7 +233,7 @@
     "substep_s": 1.5625e-05
    },
    "substeps": 64,
-   "wall_s": 442.9991127619869
+   "wall_s": 362.66940722003346
   },
   {
    "effort_hold_s": 0.000125,
@@ -260,10 +260,10 @@
     "substep_s": 1.5625e-05
    },
    "substeps": 64,
-   "wall_s": 294.33113244600827
+   "wall_s": 422.29391889699036
   }
  ],
- "source_commit": "6452ef5fdfc28f878c464d55bff9ea10faf73aa2",
+ "source_commit": "317afd6fe1b461287c1eb1ca73305c926021d856",
  "substep_convergence": [
   {
    "max_coordinate_rad": 0.014309850991444387,
