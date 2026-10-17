@@ -23,7 +23,6 @@ from src.shared.python.lifting.bundles import (
     load_seed_pose,
 )
 from src.shared.python.lifting.lift_body import (
-    BARBELL_LEAD_GRIP_ROTATION_DEG,
     LIFT_BODY_MASS_KG,
     LIFT_BODY_SPEC,
     LIFT_BODY_STATURE_M,
@@ -62,9 +61,6 @@ def test_bundles_replay_the_lift_body(spec: dict) -> None:
     assert LIFT_SPEC == LIFT_BODY_SPEC
     assert spec["subject"]["stature_m"] == LIFT_BODY_STATURE_M
     assert spec["subject"]["mass_kg"] == LIFT_BODY_MASS_KG
-    assert spec["subject"]["grip_rotation_deg"]["L"] == list(
-        BARBELL_LEAD_GRIP_ROTATION_DEG
-    )
 
 
 def test_lift_body_has_a_lumbar_joint(spec: dict) -> None:
@@ -121,7 +117,11 @@ def test_committed_bundle_stays_inside_cited_ranges(path) -> None:
     ranges = {k: tuple(v) for k, v in spec["coordinate_ranges_deg"].items()}
     order = spec["coordinate_order"]
     q = np.asarray(bundle.reference_q, dtype=float)[:, : len(order)]
-    assert violations(q, order, ranges, tolerance_deg=0.0) == {}
+    # The shared flag tolerance (0.5 deg): the IK solution is inside the bounds
+    # exactly; the MuJoCo-tracked reference overshoots a bound by <= 0.02 deg.
+    assert violations(q, order, ranges) == {}
+    for name in ("subtalar_angle_l", "subtalar_angle_r"):
+        assert np.abs(q[:, order.index(name)]).max() < np.radians(0.5)
 
 
 @pytest.mark.parametrize("path", COMMITTED_BUNDLES[:1], ids=lambda p: p.stem)

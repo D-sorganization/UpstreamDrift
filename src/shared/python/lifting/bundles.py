@@ -164,8 +164,13 @@ ARM_CHAIN_COORDINATES: tuple[str, ...] = tuple(
 BACK_BAR_REACH_TOLERANCE_M = 0.02
 BACK_BAR_CLOSURE_TOLERANCE_M = 1e-3
 TOE_COORDINATES: tuple[str, ...] = ("mtp_angle_l", "mtp_angle_r")
+#: Held at zero, as Rajagopal (2016) locks them; the OpenSim lift model the
+#: bundles feed has no subtalar freedom (OSL-14, #13057).
+SUBTALAR_COORDINATES: tuple[str, ...] = ("subtalar_angle_l", "subtalar_angle_r")
 #: Held at the standing pose while a bar lift's arm chain is solved.
-_HELD_IN_BAR_LIFTS: tuple[str, ...] = SCAPULA_COORDINATES + HEAD_COORDINATES
+_HELD_IN_BAR_LIFTS: tuple[str, ...] = (
+    SCAPULA_COORDINATES + HEAD_COORDINATES + SUBTALAR_COORDINATES
+)
 POSTURE_COORDINATES: tuple[str, ...] = (
     "hip_adduction_l",
     "hip_adduction_r",
@@ -234,7 +239,7 @@ class FullBodyLift:
         """Provenance record of the IK solve."""
         attachments = _attachments(self.back_bar)
         held = UPPER_LIMB_COORDINATES if self.back_bar is None else SCAPULA_COORDINATES
-        locked = held + HEAD_COORDINATES + TOE_COORDINATES
+        locked = held + HEAD_COORDINATES + SUBTALAR_COORDINATES + TOE_COORDINATES
         method = {"lm": "Levenberg-Marquardt", "trf": "bounded trust-region (TRF)"}
         record: dict[str, Any] = {
             "solver": f"FullBodyMarkerKinematics (MuJoCo), {method[self.options.solver]}",
@@ -489,7 +494,7 @@ def _stand(
         n: float(seed[order.index(n)])
         for n in UPPER_LIMB_COORDINATES + HEAD_COORDINATES
         if n in order
-    }
+    } | {n: 0.0 for n in SUBTALAR_COORDINATES if n in order}
     posture = dict.fromkeys(POSTURE_COORDINATES, (0.0, opts.posture_weight))
     bounds = lift_bounds(document)
     seed_positions = kin.marker_positions(seed)

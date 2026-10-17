@@ -18,10 +18,9 @@ at the lift subject instead:
   :data:`~src.shared.python.motion_matching.range_of_motion.HUMAN_RANGES_DEG`:
   Kapandji, Rajagopal 2016 for the legs), which :func:`lift_bounds` turns into
   IK bounds;
-* a barbell lead-grip rotation (:data:`BARBELL_LEAD_GRIP_ROTATION_DEG`).  The
-  golf lead grip (``GRIP_ROTATION_DEG['L']``) pronates the left forearm past
-  its -90 deg limit on a pronated barbell grip; the value here was fitted
-  (``grip_fit.fit_grip_rotation``) after that reach failure was seen.
+* the golf grip rotations (``GRIP_ROTATION_DEG``) unchanged: with the left
+  wrist moved to the barbell grip width (``back_bar.apply_grip_width``) both
+  hands reach a pronated barbell grip inside their cited ranges.
 
 The document is committed at :data:`LIFT_BODY_SPEC` so bundles hash a stable
 spec; :func:`compose_lift_body_document` regenerates it.
@@ -40,7 +39,6 @@ from numpy.typing import NDArray
 Array = NDArray[np.float64]
 
 __all__ = [
-    "BARBELL_LEAD_GRIP_ROTATION_DEG",
     "HEAD_COORDINATES",
     "LIFT_BODY_MASS_KG",
     "LIFT_BODY_SPEC",
@@ -60,10 +58,6 @@ LIFT_BODY_SPEC = (
 #: The planar optimizer's default subject (``scripts/generate_lift_bundle.py``).
 LIFT_BODY_STATURE_M = 1.78
 LIFT_BODY_MASS_KG = 80.0
-#: Lead (left) hand grip rotation for a pronated barbell grip, degrees
-#: (``grip_fit.fit_grip_rotation`` on the back-squat arm solve; the trail hand
-#: keeps the golf value, which the same fit left unchanged).
-BARBELL_LEAD_GRIP_ROTATION_DEG: tuple[float, float, float] = (-88.0, 0.0, 90.0)
 #: Root height of the seed pose, metres; only a starting point for the
 #: standing IK, which solves the root.
 SEED_PELVIS_HEIGHT_M = 0.95
@@ -72,11 +66,10 @@ HEAD_COORDINATES: tuple[str, ...] = ("NeckInputX", "NeckInputY", "NeckInputZ")
 
 
 def compose_lift_body_document() -> dict[str, Any]:
-    """The AN-1 lift-body document (de Leva, cited ranges, barbell grip).
+    """The AN-1 lift-body document (de Leva, lumbar joint, cited ranges).
 
     Postcondition: the document carries ``coordinate_ranges_deg`` for every
-    leg, spine and arm coordinate it bounds and the barbell lead-grip rotation
-    in ``subject.grip_rotation_deg``.
+    leg, spine and arm coordinate it bounds.
     """
     from src.shared.python.motion_matching.execution.spec_builder import (
         compose_anthropometric_document,
@@ -87,7 +80,6 @@ def compose_lift_body_document() -> dict[str, Any]:
         LIFT_BODY_MASS_KG,
         "driver",
         match_subject_mass=True,
-        lead_grip_rotation=BARBELL_LEAD_GRIP_ROTATION_DEG,
     )
     return dict(built.document)
 
