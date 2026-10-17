@@ -36,9 +36,10 @@ __all__ = [
     "context_from_form",
 ]
 
-#: Clock alignments a person can declare; ``cross_correlation`` is fitted
-#: against a model by code and so is never typed into the form.
-ALIGNMENT_KINDS = ("manual", "shot_impact", "absolute_utc")
+#: Clock alignments the form offers.  A ``cross_correlation`` offset was fitted
+#: against a model, so the form also asks which one: that alignment can never
+#: be evidence for the model it was fitted to (``PlateTimeAlignment.validates``).
+ALIGNMENT_KINDS = ("manual", "shot_impact", "absolute_utc", "cross_correlation")
 HANDEDNESS_CHOICES = ("RH", "LH")
 _FRAME_LABEL = "declared"
 
@@ -95,6 +96,12 @@ FORM_FIELDS: tuple[FormField, ...] = (
         "Clock",
         choices=ALIGNMENT_KINDS,
         initial=ALIGNMENT_KINDS[0],
+    ),
+    FormField(
+        "derived_from_model",
+        "Model the offset was fitted against (cross-correlation only)",
+        "Clock",
+        required=False,
     ),
     FormField("alignment_note", "How the offset was found", "Clock"),
 )
@@ -173,9 +180,14 @@ def _alignment(texts: Mapping[str, str]) -> PlateTimeAlignment:
     sigma_offset_s = _number(texts, "sigma_offset_s")
     kind = cast(AlignmentKind, _choice(texts, "alignment_kind"))
     note = _text(texts, "alignment_note")
+    derived_from_model = _text(texts, "derived_from_model") or None
     try:
         return PlateTimeAlignment(
-            offset_s=offset_s, sigma_offset_s=sigma_offset_s, kind=kind, note=note
+            offset_s=offset_s,
+            sigma_offset_s=sigma_offset_s,
+            kind=kind,
+            note=note,
+            derived_from_model=derived_from_model,
         )
     except (TypeError, ValueError) as exc:
         raise PlateFormError(_named_key(exc, "Clock"), str(exc)) from exc

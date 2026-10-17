@@ -20,8 +20,16 @@ export interface PlateFormField {
   initial: string;
 }
 
-/** Alignments a person can declare; `cross_correlation` is fitted by code. */
-export const ALIGNMENT_KINDS = ['manual', 'shot_impact', 'absolute_utc'] as const;
+/**
+ * Alignments the form offers. A `cross_correlation` offset was fitted against
+ * a model, so the form also asks which one: it can never be evidence for it.
+ */
+export const ALIGNMENT_KINDS = [
+  'manual',
+  'shot_impact',
+  'absolute_utc',
+  'cross_correlation',
+] as const;
 export const HANDEDNESS_CHOICES = ['RH', 'LH'] as const;
 
 const field = (
@@ -50,6 +58,12 @@ export const PLATE_FORM_FIELDS: readonly PlateFormField[] = [
     choices: ALIGNMENT_KINDS,
     initial: ALIGNMENT_KINDS[0],
   }),
+  field(
+    'derived_from_model',
+    'Model the offset was fitted against (cross-correlation only)',
+    'Clock',
+    { required: false },
+  ),
   field('alignment_note', 'How the offset was found', 'Clock'),
 ];
 
@@ -125,6 +139,21 @@ function trialPath(texts: Record<string, string>): string {
   return trial;
 }
 
+/** Only a cross-correlated offset names the model it was fitted against. */
+function derivedFromModel(
+  texts: Record<string, string>,
+  kind: PlateAlignment['kind'],
+): string | null {
+  const model = text(texts, 'derived_from_model');
+  if (kind === 'cross_correlation' && model === '') {
+    throw new FormRefusal('derived_from_model', 'required for a cross-correlation alignment');
+  }
+  if (kind !== 'cross_correlation' && model !== '') {
+    throw new FormRefusal('derived_from_model', 'only a cross-correlation alignment names a model');
+  }
+  return model === '' ? null : model;
+}
+
 function requireRows(texts: Record<string, string>): void {
   for (const f of PLATE_FORM_FIELDS) {
     if (f.required && text(texts, f.key) === '') throw new FormRefusal(f.key, 'required');
@@ -134,6 +163,7 @@ function requireRows(texts: Record<string, string>): void {
 function build(texts: Record<string, string>): PlateOverlayRequest {
   requireRows(texts);
   const device = text(texts, 'device');
+  const kind = choice<PlateAlignment['kind']>(texts, 'alignment_kind');
   return {
     trial: trialPath(texts),
     handedness: choice<'RH' | 'LH'>(texts, 'handedness'),
@@ -152,8 +182,9 @@ function build(texts: Record<string, string>): PlateOverlayRequest {
     alignment: {
       offset_s: number(texts, 'offset_s'),
       sigma_offset_s: number(texts, 'sigma_offset_s'),
-      kind: choice<PlateAlignment['kind']>(texts, 'alignment_kind'),
+      kind,
       note: text(texts, 'alignment_note'),
+      derived_from_model: derivedFromModel(texts, kind),
     },
   };
 }
