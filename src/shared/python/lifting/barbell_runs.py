@@ -60,6 +60,9 @@ Controller = Callable[[float, Array, Array], Array]
 PROVENANCE_KEY = "barbell"
 #: Solid name of the bar in :func:`rigid_bar_spec`.
 RIGID_BAR_SOLID = "barbell_rigid_controller_model"
+#: Key of the club record under which :func:`rigid_bar_spec` keeps the
+#: unloaded club mass, so :func:`bushing_body_spec` restores it exactly.
+UNLOADED_CLUB_MASS_KEY = "unloaded_total_mass_kg"
 #: Provenance key of :func:`retrack_landmark_deviation` (#13072).
 RETRACK_DEVIATION_KEY = "retrack_landmark_deviation_m"
 SAMPLE_EVERY = 10
@@ -126,10 +129,13 @@ def rigid_bar_spec(spec_bytes: bytes, barbell: Barbell) -> bytes:
     its tracking run both see the bar load, and :func:`bushing_body_spec`
     recovers the body the LIFT-4 bushings attach to.
 
-    Postcondition: the spec's total mass rises by ``barbell.load_kg``; every
-    other field is unchanged; ``bushing_body_spec`` of the result returns a
-    compact (``","``/``":"``) spec equal to ``spec_bytes`` when that was
-    compact.
+    Postcondition: the spec's total mass rises by ``barbell.load_kg``.  A
+    ``club`` record's ``total_mass_kg`` rises by the same load (the bar is
+    part of the club body the hands hold, so the grip partition sees club plus
+    bar, OSL-16, #13104) and its unloaded value is kept under
+    :data:`UNLOADED_CLUB_MASS_KEY`; every other field is unchanged;
+    ``bushing_body_spec`` of the result returns a compact (``","``/``":"``)
+    spec equal to ``spec_bytes`` when that was compact.
 
     Raises:
         ValueError: If the spec has no closure club body or already carries
@@ -156,6 +162,11 @@ def rigid_bar_spec(spec_bytes: bytes, barbell: Barbell) -> bytes:
             "placement": np.eye(4).tolist(),
         }
     )
+    club_record = spec.get("club")
+    if isinstance(club_record, dict) and "total_mass_kg" in club_record:
+        unloaded = club_record["total_mass_kg"]
+        club_record["total_mass_kg"] = float(unloaded) + float(dynamics.mass_kg)
+        club_record[UNLOADED_CLUB_MASS_KEY] = unloaded
     return json.dumps(spec, separators=(",", ":")).encode()
 
 
@@ -182,6 +193,9 @@ def bushing_body_spec(spec_bytes: bytes) -> bytes:
     if body is None:
         return bytes(spec_bytes)
     body["solids"] = [s for s in body["solids"] if s["name"] != RIGID_BAR_SOLID]
+    club_record = spec.get("club")
+    if isinstance(club_record, dict) and UNLOADED_CLUB_MASS_KEY in club_record:
+        club_record["total_mass_kg"] = club_record.pop(UNLOADED_CLUB_MASS_KEY)
     return json.dumps(spec, separators=(",", ":")).encode()
 
 
