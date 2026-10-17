@@ -8,26 +8,18 @@ be used to validate that same model, because the agreement is then built in.
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 from typing import Literal, get_args
 
 from src.shared.python.force_plates.contracts import (
     finite_non_negative,
-    real_number,
+    finite_real,
     non_empty_text,
 )
 
 __all__ = ["AlignmentKind", "PlateTimeAlignment"]
 
 AlignmentKind = Literal["absolute_utc", "shot_impact", "manual", "cross_correlation"]
-
-
-def _finite(value: object, name: str) -> float:
-    number = real_number(value, name)
-    if not math.isfinite(number):
-        raise ValueError(f"{name} must be finite, got {value!r}")
-    return number
 
 
 @dataclass(frozen=True)
@@ -53,7 +45,7 @@ class PlateTimeAlignment:
     derived_from_model: str | None = None
 
     def __post_init__(self) -> None:
-        _finite(self.offset_s, "offset_s")
+        finite_real(self.offset_s, "offset_s")
         finite_non_negative(self.sigma_offset_s, "sigma_offset_s")
         if self.kind not in get_args(AlignmentKind):
             raise ValueError(
@@ -76,8 +68,8 @@ class PlateTimeAlignment:
         ``shift_s`` profiles the common-mode offset: it is added to
         ``offset_s`` for this call only.  Both inputs must be finite.
         """
-        model = _finite(model_time_s, "model_time_s")
-        shift = _finite(shift_s, "shift_s")
+        model = finite_real(model_time_s, "model_time_s")
+        shift = finite_real(shift_s, "shift_s")
         return model - self.offset_s - shift
 
     def validates(self, model_identity: str) -> bool:

@@ -1,29 +1,35 @@
 """Plate readings at an arbitrary model time with an uncertainty budget (OF-05).
 
 :func:`reading_at` evaluates a placed vertical plate trial at a model time and
-reports, per foot, the load and the centre of pressure (CoP) together with an
-effective 1-sigma that covers four first-order error sources:
+reports, per foot, the load and the centre of pressure (CoP) together with the
+components of its uncertainty:
 
 * the declared measurement uncertainty of the plate;
-* a within-sample **timing skew** between channels, ``skew_s * |dy/dt|``;
-* the **linear-interpolation bias**, bounded pointwise by
-  ``|(t - t_i)(t_{i+1} - t)| / 2 * M2`` where ``M2`` estimates ``max |y''|``
-  from the neighbouring second divided differences (``2 * |f[a, b, c]|``; the
-  bound is zero at a sample and at most ``h**2 / 8 * M2``);
+* a within-sample **timing skew** between channels, ``skew_s * |dy/dt|``
+  (at an interior sample, the steeper adjacent interval);
+* the **linear-interpolation bias estimate** of :mod:`.interpolation`;
 * the common-mode clock offset, which is **not** folded in here: it is shared
   by every frame, so it is profiled with ``ReadingOptions.offset_shift_s``.
 
-The deterministic bias is converted to an equivalent sigma with the band factor
-``k = coverage`` so that the band ``k * sigma_eff`` equals
-``k * hypot(sigma_meas, sigma_skew) + bias`` exactly.  These are first-order
-bounds, not a qualification of the device or of the interpolation model.
+``*_sigma_random_*`` is ``hypot(measurement, skew)`` and ``*_bias_*`` the bias
+estimate.  The convenience ``sigma_*`` is ``random + bias / coverage``: a
+worst-case band equivalent (the bias is added, not combined in quadrature), so
+``coverage * sigma`` equals ``coverage * random + bias`` exactly, and only for
+that ``coverage``.  It is not a 1-sigma.
+
+Validity of the bias estimate: it is an estimate, not a bound.  It is valid
+when the signal is band-limited well below the sample rate so that ``y''`` is
+bounded by its neighbouring second divided differences; it is NOT valid across
+an under-sampled impact transient.  Callers must exclude or separately bound
+such intervals.  A missing curvature (two samples, or NaN neighbours) is
+refused unless a curvature floor is declared.
 """
 
 from __future__ import annotations
 
 import math
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from types import MappingProxyType
 
 import numpy as np
@@ -35,7 +41,14 @@ from src.shared.python.force_plates.contracts import (
     VerticalPlateTrial,
     finite_non_negative,
     finite_positive,
-    real_number,
+    finite_real,
+    require_foot_keys,
+)
+from src.shared.python.force_plates.interpolation import (
+    Channel,
+    Estimate,
+    interpolate,
+    locate,
 )
 from src.shared.python.force_plates.placement import PlatePlacement
 
@@ -47,26 +60,26 @@ __all__ = [
     "reading_at",
 ]
 
-#: Multiplier turning a second divided difference into a bound on ``|y''|``.
-_CURVATURE_FACTOR = 2.0
 _WORLD_DIM = 3
+_STANCE_DIM = 2
 
 
-def _finite(value: object, name: str) -> float:
-    number = real_number(value, name)
-    if not math.isfinite(number):
-        raise ValueError(f"{name} must be finite, got {value!r}")
-    return number
+def _optional_non_negative(value: float | None, name: str) -> None:
+    if value is not None:
+        finite_non_negative(value, name)
 
 
 @dataclass(frozen=True)
 class ReadingOptions:
     """How a reading's uncertainty budget is formed.
 
-    ``coverage`` is the band factor ``k > 0`` that converts the deterministic
-    interpolation bias into an equivalent sigma (``bias / k``).  ``skew_s >= 0``
-    is the declared timing skew between channels within one sample.
+    ``coverage`` is the band factor ``k > 0`` that converts the interpolation
+    bias estimate into an equivalent sigma (``bias / k``).  ``skew_s >= 0`` is
+    the declared timing skew between channels within one sample.
     ``offset_shift_s`` shifts the common-mode clock offset (profiling).
+    ``load_curvature_floor`` [N/s^2] and ``cop_curvature_floor`` [m/s^2] are
+    optional declared floors on ``|y''|`` for the load and the CoP; they are
+    required wherever the curvature cannot be estimated from the data.
 
     Raises ``TypeError`` for non-numbers, ``ValueError`` for out-of-range values.
     """
@@ -74,22 +87,28 @@ class ReadingOptions:
     coverage: float
     skew_s: float = 0.0
     offset_shift_s: float = 0.0
+    load_curvature_floor: float | None = None
+    cop_curvature_floor: float | None = None
 
     def __post_init__(self) -> None:
         finite_positive(self.coverage, "coverage")
         finite_non_negative(self.skew_s, "skew_s")
-        _finite(self.offset_shift_s, "offset_shift_s")
+        finite_real(self.offset_shift_s, "offset_shift_s")
+        _optional_non_negative(self.load_curvature_floor, "load_curvature_floor")
+        _optional_non_negative(self.cop_curvature_floor, "cop_curvature_floor")
 
 
 @dataclass(frozen=True, eq=False)
 class FootSample:
-    """One foot's reading: load, CoP on the sensing plane, and 1-sigmas.
+    """One foot's reading: load, CoP on the sensing plane, and uncertainties.
 
     ``cop_m`` is the world point ``(3,)`` on the plate's force-sensing plane
     (read-only), or ``None`` when the foot is unloaded at either bracketing
-    sample.  ``sigma_load_n`` and ``sigma_cop_m`` are effective sigmas as
-    defined in the module docstring; ``sigma_sensing_m`` is the uncertainty of
-    the sensing-plane depth.
+    sample.  ``sigma_load_n`` and ``sigma_cop_m`` are worst-case band-equivalent
+    sigmas (module docstring), the CoP one per horizontal axis for the worst
+    axis; ``*_sigma_random_*`` and ``*_bias_*`` are their components (``None``
+    when a sample was built without them).  ``sigma_sensing_m`` is the
+    uncertainty of the sensing-plane depth.
     """
 
     load_n: float
@@ -97,37 +116,56 @@ class FootSample:
     cop_m: Array | None
     sigma_cop_m: float
     sigma_sensing_m: float
+    load_sigma_random_n: float | None = None
+    load_bias_n: float | None = None
+    cop_sigma_random_m: float | None = None
+    cop_bias_m: float | None = None
 
     def __post_init__(self) -> None:
-        _finite(self.load_n, "load_n")
+        finite_real(self.load_n, "load_n")
         finite_non_negative(self.sigma_load_n, "sigma_load_n")
         finite_non_negative(self.sigma_cop_m, "sigma_cop_m")
         finite_non_negative(self.sigma_sensing_m, "sigma_sensing_m")
-        if self.cop_m is None:
-            return
-        cop = np.array(self.cop_m, dtype=np.float64, copy=True)
-        if cop.shape != (_WORLD_DIM,) or not np.isfinite(cop).all():
-            raise ValueError(f"cop_m must be a finite 3-vector, got shape {cop.shape}")
-        cop.flags.writeable = False
-        object.__setattr__(self, "cop_m", cop)
+        for name in (
+            "load_sigma_random_n",
+            "load_bias_n",
+            "cop_sigma_random_m",
+            "cop_bias_m",
+        ):
+            _optional_non_negative(getattr(self, name), name)
+        if self.cop_m is not None:
+            object.__setattr__(self, "cop_m", _frozen_world_point(self.cop_m))
+
+
+def _frozen_world_point(value: Array) -> Array:
+    cop = np.array(value, dtype=np.float64, copy=True)
+    if cop.shape != (_WORLD_DIM,) or not np.isfinite(cop).all():
+        raise ValueError(f"cop_m must be a finite 3-vector, got shape {cop.shape}")
+    cop.flags.writeable = False
+    return cop
 
 
 @dataclass(frozen=True)
 class PlateReading:
-    """Both feet at one model time; ``feet`` is keyed by ``FOOT_LABELS``."""
+    """Both feet at one model time; ``feet`` is keyed by ``FOOT_LABELS``.
+
+    ``coverage`` records the band factor the sigmas were formed with.
+    """
 
     model_time_s: float
     trial_time_s: float
     feet: Mapping[str, FootSample]
+    coverage: float | None = None
 
     def __post_init__(self) -> None:
-        _finite(self.model_time_s, "model_time_s")
-        _finite(self.trial_time_s, "trial_time_s")
-        if set(self.feet) != set(FOOT_LABELS):
-            raise ValueError(f"feet must be keyed exactly by {FOOT_LABELS}")
+        finite_real(self.model_time_s, "model_time_s")
+        finite_real(self.trial_time_s, "trial_time_s")
+        require_foot_keys(self.feet, "feet")
         for label, sample in self.feet.items():
             if not isinstance(sample, FootSample):
                 raise TypeError(f"feet[{label!r}] must be a FootSample")
+        if self.coverage is not None:
+            finite_positive(self.coverage, "coverage")
         object.__setattr__(self, "feet", MappingProxyType(dict(self.feet)))
 
 
@@ -150,87 +188,48 @@ class PlacedTrial:
         return float(times[0]), float(times[-1])
 
 
-# ----------------------------------------------------------- numerics --
-@dataclass(frozen=True)
-class _Estimate:
-    """Interpolated value, interpolation-bias bound and first difference."""
-
-    value: float
-    bias: float
-    rate: float
-
-
-def _second_difference(times: Array, y: Array, start: int) -> float | None:
-    """Second divided difference over samples ``start..start+2``, if finite."""
-    if start < 0 or start + 2 >= times.shape[0]:
-        return None
-    t0, t1, t2 = times[start : start + 3]
-    y0, y1, y2 = y[start : start + 3]
-    value = ((y2 - y1) / (t2 - t1) - (y1 - y0) / (t1 - t0)) / (t2 - t0)
-    return float(value) if math.isfinite(value) else None
-
-
-def _curvature_bound(times: Array, y: Array, index: int) -> float:
-    """Estimate of ``max |y''|`` near interval ``index``; 0 with only two samples."""
-    found = [
-        abs(dd)
-        for dd in (
-            _second_difference(times, y, index - 1),
-            _second_difference(times, y, index),
-        )
-        if dd is not None
-    ]
-    return _CURVATURE_FACTOR * max(found, default=0.0)
-
-
-def _estimate(times: Array, y: Array, index: int, t: float) -> _Estimate:
-    """Linear interpolation of ``y`` in interval ``index`` with its bias bound."""
-    t0, t1 = float(times[index]), float(times[index + 1])
-    y0, y1 = float(y[index]), float(y[index + 1])
-    slope = (y1 - y0) / (t1 - t0)
-    bias = abs((t - t0) * (t1 - t)) / 2.0 * _curvature_bound(times, y, index)
-    return _Estimate(value=y0 + slope * (t - t0), bias=bias, rate=abs(slope))
-
-
-def _effective_sigma(
-    base: float, bias: float, rate: float, options: ReadingOptions
-) -> float:
-    """``hypot(base, skew * rate) + bias / coverage`` (see the module docstring)."""
-    return math.hypot(base, options.skew_s * rate) + bias / options.coverage
-
-
-def _locate(times: Array, t: float) -> int:
-    """Index ``i`` with ``times[i] <= t <= times[i + 1]``; refuses extrapolation."""
-    if not times[0] <= t <= times[-1]:
-        raise ValueError(
-            f"trial time {t} s is outside the trial span "
-            f"[{times[0]}, {times[-1]}] s; extrapolation is refused"
-        )
-    return min(int(np.searchsorted(times, t, side="right")) - 1, times.shape[0] - 2)
-
-
 # ------------------------------------------------------------ readings --
+@dataclass(frozen=True)
+class _Budget:
+    """Random part, bias estimate and band-equivalent sigma of one quantity."""
+
+    random: float
+    bias: float
+    sigma: float
+
+
+def _budget(base: float, estimate: Estimate, options: ReadingOptions) -> _Budget:
+    """``random = hypot(base, skew * rate)``; ``sigma = random + bias / coverage``."""
+    random = math.hypot(base, options.skew_s * estimate.rate)
+    return _Budget(random, estimate.bias, random + estimate.bias / options.coverage)
+
+
 @dataclass(frozen=True, eq=False)
 class _CopEstimate:
     """Interpolated stance CoP ``(2,)`` with the worst-axis bias and rate."""
 
     xy: Array
-    bias: float
-    rate: float
+    estimate: Estimate
 
 
-def _cop_estimate(
-    times: Array, cop: Array, index: int, t: float
-) -> _CopEstimate | None:
-    """Per-axis CoP estimates merged (max bias and rate); ``None`` if unloaded."""
-    if np.isnan(cop[index : index + 2]).any():
+def _cop_estimate(channel: Channel, index: int, t: float) -> _CopEstimate | None:
+    """Per-axis CoP estimates merged (max bias, max rate); ``None`` if unloaded.
+
+    ``channel.values`` is the ``(T, 2)`` stance CoP.  Bias and skew rate are
+    those of the worst axis, so they may come from different axes.
+    """
+    if np.isnan(channel.values[index : index + 2]).any():
         return None
-    axes = [_estimate(times, cop[:, axis], index, t) for axis in range(2)]
-    return _CopEstimate(
-        xy=np.array([axis.value for axis in axes]),
+    axes = [
+        interpolate(replace(channel, values=channel.values[:, axis]), index, t)
+        for axis in range(_STANCE_DIM)
+    ]
+    merged = Estimate(
+        value=0.0,
         bias=max(axis.bias for axis in axes),
         rate=max(axis.rate for axis in axes),
     )
+    return _CopEstimate(np.array([axis.value for axis in axes]), merged)
 
 
 def _world_cop(placed: PlacedTrial, stance_xy: Array) -> Array:
@@ -246,20 +245,42 @@ def _foot_sample(
     """Reading of ``foot`` in interval ``bracket[0]`` at trial time ``bracket[1]``."""
     trial = placed.trial
     index, t = bracket
-    load = _estimate(trial.times_s, trial.load_n[foot], index, t)
-    base_load = float(trial.uncertainty.force_sigma_n(load.value))
-    cop = _cop_estimate(trial.times_s, trial.cop_m[foot], index, t)
+    times = trial.times_s
+    load_channel = Channel(
+        times,
+        trial.load_n[foot],
+        options.load_curvature_floor,
+        f"{foot} load_n",
+        "load_curvature_floor",
+    )
+    load = interpolate(load_channel, index, t)
+    load_budget = _budget(
+        float(trial.uncertainty.force_sigma_n(load.value)), load, options
+    )
+    cop_channel = Channel(
+        times,
+        trial.cop_m[foot],
+        options.cop_curvature_floor,
+        f"{foot} cop_m",
+        "cop_curvature_floor",
+    )
+    cop = _cop_estimate(cop_channel, index, t)
     base_cop = trial.uncertainty.cop_m
+    cop_budget = (
+        _Budget(base_cop, 0.0, base_cop)
+        if cop is None
+        else _budget(base_cop, cop.estimate, options)
+    )
     return FootSample(
         load_n=load.value,
-        sigma_load_n=_effective_sigma(base_load, load.bias, load.rate, options),
+        sigma_load_n=load_budget.sigma,
         cop_m=None if cop is None else _world_cop(placed, cop.xy),
-        sigma_cop_m=(
-            base_cop
-            if cop is None
-            else _effective_sigma(base_cop, cop.bias, cop.rate, options)
-        ),
+        sigma_cop_m=cop_budget.sigma,
         sigma_sensing_m=trial.uncertainty.sensing_depth_sigma_m,
+        load_sigma_random_n=load_budget.random,
+        load_bias_n=load_budget.bias,
+        cop_sigma_random_m=cop_budget.random,
+        cop_bias_m=cop_budget.bias,
     )
 
 
@@ -279,7 +300,7 @@ def reading_at(
     alignment: PlateTimeAlignment,
     options: ReadingOptions,
 ) -> PlateReading:
-    """Per-foot load and CoP at ``model_time_s`` with an effective-sigma budget.
+    """Per-foot load and CoP at ``model_time_s`` with an uncertainty budget.
 
     The trial time is ``alignment.trial_time(model_time_s, options.offset_shift_s)``.
     Loads and CoPs are linearly interpolated on the actual (possibly
@@ -288,12 +309,20 @@ def reading_at(
     bracketing sample (never interpolated across an unloaded sample); its CoP
     sigma then reports the plate's declared CoP uncertainty only.
 
+    The interpolation bias is an *estimate*, valid when the signal is
+    band-limited well below the sample rate so that ``y''`` is bounded by its
+    neighbouring second divided differences; NOT valid across an under-sampled
+    impact transient, which callers must exclude or separately bound.  Where
+    the curvature cannot be estimated (two samples, NaN neighbours) a
+    ``ReadingOptions`` curvature floor must be declared or ``ValueError`` is
+    raised.  See the module docstring for the sigma composition.
+
     Preconditions: ``placed``, ``alignment`` and ``options`` of the right types
     (``TypeError``); ``model_time_s`` finite and mapping inside the trial span
     (``ValueError``).  Postcondition: every sigma is finite and non-negative.
     """
     _check_reading_inputs(placed, alignment, options)
     t = alignment.trial_time(model_time_s, options.offset_shift_s)
-    bracket = (_locate(placed.trial.times_s, t), t)
+    bracket = (locate(placed.trial.times_s, t), t)
     feet = {foot: _foot_sample(placed, foot, bracket, options) for foot in FOOT_LABELS}
-    return PlateReading(model_time_s=model_time_s, trial_time_s=t, feet=feet)
+    return PlateReading(model_time_s, t, feet, coverage=options.coverage)

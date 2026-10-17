@@ -53,13 +53,16 @@ def test_limitation_bias_estimate_is_blind_to_an_undersampled_impact_pulse() -> 
 
     The pulse is narrower than two sample intervals, so no second divided
     difference sees it: the interpolated value misses ~989 N while the bias
-    estimate stays below 0.1 N.  Callers must exclude or separately bound such
-    intervals; this test fails if someone starts claiming otherwise.
+    estimate is ~2.5 N (second differences 2.8e5 and 2.0e5 N/s^2 -> M2 = 5.6e5,
+    bias = 0.003 * 0.003 / 2 * M2).  Callers must exclude or separately bound
+    such intervals; this test fails if someone starts claiming otherwise.
     """
     left = reading_at(_placed(_pulse_trial()), 0.007, _align(), _opts()).feet["left"]
     true_load = 1100.0
-    assert true_load - left.load_n > 900.0
-    assert left.load_bias_n < 0.1
+    error = true_load - left.load_n
+    assert error > 900.0
+    assert left.load_bias_n == pytest.approx(2.5, abs=0.05)
+    assert left.load_bias_n < 0.01 * error
 
 
 def test_components_are_carried_separately() -> None:
@@ -80,7 +83,10 @@ def test_components_are_carried_separately() -> None:
 
 def test_cop_components_are_carried_separately() -> None:
     right = reading_at(
-        _placed(), 0.0025, _align(), _opts(coverage=2.0, skew_s=0.001)
+        _placed(),
+        0.0025,
+        _align(),
+        _opts(coverage=2.0, skew_s=0.001, cop_curvature_floor=1.0),
     ).feet["right"]
     assert right.cop_sigma_random_m == pytest.approx(math.hypot(0.010, 0.006))
     assert right.cop_bias_m == pytest.approx(1.25e-3)

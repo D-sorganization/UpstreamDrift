@@ -211,7 +211,9 @@ def test_end_interval_uses_only_the_available_second_difference() -> None:
     # Three-sample factory trial, right load (400, 500, 795) at (0, .005, .010):
     # f[0,1]=2e4, f[1,2]=5.9e4 -> dd=(5.9e4-2e4)/0.010=3.9e6, M2=7.8e6.
     # At t=0.0025 bias = (0.0025*0.0025)/2*7.8e6 = 24.375 N.
-    right = reading_at(_placed(), 0.0025, _align(), _opts(coverage=3.0)).feet["right"]
+    right = reading_at(
+        _placed(), 0.0025, _align(), _opts(coverage=3.0, cop_curvature_floor=1.0)
+    ).feet["right"]
     assert right.load_n == pytest.approx(450.0)
     expected = math.hypot(2.0, 4.5) + 24.375 / 3.0
     assert right.sigma_load_n == pytest.approx(expected)
@@ -321,7 +323,9 @@ def test_cop_world_point_lies_on_the_sensing_plane() -> None:
     right = reading_at(_placed(), 0.0, _align(), _opts()).feet["right"]
     np.testing.assert_allclose(right.cop_m, [0.185, -0.02, -0.015])
     # Midway to sample 1 (0.19, 0.01): (0.1875, -0.005).
-    mid = reading_at(_placed(), 0.0025, _align(), _opts()).feet["right"]
+    mid = reading_at(_placed(), 0.0025, _align(), _opts(cop_curvature_floor=1.0)).feet[
+        "right"
+    ]
     np.testing.assert_allclose(mid.cop_m, [0.1875, -0.005, -0.015])
 
 
@@ -342,7 +346,10 @@ def test_cop_sigma_composes_measurement_skew_and_bias() -> None:
     # rate = max(1, 6) = 6 m/s ; skew 1 ms -> 6e-3 m ; measurement 0.010 m.
     k = 2.0
     right = reading_at(
-        _placed(), 0.0025, _align(), _opts(coverage=k, skew_s=0.001)
+        _placed(),
+        0.0025,
+        _align(),
+        _opts(coverage=k, skew_s=0.001, cop_curvature_floor=1.0),
     ).feet["right"]
     expected = math.hypot(0.010, 0.006) + 1.25e-3 / k
     assert right.sigma_cop_m == pytest.approx(expected)

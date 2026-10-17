@@ -43,8 +43,10 @@ __all__ = [
     "Handedness",
     "finite_non_negative",
     "finite_positive",
+    "finite_real",
     "non_empty_text",
     "real_number",
+    "require_foot_keys",
     "PlateProvenance",
     "PlateUncertainty",
     "VerticalPlateTrial",
@@ -76,6 +78,26 @@ def real_number(value: object, name: str) -> float:
     if isinstance(value, bool) or not isinstance(value, numbers.Real):
         raise TypeError(f"{name} must be a real number, got {value!r}")
     return float(value)
+
+
+def finite_real(value: object, name: str) -> float:
+    """``value`` as a float, required finite (any sign).
+
+    ``TypeError`` for a bool or non-real; ``ValueError`` for NaN or infinity.
+    """
+    number = real_number(value, name)
+    if not math.isfinite(number):
+        raise ValueError(f"{name} must be finite, got {value!r}")
+    return number
+
+
+def require_foot_keys(
+    table: Mapping[str, object], name: str, extra: tuple[str, ...] = ()
+) -> None:
+    """``ValueError`` unless ``table`` is keyed exactly by the feet plus ``extra``."""
+    keys = (*FOOT_LABELS, *extra)
+    if set(table) != set(keys):
+        raise ValueError(f"{name} must be keyed exactly by {keys}")
 
 
 def finite_positive(value: object, name: str) -> float:
@@ -295,8 +317,7 @@ class VerticalPlateTrial:
         return times
 
     def _loads(self, n: int) -> dict[str, Array]:
-        if set(self.load_n) != set(FOOT_LABELS):
-            raise ValueError(f"load_n must be keyed exactly by {FOOT_LABELS}")
+        require_foot_keys(self.load_n, "load_n")
         loads = {k: _readonly(self.load_n[k], f"load_n[{k!r}]") for k in FOOT_LABELS}
         for key, load in loads.items():
             if load.shape != (n,):
@@ -317,8 +338,7 @@ class VerticalPlateTrial:
 
     def _cops(self, n: int, loads: Mapping[str, Array]) -> dict[str, Array]:
         keys = (*FOOT_LABELS, NET_LABEL)
-        if set(self.cop_m) != set(keys):
-            raise ValueError(f"cop_m must be keyed exactly by {keys}")
+        require_foot_keys(self.cop_m, "cop_m", extra=(NET_LABEL,))
         cops = {k: _readonly(self.cop_m[k], f"cop_m[{k!r}]") for k in keys}
         for key, cop in cops.items():
             if cop.shape != (n, 2):
