@@ -2,7 +2,8 @@
 
 Public façade: the vertical plate trial and its declared uncertainty and
 provenance (:mod:`.contracts`), the stance-to-world placement
-(:mod:`.placement`), the view as a shared ground-reaction series
+(:mod:`.placement`) and its derivation from a model's target frame
+(:mod:`.model_frame`), the view as a shared ground-reaction series
 (:mod:`.conversion`), the clock alignment to model time (:mod:`.alignment`)
 and readings at a model time with an uncertainty budget (:mod:`.readings`).
 Device readers live in subpackages and depend on this package, never the
@@ -34,6 +35,10 @@ from src.shared.python.force_plates.events import (
     impact_anchor,
     merge_event_markers,
 )
+from src.shared.python.force_plates.model_frame import (
+    TargetedPlacement,
+    placement_for_target,
+)
 from src.shared.python.force_plates.placement import ROTATION_ATOL, PlatePlacement
 from src.shared.python.force_plates.readings import (
     FootSample,
@@ -61,6 +66,7 @@ __all__ = [
     "PlateTimeAlignment",
     "PlateUncertainty",
     "ReadingOptions",
+    "TargetedPlacement",
     "VerticalPlateTrial",
     "force_event_markers",
     "impact_anchor",
@@ -68,5 +74,6 @@ __all__ = [
     "merge_event_markers",
     "observability",
     "reading_at",
+    "placement_for_target",
     "to_ground_reaction_series",
 ]
