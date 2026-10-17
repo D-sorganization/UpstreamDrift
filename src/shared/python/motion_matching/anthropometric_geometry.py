@@ -170,13 +170,20 @@ def _segment_solid(
     segment: str,
     stature: float,
     mass: float,
-    start: Sequence[float] | Array,
-    end: Sequence[float] | Array,
+    origin: Sequence[float] | Array,
+    other: Sequence[float] | Array,
     share: float = 1.0,
 ) -> dict[str, Any]:
-    """One de Leva solid for a segment running from ``start`` to ``end`` in the body frame."""
+    """One de Leva solid for a segment running from ``origin`` to ``other``.
+
+    Both points are in the body frame. de Leva (1996) gives the centre of
+    mass as a fraction of length from the row's ``origin`` landmark, which is
+    the cranial end for the head and trunk parts (VERT, CERV, XYPH, OMPH) and
+    the proximal joint for the limbs, so ``origin`` must be that endpoint
+    (#13037). The inertia does not depend on the direction.
+    """
     params = segment_parameters(stature, mass, segment)
-    start, end = np.asarray(start, float), np.asarray(end, float)
+    start, end = np.asarray(origin, float), np.asarray(other, float)
     axis = end - start
     length = float(np.linalg.norm(axis))
     axis /= length
@@ -343,8 +350,8 @@ def build_upper_body(
                 "lower_trunk",
                 stature_m,
                 mass_kg,
-                (0, 0, 0),
-                (0, 0, pelvis_h),
+                (0, 0, pelvis_h),  # omphalion (L5/S1 stands in), the row origin
+                (0, 0, 0),  # mid-hip
             )
         ],
     )
@@ -381,16 +388,16 @@ def build_upper_body(
                 "middle_trunk",
                 stature_m,
                 mass_kg,
-                (0, 0, 0),
-                (0, 0, hub_h * 0.5),
+                (0, 0, hub_h * 0.5),  # xiphion (trunk midpoint), the row origin
+                (0, 0, 0),  # omphalion (L5/S1)
             ),
             _segment_solid(
                 names["COMRod"] + "/upper_trunk",
                 "upper_trunk",
                 stature_m,
                 mass_kg,
-                (0, 0, hub_h * 0.5),
-                (0, 0, hub_h),
+                (0, 0, hub_h),  # cervicale (shoulder centre), the row origin
+                (0, 0, hub_h * 0.5),  # xiphion
             ),
         ],
     )
@@ -408,8 +415,8 @@ def build_upper_body(
                 "head",
                 stature_m,
                 mass_kg,
-                (0, 0, 0),
-                (0, 0, head_len),
+                (0, 0, head_len),  # vertex, the row origin
+                (0, 0, 0),  # cervicale
             )
         ],
     )
