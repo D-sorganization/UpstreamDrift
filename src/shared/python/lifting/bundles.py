@@ -44,11 +44,18 @@ from src.shared.python.lifting.back_bar import (
     pose_axis_world,
     standard_bar_world,
 )
+from src.shared.python.lifting.barbell_runs import rigid_bar_spec
 from src.shared.python.lifting.lift_body import (
     HEAD_COORDINATES,
     LIFT_BODY_SPEC,
     lift_bounds,
     lift_seed_pose,
+)
+from src.shared.python.lifting.loaded_balance import (
+    LoadBalance,
+    balance_lift,
+    combined_com_offsets,
+    load_balance_from_record,
 )
 from src.shared.python.lifting.sagittal_retarget import (
     LANDMARK_LABELS,
@@ -108,6 +115,17 @@ BACK_BAR_LIMITATIONS = (
     "torso is not the standard's, so that shelf is not a measured anatomical "
     "site. The scapulae are held at the seed pose and the arm chain is solved."
 )
+#: Appended to :data:`BACK_BAR_LIMITATIONS` when the IK balances the bar load.
+LOAD_BALANCE_LIMITATIONS = (
+    " Bar-load balance (#13093): the IK runs on the lift body with the bar "
+    "welded to the hands and corrects each frame's trunk angle until the "
+    "centre of mass of body plus bar lies over mid-foot (ik.balance), so the "
+    "trunk is more upright than the optimizer's, whose bar sits at its "
+    "shoulder joint rather than on the shelf. The bundle's spec carries the "
+    "bar as a rigid solid on the hands (barbell_runs.rigid_bar_spec), so its "
+    "tracking carries the load; the bar-on-bushings run is the LIFT-4 "
+    "re-track (barbell_runs.bushing_body_spec recovers the body)."
+)
 HAND_BAR_LIMITATIONS = (
     "Hand-held bar (#11745): the spec's golf club body is kept as the bar "
     "carrier, with the left hand moved to the standard's grip width along it "
@@ -130,6 +148,7 @@ LANDMARK_ATTACHMENTS: dict[str, tuple[str, tuple[float, float, float]]] = {
     "shoulder_r": ("RS", _ORIGIN),
     "bar": (BAR_FRAME, _ORIGIN),
 }
+_BAR_CENTRE = (BAR_CENTRE_FRAME, _ORIGIN)
 STANCE_SPHERES: tuple[str, ...] = ("heel_l", "forefoot_l", "heel_r", "forefoot_r")
 UPPER_LIMB_COORDINATES: tuple[str, ...] = (
     "LEInput",
@@ -224,6 +243,9 @@ class FullBodyLift:
     frame: SagittalFrame
     options: LiftIKOptions
     back_bar: BackBarSetup | HandBarSetup | None = None
+    #: :func:`~.loaded_balance.balance_lift` record when the bar load is
+    #: balanced over mid-foot (#13093), else ``None``.
+    balance: Mapping[str, Any] | None = None
 
     @property
     def bar_frame(self) -> str:
@@ -256,6 +278,8 @@ class FullBodyLift:
             "sagittal_forward": list(self.frame.forward),
             "q_standing": self.q_standing.tolist(),
         }
+        if self.balance is not None:
+            record["balance"] = dict(self.balance)
         if isinstance(self.back_bar, BackBarSetup):
             record["back_bar"] = self.back_bar.to_record()
         elif self.back_bar is not None:
@@ -437,7 +461,7 @@ def _attachments(
     """Marker attachments: the bar landmark rides the Hub, or the bar-centre frame."""
     if back_bar is None:
         return LANDMARK_ATTACHMENTS
-    return {**LANDMARK_ATTACHMENTS, "bar": (BAR_CENTRE_FRAME, _ORIGIN)}
+    return {**LANDMARK_ATTACHMENTS, "bar": _BAR_CENTRE}
 
 
 @dataclass(frozen=True)
@@ -458,6 +482,11 @@ class _Standing:
     def limits(self) -> dict[str, Any]:
         """Bounds and solver every solve of this lift shares (OSL-14)."""
         return {"bounds": self.bounds, "solver": self.options.solver}
+
+
+def back_bar_kinematics(spec_bytes: bytes) -> Any:
+    """Marker kinematics of a back-bar spec: the bar landmark is the bar centre."""
+    return _engine_kinematics(spec_bytes, {**LANDMARK_ATTACHMENTS, "bar": _BAR_CENTRE})
 
 
 def _engine_kinematics(spec_bytes: bytes, attachments: Mapping[str, Any]) -> Any:
@@ -697,6 +726,7 @@ def lift_to_full_body(
     *,
     options: LiftIKOptions | None = None,
     geometry: BackBarGeometry | None = None,
+    load: LoadBalance | None = None,
 ) -> FullBodyLift:
     """Full-body joint trajectory for ``solution`` by marker IK in MuJoCo.
 
@@ -710,11 +740,21 @@ def lift_to_full_body(
             tracked on the torso shelf with the standard's grip width and a
             medio-lateral axis, the arm chain is solved and the lift refers to
             the derived spec ``lift.back_bar.spec_bytes``.
+        load: Bar load to balance over mid-foot (#13093; needs ``geometry``):
+            each frame's trunk angle is corrected until the centre of mass of
+            body plus bar lies over mid-foot (:func:`.loaded_balance.\
+balance_lift`), recorded as ``lift.balance``.
 
     Postconditions: ``q`` has one row per solution sample; toe coordinates are
     constant, as are the upper-limb coordinates (the scapulae only, with
-    ``geometry``).
+    ``geometry``); with ``load`` every frame's loaded centre of mass is within
+    ``load.tolerance_m`` of mid-foot.
+
+    Raises:
+        ValueError: If ``load`` is given without ``geometry``.
     """
+    if load is not None and geometry is None:
+        raise ValueError("load balance needs the back-bar geometry (bar on the back)")
     standing = _stand(spec_bytes, seed_q, options)
     if geometry is None:
         return _track(
@@ -730,18 +770,40 @@ def lift_to_full_body(
             ),
         )
     setup, arm_kin, q_start = _back_bar_pose(standing, spec_bytes, geometry)
-    return _track(
-        standing,
-        solution,
-        _TrackSetup(
-            kin=arm_kin,
-            points={**standing.points, "bar": setup.bar_target_m},
-            q_start=q_start,
-            held={n: v for n, v in standing.locked.items() if n in _HELD_IN_BAR_LIFTS},
-            axes=_bar_axis_targets(geometry, standing.frame),
-            back_bar=setup,
-        ),
+    track = _TrackSetup(
+        kin=arm_kin,
+        points={**standing.points, "bar": setup.bar_target_m},
+        q_start=q_start,
+        held={n: v for n, v in standing.locked.items() if n in _HELD_IN_BAR_LIFTS},
+        axes=_bar_axis_targets(geometry, standing.frame),
+        back_bar=setup,
     )
+    if load is None:
+        return _track(standing, solution, track)
+    return _balanced_track(standing, solution, track, load)
+
+
+def _balanced_track(
+    standing: _Standing,
+    solution: SagittalSolution,
+    track: _TrackSetup,
+    load: LoadBalance,
+) -> FullBodyLift:
+    """:func:`_track` with the bar load balanced over mid-foot (#13093)."""
+    if not isinstance(track.back_bar, BackBarSetup):
+        raise TypeError("load balance needs a back-bar setup")
+    loaded = back_bar_kinematics(
+        rigid_bar_spec(track.back_bar.spec_bytes, load.barbell)
+    )
+    forward = np.asarray(standing.frame.forward)
+
+    def offsets(q_rows: Array) -> Array:
+        return combined_com_offsets(loaded, q_rows, forward, standing.ground)
+
+    lift, record = balance_lift(
+        lambda corrected: _track(standing, corrected, track), solution, offsets, load
+    )
+    return replace(lift, balance=record)
 
 
 def lift_hands_to_full_body(
@@ -936,6 +998,21 @@ def _window_indices(time_s: Array, start_s: float, window_s: float) -> int:
     return index
 
 
+def lift_bundle_spec(lift: FullBodyLift) -> bytes | None:
+    """The spec a back-bar ``lift``'s bundle is tracked on, or ``None``.
+
+    The derived back-bar spec, with the balanced bar load welded to the hands
+    (:func:`rigid_bar_spec`) when the IK balanced it (#13093).  ``None`` for a
+    lift without the back bar (its bundle uses the spec it was solved on).
+    """
+    if lift.back_bar is None:
+        return None
+    if lift.balance is None:
+        return lift.back_bar.spec_bytes
+    barbell = load_balance_from_record(lift.balance["load"]).barbell
+    return rigid_bar_spec(lift.back_bar.spec_bytes, barbell)
+
+
 def build_lift_bundle(
     spec_bytes: bytes,
     solution: SagittalSolution,
@@ -962,8 +1039,8 @@ def build_lift_bundle(
         raise ValueError("lift must be the full-body trajectory of solution")
     if not lift_name:
         raise ValueError("lift_name must be non-empty")
-    if lift.back_bar is not None and bytes(spec_bytes) != lift.back_bar.spec_bytes:
-        raise ValueError("spec_bytes must be lift.back_bar.spec_bytes (derived spec)")
+    if lift.back_bar is not None and bytes(spec_bytes) != lift_bundle_spec(lift):
+        raise ValueError("spec_bytes must be lift_bundle_spec(lift) (derived spec)")
     times = solution.time_s[start:]
     record = {
         "lift": lift_name,
@@ -974,7 +1051,8 @@ def build_lift_bundle(
         "ik_bar_path_m": lift.bar_m.tolist(),
         "window": {"start_s": float(times[0]), "duration_s": float(window_s)},
         "bar_frame": lift.bar_frame,
-        "limitations": _limitations(lift.back_bar),
+        "limitations": _limitations(lift.back_bar)
+        + ("" if lift.balance is None else LOAD_BALANCE_LIMITATIONS),
         **dict(provenance or {}),
     }
     bundle = generate_reference_bundle(
