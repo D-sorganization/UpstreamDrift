@@ -1,0 +1,115 @@
+{
+  "issue": 12789,
+  "epic": 12678,
+  "engine": "mujoco",
+  "stage": "calibrated address (IK), measured via pipeline.cli.calibrate_run",
+  "base_commit": "6345c8c2a7f15f0d0a6a07cfea2f03b8842e018d",
+  "host": "Windows 11 workstation, Python 3.14.3, MuJoCo 3.8.0",
+  "tibial_torsion": {
+    "offset_deg": {
+      "r": 10.0,
+      "l": 10.0
+    },
+    "generic_leg_torsion_deg": 6.06,
+    "total_torsion_deg": 16.06,
+    "adult_range_deg": [16.0, 50.0],
+    "source": "Seber et al. 2000, Arch Orthop Trauma Surg 120:255-258, doi:10.1007/s004020050459"
+  },
+  "commands": {
+    "driver": "--static-seeds --fix-club-markers --capture driver --spec docs/development/full_body_models/full_body_spec_anthro_driver.json",
+    "iron": "--static-seeds --zmp-filter --fix-club-markers --capture iron --spec docs/development/full_body_models/full_body_spec_anthro_iron7.json"
+  },
+  "before": {
+    "note": "R3 (#12683) summary at 16e8846229; the iron style row was re-measured on 6345c8c2a7 and reproduced 15.05 / 13.53 deg exactly",
+    "style_driver": {
+      "model_toe_out_deg": {
+        "left": 16.64,
+        "right": 19.8
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -34.38,
+        "hip_rotation_l": 7.83
+      },
+      "address_marker_rms_mm": 10.54
+    },
+    "style_iron": {
+      "model_toe_out_deg": {
+        "left": 15.05,
+        "right": 13.53
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -40.0,
+        "hip_rotation_l": 18.98
+      },
+      "address_marker_rms_mm": 12.19
+    },
+    "capture_driver": {
+      "model_toe_out_deg": {
+        "left": 16.52,
+        "right": 3.74
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -18.2,
+        "hip_rotation_l": 8.36
+      },
+      "address_marker_rms_mm": 9.62
+    },
+    "capture_iron": {
+      "model_toe_out_deg": {
+        "left": 15.28,
+        "right": -0.81
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -23.32,
+        "hip_rotation_l": 15.35
+      },
+      "address_marker_rms_mm": 9.71
+    }
+  },
+  "after": {
+    "style_driver": {
+      "model_toe_out_deg": {
+        "left": 16.51,
+        "right": 19.74
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -26.58,
+        "hip_rotation_l": 19.56
+      },
+      "address_marker_rms_mm": 9.28
+    },
+    "style_iron": {
+      "model_toe_out_deg": {
+        "left": 15.07,
+        "right": 19.97
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -36.57,
+        "hip_rotation_l": 26.42
+      },
+      "address_marker_rms_mm": 12.18
+    },
+    "capture_driver": {
+      "model_toe_out_deg": {
+        "left": 16.43,
+        "right": 3.79
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -8.86,
+        "hip_rotation_l": 17.3
+      },
+      "address_marker_rms_mm": 9.83
+    },
+    "capture_iron": {
+      "model_toe_out_deg": {
+        "left": 15.06,
+        "right": -0.43
+      },
+      "hip_rotation_deg": {
+        "hip_rotation_r": -14.92,
+        "hip_rotation_l": 23.67
+      },
+      "address_marker_rms_mm": 10.71
+    }
+  }
+}
