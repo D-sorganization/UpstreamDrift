@@ -6,10 +6,10 @@ mass estimate with the adjusted Zatsiorsky-Seluyanov parameters published by
 de Leva (J. Biomech. 29(9), 1996, Table 4, males; reference subject 1.741 m,
 73.0 kg). Lengths scale linearly with stature, masses with body mass, and
 inertia tensors follow ``m (k L)^2`` with the tabulated radii of gyration.
-The table below was transcribed for this module. Its trunk, upper_trunk and
-shank rows mix values from two Table 4 endpoint rows; correcting them changes
-the golfer geometry and requires a refit (#13037). The paper's full table is
-``body_segment_parameters.de_leva_1996``.
+The table is derived from whole rows of the paper's transcription
+(``body_segment_parameters.de_leva_1996``), one row per segment named in
+``DE_LEVA_ROWS``; no value is typed here. Until #13037 the trunk, upper_trunk
+and shank rows were hand-copied and mixed two endpoint rows each.
 """
 
 from __future__ import annotations
@@ -23,6 +23,8 @@ from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
+
+from src.shared.python.body_segment_parameters.de_leva_1996 import table4_row
 
 Array: TypeAlias = NDArray[np.float64]
 
@@ -42,22 +44,40 @@ class SegmentTable:
     ]  # sagittal, transverse, longitudinal, as fractions
 
 
-# de Leva 1996 Table 4 (males), transcribed. Segment ends: head = vertex to
-# cervicale; trunk = cervicale to hip joint centre; upper arm = shoulder to
-# elbow joint centres; forearm = elbow to wrist; hand = wrist to metacarpale
-# III; thigh = hip to knee; shank = knee to ankle; foot = heel to toe tip.
+#: Segment name -> de Leva (1996) Table 4 row id (males). Segment ends: head =
+#: vertex to cervicale; trunk = cervicale to mid-hip (hip joint centres);
+#: upper_trunk = cervicale to xiphion; middle_trunk = xiphion to omphalion;
+#: lower_trunk = omphalion to mid-hip; upper arm = shoulder to elbow joint
+#: centres; forearm = elbow to wrist; hand = wrist to metacarpale III; thigh =
+#: hip to knee; shank = knee to ankle joint centres; foot = heel to toe tip.
+#: The three trunk parts add up to the trunk (checked by the table loader).
+DE_LEVA_ROWS: Mapping[str, str] = {
+    "head": "head_vert_cerv",
+    "trunk": "trunk_cerv_midh",
+    "upper_trunk": "upt_cerv_xyph",
+    "middle_trunk": "mpt_xyph_omph",
+    "lower_trunk": "lpt_omph_midh",
+    "upper_arm": "upper_arm_sjc_ejc",
+    "forearm": "forearm_ejc_wjc",
+    "hand": "hand_wjc_met3",
+    "thigh": "thigh_hjc_kjc",
+    "shank": "shank_kjc_ajc",
+    "foot": "foot_heel_ttip",
+}
+
+
+def _table_row(row_id: str) -> SegmentTable:
+    row = table4_row(row_id, "male")
+    if row.stature_m != REFERENCE_STATURE_M:
+        raise ValueError(
+            f"Table 4 male stature {row.stature_m} differs from {REFERENCE_STATURE_M}"
+        )
+    return SegmentTable(row.length_m, row.mass_fraction, row.com_fraction, row.radii)
+
+
+#: de Leva 1996 Table 4 (males), one whole printed row per segment.
 DE_LEVA_MALE: Mapping[str, SegmentTable] = {
-    "head": SegmentTable(0.2429, 0.0694, 0.5002, (0.303, 0.315, 0.261)),
-    "trunk": SegmentTable(0.5319, 0.4346, 0.5138, (0.328, 0.306, 0.169)),
-    "upper_trunk": SegmentTable(0.1707, 0.1596, 0.2999, (0.505, 0.465, 0.418)),
-    "middle_trunk": SegmentTable(0.2155, 0.1633, 0.4502, (0.482, 0.383, 0.468)),
-    "lower_trunk": SegmentTable(0.1457, 0.1117, 0.6115, (0.615, 0.551, 0.587)),
-    "upper_arm": SegmentTable(0.2817, 0.0271, 0.5772, (0.285, 0.269, 0.158)),
-    "forearm": SegmentTable(0.2689, 0.0162, 0.4574, (0.276, 0.265, 0.121)),
-    "hand": SegmentTable(0.0862, 0.0061, 0.7900, (0.628, 0.513, 0.401)),
-    "thigh": SegmentTable(0.4222, 0.1416, 0.4095, (0.329, 0.329, 0.149)),
-    "shank": SegmentTable(0.4340, 0.0433, 0.4395, (0.251, 0.246, 0.102)),
-    "foot": SegmentTable(0.2581, 0.0137, 0.4415, (0.257, 0.245, 0.124)),
+    name: _table_row(row_id) for name, row_id in DE_LEVA_ROWS.items()
 }
 
 

@@ -55,15 +55,24 @@ def test_baseline_pins_the_ratcheted_fractions(name: str) -> None:
         assert 0.0 <= metrics["friction_saturated_fraction"] <= 1.0
 
 
-@pytest.mark.xfail(
+_DRIVER_BELOW_BASELINE = pytest.mark.xfail(
     strict=True,
     reason=(
-        "#12040: main no longer reproduces the #11668 baseline, and the OSV-6 "
-        "receipts (#11737) lower the 7-iron reference fractions further; the "
+        "#12040: main no longer reproduces the #11668 driver baseline; the "
         "baseline change is an owner decision"
     ),
 )
-@pytest.mark.parametrize("name", CANONICAL)
+
+
+# The 7-iron receipt regenerated on the whole-row de Leva table with the
+# origin-measured trunk CM (#13037) meets its #11668 baseline again.
+@pytest.mark.parametrize(
+    "name",
+    [
+        pytest.param("anthro_driver_seeds", marks=_DRIVER_BELOW_BASELINE),
+        "anthro_iron_seeds_zmp",
+    ],
+)
 def test_receipt_finish_feasibility_has_not_regressed(name: str) -> None:
     receipt = json.loads((EVIDENCE / name / "receipt.json").read_text("utf-8"))
     block = receipt["dynamics"].get("finish_feasibility")
