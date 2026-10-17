@@ -16,17 +16,21 @@ LIFT-4 (#11744) on the LIFT-5 back-squat same-input bundle (#11745).  Uses
   reference states, the per-hand bushing wrenches and the coupled
   accelerations of each engine against MuJoCo.
 
-The controller adds a feedforward of the bar's static weight hung from the
-hands (:meth:`BarbellBushingPlant.weight_generalized_force`, a function of the
-pose only) to the pipeline computed-torque law; the bar's dynamic load is
-left to feedback and the unactuated root to the contact.  Feeding the
-measured bushing force back instead (held over each 1 ms step) diverged in
-the 1.5 s hold; the stiff hand-bushing mode seen through that one-step delay
-is the suspected cause, not a demonstrated one.
+The controller is the pipeline computed-torque law built on
+:func:`rigid_bar_spec`: the same body with the bar welded to the hand body, so
+the law's inverse dynamics, centre-of-mass balance and foot preload include the
+bar's weight and inertia on the whole floating-base system.  The bushings'
+compliance is left to feedback.  Until #13072 the law was built on the unloaded
+body with the bar's static weight subtracted as a joint-space feedforward
+``J^T m g`` on the actuated rows only; the root rows of that load (about 980 N
+down and 635 N m of pelvis pitch on the squat bundle) were left out of the
+controller's model, so the commanded accelerations were wrong by up to about
+4000 rad/s^2 from the first step and the re-track diverged.
 """
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
@@ -39,6 +43,8 @@ from src.shared.python.lifting.barbell_bushing import (
     SIDES,
     Barbell,
     BarbellBushingPlant,
+    barbell_dynamics,
+    barbell_interface,
 )
 from src.shared.python.motion_matching.same_input import (
     InputBundle,
@@ -52,6 +58,10 @@ from src.shared.python.motion_matching.same_input import (
 Array = NDArray[np.float64]
 Controller = Callable[[float, Array, Array], Array]
 PROVENANCE_KEY = "barbell"
+#: Solid name of the bar in :func:`rigid_bar_spec`.
+RIGID_BAR_SOLID = "barbell_rigid_controller_model"
+#: Provenance key of :func:`retrack_landmark_deviation` (#13072).
+RETRACK_DEVIATION_KEY = "retrack_landmark_deviation_m"
 SAMPLE_EVERY = 10
 
 __all__ = [
@@ -61,27 +71,79 @@ __all__ = [
     "instantaneous_parity",
     "loaded_effort_source",
     "quasi_static_hold",
+    "retrack_landmark_deviation",
+    "rigid_bar_spec",
 ]
 
 
 def loaded_effort_source(
     plant: BarbellBushingPlant, controller: Controller
 ) -> Callable[[int, float, Array, Array], Array]:
-    """Effort source: body controller plus bar-weight feedforward; bar zero."""
+    """Effort source: the rigid-bar body controller; the bar entries are zero.
+
+    ``controller`` must be built on :func:`rigid_bar_spec` (see
+    :func:`_tracking`), so its computed torque already carries the bar's
+    weight and inertia, including their load on the unactuated root.
+    """
     nv = plant.nv_body
 
     def source(_k: int, t: float, q: Array, v: Array) -> Array:
         tau = np.zeros(nv + len(BAR_COORDINATES))
         tau[:nv] = np.asarray(controller(t, q[:nv], v[:nv]), dtype=float)
-        tau[:nv] -= plant.weight_generalized_force(q[:nv])
         return tau
 
     return source
 
 
+def rigid_bar_spec(spec_bytes: bytes, barbell: Barbell) -> bytes:
+    """``spec_bytes`` with the bar welded rigidly to the hand (club) body.
+
+    The bar's mass, centre of mass and inertia
+    (:func:`~src.shared.python.lifting.barbell_bushing.barbell_dynamics`, in
+    the club body frame) are appended as one solid of the closure's club
+    body.  This is the tracking controller's model of the loaded lifter
+    (#13072): its computed torque and centre-of-mass balance see the bar on
+    the floating base as well as on the arms, and its foot preload carries
+    body plus bar.  The bushing compliance is the only bar dynamics it omits.
+
+    Postcondition: the spec's total mass rises by ``barbell.load_kg``; every
+    other field is unchanged.
+    """
+    if not isinstance(spec_bytes, bytes | bytearray):
+        raise TypeError("spec_bytes must be the raw spec document bytes")
+    if not isinstance(barbell, Barbell):
+        raise TypeError("barbell must be a Barbell")
+    spec = json.loads(spec_bytes)
+    dynamics = barbell_dynamics(barbell, barbell_interface(spec, barbell))
+    club = spec["closure"]["body_b"]
+    body = next((b for b in spec["bodies"] if b["name"] == club), None)
+    if body is None:
+        raise ValueError(f"spec has no closure club body {club!r}")
+    body["solids"].append(
+        {
+            "name": RIGID_BAR_SOLID,
+            "mass_kg": float(dynamics.mass_kg),
+            "com_m": [float(x) for x in dynamics.com_m],
+            "inertia_com_kg_m2": np.asarray(dynamics.inertia_com_kg_m2).tolist(),
+            "placement": np.eye(4).tolist(),
+        }
+    )
+    return json.dumps(spec).encode()
+
+
 def _tracking(
-    spec_bytes: bytes, times: Array, track: Array, duration_s: float
+    spec_bytes: bytes,
+    barbell: Barbell,
+    times: Array,
+    track: Array,
+    duration_s: float,
 ) -> tuple[Any, Array, Array, int, Any]:
+    """Rigid-bar controller and start state; simulator of the body alone.
+
+    The controller and the start state (feet preloaded for body plus bar)
+    come from :func:`rigid_bar_spec`; the returned simulator is the
+    unloaded body's, for its contact law, mass and centre of mass.
+    """
     from src.engines.physics_engines.mujoco.python.full_body_model import (
         NativeMujocoFullBodyModel,
     )
@@ -90,21 +152,11 @@ def _tracking(
         _tracking_setup,
     )
 
-    controller, q0, v0, steps = _tracking_setup(spec_bytes, times, track, duration_s)
+    controller, q0, v0, steps = _tracking_setup(
+        rigid_bar_spec(spec_bytes, barbell), times, track, duration_s
+    )
     simulator = fs.FullBodySimulator(NativeMujocoFullBodyModel(spec_bytes))
     return controller, q0, v0, steps, simulator
-
-
-def _preload_bar(simulator: Any, q: Array, bar_mass_kg: float) -> Array:
-    """Sink the feet further so the spheres also carry the bar at rest."""
-    adapter = simulator.adapter
-    stiffness = float(adapter.contact_parameters.stiffness_n_m)
-    gravity = float(np.linalg.norm(simulator.gravity))
-    extra = bar_mass_kg * gravity / (stiffness * len(adapter._spheres))  # noqa: SLF001
-    normal = np.asarray(adapter.ground_plane.normal, dtype=float)
-    out = np.asarray(q, dtype=float).copy()
-    out[:3] += np.linalg.solve(simulator.root_translation_axes(out), -extra * normal)
-    return out
 
 
 def _attached_start(
@@ -173,9 +225,8 @@ def quasi_static_hold(
     track = np.vstack([pose, pose])
     times = np.array([0.0, float(duration_s)])
     controller, q0, v0, steps, simulator = _tracking(
-        spec_bytes, times, track, duration_s
+        spec_bytes, barbell, times, track, duration_s
     )
-    q0 = _preload_bar(simulator, q0, barbell.load_kg)
     loaded, q_aug, v_aug = _attached_start(spec_bytes, q0, v0, barbell)
     rollout = integrate(
         loaded,
@@ -223,9 +274,8 @@ def hold_balance_geometry(
     """
     pose = np.asarray(q_hold, dtype=float)
     _, q0, v0, _, simulator = _tracking(
-        spec_bytes, np.array([0.0, 1.0]), np.vstack([pose, pose]), 1.0
+        spec_bytes, barbell, np.array([0.0, 1.0]), np.vstack([pose, pose]), 1.0
     )
-    q0 = _preload_bar(simulator, q0, barbell.load_kg)
     loaded, q_aug, _ = _attached_start(spec_bytes, q0, v0, barbell)
     adapter = simulator.adapter
     body_com = np.asarray(simulator.centre_of_mass(q0)[0], dtype=float)
@@ -250,6 +300,58 @@ def hold_balance_geometry(
     }
 
 
+def _landmark_kinematics(source: InputBundle) -> tuple[Any, tuple[str, ...]]:
+    """MuJoCo marker kinematics of the LIFT-5 landmarks of ``source``'s spec.
+
+    The bar landmark is the hand-held bar-centre frame (a body frame), so it
+    measures where the hands carry the bar, not the bushing-borne bar body.
+    """
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
+        FullBodyMarkerKinematics,
+    )
+    from src.engines.physics_engines.mujoco.python.full_body_model import (
+        NativeMujocoFullBodyModel,
+    )
+    from src.shared.python.lifting.back_bar import BAR_CENTRE_FRAME
+    from src.shared.python.lifting.bundles import LANDMARK_ATTACHMENTS
+
+    attachments = dict(LANDMARK_ATTACHMENTS)
+    if "back_bar" in source.provenance.get("ik", {}):
+        attachments["bar"] = (BAR_CENTRE_FRAME, (0.0, 0.0, 0.0))
+    model = NativeMujocoFullBodyModel(bytes(source.spec_bytes))
+    return FullBodyMarkerKinematics(model, attachments), tuple(attachments)
+
+
+def retrack_landmark_deviation(
+    source: InputBundle, reference_q: Array
+) -> dict[str, float]:
+    """Largest landmark distance (m) of a re-tracked reference from ``source``'s.
+
+    Each LIFT-5 landmark (:data:`~src.shared.python.lifting.bundles.\
+LANDMARK_ATTACHMENTS`) is placed by forward kinematics of ``reference_q`` and
+    of ``source.reference_q`` row by row; the maximum distance over all rows is
+    returned per landmark.  This is the quantity bounded by the LIFT-5 IK
+    residual thresholds (#13072).
+
+    Raises:
+        ValueError: if ``reference_q`` does not match the source's shape or is
+            not finite.
+    """
+    track = np.asarray(reference_q, dtype=float)
+    expected = np.asarray(source.reference_q, dtype=float)
+    if track.shape != expected.shape or not np.isfinite(track).all():
+        raise ValueError(
+            f"reference_q must be finite with the source shape {expected.shape}"
+        )
+    kin, labels = _landmark_kinematics(source)
+    peaks = np.zeros(len(labels))
+    for row, ref in zip(track, expected, strict=True):
+        here = np.array(kin.marker_positions(row), dtype=float)
+        gap = here - np.array(kin.marker_positions(ref), dtype=float)
+        peaks = np.maximum(peaks, np.linalg.norm(gap, axis=1))
+    return {label: float(p) for label, p in zip(labels, peaks, strict=True)}
+
+
 def build_barbell_bundle(source: InputBundle, barbell: Barbell) -> InputBundle:
     """Re-track ``source``'s reference in MuJoCo with the bar on both hands.
 
@@ -260,13 +362,13 @@ def build_barbell_bundle(source: InputBundle, barbell: Barbell) -> InputBundle:
     """
     times = np.arange(source.reference_q.shape[0], dtype=float) * source.dt_s
     duration = source.steps * source.dt_s
-    controller, q0, v0, steps, simulator = _tracking(
+    controller, q0, v0, steps, _ = _tracking(
         source.spec_bytes,
+        barbell,
         times,
         np.asarray(source.reference_q, dtype=float),
         duration,
     )
-    q0 = _preload_bar(simulator, q0, barbell.load_kg)
     loaded, q_aug, v_aug = _attached_start(source.spec_bytes, q0, v0, barbell)
     rollout = integrate(
         loaded,
@@ -282,11 +384,13 @@ def build_barbell_bundle(source: InputBundle, barbell: Barbell) -> InputBundle:
         "attach_q": q_aug[:nv].tolist(),
         "reference_bar_q": rollout.q[:, nv:].tolist(),
         "reference_bar_v": rollout.v[:, nv:].tolist(),
-        "controller": "pipeline computed-torque (kkt) plus bar-weight feedforward",
+        "controller": "pipeline computed-torque (kkt) on the rigid-bar spec "
+        "(rigid_bar_spec, #13072)",
     }
     provenance = {
         **source.provenance,
         "max_pose_drift_m": float(rollout.pose_drift.max()),
+        RETRACK_DEVIATION_KEY: retrack_landmark_deviation(source, rollout.q[:, :nv]),
         PROVENANCE_KEY: record,
         "source_bundle_spec_sha256": source.spec_sha256,
     }
