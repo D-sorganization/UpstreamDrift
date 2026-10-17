@@ -33,13 +33,13 @@ def _committed(club: str) -> dict:
 
 
 def _superseded(document: dict) -> dict:
-    """The committed document as it was before #13037, up to the rebuilt solid."""
+    """The committed document as it was before #13037, up to the rebuilt solids."""
     old = copy.deepcopy(document)
     old["de_leva_table_sha256"] = "0" * 64
     old["subject"]["trunk_scale"] = 1.15
     for body in old["bodies"]:
         for solid in body["solids"]:
-            if solid["name"].endswith(module.REBUILT_SOLID):
+            if solid["name"].endswith(module.REBUILT_SOLIDS):
                 solid["com_m"] = [0.0, 0.0, 0.0]
     return old
 
@@ -82,3 +82,23 @@ def test_update_refuses_to_move_the_geometry(native) -> None:
     document["de_leva_table_sha256"] = "0" * 64  # rescaling twice moves the trunk
     with pytest.raises(ValueError, match="geometry"):
         module.apply_whole_rows(document, native)
+
+
+@pytest.mark.parametrize("club", CLUBS)
+def test_current_table_rebuilds_only_the_trunk_solids(club: str, native) -> None:
+    """A document on the current table with caudal-end trunk CMs keeps its
+    trunk scale and has exactly the head and trunk-part solids rebuilt."""
+    committed = _committed(club)
+    document = copy.deepcopy(committed)
+    document["provenance"] = committed["provenance"].replace(
+        module.COM_ORIGIN_NOTE, ""
+    )
+    for body in document["bodies"]:
+        for solid in body["solids"]:
+            if solid["name"].endswith(module.REBUILT_SOLIDS):
+                solid["com_m"] = [0.0, 0.0, 0.0]
+    change = module.apply_whole_rows(document, native)
+    assert change is not None
+    assert change["trunk_scale"]["before"] == change["trunk_scale"]["after"]
+    assert len(change["rebuilt_solids"]) == len(module.REBUILT_SOLIDS)
+    assert document == committed

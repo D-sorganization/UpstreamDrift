@@ -16,7 +16,11 @@ factors on the old length, canonical ``trunk_scale`` 1.15). That length is
 kept: ``trunk_scale`` becomes ``1.15 * 0.5319 / 0.6033``, so every joint,
 frame and marker stays where it is, which this script checks against a fresh
 ``build_upper_body``. The upper-trunk solid is rebuilt from its whole row, and
-the hashes, subject and ``anthropometry`` block are updated. Committed documents
+the hashes, subject and ``anthropometry`` block are updated. The head and
+trunk-part solids are rebuilt too: de Leva measures their CM from the
+cranial row origin (VERT, CERV, XYPH, OMPH), which the builder used to take
+from the caudal end. A document already on the current table keeps its
+``trunk_scale`` and only has those solids rebuilt. Committed documents
 carry hand-tuned contact parameters, so they are not rebuilt; the edit is
 idempotent and appends a provenance note.
 
@@ -63,7 +67,14 @@ NOTE = (
 )
 #: The fit-path trunk length before #13037 was this row's.
 SUPERSEDED_TRUNK_ROW = "trunk_supr_midh"
-REBUILT_SOLID = "/upper_trunk"
+#: Solids rebuilt from a fresh build: the upper trunk for its whole row, and
+#: the head and trunk parts because their CM is measured from the cranial row
+#: origin (#13037 follow-up; the builder had measured it from the caudal end).
+REBUILT_SOLIDS = ("/pelvis", "/middle_trunk", "/upper_trunk", "/head")
+COM_ORIGIN_NOTE = (
+    "; head and trunk-part CM measured from the cranial de Leva row origin "
+    "(#13037)"
+)
 #: Joints, frames and the other solids must agree with a fresh build this well.
 GEOMETRY_TOL = 1e-9
 
@@ -126,27 +137,49 @@ def _fresh_upper_body(
     )
 
 
+def _rebuild_solids(
+    document: dict[str, Any], fresh: Mapping[str, Mapping[str, Any]]
+) -> dict[str, dict[str, Any]]:
+    """Replace each :data:`REBUILT_SOLIDS` solid that differs from ``fresh``."""
+    rebuilt = {}
+    found = False
+    for body in document["bodies"]:
+        for i, solid in enumerate(body["solids"]):
+            if not solid["name"].endswith(REBUILT_SOLIDS):
+                continue
+            found = True
+            after = fresh[solid["name"]]
+            if _solid_gap(solid, after) > 0.0:
+                rebuilt[solid["name"]] = {"before": solid, "after": after}
+                body["solids"][i] = after
+    if not found:
+        raise ValueError(f"document has none of the solids {REBUILT_SOLIDS}")
+    return rebuilt
+
+
 def apply_whole_rows(
     document: dict[str, Any], native: Mapping[str, Any]
 ) -> dict[str, Any] | None:
-    """Update ``document`` in place; ``None`` when it already has the table.
+    """Update ``document`` in place; ``None`` when it is already current.
 
-    Raises ``ValueError`` when the rescaled trunk would move any joint, frame
-    or solid other than the upper trunk by more than :data:`GEOMETRY_TOL`.
-    Postcondition: the document's table hashes equal ``de_leva_table_sha256()``.
+    A document on an older table has its trunk rescaled (once); one on the
+    current table keeps its ``trunk_scale``. Either way the head and trunk
+    solids are rebuilt from a fresh build. Raises ``ValueError`` when that
+    would move any joint, frame or other solid by more than
+    :data:`GEOMETRY_TOL`. Postcondition: the table hashes equal
+    ``de_leva_table_sha256()`` and the rebuilt solids equal a fresh build.
     """
     current = de_leva_table_sha256()
-    if document.get("de_leva_table_sha256") == current:
-        return None
+    table_current = document.get("de_leva_table_sha256") == current
     subject = document["subject"]
     old_scale = float(subject["trunk_scale"])
-    new_scale = preserved_trunk_scale(old_scale)
+    new_scale = old_scale if table_current else preserved_trunk_scale(old_scale)
     upper = _fresh_upper_body(subject, document["club"]["name"], new_scale, native)
     committed, fresh = _solids(document), _solids(upper)
     solid_gap = max(
         _solid_gap(committed[name], solid)
         for name, solid in fresh.items()
-        if not name.endswith(REBUILT_SOLID)
+        if not name.endswith(REBUILT_SOLIDS)
     )
     geometry_gap = max(
         solid_gap,
@@ -157,17 +190,9 @@ def apply_whole_rows(
         raise ValueError(
             f"rescaled trunk moves the document's geometry by {geometry_gap:.3e}"
         )
-    rebuilt = {}
-    for body in document["bodies"]:
-        for i, solid in enumerate(body["solids"]):
-            if solid["name"].endswith(REBUILT_SOLID):
-                rebuilt[solid["name"]] = {
-                    "before": solid,
-                    "after": fresh[solid["name"]],
-                }
-                body["solids"][i] = fresh[solid["name"]]
-    if not rebuilt:
-        raise ValueError(f"document has no {REBUILT_SOLID} solid")
+    rebuilt = _rebuild_solids(document, fresh)
+    if table_current and not rebuilt:
+        return None
     previous = document.get("de_leva_table_sha256")
     subject.update(trunk_scale=new_scale, de_leva_table_sha256=current)
     document["de_leva_table_sha256"] = current
@@ -176,6 +201,8 @@ def apply_whole_rows(
     )
     if NOTE not in document.get("provenance", ""):
         document["provenance"] = document.get("provenance", "") + NOTE
+    if COM_ORIGIN_NOTE not in document["provenance"]:
+        document["provenance"] += COM_ORIGIN_NOTE
     return {
         "de_leva_table_sha256": {"before": previous, "after": current},
         "trunk_scale": {"before": old_scale, "after": new_scale},
@@ -230,6 +257,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "table": "de Leva (1996) Table 4, males, whole rows",
             "superseded_trunk_row": SUPERSEDED_TRUNK_ROW,
             "geometry_tolerance_m": GEOMETRY_TOL,
+            "rebuilt_solid_suffixes": list(REBUILT_SOLIDS),
             "documents": records,
         }
         args.receipt.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")

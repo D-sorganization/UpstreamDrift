@@ -86,7 +86,7 @@
       "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
       "solids": [
         {
-          "com_m": [0.0, 0.0, 0.0844985910228317],
+          "com_m": [0.0, 0.0, 0.05368389634075242],
           "inertia_com_kg_m2": [
             [0.050507629431820626, 0.0, 0.0],
             [0.0, 0.06292221745597135, 0.0],
@@ -128,7 +128,7 @@
       "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
       "solids": [
         {
-          "com_m": [0.0, 0.0, 0.09512972168377368],
+          "com_m": [0.0, 0.0, 0.11617574629439975],
           "inertia_com_kg_m2": [
             [0.08342568981302116, 0.0, 0.0],
             [0.0, 0.13212844835073062, 0.0],
@@ -144,7 +144,7 @@
           ]
         },
         {
-          "com_m": [0.0, 0.0, 0.3183528180559161],
+          "com_m": [0.0, 0.0, 0.31556358587860417],
           "inertia_com_kg_m2": [
             [0.05691790642458678, 0.0, 0.0],
             [0.0, 0.1417528231047875, 0.0],
@@ -165,7 +165,7 @@
       "name": "GolfSwing3D_Kinetic/Head",
       "solids": [
         {
-          "com_m": [0.0, 0.0, 0.11933519345203904],
+          "com_m": [0.0, 0.0, 0.11923976346927052],
           "inertia_com_kg_m2": [
             [0.030572073067708965, 0.0, 0.0],
             [0.0, 0.028287139896934158, 0.0],
@@ -1904,7 +1904,7 @@
       "offset_m": [0.02, -0.15, 0.08]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210); grip rotation refitted per capture from docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_driver.json (#12221); de Leva table derived from whole Table 4 rows, trunk length kept by rescaling trunk_scale and upper-trunk solid rebuilt (#13037)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210); grip rotation refitted per capture from docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_driver.json (#12221); de Leva table derived from whole Table 4 rows, trunk length kept by rescaling trunk_scale and upper-trunk solid rebuilt (#13037); head and trunk-part CM measured from the cranial de Leva row origin (#13037)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
