@@ -51,6 +51,7 @@ __all__ = [
     "coordinate_names",
     "neutral_alignment",
     "probe_axis_dots",
+    "select_continuous",
     "solve_orientation_group",
 ]
 
@@ -58,6 +59,10 @@ _PROBE_STEP = 1e-4
 _ROT_TOL = 1e-8
 _RESTARTS = 6
 _FAR = 4.0
+
+#: An unreachable frame keeps the previous frame's branch unless another
+#: candidate lowers the orientation residual by more than this [rad] (#13056).
+DEFAULT_CONTINUITY_SLACK_RAD = 0.1
 
 
 # ------------------------------------------------------------------ adapters
@@ -330,6 +335,12 @@ class OrientationSolution:
     coordinates: Mapping[str, np.ndarray]
     residual_rad: np.ndarray
 
+    @property
+    def max_step_rad(self) -> float:
+        """Largest frame-to-frame change of any group coordinate [rad]."""
+        q = np.column_stack(list(self.coordinates.values()))
+        return float(np.abs(np.diff(q, axis=0)).max()) if q.shape[0] > 1 else 0.0
+
     def __post_init__(self) -> None:
         coords = {k: np.array(v, dtype=float) for k, v in self.coordinates.items()}
         for arr in coords.values():
@@ -370,29 +381,63 @@ def _limits(
     return lower, upper
 
 
+def select_continuous(
+    candidates: Sequence[tuple[np.ndarray, float]],
+    previous: np.ndarray | None,
+    *,
+    tolerance_rad: float,
+    slack_rad: float,
+) -> tuple[np.ndarray, float]:
+    """Choose one ``(coordinates, residual)`` candidate, preferring continuity.
+
+    When the best residual is within ``tolerance_rad`` the admissible
+    candidates are the converged ones; otherwise (an unreachable orientation)
+    they are those within ``slack_rad`` of the best residual.  The admissible
+    candidate closest to ``previous`` (max-norm) is returned; without a
+    previous frame the lowest residual wins.  A branch switch therefore
+    happens only when it lowers the residual by more than ``slack_rad``.
+
+    Raises:
+        ValueError: no candidate, or a negative or non-finite slack.
+    """
+    if not candidates:
+        raise ValueError("select_continuous needs at least one candidate")
+    if not np.isfinite(slack_rad) or slack_rad < 0.0:
+        raise ValueError(f"slack_rad must be finite and >= 0: {slack_rad}")
+    best = min(angle for _, angle in candidates)
+    if previous is None:
+        return next((x, a) for x, a in candidates if a == best)
+    limit = tolerance_rad if best <= tolerance_rad else best + slack_rad
+    admissible = [(x, a) for x, a in candidates if a <= limit]
+    return min(admissible, key=lambda c: float(np.abs(c[0] - previous).max()))
+
+
 def _solve_frame(
     objective: Any,
     starts: Sequence[np.ndarray],
     limits: tuple[np.ndarray, np.ndarray],
     tolerance_rad: float,
-) -> tuple[np.ndarray, float]:
-    """Best of the warm starts, then deterministic restarts until converged."""
+) -> list[tuple[np.ndarray, float]]:
+    """Local solutions from the warm starts, then deterministic restarts.
+
+    Restarts stop once a warm start has converged.
+    """
     lower, upper = limits
     rng = np.random.default_rng(0)
     pool = list(starts) + [rng.uniform(lower, upper) for _ in range(_RESTARTS)]
-    best_x = np.clip(pool[0], lower, upper)
-    best_angle = float("inf")
+    found: list[tuple[np.ndarray, float]] = []
     for index, start in enumerate(pool):
         result = least_squares(
             objective, np.clip(start, lower, upper), bounds=(lower, upper)
         )
-        angle = float(np.linalg.norm(result.fun))
-        if angle < best_angle:
-            best_x, best_angle = np.array(result.x), angle
-        if best_angle <= tolerance_rad and index + 1 >= len(starts):
+        found.append((np.array(result.x), float(np.linalg.norm(result.fun))))
+        best = min(angle for _, angle in found)
+        if best <= tolerance_rad and index + 1 >= len(starts):
             break
-    invariant(bool(np.isfinite(best_angle)), "solver residual must be finite")
-    return best_x, best_angle
+    invariant(
+        all(np.isfinite(angle) for _, angle in found), "solver residual must be finite"
+    )
+    return found
 
 
 def solve_orientation_group(
@@ -403,6 +448,7 @@ def solve_orientation_group(
     *,
     bounds: Mapping[str, tuple[float, float]] | None = None,
     tolerance_rad: float = 1e-6,
+    continuity_slack_rad: float = DEFAULT_CONTINUITY_SLACK_RAD,
 ) -> OrientationSolution:
     """Solve the group's target coordinates for requested world orientations.
 
@@ -413,6 +459,10 @@ def solve_orientation_group(
     deterministic starts are tried when the warm start does not reach
     ``tolerance_rad``.  An unreachable orientation gives a positive
     ``residual_rad`` and the closest in-range solution; nothing is rescaled.
+    Among the local solutions the one nearest the previous frame is kept
+    (:func:`select_continuous`, ``continuity_slack_rad``), so an Euler branch
+    is not left for an equal or marginally better residual; the largest step
+    is :attr:`OrientationSolution.max_step_rad`.
 
     Preconditions: ``target_world`` is ``(n, 3, 3)`` finite proper rotations;
     the group's coordinates and body exist; ``tolerance_rad`` is positive and
@@ -421,6 +471,10 @@ def solve_orientation_group(
     """
     if not np.isfinite(tolerance_rad) or tolerance_rad <= 0.0:
         raise ValueError(f"tolerance_rad must be positive and finite: {tolerance_rad}")
+    if not np.isfinite(continuity_slack_rad) or continuity_slack_rad < 0.0:
+        raise ValueError(
+            f"continuity_slack_rad must be finite and >= 0: {continuity_slack_rad}"
+        )
     rots = _check_targets(target_world)
     n_frames = rots.shape[0]
     names = list(group.target_coordinates)
@@ -447,7 +501,13 @@ def solve_orientation_group(
 
         starts = [solved[k - 1]] if k else []
         starts.append(np.zeros(3))
-        solved[k], residual[k] = _solve_frame(objective, starts, limits, tolerance_rad)
+        found = _solve_frame(objective, starts, limits, tolerance_rad)
+        solved[k], residual[k] = select_continuous(
+            found,
+            solved[k - 1] if k else None,
+            tolerance_rad=tolerance_rad,
+            slack_rad=continuity_slack_rad,
+        )
     ensure(bool(np.all(np.isfinite(solved))), "orientation solution must be finite")
     return OrientationSolution(
         {name: solved[:, j] for j, name in enumerate(names)}, residual
