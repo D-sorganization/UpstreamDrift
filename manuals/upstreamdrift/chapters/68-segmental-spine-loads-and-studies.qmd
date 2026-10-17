@@ -317,6 +317,10 @@ Request fields, all recorded in the receipt:
   recorded in the drive provenance (`coordinate_locks`). Holding locked
   coordinates constant instead would change the distribution and is a
   follow-up (ADR-0055).
+  The full-body stage unlocks the same coordinates in the target it poses
+  for the shoulder orientation match and the ground-reaction estimate and
+  carries the drive's series for them; holding them at the file default
+  there put the arms on a different trunk from the driven one (#13056).
 
 Both options enter the request hash only when set to a non-default value.
 Static optimisation provenance also records `moment_arm_screen` (path-length
