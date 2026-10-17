@@ -3,16 +3,22 @@
   "table": "de Leva (1996) Table 4, males, whole rows",
   "superseded_trunk_row": "trunk_supr_midh",
   "geometry_tolerance_m": 1e-09,
+  "rebuilt_solid_suffixes": [
+    "/pelvis",
+    "/middle_trunk",
+    "/upper_trunk",
+    "/head"
+  ],
   "documents": [
     {
       "document": "docs/development/full_body_models/full_body_spec_anthro_driver.json",
       "before": {
-        "file_sha256": "cba352f4e19f1fc6dc3c6846f4a5b4677746c571c601fab190b6f3126af854d1",
-        "canonical_sha256": "b0f97919a0da84604d68275026701b4d31f4c4fff0004cb4d0b4fbf493284f5d"
+        "file_sha256": "5eca0e9d0a0cfe7c6c5015b92c3cd31c9f06251f3564740f99855b787247398a",
+        "canonical_sha256": "bff0fe348027b9ad5085c8c4f375475388b0e5d9dc6459eecd7565e52ea977ce"
       },
       "after": {
-        "file_sha256": "bbdbf2e75a4073ca1381056d899b79805d298d68b89a9504eecf40a7f6c61a47",
-        "canonical_sha256": "e96121275fc7cb3759691c002a8077df5c8c70b63c083153975fa2174d9a4801"
+        "file_sha256": "a45d8c7c7168e8c68fa204f758e5a936b1816dfa256901cf3818d4d992ced930",
+        "canonical_sha256": "ab724a31539dcfc956b4dd3f7b75ebe380aa9319a2c442323b650c736d07eb99"
       },
       "de_leva_table_sha256": {
         "before": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
@@ -24,6 +30,218 @@
       },
       "max_geometry_change_m": 0.0,
       "rebuilt_solids": {
+        "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso/pelvis": {
+          "before": {
+            "com_m": [
+              0.0,
+              0.0,
+              0.0844985910228317
+            ],
+            "inertia_com_kg_m2": [
+              [
+                0.050507629431820626,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.06292221745597135,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.05732314243264351
+              ]
+            ],
+            "mass_kg": 8.7126,
+            "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso/pelvis",
+            "placement": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "after": {
+            "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso/pelvis",
+            "mass_kg": 8.7126,
+            "com_m": [
+              0.0,
+              0.0,
+              0.05368389634075242
+            ],
+            "inertia_com_kg_m2": [
+              [
+                0.050507629431820626,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.06292221745597135,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.05732314243264351
+              ]
+            ],
+            "placement": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        },
+        "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/middle_trunk": {
+          "before": {
+            "com_m": [
+              0.0,
+              0.0,
+              0.09512972168377368
+            ],
+            "inertia_com_kg_m2": [
+              [
+                0.08342568981302116,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.13212844835073062,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.12456440691263249
+              ]
+            ],
+            "mass_kg": 12.737400000000001,
+            "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/middle_trunk",
+            "placement": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "after": {
+            "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/middle_trunk",
+            "mass_kg": 12.737400000000001,
+            "com_m": [
+              0.0,
+              0.0,
+              0.11617574629439975
+            ],
+            "inertia_com_kg_m2": [
+              [
+                0.08342568981302116,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.13212844835073062,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.12456440691263249
+              ]
+            ],
+            "placement": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        },
         "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/upper_trunk": {
           "before": {
             "com_m": [
@@ -83,7 +301,7 @@
             "com_m": [
               0.0,
               0.0,
-              0.3183528180559161
+              0.31556358587860417
             ],
             "inertia_com_kg_m2": [
               [
@@ -129,18 +347,124 @@
               ]
             ]
           }
+        },
+        "GolfSwing3D_Kinetic/Head/head": {
+          "before": {
+            "com_m": [
+              0.0,
+              0.0,
+              0.11933519345203904
+            ],
+            "inertia_com_kg_m2": [
+              [
+                0.030572073067708965,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.028287139896934158,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.020988664040769992
+              ]
+            ],
+            "mass_kg": 5.413200000000001,
+            "name": "GolfSwing3D_Kinetic/Head/head",
+            "placement": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "after": {
+            "name": "GolfSwing3D_Kinetic/Head/head",
+            "mass_kg": 5.413200000000001,
+            "com_m": [
+              0.0,
+              0.0,
+              0.11923976346927052
+            ],
+            "inertia_com_kg_m2": [
+              [
+                0.030572073067708965,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.028287139896934158,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.020988664040769992
+              ]
+            ],
+            "placement": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
         }
       }
     },
     {
       "document": "docs/development/full_body_models/full_body_spec_anthro_iron7.json",
       "before": {
-        "file_sha256": "2f2a3d94dc5e5246dcd40745fe37254d107ae8398396f4b15a3a2d05348be108",
-        "canonical_sha256": "d1eb35688a6987710df2a848253cbb7c5c829e45d73c0915311badb018c1f31e"
+        "file_sha256": "10390c18777d08b562bf4a73ec1eda4af5308c65e21ca6e542e5a85e233033fe",
+        "canonical_sha256": "9f6d7de400fa45e3c2fbb8a88319844d77eb36235660e6d15c2842b82828b965"
       },
       "after": {
-        "file_sha256": "ca3c0233c1a9498088653ac9187ac59a20e7adb29d883c347d56da1a4a211f21",
-        "canonical_sha256": "cd85219de3f8d4aeeb3e403c51c74f56efc71434dbb21b18e9fe35f20c33352b"
+        "file_sha256": "5715ad935765cd37f7c5ee2abd2a4a1b2169ce5bc920e4d4eddf6af5a7833643",
+        "canonical_sha256": "11bf35afb936d56971dd81ddf7da40194583ff5c3f1ac6ff2a5630712372bd40"
       },
       "de_leva_table_sha256": {
         "before": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
@@ -152,6 +476,218 @@
       },
       "max_geometry_change_m": 0.0,
       "rebuilt_solids": {
+        "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso/pelvis": {
+          "before": {
+            "com_m": [
+              0.0,
+              0.0,
+              0.0844985910228317
+            ],
+            "inertia_com_kg_m2": [
+              [
+                0.050507629431820626,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.06292221745597135,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.05732314243264351
+              ]
+            ],
+            "mass_kg": 8.7126,
+            "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso/pelvis",
+            "placement": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "after": {
+            "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso/pelvis",
+            "mass_kg": 8.7126,
+            "com_m": [
+              0.0,
+              0.0,
+              0.05368389634075242
+            ],
+            "inertia_com_kg_m2": [
+              [
+                0.050507629431820626,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.06292221745597135,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.05732314243264351
+              ]
+            ],
+            "placement": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        },
+        "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/middle_trunk": {
+          "before": {
+            "com_m": [
+              0.0,
+              0.0,
+              0.09512972168377368
+            ],
+            "inertia_com_kg_m2": [
+              [
+                0.08342568981302116,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.13212844835073062,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.12456440691263249
+              ]
+            ],
+            "mass_kg": 12.737400000000001,
+            "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/middle_trunk",
+            "placement": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "after": {
+            "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/middle_trunk",
+            "mass_kg": 12.737400000000001,
+            "com_m": [
+              0.0,
+              0.0,
+              0.11617574629439975
+            ],
+            "inertia_com_kg_m2": [
+              [
+                0.08342568981302116,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.13212844835073062,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.12456440691263249
+              ]
+            ],
+            "placement": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        },
         "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/upper_trunk": {
           "before": {
             "com_m": [
@@ -211,7 +747,7 @@
             "com_m": [
               0.0,
               0.0,
-              0.3183528180559161
+              0.31556358587860417
             ],
             "inertia_com_kg_m2": [
               [
@@ -228,6 +764,112 @@
                 0.0,
                 0.0,
                 0.12018627262359642
+              ]
+            ],
+            "placement": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        },
+        "GolfSwing3D_Kinetic/Head/head": {
+          "before": {
+            "com_m": [
+              0.0,
+              0.0,
+              0.11933519345203904
+            ],
+            "inertia_com_kg_m2": [
+              [
+                0.030572073067708965,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.028287139896934158,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.020988664040769992
+              ]
+            ],
+            "mass_kg": 5.413200000000001,
+            "name": "GolfSwing3D_Kinetic/Head/head",
+            "placement": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "after": {
+            "name": "GolfSwing3D_Kinetic/Head/head",
+            "mass_kg": 5.413200000000001,
+            "com_m": [
+              0.0,
+              0.0,
+              0.11923976346927052
+            ],
+            "inertia_com_kg_m2": [
+              [
+                0.030572073067708965,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.028287139896934158,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.020988664040769992
               ]
             ],
             "placement": [
