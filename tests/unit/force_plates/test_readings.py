@@ -217,7 +217,7 @@ def test_end_interval_uses_only_the_available_second_difference() -> None:
     assert right.sigma_load_n == pytest.approx(expected)
 
 
-def test_two_sample_trial_has_zero_bias() -> None:
+def test_two_sample_trial_with_declared_floor_has_floor_bias() -> None:
     trial = _hand_trial(
         [0.0, 0.010],
         [100.0, 200.0],
@@ -225,9 +225,14 @@ def test_two_sample_trial_has_zero_bias() -> None:
         [[-0.2, 0.0]] * 2,
         [[0.2, 0.0]] * 2,
     )
-    left = reading_at(_placed(trial), 0.004, _align(), _opts()).feet["left"]
+    opts = _opts(load_curvature_floor=1e5, cop_curvature_floor=100.0)
+    left = reading_at(_placed(trial), 0.004, _align(), opts).feet["left"]
     assert left.load_n == pytest.approx(140.0)
-    assert left.sigma_load_n == pytest.approx(math.hypot(2.0, 1.4))
+    # bias = (0.004 * 0.006) / 2 * 1e5 = 1.2 N ; coverage 2.
+    assert left.load_bias_n == pytest.approx(1.2)
+    assert left.sigma_load_n == pytest.approx(math.hypot(2.0, 1.4) + 0.6)
+    # CoP: (0.004 * 0.006) / 2 * 100 = 1.2e-3 m.
+    assert left.cop_bias_m == pytest.approx(1.2e-3)
 
 
 def test_skew_term_is_skew_times_first_difference() -> None:
@@ -306,7 +311,7 @@ def test_cop_is_none_when_a_bracketing_sample_is_unloaded() -> None:
     assert at_unloaded.feet["left"].cop_m is None
     # The load itself is still reported (5 N is a real, if small, reading).
     assert at_unloaded.feet["left"].load_n == pytest.approx(5.0)
-    loaded = reading_at(placed, 0.004, _align(), _opts())
+    loaded = reading_at(placed, 0.004, _align(), _opts(cop_curvature_floor=1.0))
     assert loaded.feet["left"].cop_m is not None
 
 
