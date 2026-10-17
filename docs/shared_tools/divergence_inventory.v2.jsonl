@@ -689,7 +689,9 @@
 {"path": "force_plates/open_fp_format/__init__.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/open_fp_format/_arrays.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/open_fp_format/_files.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
+{"path": "force_plates/open_fp_format/_json_arrays.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/open_fp_format/_meta.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
+{"path": "force_plates/open_fp_format/client.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/open_fp_format/format.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/open_fp_format/reader.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/placement.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
