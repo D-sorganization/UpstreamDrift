@@ -13,8 +13,11 @@ read one table:
 * the deadlift and the clean-and-jerk are pulls: the bar hangs in the hands
   (the optimizer's ``deadlift`` bar model) and the window is centred on the
   knee pass;
-* the bench press and the snatch are :data:`DEFERRED_LIFTS`, each with the
-  measured reason no credible trajectory comes out of this pipeline.
+* the bench press lies supine on a bench contact body (:mod:`.bench_press`):
+  the optimizer's arm-chain bar model is applied to the model's shoulders and
+  the window is centred on the bottom (the bar at the chest);
+* the snatch is a :data:`DEFERRED_LIFTS` entry, with the measured reason no
+  credible trajectory comes out of this pipeline.
 """
 
 from __future__ import annotations
@@ -87,6 +90,11 @@ class LiftRecipe:
         """True when the bar hangs in the hands rather than on a torso shelf."""
         return self.bar_convention == "deadlift"
 
+    @property
+    def supine(self) -> bool:
+        """True when the lifter lies on the bench contact body (#11745)."""
+        return self.bar_convention == "bench_press"
+
 
 _PULL_RATIONALE = (
     "The bar hangs in the hands during a pull, so its path is the optimizer's "
@@ -135,19 +143,30 @@ RECIPES: Mapping[str, LiftRecipe] = MappingProxyType(
                 "the rack, the jerk and the overhead phases are not in it."
             ),
         ),
+        "bench_press": LiftRecipe(
+            lift="bench_press",
+            bundle_name="bench_press",
+            exercise="bench_press",
+            bar_convention="bench_press",
+            window_event="bottom",
+            phase="chest_touch",
+            duration_s=2.0,
+            bar_mass_kg=100.0,
+            rationale=(
+                "Supine on a bench contact body: four back spheres (OSL-2 "
+                "geometry) press on a raised support and the feet stand on "
+                "the floor. The bar path is the optimizer's bench arm-chain "
+                "bar model (arm tip relative to the shoulder) applied to the "
+                "model's shoulders, scaled by its straight-up reach; only the "
+                "arms move. The window is centred on the bottom (chest touch)."
+            ),
+        ),
     }
 )
 
 #: Lifts without a credible trajectory from this pipeline, with the reason.
 DEFERRED_LIFTS: Mapping[str, str] = MappingProxyType(
     {
-        "bench_press": (
-            "Supine on a bench: the same-input full-body spec has contact "
-            "spheres on the feet only and an unactuated floating root, so "
-            "nothing supports a supine trunk and it falls under gravity; the "
-            "optimizer's bench model is an arm chain only. Needs a bench "
-            "contact body in the spec."
-        ),
         "snatch": (
             "The optimizer's snatch configuration interpolates from the "
             "floor setup straight to the overhead-squat catch (via point at "

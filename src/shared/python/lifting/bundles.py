@@ -309,6 +309,7 @@ def _exercise_config(exercise: str, body: Any, bar_mass_kg: float) -> tuple:
         "full_squat": models.make_full_squat_config,
         "deadlift": models.make_deadlift_config,
         "clean": exercises.make_clean_config,
+        "bench_press": models.make_bench_press_config,
     }
     if exercise not in factories:
         raise ValueError(f"exercise must be one of {sorted(factories)}: {exercise!r}")
@@ -329,7 +330,8 @@ def solve_sagittal_lift(
     """One lift from the Tools Movement Optimizer, through its public API.
 
     Args:
-        exercise: Optimizer exercise (``full_squat``, ``deadlift``, ``clean``).
+        exercise: Optimizer exercise (``full_squat``, ``deadlift``, ``clean``,
+            ``bench_press``).
         bar_convention: Optimizer exercise whose bar model places the bar
             (``bar_position``); defaults to *exercise*.  A pull uses
             ``deadlift`` (arms hanging below the shoulder).
@@ -921,16 +923,23 @@ _HANG_REACH_M = 5e-3
 
 
 def _arm_hang(
-    kin: Any, standing: _Standing, q_body: Array, axes: Mapping[str, Any]
+    kin: Any,
+    standing: _Standing,
+    q_body: Array,
+    axes: Mapping[str, Any],
+    direction: Array | None = None,
 ) -> float:
-    """Deepest bar centre straight below the shoulder midpoint of ``q_body``.
+    """Farthest bar centre from the shoulder midpoint of ``q_body`` along a line.
 
-    Only the arm chain moves (everything else stays at ``q_body``) and the bar
-    keeps the standard's medio-lateral axis with the grip closed; bisection
-    on the depth finds the deepest point the arms reach within
-    :data:`_HANG_REACH_M`.  This is the model's own hang at the grip width.
+    The line runs from the shoulder midpoint along ``direction`` (unit;
+    default straight down, ``-standing.frame.up``: the hang of a pull; the
+    bench press reaches straight up).  Only the arm chain moves (everything
+    else stays at ``q_body``) and the bar keeps the standard's medio-lateral
+    axis with the grip closed; bisection on the distance finds the farthest
+    point the arms reach within :data:`_HANG_REACH_M`.  This is the model's
+    own reach at the grip width.
     """
-    up = np.asarray(standing.frame.up)
+    along = -np.asarray(standing.frame.up) if direction is None else direction
     markers = kin.marker_positions(q_body)
     left, right = (
         LANDMARK_LABELS.index("shoulder_l"),
@@ -946,7 +955,7 @@ def _arm_hang(
 
     def reach(depth: float, q_start: Array) -> Array | None:
         targets = np.array(markers, dtype=float)
-        targets[bar_index] = mid - depth * up
+        targets[bar_index] = mid + depth * along
         fit = kin.solve_pose(
             targets,
             np.ones(len(LANDMARK_LABELS), dtype=bool),
@@ -967,7 +976,7 @@ def _arm_hang(
     low, high = _HANG_BRACKET_M
     q_reached = reach(low, np.asarray(q_body, dtype=float))
     if q_reached is None:
-        raise RuntimeError(f"arms cannot hold the bar {low} m below the shoulders")
+        raise RuntimeError(f"arms cannot hold the bar {low} m from the shoulders")
     while high - low > _HANG_RESOLUTION_M:
         depth = 0.5 * (low + high)
         q_new = reach(depth, q_reached)
