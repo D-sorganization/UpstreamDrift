@@ -4,7 +4,9 @@
 
 Evidence class: implemented and unit tested, not approved. Issue #12686
 (epic #12678, R6) adds an opt-in flexible shaft to the full-body
-specification and the MuJoCo export. No calculation is registered. The
+specification and the MuJoCo export. Issue #12691 (R11) realises the same
+chain in OpenSim and MyoSuite and lifts their refusal; Drake, Pinocchio and
+Simscape still refuse it. No calculation is registered. The
 registry blocker `UP-R6-flexible-shaft-chain` stays open until UP-D1
 inventories the pathway, a measured shaft profile replaces the generic one
 and a human reviews it.
@@ -89,9 +91,22 @@ $1 / \sqrt{\kappa}$, which keeps the modal damping ratios.
   zero defaults byte for byte. The native full-body model subtracts
   `qfrc_passive` from the bias when the specification has chain
   coordinates.
-- Drake, Pinocchio, OpenSim and Simscape: not supported yet. `VectorPlant`
-  raises `ShaftChainUnsupportedError` for a chain specification on these
-  engines instead of replaying the shaft as free or rigid joints.
+- OpenSim (#12691): `export_full_body_osim` writes one
+  `SpringGeneralizedForce` per chain coordinate with `stiffness`,
+  `rest_length` and `viscosity` set to the primitive's `stiffness_n_m_rad`,
+  `springref_rad` and `damping_n_m_s_rad`; OpenSim applies
+  $-k\,(q - q_{ref}) - c\,\dot q$, the MuJoCo law. The chain coordinates get
+  no `CoordinateActuator`, and the links are named `ShaftLink<i>` because
+  OpenSim component names may not contain `/` or spaces. The parity adapter
+  keeps these springs when it strips the exporter's other forces, so they
+  enter the bias through OpenSim's inverse dynamics; it zeroes efforts on
+  the chain coordinates, as the MuJoCo model does.
+- MyoSuite (#12691): loads the MuJoCo export through its own runtime, so it
+  inherits the joint springs and the passive-force bias unchanged.
+- Drake, Pinocchio and Simscape: not supported yet. `VectorPlant` raises
+  `ShaftChainUnsupportedError` for a chain specification on these engines
+  instead of replaying the shaft as free or rigid joints. `CHAIN_ENGINES`
+  lists exactly the engines that pass the parity gate below.
 
 ## Acceptance Evidence
 
@@ -138,12 +153,108 @@ Further checks:
   The short window and small step are needed because $\times 10^{6}$ raises
   the shaft eigenvalues a thousandfold (about $7 \times 10^{6}$ s⁻¹).
 
+## Per-Engine Realization (R11, #12691)
+
+Every engine builds the chain from the same chain specification
+(`apply_shaft_chain` on the canonical driver seed specification); no engine
+carries a shaft parameter of its own. The springs read back from each
+compiled model (OpenSim `SpringGeneralizedForce`, MuJoCo joint stiffness and
+`dof_damping`) equal the specification values exactly.
+
+Static and modal checks run in the swing model: the shaft block of the
+full-body mass matrix is the grip-clamped chain's (the links' inertia about
+their joints does not depend on the rest of the body), and the Clubhead
+compliance is $J K^{-1} J^{T}$ with $J$ the central-difference Jacobian of
+the Clubhead origin over the eight chain coordinates (step $10^{-6}$ rad).
+
+| Engine | $f_{1,x}$ (Hz) | $f_{1,z}$ (Hz) | Clubhead compliance, largest (mm/N) | vs MuJoCo |
+|---|---|---|---|---|
+| FEM reference | 5.4973 | 5.4935 | 3.9306 (tip) | |
+| MuJoCo | 5.5155 | 5.5115 | 3.9065 | |
+| OpenSim | 5.5155 | 5.5115 | 3.9065 | frequency $2 \times 10^{-15}$, compliance $9 \times 10^{-10}$ relative |
+| MyoSuite | 5.5155 | 5.5115 | 3.9065 | identical |
+
+The values reproduce the $N = 4$ row of the clamped study above, and both
+frequencies stay within the 1 % R6 tolerance of the FEM reference. The test
+asserts engine-to-engine agreement to $10^{-8}$ relative.
+
+Topology: coordinate order (44 body coordinates, then the eight chain
+coordinates), every specification frame including the `Clubhead` frame on the
+tip link (to $10^{-12}$ m), the total mass and the full mass matrix (to
+$10^{-9}$ of its largest entry) agree with MuJoCo at three record frames with
+a random 1 mrad shaft deflection. At zero deflection the body-coordinate block
+of the OpenSim chain mass matrix equals the rigid club's.
+
+Same-input parity, at the existing tolerances (unchanged):
+
+| Check | Tolerance | OpenSim | MyoSuite |
+|---|---|---|---|
+| Pointwise constrained accelerations, frames 0, 400, 420, 1 mrad deflection, 0.01 rad/s shaft rates | $10^{-6} + 10^{-8} \max|a|$ | $\le 8.6 \times 10^{-9}$ (max $|a|$ up to $1.9 \times 10^{4}$) | 0 |
+| Open-loop 30 ms replay of a MuJoCo chain bundle, $q$ / $v$ | $10^{-10}$ / $10^{-8}$ | $8.6 \times 10^{-15}$ / $8.9 \times 10^{-13}$ | 0 / 0 |
+| Closed-loop 30 ms with the shared controller, $q$ / efforts | $10^{-10}$ / $10^{-6}$ | $1.3 \times 10^{-13}$ / $2.0 \times 10^{-10}$ | 0 / 0 |
+
+The 30 ms bundle deflects the shaft by up to 4.7 mrad, and the shaft
+accelerations in the pointwise check reach $10^{4}$ rad/s², so the springs are
+loaded in every comparison. Efforts on the chain coordinates are ignored by
+both engines, as by MuJoCo.
+
+`scripts.same_input_bundle export --shaft-model chain` builds a chain bundle
+from a pipeline run: it applies the chain of the run specification's club and
+appends a straight shaft to the tracked reference. `replay` and
+`closed-loop` accept it for the engines in `CHAIN_ENGINES` only.
+
+### Full Swing Through Impact
+
+A chain bundle of the canonical driver seed run
+(`--duration 1.330 --shaft-model chain`, 1330 steps, ball impact at
+1.323 s) was replayed open loop in each engine. MyoSuite reproduces the
+MuJoCo reference bit for bit over the whole 1.33 s. OpenSim's full-horizon
+open-loop replay separates from the reference after 0.67 s (growth rate
+40 s⁻¹); the rigid-club bundle of the same run gives the same picture in
+OpenSim (0.67 s, 42 s⁻¹), so this is the usual amplification of round-off in
+an unstabilised open-loop swing, not the chain. Restarted every 50 ms from
+the reference state, OpenSim stays within $1.1 \times 10^{-4}$ rad and
+0.5 µm (rigid club: $6.1 \times 10^{-5}$ rad and 0.3 µm).
+
+Impact window: replayed open loop from the reference state 80 ms before
+impact to 5 ms after, with the bundle efforts and ball force, every engine
+evaluates the Clubhead deflection
+$d = P\,R_0^{T}\,(p(q) - p(q_{\text{straight}}))$ in the club frame of the
+straight shaft with its own kinematics. OpenSim agrees with MuJoCo to
+$8.5 \times 10^{-14}$ m (coordinates $7.7 \times 10^{-13}$ rad) and MyoSuite
+exactly (`evidence/flex_shaft/r11/r11_chain_deflection_impact_window.png`,
+receipt `r11_chain_receipt.json`, script `chain_deflection.py`). The figure
+is evidence of identical dynamics, not a native render.
+
+Findings on the MuJoCo chain model itself (R6), reproduced by every engine
+and not resolved here:
+
+- The chain swing diverges at 1.335 s, 10 ms after ball impact, when the
+  closure projection fails; a 1.40 s export fails, so the bundle ends at
+  1.330 s.
+- The Clubhead deflection reaches 0.19 m 60 to 80 ms before impact (chain
+  joint angles to 0.13 rad), outside the small-deflection assumption of the
+  linear springs; at impact it is 42 mm along the club $z$ axis.
+
 ## Reproduction
 
 ```bash
 QT_QPA_PLATFORM=offscreen python -m pytest -o addopts="" \
   tests/unit/motion_matching/test_club_shaft_chain.py \
-  tests/unit/motion_matching/test_full_body_mujoco_flex_shaft.py -q
+  tests/unit/motion_matching/test_full_body_mujoco_flex_shaft.py \
+  tests/cross_engine/test_flex_shaft_parity.py -q
+```
+
+The MyoSuite cases of `test_flex_shaft_parity.py` run in an environment with
+`myosuite` installed and skip otherwise. Chain bundle from the committed seed
+run, and its replay:
+
+```bash
+PYTHONPATH=.:src python -m scripts.same_input_bundle export \
+  --run-dir docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds \
+  --out chain_bundle.npz --duration 1.40 --shaft-model chain
+PYTHONPATH=.:src python -m scripts.same_input_bundle replay \
+  --bundle chain_bundle.npz --engine opensim --out replay_opensim.json
 ```
 
 Code: `src/shared/python/motion_matching/club_shaft_chain.py` (engine-neutral
@@ -160,12 +271,19 @@ reference model).
   effects are not modelled.
 - The head's centre of mass is on the shaft line, so the chain does not
   produce the bending caused by an offset head centre of mass.
-- Only MuJoCo applies the chain. The other engines refuse a chain
-  specification (R11 ports them).
+- MuJoCo, OpenSim and MyoSuite apply the chain. Drake, Pinocchio and
+  Simscape refuse a chain specification until their R11 ports pass the same
+  gate.
 - The bare-club inertia partition (`club_solids_partition`) rejects a chain
   specification; grip-wrench analysis is rigid-club only.
 - Not done in #12686: the deflected-shaft render (criterion 6) and the
   dynamic study of clubhead speed and face delivery (criterion 7).
+- Native-viewer stills of a deflected shaft (#12691 criterion 5) are not
+  done: the native viewers draw the club meshes on the club body, so they
+  show a straight shaft. The impact-window figure compares the engines'
+  dynamics instead.
+- The chain swing diverges 10 ms after ball impact, and its pre-impact
+  deflection (0.19 m) exceeds the small-deflection range (see above).
 
 ## Sources
 
