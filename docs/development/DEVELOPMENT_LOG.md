@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13088 · Add Optional Live Open-Fp Bridge to Realtime IPC (OF-09)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13088
+- **Branch:** feat/13088-of-09-live-bridge
+- **PR:** #13097
+- **Paths:** see #13097
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`cd301b48`; collated from changes/13088-add-optional-live-open-fp-bridge-to-real.md)
+- **Summary:** Add optional live open-fp bridge to realtime IPC (OF-09)
+- **Next step:** Review and merge after #13085
+
 ### DL-#13087 · Overlay Measured Plate Trials on the Ground Reaction Tile (OF-07)
 
 - **State:** in_review
