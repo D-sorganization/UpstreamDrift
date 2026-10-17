@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13061 · Evaluate Open-Fp Force Plates and Add the Vertical-Only Integration Plan (Licence Boundary, Data Contract, Frames, Timing, Backlog)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13061
+- **Branch:** claude/upstreamdrift-integration-plans-nlivq0
+- **PR:** #13062
+- **Paths:** see #13062
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`c5367240`; collated from changes/13061-evaluate-open-fp-force-plates-and-add-th.md)
+- **Summary:** Evaluate open-fp force plates and add the vertical-only integration plan (licence boundary, data contract, frames, timing, backlog)
+- **Next step:** Owner confirms the AGPL arm's-length boundary and files OF-01/OF-02.
+
+### DL-#12691 · R11: The R6 Chain Shaft Runs in OpenSim (SpringGeneralizedForce) and MyoSuite (MuJoCo Export) With Static, Modal, Topology and Same-Input Parity Gates; Chain Bundles Export With --Shaft-Model Chain
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12691
+- **Branch:** claude/12691-opensim-flex-shaft
+- **PR:** #12951
+- **Paths:** see #12951
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`aa0c176b`; collated from changes/12691-r11-the-r6-chain-shaft-runs-in-opensim-s.md)
+- **Summary:** R11: the R6 chain shaft runs in OpenSim (SpringGeneralizedForce) and MyoSuite (MuJoCo export) with static, modal, topology and same-input parity gates; chain bundles export with --shaft-model chain
+- **Next step:** Drake, Pinocchio and Simscape chain ports (ControlTower lane); chain-aware native viewer club visuals for the deflected-shaft stills
+
 ### DL-#12960 · Adversarial Review 2026-10-16: 43 Findings With Draft PR Pitches Under Docs/Development/Adversarial-Review/
 
 - **State:** in_review
@@ -1168,10 +1194,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #11745
 - **Branch:** claude/lift-5-squat-bundle
-- **PR:** #12245, #12340
+- **PR:** #12245, #12340, #13052
 - **Paths:** see #12245
 - **Started:** 2026-10-14
-- **Last verified:** 2026-10-14 (`ba48dafa`; collated from changes/11745-lift-5-slice-cross-engine-open-loop-bar.md)
+- **Last verified:** 2026-10-17 (`1defdf34`; collated from changes/11745-deadlift-and-clean-and-jerk-first-pull-s.md)
 - **Summary:** LIFT-5 slice 1: back-squat same-input bundle from the Movement Optimizer via full-body marker IK, with provenance, regeneration script and MuJoCo replay smoke test
 - **Next step:** Cross-engine bar-path replay parity of the back-squat bundle in MuJoCo, Pinocchio and Drake; then the other four lifts.
 
@@ -2366,6 +2392,721 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13095 · Rotate the 315 Oldest SPEC.md Section 12 Rows (Dated up to 2026-10-14) Verbatim Into a Second Pinned Block of Docs/Spec/CHANGELOG_ARCHIVE.md; SPEC.md 349,957 to 276,739 Bytes Under the Unchanged 350,000-Byte Cap; the Change-Log Gate Reads Every Archived Row Block
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13095
+- **Branch:** merged via #13099
+- **PR:** #13099
+- **Paths:** see #13099
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`3ebdc456`; collated from changes/13095-rotate-the-315-oldest-spec-md-section-12.md)
+- **Summary:** Rotate the 315 oldest SPEC.md section 12 rows (dated up to 2026-10-14) verbatim into a second pinned block of docs/spec/CHANGELOG_ARCHIVE.md; SPEC.md 349,957 to 276,739 bytes under the unchanged 350,000-byte cap; the change-log gate reads every archived row block
+- **Next step:** Shipped in PR #13099.
+
+### DL-#13068 · Capture Rig No Longer Aborts When Its Panel Is Destroyed With Help or Status Dialogs Alive
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13068
+- **Branch:** merged via #13071
+- **PR:** #13071
+- **Paths:** see #13071
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`13a1d07f`; collated from changes/13068-capture-rig-no-longer-aborts-when-its-pa.md)
+- **Summary:** Capture Rig no longer aborts when its panel is destroyed with Help or Status dialogs alive
+- **Next step:** Shipped in PR #13071.
+
+### DL-#13058 · Sole-Load View Note Names Its Matplotlib Renderer When a 3-D Provider Is Installed; Adapter Golden Accepts Verified Numpy 2.5.3 Runtime
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13058
+- **Branch:** merged via #13059
+- **PR:** #13059
+- **Paths:** see #13059
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`7f83e101`; collated from changes/13058-sole-load-view-note-names-its-matplotlib.md)
+- **Summary:** Sole-load view note names its matplotlib renderer when a 3-D provider is installed; adapter golden accepts verified numpy 2.5.3 runtime
+- **Next step:** Shipped in PR #13059.
+
+### DL-#13056 · OS-8 Branch-Continuous Capture-A IK: Constant Marker Set, Warm-Started Tie-Break IK, Continuous Through Impact
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13056
+- **Branch:** merged via #13060
+- **PR:** #13060, #13076
+- **Paths:** see #13060
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`c0556a04`; collated from changes/13056-spine-id-and-joint-reactions-keep-driven.md)
+- **Summary:** OS-8 branch-continuous capture-A IK: constant marker set, warm-started tie-break IK, continuous through impact
+- **Next step:** Shipped in PR #13060.
+
+### DL-#13054 · Make Tests/Tools a Package so Its Test Packages Stop Shadowing Src/Tools; Collision Gate Green and Unquarantined
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13054
+- **Branch:** merged via #13055
+- **PR:** #13055
+- **Paths:** see #13055
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`dd723779`; collated from changes/13054-make-tests-tools-a-package-so-its-test-p.md)
+- **Summary:** Make tests/tools a package so its test packages stop shadowing src/tools; collision gate green and unquarantined
+- **Next step:** Shipped in PR #13055.
+
+### DL-#13050 · Bump Vendor/Ud-Tools to Tools 46C78180, Carrying the Rust Golfer Solver Closure-Row Parity With Python (Tools#5644) and the ChatDockWidget Mixin Split (Tools#5642); Pins and Divergence Inventory Kept in Step
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13050
+- **Branch:** merged via #13050
+- **PR:** #13050
+- **Paths:** see #13050
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`8db3d63d`; collated from changes/13050-bump-vendor-ud-tools-to-tools-46c7818.md)
+- **Summary:** Bump vendor/ud-tools to Tools 46c78180, carrying the Rust golfer solver closure-row parity with Python (Tools#5644) and the ChatDockWidget mixin split (Tools#5642); pins and divergence inventory kept in step
+- **Next step:** Shipped in PR #13050.
+
+### DL-#13040 · OSL-2: Compose Real OpenSim Musculoskeletal Lift Models (Rajagopal-Lai-Uhlrich Body, Hand-Held Barbell, Smooth Sphere Contact) Replacing the LIFT-6 Stub
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13040
+- **Branch:** merged via #13046
+- **PR:** #13046
+- **Paths:** see #13046
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`728522aa`; collated from changes/13040-osl-2-compose-real-opensim-musculoskelet.md)
+- **Summary:** OSL-2: compose real OpenSim musculoskeletal lift models (Rajagopal-Lai-Uhlrich body, hand-held barbell, smooth sphere contact) replacing the LIFT-6 stub
+- **Next step:** Shipped in PR #13046.
+
+### DL-#13015 · Resolve the Club-Head Body Across Engine Naming Schemes via One Shared Alias Table; Add Strict Mode
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13015
+- **Branch:** merged via #13028
+- **PR:** #13028
+- **Paths:** see #13028
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`47143bbc`; collated from changes/13015-resolve-the-club-head-body-across-engine.md)
+- **Summary:** Resolve the club-head body across engine naming schemes via one shared alias table; add strict mode
+- **Next step:** Shipped in PR #13028.
+
+### DL-#13010 · de Leva 1996 Table 4 Transcribed Whole (Both Sexes, All Rows) With Load-Time Invariants; the Humanoid Table Derives From It and Closes to Body Mass Without Rescaling; Fit-Path Mixed Rows Ratcheted (#13037)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13010
+- **Branch:** merged via #13039
+- **PR:** #13039
+- **Paths:** see #13039
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`826e1c8e`; collated from changes/13010-de-leva-1996-table-4-transcribed-whole-b.md)
+- **Summary:** de Leva 1996 Table 4 transcribed whole (both sexes, all rows) with load-time invariants; the humanoid table derives from it and closes to body mass without rescaling; fit-path mixed rows ratcheted (#13037)
+- **Next step:** Shipped in PR #13039.
+
+### DL-#12992 · Fix(Gui): Restore Dead Settings Menu Actions, Vendored Tile Fallback, Embedded C3D Viewer (#12992, #12993, #12995)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12992
+- **Branch:** merged via #13028
+- **PR:** #13028
+- **Paths:** see #13028
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`47143bbc`; collated from changes/12992-fix-gui-restore-dead-settings-menu-actio.md)
+- **Summary:** fix(gui): restore dead settings menu actions, vendored tile fallback, embedded C3D viewer (#12992, #12993, #12995)
+- **Next step:** Shipped in PR #13028.
+
+### DL-#12983 · OpenSim 4.6 Engine: Inverse Dynamics, Bias, Gravity, Drift, Counterfactuals and Reset Work and Raise on Failure, Joint Names Follow the State; Committed Golfer Models Load Their Club Meshes (#13016)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12983
+- **Branch:** merged via #13034
+- **PR:** #13034
+- **Paths:** see #13034
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`5472818a`; collated from changes/12983-opensim-4-6-engine-inverse-dynamics-bias.md)
+- **Summary:** OpenSim 4.6 engine: inverse dynamics, bias, gravity, drift, counterfactuals and reset work and raise on failure, joint names follow the state; committed golfer models load their club meshes (#13016)
+- **Next step:** Shipped in PR #13034.
+
+### DL-#12980 · Fix(Drake): Real Pydrake Forces/Reset APIs and Gravity Sign (#12980, #12981, #12982)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12980
+- **Branch:** merged via #13028
+- **PR:** #13028
+- **Paths:** see #13028
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`47143bbc`; collated from changes/12980-fix-drake-real-pydrake-forces-reset-apis.md)
+- **Summary:** fix(drake): real pydrake forces/reset APIs and gravity sign (#12980, #12981, #12982)
+- **Next step:** Shipped in PR #13028.
+
+### DL-#12963 · Ci: Propagate Pytest Exit Status Through Tee in Heavy-Test, Soak and Optional-Stack Lanes; Add Workflow Pipefail Lint Test
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12963
+- **Branch:** merged via #13018
+- **PR:** #13018
+- **Paths:** see #13018
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`71884f8e`; collated from changes/12963-ci-propagate-pytest-exit-status-through.md)
+- **Summary:** ci: propagate pytest exit status through tee in heavy-test, soak and optional-stack lanes; add workflow pipefail lint test
+- **Next step:** Shipped in PR #13018.
+
+### DL-#12948 · Results Playback: Wall-Clock Play With 0.25X/0.5X/1X Speed Selector, Viewport Scales to the Dock, Y-Label No Longer Clipped
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12948
+- **Branch:** merged via #13028
+- **PR:** #13028
+- **Paths:** see #13028
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`47143bbc`; collated from changes/12948-results-playback-wall-clock-play-with-0.md)
+- **Summary:** Results Playback: wall-clock play with 0.25x/0.5x/1x speed selector, viewport scales to the dock, y-label no longer clipped
+- **Next step:** Shipped in PR #13028.
+
+### DL-#12925 · OpenSim Preview: Orient by Model Gravity (Z-Up Golf Models No Longer Lie on Their Side), Capsules Only for Bodies With Missing Meshes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12925
+- **Branch:** merged via #13028
+- **PR:** #13028
+- **Paths:** see #13028
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`47143bbc`; collated from changes/12925-opensim-preview-orient-by-model-gravity.md)
+- **Summary:** OpenSim preview: orient by model gravity (Z-up golf models no longer lie on their side), capsules only for bodies with missing meshes
+- **Next step:** Shipped in PR #13028.
+
+### DL-#12919 · OpenSim Explorer: Resolve Meshes From Repo/Package/OPENSIM_GEOMETRY, Geometry-Missing Banner With Capsule Fallback, Anthro Golfer Default
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12919
+- **Branch:** merged via #13028
+- **PR:** #13028
+- **Paths:** see #13028
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`47143bbc`; collated from changes/12919-opensim-explorer-resolve-meshes-from-rep.md)
+- **Summary:** OpenSim explorer: resolve meshes from repo/package/OPENSIM_GEOMETRY, geometry-missing banner with capsule fallback, anthro golfer default
+- **Next step:** Shipped in PR #13028.
+
+### DL-#12915 · Model Explorer Opens Swing-Datastore Results (MuJoCo, Drake, OpenSim, Pinocchio) and Plays Them on the Shared-Appearance Golfer With Timeline, Plots and MP4 Export
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12915
+- **Branch:** merged via #13028
+- **PR:** #13028
+- **Paths:** see #13028
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`47143bbc`; collated from changes/12915-model-explorer-opens-swing-datastore-res.md)
+- **Summary:** Model Explorer opens swing-datastore results (MuJoCo, Drake, OpenSim, Pinocchio) and plays them on the shared-appearance golfer with timeline, plots and MP4 export
+- **Next step:** Shipped in PR #13028.
+
+### DL-#12912 · OpenSim Run Simulation No Longer Calls the Removed Manager.setInitialTime.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12912
+- **Branch:** merged via #13028
+- **PR:** #13028
+- **Paths:** see #13028
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`47143bbc`; collated from changes/12912-opensim-run-simulation-no-longer-calls-t.md)
+- **Summary:** OpenSim Run Simulation no longer calls the removed Manager.setInitialTime.
+- **Next step:** Shipped in PR #13028.
+
+### DL-#12901 · Launcher Theme Imports Resolve via Launcher_Compat; Sidekick API Child Runs Without Uvicorn Auto-Reload (Ready in ~10s); Closing an Engine Tab Resets Its Running Status (#12962)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12901
+- **Branch:** merged via #13028
+- **PR:** #13028
+- **Paths:** see #13028
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`47143bbc`; collated from changes/12901-launcher-theme-imports-resolve-via-launc.md)
+- **Summary:** Launcher theme imports resolve via launcher_compat; Sidekick API child runs without uvicorn auto-reload (ready in ~10s); closing an engine tab resets its Running status (#12962)
+- **Next step:** Shipped in PR #13028.
+
+### DL-#12872 · Keep the Runtime Cancel Event Out of Persisted Chat Stream Metadata and Validate JSON-Serialisability Before Persisting
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12872
+- **Branch:** merged via #13028
+- **PR:** #13028
+- **Paths:** see #13028
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`47143bbc`; collated from changes/12872-keep-the-runtime-cancel-event-out-of-per.md)
+- **Summary:** Keep the runtime cancel event out of persisted chat stream metadata and validate JSON-serialisability before persisting
+- **Next step:** Shipped in PR #13028.
+
+### DL-#12855 · Motion-Matching Smoke: Headless GL Probe and Best-Effort Playback Render (Render_Skipped in Receipt)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12855
+- **Branch:** merged via #13029
+- **PR:** #13029
+- **Paths:** see #13029
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`f565f4a7`; collated from changes/12855-motion-matching-smoke-headless-gl-probe.md)
+- **Summary:** Motion-matching smoke: headless GL probe and best-effort playback render (render_skipped in receipt)
+- **Next step:** Shipped in PR #13029.
+
+### DL-#12849 · Split Oversized Development and Agent Narrative Docs Into Index Plus Linked Parts; Drop Four Doc-Size Exceptions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12849
+- **Branch:** merged via #13026
+- **PR:** #13026
+- **Paths:** see #13026
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`c611ab8d`; collated from changes/12849-split-oversized-development-and-agent-na.md)
+- **Summary:** Split oversized development and agent narrative docs into index plus linked parts; drop four doc-size exceptions
+- **Next step:** Shipped in PR #13026.
+
+### DL-#12845 · Group IK/Eval Tuning Parameters Into Option Objects (TrajectoryIkOptions, DualFrameIkOptions, EvaluationOptions) and Delete the Three Expiring Architecture-Budget Parameter Exceptions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12845
+- **Branch:** merged via #13026
+- **PR:** #13026
+- **Paths:** see #13026
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`c611ab8d`; collated from changes/12845-group-ik-eval-tuning-parameters-into-opt.md)
+- **Summary:** Group IK/eval tuning parameters into option objects (TrajectoryIkOptions, DualFrameIkOptions, EvaluationOptions) and delete the three expiring architecture-budget parameter exceptions
+- **Next step:** Shipped in PR #13026.
+
+### DL-#12844 · Introduce Shared Frozen SimulationConfig for Pendulum Run_Simulation Variants and BatchSwingConfig for BatchSwingOptimizer; Delete 5 Expiring Architecture-Budget Exceptions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12844
+- **Branch:** merged via #13026
+- **PR:** #13026
+- **Paths:** see #13026
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`c611ab8d`; collated from changes/12844-introduce-shared-frozen-simulationconfig.md)
+- **Summary:** Introduce shared frozen SimulationConfig for pendulum run_simulation variants and BatchSwingConfig for BatchSwingOptimizer; delete 5 expiring architecture-budget exceptions
+- **Next step:** Shipped in PR #13026.
+
+### DL-#12843 · Make Pinocchio/Drake SimOut Real Dataclasses and Decompose Simulate_With_Coefficients, _Record_Rollout and Fit_Swing_Drake Under the Architecture Budget; Delete 8 Expiring Exceptions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12843
+- **Branch:** merged via #13026
+- **PR:** #13026
+- **Paths:** see #13026
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`c611ab8d`; collated from changes/12843-make-pinocchio-drake-simout-real-datacla.md)
+- **Summary:** Make pinocchio/drake SimOut real dataclasses and decompose simulate_with_coefficients, _record_rollout and fit_swing_drake under the architecture budget; delete 8 expiring exceptions
+- **Next step:** Shipped in PR #13026.
+
+### DL-#12842 · Split MuJoCo Motion-Matching Simulate_With_Coefficients, Compute_Qpos_Jacobian and Compute_Cost_Gradient_Analytical Into Helpers Under the Function-Lines Budget (Bit-Identical Outputs); Drop Their Expiring Exceptions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12842
+- **Branch:** merged via #13026
+- **PR:** #13026
+- **Paths:** see #13026
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`c611ab8d`; collated from changes/12842-split-mujoco-motion-matching-simulate-wi.md)
+- **Summary:** Split MuJoCo motion-matching simulate_with_coefficients, compute_qpos_jacobian and compute_cost_gradient_analytical into helpers under the function-lines budget (bit-identical outputs); drop their expiring exceptions
+- **Next step:** Shipped in PR #13026.
+
+### DL-#12840 · Split Launch_Monitor_Analytics gui.py Into Cohesive _Gui_* Mixin Modules and Decompose TerrainExplorerWidget._Build_Ui; Remove Expiring Size/Architecture Budget Exceptions.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12840
+- **Branch:** merged via #13026
+- **PR:** #13026
+- **Paths:** see #13026
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`c611ab8d`; collated from changes/12840-split-launch-monitor-analytics-gui-py-in.md)
+- **Summary:** Split launch_monitor_analytics gui.py into cohesive _gui_* mixin modules and decompose TerrainExplorerWidget._build_ui; remove expiring size/architecture budget exceptions.
+- **Next step:** Shipped in PR #13026.
+
+### DL-#12839 · Decompose Launcher UI Widgets (Rebuild_Grid, Init_Ui, LibraryWidget._Setup_Ui, CustomTitleBar) Under the Architecture Budget and Drop the Expiring Exceptions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12839
+- **Branch:** merged via #13026
+- **PR:** #13026
+- **Paths:** see #13026
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`c611ab8d`; collated from changes/12839-decompose-launcher-ui-widgets-rebuild-gr.md)
+- **Summary:** Decompose launcher UI widgets (rebuild_grid, init_ui, LibraryWidget._setup_ui, CustomTitleBar) under the architecture budget and drop the expiring exceptions
+- **Next step:** Shipped in PR #13026.
+
+### DL-#12838 · Re-Vendor Refactored Deferred_Validation/Handoff_Validator (RM#2112) With Handoff_Schema and Archive_Policy; Delete 3 Expiring Function-Lines Exceptions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12838
+- **Branch:** merged via #12862
+- **PR:** #12862
+- **Paths:** see #12862
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`b1bf9306`; collated from changes/12838-re-vendor-refactored-deferred-validation.md)
+- **Summary:** Re-vendor refactored deferred_validation/handoff_validator (RM#2112) with handoff_schema and archive_policy; delete 3 expiring function-lines exceptions
+- **Next step:** Shipped in PR #12862.
+
+### DL-#12807 · Cross-Engine _Safe_Cv Returns NaN at Near-Zero Mean; Robustness_Score Fails Closed and the API Reports Null With a Reason Instead of Perfect Robustness
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12807
+- **Branch:** fix/12807-cross-engine-zero-mean-cv
+- **PR:** #13029
+- **Paths:** see #13029
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`f565f4a7`; collated from changes/12807-cross-engine-safe-cv-returns-nan-at-near.md)
+- **Summary:** Cross-engine _safe_cv returns NaN at near-zero mean; robustness_score fails closed and the API reports null with a reason instead of perfect robustness
+- **Next step:** Shipped in PR #13029.
+
+### DL-#12803 · Re-Synced the Chat Child Copy With the Pinned Tools Tree: ChatDockWidget.__Init__ Now Takes ChatConnectionConfig/ChatPresentationConfig/ChatIntegrationHooks (Tools#4897), Call Sites Updated, and the Expiring Architecture-Budget Exception Removed.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12803
+- **Branch:** merged via #12858
+- **PR:** #12858
+- **Paths:** see #12858
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`ad09ed35`; collated from changes/12803-re-synced-the-chat-child-copy-with-the-p.md)
+- **Summary:** Re-synced the chat child copy with the pinned Tools tree: ChatDockWidget.__init__ now takes ChatConnectionConfig/ChatPresentationConfig/ChatIntegrationHooks (Tools#4897), call sites updated, and the expiring architecture-budget exception removed.
+- **Next step:** Shipped in PR #12858.
+
+### DL-#12758 · SPN-9C: Full-Body Driving of the Bruno Model (Coordinate Map, Shoulder Orientation Match, Club Hand Wrench and Ground Reaction Loads, Study Option and Receipt Record)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12758
+- **Branch:** merged via #12917
+- **PR:** #12917
+- **Paths:** see #12917
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`5c015d16`; collated from changes/12758-spn-9c-full-body-driving-of-the-bruno-mo.md)
+- **Summary:** SPN-9c: full-body driving of the Bruno model (coordinate map, shoulder orientation match, club hand wrench and ground reaction loads, study option and receipt record)
+- **Next step:** Shipped in PR #12917.
+
+### DL-#12727 · NSX-98: Two-Track Conformance Rows for Closed-Loop Sensitivities and Variance Across Pinocchio, Drake, MuJoCo, MyoSuite and OpenSim
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12727
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12727-nsx-98-two-track-conformance-rows-for-cl.md)
+- **Summary:** NSX-98: two-track conformance rows for closed-loop sensitivities and variance across Pinocchio, Drake, MuJoCo, MyoSuite and OpenSim
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12726 · NSX-97: MOSAIC Multi-Swing Variability Consumer With UCM/ORT, Muller-Sternad TNC, Direction Comparison, Phase and Physical-Time Residuals and Session-Level Train/Test Split (Real-Capture Falsification Deferred)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12726
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12726-nsx-97-mosaic-multi-swing-variability-co.md)
+- **Summary:** NSX-97: MOSAIC multi-swing variability consumer with UCM/ORT, Muller-Sternad TNC, direction comparison, phase and physical-time residuals and session-level train/test split (real-capture falsification deferred)
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12725 · NSX-96: Saltelli/Jansen Sobol and PRCC Global Sensitivity Screening With Grouped Indices on the Planar Oracle and Low-Rank Basis
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12725
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12725-nsx-96-saltelli-jansen-sobol-and-prcc-gl.md)
+- **Summary:** NSX-96: Saltelli/Jansen Sobol and PRCC global sensitivity screening with grouped indices on the planar oracle and low-rank basis
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12724 · NSX-95 Strategy Catalogue S1-S12 With Matched-CHS/Matched-Effort Campaigns, Prior Reversals, Held-Out Stability and Variance Budget
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12724
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12724-nsx-95-strategy-catalogue-s1-s12-with-ma.md)
+- **Summary:** NSX-95 strategy catalogue S1-S12 with matched-CHS/matched-effort campaigns, prior reversals, held-out stability and variance budget
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12723 · NSX-94: Muscle-Level Co-Contraction Experiments (Activation Fibre, Signal-Dependent Muscle Noise, Short-Range Stiffness) for OpenSim and MuJoCo-Muscle, Fail-Closed Capability Registry
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12723
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12723-nsx-94-muscle-level-co-contraction-exper.md)
+- **Summary:** NSX-94: muscle-level co-contraction experiments (activation fibre, signal-dependent muscle noise, short-range stiffness) for OpenSim and MuJoCo-muscle, fail-closed capability registry
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12722 · NSX-93: Declared Joint-Impedance and Delayed Minimum-Intervention Feedback Layer for Torque-Driven Models
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12722
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12722-nsx-93-declared-joint-impedance-and-dela.md)
+- **Summary:** NSX-93: declared joint-impedance and delayed minimum-intervention feedback layer for torque-driven models
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12721 · NSX-92 Noise-Aware Null-Space Allocation: Minimum Face-Angle Variance Under Declared M1/M2 With Convex and Local-Certified Solves, Fronts and Held-Out MC Verification
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12721
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12721-nsx-92-noise-aware-null-space-allocation.md)
+- **Summary:** NSX-92 noise-aware null-space allocation: minimum face-angle variance under declared M1/M2 with convex and local-certified solves, fronts and held-out MC verification
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12720 · NSX-91 Paired Nonlinear Monte Carlo on Constrained Replay (CRN, Hold-Out Seeds, Retained Failures)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12720
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12720-nsx-91-paired-nonlinear-monte-carlo-on-c.md)
+- **Summary:** NSX-91 paired nonlinear Monte Carlo on constrained replay (CRN, hold-out seeds, retained failures)
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12715 · NSX-86: Drake AutoDiff Constrained-Dynamics Derivatives (Closed_Loop_Derivatives FULL) Through the NSX-84 Seam, Canonical Closure Convention, Capability Rejection Instead of FD Fallback
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12715
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12715-nsx-86-drake-autodiff-constrained-dynami.md)
+- **Summary:** NSX-86: Drake AutoDiff constrained-dynamics derivatives (closed_loop_derivatives FULL) through the NSX-84 seam, canonical closure convention, capability rejection instead of FD fallback
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12706 · Humanoid_Character_Builder: One Primitive and One SMPL-X Mesh Generator Class, URDF Generator and URDFWriter Collision Exclusions Restored After #8322, Precondition Binding by Name, and the Builder Unit Tests Now Run in the Unit Gate
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12706
+- **Branch:** merged via #13029
+- **PR:** #13029
+- **Paths:** see #13029
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`f565f4a7`; collated from changes/12706-humanoid-builder-dedupe-hidden-tests.md)
+- **Summary:** humanoid_character_builder: one Primitive and one SMPL-X mesh generator class, URDF generator and URDFWriter collision exclusions restored after #8322, precondition binding by name, and the builder unit tests now run in the unit gate
+- **Next step:** Shipped in PR #13029.
+
+### DL-#12698 · Dedupe MakeHumanMeshGenerator: One Class and One _Convert_Params_to_Makehuman in _Mesh_Makehuman; Mesh-Generator Tests Marked Unit
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12698
+- **Branch:** merged via #13029
+- **PR:** #13029
+- **Paths:** see #13029
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`f565f4a7`; collated from changes/12698-dedupe-makehumanmeshgenerator-one-class.md)
+- **Summary:** Dedupe MakeHumanMeshGenerator: one class and one _convert_params_to_makehuman in _mesh_makehuman; mesh-generator tests marked unit
+- **Next step:** Shipped in PR #13029.
+
+### DL-#12689 · R9b: OpenSim and MyoSuite Viewers Render the Shared Appearance (OpenSim Registers R8 Body Meshes in the Spec Body Frame; MyoSuite Uses the MuJoCo Appearance Layer)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12689
+- **Branch:** merged via #12910
+- **PR:** #12910
+- **Paths:** see #12910
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`34968337`; collated from changes/12689-r9b-opensim-and-myosuite-viewers-render.md)
+- **Summary:** R9b: OpenSim and MyoSuite viewers render the shared appearance (OpenSim registers R8 body meshes in the spec body frame; MyoSuite uses the MuJoCo appearance layer)
+- **Next step:** Shipped in PR #12910.
+
+### DL-#12590 · NSX-72: True Closure Alternatives With Kinematics Re-Derived per Grip Model (Research Report, Per-Model Admission)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12590
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12590-nsx-72-true-closure-alternatives-with-ki.md)
+- **Summary:** NSX-72: true closure alternatives with kinematics re-derived per grip model (research report, per-model admission)
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12589 · NSX-71 Inverse Optimal Control of Allocation Weights: Pre-Registered Held-Out Report, KKT-Residual Module and Synthetic Recovery Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12589
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12589-nsx-71-inverse-optimal-control-of-alloca.md)
+- **Summary:** NSX-71 inverse optimal control of allocation weights: pre-registered held-out report, KKT-residual module and synthetic recovery tests
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12588 · NSX-70 Hit-and-Run Sampling Research Spike on a Low-Rank Temporal Basis With Mixing Diagnostics
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12588
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12588-nsx-70-hit-and-run-sampling-research-spi.md)
+- **Summary:** NSX-70 hit-and-run sampling research spike on a low-rank temporal basis with mixing diagnostics
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12587 · NSX-62: Inertial Parameter Ensemble Over Identifiability-Gated Parameters With LMI Rejection, Sensitivity Report and Anthro Acceptance
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12587
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12587-nsx-62-inertial-parameter-ensemble-over.md)
+- **Summary:** NSX-62: inertial parameter ensemble over identifiability-gated parameters with LMI rejection, sensitivity report and anthro acceptance
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12585 · Lower-Body Loop: Two-Foot Ground Contact Null Space, GRF Observations, Real Anthro Envelope Benchmark (NSX-60, NSX-22)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12585
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12585-lower-body-loop-two-foot-ground-contact.md)
+- **Summary:** Lower-body loop: two-foot ground contact null space, GRF observations, real anthro envelope benchmark (NSX-60, NSX-22)
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12572 · NSX-40: Loop-Nullspace Report Schema V1, Facade, Service, Async Cancellable Job Routes With Result Cache
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12572
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12572-nsx-40-loop-nullspace-report-schema-v1-f.md)
+- **Summary:** NSX-40: loop-nullspace report schema v1, facade, service, async cancellable job routes with result cache
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12571 · NSX-31: Open-Loop Versus Feedback-Assisted Replay of Allocated Torques With a Separate Feedback Budget (Loop_Nullspace/replay.py)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12571
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12571-nsx-31-open-loop-versus-feedback-assiste.md)
+- **Summary:** NSX-31: open-loop versus feedback-assisted replay of allocated torques with a separate feedback budget (loop_nullspace/replay.py)
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12569 · NSX-26: Reaction-Restriction Sensitivity (WELD6 to SHAFT_FREE5 to BALL3) With Anthro Report
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12569
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12569-nsx-26-reaction-restriction-sensitivity.md)
+- **Summary:** NSX-26: reaction-restriction sensitivity (WELD6 to SHAFT_FREE5 to BALL3) with anthro report
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12568 · NSX-25: Epsilon-Constraint Pareto Fronts and Dual-Certified Affine Probes Over the Trajectory Feasible Set
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12568
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12568-nsx-25-epsilon-constraint-pareto-fronts.md)
+- **Summary:** NSX-25: epsilon-constraint Pareto fronts and dual-certified affine probes over the trajectory feasible set
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12567 · Consolidate ContactForceAllocator and Redistribute_Forces/Trajectory Onto the Conic Core (Qp_Core); DeprecationWarning Shims, No SLSQP on Convex Allocation Paths
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12567
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12567-consolidate-contactforceallocator-and-re.md)
+- **Summary:** Consolidate ContactForceAllocator and redistribute_forces/trajectory onto the conic core (qp_core); DeprecationWarning shims, no SLSQP on convex allocation paths
+- **Next step:** Shipped in PR #13033.
+
+### DL-#12566 · NSX-23 Anthro Trajectory Allocation and NSX-61 (#12586) Anthro Kinematic Ensemble Acceptance Reports on the NSX-60 Foot-Contact Fixture
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12566
+- **Branch:** merged via #13033
+- **PR:** #13033
+- **Paths:** see #13033
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`73738367`; collated from changes/12566-nsx-23-trajectory-conic-allocation-capac.md)
+- **Summary:** NSX-23 anthro trajectory allocation and NSX-61 (#12586) anthro kinematic ensemble acceptance reports on the NSX-60 foot-contact fixture
+- **Next step:** Shipped in PR #13033.
+
 ### DL-#12815 · Web Spine Viewer: /Api/Tools/Spine-Viewer Routes and React Page With Always-Visible Scientific Status and Distribution Source (SPN-15C)
 
 - **State:** shipped
@@ -2502,10 +3243,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12749
 - **Branch:** merged via #13021
-- **PR:** #13021
+- **PR:** #13021, #13029
 - **Paths:** see #13021
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`fa509032`; collated from changes/12749-pin-the-bruno-2015-full-body-model-hash.md)
+- **Last verified:** 2026-10-17 (`f565f4a7`; collated from changes/12749-pin-the-bruno-2015-full-body-model-hash.md)
 - **Summary:** Pin the Bruno 2015 full-body model hash with the owner's 2026-10-16 SimTK licence acceptance; Senteler stays unpinned
 - **Next step:** Shipped in PR #13021.
 
@@ -2697,10 +3438,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12761
 - **Branch:** merged via #12796
-- **PR:** #12796
+- **PR:** #12796, #12958
 - **Paths:** see #12796
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`983e46ab`; collated from changes/12761-spn-10b-trunk-static-optimisation-with-c.md)
+- **Last verified:** 2026-10-17 (`aa63c0da`; collated from changes/12761-opt-in-muscle-model-policy-and-unlock-dr.md)
 - **Summary:** SPN-10b: trunk static optimisation with cost exponent p in {2,3}, lexicographic reserves with flagging, shared numeric core with the leg SO, per-coordinate ID accessor
 - **Next step:** Shipped in PR #12796.
 
@@ -3061,10 +3802,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12878
 - **Branch:** merged via #12899
-- **PR:** #12899
+- **PR:** #12899, #13028
 - **Paths:** see #12899
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`e34e5955`; collated from changes/12878-offscreen-per-engine-explorer-contract-t.md)
+- **Last verified:** 2026-10-17 (`47143bbc`; collated from changes/12878-docker-explorer.md)
 - **Summary:** Offscreen per-engine explorer contract tests; explorer opens MJCF, keeps every MJCF DOF, loads results, scrubs and exports MP4 via one shared frame source; OSIM loader accepts Class::Nested tags; results browser Export button follows playability; MuJoCo GUI gains Export Video (#12888) and plots no longer crash on unrecorded channels (#12887)
 - **Next step:** Shipped in PR #12899.
 
