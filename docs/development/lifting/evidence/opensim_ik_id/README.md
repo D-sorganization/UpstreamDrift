@@ -40,24 +40,29 @@ The committed squat receipt is measured on the LIFT-4 barbell re-track
 leaves its range: `range_violations` is empty, where it used to list six arm
 coordinates.
 
-The re-track still tips forward on the toes (#13072 is open), so the receipt
-fails the acceptance gates:
+The OSL-12 bar-reach fix (#13048) seeds the hold arms on the bundle's grips.
+The IK first runs on the hold-pose model with the bar unweighted. A bounded
+solve then puts each hand centre on its bundle grip, and the model is rebuilt
+with those arms (`msk_lift_arm_reach.reaching_lift_build`). The IK receipt
+records this in `arm_reach`. The bar marker is tracked at weight 1 again.
 
-- marker RMS is 8.56 cm and the maximum is 30.3 cm, set by the bar marker,
-  because the arms are held at the hold pose;
-- the shoulder markers come to 4.1-4.2 cm RMS;
-- the pelvis is not tracked: the loaded hip reaches 120.9 deg, past the
-  strict 120 deg gate;
-- the Hicks residual gate fails: the peak pelvis force is 316.7 N against a
-  176.3 N limit, and the peak pelvis moment is 688.5 N m (tilt) against a
-  20.1 N m limit.
+- Marker RMS falls from 6.81 cm to 1.18 cm and the maximum from 27.56 cm to
+  2.32 cm, which meets the 2 cm / 4 cm gate. The bar falls from 27.56 cm to
+  0.29 mm.
+- Every coordinate stays in range, and the pelvis landmarks are tracked.
+- The Hicks residual gate still fails. The peak pelvis force is 214.2 N
+  against a 167.2 N limit, and the peak pelvis moment is 153.8 N m (tilt;
+  546.4 N m before) against a 21.9 N m limit. Both peaks fall at the first
+  state of the window, where the bundle is still settling onto its loaded
+  foot contact. Over states 1-40 the peaks are 24.4 N and 20.7 N m.
 
 A diagnostic fit of the bodyweight squat bundle tracked the pelvis to 3 mm.
 Excluding the bar, its markers came to 1.78 cm RMS and 4.15 cm maximum. See
 `lift_models.tex`, OSL-14 subsection.
 
 These are software receipts, not physical acceptance. See
-`docs/research/lift_models/lift_models.tex` (OSL-3, OSL-12 and OSL-14 subsections)
+`docs/research/lift_models/lift_models.tex` (OSL-3, OSL-12, OSL-14 and "Hands That Reach the Bundle Bar"
+subsections)
 for the method, the numbers and the limitations.
 
 Reproduce from the repository root:

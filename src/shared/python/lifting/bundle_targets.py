@@ -124,7 +124,10 @@ class LiftTargets:
     ``left``/``right`` to (N, 3) foot force and moment about the OpenSim
     origin; ``hand_force_n`` / ``hand_torque_nm`` map ``L``/``R`` to the
     (N, 3) force and free torque the bar exerts on each hand;
-    ``pelvis_rotation`` (N, 3, 3) holds the bundle's Rajagopal pelvis axes
+    ``grip_m`` maps ``L``/``R`` to the (N, 3) bar grip point of each hand
+    (their midpoint is the bar centre landmark; OSL-12 #13048 seeds the
+    model's arms on them); ``pelvis_rotation`` (N, 3, 3) holds the bundle's
+    Rajagopal pelvis axes
     (columns) in the OpenSim frame; ``source_coordinates`` maps each
     :data:`SOURCE_HIP_COORDINATES` name to its (N,) bundle values (radians).
     """
@@ -140,6 +143,7 @@ class LiftTargets:
     grf_moment_nm: Mapping[str, Array]
     hand_force_n: Mapping[str, Array]
     hand_torque_nm: Mapping[str, Array]
+    grip_m: Mapping[str, Array]
     pelvis_rotation: Array
     source_coordinates: Mapping[str, Array]
     body_mass_kg: float
@@ -233,10 +237,20 @@ def _lift_frame(kin: Any, q0: Array) -> LiftFrame:
     return LiftFrame(rotation=rotation, origin_m=stance_mid_foot(kin, q0, ground))
 
 
+@dataclass(frozen=True)
+class _HandLoads:
+    """Per-state GCV-7 hand wrenches, bar grip points and bar centre."""
+
+    force_n: dict[str, Array]
+    torque_nm: dict[str, Array]
+    grip_m: dict[str, Array]
+    bar_m: Array
+
+
 def _hand_loads(
     bundle: InputBundle, indices: tuple[int, ...], frame: LiftFrame
-) -> tuple[dict[str, Array], dict[str, Array], Array]:
-    """GCV-7 bar wrench on each hand and the bar centre, per state."""
+) -> _HandLoads:
+    """GCV-7 bar wrench on each hand, the grip points and the bar centre."""
     from src.shared.python.lifting.barbell_runs import (
         augmented_reference,
         barbell_plant,
@@ -246,6 +260,7 @@ def _hand_loads(
     q_ref, v_ref = augmented_reference(bundle)
     forces: dict[str, list[Array]] = {side: [] for side in _HANDS}
     torques: dict[str, list[Array]] = {side: [] for side in _HANDS}
+    grips: dict[str, list[Array]] = {side: [] for side in _HANDS}
     bar = []
     for k in indices:
         sample = plant.sample(q_ref[k], v_ref[k])
@@ -255,11 +270,13 @@ def _hand_loads(
                 raise ValueError(f"bundle state {k}: hand {side} wrench unavailable")
             forces[side].append(-np.asarray(hand.force_on_club_n, float))
             torques[side].append(-np.asarray(hand.torque_on_club_nm, float))
+            grips[side].append(np.asarray(sample.bar_grip_m[side], float))
         bar.append(np.asarray(sample.bar.position_m, float))
-    return (
-        {s: frame.vector(np.array(forces[s])) for s in _HANDS},
-        {s: frame.vector(np.array(torques[s])) for s in _HANDS},
-        frame.point(np.array(bar)),
+    return _HandLoads(
+        force_n={s: frame.vector(np.array(forces[s])) for s in _HANDS},
+        torque_nm={s: frame.vector(np.array(torques[s])) for s in _HANDS},
+        grip_m={s: frame.point(np.array(grips[s])) for s in _HANDS},
+        bar_m=frame.point(np.array(bar)),
     )
 
 
@@ -331,8 +348,8 @@ def lift_targets(lift: str, path: Path, *, stride: int = 1) -> LiftTargets:
         name: np.array([bundle.reference_q[k][order_q.index(name)] for k in indices])
         for name in SOURCE_HIP_COORDINATES
     }
-    hand_force, hand_torque, bar = _hand_loads(bundle, indices, frame)
-    positions[:, IK_LANDMARKS.index("bar")] = bar
+    hands = _hand_loads(bundle, indices, frame)
+    positions[:, IK_LANDMARKS.index("bar")] = hands.bar_m
     grf_force, grf_moment = _foot_loads(bundle, indices, frame)
     return LiftTargets(
         lift=lift,
@@ -344,8 +361,9 @@ def lift_targets(lift: str, path: Path, *, stride: int = 1) -> LiftTargets:
         foot_stations_m=stations,
         grf_force_n=grf_force,
         grf_moment_nm=grf_moment,
-        hand_force_n=hand_force,
-        hand_torque_nm=hand_torque,
+        hand_force_n=hands.force_n,
+        hand_torque_nm=hands.torque_nm,
+        grip_m=hands.grip_m,
         pelvis_rotation=pelvis,
         source_coordinates=source,
         body_mass_kg=body_mass,

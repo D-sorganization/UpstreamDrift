@@ -71,6 +71,7 @@ from src.shared.python.lifting.pack_audit.names import LIFTS
 from src.shared.python.motion_matching.execution import spec_builder as contact_spec
 
 __all__ = [
+    "ARM_COORDINATE_PREFIXES",
     "BAR_BODY",
     "BODY_SOURCE",
     "GENERIC_STATURE_M",
@@ -116,6 +117,8 @@ PENETRATION_LIMIT_M = 0.008
 #: Bracket (deg) of the ankle lean that balances a standing hold.
 _LEAN_BRACKET_DEG = 25.0
 _LEAN_XTOL_RAD = 1e-10
+#: Coordinates a caller may set through ``arm_coordinates`` (the arm chain).
+ARM_COORDINATE_PREFIXES = ("arm_", "elbow_", "pro_sup", "wrist_")
 #: Bracket (deg) searched either side of the nominal ``arm_add`` for the grip.
 _ADD_BRACKET_DEG = 30.0
 _WIDTH_XTOL_M = 1e-6
@@ -542,6 +545,18 @@ def _require_inputs(
             raise ValueError(f"{name} must be positive and finite, got {value}")
 
 
+def _require_arm_coordinates(arm_coordinates: Mapping[str, float] | None) -> None:
+    """Given arm coordinates must name the arm chain and be finite (radians)."""
+    for name, value in (arm_coordinates or {}).items():
+        if not name.startswith(ARM_COORDINATE_PREFIXES):
+            raise ValueError(
+                f"arm_coordinates may only set the arm chain "
+                f"{ARM_COORDINATE_PREFIXES}, got {name!r}"
+            )
+        if not math.isfinite(value):
+            raise ValueError(f"arm coordinate {name!r} must be finite, got {value}")
+
+
 def build_lift_model(
     lift: str,
     *,
@@ -550,26 +565,32 @@ def build_lift_model(
     bar_mass_kg: float,
     base_model_path: str | Path | None = None,
     segment_scales: Mapping[str, SegmentScale] | None = None,
+    arm_coordinates: Mapping[str, float] | None = None,
 ) -> LiftModelBuild:
     """Compose the musculoskeletal OpenSim model of one barbell lift.
 
     ``segment_scales`` overrides the uniform ``height_m`` scale per body (the
     measured segment scaling of OSL-3; a triple scales the body's x, y, z
-    axes separately); every other body keeps the uniform factor.  A standing
-    hold is balanced by an ankle lean (:func:`_balance_lean`).
+    axes separately); every other body keeps the uniform factor.
+    ``arm_coordinates`` (radians, arm chain only) replaces the hold pose's
+    arms; the grip width is then whatever those arms give, not solved
+    (OSL-12 seeds the arms on a bundle's grips).  A standing hold is
+    balanced by an ankle lean (:func:`_balance_lean`).
 
     Postconditions: the returned model passes ``initSystem``; its skeleton
-    mass equals ``body_mass_kg``; the hand-centre grip width equals the
-    standard's ``width_m`` scaled to ``height_m``; the receipt records the
-    body source path and SHA-256, the scale factor, the hold pose and the
-    contact layout.
+    mass equals ``body_mass_kg``; without ``arm_coordinates`` the hand-centre
+    grip width equals the standard's ``width_m`` scaled to ``height_m``; the
+    receipt records the body source path and SHA-256, the scale factor, the
+    hold pose (and its ``arm_source``) and the contact layout.
 
     Raises:
         ValueError: on an unknown lift, a non-positive input, a bar lighter
-            than the shared 20 kg shaft, or an unreachable grip width.
+            than the shared 20 kg shaft, an unreachable grip width, or an
+            ``arm_coordinates`` entry outside the arm chain or not finite.
         FileNotFoundError: when the muscle-bearing body is not available.
     """
     _require_inputs(lift, body_mass_kg, height_m, bar_mass_kg)
+    _require_arm_coordinates(arm_coordinates)
     osim = import_opensim()
     base_path = resolve_base_model(base_model_path)
     Barbell(load_kg=float(bar_mass_kg))  # precondition: at least the shaft mass
@@ -578,7 +599,7 @@ def build_lift_model(
     scale = float(height_m) / GENERIC_STATURE_M
     factors = _scale_body(model, scale, body_mass_kg, segment_scales)
     skeleton_mass = float(sum(body.getMass() for body in model.getBodySet()))
-    posed = _pose_for_hold(model, lift, height_m, bar_mass_kg, scale)
+    posed = _pose_for_hold(model, lift, height_m, bar_mass_kg, scale, arm_coordinates)
     contacts, bench_height, grip_width = _add_contacts_and_bar(
         model, posed, scale, bar_mass_kg
     )
@@ -611,7 +632,7 @@ class _PosedHold:
     coordinates: dict[str, float]
     feet: list[tuple[str, str, np.ndarray, float]]
     balance: dict[str, Any] | None
-    target_width_m: float
+    target_width_m: float | None
     state: Any
 
     def hold_record(self) -> dict[str, Any]:
@@ -620,20 +641,34 @@ class _PosedHold:
             "name": self.pose.name,
             "description": self.pose.description,
             "supine": self.pose.supine,
+            "arm_source": "hold_pose" if self.target_width_m is not None else "given",
             "coordinates_rad": self.coordinates,
             "balance": self.balance,
         }
 
 
 def _pose_for_hold(
-    model: Any, lift: str, height_m: float, bar_mass_kg: float, scale: float
+    model: Any,
+    lift: str,
+    height_m: float,
+    bar_mass_kg: float,
+    scale: float,
+    arm_coordinates: Mapping[str, float] | None = None,
 ) -> _PosedHold:
-    """Set the hold pose's defaults, reach the grip width, balance, lift to floor."""
+    """Set the hold pose's defaults, reach the grip width, balance, lift to floor.
+
+    Given ``arm_coordinates`` replace the pose's arms and skip the width solve.
+    """
     pose = HOLD_POSES[lift]
-    target_width = lift_grip(lift).width_m * float(height_m) / standard_height_m()
-    _apply_defaults(model, _pose_coordinates(pose, pose.arms[1]))
-    arm_add = _solve_arm_add(model, pose, target_width)
-    coordinates = _pose_coordinates(pose, arm_add)
+    target_width: float | None = None
+    if arm_coordinates is None:
+        target_width = lift_grip(lift).width_m * float(height_m) / standard_height_m()
+        _apply_defaults(model, _pose_coordinates(pose, pose.arms[1]))
+        arm_add = _solve_arm_add(model, pose, target_width)
+        coordinates = _pose_coordinates(pose, arm_add)
+    else:
+        coordinates = _pose_coordinates(pose, pose.arms[1])
+        coordinates.update({k: float(v) for k, v in arm_coordinates.items()})
     _apply_defaults(model, coordinates)
 
     feet = _foot_spheres(scale)
