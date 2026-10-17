@@ -2,7 +2,7 @@
 
 A reference run starts with the feet preloaded for the static weight, so its
 first states settle onto the contact.  ``drop_lead_in`` keeps the run from
-``steps`` on and records what it dropped; ``generate_reference_bundle``
+``steps`` on and records what it dropped; ``generate_lead_in_bundle``
 validates the lead-in before it runs anything.
 """
 
@@ -15,7 +15,7 @@ from src.shared.python.motion_matching.pipeline.constants import DT_S
 from src.shared.python.motion_matching.same_input import Rollout
 from src.shared.python.motion_matching.same_input.reference import (
     drop_lead_in,
-    generate_reference_bundle,
+    generate_lead_in_bundle,
 )
 
 pytestmark = pytest.mark.unit
@@ -67,9 +67,10 @@ def test_lead_in_must_leave_a_bundle_step() -> None:
 )
 def test_generate_rejects_a_bad_lead_in(lead_in: object, error: type) -> None:
     with pytest.raises(error):
-        generate_reference_bundle(
+        generate_lead_in_bundle(
             b"{}",
             np.zeros(2),
             np.zeros((2, 1)),
+            duration_s=0.001,
             lead_in_steps=lead_in,  # type: ignore[arg-type]
         )

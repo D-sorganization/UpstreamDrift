@@ -140,7 +140,6 @@ def generate_reference_bundle(
     impact: ImpactForce | None = None,
     split_time_s: float | None = None,
     policy: StepPolicy = DEFAULT_POLICY,
-    lead_in_steps: int = 0,
 ) -> InputBundle:
     """Track ``q_track`` in MuJoCo with the pipeline controller held per step.
 
@@ -159,37 +158,73 @@ def generate_reference_bundle(
             #13104), from :func:`hold_policy`; the default keeps the original
             contract (eight substeps, one 1 ms hold).  The manifest records
             both, and the run always projects and raises on failure.
-        lead_in_steps: Steps tracked before the bundle starts (OSL-17,
-            #13131).  The run starts at ``track_time_s[0]`` with the feet
-            preloaded for the static weight, which is not the contact force
-            a moving reference needs, so its first states settle onto the
-            contact.  With a lead-in the bundle starts ``lead_in_steps``
-            steps into the run, on the settled state; ``duration_s`` still
-            spans the bundle, and the lead-in states are recorded as
-            ``provenance["lead_in"]`` (``reference_q``, every step).
-
-    Raises:
-        ValueError: For a negative ``lead_in_steps``, or a lead-in together
-            with a ball impact (its plan is on the run's own clock).
     """
-    if isinstance(lead_in_steps, bool) or not isinstance(lead_in_steps, int):
-        raise TypeError("lead_in_steps must be an integer")
-    if lead_in_steps < 0 or (lead_in_steps and impact is not None):
-        raise ValueError("lead_in_steps must be >= 0 and needs no ball impact")
     policy = StepPolicy(substeps=policy.substeps, effort_holds=policy.effort_holds)
-    holds = policy.effort_holds
-    lead = lead_in_steps * DT_S
     rollout = closed_loop(
         "mujoco",
         spec_bytes,
         track_time_s,
         q_track,
-        duration_s=None if duration_s is None else float(duration_s) + lead,
+        duration_s=duration_s,
         impact=impact,
         split_time_s=split_time_s,
         policy=policy,
     )
-    rollout, lead_in = drop_lead_in(rollout, lead_in_steps, holds)
+    manifest = {"ball_impact": rollout.ball_impact, "impact_split_time_s": split_time_s}
+    return _rollout_bundle(
+        spec_bytes, rollout, policy, {**manifest, **(provenance or {})}
+    )
+
+
+def generate_lead_in_bundle(
+    spec_bytes: bytes,
+    track_time_s: Array,
+    q_track: Array,
+    *,
+    duration_s: float,
+    lead_in_steps: int,
+    provenance: dict[str, Any] | None = None,
+    policy: StepPolicy = DEFAULT_POLICY,
+) -> InputBundle:
+    """:func:`generate_reference_bundle` started after a settled lead-in.
+
+    OSL-17 (#13131): a run starts at ``track_time_s[0]`` with the feet
+    preloaded for the static weight, which is not the contact force a moving
+    reference needs, so its first states settle onto the contact.  This run
+    tracks ``lead_in_steps`` steps more and the bundle starts that far in,
+    on the settled state.  ``duration_s`` spans the bundle; the lead-in is
+    recorded as ``provenance["lead_in"]`` (its ``reference_q`` every step).
+    There is no ball impact (its plan is on the bundle clock).
+
+    Raises:
+        TypeError: If ``lead_in_steps`` is not an integer.
+        ValueError: If ``lead_in_steps`` is negative.
+    """
+    if isinstance(lead_in_steps, bool) or not isinstance(lead_in_steps, int):
+        raise TypeError("lead_in_steps must be an integer")
+    if lead_in_steps < 0:
+        raise ValueError("lead_in_steps must be >= 0")
+    policy = StepPolicy(substeps=policy.substeps, effort_holds=policy.effort_holds)
+    rollout = closed_loop(
+        "mujoco",
+        spec_bytes,
+        track_time_s,
+        q_track,
+        duration_s=float(duration_s) + lead_in_steps * DT_S,
+        policy=policy,
+    )
+    rollout, lead_in = drop_lead_in(rollout, lead_in_steps, policy.effort_holds)
+    manifest = {"ball_impact": None, "impact_split_time_s": None, **lead_in}
+    return _rollout_bundle(
+        spec_bytes, rollout, policy, {**manifest, **(provenance or {})}
+    )
+
+
+def _rollout_bundle(
+    spec_bytes: bytes, rollout: Rollout, policy: StepPolicy, manifest: dict[str, Any]
+) -> InputBundle:
+    """The bundle of a MuJoCo reference rollout, with its manifest fields."""
+    holds = policy.effort_holds
     return InputBundle(
         spec_bytes=bytes(spec_bytes),
         coordinate_order=tuple(json.loads(spec_bytes)["coordinate_order"]),
@@ -203,10 +238,7 @@ def generate_reference_bundle(
         provenance={
             "controller": "pipeline computed-torque (kkt), held per step",
             "max_pose_drift_m": float(rollout.pose_drift.max()),
-            "ball_impact": rollout.ball_impact,
-            "impact_split_time_s": split_time_s,
-            **lead_in,
-            **(provenance or {}),
+            **manifest,
         },
         effort_holds=holds,
         hold_efforts=None if holds == 1 else rollout.efforts,

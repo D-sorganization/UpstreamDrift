@@ -11,7 +11,7 @@ Pipeline for one lift:
    MuJoCo marker IK (:class:`FullBodyMarkerKinematics`), feet held flat on
    the ground.
 3. :func:`build_lift_bundle` tracks a window of that joint trajectory in
-   MuJoCo with the pipeline controller (:func:`generate_reference_bundle`) and
+   MuJoCo with the pipeline controller (:func:`generate_lead_in_bundle`) and
    packages it as an :class:`InputBundle` with provenance.
 
 Model limitations are recorded in every bundle's provenance
@@ -71,9 +71,11 @@ from src.shared.python.lifting.sagittal_retarget import (
 from src.shared.python.motion_matching.same_input import (
     InputBundle,
     VectorPlant,
-    generate_reference_bundle,
 )
 from src.shared.python.motion_matching.pipeline.constants import DT_S
+from src.shared.python.motion_matching.same_input.reference import (
+    generate_lead_in_bundle,
+)
 from src.shared.python.motion_matching.same_input.integrator import DEFAULT_POLICY
 from src.shared.python.motion_matching.same_input.stiffness import (
     rk4_stability_record,
@@ -1067,7 +1069,7 @@ def build_lift_bundle(
     (``rk4_stability``) and ``provenance``.  With ``lead_in_s`` (OSL-17,
     #13131) the tracking run starts that long before the window, at a
     solution sample, so the bundle's first state is settled on its contact
-    (:func:`generate_reference_bundle` ``lead_in_steps``).
+    (:func:`generate_lead_in_bundle`).
 
     Raises:
         ValueError: For a window outside the lift, a missing ``lift``, a
@@ -1101,14 +1103,14 @@ def build_lift_bundle(
         + ("" if lift.balance is None else LOAD_BALANCE_LIMITATIONS),
         **dict(provenance or {}),
     }
-    bundle = generate_reference_bundle(
+    bundle = generate_lead_in_bundle(
         bytes(spec_bytes),
         solution.time_s[track:],
         lift.q[track:],
         duration_s=float(window_s),
+        lead_in_steps=lead_in_steps,
         provenance=record,
         policy=DEFAULT_POLICY if lift.balance is None else LOADED_TRACKING_POLICY,
-        lead_in_steps=lead_in_steps,
     )
     plant = VectorPlant("mujoco", bundle.spec_bytes)
     window_bar = bar_path(plant, bundle.reference_q, lift.bar_frame)

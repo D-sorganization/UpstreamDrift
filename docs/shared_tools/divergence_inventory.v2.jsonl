@@ -1036,6 +1036,7 @@
 {"path": "lifting/_canonical/biomech_parity_standard.json", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/additional_movements.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/back_bar.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
+{"path": "lifting/back_rack.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/bar_path_parity.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/barbell_bushing.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/barbell_runs.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
