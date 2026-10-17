@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-16T23:58:52Z",
+  "generated_at": "2026-10-17T03:27:04Z",
   "rows": [
     {
       "acceptance": null,
@@ -3886,6 +3886,31 @@
       "artefacts": {
         "gif": null,
         "mot": null,
+        "npz": "docs/development/opensim_tour_matching/evidence/os8_continuous_ik/marker_rms.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": null,
+      "lane": "tour_matching",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/opensim_tour_matching/evidence/os8_continuous_ik/receipt.json",
+      "sha256": "e05e6f1bb8ba6362c8882afa711d938dc689b012a2f609c7d1fdca8122d5998a"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
         "npz": null
       },
       "candidate_sha": null,
@@ -6394,5 +6419,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 155
+  "total_receipts": 156
 }
