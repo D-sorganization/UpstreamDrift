@@ -27,7 +27,9 @@ inverse-dynamics and joint-reaction accelerations disagree (a relative
 mismatch of order $10^{-2}$ against $10^{-6}$ unlocked). The default is to
 fail the drive stage and list the offending coordinates (truncated).
 \texttt{unlock\_driven\_coordinates} unlocks exactly those coordinates; the
-count and names are recorded. Holding them constant instead changes the load
+count and names are recorded, and a postcondition checks that they are still
+unlocked after \texttt{initSystem}, including on the external-loads path
+(\#13056). Holding them constant instead changes the load
 distribution and is left as a follow-up (ADR-0055).
 
 \paragraph{Solver and Screen.}

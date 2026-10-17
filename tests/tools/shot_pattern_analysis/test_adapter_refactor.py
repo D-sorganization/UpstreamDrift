@@ -27,6 +27,9 @@ _SUPPORTED_RUNTIMES = {
     ("3.11", "2.2.6", "1.15.3"): (_PY311_FIXTURE, _PY311_SHA256),
     ("3.12", "2.2.6", "1.15.3"): (_CI_LOCK_FIXTURE, _CI_LOCK_SHA256),
     ("3.12", "2.2.6", "1.18.1"): (_HISTORICAL_FIXTURE, _HISTORICAL_SHA256),
+    # Verified 2026-10-16: numpy 2.5.3 reproduces the scipy 1.18.1 historical
+    # receipt byte for byte, so it is bound to that same unmodified fixture.
+    ("3.12", "2.5.3", "1.18.1"): (_HISTORICAL_FIXTURE, _HISTORICAL_SHA256),
 }
 
 

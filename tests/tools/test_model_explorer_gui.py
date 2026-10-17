@@ -306,3 +306,31 @@ def test_user_initiated_load_failure_still_shows_a_dialog(tmp_path: Path) -> Non
     with patch.object(QMessageBox, "warning") as warn:
         assert widget.load_model(tmp_path / "absent.urdf") is False
     warn.assert_called_once()
+
+
+@pytest.mark.unit
+def test_viewport_timers_are_destroyed_with_their_widgets() -> None:
+    """Render/animation timers must die with their widget (#13058).
+
+    An unparented ``QTimer`` outlives the deleted widget and keeps firing
+    ``_update_render`` against a deleted ``QLabel`` viewport, which escapes
+    the Qt event loop as ``RuntimeError: wrapped C/C++ object ... deleted``.
+    """
+    from PyQt6 import sip
+    from PyQt6.QtCore import QEvent
+
+    from src.tools.model_explorer.mujoco_viewer import MuJoCoViewerWidget
+    from src.tools.model_explorer.visualization_widget import (
+        Simple3DVisualizationWidget,
+    )
+
+    _ensure_qapp()
+    for widget, attr in (
+        (MuJoCoViewerWidget(), "_render_timer"),
+        (Simple3DVisualizationWidget(), "timer"),
+    ):
+        timer = getattr(widget, attr)
+        assert timer.parent() is widget
+        widget.deleteLater()
+        QApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete.value)
+        assert sip.isdeleted(timer)
