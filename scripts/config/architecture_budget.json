@@ -338,11 +338,20 @@
     {
       "path": "src/shared/python/chat/_chat_dock_widget_qt.py",
       "symbol": "ChatDockWidget.__init__",
-      "rule": "parameters",
+      "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 12803,
-      "reason": "Audited 2026-09-01: the prior justification cited issue #7362, which is unrelated (import-layering) and already closed, so this had been renewed on autopilot without real review. Re-reviewed: the 16 keyword params group naturally into connection/presentation/integration-hooks config objects (see #9357), so unlike an irreducible-parameter case this genuinely should be split, but it is a breaking constructor-signature change across 5 in-repo call sites and is out of scope for the current pass. Tracked in #9357. Renewed 2026-10-16 by #12802 with owner approval for 14 days only: the split already landed canonically in Tools PR #4897 (closing #9357) but this Tools-owned child copy was never re-synced; re-sync or retirement is tracked in #12803.",
-      "expires_on": "2026-10-29"
+      "reason": "Issue #12803: this file is a byte-identical Tools-owned child copy (pinned vendor/ud-tools); __init__ is 112 lines in the canonical Tools source (Tools #4897/#5642/#5644) and cannot be edited here. Shrinking it is a Tools change; this entry retires on the next Tools split.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/chat/_chat_dock_widget_qt.py",
+      "symbol": "ChatDockWidget._on_message",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 12803,
+      "reason": "Issue #12803: this file is a byte-identical Tools-owned child copy (pinned vendor/ud-tools); _on_message is 119 lines in the canonical Tools source (Tools #4897/#5642/#5644) and cannot be edited here. Shrinking it is a Tools change; this entry retires on the next Tools split.",
+      "expires_on": "2026-11-30"
     },
     {
       "path": "src/shared/python/motion_matching/loaders/c3d.py",
@@ -779,33 +788,6 @@
       "issue": 10591,
       "reason": "Issue #10591: Bolt optimization added extra lines to replace np.linalg.norm with np.sqrt(np.einsum) causing function line count to marginally exceed 100.",
       "expires_on": "2027-01-01"
-    },
-    {
-      "path": "shared_scripts/deferred_validation.py",
-      "symbol": "_validate_record_shape",
-      "rule": "function-lines",
-      "owner": "codex",
-      "issue": 10783,
-      "reason": "Exact fleet bundle from Repository_Management 0a1041018e737173e49ff97ed4b82283e3cb672f; digest contract prevents local growth or forks. Refactor at the central source and requalify consumers before expiry; adoption tracked by #10783.",
-      "expires_on": "2026-10-23"
-    },
-    {
-      "path": "shared_scripts/deferred_validation.py",
-      "symbol": "validate_catalog",
-      "rule": "function-lines",
-      "owner": "codex",
-      "issue": 10783,
-      "reason": "Exact fleet bundle from Repository_Management 0a1041018e737173e49ff97ed4b82283e3cb672f; digest contract prevents local growth or forks. Refactor at the central source and requalify consumers before expiry; adoption tracked by #10783.",
-      "expires_on": "2026-10-23"
-    },
-    {
-      "path": "shared_scripts/handoff_validator.py",
-      "symbol": "validate_handoff_content",
-      "rule": "function-lines",
-      "owner": "codex",
-      "issue": 10783,
-      "reason": "Exact fleet bundle from Repository_Management 0a1041018e737173e49ff97ed4b82283e3cb672f; digest contract prevents local growth or forks. Refactor at the central source and requalify consumers before expiry; adoption tracked by #10783.",
-      "expires_on": "2026-10-23"
     },
     {
       "path": "shared_scripts/development_log_validator.py",

@@ -15,7 +15,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 4074 | `src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/2D GUI/main_scripts/golf_swing_analysis_gui.m` |
 | 1589 | `src/shared/python/motion_matching/full_body_forward_dynamics.py` |
 | 1465 | `src/shared/python/motion_matching/acceptance.py` |
-| 1421 | `src/shared/python/motion_matching/pipeline/cli.py` |
+| 1457 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 1319 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/runSimulation.m` |
 | 1200 | `src/tools/shot_pattern_analysis/matched_lean_control.py` |
 | 1199 | `src/api/services/simulation_service.py` |
@@ -80,6 +80,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1036 | `src/tools/bunker_shot_gui/report.py` |
 | 1034 | `src/shared/python/motion_matching/pipeline/receipt_components.py` |
 | 1030 | `src/engines/physics_engines/opensim/python/opensim_physics_engine.py` |
+| 1029 | `src/engines/physics_engines/opensim/python/spine/inverse_dynamics.py` |
 | 1025 | `src/launchers/launcher_ui_setup.py` |
 | 1022 | `src/tools/bunker_shot_gui/render3d.py` |
 | 1021 | `src/tools/bunker_shot_gui/slices.py` |
@@ -92,6 +93,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1000 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_opengl_renderer.py` |
 | 999 | `src/shared/python/estimation/dime_contracts.py` |
 | 997 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
+| 996 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 993 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
 | 990 | `src/shared/python/estimation/map_estimator.py` |
 | 988 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_data_core.py` |
@@ -101,6 +103,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 981 | `src/shared/python/workspace/necromatcher_video.py` |
 | 980 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py` |
 | 979 | `src/shared/python/motion_matching/pipeline/address.py` |
+| 977 | `src/shared/python/motion_matching/multi_engine_torque_allocator.py` |
 | 975 | `src/api/routes/simulation_ws.py` |
 | 974 | `src/launchers/embedded_host.py` |
 | 973 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_camera_system.py` |
@@ -108,9 +111,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 973 | `src/shared/python/motion_matching/club_only/fast_matching.py` |
 | 967 | `src/shared/python/motion_matching/club_only/matrix_qualification.py` |
 | 966 | `src/launchers/launcher_process_manager.py` |
-| 966 | `src/shared/python/motion_matching/multi_engine_torque_allocator.py` |
 | 965 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py` |
-| 964 | `src/engines/physics_engines/opensim/python/spine/inverse_dynamics.py` |
 | 964 | `src/shared/python/sidekick/lab/bio/c3d_reader.py` |
 | 962 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_whole_body_ik.m` |
 | 957 | `src/bunkershot3d/solvers/mpm/solver.py` |
@@ -123,6 +124,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 950 | `src/shared/python/signal_toolkit/signal_processing.py` |
 | 948 | `src/shared/python/sidekick/process_calculators/acid_gas_dewpoint_calculator.py` |
 | 947 | `src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/visualization/SkeletonPlotter.m` |
+| 946 | `src/shared/python/lifting/bundles.py` |
 | 943 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_match_export.m` |
 | 942 | `src/bunkershot3d/solvers/shot.py` |
 | 942 | `src/shared/python/estimation/dime_dynamics_window.py` |
@@ -137,7 +139,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 916 | `src/tools/bunker_shot_gui/export.py` |
 | 914 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 913 | `src/engines/physics_engines/opensim/python/tour_matching/native_diagnostic_contract.py` |
-| 908 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 907 | `src/unreal_integration/mesh_loader.py` |
 | 903 | `src/shared/python/motion_matching/club_only/body_candidates.py` |
 | 902 | `src/tools/capture_rig/reference_comparison.py` |

@@ -286,11 +286,12 @@ def test_rigid_default_has_no_passive_coordinates() -> None:
         shaft_model(doc)
 
 
-@pytest.mark.parametrize("engine", ["drake", "pinocchio", "opensim", "simscape"])
+@pytest.mark.parametrize("engine", ["drake", "pinocchio", "simscape"])
 def test_chain_spec_is_refused_for_engines_without_chain_support(engine: str) -> None:
     """DbC: never a silent rigid replay of a flexible-shaft bundle."""
     doc = apply_shaft_chain(_club_document(DRIVER), build_shaft_chain(DRIVER))
     with pytest.raises(ShaftChainUnsupportedError, match="silent rigid replay"):
         require_engine_support(json.dumps(doc).encode(), engine)
-    require_engine_support(doc, "mujoco")
+    for supported in ("mujoco", "opensim", "myosuite"):  # parity gates, #12691
+        require_engine_support(doc, supported)
     require_engine_support(_club_document(DRIVER), engine)  # rigid: any engine

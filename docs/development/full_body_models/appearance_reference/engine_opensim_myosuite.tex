@@ -1,0 +1,118 @@
+% Section of golfer_appearance_reference.tex (R9b, #12689). Standalone research
+% and visual reference, not the design manual.
+\section{OpenSim and MyoSuite Viewers Adopt the Shared Appearance (R9b, \#12689)}
+
+\subsection{Defect}
+The OpenSim native viewer
+(\texttt{native\_viewer\_export.backends.opensim\_worker}) drew every capsule of
+the visual skeleton as a cylinder plus two end spheres in a local grey
+$(0.75, 0.78, 0.85)$, and the hint ellipsoids in a second local grey
+$(0.7, 0.72, 0.8)$, with only the shared head and the exported club meshes in
+colour. It had no skin, garments or shoes. The MyoSuite viewer exported its
+MJCF with the legacy capsule layer plus the head
+(\texttt{visual=True, with\_head=True}), so it was grey too, although the same
+exporter can attach the full appearance layer. Side by side with the textured
+MuJoCo export, both looked like a different golfer.
+
+\subsection{Contract}
+Both workers render the default shared appearance document
+\texttt{\_body.default\_appearance()} (\texttt{appearance-v1}), the one source
+that the MuJoCo worker now uses as well. Neither adds colours, sizes or
+classification rules of its own: they translate R8's
+\texttt{ResolvedAppearance} (\#12685).
+\begin{itemize}
+\item \textbf{OpenSim.} \texttt{visual\_parts(spec, appearance, directory)}
+  $\to$ \texttt{list[VisualPart(body, geometry, params, rotation, position,
+  rgba)]} is the pure render plan; \texttt{build\_model} only turns each part
+  into an OpenSim geometry on a \texttt{PhysicalOffsetFrame}. With a document,
+  every resolved \texttt{BodyMesh} becomes one OBJ (\texttt{\_body.body\_mesh\_files})
+  registered as \texttt{osim.Mesh} with its library RGBA; there are no
+  cylinders, spheres or hint shapes. With \texttt{None} (plain mode) the
+  capsule skeleton and hint shapes are drawn in
+  \texttt{library.plain\_rgba("capsule")} and \texttt{("shape")}. In both modes
+  the shared head OBJs come first, and the club body is left to the club
+  meshes the exported \texttt{.osim} already carries, so the club is never
+  drawn twice.
+\item \textbf{MyoSuite.} \texttt{build\_spec\_xml(spec\_bytes, appearance)} calls
+  \texttt{export\_full\_body\_mjcf(spec\_bytes, appearance=appearance)}; MyoSuite
+  then renders exactly the MuJoCo appearance layer. Plain mode (\texttt{None})
+  keeps the legacy \texttt{visual=True, with\_head=True} export. The MyoSuite
+  arena merge is unchanged: it still replaces the exporter's
+  \texttt{visual\_floor} plane with the arena floor and headlight.
+\end{itemize}
+Preconditions raise \texttt{ValueError}: an unknown visual geometry kind, and
+everything \texttt{resolve\_appearance} and \texttt{body\_mesh\_files} already
+check (unknown materials, a resolution outside the spec body frame).
+
+\subsection{Frames}
+R8 states its meshes in the \emph{spec body frame}. The MuJoCo exporter's body
+is the joint follower frame, so its emitter maps every vertex through
+$\mathrm{inv}(T_{\mathrm{child\to follower}})$. The OpenSim exporter
+(\texttt{full\_body\_osim}) instead attaches each joint's
+$T_{\mathrm{child\to follower}}$ as a separate \texttt{PhysicalOffsetFrame} on
+the child body, so the OpenSim body frame \emph{is} the spec body frame. The
+identity is therefore the correct placement:
+\[
+  x_{\mathrm{OpenSim\ body}} = x_{\mathrm{spec\ body}}, \qquad
+  R = I_3,\ p = 0 .
+\]
+This is the same assumption the old worker made for the capsules, whose
+endpoints were spec-frame coordinates. A unit test asserts the identity for
+every mesh part and checks the trunk orientation independently: projected on
+the spec landmark axes (\texttt{cross\_section.body\_sections}), each trunk skin
+mesh is wider mediolaterally than it is deep.
+
+\subsection{Results}
+Default document, both anthropometric specs (identical counts):
+\begin{center}
+\begin{tabular}{lll}
+Viewer & Before & After (R9b) \\ \hline
+OpenSim & 84 grey primitives + 13 head meshes & 57 mesh parts, 0 primitives, 23 bodies \\
+MyoSuite & capsule layer + head & MuJoCo layer: 24 bodies, 62 material geoms \\
+\end{tabular}
+\end{center}
+The MyoSuite per-body material summary equals the MuJoCo export's for both
+specs. Every OpenSim colour is a library material RGBA or a shared head RGBA.
+Trunk skin spans (ML $\times$ AP, metres) in the OpenSim plan:
+\texttt{COMRod} $0.316\times0.205$ and \texttt{LowerTorso}
+$0.290\times0.196$, matching R8's spec-frame table.
+\texttt{evidence/appearance/engines/opensim\_myosuite/r9b\_appearance\_receipt.json}
+records these numbers, the bundle hash and the frames.
+
+\subsection{Native Renders}
+Address and impact stills, face-on and down-the-line, of the capture-A driver
+(the canonical \texttt{--static-seeds --fix-club-markers} fit re-fitted at
+\texttt{ceffab6c07} for \#12642), rendered through the real backends: OpenSim
+4.6's simbody visualizer under \texttt{xvfb-run} and MyoSuite's
+\texttt{MJRenderer} (mujoco 3.6.0). Both show skin, the white polo, charcoal
+trousers, black shoes and the shared head. The OpenSim views keep both feet and
+the clubhead in frame at address and impact (\#12313). OpenSim's flatter
+shading is the simbody visualizer's own lighting, not an appearance
+difference. Stills are visual evidence and do not qualify dynamics.
+
+\subsection{Physics Unchanged}
+Visual geometry is attached to offset frames that carry no mass, and the
+MyoSuite layer is the exporter's massless, non-colliding \texttt{visual} class.
+The same-input OpenSim and MyoSuite parity tests
+(\texttt{tests/unit/motion\_matching/same\_input/}) pass unchanged.
+
+\subsection{Limitations}
+\begin{itemize}
+\item The OpenSim club stays the exported model's club meshes; the grip hands
+  wrapped on the club (OSV-2) are drawn by the MuJoCo-family layer only.
+\item No job-level switch selects plain mode yet; the workers always render
+  the default document, and plain mode is reached through the functions.
+\item Simbody's visualizer has no PBR materials or textures; only the
+  material RGBA (and opacity) carries over.
+\end{itemize}
+
+\subsection{Reproduction}
+\begin{verbatim}
+python -m pytest -o addopts="" \
+  tests/unit/tools/native_viewer_export/test_opensim_myosuite_appearance.py \
+  tests/unit/tools/native_viewer_export tests/unit/motion_matching/same_input -q
+PYTHONPATH=.:src NATIVE_VIEWER_MYOSUITE_PYTHON=<myosuite python> python3 \
+  docs/development/full_body_models/evidence/appearance/engines/\
+opensim_myosuite/render_opensim_myosuite_appearance.py \
+  --bundle <capture-A driver bundle.npz> --out OUT
+\end{verbatim}

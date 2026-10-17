@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, model_validator
 
-from src.shared.python.chat_contracts.models import (
+from shared.python.chat_contracts.models import (
     DEFAULT_RESPONSE_STYLE,
     RESPONSE_STYLE_PROMPTS,
     ResponseStyle,

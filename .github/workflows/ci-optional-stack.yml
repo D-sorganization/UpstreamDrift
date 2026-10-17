@@ -257,7 +257,9 @@ jobs:
         run: |
           source scripts/ci/pip_retry.sh
           python -m ensurepip --upgrade || true
-          pip_retry install pin pin-pink crocoddyl 2>&1 | tee /tmp/pinocchio_install.log
+          set -o pipefail
+          pip_retry install pin pin-pink crocoddyl 2>&1 | tee /tmp/pinocchio_install.log \
+            || echo "pinocchio_install: install failed (non-fatal; availability is probed below)"
           if python3 -c "import pinocchio" 2>/dev/null; then
             echo "available=true" >> "$GITHUB_OUTPUT"
             echo "Pinocchio installation: SUCCESS"
@@ -374,7 +376,9 @@ jobs:
         continue-on-error: true
         run: |
           source scripts/ci/pip_retry.sh
-          pip_retry install -e ".[optimal-control]" 2>&1 | tee /tmp/casadi_install.log
+          set -o pipefail
+          pip_retry install -e ".[optimal-control]" 2>&1 | tee /tmp/casadi_install.log \
+            || echo "casadi_install: install failed (non-fatal; availability is probed below)"
           if python3 -c "import casadi" 2>/dev/null; then
             echo "available=true" >> "$GITHUB_OUTPUT"
             echo "CasADi installation: SUCCESS"
@@ -435,7 +439,9 @@ jobs:
             sudo apt-get -o DPkg::Lock::Timeout=300 install -y python3-tk || true
           fi
           source scripts/ci/pip_retry.sh
-          pip_retry install -e ".[bioptim]" 2>&1 | tee /tmp/bioptim_install.log
+          set -o pipefail
+          pip_retry install -e ".[bioptim]" 2>&1 | tee /tmp/bioptim_install.log \
+            || echo "bioptim_install: install failed (non-fatal; availability is probed below)"
           if python3 -c "from src.shared.python.optimization.ocp._compat import require_bioptim; require_bioptim()"; then
             echo "available=true" >> "$GITHUB_OUTPUT"
             echo "bioptim installation: SUCCESS"

@@ -174,12 +174,14 @@ def test_failed_counterfactual_still_restores_state_and_controls(
     def _boom(_state: object) -> None:
         raise RuntimeError("realize failed")
 
-    monkeypatch.setattr(engine._model, "realizeDynamics", _boom, raising=False)
+    monkeypatch.setattr(engine._model, "realizeAcceleration", _boom, raising=False)
     for call in (
         lambda: engine.compute_ztcf(np.array([0.5]), np.array([0.4])),
         lambda: engine.compute_zvcf(np.array([0.5])),
     ):
-        assert call().size == 0
+        # The failure surfaces instead of becoming an empty array (#12983).
+        with pytest.raises(RuntimeError, match="realize failed"):
+            call()
         q, v = engine.get_state()
         assert q[0] == pytest.approx(0.2) and v[0] == pytest.approx(0.1)
         assert engine._controls is not None

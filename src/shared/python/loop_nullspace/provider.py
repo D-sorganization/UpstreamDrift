@@ -35,6 +35,11 @@ class AdapterConstrainedProvider:
     def __init__(self, adapter: Any) -> None:
         require_closed_loop_capability(adapter)
         self._adapter = adapter
+        # Optional position-level closure error (NSX-31): present only when the
+        # adapter offers one, so ``getattr(provider, "closure_error", None)``
+        # tells a replay whether position drift can be reported.
+        if callable(getattr(adapter, "closure_position_error", None)):
+            self.closure_error = self._closure_error
 
     @property
     def nv(self) -> int:
@@ -72,6 +77,13 @@ class AdapterConstrainedProvider:
         return canonical_closure(
             self._adapter, self._vector(q, "q"), self._vector(v, "v")
         )[1]
+
+    def _closure_error(self, q: ArrayLike) -> Array:
+        """Native position-level closure error ``Phi(q)`` (adapter-defined rows)."""
+        return np.asarray(
+            self._adapter.closure_position_error(self._vector(q, "q")),
+            dtype=np.float64,
+        )
 
 
 class ReorderedProvider:

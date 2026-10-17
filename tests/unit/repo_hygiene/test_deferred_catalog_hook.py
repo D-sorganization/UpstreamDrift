@@ -58,6 +58,8 @@ def _copy_gate(tmp_path: Path) -> None:
         "deferred_validation.py",
         "deferred_planning.py",
         "handoff_validator.py",
+        "handoff_schema.py",
+        "archive_policy.py",
     ):
         shutil.copyfile(ROOT / "shared_scripts" / name, destination / name)
 
@@ -102,6 +104,6 @@ def test_installed_bundle_matches_published_receipt() -> None:
             encoding="utf-8"
         )
     )
-    assert len(receipt["files"]) == 3
+    assert len(receipt["files"]) == 5
     for relative, expected in receipt["files"].items():
         assert hashlib.sha256((ROOT / relative).read_bytes()).hexdigest() == expected

@@ -55,6 +55,10 @@ from src.engines.physics_engines.opensim.python.spine.inventory import (
     ModelLevelMap,
     inventory_spine,
 )
+from src.engines.physics_engines.opensim.python.spine.muscle_model import (
+    SWAP_NOTE,
+    check_muscle_model_policy,
+)
 from src.engines.physics_engines.opensim.python.spine.inverse_dynamics import (
     SpinalGeneralizedForces,
     prepare_model_for_id,
@@ -81,6 +85,8 @@ __all__ = [
 _A_LOW = 0.5
 _A_HIGH = 1.0
 _ZERO_DEMAND_NM = 1e-12
+_SCREEN_STEP_RAD = 1e-4
+_SCREEN_LENGTH_TOL_M = 1e-13
 
 
 def _ro(array: np.ndarray, dtype: type = float) -> np.ndarray:
@@ -147,7 +153,10 @@ class SpineSOOptions:
     ``exponent``: cost exponent p (2 or 3; Bruno 2015 uses 3);
     ``reserves``: :class:`ReserveSpec`; ``events``: name -> time [s];
     ``stride``: every ``stride``-th sample; ``max_frames``: refuse a larger
-    selection; ``level_map``: explicit level map for the inventory.
+    selection; ``level_map``: explicit level map for the inventory;
+    ``muscle_model_policy``: ``native`` (a Thelen model is refused) or
+    ``millard_equivalent`` (see ``muscle_model``); ``unlock_coordinates``:
+    locked coordinates to unlock.
     """
 
     exponent: int = 3
@@ -156,8 +165,11 @@ class SpineSOOptions:
     stride: int | None = None
     max_frames: int | None = None
     level_map: ModelLevelMap | None = None
+    muscle_model_policy: str = "native"
+    unlock_coordinates: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
+        check_muscle_model_policy(self.muscle_model_policy)
         if not isinstance(self.exponent, int) or isinstance(self.exponent, bool):
             raise TypeError("exponent must be an int")
         if self.exponent not in SUPPORTED_EXPONENTS:
@@ -314,8 +326,16 @@ class SpineMuscleBasis:
         model_id: str,
         *,
         level_map: ModelLevelMap | None = None,
+        muscle_model_policy: str = "native",
+        unlock_coordinates: tuple[str, ...] = (),
     ) -> None:
-        prepared = prepare_model_for_id(model_path)
+        prepared = prepare_model_for_id(
+            model_path,
+            muscle_policy=check_muscle_model_policy(muscle_model_policy),
+            unlock_coordinates=unlock_coordinates,
+        )
+        self.muscle_model_policy = muscle_model_policy
+        self.swapped_muscles = prepared.swapped_muscles
         self.model = prepared.model
         self._muscles = _muscle_list(self.model)
         if not self._muscles:
@@ -352,6 +372,39 @@ class SpineMuscleBasis:
         self._pose(names, np.asarray(q, float), np.asarray(qd, float))
         return self._forces_at(activation)
 
+    def _path_lengths(self) -> np.ndarray:
+        self.model.realizePosition(self.state)  # type: ignore[attr-defined]
+        return np.array([m.getLength(self.state) for m in self._muscles])
+
+    def active_pair_mask(
+        self, names: tuple[str, ...], q: np.ndarray, qd: np.ndarray
+    ) -> np.ndarray:
+        """``(nm, c)`` bool: muscle/level-coordinate pairs worth a native arm.
+
+        Native ``computeMomentArm`` costs tens of milliseconds per pair, which
+        makes a full-body model (hundreds of muscles, ~50 level coordinates)
+        impractical.  A pair is kept when a central-difference step of the
+        coordinate changes the muscle path length, and always kept for a
+        locked coordinate (a locked value cannot be perturbed).  A pair
+        screened out has an exactly unchanged path length, so its arm is
+        reported as zero.  The pose is restored.
+        """
+        self._pose(names, np.asarray(q, float), np.asarray(qd, float))
+        mask = np.ones((len(self._muscles), len(self.coordinate_names)), dtype=bool)
+        for j, coord in enumerate(
+            _coordinate_objects(self.model, self.coordinate_names)
+        ):
+            if coord.getLocked(self.state):
+                continue
+            value = float(coord.getValue(self.state))
+            coord.setValue(self.state, value + _SCREEN_STEP_RAD, False)
+            plus = self._path_lengths()
+            coord.setValue(self.state, value - _SCREEN_STEP_RAD, False)
+            minus = self._path_lengths()
+            coord.setValue(self.state, value, False)
+            mask[:, j] = np.abs(plus - minus) > _SCREEN_LENGTH_TOL_M
+        return mask
+
     def evaluate(
         self, names: tuple[str, ...], q: np.ndarray, qd: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -359,20 +412,18 @@ class SpineMuscleBasis:
 
         ``names`` order ``q``/``qd`` (all model coordinates).  ``active`` >= 0.
         """
+        mask = self.active_pair_mask(names, q, qd)
         self._pose(names, np.asarray(q, float), np.asarray(qd, float))
         high = self._forces_at(_A_HIGH)
         low = self._forces_at(_A_LOW)
         active = np.maximum((high - low) / (_A_HIGH - _A_LOW), 0.0)
         passive = high - _A_HIGH * active
-        moment = np.array(
-            [
-                [
-                    muscle_moment_arm(self.model, self.state, m, c)
-                    for c in self.coordinate_names
-                ]
-                for m in self.muscle_names
-            ]
-        )
+        moment = np.zeros(mask.shape)
+        for i, muscle in enumerate(self.muscle_names):
+            for j in np.flatnonzero(mask[i]):
+                moment[i, j] = muscle_moment_arm(
+                    self.model, self.state, muscle, self.coordinate_names[j]
+                )
         return active, passive, moment
 
 
@@ -445,14 +496,18 @@ def _sha256(path: Path) -> str:
 
 
 def _provenance(
-    path: Path, efforts: SpinalGeneralizedForces, opts: SpineSOOptions, model_id: str
+    path: Path,
+    efforts: SpinalGeneralizedForces,
+    opts: SpineSOOptions,
+    model_id: str,
+    extra: Mapping[str, str],
 ) -> dict[str, str]:
     return {
         "model_id": model_id,
         "model_sha256": _sha256(path),
         "solver": (
-            "static optimisation: lexicographic reserves (BVLS) then SLSQP "
-            "min sum a^p with analytic gradient"
+            "static optimisation: lexicographic reserves (BVLS) then min sum a^p "
+            "(stage-2 solver per frame in stage2_solver)"
         ),
         "cost_exponent": str(opts.exponent),
         "distribution_source": efforts.provenance.get("distribution_source", "n/a"),
@@ -463,10 +518,56 @@ def _provenance(
             "native Millard curves, rigid tendon (ignore_tendon_compliance), "
             f"affine in activation from a={_A_LOW:g} and a={_A_HIGH:g}"
         ),
+        "muscle_model_policy": opts.muscle_model_policy,
         "couplers": "disabled",
+        **extra,
         "reserves": opts.reserves.describe(),
         "units": "N*m (generalized forces), N (tendon forces)",
     }
+
+
+def _run_provenance(basis: SpineMuscleBasis, solvers: set[str]) -> dict[str, str]:
+    swapped = basis.swapped_muscles
+    return {
+        "stage2_solver": ",".join(sorted(solvers)),
+        "moment_arm_screen": (
+            f"path-length central difference, step {_SCREEN_STEP_RAD:g} rad, "
+            f"length threshold {_SCREEN_LENGTH_TOL_M:g} m; locked coordinates "
+            "always evaluated natively"
+        ),
+        "muscles_swapped": str(swapped),
+        "muscle_swap_note": SWAP_NOTE if swapped else "none",
+    }
+
+
+def _open_basis(
+    model_path: str | Path,
+    efforts: SpinalGeneralizedForces,
+    model_id: str,
+    options: SpineSOOptions | None,
+) -> tuple[SpineSOOptions, FrameSelection, SpineMuscleBasis]:
+    """Validate the inputs and open the muscle basis for the chosen frames."""
+    if not isinstance(efforts, SpinalGeneralizedForces):
+        raise TypeError(
+            f"efforts must be a SpinalGeneralizedForces, got {type(efforts).__name__}"
+        )
+    opts = SpineSOOptions() if options is None else options
+    if not isinstance(opts, SpineSOOptions):
+        raise TypeError("options must be a SpineSOOptions or None")
+    selection = select_frames(efforts.time_s, opts.events, opts.stride, opts.max_frames)
+    basis = SpineMuscleBasis(
+        model_path,
+        model_id,
+        level_map=opts.level_map,
+        muscle_model_policy=opts.muscle_model_policy,
+        unlock_coordinates=opts.unlock_coordinates,
+    )
+    if basis.coordinate_names != efforts.level_coordinates:
+        raise ValueError(
+            f"level coordinates differ: model {basis.coordinate_names} vs "
+            f"efforts {efforts.level_coordinates}"
+        )
+    return opts, selection, basis
 
 
 def run_spine_static_optimization(
@@ -495,26 +596,14 @@ def run_spine_static_optimization(
         ValueError: a missing file or coordinate, a level mismatch between
             ``efforts`` and the model, or the frame contract is violated.
     """
-    if not isinstance(efforts, SpinalGeneralizedForces):
-        raise TypeError(
-            f"efforts must be a SpinalGeneralizedForces, got {type(efforts).__name__}"
-        )
-    opts = SpineSOOptions() if options is None else options
-    if not isinstance(opts, SpineSOOptions):
-        raise TypeError("options must be a SpineSOOptions or None")
-    selection = select_frames(efforts.time_s, opts.events, opts.stride, opts.max_frames)
-    basis = SpineMuscleBasis(model_path, model_id, level_map=opts.level_map)
-    if basis.coordinate_names != efforts.level_coordinates:
-        raise ValueError(
-            f"level coordinates differ: model {basis.coordinate_names} vs "
-            f"efforts {efforts.level_coordinates}"
-        )
+    opts, selection, basis = _open_basis(model_path, efforts, model_id, options)
     limits = opts.reserves.limits(basis.coordinate_names)
     tau_all = efforts.level_tau()
     k, nm, nc = selection.indices.size, len(basis.muscle_names), limits.size
     act, force = np.zeros((k, nm)), np.zeros((k, nm))
     muscle, reserve = np.zeros((k, nc)), np.zeros((k, nc))
     share, success, reasons = np.zeros(k), np.zeros(k, bool), []
+    solvers: set[str] = set()
     for row, frame in enumerate(selection.indices):
         active, passive, arms = basis.evaluate(
             efforts.model_coordinates, efforts.q[frame], efforts.qd[frame]
@@ -528,6 +617,7 @@ def run_spine_static_optimization(
             reserve_scale=limits,
         )
         act[row], force[row] = sol.activation, passive + sol.activation * active
+        solvers.add(sol.solver)
         muscle[row], reserve[row], success[row] = (
             sol.muscle_moment,
             sol.reserve,
@@ -566,5 +656,11 @@ def run_spine_static_optimization(
         success=success,
         reserve_limits_nm=limits,
         cost_exponent=opts.exponent,
-        provenance=_provenance(Path(model_path), efforts, opts, model_id),
+        provenance=_provenance(
+            Path(model_path),
+            efforts,
+            opts,
+            model_id,
+            _run_provenance(basis, solvers),
+        ),
     )

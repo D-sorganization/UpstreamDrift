@@ -204,23 +204,39 @@ class PlanarGolferProvider:
 
     def __init__(self, params: PlanarGolferParams) -> None:
         self._params = params
+        self._last: dict[bool, tuple[bytes, dict[str, Array]]] = {}
+
+    def _dynamics(self, q: Array, v: Array | None = None) -> dict[str, Array]:
+        """``planar_dynamics`` with one cached entry for each of ``v = 0`` and ``v``.
+
+        ``M``, ``J_c`` and ``Phi`` do not depend on ``v``, and one RK4 stage asks
+        for all of ``M, h, J_c, Jdot_v`` at the same state.
+        """
+        moving = v is not None
+        vel = np.asarray(v if moving else np.zeros(N_Q), dtype=float)
+        key = np.asarray(q, dtype=float).tobytes() + vel.tobytes()
+        cached = self._last.get(moving)
+        if cached is None or cached[0] != key:
+            cached = (key, planar_dynamics(q, vel, self._params))
+            self._last[moving] = cached
+        return cached[1]
 
     def mass_matrix(self, q: Array) -> Array:
         """``M(q)`` of the planar golfer."""
-        return planar_dynamics(q, np.zeros(N_Q), self._params)["M"]
+        return self._dynamics(q)["M"]
 
     def bias_forces(self, q: Array, v: Array) -> Array:
         """``h(q, v)`` including gravity."""
-        return planar_dynamics(q, v, self._params)["h"]
+        return self._dynamics(q, v)["h"]
 
     def closure_jacobian(self, q: Array) -> Array:
         """``J_c(q)``, shape ``(2, 5)``."""
-        return planar_dynamics(q, np.zeros(N_Q), self._params)["Jc"]
+        return self._dynamics(q)["Jc"]
 
     def closure_drift(self, q: Array, v: Array) -> Array:
         """``Jdot_v(q, v)``, shape ``(2,)``."""
-        return planar_dynamics(q, v, self._params)["Jdot_v"]
+        return self._dynamics(q, v)["Jdot_v"]
 
     def closure_error(self, q: Array) -> Array:
         """Position-level closure error ``Phi(q)``, shape ``(2,)``."""
-        return planar_dynamics(q, np.zeros(N_Q), self._params)["phi"]
+        return self._dynamics(q)["phi"]
