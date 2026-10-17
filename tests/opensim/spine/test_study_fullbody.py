@@ -411,6 +411,7 @@ def test_identity_stage_builds_table_loads_and_record(
         for name in group.target_coordinates:
             np.testing.assert_allclose(result.coordinates[name], cols[name], atol=1e-5)
     assert result.metrics["orientation_max_residual_rad"] < 1e-5
+    assert 0.0 < result.metrics["orientation_max_step_rad"] < 0.1
     record = result.record
     assert record["policy"] == policy and record["map_id"] == "golf_identity"
     kinds = {item["kind"] for item in record["included"]}
