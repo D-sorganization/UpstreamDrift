@@ -46,4 +46,4 @@ python3 -m src.shared.python.motion_matching.pipeline.cli \
 
 ## Related Proposal
 
-Adding measured open-fp vertical-plate rows to this QP is proposed, not implemented, in [`docs/research/open_fp_contact_qp/proposal.tex`](../../research/open_fp_contact_qp/proposal.tex) (OF-10, #13089).
+Adding measured open-fp vertical-plate rows to this QP is proposed, not implemented, in [`docs/research/open_fp_contact_qp/open_fp_contact_qp.tex`](../../research/open_fp_contact_qp/open_fp_contact_qp.tex) (OF-10, #13089).

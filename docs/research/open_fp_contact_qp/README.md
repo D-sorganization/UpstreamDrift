@@ -1,6 +1,6 @@
 # Measured Plate Rows in the Contact-Wrench QP
 
-Start with the [research proposal](proposal.tex) for OF-10 (#13089) under epic
+Start with the [research proposal](open_fp_contact_qp.tex) for OF-10 (#13089) under epic
 #13061. It is an editable standalone research source (see `AGENTS.md`, Modeling
 Reference Documentation). It changes no code. Implementation is gated on OF-08
 (#13086) and on hardware qualification OF-HW (#13082).
