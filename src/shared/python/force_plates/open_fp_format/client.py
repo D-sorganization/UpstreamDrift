@@ -56,6 +56,7 @@ __all__ = [
     "OpenFpClient",
     "OpenFpClientError",
     "UnknownSwingError",
+    "validated_base",
     "widen_for_http_rounding",
 ]
 
@@ -107,7 +108,7 @@ def widen_for_http_rounding(uncertainty: PlateUncertainty) -> PlateUncertainty:
     )
 
 
-def _validated_base(base_url: object) -> str:
+def validated_base(base_url: object) -> str:
     """``scheme://host[:port]`` of a bare http(s) origin; ``ValueError`` otherwise."""
     if not isinstance(base_url, str):
         raise TypeError(f"base_url must be a str, got {type(base_url).__name__}")
@@ -237,7 +238,7 @@ class OpenFpClient:
         max_bytes: int,
         transport: httpx.BaseTransport | None = None,
     ) -> None:
-        self._base = _validated_base(base_url)
+        self._base = validated_base(base_url)
         timeout = finite_positive(timeout_s, "timeout_s")
         self._max_bytes = _validated_limit(max_bytes)
         if transport is not None and not isinstance(transport, httpx.BaseTransport):
