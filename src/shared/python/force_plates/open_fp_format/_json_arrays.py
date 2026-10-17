@@ -52,10 +52,10 @@ def _column(raw: object, key: str, where: str) -> np.ndarray:
     nullable = key in _NULLABLE
     width = fmt.ARRAY_KEYS[key]
     if width is None:
-        values = [_element(v, f"{name}[{i}]", nullable) for i, v in enumerate(raw)]
-    else:
-        values = [_row(r, width, f"{name}[{i}]", nullable) for i, r in enumerate(raw)]
-    return np.array(values, dtype=np.float64)
+        scalars = [_element(v, f"{name}[{i}]", nullable) for i, v in enumerate(raw)]
+        return np.array(scalars, dtype=np.float64)
+    rows = [_row(r, width, f"{name}[{i}]", nullable) for i, r in enumerate(raw)]
+    return np.array(rows, dtype=np.float64)
 
 
 def arrays_from_json(raw: object, where: str) -> _arrays.SwingArrays:
