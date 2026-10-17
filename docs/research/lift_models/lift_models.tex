@@ -1010,8 +1010,8 @@ bar-balanced, 64-substep source.
 \item \textbf{OpenSim IK/ID} (\texttt{opensim\_ik\_id/receipts.json}):
   marker RMS 8.56 $\to$ 6.81\,cm and maximum 30.27 $\to$ 27.56\,cm. Every
   body marker is within 2.3\,cm; the maximum is the bar marker, which the
-  Rajagopal hands cannot reach inside their joint ranges (OSL-12, weight
-  0.1). The \#13093 marker gate (RMS $<2$\,cm, maximum $<4$\,cm) therefore
+  Rajagopal hands did not reach (OSL-12, weight 0.1; the cause is the
+  back-rack hold seed, resolved in the next subsection). The \#13093 marker gate (RMS $<2$\,cm, maximum $<4$\,cm) therefore
   stays open. Pelvis residuals fell from 316.7\,N and 688.5\,N\,m to
   214.8\,N and 546.4\,N\,m, but stay above the Hicks et al.\ limits of 5\,\%
   of peak external force (167.2\,N) and 1\,\% of it times the centre-of-mass
@@ -1056,6 +1056,133 @@ bar-balanced, 64-substep source.
 \item No controller--plant mismatch was found: the controller's inverse
   dynamics cut only the six closure null directions.
 \end{itemize}
+
+\subsection{Hands That Reach the Bundle Bar (OSL-12, Issue \#13048)}
+\paragraph{Diagnosis.} After OSL-16 every body marker of the OpenSim squat
+IK was within 2.3\,cm, but the bar marker was 27.6\,cm off (RMS 6.81\,cm,
+maximum 27.56\,cm). Each candidate cause was measured on the committed
+back-squat bundle (stride 5, 41 states):
+\begin{itemize}[nosep]
+\item \textbf{Arm segment lengths: not the cause.} The scaled Rajagopal arm
+  (humerus 0.300\,m, forearm 0.264\,m, wrist to hand centre 0.071\,m)
+  reaches 0.636\,m from the shoulder. The bundle's arm is 0.288 and
+  0.275\,m long, and its grips lie only 0.252 and 0.235\,m (left, right)
+  from the shoulder centres.
+\item \textbf{Shoulder and elbow ranges: not the cause.} A bounded solve
+  inside the Rajagopal ranges puts each hand centre on its bundle grip to
+  $3.4\times10^{-6}$ and $3.5\times10^{-6}$\,m. The solved arms are
+  \texttt{arm\_flex} 50.8/50.2$^\circ$, \texttt{arm\_add}
+  $-68.0/-62.2^\circ$, \texttt{arm\_rot} $-44.5/-46.6^\circ$ and
+  \texttt{elbow\_flex} 143.0/145.8$^\circ$ (left/right).
+\item \textbf{Bar position relative to the hold: the cause.} Relative to
+  the shoulder-centre midpoint, the bundle's hands hold the bar 0.157\,m
+  forward and 0.159\,m up (constant to 1\,mm through the window). The OSL-2
+  back-rack hold puts it 0.194\,m behind and 0.073\,m above. The IK
+  assembles from that hold, and its arm tasks (weight 0.01) hold the arms
+  there. So the hands stay behind the shoulders, 0.28\,m from the bundle's
+  grips at the first state.
+\item \textbf{Weld frame placement: not the cause.} The bar body's origin is
+  the midpoint of the two hand centres. The bundle's bar centre is the
+  midpoint of its two grip points to $10^{-9}$\,m (test).
+\item \textbf{Bar weight 0.1: a symptom.} At weight 1 with the back-rack
+  seed, the bar stays 17.8\,cm off and drags the trunk (trunk RMS
+  11.6$^\circ$; marker RMS 5.54\,cm).
+\end{itemize}
+The bundle's bar sits on a fitted torso shelf (\texttt{back\_bar}), not on
+an anatomical site. Along the trunk it is 0.215\,m above the shoulder centres
+and 0.06\,m anterior to them, which is in front of the face rather than on the
+upper back. That is a property of the bundle, recorded here as a limitation,
+not changed by this fix.
+
+\paragraph{Method.} \texttt{reaching\_lift\_build}
+(\texttt{src/engines/physics\_engines/opensim/python/msk\_lift\_arm\_reach.py})
+runs two passes:
+\begin{enumerate}[nosep]
+\item \textbf{Seed pass.} It runs the IK of the hold-pose model with the bar
+  marker at weight 0, so the bar cannot pull the trunk.
+\item \textbf{Reach solve.} With the seed's first-state body held and the arm
+  chain at the hold, a bounded least-squares solve (scipy TRF, the model
+  ranges as bounds) moves \texttt{arm\_flex}, \texttt{arm\_add},
+  \texttt{arm\_rot} and \texttt{elbow\_flex} on each side until the hand's
+  centre of mass, which is the weld's grip point, lies on that hand's bundle
+  grip (\texttt{LiftTargets.grip\_m}). A prior of $10^{-3}$\,m/rad towards
+  the hold picks among the solutions. The forearm and wrist stay at the hold.
+\end{enumerate}
+The model is then rebuilt with those arms as its hold
+(\texttt{build\_lift\_model(arm\_coordinates=\ldots)}). The bar weld is
+therefore placed at the reaching pose, the grip width is the one those arms
+give (0.600\,m in the bundle, not a solved target), and the arm tasks hold the
+reaching arms. The bar marker weight is restored from 0.1 to 1, the same as
+the shoulders. No threshold changed.
+
+\paragraph{Measured Evidence (Before $\rightarrow$ After).} Receipts:
+\texttt{docs/development/lifting/evidence/opensim\_ik\_id/receipts.json};
+tests: \texttt{tests/unit/lifting/test\_opensim\_lift\_bar\_reach.py}.
+\begin{itemize}[nosep]
+\item \textbf{Markers.} RMS 6.81 $\rightarrow$ 1.18\,cm and maximum 27.56
+  $\rightarrow$ 2.32\,cm (right forefoot). This meets the 2\,cm/4\,cm gate.
+  The bar marker goes from 27.56\,cm to 0.29\,mm, and the shoulders from
+  2.09/1.95 to 1.18/0.93\,cm.
+\item \textbf{Ranges and pelvis.} Every coordinate is in range in all 41
+  states. The pelvis landmarks are tracked (ASIS 5.0--5.1\,mm, PSIS
+  1.9--2.0\,mm).
+\item \textbf{Segment angles.} RMS 1.92 $\rightarrow$ 1.22$^\circ$ (trunk
+  2.67 $\rightarrow$ 0.75$^\circ$), inside the 2$^\circ$ threshold.
+\item \textbf{Pelvis residuals (peak).} $t_y$ 214.8 $\rightarrow$ 214.2\,N,
+  $t_x$ 143.0 $\rightarrow$ 144.2\,N, tilt 546.4 $\rightarrow$ 153.8\,N\,m,
+  rotation 21.1 $\rightarrow$ 4.3\,N\,m and list 8.7 $\rightarrow$
+  4.7\,N\,m. The Hicks et al.\ gate (167.2\,N, 21.9\,N\,m) still fails for
+  $t_y$ and tilt.
+\item \textbf{Joint moments (peak).} Lumbar extension 772.9\,N\,m, hip
+  flexion 454.9/443.6\,N\,m, \texttt{arm\_flex} 147.6/139.7\,N\,m.
+\end{itemize}
+
+\paragraph{Residual Breakdown.} The ID residual was split per term
+($M\dot u$; Coriolis; gravity; foot wrench; hand wrench) at every state
+(scratch script, not committed). Both failing peaks occur only at the first
+state of the window:
+\begin{itemize}[nosep]
+\item At state 0, the hands carry exactly the bar weight (980.7\,N) and the
+  feet only 1347.2\,N, against the 1768.3\,N weight of body plus bar. The
+  bundle body therefore accelerates downwards, with net external vertical
+  force $-421.1$\,N, as it settles onto the loaded foot contact. The IK
+  motion's inertial term there is only $-207.6$\,N: the quintic GCV spline
+  has no data before $t=0$, so it does not reproduce that acceleration.
+  The remainder, 214.2\,N, is the $t_y$ peak.
+\item The tilt peak at the same state (153.8\,N\,m) is the moment of the
+  same imbalance: foot term $-199.9$, hand term $+301.9$, gravity $+78.9$
+  and inertial $-25.2$\,N\,m.
+\item Over states 1--40, the peaks are $t_y$ 24.4\,N (limit 167.2) and
+  tilt 20.7\,N\,m (limit 21.9). These are within the gate.
+  This is a diagnostic only: the gate is evaluated on every state, and no
+  state is excluded.
+\end{itemize}
+
+\paragraph{Failed Experiments.}
+\begin{itemize}[nosep]
+\item The bar at weight 1 with the back-rack seed (above): 17.8\,cm bar
+  error, with the trunk dragged 11.6$^\circ$ RMS.
+\item Every bundle state (stride 1, 201 states) instead of every fifth: the
+  state-0 peaks are not removed ($t_y$ 266.6\,N, tilt 133.2\,N\,m), and the
+  unsmoothed spline amplifies the 1\,ms IK noise (pelvis rotation
+  91.7\,N\,m, $t_z$ 75.0\,N, both from the inertial term).
+\item A first unregularised reach with seven arm coordinates per side
+  (adding \texttt{pro\_sup} and both wrist angles) and several starts also
+  reached the grips to $3\times10^{-6}$\,m. It gave asymmetric arms
+  (\texttt{arm\_flex} 67.2/88.9$^\circ$, pronation 30.7/55.0$^\circ$), so the
+  committed solve moves only the four shoulder and elbow coordinates, with
+  the hold prior.
+\end{itemize}
+
+\paragraph{Limitations.} The marker gate is met. The Hicks residual gate is
+not, because of the state-0 settling transient, and stays open on \#13048.
+Closing it needs either a bundle window that starts at rest on its contact,
+or derivatives that use the bundle's own states before the window. The
+bundle's bar position is a fitted shelf in front of the face, not a
+back-squat rack, so these arm poses are not a back-squat technique. The
+reaching arms are fitted at the first state only; the IK then tracks the bar.
+Reproduce with \texttt{MUJOCO\_GL=egl python3 scripts/measure\_opensim\_lift\_ik\_id.py}
+and \texttt{python3 -m pytest -o addopts="" tests/unit/lifting/test\_opensim\_lift\_bar\_reach.py}.
 
 \section{Measured Parity Results}
 All figures below are read from the committed receipt,
