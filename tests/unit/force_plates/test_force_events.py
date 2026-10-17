@@ -78,16 +78,24 @@ def test_merge_refuses_prefixed_model_key() -> None:
         merge_event_markers({"force.top": 0.1}, {})
 
 
-def test_merge_refuses_collision_and_names_the_key() -> None:
-    with pytest.raises(ValueError, match=r"force\.max_trail"):
-        merge_event_markers({"force.max_trail": 0.1}, {"force.max_trail": 0.2})
+def test_model_and_measured_impact_never_overwrite_each_other() -> None:
+    merged = merge_event_markers({"impact": 0.30}, {"force.impact": 0.31})
+    assert merged == {"impact": 0.30, "force.impact": 0.31}
 
 
-@pytest.mark.parametrize("bad", [float("nan"), float("inf"), "0.1", True])
-def test_merge_refuses_non_finite_or_non_numeric(bad: object) -> None:
+@pytest.mark.parametrize("bad", [float("nan"), float("inf")])
+def test_merge_refuses_non_finite_times(bad: float) -> None:
     with pytest.raises(ValueError, match=r"force\.max_trail"):
-        merge_event_markers({}, {"force.max_trail": bad})  # type: ignore[dict-item]
+        merge_event_markers({}, {"force.max_trail": bad})
     with pytest.raises(ValueError, match="top"):
+        merge_event_markers({"top": bad}, {})
+
+
+@pytest.mark.parametrize("bad", ["0.1", True, None])
+def test_merge_refuses_non_numeric_times(bad: object) -> None:
+    with pytest.raises(TypeError, match=r"force\.max_trail"):
+        merge_event_markers({}, {"force.max_trail": bad})  # type: ignore[dict-item]
+    with pytest.raises(TypeError, match="top"):
         merge_event_markers({"top": bad}, {})  # type: ignore[dict-item]
 
 

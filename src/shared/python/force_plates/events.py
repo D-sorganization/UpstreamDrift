@@ -56,7 +56,7 @@ def _check_markers(markers: Mapping[str, float], label: str) -> None:
         if not isinstance(key, str) or not key:
             raise ValueError(f"{label} keys must be non-empty strings, got {key!r}")
         if isinstance(value, bool) or not isinstance(value, int | float):
-            raise ValueError(f"{label}[{key!r}] must be a real number, got {value!r}")
+            raise TypeError(f"{label}[{key!r}] must be a real number, got {value!r}")
         if not math.isfinite(value):
             raise ValueError(f"{label}[{key!r}] must be finite, got {value!r}")
 
@@ -66,10 +66,14 @@ def merge_event_markers(
 ) -> dict[str, float]:
     """Merge model and force event times into a new dict.
 
+    Force keys must carry the ``force.`` prefix and model keys must not, so
+    the two namespaces are disjoint: a model ``impact`` and a measured
+    ``force.impact`` are both kept and neither can overwrite the other.
+
     Raises:
-        ValueError: naming the key, for a force key without the ``force.``
-            prefix, a model key carrying it, a key present in both, or a
-            non-finite or non-numeric time.
+        TypeError: naming the key, for a non-numeric time.
+        ValueError: naming the key, for a force key without the prefix, a
+            model key carrying it, an empty key or a non-finite time.
     """
     _check_markers(model_events, "model_events")
     _check_markers(force_events, "force_events")
@@ -81,9 +85,6 @@ def merge_event_markers(
     for key in model_events:
         if key.startswith(FORCE_EVENT_PREFIX):
             raise ValueError(f"model event {key!r} must not use the force namespace")
-    for key in force_events:
-        if key in model_events:
-            raise ValueError(f"event {key!r} collides between model and force events")
     return {**model_events, **force_events}
 
 
