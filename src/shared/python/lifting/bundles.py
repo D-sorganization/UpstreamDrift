@@ -44,7 +44,10 @@ from src.shared.python.lifting.back_bar import (
     pose_axis_world,
     standard_bar_world,
 )
-from src.shared.python.lifting.barbell_runs import rigid_bar_spec
+from src.shared.python.lifting.barbell_runs import (
+    LOADED_TRACKING_POLICY,
+    rigid_bar_spec,
+)
 from src.shared.python.lifting.lift_body import (
     HEAD_COORDINATES,
     LIFT_BODY_SPEC,
@@ -68,6 +71,10 @@ from src.shared.python.motion_matching.same_input import (
     InputBundle,
     VectorPlant,
     generate_reference_bundle,
+)
+from src.shared.python.motion_matching.same_input.integrator import DEFAULT_POLICY
+from src.shared.python.motion_matching.same_input.stiffness import (
+    rk4_stability_record,
 )
 
 Array = NDArray[np.float64]
@@ -95,6 +102,8 @@ SAME_INPUT_LIFT_BUNDLES: Mapping[str, Path | None] = MappingProxyType(
 )
 
 BAR_FRAME = "Hub"
+#: Reference steps between the states sampled for ``rk4_stability``.
+STABILITY_SAMPLE_EVERY = 10
 LIMITATIONS = (
     "The only spec the same-input harness replays in every engine is the golf "
     "full-body spec, so the lifter keeps that spec's arms and dual-grip club; "
@@ -1027,8 +1036,11 @@ def build_lift_bundle(
 
     The window starts at a solution sample (``window_start_s``) and spans
     ``window_s``; MuJoCo tracks the joint trajectory from there with the
-    pipeline controller held per step.  The provenance records the planar
-    solution, the IK summary, the window's bar path and ``provenance``.
+    pipeline controller held per step, or under
+    :data:`~.barbell_runs.LOADED_TRACKING_POLICY` when the IK balanced a bar
+    load (OSL-16, #13104).  The provenance records the planar solution, the
+    IK summary, the window's bar path, the RK4 stability margin of the run
+    (``rk4_stability``) and ``provenance``.
 
     Raises:
         ValueError: For a window outside the lift, a missing ``lift``, or a
@@ -1061,18 +1073,38 @@ def build_lift_bundle(
         lift.q[start:],
         duration_s=float(window_s),
         provenance=record,
+        policy=DEFAULT_POLICY if lift.balance is None else LOADED_TRACKING_POLICY,
     )
     plant = VectorPlant("mujoco", bundle.spec_bytes)
     window_bar = bar_path(plant, bundle.reference_q, lift.bar_frame)
-    return InputBundle(
-        spec_bytes=bundle.spec_bytes,
-        coordinate_order=bundle.coordinate_order,
-        dt_s=bundle.dt_s,
-        q0=bundle.q0,
-        v0=bundle.v0,
-        efforts=bundle.efforts,
-        reference_q=bundle.reference_q,
-        reference_v=bundle.reference_v,
-        reference_engine=bundle.reference_engine,
-        provenance={**bundle.provenance, "window_bar_path_m": window_bar.tolist()},
+    return replace(
+        bundle,
+        provenance={
+            **bundle.provenance,
+            "window_bar_path_m": window_bar.tolist(),
+            "rk4_stability": bundle_rk4_stability(bundle, plant),
+        },
+    )
+
+
+def bundle_rk4_stability(
+    bundle: InputBundle, plant: Any, every: int = STABILITY_SAMPLE_EVERY
+) -> dict[str, float | int]:
+    """RK4 margin of ``bundle``'s reference run, sampled every ``every`` steps.
+
+    The stiffest open-loop rate of ``plant`` (the bundle's MuJoCo plant) at
+    each sampled reference state under its recorded effort, times the
+    bundle's RK4 substep (see
+    :func:`~src.shared.python.motion_matching.same_input.stiffness.\
+rk4_stability_record`).
+    """
+    if isinstance(every, bool) or not isinstance(every, int) or every < 1:
+        raise ValueError("every must be a positive integer")
+    rows = np.arange(0, bundle.steps, every)
+    return rk4_stability_record(
+        plant,
+        bundle.reference_q[rows],
+        bundle.reference_v[rows],
+        bundle.efforts[rows],
+        bundle.dt_s / bundle.substeps,
     )

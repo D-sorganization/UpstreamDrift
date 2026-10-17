@@ -164,7 +164,12 @@ def test_mujoco_replay_reproduces_the_bar_path(bundle: InputBundle) -> None:
     steps = 10
     plant = VectorPlant("mujoco", bundle.spec_bytes)
     rollout = open_loop(
-        plant, bundle.q0, bundle.v0, bundle.efforts[:steps], dt_s=bundle.dt_s
+        plant,
+        bundle.q0,
+        bundle.v0,
+        bundle.replay_efforts(steps),
+        dt_s=bundle.dt_s,
+        policy=bundle.step_policy(),
     )
     np.testing.assert_array_equal(rollout.q, bundle.reference_q[: steps + 1])
     recorded = np.asarray(bundle.provenance["window_bar_path_m"], dtype=float)
