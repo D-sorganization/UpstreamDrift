@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13070 · Add the Family-Wise Plate Consistency Screen and Plate Observation Provider That Eliminate Candidate Swing Solutions Inconsistent With Vertical Force-Plate Data (OF-12)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13070
+- **Branch:** feat/13070-of-12-plate-screen
+- **PR:** #13079
+- **Paths:** see #13079
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`a9998da0`; collated from changes/13070-add-the-family-wise-plate-consistency-sc.md)
+- **Summary:** Add the family-wise plate consistency screen and plate observation provider that eliminate candidate swing solutions inconsistent with vertical force-plate data (OF-12)
+- **Next step:** Review and merge after #13074, #13075, the OF-05 PR and #13077.
+
 ### DL-#13088 · Add Optional Live Open-Fp Bridge to Realtime IPC (OF-09)
 
 - **State:** in_review

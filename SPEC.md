@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-17 | #13079 | Add the family-wise plate consistency screen and plate observation provider that eliminate candidate swing solutions inconsistent with vertical force-plate data (OF-12) |
 | 2026-10-17 | #13097 | Add optional live open-fp bridge to realtime IPC (OF-09) |
 | 2026-10-17 | #13118 | Fix order-dependent KeyError in the pivot parent-healing regression test |
 | 2026-10-17 | #13063 | Prettier-format the back-squat barbell_hold.json evidence record (data unchanged) so the commit-stage prettier hook no longer rewrites it. |
