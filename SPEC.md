@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-17 | #13101 | Full-body spine stage poses arms and GRF on the drive-unlocked trunk; capture-A pelvis residual 20.7 to 5.9 BW |
+| 2026-10-17 | #12814 | Static 10 deg external tibial-torsion offset in the shared full-body spec (ankle base frames, cited Seber 2000 range); 7-iron trail toe-out reaches 19.97 deg with hip_rotation_r off its limit; the four canonical ground-support receipts are regenerated on the default style feet (calibrated 7-iron dynamics 64.35 mm, G3 passes) |
 | 2026-10-17 | #13099 | Rotate the 315 oldest SPEC.md section 12 rows (dated up to 2026-10-14) verbatim into a second pinned block of docs/spec/CHANGELOG_ARCHIVE.md; SPEC.md 349,957 to 276,739 bytes under the unchanged 350,000-byte cap; the change-log gate reads every archived row block |
 | 2026-10-17 | #13071 | Capture Rig no longer aborts when its panel is destroyed with Help or Status dialogs alive |
 | 2026-10-17 | #13062 | Evaluate open-fp force plates and add the vertical-only integration plan (licence boundary, data contract, frames, timing, backlog) |
