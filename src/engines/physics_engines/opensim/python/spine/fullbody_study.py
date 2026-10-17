@@ -9,7 +9,10 @@ the golf swing and builds the external loads:
 2. The shoulders are solved from the golf humerus WORLD orientation, neutral
    calibrated, because the golf and target joints use different Euler orders
    (:func:`fullbody_native.solve_orientation_group`); the residual is reported.
-3. Held-neutral coordinates are zero; locked coordinates are not written.
+3. Held-neutral coordinates are zero; locked coordinates are not written,
+   except those the drive unlocked (``unlock_coordinates``): they carry the
+   drive's series and are unlocked wherever this stage poses the target, so
+   the arms and the ground reaction see the driven trunk (#13056).
 4. Loads by policy: ``none`` (gravity only), ``supplied`` (the request's file,
    not generated here), ``grf_only`` (estimated ground reaction on the feet),
    ``club_and_grf`` (the club net wrench applied to the hands plus the ground
@@ -105,7 +108,9 @@ class FullbodySpec:
     :data:`fullbody_loads.POLICIES`; generated files are ``<stem>_...`` in
     ``output_dir``.  ``filter_hz`` is the optional low-pass of the club wrench
     and ground-reaction kinematics; ``supplied_name`` the basename of a
-    supplied ExternalLoads file (policy ``supplied``).
+    supplied ExternalLoads file (policy ``supplied``); ``unlock_coordinates``
+    the coordinates locked in the target file that the drive unlocked and
+    moves (each needs a trunk series).
     """
 
     fmap: FullbodyMap
@@ -117,6 +122,7 @@ class FullbodySpec:
     stem: str
     filter_hz: float | None = None
     supplied_name: str | None = None
+    unlock_coordinates: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.policy not in POLICIES:
@@ -130,6 +136,10 @@ class FullbodySpec:
                 )
         if self.filter_hz is not None and not self.filter_hz > 0.0:
             raise ValueError(f"filter_hz must be positive, got {self.filter_hz!r}")
+        if not isinstance(self.unlock_coordinates, tuple) or not all(
+            isinstance(n, str) for n in self.unlock_coordinates
+        ):
+            raise TypeError("unlock_coordinates must be a tuple of names")
 
 
 @dataclass(frozen=True)
@@ -185,13 +195,23 @@ def _check_grid(time_s: np.ndarray, golf_time: np.ndarray) -> None:
 
 
 def _trunk_coordinates(
-    fmap: FullbodyMap, trunk: Mapping[str, np.ndarray], n_frames: int
+    fmap: FullbodyMap,
+    trunk: Mapping[str, np.ndarray],
+    n_frames: int,
+    unlocked: tuple[str, ...] = (),
 ) -> dict[str, np.ndarray]:
-    """Trunk series for the pelvis and spine-drive targets (pelvis required)."""
+    """Trunk series for the pelvis, spine-drive and unlocked targets.
+
+    Raises ``ValueError`` when a pelvis or unlocked coordinate has no series.
+    """
+    lacking = [n for n in unlocked if n not in trunk]
+    if lacking:
+        raise ValueError(f"unlocked coordinates lack a trunk series: {lacking}")
     out: dict[str, np.ndarray] = {}
     wanted = (
         *fmap.targets_with("driven_by_pelvis_pose"),
         *fmap.targets_with("driven_by_spine_drive"),
+        *unlocked,
     )
     for name in wanted:
         if name in trunk:
@@ -203,6 +223,16 @@ def _trunk_coordinates(
     if missing:
         raise ValueError(f"trunk lacks pelvis coordinates: {missing}")
     return out
+
+
+def _unlock(model: Any, names: tuple[str, ...]) -> None:
+    """Unlock ``names`` in ``model`` before its first ``initSystem``."""
+    coords = model.getCoordinateSet()
+    unknown = [n for n in names if coords.getIndex(n) < 0]
+    if unknown:
+        raise ValueError(f"cannot unlock unknown coordinates {unknown}")
+    for name in names:
+        coords.get(name).set_locked(False)
 
 
 def _transfer_coordinates(
@@ -322,7 +352,11 @@ def _ground_loads(
         xml = None
         if hands is not None:
             xml = write_load_set(scratch, time_s, hands, "hands")
-        prepared = prepare_model_for_id(spec.target_model_path, external_loads=xml)
+        prepared = prepare_model_for_id(
+            spec.target_model_path,
+            external_loads=xml,
+            unlock_coordinates=spec.unlock_coordinates,
+        )
         names = coordinate_names(prepared.model)
         zeros = np.zeros(time_s.size)
         table = _smoothed(
@@ -389,7 +423,8 @@ def run_fullbody(
     osim = import_opensim()
     golf = osim.Model(str(spec.golf_model_path))
     target = osim.Model(str(spec.target_model_path))
-    coords = _trunk_coordinates(spec.fmap, trunk, time.size)
+    _unlock(target, spec.unlock_coordinates)
+    coords = _trunk_coordinates(spec.fmap, trunk, time.size, spec.unlock_coordinates)
     coords.update(_transfer_coordinates(spec.fmap, golf_q))
     metrics = {
         "orientation_max_residual_rad": _solve_groups(
