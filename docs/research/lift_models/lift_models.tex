@@ -1175,7 +1175,8 @@ state of the window:
 \end{itemize}
 
 \paragraph{Limitations.} The marker gate is met. The Hicks residual gate is
-not, because of the state-0 settling transient, and stays open on \#13048.
+not, because of the state-0 settling transient, and stays open on \#13048
+(both items below are resolved by OSL-17, next subsection).
 Closing it needs either a bundle window that starts at rest on its contact,
 or derivatives that use the bundle's own states before the window. The
 bundle's bar position is a fitted shelf in front of the face, not a
@@ -1183,6 +1184,101 @@ back-squat rack, so these arm poses are not a back-squat technique. The
 reaching arms are fitted at the first state only; the IK then tracks the bar.
 Reproduce with \texttt{MUJOCO\_GL=egl python3 scripts/measure\_opensim\_lift\_ik\_id.py}
 and \texttt{python3 -m pytest -o addopts="" tests/unit/lifting/test\_opensim\_lift\_bar\_reach.py}.
+
+\subsection{Back Rack and Settled Window Start (OSL-17, Issue \#13131)}
+\paragraph{Diagnosis.} Two properties of the back-squat bundle left OSL-12
+open. First, the bar sat on a torso shelf fitted to the parity standard's
+start-pose bar position, $(-0.0263, 0, 1.591)$\,m for a 1.75\,m lifter. On
+the lift body that point lies above the shoulder centres, so the shelf put
+the bar in front of the face. Second, the window's first state was still
+settling onto its contact. \texttt{preload\_feet} seats the feet for the
+static weight, but the window starts mid-descent ($-0.46$\,m/s at 1.4\,s), so
+at state~0 the feet carried 1346.6\,N vertical and $-225.3$\,N horizontal.
+The vertical force rose to 1771.4\,N by state~20 and overshot to 2975.5\,N by
+state~50. Only that state failed the Hicks gate.
+
+\paragraph{Rack Definition (Cited).} Glassbrook et al.\ (2019, J Strength
+Cond Res 33(S1):S1--S18, doi:10.1519/JSC.0000000000001836), citing
+Wretenberg, Feng and Arborelius (1996, Med Sci Sports Exerc 28(2):218--224),
+define the high-bar position as the bar across the top of the trapezius,
+just below the C7 spinous process. They define the low-bar position as the
+bar on the lower trapezius, over the posterior deltoid and along the spine
+of the scapula. Neither source gives distances.
+
+The lift body carries C7 as its \texttt{BackTop} marker (on the trunk body).
+\texttt{src/shared/python/lifting/back\_rack.py} sets the bar centre one
+shaft radius (14\,mm, the men's bar of \texttt{Barbell}) behind that marker,
+along the trunk's posterior axis ($-x$), at the marker's own level on the
+sagittal midline. The offset is read from the spec, never copied, so the rack
+carries over to a regenerated lift body. The lift body has no
+spine-of-scapula landmark below C7 (its posterior shoulder markers sit at the
+C7 marker's height), so no low-bar rack is defined.
+
+\paragraph{Why No Tools Change.} The Tools optimizer's \texttt{BodyModel}
+places the bar at $x_s - h\sin q_2 - d\cos q_2$ with
+$d, h \ge 0$ (\texttt{squat\_bar\_depth}, \texttt{squat\_bar\_height}), so
+its bar can only sit behind or below the shoulder joint. The rack is set in
+UD's full-body IK instead. \texttt{\_back\_bar\_pose} fits the shelf to the
+rack point, and \texttt{balance\_lift} then rebalances the trunk for the real
+bar position. The planar optimizer is unchanged.
+
+\paragraph{Settled Start (Method).} \texttt{generate\_lead\_in\_bundle}
+(\texttt{same\_input/reference.py}) starts tracking 100 steps (0.1\,s, five
+solution samples) before the window. The bundle begins on step~100 of that
+run. The lead-in states are recorded as \texttt{provenance["lead\_in"]}.
+\texttt{build\_barbell\_bundle} re-tracks those lead-in states first, so the
+LIFT-4 re-track has settled too (\texttt{provenance["barbell"]["lead\_in"]}).
+The window, its duration, the controller, the gains and the step policy are
+unchanged. Reproduce with \texttt{python3 scripts/generate\_lift\_bundle.py
+--lift squat --load-balance --lead-in 0.1}.
+
+\paragraph{Results.} The numbers below are on the lift body before the de~Leva
+whole-row fix (\#13102); they are regenerated once that body lands.
+\begin{itemize}[nosep]
+\item \textbf{Rack.} At the standing pose the bar centre is 5.5\,mm from the
+  rack point. Over every state of both bundles it stays within 8.0\,mm:
+  4--5\,mm anterior and 6\,mm low, so 9--10\,mm behind the C7 skin. It is
+  behind the neck joint and the shoulder centres, between their levels. The
+  elbows sit at $-144.3/-145.6^\circ$ (bound $-150^\circ$) and the left
+  wrist on its $25^\circ$ bound.
+\item \textbf{IK.} Every landmark is within its bound. Maximum residuals:
+  ankles 4.81/3.53\,mm, knees 10.94/17.92\,mm, hips 14.50/6.06\,mm,
+  shoulders 12.73/8.83\,mm, bar 0.05\,mm. The lowest foot sphere is at
+  $-0.694$\,mm. The bar-load balance converges from 0.0574 to
+  $1.03\times10^{-4}$\,m in three corrections. The grip closure reaches
+  $2.911\times10^{-7}$\,m at the standing pose, so its bound moves from
+  $6.4\times10^{-8}$ to $3.0\times10^{-7}$\,m (evidence on \#13131).
+\item \textbf{Start.} The source bundle's state-0 contact force is
+  $(56.7, 1.1, 2224.2)$\,N, within 1\,\% of it through state~20. The
+  barbell re-track's is $(89.0, 0.8, 2308.2)$\,N, and there is no overshoot.
+  The MuJoCo body-acceleration scale of the instantaneous barbell parity
+  falls from 1108 to 55.4. Engine differences stay at or below
+  $5.0\times10^{-7}$ (bar acceleration $3.3\times10^{-8}$), inside
+  $10^{-6} + 10^{-8}\max|X|$.
+\item \textbf{OpenSim.} All 41 states pass the marker gate (RMS 1.94\,cm,
+  maximum 3.45\,cm) and the Hicks gate. Maximum residual forces are
+  30.9\,N against the 146.7\,N bound and moments 13.8\,N\,m against
+  17.3\,N\,m (pelvis tilt). Before, they were 214.2\,N and 153.8\,N\,m.
+\end{itemize}
+
+\paragraph{Failed Experiments.}
+\begin{itemize}[nosep]
+\item 300 tracking IK iterations leave the grip closure at
+  $2.911\times10^{-7}$\,m. 1000 standing iterations raise it to
+  $4.725\times10^{-7}$\,m: the arm solve trades the weld against the bar
+  target, the bar axis and the wrist bound.
+\end{itemize}
+
+\paragraph{Limitations.} The OpenSim marker error rose from 1.18/2.32\,cm.
+Rajagopal's arm coordinates reach their bounds at the high-bar grip
+(\texttt{arm\_flex} $90^\circ$, \texttt{arm\_rot} $-90^\circ$,
+\texttt{elbow\_flex} $150^\circ$), so the bar marker stays 3.3\,cm RMS off
+and pulls the shoulders about 3\,cm. The gate holds with little margin. The
+parity standard's start-pose bar position (Repository\_Management) still
+lies above the shoulders; this bundle no longer uses it. The planar
+optimizer's bar stays at its shoulder joint. The \texttt{barbell\_hold.json}
+quasi-static hold (1.5\,s) is not regenerated in this change: its sag fix is
+in progress on \#11744.
 
 \subsection{Bench Press Same-Input Bundle (LIFT-5, Issue \#11745)}
 \paragraph{Contact Model.} The same-input full-body spec had contact spheres

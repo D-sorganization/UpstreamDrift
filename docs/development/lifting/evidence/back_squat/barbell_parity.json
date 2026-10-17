@@ -3,28 +3,28 @@
   "bundle_spec_sha256": "056e082cbc9ee6f86aba969c3fa102fa02a6b7714d1a9496df3a3d84d81a6372",
   "engines": {
     "drake": {
-      "bar_acceleration": 3.0966782471608667e-09,
-      "body_acceleration": 4.252832732642986e-07,
-      "hand_force_L": 3.295099304523319e-09,
-      "hand_force_R": 2.784361186058959e-09,
-      "hand_moment_L": 4.795244756827799e-11,
-      "hand_moment_R": 4.795244756827799e-11
+      "bar_acceleration": 3.045598351292256e-08,
+      "body_acceleration": 3.90163523711351e-07,
+      "hand_force_L": 2.5810759973765585e-08,
+      "hand_force_R": 2.630976592143952e-08,
+      "hand_moment_L": 7.579016858549892e-10,
+      "hand_moment_R": 7.579016858549892e-10
     },
     "opensim": {
-      "bar_acceleration": 3.524487368622431e-09,
-      "body_acceleration": 5.799278923745987e-07,
-      "hand_force_L": 2.1177015696594026e-09,
-      "hand_force_R": 2.0543780010484625e-09,
-      "hand_moment_L": 5.918532330895232e-11,
-      "hand_moment_R": 5.918532330895232e-11
+      "bar_acceleration": 3.302480822142684e-08,
+      "body_acceleration": 4.3711424613235295e-07,
+      "hand_force_L": 2.812957378139913e-08,
+      "hand_force_R": 2.7896996712684086e-08,
+      "hand_moment_L": 7.852112293704749e-10,
+      "hand_moment_R": 7.852112293704749e-10
     },
     "pinocchio": {
-      "bar_acceleration": 3.2289133589102903e-09,
-      "body_acceleration": 3.89193566263657e-07,
-      "hand_force_L": 2.1494770408025943e-09,
-      "hand_force_R": 1.9776571491547656e-09,
-      "hand_moment_L": 4.966715927423593e-11,
-      "hand_moment_R": 4.966715927423593e-11
+      "bar_acceleration": 2.57805177206194e-08,
+      "body_acceleration": 4.990650437353139e-07,
+      "hand_force_L": 2.373291563273483e-08,
+      "hand_force_R": 2.383717134790686e-08,
+      "hand_moment_L": 6.6943858789692e-10,
+      "hand_moment_R": 6.6943858789692e-10
     }
   },
   "generator": "scripts/generate_barbell_squat_evidence.py --part parity",
@@ -43,13 +43,13 @@
   ],
   "lift": "back_squat",
   "mujoco_scale": {
-    "bar_acceleration": 9.297979060404119,
-    "body_acceleration": 1108.1818954881346,
-    "hand_force_L": 951.2857302879183,
-    "hand_force_R": 959.1771757524934,
-    "hand_moment_L": 1.9252919602235872,
-    "hand_moment_R": 1.9252919602235872
+    "bar_acceleration": 7.103164684444164,
+    "body_acceleration": 55.42005903960154,
+    "hand_force_L": 856.1212306715234,
+    "hand_force_R": 834.8602377728929,
+    "hand_moment_L": 4.692902486610068,
+    "hand_moment_R": 4.692902486610068
   },
-  "source_commit": "ba6d53fef7906a88d3546bd8c99e9647185fac23",
+  "source_commit": "60c06ac9d4ddb9ab21d4bed34df7cd90fa4f9416",
   "tolerance": "|dX| <= 1e-6 + 1e-8 * max|X| (L1, epic #11605)"
 }

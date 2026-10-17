@@ -201,3 +201,26 @@ records now read:
 - **Hold:** body plus bar is carried at 0.75-1.0 s, then sags. The 1 % bands
   over the last 0.5 s still fail narrowly: ground 0.988, hands 0.986.
 - **Size:** loaded bundles carry their hold efforts, up to 600,000 bytes.
+
+## High-Bar Rack and Settled Start (OSL-17, #13131)
+
+The bar sits on the cited high-bar rack: one shaft radius (14 mm) behind the
+lift body's C7 landmark (`BackTop`), along the trunk's posterior axis. The
+source is Glassbrook et al. 2019 (J Strength Cond Res 33(S1):S1-S18), citing
+Wretenberg et al. 1996. It is defined in
+`src/shared/python/lifting/back_rack.py`. It replaces the parity standard's
+start-pose bar position, which lies above the shoulders.
+
+Both bundles start after a 0.1 s lead-in (100 steps, recorded as
+`provenance["lead_in"]` and `provenance["barbell"]["lead_in"]`), so state 0
+is settled on its contact. The source bundle's state-0 vertical force is
+2224.2 N, steady over the first 20 states; before, it was 1346.6 N rising to
+1771.4 N. The OpenSim squat now passes the Hicks residual gate on all 41
+states. The numbers and the failed experiments are in
+`docs/research/lift_models/lift_models.tex` (OSL-17). Regenerate with:
+
+```bash
+python3 scripts/generate_lift_bundle.py --lift squat --load-balance --lead-in 0.1
+python3 scripts/generate_barbell_squat_evidence.py --part bundle --source-commit <sha>
+python3 scripts/generate_barbell_squat_evidence.py --part parity --source-commit <sha>
+```
