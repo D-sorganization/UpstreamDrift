@@ -24,6 +24,7 @@ from ..dependencies import (
     get_simulation_service,
     get_task_manager,
 )
+from ..models.plate_overlay import PlateOverlayRequest
 from ..models.requests import (
     AnalysisRequest,
     CandidateCounterfactualRequest,
@@ -38,6 +39,10 @@ from ..models.responses import (
 from ..services.grip_wrench_service import compute_grip_plot
 from ..services.ground_reaction_service import compute_ground_reaction_plot
 from ..services.impact_parameters_service import compute_impact_card
+from ..services.plate_overlay_service import (
+    PlateRootNotConfiguredError,
+    compute_ground_reaction_overlay,
+)
 from ..utils.datetime_compat import UTC
 
 if TYPE_CHECKING:
@@ -373,4 +378,30 @@ async def get_ground_reaction(
     run, payload = _run_plot_payload(
         service, run_id, compute_ground_reaction_plot, impact_time_s=impact_time_s
     )
+    return GroundReactionResponse(run_id=run.run_id, engine=run.engine_type, **payload)
+
+
+@router.post(
+    "/analysis/ground-reaction/plate-overlay", response_model=GroundReactionResponse
+)
+async def post_ground_reaction_plate_overlay(
+    request: PlateOverlayRequest,
+    service: SimulationService = Depends(get_simulation_service),
+) -> GroundReactionResponse:
+    """Ground reaction of a run with a measured plate trial overlaid (OF-07).
+
+    The trial is a path relative to the server's plate-trial root; shear is
+    ``null`` (a vertical plate does not observe it) and ``measured_qualified``
+    is false for an unqualified device.  404 unknown run, 400 refused trial or
+    declarations, 503 when no plate-trial root is configured.
+    """
+    run = service.get_run(request.run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="No such simulation run")
+    try:
+        payload = compute_ground_reaction_overlay(run, request)
+    except PlateRootNotConfiguredError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     return GroundReactionResponse(run_id=run.run_id, engine=run.engine_type, **payload)
