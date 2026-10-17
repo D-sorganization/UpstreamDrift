@@ -23,7 +23,6 @@ from src.shared.python.motion_matching.same_input.integrator import (
     effort_holds_for,
 )
 from src.shared.python.motion_matching.same_input.stiffness import (
-    RK4_MAX_DAMPING_Z,
     RK4_REAL_STABILITY_LIMIT,
     rk4_amplification,
     stiffest_rate,
@@ -127,20 +126,12 @@ def test_rk4_amplification_matches_the_stability_limit() -> None:
     assert rk4_amplification(-3.6) > 1.0
 
 
-def test_rk4_max_damping_point_is_the_amplification_minimum() -> None:
-    grid = np.linspace(0.0, RK4_REAL_STABILITY_LIMIT, 20001)
-    amplification = [rk4_amplification(-x) for x in grid]
-    assert grid[int(np.argmin(amplification))] == pytest.approx(
-        RK4_MAX_DAMPING_Z, abs=2e-4
-    )
-
-
 def test_substeps_for_keeps_the_stiffest_mode_inside_the_target() -> None:
-    # The loaded squat's stiffest foot mode, 8.95e4 1/s over a 1 ms step:
-    # 32 substeps give |z| = 2.80 (past the stability limit), 64 give 1.40,
-    # the first power of two at or below the max-damping point 1.596.
+    # The loaded squat's stiffest foot modes over a 1 ms step: 8.95e4 1/s
+    # gives |z| = 2.80 at 32 substeps (past the 2.785 limit), so 64; the
+    # window peak 1.3e5 gives 2.03 at 64.
     assert substeps_for(8.95e4, 1e-3) == 64
-    assert substeps_for(2.9e4, 1e-3) == 32
+    assert substeps_for(1.3e5, 1e-3) == 64
     assert substeps_for(1.0e4, 1e-3) == DEFAULT_SUBSTEPS
     assert substeps_for(1.0e4, 1e-3, target=1.0) == 16
     with pytest.raises(ValueError):

@@ -65,7 +65,11 @@ GRID: tuple[tuple[int, float], ...] = (
     (64, 5e-4),
     (64, 1.25e-4),
 )
-STABILITY_EVERY = 10
+STABILITY_EVERY = 5
+#: Consecutive substep counts at the committed 0.25 ms hold whose trajectories
+#: are differenced (``substep_convergence``).
+CONVERGENCE_HOLD_S = 2.5e-4
+ROOT_TRANSLATIONS = 3
 
 
 def measure(args: tuple[bytes, list[str], np.ndarray, np.ndarray, float, int, float]):
@@ -117,7 +121,31 @@ def measure(args: tuple[bytes, list[str], np.ndarray, np.ndarray, float, int, fl
             1e-3 / substeps,
         ),
         "wall_s": time.monotonic() - started,
+        "_q": rollout.q,
     }
+
+
+def substep_convergence(runs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Largest trajectory difference between consecutive substep counts at
+    :data:`CONVERGENCE_HOLD_S`: root translation (m), other coordinates (rad).
+    """
+    at_hold = sorted(
+        (r for r in runs if abs(r["effort_hold_s"] - CONVERGENCE_HOLD_S) < 1e-12),
+        key=lambda r: r["substeps"],
+    )
+    pairs = []
+    for coarse, fine in zip(at_hold, at_hold[1:], strict=False):
+        rows = min(coarse["_q"].shape[0], fine["_q"].shape[0])
+        gap = np.abs(coarse["_q"][:rows] - fine["_q"][:rows])
+        pairs.append(
+            {
+                "substeps": [coarse["substeps"], fine["substeps"]],
+                "rows": int(rows),
+                "max_root_translation_m": float(gap[:, :ROOT_TRANSLATIONS].max()),
+                "max_coordinate_rad": float(gap[:, ROOT_TRANSLATIONS:].max()),
+            }
+        )
+    return pairs
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -133,6 +161,19 @@ def main(argv: list[str] | None = None) -> int:
     jobs = [(*shared, window, substeps, hold) for substeps, hold in GRID]
     with ProcessPoolExecutor(max_workers=max(1, args.jobs)) as pool:
         runs = list(pool.map(measure, jobs))
+    convergence = substep_convergence(runs)
+    committed = next(
+        r
+        for r in runs
+        if r["substeps"] == bundle.substeps
+        and abs(r["effort_hold_s"] - bundle.effort_hold_s) < 1e-12
+    )
+    reproduces = bool(np.array_equal(committed["_q"], bundle.reference_q))
+    for run in runs:
+        run.pop("_q")
+    for pair in convergence:
+        logger.info("substep convergence %s", pair)
+    logger.info("committed-policy run reproduces the bundle: %s", reproduces)
     for run in runs:
         logger.info(
             "substeps %3d hold %.3e s: failure %s, |z| %.2f, foot r/l %.2f/%.2f mm",
@@ -155,6 +196,8 @@ def main(argv: list[str] | None = None) -> int:
         "bundle_policy": bundle.manifest()["policy"],
         "window": bundle.provenance["window"],
         "runs": runs,
+        "substep_convergence": convergence,
+        "committed_policy_run_reproduces_bundle": reproduces,
     }
     args.out.write_text(json.dumps(record, indent=1, sort_keys=True) + "\n")
     logger.info("wrote %s", args.out.relative_to(ROOT))

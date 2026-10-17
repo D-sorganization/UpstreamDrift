@@ -2,17 +2,17 @@
 
 Tracking the bar-balanced squat IK with the 100 kg bar under the original
 contract (eight 0.125 ms RK4 substeps, 1 ms effort hold) lost the feet: the
-mtp, ankle and subtalar ran away from the IK.  The stiffest open-loop
-foot-contact mode gave |lambda h| above 2.785 from the first steps, outside
-RK4's real stability limit 2.785, and the mode reaches 8.95e4 1/s at the
-squat bottom.  Bar-loaded lifts now track at 64 substeps with a 0.25 ms hold
-(``barbell_runs.LOADED_TRACKING_POLICY``), |lambda h| = 1.40, inside RK4's
-maximum-damping point 1.596.
+mtp, ankle and subtalar ran 0.23 m (right foot points) from the IK.  The
+stiffest open-loop foot-contact mode, growing with the ground force to 1.3e5
+1/s, puts |lambda h| outside RK4's real stability limit 2.785.  Bar-loaded
+lifts now track at 64 substeps with a 0.25 ms hold
+(``barbell_runs.LOADED_TRACKING_POLICY``): |lambda h| at most 2.03.
 
 The bounds are fixed, not tuned: each side's foot points, in its tibia frame
 (``loaded_foot.foot_point_deviation_m``), stay within that side's LIFT-5 ankle
 IK residual threshold for the whole window, and the result converges as the
-step shrinks (RK4 substeps at a fixed hold; the hold at fixed substeps).
+step shrinks: the trajectory at twice the substeps agrees within the epic
+#11605 L2 coordinate bound, and the foot error falls as the hold halves.
 The record is ``scripts/measure_loaded_foot_tracking.py``'s sweep.
 """
 
@@ -27,19 +27,17 @@ from src.shared.python.lifting.barbell_runs import LOADED_TRACKING_POLICY
 from src.shared.python.lifting.bundles import BACK_SQUAT_BUNDLE
 from src.shared.python.lifting.loaded_foot import LOADED_FOOT_RECORD
 from src.shared.python.motion_matching.same_input import InputBundle
+from src.shared.python.motion_matching.same_input.scoring import (
+    COORDINATE_BOUND_RAD,
+)
 from src.shared.python.motion_matching.same_input.stiffness import (
-    RK4_MAX_DAMPING_Z,
     RK4_REAL_STABILITY_LIMIT,
 )
 
 pytestmark = pytest.mark.unit
 
 #: |lambda h| target of the substep rule (stiffness.DEFAULT_TARGET).
-STABILITY_TARGET = RK4_MAX_DAMPING_Z
-#: Substep convergence: 64 -> 128 substeps at the committed hold moves no
-#: foot coordinate by more than this (rad) -- the integration error is
-#: resolved.
-SUBSTEP_CONVERGENCE_RAD = 1e-3
+STABILITY_TARGET = RK4_REAL_STABILITY_LIMIT
 
 
 def _ankle_bounds() -> dict[str, float]:
@@ -109,12 +107,19 @@ def test_loaded_feet_stay_within_the_lift5_ankle_bounds(record) -> None:
         assert run["foot_point_deviation_m"][side] <= limit, side
 
 
-def test_foot_tracking_converges_in_the_rk4_substep(record) -> None:
-    coarse, fine = _run(record, 64, 2.5e-4), _run(record, 128, 2.5e-4)
-    for joint, error in coarse["foot_joint_error_rad"].items():
-        assert abs(error - fine["foot_joint_error_rad"][joint]) <= (
-            SUBSTEP_CONVERGENCE_RAD
-        ), joint
+def test_tracking_converges_in_the_rk4_substep(record) -> None:
+    """Doubling the committed substeps moves the whole trajectory by less
+    than the L2 coordinate bound (root translation in m, the rest in rad)."""
+    assert record["committed_policy_run_reproduces_bundle"] is True
+    pairs = {tuple(p["substeps"]): p for p in record["substep_convergence"]}
+    fine = pairs[(LOADED_TRACKING_POLICY.substeps, 2 * LOADED_TRACKING_POLICY.substeps)]
+    assert fine["rows"] == round(record["window"]["duration_s"] / 1e-3) + 1
+    assert fine["max_coordinate_rad"] <= COORDINATE_BOUND_RAD
+    assert fine["max_root_translation_m"] <= COORDINATE_BOUND_RAD
+    coarse = pairs[
+        (LOADED_TRACKING_POLICY.substeps // 2, LOADED_TRACKING_POLICY.substeps)
+    ]
+    assert coarse["max_coordinate_rad"] > COORDINATE_BOUND_RAD  # half is not
 
 
 def test_foot_tracking_converges_in_the_effort_hold(record) -> None:

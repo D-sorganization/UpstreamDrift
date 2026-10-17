@@ -35,13 +35,19 @@ pytestmark = pytest.mark.unit
 # widened entries (golf body: knee_r 0.0110, hip_l 0.0149, shoulders 0.0098,
 # penetration 5.4e-4) and their physical reasons are recorded on #13057
 # (issuecomment-6229479012); the #13072 re-track fix does not change them.
+# OSL-16 (#13104): the committed source is now the bar-balanced IK (#13093),
+# whose more upright trunk moves the right ankle to 3.59 mm and the right hip
+# to 9.13 mm (were 3.08 and 6.32 mm), so those two bounds are widened with the
+# evidence on #13104; every other landmark fell (ankle_l 4.37, knee_l 3.15,
+# knee_r 11.68, hip_l 8.07, shoulder_l 3.65, shoulder_r 3.04 mm, bar 0.01 mm)
+# and keeps its earlier bound.
 IK_RESIDUAL_THRESHOLDS_M = {
     "ankle_l": 0.0057,
-    "ankle_r": 0.0031,
+    "ankle_r": 0.0036,
     "knee_l": 0.0152,
     "knee_r": 0.0225,
     "hip_l": 0.0178,
-    "hip_r": 0.0064,
+    "hip_r": 0.0092,
     "shoulder_l": 0.0196,
     "shoulder_r": 0.0151,
     "bar": 0.0001,
