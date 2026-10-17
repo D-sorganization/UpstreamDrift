@@ -158,6 +158,19 @@ def test_invalid_declarations_and_handedness_are_400(root: Path) -> None:
     assert _client().post(ROUTE, json=_body(name, origin_m=[0.0])).status_code == 422
 
 
+def test_cross_correlation_alignment_needs_its_fitted_model(root: Path) -> None:
+    name = w.write_swing(root).name
+    fitted = {
+        "offset_s": 0.0,
+        "sigma_offset_s": 0.001,
+        "kind": "cross_correlation",
+        "note": "fitted against the model's vertical force",
+    }
+    named = _body(name, alignment={**fitted, "derived_from_model": "model-a"})
+    assert _client().post(ROUTE, json=named).status_code == 200
+    assert _client().post(ROUTE, json=_body(name, alignment=fitted)).status_code == 400
+
+
 def test_run_without_ground_reaction_stays_unavailable(root: Path) -> None:
     name = w.write_swing(root).name
     response = _client({}).post(ROUTE, json=_body(name))

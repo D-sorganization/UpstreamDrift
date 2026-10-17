@@ -36,6 +36,7 @@ def _texts(**changes: str) -> dict[str, str]:
         "offset_s": "0.25",
         "sigma_offset_s": "0.001",
         "alignment_kind": "manual",
+        "derived_from_model": "",
         "alignment_note": "clap on both clocks",
     }
     texts.update(changes)
@@ -116,11 +117,35 @@ def test_domain_refusals_become_form_errors(key: str, text: str) -> None:
         context_from_form(_texts(**{key: text}))
 
 
-def test_cross_correlation_is_not_typed_by_hand() -> None:
-    assert "cross_correlation" not in ALIGNMENT_KINDS
+def test_cross_correlation_is_offered() -> None:
+    assert "cross_correlation" in ALIGNMENT_KINDS
+
+
+def test_cross_correlation_records_the_model_it_was_fitted_against() -> None:
+    alignment = context_from_form(
+        _texts(alignment_kind="cross_correlation", derived_from_model="model-a")
+    ).alignment
+    assert alignment.kind == "cross_correlation"
+    assert alignment.derived_from_model == "model-a"
+    # Fitted against model-a, so it can never be evidence for model-a.
+    assert not alignment.validates("model-a")
+    assert alignment.validates("model-b")
+
+
+def test_cross_correlation_without_its_model_names_that_field() -> None:
     with pytest.raises(PlateFormError) as info:
         context_from_form(_texts(alignment_kind="cross_correlation"))
-    assert info.value.key == "alignment_kind"
+    assert info.value.key == "derived_from_model"
+
+
+def test_a_declared_alignment_cannot_claim_a_fitted_model() -> None:
+    with pytest.raises(PlateFormError) as info:
+        context_from_form(_texts(derived_from_model="model-a"))
+    assert info.value.key == "derived_from_model"
+
+
+def test_declared_alignments_record_no_model() -> None:
+    assert context_from_form(_texts()).alignment.derived_from_model is None
 
 
 def test_unknown_field_is_refused() -> None:

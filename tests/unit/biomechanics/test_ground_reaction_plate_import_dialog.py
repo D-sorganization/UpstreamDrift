@@ -69,9 +69,27 @@ def test_a_refused_value_names_its_field_and_keeps_the_dialog_open() -> None:
     assert "capacity_n" in dialog.error_label.text()
 
 
+def test_cross_correlation_is_accepted_with_its_fitted_model() -> None:
+    dialog = _dialog(
+        _texts(alignment_kind="cross_correlation", derived_from_model="model-a")
+    )
+    dialog.accept()
+    assert dialog.result() == dialog.DialogCode.Accepted
+    context = dialog.context()
+    assert context is not None
+    assert context.alignment.derived_from_model == "model-a"
+
+
+def test_cross_correlation_without_its_model_keeps_the_dialog_open() -> None:
+    dialog = _dialog(_texts(alignment_kind="cross_correlation"))
+    dialog.accept()
+    assert dialog.result() != dialog.DialogCode.Accepted
+    assert "derived_from_model" in dialog.error_label.text()
+
+
 def test_unknown_choice_in_prefill_is_refused() -> None:
     with pytest.raises(ValueError, match="alignment_kind"):
-        _dialog(_texts(alignment_kind="cross_correlation"))
+        _dialog(_texts(alignment_kind="fitted"))
 
 
 class _FakeDialog:

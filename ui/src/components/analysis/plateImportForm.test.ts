@@ -36,8 +36,27 @@ describe('plate import form', () => {
     expect(texts.alignment_kind).toBe('manual');
   });
 
-  it('never offers cross-correlation, which is fitted by code', () => {
-    expect(ALIGNMENT_KINDS).toEqual(['manual', 'shot_impact', 'absolute_utc']);
+  it('offers cross-correlation alongside the declared alignments', () => {
+    expect(ALIGNMENT_KINDS).toEqual(['manual', 'shot_impact', 'absolute_utc', 'cross_correlation']);
+  });
+
+  it('sends the model a cross-correlated offset was fitted against', () => {
+    const result = requestFromPlateForm(
+      complete({ alignment_kind: 'cross_correlation', derived_from_model: 'model-a' }),
+    );
+    expect(result.error).toBeNull();
+    expect(result.request?.alignment.kind).toBe('cross_correlation');
+    expect(result.request?.alignment.derived_from_model).toBe('model-a');
+  });
+
+  it('refuses a cross-correlation without its model, and a model without one', () => {
+    const refused: Record<string, string>[] = [
+      { alignment_kind: 'cross_correlation' },
+      { derived_from_model: 'model-a' },
+    ];
+    for (const changes of refused) {
+      expect(requestFromPlateForm(complete(changes)).error?.key).toBe('derived_from_model');
+    }
   });
 
   it('builds the overlay request from a complete form', () => {
@@ -63,6 +82,7 @@ describe('plate import form', () => {
         sigma_offset_s: 0.001,
         kind: 'manual',
         note: 'clap on both clocks',
+        derived_from_model: null,
       },
     });
   });
@@ -87,7 +107,7 @@ describe('plate import form', () => {
     ['origin_m', '1, 2'],
     ['target_dir', '0, -1, x'],
     ['handedness', 'ambi'],
-    ['alignment_kind', 'cross_correlation'],
+    ['alignment_kind', 'fitted'],
   ])('refuses %s = %s with that field named', (key, text) => {
     const result = requestFromPlateForm(complete({ [key]: text }));
     expect(result.request).toBeNull();

@@ -31,7 +31,7 @@ _WEB_FORM = (
 )
 _FIELD = re.compile(
     r"field\(\s*'(?P<key>[a-z_]+)',\s*'(?P<label>[^']*)',\s*'(?P<section>[A-Za-z]+)'"
-    r"(?P<extra>,\s*\{[^}]*\})?\s*\)",
+    r"(?P<extra>,\s*\{[^}]*\})?,?\s*\)",
 )
 _WEB_ONLY = ("trial",)
 

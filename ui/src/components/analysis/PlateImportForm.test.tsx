@@ -16,12 +16,12 @@ describe('PlateImportForm', () => {
     expect(screen.getByTestId('plate-import-error')).toHaveTextContent('trial: required');
   });
 
-  it('offers only the alignments a person can declare', () => {
+  it('offers every alignment kind, cross-correlation included', () => {
     render(<PlateImportForm onSubmit={vi.fn()} />);
     const kinds = Array.from(
       (screen.getByTestId('plate-field-alignment_kind') as HTMLSelectElement).options,
     ).map((o) => o.value);
-    expect(kinds).toEqual(['manual', 'shot_impact', 'absolute_utc']);
+    expect(kinds).toEqual(['manual', 'shot_impact', 'absolute_utc', 'cross_correlation']);
   });
 
   it('submits the overlay request built from a complete form', () => {
