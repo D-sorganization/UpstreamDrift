@@ -292,9 +292,7 @@ class GroundObservation:
         names = [c.name for c in snapshot.foot_contacts]
         rows, values, labels = [], [], []
         for label, members in groups.items():
-            unknown = sorted(set(members) - set(names))
-            if unknown:
-                raise ValueError(f"group {label!r} has unknown contacts {unknown}")
+            _resolve_group(names, label, members)
             force = np.asarray(forces[label], dtype=np.float64)
             check_shape(force, (3,), f"forces[{label!r}]")
             for axis in range(3):
@@ -371,26 +369,16 @@ class GroundObservation:
     ) -> GroundObservation:
         """Per-foot vertical-cell plates: a load row and two CoP moment rows each.
 
-        For foot ``F`` with contacts ``k`` (``groups[F]``), measured load
-        ``N_F`` and CoP ``c'`` on the plate's force-sensing plane, with
-        ``r_k = p_k - c'`` (OF-11, #13067)::
-
-            sum_k n . f_k = N_F
-            sum_k [(r_k . t_i)(n . f_k) - (r_k . n)(t_i . f_k)] = 0,  i = 1, 2
-
-        The second term is the shear lever arm about the sensing plane; it
-        vanishes when ``c'`` lies at the contact height.  Sigmas: ``sigma_force_n``
-        for the load row and ``N_F * hypot(sigma_cop_m, mu_F * sigma_sensing_m)``
-        for the moment rows, where ``mu_F`` is the largest declared friction
-        coefficient of the foot (``|t_i . f| <= mu n . f`` bounds the effect of
-        the depth uncertainty).  A foot whose reading has no CoP (below the
-        plate's threshold), or whose group is empty, contributes only its load
-        row; an empty group's load row is zero, so a measured load on a foot
-        the model leaves unloaded is tested, never ignored.
+        The rows and sigmas are defined on :class:`FootLoadReading` (OF-11,
+        #13067).  ``groups`` maps each reading's foot to its contact names; a
+        foot whose reading has no CoP, or whose group is empty, contributes
+        only its load row (an empty group's row is zero, so a measured load
+        on a foot the model leaves unloaded is tested, never ignored).
 
         Preconditions (``ValueError``): ``readings`` and ``groups`` name the
-        same feet; every member is a contact of ``snapshot`` and belongs to one
-        foot; the contacts share one normal.  Shear is never assigned a value.
+        same feet; every member is a contact of ``snapshot``, named once and in
+        one foot; the contacts share one normal.  Shear is never assigned a
+        value.
         """
         contacts = snapshot.foot_contacts
         if not contacts:
@@ -421,6 +409,20 @@ class GroundObservation:
 @dataclass(frozen=True)
 class FootLoadReading:
     """One foot's vertical-cell plate reading in the world frame (OF-11).
+
+    For foot ``F`` with contacts ``k``, load ``N_F`` and CoP ``c'``, with
+    ``r_k = p_k - c'``, the observation rows are::
+
+        sum_k n . f_k = N_F
+        sum_k [(r_k . t_i)(n . f_k) - (r_k . n)(t_i . f_k)] = 0,  i = 1, 2
+
+    The second term is the shear lever arm.  ``c'`` lies at the height where
+    the plate's *horizontal* reactions act (for pure vertical load cells, the
+    cell plane), so ``r_k . n`` is that lever.  Sigmas: ``sigma_force_n`` for
+    the load row and ``max(N_F, sigma_force_n) * hypot(sigma_cop_m,
+    mu_F * sigma_sensing_m)`` for the moment rows, ``mu_F`` the foot's largest
+    declared friction coefficient (``|t_i . f| <= mu n . f`` bounds the effect
+    of the depth uncertainty).
 
     ``cop_m`` is the measured centre of pressure **on the plate's force-sensing
     plane** (its normal coordinate is the height of that plane), or ``None``
@@ -506,6 +508,15 @@ def _cop_moment_rows(
     return rows
 
 
+def _resolve_group(names: Sequence[str], label: str, group: Sequence[str]) -> None:
+    """Every member of ``group`` is a known contact name, each named once."""
+    unknown = sorted(set(group) - set(names))
+    if unknown:
+        raise ValueError(f"group {label!r} has unknown contacts {unknown}")
+    if len(set(group)) != len(group):
+        raise ValueError(f"group {label!r} repeats a contact")
+
+
 def _foot_members(
     contacts: Sequence[FootContact],
     readings: Mapping[str, FootLoadReading],
@@ -520,9 +531,7 @@ def _foot_members(
     seen: set[str] = set()
     out: dict[str, tuple[int, ...]] = {}
     for label, group in groups.items():
-        unknown = sorted(set(group) - set(names))
-        if unknown:
-            raise ValueError(f"group {label!r} has unknown contacts {unknown}")
+        _resolve_group(names, label, group)
         if seen & set(group):
             raise ValueError(
                 f"contacts {sorted(seen & set(group))} are in more than one foot"
@@ -549,9 +558,9 @@ def _plate_rows(
         )
     offsets = np.array([contacts[k].position for k in members]) - reading.cop_m
     mu = max(contacts[k].mu for k in members)
-    sig_m = reading.normal_load_n * math.hypot(
-        reading.sigma_cop_m, mu * reading.sigma_sensing_m
-    )
+    # max(N, sigma_N): a load near its own noise must not shrink the band.
+    scale = max(reading.normal_load_n, reading.sigma_force_n)
+    sig_m = scale * math.hypot(reading.sigma_cop_m, mu * reading.sigma_sensing_m)
     return _PlateBlock(
         np.vstack([load_row, _cop_moment_rows(offsets, members, frame, len(contacts))]),
         (reading.normal_load_n, 0.0, 0.0),

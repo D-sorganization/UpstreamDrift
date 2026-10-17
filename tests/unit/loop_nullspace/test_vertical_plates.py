@@ -29,7 +29,7 @@ from src.shared.python.loop_nullspace.ground_contact import (
     observation_accounting,
     restrict_to_observation,
 )
-from tests.unit.loop_nullspace.test_ground_contact import VARIANTS, _consistent
+from tests.unit.loop_nullspace._ground_fixtures import VARIANTS, make_consistent
 
 pytestmark = [pytest.mark.unit, pytest.mark.requires_pinocchio]
 
@@ -43,7 +43,7 @@ def plate_case(request):
     snap, _ = spatial_two_arm_club_snapshot(
         floating_root=True, feet=True, zero_root_pose=True, **VARIANTS[request.param]
     )
-    snap = _consistent(snap)
+    snap = make_consistent(snap)
     dec = decompose(snap, weights=np.eye(snap.topology.n_actuated))
     golden = load_golden("lower_body_observation", request.param).payload
     per_foot = VARIANTS[request.param]["foot_points"]
@@ -282,6 +282,27 @@ def test_a_cop_needs_a_load_above_zero() -> None:
             sigma_cop_m=0.005,
             sigma_sensing_m=0.0,
         )
+
+
+def test_a_group_may_not_repeat_a_contact(plate_case) -> None:
+    snap, dec, _, groups = plate_case
+    readings = _true_readings(snap, dec, groups, 0.0)
+    left = list(groups["left"])
+    with pytest.raises(ValueError, match="repeats"):
+        GroundObservation.from_vertical_plates(
+            snap, readings, {"left": left + left, "right": groups["right"]}
+        )
+
+
+def test_moment_sigma_does_not_collapse_for_a_load_near_its_noise(plate_case) -> None:
+    snap, dec, _, groups = plate_case
+    readings = _true_readings(snap, dec, groups, 0.0)
+    tiny = dataclasses.replace(readings["left"], normal_load_n=1.0, sigma_force_n=5.0)
+    obs = GroundObservation.from_vertical_plates(
+        snap, {**readings, "left": tiny}, groups
+    )
+    # The multiplier is max(N, sigma_N) = 5 N, not the 1 N reading.
+    assert obs.sigma[1] == pytest.approx(5.0 * SIGMA_COP)
 
 
 def test_foot_load_reading_arrays_are_read_only() -> None:

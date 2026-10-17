@@ -323,7 +323,10 @@ A vertical-cell plate under foot $F$ (epic \#13061; contacts $k\in F$ at
 $p_k$) reports the foot's normal load $N_F$ and the centre of pressure $c'_F$
 at which its cells' vertical reactions balance.  The cells sit in a
 force-sensing plane a depth $h$ below the contacts, and a massless rigid plate
-balances the moment of the foot's loads about $c'_F$ in that plane.  With
+balances the moment of the foot's loads about $c'_F$ in that plane.  The depth
+is the height at which the plate's \emph{horizontal} reactions act; for pure
+vertical load cells that is the cell plane, and a plate whose shear is carried
+by a frame or bearing at another height must declare that height instead.  With
 $r_k=p_k-c'_F$ and the contact frame $(t_1,t_2,n)$ the observation rows are
 \begin{equation}
 \sum_{k\in F} n^{\top}f_k=N_F,\qquad
@@ -337,8 +340,9 @@ normal-load-and-CoP observation.  Shear is never assigned a value: it enters
 only through the declared depth.  The free moment is a derived property of the
 shear split and is not observed.  The declared uncertainties are $\sigma_{N,F}$
 for the load row and
-$\sigma_{M,F}=N_F\sqrt{\sigma_{c,F}^2+(\mu_F\,\sigma_h)^2}$ for the moment
-rows, where $\mu_F$ is the largest declared friction coefficient of the foot;
+$\sigma_{M,F}=\max(N_F,\sigma_{N,F})\sqrt{\sigma_{c,F}^2+(\mu_F\,\sigma_h)^2}$
+for the moment rows (the floor keeps a load near its own noise from
+shrinking the band), where $\mu_F$ is the largest declared friction coefficient of the foot;
 because $|t_i^{\top}f_k|\le\mu\,n^{\top}f_k$ this bounds the effect of an
 uncertain depth.  A foot below the plate's CoP threshold contributes only its
 load row.  A foot whose model has no active contact contributes a zero load
@@ -357,15 +361,19 @@ distribution within a foot and, through $h$, part of the shear).
 $\rank E-\rank(E_xN)$ rows (two of two with point feet and $h=0$) are already
 fixed by the balance, so they cannot narrow the family; they test it, and the
 restriction routine refuses a candidate motion and model whose implied loads
-disagree with the data by more than $k\sigma$.  Neither role selects a unique
-solution.
+disagree with the data by more than $k\sigma$.  That refusal is a per-row
+screen on weighted least-squares residuals, with the depth term folded in as a
+bound; it is not a calibrated test.  The family-wise screen over a whole
+trajectory, with a profiled clock offset, is OF-12 (\#13070).  Neither role
+selects a unique solution.
 
 Non-claims: contacts are rigid and unilateral (no compliance, no slip
 dynamics); a friction coefficient is a declared hypothesis; an observation
 produced by a simulation standing in for a force plate is a simulation record,
 not a measurement; contact loads are not physiological quantities; the plate
 is massless and rigid; plate uncertainties are declared hypotheses until a
-device is qualified (deferred-validation record DV-13061).
+device is qualified (deferred-validation record DV-13061, added with the
+integration plan in \#13062).
 
 \section{Zero-Side Three-Case Analysis}
 \label{sec:zeroside}
