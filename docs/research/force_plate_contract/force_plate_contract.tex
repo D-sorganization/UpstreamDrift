@@ -1,0 +1,109 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{url}
+\title{Vertical Force-Plate Trial Contract, Placement and Observed Ground Reaction (OF-01, Epic \#13061, \#13065)}
+\author{UpstreamDrift engineering reference}
+\date{2026-10-17}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Status.} Editable standalone research reference (see
+\path{AGENTS.md}, Modeling Reference Documentation). It is not the
+engineering design manual, whose only editable source is
+\path{manuals/upstreamdrift}. Software correctness only: nothing here is a
+scientific qualification. No plate hardware has been measured; hardware
+validation is deferred to OF-HW (\#13082, record DV-13061).
+
+\section{Model Topology and Assumptions}
+
+The record is implemented in \path{src/shared/python/force_plates/}
+(\path{contracts.py}, \path{placement.py}, \path{conversion.py}). It describes
+two rigid, level plates of vertical load cells, one under each foot. Per foot
+it observes the normal load $N$ and the centre of pressure (CoP) of that
+load. It does \emph{not} observe shear $F_x, F_y$ or the free moment about the
+vertical, and these are never reported as zero.
+
+\section{Frames and Units}
+
+\paragraph{Stance Frame.} Metres, viewed from above. The origin is midway
+between the plate centres, $+x$ points from the left plate toward the right
+plate, $+y$ toward the ball, and $+z$ up. The golfer faces $+y$, so the left
+plate is under the left foot for either handedness; handedness only decides
+which foot leads (right-handed: left leads). Loads are exerted by the ground
+on the foot, positive upward, in N. Times are in seconds.
+
+\paragraph{World Placement.} A \texttt{PlatePlacement} maps a stance point to
+the world as $p = o + R\,(x, y, 0)^\top$. $R$ must be orthonormal, proper and
+keep $+z$ fixed (a yaw), all to an \emph{absolute} tolerance of $10^{-9}$ with
+no relative tolerance. A tilt would make the measured load non-vertical, a
+reflection would silently swap the feet, and a scale would stretch stance
+distances. $o_z$ is the height of the plate top surface. OF-03 derives $R$
+from a model's declared target frame.
+
+\section{Data Validity}
+
+Checked on construction, with each failure raising an error that names the
+field:
+\begin{itemize}
+  \item times finite and strictly increasing; every series has the same
+        length;
+  \item loads finite, and not below $-3\,\sigma_{\mathrm{floor}}$. An unloaded
+        plate reads slightly negative from noise; the value is kept
+        unclamped, because clamping biases it;
+  \item total load within the declared capacity;
+  \item a foot's CoP is NaN exactly where its load is below the source CoP
+        threshold, with both components NaN together;
+  \item the net CoP equals the load-weighted CoP of the feet above the
+        threshold, $c = \sum_k N_k c_k / \sum_k N_k$, within $0.1$~mm, and
+        is NaN where neither foot is above it;
+  \item force events stay in the source's own names. They are force events,
+        not swing positions.
+\end{itemize}
+
+\section{Uncertainty Model}
+
+Declared, with no defaults (\texttt{PlateUncertainty}). The 1-sigma load
+uncertainty is $\sigma_N = \operatorname{hypot}(\sigma_{\mathrm{floor}},
+\phi N)$; the CoP uncertainty is $\sigma_c$ per horizontal axis; the
+sensing-plane depth uncertainty is $\sigma_h$; and \texttt{source} names
+where the numbers come from. Provenance records the device, source format,
+pinned source revision, file digests, calibration id and qualification. A
+missing qualification means the trial is unqualified measurement.
+
+\section{Observed Ground-Reaction View}
+
+\texttt{to\_ground\_reaction\_series(trial, placement)} fills the shared
+\texttt{GroundReactionSeries}. Each foot force is $(\mathrm{NaN}, \mathrm{NaN},
+N)$ and the net is $(\mathrm{NaN}, \mathrm{NaN}, N_\ell + N_r)$. The CoP is
+placed on the plate surface. Free moment, both moments about the centre of
+mass, and the centre of mass itself are NaN, each in its own array. Contact
+is true where a foot's load reaches the CoP threshold, and for the net where
+either foot does. An explicit observability record (only $F_z$ and CoP
+observed) travels with the series, so plots and comparisons show only
+observed components.
+
+\section{Acceptance Evidence}
+
+Unit tests in \path{tests/unit/force_plates/test_contracts.py} and
+\path{test_placement_and_series.py} cover each rule above: hand-computed
+corner and centre point loads, the threshold and net-CoP rules, refusal of a
+tilted, mirrored, scaled or nearly scaled rotation, NaN shear and moments in
+independent arrays, and the package boundary that excludes engines, GUI
+toolkits and the AGPL-licensed source.
+
+\section{Limitations}
+
+The record cannot recover shear or free moment. The surface height and the
+plates' placement in a capture volume are declared, not estimated. Nothing
+here is evidence until OF-HW qualifies a device.
+
+\section{Reproduction}
+
+\begin{verbatim}
+python3 -m pytest tests/unit/force_plates -q
+\end{verbatim}
+
+\end{document}
