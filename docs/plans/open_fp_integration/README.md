@@ -65,15 +65,15 @@ metrics plus `<id>.npz` arrays), a REST API (`/api/swings`,
 
 ## Integration Value, Ranked
 
-| Rank | Use in UpstreamDrift                                                                | Needs                                   |
-| ---- | ----------------------------------------------------------------------------------- | --------------------------------------- |
-| 1    | Import and plot measured vertical GRF, CoP and lead % in the ground reaction tile   | File reader, frame mapping              |
-| 2    | Overlay measured against model-predicted per-foot Fz and CoP for a matched swing    | Time alignment, event mapping           |
-| 3    | Weight-shift section in swing reports and tour-baseline comparisons                 | Units in %BW, provenance labels         |
-| 4    | Pull swings from the board over the LAN                                             | Read-only HTTP client                   |
-| 5    | Live weight-shift stream into the realtime IPC layer                                | Socket.IO bridge, optional extra        |
-| 6    | Research: measured vertical wrench as a nominal target in contact-wrench allocation | Qualified hardware, sync error budget   |
-| 7    | Eliminate candidate swing solutions in the closed-loop null space (OF-11, OF-12)    | Implemented; unqualified until DV-13061 |
+| Rank | Use in UpstreamDrift                                                                | Needs                                                      |
+| ---- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| 1    | Import and plot measured vertical GRF, CoP and lead % in the ground reaction tile   | File reader, frame mapping                                 |
+| 2    | Overlay measured against model-predicted per-foot Fz and CoP for a matched swing    | Time alignment, event mapping                              |
+| 3    | Weight-shift section in swing reports and tour-baseline comparisons                 | Units in %BW, provenance labels                            |
+| 4    | Pull swings from the board over the LAN                                             | Read-only HTTP client                                      |
+| 5    | Live weight-shift stream into the realtime IPC layer                                | Socket.IO bridge, optional extra                           |
+| 6    | Research: measured vertical wrench as a nominal target in contact-wrench allocation | Qualified hardware, sync error budget                      |
+| 7    | Eliminate candidate swing solutions in the closed-loop null space (OF-11, OF-12)    | In review (PRs #13077, #13079); unqualified until DV-13061 |
 
 ## Reading Order
 

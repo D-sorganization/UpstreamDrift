@@ -205,9 +205,12 @@ consumer, and move it only when a second consumer appears.
 
 ## 9. Plates as Constraints on Swing-Matching Solutions
 
-Implemented by OF-11 (#13067) and OF-12 (#13070); the calculation-level
-reference is `docs/research/loop_nullspace/loop_nullspace.tex`
-(`sec:lowerbody`).
+In review in OF-11 (#13067, PR #13077) and OF-12 (#13070, PR #13079); not yet
+on `main`. Those PRs add the calculation-level reference to
+`docs/research/loop_nullspace/loop_nullspace.tex` (`sec:lowerbody`): the
+sensing-plane rows and their exact rank goldens, the family-wise screen,
+clock-offset profiling, assumptions and reproduction commands. Until they
+merge, this section is the design statement, not a reference.
 
 - **Sensing-plane lever.** Vertical cells balance moments about the plane
   where the plate's horizontal reactions act, a depth `h` below the foot. A
@@ -226,7 +229,9 @@ reference is `docs/research/loop_nullspace/loop_nullspace.tex`
   feasible-set verdict deciding. A correct candidate is eliminated with
   probability at most `alpha` under the stated conditions (true loads in the
   family, declared Gaussian sigma, bias budgeted at the same `k`, true offset
-  on the grid).
+  on the grid). A profiled shift with no data makes the screen inconclusive
+  rather than eliminating, and a declared sensing-depth sigma requires the
+  friction-cone hypothesis, because its bound holds only inside the cones.
 
 ## 10. Engineering Contract Checks
 
