@@ -2392,6 +2392,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12789 · Static 10 Deg External Tibial-Torsion Offset in the Shared Full-Body Spec (Ankle Base Frames, Cited Seber 2000 Range); 7-Iron Trail Toe-Out Reaches 19.97 Deg With Hip_Rotation_R Off Its Limit; the Four Canonical Ground-Support Receipts Are Regenerated on the Default Style Feet (Calibrated 7-Iron Dynamics 64.35 mm, G3 Passes)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12789
+- **Branch:** merged via #12814
+- **PR:** #12814
+- **Paths:** see #12814
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`72a4f96c`; collated from changes/12789-static-10-deg-external-tibial-torsion-of.md)
+- **Summary:** Static 10 deg external tibial-torsion offset in the shared full-body spec (ankle base frames, cited Seber 2000 range); 7-iron trail toe-out reaches 19.97 deg with hip_rotation_r off its limit; the four canonical ground-support receipts are regenerated on the default style feet (calibrated 7-iron dynamics 64.35 mm, G3 passes)
+- **Next step:** Shipped in PR #12814.
+
 ### DL-#13095 · Rotate the 315 Oldest SPEC.md Section 12 Rows (Dated up to 2026-10-14) Verbatim Into a Second Pinned Block of Docs/Spec/CHANGELOG_ARCHIVE.md; SPEC.md 349,957 to 276,739 Bytes Under the Unchanged 350,000-Byte Cap; the Change-Log Gate Reads Every Archived Row Block
 
 - **State:** shipped
@@ -2437,10 +2450,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13056
 - **Branch:** merged via #13060
-- **PR:** #13060, #13076
+- **PR:** #13060, #13076, #13101
 - **Paths:** see #13060
 - **Started:** 2026-10-17
-- **Last verified:** 2026-10-17 (`c0556a04`; collated from changes/13056-spine-id-and-joint-reactions-keep-driven.md)
+- **Last verified:** 2026-10-17 (`e52429c3`; collated from changes/13056-full-body-spine-stage-poses-arms-and-grf.md)
 - **Summary:** OS-8 branch-continuous capture-A IK: constant marker set, warm-started tie-break IK, continuous through impact
 - **Next step:** Shipped in PR #13060.
 
