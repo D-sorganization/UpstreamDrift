@@ -228,3 +228,44 @@ class TestTheArchiveHoldsHistory:
     def test_a_malformed_archive_row_fails(self, tmp_path: Path) -> None:
         archive = _ARCHIVE_HEADER + "| 2026-09-04 | 1.0.718 | Serial. |\n"
         assert _run(tmp_path, _HEADER, {}, archive).returncode == 1
+
+
+def _marked_blocks(*blocks: tuple[str, str]) -> str:
+    """An archive whose row tables sit in ``<!-- archive:NAME -->`` blocks."""
+    parts = ["# Archive\n\n## Change Log Rows\n\n"]
+    for name, rows in blocks:
+        parts.append(
+            f"<!-- archive:{name}:begin -->\n"
+            "| Date | PR | Changes |\n| --- | --- | --- |\n"
+            f"{rows}<!-- archive:{name}:end -->\n\n"
+        )
+    return "".join(parts)
+
+
+class TestEveryArchivedRowBlockIsRead:
+    """#13095: a second rotation wave must stay under the gate, not just the first."""
+
+    @pytest.mark.unit
+    def test_prose_copied_from_a_later_block_fails(self, tmp_path: Path) -> None:
+        archive = _marked_blocks(
+            ("change-log-rows-wave2", "| 2026-10-14 | #12500 | Wave two. |\n"),
+            ("change-log-rows", f"| 2026-06-01 | #7001 | {_LONG_BODY} |\n"),
+        )
+        live = _HEADER + f"| 2026-10-16 | #13000 | {_LONG_BODY} |\n"
+        assert _run(tmp_path, live, {}, archive).returncode == 1
+
+    @pytest.mark.unit
+    def test_a_malformed_row_in_a_later_block_fails(self, tmp_path: Path) -> None:
+        archive = _marked_blocks(
+            ("change-log-rows-wave2", "| 2026-10-14 | #12500 | Wave two. |\n"),
+            ("change-log-rows", "| 2026-09-04 | 1.0.718 | Serial. |\n"),
+        )
+        assert _run(tmp_path, _HEADER, {}, archive).returncode == 1
+
+    @pytest.mark.unit
+    def test_well_formed_marked_blocks_pass(self, tmp_path: Path) -> None:
+        archive = _marked_blocks(
+            ("change-log-rows-wave2", "| 2026-10-14 | #12500 | Wave two. |\n"),
+            ("change-log-rows", "| 2026-09-04 | #9500 | Wave one. |\n"),
+        )
+        assert _run(tmp_path, _HEADER, {}, archive).returncode == 0

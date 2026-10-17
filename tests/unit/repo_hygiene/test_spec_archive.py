@@ -9,13 +9,18 @@ verbatim into ``docs/spec/CHANGELOG_ARCHIVE.md``. These tests pin that
 * nothing was lost in the move (byte-exact SHA-256 parity of every moved block
   against the pre-move ``SPEC.md``), and
 * the gates read the archive for history and ``SPEC.md`` for the live spec.
+
+Wave 2 (issue #13095) rotated the 315 oldest live rows (dated up to 2026-10-14)
+into a second marked block, ``change-log-rows-wave2``, the same way.
 """
 
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import re
+import sys
 from datetime import date
 from pathlib import Path
 
@@ -42,9 +47,17 @@ BASELINE = {
     "trailing-sections": (
         "774a51dae716da2540f049f7659714577e7e656b1641a4aa38428e007bf78914"
     ),
+    # Wave 2 (#13095): the live table header plus the 315 oldest rows (dated up
+    # to 2026-10-14), verbatim from SPEC.md at origin/main 13a1d07fa3.
+    "change-log-rows-wave2": (
+        "7d74b091d904f2696c7dea345b3212199076c23212bbf907b879ae9f5eb4b512"
+    ),
 }
-BASELINE_ROW_COUNT = 1113
+#: Archived rows per marked block; the sum is what the archive must conserve.
+BASELINE_ROW_COUNTS = {"change-log-rows": 1113, "change-log-rows-wave2": 315}
+BASELINE_ROW_COUNT = BASELINE_ROW_COUNTS["change-log-rows"]
 _ROW = re.compile(r"^\| \d{4}-\d{2}-\d{2} \| (?:#\d+|n/a) \|", re.MULTILINE)
+_ROW_LINE = re.compile(r"^\| \d{4}-\d{2}-\d{2} \| (?:#\d+|n/a) \|.*$", re.MULTILINE)
 
 
 def _read(path: Path) -> str:
@@ -71,9 +84,36 @@ def test_moved_block_is_byte_identical_to_the_pre_move_spec(name: str) -> None:
     assert hashlib.sha256(body.encode("utf-8")).hexdigest() == BASELINE[name]
 
 
-def test_no_change_log_row_was_lost() -> None:
-    body = _block(_read(ARCHIVE), "change-log-rows")
-    assert len(_ROW.findall(body)) == BASELINE_ROW_COUNT
+@pytest.mark.unit
+@pytest.mark.parametrize("name", sorted(BASELINE_ROW_COUNTS))
+def test_no_change_log_row_was_lost(name: str) -> None:
+    body = _block(_read(ARCHIVE), name)
+    assert len(_ROW.findall(body)) == BASELINE_ROW_COUNTS[name]
+
+
+@pytest.mark.unit
+def test_wave2_rows_were_moved_not_copied() -> None:
+    """No wave-2 row may linger in the live table next to its archived copy."""
+    archived = set(_ROW_LINE.findall(_block(_read(ARCHIVE), "change-log-rows-wave2")))
+    live = set(_ROW_LINE.findall(_read(SPEC)))
+    assert len(archived) == BASELINE_ROW_COUNTS["change-log-rows-wave2"]
+    assert not archived & live
+
+
+@pytest.mark.unit
+def test_the_duplicate_gate_reads_every_archived_row_block() -> None:
+    """The change-log gate sees the wave-2 rows now that they left SPEC.md."""
+    path = REPO_ROOT / "scripts" / "ci" / "check_spec_changelog_duplicates.py"
+    spec = importlib.util.spec_from_file_location("ud_dup_gate_9415", path)
+    assert spec is not None and spec.loader is not None
+    gate = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = gate
+    spec.loader.exec_module(gate)
+    keys = {row.key for row in gate._load_archive_rows(gate._load_spec_changelog())}
+    wave2 = _block(_read(ARCHIVE), "change-log-rows-wave2")
+    wave2_keys = {line.split(" | ")[1] for line in _ROW_LINE.findall(wave2)}
+    assert len(wave2_keys) == BASELINE_ROW_COUNTS["change-log-rows-wave2"]
+    assert wave2_keys <= keys
 
 
 def test_archive_is_not_the_live_spec() -> None:

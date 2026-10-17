@@ -1,0 +1,325 @@
+{
+  "schema": "os8-continuous-ik/v1",
+  "issue": "#13056",
+  "qualification": "kinematics only; branch continuity checked, not dynamics",
+  "inputs": {
+    "model": "golf_humanoid_scaled_tour_markers.osim",
+    "model_sha256": "7dd1da1764bd8569d9e5de14eae6a249f8845e9fddf0f343796bef2ae8137381",
+    "trc": "tour_average_tracked.trc",
+    "trc_sha256": "203ad3629ea38c4c4705426bbd938de8c9706ea364c08366b61068f554eaa07f"
+  },
+  "solver": {
+    "method": "shared solve_full_body_ik_trajectory, bounded TRF, warm-started",
+    "reg_weight": 0.001,
+    "max_nfev": 100,
+    "marker_weights": "uniform (the shared solver has no per-marker weights)",
+    "bounds": "model range where clamped; seed +/- 10 elsewhere",
+    "seed": "stock OpenSim IK at the first frame, clipped to the bounds"
+  },
+  "preprocessing": {
+    "dropped_markers": [
+      "RShoulderTop"
+    ],
+    "rigid_filled": {
+      "Marker_2:2:1": [
+        444,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524,
+        525,
+        526,
+        527,
+        528,
+        529,
+        530,
+        531,
+        532,
+        533,
+        534,
+        535,
+        536,
+        537,
+        538,
+        539,
+        540,
+        541,
+        542,
+        543,
+        544
+      ],
+      "Marker_2:2:2": [
+        444,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524,
+        525,
+        526,
+        527,
+        528,
+        529,
+        530,
+        531,
+        532,
+        533,
+        534,
+        535,
+        536,
+        537,
+        538,
+        539,
+        540,
+        541,
+        542,
+        543,
+        544
+      ],
+      "Marker_2:2:3": [
+        444,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524,
+        525,
+        526,
+        527,
+        528,
+        529,
+        530,
+        531,
+        532,
+        533,
+        534,
+        535,
+        536,
+        537,
+        538,
+        539,
+        540,
+        541,
+        542,
+        543,
+        544
+      ],
+      "Marker_3:3:1": [
+        551,
+        552,
+        553,
+        554,
+        555,
+        557,
+        558,
+        559,
+        560,
+        561,
+        562,
+        563,
+        565
+      ],
+      "Marker_3:3:2": [
+        551,
+        552,
+        553,
+        554,
+        555,
+        557,
+        558,
+        559,
+        560,
+        561,
+        562,
+        563,
+        565
+      ],
+      "Marker_3:3:3": [
+        551,
+        552,
+        553,
+        554,
+        555,
+        557,
+        558,
+        559,
+        560,
+        561,
+        562,
+        563,
+        565
+      ]
+    },
+    "spline_filled": {
+      "WaistRight": [
+        446,
+        447,
+        448,
+        449,
+        450
+      ],
+      "Marker_2:2:1": [
+        545,
+        546,
+        547,
+        548,
+        549,
+        550
+      ],
+      "Marker_2:2:2": [
+        545,
+        546,
+        547,
+        548,
+        549,
+        550
+      ],
+      "Marker_2:2:3": [
+        545,
+        546,
+        547,
+        548,
+        549,
+        550
+      ],
+      "Marker_3:3:1": [
+        545,
+        546,
+        547,
+        548,
+        549,
+        550
+      ],
+      "Marker_3:3:2": [
+        545,
+        546,
+        547,
+        548,
+        549,
+        550
+      ],
+      "Marker_3:3:3": [
+        545,
+        546,
+        547,
+        548,
+        549,
+        550
+      ]
+    },
+    "trimmed_trailing_frames": 2,
+    "max_spline_gap_frames": 10
+  },
+  "frames": {
+    "first": 0,
+    "last": 529,
+    "count": 530
+  },
+  "continuity": {
+    "step_limit_rad": 0.2,
+    "judged_frames": [
+      0,
+      475
+    ],
+    "continuous": true,
+    "judged_largest_steps": [
+      {
+        "frame": 461,
+        "coordinate": "arm_flex_l",
+        "step_rad": 0.061116206912411875
+      },
+      {
+        "frame": 462,
+        "coordinate": "arm_flex_l",
+        "step_rad": 0.05628581297325991
+      },
+      {
+        "frame": 460,
+        "coordinate": "arm_flex_l",
+        "step_rad": 0.055482777714553844
+      },
+      {
+        "frame": 474,
+        "coordinate": "arm_add_r",
+        "step_rad": 0.05395322263401081
+      },
+      {
+        "frame": 459,
+        "coordinate": "arm_flex_l",
+        "step_rad": 0.05305093629464369
+      }
+    ],
+    "largest_steps": [
+      {
+        "frame": 489,
+        "coordinate": "arm_rot_r",
+        "step_rad": 0.27114220836595304
+      },
+      {
+        "frame": 490,
+        "coordinate": "arm_rot_r",
+        "step_rad": 0.2672057633691661
+      },
+      {
+        "frame": 488,
+        "coordinate": "arm_rot_r",
+        "step_rad": 0.21209864591299998
+      },
+      {
+        "frame": 491,
+        "coordinate": "arm_rot_r",
+        "step_rad": 0.2011633894876424
+      },
+      {
+        "frame": 487,
+        "coordinate": "arm_rot_r",
+        "step_rad": 0.14727102605346243
+      }
+    ],
+    "stock_opensim_largest_steps": [
+      {
+        "frame": 528,
+        "coordinate": "arm_rot_r",
+        "step_rad": 1.4591710192355556
+      },
+      {
+        "frame": 518,
+        "coordinate": "elbow_flex_r",
+        "step_rad": 0.46476579490326664
+      },
+      {
+        "frame": 444,
+        "coordinate": "arm_add_r",
+        "step_rad": 0.4078274443349649
+      },
+      {
+        "frame": 445,
+        "coordinate": "arm_add_r",
+        "step_rad": 0.3589447391199935
+      },
+      {
+        "frame": 490,
+        "coordinate": "arm_rot_r",
+        "step_rad": 0.2606998664987086
+      }
+    ]
+  },
+  "marker_rms_m": {
+    "mean": 0.048505300165420685,
+    "max": 0.0760616484487119,
+    "stock_opensim_mean": 0.05100421354455947,
+    "stock_opensim_max": 0.3351542726455616,
+    "max_increase_over_stock": -2.586117508854291e-05
+  },
+  "outputs": {
+    "states": "ik_states_continuous.sto",
+    "states_sha256": "69fd5b8ea56b237bbbcd7e733a72807d087c831913fbf9de59f09c6ed4e8fc93"
+  }
+}

@@ -99,11 +99,17 @@ class ViewportFallback:
     def describe(self) -> str:
         """One line naming the renderer and, when degraded, why.
 
+        The sole-field view always draws with :attr:`renderer`; an installed
+        provider is reported beside it, never in its place.
+
         Returns:
             The sentence shown beside the field view.
         """
         if not self.degraded:
-            return f"3-D viewport: {self.provider} (ADR-0027)"
+            return (
+                f"3-D viewport: {self.provider} (ADR-0027) available; this view "
+                f"is drawn as a {self.renderer} plan view of the sole."
+            )
         return (
             f"3-D viewport unavailable, drawn as a {self.renderer} plan view of "
             f"the sole. {self.reason}"
