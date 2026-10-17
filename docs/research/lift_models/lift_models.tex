@@ -1305,6 +1305,18 @@ The window, its duration, the controller, the gains and the step policy are
 unchanged. Reproduce with \texttt{python3 scripts/generate\_lift\_bundle.py
 --lift squat --load-balance --lead-in 0.1}.
 
+\paragraph{Hold Pose.} The pre-balance standing pose \texttt{q\_standing}
+puts the body-plus-bar centre of mass 18.6\,cm behind the equal-share
+centre of pressure, so no contact equilibrium of its joint angles exists.
+The balanced first IK frame (CoP to CoM 0.1\,mm) is now recorded as
+\texttt{provenance["ik"]["q\_balanced\_standing"]}, and
+\texttt{barbell\_runs.hold\_pose} returns it (falling back to
+\texttt{q\_standing} for older bundles). At that pose the equal-share preload
+carries 0.764\,W with the CoP 0.08\,mm from the CoM; the contact equilibrium
+then carries the weight under the CoM. The body's own centre of mass lies
+11.9\,cm forward (ahead of the 10.4\,cm forefoot spheres), the bar at
+4.3\,cm over midfoot and body plus bar at 7.7\,cm.
+
 \paragraph{Results.} The numbers below are on the lift body before the de~Leva
 whole-row fix (\#13102); they are regenerated once that body lands.
 \begin{itemize}[nosep]
@@ -1332,6 +1344,20 @@ whole-row fix (\#13102); they are regenerated once that body lands.
   maximum 3.45\,cm) and the Hicks gate. Maximum residual forces are
   30.9\,N against the 146.7\,N bound and moments 13.8\,N\,m against
   17.3\,N\,m (pelvis tilt). Before, they were 214.2\,N and 153.8\,N\,m.
+\item \textbf{Cross-Engine Bar Path.} Every 20-step re-anchored segment
+  stays within $1.2\times10^{-13}$\,m and $4.8\times10^{-13}$\,rad, and the
+  full-window bar within $8.0\times10^{-7}$\,m. The full 0.2\,s window's
+  coordinates end $6.0\times10^{-5}$ (Drake), $2.0\times10^{-5}$
+  (Pinocchio) and $1.4\times10^{-5}$\,rad (OpenSim) from MuJoCo (worst
+  coordinate \texttt{LWInputY}), above the $10^{-6}$\,rad bound; before the
+  rack it was $2\times10^{-10}$\,rad. \textbf{Regression, open}: the test is
+  a strict xfail, the bound is not loosened.
+\item \textbf{Re-Track.} The bar-loaded re-track's bar landmark drifts
+  forward of its source linearly through the window, 0.6\,mm at state~0 and
+  6.79\,mm at state~200 (shoulders 6.5/5.6\,mm, hips 4.5\,mm; hip
+  \texttt{HipInputY} 0.008\,rad, root $x$ 3.7\,mm), above the 3.6\,mm LIFT-5
+  bound; before the rack it was 2.03\,mm. \textbf{Regression, open}: strict
+  xfail, bound not loosened.
 \end{itemize}
 
 \paragraph{Failed Experiments.}
@@ -1340,6 +1366,18 @@ whole-row fix (\#13102); they are regenerated once that body lands.
   $2.911\times10^{-7}$\,m. 1000 standing iterations raise it to
   $4.725\times10^{-7}$\,m: the arm solve trades the weld against the bar
   target, the bar axis and the wrist bound.
+\item A rack bundle generated without the lead-in still gives
+  $1.69\times10^{-5}$\,rad (Drake) full-window coordinate error, so the rack
+  geometry, not the lead-in, causes the parity regression.
+\item The parity regression is not an RK4 stability limit: the largest
+  step eigenvalue is $|z| = 2.20$ against 2.785 (amplification 0.42), and
+  the closure Jacobian's conditioning matches the pre-rack bundle. The heels
+  stay loaded ($\ge 260$\,N), but the CoP moves forward to $x = 0.096$\,m
+  (toe body at 0.100\,m) by the window end, the feet load asymmetrically and
+  hip flexion sits on its $120^\circ$ bound for the whole window.
+\item Starting the hold from \texttt{q\_standing} on the rack bundle fails
+  the contact-equilibrium tests (no equilibrium of its joint angles exists),
+  which is why \texttt{hold\_pose} uses the balanced frame.
 \end{itemize}
 
 \paragraph{Limitations.} The OpenSim marker error rose from 1.18/2.32\,cm.
