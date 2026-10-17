@@ -39,9 +39,9 @@ def test_reference_subject_reproduces_the_table() -> None:
 
 def test_scaling_and_stature_estimate() -> None:
     tall = anth.segment_parameters(1.90, 90.0, "shank")
-    assert tall.length_m == pytest.approx(0.4340 * 1.90 / 1.741)
+    assert tall.length_m == pytest.approx(0.4403 * 1.90 / 1.741)
     assert tall.mass_kg == pytest.approx(0.0433 * 90.0)
-    stature = anth.stature_from_segment_lengths({"shank": 0.4340, "forearm": 0.2689})
+    stature = anth.stature_from_segment_lengths({"shank": 0.4403, "forearm": 0.2689})
     assert stature == pytest.approx(1.741)
     assert anth.mass_check(108.0, 1.74, 78.0) == pytest.approx(108.0 / 78.0)
     assert set(anth.whole_body(1.8, 80.0)) == set(anth.DE_LEVA_MALE)

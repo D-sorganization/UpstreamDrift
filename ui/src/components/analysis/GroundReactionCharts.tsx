@@ -11,8 +11,10 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   availableRange,
   fetchGroundReaction,
+  fetchGroundReactionOverlay,
   pathSegments,
   type GroundReactionResponse,
+  type PlateOverlayRequest,
 } from '@/api/groundReaction';
 
 const W = 360;
@@ -41,8 +43,20 @@ const PANEL_TITLES = [
   'Net Moment About CoM',
 ] as const;
 
-/** `x` is set only for path (non-time) panels, e.g. the CoP panel. */
-type Row = { label: string; color: string; y: Array<number | null>; x?: number[] };
+/** Banner shown while the overlaid plate trial has no device qualification. */
+const UNQUALIFIED_BANNER = 'Unqualified measurement';
+
+/**
+ * `x` is set only for path (non-time) panels, e.g. the CoP panel; `dashed`
+ * marks a measured (plate) trace so it never reads as the model's own.
+ */
+type Row = {
+  label: string;
+  color: string;
+  y: Array<number | null>;
+  x?: number[];
+  dashed?: boolean;
+};
 type Entry = { key: string; label: string; color: string };
 
 function titleCase(key: string): string {
@@ -74,6 +88,18 @@ function quantityRows(
     color: e.color,
     y: (data.traces?.[`${e.key}_${quantity}`]?.[field] ?? []) as Array<number | null>,
   }));
+}
+
+/** Dashed rows for the measured plate traces of `quantity` (feet only). */
+function measuredRows(data: GroundReactionResponse, quantity: string, field: string): Row[] {
+  return footKeys(data, false)
+    .filter((e) => data.traces?.[`measured_${e.key}_${quantity}`])
+    .map((e) => ({
+      label: `Measured ${e.label}`,
+      color: e.color,
+      dashed: true,
+      y: (data.traces?.[`measured_${e.key}_${quantity}`]?.[field] ?? []) as Array<number | null>,
+    }));
 }
 
 /** One row per key, read straight from `load_share` (feet only, never net). */
@@ -115,15 +141,37 @@ function sanitizedXY(
   return { x: xs, y: ys };
 }
 
+function copRow(data: GroundReactionResponse, trace: string, entry: Entry, dashed: boolean): Row {
+  const source = data.traces?.[trace];
+  const { x, y } = sanitizedXY(
+    (source?.x ?? []) as Array<number | null>,
+    (source?.y ?? []) as Array<number | null>,
+  );
+  return { label: entry.label, color: entry.color, x, y, dashed };
+}
+
 function copRows(data: GroundReactionResponse): Row[] {
-  return footKeys(data, true).map((e) => {
-    const trace = data.traces?.[`${e.key}_cop_m`];
-    const { x, y } = sanitizedXY(
-      (trace?.x ?? []) as Array<number | null>,
-      (trace?.y ?? []) as Array<number | null>,
+  const modelled = footKeys(data, true).map((e) => copRow(data, `${e.key}_cop_m`, e, false));
+  const measured = footKeys(data, false)
+    .filter((e) => data.traces?.[`measured_${e.key}_cop_m`])
+    .map((e) =>
+      copRow(data, `measured_${e.key}_cop_m`, { ...e, label: `Measured ${e.label}` }, true),
     );
-    return { label: e.label, color: e.color, x, y };
-  });
+  return [...modelled, ...measured];
+}
+
+/** The unqualified-measurement banner, shown only when the server says so. */
+function MeasurementBanner({ data }: { data: GroundReactionResponse }) {
+  if (data.measured_qualified !== false) return null;
+  return (
+    <div
+      role="status"
+      data-testid="ground-reaction-unqualified-banner"
+      className="text-xs font-semibold text-amber-500 mb-2"
+    >
+      {UNQUALIFIED_BANNER}
+    </div>
+  );
 }
 
 /** Shared figure/svg/legend chrome for a chart panel. */
@@ -214,6 +262,7 @@ function TimePanel({
             fill="none"
             stroke={r.color}
             strokeWidth={1.5}
+            strokeDasharray={r.dashed ? '4 2' : undefined}
           />
         );
       })}
@@ -252,6 +301,7 @@ function PathPanel({
               fill="none"
               stroke={r.color}
               strokeWidth={1.5}
+              strokeDasharray={r.dashed ? '4 2' : undefined}
             />
           );
         })
@@ -270,13 +320,26 @@ function PathPanel({
   );
 }
 
-export function GroundReactionCharts({ runId = null }: { runId?: string | null }) {
+export function GroundReactionCharts({
+  runId = null,
+  overlay = null,
+}: {
+  runId?: string | null;
+  /** When set, the measured plate trial is overlaid via the plate-overlay route. */
+  overlay?: PlateOverlayRequest | null;
+}) {
   const [data, setData] = useState<GroundReactionResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchGroundReaction({ runId }, controller.signal)
+    const request = overlay
+      ? fetchGroundReactionOverlay(
+          { ...overlay, run_id: overlay.run_id ?? runId },
+          controller.signal,
+        )
+      : fetchGroundReaction({ runId }, controller.signal);
+    request
       .then((d) => {
         setError(null);
         setData(d);
@@ -287,7 +350,7 @@ export function GroundReactionCharts({ runId = null }: { runId?: string | null }
         setError(e instanceof Error ? e.message : String(e));
       });
     return () => controller.abort();
-  }, [runId]);
+  }, [runId, overlay]);
 
   const panels = useMemo(() => {
     if (!data || !data.available) return null;
@@ -301,7 +364,10 @@ export function GroundReactionCharts({ runId = null }: { runId?: string | null }
           id: 'vertical_force',
           title: PANEL_TITLES[0],
           unit: inBw ? 'BW' : 'N',
-          rows: quantityRows(data, footKeys(data, true), forceQuantity, 'z'),
+          rows: [
+            ...quantityRows(data, footKeys(data, true), forceQuantity, 'z'),
+            ...(inBw ? [] : measuredRows(data, 'force_n', 'z')),
+          ],
         },
         {
           id: 'net_force',
@@ -350,6 +416,7 @@ export function GroundReactionCharts({ runId = null }: { runId?: string | null }
       )}
       {data && data.available && panels && (
         <>
+          <MeasurementBanner data={data} />
           {panels.time.slice(0, 3).map((p) => (
             <TimePanel key={p.id} {...p} t={panels.t} events={panels.events} />
           ))}

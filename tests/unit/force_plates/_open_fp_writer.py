@@ -200,3 +200,30 @@ def _set_flag_bits(path: Path, flag_bits: int) -> None:
 def default_members() -> dict[str, bytes]:
     """The default arrays as raw ``.npy`` members."""
     return {key: npy_bytes(value) for key, value in default_arrays().items()}
+
+
+def _round_list(values: Any, decimals: int) -> Any:
+    """Round to ``decimals`` and turn NaN into ``None`` (JSON ``null``)."""
+    array = np.round(np.asarray(values, dtype=np.float64), decimals)
+    return np.where(np.isnan(array), None, array).tolist()
+
+
+def http_swing_payload(golfer: str = "RH", swing_id: str = SWING_ID) -> dict[str, Any]:
+    """``GET /api/swings/{id}`` body: metadata plus rounded ``arrays`` lists.
+
+    Rounding follows the documented JSON form: t 1e-4 s, forces and CoP 0.1,
+    lead_pct 0.01 %, events 1e-3 s; NaN is serialised as ``null``.
+    """
+    body = default_meta(golfer, swing_id)
+    body["events"] = {
+        k: None if v is None else round(v, 3) for k, v in body["events"].items()
+    }
+    raw = default_arrays(golfer)
+    decimals = {"t": 4, "lead_pct": 2}
+    body["arrays"] = {k: _round_list(v, decimals.get(k, 1)) for k, v in raw.items()}
+    return body
+
+
+def http_summary(payload: dict[str, Any]) -> dict[str, Any]:
+    """The ``GET /api/swings`` list entry of a swing payload."""
+    return {k: v for k, v in payload.items() if k not in ("t0_host", "arrays")}

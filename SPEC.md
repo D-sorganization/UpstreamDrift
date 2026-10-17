@@ -2741,6 +2741,12 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-17 | #13107 | Src-pivot hygiene test accepts the pivot's documented parent healing, removing an order-dependent unit-test-gate failure |
+| 2026-10-17 | #13098 | Add research proposal for measured plate rows in the contact-wrench QP (OF-10) |
+| 2026-10-17 | #13077 | Add per-foot vertical-cell force-plate observation rows with the exact sensing-plane shear lever to the ground null space, with sympy goldens and spec (OF-11) |
+| 2026-10-17 | #13096 | Add fail-closed open-fp swing file reader (JSON+NPZ, CSV) producing VerticalPlateTrial (OF-02); Add plate readings at model time with an interpolation bias estimate, skew term, world-axis CoP uncertainty and common-mode clock-offset alignment (OF-05); Add model-versus-measured vertical comparison in sigma units (OF-08) |
+| 2026-10-17 | #13090 | Add force_plates package: vertical-only two-plate trial contract, ground-aligned placement and observed ground-reaction view (OF-01); Derive plate placement from a model target frame without mirroring (OF-03) |
+| 2026-10-17 | #13080 | Update the open-fp integration plan with the sensing-plane lever finding and the OF-11 and OF-12 null-space constraint children |
 | 2026-10-17 | #13101 | Full-body spine stage poses arms and GRF on the drive-unlocked trunk; capture-A pelvis residual 20.7 to 5.9 BW |
 | 2026-10-17 | #12814 | Static 10 deg external tibial-torsion offset in the shared full-body spec (ankle base frames, cited Seber 2000 range); 7-iron trail toe-out reaches 19.97 deg with hip_rotation_r off its limit; the four canonical ground-support receipts are regenerated on the default style feet (calibrated 7-iron dynamics 64.35 mm, G3 passes) |
 | 2026-10-17 | #13099 | Rotate the 315 oldest SPEC.md section 12 rows (dated up to 2026-10-14) verbatim into a second pinned block of docs/spec/CHANGELOG_ARCHIVE.md; SPEC.md 349,957 to 276,739 bytes under the unchanged 350,000-byte cap; the change-log gate reads every archived row block |

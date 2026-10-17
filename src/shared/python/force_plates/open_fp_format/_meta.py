@@ -13,7 +13,14 @@ from typing import Any, NoReturn, get_args
 from src.shared.python.force_plates.contracts import Handedness, finite_positive
 from src.shared.python.force_plates.open_fp_format import format as fmt
 
-__all__ = ["SwingMeta", "parse_meta"]
+__all__ = [
+    "SwingMeta",
+    "check_keys",
+    "finite_number",
+    "load_json",
+    "parse_meta",
+    "parse_meta_object",
+]
 
 
 @dataclass(frozen=True)
@@ -30,7 +37,7 @@ def _reject_constant(name: str, constant: str) -> NoReturn:
     raise ValueError(f"{name}: non-finite JSON literal {constant} is not allowed")
 
 
-def _number(value: object, where: str) -> float:
+def finite_number(value: object, where: str) -> float:
     """A JSON number as a finite float; ``ValueError`` otherwise (never overflows)."""
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ValueError(f"{where} must be a number, got {value!r}")
@@ -52,47 +59,54 @@ def _unique_object(name: str, pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return dict(pairs)
 
 
-def _load_object(data: bytes, path: Path) -> dict[str, Any]:
-    name = str(path)
+def load_json(data: bytes, where: str) -> Any:
+    """Strictly parse JSON ``data``; ``where`` names its origin in errors.
+
+    Refuses invalid UTF-8/JSON, NaN/Infinity literals, repeated object members
+    at any level and excessive nesting (all as ``ValueError``).
+    """
     try:
-        text = data.decode("utf-8")
-        obj = json.loads(
-            text,
-            parse_constant=lambda c: _reject_constant(name, c),
-            object_pairs_hook=lambda pairs: _unique_object(name, pairs),
+        return json.loads(
+            data.decode("utf-8"),
+            parse_constant=lambda c: _reject_constant(where, c),
+            object_pairs_hook=lambda pairs: _unique_object(where, pairs),
         )
     except UnicodeDecodeError as exc:
-        raise ValueError(f"{name}: not valid UTF-8 JSON ({exc})") from exc
+        raise ValueError(f"{where}: not valid UTF-8 JSON ({exc})") from exc
     except json.JSONDecodeError as exc:
-        raise ValueError(f"{name}: invalid JSON ({exc})") from exc
+        raise ValueError(f"{where}: invalid JSON ({exc})") from exc
     except RecursionError as exc:
-        raise ValueError(f"{name}: JSON is nested too deeply") from exc
+        raise ValueError(f"{where}: JSON is nested too deeply") from exc
+
+
+def _load_object(data: bytes, path: Path) -> dict[str, Any]:
+    obj = load_json(data, str(path))
     if not isinstance(obj, dict):
-        raise ValueError(f"{name}: top-level JSON value must be an object")
+        raise ValueError(f"{path}: top-level JSON value must be an object")
     return obj
 
 
-def _check_keys(obj: Mapping[str, Any], expected: frozenset[str], where: str) -> None:
+def check_keys(obj: Mapping[str, Any], expected: frozenset[str], where: str) -> None:
     missing, extra = sorted(expected - set(obj)), sorted(set(obj) - expected)
     if missing or extra:
         raise ValueError(f"{where}: missing keys {missing}, unexpected keys {extra}")
 
 
-def _check_events(raw: object, path: Path) -> dict[str, float | None]:
+def _check_events(raw: object, path: Path | str) -> dict[str, float | None]:
     if not isinstance(raw, dict):
         raise ValueError(f"{path}: 'events' must be an object")
-    _check_keys(raw, fmt.EVENT_NAMES, f"{path}: events")
+    check_keys(raw, fmt.EVENT_NAMES, f"{path}: events")
     events: dict[str, float | None] = {}
     for key, value in raw.items():
         events[key] = (
-            None if value is None else _number(value, f"{path}: events[{key!r}]")
+            None if value is None else finite_number(value, f"{path}: events[{key!r}]")
         )
     return events
 
 
-def _check_scalars(obj: Mapping[str, Any], path: Path) -> None:
-    if obj["id"] != path.stem:
-        raise ValueError(f"{path}: 'id' {obj['id']!r} does not equal the file stem")
+def _check_scalars(obj: Mapping[str, Any], path: Path | str, expected_id: str) -> None:
+    if obj["id"] != expected_id:
+        raise ValueError(f"{path}: 'id' {obj['id']!r} does not equal {expected_id!r}")
     created = obj["created"]
     try:
         stamp = datetime.fromisoformat(created) if isinstance(created, str) else None
@@ -100,7 +114,7 @@ def _check_scalars(obj: Mapping[str, Any], path: Path) -> None:
         stamp = None
     if stamp is None or stamp.tzinfo is not None:
         raise ValueError(f"{path}: 'created' must be a naive ISO time, got {created!r}")
-    _number(obj["t0_host"], f"{path}: t0_host")
+    finite_number(obj["t0_host"], f"{path}: t0_host")
     source = obj["impact_source"]
     if source is not None and (
         not isinstance(source, str) or source not in fmt.IMPACT_SOURCES
@@ -115,16 +129,27 @@ def parse_meta(data: bytes, path: Path) -> SwingMeta:
     than the documented one, wrong types, an ``id`` that differs from the file
     stem, or an ``impact`` event set while ``impact_source`` is null.
     """
-    obj = _load_object(data, path)
-    _check_keys(obj, fmt.META_KEYS, str(path))
-    _check_scalars(obj, path)
+    return parse_meta_object(_load_object(data, path), str(path), path.stem)
+
+
+def parse_meta_object(
+    obj: Mapping[str, Any], where: str, expected_id: str
+) -> SwingMeta:
+    """Validate an already-parsed metadata object (file or HTTP source alike).
+
+    ``obj`` must have exactly the documented key set (:data:`format.META_KEYS`);
+    ``expected_id`` is the id it must carry.  Same ``ValueError`` contract as
+    :func:`parse_meta`.
+    """
+    check_keys(obj, fmt.META_KEYS, where)
+    _check_scalars(obj, where, expected_id)
     golfer = obj["golfer"]
     if golfer not in get_args(Handedness):
-        raise ValueError(f"{path}: golfer must be 'RH' or 'LH', got {golfer!r}")
+        raise ValueError(f"{where}: golfer must be 'RH' or 'LH', got {golfer!r}")
     body_weight = finite_positive(
-        _number(obj["bw_n"], f"{path}: bw_n"), f"{path}: bw_n"
+        finite_number(obj["bw_n"], f"{where}: bw_n"), f"{where}: bw_n"
     )
-    events = _check_events(obj["events"], path)
+    events = _check_events(obj["events"], where)
     if obj["impact_source"] is None and events["impact"] is not None:
-        raise ValueError(f"{path}: impact_source is null but the impact event is set")
+        raise ValueError(f"{where}: impact_source is null but the impact event is set")
     return SwingMeta(golfer, body_weight, events, obj["impact_source"])
