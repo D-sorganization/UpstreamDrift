@@ -275,7 +275,15 @@ def test_pivot_exit_namespace_check_allows_documented_parent_healing(
         assert _ORPHAN_PARENT in sys.modules, "exit must heal the popped parent"
     finally:
         _restore(saved, saved_path)
+        # Put the original parent back both as a key and as the attribute
+        # exit() re-linked on ``src``, so later tests see one module object.
         sys.modules[_ORPHAN_PARENT] = saved_parent
+        grandparent_name, _, attr = _ORPHAN_PARENT.rpartition(".")
+        setattr(sys.modules[grandparent_name], attr, saved_parent)
+    assert sys.modules[_ORPHAN_PARENT] is saved_parent
+    assert getattr(sys.modules[grandparent_name], attr) is saved_parent, (
+        "cleanup must not leave a second parent object bound on the package"
+    )
 
 
 @pytest.mark.parametrize("conftest_path", _PIVOT_CONFTESTS, ids=lambda p: p.parent.name)
