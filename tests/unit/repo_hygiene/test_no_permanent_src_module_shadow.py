@@ -265,6 +265,9 @@ def test_pivot_exit_namespace_check_allows_documented_parent_healing(
     pivot = _load_conftest(conftest_path)._PIVOT
     importlib.import_module(_EVICTED_PROBE_MODULE)
     importlib.import_module(_ORPHAN_CHILD)
+    # An earlier test may already have orphaned the child; importing the
+    # child alone would then leave the parent missing and the pop would fail.
+    importlib.import_module(_ORPHAN_PARENT)
     saved_parent = sys.modules.pop(_ORPHAN_PARENT)
     saved = _src_namespace()
     saved_path = list(sys.path)
