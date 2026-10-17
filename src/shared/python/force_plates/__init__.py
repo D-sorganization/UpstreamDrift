@@ -39,6 +39,12 @@ from src.shared.python.force_plates.model_frame import (
     TargetedPlacement,
     placement_for_target,
 )
+from src.shared.python.force_plates.overlay import (
+    MeasuredOverlay,
+    attach_measured_overlay,
+    measured_overlay,
+    overlay_on_series,
+)
 from src.shared.python.force_plates.placement import ROTATION_ATOL, PlatePlacement
 from src.shared.python.force_plates.readings import (
     FootSample,
@@ -58,6 +64,7 @@ __all__ = [
     "AlignmentKind",
     "FootSample",
     "Handedness",
+    "MeasuredOverlay",
     "ObservedGroundReaction",
     "PlacedTrial",
     "PlatePlacement",
@@ -68,11 +75,14 @@ __all__ = [
     "ReadingOptions",
     "TargetedPlacement",
     "VerticalPlateTrial",
+    "attach_measured_overlay",
     "force_event_markers",
     "impact_anchor",
     "loaded_net_cop",
+    "measured_overlay",
     "merge_event_markers",
     "observability",
+    "overlay_on_series",
     "reading_at",
     "placement_for_target",
     "to_ground_reaction_series",
