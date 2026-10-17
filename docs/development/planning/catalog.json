@@ -419,7 +419,7 @@
     },
     {
       "id": "DV-13082",
-      "title": "Qualified open-fp Device Record for Measured Vertical Ground Reaction",
+      "title": "Qualified Open-FP Device Record for Measured Vertical Ground Reaction",
       "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/13082",
       "source_snapshot": "source-13082.json",
       "record": "DV-13082.md",
