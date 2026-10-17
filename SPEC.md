@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-17 | #13118 | Fix order-dependent KeyError in the pivot parent-healing regression test |
+| 2026-10-17 | #13063 | Prettier-format the back-squat barbell_hold.json evidence record (data unchanged) so the commit-stage prettier hook no longer rewrites it. |
 | 2026-10-17 | #13111 | Sidekick smoke-test checks fixtures out into an isolated path so the shared self-hosted workspace is never left a sparse partial clone |
 | 2026-10-17 | #13094 | Add read-only open-fp LAN client (OF-06) |
 | 2026-10-17 | #13100 | Add force-event namespace and sourced impact anchor (OF-04); Overlay measured plate trials on the ground reaction tile (OF-07) |
