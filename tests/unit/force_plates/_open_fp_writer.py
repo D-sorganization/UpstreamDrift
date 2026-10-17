@@ -181,8 +181,20 @@ def write_npz_members(
         for key, payload in members.items():
             info = zipfile.ZipInfo(f"{key}.npy")
             info.compress_type = compression
-            info.flag_bits |= flag_bits
             archive.writestr(info, payload)
+    if flag_bits:
+        _set_flag_bits(path, flag_bits)
+
+
+def _set_flag_bits(path: Path, flag_bits: int) -> None:
+    """OR ``flag_bits`` into every local and central header (zipfile clears them)."""
+    blob = bytearray(path.read_bytes())
+    for signature, offset in ((b"PK\x03\x04", 6), (b"PK\x01\x02", 8)):
+        start = blob.find(signature)
+        while start != -1:
+            blob[start + offset] |= flag_bits
+            start = blob.find(signature, start + 4)
+    path.write_bytes(bytes(blob))
 
 
 def default_members() -> dict[str, bytes]:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import math
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -53,26 +54,88 @@ NPZ_LEAD_CHECK = LeadCheck(fmt.LEAD_PCT_TOL, fmt.LOAD_SLACK_N)
 CSV_LEAD_CHECK = LeadCheck(fmt.LEAD_PCT_TOL_CSV, fmt.LOAD_SLACK_N_CSV)
 
 _FULL_SCALE_PCT = 100.0
+_MAX_NDIM = 2
+
+
+class _Refused(ValueError):
+    """An npz member this reader declines to load (already names the file)."""
+
+
+_ALLOWED_COMPRESSION = (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED)
+_ZIP_ENCRYPTED_FLAG = 0x1
+_READ_ERRORS = (
+    ValueError,
+    OSError,
+    EOFError,
+    zipfile.BadZipFile,
+    NotImplementedError,
+    RuntimeError,
+)
+
+
+def _read_npy_header(
+    archive: zipfile.ZipFile, info: zipfile.ZipInfo
+) -> tuple[tuple[int, ...], np.dtype, int]:
+    """Shape, dtype and header length of the ``.npy`` member ``info``."""
+    with archive.open(info) as member:
+        version = np.lib.format.read_magic(member)
+        if version == (1, 0):
+            shape, _, dtype = np.lib.format.read_array_header_1_0(member)
+        elif version == (2, 0):
+            shape, _, dtype = np.lib.format.read_array_header_2_0(member)
+        else:
+            raise ValueError(f"unsupported npy format version {version}")
+        return tuple(shape), dtype, member.tell()
+
+
+def _check_member(archive: zipfile.ZipFile, info: zipfile.ZipInfo, path: Path) -> None:
+    """Refuse unsupported/encrypted members and headers that lie about size."""
+    name = info.filename
+    if info.flag_bits & _ZIP_ENCRYPTED_FLAG:
+        raise _Refused(f"{path}: npz member {name!r} is encrypted")
+    if info.compress_type not in _ALLOWED_COMPRESSION:
+        raise _Refused(
+            f"{path}: npz member {name!r} uses unsupported compression "
+            f"{info.compress_type}"
+        )
+    try:
+        shape, dtype, header_len = _read_npy_header(archive, info)
+    except _READ_ERRORS as exc:
+        raise _Refused(
+            f"{path}: npz member {name!r} has a bad npy header ({exc})"
+        ) from exc
+    if dtype.hasobject or len(shape) > _MAX_NDIM or any(n < 0 for n in shape):
+        raise _Refused(f"{path}: npz member {name!r} has an unacceptable npy header")
+    size = math.prod(shape) * dtype.itemsize
+    if size > fmt.MAX_NPZ_BYTES or header_len + size != info.file_size:
+        raise _Refused(
+            f"{path}: npz member {name!r} header claims {size} data bytes, which does "
+            f"not fit the {info.file_size}-byte member"
+        )
 
 
 def _open_npz(data: bytes, path: Path) -> np.lib.npyio.NpzFile:
     try:
         with zipfile.ZipFile(io.BytesIO(data)) as archive:
-            expanded = sum(info.file_size for info in archive.infolist())
-    except zipfile.BadZipFile as exc:
+            infos = archive.infolist()
+            if sum(info.file_size for info in infos) > fmt.MAX_NPZ_BYTES:
+                raise _Refused(f"{path}: npz expands to more than the size limit")
+            for info in infos:
+                _check_member(archive, info, path)
+        return np.load(io.BytesIO(data), allow_pickle=False)
+    except _Refused:
+        raise
+    except _READ_ERRORS as exc:
         raise ValueError(f"{path}: not a valid npz archive ({exc})") from exc
-    if expanded > fmt.MAX_NPZ_BYTES:
-        raise ValueError(f"{path}: npz expands to {expanded} bytes, too large")
-    return np.load(io.BytesIO(data), allow_pickle=False)
 
 
 def _member(archive: np.lib.npyio.NpzFile, key: str, path: Path) -> Array:
     try:
         raw = archive[key]
-    except (ValueError, OSError, EOFError) as exc:
+    except _READ_ERRORS as exc:
         raise ValueError(f"{path}: npz array {key!r} is unreadable ({exc})") from exc
-    if raw.dtype.kind != "f":
-        raise ValueError(f"{path}: array {key!r} must be float, got dtype {raw.dtype}")
+    if not isinstance(raw, np.ndarray) or raw.dtype.kind != "f":
+        raise ValueError(f"{path}: npz array {key!r} must be a float array")
     return raw.astype(np.float64)
 
 
@@ -95,11 +158,7 @@ def load_npz(data: bytes, path: Path) -> SwingArrays:
     a key set other than the documented one, a non-float dtype, inconsistent
     shapes, or values failing :func:`validate_arrays`.
     """
-    try:
-        archive = _open_npz(data, path)
-    except (OSError, EOFError) as exc:
-        raise ValueError(f"{path}: unreadable npz ({exc})") from exc
-    with archive:
+    with _open_npz(data, path) as archive:
         missing = sorted(set(fmt.ARRAY_KEYS) - set(archive.files))
         extra = sorted(set(archive.files) - set(fmt.ARRAY_KEYS))
         if missing or extra:
@@ -125,12 +184,12 @@ def load_npz(data: bytes, path: Path) -> SwingArrays:
 def validate_arrays(arrays: SwingArrays, path: Path) -> None:
     """Check time, load and corner-force values (shared by NPZ and CSV).
 
-    Time must be finite and strictly increasing; loads and corner forces
-    finite.  Load sign (the noise-floor policy), CoP and net-CoP rules belong
+    Time, loads and corner forces must be finite (the check_lead_pct and
+    event steps need that); time ordering  Load sign (the noise-floor policy), CoP and net-CoP rules belong
     to the trial contract and are checked there, once.
     """
-    if not np.isfinite(arrays.t).all() or np.any(np.diff(arrays.t) <= 0.0):
-        raise ValueError(f"{path}: 't' must be finite and strictly increasing")
+    if not np.isfinite(arrays.t).all():
+        raise ValueError(f"{path}: 't' must be finite")
     for key, load in (("fz_L", arrays.fz_left), ("fz_R", arrays.fz_right)):
         if not np.isfinite(load).all():
             raise ValueError(f"{path}: {key!r} must be finite")

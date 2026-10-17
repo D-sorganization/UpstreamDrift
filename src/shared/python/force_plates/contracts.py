@@ -41,6 +41,8 @@ __all__ = [
     "NET_LABEL",
     "NET_COP_TOL_M",
     "Handedness",
+    "finite_non_negative",
+    "finite_positive",
     "PlateProvenance",
     "PlateUncertainty",
     "VerticalPlateTrial",
@@ -74,14 +76,19 @@ def _real(value: object, name: str) -> float:
     return float(value)
 
 
-def _finite_positive(value: object, name: str) -> float:
+def finite_positive(value: object, name: str) -> float:
+    """``value`` as a float, required positive and finite.
+
+    ``TypeError`` for a bool or non-real; ``ValueError`` out of range.
+    """
     number = _real(value, name)
     if not math.isfinite(number) or number <= 0.0:
         raise ValueError(f"{name} must be positive and finite, got {value!r}")
     return number
 
 
-def _finite_non_negative(value: object, name: str) -> float:
+def finite_non_negative(value: object, name: str) -> float:
+    """``value`` as a float, required finite and >= 0 (errors as above)."""
     number = _real(value, name)
     if not math.isfinite(number) or number < 0.0:
         raise ValueError(f"{name} must be finite and non-negative, got {value!r}")
@@ -166,10 +173,10 @@ class PlateUncertainty:
     source: str
 
     def __post_init__(self) -> None:
-        _finite_positive(self.force_floor_n, "force_floor_n")
-        _finite_positive(self.cop_m, "cop_m")
-        _finite_non_negative(self.force_fraction, "force_fraction")
-        _finite_non_negative(self.sensing_depth_sigma_m, "sensing_depth_sigma_m")
+        finite_positive(self.force_floor_n, "force_floor_n")
+        finite_positive(self.cop_m, "cop_m")
+        finite_non_negative(self.force_fraction, "force_fraction")
+        finite_non_negative(self.sensing_depth_sigma_m, "sensing_depth_sigma_m")
         _text(self.source, "source")
 
     def force_sigma_n(self, load_n: ArrayLike) -> Array:
@@ -271,10 +278,10 @@ class VerticalPlateTrial:
             raise ValueError(
                 f"handedness must be 'RH' or 'LH', got {self.handedness!r}"
             )
-        _finite_positive(self.body_weight_n, "body_weight_n")
-        _finite_positive(self.cop_min_load_n, "cop_min_load_n")
-        _finite_positive(self.capacity_n, "capacity_n")
-        _finite_non_negative(self.sensing_depth_m, "sensing_depth_m")
+        finite_positive(self.body_weight_n, "body_weight_n")
+        finite_positive(self.cop_min_load_n, "cop_min_load_n")
+        finite_positive(self.capacity_n, "capacity_n")
+        finite_non_negative(self.sensing_depth_m, "sensing_depth_m")
 
     def _times(self) -> Array:
         times = _readonly(self.times_s, "times_s")

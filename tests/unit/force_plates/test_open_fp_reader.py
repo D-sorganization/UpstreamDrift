@@ -254,7 +254,9 @@ def test_bad_stem_refused(tmp_path: Path) -> None:
         )
 
 
-def test_stem_that_is_not_a_swing_id_is_refused_even_with_dotdot(tmp_path: Path) -> None:
+def test_stem_that_is_not_a_swing_id_is_refused_even_with_dotdot(
+    tmp_path: Path,
+) -> None:
     # Only the stem is validated: callers pass trusted directories (documented).
     w.write_swing(tmp_path)
     with pytest.raises(ValueError, match="stem"):
@@ -569,7 +571,9 @@ def test_huge_integer_literal_is_a_value_error(tmp_path: Path) -> None:
     text = json.dumps(w.default_meta()).replace('"bw_n": 800.0', f'"bw_n": {huge}')
     with pytest.raises(ValueError, match="bw_n"):
         read(w.write_swing(tmp_path, raw_json=text))
-    events = json.dumps(w.default_meta()).replace('"finish": 0.025', f'"finish": {huge}')
+    events = json.dumps(w.default_meta()).replace(
+        '"finish": 0.025', f'"finish": {huge}'
+    )
     with pytest.raises(ValueError, match="finish"):
         read(w.write_swing(tmp_path, raw_json=events))
 

@@ -27,7 +27,7 @@ __all__ = [
     "MAX_JSON_BYTES",
     "MAX_NPZ_BYTES",
     "META_KEYS",
-    "MM_TO_M",
+    "MM_PER_M",
     "SOURCE_COP_MIN_LOAD_N",
     "SOURCE_FORMAT",
     "SOURCE_REVISION",
@@ -91,15 +91,17 @@ IMPACT_SOURCES: frozenset[str] = frozenset({"shot", "manual"})
 
 #: A plate reports no CoP below this load [N] (a property of the source plates).
 SOURCE_COP_MIN_LOAD_N = 20.0
-#: Millimetres to metres (the files store CoP in mm).
-MM_TO_M = 1e-3
+#: Millimetres per metre (the files store CoP in mm; divide, which is correctly
+#: rounded, rather than multiplying by an inexact 1e-3).
+MM_PER_M = 1000.0
 
-#: Size caps, checked before a file is parsed.  A swing is seconds of data at a
-#: few hundred hertz (tens of kB); these leave a wide margin while keeping a
-#: hostile file from exhausting memory.
+#: Size caps, checked before a file is parsed (and, for the npz, on its expanded
+#: size and every array header).  A swing is tens of kB (6 s at 200 Hz with 18
+#: columns is about 100 kB); these leave a wide margin while keeping a hostile
+#: file from exhausting memory.
 MAX_JSON_BYTES = 1 << 20  # 1 MiB
-MAX_NPZ_BYTES = 64 << 20  # 64 MiB
-MAX_CSV_BYTES = 64 << 20  # 64 MiB
+MAX_NPZ_BYTES = 8 << 20  # 8 MiB
+MAX_CSV_BYTES = 8 << 20  # 8 MiB
 
 #: CSV export header (exact) and its fixed number of decimals for loads/CoP/%.
 CSV_HEADER = (
@@ -109,8 +111,8 @@ CSV_HEADER = (
 CSV_LOAD_DECIMALS = 2
 
 #: ``lead_pct`` cross-check tolerance in percentage points for NPZ data: float
-#: round-off only (the source computes it from the same loads).
-LEAD_PCT_TOL = 0.05
+#: round-off only (the source stores float64 computed from the same loads).
+LEAD_PCT_TOL = 1e-6
 #: Load slack [N] around the 20 N threshold inside which the NaN/finite status
 #: of ``lead_pct`` is not enforced (NPZ: float round-off).
 LOAD_SLACK_N = 1e-6
@@ -121,11 +123,11 @@ _HALF_LOAD_ULP_N = 0.5 * 10.0**-CSV_LOAD_DECIMALS
 #: the threshold.
 LOAD_SLACK_N_CSV = 2.0 * _HALF_LOAD_ULP_N
 #: CSV ``lead_pct`` tolerance [percentage points]: its own 0.005 rounding plus the
-#: propagated load rounding, ``d(100 L / T) <= 100 * 0.005 * (L + R) / T**2 =
-#: 0.5 / T`` at the smallest defined total ``T = 20 N``, plus the NPZ allowance
-#: for float error.
+#: propagated load rounding, to first order ``d(100 L / T) <= 100 * 0.005 *
+#: (L + R) / T**2 = 0.5 / T`` at the smallest defined total ``T = 20 N``, plus
+#: the NPZ float allowance.
 LEAD_PCT_TOL_CSV = (
     0.5 * 10.0**-CSV_LOAD_DECIMALS
     + 100.0 * _HALF_LOAD_ULP_N / SOURCE_COP_MIN_LOAD_N
-    + 1e-6
+    + LEAD_PCT_TOL
 )

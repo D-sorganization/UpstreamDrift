@@ -13,9 +13,8 @@ open-fp is AGPL-3.0; this code is written from the documented file format only.
 
 from __future__ import annotations
 
-import csv
-import io
 import math
+import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -28,6 +27,8 @@ from src.shared.python.force_plates.contracts import (
     PlateProvenance,
     PlateUncertainty,
     VerticalPlateTrial,
+    finite_non_negative,
+    finite_positive,
 )
 from src.shared.python.force_plates.open_fp_format import _arrays, _files, _meta
 from src.shared.python.force_plates.open_fp_format import format as fmt
@@ -35,12 +36,6 @@ from src.shared.python.force_plates.open_fp_format import format as fmt
 __all__ = ["PlateDeclarations", "list_swings", "read_swing", "read_swing_csv"]
 
 _DEFAULT_DEVICE = "open-fp"
-
-
-def _positive(value: object, name: str) -> None:
-    ok = isinstance(value, (int, float)) and not isinstance(value, bool)
-    if not ok or not math.isfinite(float(value)) or float(value) <= 0.0:  # type: ignore[arg-type]
-        raise ValueError(f"{name} must be positive and finite, got {value!r}")
 
 
 @dataclass(frozen=True)
@@ -61,12 +56,8 @@ class PlateDeclarations:
     def __post_init__(self) -> None:
         if not isinstance(self.uncertainty, PlateUncertainty):
             raise TypeError("uncertainty must be a PlateUncertainty")
-        _positive(self.capacity_n, "capacity_n")
-        depth = self.sensing_depth_m
-        if isinstance(depth, bool) or not isinstance(depth, (int, float)):
-            raise ValueError(f"sensing_depth_m must be a number, got {depth!r}")
-        if not math.isfinite(depth) or depth < 0.0:
-            raise ValueError(f"sensing_depth_m must be finite and >= 0, got {depth!r}")
+        finite_positive(self.capacity_n, "capacity_n")
+        finite_non_negative(self.sensing_depth_m, "sensing_depth_m")
         if not isinstance(self.device, str) or not self.device.strip():
             raise ValueError(f"device must be a non-empty string, got {self.device!r}")
 
@@ -107,7 +98,7 @@ def _build_trial(
     declared: PlateDeclarations,
     digests: Mapping[str, str],
 ) -> VerticalPlateTrial:
-    mm = fmt.MM_TO_M
+    per_m = fmt.MM_PER_M
     provenance = PlateProvenance(
         device=declared.device,
         source_format=fmt.SOURCE_FORMAT,
@@ -120,9 +111,9 @@ def _build_trial(
         times_s=arrays.t,
         load_n={"left": arrays.fz_left, "right": arrays.fz_right},
         cop_m={
-            "left": arrays.cop_left * mm,
-            "right": arrays.cop_right * mm,
-            "net": arrays.cop_combined * mm,
+            "left": arrays.cop_left / per_m,
+            "right": arrays.cop_right / per_m,
+            "net": arrays.cop_combined / per_m,
         },
         body_weight_n=header.body_weight_n,
         handedness=header.handedness,
@@ -148,7 +139,9 @@ def read_swing(
     returned on the time axis of ``times_s``.  ``impact_source`` is only used to
     require that an ``impact`` event has a source.
 
-    Raises ``TypeError`` for wrong argument types and ``ValueError`` (naming the
+    Only the stem of ``json_path`` is validated (not its directory components):
+    callers pass trusted directories.  Raises ``TypeError`` for wrong argument
+    types and ``ValueError`` (naming the
     file and field) for anything malformed, inconsistent or out of range,
     including violations found by the trial contract.
     """
@@ -178,23 +171,21 @@ def read_swing(
 
 # ------------------------------------------------------------------- CSV --
 _CSV_COLUMN_COUNT = len(fmt.CSV_HEADER.split(","))
+_CSV_NUMBER = re.compile(r"-?\d{1,20}(\.\d{1,20})?")
 
 
 def _csv_cell(cell: str, path: Path, row: int) -> float:
     if cell == "":
         return math.nan
-    try:
-        value = float(cell)
-    except ValueError as exc:
-        raise ValueError(f"{path}: row {row} has non-numeric cell {cell!r}") from exc
-    if not math.isfinite(value):
-        raise ValueError(f"{path}: row {row} has non-finite cell {cell!r}")
-    return value
+    if not _CSV_NUMBER.fullmatch(cell):
+        raise ValueError(f"{path}: row {row} has a malformed number {cell[:40]!r}")
+    return float(cell)
 
 
-def _csv_matrix(rows: Iterable[list[str]], path: Path) -> np.ndarray:
+def _csv_matrix(rows: Iterable[str], path: Path) -> np.ndarray:
     parsed = []
-    for number, cells in enumerate(rows, start=2):
+    for number, line in enumerate(rows, start=2):
+        cells = line.split(",")
         if len(cells) != _CSV_COLUMN_COUNT:
             raise ValueError(
                 f"{path}: row {number} has {len(cells)} cells, expected {_CSV_COLUMN_COUNT}"
@@ -219,7 +210,8 @@ def _arrays_from_csv(matrix: np.ndarray) -> _arrays.SwingArrays:
     )
 
 
-def _split_csv(data: bytes, path: Path) -> list[list[str]]:
+def _split_csv(data: bytes, path: Path) -> list[str]:
+    """Data lines of the export; it has no quoting, so no csv parser is needed."""
     try:
         text = data.decode("utf-8")
     except UnicodeDecodeError as exc:
@@ -227,13 +219,13 @@ def _split_csv(data: bytes, path: Path) -> list[list[str]]:
     lines = text.splitlines()
     if not lines or lines[0] != fmt.CSV_HEADER:
         raise ValueError(f"{path}: CSV header does not match the documented export")
-    return list(csv.reader(io.StringIO("\n".join(lines[1:]))))
+    return lines[1:]
 
 
 def _check_csv_arguments(handedness: object, body_weight_n: object) -> None:
     if handedness not in get_args(Handedness):
         raise ValueError(f"handedness must be 'RH' or 'LH', got {handedness!r}")
-    _positive(body_weight_n, "body_weight_n")
+    finite_positive(body_weight_n, "body_weight_n")
 
 
 def read_swing_csv(

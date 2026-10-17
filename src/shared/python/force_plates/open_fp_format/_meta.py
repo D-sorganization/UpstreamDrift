@@ -8,9 +8,9 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, NoReturn, cast, get_args
+from typing import Any, NoReturn, get_args
 
-from src.shared.python.force_plates.contracts import Handedness
+from src.shared.python.force_plates.contracts import Handedness, finite_positive
 from src.shared.python.force_plates.open_fp_format import format as fmt
 
 __all__ = ["SwingMeta", "parse_meta"]
@@ -31,10 +31,16 @@ def _reject_constant(name: str, constant: str) -> NoReturn:
 
 
 def _number(value: object, where: str) -> float:
-    ok = isinstance(value, (int, float)) and not isinstance(value, bool)
-    if not ok or not math.isfinite(cast(float, value)):
-        raise ValueError(f"{where} must be a finite number, got {value!r}")
-    return float(cast(float, value))
+    """A JSON number as a finite float; ``ValueError`` otherwise (never overflows)."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"{where} must be a number, got {value!r}")
+    try:
+        number = float(value)
+    except OverflowError as exc:
+        raise ValueError(f"{where} is too large to be a finite number") from exc
+    if not math.isfinite(number):
+        raise ValueError(f"{where} must be finite, got {value!r}")
+    return number
 
 
 def _load_object(data: bytes, path: Path) -> dict[str, Any]:
@@ -46,6 +52,8 @@ def _load_object(data: bytes, path: Path) -> dict[str, Any]:
         raise ValueError(f"{name}: not valid UTF-8 JSON ({exc})") from exc
     except json.JSONDecodeError as exc:
         raise ValueError(f"{name}: invalid JSON ({exc})") from exc
+    except RecursionError as exc:
+        raise ValueError(f"{name}: JSON is nested too deeply") from exc
     if not isinstance(obj, dict):
         raise ValueError(f"{name}: top-level JSON value must be an object")
     return obj
@@ -100,9 +108,9 @@ def parse_meta(data: bytes, path: Path) -> SwingMeta:
     golfer = obj["golfer"]
     if golfer not in get_args(Handedness):
         raise ValueError(f"{path}: golfer must be 'RH' or 'LH', got {golfer!r}")
-    body_weight = _number(obj["bw_n"], f"{path}: bw_n")
-    if body_weight <= 0.0:
-        raise ValueError(f"{path}: bw_n must be positive, got {body_weight}")
+    body_weight = finite_positive(
+        _number(obj["bw_n"], f"{path}: bw_n"), f"{path}: bw_n"
+    )
     events = _check_events(obj["events"], path)
     if obj["impact_source"] is None and events["impact"] is not None:
         raise ValueError(f"{path}: impact_source is null but the impact event is set")
