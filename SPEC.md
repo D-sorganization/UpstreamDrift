@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-17 | #13134 | Plate declarations dialog and web form offer the cross_correlation alignment and require the model it was fitted against |
 | 2026-10-17 | #13125 | Web Analysis Tools ground reaction charts gain the plate declarations form (same fields as the PyQt6 dialog, guarded by a cross-language parity test); analysis.ground_reaction back to parity |
 | 2026-10-17 | #13129 | Add DV-13082 deferred-validation record for OF-HW open-fp device qualification; refresh DV-13061 now that the software children have landed |
 | 2026-10-17 | #13124 | Ground reaction tile asks for plate declarations, stance placement and clock alignment in a dialog; API and tile share open_fp_format.declared_import; web form tracked as gap #13122 |
