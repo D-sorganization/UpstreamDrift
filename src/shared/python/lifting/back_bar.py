@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import json
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
@@ -31,7 +32,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from . import lift_spec
-from .back_rack import BackRack
+from .back_rack import RACKS, BackRack
 from .sagittal_retarget import SagittalFrame
 
 Array = NDArray[np.float64]
@@ -86,6 +87,21 @@ class BackBarGeometry:
     bar_axis: tuple[float, float, float]
     start_bar_position_m: tuple[float, float, float]
     rack: BackRack | None = None
+
+    @classmethod
+    def from_record(cls, record: Mapping[str, Any]) -> BackBarGeometry:
+        """The geometry a bundle recorded (``ik.back_bar.geometry``).
+
+        Raises:
+            KeyError: If the record names an unknown rack.
+            ValueError: As :meth:`from_standard`.
+        """
+        rack = record.get("rack")
+        return cls.from_standard(
+            str(record["lift"]),
+            height_m=float(record["height_m"]),
+            rack=None if rack is None else RACKS[rack["name"]],
+        )
 
     @classmethod
     def from_standard(

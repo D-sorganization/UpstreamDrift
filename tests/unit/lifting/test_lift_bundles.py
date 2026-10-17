@@ -139,14 +139,8 @@ def test_ik_from_the_recorded_solution_meets_thresholds(
     geometry = None
     if geom_rec is not None:
         from src.shared.python.lifting.back_bar import BackBarGeometry
-        from src.shared.python.lifting.back_rack import RACKS
 
-        rack_rec = geom_rec.get("rack")
-        geometry = BackBarGeometry.from_standard(
-            geom_rec["lift"],
-            height_m=geom_rec["height_m"],
-            rack=None if rack_rec is None else RACKS[rack_rec["name"]],
-        )
+        geometry = BackBarGeometry.from_record(geom_rec)
     balance = bundle.provenance["ik"].get("balance")
     load = None
     if balance is not None:

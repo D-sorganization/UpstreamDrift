@@ -43,7 +43,7 @@ if str(ROOT) not in sys.path:
 from src.shared.python.lifting.bundles import BACK_SQUAT_BUNDLE  # noqa: E402
 from src.shared.python.lifting.loaded_foot import (  # noqa: E402
     LOADED_FOOT_RECORD,
-    balanced_ik_window,
+    balanced_ik_track,
 )
 from src.shared.python.motion_matching.same_input import (  # noqa: E402
     InputBundle,
@@ -72,8 +72,14 @@ CONVERGENCE_HOLD_S = 2.5e-4
 ROOT_TRANSLATIONS = 3
 
 
-def measure(args: tuple[bytes, list[str], np.ndarray, np.ndarray, float, int, float]):
-    """One grid run: track, then measure the foot against the IK."""
+def measure(
+    args: tuple[bytes, list[str], np.ndarray, np.ndarray, float, int, float, int],
+):
+    """One grid run: track, then measure the foot against the IK.
+
+    A bundle with a lead-in (OSL-17, #13131) is tracked from its lead-in
+    sample and measured from the window start, as the bundle was built.
+    """
     from src.shared.python.lifting.loaded_foot import (
         foot_joint_error_rad,
         foot_point_deviation_m,
@@ -84,11 +90,12 @@ def measure(args: tuple[bytes, list[str], np.ndarray, np.ndarray, float, int, fl
         closed_loop,
         hold_policy,
     )
+    from src.shared.python.motion_matching.same_input.reference import drop_lead_in
     from src.shared.python.motion_matching.same_input.stiffness import (
         rk4_stability_record,
     )
 
-    spec, order, times, track, window, substeps, hold = args
+    spec, order, times, track, window, substeps, hold, lead = args
     policy = hold_policy(hold, substeps)
     started = time.monotonic()
     rollout = closed_loop(
@@ -96,14 +103,16 @@ def measure(args: tuple[bytes, list[str], np.ndarray, np.ndarray, float, int, fl
         spec,
         times,
         track,
-        duration_s=window,
+        duration_s=window + lead * 1e-3,
         policy=StepPolicy(
             substeps=policy.substeps,
             effort_holds=policy.effort_holds,
             stop_on_failure=True,
         ),
     )
-    ref = window_reference(times, track, rollout.time_s)
+    if rollout.q.shape[0] - 1 > lead:
+        rollout, _ = drop_lead_in(rollout, lead, policy.effort_holds)
+    ref = window_reference(times, track, rollout.time_s + lead * 1e-3)
     rows = np.arange(0, rollout.efforts.shape[0], STABILITY_EVERY * policy.effort_holds)
     steps = rows // policy.effort_holds
     return {
@@ -156,9 +165,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--jobs", type=int, default=4)
     args = parser.parse_args(argv)
     bundle = InputBundle.load(args.bundle)
-    times, track, window = balanced_ik_window(bundle)
+    times, track, window, lead = balanced_ik_track(bundle)
     shared = (bytes(bundle.spec_bytes), list(bundle.coordinate_order), times, track)
-    jobs = [(*shared, window, substeps, hold) for substeps, hold in GRID]
+    jobs = [(*shared, window, substeps, hold, lead) for substeps, hold in GRID]
     with ProcessPoolExecutor(max_workers=max(1, args.jobs)) as pool:
         runs = list(pool.map(measure, jobs))
     convergence = substep_convergence(runs)
