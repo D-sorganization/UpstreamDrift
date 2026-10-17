@@ -17,12 +17,23 @@ __all__ = [
     "CSV_LOAD_DECIMALS",
     "EVENT_EDGE_TOL_S",
     "EVENT_NAMES",
+    "HTTP_COP_QUANTUM_MM",
+    "HTTP_EVENT_EDGE_TOL_S",
+    "HTTP_EVENT_QUANTUM_S",
+    "HTTP_FORCE_QUANTUM_N",
+    "HTTP_LEAD_PCT_QUANTUM",
+    "HTTP_META_KEYS",
+    "HTTP_SOURCE_FORMAT",
+    "HTTP_SUMMARY_KEYS",
+    "HTTP_TIME_QUANTUM_S",
     "ID_PATTERN",
     "IMPACT_SOURCES",
     "LEAD_PCT_TOL",
     "LEAD_PCT_TOL_CSV",
+    "LEAD_PCT_TOL_HTTP",
     "LOAD_SLACK_N",
     "LOAD_SLACK_N_CSV",
+    "LOAD_SLACK_N_HTTP",
     "MAX_CSV_BYTES",
     "MAX_JSON_BYTES",
     "MAX_NPZ_BYTES",
@@ -132,5 +143,40 @@ LOAD_SLACK_N_CSV = 2.0 * _HALF_LOAD_ULP_N
 LEAD_PCT_TOL_CSV = (
     0.5 * 10.0**-CSV_LOAD_DECIMALS
     + 100.0 * _HALF_LOAD_ULP_N / SOURCE_COP_MIN_LOAD_N
+    + LEAD_PCT_TOL
+)
+
+# ------------------------------------------------------------------ HTTP --
+#: ``PlateProvenance.source_format`` label of the LAN JSON form (OF-06).
+HTTP_SOURCE_FORMAT = "open-fp-http-json"
+#: Top-level keys of ``GET /api/swings/{id}``: the file metadata plus ``arrays``.
+HTTP_META_KEYS: frozenset[str] = META_KEYS | {"arrays"}
+#: Keys of one summary object of ``GET /api/swings`` (no ``t0_host``/``arrays``).
+HTTP_SUMMARY_KEYS: frozenset[str] = META_KEYS - {"t0_host"}
+
+#: Quantisation of the JSON form, from the documented rounding in open-fp's
+#: ``swing.py::to_dict``: ``t`` to 1e-4 s, forces [N] and CoP [mm] to 0.1,
+#: ``lead_pct`` to 0.01 %, events to 1e-3 s.  Each value is rounded to the
+#: nearest multiple, so the error is at most half of it.
+HTTP_TIME_QUANTUM_S = 1e-4
+HTTP_FORCE_QUANTUM_N = 0.1
+HTTP_COP_QUANTUM_MM = 0.1
+HTTP_LEAD_PCT_QUANTUM = 0.01
+HTTP_EVENT_QUANTUM_S = 1e-3
+
+#: Event range slack [s] for the JSON form: an event rounded to 1e-3 s may exceed
+#: the span ``t[-1] - t[0]`` (rounded to 1e-4 s) by half an event quantum plus
+#: the time rounding of both ends.
+HTTP_EVENT_EDGE_TOL_S = 0.5 * HTTP_EVENT_QUANTUM_S + HTTP_TIME_QUANTUM_S
+
+_HTTP_HALF_LOAD_N = 0.5 * HTTP_FORCE_QUANTUM_N
+#: As for the CSV: loads off by up to half a quantum, a total by up to a full one.
+LOAD_SLACK_N_HTTP = 2.0 * _HTTP_HALF_LOAD_N
+#: ``lead_pct`` tolerance [percentage points] for the JSON form: its own rounding
+#: plus the propagated load rounding ``100 * (0.05 N) / 20 N`` (see the CSV
+#: derivation above) plus the NPZ float allowance.
+LEAD_PCT_TOL_HTTP = (
+    0.5 * HTTP_LEAD_PCT_QUANTUM
+    + 100.0 * _HTTP_HALF_LOAD_N / SOURCE_COP_MIN_LOAD_N
     + LEAD_PCT_TOL
 )
