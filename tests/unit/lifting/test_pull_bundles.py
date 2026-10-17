@@ -1,6 +1,6 @@
-"""Deadlift and clean-and-jerk same-input bundles (LIFT-5, #11745).
+"""Deadlift, clean-and-jerk and snatch same-input bundles (LIFT-5, #11745).
 
-Both are pulls built by the back-squat pipeline (``scripts/generate_lift_bundle
+All three are pulls built by the back-squat pipeline (``scripts/generate_lift_bundle
 .py --lift ...``): a Movement Optimizer solve, full-body marker IK with the bar
 held in the hands at the standard's grip width, and a 0.2 s MuJoCo tracking
 window centred on the knee pass.  The IK thresholds are the residuals measured
@@ -29,7 +29,7 @@ from src.shared.python.motion_matching.same_input import InputBundle
 
 pytestmark = pytest.mark.unit
 
-PULLS = ("deadlift", "clean_and_jerk")
+PULLS = ("deadlift", "clean_and_jerk", "snatch")
 MAX_BUNDLE_BYTES = 300_000
 # Measured maxima over all 151 frames (metres); see the module docstring.
 IK_RESIDUAL_THRESHOLDS_M: dict[str, dict[str, float]] = {
@@ -55,16 +55,46 @@ IK_RESIDUAL_THRESHOLDS_M: dict[str, dict[str, float]] = {
         "shoulder_r": 0.0030,
         "bar": 0.0012,
     },
+    # Whole-lift maxima, set by the turnover and the catch (0.50-0.77 of the
+    # lift, after the window): see _SNATCH_CATCH below.
+    "snatch": {
+        "ankle_l": 0.0473,
+        "ankle_r": 0.0502,
+        "knee_l": 0.0455,
+        "knee_r": 0.0431,
+        "hip_l": 0.0471,
+        "hip_r": 0.0473,
+        "shoulder_l": 0.0198,
+        "shoulder_r": 0.0112,
+        "bar": 0.0402,
+    },
 }
 # OSL-14 (#13057): the bounded arm solve ends with the hanging arm at its
 # cited elbow-extension limit, so the grip weld closes to tens of microns
 # (the unbounded golf-body solve closed to 1e-7 m with out-of-range joints).
 # Before/after numbers: #13057 (issuecomment-6229479012).
-CLOSURE_THRESHOLD_M: dict[str, float] = {"deadlift": 7.7e-5, "clean_and_jerk": 2.8e-5}
+CLOSURE_THRESHOLD_M: dict[str, float] = {
+    "deadlift": 7.7e-5,
+    "clean_and_jerk": 2.8e-5,
+    "snatch": 1.8e-4,
+}
 FOOT_PENETRATION_THRESHOLD_M: dict[str, float] = {
     "deadlift": 7.0e-4,
     "clean_and_jerk": 7.0e-4,
+    "snatch": 2.1e-3,
 }
+_SNATCH_CATCH = pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "Measured snatch IK (#11745): through the pulls (0-0.45 of the lift) "
+        "and the 0.467-0.667 s window the residuals are deadlift class "
+        "(worst knee_r 11.2 mm, bar 0.23 mm, feet 0.69 mm), but the full-body "
+        "model cannot follow the turnover (bar 40.1 mm, shoulder_l 19.7 mm at "
+        "0.50) or the planar overhead-squat catch (legs 43-50 mm, feet "
+        "2.07 mm into the ground at 0.53-0.77).  The deadlift bounds are not "
+        "loosened."
+    ),
+)
 
 
 @pytest.fixture(scope="module", params=PULLS)
@@ -206,3 +236,11 @@ def test_lift_hands_rejects_an_unknown_lift() -> None:
         lift_hands_to_full_body(
             LIFT_SPEC.read_bytes(), solution, load_seed_pose(), "curl"
         )
+
+
+@_SNATCH_CATCH
+def test_snatch_whole_lift_ik_meets_the_deadlift_bounds() -> None:
+    ik = InputBundle.load(recipe("snatch").bundle_path).provenance["ik"]
+    for label, limit in IK_RESIDUAL_THRESHOLDS_M["deadlift"].items():
+        assert ik["max_residual_m"][label] <= limit, label
+    assert ik["min_sphere_height_m"] >= -FOOT_PENETRATION_THRESHOLD_M["deadlift"]
