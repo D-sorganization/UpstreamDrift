@@ -2561,6 +2561,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13122 · Web Analysis Tools Ground Reaction Charts Gain the Plate Declarations Form (Same Fields as the PyQt6 Dialog, Guarded by a Cross-Language Parity Test); Analysis.Ground_Reaction Back to Parity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13122
+- **Branch:** merged via #13125
+- **PR:** #13125
+- **Paths:** see #13125
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`00019c88`; collated from changes/13122-web-analysis-tools-ground-reaction-chart.md)
+- **Summary:** Web Analysis Tools ground reaction charts gain the plate declarations form (same fields as the PyQt6 dialog, guarded by a cross-language parity test); analysis.ground_reaction back to parity
+- **Next step:** Shipped in PR #13125.
+
 ### DL-#13082 · Add DV-13082 Deferred-Validation Record for OF-HW Open-Fp Device Qualification; Refresh DV-13061 Now That the Software Children Have Landed
 
 - **State:** shipped
