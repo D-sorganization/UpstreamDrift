@@ -2684,10 +2684,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13056
 - **Branch:** merged via #13060
-- **PR:** #13060, #13076, #13101
+- **PR:** #13060, #13076, #13101, #13117
 - **Paths:** see #13060
 - **Started:** 2026-10-17
-- **Last verified:** 2026-10-17 (`e52429c3`; collated from changes/13056-full-body-spine-stage-poses-arms-and-grf.md)
+- **Last verified:** 2026-10-17 (`bb5df06b`; collated from changes/13056-shoulder-orientation-solve-keeps-its-eul.md)
 - **Summary:** OS-8 branch-continuous capture-A IK: constant marker set, warm-started tie-break IK, continuous through impact
 - **Next step:** Shipped in PR #13060.
 
