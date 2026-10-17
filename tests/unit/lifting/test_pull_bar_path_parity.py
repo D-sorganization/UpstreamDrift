@@ -1,4 +1,4 @@
-"""Cross-engine bar-path parity of the pull bundles (LIFT-5, #11745).
+"""Cross-engine bar-path parity of the pull and bench bundles (LIFT-5, #11745).
 
 Same protocol and the same never-loosened tolerances as the back squat
 (``test_bar_path_parity.py``): every engine replays the committed bundle open
@@ -54,6 +54,7 @@ _DEADLIFT_COORDINATES = pytest.mark.xfail(
 PULL_COORDINATE_CASES = [
     pytest.param("deadlift", marks=_DEADLIFT_COORDINATES),
     "clean_and_jerk",
+    "bench_press",
 ]
 
 
@@ -69,7 +70,7 @@ def _measured(record: dict) -> dict:
     }
 
 
-@pytest.fixture(scope="module", params=("deadlift", "clean_and_jerk"))
+@pytest.fixture(scope="module", params=("deadlift", "clean_and_jerk", "bench_press"))
 def lift(request: pytest.FixtureRequest) -> str:
     return str(request.param)
 

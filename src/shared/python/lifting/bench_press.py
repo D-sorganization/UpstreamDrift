@@ -426,7 +426,7 @@ def lift_bench_to_full_body(
     hold = solve_bench_hold(bytes(spec_bytes), seed_q, options=options)
     setup, kin, axes = _press_setup(bytes(spec_bytes), hold)
     frame = bench_frame(hold)
-    standing = replace(hold.standing, q=hold.q, frame=frame, points=hold.points)
+    standing = replace(hold.standing, q=hold.q, frame=frame, points=dict(hold.points))
     up = np.asarray(frame.up)
     reach = _arm_hang(kin, standing, hold.q, axes, direction=up)
     setup = replace(setup, arm_hang_m=reach, bar_offset_scale=reach / lockout)
