@@ -203,3 +203,28 @@ def test_solve_preconditions(make) -> None:
 
 
 ZXY_NAMES = tuple(n for n, _ in ZXY)
+
+
+def test_unreachable_sweep_keeps_one_branch_within_the_slack(make) -> None:
+    """#13056: a target turning through pi beyond a bounded axis.
+
+    The closest in-range solutions sit on the two bounds of ``ang`` with
+    residuals that cross at pi; lowest-residual selection flips between
+    them, continuity keeps the first branch while the gain is within the
+    slack.
+    """
+    target_model = make(XYZ)
+    angles = np.linspace(np.pi - 0.2, np.pi + 0.03, 12)
+    far = Rotation.from_rotvec(np.outer(angles, [0.0, 0.0, 1.0])).as_matrix()
+    limits = {"elv": (-0.3, 0.3), "rot": (-0.3, 0.3), "ang": (-0.5, 0.5)}
+    kept = solve_orientation_group(target_model, _group(), {}, far, bounds=limits)
+    assert kept.max_step_rad < 0.2
+    assert kept.residual_rad.min() > 1.0
+    flipped = solve_orientation_group(
+        target_model, _group(), {}, far, bounds=limits, continuity_slack_rad=0.0
+    )
+    assert flipped.max_step_rad > 0.5
+    with pytest.raises(ValueError, match="continuity_slack_rad"):
+        solve_orientation_group(
+            target_model, _group(), {}, far, bounds=limits, continuity_slack_rad=-1.0
+        )
