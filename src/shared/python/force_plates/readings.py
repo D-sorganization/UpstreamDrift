@@ -58,6 +58,7 @@ __all__ = [
     "PlacedTrial",
     "PlateReading",
     "ReadingOptions",
+    "covers",
     "reading_at",
 ]
 
@@ -361,3 +362,20 @@ def reading_at(
     bracket = (locate(times, t), t)
     feet = {foot: _foot_sample(placed, foot, bracket, options) for foot in FOOT_LABELS}
     return PlateReading(model_time_s, t, feet, coverage=options.coverage)
+
+
+def covers(
+    placed: PlacedTrial,
+    model_time_s: float,
+    alignment: PlateTimeAlignment,
+    options: ReadingOptions,
+) -> bool:
+    """Whether :func:`reading_at` can read ``model_time_s`` (inside the trial span).
+
+    Uses the same trial-time mapping and rounding snap as :func:`reading_at`,
+    so a ``True`` here never meets an extrapolation refusal there.
+    """
+    _check_reading_inputs(placed, alignment, options)
+    start, end = placed.span_s()
+    t = _trial_time(placed.trial.times_s, model_time_s, alignment, options)
+    return start <= t <= end

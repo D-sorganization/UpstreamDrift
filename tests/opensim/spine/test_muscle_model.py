@@ -254,3 +254,46 @@ def test_prepare_unlocks_only_the_named_coordinates(tmp_path) -> None:
     assert chosen.unlocked_coordinates == (name,)
     with pytest.raises(ValueError, match="unknown coordinates"):
         prepare_model_for_id(path, unlock_coordinates=("nope",))
+
+
+def _empty_external_loads(tmp_path: Path) -> Path:
+    """An ExternalLoads XML with no forces and a one-row data file."""
+    data = tmp_path / "no_forces.mot"
+    data.write_text(
+        "no_forces\nversion=1\nnRows=2\nnColumns=1\ninDegrees=no\nendheader\n"
+        "time\n0\n1\n",
+        encoding="utf-8",
+    )
+    xml = tmp_path / "no_forces.xml"
+    xml.write_text(
+        '<OpenSimDocument Version="40000"><ExternalLoads name="loads">'
+        "<objects/><datafile>no_forces.mot</datafile></ExternalLoads>"
+        "</OpenSimDocument>",
+        encoding="utf-8",
+    )
+    return xml
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+@pytest.mark.parametrize("with_loads", [False, True], ids=["plain", "external_loads"])
+def test_unlock_survives_init_system_with_external_loads(tmp_path, with_loads) -> None:
+    """#13056: the ModelProcessor path re-locked unlocked coordinates.
+
+    ``setValue`` then silently refused the driven values, so ID and joint
+    reactions ran at the locked pose while the SO basis used the driven one.
+    """
+    from src.engines.physics_engines.opensim.python.spine.inverse_dynamics import (
+        prepare_model_for_id,
+    )
+
+    path, name = _locked_fixture(tmp_path)
+    loads = _empty_external_loads(tmp_path) if with_loads else None
+    prepared = prepare_model_for_id(
+        path, external_loads=loads, unlock_coordinates=(name,)
+    )
+    coord = prepared.model.getCoordinateSet().get(name)
+    assert not coord.get_locked()
+    assert not coord.getLocked(prepared.state)
+    coord.setValue(prepared.state, 0.123, False)
+    assert coord.getValue(prepared.state) == pytest.approx(0.123)

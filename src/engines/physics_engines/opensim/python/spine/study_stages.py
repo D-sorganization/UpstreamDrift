@@ -248,6 +248,7 @@ def _fullbody(
         stem=request.study_id,
         filter_hz=request.filter_hz,
         supplied_name=None if loads is None else loads.name,
+        unlock_coordinates=tuple(out.unlocked),
     )
     result = run_fullbody(spec, drive.time_s, drive.coordinates)
     out.artifacts.extend(result.artifacts)
