@@ -5,9 +5,11 @@ it as plot traces that sit beside the model's computed ground reaction:
 
 * ``measured_<foot>_force_n`` - ``x`` and ``y`` are ``None`` (a vertical plate
   does not observe shear; unobserved is never zero), ``z`` is the load;
-* ``measured_<foot>_force_sigma_n`` - ``z`` is that load's 1-sigma
-  uncertainty: the declared measurement uncertainty plus the reading's timing
-  and interpolation terms (``FootSample.sigma_load_n``);
+* ``measured_<foot>_force_sigma_n`` - ``z`` is that load's random 1-sigma:
+  the declared measurement uncertainty combined with the declared timing skew
+  (``FootSample.load_sigma_random_n``).  The interpolation bias is an
+  estimate, not a random error, so it is left out; ``sigma_load_n`` adds it as
+  ``bias / coverage`` and is not a 1-sigma, so it is never plotted as one;
 * ``measured_<foot>_cop_m`` - the centre of pressure on the force-sensing
   plane, ``None`` where the foot is unloaded.
 
@@ -116,7 +118,7 @@ def _append_foot(
             _append(trace, None, None, None)
         return
     _append(force, None, None, sample.load_n)
-    _append(sigma, None, None, sample.sigma_load_n)
+    _append(sigma, None, None, sample.load_sigma_random_n)
     point = sample.cop_m
     if point is None:
         _append(cop, None, None, None)

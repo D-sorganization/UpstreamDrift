@@ -158,18 +158,24 @@ def test_force_namespace_cannot_clobber_model_events() -> None:
         attach_measured_overlay(series, overlay)
 
 
-def test_load_sigma_is_the_readings_own_one_sigma() -> None:
+def test_load_sigma_is_the_random_one_sigma_not_the_band_equivalent() -> None:
     from src.shared.python.force_plates import reading_at
 
-    placed, times = _placed(), (0.0, 0.005)
-    overlay = measured_overlay(placed, _align(), times, _opts())
+    placed, times = _placed(), (0.0, 0.0025, 0.005)
+    # Between samples the reading carries an interpolation bias; declared
+    # curvature floors make it computable.
+    opts = ReadingOptions(
+        coverage=2.0, load_curvature_floor=1.0e5, cop_curvature_floor=1.0
+    )
+    overlay = measured_overlay(placed, _align(), times, opts)
     sigma = overlay.traces["measured_left_force_sigma_n"]
-    expected = [
-        reading_at(placed, t, _align(), _opts()).feet["left"].sigma_load_n
-        for t in times
-    ]
-    assert sigma["z"] == pytest.approx(expected)
-    assert sigma["x"] == sigma["y"] == sigma["magnitude"] == [None, None]
+    feet = [reading_at(placed, t, _align(), opts).feet["left"] for t in times]
+    assert sigma["z"] == pytest.approx([f.load_sigma_random_n for f in feet])
+    # sigma_load_n adds bias / coverage and is not a 1-sigma: never plot it as one.
+    biased = [f for f in feet if f.load_bias_n]
+    assert biased, "fixture must exercise a nonzero interpolation bias"
+    assert all(f.load_sigma_random_n < f.sigma_load_n for f in biased)
+    assert sigma["x"] == sigma["y"] == sigma["magnitude"] == [None] * 3
     assert all(s > 0.0 for s in sigma["z"])
 
 

@@ -12,8 +12,8 @@ lists, unit in ``units``):
 * ``<key>_cop_m`` - centre of pressure, ``None`` below the CoP threshold;
 * ``<key>_free_moment_nm`` - free moment at the CoP;
 * ``<key>_moment_com_nm`` - moment about the whole-body centre of mass;
-* ``measured_<foot>_force_sigma_n`` - with a plate overlay, the 1-sigma
-  uncertainty of the measured load (``z``).
+* ``measured_<foot>_force_sigma_n`` - with a plate overlay, the random
+  1-sigma of the measured load (``z``), interpolation bias excluded.
 
 ``load_share`` holds each foot's share of the summed vertical force, ``None``
 when the feet together carry less than :data:`COP_MIN_FZ_N`.
