@@ -41,6 +41,12 @@ __all__ = [
     "NET_LABEL",
     "NET_COP_TOL_M",
     "Handedness",
+    "finite_non_negative",
+    "finite_positive",
+    "finite_real",
+    "non_empty_text",
+    "real_number",
+    "require_foot_keys",
     "PlateProvenance",
     "PlateUncertainty",
     "VerticalPlateTrial",
@@ -67,28 +73,54 @@ _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _LEAD = {"RH": "left", "LH": "right"}
 
 
-def _real(value: object, name: str) -> float:
-    """``value`` as a float; ``TypeError`` for a bool or a non-real type."""
+def real_number(value: object, name: str) -> float:
+    """``value`` as a float; ``TypeError`` (naming ``name``) for a bool or non-real."""
     if isinstance(value, bool) or not isinstance(value, numbers.Real):
         raise TypeError(f"{name} must be a real number, got {value!r}")
     return float(value)
 
 
-def _finite_positive(value: object, name: str) -> float:
-    number = _real(value, name)
+def finite_real(value: object, name: str) -> float:
+    """``value`` as a float, required finite (any sign).
+
+    ``TypeError`` for a bool or non-real; ``ValueError`` for NaN or infinity.
+    """
+    number = real_number(value, name)
+    if not math.isfinite(number):
+        raise ValueError(f"{name} must be finite, got {value!r}")
+    return number
+
+
+def require_foot_keys(
+    table: Mapping[str, object], name: str, extra: tuple[str, ...] = ()
+) -> None:
+    """``ValueError`` unless ``table`` is keyed exactly by the feet plus ``extra``."""
+    keys = (*FOOT_LABELS, *extra)
+    if set(table) != set(keys):
+        raise ValueError(f"{name} must be keyed exactly by {keys}")
+
+
+def finite_positive(value: object, name: str) -> float:
+    """``value`` as a float, required positive and finite.
+
+    ``TypeError`` for a bool or non-real; ``ValueError`` out of range.
+    """
+    number = real_number(value, name)
     if not math.isfinite(number) or number <= 0.0:
         raise ValueError(f"{name} must be positive and finite, got {value!r}")
     return number
 
 
-def _finite_non_negative(value: object, name: str) -> float:
-    number = _real(value, name)
+def finite_non_negative(value: object, name: str) -> float:
+    """``value`` as a float, required finite and >= 0 (errors as above)."""
+    number = real_number(value, name)
     if not math.isfinite(number) or number < 0.0:
         raise ValueError(f"{name} must be finite and non-negative, got {value!r}")
     return number
 
 
-def _text(value: object, name: str) -> str:
+def non_empty_text(value: object, name: str) -> str:
+    """``value`` if it is a non-blank string, else ``ValueError`` naming ``name``."""
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{name} must be a non-empty string, got {value!r}")
     return value
@@ -166,11 +198,11 @@ class PlateUncertainty:
     source: str
 
     def __post_init__(self) -> None:
-        _finite_positive(self.force_floor_n, "force_floor_n")
-        _finite_positive(self.cop_m, "cop_m")
-        _finite_non_negative(self.force_fraction, "force_fraction")
-        _finite_non_negative(self.sensing_depth_sigma_m, "sensing_depth_sigma_m")
-        _text(self.source, "source")
+        finite_positive(self.force_floor_n, "force_floor_n")
+        finite_positive(self.cop_m, "cop_m")
+        finite_non_negative(self.force_fraction, "force_fraction")
+        finite_non_negative(self.sensing_depth_sigma_m, "sensing_depth_sigma_m")
+        non_empty_text(self.source, "source")
 
     def force_sigma_n(self, load_n: ArrayLike) -> Array:
         """1-sigma load uncertainty [N] for the loads ``load_n`` [N]."""
@@ -198,16 +230,16 @@ class PlateProvenance:
 
     def __post_init__(self) -> None:
         for name in ("device", "source_format", "source_revision"):
-            _text(getattr(self, name), name)
+            non_empty_text(getattr(self, name), name)
         digests = dict(self.file_sha256)
         for role, digest in digests.items():
-            _text(role, "file_sha256 role")
+            non_empty_text(role, "file_sha256 role")
             if not isinstance(digest, str) or not _SHA256.match(digest):
                 raise ValueError(f"file_sha256[{role!r}] is not a sha256 hex digest")
         for name in ("calibration_id", "qualification"):
             value = getattr(self, name)
             if value is not None:
-                _text(value, name)
+                non_empty_text(value, name)
         object.__setattr__(self, "file_sha256", MappingProxyType(digests))
 
     @property
@@ -271,10 +303,10 @@ class VerticalPlateTrial:
             raise ValueError(
                 f"handedness must be 'RH' or 'LH', got {self.handedness!r}"
             )
-        _finite_positive(self.body_weight_n, "body_weight_n")
-        _finite_positive(self.cop_min_load_n, "cop_min_load_n")
-        _finite_positive(self.capacity_n, "capacity_n")
-        _finite_non_negative(self.sensing_depth_m, "sensing_depth_m")
+        finite_positive(self.body_weight_n, "body_weight_n")
+        finite_positive(self.cop_min_load_n, "cop_min_load_n")
+        finite_positive(self.capacity_n, "capacity_n")
+        finite_non_negative(self.sensing_depth_m, "sensing_depth_m")
 
     def _times(self) -> Array:
         times = _readonly(self.times_s, "times_s")
@@ -285,8 +317,7 @@ class VerticalPlateTrial:
         return times
 
     def _loads(self, n: int) -> dict[str, Array]:
-        if set(self.load_n) != set(FOOT_LABELS):
-            raise ValueError(f"load_n must be keyed exactly by {FOOT_LABELS}")
+        require_foot_keys(self.load_n, "load_n")
         loads = {k: _readonly(self.load_n[k], f"load_n[{k!r}]") for k in FOOT_LABELS}
         for key, load in loads.items():
             if load.shape != (n,):
@@ -307,8 +338,7 @@ class VerticalPlateTrial:
 
     def _cops(self, n: int, loads: Mapping[str, Array]) -> dict[str, Array]:
         keys = (*FOOT_LABELS, NET_LABEL)
-        if set(self.cop_m) != set(keys):
-            raise ValueError(f"cop_m must be keyed exactly by {keys}")
+        require_foot_keys(self.cop_m, "cop_m", extra=(NET_LABEL,))
         cops = {k: _readonly(self.cop_m[k], f"cop_m[{k!r}]") for k in keys}
         for key, cop in cops.items():
             if cop.shape != (n, 2):
