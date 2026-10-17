@@ -4,8 +4,8 @@
     "LSInputY": 45.0,
     "REInput": -20.0,
     "RSInputY": 45.0,
-    "hip_rotation_l": -15.972663320939011,
-    "hip_rotation_r": -19.60807483876539
+    "hip_rotation_l": -5.972319850061025,
+    "hip_rotation_r": -9.607738447471043
   },
   "anthropometry": {
     "de_leva_table_sha256": "f3aff01daf746bd965d888622d74461563a4b7ef2331ae03cdc75f87a18f524b",
@@ -135,7 +135,7 @@
           "com_m": [
             0.0,
             0.0,
-            0.0844985910228317
+            0.05368389634075242
           ],
           "inertia_com_kg_m2": [
             [
@@ -249,7 +249,7 @@
           "com_m": [
             0.0,
             0.0,
-            0.09512972168377368
+            0.11617574629439975
           ],
           "inertia_com_kg_m2": [
             [
@@ -301,7 +301,7 @@
           "com_m": [
             0.0,
             0.0,
-            0.3183528180559161
+            0.31556358587860417
           ],
           "inertia_com_kg_m2": [
             [
@@ -358,7 +358,7 @@
           "com_m": [
             0.0,
             0.0,
-            0.11933519345203904
+            0.11923976346927052
           ],
           "inertia_com_kg_m2": [
             [
@@ -3761,21 +3761,21 @@
       "parent": "tibia_r",
       "parent_to_base": [
         [
-          0.9942975703750765,
-          -0.018557934606193413,
-          -0.10501402101325395,
+          0.9606744933938294,
+          -0.04885385617842596,
+          -0.27334560263338276,
           -0.0102646
         ],
         [
-          4.12693463669788e-08,
-          0.9847417938081873,
-          -0.1740218363523156,
+          0.0007514106500190886,
+          0.9848550721970922,
+          -0.17337797481138043,
           -0.438544
         ],
         [
-          0.10664118128667834,
-          0.17302948474345656,
-          0.9791263737961489,
+          0.27767598586219977,
+          0.16635440332061638,
+          0.9461618568571115,
           0.0
         ],
         [
@@ -4084,21 +4084,21 @@
       "parent": "tibia_l",
       "parent_to_base": [
         [
-          0.9942975703750765,
-          -0.018557934606193413,
-          0.10501402101325395,
+          0.9606745016284401,
+          -0.04885759847845805,
+          0.2733449048214841,
           -0.0102381
         ],
         [
-          4.12693463669788e-08,
-          0.9847417938081873,
-          0.1740218363523156,
+          0.0007566989339442371,
+          0.9848558635571361,
+          0.17337345651469113,
           -0.434354
         ],
         [
-          -0.10664118128667834,
-          -0.17302948474345656,
-          0.9791263737961489,
+          -0.27767594301212306,
+          -0.1663486191347734,
+          0.9461628863912821,
           0.0
         ],
         [
@@ -4485,7 +4485,7 @@
       ]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210); grip rotation refitted per capture from docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_driver.json (#12221); de Leva table derived from whole Table 4 rows, trunk length kept by rescaling trunk_scale and upper-trunk solid rebuilt (#13037) | hip joints relocated to functional centres from the capture (radii 0.4040/0.3829 m, sphere sd 1.9/2.0 mm over 649 frames) with zero twist calibrated (R: -5.74 deg, L: 25.46 deg) | toe contact spheres added on calcanei; stiffness 5e+04 N/m",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210); grip rotation refitted per capture from docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_driver.json (#12221); static external tibial-torsion offset 10 deg per ankle (#12789); de Leva table derived from whole Table 4 rows, trunk length kept by rescaling trunk_scale and upper-trunk solid rebuilt (#13037); head and trunk-part CM measured from the cranial de Leva row origin (#13037) | hip joints relocated to functional centres from the capture (radii 0.4040/0.3829 m, sphere sd 1.9/2.0 mm over 649 frames) with zero twist calibrated (R: -5.74 deg, L: 25.46 deg) | toe contact spheres added on calcanei; stiffness 5e+04 N/m",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
@@ -4513,6 +4513,11 @@
     "source": "de Leva 1996 male table",
     "stature_m": 1.71,
     "trunk_scale": 1.0138985579313775
+  },
+  "tibial_torsion_deg": {
+    "l": 10.0,
+    "r": 10.0,
+    "source": "Seber et al. 2000, Arch Orthop Trauma Surg 120:255-258 (doi:10.1007/s004020050459): CT tibiofibular torsion of 50 male adults, range 16-50 deg"
   },
   "upper_body_counts": {
     "bodies": 15,
