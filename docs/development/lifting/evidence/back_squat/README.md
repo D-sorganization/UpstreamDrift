@@ -176,3 +176,28 @@ committed: it changes the bundle spec hash recorded in the bar-path, kinetics
 and barbell evidence (#12340, #12341, #12345) and exceeds two recorded IK
 thresholds (`hip_r` 0.0153 m against 0.0138 m, closure 1.9e-6 m against
 1.5e-6 m), so it lands with that evidence in the next slice.
+
+## Loaded Foot Stability (OSL-16, #13104)
+
+The committed bundles are the bar-balanced source (#13093,
+`--load-balance`) tracked at 64 RK4 substeps with a 0.25 ms effort hold
+(`barbell_runs.LOADED_TRACKING_POLICY`). At the original eight substeps the
+stiffest loaded foot-contact mode (1.3e5 1/s) left the RK4 stability region,
+and the right foot points ran 0.23 m from the IK. The sweep is in
+`loaded_foot_tracking.json` (`scripts/measure_loaded_foot_tracking.py`), and
+`lift_models.tex` (OSL-16 subsection) holds the full account. The earlier
+sections above describe the eight-substep records. They stay for history; the
+records now read:
+
+- **Feet:** foot points within 1.81/1.79 mm of the IK, against the ankle
+  bounds 3.6/5.7 mm.
+- **Bar-path parity:** over the full window the engines agree within 2.2e-9
+  rad and the bar within 4.3e-12 m. The coordinate xfails are now plain
+  tests.
+- **Re-track:** every landmark is within its LIFT-5 bound. Ankles 0.97,
+  knees 1.21, hips 1.39, shoulders 1.83 and bar 2.03 mm. The bar is bounded
+  by the tightest body-landmark bound (3.6 mm), not the IK's 0.1 mm
+  constraint precision.
+- **Hold:** body plus bar is carried at 0.75-1.0 s, then sags. The 1 % bands
+  over the last 0.5 s still fail narrowly: ground 0.988, hands 0.986.
+- **Size:** loaded bundles carry their hold efforts, up to 600,000 bytes.

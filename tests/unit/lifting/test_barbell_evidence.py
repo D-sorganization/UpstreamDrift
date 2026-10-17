@@ -6,10 +6,12 @@ thresholds are fixed before the runs and are not loosened:
 * Quasi-static hold, means over the last 0.5 s of a 1.5 s hold: vertical
   ground reaction equals body plus bar weight within 1 %; the hand forces
   carry the bar weight within 1 %; the left hand carries 0.5 +- 0.01 of it;
-  peak bushing deflection at most 3 mm over the whole hold.  The committed
-  hold FAILS these checks (the stance tips forward after about 0.4 s); they
-  are kept as strict expected failures with the thresholds unchanged, and
-  :func:`test_hold_failure_is_the_forward_tip` pins the physical cause.
+  peak bushing deflection at most 3 mm over the whole hold.  On the
+  64-substep loaded policy (OSL-16, #13104) the split and the deflection
+  pass, but the 1 % bands still FAIL narrowly (ground 0.988, hands 0.986 of
+  their loads): the hold carries body plus bar at 0.75-1.0 s (1.000) and then
+  sags.  They are kept as strict expected failures with the thresholds
+  unchanged (:data:`HOLD_GAP`).
 * Loaded bundle: same-engine open-loop replay of the first steps reproduces
   the reference within 1e-8 (determinism of the coupled plant).
 * Loaded re-track (#13072): every LIFT-5 body landmark stays within the
@@ -48,9 +50,10 @@ def _load(path: Path) -> dict:
 
 
 HOLD_GAP = (
-    "#11744 gap: with the golf spec's hands the 100 kg bar hangs in front of "
-    "the body; the combined centre of mass lies ahead of both forefoot "
-    "spheres, so the standing hold tips forward (bar on the back is needed)"
+    "#13093 gap: at 64 RK4 substeps (#13104) the hold carries body plus bar "
+    "(1.000 at 0.75-1.0 s; was 0.455 overall at 8 substeps), then sags to "
+    "0.982 by 1.5 s under a steady -102 N net horizontal ground force, so "
+    "the last-0.5 s means miss the 1 % bands (ground 0.988, hands 0.986)"
 )
 
 
@@ -72,7 +75,7 @@ def test_hold_hands_carry_the_bar_symmetrically() -> None:
 
 
 def test_hold_starts_supported_then_fails() -> None:
-    """The first 0.3 s carry body plus bar; the end of the hold does not."""
+    """The start carries body plus bar; the last 0.5 s miss the 1 % band."""
     record = _load(HOLD_JSON)
     series, summary = record["series"], record["summary"]
     time = np.asarray(series["time_s"])

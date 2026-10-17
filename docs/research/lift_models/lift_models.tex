@@ -1018,7 +1018,16 @@ bar-balanced, 64-substep source.
   height (21.9\,N\,m). The cause is the same: the hand loads act at a grip the
   model's hands do not reach. The OpenSim static hold carries body plus bar
   exactly (1961.33\,N).
-%OSL16-HOLD%
+\item \textbf{Barbell hold} (\texttt{barbell\_hold.json}, 1.5\,s at the
+  loaded policy): vertical ground force over body plus bar rose from 0.455
+  to 0.988, and hand force over bar weight from 0.298 to 0.986. The left-hand
+  share is 0.493 and the peak deflection 0.63\,mm, both within their bounds.
+  Body plus bar is carried exactly at 0.75--1.0\,s (1.000); the hold then
+  sags to 0.982 by 1.5\,s under a steady $-102$\,N net horizontal ground
+  force, so the last-0.5\,s means still miss the 1\,\% bands. The hold xfails
+  stay strict, thresholds unchanged. This drift was present at eight
+  substeps too ($-100$\,N), so it is a hold-balance gap of \#13093, not the
+  foot instability.
 \end{itemize}
 
 \paragraph{Failed Experiments.}
