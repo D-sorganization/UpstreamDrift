@@ -12,13 +12,14 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
+from src.shared.python.force_plates.contracts import NEGATIVE_LOAD_SIGMAS
 from src.shared.python.force_plates.open_fp_format.format import (
     HTTP_FORCE_QUANTUM_N,
     MM_PER_M,
     SOURCE_COP_MIN_LOAD_N,
 )
 
-__all__ = ["LiveBatch", "LiveBatchError", "parse_live_batch"]
+__all__ = ["LiveBatch", "LiveBatchError", "negative_load_floor_n", "parse_live_batch"]
 
 #: Every key the board's ``live`` message carries (no more, no fewer).
 LIVE_KEYS: frozenset[str] = frozenset(
@@ -38,10 +39,26 @@ LIVE_KEYS: frozenset[str] = frozenset(
 PLATE_KEYS: frozenset[str] = frozenset({"L", "R"})
 COP_KEYS: frozenset[str] = frozenset({"L", "R", "C"})
 CELLS_PER_SAMPLE = 8  # four load cells per plate, two plates
-#: Loads are rounded to ``HTTP_FORCE_QUANTUM_N``: a plate at or just below the
-#: threshold may show a rounded load half a quantum under it yet still carry CoP.
-_COP_LOAD_FLOOR_N = SOURCE_COP_MIN_LOAD_N - 0.5 * HTTP_FORCE_QUANTUM_N
+#: Loads are rounded to ``HTTP_FORCE_QUANTUM_N``, so a rounded load is within
+#: half a quantum of the true one: CoP may be present down to the threshold
+#: minus that, and absent up to the threshold plus it.
+_HALF_QUANTUM_N = 0.5 * HTTP_FORCE_QUANTUM_N
+_COP_LOAD_FLOOR_N = SOURCE_COP_MIN_LOAD_N - _HALF_QUANTUM_N
+_NULL_COP_CEILING_N = SOURCE_COP_MIN_LOAD_N + _HALF_QUANTUM_N
 _FLOAT_EPS = 1e-9
+
+
+def negative_load_floor_n(force_floor_n: float) -> float:
+    """Lowest accepted rounded load [N]: the trial contract's noise rule.
+
+    An unloaded plate reads slightly negative from noise; like
+    :class:`~src.shared.python.force_plates.contracts.VerticalPlateTrial`, a
+    value is kept unclamped down to ``NEGATIVE_LOAD_SIGMAS`` declared floor
+    sigmas (here also allowing half a rounding quantum).
+    """
+    return -(NEGATIVE_LOAD_SIGMAS * force_floor_n + _HALF_QUANTUM_N)
+
+
 _SIDE = {"L": "left", "R": "right"}
 
 
@@ -89,20 +106,22 @@ def _times(raw: object) -> list[float]:
     return times
 
 
-def _loads(raw: object, count: int, plate: str) -> list[float]:
+def _loads(raw: object, count: int, plate: str, floor_n: float) -> list[float]:
     values = _sequence(raw, f"fz.{plate}")
     if len(values) != count:
         raise LiveBatchError(f"fz.{plate} has {len(values)} samples, t has {count}")
     loads = [_number(v, f"fz.{plate}") for v in values]
-    if any(v < 0.0 for v in loads):
-        raise LiveBatchError(f"fz.{plate} has a negative load")
+    if any(v < floor_n - _FLOAT_EPS for v in loads):
+        raise LiveBatchError(
+            f"fz.{plate} has a load below {floor_n} N (beyond the noise floor)"
+        )
     return loads
 
 
 def _cop_point(row: object, load_n: float, name: str) -> list[float] | None:
     """One CoP row in metres, or ``None``; its presence must follow the load."""
     if row is None:
-        if load_n > SOURCE_COP_MIN_LOAD_N + _FLOAT_EPS:
+        if load_n > _NULL_COP_CEILING_N + _FLOAT_EPS:
             raise LiveBatchError(f"{name} is null at {load_n} N (>= 20 N)")
         return None
     pair = _sequence(row, name)
@@ -146,19 +165,24 @@ def _check_aux(body: dict[str, Any], count: int) -> None:
             raise LiveBatchError(f"{key} must be a string or null")
 
 
-def parse_live_batch(payload: object) -> LiveBatch:
+def parse_live_batch(payload: object, *, negative_floor_n: float) -> LiveBatch:
     """Validate a decoded ``live`` message and convert it to SI units.
+
+    ``negative_floor_n`` is the lowest accepted load
+    (:func:`negative_load_floor_n` of the declared force floor).
 
     Raises:
         LiveBatchError: unknown or missing keys, ragged or non-finite series,
-            non-increasing times, negative loads, or CoP presence that
+            non-increasing times, loads below the noise floor, or CoP presence that
             disagrees with the 20 N source threshold.
     """
     body = _keyed(payload, LIVE_KEYS, "live message")
     times = _times(body["t"])
     fz = _keyed(body["fz"], PLATE_KEYS, "fz")
     cop = _keyed(body["cop"], COP_KEYS, "cop")
-    loads = {p: _loads(fz[p], len(times), p) for p in sorted(PLATE_KEYS)}
+    loads = {
+        p: _loads(fz[p], len(times), p, negative_floor_n) for p in sorted(PLATE_KEYS)
+    }
     cop_m = {_SIDE[p]: _cop_rows(cop[p], loads[p], p) for p in sorted(PLATE_KEYS)}
     _cop_shape_only(cop["C"], len(times))
     _check_aux(body, len(times))

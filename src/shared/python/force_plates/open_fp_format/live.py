@@ -38,6 +38,7 @@ from src.shared.python.force_plates.contracts import finite_positive
 from src.shared.python.force_plates.open_fp_format._live_payload import (
     LiveBatch,
     LiveBatchError,
+    negative_load_floor_n,
     parse_live_batch,
 )
 from src.shared.python.force_plates.open_fp_format.client import validated_base
@@ -142,7 +143,10 @@ def register_live_channel() -> None:
 class LiveBridge:
     """Receive-only bridge: validate ``live`` batches, queue them, publish them.
 
-    ``publish(channel, message)`` receives plain-dict messages.  Counters:
+    ``publish(channel, message)`` receives plain-dict messages.
+    ``force_floor_n`` is the plates' declared 1-sigma force floor [N]; loads
+    down to ``-3`` floor sigmas are noise and are kept unclamped, as in the
+    trial contract, and lower loads make a batch malformed.  Counters:
     ``dropped`` (batches lost to queue overflow) and ``malformed`` (batches
     refused by validation, never forwarded).  No threads: the socket library
     calls the handler, the owner calls :meth:`pump`.
@@ -154,6 +158,7 @@ class LiveBridge:
         publish: Callable[[str, dict[str, Any]], object],
         *,
         max_queue: int,
+        force_floor_n: float,
         socket_factory: Callable[[], LiveSocket] | None = None,
         backoff: BackoffPolicy | None = None,
         sleep: Callable[[float], object] = time.sleep,
@@ -163,6 +168,9 @@ class LiveBridge:
             raise TypeError("publish must be callable")
         self._publish = publish
         self._max_queue = _positive_int(max_queue, "max_queue")
+        self._load_floor_n = negative_load_floor_n(
+            finite_positive(force_floor_n, "force_floor_n")
+        )
         self._factory = socket_factory or default_socket_factory
         self._backoff = backoff or BackoffPolicy()
         self._sleep = sleep
@@ -222,7 +230,7 @@ class LiveBridge:
 
     def _on_live(self, payload: object) -> None:
         try:
-            batch = parse_live_batch(payload)
+            batch = parse_live_batch(payload, negative_floor_n=self._load_floor_n)
         except LiveBatchError as exc:
             self.malformed += 1
             logger.warning("open-fp live: dropped malformed batch: %s", exc)

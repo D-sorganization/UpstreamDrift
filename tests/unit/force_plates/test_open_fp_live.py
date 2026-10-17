@@ -21,6 +21,9 @@ from src.shared.python.force_plates.open_fp_format.live import (
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
+#: Declared 1-sigma force floor of the plates [N].
+FLOOR_N = 2.0
+
 
 class FakeSocket:
     """Records registrations; has no ``emit`` so any call would fail."""
@@ -72,6 +75,7 @@ def _bridge(max_queue: int = 4):
         "http://192.168.1.5:8000",
         lambda ch, msg: published.append((ch, msg)),
         max_queue=max_queue,
+        force_floor_n=FLOOR_N,
         socket_factory=lambda: sock,
     )
     assert bridge.start() is True
@@ -112,7 +116,8 @@ def _mutations() -> dict[str, Any]:
     inf_load = _batch()
     inf_load["fz"]["R"][0] = math.inf
     neg_load = _batch()
-    neg_load["fz"]["L"][0] = -5.0
+    # Beyond 3 floor sigmas plus half a 0.1 N quantum: -(3 * 2 + 0.05) N.
+    neg_load["fz"]["R"][2] = -6.1
     cop_low = _batch()
     cop_low["cop"]["L"][2] = [1.0, 1.0]  # 10 N < 20 N but CoP present
     cop_below_slack = _batch()
@@ -236,6 +241,7 @@ def _retry_bridge(sock: FakeSocket, sleeps: list[float]) -> LiveBridge:
         "http://10.0.0.2:8000",
         lambda ch, msg: None,
         max_queue=2,
+        force_floor_n=FLOOR_N,
         socket_factory=lambda: sock,
         sleep=sleeps.append,
     )
@@ -273,20 +279,24 @@ def test_disconnect_event_then_reconnect() -> None:
 )
 def test_bad_base_url_rejected(url: str) -> None:
     with pytest.raises(ValueError):
-        LiveBridge(url, lambda c, m: None, max_queue=1)
+        LiveBridge(url, lambda c, m: None, max_queue=1, force_floor_n=FLOOR_N)
 
 
 def test_constructor_validates_types() -> None:
     with pytest.raises(TypeError):
-        LiveBridge(5, lambda c, m: None, max_queue=1)  # type: ignore[arg-type]
+        LiveBridge(5, lambda c, m: None, max_queue=1, force_floor_n=FLOOR_N)  # type: ignore[arg-type]
     with pytest.raises(TypeError):
-        LiveBridge("http://h", "nope", max_queue=1)  # type: ignore[arg-type]
+        LiveBridge("http://h", "nope", max_queue=1, force_floor_n=FLOOR_N)  # type: ignore[arg-type]
     for bad in (0, -1):
         with pytest.raises(ValueError):
-            LiveBridge("http://h", lambda c, m: None, max_queue=bad)
+            LiveBridge(
+                "http://h", lambda c, m: None, max_queue=bad, force_floor_n=FLOOR_N
+            )
     for bad in (True, 1.5):
         with pytest.raises(TypeError):
-            LiveBridge("http://h", lambda c, m: None, max_queue=bad)  # type: ignore[arg-type]
+            LiveBridge(
+                "http://h", lambda c, m: None, max_queue=bad, force_floor_n=FLOOR_N
+            )  # type: ignore[arg-type]
 
 
 def test_channel_registered_in_both_registries() -> None:
@@ -326,3 +336,21 @@ def test_batch_not_mutated_by_validation() -> None:
     snapshot = copy.deepcopy(body)
     _push(sock, body)
     assert body == snapshot
+
+
+def test_negative_noise_within_three_floor_sigmas_is_kept_unclamped() -> None:
+    # The trial contract's rule (NEGATIVE_LOAD_SIGMAS): an unloaded plate reads
+    # slightly negative from noise; the value is kept, never clamped to zero.
+    bridge, sock, published = _bridge()
+    body = _batch()
+    body["fz"]["R"][2] = -6.0
+    _push(sock, body)
+    assert bridge.malformed == 0
+    assert bridge.pump() == 1
+    assert published[0][1]["load_n"]["right"][2] == -6.0
+
+
+def test_force_floor_must_be_declared_and_positive() -> None:
+    for bad in (0.0, -1.0, math.nan):
+        with pytest.raises(ValueError):
+            LiveBridge("http://h", lambda c, m: None, max_queue=1, force_floor_n=bad)
