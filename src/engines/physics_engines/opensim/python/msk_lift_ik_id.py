@@ -128,11 +128,13 @@ RESIDUAL_COORDINATES: tuple[str, ...] = (
 LOWER_LIMB_WEIGHT = 10.0
 UPPER_BODY_WEIGHT = 1.0
 _UPPER_BODY = ("shoulder_l", "shoulder_r", "bar")
-#: Bar weight (OSL-12): with the arms inside their Rajagopal ranges the hands
-#: cannot reach the bundle's bar (it sits 0.15-0.24 m away), so at weight 1
-#: the bar drags the trunk off its target (trunk-angle RMS 4.95 deg); it is
-#: tracked lightly and its error still reported.
-BAR_WEIGHT = 0.1
+#: Bar weight: the same as the shoulders.  OSL-12 first dropped it to 0.1
+#: because the hands, held at the OSL-2 back-rack hold behind the shoulders,
+#: stayed 0.18-0.28 m from the bundle's bar, which its hands hold in front of
+#: and above the shoulders; at weight 1 the bar then dragged the trunk.  With
+#: the arms seeded on the bundle's grips (``msk_lift_arm_reach``)
+#: the bar is tracked at full weight again (#13048).
+BAR_WEIGHT = UPPER_BODY_WEIGHT
 _MARKER_PREFIX = "ik_"
 #: Landmark -> OpenSim body whose origin it is (feet: calcaneus stations).
 _BODY_OF = {
@@ -475,7 +477,10 @@ def _marker_weight(label: str) -> float:
 
 
 def _markers_reference(
-    targets: LiftTargets, pelvis: PelvisLandmarks, labels: tuple[str, ...]
+    targets: LiftTargets,
+    pelvis: PelvisLandmarks,
+    labels: tuple[str, ...],
+    bar_weight: float,
 ) -> Any:
     osim = import_opensim()
     names = osim.StdVectorString()
@@ -491,9 +496,8 @@ def _markers_reference(
     table.addTableMetaDataString("Units", "m")
     weights = osim.SetMarkerWeights()
     for label in labels:
-        weights.cloneAndAppend(
-            osim.MarkerWeight(_MARKER_PREFIX + label, _marker_weight(label))
-        )
+        weight = bar_weight if label == "bar" else _marker_weight(label)
+        weights.cloneAndAppend(osim.MarkerWeight(_MARKER_PREFIX + label, weight))
     return osim.MarkersReference(table, weights)
 
 
@@ -537,18 +541,28 @@ def _arm_coordinate_tasks(model: Any) -> Any:
 
 
 def run_inverse_kinematics(
-    build: LiftModelBuild, targets: LiftTargets, pelvis: PelvisLandmarks
+    build: LiftModelBuild,
+    targets: LiftTargets,
+    pelvis: PelvisLandmarks,
+    bar_weight: float = BAR_WEIGHT,
 ) -> IKResult:
     """Track the bundle landmarks with OpenSim's ``InverseKinematicsSolver``.
 
     Mutates ``build.model``: adds one ``ik_<label>`` marker per tracked
     landmark and clamps every coordinate to its range except the arms
     (``_UNCLAMPED_PREFIXES``), which weak coordinate tasks hold near the
-    hold pose instead (:func:`_arm_coordinate_tasks`).
+    hold pose instead (:func:`_arm_coordinate_tasks`).  ``bar_weight``
+    overrides :data:`BAR_WEIGHT` (the OSL-12 seed pass uses 0 so the bar
+    does not pull a body it cannot yet reach).
+
+    Raises:
+        ValueError: when ``bar_weight`` is negative or not finite.
 
     Postconditions: ``q`` is (N, coordinates); ``marker_error_m`` (N, M) and
     ``model_points_m`` (N, M, 3) follow ``markers``.
     """
+    if not (math.isfinite(bar_weight) and bar_weight >= 0.0):
+        raise ValueError(f"bar_weight must be finite and >= 0, got {bar_weight}")
     osim = import_opensim()
     model = build.model
     labels = _add_markers(build, targets, pelvis)
@@ -557,7 +571,7 @@ def run_inverse_kinematics(
     state = model.initSystem()
     solver = osim.InverseKinematicsSolver(
         model,
-        _markers_reference(targets, pelvis, labels),
+        _markers_reference(targets, pelvis, labels, bar_weight),
         _arm_coordinate_tasks(model),
         math.inf,
     )
