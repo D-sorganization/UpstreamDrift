@@ -43,6 +43,8 @@ __all__ = [
     "Handedness",
     "finite_non_negative",
     "finite_positive",
+    "non_empty_text",
+    "real_number",
     "PlateProvenance",
     "PlateUncertainty",
     "VerticalPlateTrial",
@@ -69,8 +71,8 @@ _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _LEAD = {"RH": "left", "LH": "right"}
 
 
-def _real(value: object, name: str) -> float:
-    """``value`` as a float; ``TypeError`` for a bool or a non-real type."""
+def real_number(value: object, name: str) -> float:
+    """``value`` as a float; ``TypeError`` (naming ``name``) for a bool or non-real."""
     if isinstance(value, bool) or not isinstance(value, numbers.Real):
         raise TypeError(f"{name} must be a real number, got {value!r}")
     return float(value)
@@ -81,7 +83,7 @@ def finite_positive(value: object, name: str) -> float:
 
     ``TypeError`` for a bool or non-real; ``ValueError`` out of range.
     """
-    number = _real(value, name)
+    number = real_number(value, name)
     if not math.isfinite(number) or number <= 0.0:
         raise ValueError(f"{name} must be positive and finite, got {value!r}")
     return number
@@ -89,13 +91,14 @@ def finite_positive(value: object, name: str) -> float:
 
 def finite_non_negative(value: object, name: str) -> float:
     """``value`` as a float, required finite and >= 0 (errors as above)."""
-    number = _real(value, name)
+    number = real_number(value, name)
     if not math.isfinite(number) or number < 0.0:
         raise ValueError(f"{name} must be finite and non-negative, got {value!r}")
     return number
 
 
-def _text(value: object, name: str) -> str:
+def non_empty_text(value: object, name: str) -> str:
+    """``value`` if it is a non-blank string, else ``ValueError`` naming ``name``."""
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{name} must be a non-empty string, got {value!r}")
     return value
@@ -177,7 +180,7 @@ class PlateUncertainty:
         finite_positive(self.cop_m, "cop_m")
         finite_non_negative(self.force_fraction, "force_fraction")
         finite_non_negative(self.sensing_depth_sigma_m, "sensing_depth_sigma_m")
-        _text(self.source, "source")
+        non_empty_text(self.source, "source")
 
     def force_sigma_n(self, load_n: ArrayLike) -> Array:
         """1-sigma load uncertainty [N] for the loads ``load_n`` [N]."""
@@ -205,16 +208,16 @@ class PlateProvenance:
 
     def __post_init__(self) -> None:
         for name in ("device", "source_format", "source_revision"):
-            _text(getattr(self, name), name)
+            non_empty_text(getattr(self, name), name)
         digests = dict(self.file_sha256)
         for role, digest in digests.items():
-            _text(role, "file_sha256 role")
+            non_empty_text(role, "file_sha256 role")
             if not isinstance(digest, str) or not _SHA256.match(digest):
                 raise ValueError(f"file_sha256[{role!r}] is not a sha256 hex digest")
         for name in ("calibration_id", "qualification"):
             value = getattr(self, name)
             if value is not None:
-                _text(value, name)
+                non_empty_text(value, name)
         object.__setattr__(self, "file_sha256", MappingProxyType(digests))
 
     @property

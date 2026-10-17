@@ -33,9 +33,9 @@ from src.shared.python.force_plates.contracts import (
     FOOT_LABELS,
     Array,
     VerticalPlateTrial,
-    _finite_non_negative,
-    _finite_positive,
-    _real,
+    finite_non_negative,
+    finite_positive,
+    real_number,
 )
 from src.shared.python.force_plates.placement import PlatePlacement
 
@@ -53,7 +53,7 @@ _WORLD_DIM = 3
 
 
 def _finite(value: object, name: str) -> float:
-    number = _real(value, name)
+    number = real_number(value, name)
     if not math.isfinite(number):
         raise ValueError(f"{name} must be finite, got {value!r}")
     return number
@@ -76,8 +76,8 @@ class ReadingOptions:
     offset_shift_s: float = 0.0
 
     def __post_init__(self) -> None:
-        _finite_positive(self.coverage, "coverage")
-        _finite_non_negative(self.skew_s, "skew_s")
+        finite_positive(self.coverage, "coverage")
+        finite_non_negative(self.skew_s, "skew_s")
         _finite(self.offset_shift_s, "offset_shift_s")
 
 
@@ -100,9 +100,9 @@ class FootSample:
 
     def __post_init__(self) -> None:
         _finite(self.load_n, "load_n")
-        _finite_non_negative(self.sigma_load_n, "sigma_load_n")
-        _finite_non_negative(self.sigma_cop_m, "sigma_cop_m")
-        _finite_non_negative(self.sigma_sensing_m, "sigma_sensing_m")
+        finite_non_negative(self.sigma_load_n, "sigma_load_n")
+        finite_non_negative(self.sigma_cop_m, "sigma_cop_m")
+        finite_non_negative(self.sigma_sensing_m, "sigma_sensing_m")
         if self.cop_m is None:
             return
         cop = np.array(self.cop_m, dtype=np.float64, copy=True)

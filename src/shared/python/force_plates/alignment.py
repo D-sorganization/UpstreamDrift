@@ -13,9 +13,9 @@ from dataclasses import dataclass
 from typing import Literal, get_args
 
 from src.shared.python.force_plates.contracts import (
-    _finite_non_negative,
-    _real,
-    _text,
+    finite_non_negative,
+    real_number,
+    non_empty_text,
 )
 
 __all__ = ["AlignmentKind", "PlateTimeAlignment"]
@@ -24,7 +24,7 @@ AlignmentKind = Literal["absolute_utc", "shot_impact", "manual", "cross_correlat
 
 
 def _finite(value: object, name: str) -> float:
-    number = _real(value, name)
+    number = real_number(value, name)
     if not math.isfinite(number):
         raise ValueError(f"{name} must be finite, got {value!r}")
     return number
@@ -54,17 +54,17 @@ class PlateTimeAlignment:
 
     def __post_init__(self) -> None:
         _finite(self.offset_s, "offset_s")
-        _finite_non_negative(self.sigma_offset_s, "sigma_offset_s")
+        finite_non_negative(self.sigma_offset_s, "sigma_offset_s")
         if self.kind not in get_args(AlignmentKind):
             raise ValueError(
                 f"kind must be one of {get_args(AlignmentKind)}, got {self.kind!r}"
             )
-        _text(self.note, "note")
+        non_empty_text(self.note, "note")
         self._check_derivation()
 
     def _check_derivation(self) -> None:
         if self.kind == "cross_correlation":
-            _text(self.derived_from_model, "derived_from_model")
+            non_empty_text(self.derived_from_model, "derived_from_model")
         elif self.derived_from_model is not None:
             raise ValueError(
                 "derived_from_model must be None unless kind is 'cross_correlation'"
@@ -86,5 +86,5 @@ class PlateTimeAlignment:
         An alignment cross-correlated against a model cannot independently
         validate that model; every other alignment can.
         """
-        _text(model_identity, "model_identity")
+        non_empty_text(model_identity, "model_identity")
         return self.derived_from_model != model_identity
