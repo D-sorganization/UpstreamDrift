@@ -184,7 +184,12 @@ shoulder_scale)`; 27 native coordinate names, native body/joint/frame
 - `docs/development/full_body_models/build_anthropometric_spec.py` writes
   `full_body_spec_anthro_<club>.json` (+ `build_receipt_anthro_<club>.json`) with
   the Rajagopal legs on a fixed pelvis alignment, toe spheres, 2e5 N/m.
-  Canonical scales: trunk 1.15, arm 1.10, shoulder 1.00 at 1.71 m, 78 kg.
+  Canonical scales: trunk 1.0139, arm 1.10, shoulder 1.00 at 1.71 m, 78 kg. The
+  trunk scale was 1.15 on the superseded 0.5319 trunk length; #13037 derived the
+  de Leva table from whole Table 4 rows (trunk 0.6033 cervicale to mid-hip) and
+  `scripts/apply_de_leva_whole_rows.py` rescaled it so the capture-identified
+  trunk length and every joint stay put (receipt
+  `evidence/anthropometry/de_leva_whole_rows_receipt.json`).
 - `marker_calibration.static_marker_offsets` (static-trial placement);
   `full_body_markers.solve_pose(marker_weights=...)` and
   `solve_trajectory(restarts, restart_threshold_m)`.

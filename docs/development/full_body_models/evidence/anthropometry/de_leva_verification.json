@@ -48,7 +48,20 @@
         0.169
       ],
       "status": "mixed_endpoint_rows",
-      "notes": "Mixed rows: length 0.5319 is SUPR-MIDH; CM 0.5138 and radii are CERV-MIDH (length 0.6033). Recorded 2026-10-16 (#13010); correction with refit in #13037."
+      "notes": "Mixed rows: length 0.5319 is SUPR-MIDH; CM 0.5138 and radii are CERV-MIDH (length 0.6033). Recorded 2026-10-16 (#13010); correction with refit in #13037.",
+      "corrected": {
+        "issue": 13037,
+        "date": "2026-10-17",
+        "table4_row": "trunk_cerv_midh",
+        "length_m": 0.6033,
+        "mass_fraction": 0.4346,
+        "com_fraction_proximal": 0.5138,
+        "radii": [
+          0.328,
+          0.306,
+          0.169
+        ]
+      }
     },
     {
       "segment": "upper_trunk",
@@ -63,7 +76,20 @@
         0.418
       ],
       "status": "mixed_endpoint_rows",
-      "notes": "Mixed rows: length 0.1707 and CM 0.2999 are SUPR-XYPH; radii (0.505, 0.465, 0.418) match no row (CERV-XYPH is 0.505, 0.320, 0.465). Recorded 2026-10-16 (#13010); correction with refit in #13037."
+      "notes": "Mixed rows: length 0.1707 and CM 0.2999 are SUPR-XYPH; radii (0.505, 0.465, 0.418) match no row (CERV-XYPH is 0.505, 0.320, 0.465). Recorded 2026-10-16 (#13010); correction with refit in #13037.",
+      "corrected": {
+        "issue": 13037,
+        "date": "2026-10-17",
+        "table4_row": "upt_cerv_xyph",
+        "length_m": 0.2421,
+        "mass_fraction": 0.1596,
+        "com_fraction_proximal": 0.5066,
+        "radii": [
+          0.505,
+          0.32,
+          0.465
+        ]
+      }
     },
     {
       "segment": "middle_trunk",
@@ -174,7 +200,20 @@
         0.103
       ],
       "status": "mixed_endpoint_rows",
-      "notes": "Mixed rows: length 0.4340 is KJC-LMAL; CM 0.4395 and radii are KJC-AJC (length 0.4403). Recorded 2026-10-16 (#13010); correction with refit in #13037."
+      "notes": "Mixed rows: length 0.4340 is KJC-LMAL; CM 0.4395 and radii are KJC-AJC (length 0.4403). Recorded 2026-10-16 (#13010); correction with refit in #13037.",
+      "corrected": {
+        "issue": 13037,
+        "date": "2026-10-17",
+        "table4_row": "shank_kjc_ajc",
+        "length_m": 0.4403,
+        "mass_fraction": 0.0433,
+        "com_fraction_proximal": 0.4395,
+        "radii": [
+          0.251,
+          0.246,
+          0.102
+        ]
+      }
     },
     {
       "segment": "foot",
@@ -196,6 +235,17 @@
     "date": "2026-10-16",
     "issue": 13010,
     "by": "docs/development/full_body_models/evidence/anthropometry/de_leva_table4_transcription.json",
-    "reason": "Three rows marked verified_exact mix values from two endpoint rows of Table 4; see the per-row notes and #13037."
+    "reason": "Three rows marked verified_exact mix values from two endpoint rows of Table 4; see the per-row notes and #13037.",
+    "corrected": {
+      "date": "2026-10-17",
+      "issue": 13037,
+      "module": "src/shared/python/motion_matching/anthropometry.py derives DE_LEVA_MALE from whole rows of src/shared/python/body_segment_parameters/data/de_leva_1996_table4.json (DE_LEVA_ROWS)",
+      "rows": [
+        "trunk",
+        "upper_trunk",
+        "shank"
+      ],
+      "note": "The values recorded per segment above are the superseded hand-copied table; each mixed row's 'corrected' block is the whole Table 4 row now used."
+    }
   }
 }
