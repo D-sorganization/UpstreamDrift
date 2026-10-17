@@ -106,6 +106,9 @@ class NativeMujocoFullBodyModel:
             [self._indices[name] for name in self.passive_coordinates], dtype=int
         )
 
+        self._order_dofs = np.array(
+            [self._indices[name] for name in self.coordinate_order], dtype=int
+        )
         self._sites = {
             name: self.model.site(site).id
             for name, site in self.metadata["frame_sites"].items()
@@ -178,6 +181,27 @@ class NativeMujocoFullBodyModel:
         self.data.qpos[:] = self._vector(coordinates)
         self._mj.mj_kinematics(self.model, self.data)
         return _extract_frame_poses(self.data, self._sites)
+
+    def ordered_frame_pose(self, values: np.ndarray, name: str) -> np.ndarray:
+        """4x4 pose of one frame site at ``values`` (``coordinate_order``).
+
+        The forward kinematics of :meth:`frame_poses`, extracting only the
+        requested site: equal, bit for bit, to
+        ``frame_poses(dict(zip(coordinate_order, values)))[name]`` (#11744).
+
+        Raises:
+            KeyError: If ``name`` is not a frame site of this model.
+            ValueError: If ``values`` is not finite with one per coordinate.
+        """
+        index = self._sites[name]
+        ordered = np.asarray(values, dtype=float)
+        if ordered.shape != (len(self._order_dofs),) or not np.isfinite(ordered).all():
+            raise ValueError("Coordinates and rates must be finite")
+        qpos = np.zeros(self.model.nv)
+        qpos[self._order_dofs] = ordered
+        self.data.qpos[:] = qpos
+        self._mj.mj_kinematics(self.model, self.data)
+        return _extract_frame_poses(self.data, {name: index})[name]
 
     def kinematic_closure_residuals(
         self, coordinates: Mapping[str, float]
