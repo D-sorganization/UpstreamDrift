@@ -685,6 +685,7 @@
 {"path": "force_overlay/series.py", "classification": "ud-only", "package": "force_overlay", "spelling_only": false}
 {"path": "force_plates/__init__.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/alignment.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
+{"path": "force_plates/comparison.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/contracts.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/conversion.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/interpolation.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}

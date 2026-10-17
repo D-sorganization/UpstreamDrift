@@ -124,6 +124,47 @@ pins that failure. Callers must exclude or separately bound such intervals.
 The world-axis propagation is conservative, not exact, because rates are
 carried as magnitudes.
 
+\section{Model-Versus-Measured Comparison (OF-08, \#13086)}
+
+\path{src/shared/python/force_plates/comparison.py} compares a model
+ground-reaction series with a placed plate trial on observed components only.
+It is a diagnostic, not an acceptance test: eliminating candidates is the
+family-wise screen of OF-12, and qualification is OF-HW (\#13082). At every
+model frame that the trial covers (\texttt{covers}, which uses the same
+mapping and snap as \texttt{reading\_at}) the plates are read as above, and
+each residual is divided by the band-equivalent sigma, so $|z| \le k$ means
+exactly ``inside the $k$-band''. Frames outside the trial are counted and
+skipped.
+
+\paragraph{Load.} $r = F_{z,\mathrm{model}} - N$, $z = r/\sigma_N$.
+
+\paragraph{CoP on the Sensing Plane.} The plate balances moments about its
+sensing plane, a depth $h$ below the foot. For a foot resultant $F$ applied at
+$c$ on the surface, the point $q$ on the sensing plane with no tangential
+moment satisfies $(c-q)\times F \cdot t_i = 0$, which gives
+\begin{equation}
+  q_{xy} = c_{xy} - h\,\frac{F_{xy}}{F_z}.
+\end{equation}
+The model CoP is projected this way before comparison, with the model's own
+shear, and the per-axis sigma is
+$\operatorname{hypot}(\sigma_c, |F_{\mathrm{axis}}/F_z|\,\sigma_h)$. The model's
+ground height must equal the plate surface within 1~mm.
+
+\paragraph{Lead-Fraction Crossing.} $f = N_\ell/(N_\ell + N_t)$, NaN below the
+CoP load threshold, with
+$\sigma_f = \operatorname{hypot}(N_t\sigma_\ell, N_\ell\sigma_t)/(N_\ell+N_t)^2$.
+The first upward crossing of $0.5$ is located by linear interpolation between
+frames for model and measurement. The measured crossing has
+$\sigma_\tau = \sigma_f/|\mathrm{d}f/\mathrm{d}t|$ ($\sigma_f$ interpolated
+between the bracketing frames), combined in quadrature with the alignment's
+common-mode $\sigma_\Delta$. A delta with $|\delta| \le k\sigma$ is reported as
+unresolved, without a value.
+
+\paragraph{Refusals and Labels.} A validation-purpose comparison refuses an
+alignment cross-correlated against the same model. Every result carries the
+trial's qualification (``unqualified measurement'' until OF-HW), the
+alignment kind and the world frame id.
+
 \section{Reproduction}
 
 \begin{verbatim}
