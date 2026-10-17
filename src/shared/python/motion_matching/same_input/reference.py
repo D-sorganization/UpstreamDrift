@@ -140,6 +140,7 @@ def generate_reference_bundle(
     impact: ImpactForce | None = None,
     split_time_s: float | None = None,
     policy: StepPolicy = DEFAULT_POLICY,
+    lead_in_steps: int = 0,
 ) -> InputBundle:
     """Track ``q_track`` in MuJoCo with the pipeline controller held per step.
 
@@ -158,19 +159,37 @@ def generate_reference_bundle(
             #13104), from :func:`hold_policy`; the default keeps the original
             contract (eight substeps, one 1 ms hold).  The manifest records
             both, and the run always projects and raises on failure.
+        lead_in_steps: Steps tracked before the bundle starts (OSL-17,
+            #13131).  The run starts at ``track_time_s[0]`` with the feet
+            preloaded for the static weight, which is not the contact force
+            a moving reference needs, so its first states settle onto the
+            contact.  With a lead-in the bundle starts ``lead_in_steps``
+            steps into the run, on the settled state; ``duration_s`` still
+            spans the bundle, and the lead-in states are recorded as
+            ``provenance["lead_in"]`` (``reference_q``, every step).
+
+    Raises:
+        ValueError: For a negative ``lead_in_steps``, or a lead-in together
+            with a ball impact (its plan is on the run's own clock).
     """
+    if isinstance(lead_in_steps, bool) or not isinstance(lead_in_steps, int):
+        raise TypeError("lead_in_steps must be an integer")
+    if lead_in_steps < 0 or (lead_in_steps and impact is not None):
+        raise ValueError("lead_in_steps must be >= 0 and needs no ball impact")
     policy = StepPolicy(substeps=policy.substeps, effort_holds=policy.effort_holds)
     holds = policy.effort_holds
+    lead = lead_in_steps * DT_S
     rollout = closed_loop(
         "mujoco",
         spec_bytes,
         track_time_s,
         q_track,
-        duration_s=duration_s,
+        duration_s=None if duration_s is None else float(duration_s) + lead,
         impact=impact,
         split_time_s=split_time_s,
         policy=policy,
     )
+    rollout, lead_in = drop_lead_in(rollout, lead_in_steps, holds)
     return InputBundle(
         spec_bytes=bytes(spec_bytes),
         coordinate_order=tuple(json.loads(spec_bytes)["coordinate_order"]),
@@ -186,9 +205,44 @@ def generate_reference_bundle(
             "max_pose_drift_m": float(rollout.pose_drift.max()),
             "ball_impact": rollout.ball_impact,
             "impact_split_time_s": split_time_s,
+            **lead_in,
             **(provenance or {}),
         },
         effort_holds=holds,
         hold_efforts=None if holds == 1 else rollout.efforts,
         substeps=policy.substeps,
     )
+
+
+def drop_lead_in(
+    rollout: Rollout, steps: int, holds: int
+) -> tuple[Rollout, dict[str, Any]]:
+    """``rollout`` from step ``steps`` on, and the record of what was dropped.
+
+    Postcondition: with ``steps == 0`` the rollout is returned unchanged and
+    the record is empty, so a bundle without a lead-in keeps its manifest.
+    """
+    if steps == 0:
+        return rollout, {}
+    if steps >= rollout.q.shape[0] - 1:
+        raise ValueError("lead_in_steps must leave at least one bundle step")
+    trimmed = Rollout(
+        time_s=rollout.time_s[steps:] - rollout.time_s[steps],
+        q=rollout.q[steps:],
+        v=rollout.v[steps:],
+        efforts=rollout.efforts[steps * holds :],
+        pose_drift=rollout.pose_drift[steps:],
+        failure=rollout.failure,
+        ball_impact=rollout.ball_impact,
+    )
+    record = {
+        "lead_in": {
+            "steps": int(steps),
+            "duration_s": float(steps * DT_S),
+            "reason": "the run settles onto its contact before the bundle "
+            "starts (OSL-17, #13131)",
+            "max_pose_drift_m": float(rollout.pose_drift[:steps].max()),
+            "reference_q": rollout.q[:steps].tolist(),
+        }
+    }
+    return trimmed, record

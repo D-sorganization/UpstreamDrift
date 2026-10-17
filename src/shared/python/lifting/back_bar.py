@@ -31,6 +31,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from . import lift_spec
+from .back_rack import BackRack
 from .sagittal_retarget import SagittalFrame
 
 Array = NDArray[np.float64]
@@ -73,6 +74,10 @@ class BackBarGeometry:
         bar_axis: Bar long axis in the standard's frame (``+Y``).
         start_bar_position_m: Bar centre at the ``start`` via-pose, standard
             pose frame, scaled by ``height_m / standard height``.
+        rack: Anatomical rack the shelf is fitted to (OSL-17, #13131;
+            :mod:`.back_rack`).  ``None`` fits it to
+            ``start_bar_position_m``, which lies above the shoulders and puts
+            the bar in front of the lift body's face.
     """
 
     lift: str
@@ -80,15 +85,24 @@ class BackBarGeometry:
     grip_width_m: float
     bar_axis: tuple[float, float, float]
     start_bar_position_m: tuple[float, float, float]
+    rack: BackRack | None = None
 
     @classmethod
-    def from_standard(cls, lift: str, *, height_m: float) -> BackBarGeometry:
+    def from_standard(
+        cls, lift: str, *, height_m: float, rack: BackRack | None = None
+    ) -> BackBarGeometry:
         """Read the geometry of *lift* from the parity standard.
 
+        ``rack`` (OSL-17, #13131) places the bar on that trunk landmark
+        instead of the standard's start-pose bar position.
+
         Raises:
+            TypeError: If *rack* is neither ``None`` nor a :class:`BackRack`.
             ValueError: If *lift* is not the back squat or *height_m* is not
                 positive and finite.
         """
+        if rack is not None and not isinstance(rack, BackRack):
+            raise TypeError("rack must be a BackRack or None")
         if lift != BACK_SQUAT:
             raise ValueError(
                 f"back-bar geometry is defined for {BACK_SQUAT!r}: {lift!r}"
@@ -105,6 +119,7 @@ class BackBarGeometry:
             grip_width_m=lift_spec.lift_grip(lift).width_m,
             bar_axis=lift_spec.bar_axis(),
             start_bar_position_m=(x, y, z),
+            rack=rack,
         )
 
     def to_record(self) -> dict[str, Any]:
@@ -116,6 +131,7 @@ class BackBarGeometry:
             "grip_width_m": self.grip_width_m,
             "bar_axis": list(self.bar_axis),
             "start_bar_position_m": list(self.start_bar_position_m),
+            "rack": None if self.rack is None else self.rack.to_record(),
         }
 
 

@@ -438,16 +438,21 @@ def build_barbell_bundle(source: InputBundle, barbell: Barbell) -> InputBundle:
     the returned bundle carries the body spec.  The re-track integrates
     with ``source``'s step policy (substeps and effort holds) and records it.
     """
-    body = bushing_body_spec(source.spec_bytes)
-    times = np.arange(source.reference_q.shape[0], dtype=float) * source.dt_s
-    duration = source.steps * source.dt_s
-    controller, q0, v0, steps, _ = _tracking(
-        body,
-        barbell,
-        times,
-        np.asarray(source.reference_q, dtype=float),
-        duration,
+    from src.shared.python.motion_matching.same_input.reference import (
+        drop_lead_in,
     )
+
+    body = bushing_body_spec(source.spec_bytes)
+    # OSL-17 (#13131): a source with a lead-in is re-tracked from its lead-in
+    # states too, so the re-track has also settled when the bundle starts.
+    lead_q = np.asarray(source.provenance.get("lead_in", {}).get("reference_q", []))
+    track = np.asarray(source.reference_q, dtype=float)
+    if lead_q.size:
+        track = np.concatenate([lead_q.reshape(-1, track.shape[1]), track])
+    lead_steps = track.shape[0] - source.reference_q.shape[0]
+    times = np.arange(track.shape[0], dtype=float) * source.dt_s
+    duration = (source.steps + lead_steps) * source.dt_s
+    controller, q0, v0, steps, _ = _tracking(body, barbell, times, track, duration)
     loaded, q_aug, v_aug = _attached_start(body, q0, v0, barbell)
     rollout = integrate(
         loaded,
@@ -459,8 +464,11 @@ def build_barbell_bundle(source: InputBundle, barbell: Barbell) -> InputBundle:
         policy=source.step_policy(),
     )
     nv, holds = loaded.nv_body, source.effort_holds
+    rollout, lead_in = drop_lead_in(rollout, lead_steps, holds)
+    lead_in.get("lead_in", {}).pop("reference_q", None)
     record = {
         **loaded.record(),
+        **lead_in,
         "attach_q": q_aug[:nv].tolist(),
         "reference_bar_q": rollout.q[:, nv:].tolist(),
         "reference_bar_v": rollout.v[:, nv:].tolist(),
