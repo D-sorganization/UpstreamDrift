@@ -26,7 +26,7 @@ import numpy as np
 
 from src.shared.python.force_plates.contracts import Array
 
-__all__ = ["Channel", "Estimate", "interpolate", "locate"]
+__all__ = ["Channel", "Estimate", "interpolate", "locate", "snap"]
 
 #: Multiplier turning a second divided difference into an estimate of ``|y''|``.
 _CURVATURE_FACTOR = 2.0
@@ -55,6 +55,17 @@ class Estimate:
     value: float
     bias: float
     rate: float
+
+
+def snap(times: Array, t: float, tolerance: float) -> float:
+    """``t`` moved onto its nearest sample when it lies within ``tolerance``.
+
+    Removes the floating-point residue of a clock offset (``1.015 - 1.0`` is
+    not ``0.015``), so a time at a sample reads as that sample: it is neither
+    refused as an extrapolation nor given a spurious interpolation bias.
+    """
+    nearest = float(times[int(np.argmin(np.abs(times - t)))])
+    return nearest if abs(t - nearest) <= tolerance else t
 
 
 def locate(times: Array, t: float) -> int:

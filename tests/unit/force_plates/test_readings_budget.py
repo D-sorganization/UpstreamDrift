@@ -12,6 +12,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.force_plates import (
+    PlatePlacement,
     PlateReading,
     PlateTimeAlignment,
     ReadingOptions,
@@ -25,6 +26,7 @@ from tests.unit.force_plates.test_readings import (
     NONUNIFORM,
     _align,
     _hand_trial,
+    _linear_trial,
     _opts,
     _placed,
     _quadratic_trial,
@@ -194,3 +196,71 @@ def test_clock_offset_sigma_is_profiled_not_folded_into_sigmas() -> None:
     for foot in ("left", "right"):
         assert a.feet[foot].sigma_load_n == b.feet[foot].sigma_load_n
         assert a.feet[foot].sigma_cop_m == b.feet[foot].sigma_cop_m
+
+
+# --------------------------------------------- clock rounding (Codex P1) --
+def test_offset_rounding_at_the_last_sample_is_snapped_not_refused() -> None:
+    # (2.0 + 0.015) - 2.0 rounds to 0.015000000000000124 > 0.015: one ulp of
+    # the model time, not an extrapolation.  The reading is the last sample.
+    model_time = 2.0 + NONUNIFORM[-1]
+    assert model_time - 2.0 > NONUNIFORM[-1]
+    reading = reading_at(_placed(_linear_trial()), model_time, _align(2.0), _opts())
+    assert reading.trial_time_s == NONUNIFORM[-1]
+    assert reading.feet["left"].load_n == 115.0
+    assert reading.feet["left"].load_bias_n == 0.0
+
+
+def test_offset_rounding_at_an_interior_sample_keeps_exact_hit_semantics() -> None:
+    # 1.004 - 1.0 is not 0.004 in floating point; snapped, the bias is zero.
+    model_time = 1.0 + NONUNIFORM[1]
+    reading = reading_at(_placed(_quadratic_trial()), model_time, _align(1.0), _opts())
+    assert reading.trial_time_s == NONUNIFORM[1]
+    assert reading.feet["left"].load_bias_n == 0.0
+
+
+def test_a_time_beyond_rounding_is_still_refused() -> None:
+    with pytest.raises(ValueError, match="extrapolation"):
+        reading_at(_placed(_linear_trial()), 1.0151, _align(1.0), _opts())
+
+
+# ------------------------------------- CoP sigma in world axes (Codex P1) --
+def _diagonal_cop_trial() -> VerticalPlateTrial:
+    # Left CoP moves at 1 m/s along both stance axes (linear: zero bias).
+    left_cop = [[-0.2 + t, t] for t in NONUNIFORM]
+    return _hand_trial(NONUNIFORM, [100.0] * 4, [400.0] * 4, left_cop, CONST_COP_R)
+
+
+def _left_cop_random(placement: PlatePlacement) -> float:
+    placed = _placed(_diagonal_cop_trial(), placement)
+    left = reading_at(placed, 0.002, _align(), _opts(skew_s=0.001)).feet["left"]
+    return left.cop_sigma_random_m
+
+
+def test_cop_skew_rate_is_taken_on_world_axes_under_yaw() -> None:
+    # Stance rates (1, 1) m/s.  At 45 deg yaw the world y rate is sqrt(2) m/s,
+    # so the skew term is 1e-3 * sqrt(2) m, not the stance-axis 1e-3 m.
+    base = 0.010  # declared CoP sigma of the factory uncertainty
+    identity = _left_cop_random(PlatePlacement.identity())
+    yawed = _left_cop_random(PlatePlacement.from_yaw(math.pi / 4, origin_m=[0, 0, 0]))
+    assert identity == pytest.approx(math.hypot(base, 1e-3))
+    assert yawed == pytest.approx(math.hypot(base, 1e-3 * math.sqrt(2.0)))
+
+
+def test_cop_bias_is_propagated_to_world_axes_under_yaw() -> None:
+    # Quadratic CoP x only: stance bias (b, 0).  At 45 deg each world axis
+    # carries b / sqrt(2); at 90 deg the bias moves wholly to world y.
+    left_cop = [[-0.2 + 1e3 * t * t, 0.0] for t in NONUNIFORM]
+    trial = _hand_trial(NONUNIFORM, [100.0] * 4, [400.0] * 4, left_cop, CONST_COP_R)
+
+    def bias(yaw: float) -> float:
+        placement = PlatePlacement.from_yaw(yaw, origin_m=[0, 0, 0])
+        return (
+            reading_at(_placed(trial, placement), 0.007, _align(), _opts())
+            .feet["left"]
+            .cop_bias_m
+        )
+
+    stance = bias(0.0)
+    assert stance > 0.0
+    assert bias(math.pi / 4) == pytest.approx(stance / math.sqrt(2.0))
+    assert bias(math.pi / 2) == pytest.approx(stance)

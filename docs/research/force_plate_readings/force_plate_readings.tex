@@ -1,0 +1,133 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{url}
+\title{Vertical Force-Plate Readings at Model Time With an Uncertainty Budget (OF-05, Epic \#13061, \#13069)}
+\author{UpstreamDrift engineering reference}
+\date{2026-10-17}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Status.} Editable standalone research reference (see
+\path{AGENTS.md}, Modeling Reference Documentation). It is not the
+engineering design manual, whose only editable source is
+\path{manuals/upstreamdrift}. Software correctness only: nothing here is a
+scientific qualification. No plate hardware has been measured; hardware
+validation is deferred to the OF-HW child of epic \#13061.
+
+\section{Scope and Assumptions}
+
+The calculation is implemented in
+\path{src/shared/python/force_plates/readings.py},
+\path{interpolation.py} and \path{alignment.py}. It reads a
+\texttt{VerticalPlateTrial} (OF-01) placed in the world by a yaw-only
+\texttt{PlatePlacement} at an arbitrary model time and returns, per foot,
+the normal load $N$ [N] and the centre of pressure (CoP) [m] on the
+force-sensing plane, each with its uncertainty components. Only vertical
+loads are measured: shear and free moment are not observed and are not
+produced here.
+
+Assumptions: the two plates are rigid and level; the plate clock and the
+model clock differ by a common-mode offset; channels within one sample may
+be skewed by at most a declared $s$; loads and CoPs are linearly
+interpolated on the actual, possibly non-uniform, sample times.
+
+\section{Frames, Units and Data Validity}
+
+Stance coordinates $(x, y)$ are the plate's own axes in metres; the world
+point is $p = o + R\,(x, y, 0)^\top$ with $R$ a proper rotation about world
+$z$, and the CoP is reported on the sensing plane, a depth $h$ below the
+plate surface. Times are seconds. A time outside the trial span is refused,
+never extrapolated. A CoP is unavailable (\texttt{None}) when either
+bracketing sample is unloaded; it is never interpolated across an unloaded
+sample.
+
+\section{Equations}
+
+\paragraph{Time.} With alignment offset $\delta$ and profiled shift
+$\Delta$, the trial time is $t = t_{\mathrm{model}} - \delta - \Delta$. A
+value within $4\,\mathrm{ulp}(\max(|t_{\mathrm{model}}|, |\delta|,
+|\Delta|, |t|))$ of a sample is snapped onto that sample, so the rounding of
+the subtraction is never read as an extrapolation or as a spurious bias.
+
+\paragraph{Interpolation and Bias Estimate.} In interval
+$[t_i, t_{i+1}]$ the reading is $y(t) = y_i + m\,(t - t_i)$ with slope
+$m = (y_{i+1} - y_i)/(t_{i+1} - t_i)$. The interpolation bias is estimated
+as
+\begin{equation}
+  b(t) = \tfrac12\,|(t - t_i)(t_{i+1} - t)|\;M_2,\qquad
+  M_2 = \max\bigl(2|f[t_{i-1}, t_i, t_{i+1}]|,\;2|f[t_i, t_{i+1}, t_{i+2}]|,\;c\bigr),
+\end{equation}
+where $f[\cdot,\cdot,\cdot]$ is the non-uniform second divided difference
+and $c$ an optional declared curvature floor. $b$ is zero at a sample and
+at most $h_i^2 M_2/8$. Where neither divided difference exists (two
+samples, NaN neighbours) a floor must be declared; a missing curvature is
+never read as zero bias.
+
+\paragraph{Skew.} The skew term is $s\,|\dot y|$ with $|\dot y| = |m|$; at
+an interior sample the steeper adjacent interval is used.
+
+\paragraph{CoP in World Axes.} The stance-axis bias $b_s$ and rate
+magnitude $r_s$ (each a 2-vector) are carried to world axes by
+$|R_{xy}|$, the element-wise absolute value of the horizontal block of
+$R$: a stance error $e$ becomes $R e$, so $|R_{xy}|\,|e|$ bounds each world
+component. The reported CoP bias and rate are the worst world axis,
+$\max_j (|R_{xy}|\,b_s)_j$ and $\max_j (|R_{xy}|\,r_s)_j$. Under a $45^\circ$
+yaw a CoP moving at $r$ along both stance axes thus has world rate
+$\sqrt2\,r$.
+
+\paragraph{Composition.} With declared measurement sigma $\sigma_m$ and
+band factor $k$,
+\begin{equation}
+  \sigma_{\mathrm{random}} = \operatorname{hypot}(\sigma_m, s\,|\dot y|),
+  \qquad
+  \sigma = \sigma_{\mathrm{random}} + b/k,
+\end{equation}
+so $k\sigma = k\sigma_{\mathrm{random}} + b$ exactly, and only for that
+$k$. $\sigma$ is a band equivalent, not a one-sigma. The common-mode clock
+offset is not folded in: it is shared by every frame and is profiled
+through $\Delta$ by the OF-12 screen.
+
+\section{Parameters}
+
+\begin{tabular}{@{}ll@{}}
+\toprule
+Parameter & Source \\
+\midrule
+$\sigma_m$ (load, CoP), sensing depth $h$ and its sigma & \texttt{PlateUncertainty}, declared \\
+$\delta$, $\sigma_\delta$ & \texttt{PlateTimeAlignment}, declared \\
+$k$, $s$, $\Delta$, curvature floors & \texttt{ReadingOptions} \\
+\bottomrule
+\end{tabular}
+
+\section{Acceptance Criteria and Evidence}
+
+Unit tests in \path{tests/unit/force_plates/test_readings.py} and
+\path{test_readings_budget.py} check hand-worked oracles: exact sample hits
+with zero bias; exact linear interpolation on non-uniform samples; the
+quadratic bias estimate equal to the true interpolation error; the literal
+composition of measurement, skew and bias; refusal of extrapolation;
+snapping of clock rounding at the last and at an interior sample; and the
+world-axis CoP rate and bias under $45^\circ$ and $90^\circ$ yaw.
+
+\section{Limitations}
+
+The bias is an \emph{estimate, not a bound}. It holds when the signal is
+band-limited well below the sample rate, so that $y''$ is bounded by its
+neighbouring second divided differences. It is not valid across an
+under-sampled impact transient: a 1~ms pulse between samples 4~ms and 10~ms
+apart is invisible to every divided difference, and the test
+\texttt{test\_limitation\_bias\_estimate\_is\_blind\_to\_an\_undersampled\_impact\_pulse}
+pins that failure. Callers must exclude or separately bound such intervals.
+The world-axis propagation is conservative, not exact, because rates are
+carried as magnitudes.
+
+\section{Reproduction}
+
+\begin{verbatim}
+python3 -m pytest tests/unit/force_plates -q
+\end{verbatim}
+
+\end{document}
