@@ -81,7 +81,9 @@ class DeclaredStance:
         """
         frame_handedness = _FRAME_HANDEDNESS.get(self.handedness)
         if frame_handedness is None:
-            raise ValueError(f"handedness must be 'RH' or 'LH', got {self.handedness!r}")
+            raise ValueError(
+                f"handedness must be 'RH' or 'LH', got {self.handedness!r}"
+            )
         if not isinstance(frame_label, str) or not frame_label.strip():
             raise ValueError("frame_label must be a non-empty string")
         target_dir = tuple(float(v) for v in self.target_dir)
