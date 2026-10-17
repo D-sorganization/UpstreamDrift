@@ -53,6 +53,8 @@ from src.shared.python.loop_nullspace.plate_screen import (
 
 __all__ = ["PlateObservationProvider", "screen_with_plates"]
 
+_CONE_ID = "H-FRICTION-CONE"
+
 
 @dataclass(frozen=True, eq=False)
 class PlateObservationProvider:
@@ -138,6 +140,15 @@ class PlateObservationProvider:
             max_step_s=step,
         )
 
+    def depth_uncertain(self) -> bool:
+        """True when the plate declares a non-zero sensing-depth sigma.
+
+        The moment-row sigma then bounds the depth error by ``mu * N``, which
+        holds only where the friction cones are imposed.
+        """
+        trial = self.placed.trial
+        return trial.uncertainty.sensing_depth_sigma_m > 0.0
+
     def validates(self, model_identity: str) -> bool:
         """False when the alignment was derived from ``model_identity`` itself."""
         return self.alignment.validates(model_identity)
@@ -180,13 +191,20 @@ def screen_with_plates(
     skew is widened by half the largest gap of ``setup.offsets_s`` so that a
     true offset between grid points is covered.  Raises ``ValueError`` when
     the provider's alignment was derived from the same model (an offset
-    fitted to a model cannot then test that model).
+    fitted to a model cannot then test that model), or when the plate declares
+    a sensing-depth sigma but ``setup`` does not declare ``H-FRICTION-CONE``
+    (that sigma is only a bound on the moment-row error inside the cones).
     """
     if not isinstance(provider, PlateObservationProvider):
         raise TypeError("provider must be a PlateObservationProvider")
     if not provider.validates(model_identity):
         raise ValueError(
             f"the alignment was derived from {model_identity!r}; it cannot test it"
+        )
+    if provider.depth_uncertain() and not setup.declares(_CONE_ID):
+        raise ValueError(
+            f"a sensing-depth sigma is bounded by mu * N only inside the "
+            f"friction cones; declare {_CONE_ID}"
         )
     half_step = _half_grid_step(setup.offsets_s)
 

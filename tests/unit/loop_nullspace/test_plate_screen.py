@@ -403,7 +403,12 @@ def test_elimination_boundary_is_k_sigma_on_a_fixed_load_row(
     assert report.eliminated is eliminated
 
 
-def test_a_shift_without_data_cannot_rescue_a_candidate(truth) -> None:
+def test_a_shift_without_data_makes_the_screen_inconclusive(truth) -> None:
+    """A vacuous shift could be the true offset: no elimination is claimed.
+
+    The candidate fails at every data-bearing shift, but at the vacuous shift
+    nothing was tested, so the false-elimination guarantee does not cover it.
+    """
     snap, dec = truth
     sigmas = _sigmas(truth)
     light, light_dec = scaled_mass_model(snap, 0.95)
@@ -424,9 +429,11 @@ def test_a_shift_without_data_cannot_rescue_a_candidate(truth) -> None:
         return provider
 
     report = plate_consistency(_frames(snap, dec), factory, _setup(offsets=(0.0, 0.01)))
-    assert report.eliminated
+    assert report.tested and not report.conclusive
+    assert not report.eliminated
     assert report.vacuous_shifts_s == (0.01,)
     assert report.surviving_shifts_s == ()
+    assert report.to_dict()["conclusive"] is False
 
 
 def test_provider_coverage_is_the_family_wise_coverage(truth) -> None:

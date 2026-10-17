@@ -69,17 +69,17 @@ def _foot_truth(snap, dec, member: int):
     )
 
 
-def _uncertainty(load: float) -> PlateUncertainty:
+def _uncertainty(load: float, depth_sigma_m: float = 0.0) -> PlateUncertainty:
     return PlateUncertainty(
         force_floor_n=0.005 * load,
         force_fraction=0.0,
         cop_m=0.002,
-        sensing_depth_sigma_m=0.0,
+        sensing_depth_sigma_m=depth_sigma_m,
         source="declared hypothesis for tests",
     )
 
 
-def _placed(snap, dec) -> PlacedTrial:
+def _placed(snap, dec, depth_sigma_m: float = 0.0) -> PlacedTrial:
     feet = {"left": _foot_truth(snap, dec, 0), "right": _foot_truth(snap, dec, 1)}
     n = TIMES_S.size
     loads = {k: np.full(n, v[0]) for k, v in feet.items()}
@@ -102,7 +102,7 @@ def _placed(snap, dec) -> PlacedTrial:
             source_revision="none",
             file_sha256={},
         ),
-        uncertainty=_uncertainty(min(v[0] for v in feet.values())),
+        uncertainty=_uncertainty(min(v[0] for v in feet.values()), depth_sigma_m),
     )
     placement = PlatePlacement(rotation=np.eye(3), origin_m=np.array([0, 0, surface]))
     return PlacedTrial(trial=trial, placement=placement)
@@ -248,6 +248,29 @@ def test_alignment_derived_from_the_model_under_test_is_refused(truth) -> None:
         model_identity=MODEL,
     )
     assert not report.eliminated
+
+
+def test_depth_uncertainty_requires_the_friction_cone_hypothesis(truth) -> None:
+    # The moment-row sigma bounds the depth error by mu * N, which holds only
+    # when the friction cones are imposed; without them it is refused.
+    snap, dec = truth
+    provider = _provider(snap, dec, placed=_placed(snap, dec, depth_sigma_m=0.002))
+    with pytest.raises(ValueError, match="H-FRICTION-CONE"):
+        screen_with_plates(_frames(snap, dec), provider, _setup(), model_identity=MODEL)
+
+
+def test_depth_uncertainty_is_accepted_with_the_friction_cone(truth) -> None:
+    snap, dec = truth
+    provider = _provider(snap, dec, placed=_placed(snap, dec, depth_sigma_m=0.002))
+    setup = ScreenSetup(
+        rule=FamilyWiseRule(alpha=0.05),
+        hypotheses=hypothesis_set(GRF_ID, "H-FRICTION-CONE"),
+        offsets_s=(0.0,),
+    )
+    report = screen_with_plates(
+        _frames(snap, dec), provider, setup, model_identity=MODEL
+    )
+    assert report.tested and not report.eliminated
 
 
 # ------------------------------------------------------------ facade seam --

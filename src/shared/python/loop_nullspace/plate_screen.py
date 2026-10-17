@@ -27,9 +27,10 @@ Statistics (binding, epic #13061):
   true offset beyond a grid spanning ``r`` offset sigmas adds ``2 Phi(-r)``; a
   true offset between grid points is covered by widening the reading skew by
   half the grid step (:func:`~src.shared.python.loop_nullspace.plate_provider.screen_with_plates`).
-* **No vacuous rescue.**  A shift at which no frame has data tests nothing; it
-  is reported (``vacuous_shifts_s``) but never rescues a candidate, so the
-  offset grid must stay within the trial.
+* **Vacuous shifts are inconclusive.**  A shift at which no frame has data
+  tests nothing, yet it may be the true offset, where the guarantee needs a
+  test.  So a grid with any vacuous shift is ``conclusive=False`` and never
+  eliminates; keep the offset grid within the trial.
 * **Joint verdict decides.**  A frame is consistent when the candidate's full
   feasible set (declared hypotheses, friction cones when declared, and the
   observation bands) is non-empty.  The weighted least-squares residual check
@@ -224,9 +225,11 @@ class OffsetVerdict:
 class PlateConsistencyReport:
     """The screen's answer for one candidate.
 
-    ``eliminated`` is true when data were tested and no data-bearing profiled
-    shift leaves every tested frame jointly feasible; a vacuous shift (no data)
-    never rescues a candidate.  ``deciding_verdict`` is ``"joint"``.
+    ``eliminated`` is true when the screen is ``conclusive`` (data were tested
+    and every profiled shift has data) and no shift leaves every tested frame
+    jointly feasible.  A vacuous shift could be the true offset, so it makes
+    the screen inconclusive rather than either rescuing or condemning the
+    candidate.  ``deciding_verdict`` is ``"joint"``.
     """
 
     alpha: float
@@ -239,9 +242,14 @@ class PlateConsistencyReport:
         return any(o.n_rows for o in self.offsets)
 
     @property
+    def conclusive(self) -> bool:
+        """True when data were tested and no profiled shift is vacuous."""
+        return self.tested and not self.vacuous_shifts_s
+
+    @property
     def eliminated(self) -> bool:
-        """True when the data rule the candidate out at every data-bearing shift."""
-        return self.tested and not self.surviving_shifts_s
+        """True when the screen is conclusive and every shift rules the candidate out."""
+        return self.conclusive and not self.surviving_shifts_s
 
     @property
     def surviving_shifts_s(self) -> tuple[float, ...]:
@@ -259,6 +267,7 @@ class PlateConsistencyReport:
             "alpha": self.alpha,
             "deciding_verdict": self.deciding_verdict,
             "tested": self.tested,
+            "conclusive": self.conclusive,
             "eliminated": self.eliminated,
             "surviving_shifts_s": list(self.surviving_shifts_s),
             "vacuous_shifts_s": list(self.vacuous_shifts_s),

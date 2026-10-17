@@ -423,7 +423,8 @@ class FootLoadReading:
     the load row and ``max(N_F, sigma_force_n) * hypot(sigma_cop_m,
     mu_F * sigma_sensing_m)`` for the moment rows, ``mu_F`` the foot's largest
     declared friction coefficient (``|t_i . f| <= mu n . f`` bounds the effect
-    of the depth uncertainty).
+    of the depth uncertainty; that bound holds only where the friction cones
+    are imposed, so a non-zero ``sigma_sensing_m`` needs ``H-FRICTION-CONE``).
 
     ``cop_m`` is the measured centre of pressure **on the plate's force-sensing
     plane** (its normal coordinate is the height of that plane), or ``None``

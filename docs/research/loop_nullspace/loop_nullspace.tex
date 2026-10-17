@@ -400,8 +400,12 @@ multiplied by the number of shifts.  A true offset beyond the grid adds
 $2\Phi(-r)$; a true offset between grid points is covered by widening the
 reading skew by half the grid step, which adds at least the
 $\dot F\,\Delta/2$ reading error to the band.  A shift at which no frame has
-data tests nothing: it is reported but never rescues a candidate, so the grid
-must stay within the trial.  A frame is consistent when the candidate's
+data tests nothing, yet it may hold the true offset, where the guarantee
+needs a test: a grid with any such shift is reported as inconclusive and
+never eliminates, so the grid must stay within the trial.  The sensing-depth
+term of the moment-row sigma bounds the depth error by $\mu N$, which holds
+only inside the friction cones, so a plate with a non-zero depth sigma is
+screened only when the cones are declared.  A frame is consistent when the candidate's
 \emph{joint} feasible set (the declared hypotheses, friction cones and torque
 capacity when declared, and the observation bands) is non-empty; the
 weighted least-squares residual check reported beside it is a diagnostic with
