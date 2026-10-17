@@ -805,7 +805,7 @@ def _external_body_forces(model: Any, state: Any, targets: LiftTargets, k: int) 
     osim = import_opensim()
     count = model.getBodySet().getSize() + 1  # plus ground
     forces = osim.VectorOfSpatialVec(count, osim.SpatialVec(osim.Vec3(0), osim.Vec3(0)))
-    zero = np.zeros(3)
+    zero: Array = np.zeros(3)
     wrenches = [
         (
             _FOOT_BODY[foot],
