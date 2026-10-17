@@ -75,6 +75,7 @@ from src.shared.python.motion_matching.same_input import (
 from src.shared.python.motion_matching.same_input.integrator import DEFAULT_POLICY
 from src.shared.python.motion_matching.same_input.stiffness import (
     rk4_stability_record,
+    stable_substeps,
 )
 
 Array = NDArray[np.float64]
@@ -104,6 +105,10 @@ SAME_INPUT_LIFT_BUNDLES: Mapping[str, Path | None] = MappingProxyType(
 BAR_FRAME = "Hub"
 #: Reference steps between the states sampled for ``rk4_stability``.
 STABILITY_SAMPLE_EVERY = 5
+#: Bundle runs tried while raising the substeps to the recorded stiffest rate
+#: (:func:`~src.shared.python.motion_matching.same_input.stiffness.\
+#: stable_substeps`); each retry at least doubles them.
+STABILITY_ATTEMPTS = 4
 LIMITATIONS = (
     "The only spec the same-input harness replays in every engine is the golf "
     "full-body spec, so the lifter keeps that spec's arms and dual-grip club; "
@@ -1047,7 +1052,9 @@ def build_lift_bundle(
     ``window_s``; MuJoCo tracks the joint trajectory from there with the
     pipeline controller held per step, or under
     :data:`~.barbell_runs.LOADED_TRACKING_POLICY` when the IK balanced a bar
-    load (OSL-16, #13104).  The provenance records the planar solution, the
+    load (OSL-16, #13104).  If the run's stiffest rate leaves the RK4 real
+    stability region, it is regenerated with the substeps that rate needs
+    (#13041; the floor pulls at eight substeps were outside it).  The provenance records the planar solution, the
     IK summary, the window's bar path, the RK4 stability margin of the run
     (``rk4_stability``) and ``provenance``.
 
@@ -1076,22 +1083,31 @@ def build_lift_bundle(
         + ("" if lift.balance is None else LOAD_BALANCE_LIMITATIONS),
         **dict(provenance or {}),
     }
-    bundle = generate_reference_bundle(
-        bytes(spec_bytes),
-        times,
-        lift.q[start:],
-        duration_s=float(window_s),
-        provenance=record,
-        policy=DEFAULT_POLICY if lift.balance is None else LOADED_TRACKING_POLICY,
-    )
-    plant = VectorPlant("mujoco", bundle.spec_bytes)
+    policy = DEFAULT_POLICY if lift.balance is None else LOADED_TRACKING_POLICY
+    plant = VectorPlant("mujoco", bytes(spec_bytes))
+    for _ in range(STABILITY_ATTEMPTS):
+        bundle = generate_reference_bundle(
+            bytes(spec_bytes),
+            times,
+            lift.q[start:],
+            duration_s=float(window_s),
+            provenance=record,
+            policy=policy,
+        )
+        stability = bundle_rk4_stability(bundle, plant)
+        substeps = stable_substeps(stability, bundle.dt_s, policy.substeps)
+        if substeps == policy.substeps:
+            break
+        policy = replace(policy, substeps=substeps)
+    else:
+        raise ValueError(f"no stable RK4 substep count for {lift_name}: {stability}")
     window_bar = bar_path(plant, bundle.reference_q, lift.bar_frame)
     return replace(
         bundle,
         provenance={
             **bundle.provenance,
             "window_bar_path_m": window_bar.tolist(),
-            "rk4_stability": bundle_rk4_stability(bundle, plant),
+            "rk4_stability": stability,
         },
     )
 

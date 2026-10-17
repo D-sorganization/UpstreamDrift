@@ -18,7 +18,8 @@ run, at ``|z| = 2.80``, is 2e-3 rad off).
 
 from __future__ import annotations
 
-from typing import Protocol
+from collections.abc import Mapping
+from typing import Any, Protocol
 
 import numpy as np
 from numpy.typing import NDArray
@@ -111,6 +112,22 @@ def substeps_for(rate: float, dt_s: float, *, target: float = DEFAULT_TARGET) ->
         if substeps > MAX_SUBSTEPS:
             raise ValueError(f"rate {rate} needs more than {MAX_SUBSTEPS} substeps")
     return substeps
+
+
+def stable_substeps(record: Mapping[str, Any], dt_s: float, substeps: int) -> int:
+    """Substeps keeping a run's recorded stiffest rate inside the RK4 region.
+
+    ``record`` is an :func:`rk4_stability_record` of a run integrated at
+    ``substeps`` per ``dt_s`` step.  Returns ``substeps`` when its rate is
+    already inside the real stability limit, otherwise the count
+    :func:`substeps_for` picks for that rate (#13041: the eight-substep
+    deadlift sat at ``|z| = 4.24``).  Never fewer than ``substeps``, so an
+    explicit policy (the loaded 64) is kept.  Preconditions: ``substeps`` is
+    a positive int; the rate and ``dt_s`` as for :func:`substeps_for`.
+    """
+    if isinstance(substeps, bool) or not isinstance(substeps, int) or substeps < 1:
+        raise ValueError("substeps must be a positive int")
+    return max(substeps, substeps_for(float(record["max_rate_per_s"]), dt_s))
 
 
 def rk4_stability_record(

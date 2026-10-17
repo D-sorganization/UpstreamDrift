@@ -25,6 +25,7 @@ from src.shared.python.motion_matching.same_input.integrator import (
 from src.shared.python.motion_matching.same_input.stiffness import (
     RK4_REAL_STABILITY_LIMIT,
     rk4_amplification,
+    stable_substeps,
     stiffest_rate,
     substeps_for,
 )
@@ -138,6 +139,19 @@ def test_substeps_for_keeps_the_stiffest_mode_inside_the_target() -> None:
         substeps_for(-1.0, 1e-3)
     with pytest.raises(ValueError):
         substeps_for(1.0, 1e-3, target=0.0)
+
+
+def test_stable_substeps_follows_an_unstable_record_and_never_lowers() -> None:
+    # The pre-#13041 deadlift: 3.39e4 1/s at eight substeps, |z| = 4.24.
+    unstable = {"max_rate_per_s": 3.39e4}
+    assert stable_substeps(unstable, 1e-3, DEFAULT_SUBSTEPS) == 16
+    # The loaded squat keeps its 64 substeps although 8 would not do.
+    loaded = {"max_rate_per_s": 1.28e5}
+    assert stable_substeps(loaded, 1e-3, 64) == 64
+    # A stable record never lowers an explicit policy.
+    assert stable_substeps({"max_rate_per_s": 1.0e3}, 1e-3, 64) == 64
+    with pytest.raises(ValueError):
+        stable_substeps({"max_rate_per_s": 1.0e3}, 1e-3, 0)
 
 
 def test_stability_record_reports_the_stiffest_sample() -> None:
