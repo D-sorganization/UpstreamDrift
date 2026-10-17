@@ -338,3 +338,12 @@ Shared beside the spine packages:
 
 - `src/engines/physics_engines/opensim/python/static_opt_core.py` — model-independent static-optimisation numerics shared by the leg and trunk solvers.
 - `src/shared/python/injury/spinal_load_providers.py` — `SpinalLoadProvider` seam: labelled `heuristic_v1` screening provider and pass-through `ModelSpinalLoadProvider` (heuristic risk bands never applied to model loads).
+
+## Vertical Force Plates
+
+`src/shared/python/force_plates/` (epic #13061, OF-01 #13065) holds engine-neutral contracts for vertical-only two-plate force data, such as the open-fp plates. Calculation reference: `docs/research/force_plate_contract/force_plate_contract.tex`.
+
+- `VerticalPlateTrial` stores per-foot normal load, per-foot and net centre of pressure in the stance frame (metres) and handedness. It also carries force events, the declared sensing-plane depth, `PlateProvenance` and a declared `PlateUncertainty` with no defaults. It checks the source rules on construction: CoP is NaN exactly below threshold, and the net CoP equals `loaded_net_cop`.
+- `PlatePlacement` is the ground-aligned (yaw-only) stance-to-world transform. It rejects tilt and reflection. `placement_for_target(handedness, TargetFrame, origin_m=...)` (OF-03 #13083) derives it from a model's declared target frame: the stance target (`-x` for RH, `+x` for LH) is turned onto `target_dir` by a proper yaw, a handedness mismatch is refused rather than mirrored, and the result records the frame id.
+- `to_ground_reaction_series` returns an `ObservedGroundReaction`: a `GroundReactionSeries` whose unobserved shear, free moment and centre-of-mass terms are NaN, never zero, plus the observability record.
+- Device readers live in subpackages and depend on this package, never the reverse. open-fp is AGPL-3.0, so it is read only through its files and network API, never imported or copied (`tests/unit/force_plates/test_package_boundaries.py`).
