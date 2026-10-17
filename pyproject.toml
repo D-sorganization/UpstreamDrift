@@ -104,6 +104,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Opt-in live open-fp Socket.IO bridge (OF-09, #13088); the client is imported lazily.
+force-plate-live = ["python-socketio[client]>=5"]
 # Pandoc is an external CLI; this extra supplies the Python PDF renderer.
 shot-pattern-report = ["reportlab>=4,<5", "pypdf>=6,<7", "matplotlib>=3.10.8,<4"]
 # Optional JIT for the profiled incremental contact loop; Python reference remains available.
