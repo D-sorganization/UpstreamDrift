@@ -2046,6 +2046,8 @@ export interface GroundReactionResponse {
   measured_qualified?: boolean | null;
   /** Which components the overlaid plates observe */
   observability?: Record<string, boolean> | null;
+  /** Set when a plate trial is overlaid: where the declared plate uncertainty behind the measured_<foot>_force_sigma_n band came from */
+  measured_uncertainty_source?: string | null;
 }
 
 export interface GroupSummaryV1 {

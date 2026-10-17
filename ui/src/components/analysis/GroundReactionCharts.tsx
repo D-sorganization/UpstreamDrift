@@ -10,6 +10,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   availableRange,
+  bandSegments,
   fetchGroundReaction,
   fetchGroundReactionOverlay,
   pathSegments,
@@ -46,6 +47,9 @@ const PANEL_TITLES = [
 
 /** Banner shown while the overlaid plate trial has no device qualification. */
 const UNQUALIFIED_BANNER = 'Unqualified measurement';
+/** Legend suffix of the shaded 1-sigma band (the PyQt `SIGMA_BAND_SUFFIX`). */
+const SIGMA_BAND_SUFFIX = '\u00b11\u03c3';
+const BAND_OPACITY = 0.2;
 
 /**
  * `x` is set only for path (non-time) panels, e.g. the CoP panel; `dashed`
@@ -59,6 +63,13 @@ type Row = {
   dashed?: boolean;
 };
 type Entry = { key: string; label: string; color: string };
+/** A shaded `lower..upper` region, e.g. a measured load +/- its 1-sigma. */
+type Band = {
+  label: string;
+  color: string;
+  lower: Array<number | null>;
+  upper: Array<number | null>;
+};
 
 function titleCase(key: string): string {
   return key
@@ -101,6 +112,29 @@ function measuredRows(data: GroundReactionResponse, quantity: string, field: str
       dashed: true,
       y: (data.traces?.[`measured_${e.key}_${quantity}`]?.[field] ?? []) as Array<number | null>,
     }));
+}
+
+/** Measured load +/- its 1-sigma, per foot whose overlay carries a sigma trace. */
+function measuredLoadBands(data: GroundReactionResponse): Band[] {
+  return footKeys(data, false).flatMap((e) => {
+    const load = data.traces?.[`measured_${e.key}_force_n`]?.z;
+    const sigma = data.traces?.[`measured_${e.key}_force_sigma_n`]?.z;
+    if (!load || !sigma) return [];
+    // A bound is available only where both the load and its sigma are.
+    const bound = (sign: 1 | -1) =>
+      load.map((f, i) => {
+        const s = sigma[i];
+        return f === null || s === null || s === undefined ? null : f + sign * s;
+      });
+    return [
+      {
+        label: `Measured ${e.label} ${SIGMA_BAND_SUFFIX}`,
+        color: e.color,
+        lower: bound(-1),
+        upper: bound(1),
+      },
+    ];
+  });
 }
 
 /** One row per key, read straight from `load_share` (feet only, never net). */
@@ -175,6 +209,17 @@ function MeasurementBanner({ data }: { data: GroundReactionResponse }) {
   );
 }
 
+/** Says what the shaded bands are and where their declared uncertainty came from. */
+function UncertaintyCaption({ data, banded }: { data: GroundReactionResponse; banded: boolean }) {
+  if (!banded) return null;
+  const source = data.measured_uncertainty_source ?? 'not stated';
+  return (
+    <div data-testid="ground-reaction-uncertainty-caption" className="text-xs text-gray-400 mb-2">
+      Shaded: measured load {SIGMA_BAND_SUFFIX} (declared uncertainty: {source})
+    </div>
+  );
+}
+
 /** Shared figure/svg/legend chrome for a chart panel. */
 function ChartFrame({
   id,
@@ -216,6 +261,7 @@ function TimePanel({
   unit,
   t,
   rows,
+  bands = [],
   events,
 }: {
   id: string;
@@ -223,10 +269,14 @@ function TimePanel({
   unit: string;
   t: number[];
   rows: Row[];
+  bands?: Band[];
   events: Record<string, number>;
 }) {
   const { x0, x1, y0, y1 } = BOUNDS;
-  const yr = availableRange(rows.map((r) => r.y));
+  const yr = availableRange([
+    ...rows.map((r) => r.y),
+    ...bands.flatMap((b) => [b.lower, b.upper]),
+  ]);
   const xr: [number, number] = [t[0] ?? 0, t[t.length - 1] ?? 1];
   const yRange: [number, number] = yr ?? [0, 1];
   const sx = (v: number) => x0 + ((v - xr[0]) / (xr[1] - xr[0] || 1)) * (x1 - x0);
@@ -235,7 +285,20 @@ function TimePanel({
   );
 
   return (
-    <ChartFrame id={id} title={title} suffix={unit} legend={rows}>
+    <ChartFrame id={id} title={title} suffix={unit} legend={[...rows, ...bands]}>
+      {bands.map((b) => {
+        const segs = bandSegments(t, b.lower, b.upper, x0, x1, y0, y1, xr, yRange);
+        return segs.length === 0 ? null : (
+          <path
+            key={b.label}
+            data-testid={`ground-reaction-band-${id}-${b.label.replace(` ${SIGMA_BAND_SUFFIX}`, '')}`}
+            d={segs.join('')}
+            fill={b.color}
+            fillOpacity={BAND_OPACITY}
+            stroke="none"
+          />
+        );
+      })}
       <text x={2} y={y0 + 8} fontSize="8" fill="#9ca3af">
         {yr ? yr[1].toFixed(2) : ''}
       </text>
@@ -373,7 +436,9 @@ export function GroundReactionCharts({
     if (!data || !data.available) return null;
     const inBw = Boolean(data.traces?.net_force_bw);
     const forceQuantity = inBw ? 'force_bw' : 'force_n';
+    const loadBands = inBw ? [] : measuredLoadBands(data);
     return {
+      banded: loadBands.length > 0,
       t: data.time_s ?? [],
       events: data.events ?? {},
       time: [
@@ -385,6 +450,7 @@ export function GroundReactionCharts({
             ...quantityRows(data, footKeys(data, true), forceQuantity, 'z'),
             ...(inBw ? [] : measuredRows(data, 'force_n', 'z')),
           ],
+          bands: loadBands,
         },
         {
           id: 'net_force',
@@ -442,6 +508,7 @@ export function GroundReactionCharts({
       {data && data.available && panels && (
         <>
           <MeasurementBanner data={data} />
+          <UncertaintyCaption data={data} banded={panels.banded} />
           {panels.time.slice(0, 3).map((p) => (
             <TimePanel key={p.id} {...p} t={panels.t} events={panels.events} />
           ))}

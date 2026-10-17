@@ -11,7 +11,9 @@ lists, unit in ``units``):
 * ``<key>_force_n`` and, when a body weight is given, ``<key>_force_bw``;
 * ``<key>_cop_m`` - centre of pressure, ``None`` below the CoP threshold;
 * ``<key>_free_moment_nm`` - free moment at the CoP;
-* ``<key>_moment_com_nm`` - moment about the whole-body centre of mass.
+* ``<key>_moment_com_nm`` - moment about the whole-body centre of mass;
+* ``measured_<foot>_force_sigma_n`` - with a plate overlay, the random
+  1-sigma of the measured load (``z``), interpolation bias excluded.
 
 ``load_share`` holds each foot's share of the summed vertical force, ``None``
 when the feet together carry less than :data:`COP_MIN_FZ_N`.
@@ -44,6 +46,7 @@ __all__ = [
 
 #: (trace suffix, label, unit) per plotted quantity, in display order.
 _QUANTITIES: tuple[tuple[str, str, str], ...] = (
+    ("force_sigma_n", "Force Uncertainty (1 Sigma)", "N"),
     ("force_n", "Force", "N"),
     ("force_bw", "Force in Body Weights", "BW"),
     ("cop_m", "Centre of Pressure", "m"),
@@ -65,6 +68,7 @@ class GroundReactionPlotSeries:
     events: Mapping[str, float] = field(default_factory=dict)
     measured_qualified: bool | None = None
     observability: Mapping[str, bool] | None = None
+    measured_uncertainty_source: str | None = None
 
     @property
     def labels(self) -> dict[str, str]:
@@ -79,14 +83,17 @@ class GroundReactionPlotSeries:
     def to_dict(self) -> dict[str, Any]:
         """JSON-safe mapping (``None`` for unavailable samples, no NaN).
 
-        ``measured_qualified`` and ``observability`` are present only when a
-        measured overlay is attached, so plain payloads are unchanged.
+        ``measured_qualified``, ``observability`` and
+        ``measured_uncertainty_source`` are present only when a measured overlay
+        is attached, so plain payloads are unchanged.
         """
         payload = self._base_dict()
         if self.measured_qualified is not None:
             payload["measured_qualified"] = self.measured_qualified
         if self.observability is not None:
             payload["observability"] = dict(self.observability)
+        if self.measured_uncertainty_source is not None:
+            payload["measured_uncertainty_source"] = self.measured_uncertainty_source
         return payload
 
     def _base_dict(self) -> dict[str, Any]:
@@ -217,6 +224,12 @@ def _optional_bool(value: Any) -> bool | None:
     return value
 
 
+def _optional_text(value: Any, name: str) -> str | None:
+    if value is not None and (not isinstance(value, str) or not value.strip()):
+        raise ValueError(f"{name} must be a non-empty string, got {value!r}")
+    return value
+
+
 def _optional_flags(value: Any) -> dict[str, bool] | None:
     if value is None:
         return None
@@ -252,4 +265,7 @@ def series_from_payload(payload: Mapping[str, Any]) -> GroundReactionPlotSeries:
         events=_validated_events(payload.get("events")),
         measured_qualified=_optional_bool(payload.get("measured_qualified")),
         observability=_optional_flags(payload.get("observability")),
+        measured_uncertainty_source=_optional_text(
+            payload.get("measured_uncertainty_source"), "measured_uncertainty_source"
+        ),
     )
