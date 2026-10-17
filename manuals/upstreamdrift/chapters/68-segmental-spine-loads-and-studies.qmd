@@ -314,7 +314,9 @@ Request fields, all recorded in the receipt:
 - `unlock_driven_coordinates` (default false). A coordinate locked in the model
   but moved by the drive fails the drive stage, listing the names. With
   `true`, only those coordinates are unlocked and their count and names are
-  recorded in the drive provenance (`coordinate_locks`). Holding locked
+  recorded in the drive provenance (`coordinate_locks`). Model preparation
+  checks that they are still unlocked after `initSystem`, also when external
+  loads are applied (#13056). Holding locked
   coordinates constant instead would change the distribution and is a
   follow-up (ADR-0055).
 

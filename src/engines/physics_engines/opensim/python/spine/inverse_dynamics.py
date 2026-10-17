@@ -398,7 +398,12 @@ def _load_model(model_path: Path, external_loads: Path | None) -> Any:
         return osim.Model(str(model_path))
     processor = osim.ModelProcessor(str(model_path))
     processor.append(osim.ModOpAddExternalLoads(str(external_loads.resolve())))
-    return processor.process()
+    model = processor.process()
+    # The processed model's sets are detached until finalized: without this,
+    # unlocking a coordinate edits a stale copy and initSystem re-locks it,
+    # so setValue silently keeps the locked pose (#13056).
+    model.finalizeFromProperties()
+    return model
 
 
 def _unlock_coordinates(model: Any, names: Sequence[str]) -> tuple[str, ...]:
@@ -456,8 +461,8 @@ def prepare_model_for_id(
     Preconditions: the model file exists; ``external_loads`` is ``None`` or an
     existing ExternalLoads XML.  Postconditions: with ``disable_couplers`` every
     constraint of the model has ``isEnforced == False`` (couplers prescribe
-    kinematics only, ADR-0055 item 6) and no coordinate is locked; the returned
-    state is initialised.
+    kinematics only, ADR-0055 item 6); no ``unlock_coordinates`` entry is
+    locked in the returned state, which is initialised.
 
     Raises:
         TypeError: ``disable_couplers`` is not a bool.
@@ -494,6 +499,11 @@ def prepare_model_for_id(
     ensure(
         not disable_couplers or not any(prepared.enforced_flags()),
         "every constraint must be disabled for ID",
+    )
+    coords = model.getCoordinateSet()
+    ensure(
+        not any(coords.get(n).getLocked(state) for n in unlocked),
+        "every unlocked coordinate must stay unlocked after initSystem",
     )
     return prepared
 
