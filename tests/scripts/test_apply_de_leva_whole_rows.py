@@ -90,9 +90,7 @@ def test_current_table_rebuilds_only_the_trunk_solids(club: str, native) -> None
     trunk scale and has exactly the head and trunk-part solids rebuilt."""
     committed = _committed(club)
     document = copy.deepcopy(committed)
-    document["provenance"] = committed["provenance"].replace(
-        module.COM_ORIGIN_NOTE, ""
-    )
+    document["provenance"] = committed["provenance"].replace(module.COM_ORIGIN_NOTE, "")
     for body in document["bodies"]:
         for solid in body["solids"]:
             if solid["name"].endswith(module.REBUILT_SOLIDS):

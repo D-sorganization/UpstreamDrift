@@ -249,6 +249,23 @@ de Leva mean rather than 5 to 25 % longer, and the canonical 1.15 is 1.0139.
 The documents keep the same trunk length with that rescaled factor
 (`de_leva_whole_rows_receipt.json`); the scan itself was not re-run.
 
+CM origin (#13037): de Leva measures every CM fraction from the row's origin
+landmark, which is cranial for the head (vertex) and the trunk parts
+(cervicale, xiphion, omphalion). The builder took the head, upper-, middle-
+and lower-trunk CMs from the caudal end of each link, so each of those CMs sat
+at (1 - f) instead of f of its length. On the canonical documents the pelvis (lower-trunk row)
+CM moves from 0.0845 to 0.0537 m (f = 0.6115) and the middle-trunk CM from
+0.0951 to 0.1162 m (f = 0.4502) in their link frames; the upper trunk
+(0.3184 to 0.3156 m, f = 0.5066) and head (0.1193 to 0.1192 m, f = 0.5002)
+barely move because their fractions are close to one half. Masses and
+inertias about the CM are unchanged.
+`anthropometric_geometry._segment_solid` now takes the row origin as its
+first endpoint, `test_every_solid_has_its_com_measured_from_the_row_origin`
+checks every solid against its Table 4 row, and
+`scripts/apply_de_leva_whole_rows.py` rebuilt the pelvis, middle-trunk,
+upper-trunk and head solids of both documents with zero joint, frame or marker
+change (same receipt).
+
 Against the acceptance in section 8 and #10099: posture met; whole-swing
 body-marker RMS 28.9 mm (24.6 at the flat-basin best) against the
 qualified geometry's 26.2 mm body-only (28.8 mm with its head at 47 mm);

@@ -72,8 +72,7 @@ SUPERSEDED_TRUNK_ROW = "trunk_supr_midh"
 #: origin (#13037 follow-up; the builder had measured it from the caudal end).
 REBUILT_SOLIDS = ("/pelvis", "/middle_trunk", "/upper_trunk", "/head")
 COM_ORIGIN_NOTE = (
-    "; head and trunk-part CM measured from the cranial de Leva row origin "
-    "(#13037)"
+    "; head and trunk-part CM measured from the cranial de Leva row origin (#13037)"
 )
 #: Joints, frames and the other solids must agree with a fresh build this well.
 GEOMETRY_TOL = 1e-9
