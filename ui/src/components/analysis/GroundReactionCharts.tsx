@@ -16,6 +16,7 @@ import {
   type GroundReactionResponse,
   type PlateOverlayRequest,
 } from '@/api/groundReaction';
+import { PlateImportForm } from './PlateImportForm';
 
 const W = 360;
 const H = 120;
@@ -330,12 +331,16 @@ export function GroundReactionCharts({
 }) {
   const [data, setData] = useState<GroundReactionResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [formOverlay, setFormOverlay] = useState<PlateOverlayRequest | null>(null);
+  const [plateError, setPlateError] = useState<string | null>(null);
+  const activeOverlay = overlay ?? formOverlay;
+  const fromForm = overlay === null && formOverlay !== null;
 
   useEffect(() => {
     const controller = new AbortController();
-    const request = overlay
+    const request = activeOverlay
       ? fetchGroundReactionOverlay(
-          { ...overlay, run_id: overlay.run_id ?? runId },
+          { ...activeOverlay, run_id: activeOverlay.run_id ?? runId },
           controller.signal,
         )
       : fetchGroundReaction({ runId }, controller.signal);
@@ -346,11 +351,23 @@ export function GroundReactionCharts({
       })
       .catch((e: unknown) => {
         if (controller.signal.aborted) return;
+        const message = e instanceof Error ? e.message : String(e);
+        if (fromForm) {
+          // A refused declaration belongs next to the form; show the model again.
+          setPlateError(message);
+          setFormOverlay(null);
+          return;
+        }
         setData(null);
-        setError(e instanceof Error ? e.message : String(e));
+        setError(message);
       });
     return () => controller.abort();
-  }, [runId, overlay]);
+  }, [runId, activeOverlay, fromForm]);
+
+  const submitPlateForm = (request: PlateOverlayRequest) => {
+    setPlateError(null);
+    setFormOverlay(request);
+  };
 
   const panels = useMemo(() => {
     if (!data || !data.available) return null;
@@ -404,6 +421,14 @@ export function GroundReactionCharts({
       data-testid="ground-reaction-charts"
     >
       <h3 className="text-sm font-semibold text-gray-300 mb-2">Ground Reaction</h3>
+      {overlay === null && (
+        <PlateImportForm
+          onSubmit={submitPlateForm}
+          onClear={() => setFormOverlay(null)}
+          serverError={plateError}
+          active={formOverlay !== null}
+        />
+      )}
       {error && (
         <div role="alert" className="text-xs text-red-400">
           Ground reaction unavailable: {error}

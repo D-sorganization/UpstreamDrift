@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { GroundReactionCharts } from './GroundReactionCharts';
 import * as api from '@/api/groundReaction';
 import type { GroundReactionResponse } from '@/api/groundReaction';
+import { fillPlateForm, submitPlateForm } from './plateImportForm.fixture';
 
 vi.mock('@/api/fetch', () => ({ apiFetch: vi.fn() }));
 
@@ -215,6 +216,39 @@ describe('GroundReactionCharts', () => {
       await screen.findByTestId('ground-reaction-unqualified-banner');
       expect(post).toHaveBeenCalledWith({ ...request, run_id: 'r1' }, expect.any(AbortSignal));
       expect(get).not.toHaveBeenCalled();
+    });
+
+    it('overlays the trial declared in the form', async () => {
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(base);
+      const post = vi
+        .spyOn(api, 'fetchGroundReactionOverlay')
+        .mockResolvedValue(withOverlay(false));
+      render(<GroundReactionCharts runId="r1" />);
+      await screen.findByTestId('ground-reaction-chart-vertical_force');
+      fillPlateForm();
+      submitPlateForm();
+      await screen.findByTestId('ground-reaction-unqualified-banner');
+      const [request] = post.mock.calls[0];
+      expect(request.run_id).toBe('r1');
+      expect(request.trial).toBe('session-1/swing-0001.json');
+      expect(request.declared.capacity_n).toBe(3923);
+    });
+
+    it('shows a server refusal next to the form and returns to the model', async () => {
+      const get = vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(base);
+      vi.spyOn(api, 'fetchGroundReactionOverlay').mockRejectedValue(
+        new Error('capacity_n must be positive'),
+      );
+      render(<GroundReactionCharts runId="r1" />);
+      await screen.findByTestId('ground-reaction-chart-vertical_force');
+      fillPlateForm();
+      submitPlateForm();
+      expect(await screen.findByTestId('plate-import-error')).toHaveTextContent(
+        'Plate overlay refused: capacity_n must be positive',
+      );
+      await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+      expect(screen.queryByRole('alert', { name: /Ground reaction unavailable/ })).toBeNull();
+      expect(await screen.findByTestId('ground-reaction-chart-vertical_force')).toBeTruthy();
     });
 
     it('does not draw measured load in BW mode (the plate has no model body weight)', async () => {

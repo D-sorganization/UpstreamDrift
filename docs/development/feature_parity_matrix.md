@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 42 parity · 6 gap · 16 exempt (12 pending decision in #7460).
+**Summary:** 43 parity · 5 gap · 16 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -15,7 +15,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `analysis.counterfactuals`<br>ZTCF/ZVCF + induced-acceleration counterfactuals | ✅ parity | `src/shared/python/biomechanics/ztcf.py` | `src/api/routes/analysis.py` | `ui/src/components/analysis/CounterfactualPanel.tsx` | — |
 | `analysis.cross_engine_robustness`<br>Cross-engine robustness dashboard (perturbation/CV) | ✅ parity | `src/launchers/cross_engine_dashboard.py` | `src/api/routes/cross_engine.py` | `ui/src/pages/CrossEngineDashboard.tsx` | — |
 | `analysis.grip_wrench`<br>Per-hand grip wrench on the club (weld multipliers and efc_force): overlay glyphs and force/couple plots | ✅ parity | `src/tools/grip_wrench_plots/gui.py` | `src/api/routes/analysis.py` | `ui/src/components/analysis/GripWrenchCharts.tsx` | — |
-| `analysis.ground_reaction`<br>Ground reaction plots: per-foot and net force (N and body weights), vertical load share, CoP path, free moment and moment about CoM | 🔴 gap | `src/tools/ground_reaction_plots/gui.py` | `src/api/routes/analysis.py` | `ui/src/components/analysis/GroundReactionCharts.tsx` | #13122 |
+| `analysis.ground_reaction`<br>Ground reaction plots: per-foot and net force (N and body weights), vertical load share, CoP path, free moment and moment about CoM | ✅ parity | `src/tools/ground_reaction_plots/gui.py` | `src/api/routes/analysis.py` | `ui/src/components/analysis/GroundReactionCharts.tsx` | — |
 | `analysis.impact_parameters`<br>Impact parameters panel (speed, attack angle, path, face, face-to-path, dynamic loft, spin loft) relative to a target line | ✅ parity | `src/tools/impact_parameters_panel/gui.py` | `src/api/routes/analysis.py` | `ui/src/components/analysis/ImpactParametersPanel.tsx` | — |
 | `analysis.static_plots`<br>Static analysis plots (20+ plot types) | ✅ parity | `vendor/ud-tools/src/shared/python/plot_engine/pyqt6_widget.py` | `src/api/routes/analysis_plots.py` | `ui/src/components/analysis/PlotsSection.tsx` | — |
 | `biomech.exercise_injury_dashboards`<br>Exercise + injury-risk biomechanics dashboards | ⚪ exempt | `src/launchers/exercise_dashboard.py` | — | — | Desktop biomechanics dashboards; desktop-only candidate pending #7460. — **pending decision (#7460)** |
