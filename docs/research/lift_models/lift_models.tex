@@ -720,6 +720,79 @@ bodyweight bundle, but the moment residual still fails Hicks. The AN-1 trunk
 bends only at L5/S1 against Rajagopal's lumbar joint, and the arms are not
 Rajagopal's.
 
+\subsection{LIFT-4 Barbell Re-Track Drift (Issue \#13072)}
+
+\paragraph{Root Cause A: Bar Load Missing From the Controller Model (Fixed).}
+\texttt{build\_barbell\_bundle} tracked the loaded plant with the pipeline
+computed-torque controller (kkt) built on the body-only spec. It then added the
+bar weight as a joint-space feedforward on the actuated rows only. On a floating
+base the root rows carry part of that load, so the controller's predicted
+acceleration was wrong from the first step, and the error compounded.
+\texttt{SpineInputY} error was $0.99^\circ$ at step 3 and $9.76^\circ$ at
+step 10. The fix is \texttt{rigid\_bar\_spec}, which appends the bar as a rigid
+solid on the hand body so the controller's mass matrix and bias include the bar
+on every row. The feet are preloaded for body plus bar, and the feedforward is
+removed. After the fix the error is $2\times10^{-4}$ and $1\times10^{-4}$\,deg
+at steps 3 and 10, and the wrist no longer sags. A unit test checks that the
+rigid-bar gravity bias minus the body-only bias equals the hand weight's
+generalized force on every row, root rows included (each above 500).
+
+\paragraph{Root Cause B: Combined Centre of Mass Beyond the Support (Open).}
+The source squat was generated without the bar. With the bar added on the back
+shelf, the combined centre of mass sits 0.15--0.17\,m ahead of the forefoot
+spheres. The tracked body tips forward about the toes (pelvis pitch
+$11.8^\circ$, shoulders 13.2\,cm), and no joint-space tracker can hold it.
+Maximum landmark deviation of the re-track from its source, with the first
+step past the LIFT-5 IK bound (old bundle in brackets):
+\begin{itemize}[nosep]
+\item Ankles: 13.3\,mm (step 80, left) and 12.0\,mm (step 58, right)
+  [245 and 302\,mm].
+\item Knees: 73.0 and 74.0\,mm (steps 95 and 114).
+\item Hips: 88.1 and 90.1\,mm (steps 113 and 77) [right hip 272\,mm].
+\item Shoulders: 132\,mm each (steps 85 and 73) [left shoulder 346\,mm].
+\item Bar: 159\,mm (from step 0, see cause C).
+\end{itemize}
+A real fix needs the source squat regenerated with the bar over mid-foot, from
+the shelf geometry or a balance constraint in the IK. That follow-up is outside
+\texttt{build\_barbell\_bundle}. The bundle records the per-landmark deviation
+as \texttt{retrack\_landmark\_deviation\_m}, and the bound test is a strict
+xfail until it passes.
+
+\paragraph{Root Cause C: Target and Sink (Open).} The re-track follows the
+reference rollout, not the IK target, and the bar landmark of the bodyweight
+source is the shoulder-girdle centre, not the bar. The loaded feet also sink
+1.63\,mm further, so a 0.1\,mm bar bound cannot be met by any loaded re-track.
+
+\paragraph{OpenSim Squat Receipt After the Fix.}
+\begin{itemize}[nosep]
+\item Range violations: before, \texttt{arm\_flex}, \texttt{arm\_rot} and
+  \texttt{pro\_sup} (6); after, none.
+\item Marker RMS: 5.04\,cm before, 8.56\,cm after. Maximum: 29.7 before,
+  30.3\,cm after (bar marker). The rise is cause B, not a regression of IK.
+\item Shoulder RMS 4.1--4.2\,cm. Segment-angle RMS 0.0243\,rad.
+\item Pelvis untracked: the hip runs 120.0--120.9$^\circ$, past the cited
+  $120^\circ$ bound.
+\item Hicks limits 176.3\,N and 20.1\,N\,m; residual peaks $t_y$ 316.7\,N and
+  tilt 688.5\,N\,m (fails).
+\end{itemize}
+
+\paragraph{Tolerances.} The pelvis-range gate tolerance goes from
+$0.5^\circ$ back to 0. The OSL-14 IK-residual, penetration and closure
+thresholds measure the bodyweight bundles, which this fix does not change. They
+stay at their measured AN-1 maxima, with the physical reasons recorded on
+\#13057.
+
+\paragraph{Failed Experiments.}
+\begin{itemize}[nosep]
+\item Static KKT feedforward on all rows (root included): shoulders drift
+  21\,cm and the arm $53^\circ$.
+\item Feedforward from the measured load: shoulders 13\,cm.
+\item Control re-track with no bar load: bar 8.8\,mm and mtp $2.4^\circ$.
+  This shows the tracker itself is sound and the load is the cause.
+\item A 20\,kg bar: shoulders 7.8\,cm, still past the bounds, consistent with
+  cause B scaling with the bar mass.
+\end{itemize}
+
 \section{Measured Parity Results}
 All figures below are read from the committed receipt,
 \texttt{docs/development/lifting/pack\_parity\_baseline.json} (schema
