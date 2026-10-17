@@ -1,0 +1,152 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{url}
+\title{Measured Vertical Plate Rows as Soft Targets in the Contact-Wrench QP: A Research Proposal (OF-10, Epic \#13061, \#13089)}
+\author{UpstreamDrift engineering reference}
+\date{2026-10-17}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Status.} Proposal only, an editable standalone research
+source (see \path{AGENTS.md}, Modeling Reference Documentation). No solver
+change lands with it. Implementation is gated on OF-08 (\#13086, the
+comparison metrics this design is validated with) and on OF-HW (\#13082):
+unqualified plate data is never evidence for or against this design.
+
+\section{Context}
+
+The contact-wrench QP in \path{src/shared/python/motion_matching/contact_wrench_qp.py}
+(\#11670) solves, per control step, for the actuated joint accelerations $a$,
+the root acceleration $a_r$, one wrench $w_k = (f_k, M_k)$ per foot about its
+support centre $p_k$, and a non-negative cone slack $s$:
+\begin{equation}
+  \min\; \|a-a^*\|^2_{W_a} + \|a_r-a_r^0\|^2_{W_r} + \|w-w^0\|^2_{W_w}
+  + \rho\|s\|^2
+  \quad\text{s.t.}\quad \text{centroidal dynamics},\; C_k w_k \le s_k .
+\end{equation}
+The nominal wrench $w^0$ is what the plant would produce from the baseline
+torques; no measured wrench enters today. The question is whether, and how,
+measured per-foot vertical load and centre of pressure (CoP) from open-fp
+plates should enter this cost.
+
+\section{Question 1: Which Components May Be Targeted}
+
+Vertical cells observe, per foot, the normal load and the CoP on their
+sensing plane, a depth $h$ below the foot (OF-11). Both give rows that are
+\emph{exactly linear} in $w_k$, with no approximation. Let $n$ be the ground
+normal, $t_{1,2}$ the tangents, $c'$ the measured sensing-plane CoP and
+$r_k = p_k - c'$. The moment of the foot wrench about $c'$ is
+$M_k + r_k \times f_k$. The cells carry no tangential moment about $c'$, so
+\begin{align}
+  n^\top f_k &= N_k, \\
+  t_i^\top M_k + (t_i \times r_k)^\top f_k &= 0, \qquad i = 1, 2,
+\end{align}
+using $t\cdot(r\times f) = f\cdot(t\times r)$. In matrix form these are
+$E_k w_k = g_k$ with
+\begin{equation}
+  E_k = \begin{bmatrix} n^\top & 0 \\ (t_1\times r_k)^\top & t_1^\top \\
+  (t_2\times r_k)^\top & t_2^\top \end{bmatrix},\qquad
+  g_k = (N_k, 0, 0)^\top .
+\end{equation}
+Shear $t_i^\top f_k$ and free moment $n^\top M_k$ are not observed. They
+receive \textbf{no target and no prior}. Shear enters only through the lever
+arm $h$ inside $r_k$, exactly as the plate physics dictates.
+
+\section{Question 2: Weighting and the Clock Offset}
+
+Each row is weighted by $1/\sigma^2$ from the OF-05 reading budget, not by a
+tuned scalar:
+$\sigma_N = \operatorname{hypot}(\sigma_m, s|\dot N|) + b/k$ for the load
+row, and, for the moment rows,
+$\max(N,\sigma_N)\operatorname{hypot}(\sigma_c, \mu\sigma_h)$ (OF-11). The
+$\mu\sigma_h$ term bounds $|t_i^\top f| \le \mu\, n^\top f$, which holds
+because the QP already imposes the inscribed friction pyramid. The bias $b$ is
+an estimate, not a bound (OF-05); frames inside an under-sampled impact
+transient are excluded from targeting.
+
+The clock offset is one common-mode unknown, never independent per-frame
+noise. It is \emph{profiled}, as in OF-12. The QP is run at each grid shift
+that OF-12 left consistent, and the shift is chosen on held-out frames only
+(Question 4), never on the frames that are being tracked.
+
+\section{Question 3: Conflict With the Dynamics}
+
+A soft target can silently absorb a frame whose measured load the motion and
+model cannot reach: the cost simply rises. That would hide exactly the
+falsification OF-12 exists to expose. The proposal therefore orders the
+two steps:
+\begin{enumerate}
+  \item Run the OF-12 family-wise screen first. A candidate it eliminates is
+        not tracked at all.
+  \item In the QP, impose the observation \emph{bands}
+        $|E_k w_k - g_k| \le k\sigma$ as constraints with their own slack
+        $u \ge 0$, penalised like the cone slack. Any frame with $u > 0$ is
+        reported as a conflict frame and returned to OF-12; it is never
+        accepted as tracked.
+  \item Inside the bands, add the weighted target
+        $\|E_k w_k - g_k\|^2_{\Sigma^{-1}}$ with a declared trade-off weight
+        against $\|w-w^0\|^2_{W_w}$.
+\end{enumerate}
+
+\section{Question 4: Validation Without Circularity}
+
+A run that tracks the plates cannot then be validated against the same
+plates. The design is:
+\begin{itemize}
+  \item \textbf{Held-out frames.} Split each trial into contiguous time
+        blocks longer than the load autocorrelation time. Track on some
+        blocks and compute OF-08 residuals on the others.
+  \item \textbf{Held-out trials.} Track on some swings and compare on others
+        by the same golfer, captured with the same qualified device.
+  \item \textbf{Alignment.} An alignment cross-correlated against the
+        tracked model is refused for validation (\texttt{validates()}).
+  \item \textbf{Reporting.} OF-08 labels apply. Results stay ``unqualified''
+        until OF-HW passes, and an unresolved timing delta is not reported
+        as a number.
+\end{itemize}
+
+\section{Error Budget}
+
+\begin{tabular}{@{}ll@{}}
+\toprule
+Term & Source \\
+\midrule
+Load and CoP measurement & declared \texttt{PlateUncertainty} (OF-01) \\
+JSON or live rounding & $q/\sqrt{12}$ (OF-06, OF-09) \\
+Within-sample skew & $s\,|\dot y|$ (OF-05) \\
+Interpolation bias estimate & $b/k$ (OF-05; excluded across impact) \\
+Sensing depth & $\mu\,\sigma_h\,N$ (OF-11; valid inside the cones) \\
+Clock offset & profiled grid, half-step added to skew (OF-12) \\
+Model side & not budgeted; elimination and tracking stay conditional on it \\
+\bottomrule
+\end{tabular}
+
+\section{Non-Claims}
+
+\begin{itemize}
+  \item Tracking plate rows does not identify shear or free moment, and it
+        does not make the matched solution unique. Infinitely many solutions
+        remain.
+  \item A tracked run is not validated by its own targets.
+  \item Nothing here is evidence until OF-HW qualifies a device.
+\end{itemize}
+
+\section{Implementation Plan (When Unblocked)}
+
+\begin{enumerate}
+  \item A pure function that builds $E_k, g_k, \sigma$ for a foot from an
+        OF-05 \texttt{FootSample} and the QP's \texttt{FootSupport}. It
+        reuses OF-11's rows, and is checked against them by a test that
+        evaluates both on the same wrench.
+  \item An optional observation term in \texttt{WrenchQPProblem} and
+        \texttt{WrenchQPConfig} (default off, so the existing controller is
+        unchanged), with band slacks reported in \texttt{WrenchQPSolution}.
+  \item Tests: identical to the baseline when the term is off; reproduces a
+        synthetic measured wrench when it is on; a conflict frame produces
+        band slack and is reported, never absorbed.
+\end{enumerate}
+
+\end{document}
