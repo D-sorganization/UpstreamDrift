@@ -125,14 +125,15 @@ def load_npz(data: bytes, path: Path) -> SwingArrays:
 def validate_arrays(arrays: SwingArrays, path: Path) -> None:
     """Check time, load and corner-force values (shared by NPZ and CSV).
 
-    Time must be finite and strictly increasing; loads finite and non-negative;
-    corner forces finite.  CoP values are checked by the trial contract.
+    Time must be finite and strictly increasing; loads and corner forces
+    finite.  Load sign (the noise-floor policy), CoP and net-CoP rules belong
+    to the trial contract and are checked there, once.
     """
     if not np.isfinite(arrays.t).all() or np.any(np.diff(arrays.t) <= 0.0):
         raise ValueError(f"{path}: 't' must be finite and strictly increasing")
     for key, load in (("fz_L", arrays.fz_left), ("fz_R", arrays.fz_right)):
-        if not np.isfinite(load).all() or np.any(load < 0.0):
-            raise ValueError(f"{path}: {key!r} must be finite and non-negative")
+        if not np.isfinite(load).all():
+            raise ValueError(f"{path}: {key!r} must be finite")
     if not np.isfinite(arrays.forces).all():
         raise ValueError(f"{path}: 'forces' must be finite")
 

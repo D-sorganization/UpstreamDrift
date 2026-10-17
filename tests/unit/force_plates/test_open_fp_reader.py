@@ -140,12 +140,27 @@ def test_non_increasing_time_rejected(tmp_path: Path) -> None:
         read(w.write_swing(tmp_path, arrays=arrays))
 
 
-def test_negative_or_nan_load_rejected(tmp_path: Path) -> None:
-    for bad in (-1.0, np.nan):
-        arrays = w.default_arrays()
-        arrays["fz_R"][0] = bad
-        with pytest.raises(ValueError, match="fz_R"):
-            read(w.write_swing(tmp_path, arrays=arrays))
+def _with_left_load(sample: int, value: float) -> dict[str, np.ndarray]:
+    arrays = w.default_arrays()
+    arrays["fz_L"][sample] = value
+    arrays["lead_pct"] = w.lead_pct(arrays["fz_L"], arrays["fz_R"], "RH")
+    return arrays
+
+
+def test_nan_load_rejected_by_the_reader(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="fz_L"):
+        read(w.write_swing(tmp_path, arrays=_with_left_load(5, np.nan)))
+
+
+def test_small_negative_noise_load_is_kept_unclamped(tmp_path: Path) -> None:
+    # The unloaded left foot (sample 5) reads -4 N: inside 3 x the 2 N floor.
+    trial = read(w.write_swing(tmp_path, arrays=_with_left_load(5, -4.0)))
+    assert trial.load_n["left"][5] == -4.0
+
+
+def test_gross_negative_load_rejected_by_the_contract(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="load_n"):
+        read(w.write_swing(tmp_path, arrays=_with_left_load(5, -50.0)))
 
 
 def test_nonfinite_corner_force_rejected(tmp_path: Path) -> None:
