@@ -152,12 +152,13 @@ def measured_overlay(
     for foot in FOOT_LABELS:
         traces[f"{MEASURED_PREFIX}{foot}_force_n"] = force[foot]
         traces[f"{MEASURED_PREFIX}{foot}_cop_m"] = cop[foot]
+    trial = placed.trial
     return MeasuredOverlay(
         traces=traces,
         covered=tuple(covered),
-        qualified=placed.trial.provenance.qualified,
+        qualified=trial.provenance.qualified,
         observability=observability(),
-        events=force_event_markers(placed.trial, alignment=alignment),
+        events=force_event_markers(trial, alignment=alignment),
     )
 
 
