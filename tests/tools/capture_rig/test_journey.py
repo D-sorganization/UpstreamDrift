@@ -135,3 +135,56 @@ def test_capture_title_and_id_follow_library_selection_and_clear_on_error(
     assert not widget.playback.isEnabled()
     assert "No capture" in widget.playback.image.text()
     widget.close()
+
+
+def test_deleting_the_panel_with_its_dialogs_open_raises_nothing(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """The dialogs' destroyed slots must not reach into a deleted panel.
+
+    A slot that raises aborts a PyQt6 process unless an excepthook is
+    installed, so a widget torn down with Help or Status open crashed the
+    whole application.
+    """
+    import gc
+    import sys
+
+    root = tmp_path / "take"
+    root.mkdir()
+    _bundle(root)
+    widget = widget_at(tmp_path)
+    widget.capture.set_session_path(root)
+    widget.refresh_session()
+    widget.journey.show_help()
+    widget.journey.show_details()
+    assert widget.journey._help is not None
+    assert widget.journey._details is not None
+    raised: list[BaseException] = []
+    monkeypatch.setattr(sys, "excepthook", lambda _t, value, _tb: raised.append(value))
+    del widget
+    gc.collect()
+    assert raised == []
+
+
+def test_a_replaced_status_dialog_does_not_forget_its_successor(
+    tmp_path: Path,
+) -> None:
+    from PyQt6.QtCore import QCoreApplication, QEvent
+
+    root = tmp_path / "take"
+    root.mkdir()
+    _bundle(root)
+    widget = widget_at(tmp_path)
+    widget.capture.set_session_path(root)
+    widget.refresh_session()
+    widget.journey.show_details()
+    widget.journey.show_details()
+    second = widget.journey._details
+    # Closing the first dialog queued its deletion; run it.
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete.value)
+    assert second is not None
+    assert widget.journey._details is second
+    second.close()
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete.value)
+    assert widget.journey._details is None
+    widget.close()
