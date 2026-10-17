@@ -254,9 +254,13 @@ def _solve_groups(
     target: Any,
     golf_q: Mapping[str, np.ndarray],
     coords: dict[str, np.ndarray],
-) -> float:
-    """Solve every orientation group into ``coords``; max residual [rad]."""
-    worst = 0.0
+) -> dict[str, float]:
+    """Solve every orientation group into ``coords``.
+
+    Returns the largest residual and the largest frame-to-frame coordinate
+    step over the groups [rad]; a large step is a branch switch.
+    """
+    worst = step = 0.0
     for group in spec.fmap.groups:
         world = body_rotations(golf, golf_q, group.golf_body)
         align = neutral_alignment(golf, group.golf_body, target, group.target_body)
@@ -265,7 +269,8 @@ def _solve_groups(
         )
         coords.update(solution.coordinates)
         worst = max(worst, float(np.max(solution.residual_rad)))
-    return worst
+        step = max(step, solution.max_step_rad)
+    return {"orientation_max_residual_rad": worst, "orientation_max_step_rad": step}
 
 
 def _smoothed(
@@ -426,11 +431,7 @@ def run_fullbody(
     _unlock(target, spec.unlock_coordinates)
     coords = _trunk_coordinates(spec.fmap, trunk, time.size, spec.unlock_coordinates)
     coords.update(_transfer_coordinates(spec.fmap, golf_q))
-    metrics = {
-        "orientation_max_residual_rad": _solve_groups(
-            spec, golf, target, golf_q, coords
-        )
-    }
+    metrics = _solve_groups(spec, golf, target, golf_q, coords)
     for name, series in coords.items():
         ensure(bool(np.all(np.isfinite(series))), f"{name} must be finite")
     loads, extra = _build_loads(spec, golf, golf_q, coords, time)
