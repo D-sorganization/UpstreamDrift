@@ -51,13 +51,13 @@ class PlatePlacement:
             raise ValueError("origin_m must be a finite 3-vector")
         if rot.shape != (3, 3) or not np.isfinite(rot).all():
             raise ValueError("rotation must be a finite 3x3 matrix")
-        if not np.allclose(rot.T @ rot, np.eye(3), atol=ROTATION_ATOL):
+        if not np.allclose(rot.T @ rot, np.eye(3), rtol=0.0, atol=ROTATION_ATOL):
             raise ValueError("rotation must be orthonormal")
         if np.linalg.det(rot) < 0.0:
             raise ValueError(
                 "rotation must be proper (a reflection would swap the feet)"
             )
-        if not np.allclose(rot @ _ZHAT, _ZHAT, atol=ROTATION_ATOL):
+        if not np.allclose(rot @ _ZHAT, _ZHAT, rtol=0.0, atol=ROTATION_ATOL):
             raise ValueError("rotation must keep the vertical axis vertical (yaw only)")
         object.__setattr__(self, "rotation", rot)
         object.__setattr__(self, "origin_m", origin)
