@@ -32,35 +32,40 @@ pytestmark = pytest.mark.unit
 PULLS = ("deadlift", "clean_and_jerk")
 MAX_BUNDLE_BYTES = 300_000
 # Measured maxima over all 151 frames (metres); see the module docstring.
+# #13037 (whole-row de Leva lift body plus the 10 deg tibial torsion of
+# #12814): the ankle, knee and shoulder snapshots are re-derived from the
+# regenerated bundles with the same rounding; evidence on #13041
+# (issuecomment-6243170509).
 IK_RESIDUAL_THRESHOLDS_M: dict[str, dict[str, float]] = {
     "deadlift": {
-        "ankle_l": 0.0032,
-        "ankle_r": 0.0030,
-        "knee_l": 0.0031,
-        "knee_r": 0.0109,
+        "ankle_l": 0.0038,
+        "ankle_r": 0.0032,
+        "knee_l": 0.0035,
+        "knee_r": 0.0110,
         "hip_l": 0.0084,
         "hip_r": 0.0060,
-        "shoulder_l": 0.0040,
-        "shoulder_r": 0.0045,
+        "shoulder_l": 0.0042,
+        "shoulder_r": 0.0046,
         "bar": 0.0029,
     },
     "clean_and_jerk": {
-        "ankle_l": 0.0032,
-        "ankle_r": 0.0019,
-        "knee_l": 0.0031,
-        "knee_r": 0.0109,
+        "ankle_l": 0.0038,
+        "ankle_r": 0.0029,
+        "knee_l": 0.0035,
+        "knee_r": 0.0110,
         "hip_l": 0.0084,
         "hip_r": 0.0060,
-        "shoulder_l": 0.0040,
-        "shoulder_r": 0.0030,
+        "shoulder_l": 0.0042,
+        "shoulder_r": 0.0031,
         "bar": 0.0012,
     },
 }
 # OSL-14 (#13057): the bounded arm solve ends with the hanging arm at its
 # cited elbow-extension limit, so the grip weld closes to tens of microns
 # (the unbounded golf-body solve closed to 1e-7 m with out-of-range joints).
-# Before/after numbers: #13057 (issuecomment-6229479012).
-CLOSURE_THRESHOLD_M: dict[str, float] = {"deadlift": 7.7e-5, "clean_and_jerk": 2.8e-5}
+# Before/after numbers: #13057 (issuecomment-6229479012); re-derived on the
+# #13037 lift body (8.94e-5 and 3.29e-5 m): #13041 (issuecomment-6243170509).
+CLOSURE_THRESHOLD_M: dict[str, float] = {"deadlift": 9.0e-5, "clean_and_jerk": 3.3e-5}
 FOOT_PENETRATION_THRESHOLD_M: dict[str, float] = {
     "deadlift": 7.0e-4,
     "clean_and_jerk": 7.0e-4,

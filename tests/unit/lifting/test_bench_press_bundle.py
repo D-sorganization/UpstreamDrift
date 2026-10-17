@@ -51,7 +51,9 @@ IK_RESIDUAL_THRESHOLDS_M: dict[str, float] = {
     "shoulder_r": 0.0001,
     "bar": 0.0148,
 }
-CLOSURE_THRESHOLD_M = 2.9e-5
+# #13037 lift body: closure 2.998e-5 m (was 2.86e-5); #13041
+# (issuecomment-6243170509).
+CLOSURE_THRESHOLD_M = 3.0e-5
 FOOT_PENETRATION_THRESHOLD_M = 7.0e-4
 # Measured on the supine hold fit (metres): the largest back-sphere gap above
 # the bench top, and the hold's bench height (IPF 42-45 cm is not met).

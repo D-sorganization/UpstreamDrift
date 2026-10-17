@@ -41,18 +41,22 @@ pytestmark = pytest.mark.unit
 # evidence on #13104; every other landmark fell (ankle_l 4.37, knee_l 3.15,
 # knee_r 11.68, hip_l 8.07, shoulder_l 3.65, shoulder_r 3.04 mm, bar 0.01 mm)
 # and keeps its earlier bound.
+# #13037 (whole-row de Leva lift body plus the 10 deg tibial torsion of
+# #12814): ankle_r 4.43 mm, hip_r 9.32 mm and the closure 8.97e-8 m exceed
+# their snapshots, which are re-derived with the same rounding; evidence on
+# #13041 (issuecomment-6243170509).
 IK_RESIDUAL_THRESHOLDS_M = {
     "ankle_l": 0.0057,
-    "ankle_r": 0.0036,
+    "ankle_r": 0.0045,
     "knee_l": 0.0152,
     "knee_r": 0.0225,
     "hip_l": 0.0178,
-    "hip_r": 0.0092,
+    "hip_r": 0.0094,
     "shoulder_l": 0.0196,
     "shoulder_r": 0.0151,
     "bar": 0.0001,
 }
-CLOSURE_THRESHOLD_M = 6.4e-8
+CLOSURE_THRESHOLD_M = 9.0e-8
 FOOT_PENETRATION_THRESHOLD_M = 7.0e-4
 #: Committed bar-loaded bundle size bound (bytes).  OSL-16 (#13104): a loaded
 #: bundle records its 0.25 ms hold efforts (``hold_efforts``, 4 per step) so
