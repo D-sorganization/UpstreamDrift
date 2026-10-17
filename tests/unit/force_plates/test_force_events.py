@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 
 import pytest
-from matplotlib.figure import Figure
 
 from src.shared.python.biomechanics.ground_reaction_plot_model import (
     plot_series_to_json,
@@ -19,11 +18,17 @@ from src.shared.python.force_plates import (
     impact_anchor,
     merge_event_markers,
 )
-from src.shared.python.plotting.renderers.time_panels import draw_event_markers
-from tests.unit.biomechanics.test_ground_reaction_plot_renderer import _plot
 from tests.unit.force_plates._trial_factory import trial_kwargs
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
+
+
+def _require_matplotlib() -> None:
+    """Skip, rather than fail collection, where matplotlib cannot load."""
+    try:
+        import matplotlib  # noqa: F401
+    except (ImportError, OSError) as exc:
+        pytest.skip(f"matplotlib not loadable: {exc}")
 
 
 def _trial(**events: float | None) -> VerticalPlateTrial:
@@ -106,6 +111,9 @@ def test_impact_anchor_none_without_impact_and_equal_with_it() -> None:
 
 
 def test_merged_events_survive_the_plot_model_and_json_round_trip() -> None:
+    _require_matplotlib()
+    from tests.unit.biomechanics.test_ground_reaction_plot_renderer import _plot
+
     merged = merge_event_markers(
         {"top": 0.1}, force_event_markers(_trial(max_trail=0.005))
     )
@@ -118,6 +126,11 @@ def test_merged_events_survive_the_plot_model_and_json_round_trip() -> None:
 
 
 def test_python_renderer_label_keeps_the_force_namespace() -> None:
+    _require_matplotlib()
+    from matplotlib.figure import Figure
+
+    from src.shared.python.plotting.renderers.time_panels import draw_event_markers
+
     ax = Figure().subplots()
     draw_event_markers(ax, {"force.max_trail": 0.1, "top": 0.2})
     assert [t.get_text() for t in ax.texts] == ["force.max_trail", "top"]
