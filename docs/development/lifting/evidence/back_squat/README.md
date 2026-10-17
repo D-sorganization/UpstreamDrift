@@ -122,8 +122,25 @@ The lift body has:
 The grip-width shift also moves the left wrist joint. Every coordinate of the
 squat bundle stays inside its cited range.
 
-The LIFT-4 barbell re-track diverges from its source. This is pre-existing:
-the golf-body bundle diverged as well. See `lift_models.tex`.
+The LIFT-4 barbell re-track (`back_squat_barbell_bundle.npz`) still leaves its
+source (#13072). The controller is now built on the rigid-bar spec
+(`barbell_runs.rigid_bar_spec`), which removed the fast divergence. Before that,
+the bar-weight feedforward left out the bar's load on the floating base. The
+SpineInputY error went from 0.99 deg to 0.0002 deg at step 3, and from
+9.76 deg to 0.0001 deg at step 10.
+
+The loaded body still pivots forward on its toes. With the bar in the hands,
+the source kinematics put the combined centre of mass 0.15-0.17 m ahead of the
+forefoot spheres, while the body alone sits 0.039 m inside them. By step 200:
+
+- pelvis pitch is 11.8 deg off the source;
+- the shoulder landmarks are 13.2 cm off;
+- the LIFT-5 bounds are crossed from step 58 (ankle) onwards.
+
+The deviation per landmark is recorded in the provenance under
+`retrack_landmark_deviation_m`. The bound test is a strict xfail in
+`tests/unit/lifting/test_barbell_evidence.py`. See `lift_models.tex`, #13072
+subsection.
 
 ## Regenerate
 

@@ -294,17 +294,18 @@ def bundle_segment_scales(
 # --------------------------------------------------------------------------
 
 
-#: Range-flag tolerance of the pelvis gate: the shared range-of-motion flag
-#: tolerance (``range_of_motion.violations``, 0.5 deg).  OSL-14: the bundle
-#: IK keeps hip flexion inside its cited 120 deg bound exactly, but the
-#: MuJoCo-tracked reference overshoots it by 0.012 deg (controller error).
-PELVIS_GATE_TOLERANCE_RAD = math.radians(0.5)
+#: Tolerance of the pelvis gate: none.  OSL-14 briefly allowed the shared
+#: 0.5 deg range-flag tolerance because the diverged LIFT-4 re-track's hip
+#: overshot the 120 deg bound by 0.012 deg; after the #13072 controller fix
+#: the loaded re-track overshoots by 0.86 deg, outside either way, so the gate
+#: is strict again (a bound a source needs to cross is not observed).
+PELVIS_GATE_TOLERANCE_RAD = 0.0
 
 
 def hip_flexion_inside(source: tuple[float, float], low: float, high: float) -> bool:
     """Whether a bundle hip-flexion span ``(min, max)`` lies in ``[low, high]``.
 
-    Within :data:`PELVIS_GATE_TOLERANCE_RAD` of a bound counts as inside.
+    Within :data:`PELVIS_GATE_TOLERANCE_RAD` (zero) of a bound counts as inside.
     """
     tol = PELVIS_GATE_TOLERANCE_RAD
     return low - tol <= source[0] and source[1] <= high + tol

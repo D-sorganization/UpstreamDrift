@@ -336,13 +336,16 @@ def test_squat_ik_keeps_every_coordinate_in_range() -> None:
     assert isinstance(landmarks["tracked"], bool) and landmarks["reason"]
 
 
-def test_pelvis_gate_allows_the_shared_range_flag_tolerance() -> None:
-    """OSL-14: a tracked reference that overshoots the bound by its controller
-    error (0.012 deg) is inside; the shared 0.5 deg flag tolerance decides."""
+def test_pelvis_gate_is_strict() -> None:
+    """#13072: the pelvis gate has no tolerance; a bound crossed by any amount
+    (here the 0.012 deg the diverged OSL-14 re-track needed) is outside."""
     from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
 
     low, high = math.radians(-30.0), math.radians(120.0)
-    inside = (math.radians(80.0), math.radians(120.012))
-    assert ikid.hip_flexion_inside(inside, low, high)
+    assert ikid.PELVIS_GATE_TOLERANCE_RAD == 0.0
+    assert ikid.hip_flexion_inside((math.radians(80.0), high), low, high)
+    assert not ikid.hip_flexion_inside(
+        (math.radians(80.0), math.radians(120.012)), low, high
+    )
     assert not ikid.hip_flexion_inside((low, math.radians(121.0)), low, high)
     assert not ikid.hip_flexion_inside((math.radians(-31.0), high), low, high)

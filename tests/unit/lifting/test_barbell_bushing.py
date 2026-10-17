@@ -278,3 +278,66 @@ def test_cross_engine_parity_at_a_loaded_state(
             x = getattr(sa.wrench[side], field)
             y = getattr(sb.wrench[side], field)
             assert np.abs(x - y).max() <= l1_tolerance(float(np.abs(x).max()))
+
+
+# -- Rigid-bar controller model (#13072) --------------------------------------
+
+
+def _simulator(spec_bytes: bytes):
+    from src.engines.physics_engines.mujoco.python.full_body_model import (
+        NativeMujocoFullBodyModel,
+    )
+    from src.shared.python.motion_matching import full_body_forward_dynamics as fs
+
+    return fs.FullBodySimulator(NativeMujocoFullBodyModel(spec_bytes))
+
+
+def _gravity_bias(simulator, q: np.ndarray) -> np.ndarray:
+    zero = np.zeros_like(q)
+    bias = simulator.adapter.generalized_forces(
+        simulator._map(q),  # noqa: SLF001 - spec order to MuJoCo order
+        simulator._map(zero),  # noqa: SLF001
+    )[0]
+    return np.asarray(bias)[simulator._dof]  # noqa: SLF001
+
+
+def test_rigid_bar_spec_adds_the_bar_mass(bundle: InputBundle) -> None:
+    from src.shared.python.lifting.barbell_runs import rigid_bar_spec
+
+    body = _simulator(bundle.spec_bytes)
+    rigid = _simulator(rigid_bar_spec(bundle.spec_bytes, Barbell(100.0)))
+    assert rigid.mass_kg - body.mass_kg == pytest.approx(100.0, abs=1e-9)
+
+
+def test_rigid_bar_gravity_is_the_hand_weight_load_on_every_row(
+    loaded: BarbellBushingPlant, bundle: InputBundle
+) -> None:
+    """#13072: the controller model carries the bar's weight on the root too.
+
+    The rigid-bar spec's extra gravity generalized force equals the bar weight
+    hung from the hands (``weight_generalized_force``) in every coordinate,
+    including the unactuated pelvis rows that the old joint-space feedforward
+    left out (about 980 N and 635 N m on this bundle).
+    """
+    from src.shared.python.lifting.barbell_runs import rigid_bar_spec
+    from src.shared.python.motion_matching.same_input.integrator import (
+        root_indices,
+    )
+
+    q = bundle.reference_q[0]
+    body = _simulator(bundle.spec_bytes)
+    rigid = _simulator(rigid_bar_spec(bundle.spec_bytes, Barbell(100.0)))
+    extra = -(_gravity_bias(rigid, q) - _gravity_bias(body, q))
+    expected = loaded.weight_generalized_force(q)
+    assert np.abs(extra - expected).max() <= THIRD_LAW_N
+    root = root_indices(loaded.body_order)
+    assert np.abs(expected[root]).max() > 500.0
+
+
+def test_rigid_bar_spec_rejects_bad_inputs(bundle: InputBundle) -> None:
+    from src.shared.python.lifting.barbell_runs import rigid_bar_spec
+
+    with pytest.raises(TypeError, match="spec_bytes"):
+        rigid_bar_spec("not bytes", Barbell(100.0))  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="Barbell"):
+        rigid_bar_spec(bundle.spec_bytes, 100.0)  # type: ignore[arg-type]

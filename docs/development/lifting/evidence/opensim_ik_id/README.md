@@ -35,9 +35,22 @@ lumbar joint, de Leva hips and cited-range IK bounds. OSL-14 also scales the
 OpenSim torso to the bundle shoulder width.
 
 The committed squat receipt is measured on the LIFT-4 barbell re-track
-(`back_squat_barbell_bundle.npz`), which diverges from its source in the golf
-body and the lift body alike. That receipt therefore fails the acceptance
-gates: marker RMS 5.04 cm, maximum 29.7 cm, and the pelvis is not tracked.
+(`back_squat_barbell_bundle.npz`). The re-track was regenerated with the
+#13072 rigid-bar controller. The arms now stay on the bar, so no coordinate
+leaves its range: `range_violations` is empty, where it used to list six arm
+coordinates.
+
+The re-track still tips forward on the toes (#13072 is open), so the receipt
+fails the acceptance gates:
+
+- marker RMS is 8.56 cm and the maximum is 30.3 cm, set by the bar marker,
+  because the arms are held at the hold pose;
+- the shoulder markers come to 4.1-4.2 cm RMS;
+- the pelvis is not tracked: the loaded hip reaches 120.9 deg, past the
+  strict 120 deg gate;
+- the Hicks residual gate fails: the peak pelvis force is 316.7 N against a
+  176.3 N limit, and the peak pelvis moment is 688.5 N m (tilt) against a
+  20.1 N m limit.
 
 A diagnostic fit of the bodyweight squat bundle tracked the pelvis to 3 mm.
 Excluding the bar, its markers came to 1.78 cm RMS and 4.15 cm maximum. See

@@ -59,6 +59,7 @@ IK_RESIDUAL_THRESHOLDS_M: dict[str, dict[str, float]] = {
 # OSL-14 (#13057): the bounded arm solve ends with the hanging arm at its
 # cited elbow-extension limit, so the grip weld closes to tens of microns
 # (the unbounded golf-body solve closed to 1e-7 m with out-of-range joints).
+# Before/after numbers: #13057 (issuecomment-6229479012).
 CLOSURE_THRESHOLD_M: dict[str, float] = {"deadlift": 7.7e-5, "clean_and_jerk": 2.8e-5}
 FOOT_PENETRATION_THRESHOLD_M: dict[str, float] = {
     "deadlift": 7.0e-4,

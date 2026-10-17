@@ -12,6 +12,10 @@ thresholds are fixed before the runs and are not loosened:
   :func:`test_hold_failure_is_the_forward_tip` pins the physical cause.
 * Loaded bundle: same-engine open-loop replay of the first steps reproduces
   the reference within 1e-8 (determinism of the coupled plant).
+* Loaded re-track (#13072): every LIFT-5 landmark stays within the LIFT-5 IK
+  residual bound of the source reference's.  It does not yet: the source
+  kinematics put the loaded centre of mass ahead of the feet (strict xfail,
+  :data:`RETRACK_GAP`).
 * Cross-engine parity at every 20th reference state: L1 of epic #11605,
   ``|dX| <= 1e-6 + 1e-8 * max|X|`` per quantity.
 """
@@ -137,3 +141,78 @@ def test_cross_engine_parity_within_l1() -> None:
             continue
         for key, diff in diffs.items():
             assert diff <= 1e-6 + 1e-8 * scale[key], (engine, key, diff)
+
+
+RETRACK_GAP = (
+    "#13072 open: with the bar in the hands the source squat's combined centre "
+    "of mass lies 0.15-0.17 m ahead of the forefoot spheres (body alone 0.039 m "
+    "inside), so the loaded re-track pivots forward on the toes (pelvis pitch "
+    "11.8 deg, shoulders 13.2 cm off by step 200); the 100 kg reference is not "
+    "balanceable on these source kinematics"
+)
+
+
+def _lift5_bounds() -> dict[str, float]:
+    """The LIFT-5 squat IK residual thresholds (``test_lift_bundles``)."""
+    from test_lift_bundles import IK_RESIDUAL_THRESHOLDS_M
+
+    return dict(IK_RESIDUAL_THRESHOLDS_M)
+
+
+@pytest.mark.xfail(strict=True, reason=RETRACK_GAP)
+def test_retracked_bundle_records_it_follows_its_source() -> None:
+    """#13072: the bar-loaded re-track stays on its source reference.
+
+    Every LIFT-5 landmark of the re-tracked reference lies within the LIFT-5
+    IK residual bound of the same landmark on the source reference, at every
+    state of the window.
+    """
+    from src.shared.python.lifting.barbell_runs import RETRACK_DEVIATION_KEY
+    from src.shared.python.motion_matching.same_input import InputBundle
+
+    bundle = InputBundle.load(BARBELL_BUNDLE)
+    recorded = bundle.provenance[RETRACK_DEVIATION_KEY]
+    for label, limit in _lift5_bounds().items():
+        assert recorded[label] <= limit, (label, recorded[label], limit)
+
+
+def _recomputed_deviation() -> tuple[dict[str, float], dict[str, float]]:
+    from src.shared.python.lifting.barbell_runs import (
+        RETRACK_DEVIATION_KEY,
+        retrack_landmark_deviation,
+    )
+    from src.shared.python.motion_matching.same_input import InputBundle
+
+    bundle = InputBundle.load(BARBELL_BUNDLE)
+    source = InputBundle.load(BACK_SQUAT_BUNDLE)
+    deviation = retrack_landmark_deviation(source, bundle.reference_q)
+    return deviation, bundle.provenance[RETRACK_DEVIATION_KEY]
+
+
+@pytest.mark.integration
+@pytest.mark.requires_mujoco
+def test_recorded_retrack_deviation_is_reproducible() -> None:
+    """The provenance deviation is the committed arrays' own (#13072)."""
+    pytest.importorskip("mujoco")
+    deviation, recorded = _recomputed_deviation()
+    assert recorded == pytest.approx(deviation, rel=0, abs=1e-12)
+
+
+@pytest.mark.integration
+@pytest.mark.requires_mujoco
+@pytest.mark.xfail(strict=True, reason=RETRACK_GAP)
+def test_retracked_bundle_follows_its_source_within_lift5_bounds() -> None:
+    """#13072: recompute the landmark deviation from the committed arrays."""
+    pytest.importorskip("mujoco")
+    deviation, _ = _recomputed_deviation()
+    for label, limit in _lift5_bounds().items():
+        assert deviation[label] <= limit, (label, deviation[label], limit)
+
+
+def test_retrack_deviation_rejects_a_mismatched_reference() -> None:
+    from src.shared.python.lifting.barbell_runs import retrack_landmark_deviation
+    from src.shared.python.motion_matching.same_input import InputBundle
+
+    source = InputBundle.load(BACK_SQUAT_BUNDLE)
+    with pytest.raises(ValueError, match="reference_q"):
+        retrack_landmark_deviation(source, source.reference_q[:-1])
