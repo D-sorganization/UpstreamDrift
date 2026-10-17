@@ -31,7 +31,10 @@ from src.shared.python.motion_matching.same_input import InputBundle
 
 pytestmark = pytest.mark.unit
 
-# Measured maxima over all 151 frames (metres); see module docstring.
+# Measured maxima over all 151 frames (metres); see module docstring.  The
+# widened entries (golf body: knee_r 0.0110, hip_l 0.0149, shoulders 0.0098,
+# penetration 5.4e-4) and their physical reasons are recorded on #13057
+# (issuecomment-6229479012); the #13072 re-track fix does not change them.
 IK_RESIDUAL_THRESHOLDS_M = {
     "ankle_l": 0.0057,
     "ankle_r": 0.0031,
