@@ -16,22 +16,20 @@ from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
 if DRAKE_AVAILABLE:
     pass
 
-# MultibodyPlant uses some undocumented Drake APIs (SetDefaultVelocities,
-# MakeMultibodyForces) via type-ignore in the production code.  We enumerate
-# the attributes the tests rely on so that the mock is constrained yet still
-# permits those extra calls.
+# Only attributes that exist on the real pydrake MultibodyPlant may be listed
+# (enforced against real pydrake by tests/engines/drake/test_drake_real_api_parity.py).
 _PLANT_SPEC_ATTRS = [
     "Finalize",
     "time_step",
     "GetMyContextFromRoot",
-    "SetDefaultPositions",
-    "SetDefaultVelocities",
+    "SetDefaultState",
+    "SetPositions",
+    "SetVelocities",
     "GetPositions",
     "GetVelocities",
     "CalcMassMatrixViaInverseDynamics",
     "CalcInverseDynamics",
     "num_velocities",
-    "MakeMultibodyForces",
 ]
 
 

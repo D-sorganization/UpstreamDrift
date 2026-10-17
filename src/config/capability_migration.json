@@ -2074,6 +2074,18 @@
       "evidence": "src/tools/model_explorer/frankenstein_editor/assembly_panel.py",
       "acceptance_owner": "tests/unit/tools/model_explorer/test_assembly_panel_gui.py"
     },
+    "tools.model_explorer.results_playback": {
+      "id": "tools.model_explorer.results_playback",
+      "name": "Model Explorer results playback on the shared-appearance golfer",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/tools/model_explorer/results_playback_panel.py",
+      "acceptance_owner": "tests/ui/explorer/test_results_playback_panel.py"
+    },
     "tools.motion_matching": {
       "id": "tools.motion_matching",
       "name": "Motion Matching tool (full-body forward-dynamics matching of the tour captures)",

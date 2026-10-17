@@ -27,6 +27,7 @@ from typing import Any, Literal
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.club_body_names import CLUB_HEAD_BODY_ALIASES
 from src.shared.python.core.contracts.decorators import postcondition, precondition
 from src.shared.python.motion_matching.output_time_grid import build_output_grid
 from src.shared.python.motion_matching.validate_theta import validate_theta
@@ -374,7 +375,7 @@ def _resolve_anchors(model: Any, variant: str) -> _Anchors:
         head_bid = _first_body_id(
             model,
             _CLUBHEAD_BODY_BY_VARIANT.get(variant_key, "clubhead"),
-            ("club_head", "clubhead", "club_shaft"),
+            (*CLUB_HEAD_BODY_ALIASES, "club_shaft"),
         )
     return _Anchors(int(grip_site_id), int(club_site_id), grip_bid, head_bid)
 

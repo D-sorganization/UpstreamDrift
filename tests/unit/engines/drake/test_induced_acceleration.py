@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from types import ModuleType
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -40,8 +40,15 @@ class TestDrakeInducedAcceleration:
         plant = MagicMock()
         # Setup basic mock behavior
         plant.num_velocities.return_value = 2
-        plant.MakeMultibodyForces.return_value = MagicMock()
         return plant
+
+    @pytest.fixture(autouse=True)
+    def mock_forces_cls(self, induced_acceleration_module: ModuleType) -> Iterator[Any]:
+        """Stand in for ``pydrake.multibody.tree.MultibodyForces`` (real ctor)."""
+        with patch(
+            "src.engines.physics_engines.drake.python.drake_forces.MultibodyForces"
+        ) as forces_cls:
+            yield forces_cls
 
     @pytest.fixture
     def analyzer(self, mock_plant, induced_acceleration_module: ModuleType) -> Any:
@@ -52,7 +59,9 @@ class TestDrakeInducedAcceleration:
         """Test initialization."""
         assert analyzer.plant == mock_plant
 
-    def test_compute_components_basic(self, analyzer, mock_plant) -> None:
+    def test_compute_components_basic(
+        self, analyzer, mock_plant, mock_forces_cls
+    ) -> None:
         """Test compute_components with simple inputs."""
         context = MagicMock()
 
@@ -96,7 +105,8 @@ class TestDrakeInducedAcceleration:
         )
         assert called_context is context
         np.testing.assert_allclose(called_vdot, np.zeros(2))
-        assert called_forces is mock_plant.MakeMultibodyForces.return_value
+        mock_forces_cls.assert_called_once_with(mock_plant)
+        assert called_forces is mock_forces_cls.return_value
 
     def test_compute_components_with_non_identity_mass(
         self, analyzer, mock_plant

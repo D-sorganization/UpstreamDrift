@@ -8,6 +8,8 @@ and dynamic theme change handling.
 
 from __future__ import annotations
 
+from typing import Any
+
 from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import QMenu
 
@@ -79,9 +81,8 @@ class ThemeManager:
     def _apply_theme_system(self) -> None:
         """Initialize theme manager and register for theme change callbacks."""
         try:
-            from src.shared.python.theme import (
-                ThemeManager,
-                FontManager,
+            from src.shared.python.theme import FontManager, ThemeManager
+            from src.shared.python.theme.launcher_compat import (
                 apply_golf_suite_style,
             )
 
@@ -134,6 +135,23 @@ class ThemeManager:
             for action in self._theme_actions:
                 action.setChecked(action.text() == current)
 
+    def _add_theme_action(
+        self,
+        theme_menu: QMenu,
+        group: Any,
+        manager: Any,
+        label: str,
+        theme_value: str,
+    ) -> None:
+        """Add one checkable, exclusive theme action to *theme_menu*."""
+        action = QAction(label, self.launcher)
+        action.setCheckable(True)
+        action.setChecked(manager.get_current_theme_name() == label)
+        action.triggered.connect(lambda checked, v=theme_value: manager.change_theme(v))
+        group.addAction(action)
+        theme_menu.addAction(action)
+        self._theme_actions.append(action)
+
     def _setup_theme_menu(self, theme_menu: QMenu) -> None:
         """Populate the View > Theme submenu with all available themes.
 
@@ -145,7 +163,8 @@ class ThemeManager:
         from PyQt6.QtGui import QActionGroup
 
         try:
-            from src.shared.python.theme import ThemeManager, ThemePreset
+            from src.shared.python.theme import ThemeManager
+            from src.shared.python.theme.launcher_compat import ThemePreset
 
             manager = ThemeManager.instance()
 
@@ -160,15 +179,7 @@ class ThemeManager:
                 "High Contrast": ThemePreset.HIGH_CONTRAST,
             }
             for name, preset in preset_map.items():
-                action = QAction(name, self.launcher)
-                action.setCheckable(True)
-                action.setChecked(manager.get_current_theme_name() == name)
-                action.triggered.connect(
-                    lambda checked, p=preset: manager.change_theme(p.value)
-                )
-                group.addAction(action)
-                theme_menu.addAction(action)
-                self._theme_actions.append(action)
+                self._add_theme_action(theme_menu, group, manager, name, preset.value)
 
             # Additional built-in themes beyond the core presets.
             #
@@ -187,29 +198,15 @@ class ThemeManager:
             if extra_themes:
                 theme_menu.addSeparator()
                 for theme_name in extra_themes:
-                    action = QAction(theme_name, self.launcher)
-                    action.setCheckable(True)
-                    action.setChecked(manager.get_current_theme_name() == theme_name)
-                    action.triggered.connect(
-                        lambda checked, n=theme_name: manager.change_theme(n)
+                    self._add_theme_action(
+                        theme_menu, group, manager, theme_name, theme_name
                     )
-                    group.addAction(action)
-                    theme_menu.addAction(action)
-                    self._theme_actions.append(action)
 
             # Custom themes
             if custom_names:
                 theme_menu.addSeparator()
                 for cname in custom_names:
-                    action = QAction(cname, self.launcher)
-                    action.setCheckable(True)
-                    action.setChecked(manager.get_current_theme_name() == cname)
-                    action.triggered.connect(
-                        lambda checked, n=cname: manager.change_theme(n)
-                    )
-                    group.addAction(action)
-                    theme_menu.addAction(action)
-                    self._theme_actions.append(action)
+                    self._add_theme_action(theme_menu, group, manager, cname, cname)
 
             # Manage Themes dialog
             theme_menu.addSeparator()
@@ -343,7 +340,9 @@ class ThemeManager:
         # Apply immediately if matplotlib is available
         if theme_name == "follow_ui":
             try:
-                from src.shared.python.theme import apply_golf_suite_style
+                from src.shared.python.theme.launcher_compat import (
+                    apply_golf_suite_style,
+                )
 
                 apply_golf_suite_style()
             except ImportError:
