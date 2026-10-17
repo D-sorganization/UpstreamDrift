@@ -419,7 +419,7 @@
 {"path": "chat/terminal_runtime.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/__init__.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_chat.py", "classification": "identical", "package": "chat", "spelling_only": false}
-{"path": "chat/tests/test_chat_drift.py", "classification": "diverged", "package": "chat", "spelling_only": false}
+{"path": "chat/tests/test_chat_drift.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_chat_routing_lifecycle.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_chat_ws_error_handling.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_credentials.py", "classification": "identical", "package": "chat", "spelling_only": false}
