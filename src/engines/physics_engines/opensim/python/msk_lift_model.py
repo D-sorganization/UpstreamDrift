@@ -578,7 +578,57 @@ def build_lift_model(
     scale = float(height_m) / GENERIC_STATURE_M
     factors = _scale_body(model, scale, body_mass_kg, segment_scales)
     skeleton_mass = float(sum(body.getMass() for body in model.getBodySet()))
+    posed = _pose_for_hold(model, lift, height_m, bar_mass_kg, scale)
+    contacts, bench_height, grip_width = _add_contacts_and_bar(
+        model, posed, scale, bar_mass_kg
+    )
+    receipt = {
+        "body_source": _body_source(base_path),
+        "generic_stature_m": GENERIC_STATURE_M,
+        "scale_factor": scale,
+        "segment_scale_factors": {
+            body: axes[0] if len(set(axes)) == 1 else list(axes)
+            for body, axes in factors.items()
+            if axes != (scale,) * 3
+        },
+        "skeleton_mass_kg": skeleton_mass,
+        "bar_mass_kg": float(bar_mass_kg),
+        "hold_pose": posed.hold_record(),
+        "grip_width_m": grip_width,
+        "grip_width_target_m": posed.target_width_m,
+        "bench_height_m": bench_height,
+        "contact_forces": contacts,
+        "contact_parameters": _contact_parameters(),
+    }
+    return LiftModelBuild(model=model, receipt=receipt)
 
+
+@dataclass(frozen=True)
+class _PosedHold:
+    """A lift model posed in its hold, standing on (or lying above) the floor."""
+
+    pose: HoldPose
+    coordinates: dict[str, float]
+    feet: list[tuple[str, str, np.ndarray, float]]
+    balance: dict[str, Any] | None
+    target_width_m: float
+    state: Any
+
+    def hold_record(self) -> dict[str, Any]:
+        """The receipt's ``hold_pose`` entry."""
+        return {
+            "name": self.pose.name,
+            "description": self.pose.description,
+            "supine": self.pose.supine,
+            "coordinates_rad": self.coordinates,
+            "balance": self.balance,
+        }
+
+
+def _pose_for_hold(
+    model: Any, lift: str, height_m: float, bar_mass_kg: float, scale: float
+) -> _PosedHold:
+    """Set the hold pose's defaults, reach the grip width, balance, lift to floor."""
     pose = HOLD_POSES[lift]
     target_width = lift_grip(lift).width_m * float(height_m) / standard_height_m()
     _apply_defaults(model, _pose_coordinates(pose, pose.arms[1]))
@@ -597,58 +647,46 @@ def build_lift_model(
     )
     _apply_defaults(model, {"pelvis_ty": coordinates["pelvis_ty"]})
     state = model.initSystem()
+    return _PosedHold(pose, coordinates, feet, balance, target_width, state)
 
+
+def _add_contacts_and_bar(
+    model: Any, posed: _PosedHold, scale: float, bar_mass_kg: float
+) -> tuple[list[str], float | None, float]:
+    """Floor (and bench) contacts plus the welded bar; returns the grip width."""
     # Measure everything posed first: adding a component drops the System.
-    back = _back_spheres(model, scale) if pose.supine else []
-    bench_height = _lowest_point(model, state, back) if back else None
-    placement = _bar_placement(model, state)
+    back = _back_spheres(model, scale) if posed.pose.supine else []
+    bench_height = _lowest_point(model, posed.state, back) if back else None
+    placement = _bar_placement(model, posed.state)
 
-    contacts = _add_contact(model, _half_space(model, FLOOR, 0.0), feet)
+    contacts = _add_contact(model, _half_space(model, FLOOR, 0.0), posed.feet)
     if bench_height is not None:
         bench = _half_space(model, BENCH_TOP, bench_height)
         contacts += _add_contact(model, bench, back)
     _attach_barbell(model, placement, bar_mass_kg)
-    grip_width = 2.0 * placement.half_width_m
     model.finalizeConnections()
     model.initSystem()
+    return contacts, bench_height, 2.0 * placement.half_width_m
 
-    receipt = {
-        "body_source": {
-            "name": BODY_SOURCE,
-            "path": str(base_path),
-            "sha256": _sha256(base_path),
-            "licence": "opensim-org/opensim-models submodule, referenced not vendored; "
-            "audit in src/engines/physics_engines/opensim/models/README.md",
-        },
-        "generic_stature_m": GENERIC_STATURE_M,
-        "scale_factor": scale,
-        "segment_scale_factors": {
-            body: axes[0] if len(set(axes)) == 1 else list(axes)
-            for body, axes in factors.items()
-            if axes != (scale,) * 3
-        },
-        "skeleton_mass_kg": skeleton_mass,
-        "bar_mass_kg": float(bar_mass_kg),
-        "hold_pose": {
-            "name": pose.name,
-            "description": pose.description,
-            "supine": pose.supine,
-            "coordinates_rad": coordinates,
-            "balance": balance,
-        },
-        "grip_width_m": grip_width,
-        "grip_width_target_m": target_width,
-        "bench_height_m": bench_height,
-        "contact_forces": contacts,
-        "contact_parameters": {
-            "stiffness_pa": LIFT_CONTACT_STIFFNESS_PA,
-            "stiffness_source": "OpenSim_Models PR #476 CONTACT_STIFFNESS",
-            "dissipation_friction_source": "MS-20 (#10335) receipt "
-            + contact_spec.CONTACT_RECEIPT_SHA256,
-            "penetration_limit_m": PENETRATION_LIMIT_M,
-        },
+
+def _body_source(base_path: Path) -> dict[str, str]:
+    return {
+        "name": BODY_SOURCE,
+        "path": str(base_path),
+        "sha256": _sha256(base_path),
+        "licence": "opensim-org/opensim-models submodule, referenced not vendored; "
+        "audit in src/engines/physics_engines/opensim/models/README.md",
     }
-    return LiftModelBuild(model=model, receipt=receipt)
+
+
+def _contact_parameters() -> dict[str, Any]:
+    return {
+        "stiffness_pa": LIFT_CONTACT_STIFFNESS_PA,
+        "stiffness_source": "OpenSim_Models PR #476 CONTACT_STIFFNESS",
+        "dissipation_friction_source": "MS-20 (#10335) receipt "
+        + contact_spec.CONTACT_RECEIPT_SHA256,
+        "penetration_limit_m": PENETRATION_LIMIT_M,
+    }
 
 
 def _ancestors(model: Any, body: str) -> list[str]:
