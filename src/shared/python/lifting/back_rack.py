@@ -129,7 +129,7 @@ def rack_offset(
         raise TypeError("rack must be a BackRack")
     marker = dict(_document(spec).get("marker_attachments", {})).get(rack.landmark)
     offset = None if marker is None else marker.get("offset_m")
-    if offset is None:
+    if marker is None or offset is None:
         raise ValueError(f"spec has no marker {rack.landmark!r} with an offset")
     local = np.asarray(offset, dtype=float) + rack.clearance_m * np.asarray(
         TRUNK_POSTERIOR_LOCAL
