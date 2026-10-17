@@ -192,7 +192,7 @@ def balance_lift(
     """
     column = SEGMENTS.index(load.segment)
     n = solution.time_s.size
-    delta = np.zeros(n)
+    delta: Array = np.zeros(n)
 
     def measure(correction: Array) -> tuple[Any, Array]:
         lift = solve(_corrected(solution, column, correction))
@@ -205,7 +205,7 @@ def balance_lift(
     unbalanced = float(np.abs(off).max())
     previous: tuple[Array, Array] | None = None
     # Leaning the segment forward moves the centre of mass forward.
-    slope = np.full(n, 1.0)
+    slope: Array = np.full(n, 1.0)
     iterations = 0
     while float(np.abs(off).max()) > load.tolerance_m:
         if iterations == load.max_iterations:

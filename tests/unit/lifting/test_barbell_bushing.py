@@ -263,6 +263,33 @@ def test_hand_jacobian_matches_mujoco_analytic(
     assert np.abs(numeric - analytic).max() <= JACOBIAN_TOL
 
 
+def test_hand_pose_reads_the_single_hand_frame(
+    loaded: BarbellBushingPlant, bundle: InputBundle
+) -> None:
+    """The hand pose comes from one frame and equals the all-frames FK exactly."""
+    from src.shared.python.lifting.barbell_bushing import HAND_BODY_FRAME
+
+    plant = loaded._plant  # noqa: SLF001
+    calls: list[str] = []
+    single = plant.kinematic_frame
+
+    def spy(q: np.ndarray, name: str) -> np.ndarray:
+        calls.append(name)
+        return single(q, name)
+
+    q = bundle.reference_q[100]
+    expected = (
+        plant.kinematic_frames(q)[HAND_BODY_FRAME] @ loaded._hand_to_frame  # noqa: SLF001
+    )
+    plant.kinematic_frame = spy  # type: ignore[method-assign]
+    try:
+        pose = loaded._hand_pose(q)  # noqa: SLF001
+    finally:
+        del plant.kinematic_frame
+    assert calls == [HAND_BODY_FRAME]
+    assert np.array_equal(pose, expected)
+
+
 @pytest.mark.parametrize("engine", ["drake", "pinocchio"])
 def test_cross_engine_parity_at_a_loaded_state(
     engine: str, loaded: BarbellBushingPlant, bundle: InputBundle

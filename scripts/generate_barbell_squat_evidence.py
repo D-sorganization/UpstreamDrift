@@ -72,7 +72,10 @@ def run_hold(source: InputBundle, commit: str) -> None:
     )
     record = {
         "lift": "back_squat",
-        "pose": "IK standing pose (provenance ik.q_standing)",
+        "pose": (
+            "IK standing pose (provenance ik.q_standing), root in contact "
+            "equilibrium for body plus bar (barbell_runs.hold_start, #11744)"
+        ),
         "source_commit": commit,
         "bundle_spec_sha256": source.spec_sha256,
         "generator": "scripts/generate_barbell_squat_evidence.py --part hold",
@@ -80,6 +83,7 @@ def run_hold(source: InputBundle, commit: str) -> None:
         "series": {
             "time_s": result.time_s.tolist(),
             "grf_vertical_n": result.grf_n[:, 2].tolist(),
+            "grf_forward_n": result.grf_n[:, 0].tolist(),
             "hand_vertical_on_bar_n": {
                 s: result.hand_force_n[s][:, 2].tolist() for s in ("L", "R")
             },

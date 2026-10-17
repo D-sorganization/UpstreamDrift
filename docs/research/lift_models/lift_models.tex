@@ -1023,11 +1023,9 @@ bar-balanced, 64-substep source.
   to 0.988, and hand force over bar weight from 0.298 to 0.986. The left-hand
   share is 0.493 and the peak deflection 0.63\,mm, both within their bounds.
   Body plus bar is carried exactly at 0.75--1.0\,s (1.000); the hold then
-  sags to 0.982 by 1.5\,s under a steady $-102$\,N net horizontal ground
-  force, so the last-0.5\,s means still miss the 1\,\% bands. The hold xfails
-  stay strict, thresholds unchanged. This drift was present at eight
-  substeps too ($-100$\,N), so it is a hold-balance gap of \#13093, not the
-  foot instability.
+  sags to 0.982 by 1.5\,s under a $-102$\,N mean horizontal ground force.
+  The cause was a start outside contact equilibrium, resolved in the
+  LIFT-4 hold subsection below (\#11744).
 \end{itemize}
 
 \paragraph{Failed Experiments.}
@@ -1056,6 +1054,81 @@ bar-balanced, 64-substep source.
 \item No controller--plant mismatch was found: the controller's inverse
   dynamics cut only the six closure null directions.
 \end{itemize}
+
+\subsection{Barbell Hold in Contact Equilibrium (LIFT-4, Issue \#11744)}
+\paragraph{Diagnosis.} After OSL-16 the 1.5\,s hold carried body plus bar
+exactly at 0.75--1.0\,s, then sagged to 0.988 (ground) and 0.986 (hands)
+over the last 0.5\,s, under a mean horizontal ground force of $-102$\,N.
+Each candidate cause was measured on the committed back-squat bundle
+(old-body baseline reproduced to the last digit: ground 0.98799, hands
+0.98627, left share 0.49258, deflection 0.629\,mm):
+\begin{itemize}[nosep]
+\item \textbf{Start not in contact equilibrium: the cause.} The hold
+  started from \texttt{preload\_feet}, which translates the IK standing
+  pose down until its lowest sphere (the toes) sinks to the equal-share
+  depth $W/(6k)$. At that state the feet carried 0.595 of body plus bar
+  and their centre of pressure lay 6.7\,cm ahead of the combined centre of
+  mass. The rigid posture rotated back toward its contact equilibrium
+  (root pitch from 0.07 to $-2.06^\circ$ by about 0.55\,s), arrived with
+  momentum (CoM velocity about $-0.14$\,m/s), and overshot. The CoP pinned
+  at the heel edge ($-0.046$\,m) at 0.75--0.8\,s and the body toppled
+  backwards: CoM $-0.204$\,m and pitch $-9.15^\circ$ at 1.5\,s, horizontal
+  force $-190$\,N. The ``steady $-102$\,N'' was the mean of this topple
+  over 1.0--1.5\,s.
+\item \textbf{Balance controller: does not arrest it, does not cause it.}
+  The horizontal CoM error reached $-0.24$\,m; the balance gains (60, 15)
+  are small against the posture's $\omega^2=900$, so a large initial
+  imbalance is not corrected. From an equilibrium start the term is idle.
+\item \textbf{Friction or tangential creep: not the cause.} Heel slip
+  stayed below 2.5\,mm and comes from rolling about the heel edge.
+\item \textbf{Bushing pre-load direction: not the cause.} At $t=0$ each
+  hand bushing pulls exactly vertically (490.33\,N per hand).
+\item \textbf{Asymmetric feet: not the cause.} Lateral foot offsets are
+  symmetric within 1.5\,mm and the lateral CoP is $-4.2$\,mm. The internal
+  lateral friction during the fall (about $\pm300$\,N) cancelled between
+  the feet. The equilibrium foot loads (850 and 918\,N) are harmless.
+\end{itemize}
+
+\paragraph{Fix.} \texttt{barbell\_runs.hold\_start} projects the hold pose
+onto the closure, then solves for the contact equilibrium on the
+rigid-bar model (\texttt{contact\_equilibrium\_pose}): a minimum-norm
+Gauss--Newton over the root's normal translation and its three angles,
+with residuals $F_n/W-1$ and the tangential contact moment about the
+combined CoM over $W$, to $10^{-12}$. The actuated coordinates and the
+root's horizontal position are unchanged. The bushing plant starts from
+that state with the bar hanging still. The bushing hand Jacobian now reads
+the single hand frame (\texttt{VectorPlant.kinematic\_frame}), bit-identical
+to the full frame map and 3.9 times faster.
+
+\paragraph{Result.} \texttt{barbell\_hold.json} (old body, see below): over
+the whole 1.5\,s, vertical ground force over body plus bar 1.000000
+(1768.2665\,N, range $4\times10^{-11}$\,N), hand force over bar weight
+1.000000, left share 0.500, peak deflection 0.49\,mm, horizontal force
+below $10^{-8}$\,N. The hold xfails are now plain tests with unchanged
+thresholds (1\,\%, 0.01, 3\,mm), held at every sample, not only the last
+0.5\,s.
+
+\paragraph{Robustness.} From the equilibrium with $+0.25^\circ$ root pitch
+the hold stays bounded: CoM error at most 1.1\,cm, horizontal force at
+most 10\,N, heel slip below 0.1\,mm, a slow sway, no failure in 1.5\,s.
+A large initial imbalance (the old 6.7\,cm) is not recovered, so the
+balance controller's authority remains a limitation.
+
+\paragraph{Failed Experiments.}
+\begin{itemize}[nosep]
+\item The first equilibrium solve used \texttt{attached\_state}'s bar
+  position, which is the fixed attach point, not the current hand. It
+  balanced the wrong CoM; the solve now runs on the rigid-bar model whose
+  bar moves with the hands.
+\item Routing the hand pose through a per-call dictionary of all frames
+  gave only a small speed-up; the dictionary-free single-site kinematics
+  was needed.
+\end{itemize}
+
+\paragraph{Evidence Status.} The hold evidence was generated on the
+pre-\#13102 lift body (old de Leva trunk). It must be regenerated with
+the lift-body refresh on the base; the cause and fix do not depend on the
+segment lengths.
 
 \subsection{Hands That Reach the Bundle Bar (OSL-12, Issue \#13048)}
 \paragraph{Diagnosis.} After OSL-16 every body marker of the OpenSim squat

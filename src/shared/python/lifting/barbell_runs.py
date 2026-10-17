@@ -83,9 +83,13 @@ LOADED_TRACKING_POLICY = StepPolicy(substeps=64, effort_holds=4)
 
 __all__ = [
     "HoldResult",
+    "HoldStart",
     "barbell_plant",
     "build_barbell_bundle",
     "bushing_body_spec",
+    "contact_equilibrium_pose",
+    "contact_wrench_about_com",
+    "hold_start",
     "instantaneous_parity",
     "LOADED_TRACKING_POLICY",
     "loaded_effort_source",
@@ -237,6 +241,152 @@ def _attached_start(
     return loaded, q_aug, v_aug
 
 
+#: Convergence of :func:`contact_equilibrium_pose`: vertical force within this
+#: fraction of the weight and tangential moment within this many weight-metres.
+EQUILIBRIUM_TOLERANCE = 1e-12
+_EQUILIBRIUM_FD_STEP = 1e-7
+
+
+def contact_wrench_about_com(simulator: Any, q: Array) -> tuple[Array, Array]:
+    """Total contact force and its moment about the centre of mass, at rest at ``q``.
+
+    ``simulator`` is a :class:`FullBodySimulator`; the force is the shared
+    contact law summed over every sphere with zero rates (world frame, N and
+    N m).
+    """
+    names = simulator.names
+    samples = simulator.adapter.evaluate_contact_samples(
+        dict(zip(names, map(float, q), strict=True)), dict.fromkeys(names, 0.0)
+    )
+    com = np.asarray(simulator.centre_of_mass(q)[0], dtype=float)
+    force, moment = np.zeros(3), np.zeros(3)
+    for sample in samples.values():
+        f = np.asarray(sample.normal_force_n) + np.asarray(sample.friction_force_n)
+        force += f
+        moment += np.cross(np.asarray(sample.contact_point_m) - com, f)
+    return force, moment
+
+
+def _equilibrium_residual(simulator: Any, q: Array, basis: Array) -> Array:
+    """``[F.n / W - 1, M.t1 / W, M.t2 / W]`` (``basis`` rows: n, t1, t2)."""
+    force, moment = contact_wrench_about_com(simulator, q)
+    weight = float(simulator.mass_kg) * float(np.linalg.norm(simulator.gravity))
+    return np.array([force @ basis[0] / weight - 1.0, *(basis[1:] @ moment / weight)])
+
+
+def _root_step(simulator: Any, q: Array, step: Array, normal: Array) -> Array:
+    """``q`` moved ``step[0]`` along the ground normal and ``step[1:]`` in root angles."""
+    out = np.array(q, dtype=float)
+    axes = simulator.root_translation_axes(out)
+    out[:3] += np.linalg.solve(axes, step[0] * normal)
+    out[3:6] += step[1:]
+    return out
+
+
+def contact_equilibrium_pose(
+    simulator: Any, q: Array, *, max_iterations: int = 30
+) -> Array:
+    """``q`` with its root placed in static equilibrium on the foot contact.
+
+    Only the unactuated root moves: along the ground normal and in its three
+    angles (minimum-norm Gauss-Newton from :func:`preload_feet`), until the
+    contact law at rest carries the simulator's weight with zero tangential
+    moment about its centre of mass, i.e. the centre of pressure lies under
+    the centre of mass.  ``simulator`` is the model whose weight the feet must
+    carry (for a loaded hold, the :func:`rigid_bar_spec` body plus bar).
+
+    Postconditions: the actuated coordinates and the horizontal root
+    translations equal ``q``'s; the residuals are within
+    :data:`EQUILIBRIUM_TOLERANCE`.
+
+    Raises:
+        ValueError: If ``q`` is not finite with one value per coordinate, or
+            the contact equilibrium is not reached in ``max_iterations``.
+    """
+    from src.shared.python.motion_matching import full_body_forward_dynamics as fs
+
+    pose = np.asarray(q, dtype=float)
+    if pose.shape != (simulator.nv,) or not np.isfinite(pose).all():
+        raise ValueError(f"q must be {simulator.nv} finite values in spec order")
+    normal = -np.asarray(simulator.gravity, dtype=float)
+    normal /= np.linalg.norm(normal)
+    tangent = np.cross(normal, [1.0, 0.0, 0.0])
+    if np.linalg.norm(tangent) < 0.5:
+        tangent = np.cross(normal, [0.0, 1.0, 0.0])
+    tangent /= np.linalg.norm(tangent)
+    basis = np.vstack([normal, np.cross(tangent, normal), tangent])
+    current = fs.preload_feet(simulator, pose)
+    for _ in range(max_iterations):
+        residual = _equilibrium_residual(simulator, current, basis)
+        if np.abs(residual).max() <= EQUILIBRIUM_TOLERANCE:
+            current[simulator.actuated] = pose[simulator.actuated]
+            return current
+        jacobian = np.zeros((3, 4))
+        for k in range(4):
+            step = np.zeros(4)
+            step[k] = _EQUILIBRIUM_FD_STEP
+            jacobian[:, k] = (
+                _equilibrium_residual(
+                    simulator, _root_step(simulator, current, step, normal), basis
+                )
+                - _equilibrium_residual(
+                    simulator, _root_step(simulator, current, -step, normal), basis
+                )
+            ) / (2.0 * _EQUILIBRIUM_FD_STEP)
+        delta = np.linalg.lstsq(jacobian, -residual, rcond=1e-8)[0]
+        current = _root_step(simulator, current, delta, normal)
+    raise ValueError(
+        f"contact equilibrium not reached in {max_iterations} iterations "
+        "(are the feet in contact?)"
+    )
+
+
+@dataclass(frozen=True)
+class HoldStart:
+    """Start of the quasi-static hold: the loaded plant and its rest state."""
+
+    plant: BarbellBushingPlant
+    q: Array
+    v: Array
+
+    @property
+    def q_body(self) -> Array:
+        """Body coordinates of the start state (spec order)."""
+        return self.q[: self.plant.nv_body]
+
+    @property
+    def track(self) -> Array:
+        """Constant two-row posture reference holding :attr:`q_body`."""
+        return np.vstack([self.q_body, self.q_body])
+
+
+def hold_start(spec_bytes: bytes, q_hold: Array, barbell: Barbell) -> HoldStart:
+    """Hold start at the contact equilibrium of ``q_hold``'s joint angles (#11744).
+
+    ``q_hold`` is projected onto the hand closure, then its root is placed by
+    :func:`contact_equilibrium_pose` on the :func:`rigid_bar_spec` body, so
+    the feet carry body plus bar with the centre of pressure under the
+    combined centre of mass.  The bar hangs at its static bushing deflection
+    and every rate is zero.  A bar-loaded spec is reduced to its body first.
+    """
+    from src.engines.physics_engines.mujoco.python.full_body_model import (
+        NativeMujocoFullBodyModel,
+    )
+    from src.shared.python.motion_matching import full_body_forward_dynamics as fs
+
+    spec_bytes = bushing_body_spec(spec_bytes)
+    plant = VectorPlant("mujoco", spec_bytes)
+    pose = np.asarray(q_hold, dtype=float)
+    closed = project_to_closure(plant, pose, np.zeros_like(pose)).q
+    rigid = fs.FullBodySimulator(
+        NativeMujocoFullBodyModel(rigid_bar_spec(spec_bytes, barbell))
+    )
+    q_eq = contact_equilibrium_pose(rigid, closed)
+    loaded = BarbellBushingPlant(plant, spec_bytes, barbell, q_eq)
+    q_aug, v_aug = loaded.attached_state(q_eq, np.zeros_like(q_eq))
+    return HoldStart(loaded, q_aug, v_aug)
+
+
 @dataclass(frozen=True)
 class HoldResult:
     """Sampled quasi-static hold (every :data:`SAMPLE_EVERY` steps)."""
@@ -286,24 +436,28 @@ def quasi_static_hold(
 ) -> HoldResult:
     """Hold ``q_hold`` in MuJoCo with the bar on both hands for ``duration_s``.
 
-    The feet are preloaded for body plus bar; the bar starts undeflected and
-    at rest.  A bar-loaded spec is reduced to its body first
-    (:func:`bushing_body_spec`).  The run uses :data:`LOADED_TRACKING_POLICY`
-    and stops on failure.  Postcondition: samples every :data:`SAMPLE_EVERY`
-    steps.
+    The run starts at rest at :func:`hold_start`: ``q_hold``'s joint angles
+    with the root in contact equilibrium for body plus bar, and the bar
+    hanging at its static bushing deflection.  The controller holds that
+    posture and its centre of mass.  Until #11744 the start was the
+    ``preload_feet`` pose, whose feet carried 0.595 of the load with the centre
+    of pressure 6.7 cm ahead of the centre of mass; the fall onto the heels
+    rang a lightly damped fore-aft sway that sagged the last 0.5 s.  A
+    bar-loaded spec is reduced to its body first (:func:`bushing_body_spec`).
+    The run uses :data:`LOADED_TRACKING_POLICY` and stops on failure.
+    Postcondition: samples every :data:`SAMPLE_EVERY` steps.
     """
     spec_bytes = bushing_body_spec(spec_bytes)
-    pose = np.asarray(q_hold, dtype=float)
-    track = np.vstack([pose, pose])
+    start = hold_start(spec_bytes, q_hold, barbell)
     times = np.array([0.0, float(duration_s)])
-    controller, q0, v0, steps, simulator = _tracking(
-        spec_bytes, barbell, times, track, duration_s
+    controller, _, _, steps, simulator = _tracking(
+        spec_bytes, barbell, times, start.track, duration_s
     )
-    loaded, q_aug, v_aug = _attached_start(spec_bytes, q0, v0, barbell)
+    loaded = start.plant
     rollout = integrate(
         loaded,
-        q_aug,
-        v_aug,
+        start.q,
+        start.v,
         loaded_effort_source(loaded, controller),
         steps=steps,
         dt_s=float(duration_s) / steps,
@@ -336,25 +490,38 @@ def quasi_static_hold(
 def hold_balance_geometry(
     spec_bytes: bytes, q_hold: Array, barbell: Barbell
 ) -> dict[str, Any]:
-    """Centres of mass and foot contact points at the start of the hold.
+    """Centres of mass, centre of pressure and foot points at the hold start.
 
-    Returns the body and the body-plus-bar centres of mass, the forefoot and
-    heel contact-sphere centres (by sphere name) and the horizontal unit
-    ``forward_axis`` from the mean heel to the mean forefoot, all in metres in
-    the world frame, so a caller can see on which side of the feet each
-    centre of mass falls.  A bar-loaded spec is reduced to its body first.
+    Returns, at :func:`hold_start`, the body and the body-plus-bar centres of
+    mass, the contact law's centre of pressure at rest (on the ground plane),
+    the forefoot and heel contact-sphere centres (by sphere name) and the
+    horizontal unit ``forward_axis`` from the mean heel to the mean forefoot,
+    all in metres in the world frame, so a caller can see on which side of the
+    feet each centre of mass falls.  A bar-loaded spec is reduced to its body
+    first.
     """
-    spec_bytes = bushing_body_spec(spec_bytes)
-    pose = np.asarray(q_hold, dtype=float)
-    _, q0, v0, _, simulator = _tracking(
-        spec_bytes, barbell, np.array([0.0, 1.0]), np.vstack([pose, pose]), 1.0
+    from src.engines.physics_engines.mujoco.python.full_body_model import (
+        NativeMujocoFullBodyModel,
     )
-    loaded, q_aug, _ = _attached_start(spec_bytes, q0, v0, barbell)
+    from src.shared.python.motion_matching import full_body_forward_dynamics as fs
+
+    spec_bytes = bushing_body_spec(spec_bytes)
+    start = hold_start(spec_bytes, q_hold, barbell)
+    loaded, q_aug = start.plant, start.q
+    q0, v0 = start.q_body, np.zeros_like(start.q_body)
+    simulator = fs.FullBodySimulator(NativeMujocoFullBodyModel(spec_bytes))
     adapter = simulator.adapter
     body_com = np.asarray(simulator.centre_of_mass(q0)[0], dtype=float)
     bar_com = np.asarray(q_aug[-6:-3], dtype=float)
     mass = float(simulator.mass_kg)
-    _contact_force(adapter, loaded.body_order, q0, v0)  # leaves the sites placed at q0
+    samples = adapter.evaluate_contact_samples(  # leaves the sites placed at q0
+        dict(zip(loaded.body_order, map(float, q0), strict=True)),
+        dict(zip(loaded.body_order, map(float, v0), strict=True)),
+    )
+    weights = np.array(
+        [float(np.linalg.norm(c.normal_force_n)) for c in samples.values()]
+    )
+    points = np.array([np.asarray(c.contact_point_m) for c in samples.values()])
     spheres = adapter._spheres  # noqa: SLF001 - contact-sphere site ids
     sites = {k: adapter.data.site_xpos[i["site_id"]].copy() for k, i in spheres.items()}
     forefoot = {k: p for k, p in sites.items() if k.startswith("forefoot")}
@@ -367,6 +534,7 @@ def hold_balance_geometry(
         "body_com_m": body_com,
         "combined_com_m": (mass * body_com + barbell.load_kg * bar_com)
         / (mass + barbell.load_kg),
+        "centre_of_pressure_m": weights @ points / weights.sum(),
         "forefoot_m": forefoot,
         "heel_m": heel,
         "forward_axis": axis / np.linalg.norm(axis),
