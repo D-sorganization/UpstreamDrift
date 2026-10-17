@@ -56,6 +56,16 @@ records this in `arm_reach`. The bar marker is tracked at weight 1 again.
   state of the window, where the bundle is still settling onto its loaded
   foot contact. Over states 1-40 the peaks are 24.4 N and 20.7 N m.
 
+On the whole-row lift body (#13037) the squat receipt reads: marker RMS
+1.74 cm and maximum 3.70 cm (right forefoot), still inside the 2 cm / 4 cm
+gate; segment-angle RMS 1.47 deg. The reach solve now ends at the 150 deg
+`elbow_flex` bound on both sides, so the bar marker is 12.56 mm off and
+`range_violations` lists `elbow_flex` (1.6e-4 rad past the bound) and
+`pro_sup` (-1.9e-4 rad). The cause is not yet diagnosed. Hicks limits are
+167.0 N and 22.5 N m; peaks `pelvis_ty` 213.9 N, tilt 136.9 N m and `tx`
+106.6 N, so the residual gate still fails. Peak lumbar extension 769.5 N m,
+hip flexion 444.8/433.5 N m.
+
 A diagnostic fit of the bodyweight squat bundle tracked the pelvis to 3 mm.
 Excluding the bar, its markers came to 1.78 cm RMS and 4.15 cm maximum. See
 `lift_models.tex`, OSL-14 subsection.

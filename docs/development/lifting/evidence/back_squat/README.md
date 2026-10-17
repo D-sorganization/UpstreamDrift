@@ -201,6 +201,30 @@ records now read:
 - **Hold:** the hold starts in contact equilibrium (`barbell_runs.hold_start`,
   #11744), with the CoP under the combined CoM. Body plus bar is carried over the
   whole 1.5 s: ground 1.000, hands 1.000, left share 0.500, deflection 0.49 mm.
-  The old start sat 6.7 cm out of balance and toppled backwards. This evidence
-  is on the pre-#13102 lift body.
+  The old start sat 6.7 cm out of balance and toppled backwards.
 - **Size:** loaded bundles carry their hold efforts, up to 600,000 bytes.
+
+## Whole-Row Lift Body (#13037)
+
+Every record in this directory is regenerated on the AN-1 lift body built from
+the whole de Leva Table 4 rows (#13102) with the default 10 deg tibial torsion
+(#12814). The numbers in the previous section were measured on the earlier
+body; the records now read:
+
+- **Source IK:** max residuals ankle 4.99/4.43, knee 3.62/11.82, hip
+  8.11/9.32, shoulder 3.65/3.04 and bar 0.01 mm (left/right); closure 9.0e-8
+  m; lowest sphere 0.69 mm; balance offset 0.207 m to 1.3e-4 m in five
+  corrections; 463,674 bytes. `ankle_r` (bound 3.6 mm), `hip_r` (9.2 mm) and
+  the closure (6.4e-8 m) exceed their unchanged bounds in
+  `tests/unit/lifting/test_lift_bundles.py`. The bounds are not widened (see
+  `lift_models.tex`, "Lift Body on the Whole de Leva Rows").
+- **Feet:** foot points within 1.77/1.75 mm of the IK at 64 substeps and a
+  0.25 ms hold; 64 against 128 substeps moves no coordinate by more than
+  1.6e-8 rad.
+- **Bar-path parity:** full window within 6.3e-10 rad and the bar within
+  7.5e-12 m.
+- **Re-track:** ankles 0.99/1.00, knees 1.19/1.22, hips 1.39/1.38,
+  shoulders 1.85/1.55 and bar 1.87 mm; 496,399 bytes. Bushing parity largest
+  difference 6.2e-7 (body acceleration, scale 1.0e3).
+- **Hold:** from `barbell_runs.hold_start`, ground 1.000, hands 1.000, left
+  share 0.500, peak deflection 0.49 mm.
