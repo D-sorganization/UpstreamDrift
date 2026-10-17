@@ -18,18 +18,14 @@ from src.api.services.ground_reaction_service import compute_ground_reaction_plo
 from src.shared.python.biomechanics.ground_reaction_plot_model import (
     series_from_payload,
 )
-from src.shared.python.force_plates import (
-    PlateTimeAlignment,
-    PlateUncertainty,
-    ReadingOptions,
-    TargetedPlacement,
-    placement_for_target,
+from src.shared.python.force_plates import PlateTimeAlignment, ReadingOptions
+from src.shared.python.force_plates.open_fp_format.declared_import import (
+    DeclaredPlate,
+    DeclaredStance,
 )
-from src.shared.python.force_plates.open_fp_format import PlateDeclarations
 from src.shared.python.force_plates.open_fp_format.overlay_file import (
     overlay_swing_file,
 )
-from src.shared.python.impact_parameters.target_frame import TargetFrame
 
 __all__ = [
     "PLATE_TRIAL_ROOT_ENV",
@@ -39,7 +35,6 @@ __all__ = [
 ]
 
 PLATE_TRIAL_ROOT_ENV = "UPSTREAMDRIFT_PLATE_TRIAL_ROOT"
-_FRAME_HANDEDNESS = {"RH": "right", "LH": "left"}
 
 
 class PlateRootNotConfiguredError(RuntimeError):
@@ -90,31 +85,12 @@ def resolve_trial_path(trial: str, root: str | Path | None = None) -> Path:
     return current
 
 
-def _declarations(request: PlateOverlayRequest) -> PlateDeclarations:
-    d = request.declared
-    uncertainty = PlateUncertainty(
-        force_floor_n=d.force_floor_n,
-        force_fraction=d.force_fraction,
-        cop_m=d.cop_m,
-        sensing_depth_sigma_m=d.sensing_depth_sigma_m,
-        source=d.uncertainty_source,
-    )
-    extra = {} if d.device is None else {"device": d.device}
-    return PlateDeclarations(
-        uncertainty=uncertainty,
-        sensing_depth_m=d.sensing_depth_m,
-        capacity_n=d.capacity_n,
-        **extra,
-    )
-
-
-def _placement(request: PlateOverlayRequest) -> TargetedPlacement:
-    frame = TargetFrame(
+def _stance(request: PlateOverlayRequest) -> DeclaredStance:
+    return DeclaredStance(
+        handedness=request.handedness,
+        origin_m=tuple(request.origin_m),  # type: ignore[arg-type]
         target_dir=tuple(request.target_dir),  # type: ignore[arg-type]
-        handedness=_FRAME_HANDEDNESS[request.handedness],
-        frame_id=f"request:target_{tuple(request.target_dir)}",
     )
-    return placement_for_target(request.handedness, frame, origin_m=request.origin_m)
 
 
 def compute_ground_reaction_overlay(
@@ -135,8 +111,8 @@ def compute_ground_reaction_overlay(
     overlaid = overlay_swing_file(
         series_from_payload(payload),
         path,
-        declared=_declarations(request),
-        placement=_placement(request),
+        declared=DeclaredPlate(**request.declared.model_dump()).to_declarations(),
+        placement=_stance(request).to_placement(frame_label="request"),
         alignment=alignment,
         options=ReadingOptions(coverage=request.coverage),
     )
