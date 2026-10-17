@@ -107,6 +107,24 @@ MUJOCO_GL=egl python3 scripts/measure_lift_bar_path_parity.py
   recorded: TODO(#11745) add cited reference values as evidence, not tuning
   targets.
 
+## Lift Body (OSL-14, #13057)
+
+The bundles now replay the AN-1 lift body
+(`docs/development/lifting/evidence/lift_body/lift_body_spec.json`, from
+`src/shared/python/lifting/lift_body.py`), not the golf spec. The limitation
+text above, which describes the golf spec, is kept for the bundle provenance.
+The lift body has:
+
+- a lumbar joint at L5/S1;
+- de Leva hips 0.1851 m apart;
+- cited ranges, solved as bounded (TRF) IK.
+
+The grip-width shift also moves the left wrist joint. Every coordinate of the
+squat bundle stays inside its cited range.
+
+The LIFT-4 barbell re-track diverges from its source. This is pre-existing:
+the golf-body bundle diverged as well. See `lift_models.tex`.
+
 ## Regenerate
 
 ```bash

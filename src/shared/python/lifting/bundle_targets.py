@@ -1,10 +1,12 @@
 """IK targets and external loads of a LIFT-5 bundle in the OpenSim frame (OSL-3).
 
-A same-input lift bundle (LIFT-5, #11745) replays the full-body golf spec,
-not the Rajagopal model OpenSim lifts use, so the bundle's coordinates do not
-transfer by name (its ``hip_flexion_r`` reads 160-171 deg in the back-squat
-window, outside Rajagopal's -30..120 deg range; its left knee is negative).
-What does transfer is geometry and load:
+A same-input lift bundle (LIFT-5, #11745) replays the AN-1 lift body
+(:mod:`.lift_body`, OSL-14 #13057), not the Rajagopal model OpenSim lifts
+use, so the bundle's coordinates do not transfer by name (its trunk is a de
+Leva chain with a lumbar universal joint, not Rajagopal's lumbar and
+thorax).  The golf spec it replaced read 160-171 deg hip flexion in the
+back-squat window; the lift body stays inside the cited ranges.  What
+transfers is geometry and load:
 
 * **Landmarks.**  The shared MuJoCo marker kinematics of the bundle spec
   (:class:`FullBodyMarkerKinematics`, the attachments the bundle's own IK
@@ -17,8 +19,8 @@ What does transfer is geometry and load:
 * **Hand wrench (GCV-7, #11713).**  The per-hand bushing wrench on the bar
   (:meth:`BushingSample.grip_analysis`); the hands carry its negative.
 * **Pelvis frame (OSL-12, #13048).**  The spec grafts Rajagopal lower limbs
-  onto the golf ``LowerTorso``; both hip joints share one parent orientation,
-  and that orientation, with the spec's hip axis permutation
+  onto the ``LowerTorso``; the right hip's parent orientation (the left one is
+  its ``HIP_MIRROR`` conjugate), with the spec's hip axis permutation
   (``spec_builder.HIP_PERMUTATION``), is the Rajagopal pelvis frame:
   :func:`bundle_pelvis_rotation`.  Its source hip coordinates are kept so a
   caller can check them against a model's range.
@@ -166,18 +168,22 @@ def _foot_stations(spec: Mapping[str, Any]) -> dict[str, tuple[str, tuple]]:
 def bundle_pelvis_rotation(spec: Mapping[str, Any]) -> Array:
     """Rajagopal pelvis axes expressed in the spec's pelvis body frame.
 
-    The two hip joints of the spec must share one parent orientation (they
-    hang from one pelvis); its base frame is the Rajagopal hip frame with the
-    spec's axis permutation, so ``R_base @ HIP_PERMUTATION.T`` gives the
-    pelvis axes (columns) in :data:`PELVIS_BODY` coordinates.
+    Both hip joints hang from one pelvis.  The right hip's base frame is the
+    Rajagopal hip frame with the spec's axis permutation, so
+    ``R_base @ HIP_PERMUTATION.T`` gives the pelvis axes (columns) in
+    :data:`PELVIS_BODY` coordinates.  The left hip's base must be the same
+    orientation, or (the AN-1 lift body, OSL-14 #13057) that orientation
+    conjugated by ``spec_builder.HIP_MIRROR``, which mirrors the left leg while
+    keeping OpenSim's coordinate signs.
 
     Postcondition: the result is a proper rotation (orthonormal, det +1).
 
     Raises:
         ValueError: when a hip joint is missing, hangs from another body, or
-            the two hip parent orientations differ.
+            the left hip base is neither the right one nor its mirror.
     """
     from src.shared.python.motion_matching.execution.spec_builder import (
+        HIP_MIRROR,
         HIP_PERMUTATION,
     )
 
@@ -188,9 +194,14 @@ def bundle_pelvis_rotation(spec: Mapping[str, Any]) -> Array:
         if joint is None or joint["parent"] != PELVIS_BODY:
             raise ValueError(f"spec joint {name!r} does not hang from the pelvis")
         bases.append(np.asarray(joint["parent_to_base"], dtype=float)[:3, :3])
-    if not np.allclose(bases[0], bases[1], atol=1e-12):
+    left, right = bases
+    mirror = np.asarray(HIP_MIRROR, dtype=float)[:3, :3]
+    if not (
+        np.allclose(left, right, atol=1e-12)
+        or np.allclose(left, right @ mirror, atol=1e-12)
+    ):
         raise ValueError("the spec's hip joints do not share a pelvis orientation")
-    rotation = bases[0] @ HIP_PERMUTATION.T
+    rotation = right @ HIP_PERMUTATION.T
     if not np.allclose(rotation.T @ rotation, np.eye(3), atol=1e-9) or (
         np.linalg.det(rotation) <= 0.0
     ):

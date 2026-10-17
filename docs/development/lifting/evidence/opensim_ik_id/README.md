@@ -30,8 +30,21 @@ Two squat results remain below acceptance:
   and forefoot geometry of the golf body does not match Rajagopal.
 - The squat ID still fails the residual gate.
 
+OSL-14 (#13057) moves the bundles onto the AN-1 lift body. That body has a
+lumbar joint, de Leva hips and cited-range IK bounds. OSL-14 also scales the
+OpenSim torso to the bundle shoulder width.
+
+The committed squat receipt is measured on the LIFT-4 barbell re-track
+(`back_squat_barbell_bundle.npz`), which diverges from its source in the golf
+body and the lift body alike. That receipt therefore fails the acceptance
+gates: marker RMS 5.04 cm, maximum 29.7 cm, and the pelvis is not tracked.
+
+A diagnostic fit of the bodyweight squat bundle tracked the pelvis to 3 mm.
+Excluding the bar, its markers came to 1.78 cm RMS and 4.15 cm maximum. See
+`lift_models.tex`, OSL-14 subsection.
+
 These are software receipts, not physical acceptance. See
-`docs/research/lift_models/lift_models.tex` (OSL-3 and OSL-12 subsections)
+`docs/research/lift_models/lift_models.tex` (OSL-3, OSL-12 and OSL-14 subsections)
 for the method, the numbers and the limitations.
 
 Reproduce from the repository root:

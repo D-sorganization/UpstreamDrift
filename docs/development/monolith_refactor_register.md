@@ -48,6 +48,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1146 | `src/engines/physics_engines/myosuite/python/native_direct_model_replay.py` |
 | 1146 | `src/tools/model_explorer/model_loader_dialog.py` |
 | 1144 | `src/shared/python/motion_matching/full_body_ik.py` |
+| 1137 | `src/engines/physics_engines/opensim/python/msk_lift_ik_id.py` |
 | 1136 | `src/engines/feedback_native_execution.py` |
 | 1134 | `src/shared/python/shadow_tracker/segmentation.py` |
 | 1134 | `src/tools/model_explorer/model_library.py` |
@@ -58,7 +59,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1114 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py` |
 | 1113 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/PostProcessingModule.m` |
 | 1110 | `src/tools/shot_pattern_analysis/academic_plots.py` |
-| 1107 | `src/engines/physics_engines/opensim/python/msk_lift_ik_id.py` |
 | 1106 | `src/shared/python/motion_matching/leaderboard.py` |
 | 1103 | `src/shared/python/config/model_source_providers.py` |
 | 1102 | `src/launchers/launcher_dialogs.py` |
@@ -91,6 +91,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1017 | `src/shared/python/shadow_tracker/contracts.py` |
 | 1015 | `src/shared/python/motion_matching/gs3dx_variants.py` |
 | 1000 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_opengl_renderer.py` |
+| 1000 | `src/shared/python/lifting/bundles.py` |
 | 999 | `src/shared/python/estimation/dime_contracts.py` |
 | 997 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
 | 996 | `src/engines/physics_engines/drake/python/full_body_model.py` |
@@ -114,7 +115,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 965 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py` |
 | 964 | `src/shared/python/sidekick/lab/bio/c3d_reader.py` |
 | 962 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_whole_body_ik.m` |
-| 961 | `src/shared/python/lifting/bundles.py` |
 | 957 | `src/bunkershot3d/solvers/mpm/solver.py` |
 | 955 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 955 | `src/shared/python/force_overlay/glyphs.py` |

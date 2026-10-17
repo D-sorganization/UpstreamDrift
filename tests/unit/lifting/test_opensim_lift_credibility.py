@@ -2,10 +2,11 @@
 
 Red tests against the real OpenSim 4.6 runtime, written before the code:
 
-* **Pelvis landmarks.**  The bundle's Rajagopal pelvis frame (the golf
+* **Pelvis landmarks.**  The bundle's Rajagopal pelvis frame (the
   ``LowerTorso`` carrying both grafted Rajagopal hips) is verified against
   both femur poses; the pelvis is scaled mediolaterally to the bundle's
-  0.2205 m hip width (generic 0.1545 m), and a model scaled that way whose
+  0.1851 m hip width (OSL-14 lift body; generic 0.1545 m), and a model
+  scaled that way whose
   pelvis coincides with the bundle's carries its own RASI/LASI/RPSI/LPSI
   markers exactly onto the virtual targets.
 * **Contact stiffness.**  The lift contacts use the 1e7 Pa stiffness of
@@ -38,8 +39,9 @@ from src.shared.python.lifting.pack_audit.names import LIFTS
 
 pytestmark = pytest.mark.unit
 
-#: Bundle hip-centre separation (golf LowerTorso) and the generic Rajagopal one.
-_BUNDLE_HIP_WIDTH_M = 0.2205
+#: Bundle hip-centre separation (OSL-14, #13057: the AN-1 lift body's de Leva
+#: spacing, 2 * 0.052 * 1.78 m) and the generic Rajagopal one.
+_BUNDLE_HIP_WIDTH_M = 0.18512
 _GENERIC_HIP_WIDTH_M = 0.1545
 _WIDTH_TOL_M = 5e-4
 #: Frame identities hold to round-off.
@@ -95,11 +97,19 @@ def squat_build(squat_targets):
 
 
 def _hip_rotation(q: np.ndarray, order: list[str], side: str) -> np.ndarray:
-    """Rajagopal hip: flexion about z, adduction about x, rotation about y."""
+    """Rajagopal hip: flexion about z, adduction about x, rotation about y.
+
+    The left hip is the mirror (OpenSim's left adduction and rotation axes
+    point along -x and -y): ``D @ R @ D`` with ``D = diag(-1, -1, 1)``.
+    """
     angles = [
         q[order.index(f"hip_{n}_{side}")] for n in ("flexion", "adduction", "rotation")
     ]
-    return Rotation.from_euler("ZXY", angles).as_matrix()
+    rotation = Rotation.from_euler("ZXY", angles).as_matrix()
+    if side == "l":
+        mirror = np.diag([-1.0, -1.0, 1.0])
+        rotation = mirror @ rotation @ mirror
+    return rotation
 
 
 @pytest.mark.integration
@@ -157,6 +167,26 @@ def test_pelvis_is_scaled_to_the_bundle_hip_width(squat_targets, squat_build) ->
     )
     assert scales["pelvis"] == pytest.approx(expected, rel=1e-12)
     assert pelvis.scale == pytest.approx(expected, rel=1e-12)
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_torso_is_scaled_to_the_bundle_shoulder_width(squat_targets) -> None:
+    """OSL-14: the trunk length scales x/y, the shoulder width scales z."""
+    from pathlib import Path
+
+    from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
+
+    _real_opensim()
+    base = _base_model()
+    scales = ikid.bundle_segment_scales(squat_targets, base)
+    generic = ikid._generic_marker_points(Path(base))
+    points = squat_targets.landmarks(0)
+    width = np.linalg.norm(points["shoulder_r"] - points["shoulder_l"])
+    generic_width = np.linalg.norm(generic["RSJC"] - generic["LSJC"])
+    trunk, trunk_y, lateral = scales["torso"]
+    assert trunk == trunk_y
+    assert lateral == pytest.approx(width / generic_width, rel=1e-12)
 
 
 @pytest.mark.requires_opensim
@@ -304,3 +334,15 @@ def test_squat_ik_keeps_every_coordinate_in_range() -> None:
         _BUNDLE_HIP_WIDTH_M, abs=_WIDTH_TOL_M
     )
     assert isinstance(landmarks["tracked"], bool) and landmarks["reason"]
+
+
+def test_pelvis_gate_allows_the_shared_range_flag_tolerance() -> None:
+    """OSL-14: a tracked reference that overshoots the bound by its controller
+    error (0.012 deg) is inside; the shared 0.5 deg flag tolerance decides."""
+    from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
+
+    low, high = math.radians(-30.0), math.radians(120.0)
+    inside = (math.radians(80.0), math.radians(120.012))
+    assert ikid.hip_flexion_inside(inside, low, high)
+    assert not ikid.hip_flexion_inside((low, math.radians(121.0)), low, high)
+    assert not ikid.hip_flexion_inside((math.radians(-31.0), high), low, high)

@@ -6,14 +6,16 @@ Builds on the OSL-2 lift models (:mod:`.msk_lift_model`):
   trunk factors from the bundle's landmark distances over the generic
   Rajagopal joint-centre markers (``XHJC``, ``XKJC``, ``XAJC``, ``XSJC``),
   and (OSL-12, #13048) the pelvis scaled mediolaterally by the bundle's hip
-  width over the generic one (0.2205 m / 0.1545 m), uniformly otherwise.
+  width over the generic one (0.1851 m / 0.1545 m on the OSL-14 lift body,
+  #13057), uniformly otherwise.
 * :func:`pelvis_landmark_targets` -- virtual ASIS/PSIS targets: the model's
   own ``RASI``/``LASI``/``RPSI``/``LPSI`` markers carried into the bundle by
   its Rajagopal pelvis frame (``bundle_targets.bundle_pelvis_rotation``) and
   hip-centre midpoint, with the same pelvis scaling.  They are tracked only
-  when the bundle's own hip flexion lies inside the model's range; the LIFT-5
-  squat bundle's does not (159-171 deg against 120 deg: LIFT-5 never observed
-  its pelvis either), so there they are reported, not tracked.
+  when the bundle's own hip flexion lies inside the model's range.  The
+  golf-body LIFT-5 squat's did not (159-171 deg against 120 deg); the OSL-14
+  lift body (#13057) keeps its hips inside the cited range, so they are
+  tracked.
 * :func:`run_inverse_kinematics` -- OpenSim's ``InverseKinematicsSolver``
   (the engine of ``InverseKinematicsTool``) tracks the bundle landmarks.
   Coordinate ranges are clamped (OpenSim's IK default) except the arms, whose
@@ -234,11 +236,16 @@ def bundle_segment_scales(
     """Per-body scale factors fitting the generic body to the bundle (frame 0).
 
     Thigh (``femur``, ``patella``): hip-to-knee distance; shank (``tibia``,
-    ``talus``, ``calcn``, ``toes``): knee-to-ankle distance; ``torso``:
-    hip-centre midpoint to shoulder-centre midpoint; ``pelvis``: the triple
+    ``talus``, ``calcn``, ``toes``): knee-to-ankle distance; ``torso``: the
+    triple (trunk, trunk, shoulder width) -- hip-centre midpoint to
+    shoulder-centre midpoint along x and y, bundle shoulder-centre separation
+    over the generic ``RSJC``-``LSJC`` one along the torso ``z`` (OSL-14: the
+    lift body's shoulders are 0.406 m apart against the generic 0.340 m);
+    ``pelvis``: the triple
     (stature, stature, bundle hip width / generic hip width) -- the bundle's
-    hip centres are 0.2205 m apart along its pelvis ``z`` against the generic
-    0.1545 m, while nothing in the bundle measures pelvis depth or height.
+    hip centres are 0.1851 m apart (OSL-14 lift body) along its pelvis ``z``
+    against the generic 0.1545 m, while nothing in the bundle measures pelvis
+    depth or height.
     Arms keep the uniform height scale (the bundle's golf arms are not
     Rajagopal's, so their landmarks do not measure the model's segments).
 
@@ -262,14 +269,21 @@ def bundle_segment_scales(
     }
     g_mid_hip = 0.5 * (generic["RHJC"] + generic["LHJC"])
     g_mid_shoulder = 0.5 * (generic["RSJC"] + generic["LSJC"])
-    trunk = np.linalg.norm(mid["shoulder"] - mid["hip"])
-    factors["torso"] = float(trunk / np.linalg.norm(g_mid_shoulder - g_mid_hip))
+    trunk = float(
+        np.linalg.norm(mid["shoulder"] - mid["hip"])
+        / np.linalg.norm(g_mid_shoulder - g_mid_hip)
+    )
+    shoulders = float(
+        np.linalg.norm(bundle["shoulder_r"] - bundle["shoulder_l"])
+        / np.linalg.norm(generic["RSJC"] - generic["LSJC"])
+    )
     pelvis = _pelvis_scale(
         targets, _generic_marker_points(Path(base_model_path), "pelvis")
     )
     scales: dict[str, float | tuple[float, float, float]] = dict(factors)
+    scales["torso"] = (trunk, trunk, shoulders)
     scales["pelvis"] = pelvis
-    flat = [*factors.values(), *pelvis]
+    flat = [*factors.values(), trunk, shoulders, *pelvis]
     if not all(math.isfinite(f) and f > 0.0 for f in flat):
         raise ValueError(f"degenerate segment scales {scales}")
     return scales
@@ -278,6 +292,22 @@ def bundle_segment_scales(
 # --------------------------------------------------------------------------
 # Inverse kinematics
 # --------------------------------------------------------------------------
+
+
+#: Range-flag tolerance of the pelvis gate: the shared range-of-motion flag
+#: tolerance (``range_of_motion.violations``, 0.5 deg).  OSL-14: the bundle
+#: IK keeps hip flexion inside its cited 120 deg bound exactly, but the
+#: MuJoCo-tracked reference overshoots it by 0.012 deg (controller error).
+PELVIS_GATE_TOLERANCE_RAD = math.radians(0.5)
+
+
+def hip_flexion_inside(source: tuple[float, float], low: float, high: float) -> bool:
+    """Whether a bundle hip-flexion span ``(min, max)`` lies in ``[low, high]``.
+
+    Within :data:`PELVIS_GATE_TOLERANCE_RAD` of a bound counts as inside.
+    """
+    tol = PELVIS_GATE_TOLERANCE_RAD
+    return low - tol <= source[0] and source[1] <= high + tol
 
 
 @dataclass(frozen=True)
@@ -361,7 +391,7 @@ def pelvis_landmark_targets(
     coordinate = build.model.getCoordinateSet().get("hip_flexion_r")
     low, high = float(coordinate.getRangeMin()), float(coordinate.getRangeMax())
     source = _span(flexion)
-    tracked = low <= source[0] and source[1] <= high
+    tracked = hip_flexion_inside(source, low, high)
     tilt = [Rotation.from_matrix(r).as_euler("ZXY")[0] for r in targets.pelvis_rotation]
     reason = (
         "the bundle's hip flexion lies inside the model range"
