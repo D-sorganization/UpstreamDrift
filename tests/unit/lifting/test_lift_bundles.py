@@ -54,6 +54,12 @@ IK_RESIDUAL_THRESHOLDS_M = {
 }
 CLOSURE_THRESHOLD_M = 6.4e-8
 FOOT_PENETRATION_THRESHOLD_M = 7.0e-4
+#: Committed bar-loaded bundle size bound (bytes).  OSL-16 (#13104): a loaded
+#: bundle records its 0.25 ms hold efforts (``hold_efforts``, 4 per step) so
+#: a replay reproduces it exactly; at 200 steps that table is 281,728 raw
+#: bytes (about 233 KB compressed, full-precision torques).  The earlier
+#: 300,000 byte bound plus that raw table, rounded up; evidence on #13104.
+LOADED_BUNDLE_MAX_BYTES = 600_000
 
 
 @pytest.fixture(scope="module")
@@ -62,7 +68,7 @@ def bundle() -> InputBundle:
 
 
 def test_committed_bundle_is_small(bundle: InputBundle) -> None:
-    assert BACK_SQUAT_BUNDLE.stat().st_size <= 300_000
+    assert BACK_SQUAT_BUNDLE.stat().st_size <= LOADED_BUNDLE_MAX_BYTES
     assert bundle.reference_engine == "mujoco"
 
 
