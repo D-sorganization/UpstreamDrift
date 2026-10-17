@@ -145,7 +145,7 @@ def planar_oracle_model(
     def model(x: Array) -> Array:
         out = np.empty(x.shape[0])
         for r, row in enumerate(x):
-            vals = dict(zip(names, row, strict=True))
+            vals = dict(zip(names, np.asarray(row).tolist(), strict=True))
             params = dataclasses.replace(base, **{k: float(vals[k]) for k in bounds})
             vel = v0.copy()
             vel[0] = vals["lead_shoulder_rate"]

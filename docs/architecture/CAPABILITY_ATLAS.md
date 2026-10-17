@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**69 launcher tiles · 63 feature contracts.**
+**69 launcher tiles · 64 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -244,6 +244,7 @@ flowchart LR
 | MATLAB/Simscape model suite | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/matlab_suite_dialog.py) |
 | Model Explorer (browse/select/build URDF-MJCF) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/model_explorer/launch_model_explorer.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/model_explorer.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/ModelExplorer.tsx) |
 | Frankenstein drag-and-drop assembly with typed attachment ports | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/model_explorer/frankenstein_editor/assembly_panel.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/model_explorer_assembly.py) |
+| Model Explorer results playback on the shared-appearance golfer | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/model_explorer/results_playback_panel.py) |
 | Motion Matching tour-average and club-only Excel matching | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/motion_matching/gui.py) |
 | Native per-engine viewer video export (CLI) | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/native_viewer_export/cli.py) |
 | Historical Player Library And Source Review | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/necromatcher/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/necromatcher.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Necromatcher.tsx) |

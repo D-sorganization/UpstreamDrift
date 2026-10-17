@@ -148,11 +148,14 @@ class TestDrakeInducedAccelerationAnalyzer:
 
         plant.CalcMassMatrixViaInverseDynamics.return_value = np.eye(2)
         plant.num_velocities.return_value = 2
-        plant.MakeMultibodyForces.return_value = MagicMock()
         plant.CalcGravityGeneralizedForces.return_value = np.array([0.0, -9.80665])
         plant.CalcInverseDynamics.return_value = np.array([0.1, 0.2])
 
-        result = analyzer.compute_components(context)
+        with patch(
+            "src.engines.physics_engines.drake.python.drake_forces.MultibodyForces",
+            create=True,
+        ):
+            result = analyzer.compute_components(context)
 
         # gravity accel = M^-1 @ tau_g = [0, -9.80665]
         np.testing.assert_array_almost_equal(
@@ -188,11 +191,14 @@ class TestDrakeInducedAccelerationAnalyzer:
 
         plant.CalcMassMatrixViaInverseDynamics.return_value = np.eye(2)
         plant.num_velocities.return_value = 2
-        plant.MakeMultibodyForces.return_value = MagicMock()
         plant.CalcInverseDynamics.return_value = np.array([0.5, 1.0])
         plant.CalcGravityGeneralizedForces.return_value = np.array([0.0, -9.80665])
 
-        result = analyzer.compute_counterfactuals(context)
+        with patch(
+            "src.engines.physics_engines.drake.python.drake_forces.MultibodyForces",
+            create=True,
+        ):
+            result = analyzer.compute_counterfactuals(context)
 
         assert "ztcf_accel" in result
         assert "zvcf_torque" in result

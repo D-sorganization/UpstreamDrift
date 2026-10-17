@@ -1,0 +1,80 @@
+{
+  "schema_version": "fixture-min",
+  "note": "Minimal spec for loader tests: only coordinate_order and joints.",
+  "coordinate_order": [
+    "TranslationInputX",
+    "TranslationInputY",
+    "TranslationInputZ",
+    "HipInputX",
+    "HipInputY",
+    "HipInputZ",
+    "SpineInputX",
+    "SpineInputY",
+    "TorsoInput",
+    "LEInput",
+    "LFInput",
+    "LScapInputX",
+    "LScapInputY",
+    "LSInputX",
+    "LSInputY",
+    "LSInputZ",
+    "LWInputX",
+    "LWInputY",
+    "REInput",
+    "RFInput",
+    "RScapInputX",
+    "RScapInputY",
+    "RSInputX",
+    "RSInputY",
+    "RSInputZ",
+    "RWInputX",
+    "RWInputY",
+    "NeckInputX",
+    "NeckInputY",
+    "NeckInputZ",
+    "hip_flexion_r",
+    "hip_adduction_r",
+    "hip_rotation_r",
+    "knee_angle_r",
+    "ankle_angle_r",
+    "subtalar_angle_r",
+    "mtp_angle_r",
+    "hip_flexion_l",
+    "hip_adduction_l",
+    "hip_rotation_l",
+    "knee_angle_l",
+    "ankle_angle_l",
+    "subtalar_angle_l",
+    "mtp_angle_l"
+  ],
+  "joints": [
+    {
+      "primitives": [
+        {
+          "coordinate": "TranslationInputX",
+          "primitive": "Px"
+        },
+        {
+          "coordinate": "TranslationInputY",
+          "primitive": "Py"
+        },
+        {
+          "coordinate": "TranslationInputZ",
+          "primitive": "Pz"
+        },
+        {
+          "coordinate": "HipInputX",
+          "primitive": "Rx"
+        },
+        {
+          "coordinate": "HipInputY",
+          "primitive": "Ry"
+        },
+        {
+          "coordinate": "HipInputZ",
+          "primitive": "Rz"
+        }
+      ]
+    }
+  ]
+}

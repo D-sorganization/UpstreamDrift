@@ -37,12 +37,21 @@ class BiomechanicalAnalyzer:
             Initialized to None and updated during state extraction.
     """
 
-    def __init__(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
+    def __init__(
+        self,
+        model: mujoco.MjModel,
+        data: mujoco.MjData,
+        *,
+        require_club_head: bool = False,
+    ) -> None:
         """Initialize analyzer with MuJoCo model and data.
 
         Args:
             model: MuJoCo model structure
             data: MuJoCo data structure (will be read, not modified)
+            require_club_head: When True, raise ``ValueError`` if no club-head
+                body resolves (strict mode) instead of silently dropping
+                club-head metrics.
         """
         if not (model is not None):
             raise ValueError("model must be provided")
@@ -58,7 +67,9 @@ class BiomechanicalAnalyzer:
 
         # Find important body IDs
         self.club_head_id = find_club_head_body_id(
-            self.model, owner=type(self).__name__
+            self.model,
+            owner=type(self).__name__,
+            strict=require_club_head,
         )
         self.left_foot_id = self._find_body_id("left_foot")
         self.right_foot_id = self._find_body_id("right_foot")

@@ -982,6 +982,10 @@ class UpstreamDriftLauncher(QMainWindow):
             self.lbl_status.setStyleSheet(Styles.STATUS_ERROR_BOLD)
         self.update_launch_button()
 
+    def _restore_idle_status(self) -> None:
+        """Return the status label to the idle (Docker-derived) state (#12962)."""
+        self._apply_docker_status(bool(self.orchestrator.docker_available))
+
     def check_docker(self) -> None:
         """Start the docker check thread."""
         logger.info("Checking Docker status...")

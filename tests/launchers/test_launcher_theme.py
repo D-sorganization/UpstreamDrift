@@ -101,7 +101,7 @@ def test_apply_theme_system(qapp) -> None:
             "src.shared.python.theme.ThemeManager.instance", return_value=mock_manager
         ),
         patch(
-            "src.shared.python.theme.apply_golf_suite_style", create=True
+            "src.shared.python.theme.launcher_compat.apply_golf_suite_style"
         ) as mock_apply,
     ):
         launcher._apply_theme_system()
@@ -223,7 +223,7 @@ def test_set_plot_theme(qapp) -> None:
     with (
         patch("PyQt6.QtCore.QSettings") as mock_settings_class,
         patch(
-            "src.shared.python.theme.apply_golf_suite_style", create=True
+            "src.shared.python.theme.launcher_compat.apply_golf_suite_style"
         ) as mock_apply,
     ):
         mock_settings = MagicMock()

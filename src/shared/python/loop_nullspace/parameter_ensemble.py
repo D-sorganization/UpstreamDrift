@@ -551,7 +551,8 @@ def _stats(values: Array) -> tuple[float | None, float | None, float | None]:
 def _bound_shift(nominal: EnvelopeSeries, members: Sequence[EnvelopeSeries], j: int):
     """Largest absolute and relative move of any bound of quantity ``j``."""
     width = nominal.upper[:, j] - nominal.lower[:, j]
-    absolute, relative = 0.0, None
+    absolute = 0.0
+    relative: float | None = None
     for m in members:
         for ref, got in ((nominal.lower, m.lower), (nominal.upper, m.upper)):
             ok = np.isfinite(ref[:, j]) & np.isfinite(got[:, j])

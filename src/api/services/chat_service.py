@@ -32,6 +32,19 @@ logger = get_logger(__name__)
 UTC = timezone.utc
 
 
+def _assert_json_serialisable(metadata: dict[str, Any]) -> None:
+    """Raise ``ValueError`` naming the first metadata key that is not JSON-safe."""
+    for key, value in metadata.items():
+        try:
+            json.dumps(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                f"session metadata key {key!r} is not JSON-serialisable "
+                f"({type(value).__name__}); keep runtime-only state out of "
+                "persisted metadata"
+            ) from exc
+
+
 class ChatService:
     """Server-side chat session manager.
 
@@ -406,7 +419,10 @@ class ChatService:
             session_id=ctx.session_id,
             messages=temp_messages,
             user_expertise=ctx.user_expertise,
-            metadata=ctx.metadata,
+            # Shallow copy: runtime-only keys (the cancel ``stop_event``) are
+            # injected into this copy and must never reach the live, persisted
+            # session metadata (#12872).
+            metadata=dict(ctx.metadata),
         )
 
     def _cancel_adapter_stream(self) -> None:
@@ -574,6 +590,9 @@ class ChatService:
         if not ctx:
             return
         try:
+            # Postcondition guard (#12872): fail clearly, naming the key,
+            # before any file is opened or truncated.
+            _assert_json_serialisable(ctx.metadata)
             self.PERSIST_DIR.mkdir(parents=True, exist_ok=True)
             path = self.PERSIST_DIR / f"{session_id}.json"
             ctx.save_to_file(path)
