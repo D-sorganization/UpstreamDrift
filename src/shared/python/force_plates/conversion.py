@@ -9,6 +9,8 @@ where the centre of mass is).  :func:`observability` states this explicitly.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from dataclasses import dataclass
 from types import MappingProxyType
 
 import numpy as np
@@ -24,7 +26,7 @@ from src.shared.python.force_plates.contracts import (
 )
 from src.shared.python.force_plates.placement import PlatePlacement
 
-__all__ = ["observability", "to_ground_reaction_series"]
+__all__ = ["ObservedGroundReaction", "observability", "to_ground_reaction_series"]
 
 _OBSERVED = MappingProxyType(
     {"fx": False, "fy": False, "fz": True, "cop": True, "free_moment": False}
@@ -36,6 +38,31 @@ def observability() -> dict[str, bool]:
     return dict(_OBSERVED)
 
 
+@dataclass(frozen=True, eq=False)
+class ObservedGroundReaction:
+    """A ground-reaction series together with which components were observed.
+
+    A NaN in ``series`` means either "below the CoP threshold" or "never
+    observed"; ``observed`` tells the two apart.
+    """
+
+    series: GroundReactionSeries
+    observed: Mapping[str, bool]
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.series, GroundReactionSeries):
+            raise TypeError("series must be a GroundReactionSeries")
+        object.__setattr__(self, "observed", MappingProxyType(dict(self.observed)))
+
+    def is_observed(self, component: str) -> bool:
+        """Whether ``component`` (``fx``, ``fy``, ``fz``, ``cop``, ``free_moment``) was observed."""
+        if component not in self.observed:
+            raise ValueError(
+                f"unknown component {component!r}; expected one of {tuple(self.observed)}"
+            )
+        return bool(self.observed[component])
+
+
 def _vertical(load_n: Array) -> Array:
     out = np.full((load_n.shape[0], 3), np.nan)
     out[:, 2] = load_n
@@ -44,12 +71,13 @@ def _vertical(load_n: Array) -> Array:
 
 def to_ground_reaction_series(
     trial: VerticalPlateTrial, placement: PlatePlacement
-) -> GroundReactionSeries:
-    """Ground-reaction series of ``trial`` placed in the world by ``placement``.
+) -> ObservedGroundReaction:
+    """Observed ground-reaction series of ``trial`` placed by ``placement``.
 
     Keys are the anatomical feet and ``"net"``.  Postconditions: shear, free
-    moment, CoM moments and ``com_m`` are NaN; ``in_contact`` is true where the
-    load reaches the trial's CoP threshold; CoPs lie on the plate surface.
+    moment, CoM moments and ``com_m`` are NaN (unobserved, see
+    :func:`observability`); ``in_contact`` is true where the load reaches the
+    trial's CoP threshold; CoPs lie on the plate top surface.
     """
     if not isinstance(trial, VerticalPlateTrial):
         raise TypeError(
@@ -62,7 +90,7 @@ def to_ground_reaction_series(
     loads = {**{k: trial.load_n[k] for k in FOOT_LABELS}, NET_LABEL: trial.net_load_n()}
     n = trial.n_samples
     unobserved = {k: np.full((n, 3), np.nan) for k in loads}
-    return GroundReactionSeries(
+    series = GroundReactionSeries(
         times_s=np.array(trial.times_s),
         force_n=MappingProxyType({k: _vertical(v) for k, v in loads.items()}),
         cop_m=MappingProxyType({k: placement.to_world(trial.cop_m[k]) for k in loads}),
@@ -75,3 +103,4 @@ def to_ground_reaction_series(
         com_m=np.full((n, 3), np.nan),
         ground_height_m=np.full(n, placement.surface_height_m),
     )
+    return ObservedGroundReaction(series=series, observed=_OBSERVED)

@@ -67,6 +67,12 @@ def _finite_positive(value: float, name: str) -> float:
     return float(value)
 
 
+def _finite_non_negative(value: float, name: str) -> float:
+    if not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0.0:
+        raise ValueError(f"{name} must be finite and non-negative, got {value!r}")
+    return float(value)
+
+
 def _text(value: object, name: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{name} must be a non-empty string, got {value!r}")
@@ -112,25 +118,27 @@ class PlateUncertainty:
 
     The load uncertainty of a foot is ``hypot(force_floor_n, force_fraction * F)``
     (an absolute floor plus a fraction of the reading); the CoP uncertainty is
-    ``cop_m`` in each horizontal axis.  ``source`` names where the numbers come
-    from (a calibration record, a datasheet, or a declared hypothesis).
+    ``cop_m`` in each horizontal axis; ``sensing_depth_sigma_m`` is the
+    uncertainty of the declared depth of the force-sensing plane.  ``source``
+    names where the numbers come from (a calibration record, a datasheet, or a
+    declared hypothesis).
 
     Preconditions: ``force_floor_n`` and ``cop_m`` positive and finite,
-    ``force_fraction`` finite and non-negative, ``source`` non-empty
-    (``ValueError``).
+    ``force_fraction`` and ``sensing_depth_sigma_m`` finite and non-negative,
+    ``source`` non-empty (``ValueError``).
     """
 
     force_floor_n: float
     force_fraction: float
     cop_m: float
+    sensing_depth_sigma_m: float
     source: str
 
     def __post_init__(self) -> None:
         _finite_positive(self.force_floor_n, "force_floor_n")
         _finite_positive(self.cop_m, "cop_m")
-        frac = self.force_fraction
-        if not isinstance(frac, (int, float)) or not math.isfinite(frac) or frac < 0.0:
-            raise ValueError(f"force_fraction must be finite and >= 0, got {frac!r}")
+        _finite_non_negative(self.force_fraction, "force_fraction")
+        _finite_non_negative(self.sensing_depth_sigma_m, "sensing_depth_sigma_m")
         _text(self.source, "source")
 
     def force_sigma_n(self, load_n: ArrayLike) -> Array:
@@ -188,6 +196,9 @@ class VerticalPlateTrial:
     own names; they are force events, not swing positions.
     ``corner_forces_n`` optionally keeps the ``(T, 8)`` raw corner channels for
     diagnostics.  ``capacity_n`` is the declared total capacity of the pair.
+    ``sensing_depth_m`` is the declared depth of the force-sensing plane below
+    the plate top surface: the cells balance moments about that plane, so a
+    reported CoP mixes vertical load with shear times this depth.
 
     Raises ``ValueError`` (``TypeError`` for wrong object types) on any broken
     invariant; arrays are stored as read-only copies.
@@ -201,6 +212,7 @@ class VerticalPlateTrial:
     events_s: Mapping[str, float | None]
     cop_min_load_n: float
     capacity_n: float
+    sensing_depth_m: float
     provenance: PlateProvenance
     uncertainty: PlateUncertainty
     corner_forces_n: Array | None = field(default=None)
@@ -231,6 +243,7 @@ class VerticalPlateTrial:
         _finite_positive(self.body_weight_n, "body_weight_n")
         _finite_positive(self.cop_min_load_n, "cop_min_load_n")
         _finite_positive(self.capacity_n, "capacity_n")
+        _finite_non_negative(self.sensing_depth_m, "sensing_depth_m")
 
     def _times(self) -> Array:
         times = _readonly(self.times_s, "times_s")

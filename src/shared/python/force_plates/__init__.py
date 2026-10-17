@@ -20,6 +20,7 @@ from src.shared.python.force_plates.contracts import (
     loaded_net_cop,
 )
 from src.shared.python.force_plates.conversion import (
+    ObservedGroundReaction,
     observability,
     to_ground_reaction_series,
 )
@@ -31,6 +32,7 @@ __all__ = [
     "NET_LABEL",
     "ROTATION_ATOL",
     "Handedness",
+    "ObservedGroundReaction",
     "PlatePlacement",
     "PlateProvenance",
     "PlateUncertainty",

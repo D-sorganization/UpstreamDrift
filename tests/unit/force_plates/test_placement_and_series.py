@@ -12,6 +12,7 @@ from src.shared.python.biomechanics.ground_reaction import (
     GroundReactionSeries,
 )
 from src.shared.python.force_plates import (
+    ObservedGroundReaction,
     PlatePlacement,
     observability,
     to_ground_reaction_series,
@@ -83,9 +84,21 @@ def test_observability_names_only_vertical_load_and_cop() -> None:
 
 
 # ------------------------------------------------------------------ series --
-def _series() -> GroundReactionSeries:
+def _observed() -> ObservedGroundReaction:
     placement = PlatePlacement.from_yaw(0.0, origin_m=(0.0, 0.0, 0.02))
     return to_ground_reaction_series(tf.make_trial(), placement)
+
+
+def _series() -> GroundReactionSeries:
+    return _observed().series
+
+
+def test_series_carries_its_observability_record() -> None:
+    observed = _observed()
+    assert observed.observed == observability()
+    assert observed.is_observed("fz") and not observed.is_observed("fx")
+    with pytest.raises(ValueError, match="component"):
+        observed.is_observed("torque")
 
 
 def test_series_is_a_ground_reaction_series_keyed_by_feet_and_net() -> None:

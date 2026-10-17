@@ -34,10 +34,17 @@ def test_force_sigma_combines_floor_and_fraction_in_quadrature() -> None:
         ("force_fraction", -0.01),
         ("force_fraction", float("inf")),
         ("cop_m", 0.0),
+        ("sensing_depth_sigma_m", -0.001),
+        ("sensing_depth_sigma_m", float("nan")),
     ],
 )
 def test_uncertainty_must_be_declared_positive_and_finite(field, value) -> None:
-    kwargs = {"force_floor_n": 2.0, "force_fraction": 0.01, "cop_m": 0.01}
+    kwargs = {
+        "force_floor_n": 2.0,
+        "force_fraction": 0.01,
+        "cop_m": 0.01,
+        "sensing_depth_sigma_m": 0.002,
+    }
     kwargs[field] = value
     with pytest.raises(ValueError, match=field):
         PlateUncertainty(**kwargs, source="test")
@@ -45,7 +52,13 @@ def test_uncertainty_must_be_declared_positive_and_finite(field, value) -> None:
 
 def test_uncertainty_must_name_its_source() -> None:
     with pytest.raises(ValueError, match="source"):
-        PlateUncertainty(force_floor_n=2.0, force_fraction=0.0, cop_m=0.01, source="")
+        PlateUncertainty(
+            force_floor_n=2.0,
+            force_fraction=0.0,
+            cop_m=0.01,
+            sensing_depth_sigma_m=0.0,
+            source="",
+        )
 
 
 def test_uncertainty_has_no_defaults() -> None:
@@ -219,6 +232,17 @@ def test_net_cop_must_be_the_load_weighted_cop_of_the_loaded_feet() -> None:
 def test_body_weight_must_be_positive_and_finite(bw) -> None:
     with pytest.raises(ValueError, match="body_weight_n"):
         tf.make_trial(body_weight_n=bw)
+
+
+@pytest.mark.parametrize("depth", [-0.001, np.nan, np.inf])
+def test_sensing_depth_must_be_finite_and_non_negative(depth) -> None:
+    with pytest.raises(ValueError, match="sensing_depth_m"):
+        tf.make_trial(sensing_depth_m=depth)
+
+
+def test_sensing_depth_may_be_zero_and_is_exposed() -> None:
+    assert tf.make_trial(sensing_depth_m=0.0).sensing_depth_m == 0.0
+    assert tf.make_trial().sensing_depth_m == pytest.approx(0.015)
 
 
 def test_handedness_must_be_rh_or_lh() -> None:

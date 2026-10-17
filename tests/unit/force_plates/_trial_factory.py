@@ -44,6 +44,7 @@ def uncertainty() -> PlateUncertainty:
         force_floor_n=2.0,
         force_fraction=0.01,
         cop_m=0.010,
+        sensing_depth_sigma_m=0.002,
         source="declared hypothesis for tests",
     )
 
@@ -71,6 +72,7 @@ def trial_kwargs(**overrides: Any) -> dict[str, Any]:
         "events_s": {"max_trail": 0.005, "impact": None},
         "cop_min_load_n": 20.0,
         "capacity_n": 3923.0,
+        "sensing_depth_m": 0.015,
         "provenance": provenance(),
         "uncertainty": uncertainty(),
     }
