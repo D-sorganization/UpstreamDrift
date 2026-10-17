@@ -23,8 +23,11 @@ kinetics and barbell evidence (#12340, #12341, #12345), so that happens
 together with their regeneration, not before.
 
 Since #13093 the back-bar squat IK balances the optimizer's bar load over
-mid-foot (``--no-load-balance`` skips it) and the bundle's spec carries that
-bar as a rigid solid on the hands (:func:`lift_bundle_spec`).
+mid-foot with ``--load-balance`` (opt-in), and the bundle's spec then carries
+that bar as a rigid solid on the hands (:func:`lift_bundle_spec`).  The
+committed squat bundle is not balanced: tracking the balanced IK with the bar
+load loses the feet within the window (OSL-15 measurements in
+``docs/research/lift_models/lift_models.tex``).
 """
 
 from __future__ import annotations
@@ -107,9 +110,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="squat only. back_bar: #12347 geometry (committed); legacy: golf grip",
     )
     parser.add_argument(
-        "--no-load-balance",
+        "--load-balance",
         action="store_true",
-        help="back_bar only: skip the #13093 bar-load balance over mid-foot",
+        help="back_bar only: balance the bar load over mid-foot (#13093, opt-in)",
     )
     return parser
 
@@ -118,7 +121,7 @@ def _full_body(args: argparse.Namespace, lift: LiftRecipe, solution: Any) -> Any
     """Full-body IK of *solution*: back bar (squat) or bar in the hands.
 
     The back bar is balanced with the optimizer's bar load over mid-foot
-    (#13093) unless ``--no-load-balance`` is given.
+    (#13093) when ``--load-balance`` is given.
     """
     spec = LIFT_SPEC.read_bytes()
     if lift.hand_held:
@@ -127,9 +130,9 @@ def _full_body(args: argparse.Namespace, lift: LiftRecipe, solution: Any) -> Any
         return lift_to_full_body(spec, solution, load_seed_pose())
     geometry = BackBarGeometry.from_standard(BACK_SQUAT, height_m=args.height)
     load = (
-        None
-        if args.no_load_balance
-        else LoadBalance(Barbell(float(solution.source["bar_mass_kg"])))
+        LoadBalance(Barbell(float(solution.source["bar_mass_kg"])))
+        if args.load_balance
+        else None
     )
     return lift_to_full_body(
         spec, solution, load_seed_pose(), geometry=geometry, load=load

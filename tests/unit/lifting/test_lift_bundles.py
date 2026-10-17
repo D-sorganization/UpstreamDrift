@@ -131,8 +131,11 @@ def test_ik_from_the_recorded_solution_meets_thresholds(
         from src.shared.python.lifting.loaded_balance import load_balance_from_record
 
         load = load_balance_from_record(balance["load"])
+    # The generator solves the back bar from the lift-body spec (it derives
+    # the grip-width spec itself); a legacy bundle carries that spec.
+    body = bundle.spec_bytes if geometry is None else LIFT_SPEC.read_bytes()
     lift = lift_to_full_body(
-        bundle.spec_bytes, solution, load_seed_pose(), geometry=geometry, load=load
+        body, solution, load_seed_pose(), geometry=geometry, load=load
     )
     if balance is not None:
         assert lift.balance is not None

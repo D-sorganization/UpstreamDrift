@@ -793,6 +793,101 @@ stay at their measured AN-1 maxima, with the physical reasons recorded on
   cause B scaling with the bar mass.
 \end{itemize}
 
+\subsection{Bar-Load Balance of the Source Squat (OSL-15, Issue \#13093)}
+
+\paragraph{Method.} The Movement Optimizer balances its planar
+\texttt{full\_squat} with the bar at its shoulder joint: the Tools
+\texttt{BodyModel} accepts only \texttt{squat\_bar\_depth} and
+\texttt{squat\_bar\_height} $\ge 0$ (bar behind or below the shoulder), so it
+cannot express the back-bar shelf, which sits 0.20\,m above and 0.06\,m in
+front of the shoulder joints. That gap is reported to Tools; it is not
+patched here. \texttt{loaded\_balance.balance\_lift} closes it in the IK. The
+lift is solved as before; the body-plus-bar centre of mass is evaluated on the
+lift body with the bar welded to the hands (\texttt{rigid\_bar\_spec}, the
+model the LIFT-4 re-track controller uses), and each frame's sagittal trunk
+angle is corrected by a per-frame secant iteration (first step a 0.05\,rad
+probe, steps clipped to 0.25\,rad) until the combined centre of mass lies
+within 0.5\,mm of mid-foot (the mean floor point of the contact spheres, the
+origin the shelf was fitted from). The bar stays on the shelf and rides the
+corrected trunk. This is the optimizer's own squat-bottom rule
+(\texttt{balance\_pose(..., adjust\_joint=2)}) applied with the full-body
+masses and the bar where the shelf holds it. The generator applies it with
+\texttt{--load-balance}; \texttt{lift\_bundle\_spec} then makes the bundle's
+spec the rigid-bar spec, and \texttt{bushing\_body\_spec} recovers the body
+the LIFT-4 bushings attach to.
+
+\paragraph{IK Result.} On the committed planar solution (100\,kg bar) the
+largest offset of the combined centre of mass from mid-foot falls from
+0.190\,m to $6.4\times10^{-5}$\,m in 5 corrections. The trunk correction
+runs from $-0.155$\,rad at the ends to $-0.554$\,rad ($31.7^\circ$ more
+upright) at the bottom. Maximum IK residuals (mm): ankles 4.37 and 3.59,
+knees 3.15 and 11.68, hips 8.07 and 9.13, shoulders 3.65 and 3.04, bar 0.01;
+closure $5.0\times10^{-8}$\,m; lowest foot sphere $-0.69$\,mm. The right ankle
+and right hip exceed the OSL-14 thresholds (3.1 and 6.4\,mm). The thresholds
+are not widened, because the balanced bundle is not committed (below). The
+zero-moment point of the balanced trajectory, from the centroidal momentum
+of the rigid-bar body, stays at 0.074--0.089\,m on the forward axis, inside
+the support (heel $-0.048$, toe 0.176\,m), with vertical force up to 1.59
+body-plus-bar weights at the bottom: the balanced trajectory is dynamically
+feasible.
+
+\paragraph{Tracking Result (Open).} The bundle window is the pipeline
+computed-torque (kkt) MuJoCo tracking of the IK, and that tracking does not
+hold the feet under the bar load. Window 1.4--1.6\,s, errors against the IK:
+\begin{itemize}[nosep]
+\item Rigid-bar spec, 1\,ms hold: the combined centre of mass stays over
+  mid-foot (0.072--0.077\,m), but the foot joints diverge. Right
+  \texttt{mtp} error 0.12\,rad at step 60 and 2.26\,rad at step 200; right
+  ankle 1.18\,rad. The left calcaneus lifts 9.5\,cm and the right sinks
+  3.4\,cm.
+\item Rigid-bar spec, 0.5\,ms hold: the feet stay within about 5\,mm, but the
+  left subtalar error reaches 0.117\,rad. A 0.125\,ms hold is worse (left
+  \texttt{mtp} 0.81\,rad, subtalar 0.55\,rad), so this is not a monotone
+  sample-and-hold effect.
+\item Rigid-bar spec with each heel and forefoot sphere split $\pm3$\,cm
+  medio-laterally (scratch experiment): the \texttt{mtp} errors reach
+  2.6\,rad by step 100. A knife-edge foot in roll is not the cause.
+\item Bodyweight spec (as before \#13093): the feet stay planted, but the
+  body-plus-bar centre of mass drifts 4.1\,cm behind mid-foot by the window
+  end, because the body alone is balanced behind the heels. The LIFT-4
+  re-track of that source loses the feet. Deviations from the source (mm):
+  ankles 140 and 248, knees 115 and 104, hips 142 and 135, shoulders 45 and
+  50, bar 93. These are worse than the unbalanced \#13072 re-track (ankles
+  13.3 and 12.0, shoulders 132).
+\item The quasi-static barbell hold of the committed bundle (0.6\,s
+  diagnostic run): vertical ground force 1.007 of body plus bar; hands
+  501.8\,N (left) and 484.2\,N (right). Its subtalar and \texttt{mtp}
+  coordinates diverge in the same way: left subtalar $-46.8^\circ$ at
+  0.6\,s.
+\item OpenSim IK/ID (OSL-12 pipeline, committed stride) of the
+  bodyweight-source re-track above: marker RMS 6.88\,cm and maximum 27.6\,cm (bar marker; the largest
+  non-bar maximum is the left forefoot, 9.1\,cm), against the 2 and 4\,cm
+  acceptance (committed after \#13072: 8.56 and 30.3\,cm). Segment-angle RMS
+  0.034\,rad. Hicks limits 181.6\,N and 24.1\,N\,m; residual peaks $t_y$
+  602\,N and tilt 477\,N\,m (fails).
+\end{itemize}
+In every bar-loaded run the foot joints (\texttt{mtp}, subtalar, ankle)
+diverge first, while the centre of mass is held. The open problem is the
+foot-joint stability of the kkt tracker under a body-plus-bar load. It is not
+the posture. The committed source bundle therefore stays the unbalanced
+\#13072 one. The barbell hold, re-track and cross-engine parity receipts are
+not regenerated, and their strict xfails, the OpenSim squat receipt and the
+OSL-14 thresholds are unchanged. \texttt{test\_loaded\_balance.py} checks the
+balance on three bottom frames of the real lift body. Its committed-bundle
+checks are strict xfails until a balanced source is tracked.
+
+\paragraph{Failed Experiments.}
+\begin{itemize}[nosep]
+\item A per-frame mid-foot target for the rigid-bar centre of mass in the
+  trajectory IK cost (\texttt{com\_targets\_per\_frame}), with no trunk
+  correction: at weights 10 and 1000 the largest offset is 49.6 and 14.5\,mm
+  (0.190\,m without it), still far above the 0.5\,mm tolerance, because the
+  landmark terms hold the optimizer's trunk.
+\item The balanced source tracked with bodyweight dynamics: it tips backward
+  (above), so a balanced source must carry the bar in its tracking.
+\item Effort holds of 0.5 and 0.125\,ms, and wider foot spheres (above).
+\end{itemize}
+
 \section{Measured Parity Results}
 All figures below are read from the committed receipt,
 \texttt{docs/development/lifting/pack\_parity\_baseline.json} (schema

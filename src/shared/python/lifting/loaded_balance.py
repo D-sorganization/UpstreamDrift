@@ -127,6 +127,9 @@ def combined_com_offsets(kin: Any, q_rows: Array, forward: Array, ground: Any) -
 def loaded_com_offsets(spec_bytes: bytes, q_rows: Array, load: LoadBalance) -> Array:
     """Body-plus-bar centre-of-mass offsets from mid-foot of ``q_rows``.
 
+    ``spec_bytes`` is the lifter body without the bar (for a bar-loaded
+    bundle, ``barbell_runs.bushing_body_spec`` of its spec); ``load`` adds it.
+
     The forward axis is the stance frame of the first row; the ground is the
     lift IK's (horizontal, height 0).
     """
