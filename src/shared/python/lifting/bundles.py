@@ -309,11 +309,29 @@ def _exercise_config(exercise: str, body: Any, bar_mass_kg: float) -> tuple:
         "full_squat": models.make_full_squat_config,
         "deadlift": models.make_deadlift_config,
         "clean": exercises.make_clean_config,
+        "snatch": exercises.make_snatch_config,
         "bench_press": models.make_bench_press_config,
     }
     if exercise not in factories:
         raise ValueError(f"exercise must be one of {sorted(factories)}: {exercise!r}")
     return tuple(factories[exercise](body, bar_mass_kg))
+
+
+def _bar_path_m(dyn: Any, angles: Array, time_s: Array, convention: str) -> Array:
+    """Planar bar positions (N, 2) of the optimizer's *convention* bar model.
+
+    ``snatch`` is the phase-correct snatch bar (hanging through the pulls,
+    overhead from the catch on); every other convention is the optimizer's
+    configuration-only ``bar_position``.
+    """
+    if convention == "snatch":
+        from movement_optimizer.exercises.snatch import snatch_bar_path
+
+        span = float(time_s[-1] - time_s[0])
+        return np.asarray(
+            snatch_bar_path(dyn, angles, (time_s - time_s[0]) / span), dtype=float
+        )
+    return np.array([dyn.bar_position(q, convention) for q in angles])
 
 
 def solve_sagittal_lift(
@@ -331,10 +349,11 @@ def solve_sagittal_lift(
 
     Args:
         exercise: Optimizer exercise (``full_squat``, ``deadlift``, ``clean``,
-            ``bench_press``).
+            ``snatch``, ``bench_press``).
         bar_convention: Optimizer exercise whose bar model places the bar
             (``bar_position``); defaults to *exercise*.  A pull uses
-            ``deadlift`` (arms hanging below the shoulder).
+            ``deadlift`` (arms hanging below the shoulder); ``snatch`` is the
+            phase-correct snatch bar (:func:`_bar_path_m`).
 
     Raises:
         ImportError: When ``movement_optimizer`` (vendored Tools) is absent.
@@ -365,10 +384,11 @@ def solve_sagittal_lift(
     if not result.success:
         raise RuntimeError(f"movement optimizer did not converge for {exercise}")
     angles = np.asarray(result.q, dtype=float)
+    time_s = np.asarray(result.t, dtype=float)
     return SagittalSolution(
-        time_s=np.asarray(result.t, dtype=float),
+        time_s=time_s,
         segment_angles_rad=angles,
-        bar_m=np.array([dyn.bar_position(q, convention) for q in angles]),
+        bar_m=_bar_path_m(dyn, angles, time_s, convention),
         source={
             "package": "movement_optimizer",
             "version": movement_optimizer.__version__,
@@ -915,11 +935,25 @@ def lift_hands_to_full_body(
 
 #: Bracket (metres below the shoulder midpoint) and resolution of the hang search.
 _HANG_BRACKET_M = (0.3, 1.0)
+#: Elbow flexion (rad) of the retry seed for the bracket's lower end.  From the
+#: near-straight seed arms the solve at the snatch's 0.9 m grip settles in a
+#: hyperextended-elbow minimum (bar 139 mm off at 0.3 m); seeded with both
+#: elbows at -0.8 rad it reaches 0.3 m within 2.3 mm (#11745).
+_HANG_RETRY_ELBOW_RAD = -0.8
+_HANG_RETRY_ELBOWS = ("LEInput", "REInput")
 _HANG_RESOLUTION_M = 5e-4
 #: Bar-centre error below which a probed depth counts as reached, metres (the
 #: Levenberg-Marquardt arm solve settles within a few millimetres of points it
 #: can reach and centimetres away from points it cannot).
 _HANG_REACH_M = 5e-3
+
+
+def _bent_elbow_seed(standing: _Standing, q_body: Array) -> Array:
+    """``q_body`` with both elbows flexed to :data:`_HANG_RETRY_ELBOW_RAD`."""
+    seed = np.array(q_body, dtype=float)
+    for name in _HANG_RETRY_ELBOWS:
+        seed[standing.order.index(name)] = _HANG_RETRY_ELBOW_RAD
+    return seed
 
 
 def _arm_hang(
@@ -975,6 +1009,8 @@ def _arm_hang(
 
     low, high = _HANG_BRACKET_M
     q_reached = reach(low, np.asarray(q_body, dtype=float))
+    if q_reached is None:
+        q_reached = reach(low, _bent_elbow_seed(standing, q_body))
     if q_reached is None:
         raise RuntimeError(f"arms cannot hold the bar {low} m from the shoulders")
     while high - low > _HANG_RESOLUTION_M:
