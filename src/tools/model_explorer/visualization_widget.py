@@ -401,9 +401,9 @@ class Simple3DVisualizationWidget(QWidget):
 
         self._highlighted_object: str | None = None
 
-        # Timer for animation
+        # Timer for animation, parented so it stops when the widget is deleted
 
-        self.timer = QTimer()
+        self.timer = QTimer(self)
 
         self.timer.timeout.connect(self.update)
 

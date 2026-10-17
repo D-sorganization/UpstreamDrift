@@ -64,6 +64,10 @@ from src.shared.python.motion_matching.range_of_motion import (
     HUMAN_RANGES_DEG,
     as_document,
 )
+from src.shared.python.motion_matching.tibial_torsion import (
+    DEFAULT_TIBIAL_TORSION_OFFSET_DEG,
+    apply_tibial_torsion,
+)
 from src.shared.python.motion_matching.tour_capture_contract import (
     MARKER_SEGMENTS,
     tracked_labels,
@@ -707,6 +711,19 @@ class AnthropometricDocument:
     notes: list[str]
 
 
+def _apply_kwarg_tibial_torsion(document: Any, kwargs: dict[str, Any]) -> Any:
+    """Apply the static external tibial-torsion offset to both ankles.
+
+    ``tibial_torsion_offset_deg`` (default
+    ``tibial_torsion.DEFAULT_TIBIAL_TORSION_OFFSET_DEG``; R3b, #12789); ``0``
+    keeps the generic Rajagopal leg bit-for-bit.
+    """
+    torsion = float(
+        kwargs.get("tibial_torsion_offset_deg", DEFAULT_TIBIAL_TORSION_OFFSET_DEG)
+    )
+    return apply_tibial_torsion(document, {"r": torsion, "l": torsion})
+
+
 def compose_anthropometric_document(
     stature_m: float = 1.80,
     mass_kg: float = 80.0,
@@ -734,7 +751,7 @@ def compose_anthropometric_document(
     body mass so total subject mass equals ``mass_kg``, scaling the Rajagopal legs
     with :func:`scale_leg_mass` so body mass without the club equals ``mass_kg``
     (#12199, #12300); the legs carry what the upper body does not. Raises
-    ``ValueError`` when the upper body alone reaches ``mass_kg``.
+    ``ValueError`` when the upper body alone reaches ``mass_kg``; see :func:`_apply_kwarg_tibial_torsion`.
     """
     native_path = native_path or get_native_geometry_spec(None)
     osim_path = osim_path or get_opensim_model(None)
@@ -799,6 +816,7 @@ def compose_anthropometric_document(
     )
     _annotate_document(document, upper)
     document = with_shaft_model(document, club, kwargs.get("shaft_model"))
+    document = _apply_kwarg_tibial_torsion(document, kwargs)
     return AnthropometricDocument(
         document=document,
         subject=upper["subject"],
@@ -886,6 +904,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="club.shaft.model: rigid (default) or the chain flexible shaft (#12686)",
     )
     parser.add_argument(
+        "--tibial-torsion",
+        type=float,
+        default=DEFAULT_TIBIAL_TORSION_OFFSET_DEG,
+        help="static external tibial-torsion offset per ankle, deg (#12789)",
+    )
+    parser.add_argument(
         "--club-markers",
         type=Path,
         default=None,
@@ -918,6 +942,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         name=args.name,
         club_markers_path=args.club_markers,
         shaft_model=args.shaft_model,
+        tibial_torsion_offset_deg=args.tibial_torsion,
     )
     return 0
 

@@ -11,7 +11,9 @@ supplies what is specific to the feet:
   signed gap to the ground is within a declared tolerance is a rigid contact);
 * Coulomb cones over each contact's load entries, reusing ``FrictionCone``;
 * optional *ground-reaction observations* ``E f_g = g`` with a declared
-  1-sigma uncertainty per row (hypothesis ``H-GRF-OBSERVATION``).
+  1-sigma uncertainty per row (hypothesis ``H-GRF-OBSERVATION``), including a
+  per-foot vertical-cell force plate (OF-11) whose CoP rows carry the exact
+  shear lever arm about the plate's force-sensing plane.
 
 An observation never changes the equality balance.  In the zero-uncertainty
 limit it adds ``rank(E_x N)`` equality rows and removes that many null
@@ -60,6 +62,7 @@ __all__ = [
     "DEFAULT_COVERAGE",
     "GRF_ID",
     "ContactCandidate",
+    "FootLoadReading",
     "GroundObservation",
     "ObservationAccounting",
     "ObservationInconsistentError",
@@ -289,9 +292,7 @@ class GroundObservation:
         names = [c.name for c in snapshot.foot_contacts]
         rows, values, labels = [], [], []
         for label, members in groups.items():
-            unknown = sorted(set(members) - set(names))
-            if unknown:
-                raise ValueError(f"group {label!r} has unknown contacts {unknown}")
+            _resolve_group(names, label, members)
             force = np.asarray(forces[label], dtype=np.float64)
             check_shape(force, (3,), f"forces[{label!r}]")
             for axis in range(3):
@@ -326,7 +327,9 @@ class GroundObservation:
         Row 0 is ``sum_k n . f_k = N``; rows 1 and 2 are the load-weighted
         offsets ``sum_k ((p_k - c) . t_i)(n . f_k) = 0`` (zero by definition of
         the centre of pressure ``c``), with uncertainty ``sigma_cop_m * N``.
-        All contacts must share one normal.
+        All contacts must share one normal.  The offsets are taken in the
+        tangent plane, so the height of ``c`` does not matter (no shear lever;
+        :meth:`from_vertical_plates` models a sensing plane below the feet).
         """
         load = _positive(normal_load_n, "normal_load_n")
         sig_f = _positive(sigma_force_n, "sigma_force_n")
@@ -334,19 +337,18 @@ class GroundObservation:
         contacts = snapshot.foot_contacts
         if not contacts:
             raise ValueError("snapshot has no foot contacts")
-        normal = contacts[0].normal
-        if any(np.max(np.abs(c.normal - normal)) > ROTATION_ATOL for c in contacts):
-            raise ValueError("contacts must share one ground normal")
+        normal = _shared_normal(contacts)
         cop = np.asarray(cop_m, dtype=np.float64)
         check_shape(cop, (3,), "cop_m")
         frame = contact_frame(normal)
-        sel = np.zeros((3, 3 * len(contacts)))
-        for k, c in enumerate(contacts):
-            sel[0, 3 * k : 3 * k + 3] = normal
-            for i in (0, 1):
-                sel[1 + i, 3 * k : 3 * k + 3] = (
-                    float((c.position - cop) @ frame[:, i]) * normal
-                )
+        members = tuple(range(len(contacts)))
+        offsets = _tangential(np.array([c.position for c in contacts]) - cop, normal)
+        sel = np.vstack(
+            [
+                _normal_load_row(normal, members, len(contacts)),
+                _cop_moment_rows(offsets, members, frame, len(contacts)),
+            ]
+        )
         return cls(
             sel,
             np.array([load, 0.0, 0.0]),
@@ -355,6 +357,216 @@ class GroundObservation:
             "total normal load and centre of pressure",
             coverage,
         )
+
+    @classmethod
+    def from_vertical_plates(
+        cls,
+        snapshot: ClosedLoopSnapshot,
+        readings: Mapping[str, FootLoadReading],
+        groups: Mapping[str, Sequence[str]],
+        *,
+        coverage: float = DEFAULT_COVERAGE,
+    ) -> GroundObservation:
+        """Per-foot vertical-cell plates: a load row and two CoP moment rows each.
+
+        The rows and sigmas are defined on :class:`FootLoadReading` (OF-11,
+        #13067).  ``groups`` maps each reading's foot to its contact names; a
+        foot whose reading has no CoP, or whose group is empty, contributes
+        only its load row (an empty group's row is zero, so a measured load
+        on a foot the model leaves unloaded is tested, never ignored).
+
+        Preconditions (``ValueError``): ``readings`` and ``groups`` name the
+        same feet; every member is a contact of ``snapshot``, named once and in
+        one foot; the contacts share one normal.  Shear is never assigned a
+        value.
+        """
+        contacts = snapshot.foot_contacts
+        if not contacts:
+            raise ValueError("snapshot has no foot contacts")
+        members = _foot_members(contacts, readings, groups)
+        normal = _shared_normal(contacts)
+        frame = contact_frame(normal)
+        rows: list[Array] = []
+        values: list[float] = []
+        sigma: list[float] = []
+        labels: list[str] = []
+        for label, reading in readings.items():
+            block = _plate_rows(contacts, members[label], reading, frame)
+            rows.append(block.selector)
+            values.extend(block.values)
+            sigma.extend(block.sigma)
+            labels.extend(f"{label}:{name}" for name in block.names)
+        return cls(
+            np.vstack(rows),
+            np.array(values),
+            np.array(sigma),
+            tuple(labels),
+            "per-foot vertical-cell force plates",
+            coverage,
+        )
+
+
+@dataclass(frozen=True)
+class FootLoadReading:
+    """One foot's vertical-cell plate reading in the world frame (OF-11).
+
+    For foot ``F`` with contacts ``k``, load ``N_F`` and CoP ``c'``, with
+    ``r_k = p_k - c'``, the observation rows are::
+
+        sum_k n . f_k = N_F
+        sum_k [(r_k . t_i)(n . f_k) - (r_k . n)(t_i . f_k)] = 0,  i = 1, 2
+
+    The second term is the shear lever arm.  ``c'`` lies at the height where
+    the plate's *horizontal* reactions act (for pure vertical load cells, the
+    cell plane), so ``r_k . n`` is that lever.  Sigmas: ``sigma_force_n`` for
+    the load row and ``max(N_F, sigma_force_n) * hypot(sigma_cop_m,
+    mu_F * sigma_sensing_m)`` for the moment rows, ``mu_F`` the foot's largest
+    declared friction coefficient (``|t_i . f| <= mu n . f`` bounds the effect
+    of the depth uncertainty).
+
+    ``cop_m`` is the measured centre of pressure **on the plate's force-sensing
+    plane** (its normal coordinate is the height of that plane), or ``None``
+    when the foot is below the plate's CoP threshold.  Sigmas are declared
+    1-sigma uncertainties: load [N], CoP per tangent axis [m], sensing-plane
+    height [m] (``0`` when the depth is known exactly).
+
+    The load is kept as measured: an unloaded plate may read slightly negative
+    from noise, and clamping would bias the observation.
+
+    Raises ``ValueError`` for a non-finite load, non-positive load or CoP
+    sigma, negative sensing sigma, a CoP without a positive load, or a CoP
+    that is not a finite 3-vector.  ``cop_m`` is stored read-only.
+    """
+
+    normal_load_n: float
+    cop_m: Array | None
+    sigma_force_n: float
+    sigma_cop_m: float
+    sigma_sensing_m: float
+
+    def __post_init__(self) -> None:
+        if not math.isfinite(self.normal_load_n):
+            raise ValueError(f"normal_load_n must be finite, got {self.normal_load_n}")
+        _positive(self.sigma_force_n, "sigma_force_n")
+        _positive(self.sigma_cop_m, "sigma_cop_m")
+        if not math.isfinite(self.sigma_sensing_m) or self.sigma_sensing_m < 0.0:
+            raise ValueError(
+                f"sigma_sensing_m must be finite and non-negative, got {self.sigma_sensing_m}"
+            )
+        if self.cop_m is not None:
+            if self.normal_load_n <= 0.0:
+                raise ValueError("FootLoadReading.cop_m needs a positive normal load")
+            cop = readonly_float(self.cop_m, "FootLoadReading.cop_m")
+            check_shape(cop, (3,), "FootLoadReading.cop_m")
+            object.__setattr__(self, "cop_m", cop)
+
+
+@dataclass(frozen=True)
+class _PlateBlock:
+    """Rows of one foot's plate observation before stacking."""
+
+    selector: Array
+    values: tuple[float, ...]
+    sigma: tuple[float, ...]
+    names: tuple[str, ...]
+
+
+def _shared_normal(contacts: Sequence[FootContact]) -> Array:
+    normal = contacts[0].normal
+    if any(np.max(np.abs(c.normal - normal)) > ROTATION_ATOL for c in contacts):
+        raise ValueError("contacts must share one ground normal")
+    return normal
+
+
+def _tangential(offsets: Array, normal: Array) -> Array:
+    """Offsets projected onto the tangent plane of ``normal`` (rows)."""
+    return offsets - np.outer(offsets @ normal, normal)
+
+
+def _normal_load_row(normal: Array, members: Sequence[int], n_contacts: int) -> Array:
+    """One row ``sum_{k in members} n . f_k`` over the stacked contact loads."""
+    row = np.zeros((1, 3 * n_contacts))
+    for k in members:
+        row[0, 3 * k : 3 * k + 3] = normal
+    return row
+
+
+def _cop_moment_rows(
+    offsets: Array, members: Sequence[int], frame: Array, n_contacts: int
+) -> Array:
+    """Rows ``sum_k [(r_k . t_i)(n . f_k) - (r_k . n)(t_i . f_k)]``, ``i = 1, 2``.
+
+    ``offsets[j]`` is ``r_k`` of contact ``members[j]`` from the CoP; the
+    second term vanishes for offsets in the tangent plane.
+    """
+    normal = frame[:, 2]
+    rows = np.zeros((2, 3 * n_contacts))
+    for r, k in zip(offsets, members, strict=True):
+        for i in (0, 1):
+            tangent = frame[:, i]
+            rows[i, 3 * k : 3 * k + 3] = (r @ tangent) * normal - (r @ normal) * tangent
+    return rows
+
+
+def _resolve_group(names: Sequence[str], label: str, group: Sequence[str]) -> None:
+    """Every member of ``group`` is a known contact name, each named once."""
+    unknown = sorted(set(group) - set(names))
+    if unknown:
+        raise ValueError(f"group {label!r} has unknown contacts {unknown}")
+    if len(set(group)) != len(group):
+        raise ValueError(f"group {label!r} repeats a contact")
+
+
+def _foot_members(
+    contacts: Sequence[FootContact],
+    readings: Mapping[str, FootLoadReading],
+    groups: Mapping[str, Sequence[str]],
+) -> dict[str, tuple[int, ...]]:
+    if set(readings) != set(groups) or not readings:
+        raise ValueError(
+            f"groups {sorted(groups)} must name exactly the feet of readings "
+            f"{sorted(readings)}"
+        )
+    names = [c.name for c in contacts]
+    seen: set[str] = set()
+    out: dict[str, tuple[int, ...]] = {}
+    for label, group in groups.items():
+        _resolve_group(names, label, group)
+        if seen & set(group):
+            raise ValueError(
+                f"contacts {sorted(seen & set(group))} are in more than one foot"
+            )
+        seen |= set(group)
+        out[label] = tuple(names.index(n) for n in group)
+    return out
+
+
+def _plate_rows(
+    contacts: Sequence[FootContact],
+    members: tuple[int, ...],
+    reading: FootLoadReading,
+    frame: Array,
+) -> _PlateBlock:
+    normal = frame[:, 2]
+    load_row = _normal_load_row(normal, members, len(contacts))
+    if reading.cop_m is None or not members:
+        return _PlateBlock(
+            load_row,
+            (reading.normal_load_n,),
+            (reading.sigma_force_n,),
+            ("normal_load",),
+        )
+    offsets = np.array([contacts[k].position for k in members]) - reading.cop_m
+    mu = max(contacts[k].mu for k in members)
+    # max(N, sigma_N): a load near its own noise must not shrink the band.
+    scale = max(reading.normal_load_n, reading.sigma_force_n)
+    sig_m = scale * math.hypot(reading.sigma_cop_m, mu * reading.sigma_sensing_m)
+    return _PlateBlock(
+        np.vstack([load_row, _cop_moment_rows(offsets, members, frame, len(contacts))]),
+        (reading.normal_load_n, 0.0, 0.0),
+        (reading.sigma_force_n, sig_m, sig_m),
+        ("normal_load", "cop_moment_t1", "cop_moment_t2"),
+    )
 
 
 def _positive(value: float, name: str) -> float:

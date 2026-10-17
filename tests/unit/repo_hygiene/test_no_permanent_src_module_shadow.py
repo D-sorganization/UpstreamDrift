@@ -105,6 +105,24 @@ def _src_namespace() -> dict[str, ModuleType]:
     }
 
 
+def _assert_namespace_restored(saved: dict[str, ModuleType]) -> None:
+    """Assert exit() restored the snapshot, per its documented postcondition.
+
+    Every snapshotted module is back by identity. The only keys exit() may add
+    are parents of snapshotted children that were missing from the snapshot:
+    the healing exception of ``EngineSrcPivot.exit`` (PR #9446).
+    """
+    after = _src_namespace()
+    missing = sorted(name for name, mod in saved.items() if after.get(name) is not mod)
+    assert not missing, f"exit left evicted or replaced repo modules: {missing}"
+    healable = {name.rpartition(".")[0] for name in saved} - set(saved)
+    extra = sorted(set(after) - set(saved) - healable)
+    assert not extra, (
+        "exit must restore the src namespace exactly -- no leftover engine "
+        f"modules, no evicted repo modules; unexpected keys: {extra}"
+    )
+
+
 def _restore(saved: dict[str, ModuleType], saved_path: list[str]) -> None:
     """Belt-and-suspenders cleanup so a failed assertion cannot leak."""
     for name in list(_src_namespace()):
@@ -219,15 +237,53 @@ def test_pivot_exit_restores_the_whole_src_namespace(conftest_path: Path) -> Non
             f"exit left {_EVICTED_PROBE_MODULE} evicted; later tests would "
             "re-import it and hold a duplicate module object"
         )
-        assert _src_namespace() == saved, (
-            "exit must restore the src namespace exactly -- no leftover engine "
-            "modules, no evicted repo modules"
-        )
+        _assert_namespace_restored(saved)
         assert sys.path == saved_path, (
             "exit must also undo the sys.path entries the pivot added"
         )
     finally:
         _restore(saved, saved_path)
+
+
+# A repo package plus a child it does not import itself, used to build the
+# child-without-parent state an earlier test in the same worker can leave.
+_ORPHAN_PARENT = "src.launchers"
+_ORPHAN_CHILD = "src.launchers.launcher_constants"
+
+
+@pytest.mark.parametrize("conftest_path", _PIVOT_CONFTESTS, ids=lambda p: p.parent.name)
+def test_pivot_exit_namespace_check_allows_documented_parent_healing(
+    conftest_path: Path,
+) -> None:
+    """The namespace check must accept the healing exit() is contracted to do.
+
+    Regression coverage for #13106: when an earlier test in the worker popped
+    a parent key but left a child cached, exit() re-imports that parent
+    (PR #9446). The exact-equality check rejected that, so the namespace test
+    failed or passed depending on test order.
+    """
+    pivot = _load_conftest(conftest_path)._PIVOT
+    importlib.import_module(_EVICTED_PROBE_MODULE)
+    importlib.import_module(_ORPHAN_CHILD)
+    saved_parent = sys.modules.pop(_ORPHAN_PARENT)
+    saved = _src_namespace()
+    saved_path = list(sys.path)
+    try:
+        pivot.enter()
+        pivot.exit()
+        _assert_namespace_restored(saved)
+        assert _ORPHAN_PARENT in sys.modules, "exit must heal the popped parent"
+    finally:
+        _restore(saved, saved_path)
+        # Put the original parent back both as a key and as the attribute
+        # exit() re-linked on ``src``, so later tests see one module object.
+        sys.modules[_ORPHAN_PARENT] = saved_parent
+        grandparent_name, _, attr = _ORPHAN_PARENT.rpartition(".")
+        setattr(sys.modules[grandparent_name], attr, saved_parent)
+    assert sys.modules[_ORPHAN_PARENT] is saved_parent
+    assert getattr(sys.modules[grandparent_name], attr) is saved_parent, (
+        "cleanup must not leave a second parent object bound on the package"
+    )
 
 
 @pytest.mark.parametrize("conftest_path", _PIVOT_CONFTESTS, ids=lambda p: p.parent.name)

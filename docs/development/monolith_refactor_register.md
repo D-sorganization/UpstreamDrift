@@ -76,11 +76,11 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1042 | `src/shared/python/physics/flight_models.py` |
 | 1040 | `src/bunkershot3d/solvers/mpm/order_of_accuracy.py` |
 | 1040 | `src/tools/tour_matching_viewer/gui.py` |
+| 1039 | `src/engines/physics_engines/opensim/python/spine/inverse_dynamics.py` |
 | 1037 | `src/tools/bunker_shot_gui/shot3d.py` |
 | 1036 | `src/tools/bunker_shot_gui/report.py` |
 | 1034 | `src/shared/python/motion_matching/pipeline/receipt_components.py` |
 | 1032 | `src/launchers/launcher_ui_setup.py` |
-| 1029 | `src/engines/physics_engines/opensim/python/spine/inverse_dynamics.py` |
 | 1022 | `src/engines/physics_engines/opensim/python/opensim_physics_engine.py` |
 | 1022 | `src/tools/bunker_shot_gui/render3d.py` |
 | 1021 | `src/tools/bunker_shot_gui/slices.py` |
@@ -118,6 +118,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 955 | `src/shared/python/force_overlay/glyphs.py` |
 | 955 | `src/shared/python/pendulum_simulator/gui/simulation_panel.py` |
 | 954 | `src/tools/shot_pattern_analysis/matched_gui.py` |
+| 953 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 952 | `src/shared/python/pendulum_simulator/gui/panel_builders.py` |
 | 950 | `src/engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py` |
 | 950 | `src/shared/python/dashboard/widgets.py` |
@@ -130,7 +131,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 942 | `src/shared/python/estimation/dime_dynamics_window.py` |
 | 934 | `src/shared/python/sidekick/ui/tools_sidebar/os_terminal.py` |
 | 932 | `src/shared/python/model_generation/library/model_library.py` |
-| 928 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 926 | `src/shared/python/engine_core/cross_engine_validator.py` |
 | 924 | `src/engines/physics_engines/opensim/python/muscle_analysis.py` |
 | 924 | `src/research/differentiable/engine.py` |
