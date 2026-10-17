@@ -49,6 +49,7 @@ from src.shared.python.force_plates.interpolation import (
     Estimate,
     interpolate,
     locate,
+    snap,
 )
 from src.shared.python.force_plates.placement import PlatePlacement
 
@@ -62,6 +63,9 @@ __all__ = [
 
 _WORLD_DIM = 3
 _STANCE_DIM = 2
+#: Rounding allowance, in ulps of the largest clock term, for snapping a
+#: trial time onto a sample (two subtractions each round by <= 1/2 ulp).
+_SNAP_ULPS = 4
 
 
 def _optional_non_negative(value: float | None, name: str) -> None:
@@ -187,6 +191,14 @@ class PlacedTrial:
         times = self.trial.times_s
         return float(times[0]), float(times[-1])
 
+    def world_axis_gain(self) -> Array:
+        """``|R|`` (2x2): world-x/y error per unit stance-x/y error.
+
+        A stance error ``e`` maps to world ``R e``, so ``|R| @ |e|`` bounds
+        each world-axis component.
+        """
+        return np.abs(self.placement.rotation[:2, :2])
+
 
 # ------------------------------------------------------------ readings --
 @dataclass(frozen=True)
@@ -212,11 +224,15 @@ class _CopEstimate:
     estimate: Estimate
 
 
-def _cop_estimate(channel: Channel, index: int, t: float) -> _CopEstimate | None:
-    """Per-axis CoP estimates merged (max bias, max rate); ``None`` if unloaded.
+def _cop_estimate(
+    channel: Channel, index: int, t: float, gain: Array
+) -> _CopEstimate | None:
+    """Per-axis CoP estimates in world axes; ``None`` if unloaded.
 
-    ``channel.values`` is the ``(T, 2)`` stance CoP.  Bias and skew rate are
-    those of the worst axis, so they may come from different axes.
+    ``channel.values`` is the ``(T, 2)`` stance CoP and ``gain`` the
+    :meth:`PlacedTrial.world_axis_gain`.  Stance bias and rate magnitudes are
+    carried to world axes by ``gain`` (conservative under yaw); the worst
+    world axis is reported, so bias and rate may come from different axes.
     """
     if np.isnan(channel.values[index : index + 2]).any():
         return None
@@ -226,8 +242,8 @@ def _cop_estimate(channel: Channel, index: int, t: float) -> _CopEstimate | None
     ]
     merged = Estimate(
         value=0.0,
-        bias=max(axis.bias for axis in axes),
-        rate=max(axis.rate for axis in axes),
+        bias=float(np.max(gain @ np.array([axis.bias for axis in axes]))),
+        rate=float(np.max(gain @ np.array([axis.rate for axis in axes]))),
     )
     return _CopEstimate(np.array([axis.value for axis in axes]), merged)
 
@@ -264,7 +280,7 @@ def _foot_sample(
         f"{foot} cop_m",
         "cop_curvature_floor",
     )
-    cop = _cop_estimate(cop_channel, index, t)
+    cop = _cop_estimate(cop_channel, index, t, placed.world_axis_gain())
     base_cop = trial.uncertainty.cop_m
     cop_budget = (
         _Budget(base_cop, 0.0, base_cop)
@@ -292,6 +308,20 @@ def _check_reading_inputs(placed: object, alignment: object, options: object) ->
     ):
         if not isinstance(value, kind):
             raise TypeError(f"{name} must be a {kind.__name__}")
+
+
+def _trial_time(
+    times: Array,
+    model_time_s: float,
+    alignment: PlateTimeAlignment,
+    options: ReadingOptions,
+) -> float:
+    """Trial time of ``model_time_s``, snapped onto a sample within rounding."""
+    t = alignment.trial_time(model_time_s, options.offset_shift_s)
+    scale = max(
+        abs(model_time_s), abs(alignment.offset_s), abs(options.offset_shift_s), abs(t)
+    )
+    return snap(times, t, _SNAP_ULPS * math.ulp(scale))
 
 
 def reading_at(
@@ -322,7 +352,8 @@ def reading_at(
     (``ValueError``).  Postcondition: every sigma is finite and non-negative.
     """
     _check_reading_inputs(placed, alignment, options)
-    t = alignment.trial_time(model_time_s, options.offset_shift_s)
-    bracket = (locate(placed.trial.times_s, t), t)
+    times = placed.trial.times_s
+    t = _trial_time(times, model_time_s, alignment, options)
+    bracket = (locate(times, t), t)
     feet = {foot: _foot_sample(placed, foot, bracket, options) for foot in FOOT_LABELS}
     return PlateReading(model_time_s, t, feet, coverage=options.coverage)
