@@ -77,6 +77,11 @@ def _contact(trial: VerticalPlateTrial) -> dict[str, NDArray[np.bool_]]:
     return {**feet, NET_LABEL: feet["left"] | feet["right"]}
 
 
+def _unobserved(keys: Mapping[str, Array], n: int) -> MappingProxyType:
+    """A fresh all-NaN ``(n, 3)`` table per key (never shared between tables)."""
+    return MappingProxyType({k: np.full((n, 3), np.nan) for k in keys})
+
+
 def _vertical(load_n: Array) -> Array:
     out = np.full((load_n.shape[0], 3), np.nan)
     out[:, 2] = load_n
@@ -105,14 +110,13 @@ def to_ground_reaction_series(
         )
     loads = {**{k: trial.load_n[k] for k in FOOT_LABELS}, NET_LABEL: trial.net_load_n()}
     n = trial.n_samples
-    unobserved = {k: np.full((n, 3), np.nan) for k in loads}
     series = GroundReactionSeries(
         times_s=np.array(trial.times_s),
         force_n=MappingProxyType({k: _vertical(v) for k, v in loads.items()}),
         cop_m=MappingProxyType({k: placement.to_world(trial.cop_m[k]) for k in loads}),
-        free_moment_nm=MappingProxyType(dict(unobserved)),
-        moment_about_com_nm=MappingProxyType(dict(unobserved)),
-        force_moment_about_com_nm=MappingProxyType(dict(unobserved)),
+        free_moment_nm=_unobserved(loads, n),
+        moment_about_com_nm=_unobserved(loads, n),
+        force_moment_about_com_nm=_unobserved(loads, n),
         in_contact=MappingProxyType(_contact(trial)),
         com_m=np.full((n, 3), np.nan),
         ground_height_m=np.full(n, placement.surface_height_m),

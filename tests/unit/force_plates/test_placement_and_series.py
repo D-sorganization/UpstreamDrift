@@ -212,3 +212,12 @@ def test_series_rejects_wrong_types() -> None:
         to_ground_reaction_series("trial", PlatePlacement.identity())  # type: ignore[arg-type]
     with pytest.raises(TypeError, match="placement"):
         to_ground_reaction_series(tf.make_trial(), None)  # type: ignore[arg-type]
+
+
+def test_unobserved_tables_do_not_share_arrays() -> None:
+    # The series is a mutable snapshot: filling one unobserved table must not
+    # silently change another.
+    series = _series()
+    series.moment_about_com_nm["left"][0, 0] = 1.0
+    assert np.isnan(series.free_moment_nm["left"][0, 0])
+    assert np.isnan(series.force_moment_about_com_nm["left"][0, 0])
