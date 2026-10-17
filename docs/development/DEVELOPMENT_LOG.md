@@ -2561,6 +2561,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13082 · Add DV-13082 Deferred-Validation Record for OF-HW Open-Fp Device Qualification; Refresh DV-13061 Now That the Software Children Have Landed
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13082
+- **Branch:** merged via #13129
+- **PR:** #13129
+- **Paths:** see #13129
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`e98259fe`; collated from changes/13082-add-dv-13082-deferred-validation-record.md)
+- **Summary:** Add DV-13082 deferred-validation record for OF-HW open-fp device qualification; refresh DV-13061 now that the software children have landed
+- **Next step:** Shipped in PR #13129.
+
 ### DL-#13110 · Sidekick Smoke-Test Checks Fixtures Out Into an Isolated Path so the Shared Self-Hosted Workspace Is Never Left a Sparse Partial Clone
 
 - **State:** shipped
