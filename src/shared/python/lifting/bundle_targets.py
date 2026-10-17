@@ -1,10 +1,12 @@
 """IK targets and external loads of a LIFT-5 bundle in the OpenSim frame (OSL-3).
 
-A same-input lift bundle (LIFT-5, #11745) replays the full-body golf spec,
-not the Rajagopal model OpenSim lifts use, so the bundle's coordinates do not
-transfer by name (its ``hip_flexion_r`` reads 160-171 deg in the back-squat
-window, outside Rajagopal's -30..120 deg range; its left knee is negative).
-What does transfer is geometry and load:
+A same-input lift bundle (LIFT-5, #11745) replays the AN-1 lift body
+(:mod:`.lift_body`, OSL-14 #13057), not the Rajagopal model OpenSim lifts
+use, so the bundle's coordinates do not transfer by name (its trunk is a de
+Leva chain with a lumbar universal joint, not Rajagopal's lumbar and
+thorax).  The golf spec it replaced read 160-171 deg hip flexion in the
+back-squat window; the lift body stays inside the cited ranges.  What
+transfers is geometry and load:
 
 * **Landmarks.**  The shared MuJoCo marker kinematics of the bundle spec
   (:class:`FullBodyMarkerKinematics`, the attachments the bundle's own IK
@@ -17,8 +19,8 @@ What does transfer is geometry and load:
 * **Hand wrench (GCV-7, #11713).**  The per-hand bushing wrench on the bar
   (:meth:`BushingSample.grip_analysis`); the hands carry its negative.
 * **Pelvis frame (OSL-12, #13048).**  The spec grafts Rajagopal lower limbs
-  onto the golf ``LowerTorso``; both hip joints share one parent orientation,
-  and that orientation, with the spec's hip axis permutation
+  onto the ``LowerTorso``; the right hip's parent orientation (the left one is
+  its ``HIP_MIRROR`` conjugate), with the spec's hip axis permutation
   (``spec_builder.HIP_PERMUTATION``), is the Rajagopal pelvis frame:
   :func:`bundle_pelvis_rotation`.  Its source hip coordinates are kept so a
   caller can check them against a model's range.

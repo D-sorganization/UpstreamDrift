@@ -2,9 +2,11 @@
 
 The IK thresholds below are the residuals measured when the committed bundle
 was generated (``scripts/generate_lift_bundle.py``), rounded up to 0.1 mm;
-they are recorded evidence, not tuning targets.  The dominant residuals come
-from the full-body spec's own left/right segment-length and pelvis asymmetry,
-which a symmetric sagittal chain cannot match exactly.
+they are recorded evidence, not tuning targets.  Since OSL-14 (#13057) the
+bundle replays the AN-1 lift body under its cited ranges: the hip stops at its
+120 deg limit near the bottom, where the optimizer's planar trunk-thigh fold
+asks for more, so the knee, hip and shoulder landmarks trail their sagittal
+targets by up to 2.2 cm there (the Rajagopal legs are also mildly asymmetric).
 """
 
 from __future__ import annotations
@@ -31,18 +33,18 @@ pytestmark = pytest.mark.unit
 
 # Measured maxima over all 151 frames (metres); see module docstring.
 IK_RESIDUAL_THRESHOLDS_M = {
-    "ankle_l": 0.0083,
-    "ankle_r": 0.0054,
-    "knee_l": 0.0270,
-    "knee_r": 0.0110,
-    "hip_l": 0.0149,
-    "hip_r": 0.0153,
-    "shoulder_l": 0.0098,
-    "shoulder_r": 0.0098,
-    "bar": 0.0044,
+    "ankle_l": 0.0056,
+    "ankle_r": 0.0031,
+    "knee_l": 0.0152,
+    "knee_r": 0.0223,
+    "hip_l": 0.0177,
+    "hip_r": 0.0064,
+    "shoulder_l": 0.0196,
+    "shoulder_r": 0.0150,
+    "bar": 0.0001,
 }
-CLOSURE_THRESHOLD_M = 1.9e-6
-FOOT_PENETRATION_THRESHOLD_M = 5.4e-4
+CLOSURE_THRESHOLD_M = 6.4e-8
+FOOT_PENETRATION_THRESHOLD_M = 7.0e-4
 
 
 @pytest.fixture(scope="module")
