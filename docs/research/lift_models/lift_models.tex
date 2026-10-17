@@ -592,6 +592,134 @@ not from a sole-compliance measurement.
 Reproduce with \texttt{python3 scripts/measure\_opensim\_lift\_ik\_id.py} and
 \texttt{python3 -m pytest -o addopts="" tests/unit/lifting/test\_opensim\_lift\_credibility.py}.
 
+\subsection{Lift Body With a Lumbar Joint and Cited Ranges (OSL-14, Issue \#13057)}
+\paragraph{Diagnostic.} The 159--172$^\circ$ bundle hip flexion of OSL-12 is a
+real angle, not a convention offset. The golf hip-calibrated spec has no
+lumbar joint (its spine universal sits at the shoulders), so the whole
+trunk-thigh fold of the squat lands on the hip. The OSL-12 pelvis-frame test
+already shows that the femur pose and the Rajagopal hip rotation agree to
+$10^{-9}$, which rules out an axis or sign offset.
+
+\paragraph{Method.} The bundles now replay the AN-1 anthropometric body
+(\texttt{src/shared/python/lifting/lift\_body.py}, committed at
+\texttt{docs/development/lifting/evidence/lift\_body/lift\_body\_spec.json}):
+\begin{itemize}[nosep]
+\item de Leva segments at 1.78\,m and 80\,kg.
+\item A lumbar universal joint at L5/S1 (\texttt{SpineInputX} lateral bend,
+  \texttt{SpineInputY} flexion).
+\item Hip centres $2\times0.052\,h = 0.1851$\,m apart.
+\item Cited ranges (\texttt{HUMAN\_RANGES\_DEG}: Kapandji, with Rajagopal 2016
+  for the legs).
+\end{itemize}
+The lift IK runs a bounded trust-region (TRF) solve with those ranges as
+bounds. The head, which no landmark observes, and the subtalar joints, which
+Rajagopal locks, are held. Two further changes:
+\begin{itemize}[nosep]
+\item \texttt{apply\_grip\_width} now also moves the left wrist joint's
+  club-side placement. Before, the real left hand stayed at the golf grip, so
+  the bar centre sat about 0.33\,m lateral.
+\item On the OpenSim side, the torso is scaled per axis by
+  (trunk, trunk, shoulder width): the lift body's shoulders are 0.406\,m apart
+  against the generic 0.340\,m.
+\item The pelvis gate accepts a source hip flexion within the shared 0.5$^\circ$
+  range-flag tolerance. This choice was made after seeing the result: the
+  tracked reference overshoots the 120$^\circ$ bound by 0.012$^\circ$.
+\end{itemize}
+
+\paragraph{Bundles.} Every coordinate of the squat, deadlift and clean
+first-pull bundles lies inside its cited range. The bundle IK solutions are
+inside exactly; the MuJoCo-tracked reference overshoots a bound by at most
+0.012$^\circ$.
+
+Squat:
+\begin{itemize}[nosep]
+\item Hip flexion reaches its 120$^\circ$ bound at the bottom.
+\item Lumbar flexion 31--39$^\circ$.
+\item Knee $-115$ to $-110^\circ$ and ankle 26--28$^\circ$.
+\end{itemize}
+
+Pulls:
+\begin{itemize}[nosep]
+\item Hip flexion 82--94$^\circ$ (deadlift) and 75--101$^\circ$ (clean).
+\item The elbows sit at their 5$^\circ$ extension bound, which raises the
+  grip-closure residual to $7.7\times10^{-5}$ (deadlift) and
+  $2.8\times10^{-5}$\,m (clean). These were $1.7\times10^{-7}$ and
+  $6.5\times10^{-7}$\,m with unbounded arms.
+\end{itemize}
+
+The squat foot-penetration bound in \texttt{test\_lift\_bundles.py} rises from
+0.54 to 0.70\,mm. Both this bound and the closure bounds were set after the
+measurement.
+
+\paragraph{Cross-Engine Bar Path.} The CI replay stays within $10^{-9}$\,m.
+Full-window open-loop bar deviation:
+\begin{itemize}[nosep]
+\item Squat: $4.9\times10^{-6}$ falls to $2.1\times10^{-7}$\,m in Drake and
+  Pinocchio, and to $4.1\times10^{-8}$\,m in OpenSim. The segmented frame
+  error falls from $2.2\times10^{-7}$ to $6.9\times10^{-9}$\,m.
+\item Deadlift: at most $8.1\times10^{-10}$\,m.
+\item Clean: at most $2.7\times10^{-14}$\,m.
+\end{itemize}
+
+\paragraph{OpenSim Squat IK/ID.} The committed receipt is measured on the
+LIFT-4 barbell re-track (\texttt{back\_squat\_barbell\_bundle.npz}), and that
+re-track diverges (see Failed Experiments). The receipt is therefore not
+evidence of IK quality.
+\begin{itemize}[nosep]
+\item Before (OSL-12): RMS 7.54\,cm, maximum 24.6\,cm, pelvis untracked.
+  Residual peaks: $t_x$ 1107\,N, tilt 593\,N\,m.
+\item After: RMS 5.04\,cm, maximum 29.7\,cm. The source hip flexion of the
+  diverged states reaches 267$^\circ$, so the pelvis is not tracked and the arms
+  leave their ranges.
+\end{itemize}
+
+A diagnostic run fitted the valid bodyweight squat bundle with the same
+weights and no hand loads (scratch, not committed):
+\begin{itemize}[nosep]
+\item The pelvis landmarks are tracked to 2.3--3.2\,mm.
+\item Marker RMS is 1.78\,cm and the maximum 4.15\,cm (right shoulder),
+  excluding the bar. That bundle's bar target is the shoulder-girdle centre,
+  which the welded hands cannot reach (19.4\,cm).
+\item Segment-angle RMS is 1.35$^\circ$.
+\item Hicks residuals: forces peak at 52.4\,N against the 75.2\,N limit
+  (within); moments peak at 36.8\,N\,m against 8.7\,N\,m (pelvis tilt, not
+  within).
+\end{itemize}
+Before the torso width scaling, shoulder error was 6.0\,cm and the no-bar RMS
+2.42\,cm.
+
+\paragraph{Failed Experiments.}
+\begin{itemize}[nosep]
+\item Levenberg--Marquardt with clipping (the earlier lift IK) showed hip and
+  lumbar hysteresis at the bounds; it was replaced by TRF.
+\item A fitted lead-grip rotation ($-88, 0, 90^\circ$) only compensated for the
+  phantom left hand. It was dropped once the wrist joint moved with the grip.
+\item The pull bundles failed (``arms cannot hold the bar 0.3\,m below the
+  shoulders'') until the wrist fix.
+\item With subtalar free, the dynamic reference left its $\pm20^\circ$ range by
+  0.65$^\circ$.
+\item \textbf{LIFT-4 barbell re-track diverges (pre-existing).}
+  \texttt{build\_barbell\_bundle} does not follow its source in either body:
+  \begin{itemize}[nosep]
+  \item Golf body (committed before OSL-14): \texttt{HipInputZ} error 0.91,
+    14.8 and 39.4$^\circ$ at steps 10, 50 and 100; \texttt{RWInputY}
+    85.8$^\circ$ at step 200.
+  \item Lift body: \texttt{SpineInputY} error passes 1$^\circ$ by step 3 and
+    grows quadratically; the hip then reaches 267$^\circ$.
+  \item Doubling the RK4 substeps (8 to 16) changes nothing.
+  \item Removing the bar-weight feedforward lets the spine track but the left
+    wrist sags.
+  \end{itemize}
+  OSL-12's receipts were therefore also measured on diverged states
+  (follow-up \#13072).
+\end{itemize}
+
+\paragraph{Limitations.} Acceptance is not met on the committed receipt: it
+waits on a non-diverging LIFT-4 re-track. The pelvis is now tracked on the
+bodyweight bundle, but the moment residual still fails Hicks. The AN-1 trunk
+bends only at L5/S1 against Rajagopal's lumbar joint, and the arms are not
+Rajagopal's.
+
 \section{Measured Parity Results}
 All figures below are read from the committed receipt,
 \texttt{docs/development/lifting/pack\_parity\_baseline.json} (schema

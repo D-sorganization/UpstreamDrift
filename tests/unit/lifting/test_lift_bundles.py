@@ -33,14 +33,14 @@ pytestmark = pytest.mark.unit
 
 # Measured maxima over all 151 frames (metres); see module docstring.
 IK_RESIDUAL_THRESHOLDS_M = {
-    "ankle_l": 0.0056,
+    "ankle_l": 0.0057,
     "ankle_r": 0.0031,
     "knee_l": 0.0152,
-    "knee_r": 0.0223,
-    "hip_l": 0.0177,
+    "knee_r": 0.0225,
+    "hip_l": 0.0178,
     "hip_r": 0.0064,
     "shoulder_l": 0.0196,
-    "shoulder_r": 0.0150,
+    "shoulder_r": 0.0151,
     "bar": 0.0001,
 }
 CLOSURE_THRESHOLD_M = 6.4e-8

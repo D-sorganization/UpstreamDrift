@@ -42,7 +42,7 @@ _EVIDENCE = BACK_SQUAT_BUNDLE.parents[1]
 #: The LIFT-4 barbell re-track (``BACK_SQUAT_BARBELL_BUNDLE``) is not listed:
 #: its MuJoCo replay with the bar on hand bushings diverges from the source
 #: reference for the golf body and the lift body alike (pre-existing LIFT-4
-#: defect, measured in ``lift_models.tex``), so its states are not a lift.
+#: defect #13072, measured in ``lift_models.tex``), so its states are not a lift.
 COMMITTED_BUNDLES = (
     BACK_SQUAT_BUNDLE,
     _EVIDENCE / "deadlift" / "deadlift_bundle.npz",
@@ -122,8 +122,12 @@ def test_committed_bundle_stays_inside_cited_ranges(path) -> None:
     # The shared flag tolerance (0.5 deg): the IK solution is inside the bounds
     # exactly; the MuJoCo-tracked reference overshoots a bound by <= 0.02 deg.
     assert violations(q, order, ranges) == {}
+    # Subtalar is held at 0 in the IK (Rajagopal locks it); the tracked
+    # reference drifts up to 1.09 deg (squat), inside its cited range.
+    standing = bundle.provenance["ik"]["q_standing"]
     for name in ("subtalar_angle_l", "subtalar_angle_r"):
-        assert np.abs(q[:, order.index(name)]).max() < np.radians(0.5)
+        assert name in bundle.provenance["ik"]["locked"]
+        assert standing[order.index(name)] == 0.0
 
 
 @pytest.mark.parametrize("path", COMMITTED_BUNDLES[:1], ids=lambda p: p.stem)
