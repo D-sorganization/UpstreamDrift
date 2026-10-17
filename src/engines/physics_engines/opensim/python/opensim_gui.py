@@ -328,7 +328,10 @@ class MainWidget(QWidget):
                 self.fig, segments, title=Path(self.model_path).name
             )
             self.canvas.draw_idle()
-        except Exception as exc:  # noqa: BLE001  # surfaced in the banner, not hidden
+        # Missing file (OSError), OpenSim/SWIG load failure (RuntimeError), no
+        # opensim install (ImportError), bad geometry/gravity (ValueError):
+        # each is surfaced in the banner rather than leaving a blank view.
+        except (OSError, RuntimeError, ImportError, ValueError) as exc:
             banner = f"{banner + '; ' if banner else ''}preview unavailable: {exc}"
         self.lbl_geometry_banner.setText(banner or "")
         self.lbl_geometry_banner.setVisible(banner is not None)
