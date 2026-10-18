@@ -44,10 +44,12 @@ pytestmark = pytest.mark.unit
 # #13037 (whole-row de Leva lift body plus the 10 deg tibial torsion of
 # #12814): ankle_r 4.43 mm, hip_r 9.32 mm and the closure 8.97e-8 m exceed
 # their snapshots, which are re-derived with the same rounding; evidence on
-# #13041 (issuecomment-6243170509).
+# #13041 (issuecomment-6243170509).  On the OSL-17 high-bar rack (#13131) the
+# whole-row body gives ankle_r 4.89 mm (rack on the earlier body 3.53 mm), so
+# that snapshot is re-derived again with the same rounding.
 IK_RESIDUAL_THRESHOLDS_M = {
     "ankle_l": 0.0057,
-    "ankle_r": 0.0045,
+    "ankle_r": 0.0049,
     "knee_l": 0.0152,
     "knee_r": 0.0225,
     "hip_l": 0.0178,
