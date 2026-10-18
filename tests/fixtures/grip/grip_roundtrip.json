@@ -1,0 +1,172 @@
+{
+  "comment": "Shared by tests/unit/motion_matching/test_grip_selection.py (Python resolver, spec_builder CLI, desktop model, web API) and ui/src/components/character/gripSelection.test.ts (TypeScript writer). Expected values are the Python resolver's output (HRG-GR4, #13205).",
+  "cases": [
+    {
+      "name": "weak",
+      "picks": {
+        "preset": "weak"
+      },
+      "expected": {
+        "grip": {
+          "lead": {
+            "alpha_deg": -15.0,
+            "psi_deg": 40.0,
+            "gamma_deg": 0.0
+          },
+          "trail": {
+            "alpha_deg": -15.0,
+            "psi_deg": 40.0,
+            "gamma_deg": 0.0
+          },
+          "lead_below_butt_m": 0.032,
+          "hand_spacing_m": 0.0762,
+          "handedness": "right"
+        },
+        "sidecar_grip": {},
+        "refit_required": true,
+        "driver_physics_spec_sha256": "abaaa6e77dd3d5981bbdfdbdde87a588036f303974cb6881a37d501300cf583c",
+        "character_physics_spec_sha256": "6732a6cb8a54eb9971cc5dbe4e4edffd869a64622cfe48ce7523092339c1248b"
+      }
+    },
+    {
+      "name": "strong_palm",
+      "picks": {
+        "preset": "strong",
+        "lead_palm_diagonal": 55.0
+      },
+      "expected": {
+        "grip": {
+          "lead": {
+            "alpha_deg": 15.0,
+            "psi_deg": 55.0,
+            "gamma_deg": 0.0
+          },
+          "trail": {
+            "alpha_deg": 15.0,
+            "psi_deg": 40.0,
+            "gamma_deg": 0.0
+          },
+          "lead_below_butt_m": 0.032,
+          "hand_spacing_m": 0.0762,
+          "handedness": "right"
+        },
+        "sidecar_grip": {},
+        "refit_required": true,
+        "driver_physics_spec_sha256": "bc6762ffd267effe13c3dc66efc30a6dd39874446cc3e5d612632b5be004c56d",
+        "character_physics_spec_sha256": "05e1e39f64e0f14dc17da4ed9bdad34b10e4ff6fb300fae7e26f30a2a5455043"
+      }
+    },
+    {
+      "name": "neutral_wide",
+      "picks": {
+        "preset": "neutral",
+        "hand_spacing": 0.09,
+        "trail_shaft_rotation": 5.0
+      },
+      "expected": {
+        "grip": {
+          "lead": {
+            "alpha_deg": 0.0,
+            "psi_deg": 40.0,
+            "gamma_deg": 0.0
+          },
+          "trail": {
+            "alpha_deg": 5.0,
+            "psi_deg": 40.0,
+            "gamma_deg": 0.0
+          },
+          "lead_below_butt_m": 0.032,
+          "hand_spacing_m": 0.09,
+          "handedness": "right"
+        },
+        "sidecar_grip": {},
+        "refit_required": true,
+        "driver_physics_spec_sha256": "0989eeb5d12240f788ea634a81675c49435edb190aa064683f6b358c011dc950",
+        "character_physics_spec_sha256": "e1daa9d6c4fdc6bbc208b3f2ff875dfd266ca622b743fa3fcc770a42d52b847b"
+      }
+    },
+    {
+      "name": "explicit_angles",
+      "picks": {
+        "lead_shaft_rotation": 8.0,
+        "trail_shaft_rotation": -4.0,
+        "lead_palm_diagonal": 45.0,
+        "trail_palm_diagonal": 50.0,
+        "lead_set_angle": 3.0,
+        "trail_set_angle": -2.0
+      },
+      "expected": {
+        "grip": {
+          "lead": {
+            "alpha_deg": 8.0,
+            "psi_deg": 45.0,
+            "gamma_deg": 3.0
+          },
+          "trail": {
+            "alpha_deg": -4.0,
+            "psi_deg": 50.0,
+            "gamma_deg": -2.0
+          },
+          "lead_below_butt_m": 0.032,
+          "hand_spacing_m": 0.0762,
+          "handedness": "right"
+        },
+        "sidecar_grip": {},
+        "refit_required": true,
+        "driver_physics_spec_sha256": "151d0823d5cb88edeeb928c32cca386445f9cc38f86a683b0999c52c0a5aaeeb",
+        "character_physics_spec_sha256": "600cbb2289daf7f978410b1557ccb664a3eda2d0b870d3f7505922e7e66a3ca8"
+      }
+    },
+    {
+      "name": "style_only",
+      "picks": {
+        "grip_style": "interlock",
+        "grip_thumb_offset_deg": 20.0
+      },
+      "expected": {
+        "grip": null,
+        "sidecar_grip": {
+          "style": "interlock",
+          "lead_thumb_offset_deg": 20.0
+        },
+        "refit_required": false,
+        "driver_physics_spec_sha256": "296bdc363b3f68cbfba3a651efc45e818b3946331802e8fa113a650eb973537f",
+        "character_physics_spec_sha256": "d7b5b93bcfc9bb619d8c8d01d83f192bb0d9d55f19dd507668158e575ab8df45"
+      }
+    },
+    {
+      "name": "preset_and_style",
+      "picks": {
+        "preset": "strong",
+        "grip_style": "ten_finger"
+      },
+      "expected": {
+        "grip": {
+          "lead": {
+            "alpha_deg": 15.0,
+            "psi_deg": 40.0,
+            "gamma_deg": 0.0
+          },
+          "trail": {
+            "alpha_deg": 15.0,
+            "psi_deg": 40.0,
+            "gamma_deg": 0.0
+          },
+          "lead_below_butt_m": 0.032,
+          "hand_spacing_m": 0.0762,
+          "handedness": "right"
+        },
+        "sidecar_grip": {
+          "style": "ten_finger"
+        },
+        "refit_required": true,
+        "driver_physics_spec_sha256": "9c10c7e4bc260b08258ea88bd39abf2995deedfc31a3b64c05609966030a5359",
+        "character_physics_spec_sha256": "35d8bbb9e4ef8a2bdfb825bbe0a419da665389e2d15e15a30a83a6492876066a"
+      }
+    }
+  ],
+  "parent": {
+    "driver_physics_spec_sha256": "296bdc363b3f68cbfba3a651efc45e818b3946331802e8fa113a650eb973537f",
+    "character_physics_spec_sha256": "d7b5b93bcfc9bb619d8c8d01d83f192bb0d9d55f19dd507668158e575ab8df45"
+  }
+}

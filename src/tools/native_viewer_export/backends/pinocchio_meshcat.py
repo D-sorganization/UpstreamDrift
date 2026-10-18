@@ -29,8 +29,9 @@ from src.tools.native_viewer_export.backends._meshcat_scene import (
     VisualItem,
     build_scene_visuals,
     check_bodies,
-    default_appearance,
+    default_appearance as default_appearance,
 )
+from src.tools.native_viewer_export.backends._body import scene_appearance
 from src.tools.native_viewer_export.backends._meshcat_page import (
     MeshcatPage,
     playwright_unavailable_reason,
@@ -68,7 +69,12 @@ class PinocchioMeshcatBackend:
 
     def __init__(self, plain: bool = False) -> None:
         """``plain`` draws the grey library skeleton instead of the appearance."""
-        self._appearance = None if plain else default_appearance()
+        self._plain = plain
+        self._appearance = scene_appearance(plain, None)
+
+    def _apply_settings(self, settings: ExportSettings) -> None:
+        """Adopt the export's resolved appearance document (HRG-B2, #13167)."""
+        self._appearance = scene_appearance(self._plain, settings.appearance)
 
     def unavailable_reason(self) -> str | None:
         for module in ("pinocchio", "meshcat", "coal"):
@@ -128,6 +134,7 @@ class PinocchioMeshcatBackend:
         indices: Sequence[int],
         overlay: OverlayFeed | None,
     ) -> Iterator[dict[str, Image8]]:
+        self._apply_settings(settings)
         adapter, viz, _, scene = self._build(swing)
         names = swing.bundle.coordinate_order
 

@@ -6008,6 +6008,269 @@ constant. Limitation: $\delta$ and the V angles are not yet coupled; a
 calibration that turned the hand by $\psi_L$ would change the committed
 address frames and needs an OpenSim host to rerun.
 
+\subsection{Subject Handedness and Lead-Trail Sides}
+Definition (HRG-GR0, \#13201). \texttt{subject.handedness} is
+\texttt{"right"} or \texttt{"left"}: the hand that is \emph{lead} (nearer the
+target) is the anatomical left hand of a right-handed golfer and the right
+hand of a left-handed one. \texttt{core.handedness} is the single resolver:
+\texttt{lead\_side} gives \texttt{"L"} for right and \texttt{"R"} for left,
+\texttt{trail\_side} the other, and any other value raises \texttt{ValueError}.
+A spec without the field resolves to \texttt{"right"} through
+\texttt{subject\_handedness}; this is a declared default, not an inference from
+data. The builder writes the key only for a non-default value, so every spec
+and receipt committed before this change is byte-identical (a test hashes a
+committed spec across the accessor); the receipt schema carries an optional
+\texttt{handedness} that is \texttt{null} on old receipts.
+
+Sign conventions. \texttt{GripPose.landmarks} uses the golfer body frame
+$x$ anterior, $y$ toward the golfer's anatomical left, $z$ up. The sagittal
+plane is $x$--$z$, so the lateral axis is $y$ and the sagittal reflection is
+$P=\mathrm{diag}(1,-1,1)$. The target lies toward $+y$ for a right-hander and
+$-y$ for a left-hander; the toe axis is $+x$; the grip axis is idealised as
+vertical, down $-z$ from the butt. Every distance and angle of the grip is in
+lead/trail terms and is identical for both handednesses; only the target
+direction, hence the azimuth and palm-normal vectors, changes sign in $y$.
+Hence $P\,\ell_{\mathrm{right}}=\ell_{\mathrm{left}}$ for each landmark
+$\ell$, tested to $10^{-9}$~m. Limitation: the OpenSim address calibration
+still maps lead and trail to fixed sides (\texttt{SIDE\_HANDS}); it is a
+right-handed-only consumer until a follow-up changes it.
+
+\subsection{Grip Configuration: Golf Angles and the Calibration Euler Triple}
+Definition (HRG-GR1, \#13202; \texttt{motion\_matching/grip\_contract.py}).
+Two grip descriptions existed unconnected: the visual \texttt{GripPose}
+(V azimuth, palm diagonal) and the physical \texttt{subject.grip\_rotation\_deg}
+(extrinsic $x$-$y$-$z$ Euler triples, calibration constants of
+\texttt{grip\_fit}). The triples are not golf angles and are never edited by
+users. This change adds the exact bijection and the \texttt{GripSpec} contract
+only; no builder, spec or receipt reads it, so every committed spec and receipt
+is byte-identical.
+
+\paragraph{Equations and Frames.}
+The builder writes the rotation block $C=N\,M$ of the wrist
+\texttt{child\_to\_follower}, with $N$ the native block and
+$M=R_x(25^\circ)\,G(e)$ the total constant offset, where
+$G(e)=R_z(e_z)R_y(e_y)R_x(e_x)$ is the extrinsic $x$-$y$-$z$ matrix of the
+stored triple $e$ (degrees) and $25^\circ$ is \texttt{GRIP\_ULNAR\_OFFSET\_DEG}.
+In \texttt{native\_geometry\_spec\_9967.json}
+$N_L=R_y(80^\circ)$ and $B\,N_R=R_y(80^\circ)$ with $B$ the rotation of the
+closure \texttt{placement\_b}, both to $1.1\times10^{-16}$: the club-frame
+rotation of the native follower frame is the same $R_y(80^\circ)$ for both
+hands, and its $y$ axis is the shaft, butt to head ($+y$: the head lies at
+$+1.124$~m along $y$ from the lead wrist in the club frame). Unit: degrees,
+right-handed rotations.
+
+\paragraph{Factorisation (Verified Independently).}
+$M$ factors uniquely as the intrinsic $Y$-$X$-$Z$ product
+\begin{equation}
+M=R_y(\alpha)\,R_x(\psi-90^\circ)\,R_z(\gamma),\qquad |\psi-90^\circ|<90^\circ,
+\end{equation}
+with the closed form $\beta=\psi-90^\circ=\arcsin(-M_{12})$,
+$\alpha=\operatorname{atan2}(M_{02},M_{22})$ and
+$\gamma=\operatorname{atan2}(M_{10},M_{11})$. Hence
+$e=\mathrm{euler}_{xyz}\!\left(R_x(-25^\circ)M\right)$. The three claims
+tested: (i) $R_y(\alpha)$ commutes with $R_y(80^\circ)$, so for both hands the
+club-frame twist between two grips differing in $\alpha$ is exactly
+$R_y(\Delta\alpha)$ (rotation vector $(0,\Delta\alpha,0)$ to $10^{-9}$ degrees);
+(ii) $R_z(\gamma)$ stands directly against the distal wrist primitive
+$R_z(\text{flexion})$, so $\gamma$ only offsets the flexion coordinate of the
+hand orientation (the position of the hand origin is not invariant, because
+the translation block is fixed in the hand frame); (iii) the defaults decompose
+to $L:(\alpha,\psi,\gamma)=(0,25,47)^\circ$ and, for the driver refit of \#12221,
+$L=(-25.018,55.120,94.098)^\circ$, $R=(16.312,63.826,78.857)^\circ$. This
+confirms the proposed $Y$-$X$-$Z$ factorisation unchanged; no correction was
+needed.
+
+\paragraph{Angles and Presets.}
+$\alpha$ is the rotation about the shaft, positive being stronger: a
+right-hand rotation about $g$ (butt to head), which is the direction of
+increasing V azimuth of \texttt{GripPose} (azimuth increases toward the trail
+side). $\psi$ is the palm diagonal, radial to distal in the palm plane, and
+$\gamma$ the set angle about the wrist flexion axis, default $0$ and kept so
+the map is lossless. The published neutral transform is $\alpha=\gamma=0$,
+$\psi=40^\circ$ (\texttt{PALM\_DIAGONAL\_DEG}), that is $M_0=R_x(-50^\circ)$ and
+the Euler triple $(-75^\circ,0,0)$, \texttt{NEUTRAL\_EULER\_DEG}. The fitted
+defaults are calibration constants, not neutral. Presets are product values,
+not anatomical thresholds: $\alpha\in\{-15,0,+15\}^\circ$ for
+weak, neutral, strong (about one, two and three lead-hand knuckles visible at
+address, a coaching approximation) and $\psi\in\{25,40,65\}^\circ$ for
+fingers, neutral, palm. The visual pose is derived:
+V azimuth $=20^\circ+\alpha_{\mathrm{lead}}$, so \texttt{grip\_strength}
+(\#13166) is $\alpha$, one value with two consumers. The visual pose carries
+one palm diagonal (the lead hand's); the trail $\psi$ is physical only.
+
+\paragraph{Singularities and Branches.}
+The factorisation is singular at $\psi=0^\circ$ or $180^\circ$
+($|M_{12}|=1$); \texttt{hand\_from\_euler} raises \texttt{ValueError}, and
+\texttt{HandAngles} restricts $\psi$ to $[5,85]^\circ$, $\alpha$ to
+$[-60,60]^\circ$ and $\gamma$ to $[-180,180]^\circ$. The extrinsic $x$-$y$-$z$
+triple is itself singular at $e_y=\pm90^\circ$ and the fit receipt may report
+a different branch of the same rotation, so triples are never compared:
+matrices are compared by Frobenius norm. A left-handed spec uses the same
+lead/trail numbers and swaps the anatomical sides through
+\texttt{lead\_side}; its visual landmarks equal $P\,\ell_{\mathrm{right}}$
+(GR0 helper) to $10^{-9}$.
+
+\paragraph{Results.}
+Over 1000 seeded samples ($\alpha\in[-60,60]^\circ$, $\psi\in[15,75]^\circ$,
+$\gamma\in[-90,90]^\circ$) the round trip error is at most
+$1.8\times10^{-13}$ degrees and the matrix Frobenius error at most
+$3.0\times10^{-15}$. Decomposing and recomposing the stored triples
+reproduces the committed rotation blocks to at most $5.6\times10^{-16}$ for
+the driver and the 7-iron specs (both hands), and the built defaults to
+$10^{-9}$. The $+15^\circ$ strong preset rotates the physical follower frame
+about the shaft by $15^\circ\pm10^{-9}$ with no change of the translation block
+(0 by construction), and turns the visual lead V direction by the same
+$15^\circ$. Reproduce with
+\texttt{pytest tests/unit/motion\_matching/test\_grip\_contract.py}.
+
+\paragraph{Investigation of the Grip-Roll Offset.}
+Reported: \texttt{\_grip\_offset} left-multiplies $R_y(\text{roll})$ onto the
+$4\times4$ \texttt{child\_to\_follower}. Two claims were tested. (a) The roll
+also rotates the wrist translation. This is correct, not a defect: the wrist
+lies $6.4$~cm off the shaft axis, so rolling the hand rigidly about the shaft
+carries the standoff around it; the test asserts the radial distance and the
+position along the shaft are preserved to $10^{-12}$. (b) The shaft axis
+differs between the children. Confirmed: $y$ is the shaft only in the lead
+child (the club); in \texttt{RHandStandoff} the shaft is $+x$. With a $40^\circ$
+roll the trail follower frame turned by the rotation vector
+$(6.95,0,-39.39)^\circ$ in the club frame, an axis $90^\circ$ from the shaft
+(red test \texttt{test\_roll\_turns\_each\_hand\_about\_the\_shaft\_by\_the\_roll[R]}),
+and its position moved along the shaft by $8.2$~mm. Fix: the roll is
+conjugated by the pose of the child frame in the club frame,
+$X=B_{\mathrm{pl}}A_{\mathrm{pl}}^{-1}$ from the closure placements, so
+$A=X^{-1}R_y X$ (identity for the lead child). A zero roll skips the product,
+so the output is bit-identical; every committed spec records
+\texttt{grip\_roll\_deg}~$=0$, so no committed spec or receipt changes, and
+the lead hand with a non-zero roll is unchanged. Only a non-zero trail roll,
+which no committed artefact uses, now turns about the shaft.
+
+\subsection{Physical Grip Revision, Closure Shift, and Provenance}
+Definition (HRG-GR2, \#13203; \texttt{execution/grip\_rotation.py},
+\texttt{apply\_grip\_config}). A \texttt{GripSpec} is applied to a spec
+document as a \emph{new revision}; the input document, and every committed
+spec and receipt, keep their bytes.
+
+\paragraph{Revision Schema.}
+The result carries \texttt{spec\_revision} with \texttt{version} (parent
+version $+1$), \texttt{configuration} (\texttt{"grip"}),
+\texttt{parent\_spec\_canonical\_sha256} (the canonical hash of the input) and
+\texttt{parent\_physics\_spec\_sha256}; \texttt{subject.grip\_config} holds the
+physical configuration at full double precision (lead and trail
+$(\alpha,\psi,\gamma)$, \texttt{lead\_below\_butt\_m}, \texttt{hand\_spacing\_m},
+\texttt{handedness}) and \texttt{subject.grip\_provenance} the source of each of
+the eight physical parameters. Style and thumb offset are visual only and live
+in \texttt{visual\_hints.grip}, which \texttt{physics\_spec\_sha256} strips, so
+changing them alters the file bytes but not the physics hash and mints no
+revision. Applying a configuration whose physical part and provenance already
+match returns an equal document (idempotent).
+
+\paragraph{Equations.}
+Rotation: for a hand with stored triple $R$ and target $T=$
+\texttt{hand\_to\_euler}$(\alpha,\psi,\gamma)$ the rotation block becomes
+$C\leftarrow C\,G(R)^{\top}G(T)$ in float64, so a chain of revisions agrees
+with the direct application to $10^{-14}$ (no rounded triple is re-read).
+Closure shift: with club length $L$ (\texttt{club.length\_m}), the club frame
+has $y$ along the shaft, butt to head, with the head at $y=0$. The lead wrist is
+$y_L=-(L-d)$ for depth $d=$\texttt{lead\_below\_butt\_m}, and the trail weld
+$y_T=y_L+s$ for spacing $s=$\texttt{hand\_spacing\_m}. Both are absolute
+targets: $\Delta_L=y_L^{\mathrm{new}}-y_L^{\mathrm{old}}$ is added to the $(1,3)$
+entry of the lead wrist \texttt{child\_to\_follower} (a club-frame translation,
+unchanged by a roll about $y$) and $\Delta_T=y_T^{\mathrm{new}}-y_T^{\mathrm{old}}$
+to \texttt{closure.placement\_b}; the trail wrist translation lies in the
+standoff frame, which the weld carries. \texttt{LHand} and
+\texttt{LHandStandoff} (and frame \texttt{LW}) move by $\Delta_L$, \texttt{RHand}
+by $\Delta_T$; masses, inertias and centres of mass are not edited, so nothing is
+counted twice. \texttt{club.wrist\_to\_head\_m} is set to $-y_L$.
+
+\paragraph{Provenance and the Lane.}
+Sources are \texttt{user\_declared}, \texttt{rom\_set\_identified} and
+\texttt{default}; \texttt{fitted\_grip} (wrist bounding in the lane) is true only
+when a parameter is \texttt{rom\_set\_identified}. A document without
+\texttt{grip\_provenance} (every pre-GR2 spec) keeps the legacy rule, a nonzero
+rotation. The receipt records \texttt{grip\_provenance} and \texttt{spec\_revision}.
+Visual hands take \texttt{GripSpec.pose()}; \texttt{resolve\_visual\_pose}
+rejects an override of a physical value (V azimuth, trail V, palm diagonal,
+depth, spacing, handedness) unless explicitly flagged.
+
+\paragraph{Limitations and Results.}
+A left-handed physical spec raises \texttt{ValueError}: its wrist
+\texttt{child\_to\_follower} would have to be mirrored, which is not implemented,
+and a silently right-handed model is refused. Measured: the strong preset turns
+the compiled lead hand frame about the shaft by $14.999999999999986^\circ$
+($\pm0.01^\circ$ required); the \texttt{GripInterface.from\_spec} spacing error
+at $s=0.0123456789$~m is $4.5\times10^{-17}$~m; style and thumb leave
+\texttt{body\_mass}, \texttt{body\_inertia}, \texttt{jnt\_axis}, \texttt{eq\_data}
+and the physics hash identical. Reproduce with
+\texttt{pytest tests/unit/motion\_matching/test\_grip\_config.py}.
+
+\subsection{Grip Fitting Modes and Golf-Language Reporting}
+Definition (HRG-GR3, \#13204; \texttt{motion\_matching/grip\_fit\_modes.py},
+\texttt{grip\_report.py}). \emph{Observability.} The capture has no hand or
+finger markers and the three-coordinate forearm-plus-wrist chain spans
+$SO(3)$, so a constant grip rotation is absorbed with no change of marker
+residual. The fit therefore \emph{set-identifies} the grip through the
+joint-range excess only: it is regularised, not measured. Style, thumb offset,
+depth and spacing are unobservable and stay user-declared. The global marker
+residual (50.9~mm in the HRG record) is never an angular interval and is not
+reported as one.
+
+\paragraph{Objective.}
+Let $\theta=(\alpha,\psi,\gamma)$ be the golf angles of the total hand offset,
+$M(\theta)=R_y(\alpha)R_x(\psi-90^\circ)R_z(\gamma)$, and $\theta_u$ the
+declared grip carried by the document. The stack $A_k$ of forearm-to-hand
+rotations is measured with $\theta_u$ in place, so a candidate turns it by
+$E(\theta)=M(\theta_u)^{\mathsf T}M(\theta)$ (the $25^\circ$ ulnar factor
+cancels). With $e_j(\cdot)$ the degrees beyond the human range of wrist
+coordinate $j$ (pronation, cock, flexion) of $A_kE$,
+\begin{equation}
+J(\theta)=\sqrt{\tfrac1{3K}\textstyle\sum_{k,j}e_j(A_kE(\theta))^2},\qquad
+F(\theta)=J(\theta)+\lambda\,\lVert\theta-\theta_0\rVert^2 .
+\end{equation}
+Units: $J$ degrees, $\lambda$ per square degree. Modes (\texttt{subject.grip\_mode},
+default \texttt{user\_fixed}):
+\texttt{user\_fixed} runs no fit and returns $\theta_u$ (drift exactly zero);
+\texttt{bounded\_prior} minimises $F$ with $\theta_0=\theta_u$,
+$\lambda=10^{-4}$, inside $\theta_u\pm h$ ($h=(20,20,30)^\circ$ default,
+intersected with the physical ranges $\alpha\in[-60,60]$, $\psi\in[5,85]$,
+$\gamma\in[-180,180]$); \texttt{free\_fit} minimises $F$ over the physical
+ranges with $\theta_0=(0,40,0)^\circ$ (neutral) and $\lambda=10^{-5}$, so a
+zero-cost plateau has one answer. Method: a seven-point-per-axis grid seeds
+Nelder--Mead from the declared, prior and three best grid points
+(deterministic, independent of the multistart seed). Postcondition
+$J(\theta^\ast)\le J(\theta_u)$ in every mode, enforced by falling back to
+$\theta_u$ and flagging it. The legacy Euler search \texttt{fit\_grip\_rotation}
+is unchanged and shares the cost \texttt{ExcessObjective}.
+
+\paragraph{Reporting and Uncertainty.}
+Each hand is reported as $(\alpha,\psi,\gamma)$ with the nearest product
+preset in golf words (weak, neutral, strong; fingers, neutral, palm), the
+declared value, the drift, bound hits and $J$ before and after.
+\emph{Feasible interval:} for each angle, the other two are minimised over a
+61-point profile scan of the search box; the interval is the hull of values
+whose profile $J$ is within $0.1^\circ$ of the minimum, with the grid
+resolution and an at-edge flag. \emph{Sensitivity:} seeded random starts are
+polished on $F$; the per-angle spread among starts within $0.1^\circ$ of the
+best $J$ is reported. Unavailable items (\texttt{user\_fixed}, not requested)
+are \texttt{null} with a reason, never zero. A fit stamps
+\texttt{rom\_set\_identified} (through \texttt{apply\_grip\_config}) on the
+angles it moved by more than $10^{-3\circ}$ only; depth and spacing stay
+\texttt{user\_declared}, and \texttt{fitted\_grip} then follows the bound-wrist
+rule. \texttt{scripts/set\_spec\_grip\_rotation.py} logs the applied totals in
+the same golf terms with the set-identification caveat.
+
+\paragraph{Results (Synthetic Fixtures).}
+Plateau ($J=0$ at the declared grip): with $\lambda=0$ the equally-good
+multistart solutions spread by $88^\circ$, $25^\circ$ and $64^\circ$ in
+$\alpha,\psi,\gamma$; with the tie-breaker they spread by at most
+$5\times10^{-4\circ}$ and land on the neutral grip. Bounded example (hidden
+$(45,-35,30)^\circ$ rotation, $h=(10,10,15)^\circ$): $J$ falls from
+$7.24^\circ$ to $2.08^\circ$ with all three angles on a bound (interval
+widths $0.7^\circ$, $0.7^\circ$, $4^\circ$ at the bound), which reads as
+\emph{bounds too tight}, not as an identified anatomy. Real-capture
+validation is deferred. Reproduce with
+\texttt{pytest tests/unit/motion\_matching/test\_grip\_fit\_modes.py
+tests/scripts/test\_set\_spec\_grip\_rotation.py}.
+
 \subsection{Reconciling the Hand Spacing}
 \texttt{club\_geometry.py} previously placed the hands 0.035 m apart
 ($-0.025$ and $-0.06$ m) while the native spec places them 0.0762 m apart.
@@ -6193,6 +6456,82 @@ licence still has to be confirmed and recorded before any asset-based variant.
  Rajagopal coordinates, so no \texttt{golf\_humanoid} residual series is
  claimed; its welds are exact at the calibrated address pose only.
 \end{itemize}
+
+\subsection{Anatomical Wrist and Forearm Angles}
+HRG-E2 (\#13169) adds the package \texttt{anatomical\_angles} and eight terms
+(lead/trail wrist flexion--extension, ulnar deviation, wrist axial rotation,
+forearm pronation) to the single golf-term registry
+(\texttt{spine/golf\_terms.py}); there is no second registry. Segment poses are
+passed as \texttt{AnatomicalFrame} objects; an engine adapter supplies body
+poses and a calibration, so no engine joint name or sign enters the angles.
+
+\paragraph{Conventions and Frames.}
+Wu et al.\ (2005, ISB part II, section 4.3) frames: the radius and the third
+metacarpal (hand). Both sides use the proper frame with columns
+$X$ volar, $Y$ proximal and $Z=X\times Y$ (radial on the right, ulnar on the
+left). The printed left-side triad (dorsal, distal, ulnar) is left-handed if
+read literally, so it is realised by the proper frame above plus the
+side-sign table below. The wrist uses the ISB \texttt{isb\_wrist} Cardan
+sequence $R=R_z(a)R_x(b)R_y(c)$ on $R_{\mathrm{rad}}^{\top}R_{\mathrm{hand}}$:
+$a$ flexion (about the radius $Z$), $b$ ulnar deviation (floating axis) and $c$
+a third angle about the hand long axis. Forearm pronation is the third angle of
+the ISB elbow sequence (\texttt{isb\_elbow}, $ZXY$) on
+$R_{\mathrm{hum}}^{\top}R_{\mathrm{forearm}}$, whose frames differ from the
+wrist frames; it is reported as its own series and is not the wrist third
+angle. Angles are radians in the code and degrees in the registry.
+Basis maps are explicit: \texttt{ISB\_FROM\_MYOFULLBODY} relabels MyoFullBody
+($x$ right, $y$ up, $z$ posterior) to ISB ($X$ anterior, $Y$ up, $Z$ right) by
+$P R P^{\top}$ with $P=\left[\begin{smallmatrix}0&0&-1\\0&1&0\\1&0&0\end{smallmatrix}\right]$.
+
+\paragraph{Equations.}
+With $s_R=(1,1,1)$ and $s_L=(1,-1,-1)$ the anatomical-sign angles are
+$\theta=s_{\mathrm{side}}\odot(a,b,c)$, so that flexion, ulnar deviation and
+pronation are positive on both sides and a motion reflected across the
+sagittal plane gives identical values. The hand frame is
+$R_{\mathrm{hand}}=R_{\mathrm{club}}\,N\,M(\alpha,\psi,\gamma)$ with
+$M=R_y(\alpha)R_x(\psi-90^\circ)R_z(\gamma)$ from the physical grip contract
+(\texttt{follower\_rotation}); only $\alpha,\psi,\gamma$ enter, never
+\texttt{GripPose} style, thumb or lifeline. At $|b|=90^\circ$ the components
+$a$ and $c$ are indeterminate and are NaN with a reason; $b$ stays valid.
+Reconstruction $R_z(a)R_x(b)R_y(c)$ matches the input rotation to
+$10^{-10}$ rad.
+
+\paragraph{Golf Aliases.}
+\begin{center}
+\begin{tabular}{lll}
+\hline
+Golf word & Component & Sense \\
+\hline
+cupped & flexion--extension & extension (negative flexion) \\
+bowed & flexion--extension & flexion (positive) \\
+hinge, cock & ulnar deviation & radial deviation (negative ulnar) \\
+release & none & event and motion description; no sign alias \\
+\hline
+\end{tabular}
+\end{center}
+Lead and trail map to anatomical sides through \texttt{core.handedness}.
+
+\paragraph{Observability Limits.}
+Every wrist series carries \texttt{observability = fitted\_grip\_rotation} and a
+receipt path. The capture has no hand markers; the hand frame is the club body
+plus a fitted physical grip rotation, so wrist angles are model-estimated, not
+measured hand anatomy, and a wrong grip constant moves angle between flexion,
+deviation and the third angle. The direction convention of the native
+rotation $N$ follows \texttt{child\_to\_follower} and is the adapter's duty.
+
+\paragraph{Best-Fit Values.}
+Not reported. The committed best driver fit (\texttt{s32-fw-drv}) stores the
+grip as golf angles (lead $\alpha=0^\circ,\psi=25.0^\circ,\gamma=47.0^\circ$;
+trail $\alpha=-14.0^\circ,\psi=61.9^\circ,\gamma=77.2^\circ$), but its
+forearm and hand bodies have no declared Wu volar/proximal calibration, so a
+wrist angle at address, top and impact would rest on an assumed neutral-wrist
+alignment. The calibration is a follow-up; no value is claimed here.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+PYTHONPATH=.:src python3 -m pytest -o addopts="" -q -n 4 \
+    tests/unit/anatomical_angles tests/shared/python/spine/test_golf_terms.py
+\end{verbatim}
 
 \section{Clubhead Speed Timing and the Ball Collision Impulse (GCV-20)}
 \label{sec:gcv20_speed_timing}

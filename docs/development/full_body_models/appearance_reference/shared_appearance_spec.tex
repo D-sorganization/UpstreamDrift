@@ -288,6 +288,38 @@ deep. \texttt{trunk\_and\_outfit.json} records the sizing source and garment
 of each trunk and leg body. Stills are visual evidence and do not qualify
 dynamics.
 
+\subsection{Hands and Glove (HRG-G1, \#13186)}
+\paragraph{Defect.} Both grip hands drew in \texttt{glove\_white}: once from
+\texttt{club\_assembly.PART\_MATERIALS} and again from the clothing presets'
+\texttt{hand} entry; the standoff body \texttt{RHandStandoff} also received a
+generic $42$~mm hand loft that poked through the grip hand, and the OpenSim
+worker resolved the appearance without the club, so the club-owned lead hand
+classified as \texttt{club} (\texttt{satin\_steel}).
+\paragraph{Contract.} One resolver, \texttt{library.hand\_material\_name\_for},
+returns \texttt{glove\_white} for a gloved hand and the document \texttt{skin\_tone}
+(custom colour included) for a bare one. The document field
+\texttt{glove}~$\in\{\texttt{none},\texttt{lead},\texttt{trail},\texttt{both}\}$
+names the gloved hand by golf role; the default, and the value of any document
+written before the field existed, is \texttt{none} (bare, skin-coloured hands;
+this is a deliberate change of the historical two-glove default). The field
+\texttt{handedness}~$\in\{\texttt{right},\texttt{left}\}$ (default
+\texttt{right}) maps role to anatomical side through
+\texttt{core.handedness}: the lead hand is the left hand of a right-handed
+golfer and the right hand of a left-handed one. The compiled spec carries no
+handedness; the document is the only source here. Glove policy no longer lives in
+clothing presets or in \texttt{PART\_MATERIALS}.
+\paragraph{Duplicate Loft.} When a club assembly is drawn, the
+\texttt{RHandStandoff} body gets no generic loft (the grip hand replaces it);
+without a club it keeps the skin loft. The OpenSim worker now resolves with the
+spec's club assembly and draws the two grip hands from the resolved meshes (the
+exported model carries only shaft, grip and head).
+\paragraph{Controls.} \texttt{--glove} (CLI), a Glove combo (desktop character
+builder) and a Glove select (web \texttt{AppearancePanel}) write the same field
+through the override, document, default precedence.
+\paragraph{Invariants.} Visual only: masses, inertias, joints and
+\texttt{physics\_spec\_sha256} are unchanged. Tests cover handedness
+$\times$ glove $\times$ every clothing preset.
+
 \subsection{Limitations}
 \begin{itemize}
 \item The skinned glTF body (\texttt{skinned\_body}) still sizes its trunk from

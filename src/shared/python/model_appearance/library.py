@@ -13,7 +13,10 @@ from fnmatch import fnmatchcase
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
+from src.shared.python.core.handedness import lead_side, trail_side
 from src.shared.python.model_appearance import defaults
+from src.shared.python.motion_matching.club_models import HAND_STANDOFF_SUFFIX
+from src.shared.python.model_appearance.grip_pose import Hand
 from src.shared.python.model_appearance.schema import (
     DEFAULT_CLOTHING,
     AppearanceDocument,
@@ -156,7 +159,6 @@ def _outfit(top: str, pants: str, shoes: str, *, full_length: bool) -> dict[str,
         "pelvis": pants,
         PANTS_PART: pants,
         "foot": shoes,
-        "hand": "glove_white",
     }
     if full_length:
         parts["shin"] = pants
@@ -165,7 +167,7 @@ def _outfit(top: str, pants: str, shoes: str, *, full_length: bool) -> dict[str,
 
 # Anatomical part -> material, per clothing preset; absent parts show skin.
 CLOTHING: dict[str, dict[str, str]] = {
-    "none": {"foot": "shoe_white", "hand": "glove_white"},
+    "none": {"foot": "shoe_white"},
     "golf_polo_shorts": _outfit(
         "polo_navy", "shorts_khaki", "shoe_white", full_length=False
     ),
@@ -423,6 +425,58 @@ def material_name_for(doc: AppearanceDocument, body_name: str) -> str:
     if part == "other":
         return PLAIN_BODY_MATERIAL  # never silently skin
     return doc.skin_tone  # clothing, gloves and shoes are garment layers
+
+
+#: The one glove material. Gloves are an option of the document (``glove``),
+#: never part of a clothing preset or of the static club part materials.
+GLOVE_MATERIAL = "glove_white"
+_GLOVED_ROLES = {
+    "none": frozenset(),
+    "lead": frozenset({Hand.LEAD}),
+    "trail": frozenset({Hand.TRAIL}),
+    "both": frozenset({Hand.LEAD, Hand.TRAIL}),
+}
+
+
+def gloved_hands(doc: AppearanceDocument) -> frozenset[Hand]:
+    """The grip hands (by golf role) that wear the glove under ``doc.glove``."""
+    if doc.glove not in _GLOVED_ROLES:
+        raise ValueError(f"unknown glove choice: {doc.glove!r}")
+    return _GLOVED_ROLES[doc.glove]
+
+
+def hand_side(hand: Hand, handedness: str) -> str:
+    """Anatomical side (``"left"``/``"right"``) of a grip hand role.
+
+    Delegates to the shared ``core.handedness`` rule (lead = left for a
+    right-hander).
+    """
+    side = lead_side(handedness) if hand is Hand.LEAD else trail_side(handedness)
+    return "left" if side == "L" else "right"
+
+
+def gloved_sides(doc: AppearanceDocument) -> frozenset[str]:
+    """Anatomical sides that wear the glove (``handedness`` maps role to side)."""
+    return frozenset(hand_side(h, doc.handedness) for h in gloved_hands(doc))
+
+
+def hand_material_name_for(hand: Hand, doc: AppearanceDocument) -> str:
+    """Material of one grip hand: the glove when gloved, else the document skin.
+
+    The single resolver every engine uses for the two grip hands, so a bare hand
+    always matches the body skin (custom colour included).
+    """
+    return GLOVE_MATERIAL if hand in gloved_hands(doc) else doc.skin_tone
+
+
+def is_grip_hand_standoff(body_name: str) -> bool:
+    """True for the standoff body whose generic hand shape the club's grip hand
+    replaces whenever the club (and so the grip hands) is drawn.
+
+    The one predicate shared by the dressed resolution and every plain render
+    path, so no engine draws a second hand over the grip hand.
+    """
+    return body_name.rsplit("/", 1)[-1].endswith(HAND_STANDOFF_SUFFIX)
 
 
 def garment_name_for(doc: AppearanceDocument, body_name: str) -> str | None:

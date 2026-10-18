@@ -149,3 +149,31 @@ def test_export_filename_includes_spec_hash_when_bound(client: TestClient) -> No
     doc = document_from_dict(r.json())
     assert doc.spec_sha256 is not None
     assert doc.spec_sha256[:8] in disposition
+
+
+def test_custom_colours_become_document_materials(client: TestClient) -> None:
+    """HRG-B2 (#13167): hex picks are written as ``materials`` entries."""
+    res = client.post(
+        "/character-builder/appearance",
+        json={"hair_color": "#336699", "top_color": "#aa0000"},
+    )
+    assert res.status_code == 200
+    doc = res.json()["appearance"]
+    assert doc["head"]["headwear_material"] == "custom_hair"
+    assert doc["materials"]["custom_hair"]["base_color"] == pytest.approx(
+        [0.2, 0.4, 0.6, 1.0]
+    )
+    assert doc["materials"]["polo_white"]["base_color"][0] == pytest.approx(170 / 255)
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        {"hair_color": "teal"},
+        {"skin_color": "#12345"},
+        {"headwear": "cap", "hair_color": "#336699"},
+        {"clothing": "none", "top_color": "#336699"},
+    ],
+)
+def test_bad_custom_colours_are_rejected(client: TestClient, body: dict) -> None:
+    assert client.post("/character-builder/appearance", json=body).status_code == 422

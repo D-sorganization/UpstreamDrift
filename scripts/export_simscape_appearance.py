@@ -53,15 +53,17 @@ DEFAULT_OUTPUT = (
     "/exploratory_gs3dx/appearance/gs3dx_appearance.v1.json"
 )
 
-ROLES = ("skin", "top", "pants", "shoe", "glove")
+ROLES = ("skin", "top", "pants", "shoe", "hand_left", "hand_right")
 # role -> (anatomical part, mesh label prefix) whose resolved material it is.
 _ROLE_SOURCE = {
     "skin": ("forearm", "skin"),
     "top": ("torso", "garment"),
     "pants": ("pelvis", "garment"),
     "shoe": ("foot", "garment"),
-    "glove": ("hand", "garment"),
 }
+# Hand roles are anatomical sides; their material is the shared resolver's
+# (bare skin by default, the glove when ``doc.glove`` names that side).
+_HAND_ROLES = {"left": "hand_left", "right": "hand_right"}
 _TRUNK_PARTS = {"LowerTorso": "pelvis", "COMRod": "torso"}
 
 # GS3DX frame layout. Hip line 46.3 deg from x toward y on the lower trunk;
@@ -123,8 +125,8 @@ _LIMB_LAYOUT = (
 # Blocks that already exist in the model and are only recoloured.
 _RECOLOUR = (
     ("Hips and Torso Inputs/Head", "skin"),
-    ("Grip/LHand", "glove"),
-    ("Grip/RHand", "glove"),
+    ("Grip/LHand", "hand_left"),
+    ("Grip/RHand", "hand_right"),
     ("Lower Body/L Thigh", "pants"),
     ("Lower Body/R Thigh", "pants"),
     ("Lower Body/L Shank", "pants"),
@@ -140,7 +142,7 @@ def _short(body: str) -> str:
     return body.rsplit("/", 1)[-1]
 
 
-def _role_rgb(resolved: Any, library: Any) -> dict[str, list[float]]:
+def _role_rgb(resolved: Any, library: Any, doc: Any) -> dict[str, list[float]]:
     """RGB of each role, read from the resolved meshes (the only colour source)."""
     out: dict[str, list[float]] = {}
     for role, (part, label) in _ROLE_SOURCE.items():
@@ -155,6 +157,13 @@ def _role_rgb(resolved: Any, library: Any) -> dict[str, list[float]]:
                 f"{sorted(names)}"
             )
         rgba = resolved.rgba(next(iter(names)))
+        out[role] = [round(c, 6) for c in rgba[:3]]
+    from src.shared.python.model_appearance.grip_pose import Hand
+
+    materials = library.library_materials(doc)
+    for hand in Hand:
+        role = _HAND_ROLES[library.hand_side(hand, doc.handedness)]
+        rgba = materials[library.hand_material_name_for(hand, doc)].rgba
         out[role] = [round(c, 6) for c in rgba[:3]]
     return out
 
@@ -232,7 +241,7 @@ def build_payload(
     from src.shared.python.model_appearance.body_meshes import resolve_appearance
 
     resolved = resolve_appearance(spec, doc)
-    rgb = _role_rgb(resolved, library)
+    rgb = _role_rgb(resolved, library, doc)
     thickness = library.GARMENT_THICKNESS
     payload = {
         "schema_version": SCHEMA_VERSION,

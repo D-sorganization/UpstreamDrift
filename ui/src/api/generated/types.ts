@@ -1116,6 +1116,20 @@ export interface CharacterAppearanceRequest {
   headwear_material?: string | null;
   /** Ground material name */
   ground_material?: string | null;
+  /** Custom skin colour #rrggbb */
+  skin_color?: string | null;
+  /** Custom hair colour #rrggbb */
+  hair_color?: string | null;
+  /** Custom shirt colour #rrggbb */
+  top_color?: string | null;
+  /** Custom trousers/shorts colour #rrggbb */
+  bottom_color?: string | null;
+  /** Golf glove by role; the lead hand is the left of a right-hander */
+  glove?: "none" | "lead" | "trail" | "both" | null;
+  /** Grip style (picture only): overlap, interlock, ten_finger */
+  grip_style?: "overlap" | "interlock" | "ten_finger" | null;
+  /** Lead thumb offset, degrees (picture only) */
+  grip_thumb_offset_deg?: number | null;
   /** Appearance document name (letters, digits, '_' or '-') */
   name?: string | null;
 }
@@ -2016,6 +2030,24 @@ export interface GreenReadingResponse {
   aim_point: number[];
   elevations: number[];
   slopes: number[][];
+}
+
+/**
+ * Grip picks for a character: physical ones make a new model revision. Golf words: ``preset`` is the grip strength; the ``*_shaft_rotation`` values turn a hand about the shaft (positive is stronger); the ``*_palm_diagonal`` values set where the shaft crosses the palm; the ``*_set_angle`` values the angle at the wrist; ``lead_below_butt`` and ``hand_spacing`` are metres. ``grip_style`` and ``grip_thumb_offset_deg`` are picture-only.
+ */
+export interface GripRevisionRequest {
+  character?: CharacterSpecRequest | null;
+  preset?: "weak" | "neutral" | "strong" | null;
+  lead_shaft_rotation?: number | null;
+  trail_shaft_rotation?: number | null;
+  lead_palm_diagonal?: number | null;
+  trail_palm_diagonal?: number | null;
+  lead_set_angle?: number | null;
+  trail_set_angle?: number | null;
+  lead_below_butt?: number | null;
+  hand_spacing?: number | null;
+  grip_style?: "overlap" | "interlock" | "ten_finger" | null;
+  grip_thumb_offset_deg?: number | null;
 }
 
 /**

@@ -71,8 +71,21 @@ def _events(n: int = 10) -> SwingEvents:
 # -- registry -----------------------------------------------------------------
 
 
+#: HRG-E2 (#13169) wrist and forearm terms extend the same registry.
+HRG_E2_TERMS = {
+    f"{role}_{name}"
+    for role in ("lead", "trail")
+    for name in (
+        "wrist_flexion_extension",
+        "wrist_ulnar_deviation",
+        "wrist_axial_rotation",
+        "forearm_pronation",
+    )
+}
+
+
 def test_registered_terms_are_the_adr_table() -> None:
-    assert set(registered_terms()) == EXPECTED_TERMS
+    assert set(registered_terms()) == EXPECTED_TERMS | HRG_E2_TERMS
 
 
 @pytest.mark.parametrize("term_id", sorted(EXPECTED_TERMS))

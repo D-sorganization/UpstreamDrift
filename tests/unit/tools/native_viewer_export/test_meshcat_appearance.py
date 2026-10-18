@@ -18,6 +18,8 @@ from typing import Any
 
 import numpy as np
 import pytest
+
+from src.shared.python.motion_matching.club_models import HAND_STANDOFF_SUFFIX
 from defusedxml import ElementTree as ET
 
 from src.shared.python.model_appearance import document_from_dict, library
@@ -98,6 +100,8 @@ def test_every_dressed_body_has_registered_meshes(built) -> None:
         rule = library.rule_for_body(doc, body)
         if rule is not None and rule.mesh == "none":
             continue
+        if body.endswith(HAND_STANDOFF_SUFFIX):
+            continue  # the grip hands are drawn on the club body (HRG-G1)
         assert body in scene.bodies(), f"{body} has no registered mesh"
 
 

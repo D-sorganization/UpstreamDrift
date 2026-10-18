@@ -156,6 +156,7 @@ describe('AppearancePanel', () => {
       headwear: 'hair',
       headwear_material: 'hair_brown',
       ground_material: 'turf',
+      glove: 'none',
     });
 
     await waitFor(() =>
@@ -217,6 +218,7 @@ describe('AppearancePanel', () => {
       headwear: 'hair',
       headwear_material: 'hair_brown',
       ground_material: 'turf',
+      glove: 'none',
       character,
     });
 
@@ -254,5 +256,97 @@ describe('AppearancePanel', () => {
     expect(
       await screen.findByText('name must match ^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$'),
     ).toBeInTheDocument();
+  });
+
+  describe('custom colour controls (HRG-B2)', () => {
+    const exportStub = () =>
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes('/character-builder/appearance/library')) {
+          return Promise.resolve(jsonResponse(LIBRARY));
+        }
+        if (url.includes('/character-builder/appearance/export')) {
+          return Promise.resolve(
+            jsonResponse(
+              { schema_version: 'appearance-v1' },
+              { headers: { 'Content-Disposition': 'attachment; filename="g.appearance.json"' } },
+            ),
+          );
+        }
+        return Promise.resolve(jsonResponse({ detail: 'not stubbed' }, { ok: false, status: 404 }));
+      });
+
+    it('renders a colour input for skin, hair, shirt and trousers', async () => {
+      render(<AppearancePanel />);
+      await screen.findByRole('option', { name: 'skin_1' });
+      for (const label of ['Custom Skin Color', 'Hair Color', 'Shirt Color', 'Trousers/Shorts Color']) {
+        expect((screen.getByLabelText(label) as HTMLInputElement).type).toBe('color');
+      }
+      // Shows the current library colours until a custom one is picked.
+      expect((screen.getByLabelText('Shirt Color') as HTMLInputElement).value).toBe(
+        rgbaToHex(LIBRARY.materials.polo_white.base_color),
+      );
+    });
+
+    it('a shirt colour recolours the palette trunk and is sent on export', async () => {
+      exportStub();
+      const onPaletteChange = vi.fn();
+      render(<AppearancePanel onPaletteChange={onPaletteChange} />);
+      await screen.findByRole('option', { name: 'skin_1' });
+
+      fireEvent.change(screen.getByLabelText('Shirt Color'), { target: { value: '#aa0000' } });
+      expect(onPaletteChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ trunk: '#aa0000', upperArm: '#aa0000' }),
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: /Export Appearance/i }));
+      });
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledWith(
+        '/api/character-builder/appearance/export',
+        expect.objectContaining({
+          body: expect.stringContaining('"top_color":"#aa0000"'),
+        }),
+      ));
+    });
+
+    it('hair and skin colours are sent; Reset removes them again', async () => {
+      exportStub();
+      render(<AppearancePanel />);
+      await screen.findByRole('option', { name: 'skin_1' });
+      fireEvent.change(screen.getByLabelText('Hair Color'), { target: { value: '#336699' } });
+      fireEvent.change(screen.getByLabelText('Custom Skin Color'), { target: { value: '#c68642' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Reset Custom Skin Color' }));
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: /Export Appearance/i }));
+      });
+      const call = mockFetch.mock.calls.find(([u]) => String(u).includes('/export'));
+      const body = JSON.parse(call![1].body as string);
+      expect(body.hair_color).toBe('#336699');
+      expect(body).not.toHaveProperty('skin_color');
+    });
+
+    it('defaults to no glove and sends the chosen glove on export (HRG-G1)', async () => {
+      exportStub();
+      render(<AppearancePanel />);
+      await screen.findByRole('option', { name: 'skin_1' });
+      const select = screen.getByLabelText('Glove') as HTMLSelectElement;
+      expect(select.value).toBe('none');
+      fireEvent.change(select, { target: { value: 'lead' } });
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: /Export Appearance/i }));
+      });
+      const call = mockFetch.mock.calls.find(([u]) => String(u).includes('/export'));
+      expect(JSON.parse(call![1].body as string).glove).toBe('lead');
+    });
+
+    it('disables the hair colour (and drops it) when headwear is not hair', async () => {
+      render(<AppearancePanel />);
+      await screen.findByRole('option', { name: 'skin_1' });
+      fireEvent.change(screen.getByLabelText('Hair Color'), { target: { value: '#336699' } });
+      fireEvent.change(screen.getByLabelText(/Headwear/i), { target: { value: 'cap' } });
+      const hair = screen.getByLabelText('Hair Color') as HTMLInputElement;
+      expect(hair.disabled).toBe(true);
+      expect(screen.getByRole('button', { name: 'Reset Hair Color' })).toBeDisabled();
+    });
   });
 });

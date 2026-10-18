@@ -9,7 +9,6 @@ const LIBRARY: AppearanceLibrary = {
   schema_version: 'appearance-v1',
   skin_tones: ['skin_light', 'skin_medium', 'skin_tan', 'skin_dark'],
   clothing: {
-    none: { foot: 'shoe_white', hand: 'glove_white' },
     golf_polo_shorts: {
       torso: 'polo_navy',
       pelvis: 'shorts_khaki',
@@ -17,7 +16,6 @@ const LIBRARY: AppearanceLibrary = {
       shoulder: 'polo_navy',
       thigh: 'shorts_khaki',
       foot: 'shoe_white',
-      hand: 'glove_white',
     },
     golf_polo_trousers: {
       torso: 'polo_white',
@@ -27,7 +25,6 @@ const LIBRARY: AppearanceLibrary = {
       thigh: 'trousers_charcoal',
       shin: 'trousers_charcoal',
       foot: 'shoe_black',
-      hand: 'glove_white',
     },
   },
   club_finishes: ['satin_steel', 'chrome', 'graphite', 'black_pvd'],

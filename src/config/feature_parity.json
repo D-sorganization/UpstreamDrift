@@ -27,6 +27,7 @@
       "web": null,
       "status": "exempt",
       "reason": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL); the artefacts are mp4 files, so there is no interactive browser equivalent (epic #11673).",
+      "notes": "Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; --grip-style (HRG-GR4, #13205) is picture-only and goes in the appearance sidecar's grip block, while a physical grip flag (--grip-preset, --lead-shaft-rotation, ...) is refused with a message pointing to spec_builder, which writes the new model revision; the matching interactive controls are tracked under tools.character_builder.",
       "tiles": []
     },
     "export.video_speed_variants": {
@@ -415,7 +416,16 @@
       "web": "ui/src/pages/CharacterBuilder.tsx",
       "status": "parity",
       "tiles": ["character_builder"],
-      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM/glTF, presets). The web page now drives presets, preview/build and spec/URDF/MJCF/OSIM/glTF export through the spec API (CMB-7a, #11658), and picks skin tone, clothing, club finish, headwear and ground from the model_appearance library with a recoloured preview and an appearance-v1 sidecar export (CMB-7b/7c, #11658); the desktop tool now also picks the same appearance choices and exports the same appearance-v1 sidecar through the shared character_appearance_service (CMB-7e, #11658). A rigidly skinned glTF export of the spec skeleton landed under CMB-6 (#11657). The web page can preview that glTF body live, refetched (debounced) as the spec sliders move and tinted with the appearance trunk colour (CMB-7f, #11658); the desktop tool keeps its primitive preview."
+      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM/glTF, presets). The web page now drives presets, preview/build and spec/URDF/MJCF/OSIM/glTF export through the spec API (CMB-7a, #11658), and picks skin tone, clothing, club finish, headwear and ground from the model_appearance library with a recoloured preview and an appearance-v1 sidecar export (CMB-7b/7c, #11658); the desktop tool now also picks the same appearance choices and exports the same appearance-v1 sidecar through the shared character_appearance_service (CMB-7e, #11658). A rigidly skinned glTF export of the spec skeleton landed under CMB-6 (#11657). The web page can preview that glTF body live, refetched (debounced) as the spec sliders move and tinted with the appearance trunk colour (CMB-7f, #11658); the desktop tool keeps its primitive preview. Custom skin, hair, shirt and trousers colours (HRG-B2, #13167) are picked with a shared Qt colour field on the desktop and `<input type=\"color\">` controls on the web; both write the same appearance-v1 document `materials` entries through the one shared writer (`model_appearance/appearance_selection.py`), held equal by a shared JSON fixture. HRG-G1 (#13186): grip hands are skin-coloured by default; the optional white golf glove (glove none/lead/trail/both, a Glove combo on the desktop and a Glove select on the web) goes through the same writer."
+    },
+    "tools.character_builder_grip": {
+      "title": "Grip presets and sliders (weak, neutral, strong; rotation, palm diagonal, spacing, style)",
+      "pyqt": "src/tools/character_builder/gui.py",
+      "api": "src/api/routes/character_appearance.py",
+      "web": "ui/src/components/character/GripControls.tsx",
+      "status": "parity",
+      "tiles": [],
+      "notes": "HRG-GR4 (#13205). One resolver (src/shared/python/motion_matching/execution/grip_selection.py) with the override, document, default precedence of the appearance colours. Physical picks (strength preset, rotation about the shaft, palm diagonal, set angle, depth, hand spacing) make a new spec revision through apply_grip_config and need a refit; they are never written to the .appearance.json sidecar. Picture-only picks (style, lead thumb) go in the sidecar's grip block and leave physics_spec_sha256 unchanged. The desktop Grip group, the web GripControls and POST /api/character-builder/grip are held equal to the Python resolver by tests/fixtures/grip/grip_roundtrip.json. The CLI flags live in spec_builder (physical) and native_viewer_export (picture-only; a physical flag is refused)."
     },
     "tools.data_explorer": {
       "title": "Data Explorer (import/filter/visualize datasets)",

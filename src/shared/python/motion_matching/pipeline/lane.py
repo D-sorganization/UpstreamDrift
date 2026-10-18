@@ -251,8 +251,19 @@ def expand_stance_for_width(
 
 
 def fitted_grip(document: dict[str, Any]) -> bool:
-    """True when the document's hands carry a fitted (nonzero) rotation."""
-    rotation = document.get("subject", {}).get("grip_rotation_deg") or {}
+    """True when the document's hands carry a grip identified from motion.
+
+    With ``subject.grip_provenance`` (HRG-GR2, #13203) only a parameter whose
+    source is ``rom_set_identified`` counts: a declared or default grip has
+    nonzero rotations too but is not a fit, so it must not inherit the
+    fitted-grip lane behaviour. A document without provenance (every spec
+    built before GR2) keeps the legacy rule, a nonzero rotation.
+    """
+    subject = document.get("subject", {})
+    provenance = subject.get("grip_provenance")
+    if provenance is not None:
+        return any(v == "rom_set_identified" for v in provenance.values())
+    rotation = subject.get("grip_rotation_deg") or {}
     return any(abs(v) > 0 for angles in rotation.values() for v in angles)
 
 

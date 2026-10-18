@@ -27,6 +27,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.ui.hex_color_field import ColorPicker, HexColorField
+
 from .force_colors import (
     DEFAULT_COMPRESSION_COLOR,
     DEFAULT_NEUTRAL_COLOR,
@@ -183,17 +185,17 @@ def install_force_color_action(
         raise TypeError("menu and callable targets are required")
     if hub is not None and not isinstance(hub, ForceColorHub):
         raise TypeError("hub must be ForceColorHub or None")
-    hub = hub or ForceColorHub(parent=menu)
+    active_hub: ForceColorHub = hub if hub is not None else ForceColorHub(parent=menu)
     action = QAction("Segment Force Colors…", menu)
     action.setShortcut("Ctrl+Shift+F")
-    action.force_color_hub = hub  # type: ignore[attr-defined]
+    action.force_color_hub = active_hub  # type: ignore[attr-defined]
     dialog: QDialog | None = None
 
     def apply(scale: ForceColorScale) -> None:
         for target in targets():
             target.set_axial_color_scale(scale)
 
-    hub.scale_changed.connect(apply)
+    active_hub.scale_changed.connect(apply)
 
     def show() -> None:
         nonlocal dialog
@@ -202,9 +204,9 @@ def install_force_color_action(
             dialog.setObjectName("segment_force_colors_dialog")
             dialog.setWindowTitle("Segment Force Colors")
             layout = QVBoxLayout(dialog)
-            controls = ForceColorControls(dialog, scale=hub.scale)
-            controls.scale_changed.connect(hub.set_scale)
-            hub.scale_changed.connect(controls.set_scale)
+            controls = ForceColorControls(dialog, scale=active_hub.scale)
+            controls.scale_changed.connect(active_hub.set_scale)
+            active_hub.scale_changed.connect(controls.set_scale)
             layout.addWidget(controls)
             layout.addWidget(
                 QLabel(
@@ -232,13 +234,18 @@ class ForceColorControls(QWidget):
     scale_changed = pyqtSignal(object)
 
     def __init__(
-        self, parent: QWidget | None = None, *, scale: ForceColorScale | None = None
+        self,
+        parent: QWidget | None = None,
+        *,
+        scale: ForceColorScale | None = None,
+        color_picker: ColorPicker | None = None,
     ) -> None:
         if scale is not None and not isinstance(scale, ForceColorScale):
             raise TypeError("scale must be ForceColorScale or None")
         super().__init__(parent)
         self._scale = scale or ForceColorScale()
-        self._color_picker: Callable[[str, QWidget], str | None] = _pick_color
+        picker: ColorPicker = color_picker or _pick_color
+        self._color_picker: ColorPicker = picker
         layout = QFormLayout(self)
         self._enabled = QCheckBox("Color Segments by Axial Force")
         self._enabled.setObjectName("force_color_enabled")
@@ -276,23 +283,13 @@ class ForceColorControls(QWidget):
             self._blend.addItem(mode_label, mode)
         layout.addRow("Blend Mode", self._blend)
         self._colors: dict[str, QLineEdit] = {}
-        self._pickers: dict[str, QToolButton] = {}
         for name, label, _default in _COLOR_FIELDS:
-            color_field = QLineEdit(getattr(self._scale, name))
-            color_field.setObjectName(name)
-            color_field.textChanged.connect(self._refresh_swatches)
-            self._colors[name] = color_field
-            picker = QToolButton()
-            picker.setObjectName(f"pick_{name}")
-            picker.setText("…")
-            picker.setToolTip(f"Pick {label.split(' (')[0]}")
-            picker.setAccessibleName(f"Pick {label.split(' (')[0]}")
-            picker.clicked.connect(lambda _=False, key=name: self._pick(key))
-            self._pickers[name] = picker
-            row = QHBoxLayout()
-            row.addWidget(color_field)
-            row.addWidget(picker)
-            layout.addRow(label, row)
+            field_widget = HexColorField(
+                getattr(self._scale, name), object_name=name, color_picker=picker
+            )
+            field_widget.colour_changed.connect(lambda _hex: self._apply_edits())
+            self._colors[name] = field_widget.line_edit
+            layout.addRow(label, field_widget)
         apply_button = QPushButton("Apply Colors and Ranges")
         apply_button.setObjectName("apply_force_colors")
         layout.addRow(apply_button)
@@ -364,13 +361,6 @@ class ForceColorControls(QWidget):
     def _blend_edited(self, _index: int) -> None:
         self._commit(replace(self._scale, blend_mode=self._blend.currentData()))
 
-    def _pick(self, name: str) -> None:
-        chosen = self._color_picker(self._colors[name].text().strip(), self)
-        if not chosen:
-            return
-        self._colors[name].setText(chosen.lower())
-        self._apply_edits()
-
     def _reset_colors(self) -> None:
         reset = replace(
             self._scale,
@@ -382,15 +372,7 @@ class ForceColorControls(QWidget):
         self._commit(reset)
 
     def _refresh_swatches(self, *_args: object) -> None:
-        for name, picker in self._pickers.items():
-            text = self._colors[name].text().strip()
-            if QColor.isValidColorName(text):
-                picker.setStyleSheet(
-                    f"background-color: {text}; border: 1px solid #555;"
-                    " min-width: 22px;"
-                )
-            else:
-                picker.setStyleSheet("")
+        return
 
     def _apply_edits(self) -> None:
         values = {name: field.value() for name, field in self._ranges.items()}
@@ -426,7 +408,7 @@ class ForceColorControls(QWidget):
         )
 
 
-def _pick_color(current: str, parent: QWidget) -> str | None:
+def _pick_color(current: str, parent: QWidget | None = None) -> str | None:
     """Open the Qt colour dialog; None when cancelled."""
     initial = QColor(current) if QColor.isValidColorName(current) else QColor()
     chosen = QColorDialog.getColor(initial, parent, "Pick Segment Colour")
