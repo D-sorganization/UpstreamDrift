@@ -123,7 +123,7 @@ class TestAppearanceWidget:
         del app
 
     def test_combos_populated(self, widget) -> None:
-        assert widget.appearance_combos["skin_tone"].count() == 4
+        assert widget.appearance_combos["skin_tone"].count() == 8
         assert widget.appearance_combos["clothing"].count() >= 2
         assert widget.appearance_combos["club_finish"].count() == 4
         assert widget.appearance_combos["headwear"].count() == 3

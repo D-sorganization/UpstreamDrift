@@ -139,13 +139,15 @@ def test_pelvis_ends_at_the_lumbar_plane_and_does_not_overlap_the_chest() -> Non
     assert p_lo < hjc_lo, "the pelvis must run below the HJC line"
 
 
-def test_pelvis_width_covers_the_hjcs_plus_the_femur_radii() -> None:
+def test_pelvis_width_covers_the_hjcs_plus_the_femoral_heads() -> None:
+    # HRG-C4 (#13187) replaced "HJCs plus whole femur radii" (C1) with femoral
+    # head containment; the width rules are pinned in test_pelvis_width.py.
     spec = _with_hips(BEST_FIT_HIPS)
     body = _pelvis_body(spec)
     verts = _skin(spec, body).mesh_in_body_frame.vertices
     ml = body_sections(spec)[body].ml_axis
     hjc = _hjcs(spec, body) @ ml
-    need = float(np.ptp(hjc)) + 2 * library.PART_RADIUS_M["thigh"]
+    need = float(np.ptp(hjc)) + 2 * (0.025 + 0.010)
     assert float(np.ptp(verts @ ml)) >= need
 
 
