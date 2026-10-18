@@ -4,6 +4,8 @@ Shows a hash-verified study receipt as a load heatmap and provides a Run Study
 panel to configure and execute studies off the GUI thread. The scientific status
 and ``distribution_source`` are always visible; unqualified data is rendered in
 a warning colour and never labelled qualified.
+
+# noqa: gui-thread/ok -- background studies execute off the GUI thread in SpineStudyWorker (QThread).
 """
 
 from __future__ import annotations
