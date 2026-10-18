@@ -206,6 +206,33 @@ class TestPinocchioJointNamesContract:
         assert len(set(names)) == len(names)
 
 
+@pytest.fixture
+def drake_builder_stub(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make ``DrakePhysicsEngine()`` constructible when pydrake is absent.
+
+    Without pydrake the engine module binds ``DiagramBuilder`` and
+    ``AddMultibodyPlantSceneGraph`` to ``None``, so the constructor cannot run.
+    The stub models what real Drake returns for a freshly constructed engine:
+    an empty ``MultibodyPlant`` with zero generalized velocities. When pydrake
+    is installed the real builder is used unchanged.
+    """
+    from src.engines.physics_engines.drake.python import drake_physics_engine as dpe
+
+    if dpe.DRAKE_AVAILABLE:
+        return
+
+    empty_plant = MagicMock(name="EmptyMultibodyPlant")
+    empty_plant.num_velocities.return_value = 0
+    empty_plant.num_joints.return_value = 0
+    monkeypatch.setattr(dpe, "DiagramBuilder", MagicMock(name="DiagramBuilder"))
+    monkeypatch.setattr(
+        dpe,
+        "AddMultibodyPlantSceneGraph",
+        MagicMock(return_value=(empty_plant, MagicMock(name="SceneGraph"))),
+    )
+
+
+@pytest.mark.usefixtures("drake_builder_stub")
 class TestDrakeJointNamesContract:
     """Test Drake get_joint_names() contract."""
 
