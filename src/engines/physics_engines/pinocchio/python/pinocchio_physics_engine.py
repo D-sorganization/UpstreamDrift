@@ -44,6 +44,25 @@ if PINOCCHIO_AVAILABLE:
 
 from src.shared.python.core import constants
 
+
+def _require_pinocchio() -> None:
+    """Precondition for model loading: the bindings imported with this module.
+
+    ``pin`` is bound only when ``PINOCCHIO_AVAILABLE`` was true at import time
+    (a ``MagicMock`` injected into ``sys.modules`` by a unit-test conftest is
+    rejected there), or when a caller binds it explicitly. Loading without it
+    must fail as a missing requirement, not as a ``NameError`` deep inside the
+    loader.
+
+    Raises:
+        ImportError: If the Pinocchio bindings are not bound to ``pin``.
+    """
+    if "pin" not in globals():
+        raise ImportError(
+            "Pinocchio Python bindings are not available; install pin>=2.6.0"
+        )
+
+
 logger = get_logger(__name__)
 
 DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
@@ -149,6 +168,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         """
         if path is None:
             raise ValueError("path must be provided")
+        _require_pinocchio()
         if not path.endswith(".urdf"):
             logger.warning("Pinocchio loader expects URDF, got: %s", path)
 
@@ -172,6 +192,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         """
         if content is None:
             raise ValueError("content must be provided")
+        _require_pinocchio()
         if extension != "urdf":
             logger.warning("Pinocchio load_from_string mostly supports URDF.")
 
