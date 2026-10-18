@@ -1,0 +1,42 @@
+% Section of golfer_appearance_reference.tex (HRG-A1, #13162). Standalone research
+% and visual reference, not the design manual.
+\section{Grip Hand Orientation About the Shaft (HRG-A1, \#13162)}
+
+\subsection{Hand Orientation}
+Both grip hands are baked in a hand-grip frame whose $z$ axis is the grip axis
+$g$ (butt toward head) and whose azimuth $\varphi$ is measured about $g$ from
+the $x$ axis toward the $y$ axis. Let $n$ be the rendered face normal and $t$
+the heel-to-toe axis, both projected off the shaft and normalised; with the
+right-handed triad $(-n, -t, g)$, $t = g \times n$.
+
+\textbf{Defect.} The frame was $(x, y, z) = (-n, -t, g)$, and the documentation
+called azimuth 0 the chin line. The shaft leans toward the golfer, so the top of
+the grip, toward the chin, is the toe-ward direction $+t$; $-n$ points away from
+the target, the trail side. Both hands were therefore rolled about $90^{\circ}$
+under the grip (measured $93^{\circ}$ at the address of the driver match).
+
+\textbf{Fix.} A single roll of the frame about $g$:
+\begin{equation}
+  (x, y, z) = (+t,\; -n,\; g), \qquad x \times y = t \times (-n) = g,
+\end{equation}
+a proper rotation. Azimuth 0 is the top of the grip, azimuth increases toward
+$-n$ (trail side). The nominal parameters are unchanged: lead V at
+$20^{\circ}$, lead thumb offset $10^{\circ}$, palm block spanning $110^{\circ}$.
+The grip pose describes a right-handed golfer only (it carries no handedness);
+a left-handed golfer is not modelled by it.
+
+\subsection{Acceptance Evidence}
+In the new frame the lead index knuckle ($\varphi = 20 - 110 = -90^{\circ}$)
+lies along $+n$, the target. The lead palm block midpoint is at
+$\varphi = -35^{\circ}$. The trail palm block midpoint is at $75^{\circ}$, so its
+inward normal ($255^{\circ}$) lies $15^{\circ}$ from $+n$. At address, the lead
+wrist flexion axis of the driver match is $82^{\circ}$ from the lead palm
+normal after the fix (it was $14^{\circ}$ before; $90^{\circ}$ is anatomical).
+Hands are drawn on the club body only, so mass, inertia, joint axes and ranges,
+contacts and constraints are unchanged: the compiled MuJoCo arrays are identical
+before and after. A rendered hand is visual evidence only and does not qualify
+forward dynamics.
+
+\subsection{Reproduction}
+\texttt{pytest tests/unit/model\_appearance/test\_grip\_hands.py} checks the frame
+columns to $10^{-9}$, the palm normals and the knuckle azimuths.
