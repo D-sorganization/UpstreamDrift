@@ -5,6 +5,7 @@ import {
   asPlotModel,
   cancelLoopNullspaceJob,
   fetchLoopNullspacePresets,
+  fetchLoopNullspaceSensitivityOptions,
   getLoopNullspaceJob,
   isTerminalLoopNullspaceJob,
   nextLoopNullspaceDelay,
@@ -94,6 +95,49 @@ describe('plot model extraction', () => {
     ).toBeNull();
     expect(asPlotModel({ schema_version: '1.0.0' })).toBeNull();
     expect(asPlotModel(null)).toBeNull();
+  });
+});
+
+describe('plot model 2.0.0 (NSX-100)', () => {
+  const v2 = (
+    JSON.parse(
+      readFileSync(
+        resolve(__dirname, '../../../tests/fixtures/loop_nullspace/goldens/report_v2_variability.json'),
+        'utf8',
+      ),
+    ) as { plot_model: unknown }
+  ).plot_model;
+
+  it('accepts the v2 golden and still accepts 1.0.0', () => {
+    expect(asPlotModel(v2)?.sensitivity?.primary_outcome).toBe('face_angle');
+    expect(asPlotModel(golden.plot_model)?.sensitivity).toBeUndefined();
+  });
+
+  it('refuses a 2.0.0 model without sensitivity and any other version', () => {
+    const { sensitivity: _drop, ...rest } = v2 as Record<string, unknown>;
+    expect(asPlotModel(rest)).toBeNull();
+    expect(asPlotModel({ ...(v2 as object), schema_version: '3.0.0' })).toBeNull();
+  });
+});
+
+describe('sensitivity options', () => {
+  const cat = {
+    stages: [],
+    spectra: [],
+    mechanisms: [],
+    strategies: [],
+    outcomes: [{ id: 'face_angle', label: 'face angle' }],
+    default_outcome_priority: ['face_angle'],
+    engines: [],
+  };
+  it('returns the served catalogue and rejects a malformed one', async () => {
+    vi.mocked(apiFetch).mockResolvedValue(cat);
+    await expect(fetchLoopNullspaceSensitivityOptions()).resolves.toEqual(cat);
+    expect(vi.mocked(apiFetch).mock.calls.at(-1)![0]).toBe(
+      '/api/analysis/loop-nullspace/sensitivity-options',
+    );
+    vi.mocked(apiFetch).mockResolvedValue({ stages: 3 });
+    await expect(fetchLoopNullspaceSensitivityOptions()).rejects.toThrow(/malformed/);
   });
 });
 
