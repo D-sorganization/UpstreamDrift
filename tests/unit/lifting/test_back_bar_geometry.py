@@ -29,6 +29,7 @@ from src.shared.python.lifting.back_bar import (
     fit_bar_shelf,
     standard_bar_world,
 )
+from src.shared.python.lifting.back_rack import HIGH_BAR
 from src.shared.python.lifting.bundles import (
     BACK_SQUAT_BUNDLE,
     LIFT_SPEC,
@@ -135,6 +136,31 @@ def test_geometry_scales_the_start_bar_position_with_height() -> None:
 def test_geometry_rejects_a_bad_height(height: float) -> None:
     with pytest.raises(ValueError, match="height_m"):
         BackBarGeometry.from_standard(LIFT, height_m=height)
+
+
+@pytest.mark.parametrize("grip_width", [0.0, -0.5, float("nan"), float("inf")])
+def test_geometry_rejects_a_bad_grip_width(grip_width: float) -> None:
+    with pytest.raises(ValueError, match="grip_width_m"):
+        BackBarGeometry.from_standard(LIFT, height_m=HEIGHT_M, grip_width_m=grip_width)
+
+
+def test_geometry_grip_width_precedence() -> None:
+    geom_std = BackBarGeometry.from_standard(LIFT, height_m=HEIGHT_M)
+    assert geom_std.grip_width_m == lift_spec.lift_grip(LIFT).width_m
+
+    geom_rack = BackBarGeometry.from_standard(LIFT, height_m=HEIGHT_M, rack=HIGH_BAR)
+    assert geom_rack.grip_width_m == HIGH_BAR.grip_width_m
+
+    geom_explicit = BackBarGeometry.from_standard(
+        LIFT, height_m=HEIGHT_M, rack=HIGH_BAR, grip_width_m=0.82
+    )
+    assert geom_explicit.grip_width_m == 0.82
+
+    rec = geom_explicit.to_record()
+    assert rec["grip_width_m"] == 0.82
+    roundtrip = BackBarGeometry.from_record(rec)
+    assert roundtrip.grip_width_m == 0.82
+    assert roundtrip.rack == HIGH_BAR
 
 
 @pytest.mark.parametrize("lift", ["deadlift", "bench_press", "not_a_lift"])
