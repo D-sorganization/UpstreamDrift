@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
+import math
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -12,6 +13,34 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from src.deployment.realtime import ControlCommand, RobotConfig, RobotState
+
+
+def _validate_joint_array(
+    arr: np.ndarray | None,
+    name: str,
+    n_joints: int,
+    violations: list[str],
+) -> bool:
+    """Validate shape and finite values of a joint array.
+
+    Returns:
+        True if valid or None; False if shape mismatch or non-finite.
+    """
+    if arr is None:
+        return True
+    if not isinstance(arr, np.ndarray) or arr.shape != (n_joints,):
+        shape_str = str(getattr(arr, "shape", type(arr)))
+        violations.append(
+            f"Invalid shape for {name}: expected ({n_joints},), got {shape_str}"
+        )
+        return False
+    if not np.all(np.isfinite(arr)):
+        bad_indices = list(np.where(~np.isfinite(arr))[0])
+        violations.append(
+            f"Non-finite values (NaN/inf) in {name} on joints {bad_indices}"
+        )
+        return False
+    return True
 
 
 # Margin (rad) from a joint limit at which an approaching-limit WARNING is
@@ -177,52 +206,70 @@ class SafetyMonitor:
         """
         if not (state is not None):
             raise ValueError("state must be provided")
-        violations = []
-        warnings = []
+        violations: list[str] = []
+        warnings: list[str] = []
+        n_joints = self.config.n_joints
+
+        pos_valid = _validate_joint_array(
+            state.joint_positions, "joint_positions", n_joints, violations
+        )
+        vel_valid = _validate_joint_array(
+            state.joint_velocities, "joint_velocities", n_joints, violations
+        )
+        tau_valid = _validate_joint_array(
+            state.joint_torques, "joint_torques", n_joints, violations
+        )
 
         # Check joint velocities
-        vel_violation = np.abs(state.joint_velocities) > self.limits.max_joint_velocity
-        if np.any(vel_violation):
-            joints = list(np.where(vel_violation)[0])
-            violations.append(f"Joint velocity exceeded on joints {joints}")
+        if vel_valid:
+            vel_violation = (
+                np.abs(state.joint_velocities) > self.limits.max_joint_velocity
+            )
+            if np.any(vel_violation):
+                joints = list(np.where(vel_violation)[0])
+                violations.append(f"Joint velocity exceeded on joints {joints}")
 
         # Check joint torques
-        torque_violation = np.abs(state.joint_torques) > self.limits.max_joint_torque
-        if np.any(torque_violation):
-            joints = list(np.where(torque_violation)[0])
-            violations.append(f"Joint torque exceeded on joints {joints}")
+        if tau_valid:
+            torque_violation = (
+                np.abs(state.joint_torques) > self.limits.max_joint_torque
+            )
+            if np.any(torque_violation):
+                joints = list(np.where(torque_violation)[0])
+                violations.append(f"Joint torque exceeded on joints {joints}")
 
         # Check joint limits
-        if self.limits.joint_limits_lower is not None:
-            lower_violation = state.joint_positions < self.limits.joint_limits_lower
-            if np.any(lower_violation):
-                joints = list(np.where(lower_violation)[0])
-                violations.append(f"Lower joint limit exceeded on joints {joints}")
+        if pos_valid:
+            if self.limits.joint_limits_lower is not None:
+                lower_violation = state.joint_positions < self.limits.joint_limits_lower
+                if np.any(lower_violation):
+                    joints = list(np.where(lower_violation)[0])
+                    violations.append(f"Lower joint limit exceeded on joints {joints}")
 
-        if self.limits.joint_limits_upper is not None:
-            upper_violation = state.joint_positions > self.limits.joint_limits_upper
-            if np.any(upper_violation):
-                joints = list(np.where(upper_violation)[0])
-                violations.append(f"Upper joint limit exceeded on joints {joints}")
+            if self.limits.joint_limits_upper is not None:
+                upper_violation = state.joint_positions > self.limits.joint_limits_upper
+                if np.any(upper_violation):
+                    joints = list(np.where(upper_violation)[0])
+                    violations.append(f"Upper joint limit exceeded on joints {joints}")
 
-        # Check for approaching limits (warnings) — symmetric on both bounds.
-        if self.limits.joint_limits_upper is not None:
-            near_upper = (
-                state.joint_positions
-                > self.limits.joint_limits_upper - NEAR_LIMIT_MARGIN_RAD
-            )
-            if np.any(near_upper):
-                joints = list(np.where(near_upper)[0])
-                warnings.append(f"Approaching upper limit on joints {joints}")
+            # Check for approaching limits (warnings) — symmetric on both bounds.
+            if self.limits.joint_limits_upper is not None:
+                near_upper = (
+                    state.joint_positions
+                    > self.limits.joint_limits_upper - NEAR_LIMIT_MARGIN_RAD
+                )
+                if np.any(near_upper):
+                    joints = list(np.where(near_upper)[0])
+                    warnings.append(f"Approaching upper limit on joints {joints}")
 
-        if self.limits.joint_limits_lower is not None:
-            near_lower = (
-                state.joint_positions
-                < self.limits.joint_limits_lower + NEAR_LIMIT_MARGIN_RAD
-            )
-            if np.any(near_lower):
-                joints = list(np.where(near_lower)[0])
-                warnings.append(f"Approaching lower limit on joints {joints}")
+            if self.limits.joint_limits_lower is not None:
+                near_lower = (
+                    state.joint_positions
+                    < self.limits.joint_limits_lower + NEAR_LIMIT_MARGIN_RAD
+                )
+                if np.any(near_lower):
+                    joints = list(np.where(near_lower)[0])
+                    warnings.append(f"Approaching lower limit on joints {joints}")
 
         # Emergency stop check
         if self._emergency_stop:
@@ -243,9 +290,23 @@ class SafetyMonitor:
             raise ValueError("command must be provided")
         violations: list[str] = []
         warnings: list[str] = []
+        n_joints = self.config.n_joints
+
+        pos_valid = _validate_joint_array(
+            command.position_targets, "position_targets", n_joints, violations
+        )
+        vel_valid = _validate_joint_array(
+            command.velocity_targets, "velocity_targets", n_joints, violations
+        )
+        tau_valid = _validate_joint_array(
+            command.torque_commands, "torque_commands", n_joints, violations
+        )
+        _validate_joint_array(
+            command.feedforward_torque, "feedforward_torque", n_joints, violations
+        )
 
         # Check torque limits
-        if command.torque_commands is not None:
+        if tau_valid and command.torque_commands is not None:
             torque_violation = (
                 np.abs(command.torque_commands) > self.limits.max_joint_torque
             )
@@ -254,7 +315,7 @@ class SafetyMonitor:
                 violations.append(f"Command torque exceeds limit on joints {joints}")
 
         # Check velocity limits
-        if command.velocity_targets is not None:
+        if vel_valid and command.velocity_targets is not None:
             velocity_violation = (
                 np.abs(command.velocity_targets) > self.limits.max_joint_velocity
             )
@@ -263,7 +324,7 @@ class SafetyMonitor:
                 violations.append(f"Command velocity exceeds limit on joints {joints}")
 
         # Check position targets against limits
-        if command.position_targets is not None:
+        if pos_valid and command.position_targets is not None:
             if self.limits.joint_limits_lower is not None:
                 lower_violation = (
                     command.position_targets < self.limits.joint_limits_lower
@@ -342,22 +403,50 @@ class SafetyMonitor:
             if safe_command.torque_commands is not None:
                 safe_command.torque_commands *= self._speed_override
 
-        # Enforce E-stop as an authoritative no-actuation state.
-        if self._emergency_stop:
+        # Check if desired command or state has any non-finite entries or shape mismatch
+        n_joints = self.config.n_joints
+        has_invalid = (
+            not _validate_joint_array(
+                state.joint_positions, "joint_positions", n_joints, []
+            )
+            or not _validate_joint_array(
+                state.joint_velocities, "joint_velocities", n_joints, []
+            )
+            or not _validate_joint_array(
+                state.joint_torques, "joint_torques", n_joints, []
+            )
+            or not _validate_joint_array(
+                desired.position_targets, "position_targets", n_joints, []
+            )
+            or not _validate_joint_array(
+                desired.velocity_targets, "velocity_targets", n_joints, []
+            )
+            or not _validate_joint_array(
+                desired.torque_commands, "torque_commands", n_joints, []
+            )
+            or not _validate_joint_array(
+                desired.feedforward_torque, "feedforward_torque", n_joints, []
+            )
+        )
+
+        # Enforce E-stop or fallback safe command on invalid inputs
+        if self._emergency_stop or has_invalid:
             if safe_command.position_targets is not None:
-                safe_command.position_targets = state.joint_positions.copy()
+                if (
+                    state.joint_positions is not None
+                    and isinstance(state.joint_positions, np.ndarray)
+                    and state.joint_positions.shape == (n_joints,)
+                    and np.all(np.isfinite(state.joint_positions))
+                ):
+                    safe_command.position_targets = state.joint_positions.copy()
+                else:
+                    safe_command.position_targets = np.zeros(n_joints)
             if safe_command.velocity_targets is not None:
-                safe_command.velocity_targets = np.zeros_like(
-                    safe_command.velocity_targets
-                )
+                safe_command.velocity_targets = np.zeros(n_joints)
             if safe_command.torque_commands is not None:
-                safe_command.torque_commands = np.zeros_like(
-                    safe_command.torque_commands
-                )
+                safe_command.torque_commands = np.zeros(n_joints)
             if safe_command.feedforward_torque is not None:
-                safe_command.feedforward_torque = np.zeros_like(
-                    safe_command.feedforward_torque
-                )
+                safe_command.feedforward_torque = np.zeros(n_joints)
 
         # Clip velocity targets
         if safe_command.velocity_targets is not None:
@@ -385,6 +474,21 @@ class SafetyMonitor:
                 upper = self.limits.joint_limits_upper
                 pos_targets = np.minimum(pos_targets, upper)  # type: ignore[arg-type]
             safe_command.position_targets = pos_targets
+
+        # Ensure postcondition: all output command arrays are strictly finite
+        for attr in (
+            "position_targets",
+            "velocity_targets",
+            "torque_commands",
+            "feedforward_torque",
+        ):
+            val = getattr(safe_command, attr)
+            if val is not None and not np.all(np.isfinite(val)):
+                setattr(
+                    safe_command,
+                    attr,
+                    np.nan_to_num(val, nan=0.0, posinf=0.0, neginf=0.0),
+                )
 
         return safe_command
 
@@ -415,6 +519,8 @@ class SafetyMonitor:
         """
         if not (state is not None):
             raise ValueError("state must be provided")
+        if not np.all(np.isfinite(state.joint_velocities)):
+            raise ValueError("joint_velocities must be finite")
         max_joint_vel = float(np.max(np.abs(state.joint_velocities)))  # rad/s
         max_decel = self._STOPPING_DECELERATION_RAD_S2  # rad/s²
 
@@ -427,6 +533,10 @@ class SafetyMonitor:
         Args:
             factor: Speed reduction (0.0 to 1.0).
         """
+        if not math.isfinite(factor):
+            raise ValueError(
+                "Speed override factor must be a finite float between 0.0 and 1.0"
+            )
         if self._emergency_stop:
             self._speed_override = 0.0
             return
