@@ -254,7 +254,7 @@ def neutral_curvature_report(
     """
     points = [np.asarray(p, dtype=float) for p in (l5s1, t12l1, c7t1)]
     lumbar, thoracic = points[1] - points[0], points[2] - points[1]
-    if min(np.linalg.norm(lumbar), np.linalg.norm(thoracic)) < 1e-3:
+    if min(float(np.linalg.norm(lumbar)), float(np.linalg.norm(thoracic))) < 1e-3:
         raise ValueError("Trunk chords must be at least 1 mm long")
     lumbar_fwd, lumbar_left = _tilts_deg(lumbar)
     thoracic_fwd, thoracic_left = _tilts_deg(thoracic)
@@ -555,7 +555,9 @@ def trunk_observability(
     null = np.asarray(v[:, probe.rank :], dtype=np.float64)
     info = (v * (s**2)) @ v.T / noise_m**2
     split = prior.split_matrix(V2_TRUNK)
-    posterior = np.linalg.inv(info + split.T @ split / prior_sd_rad**2)
+    posterior: Array = np.asarray(
+        np.linalg.inv(info + split.T @ split / prior_sd_rad**2), dtype=np.float64
+    )
     status, weight = _coordinate_status(info, posterior, null)
     regularised = any(v != "identified" for v in status.values())
     return {
