@@ -9,7 +9,9 @@ try:
     import PyQt6.QtCore  # noqa: F401
     import pytestqt  # noqa: F401
 except (ImportError, OSError) as exc:  # pragma: no cover - environment
-    pytest.skip(f"PyQt6/matplotlib/pytest-qt not loadable: {exc}", allow_module_level=True)
+    pytest.skip(
+        f"PyQt6/matplotlib/pytest-qt not loadable: {exc}", allow_module_level=True
+    )
 
 from src.shared.python.loop_nullspace.plot_model import NSXPlotModel  # noqa: E402
 from src.shared.python.loop_nullspace.sensitivity_options import option_catalogue  # noqa: E402

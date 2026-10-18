@@ -17,15 +17,15 @@ CAT = option_catalogue()
 
 
 def _choice(**kw) -> DisturbanceChoice:
-    base = dict(
-        name="torque_add",
-        stage="torque",
-        spectrum="white",
-        persistent=False,
-        channels=(("shoulder", 0.004), ("elbow", 0.009)),
-        units="N m",
-        bandwidth_hz=None,
-    )
+    base = {
+        "name": "torque_add",
+        "stage": "torque",
+        "spectrum": "white",
+        "persistent": False,
+        "channels": (("shoulder", 0.004), ("elbow", 0.009)),
+        "units": "N m",
+        "bandwidth_hz": None,
+    }
     base.update(kw)
     return DisturbanceChoice(**base)
 
@@ -87,12 +87,12 @@ def test_mechanism_strategy_and_outcome_must_be_catalogued() -> None:
         {"outcome_priority": ("elbow_angle",)},
         {"outcome_priority": ()},
     ):
-        args = dict(
-            disturbances=(_choice(),),
-            mechanisms=(),
-            strategies=None,
-            outcome_priority=("face_angle",),
-        )
+        args = {
+            "disturbances": (_choice(),),
+            "mechanisms": (),
+            "strategies": None,
+            "outcome_priority": ("face_angle",),
+        }
         args.update(kw)
         with pytest.raises(ValueError):
             sensitivity_options(VariabilityChoices(**args), CAT)

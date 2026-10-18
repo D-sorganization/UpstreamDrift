@@ -23,6 +23,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.loop_nullspace.plot_model import NSXPlotModel
+from src.tools.grip_wrench_plots.variability_controls import VariabilityControls
 from src.tools.grip_wrench_plots.variability_tab import TAB_TITLE, VariabilityTab
 from src.tools.grip_wrench_plots.nsx_draw import draw_panel
 from src.tools.grip_wrench_plots.nsx_view import (
@@ -128,6 +129,10 @@ class NSXTabs(QTabWidget):
             self.addTab(tab, panel.replace("_", " ").title())
         self.variability_tab = VariabilityTab(catalogue=catalogue)
         self.addTab(self.variability_tab, TAB_TITLE)
+
+    def variability_controls(self) -> VariabilityControls:
+        """The request controls of the Variability & Consistency tab."""
+        return self.variability_tab.controls
 
     def set_plot_model(self, model: NSXPlotModel | None) -> None:
         """Render ``model`` in every tab (``None`` clears them).

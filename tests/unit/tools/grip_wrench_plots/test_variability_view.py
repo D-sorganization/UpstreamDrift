@@ -29,7 +29,9 @@ def test_view_module_has_no_gui_imports() -> None:
         if isinstance(n, ast.Import | ast.ImportFrom)
         for a in (n.names if isinstance(n, ast.Import) else [n])
     }
-    assert not any(str(m).split(".")[0] in {"PyQt6", "matplotlib", "numpy"} for m in names)
+    assert not any(
+        str(m).split(".")[0] in {"PyQt6", "matplotlib", "numpy"} for m in names
+    )
 
 
 def test_complete_view_shows_every_expected_string() -> None:
@@ -52,7 +54,10 @@ def test_sections_and_unvalidated_badge_come_from_the_payload() -> None:
 def test_withheld_arm_carries_its_reason_and_no_number() -> None:
     raw = variability_golden_dict()["sensitivity"]["strategy_pareto"]["points"][0]
     row = next(
-        r for r in vv.variability_view(variability_golden_model()).section("strategy_pareto").rows
+        r
+        for r in vv.variability_view(variability_golden_model())
+        .section("strategy_pareto")
+        .rows
         if r[0] == raw["label"]
     )
     assert raw["reason"] in row
