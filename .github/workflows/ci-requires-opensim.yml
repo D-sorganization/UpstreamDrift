@@ -1,0 +1,146 @@
+name: CI Requires OpenSim
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - "docs/**"
+      - "**.md"
+      - "LICENSE"
+      - ".gitignore"
+  merge_group:
+  push:
+    branches-ignore:
+      - "gh-readonly-queue/**"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pick-runner:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+
+  requires-opensim:
+    name: Real OpenSim 4.6 (requires_opensim)
+    needs: pick-runner
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ${{ github.event.pull_request && github.event.pull_request.head.repo.full_name != github.repository && 'ubuntu-latest' || needs.pick-runner.outputs.runner }}
+    timeout-minutes: 25
+    env:
+      QT_QPA_PLATFORM: offscreen
+      MPLBACKEND: Agg
+      MUJOCO_GL: egl
+      SDL_VIDEODRIVER: dummy
+      UPSTREAMDRIFT_MSK_BASE_MODEL: shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+
+      - name: Fetch OpenSim Rajagopal body model
+        shell: bash
+        run: |
+          rm -rf shared/models/opensim/opensim-models
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/opensim-org/opensim-models.git shared/models/opensim/opensim-models
+          git -C shared/models/opensim/opensim-models sparse-checkout set Models/Rajagopal
+          test -f shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v5.4.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.lock
+
+      - name: Create stub ui/dist for editable install
+        run: mkdir -p ui/dist
+
+      - name: Set up Python venv and install dependencies
+        run: |
+          python -m venv "$RUNNER_TEMP/opensim-ci-venv"
+          echo "$RUNNER_TEMP/opensim-ci-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/opensim-ci-venv" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/opensim-ci-venv/bin/python" -m pip install --upgrade pip
+          "$RUNNER_TEMP/opensim-ci-venv/bin/python" -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          "$RUNNER_TEMP/opensim-ci-venv/bin/python" -m pip install --no-cache-dir --no-deps -e ".[dev]"
+          "$RUNNER_TEMP/opensim-ci-venv/bin/python" -m pip install "opensim==4.6"
+
+      - name: Verify OpenSim 4.6 is importable
+        run: |
+          python - <<'PY'
+          import opensim
+          version = opensim.GetVersion()
+          print(f"OpenSim version: {version}")
+          assert version.startswith("4.6"), f"expected OpenSim 4.6, got {version}"
+          PY
+
+      - name: Run requires_opensim tests
+        run: |
+          python -m pytest \
+            tests/unit/lifting tests/opensim \
+            -m "requires_opensim and not slow and not heavy" \
+            -n auto \
+            --timeout=300 \
+            --timeout-method=thread \
+            -rs \
+            --tb=short \
+            -v \
+            --junitxml="$RUNNER_TEMP/opensim-results.xml"
+
+          python - <<'PY'
+          import sys
+          import xml.etree.ElementTree as ET
+
+          tree = ET.parse(sys.argv[1])
+          root = tree.getroot()
+          passed = 0
+          for tc in root.iter("testcase"):
+              if not any(child.tag in ("failure", "error", "skipped") for child in tc):
+                  passed += 1
+
+          print(f"Passed requires_opensim tests: {passed}")
+          if passed == 0:
+              print("::error::Zero tests passed! All selected tests were skipped or none were run.", file=sys.stderr)
+              sys.exit(1)
+          PY "$RUNNER_TEMP/opensim-results.xml"
