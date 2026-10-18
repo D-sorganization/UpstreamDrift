@@ -183,13 +183,14 @@ def _probe_torch(_suite_root: Path) -> ProbeOutcome:
             message=f"PyTorch {torch.__version__}{suffix}",
         )
     except ImportError:
+        from .training_torch_pin import torch_cuda_pip_install_command
+
         return ProbeOutcome(
             available=False,
             version=None,
             message=(
                 "PyTorch not installed. CUDA wheels: "
-                "pip install 'torch==2.8.0' "
-                "--index-url https://download.pytorch.org/whl/cu124"
+                f"{torch_cuda_pip_install_command()}"
             ),
             missing=("torch",),
         )
