@@ -46,7 +46,7 @@ import numpy as np
 from src.shared.python.model_appearance import geometry, library
 from src.shared.python.model_appearance import head_mesh as head_mesh_asset
 from src.shared.python.model_appearance.club_assembly import (
-    PART_MATERIALS,
+    club_part_material,
     ClubAssembly,
 )
 from src.shared.python.model_appearance.cross_section import (
@@ -57,6 +57,7 @@ from src.shared.python.model_appearance.cross_section import (
 )
 from src.shared.python.model_appearance.grip_hands import assembly_meshes_with_hands
 from src.shared.python.model_appearance.schema import AppearanceDocument, Material
+from src.shared.python.motion_matching.club_models import HAND_STANDOFF_SUFFIX
 from src.shared.python.motion_matching.visual_skeleton import (
     Capsule,
     Shape,
@@ -198,11 +199,14 @@ def section_size(spec: Mapping[str, Any], body: str) -> SectionSize:
 
 
 def club_meshes(
-    club: ClubAssembly, finish: str
+    club: ClubAssembly, finish: str, doc: AppearanceDocument
 ) -> list[tuple[str, geometry.Mesh, str]]:
-    """Shaft, grip, mesh head (GCV-11) and both grip hands (OSV-2), club frame."""
+    """Shaft, grip, mesh head (GCV-11) and both grip hands (OSV-2), club frame.
+
+    The hands are skin-coloured, or gloved per ``doc.glove`` (HRG-G1).
+    """
     return [
-        (label, mesh, PART_MATERIALS[label] or finish)
+        (label, mesh, club_part_material(label, finish, doc))
         for label, mesh in assembly_meshes_with_hands(club).items()
     ]
 
@@ -298,6 +302,11 @@ def _segment_meshes(
     return out
 
 
+def _is_grip_hand_body(body: str) -> bool:
+    """True for the standoff body that hosts the trail grip hand's mass."""
+    return body.rsplit("/", 1)[-1].endswith(HAND_STANDOFF_SUFFIX)
+
+
 def _meshes_for_body(
     ctx: _Context, body: str, caps: Sequence[Capsule]
 ) -> list[BodyMesh]:
@@ -307,9 +316,13 @@ def _meshes_for_body(
     part = library.classify_body(body)
     if part == "head" and ctx.head_enabled:
         return []  # drawn by the shared head: skull, face, ears and neck
+    if part == "hand" and ctx.club is not None and _is_grip_hand_body(body):
+        return []  # the grip hands are drawn on the club; no second hand loft
     if part == "club" and ctx.club is not None:
         finish = library.material_name_for(ctx.doc, body)
-        return [BodyMesh(body, *item) for item in club_meshes(ctx.club, finish)]
+        return [
+            BodyMesh(body, *item) for item in club_meshes(ctx.club, finish, ctx.doc)
+        ]
     scale = 1.0 if rule is None else rule.radius_scale
     if part in TRUNK_PARTS:
         segments = [_trunk_segment(ctx, body, part, caps, scale)]

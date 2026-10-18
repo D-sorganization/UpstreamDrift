@@ -97,7 +97,7 @@
         "bbox_max": [0.045697, 0.023448, 0.063927],
         "bbox_min": [-0.055698, -0.048653, -0.019558],
         "label": "lead_hand",
-        "material": "mat_glove_white",
+        "material": "mat_skin_2",
         "n_vertices": 3102
       },
       {
@@ -111,24 +111,8 @@
         "bbox_max": [0.10787, 0.027114, 0.10132],
         "bbox_min": [-0.031581, -0.050053, 0.026196],
         "label": "trail_hand",
-        "material": "mat_glove_white",
-        "n_vertices": 3102
-      }
-    ],
-    "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff": [
-      {
-        "bbox_max": [0.006373, 0.009703, 0.016016],
-        "bbox_min": [-0.012338, -0.007243, -0.005077],
-        "label": "garment0",
-        "material": "mat_glove_white",
-        "n_vertices": 794
-      },
-      {
-        "bbox_max": [0.005928, 0.009138, 0.01583],
-        "bbox_min": [-0.011893, -0.006678, -0.004891],
-        "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 3102
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": [
@@ -401,15 +385,15 @@
     ],
     "toes_l": [
       {
-        "bbox_max": [0.033529, 0.014422, 0.013686],
-        "bbox_min": [-0.018705, -0.020422, -0.046279],
+        "bbox_max": [0.03353, 0.014422, 0.013685],
+        "bbox_min": [-0.018706, -0.020422, -0.046278],
         "label": "garment0",
         "material": "mat_shoe_white",
         "n_vertices": 794
       },
       {
-        "bbox_max": [0.032194, 0.013295, 0.013325],
-        "bbox_min": [-0.01737, -0.019295, -0.045918],
+        "bbox_max": [0.032195, 0.013295, 0.013324],
+        "bbox_min": [-0.017371, -0.019295, -0.045917],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -530,7 +514,7 @@
         "bbox_max": [0.04107, 0.039425, 0.06633],
         "bbox_min": [-0.040584, -0.052603, -0.01438],
         "label": "lead_hand",
-        "material": "mat_glove_white",
+        "material": "mat_skin_2",
         "n_vertices": 3102
       },
       {
@@ -544,24 +528,8 @@
         "bbox_max": [0.082221, 0.092789, 0.093484],
         "bbox_min": [-0.032609, -0.033522, 0.017565],
         "label": "trail_hand",
-        "material": "mat_glove_white",
-        "n_vertices": 3102
-      }
-    ],
-    "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff": [
-      {
-        "bbox_max": [0.006447, 0.011141, 0.015717],
-        "bbox_min": [-0.012146, -0.006733, -0.005259],
-        "label": "garment0",
-        "material": "mat_glove_white",
-        "n_vertices": 794
-      },
-      {
-        "bbox_max": [0.005989, 0.01063, 0.015508],
-        "bbox_min": [-0.011688, -0.006221, -0.005051],
-        "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 3102
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": [
@@ -834,15 +802,15 @@
     ],
     "toes_l": [
       {
-        "bbox_max": [0.033529, 0.014422, 0.013686],
-        "bbox_min": [-0.018705, -0.020422, -0.046279],
+        "bbox_max": [0.03353, 0.014422, 0.013685],
+        "bbox_min": [-0.018706, -0.020422, -0.046278],
         "label": "garment0",
         "material": "mat_shoe_white",
         "n_vertices": 794
       },
       {
-        "bbox_max": [0.032194, 0.013295, 0.013325],
-        "bbox_min": [-0.01737, -0.019295, -0.045918],
+        "bbox_max": [0.032195, 0.013295, 0.013324],
+        "bbox_min": [-0.017371, -0.019295, -0.045917],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -963,7 +931,7 @@
         "bbox_max": [0.036731, 0.024, 0.061266],
         "bbox_min": [-0.030015, -0.06275, -0.005877],
         "label": "lead_hand",
-        "material": "mat_glove_white",
+        "material": "mat_skin_2",
         "n_vertices": 3102
       },
       {
@@ -977,24 +945,8 @@
         "bbox_max": [0.029938, 0.1002, 0.069571],
         "bbox_min": [-0.045184, -0.0233, -0.00549],
         "label": "trail_hand",
-        "material": "mat_glove_white",
-        "n_vertices": 3102
-      }
-    ],
-    "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff": [
-      {
-        "bbox_max": [0.008219, 0.008219, 0.01651],
-        "bbox_min": [-0.008219, -0.008219, -0.00381],
-        "label": "garment0",
-        "material": "mat_glove_white",
-        "n_vertices": 794
-      },
-      {
-        "bbox_max": [0.00761, 0.00761, 0.01651],
-        "bbox_min": [-0.00761, -0.00761, -0.00381],
-        "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 3102
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": [

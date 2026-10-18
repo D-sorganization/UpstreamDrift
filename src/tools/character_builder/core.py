@@ -46,6 +46,7 @@ APPEARANCE_NAMES = (
     "hair_color",
     "top_color",
     "bottom_color",
+    "glove",
 )
 
 

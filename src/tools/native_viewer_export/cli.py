@@ -17,7 +17,7 @@ from src.shared.python.model_appearance.appearance_selection import (
     AppearanceOverrides,
     resolve_appearance,
 )
-from src.shared.python.model_appearance.schema import document_from_dict
+from src.shared.python.model_appearance.schema import GLOVE_CHOICES, document_from_dict
 from src.tools.native_viewer_export.core import (
     DEFAULT_SPEEDS,
     ENGINES,
@@ -152,6 +152,13 @@ def add_appearance_arguments(p: argparse.ArgumentParser) -> None:
         "--clothing", default=None, metavar="ID", help="clothing preset id"
     )
     group.add_argument(
+        "--glove",
+        default=None,
+        choices=GLOVE_CHOICES,
+        help="golf glove by role (default none: bare skin-coloured hands); the "
+        "lead hand is the left one for a right-handed golfer",
+    )
+    group.add_argument(
         "--top-color", default=None, metavar="HEX", help="shirt colour #rrggbb"
     )
     group.add_argument(
@@ -183,6 +190,7 @@ def build_appearance(args: argparse.Namespace) -> dict[str, Any] | None:
         clothing=args.clothing,
         top_color=args.top_color,
         bottom_color=args.bottom_color,
+        glove=args.glove,
     )
     if args.appearance is None and overrides.is_empty:
         return None
