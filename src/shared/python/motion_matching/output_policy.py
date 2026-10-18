@@ -79,6 +79,11 @@ class OutputStatus:
     status: str
     reason: str
 
+    @property
+    def admitted(self) -> bool:
+        """Whether the policy shows this output's value (advertised or validated)."""
+        return self.status in (_STATUS_ADVERTISED, _STATUS_VALIDATED)
+
 
 def _require_mapping(value: Any, label: str) -> Mapping[str, Any]:
     if not isinstance(value, Mapping):

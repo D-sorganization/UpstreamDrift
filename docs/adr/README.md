@@ -61,7 +61,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0051](0051-matched-swing-abstraction.md)                               | Unified Motion-Matching Abstraction Stack                                         | Accepted               | 2026-09-20 |
 | [0052](0052-force-torque-overlay-contract.md)                           | Engine-Agnostic Force and Torque Overlay Contract                                 | Proposed               | 2026-10-02 |
 | [0053](0053-opencap-sidecar-licence-and-privacy-boundary.md)            | OpenCap Sidecar, Licence, and Privacy Boundary                                    | Proposed               | 2026-10-03 |
-| [0054](0054-closed-loop-null-space-exploration.md)                      | Closed-Loop Null-Space Exploration                                                | Accepted (D7 proposed) | 2026-10-14 |
+| [0054](0054-closed-loop-null-space-exploration.md)                      | Closed-Loop Null-Space Exploration                                                | Accepted               | 2026-10-14 |
 | [0055](0055-segmental-spine-kinematics-and-loads.md)                    | Segmental Spine Kinematics, Load Observables and Golf-Term Definitions            | Accepted               | 2026-10-15 |
 | [0056](0056-canonical-golfer-kinematics-source.md)                      | Canonical Source for Golfer Kinematics and the Closure Jacobian                   | Accepted               | 2026-10-15 |
 

@@ -1,6 +1,6 @@
 # ADR-0054: Closed-Loop Null-Space Exploration
 
-- Status: Accepted for D1 to D6 (owner-directed implementation of epic #12593, 2026-10-14). D7 (output policy) is Proposed and awaits an explicit owner decision; NSX-41 (#12573) must not start before it.
+- Status: Accepted. D1 to D6 owner-directed implementation of epic #12593, 2026-10-14. D7 (output policy) accepted as Option A by owner decision, 2026-10-17; NSX-41 (#12573) implements it.
 - Date: 2026-10-14
 - Decision Makers: repository owner (acceptance pending); proposed in the #12593 planning session
 - Related Issues/PRs: epic #12593, NSX-00 #12549, NSX-01 #12550, NSX-02 #12551, NSX-13 #12558, NSX-24 #12567, NSX-41 #12573; ADR-0052; ADR-0041; #10382 (output policy)
@@ -79,7 +79,7 @@ Every invariant carries its validity gate. Replay is labelled open-loop or
 feedback-assisted (R10). Hypotheses cite sources with a verification status
 and an unverified source cannot appear in a user-facing string (R13).
 
-**D7. Output policy. Proposed, awaiting owner decision.** The question is how
+**D7. Output policy. Accepted: Option A (owner decision, 2026-10-17).** The question was how
 NSX research views may display `INVARIANT` quantities, envelopes and
 representatives while `output_policy.py` continues to withhold joint loads from
 swing reports without calibration and evidence.
@@ -106,8 +106,11 @@ Option A is recommended because it keeps the owner's 2026-10-11 ruling intact
 for reports and still lets a user see what is invariant. Option B is the most
 conservative and is a strict subset of A. Option C changes the policy itself
 and needs the owner to say which invariants count as advertised outputs.
-NSX-41 (#12573) implements whichever option is accepted and must not start
-before this ADR changes status.
+The owner accepted Option A on 2026-10-17. NSX-41 (#12573) implements it as
+`display_decision(record, surface)`. On the swing-report surface it delegates
+admission to `output_policy.py` and does not restate that policy's rules.
+Options B and C were not adopted. The calibration requirements of
+`output_policy.py` are unchanged.
 
 ## Alternatives Considered
 
