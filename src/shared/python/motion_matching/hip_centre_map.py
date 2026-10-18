@@ -482,8 +482,10 @@ def estimate_hip_centres(
     sigma = _noise_sds(tracks, theta0, noise_sd_m, math.sqrt(tau))
     data_info = _data_information(tracks, theta0, sigma)
 
-    prior_info = np.linalg.inv(prior.covariance())
-    prior_mean = np.concatenate([prior.mean_r, prior.mean_l])
+    prior_info: Array = np.asarray(np.linalg.inv(prior.covariance()), dtype=float)
+    prior_mean: Array = np.asarray(
+        np.concatenate([prior.mean_r, prior.mean_l]), dtype=float
+    )
     if use_prior:
         # Start at the prior mean: weak data can send the free fit far away.
         radii = [

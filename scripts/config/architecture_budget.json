@@ -930,6 +930,33 @@
       "issue": 12065,
       "reason": "Issue #12065: CMCMatchingSolver.match solves computed muscle control matching with fallback handling (107 lines > 100).",
       "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/motion_matching/hip_centre_map.py",
+      "symbol": "estimate_hip_centres",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 13168,
+      "reason": "Issue #13168: estimate_hip_centres runs the MAP fit end to end (116 lines > 100).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/motion_matching/hip_centre_map.py",
+      "symbol": "estimate_hip_centres",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 13168,
+      "reason": "Issue #13168: estimate_hip_centres takes keyword-only estimator options (9 > 8).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/motion_matching/hip_centre_map.py",
+      "symbol": "estimate_hip_centres_from_capture",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 13168,
+      "reason": "Issue #13168: estimate_hip_centres_from_capture forwards the capture and estimator options (10 > 8).",
+      "expires_on": "2026-12-31"
     }
   ]
 }
