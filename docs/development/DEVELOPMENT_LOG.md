@@ -2561,6 +2561,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13141 · Ground Reaction Overlay Rings Measured CoP Points by Their 1-Sigma per Axis
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13141
+- **Branch:** merged via #13141
+- **PR:** #13141
+- **Paths:** see #13141
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`2dc3724e`; collated from changes/13141-ground-reaction-overlay-rings-measured-c.md)
+- **Summary:** Ground reaction overlay rings measured CoP points by their 1-sigma per axis
+- **Next step:** Shipped in PR #13141.
+
 ### DL-#13139 · Ground Reaction Overlay Shades Measured Plate Load by Its 1-Sigma Uncertainty and Names the Declared Uncertainty Source
 
 - **State:** shipped
