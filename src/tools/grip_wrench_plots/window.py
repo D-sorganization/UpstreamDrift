@@ -103,8 +103,8 @@ class GripWrenchTabsWidget(QWidget):
         ):
             controls.addWidget(QLabel(label))
             controls.addWidget(widget)
-        for widget in (self.allocation_check, self.run_button, self.cancel_button):
-            controls.addWidget(widget)
+        for control in (self.allocation_check, self.run_button, self.cancel_button):
+            controls.addWidget(control)
         root.addLayout(controls)
         self.progress = QProgressBar()
         self.progress.setRange(0, 100)
