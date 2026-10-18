@@ -14,8 +14,8 @@ lists, unit in ``units``):
 * ``<key>_moment_com_nm`` - moment about the whole-body centre of mass;
 * ``measured_<foot>_force_sigma_n`` - with a plate overlay, the random
   1-sigma of the measured load (``z``), interpolation bias excluded;
-* ``measured_<foot>_cop_sigma_m`` - likewise the random 1-sigma per axis of
-  the measured CoP (``z``).
+* ``measured_<foot>_cop_sigma_m`` - likewise the random 1-sigma of the
+  measured CoP: ``x`` and ``y`` per world axis, ``z`` the worse axis.
 
 ``load_share`` holds each foot's share of the summed vertical force, ``None``
 when the feet together carry less than :data:`COP_MIN_FZ_N`.

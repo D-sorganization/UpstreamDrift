@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   MAX_COP_MARKERS,
   copMarkerIndices,
+  copSemiAxes,
   uncertaintyCaption,
 } from './groundReactionUncertainty';
 
@@ -25,12 +26,27 @@ describe('copMarkerIndices', () => {
 describe('uncertaintyCaption', () => {
   it('names what is drawn and the declared source', () => {
     expect(uncertaintyCaption(true, true, 'datasheet rev 3')).toBe(
-      'Shaded: measured load ±1σ; circles: measured CoP ±1σ per axis ' +
+      'Shaded: measured load ±1σ; ellipses: measured CoP ±1σ per axis ' +
         '(declared uncertainty: datasheet rev 3)',
     );
     expect(uncertaintyCaption(false, true, null)).toBe(
-      'Circles: measured CoP ±1σ per axis (declared uncertainty: not stated)',
+      'Ellipses: measured CoP ±1σ per axis (declared uncertainty: not stated)',
     );
     expect(uncertaintyCaption(false, false, 'x')).toBeNull();
+  });
+});
+
+describe('copSemiAxes', () => {
+  it('uses the per-world-axis sigmas when present', () => {
+    expect(copSemiAxes({ x: [0.004], y: [0.001], z: [0.004] }, 0)).toEqual([0.004, 0.001]);
+  });
+
+  it('falls back to a circle of the worse axis without them', () => {
+    expect(copSemiAxes({ x: [null], y: [null], z: [0.003] }, 0)).toEqual([0.003, 0.003]);
+    expect(copSemiAxes({ z: [0.003] }, 0)).toEqual([0.003, 0.003]);
+  });
+
+  it('has no ellipse without a worse-axis sigma', () => {
+    expect(copSemiAxes({ x: [0.004], y: [0.001], z: [null] }, 0)).toBeNull();
   });
 });

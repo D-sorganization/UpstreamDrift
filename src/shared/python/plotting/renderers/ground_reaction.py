@@ -10,13 +10,13 @@ panel without data says "unavailable" with the reason.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 import math
 from typing import Any
 
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from matplotlib.patches import Circle
+from matplotlib.patches import Ellipse
 import numpy as np
 
 from src.shared.python.biomechanics.ground_reaction_plot_model import (
@@ -129,7 +129,7 @@ _MEASURED_STYLE: dict[str, Any] = {"linestyle": "--", "linewidth": 1.4, "alpha":
 #: Legend suffix of the shaded 1-sigma band around a measured load.
 SIGMA_BAND_SUFFIX = "\u00b11\u03c3"
 _BAND_ALPHA = 0.2
-#: CoP uncertainty circles drawn per foot at most, so the path stays legible.
+#: CoP uncertainty ellipses drawn per foot at most, so the path stays legible.
 MAX_COP_MARKERS = 12
 #: The CoP sigma is one sigma per horizontal axis, not a 2-D covariance.
 _PER_AXIS = "per axis"
@@ -166,31 +166,42 @@ def cop_marker_indices(
     return usable[::stride]
 
 
-def _draw_cop_circles(
+def _semi_axes(sigma: Mapping[str, list[float | None]], i: int) -> tuple[float, float]:
+    """Per-world-axis sigma at frame ``i``, else the worse axis on both."""
+    worse = sigma["z"][i]
+    assert worse is not None, "cop_marker_indices keeps only frames with a sigma"
+    sx, sy = sigma["x"][i], sigma["y"][i]
+    return (worse, worse) if sx is None or sy is None else (sx, sy)
+
+
+def _draw_cop_ellipses(
     ax: Axes, series: GroundReactionPlotSeries, key: str, style: tuple[str, str]
 ) -> bool:
-    """Circles of radius sigma at sampled CoP points; False without a sigma trace."""
+    """Axis-aligned 1-sigma ellipses at sampled CoP points.
+
+    The semi-axes are the per-world-axis sigmas (a circle of the worse-axis
+    sigma when a payload has only that).  False without a CoP sigma trace.
+    """
     label, color = style
     cop = series.traces.get(f"{key}_cop_m")
     sigma = series.traces.get(f"{key}_cop_sigma_m")
     if cop is None or sigma is None:
         return False
     rings = [
-        (x, y, r)
+        ((x, y), _semi_axes(sigma, i))
         for i in cop_marker_indices(cop["x"], sigma["z"], MAX_COP_MARKERS)
-        if (x := cop["x"][i]) is not None
-        and (y := cop["y"][i]) is not None
-        and (r := sigma["z"][i]) is not None
+        if (x := cop["x"][i]) is not None and (y := cop["y"][i]) is not None
     ]
     if not rings:
         return False
-    # One legend entry per foot: only the first circle carries the label.
+    # One legend entry per foot: only the first ellipse carries the label.
     names = [f"{label} {SIGMA_BAND_SUFFIX} {_PER_AXIS}"] + ["_nolegend_"] * len(rings)
-    for (x, y, r), name in zip(rings, names, strict=False):
+    for (center, (sx, sy)), name in zip(rings, names, strict=False):
         ax.add_patch(
-            Circle(
-                (x, y),
-                r,
+            Ellipse(
+                center,
+                2.0 * sx,
+                2.0 * sy,
                 facecolor=color,
                 edgecolor=color,
                 alpha=_BAND_ALPHA,
@@ -236,11 +247,11 @@ def _draw_measured(
     axes: np.ndarray, series: GroundReactionPlotSeries, in_bw: bool
 ) -> tuple[bool, bool]:
     """Dashed measured load with its 1-sigma band (N panels only) and CoP path
-    with its 1-sigma circles.
+    with its 1-sigma ellipses.
 
-    Returns whether any load band and any CoP circle was drawn.
+    Returns whether any load band and any CoP ellipse was drawn.
     """
-    banded = circled = False
+    banded = ringed = False
     for key, label, color in _measured_keys(series):
         if not in_bw:
             banded = _draw_measured_load(axes[0], series, key, (label, color)) or banded
@@ -248,22 +259,22 @@ def _draw_measured(
         y = _component(series, f"{key}_cop_m", "y")
         if x is not None and y is not None:
             axes[3].plot(x, y, color=color, label=label, **_MEASURED_STYLE)
-            circled = _draw_cop_circles(axes[3], series, key, (label, color)) or circled
+            ringed = _draw_cop_ellipses(axes[3], series, key, (label, color)) or ringed
     for ax in (axes[0], axes[3]):
         if ax.get_legend_handles_labels()[0]:
             ax.legend(fontsize=7, loc="upper left")
-    return banded, circled
+    return banded, ringed
 
 
 def _uncertainty_caption(
-    series: GroundReactionPlotSeries, banded: bool, circled: bool
+    series: GroundReactionPlotSeries, banded: bool, ringed: bool
 ) -> str | None:
-    """What the band and circles show and where their uncertainty came from."""
+    """What the band and ellipses show and where their uncertainty came from."""
     parts = []
     if banded:
         parts.append(f"shaded: measured load {SIGMA_BAND_SUFFIX}")
-    if circled:
-        parts.append(f"circles: measured CoP {SIGMA_BAND_SUFFIX} {_PER_AXIS}")
+    if ringed:
+        parts.append(f"ellipses: measured CoP {SIGMA_BAND_SUFFIX} {_PER_AXIS}")
     if not parts:
         return None
     text = "; ".join(parts)
@@ -321,9 +332,9 @@ def plot_ground_reaction(fig: Figure, series: GroundReactionPlotSeries) -> None:
             reason=reason,
         )
     _cop_path(axes[3], series)
-    banded, circled = _draw_measured(axes, series, in_bw)
+    banded, ringed = _draw_measured(axes, series, in_bw)
     for ax in axes[4:]:
         ax.set_xlabel("Time (s)", fontsize=8)
     fig.suptitle("Ground Reaction (on the body, world axes)", fontsize=9)
-    _draw_banner(fig, series, _uncertainty_caption(series, banded, circled))
+    _draw_banner(fig, series, _uncertainty_caption(series, banded, ringed))
     fig.tight_layout(rect=(0, 0, 1, 0.95))

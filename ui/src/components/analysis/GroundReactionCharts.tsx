@@ -24,6 +24,7 @@ import {
   PER_AXIS,
   SIGMA_BAND_SUFFIX,
   copMarkerIndices,
+  copSemiAxes,
   uncertaintyCaption,
 } from './groundReactionUncertainty';
 
@@ -79,7 +80,7 @@ type Band = {
 type Ring = {
   label: string;
   color: string;
-  points: Array<{ frame: number; x: number; y: number; r: number }>;
+  points: Array<{ frame: number; x: number; y: number; rx: number; ry: number }>;
 };
 
 function titleCase(key: string): string {
@@ -152,13 +153,17 @@ function measuredLoadBands(data: GroundReactionResponse): Band[] {
 function measuredCopRings(data: GroundReactionResponse): Ring[] {
   return footKeys(data, false).flatMap((e) => {
     const cop = data.traces?.[`measured_${e.key}_cop_m`];
-    const sigma = data.traces?.[`measured_${e.key}_cop_sigma_m`]?.z;
-    if (!cop || !sigma) return [];
+    const sigma = data.traces?.[`measured_${e.key}_cop_sigma_m`];
+    if (!cop || !sigma?.z) return [];
     const x = (cop.x ?? []) as Array<number | null>;
     const y = (cop.y ?? []) as Array<number | null>;
-    const points = copMarkerIndices(x, sigma, MAX_COP_MARKERS)
-      .filter((i) => y[i] !== null && y[i] !== undefined)
-      .map((i) => ({ frame: i, x: x[i] as number, y: y[i] as number, r: sigma[i] as number }));
+    const points = copMarkerIndices(x, sigma.z, MAX_COP_MARKERS).flatMap((i) => {
+      const axes = copSemiAxes(sigma, i);
+      const yi = y[i];
+      return axes === null || yi === null || yi === undefined
+        ? []
+        : [{ frame: i, x: x[i] as number, y: yi, rx: axes[0], ry: axes[1] }];
+    });
     return points.length === 0
       ? []
       : [{ label: `Measured ${e.label} ${SIGMA_BAND_SUFFIX} ${PER_AXIS}`, color: e.color, points }];
@@ -241,13 +246,13 @@ function MeasurementBanner({ data }: { data: GroundReactionResponse }) {
 function UncertaintyCaption({
   data,
   banded,
-  circled,
+  ringed,
 }: {
   data: GroundReactionResponse;
   banded: boolean;
-  circled: boolean;
+  ringed: boolean;
 }) {
-  const caption = uncertaintyCaption(banded, circled, data.measured_uncertainty_source);
+  const caption = uncertaintyCaption(banded, ringed, data.measured_uncertainty_source);
   if (caption === null) return null;
   return (
     <div data-testid="ground-reaction-uncertainty-caption" className="text-xs text-gray-400 mb-2">
@@ -372,7 +377,8 @@ function TimePanel({
 
 /** Each ring's data-unit extremes, so the axis ranges never clip a ring. */
 function ringExtents(rings: Ring[], axis: 'x' | 'y'): number[][] {
-  return rings.map((g) => g.points.flatMap((p) => [p[axis] - p.r, p[axis] + p.r]));
+  const half = axis === 'x' ? 'rx' : 'ry';
+  return rings.map((g) => g.points.flatMap((p) => [p[axis] - p[half], p[axis] + p[half]]));
 }
 
 function PathPanel({
@@ -394,7 +400,7 @@ function PathPanel({
   const hasData = xr !== null && yr !== null;
   const xRange: [number, number] = xr ?? [0, 1];
   const yRange: [number, number] = yr ?? [0, 1];
-  // A circle in data units is an ellipse here: x and y are scaled separately.
+  // Data-unit semi-axes become SVG units through separate x and y scales.
   const kx = (x1 - x0) / (xRange[1] - xRange[0] || 1);
   const ky = (y1 - y0) / (yRange[1] - yRange[0] || 1);
 
@@ -408,8 +414,8 @@ function PathPanel({
               data-testid={`ground-reaction-cop-sigma-${g.label.replace(` ${SIGMA_BAND_SUFFIX} ${PER_AXIS}`, '')}-${p.frame}`}
               cx={x0 + (p.x - xRange[0]) * kx}
               cy={y1 - (p.y - yRange[0]) * ky}
-              rx={p.r * kx}
-              ry={p.r * ky}
+              rx={p.rx * kx}
+              ry={p.ry * ky}
               fill={g.color}
               fillOpacity={BAND_OPACITY}
               stroke={g.color}
@@ -574,7 +580,7 @@ export function GroundReactionCharts({
         <>
           <MeasurementBanner data={data} />
           <UncertaintyCaption data={data} banded={panels.banded}
-            circled={panels.rings.length > 0}
+            ringed={panels.rings.length > 0}
           />
           {panels.time.slice(0, 3).map((p) => (
             <TimePanel key={p.id} {...p} t={panels.t} events={panels.events} />

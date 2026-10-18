@@ -76,7 +76,13 @@ $R$: a stance error $e$ becomes $R e$, so $|R_{xy}|\,|e|$ bounds each world
 component. The reported CoP bias and rate are the worst world axis,
 $\max_j (|R_{xy}|\,b_s)_j$ and $\max_j (|R_{xy}|\,r_s)_j$. Under a $45^\circ$
 yaw a CoP moving at $r$ along both stance axes thus has world rate
-$\sqrt2\,r$.
+$\sqrt2\,r$. The reading also keeps the random sigma of each world axis,
+$\sigma_{\mathrm{random},j} = \operatorname{hypot}\bigl(\sigma_m,
+s\,(|R_{xy}|\,r_s)_j\bigr)$ for $j \in \{x, y\}$
+(\texttt{cop\_sigma\_random\_xy\_m}), whose maximum is the worst-axis
+random sigma; an unloaded CoP carries $\sigma_m$ on both axes. No $x$--$y$
+covariance is formed, so the ground-reaction overlay draws these as the
+semi-axes of an axis-aligned ellipse, never a tilted one.
 
 \paragraph{Composition.} With declared measurement sigma $\sigma_m$ and
 band factor $k$,
@@ -111,6 +117,9 @@ quadratic bias estimate equal to the true interpolation error; the literal
 composition of measurement, skew and bias; refusal of extrapolation;
 snapping of clock rounding at the last and at an interior sample; and the
 world-axis CoP rate and bias under $45^\circ$ and $90^\circ$ yaw.
+\path{test_readings_cop_axes.py} checks the per-world-axis CoP random sigma,
+its axis swap under a $90^\circ$ yaw and that its maximum equals the
+worst-axis value.
 
 \section{Limitations}
 
