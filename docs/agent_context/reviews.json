@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Regenerated the capability atlas for the segment-shading and force-colour additions (generate_capability_atlas); re-read the launcher-atlas inputs and ran the atlas freshness and launcher manifest tests."
+      "rationale": "Regenerated the capability atlas for the segment-shading and force-colour additions (generate_capability_atlas); re-read the launcher-atlas inputs and ran tests/scripts/test_capability_atlas.py (passed) and the launcher manifest tests (215 passed, 1 failed locally: test_engine_hub_consolidation_9479 visible-physics-engine-tiles, not examined)."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",
