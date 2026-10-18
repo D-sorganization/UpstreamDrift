@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   asPlotModel,
   cancelLoopNullspaceJob,
+  fetchLoopNullspacePresets,
   getLoopNullspaceJob,
   isTerminalLoopNullspaceJob,
   nextLoopNullspaceDelay,
@@ -94,4 +95,21 @@ describe('plot model extraction', () => {
     expect(asPlotModel({ schema_version: '1.0.0' })).toBeNull();
     expect(asPlotModel(null)).toBeNull();
   });
+});
+
+describe('preset list', () => {
+  it('returns the served presets', async () => {
+    vi.mocked(apiFetch).mockResolvedValue([{ id: 'envelope_only', label: 'Envelope only' }]);
+    await expect(fetchLoopNullspacePresets()).resolves.toEqual([
+      { id: 'envelope_only', label: 'Envelope only' },
+    ]);
+  });
+
+  it.each([{}, null, [{ id: 'x' }], [{ id: 1, label: 'y' }]])(
+    'rejects a malformed preset payload %j instead of returning it',
+    async (payload) => {
+      vi.mocked(apiFetch).mockResolvedValue(payload);
+      await expect(fetchLoopNullspacePresets()).rejects.toThrow(/malformed preset list/);
+    },
+  );
 });

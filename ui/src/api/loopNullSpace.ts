@@ -29,9 +29,25 @@ export interface LoopNullspacePreset {
   label: string;
 }
 
-/** The registry presets served by `GET .../presets` (no copy is kept here). */
-export function fetchLoopNullspacePresets(signal?: AbortSignal): Promise<LoopNullspacePreset[]> {
-  return apiFetch<LoopNullspacePreset[]>(`${LOOP_NULLSPACE_PATH}/presets`, { signal });
+const isPreset = (value: unknown): value is LoopNullspacePreset =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as LoopNullspacePreset).id === 'string' &&
+  typeof (value as LoopNullspacePreset).label === 'string';
+
+/**
+ * The registry presets served by `GET .../presets` (no copy is kept here).
+ * Rejects a payload that is not a list of `{id, label}` strings, so a caller
+ * shows an error instead of rendering a malformed list.
+ */
+export async function fetchLoopNullspacePresets(
+  signal?: AbortSignal,
+): Promise<LoopNullspacePreset[]> {
+  const payload: unknown = await apiFetch<unknown>(`${LOOP_NULLSPACE_PATH}/presets`, { signal });
+  if (!Array.isArray(payload) || !payload.every(isPreset)) {
+    throw new Error('malformed preset list from the loop-nullspace presets endpoint');
+  }
+  return payload;
 }
 
 // ----------------------------------------------------------- plot model
