@@ -335,185 +335,50 @@ def _compute_joint_summaries(
     return summaries, overall_depth, overall_image
 
 
-def _compute_kinematic_angles_and_sequence(
+def _resolve_depth_axis(
+    depth_axis: Sequence[float] | np.ndarray | None,
+    camera: Any | None,
+    view: str | None,
+) -> np.ndarray:
+    """Resolve optical / depth axis direction vector following ADR-0041."""
+    if depth_axis is not None:
+        d_arr = np.asarray(depth_axis, dtype=float)
+        norm_d = float(np.linalg.norm(d_arr))
+        require(norm_d > 1e-8, "depth_axis cannot be zero")
+        return d_arr / norm_d
+    if camera is not None:
+        if hasattr(camera, "rotation_world_from_camera"):
+            r_wc = np.asarray(camera.rotation_world_from_camera, dtype=float)
+            d_arr = r_wc[:, 2]
+        elif hasattr(camera, "extrinsics") and hasattr(
+            camera.extrinsics, "rotation_world_from_camera"
+        ):
+            r_wc = np.asarray(camera.extrinsics.rotation_world_from_camera, dtype=float)
+            d_arr = r_wc[:, 2]
+        else:
+            raise ValueError(
+                f"Unable to extract optical axis from camera of type {type(camera)}"
+            )
+        norm_d = float(np.linalg.norm(d_arr))
+        require(norm_d > 1e-8, "camera optical axis cannot be zero")
+        return d_arr / norm_d
+    if view is not None:
+        v = view.strip().lower()
+        if v in ("dtl", "down_the_line"):
+            return np.array([1.0, 0.0, 0.0], dtype=float)
+        if v in ("face_on", "fo", "faceon"):
+            return np.array([0.0, 0.0, 1.0], dtype=float)
+    return np.array([0.0, 0.0, 1.0], dtype=float)
+
+
+def _validate_laterality_pairs(
     pred: np.ndarray,
     ref: np.ndarray,
     joint_names: Sequence[str],
-    event_frames: Mapping[str, int] | None = None,
-) -> tuple[dict[str, float], dict[str, dict[str, float]], bool | None, float | None]:
-    """Compute biomechanical axial angles, X-factor, and kinematic sequence timing."""
-    t_len = pred.shape[0]
-    angle_errors_deg: dict[str, float] = {}
-    phase_angles: dict[str, dict[str, float]] = {"P1": {}, "P4": {}, "P7": {}}
-
-    name_to_idx = _resolve_canonical_indices(joint_names)
-    has_pelvis = "left_hip" in name_to_idx and "right_hip" in name_to_idx
-    has_thorax = "left_shoulder" in name_to_idx and "right_shoulder" in name_to_idx
-
-    # Event frames resolution
-    if event_frames is not None:
-        p1_f = int(event_frames.get("P1", event_frames.get("address", 0)))
-        p4_f = int(event_frames.get("P4", event_frames.get("top", int(0.4 * t_len))))
-        p7_f = int(event_frames.get("P7", event_frames.get("impact", int(0.7 * t_len))))
-    else:
-        p1_f, p4_f, p7_f = 0, int(0.4 * t_len), int(0.7 * t_len)
-
-    p1_f = max(0, min(p1_f, t_len - 1))
-    p4_f = max(0, min(p4_f, t_len - 1))
-    p7_f = max(0, min(p7_f, t_len - 1))
-
-    if not (has_pelvis and has_thorax):
-        return angle_errors_deg, phase_angles, None, None
-
-    hl, hr = name_to_idx["left_hip"], name_to_idx["right_hip"]
-    sl, sr = name_to_idx["left_shoulder"], name_to_idx["right_shoulder"]
-    pelvis_ref = np.arctan2(
-        ref[:, hr, 2] - ref[:, hl, 2], ref[:, hr, 0] - ref[:, hl, 0]
-    )
-    pelvis_pred = np.arctan2(
-        pred[:, hr, 2] - pred[:, hl, 2], pred[:, hr, 0] - pred[:, hl, 0]
-    )
-    thorax_ref = np.arctan2(
-        ref[:, sr, 2] - ref[:, sl, 2], ref[:, sr, 0] - ref[:, sl, 0]
-    )
-    thorax_pred = np.arctan2(
-        pred[:, sr, 2] - pred[:, sl, 2], pred[:, sr, 0] - pred[:, sl, 0]
-    )
-
-    # Detect events from thorax rotation if event_frames was not provided
-    if event_frames is None and t_len >= 5:
-        unwrapped_t = np.unwrap(thorax_ref)
-        if float(np.ptp(unwrapped_t)) > np.radians(10.0):
-            top_cand = int(np.argmax(np.abs(unwrapped_t - unwrapped_t[0])))
-            if 0 < top_cand < t_len - 2:
-                p4_f = top_cand
-                p7_f = min(t_len - 1, p4_f + max(1, int(0.5 * (t_len - p4_f))))
-
-    xfactor_ref = np.degrees(thorax_ref - pelvis_ref)
-    xfactor_pred = np.degrees(thorax_pred - pelvis_pred)
-    angle_errors_deg["pelvis_axial_rotation"] = float(
-        np.degrees(np.sqrt(np.mean((pelvis_pred - pelvis_ref) ** 2)))
-    )
-    angle_errors_deg["thorax_axial_rotation"] = float(
-        np.degrees(np.sqrt(np.mean((thorax_pred - thorax_ref) ** 2)))
-    )
-    angle_errors_deg["x_factor"] = float(
-        np.sqrt(np.mean((xfactor_pred - xfactor_ref) ** 2))
-    )
-
-    for key, f_idx in (("P1", p1_f), ("P4", p4_f), ("P7", p7_f)):
-        phase_angles[key] = {
-            "pelvis_deg": float(
-                np.degrees(abs(pelvis_pred[f_idx] - pelvis_ref[f_idx]))
-            ),
-            "thorax_deg": float(
-                np.degrees(abs(thorax_pred[f_idx] - thorax_ref[f_idx]))
-            ),
-            "x_factor_deg": float(abs(xfactor_pred[f_idx] - xfactor_ref[f_idx])),
-        }
-
-    if t_len < 3:
-        return angle_errors_deg, phase_angles, None, None
-
-    # Kinematic sequence angular speeds
-    omega_pelvis_ref = np.abs(np.gradient(np.unwrap(pelvis_ref)))
-    omega_pelvis_pred = np.abs(np.gradient(np.unwrap(pelvis_pred)))
-    omega_thorax_ref = np.abs(np.gradient(np.unwrap(thorax_ref)))
-    omega_thorax_pred = np.abs(np.gradient(np.unwrap(thorax_pred)))
-
-    ref_dynamic = (float(np.ptp(omega_pelvis_ref)) > 1e-4) or (
-        float(np.ptp(omega_thorax_ref)) > 1e-4
-    )
-    pred_dynamic = (float(np.ptp(omega_pelvis_pred)) > 1e-4) or (
-        float(np.ptp(omega_thorax_pred)) > 1e-4
-    )
-    if not (ref_dynamic and pred_dynamic):
-        return angle_errors_deg, phase_angles, None, None
-
-    # Search window around downswing
-    w_start = min(p4_f, p7_f)
-    w_end = min(t_len, max(p4_f, p7_f) + max(1, int(0.15 * t_len)))
-    if w_end <= w_start:
-        w_start, w_end = 0, t_len
-    win = slice(w_start, w_end)
-
-    peak_p_ref = w_start + int(np.argmax(omega_pelvis_ref[win]))
-    peak_t_ref = w_start + int(np.argmax(omega_thorax_ref[win]))
-    peak_p_pred = w_start + int(np.argmax(omega_pelvis_pred[win]))
-    peak_t_pred = w_start + int(np.argmax(omega_thorax_pred[win]))
-
-    ref_segments: list[tuple[str, int]] = [
-        ("pelvis", peak_p_ref),
-        ("thorax", peak_t_ref),
-    ]
-    pred_segments: list[tuple[str, int]] = [
-        ("pelvis", peak_p_pred),
-        ("thorax", peak_t_pred),
-    ]
-
-    # Include lead arm if available
-    if "left_wrist" in name_to_idx and "left_shoulder" in name_to_idx:
-        wl, sl_idx = name_to_idx["left_wrist"], name_to_idx["left_shoulder"]
-        arm_ref = np.arctan2(
-            ref[:, wl, 2] - ref[:, sl_idx, 2], ref[:, wl, 0] - ref[:, sl_idx, 0]
-        )
-        arm_pred = np.arctan2(
-            pred[:, wl, 2] - pred[:, sl_idx, 2], pred[:, wl, 0] - pred[:, sl_idx, 0]
-        )
-        omega_arm_ref = np.abs(np.gradient(np.unwrap(arm_ref)))
-        omega_arm_pred = np.abs(np.gradient(np.unwrap(arm_pred)))
-        if float(np.ptp(omega_arm_ref)) > 1e-4 and float(np.ptp(omega_arm_pred)) > 1e-4:
-            ref_segments.append(
-                ("lead_arm", w_start + int(np.argmax(omega_arm_ref[win])))
-            )
-            pred_segments.append(
-                ("lead_arm", w_start + int(np.argmax(omega_arm_pred[win])))
-            )
-
-    order_ref = [name for name, _ in sorted(ref_segments, key=lambda s: s[1])]
-    order_pred = [name for name, _ in sorted(pred_segments, key=lambda s: s[1])]
-    order_agree = bool(order_pred == order_ref)
-
-    phase_span = float(max(1, abs(p7_f - p4_f)))
-    timing_err_phase = float(
-        np.mean(
-            [
-                abs(pf - rf)
-                for (_, pf), (_, rf) in zip(pred_segments, ref_segments, strict=True)
-            ]
-        )
-        / phase_span
-    )
-
-    return angle_errors_deg, phase_angles, order_agree, timing_err_phase
-
-
-def compute_l3_paired_comparison(
-    predicted_trajectories: np.ndarray,
-    reference_trajectories: np.ndarray,
-    joint_names: Sequence[str],
     *,
-    physical_clock: str = "unknown",
-    fps: float | None = None,
-    video_swing_id: str = "video-swing",
-    paired_capture_swing_id: str = "capture-O-swing",
-    backend: str = "necromatcher",
-    camera: Any | None = None,
-    depth_axis: Sequence[float] | np.ndarray | None = None,
-    view: str | None = None,
-    event_frames: Mapping[str, int] | None = None,
-    require_laterality: bool = True,
-) -> L3ComparisonResult:
-    """Compute L3 paired comparison between video 3D fit and capture-O marker IK."""
-    pred = np.asarray(predicted_trajectories, dtype=float)
-    ref = np.asarray(reference_trajectories, dtype=float)
-    _validate_matching_3d_trajectories(pred, ref)
-    require(
-        len(joint_names) == pred.shape[1],
-        f"joint_names ({len(joint_names)}) must match landmark dimension ({pred.shape[1]})",
-    )
-
-    # Laterality validation with canonical alias resolution
+    require_laterality: bool,
+) -> None:
+    """Validate coronal laterality against bilateral pairs, failing closed if none present."""
     canonical_indices = _resolve_canonical_indices(joint_names)
     l_idx: list[int] = []
     r_idx: list[int] = []
@@ -530,67 +395,260 @@ def compute_l3_paired_comparison(
     if l_idx:
         validate_laterality(pred, ref, left_indices=l_idx, right_indices=r_idx)
 
-    # Fixed-scale rigid alignment on address frame
-    aligned_pred, _ = align_trajectories_rigid_fixed_scale(pred, ref)
 
-    # Depth axis resolution following camera / view
-    if depth_axis is not None:
-        d_arr = np.asarray(depth_axis, dtype=float)
-        norm_d = float(np.linalg.norm(d_arr))
-        require(norm_d > 1e-8, "depth_axis cannot be zero")
-        resolved_depth_axis = d_arr / norm_d
-    elif camera is not None:
-        if hasattr(camera, "rotation_world_from_camera"):
-            r_wc = np.asarray(camera.rotation_world_from_camera, dtype=float)
-            d_arr = r_wc[:, 2]
-        elif hasattr(camera, "extrinsics") and hasattr(
-            camera.extrinsics, "rotation_world_from_camera"
-        ):
-            r_wc = np.asarray(camera.extrinsics.rotation_world_from_camera, dtype=float)
-            d_arr = r_wc[:, 2]
-        else:
-            raise ValueError(
-                f"Unable to extract optical axis from camera of type {type(camera)}"
-            )
-        norm_d = float(np.linalg.norm(d_arr))
-        require(norm_d > 1e-8, "camera optical axis cannot be zero")
-        resolved_depth_axis = d_arr / norm_d
-    elif view is not None:
-        v = view.strip().lower()
-        if v in ("dtl", "down_the_line"):
-            # ADR-0041: X is toward the target (down-the-line optical axis)
-            resolved_depth_axis = np.array([1.0, 0.0, 0.0], dtype=float)
-        elif v in ("face_on", "fo", "faceon"):
-            # ADR-0041: Z is lateral / golfer right (face-on optical axis)
-            resolved_depth_axis = np.array([0.0, 0.0, 1.0], dtype=float)
-        else:
-            resolved_depth_axis = np.array([0.0, 0.0, 1.0], dtype=float)
+def _detect_event_frames(
+    thorax_ref: np.ndarray,
+    t_len: int,
+    event_frames: Mapping[str, int] | None,
+) -> tuple[int, int, int]:
+    """Determine P1, P4, P7 event frame indices from explicit mapping or kinematics."""
+    if event_frames is not None:
+        p1 = int(event_frames.get("P1", event_frames.get("address", 0)))
+        p4 = int(event_frames.get("P4", event_frames.get("top", int(0.4 * t_len))))
+        p7 = int(event_frames.get("P7", event_frames.get("impact", int(0.7 * t_len))))
     else:
-        resolved_depth_axis = np.array([0.0, 0.0, 1.0], dtype=float)
+        p1 = 0
+        p4 = int(0.4 * t_len)
+        p7 = int(0.7 * t_len)
+        if t_len >= 5:
+            unwrapped_t = np.unwrap(thorax_ref)
+            if float(np.ptp(unwrapped_t)) > np.radians(10.0):
+                top_cand = int(np.argmax(np.abs(unwrapped_t - unwrapped_t[0])))
+                if 0 < top_cand < t_len - 2:
+                    p4 = top_cand
+                    p7 = min(t_len - 1, p4 + max(1, int(0.5 * (t_len - p4))))
+    return (
+        max(0, min(p1, t_len - 1)),
+        max(0, min(p4, t_len - 1)),
+        max(0, min(p7, t_len - 1)),
+    )
+
+
+def _compute_axial_rotations(
+    pred: np.ndarray,
+    ref: np.ndarray,
+    name_to_idx: Mapping[str, int],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | None:
+    """Compute pelvis and thorax axial rotation angle arrays if bilateral markers exist."""
+    has_pelvis = "left_hip" in name_to_idx and "right_hip" in name_to_idx
+    has_thorax = "left_shoulder" in name_to_idx and "right_shoulder" in name_to_idx
+    if not (has_pelvis and has_thorax):
+        return None
+    hl, hr = name_to_idx["left_hip"], name_to_idx["right_hip"]
+    sl, sr = name_to_idx["left_shoulder"], name_to_idx["right_shoulder"]
+    pelvis_ref = np.arctan2(
+        ref[:, hr, 2] - ref[:, hl, 2], ref[:, hr, 0] - ref[:, hl, 0]
+    )
+    pelvis_pred = np.arctan2(
+        pred[:, hr, 2] - pred[:, hl, 2], pred[:, hr, 0] - pred[:, hl, 0]
+    )
+    thorax_ref = np.arctan2(
+        ref[:, sr, 2] - ref[:, sl, 2], ref[:, sr, 0] - ref[:, sl, 0]
+    )
+    thorax_pred = np.arctan2(
+        pred[:, sr, 2] - pred[:, sl, 2], pred[:, sr, 0] - pred[:, sl, 0]
+    )
+    return pelvis_pred, pelvis_ref, thorax_pred, thorax_ref
+
+
+def _compute_phase_angles_and_errors(
+    rotations: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+    event_frames: tuple[int, int, int],
+) -> tuple[dict[str, float], dict[str, dict[str, float]]]:
+    """Compute RMSE angle errors and phase-binned angle discrepancies."""
+    p_pred, p_ref, t_pred, t_ref = rotations
+    p1_f, p4_f, p7_f = event_frames
+    xfactor_ref = np.degrees(t_ref - p_ref)
+    xfactor_pred = np.degrees(t_pred - p_pred)
+
+    angle_errors_deg = {
+        "pelvis_axial_rotation": float(
+            np.degrees(np.sqrt(np.mean((p_pred - p_ref) ** 2)))
+        ),
+        "thorax_axial_rotation": float(
+            np.degrees(np.sqrt(np.mean((t_pred - t_ref) ** 2)))
+        ),
+        "x_factor": float(np.sqrt(np.mean((xfactor_pred - xfactor_ref) ** 2))),
+    }
+    phase_angles = {}
+    for key, f_idx in (("P1", p1_f), ("P4", p4_f), ("P7", p7_f)):
+        phase_angles[key] = {
+            "pelvis_deg": float(np.degrees(abs(p_pred[f_idx] - p_ref[f_idx]))),
+            "thorax_deg": float(np.degrees(abs(t_pred[f_idx] - t_ref[f_idx]))),
+            "x_factor_deg": float(abs(xfactor_pred[f_idx] - xfactor_ref[f_idx])),
+        }
+    return angle_errors_deg, phase_angles
+
+
+def _compute_sequence_agreement_and_timing(
+    pred: np.ndarray,
+    ref: np.ndarray,
+    name_to_idx: Mapping[str, int],
+    rotations: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+    events: tuple[int, int, int],
+    t_len: int,
+) -> tuple[bool | None, float | None]:
+    """Compute proximal-to-distal peak sequence agreement and normalized timing error."""
+    if t_len < 3:
+        return None, None
+    p_pred, p_ref, t_pred, t_ref = rotations
+    _, p4_f, p7_f = events
+
+    omega_pelvis_ref = np.abs(np.gradient(np.unwrap(p_ref)))
+    omega_pelvis_pred = np.abs(np.gradient(np.unwrap(p_pred)))
+    omega_thorax_ref = np.abs(np.gradient(np.unwrap(t_ref)))
+    omega_thorax_pred = np.abs(np.gradient(np.unwrap(t_pred)))
+
+    ref_dyn = (float(np.ptp(omega_pelvis_ref)) > 1e-4) or (
+        float(np.ptp(omega_thorax_ref)) > 1e-4
+    )
+    pred_dyn = (float(np.ptp(omega_pelvis_pred)) > 1e-4) or (
+        float(np.ptp(omega_thorax_pred)) > 1e-4
+    )
+    if not (ref_dyn and pred_dyn):
+        return None, None
+
+    w_start = min(p4_f, p7_f)
+    w_end = min(t_len, max(p4_f, p7_f) + max(1, int(0.15 * t_len)))
+    if w_end <= w_start:
+        w_start, w_end = 0, t_len
+    win = slice(w_start, w_end)
+
+    ref_segs: list[tuple[str, int]] = [
+        ("pelvis", w_start + int(np.argmax(omega_pelvis_ref[win]))),
+        ("thorax", w_start + int(np.argmax(omega_thorax_ref[win]))),
+    ]
+    pred_segs: list[tuple[str, int]] = [
+        ("pelvis", w_start + int(np.argmax(omega_pelvis_pred[win]))),
+        ("thorax", w_start + int(np.argmax(omega_thorax_pred[win]))),
+    ]
+
+    if "left_wrist" in name_to_idx and "left_shoulder" in name_to_idx:
+        wl, sl_idx = name_to_idx["left_wrist"], name_to_idx["left_shoulder"]
+        a_ref = np.arctan2(
+            ref[:, wl, 2] - ref[:, sl_idx, 2], ref[:, wl, 0] - ref[:, sl_idx, 0]
+        )
+        a_pred = np.arctan2(
+            pred[:, wl, 2] - pred[:, sl_idx, 2], pred[:, wl, 0] - pred[:, sl_idx, 0]
+        )
+        om_a_ref = np.abs(np.gradient(np.unwrap(a_ref)))
+        om_a_pred = np.abs(np.gradient(np.unwrap(a_pred)))
+        if float(np.ptp(om_a_ref)) > 1e-4 and float(np.ptp(om_a_pred)) > 1e-4:
+            ref_segs.append(("lead_arm", w_start + int(np.argmax(om_a_ref[win]))))
+            pred_segs.append(("lead_arm", w_start + int(np.argmax(om_a_pred[win]))))
+
+    order_ref = [name for name, _ in sorted(ref_segs, key=lambda s: s[1])]
+    order_pred = [name for name, _ in sorted(pred_segs, key=lambda s: s[1])]
+    order_agree = bool(order_pred == order_ref)
+
+    span = float(max(1, abs(p7_f - p4_f)))
+    time_err = float(
+        np.mean(
+            [abs(pf - rf) for (_, pf), (_, rf) in zip(pred_segs, ref_segs, strict=True)]
+        )
+        / span
+    )
+    return order_agree, time_err
+
+
+def _compute_kinematic_angles_and_sequence(
+    pred: np.ndarray,
+    ref: np.ndarray,
+    joint_names: Sequence[str],
+    event_frames: Mapping[str, int] | None = None,
+) -> tuple[dict[str, float], dict[str, dict[str, float]], bool | None, float | None]:
+    """Compute biomechanical axial angles, X-factor, and kinematic sequence timing."""
+    t_len = pred.shape[0]
+    name_to_idx = _resolve_canonical_indices(joint_names)
+    rotations = _compute_axial_rotations(pred, ref, name_to_idx)
+    if rotations is None:
+        empty_phases = {"P1": {}, "P4": {}, "P7": {}}
+        return {}, empty_phases, None, None
+
+    events = _detect_event_frames(rotations[3], t_len, event_frames)
+    angle_errors_deg, phase_angles = _compute_phase_angles_and_errors(rotations, events)
+    order_agree, time_err = _compute_sequence_agreement_and_timing(
+        pred, ref, name_to_idx, rotations, events, t_len
+    )
+    return angle_errors_deg, phase_angles, order_agree, time_err
+
+
+def _compute_velocity_metrics(
+    aligned_pred: np.ndarray,
+    fps: float | None,
+    joint_names: Sequence[str],
+    physical_clock: str,
+) -> dict[str, Any] | None:
+    """Compute velocity metrics only when physical clock is known."""
+    if physical_clock != "known" or fps is None or fps <= 0:
+        return None
+    vels = np.diff(aligned_pred, axis=0) * fps
+    speeds = np.linalg.norm(vels, axis=-1)
+    return {
+        "peak_joint_speeds_m_s": {
+            name: float(np.max(speeds[:, k])) for k, name in enumerate(joint_names)
+        },
+        "mean_joint_speeds_m_s": {
+            name: float(np.mean(speeds[:, k])) for k, name in enumerate(joint_names)
+        },
+    }
+
+
+def compute_l3_paired_comparison(
+    predicted_trajectories: np.ndarray,
+    reference_trajectories: np.ndarray,
+    joint_names: Sequence[str],
+    *,
+    physical_clock: str = "unknown",
+    fps: float | None = None,
+    video_swing_id: str = "video-swing",
+    paired_capture_swing_id: str = "capture-O-swing",
+    **kwargs: Any,
+) -> L3ComparisonResult:
+    """Compute L3 paired comparison between video 3D fit and capture-O marker IK."""
+    pred = np.asarray(predicted_trajectories, dtype=float)
+    ref = np.asarray(reference_trajectories, dtype=float)
+    _validate_matching_3d_trajectories(pred, ref)
+    require(
+        len(joint_names) == pred.shape[1],
+        f"joint_names ({len(joint_names)}) must match landmark dimension ({pred.shape[1]})",
+    )
+
+    allowed_kwargs = {
+        "backend",
+        "camera",
+        "depth_axis",
+        "view",
+        "event_frames",
+        "require_laterality",
+    }
+    extra = set(kwargs) - allowed_kwargs
+    if extra:
+        raise TypeError(
+            f"compute_l3_paired_comparison() got unexpected keyword arguments: {extra}"
+        )
+
+    backend: str = kwargs.get("backend", "necromatcher")
+    req_lat: bool = kwargs.get("require_laterality", True)
+    _validate_laterality_pairs(pred, ref, joint_names, require_laterality=req_lat)
+
+    aligned_pred, _ = align_trajectories_rigid_fixed_scale(pred, ref)
+    d_axis = _resolve_depth_axis(
+        kwargs.get("depth_axis"), kwargs.get("camera"), kwargs.get("view")
+    )
 
     overall_mpjpe, overall_pa, _, _ = compute_mpjpe_and_pa_mpjpe(aligned_pred, ref)
     summaries, depth_err, img_err = _compute_joint_summaries(
-        aligned_pred, ref, joint_names, resolved_depth_axis
+        aligned_pred, ref, joint_names, d_axis
     )
     angles_deg, phase_angles, order_ok, time_err = (
         _compute_kinematic_angles_and_sequence(
-            aligned_pred, ref, joint_names, event_frames=event_frames
+            aligned_pred, ref, joint_names, event_frames=kwargs.get("event_frames")
         )
     )
-
-    # Velocity metrics emitted ONLY when physical_clock == "known"
-    velocity_metrics: dict[str, Any] | None = None
-    if physical_clock == "known" and fps is not None and fps > 0:
-        vels = np.diff(aligned_pred, axis=0) * fps
-        speeds = np.linalg.norm(vels, axis=-1)
-        velocity_metrics = {
-            "peak_joint_speeds_m_s": {
-                name: float(np.max(speeds[:, k])) for k, name in enumerate(joint_names)
-            },
-            "mean_joint_speeds_m_s": {
-                name: float(np.mean(speeds[:, k])) for k, name in enumerate(joint_names)
-            },
-        }
+    vel_metrics = _compute_velocity_metrics(
+        aligned_pred, fps, joint_names, physical_clock
+    )
 
     return L3ComparisonResult(
         video_swing_id=video_swing_id,
@@ -607,7 +665,7 @@ def compute_l3_paired_comparison(
         kinematic_sequence_order_agreement=order_ok,
         kinematic_sequence_timing_error_phase=time_err,
         physical_clock=physical_clock,
-        velocity_metrics=velocity_metrics,
+        velocity_metrics=vel_metrics,
         evaluated_frames_count=pred.shape[0],
     )
 
