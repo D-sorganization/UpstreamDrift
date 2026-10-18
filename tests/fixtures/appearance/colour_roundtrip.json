@@ -1,0 +1,249 @@
+{
+  "comment": "Shared by tests/unit/model_appearance/test_appearance_colour_roundtrip.py (Python: CLI, worker job, desktop writer, web API) and ui/src/components/character/appearanceDocument.test.ts (TypeScript serializer). Expected values are the Python writer's output (HRG-B2, #13167).",
+  "library": {
+    "schema_version": "appearance-v1",
+    "clothing": {
+      "golf_polo_shorts": {
+        "torso": "polo_navy",
+        "shoulder": "polo_navy",
+        "upper_arm": "polo_navy",
+        "pelvis": "shorts_khaki",
+        "thigh": "shorts_khaki",
+        "foot": "shoe_white",
+        "hand": "glove_white"
+      },
+      "golf_polo_trousers": {
+        "torso": "polo_white",
+        "shoulder": "polo_white",
+        "upper_arm": "polo_white",
+        "pelvis": "trousers_charcoal",
+        "thigh": "trousers_charcoal",
+        "foot": "shoe_black",
+        "hand": "glove_white",
+        "shin": "trousers_charcoal"
+      }
+    },
+    "headwear_default_material": {
+      "hair": "hair_brown",
+      "cap": "cap_navy"
+    },
+    "materials": {
+      "hair_brown": {
+        "base_color": [
+          0.45,
+          0.29,
+          0.17,
+          1.0
+        ],
+        "roughness": 0.8,
+        "metallic": 0.0,
+        "texture": {
+          "kind": "noise",
+          "noise": 0.05
+        }
+      },
+      "polo_navy": {
+        "base_color": [
+          0.16,
+          0.27,
+          0.55,
+          1.0
+        ],
+        "roughness": 0.85,
+        "metallic": 0.0,
+        "texture": {
+          "kind": "noise",
+          "noise": 0.04
+        }
+      },
+      "polo_white": {
+        "base_color": [
+          0.93,
+          0.93,
+          0.92,
+          1.0
+        ],
+        "roughness": 0.85,
+        "metallic": 0.0,
+        "texture": {
+          "kind": "noise",
+          "noise": 0.04
+        }
+      },
+      "shorts_khaki": {
+        "base_color": [
+          0.78,
+          0.7,
+          0.52,
+          1.0
+        ],
+        "roughness": 0.9,
+        "metallic": 0.0,
+        "texture": {
+          "kind": "noise",
+          "noise": 0.05
+        }
+      },
+      "skin_2": {
+        "base_color": [
+          0.93,
+          0.76,
+          0.66,
+          1.0
+        ],
+        "roughness": 0.55,
+        "metallic": 0.0,
+        "texture": {
+          "kind": "noise",
+          "noise": 0.02
+        }
+      },
+      "skin_5": {
+        "base_color": [
+          0.73,
+          0.53,
+          0.38,
+          1.0
+        ],
+        "roughness": 0.55,
+        "metallic": 0.0,
+        "texture": {
+          "kind": "noise",
+          "noise": 0.02
+        }
+      },
+      "trousers_charcoal": {
+        "base_color": [
+          0.3,
+          0.32,
+          0.35,
+          1.0
+        ],
+        "roughness": 0.9,
+        "metallic": 0.0,
+        "texture": {
+          "kind": "noise",
+          "noise": 0.05
+        }
+      }
+    }
+  },
+  "cases": [
+    {
+      "name": "custom_hair",
+      "picks": {
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "headwear": "hair",
+        "hair_color": "#336699"
+      },
+      "expected": {
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "headwear_material": "custom_hair",
+        "materials": {
+          "custom_hair": [
+            0.2,
+            0.4,
+            0.6,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "custom_skin",
+      "picks": {
+        "skin_tone": "skin_5",
+        "clothing": "golf_polo_trousers",
+        "headwear": "hair",
+        "skin_color": "#c68642"
+      },
+      "expected": {
+        "skin_tone": "custom_skin",
+        "clothing": "golf_polo_trousers",
+        "headwear_material": null,
+        "materials": {
+          "custom_skin": [
+            0.7764705882352941,
+            0.5254901960784314,
+            0.25882352941176473,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "shorts_top_and_bottom",
+      "picks": {
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_shorts",
+        "headwear": "hair",
+        "top_color": "#aa0000",
+        "bottom_color": "#00aa00"
+      },
+      "expected": {
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_shorts",
+        "headwear_material": null,
+        "materials": {
+          "polo_navy": [
+            0.6666666666666666,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "shorts_khaki": [
+            0.0,
+            0.6666666666666666,
+            0.0,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "trousers_all_four",
+      "picks": {
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "headwear": "hair",
+        "skin_color": "#f1c27d",
+        "hair_color": "#0a0a0a",
+        "top_color": "#ffffff",
+        "bottom_color": "#101010"
+      },
+      "expected": {
+        "skin_tone": "custom_skin",
+        "clothing": "golf_polo_trousers",
+        "headwear_material": "custom_hair",
+        "materials": {
+          "custom_hair": [
+            0.0392156862745098,
+            0.0392156862745098,
+            0.0392156862745098,
+            1.0
+          ],
+          "custom_skin": [
+            0.9450980392156862,
+            0.7607843137254902,
+            0.49019607843137253,
+            1.0
+          ],
+          "polo_white": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "trousers_charcoal": [
+            0.06274509803921569,
+            0.06274509803921569,
+            0.06274509803921569,
+            1.0
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -12,6 +12,7 @@
  */
 
 import { DEFAULT_SKIN_HEX } from './appearanceDefaults.generated';
+import { customizeDocument, type ColourPicks } from './appearanceDocument';
 
 export interface AppearanceMaterial {
   base_color: number[];
@@ -32,7 +33,7 @@ export interface AppearanceLibrary {
 }
 
 /** The user's current choices; also the exact shape of the export request body. */
-export interface AppearancePicks {
+export interface AppearancePicks extends ColourPicks {
   skin_tone: string;
   clothing: string;
   club_finish: string;
@@ -88,9 +89,18 @@ export function appearancePalette(
   library: AppearanceLibrary,
   picks: AppearancePicks,
 ): AppearancePalette {
-  const skinHex = materialHex(library, picks.skin_tone, DEFAULT_SKIN_HEX);
+  // Custom colours override library materials exactly as the document writer does.
+  const custom = customizeDocument(library, {
+    ...picks,
+    hair_color: undefined, // hair never shows in the segment palette
+  });
+  const dressed: AppearanceLibrary = {
+    ...library,
+    materials: { ...library.materials, ...custom.materials },
+  };
+  const skinHex = materialHex(dressed, custom.skin_tone, DEFAULT_SKIN_HEX);
   const preset = library.clothing[picks.clothing] ?? {};
-  const partHex = (part: string) => materialHex(library, preset[part], skinHex);
+  const partHex = (part: string) => materialHex(dressed, preset[part], skinHex);
 
   return {
     head: skinHex,
