@@ -334,16 +334,20 @@ def test_check_engine_availability_success(mock_manager_class) -> None:
 
 
 @pytest.mark.unit
-def test_reset_layout_config_overwrites_existing_backup(tmp_path: Path) -> None:
-    config_file = tmp_path / "launcher_layout.json"
+def test_reset_layout_config_overwrites_existing_backup(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        "src.launchers.launcher_constants._get_config_dir", lambda: tmp_path
+    )
+    config_file = tmp_path / "layout.json"
     backup_file = config_file.with_suffix(".json.bak")
     backup_file.write_text("old backup", encoding="utf-8")
     config_file.write_text("first layout", encoding="utf-8")
 
-    with patch("src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", config_file):
-        assert reset_layout_config() is True
-        config_file.write_text("second layout", encoding="utf-8")
-        assert reset_layout_config() is True
+    assert reset_layout_config() is True
+    config_file.write_text("second layout", encoding="utf-8")
+    assert reset_layout_config() is True
 
     assert not config_file.exists()
     assert backup_file.read_text(encoding="utf-8") == "second layout"

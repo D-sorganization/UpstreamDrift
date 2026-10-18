@@ -6,9 +6,15 @@ This module owns the repository-state comparison while
 
 from __future__ import annotations
 
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
+
+from src.shared.python.data_io.path_utils import get_repo_root
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+_logger = get_logger(__name__)
 
 
 class GitCommandRunner(Protocol):
@@ -21,6 +27,45 @@ class SiblingRootFinder(Protocol):
     """Callable boundary used to locate a sibling Tools checkout."""
 
     def __call__(self) -> Path | None: ...
+
+
+def load_parent_model_ids(models_yaml_path: Path) -> list[str]:
+    """Load model IDs declared directly by the parent models.yaml manifest."""
+    try:
+        import yaml  # type: ignore[import-untyped]
+    except ImportError:
+        return []
+
+    try:
+        data = yaml.safe_load(models_yaml_path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return []
+
+    if not isinstance(data, dict) or not isinstance(data.get("models"), list):
+        return []
+    return [
+        model["id"]
+        for model in data["models"]
+        if isinstance(model, dict) and isinstance(model.get("id"), str)
+    ]
+
+
+def run_git_cmd(cmd: list[str], cwd: Path | None = None) -> str:
+    """Run a git command and return stripped stdout (empty string on failure)."""
+    try:
+        result = subprocess.run(
+            cmd,
+            cwd=str(cwd or get_repo_root()),
+            capture_output=True,
+            text=True,
+            check=True,
+            encoding="utf-8",
+            timeout=5.0,
+        )
+        return result.stdout.strip()
+    except (subprocess.SubprocessError, FileNotFoundError, OSError) as exc:
+        _logger.debug("Git command %s failed: %s", cmd, exc)
+        return ""
 
 
 @dataclass(frozen=True)
