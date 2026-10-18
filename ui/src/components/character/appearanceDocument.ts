@@ -19,16 +19,24 @@ const SKIN_REFERENCE = 'skin_2';
 const PANTS_PART = 'thigh';
 const HEX = /^#[0-9a-fA-F]{6}$/;
 
+/** Which grip hands wear the golf glove, by golf role (HRG-G1, #13186). */
+export const GLOVE_CHOICES = ['none', 'lead', 'trail', 'both'] as const;
+export type GloveChoice = (typeof GLOVE_CHOICES)[number];
+export const DEFAULT_GLOVE: GloveChoice = 'none';
+
 /** Custom `#rrggbb` picks; `undefined` leaves the library default. */
 export interface ColourPicks {
   skin_color?: string;
   hair_color?: string;
   top_color?: string;
   bottom_color?: string;
+  /** Glove option; absent resolves to `none` (bare, skin-coloured hands). */
+  glove?: GloveChoice;
 }
 
 export interface CustomizableDocument {
   skin_tone: string;
+  glove: GloveChoice;
   headwear_material?: string;
   materials: Record<string, AppearanceMaterial>;
 }
@@ -88,6 +96,10 @@ export function customizeDocument(
     headwear_material?: string;
   } & ColourPicks,
 ): CustomizableDocument {
+  const glove = picks.glove ?? DEFAULT_GLOVE;
+  if (!GLOVE_CHOICES.includes(glove)) {
+    throw new Error(`glove must be one of ${GLOVE_CHOICES.join(', ')}, got ${JSON.stringify(glove)}`);
+  }
   const materials: Record<string, AppearanceMaterial> = {};
   let skin_tone = picks.skin_tone;
   let headwear_material = picks.headwear_material;
@@ -115,5 +127,5 @@ export function customizeDocument(
     const name = garmentName(library, picks.clothing, part, label);
     materials[name] = recoloured(libraryMaterial(library, name), colour);
   }
-  return { skin_tone, headwear_material, materials };
+  return { skin_tone, glove, headwear_material, materials };
 }

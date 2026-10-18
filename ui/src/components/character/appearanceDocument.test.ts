@@ -16,6 +16,7 @@ describe('customizeDocument', () => {
     it(`matches the Python writer: ${c.name}`, () => {
       const out = customizeDocument(LIBRARY, c.picks as never);
       expect(out.skin_tone).toBe(c.expected.skin_tone);
+      expect(out.glove).toBe(c.expected.glove);
       expect(out.headwear_material ?? null).toBe(c.expected.headwear_material);
       const colours = Object.fromEntries(
         Object.entries(out.materials).map(([k, v]) => [k, v.base_color]),
@@ -23,6 +24,12 @@ describe('customizeDocument', () => {
       expect(colours).toEqual(c.expected.materials);
     });
   }
+
+  it('defaults to bare hands and rejects an unknown glove', () => {
+    const base = { skin_tone: 'skin_2', clothing: 'golf_polo_trousers', headwear: 'hair' };
+    expect(customizeDocument(LIBRARY, base).glove).toBe('none');
+    expect(() => customizeDocument(LIBRARY, { ...base, glove: 'left' as never })).toThrow(/glove/);
+  });
 
   it('keeps roughness and texture of the recoloured garment', () => {
     const out = customizeDocument(LIBRARY, {

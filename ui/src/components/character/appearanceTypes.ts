@@ -23,6 +23,7 @@ export interface AppearanceMaterial {
 
 export interface AppearanceLibrary {
   schema_version: string;
+  glove?: string[];
   skin_tones: string[];
   clothing: Record<string, Record<string, string>>;
   club_finishes: string[];
