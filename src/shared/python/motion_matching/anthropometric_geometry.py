@@ -129,10 +129,19 @@ def _grip_offset(
     child_to_follower: Any,
     grip_roll_deg: float = GRIP_ROLL_DEG,
     rotation_deg: Sequence[float] = (0.0, 0.0, 0.0),
+    club_from_child: Any = None,
 ) -> list[list[float]]:
-    """Native hand-to-club transform with the grip roll about the shaft (base
-    y), the neutral-grip ulnar turn about the wrist cock axis (base x) and the
-    fitted constant hand rotation (``grip_fit``) applied on the base side."""
+    """Native hand-to-club transform with the grip roll about the shaft, the
+    neutral-grip ulnar turn about the wrist cock axis (base x) and the fitted
+    constant hand rotation (``grip_fit``) applied on the base side.
+
+    The roll turns the hand rigidly about the shaft, the club ``y`` axis.
+    ``club_from_child`` is the 4x4 pose of the child frame in the club frame
+    (``None`` for the lead child, whose frame is the club frame); the trail
+    standoff frame has its shaft along ``x``, so a bare ``R_y`` would turn it
+    about an axis 90 deg off the shaft (HRG-GR1, #13202). A zero roll leaves
+    the matrix bit-identical to the pre-fix build.
+    """
     extra = np.eye(4)
     extra[:3, :3] = grip_rotation(rotation_deg)
     angle = np.radians(GRIP_ULNAR_OFFSET_DEG)  # sign checked by the axis test
@@ -141,12 +150,27 @@ def _grip_offset(
     cr, sr = np.cos(roll), np.sin(roll)
     turn = np.eye(4)
     turn[:3, :3] = np.array([[1.0, 0.0, 0.0], [0.0, c, -s_], [0.0, s_, c]])
-    about_shaft = np.eye(4)  # the child frame's y is the shaft axis
+    about_shaft = np.eye(4)  # in the club frame the shaft axis is y
     about_shaft[:3, :3] = np.array([[cr, 0.0, sr], [0.0, 1.0, 0.0], [-sr, 0.0, cr]])
+    if club_from_child is not None and grip_roll_deg != 0.0:
+        x = np.asarray(club_from_child, dtype=float)
+        about_shaft = np.linalg.inv(x) @ about_shaft @ x
     # child_to_follower is expressed in the child (hand/club) frame, so a turn
     # in the follower (wrist base) frame composes on the right.
     c2f = np.asarray(child_to_follower, dtype=float)
     return (about_shaft @ c2f @ turn @ extra).tolist()
+
+
+def _club_from_child(closure: Mapping[str, Any]) -> dict[str, Any]:
+    """Pose of each wrist child frame in the club frame, from the grip closure.
+
+    The lead child is the club (identity, ``None``); the trail standoff is
+    welded to the club by ``placement_a``/``placement_b``, so the standoff
+    frame sits in the club frame at ``placement_b @ inv(placement_a)``.
+    """
+    placement_a = np.asarray(closure["placement_a"], dtype=float)
+    placement_b = np.asarray(closure["placement_b"], dtype=float)
+    return {"L": None, "R": placement_b @ np.linalg.inv(placement_a)}
 
 
 def _t(
@@ -439,6 +463,7 @@ def build_upper_body(
     )
     frame("Head", head, (0, 0, 0))
     subsystems: dict[str, dict[str, Any]] = {}
+    club_from_child = _club_from_child(native_dict["closure"])
     for side, sign in (("L", 1.0), ("R", -1.0)):
         link = body(
             f"Hubto{side}S",
@@ -562,7 +587,10 @@ def build_upper_body(
             ],
             rotation=rotation,
             c2f=_grip_offset(
-                native_wrist["child_to_follower"], grip_roll_deg, grip_rotation[side]
+                native_wrist["child_to_follower"],
+                grip_roll_deg,
+                grip_rotation[side],
+                club_from_child[side],
             ),
         )
     for f in native_dict["frames"]:
