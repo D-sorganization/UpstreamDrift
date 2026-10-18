@@ -32,6 +32,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 from scipy.spatial.transform import Rotation
 
+from src.shared.python.motion_matching.full_body_schema import require_full_body_schema
 from src.shared.python.contracts import require
 
 Array = np.ndarray
@@ -177,6 +178,10 @@ def side_of(name: str) -> str | None:
 def spec_document(spec_bytes: bytes) -> dict[str, Any]:
     """Parse and minimally validate a full-body spec document."""
     spec = json.loads(spec_bytes)
-    if spec.get("schema_version") != "full-body-v1":
-        raise ValueError("expected a full-body-v1 specification")
+    schema = require_full_body_schema(spec, consumer="musculoskeletal graft")
+    if schema.schema_id != "full-body-v1":
+        raise NotImplementedError(
+            "Grafting muscles onto the full-body-v2 regional trunk needs the "
+            "per-level spine geometry and muscle paths (HRG-D2, HRG-Q1)"
+        )
     return spec

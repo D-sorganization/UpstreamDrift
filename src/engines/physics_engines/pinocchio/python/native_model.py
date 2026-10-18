@@ -20,6 +20,7 @@ from src.shared.python.motion_matching.contact_law import (
     sphere_ground_contact,
     support_planes,
 )
+from src.shared.python.motion_matching.full_body_schema import require_full_body_schema
 from src.shared.python.motion_matching.full_body_spec import (
     FULL_BODY_SCHEMA_VERSION,
     ContactSphere,
@@ -791,8 +792,7 @@ class FullBodyPinocchioModel(NativePinocchioModel):
     def __init__(self, specification: Mapping[str, Any]) -> None:
         pin: Any = import_module("pinocchio")
 
-        if specification.get("schema_version") != FULL_BODY_SCHEMA_VERSION:
-            raise ValueError("Unsupported full-body schema")
+        require_full_body_schema(specification, consumer="Pinocchio full-body model")
         self.specification = specification
         self._pin = pin
         self._build_tree(specification)
@@ -841,7 +841,16 @@ class FullBodyPinocchioModel(NativePinocchioModel):
             )
 
     def upper_body_model(self) -> NativePinocchioModel:
-        """Construct the qualified upper-body model from this spec's upper-body slice."""
+        """Construct the qualified upper-body model from this spec's upper-body slice.
+
+        Raises ``NotImplementedError`` for ``full-body-v2``: its slice has the
+        regional trunk, which the qualified upper-body model does not (HRG-D2).
+        """
+        if self.specification["schema_version"] != FULL_BODY_SCHEMA_VERSION:
+            raise NotImplementedError(
+                "The upper-body model of a full-body-v2 spec needs the "
+                "regional-trunk upper body (HRG-D2)"
+            )
         return NativePinocchioModel(upper_body_slice(self.specification))
 
     def mass_matrix(self, coordinates: Mapping[str, float]) -> NDArray[np.float64]:

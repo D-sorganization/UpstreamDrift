@@ -38,11 +38,11 @@ def v2_bytes(v2_doc) -> bytes:
 
 
 def _random_q(doc: dict) -> dict[str, float]:
+    """Seeded rotations on every coordinate; translations stay at zero."""
     rng = np.random.default_rng(SEED)
     return {
-        name: float(rng.uniform(-0.4, 0.4))
+        name: 0.0 if name.startswith("Translation") else float(rng.uniform(-0.4, 0.4))
         for name in doc["coordinate_order"]
-        if not name.startswith("Translation")
     }
 
 

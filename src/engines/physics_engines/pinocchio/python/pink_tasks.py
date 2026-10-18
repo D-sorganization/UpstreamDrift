@@ -17,6 +17,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.motion_matching.full_body_schema import require_full_body_schema
 
 logger = get_logger(__name__)
 
@@ -275,9 +276,7 @@ class FullBodyPinkTasks:
         else:
             self.specification = dict(specification)
 
-        schema = self.specification.get("schema_version")
-        if schema != "full-body-v1":
-            raise ValueError(f"Unsupported specification schema: {schema}")
+        require_full_body_schema(self.specification, consumer="Pink task builder")
 
         self.coordinate_order: tuple[str, ...] = tuple(
             self.specification["coordinate_order"]
