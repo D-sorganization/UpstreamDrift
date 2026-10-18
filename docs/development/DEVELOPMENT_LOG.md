@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13104 · OSL-16: Bar-Loaded Lifts Track at 64 RK4 Substeps With a 0.25 ms Effort Hold; the Loaded Feet Stay Within the LIFT-5 Ankle Bounds and the Re-Track and Full-Window Bar-Path Parity Close
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13104
+- **Branch:** fix/13104-loaded-foot-stability
+- **PR:** #13047
+- **Paths:** see #13047
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/13104-osl-16-bar-loaded-lifts-track-at-64-rk4.md)
+- **Summary:** OSL-16: bar-loaded lifts track at 64 RK4 substeps with a 0.25 ms effort hold; the loaded feet stay within the LIFT-5 ankle bounds and the re-track and full-window bar-path parity close
+- **Next step:** Review PR; OpenSim bar-marker reach and Hicks pelvis residuals remain open under #13093
+
 ### DL-#13070 · Add the Family-Wise Plate Consistency Screen and Plate Observation Provider That Eliminate Candidate Swing Solutions Inconsistent With Vertical Force-Plate Data (OF-12)
 
 - **State:** in_review
@@ -1363,12 +1376,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #11745
 - **Branch:** claude/lift-5-squat-bundle
-- **PR:** #12245, #12340, #13052
+- **PR:** #12245, #12340, #13052, #13047
 - **Paths:** see #12245
 - **Started:** 2026-10-14
-- **Last verified:** 2026-10-17 (`1defdf34`; collated from changes/11745-deadlift-and-clean-and-jerk-first-pull-s.md)
+- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/11745-snatch-bundle.md)
 - **Summary:** LIFT-5 slice 1: back-squat same-input bundle from the Movement Optimizer via full-body marker IK, with provenance, regeneration script and MuJoCo replay smoke test
-- **Next step:** Cross-engine bar-path replay parity of the back-squat bundle in MuJoCo, Pinocchio and Drake; then the other four lifts.
+- **Next step:** Bump vendor/ud-tools to the Tools #5653 merge commit and regenerate the snatch bundle and parity record so tools_pin matches
 
 ### DL-#11737 · OSV-6 Lead Foot: Lateral-Marker Zero-Twist Correction (Knee_Flexion_Axis) and Leg-Marker Calibration Constraints Under --Foot-Progression; MuJoCo Address Toe-Out Within 2 Deg on Both Captures (Driver +0.2/-0.3, Iron -0.0/-1.4 Deg); Canonical Receipts Unchanged (Default-On Correction Is a Recorded Failed Experiment)
 
@@ -2560,6 +2573,97 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13131 · OSL-17: Back-Squat Bar on the Cited High-Bar Rack (One Shaft Radius Behind the C7 Landmark, Glassbrook 2019 / Wretenberg 1996) and a 0.1 s Lead-In so the Bundle and Barbell Re-Track Start Settled; OpenSim Squat Hicks Gate Passes on All 41 States
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13131
+- **Branch:** merged via #13047
+- **PR:** #13047
+- **Paths:** see #13047
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/13131-osl-17-back-squat-bar-on-the-cited-high.md)
+- **Summary:** OSL-17: back-squat bar on the cited high-bar rack (one shaft radius behind the C7 landmark, Glassbrook 2019 / Wretenberg 1996) and a 0.1 s lead-in so the bundle and barbell re-track start settled; OpenSim squat Hicks gate passes on all 41 states
+- **Next step:** Shipped in PR #13047.
+
+### DL-#13093 · OSL-15: Opt-In Bar-Load Balance of the Back-Squat IK Over Mid-Foot (0.190 m to 6.4E-5 m); Loaded Kkt Tracking Loses the Feet, so the Committed Source and Evidence Stay Unchanged
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13093
+- **Branch:** merged via #13047
+- **PR:** #13047
+- **Paths:** see #13047
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/13093-osl-15-opt-in-bar-load-balance-of-the-ba.md)
+- **Summary:** OSL-15: opt-in bar-load balance of the back-squat IK over mid-foot (0.190 m to 6.4e-5 m); loaded kkt tracking loses the feet, so the committed source and evidence stay unchanged
+- **Next step:** Shipped in PR #13047.
+
+### DL-#13072 · LIFT-4 Barbell Re-Track: Track the Loaded Plant With a Rigid-Bar Controller Model so the Bar's Floating-Base Load Is on Every Row (Drift Removed); Record Per-Landmark Re-Track Deviation; Re-Tighten the Pelvis Gate to 0; Split Build_Lift_Model; Source-Squat Balance (Bar Ahead of the Forefoot) Still Blocks the LIFT-5 Bounds
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13072
+- **Branch:** merged via #13047
+- **PR:** #13047
+- **Paths:** see #13047
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/13072-lift-4-barbell-re-track-track-the-loaded.md)
+- **Summary:** LIFT-4 barbell re-track: track the loaded plant with a rigid-bar controller model so the bar's floating-base load is on every row (drift removed); record per-landmark re-track deviation; re-tighten the pelvis gate to 0; split build_lift_model; source-squat balance (bar ahead of the forefoot) still blocks the LIFT-5 bounds
+- **Next step:** Shipped in PR #13047.
+
+### DL-#13057 · OSL-14: Lift Bundles Rebuilt on the AN-1 Lift Body (Lumbar Joint, Cited-Range TRF Bounds, de Leva Hips, Wrist Grip Fix); OpenSim Torso Width Scaling and Pelvis Tracking; LIFT-4 Barbell Re-Track Divergence Measured as Pre-Existing
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13057
+- **Branch:** merged via #13047
+- **PR:** #13047
+- **Paths:** see #13047
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/13057-osl-14-lift-bundles-rebuilt-on-the-an-1.md)
+- **Summary:** OSL-14: lift bundles rebuilt on the AN-1 lift body (lumbar joint, cited-range TRF bounds, de Leva hips, wrist grip fix); OpenSim torso width scaling and pelvis tracking; LIFT-4 barbell re-track divergence measured as pre-existing
+- **Next step:** Shipped in PR #13047.
+
+### DL-#13048 · OSL-12: OpenSim Lift IK/ID Credibility: Pelvis Width Scaling and Verified Virtual ASIS/PSIS Landmarks, 1E7 Pa Contact (PR #476) Within 8 mm, Ankle-Lean Balanced Holds at Zero Pelvis Residual, In-Range Squat IK
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13048
+- **Branch:** merged via #13047
+- **PR:** #13047
+- **Paths:** see #13047
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/13048-osl-12-rajagopal-hands-reach-the-bundle.md)
+- **Summary:** OSL-12: OpenSim lift IK/ID credibility: pelvis width scaling and verified virtual ASIS/PSIS landmarks, 1e7 Pa contact (PR #476) within 8 mm, ankle-lean balanced holds at zero pelvis residual, in-range squat IK
+- **Next step:** Shipped in PR #13047.
+
+### DL-#13041 · Lift Body and Every Derived Lift Input (Squat on the OSL-17 Rack, Deadlift, Clean, Snatch, Bench) Regenerated on the Whole-Row de Leva Table (#13037) With Main's Tibial Torsion; Regression-Snapshot IK Bounds Re-Derived; Bundle Builder Picks RK4-Stable Substeps (Deadlift 8 -> 16, Parity Xfail Removed); Follow-Ups OSL-18 #13157 (Foot Torsion Marker Gate, Strict Xfail), OSL-19 #13158 (Arm Reach), OSL-20 #13159 (Open-Loop Wrist Mode)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13041
+- **Branch:** merged via #13047
+- **PR:** #13047
+- **Paths:** see #13047
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/13041-osl-3-opensim-ik-and-inverse-dynamics-of.md)
+- **Summary:** Lift body and every derived lift input (squat on the OSL-17 rack, deadlift, clean, snatch, bench) regenerated on the whole-row de Leva table (#13037) with main's tibial torsion; regression-snapshot IK bounds re-derived; bundle builder picks RK4-stable substeps (deadlift 8 -> 16, parity xfail removed); follow-ups OSL-18 #13157 (foot torsion marker gate, strict xfail), OSL-19 #13158 (arm reach), OSL-20 #13159 (open-loop wrist mode)
+- **Next step:** Shipped in PR #13047.
+
+### DL-#12729 · NSX-100: Variability & Consistency Tab in the PyQt6 Grip Wrench Window and a Matching React Section, Driven by the Plot Model 2.0.0 Sensitivity Panels, With Catalogue-Backed Request Controls and Parity Entry Loop_Nullspace_Variability
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12729
+- **Branch:** merged via #13227
+- **PR:** #13227
+- **Paths:** see #13227
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`62be7661`; collated from changes/12729-nsx-100-variability-consistency-tab-in-t.md)
+- **Summary:** NSX-100: Variability & Consistency tab in the PyQt6 Grip Wrench window and a matching React section, driven by the plot model 2.0.0 sensitivity panels, with catalogue-backed request controls and parity entry loop_nullspace_variability
+- **Next step:** Shipped in PR #13227.
 
 ### DL-#12978 · Reject Duplicate Source Labels and Handle Inf Values in Capture Export
 
@@ -6909,10 +7013,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #11744
 - **Branch:** merged via #12345
-- **PR:** #12345, #12189
+- **PR:** #12345, #12189, #13047
 - **Paths:** see #12345
 - **Started:** 2026-10-14
-- **Last verified:** 2026-10-14 (`7d05b4f1`; collated from changes/11744-lift-4-per-hand-bar-wrench-static-hold-f.md)
+- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/11744-lift-4-the-barbell-hold-starts-in-contac.md)
 - **Summary:** LIFT-4: barbell held at both hands through the OSV-7 compliant bushing on the back-squat same-input bundle, with per-hand bushing wrench, a recorded quasi-static hold and four-engine parity
 - **Next step:** Shipped in PR #12345.
 
