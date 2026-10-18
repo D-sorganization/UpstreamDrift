@@ -71,6 +71,7 @@ class Reconstruction(BaseModel):
     views: tuple[ViewResidualStats, ...]
     rejected: list[dict[str, Any]]
     metrics: dict[str, Any] = Field(default_factory=dict)
+    converged: bool = True
 
 
 def load_views(bundle_dir: Path) -> dict[str, dict[str, Any]]:
@@ -224,6 +225,7 @@ def fit_bundle(
             for r in result.rejected
         ],
         metrics=_metrics_against(truth, result) if truth is not None else {},
+        converged=result.converged,
     )
     cleaned = sorted((bundle_dir / "observations").glob("*.json"))
     write_stamped(
