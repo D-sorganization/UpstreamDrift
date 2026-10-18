@@ -1621,20 +1621,23 @@ Arm range overshoot (rad) & $1.21\times10^{-3}$ & $8.0\times10^{-4}$\\
   over the window, which matches every case ($2\times10^{-10}$,
   $6.0\times10^{-5}$, $8.5\times10^{-4}$\,rad), while the 20-step segments
   stay within $7.0\times10^{-13}$\,rad. The run is inside the RK4 limit, so
-  this is a physical instability of the open-loop posture.
+  this is a physical instability of the open-loop posture. Tracked by
+  OSL-20 (\#13159).
 \item \textbf{OpenSim reach (diagnosed with the pre-rack miss).} In all four
   measured cases (earlier and whole-row body, before and on the rack) the
   shoulder-to-grip distance plus the reach miss is 0.198--0.213\,m: the folded
   Rajagopal arm cannot bring the hand within about 0.20\,m of its shoulder
   landmark in these directions, and the grips sit 0.146--0.190\,m away. The
-  ranges and the 1\,mm reach bound are not widened.
+  ranges and the 1\,mm reach bound are not widened. Tracked by OSL-19
+  (\#13158).
 \item \textbf{New failure: OpenSim marker gate.} Marker RMS is 2.45\,cm
   against the 2\,cm gate (maximum 3.81\,cm, inside 4\,cm; 1.94\,cm on the
   earlier rack body). The foot markers carry it (forefoot 2.4 to 3.8\,cm):
   the 10$^\circ$ tibial torsion (\#12814) turns the bundle feet out from
   8.8 to 17.9$^\circ$, which the torsion-free Rajagopal foot cannot follow.
-  The gate is not loosened, so the test fails. The Hicks gate passes
-  (146.6\,N, 18.5\,N\,m).
+  The gate is not loosened; the marker-gate tests are strict xfails
+  tracked by OSL-18 (\#13157). The Hicks gate passes (146.6\,N,
+  18.5\,N\,m) and stays a separate passing test.
 \end{itemize}
 \subsection{Snatch Same-Input Bundle (LIFT-5, Issue \#11745)}
 \paragraph{Planar Pull.} The previous Tools snatch configuration ran from

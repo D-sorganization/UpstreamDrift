@@ -47,8 +47,8 @@ pytestmark = pytest.mark.unit
 _RAJAGOPAL_ARM_RANGES = pytest.mark.xfail(
     strict=True,
     reason=(
-        "OSL-17 #13131 / #13041: high-bar grip pushes Rajagopal arm "
-        "coordinates up to 8.0e-4 rad past their ranges."
+        "OSL-19 #13158: high-bar grip pushes Rajagopal arm coordinates up "
+        "to 8.0e-4 rad past their ranges (folded arm reach about 0.20 m)."
     ),
 )
 #: Bundle hip-centre separation (OSL-14, #13057: the AN-1 lift body's de Leva

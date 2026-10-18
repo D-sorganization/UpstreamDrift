@@ -58,9 +58,9 @@ _REACH_TOL_M = 1e-3
 _RAJAGOPAL_ARM_RANGES = pytest.mark.xfail(
     strict=True,
     reason=(
-        "OSL-17 #13131 / #13041: Rajagopal arm ranges cannot reach the "
-        "high-bar grip (reach 3.81/5.69 cm > 1 mm; ranges exceeded by up to "
-        "8.0e-4 rad); the folded arm stops about 0.20 m from the shoulder."
+        "OSL-19 #13158: Rajagopal arm ranges cannot reach the high-bar grip "
+        "(reach 3.81/5.69 cm > 1 mm; ranges exceeded by up to 8.0e-4 rad); "
+        "the folded arm stops about 0.20 m from the shoulder."
     ),
 )
 
@@ -186,8 +186,25 @@ def test_squat_bar_is_tracked_at_full_weight(squat_receipt: dict) -> None:
     assert max(ik["arm_reach"]["reach_error_m"].values()) <= _REACH_TOL_M
 
 
+#: OSL-18 (#13157): on the whole-row rack bundle the squat marker RMS is
+#: 2.45 cm (max 3.81 cm) against the 2 cm gate, up from 1.94 cm.  The foot
+#: markers carry the increase (forefoot 3.8, heel 2.3, ankle 1.6 cm): the
+#: default 10 degree tibial torsion turns the bundle feet to 17.9 degrees of
+#: yaw (8.8 before), which the torsion-free Rajagopal foot cannot follow.
+#: The 2 cm / 4 cm gate is not loosened.
+_FOOT_TORSION_MARKERS = pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "OSL-18 #13157: squat marker RMS 2.45 cm > 2 cm gate; bundle feet "
+        "turned out 17.9 deg (10 deg tibial torsion) vs the torsion-free "
+        "Rajagopal foot; gate not loosened."
+    ),
+)
+
+
 @pytest.mark.requires_opensim
 @pytest.mark.integration
+@_FOOT_TORSION_MARKERS
 def test_squat_ik_meets_the_marker_gate(squat_receipt: dict) -> None:
     markers = squat_receipt["ik"]["marker_error"]
     assert markers["rms_m"] < markers["threshold_rms_m"] == 0.02

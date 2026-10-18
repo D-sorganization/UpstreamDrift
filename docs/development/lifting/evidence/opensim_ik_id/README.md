@@ -79,7 +79,9 @@ folded Rajagopal arm cannot bring the hand within about 0.20 m of its
 shoulder landmark in these directions; shoulder-to-grip distance plus reach
 miss is 0.198-0.213 m in all four measured cases, while the grips sit
 0.146-0.190 m from the shoulders. The elbow and arm ranges and the reach
-tolerance are not widened.
+tolerance are not widened. Follow-ups: the foot-torsion marker gate is OSL-18
+(#13157), the arm reach OSL-19 (#13158), and the open-loop wrist mode that
+blocks full-window parity OSL-20 (#13159).
 
 A diagnostic fit of the bodyweight squat bundle tracked the pelvis to 3 mm.
 Excluding the bar, its markers came to 1.78 cm RMS and 4.15 cm maximum. See

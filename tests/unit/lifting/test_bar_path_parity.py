@@ -113,7 +113,7 @@ def test_full_window_bar_path_is_inside_the_l2_frame_bound(record) -> None:
 _RACK_COORDINATE_REGRESSION = pytest.mark.xfail(
     strict=True,
     reason=(
-        "OSL-17 #13131 / #13041: high-bar rack full-window coordinates "
+        "OSL-20 #13159: high-bar rack full-window coordinates "
         "8.5e-4 rad (Drake) > 1e-6 rad bound; round-off grown by the open-loop "
         "unstable LWInputY mode (116-132 1/s); bound not loosened."
     ),

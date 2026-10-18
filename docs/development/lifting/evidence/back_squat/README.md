@@ -322,6 +322,8 @@ still fails:
   rise (forefoot 2.4 to 3.8 cm, heel 1.5 to 2.3 cm, ankle 1.0 to 1.6 cm): the
   10 deg tibial torsion (#12814) turns the bundle feet out from 8.8 to 17.9 deg,
   and the torsion-free Rajagopal foot cannot follow. The gate is a
-  best-practice threshold and is not loosened, so
-  `test_squat_ik_meets_the_marker_gate` fails. The Hicks gate passes (146.6 N,
-  18.5 N m).
+  best-practice threshold and is not loosened, so the marker-gate tests are
+  strict xfails tracked by OSL-18 (#13157). The Hicks gate passes (146.6 N,
+  18.5 N m) and stays a passing test.
+- **Follow-ups.** The arm reach is tracked by OSL-19 (#13158). The open-loop
+  left-wrist mode that blocks full-window parity is tracked by OSL-20 (#13159).
