@@ -23,6 +23,7 @@ from enum import Enum
 import numpy as np
 
 from src.shared.python.core.constants import GRAVITY_M_S2
+from src.shared.python.core.contracts.exceptions import StateError
 
 _WRIST_SIGN_CONVENTIONS = ("ulnar_positive", "radial_positive")
 
@@ -375,7 +376,8 @@ class JointStressAnalyzer:
         )
         if unavailable is not None:
             return unavailable
-        assert rotation is not None and flexion is not None  # narrowed
+        if rotation is None or flexion is None:
+            raise StateError("hip inputs missing after availability check")
         result = JointStressResult(joint_name="hip", side=side, time=time)
 
         # Compute internal rotation range
@@ -429,8 +431,8 @@ class JointStressAnalyzer:
         )
         if unavailable is not None:
             return unavailable
-        assert horizontal is not None and torque is not None
-        assert velocity is not None  # narrowed by the availability check
+        if horizontal is None or torque is None or velocity is None:
+            raise StateError("shoulder inputs missing after availability check")
         result = JointStressResult(joint_name="shoulder", side=side, time=time)
 
         # Peak values
@@ -487,8 +489,8 @@ class JointStressAnalyzer:
         )
         if unavailable is not None:
             return unavailable
-        assert flexion is not None and torque is not None
-        assert wrist_torque is not None  # narrowed by the availability check
+        if flexion is None or torque is None or wrist_torque is None:
+            raise StateError("elbow inputs missing after availability check")
         result = JointStressResult(joint_name="elbow", side=side, time=time)
 
         # Valgus torque estimate (simplified)
@@ -565,7 +567,8 @@ class JointStressAnalyzer:
             reasons.append("wrist_rotation missing")
         if reasons:
             return _unavailable_result("wrist", side, time, reasons)
-        assert deviation is not None and rotation is not None  # narrowed
+        if deviation is None or rotation is None:
+            raise StateError("wrist inputs missing after availability check")
 
         result = JointStressResult(joint_name="wrist", side=side, time=time)
 
