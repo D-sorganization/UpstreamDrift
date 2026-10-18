@@ -119,6 +119,7 @@ _WRIST_T = np.linspace(0.0, 1.0, 5)
 _WRIST_ROT = {"wrist_rotation": np.zeros(5)}
 
 
+@pytest.mark.unit
 class TestWristDeviationInput:
     def test_unsigned_convention_raises(self) -> None:
         with pytest.raises(ValueError, match="sign_convention"):
@@ -137,6 +138,7 @@ class TestWristDeviationInput:
             )
 
 
+@pytest.mark.unit
 class TestAnalyzeWristDeviation:
     def _analyze(self, side: JointSide, deviation, angles=None):
         analyzer = _make_analyzer()
@@ -233,6 +235,7 @@ class TestAnalyzeWristDeviation:
         assert math.isnan(results["wrist_trail"].risk_score)
 
 
+@pytest.mark.unit
 class TestNoSilentZeroDefaults:
     """Missing required series give unavailable results, never zero-filled ones."""
 
