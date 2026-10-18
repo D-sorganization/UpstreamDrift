@@ -11,6 +11,11 @@
  * +x, the golfer's left on -z). Visual only: no mass, inertia or collision.
  */
 
+import {
+  DEFAULT_HAIR_HEX,
+  DEFAULT_SKIN_HEX,
+} from '../character/appearanceDefaults.generated';
+
 export type Vec3 = [number, number, number];
 
 export const DEFAULT_HEAD_LENGTH_M = 0.2429; // de Leva (1996) male head length
@@ -40,12 +45,12 @@ export interface HeadPartSpec {
 
 /** sRGB values of the matching `model_appearance/library.py` materials. */
 export const HEAD_COLORS: Record<string, string> = {
-  skin: '#cc9975', // skin_medium
+  skin: DEFAULT_SKIN_HEX, // default skin_tone (contract)
   eye_white: '#f5f5f0',
   iris_dark: '#1a120d',
   brow_dark: '#240f06',
   lip_pink: '#9e4d4d',
-  hair: '#332114', // hair_brown
+  hair: DEFAULT_HAIR_HEX, // default hair material (contract)
   cap: '#1f3373', // cap_navy
 };
 

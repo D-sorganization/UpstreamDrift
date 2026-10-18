@@ -11,6 +11,8 @@
  * hand) to a material name — a part absent from a preset shows skin.
  */
 
+import { DEFAULT_SKIN_HEX } from './appearanceDefaults.generated';
+
 export interface AppearanceMaterial {
   base_color: number[];
   roughness: number;
@@ -86,7 +88,7 @@ export function appearancePalette(
   library: AppearanceLibrary,
   picks: AppearancePicks,
 ): AppearancePalette {
-  const skinHex = materialHex(library, picks.skin_tone, '#cc9966');
+  const skinHex = materialHex(library, picks.skin_tone, DEFAULT_SKIN_HEX);
   const preset = library.clothing[picks.clothing] ?? {};
   const partHex = (part: string) => materialHex(library, preset[part], skinHex);
 

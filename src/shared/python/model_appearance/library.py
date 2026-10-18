@@ -13,6 +13,7 @@ from fnmatch import fnmatchcase
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
+from src.shared.python.model_appearance import defaults
 from src.shared.python.model_appearance.schema import (
     DEFAULT_CLOTHING,
     AppearanceDocument,
@@ -62,10 +63,6 @@ def _skin(rgb: tuple[float, float, float]) -> Material:
 
 
 MATERIALS: dict[str, Material] = {
-    "skin_light": _skin((0.93, 0.76, 0.66)),
-    "skin_medium": _skin((0.80, 0.60, 0.46)),
-    "skin_tan": _skin((0.66, 0.45, 0.32)),
-    "skin_dark": _skin((0.40, 0.27, 0.20)),
     "polo_navy": Material(
         (0.16, 0.27, 0.55, 1.0), 0.85, texture=Texture("noise", noise=0.04)
     ),
@@ -80,15 +77,6 @@ MATERIALS: dict[str, Material] = {
     ),
     "trousers_charcoal": Material(
         (0.30, 0.32, 0.35, 1.0), 0.9, texture=Texture("noise", noise=0.05)
-    ),
-    "hair_brown": Material(
-        (0.20, 0.13, 0.08, 1.0), 0.8, texture=Texture("noise", noise=0.05)
-    ),
-    "hair_black": Material(
-        (0.05, 0.045, 0.045, 1.0), 0.75, texture=Texture("noise", noise=0.04)
-    ),
-    "hair_blond": Material(
-        (0.70, 0.55, 0.30, 1.0), 0.8, texture=Texture("noise", noise=0.05)
     ),
     "cap_white": Material(
         (0.94, 0.94, 0.93, 1.0), 0.85, texture=Texture("noise", noise=0.04)
@@ -132,8 +120,23 @@ MATERIALS: dict[str, Material] = {
     ),
 }
 
-SKIN_TONES = ("skin_light", "skin_medium", "skin_tan", "skin_dark")
-HEADWEAR_DEFAULT_MATERIAL = {"hair": "hair_brown", "cap": "cap_navy"}
+# Skin swatches and hair colours come from the one default-golfer contract
+# (``defaults``); legacy skin names stay as exact aliases so saved documents load.
+SKIN_TONES = tuple(s["id"] for s in defaults.skin_palette())
+HEADWEAR_DEFAULT_MATERIAL = {
+    "hair": defaults.default_fields()["headwear_material"],
+    "cap": "cap_navy",
+}
+for _swatch in defaults.skin_palette():
+    MATERIALS[_swatch["id"]] = _skin(tuple(_swatch["srgb"]))
+for _legacy, _target in defaults.skin_aliases().items():
+    MATERIALS[_legacy] = MATERIALS[_target]
+for _hair in defaults.hair_palette():
+    MATERIALS[_hair["id"]] = Material(
+        (*_hair["srgb"], 1.0),
+        _hair["roughness"],
+        texture=Texture("noise", noise=_hair["noise"]),
+    )
 CLUB_FINISHES = ("satin_steel", "chrome", "graphite", "black_pvd")
 
 # The lower-body garment is keyed on the thigh; the pelvis always wears it.
