@@ -289,8 +289,31 @@ the same fit is 50.93\,mm, the number later children must hold while the
 violations go to zero.
 
 \section{Grip}
-Placeholder for HRG grip children.  Append method, equations, parameters,
-acceptance criteria, provenance, limitations and failed experiments.
+
+\subsection{Subject Handedness and Lead-Trail Sides (HRG-GR0, \#13201)}
+
+\paragraph{Definition.}
+\texttt{subject.handedness} is \texttt{"right"} or \texttt{"left"}: the hand that
+is \emph{lead} (nearer the target) is the anatomical left hand of a right-handed
+golfer and the right hand of a left-handed golfer. \texttt{core.handedness} is the
+single resolver: \texttt{lead\_side} yields \texttt{"L"} for right and \texttt{"R"}
+for left, \texttt{trail\_side} the opposite, and any other value raises \texttt{ValueError}.
+A specification without the field resolves to \texttt{"right"} through
+\texttt{subject\_handedness}; this is a declared default, not an inference from data.
+The builder writes the key only for a non-default value, so every specification and
+receipt committed before this change remains byte-identical. The receipt schema records
+an optional \texttt{handedness} field that is \texttt{null} on legacy receipts.
+
+\paragraph{Sign Conventions and Sagittal Reflection.}
+\texttt{GripPose.landmarks} uses the golfer body frame with $x$ anterior, $y$ toward
+the golfer's anatomical left, and $z$ up. The sagittal plane is $x$--$z$, so the lateral
+axis is $y$ and the sagittal reflection is $P = \mathrm{diag}(1, -1, 1)$. The target
+lies toward $+y$ for a right-hander and $-y$ for a left-hander; the toe axis is $+x$;
+the grip axis is idealized as vertical, down $-z$ from the butt. Every distance and
+angle of the grip is expressed in lead/trail terms and is identical for both handednesses;
+only the target direction, hence the azimuth and palm-normal vectors, changes sign in $y$.
+Consequently, $P\,\ell_{\mathrm{right}} = \ell_{\mathrm{left}}$ for each landmark $\ell$,
+asserted within $10^{-9}$~m.
 
 \section{Appearance}
 Placeholder for HRG appearance children.
