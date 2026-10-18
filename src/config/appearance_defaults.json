@@ -124,11 +124,11 @@
     {
       "id": "hair_brown",
       "srgb": [
-        0.36,
-        0.23,
-        0.14
+        0.45,
+        0.29,
+        0.17
       ],
-      "hex": "#5c3b24",
+      "hex": "#734a2b",
       "description": "Mid brown (the default golfer)",
       "roughness": 0.8,
       "noise": 0.05
