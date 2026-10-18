@@ -2561,6 +2561,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13161 · HRG-00: Measured Coordinate Sign Map, ISB Basis Map, Human-Range Characterisation and HRG Calculation Reference
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13161
+- **Branch:** chore/13161-hrg-baseline-sign-map
+- **PR:** #13184
+- **Paths:** see #13184
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`e487e2c5`; collated from changes/13161-hrg-00-measured-coordinate-sign-map-isb.md)
+- **Summary:** HRG-00: measured coordinate sign map, ISB basis map, human-range characterisation and HRG calculation reference
+- **Next step:** Shipped in PR #13184.
+
 ### DL-#12728 · NSX-99: Sensitivity Stage, Report Schema V2 and Variability Panels
 
 - **State:** shipped
