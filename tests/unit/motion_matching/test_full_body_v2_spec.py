@@ -184,6 +184,8 @@ def test_v2_validator_rejects_a_broken_trunk() -> None:
     broken = copy.deepcopy(doc)
     lumbar = next(j for j in broken["joints"] if j["child"] == v2.LUMBAR_BODY)
     lumbar["primitives"][0]["primitive"] = "Rx"
+    # Re-seal the slice identity so the trunk rule is what fails.
+    broken["upper_body_sha256"] = canonical_sha256(upper_body_slice(broken))
     with pytest.raises(ValueError, match="trunk"):
         v2.validate_full_body_v2_spec(broken, upper_body_slice(broken))
     with pytest.raises(ValueError, match="identity"):

@@ -19,6 +19,7 @@ from src.shared.python.motion_matching.full_body_spec import (
     save_full_body_spec,
     upper_body_slice,
     validate_full_body_spec,
+    validate_full_body_structure,
 )
 
 pytestmark = pytest.mark.unit
@@ -97,7 +98,7 @@ def test_trunk_topologies_are_declared_once_per_schema() -> None:
     # Every trunk coordinate has exactly one ISB (isb_spine) axis and sign.
     for trunk in (v1, v2):
         axes = {c: trunk.isb_axis(c) for c in trunk.coordinates}
-        assert set(a for a, _ in axes.values()) == {
+        assert {a for a, _ in axes.values()} == {
             "flexion_extension",
             "lateral_bending",
             "axial_rotation",
@@ -113,7 +114,11 @@ def test_committed_v1_documents_keep_their_bytes_and_identity(name: str) -> None
     document = json.loads(raw)
     assert document["schema_version"] == "full-body-v1"
     assert canonical_sha256(document) == canonical
-    validate_full_body_spec(document, upper_body_slice(document))
+    validate_full_body_structure(document)
+    if "anthro" not in name:
+        # Anthropometric candidates change the upper body on purpose, so only
+        # the native documents are strict extensions of their own slice.
+        validate_full_body_spec(document, upper_body_slice(document))
     assert registry.full_body_schema(document).schema_id == "full-body-v1"
 
 
