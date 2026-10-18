@@ -12,8 +12,12 @@ through :meth:`ResultsSession.load`:
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
+
+import numpy as np
+from numpy.typing import NDArray
 
 from src.shared.python.motion_matching.export import export_video
 from src.shared.python.motion_matching.video_frame_source import (
@@ -27,10 +31,92 @@ from src.tools.model_explorer.pose_results import (
     load_pose_frame_source,
 )
 
-__all__ = ["ResultsSession"]
+__all__ = ["ResultsSession", "detect_engine_from_archive"]
 
 _VIDEO_SUFFIXES = (".mp4", ".gif")
 FrameSource = MarkerFrameSource | PoseFrameSource
+_KNOWN_ENGINES = ("mujoco", "drake", "pinocchio", "opensim", "myosuite", "simscape")
+
+
+def detect_engine_from_archive(path: str | Path) -> str | None:
+    """Extract engine name from an archive's contents, receipts, or metadata."""
+    target = Path(path)
+    if not target.is_file():
+        return None
+
+    # 1. Inspect npz keys
+    if target.suffix.lower() == ".npz":
+        try:
+            with np.load(target, allow_pickle=False) as data:
+                files = set(data.files)
+                if "engine" in files:
+                    val = data["engine"]
+                    raw = (
+                        str(val.item() if getattr(val, "ndim", 0) == 0 else val[0])
+                        .strip()
+                        .lower()
+                    )
+                    if raw and raw not in ("unknown", "engine"):
+                        return raw
+                if "manifest_json" in files:
+                    try:
+                        manifest = json.loads(str(data["manifest_json"]))
+                        eng = manifest.get("engine") or manifest.get(
+                            "metadata", {}
+                        ).get("engine")
+                        if eng and str(eng).strip().lower() not in (
+                            "unknown",
+                            "engine",
+                        ):
+                            return str(eng).strip().lower()
+                    except (ValueError, TypeError):
+                        pass
+                if "manifest" in files:
+                    try:
+                        manifest = json.loads(str(data["manifest"]))
+                        eng = manifest.get("engine") or manifest.get("reference_engine")
+                        if eng and str(eng).strip().lower() not in (
+                            "unknown",
+                            "engine",
+                        ):
+                            return str(eng).strip().lower()
+                    except (ValueError, TypeError):
+                        pass
+                if "backend" in files:
+                    val = data["backend"]
+                    raw = (
+                        str(val.item() if getattr(val, "ndim", 0) == 0 else val[0])
+                        .strip()
+                        .lower()
+                    )
+                    if raw and raw not in ("unknown", "engine"):
+                        return raw
+        except (OSError, ValueError):
+            pass
+
+    # 2. Sibling receipt JSON
+    for receipt_candidate in (
+        target.with_suffix(".json"),
+        target.parent / "receipt.json",
+    ):
+        if receipt_candidate.is_file():
+            try:
+                receipt = json.loads(receipt_candidate.read_text(encoding="utf-8"))
+                eng = receipt.get("engine") or receipt.get("backend")
+                if eng and str(eng).strip().lower() not in ("unknown", "engine"):
+                    return str(eng).strip().lower()
+            except (ValueError, OSError):
+                pass
+
+    # 3. Known engine names in stem or parent folder
+    for part in target.stem.lower().replace("-", "_").split("_"):
+        if part in _KNOWN_ENGINES:
+            return part
+    for part in target.parent.name.lower().replace("-", "_").split("_"):
+        if part in _KNOWN_ENGINES:
+            return part
+
+    return None
 
 
 class ResultsSession:
@@ -49,17 +135,30 @@ class ResultsSession:
         self._playback: Any | None = None
 
     @classmethod
-    def load(cls, path: str | Path, engine: str = "engine") -> ResultsSession:
+    def load(cls, path: str | Path, engine: str | None = None) -> ResultsSession:
         """Load ``path``; raise ``FileNotFoundError`` or ``VideoSourceError``.
 
-        Joint-space runs take their engine from the run itself; ``engine``
-        names marker archives, which do not record one.
+        Joint-space runs take their engine from the run itself; marker
+        archives read engine metadata if present or fall back to ``engine``.
         """
         resolved = Path(path)
         if is_pose_results(resolved):
             pose = load_pose_frame_source(resolved)
             return cls(resolved, pose, pose.engine)
-        return cls(resolved, load_marker_frame_source(resolved), engine)
+        detected = detect_engine_from_archive(resolved)
+        chosen_engine = (
+            engine
+            if (engine is not None and engine != "engine")
+            else (detected or "engine")
+        )
+        return cls(resolved, load_marker_frame_source(resolved), chosen_engine)
+
+    @property
+    def markers(self) -> NDArray[np.float64] | None:
+        """Current marker trajectories across all frames, shape (n, k, 3), or None."""
+        if hasattr(self._source, "markers"):
+            return self._source.markers
+        return None
 
     @property
     def pose_source(self) -> PoseFrameSource | None:

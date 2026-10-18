@@ -107,6 +107,9 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         self._setup_menu_bar()
         self._connect_signals()
 
+        self.playback_bar = self.visualization_widget.playback_bar
+        self.playback_bar.scrubbed.connect(self.scrub_results)
+
         self.destroyed.connect(lambda: self.cleanup())
 
         logger.info("Model Explorer MainWidget initialized")
@@ -172,6 +175,11 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         desired. Embedded hosts must not rely on this.
         """
         return self._inner
+
+    @property
+    def viewport(self) -> VisualizationWidget:
+        """The 3D visualization viewport widget."""
+        return self.visualization_widget
 
     # ---- segment signal handlers --------------------------------------
 
@@ -534,7 +542,26 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         """Move the playback cursor; ``ValueError`` if out of range or unloaded."""
         if self._results is None:
             raise ValueError("no results loaded: no frame to scrub")
+        if not (0 <= index < self._results.frame_count):
+            raise ValueError(
+                f"frame {index} is outside the results (0..{self._results.frame_count - 1})"
+            )
         self._results.scrub(index)
+        assert 0 <= self._results.current_frame < self._results.frame_count, (
+            "postcondition failed: current_frame out of range"
+        )
+        if hasattr(self, "playback_bar") and self.playback_bar is not None:
+            self.playback_bar.show_frame(index)
+        if (
+            self._results.markers is not None
+            and hasattr(self, "visualization_widget")
+            and hasattr(self.visualization_widget, "set_markers")
+        ):
+            self.visualization_widget.set_markers(self._results.markers[index])
+        if self.playback_panel is not None and hasattr(
+            self.playback_panel, "show_frame"
+        ):
+            self.playback_panel.show_frame(index)
         self.status_bar.showMessage(
             f"Frame {index + 1}/{self._results.frame_count} "
             f"(t = {self._results.current_time_s:.3f} s)"
@@ -581,6 +608,8 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
 
     def cleanup(self) -> None:
         """Release any resources held by the widget. Idempotent."""
+        if hasattr(self, "playback_bar") and self.playback_bar is not None:
+            self.playback_bar.stop()
         self._discard_results()
         # No long-lived background resources today; the visualization
         # widget owns its own GL context which Qt tears down with the
