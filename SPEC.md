@@ -2741,6 +2741,11 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-18 | #13244 | full-body-v2 schema (regional lumbar L5/S1 and thoracic T12/L1 trunk), one schema registry for exporters and consumers, and a constrained v1->v2 trunk migration with residual and non-uniqueness report; v1 stays default and byte-identical |
+| 2026-10-18 | #13200 | Translucent tension/compression segment shading with independent force/torque vector toggles, user colours and opacity across MuJoCo GUI, Drake/Pinocchio GUIs, web and native_viewer_export (MuJoCo, Drake, Pinocchio, MyoSuite); Close the segment axial-load evaluation over the grip weld: physical KKT closure wrench replaces the soft weld in the prescribed inverse, ball-impact frames are unavailable, ground free moment is carried |
+| 2026-10-18 | #13239 | Fail closed with ok=False and rejected cameras on degenerate or collinear camera pairs |
+| 2026-10-18 | #13242 | Penalize behind-camera observations in bundle adjustment and propagate optimizer convergence |
+| 2026-10-18 | #13249 | Verify all participating swing receipt hashes in leakage guard, preserve all participant hashes, and abstain on single candidates |
 | 2026-10-18 | #13196 | Procedural shoe-last feet (HRG-F1): heel counter, medial arch, instep ramp, asymmetric toe box, flat sole sized from spec foot length and a cited breadth ratio; foot.model option |
 | 2026-10-18 | #13243 | Align multi-view observations by physical time across different frame rates and report dropped frames |
 | 2026-10-18 | #13182 | HRG-B1: default golfer is light skin with mid brown hair from one serialized appearance-defaults contract (Python + generated TS), skin_1..8 and hair palettes |

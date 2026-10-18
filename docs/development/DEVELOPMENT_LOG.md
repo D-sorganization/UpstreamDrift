@@ -2574,6 +2574,84 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13179 · Close the Segment Axial-Load Evaluation Over the Grip Weld: Physical KKT Closure Wrench Replaces the Soft Weld in the Prescribed Inverse, Ball-Impact Frames Are Unavailable, Ground Free Moment Is Carried
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13179
+- **Branch:** fix/13179-closure-wrench-overlay
+- **PR:** #13200
+- **Paths:** see #13200
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`33b2d5eb`; collated from changes/13179-close-the-segment-axial-load-evaluation.md)
+- **Summary:** Close the segment axial-load evaluation over the grip weld: physical KKT closure wrench replaces the soft weld in the prescribed inverse, ball-impact frames are unavailable, ground free moment is carried
+- **Next step:** Shipped in PR #13200.
+
+### DL-#13170 · Full-Body-V2 Schema (Regional Lumbar L5/S1 and Thoracic T12/L1 Trunk), One Schema Registry for Exporters and Consumers, and a Constrained V1->V2 Trunk Migration With Residual and Non-Uniqueness Report; V1 Stays Default and Byte-Identical
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13170
+- **Branch:** feat/13170-full-body-v2-schema
+- **PR:** #13244
+- **Paths:** see #13244
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`657b64c4`; collated from changes/13170-full-body-v2-schema-regional-lumbar-l5-s.md)
+- **Summary:** full-body-v2 schema (regional lumbar L5/S1 and thoracic T12/L1 trunk), one schema registry for exporters and consumers, and a constrained v1->v2 trunk migration with residual and non-uniqueness report; v1 stays default and byte-identical
+- **Next step:** Shipped in PR #13244.
+
+### DL-#13146 · Translucent Tension/Compression Segment Shading With Independent Force/Torque Vector Toggles, User Colours and Opacity Across MuJoCo GUI, Drake/Pinocchio GUIs, Web and Native_Viewer_Export (MuJoCo, Drake, Pinocchio, MyoSuite)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13146
+- **Branch:** feat/tension-compression-overlay
+- **PR:** #13200
+- **Paths:** see #13200
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`33b2d5eb`; collated from changes/13146-translucent-tension-compression-segment.md)
+- **Summary:** Translucent tension/compression segment shading with independent force/torque vector toggles, user colours and opacity across MuJoCo GUI, Drake/Pinocchio GUIs, web and native_viewer_export (MuJoCo, Drake, Pinocchio, MyoSuite)
+- **Next step:** Shipped in PR #13200.
+
+### DL-#13004 · Fail Closed With Ok=False and Rejected Cameras on Degenerate or Collinear Camera Pairs
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13004
+- **Branch:** merged via #13239
+- **PR:** #13239
+- **Paths:** see #13239
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`46afb82e`; collated from changes/13004-triangulate-degenerate-cameras.md)
+- **Summary:** Fail closed with ok=False and rejected cameras on degenerate or collinear camera pairs
+- **Next step:** Shipped in PR #13239.
+
+### DL-#13003 · Penalize Behind-Camera Observations in Bundle Adjustment and Propagate Optimizer Convergence
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13003
+- **Branch:** merged via #13242
+- **PR:** #13242
+- **Paths:** see #13242
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`0a104862`; collated from changes/13003-bundle-behind-camera-convergence.md)
+- **Summary:** Penalize behind-camera observations in bundle adjustment and propagate optimizer convergence
+- **Next step:** Shipped in PR #13242.
+
+### DL-#12975 · Verify All Participating Swing Receipt Hashes in Leakage Guard, Preserve All Participant Hashes, and Abstain on Single Candidates
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12975
+- **Branch:** merged via #13249
+- **PR:** #13249
+- **Paths:** see #13249
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`6f3a0ad9`; collated from changes/12975-swing-pairing-receipt-hash-guard.md)
+- **Summary:** Verify all participating swing receipt hashes in leakage guard, preserve all participant hashes, and abstain on single candidates
+- **Next step:** Shipped in PR #13249.
+
 ### DL-#13188 · Procedural Shoe-Last Feet (HRG-F1): Heel Counter, Medial Arch, Instep Ramp, Asymmetric Toe Box, Flat Sole Sized From Spec Foot Length and a Cited Breadth Ratio; Foot.Model Option
 
 - **State:** shipped
