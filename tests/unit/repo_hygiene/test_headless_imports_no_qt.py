@@ -92,3 +92,27 @@ def test_plot_style_widget_exports_resolve() -> None:
 
     assert ColorPicker is WidgetColorPicker
     assert MarkerStylePicker is WidgetMarkerStylePicker
+
+
+def test_plot_style_import_with_strict_meta_path_finder() -> None:
+    """Importing plot_style does not invoke find_spec for PyQt6."""
+    probe = (
+        "import importlib.abc, sys\n"
+        "class Blocker(importlib.abc.MetaPathFinder):\n"
+        "    def find_spec(self, fullname, path=None, target=None):\n"
+        "        if fullname == 'PyQt6' or fullname.startswith('PyQt6.'):\n"
+        "            raise AssertionError(f'native import: {fullname}')\n"
+        "        return None\n"
+        "sys.meta_path.insert(0, Blocker())\n"
+        "import src.shared.python.plot_style\n"
+        "print('STRICT_BLOCKER_OK')\n"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", probe],
+        cwd=_REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "STRICT_BLOCKER_OK" in result.stdout

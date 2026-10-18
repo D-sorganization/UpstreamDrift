@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import importlib
 import importlib.util
+import sys
 from typing import TYPE_CHECKING, Any
 
 from ._types import RGBATuple
@@ -81,19 +82,13 @@ _LAZY_EXPORTS: dict[str, str] = {
 }
 
 
-def _pyqt6_installed() -> bool:
-    """Return whether PyQt6 is discoverable, without importing it."""
-    try:
-        return importlib.util.find_spec("PyQt6") is not None
-    except (ImportError, ValueError):
-        return False
-
-
-# UNION resolution (#4807): widget names join ``__all__`` only when
-# PyQt6 is installed.
+# Optional Qt widgets join ``__all__`` only when PyQt6 is already loaded in
+# sys.modules. Headless consumers (force_overlay, loop_nullspace, docs)
+# never query find_spec("PyQt6") or trigger import-blocker guards at module
+# load time; interactive/GUI consumers access them lazily via __getattr__.
 _WIDGET_NAMES: tuple[str, ...] = (
     ("ColormapPicker", "ColorPicker", "DataChannelEditor", "MarkerStylePicker")
-    if _pyqt6_installed()
+    if "PyQt6" in sys.modules
     else ()
 )
 
@@ -153,7 +148,13 @@ def __getattr__(name: str) -> Any:
     module_name = _LAZY_EXPORTS.get(name)
     if module_name is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    value = getattr(importlib.import_module(module_name, __name__), name)
+    try:
+        module = importlib.import_module(module_name, __name__)
+        value = getattr(module, name)
+    except (ImportError, OSError) as exc:
+        raise AttributeError(
+            f"module {__name__!r} attribute {name!r} is unavailable: {exc}"
+        ) from exc
     globals()[name] = value
     return value
 
