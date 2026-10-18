@@ -21,6 +21,7 @@ import numpy as np
 
 from src.shared.python.contracts import require
 from src.shared.python.grip_contact.pad_layout import GRIP_RADIUS_M
+from src.shared.python.grip_contact.pair_contact import closest_points_segments
 
 if TYPE_CHECKING:
     from src.shared.python.motion_matching.grip_contract import GripSpec
@@ -381,30 +382,8 @@ def _segment_distance_m(site_a: ContactSite, site_b: ContactSite) -> float:
     """Minimum Euclidean distance (m) between the medial axes of two sites."""
     a0, a1 = (np.asarray(p, dtype=float) for p in site_a.endpoints_m)
     b0, b1 = (np.asarray(p, dtype=float) for p in site_b.endpoints_m)
-    u = a1 - a0
-    v = b1 - b0
-    w = a0 - b0
-    uu = float(u @ u)
-    vv = float(v @ v)
-    uv = float(u @ v)
-    uw = float(u @ w)
-    vw = float(v @ w)
-    denom = uu * vv - uv * uv
-    if uu <= 1e-18 and vv <= 1e-18:
-        return float(np.linalg.norm(w))
-    if uu <= 1e-18:
-        t = float(np.clip(vw / vv, 0.0, 1.0))
-        return float(np.linalg.norm(a0 - (b0 + t * v)))
-    if vv <= 1e-18:
-        s = float(np.clip(-uw / uu, 0.0, 1.0))
-        return float(np.linalg.norm((a0 + s * u) - b0))
-    if denom > 1e-18:
-        s = float(np.clip((uv * vw - vv * uw) / denom, 0.0, 1.0))
-    else:
-        s = 0.5
-    t = float(np.clip((uv * s + vw) / vv, 0.0, 1.0))
-    s = float(np.clip((uv * t - uw) / uu, 0.0, 1.0))
-    return float(np.linalg.norm((a0 + s * u) - (b0 + t * v)))
+    pa, pb = closest_points_segments(a0, a1, b0, b1)
+    return float(np.linalg.norm(pa - pb))
 
 
 def pair_surface_gap_m(topology: ContactTopology, pair: ContactPair) -> float:
