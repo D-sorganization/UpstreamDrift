@@ -640,6 +640,17 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
 
     # -------- Section 4: Jacobian Analysis --------
 
+    def get_body_names(self) -> list[str]:
+        """Get names of all bodies in the MuJoCo model."""
+        if self.model is None:
+            return []
+        names = []
+        for i in range(self.model.nbody):
+            name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i)
+            if name:
+                names.append(name)
+        return names
+
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""
         if body_name is None:
@@ -649,7 +660,10 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
 
         body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)
         if body_id == -1:
-            return None
+            valid_bodies = self.get_body_names()
+            raise KeyError(
+                f"Body '{body_name}' not found in MuJoCo model. Valid bodies: {valid_bodies}"
+            )
 
         jacp = np.zeros((3, self.model.nv))
         jacr = np.zeros((3, self.model.nv))

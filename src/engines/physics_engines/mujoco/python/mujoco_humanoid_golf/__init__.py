@@ -35,7 +35,7 @@ try:
         urdf_io,
     )
     from .control_system import ActuatorControl, ControlSystem, ControlType
-except (ImportError, OSError):
+except (ImportError, OSError, AttributeError):
     # If core modules fail to load (e.g. strict headless environments with no GL),
     # we allow partial loading.
     for _name in (
@@ -66,7 +66,7 @@ try:
     from . import sim_widget
 
     _has_gui = True
-except (ImportError, TypeError):
+except (ImportError, TypeError, AttributeError, OSError):
     # GUI not available (e.g., in headless CI or PyQt6 metaclass conflict)
     # Don't expose these in __all__ to avoid AttributeErrors
     sim_widget = None  # type: ignore[assignment]

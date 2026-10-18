@@ -436,6 +436,12 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         frame = self.get_force_torque_frame()
         return None if frame is None else frame.axial_loads
 
+    def get_body_names(self) -> list[str]:
+        """Get names of all frames/bodies in the Pinocchio model."""
+        if self.model is None:
+            return []
+        return [f.name for f in getattr(self.model, "frames", [])]
+
     @precondition(
         lambda self, body_name: self.is_initialized,
         "Engine must be initialized",
@@ -452,8 +458,12 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             return None
 
         if not self.model.existFrame(body_name):
+            valid_frames = self.get_body_names()
             logger.warning(f"Body/Frame '{body_name}' not found in Pinocchio model.")
-            return None
+            raise KeyError(
+                f"Body/Frame '{body_name}' not found in Pinocchio model. "
+                f"Valid frames: {valid_frames}"
+            )
 
         frame_id = self.model.getFrameId(body_name)
 

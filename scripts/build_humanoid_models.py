@@ -68,6 +68,9 @@ if str(REPO_ROOT) not in sys.path:
 shared_python = REPO_ROOT / "src" / "shared" / "python"
 if str(shared_python) not in sys.path:
     sys.path.insert(0, str(shared_python))
+src_path = REPO_ROOT / "src"
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
 
 #: All engines this orchestrator knows about, in canonical order.
 ENGINES: tuple[str, ...] = ("drake", "pinocchio", "mujoco", "opensim")
@@ -79,44 +82,55 @@ ENGINES: tuple[str, ...] = ("drake", "pinocchio", "mujoco", "opensim")
 
 
 def _build_drake(yaml_path: Path, *, check: bool) -> int:
-    """Generate (or verify) the Drake humanoid URDF."""
-    # Lazy import so that --engine mujoco doesn't pull in drake plumbing.
-    from src.engines.physics_engines.drake.python.motion_matching.humanoid_urdf import (  # noqa: E501
-        CANONICAL_URDF,
-        build_humanoid_urdf,
+    """Generate (or verify) the Drake humanoid URDF (Issue #12985)."""
+    from tools.model_converter.build_models import (
+        DEFAULT_CANONICAL_YAML,
+        DEFAULT_DRAKE_URDF_OUT,
     )
+    from tools.model_converter.schema_validator import validate_canonical_model
+    from tools.model_converter.urdf_exporter import export_urdf
+
+    canonical_urdf = DEFAULT_DRAKE_URDF_OUT
+    model_spec = (
+        DEFAULT_CANONICAL_YAML
+        if not yaml_path or yaml_path == SHARED_YAML
+        else yaml_path
+    )
+    if not model_spec.exists():
+        model_spec = DEFAULT_CANONICAL_YAML
+
+    model = validate_canonical_model(model_spec)
+
+    try:
+        rel_canonical = canonical_urdf.relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        rel_canonical = str(canonical_urdf)
 
     if check:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_out = Path(tmp) / "golfer.urdf"
-            build_humanoid_urdf(yaml_path=yaml_path, out_path=tmp_out)
-            try:
-                rel_canonical = CANONICAL_URDF.relative_to(REPO_ROOT).as_posix()
-            except ValueError:
-                rel_canonical = str(CANONICAL_URDF)
-            if not CANONICAL_URDF.exists():
+            export_urdf(model, tmp_out)
+            if not canonical_urdf.exists():
                 sys.stderr.write(
                     "FAIL: drake URDF drift gate (#4129)\n"
                     f"  Canonical URDF missing: {rel_canonical}\n"
                     "  Fix locally:\n"
                     "    python3 scripts/build_humanoid_models.py --engine drake\n"
-                    "    git add "
-                    f"{rel_canonical}\n"
+                    f"    git add {rel_canonical}\n"
                     "    git commit -m 'regen drake URDF'\n"
                 )
                 return 1
-            if not filecmp.cmp(tmp_out, CANONICAL_URDF, shallow=False):
+            if not filecmp.cmp(tmp_out, canonical_urdf, shallow=False):
                 sys.stderr.write(
                     "FAIL: drake URDF drift gate (#4129)\n"
                     f"  Drift detected in: {rel_canonical}\n"
                     "  The on-disk URDF does not match a fresh regeneration\n"
-                    "  from the shared YAML. Hand-edits to engine model files\n"
+                    "  from the canonical specification. Hand-edits to engine model files\n"
                     "  are forbidden by CROSS_ENGINE_PARITY_SPEC.md §6.\n"
                     "\n"
                     "  Fix locally:\n"
                     "    python3 scripts/build_humanoid_models.py --engine drake\n"
-                    "    git add "
-                    f"{rel_canonical}\n"
+                    f"    git add {rel_canonical}\n"
                     "    git commit -m 'regen drake URDF'\n"
                 )
                 return 1
@@ -125,8 +139,8 @@ def _build_drake(yaml_path: Path, *, check: bool) -> int:
             )
             return 0
 
-    out = build_humanoid_urdf(yaml_path=yaml_path)
-    sys.stdout.write(f"Wrote {out}\n")
+    export_urdf(model, canonical_urdf)
+    sys.stdout.write(f"Wrote {canonical_urdf}\n")
     return 0
 
 
