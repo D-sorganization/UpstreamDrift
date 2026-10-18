@@ -338,6 +338,15 @@ class TestWebReachabilityContract:
                     f"Tile '{tile['id']}' unavailable mode requires a reason"
                 )
 
+    def test_spine_viewer_web_mode_is_route(self) -> None:
+        """spine_viewer tile must declare route mode to /tools/spine-viewer (#13258)."""
+        tiles = [t for t in _raw_manifest_tiles() if t["id"] == "spine_viewer"]
+        assert len(tiles) == 1
+        assert tiles[0]["web"] == {
+            "mode": "route",
+            "route": "/tools/spine-viewer",
+        }
+
     def test_every_tile_destination_resolves_authoritatively(self) -> None:
         """Every manifest tile resolves to route, native-window, or unavailable (issue #10513)."""
         manifest = LauncherManifest.load()

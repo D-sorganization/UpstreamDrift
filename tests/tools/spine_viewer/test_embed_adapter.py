@@ -57,6 +57,7 @@ def test_create_main_widget_and_idempotent_cleanup() -> None:
 
 
 def test_registration_surfaces_agree() -> None:
+    import json
     from pathlib import Path
 
     import yaml
@@ -69,3 +70,12 @@ def test_registration_surfaces_agree() -> None:
     assert len(tiles) == 1
     assert tiles[0]["launcher"]["category"] == "tool"
     assert tiles[0]["launcher"]["status"] == "beta"
+    manifest = json.loads(
+        (root / "src/config/launcher_manifest.json").read_text("utf-8")
+    )
+    manifest_tiles = [m for m in manifest["tiles"] if m.get("id") == "spine_viewer"]
+    assert len(manifest_tiles) == 1
+    assert manifest_tiles[0]["web"] == {
+        "mode": "route",
+        "route": "/tools/spine-viewer",
+    }
