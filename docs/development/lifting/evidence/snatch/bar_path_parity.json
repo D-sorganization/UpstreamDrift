@@ -1,11 +1,11 @@
 {
   "lift": "snatch",
   "bundle": "docs/development/lifting/evidence/snatch/snatch_bundle.npz",
-  "bundle_spec_sha256": "64d09b4e38500eec39f3f0f6bf3cea6228ee318e789da4ec068495c4feace50f",
+  "bundle_spec_sha256": "19a4f3a5b062d75d13121911cc621e1f482037b82bd1625fd7db0cd7298386fa",
   "bundle_steps": 200,
   "dt_s": 0.001,
   "reference": "window_bar_path_m (MuJoCo, recorded at bundle generation)",
-  "source_commit": "ff36a7872ba08c4ce9a69047d5d5576f772afb16",
+  "source_commit": "748284a40d4dac4849f3f0e5fbfa897507a80b32",
   "generator": "scripts/measure_lift_bar_path_parity.py",
   "engines": {
     "mujoco": {
@@ -24,109 +24,82 @@
         "max_frame_error_m": 0.0,
         "worst_segment_start_s": 0.0,
         "coordinate_error_rad_by_segment": [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         ]
       },
-      "wall_time_s": 130.8
+      "wall_time_s": 119.5
     },
     "drake": {
       "engine": "drake",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 6.17193273301158e-14,
-      "final_bar_deviation_m": 6.17193273301158e-14,
-      "max_coordinate_error_rad": 2.8703706078658797e-12,
+      "max_bar_deviation_m": 7.328617545227222e-14,
+      "final_bar_deviation_m": 7.328617545227222e-14,
+      "max_coordinate_error_rad": 3.315014929228255e-12,
       "worst_final_coordinate": "LWInputY",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 2.01574867908505e-14,
-        "max_frame_error_m": 9.509920541230278e-15,
-        "worst_segment_start_s": 0.02,
+        "max_coordinate_error_rad": 2.964295475749168e-14,
+        "max_frame_error_m": 2.2121037052315357e-15,
+        "worst_segment_start_s": 0.14,
         "coordinate_error_rad_by_segment": [
-          6.158268339717665e-15,
-          2.01574867908505e-14,
-          1.3433698597964394e-14,
-          1.1435297153639112e-14,
-          7.66053886991358e-15,
-          1.161050422471277e-14,
-          1.9872992140790302e-14,
-          5.10702591327572e-15,
-          1.1546319456101628e-14,
-          1.2361639489810727e-14
+          6.4063337967823486e-15, 1.1282641487753153e-14,
+          1.4654943925052066e-14, 1.587618925213974e-14, 1.1546319456101628e-14,
+          1.1372847108503947e-14, 2.298161660974074e-14, 2.964295475749168e-14,
+          1.1213252548714081e-14, 1.1187231696574429e-14
         ]
       },
-      "wall_time_s": 70.2
+      "wall_time_s": 73.8
     },
     "pinocchio": {
       "engine": "pinocchio",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 4.6832893300437225e-14,
-      "final_bar_deviation_m": 4.6832893300437225e-14,
-      "max_coordinate_error_rad": 2.0816681711721685e-12,
+      "max_bar_deviation_m": 5.4619728923369847e-14,
+      "final_bar_deviation_m": 5.4619728923369847e-14,
+      "max_coordinate_error_rad": 2.4564794642856214e-12,
       "worst_final_coordinate": "LWInputY",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 2.2426505097428162e-14,
-        "max_frame_error_m": 9.941030513904261e-15,
-        "worst_segment_start_s": 0.12,
+        "max_coordinate_error_rad": 3.219646771412954e-14,
+        "max_frame_error_m": 3.1714313080323688e-15,
+        "worst_segment_start_s": 0.14,
         "coordinate_error_rad_by_segment": [
-          6.646592998205136e-15,
-          7.348288644237755e-15,
-          1.176836406102666e-14,
-          9.43689570931383e-15,
-          5.218048215738236e-15,
-          4.647324192141866e-15,
-          2.2426505097428162e-14,
-          6.994405055138486e-15,
-          1.1879386363489175e-14,
-          3.722716579446228e-15
+          3.0192862099376327e-15, 6.987466161234579e-15, 1.354472090042691e-14,
+          1.3766765505351941e-14, 8.770761894538737e-15, 6.4878658001532585e-15,
+          2.5979218776228663e-14, 3.219646771412954e-14, 1.3100631690576847e-14,
+          4.440892098500626e-15
         ]
       },
-      "wall_time_s": 40.5
+      "wall_time_s": 49.5
     },
     "opensim": {
       "engine": "opensim",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 1.591534813586587e-15,
-      "final_bar_deviation_m": 1.1243577791325062e-15,
-      "max_coordinate_error_rad": 1.1025381996265793e-12,
+      "max_bar_deviation_m": 2.9279172407116403e-15,
+      "final_bar_deviation_m": 2.9279172407116403e-15,
+      "max_coordinate_error_rad": 4.107309110878976e-13,
       "worst_final_coordinate": "subtalar_angle_r",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 9.936496070395151e-15,
-        "max_frame_error_m": 1.6662594659381951e-15,
-        "worst_segment_start_s": 0.02,
+        "max_coordinate_error_rad": 9.249545573908335e-15,
+        "max_frame_error_m": 1.227537204523176e-15,
+        "worst_segment_start_s": 0.1,
         "coordinate_error_rad_by_segment": [
-          4.4521678010944754e-15,
-          9.936496070395151e-15,
-          4.7531423241764514e-15,
-          8.952907859516301e-15,
-          5.010748760359007e-15,
-          7.277164981722706e-15,
-          2.6506574712925612e-15,
-          2.850150671029894e-15,
-          6.968167362564337e-15,
-          6.869504964868156e-15
+          2.3132537552150723e-15, 6.022959908591474e-15, 4.850286838831153e-15,
+          2.71657696337968e-15, 4.90059381963448e-15, 9.249545573908335e-15,
+          1.7763568394002505e-15, 5.9119376061289586e-15,
+          1.6740081543176188e-15, 6.104491911962384e-15
         ]
       },
-      "wall_time_s": 90.4
+      "wall_time_s": 107.2
     }
   }
 }
