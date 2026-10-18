@@ -6,9 +6,11 @@ import argparse
 from collections.abc import Sequence
 from dataclasses import replace
 from functools import partial
+import json
 import logging
 from pathlib import Path
 import sys
+from typing import Any
 
 from src.shared.python.body_part_viz.force_colors import (
     BLEND_MODES,
@@ -17,6 +19,22 @@ from src.shared.python.body_part_viz.force_colors import (
     ForceColorScale,
 )
 from src.shared.python.golf_view_presets import VIEW_ORDER
+from src.shared.python.model_appearance.appearance_selection import (
+    AppearanceOverrides,
+    resolve_appearance,
+)
+from src.shared.python.model_appearance.schema import (
+    GLOVE_CHOICES,
+    document_from_dict,
+    document_to_dict,
+)
+from src.shared.python.motion_matching.execution.grip_selection import (
+    add_grip_arguments,
+    apply_visual_picks,
+    check_sidecar_grip,
+    overrides_from_args,
+    refuse_physical_in_sidecar,
+)
 from src.tools.native_viewer_export.core import (
     DEFAULT_SPEEDS,
     ENGINES,
@@ -197,7 +215,92 @@ def build_parser() -> argparse.ArgumentParser:
         help="do not draw the decorative golf ball (shown until impact)",
     )
     p.add_argument("--no-grid", action="store_true", help="skip the 2x2 clip")
+    add_appearance_arguments(p)
+    add_grip_arguments(p, physical=True)
     return p
+
+
+def add_appearance_arguments(p: argparse.ArgumentParser) -> None:
+    """Appearance flags (HRG-B2, #13167). Precedence: flag, then ``--appearance``
+    document, then the contract defaults; nothing is read from GUI settings."""
+    group = p.add_argument_group(
+        "appearance",
+        "explicit flag > --appearance document or sidecar > contract defaults",
+    )
+    group.add_argument(
+        "--appearance",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="appearance-v1 document or <spec>.appearance.json sidecar",
+    )
+    group.add_argument(
+        "--skin-tone",
+        default=None,
+        metavar="ID_OR_HEX",
+        help="skin palette id (skin_1..skin_8) or a #rrggbb colour",
+    )
+    group.add_argument(
+        "--hair",
+        default=None,
+        metavar="ID_OR_HEX",
+        help="hair palette id (hair_brown, ...) or a #rrggbb colour",
+    )
+    group.add_argument(
+        "--clothing", default=None, metavar="ID", help="clothing preset id"
+    )
+    group.add_argument(
+        "--glove",
+        default=None,
+        choices=GLOVE_CHOICES,
+        help="golf glove by role (default none: bare skin-coloured hands); the "
+        "lead hand is the left one for a right-handed golfer",
+    )
+    group.add_argument(
+        "--top-color", default=None, metavar="HEX", help="shirt colour #rrggbb"
+    )
+    group.add_argument(
+        "--bottom-color",
+        default=None,
+        metavar="HEX",
+        help="trousers or shorts colour #rrggbb",
+    )
+
+
+def load_appearance_document(path: Path) -> dict[str, Any]:
+    """Parse an appearance-v1 document file (``ValueError`` if unreadable/invalid)."""
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"cannot read --appearance {path}: {exc}") from exc
+    if not isinstance(data, dict):
+        raise ValueError(f"--appearance {path} must hold a JSON object")
+    if "grip" in data:
+        check_sidecar_grip(data["grip"])  # a clear message before the schema's
+    document_from_dict(data)  # validates (fail closed)
+    return data
+
+
+def build_appearance(args: argparse.Namespace) -> dict[str, Any] | None:
+    """Resolved appearance document, or ``None`` when no appearance flag is given
+    (backends then render the contract default, exactly as before)."""
+    overrides = AppearanceOverrides(
+        skin_tone=args.skin_tone,
+        hair=args.hair,
+        clothing=args.clothing,
+        top_color=args.top_color,
+        bottom_color=args.bottom_color,
+        glove=args.glove,
+    )
+    grip = overrides_from_args(args)
+    refuse_physical_in_sidecar(grip)  # never silently applied picture-only
+    if args.appearance is None and overrides.is_empty and not grip.has_visual:
+        return None
+    document = (
+        None if args.appearance is None else load_appearance_document(args.appearance)
+    )
+    resolved = resolve_appearance(overrides, document)
+    return document_to_dict(document_from_dict(apply_visual_picks(resolved, grip)))
 
 
 def parse_size(text: str) -> tuple[int, int]:
@@ -261,6 +364,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         grip=args.grip,
         hud=not args.no_hud,
         ball=not args.no_ball,
+        appearance=build_appearance(args),
         **(
             {"impact_speed": args.impact_speed} if args.impact_speed is not None else {}
         ),

@@ -22,11 +22,12 @@ from pathlib import Path
 import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # construction only
 
 from src.shared.python.model_appearance import library
-from src.shared.python.model_appearance.schema import Material
+from src.shared.python.model_appearance.defaults import default_appearance
+from src.shared.python.model_appearance.schema import AppearanceDocument, Material
 from src.shared.python.model_appearance.club_assembly import (
-    PART_MATERIALS,
     ClubAssembly,
     assembly_meshes,
+    club_part_material,
 )
 from src.shared.python.model_appearance.grip_hands import grip_hand_meshes
 from src.shared.python.model_appearance.club_head_mesh import load_club_head
@@ -157,6 +158,7 @@ def club_mesh_elements(
     materials: Mapping[str, Material] | None = None,
     socket_frame: str = "..",
     parts: tuple[str, ...] = PARTS,
+    appearance: AppearanceDocument | None = None,
 ) -> list[ET.Element]:
     """``<Mesh>`` elements for shaft, grip and head, files under ``mesh_dir_ref``.
 
@@ -165,14 +167,16 @@ def club_mesh_elements(
     relative paths containing ``..``, so committed models use bare names and
     loaders call :func:`register_geometry_path`. Colours follow the appearance
     library: club finish for shaft and head, ``grip_rubber`` for the grip and
-    the golf glove for the grip hands (``parts=HAND_PARTS``).
+    the document's skin (or its glove, ``appearance.glove``) for the grip hands
+    (``parts=HAND_PARTS``); ``appearance`` defaults to the contract default.
     """
-    table = materials if materials is not None else library.MATERIALS
+    doc = appearance if appearance is not None else default_appearance()
+    table = materials if materials is not None else library.library_materials(doc)
     if finish not in table:
         raise ValueError(f"unknown club finish {finish!r}")
     elements = []
     for part in parts:
-        material = table[PART_MATERIALS[part] or finish]
+        material = table[club_part_material(part, finish, doc)]
         rgb = (material.rgba[0], material.rgba[1], material.rgba[2])
         name = asset_filename(alias, part)
         file_ref = f"{mesh_dir_ref.rstrip('/')}/{name}" if mesh_dir_ref else name
@@ -197,7 +201,12 @@ def attach_club_meshes(
     return len(new)
 
 
-def attach_grip_hand_meshes(body: ET.Element, alias: str, mesh_dir_ref: str) -> int:
+def attach_grip_hand_meshes(
+    body: ET.Element,
+    alias: str,
+    mesh_dir_ref: str,
+    appearance: AppearanceDocument | None = None,
+) -> int:
     """Replace ``body``'s grip-hand meshes by both wrapped hands; returns 2.
 
     ``body`` must be the club body: the hand meshes are in its frame.
@@ -208,7 +217,9 @@ def attach_grip_hand_meshes(body: ET.Element, alias: str, mesh_dir_ref: str) -> 
     names = {f"club_{part}_geom" for part in HAND_PARTS}
     for old in [m for m in geom if m.get("name") in names]:
         geom.remove(old)
-    new = club_mesh_elements(alias, mesh_dir_ref, parts=HAND_PARTS)
+    new = club_mesh_elements(
+        alias, mesh_dir_ref, parts=HAND_PARTS, appearance=appearance
+    )
     geom.extend(new)
     return len(new)
 

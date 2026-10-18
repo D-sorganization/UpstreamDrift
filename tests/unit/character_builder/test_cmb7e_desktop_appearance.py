@@ -123,7 +123,9 @@ class TestAppearanceWidget:
         del app
 
     def test_combos_populated(self, widget) -> None:
-        assert widget.appearance_combos["skin_tone"].count() == 8
+        from src.shared.python.model_appearance.library import SKIN_TONES
+
+        assert widget.appearance_combos["skin_tone"].count() == len(SKIN_TONES) == 8
         assert widget.appearance_combos["clothing"].count() >= 2
         assert widget.appearance_combos["club_finish"].count() == 4
         assert widget.appearance_combos["headwear"].count() == 3
@@ -152,3 +154,109 @@ class TestAppearanceWidget:
         written = widget.export("appearance", str(tmp_path))
         assert written is not None and Path(written).is_file()
         assert "Wrote" in widget.status.text()
+
+
+# --- HRG-B2 (#13167): custom colours become document materials -------------
+
+
+def test_custom_colours_write_document_materials() -> None:
+    from src.shared.python.model_appearance import library
+    from src.shared.python.model_appearance.appearance_selection import hex_to_rgb
+
+    model = _model_cls()()
+    model.set_appearance("hair_color", "#336699")
+    model.set_appearance("top_color", "#aa0000")
+    model.set_appearance("skin_color", "#c68642")
+    doc = model.appearance_document()
+    parsed = _document_from_dict()(doc)
+    mats = library.library_materials(parsed)
+    assert mats[parsed.head.headwear_material].rgba[:3] == pytest.approx(
+        hex_to_rgb("#336699")
+    )
+    assert mats[parsed.skin_tone].rgba[:3] == pytest.approx(hex_to_rgb("#c68642"))
+    torso = library.CLOTHING[parsed.clothing]["torso"]
+    assert mats[torso].rgba[:3] == pytest.approx(hex_to_rgb("#aa0000"))
+
+
+def test_bad_custom_colour_is_rejected_without_changing_state() -> None:
+    model = _model_cls()()
+    before = model.appearance_document()
+    for name in ("hair_color", "skin_color", "top_color", "bottom_color"):
+        with pytest.raises(ValueError):
+            model.set_appearance(name, "teal")
+    assert model.appearance_document() == before
+
+
+def test_clearing_a_colour_restores_the_library_default() -> None:
+    model = _model_cls()()
+    before = model.appearance_document()
+    model.set_appearance("hair_color", "#336699")
+    model.set_appearance("hair_color", None)
+    assert model.appearance_document() == before
+
+
+def test_custom_colour_never_changes_compile_hash() -> None:
+    model = _model_cls()()
+    before = model.compile().sha256
+    model.set_appearance("top_color", "#aa0000")
+    assert model.compile().sha256 == before
+
+
+class TestColourPickers:
+    @pytest.fixture
+    def widget_factory(self):
+        QtWidgets = pytest.importorskip("PyQt6.QtWidgets")
+        app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+        from src.tools.character_builder.gui import CharacterBuilderWidget
+
+        made = []
+
+        def make(color):
+            w = CharacterBuilderWidget(color_picker=lambda current, parent: color)
+            made.append(w)
+            return w
+
+        yield make
+        for w in made:
+            w.cleanup()
+        del app
+
+    def test_every_colour_field_exists(self, widget_factory) -> None:
+        w = widget_factory("#112233")
+        assert set(w.colour_fields) == {
+            "skin_color",
+            "hair_color",
+            "top_color",
+            "bottom_color",
+        }
+
+    @pytest.mark.parametrize(
+        "name", ["skin_color", "hair_color", "top_color", "bottom_color"]
+    )
+    def test_injected_picker_writes_the_document(self, widget_factory, name) -> None:
+        from PyQt6.QtWidgets import QPushButton
+
+        w = widget_factory("#112233")
+        w.colour_fields[name].findChild(QPushButton).click()
+        assert w.model.appearance_choices()[name] == "#112233"
+        assert w.status.text() == ""
+        assert _document_from_dict()(w.model.appearance_document())
+
+    def test_reset_clears_the_choice(self, widget_factory) -> None:
+        from PyQt6.QtWidgets import QPushButton
+
+        w = widget_factory("#112233")
+        w.colour_fields["hair_color"].findChild(QPushButton).click()
+        w.findChild(QPushButton, "reset_hair_color").click()
+        assert "hair_color" not in w.model.appearance_choices()
+
+    def test_hair_colour_with_cap_reports_instead_of_silently_ignoring(
+        self, widget_factory
+    ) -> None:
+        from PyQt6.QtWidgets import QPushButton
+
+        w = widget_factory("#112233")
+        w.appearance_combos["headwear"].setCurrentText("cap")
+        w.colour_fields["hair_color"].findChild(QPushButton).click()
+        assert "hair_color" not in w.model.appearance_choices()
+        assert "headwear" in w.status.text()

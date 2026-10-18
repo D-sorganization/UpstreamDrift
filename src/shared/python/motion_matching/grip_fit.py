@@ -167,6 +167,38 @@ def excess_deg(
     return np.maximum(0.0, np.maximum(r[:, 0] - a, a - r[:, 1]))
 
 
+class ExcessObjective:
+    """The ROM-excess cost of a stack of relative rotations (shared by the
+    legacy search and the HRG-GR3 modes, so the cost is defined once).
+
+    ``cost(rotation)`` is the weighted root-mean-square excess, in degrees,
+    of ``relative @ rotation`` beyond ``ranges_deg``; ``angles_deg`` returns
+    the decomposed coordinates. ``ValueError`` for bad shapes or weights.
+    """
+
+    def __init__(
+        self,
+        relative: Array,
+        wrist_base: Array,
+        ranges_deg: Sequence[Sequence[float]],
+        weights: Sequence[float] | None = None,
+    ) -> None:
+        self.relative = _matrices(relative)
+        self.wrist_base = _base(wrist_base)
+        self.ranges = np.asarray(ranges_deg, dtype=float)
+        self.weights = np.ones(3) if weights is None else np.asarray(weights, float)
+        if self.weights.shape != (3,) or (self.weights < 0).any():
+            raise ValueError("weights must be three non-negative numbers")
+
+    def angles_deg(self, rotation: Array) -> Array:
+        turned: Array = np.asarray(self.relative @ rotation)
+        return np.degrees(wrist_angles(turned, self.wrist_base))
+
+    def cost(self, rotation: Array) -> float:
+        ex = excess_deg(self.angles_deg(rotation), self.ranges) * self.weights
+        return float(np.sqrt(np.mean(ex**2)))
+
+
 @dataclass(frozen=True)
 class GripFit:
     """Result of :func:`fit_grip_rotation`."""
@@ -228,22 +260,16 @@ def fit_grip_rotation(
     angles seeds a Nelder-Mead refinement. Postcondition: ``cost_after <=
     cost_before`` (the identity is in the grid).
     """
-    m = _matrices(relative)
-    b = _base(wrist_base)
-    r = np.asarray(ranges_deg, dtype=float)
-    w = np.ones(3) if weights is None else np.asarray(weights, dtype=float)
-    if w.shape != (3,) or (w < 0).any():
-        raise ValueError("weights must be three non-negative numbers")
+    objective = ExcessObjective(relative, wrist_base, ranges_deg, weights)
+    r = objective.ranges
     if grid_half_deg <= 0 or grid_step_deg <= 0:
         raise ValueError("grid extent and step must be positive")
 
     def angles_for(euler_deg: Array) -> Array:
-        turned: Array = np.asarray(m @ grip_rotation(euler_deg))
-        return np.degrees(wrist_angles(turned, b))
+        return objective.angles_deg(grip_rotation(euler_deg))
 
     def cost(euler_deg: Array) -> float:
-        ex = excess_deg(angles_for(euler_deg), r) * w
-        return float(np.sqrt(np.mean(ex**2)))
+        return objective.cost(grip_rotation(euler_deg))
 
     ticks = np.arange(-grid_half_deg, grid_half_deg + 1e-9, grid_step_deg)
     ticks = np.union1d(ticks, [0.0])

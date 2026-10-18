@@ -32,8 +32,8 @@ packages, saved layouts, and golden test fixtures.
 | `capture` | 21 | Multi-camera mocap, pose estimation, marker tracking, and 3D reconstruction |
 | `governance` | 13 | Configuration setup, project architecture mapping, sidekick docks, and registry admin |
 | `putting` | 6 | Putting physics, green surface simulation, and ball rolling dynamics |
-| `simulation` | 89 | Physics engines, multi-body kinematics, dynamics solvers, and forward simulation |
-| `training` | 17 | Drills, objective laboratories, movement/swing optimization, and skill reinforcement |
+| `simulation` | 88 | Physics engines, multi-body kinematics, dynamics solvers, and forward simulation |
+| `training` | 18 | Drills, objective laboratories, movement/swing optimization, and skill reinforcement |
 
 ## Representative Golden Preservation Fixtures
 
@@ -74,7 +74,7 @@ The full inventory table is split into linked parts by primary workspace.
 | [Capability Baseline Inventory: Governance](org01_capability_baseline/inventory-governance.md) | 13 | `aip` | `tools.terrain_engine` |
 | [Capability Baseline Inventory: Putting](org01_capability_baseline/inventory-putting.md) | 6 | `bunkershot3d` | `tools.rate_of_closure` |
 | [Capability Baseline Inventory: Simulation (Part 1/4)](org01_capability_baseline/inventory-simulation-1.md) | 25 | `actuator_controls` | `engines.load_and_simulate` |
-| [Capability Baseline Inventory: Simulation (Part 2/4)](org01_capability_baseline/inventory-simulation-2.md) | 25 | `export.video_speed_variants` | `myosim_suite` |
-| [Capability Baseline Inventory: Simulation (Part 3/4)](org01_capability_baseline/inventory-simulation-3.md) | 25 | `native_viewer_export` | `pinocchio_models_shared` |
-| [Capability Baseline Inventory: Simulation (Part 4/4)](org01_capability_baseline/inventory-simulation-4.md) | 14 | `realtime_ws` | `visualization.force_color_controls` |
-| [Capability Baseline Inventory: Training](org01_capability_baseline/inventory-training.md) | 17 | `character_builder` | `training_controller` |
+| [Capability Baseline Inventory: Simulation (Part 2/4)](org01_capability_baseline/inventory-simulation-2.md) | 25 | `export.video_speed_variants` | `native_viewer_export` |
+| [Capability Baseline Inventory: Simulation (Part 3/4)](org01_capability_baseline/inventory-simulation-3.md) | 25 | `offline_validation` | `realtime_ws` |
+| [Capability Baseline Inventory: Simulation (Part 4/4)](org01_capability_baseline/inventory-simulation-4.md) | 13 | `robotics_module` | `visualization.force_color_controls` |
+| [Capability Baseline Inventory: Training](org01_capability_baseline/inventory-training.md) | 18 | `character_builder` | `training_controller` |

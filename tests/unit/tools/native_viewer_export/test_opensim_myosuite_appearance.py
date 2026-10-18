@@ -21,6 +21,7 @@ from src.shared.python.model_appearance import library, library_materials
 from src.shared.python.model_appearance.body_meshes import resolve_appearance
 from src.shared.python.model_appearance.cross_section import body_sections
 from src.tools.native_viewer_export.backends._body import default_appearance
+from src.shared.python.model_appearance.club_assembly import assembly_from_spec
 from src.tools.native_viewer_export.backends._club import club_parts
 
 pytestmark = pytest.mark.unit
@@ -64,7 +65,7 @@ def dressed(request, tmp_path_factory):
 
 def test_every_dressed_body_has_mesh_geometry_and_no_primitive(dressed) -> None:
     spec, parts = dressed
-    resolved = resolve_appearance(spec, default_appearance())
+    resolved = resolve_appearance(spec, default_appearance(), assembly_from_spec(spec))
     club_body = club_parts(spec)[0]
     expected = {m.body for m in resolved.meshes} - {club_body}
     meshed = {p.body for p in parts if p.geometry == "mesh"}
@@ -72,9 +73,16 @@ def test_every_dressed_body_has_mesh_geometry_and_no_primitive(dressed) -> None:
     assert not [p for p in parts if p.geometry in PRIMITIVES]
 
 
-def test_club_body_keeps_the_exported_club_meshes_only(dressed) -> None:
+def test_club_body_keeps_the_exported_club_meshes_and_adds_the_grip_hands(
+    dressed,
+) -> None:
+    """The model carries shaft, grip and head; the dressed parts add the hands
+    only, bare skin by default (HRG-G1)."""
     spec, parts = dressed
-    assert club_parts(spec)[0] not in {p.body for p in parts}
+    on_club = [p for p in parts if p.body == club_parts(spec)[0]]
+    assert len(on_club) == 2
+    skin = library_materials(default_appearance())["skin_2"].rgba
+    assert {p.rgba for p in on_club} == {skin}
 
 
 def test_pelvis_wears_the_trousers_colour(dressed) -> None:

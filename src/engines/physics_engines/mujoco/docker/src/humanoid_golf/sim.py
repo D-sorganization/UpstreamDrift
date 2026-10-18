@@ -22,6 +22,7 @@ import imageio
 import numpy as np
 
 from . import iaa_helper, utils
+from .legacy_notice import warn_if_legacy_colors
 
 logger = logging.getLogger(__name__)
 
@@ -374,6 +375,7 @@ def _load_simulation_config() -> dict:
                 config = json.load(f)
         except (FileNotFoundError, PermissionError, OSError) as exc:
             logger.debug("Could not load simulation_config.json: %s", exc)
+    warn_if_legacy_colors(config)
     return config
 
 

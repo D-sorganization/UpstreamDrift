@@ -48,6 +48,17 @@ from src.shared.python.motion_matching.execution.club_markers import (
     Offset,
     load_club_markers,
 )
+from src.shared.python.motion_matching.execution.grip_selection import (
+    GripOverrides,
+    add_grip_arguments,
+    apply_grip_selection,
+    apply_visual_picks,
+    overrides_from_args,
+)
+from src.shared.python.model_appearance.appearance_selection import (
+    resolve_appearance,
+)
+from src.shared.python.model_appearance.schema import appearance_path_for
 from src.shared.python.motion_matching.hip_calibration import hip_is_mirrored
 from src.shared.python.motion_matching.full_body_spec import (
     BodySpec,
@@ -826,6 +837,30 @@ def compose_anthropometric_document(
     )
 
 
+def _with_grip_revision(
+    built: AnthropometricDocument, overrides: GripOverrides | None
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """The document and receipt subject after the physical grip picks (GR4).
+
+    Physical picks make a GR2 spec revision (a refit is needed); picture-only
+    picks do not touch the spec (they belong in an appearance sidecar).
+    """
+    if overrides is None or not overrides.has_physical:
+        return built.document, built.subject
+    document, _grip = apply_grip_selection(built.document, overrides)
+    return document, {**built.subject, **document["subject"]}
+
+
+def _write_grip_sidecar(spec_path: Path, overrides: GripOverrides | None) -> None:
+    """Write the picture-only grip picks beside the spec (never physical ones)."""
+    if overrides is None or not overrides.has_visual:
+        return
+    sidecar = resolve_appearance(None, apply_visual_picks({}, overrides.visual_only()))
+    appearance_path_for(spec_path).write_text(
+        json.dumps(sidecar, indent=2) + "\n", encoding="utf-8"
+    )
+
+
 def build_anthropometric_spec(
     *,
     native_path: Path,
@@ -850,17 +885,20 @@ def build_anthropometric_spec(
         **kwargs,
     )
     club_markers = get_club_markers(club, kwargs.get("club_markers_path"))
-    return _write_outputs(
-        document=built.document,
+    document, subject = _with_grip_revision(built, kwargs.get("grip_overrides"))
+    paths = _write_outputs(
+        document=document,
         output_dir=output_dir,
         spec_name=spec_name,
-        subject=built.subject,
+        subject=subject,
         input_paths=(native_path, osim_path, native_candidate_path)
         + ((club_markers,) if club_markers else ()),
         hip_half=built.hip_half_m,
         hub_h=built.hub_height_m,
         notes=built.notes,
     )
+    _write_grip_sidecar(paths[0], kwargs.get("grip_overrides"))
+    return paths
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -915,6 +953,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="club-markers/1 file (default evidence/club_markers/<club>.json)",
     )
+    add_grip_arguments(parser, physical=True)
     return parser
 
 
@@ -943,6 +982,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         club_markers_path=args.club_markers,
         shaft_model=args.shaft_model,
         tibial_torsion_offset_deg=args.tibial_torsion,
+        grip_overrides=overrides_from_args(args),
     )
     return 0
 

@@ -90,6 +90,37 @@ build renders much faster than the headless shell), and
 The OpenSim backend only ever runs under `xvfb-run` and refuses to start when
 `NATIVE_VIEWER_XVFB` is missing or `DISPLAY` is a real display.
 
+## Appearance Flags
+
+The golfer's look can be chosen per export (HRG-B2, #13167); without any of
+these flags every engine renders the contract default golfer
+(`src/config/appearance_defaults.json`).
+
+```bash
+python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
+  --out out/ --engines mujoco \
+  --appearance driver.appearance.json \
+  --skin-tone skin_5 --hair '#2a5db0' \
+  --clothing golf_polo_shorts --top-color '#c0392b' --bottom-color '#f4d03f'
+```
+
+- `--appearance PATH` is an `appearance-v1` document or a `<spec>.appearance.json`
+  sidecar. `--skin-tone` and `--hair` take a palette id (`skin_1`..`skin_8`,
+  `hair_brown`, ...) or a `#rrggbb` colour; `--clothing` takes a preset id;
+  `--top-color` and `--bottom-color` take `#rrggbb` and recolour the preset's
+  shirt and trousers/shorts. `--glove {none,lead,trail,both}` (HRG-G1, #13186)
+  puts the white golf glove on the named grip hand by role; the lead hand is the
+  left one for a right-handed golfer (document field `handedness`, default
+  `right`). The default `none` draws bare hands in the skin colour. Custom colours become document `materials` entries
+  (see `docs/help/character_builder.md`).
+- **Precedence:** an explicit flag beats the `--appearance` document, which beats
+  the contract defaults (`model_appearance.appearance_selection.resolve_appearance`).
+  GUI settings (QSettings) are never read.
+- The resolved document travels in `ExportSettings.appearance` and
+  `WorkerJob.appearance` and is applied by the MuJoCo, MyoSuite, OpenSim, Drake
+  and Pinocchio workers. Unknown ids, a malformed colour, a garment colour on
+  the `none` preset, or a hair colour with a cap are errors (exit 2).
+
 ## Segment Shading
 
 `--segment-shading` (off by default; engine support below) paints each segment

@@ -140,6 +140,40 @@ document; `POST /character-builder/appearance/export` returns it as a
 downloadable JSON sidecar (route `src/api/routes/character_appearance.py`,
 service `src/api/services/character_appearance_service.py`).
 
+### Custom Skin, Hair and Clothing Colours
+
+Beyond the palette ids, the golfer's skin, hair, shirt and trousers/shorts can
+take any `#rrggbb` colour (HRG-B2, #13167). A custom colour is written as an
+entry of the document's `materials` map, authored in non-linear sRGB
+(`byte / 255`):
+
+| Control | Document field written |
+| --- | --- |
+| Custom Skin Color | `materials.custom_skin`; `skin_tone` is set to `custom_skin` |
+| Hair Color | `materials.custom_hair`; `head.headwear_material` is set to `custom_hair` (needs headwear `hair`) |
+| Shirt Color | the library material the clothing preset gives the torso (`polo_white`, `polo_navy`) is overridden by that name |
+| Trousers/Shorts Color | the preset's pants material (`trousers_charcoal`, `shorts_khaki`) is overridden by that name |
+
+Roughness, metallic and texture of the overridden material are kept, so only the
+colour changes; shoes and gloves keep their library materials. Every surface
+writes the same values: the desktop group box (a **Pick...** button that opens
+the Qt colour dialog, and a **Reset** button that clears the custom colour), the
+web panel (`<input type="color">` with Reset) and the export CLI. The single
+writer is `model_appearance/appearance_selection.py` (`apply_overrides`); the web
+serializer `appearanceDocument.ts` mirrors it and both are held to
+`tests/fixtures/appearance/colour_roundtrip.json`.
+
+**Precedence for an export** (`resolve_appearance`): an explicit override, then
+the selected appearance document or `<spec>.appearance.json` sidecar, then the
+contract defaults. A remembered GUI selection may pre-fill a picker but never
+feeds an export implicitly, so an export is reproducible from its arguments.
+
+**Legacy `simulation_config.json`.** Its `colors` block (the MuJoCo Docker
+simulation and the Tk dm_control GUI) is deprecated and now emits a
+`DeprecationWarning`; the readers still honour it. Convert a config once with
+`overrides_from_legacy_config(config)` (skin, shirt and pants become hex
+overrides) and keep the result as an appearance document.
+
 ### Desktop Appearance Picker
 
 The desktop builder's Appearance group box picks a skin tone, clothing
@@ -267,3 +301,14 @@ converters, library) and `src/shared/python/humanoid_character_builder`
 - [Character presets reference](../user_guide/character_presets.md)
 - [Engine Selection](engine_selection.md)
 - [Project Map](../architecture/PROJECT_MAP.md)
+
+### Hands and Golf Glove
+
+The grip hands are bare and take the skin colour by default (HRG-G1, #13186), so
+a custom skin colour colours the hands too. The **Glove** control (desktop combo,
+web select, `--glove` on the export CLI) puts the white golf glove on `none`,
+`lead`, `trail` or `both` grip hands. The choice is by golf role: the lead hand is
+the left hand of a right-handed golfer. The document's `handedness` field
+(`right` by default) maps role to side; the compiled spec has no handedness. A
+document saved before this option existed has no `glove` field and shows bare
+hands.

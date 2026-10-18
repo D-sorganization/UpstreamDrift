@@ -11,8 +11,12 @@ import {
   DEFAULT_HEADWEAR,
   DEFAULT_SKIN_TONE,
 } from './appearanceDefaults.generated';
+import { DEFAULT_GLOVE, GLOVE_CHOICES, hexToRgb, type ColourPicks, type GloveChoice } from './appearanceDocument';
+import { GripControls } from './GripControls';
+import type { GripPicks } from './gripSelection';
 import {
   appearancePalette,
+  rgbaToHex,
   type AppearanceLibrary,
   type AppearancePalette,
   type AppearancePicks,
@@ -69,6 +73,63 @@ function LabeledSelect({
   );
 }
 
+const COLOUR_CONTROLS: ReadonlyArray<{
+  key: keyof ColourPicks;
+  id: string;
+  label: string;
+}> = [
+  { key: 'skin_color', id: 'appearance-skin-color', label: 'Custom Skin Color' },
+  { key: 'hair_color', id: 'appearance-hair-color', label: 'Hair Color' },
+  { key: 'top_color', id: 'appearance-top-color', label: 'Shirt Color' },
+  { key: 'bottom_color', id: 'appearance-bottom-color', label: 'Trousers/Shorts Color' },
+];
+
+/** A labelled `<input type="color">` with a Reset button that clears the custom colour. */
+function ColourControl({
+  id,
+  label,
+  value,
+  isCustom,
+  disabled,
+  onChange,
+  onReset,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  isCustom: boolean;
+  disabled?: boolean;
+  onChange: (hex: string) => void;
+  onReset: () => void;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="block text-xs font-semibold text-gray-300 mb-1">
+        {label}
+      </label>
+      <div className="flex items-center gap-2">
+        <input
+          id={id}
+          type="color"
+          value={value}
+          disabled={disabled}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-7 w-10 bg-gray-700 border-none rounded cursor-pointer disabled:opacity-40"
+        />
+        <button
+          type="button"
+          aria-label={`Reset ${label}`}
+          disabled={!isCustom}
+          onClick={onReset}
+          className="text-xs text-gray-300 hover:text-white disabled:opacity-40"
+        >
+          Reset
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /** `preferred` when the library offers it, else the library's first option. */
 function pickDefault(options: string[], preferred: string): string {
   return options.includes(preferred) ? preferred : (options[0] ?? preferred);
@@ -96,6 +157,7 @@ function defaultPicks(library: AppearanceLibrary): AppearancePicks {
     headwear,
     headwear_material,
     ground_material,
+    glove: DEFAULT_GLOVE,
   };
 }
 
@@ -119,6 +181,7 @@ export function AppearancePanel({
   const [library, setLibrary] = useState<AppearanceLibrary | null>(null);
   const [libraryError, setLibraryError] = useState<string | null>(null);
   const [picks, setPicks] = useState<AppearancePicks | null>(null);
+  const [grip, setGrip] = useState<GripPicks>({});
 
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -164,6 +227,11 @@ export function AppearancePanel({
     applyPicks({ ...picks, clothing: e.target.value });
   };
 
+  const handleGloveChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (!picks) return;
+    applyPicks({ ...picks, glove: e.target.value as GloveChoice });
+  };
+
   const handleClubFinishChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (!picks) return;
     applyPicks({ ...picks, club_finish: e.target.value });
@@ -176,7 +244,33 @@ export function AppearancePanel({
       headwear === 'none'
         ? undefined
         : library.headwear_default_material[headwear];
-    applyPicks({ ...picks, headwear, headwear_material });
+    // A hair colour only applies to hair; drop it rather than send a request
+    // the server rejects.
+    const hair_color = headwear === 'hair' ? picks.hair_color : undefined;
+    applyPicks({ ...picks, headwear, headwear_material, hair_color });
+  };
+
+  const handleColourChange = (key: keyof ColourPicks, hex: string) => {
+    if (!picks) return;
+    hexToRgb(hex); // <input type="color"> always yields #rrggbb
+    applyPicks({ ...picks, [key]: hex });
+  };
+
+  const handleColourReset = (key: keyof ColourPicks) => {
+    if (!picks) return;
+    applyPicks({ ...picks, [key]: undefined });
+  };
+
+  /** Colour shown by a picker: the custom pick, else the current library colour. */
+  const colourValue = (key: keyof ColourPicks): string => {
+    const custom = picks?.[key];
+    if (custom !== undefined) return custom;
+    if (key === 'skin_color') return palette?.head ?? '#000000';
+    if (key === 'top_color') return palette?.trunk ?? '#000000';
+    if (key === 'bottom_color') return palette?.thigh ?? '#000000';
+    const hairName = picks?.headwear_material;
+    const hair = hairName ? library?.materials[hairName] : undefined;
+    return hair ? rgbaToHex(hair.base_color) : '#000000';
   };
 
   const handleGroundChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -186,6 +280,13 @@ export function AppearancePanel({
 
   const handleExport = useCallback(async () => {
     if (!picks) return;
+    // Only the picture-only grip picks go in the sidecar; physical ones never do.
+    const visualPicks = {
+      ...(grip.grip_style !== undefined && { grip_style: grip.grip_style }),
+      ...(grip.grip_thumb_offset_deg !== undefined && {
+        grip_thumb_offset_deg: grip.grip_thumb_offset_deg,
+      }),
+    };
     setExporting(true);
     setExportError(null);
     try {
@@ -194,7 +295,9 @@ export function AppearancePanel({
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(character ? { ...picks, character } : picks),
+          body: JSON.stringify(
+            character ? { ...picks, ...visualPicks, character } : { ...picks, ...visualPicks },
+          ),
         },
       );
       if (!response.ok) {
@@ -229,7 +332,7 @@ export function AppearancePanel({
     } finally {
       setExporting(false);
     }
-  }, [picks, character]);
+  }, [picks, grip, character]);
 
   if (libraryError) {
     return (
@@ -290,12 +393,33 @@ export function AppearancePanel({
       />
 
       <LabeledSelect
+        id="appearance-glove-select"
+        label="Glove"
+        value={picks.glove ?? DEFAULT_GLOVE}
+        onChange={handleGloveChange}
+        options={library.glove ?? [...GLOVE_CHOICES]}
+      />
+
+      <LabeledSelect
         id="appearance-headwear-select"
         label="Headwear"
         value={picks.headwear}
         onChange={handleHeadwearChange}
         options={library.headwear}
       />
+
+      {COLOUR_CONTROLS.map(({ key, id, label }) => (
+        <ColourControl
+          key={key}
+          id={id}
+          label={label}
+          value={colourValue(key)}
+          isCustom={picks[key] !== undefined}
+          disabled={key === 'hair_color' && picks.headwear !== 'hair'}
+          onChange={(hex) => handleColourChange(key, hex)}
+          onReset={() => handleColourReset(key)}
+        />
+      ))}
 
       <LabeledSelect
         id="appearance-ground-select"
@@ -304,6 +428,8 @@ export function AppearancePanel({
         onChange={handleGroundChange}
         options={library.ground_materials}
       />
+
+      <GripControls picks={grip} onChange={setGrip} character={character} />
 
       <button
         type="button"
