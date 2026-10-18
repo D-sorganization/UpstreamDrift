@@ -1643,6 +1643,19 @@ $1.6\times10^{-15}$\,m (OpenSim). The coordinates agree to
 $2.9\times10^{-12}$, $2.1\times10^{-12}$ and $1.1\times10^{-12}$\,rad, and
 MuJoCo is bit exact (\texttt{docs/development/lifting/evidence/snatch/}).
 
+\paragraph{On the Whole-Row Lift Body.} The figures above are on the earlier
+lift body. Regenerated on the whole-row body (\#13037, with the same
+Tools \#5653 code, which reproduces the earlier bundle to
+$1.3\times10^{-13}$\,rad), the pull and window stay deadlift class
+(\texttt{knee\_r} 11.3\,mm, bar 0.23\,mm, feet 0.69\,mm). The turnover bar
+residual falls to 19.5\,mm and \texttt{shoulder\_r} rises to 15.1\,mm; the
+catch legs fall to 34--45\,mm and the feet to 1.88\,mm into the ground. Only
+\texttt{shoulder\_r} and the closure ($1.75$ to $2.35\times10^{-4}$\,m)
+exceed their snapshots, which are re-derived with the same rounding; the
+strict xfail against the deadlift bounds stays. The parity is
+$7.3\times10^{-14}$\,m and $3.3\times10^{-12}$\,rad (Drake), and the run is
+inside the RK4 limit at eight substeps ($|z|=2.37$).
+
 \paragraph{Limitations.} The bundle covers the pull only. It is not in
 \texttt{SAME\_INPUT\_LIFT\_BUNDLES}, because the OpenSim IK/ID needs a LIFT-4
 barbell record (measured: ``IK/ID setup failed: bundle carries no barbell

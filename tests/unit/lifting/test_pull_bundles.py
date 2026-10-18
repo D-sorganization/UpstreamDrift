@@ -60,7 +60,9 @@ IK_RESIDUAL_THRESHOLDS_M: dict[str, dict[str, float]] = {
         "bar": 0.0012,
     },
     # Whole-lift maxima, set by the turnover and the catch (0.50-0.77 of the
-    # lift, after the window): see _SNATCH_CATCH below.
+    # lift, after the window): see _SNATCH_CATCH below.  #13037: shoulder_r
+    # 11.16 -> 15.09 mm at the turnover, re-derived with the same rounding; the
+    # other maxima fell (#13041, issuecomment-6243170509).
     "snatch": {
         "ankle_l": 0.0473,
         "ankle_r": 0.0502,
@@ -69,7 +71,7 @@ IK_RESIDUAL_THRESHOLDS_M: dict[str, dict[str, float]] = {
         "hip_l": 0.0471,
         "hip_r": 0.0473,
         "shoulder_l": 0.0198,
-        "shoulder_r": 0.0112,
+        "shoulder_r": 0.0151,
         "bar": 0.0402,
     },
 }
@@ -81,7 +83,7 @@ IK_RESIDUAL_THRESHOLDS_M: dict[str, dict[str, float]] = {
 CLOSURE_THRESHOLD_M: dict[str, float] = {
     "deadlift": 9.0e-5,
     "clean_and_jerk": 3.3e-5,
-    "snatch": 1.8e-4,
+    "snatch": 2.4e-4,  # 1.75e-4 -> 2.35e-4 m on the #13037 lift body
 }
 FOOT_PENETRATION_THRESHOLD_M: dict[str, float] = {
     "deadlift": 7.0e-4,
@@ -91,13 +93,13 @@ FOOT_PENETRATION_THRESHOLD_M: dict[str, float] = {
 _SNATCH_CATCH = pytest.mark.xfail(
     strict=True,
     reason=(
-        "Measured snatch IK (#11745): through the pulls (0-0.45 of the lift) "
-        "and the 0.467-0.667 s window the residuals are deadlift class "
-        "(worst knee_r 11.2 mm, bar 0.23 mm, feet 0.69 mm), but the full-body "
-        "model cannot follow the turnover (bar 40.1 mm, shoulder_l 19.7 mm at "
-        "0.50) or the planar overhead-squat catch (legs 43-50 mm, feet "
-        "2.07 mm into the ground at 0.53-0.77).  The deadlift bounds are not "
-        "loosened."
+        "Measured snatch IK on the #13037 lift body (#11745, #13041): through "
+        "the pulls (0-0.45 of the lift) and the 0.467-0.667 s window the "
+        "residuals are deadlift class (worst knee_r 11.3 mm, bar 0.23 mm, feet "
+        "0.69 mm), but the full-body model cannot follow the turnover (bar "
+        "19.5 mm, shoulder_r 15.1 mm at 0.50) or the planar overhead-squat "
+        "catch (legs 34-45 mm, feet 1.88 mm into the ground at 0.53-0.77).  "
+        "The deadlift bounds are not loosened."
     ),
 )
 
