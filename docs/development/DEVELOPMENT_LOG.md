@@ -2561,6 +2561,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12573 · NSX-41: Display_Decision Output-Policy Integration (ADR-0054 D7 Option A)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12573
+- **Branch:** merged via #13149
+- **PR:** #13149
+- **Paths:** see #13149
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`551c914c`; collated from changes/12573-nsx-41-display-decision-output-policy-in.md)
+- **Summary:** NSX-41: display_decision output-policy integration (ADR-0054 D7 Option A)
+- **Next step:** Shipped in PR #13149.
+
+### DL-#13147 · Ground Reaction Overlay Draws Measured CoP Uncertainty as Per-World-Axis 1-Sigma Ellipses
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13147
+- **Branch:** merged via #13147
+- **PR:** #13147
+- **Paths:** see #13147
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`35a56c55`; collated from changes/13147-ground-reaction-overlay-draws-measured-c.md)
+- **Summary:** Ground reaction overlay draws measured CoP uncertainty as per-world-axis 1-sigma ellipses
+- **Next step:** Shipped in PR #13147.
+
 ### DL-#13141 · Ground Reaction Overlay Rings Measured CoP Points by Their 1-Sigma per Axis
 
 - **State:** shipped

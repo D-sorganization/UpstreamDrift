@@ -9,6 +9,8 @@ from scripts.ci import check_dockerfile_contracts as guard
 pytestmark = pytest.mark.unit
 
 _EXPLORER_DOCKERFILE_OK = """
+FROM python:3.12-slim AS runtime
+LABEL keep="true"
 FROM runtime AS explorer-base
 ENV PYTHONDONTWRITEBYTECODE=1
 FROM explorer-base AS explorer-headless
@@ -364,6 +366,36 @@ def test_explorer_images_must_be_labelled_keep(tmp_path: Path) -> None:
     )
 
     assert any("keep" in f for f in _failures(tmp_path))
+
+
+def test_runtime_stage_must_be_labelled_keep(tmp_path: Path) -> None:
+    """UD #13113: profile images (upstream-drift:full et al.) build from runtime.
+
+    Without the label, ControlTower's disk guard deleted every profile image and
+    the ud-sim image built on top of upstream-drift:full.
+    """
+    _write_minimal_tree(tmp_path)
+    modular = (tmp_path / "Dockerfile.modular").read_text()
+    (tmp_path / "Dockerfile.modular").write_text(
+        modular.replace(
+            'AS runtime\nLABEL keep="true"\n', "AS runtime\nLABEL other=x\n"
+        ),
+        encoding="utf-8",
+    )
+
+    assert any("runtime" in f and "keep" in f for f in _failures(tmp_path))
+
+
+def test_keep_label_in_a_later_stage_does_not_cover_runtime(tmp_path: Path) -> None:
+    """The label must sit inside the runtime stage, not merely somewhere in the file."""
+    _write_minimal_tree(tmp_path)
+    modular = (tmp_path / "Dockerfile.modular").read_text()
+    modular = modular.replace('AS runtime\nLABEL keep="true"\n', "AS runtime\n")
+    (tmp_path / "Dockerfile.modular").write_text(
+        modular + '\nFROM runtime AS other\nLABEL keep="true"\n', encoding="utf-8"
+    )
+
+    assert any("runtime" in f and "keep" in f for f in _failures(tmp_path))
 
 
 @pytest.mark.parametrize(
