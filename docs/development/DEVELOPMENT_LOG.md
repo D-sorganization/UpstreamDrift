@@ -2574,6 +2574,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12968 · Robotics: Eliminate Silent Velocity, Acceleration, and Mass Fallbacks in ZMPComputer and Support Finite-Difference Acceleration
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12968
+- **Branch:** fix/12968-zmp-computer-velocity-fallback
+- **PR:** #13250
+- **Paths:** see #13250
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`77c7b1d9`; collated from changes/12968-zmp-computer-velocity-fallback.md)
+- **Summary:** robotics: eliminate silent velocity, acceleration, and mass fallbacks in ZMPComputer and support finite-difference acceleration
+- **Next step:** Shipped in PR #13250.
+
 ### DL-#13179 · Close the Segment Axial-Load Evaluation Over the Grip Weld: Physical KKT Closure Wrench Replaces the Soft Weld in the Prescribed Inverse, Ball-Impact Frames Are Unavailable, Ground Free Moment Is Carried
 
 - **State:** shipped
