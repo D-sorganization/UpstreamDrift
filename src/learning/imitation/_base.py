@@ -23,6 +23,9 @@ except ImportError:
 from src.learning.imitation.dataset import DemonstrationDataset
 
 
+SUPPORTED_ACTIVATIONS: tuple[str, ...] = ("relu", "tanh", "identity")
+
+
 @dataclass
 class TrainingConfig:
     """Configuration for imitation learning training.
@@ -33,8 +36,9 @@ class TrainingConfig:
         learning_rate: Learning rate for optimizer.
         weight_decay: L2 regularization weight.
         hidden_sizes: Hidden layer sizes for neural network.
-        activation: Activation function name.
-        dropout: Dropout probability.
+        activation: Activation function name ("relu", "tanh", "identity").
+        dropout: Dropout probability in [0.0, 1.0).
+        seed: Optional random seed for reproducible training runs.
     """
 
     epochs: int = 100
@@ -44,6 +48,37 @@ class TrainingConfig:
     hidden_sizes: list[int] = field(default_factory=lambda: [256, 256])
     activation: str = "relu"
     dropout: float = 0.0
+    seed: int | None = None
+
+    def __post_init__(self) -> None:
+        if self.epochs <= 0:
+            raise ValueError(f"epochs must be positive, got {self.epochs}")
+        if self.batch_size <= 0:
+            raise ValueError(f"batch_size must be positive, got {self.batch_size}")
+        if self.learning_rate <= 0:
+            raise ValueError(f"learning_rate must be positive, got {self.learning_rate}")
+        if self.weight_decay < 0:
+            raise ValueError(f"weight_decay must be non-negative, got {self.weight_decay}")
+        if not 0.0 <= self.dropout < 1.0:
+            raise ValueError(f"dropout must be in [0.0, 1.0), got {self.dropout}")
+        if self.activation not in SUPPORTED_ACTIVATIONS:
+            raise ValueError(
+                f"Unsupported activation '{self.activation}'. "
+                f"Supported activations: {SUPPORTED_ACTIVATIONS}"
+            )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert configuration to dictionary."""
+        return {
+            "epochs": self.epochs,
+            "batch_size": self.batch_size,
+            "learning_rate": self.learning_rate,
+            "weight_decay": self.weight_decay,
+            "hidden_sizes": list(self.hidden_sizes),
+            "activation": self.activation,
+            "dropout": self.dropout,
+            "seed": self.seed,
+        }
 
 
 class ImitationLearner(ABC):
@@ -80,6 +115,7 @@ class ImitationLearner(ABC):
         self.action_dim = action_dim
         self.config = config or TrainingConfig()
         self.device = device
+        self._rng: np.random.Generator = np.random.default_rng(self.config.seed)
         self._policy: Any = None  # Neural network policy
         self._training_history: dict[str, list[float]] = {}
 
@@ -163,3 +199,46 @@ class ImitationLearner(ABC):
             Dictionary with training metrics over epochs.
         """
         return self._training_history.copy()
+
+
+def apply_activation(x: NDArray[np.floating], activation: str) -> NDArray[np.floating]:
+    """Apply configured activation function."""
+    if activation == "relu":
+        return np.maximum(0.0, x)
+    if activation == "tanh":
+        return np.tanh(x)
+    if activation == "identity":
+        return x
+    raise ValueError(f"Unsupported activation '{activation}'")
+
+
+def apply_activation_grad(
+    grad: NDArray[np.floating],
+    activated: NDArray[np.floating],
+    activation: str,
+) -> NDArray[np.floating]:
+    """Backpropagate gradient through configured activation function."""
+    if activation == "relu":
+        return grad * (activated > 0)
+    if activation == "tanh":
+        return grad * (1.0 - activated**2)
+    if activation == "identity":
+        return grad
+    raise ValueError(f"Unsupported activation '{activation}'")
+
+
+def validate_dataset_and_split(
+    dataset: DemonstrationDataset | None,
+    validation_split: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Validate dataset and validation split range, returning state and action arrays."""
+    if dataset is None:
+        raise ValueError("dataset must be provided")
+    if not 0.0 <= validation_split < 1.0:
+        raise ValueError(
+            f"validation_split must be in [0, 1), got {validation_split}"
+        )
+    states, actions = dataset.to_state_action_pairs()
+    if len(states) == 0:
+        raise ValueError("Dataset has no state-action pairs")
+    return np.asarray(states, dtype=float), np.asarray(actions, dtype=float)

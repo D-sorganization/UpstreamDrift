@@ -5,12 +5,19 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import json
 import numpy as np
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-from src.learning.imitation._base import ImitationLearner, TrainingConfig
+from src.learning.imitation._base import (
+    ImitationLearner,
+    TrainingConfig,
+    apply_activation,
+    apply_activation_grad,
+    validate_dataset_and_split,
+)
 from src.learning.imitation.dataset import DemonstrationDataset
 
 _ADAM_BETA1 = 0.9
@@ -19,13 +26,16 @@ _ADAM_EPS = 1e-8
 
 
 def _mlp_forward(
-    layers: list[dict[str, NDArray[np.floating]]], x: NDArray[np.floating]
+    layers: list[dict[str, NDArray[np.floating]]],
+    x: NDArray[np.floating],
+    activation: str = "relu",
 ) -> tuple[NDArray[np.floating], list[NDArray[np.floating]]]:
-    """Forward pass through a ReLU MLP, retaining per-layer inputs.
+    """Forward pass through an MLP with configured activation, retaining per-layer inputs.
 
     Args:
         layers: Layer dicts with ``W`` and ``b``.
         x: Batched input, shape ``(N, in_dim)``.
+        activation: Activation function name.
 
     Returns:
         ``(output, activations)`` where ``activations[i]`` is the input fed to
@@ -36,7 +46,7 @@ def _mlp_forward(
         activations.append(x)
         x = x @ layer["W"] + layer["b"]
         if i < len(layers) - 1:
-            x = np.maximum(0.0, x)
+            x = apply_activation(x, activation)
     return x, activations
 
 
@@ -44,13 +54,15 @@ def _mlp_backward(
     layers: list[dict[str, NDArray[np.floating]]],
     activations: list[NDArray[np.floating]],
     grad_output: NDArray[np.floating],
+    activation: str = "relu",
 ) -> tuple[list[dict[str, NDArray[np.floating]]], NDArray[np.floating]]:
-    """Backpropagate ``grad_output`` through a ReLU MLP.
+    """Backpropagate ``grad_output`` through an MLP with configured activation.
 
     Args:
         layers: Layer dicts with ``W`` and ``b``.
         activations: Per-layer inputs from :func:`_mlp_forward`.
         grad_output: Gradient of the loss w.r.t. the network output.
+        activation: Activation function name.
 
     Returns:
         ``(grads, grad_input)`` where ``grads[i]`` holds ``dW``/``db`` for
@@ -66,8 +78,7 @@ def _mlp_backward(
         grads[i] = {"W": a.T @ grad, "b": grad.sum(axis=0)}
         grad = grad @ layers[i]["W"].T
         if i > 0:
-            # ReLU derivative: activations[i] is the post-ReLU output of i-1.
-            grad = grad * (a > 0)
+            grad = apply_activation_grad(grad, a, activation)
     return grads, grad
 
 
@@ -156,7 +167,7 @@ class GAIL(ImitationLearner):
         for hidden_dim in self.config.hidden_sizes:
             policy_layers.append(
                 {
-                    "W": np.random.randn(input_dim, hidden_dim) * 0.01,
+                    "W": self._rng.normal(0.0, 0.01, size=(input_dim, hidden_dim)),
                     "b": np.zeros(hidden_dim),
                 }
             )
@@ -164,7 +175,7 @@ class GAIL(ImitationLearner):
 
         policy_layers.append(
             {
-                "W": np.random.randn(input_dim, self.action_dim) * 0.01,
+                "W": self._rng.normal(0.0, 0.01, size=(input_dim, self.action_dim)),
                 "b": np.zeros(self.action_dim),
             }
         )
@@ -177,7 +188,7 @@ class GAIL(ImitationLearner):
         for hidden_dim in self.config.hidden_sizes:
             disc_layers.append(
                 {
-                    "W": np.random.randn(input_dim, hidden_dim) * 0.01,
+                    "W": self._rng.normal(0.0, 0.01, size=(input_dim, hidden_dim)),
                     "b": np.zeros(hidden_dim),
                 }
             )
@@ -185,7 +196,7 @@ class GAIL(ImitationLearner):
 
         disc_layers.append(
             {
-                "W": np.random.randn(input_dim, 1) * 0.01,
+                "W": self._rng.normal(0.0, 0.01, size=(input_dim, 1)),
                 "b": np.zeros(1),
             }
         )
@@ -195,7 +206,7 @@ class GAIL(ImitationLearner):
         """Forward pass through policy network."""
         if x is None:
             raise ValueError("x must be provided")
-        output, _ = _mlp_forward(self._policy, x)
+        output, _ = _mlp_forward(self._policy, x, activation=self.config.activation)
         return output
 
     @staticmethod
@@ -221,7 +232,9 @@ class GAIL(ImitationLearner):
         if state is None:
             raise ValueError("state must be provided")
         x = np.concatenate([state, action], axis=-1)
-        logits, _ = _mlp_forward(self._discriminator, x)
+        logits, _ = _mlp_forward(
+            self._discriminator, x, activation=self.config.activation
+        )
         return logits
 
     def _forward_discriminator(
@@ -262,19 +275,9 @@ class GAIL(ImitationLearner):
             ValueError: If ``dataset`` is empty or ``validation_split`` is
                 outside ``[0, 1)``.
         """
-        if dataset is None:
-            raise ValueError("dataset must be provided")
-        if not 0.0 <= validation_split < 1.0:
-            raise ValueError(
-                f"validation_split must be in [0, 1), got {validation_split}"
-            )
-        expert_states, expert_actions = dataset.to_state_action_pairs()
-
-        if len(expert_states) == 0:
-            raise ValueError("Dataset has no state-action pairs")
-
-        expert_states = np.asarray(expert_states, dtype=float)
-        expert_actions = np.asarray(expert_actions, dtype=float)
+        expert_states, expert_actions = validate_dataset_and_split(
+            dataset, validation_split
+        )
 
         n_total = len(expert_states)
         n_val = int(n_total * validation_split)
@@ -297,7 +300,7 @@ class GAIL(ImitationLearner):
         step = 0
 
         for _epoch in range(self.config.epochs):
-            order = np.random.permutation(len(train_states))
+            order = self._rng.permutation(len(train_states))
             epoch_disc: list[float] = []
             epoch_policy: list[float] = []
 
@@ -355,15 +358,19 @@ class GAIL(ImitationLearner):
         """
         n = len(states)
         # Exploration noise stands in for the missing environment rollout.
-        policy_states = states + np.random.randn(*states.shape) * 0.1
+        policy_states = states + self._rng.normal(0.0, 0.1, size=states.shape)
 
         # --- Discriminator update: expert -> 1, policy -> 0. ---
         policy_actions = self._forward_policy(policy_states)
         expert_in = np.concatenate([states, actions], axis=-1)
         policy_in = np.concatenate([policy_states, policy_actions], axis=-1)
 
-        expert_logits, expert_acts = _mlp_forward(self._discriminator, expert_in)
-        policy_logits, policy_acts = _mlp_forward(self._discriminator, policy_in)
+        expert_logits, expert_acts = _mlp_forward(
+            self._discriminator, expert_in, activation=self.config.activation
+        )
+        policy_logits, policy_acts = _mlp_forward(
+            self._discriminator, policy_in, activation=self.config.activation
+        )
 
         # Stable BCE via softplus (issue #7567).
         disc_loss = float(
@@ -374,8 +381,18 @@ class GAIL(ImitationLearner):
         # d/dz softplus(-z) = sigmoid(z) - 1 ; d/dz softplus(z) = sigmoid(z).
         grad_expert = (self._stable_sigmoid(expert_logits) - 1.0) / n
         grad_policy = self._stable_sigmoid(policy_logits) / n
-        disc_grads_e, _ = _mlp_backward(self._discriminator, expert_acts, grad_expert)
-        disc_grads_p, _ = _mlp_backward(self._discriminator, policy_acts, grad_policy)
+        disc_grads_e, _ = _mlp_backward(
+            self._discriminator,
+            expert_acts,
+            grad_expert,
+            activation=self.config.activation,
+        )
+        disc_grads_p, _ = _mlp_backward(
+            self._discriminator,
+            policy_acts,
+            grad_policy,
+            activation=self.config.activation,
+        )
         disc_grads = [
             {"W": ge["W"] + gp["W"], "b": ge["b"] + gp["b"]}
             for ge, gp in zip(disc_grads_e, disc_grads_p, strict=True)
@@ -383,15 +400,29 @@ class GAIL(ImitationLearner):
         _adam_step(self._discriminator, disc_grads, disc_state, lr, step, weight_decay)
 
         # --- Policy update: make the (updated) discriminator call us expert. ---
-        policy_out, policy_net_acts = _mlp_forward(self._policy, policy_states)
+        policy_out, policy_net_acts = _mlp_forward(
+            self._policy, policy_states, activation=self.config.activation
+        )
         disc_in = np.concatenate([policy_states, policy_out], axis=-1)
-        logits, disc_acts = _mlp_forward(self._discriminator, disc_in)
+        logits, disc_acts = _mlp_forward(
+            self._discriminator, disc_in, activation=self.config.activation
+        )
         policy_loss = float(np.mean(np.logaddexp(0.0, -logits)))
 
         grad_logits = (self._stable_sigmoid(logits) - 1.0) / n
-        _, grad_disc_in = _mlp_backward(self._discriminator, disc_acts, grad_logits)
+        _, grad_disc_in = _mlp_backward(
+            self._discriminator,
+            disc_acts,
+            grad_logits,
+            activation=self.config.activation,
+        )
         grad_action = grad_disc_in[:, self.observation_dim :]
-        policy_grads, _ = _mlp_backward(self._policy, policy_net_acts, grad_action)
+        policy_grads, _ = _mlp_backward(
+            self._policy,
+            policy_net_acts,
+            grad_action,
+            activation=self.config.activation,
+        )
         _adam_step(self._policy, policy_grads, policy_state, lr, step, weight_decay)
 
         return disc_loss, policy_loss
@@ -418,7 +449,7 @@ class GAIL(ImitationLearner):
         action = self._forward_policy(observation)
 
         if not deterministic:
-            action = action + np.random.randn(*action.shape) * 0.1
+            action = action + self._rng.normal(0.0, 0.1, size=action.shape)
 
         if observation.shape[0] == 1:
             action = action.flatten()
@@ -462,6 +493,8 @@ class GAIL(ImitationLearner):
             "num_policy_layers": np.array(len(self._policy)),
             "num_disc_layers": np.array(len(self._discriminator)),
         }
+
+        save_data["config_json"] = np.array(json.dumps(self.config.to_dict()))
 
         for i, layer in enumerate(self._policy):
             save_data[f"policy_{i}_W"] = layer["W"]
