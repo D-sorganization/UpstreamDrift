@@ -32,6 +32,9 @@ from src.shared.python.loop_nullspace.output_policy_integration import (
     display_decision,
 )
 from src.shared.python.loop_nullspace.plot_model import decision_key
+from src.shared.python.loop_nullspace.plot_model_sensitivity import (
+    sensitivity_quantities,
+)
 from src.shared.python.loop_nullspace.registry import Registry
 from src.shared.python.motion_matching.output_policy import OutputStatus
 
@@ -73,6 +76,7 @@ def quantity_record_from_dict(data: Mapping[str, Any]) -> QuantityRecord:
             conventions=tuple(data["conventions"]),
             hypotheses=tuple(data["hypotheses"]),
             reason=data["reason"],
+            conditioning=tuple(data.get("conditioning", ())),
         )
     except KeyError as exc:
         raise ValueError(f"report quantity lacks {exc.args[0]!r}") from exc
@@ -120,6 +124,12 @@ def _ask_invariants(asker: _Asker, inv: Mapping[str, Any] | None) -> None:
             asker.ask(decision_key("invariants", name, int(frame["index"])), data)
 
 
+def _ask_sensitivity(asker: _Asker, report: Mapping[str, Any]) -> None:
+    """One decision per sensitivity quantity (kernel, budget, arms, dispersion)."""
+    for key, quantity in sensitivity_quantities(report).items():
+        asker.ask(key, quantity)
+
+
 def report_decisions(
     report: Mapping[str, Any],
     surface: str = "research_view",
@@ -159,4 +169,5 @@ def report_decisions(
     if adm is not None:
         for level in _LEVELS:
             asker.ask(decision_key("diagnostics", level), adm["residuals"][level])
+    _ask_sensitivity(asker, report)
     return asker.out

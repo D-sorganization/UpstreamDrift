@@ -56,13 +56,14 @@ reason and no number.  A quantity with no decision is withheld by name
 
 from __future__ import annotations
 
+import dataclasses
 import math
 import types
 import typing
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, fields, is_dataclass
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from src.shared.python.loop_nullspace.grip_split import SPLIT_COLUMN_NAMES
 from src.shared.python.loop_nullspace.output_policy_integration import (
@@ -70,8 +71,14 @@ from src.shared.python.loop_nullspace.output_policy_integration import (
     DisplayDecision,
 )
 
+if TYPE_CHECKING:
+    from src.shared.python.loop_nullspace.plot_model_sensitivity import (
+        SensitivityPanels,
+    )
+
 __all__ = [
     "PLOT_MODEL_SCHEMA_VERSION",
+    "PLOT_MODEL_SENSITIVITY_VERSION",
     "AdmissionSummary",
     "AllocationPanel",
     "Band",
@@ -96,8 +103,19 @@ __all__ = [
 ]
 
 PLOT_MODEL_SCHEMA_VERSION = "1.0.0"
+PLOT_MODEL_SENSITIVITY_VERSION = "2.0.0"
 GRIP_FRAME = "grip frame"
-PANELS = ("invariants", "envelopes", "hand_split", "allocation", "diagnostics")
+PANELS = (
+    "invariants",
+    "envelopes",
+    "hand_split",
+    "allocation",
+    "diagnostics",
+    "kernel_heatmap",
+    "variance_budget",
+    "strategy_pareto",
+    "face_dispersion",
+)
 _RESIDUAL_LEVELS = ("phi", "phi_dot", "phi_ddot")
 _SHOW_BAND = (DisplayAction.SHOW_BAND, DisplayAction.SHOW_REPRESENTATIVE_ON_BAND)
 _DETERMINED = frozenset({"positive", "negative", "zero"})
@@ -412,6 +430,7 @@ class NSXPlotModel:
     hand_split: HandSplitPanel
     allocation: AllocationPanel
     diagnostics: DiagnosticsPanel
+    sensitivity: SensitivityPanels | None = None
 
     def __post_init__(self) -> None:
         bands = {b.quantity_id: b for b in self._bands()}
@@ -452,7 +471,11 @@ class NSXPlotModel:
 # ------------------------------------------------- generic (de)serialisation
 def _plain(obj: Any) -> Any:
     if is_dataclass(obj) and not isinstance(obj, type):
-        return {f.name: _plain(getattr(obj, f.name)) for f in fields(obj)}
+        return {
+            f.name: _plain(getattr(obj, f.name))
+            for f in fields(obj)
+            if not (f.default is None and getattr(obj, f.name) is None)
+        }
     if isinstance(obj, tuple | list):
         return [_plain(x) for x in obj]
     if isinstance(obj, Enum):
@@ -491,18 +514,26 @@ def _build_scalar(tp: Any, data: Any) -> Any:
     return data
 
 
+def _late_types() -> dict[str, Any]:
+    """Types of the sensitivity module (imported late: it imports this module)."""
+    from src.shared.python.loop_nullspace import plot_model_sensitivity as late
+
+    return {name: getattr(late, name) for name in late.__all__ if name[0].isupper()}
+
+
 def _build_dataclass(cls: type, data: Any) -> Any:
     if not isinstance(data, Mapping):
         raise ValueError(f"{cls.__name__} expects a mapping, got {data!r}")
-    hints = typing.get_type_hints(cls)
+    hints = typing.get_type_hints(cls, localns=_late_types())
     names = [f.name for f in fields(cls)]
     unknown = sorted(set(data) - set(names))
     if unknown:
         raise ValueError(f"{cls.__name__}: unknown keys {unknown}")
-    missing = [n for n in names if n not in data]
+    optional = {f.name for f in fields(cls) if f.default is None}
+    missing = [n for n in names if n not in data and n not in optional]
     if missing:
         raise ValueError(f"{cls.__name__}: missing keys {missing}")
-    return cls(**{n: _build(hints[n], data[n]) for n in names})
+    return cls(**{n: _build(hints[n], data[n]) for n in names if n in data})
 
 
 # ----------------------------------------------------------------- builders
@@ -919,5 +950,15 @@ def build_plot_model(
         allocation=_allocation_panel(report, decs, shown),
         diagnostics=_diagnostics_panel(report, decs),
     )
+    if str(report["schema_version"]).startswith("2."):
+        from src.shared.python.loop_nullspace.plot_model_sensitivity import (
+            build_sensitivity_panels,
+        )
+
+        model = dataclasses.replace(
+            model,
+            schema_version=PLOT_MODEL_SENSITIVITY_VERSION,
+            sensitivity=build_sensitivity_panels(report, decs),
+        )
     decs.check_all_used()
     return model
