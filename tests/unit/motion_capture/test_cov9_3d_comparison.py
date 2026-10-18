@@ -438,3 +438,222 @@ class TestCOV9_3DComparison:
                 reference_trajectories=synthetic_reference_motion,
                 joint_names=synthetic_landmark_names[:3],  # mismatch count
             )
+
+    def test_reconstruct_skeleton_names_trigger_laterality_and_angles(self) -> None:
+        """Issue #13006: Reconstruct skeleton JOINT_NAMES must populate angle metrics and laterality."""
+        from src.motion_capture.reconstruct.skeleton import (
+            DEFAULT_LENGTHS_M,
+            JOINT_NAMES,
+            RigidSkeleton,
+            swing_trajectory,
+        )
+
+        skel = RigidSkeleton(DEFAULT_LENGTHS_M)
+        roots, rotations = swing_trajectory(50, 60.0)
+        poses = np.stack(
+            [skel.forward(r, rot) for r, rot in zip(roots, rotations, strict=True)]
+        )
+
+        # Slight perturbation
+        pred = poses + 0.005
+        res = compute_l3_paired_comparison(
+            predicted_trajectories=pred,
+            reference_trajectories=poses,
+            joint_names=JOINT_NAMES,
+        )
+
+        assert "pelvis_axial_rotation" in res.angle_errors_deg
+        assert "thorax_axial_rotation" in res.angle_errors_deg
+        assert "x_factor" in res.angle_errors_deg
+        assert res.angle_errors_deg["pelvis_axial_rotation"] >= 0.0
+        assert "P1" in res.phase_angle_errors_deg
+        assert "P4" in res.phase_angle_errors_deg
+        assert "P7" in res.phase_angle_errors_deg
+
+    def test_reconstruct_skeleton_swapped_lr_rejected(self) -> None:
+        """Issue #13006: Swapped left/right joints with reconstruct JOINT_NAMES must fail closed."""
+        from src.motion_capture.reconstruct.skeleton import (
+            DEFAULT_LENGTHS_M,
+            JOINT_NAMES,
+            RigidSkeleton,
+            swing_trajectory,
+        )
+
+        skel = RigidSkeleton(DEFAULT_LENGTHS_M)
+        roots, rotations = swing_trajectory(30, 60.0)
+        poses = np.stack(
+            [skel.forward(r, rot) for r, rot in zip(roots, rotations, strict=True)]
+        )
+
+        swapped = poses.copy()
+        l_idx = JOINT_NAMES.index("left_shoulder")
+        r_idx = JOINT_NAMES.index("right_shoulder")
+        swapped[:, [l_idx, r_idx]] = swapped[:, [r_idx, l_idx]]
+
+        with pytest.raises(ValueError, match="[Ll]aterality.*swap"):
+            compute_l3_paired_comparison(
+                predicted_trajectories=swapped,
+                reference_trajectories=poses,
+                joint_names=JOINT_NAMES,
+            )
+
+    def test_no_bilateral_pairs_fails_closed(self) -> None:
+        """Issue #13006: Trajectories without bilateral pairs fail closed under DbC."""
+        names = ("mid_hip", "neck", "nose")
+        data = np.zeros((20, 3, 3), dtype=float)
+        with pytest.raises(ValueError, match="Laterality.*fail"):
+            compute_l3_paired_comparison(
+                predicted_trajectories=data,
+                reference_trajectories=data,
+                joint_names=names,
+            )
+
+    def test_kinematic_sequence_order_disagreement(self) -> None:
+        """Issue #13006: Known peak order disagreement gives order_agreement=False and non-zero timing error."""
+        t_len = 50
+        joint_names = ("hip_left", "hip_right", "shoulder_left", "shoulder_right")
+        ref = np.zeros((t_len, 4, 3), dtype=float)
+        pred = np.zeros((t_len, 4, 3), dtype=float)
+
+        # In ref: pelvis yaw peaks at frame 20, thorax yaw peaks at frame 30
+        # In pred: thorax yaw peaks at frame 20, pelvis yaw peaks at frame 30 (reversed!)
+        angles_p_ref = np.zeros(t_len)
+        angles_p_ref[20] = 1.0  # peak angular change
+        angles_t_ref = np.zeros(t_len)
+        angles_t_ref[30] = 1.0
+
+        angles_p_pred = np.zeros(t_len)
+        angles_p_pred[30] = 1.0  # peak angular change
+        angles_t_pred = np.zeros(t_len)
+        angles_t_pred[20] = 1.0
+
+        # Build trajectory positions from angles
+        for t in range(t_len):
+            # Pelvis: hl=(-cos, 0, -sin), hr=(cos, 0, sin)
+            ref[t, 0] = [
+                -0.15 * np.cos(angles_p_ref[t]),
+                0.85,
+                -0.15 * np.sin(angles_p_ref[t]),
+            ]
+            ref[t, 1] = [
+                0.15 * np.cos(angles_p_ref[t]),
+                0.85,
+                0.15 * np.sin(angles_p_ref[t]),
+            ]
+            # Thorax: sl=(-cos, 0, -sin), sr=(cos, 0, sin)
+            ref[t, 2] = [
+                -0.20 * np.cos(angles_t_ref[t]),
+                1.40,
+                -0.20 * np.sin(angles_t_ref[t]),
+            ]
+            ref[t, 3] = [
+                0.20 * np.cos(angles_t_ref[t]),
+                1.40,
+                0.20 * np.sin(angles_t_ref[t]),
+            ]
+
+            pred[t, 0] = [
+                -0.15 * np.cos(angles_p_pred[t]),
+                0.85,
+                -0.15 * np.sin(angles_p_pred[t]),
+            ]
+            pred[t, 1] = [
+                0.15 * np.cos(angles_p_pred[t]),
+                0.85,
+                0.15 * np.sin(angles_p_pred[t]),
+            ]
+            pred[t, 2] = [
+                -0.20 * np.cos(angles_t_pred[t]),
+                1.40,
+                -0.20 * np.sin(angles_t_pred[t]),
+            ]
+            pred[t, 3] = [
+                0.20 * np.cos(angles_t_pred[t]),
+                1.40,
+                0.20 * np.sin(angles_t_pred[t]),
+            ]
+
+        res = compute_l3_paired_comparison(
+            predicted_trajectories=pred,
+            reference_trajectories=ref,
+            joint_names=joint_names,
+            event_frames={"P1": 0, "P4": 10, "P7": 40},
+        )
+        assert res.kinematic_sequence_order_agreement is False
+        assert res.kinematic_sequence_timing_error_phase is not None
+        assert res.kinematic_sequence_timing_error_phase > 0.0
+
+    def test_kinematic_sequence_unmeasured_explicit_none(self) -> None:
+        """Issue #13006: Static data with no angular motion explicitly yields None, never hard-coded True/0.0."""
+        t_len = 30
+        joint_names = ("hip_left", "hip_right", "shoulder_left", "shoulder_right")
+        ref = np.zeros((t_len, 4, 3), dtype=float)
+        # Constant static positions
+        ref[:, 0] = [-0.15, 0.85, 0.0]
+        ref[:, 1] = [0.15, 0.85, 0.0]
+        ref[:, 2] = [-0.20, 1.40, 0.0]
+        ref[:, 3] = [0.20, 1.40, 0.0]
+
+        res = compute_l3_paired_comparison(
+            predicted_trajectories=ref,
+            reference_trajectories=ref,
+            joint_names=joint_names,
+        )
+        assert res.kinematic_sequence_order_agreement is None
+        assert res.kinematic_sequence_timing_error_phase is None
+
+    def test_camera_depth_axis_isolation(self) -> None:
+        """Issue #13006: Depth axis follows camera; DTL (+X) isolates X offset as depth, FO (+Z) isolates Z."""
+        from src.motion_capture.reconstruct.cameras import PinholeCamera
+
+        t_len = 20
+        joint_names = ("hip_left", "hip_right", "shoulder_left", "shoulder_right")
+        ref = np.zeros((t_len, 4, 3), dtype=float)
+        ref[:, 0] = [-0.15, 0.85, -0.1]
+        ref[:, 1] = [0.15, 0.85, 0.1]
+        ref[:, 2] = [-0.20, 1.40, -0.2]
+        ref[:, 3] = [0.20, 1.40, 0.2]
+
+        # Perturbation purely in X on post-address frames (50 mm)
+        pred_x = ref.copy()
+        pred_x[1:, :, 0] += 0.050
+
+        # DTL: optical axis along +X
+        res_dtl = compute_l3_paired_comparison(
+            predicted_trajectories=pred_x,
+            reference_trajectories=ref,
+            joint_names=joint_names,
+            view="dtl",
+        )
+        assert res_dtl.depth_error_mm > 40.0
+        assert pytest.approx(res_dtl.image_plane_error_mm, abs=1e-3) == 0.0
+
+        # Face-on: optical axis along +Z
+        res_fo = compute_l3_paired_comparison(
+            predicted_trajectories=pred_x,
+            reference_trajectories=ref,
+            joint_names=joint_names,
+            view="face_on",
+        )
+        assert pytest.approx(res_fo.depth_error_mm, abs=1e-3) == 0.0
+        assert res_fo.image_plane_error_mm > 40.0
+
+        # Explicit PinholeCamera with optical axis along +X
+        r_dtl = np.array(
+            [[0, 0, 1], [0, 1, 0], [-1, 0, 0]], dtype=float
+        )  # cam Z points to world X: r[:, 2] = [1, 0, 0]
+        cam_dtl = PinholeCamera(
+            camera_id="cam_dtl",
+            matrix=np.diag([1000.0, 1000.0, 1.0]),
+            rotation_world_from_camera=r_dtl,
+            translation_world_from_camera_m=np.array([-5.0, 1.0, 0.0]),
+            image_size_px=(1920, 1080),
+        )
+        res_cam = compute_l3_paired_comparison(
+            predicted_trajectories=pred_x,
+            reference_trajectories=ref,
+            joint_names=joint_names,
+            camera=cam_dtl,
+        )
+        assert res_cam.depth_error_mm > 40.0
+        assert pytest.approx(res_cam.image_plane_error_mm, abs=1e-3) == 0.0
