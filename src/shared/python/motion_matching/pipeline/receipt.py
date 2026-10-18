@@ -184,6 +184,8 @@ def build_ground_support_receipt(
             "grip_rotation_deg"
         ),
         "handedness": subject_handedness(inputs.base_spec),
+        "grip_provenance": inputs.base_spec.get("subject", {}).get("grip_provenance"),
+        "spec_revision": inputs.base_spec.get("spec_revision"),
         "wrists_bounded": any(name in lane.bounds for name in IK_UNBOUNDED),
         "labels": list(lane.labels),
         "ground": {

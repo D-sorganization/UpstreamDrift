@@ -6144,6 +6144,65 @@ so the output is bit-identical; every committed spec records
 the lead hand with a non-zero roll is unchanged. Only a non-zero trail roll,
 which no committed artefact uses, now turns about the shaft.
 
+\subsection{Physical Grip Revision, Closure Shift, and Provenance}
+Definition (HRG-GR2, \#13203; \texttt{execution/grip\_rotation.py},
+\texttt{apply\_grip\_config}). A \texttt{GripSpec} is applied to a spec
+document as a \emph{new revision}; the input document, and every committed
+spec and receipt, keep their bytes.
+
+\paragraph{Revision Schema.}
+The result carries \texttt{spec\_revision} with \texttt{version} (parent
+version $+1$), \texttt{configuration} (\texttt{"grip"}),
+\texttt{parent\_spec\_canonical\_sha256} (the canonical hash of the input) and
+\texttt{parent\_physics\_spec\_sha256}; \texttt{subject.grip\_config} holds the
+physical configuration at full double precision (lead and trail
+$(\alpha,\psi,\gamma)$, \texttt{lead\_below\_butt\_m}, \texttt{hand\_spacing\_m},
+\texttt{handedness}) and \texttt{subject.grip\_provenance} the source of each of
+the eight physical parameters. Style and thumb offset are visual only and live
+in \texttt{visual\_hints.grip}, which \texttt{physics\_spec\_sha256} strips, so
+changing them alters the file bytes but not the physics hash and mints no
+revision. Applying a configuration whose physical part and provenance already
+match returns an equal document (idempotent).
+
+\paragraph{Equations.}
+Rotation: for a hand with stored triple $R$ and target $T=$
+\texttt{hand\_to\_euler}$(\alpha,\psi,\gamma)$ the rotation block becomes
+$C\leftarrow C\,G(R)^{\top}G(T)$ in float64, so a chain of revisions agrees
+with the direct application to $10^{-14}$ (no rounded triple is re-read).
+Closure shift: with club length $L$ (\texttt{club.length\_m}), the club frame
+has $y$ along the shaft, butt to head, with the head at $y=0$. The lead wrist is
+$y_L=-(L-d)$ for depth $d=$\texttt{lead\_below\_butt\_m}, and the trail weld
+$y_T=y_L+s$ for spacing $s=$\texttt{hand\_spacing\_m}. Both are absolute
+targets: $\Delta_L=y_L^{\mathrm{new}}-y_L^{\mathrm{old}}$ is added to the $(1,3)$
+entry of the lead wrist \texttt{child\_to\_follower} (a club-frame translation,
+unchanged by a roll about $y$) and $\Delta_T=y_T^{\mathrm{new}}-y_T^{\mathrm{old}}$
+to \texttt{closure.placement\_b}; the trail wrist translation lies in the
+standoff frame, which the weld carries. \texttt{LHand} and
+\texttt{LHandStandoff} (and frame \texttt{LW}) move by $\Delta_L$, \texttt{RHand}
+by $\Delta_T$; masses, inertias and centres of mass are not edited, so nothing is
+counted twice. \texttt{club.wrist\_to\_head\_m} is set to $-y_L$.
+
+\paragraph{Provenance and the Lane.}
+Sources are \texttt{user\_declared}, \texttt{rom\_set\_identified} and
+\texttt{default}; \texttt{fitted\_grip} (wrist bounding in the lane) is true only
+when a parameter is \texttt{rom\_set\_identified}. A document without
+\texttt{grip\_provenance} (every pre-GR2 spec) keeps the legacy rule, a nonzero
+rotation. The receipt records \texttt{grip\_provenance} and \texttt{spec\_revision}.
+Visual hands take \texttt{GripSpec.pose()}; \texttt{resolve\_visual\_pose}
+rejects an override of a physical value (V azimuth, trail V, palm diagonal,
+depth, spacing, handedness) unless explicitly flagged.
+
+\paragraph{Limitations and Results.}
+A left-handed physical spec raises \texttt{ValueError}: its wrist
+\texttt{child\_to\_follower} would have to be mirrored, which is not implemented,
+and a silently right-handed model is refused. Measured: the strong preset turns
+the compiled lead hand frame about the shaft by $14.999999999999986^\circ$
+($\pm0.01^\circ$ required); the \texttt{GripInterface.from\_spec} spacing error
+at $s=0.0123456789$~m is $4.5\times10^{-17}$~m; style and thumb leave
+\texttt{body\_mass}, \texttt{body\_inertia}, \texttt{jnt\_axis}, \texttt{eq\_data}
+and the physics hash identical. Reproduce with
+\texttt{pytest tests/unit/motion\_matching/test\_grip\_config.py}.
+
 \subsection{Reconciling the Hand Spacing}
 \texttt{club\_geometry.py} previously placed the hands 0.035 m apart
 ($-0.025$ and $-0.06$ m) while the native spec places them 0.0762 m apart.
