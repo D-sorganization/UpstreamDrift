@@ -30,10 +30,17 @@ class ExternalWrench(Protocol):
     ``force_n``/``torque_nm`` are world-frame vectors or ``None`` (absent half).
     """
 
-    body: str
-    point_m: Sequence[float]
-    force_n: Sequence[float] | None
-    torque_nm: Sequence[float] | None
+    @property
+    def body(self) -> str: ...
+
+    @property
+    def point_m(self) -> Sequence[float]: ...
+
+    @property
+    def force_n(self) -> Sequence[float] | None: ...
+
+    @property
+    def torque_nm(self) -> Sequence[float] | None: ...
 
 
 def _enum(native: Any, group: str, name: str) -> int:

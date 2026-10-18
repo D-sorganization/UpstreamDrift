@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
 import time
 from dataclasses import dataclass, field
@@ -23,11 +24,9 @@ from typing import Any
 from src.launchers.layout_config_backup import replace_existing_layout_backup
 from src.launchers.launcher_shared_tools_diagnostics import (
     inspect_shared_tools_freshness,
-    load_parent_model_ids,
-    run_git_cmd,
 )
-from src.launchers import launcher_constants as _launcher_constants
 from src.shared.python.data_io.path_utils import get_repo_root
+from src.shared.python.data_io.user_config_root import user_config_dir
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -35,15 +34,50 @@ logger = get_logger(__name__)
 # Constants — use centralized root discovery (issue #2354)
 REPOS_ROOT = get_repo_root()
 ASSETS_DIR = Path(__file__).parent / "assets"
+CONFIG_DIR = user_config_dir()
+LAYOUT_CONFIG_FILE = CONFIG_DIR / "layout.json"
 
 
-def __getattr__(name: str) -> Any:
-    """Delegate config paths to launcher_constants (lazy, test XDG-safe)."""
-    if name == "CONFIG_DIR":
-        return _launcher_constants.CONFIG_DIR
-    if name == "LAYOUT_CONFIG_FILE":
-        return _launcher_constants.LAYOUT_CONFIG_FILE
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+def _load_parent_model_ids(models_yaml_path: Path) -> list[str]:
+    """Load model IDs declared directly by the parent models.yaml manifest."""
+    try:
+        import yaml  # type: ignore[import-untyped]
+    except ImportError:
+        return []
+
+    try:
+        data = yaml.safe_load(models_yaml_path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return []
+
+    if not isinstance(data, dict) or not isinstance(data.get("models"), list):
+        return []
+    return [
+        model["id"]
+        for model in data["models"]
+        if isinstance(model, dict) and isinstance(model.get("id"), str)
+    ]
+
+
+def _run_git_cmd(cmd: list[str], cwd: Path | None = None) -> str:
+    """Run a git command and return stripped stdout.
+
+    Returns empty string if any error occurs.
+    """
+    try:
+        result = subprocess.run(
+            cmd,
+            cwd=str(cwd or REPOS_ROOT),
+            capture_output=True,
+            text=True,
+            check=True,
+            encoding="utf-8",
+            timeout=5.0,
+        )
+        return result.stdout.strip()
+    except (subprocess.SubprocessError, FileNotFoundError, OSError) as exc:
+        logger.debug("Git command %s failed: %s", cmd, exc)
+        return ""
 
 
 def _read_manifest_schema(manifest_path: Path | None) -> str | None:
@@ -115,7 +149,7 @@ class LauncherDiagnostics:
     """Diagnostic utilities for the UpstreamDrift Launcher."""
 
     # Parent-manifest IDs exclude models discovered from installed providers.
-    PARENT_MANIFEST_TILE_IDS = load_parent_model_ids(
+    PARENT_MANIFEST_TILE_IDS = _load_parent_model_ids(
         REPOS_ROOT / "src" / "config" / "models.yaml"
     )
 
@@ -516,13 +550,13 @@ class LauncherDiagnostics:
         """Check saved layout configuration."""
         start = time.time()
         details: dict[str, Any] = {
-            "config_dir": str(_launcher_constants.CONFIG_DIR),
-            "config_dir_exists": _launcher_constants.CONFIG_DIR.exists(),
-            "layout_file": str(_launcher_constants.LAYOUT_CONFIG_FILE),
-            "layout_file_exists": _launcher_constants.LAYOUT_CONFIG_FILE.exists(),
+            "config_dir": str(CONFIG_DIR),
+            "config_dir_exists": CONFIG_DIR.exists(),
+            "layout_file": str(LAYOUT_CONFIG_FILE),
+            "layout_file_exists": LAYOUT_CONFIG_FILE.exists(),
         }
 
-        if not _launcher_constants.LAYOUT_CONFIG_FILE.exists():
+        if not LAYOUT_CONFIG_FILE.exists():
             result = DiagnosticResult(
                 name="layout_config",
                 status="pass",
@@ -534,7 +568,7 @@ class LauncherDiagnostics:
             return result
 
         try:
-            with open(_launcher_constants.LAYOUT_CONFIG_FILE, encoding="utf-8") as f:
+            with open(LAYOUT_CONFIG_FILE, encoding="utf-8") as f:
                 layout_data = json.load(f)
 
             details["layout_content"] = layout_data
@@ -944,7 +978,7 @@ class LauncherDiagnostics:
         start = time.time()
         freshness = inspect_shared_tools_freshness(
             repo_root=REPOS_ROOT,
-            run_git_cmd=run_git_cmd,
+            run_git_cmd=_run_git_cmd,
             find_sibling_root=self._find_sibling_tools_root,
         )
 
@@ -1039,7 +1073,7 @@ def generate_recommendations(  # noqa: C901
                 details = result.details
                 if details.get("missing_from_saved"):
                     recommendations.append(
-                        f"LIKELY CAUSE: Saved layout is missing tiles. Delete {_launcher_constants.LAYOUT_CONFIG_FILE} to reset to defaults with all 17 tiles"
+                        f"LIKELY CAUSE: Saved layout is missing tiles. Delete {LAYOUT_CONFIG_FILE} to reset to defaults with all 17 tiles"
                     )
             elif result.name == "asset_files":
                 recommendations.append("Some tile icons may not display correctly")
@@ -1079,9 +1113,7 @@ def reset_layout_config() -> bool:
         True if reset was successful, False otherwise
     """
     try:
-        backup_path = replace_existing_layout_backup(
-            _launcher_constants.LAYOUT_CONFIG_FILE
-        )
+        backup_path = replace_existing_layout_backup(LAYOUT_CONFIG_FILE)
         if backup_path is not None:
             logger.info("Backed up existing config to %s", backup_path)
 

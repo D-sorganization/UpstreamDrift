@@ -126,7 +126,7 @@ class ForceColorScale:
         if not isinstance(base_color, str):
             raise TypeError("base_color must be a string")
         self._check_force(force_n)
-        if not self._active(force_n):
+        if force_n is None or not self._active(force_n):
             return base_color
         endpoint, fraction = self._endpoint_fraction(force_n)
         return "#" + "".join(
@@ -146,7 +146,7 @@ class ForceColorScale:
         """
         base = self._check_rgb(base_rgb)
         self._check_force(force_n)
-        if not self._active(force_n):
+        if force_n is None or not self._active(force_n):
             return None
         endpoint, fraction = self._endpoint_fraction(force_n)
         if self.blend_mode == "tint":
@@ -168,7 +168,7 @@ class ForceColorScale:
         if not isinstance(base_color, str):
             raise TypeError("base_color must be a string")
         self._check_force(force_n)
-        if not self._active(force_n):
+        if force_n is None or not self._active(force_n):
             return None
         if self.opacity == 1.0 and self.blend_mode == "replace":
             return self.color(force_n, base_color)

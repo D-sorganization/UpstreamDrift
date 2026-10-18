@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Merged origin/main at 3f7b262; regenerated capability atlas graph.json after merge and PR #13200 closure-wrench/force-color inputs touching feature_parity and launcher surfaces. Re-read launcher-atlas contract inputs and ran tests/scripts/test_capability_atlas.py, tests/config/test_launcher_manifest.py, and tests/launchers/test_launcher_manifest_categories.py (56 passed)."
+      "rationale": "Merged origin/main into the tension-compression overlay branch; regenerated capability atlas and feature parity matrix. Additive overlay, no boundary contract change."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",
