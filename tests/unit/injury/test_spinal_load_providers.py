@@ -6,6 +6,8 @@ before the provider seam existed) and must pass both before and after.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -259,3 +261,27 @@ def test_injected_non_model_provider_loads_are_used() -> None:
     np.testing.assert_allclose(
         result.segments["L4-L5"].compression, series.compression_n()[:, 1], atol=1e-12
     )
+
+
+def test_feed_fixture_study_receipt_through_injury_analyzer(tmp_path: Path) -> None:
+    from tests.tools.spine_viewer.conftest import write_study
+
+    receipt_path = write_study(tmp_path / "study1")
+    provider = ModelSpinalLoadProvider.from_study_receipt(receipt_path)
+    assert provider.is_model_based is True
+    assert provider.provider_id.startswith("spine_study_")
+
+    analyzer = SpinalLoadAnalyzer(body_weight=80.0, provider=provider)
+    result = analyzer.analyze_study_receipt(receipt_path)
+
+    assert result.is_model_based is True
+    assert result.risk_assessed is False
+    assert result.overall_risk is SpinalRiskLevel.NOT_ASSESSED
+    assert "L5-S1" in result.segments
+    assert "L4-L5" in result.segments
+
+    # Peak compression in fixture study: force[:, 0, 1] is [0, 100, 300, 200] N.
+    # Peak is 300 N. Body weight in N = 80.0 * GRAVITY_M_S2.
+    expected_peak_bw = 300.0 / analyzer.body_weight_N
+    assert result.peak_compression_bw == pytest.approx(expected_peak_bw, abs=1e-5)
+    assert result.cumulative_compression_impulse > 0

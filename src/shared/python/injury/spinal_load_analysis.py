@@ -28,8 +28,12 @@ References:
 - Lindsay et al. (2002) review of spine loading mechanisms
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -43,6 +47,7 @@ from src.shared.python.core.constants import GRAVITY_M_S2
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.injury.spinal_load_providers import (
     HeuristicSpinalLoadProvider,
+    ModelSpinalLoadProvider,
     SpinalLoadProvider,
 )
 from src.shared.python.spine import golf_terms
@@ -239,12 +244,47 @@ class SpinalLoadAnalyzer:
             provider if provider is not None else HeuristicSpinalLoadProvider(self)
         )
 
+    def analyze_study_receipt(
+        self,
+        receipt: str | Path | Any,
+        artifact_dir: str | Path | None = None,
+        pelvis_angles: np.ndarray | None = None,
+        thorax_angles: np.ndarray | None = None,
+    ) -> SpinalLoadResult:
+        """Perform spinal load analysis on a finished spine study receipt.
+
+        Wires the study's hash-verified per-level joint reactions into the
+        analyzer via :class:`ModelSpinalLoadProvider`. Heuristic risk bands
+        are skipped as they do not apply to model-based joint reaction forces.
+
+        Args:
+            receipt: Path to study receipt file or a loaded study view/run.
+            artifact_dir: Directory containing loads artifact if different from receipt.
+            pelvis_angles: Optional pelvis orientation for X-factor analysis.
+            thorax_angles: Optional thorax orientation for X-factor analysis.
+
+        Returns:
+            SpinalLoadResult populated with the study's per-level loads.
+        """
+        provider = ModelSpinalLoadProvider.from_study_receipt(
+            receipt, artifact_dir=artifact_dir
+        )
+        self.provider = provider
+        return self.analyze(
+            joint_angles={},
+            joint_velocities={},
+            joint_torques={},
+            time=provider.series.time_s,
+            pelvis_angles=pelvis_angles,
+            thorax_angles=thorax_angles,
+        )
+
     def analyze(  # noqa: C901
         self,
-        joint_angles: dict[str, np.ndarray],
-        joint_velocities: dict[str, np.ndarray],
-        joint_torques: dict[str, np.ndarray],
-        time: np.ndarray,
+        joint_angles: dict[str, np.ndarray] | None = None,
+        joint_velocities: dict[str, np.ndarray] | None = None,
+        joint_torques: dict[str, np.ndarray] | None = None,
+        time: np.ndarray | None = None,
         pelvis_angles: np.ndarray | None = None,
         thorax_angles: np.ndarray | None = None,
     ) -> SpinalLoadResult:
@@ -252,19 +292,31 @@ class SpinalLoadAnalyzer:
         Perform complete spinal load analysis.
 
         Args:
-            joint_angles: Dictionary of joint angle time series (radians)
-                Required keys: 'lumbar_flexion', 'lumbar_lateral', 'lumbar_rotation'
-            joint_velocities: Dictionary of joint angular velocity time series (rad/s)
-            joint_torques: Dictionary of joint torque time series (Nm)
-            time: Time array (seconds)
-            pelvis_angles: Optional pelvis orientation time series [roll, pitch, yaw]
-            thorax_angles: Optional thorax orientation time series [roll, pitch, yaw]
+            joint_angles: Dictionary of joint angle time series (radians).
+                Required for heuristic provider; optional for model-based providers.
+            joint_velocities: Dictionary of joint angular velocity time series (rad/s).
+            joint_torques: Dictionary of joint torque time series (Nm).
+            time: Time array (seconds). Optional when provider supplies a series time base.
+            pelvis_angles: Optional pelvis orientation time series [roll, pitch, yaw].
+            thorax_angles: Optional thorax orientation time series [roll, pitch, yaw].
 
         Returns:
-            SpinalLoadResult containing all computed metrics and risk assessments
+            SpinalLoadResult containing all computed metrics and risk assessments.
         """
         if joint_angles is None:
-            raise ValueError("joint_angles must be provided")
+            if not self.provider.is_model_based:
+                raise ValueError("joint_angles must be provided")
+            joint_angles = {}
+        if joint_velocities is None:
+            joint_velocities = {}
+        if joint_torques is None:
+            joint_torques = {}
+        if time is None:
+            if hasattr(self.provider, "series"):
+                time = self.provider.series.time_s
+            else:
+                raise ValueError("time must be provided")
+
         result = SpinalLoadResult(
             time=time,
             provider_id=self.provider.provider_id,
