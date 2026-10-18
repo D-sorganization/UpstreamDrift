@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-18 | #13194 | HRG-C3: pelvis frame re-expression (invariant) and documented HJC/COM/L5S1 relocation as a new spec revision |
+| 2026-10-18 | #13192 | HRG-C2: MAP hip joint centre estimator with covariance, status and stature prior (estimation only) |
+| 2026-10-18 | #13206 | Grip hand frame rolled -90 deg about the shaft so azimuth 0 is the top of the grip (HRG-A1) |
 | 2026-10-18 | #13183 | HRG-C1: loft the pelvis visual on the hip landmarks (centred on the HJC midpoint, ends at the lumbar plane) and shrink the hip blend ball; visual only |
 | 2026-10-18 | #13156 | Plate import forms (PyQt and web) and the plate-overlay route declare channel timing skew and the CoP skew relation (DeclaredReading); only independent allows the CoP covariance |
 | 2026-10-18 | #13152 | Ground-reaction overlay draws measured CoP 1-sigma covariance ellipses, tilted with the plate yaw (cop_cov_random_xy_m2 = R_xy diag R_xy^T) |
