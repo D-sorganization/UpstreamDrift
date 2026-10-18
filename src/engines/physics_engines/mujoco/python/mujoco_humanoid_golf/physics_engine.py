@@ -446,13 +446,34 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
         return ground_reaction_breakdown(wrenches, self.data.subtree_com[0])
 
     def get_joint_names(self) -> list[str]:
-        """Get list of joint names."""
+        """Get list of joint names matching generalized velocity dimensions (nv).
+
+        Returns:
+            List of unique, non-empty joint names of length nv in model order.
+            Empty list if no model is loaded.
+        """
         if self.model is None:
             return []
-        return [
-            mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, i) or f"Joint {i}"
-            for i in range(self.model.njnt)
-        ]
+
+        nv = int(self.model.nv)
+        if nv == 0:
+            return []
+
+        names: list[str] = []
+        for i in range(nv):
+            jnt_id = int(self.model.dof_jntid[i])
+            jnt_name = (
+                mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, jnt_id)
+                or f"joint_{jnt_id}"
+            )
+            first_dof = int(self.model.jnt_dofadr[jnt_id])
+            dof_offset = i - first_dof
+            count = int(np.count_nonzero(self.model.dof_jntid == jnt_id))
+            if count == 1:
+                names.append(jnt_name)
+            else:
+                names.append(f"{jnt_name}_{dof_offset}")
+        return names
 
     def get_full_state(self) -> dict[str, Any]:
         """Get complete state in a single batched call (performance optimization).

@@ -285,6 +285,58 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         """Get the current state (positions, velocities)."""
         return self.q.copy(), self.v.copy()
 
+    def get_joint_names(self) -> list[str]:
+        """Get list of joint names matching generalized velocity dimensions (nv).
+
+        Returns:
+            List of unique, non-empty joint names of length nv in model order.
+            Empty list if no model is loaded.
+        """
+        if self.model is None:
+            return []
+
+        nv = int(self.model.nv)
+        if nv == 0:
+            return []
+
+        names: list[str] = [""] * nv
+        njoints = getattr(self.model, "njoints", len(getattr(self.model, "joints", [])))
+        # Pinocchio joint 0 is Universe (fixed, 0 DOFs). Joints 1..njoints-1 are the model joints.
+        for j in range(1, njoints):
+            try:
+                joint = self.model.joints[j]
+                nv_j = int(joint.nv)
+                if nv_j == 0:
+                    continue
+                idx_v = int(joint.idx_v)
+                raw_name = ""
+                if hasattr(self.model, "names") and j < len(self.model.names):
+                    raw_name = str(self.model.names[j])
+                j_name = raw_name if raw_name else f"joint_{j}"
+
+                if nv_j == 1:
+                    if 0 <= idx_v < nv:
+                        names[idx_v] = j_name
+                else:
+                    for d in range(nv_j):
+                        if 0 <= idx_v + d < nv:
+                            names[idx_v + d] = f"{j_name}_{d}"
+            except (
+                RuntimeError,
+                ValueError,
+                AttributeError,
+                TypeError,
+                IndexError,
+            ) as exc:
+                logger.debug("Error processing Pinocchio joint %d: %s", j, exc)
+                continue
+
+        for i in range(nv):
+            if not names[i]:
+                names[i] = f"dof_{i}"
+
+        return names
+
     def get_link_transforms(self) -> dict[str, np.ndarray]:
         """Return frame poses without advancing the Pinocchio model."""
         if not self.is_initialized:

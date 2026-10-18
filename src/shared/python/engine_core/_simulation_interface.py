@@ -251,9 +251,13 @@ class SimulationInterface(Checkpointable, Protocol):
 
         Returns:
             List of strings corresponding to the joint names in order.
-            Default implementation returns generic names.
+            Default implementation returns generic names based on velocity DOFs.
         """
-        return []
+        try:
+            _, v = self.get_state()
+            return [f"dof_{i}" for i in range(len(v))]
+        except (RuntimeError, ValueError, AttributeError, TypeError):
+            return []
 
     def get_capabilities(self) -> EngineCapabilities:
         """Report which optional capabilities this engine supports.
