@@ -154,20 +154,17 @@ class GripPose:
             isinstance(self.style, GripStyle),
             f"style must be a GripStyle, got {self.style!r}",
         )
-        for name, lo, hi in (
-            ("lead_below_butt_m", 0.0, 0.1),
-            ("hand_spacing_m", 0.0, 0.2),
-            ("lead_v_azimuth_deg", 0.0, 90.0),
-            ("trail_v_offset_deg", -30.0, 30.0),
-            ("lead_thumb_offset_deg", 0.0, 45.0),
-            ("palm_diagonal_deg", 0.0, 90.0),
-        ):
-            value = getattr(self, name)
-            require(
-                isinstance(value, (int, float)) and math.isfinite(value),
-                f"{name} must be a finite number, got {value!r}",
-            )
-            require(lo <= value <= hi, f"{name} must be in [{lo}, {hi}], got {value}")
+        require_fields_in_range(
+            self,
+            (
+                ("lead_below_butt_m", 0.0, 0.1),
+                ("hand_spacing_m", 0.0, 0.2),
+                ("lead_v_azimuth_deg", 0.0, 90.0),
+                ("trail_v_offset_deg", -30.0, 30.0),
+                ("lead_thumb_offset_deg", 0.0, 45.0),
+                ("palm_diagonal_deg", 0.0, 90.0),
+            ),
+        )
         require(self.hand_spacing_m > 0.0, "hand_spacing_m must be positive")
         validate_handedness(self.handedness)
         ensure(
@@ -277,6 +274,23 @@ class GripPose:
     def interlocked(self) -> bool:
         """True when the little finger passes between the lead fingers."""
         return self.style is GripStyle.INTERLOCK
+
+
+def require_fields_in_range(
+    obj: object, bounds: Sequence[tuple[str, float, float]]
+) -> None:
+    """Require each named attribute of ``obj`` to be a finite number in range.
+
+    Precondition: every ``(name, lo, hi)`` names an attribute of ``obj`` and
+    ``lo <= hi``. Raises ``ValueError`` naming the first offending field.
+    """
+    for name, lo, hi in bounds:
+        value = getattr(obj, name)
+        require(
+            isinstance(value, (int, float)) and math.isfinite(value),
+            f"{name} must be a finite number, got {value!r}",
+        )
+        require(lo <= value <= hi, f"{name} must be in [{lo}, {hi}], got {value}")
 
 
 def _unit_axis(
