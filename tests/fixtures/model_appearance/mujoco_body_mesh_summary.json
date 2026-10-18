@@ -133,15 +133,15 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso": [
       {
-        "bbox_max": [0.106191, 0.191074, 0.138182],
-        "bbox_min": [-0.106191, -0.191074, -0.078],
+        "bbox_max": [0.106191, 0.18191, 0.138182],
+        "bbox_min": [-0.106191, -0.18191, -0.078],
         "label": "garment0",
         "material": "mat_shorts_khaki",
         "n_vertices": 758
       },
       {
-        "bbox_max": [0.098325, 0.17692, 0.135182],
-        "bbox_min": [-0.098325, -0.17692, -0.078],
+        "bbox_max": [0.098325, 0.168435, 0.135182],
+        "bbox_min": [-0.098325, -0.168435, -0.078],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 758
@@ -494,15 +494,15 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso": [
       {
-        "bbox_max": [0.106191, 0.191074, 0.138182],
-        "bbox_min": [-0.106191, -0.191074, -0.078],
+        "bbox_max": [0.106191, 0.18191, 0.138182],
+        "bbox_min": [-0.106191, -0.18191, -0.078],
         "label": "garment0",
         "material": "mat_shorts_khaki",
         "n_vertices": 758
       },
       {
-        "bbox_max": [0.098325, 0.17692, 0.135182],
-        "bbox_min": [-0.098325, -0.17692, -0.078],
+        "bbox_max": [0.098325, 0.168435, 0.135182],
+        "bbox_min": [-0.098325, -0.168435, -0.078],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 758
@@ -855,15 +855,15 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso": [
       {
-        "bbox_max": [0.069945, 0.268733, 0.276742],
-        "bbox_min": [-0.16892, -0.115227, -0.106546],
+        "bbox_max": [0.060892, 0.243627, 0.262247],
+        "bbox_min": [-0.159867, -0.082921, -0.09129],
         "label": "garment0",
         "material": "mat_shorts_khaki",
         "n_vertices": 758
       },
       {
-        "bbox_max": [0.061098, 0.260043, 0.269993],
-        "bbox_min": [-0.160073, -0.104796, -0.101803],
+        "bbox_max": [0.052716, 0.236577, 0.256445],
+        "bbox_min": [-0.151691, -0.07487, -0.088118],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 758
