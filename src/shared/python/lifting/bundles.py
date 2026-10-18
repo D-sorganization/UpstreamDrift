@@ -45,6 +45,10 @@ from src.shared.python.lifting.back_bar import (
     standard_bar_world,
 )
 from src.shared.python.lifting.back_rack import rack_bar_world
+from src.shared.python.lifting.bundle_stability import (
+    bundle_rk4_stability as bundle_rk4_stability,
+)
+from src.shared.python.lifting.bundle_stability import stable_tracking_bundle
 from src.shared.python.lifting.barbell_runs import (
     LOADED_TRACKING_POLICY,
     rigid_bar_spec,
@@ -77,9 +81,6 @@ from src.shared.python.motion_matching.same_input.reference import (
     generate_lead_in_bundle,
 )
 from src.shared.python.motion_matching.same_input.integrator import DEFAULT_POLICY
-from src.shared.python.motion_matching.same_input.stiffness import (
-    rk4_stability_record,
-)
 
 Array = NDArray[np.float64]
 
@@ -106,8 +107,6 @@ SAME_INPUT_LIFT_BUNDLES: Mapping[str, Path | None] = MappingProxyType(
 )
 
 BAR_FRAME = "Hub"
-#: Reference steps between the states sampled for ``rk4_stability``.
-STABILITY_SAMPLE_EVERY = 5
 LIMITATIONS = (
     "The only spec the same-input harness replays in every engine is the golf "
     "full-body spec, so the lifter keeps that spec's arms and dual-grip club; "
@@ -1103,8 +1102,9 @@ def build_lift_bundle(
     ``window_s``; MuJoCo tracks the joint trajectory from there with the
     pipeline controller held per step, or under
     :data:`~.barbell_runs.LOADED_TRACKING_POLICY` when the IK balanced a bar
-    load (OSL-16, #13104).  The provenance records the planar solution, the
-    IK summary, the window's bar path, the RK4 stability margin of the run
+    load (OSL-16, #13104), at the substeps that keep the run inside the RK4
+    real stability region (:func:`.bundle_stability.stable_tracking_bundle`,
+    #13041).  The provenance records the planar solution, the IK summary, the window's bar path, the RK4 stability margin of the run
     (``rk4_stability``) and ``provenance``.  With ``lead_in_s`` (OSL-17,
     #13131) the tracking run starts that long before the window, at a
     solution sample, so the bundle's first state is settled on its contact
@@ -1142,45 +1142,25 @@ def build_lift_bundle(
         + ("" if lift.balance is None else LOAD_BALANCE_LIMITATIONS),
         **dict(provenance or {}),
     }
-    bundle = generate_lead_in_bundle(
-        bytes(spec_bytes),
-        solution.time_s[track:],
-        lift.q[track:],
-        duration_s=float(window_s),
-        lead_in_steps=lead_in_steps,
-        provenance=record,
-        policy=DEFAULT_POLICY if lift.balance is None else LOADED_TRACKING_POLICY,
+    bundle, stability, plant = stable_tracking_bundle(
+        lambda policy: generate_lead_in_bundle(
+            bytes(spec_bytes),
+            solution.time_s[track:],
+            lift.q[track:],
+            duration_s=float(window_s),
+            lead_in_steps=lead_in_steps,
+            provenance=record,
+            policy=policy,
+        ),
+        DEFAULT_POLICY if lift.balance is None else LOADED_TRACKING_POLICY,
+        label=lift_name,
     )
-    plant = VectorPlant("mujoco", bundle.spec_bytes)
     window_bar = bar_path(plant, bundle.reference_q, lift.bar_frame)
     return replace(
         bundle,
         provenance={
             **bundle.provenance,
             "window_bar_path_m": window_bar.tolist(),
-            "rk4_stability": bundle_rk4_stability(bundle, plant),
+            "rk4_stability": stability,
         },
-    )
-
-
-def bundle_rk4_stability(
-    bundle: InputBundle, plant: Any, every: int = STABILITY_SAMPLE_EVERY
-) -> dict[str, float | int]:
-    """RK4 margin of ``bundle``'s reference run, sampled every ``every`` steps.
-
-    The stiffest open-loop rate of ``plant`` (the bundle's MuJoCo plant) at
-    each sampled reference state under its recorded effort, times the
-    bundle's RK4 substep (see
-    :func:`~src.shared.python.motion_matching.same_input.stiffness.\
-rk4_stability_record`).
-    """
-    if isinstance(every, bool) or not isinstance(every, int) or every < 1:
-        raise ValueError("every must be a positive integer")
-    rows = np.arange(0, bundle.steps, every)
-    return rk4_stability_record(
-        plant,
-        bundle.reference_q[rows],
-        bundle.reference_v[rows],
-        bundle.efforts[rows],
-        bundle.dt_s / bundle.substeps,
     )

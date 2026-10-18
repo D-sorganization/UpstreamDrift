@@ -1,11 +1,11 @@
 {
   "lift": "deadlift",
   "bundle": "docs/development/lifting/evidence/deadlift/deadlift_bundle.npz",
-  "bundle_spec_sha256": "03ade594a5ab46bbd2e0268fe84188b9ad443e836690c663aadfd38a9fee2b3b",
+  "bundle_spec_sha256": "97c9c5f2565abc0747ea1b73ae9f245f2d1126644fce0649401da1521d81b804",
   "bundle_steps": 200,
   "dt_s": 0.001,
   "reference": "window_bar_path_m (MuJoCo, recorded at bundle generation)",
-  "source_commit": "9fece273597826917242b0c347c331c68fe7193f",
+  "source_commit": "33abf79c74fdbae407242d61ec81d19de7cb5bcb",
   "generator": "scripts/measure_lift_bar_path_parity.py",
   "engines": {
     "mujoco": {
@@ -24,109 +24,82 @@
         "max_frame_error_m": 0.0,
         "worst_segment_start_s": 0.0,
         "coordinate_error_rad_by_segment": [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         ]
       },
-      "wall_time_s": 142.5
+      "wall_time_s": 105.1
     },
     "drake": {
       "engine": "drake",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 8.116358831066484e-10,
-      "final_bar_deviation_m": 8.116358831066484e-10,
-      "max_coordinate_error_rad": 1.0106873367067212e-06,
-      "worst_final_coordinate": "subtalar_angle_l",
+      "max_bar_deviation_m": 3.820568861884042e-15,
+      "final_bar_deviation_m": 3.820568861884042e-15,
+      "max_coordinate_error_rad": 1.6908696665041134e-13,
+      "worst_final_coordinate": "LWInputY",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 1.3763904946340055e-10,
-        "max_frame_error_m": 1.6306393110868958e-13,
-        "worst_segment_start_s": 0.12,
+        "max_coordinate_error_rad": 8.237334425675868e-15,
+        "max_frame_error_m": 6.77599954797753e-16,
+        "worst_segment_start_s": 0.0,
         "coordinate_error_rad_by_segment": [
-          2.8720678179466885e-14,
-          9.690876990849431e-11,
-          5.2284565565940966e-15,
-          4.747938153748521e-15,
-          6.90289839178071e-15,
-          5.472944146489578e-15,
-          1.3763904946340055e-10,
-          9.693634783758398e-15,
-          4.6351811278100286e-15,
-          7.491403331005841e-15
+          8.237334425675868e-15, 2.831068712794149e-15, 8.052586375484339e-15,
+          5.181619022742723e-15, 6.958843223880962e-15, 1.7763568394002505e-15,
+          2.3037127760972e-15, 4.838143774499315e-15, 5.2475385148298415e-15,
+          3.219646771412954e-15
         ]
       },
-      "wall_time_s": 139.7
+      "wall_time_s": 94.4
     },
     "pinocchio": {
       "engine": "pinocchio",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 6.113879716899977e-10,
-      "final_bar_deviation_m": 6.113879716899977e-10,
-      "max_coordinate_error_rad": 8.751604677228846e-07,
-      "worst_final_coordinate": "subtalar_angle_l",
+      "max_bar_deviation_m": 1.6363859778907817e-14,
+      "final_bar_deviation_m": 1.6363859778907817e-14,
+      "max_coordinate_error_rad": 9.14823772291129e-14,
+      "worst_final_coordinate": "LFInput",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 1.4473503472112181e-10,
-        "max_frame_error_m": 1.3254307723168613e-13,
-        "worst_segment_start_s": 0.12,
+        "max_coordinate_error_rad": 5.437490735449302e-15,
+        "max_frame_error_m": 1.355199909595506e-15,
+        "worst_segment_start_s": 0.16,
         "coordinate_error_rad_by_segment": [
-          1.9632556756514485e-14,
-          7.876622043403309e-11,
-          3.3861802251067274e-15,
-          6.369037242048847e-15,
-          6.437558819349931e-15,
-          4.300216866620632e-15,
-          1.4473503472112181e-10,
-          4.8411795405822744e-15,
-          5.384581669432009e-15,
-          2.1649348980190553e-15
+          4.839878497975292e-15, 2.348815586472597e-15, 3.0808688933348094e-15,
+          3.9968028886505635e-15, 2.5053743801795036e-15,
+          2.0972806824559598e-15, 3.9065972678997696e-15, 2.815456201510358e-15,
+          5.437490735449302e-15, 2.6645352591003757e-15
         ]
       },
-      "wall_time_s": 111.1
+      "wall_time_s": 62.3
     },
     "opensim": {
       "engine": "opensim",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 4.770993157865465e-10,
-      "final_bar_deviation_m": 4.770993157865465e-10,
-      "max_coordinate_error_rad": 7.662067323249699e-07,
-      "worst_final_coordinate": "subtalar_angle_l",
+      "max_bar_deviation_m": 1.137640067256873e-15,
+      "final_bar_deviation_m": 1.0333129057397298e-15,
+      "max_coordinate_error_rad": 3.078115019816696e-14,
+      "worst_final_coordinate": "mtp_angle_r",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 4.816216089137404e-11,
-        "max_frame_error_m": 3.543298493019584e-14,
-        "worst_segment_start_s": 0.12,
+        "max_coordinate_error_rad": 4.623471744347185e-15,
+        "max_frame_error_m": 6.9831616186284e-16,
+        "worst_segment_start_s": 0.1,
         "coordinate_error_rad_by_segment": [
-          8.948801443788013e-15,
-          2.1068295816707022e-11,
-          3.0600522116230877e-15,
-          4.0419056990259605e-15,
-          5.701710804884019e-15,
-          5.185413730346422e-15,
-          4.816216089137404e-11,
-          4.0718296789865605e-15,
-          8.881784197001252e-16,
-          5.776629175002768e-15
+          4.419208055050916e-15, 1.807581861967833e-15, 1.6792123247455493e-15,
+          2.6211671722009555e-15, 3.5849144833233204e-15, 4.623471744347185e-15,
+          3.936087566991375e-15, 1.7208456881689926e-15, 3.737461728992031e-15,
+          1.1102230246251565e-15
         ]
       },
-      "wall_time_s": 201.9
+      "wall_time_s": 132.3
     }
   }
 }

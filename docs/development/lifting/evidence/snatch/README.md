@@ -30,17 +30,17 @@ are in the planar solution, but not in the window.
 
 ## Measured Numbers
 
-| Quantity                                       | Before (Single Via)     | After (Timed Schedule)                    |
-| ---------------------------------------------- | ----------------------- | ----------------------------------------- |
-| Shoulder height, setup → 0.93 s                | 0.876 → 0.653 m (falls) | 0.876 → 1.373 m                           |
-| Shoulder over the pull (0.1-0.45)              | falls                   | rises 0.390 m monotonically, peak 1.376 m |
-| Optimizer bar height at the setup              | 1.565 m (overhead)      | 0.187 m (hanging)                         |
-| Catch trunk lean (standard 18.70°)             | 59.3°                   | 18.70° (tolerance 3.87°)                  |
-| Optimizer peak vertical bar velocity, pull     | n/a                     | 1.21 m/s at 0.653 s                       |
-| Model bar height (world), setup → end          | n/a                     | 0.462 → 1.884 m                           |
-| Window bar rise, mean vertical velocity        | n/a                     | 0.123 m, 0.61 m/s                         |
-| Window bar drift forward / lateral             | n/a                     | −13.7 mm / −0.3 mm                        |
-| Bundle size                                    | n/a                     | 231,194 bytes                             |
+| Quantity                                   | Before (Single Via)     | After (Timed Schedule)                    |
+| ------------------------------------------ | ----------------------- | ----------------------------------------- |
+| Shoulder height, setup → 0.93 s            | 0.876 → 0.653 m (falls) | 0.876 → 1.373 m                           |
+| Shoulder over the pull (0.1-0.45)          | falls                   | rises 0.390 m monotonically, peak 1.376 m |
+| Optimizer bar height at the setup          | 1.565 m (overhead)      | 0.187 m (hanging)                         |
+| Catch trunk lean (standard 18.70°)         | 59.3°                   | 18.70° (tolerance 3.87°)                  |
+| Optimizer peak vertical bar velocity, pull | n/a                     | 1.21 m/s at 0.653 s                       |
+| Model bar height (world), setup → end      | n/a                     | 0.462 → 1.884 m                           |
+| Window bar rise, mean vertical velocity    | n/a                     | 0.123 m, 0.61 m/s                         |
+| Window bar drift forward / lateral         | n/a                     | −13.7 mm / −0.3 mm                        |
+| Bundle size                                | n/a                     | 231,194 bytes                             |
 
 The IK residuals below are the maximum over all 151 frames, in metres,
 rounded up to 0.1 mm. They are asserted in
@@ -61,12 +61,12 @@ rounded up to 0.1 mm. They are asserted in
 The grip closure is at most 1.75e-4 m, and the lowest foot sphere is 2.07 mm
 into the ground. These maxima are set after the window:
 
-| Part of the Lift                      | Worst Residuals                          | Feet Into Ground |
-| ------------------------------------- | ---------------------------------------- | ---------------- |
-| Pull (0-0.45)                         | knee_r 11.2 mm, bar 0.23 mm              | 0.69 mm          |
-| Window (0.467-0.667 s)                | knee_r 8.1 mm, bar 0.06 mm               | 0.69 mm          |
-| Turnover (0.50)                       | bar 40.1 mm, shoulder_l 19.7 mm          | 0.69 mm          |
-| Catch and hold (0.53-0.77)            | legs 43-50 mm                            | up to 2.07 mm    |
+| Part of the Lift           | Worst Residuals                 | Feet Into Ground |
+| -------------------------- | ------------------------------- | ---------------- |
+| Pull (0-0.45)              | knee_r 11.2 mm, bar 0.23 mm     | 0.69 mm          |
+| Window (0.467-0.667 s)     | knee_r 8.1 mm, bar 0.06 mm      | 0.69 mm          |
+| Turnover (0.50)            | bar 40.1 mm, shoulder_l 19.7 mm | 0.69 mm          |
+| Catch and hold (0.53-0.77) | legs 43-50 mm                   | up to 2.07 mm    |
 
 The pull and window rows match the deadlift. The full-body model cannot
 follow the turnover or reach the planar deep-squat catch. A strict xfail
@@ -85,6 +85,41 @@ records this against the deadlift bounds; those bounds are not loosened.
 
 Every engine meets both L2 bounds (1e-3 m frames, 1e-6 rad coordinates). They
 hold over the full open-loop window and over the re-anchored segments.
+
+## Current Records (Whole-Row Lift Body, #13037)
+
+The sections above were measured on the earlier lift body and stay for
+history. The bundle and `bar_path_parity.json` are now regenerated on the AN-1
+lift body built from the whole de Leva Table 4 rows (#13102) with the default
+10 deg tibial torsion (#12814), with the same Tools #5653 code (`b7f36b35`).
+That code reproduces the earlier committed bundle on the earlier body to
+1.3e-13 rad. The recorded `tools_pin` is unchanged.
+
+IK residuals (maximum over all 151 frames, mm): ankle_l 42.45, ankle_r 45.00,
+knee_l 37.16, knee_r 34.28, hip_l 40.64, hip_r 40.66, shoulder_l 8.97,
+shoulder_r 15.09, bar 19.47. Grip closure at most 2.35e-4 m, lowest foot
+sphere 1.88 mm into the ground, bundle 231,579 bytes. Only `shoulder_r` and
+the closure exceed their regression snapshots; they are re-derived with the
+same rounding (0.0151 m and 2.4e-4 m; #13041, issuecomment-6243170509).
+
+| Part of the Lift           | Worst Residuals                 | Feet Into Ground |
+| -------------------------- | ------------------------------- | ---------------- |
+| Pull (0-0.45)              | knee_r 11.3 mm, bar 0.23 mm     | 0.69 mm          |
+| Window (0.467-0.667 s)     | knee_r 8.1 mm, bar 0.06 mm      | 0.69 mm          |
+| Turnover (0.50)            | bar 19.5 mm, shoulder_r 15.1 mm | 0.93 mm          |
+| Catch and hold (0.53-0.77) | legs 34-45 mm                   | up to 1.88 mm    |
+
+The strict xfail against the deadlift bounds still fails, so it stays.
+
+| Engine    | Full Window Bar Max (m) | Full Window Coordinate Max (rad) | 20-Step Segments Coordinate Max (rad) | 20-Step Segments Frame Max (m) |
+| --------- | ----------------------- | -------------------------------- | ------------------------------------- | ------------------------------ |
+| MuJoCo    | 0 (bit exact)           | 0                                | 0                                     | 0                              |
+| Drake     | 7.3e-14                 | 3.3e-12                          | 3.0e-14                               | 2.2e-15                        |
+| Pinocchio | 5.5e-14                 | 2.5e-12                          | 3.2e-14                               | 3.2e-15                        |
+| OpenSim   | 2.9e-15                 | 4.1e-13                          | 9.2e-15                               | 1.2e-15                        |
+
+The run stays at eight RK4 substeps: |z| 2.37 (amplification 0.53), inside
+the 2.785 limit.
 
 ## Limitations
 

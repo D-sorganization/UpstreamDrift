@@ -634,7 +634,9 @@ inside exactly; the MuJoCo-tracked reference overshoots a bound by at most
 Squat:
 \begin{itemize}[nosep]
 \item Hip flexion reaches its 120$^\circ$ bound at the bottom.
-\item Lumbar flexion 31--39$^\circ$.
+\item Lumbar flexion (\texttt{SpineInputY}) 0.05--0.09$^\circ$ in the committed
+  window. The 31--39$^\circ$ given here before was stale: it does not match
+  the committed window before or after the \#13037 regeneration.
 \item Knee $-115$ to $-110^\circ$ and ankle 26--28$^\circ$.
 \end{itemize}
 
@@ -1125,10 +1127,11 @@ balance controller's authority remains a limitation.
   was needed.
 \end{itemize}
 
-\paragraph{Evidence Status.} The hold evidence was generated on the
-pre-\#13102 lift body (old de Leva trunk). It must be regenerated with
-the lift-body refresh on the base; the cause and fix do not depend on the
-segment lengths.
+\paragraph{Evidence Status.} The hold evidence above was generated on the
+pre-\#13102 lift body (old de Leva trunk). It has been regenerated on the
+whole-row lift body (Section~\ref{sec:whole-row-body}): ground force over body plus
+bar 1.000, hand force over bar weight 1.000, left share 0.500 and peak
+deflection 0.49\,mm, unchanged to the printed precision.
 
 \subsection{Hands That Reach the Bundle Bar (OSL-12, Issue \#13048)}
 \paragraph{Diagnosis.} After OSL-16 every body marker of the OpenSim squat
@@ -1466,6 +1469,176 @@ with supports. Reproduce with
 \texttt{MUJOCO\_GL=egl python3 scripts/generate\_lift\_bundle.py --lift bench\_press}
 then \texttt{scripts/measure\_lift\_bar\_path\_parity.py --lift bench\_press}.
 
+\subsection{Lift Body on the Whole de Leva Rows (Issue \#13037)}\label{sec:whole-row-body}
+\paragraph{Cause.} \#13102 derives the fit-path de Leva table from whole
+Table~4 rows (\texttt{DE\_LEVA\_ROWS}: head \texttt{head\_vert\_cerv}, trunk
+\texttt{trunk\_cerv\_midh}, trunk parts \texttt{upt\_cerv\_xyph},
+\texttt{mpt\_xyph\_omph}, \texttt{lpt\_omph\_midh}). The committed OSL-14 lift
+body was built on the earlier mixed rows, so
+\texttt{test\_committed\_lift\_body\_regenerates} failed. At 1.78\,m the trunk
+grows from 0.5319 to 0.6033\,m and the upper trunk from 0.1707 to 0.2421\,m;
+the hub rises from 0.3787 to 0.4349\,m, the pelvis height from 0.1251 to
+0.1419\,m and the neck from 0.4187 to 0.4749\,m above mid-hip. The shank
+changes from 0.434 to 0.4403\,m. The regenerated body also carries main's
+default 10$^\circ$ tibial torsion (\#12814; Seber et al.\ 2000), which the
+committed body predates.
+
+\paragraph{Checks Before Regenerating.} \texttt{lift\_body.py} applies no
+compensation for the old table (\texttt{trunk\_scale} 1, no length
+override). A new test in \texttt{test\_lift\_body.py} (vertex to
+mid-hip on whole rows) pins that head plus trunk span vertex to mid-hip with
+nothing counted twice: the neck joint sits one whole-row trunk length above the pelvis joint,
+and the head centre of mass lies one head length minus its vertex-measured
+centre-of-mass distance above the neck (both to $10^{-9}$\,m).
+
+\paragraph{Regeneration.} In dependency order: the lift body
+(\texttt{lift\_body}, with \texttt{--write}); the squat (with
+\texttt{--load-balance}), deadlift, clean first-pull and bench bundles
+(\texttt{generate\_lift\_bundle.py}); the
+four bar-path parity records, the squat kinetics parity and the loaded-foot
+sweep; the barbell hold (from \texttt{barbell\_runs.hold\_start}, \#13136),
+re-track and bushing parity; the OpenSim receipts. The regression-snapshot IK
+bounds are re-derived (below); no physical requirement is changed.
+
+\paragraph{Before and After.} Before is the committed evidence on the
+OSL-14/OSL-16 body (the hold after \#13136); after is the whole-row body.
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lll}
+\toprule
+Quantity & Before & After\\
+\midrule
+Squat window hip flexion r/l ($^\circ$) & 114.1--117.7 / 114.9--118.7 & 112.5--116.1 / 113.4--117.1\\
+Squat window knee r, ankle r ($^\circ$) & $-114.9$ to $-110.7$, 23.0--23.9 & $-114.7$ to $-110.5$, 21.9--22.7\\
+Deadlift / clean hip flexion r ($^\circ$) & 81.9--93.9 / 75.0--100.7 & 81.7--93.7 / 74.9--100.6\\
+Squat IK ankle r / hip r (mm) & 3.59 / 9.13 & 4.43 / 9.32\\
+Squat IK closure (m) & $5.0\times10^{-8}$ & $9.0\times10^{-8}$\\
+Squat balance offset (m) & $0.190\to6.4\times10^{-5}$ & $0.207\to1.3\times10^{-4}$\\
+Squat parity, bar / coordinate & $4.3\times10^{-12}$\,m / $2.2\times10^{-9}$\,rad & $7.5\times10^{-12}$\,m / $6.3\times10^{-10}$\,rad\\
+Deadlift parity, bar / coordinate & $8.1\times10^{-10}$\,m / $1.0\times10^{-6}$\,rad & $1.6\times10^{-14}$\,m / $1.7\times10^{-13}$\,rad\\
+Clean parity, bar / coordinate & $2.7\times10^{-14}$\,m / $6.5\times10^{-13}$\,rad & $2.0\times10^{-14}$\,m / $5.1\times10^{-13}$\,rad\\
+Bench parity, bar / coordinate & $1.2\times10^{-11}$\,m / $2.2\times10^{-9}$\,rad & $6.4\times10^{-12}$\,m / $9.2\times10^{-10}$\,rad\\
+Loaded foot r/l, 64 substeps, 0.25\,ms (mm) & 1.81 / 1.79 & 1.77 / 1.75\\
+Re-track deviation, max (mm) & 2.03 (bar) & 1.87 (bar)\\
+Hold ground / hands / left share & 1.000 / 1.000 / 0.500 & 1.000 / 1.000 / 0.500\\
+OpenSim marker RMS / max (cm) & 1.18 / 2.32 & 1.74 / 3.70\\
+OpenSim bar marker (mm) & 0.29 & 12.56\\
+OpenSim segment RMS ($^\circ$) & 1.22 & 1.47\\
+Hicks limits (N, N\,m) & 167.2, 21.9 & 167.0, 22.5\\
+Pelvis peaks $t_y$ / tilt / $t_x$ & 214.2\,N / 153.8\,N\,m / 144.2\,N & 213.9\,N / 136.9\,N\,m / 106.6\,N\\
+Lumbar ext.\ / hip flexion r, l (N\,m) & 772.9 / 454.9, 443.6 & 769.5 / 444.8, 433.5\\
+\bottomrule
+\end{tabular}
+\end{center}
+The CI replay of every bundle stays within $10^{-9}$\,m. The marker gate
+(2\,cm, 4\,cm) is still met; the Hicks gate still fails for $t_y$ and tilt.
+
+\paragraph{Re-Derived Regression Bounds.} The IK bounds of the squat, pull
+and bench bundle tests (\texttt{tests/unit/lifting}) are documented there as
+the residuals
+measured when the committed bundle was generated, rounded up to 0.1\,mm
+(closures to two significant figures, the OSL-14 rule), and as recorded
+evidence rather than tuning targets. They are therefore re-derived from the
+regenerated bundles with the same rounding (evidence in issue \#13041,
+comment 6243170509, with \texttt{Tolerance-Change-Evidence} trailers):
+\begin{itemize}[nosep]
+\item Squat: \texttt{ankle\_r} 3.6 to 4.5\,mm (measured 4.43), \texttt{hip\_r}
+  9.2 to 9.4\,mm (9.32), closure $6.4$ to $9.0\times10^{-8}$\,m.
+\item Deadlift: ankles 3.2/3.0 to 3.8/3.2, \texttt{knee\_l} 3.1 to 3.5,
+  \texttt{knee\_r} 10.9 to 11.0, shoulders 4.0/4.5 to 4.2/4.6\,mm, closure
+  $7.7$ to $9.0\times10^{-5}$\,m.
+\item Clean: ankles 3.2/1.9 to 3.8/2.9, \texttt{knee\_l} 3.1 to 3.5,
+  \texttt{knee\_r} 10.9 to 11.0, shoulders 4.0/3.0 to 4.2/3.1\,mm, closure
+  $2.8$ to $3.3\times10^{-5}$\,m.
+\item Bench: closure $2.9$ to $3.0\times10^{-5}$\,m.
+\end{itemize}
+An attribution run rebuilt the squat and deadlift bundles on the whole-row
+table without the tibial torsion. Most of the ankle and knee increase comes
+from the torsion, not the table: squat \texttt{ankle\_r} 3.59, 3.57, 4.43\,mm
+and \texttt{knee\_l} 3.15, 3.14, 3.62\,mm (old body, whole rows only, both);
+deadlift \texttt{ankle\_l} 3.12, 3.13, 3.78\,mm. The closure increase comes
+from the table (squat $5.0$, $9.5$, $9.0\times10^{-8}$\,m). These are
+software regression records, not physical acceptance.
+
+\paragraph{New Findings.}
+\begin{itemize}[nosep]
+\item \textbf{Deadlift RK4 margin (fixed).} The regenerated deadlift recorded
+  its \texttt{rk4\_stability} for the first time: at the hand-held
+  eight-substep policy its stiffest foot mode ($3.4\times10^4$\,s$^{-1}$) gave
+  $|z|=4.24$, outside the real stability limit 2.785 (amplification 6.5), and
+  its subtalar coordinates drifted $9.5\times10^{-5}$ (Drake),
+  $9.9\times10^{-5}$ (Pinocchio) and $4.6\times10^{-5}$\,rad (OpenSim) from
+  MuJoCo. Only balanced (loaded) lifts took the 64-substep policy; the step
+  count was otherwise fixed. The bundle builder now raises the substep count
+  from the bundle's own stability record (\texttt{stiffness.stable\_substeps},
+  the smallest power of two from 8 that puts $|z|$ inside the limit) and
+  rebuilds. The deadlift records 16 substeps, $|z|=2.49$ (amplification
+  0.63); its parity is $1.6\times10^{-14}$\,m and $1.7\times10^{-13}$\,rad,
+  so the strict xfail is removed. MuJoCo replays at 16, 32 and 64 substeps
+  differ by at most $6.3\times10^{-9}$\,rad. The clean ($|z|=2.24$), bench
+  ($|z|=2.68$) and squat (64 substeps) are unchanged. A test now requires
+  every registered bundle to be inside the limit.
+\item \textbf{OpenSim elbow bound.} Before the OSL-17 rack, the bar-reach
+  solve ended at the 150$^\circ$ Rajagopal \texttt{elbow\_flex} bound on both
+  sides, 8.3\,mm (left) and 21.5\,mm (right) from the grips, with the elbows
+  ($1.6\times10^{-4}$\,rad) and \texttt{pro\_sup} ($-1.9\times10^{-4}$\,rad)
+  past their ranges. The bar target was the parity standard's start pose
+  scaled by height ($z=1.618$\,m), and the longer whole-row trunk (0.504 to
+  0.577\,m) raised the shoulders 7.1\,cm, so the shoulder-to-grip distance
+  fell from 0.253/0.235 to 0.190/0.175\,m. The inputs were current, not
+  stale. The OSL-17 rack miss below has the same cause.
+\item \textbf{Lumbar flexion.} The OSL-14 text above gave squat lumbar
+  flexion 31--39$^\circ$. In the committed window \texttt{SpineInputY} is
+  0.05--0.09$^\circ$ both before and after this regeneration, so that figure
+  was stale and is corrected there.
+\end{itemize}
+\paragraph{High-Bar Rack on the Whole-Row Body (OSL-17).} After the OSL-17
+merge (\#13144) the squat evidence is the high-bar rack regenerated on the
+whole-row body with the OSL-17 commands. The source IK is inside every bound
+except \texttt{ankle\_r} (4.89\,mm, rack on the earlier body 3.53\,mm), which
+is re-derived from 4.5 to 4.9\,mm; the closure is $2.81\times10^{-7}$\,m and
+the run stays at 64 substeps ($|z|=2.21$). The OSL-17 strict xfails, with
+their bounds unchanged, all still fail:
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lll}
+\toprule
+Regression & Rack, Earlier Body & Rack, Whole-Row Body\\
+\midrule
+Full-window coordinates, Drake (rad) & $6.0\times10^{-5}$ & $8.5\times10^{-4}$\\
+Re-track bar deviation (mm, bound 3.6) & 6.79 & 6.45\\
+Body-alone CoM / forefoot (cm) & 11.9 / 10.4 & 11.65 / 10.02\\
+OpenSim reach miss L / R (cm) & 4.63 / 6.03 & 3.81 / 5.69\\
+Arm range overshoot (rad) & $1.21\times10^{-3}$ & $8.0\times10^{-4}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{itemize}[nosep]
+\item \textbf{Full-window coordinates (diagnosed).} The open-loop dynamics
+  under the recorded efforts have an unstable left-wrist mode: the largest
+  real eigenvalue of the state Jacobian lies on \texttt{LWInputY},
+  116--132\,s$^{-1}$ (101--115\,s$^{-1}$ on the earlier rack body; before the
+  rack 64--70\,s$^{-1}$ on \texttt{SpineInputX}). Round-off of about
+  $10^{-14}$ grows by $e^{\lambda\cdot0.2\,\mathrm{s}}$, $10^9$ to $10^{11}$,
+  over the window, which matches every case ($2\times10^{-10}$,
+  $6.0\times10^{-5}$, $8.5\times10^{-4}$\,rad), while the 20-step segments
+  stay within $7.0\times10^{-13}$\,rad. The run is inside the RK4 limit, so
+  this is a physical instability of the open-loop posture. Tracked by
+  OSL-20 (\#13159).
+\item \textbf{OpenSim reach (diagnosed with the pre-rack miss).} In all four
+  measured cases (earlier and whole-row body, before and on the rack) the
+  shoulder-to-grip distance plus the reach miss is 0.198--0.213\,m: the folded
+  Rajagopal arm cannot bring the hand within about 0.20\,m of its shoulder
+  landmark in these directions, and the grips sit 0.146--0.190\,m away. The
+  ranges and the 1\,mm reach bound are not widened. Tracked by OSL-19
+  (\#13158).
+\item \textbf{New failure: OpenSim marker gate.} Marker RMS is 2.45\,cm
+  against the 2\,cm gate (maximum 3.81\,cm, inside 4\,cm; 1.94\,cm on the
+  earlier rack body). The foot markers carry it (forefoot 2.4 to 3.8\,cm):
+  the 10$^\circ$ tibial torsion (\#12814) turns the bundle feet out from
+  8.8 to 17.9$^\circ$, which the torsion-free Rajagopal foot cannot follow.
+  The gate is not loosened; the marker-gate tests are strict xfails
+  tracked by OSL-18 (\#13157). The Hicks gate passes (146.6\,N,
+  18.5\,N\,m) and stays a separate passing test.
+\end{itemize}
 \subsection{Snatch Same-Input Bundle (LIFT-5, Issue \#11745)}
 \paragraph{Planar Pull.} The previous Tools snatch configuration ran from
 the floor setup to the overhead-squat catch through one mid-time via point.
@@ -1512,6 +1685,19 @@ $6.2\times10^{-14}$\,m (Drake), $4.7\times10^{-14}$\,m (Pinocchio) and
 $1.6\times10^{-15}$\,m (OpenSim). The coordinates agree to
 $2.9\times10^{-12}$, $2.1\times10^{-12}$ and $1.1\times10^{-12}$\,rad, and
 MuJoCo is bit exact (\texttt{docs/development/lifting/evidence/snatch/}).
+
+\paragraph{On the Whole-Row Lift Body.} The figures above are on the earlier
+lift body. Regenerated on the whole-row body (\#13037, with the same
+Tools \#5653 code, which reproduces the earlier bundle to
+$1.3\times10^{-13}$\,rad), the pull and window stay deadlift class
+(\texttt{knee\_r} 11.3\,mm, bar 0.23\,mm, feet 0.69\,mm). The turnover bar
+residual falls to 19.5\,mm and \texttt{shoulder\_r} rises to 15.1\,mm; the
+catch legs fall to 34--45\,mm and the feet to 1.88\,mm into the ground. Only
+\texttt{shoulder\_r} and the closure ($1.75$ to $2.35\times10^{-4}$\,m)
+exceed their snapshots, which are re-derived with the same rounding; the
+strict xfail against the deadlift bounds stays. The parity is
+$7.3\times10^{-14}$\,m and $3.3\times10^{-12}$\,rad (Drake), and the run is
+inside the RK4 limit at eight substeps ($|z|=2.37$).
 
 \paragraph{Limitations.} The bundle covers the pull only. It is not in
 \texttt{SAME\_INPUT\_LIFT\_BUNDLES}, because the OpenSim IK/ID needs a LIFT-4

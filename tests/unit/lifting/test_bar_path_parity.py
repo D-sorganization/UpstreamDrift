@@ -100,15 +100,22 @@ def test_full_window_bar_path_is_inside_the_l2_frame_bound(record) -> None:
 #: OSL-17 (#13131) regression, measured on the high-bar rack bundle: the
 #: full 0.2 s window ends 6.0e-5 (Drake), 2.0e-5 (Pinocchio) and 1.4e-5 rad
 #: (OpenSim) from MuJoCo (worst coordinate LWInputY), above the 1e-6 rad
-#: bound; before the rack it was 2e-10 rad.  The bar stays within 8.0e-7 m
-#: and every 20-step re-anchored segment within 4.8e-13 rad, and a rack
-#: bundle without the lead-in gives 1.7e-5 rad (Drake), so the rack geometry,
-#: not the lead-in, is the cause.  The bound is not loosened.
+#: bound; before the rack it was 2e-10 rad.  On the #13037 whole-row lift body
+#: it is 8.5e-4, 2.7e-3 and 8.6e-5 rad (bar 3.7e-5 m), while every 20-step
+#: re-anchored segment stays within 7.0e-13 rad.  Cause (#13041): the
+#: open-loop dynamics under the recorded efforts have an unstable left-wrist
+#: mode (largest real eigenvalue, LWInputY, 116-132 1/s on the whole-row body,
+#: 101-115 1/s on the earlier rack body; before the rack 64-70 1/s, on
+#: SpineInputX), so engine round-off (1e-14) grows by exp(lambda * 0.2 s), 1e9 to
+#: 1e11, over the window.  It is a physical instability of the open-loop
+#: posture, not an integration error (the run is inside the RK4 limit).  The
+#: bound is not loosened.
 _RACK_COORDINATE_REGRESSION = pytest.mark.xfail(
     strict=True,
     reason=(
-        "OSL-17 #13131: high-bar rack full-window coordinates 6.0e-5 rad "
-        "(Drake) > 1e-6 rad bound; root cause open, bound not loosened."
+        "OSL-20 #13159: high-bar rack full-window coordinates "
+        "8.5e-4 rad (Drake) > 1e-6 rad bound; round-off grown by the open-loop "
+        "unstable LWInputY mode (116-132 1/s); bound not loosened."
     ),
 )
 

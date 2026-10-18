@@ -85,24 +85,28 @@ def test_hold_carries_body_plus_bar_over_the_whole_window() -> None:
 #: bar-loaded re-track's bar landmark drifts forward of its source linearly
 #: through the window (0.6 mm at the first state, 6.79 mm at the last; the
 #: shoulders 6.5/5.6 mm, the hips 4.5 mm), above the 3.6 mm LIFT-5 bound;
-#: before the rack it was 2.03 mm.  The bound is not loosened.
+#: before the rack it was 2.03 mm.  On the #13037 whole-row lift body
+#: (#13041): bar 6.45 mm, shoulders 6.57/5.12 mm, hips 4.07/3.68 mm.  The
+#: bound is not loosened.
 _RETRACK_REGRESSION = pytest.mark.xfail(
     strict=True,
     reason=(
-        "OSL-17 #13131: high-bar re-track bar deviation 6.79 mm > 3.6 mm "
-        "LIFT-5 bound; root cause open, bound not loosened."
+        "OSL-17 #13131 / #13041: high-bar re-track bar deviation 6.45 mm > "
+        "3.6 mm LIFT-5 bound; root cause open, bound not loosened."
     ),
 )
 #: OSL-17 (#13131): with the bar behind the neck the balanced standing pose
 #: carries the body's own centre of mass 11.9 cm forward of the mean-heel
 #: axis origin, ahead of the forefoot spheres (10.4 cm); body plus bar
 #: (7.7 cm) and the bar (4.3 cm) lie over the feet and the CoP sits under the
-#: combined centre of mass.  Measured, not loosened.
+#: combined centre of mass.  Measured, not loosened.  On the #13037
+#: whole-row lift body (#13041): body 11.65 cm, forefoot 10.02 cm, body plus
+#: bar 7.32 cm.
 _BODY_COM_AHEAD = pytest.mark.xfail(
     strict=True,
     reason=(
-        "OSL-17 #13131: body-alone CoM 0.119 m forward, ahead of the "
-        "forefoot (0.104 m) at the high-bar balanced pose."
+        "OSL-17 #13131 / #13041: body-alone CoM 0.117 m forward, ahead of the "
+        "forefoot (0.100 m) at the high-bar balanced pose."
     ),
 )
 

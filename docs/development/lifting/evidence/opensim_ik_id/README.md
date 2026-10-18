@@ -56,6 +56,33 @@ records this in `arm_reach`. The bar marker is tracked at weight 1 again.
   state of the window, where the bundle is still settling onto its loaded
   foot contact. Over states 1-40 the peaks are 24.4 N and 20.7 N m.
 
+Before the OSL-17 rack, on the whole-row lift body (#13037) the squat
+receipt read: marker RMS 1.74 cm and maximum 3.70 cm (right forefoot), inside
+the 2 cm / 4 cm gate; segment-angle RMS 1.47 deg. The reach solve ended at the
+150 deg `elbow_flex` bound on both sides, 8.3 mm (left) and 21.5 mm (right)
+from the grips (bar marker 12.56 mm off), with `elbow_flex` 1.6e-4 rad and
+`pro_sup` -1.9e-4 rad past their ranges. The bar target was then the parity
+standard's start pose scaled by height (1.618 m), and the longer whole-row
+trunk raised the shoulders 7.1 cm, so the shoulder-to-grip distance fell from
+0.253/0.235 m to 0.190/0.175 m.
+
+The committed receipt is the OSL-17 high-bar rack on the whole-row body
+(#13041): marker RMS 2.45 cm and maximum 3.81 cm, so the 2 cm RMS gate now
+fails (it was 1.94 cm on the earlier body). The foot markers carry the
+increase (forefoot 3.8 cm): the 10 deg tibial torsion (#12814) turns the
+bundle feet out from 8.8 to 17.9 deg, which the torsion-free Rajagopal foot
+cannot follow. The gate is not loosened. The Hicks gate passes on all 41
+states (146.6 N, 18.5 N m). The reach misses the high-bar grips by 3.81/5.69
+cm (4.63/6.03 cm on the earlier body) and the arm coordinates go up to 8.0e-4
+rad past their ranges (strict xfails). Both reach misses have one cause: the
+folded Rajagopal arm cannot bring the hand within about 0.20 m of its
+shoulder landmark in these directions; shoulder-to-grip distance plus reach
+miss is 0.198-0.213 m in all four measured cases, while the grips sit
+0.146-0.190 m from the shoulders. The elbow and arm ranges and the reach
+tolerance are not widened. Follow-ups: the foot-torsion marker gate is OSL-18
+(#13157), the arm reach OSL-19 (#13158), and the open-loop wrist mode that
+blocks full-window parity OSL-20 (#13159).
+
 A diagnostic fit of the bodyweight squat bundle tracked the pelvis to 3 mm.
 Excluding the bar, its markers came to 1.78 cm RMS and 4.15 cm maximum. See
 `lift_models.tex`, OSL-14 subsection.

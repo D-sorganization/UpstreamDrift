@@ -1,300 +1,291 @@
 {
- "bundle": "docs/development/lifting/evidence/back_squat/back_squat_bundle.npz",
- "bundle_policy": {
-  "closure_projection": "closest_point_each_step",
-  "effort_hold": "zero_order",
-  "effort_hold_dt_s": 0.00025,
-  "effort_hold_s": 0.00025,
-  "effort_holds_per_step": 4,
-  "effort_substeps": 16,
-  "integrator": "rk4",
-  "kkt": "exact",
-  "projection_dt_s": 0.001,
-  "projection_tolerance": 1e-13,
-  "root_efforts": "zero",
-  "substeps": 64
- },
- "bundle_spec_sha256": "a474d797ae80dfd0c4a62f94e89721243c2a9faa0458d4a1c51b49f83fc213a7",
- "committed_policy_run_reproduces_bundle": true,
- "generator": "scripts/measure_loaded_foot_tracking.py",
- "issue": 13104,
- "runs": [
-  {
-   "effort_hold_s": 0.001,
-   "failure": null,
-   "foot_joint_error_rad": {
-    "ankle_angle_l": 0.11810050142771572,
-    "ankle_angle_r": 1.3126453403813894,
-    "mtp_angle_l": 0.19855626283128724,
-    "mtp_angle_r": 2.858981565963821,
-    "subtalar_angle_l": 0.01851113161684688,
-    "subtalar_angle_r": 0.1406108468409353
-   },
-   "foot_point_deviation_m": {
-    "l": 0.023090570327598106,
-    "r": 0.23013993584607526
-   },
-   "reached_steps": 200,
-   "rk4_stability": {
-    "max_abs_z": 3.885937365851024,
-    "max_amplification": 4.385435843579874,
-    "max_rate_per_s": 31087.49892680819,
-    "real_stability_limit": 2.785293563405282,
-    "samples": 40,
-    "substep_s": 0.000125
-   },
-   "substeps": 8,
-   "wall_s": 332.24502216500696
+  "bundle": "docs/development/lifting/evidence/back_squat/back_squat_bundle.npz",
+  "bundle_policy": {
+    "closure_projection": "closest_point_each_step",
+    "effort_hold": "zero_order",
+    "effort_hold_dt_s": 0.00025,
+    "effort_hold_s": 0.00025,
+    "effort_holds_per_step": 4,
+    "effort_substeps": 16,
+    "integrator": "rk4",
+    "kkt": "exact",
+    "projection_dt_s": 0.001,
+    "projection_tolerance": 1e-13,
+    "root_efforts": "zero",
+    "substeps": 64
   },
-  {
-   "effort_hold_s": 0.000125,
-   "failure": null,
-   "foot_joint_error_rad": {
-    "ankle_angle_l": 0.022748397463582426,
-    "ankle_angle_r": 0.0436489649390262,
-    "mtp_angle_l": 0.05699233615956382,
-    "mtp_angle_r": 0.12325328020651376,
-    "subtalar_angle_l": 0.16026865277303082,
-    "subtalar_angle_r": 0.19307141793680457
-   },
-   "foot_point_deviation_m": {
-    "l": 0.0229097957508846,
-    "r": 0.026400016726797797
-   },
-   "reached_steps": 200,
-   "rk4_stability": {
-    "max_abs_z": 4.2997495362046365,
-    "max_amplification": 6.937007756229672,
-    "max_rate_per_s": 34397.99628963709,
-    "real_stability_limit": 2.785293563405282,
-    "samples": 40,
-    "substep_s": 0.000125
-   },
-   "substeps": 8,
-   "wall_s": 559.333158768015
-  },
-  {
-   "effort_hold_s": 0.00025,
-   "failure": null,
-   "foot_joint_error_rad": {
-    "ankle_angle_l": 0.013465716583130172,
-    "ankle_angle_r": 0.008584360300140481,
-    "mtp_angle_l": 0.03106861535641915,
-    "mtp_angle_r": 0.015057814251498903,
-    "subtalar_angle_l": 0.0380747817863867,
-    "subtalar_angle_r": 0.013761393321448299
-   },
-   "foot_point_deviation_m": {
-    "l": 0.0052839518668241076,
-    "r": 0.0019456259283932298
-   },
-   "reached_steps": 200,
-   "rk4_stability": {
-    "max_abs_z": 2.901751018990206,
-    "max_amplification": 1.190255870262889,
-    "max_rate_per_s": 46428.016303843295,
-    "real_stability_limit": 2.785293563405282,
-    "samples": 40,
-    "substep_s": 6.25e-05
-   },
-   "substeps": 16,
-   "wall_s": 560.3846187039744
-  },
-  {
-   "effort_hold_s": 0.00025,
-   "failure": null,
-   "foot_joint_error_rad": {
-    "ankle_angle_l": 0.006725516837932766,
-    "ankle_angle_r": 0.008817109438040371,
-    "mtp_angle_l": 0.014434749191092748,
-    "mtp_angle_r": 0.01572812583634334,
-    "subtalar_angle_l": 0.026885026243609438,
-    "subtalar_angle_r": 0.017487642672779115
-   },
-   "foot_point_deviation_m": {
-    "l": 0.0037297961391803947,
-    "r": 0.0024732942095307717
-   },
-   "reached_steps": 200,
-   "rk4_stability": {
-    "max_abs_z": 2.7923597881777993,
-    "max_amplification": 1.0107060022975203,
-    "max_rate_per_s": 89355.51322168957,
-    "real_stability_limit": 2.785293563405282,
-    "samples": 40,
-    "substep_s": 3.125e-05
-   },
-   "substeps": 32,
-   "wall_s": 765.2220120250131
-  },
-  {
-   "effort_hold_s": 0.00025,
-   "failure": null,
-   "foot_joint_error_rad": {
-    "ankle_angle_l": 0.006726849093260101,
-    "ankle_angle_r": 0.008823275535748965,
-    "mtp_angle_l": 0.010291961639298755,
-    "mtp_angle_r": 0.01578783997102226,
-    "subtalar_angle_l": 0.017702430775443066,
-    "subtalar_angle_r": 0.020627746562709506
-   },
-   "foot_point_deviation_m": {
-    "l": 0.0024780371455794966,
-    "r": 0.002917417752583326
-   },
-   "reached_steps": 200,
-   "rk4_stability": {
-    "max_abs_z": 2.2046879198012492,
-    "max_amplification": 0.4240136591959417,
-    "max_rate_per_s": 141100.02686727996,
-    "real_stability_limit": 2.785293563405282,
-    "samples": 40,
-    "substep_s": 1.5625e-05
-   },
-   "substeps": 64,
-   "wall_s": 883.7867470579804
-  },
-  {
-   "effort_hold_s": 0.00025,
-   "failure": null,
-   "foot_joint_error_rad": {
-    "ankle_angle_l": 0.006726848717578782,
-    "ankle_angle_r": 0.008823268325695188,
-    "mtp_angle_l": 0.010291961095447161,
-    "mtp_angle_r": 0.01578782066705864,
-    "subtalar_angle_l": 0.017702433745285524,
-    "subtalar_angle_r": 0.02062774316517708
-   },
-   "foot_point_deviation_m": {
-    "l": 0.0024780375112320734,
-    "r": 0.0029174170012098003
-   },
-   "reached_steps": 200,
-   "rk4_stability": {
-    "max_abs_z": 1.1023438219250847,
-    "max_amplification": 0.34350852841645785,
-    "max_rate_per_s": 141100.00920641085,
-    "real_stability_limit": 2.785293563405282,
-    "samples": 40,
-    "substep_s": 7.8125e-06
-   },
-   "substeps": 128,
-   "wall_s": 1056.5499756389763
-  },
-  {
-   "effort_hold_s": 0.001,
-   "failure": null,
-   "foot_joint_error_rad": {
-    "ankle_angle_l": 0.01653093729120797,
-    "ankle_angle_r": 0.020009332919516454,
-    "mtp_angle_l": 0.0445631250352524,
-    "mtp_angle_r": 0.05203120905484977,
-    "subtalar_angle_l": 0.026654912331864764,
-    "subtalar_angle_r": 0.011618720156207725
-   },
-   "foot_point_deviation_m": {
-    "l": 0.004123721282720874,
-    "r": 0.003676579890375492
-   },
-   "reached_steps": 200,
-   "rk4_stability": {
-    "max_abs_z": 1.7264986172568333,
-    "max_amplification": 0.27639106672794733,
-    "max_rate_per_s": 110495.91150443733,
-    "real_stability_limit": 2.785293563405282,
-    "samples": 40,
-    "substep_s": 1.5625e-05
-   },
-   "substeps": 64,
-   "wall_s": 451.05961297499016
-  },
-  {
-   "effort_hold_s": 0.0005,
-   "failure": null,
-   "foot_joint_error_rad": {
-    "ankle_angle_l": 0.009984630431140284,
-    "ankle_angle_r": 0.01338776856074081,
-    "mtp_angle_l": 0.022019217666797628,
-    "mtp_angle_r": 0.0303497850903689,
-    "subtalar_angle_l": 0.02310530687661341,
-    "subtalar_angle_r": 0.018012682900288953
-   },
-   "foot_point_deviation_m": {
-    "l": 0.0032718467038988053,
-    "r": 0.002779535496027316
-   },
-   "reached_steps": 200,
-   "rk4_stability": {
-    "max_abs_z": 2.055899876460003,
-    "max_amplification": 0.35355854304890466,
-    "max_rate_per_s": 131577.59209344018,
-    "real_stability_limit": 2.785293563405282,
-    "samples": 40,
-    "substep_s": 1.5625e-05
-   },
-   "substeps": 64,
-   "wall_s": 497.73588482895866
-  },
-  {
-   "effort_hold_s": 0.000125,
-   "failure": null,
-   "foot_joint_error_rad": {
-    "ankle_angle_l": 0.005343880588026817,
-    "ankle_angle_r": 0.006283827547674148,
-    "mtp_angle_l": 0.004978444596511136,
-    "mtp_angle_r": 0.007598545992491869,
-    "subtalar_angle_l": 0.012356301930485059,
-    "subtalar_angle_r": 0.013765202732237943
-   },
-   "foot_point_deviation_m": {
-    "l": 0.00172862550029375,
-    "r": 0.0019313347666284693
-   },
-   "reached_steps": 200,
-   "rk4_stability": {
-    "max_abs_z": 2.2650981053808255,
-    "max_amplification": 0.46014870709491773,
-    "max_rate_per_s": 144966.27874437283,
-    "real_stability_limit": 2.785293563405282,
-    "samples": 40,
-    "substep_s": 1.5625e-05
-   },
-   "substeps": 64,
-   "wall_s": 522.5168511089869
+  "bundle_spec_sha256": "fc2c74babef4ede1c687eb129b13e6ccfe5279019549be94df8d3b2e2faa84e9",
+  "committed_policy_run_reproduces_bundle": true,
+  "generator": "scripts/measure_loaded_foot_tracking.py",
+  "issue": 13104,
+  "runs": [
+    {
+      "effort_hold_s": 0.001,
+      "failure": null,
+      "foot_joint_error_rad": {
+        "ankle_angle_l": 0.058005929096890285,
+        "ankle_angle_r": 0.012121593190327351,
+        "mtp_angle_l": 0.1362377872027318,
+        "mtp_angle_r": 0.02791242465779627,
+        "subtalar_angle_l": 0.12648398132831593,
+        "subtalar_angle_r": 0.009900471793253766
+      },
+      "foot_point_deviation_m": {
+        "l": 0.017647857739230863,
+        "r": 0.0022623948738937642
+      },
+      "reached_steps": 200,
+      "rk4_stability": {
+        "max_abs_z": 4.251961435353309,
+        "max_amplification": 6.5946586390627076,
+        "max_rate_per_s": 34015.69148282647,
+        "real_stability_limit": 2.785293563405282,
+        "samples": 40,
+        "substep_s": 0.000125
+      },
+      "substeps": 8,
+      "wall_s": 103.46756980201462
+    },
+    {
+      "effort_hold_s": 0.000125,
+      "failure": null,
+      "foot_joint_error_rad": {
+        "ankle_angle_l": 0.03295614406008529,
+        "ankle_angle_r": 0.01910187830411525,
+        "mtp_angle_l": 0.07816932533910469,
+        "mtp_angle_r": 0.05071972900020907,
+        "subtalar_angle_l": 0.0466011321077312,
+        "subtalar_angle_r": 0.03522487714352682
+      },
+      "foot_point_deviation_m": {
+        "l": 0.00709873047251462,
+        "r": 0.0053069682986925625
+      },
+      "reached_steps": 200,
+      "rk4_stability": {
+        "max_abs_z": 10.538684162488673,
+        "max_amplification": 364.8813280330049,
+        "max_rate_per_s": 84309.47329990938,
+        "real_stability_limit": 2.785293563405282,
+        "samples": 40,
+        "substep_s": 0.000125
+      },
+      "substeps": 8,
+      "wall_s": 112.12630054703914
+    },
+    {
+      "effort_hold_s": 0.00025,
+      "failure": null,
+      "foot_joint_error_rad": {
+        "ankle_angle_l": 0.022076939242145432,
+        "ankle_angle_r": 0.008674763250884177,
+        "mtp_angle_l": 0.05420974097332247,
+        "mtp_angle_r": 0.014849269809317682,
+        "subtalar_angle_l": 0.058550813179812804,
+        "subtalar_angle_r": 0.008110381220561725
+      },
+      "foot_point_deviation_m": {
+        "l": 0.00812539810864814,
+        "r": 0.0015716848380568226
+      },
+      "reached_steps": 200,
+      "rk4_stability": {
+        "max_abs_z": 2.8165054334373467,
+        "max_amplification": 1.0480864874035354,
+        "max_rate_per_s": 45064.08693499755,
+        "real_stability_limit": 2.785293563405282,
+        "samples": 40,
+        "substep_s": 6.25e-5
+      },
+      "substeps": 16,
+      "wall_s": 124.23808752198238
+    },
+    {
+      "effort_hold_s": 0.00025,
+      "failure": null,
+      "foot_joint_error_rad": {
+        "ankle_angle_l": 0.011647759708255767,
+        "ankle_angle_r": 0.009077500902603952,
+        "mtp_angle_l": 0.02761315450165635,
+        "mtp_angle_r": 0.01600948130442878,
+        "subtalar_angle_l": 0.03952128178901571,
+        "subtalar_angle_r": 0.014833181970121408
+      },
+      "foot_point_deviation_m": {
+        "l": 0.005464842751224867,
+        "r": 0.002077981533170284
+      },
+      "reached_steps": 200,
+      "rk4_stability": {
+        "max_abs_z": 2.792536396409908,
+        "max_amplification": 1.0109749250444113,
+        "max_rate_per_s": 89361.16468511705,
+        "real_stability_limit": 2.785293563405282,
+        "samples": 40,
+        "substep_s": 3.125e-5
+      },
+      "substeps": 32,
+      "wall_s": 167.74297145899618
+    },
+    {
+      "effort_hold_s": 0.00025,
+      "failure": null,
+      "foot_joint_error_rad": {
+        "ankle_angle_l": 0.005993951100973949,
+        "ankle_angle_r": 0.009192589628480963,
+        "mtp_angle_l": 0.009474819508560007,
+        "mtp_angle_r": 0.016257710515159538,
+        "subtalar_angle_l": 0.019859233588058536,
+        "subtalar_angle_r": 0.02216586087438722
+      },
+      "foot_point_deviation_m": {
+        "l": 0.002763012721263156,
+        "r": 0.003100279866529191
+      },
+      "reached_steps": 200,
+      "rk4_stability": {
+        "max_abs_z": 2.2054550202656245,
+        "max_amplification": 0.42444390232962437,
+        "max_rate_per_s": 141149.12129699998,
+        "real_stability_limit": 2.785293563405282,
+        "samples": 40,
+        "substep_s": 1.5625e-5
+      },
+      "substeps": 64,
+      "wall_s": 254.47079957497772
+    },
+    {
+      "effort_hold_s": 0.00025,
+      "failure": null,
+      "foot_joint_error_rad": {
+        "ankle_angle_l": 0.0059939508619599735,
+        "ankle_angle_r": 0.009192580846257348,
+        "mtp_angle_l": 0.009474823479230652,
+        "mtp_angle_r": 0.016257686239457572,
+        "subtalar_angle_l": 0.01985923618837228,
+        "subtalar_angle_r": 0.022165860944788663
+      },
+      "foot_point_deviation_m": {
+        "l": 0.0027630130645149784,
+        "r": 0.003100279674321293
+      },
+      "reached_steps": 200,
+      "rk4_stability": {
+        "max_abs_z": 1.10272739844977,
+        "max_amplification": 0.3434004036184159,
+        "max_rate_per_s": 141149.10700157058,
+        "real_stability_limit": 2.785293563405282,
+        "samples": 40,
+        "substep_s": 7.8125e-6
+      },
+      "substeps": 128,
+      "wall_s": 443.93631000595633
+    },
+    {
+      "effort_hold_s": 0.001,
+      "failure": null,
+      "foot_joint_error_rad": {
+        "ankle_angle_l": 0.012609739914377027,
+        "ankle_angle_r": 0.019316478443428486,
+        "mtp_angle_l": 0.031597708524242304,
+        "mtp_angle_r": 0.048212914545984274,
+        "subtalar_angle_l": 0.038332162368462847,
+        "subtalar_angle_r": 0.012105200232500236
+      },
+      "foot_point_deviation_m": {
+        "l": 0.005459340111063992,
+        "r": 0.0034735545051459323
+      },
+      "reached_steps": 200,
+      "rk4_stability": {
+        "max_abs_z": 1.8977632988460942,
+        "max_amplification": 0.3043070544459151,
+        "max_rate_per_s": 121456.85112615002,
+        "real_stability_limit": 2.785293563405282,
+        "samples": 40,
+        "substep_s": 1.5625e-5
+      },
+      "substeps": 64,
+      "wall_s": 266.96482748299604
+    },
+    {
+      "effort_hold_s": 0.0005,
+      "failure": null,
+      "foot_joint_error_rad": {
+        "ankle_angle_l": 0.008110744382722801,
+        "ankle_angle_r": 0.013718805059829975,
+        "mtp_angle_l": 0.015052762364751096,
+        "mtp_angle_r": 0.030056926876688442,
+        "subtalar_angle_l": 0.029728565556271666,
+        "subtalar_angle_r": 0.019770411086624
+      },
+      "foot_point_deviation_m": {
+        "l": 0.0041388002956203,
+        "r": 0.0029479821347900025
+      },
+      "reached_steps": 200,
+      "rk4_stability": {
+        "max_abs_z": 2.0650230376781655,
+        "max_amplification": 0.35716824128923874,
+        "max_rate_per_s": 132161.4744114026,
+        "real_stability_limit": 2.785293563405282,
+        "samples": 40,
+        "substep_s": 1.5625e-5
+      },
+      "substeps": 64,
+      "wall_s": 254.51855265296763
+    },
+    {
+      "effort_hold_s": 0.000125,
+      "failure": null,
+      "foot_joint_error_rad": {
+        "ankle_angle_l": 0.004976099839555326,
+        "ankle_angle_r": 0.006479891373512958,
+        "mtp_angle_l": 0.003712087153631936,
+        "mtp_angle_r": 0.008088791052589472,
+        "subtalar_angle_l": 0.011166180083982272,
+        "subtalar_angle_r": 0.01280355651770396
+      },
+      "foot_point_deviation_m": {
+        "l": 0.0016020016606212426,
+        "r": 0.001807541812190004
+      },
+      "reached_steps": 200,
+      "rk4_stability": {
+        "max_abs_z": 2.21889128004301,
+        "max_amplification": 0.43209741410470537,
+        "max_rate_per_s": 142009.04192275263,
+        "real_stability_limit": 2.785293563405282,
+        "samples": 40,
+        "substep_s": 1.5625e-5
+      },
+      "substeps": 64,
+      "wall_s": 254.88168824400054
+    }
+  ],
+  "source_commit": "18970f57f467497404b106ee52a3db0c0ca9e3d1",
+  "substep_convergence": [
+    {
+      "max_coordinate_rad": 0.02659658647166612,
+      "max_root_translation_m": 0.0010438484407060875,
+      "rows": 201,
+      "substeps": [16, 32]
+    },
+    {
+      "max_coordinate_rad": 0.019662048200957176,
+      "max_root_translation_m": 0.0004351198460369283,
+      "rows": 201,
+      "substeps": [32, 64]
+    },
+    {
+      "max_coordinate_rad": 3.1774274293280835e-8,
+      "max_root_translation_m": 2.3257355208361474e-9,
+      "rows": 201,
+      "substeps": [64, 128]
+    }
+  ],
+  "window": {
+    "duration_s": 0.2,
+    "start_s": 1.4000000000000001
   }
- ],
- "source_commit": "000103234781acd67d1db0874a53e71e84b51146",
- "substep_convergence": [
-  {
-   "max_coordinate_rad": 0.016633866165326402,
-   "max_root_translation_m": 0.0006838855910317946,
-   "rows": 201,
-   "substeps": [
-    16,
-    32
-   ]
-  },
-  {
-   "max_coordinate_rad": 0.009182595468166372,
-   "max_root_translation_m": 0.00028493204061388845,
-   "rows": 201,
-   "substeps": [
-    32,
-    64
-   ]
-  },
-  {
-   "max_coordinate_rad": 2.345805104157772e-08,
-   "max_root_translation_m": 1.3296616906480208e-09,
-   "rows": 201,
-   "substeps": [
-    64,
-    128
-   ]
-  }
- ],
- "window": {
-  "duration_s": 0.2,
-  "start_s": 1.4000000000000001
- }
 }
