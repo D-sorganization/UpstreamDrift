@@ -49,6 +49,7 @@ from typing import Any, TypeAlias
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.motion_matching.full_body_schema import require_full_body_schema
 from src.shared.python.motion_matching.full_body_spec import (
     FULL_BODY_SCHEMA_VERSION,
     canonical_sha256,
@@ -329,8 +330,9 @@ def relocate_pelvis(
     joints, a missing ``hip_frame`` on the pelvis, or centres that are not
     finite, 3-vectors and distinct.
     """
-    if spec.get("schema_version") != FULL_BODY_SCHEMA_VERSION:
-        raise ValueError(f"relocation needs a {FULL_BODY_SCHEMA_VERSION} document")
+    require_full_body_schema(
+        spec, consumer="pelvis relocation", accepted=(FULL_BODY_SCHEMA_VERSION,)
+    )
     c_r, c_l = _vec3(centre_r, "centre_r"), _vec3(centre_l, "centre_l")
     inter = float(np.linalg.norm(c_r - c_l))
     if inter < 1.0e-6:

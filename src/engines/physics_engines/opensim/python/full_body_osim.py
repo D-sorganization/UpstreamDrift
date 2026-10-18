@@ -37,11 +37,12 @@ from src.shared.python.club_body_names import (
     SPEC_CLUB_HEAD_BODY_NAME,
 )
 from src.shared.python.grip_contact import GripInterface
+from src.shared.python.motion_matching.full_body_schema import require_full_body_schema
 from src.shared.python.model_appearance.club_assembly import assembly_from_spec
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_SCHEMA_VERSIONS = {"full-body-v1"}
+SUPPORTED_SCHEMA_VERSIONS = ("full-body-v1", "full-body-v2")
 DEFAULT_CLOSURE_TYPE = "weld"
 CLUB_BODY = CANONICAL_CLUB_HEAD_NAME  # OpenSim name of the spec's club body
 DEFAULT_CLUB_GEOMETRY_REF = ""  # bare names; loaders register models/geometry/club
@@ -57,11 +58,9 @@ def _format_numbers(values: Sequence[float] | np.ndarray) -> str:
 
 def _validate_spec(spec: Mapping[str, Any]) -> None:
     """Validate top-level full-body specification structure."""
-    if spec.get("schema_version") not in SUPPORTED_SCHEMA_VERSIONS:
-        raise ValueError(
-            f"Unsupported schema version: {spec.get('schema_version')!r}; "
-            f"expected one of {SUPPORTED_SCHEMA_VERSIONS}"
-        )
+    require_full_body_schema(
+        spec, consumer="OpenSim export", accepted=SUPPORTED_SCHEMA_VERSIONS
+    )
     for required_key in ("bodies", "joints", "coordinate_order", "contact", "closure"):
         if required_key not in spec:
             raise ValueError(f"Missing required key in specification: {required_key!r}")

@@ -24,6 +24,12 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.body_part_viz.fitters._kabsch import kabsch_rotation
+from src.shared.python.motion_matching.full_body_schema import (
+    FullBodySchema,
+    TrunkJointDefinition,
+    TrunkTopology,
+    full_body_schema,
+)
 from src.shared.python.motion_matching.tibial_torsion import validate_tibial_torsion
 from src.shared.python.motion_matching.tour_capture_contract import tracked_labels
 
@@ -350,7 +356,15 @@ def derive_full_body_spec(
 
 
 def upper_body_slice(document: Mapping[str, Any]) -> dict[str, Any]:
-    """Recover the embedded upper-body document from its recorded counts."""
+    """Recover the embedded upper-body document from its recorded counts.
+
+    Schema-aware: the document's ``schema_version`` must be registered in
+    :mod:`full_body_schema` (``ValueError`` otherwise). Every registered
+    schema stores its upper body first, so the slice is taken by the recorded
+    counts; a v2 slice carries its own upper schema label and is never the
+    qualified native upper body.
+    """
+    full_body_schema(document)
     counts = document["upper_body_counts"]
     n_bodies, n_joints, n_coordinates = (
         int(counts["bodies"]),
@@ -372,9 +386,33 @@ def upper_body_slice(document: Mapping[str, Any]) -> dict[str, Any]:
 def validate_full_body_spec(
     document: Mapping[str, Any], upper: Mapping[str, Any]
 ) -> None:
+    """Raise ValueError unless ``document`` is valid under its own schema.
+
+    Dispatches on ``schema_version`` through :func:`full_body_schema`; for
+    ``full-body-v1`` this is :func:`validate_full_body_v1_spec` (a strict
+    extension of ``upper``). Unregistered schemas raise ``ValueError``.
+    """
+    full_body_schema(document).validate(document, upper)
+
+
+def validate_full_body_v1_spec(
+    document: Mapping[str, Any], upper: Mapping[str, Any]
+) -> None:
     """Raise ValueError unless ``document`` is a valid strict extension of ``upper``."""
     if document.get("schema_version") != FULL_BODY_SCHEMA_VERSION:
         raise ValueError("Not a full-body-v1 document")
+    validate_upper_body_identity(document, upper)
+    validate_full_body_structure(document)
+
+
+def validate_upper_body_identity(
+    document: Mapping[str, Any], upper: Mapping[str, Any]
+) -> None:
+    """Raise ValueError unless the embedded upper body is exactly ``upper``.
+
+    Checks the recorded ``upper_body_sha256``, the counts block and that the
+    slice recovered from the counts is byte-identical to ``upper``.
+    """
     if document.get("upper_body_sha256") != canonical_sha256(upper):
         raise ValueError("Embedded upper-body identity differs from the supplied base")
     counts = document.get("upper_body_counts")
@@ -386,6 +424,14 @@ def validate_full_body_spec(
         raise ValueError("Missing upper-body counts")
     if upper_body_slice(document) != {key: upper[key] for key in _UPPER_KEYS}:
         raise ValueError("Upper-body slice is not byte-identical to the base spec")
+
+
+def validate_full_body_structure(document: Mapping[str, Any]) -> None:
+    """Schema-independent structure: gravity, tree, masses, contact, markers.
+
+    Raises ``ValueError`` on the first violation. Shared by every registered
+    schema so the structural rules are stated once.
+    """
     gravity = np.asarray(document["gravity_m_s2"], dtype=float)
     if (
         gravity.shape != (3,)
@@ -453,6 +499,43 @@ def validate_full_body_spec(
     ):
         raise ValueError("Provenance is required")
     validate_tibial_torsion(document)
+
+
+#: The v1 trunk, declared once: a twist about pelvis z then a universal joint,
+#: both at the single L5/S1 pivot. ISB signs follow ``coordinate_sign_map``:
+#: +SpineInputY is forward flexion (ISB extension is positive).
+V1_TRUNK = TrunkTopology(
+    joints=(
+        TrunkJointDefinition(
+            name="Torso Kinetically Driven",
+            level="L5_S1",
+            parent_role="pelvis",
+            child_role="twist_base",
+            primitives=("Rz",),
+            coordinates=("TorsoInput",),
+            isb_axes=("axial_rotation",),
+            isb_signs=(1.0,),
+        ),
+        TrunkJointDefinition(
+            name="Spine Tilt Kinetically Driven",
+            level="L5_S1",
+            parent_role="twist_base",
+            child_role="thorax",
+            primitives=("Rx", "Ry"),
+            coordinates=("SpineInputX", "SpineInputY"),
+            isb_axes=("lateral_bending", "flexion_extension"),
+            isb_signs=(1.0, -1.0),
+        ),
+    ),
+    coordinates=("SpineInputX", "SpineInputY", "TorsoInput"),
+    description="single L5/S1 pivot: TorsoInput (Rz) then SpineInputX/Y (Rx, Ry)",
+)
+FULL_BODY_SCHEMA = FullBodySchema(
+    schema_id=FULL_BODY_SCHEMA_VERSION,
+    trunk=V1_TRUNK,
+    validate=validate_full_body_v1_spec,
+    description="qualified upper body plus lower limbs (default)",
+)
 
 
 def save_full_body_spec(document: Mapping[str, Any], path: Path) -> Path:
