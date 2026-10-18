@@ -506,6 +506,7 @@ def _assert_axes_match_table(axes: dict[str, np.ndarray]) -> None:
         assert got < sign_map.AXIS_TOLERANCE_DEG, (row.coordinate, got)
 
 
+@pytest.mark.requires_pinocchio
 def test_pinocchio_forward_kinematics_reproduces_the_table() -> None:
     pin = pytest.importorskip("pinocchio")
     if not hasattr(pin, "SE3"):
@@ -526,6 +527,7 @@ def test_pinocchio_forward_kinematics_reproduces_the_table() -> None:
     _assert_axes_match_table(_axes_from_rotation_provider(spec, rotation_of))
 
 
+@pytest.mark.requires_drake
 def test_drake_forward_kinematics_reproduces_the_table() -> None:
     pytest.importorskip("pydrake")
     from src.engines.physics_engines.drake.python.full_body_model import (

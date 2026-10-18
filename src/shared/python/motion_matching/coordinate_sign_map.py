@@ -187,7 +187,7 @@ class CoordinateSign:
             raise ValueError("meaning must say what a positive value is")
 
 
-def _rows() -> tuple[CoordinateSign, ...]:
+def _rows_part1() -> tuple[CoordinateSign, ...]:
     r = CoordinateSign
     return (
         r(
@@ -271,6 +271,12 @@ def _rows() -> tuple[CoordinateSign, ...]:
             "left",
             "axial rotation to the left of the upper torso on the pelvis (twist about pelvis z)",
         ),
+    )
+
+
+def _rows_part2() -> tuple[CoordinateSign, ...]:
+    r = CoordinateSign
+    return (
         r(
             "LEInput",
             "LUpperArm",
@@ -352,6 +358,12 @@ def _rows() -> tuple[CoordinateSign, ...]:
             "left",
             "extension of the left wrist (toward the dorsum; flexion is negative)",
         ),
+    )
+
+
+def _rows_part3() -> tuple[CoordinateSign, ...]:
+    r = CoordinateSign
+    return (
         r(
             "REInput",
             "RUpperArm",
@@ -433,6 +445,12 @@ def _rows() -> tuple[CoordinateSign, ...]:
             "left",
             "flexion of the right wrist (toward the palm; extension is negative)",
         ),
+    )
+
+
+def _rows_part4() -> tuple[CoordinateSign, ...]:
+    r = CoordinateSign
+    return (
         r(
             "NeckInputX",
             "COMRod",
@@ -514,6 +532,12 @@ def _rows() -> tuple[CoordinateSign, ...]:
             "up",
             "inversion of the right subtalar joint (oblique axis; sole turns medially)",
         ),
+    )
+
+
+def _rows_part5() -> tuple[CoordinateSign, ...]:
+    r = CoordinateSign
+    return (
         r(
             "mtp_angle_r",
             "calcn_r",
@@ -586,6 +610,16 @@ def _rows() -> tuple[CoordinateSign, ...]:
             "left",
             "flexion of the left toes (oblique axis; toe tip moves down)",
         ),
+    )
+
+
+def _rows() -> tuple[CoordinateSign, ...]:
+    return (
+        *_rows_part1(),
+        *_rows_part2(),
+        *_rows_part3(),
+        *_rows_part4(),
+        *_rows_part5(),
     )
 
 
