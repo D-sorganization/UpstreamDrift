@@ -1,8 +1,8 @@
 """Text form behind the plate declarations dialog (OF-07 follow-up, #13087).
 
 A swing file cannot carry the plate's uncertainty, sensing depth, capacity,
-where the stance frame sits in the model's world, or how the plate clock maps
-onto model time.  The dialog collects those as text; this module turns the
+how its channels' sampling is skewed, where the stance frame sits in the
+model's world, or how the plate clock maps onto model time.  The dialog collects those as text; this module turns the
 text into a :class:`PlateImportContext` and names the field at fault when it
 cannot.  Physical facts start empty: they are declared, never assumed.
 """
@@ -22,9 +22,12 @@ from src.shared.python.force_plates import (
 )
 from src.shared.python.force_plates.open_fp_format import PlateDeclarations
 from src.shared.python.force_plates.open_fp_format.declared_import import (
+    COP_SKEW_CHOICES,
     DeclaredPlate,
+    DeclaredReading,
     DeclaredStance,
 )
+from src.shared.python.force_plates.open_fp_format.overlay_file import DEFAULT_COVERAGE
 from src.shared.python.impact_parameters.target_frame import UD_DEFAULT_TARGET_DIR
 
 __all__ = [
@@ -49,7 +52,8 @@ class PlateImportContext:
     """Facts a plate trial file cannot carry: set by the host before importing.
 
     ``declared`` is the plate uncertainty and geometry, ``placement`` the
-    stance frame in the model's world, ``alignment`` the clock mapping.
+    stance frame in the model's world, ``alignment`` the clock mapping and
+    ``options`` the reading budget (``None`` for the reader's default).
     """
 
     declared: PlateDeclarations
@@ -81,6 +85,14 @@ FORM_FIELDS: tuple[FormField, ...] = (
     FormField("sensing_depth_m", "Sensing plane depth [m]", "Plate"),
     FormField("sensing_depth_sigma_m", "Sensing depth uncertainty [m]", "Plate"),
     FormField("capacity_n", "Pair capacity [N]", "Plate"),
+    FormField("skew_s", "Channel timing skew within a sample [s]", "Plate"),
+    FormField(
+        "cop_skew",
+        "CoP channel skews",
+        "Plate",
+        choices=COP_SKEW_CHOICES,
+        initial=COP_SKEW_CHOICES[0],
+    ),
     FormField(
         "handedness", "Handedness", "Stance", choices=HANDEDNESS_CHOICES, initial="RH"
     ),
@@ -167,6 +179,16 @@ def _plate(texts: Mapping[str, str]) -> DeclaredPlate:
     )
 
 
+def _options(texts: Mapping[str, str]) -> ReadingOptions:
+    reading = DeclaredReading(
+        skew_s=_number(texts, "skew_s"), cop_skew=_choice(texts, "cop_skew")
+    )
+    try:
+        return reading.to_options(DEFAULT_COVERAGE)
+    except (TypeError, ValueError) as exc:
+        raise PlateFormError(_named_key(exc, "Plate"), str(exc)) from exc
+
+
 def _stance(texts: Mapping[str, str]) -> DeclaredStance:
     return DeclaredStance(
         handedness=_choice(texts, "handedness"),
@@ -221,4 +243,4 @@ def context_from_form(texts: Mapping[str, str]) -> PlateImportContext:
         placement = stance.to_placement(frame_label=_FRAME_LABEL)
     except (TypeError, ValueError) as exc:
         raise PlateFormError(_named_key(exc, "Stance"), str(exc)) from exc
-    return PlateImportContext(declared, placement, _alignment(texts))
+    return PlateImportContext(declared, placement, _alignment(texts), _options(texts))

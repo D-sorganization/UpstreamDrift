@@ -320,6 +320,7 @@ describe('GroundReactionCharts', () => {
           capacity_n: 3923,
         },
         alignment: { offset_s: 0, sigma_offset_s: 0.001, kind: 'manual', note: 'clock' },
+        reading: { skew_s: 0, cop_skew: 'unknown' },
       };
       render(<GroundReactionCharts runId="r1" overlay={request} />);
       await screen.findByTestId('ground-reaction-unqualified-banner');
@@ -341,6 +342,7 @@ describe('GroundReactionCharts', () => {
       expect(request.run_id).toBe('r1');
       expect(request.trial).toBe('session-1/swing-0001.json');
       expect(request.declared.capacity_n).toBe(3923);
+      expect(request.reading).toEqual({ skew_s: 0, cop_skew: 'unknown' });
     });
 
     it('shows a server refusal next to the form and returns to the model', async () => {
