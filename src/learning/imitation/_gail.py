@@ -13,102 +13,16 @@ if TYPE_CHECKING:
 from src.learning.imitation._base import ImitationLearner, TrainingConfig
 from src.learning.imitation.dataset import DemonstrationDataset
 
-_ADAM_BETA1 = 0.9
-_ADAM_BETA2 = 0.999
-_ADAM_EPS = 1e-8
-
-
-def _mlp_forward(
-    layers: list[dict[str, NDArray[np.floating]]], x: NDArray[np.floating]
-) -> tuple[NDArray[np.floating], list[NDArray[np.floating]]]:
-    """Forward pass through a ReLU MLP, retaining per-layer inputs.
-
-    Args:
-        layers: Layer dicts with ``W`` and ``b``.
-        x: Batched input, shape ``(N, in_dim)``.
-
-    Returns:
-        ``(output, activations)`` where ``activations[i]`` is the input fed to
-        ``layers[i]``. Postcondition: ``len(activations) == len(layers)``.
-    """
-    activations: list[NDArray[np.floating]] = []
-    for i, layer in enumerate(layers):
-        activations.append(x)
-        x = x @ layer["W"] + layer["b"]
-        if i < len(layers) - 1:
-            x = np.maximum(0.0, x)
-    return x, activations
-
-
-def _mlp_backward(
-    layers: list[dict[str, NDArray[np.floating]]],
-    activations: list[NDArray[np.floating]],
-    grad_output: NDArray[np.floating],
-) -> tuple[list[dict[str, NDArray[np.floating]]], NDArray[np.floating]]:
-    """Backpropagate ``grad_output`` through a ReLU MLP.
-
-    Args:
-        layers: Layer dicts with ``W`` and ``b``.
-        activations: Per-layer inputs from :func:`_mlp_forward`.
-        grad_output: Gradient of the loss w.r.t. the network output.
-
-    Returns:
-        ``(grads, grad_input)`` where ``grads[i]`` holds ``dW``/``db`` for
-        ``layers[i]`` and ``grad_input`` is the gradient w.r.t. the network
-        input (needed to chain the discriminator gradient into the policy).
-    """
-    grads: list[dict[str, NDArray[np.floating]]] = [
-        {"W": np.zeros(0), "b": np.zeros(0)} for _ in layers
-    ]
-    grad = grad_output
-    for i in range(len(layers) - 1, -1, -1):
-        a = activations[i]
-        grads[i] = {"W": a.T @ grad, "b": grad.sum(axis=0)}
-        grad = grad @ layers[i]["W"].T
-        if i > 0:
-            # ReLU derivative: activations[i] is the post-ReLU output of i-1.
-            grad = grad * (a > 0)
-    return grads, grad
-
-
-def _adam_step(
-    layers: list[dict[str, NDArray[np.floating]]],
-    grads: list[dict[str, NDArray[np.floating]]],
-    state: list[dict[str, NDArray[np.floating]]],
-    lr: float,
-    step: int,
-    weight_decay: float = 0.0,
-) -> None:
-    """Apply one in-place Adam update to ``layers``."""
-    bias1 = 1.0 - _ADAM_BETA1**step
-    bias2 = 1.0 - _ADAM_BETA2**step
-    for layer, grad, moments in zip(layers, grads, state, strict=True):
-        for key in ("W", "b"):
-            g = grad[key] + weight_decay * layer[key]
-            moments[f"m_{key}"] = (
-                _ADAM_BETA1 * moments[f"m_{key}"] + (1.0 - _ADAM_BETA1) * g
-            )
-            moments[f"v_{key}"] = _ADAM_BETA2 * moments[f"v_{key}"] + (
-                1.0 - _ADAM_BETA2
-            ) * (g * g)
-            m_hat = moments[f"m_{key}"] / bias1
-            v_hat = moments[f"v_{key}"] / bias2
-            layer[key] -= lr * m_hat / (np.sqrt(v_hat) + _ADAM_EPS)
-
-
-def _init_adam_state(
-    layers: list[dict[str, NDArray[np.floating]]],
-) -> list[dict[str, NDArray[np.floating]]]:
-    """Create zeroed Adam moment buffers matching ``layers``."""
-    return [
-        {
-            "m_W": np.zeros_like(layer["W"]),
-            "v_W": np.zeros_like(layer["W"]),
-            "m_b": np.zeros_like(layer["b"]),
-            "v_b": np.zeros_like(layer["b"]),
-        }
-        for layer in layers
-    ]
+from src.learning.imitation._mlp import (
+    _ADAM_BETA1,
+    _ADAM_BETA2,
+    _ADAM_EPS,
+    _adam_step,
+    _build_mlp,
+    _init_adam_state,
+    _mlp_backward,
+    _mlp_forward,
+)
 
 
 class GAIL(ImitationLearner):
@@ -149,47 +63,18 @@ class GAIL(ImitationLearner):
 
     def _build_networks(self) -> None:
         """Build policy and discriminator networks."""
-        # Build simple MLP policy
-        policy_layers = []
-        input_dim = self.observation_dim
-
-        for hidden_dim in self.config.hidden_sizes:
-            policy_layers.append(
-                {
-                    "W": np.random.randn(input_dim, hidden_dim) * 0.01,
-                    "b": np.zeros(hidden_dim),
-                }
-            )
-            input_dim = hidden_dim
-
-        policy_layers.append(
-            {
-                "W": np.random.randn(input_dim, self.action_dim) * 0.01,
-                "b": np.zeros(self.action_dim),
-            }
+        self._policy = _build_mlp(
+            input_dim=self.observation_dim,
+            output_dim=self.action_dim,
+            hidden_sizes=self.config.hidden_sizes,
+            init="small",
         )
-        self._policy = policy_layers  # type: ignore[assignment]
-
-        # Build discriminator (state-action -> [0, 1])
-        disc_layers = []
-        input_dim = self.observation_dim + self.action_dim
-
-        for hidden_dim in self.config.hidden_sizes:
-            disc_layers.append(
-                {
-                    "W": np.random.randn(input_dim, hidden_dim) * 0.01,
-                    "b": np.zeros(hidden_dim),
-                }
-            )
-            input_dim = hidden_dim
-
-        disc_layers.append(
-            {
-                "W": np.random.randn(input_dim, 1) * 0.01,
-                "b": np.zeros(1),
-            }
+        self._discriminator = _build_mlp(
+            input_dim=self.observation_dim + self.action_dim,
+            output_dim=1,
+            hidden_sizes=self.config.hidden_sizes,
+            init="small",
         )
-        self._discriminator = disc_layers  # type: ignore[assignment]
 
     def _forward_policy(self, x: NDArray[np.floating]) -> NDArray[np.floating]:
         """Forward pass through policy network."""
@@ -471,7 +356,7 @@ class GAIL(ImitationLearner):
             save_data[f"disc_{i}_W"] = layer["W"]
             save_data[f"disc_{i}_b"] = layer["b"]
 
-        np.savez(path, **save_data)
+        np.savez(path, **save_data)  # type: ignore[arg-type]
 
     def load(self, path: str | Path) -> None:
         """Load GAIL networks."""

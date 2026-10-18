@@ -2,17 +2,28 @@
 
 from __future__ import annotations
 
+import json
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
+import warnings
 
-import json
 import numpy as np
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
 from src.learning.imitation._base import ImitationLearner, TrainingConfig
+from src.learning.imitation._mlp import (
+    _adam_step,
+    _build_mlp,
+    _init_adam_state,
+    _mlp_backward,
+    _mlp_forward,
+)
 from src.learning.imitation.dataset import DemonstrationDataset
+
+logger = logging.getLogger(__name__)
 
 
 class BehaviorCloning(ImitationLearner):
@@ -37,31 +48,13 @@ class BehaviorCloning(ImitationLearner):
         self._build_policy()
 
     def _build_policy(self) -> None:
-        """Build the neural network policy."""
-        # Build a simple MLP policy
-        # In production, would use PyTorch/JAX
-        # Here we implement a simple numpy-based MLP for demonstration
-        layers = []
-        input_dim = self.observation_dim
-
-        for hidden_dim in self.config.hidden_sizes:
-            layers.append(
-                {
-                    "W": np.random.randn(input_dim, hidden_dim) * 0.01,
-                    "b": np.zeros(hidden_dim),
-                }
-            )
-            input_dim = hidden_dim
-
-        # Output layer
-        layers.append(
-            {
-                "W": np.random.randn(input_dim, self.action_dim) * 0.01,
-                "b": np.zeros(self.action_dim),
-            }
+        """Build the neural network policy with He/Xavier initialisation."""
+        self._policy = _build_mlp(
+            input_dim=self.observation_dim,
+            output_dim=self.action_dim,
+            hidden_sizes=self.config.hidden_sizes,
+            init="he",
         )
-
-        self._policy = layers
 
     def _forward(self, x: NDArray[np.floating]) -> NDArray[np.floating]:
         """Forward pass through network.
@@ -74,12 +67,8 @@ class BehaviorCloning(ImitationLearner):
         """
         if x is None:
             raise ValueError("x must be provided")
-        for i, layer in enumerate(self._policy):
-            x = x @ layer["W"] + layer["b"]
-            # ReLU activation for hidden layers
-            if i < len(self._policy) - 1:
-                x = np.maximum(0, x)
-        return x
+        out, _ = _mlp_forward(self._policy, x)
+        return out
 
     def _compute_loss(
         self,
@@ -97,6 +86,8 @@ class BehaviorCloning(ImitationLearner):
         """
         if observations is None:
             raise ValueError("observations must be provided")
+        if actions is None:
+            raise ValueError("actions must be provided")
         predictions = self._forward(observations)
         diff = predictions - actions
         # ⚡ Bolt: np.vdot is ~2x faster than np.mean(diff**2) and avoids temporary array allocations
@@ -118,34 +109,12 @@ class BehaviorCloning(ImitationLearner):
         """
         if observations is None:
             raise ValueError("observations must be provided")
+        if actions is None:
+            raise ValueError("actions must be provided")
         batch_size = len(observations)
-
-        # Forward pass with caching
-        activations = [observations]
-        x = observations
-        for i, layer in enumerate(self._policy):
-            z = x @ layer["W"] + layer["b"]
-            x = np.maximum(0, z) if i < len(self._policy) - 1 else z  # Linear output
-            activations.append(x)
-
-        # Backward pass
-        gradients: list[dict[str, NDArray[np.floating]]] = []
-        predictions = activations[-1]
-        delta = 2 * (predictions - actions) / batch_size  # MSE gradient
-
-        for i in range(len(self._policy) - 1, -1, -1):
-            layer = self._policy[i]
-            a = activations[i]
-
-            grad_W = a.T @ delta
-            grad_b = delta.sum(axis=0)
-            gradients.insert(0, {"W": grad_W, "b": grad_b})
-
-            if i > 0:
-                delta = delta @ layer["W"].T
-                # ReLU gradient
-                delta = delta * (activations[i] > 0)
-
+        predictions, activations = _mlp_forward(self._policy, observations)
+        delta = 2.0 * (predictions - actions) / batch_size
+        gradients, _ = _mlp_backward(self._policy, activations, delta)
         return gradients
 
     def train(
@@ -161,14 +130,23 @@ class BehaviorCloning(ImitationLearner):
 
         Returns:
             Training history.
+
+        Raises:
+            ValueError: If dataset is invalid or validation_split is out of bounds.
         """
-        # Get training data
         if dataset is None:
             raise ValueError("dataset must be provided")
+        if not 0.0 <= validation_split < 1.0:
+            raise ValueError(
+                f"validation_split must be in [0, 1), got {validation_split}"
+            )
         observations, actions = dataset.to_state_action_pairs()
 
         if len(observations) == 0:
             raise ValueError("Dataset has no state-action pairs")
+
+        observations = np.asarray(observations, dtype=float)
+        actions = np.asarray(actions, dtype=float)
 
         # Split data
         n = len(observations)
@@ -183,9 +161,16 @@ class BehaviorCloning(ImitationLearner):
         val_obs = observations[val_idx] if n_val > 0 else train_obs[:100]
         val_act = actions[val_idx] if n_val > 0 else train_act[:100]
 
+        if len(train_obs) == 0:
+            raise ValueError("validation_split leaves no training samples")
+
         # Training loop
         history: dict[str, list[float]] = {"train_loss": [], "val_loss": []}
         lr = self.config.learning_rate
+        weight_decay = self.config.weight_decay
+        batch_size = max(1, min(self.config.batch_size, len(train_obs)))
+        adam_state = _init_adam_state(self._policy)
+        step = 0
 
         for _epoch in range(self.config.epochs):
             # Shuffle training data
@@ -193,23 +178,26 @@ class BehaviorCloning(ImitationLearner):
             train_obs = train_obs[perm]
             train_act = train_act[perm]
 
-            # Mini-batch training
             epoch_loss = 0.0
             n_batches = 0
 
-            for i in range(0, len(train_obs), self.config.batch_size):
-                batch_obs = train_obs[i : i + self.config.batch_size]
-                batch_act = train_act[i : i + self.config.batch_size]
+            for i in range(0, len(train_obs), batch_size):
+                batch_obs = train_obs[i : i + batch_size]
+                batch_act = train_act[i : i + batch_size]
+                step += 1
 
                 # Compute gradients
                 gradients = self._backward(batch_obs, batch_act)
 
-                # Update weights
-                for layer, grad in zip(self._policy, gradients, strict=True):
-                    layer["W"] -= lr * (
-                        grad["W"] + self.config.weight_decay * layer["W"]
-                    )
-                    layer["b"] -= lr * grad["b"]
+                # Update weights via Adam
+                _adam_step(
+                    self._policy,
+                    gradients,
+                    adam_state,
+                    lr,
+                    step,
+                    weight_decay,
+                )
 
                 epoch_loss += self._compute_loss(batch_obs, batch_act)
                 n_batches += 1
@@ -220,6 +208,18 @@ class BehaviorCloning(ImitationLearner):
 
             history["train_loss"].append(train_loss)
             history["val_loss"].append(val_loss)
+
+        # Postcondition: warn if training did not decrease loss by a margin
+        if len(history["train_loss"]) >= 2:
+            initial_loss = history["train_loss"][0]
+            final_loss = history["train_loss"][-1]
+            if initial_loss > 0 and final_loss >= initial_loss * 0.99:
+                msg = (
+                    f"Training did not decrease loss significantly: "
+                    f"initial loss {initial_loss:.4f}, final loss {final_loss:.4f}."
+                )
+                logger.warning(msg)
+                warnings.warn(msg, UserWarning, stacklevel=2)
 
         self._training_history = history
         return history
@@ -279,7 +279,7 @@ class BehaviorCloning(ImitationLearner):
             save_data[f"layer_{i}_W"] = layer["W"]
             save_data[f"layer_{i}_b"] = layer["b"]
 
-        np.savez(path, **save_data)
+        np.savez(path, **save_data)  # type: ignore[arg-type]
 
     def load(self, path: str | Path) -> None:
         """Load policy from disk.
