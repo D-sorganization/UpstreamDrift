@@ -9,6 +9,7 @@ from __future__ import annotations
 import copy
 import math
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any, Protocol
 
@@ -45,6 +46,76 @@ class ExternalWrench(Protocol):
 def _enum(native: Any, group: str, name: str) -> int:
     """Return the integer value of a native enum member (``native.<group>.<name>``)."""
     return int(getattr(getattr(native, group), name))
+
+
+@dataclass(frozen=True)
+class BodyWrench:
+    """World-frame wrench on a named body at a point (``ExternalWrench``)."""
+
+    body: str
+    point_m: tuple[float, float, float]
+    force_n: tuple[float, float, float] | None
+    torque_nm: tuple[float, float, float] | None
+
+
+def _vec3(value: Sequence[float] | np.ndarray) -> tuple[float, float, float]:
+    return (float(value[0]), float(value[1]), float(value[2]))
+
+
+@dataclass(frozen=True)
+class GripClosure:
+    """Physical closure wrench of a rigid weld loop, or why it is unavailable.
+
+    ``multiplier_world`` is the 6-D weld multiplier ``[force; torque]`` (world
+    frame, N and N m) of the explicit KKT solve: ``+lambda`` acts on body A at
+    ``point_a`` and ``-lambda`` on body B at ``point_b``. ``wrenches`` is that
+    pair as ``ExternalWrench`` objects. An unavailable closure has no wrenches,
+    no multiplier and a non-empty ``reason``; it is never a zero wrench.
+    """
+
+    wrenches: tuple[BodyWrench, ...] = ()
+    multiplier_world: tuple[float, ...] | None = None
+    reason: str = ""
+
+    @property
+    def available(self) -> bool:
+        """True when the closure wrench pair is present."""
+        return bool(self.wrenches)
+
+    @classmethod
+    def unavailable(cls, reason: str) -> GripClosure:
+        """A closure that could not be resolved; ``reason`` must be non-empty."""
+        if not isinstance(reason, str) or not reason.strip():
+            raise ValueError("an unavailable closure needs a non-empty reason")
+        return cls(reason=reason)
+
+    @classmethod
+    def from_multiplier(
+        cls,
+        *,
+        body_a: str,
+        body_b: str,
+        point_a_m: Sequence[float] | np.ndarray,
+        point_b_m: Sequence[float] | np.ndarray,
+        multiplier: Sequence[float] | np.ndarray,
+    ) -> GripClosure:
+        """Build the +/- pair from a 6-D multiplier ``[force; torque]``.
+
+        Postcondition: the two forces and the two torques sum to zero exactly
+        (Newton's third law); the pair's moment about any point equals
+        ``(point_a - point_b) x force``, i.e. zero when the weld is closed.
+        Raises ValueError for a multiplier that is not a finite 6-vector.
+        """
+        lam = np.asarray(multiplier, dtype=float)
+        if lam.shape != (6,):
+            raise ValueError(f"multiplier must have shape (6,), got {lam.shape}")
+        if not np.isfinite(lam).all():
+            raise ValueError("multiplier must be finite")
+        pair = (
+            BodyWrench(body_a, _vec3(point_a_m), _vec3(lam[:3]), _vec3(lam[3:])),
+            BodyWrench(body_b, _vec3(point_b_m), _vec3(-lam[:3]), _vec3(-lam[3:])),
+        )
+        return cls(pair, tuple(float(x) for x in lam))
 
 
 class MujocoAxialLoadSource:
@@ -88,7 +159,8 @@ class MujocoAxialLoadSource:
         self.axis_policy = axis_policy
         self._native = mujoco
         self._scratch = mujoco.MjData(model)
-        self._contactless: tuple[Any, Any] | None = None
+        self._private: dict[tuple[bool, bool], tuple[Any, Any]] = {}
+        self._loop_bodies = self._weld_loop_bodies()
         self._axes, sources = self._discover_axes()
         self._axis_sources = MappingProxyType(sources)
 
@@ -206,10 +278,22 @@ class MujocoAxialLoadSource:
         )
         return not any(get_callback() is not None for get_callback in callbacks)
 
-    def _project(self, time_s: float, scratch: Any, note: str = "") -> AxialLoadFrame:
-        """Project scratch cfrc_int onto each qualified axis (scratch is solved)."""
-        values = {}
+    def _project(
+        self,
+        time_s: float,
+        scratch: Any,
+        note: str = "",
+        unavailable: frozenset[int] = frozenset(),
+    ) -> AxialLoadFrame:
+        """Project scratch cfrc_int onto each qualified axis (scratch is solved).
+
+        Bodies in ``unavailable`` report ``None``, never a computed value.
+        """
+        values: dict[str, float | None] = {}
         for body, (name, proximal, distal) in self._axes.items():
+            if body in unavailable:
+                values[name] = None
+                continue
             rotation = scratch.xmat[body].reshape(3, 3)
             origin = scratch.xpos[body]
             values[name] = axial_force_from_proximal_reaction(
@@ -246,18 +330,59 @@ class MujocoAxialLoadSource:
             raise ValueError(f"{name} must be finite")
         return array
 
-    def _contactless_pair(self) -> tuple[Any, Any]:
-        """Private model copy with native contact disabled, plus its scratch data.
+    def _private_pair(self, *, contact_off: bool, equality_off: bool) -> tuple:
+        """Private model copy with native contact and/or equality disabled.
 
-        The live model is never touched: only this copy carries the flag.
+        The live model is never touched: only this copy carries the flags.
         """
-        if self._contactless is None:
+        key = (contact_off, equality_off)
+        if key not in self._private:
+            bits = self._native.mjtDisableBit
             model = copy.copy(self.model)
-            model.opt.disableflags |= int(
-                _enum(self._native, "mjtDisableBit", "mjDSBL_CONTACT")
-            )
-            self._contactless = (model, self._native.MjData(model))
-        return self._contactless
+            if contact_off:
+                model.opt.disableflags |= int(bits.mjDSBL_CONTACT)
+            if equality_off:
+                model.opt.disableflags |= int(bits.mjDSBL_EQUALITY)
+            self._private[key] = (model, self._native.MjData(model))
+        return self._private[key]
+
+    def _contactless_pair(self) -> tuple[Any, Any]:
+        """Private model copy with native contact disabled, plus its scratch data."""
+        return self._private_pair(contact_off=True, equality_off=False)
+
+    def _eq_body(self, objtype: int, obj: int) -> int:
+        native = self._native
+        if objtype == int(native.mjtObj.mjOBJ_SITE):
+            return int(self.model.site_bodyid[obj])
+        return int(obj)
+
+    def _weld_loop_bodies(self) -> frozenset[int]:
+        """Bodies whose proximal section carries a weld/connect loop reaction.
+
+        For each active weld or connect equality between two bodies, the bodies
+        on the tree path between them excluding their lowest common ancestor
+        (that body's own parent joint sees only the internal loop force).
+        """
+        model, native = self.model, self._native
+        kinds = {int(native.mjtEq.mjEQ_WELD), int(native.mjtEq.mjEQ_CONNECT)}
+        out: set[int] = set()
+        for eq in range(model.neq):
+            if int(model.eq_type[eq]) not in kinds or not model.eq_active0[eq]:
+                continue
+            pair = [
+                self._eq_body(int(model.eq_objtype[eq]), int(obj))
+                for obj in (model.eq_obj1id[eq], model.eq_obj2id[eq])
+            ]
+            chains = []
+            for body in pair:
+                chain = [body]
+                while chain[-1] != 0:
+                    chain.append(int(model.body_parentid[chain[-1]]))
+                chains.append(chain)
+            common = next(b for b in chains[0] if b in chains[1])
+            for chain in chains:
+                out.update(b for b in chain[: chain.index(common)] if b != 0)
+        return frozenset(out)
 
     def _apply_external(
         self, model: Any, data: Any, wrenches: Sequence[ExternalWrench]
@@ -285,6 +410,104 @@ class MujocoAxialLoadSource:
                     "external wrench torque_nm", wrench.torque_nm, 3
                 )
 
+    def _run_inverse(
+        self,
+        qpos: Any,
+        qvel: Any,
+        qacc: Any,
+        time_s: float,
+        external_wrenches: Sequence[ExternalWrench] | None,
+        closure: GripClosure | None,
+    ) -> tuple[Any, Any, str, frozenset[int]] | None:
+        """Validate, run ``mj_inverse`` + ``mj_rnePostConstraint`` on scratch data.
+
+        Returns ``(model, scratch, note, unavailable_bodies)`` or None when the
+        model is unsupported. With an active weld loop the weld equality is
+        disabled on the private copy; its physical closure wrench (``closure``)
+        is injected instead, so the loop is not closed by solref/solimp
+        impedance. Without one, the loop bodies are reported unavailable.
+        """
+        model, native, scratch = self.model, self._native, self._scratch
+        q = self._checked("qpos", qpos, model.nq)
+        v = self._checked("qvel", qvel, model.nv)
+        a = self._checked("qacc", qacc, model.nv)
+        if not math.isfinite(time_s):
+            raise ValueError("time_s must be finite")
+        if closure is not None and not isinstance(closure, GripClosure):
+            raise TypeError("closure must be a GripClosure or None")
+        if not self._available():
+            return None
+        loop = bool(self._loop_bodies)
+        note = ""
+        wrenches: list[Any] | None = None
+        blank: frozenset[int] = frozenset()
+        if external_wrenches is not None:
+            wrenches = list(external_wrenches)
+            note = "; external contact wrenches, native contacts off"
+        if loop:
+            closure = closure or GripClosure.unavailable(
+                "no closure wrench supplied for the active grip weld"
+            )
+            if closure.available:
+                wrenches = [*(wrenches or []), *closure.wrenches]
+                note += "; grip closure wrench applied, weld equality off"
+            else:
+                blank = self._loop_bodies
+                note += f"; grip closure unavailable ({closure.reason})"
+        model, scratch = (
+            self._private_pair(
+                contact_off=external_wrenches is not None, equality_off=loop
+            )
+            if (external_wrenches is not None or loop)
+            else (model, scratch)
+        )
+        native.mj_resetData(model, scratch)
+        scratch.qpos[:], scratch.qvel[:], scratch.qacc[:] = q, v, a
+        scratch.time = float(time_s)
+        if wrenches is not None:
+            self._apply_external(model, scratch, wrenches)
+        native.mj_inverse(model, scratch)
+        scratch.qacc[:] = a  # mj_inverse consumes qacc; make the invariant explicit
+        native.mj_rnePostConstraint(model, scratch)
+        return model, scratch, note, blank
+
+    def required_generalized_force(
+        self,
+        qpos: Any,
+        qvel: Any,
+        qacc: Any,
+        external_wrenches: Sequence[ExternalWrench] | None = None,
+        closure: GripClosure | None = None,
+    ) -> np.ndarray | None:
+        """Joint efforts a prescribed motion requires beyond the external wrenches.
+
+        ``qfrc_inverse`` minus the generalized force of ``xfrc_applied`` (MuJoCo's
+        inverse leaves the latter out), i.e. what the actuators must supply.
+
+        Same inputs, private copies and closure handling as
+        :meth:`sample_prescribed`. With the physical closure wrench injected this
+        equals the applied efforts of the forward solve that produced the
+        motion; ``None`` when the model is unsupported.
+        """
+        run = self._run_inverse(qpos, qvel, qacc, 0.0, external_wrenches, closure)
+        if run is None:
+            return None
+        model, scratch = run[0], run[1]
+        external = np.zeros(model.nv)
+        for body in range(1, model.nbody):
+            wrench = scratch.xfrc_applied[body]
+            if wrench.any():
+                self._native.mj_applyFT(
+                    model,
+                    scratch,
+                    wrench[:3],
+                    wrench[3:],
+                    scratch.xipos[body],
+                    body,
+                    external,
+                )
+        return np.array(scratch.qfrc_inverse) - external
+
     def sample_prescribed(
         self,
         qpos: Any,
@@ -292,6 +515,7 @@ class MujocoAxialLoadSource:
         qacc: Any,
         time_s: float,
         external_wrenches: Sequence[ExternalWrench] | None = None,
+        closure: GripClosure | None = None,
     ) -> AxialLoadFrame | None:
         """Axial loads for a prescribed motion via inverse dynamics.
 
@@ -312,25 +536,18 @@ class MujocoAxialLoadSource:
         through ``xfrc_applied``, which ``mj_inverse`` and ``mj_rnePostConstraint``
         include in the section loads. Raises ValueError for an unknown body or a
         non-finite wrench.
+
+        ``closure`` is the physical wrench of an active ``weld``/``connect``
+        equality (a rigid grip). The prescribed-motion inverse has a nullspace
+        over the loop, so MuJoCo's soft weld would allocate it by impedance, not
+        by physics. The weld is therefore disabled on the private copy and
+        ``closure``'s +/- pair is applied instead. If the model has an active
+        weld and ``closure`` is omitted or unavailable, every body on the loop
+        path reports ``None`` (never zero, never the impedance value) and the
+        frame's source says why. Models without such an equality are unchanged.
         """
-        model, native, scratch = self.model, self._native, self._scratch
-        q = self._checked("qpos", qpos, model.nq)
-        v = self._checked("qvel", qvel, model.nv)
-        a = self._checked("qacc", qacc, model.nv)
-        if not math.isfinite(time_s):
-            raise ValueError("time_s must be finite")
-        if not self._available():
+        run = self._run_inverse(qpos, qvel, qacc, time_s, external_wrenches, closure)
+        if run is None:
             return None
-        note = ""
-        if external_wrenches is not None:
-            model, scratch = self._contactless_pair()
-            note = "; external contact wrenches, native contacts off"
-        native.mj_resetData(model, scratch)
-        scratch.qpos[:], scratch.qvel[:], scratch.qacc[:] = q, v, a
-        scratch.time = float(time_s)
-        if external_wrenches is not None:
-            self._apply_external(model, scratch, external_wrenches)
-        native.mj_inverse(model, scratch)
-        scratch.qacc[:] = a  # mj_inverse consumes qacc; make the invariant explicit
-        native.mj_rnePostConstraint(model, scratch)
-        return self._project(time_s, scratch, note)
+        _, scratch, note, blank = run
+        return self._project(time_s, scratch, note, blank)

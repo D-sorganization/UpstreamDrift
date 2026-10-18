@@ -511,7 +511,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "Visual-only parametric head (skull, eyes, brows, nose, mouth, ears, neck, optional hair or cap) attached to the spec Head body, with a visual-only yaw/pitch/roll orientation channel for gaze (OSV-3 #11729). No mass, inertia or degree of freedom changes. The web HeadModel.tsx (headModel.ts, #11718) mirrors head.py with the same constants and is mounted on the torso of GolferModel.tsx; the web golfer has no appearance document, so the gaze orientation channel and the body_model option are not mirrored there (visual-only, no web consumer yet).",
+      "notes": "Visual-only parametric head (skull, eyes, brows, nose, mouth, ears, neck, optional hair or cap) attached to the spec Head body, with a visual-only yaw/pitch/roll orientation channel for gaze (OSV-3 #11729). No mass, inertia or degree of freedom changes. The web HeadModel.tsx (headModel.ts, #11718) mirrors head.py with the same constants and is mounted on the torso of GolferModel.tsx; the web golfer has no appearance document, so the gaze orientation channel and the body_model option are not mirrored there (visual-only, no web consumer yet). HRG-B1 (#13163): the default golfer is light skin (skin_2) with mid brown hair, with skin_1..skin_8 and hair palettes, all from one contract (src/config/appearance_defaults.json); the web reads a generated TypeScript module of the same values.",
       "id": "render.body_appearance"
     },
     {
@@ -3262,7 +3262,7 @@
   "inputs": {
     "src/config/models.yaml": "64caf5311e4be2c75e742dc053b425a528f851638ca2773423fcc77d40b5d419",
     "src/config/launcher_manifest.json": "c9844ac6e0cd9c6cc867bda7cfd44edf1199ac85a07af5b9a83bec70a65d00bc",
-    "src/config/feature_parity.json": "f0c1ebb4200cb7124a66da003674374bc77ec4afdea27544d1e0a70153c2d3b2",
+    "src/config/feature_parity.json": "15a2d74b0fd1913786aff1f621f3e6942576c41a8e0b3cff40a808d562ee49e4",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

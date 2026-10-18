@@ -22,6 +22,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, cast
 
+from src.shared.python.model_appearance.defaults import default_fields
+
 SCHEMA_VERSION = "appearance-v1"
 SCHEMA_PATH = Path(__file__).with_name("appearance_v1.schema.json")
 APPEARANCE_SUFFIX = ".appearance.json"
@@ -29,7 +31,11 @@ APPEARANCE_SUFFIX = ".appearance.json"
 VISUAL_ONLY_SPEC_KEYS = ("visual_hints", "appearance")
 # Owner ruling (#12685): the default outfit is charcoal trousers. The preset
 # itself is defined in ``library.CLOTHING``, which checks this name exists.
-DEFAULT_CLOTHING = "golf_polo_trousers"
+# Every default comes from the one contract (HRG-B1, #13163; see ``defaults``).
+_DEFAULTS = default_fields()
+DEFAULT_CLOTHING = _DEFAULTS["clothing"]
+DEFAULT_SKIN_TONE = _DEFAULTS["skin_tone"]
+DEFAULT_CLUB_FINISH = _DEFAULTS["club_finish"]
 
 
 @dataclass(frozen=True)
@@ -146,11 +152,19 @@ class HeadSettings:
 
 
 @dataclass(frozen=True)
+class FootSettings:
+    """Foot and shoe model (HRG-F1, #13188), visual only."""
+
+    #: ``procedural`` (shoe last, default) or ``cc0_mesh`` (reserved, unavailable).
+    model: str = "procedural"
+
+
+@dataclass(frozen=True)
 class AppearanceDocument:
     name: str = "default"
-    skin_tone: str = "skin_medium"
+    skin_tone: str = DEFAULT_SKIN_TONE
     clothing: str = DEFAULT_CLOTHING
-    club_finish: str = "satin_steel"
+    club_finish: str = DEFAULT_CLUB_FINISH
     materials: dict[str, Material] = field(default_factory=dict)
     segments: tuple[SegmentRule, ...] = ()
     environment: Environment = field(default_factory=Environment)
@@ -158,6 +172,7 @@ class AppearanceDocument:
     head: HeadSettings = field(default_factory=HeadSettings)
     body_model: str = "ellipsoid"
     ball: BallSettings = field(default_factory=BallSettings)
+    foot: FootSettings = field(default_factory=FootSettings)
 
 
 @lru_cache(maxsize=1)
@@ -300,9 +315,9 @@ def document_from_dict(data: Mapping[str, Any]) -> AppearanceDocument:
     )
     doc = AppearanceDocument(
         name=data.get("name", "default"),
-        skin_tone=data.get("skin_tone", "skin_medium"),
+        skin_tone=data.get("skin_tone", DEFAULT_SKIN_TONE),
         clothing=data.get("clothing", DEFAULT_CLOTHING),
-        club_finish=data.get("club_finish", "satin_steel"),
+        club_finish=data.get("club_finish", DEFAULT_CLUB_FINISH),
         materials=materials,
         segments=tuple(
             SegmentRule(
@@ -318,6 +333,7 @@ def document_from_dict(data: Mapping[str, Any]) -> AppearanceDocument:
         head=_head_settings(data.get("head", {})),
         body_model=data.get("body_model", "ellipsoid"),
         ball=_ball_settings(data.get("ball", {})),
+        foot=FootSettings(data.get("foot", {}).get("model", FootSettings().model)),
     )
     library.check_references(doc)
     return doc
@@ -378,6 +394,8 @@ def document_to_dict(doc: AppearanceDocument) -> dict[str, Any]:
         "body_model": doc.body_model,
         "ball": _ball_to_dict(doc.ball),
     }
+    if doc.foot != FootSettings():
+        out["foot"] = {"model": doc.foot.model}
     if doc.spec_sha256 is not None:
         out["spec_sha256"] = doc.spec_sha256
     validate_document(out)

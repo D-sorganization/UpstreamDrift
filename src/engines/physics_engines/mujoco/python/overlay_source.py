@@ -18,7 +18,9 @@ from src.engines.physics_engines.mujoco.python.full_body_model import (
 )
 from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
 from src.shared.python.body_part_viz.mujoco_axial_loads import (
+    BodyWrench,
     ExternalWrench,
+    GripClosure,
     MujocoAxialLoadSource,
 )
 from src.shared.python.force_overlay.bundle_provider import JointFrame
@@ -41,6 +43,7 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
         accelerations: Mapping[str, float],
         time_s: float,
         external_wrenches: Sequence[ExternalWrench] | None = None,
+        closure: GripClosure | None = None,
     ) -> AxialLoadFrame | None:
         """Segment axial loads of a prescribed motion (inverse dynamics).
 
@@ -49,10 +52,16 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
         the model has tendons, plugins or callbacks. The ground reaction comes from
         the shared contact law (``external_wrenches``), not MuJoCo contacts, which a
         prescribed pose lacks; see ``MujocoAxialLoadSource.sample_prescribed``.
+        ``closure`` (from :meth:`closure_wrench`) is the physical grip-weld
+        wrench; without it the segments on the grip loop report ``None``.
         """
         if self._axial_source is None:
             self._axial_source = MujocoAxialLoadSource(
                 self.model, axis_policy="kinematic"
+            )
+        if external_wrenches is not None:
+            external_wrenches = self.on_forward_line_of_action(
+                external_wrenches, coordinates, rates
             )
         return self._axial_source.sample_prescribed(
             self._vector(coordinates),
@@ -60,7 +69,94 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
             self._vector(accelerations),
             time_s,
             external_wrenches,
+            closure,
         )
+
+    def on_forward_line_of_action(
+        self,
+        wrenches: Sequence[ExternalWrench],
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+    ) -> list[ExternalWrench]:
+        """Ground wrenches re-expressed where the forward model applies them.
+
+        The overlay draws each contact force at its contact point, but the
+        forward dynamics applies it at the contact sphere centre (its force
+        line passes through the centre; no couple is added). A wrench whose
+        point is a sphere's contact point is moved to that centre, force and
+        free moment unchanged, so the inverse reproduces the forward solve.
+        Other wrenches pass through. Only the inverse uses this; the drawn
+        wrench keeps its contact point.
+        """
+        samples = self.evaluate_contact_samples(coordinates, rates)
+        self._forward(coordinates)
+        centres = [
+            (
+                np.asarray(sample.contact_point_m, float),
+                self.data.site_xpos[self._spheres[name]["site_id"]].copy(),
+            )
+            for name, sample in samples.items()
+        ]
+        out: list[ExternalWrench] = []
+        for wrench in wrenches:
+            point = np.asarray(wrench.point_m, float)
+            hit = next(
+                (c for p, c in centres if np.allclose(p, point, atol=1e-9)), None
+            )
+            if hit is None or wrench.force_n is None:
+                out.append(wrench)
+                continue
+            out.append(
+                BodyWrench(
+                    wrench.body,
+                    (float(hit[0]), float(hit[1]), float(hit[2])),
+                    tuple(float(x) for x in wrench.force_n),  # type: ignore[arg-type]
+                    None
+                    if wrench.torque_nm is None
+                    else tuple(float(x) for x in wrench.torque_nm),  # type: ignore[arg-type]
+                )
+            )
+        return out
+
+    def closure_wrench(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        primitive_efforts: Mapping[str, float] | None,
+    ) -> GripClosure:
+        """Physical grip-weld closure wrench at the state, world frame (#13179).
+
+        The 6-D multiplier ``lambda`` of the explicit KKT solve given the applied
+        efforts: ``+lambda`` acts on the hand-side closure body at its site and
+        ``-lambda`` on the club at its site (``GripClosure.wrenches``;
+        ``multiplier_world`` is ``[force; torque]``). This is the public accessor
+        for consumers that transport the grip load (e.g. onto a palm patch).
+
+        Unavailable (``GripClosure.available`` False, with a ``reason``; never a
+        zero wrench) when ``primitive_efforts`` is ``None`` or incomplete or the
+        solve fails. Postcondition: the model state is left at the given state.
+        """
+        if primitive_efforts is None:
+            return GripClosure.unavailable("no applied efforts for the closure solve")
+        try:
+            _, multiplier = self.solve_with_multipliers(
+                coordinates, rates, primitive_efforts
+            )
+            site_a, site_b = self._closure
+            mj, model = self._mj, self.model
+            body_a, body_b = (
+                mj.mj_id2name(model, mj.mjtObj.mjOBJ_BODY, int(model.site_bodyid[s]))
+                for s in (site_a, site_b)
+            )
+            return GripClosure.from_multiplier(
+                body_a=body_a,
+                body_b=body_b,
+                point_a_m=self.data.site_xpos[site_a],
+                point_b_m=self.data.site_xpos[site_b],
+                multiplier=multiplier,
+            )
+        except (KeyError, ValueError, ArithmeticError, np.linalg.LinAlgError) as exc:
+            return GripClosure.unavailable(f"closure solve failed: {exc}")
 
     def _forward(self, coordinates: Mapping[str, float]) -> None:
         self.data.qpos[:] = self._vector(coordinates)

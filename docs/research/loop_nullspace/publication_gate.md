@@ -259,6 +259,38 @@ Authority).
   `python3 scripts/ci/check_file_size_budget.py`, ruff check and ruff format.
   These are the CI requirements in `CLAUDE.md`.
 
+## Variability Sensitivity Claims
+
+NSX-101 (#12730) closes the Phase 8 variability branch honestly. Each row below
+is one claim type that a variability or consistency result could make. Every
+claim is blocked or deferred: the only `sensitivity_provider` in the repository
+is a pendulum test fixture (NSX-99, #12728), amplitudes are declared
+hypotheses, and no variability number from a real golfer exists. A row may move
+only when its blocker is closed by recorded evidence. A closed issue, a mock
+result, a changed golden or a raised tolerance is not that evidence. The
+experiments are preregistered in `docs/development/planning/DV-12554.md`
+(section `Variability Sensitivity Experiments`). The user guide is
+`docs/help/loop_nullspace_variability.md`.
+
+| ID | Claim | Required Evidence | Status | Blocking Item | Unblocked By |
+| --- | --- | --- | --- | --- | --- |
+| VAR-01 | Absolute face-angle dispersion (SD) of a golfer's swings under the linear model | A real-engine `sensitivity_provider`, measured noise amplitudes, and calibrated independent face and launch measurement on held-out swings | BLOCKED | No real-engine provider wired (#12728); amplitudes declared; DV-12554 deferred | EXP-V1 |
+| VAR-02 | Variance budget shares by input class describe real golfer variability | Provider plus measured per-class noise and a perturbation or intervention test of each class | BLOCKED | Provider not wired (#12728); DV-12554 deferred | EXP-V1, EXP-V3 |
+| VAR-03 | A minimum-variance allocation describes or predicts how a golfer shares load | Held-out measured hand loads compared with the predicted allocation, with the noise model fitted on training sessions only | DEFERRED | No instrumented-grip data; DV-12554 deferred | EXP-V2 |
+| VAR-04 | Grip preload and hand-split choice (S5) reduces face dispersion in practice | Measured per-hand wrenches plus a randomized intervention on grip loading | DEFERRED | No instrumented grip; DV-12554 deferred | EXP-V2, EXP-V5 |
+| VAR-05 | Co-contraction or joint impedance (S2, S3) reduces face dispersion | Perturbation-derived impedance, EMG co-contraction ratios as an activation proxy, and an intervention test | DEFERRED | Impedance is declared, not measured (#12722); DV-12554 deferred | EXP-V3, EXP-V4, EXP-V5 |
+| VAR-06 | Delayed feedback stability margin (S7) holds for a golfer | Measured sensorimotor delay and feedback gain from perturbation trials | DEFERRED | Delay and gain are declared hypotheses (#12722); DV-12554 deferred | EXP-V3 |
+| VAR-07 | Real-capture UCM and TNC structure of impact variability | Held-out multi-session anonymous capture analysed with the preregistered split; report from the private execution receipt | DEFERRED | Real-capture report deferred (#12726); DV-12554 deferred | EXP-V1 |
+| VAR-08 | Strategy ranking is coaching advice for a golfer | A randomized strategy intervention with preregistered outcome and effect size, plus replication | BLOCKED | No intervention data (DV-12554); rankings are conditional on declared priors (#12724) | EXP-V5 |
+| VAR-09 | Strategy coverage: all twelve strategies were compared | Implemented evaluators for S4, S6, S9, S11 and S12, and a shaft-flex model for S10 | BLOCKED | Evaluators not implemented and S10 unavailable (#12724 partial) | NSX-95 completion |
+| VAR-10 | Speed-accuracy trade-off front (S8) holds for a golfer | Matched-speed measured dispersion across clubhead speed levels | DEFERRED | No measured speed-dispersion data; DV-12554 deferred | EXP-V1, EXP-V5 |
+
+Status vocabulary: `BLOCKED` means a software or model prerequisite is missing.
+`DEFERRED` means the software exists but the acceptance needs a physical
+measurement that has not been made. No status here may be changed to a
+validated reading while `DV-12554` is deferred in `docs/development/planning/catalog.json`.
+Enforced by `tests/unit/loop_nullspace/test_variability_docs_gate.py`.
+
 ## Open Blockers
 
 These children must land, or be recorded as deferred, before the matching item
@@ -274,6 +306,9 @@ can pass.
 | MyoSuite conformance run | NSX-52 (#12580) | Cross-engine conformance |
 | Simscape snapshot or deferred record | NSX-55 (#12583) | Cross-engine conformance |
 | Seeded ensembles | NSX-61 (#12586), NSX-62 (#12587) | Reproducibility |
+| Real-engine sensitivity provider | NSX-99 (#12728) seam, no provider | Variability sensitivity claims (VAR-01, VAR-02) |
+| Strategy catalogue completion | NSX-95 (#12724), partial | Variability sensitivity claims (VAR-09) |
+| Real-capture variability report | NSX-97 (#12726), partial | Variability sensitivity claims (VAR-07) |
 | Hypothesis ID reconciliation | DV-12554 and registry | Verified citations |
 | External validation | NSX-05 (#12554), board decision, equipment | External validation |
 | Design-manual inventory and approval | UP-NSX-loop-nullspace-exploration, UP-D5, UP-D7, UP-D8 | Design-manual governance |

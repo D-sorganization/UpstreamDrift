@@ -47,6 +47,11 @@ ALLOWED_SLSQP: dict[str, str] = {
     "src/engines/physics_engines/mujoco/python/native_manifold_box_fddp.py": _NONCONVEX,
     "src/engines/physics_engines/opensim/python/motion_matching/fit_swing.py": _NONCONVEX,
     "src/shared/python/motion_matching/bounded_candidate_search.py": _NONCONVEX,
+    "src/shared/python/motion_matching/full_body_migration.py": (
+        "HRG-D1 v1->v2 trunk migration: the equality log(R1^T R2(phi)) = 0 "
+        "composes two Euler chains on SO(3), so its feasible set is a "
+        "nonlinear manifold and the problem is non-convex; not an allocation"
+    ),
     "src/shared/python/motion_matching/equality_least_squares.py": (
         "non-convex residual least squares on simulated physical outputs"
     ),

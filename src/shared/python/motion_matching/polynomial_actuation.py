@@ -10,6 +10,7 @@ from typing import Any, ClassVar
 import numpy as np
 from numpy.typing import NDArray
 
+from .full_body_schema import require_full_body_schema
 from .piecewise_polynomial import PolynomialSegment
 from .polynomial_torque import COEFFS_PER_JOINT
 from .prefix_fit import bernstein_to_simscape
@@ -97,9 +98,8 @@ class FullBodyPolynomialControl:
     def from_spec(
         cls, spec: Mapping[str, Any], *, duration_s: float
     ) -> FullBodyPolynomialControl:
-        """Derive actuator names from a full-body-v1 scalar primitive inventory."""
-        if spec.get("schema_version") != "full-body-v1":
-            raise ValueError("spec must use the full-body-v1 schema")
+        """Derive actuator names from a full-body scalar primitive inventory."""
+        require_full_body_schema(spec, consumer="polynomial actuation")
         coordinates = _names(spec.get("coordinate_order", ()), "coordinate_order")
         joints = spec.get("joints")
         if (

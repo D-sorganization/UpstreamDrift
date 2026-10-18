@@ -75,8 +75,147 @@ garment). Visual only: compiled masses, inertias, joints and equality
 constraints are unchanged (\texttt{test\_pelvis\_loft.py}, the compiled-array
 test in \texttt{test\_mujoco\_appearance\_layer\_body\_meshes.py}).
 
+\subsection{Procedural Feet and Shoes (HRG-F1, \#13188)}
+The foot (\texttt{talus}, \texttt{calcn}, \texttt{toes}) used to be three
+generic capsule lofts ($r=0.040$\,m, aspect $0.7$). \texttt{foot.py} replaces
+them with a dimensioned shoe last (\texttt{foot.model = procedural}, the
+default; \texttt{cc0\_mesh} is reserved and raises
+\texttt{FootModelUnavailableError}). It is visual only: no contact sphere, mass,
+inertia or joint is touched, and a spec without foot length, contact spheres or
+a cross-section keeps the legacy loft (nothing is guessed).
+
+\paragraph{Frame.} Let $(\hat f,\hat\ell,\hat u)$ be the forward, left and up
+axes of \texttt{cross\_section.BodySection} in the calcn frame. With contact
+sphere $i$ at $c_i$ (radius $r_i$), let $a_i=c_i\!\cdot\!\hat f$ and nadir
+$n_i=c_i\!\cdot\!\hat u-r_i$. The sole frame pitches $(\hat f,\hat u)$ about
+$\hat\ell$ by $\varphi=\arctan\bigl(\mathrm{slope}_{\mathrm{LS}}(n_i\text{ vs }a_i)\bigr)$
+so the nadir line is level ($|\varphi|\le15^\circ$; the calibrated zero pose is
+not foot-flat, so the sole follows the spheres, not gravity). In the sole frame
+the sole is the plane $h_s=\min_i n_i + 0.5$\,mm, so neutral-stance clearance
+is $0.5$\,mm; $\max_i|n_i-h_s|\le 2$\,mm is enforced (otherwise
+\texttt{ValueError}). Left and right are exact mirrors about the $\ell=0$ plane
+through the sphere centres; the medial side is $+\hat\ell$ for the right foot.
+
+\paragraph{Size.} Length $L$ is the spec
+\texttt{anthropometry.segments.foot.length\_m} ($0.2581$\,m) or a measurement
+(\texttt{foot\_parts(length\_m=)}); the heel back is $22$\,mm behind the
+rearmost sphere centre and the toe tip is $L$ ahead of it. The widest
+cross-section (lateral plus medial extent) is $B=0.376\,L$. Source: the public
+ANSUR II files (2012 U.S.\ Army Anthropometric Survey; Gordon et al.\ 2015,
+Report NATICK/TR-15/007), per-subject ratio \texttt{footbreadthhorizontal}/\texttt{footlength},
+both sexes pooled ($n=6068$): median $0.3759$, mean $0.3762$, SD $0.0175$
+(men median $0.3755$, women $0.3766$). The ratio is a median of per-subject
+ratios, not a regression with uncertainty; it supersedes the earlier
+$0.377$ read from survey summary medians through a secondary data explorer.
+Heights scale with $L/0.2581$.
+
+\paragraph{Reproducing the ANSUR II Breadth Ratio.}
+Datasets: \texttt{https://tools.openlab.psu.edu/publicData/ANSUR\_II\_MALE\_Public.csv}
+(SHA-256 \texttt{0547aea0170e5293de519389981135e75803f02e6d40c77ace740decc0caac64},
+$n=4082$) and \texttt{ANSUR\_II\_FEMALE\_Public.csv} (SHA-256
+\texttt{ed7e800aa97a4d42f8286b988be2fe1883a2e789588169db959864b707d1757a},
+$n=1986$), listed at \texttt{https://www.openlab.psu.edu/ansur2/}. Columns:
+\texttt{footbreadthhorizontal} and \texttt{footlength} (mm). Formula:
+$r_i=\mathrm{footbreadthhorizontal}_i/\mathrm{footlength}_i$ per subject, pooled over
+both files; report the median, mean and sample SD of $r_i$. The files are not
+committed to the repository.
+
+\paragraph{Shape.} Stations $a$ run heel back to toe tip (cosine spaced, 46
+rings of 40 points). Each ring is a flat sole, $7$\,mm rounded sole edges and a
+super-elliptic dome (exponent $2.6$) from the lateral to the medial extreme.
+Total width, medial share $m(f)$ and top height $h(f)$ are monotone cubic
+Hermite curves over the length fraction $f$: heel counter ($h\approx68$\,mm at
+$f=0.12$), medial arch waist (width $0.79\,B$ and $m=0.43$ at $f=0.40$),
+instep/tongue ramp (peak $80$\,mm at $f=0.42$) falling to the ball
+($f=0.70$, width $B$, $m=0.53$) and an asymmetric toe box ($m$ rising to
+$0.60$: wider on the hallux side). Elliptical end caps ($0.055\,L$ heel,
+$0.14\,L$ toe) close the ends. These knots are modelling parameters, not
+measurements.
+
+\paragraph{Articulation.} The upper and sole up to the MTP plane belong to
+\texttt{calcn}; the toe box belongs to \texttt{toes}; the \texttt{talus} carries
+a $36$\,mm-radius ankle stub joining the shank to the shoe (label ankle0: trouser leg when the outfit has one, else skin). Each shell is
+closed. The calcn shell runs $14$\,mm past the MTP plane and the toes shell
+starts $14$\,mm before it, each inset up to $0.8$\,mm under the other, so no cut
+face shows at the neutral pose. The shoe is a garment (\texttt{garment0},
+shoe material); the bare foot is \texttt{skin0}, inset $2$\,mm.
+
+\paragraph{Acceptance (\texttt{test\_foot.py}).} Contact-sphere centres are
+inside the shoe (generalised winding number); sphere nadirs lie within $2$\,mm
+of the sole ($0.4$ to $1.3$\,mm measured); clearance $0.50$\,mm ($\in[0,2]$);
+length within $1$\,mm ($0.2$ mm short, from the end-station offset); breadth
+$B$ within $1$\,mm; every shell passes \texttt{validate\_closed\_mesh}; the
+left shoe mirrors the right to $10^{-5}$\,m; the spec is not modified. The
+captured address frame clearance is reported, not gated.
+
+\paragraph{Limitations.} The shoe envelope is sized to the foot length, so it
+is not a retail shoe (real shoes are about $12$\,mm longer). The collar is a
+closed solid (no opening, laces or cleats). The toe box hinges about the
+\texttt{mtp} joint; flexion beyond about $25^\circ$ exposes the hidden overlap
+shell. Specs without \texttt{calcn}/\texttt{toes}/\texttt{talus} body names or
+foot contact spheres keep the legacy loft.
+
+\subsection{Pelvis Width (HRG-C4, \#13187)}
+C1's width rule enclosed each whole thigh radius, $W=\max_i(|(p_i-\bar p)\!\cdot\!\hat m|
++ r_{\mathrm{thigh}}+0.01)/\sqrt{1-\ell_i^2}$, which gave a $395$\,mm skin and
+$427$\,mm trouser width on the fitted best-driver capture (and $354$\,mm at the
+corrected $178$\,mm hip spacing). Only the femoral heads belong inside the
+pelvis; the thigh joins through the hip ball. The \emph{full} skin width
+$2W$ (at the widest level, which is where the section correction is $1$) is now
+\begin{equation}
+2W=\max\bigl(B,\ 2\max_i\frac{|(p_i-\bar p)\cdot\hat m|+r_{\mathrm{head}}+m}
+{\sqrt{1-\ell_i^2}}\bigr),\quad r_{\mathrm{head}}=25\,\mathrm{mm},\ m=10\,\mathrm{mm},
+\end{equation}
+with target $B$ chosen in this order: the subject's measured standing hip
+breadth (\texttt{subject.hip\_breadth\_m}, source \texttt{measured}); else
+$B=f_H\,H$ with stature $H$ (\texttt{subject.stature\_m}, source
+\texttt{stature\_prior}); else the spec hint ML width (\texttt{spec\_hint}).
+When the containment term wins, the width follows it and the status is
+\texttt{containment\_dominated}; it is never clipped
+(\texttt{body\_meshes.pelvis\_width\_report}). Because the HJC term is
+$0.089+0.035=0.124$\,m per side at $178$\,mm and $0.110+0.035=0.145$\,m at $220$\,mm,
+both stay below $B/2$, so the result is identical for the two spacings and a
+later HJC correction (C3, \#13172) does not retune the visual. The lower pole is
+$\delta=r_{\mathrm{thigh}}$ below the \emph{mean} HJC height $\bar z$ (so vertical
+HJC asymmetry does not stretch the solid), with at least $25$\,mm of solid below
+the lowest HJC; the lumbar interface and the C1 gates (symmetry $<1$\,mm,
+centring $<5$\,mm, lumbar overlap $\le10^{-6}$\,m) are unchanged.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llll}
+Quantity & Value & Status & Source \\ \hline
+$f_H$, hip breadth / stature (male) & $0.1970$ ($0.3369$\,m at $1.71$\,m) & verified prior & ANSUR II, $n=4082$ \\
+\quad SD, median, P5, P95 & $0.0129$, $0.1964$, $0.1770$, $0.2200$ & measured & ANSUR II male \\
+$f_H$ (female, not used by the spec) & $0.2174$ (SD $0.0153$, $n=1986$) & measured & ANSUR II female \\
+Femoral head radius & $25$\,mm & modelling choice & --- \\
+Containment margin & $10$\,mm & modelling choice & --- \\
+\end{tabular}
+\end{table}
+The prior is the mean of the per-subject ratio \texttt{hipbreadth}/\texttt{stature}
+over the public ANSUR II male file (2012 U.S.\ Army Anthropometric Survey; Gordon
+et al.\ 2015, Report NATICK/TR-15/007). The spec records no subject sex; the
+AN-1 driver subject is male (de Leva 1996 male table), so the male mean is used.
+A female subject needs $0.2174$, or \texttt{subject.hip\_breadth\_m}, which
+overrides the prior. Measured result at $H=1.71$\,m: skin $336.9$\,mm (target
+$336.87$\,mm), trousers $363.8$\,mm; the earlier unverified $0.195$ gave
+$333.5$ / $360.1$\,mm, and C1 gave $395.2$ / $426.8$\,mm. Visual only; physics
+unchanged. Tests: \texttt{tests/unit/model\_appearance/test\_pelvis\_width.py}.
+Reproduce stills: render the best-driver bundle before and after at address,
+top and impact.
+
+\paragraph{Reproducing the ANSUR II Prior.}
+Dataset: \texttt{https://tools.openlab.psu.edu/publicData/ANSUR\_II\_MALE\_Public.csv}
+(SHA-256 \texttt{0547aea0170e5293de519389981135e75803f02e6d40c77ace740decc0caac64},
+$n=4082$) and \texttt{ANSUR\_II\_FEMALE\_Public.csv} (SHA-256
+\texttt{ed7e800aa97a4d42f8286b988be2fe1883a2e789588169db959864b707d1757a},
+$n=1986$), listed at \texttt{https://www.openlab.psu.edu/ansur2/}. Columns:
+\texttt{hipbreadth} and \texttt{stature} (mm). Formula: $r_i=\mathrm{hipbreadth}_i/\mathrm{stature}_i$
+per subject; report the mean, sample SD, median and the 5th and 95th percentiles
+of $r_i$ (not the ratio of means). The files are not committed to the repository.
+
 \subsection{Sizing Rule}
-Limbs, hands, feet and the head keep \texttt{PART\_RADIUS\_M} (with the
+Limbs, hands and the head (feet: see the HRG-F1 subsection) keep \texttt{PART\_RADIUS\_M} (with the
 short-link clamp $\rho\le 0.6\,\ell$). The trunk (torso, pelvis) is one lofted
 solid per body along its longest capsule (joint origin to the farthest child
 joint). With the body's landmark axes $\hat m$ (ML) and $\hat d$ (AP) from

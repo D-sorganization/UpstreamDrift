@@ -18,7 +18,7 @@
       "web": "ui/src/components/visualization/HeadModel.tsx",
       "status": "parity",
       "tiles": [],
-      "notes": "Visual-only parametric head (skull, eyes, brows, nose, mouth, ears, neck, optional hair or cap) attached to the spec Head body, with a visual-only yaw/pitch/roll orientation channel for gaze (OSV-3 #11729). No mass, inertia or degree of freedom changes. The web HeadModel.tsx (headModel.ts, #11718) mirrors head.py with the same constants and is mounted on the torso of GolferModel.tsx; the web golfer has no appearance document, so the gaze orientation channel and the body_model option are not mirrored there (visual-only, no web consumer yet)."
+      "notes": "Visual-only parametric head (skull, eyes, brows, nose, mouth, ears, neck, optional hair or cap) attached to the spec Head body, with a visual-only yaw/pitch/roll orientation channel for gaze (OSV-3 #11729). No mass, inertia or degree of freedom changes. The web HeadModel.tsx (headModel.ts, #11718) mirrors head.py with the same constants and is mounted on the torso of GolferModel.tsx; the web golfer has no appearance document, so the gaze orientation channel and the body_model option are not mirrored there (visual-only, no web consumer yet). HRG-B1 (#13163): the default golfer is light skin (skin_2) with mid brown hair, with skin_1..skin_8 and hair palettes, all from one contract (src/config/appearance_defaults.json); the web reads a generated TypeScript module of the same values."
     },
     "tools.native_viewer_export": {
       "title": "Native per-engine viewer video export (CLI)",
