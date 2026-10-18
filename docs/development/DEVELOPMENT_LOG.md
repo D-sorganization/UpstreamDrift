@@ -2561,6 +2561,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13164 · HRG-C1: Loft the Pelvis Visual on the Hip Landmarks (Centred on the HJC Midpoint, Ends at the Lumbar Plane) and Shrink the Hip Blend Ball; Visual Only
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13164
+- **Branch:** fix/13164-pelvis-visual-loft
+- **PR:** #13183
+- **Paths:** see #13183
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`075d5542`; collated from changes/13164-hrg-c1-loft-the-pelvis-visual-on-the-hip.md)
+- **Summary:** HRG-C1: loft the pelvis visual on the hip landmarks (centred on the HJC midpoint, ends at the lumbar plane) and shrink the hip blend ball; visual only
+- **Next step:** Shipped in PR #13183.
+
 ### DL-#13156 · Plate Import Forms (PyQt and Web) and the Plate-Overlay Route Declare Channel Timing Skew and the CoP Skew Relation (DeclaredReading); Only Independent Allows the CoP Covariance
 
 - **State:** shipped
