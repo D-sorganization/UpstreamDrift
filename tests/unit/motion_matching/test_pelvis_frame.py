@@ -452,3 +452,77 @@ def test_invariance_check_detects_a_wrong_reexpression() -> None:
     _assert_invariant(before, _snapshot(good))
     with pytest.raises(AssertionError, match="world inertia"):
         _assert_invariant(before, _snapshot(bad))
+
+
+# ----------------------------------------------- before/after report (MuJoCo)
+
+
+def _trajectory(spec: dict, frames: int = 3):
+    from src.engines.physics_engines.mujoco.python import pelvis_revision_report as rep
+
+    names = list(spec["coordinate_order"])
+    rng = np.random.default_rng(11)
+    q = rng.normal(0.0, 0.2, (frames, len(names)))
+    v = rng.normal(0.0, 1.0, (frames, len(names)))
+    a = rng.normal(0.0, 3.0, (frames, len(names)))
+    return rep, names, q, v, a
+
+
+def _flatten(node, prefix=""):
+    if isinstance(node, dict):
+        for k, v in node.items():
+            yield from _flatten(v, f"{prefix}/{k}")
+    elif isinstance(node, list):
+        for i, v in enumerate(node):
+            yield from _flatten(v, f"{prefix}[{i}]")
+    elif isinstance(node, float):
+        yield prefix, node
+
+
+def _legacy_hip_calibrated(spec: dict) -> dict:
+    """What ``apply_hip_calibration`` leaves: hip joints moved, pelvis not."""
+    out = copy.deepcopy(spec)
+    for joint in out["joints"]:
+        if joint["name"] in module.HIP_JOINTS:
+            joint["parent_to_base"][0][3] += -0.01
+            joint["parent_to_base"][2][3] += -0.0787
+    return out
+
+
+@needs_mujoco
+def test_hip_reaction_wrench_and_lever_arms_are_invariant_under_reexpression() -> None:
+    spec = _load("anthro_driver")
+    moved = module.reexpress_body_frame(
+        spec, PELVIS, _rigid((0, 0, 0), (0.0, 0.0, 0.07))
+    )
+    rep, names, q, v, a = _trajectory(spec)
+    out = rep.compare(spec, moved, names, q, v, a, [0, 1, 2])
+    pairs = dict(_flatten(out["before"]))
+    other = dict(_flatten(out["after"]))
+    assert pairs.keys() == other.keys() and len(pairs) > 50
+    scale = max(abs(x) for x in pairs.values())
+    worst = max(abs(pairs[k] - other[k]) for k in pairs) / scale
+    assert worst <= REL_TOL, worst
+
+
+@needs_mujoco
+def test_relocation_changes_lever_arms_and_l5s1_torque_as_documented() -> None:
+    spec = _legacy_hip_calibrated(_load("anthro_driver"))
+    rev = module.relocate_pelvis(spec, CENTRE_R, CENTRE_L)
+    rep, names, q, v, a = _trajectory(spec)
+    zero = [names.index(n) for n in SPINE]
+    q[:, zero] = 0.0
+    out = rep.compare(spec, rev.spec, names, q, v, a, [0, 1, 2])
+    b, c = out["before"][0], out["after"][0]
+    # After: the design offset from the HJC midpoint; before: not.
+    design = float(np.linalg.norm(module.PelvisDesign.from_spec(spec).com_m))
+    assert c["lever_arms"]["pelvis_com_to_hjc_midpoint_m"] == pytest.approx(
+        design, abs=1e-9
+    )
+    assert b["lever_arms"]["pelvis_com_to_hjc_midpoint_m"] != pytest.approx(
+        c["lever_arms"]["pelvis_com_to_hjc_midpoint_m"], abs=1e-3
+    )
+    # The upper body moves rigidly about a different L5/S1 pivot, so its torque changes.
+    assert b["l5s1_torque_nm"]["SpineInputX"] != pytest.approx(
+        c["l5s1_torque_nm"]["SpineInputX"], rel=1e-6
+    )
