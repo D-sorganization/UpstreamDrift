@@ -1532,9 +1532,9 @@ Lumbar ext.\ / hip flexion r, l (N\,m) & 772.9 / 454.9, 443.6 & 769.5 / 444.8, 4
 The CI replay of every bundle stays within $10^{-9}$\,m. The marker gate
 (2\,cm, 4\,cm) is still met; the Hicks gate still fails for $t_y$ and tilt.
 
-\paragraph{Re-Derived Regression Bounds.} The IK bounds of
-\texttt{test\_lift\_bundles.py}, \texttt{test\_pull\_bundles.py} and
-\texttt{test\_bench\_press\_bundle.py} are documented there as the residuals
+\paragraph{Re-Derived Regression Bounds.} The IK bounds of the squat, pull
+and bench bundle tests (\texttt{tests/unit/lifting}) are documented there as
+the residuals
 measured when the committed bundle was generated, rounded up to 0.1\,mm
 (closures to two significant figures, the OSL-14 rule), and as recorded
 evidence rather than tuning targets. They are therefore re-derived from the
@@ -1577,24 +1577,64 @@ software regression records, not physical acceptance.
   differ by at most $6.3\times10^{-9}$\,rad. The clean ($|z|=2.24$), bench
   ($|z|=2.68$) and squat (64 substeps) are unchanged. A test now requires
   every registered bundle to be inside the limit.
-\item \textbf{OpenSim elbow bound.} The bar-reach solve now ends at the
-  150$^\circ$ Rajagopal \texttt{elbow\_flex} bound on both sides, so the hands
-  stop 12.6\,mm short of the bar and \texttt{range\_violations} lists the
-  elbows ($1.6\times10^{-4}$\,rad past the bound) and \texttt{pro\_sup}
-  ($-1.9\times10^{-4}$\,rad). Cause: the bar target is the parity standard's
-  start pose scaled by height ($z=1.618$\,m), independent of the body, while
-  the longer whole-row trunk (0.504 to 0.577\,m in the model) raises the
-  shoulders 7.1\,cm. The shoulder-to-grip distance falls from 0.253/0.235 to
-  0.190/0.175\,m, near the roughly 0.17\,m that the uniformly scaled arm
-  reaches when folded to its bound; the reach misses by 8.3\,mm (left) and
-  21.5\,mm (right). The inputs are current, not stale. The elbow range and
-  the reach tolerance are physical and model limits and are not widened, so
-  the four reach and range tests fail until the bar height or the arm is
-  revisited.
+\item \textbf{OpenSim elbow bound.} Before the OSL-17 rack, the bar-reach
+  solve ended at the 150$^\circ$ Rajagopal \texttt{elbow\_flex} bound on both
+  sides, 8.3\,mm (left) and 21.5\,mm (right) from the grips, with the elbows
+  ($1.6\times10^{-4}$\,rad) and \texttt{pro\_sup} ($-1.9\times10^{-4}$\,rad)
+  past their ranges. The bar target was the parity standard's start pose
+  scaled by height ($z=1.618$\,m), and the longer whole-row trunk (0.504 to
+  0.577\,m) raised the shoulders 7.1\,cm, so the shoulder-to-grip distance
+  fell from 0.253/0.235 to 0.190/0.175\,m. The inputs were current, not
+  stale. The OSL-17 rack miss below has the same cause.
 \item \textbf{Lumbar flexion.} The OSL-14 text above gave squat lumbar
   flexion 31--39$^\circ$. In the committed window \texttt{SpineInputY} is
   0.05--0.09$^\circ$ both before and after this regeneration, so that figure
   was stale and is corrected there.
+\end{itemize}
+\paragraph{High-Bar Rack on the Whole-Row Body (OSL-17).} After the OSL-17
+merge (\#13144) the squat evidence is the high-bar rack regenerated on the
+whole-row body with the OSL-17 commands. The source IK is inside every bound
+except \texttt{ankle\_r} (4.89\,mm, rack on the earlier body 3.53\,mm), which
+is re-derived from 4.5 to 4.9\,mm; the closure is $2.81\times10^{-7}$\,m and
+the run stays at 64 substeps ($|z|=2.21$). The OSL-17 strict xfails, with
+their bounds unchanged, all still fail:
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lll}
+\toprule
+Regression & Rack, Earlier Body & Rack, Whole-Row Body\\
+\midrule
+Full-window coordinates, Drake (rad) & $6.0\times10^{-5}$ & $8.5\times10^{-4}$\\
+Re-track bar deviation (mm, bound 3.6) & 6.79 & 6.45\\
+Body-alone CoM / forefoot (cm) & 11.9 / 10.4 & 11.65 / 10.02\\
+OpenSim reach miss L / R (cm) & 4.63 / 6.03 & 3.81 / 5.69\\
+Arm range overshoot (rad) & $1.21\times10^{-3}$ & $8.0\times10^{-4}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{itemize}[nosep]
+\item \textbf{Full-window coordinates (diagnosed).} The open-loop dynamics
+  under the recorded efforts have an unstable left-wrist mode: the largest
+  real eigenvalue of the state Jacobian lies on \texttt{LWInputY},
+  116--132\,s$^{-1}$ (101--115\,s$^{-1}$ on the earlier rack body; before the
+  rack 64--70\,s$^{-1}$ on \texttt{SpineInputX}). Round-off of about
+  $10^{-14}$ grows by $e^{\lambda\cdot0.2\,\mathrm{s}}$, $10^9$ to $10^{11}$,
+  over the window, which matches every case ($2\times10^{-10}$,
+  $6.0\times10^{-5}$, $8.5\times10^{-4}$\,rad), while the 20-step segments
+  stay within $7.0\times10^{-13}$\,rad. The run is inside the RK4 limit, so
+  this is a physical instability of the open-loop posture.
+\item \textbf{OpenSim reach (diagnosed with the pre-rack miss).} In all four
+  measured cases (earlier and whole-row body, before and on the rack) the
+  shoulder-to-grip distance plus the reach miss is 0.198--0.213\,m: the folded
+  Rajagopal arm cannot bring the hand within about 0.20\,m of its shoulder
+  landmark in these directions, and the grips sit 0.146--0.190\,m away. The
+  ranges and the 1\,mm reach bound are not widened.
+\item \textbf{New failure: OpenSim marker gate.} Marker RMS is 2.45\,cm
+  against the 2\,cm gate (maximum 3.81\,cm, inside 4\,cm; 1.94\,cm on the
+  earlier rack body). The foot markers carry it (forefoot 2.4 to 3.8\,cm):
+  the 10$^\circ$ tibial torsion (\#12814) turns the bundle feet out from
+  8.8 to 17.9$^\circ$, which the torsion-free Rajagopal foot cannot follow.
+  The gate is not loosened, so the test fails. The Hicks gate passes
+  (146.6\,N, 18.5\,N\,m).
 \end{itemize}
 \subsection{Snatch Same-Input Bundle (LIFT-5, Issue \#11745)}
 \paragraph{Planar Pull.} The previous Tools snatch configuration ran from

@@ -56,23 +56,30 @@ records this in `arm_reach`. The bar marker is tracked at weight 1 again.
   state of the window, where the bundle is still settling onto its loaded
   foot contact. Over states 1-40 the peaks are 24.4 N and 20.7 N m.
 
-On the whole-row lift body (#13037) the squat receipt reads: marker RMS
-1.74 cm and maximum 3.70 cm (right forefoot), still inside the 2 cm / 4 cm
-gate; segment-angle RMS 1.47 deg. The reach solve now ends at the 150 deg
-`elbow_flex` bound on both sides, so the bar marker is 12.56 mm off and
-`range_violations` lists `elbow_flex` (1.6e-4 rad past the bound) and
-`pro_sup` (-1.9e-4 rad). Cause: the bar target is the parity standard's
-start pose scaled by height (1.618 m), independent of the body, while the
-longer whole-row trunk raises the shoulders 7.1 cm (mid-shoulder 0.950 to
-1.021 m). The shoulder-to-grip distance falls from 0.253/0.235 m to
-0.190/0.175 m, near the roughly 0.17 m that the uniformly scaled Rajagopal
-arm reaches when folded to its 150 deg bound, so the reach misses by 8.3 mm
-(left) and 21.5 mm (right). The inputs are current, not stale; the elbow
-range and reach tolerance are not widened, and the four reach and range
-tests still fail. Hicks limits are
-167.0 N and 22.5 N m; peaks `pelvis_ty` 213.9 N, tilt 136.9 N m and `tx`
-106.6 N, so the residual gate still fails. Peak lumbar extension 769.5 N m,
-hip flexion 444.8/433.5 N m.
+Before the OSL-17 rack, on the whole-row lift body (#13037) the squat
+receipt read: marker RMS 1.74 cm and maximum 3.70 cm (right forefoot), inside
+the 2 cm / 4 cm gate; segment-angle RMS 1.47 deg. The reach solve ended at the
+150 deg `elbow_flex` bound on both sides, 8.3 mm (left) and 21.5 mm (right)
+from the grips (bar marker 12.56 mm off), with `elbow_flex` 1.6e-4 rad and
+`pro_sup` -1.9e-4 rad past their ranges. The bar target was then the parity
+standard's start pose scaled by height (1.618 m), and the longer whole-row
+trunk raised the shoulders 7.1 cm, so the shoulder-to-grip distance fell from
+0.253/0.235 m to 0.190/0.175 m.
+
+The committed receipt is the OSL-17 high-bar rack on the whole-row body
+(#13041): marker RMS 2.45 cm and maximum 3.81 cm, so the 2 cm RMS gate now
+fails (it was 1.94 cm on the earlier body). The foot markers carry the
+increase (forefoot 3.8 cm): the 10 deg tibial torsion (#12814) turns the
+bundle feet out from 8.8 to 17.9 deg, which the torsion-free Rajagopal foot
+cannot follow. The gate is not loosened. The Hicks gate passes on all 41
+states (146.6 N, 18.5 N m). The reach misses the high-bar grips by 3.81/5.69
+cm (4.63/6.03 cm on the earlier body) and the arm coordinates go up to 8.0e-4
+rad past their ranges (strict xfails). Both reach misses have one cause: the
+folded Rajagopal arm cannot bring the hand within about 0.20 m of its
+shoulder landmark in these directions; shoulder-to-grip distance plus reach
+miss is 0.198-0.213 m in all four measured cases, while the grips sit
+0.146-0.190 m from the shoulders. The elbow and arm ranges and the reach
+tolerance are not widened.
 
 A diagnostic fit of the bodyweight squat bundle tracked the pelvis to 3 mm.
 Excluding the bar, its markers came to 1.78 cm RMS and 4.15 cm maximum. See
