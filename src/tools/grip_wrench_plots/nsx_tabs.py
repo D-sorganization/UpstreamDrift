@@ -1,4 +1,4 @@
-"""PyQt6 tabs that render an NSX plot model (NSX-43, #12575).
+"""PyQt6 tabs (and the Variability & Consistency tab, NSX-100) that render an NSX plot model (NSX-43, #12575).
 
 Every tab is a thin shell over a :class:`~.nsx_view.PanelView`: an evidence
 badge (the ``display_decision`` outcome), the status, a figure drawn by
@@ -7,6 +7,9 @@ evidence and reason.  Nothing is computed or gated here.
 """
 
 from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
@@ -20,6 +23,8 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.loop_nullspace.plot_model import NSXPlotModel
+from src.tools.grip_wrench_plots.variability_controls import VariabilityControls
+from src.tools.grip_wrench_plots.variability_tab import TAB_TITLE, VariabilityTab
 from src.tools.grip_wrench_plots.nsx_draw import draw_panel
 from src.tools.grip_wrench_plots.nsx_view import (
     PANEL_TABS,
@@ -110,13 +115,24 @@ class NSXPanelTab(QWidget):
 class NSXTabs(QTabWidget):
     """Invariants, Envelopes, Hand Split and Diagnostics tabs of one model."""
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        *,
+        catalogue: Mapping[str, Any] | None = None,
+    ) -> None:
         super().__init__(parent)
         self.panel_tabs: dict[str, NSXPanelTab] = {}
         for panel in PANEL_TABS:
             tab = NSXPanelTab(panel)
             self.panel_tabs[panel] = tab
             self.addTab(tab, panel.replace("_", " ").title())
+        self.variability_tab = VariabilityTab(catalogue=catalogue)
+        self.addTab(self.variability_tab, TAB_TITLE)
+
+    def variability_controls(self) -> VariabilityControls:
+        """The request controls of the Variability & Consistency tab."""
+        return self.variability_tab.controls
 
     def set_plot_model(self, model: NSXPlotModel | None) -> None:
         """Render ``model`` in every tab (``None`` clears them).
@@ -129,3 +145,4 @@ class NSXTabs(QTabWidget):
         views = None if model is None else panel_views(model)
         for panel, tab in self.panel_tabs.items():
             tab.set_view(None if views is None else views[panel])
+        self.variability_tab.set_plot_model(model)

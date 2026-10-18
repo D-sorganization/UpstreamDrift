@@ -67,9 +67,12 @@ def _array(values: Any) -> Any:
 
 
 def quantity_dict(rec: QuantityRecord) -> dict[str, Any]:
-    """A quantity with its units and all six evidence axes."""
+    """A quantity with its units and all six evidence axes.
+
+    ``conditioning`` (NSX-81) is added, as a list, only when the record has any.
+    """
     unavailable = rec.allocation_dependence is AllocationDependence.UNAVAILABLE
-    return {
+    out = {
         "values": None if unavailable else _array(rec.values),
         "units": rec.units,
         "allocation_dependence": rec.allocation_dependence.value,
@@ -88,6 +91,11 @@ def quantity_dict(rec: QuantityRecord) -> dict[str, Any]:
         "hypotheses": list(rec.hypotheses),
         "reason": rec.reason,
     }
+    if rec.conditioning:
+        # Report 2.0.0 (NSX-99): the orthogonal conditioning axis, written only
+        # when present so every earlier report stays byte-identical.
+        out["conditioning"] = list(rec.conditioning)
+    return out
 
 
 def invariants_dict(

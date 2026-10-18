@@ -2561,6 +2561,110 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12978 · Reject Duplicate Source Labels and Handle Inf Values in Capture Export
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12978
+- **Branch:** merged via #13225
+- **PR:** #13225
+- **Paths:** see #13225
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`6e9291cc`; collated from changes/12978-reject-duplicate-source-labels-and-handl.md)
+- **Summary:** Reject duplicate source labels and handle inf values in capture export
+- **Next step:** Shipped in PR #13225.
+
+### DL-#13023 · Surface Searched Paths and Submodule Remedy in Tile Launch Failure Toast
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13023
+- **Branch:** merged via #13219
+- **PR:** #13219
+- **Paths:** see #13219
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`b997dddd`; collated from changes/13023-surface-searched-paths-and-submodule-rem.md)
+- **Summary:** Surface searched paths and submodule remedy in tile launch failure toast
+- **Next step:** Shipped in PR #13219.
+
+### DL-#12984 · Resolve MATLAB Default Slx Path Under Production Src Root and Raise GolfModelingError on Missing Default Model
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12984
+- **Branch:** merged via #13222
+- **PR:** #13222
+- **Paths:** see #13222
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`9cf31a81`; collated from changes/12984-resolve-matlab-default-slx-path-under-pr.md)
+- **Summary:** Resolve MATLAB default slx path under production src root and raise GolfModelingError on missing default model
+- **Next step:** Shipped in PR #13222.
+
+### DL-#12576 · NSX-44: React Loop Null-Space Panel Rendering the Shared Plot-Model Golden
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12576
+- **Branch:** merged via #13215
+- **PR:** #13215
+- **Paths:** see #13215
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`b13bbb0e`; collated from changes/12576-nsx44-react-panel.md)
+- **Summary:** NSX-44: React loop null-space panel rendering the shared plot-model golden
+- **Next step:** Shipped in PR #13215.
+
+### DL-#13161 · HRG-00: Measured Coordinate Sign Map, ISB Basis Map, Human-Range Characterisation and HRG Calculation Reference
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13161
+- **Branch:** chore/13161-hrg-baseline-sign-map
+- **PR:** #13184
+- **Paths:** see #13184
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`e487e2c5`; collated from changes/13161-hrg-00-measured-coordinate-sign-map-isb.md)
+- **Summary:** HRG-00: measured coordinate sign map, ISB basis map, human-range characterisation and HRG calculation reference
+- **Next step:** Shipped in PR #13184.
+
+### DL-#12728 · NSX-99: Sensitivity Stage, Report Schema V2 and Variability Panels
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12728
+- **Branch:** merged via #13195
+- **PR:** #13195
+- **Paths:** see #13195
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`878ab14f`; collated from changes/12728-nsx99-variability-service.md)
+- **Summary:** NSX-99: sensitivity stage, report schema v2 and variability panels
+- **Next step:** Shipped in PR #13195.
+
+### DL-#13165 · HRG-E1: Wrist Lever Angle Renamed With NaN-Plus-Reason on Missing Markers; Joint_Stress Requires Signed, Side-Tagged WristDeviation
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13165
+- **Branch:** fix/13165-legacy-angle-validity
+- **PR:** #13180
+- **Paths:** see #13180
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`610d9a0b`; collated from changes/13165-hrg-e1-wrist-lever-angle-renamed-with-na.md)
+- **Summary:** HRG-E1: wrist lever angle renamed with NaN-plus-reason on missing markers; joint_stress requires signed, side-tagged WristDeviation
+- **Next step:** Shipped in PR #13180.
+
+### DL-#12575 · NSX-43: Tabbed Grip Wrench Window With NSX Plot-Model Tabs, Preset Selector and QThreadPool Runner
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12575
+- **Branch:** merged via #13197
+- **PR:** #13197
+- **Paths:** see #13197
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`c3ee8732`; collated from changes/12575-nsx-43-pyqt-tabbed-nsx-window.md)
+- **Summary:** NSX-43: tabbed Grip Wrench window with NSX plot-model tabs, preset selector and QThreadPool runner
+- **Next step:** Shipped in PR #13197.
+
 ### DL-#13172 · HRG-C3: Pelvis Frame Re-Expression (Invariant) and Documented HJC/COM/L5S1 Relocation as a New Spec Revision
 
 - **State:** shipped

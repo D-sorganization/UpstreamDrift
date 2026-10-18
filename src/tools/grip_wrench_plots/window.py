@@ -155,11 +155,14 @@ class GripWrenchTabsWidget(QWidget):
     # ----------------------------------------------------------- running
     def current_request(self) -> NSXRequest:
         """The request the controls describe (``ValueError`` when invalid)."""
+        controls = self.tabs.variability_controls()
         return NSXRequest(
             source_id=self.source_combo.currentText(),
             preset=self.selected_preset(),
             frame_indices=parse_frames(self.frames_edit.text()),
+            engine=controls.engine(),
             include_allocation=self.allocation_check.isChecked(),
+            sensitivity=controls.request_options(),
         )
 
     def run_analysis(self) -> None:

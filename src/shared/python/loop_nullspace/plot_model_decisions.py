@@ -28,10 +28,17 @@ from src.shared.python.loop_nullspace.evidence import (
 )
 from src.shared.python.loop_nullspace.grip_split import SPLIT_COLUMN_NAMES
 from src.shared.python.loop_nullspace.output_policy_integration import (
+    DisplayAction,
     DisplayDecision,
     display_decision,
 )
-from src.shared.python.loop_nullspace.plot_model import decision_key
+from src.shared.python.loop_nullspace.plot_model import (
+    build_plot_model,
+    decision_key,
+)
+from src.shared.python.loop_nullspace.plot_model_sensitivity import (
+    sensitivity_quantities,
+)
 from src.shared.python.loop_nullspace.registry import Registry
 from src.shared.python.motion_matching.output_policy import OutputStatus
 
@@ -73,6 +80,7 @@ def quantity_record_from_dict(data: Mapping[str, Any]) -> QuantityRecord:
             conventions=tuple(data["conventions"]),
             hypotheses=tuple(data["hypotheses"]),
             reason=data["reason"],
+            conditioning=tuple(data.get("conditioning", ())),
         )
     except KeyError as exc:
         raise ValueError(f"report quantity lacks {exc.args[0]!r}") from exc
@@ -120,6 +128,12 @@ def _ask_invariants(asker: _Asker, inv: Mapping[str, Any] | None) -> None:
             asker.ask(decision_key("invariants", name, int(frame["index"])), data)
 
 
+def _ask_sensitivity(asker: _Asker, report: Mapping[str, Any]) -> None:
+    """One decision per sensitivity quantity (kernel, budget, arms, dispersion)."""
+    for key, quantity in sensitivity_quantities(report).items():
+        asker.ask(key, quantity)
+
+
 def report_decisions(
     report: Mapping[str, Any],
     surface: str = "research_view",
@@ -159,4 +173,60 @@ def report_decisions(
     if adm is not None:
         for level in _LEVELS:
             asker.ask(decision_key("diagnostics", level), adm["residuals"][level])
+    _ask_sensitivity(asker, report)
     return asker.out
+
+
+def _apply_withhold_overrides(
+    decisions: dict[str, DisplayDecision],
+    overrides: Mapping[str, DisplayDecision],
+) -> None:
+    """Tighten ``decisions`` in place; an override may only withhold."""
+    for key, override in overrides.items():
+        if key not in decisions:
+            raise ValueError(f"override names an unknown decision key {key!r}")
+        if override.action is not DisplayAction.WITHHOLD:
+            raise ValueError(
+                f"override for {key!r} may only withhold, got {override.action}"
+            )
+        decisions[key] = override
+
+
+def plot_model_payload(
+    report: Mapping[str, Any],
+    *,
+    preset: str | None = None,
+    surface: str = "research_view",
+    decision_overrides: Mapping[str, DisplayDecision] | None = None,
+) -> dict[str, Any]:
+    """The JSON-safe plot model of ``report`` (the cross-UI ``to_dict`` form).
+
+    Runs :func:`report_decisions` (one ``display_decision`` per quantity) and
+    :func:`~.plot_model.build_plot_model`; this helper decides nothing.
+    ``decision_overrides`` replaces the answer for an existing decision key
+    with ``WITHHOLD`` only, so a fixture (the golden) can exercise the withheld
+    path; an override can tighten a decision but never admit a value the
+    output policy did not.  Production callers pass none.  ``preset``, when
+    given, must be the report's own preset.
+
+    Raises:
+        TypeError: ``report`` is not a mapping.
+        ValueError: ``report`` is malformed (missing sections or keys, a preset
+            that differs from ``preset``), an override key that names no
+            decision, or an override whose action is not ``WITHHOLD``.
+    """
+    if not isinstance(report, Mapping):
+        raise TypeError("report must be the mapping returned by analyze()")
+    if preset is not None and report.get("preset") != preset:
+        raise ValueError(
+            f"report preset {report.get('preset')!r} differs from requested {preset!r}"
+        )
+    try:
+        decisions = report_decisions(report, surface)
+    except (KeyError, AttributeError) as error:
+        raise ValueError(f"malformed report: {error!r}") from error
+    _apply_withhold_overrides(decisions, decision_overrides or {})
+    try:
+        return build_plot_model(report, decisions).to_dict()
+    except (KeyError, AttributeError) as error:
+        raise ValueError(f"malformed report: {error!r}") from error

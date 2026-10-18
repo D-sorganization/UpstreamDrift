@@ -9,7 +9,14 @@ envelopes and the allocation are the functions of their own modules.
 Pipeline (each stage can report progress and be cancelled between stages)::
 
     decomposition -> admission -> invariants -> feasible_sets -> envelopes
-                  -> allocation (optional)
+                  -> allocation (optional) -> sensitivity (optional, NSX-99)
+
+The ``sensitivity`` stage runs when ``AnalysisOptions.disturbance_spec`` is
+declared.  It adds the ``sensitivity``, ``variance_budget`` and ``strategies``
+sections and raises the report to schema 2.0.0
+(``schemas/loop-nullspace-report-v2.json``); a report without it stays 1.1.0 and
+validates against v1 exactly as before.  The facade only calls the stage; the
+engine's ``sensitivity_provider`` supplies the linearised model.
 
 Honesty rules (R-series of the epic):
 
@@ -24,8 +31,9 @@ Honesty rules (R-series of the epic):
 
 from __future__ import annotations
 
+import copy
 import logging
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
@@ -81,12 +89,25 @@ from src.shared.python.loop_nullspace.report_serialization import (
     invariants_dict,
     json_float,
 )
+from src.shared.python.loop_nullspace.sensitivity_options import (
+    DEFAULT_OUTCOME_PRIORITY,
+    SensitivitySpec,
+)
+from src.shared.python.loop_nullspace.sensitivity_stage import (
+    SensitivityProvider,
+    SensitivityRequest,
+    run_sensitivity,
+)
+from src.shared.python.loop_nullspace.strategy_spec import StrategyId
+from src.shared.python.loop_nullspace.variance_records import Mechanism
 from src.shared.python.motion_matching.same_input.closure import ClosurePlant
+from src.shared.python.perturbation.disturbance import DisturbanceSpec
 
 logger = logging.getLogger(__name__)
 
 __all__ = [
     "REPORT_SCHEMA_VERSION",
+    "REPORT_SCHEMA_VERSION_V2",
     "STAGES",
     "AnalysisCancelledError",
     "AnalysisOptions",
@@ -97,6 +118,7 @@ __all__ = [
 ]
 
 REPORT_SCHEMA_VERSION = "1.1.0"
+REPORT_SCHEMA_VERSION_V2 = "2.0.0"
 STAGES = (
     "decomposition",
     "admission",
@@ -104,6 +126,7 @@ STAGES = (
     "feasible_sets",
     "envelopes",
     "allocation",
+    "sensitivity",
 )
 _PROGRESS = {
     "decomposition": 10.0,
@@ -112,6 +135,7 @@ _PROGRESS = {
     "feasible_sets": 60.0,
     "envelopes": 90.0,
     "allocation": 98.0,
+    "sensitivity": 99.5,
 }
 NON_CLAIMS = (
     "Static per-frame feasible sets over-approximate trajectory-feasible ranges.",
@@ -192,7 +216,9 @@ class EngineContext:
 
     ``ground_groups`` maps a report label to a contact-name suffix (a foot
     side); ``observation_for(index, snapshot)`` supplies ground-reaction data
-    when the preset declares ``H-GRF-OBSERVATION``.
+    when the preset declares ``H-GRF-OBSERVATION``; ``sensitivity_provider``
+    supplies the linearised variance model when the options declare a
+    ``disturbance_spec`` (NSX-99).
     """
 
     name: str
@@ -202,6 +228,7 @@ class EngineContext:
     club_newton_euler: ClubNewtonEuler | None = None
     observation_for: ObservationProvider | None = None
     ground_groups: Mapping[str, str] = field(default_factory=dict)
+    sensitivity_provider: SensitivityProvider | None = None
 
     def __post_init__(self) -> None:
         if not self.name:
@@ -212,8 +239,18 @@ class EngineContext:
 class AnalysisOptions:
     """What to compute; every field enters the result-cache key.
 
+    The sensitivity stage (NSX-99) is requested by ``disturbance_spec`` (one
+    :class:`DisturbanceSpec` or a sequence of them).  ``mechanisms`` are the
+    declared mechanism ids (``H-NOISE-SIGNAL-DEPENDENT``, ``H-GEOMETRIC-PRELOAD``,
+    ``H-MUSCLE-SHORT-RANGE-STIFFNESS``), ``strategy_set`` the catalogue ids to
+    compare (default all twelve) and ``outcome_priority`` the order of outcomes
+    (default ``("face_angle",)``, face first).  They are validated and normalised
+    by :class:`SensitivitySpec` and enter the cache key in full.
+
     Raises:
-        ValueError: On an unknown metric or a non-finite / negative weight.
+        ValueError: On an unknown metric or a non-finite / negative weight, an
+            invalid sensitivity declaration, or sensitivity fields without a
+            ``disturbance_spec``.
     """
 
     metric: Literal["identity", "inverse_mass"] = "identity"
@@ -221,6 +258,10 @@ class AnalysisOptions:
     include_allocation: bool = False
     effort_weight: float = 1.0
     rate_weight: float = 0.0
+    disturbance_spec: DisturbanceSpec | Sequence[DisturbanceSpec] | None = None
+    mechanisms: Iterable[Mechanism | str] = frozenset()
+    strategy_set: Iterable[StrategyId | str] = tuple(StrategyId)
+    outcome_priority: Sequence[str] = DEFAULT_OUTCOME_PRIORITY
 
     def __post_init__(self) -> None:
         if self.metric not in ("identity", "inverse_mass"):
@@ -231,16 +272,60 @@ class AnalysisOptions:
                 raise ValueError(f"{name} must be finite and >= 0, got {value!r}")
         if self.include_allocation and not self.include_envelopes:
             raise ValueError("an allocation needs the envelope stage's feasible sets")
+        self._normalise_sensitivity()
+
+    def _normalise_sensitivity(self) -> None:
+        if self.disturbance_spec is None:
+            untouched = (
+                len(tuple(self.mechanisms)) == 0
+                and tuple(self.strategy_set) == tuple(StrategyId)
+                and tuple(self.outcome_priority) == DEFAULT_OUTCOME_PRIORITY
+            )
+            if not untouched:
+                raise ValueError(
+                    "mechanisms, strategy_set and outcome_priority need a "
+                    "disturbance_spec"
+                )
+            return
+        spec = SensitivitySpec(
+            self.disturbance_spec,  # type: ignore[arg-type]
+            self.mechanisms,  # type: ignore[arg-type]
+            self.strategy_set,  # type: ignore[arg-type]
+            self.outcome_priority,  # type: ignore[arg-type]
+        )
+        object.__setattr__(self, "disturbance_spec", spec.disturbances)
+        object.__setattr__(self, "mechanisms", spec.mechanisms)
+        object.__setattr__(self, "strategy_set", spec.strategies)
+        object.__setattr__(self, "outcome_priority", spec.outcome_priority)
+
+    def sensitivity(self) -> SensitivitySpec | None:
+        """The validated sensitivity declaration, or ``None`` if not requested."""
+        if self.disturbance_spec is None:
+            return None
+        return SensitivitySpec(
+            self.disturbance_spec,  # type: ignore[arg-type]
+            self.mechanisms,  # type: ignore[arg-type]
+            self.strategy_set,  # type: ignore[arg-type]
+            self.outcome_priority,  # type: ignore[arg-type]
+        )
 
     def as_dict(self) -> dict[str, Any]:
-        """JSON form (also the cache-key payload)."""
-        return {
+        """JSON form (also the cache-key payload).
+
+        The ``sensitivity`` entry is present only when requested, with every
+        covariance entry, gain, bound, mechanism, strategy and outcome in it.
+        """
+        out: dict[str, Any] = {
             "metric": self.metric,
             "include_envelopes": self.include_envelopes,
             "include_allocation": self.include_allocation,
             "effort_weight": float(self.effort_weight),
             "rate_weight": float(self.rate_weight),
         }
+        spec = self.sensitivity()
+        if spec is not None:
+            out["sensitivity"] = spec.as_dict()
+        return out
 
 
 class _Run:
@@ -424,8 +509,11 @@ def _report_skeleton(
 ) -> dict[str, Any]:
     """The report with every stage section still empty."""
     model = engine.model_provenance
+    requested = options.sensitivity() is not None
     return {
-        "schema_version": REPORT_SCHEMA_VERSION,
+        "schema_version": REPORT_SCHEMA_VERSION_V2
+        if requested
+        else REPORT_SCHEMA_VERSION,
         "status": "complete",
         "registry_version": reg.registry_version,
         "preset": hyp_set.id,
@@ -445,6 +533,11 @@ def _report_skeleton(
         "envelopes": None,
         "allocation": None,
         "restriction_sensitivity": None,
+        **(
+            {"sensitivity": None, "variance_budget": None, "strategies": None}
+            if requested
+            else {}
+        ),
     }
 
 
@@ -507,7 +600,77 @@ def _invariants_stage(
     )
     inv = invariants_dict(compute_invariants(admitted, decs, club_ne=club), indices)
     report["invariants"] = inv
-    run.done("invariants", {"invariants": inv})
+    # ``report`` is the in-progress report so the service layer can build a
+    # partial plot model; it is not part of the public partial.
+    run.done("invariants", {"invariants": inv, "report": copy.deepcopy(report)})
+
+
+@dataclass(frozen=True)
+class _Frames:
+    """The frames that survived decomposition, aligned by position."""
+
+    decs: Sequence[Decomposition]
+    snaps: Sequence[ClosedLoopSnapshot]
+    times: Sequence[float]
+    indices: Sequence[int]
+
+
+def _envelope_stages(
+    report: dict[str, Any],
+    frames: _Frames,
+    ctx: tuple[registry.HypothesisSet, EngineContext, InputProvenance],
+    options: AnalysisOptions,
+    run: _Run,
+) -> list[FeasibleSet]:
+    """Feasible sets, envelopes and the optional allocation; the sets (or none)."""
+    hyp_set, engine, provenance = ctx
+    if not options.include_envelopes:
+        return []
+    sets = [
+        _frame_set(d, s, i, hyp_set, engine)
+        for d, s, i in zip(frames.decs, frames.snaps, frames.indices, strict=True)
+    ]
+    run.done("feasible_sets")
+    report["envelopes"], feasible = _envelope_section(
+        sets, frames.snaps, frames.indices, engine, provenance
+    )
+    run.done("envelopes")
+    if options.include_allocation:
+        report["allocation"] = _allocation(
+            sets, frames.times, frames.indices, feasible, engine, options
+        )
+        run.done("allocation")
+    return sets
+
+
+def _sensitivity_stage(
+    report: dict[str, Any],
+    spec: SensitivitySpec,
+    request: SensitivityRequest,
+    engine: EngineContext,
+    run: _Run,
+) -> None:
+    """Run the sensitivity stage and store its three sections."""
+    provider = engine.sensitivity_provider
+    if provider is None:  # pragma: no cover - refused up front by _check_sensitivity
+        raise ValueError("the engine supplies no sensitivity provider")
+    run.check()
+    inputs = provider(request)
+    run.check()
+    sections = run_sensitivity(spec, inputs, run.check)
+    report["sensitivity"] = sections.sensitivity
+    report["variance_budget"] = sections.variance_budget
+    report["strategies"] = sections.strategies
+    run.done("sensitivity", {"sensitivity": sections.sensitivity})
+
+
+def _check_sensitivity(options: AnalysisOptions, engine: EngineContext) -> None:
+    """A declared sensitivity needs an engine that can supply the model."""
+    if options.sensitivity() is not None and engine.sensitivity_provider is None:
+        raise ValueError(
+            "the options declare a disturbance_spec but the engine supplies no "
+            "sensitivity_provider"
+        )
 
 
 def analyze(
@@ -522,23 +685,27 @@ def analyze(
     """Run the loop-nullspace analysis and return the report mapping.
 
     ``on_stage(stage, percent, partial)`` is called after each stage; the
-    ``invariants`` stage passes ``{"invariants": ...}`` so a client can show
-    the invariant quantities while the envelopes are still being solved.
+    ``invariants`` stage passes ``{"invariants": ..., "report": <copy of the
+    in-progress report>}`` so a client can show the invariant quantities (and a
+    service can build a partial plot model) while the envelopes are solved.
     ``should_cancel()`` is checked between stages; ``AnalysisCancelledError``
     is raised once it returns ``True``.
 
     Preconditions (``TypeError``/``ValueError``): typed inputs; ``preset`` is a
     registry preset; a preset declaring ``H-TORQUE-CAPACITY`` needs
     ``engine.capacity``; one declaring ``H-GRF-OBSERVATION`` needs
-    ``engine.observation_for``.
+    ``engine.observation_for``; options declaring a ``disturbance_spec`` need
+    ``engine.sensitivity_provider``.
 
     Postconditions: the report validates against
-    ``schemas/loop-nullspace-report-v1.json``; every quantity carries all six
+    ``schemas/loop-nullspace-report-v1.json`` (v2 when a sensitivity is
+    declared); every quantity carries all six
     evidence axes; no frame is silently dropped (refused, failing and
     infeasible frames are listed); nothing is repaired.
     """
     options = options if options is not None else AnalysisOptions()
     _validate(trajectory, engine, options)
+    _check_sensitivity(options, engine)
     reg = registry.load_registry()
     hyp_set = _resolve_preset(reg, preset, engine)
     run = _Run(on_stage, should_cancel)
@@ -563,21 +730,19 @@ def analyze(
     if admitted is None:
         return report
     _invariants_stage(report, admitted, decs, snaps, indices, engine, run)
-    if not options.include_envelopes:
-        return report
-
-    sets = [
-        _frame_set(d, s, i, hyp_set, engine)
-        for d, s, i in zip(decs, snaps, indices, strict=True)
-    ]
-    run.done("feasible_sets")
-    report["envelopes"], feasible = _envelope_section(
-        sets, snaps, indices, engine, trajectory.provenance
-    )
-    run.done("envelopes")
-    if options.include_allocation:
-        report["allocation"] = _allocation(
-            sets, times, indices, feasible, engine, options
+    frames = _Frames(decs, snaps, times, indices)
+    ctx = (hyp_set, engine, trajectory.provenance)
+    sets = _envelope_stages(report, frames, ctx, options, run)
+    spec = options.sensitivity()
+    if spec is not None:
+        request = SensitivityRequest(
+            spec,
+            hyp_set.id,
+            engine.name,
+            tuple(snaps),
+            tuple(times),
+            tuple(indices),
+            tuple(sets),
         )
-        run.done("allocation")
+        _sensitivity_stage(report, spec, request, engine, run)
     return report

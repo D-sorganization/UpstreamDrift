@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 43 parity · 6 gap · 16 exempt (12 pending decision in #7460).
+**Summary:** 45 parity · 5 gap · 16 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -35,7 +35,8 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `launcher.tile_grid`<br>Launcher tile grid from shared manifest | ✅ parity | `src/launchers/embedded_tool_bootstrap.py` | `src/api/routes/launcher.py` | `ui/src/pages/Dashboard.tsx` | — |
 | `launcher.tile_web_reachability`<br>Manifest tile web-reachability contract (route / native-window / unavailable) | ✅ parity | `src/launchers/embedded_tool_bootstrap.py` | `src/api/routes/launcher.py` | `ui/src/pages/Dashboard.tsx` | — |
 | `lifting.five_lift_viewing`<br>Weightlifting viewing and analysis for the five lifts (squat, deadlift, bench press, snatch, clean and jerk): lift selection, barbell, hand-force and GRF overlays, plots | 🔴 gap | `src/launchers/exercise_dashboard.py` | `src/api/routes/lifting.py` | `ui/src/pages/LiftBaseline.tsx` | #11748 |
-| `loop_nullspace_exploration`<br>Closed-loop null-space exploration (NSX): invariants, envelopes, hand split and diagnostics tabs with a registry preset selector | 🔴 gap | `src/tools/grip_wrench_plots/window.py` | `src/api/routes/analysis_loop_nullspace.py` | — | #12576 |
+| `loop_nullspace_exploration`<br>Closed-loop null-space exploration (NSX): invariants, envelopes, hand split and diagnostics from one plot model, with a registry preset selector | ✅ parity | `src/tools/grip_wrench_plots/window.py` | `src/api/routes/analysis_loop_nullspace.py` | `ui/src/components/analysis/LoopNullSpacePanel.tsx` | — |
+| `loop_nullspace_variability`<br>Closed-loop null-space variability and consistency (NSX-100): kernel heatmap, variance budget, strategy Pareto and face dispersion from the plot model 2.0.0 sensitivity panels, with disturbance, mechanism, strategy, outcome-priority and engine controls | ✅ parity | `src/tools/grip_wrench_plots/variability_tab.py` | `src/api/routes/analysis_loop_nullspace.py` | `ui/src/components/analysis/loopNullSpace/VariabilityView.tsx` | — |
 | `mocap.breadth`<br>Motion-capture breadth (C3D upload/playback, OpenPose source) | ✅ parity | `src/tools/freemocap_sidecar/run_freemocap.py` | `src/api/routes/motion_capture.py` | `ui/src/pages/MotionCapture.tsx` | — |
 | `mujoco.force_overlays`<br>MuJoCo GUI force/torque overlays drawn through the shared glyph renderers (native viewer and MeshCat) | ✅ parity | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py` | `src/api/routes/force_overlays.py` | `ui/src/components/visualization/ForceOverlay.tsx` | — |
 | `onboarding.about_version`<br>About/version info + onboarding | ✅ parity | `src/launchers/about_dialog.py` | `src/api/routes/about.py` | `ui/src/components/ui/AboutModal.tsx` | — |

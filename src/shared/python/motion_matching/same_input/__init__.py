@@ -28,6 +28,7 @@ _LAZY_EXPORTS: dict[str, tuple[str, str]] = {
     "VectorPlant": (".plant", "VectorPlant"),
     "closed_loop": (".reference", "closed_loop"),
     "generate_reference_bundle": (".reference", "generate_reference_bundle"),
+    "hold_policy": (".reference", "hold_policy"),
     "growth_rate": (".scoring", "growth_rate"),
     "integrate": (".integrator", "integrate"),
     "open_loop": (".integrator", "open_loop"),
@@ -56,6 +57,7 @@ __all__ = [
     "VectorPlant",
     "closed_loop",
     "generate_reference_bundle",
+    "hold_policy",
     "growth_rate",
     "integrate",
     "open_loop",
@@ -86,7 +88,7 @@ if TYPE_CHECKING:
         zoh_rk4_step,
     )
     from .plant import ALL_ENGINES, OPTIONAL_ENGINES, PARITY_ENGINES, VectorPlant
-    from .reference import closed_loop, generate_reference_bundle
+    from .reference import closed_loop, generate_reference_bundle, hold_policy
     from .scoring import ReplayScore, growth_rate, score_replay, segmented_replay
 
 
