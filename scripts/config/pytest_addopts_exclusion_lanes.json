@@ -1,0 +1,23 @@
+{
+  "slow": {
+    "positive_lane_paths": ["scripts/ci/run_motion_matching_smoke.sh"]
+  },
+  "live_simulation": {
+    "positive_lane_paths": [
+      ".github/workflows/heavy-tests-opt-in.yml",
+      "scripts/ci/run_local_heavy_tests.sh"
+    ]
+  },
+  "e2e": {
+    "manual_only": true,
+    "reason": "Reserved nightly/release gate; no test carries @pytest.mark.e2e yet (#13000)."
+  },
+  "requires_network": {
+    "manual_only": true,
+    "reason": "Opt-in network tests; run with -m requires_network locally (docs/development/test-marker-conventions.md)."
+  },
+  "requires_mocap_fixtures": {
+    "manual_only": true,
+    "reason": "Post-MVP Rajagopal2015 muscle CMC fixtures (#4296); run pytest -m requires_mocap_fixtures."
+  }
+}
