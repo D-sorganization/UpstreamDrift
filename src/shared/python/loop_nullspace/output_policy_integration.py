@@ -60,10 +60,6 @@ __all__ = [
     "display_decision",
 ]
 
-# Vocabulary of OutputStatus.status that means "the policy lets this through";
-# tests pin it against real evaluate_output_policy results.
-_POLICY_ADMITTED = frozenset({"advertised", "validated"})
-
 
 class DisplaySurface(str, Enum):
     """Where a quantity is about to be shown."""
@@ -167,7 +163,7 @@ def _policy_gate(
     status = statuses.get(output_name)
     if status is None:
         return f"output {output_name!r} is unknown to the output policy"
-    if status.status not in _POLICY_ADMITTED:
+    if not status.admitted:
         return f"output policy: {output_name!r} is {status.status} ({status.reason})"
     return ""
 
