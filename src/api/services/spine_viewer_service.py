@@ -208,6 +208,41 @@ def parse_study_request(
     values = dict(payload)
     values["output_dir"] = resolved_out
 
+    # Normalize fixture asset_id if selected as asset
+    if values.get("asset_id") == "fixture":
+        values["asset_id"] = None
+        values.setdefault("model_id", "fixture")
+        values.setdefault("pelvis", "fixture")
+
+    if values.get("model_id") == "fixture" and values.get("model_path") is None:
+        fixture_path = target_root / ".fixtures" / "fixture.osim"
+        if not fixture_path.is_file():
+            from src.engines.physics_engines.opensim.python.spine.fixture_model import (
+                FixtureSpec,
+                write_fixture_osim,
+            )
+
+            fixture_path.parent.mkdir(parents=True, exist_ok=True)
+            write_fixture_osim(FixtureSpec(), fixture_path, muscles=True)
+        values["model_path"] = fixture_path
+        values.setdefault("pelvis", "fixture")
+
+    if values.get("model_id") is None and values.get("asset_id"):
+        values["model_id"] = values["asset_id"]
+
+    if values.get("golf_model_path") is None:
+        default_golf = (
+            _PROJECT_ROOT
+            / "src"
+            / "engines"
+            / "physics_engines"
+            / "opensim"
+            / "models"
+            / "golf_humanoid.osim"
+        )
+        if default_golf.is_file():
+            values["golf_model_path"] = default_golf
+
     # Resolve relative paths against _PROJECT_ROOT
     for name in ("motion_path", "golf_model_path", "model_path", "external_loads"):
         val = values.get(name)
