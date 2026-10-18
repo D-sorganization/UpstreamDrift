@@ -190,10 +190,10 @@ def _mid_ring_extents(
 
 
 @pytest.mark.parametrize("spec_path", ANTHRO, ids=lambda p: p.stem)
-def test_trunk_and_shoe_cross_sections_are_wider_than_deep(spec_path) -> None:
+def test_trunk_cross_sections_are_wider_than_deep(spec_path) -> None:
     from src.shared.python.model_appearance.body_meshes import section_size
     from src.shared.python.model_appearance.cross_section import body_sections
-    from src.shared.python.model_appearance.library import PART_ASPECT, classify_body
+    from src.shared.python.model_appearance.library import classify_body
     from src.shared.python.motion_matching.visual_skeleton import (
         derive_visual_skeleton,
     )
@@ -207,14 +207,15 @@ def test_trunk_and_shoe_cross_sections_are_wider_than_deep(spec_path) -> None:
     for body, caps in by_body.items():
         part = classify_body(body)
         # The pelvis solid is lofted on the hip landmarks, not on a capsule
-        # (HRG-C1, #13164); its geometry is pinned in test_pelvis_loft.py.
-        if part not in ("torso", "foot") or body not in meshes:
+        # (HRG-C1, #13164); its geometry is pinned in test_pelvis_loft.py. The
+        # feet are procedural shoe lasts, not capsule lofts (HRG-F1, #13188);
+        # their dimensions are pinned in tests/unit/model_appearance/test_foot.py.
+        if part != "torso" or body not in meshes:
             continue
         ml = sections[body].ml_axis
-        aspect = PART_ASPECT[part]
-        if part != "foot":  # R8 (#12685): one hint-sized solid on the spine capsule
-            caps = [max(caps, key=lambda c: c.length_m())]
-            aspect = section_size(spec, body).aspect
+        # R8 (#12685): one hint-sized solid on the spine capsule
+        caps = [max(caps, key=lambda c: c.length_m())]
+        aspect = section_size(spec, body).aspect
         for cap, verts in zip(caps, meshes[body], strict=True):
             axis = np.subtract(cap.end_m, cap.start_m)
             if cap.length_m() < 0.05 or abs(np.dot(axis, ml)) > 0.1 * np.linalg.norm(
@@ -224,8 +225,8 @@ def test_trunk_and_shoe_cross_sections_are_wider_than_deep(spec_path) -> None:
             width_ext, depth_ext = _mid_ring_extents(verts, cap.start_m, cap.end_m, ml)
             assert width_ext > depth_ext, (body, width_ext, depth_ext)
             assert depth_ext / width_ext == pytest.approx(aspect, abs=0.02), body
-            seen.add(part if part != "foot" else body)
-    assert {"calcn_r", "calcn_l"} <= seen and "torso" in seen
+            seen.add(part)
+    assert "torso" in seen
     pelvis = next(b for b in by_body if b.endswith("LowerTorso"))
     pts = np.vstack(meshes[pelvis])
     depth = sections[pelvis].depth_axis

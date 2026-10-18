@@ -152,6 +152,14 @@ class HeadSettings:
 
 
 @dataclass(frozen=True)
+class FootSettings:
+    """Foot and shoe model (HRG-F1, #13188), visual only."""
+
+    #: ``procedural`` (shoe last, default) or ``cc0_mesh`` (reserved, unavailable).
+    model: str = "procedural"
+
+
+@dataclass(frozen=True)
 class AppearanceDocument:
     name: str = "default"
     skin_tone: str = DEFAULT_SKIN_TONE
@@ -164,6 +172,7 @@ class AppearanceDocument:
     head: HeadSettings = field(default_factory=HeadSettings)
     body_model: str = "ellipsoid"
     ball: BallSettings = field(default_factory=BallSettings)
+    foot: FootSettings = field(default_factory=FootSettings)
 
 
 @lru_cache(maxsize=1)
@@ -324,6 +333,7 @@ def document_from_dict(data: Mapping[str, Any]) -> AppearanceDocument:
         head=_head_settings(data.get("head", {})),
         body_model=data.get("body_model", "ellipsoid"),
         ball=_ball_settings(data.get("ball", {})),
+        foot=FootSettings(data.get("foot", {}).get("model", FootSettings().model)),
     )
     library.check_references(doc)
     return doc
@@ -384,6 +394,8 @@ def document_to_dict(doc: AppearanceDocument) -> dict[str, Any]:
         "body_model": doc.body_model,
         "ball": _ball_to_dict(doc.ball),
     }
+    if doc.foot != FootSettings():
+        out["foot"] = {"model": doc.foot.model}
     if doc.spec_sha256 is not None:
         out["spec_sha256"] = doc.spec_sha256
     validate_document(out)
