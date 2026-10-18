@@ -2574,6 +2574,58 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13163 · HRG-B1: Default Golfer Is Light Skin With Mid Brown Hair From One Serialized Appearance-Defaults Contract (Python + Generated TS), Skin_1..8 and Hair Palettes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13163
+- **Branch:** feat/13163-appearance-default-contract
+- **PR:** #13182
+- **Paths:** see #13182
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`9ef639a9`; collated from changes/13163-hrg-b1-default-golfer-is-light-skin-with.md)
+- **Summary:** HRG-B1: default golfer is light skin with mid brown hair from one serialized appearance-defaults contract (Python + generated TS), skin_1..8 and hair palettes
+- **Next step:** Shipped in PR #13182.
+
+### DL-#13009 · Export NaN Markers With Negative Residual, Homogeneous Coordinates, and Axis Convention in Canonical_C3d_Exporter
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13009
+- **Branch:** merged via #13232
+- **PR:** #13232
+- **Paths:** see #13232
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`c245e9c9`; collated from changes/13009-c3d-exporter-nan-residuals-and-axis.md)
+- **Summary:** Export NaN markers with negative residual, homogeneous coordinates, and axis convention in canonical_c3d_exporter
+- **Next step:** Shipped in PR #13232.
+
+### DL-#13006 · Map Reconstruct and Legacy Joint Names in L3 Paired 3D Comparisons, Fail Closed on Missing or Swapped Bilateral Joints, Compute Kinematic Sequence Order and Timing Error From Angular Velocity Peaks With Explicit Unmeasured None, and Isolate Depth Axis According to Camera Pose and View.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13006
+- **Branch:** merged via #13237
+- **PR:** #13237
+- **Paths:** see #13237
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`da3a7975`; collated from changes/13006-l3-comparison-laterality-angles.md)
+- **Summary:** Map reconstruct and legacy joint names in L3 paired 3D comparisons, fail closed on missing or swapped bilateral joints, compute kinematic sequence order and timing error from angular velocity peaks with explicit unmeasured None, and isolate depth axis according to camera pose and view.
+- **Next step:** Shipped in PR #13237.
+
+### DL-#12972 · Reject Non-Finite Inputs and Validate Shapes in SafetyMonitor
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12972
+- **Branch:** merged via #13229
+- **PR:** #13229
+- **Paths:** see #13229
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`74de6533`; collated from changes/12972-reject-non-finite-inputs-and-validate-sh.md)
+- **Summary:** Reject non-finite inputs and validate shapes in SafetyMonitor
+- **Next step:** Shipped in PR #13229.
+
 ### DL-#13187 · HRG-C4: Pelvis Skin Width From Measured Hip Breadth or Stature Prior With Femoral-Head Containment
 
 - **State:** shipped
