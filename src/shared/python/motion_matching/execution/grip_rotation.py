@@ -175,17 +175,18 @@ def grip_spec_of(document: Mapping[str, Any]) -> GripSpec:
     if cfg is None:
         raise ValueError("document carries no subject.grip_config")
     visual = document.get("visual_hints", {}).get("grip", {})
-    extra = {}
-    if "style" in visual:
-        extra["style"] = GripStyle(visual["style"])
-    if "lead_thumb_offset_deg" in visual:
-        extra["lead_thumb_offset_deg"] = float(visual["lead_thumb_offset_deg"])
+    style = GripStyle(visual["style"]) if "style" in visual else GripStyle.OVERLAP
+    thumb = visual.get("lead_thumb_offset_deg")
+    extra: dict[str, float] = {}
+    if thumb is not None:
+        extra["lead_thumb_offset_deg"] = float(thumb)
     return GripSpec(
         lead=HandAngles(**cfg["lead"]),
         trail=HandAngles(**cfg["trail"]),
         lead_below_butt_m=cfg["lead_below_butt_m"],
         hand_spacing_m=cfg["hand_spacing_m"],
         handedness=cfg["handedness"],
+        style=style,
         **extra,
     )
 
@@ -242,7 +243,10 @@ def apply_grip_config(
         out = copy.deepcopy(dict(document))  # visual-only restyle, same physics
         _set_visual(out, grip)
         return out
-    out, _ = apply_grip_rotation(document, to_grip_rotation(grip))
+    totals: dict[str, Sequence[float]] = {}
+    for side, euler in to_grip_rotation(grip).items():
+        totals[side] = euler
+    out, _ = apply_grip_rotation(document, totals)
     _shift_closure(out, grip)
     version = int(document.get("spec_revision", {}).get("version", 0)) + 1
     out["subject"]["grip_config"] = physical
