@@ -44,7 +44,7 @@ overhead phases**; those are in the recorded solution and IK only.
 
 Before is the previous bundle (the first pull of the `clean` exercise,
 1.2 s, `deadlift` bar model, the whole-row lift body, source `858f4c03`).
-After is this bundle (source `657b64c4`).
+After is this bundle (source `5aac442d`, Tools pin `0c585b39`).
 
 | Quantity                                   | Before                                     | After                               |
 | ------------------------------------------ | ------------------------------------------ | ----------------------------------- |
@@ -57,7 +57,7 @@ After is this bundle (source `657b64c4`).
 | Window start, rise, mean vertical velocity | 0.136 s, 0.155 m, 0.78 m/s                 | 0.693 s, 0.250 m, 1.25 m/s          |
 | Window bar drift forward / lateral         | −30.5 / 0.3 mm                             | −42.3 / −1.4 mm                     |
 | RK4 substeps (bundle_stability)            | 8 (max abs z 2.24)                         | 16 (max abs z 1.88)                 |
-| Bundle size                                | 231,153 bytes                              | 232,238 bytes                       |
+| Bundle size                                | 231,153 bytes                              | 232,229 bytes                       |
 
 In the new planar solution the shoulder rises monotonically from 0.890 to
 1.376 m through the pulls (0.08–0.25), drops into the catch, dips from 1.380
@@ -107,7 +107,7 @@ mm off.
 
 ## Cross-Engine Bar-Path Parity
 
-`bar_path_parity.json` (measured at commit `38cf4d92`, the window above),
+`bar_path_parity.json` (measured at commit `5aac442d`, the window above),
 back-squat protocol and fixed tolerances:
 
 | Engine    | Full Window Bar Max (m) | Full Window Coordinate Max (rad) | 20-Step Segments Coordinate Max (rad) | 20-Step Segments Frame Max (m) |
