@@ -333,7 +333,9 @@ def contact_equilibrium_pose(
                     simulator, _root_step(simulator, current, -step, normal), basis
                 )
             ) / (2.0 * _EQUILIBRIUM_FD_STEP)
-        delta = np.linalg.lstsq(jacobian, -residual, rcond=1e-8)[0]
+        delta: Array = np.asarray(
+            np.linalg.lstsq(jacobian, -residual, rcond=1e-8)[0], dtype=np.float64
+        )
         current = _root_step(simulator, current, delta, normal)
     raise ValueError(
         f"contact equilibrium not reached in {max_iterations} iterations "
