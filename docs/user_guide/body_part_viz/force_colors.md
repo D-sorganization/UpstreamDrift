@@ -107,6 +107,52 @@ reuses clones during playback, and restores/disposes only owned clones on cleanu
 Python and JavaScript share conformance examples in
 `schemas/force-color-examples.json`.
 
+## Closed-Loop Terms in Prescribed-Motion Loads (#13179)
+
+A fitted (prescribed) motion has no forward simulation behind it, so the segment
+loads come from inverse dynamics on a private model copy. Three terms that the
+open chain does not contain are handled explicitly:
+
+- **Grip weld closure wrench.** The `native_grip` weld (trail hand
+  `RHandStandoff` to the club) is a rigid loop. The prescribed inverse has a
+  nullspace over the loop, so MuJoCo's soft weld would split the force by
+  solref/solimp impedance rather than by physics. With the bundle efforts the
+  explicit KKT solve of the full-body model gives the physical 6-D multiplier
+  `lambda` (`[force; torque]`, world frame). The weld is disabled
+  (`mjDSBL_EQUALITY`) on the private copy and `+lambda` is applied on the hand
+  closure body and `-lambda` on the club through `xfrc_applied`, so the pair
+  obeys Newton's third law exactly and the loop is not counted twice. Without
+  efforts, or if the solve fails, the closure is unavailable: every segment on
+  the loop path (the bodies between the two weld bodies below their lowest common
+  ancestor) reports `None`, never zero and never the impedance value, and the
+  frame metadata reads `axial_closure: unavailable` with `axial_closure_reason`.
+  When applied, the frame carries `axial_closure: applied` and the 6-D
+  `axial_closure_multiplier`.
+- **Ball impact.** The impact impulse is not modelled. Frames within one bundle
+  step of the detected impact time report `None` for every segment
+  (`axial_impact: unavailable`) instead of an open-loop load.
+- **Ground free moment.** The spin-friction moment about the ground normal is
+  carried as the torque of each ground contact wrench (`contact_free_moments`),
+  so it reaches the inverse and the ground-reaction glyphs. It is zero (absent)
+  when the specification declares no torsion patch.
+
+Public accessor for later consumers (for example transporting the grip load onto a
+palm patch): `MujocoOverlaySource.closure_wrench(coordinates, rates, efforts)`
+returns a `GripClosure` (`wrenches`, `multiplier_world`, `available`, `reason`).
+
+Reproduce the consistency check (`qfrc_inverse - efforts`, with the contact
+force applied at the contact sphere centre, the forward model's line of action):
+
+```bash
+python3 -m pytest -o addopts="" -q -n 0 \
+  tests/unit/body_part_viz/test_mujoco_axial_closure.py \
+  tests/unit/motion_matching/test_closure_wrench_overlay_13179.py
+```
+
+The prescribed accelerations are the unfiltered finite difference of the bundle
+velocity, so on a real fit the residual also carries that numerical noise; with
+the forward solve's own accelerations the residual is at round-off.
+
 ## Qualification Status
 
 The Pendulums View menu provides Segment Force Colors (Ctrl+Shift+F). Double and

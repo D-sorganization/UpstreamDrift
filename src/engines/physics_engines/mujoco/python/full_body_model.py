@@ -252,20 +252,56 @@ class NativeMujocoFullBodyModel:
             mj.mj_jacSite(model, data, jac_pos, jac_rot, site_id)
             tau_contact += jac_pos.T @ f_contact
             if jac_rot is not None:
-                moment = torsional_friction_moment(
-                    sample.normal_force_n,
-                    jac_rot @ data.qvel,
-                    self.ground_plane,
-                    patch_radius_m=self._torsion_patch_m,
-                    friction=self.contact_parameters.dynamic_friction,
-                    transition_rad_s=self._torsion_rate_rad_s,
-                )
+                moment = self._free_moment(sample, jac_rot)
                 data.xfrc_applied[body_id, 3:] += moment
                 tau_contact += jac_rot.T @ moment
         bias = data.qfrc_bias.copy()
         if self._passive_dofs.size:
             bias -= data.qfrc_passive  # shaft springs and dampers
         return bias, tau_contact, samples
+
+    def _free_moment(self, sample: ContactSample, jac_rot: np.ndarray) -> np.ndarray:
+        """Spin-friction moment of one loaded sphere (shared contact law)."""
+        return torsional_friction_moment(
+            sample.normal_force_n,
+            jac_rot @ self.data.qvel,
+            self.ground_plane,
+            patch_radius_m=self._torsion_patch_m,
+            friction=self.contact_parameters.dynamic_friction,
+            transition_rad_s=self._torsion_rate_rad_s,
+        )
+
+    def contact_free_moments(
+        self, coordinates: Mapping[str, float], rates: Mapping[str, float]
+    ) -> dict[str, np.ndarray]:
+        """Ground free moment per loaded sphere, world frame (#13179).
+
+        The same torsional friction moment about the ground normal that
+        :meth:`generalized_forces` applies, so a ground wrench that carries it
+        reproduces the contact generalized force. Empty when the specification
+        declares no torsion patch; spheres without load are omitted.
+        """
+        mj, model, data = self._mj, self.model, self.data
+        _prepare_forward_dynamics(
+            mj, model, data, self._vector(coordinates), self._vector(rates)
+        )
+        samples = self.evaluate_contact_samples(coordinates, rates)
+        out: dict[str, np.ndarray] = {}
+        if self._torsion_patch_m <= 0:
+            return out
+        for name, sample in samples.items():
+            if np.linalg.norm(sample.normal_force_n + sample.friction_force_n) <= 0.0:
+                continue
+            jac_rot = np.zeros((3, model.nv))
+            mj.mj_jacSite(
+                model,
+                data,
+                np.zeros((3, model.nv)),
+                jac_rot,
+                self._spheres[name]["site_id"],
+            )
+            out[name] = self._free_moment(sample, jac_rot)
+        return out
 
     def _constrained_solve(
         self,

@@ -45,12 +45,22 @@ def _grip_source(swing: SwingInput, engine: str, mujoco_source: Any) -> tuple[An
     return mujoco_source, "mujoco:kkt"
 
 
+def _impact_or_none(swing: SwingInput) -> float | None:
+    """Detected impact time, or None (logged) when the swing has no valid impact."""
+    try:
+        return detect_impact_time_s(swing)
+    except (ValueError, BackendUnavailable) as exc:
+        logger.warning("no ball impact for the axial blackout: %s", exc)
+        return None
+
+
 def build_overlay_feed(
     swing: SwingInput,
     engine: str,
     *,
     grip: bool = False,
     axial: bool = False,
+    impact_time_s: float | None = None,
     show_force: bool = True,
     show_torque: bool = True,
 ) -> tuple[OverlayFeed, tuple[float, float, float]]:
@@ -61,7 +71,11 @@ def build_overlay_feed(
     frame also carries the segment axial loads (tension positive) from inverse
     dynamics at the provider's own kinematics (``q`` of ``swing``, bundle
     reference velocity, accelerations by finite difference of that velocity), so
-    the torque arcs and the shading come from one evaluation. ``show_force`` and
+    the torque arcs and the shading come from one evaluation. The grip weld
+    closure wrench is solved from the bundle efforts and injected; around ball
+    impact (``impact_time_s``, default the shared detector's; frames within one
+    bundle step) the loads are unavailable, as the impact impulse is not
+    modelled (#13179). ``show_force`` and
     ``show_torque`` choose the glyph kinds drawn.
 
     Raises ``BackendUnavailable`` when MuJoCo is not installed.
@@ -89,6 +103,9 @@ def build_overlay_feed(
         provider.with_grip(grip_source, grip_name)
     if axial:
         provider.with_axial_loads(source)
+        impact = _impact_or_none(swing) if impact_time_s is None else impact_time_s
+        if impact is not None:
+            provider.with_axial_impact_window(impact, float(swing.bundle.dt_s))
     names = swing.bundle.coordinate_order
     com = source.center_of_mass_m(dict(zip(names, map(float, swing.q[0]), strict=True)))
     lookat = (float(com[0]), float(com[1]), LOOKAT_HEIGHT_M)

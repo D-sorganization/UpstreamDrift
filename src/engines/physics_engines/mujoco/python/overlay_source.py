@@ -19,6 +19,7 @@ from src.engines.physics_engines.mujoco.python.full_body_model import (
 from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
 from src.shared.python.body_part_viz.mujoco_axial_loads import (
     ExternalWrench,
+    GripClosure,
     MujocoAxialLoadSource,
 )
 from src.shared.python.force_overlay.bundle_provider import JointFrame
@@ -41,6 +42,7 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
         accelerations: Mapping[str, float],
         time_s: float,
         external_wrenches: Sequence[ExternalWrench] | None = None,
+        closure: GripClosure | None = None,
     ) -> AxialLoadFrame | None:
         """Segment axial loads of a prescribed motion (inverse dynamics).
 
@@ -49,6 +51,8 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
         the model has tendons, plugins or callbacks. The ground reaction comes from
         the shared contact law (``external_wrenches``), not MuJoCo contacts, which a
         prescribed pose lacks; see ``MujocoAxialLoadSource.sample_prescribed``.
+        ``closure`` (from :meth:`closure_wrench`) is the physical grip-weld
+        wrench; without it the segments on the grip loop report ``None``.
         """
         if self._axial_source is None:
             self._axial_source = MujocoAxialLoadSource(
@@ -60,7 +64,48 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
             self._vector(accelerations),
             time_s,
             external_wrenches,
+            closure,
         )
+
+    def closure_wrench(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        primitive_efforts: Mapping[str, float] | None,
+    ) -> GripClosure:
+        """Physical grip-weld closure wrench at the state, world frame (#13179).
+
+        The 6-D multiplier ``lambda`` of the explicit KKT solve given the applied
+        efforts: ``+lambda`` acts on the hand-side closure body at its site and
+        ``-lambda`` on the club at its site (``GripClosure.wrenches``;
+        ``multiplier_world`` is ``[force; torque]``). This is the public accessor
+        for consumers that transport the grip load (e.g. onto a palm patch).
+
+        Unavailable (``GripClosure.available`` False, with a ``reason``; never a
+        zero wrench) when ``primitive_efforts`` is ``None`` or incomplete or the
+        solve fails. Postcondition: the model state is left at the given state.
+        """
+        if primitive_efforts is None:
+            return GripClosure.unavailable("no applied efforts for the closure solve")
+        try:
+            _, multiplier = self.solve_with_multipliers(
+                coordinates, rates, primitive_efforts
+            )
+            site_a, site_b = self._closure
+            mj, model = self._mj, self.model
+            body_a, body_b = (
+                mj.mj_id2name(model, mj.mjtObj.mjOBJ_BODY, int(model.site_bodyid[s]))
+                for s in (site_a, site_b)
+            )
+            return GripClosure.from_multiplier(
+                body_a=body_a,
+                body_b=body_b,
+                point_a_m=self.data.site_xpos[site_a],
+                point_b_m=self.data.site_xpos[site_b],
+                multiplier=multiplier,
+            )
+        except (KeyError, ValueError, ArithmeticError, np.linalg.LinAlgError) as exc:
+            return GripClosure.unavailable(f"closure solve failed: {exc}")
 
     def _forward(self, coordinates: Mapping[str, float]) -> None:
         self.data.qpos[:] = self._vector(coordinates)

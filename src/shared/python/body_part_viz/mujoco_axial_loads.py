@@ -46,7 +46,7 @@ class BodyWrench:
     torque_nm: tuple[float, float, float] | None
 
 
-def _vec3(value: Sequence[float]) -> tuple[float, float, float]:
+def _vec3(value: Sequence[float] | np.ndarray) -> tuple[float, float, float]:
     return (float(value[0]), float(value[1]), float(value[2]))
 
 
@@ -83,9 +83,9 @@ class GripClosure:
         *,
         body_a: str,
         body_b: str,
-        point_a_m: Sequence[float],
-        point_b_m: Sequence[float],
-        multiplier: Sequence[float],
+        point_a_m: Sequence[float] | np.ndarray,
+        point_b_m: Sequence[float] | np.ndarray,
+        multiplier: Sequence[float] | np.ndarray,
     ) -> GripClosure:
         """Build the +/- pair from a 6-D multiplier ``[force; torque]``.
 
@@ -426,7 +426,9 @@ class MujocoAxialLoadSource:
         if not self._available():
             return None
         loop = bool(self._loop_bodies)
-        note, wrenches, blank = "", None, frozenset()
+        note = ""
+        wrenches: list[Any] | None = None
+        blank: frozenset[int] = frozenset()
         if external_wrenches is not None:
             wrenches = list(external_wrenches)
             note = "; external contact wrenches, native contacts off"
