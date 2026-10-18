@@ -19,7 +19,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1319 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/runSimulation.m` |
 | 1200 | `src/tools/shot_pattern_analysis/matched_lean_control.py` |
 | 1199 | `src/api/services/simulation_service.py` |
-| 1199 | `src/launchers/launcher_model_handlers.py` |
 | 1198 | `src/launchers/cross_engine_dashboard.py` |
 | 1198 | `src/tools/capture_rig/gui.py` |
 | 1197 | `src/bunkershot3d/solvers/mpm/verification.py` |
@@ -30,6 +29,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1185 | `src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m` |
 | 1184 | `src/bunkershot3d/ball/splash.py` |
 | 1183 | `src/launchers/launcher_simulation.py` |
+| 1182 | `src/launchers/launcher_model_handlers.py` |
 | 1180 | `src/launchers/upstream_drift_launcher.py` |
 | 1178 | `src/engines/physics_engines/pinocchio/python/full_body_fit.py` |
 | 1170 | `src/config/launcher_manifest_loader.py` |

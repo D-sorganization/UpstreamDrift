@@ -6,6 +6,7 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 
 | ID | Name | Entity Kind | Primary Workspace | Secondary Links | Authority | Lifecycle | Evidence | Acceptance Owner |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `render.body_appearance` | Golfer body appearance with a visible head, face and neck in every engine render | `feature` | `analysis` | — | `core` | 🔵 planned | `src/shared/python/model_appearance/head.py` | `tests/unit/model_appearance/test_head_model.py` |
 | `render.club_head_and_ball` | Realistic Club Head And Ball Rendering | `feature` | `analysis` | — | `core` | 🔵 planned | `src/shared/python/model_appearance/club_head_mesh.py` | `tests/unit/model_appearance/test_club_head_mesh.py` |
 | `reporting.swing_report_dialog` | Swing Report Full/Custom plot selection and package export | `feature` | `analysis` | — | `core` | 🟢 active_feature | `src/api/routes/swing_report.py` | `tests/unit/api/test_routes_swing_report.py` |
 | `shot_pattern_analysis` | Shot Pattern Analysis | `tile` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/shot_pattern_analysis/__main__.py` | `tests/config/test_launcher_registry_parity.py` |

@@ -2,7 +2,8 @@
  * Loop null-space exploration client and plot-model contract (NSX-44, #12576).
  *
  * The TypeScript types below mirror `NSXPlotModel.to_dict()` in
- * `src/shared/python/loop_nullspace/plot_model.py` (schema 1.0.0). The Python
+ * `src/shared/python/loop_nullspace/plot_model.py` (schema 1.0.0, and 2.0.0
+ * with the `sensitivity` panels of NSX-99 / NSX-100 #12729). The Python
  * model has already applied every display decision (ADR-0054 D7); this module
  * and the panel built on it read those decisions and compute nothing. The
  * golden `tests/fixtures/loop_nullspace/goldens/plot_model_v1.json` is the one
@@ -21,7 +22,37 @@ import type {
 
 export type { LoopNullspaceJobStatusV1, LoopNullspaceOptions, LoopNullspaceRequest };
 
+/** A disturbance as the API's `DisturbanceModel` takes it (NSX-99). */
+export interface DisturbancePayload {
+  name: string;
+  stage: string;
+  channels: string[];
+  units: string;
+  covariance: number[][];
+  spectrum: string | null;
+  persistent: boolean;
+  bandwidth_hz: number | null;
+  band_hz: [number, number] | null;
+  signal_gain: number[] | null;
+  signal_bounds: Array<[number, number]> | null;
+}
+
+/** The API's `SensitivityOptions` (NSX-99); every id comes from the catalogue. */
+export interface SensitivityOptionsPayload {
+  disturbance_spec: DisturbancePayload[];
+  mechanisms: string[];
+  strategy_set: string[] | null;
+  outcome_priority: string[] | null;
+}
+
+/** A job request; `options.sensitivity` is newer than the generated types. */
+export type LoopNullspaceJobRequest = Omit<LoopNullspaceRequest, 'options'> & {
+  options?: LoopNullspaceOptions & { sensitivity?: SensitivityOptionsPayload };
+};
+
 export const PLOT_MODEL_SCHEMA_VERSION = '1.0.0';
+/** Plot model version that adds the `sensitivity` panels (NSX-99). */
+export const PLOT_MODEL_SENSITIVITY_VERSION = '2.0.0';
 export const LOOP_NULLSPACE_PATH = '/api/analysis/loop-nullspace';
 
 export interface LoopNullspacePreset {
@@ -46,6 +77,66 @@ export async function fetchLoopNullspacePresets(
   const payload: unknown = await apiFetch<unknown>(`${LOOP_NULLSPACE_PATH}/presets`, { signal });
   if (!Array.isArray(payload) || !payload.every(isPreset)) {
     throw new Error('malformed preset list from the loop-nullspace presets endpoint');
+  }
+  return payload;
+}
+
+// ------------------------------------------------- sensitivity catalogue
+export interface CatalogueEntry {
+  id: string;
+  label: string;
+}
+
+export interface StrategyEntry {
+  id: string;
+  name: string;
+  mechanism: string;
+  availability: string;
+  reason: string;
+}
+
+export interface EngineEntry {
+  id: string;
+  method: string;
+  available: boolean;
+  reason: string;
+}
+
+/** `GET .../sensitivity-options`: every value a sensitivity request may name. */
+export interface SensitivityCatalogue {
+  stages: CatalogueEntry[];
+  spectra: CatalogueEntry[];
+  mechanisms: Array<CatalogueEntry & { note: string }>;
+  strategies: StrategyEntry[];
+  outcomes: CatalogueEntry[];
+  default_outcome_priority: string[];
+  engines: EngineEntry[];
+}
+
+const CATALOGUE_LISTS = [
+  'stages',
+  'spectra',
+  'mechanisms',
+  'strategies',
+  'outcomes',
+  'engines',
+] as const;
+
+const isCatalogue = (v: unknown): v is SensitivityCatalogue =>
+  typeof v === 'object' &&
+  v !== null &&
+  CATALOGUE_LISTS.every((k) => Array.isArray((v as Record<string, unknown>)[k])) &&
+  Array.isArray((v as SensitivityCatalogue).default_outcome_priority);
+
+/** The sensitivity option catalogue served by the backend (no copy is kept here). */
+export async function fetchLoopNullspaceSensitivityOptions(
+  signal?: AbortSignal,
+): Promise<SensitivityCatalogue> {
+  const payload: unknown = await apiFetch<unknown>(`${LOOP_NULLSPACE_PATH}/sensitivity-options`, {
+    signal,
+  });
+  if (!isCatalogue(payload)) {
+    throw new Error('malformed catalogue from the loop-nullspace sensitivity-options endpoint');
   }
   return payload;
 }
@@ -157,6 +248,129 @@ export interface KktSummary {
   complementarity: number | null;
 }
 
+// ------------------------------------------------- sensitivity panels (2.0.0)
+export interface KernelHeatmap {
+  outcome: string | null;
+  units: string;
+  shown: boolean;
+  input_labels: string[];
+  step_times_s: Array<number | null>;
+  lower: Array<Array<number | null>>;
+  upper: Array<Array<number | null>>;
+  is_band: boolean;
+  decision: DecisionView | null;
+  reason: string;
+}
+
+export interface BudgetPart {
+  input_class: string;
+  variance: number | null;
+  share: number | null;
+  by_time: Array<number | null>;
+}
+
+export interface VarianceBudgetPanel {
+  outcome: string | null;
+  units: string;
+  shown: boolean;
+  step_times_s: Array<number | null>;
+  parts: BudgetPart[];
+  decision: DecisionView | null;
+  reason: string;
+}
+
+export interface ParetoPoint {
+  label: string;
+  strategy: string;
+  status: string;
+  shown: boolean;
+  rank: number | null;
+  beats_baseline: boolean;
+  variance_ratio: number | null;
+  chs_mps: number | null;
+  effort: number | null;
+  effort_basis: string;
+  mechanisms: string[];
+  decision: DecisionView | null;
+  reason: string;
+}
+
+export interface ParetoFront {
+  name: string;
+  labels: string[];
+  withheld_count: number;
+}
+
+export interface SkippedArm {
+  label: string;
+  status: string;
+  exclusion: string | null;
+  reason: string;
+}
+
+export interface StrategyParetoPanel {
+  mode: string | null;
+  ranking_basis: string | null;
+  points: ParetoPoint[];
+  fronts: ParetoFront[];
+  skipped: SkippedArm[];
+  failure_rate: number | null;
+  winner: string | null;
+  assumptions: string[];
+  non_claim: string | null;
+  unavailable_reason: string | null;
+}
+
+export interface DispersionEntry {
+  label: string;
+  units: string;
+  shown: boolean;
+  lower: number | null;
+  upper: number | null;
+  is_band: boolean;
+  decision: DecisionView | null;
+  reason: string;
+}
+
+export interface McCheck {
+  outcome: string;
+  status: string;
+  shown: boolean;
+  predicted_sd: number | null;
+  mc_sd: number | null;
+  mc_sd_ci: Array<number | null>;
+  gap: number | null;
+  failure_rate: number | null;
+  decision: DecisionView | null;
+  reason: string;
+}
+
+export interface DispersionPanel {
+  outcome: string | null;
+  units: string;
+  linear: DispersionEntry | null;
+  arms: DispersionEntry[];
+  mc: McCheck[];
+  unavailable_reason: string | null;
+}
+
+export interface SensitivityPanels {
+  status: string;
+  reason: string | null;
+  primary_outcome: string | null;
+  skipped_priority: string[];
+  outcomes: string[];
+  declared_mechanisms: string[];
+  noise_hypotheses: string[];
+  linear_validity: string | null;
+  cache_identity: string | null;
+  non_claims: string[];
+  kernel_heatmap: KernelHeatmap;
+  variance_budget: VarianceBudgetPanel;
+  strategy_pareto: StrategyParetoPanel;
+  face_dispersion: DispersionPanel;
+}
+
 export interface NSXPlotModel {
   schema_version: string;
   status: string;
@@ -195,6 +409,8 @@ export interface NSXPlotModel {
     residuals: ValueSeries[];
     kkt: KktSummary | null;
   };
+  /** Present in 2.0.0 models (NSX-99); absent in 1.0.0. */
+  sensitivity?: SensitivityPanels;
 }
 
 const PANEL_KEYS = ['invariants', 'envelopes', 'hand_split', 'allocation', 'diagnostics'];
@@ -205,15 +421,20 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 /**
  * `value` as a plot model, or `null` when it is not one (fail closed).
  *
- * Only the schema version and the presence of the five panels are checked;
- * nothing is repaired or defaulted, so a model of another version is refused
+ * Accepted: 1.0.0 with its five panels, and 2.0.0 with the same five plus a
+ * `sensitivity` record. Nothing is repaired or defaulted, so a model of any
+ * other version, or a 2.0.0 one without its sensitivity panels, is refused
  * rather than drawn.
  */
 export function asPlotModel(value: unknown): NSXPlotModel | null {
-  if (!isRecord(value) || value.schema_version !== PLOT_MODEL_SCHEMA_VERSION) {
+  if (!isRecord(value)) return null;
+  const version = value.schema_version;
+  if (version !== PLOT_MODEL_SCHEMA_VERSION && version !== PLOT_MODEL_SENSITIVITY_VERSION) {
     return null;
   }
-  return PANEL_KEYS.every((k) => isRecord(value[k])) ? (value as unknown as NSXPlotModel) : null;
+  if (!PANEL_KEYS.every((k) => isRecord(value[k]))) return null;
+  if (version === PLOT_MODEL_SENSITIVITY_VERSION && !isRecord(value.sensitivity)) return null;
+  return value as unknown as NSXPlotModel;
 }
 
 /**
@@ -251,7 +472,7 @@ function jobPath(jobId: string): string {
 
 /** Submit a job (or receive a cache hit as an already completed one). */
 export function submitLoopNullspaceJob(
-  request: LoopNullspaceRequest,
+  request: LoopNullspaceJobRequest,
   signal?: AbortSignal,
 ): Promise<LoopNullspaceJobStatusV1> {
   return apiFetch<LoopNullspaceJobStatusV1>(`${LOOP_NULLSPACE_PATH}/jobs`, {

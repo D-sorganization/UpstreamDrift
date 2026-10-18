@@ -206,6 +206,12 @@ def list_presets() -> list[dict[str, str]]:
     return service.presets()
 
 
+@router.get("/sensitivity-options")
+def sensitivity_options() -> dict[str, Any]:
+    """The values a sensitivity request may name (NSX-100); the UIs invent none."""
+    return service.sensitivity_catalogue()
+
+
 @router.post(
     "/jobs",
     response_model=LoopNullspaceJobStatusV1,

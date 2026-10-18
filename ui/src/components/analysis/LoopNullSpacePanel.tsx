@@ -7,19 +7,38 @@
  * no math and takes no display decision. When the job carries no plot model
  * (for example mid-run, before the display decisions exist) the panel says so
  * and shows nothing in its place.
+ *
+ * NSX-100 (#12729): the Variability & Consistency section adds the sensitivity
+ * request controls (their lists are the backend catalogue's, served by
+ * `GET .../sensitivity-options`) and renders the plot model's `sensitivity`
+ * panels. Without the catalogue the engine stays a plain text field and no
+ * sensitivity block is sent.
  */
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import {
   fetchLoopNullspacePresets,
+  fetchLoopNullspaceSensitivityOptions,
   isTerminalLoopNullspaceJob,
   plotModelOf,
+  type LoopNullspaceJobRequest,
   type LoopNullspacePreset,
-  type LoopNullspaceRequest,
+  type SensitivityCatalogue,
 } from '@/api/loopNullSpace';
 import { useLoopNullspaceJob } from '@/api/useLoopNullspaceJob';
 import { parseFrameIndices } from './loopNullSpace/format';
 import { PlotModelView } from './loopNullSpace/PlotModelView';
+import { VariabilityControls, type ControlsState } from './loopNullSpace/VariabilityControls';
+import { VariabilityView } from './loopNullSpace/VariabilityView';
+import { buildSensitivityOptions } from './loopNullSpace/variabilityRequest';
+
+const DEFAULT_OPTIONS = {
+  metric: 'identity',
+  include_envelopes: true,
+  include_allocation: false,
+  effort_weight: 1,
+  rate_weight: 0,
+} as const;
 
 const FIELD = 'bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm text-gray-100';
 
@@ -43,6 +62,22 @@ export function LoopNullSpacePanel() {
       });
     return () => controller.abort();
   }, []);
+  const [catalogue, setCatalogue] = useState<SensitivityCatalogue | null>(null);
+  const [catalogueError, setCatalogueError] = useState<string | null>(null);
+  const [controls, setControls] = useState<ControlsState | null>(null);
+  const onControls = useCallback((state: ControlsState) => setControls(state), []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchLoopNullspaceSensitivityOptions(controller.signal)
+      .then(setCatalogue)
+      .catch((e: unknown) => {
+        if (!controller.signal.aborted) {
+          setCatalogueError(e instanceof Error ? e.message : String(e));
+        }
+      });
+    return () => controller.abort();
+  }, []);
   const [frames, setFrames] = useState('0');
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -53,7 +88,8 @@ export function LoopNullSpacePanel() {
       setFormError('No preset is available; the preset list has not loaded.');
       return;
     }
-    if (!sourceId.trim() || !engine.trim()) {
+    const chosenEngine = catalogue && controls ? controls.engine : engine.trim();
+    if (!sourceId.trim() || !chosenEngine) {
       setFormError('Source and engine are required.');
       return;
     }
@@ -61,12 +97,23 @@ export function LoopNullSpacePanel() {
       setFormError('Frame indices must be comma-separated whole numbers.');
       return;
     }
+    let sensitivity;
+    if (catalogue && controls?.enabled) {
+      try {
+        if (controls.error) throw new Error(controls.error);
+        sensitivity = buildSensitivityOptions(controls.choices, catalogue);
+      } catch (e) {
+        setFormError(`Variability options: ${e instanceof Error ? e.message : String(e)}`);
+        return;
+      }
+    }
     setFormError(null);
-    const request: LoopNullspaceRequest = {
+    const request: LoopNullspaceJobRequest = {
       source_id: sourceId.trim(),
-      engine: engine.trim(),
+      engine: chosenEngine,
       preset,
       frame_indices: indices,
+      ...(sensitivity ? { options: { ...DEFAULT_OPTIONS, sensitivity } } : {}),
     };
     void start(request);
   };
@@ -86,10 +133,12 @@ export function LoopNullSpacePanel() {
           Source
           <input className={FIELD} value={sourceId} onChange={(e) => setSourceId(e.target.value)} />
         </label>
-        <label className="text-xs text-gray-300 flex flex-col gap-1">
-          Engine
-          <input className={FIELD} value={engine} onChange={(e) => setEngine(e.target.value)} />
-        </label>
+        {!catalogue && (
+          <label className="text-xs text-gray-300 flex flex-col gap-1">
+            Engine
+            <input className={FIELD} value={engine} onChange={(e) => setEngine(e.target.value)} />
+          </label>
+        )}
         <label className="text-xs text-gray-300 flex flex-col gap-1">
           Preset
           <select className={FIELD} value={preset} onChange={(e) => setPreset(e.target.value)}>
@@ -120,6 +169,16 @@ export function LoopNullSpacePanel() {
           Cancel
         </button>
       </form>
+      <section data-testid="nsx-variability" aria-label="Variability & Consistency">
+        <h4 className="text-sm font-semibold text-gray-200 mb-2">Variability &amp; Consistency</h4>
+        {catalogue && <VariabilityControls catalogue={catalogue} onChange={onControls} />}
+        {catalogueError && (
+          <p role="alert" data-testid="nsx-catalogue-error" className="text-sm text-red-300">
+            Sensitivity options unavailable: {catalogueError}
+          </p>
+        )}
+        {model?.sensitivity && <VariabilityView sensitivity={model.sensitivity} />}
+      </section>
       {presetError && (
         <p role="alert" data-testid="nsx-preset-error" className="text-sm text-red-300">
           Presets unavailable: {presetError}
