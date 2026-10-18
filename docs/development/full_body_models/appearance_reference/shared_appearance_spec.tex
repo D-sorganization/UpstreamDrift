@@ -55,6 +55,26 @@ regression test compiles the MJCF in MuJoCo and checks the chest mesh in the
 \texttt{mesh\_vert}) against the world shoulder line; replacing $T_b$ by a
 pure translation fails it for v1.
 
+\subsection{Pelvis Solid (HRG-C1, \#13164)}
+A pelvis body that parents two hips and a torso joint is not lofted on a
+capsule: after a functional hip calibration the longest capsule was the left
+hip and the pelvis was drawn $51$\,mm off the midline. It is instead a convex
+split ellipsoid. With up axis $\hat u$ (\texttt{BodySection.trunk\_up\_axis}),
+hip joint centres $p_r,p_l$ and lumbar joint $p_L$ (all in the pelvis frame),
+the centre is $c = \bar p - (\bar p\!\cdot\!\hat u)\hat u + z_{\min}\hat u$ with
+$\bar p=(p_r+p_l)/2$, $z_{\min}=\min_i p_i\!\cdot\!\hat u$ (widest level). The
+solid runs $\delta=r_{\mathrm{thigh}}$ below $c$ and is cut flat at the lumbar
+plane, height $T = p_L\!\cdot\!\hat u - z_{\min}$; the upper half-height is
+$T/\sqrt{1-\kappa^2}$ with waist ratio $\kappa=0.75$. Half width
+$W=\max\bigl(\rho,\ \max_i (|(p_i-\bar p)\!\cdot\!\hat m| + r_{\mathrm{thigh}} + 0.01)
+/\sqrt{1-\ell_i^2}\bigr)$ with $\ell_i$ the HJC's height over the widest level
+in upper half-heights; half depth is the hint AP semi-axis. The chest's lower
+tip is its joint origin, so the two solids meet at the lumbar plane without
+overlap. The thigh blend ball is $0.95\,r_{\mathrm{thigh}}$ ($\le1.05$ with the
+garment). Visual only: compiled masses, inertias, joints and equality
+constraints are unchanged (\texttt{test\_pelvis\_loft.py}, the compiled-array
+test in \texttt{test\_mujoco\_appearance\_layer\_body\_meshes.py}).
+
 \subsection{Sizing Rule}
 Limbs, hands, feet and the head keep \texttt{PART\_RADIUS\_M} (with the
 short-link clamp $\rho\le 0.6\,\ell$). The trunk (torso, pelvis) is one lofted

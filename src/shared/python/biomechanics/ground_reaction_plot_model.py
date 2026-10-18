@@ -16,6 +16,8 @@ lists, unit in ``units``):
   1-sigma of the measured load (``z``), interpolation bias excluded;
 * ``measured_<foot>_cop_sigma_m`` - likewise the random 1-sigma of the
   measured CoP: ``x`` and ``y`` per world axis, ``z`` the worse axis.
+* ``measured_<foot>_cop_cov_m2`` - the measured CoP's random covariance in
+  world axes: ``x`` = var_x, ``y`` = var_y, ``z`` = cov_xy.
 
 ``load_share`` holds each foot's share of the summed vertical force, ``None``
 when the feet together carry less than :data:`COP_MIN_FZ_N`.
@@ -51,6 +53,7 @@ _QUANTITIES: tuple[tuple[str, str, str], ...] = (
     ("force_sigma_n", "Force Uncertainty (1 Sigma)", "N"),
     ("force_n", "Force", "N"),
     ("cop_sigma_m", "Centre of Pressure Uncertainty (1 Sigma)", "m"),
+    ("cop_cov_m2", "Centre of Pressure Covariance (1 Sigma)", "m^2"),
     ("force_bw", "Force in Body Weights", "BW"),
     ("cop_m", "Centre of Pressure", "m"),
     ("free_moment_nm", "Free Moment", "N*m"),

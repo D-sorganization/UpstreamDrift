@@ -87,6 +87,7 @@ def _body(trial: str, **changes: Any) -> dict[str, Any]:
             "kind": "manual",
             "note": "test clock",
         },
+        "reading": {"skew_s": 0.0, "cop_skew": "unknown"},
     }
     body.update(changes)
     return body
@@ -177,3 +178,31 @@ def test_run_without_ground_reaction_stays_unavailable(root: Path) -> None:
     assert response.status_code == 200
     assert response.json()["available"] is False
     assert os.environ[PLATE_TRIAL_ROOT_ENV] == str(root)
+
+
+def _cop_cov(root: Path, reading: dict[str, Any]) -> list[Any]:
+    json_path = w.write_swing(root)
+    response = _client().post(ROUTE, json=_body(json_path.name, reading=reading))
+    assert response.status_code == 200, response.text
+    return response.json()["traces"]["measured_left_cop_cov_m2"]["x"]
+
+
+def test_declared_independent_skew_carries_the_cop_covariance(root: Path) -> None:
+    cov = _cop_cov(root, {"skew_s": 0.0005, "cop_skew": "independent"})
+    assert any(v is not None for v in cov)
+
+
+def test_undeclared_skew_relation_keeps_only_the_per_axis_bound(root: Path) -> None:
+    cov = _cop_cov(root, {"skew_s": 0.0005, "cop_skew": "unknown"})
+    assert all(v is None for v in cov)
+
+
+def test_reading_declarations_are_required_and_validated(root: Path) -> None:
+    json_path = w.write_swing(root)
+    body = _body(json_path.name)
+    del body["reading"]
+    assert _client().post(ROUTE, json=body).status_code == 422
+    bad = _body(json_path.name, reading={"skew_s": 0.0, "cop_skew": "shared"})
+    assert _client().post(ROUTE, json=bad).status_code == 422
+    negative = _body(json_path.name, reading={"skew_s": -1.0, "cop_skew": "unknown"})
+    assert _client().post(ROUTE, json=negative).status_code in (400, 422)

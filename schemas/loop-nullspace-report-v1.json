@@ -375,6 +375,63 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "sign_class": {
+                "type": "array",
+                "description": "Per frame: positive, negative, zero or indeterminate (NSX-22 sign class); null for an infeasible frame.",
+                "items": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "positive",
+                    "negative",
+                    "zero",
+                    "indeterminate",
+                    null
+                  ]
+                }
+              },
+              "binding_lower": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": "Per frame: labels of the rows active at this bound's optimum (support of the optimal duals)."
+              },
+              "binding_upper": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": "Per frame: labels of the rows active at this bound's optimum (support of the optimal duals)."
+              },
+              "binding_hypotheses_lower": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": "Per frame: hypothesis ids of the active rows."
+              },
+              "binding_hypotheses_upper": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": "Per frame: hypothesis ids of the active rows."
               }
             }
           }
@@ -583,6 +640,42 @@
         },
         "frames": {
           "type": "object"
+        }
+      }
+    },
+    "frame_diagnostics": {
+      "type": "array",
+      "description": "Per analysed frame: rank and condition number of the decomposition.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "index",
+          "rank_A",
+          "nullity",
+          "rank_J_c",
+          "condition_number"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "rank_A": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "nullity": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "rank_J_c": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "condition_number": {
+            "$ref": "#/$defs/number"
+          }
         }
       }
     }

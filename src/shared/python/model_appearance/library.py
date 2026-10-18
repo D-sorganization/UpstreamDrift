@@ -299,11 +299,28 @@ def garment_coverage(preset: str, part: str) -> tuple[float, float]:
 LOFT_RINGS, LOFT_SIDES = 22, 36
 BLEND_PARTS = ("upper_arm", "thigh")
 BLEND_RADIUS_SCALE = 1.0  # ball only fills the seam; never wider than the limb
+# The hip ball sits at the femoral head, inside the pelvis solid; a full-radius
+# ball read as "legs plugged into spheres" (HRG-C1, #13164), so it stays just
+# under the garment-thickened thigh. With a garment: 0.95 * 1.08 = 1.026.
+HIP_BLEND_RADIUS_SCALE = 0.95
+HIP_BLEND_MAX_OVER_FEMUR = 1.05
 
 
-def blend_scale(garment: bool) -> float:
-    """Blend-ball radius over the limb radius (<= 1.1 incl. garment thickness)."""
-    return BLEND_RADIUS_SCALE * (GARMENT_THICKNESS if garment else 1.0)
+def blend_scale(garment: bool, part: str = "upper_arm") -> float:
+    """Blend-ball radius over the limb radius (<= 1.1 incl. garment thickness).
+
+    The thigh (hip) ball uses ``HIP_BLEND_RADIUS_SCALE`` and is held to
+    ``HIP_BLEND_MAX_OVER_FEMUR`` times the femur radius.
+    """
+    base = HIP_BLEND_RADIUS_SCALE if part == "thigh" else BLEND_RADIUS_SCALE
+    return base * (GARMENT_THICKNESS if garment else 1.0)
+
+
+# Pelvis solid (HRG-C1, #13164): lofted on the hip landmarks, see
+# ``body_meshes._pelvis_segment``.
+PELVIS_HIP_MARGIN_M = 0.01  # skin clearance beyond the femur at the widest level
+PELVIS_CROTCH_DROP_M = PART_RADIUS_M["thigh"]  # solid runs this far below the HJCs
+PELVIS_WAIST_RATIO = 0.75  # flat cap at the lumbar plane / widest half width
 
 
 GARMENT_PARTS = ("torso", "pelvis", "shoulder", "upper_arm", "thigh", "shin")

@@ -177,6 +177,10 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # operators can verify which build they're running without exec'ing in.
 LABEL org.upstream-drift.profile=${PROFILE}
 LABEL org.upstream-drift.features=${FEATURES}
+# Slow, WAN-bound rebuild: tell host prune jobs (runner-cleanup, docker-cache-prune,
+# which skip label keep) to leave every profile image alone; stages built FROM
+# runtime (explorer-base and its targets) inherit it. UD #13113, DOCKER_SETUP.md.
+LABEL keep="true"
 
 CMD ["python3", "-m", "uvicorn", "src.api.server:app", \
      "--host", "0.0.0.0", \
@@ -240,9 +244,7 @@ ENV PYTHONPATH="/workspace/vendor/ud-tools/src/shared/python:/workspace/vendor/u
 
 USER ${USER_NAME}
 
-# Slow, WAN-bound rebuild: tell host prune jobs (runner-cleanup, docker-cache-prune,
-# which skip label keep) to leave this image alone. See DOCKER_SETUP.md.
-LABEL keep="true"
+# label keep="true" is inherited from the runtime stage (UD #13113).
 # The runtime stage's API healthcheck does not apply to the explorer.
 HEALTHCHECK NONE
 ENTRYPOINT ["/usr/local/bin/explorer-entrypoint.sh"]

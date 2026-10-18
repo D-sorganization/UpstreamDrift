@@ -163,9 +163,11 @@ def test_trunk_ml_extent_is_the_spec_hint_semi_axis(built) -> None:
             and item.body in hints
         ):
             ml = float(np.ptp(_read_obj(item.mesh_path) @ sections[item.body].ml_axis))
-            assert ml == pytest.approx(
-                2 * section_size(spec, item.body).radius_m, rel=0.05
-            )
+            hint = 2 * section_size(spec, item.body).radius_m
+            if library.classify_body(item.body) == "pelvis":
+                assert ml >= 0.95 * hint  # grows to enclose the HJCs (HRG-C1)
+            else:
+                assert ml == pytest.approx(hint, rel=0.05)
             checked += 1
     assert checked >= 2
 

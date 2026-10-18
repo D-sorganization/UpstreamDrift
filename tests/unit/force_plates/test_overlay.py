@@ -238,3 +238,46 @@ def test_cop_sigma_trace_is_labelled() -> None:
         "Measured Left Centre of Pressure Uncertainty (1 Sigma)"
     )
     assert series.units["measured_left_cop_sigma_m"] == "m"
+
+
+def test_cop_covariance_trace_carries_the_reading_covariance() -> None:
+    from src.shared.python.force_plates import reading_at
+
+    placed, times = _placed(), (-1.0, 0.0, 0.005, 0.010)
+    overlay = measured_overlay(placed, _align(), times, _opts())
+    for foot in ("left", "right"):
+        cov = overlay.traces[f"measured_{foot}_cop_cov_m2"]
+        cop = overlay.traces[f"measured_{foot}_cop_m"]["x"]
+        expected = [
+            None
+            if c is None
+            else reading_at(placed, t, _align(), _opts())
+            .feet[foot]
+            .cop_cov_random_xy_m2
+            for t, c in zip(times, cop, strict=True)
+        ]
+        got = [
+            None if xx is None else (xx, yy, xy)
+            for xx, yy, xy in zip(cov["x"], cov["y"], cov["z"], strict=True)
+        ]
+        assert got == expected
+        assert cov["magnitude"] == [None] * len(times)
+    assert overlay.traces["measured_left_cop_cov_m2"]["x"][1] is not None
+
+
+def test_cop_covariance_trace_is_labelled() -> None:
+    series = overlay_on_series(
+        _model_series((0.0, 0.005)), _placed(), _align(), _opts()
+    )
+    assert series.labels["measured_left_cop_cov_m2"] == (
+        "Measured Left Centre of Pressure Covariance (1 Sigma)"
+    )
+    assert series.units["measured_left_cop_cov_m2"] == "m^2"
+
+
+def test_undeclared_skew_independence_leaves_only_the_per_axis_sigma() -> None:
+    opts = ReadingOptions(coverage=2.0, skew_s=1.0e-3)
+    overlay = measured_overlay(_placed(), _align(), (0.0, 0.005), opts)
+    cov = overlay.traces["measured_left_cop_cov_m2"]
+    assert cov["x"] == cov["y"] == cov["z"] == [None, None]
+    assert overlay.traces["measured_left_cop_sigma_m"]["x"][0] is not None
