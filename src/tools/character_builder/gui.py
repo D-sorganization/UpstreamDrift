@@ -13,6 +13,11 @@ from PyQt6 import QtWidgets
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.motion_matching.club_models import CLUBS
 
+from src.shared.python.model_appearance import library as appearance_library_mod
+from src.shared.python.model_appearance.appearance_selection import rgb_to_hex
+from src.shared.python.model_appearance.schema import document_from_dict
+from src.shared.python.ui.hex_color_field import ColorPicker, HexColorField
+
 from .core import PARAMETER_RANGES, CharacterBuilderModel
 
 logger = get_logger(__name__)
@@ -46,6 +51,13 @@ _APPEARANCE_FIELDS = (
     ("headwear", "headwear", "Headwear"),
     ("ground_material", "ground_materials", "Ground"),
 )
+# (appearance colour choice, label) written as document ``materials`` entries
+_COLOUR_FIELDS = (
+    ("skin_color", "Custom Skin Color"),
+    ("hair_color", "Hair Color"),
+    ("top_color", "Shirt Color"),
+    ("bottom_color", "Trousers/Shorts Color"),
+)
 
 
 def _library_options(library: dict[str, Any], key: str) -> list[str]:
@@ -56,8 +68,11 @@ def _library_options(library: dict[str, Any], key: str) -> list[str]:
 class CharacterBuilderWidget(QtWidgets.QWidget):
     """Preset picker, parameter form, live summary and export buttons."""
 
-    def __init__(self, parent: Any = None) -> None:
+    def __init__(
+        self, parent: Any = None, *, color_picker: ColorPicker | None = None
+    ) -> None:
         super().__init__(parent)
+        self._color_picker = color_picker
         self.model = CharacterBuilderModel()
         self._syncing = False
         self._build_ui()
@@ -129,7 +144,68 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
             )
             self.appearance_combos[name] = combo
             form.addRow(label, combo)
+        self.colour_fields: dict[str, HexColorField] = {}
+        for name, label in _COLOUR_FIELDS:
+            form.addRow(label, self._build_colour_row(name))
         return group
+
+    def _current_colours(self) -> dict[str, str]:
+        """Hex of the document's current skin, hair, shirt and trousers."""
+        doc = document_from_dict(self.model.appearance_document())
+        mats = appearance_library_mod.library_materials(doc)
+        preset = appearance_library_mod.CLOTHING[doc.clothing]
+        hair = appearance_library_mod.headwear_material_name(doc)
+        names = {
+            "skin_color": doc.skin_tone,
+            "hair_color": hair
+            or appearance_library_mod.HEADWEAR_DEFAULT_MATERIAL["hair"],
+            "top_color": preset.get("torso", doc.skin_tone),
+            "bottom_color": preset.get(
+                appearance_library_mod.PANTS_PART, doc.skin_tone
+            ),
+        }
+        return {k: rgb_to_hex(mats[v].rgba) for k, v in names.items()}
+
+    def _build_colour_row(self, name: str) -> QtWidgets.QWidget:
+        """Colour field plus a Reset button that clears the custom choice."""
+        field = HexColorField(
+            self._current_colours()[name],
+            object_name=f"colour_{name}",
+            color_picker=self._color_picker,
+        )
+        field.colour_changed.connect(
+            lambda hex_, n=name: self._on_colour_change(n, hex_)
+        )
+        field.line_edit.editingFinished.connect(
+            lambda n=name, f=field: self._on_colour_change(n, f.text())
+        )
+        self.colour_fields[name] = field
+        reset = QtWidgets.QPushButton("Reset")
+        reset.setObjectName(f"reset_{name}")
+        reset.clicked.connect(lambda _c=False, n=name: self._on_colour_reset(n))
+        row = QtWidgets.QWidget()
+        layout = QtWidgets.QHBoxLayout(row)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(field, 1)
+        layout.addWidget(reset)
+        return row
+
+    def _on_colour_change(self, name: str, value: str) -> None:
+        if value == self._current_colours()[name] and name not in (
+            self.model.appearance_choices()
+        ):
+            return  # focus loss without an edit is not a custom choice
+        self._on_appearance_change(name, value)
+
+    def _on_colour_reset(self, name: str) -> None:
+        try:
+            self.model.set_appearance(name, None)
+        except ValueError as exc:
+            self.status.setText(str(exc))
+            return
+        field = self.colour_fields[name]
+        field.line_edit.setText(self._current_colours()[name])
+        self.status.setText("")
 
     def _on_appearance_change(self, name: str, value: str) -> None:
         try:

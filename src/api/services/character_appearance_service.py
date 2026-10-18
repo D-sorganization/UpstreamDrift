@@ -15,6 +15,11 @@ from dataclasses import replace
 from typing import Any
 
 from src.shared.python.model_appearance import library
+from src.shared.python.model_appearance.appearance_selection import (
+    AppearanceOverrides,
+    apply_overrides,
+    hex_to_rgb,
+)
 from src.shared.python.model_appearance.schema import (
     HEADWEAR,
     SCHEMA_VERSION,
@@ -36,6 +41,17 @@ GROUND_MATERIALS: tuple[str, ...] = ("turf", "studio_floor")
 
 # Request fields that map 1:1 onto AppearanceDocument top-level attributes.
 _DOCUMENT_CHOICE_FIELDS = ("skin_tone", "clothing", "club_finish", "name")
+
+
+# Custom ``#rrggbb`` colour choices (HRG-B2, #13167) and the AppearanceOverrides
+# field each one fills; they are written as document ``materials`` entries by the
+# shared writer, so the CLI, desktop and web produce the same material values.
+COLOUR_CHOICES: dict[str, str] = {
+    "skin_color": "skin_tone",
+    "hair_color": "hair",
+    "top_color": "top_color",
+    "bottom_color": "bottom_color",
+}
 
 
 def appearance_library() -> dict[str, Any]:
@@ -101,7 +117,9 @@ def build_appearance(
     """Apply picked library names to the default document and validate it.
 
     ``choices`` may set ``skin_tone``, ``clothing``, ``club_finish``,
-    ``headwear``, ``headwear_material``, ``ground_material`` and ``name``;
+    ``headwear``, ``headwear_material``, ``ground_material`` and ``name``,
+    plus the custom ``#rrggbb`` colours ``skin_color``, ``hair_color``,
+    ``top_color`` and ``bottom_color`` (written as document ``materials``);
     absent or ``None`` entries keep the ``AppearanceDocument`` default.
     ``spec_sha256``, when given, binds the appearance sidecar to the compiled
     physics spec it was picked for.
@@ -135,6 +153,16 @@ def build_appearance(
 
     data = document_to_dict(doc)
     document_from_dict(data)
+    colours = {
+        field: choices[choice]
+        for choice, field in COLOUR_CHOICES.items()
+        if choices.get(choice) is not None
+    }
+    for choice in COLOUR_CHOICES:
+        if choices.get(choice) is not None:
+            hex_to_rgb(choices[choice])  # ValueError unless #rrggbb
+    if colours:
+        data = apply_overrides(data, AppearanceOverrides(**colours))
     return data
 
 
@@ -159,6 +187,7 @@ def appearance_sidecar_filename(
 
 
 __all__ = [
+    "COLOUR_CHOICES",
     "GROUND_MATERIALS",
     "appearance_library",
     "appearance_sidecar_filename",

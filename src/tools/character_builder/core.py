@@ -42,6 +42,10 @@ APPEARANCE_NAMES = (
     "headwear",
     "headwear_material",
     "ground_material",
+    "skin_color",
+    "hair_color",
+    "top_color",
+    "bottom_color",
 )
 
 
@@ -128,10 +132,12 @@ class CharacterBuilderModel:
         """Parameters as a plain mapping (for save/restore)."""
         return self._params.to_dict()
 
-    def set_appearance(self, name: str, value: str) -> None:
+    def set_appearance(self, name: str, value: str | None) -> None:
         """Set one appearance choice, validating the merged document first.
 
-        Precondition: ``name`` must be one of :data:`APPEARANCE_NAMES`.
+        Precondition: ``name`` must be one of :data:`APPEARANCE_NAMES`. The
+        ``*_color`` names take ``#rrggbb`` and are written as document
+        ``materials`` entries (HRG-B2); ``None`` clears a choice.
         Raises ``ValueError`` for an unknown name, or an unknown skin tone,
         clothing preset, club finish, headwear or ground material value;
         the current choices are left unchanged when it raises.
@@ -141,12 +147,18 @@ class CharacterBuilderModel:
         if name not in APPEARANCE_NAMES:
             raise ValueError(f"unknown appearance choice: {name!r}")
         candidate = {**self._appearance_choices, name: value}
+        if value is None:
+            candidate.pop(name)
         build_appearance(candidate, self.compile().sha256)
         self._appearance_choices = candidate
 
     def appearance_document(self) -> dict[str, Any]:
         """Appearance document for the current choices, bound to the spec hash."""
         return build_appearance(self._appearance_choices, self.compile().sha256)
+
+    def appearance_choices(self) -> dict[str, Any]:
+        """The explicit appearance choices made so far (a copy)."""
+        return dict(self._appearance_choices)
 
     def appearance_library(self) -> dict[str, Any]:
         """Pickable appearance names and materials (delegates for the GUI)."""

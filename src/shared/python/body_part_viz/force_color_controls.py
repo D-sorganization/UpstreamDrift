@@ -22,6 +22,8 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 
+from src.shared.python.ui.hex_color_field import ColorPicker, HexColorField
+
 from .force_colors import ForceColorScale
 
 
@@ -96,7 +98,11 @@ class ForceColorControls(QWidget):
     scale_changed = pyqtSignal(object)
 
     def __init__(
-        self, parent: QWidget | None = None, *, scale: ForceColorScale | None = None
+        self,
+        parent: QWidget | None = None,
+        *,
+        scale: ForceColorScale | None = None,
+        color_picker: ColorPicker | None = None,
     ) -> None:
         if scale is not None and not isinstance(scale, ForceColorScale):
             raise TypeError("scale must be ForceColorScale or None")
@@ -126,10 +132,11 @@ class ForceColorControls(QWidget):
             ("compression_color", "Compression Color (#RRGGBB)"),
             ("neutral_color", "Neutral Color (#RRGGBB)"),
         ):
-            color_field = QLineEdit(getattr(self._scale, name))
-            color_field.setObjectName(name)
-            self._colors[name] = color_field
-            layout.addRow(label, color_field)
+            field_widget = HexColorField(
+                getattr(self._scale, name), object_name=name, color_picker=color_picker
+            )
+            self._colors[name] = field_widget.line_edit
+            layout.addRow(label, field_widget)
         apply_button = QPushButton("Apply Colors and Ranges")
         apply_button.setObjectName("apply_force_colors")
         layout.addRow(apply_button)

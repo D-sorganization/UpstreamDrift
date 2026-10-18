@@ -36,8 +36,15 @@ _CHOICE_FIELDS = (
     "headwear",
     "headwear_material",
     "ground_material",
+    "skin_color",
+    "hair_color",
+    "top_color",
+    "bottom_color",
     "name",
 )
+
+
+_HEX_PATTERN = r"^#[0-9a-fA-F]{6}$"
 
 
 class CharacterAppearanceRequest(BaseModel):
@@ -59,6 +66,18 @@ class CharacterAppearanceRequest(BaseModel):
         None, description="Hair/cap material name override"
     )
     ground_material: str | None = Field(None, description="Ground material name")
+    skin_color: str | None = Field(
+        None, pattern=_HEX_PATTERN, description="Custom skin colour #rrggbb"
+    )
+    hair_color: str | None = Field(
+        None, pattern=_HEX_PATTERN, description="Custom hair colour #rrggbb"
+    )
+    top_color: str | None = Field(
+        None, pattern=_HEX_PATTERN, description="Custom shirt colour #rrggbb"
+    )
+    bottom_color: str | None = Field(
+        None, pattern=_HEX_PATTERN, description="Custom trousers/shorts colour #rrggbb"
+    )
     # The name becomes the export filename stem, so it is restricted to a
     # header- and path-safe identifier.
     name: str | None = Field(
