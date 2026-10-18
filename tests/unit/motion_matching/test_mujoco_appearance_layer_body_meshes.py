@@ -181,6 +181,61 @@ def test_physics_is_bit_identical_with_the_shared_body_meshes(stem) -> None:
         assert np.array_equal(getattr(dressed, attr), getattr(plain, attr)), attr
 
 
+PHYSICS_ARRAYS = (
+    "body_mass",
+    "body_inertia",
+    "body_iquat",
+    "body_ipos",
+    "body_pos",
+    "body_quat",
+    "body_subtreemass",
+    "jnt_axis",
+    "jnt_range",
+    "jnt_pos",
+    "jnt_limited",
+    "dof_armature",
+    "dof_damping",
+    "eq_type",
+    "eq_obj1id",
+    "eq_obj2id",
+    "eq_data",
+)
+
+
+@pytest.mark.parametrize("stem", sorted(SPECS))
+def test_compiled_physics_arrays_and_collision_masks_ignore_the_appearance(
+    stem,
+) -> None:
+    """HRG-C1 (#13164): the pelvis/blend visuals never reach the dynamics.
+
+    Every inertial, joint and equality array, and the collision mask of every
+    geom the plain model has, are bit-identical with the appearance on.
+    """
+    mujoco = pytest.importorskip("mujoco")
+    raw = SPECS[stem].read_bytes()
+    plain = mujoco.MjModel.from_xml_string(exporter.export_full_body_mjcf(raw)[0])
+    dressed = mujoco.MjModel.from_xml_string(
+        exporter.export_full_body_mjcf(raw, appearance=document_from_dict(DEFAULT))[0]
+    )
+    for attr in PHYSICS_ARRAYS:
+        assert np.array_equal(getattr(dressed, attr), getattr(plain, attr)), attr
+    for gid in range(plain.ngeom):
+        name = plain.geom(gid).name
+        if not name:
+            continue
+        twin = dressed.geom(name)
+        for attr in ("contype", "conaffinity", "size", "pos", "quat", "type"):
+            assert np.array_equal(getattr(twin, attr), getattr(plain.geom(gid), attr))
+    added = [dressed.geom(g) for g in range(dressed.ngeom) if dressed.geom(g).name]
+    visual = [
+        g
+        for g in added
+        if g.name not in {plain.geom(i).name for i in range(plain.ngeom)}
+    ]
+    assert visual, "the dressed model adds visual geoms"
+    assert all(g.contype[0] == 0 and g.conaffinity[0] == 0 for g in visual)
+
+
 def test_visual_layer_plain_colours_come_from_the_library_palette() -> None:
     palette = library.PLAIN_PALETTE
     assert visual_layer.plain_rgba("capsule") == palette["capsule"]

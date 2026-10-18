@@ -38,7 +38,13 @@ from src.shared.python.model_appearance.skinned_body import spec_body_poses
 
 Array = NDArray[np.float64]
 
-__all__ = ["BodySection", "body_sections", "width_hint_for"]
+__all__ = [
+    "BodySection",
+    "PelvisLandmarks",
+    "body_sections",
+    "pelvis_landmarks",
+    "width_hint_for",
+]
 
 TRUNK_PARTS = frozenset({"torso", "pelvis"})
 FOOT_PARTS = frozenset({"foot"})
@@ -53,6 +59,14 @@ class BodySection:
     body: str
     ml_axis: Array  # mediolateral, from the landmarks (sign is irrelevant)
     depth_axis: Array  # the thin semi-axis: AP for the trunk, up for the foot
+
+    def trunk_up_axis(self) -> Array:
+        """Unit vertical of a trunk body (``depth x ML``), in its own frame.
+
+        Precondition: a trunk section, whose depth axis is horizontal (AP);
+        a foot section's depth axis is already "up".
+        """
+        return np.cross(self.depth_axis, self.ml_axis)
 
     def width_axis(self, start: ArrayLike, end: ArrayLike) -> Array:
         """Full-radius axis for the segment ``start -> end`` of this body."""
@@ -192,3 +206,35 @@ def body_sections(spec: Mapping[str, Any]) -> dict[str, BodySection]:
             section.body,
         )
     return sections
+
+
+@dataclass(frozen=True)
+class PelvisLandmarks:
+    """Hip joint centres and lumbar joint of a pelvis, in its spec body frame."""
+
+    body: str
+    hjc_r: Array  # the two hip joint origins (sides are not assigned)
+    hjc_l: Array
+    lumbar: Array  # origin of the first torso child joint (the lumbar plane)
+
+
+def pelvis_landmarks(spec: Mapping[str, Any]) -> dict[str, PelvisLandmarks]:
+    """Landmarks of every body that parents two hips and a torso joint.
+
+    Postcondition: one entry per such body; a body missing either landmark
+    is absent (the caller keeps its legacy sizing; nothing is guessed).
+    """
+    joints = list(spec["joints"])
+    out: dict[str, PelvisLandmarks] = {}
+    for body in {j["parent"] for j in joints if j["parent"] != "world"}:
+        kids = [j for j in joints if j["parent"] == body]
+        hips = [j for j in kids if classify_body(j["child"]) == "thigh"]
+        spine = [j for j in kids if classify_body(j["child"]) == "torso"]
+        if len(hips) != 2 or not spine:
+            continue
+        origin = [
+            np.asarray(j["parent_to_base"], dtype=np.float64)[:3, 3]
+            for j in (*hips, spine[0])
+        ]
+        out[body] = PelvisLandmarks(body, origin[0], origin[1], origin[2])
+    return out

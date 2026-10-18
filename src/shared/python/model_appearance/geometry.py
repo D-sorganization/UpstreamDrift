@@ -306,3 +306,64 @@ def closed_grid_mesh(grid: Array, top: Array, bottom: Array) -> Mesh:
         faces.append((n, j2, j))
         faces.append((n + 1, last + j, last + j2))
     return _orient(verts, np.asarray(faces, dtype=np.int64))
+
+
+@dataclass(frozen=True)
+class SplitEllipsoid:
+    """Ellipsoid of two half heights about a widest level, cut flat on top.
+
+    ``centre`` is the widest point; ``up`` the vertical and ``width`` the
+    full-width axis (made perpendicular to ``up``). The lower half is a plain
+    half-ellipsoid of height ``half_down``; the upper half has height
+    ``half_up`` but is cut flat ``top`` above the centre (``top <= half_up``),
+    so the cap sits exactly at that plane.
+    """
+
+    centre: Array
+    up: Array
+    width: Array
+    half_width: float
+    half_depth: float
+    half_up: float
+    half_down: float
+    top: float
+
+
+def split_ellipsoid_mesh(
+    shape: SplitEllipsoid, *, thickness: float = 1.0, rings: int = 14, sides: int = 24
+) -> Mesh:
+    """Closed convex mesh of ``shape``; ``thickness`` scales width and depth only.
+
+    Preconditions: finite inputs, positive sizes, ``0 < top <= half_up``,
+    even ``sides`` (left/right mirror symmetry), ``rings >= 4``. Postcondition:
+    positive volume, symmetric about the plane through ``centre`` normal to
+    ``width``; the highest point is the flat cap at ``centre + top * up``.
+    """
+    c = _check_finite("centre", shape.centre, 3)
+    up = _check_finite("up", shape.up, 3)
+    wid = _check_finite("width", shape.width, 3)
+    sizes = (shape.half_width, shape.half_depth, shape.half_up, shape.half_down)
+    if not all(math.isfinite(x) and x > 0 for x in (*sizes, thickness)):
+        raise ValueError("ellipsoid sizes and thickness must be positive and finite")
+    if not 0 < shape.top <= shape.half_up:
+        raise ValueError("top must satisfy 0 < top <= half_up")
+    if sides < 6 or sides % 2 or rings < 4:
+        raise ValueError("need even sides >= 6 and rings >= 4")
+    a = up / np.linalg.norm(up)
+    u = wid - np.dot(wid, a) * a
+    if np.linalg.norm(u) < 1e-9:
+        raise ValueError("width axis must not be parallel to up")
+    u /= np.linalg.norm(u)
+    v = np.cross(a, u)
+    lower = -np.linspace(math.pi / 2, 0.0, rings, endpoint=False)[1:]  # pole -> 0
+    top_angle = math.asin(shape.top / shape.half_up)
+    angles = np.concatenate([lower, np.linspace(0.0, top_angle, rings)])[::-1]
+    phi = np.linspace(0.0, 2.0 * math.pi, sides, endpoint=False)
+    plane = np.outer(np.cos(phi), u * shape.half_width * thickness) + np.outer(
+        np.sin(phi), v * shape.half_depth * thickness
+    )
+    grid = np.empty((len(angles), sides, 3))
+    for k, ang in enumerate(angles):
+        height = math.sin(ang) * (shape.half_up if ang > 0 else shape.half_down)
+        grid[k] = c + a * height + math.cos(ang) * plane
+    return closed_grid_mesh(grid, c + a * shape.top, c - a * shape.half_down)

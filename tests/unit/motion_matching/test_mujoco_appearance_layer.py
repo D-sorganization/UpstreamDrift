@@ -206,7 +206,9 @@ def test_trunk_and_shoe_cross_sections_are_wider_than_deep(spec_path) -> None:
     seen: set[str] = set()
     for body, caps in by_body.items():
         part = classify_body(body)
-        if part not in ("torso", "pelvis", "foot") or body not in meshes:
+        # The pelvis solid is lofted on the hip landmarks, not on a capsule
+        # (HRG-C1, #13164); its geometry is pinned in test_pelvis_loft.py.
+        if part not in ("torso", "foot") or body not in meshes:
             continue
         ml = sections[body].ml_axis
         aspect = PART_ASPECT[part]
@@ -223,7 +225,7 @@ def test_trunk_and_shoe_cross_sections_are_wider_than_deep(spec_path) -> None:
             assert width_ext > depth_ext, (body, width_ext, depth_ext)
             assert depth_ext / width_ext == pytest.approx(aspect, abs=0.02), body
             seen.add(part if part != "foot" else body)
-    assert {"calcn_r", "calcn_l"} <= seen and ({"torso", "pelvis"} & seen)
+    assert {"calcn_r", "calcn_l"} <= seen and "torso" in seen
     pelvis = next(b for b in by_body if b.endswith("LowerTorso"))
     pts = np.vstack(meshes[pelvis])
     depth = sections[pelvis].depth_axis
