@@ -50,6 +50,7 @@ except ImportError:
 from .model_source import model_as_urdf
 from .results_playback_host import ResultsPlaybackHostMixin
 from .results_session import ResultsSession
+from .segment_manager import SegmentManager
 from .segment_panel import SegmentPanel
 from .urdf_builder import URDFBuilder
 from .visualization_widget import VisualizationWidget
@@ -78,6 +79,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.urdf_builder = URDFBuilder()
+        self.segment_manager = SegmentManager()
         self.current_file_path: Path | None = None
         self._notepad_window: Any | None = None
         self._results: ResultsSession | None = None
@@ -176,6 +178,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
     def _on_segment_added(self, segment_data: dict) -> None:
         try:
             self.urdf_builder.add_segment(segment_data)
+            self.segment_manager.add_segment(segment_data)
             self.visualization_widget.update_visualization(self.urdf_builder.get_urdf())
             self.segment_added.emit(segment_data)
             self.status_bar.showMessage(f"Added segment: {segment_data['name']}")
@@ -187,6 +190,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
     def _on_segment_removed(self, segment_name: str) -> None:
         try:
             self.urdf_builder.remove_segment(segment_name)
+            self.segment_manager.remove_segment(segment_name)
             self.visualization_widget.update_visualization(self.urdf_builder.get_urdf())
             self.segment_removed.emit(segment_name)
             self.status_bar.showMessage(f"Removed segment: {segment_name}")
@@ -198,6 +202,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
     def _on_segment_modified(self, segment_data: dict) -> None:
         try:
             self.urdf_builder.modify_segment(segment_data)
+            self.segment_manager.modify_segment(segment_data)
             self.visualization_widget.update_visualization(self.urdf_builder.get_urdf())
             self.status_bar.showMessage(f"Modified segment: {segment_data['name']}")
             logger.info(f"Segment modified: {segment_data['name']}")
@@ -210,6 +215,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
     def new_urdf(self) -> None:
         """Reset the URDF builder and viewport."""
         self.urdf_builder.clear()
+        self.segment_manager.clear()
         self.segment_panel.clear()
         self.visualization_widget.clear()
         self.current_file_path = None
@@ -382,31 +388,69 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
             logger.error(f"Error saving URDF: {e}")
             QMessageBox.critical(self, "Error", f"Failed to save URDF: {e}")
 
-    def export_for_engine(self, engine: str, default_filename: str) -> None:
-        """Export the current URDF, optimised for ``engine``.
+    def export_for_engine(
+        self,
+        engine: str,
+        default_filename: str = "",
+        file_path: str | Path | None = None,
+    ) -> str:
+        """Export the current model, optimised for ``engine``.
 
-        Currently exports a generic URDF (Drake / Pinocchio / MuJoCo all
-        accept it). The hook exists so engine-specific tag emission can
-        be added in one place later.
+        Converts the active model to an engine-specific format:
+        - MuJoCo: MJCF XML
+        - Drake: Drake-optimized URDF (xmlns:drake, collision filter groups)
+        - Pinocchio: Pinocchio-optimized URDF
+
+        Args:
+            engine: Target physics engine ('MuJoCo', 'Drake', 'Pinocchio').
+            default_filename: Optional default filename for the save dialog.
+            file_path: Optional explicit output path to bypass dialog.
+
+        Returns:
+            The exported model content as a string.
+
+        Raises:
+            ValueError: If ``engine`` is not one of the supported engines.
         """
-        from PyQt6.QtWidgets import QFileDialog
+        if not engine or engine.lower() not in ("mujoco", "drake", "pinocchio"):
+            raise ValueError(f"Unsupported engine: {engine}")
 
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            f"Export for {engine}",
-            default_filename,
-            "URDF Files (*.urdf);;XML Files (*.xml)",
+        urdf_content = (
+            self.visualization_widget.urdf_content or self.urdf_builder.get_urdf()
         )
-        if not file_path:
-            return
-        try:
-            urdf_content = self.urdf_builder.get_urdf()
-            Path(file_path).write_text(urdf_content, encoding="utf-8")
-            self.status_bar.showMessage(f"Exported for {engine}: {file_path}")
-            logger.info(f"{engine} export saved to: {file_path}")
-        except (FileNotFoundError, OSError) as e:
-            logger.error(f"Error exporting for {engine}: {e}")
-            QMessageBox.critical(self, "Error", f"Failed to export for {engine}: {e}")
+
+        export_data = self.segment_manager.export_for_engine(
+            engine, urdf_content=urdf_content
+        )
+        content = str(export_data.get("content", ""))
+
+        save_path: Path | None = None
+        if file_path is not None:
+            save_path = Path(file_path)
+        elif default_filename:
+            from PyQt6.QtWidgets import QFileDialog
+
+            chosen, _ = QFileDialog.getSaveFileName(
+                self,
+                f"Export for {engine}",
+                default_filename,
+                "URDF Files (*.urdf);;XML Files (*.xml);;All Files (*)",
+            )
+            if chosen:
+                save_path = Path(chosen)
+
+        if save_path is not None:
+            try:
+                save_path.write_text(content, encoding="utf-8")
+                self.status_bar.showMessage(f"Exported for {engine}: {save_path}")
+                logger.info(f"{engine} export saved to: {save_path}")
+            except (FileNotFoundError, OSError) as e:
+                logger.error(f"Error exporting for {engine}: {e}")
+                QMessageBox.critical(
+                    self, "Error", f"Failed to export for {engine}: {e}"
+                )
+
+        return content
 
     # ---- Tools menu actions -------------------------------------------
 
@@ -656,7 +700,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
     def _setup_export_menu(self, export_menu: Any) -> None:
         export_mujoco_action = QAction("Export for MuJoCo", self)
         export_mujoco_action.triggered.connect(
-            lambda: self.export_for_engine("MuJoCo", "golf_robot_mujoco.urdf")
+            lambda: self.export_for_engine("MuJoCo", "golf_robot_mujoco.xml")
         )
         export_menu.addAction(export_mujoco_action)
 
