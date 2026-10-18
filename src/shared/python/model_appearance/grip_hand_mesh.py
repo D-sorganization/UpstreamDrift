@@ -43,6 +43,11 @@ from dataclasses import dataclass, field, replace
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.grip_contact.contact_topology import (
+    ContactSite,
+    contact_topology,
+    site_grip_surface_gap_m,
+)
 from src.shared.python.model_appearance.geometry import (
     Mesh,
     closed_grid_mesh,
@@ -54,6 +59,7 @@ from src.shared.python.model_appearance.grip_pose import (
     GripStyle,
     Hand,
 )
+from src.shared.python.motion_matching.grip_contract import GripSpec, HandAngles
 
 Array = NDArray[np.float64]
 
@@ -174,6 +180,26 @@ class GripHandMesh:
         return (
             self.distance_below_butt_m + float(z.min()),
             self.distance_below_butt_m + float(z.max()),
+        )
+
+    def fingertip_position(self, finger: str) -> np.ndarray:
+        """Fingertip (distal phalanx centroid) in the hand-grip frame."""
+        for part in self.components:
+            if part.name == f"{finger}_distal":
+                return np.asarray(part.mesh.vertices.mean(axis=0), dtype=float)
+        raise KeyError(f"finger {finger!r} distal segment not found in components")
+
+    def fingertip_in_grip_m(self, finger: str) -> np.ndarray:
+        """Fingertip (distal phalanx centroid) in the shared grip frame (metres).
+
+        Shared grip frame:
+        x along the shaft from butt to head (metres),
+        y = x_hand (rho * cos(theta)),
+        z = y_hand (rho * sin(theta)).
+        """
+        tip = self.fingertip_position(finger)
+        return np.array(
+            [self.distance_below_butt_m + tip[2], tip[0], tip[1]], dtype=float
         )
 
 
@@ -361,17 +387,53 @@ def build_grip_hand_mesh(
     stack = _stack_z(params)
     clearance, k = params.pad_clearance_m, params.scale
 
+    lead_alpha = pose.roll_offset_deg(Hand.LEAD)
+    trail_alpha = pose.roll_offset_deg(Hand.TRAIL)
+    spec = GripSpec(
+        lead=HandAngles(alpha_deg=lead_alpha),
+        trail=HandAngles(alpha_deg=trail_alpha),
+        style=grip_style,
+        trigger_finger=pose.trigger_finger,
+        lead_below_butt_m=pose.lead_below_butt_m,
+        hand_spacing_m=pose.hand_spacing_m,
+        lead_thumb_offset_deg=pose.lead_thumb_offset_deg,
+        handedness=pose.handedness,
+    )
+    topo = contact_topology(spec, grip_radius_m=radius)
+
     parts: list[HandComponent] = []
     for finger in FINGER_NAMES:
         r = k * params.finger_radius_m[finger]
         p = params.phalanx_lengths_m[finger]
         lengths = (k * p[0], k * p[1], k * p[2])
 
-        d, z, on_grip = radius + clearance + r, stack[finger], True
-        if hand is Hand.TRAIL and finger == "little" and pose.linked_fingers():
-            z, d = _linked_little(pose, params, radius, r)
-            on_grip = False
-        for name, mesh in _finger(finger, lengths, r, d, mcp, z, curl, params.sides):
+        target_site: ContactSite | None = None
+        if hand is Hand.LEAD and finger == "index":
+            target_site = topo.site("lead_index")
+        elif hand is Hand.TRAIL and finger == "little":
+            target_site = topo.site("trail_little_finger")
+        elif hand is Hand.TRAIL and finger == "index" and pose.trigger_finger:
+            target_site = topo.site("trail_index_trigger")
+
+        if target_site is not None:
+            d, mcp_finger, z, on_grip = _solve_topology_finger(
+                lengths,
+                r,
+                target_site,
+                placement.distance_below_butt_m,
+                radius,
+                curl,
+                params.sides,
+            )
+        else:
+            d = radius + clearance + r
+            z = stack[finger]
+            mcp_finger = mcp
+            on_grip = True
+
+        for name, mesh in _finger(
+            finger, lengths, r, d, mcp_finger, z, curl, params.sides
+        ):
             parts.append(HandComponent(name, finger, mesh, on_grip))
     z_lo = min(stack.values()) - k * params.finger_radius_m["little"] * 0.6
     z_hi = max(stack.values()) + k * params.finger_radius_m["index"] * 0.6
@@ -383,7 +445,8 @@ def build_grip_hand_mesh(
         params.sides,
     )
     parts.append(HandComponent("palm", "palm", palm, True))
-    parts += _thumb(radius, math.radians(placement.thumb_offset_deg), params)
+    thumb_azimuth = math.radians(placement.thumb_offset_deg + placement.roll_offset_deg)
+    parts += _thumb(radius, thumb_azimuth, params)
 
     on_grip_vertices = np.vstack([p.mesh.vertices for p in parts if p.on_grip])
     gap = float(np.min(np.hypot(on_grip_vertices[:, 0], on_grip_vertices[:, 1])))
@@ -396,7 +459,7 @@ def build_grip_hand_mesh(
         grip_radius_m=radius,
         distance_below_butt_m=placement.distance_below_butt_m,
         v_azimuth_deg=placement.v_azimuth_deg,
-        thumb_azimuth_deg=placement.thumb_offset_deg,
+        thumb_azimuth_deg=placement.thumb_offset_deg + placement.roll_offset_deg,
         curl_sign=curl,
         components=tuple(parts),
         mesh=concat_meshes(*(p.mesh for p in parts)),
@@ -404,26 +467,39 @@ def build_grip_hand_mesh(
     )
 
 
-def _linked_little(
-    pose: GripPose,
-    params: HandMeshParams,
+def _solve_topology_finger(
+    lengths: tuple[float, float, float],
+    r: float,
+    target_site: ContactSite,
+    distance_below_butt_m: float,
     grip_radius: float,
-    little_radius: float,
-) -> tuple[float, float]:
-    """Axial position and tangent radius of a linked trail little finger.
+    curl: int,
+    sides: int,
+) -> tuple[float, float, float, bool]:
+    """Solve (d, mcp_azimuth, z, on_grip) matching target_site.centre_m to <= 1 mm."""
+    centre = target_site.centre_m
+    target_z = centre[0] - distance_below_butt_m
+    target_rho = float(np.hypot(centre[1], centre[2]))
+    target_azimuth = float(math.atan2(centre[2], centre[1]))
 
-    It lies over the lead index/middle gap: on top of the lead finger pads for
-    overlap, half-sunk between them for interlock (visual approximation).
-    """
-    stack = _stack_z(params)
-    gap_depth = pose.distance_below_butt_m(Hand.LEAD)
-    gap_depth += 0.5 * (stack["index"] + stack["middle"])
-    z = gap_depth - pose.distance_below_butt_m(Hand.TRAIL)
-    lead_r = params.scale * max(params.finger_radius_m[f] for f in ("index", "middle"))
-    pads = grip_radius + params.pad_clearance_m
-    if pose.style is GripStyle.OVERLAP:
-        return z, pads + 2.0 * lead_r + params.pad_clearance_m + little_radius
-    return z, pads + lead_r + little_radius
+    gap = site_grip_surface_gap_m(target_site, grip_radius)
+    on_grip = abs(gap) <= 0.001
+
+    d_min = grip_radius + r + 0.0001 if on_grip else 0.005
+    d = max(target_rho, d_min)
+    for _ in range(5):
+        parts_tmp = _finger("tmp", lengths, r, d, 0.0, 0.0, curl, sides)
+        c = parts_tmp[2][1].vertices.mean(axis=0)
+        err = float(np.hypot(c[0], c[1])) - target_rho
+        if abs(err) < 1e-6:
+            break
+        d = max(d_min, d - err * 0.95)
+
+    parts_ref = _finger("tmp", lengths, r, d, 0.0, 0.0, curl, sides)
+    c = parts_ref[2][1].vertices.mean(axis=0)
+    angle0 = math.atan2(c[1], c[0])
+    mcp = target_azimuth - angle0
+    return d, mcp, target_z, on_grip
 
 
 def _thumb(
