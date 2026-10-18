@@ -55,4 +55,3 @@ def test_validate_camera_baselines() -> None:
         validate_camera_baselines([cam_a])
     with pytest.raises(Exception, match="positive"):
         validate_camera_baselines([cam_a, cam_b], min_baseline_m=0.0)
-

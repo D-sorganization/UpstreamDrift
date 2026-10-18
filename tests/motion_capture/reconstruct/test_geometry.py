@@ -147,4 +147,3 @@ def test_triangulate_degenerate_cameras_fails_closed() -> None:
     assert set(res2.rejected) == {"d", "e"}
     assert res2.contributing == ()
     assert res2.covariance_m2 is None
-
