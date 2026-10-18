@@ -355,8 +355,10 @@ class _Problem:
                     diff_rot = np.zeros_like(px_p)
                     diff_rot[valid] = (px_p[valid] - base_px[valid]) / eps
                     rot_cols[:, :, a] = diff_rot * w[:, None]
-            for m, (t_i, k_i) in enumerate(idx):
-                j0 = self._joint_column(int(t_i), int(k_i))
+            for m in range(len(idx)):
+                t_i = int(idx[m, 0])
+                k_i = int(idx[m, 1])
+                j0 = self._joint_column(t_i, k_i)
                 for r in range(2):
                     for a in range(3):
                         rows.append(row + r)

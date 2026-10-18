@@ -20,6 +20,8 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+    from src.deployment.safety.monitor import SafetyMonitor
+
 
 class CommunicationType(Enum):
     """Communication protocol for robot interface."""
@@ -117,6 +119,8 @@ class RealTimeController:
         control_frequency: float = 1000.0,
         communication_type: str = "simulation",
         max_consecutive_failures: int = DEFAULT_MAX_CONSECUTIVE_FAILURES,
+        safety_monitor: SafetyMonitor | None = None,
+        allow_unmonitored_operation: bool = False,
     ) -> None:
         """Initialize real-time controller.
 
@@ -126,6 +130,13 @@ class RealTimeController:
             max_consecutive_failures: Number of back-to-back control-loop
                 errors tolerated before the loop stops and sends zero torque.
                 Must be positive.
+            safety_monitor: Optional safety monitor for limit-checking outgoing
+                commands on non-simulation backends. When omitted, one is created
+                from the robot config on :meth:`connect` unless
+                ``allow_unmonitored_operation`` is set.
+            allow_unmonitored_operation: Opt out of the default SafetyMonitor on
+                non-simulation backends. Starting without a monitor logs a
+                warning instead of refusing.
         """
         if control_frequency is None or control_frequency <= 0:
             raise ValueError("control_frequency must be a positive number of Hz")
@@ -135,6 +146,8 @@ class RealTimeController:
         self.dt = 1.0 / control_frequency
         self.comm_type = CommunicationType(communication_type)
         self._max_consecutive_failures = max_consecutive_failures
+        self._safety_monitor = safety_monitor
+        self._allow_unmonitored_operation = allow_unmonitored_operation
 
         self._config: RobotConfig | None = None
         self._control_callback: Callable[[RobotState], ControlCommand] | None = None
@@ -187,6 +200,11 @@ class RealTimeController:
         """Whether the loop self-aborted after too many consecutive errors."""
         return self._aborted_on_failure
 
+    @property
+    def safety_monitor(self) -> SafetyMonitor | None:
+        """Safety monitor used to limit-check outgoing commands, if any."""
+        return self._safety_monitor
+
     def connect(self, robot_config: RobotConfig) -> bool:
         """Connect to real robot.
 
@@ -203,6 +221,14 @@ class RealTimeController:
                 "Cannot call connect() while the control loop is running"
             )
         self._config = robot_config
+        if (
+            self.comm_type != CommunicationType.SIMULATION
+            and self._safety_monitor is None
+            and not self._allow_unmonitored_operation
+        ):
+            from src.deployment.safety.monitor import SafetyMonitor
+
+            self._safety_monitor = SafetyMonitor(robot_config)
 
         try:
             if self.comm_type in (
@@ -297,6 +323,20 @@ class RealTimeController:
             raise RuntimeError("Must connect to robot before starting")
         if self._control_callback is None:
             raise RuntimeError("Must set control callback before starting")
+        if (
+            self.comm_type != CommunicationType.SIMULATION
+            and self._safety_monitor is None
+        ):
+            if self._allow_unmonitored_operation:
+                logger.warning(
+                    "RealTimeController starting %s backend without "
+                    "SafetyMonitor; outgoing commands will not be limit-checked.",
+                    self.comm_type.value,
+                )
+            else:
+                raise RuntimeError(
+                    "Non-simulation backends require a SafetyMonitor before start"
+                )
         with self._running_lock:
             if self._is_running:
                 return
@@ -360,6 +400,13 @@ class RealTimeController:
         """
         try:
             self._run_control_loop()
+        except Exception:
+            if not self._should_stop:
+                logger.exception(
+                    "Control loop exited unexpectedly; commanding zero torque."
+                )
+                self._aborted_on_failure = True
+                self._command_zero_torque_for_abort()
         finally:
             with self._running_lock:
                 self._is_running = False
@@ -383,16 +430,7 @@ class RealTimeController:
                 # Compute control
                 if self._control_callback is not None:
                     command = self._control_callback(state)
-
-                    # Validate command
-                    if self._config is not None:
-                        command.validate(self._config.n_joints)
-
-                    # Send command
-                    self._send_command(command)
-
-                    with self._command_lock:
-                        self._last_command = command
+                    self._apply_outgoing_command(command, state)
 
                 consecutive_failures = 0
 
@@ -413,6 +451,14 @@ class RealTimeController:
                     self._should_stop = True
                     self._command_zero_torque_for_abort()
                     break
+            except Exception:
+                logger.exception(
+                    "Unexpected control loop error; aborting and commanding zero torque."
+                )
+                self._aborted_on_failure = True
+                self._should_stop = True
+                self._command_zero_torque_for_abort()
+                break
 
             # Record timing
             cycle_end = time.perf_counter()
@@ -431,6 +477,21 @@ class RealTimeController:
             else:
                 # Missed deadline, reset timing
                 next_cycle_time = time.perf_counter()
+
+    def _apply_outgoing_command(
+        self,
+        command: ControlCommand,
+        state: RobotState,
+    ) -> None:
+        """Validate, safety-limit, and send an outgoing control command."""
+        if self._config is not None:
+            command.validate(self._config.n_joints)
+        outgoing = command
+        if self._safety_monitor is not None:
+            outgoing = self._safety_monitor.compute_safe_command(command, state)
+        self._send_command(outgoing)
+        with self._command_lock:
+            self._last_command = outgoing
 
     def _command_zero_torque_for_abort(self) -> None:
         """Best-effort emergency zero torque during failure abort."""
@@ -534,28 +595,44 @@ class RealTimeController:
                 command.validate(self._loopback_joint_count())
 
                 if command.mode == ControlMode.TORQUE:
-                    torque_commands = self._copy_command_vector(command.torque_commands)
+                    torque_raw = command.torque_commands
+                    if torque_raw is None:
+                        raise ValueError("Torque mode requires torque_commands")
+                    torque_commands = self._copy_command_vector(torque_raw)
                     damping = 0.1
                     qdd = torque_commands - damping * qd
                     qd = qd + qdd * self.dt
                     q = q + qd * self.dt
 
                 elif command.mode == ControlMode.POSITION:
-                    q = self._copy_command_vector(command.position_targets)
+                    position_raw = command.position_targets
+                    if position_raw is None:
+                        raise ValueError("Position mode requires position_targets")
+                    q = self._copy_command_vector(position_raw)
                     qd = np.zeros_like(q)
 
                 elif command.mode == ControlMode.VELOCITY:
-                    qd = self._copy_command_vector(command.velocity_targets)
+                    velocity_raw = command.velocity_targets
+                    if velocity_raw is None:
+                        raise ValueError("Velocity mode requires velocity_targets")
+                    qd = self._copy_command_vector(velocity_raw)
                     q = q + qd * self.dt
 
                 elif command.mode == ControlMode.IMPEDANCE:
-                    position_targets = self._copy_command_vector(
-                        command.position_targets
-                    )
-                    stiffness = self._copy_command_vector(command.stiffness)
-                    damping = self._copy_command_vector(command.damping)
+                    position_raw = command.position_targets
+                    stiffness_raw = command.stiffness
+                    damping_raw = command.damping
+                    if position_raw is None:
+                        raise ValueError("Impedance mode requires position_targets")
+                    if stiffness_raw is None:
+                        raise ValueError("Impedance mode requires stiffness")
+                    if damping_raw is None:
+                        raise ValueError("Impedance mode requires damping")
+                    position_targets = self._copy_command_vector(position_raw)
+                    stiffness = self._copy_command_vector(stiffness_raw)
+                    damping_coeffs = self._copy_command_vector(damping_raw)
                     q_err = position_targets - q
-                    tau = stiffness * q_err - damping * qd
+                    tau = stiffness * q_err - damping_coeffs * qd
                     if command.feedforward_torque is not None:
                         tau += self._copy_command_vector(command.feedforward_torque)
                     qdd = tau

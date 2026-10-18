@@ -216,7 +216,7 @@ class TestRealTimeController:
         )
         controller._send_command(cmd)
 
-        q, qd = controller._sim_state  # type: ignore
+        q, qd = controller._sim_state  # type: ignore[attr-defined]
         # After 1 step (dt=0.01) with tau=1: v=0.01, p=0.0001
         assert qd[0] > 0
         assert q[0] > 0
@@ -229,7 +229,7 @@ class TestRealTimeController:
         )
         controller._send_command(cmd_vel)
 
-        q_new, qd_new = controller._sim_state  # type: ignore
+        q_new, qd_new = controller._sim_state  # type: ignore[attr-defined]
         assert qd_new[0] == 2.0
         assert q_new[0] > q[0]
 
@@ -241,7 +241,7 @@ class TestRealTimeController:
         )
         controller._send_command(cmd_pos)
 
-        q_pos, qd_pos = controller._sim_state  # type: ignore
+        q_pos, qd_pos = controller._sim_state  # type: ignore[attr-defined]
         assert q_pos[0] == 10.0
         assert qd_pos[0] == 0.0
 
@@ -708,6 +708,155 @@ class TestControlLoopFailureEscalation:
 
         with pytest.raises(ValueError):
             RealTimeController(max_consecutive_failures=0)
+
+
+class TestControlLoopUnexpectedExceptions:
+    """Issue #12986: policy bugs must abort and zero torque immediately."""
+
+    @pytest.mark.parametrize(
+        "exc_type",
+        [KeyError, TypeError, IndexError, AttributeError, ZeroDivisionError],
+    )
+    def test_unexpected_callback_exception_aborts_and_zeroes_torque(
+        self,
+        exc_type: type[BaseException],
+    ) -> None:
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=100.0,
+            communication_type="simulation",
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=3))
+
+        sent: list[ControlCommand] = []
+        controller._send_command = sent.append  # type: ignore[method-assign]
+
+        state = {"calls": 0}
+
+        def policy_bug(_s: RobotState) -> ControlCommand:
+            state["calls"] += 1
+            if state["calls"] <= 4:
+                return ControlCommand(
+                    timestamp=_s.timestamp,
+                    mode=ControlMode.TORQUE,
+                    torque_commands=np.full(3, 5.0),
+                )
+            raise exc_type("bug in policy")
+
+        controller.set_control_callback(policy_bug)
+        controller.start()
+
+        wait_until(
+            lambda: not controller.is_running,
+            timeout=2.0,
+            message="control loop did not stop after unexpected callback error",
+        )
+
+        assert not controller.is_running
+        assert controller.aborted_on_failure
+        assert sent, "expected commands including zero-torque abort fallback"
+        np.testing.assert_array_equal(sent[-1].torque_commands, np.zeros(3))
+
+
+class TestRealTimeControllerSafetyMonitor:
+    """Issue #12986: non-simulation backends route commands through SafetyMonitor."""
+
+    def test_loopback_connect_installs_default_safety_monitor(self) -> None:
+        from src.deployment.realtime import RealTimeController, RobotConfig
+        from src.deployment.safety import SafetyMonitor
+
+        controller = RealTimeController(communication_type="loopback")
+        controller.connect(RobotConfig(name="test", n_joints=3))
+        assert controller.safety_monitor is not None
+        assert isinstance(controller.safety_monitor, SafetyMonitor)
+
+    def test_unmonitored_loopback_logs_warning_on_start(
+        self,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        from src.deployment.realtime import (
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            communication_type="loopback",
+            allow_unmonitored_operation=True,
+        )
+        controller.connect(RobotConfig(name="test", n_joints=3))
+        assert controller.safety_monitor is None
+
+        def cb(s: RobotState) -> object:
+            from src.deployment.realtime import ControlCommand, ControlMode
+
+            return ControlCommand(
+                timestamp=s.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(3),
+            )
+
+        controller.set_control_callback(cb)
+        with caplog.at_level(logging.WARNING):
+            controller.start()
+            controller.stop()
+
+        assert any("SafetyMonitor" in record.message for record in caplog.records), (
+            "expected warning when starting unmonitored non-simulation backend"
+        )
+
+    def test_safety_monitor_clips_torque_before_send(self) -> None:
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+        from src.deployment.safety import SafetyLimits, SafetyMonitor
+
+        config = RobotConfig(
+            name="test",
+            n_joints=2,
+            torque_limits=np.array([1.0, 1.0]),
+        )
+        limits = SafetyLimits.from_config(config)
+        monitor = SafetyMonitor(config, limits=limits)
+
+        controller = RealTimeController(
+            control_frequency=200.0,
+            communication_type="loopback",
+            safety_monitor=monitor,
+        )
+        controller.connect(config)
+
+        sent: list[ControlCommand] = []
+        controller._send_command = sent.append  # type: ignore[method-assign]
+
+        def hot_torque(s: RobotState) -> ControlCommand:
+            return ControlCommand(
+                timestamp=s.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.full(2, 50.0),
+            )
+
+        controller.set_control_callback(hot_torque)
+        controller.start()
+        wait_until(lambda: len(sent) >= 1, timeout=2.0, message="no command sent")
+        controller.stop()
+
+        assert sent
+        np.testing.assert_array_less(
+            np.abs(sent[-1].torque_commands),
+            np.array([1.01, 1.01]),
+        )
 
 
 class TestControllerStopTimeout:
