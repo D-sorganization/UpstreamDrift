@@ -259,10 +259,23 @@ driver model); pass `--results` to replay a trajectory for such models.
 
 ### Image Retention and Health Check
 
-Every explorer image carries the label `keep=true` (Dockerfile `LABEL` plus
-compose `labels:`). The host prune jobs (`runner-cleanup --disk-guard` from
-Runner_Dashboard and the host-only `docker-cache-prune`) skip images with that
-label (`--filter label!=keep`). Four images are required, and the compose
+Every image built from `Dockerfile.modular` carries the label `keep=true`: it
+is set once in the `runtime` stage, so the profile images (`upstream-drift:full`,
+`:biomech`, `:research`, `:slim`) and the explorer stages built on top of them
+all inherit it (compose `labels:` repeats it for the explorer services). The
+host prune jobs (`runner-cleanup --disk-guard` from Runner_Dashboard and the
+host-only `docker-cache-prune`) skip images with that label
+(`--filter label!=keep`). Before UD #13113 only the explorer stage was
+labelled, and ControlTower's disk guard deleted every profile image (and
+`ud-sim`, which is built `FROM upstream-drift:full`). Put the label in the
+Dockerfile, not on the `docker build` command line, so cached and ad-hoc
+rebuilds keep it.
+
+Trade-off: the dangling-image prune applies the same filter, so superseded,
+untagged builds of a labelled image are not reclaimed automatically. Keep build
+tags stable (rebuild in place) and remove old untagged builds with
+`docker image prune --filter dangling=true` when needed; a Runner_Dashboard
+follow-up to ignore the label for dangling images is tracked on UD #13113. Four images are required, and the compose
 services build them on demand, so a pruned image is rebuilt rather than pulled:
 
 | Image                              | Profile             |

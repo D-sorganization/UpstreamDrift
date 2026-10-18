@@ -9,6 +9,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from src.shared.python.force_plates.open_fp_format.overlay_file import DEFAULT_COVERAGE
 from src.tools.ground_reaction_plots.plate_import_form import (
     ALIGNMENT_KINDS,
     FORM_FIELDS,
@@ -30,6 +31,8 @@ def _texts(**changes: str) -> dict[str, str]:
         "sensing_depth_m": "0.015",
         "sensing_depth_sigma_m": "0.002",
         "capacity_n": "3923",
+        "skew_s": "0.0005",
+        "cop_skew": "independent",
         "handedness": "RH",
         "origin_m": "1.0, 2.0, 0.0",
         "target_dir": "0, -1, 0",
@@ -54,7 +57,10 @@ def test_complete_form_builds_the_context() -> None:
     np.testing.assert_allclose(context.placement.placement.origin_m, (1.0, 2.0, 0.0))
     assert context.alignment.offset_s == 0.25
     assert context.alignment.kind == "manual"
-    assert context.options is None
+    assert context.options is not None
+    assert context.options.skew_s == 0.0005
+    assert context.options.cop_skew_independent is True
+    assert context.options.coverage == DEFAULT_COVERAGE
 
 
 def test_every_physical_fact_is_required_and_starts_empty() -> None:
@@ -67,17 +73,18 @@ def test_every_physical_fact_is_required_and_starts_empty() -> None:
         "sensing_depth_m",
         "sensing_depth_sigma_m",
         "capacity_n",
+        "skew_s",
         "origin_m",
         "offset_s",
         "sigma_offset_s",
         "alignment_note",
     } <= required
     for field in FORM_FIELDS:
-        if field.key not in {"target_dir", "handedness", "alignment_kind"}:
+        if field.key not in {"target_dir", "handedness", "alignment_kind", "cop_skew"}:
             assert field.initial == "", field.key
 
 
-@pytest.mark.parametrize("key", ["capacity_n", "origin_m", "alignment_note"])
+@pytest.mark.parametrize("key", ["capacity_n", "skew_s", "origin_m", "alignment_note"])
 def test_missing_required_field_is_named(key: str) -> None:
     with pytest.raises(PlateFormError, match=key) as info:
         context_from_form(_texts(**{key: "  "}))
@@ -93,6 +100,7 @@ def test_blank_device_keeps_the_default_label() -> None:
     [
         ("capacity_n", "lots"),
         ("force_floor_n", "nan"),
+        ("skew_s", "fast"),
         ("origin_m", "1, 2"),
         ("target_dir", "0, -1, x"),
     ],
@@ -107,6 +115,8 @@ def test_unparseable_numbers_are_named(key: str, text: str) -> None:
     ("key", "text"),
     [
         ("capacity_n", "-1"),
+        ("skew_s", "-0.001"),
+        ("cop_skew", "shared"),
         ("sigma_offset_s", "-0.1"),
         ("handedness", "ambi"),
         ("target_dir", "0, 0, 1"),
@@ -158,3 +168,21 @@ def test_gui_still_exports_the_context_type() -> None:
     from src.tools.ground_reaction_plots import gui
 
     assert gui.PlateImportContext is PlateImportContext
+
+
+@pytest.mark.parametrize(
+    ("key", "text"), [("skew_s", "-0.001"), ("cop_skew", "shared")]
+)
+def test_reading_refusals_name_their_field(key: str, text: str) -> None:
+    with pytest.raises(PlateFormError) as info:
+        context_from_form(_texts(**{key: text}))
+    assert info.value.key == key
+
+
+def test_skew_relation_starts_unknown_and_unknown_claims_no_independence() -> None:
+    field = next(f for f in FORM_FIELDS if f.key == "cop_skew")
+    assert field.initial == "unknown"
+    texts = _texts()
+    del texts["cop_skew"]
+    options = context_from_form(texts).options
+    assert options is not None and options.cop_skew_independent is False

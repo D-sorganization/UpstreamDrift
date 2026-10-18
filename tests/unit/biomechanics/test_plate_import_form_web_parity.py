@@ -13,6 +13,9 @@ from pathlib import Path
 
 import pytest
 
+from src.shared.python.force_plates.open_fp_format.declared_import import (
+    COP_SKEW_CHOICES,
+)
 from src.tools.ground_reaction_plots.plate_import_form import (
     ALIGNMENT_KINDS,
     FORM_FIELDS,
@@ -79,3 +82,4 @@ def test_required_flags_and_initial_texts_match() -> None:
 def test_choices_match() -> None:
     assert _quoted_tuple("ALIGNMENT_KINDS") == ALIGNMENT_KINDS
     assert _quoted_tuple("HANDEDNESS_CHOICES") == HANDEDNESS_CHOICES
+    assert _quoted_tuple("COP_SKEW_CHOICES") == COP_SKEW_CHOICES

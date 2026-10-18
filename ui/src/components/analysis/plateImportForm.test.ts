@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   ALIGNMENT_KINDS,
+  COP_SKEW_CHOICES,
   PLATE_FORM_FIELDS,
   initialPlateFormTexts,
   requestFromPlateForm,
@@ -17,6 +18,8 @@ const complete = (changes: Record<string, string> = {}): Record<string, string> 
   sensing_depth_m: '0.015',
   sensing_depth_sigma_m: '0.002',
   capacity_n: '3923',
+  skew_s: '0.0005',
+  cop_skew: 'independent',
   origin_m: '1.0, 2.0, 0.0',
   offset_s: '0.25',
   sigma_offset_s: '0.001',
@@ -28,12 +31,30 @@ describe('plate import form', () => {
   it('starts with every physical fact empty and only conventions prefilled', () => {
     const texts = initialPlateFormTexts();
     for (const field of PLATE_FORM_FIELDS) {
-      if (['handedness', 'target_dir', 'alignment_kind'].includes(field.key)) continue;
+      if (['handedness', 'target_dir', 'alignment_kind', 'cop_skew'].includes(field.key)) continue;
       expect(texts[field.key], field.key).toBe('');
     }
     expect(texts.handedness).toBe('RH');
     expect(texts.target_dir).toBe('0, -1, 0');
     expect(texts.alignment_kind).toBe('manual');
+    // The conservative relation: no covariance is claimed until declared.
+    expect(texts.cop_skew).toBe('unknown');
+  });
+
+  it('offers the CoP skew relations, conservative first', () => {
+    expect(COP_SKEW_CHOICES).toEqual(['unknown', 'independent', 'common']);
+  });
+
+  it('sends the declared skew and refuses a missing or unparseable one', () => {
+    expect(requestFromPlateForm(complete()).request?.reading).toEqual({
+      skew_s: 0.0005,
+      cop_skew: 'independent',
+    });
+    // A negative skew is a range the server refuses, like every other range.
+    for (const skew_s of ['', 'fast']) {
+      expect(requestFromPlateForm(complete({ skew_s })).error?.key, skew_s).toBe('skew_s');
+    }
+    expect(requestFromPlateForm(complete({ cop_skew: 'shared' })).error?.key).toBe('cop_skew');
   });
 
   it('offers cross-correlation alongside the declared alignments', () => {
@@ -84,6 +105,7 @@ describe('plate import form', () => {
         note: 'clap on both clocks',
         derived_from_model: null,
       },
+      reading: { skew_s: 0.0005, cop_skew: 'independent' },
     });
   });
 

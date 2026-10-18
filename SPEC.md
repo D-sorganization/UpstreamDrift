@@ -2741,6 +2741,14 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-18 | #13156 | Plate import forms (PyQt and web) and the plate-overlay route declare channel timing skew and the CoP skew relation (DeclaredReading); only independent allows the CoP covariance |
+| 2026-10-18 | #13152 | Ground-reaction overlay draws measured CoP 1-sigma covariance ellipses, tilted with the plate yaw (cop_cov_random_xy_m2 = R_xy diag R_xy^T) |
+| 2026-10-18 | #13155 | Sanitize 400/403/404 error details in handle_api_errors to prevent path leaks |
+| 2026-10-18 | #13154 | NSX-42: framework-free NSX plot model and cross-UI golden |
+| 2026-10-18 | #13138 | Label the Dockerfile.modular runtime stage keep=true so host prune jobs spare every profile image; contract test guards it |
+| 2026-10-18 | #13149 | NSX-41: display_decision output-policy integration (ADR-0054 D7 Option A) |
+| 2026-10-18 | #13147 | Ground reaction overlay draws measured CoP uncertainty as per-world-axis 1-sigma ellipses |
+| 2026-10-18 | #13141 | Ground reaction overlay rings measured CoP points by their 1-sigma per axis |
 | 2026-10-18 | #13139 | Ground reaction overlay shades measured plate load by its 1-sigma uncertainty and names the declared uncertainty source |
 | 2026-10-17 | #13117 | Shoulder orientation solve keeps its Euler branch (continuity rule); fullbody reports orientation_max_step_rad |
 | 2026-10-17 | #13134 | Plate declarations dialog and web form offer the cross_correlation alignment and require the model it was fitted against |

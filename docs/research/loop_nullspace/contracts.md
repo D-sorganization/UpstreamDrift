@@ -496,3 +496,33 @@ Implementation notes (`loop_nullspace/envelopes.py`, #12565):
 - Non-claim: static envelopes over-approximate trajectory-feasible ranges when
   smoothness priors are active (NSX-25).
 
+
+## NSX-41 Output-Policy Display Contract (#12573)
+
+`loop_nullspace.output_policy_integration.display_decision(record, surface, *,
+preset=None, representative=False, output_name=None, policy_statuses=None,
+registry=None) -> DisplayDecision` is the one display gate (ADR-0054 D7,
+Option A, accepted 2026-10-17). Neither UI may implement its own.
+
+- Surfaces: `research_view` and `swing_report` (`DisplaySurface`). An unknown
+  surface string withholds.
+- Research view: `INVARIANT` is a value with a model-provenance badge.
+  `FAMILY_DEPENDENT` is a band, or with `representative=True` a representative
+  labelled with its preset and overlaid on the band; the preset must exist in
+  the registry, otherwise the decision is `WITHHOLD`. `UNAVAILABLE` is
+  `SHOW_REASON` carrying the record's reason.
+- Swing report: nothing enters unless `output_policy.py` admits the output.
+  The caller passes `output_name` and the `dict[str, OutputStatus]` from
+  `evaluate_output_policy`; the status must be `advertised` or `validated`.
+  Missing policy context, an unknown name, an unavailable or
+  non-`VALIDATED` record, or any failed research-view rule withholds.
+  Calibration and evidence requirements stay in `output_policy.py`, unchanged.
+- Conditioning: `conditioning` ids are chips on every record (also
+  `INVARIANT`), separate from `hypotheses` chips, and pass the same
+  `require_verified_for_display` gate; an unknown or unverified id withholds.
+  A conditioned record is labelled "conditioned on ..."; only a record with no
+  conditioning is labelled unconditioned.
+- Errors: wrong argument types raise `TypeError`; empty names or half-supplied
+  policy context raise `ValueError`; well-typed unrecognised values withhold.
+- Non-claim: an admitted decision says the policy let the output name through,
+  not that the NSX value is scientifically qualified.

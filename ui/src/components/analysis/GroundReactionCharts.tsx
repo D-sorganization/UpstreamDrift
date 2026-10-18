@@ -24,6 +24,11 @@ import {
   PER_AXIS,
   SIGMA_BAND_SUFFIX,
   copMarkerIndices,
+  COVARIANCE,
+  copMarkerCovariance,
+  svgEllipse,
+  type Covariance,
+  type RingKind,
   uncertaintyCaption,
 } from './groundReactionUncertainty';
 
@@ -75,11 +80,14 @@ type Band = {
   lower: Array<number | null>;
   upper: Array<number | null>;
 };
-/** Sampled measured CoP points ringed by their 1-sigma per axis (data units). */
+/** Sampled measured CoP points ringed by their 1-sigma (data-unit covariance). */
 type Ring = {
   label: string;
+  /** `Measured <Foot>`: names the ellipses' test ids. */
+  foot: string;
   color: string;
-  points: Array<{ frame: number; x: number; y: number; r: number }>;
+  kind: RingKind;
+  points: Array<{ frame: number; x: number; y: number; terms: Covariance }>;
 };
 
 function titleCase(key: string): string {
@@ -152,17 +160,29 @@ function measuredLoadBands(data: GroundReactionResponse): Band[] {
 function measuredCopRings(data: GroundReactionResponse): Ring[] {
   return footKeys(data, false).flatMap((e) => {
     const cop = data.traces?.[`measured_${e.key}_cop_m`];
-    const sigma = data.traces?.[`measured_${e.key}_cop_sigma_m`]?.z;
-    if (!cop || !sigma) return [];
+    const sigma = data.traces?.[`measured_${e.key}_cop_sigma_m`];
+    const cov = data.traces?.[`measured_${e.key}_cop_cov_m2`];
+    if (!cop || !sigma?.z) return [];
     const x = (cop.x ?? []) as Array<number | null>;
     const y = (cop.y ?? []) as Array<number | null>;
-    const points = copMarkerIndices(x, sigma, MAX_COP_MARKERS)
-      .filter((i) => y[i] !== null && y[i] !== undefined)
-      .map((i) => ({ frame: i, x: x[i] as number, y: y[i] as number, r: sigma[i] as number }));
-    return points.length === 0
-      ? []
-      : [{ label: `Measured ${e.label} ${SIGMA_BAND_SUFFIX} ${PER_AXIS}`, color: e.color, points }];
+    const markers = copMarkerIndices(x, sigma.z, MAX_COP_MARKERS).flatMap((i) => {
+      const marker = copMarkerCovariance(sigma, cov, i);
+      const yi = y[i];
+      if (marker === null || yi === null || yi === undefined) return [];
+      return [{ frame: i, x: x[i] as number, y: yi, terms: marker.terms, kind: marker.kind }];
+    });
+    if (markers.length === 0) return [];
+    const kind = markers.every((m) => m.kind === COVARIANCE) ? COVARIANCE : PER_AXIS;
+    const foot = `Measured ${e.label}`;
+    const points = markers.map(({ frame, x: px, y: py, terms }) => ({ frame, x: px, y: py, terms }));
+    return [{ label: `${foot} ${SIGMA_BAND_SUFFIX} ${kind}`, foot, color: e.color, kind, points }];
   });
+}
+
+/** What every foot's ellipses show, `per axis` if any foot lacks a covariance. */
+function ringKind(rings: Ring[]): RingKind | null {
+  if (rings.length === 0) return null;
+  return rings.every((g) => g.kind === COVARIANCE) ? COVARIANCE : PER_AXIS;
 }
 
 /** One row per key, read straight from `load_share` (feet only, never net). */
@@ -241,13 +261,13 @@ function MeasurementBanner({ data }: { data: GroundReactionResponse }) {
 function UncertaintyCaption({
   data,
   banded,
-  circled,
+  ringed,
 }: {
   data: GroundReactionResponse;
   banded: boolean;
-  circled: boolean;
+  ringed: RingKind | null;
 }) {
-  const caption = uncertaintyCaption(banded, circled, data.measured_uncertainty_source);
+  const caption = uncertaintyCaption(banded, ringed, data.measured_uncertainty_source);
   if (caption === null) return null;
   return (
     <div data-testid="ground-reaction-uncertainty-caption" className="text-xs text-gray-400 mb-2">
@@ -372,7 +392,14 @@ function TimePanel({
 
 /** Each ring's data-unit extremes, so the axis ranges never clip a ring. */
 function ringExtents(rings: Ring[], axis: 'x' | 'y'): number[][] {
-  return rings.map((g) => g.points.flatMap((p) => [p[axis] - p.r, p[axis] + p.r]));
+  // A 1-sigma ellipse reaches sqrt(var) along each axis, whatever its tilt.
+  const term = axis === 'x' ? 0 : 1;
+  return rings.map((g) =>
+    g.points.flatMap((p) => {
+      const half = Math.sqrt(p.terms[term]);
+      return [p[axis] - half, p[axis] + half];
+    }),
+  );
 }
 
 function PathPanel({
@@ -394,7 +421,7 @@ function PathPanel({
   const hasData = xr !== null && yr !== null;
   const xRange: [number, number] = xr ?? [0, 1];
   const yRange: [number, number] = yr ?? [0, 1];
-  // A circle in data units is an ellipse here: x and y are scaled separately.
+  // Data-unit covariances become SVG units through separate x and y scales.
   const kx = (x1 - x0) / (xRange[1] - xRange[0] || 1);
   const ky = (y1 - y0) / (yRange[1] - yRange[0] || 1);
 
@@ -402,20 +429,26 @@ function PathPanel({
     <ChartFrame id={id} title={title} suffix="m" legend={[...rows, ...rings]}>
       {hasData &&
         rings.flatMap((g) =>
-          g.points.map((p) => (
-            <ellipse
-              key={`${g.label}-${p.frame}`}
-              data-testid={`ground-reaction-cop-sigma-${g.label.replace(` ${SIGMA_BAND_SUFFIX} ${PER_AXIS}`, '')}-${p.frame}`}
-              cx={x0 + (p.x - xRange[0]) * kx}
-              cy={y1 - (p.y - yRange[0]) * ky}
-              rx={p.r * kx}
-              ry={p.r * ky}
-              fill={g.color}
-              fillOpacity={BAND_OPACITY}
-              stroke={g.color}
-              strokeOpacity={BAND_OPACITY}
-            />
-          )),
+          g.points.map((p) => {
+            const cx = x0 + (p.x - xRange[0]) * kx;
+            const cy = y1 - (p.y - yRange[0]) * ky;
+            const e = svgEllipse(p.terms, kx, ky);
+            return (
+              <ellipse
+                key={`${g.label}-${p.frame}`}
+                data-testid={`ground-reaction-cop-sigma-${g.foot}-${p.frame}`}
+                cx={cx}
+                cy={cy}
+                rx={e.rx}
+                ry={e.ry}
+                transform={e.rotateDeg === 0 ? undefined : `rotate(${e.rotateDeg} ${cx} ${cy})`}
+                fill={g.color}
+                fillOpacity={BAND_OPACITY}
+                stroke={g.color}
+                strokeOpacity={BAND_OPACITY}
+              />
+            );
+          }),
         )}
       {hasData ? (
         rows.map((r) => {
@@ -574,7 +607,7 @@ export function GroundReactionCharts({
         <>
           <MeasurementBanner data={data} />
           <UncertaintyCaption data={data} banded={panels.banded}
-            circled={panels.rings.length > 0}
+            ringed={ringKind(panels.rings)}
           />
           {panels.time.slice(0, 3).map((p) => (
             <TimePanel key={p.id} {...p} t={panels.t} events={panels.events} />

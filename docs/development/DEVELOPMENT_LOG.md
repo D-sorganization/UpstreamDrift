@@ -2561,6 +2561,110 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13156 · Plate Import Forms (PyQt and Web) and the Plate-Overlay Route Declare Channel Timing Skew and the CoP Skew Relation (DeclaredReading); Only Independent Allows the CoP Covariance
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13156
+- **Branch:** merged via #13156
+- **PR:** #13156
+- **Paths:** see #13156
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`ef519eca`; collated from changes/13156-plate-import-forms-pyqt-and-web-and-the.md)
+- **Summary:** Plate import forms (PyQt and web) and the plate-overlay route declare channel timing skew and the CoP skew relation (DeclaredReading); only independent allows the CoP covariance
+- **Next step:** Shipped in PR #13156.
+
+### DL-#13152 · Ground-Reaction Overlay Draws Measured CoP 1-Sigma Covariance Ellipses, Tilted With the Plate Yaw (Cop_Cov_Random_Xy_M2 = R_Xy Diag R_Xy^T)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13152
+- **Branch:** merged via #13152
+- **PR:** #13152
+- **Paths:** see #13152
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`8582cf13`; collated from changes/13152-ground-reaction-overlay-draws-measured-c.md)
+- **Summary:** Ground-reaction overlay draws measured CoP 1-sigma covariance ellipses, tilted with the plate yaw (cop_cov_random_xy_m2 = R_xy diag R_xy^T)
+- **Next step:** Shipped in PR #13152.
+
+### DL-#12965 · Infra: Handle_Api_Errors Leaks Absolute Server Paths and Internals via Str(E) in 400/403/404 Bodies
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #12965
+- **Branch:** fix/12965-sanitize-api-errors
+- **PR:** #13155
+- **Paths:** src/api/middleware/error_handler.py,src/api/utils/error_codes.py,tests/unit/api/test_error_handler.py
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`6c4b5e9f`; collated from changes/12965-sanitize-400-403-404-error-details-in-ha.md)
+- **Summary:** Sanitize 400/403/404 error details in handle_api_errors to prevent path leaks
+- **Next step:** Shipped in PR #13155.
+
+### DL-#12574 · NSX-42: Framework-Free NSX Plot Model and Cross-UI Golden
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12574
+- **Branch:** merged via #13154
+- **PR:** #13154
+- **Paths:** see #13154
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`bfc324fd`; collated from changes/12574-nsx-42-framework-free-nsx-plot-model-and.md)
+- **Summary:** NSX-42: framework-free NSX plot model and cross-UI golden
+- **Next step:** Shipped in PR #13154.
+
+### DL-#13113 · Label the Dockerfile.Modular Runtime Stage Keep=True so Host Prune Jobs Spare Every Profile Image; Contract Test Guards It
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13113
+- **Branch:** merged via #13138
+- **PR:** #13138
+- **Paths:** see #13138
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`dea902bb`; collated from changes/13113-label-the-dockerfile-modular-runtime-sta.md)
+- **Summary:** Label the Dockerfile.modular runtime stage keep=true so host prune jobs spare every profile image; contract test guards it
+- **Next step:** Shipped in PR #13138.
+
+### DL-#12573 · NSX-41: Display_Decision Output-Policy Integration (ADR-0054 D7 Option A)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12573
+- **Branch:** merged via #13149
+- **PR:** #13149
+- **Paths:** see #13149
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`551c914c`; collated from changes/12573-nsx-41-display-decision-output-policy-in.md)
+- **Summary:** NSX-41: display_decision output-policy integration (ADR-0054 D7 Option A)
+- **Next step:** Shipped in PR #13149.
+
+### DL-#13147 · Ground Reaction Overlay Draws Measured CoP Uncertainty as Per-World-Axis 1-Sigma Ellipses
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13147
+- **Branch:** merged via #13147
+- **PR:** #13147
+- **Paths:** see #13147
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`35a56c55`; collated from changes/13147-ground-reaction-overlay-draws-measured-c.md)
+- **Summary:** Ground reaction overlay draws measured CoP uncertainty as per-world-axis 1-sigma ellipses
+- **Next step:** Shipped in PR #13147.
+
+### DL-#13141 · Ground Reaction Overlay Rings Measured CoP Points by Their 1-Sigma per Axis
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13141
+- **Branch:** merged via #13141
+- **PR:** #13141
+- **Paths:** see #13141
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`2dc3724e`; collated from changes/13141-ground-reaction-overlay-rings-measured-c.md)
+- **Summary:** Ground reaction overlay rings measured CoP points by their 1-sigma per axis
+- **Next step:** Shipped in PR #13141.
+
 ### DL-#13139 · Ground Reaction Overlay Shades Measured Plate Load by Its 1-Sigma Uncertainty and Names the Declared Uncertainty Source
 
 - **State:** shipped

@@ -64,6 +64,10 @@ __all__ = [
 
 _WORLD_DIM = 3
 _STANCE_DIM = 2
+#: ``(var_x, var_y, cov_xy)``: the independent terms of a 2x2 covariance.
+_COV_TERMS = 3
+#: Relative slack on ``cov_xy^2 <= var_x var_y`` for floating-point rounding.
+_PSD_REL_SLACK = 1.0e-12
 #: Rounding allowance, in ulps of the largest clock term, for snapping a
 #: trial time onto a sample (two subtractions each round by <= 1/2 ulp).
 _SNAP_ULPS = 4
@@ -85,8 +89,13 @@ class ReadingOptions:
     ``load_curvature_floor`` [N/s^2] and ``cop_curvature_floor`` [m/s^2] are
     optional declared floors on ``|y''|`` for the load and the CoP; they are
     required wherever the curvature cannot be estimated from the data.
+    ``cop_skew_independent`` declares that the two stance CoP channels' skews
+    are independent; with ``skew_s > 0`` the CoP covariance is only reported
+    when it is ``True`` (a skew common to both channels would correlate them
+    along the signed CoP velocity, which a reading does not keep).
 
-    Raises ``TypeError`` for non-numbers, ``ValueError`` for out-of-range values.
+    Raises ``TypeError`` for non-numbers or a non-bool ``cop_skew_independent``,
+    ``ValueError`` for out-of-range values.
     """
 
     coverage: float
@@ -94,8 +103,11 @@ class ReadingOptions:
     offset_shift_s: float = 0.0
     load_curvature_floor: float | None = None
     cop_curvature_floor: float | None = None
+    cop_skew_independent: bool = False
 
     def __post_init__(self) -> None:
+        if not isinstance(self.cop_skew_independent, bool):
+            raise TypeError("cop_skew_independent must be a bool")
         finite_positive(self.coverage, "coverage")
         finite_non_negative(self.skew_s, "skew_s")
         finite_real(self.offset_shift_s, "offset_shift_s")
@@ -112,8 +124,13 @@ class FootSample:
     sample.  ``sigma_load_n`` and ``sigma_cop_m`` are worst-case band-equivalent
     sigmas (module docstring), the CoP one per horizontal axis for the worst
     axis; ``*_sigma_random_*`` and ``*_bias_*`` are their components (``None``
-    when a sample was built without them).  ``sigma_sensing_m`` is the
-    uncertainty of the sensing-plane depth.
+    when a sample was built without them).  ``cop_sigma_random_xy_m`` is the
+    CoP's random 1-sigma for world x and y separately, whose maximum is
+    ``cop_sigma_random_m``; it bounds each world axis through ``|R_xy|``.
+    ``cop_cov_random_xy_m2`` is the CoP's random covariance in world
+    ``(var_x, var_y, cov_xy)`` [m^2], its principal axes the plate's; ``None``
+    when a skew is declared without declaring the channels' skews independent.
+    ``sigma_sensing_m`` is the uncertainty of the sensing-plane depth.
     """
 
     load_n: float
@@ -125,6 +142,8 @@ class FootSample:
     load_bias_n: float | None = None
     cop_sigma_random_m: float | None = None
     cop_bias_m: float | None = None
+    cop_sigma_random_xy_m: tuple[float, float] | None = None
+    cop_cov_random_xy_m2: tuple[float, float, float] | None = None
 
     def __post_init__(self) -> None:
         finite_real(self.load_n, "load_n")
@@ -138,8 +157,36 @@ class FootSample:
             "cop_bias_m",
         ):
             _optional_non_negative(getattr(self, name), name)
+        _check_axis_pair(self.cop_sigma_random_xy_m, "cop_sigma_random_xy_m")
+        _check_covariance(self.cop_cov_random_xy_m2, "cop_cov_random_xy_m2")
         if self.cop_m is not None:
             object.__setattr__(self, "cop_m", _frozen_world_point(self.cop_m))
+
+
+def _check_axis_pair(value: tuple[float, float] | None, name: str) -> None:
+    """``None`` or two finite non-negative numbers (world x, world y)."""
+    if value is None:
+        return
+    if len(value) != _STANCE_DIM:
+        raise ValueError(f"{name} must hold one value per world axis, got {value!r}")
+    for axis in value:
+        finite_non_negative(axis, name)
+
+
+def _check_covariance(value: tuple[float, float, float] | None, name: str) -> None:
+    """``None`` or ``(var_x, var_y, cov_xy)`` of a positive semi-definite matrix."""
+    if value is None:
+        return
+    if len(value) != _COV_TERMS:
+        raise ValueError(f"{name} must be (var_x, var_y, cov_xy), got {value!r}")
+    var_x, var_y, cov_xy = value
+    finite_non_negative(var_x, name)
+    finite_non_negative(var_y, name)
+    finite_real(cov_xy, name)
+    # Rounding of R diag(v) R^T can overshoot the bound by a few ulps.
+    slack = _PSD_REL_SLACK * max(var_x, var_y) ** 2
+    if cov_xy**2 > var_x * var_y + slack:
+        raise ValueError(f"{name} is not a covariance: |cov_xy| > sqrt(var_x var_y)")
 
 
 def _frozen_world_point(value: Array) -> Array:
@@ -196,13 +243,13 @@ class PlacedTrial:
         """Smallest interval between consecutive samples [s]."""
         return float(np.min(np.diff(self.trial.times_s)))
 
-    def world_axis_gain(self) -> Array:
-        """``|R|`` (2x2): world-x/y error per unit stance-x/y error.
+    def horizontal_rotation(self) -> Array:
+        """``R_xy`` (2x2): a stance-x/y error ``e`` is the world error ``R_xy e``."""
+        return np.array(self.placement.rotation[:2, :2])
 
-        A stance error ``e`` maps to world ``R e``, so ``|R| @ |e|`` bounds
-        each world-axis component.
-        """
-        return np.abs(self.placement.rotation[:2, :2])
+    def world_axis_gain(self) -> Array:
+        """``|R_xy|`` (2x2): ``|R_xy| @ |e|`` bounds each world-axis component."""
+        return np.abs(self.horizontal_rotation())
 
 
 # ------------------------------------------------------------ readings --
@@ -223,10 +270,13 @@ def _budget(base: float, estimate: Estimate, options: ReadingOptions) -> _Budget
 
 @dataclass(frozen=True, eq=False)
 class _CopEstimate:
-    """Interpolated stance CoP ``(2,)`` with the worst-axis bias and rate."""
+    """Interpolated stance CoP ``(2,)``, the worst-axis bias and rate, and the
+    rate on each stance and (bounded through ``|R_xy|``) world axis ``(2,)``."""
 
     xy: Array
     estimate: Estimate
+    stance_rates: Array
+    world_rates: Array
 
 
 def _cop_estimate(
@@ -245,12 +295,49 @@ def _cop_estimate(
         interpolate(replace(channel, values=channel.values[:, axis]), index, t)
         for axis in range(_STANCE_DIM)
     ]
+    stance_rates = np.array([axis.rate for axis in axes])
+    world_rates = gain @ stance_rates
     merged = Estimate(
         value=0.0,
         bias=float(np.max(gain @ np.array([axis.bias for axis in axes]))),
-        rate=float(np.max(gain @ np.array([axis.rate for axis in axes]))),
+        rate=float(np.max(world_rates)),
     )
-    return _CopEstimate(np.array([axis.value for axis in axes]), merged)
+    return _CopEstimate(
+        np.array([axis.value for axis in axes]), merged, stance_rates, world_rates
+    )
+
+
+def _cop_random_xy(
+    cop: _CopEstimate | None, base: float, skew_s: float
+) -> tuple[float, float]:
+    """Random 1-sigma on world x and y: ``hypot(base, skew * world rate)``.
+
+    An unloaded CoP has no rate, so both axes carry the declared ``base``.
+    """
+    if cop is None:
+        return base, base
+    sx, sy = (math.hypot(base, skew_s * float(rate)) for rate in cop.world_rates)
+    return sx, sy
+
+
+def _cop_random_cov(
+    cop: _CopEstimate | None, base: float, options: ReadingOptions, rotation_xy: Array
+) -> tuple[float, float, float] | None:
+    """World random covariance ``(var_x, var_y, cov_xy)`` of the CoP, or ``None``.
+
+    With independent channel skews (declared, or no skew at all) the stance
+    covariance is ``diag(base^2 + (skew * stance rate)^2)`` and the yaw
+    carries it to world axes as ``R_xy diag R_xy^T``.  An unloaded CoP has no
+    rate: ``base^2`` on both stance axes, which no rotation changes.  A skew
+    without declared independence gives ``None``: its cross term is unknown.
+    """
+    if options.skew_s > 0.0 and not options.cop_skew_independent:
+        return None
+    rates = np.zeros(_STANCE_DIM) if cop is None else cop.stance_rates
+    stance_var = base**2 + (options.skew_s * rates) ** 2
+    cov = rotation_xy @ np.diag(stance_var) @ rotation_xy.T
+    # Average the off-diagonals so the reported matrix is exactly symmetric.
+    return float(cov[0, 0]), float(cov[1, 1]), 0.5 * float(cov[0, 1] + cov[1, 0])
 
 
 def _world_cop(placed: PlacedTrial, stance_xy: Array) -> Array:
@@ -302,6 +389,10 @@ def _foot_sample(
         load_bias_n=load_budget.bias,
         cop_sigma_random_m=cop_budget.random,
         cop_bias_m=cop_budget.bias,
+        cop_sigma_random_xy_m=_cop_random_xy(cop, base_cop, options.skew_s),
+        cop_cov_random_xy_m2=_cop_random_cov(
+            cop, base_cop, options, placed.horizontal_rotation()
+        ),
     )
 
 
