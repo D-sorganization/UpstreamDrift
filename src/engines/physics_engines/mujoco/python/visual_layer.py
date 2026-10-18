@@ -210,11 +210,16 @@ def attach_visual_layer(
     if appearance is not None and head_meta.get("enabled"):
         appearance_meta["meshes"] += len(head_meta["parts"])
     head_body = head_meta["body"] if head_meta.get("source") == "head_body" else None
+    club = assembly_from_spec(spec)
+    club_body = club_body_name(spec)
+    mesh_club = appearance is None and club is not None and club_body in elements
     for index, capsule in enumerate(
         () if appearance is not None else skeleton.capsules
     ):
         if capsule.body == head_body:
             continue  # the head mesh replaces the head capsule
+        if mesh_club and library.is_grip_hand_standoff(capsule.body):
+            continue  # the grip hand mesh replaces the standoff capsule
         offset = offsets[capsule.body]
         start = _to_mjcf_frame(offset, np.asarray(capsule.start_m))
         end = _to_mjcf_frame(offset, np.asarray(capsule.end_m))
@@ -228,9 +233,6 @@ def attach_visual_layer(
             rgba=_rgba("capsule"),
             attrib={"class": _VISUAL_CLASS},
         )
-    club = assembly_from_spec(spec)
-    club_body = club_body_name(spec)
-    mesh_club = appearance is None and club is not None and club_body in elements
     if mesh_club:
         from src.engines.physics_engines.mujoco.python.appearance_layer import (
             attach_club_meshes,
