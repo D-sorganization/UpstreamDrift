@@ -248,3 +248,153 @@ def test_run_opencap_pipeline_from_keypoints() -> None:
     assert len(result.augmented_observations.frames) == 5
     assert len(result.joint_trajectory.frames) == 5
     assert result.scaled_rig is not None
+
+
+def test_mid_hip_and_neck_derived_from_present_joints_without_zero_origin() -> None:
+    """Hips and shoulders at x=5 without mid_hip/neck must derive from joints, not zero-origin."""
+    n_frames = 3
+    # Both hips and both shoulders centered at x=5.0
+    r_hip = np.array([[5.0, 0.90, 0.10]] * n_frames)
+    l_hip = np.array([[5.0, 0.90, -0.10]] * n_frames)
+    r_sh = np.array([[5.0, 1.40, 0.20]] * n_frames)
+    l_sh = np.array([[5.0, 1.40, -0.20]] * n_frames)
+
+    kpts = {
+        "right_hip": r_hip,
+        "left_hip": l_hip,
+        "right_shoulder": r_sh,
+        "left_shoulder": l_sh,
+    }
+
+    augmenter = OpenCapMarkerAugmenter(OpenCapAugmenterConfig(synthetic_fallback=True))
+    obs = augmenter.augment(kpts)
+
+    expected_hip_midpoint = (r_hip + l_hip) / 2.0  # [5.0, 0.90, 0.0]
+    expected_sh_midpoint = (r_sh + l_sh) / 2.0  # [5.0, 1.40, 0.0]
+
+    # Check hip markers (RHJC_study and LHJC_study mid should match hip midpoint)
+    rhjc = np.array(
+        [
+            [
+                f.markers["RHJC_study"].x,
+                f.markers["RHJC_study"].y,
+                f.markers["RHJC_study"].z,
+            ]
+            for f in obs.frames
+        ]
+    )
+    lhjc = np.array(
+        [
+            [
+                f.markers["LHJC_study"].x,
+                f.markers["LHJC_study"].y,
+                f.markers["LHJC_study"].z,
+            ]
+            for f in obs.frames
+        ]
+    )
+    computed_hip_mid = (rhjc + lhjc) / 2.0
+    np.testing.assert_allclose(computed_hip_mid, expected_hip_midpoint, atol=1e-5)
+
+    # C7_study must be near x=5, within 0.3m of shoulder midpoint
+    for f in obs.frames:
+        c7 = np.array(
+            [f.markers["C7_study"].x, f.markers["C7_study"].y, f.markers["C7_study"].z]
+        )
+        sh_mid = expected_sh_midpoint[0]
+        dist = float(np.linalg.norm(c7 - sh_mid))
+        assert dist <= 0.3, (
+            f"C7 ({c7}) must be within 0.3m of shoulder midpoint ({sh_mid}), got {dist}"
+        )
+        assert abs(c7[0] - 5.0) < 0.2, (
+            f"C7 x ({c7[0]}) must be near 5.0, not world origin"
+        )
+
+    # Imputed joints must be recorded in provenance
+    provenance = obs.source_provenance
+    assert "imputed_keypoints" in provenance
+    imputed = provenance["imputed_keypoints"]
+    assert "mid_hip" in imputed
+    assert "neck" in imputed
+    assert obs.metadata.get("imputed_keypoints") == imputed
+
+
+def test_nan_keypoint_frames_propagate_as_invalid_markers_and_record_gap_count() -> (
+    None
+):
+    """NaN frames in keypoint input must propagate as invalid markers and record gap count."""
+    kpt_arr, names = _synthetic_15_keypoints(4)
+    # Set left_hip in frame 1 to NaN
+    l_hip_idx = names.index("left_hip")
+    kpt_arr[1, l_hip_idx] = [np.nan, np.nan, np.nan]
+
+    augmenter = OpenCapMarkerAugmenter(OpenCapAugmenterConfig(synthetic_fallback=True))
+    obs = augmenter.augment((kpt_arr, names))
+
+    # Must not drop the run; must have all 4 frames
+    assert len(obs.frames) == 4
+
+    # Frame 1 must have invalid markers for markers depending on left_hip
+    f1_markers = obs.frames[1].markers
+    assert "LHJC_study" in f1_markers
+    lhjc = f1_markers["LHJC_study"]
+    assert np.isnan(lhjc.x) and np.isnan(lhjc.y) and np.isnan(lhjc.z)
+    assert lhjc.occluded is True
+
+    # Frame 0 must be valid
+    f0_markers = obs.frames[0].markers
+    assert not np.isnan(f0_markers["LHJC_study"].x)
+    assert f0_markers["LHJC_study"].occluded is False
+
+    # Gap count recorded in provenance and metadata
+    assert obs.metadata.get("gap_count", 0) > 0
+    assert obs.source_provenance.get("gap_count", 0) > 0
+
+
+def test_missing_marker_in_some_frames_is_nan_padded() -> None:
+    """Markers missing in some frames must be NaN-padded to n_frames in _from_canonical_obs."""
+    frame0 = CanonicalObservationFrame(
+        timestamp=0.0,
+        markers={
+            "r_hip": Marker(name="r_hip", x=0.0, y=0.9, z=0.1),
+            "l_hip": Marker(name="l_hip", x=0.0, y=0.9, z=-0.1),
+        },
+    )
+    frame1 = CanonicalObservationFrame(
+        timestamp=0.05,
+        markers={
+            "r_hip": Marker(name="r_hip", x=0.0, y=0.9, z=0.1),
+            # l_hip missing in frame 1
+        },
+    )
+    obs = CanonicalObservations(
+        id="test-obs",
+        frames=[frame0, frame1],
+    )
+
+    kpt_dict = OpenCapMarkerAugmenter._from_canonical_obs(obs)
+    assert "l_hip" in kpt_dict
+    assert kpt_dict["l_hip"].shape == (2, 3)
+    assert not np.isnan(kpt_dict["l_hip"][0, 0])
+    assert np.isnan(kpt_dict["l_hip"][1, 0])
+
+    # Also test _from_marker_traj
+    mf0 = MarkerFrame(timestamp=0.0, markers=frame0.markers, frame_index=0)
+    mf1 = MarkerFrame(timestamp=0.05, markers=frame1.markers, frame_index=1)
+    traj = MarkerTrajectory(id="test-traj", frames=[mf0, mf1])
+
+    traj_dict = OpenCapMarkerAugmenter._from_marker_traj(traj)
+    assert "l_hip" in traj_dict
+    assert traj_dict["l_hip"].shape == (2, 3)
+    assert not np.isnan(traj_dict["l_hip"][0, 0])
+    assert np.isnan(traj_dict["l_hip"][1, 0])
+
+
+def test_mediapipe_foot_index_synonyms_and_head_c7_aliases() -> None:
+    """MediaPipe foot index must be recognized, and head/c7 must not be equated to nose/neck."""
+    from src.motion_capture.opencap_ingest.augmenter import _KEYPOINT_SYNONYMS
+
+    assert _KEYPOINT_SYNONYMS.get("right_foot_index") == "r_toe"
+    assert _KEYPOINT_SYNONYMS.get("left_foot_index") == "l_toe"
+    assert _KEYPOINT_SYNONYMS.get("head") != "nose"
+    assert _KEYPOINT_SYNONYMS.get("c7") != "neck"
