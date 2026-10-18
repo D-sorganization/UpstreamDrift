@@ -76,7 +76,21 @@ share reported.
 
 ## Back Squat Muscle Activation and Force Results
 
-### Per-Group Summary across the Complete Motion
+### Motion Window and Phase Labeling
+
+The back squat bundle (`back_squat_bundle.npz`, 0.2 s duration, 41 frames at stride 5) is a partial engine window located entirely at the deep squat bottom. The lifter begins at:
+- `hip_flexion_r`: $119.97^\circ$ (pinned at model bound $120.0^\circ$)
+- `hip_flexion_l`: $120.00^\circ$ (pinned at model bound $120.0^\circ$)
+- `knee_angle_r`: $109.76^\circ$
+- `knee_angle_l`: $109.49^\circ$
+
+Because the motion remains in deep flexion throughout ($> 100^\circ$ knee angle) and never approaches standing ($< 25^\circ$), it does not cover standard standing, descent, ascent, or lockout phases. The pipeline derives phase segments directly from kinematics and reports the single honest segment:
+
+| Phase | Quadriceps Act (Mean) | Gluteals Act (Mean) | Hamstrings Act (Mean) | Quadriceps Force (Pk N) | Gluteals Force (Pk N) | Hamstrings Force (Pk N) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Bottom (engine window 0.0–0.2 s)** | 0.780 | 0.360 | 0.409 | 4561.8 | 1157.0 | 2145.9 |
+
+### Per-Group Summary Across the Motion Window
 
 | Muscle Group | Muscles | Peak Activation | Mean Activation | Peak Force (N) | Mean Force (N) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -88,26 +102,66 @@ share reported.
 | **Trapezius** | 0 | — | — | — | — |
 | **Triceps** | 0 | — | — | — | — |
 
-*Maximum joint moment reconstruction residual error: $1.14 \times 10^{-13}\text{ N m}$.*
+*Numerical sanity check: Moment balance residual error $< 1.14 \times 10^{-13}\text{ N m}$ holds by construction because reserve actuators close any remainder in the static optimization solve; this is not evidence of physical acceptance.*
 
-### Phase-Resolved Metrics (Squat)
+### Leg Coordinate Breakdown (Demands, Capacities, and Reserves)
 
-| Phase | Quadriceps Act (Mean) | Gluteals Act (Mean) | Hamstrings Act (Mean) | Quadriceps Force (Pk N) | Gluteals Force (Pk N) | Hamstrings Force (Pk N) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Standing** ($t_\text{frac} = 0.00-0.15$) | 0.822 | 0.543 | 0.377 | 4561.8 | 1146.0 | 1510.0 |
-| **Descent** ($t_\text{frac} = 0.15-0.45$) | 0.825 | 0.366 | 0.463 | 4561.8 | 1157.0 | 2145.9 |
-| **Bottom** ($t_\text{frac} = 0.45-0.50$) | 0.796 | 0.289 | 0.347 | 4561.8 | 913.8 | 1581.4 |
-| **Ascent** ($t_\text{frac} = 0.50-0.90$) | 0.771 | 0.301 | 0.379 | 4561.8 | 1083.5 | 1801.3 |
-| **Lockout** ($t_\text{frac} = 0.90-1.00$) | 0.655 | 0.364 | 0.439 | 4561.8 | 1125.7 | 1587.8 |
+At frame 0, the hip extension demand is $-219.96\text{ N m}$ (right) and $-381.92\text{ N m}$ (left) against physiological active extensor capacities of $-204.64\text{ N m}$ and $-200.02\text{ N m}$ at full activation, requiring substantial reserve actuator assistance.
+
+| Coordinate | ID Demand Frame 0 (N·m) | ID Demand Mean (N·m) | Active Capacity Neg (Mean N·m) | Active Capacity Pos (Mean N·m) | Passive Moment (Mean N·m) | Reserve Mean (N·m) | Reserve Peak (N·m) | Reserve Share |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `hip_flexion_r` | -219.96 | 360.36 | -204.64 | +75.07 | -28.26 | 203.54 | 272.41 | 56.5% |
+| `hip_flexion_l` | -381.92 | 315.76 | -200.02 | +63.09 | -31.74 | 174.30 | 238.50 | 55.2% |
+| `hip_adduction_r` | -125.17 | 51.54 | -106.49 | +360.94 | +15.45 | 109.54 | 136.09 | 212.6% |
+| `hip_adduction_l` | -134.36 | 58.93 | -103.64 | +350.18 | +18.32 | 100.28 | 169.76 | 170.2% |
+| `hip_rotation_r` | +152.12 | 92.90 | -37.14 | +197.95 | +26.43 | 92.86 | 172.61 | 100.0% |
+| `hip_rotation_l` | +156.48 | 97.46 | -35.39 | +199.38 | +23.06 | 94.04 | 155.67 | 96.5% |
+| `knee_angle_r` | -214.72 | 116.63 | -187.16 | +218.17 | +4.49 | 18.18 | 39.89 | 15.6% |
+| `knee_angle_l` | -52.97 | 168.11 | -178.57 | +211.43 | +5.97 | 52.29 | 98.45 | 31.1% |
+| `ankle_angle_r` | -47.98 | 84.76 | -277.16 | +72.30 | -28.35 | 0.00 | 0.00 | 0.0% |
+| `ankle_angle_l` | -73.20 | 94.31 | -276.40 | +71.75 | -29.04 | 0.15 | 1.57 | 0.2% |
+| `subtalar_angle_r` | -12.81 | 18.74 | -45.57 | +83.17 | +4.26 | 0.02 | 0.05 | 0.1% |
+| `subtalar_angle_l` | -10.21 | 30.79 | -45.31 | +82.89 | +4.37 | 0.49 | 5.98 | 1.6% |
+| `mtp_angle_r` | -0.04 | 0.04 | -4.38 | +7.40 | +0.16 | 0.05 | 0.09 | 116.5% |
+| `mtp_angle_l` | -0.04 | 0.04 | -4.39 | +7.39 | +0.16 | 0.90 | 7.48 | 2253.6% |
+
+**Primary Reserve Drivers:** `hip_flexion_r`, `hip_flexion_l`, `hip_adduction_r`, `hip_adduction_l`.
+
+### Coordinate Range Bounds and Pose Credibility
+
+> **Warning:** An IK result pinned at a coordinate bound is not a credible posture.
+
+Both `hip_flexion_r` and `hip_flexion_l` sit at the model upper range bound of $120.0^\circ$ ($2.0944\text{ rad}$) across all 41 frames ($100\%$ pinned, margin $0.001^\circ$–$0.002^\circ$). The lifter's posture represents a boundary singularity of the Rajagopal model rather than an unconstrained physiological configuration.
+
+### Ground Shear Asymmetry and Hip vs Knee Torque Split
+
+At frame 0, total sagittal extension demand ($\tau_{\text{hip}} + \tau_{\text{knee}}$) is virtually identical across both legs:
+- **Right Leg:** $-219.96 + (-214.72) = -434.68\text{ N m}$
+- **Left Leg:** $-381.92 + (-52.97) = -434.89\text{ N m}$ (agreement within 0.05%)
+- **Vertical Ground Reactions:** $1139.24\text{ N}$ (right) vs $1131.02\text{ N}$ (left)
+
+The large hip-extension asymmetry ($-220.0\text{ N m}$ right vs $-381.9\text{ N m}$ left) is driven by the anterior-posterior ground shear force:
+- **Left Foot:** $+208.96\text{ N}$ (forward shear)
+- **Right Foot:** $-127.35\text{ N}$ (backward shear)
+- **Shear Differential:** $336.31\text{ N}$
+
+Because the knee is anterior to the ankle and the hip is posterior in a deep squat, forward ground shear ($+F_x$) produces a clockwise moment about the knee (assisting extension, reducing required internal knee moment from $-214.7\text{ N m}$ to $-53.0\text{ N m}$) while shifting the ground reaction force line of action forward relative to the hip (increasing internal hip extension demand from $-220.0\text{ N m}$ to $-381.9\text{ N m}$).
+
+### Solver Comparison: Static Optimization vs MocoInverse
+
+| Solver | Formulation | Convergence | Reserve Share | Wall Clock (s) | Status / Notes |
+| :--- | :--- | :---: | :---: | :---: | :--- |
+| **StaticOptimization** | Per-frame QP, rigid tendon Millard | Converged | **56.8%** | 54.1 s | Evaluated across 41 frames; reserves required to resolve physiological deficits |
+| **MocoInverse** | Direct collocation (Hermite-Simpson, DGF2016) | Unconverged | — | 143.0 s | Completed 20 iterations (`Maximum_Iterations_Exceeded`), objective $142,168$ |
 
 ---
 
 ## Evidence Plots
 
-### 1. Muscle Group Activations by Phase
+### 1. Muscle Group Activations
 ![Back Squat Activations](squat_muscle_activations_by_phase.png)
 
-### 2. Muscle Group Forces by Phase
+### 2. Muscle Group Forces
 ![Back Squat Forces](squat_muscle_forces_by_phase.png)
 
 ### 3. Joint Moment Balance and Reserve Loads

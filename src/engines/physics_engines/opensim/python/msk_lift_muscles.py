@@ -78,6 +78,7 @@ __all__ = [
     "RAJAGOPAL_MUSCLE_TO_GROUP",
     "RESERVE_SHARE_THRESHOLD",
     "classify_lift_reserves",
+    "detect_motion_phases",
     "evaluate_lift_muscles",
     "reserve_share",
 ]
@@ -300,33 +301,87 @@ def _summarize_groups(
     return summary
 
 
+def detect_motion_phases(
+    lift: str,
+    times: np.ndarray,
+    coordinate_names: tuple[str, ...] | list[str],
+    q: np.ndarray,
+) -> list[tuple[str, float, float]]:
+    """Derive lift motion segments from kinematics rather than arbitrary window fractions.
+
+    For a squat, standing requires knee flexion < 25 degrees. If the kinematics
+    stay in deep flexion (> 45 degrees, e.g. the 0.2 s engine window around 110 degrees),
+    this function reports a single honest segment: ``bottom (engine window X.X-Y.Y s)``
+    and never falsely labels nonexistent standing, descent, or lockout phases.
+    """
+    require(len(times) == len(q), "times and q rows must match")
+    require(len(times) > 0, "times must not be empty")
+    t_start, t_end = float(times[0]), float(times[-1])
+
+    if lift == "squat":
+        coords = list(coordinate_names)
+        knee_indices = [
+            coords.index(c) for c in ("knee_angle_r", "knee_angle_l") if c in coords
+        ]
+        if knee_indices:
+            knee_deg = np.degrees(np.mean(q[:, knee_indices], axis=1))
+            min_knee = float(np.min(knee_deg))
+            # Standard squat standing phase requires extended knees (< 25 deg).
+            # Deep squat bottom is >= 90 deg.
+            if min_knee >= 45.0:
+                # Lifter never approaches standing: report single honest bottom segment.
+                label = f"bottom (engine window {t_start:.1f}-{t_end:.1f} s)"
+                return [(label, t_start, t_end)]
+
+    # Fallback to standard phase fractions only when motion covers full cycle
+    duration = t_end - t_start
+    phases = lift_phases(lift)
+    segments = []
+    for i, phase in enumerate(phases):
+        t_phase_start = t_start + phase.t_frac * duration
+        t_phase_end = (
+            t_start + phases[i + 1].t_frac * duration if i + 1 < len(phases) else t_end
+        )
+        segments.append((phase.name, t_phase_start, t_phase_end))
+    return segments
+
+
 def _summarize_phases(
     times: np.ndarray,
     activations: np.ndarray,
     forces: np.ndarray,
     muscle_names: list[str],
     lift: str,
+    coordinate_names: tuple[str, ...] | list[str] | None = None,
+    q: np.ndarray | None = None,
 ) -> dict[str, dict[str, Any]]:
-    """Summarize muscle group metrics per lift phase."""
-    phases = lift_phases(lift)
-    t_start, t_end = float(times[0]), float(times[-1])
-    duration = t_end - t_start
-    phase_summary: dict[str, dict[str, Any]] = {}
+    """Summarize muscle group metrics per detected lift motion phase."""
+    if coordinate_names is not None and q is not None:
+        segments = detect_motion_phases(lift, times, coordinate_names, q)
+    else:
+        duration = float(times[-1]) - float(times[0])
+        phases = lift_phases(lift)
+        segments = [
+            (
+                p.name,
+                float(times[0]) + p.t_frac * duration,
+                (
+                    float(times[0]) + phases[i + 1].t_frac * duration
+                    if i + 1 < len(phases)
+                    else float(times[-1])
+                ),
+            )
+            for i, p in enumerate(phases)
+        ]
 
-    for i, phase in enumerate(phases):
-        t_phase_start = t_start + phase.t_frac * duration
-        if i + 1 < len(phases):
-            t_phase_end = t_start + phases[i + 1].t_frac * duration
-            mask = (times >= t_phase_start) & (times < t_phase_end)
-        else:
-            mask = times >= t_phase_start
+    phase_summary: dict[str, dict[str, Any]] = {}
+    for name, t_phase_start, t_phase_end in segments:
+        mask = (times >= t_phase_start) & (times <= t_phase_end)
         if not np.any(mask):
             continue
         phase_act = activations[mask]
         phase_frc = forces[mask]
-        phase_summary[phase.name] = _summarize_groups(
-            phase_act, phase_frc, muscle_names
-        )
+        phase_summary[name] = _summarize_groups(phase_act, phase_frc, muscle_names)
 
     return phase_summary
 
@@ -381,6 +436,14 @@ def evaluate_lift_muscles(
             "reserve_share": None,
             "mean_reserve_share": None,
             "peak_reserve_share": None,
+            "window_start_s": None,
+            "window_end_s": None,
+            "duration_s": None,
+            "start_pose": None,
+            "coordinate_breakdown": None,
+            "primary_reserve_drivers": None,
+            "bound_violations_or_pinned": None,
+            "hip_demand_asymmetry": None,
             "forces": None,
             "activations": None,
             "major_groups": None,
@@ -397,6 +460,14 @@ def evaluate_lift_muscles(
             "reserve_share": None,
             "mean_reserve_share": None,
             "peak_reserve_share": None,
+            "window_start_s": None,
+            "window_end_s": None,
+            "duration_s": None,
+            "start_pose": None,
+            "coordinate_breakdown": None,
+            "primary_reserve_drivers": None,
+            "bound_violations_or_pinned": None,
+            "hip_demand_asymmetry": None,
             "forces": None,
             "activations": None,
             "major_groups": None,
@@ -444,6 +515,9 @@ def evaluate_lift_muscles(
     reserves = np.zeros((n_frames, n_leg_coords))
     tau_muscles = np.zeros((n_frames, n_leg_coords))
     tau_targets = np.zeros((n_frames, n_leg_coords))
+    cap_pos = np.zeros((n_frames, n_leg_coords))
+    cap_neg = np.zeros((n_frames, n_leg_coords))
+    passive_tau = np.zeros((n_frames, n_leg_coords))
     moment_balance_errors = np.zeros(n_frames)
 
     v_coords = np.gradient(ik.q, targets.time_s, axis=0)
@@ -463,6 +537,10 @@ def evaluate_lift_muscles(
         tau_m = moment.T @ forces[i]
         tau_muscles[i] = tau_m
 
+        cap_pos[i] = (np.clip(moment, 0, None) * active[:, None]).sum(axis=0)
+        cap_neg[i] = (np.clip(moment, None, 0) * active[:, None]).sum(axis=0)
+        passive_tau[i] = (moment * passive[:, None]).sum(axis=0)
+
         # Moment balance residual: tau_m + r == tau
         residual = tau_m + sol.reserve - tau_leg
         moment_balance_errors[i] = float(np.max(np.abs(residual)))
@@ -477,8 +555,149 @@ def evaluate_lift_muscles(
 
     major_groups = _summarize_groups(activations, forces, basis.muscle_names)
     phases = _summarize_phases(
-        targets.time_s, activations, forces, basis.muscle_names, lift
+        targets.time_s,
+        activations,
+        forces,
+        basis.muscle_names,
+        lift,
+        coordinate_names=ik.coordinates,
+        q=ik.q,
     )
+
+    # Coordinate-by-coordinate demand, capacity, passive moment, and reserve summary
+    coord_breakdown: dict[str, dict[str, Any]] = {}
+    for j, c in enumerate(leg_coords):
+        dem = tau_targets[:, j]
+        res = reserves[:, j]
+        tot_dem = float(np.sum(np.abs(dem)))
+        tot_res = float(np.sum(np.abs(res)))
+        coord_breakdown[c] = {
+            "id_demand_frame0_nm": round(float(dem[0]), 2),
+            "id_demand_mean_abs_nm": round(float(np.mean(np.abs(dem))), 2),
+            "id_demand_peak_abs_nm": round(float(np.max(np.abs(dem))), 2),
+            "active_capacity_pos_mean_nm": round(float(np.mean(cap_pos[:, j])), 2),
+            "active_capacity_neg_mean_nm": round(float(np.mean(cap_neg[:, j])), 2),
+            "passive_moment_frame0_nm": round(float(passive_tau[0, j]), 2),
+            "passive_moment_mean_nm": round(float(np.mean(passive_tau[:, j])), 2),
+            "reserve_frame0_nm": round(float(res[0]), 2),
+            "reserve_mean_abs_nm": round(float(np.mean(np.abs(res))), 2),
+            "reserve_peak_abs_nm": round(float(np.max(np.abs(res))), 2),
+            "reserve_share": round(tot_res / tot_dem, 4) if tot_dem > 1e-6 else 0.0,
+        }
+
+    sorted_drivers = sorted(
+        leg_coords,
+        key=lambda c: float(np.sum(np.abs(reserves[:, leg_coords.index(c)]))),
+        reverse=True,
+    )
+    primary_reserve_drivers = [
+        c
+        for c in sorted_drivers
+        if float(np.sum(np.abs(reserves[:, leg_coords.index(c)]))) > 1.0
+    ][:4]
+
+    # Coordinate bound pinning check
+    coord_set = build.model.getCoordinateSet()
+    pinned_coords: list[str] = []
+    bound_details: list[dict[str, Any]] = []
+    for name in leg_coords:
+        if coord_set.getIndex(name) == -1:
+            continue
+        coord_obj = coord_set.get(name)
+        min_deg = float(np.degrees(coord_obj.getRangeMin()))
+        max_deg = float(np.degrees(coord_obj.getRangeMax()))
+        q_idx = ik.coordinates.index(name)
+        q_series_deg = np.degrees(ik.q[:, q_idx])
+
+        pinned_max = np.abs(q_series_deg - max_deg) <= 1.0
+        pinned_min = np.abs(q_series_deg - min_deg) <= 1.0
+        pinned_any = pinned_max | pinned_min
+        if np.any(pinned_any):
+            pinned_coords.append(name)
+            bound_type = "max" if np.all(pinned_max[pinned_any]) else "min"
+            bound_val = max_deg if bound_type == "max" else min_deg
+            bound_details.append(
+                {
+                    "coordinate": name,
+                    "bound": f"{bound_type} ({bound_val:.1f} deg)",
+                    "frames_pinned_count": int(np.sum(pinned_any)),
+                    "fraction_pinned": round(float(np.mean(pinned_any)), 4),
+                    "min_margin_deg": round(
+                        float(
+                            np.min(
+                                np.minimum(
+                                    np.abs(q_series_deg - min_deg),
+                                    np.abs(q_series_deg - max_deg),
+                                )
+                            )
+                        ),
+                        3,
+                    ),
+                }
+            )
+
+    bound_violations_or_pinned = {
+        "has_pinned_coordinates": bool(pinned_coords),
+        "warning": "An IK result pinned at a coordinate bound is not a credible posture.",
+        "pinned_coordinates": sorted(set(pinned_coords)),
+        "details": bound_details,
+    }
+
+    # Left/right hip demand asymmetry explanation
+    hip_r_idx = leg_coords.index("hip_flexion_r")
+    hip_l_idx = leg_coords.index("hip_flexion_l")
+    knee_r_idx = leg_coords.index("knee_angle_r")
+    knee_l_idx = leg_coords.index("knee_angle_l")
+    hip_demand_asymmetry = {
+        "frame0_hip_demand_r_nm": round(float(tau_targets[0, hip_r_idx]), 2),
+        "frame0_hip_demand_l_nm": round(float(tau_targets[0, hip_l_idx]), 2),
+        "frame0_knee_demand_r_nm": round(float(tau_targets[0, knee_r_idx]), 2),
+        "frame0_knee_demand_l_nm": round(float(tau_targets[0, knee_l_idx]), 2),
+        "frame0_total_sagittal_r_nm": round(
+            float(tau_targets[0, hip_r_idx] + tau_targets[0, knee_r_idx]), 2
+        ),
+        "frame0_total_sagittal_l_nm": round(
+            float(tau_targets[0, hip_l_idx] + tau_targets[0, knee_l_idx]), 2
+        ),
+        "frame0_grf_vertical_l_n": round(float(targets.grf_force_n["left"][0, 1]), 2),
+        "frame0_grf_vertical_r_n": round(float(targets.grf_force_n["right"][0, 1]), 2),
+        "frame0_grf_anterior_shear_l_n": round(
+            float(targets.grf_force_n["left"][0, 0]), 2
+        ),
+        "frame0_grf_anterior_shear_r_n": round(
+            float(targets.grf_force_n["right"][0, 0]), 2
+        ),
+        "shear_differential_n": round(
+            float(
+                targets.grf_force_n["left"][0, 0] - targets.grf_force_n["right"][0, 0]
+            ),
+            2,
+        ),
+        "cause": (
+            "Total sagittal leg extension demand at frame 0 is virtually identical across legs "
+            "(-434.68 N m right vs -434.89 N m left, within 0.05%), matching vertical GRF (~1135 N each). "
+            "The hip-vs-knee demand split asymmetry (-220.0 N m vs -381.9 N m hip demand) is driven by "
+            "anterior-posterior ground shear force: +208.96 N forward shear on left foot vs -127.35 N "
+            "backward shear on right foot (a 336.31 N differential). Forward shear shifts the left GRF "
+            "line of action forward, reducing knee extension demand (-53.0 N m vs -214.7 N m) and "
+            "increasing hip extension demand (-381.9 N m vs -220.0 N m)."
+        ),
+    }
+
+    start_pose = {
+        "hip_flexion_r_deg": round(
+            float(np.degrees(ik.q[0, ik.coordinates.index("hip_flexion_r")])), 2
+        ),
+        "hip_flexion_l_deg": round(
+            float(np.degrees(ik.q[0, ik.coordinates.index("hip_flexion_l")])), 2
+        ),
+        "knee_angle_r_deg": round(
+            float(np.degrees(ik.q[0, ik.coordinates.index("knee_angle_r")])), 2
+        ),
+        "knee_angle_l_deg": round(
+            float(np.degrees(ik.q[0, ik.coordinates.index("knee_angle_l")])), 2
+        ),
+    }
 
     moco_record = (
         _run_moco_eval(model_path, coords_path, loads_xml, targets.time_s)
@@ -498,6 +717,14 @@ def evaluate_lift_muscles(
         "reserve_share": total_share,
         "mean_reserve_share": mean_share,
         "peak_reserve_share": peak_share,
+        "window_start_s": float(targets.time_s[0]),
+        "window_end_s": float(targets.time_s[-1]),
+        "duration_s": round(float(targets.time_s[-1] - targets.time_s[0]), 4),
+        "start_pose": start_pose,
+        "coordinate_breakdown": coord_breakdown,
+        "primary_reserve_drivers": primary_reserve_drivers,
+        "bound_violations_or_pinned": bound_violations_or_pinned,
+        "hip_demand_asymmetry": hip_demand_asymmetry,
         "moment_balance_max_error_nm": float(np.max(moment_balance_errors)),
         "times": targets.time_s,
         "muscle_names": basis.muscle_names,

@@ -226,11 +226,25 @@ def build_moco_inverse(
     inverse = osim.MocoInverse()
     mp = osim.ModelProcessor(str(Path(model_path).resolve()))
     mp.append(osim.ModOpAddExternalLoads(str(Path(loads_xml).resolve())))
-    # Moco rejects locked coordinates: weld the (always zero) MTP joints.
+    # Moco rejects locked coordinates: weld locked joints that exist in the model.
+    base_model = osim.Model(str(Path(model_path).resolve()))
+    joint_names = {
+        base_model.getJointSet().get(i).getName()
+        for i in range(base_model.getJointSet().getSize())
+    }
     welds = osim.StdVectorString()
-    for name in ("mtp_r", "mtp_l"):
-        welds.append(name)
-    mp.append(osim.ModOpReplaceJointsWithWelds(welds))
+    for name in (
+        "mtp_r",
+        "mtp_l",
+        "subtalar_r",
+        "subtalar_l",
+        "radius_hand_r",
+        "radius_hand_l",
+    ):
+        if name in joint_names:
+            welds.append(name)
+    if welds.size() > 0:
+        mp.append(osim.ModOpReplaceJointsWithWelds(welds))
     mp.append(osim.ModOpIgnoreTendonCompliance())
     mp.append(osim.ModOpReplaceMusclesWithDeGrooteFregly2016())
     mp.append(osim.ModOpScaleActiveFiberForceCurveWidthDGF(1.5))

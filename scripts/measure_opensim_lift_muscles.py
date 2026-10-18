@@ -82,30 +82,53 @@ def _render_squat_plots(solution: dict[str, Any], out_dir: Path) -> list[str]:
     }
 
     def shade_phases(ax: plt.Axes) -> None:
-        for p_idx, p in enumerate(phases):
-            t_p0 = t_start + p.t_frac * (t_end - t_start)
-            if p_idx + 1 < len(phases):
-                t_p1 = t_start + phases[p_idx + 1].t_frac * (t_end - t_start)
-            else:
-                t_p1 = t_end
-            col = phase_colors.get(p.name, "#F1F5F9")
-            ax.axvspan(
-                t_p0,
-                t_p1,
-                color=col,
-                alpha=0.5,
-                label=f"Phase: {p.name}" if p_idx == 0 else None,
-            )
+        phase_dict = solution.get("phases") or {}
+        if len(phase_dict) == 1 and "bottom" in list(phase_dict.keys())[0]:
+            seg_label = list(phase_dict.keys())[0]
+            ax.axvspan(t_start, t_end, color="#FED7AA", alpha=0.35)
+            y_top = ax.get_ylim()[1]
             ax.text(
-                0.5 * (t_p0 + t_p1),
-                ax.get_ylim()[1] * 0.92,
-                p.name,
+                0.5 * (t_start + t_end),
+                y_top * 0.93,
+                seg_label,
                 ha="center",
                 va="top",
-                fontsize=8,
+                fontsize=8.5,
                 fontweight="semibold",
-                alpha=0.7,
+                color="#9A3412",
+                bbox={
+                    "boxstyle": "round,pad=0.2",
+                    "facecolor": "#FFEDD5",
+                    "edgecolor": "#FDBA74",
+                    "alpha": 0.9,
+                },
             )
+        else:
+            for p_idx, p in enumerate(phases):
+                t_p0 = t_start + p.t_frac * (t_end - t_start)
+                t_p1 = (
+                    t_start + phases[p_idx + 1].t_frac * (t_end - t_start)
+                    if p_idx + 1 < len(phases)
+                    else t_end
+                )
+                col = phase_colors.get(p.name, "#F1F5F9")
+                ax.axvspan(
+                    t_p0,
+                    t_p1,
+                    color=col,
+                    alpha=0.5,
+                    label=f"Phase: {p.name}" if p_idx == 0 else None,
+                )
+                ax.text(
+                    0.5 * (t_p0 + t_p1),
+                    ax.get_ylim()[1] * 0.92,
+                    p.name,
+                    ha="center",
+                    va="top",
+                    fontsize=8,
+                    fontweight="semibold",
+                    alpha=0.7,
+                )
 
     # 1. Major Groups Activations by Phase
     fig, ax = plt.subplots(figsize=(8, 4.5), dpi=130)
@@ -129,7 +152,7 @@ def _render_squat_plots(solution: dict[str, Any], out_dir: Path) -> list[str]:
     ax.set_xlabel("Time (s)", fontsize=10)
     ax.set_ylabel("Activation [0, 1]", fontsize=10)
     ax.set_title(
-        "Back Squat: Muscle Group Activations across Lift Phases",
+        "Back Squat: Muscle Group Activations (Engine Window 0.0-0.2 s)",
         fontsize=11,
         fontweight="bold",
     )
@@ -166,7 +189,7 @@ def _render_squat_plots(solution: dict[str, Any], out_dir: Path) -> list[str]:
     ax.set_xlabel("Time (s)", fontsize=10)
     ax.set_ylabel("Muscle Force (N)", fontsize=10)
     ax.set_title(
-        "Back Squat: Total Muscle Force per Group across Lift Phases",
+        "Back Squat: Total Muscle Force per Group (Engine Window 0.0-0.2 s)",
         fontsize=11,
         fontweight="bold",
     )
@@ -260,6 +283,14 @@ def measure(stride: int = 5, out_dir: Path = DEFAULT_OUT_DIR) -> dict[str, Any]:
                 "mean_reserve_share": res["mean_reserve_share"],
                 "peak_reserve_share": res["peak_reserve_share"],
                 "reserve_share_threshold": RESERVE_SHARE_THRESHOLD,
+                "window_start_s": res["window_start_s"],
+                "window_end_s": res["window_end_s"],
+                "duration_s": res["duration_s"],
+                "start_pose": res["start_pose"],
+                "coordinate_breakdown": res["coordinate_breakdown"],
+                "primary_reserve_drivers": res["primary_reserve_drivers"],
+                "bound_violations_or_pinned": res["bound_violations_or_pinned"],
+                "hip_demand_asymmetry": res["hip_demand_asymmetry"],
                 "moment_balance_max_error_nm": res["moment_balance_max_error_nm"],
                 "frames": int(len(res["times"])),
                 "stride": stride,
@@ -275,6 +306,14 @@ def measure(stride: int = 5, out_dir: Path = DEFAULT_OUT_DIR) -> dict[str, Any]:
                 "classification": "unqualified",
                 "reason": res.get("reason", "unknown reason"),
                 "reserve_share": None,
+                "window_start_s": None,
+                "window_end_s": None,
+                "duration_s": None,
+                "start_pose": None,
+                "coordinate_breakdown": None,
+                "primary_reserve_drivers": None,
+                "bound_violations_or_pinned": None,
+                "hip_demand_asymmetry": None,
                 "major_groups": None,
                 "phases": None,
                 "moco": None,

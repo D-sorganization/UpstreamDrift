@@ -20,6 +20,7 @@ from src.engines.physics_engines.opensim.python.msk_lift_muscles import (
     MAJOR_MUSCLE_GROUPS,
     RAJAGOPAL_MODEL_CITATION,
     classify_lift_reserves,
+    detect_motion_phases,
     evaluate_lift_muscles,
     reserve_share,
 )
@@ -124,6 +125,35 @@ def test_major_muscle_groups_table() -> None:
     assert "2016" in RAJAGOPAL_MODEL_CITATION
 
 
+def test_deep_squat_window_never_labeled_standing() -> None:
+    """A partial engine window covering deep squat (>45 deg knee flexion) is never labeled standing.
+
+    Verifies OSL-4 finding 1: deep squat bottom (knee ~110 deg) must report
+    'bottom (engine window ...)' and never falsely label standing, descent, or lockout.
+    """
+    times = np.linspace(0.0, 0.2, 41)
+    coord_names = ["hip_flexion_r", "hip_flexion_l", "knee_angle_r", "knee_angle_l"]
+    # Deep squat: hip at 120 deg (2.094 rad), knees at ~110 deg (1.92 rad)
+    q = np.zeros((41, 4))
+    q[:, 0] = np.radians(120.0)
+    q[:, 1] = np.radians(120.0)
+    q[:, 2] = np.radians(110.0)
+    q[:, 3] = np.radians(109.5)
+
+    segments = detect_motion_phases("squat", times, coord_names, q)
+    assert len(segments) == 1
+    seg_name, t0, t1 = segments[0]
+    assert "bottom" in seg_name
+    assert "engine window 0.0-0.2 s" in seg_name
+    assert t0 == pytest.approx(0.0)
+    assert t1 == pytest.approx(0.2)
+
+    # Ensure nonexistent full-lift phases are not present
+    all_names = [s[0].lower() for s in segments]
+    for disallowed in ("standing", "descent", "lockout"):
+        assert not any(disallowed in name for name in all_names)
+
+
 @pytest.mark.parametrize("lift", [lift for lift in LIFTS if lift != "squat"])
 def test_unavailable_lifts_reported_with_reason_never_zero(lift: str) -> None:
     """Non-squat lifts must report status='unavailable' with reason, never fake numbers."""
@@ -184,6 +214,43 @@ def test_squat_muscle_moments_match_joint_moments_within_reserve(
     assert math.isfinite(share)
     assert share > 0.05
     assert sol["classification"] == "unqualified"
+
+    # Verify honest phase labeling
+    assert "phases" in sol
+    phase_names = list(sol["phases"].keys())
+    assert len(phase_names) == 1
+    assert "bottom" in phase_names[0]
+    assert "standing" not in sol["phases"]
+    assert "descent" not in sol["phases"]
+    assert "lockout" not in sol["phases"]
+
+    # Verify window metadata and start pose
+    assert sol["window_start_s"] == pytest.approx(0.0)
+    assert sol["window_end_s"] == pytest.approx(0.2)
+    assert sol["duration_s"] == pytest.approx(0.2)
+    start_pose = sol["start_pose"]
+    assert start_pose["hip_flexion_r_deg"] == pytest.approx(120.0, abs=0.1)
+    assert start_pose["hip_flexion_l_deg"] == pytest.approx(120.0, abs=0.1)
+    assert start_pose["knee_angle_r_deg"] > 100.0
+
+    # Verify coordinate breakdown and asymmetry
+    assert "coordinate_breakdown" in sol
+    assert "hip_flexion_r" in sol["coordinate_breakdown"]
+    assert "primary_reserve_drivers" in sol
+    assert "hip_flexion_l" in sol["primary_reserve_drivers"]
+
+    # Verify bound pinning flags
+    assert "bound_violations_or_pinned" in sol
+    pinned = sol["bound_violations_or_pinned"]
+    assert pinned["has_pinned_coordinates"] is True
+    assert "hip_flexion_r" in pinned["pinned_coordinates"]
+    assert "hip_flexion_l" in pinned["pinned_coordinates"]
+
+    # Verify asymmetry explanation
+    assert "hip_demand_asymmetry" in sol
+    asym = sol["hip_demand_asymmetry"]
+    assert asym["shear_differential_n"] > 300.0
+    assert "cause" in asym
 
     # Moco status is honestly recorded
     moco = sol["moco"]
