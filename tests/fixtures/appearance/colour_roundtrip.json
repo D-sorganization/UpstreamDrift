@@ -9,8 +9,7 @@
         "upper_arm": "polo_navy",
         "pelvis": "shorts_khaki",
         "thigh": "shorts_khaki",
-        "foot": "shoe_white",
-        "hand": "glove_white"
+        "foot": "shoe_white"
       },
       "golf_polo_trousers": {
         "torso": "polo_white",
@@ -19,7 +18,6 @@
         "pelvis": "trousers_charcoal",
         "thigh": "trousers_charcoal",
         "foot": "shoe_black",
-        "hand": "glove_white",
         "shin": "trousers_charcoal"
       }
     },
@@ -148,7 +146,8 @@
             0.6,
             1.0
           ]
-        }
+        },
+        "glove": "none"
       }
     },
     {
@@ -170,7 +169,8 @@
             0.25882352941176473,
             1.0
           ]
-        }
+        },
+        "glove": "none"
       }
     },
     {
@@ -199,7 +199,8 @@
             0.0,
             1.0
           ]
-        }
+        },
+        "glove": "none"
       }
     },
     {
@@ -242,7 +243,24 @@
             0.06274509803921569,
             1.0
           ]
-        }
+        },
+        "glove": "none"
+      }
+    },
+    {
+      "name": "lead_glove",
+      "picks": {
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "headwear": "hair",
+        "glove": "lead"
+      },
+      "expected": {
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "headwear_material": null,
+        "materials": {},
+        "glove": "lead"
       }
     }
   ]

@@ -15,10 +15,12 @@ from typing import Any
 
 from src.shared.python.model_appearance import library
 from src.shared.python.model_appearance.club_assembly import (
-    PART_MATERIALS,
     assembly_from_spec,
     club_body_name,
+    club_part_material,
 )
+from src.shared.python.model_appearance.defaults import default_appearance
+from src.shared.python.model_appearance.schema import AppearanceDocument
 from src.shared.python.model_appearance.grip_hands import assembly_meshes_with_hands
 from src.shared.python.model_appearance.geometry import Mesh
 
@@ -35,15 +37,20 @@ class ClubPart:
 
 
 def club_parts(
-    spec: Mapping[str, Any], finish: str = DEFAULT_FINISH
+    spec: Mapping[str, Any],
+    finish: str = DEFAULT_FINISH,
+    appearance: AppearanceDocument | None = None,
 ) -> tuple[str, list[ClubPart]] | None:
     """``(club body, [shaft, grip, head, lead_hand, trail_hand])`` or ``None``.
 
     The two curled-finger hands are wrapped on the grip (OSV-2,
     ``model_appearance.grip_hands``) and ride the club body like the rest.
 
-    Postcondition: ``None`` exactly when the spec has no club assembly.
+    ``appearance`` (default: the contract default) makes the hands bare skin or
+    gloved per its ``glove`` field. Postcondition: ``None`` exactly when the spec
+    has no club assembly.
     """
+    doc = appearance if appearance is not None else default_appearance()
     if finish not in library.MATERIALS:
         raise ValueError(f"unknown club finish {finish!r}")
     club = assembly_from_spec(spec)
@@ -52,7 +59,9 @@ def club_parts(
         return None
     parts = []
     for name, mesh in assembly_meshes_with_hands(club).items():
-        rgba = library.MATERIALS[PART_MATERIALS[name] or finish].rgba
+        rgba = library.library_materials(doc)[
+            club_part_material(name, finish, doc)
+        ].rgba
         parts.append(ClubPart(f"club_{name}", mesh, tuple(float(c) for c in rgba)))  # type: ignore[arg-type]
     return body, parts
 

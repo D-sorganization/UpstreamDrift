@@ -28,6 +28,10 @@ from src.shared.python.model_appearance.body_meshes import (
     ResolvedAppearance,
     resolve_appearance,
 )
+from src.shared.python.model_appearance.club_assembly import (
+    HAND_PART_ROLES as GRIP_HAND_LABELS,
+    assembly_from_spec,
+)
 from src.shared.python.model_appearance.schema import AppearanceDocument
 from src.shared.python.golf_view_presets import (
     VIEWER_FOV_Y_RAD,
@@ -185,7 +189,9 @@ def _dressed_parts(
     return [
         VisualPart(f.body, "mesh", (str(f.path),), np.eye(3), _ORIGIN, f.rgba)
         for f in body_mesh_files(resolved, directory)
-        if f.body != club_body  # the exported model carries the club meshes
+        # the exported model carries the shaft, grip and head meshes, but not the
+        # grip hands (HRG-G1): those come from the resolved appearance
+        if f.body != club_body or f.label in GRIP_HAND_LABELS
     ]
 
 
@@ -211,7 +217,7 @@ def visual_parts(
     if appearance is None:
         skip = {heads[0].body} if heads else set()
         return out + _plain_parts(derive_visual_skeleton(spec), skip, club_body)
-    resolved = resolve_appearance(spec, appearance)
+    resolved = resolve_appearance(spec, appearance, assembly_from_spec(spec))
     return out + _dressed_parts(resolved, directory / "body", club_body)
 
 

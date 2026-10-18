@@ -60,7 +60,8 @@ def test_colours_are_the_shared_library_materials(payload: dict[str, Any]) -> No
         "top": library.MATERIALS[clothing["torso"]].rgba[:3],
         "pants": library.MATERIALS[clothing["pelvis"]].rgba[:3],
         "shoe": library.MATERIALS[clothing["foot"]].rgba[:3],
-        "glove": library.MATERIALS[clothing["hand"]].rgba[:3],
+        "hand_left": library.MATERIALS[payload["source"]["skin_tone"]].rgba[:3],
+        "hand_right": library.MATERIALS[payload["source"]["skin_tone"]].rgba[:3],
         "skin": library.MATERIALS[payload["source"]["skin_tone"]].rgba[:3],
     }
     for role, rgb in expect.items():
@@ -158,3 +159,18 @@ def test_matlab_builder_has_no_appearance_literals() -> None:
     assert "gs3dx_read_appearance" in body
     for literal in ("[0.17 0.115 0.12]", "[0.145 0.105 0.15]", "[0.16 0.11 0.155]"):
         assert literal not in src
+
+
+def test_hands_follow_the_glove_option_by_side(exporter: Any) -> None:
+    """HRG-G1: bare skin by default; the glove goes on the sided hand (lead = left)."""
+    from src.shared.python.model_appearance import library
+    from src.shared.python.model_appearance.defaults import default_appearance
+
+    spec = json.loads(Path(exporter.DEFAULT_SPEC).read_text(encoding="utf-8"))
+    white = library.MATERIALS["glove_white"].rgba[:3]
+    for handedness, gloved in (("right", "hand_left"), ("left", "hand_right")):
+        doc = default_appearance(glove="lead", handedness=handedness)
+        colours = exporter.build_payload(spec, doc)["colours"]
+        other = "hand_right" if gloved == "hand_left" else "hand_left"
+        assert colours[gloved] == pytest.approx(white, abs=1e-6)
+        assert colours[other] != pytest.approx(white, abs=1e-6)

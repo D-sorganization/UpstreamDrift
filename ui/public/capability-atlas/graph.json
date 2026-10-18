@@ -483,7 +483,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "Visual-only parametric head (skull, eyes, brows, nose, mouth, ears, neck, optional hair or cap) attached to the spec Head body, with a visual-only yaw/pitch/roll orientation channel for gaze (OSV-3 #11729). No mass, inertia or degree of freedom changes. The web HeadModel.tsx (headModel.ts, #11718) mirrors head.py with the same constants and is mounted on the torso of GolferModel.tsx; the web golfer has no appearance document, so the gaze orientation channel and the body_model option are not mirrored there (visual-only, no web consumer yet).",
+      "notes": "Visual-only parametric head (skull, eyes, brows, nose, mouth, ears, neck, optional hair or cap) attached to the spec Head body, with a visual-only yaw/pitch/roll orientation channel for gaze (OSV-3 #11729). No mass, inertia or degree of freedom changes. The web HeadModel.tsx (headModel.ts, #11718) mirrors head.py with the same constants and is mounted on the torso of GolferModel.tsx; the web golfer has no appearance document, so the gaze orientation channel and the body_model option are not mirrored there (visual-only, no web consumer yet). HRG-B1 (#13163): the default golfer is light skin (skin_2) with mid brown hair, with skin_1..skin_8 and hair palettes, all from one contract (src/config/appearance_defaults.json); the web reads a generated TypeScript module of the same values.",
       "id": "render.body_appearance"
     },
     {
@@ -682,7 +682,7 @@
       "tiles": [
         "character_builder"
       ],
-      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM/glTF, presets). The web page now drives presets, preview/build and spec/URDF/MJCF/OSIM/glTF export through the spec API (CMB-7a, #11658), and picks skin tone, clothing, club finish, headwear and ground from the model_appearance library with a recoloured preview and an appearance-v1 sidecar export (CMB-7b/7c, #11658); the desktop tool now also picks the same appearance choices and exports the same appearance-v1 sidecar through the shared character_appearance_service (CMB-7e, #11658). A rigidly skinned glTF export of the spec skeleton landed under CMB-6 (#11657). The web page can preview that glTF body live, refetched (debounced) as the spec sliders move and tinted with the appearance trunk colour (CMB-7f, #11658); the desktop tool keeps its primitive preview.",
+      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM/glTF, presets). The web page now drives presets, preview/build and spec/URDF/MJCF/OSIM/glTF export through the spec API (CMB-7a, #11658), and picks skin tone, clothing, club finish, headwear and ground from the model_appearance library with a recoloured preview and an appearance-v1 sidecar export (CMB-7b/7c, #11658); the desktop tool now also picks the same appearance choices and exports the same appearance-v1 sidecar through the shared character_appearance_service (CMB-7e, #11658). A rigidly skinned glTF export of the spec skeleton landed under CMB-6 (#11657). The web page can preview that glTF body live, refetched (debounced) as the spec sliders move and tinted with the appearance trunk colour (CMB-7f, #11658); the desktop tool keeps its primitive preview. Custom skin, hair, shirt and trousers colours (HRG-B2, #13167) are picked with a shared Qt colour field on the desktop and `<input type=\"color\">` controls on the web; both write the same appearance-v1 document `materials` entries through the one shared writer (`model_appearance/appearance_selection.py`), held equal by a shared JSON fixture. HRG-G1 (#13186): grip hands are skin-coloured by default; the optional white golf glove (glove none/lead/trail/both, a Glove combo on the desktop and a Glove select on the web) goes through the same writer.",
       "id": "tools.character_builder"
     },
     {
@@ -852,7 +852,7 @@
       "reason": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL); the artefacts are mp4 files, so there is no interactive browser equivalent (epic #11673).",
       "pending_decision": false,
       "tiles": [],
-      "notes": "",
+      "notes": "Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; the matching interactive controls are tracked under tools.character_builder.",
       "id": "tools.native_viewer_export"
     },
     {
@@ -3234,7 +3234,7 @@
   "inputs": {
     "src/config/models.yaml": "64caf5311e4be2c75e742dc053b425a528f851638ca2773423fcc77d40b5d419",
     "src/config/launcher_manifest.json": "c9844ac6e0cd9c6cc867bda7cfd44edf1199ac85a07af5b9a83bec70a65d00bc",
-    "src/config/feature_parity.json": "7ddb6a1707d98c31a43435cd8f710370b0d0a9b6b1fde4d9e1b22a3945981a8e",
+    "src/config/feature_parity.json": "b2ad814216058c71061dff270028a430e9e7128fb02a0e091dbb3f9401c273b1",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

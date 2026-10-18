@@ -11,7 +11,7 @@ import {
   DEFAULT_HEADWEAR,
   DEFAULT_SKIN_TONE,
 } from './appearanceDefaults.generated';
-import { hexToRgb, type ColourPicks } from './appearanceDocument';
+import { DEFAULT_GLOVE, GLOVE_CHOICES, hexToRgb, type ColourPicks, type GloveChoice } from './appearanceDocument';
 import {
   appearancePalette,
   rgbaToHex,
@@ -155,6 +155,7 @@ function defaultPicks(library: AppearanceLibrary): AppearancePicks {
     headwear,
     headwear_material,
     ground_material,
+    glove: DEFAULT_GLOVE,
   };
 }
 
@@ -221,6 +222,11 @@ export function AppearancePanel({
   const handleClothingChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (!picks) return;
     applyPicks({ ...picks, clothing: e.target.value });
+  };
+
+  const handleGloveChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (!picks) return;
+    applyPicks({ ...picks, glove: e.target.value as GloveChoice });
   };
 
   const handleClubFinishChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -372,6 +378,14 @@ export function AppearancePanel({
         value={picks.club_finish}
         onChange={handleClubFinishChange}
         options={library.club_finishes}
+      />
+
+      <LabeledSelect
+        id="appearance-glove-select"
+        label="Glove"
+        value={picks.glove ?? DEFAULT_GLOVE}
+        onChange={handleGloveChange}
+        options={library.glove ?? [...GLOVE_CHOICES]}
       />
 
       <LabeledSelect

@@ -40,6 +40,7 @@ _FLAGS = {
     "hair_color": "--hair",
     "top_color": "--top-color",
     "bottom_color": "--bottom-color",
+    "glove": "--glove",
 }
 
 
@@ -51,6 +52,7 @@ def _summary(doc: dict) -> dict:
     return {
         "skin_tone": doc["skin_tone"],
         "clothing": doc["clothing"],
+        "glove": doc.get("glove", "none"),
         "headwear_material": doc["head"].get("headwear_material"),
         "materials": _materials(doc),
     }
@@ -135,7 +137,7 @@ def test_fixture_library_subset_is_the_real_library() -> None:
 
 
 def test_resolve_appearance_equals_the_writers() -> None:
-    case = CASES[-1]
+    case = next(c for c in CASES if c["name"] == "trousers_all_four")
     picks = case["picks"]
     doc = resolve_appearance(
         AppearanceOverrides(
@@ -144,6 +146,7 @@ def test_resolve_appearance_equals_the_writers() -> None:
             clothing=picks["clothing"],
             top_color=picks["top_color"],
             bottom_color=picks["bottom_color"],
+            glove=picks.get("glove"),
         ),
         None,
     )

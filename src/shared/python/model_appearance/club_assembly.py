@@ -16,6 +16,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.model_appearance import library
 from src.shared.python.model_appearance.club_head_mesh import (
     DEFAULT_AXIS_OFFSET_M,
     club_face_normal,
@@ -26,6 +27,8 @@ from src.shared.python.model_appearance.club_head_mesh import (
 )
 from src.shared.python.model_appearance.club_shaft_mesh import tapered_tube
 from src.shared.python.model_appearance.geometry import Mesh
+from src.shared.python.model_appearance.grip_pose import Hand
+from src.shared.python.model_appearance.schema import AppearanceDocument
 
 CLUB_BODY_SUFFIX = "Clubface Vector"
 DEFAULT_GRIP_LENGTH_M = 0.265
@@ -47,15 +50,28 @@ DRIVER_MIN_LENGTH_M = 1.05  # longer than this and the head is a driver
 #: re-seats the head and the ``Clubface Vector`` for every engine. Solved from
 #: forward kinematics (OSV-8, #11755); see test_clubface_square_at_address.
 ADDRESS_SQUARE_FACE_ROLL_DEG = {"driver": -37.92, "iron7": -48.99}
-#: Material per drawn part; ``None`` takes the club finish. The two grip hands
-#: (``grip_hands``, OSV-2) wear the library's golf glove.
+#: Material per static club part; ``None`` takes the club finish. The two grip
+#: hands (``grip_hands``, OSV-2) are not listed: their material is the document's
+#: skin or glove, resolved by ``library.hand_material_name_for`` (HRG-G1).
 PART_MATERIALS = {
     "shaft": None,
     "grip": "grip_rubber",
     "head": None,
-    "lead_hand": "glove_white",
-    "trail_hand": "glove_white",
 }
+HAND_PART_ROLES = {"lead_hand": Hand.LEAD, "trail_hand": Hand.TRAIL}
+
+
+def club_part_material(label: str, finish: str, doc: AppearanceDocument) -> str:
+    """Material name of the drawn club part ``label`` under ``doc``.
+
+    The grip hands resolve through ``library.hand_material_name_for`` (skin or
+    glove); the other parts take :data:`PART_MATERIALS` or the club ``finish``.
+    """
+    if label in HAND_PART_ROLES:
+        return library.hand_material_name_for(HAND_PART_ROLES[label], doc)
+    if label not in PART_MATERIALS:
+        raise ValueError(f"unknown club part {label!r}")
+    return PART_MATERIALS[label] or finish
 
 
 @dataclass(frozen=True)

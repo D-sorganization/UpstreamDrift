@@ -50,6 +50,7 @@ _APPEARANCE_FIELDS = (
     ("club_finish", "club_finishes", "Club Finish"),
     ("headwear", "headwear", "Headwear"),
     ("ground_material", "ground_materials", "Ground"),
+    ("glove", "glove", "Glove"),
 )
 # (appearance colour choice, label) written as document ``materials`` entries
 _COLOUR_FIELDS = (
@@ -133,6 +134,7 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
             "club_finish": defaults["club_finish"],
             "headwear": defaults["head"]["headwear"],
             "ground_material": defaults["environment"]["ground_material"],
+            "glove": defaults.get("glove", "none"),
         }
         self.appearance_combos: dict[str, QtWidgets.QComboBox] = {}
         for name, library_key, label in _APPEARANCE_FIELDS:

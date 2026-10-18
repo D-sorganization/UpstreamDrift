@@ -104,7 +104,10 @@ python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
   sidecar. `--skin-tone` and `--hair` take a palette id (`skin_1`..`skin_8`,
   `hair_brown`, ...) or a `#rrggbb` colour; `--clothing` takes a preset id;
   `--top-color` and `--bottom-color` take `#rrggbb` and recolour the preset's
-  shirt and trousers/shorts. Custom colours become document `materials` entries
+  shirt and trousers/shorts. `--glove {none,lead,trail,both}` (HRG-G1, #13186)
+  puts the white golf glove on the named grip hand by role; the lead hand is the
+  left one for a right-handed golfer (document field `handedness`, default
+  `right`). The default `none` draws bare hands in the skin colour. Custom colours become document `materials` entries
   (see `docs/help/character_builder.md`).
 - **Precedence:** an explicit flag beats the `--appearance` document, which beats
   the contract defaults (`model_appearance.appearance_selection.resolve_appearance`).
