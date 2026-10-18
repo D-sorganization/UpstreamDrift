@@ -18,6 +18,9 @@ from typing import TYPE_CHECKING, Any, cast  # noqa: F401
 import mujoco
 import numpy as np
 
+from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.randomization_mixin import (
+    MuJoCoDomainRandomizationMixin,
+)
 from src.shared.python.body_part_viz import AxialLoadFrame
 from src.shared.python.core.contracts import (
     PreconditionError,
@@ -60,7 +63,7 @@ ALLOWED_MODEL_DIRS = [
     lambda self: self.model is None or self.data is not None,
     "If model is loaded, data must also be initialized",
 )
-class MuJoCoPhysicsEngine(BasePhysicsEngine):
+class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
     """Encapsulates MuJoCo model, data, and simulation control.
 
     Implements the shared PhysicsEngine protocol via BasePhysicsEngine,
