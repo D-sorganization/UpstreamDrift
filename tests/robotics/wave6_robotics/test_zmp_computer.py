@@ -151,16 +151,64 @@ def test_get_com_position_non_humanoid_raises() -> None:
         z._get_com_position()
 
 
-def test_get_com_velocity_non_humanoid_returns_zeros() -> None:
+def test_get_com_velocity_non_humanoid_raises() -> None:
     z = ZMPComputer(FakeRC())
-    v = z._get_com_velocity()
-    assert np.allclose(v, 0.0)
+    with pytest.raises(ValueError, match="COM velocity"):
+        z._get_com_velocity()
 
 
-def test_estimate_mass_non_humanoid_default() -> None:
+def test_estimate_mass_non_humanoid_raises() -> None:
     z = ZMPComputer(FakeRC())
-    m = z._estimate_mass()
-    assert m > 0
+    with pytest.raises(ValueError, match="robot mass"):
+        z._estimate_mass()
+
+
+def test_compute_capture_point_non_humanoid_without_velocity_raises() -> None:
+    z = ZMPComputer(FakeRC())
+    with pytest.raises(ValueError, match="COM position|COM velocity"):
+        z.compute_capture_point()
+    with pytest.raises(ValueError, match="COM velocity"):
+        z.compute_capture_point(com_position=np.array([0.0, 0.0, 0.9]))
+
+
+def test_compute_zmp_without_acceleration_or_history_raises() -> None:
+    eng = FakeHumanoid(com=np.array([0.0, 0.0, 1.0]))
+    z = ZMPComputer(eng)
+    with pytest.raises(ValueError, match="Cannot estimate COM acceleration"):
+        z.compute_zmp()
+    with pytest.raises(ValueError, match="Cannot estimate COM acceleration"):
+        z.compute_zmp(com_velocity=np.array([5.0, 0.0, 0.0]))
+
+
+def test_compute_zmp_finite_difference_acceleration() -> None:
+    eng = FakeHumanoid(com=np.array([0.0, 0.0, 1.0]))
+    z = ZMPComputer(eng)
+    # First call records velocity history but raises because dt/history is incomplete
+    with pytest.raises(ValueError, match="Cannot estimate COM acceleration"):
+        z.compute_zmp(com_velocity=np.array([0.0, 0.0, 0.0]), dt=0.1)
+    # Second call estimates acceleration via (1.0 - 0.0) / 0.1 = 10.0 m/s^2
+    res = z.compute_zmp(com_velocity=np.array([1.0, 0.0, 0.0]), dt=0.1)
+    assert res.zmp_position[0] < 0.0
+    assert not res.is_valid
+    assert "estimated via finite difference" in res.validity_reason
+
+
+def test_compute_zmp_explicit_mass_and_validation() -> None:
+    eng = FakeHumanoid(com=np.array([0.0, 0.0, 1.0]))
+    z = ZMPComputer(eng)
+    res = z.compute_zmp(com_acceleration=np.zeros(3), mass=50.0)
+    assert res.total_normal_force == pytest.approx(50.0 * z.GRAVITY)
+    with pytest.raises(ValueError, match="mass must be positive"):
+        z.compute_zmp(com_acceleration=np.zeros(3), mass=0.0)
+    with pytest.raises(ValueError, match="mass must be positive"):
+        z.compute_zmp(com_acceleration=np.zeros(3), mass=-5.0)
+
+
+def test_compute_zmp_dt_validation() -> None:
+    eng = FakeHumanoid(com=np.array([0.0, 0.0, 1.0]))
+    z = ZMPComputer(eng)
+    with pytest.raises(ValueError, match="dt must be positive"):
+        z.compute_zmp(com_acceleration=np.zeros(3), dt=-0.01)
 
 
 def test_check_support_custom_polygon_inside() -> None:
