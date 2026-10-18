@@ -111,6 +111,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 967 | `src/shared/python/motion_matching/club_only/matrix_qualification.py` |
 | 966 | `src/launchers/launcher_process_manager.py` |
 | 965 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py` |
+| 964 | `src/shared/python/loop_nullspace/plot_model.py` |
 | 964 | `src/shared/python/sidekick/lab/bio/c3d_reader.py` |
 | 962 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_whole_body_ik.m` |
 | 957 | `src/bunkershot3d/solvers/mpm/solver.py` |
@@ -134,7 +135,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 926 | `src/shared/python/engine_core/cross_engine_validator.py` |
 | 924 | `src/engines/physics_engines/opensim/python/muscle_analysis.py` |
 | 924 | `src/research/differentiable/engine.py` |
-| 923 | `src/shared/python/loop_nullspace/plot_model.py` |
 | 922 | `src/shared/python/shadow_tracker/service.py` |
 | 919 | `src/bunkershot3d/vandv/ledger.py` |
 | 916 | `src/tools/bunker_shot_gui/export.py` |
