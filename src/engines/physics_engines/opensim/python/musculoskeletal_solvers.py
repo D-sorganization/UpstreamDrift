@@ -204,6 +204,23 @@ class MocoInverseConfig:
     convergence_tolerance: float = 1e-2
 
 
+def _moco_weld_joints(model: Any) -> tuple[str, ...]:
+    """Joints to weld for Moco: ``mtp_r``/``mtp_l`` plus fully locked joints.
+
+    A joint is welded only when every one of its coordinates is locked by
+    default, so free joints (for example the golf model's subtalar) keep their
+    degrees of freedom.
+    """
+    joints = model.getJointSet()
+    locked = []
+    for i in range(joints.getSize()):
+        joint = joints.get(i)
+        n = joint.numCoordinates()
+        if n and all(joint.get_coordinates(k).get_locked() for k in range(n)):
+            locked.append(joint.getName())
+    return tuple(dict.fromkeys(("mtp_r", "mtp_l", *locked)))
+
+
 def build_moco_inverse(
     model_path: str | Path,
     kinematics_file: str | Path,
@@ -226,25 +243,12 @@ def build_moco_inverse(
     inverse = osim.MocoInverse()
     mp = osim.ModelProcessor(str(Path(model_path).resolve()))
     mp.append(osim.ModOpAddExternalLoads(str(Path(loads_xml).resolve())))
-    # Moco rejects locked coordinates: weld locked joints that exist in the model.
-    base_model = osim.Model(str(Path(model_path).resolve()))
-    joint_names = {
-        base_model.getJointSet().get(i).getName()
-        for i in range(base_model.getJointSet().getSize())
-    }
+    # Moco rejects locked coordinates: weld the (always zero) MTP joints and
+    # any other joint whose coordinates are all locked by default.
     welds = osim.StdVectorString()
-    for name in (
-        "mtp_r",
-        "mtp_l",
-        "subtalar_r",
-        "subtalar_l",
-        "radius_hand_r",
-        "radius_hand_l",
-    ):
-        if name in joint_names:
-            welds.append(name)
-    if welds.size() > 0:
-        mp.append(osim.ModOpReplaceJointsWithWelds(welds))
+    for name in _moco_weld_joints(osim.Model(str(Path(model_path).resolve()))):
+        welds.append(name)
+    mp.append(osim.ModOpReplaceJointsWithWelds(welds))
     mp.append(osim.ModOpIgnoreTendonCompliance())
     mp.append(osim.ModOpReplaceMusclesWithDeGrooteFregly2016())
     mp.append(osim.ModOpScaleActiveFiberForceCurveWidthDGF(1.5))
