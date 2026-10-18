@@ -27,7 +27,7 @@ for _root in (REPO_ROOT / "src", REPO_ROOT):
         sys.path.insert(0, str(_root))
 
 DEFAULT_OUT = REPO_ROOT / "docs/user_guide/images/character_builder"
-WIDGET_SIZE = (960, 600)
+WIDGET_SIZE = (960, 720)  # tall enough for the HRG-B2 colour rows
 PRESET_ID = "tour_average_male"
 MASS_KG = 90.0
 CLUB = "iron7"
