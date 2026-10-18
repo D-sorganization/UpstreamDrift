@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-18 | #13264 | OSL-18: OpenSim lift foot carries the bundle's 10 deg tibial torsion and is sized from the bundle's calcaneus stations; squat IK marker RMS 1.93 cm / max 3.55 cm, inside the unchanged 2/4 cm gate; marker-gate xfails removed |
+| 2026-10-18 | #13263 | Bump vendor/ud-tools to a459505 (Tools #5653 snatch pull phase) and regenerate the snatch bundle on the merged pin |
 | 2026-10-18 | #13224 | Add JaxSim launcher dashboard tile and engine tile coverage test; Fail closed with ok=False and rejected cameras on degenerate or collinear camera pairs; full-body-v2 schema (regional lumbar L5/S1 and thoracic T12/L1 trunk), one schema registry for exporters and consumers, and a constrained v1->v2 trunk migration with residual and non-uniqueness report; v1 stays default and byte-identical |
 | 2026-10-18 | #13252 | pipeline: FreeMoCap adapter deterministic CSV selection, NaN confidence handling, non-monotonic time rejection, and configurable min_confidence |
 | 2026-10-18 | #13250 | robotics: eliminate silent velocity, acceleration, and mass fallbacks in ZMPComputer and support finite-difference acceleration |
