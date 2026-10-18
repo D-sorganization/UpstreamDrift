@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import type * as THREE from 'three';
-import { forceColor } from './forceColors';
+import { forceShade } from './forceColors';
 import type { ForceColorScale } from './forceColors';
 import { bindSegmentMeshes, SegmentMaterialColors } from './segmentMaterialColors';
 
@@ -38,7 +38,10 @@ export function ForceColorLayer({ rootRef, segmentIds, forces, scale }: Props) {
       state.current = { bindings, adapter: new SegmentMaterialColors(bindings) };
     }
     const suppliedForces = new Map(Object.entries(forces));
-    const colors = Object.fromEntries(segmentIds.map(id => [id, forceColor(suppliedForces.get(id), '', scale) || null]));
+    const colors = Object.fromEntries(segmentIds.map(id => {
+      const force = suppliedForces.get(id);
+      return [id, force == null ? null : (base: string) => forceShade(force, base, scale)];
+    }));
     state.current?.adapter.apply(colors);
   });
   return null;

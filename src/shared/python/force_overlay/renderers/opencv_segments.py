@@ -269,7 +269,7 @@ def _extract_segment_triangles(
     has_load = False
     if loads is not None and pose.name in loads.values_n:
         load_val = loads.values_n[pose.name]
-        color_hex = color_scale.color(load_val, pose.base_color)
+        color_hex = color_scale.shade_hex(load_val, pose.base_color) or pose.base_color
         has_load = load_val is not None
     else:
         color_hex = pose.base_color

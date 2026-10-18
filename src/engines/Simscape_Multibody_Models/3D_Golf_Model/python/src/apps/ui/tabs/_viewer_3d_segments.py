@@ -8,6 +8,7 @@ existing public segment API.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable, Mapping
 from typing import Any
 
@@ -179,10 +180,22 @@ class UserSegmentRenderer:
             for name, i in self._load_indices.items()
             if i < len(self._render_entries) and self._render_entries[i][0] is not None
         }
-        self._force_display = ForceColorDisplay(self._renderer, handles)
+        self._force_display = ForceColorDisplay(
+            self._renderer, handles, self._base_colors_for(self._load_indices)
+        )
         self._force_display.set_loads(self._loads)
         self._force_display.update_frame(self._frame)
         self._force_display.configure(self._force_scale)
+
+    def _base_colors_for(self, indices: Mapping[str, int]) -> dict[str, str]:
+        """Hex base colors of the bound segments, for translucent overlay blending."""
+        colors: dict[str, str] = {}
+        for name, i in indices.items():
+            if i < len(self._segments):
+                color = self._theme_for_spec(self._segments[i]).color
+                if isinstance(color, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", color):
+                    colors[name] = color
+        return colors
 
     def set_segments(
         self,

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..plot_style.color_utils import hex_to_rgba
 from .axial_loads import AxialLoadFrame
 from .force_colors import ForceColorScale
 
@@ -14,7 +13,8 @@ def apply_mujoco_scene_colors(
 ) -> None:
     """Apply after each native update_scene; the next update restores base styling.
 
-    Only scene RGB values change, preserving opacity, geometry, overlays and the
+    Only scene RGB values change (blended with each geom's current color per
+    the scale's opacity and blend mode), preserving opacity, geometry, overlays and the
     physics model. Callers must supply a fresh scene and a synchronous force frame.
     """
     import mujoco
@@ -36,6 +36,7 @@ def apply_mujoco_scene_colors(
             continue
         body = model.geom_bodyid[geom.objid]
         name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body)
-        color = scale.color(frame.values_n.get(name), "")
-        if color:
-            geom.rgba[:3] = hex_to_rgba(color)[:3]
+        base = tuple(float(channel) for channel in geom.rgba[:3])
+        rgb = scale.shade_rgb(frame.values_n.get(name), base)
+        if rgb is not None:
+            geom.rgba[:3] = rgb

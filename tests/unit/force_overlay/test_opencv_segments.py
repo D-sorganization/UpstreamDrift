@@ -509,3 +509,43 @@ def test_synthetic_demo_still_generation(synthetic_camera: PinholeCamera) -> Non
     repo_docs = Path(__file__).resolve().parents[3] / "docs" / "development"
     if repo_docs.is_dir():
         cv2.imwrite(str(repo_docs / "fto_26_demo_still.png"), img_bytes)
+
+
+def test_tint_mode_zero_load_matches_unloaded_render(
+    synthetic_camera: PinholeCamera, synthetic_frame: np.ndarray
+) -> None:
+    """A tint overlay keeps a zero-load segment identical to the unloaded render."""
+    axis = SegmentAxis(
+        segment="arm",
+        joint_label="joint_reaction:shoulder",
+        proximal_m=(-0.2, 0.0, 0.0),
+        distal_m=(0.2, 0.0, 0.0),
+    )
+    poses = segment_poses_from_axes([axis], radius_m=0.08)
+    projector = PinholeProjector(synthetic_camera)
+    shading = SegmentShading(opacity=1.0)
+    zero = AxialLoadFrame(time_s=0.0, values_n={"arm": 0.0}, source="test")
+    tint = ForceColorScale(enabled=True, blend_mode="tint", opacity=0.5)
+    unloaded, _ = draw_segment_meshes_on_frame(
+        synthetic_frame.copy(), poses, projector, shading=shading
+    )
+    tinted, _ = draw_segment_meshes_on_frame(
+        synthetic_frame.copy(),
+        poses,
+        projector,
+        shading=shading,
+        loads=zero,
+        color_scale=tint,
+    )
+    assert np.array_equal(unloaded, tinted)
+    # Replace mode at the same load whitens the segment, so the frames differ.
+    replace = ForceColorScale(enabled=True)
+    whitened, _ = draw_segment_meshes_on_frame(
+        synthetic_frame.copy(),
+        poses,
+        projector,
+        shading=shading,
+        loads=zero,
+        color_scale=replace,
+    )
+    assert not np.array_equal(unloaded, whitened)
