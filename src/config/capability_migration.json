@@ -2295,8 +2295,8 @@
     "model.double_pendulum_urdf": {
       "path": "tests/fixtures/models/double_pendulum.urdf",
       "kind": "model",
-      "sha256": "807f40e3feaf5955b6490d173ce1ad98b25ec1b58664bff4f0c66ae94361c49a",
-      "size_bytes": 4647,
+      "sha256": "3524fd4631357f37293b34fa922f0507d52bf293d363ad35041e3b2ea34ede59",
+      "size_bytes": 4547,
       "support_status": "golden_baseline",
       "notes": "Canonical double pendulum URDF physics model"
     },
