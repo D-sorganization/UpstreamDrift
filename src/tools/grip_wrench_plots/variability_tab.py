@@ -75,15 +75,15 @@ class _SectionBox(QWidget):
 
     def text(self) -> str:
         cells = [
-            self.table.item(r, c).text()
+            item.text()
             for r in range(self.table.rowCount())
             for c in range(self.table.columnCount())
-            if self.table.item(r, c) is not None
+            if (item := self.table.item(r, c)) is not None
         ]
         heads = [
-            self.table.horizontalHeaderItem(c).text()
+            head.text()
             for c in range(self.table.columnCount())
-            if self.table.horizontalHeaderItem(c) is not None
+            if (head := self.table.horizontalHeaderItem(c)) is not None
         ]
         labels = [
             self.title_label.text(),
