@@ -202,6 +202,15 @@
       "tiles": ["spine_viewer"],
       "notes": "SPN-15c (#12815): GET /api/tools/spine-viewer/study opens a receipt under the allowed study root, verifies the loads artifact SHA-256 server-side through study_aggregation.load_verified_run and returns the src/tools/spine_viewer/core.py view model (view_to_dict). The web heatmap and status banner always show scientific_status and distribution_source; anything but the exact status qualified reads UNQUALIFIED. Angle-stack plots are not part of the web view."
     },
+    "tools.spine_study": {
+      "title": "Segmental spine study execution and model asset selection",
+      "pyqt": "src/tools/spine_viewer/gui.py",
+      "api": "src/api/routes/spine_viewer.py",
+      "web": "ui/src/pages/SpineViewer.tsx",
+      "status": "parity",
+      "tiles": [],
+      "notes": "SPN-17c (#13260): Run Study panel on both PyQt and React surfaces. Allows configuring and executing spine studies (model: synthetic fixture or licensed asset with admission status from the assets service, coupling law, swing source) through the background study runner API (/tools/spine-viewer/studies), polling the job to completion, and opening the resulting receipt."
+    },
     "analysis.grip_wrench": {
       "title": "Per-hand grip wrench on the club (weld multipliers and efc_force): overlay glyphs and force/couple plots",
       "pyqt": "src/tools/grip_wrench_plots/gui.py",

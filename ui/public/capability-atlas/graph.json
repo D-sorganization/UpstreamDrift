@@ -964,6 +964,20 @@
       "id": "tools.shot_pattern_analysis"
     },
     {
+      "feature_id": "tools.spine_study",
+      "title": "Segmental spine study execution and model asset selection",
+      "status": "parity",
+      "pyqt": "src/tools/spine_viewer/gui.py",
+      "api": "src/api/routes/spine_viewer.py",
+      "web": "ui/src/pages/SpineViewer.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "SPN-17c (#13260): Run Study panel on both PyQt and React surfaces. Allows configuring and executing spine studies (model: synthetic fixture or licensed asset with admission status from the assets service, coupling law, swing source) through the background study runner API (/tools/spine-viewer/studies), polling the job to completion, and opening the resulting receipt.",
+      "id": "tools.spine_study"
+    },
+    {
       "feature_id": "tools.spine_viewer",
       "title": "Segmental spine viewer (per-level load heatmaps from study receipts)",
       "status": "parity",
@@ -1577,7 +1591,7 @@
     {
       "id": "spine_viewer",
       "title": "Spine Viewer",
-      "description": "Read-only per-level spinal load heatmaps from hash-verified study receipts; always shows scientific status and distribution source. Install: pip install upstream-drift[gui-tools]",
+      "description": "Per-level spinal load heatmaps and study runner with model asset selection, coupling laws, and hash-verified study receipts; always shows scientific status and distribution source. Install: pip install upstream-drift[gui-tools]",
       "path": "src/tools/spine_viewer/__main__.py",
       "launch_target": "src/tools/spine_viewer/__main__.py",
       "category": "tool",
@@ -3260,9 +3274,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "64caf5311e4be2c75e742dc053b425a528f851638ca2773423fcc77d40b5d419",
-    "src/config/launcher_manifest.json": "c9844ac6e0cd9c6cc867bda7cfd44edf1199ac85a07af5b9a83bec70a65d00bc",
-    "src/config/feature_parity.json": "15a2d74b0fd1913786aff1f621f3e6942576c41a8e0b3cff40a808d562ee49e4",
+    "src/config/models.yaml": "57f8888b547764bc5e416b9e81ba0651340fac41c813c25f022bda08e15a3dd4",
+    "src/config/launcher_manifest.json": "8d79dd83e0d501561c53646574fb942a6ee0f78a72a723b323b1ae81256af070",
+    "src/config/feature_parity.json": "7feac3019801e7168b6e7674716e0b5a5d98fee490b177ab2434cbee9790fffe",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
