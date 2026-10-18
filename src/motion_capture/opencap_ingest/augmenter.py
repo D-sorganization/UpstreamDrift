@@ -1,10 +1,14 @@
-"""OpenCap marker augmenter runner and coordinator (#11405).
+"""OpenCap marker augmenter runner and coordinator (#11405, #12971).
 
 Runs OpenCap's LSTM marker augmenter on 3-D detector keypoints (from the
 self-calibrating pipeline or external detector) to synthesize 43 LaiUhlrich2022
-anatomical markers. The resulting markers are labelled ``model-conditioned``
-per ADR-0041 and can be fed directly to OpenSimScaleBackend and
-OpenSimIKBackend.
+anatomical markers via the opencap-core sidecar. Output from real sidecar
+execution is labelled ``model-conditioned`` per ADR-0041 and can be fed directly
+to OpenSimScaleBackend and OpenSimIKBackend.
+
+When running in synthetic or fallback mode, markers are synthesized using
+deterministic geometric offsets and stamped ``synthetic`` (generator:
+``geometric-offsets``).
 
 Adheres strictly to ADR-0053: OpenCap and TensorFlow are sidecar dependencies
 only and are never imported into core product code.
@@ -13,6 +17,8 @@ only and are never imported into core product code.
 from __future__ import annotations
 
 import logging
+import shutil
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Sequence
@@ -144,6 +150,7 @@ class OpenCapAugmenterConfig:
     synthetic_fallback: bool = False
     timeout_seconds: int = 600
     extra_args: list[str] | None = None
+    session_dir: Path | None = None
 
     def __post_init__(self) -> None:
         require(
@@ -156,6 +163,11 @@ class OpenCapAugmenterConfig:
             "mass_kg must be a positive finite number",
             self.mass_kg,
         )
+        require(
+            self.runner_type.lower() in ("auto", "subprocess", "docker", "synthetic"),
+            "runner_type must be one of 'auto', 'subprocess', 'docker', 'synthetic'",
+            self.runner_type,
+        )
 
 
 @dataclass(frozen=True)
@@ -165,7 +177,7 @@ class OpenCapPipelineResult:
     augmented_observations: CanonicalObservations
     scaled_rig: SkeletonRig
     joint_trajectory: JointTrajectory
-    evidence_level: str = "model-conditioned"
+    evidence_level: str = "synthetic"
     marker_set_name: str = OPENCAP_MARKER_SET_NAME
     num_frames: int = 0
 
@@ -213,15 +225,101 @@ def create_opencap_rig(rig_id: str = "opencap-laiuhlrich2022") -> SkeletonRig:
     )
 
 
+def _write_keypoints_trc(
+    path: Path,
+    kpts: dict[str, np.ndarray],
+    times: np.ndarray,
+    fps: float,
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    n_frames = len(times)
+    kpt_names = list(kpts.keys())
+    n_markers = len(kpt_names)
+    if not kpt_names:
+        rows = [
+            f"PathFileType\t4\t(X/Y/Z)\t{path.name}",
+            (
+                "DataRate\tCameraRate\tNumFrames\tNumMarkers\tUnits\t"
+                "OrigDataRate\tOrigDataStartFrame\tOrigNumFrames"
+            ),
+            f"{fps:.2f}\t{fps:.2f}\t{n_frames}\t0\tm\t{fps:.2f}\t1\t{n_frames}",
+            "Frame#\tTime",
+            "",
+        ]
+        for f in range(n_frames):
+            rows.append(f"{f + 1}\t{times[f]:.6f}")
+        path.write_text("\n".join(rows) + "\n", encoding="utf-8")
+        return
+
+    name_row = "Frame#\tTime\t" + "\t\t\t".join(kpt_names) + "\t\t\t"
+    axis_row = "\t\t" + "\t".join(f"X{i}\tY{i}\tZ{i}" for i in range(1, n_markers + 1))
+    rows = [
+        f"PathFileType\t4\t(X/Y/Z)\t{path.name}",
+        (
+            "DataRate\tCameraRate\tNumFrames\tNumMarkers\tUnits\t"
+            "OrigDataRate\tOrigDataStartFrame\tOrigNumFrames"
+        ),
+        f"{fps:.2f}\t{fps:.2f}\t{n_frames}\t{n_markers}\tm\t{fps:.2f}\t1\t{n_frames}",
+        name_row,
+        axis_row,
+    ]
+    for f in range(n_frames):
+        t = times[f]
+        coords = []
+        for name in kpt_names:
+            pt = kpts[name][f]
+            coords.extend(
+                [
+                    f"{pt[0]:.4f}" if np.isfinite(pt[0]) else "nan",
+                    f"{pt[1]:.4f}" if np.isfinite(pt[1]) else "nan",
+                    f"{pt[2]:.4f}" if np.isfinite(pt[2]) else "nan",
+                ]
+            )
+        rows.append(f"{f + 1}\t{t:.6f}\t" + "\t".join(coords))
+    path.write_text("\n".join(rows) + "\n", encoding="utf-8")
+
+
+def _write_session_metadata(
+    path: Path,
+    height_m: float,
+    mass_kg: float,
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    content = (
+        "calibrationSettings:\n"
+        "  overwriteDeployedIntrinsics: false\n"
+        "  saveSessionIntrinsics: false\n"
+        "gender_mf: m\n"
+        f"height_m: {height_m}\n"
+        "iphoneModel:\n"
+        "  Cam0: iphone13,3\n"
+        "  Cam1: iphone13,3\n"
+        "markerAugmentationSettings:\n"
+        "  markerAugmenterModel: LSTM\n"
+        f"mass_kg: {mass_kg}\n"
+        "openSimModel: LaiUhlrich2022\n"
+        "subjectID: subject-01\n"
+    )
+    path.write_text(content, encoding="utf-8")
+
+
 class OpenCapMarkerAugmenter:
-    """Learned marker augmenter sidecar runner and synthesizer.
+    """Learned marker augmenter sidecar runner and geometric synthesizer.
 
     Maps 3-D triangulated keypoints to 43 LaiUhlrich2022 anatomical markers.
-    Labels all output as ``model-conditioned`` per ADR-0041.
+    Real sidecar execution is labelled ``model-conditioned`` per ADR-0041.
+    Synthetic fallback or dry-run execution is labelled ``synthetic`` with
+    generator ``geometric-offsets``.
     """
 
-    def __init__(self, config: OpenCapAugmenterConfig | None = None) -> None:
+    def __init__(
+        self,
+        config: OpenCapAugmenterConfig | None = None,
+        launcher: OpenCapLauncher | None = None,
+    ) -> None:
         self.config = config or OpenCapAugmenterConfig()
+        self._custom_launcher = launcher is not None
+        self.launcher = launcher or OpenCapLauncher()
 
     def augment(
         self,
@@ -238,21 +336,106 @@ class OpenCapMarkerAugmenter:
     ) -> CanonicalObservations:
         """Augment input 3-D keypoints into 43 LaiUhlrich2022 anatomical markers."""
         kpt_dict, times = self._extract_keypoints(keypoints, fps)
+
+        runner = self.config.runner_type.lower()
+        if runner == "synthetic" or self.config.synthetic_fallback:
+            return self._synthesize_markers(kpt_dict, times)
+
         sidecar_py = OpenCapLauncher.find_opencap_python(self.config.sidecar_env)
         has_docker = OpenCapLauncher.is_docker_available()
 
-        if self.config.runner_type == "synthetic" or self.config.synthetic_fallback:
-            return self._synthesize_markers(kpt_dict, times)
+        if self._custom_launcher:
+            sidecar_available = True
+        elif runner == "subprocess":
+            sidecar_available = sidecar_py is not None
+        elif runner == "docker":
+            sidecar_available = has_docker
+        else:  # "auto"
+            sidecar_available = sidecar_py is not None or has_docker
 
-        if sidecar_py is None and not has_docker and not self.config.dry_run:
+        if not sidecar_available and not self.config.dry_run:
             raise OpenCapSidecarNotFoundError(
                 "opencap-core sidecar is not installed or accessible. "
                 "Install opencap-core with TensorFlow in a separate environment, "
                 "or pass synthetic_fallback=True for synthetic pipeline tests."
             )
 
-        # In sidecar or dry-run mode, synthesize markers with provenance
-        return self._synthesize_markers(kpt_dict, times)
+        return self._run_sidecar(keypoints, kpt_dict, times, fps)
+
+    def _run_sidecar(
+        self,
+        keypoints: Any,
+        kpt_dict: dict[str, np.ndarray],
+        times: np.ndarray,
+        fps: float,
+    ) -> CanonicalObservations:
+        from .launcher import OpenCapLaunchConfig
+
+        session_dir = self.config.session_dir
+        cleanup_temp = False
+        if session_dir is None:
+            if isinstance(keypoints, Path) and keypoints.is_dir():
+                session_dir = keypoints
+            elif isinstance(keypoints, str) and Path(keypoints).is_dir():
+                session_dir = Path(keypoints)
+            else:
+                session_dir = Path(tempfile.mkdtemp(prefix="opencap_augment_"))
+                cleanup_temp = True
+
+        try:
+            trc_path = session_dir / "MarkerData" / "trial1.trc"
+            meta_path = session_dir / "sessionMetadata.yaml"
+            if not trc_path.exists():
+                _write_keypoints_trc(trc_path, kpt_dict, times, fps)
+            if not meta_path.exists():
+                _write_session_metadata(
+                    meta_path, self.config.height_m, self.config.mass_kg
+                )
+
+            launch_cfg = OpenCapLaunchConfig(
+                session_dir=session_dir,
+                opencap_env=self.config.sidecar_env,
+                docker_image=self.config.docker_image,
+                runner_type=self.config.runner_type,
+                timeout_seconds=self.config.timeout_seconds,
+                trial_name="trial1",
+                extra_args=self.config.extra_args,
+                dry_run=self.config.dry_run,
+            )
+
+            result = self.launcher.launch(launch_cfg, raise_on_error=True)
+
+            if result.session is not None and result.session.observations is not None:
+                obs = result.session.observations
+                if result.used_real_opencap:
+                    obs.metadata["evidence_level"] = "model-conditioned"
+                    obs.metadata["generator"] = "opencap-marker-augmenter"
+                    obs.source_provenance["evidence_level"] = "model-conditioned"
+                    obs.source_provenance["generator"] = "opencap-marker-augmenter"
+                    return obs
+                if all(m in obs.frames[0].markers for m in OPENCAP_AUGMENTED_MARKERS):
+                    obs.metadata["evidence_level"] = "synthetic"
+                    obs.metadata["generator"] = "geometric-offsets"
+                    obs.metadata["dry_run"] = True
+                    obs.source_provenance["evidence_level"] = "synthetic"
+                    obs.source_provenance["generator"] = "geometric-offsets"
+                    obs.source_provenance["dry_run"] = True
+                    return obs
+
+            if self.config.dry_run:
+                obs = self._synthesize_markers(kpt_dict, times)
+                obs.metadata["dry_run"] = True
+                obs.source_provenance["dry_run"] = True
+                return obs
+
+            if result.error_message:
+                raise RuntimeError(result.error_message)
+            raise RuntimeError(
+                "OpenCap sidecar completed without returning observations"
+            )
+        finally:
+            if cleanup_temp and session_dir.exists():
+                shutil.rmtree(session_dir, ignore_errors=True)
 
     def _extract_keypoints(
         self,
@@ -373,24 +556,31 @@ class OpenCapMarkerAugmenter:
             )
 
         imputed_list = sorted(imputed_keypoints)
+        meta = {
+            "evidence_level": "synthetic",
+            "source": "opencap_marker_augmenter",
+            "generator": "geometric-offsets",
+            "subject_height_m": self.config.height_m,
+            "subject_mass_kg": self.config.mass_kg,
+            "imputed_keypoints": imputed_list,
+            "gap_count": gap_count,
+        }
+        prov = {
+            "evidence_level": "synthetic",
+            "generator": "geometric-offsets",
+            "imputed_keypoints": imputed_list,
+            "gap_count": gap_count,
+        }
+        if self.config.dry_run:
+            meta["dry_run"] = True
+            prov["dry_run"] = True
+
         return CanonicalObservations(
             id="augmented-opencap-markers",
             frames=frames,
             marker_set_name=OPENCAP_MARKER_SET_NAME,
-            metadata={
-                "evidence_level": "model-conditioned",
-                "source": "opencap_marker_augmenter",
-                "subject_height_m": self.config.height_m,
-                "subject_mass_kg": self.config.mass_kg,
-                "imputed_keypoints": imputed_list,
-                "gap_count": gap_count,
-            },
-            source_provenance={
-                "evidence_level": "model-conditioned",
-                "generator": "opencap-marker-augmenter",
-                "imputed_keypoints": imputed_list,
-                "gap_count": gap_count,
-            },
+            metadata=meta,
+            source_provenance=prov,
         )
 
 
@@ -648,7 +838,7 @@ def run_opencap_pipeline_from_keypoints(
 ) -> OpenCapPipelineResult:
     """Run triangulated keypoints through OpenCap augmentation, scaling and IK."""
     config = augmenter_config or OpenCapAugmenterConfig(
-        height_m=height_m, mass_kg=mass_kg, synthetic_fallback=True
+        height_m=height_m, mass_kg=mass_kg, synthetic_fallback=allow_fallback
     )
     augmenter = OpenCapMarkerAugmenter(config)
     augmented_obs = augmenter.augment(keypoints)
@@ -683,11 +873,16 @@ def run_opencap_pipeline_from_keypoints(
     )
     joint_traj = ik_backend.solve(marker_traj, scaled_rig)
 
+    evidence_level = augmented_obs.metadata.get(
+        "evidence_level",
+        augmented_obs.source_provenance.get("evidence_level", "synthetic"),
+    )
+
     return OpenCapPipelineResult(
         augmented_observations=augmented_obs,
         scaled_rig=scaled_rig,
         joint_trajectory=joint_traj,
-        evidence_level="model-conditioned",
+        evidence_level=evidence_level,
         marker_set_name=OPENCAP_MARKER_SET_NAME,
         num_frames=len(augmented_obs.frames),
     )
