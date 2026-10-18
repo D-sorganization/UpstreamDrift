@@ -55,6 +55,7 @@ from src.shared.python.model_appearance.grip_pose import (
     PALM_DIAGONAL_DEG,
     GripPose,
     GripStyle,
+    require_fields_in_range,
 )
 from src.shared.python.motion_matching.anthropometric_geometry import (
     GRIP_ULNAR_OFFSET_DEG,
@@ -108,17 +109,14 @@ class HandAngles:
     gamma_deg: float = 0.0
 
     def __post_init__(self) -> None:
-        for name, (lo, hi) in (
-            ("alpha_deg", _ALPHA_RANGE),
-            ("psi_deg", _PSI_RANGE),
-            ("gamma_deg", _GAMMA_RANGE),
-        ):
-            value = getattr(self, name)
-            require(
-                isinstance(value, (int, float)) and math.isfinite(value),
-                f"{name} must be a finite number, got {value!r}",
-            )
-            require(lo <= value <= hi, f"{name} must be in [{lo}, {hi}], got {value}")
+        require_fields_in_range(
+            self,
+            (
+                ("alpha_deg", *_ALPHA_RANGE),
+                ("psi_deg", *_PSI_RANGE),
+                ("gamma_deg", *_GAMMA_RANGE),
+            ),
+        )
 
 
 def hand_to_euler(angles: HandAngles) -> Euler:
