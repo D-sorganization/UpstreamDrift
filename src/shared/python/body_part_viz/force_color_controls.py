@@ -372,8 +372,12 @@ class ForceColorControls(QWidget):
         self._apply_edits()
 
     def _reset_colors(self) -> None:
-        defaults = {name: default for name, _label, default in _COLOR_FIELDS}
-        reset = replace(self._scale, **defaults)
+        reset = replace(
+            self._scale,
+            tension_color=DEFAULT_TENSION_COLOR,
+            compression_color=DEFAULT_COMPRESSION_COLOR,
+            neutral_color=DEFAULT_NEUTRAL_COLOR,
+        )
         self._write_widgets(reset)
         self._commit(reset)
 

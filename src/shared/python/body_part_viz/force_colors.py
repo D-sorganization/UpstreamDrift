@@ -128,6 +128,7 @@ class ForceColorScale:
         self._check_force(force_n)
         if not self._active(force_n):
             return base_color
+        assert force_n is not None
         endpoint, fraction = self._endpoint_fraction(force_n)
         return "#" + "".join(
             f"{c:02x}" for c in self._load_channels(endpoint, fraction)
@@ -148,6 +149,7 @@ class ForceColorScale:
         self._check_force(force_n)
         if not self._active(force_n):
             return None
+        assert force_n is not None
         endpoint, fraction = self._endpoint_fraction(force_n)
         if self.blend_mode == "tint":
             target, weight = self._channels(endpoint), self.opacity * fraction

@@ -26,7 +26,10 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
-from src.shared.python.body_part_viz.mujoco_axial_loads import GripClosure
+from src.shared.python.body_part_viz.mujoco_axial_loads import (
+    ExternalWrench,
+    GripClosure,
+)
 from src.shared.python.biomechanics.grip_extraction import unavailable_analysis
 from src.shared.python.biomechanics.grip_wrench import GripAnalysis
 from src.shared.python.biomechanics.ground_reaction_wrenches import (
@@ -116,7 +119,8 @@ class AxialLoadSource(Protocol):
         rates: Mapping[str, float],
         accelerations: Mapping[str, float],
         time_s: float,
-        external_wrenches: Sequence[OverlayWrench] | None = None,
+        external_wrenches: Sequence[ExternalWrench] | None = None,
+        closure: GripClosure | None = None,
     ) -> AxialLoadFrame | None:
         """Axial loads for a prescribed motion, or ``None`` when unqualified.
 
