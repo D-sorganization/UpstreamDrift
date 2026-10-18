@@ -562,7 +562,7 @@ def _compute_kinematic_angles_and_sequence(
     name_to_idx = _resolve_canonical_indices(joint_names)
     rotations = _compute_axial_rotations(pred, ref, name_to_idx)
     if rotations is None:
-        empty_phases = {"P1": {}, "P4": {}, "P7": {}}
+        empty_phases: dict[str, dict[str, float]] = {"P1": {}, "P4": {}, "P7": {}}
         return {}, empty_phases, None, None
 
     events = _detect_event_frames(rotations[3], t_len, event_frames)
