@@ -2574,6 +2574,58 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13187 · HRG-C4: Pelvis Skin Width From Measured Hip Breadth or Stature Prior With Femoral-Head Containment
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13187
+- **Branch:** fix/13187-pelvis-width-prior
+- **PR:** #13193
+- **Paths:** see #13193
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`bb7ad6f3`; collated from changes/13187-hrg-c4-pelvis-skin-width-from-measured-h.md)
+- **Summary:** HRG-C4: pelvis skin width from measured hip breadth or stature prior with femoral-head containment
+- **Next step:** Shipped in PR #13193.
+
+### DL-#13007 · Handle Numeric Array Wrench Point Attributes Without Boolean Evaluation Error and Log Warnings for Unparseable Points in Load_Trace_Forces
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13007
+- **Branch:** merged via #13234
+- **PR:** #13234
+- **Paths:** see #13234
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`03bd87ab`; collated from changes/13007-force-alignment-numeric-attr.md)
+- **Summary:** Handle numeric array wrench point attributes without boolean evaluation error and log warnings for unparseable points in load_trace_forces
+- **Next step:** Shipped in PR #13234.
+
+### DL-#13005 · Enforce Unit, Metric, and Level Preconditions in Error-Budget Guidance Classification
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13005
+- **Branch:** merged via #13236
+- **PR:** #13236
+- **Paths:** see #13236
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`4198982e`; collated from changes/13005-error-budget-guidance-unit-level-matching.md)
+- **Summary:** Enforce unit, metric, and level preconditions in error-budget guidance classification
+- **Next step:** Shipped in PR #13236.
+
+### DL-#12730 · NSX-101: Variability Interpretation Guide, Ten Publication-Gate Rows (All Blocked or Deferred), Five Preregistered External Experiments in DV-12554, and a Variability Sensitivity Section in the Design-Manual QMD Chapter; No Coaching Prescription Validated
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12730
+- **Branch:** merged via #13233
+- **PR:** #13233
+- **Paths:** see #13233
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`913b5eac`; collated from changes/12730-nsx101-variability-docs-gates.md)
+- **Summary:** NSX-101: variability interpretation guide, ten publication-gate rows (all blocked or deferred), five preregistered external experiments in DV-12554, and a Variability Sensitivity section in the design-manual QMD chapter; no coaching prescription validated
+- **Next step:** Shipped in PR #13233.
+
 ### DL-#12973 · OpenCap Augmenter Non-Zero Base Joint Derivation, NaN Marker Propagation, and Gap Counting
 
 - **State:** shipped
