@@ -12,7 +12,7 @@
         "bbox_max": [0.031787, 0.020792, 0.021392],
         "bbox_min": [-0.057208, -0.11804, -0.146155],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -28,7 +28,7 @@
         "bbox_max": [0.031726, 0.020771, 0.147592],
         "bbox_min": [-0.057433, -0.11913, -0.021365],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -51,7 +51,7 @@
         "bbox_max": [0.079332, 0.082102, 0.432192],
         "bbox_min": [-0.076681, -0.074305, -0.038991],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -74,7 +74,7 @@
         "bbox_max": [0.076644, 0.074195, 0.038991],
         "bbox_min": [-0.079374, -0.082228, -0.444029],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -127,7 +127,7 @@
         "bbox_max": [0.005928, 0.009138, 0.01583],
         "bbox_min": [-0.011893, -0.006678, -0.004891],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -157,21 +157,21 @@
         "bbox_max": [0.104266, 0.144814, 0.535111],
         "bbox_min": [-0.104266, -0.144814, -0.0725],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       },
       {
         "bbox_max": [0.104266, 0.144814, 0.495111],
         "bbox_min": [-0.104266, -0.144814, -0.0725],
         "label": "skin1",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       },
       {
         "bbox_max": [0.104266, 0.144814, 0.495111],
         "bbox_min": [-0.104266, -0.144814, -0.0725],
         "label": "skin2",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -201,21 +201,21 @@
         "bbox_max": [0.064586, 0.082803, 0.179637],
         "bbox_min": [-0.064586, -0.082803, -0.041455],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       },
       {
         "bbox_max": [0.041561, 0.026676, 0.053284],
         "bbox_min": [-0.041561, -0.115596, -0.053284],
         "label": "skin1",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       },
       {
         "bbox_max": [0.041561, 0.115596, 0.053284],
         "bbox_min": [-0.041561, -0.026676, -0.053284],
         "label": "skin2",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -231,7 +231,7 @@
         "bbox_max": [0.002589, 0.003595, 0.0078],
         "bbox_min": [-0.002589, -0.003595, -0.0018],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -247,7 +247,7 @@
         "bbox_max": [0.049936, 0.21994, 0.049936],
         "bbox_min": [-0.049936, -0.025, -0.049936],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -263,7 +263,7 @@
         "bbox_max": [0.049936, 0.025, 0.049936],
         "bbox_min": [-0.049936, -0.21994, -0.049936],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -286,7 +286,7 @@
         "bbox_max": [0.042945, 0.042945, 0.0215],
         "bbox_min": [-0.042945, -0.042945, -0.325852],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -295,7 +295,7 @@
         "bbox_max": [0.035954, 0.035954, 0.018],
         "bbox_min": [-0.035954, -0.035954, -0.163262],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -304,7 +304,7 @@
         "bbox_max": [0.035954, 0.035954, 0.018],
         "bbox_min": [-0.035954, -0.035954, -0.163262],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -327,7 +327,7 @@
         "bbox_max": [0.042945, 0.042945, 0.0215],
         "bbox_min": [-0.042945, -0.042945, -0.325852],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -336,7 +336,7 @@
         "bbox_max": [0.035954, 0.035954, 0.018],
         "bbox_min": [-0.035954, -0.035954, -0.163262],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -345,7 +345,7 @@
         "bbox_max": [0.035954, 0.035954, 0.018],
         "bbox_min": [-0.035954, -0.035954, -0.163262],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -361,7 +361,7 @@
         "bbox_max": [0.021935, 0.021305, 0.030188],
         "bbox_min": [-0.064518, -0.060401, -0.050016],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -377,7 +377,7 @@
         "bbox_max": [0.022059, 0.021426, 0.050288],
         "bbox_min": [-0.065144, -0.060508, -0.030386],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -386,7 +386,7 @@
         "bbox_max": [0.026018, 0.092227, 0.070518],
         "bbox_min": [-0.451989, -0.036897, -0.041592],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -395,7 +395,7 @@
         "bbox_max": [0.025998, 0.092664, 0.041514],
         "bbox_min": [-0.45608, -0.036814, -0.07073],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -411,7 +411,7 @@
         "bbox_max": [0.032194, 0.013295, 0.013325],
         "bbox_min": [-0.01737, -0.019295, -0.045918],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -427,7 +427,7 @@
         "bbox_max": [0.032595, 0.013426, 0.046307],
         "bbox_min": [-0.017506, -0.019426, -0.013467],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ]
@@ -445,7 +445,7 @@
         "bbox_max": [0.031787, 0.020792, 0.021392],
         "bbox_min": [-0.057208, -0.11804, -0.146155],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -461,7 +461,7 @@
         "bbox_max": [0.031726, 0.020771, 0.147592],
         "bbox_min": [-0.057433, -0.11913, -0.021365],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -484,7 +484,7 @@
         "bbox_max": [0.079332, 0.082102, 0.432192],
         "bbox_min": [-0.076681, -0.074305, -0.038991],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -507,7 +507,7 @@
         "bbox_max": [0.076644, 0.074195, 0.038991],
         "bbox_min": [-0.079374, -0.082228, -0.444029],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -560,7 +560,7 @@
         "bbox_max": [0.005989, 0.01063, 0.015508],
         "bbox_min": [-0.011688, -0.006221, -0.005051],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -590,21 +590,21 @@
         "bbox_max": [0.104266, 0.144814, 0.535111],
         "bbox_min": [-0.104266, -0.144814, -0.0725],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       },
       {
         "bbox_max": [0.104266, 0.144814, 0.495111],
         "bbox_min": [-0.104266, -0.144814, -0.0725],
         "label": "skin1",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       },
       {
         "bbox_max": [0.104266, 0.144814, 0.495111],
         "bbox_min": [-0.104266, -0.144814, -0.0725],
         "label": "skin2",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -634,21 +634,21 @@
         "bbox_max": [0.064586, 0.082803, 0.179637],
         "bbox_min": [-0.064586, -0.082803, -0.041455],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       },
       {
         "bbox_max": [0.041561, 0.026676, 0.053284],
         "bbox_min": [-0.041561, -0.115596, -0.053284],
         "label": "skin1",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       },
       {
         "bbox_max": [0.041561, 0.115596, 0.053284],
         "bbox_min": [-0.041561, -0.026676, -0.053284],
         "label": "skin2",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -664,7 +664,7 @@
         "bbox_max": [0.002589, 0.003595, 0.0078],
         "bbox_min": [-0.002589, -0.003595, -0.0018],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -680,7 +680,7 @@
         "bbox_max": [0.049936, 0.21994, 0.049936],
         "bbox_min": [-0.049936, -0.025, -0.049936],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -696,7 +696,7 @@
         "bbox_max": [0.049936, 0.025, 0.049936],
         "bbox_min": [-0.049936, -0.21994, -0.049936],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -719,7 +719,7 @@
         "bbox_max": [0.042945, 0.042945, 0.0215],
         "bbox_min": [-0.042945, -0.042945, -0.325852],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -728,7 +728,7 @@
         "bbox_max": [0.035954, 0.035954, 0.018],
         "bbox_min": [-0.035954, -0.035954, -0.163262],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -737,7 +737,7 @@
         "bbox_max": [0.035954, 0.035954, 0.018],
         "bbox_min": [-0.035954, -0.035954, -0.163262],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -760,7 +760,7 @@
         "bbox_max": [0.042945, 0.042945, 0.0215],
         "bbox_min": [-0.042945, -0.042945, -0.325852],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -769,7 +769,7 @@
         "bbox_max": [0.035954, 0.035954, 0.018],
         "bbox_min": [-0.035954, -0.035954, -0.163262],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -778,7 +778,7 @@
         "bbox_max": [0.035954, 0.035954, 0.018],
         "bbox_min": [-0.035954, -0.035954, -0.163262],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -794,7 +794,7 @@
         "bbox_max": [0.021935, 0.021305, 0.030188],
         "bbox_min": [-0.064518, -0.060401, -0.050016],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -810,7 +810,7 @@
         "bbox_max": [0.022059, 0.021426, 0.050288],
         "bbox_min": [-0.065144, -0.060508, -0.030386],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -819,7 +819,7 @@
         "bbox_max": [0.026018, 0.092227, 0.070518],
         "bbox_min": [-0.451989, -0.036897, -0.041592],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -828,7 +828,7 @@
         "bbox_max": [0.025998, 0.092664, 0.041514],
         "bbox_min": [-0.45608, -0.036814, -0.07073],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -844,7 +844,7 @@
         "bbox_max": [0.032194, 0.013295, 0.013325],
         "bbox_min": [-0.01737, -0.019295, -0.045918],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -860,7 +860,7 @@
         "bbox_max": [0.032595, 0.013426, 0.046307],
         "bbox_min": [-0.017506, -0.019426, -0.013467],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ]
@@ -878,7 +878,7 @@
         "bbox_max": [0.031767, 0.020744, 0.021464],
         "bbox_min": [-0.057188, -0.117992, -0.146226],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -894,7 +894,7 @@
         "bbox_max": [0.031722, 0.020794, 0.147546],
         "bbox_min": [-0.057429, -0.119154, -0.021319],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -917,7 +917,7 @@
         "bbox_max": [0.038991, 0.079332, 0.074305],
         "bbox_min": [-0.432192, -0.076681, -0.082102],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -940,7 +940,7 @@
         "bbox_max": [0.038991, 0.076644, 0.074195],
         "bbox_min": [-0.444029, -0.079374, -0.082228],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -993,7 +993,7 @@
         "bbox_max": [0.00761, 0.00761, 0.01651],
         "bbox_min": [-0.00761, -0.00761, -0.00381],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1023,21 +1023,21 @@
         "bbox_max": [0.144814, 0.089226, 0.076291],
         "bbox_min": [-0.144814, -0.140026, -0.320131],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       },
       {
         "bbox_max": [0.144814, 0.089226, 0.076291],
         "bbox_min": [-0.144814, -0.140026, -0.320131],
         "label": "skin1",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       },
       {
         "bbox_max": [0.144814, 0.104266, 0.0725],
         "bbox_min": [-0.144814, -0.104266, -0.57034],
         "label": "skin2",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1067,21 +1067,21 @@
         "bbox_max": [0.10075, 0.121578, 0.3673],
         "bbox_min": [-0.10075, -0.121578, -0.0625],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       },
       {
         "bbox_max": [0.032119, 0.041832, 0.078192],
         "bbox_min": [-0.112219, -0.067306, -0.040644],
         "label": "skin1",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       },
       {
         "bbox_max": [0.043585, 0.137042, 0.053323],
         "bbox_min": [-0.06246, -0.037098, -0.08513],
         "label": "skin2",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1097,7 +1097,7 @@
         "bbox_max": [0.036529, 0.026301, 0.079248],
         "bbox_min": [-0.036529, -0.026301, -0.018288],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1113,7 +1113,7 @@
         "bbox_max": [0.049936, 0.049936, 0.025],
         "bbox_min": [-0.049936, -0.049936, -0.279],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1129,7 +1129,7 @@
         "bbox_max": [0.049936, 0.049936, 0.279],
         "bbox_min": [-0.049936, -0.049936, -0.025],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1152,7 +1152,7 @@
         "bbox_max": [0.3898, 0.042945, 0.042945],
         "bbox_min": [-0.0215, -0.042945, -0.042945],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1161,7 +1161,7 @@
         "bbox_max": [0.1704, 0.035954, 0.035954],
         "bbox_min": [-0.018, -0.035954, -0.035954],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1170,7 +1170,7 @@
         "bbox_max": [0.035954, 0.035954, 0.1704],
         "bbox_min": [-0.035954, -0.035954, -0.018],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1193,7 +1193,7 @@
         "bbox_max": [0.3898, 0.042945, 0.042945],
         "bbox_min": [-0.0215, -0.042945, -0.042945],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1202,7 +1202,7 @@
         "bbox_max": [0.1704, 0.035954, 0.035954],
         "bbox_min": [-0.018, -0.035954, -0.035954],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1211,7 +1211,7 @@
         "bbox_max": [0.035954, 0.035954, 0.1704],
         "bbox_min": [-0.035954, -0.035954, -0.018],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1227,7 +1227,7 @@
         "bbox_max": [0.021514, 0.021648, 0.03024],
         "bbox_min": [-0.064097, -0.060744, -0.050069],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1243,7 +1243,7 @@
         "bbox_max": [0.021562, 0.021962, 0.050267],
         "bbox_min": [-0.064647, -0.061045, -0.030365],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1252,7 +1252,7 @@
         "bbox_max": [0.092227, 0.070518, 0.026018],
         "bbox_min": [-0.036897, -0.041592, -0.451989],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1261,7 +1261,7 @@
         "bbox_max": [0.036814, 0.07073, 0.025998],
         "bbox_min": [-0.092664, -0.041514, -0.45608],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1277,7 +1277,7 @@
         "bbox_max": [0.031303, 0.014387, 0.013471],
         "bbox_min": [-0.016479, -0.020387, -0.046064],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ],
@@ -1293,7 +1293,7 @@
         "bbox_max": [0.031578, 0.014656, 0.046437],
         "bbox_min": [-0.016488, -0.020656, -0.013597],
         "label": "skin0",
-        "material": "mat_skin_medium",
+        "material": "mat_skin_2",
         "n_vertices": 794
       }
     ]
