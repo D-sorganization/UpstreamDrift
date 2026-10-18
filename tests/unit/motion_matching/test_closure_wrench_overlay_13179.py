@@ -179,3 +179,28 @@ def test_overlay_feed_blanks_axial_loads_at_ball_impact(spec_bytes: bytes) -> No
     assert before.metadata["axial_closure"] == "applied"
     assert all(v is None for v in at.axial_loads.values_n.values())
     assert at.metadata["axial_impact"] == "unavailable"
+
+
+def test_drawn_contact_point_wrenches_match_the_forward_line_of_action(case) -> None:
+    """The overlay draws force at the contact point; the inverse must not."""
+    source, q, v, e, accel, bodies = case
+    drawn = contact_sample_wrenches(
+        source.evaluate_contact_samples(q, v),
+        bodies,
+        source="t",
+        free_moments=source.contact_free_moments(q, v),
+    )
+    moved = source.on_forward_line_of_action(drawn, q, v)
+    assert len(moved) == len(drawn) and drawn
+    axial = MujocoAxialLoadSource(source.model, axis_policy="kinematic")
+    vec, closure = source._vector, source.closure_wrench(q, v, e)
+    at_point = axial.required_generalized_force(
+        vec(q), vec(v), vec(accel), drawn, closure
+    )
+    on_line = axial.required_generalized_force(
+        vec(q), vec(v), vec(accel), moved, closure
+    )
+    assert np.abs(on_line - vec(e)).max() <= TOLERANCE_NM
+    assert np.abs(at_point - vec(e)).max() > TOLERANCE_NM  # the shift matters
+    net = lambda ws: sum(np.asarray(w.force_n) for w in ws)  # noqa: E731
+    np.testing.assert_allclose(net(moved), net(drawn), atol=1e-12)

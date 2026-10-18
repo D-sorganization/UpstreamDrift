@@ -18,6 +18,7 @@ from src.engines.physics_engines.mujoco.python.full_body_model import (
 )
 from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
 from src.shared.python.body_part_viz.mujoco_axial_loads import (
+    BodyWrench,
     ExternalWrench,
     GripClosure,
     MujocoAxialLoadSource,
@@ -58,6 +59,10 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
             self._axial_source = MujocoAxialLoadSource(
                 self.model, axis_policy="kinematic"
             )
+        if external_wrenches is not None:
+            external_wrenches = self.on_forward_line_of_action(
+                external_wrenches, coordinates, rates
+            )
         return self._axial_source.sample_prescribed(
             self._vector(coordinates),
             self._vector(rates),
@@ -66,6 +71,52 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
             external_wrenches,
             closure,
         )
+
+    def on_forward_line_of_action(
+        self,
+        wrenches: Sequence[ExternalWrench],
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+    ) -> list[ExternalWrench]:
+        """Ground wrenches re-expressed where the forward model applies them.
+
+        The overlay draws each contact force at its contact point, but the
+        forward dynamics applies it at the contact sphere centre (its force
+        line passes through the centre; no couple is added). A wrench whose
+        point is a sphere's contact point is moved to that centre, force and
+        free moment unchanged, so the inverse reproduces the forward solve.
+        Other wrenches pass through. Only the inverse uses this; the drawn
+        wrench keeps its contact point.
+        """
+        samples = self.evaluate_contact_samples(coordinates, rates)
+        self._forward(coordinates)
+        centres = [
+            (
+                np.asarray(sample.contact_point_m, float),
+                self.data.site_xpos[self._spheres[name]["site_id"]].copy(),
+            )
+            for name, sample in samples.items()
+        ]
+        out: list[ExternalWrench] = []
+        for wrench in wrenches:
+            point = np.asarray(wrench.point_m, float)
+            hit = next(
+                (c for p, c in centres if np.allclose(p, point, atol=1e-9)), None
+            )
+            if hit is None or wrench.force_n is None:
+                out.append(wrench)
+                continue
+            out.append(
+                BodyWrench(
+                    wrench.body,
+                    (float(hit[0]), float(hit[1]), float(hit[2])),
+                    tuple(float(x) for x in wrench.force_n),  # type: ignore[arg-type]
+                    None
+                    if wrench.torque_nm is None
+                    else tuple(float(x) for x in wrench.torque_nm),  # type: ignore[arg-type]
+                )
+            )
+        return out
 
     def closure_wrench(
         self,
