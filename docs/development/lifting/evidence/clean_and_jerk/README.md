@@ -65,9 +65,11 @@ every number below is read from the committed bundle and
 IK residuals (maximum over all 151 frames, mm): ankle_l 3.78, ankle_r 2.83,
 knee_l 3.43, knee_r 10.98, hip_l 8.32, hip_r 5.92, shoulder_l 4.10,
 shoulder_r 3.06, bar 1.15. Grip closure at most 3.3e-5 m, lowest foot sphere
-0.69 mm into the ground, bundle 231,160 bytes. Against the unchanged bounds
-in `tests/unit/lifting/test_pull_bundles.py`, both ankles, knee_l, knee_r,
-both shoulders and the closure (2.8e-5 m) now fail; no bound is widened.
+0.69 mm into the ground, bundle 231,160 bytes. The regression-snapshot
+bounds in `tests/unit/lifting/test_pull_bundles.py` (both ankles, knee_l,
+knee_r, both shoulders and the closure, 2.8e-5 to 3.3e-5 m) are re-derived
+with their original rounding (#13041, issuecomment-6243170509). Its RK4 record is inside the limit at
+eight substeps (|z| 2.24), so it is unchanged by the substep fix.
 
 | Engine    | Full Window Bar Max (m) | Full Window Coordinate Max (rad) | 20-Step Segments Coordinate Max (rad) | 20-Step Segments Frame Max (m) |
 | --------- | ----------------------- | -------------------------------- | ------------------------------------- | ------------------------------ |

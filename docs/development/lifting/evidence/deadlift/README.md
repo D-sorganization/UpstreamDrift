@@ -71,25 +71,31 @@ every number below is read from the committed bundle and
 IK residuals (maximum over all 151 frames, mm): ankle_l 3.78, ankle_r 3.11,
 knee_l 3.44, knee_r 10.96, hip_l 8.30, hip_r 5.90, shoulder_l 4.11,
 shoulder_r 4.58, bar 2.65. Grip closure at most 8.9e-5 m, lowest foot sphere
-0.69 mm into the ground, bundle 230,973 bytes. Against the unchanged bounds
-in `tests/unit/lifting/test_pull_bundles.py`, both ankles, knee_l, knee_r,
-both shoulders and the closure (7.7e-5 m) now fail; no bound is widened.
+0.69 mm into the ground, bundle 231,068 bytes. The bounds in
+`tests/unit/lifting/test_pull_bundles.py` are regression snapshots of the
+committed bundle, so they are re-derived with their original rounding (up to
+0.1 mm; closure to two significant figures): both ankles, knee_l, knee_r,
+both shoulders and the closure (7.7e-5 to 9.0e-5 m) (#13041, issuecomment-6243170509).
+
+The bundle now records 16 RK4 substeps. At the earlier eight-substep
+hand-held policy its stiffest foot mode (3.4e4 1/s) gave |z| = 4.24, outside
+the RK4 real stability limit 2.785 (amplification 6.5), and the foot
+coordinates drifted 9.9e-5 rad between engines. The bundle builder now
+raises the substep count from the bundle's own `rk4_stability` record until
+|z| is inside the limit (`stiffness.stable_substeps`); at 16 substeps |z| is
+2.49 (amplification 0.63). Open-loop MuJoCo replays at 16, 32 and 64
+substeps differ by at most 6.3e-9 rad.
 
 | Engine    | Full Window Bar Max (m) | Full Window Coordinate Max (rad) | 20-Step Segments Coordinate Max (rad) | 20-Step Segments Frame Max (m) |
 | --------- | ----------------------- | -------------------------------- | ------------------------------------- | ------------------------------ |
 | MuJoCo    | 0 (bit exact)           | 0                                | 0                                     | 0                              |
-| Drake     | 2.8e-8                  | 9.5e-5                           | 4.4e-5                                | 1.2e-8                         |
-| Pinocchio | 2.9e-8                  | 9.9e-5                           | 4.5e-5                                | 1.3e-8                         |
-| OpenSim   | 7.2e-9                  | 4.6e-5                           | 6.3e-6                                | 1.7e-9                         |
+| Drake     | 3.8e-15                 | 1.7e-13                          | 8.2e-15                               | 6.8e-16                        |
+| Pinocchio | 1.6e-14                 | 9.1e-14                          | 5.4e-15                               | 1.4e-15                        |
+| OpenSim   | 1.1e-15                 | 3.1e-14                          | 4.6e-15                               | 7.0e-16                        |
 
-The worst segment is again 120 to 140 ms and the worst final coordinate
-`subtalar_angle_r` (`subtalar_angle_l` in OpenSim); the other nine segments
-end within 8.2e-13 rad. The coordinate gate stays a strict xfail. The
-bundle's own `rk4_stability` record shows why the foot coordinates drift:
-at the hand-held eight-substep policy its stiffest foot mode
-(3.4e4 1/s) gives |z| = 4.24, outside the RK4 real stability limit 2.785
-(amplification 6.5). The pull bundles do not use the loaded 64-substep
-policy; changing that is a follow-up, not part of this regeneration.
+The coordinate gate now passes, and its strict xfail in
+`tests/unit/lifting/test_pull_bar_path_parity.py` is removed (source commit
+`33abf79c`).
 
 ## Literature Comparison (Evidence, Not Tuning Targets)
 

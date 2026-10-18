@@ -214,9 +214,10 @@ body; the records now read:
 - **Source IK:** max residuals ankle 4.99/4.43, knee 3.62/11.82, hip
   8.11/9.32, shoulder 3.65/3.04 and bar 0.01 mm (left/right); closure 9.0e-8
   m; lowest sphere 0.69 mm; balance offset 0.207 m to 1.3e-4 m in five
-  corrections; 463,674 bytes. `ankle_r` (bound 3.6 mm), `hip_r` (9.2 mm) and
-  the closure (6.4e-8 m) exceed their unchanged bounds in
-  `tests/unit/lifting/test_lift_bundles.py`. The bounds are not widened (see
+  corrections; 463,674 bytes. The regression-snapshot bounds in
+  `tests/unit/lifting/test_lift_bundles.py` for `ankle_r` (3.6 to 4.5 mm),
+  `hip_r` (9.2 to 9.4 mm) and the closure (6.4e-8 to 9.0e-8 m) are re-derived
+  with their original rounding (#13041, issuecomment-6243170509; see
   `lift_models.tex`, "Lift Body on the Whole de Leva Rows").
 - **Feet:** foot points within 1.77/1.75 mm of the IK at 64 substeps and a
   0.25 ms hold; 64 against 128 substeps moves no coordinate by more than

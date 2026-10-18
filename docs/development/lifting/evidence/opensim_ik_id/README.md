@@ -61,7 +61,15 @@ On the whole-row lift body (#13037) the squat receipt reads: marker RMS
 gate; segment-angle RMS 1.47 deg. The reach solve now ends at the 150 deg
 `elbow_flex` bound on both sides, so the bar marker is 12.56 mm off and
 `range_violations` lists `elbow_flex` (1.6e-4 rad past the bound) and
-`pro_sup` (-1.9e-4 rad). The cause is not yet diagnosed. Hicks limits are
+`pro_sup` (-1.9e-4 rad). Cause: the bar target is the parity standard's
+start pose scaled by height (1.618 m), independent of the body, while the
+longer whole-row trunk raises the shoulders 7.1 cm (mid-shoulder 0.950 to
+1.021 m). The shoulder-to-grip distance falls from 0.253/0.235 m to
+0.190/0.175 m, near the roughly 0.17 m that the uniformly scaled Rajagopal
+arm reaches when folded to its 150 deg bound, so the reach misses by 8.3 mm
+(left) and 21.5 mm (right). The inputs are current, not stale; the elbow
+range and reach tolerance are not widened, and the four reach and range
+tests still fail. Hicks limits are
 167.0 N and 22.5 N m; peaks `pelvis_ty` 213.9 N, tilt 136.9 N m and `tx`
 106.6 N, so the residual gate still fails. Peak lumbar extension 769.5 N m,
 hip flexion 444.8/433.5 N m.
