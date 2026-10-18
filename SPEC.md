@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-18 | #13225 | Reject duplicate source labels and handle inf values in capture export |
 | 2026-10-18 | #13219 | Surface searched paths and submodule remedy in tile launch failure toast |
 | 2026-10-18 | #13222 | Resolve MATLAB default slx path under production src root and raise GolfModelingError on missing default model |
 | 2026-10-18 | #13215 | NSX-44: React loop null-space panel rendering the shared plot-model golden |
