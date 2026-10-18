@@ -37,7 +37,8 @@
     "pinocchio_dashboard": "pinocchio",
     "opensim_golf": "opensim",
     "myosim_suite": "myosuite",
-    "matlab_suite": "simscape"
+    "matlab_suite": "simscape",
+    "jaxsim_dashboard": "jaxsim"
   },
   "packages": [
     {

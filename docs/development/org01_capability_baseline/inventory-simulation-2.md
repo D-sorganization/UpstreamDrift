@@ -11,6 +11,7 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `golf_simulation_suite` | Golf Simulation Suite | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/golf_simulation_suite/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `golf_simulator` | Golf Simulator Console | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/golf_simulator/gui.py` | `tests/config/test_launcher_registry_parity.py` |
 | `hmr2_sidecar` | Tools Package: hmr2_sidecar | `library` | `simulation` | `analysis` | `core` | 🟣 intentionally_headless | `src/tools/hmr2_sidecar/__init__.py` | `tests/config/test_registry_exclusions.py` |
+| `jaxsim_dashboard` | JaxSim Dashboard | `model` | `simulation` | — | `core` | 🟢 active_feature | `src/launchers/jaxsim_dashboard.py` | `tests/config/test_engine_tile_coverage.py` |
 | `launcher.docker_management` | Docker engine management dialog | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/launchers/docker_manager.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `launcher.embedded_tabs_docks` | Embedded tool host (tabs + docks) | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/launchers/embedded_host.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `launcher.tile_grid` | Launcher tile grid from shared manifest | `feature` | `simulation` | — | `core` | 🟢 active_feature | `src/launchers/embedded_tool_bootstrap.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
@@ -30,4 +31,3 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `mujoco_models_shared` | MuJoCo Models | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `MuJoCo_Models` | `tests/config/test_launcher_registry_parity.py` |
 | `mujoco_unified` | MuJoCo | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `myosim_suite` | MyoSuite | `model` | `simulation` | — | `opensim` | 🟢 active_feature | `src/engines/physics_engines/myosuite/python/gui.py` | `tests/config/test_launcher_registry_parity.py` |
-| `native_viewer_export` | Tools Package: native_viewer_export | `cli_tool` | `simulation` | `analysis` | `core` | 🟣 intentionally_headless | `src/tools/native_viewer_export/__init__.py` | `tests/config/test_registry_exclusions.py` |

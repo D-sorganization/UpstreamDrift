@@ -29,6 +29,7 @@ ENGINE_MODULES: dict[str, str] = {
     "pinocchio": "pinocchio",
     "opensim": "opensim",
     "myosuite": "myosuite",
+    "jaxsim": "jaxsim.api",
 }
 
 _WSL_DOCKER = "use the Docker or WSL launch mode"
@@ -51,6 +52,10 @@ ENGINE_INSTALL_HINTS: dict[str, dict[str, str]] = {
         "win32": "pip install myosuite",
         "default": "pip install myosuite",
     },
+    "jaxsim": {
+        "win32": f"JaxSim is Linux-only: {_WSL_DOCKER} (pip install upstream-drift[jaxsim])",
+        "default": "pip install upstream-drift[jaxsim]",
+    },
 }
 
 # model id / type -> engine key.
@@ -64,6 +69,8 @@ _MODEL_ENGINE_ALIASES: dict[str, str] = {
     "myosim": "myosuite",
     "myosim_suite": "myosuite",
     "myosuite": "myosuite",
+    "jaxsim": "jaxsim",
+    "jaxsim_dashboard": "jaxsim",
 }
 
 

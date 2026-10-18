@@ -76,9 +76,9 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
     catalog = _catalog_module().build_catalog(REPO_ROOT, require_clean=False)
 
     assert catalog["summary"] == {
-        "raw_launcher_records": 60,
-        "local_model_records": 69,
-        "program_records": 82,
+        "raw_launcher_records": 61,
+        "local_model_records": 70,
+        "program_records": 83,
         "feature_records": 67,
         "feature_surface_paths": 154,
         "workflow_records": 15,
@@ -88,13 +88,13 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
         "current_documentation_records": 4,
         "engine_capability_records": 17,
         "qualified_engine_capability_records": 4,
-        "undocumented_visible_program_records": 68,
+        "undocumented_visible_program_records": 69,
         "known_gap_records": 1,
-        "screenshot_records": 82,
+        "screenshot_records": 83,
         "captured_screenshot_records": 6,
-        "pending_screenshot_records": 76,
+        "pending_screenshot_records": 77,
     }
-    assert len({record["id"] for record in catalog["programs"]}) == 82
+    assert len({record["id"] for record in catalog["programs"]}) == 83
     assert len({record["id"] for record in catalog["features"]}) == 67
 
     schema_text = SCHEMA_PATH.read_text(encoding="utf-8")

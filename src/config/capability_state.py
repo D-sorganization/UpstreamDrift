@@ -55,6 +55,7 @@ KNOWN_PHYSICS_ENGINES: Final[frozenset[str]] = frozenset(
         "myosuite",
         "myosim",
         "matlab",
+        "jaxsim",
     }
 )
 
@@ -101,6 +102,7 @@ _ENGINE_LOGOS: Final[dict[str, str]] = {
     "opensim": "opensim.svg",
     "pinocchio": "pinocchio.svg",
     "putting_green": "putting_green.svg",
+    "jaxsim": "cross_engine.svg",
 }
 
 

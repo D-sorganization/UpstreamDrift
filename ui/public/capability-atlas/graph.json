@@ -2013,6 +2013,23 @@
       ]
     },
     {
+      "id": "jaxsim_dashboard",
+      "title": "JaxSim Dashboard",
+      "description": "Interactive JaxSim simulation dashboard (capabilities, kinematics, forward dynamics, and parameter sensitivity — #6658)",
+      "path": "src/launchers/jaxsim_dashboard.py",
+      "launch_target": "src/launchers/jaxsim_dashboard.py",
+      "category": "physics_engine",
+      "status": "experimental",
+      "capabilities": [
+        "rigid_body",
+        "kinematics",
+        "forward_dynamics",
+        "dashboard",
+        "recorder",
+        "advanced_analysis"
+      ]
+    },
+    {
       "id": "pinn_pure_rigid",
       "title": "Pure Rigid Body",
       "description": "Pinocchio inverse dynamics only — no ML",
@@ -3274,8 +3291,8 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "64caf5311e4be2c75e742dc053b425a528f851638ca2773423fcc77d40b5d419",
-    "src/config/launcher_manifest.json": "c9844ac6e0cd9c6cc867bda7cfd44edf1199ac85a07af5b9a83bec70a65d00bc",
+    "src/config/models.yaml": "eb564e4c2961c6963c0331621f8a69907d47b7dffaf7673ae448cbde3a679852",
+    "src/config/launcher_manifest.json": "d96bb6570c18b2c03febaad6af071fd2a4153adcefea41c5218c8445e799cfcc",
     "src/config/feature_parity.json": "3d4c353dc22334368618d21e27eba2b9ce520c41c878d62932fef8fbe2d821dc",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"

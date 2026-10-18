@@ -174,14 +174,8 @@ def get_ud_tool_catalog() -> UDToolCatalog:
 # ── Catalog definition ────────────────────────────────────────────────
 
 
-def _build_catalog() -> list[UDToolEntry]:
-    """Return the definitive list of all UpstreamDrift tool entries.
-
-    Add new tools here.  Use ``is_hidden=True`` + ``hidden_reason`` for
-    features that exist but are not yet ready to surface.
-    """
-    tools: list[UDToolEntry] = [
-        # ── Physics Engines ───────────────────────────────────────────
+def _engine_tools() -> list[UDToolEntry]:
+    return [
         UDToolEntry(
             tool_id="mujoco_dashboard",
             title="MuJoCo Dashboard",
@@ -206,7 +200,19 @@ def _build_catalog() -> list[UDToolEntry]:
             command="src.launchers.pinocchio_dashboard",
             icon="pinocchio",
         ),
-        # ── Biomechanics ──────────────────────────────────────────────
+        UDToolEntry(
+            tool_id="jaxsim_dashboard",
+            title="JaxSim Dashboard",
+            category="Physics Engines",
+            description="Launch the JaxSim simulation and kinematics dashboard.",
+            command="src.launchers.jaxsim_dashboard",
+            icon="cross_engine",
+        ),
+    ]
+
+
+def _domain_tools() -> list[UDToolEntry]:
+    return [
         UDToolEntry(
             tool_id="cross_engine_dashboard",
             title="Cross-Engine Dashboard",
@@ -223,7 +229,6 @@ def _build_catalog() -> list[UDToolEntry]:
             command="src.launchers.exercise_dashboard",
             icon="exercise",
         ),
-        # ── Simulation ────────────────────────────────────────────────
         UDToolEntry(
             tool_id="full_swing_ball_flight",
             title="Full Swing + Ball Flight",
@@ -244,7 +249,6 @@ def _build_catalog() -> list[UDToolEntry]:
             command="src.shared.python.pendulum_simulator",
             icon="pendulum",
         ),
-        # ── Motion Capture ────────────────────────────────────────────
         UDToolEntry(
             tool_id="motion_capture_launcher",
             title="Motion Capture",
@@ -253,7 +257,6 @@ def _build_catalog() -> list[UDToolEntry]:
             command="src.tools.freemocap_sidecar.run_freemocap",
             icon="mocap",
         ),
-        # ── Motion Matching ───────────────────────────────────────────
         UDToolEntry(
             tool_id="pose_studio",
             title="Pose Studio",
@@ -262,7 +265,11 @@ def _build_catalog() -> list[UDToolEntry]:
             command="src.tools.pose_studio",
             icon="pose_studio",
         ),
-        # ── Analysis ─────────────────────────────────────────────────
+    ]
+
+
+def _utility_tools() -> list[UDToolEntry]:
+    return [
         UDToolEntry(
             tool_id="launcher_diagnostics",
             title="Diagnostics",
@@ -271,7 +278,6 @@ def _build_catalog() -> list[UDToolEntry]:
             command="src.launchers.launcher_diagnostics",
             icon="diagnostics",
         ),
-        # ── Visualization ─────────────────────────────────────────────
         UDToolEntry(
             tool_id="shot_tracer_viewer",
             title="Shot Tracer",
@@ -280,7 +286,6 @@ def _build_catalog() -> list[UDToolEntry]:
             command="src.launchers.shot_tracer",
             icon="shot_tracer",
         ),
-        # ── External Providers ────────────────────────────────────────
         UDToolEntry(
             tool_id="matlab_launcher",
             title="MATLAB Suite",
@@ -289,7 +294,6 @@ def _build_catalog() -> list[UDToolEntry]:
             command="src.launchers.matlab_suite_dialog",
             icon="matlab",
         ),
-        # ── Developer Tools ───────────────────────────────────────────
         UDToolEntry(
             tool_id="onboarding",
             title="Getting Started",
@@ -316,6 +320,14 @@ def _build_catalog() -> list[UDToolEntry]:
         ),
     ]
 
+
+def _build_catalog() -> list[UDToolEntry]:
+    """Return the definitive list of all UpstreamDrift tool entries.
+
+    Add new tools here.  Use ``is_hidden=True`` + ``hidden_reason`` for
+    features that exist but are not yet ready to surface.
+    """
+    tools = _engine_tools() + _domain_tools() + _utility_tools()
     _validate_catalog(tools)
     return sorted(tools, key=lambda t: (t.category, t.title))
 
