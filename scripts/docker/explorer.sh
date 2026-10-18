@@ -23,7 +23,7 @@ die() {
     die "vendor/ud-tools is not materialised; run: git submodule update --init vendor/ud-tools"
 
 if [ -z "${TOOLS_GITLINK_SHA:-}" ]; then
-    TOOLS_GITLINK_SHA="$(git rev-parse HEAD:vendor/ud-tools 2>/dev/null)" ||
+    TOOLS_GITLINK_SHA="$(python3 scripts/packaging/resolve_tools_gitlink_sha.py --root .)" ||
         die "cannot read the vendor/ud-tools gitlink; export TOOLS_GITLINK_SHA=<40-hex sha> explicitly"
 fi
 if [ -z "${TOOLS_SOURCE_SHA256:-}" ]; then
