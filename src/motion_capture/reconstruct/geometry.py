@@ -20,7 +20,7 @@ from typing import TypeAlias
 import numpy as np
 import numpy.typing as npt
 
-from src.shared.python.core.contracts import require
+from src.shared.python.core.contracts import PreconditionError, require
 
 from .cameras import PinholeCamera
 
@@ -107,6 +107,42 @@ def _covariance(
     return np.asarray(sigma_px**2 * np.linalg.pinv(jtj), dtype=float)
 
 
+def _is_degenerate_geometry(cams: Sequence[PinholeCamera], pixels: Array) -> bool:
+    """Detect coincident cameras or collinear viewing rays before DLT."""
+    n = len(cams)
+    if n < MIN_VIEWS:
+        return True
+    c0 = cams[0].position_m
+    if all(float(np.linalg.norm(c.position_m - c0)) < 1e-5 for c in cams[1:]):
+        return True
+    if n == 2:
+        c1, c2 = cams[0], cams[1]
+        b = c2.position_m - c1.position_m
+        dist = float(np.linalg.norm(b))
+        if dist < 1e-5:
+            return True
+        b_hat = b / dist
+        px = np.asarray(pixels, dtype=float).reshape(-1, 2)
+        rays = []
+        for cam, (u, v) in zip(cams, px, strict=True):
+            fx, fy = cam.matrix[0, 0], cam.matrix[1, 1]
+            cx, cy = cam.matrix[0, 2], cam.matrix[1, 2]
+            v_cam = np.array([(u - cx) / fx, (v - cy) / fy, 1.0])
+            r_world = cam.rotation_world_from_camera @ v_cam
+            r_norm = float(np.linalg.norm(r_world))
+            if r_norm < 1e-9:
+                return True
+            rays.append(r_world / r_norm)
+        cos_rays = abs(float(np.dot(rays[0], rays[1])))
+        if cos_rays > 1.0 - 1e-5:
+            return True
+        cos_b0 = abs(float(np.dot(rays[0], b_hat)))
+        cos_b1 = abs(float(np.dot(rays[1], b_hat)))
+        if cos_b0 > 1.0 - 1e-5 and cos_b1 > 1.0 - 1e-5:
+            return True
+    return False
+
+
 def triangulate(
     cams: Sequence[PinholeCamera],
     pixels: Array,
@@ -136,8 +172,18 @@ def triangulate(
 
     def solve(subset: list[int]) -> tuple[Array, Array]:
         sub = [cams[i] for i in subset]
-        pt = dlt(sub, px[subset], conf[subset])
-        return pt, reprojection_residuals(sub, pt, px[subset])
+        if _is_degenerate_geometry(sub, px[subset]):
+            return np.full(3, np.nan), np.full(len(subset), np.nan)
+        try:
+            pt = dlt(sub, px[subset], conf[subset])
+            return pt, reprojection_residuals(sub, pt, px[subset])
+        except (
+            PreconditionError,
+            ZeroDivisionError,
+            FloatingPointError,
+            np.linalg.LinAlgError,
+        ):
+            return np.full(3, np.nan), np.full(len(subset), np.nan)
 
     # A wrong view contaminates the joint solution, so its residual is not
     # reliably the largest: judge by leaving each view out in turn and keeping
@@ -159,8 +205,16 @@ def triangulate(
             )
             if worst < best_worst:
                 best_k, best_worst = k, worst
+        if best_k == -1 or not np.isfinite(best_worst):
+            break
         rejected.append(ids[usable[best_k]])
         usable = usable[:best_k] + usable[best_k + 1 :]
+
+    if not np.all(np.isfinite(point)) or not np.all(np.isfinite(res)):
+        rejected.extend([ids[i] for i in usable if ids[i] not in rejected])
+        usable = []
+        point = np.full(3, np.nan)
+
     contributing = tuple(ids[i] for i in usable) if len(usable) >= MIN_VIEWS else ()
     cov = (
         _covariance([cams[i] for i in usable], point, sigma_px)
