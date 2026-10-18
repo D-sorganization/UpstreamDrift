@@ -266,6 +266,7 @@ def test_load_matlab_3d_requires_path_type() -> None:
         load_matlab_3d_engine("not-a-path")  # type: ignore[arg-type]
 
 
+@pytest.mark.unit
 def test_load_matlab_3d_model_missing_raises_error(tmp_path: Path) -> None:
     """When the default .slx file does not exist the loader raises GolfModelingError (#12984)."""
     from src.engines.loaders import load_matlab_3d_engine
