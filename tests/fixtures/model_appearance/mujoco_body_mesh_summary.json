@@ -2,34 +2,34 @@
   "full_body_spec_anthro_driver": {
     "calcn_l": [
       {
-        "bbox_max": [0.034614, 0.021704, 0.022089],
-        "bbox_min": [-0.060035, -0.118951, -0.146851],
+        "bbox_max": [0.029946, 0.020645, 0.033367],
+        "bbox_min": [-0.071343, -0.136582, -0.14714],
         "label": "garment0",
         "material": "mat_shoe_white",
-        "n_vertices": 794
+        "n_vertices": 1842
       },
       {
-        "bbox_max": [0.031787, 0.020792, 0.021392],
-        "bbox_min": [-0.057208, -0.11804, -0.146155],
+        "bbox_max": [0.027939, 0.019298, 0.031342],
+        "bbox_min": [-0.068512, -0.127288, -0.137581],
         "label": "skin0",
         "material": "mat_skin_medium",
-        "n_vertices": 794
+        "n_vertices": 1842
       }
     ],
     "calcn_r": [
       {
-        "bbox_max": [0.034553, 0.021657, 0.148289],
-        "bbox_min": [-0.06026, -0.120017, -0.022062],
+        "bbox_max": [0.029938, 0.020691, 0.148373],
+        "bbox_min": [-0.071474, -0.137662, -0.033366],
         "label": "garment0",
         "material": "mat_shoe_white",
-        "n_vertices": 794
+        "n_vertices": 1842
       },
       {
-        "bbox_max": [0.031726, 0.020771, 0.147592],
-        "bbox_min": [-0.057433, -0.11913, -0.021365],
+        "bbox_max": [0.027931, 0.019314, 0.13867],
+        "bbox_min": [-0.068821, -0.128388, -0.031341],
         "label": "skin0",
         "material": "mat_skin_medium",
-        "n_vertices": 794
+        "n_vertices": 1842
       }
     ],
     "femur_l": [
@@ -295,34 +295,20 @@
     ],
     "talus_l": [
       {
-        "bbox_max": [0.022894, 0.022381, 0.032664],
-        "bbox_min": [-0.065476, -0.061477, -0.052493],
-        "label": "garment0",
-        "material": "mat_shoe_white",
-        "n_vertices": 794
-      },
-      {
-        "bbox_max": [0.021935, 0.021305, 0.030188],
-        "bbox_min": [-0.064518, -0.060401, -0.050016],
+        "bbox_max": [0.036212, 0.019288, 0.032694],
+        "bbox_min": [-0.03522, -0.059648, -0.039695],
         "label": "skin0",
         "material": "mat_skin_medium",
-        "n_vertices": 794
+        "n_vertices": 242
       }
     ],
     "talus_r": [
       {
-        "bbox_max": [0.023018, 0.022533, 0.05278],
-        "bbox_min": [-0.066102, -0.061616, -0.032878],
-        "label": "garment0",
-        "material": "mat_shoe_white",
-        "n_vertices": 794
-      },
-      {
-        "bbox_max": [0.022059, 0.021426, 0.050288],
-        "bbox_min": [-0.065144, -0.060508, -0.030386],
+        "bbox_max": [0.036212, 0.019288, 0.039694],
+        "bbox_min": [-0.03522, -0.059637, -0.032694],
         "label": "skin0",
         "material": "mat_skin_medium",
-        "n_vertices": 794
+        "n_vertices": 242
       }
     ],
     "tibia_l": [
@@ -345,68 +331,68 @@
     ],
     "toes_l": [
       {
-        "bbox_max": [0.03353, 0.014422, 0.013685],
-        "bbox_min": [-0.018706, -0.020422, -0.046278],
+        "bbox_max": [0.073968, 0.034219, 0.043551],
+        "bbox_min": [-0.037768, -0.02738, -0.071759],
         "label": "garment0",
         "material": "mat_shoe_white",
-        "n_vertices": 794
+        "n_vertices": 1842
       },
       {
-        "bbox_max": [0.032195, 0.013295, 0.013324],
-        "bbox_min": [-0.017371, -0.019295, -0.045917],
+        "bbox_max": [0.072797, 0.032218, 0.035262],
+        "bbox_min": [-0.027253, -0.019043, -0.07011],
         "label": "skin0",
         "material": "mat_skin_medium",
-        "n_vertices": 794
+        "n_vertices": 1842
       }
     ],
     "toes_r": [
       {
-        "bbox_max": [0.03394, 0.014564, 0.046674],
-        "bbox_min": [-0.01885, -0.020564, -0.013834],
+        "bbox_max": [0.072442, 0.034179, 0.070684],
+        "bbox_min": [-0.038016, -0.026332, -0.043684],
         "label": "garment0",
         "material": "mat_shoe_white",
-        "n_vertices": 794
+        "n_vertices": 1842
       },
       {
-        "bbox_max": [0.032595, 0.013426, 0.046307],
-        "bbox_min": [-0.017506, -0.019426, -0.013467],
+        "bbox_max": [0.071273, 0.032173, 0.069024],
+        "bbox_min": [-0.027412, -0.018344, -0.035282],
         "label": "skin0",
         "material": "mat_skin_medium",
-        "n_vertices": 794
+        "n_vertices": 1842
       }
     ]
   },
   "full_body_spec_anthro_iron7": {
     "calcn_l": [
       {
-        "bbox_max": [0.034614, 0.021704, 0.022089],
-        "bbox_min": [-0.060035, -0.118951, -0.146851],
+        "bbox_max": [0.029946, 0.020645, 0.033367],
+        "bbox_min": [-0.071343, -0.136582, -0.14714],
         "label": "garment0",
         "material": "mat_shoe_white",
-        "n_vertices": 794
+        "n_vertices": 1842
       },
       {
-        "bbox_max": [0.031787, 0.020792, 0.021392],
-        "bbox_min": [-0.057208, -0.11804, -0.146155],
+        "bbox_max": [0.027939, 0.019298, 0.031342],
+        "bbox_min": [-0.068512, -0.127288, -0.137581],
         "label": "skin0",
         "material": "mat_skin_medium",
-        "n_vertices": 794
+        "n_vertices": 1842
       }
     ],
     "calcn_r": [
       {
-        "bbox_max": [0.034553, 0.021657, 0.148289],
-        "bbox_min": [-0.06026, -0.120017, -0.022062],
+        "bbox_max": [0.029938, 0.020691, 0.148373],
+        "bbox_min": [-0.071474, -0.137662, -0.033366],
         "label": "garment0",
         "material": "mat_shoe_white",
-        "n_vertices": 794
+        "n_vertices": 1842
       },
       {
-        "bbox_max": [0.031726, 0.020771, 0.147592],
-        "bbox_min": [-0.057433, -0.11913, -0.021365],
+        "bbox_max": [0.027931, 0.019314, 0.13867],
+        "bbox_min": [-0.068821, -0.128388, -0.031341],
         "label": "skin0",
         "material": "mat_skin_medium",
-        "n_vertices": 794
+        "n_vertices": 1842
       }
     ],
     "femur_l": [
@@ -672,34 +658,20 @@
     ],
     "talus_l": [
       {
-        "bbox_max": [0.022894, 0.022381, 0.032664],
-        "bbox_min": [-0.065476, -0.061477, -0.052493],
-        "label": "garment0",
-        "material": "mat_shoe_white",
-        "n_vertices": 794
-      },
-      {
-        "bbox_max": [0.021935, 0.021305, 0.030188],
-        "bbox_min": [-0.064518, -0.060401, -0.050016],
+        "bbox_max": [0.036212, 0.019288, 0.032694],
+        "bbox_min": [-0.03522, -0.059648, -0.039695],
         "label": "skin0",
         "material": "mat_skin_medium",
-        "n_vertices": 794
+        "n_vertices": 242
       }
     ],
     "talus_r": [
       {
-        "bbox_max": [0.023018, 0.022533, 0.05278],
-        "bbox_min": [-0.066102, -0.061616, -0.032878],
-        "label": "garment0",
-        "material": "mat_shoe_white",
-        "n_vertices": 794
-      },
-      {
-        "bbox_max": [0.022059, 0.021426, 0.050288],
-        "bbox_min": [-0.065144, -0.060508, -0.030386],
+        "bbox_max": [0.036212, 0.019288, 0.039694],
+        "bbox_min": [-0.03522, -0.059637, -0.032694],
         "label": "skin0",
         "material": "mat_skin_medium",
-        "n_vertices": 794
+        "n_vertices": 242
       }
     ],
     "tibia_l": [
@@ -722,34 +694,34 @@
     ],
     "toes_l": [
       {
-        "bbox_max": [0.03353, 0.014422, 0.013685],
-        "bbox_min": [-0.018706, -0.020422, -0.046278],
+        "bbox_max": [0.073968, 0.034219, 0.043551],
+        "bbox_min": [-0.037768, -0.02738, -0.071759],
         "label": "garment0",
         "material": "mat_shoe_white",
-        "n_vertices": 794
+        "n_vertices": 1842
       },
       {
-        "bbox_max": [0.032195, 0.013295, 0.013324],
-        "bbox_min": [-0.017371, -0.019295, -0.045917],
+        "bbox_max": [0.072797, 0.032218, 0.035262],
+        "bbox_min": [-0.027253, -0.019043, -0.07011],
         "label": "skin0",
         "material": "mat_skin_medium",
-        "n_vertices": 794
+        "n_vertices": 1842
       }
     ],
     "toes_r": [
       {
-        "bbox_max": [0.03394, 0.014564, 0.046674],
-        "bbox_min": [-0.01885, -0.020564, -0.013834],
+        "bbox_max": [0.072442, 0.034179, 0.070684],
+        "bbox_min": [-0.038016, -0.026332, -0.043684],
         "label": "garment0",
         "material": "mat_shoe_white",
-        "n_vertices": 794
+        "n_vertices": 1842
       },
       {
-        "bbox_max": [0.032595, 0.013426, 0.046307],
-        "bbox_min": [-0.017506, -0.019426, -0.013467],
+        "bbox_max": [0.071273, 0.032173, 0.069024],
+        "bbox_min": [-0.027412, -0.018344, -0.035282],
         "label": "skin0",
         "material": "mat_skin_medium",
-        "n_vertices": 794
+        "n_vertices": 1842
       }
     ]
   },
