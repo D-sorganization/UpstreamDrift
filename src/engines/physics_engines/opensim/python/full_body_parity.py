@@ -44,6 +44,7 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
 
+from src.shared.python.motion_matching.full_body_schema import require_full_body_schema
 from src.engines.physics_engines.drake.python.full_body_model import (
     solve_weld_acceleration,
 )
@@ -100,8 +101,7 @@ class OpenSimFullBodyParityAdapter:
 
     def __init__(self, spec_bytes: bytes) -> None:
         spec = json.loads(spec_bytes)
-        if spec.get("schema_version") != FULL_BODY_SCHEMA_VERSION:
-            raise ValueError("Unsupported full-body schema: expected full-body-v1")
+        require_full_body_schema(spec, consumer="OpenSim parity adapter")
         self.specification = spec
         self.coordinate_order: tuple[str, ...] = tuple(spec["coordinate_order"])
         self.nv = len(self.coordinate_order)
