@@ -364,6 +364,77 @@ def test_trace_without_declared_wrench_point_gives_no_fabricated_wrench() -> Non
         path.unlink(missing_ok=True)
 
 
+def test_trace_with_numeric_array_wrench_point_loads_forces() -> None:
+    """Numeric array attributes in HDF5 metadata load correctly, including [0, 0, 0]."""
+    import h5py
+
+    with tempfile.NamedTemporaryFile(suffix=".h5", delete=False) as tmp:
+        path = Path(tmp.name)
+
+    try:
+        # Case 1: non-zero numpy array
+        with h5py.File(path, "w") as f:
+            f.attrs["schema_version"] = "2.0.0"
+            f.attrs["meta_wrench_point"] = np.array([0.0, 0.0, 0.9])
+            f.create_dataset("t", data=np.array([0.0, 0.01]))
+            f.create_dataset("wrench", data=np.ones((2, 6)))
+        loaded = load_trace_forces(path)
+        assert loaded is not None
+        assert len(loaded.frames) == 2
+        assert loaded.frames[0].wrenches[0].point_m == (0.0, 0.0, 0.9)
+
+        # Case 2: zero numpy array [0., 0., 0.] (must not be treated as falsey)
+        with h5py.File(path, "w") as f:
+            f.attrs["schema_version"] = "2.0.0"
+            f.attrs["meta_wrench_point"] = np.array([0.0, 0.0, 0.0])
+            f.create_dataset("t", data=np.array([0.0, 0.01]))
+            f.create_dataset("wrench", data=np.ones((2, 6)))
+        loaded = load_trace_forces(path)
+        assert loaded is not None
+        assert len(loaded.frames) == 2
+        assert loaded.frames[0].wrenches[0].point_m == (0.0, 0.0, 0.0)
+
+        # Case 3: fallback attribute meta_root_point as numeric array
+        with h5py.File(path, "w") as f:
+            f.attrs["schema_version"] = "2.0.0"
+            f.attrs["meta_root_point"] = np.array([1.0, 2.0, 3.0])
+            f.create_dataset("t", data=np.array([0.0, 0.01]))
+            f.create_dataset("wrench", data=np.ones((2, 6)))
+        loaded = load_trace_forces(path)
+        assert loaded is not None
+        assert loaded.frames[0].wrenches[0].point_m == (1.0, 2.0, 3.0)
+    finally:
+        path.unlink(missing_ok=True)
+
+
+def test_unparseable_point_logs_warning_when_wrench_present(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """When a trace has a wrench dataset but point attribute is unparseable, log a warning."""
+    import logging
+    import h5py
+
+    with tempfile.NamedTemporaryFile(suffix=".h5", delete=False) as tmp:
+        path = Path(tmp.name)
+
+    try:
+        with h5py.File(path, "w") as f:
+            f.attrs["schema_version"] = "2.0.0"
+            f.attrs["meta_wrench_point"] = "invalid_point_string"
+            f.create_dataset("t", data=np.array([0.0, 0.01]))
+            f.create_dataset("wrench", data=np.ones((2, 6)))
+
+        with caplog.at_level(logging.WARNING):
+            loaded = load_trace_forces(path)
+        assert loaded is None
+        assert any(
+            "wrench" in rec.message.lower() or "point" in rec.message.lower()
+            for rec in caplog.records
+        )
+    finally:
+        path.unlink(missing_ok=True)
+
+
 def test_series_to_viewport_payload_wrench() -> None:
     """series_to_viewport_payload_wrench produces (T, 6) sum of contact and external wrenches
 

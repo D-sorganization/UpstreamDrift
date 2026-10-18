@@ -34,7 +34,7 @@ MINIMAL = {"schema_version": "appearance-v1"}
 
 def test_minimal_document_parses_with_defaults() -> None:
     doc = document_from_dict(MINIMAL)
-    assert doc.skin_tone == "skin_medium"
+    assert doc.skin_tone == "skin_2"
     assert doc.clothing in CLOTHING and doc.club_finish in MATERIALS
     assert doc.ball == BallSettings(True, None, "address_geometry")
 

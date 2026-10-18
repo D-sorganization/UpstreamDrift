@@ -108,7 +108,7 @@ describe('appearancePalette', () => {
       ground_material: 'turf',
     });
 
-    expect(palette.head).toBe('#cc9966');
-    expect(palette.forearm).toBe('#cc9966');
+    expect(palette.head).toBe('#edc2a8');
+    expect(palette.forearm).toBe('#edc2a8');
   });
 });
