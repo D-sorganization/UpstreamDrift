@@ -2574,6 +2574,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13002 · Align Multi-View Observations by Physical Time Across Different Frame Rates and Report Dropped Frames
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13002
+- **Branch:** merged via #13243
+- **PR:** #13243
+- **Paths:** see #13243
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`412e4fbf`; collated from changes/13002-observations-from-views-fps.md)
+- **Summary:** Align multi-view observations by physical time across different frame rates and report dropped frames
+- **Next step:** Shipped in PR #13243.
+
 ### DL-#13163 · HRG-B1: Default Golfer Is Light Skin With Mid Brown Hair From One Serialized Appearance-Defaults Contract (Python + Generated TS), Skin_1..8 and Hair Palettes
 
 - **State:** shipped

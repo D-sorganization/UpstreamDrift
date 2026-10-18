@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-18 | #13243 | Align multi-view observations by physical time across different frame rates and report dropped frames |
 | 2026-10-18 | #13182 | HRG-B1: default golfer is light skin with mid brown hair from one serialized appearance-defaults contract (Python + generated TS), skin_1..8 and hair palettes |
 | 2026-10-18 | #13232 | Export NaN markers with negative residual, homogeneous coordinates, and axis convention in canonical_c3d_exporter |
 | 2026-10-18 | #13237 | Map reconstruct and legacy joint names in L3 paired 3D comparisons, fail closed on missing or swapped bilateral joints, compute kinematic sequence order and timing error from angular velocity peaks with explicit unmeasured None, and isolate depth axis according to camera pose and view. |
