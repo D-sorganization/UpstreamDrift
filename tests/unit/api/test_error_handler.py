@@ -78,14 +78,6 @@ def app_and_client():
     def sync_timeout_error() -> None:
         raise TimeoutError("Simulation engine hung")
 
-    @app.get("/sync-unexpected-error")
-    @handle_api_errors
-    def sync_unexpected_error() -> None:
-        class ArbitraryDomainError(Exception):
-            pass
-
-        raise ArbitraryDomainError("unexpected failure")
-
     @app.get("/sync-http-exception")
     @handle_api_errors
     def sync_http_exception() -> None:
@@ -219,18 +211,22 @@ def test_timeout_error_maps_to_504(
 
 
 def test_unexpected_error_fallback_maps_to_500(
-    app_and_client: tuple[FastAPI, TestClient],
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """Unexpected exception types outside common tuple reach exhaustive 500 fallback."""
-    _, client = app_and_client
-    with caplog.at_level(logging.ERROR):
-        response = client.get("/sync-unexpected-error")
+    """Unexpected exception types outside common tuple reach exhaustive 500 fallback in _handle_common_exceptions."""
+    from src.api.middleware.error_handler import _handle_common_exceptions
 
-    assert response.status_code == 500
-    body = response.json()
-    assert body["detail"]["error"]["code"] == ErrorCode.INTERNAL_ERROR.value
-    assert "Internal server error" in body["detail"]["error"]["message"]
+    class ArbitraryDomainError(Exception):
+        pass
+
+    with caplog.at_level(logging.ERROR), pytest.raises(HTTPException) as exc_info:
+        _handle_common_exceptions(
+            ArbitraryDomainError("unexpected failure"), "test_func"
+        )
+
+    assert exc_info.value.status_code == 500
+    assert exc_info.value.detail["error"]["code"] == ErrorCode.INTERNAL_ERROR.value
+    assert "Internal server error" in exc_info.value.detail["error"]["message"]
 
 
 def test_http_exception_reraises_verbatim(

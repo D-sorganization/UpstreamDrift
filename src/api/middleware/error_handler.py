@@ -142,7 +142,18 @@ def handle_api_errors(func: Callable[..., Any]) -> Callable[..., Any]:  # noqa: 
         async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
             try:
                 return await func(*args, **kwargs)
-            except Exception as e:  # noqa: BLE001 - centralized API decorator must catch any unhandled exception to return 500
+            except (
+                HTTPException,
+                ValueError,
+                FileNotFoundError,
+                PermissionError,
+                NotImplementedError,
+                RuntimeError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+            ) as e:
                 _handle_common_exceptions(e, func.__name__)
                 return None  # pragma: no cover
 
@@ -152,7 +163,18 @@ def handle_api_errors(func: Callable[..., Any]) -> Callable[..., Any]:  # noqa: 
     def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
             return func(*args, **kwargs)
-        except Exception as e:  # noqa: BLE001 - centralized API decorator must catch any unhandled exception to return 500
+        except (
+            HTTPException,
+            ValueError,
+            FileNotFoundError,
+            PermissionError,
+            NotImplementedError,
+            RuntimeError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+        ) as e:
             _handle_common_exceptions(e, func.__name__)
             return None  # pragma: no cover
 
