@@ -40,6 +40,10 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.core.handedness import (
+    DEFAULT_HANDEDNESS,
+    validate_handedness,
+)
 from src.shared.python.motion_matching.anthropometry import (
     DE_LEVA_MALE,
     de_leva_table_sha256,
@@ -238,8 +242,14 @@ def build_upper_body(
     grip_roll_deg: float = GRIP_ROLL_DEG,
     grip_rotation_deg: Mapping[str, Sequence[float]] | None = None,
     scale_hand_mass: bool = False,
+    handedness: str = DEFAULT_HANDEDNESS,
 ) -> dict[str, Any]:
     """Return the anthropometric upper-body document for a subject.
+
+    ``handedness`` (``"right"`` or ``"left"``, validated) is written to
+    ``subject.handedness`` only when it is not the default, so a right-handed
+    build stays byte-identical to every spec committed before HRG-GR0 (#13201);
+    read it back with ``core.handedness.subject_handedness``.
 
     ``grip_rotation_deg`` maps ``"L"`` and ``"R"`` to the constant rotation
     of each hand on its wrist (default ``GRIP_ROTATION_DEG``).
@@ -266,6 +276,7 @@ def build_upper_body(
     same body and joint names, total mass within 1 % of the de Leva sum for
     the bodies built here plus the copied club and hands.
     """
+    handedness = validate_handedness(handedness)
     if isinstance(native, (int, float)):
         stature_m = float(native)
         if mass_kg_pos is not None:
@@ -577,6 +588,7 @@ def build_upper_body(
             "grip_rotation_deg": {k: list(v) for k, v in grip_rotation.items()},
             "source": "de Leva 1996 male table",
             "de_leva_table_sha256": de_leva_table_sha256(),
+            **({} if handedness == DEFAULT_HANDEDNESS else {"handedness": handedness}),
         },
         "coordinate_ranges_deg": {k: list(v) for k, v in COORDINATE_RANGES_DEG.items()},
         "address_seed_deg": dict(ADDRESS_SEED_DEG),

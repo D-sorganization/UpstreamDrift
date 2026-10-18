@@ -6,7 +6,8 @@ right-handed golfer, the right hand of a left-handed one (HRG-G1, #13186).
 
 from __future__ import annotations
 
-from typing import Literal
+from collections.abc import Mapping
+from typing import Any, Literal
 
 Handedness = Literal["right", "left"]
 Side = Literal["L", "R"]
@@ -31,3 +32,15 @@ def lead_side(handedness: object) -> Side:
 def trail_side(handedness: object) -> Side:
     """Side of the trail hand: ``"R"`` for a right-handed golfer."""
     return "R" if lead_side(handedness) == "L" else "L"
+
+
+def subject_handedness(spec: Mapping[str, Any]) -> Handedness:
+    """Handedness declared by a spec's ``subject`` block, the one accessor.
+
+    A spec without ``subject.handedness`` (every spec built before HRG-GR0,
+    #13201) resolves to :data:`DEFAULT_HANDEDNESS`; this is a declared default,
+    not an inference. ``ValueError`` for a declared value that is not
+    ``"right"`` or ``"left"``.
+    """
+    subject = spec.get("subject") or {}
+    return validate_handedness(subject.get("handedness", DEFAULT_HANDEDNESS))

@@ -6008,6 +6008,33 @@ constant. Limitation: $\delta$ and the V angles are not yet coupled; a
 calibration that turned the hand by $\psi_L$ would change the committed
 address frames and needs an OpenSim host to rerun.
 
+\subsection{Subject Handedness and Lead-Trail Sides}
+Definition (HRG-GR0, \#13201). \texttt{subject.handedness} is
+\texttt{"right"} or \texttt{"left"}: the hand that is \emph{lead} (nearer the
+target) is the anatomical left hand of a right-handed golfer and the right
+hand of a left-handed one. \texttt{core.handedness} is the single resolver:
+\texttt{lead\_side} gives \texttt{"L"} for right and \texttt{"R"} for left,
+\texttt{trail\_side} the other, and any other value raises \texttt{ValueError}.
+A spec without the field resolves to \texttt{"right"} through
+\texttt{subject\_handedness}; this is a declared default, not an inference from
+data. The builder writes the key only for a non-default value, so every spec
+and receipt committed before this change is byte-identical (a test hashes a
+committed spec across the accessor); the receipt schema carries an optional
+\texttt{handedness} that is \texttt{null} on old receipts.
+
+Sign conventions. \texttt{GripPose.landmarks} uses the golfer body frame
+$x$ anterior, $y$ toward the golfer's anatomical left, $z$ up. The sagittal
+plane is $x$--$z$, so the lateral axis is $y$ and the sagittal reflection is
+$P=\mathrm{diag}(1,-1,1)$. The target lies toward $+y$ for a right-hander and
+$-y$ for a left-hander; the toe axis is $+x$; the grip axis is idealised as
+vertical, down $-z$ from the butt. Every distance and angle of the grip is in
+lead/trail terms and is identical for both handednesses; only the target
+direction, hence the azimuth and palm-normal vectors, changes sign in $y$.
+Hence $P\,\ell_{\mathrm{right}}=\ell_{\mathrm{left}}$ for each landmark
+$\ell$, tested to $10^{-9}$~m. Limitation: the OpenSim address calibration
+still maps lead and trail to fixed sides (\texttt{SIDE\_HANDS}); it is a
+right-handed-only consumer until a follow-up changes it.
+
 \subsection{Reconciling the Hand Spacing}
 \texttt{club\_geometry.py} previously placed the hands 0.035 m apart
 ($-0.025$ and $-0.06$ m) while the native spec places them 0.0762 m apart.
