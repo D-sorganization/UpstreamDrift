@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import math
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-import math
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -13,6 +14,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from src.deployment.realtime import ControlCommand, RobotConfig, RobotState
+    from src.deployment.safety.collision import Obstacle
 
 
 def _validate_joint_array(
@@ -101,11 +103,95 @@ class SafetyLimits:
     max_cartesian_velocity: float = 0.25  # m/s for collaborative mode
     max_cartesian_force: float = 150.0
     workspace_bounds: NDArray[np.floating] | None = None
-    forbidden_zones: list[NDArray[np.floating]] = field(default_factory=list)
+    forbidden_zones: list[Any] = field(default_factory=list)
     max_contact_force: float = 150.0  # ISO 10218-1
     max_pressure: float = 110.0  # N/cm² ISO/TS 15066
     joint_limits_lower: NDArray[np.floating] | None = None
     joint_limits_upper: NDArray[np.floating] | None = None
+
+    def __post_init__(self) -> None:
+        """Validate safety limits parameters."""
+        if self.max_joint_velocity is None:
+            raise ValueError("max_joint_velocity must be provided")
+        if self.max_joint_torque is None:
+            raise ValueError("max_joint_torque must be provided")
+
+        if not np.all(np.isfinite(self.max_joint_velocity)) or np.any(
+            self.max_joint_velocity <= 0
+        ):
+            raise ValueError("max_joint_velocity must be strictly positive and finite")
+        if not np.all(np.isfinite(self.max_joint_torque)) or np.any(
+            self.max_joint_torque <= 0
+        ):
+            raise ValueError("max_joint_torque must be strictly positive and finite")
+
+        if self.max_cartesian_velocity is not None:
+            if (
+                not math.isfinite(self.max_cartesian_velocity)
+                or self.max_cartesian_velocity <= 0
+            ):
+                raise ValueError(
+                    "max_cartesian_velocity must be a positive finite float"
+                )
+        if self.max_cartesian_force is not None:
+            if (
+                not math.isfinite(self.max_cartesian_force)
+                or self.max_cartesian_force <= 0
+            ):
+                raise ValueError("max_cartesian_force must be a positive finite float")
+        if self.max_contact_force is not None:
+            if not math.isfinite(self.max_contact_force) or self.max_contact_force <= 0:
+                raise ValueError("max_contact_force must be a positive finite float")
+        if self.max_pressure is not None:
+            if not math.isfinite(self.max_pressure) or self.max_pressure <= 0:
+                raise ValueError("max_pressure must be a positive finite float")
+
+        if self.workspace_bounds is not None:
+            wb = np.asarray(self.workspace_bounds, dtype=float)
+            if wb.shape == (6,):
+                pass
+            elif wb.shape == (3, 2):
+                wb = wb.flatten()
+            else:
+                raise ValueError(
+                    "workspace_bounds must have shape (6,) [x_min, x_max, y_min, y_max, z_min, z_max] or (3, 2)"
+                )
+            if not np.all(np.isfinite(wb)):
+                raise ValueError("workspace_bounds must contain only finite values")
+            if wb[0] >= wb[1] or wb[2] >= wb[3] or wb[4] >= wb[5]:
+                raise ValueError(
+                    f"workspace_bounds min must be strictly less than max: "
+                    f"x=[{wb[0]}, {wb[1]}], y=[{wb[2]}, {wb[3]}], z=[{wb[4]}, {wb[5]}]"
+                )
+            self.workspace_bounds = wb
+
+        if self.forbidden_zones:
+            from src.deployment.safety.collision import Obstacle
+
+            for i, zone in enumerate(self.forbidden_zones):
+                if isinstance(zone, Obstacle):
+                    continue
+                z = np.asarray(zone, dtype=float)
+                if z.shape == (6,):
+                    pass
+                elif z.shape == (3, 2):
+                    z = z.flatten()
+                else:
+                    raise ValueError(
+                        f"forbidden_zones[{i}] must have shape (6,) or (3, 2) or be an Obstacle"
+                    )
+                if not np.all(np.isfinite(z)):
+                    raise ValueError(
+                        f"forbidden_zones[{i}] must contain only finite values"
+                    )
+                if z[0] >= z[1] or z[2] >= z[3] or z[4] >= z[5]:
+                    raise ValueError(
+                        f"forbidden_zones[{i}] min must be strictly less than max"
+                    )
+
+        if self.joint_limits_lower is not None and self.joint_limits_upper is not None:
+            if np.any(self.joint_limits_lower > self.joint_limits_upper):
+                raise ValueError("joint_limits_lower must be <= joint_limits_upper")
 
     @classmethod
     def from_config(cls, robot_config: RobotConfig) -> SafetyLimits:
@@ -161,23 +247,101 @@ class SafetyMonitor:
         self,
         robot_config: RobotConfig,
         limits: SafetyLimits | None = None,
+        fk_callback: Callable[[NDArray[np.floating]], Any] | None = None,
+        fk_velocity_callback: Callable[
+            [NDArray[np.floating], NDArray[np.floating]], Any
+        ]
+        | None = None,
+        contact_surface_area_cm2: float | None = None,
     ) -> None:
         """Initialize safety monitor.
 
         Args:
             robot_config: Robot configuration.
             limits: Safety limits (derived from config if None).
+            fk_callback: Optional forward kinematics callback mapping joint positions
+                to 3D point(s) or dictionary of link positions.
+            fk_velocity_callback: Optional callback mapping (positions, velocities)
+                to 3D Cartesian linear velocity vector.
+            contact_surface_area_cm2: Optional contact surface area for pressure checks (cm²).
         """
         if not (robot_config is not None):
             raise ValueError("robot_config must be provided")
         self.config = robot_config
         self.limits = limits or SafetyLimits.from_config(robot_config)
+        self.fk_callback = fk_callback or getattr(robot_config, "fk_callback", None)
+        self.fk_velocity_callback = fk_velocity_callback or getattr(
+            robot_config, "fk_velocity_callback", None
+        )
+        self._contact_surface_area_cm2 = contact_surface_area_cm2 or getattr(
+            robot_config, "contact_surface_area_cm2", None
+        )
         self._speed_override = 1.0
         self._human_nearby = False
         self._emergency_stop = False
 
+        # Validate that configured limits can be enforced
+        if self.limits.workspace_bounds is not None and self.fk_callback is None:
+            raise ValueError(
+                "workspace_bounds limit is configured on SafetyLimits but no fk_callback is provided on RobotConfig or SafetyMonitor"
+            )
+        if self.limits.forbidden_zones and self.fk_callback is None:
+            raise ValueError(
+                "forbidden_zones limit is configured on SafetyLimits but no fk_callback is provided on RobotConfig or SafetyMonitor"
+            )
+
+        from src.deployment.safety.collision import Obstacle, ObstacleType
+
+        self._forbidden_obstacles: list[Obstacle] = []
+        for i, zone in enumerate(self.limits.forbidden_zones):
+            if isinstance(zone, Obstacle):
+                self._forbidden_obstacles.append(zone)
+            else:
+                z = np.asarray(zone, dtype=float)
+                if z.shape == (6,):
+                    center = np.array(
+                        [(z[0] + z[1]) / 2.0, (z[2] + z[3]) / 2.0, (z[4] + z[5]) / 2.0]
+                    )
+                    dims = np.array([z[1] - z[0], z[3] - z[2], z[5] - z[4]])
+                    self._forbidden_obstacles.append(
+                        Obstacle(
+                            name=f"zone_{i}",
+                            obstacle_type=ObstacleType.BOX,
+                            position=center,
+                            dimensions=dims,
+                            inflation=0.0,
+                        )
+                    )
+                elif z.shape == (3, 2):
+                    center = np.array(
+                        [
+                            (z[0, 0] + z[0, 1]) / 2.0,
+                            (z[1, 0] + z[1, 1]) / 2.0,
+                            (z[2, 0] + z[2, 1]) / 2.0,
+                        ]
+                    )
+                    dims = np.array(
+                        [
+                            z[0, 1] - z[0, 0],
+                            z[1, 1] - z[1, 0],
+                            z[2, 1] - z[2, 0],
+                        ]
+                    )
+                    self._forbidden_obstacles.append(
+                        Obstacle(
+                            name=f"zone_{i}",
+                            obstacle_type=ObstacleType.BOX,
+                            position=center,
+                            dimensions=dims,
+                            inflation=0.0,
+                        )
+                    )
+
     def _build_status(self, violations: list[str], warnings: list[str]) -> SafetyStatus:
-        if violations:
+        if self._emergency_stop:
+            level = SafetyStatusLevel.EMERGENCY
+            is_safe = False
+        elif violations:
             level = SafetyStatusLevel.ERROR
             is_safe = False
         elif warnings:
@@ -194,6 +358,56 @@ class SafetyMonitor:
             warnings=warnings,
             speed_override=self._speed_override,
         )
+
+    def _extract_points(self, result: Any) -> list[tuple[str, np.ndarray]]:
+        """Extract list of named 3D points from FK callback return value."""
+        points: list[tuple[str, np.ndarray]] = []
+        if isinstance(result, dict):
+            for k, v in result.items():
+                arr = np.asarray(v, dtype=float)
+                if arr.shape == (3,) and np.all(np.isfinite(arr)):
+                    points.append((str(k), arr))
+        elif isinstance(result, np.ndarray):
+            if (
+                result.ndim == 1
+                and result.shape == (3,)
+                and np.all(np.isfinite(result))
+            ):
+                points.append(("end_effector", result.astype(float)))
+            elif (
+                result.ndim == 2
+                and result.shape[1] == 3
+                and np.all(np.isfinite(result))
+            ):
+                for i, row in enumerate(result):
+                    points.append((f"link_{i}", row.astype(float)))
+        elif isinstance(result, (list, tuple)):
+            if len(result) == 3 and all(
+                isinstance(x, (int, float, np.floating)) for x in result
+            ):
+                arr = np.asarray(result, dtype=float)
+                if np.all(np.isfinite(arr)):
+                    points.append(("end_effector", arr))
+            else:
+                for i, item in enumerate(result):
+                    arr = np.asarray(item, dtype=float)
+                    if arr.shape == (3,) and np.all(np.isfinite(arr)):
+                        points.append((f"point_{i}", arr))
+        return points
+
+    def _compute_cartesian_velocity(
+        self, positions: np.ndarray, velocities: np.ndarray
+    ) -> np.ndarray | None:
+        """Compute Cartesian linear velocity vector from joint state."""
+        if self.fk_velocity_callback is not None:
+            try:
+                res = self.fk_velocity_callback(positions, velocities)
+                arr = np.asarray(res, dtype=float)
+                if arr.shape == (3,) and np.all(np.isfinite(arr)):
+                    return arr
+            except (ValueError, TypeError, RuntimeError, ArithmeticError):
+                pass
+        return None
 
     def check_state(self, state: RobotState) -> SafetyStatus:  # noqa: C901
         """Check if current state is safe.
@@ -271,6 +485,101 @@ class SafetyMonitor:
                     joints = list(np.where(near_lower)[0])
                     warnings.append(f"Approaching lower limit on joints {joints}")
 
+        # Check workspace bounds and forbidden zones via FK
+        if pos_valid and self.fk_callback is not None:
+            try:
+                fk_res = self.fk_callback(state.joint_positions)
+                points = self._extract_points(fk_res)
+                for name, pt in points:
+                    if self.limits.workspace_bounds is not None:
+                        wb = self.limits.workspace_bounds
+                        if (
+                            pt[0] < wb[0]
+                            or pt[0] > wb[1]
+                            or pt[1] < wb[2]
+                            or pt[1] > wb[3]
+                            or pt[2] < wb[4]
+                            or pt[2] > wb[5]
+                        ):
+                            violations.append(
+                                f"Workspace bounds exceeded for {name}: position "
+                                f"[{pt[0]:.3f}, {pt[1]:.3f}, {pt[2]:.3f}] outside bounds "
+                                f"[{wb[0]:.3f}, {wb[1]:.3f}, {wb[2]:.3f}, {wb[3]:.3f}, {wb[4]:.3f}, {wb[5]:.3f}]"
+                            )
+                    for obs in self._forbidden_obstacles:
+                        if obs.get_distance(pt) <= 0:
+                            violations.append(
+                                f"Forbidden zone violation for {name}: position "
+                                f"[{pt[0]:.3f}, {pt[1]:.3f}, {pt[2]:.3f}] inside forbidden zone '{obs.name}'"
+                            )
+            except (ValueError, TypeError, RuntimeError, ArithmeticError) as exc:
+                violations.append(f"FK computation error in check_state: {exc}")
+
+        # Check Cartesian velocity
+        if vel_valid and pos_valid:
+            cart_vel = self._compute_cartesian_velocity(
+                state.joint_positions, state.joint_velocities
+            )
+            if cart_vel is not None and self.limits.max_cartesian_velocity is not None:
+                cart_speed = float(np.linalg.norm(cart_vel[:3]))
+                if cart_speed > self.limits.max_cartesian_velocity:
+                    violations.append(
+                        f"Cartesian velocity {cart_speed:.3f} m/s exceeds limit {self.limits.max_cartesian_velocity:.3f} m/s"
+                    )
+
+        # Check contact force, Cartesian force, and pressure from F/T sensors
+        if state.ft_wrenches:
+            for sensor_name, wrench in state.ft_wrenches.items():
+                if wrench is None:
+                    continue
+                if not isinstance(wrench, np.ndarray):
+                    violations.append(
+                        f"Invalid type for ft_wrenches on sensor '{sensor_name}'"
+                    )
+                    continue
+                if not np.all(np.isfinite(wrench)):
+                    violations.append(
+                        f"Non-finite values in ft_wrenches on sensor '{sensor_name}'"
+                    )
+                    continue
+
+                if wrench.size >= 3:
+                    f_mag = float(np.linalg.norm(wrench[:3]))
+                    if (
+                        self.limits.max_contact_force is not None
+                        and f_mag > self.limits.max_contact_force
+                    ):
+                        violations.append(
+                            f"Contact force {f_mag:.1f} N exceeds limit {self.limits.max_contact_force:.1f} N on sensor '{sensor_name}'"
+                        )
+                    if (
+                        self.limits.max_cartesian_force is not None
+                        and f_mag > self.limits.max_cartesian_force
+                    ):
+                        violations.append(
+                            f"Cartesian force {f_mag:.1f} N exceeds limit {self.limits.max_cartesian_force:.1f} N on sensor '{sensor_name}'"
+                        )
+                    area = self._contact_surface_area_cm2
+                    if (
+                        area is not None
+                        and area > 0
+                        and self.limits.max_pressure is not None
+                    ):
+                        pressure = f_mag / area
+                        if pressure > self.limits.max_pressure:
+                            violations.append(
+                                f"Contact pressure {pressure:.1f} N/cm² exceeds limit {self.limits.max_pressure:.1f} N/cm² on sensor '{sensor_name}'"
+                            )
+                elif wrench.size == 1:
+                    p_val = float(wrench[0])
+                    if (
+                        self.limits.max_pressure is not None
+                        and p_val > self.limits.max_pressure
+                    ):
+                        violations.append(
+                            f"Contact pressure {p_val:.1f} N/cm² exceeds limit {self.limits.max_pressure:.1f} N/cm² on sensor '{sensor_name}'"
+                        )
+
         # Emergency stop check
         if self._emergency_stop:
             violations.append("Emergency stop active")
@@ -340,6 +649,56 @@ class SafetyMonitor:
                 if np.any(upper_violation):
                     joints = list(np.where(upper_violation)[0])
                     violations.append(f"Position target above limit on joints {joints}")
+
+        # Check workspace bounds and forbidden zones for command position targets
+        if (
+            pos_valid
+            and command.position_targets is not None
+            and self.fk_callback is not None
+        ):
+            try:
+                fk_res = self.fk_callback(command.position_targets)
+                points = self._extract_points(fk_res)
+                for name, pt in points:
+                    if self.limits.workspace_bounds is not None:
+                        wb = self.limits.workspace_bounds
+                        if (
+                            pt[0] < wb[0]
+                            or pt[0] > wb[1]
+                            or pt[1] < wb[2]
+                            or pt[1] > wb[3]
+                            or pt[2] < wb[4]
+                            or pt[2] > wb[5]
+                        ):
+                            violations.append(
+                                f"Command target for {name} outside workspace bounds: position "
+                                f"[{pt[0]:.3f}, {pt[1]:.3f}, {pt[2]:.3f}]"
+                            )
+                    for obs in self._forbidden_obstacles:
+                        if obs.get_distance(pt) <= 0:
+                            violations.append(
+                                f"Command target for {name} inside forbidden zone '{obs.name}': position "
+                                f"[{pt[0]:.3f}, {pt[1]:.3f}, {pt[2]:.3f}]"
+                            )
+            except (ValueError, TypeError, RuntimeError, ArithmeticError) as exc:
+                violations.append(f"FK computation error in check_command: {exc}")
+
+        # Check command Cartesian velocity
+        if vel_valid and command.velocity_targets is not None:
+            ref_pos = (
+                command.position_targets
+                if command.position_targets is not None
+                else np.zeros(n_joints)
+            )
+            cart_vel = self._compute_cartesian_velocity(
+                ref_pos, command.velocity_targets
+            )
+            if cart_vel is not None and self.limits.max_cartesian_velocity is not None:
+                cart_speed = float(np.linalg.norm(cart_vel[:3]))
+                if cart_speed > self.limits.max_cartesian_velocity:
+                    violations.append(
+                        f"Command Cartesian velocity {cart_speed:.3f} m/s exceeds limit {self.limits.max_cartesian_velocity:.3f} m/s"
+                    )
 
         if self._emergency_stop:
             violations.append("Emergency stop active")
@@ -487,7 +846,12 @@ class SafetyMonitor:
                 safe_command.torque_commands *= self._speed_override
 
         has_invalid = self._check_invalid_command_or_state(state, desired)
-        if self._emergency_stop or has_invalid:
+        cmd_status = self.check_command(desired)
+        has_zone_or_ws_violation = any(
+            "workspace bounds" in v.lower() or "forbidden zone" in v.lower()
+            for v in cmd_status.violations
+        )
+        if self._emergency_stop or has_invalid or has_zone_or_ws_violation:
             self._apply_fallback_or_estop(safe_command, state)
 
         self._clip_command_limits(safe_command)
