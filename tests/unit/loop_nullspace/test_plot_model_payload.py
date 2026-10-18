@@ -8,9 +8,14 @@ import pytest
 
 pytest.importorskip("highspy")
 
+from src.shared.python.loop_nullspace.output_policy_integration import (  # noqa: E402
+    DisplayAction,
+    DisplayDecision,
+)
 from src.shared.python.loop_nullspace.plot_model import (  # noqa: E402
     PLOT_MODEL_SCHEMA_VERSION,
     NSXPlotModel,
+    decision_key,
 )
 from src.shared.python.loop_nullspace.plot_model_decisions import (  # noqa: E402
     plot_model_payload,
@@ -50,3 +55,28 @@ def test_malformed_report_is_a_value_error() -> None:
         plot_model_payload(report)
     with pytest.raises(TypeError):
         plot_model_payload([])  # type: ignore[arg-type]
+
+
+def _override(action: DisplayAction) -> dict[str, DisplayDecision]:
+    return {
+        decision_key("envelopes", "tau_4"): DisplayDecision(
+            "research_view", action, "fixture override"
+        )
+    }
+
+
+def test_override_may_only_tighten_to_withhold() -> None:
+    with pytest.raises(ValueError, match="only withhold"):
+        plot_model_payload(
+            fixture_report(), decision_overrides=_override(DisplayAction.SHOW_VALUE)
+        )
+
+
+def test_override_of_an_unknown_key_is_rejected() -> None:
+    unknown = {
+        decision_key("envelopes", "tau_99"): DisplayDecision(
+            "research_view", DisplayAction.WITHHOLD, "fixture override"
+        )
+    }
+    with pytest.raises(ValueError, match="unknown decision key"):
+        plot_model_payload(fixture_report(), decision_overrides=unknown)
