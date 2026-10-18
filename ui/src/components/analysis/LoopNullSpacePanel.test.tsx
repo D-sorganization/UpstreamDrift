@@ -10,6 +10,9 @@ import type { LoopNullspaceJobStatusV1, NSXPlotModel } from '@/api/loopNullSpace
 
 vi.mock('@/api/fetch', () => ({ apiFetch: vi.fn() }));
 
+// Rendering the full golden model is heavy on a loaded machine.
+vi.setConfig({ testTimeout: 20_000 });
+
 // The one cross-UI fixture, read in place (never copied): NSX-42/43/44.
 const GOLDEN = resolve(
   __dirname,
