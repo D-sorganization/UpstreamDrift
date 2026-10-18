@@ -43,7 +43,9 @@ describe('signed axial force colors', () => {
     }
   });
   it('defaults legacy settings to the opaque replace look and validates the new fields', () => {
-    const { opacity: _o, blend_mode: _b, ...legacy } = defaultForceColorScale;
+    const legacy: Record<string, unknown> = { ...defaultForceColorScale };
+    delete legacy.opacity;
+    delete legacy.blend_mode;
     expect(validateForceColorScale(legacy)).toEqual(defaultForceColorScale);
     for (const edit of [{ opacity: -0.1 }, { opacity: 1.1 }, { opacity: NaN }, { blend_mode: 'multiply' }]) {
       expect(() => validateForceColorScale({ ...defaultForceColorScale, ...edit } as never)).toThrow();

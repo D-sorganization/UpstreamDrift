@@ -28,81 +28,8 @@ from src.tools.native_viewer_export.runner import ExportJob, run_export
 logger = logging.getLogger(__name__)
 
 
-def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(
-        prog="python -m src.tools.native_viewer_export",
-        description=(
-            "Render a same-input swing in each engine's native viewer (Drake MeshCat, "
-            "Pinocchio MeshCat, OpenSim simbody under xvfb, MyoSuite arena, MuJoCo Renderer) as mp4 "
-            "clips: one per camera view plus a labelled 2x2."
-        ),
-    )
-    p.add_argument("--bundle", type=Path, required=True, help="same-input bundle .npz")
-    p.add_argument("--out", type=Path, required=True, help="output directory")
-    p.add_argument("--swing", required=True, help="swing name used in file names")
-    p.add_argument("--club", default="Driver", help="club label for the HUD")
-    p.add_argument(
-        "--engines", default=",".join(ENGINES), help="comma-separated engines"
-    )
-    for engine in ENGINES:
-        p.add_argument(
-            f"--receipt-{engine}",
-            type=Path,
-            help=f"{engine} same-input receipt .json (sibling .npz holds q)",
-        )
-    p.add_argument(
-        "--views", default=",".join(VIEW_ORDER), help="comma-separated views"
-    )
-    p.add_argument(
-        "--stride",
-        type=int,
-        default=None,
-        help="DEPRECATED alias: render every Nth state (use --speeds and --fps)",
-    )
-    p.add_argument("--fps", type=int, default=60, help="video frame rate")
-    p.add_argument(
-        "--speeds",
-        default=",".join(f"{v:g}" for v in DEFAULT_SPEEDS),
-        help="comma-separated playback speeds, each in (0, 4]; one clip set per "
-        "speed with _1x / _0p5x suffixes (default 1,0.5,0.25: full, half, quarter)",
-    )
-    p.add_argument(
-        "--impact-window",
-        type=float,
-        default=None,
-        metavar="SECONDS",
-        help="also write a clip of this many swing seconds centred on impact "
-        "at 0.1x speed (suffix _impact_0p1x)",
-    )
-    p.add_argument(
-        "--impact-speed",
-        type=float,
-        default=None,
-        help="playback speed of the --impact-window clip (default 0.1)",
-    )
-    p.add_argument(
-        "--no-hud",
-        action="store_true",
-        help="clean frames: no view label, HUD or legend text",
-    )
-    p.add_argument(
-        "--impact-time",
-        type=float,
-        default=None,
-        metavar="SECONDS",
-        help="impact time in the swing; default: bundle provenance impact_time_s, "
-        "else the last sample",
-    )
-    p.add_argument(
-        "--preset",
-        choices=("hq", "preview"),
-        default="hq",
-        help="hq: 1280x720 tiles, libx264 yuv420p CRF 18 (default); "
-        "preview: 640x544, CRF 23",
-    )
-    p.add_argument(
-        "--size", default=None, help="tile size WIDTHxHEIGHT (overrides the preset)"
-    )
+def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
+    """Add the overlay and segment-shading options."""
     p.add_argument(
         "--no-overlay",
         action="store_true",
@@ -179,6 +106,84 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="N",
         help="compression saturation load (default: --shading-limit-n)",
     )
+
+
+def build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="python -m src.tools.native_viewer_export",
+        description=(
+            "Render a same-input swing in each engine's native viewer (Drake MeshCat, "
+            "Pinocchio MeshCat, OpenSim simbody under xvfb, MyoSuite arena, MuJoCo Renderer) as mp4 "
+            "clips: one per camera view plus a labelled 2x2."
+        ),
+    )
+    p.add_argument("--bundle", type=Path, required=True, help="same-input bundle .npz")
+    p.add_argument("--out", type=Path, required=True, help="output directory")
+    p.add_argument("--swing", required=True, help="swing name used in file names")
+    p.add_argument("--club", default="Driver", help="club label for the HUD")
+    p.add_argument(
+        "--engines", default=",".join(ENGINES), help="comma-separated engines"
+    )
+    for engine in ENGINES:
+        p.add_argument(
+            f"--receipt-{engine}",
+            type=Path,
+            help=f"{engine} same-input receipt .json (sibling .npz holds q)",
+        )
+    p.add_argument(
+        "--views", default=",".join(VIEW_ORDER), help="comma-separated views"
+    )
+    p.add_argument(
+        "--stride",
+        type=int,
+        default=None,
+        help="DEPRECATED alias: render every Nth state (use --speeds and --fps)",
+    )
+    p.add_argument("--fps", type=int, default=60, help="video frame rate")
+    p.add_argument(
+        "--speeds",
+        default=",".join(f"{v:g}" for v in DEFAULT_SPEEDS),
+        help="comma-separated playback speeds, each in (0, 4]; one clip set per "
+        "speed with _1x / _0p5x suffixes (default 1,0.5,0.25: full, half, quarter)",
+    )
+    p.add_argument(
+        "--impact-window",
+        type=float,
+        default=None,
+        metavar="SECONDS",
+        help="also write a clip of this many swing seconds centred on impact "
+        "at 0.1x speed (suffix _impact_0p1x)",
+    )
+    p.add_argument(
+        "--impact-speed",
+        type=float,
+        default=None,
+        help="playback speed of the --impact-window clip (default 0.1)",
+    )
+    p.add_argument(
+        "--no-hud",
+        action="store_true",
+        help="clean frames: no view label, HUD or legend text",
+    )
+    p.add_argument(
+        "--impact-time",
+        type=float,
+        default=None,
+        metavar="SECONDS",
+        help="impact time in the swing; default: bundle provenance impact_time_s, "
+        "else the last sample",
+    )
+    p.add_argument(
+        "--preset",
+        choices=("hq", "preview"),
+        default="hq",
+        help="hq: 1280x720 tiles, libx264 yuv420p CRF 18 (default); "
+        "preview: 640x544, CRF 23",
+    )
+    p.add_argument(
+        "--size", default=None, help="tile size WIDTHxHEIGHT (overrides the preset)"
+    )
+    _add_overlay_arguments(p)
     p.add_argument(
         "--grip",
         action="store_true",
