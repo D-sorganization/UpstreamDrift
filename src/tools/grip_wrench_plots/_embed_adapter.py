@@ -1,4 +1,4 @@
-"""Embeddable-tool adapter for the Grip Wrench Plots tool (GCV-10, #11716).
+"""Embeddable-tool adapter for the Grip Wrench Plots tool (GCV-10, #11716; tabs NSX-43, #12575).
 
 PyQt6 is imported lazily inside :meth:`create_main_widget` so headless CI can
 introspect the adapter.  ``cleanup`` is idempotent.
@@ -18,7 +18,7 @@ __all__ = ["GripWrenchPlotsEmbedAdapter"]
 
 
 class GripWrenchPlotsEmbedAdapter:
-    """Expose :class:`GripWrenchPlotWidget` through the embed contract."""
+    """Expose the tabbed :class:`GripWrenchTabsWidget` (grip view + NSX tabs) through the embed contract."""
 
     tool_id: str = "grip_wrench_plots"
 
@@ -29,15 +29,15 @@ class GripWrenchPlotsEmbedAdapter:
         return EmbedCapabilities(
             supports_embedded=True,
             prefers_dock=True,
-            min_size=(420, 560),
+            min_size=(640, 640),
             requires_separate_qapplication=False,
         )
 
     def create_main_widget(self, parent: Any) -> Any:
-        from .gui import GripWrenchPlotWidget
+        from .window import GripWrenchTabsWidget
 
         if self._widget is None:
-            self._widget = GripWrenchPlotWidget(parent)
+            self._widget = GripWrenchTabsWidget(parent)
         return self._widget
 
     def cleanup(self) -> None:
