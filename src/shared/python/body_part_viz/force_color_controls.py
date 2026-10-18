@@ -185,17 +185,17 @@ def install_force_color_action(
         raise TypeError("menu and callable targets are required")
     if hub is not None and not isinstance(hub, ForceColorHub):
         raise TypeError("hub must be ForceColorHub or None")
-    hub = hub or ForceColorHub(parent=menu)
+    active_hub: ForceColorHub = hub if hub is not None else ForceColorHub(parent=menu)
     action = QAction("Segment Force Colors…", menu)
     action.setShortcut("Ctrl+Shift+F")
-    action.force_color_hub = hub  # type: ignore[attr-defined]
+    action.force_color_hub = active_hub  # type: ignore[attr-defined]
     dialog: QDialog | None = None
 
     def apply(scale: ForceColorScale) -> None:
         for target in targets():
             target.set_axial_color_scale(scale)
 
-    hub.scale_changed.connect(apply)
+    active_hub.scale_changed.connect(apply)
 
     def show() -> None:
         nonlocal dialog
@@ -204,9 +204,9 @@ def install_force_color_action(
             dialog.setObjectName("segment_force_colors_dialog")
             dialog.setWindowTitle("Segment Force Colors")
             layout = QVBoxLayout(dialog)
-            controls = ForceColorControls(dialog, scale=hub.scale)
-            controls.scale_changed.connect(hub.set_scale)
-            hub.scale_changed.connect(controls.set_scale)
+            controls = ForceColorControls(dialog, scale=active_hub.scale)
+            controls.scale_changed.connect(active_hub.set_scale)
+            active_hub.scale_changed.connect(controls.set_scale)
             layout.addWidget(controls)
             layout.addWidget(
                 QLabel(
@@ -245,7 +245,7 @@ class ForceColorControls(QWidget):
         super().__init__(parent)
         self._scale = scale or ForceColorScale()
         picker: ColorPicker = color_picker or _pick_color
-        self._color_picker: Callable[[str, QWidget], str | None] = picker
+        self._color_picker: ColorPicker = picker
         layout = QFormLayout(self)
         self._enabled = QCheckBox("Color Segments by Axial Force")
         self._enabled.setObjectName("force_color_enabled")
@@ -408,7 +408,7 @@ class ForceColorControls(QWidget):
         )
 
 
-def _pick_color(current: str, parent: QWidget) -> str | None:
+def _pick_color(current: str, parent: QWidget | None = None) -> str | None:
     """Open the Qt colour dialog; None when cancelled."""
     initial = QColor(current) if QColor.isValidColorName(current) else QColor()
     chosen = QColorDialog.getColor(initial, parent, "Pick Segment Colour")
