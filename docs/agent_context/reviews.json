@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Merged the physical grip revision base into the grip controls branch; regenerated capability atlas and feature parity matrix. Additive, no boundary contract change."
+      "rationale": "merge of HRG-B2 (with main's HRG-B1 defaults contract) into HRG-GR4 grip controls; interfaces re-verified by targeted tests"
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",

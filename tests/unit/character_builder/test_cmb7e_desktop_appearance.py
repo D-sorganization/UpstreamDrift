@@ -125,7 +125,7 @@ class TestAppearanceWidget:
     def test_combos_populated(self, widget) -> None:
         from src.shared.python.model_appearance.library import SKIN_TONES
 
-        assert widget.appearance_combos["skin_tone"].count() == len(SKIN_TONES)
+        assert widget.appearance_combos["skin_tone"].count() == len(SKIN_TONES) == 8
         assert widget.appearance_combos["clothing"].count() >= 2
         assert widget.appearance_combos["club_finish"].count() == 4
         assert widget.appearance_combos["headwear"].count() == 3

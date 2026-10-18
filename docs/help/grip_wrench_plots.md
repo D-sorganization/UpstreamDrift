@@ -45,7 +45,7 @@ The last tab (and the matching section of the web Loop Null-Space panel) shows h
 - the primary outcome (face angle first, an order and not a weight);
 - the engine. An engine that cannot supply derivatives is listed as UNAVAILABLE with its reason.
 
-Every list of allowed values comes from the backend (`GET /api/analysis/loop-nullspace/sensitivity-options`). The tab does no math: each quantity carries its evidence badge, the UNVALIDATED badge and hypothesis chips come from the payload, and a withheld item shows its reason and no number. Amplitudes are declared hypotheses, not golfer measurements; a ranking is a ranking under the declared assumptions, not coaching advice.
+Every list of allowed values comes from the backend (`GET /api/analysis/loop-nullspace/sensitivity-options`). The tab does no math: each quantity carries its evidence badge, the UNVALIDATED badge and hypothesis chips come from the payload, and a withheld item shows its reason and no number. Amplitudes are declared hypotheses, not golfer measurements; a ranking is a ranking under the declared assumptions, not coaching advice. Read the [Variability Sensitivity Interpretation Guide](loop_nullspace_variability.md) before using any of these panels.
 
 ## Method
 
@@ -59,3 +59,4 @@ The left/right split of two rigid welds is set by the solver, not by physics; re
 
 - [Impact Parameters](impact_parameters.md)
 - [Analysis Tools](analysis_tools.md)
+- [Variability Sensitivity Interpretation Guide](loop_nullspace_variability.md)

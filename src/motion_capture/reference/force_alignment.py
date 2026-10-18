@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import io
 import json
+import logging
 import math
 from pathlib import Path
 from typing import Any
@@ -38,6 +39,15 @@ __all__ = [
     "series_to_viewport_payload_wrench",
     "write_trace_forces",
 ]
+
+logger = logging.getLogger(__name__)
+
+_WRENCH_POINT_ATTRS = (
+    "meta_wrench_point",
+    "meta_root_point",
+    "wrench_point",
+    "root_point",
+)
 
 _CANONICAL_TO_ADR0041 = np.array(
     [
@@ -205,11 +215,9 @@ def _load_group_forces(grp: h5py.Group) -> ForceTorqueSeries:
 
 def _parse_meta_point(handle: h5py.File) -> tuple[float, float, float] | None:
     """Extract declared wrench_point or root_point from HDF5 metadata attributes."""
-    point_val = (
-        handle.attrs.get("meta_wrench_point")
-        or handle.attrs.get("meta_root_point")
-        or handle.attrs.get("wrench_point")
-        or handle.attrs.get("root_point")
+    point_val = next(
+        (v for k in _WRENCH_POINT_ATTRS if (v := handle.attrs.get(k)) is not None),
+        None,
     )
     if point_val is None:
         return None
@@ -218,13 +226,23 @@ def _parse_meta_point(handle: h5py.File) -> tuple[float, float, float] | None:
     if isinstance(point_val, str):
         try:
             point_data = json.loads(point_val)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as exc:
+            logger.warning(
+                "Could not parse JSON wrench point attribute %r: %s",
+                point_val,
+                exc,
+            )
             return None
     else:
         point_data = point_val
     try:
         return validate_vec3(point_data, "wrench_point")
-    except (ValueError, TypeError):
+    except (ValueError, TypeError) as exc:
+        logger.warning(
+            "Invalid coordinates for wrench point attribute %r: %s",
+            point_data,
+            exc,
+        )
         return None
 
 
@@ -234,16 +252,30 @@ def _load_fallback_trace_forces(handle: h5py.File) -> ForceTorqueSeries | None:
         return None
     wrench_arr = np.asarray(handle["wrench"][()], dtype=np.float64)
     if wrench_arr.ndim != 2 or wrench_arr.shape[1] != 6:
+        logger.warning(
+            "Trace 'wrench' dataset has invalid shape %s (expected (T, 6))",
+            wrench_arr.shape,
+        )
         return None
 
     point_m = _parse_meta_point(handle)
     if point_m is None:
+        logger.warning(
+            "Trace has 'wrench' dataset but no valid declared wrench point attribute (%s)",
+            ", ".join(_WRENCH_POINT_ATTRS),
+        )
         return None
 
     times = np.asarray(handle["t"][()], dtype=np.float64)
     if len(times) != wrench_arr.shape[0] or len(times) == 0:
+        logger.warning(
+            "Trace 't' length (%d) does not match 'wrench' rows (%d)",
+            len(times),
+            wrench_arr.shape[0],
+        )
         return None
     if np.any(np.diff(times) <= 0):
+        logger.warning("Trace 't' timestamps are not strictly monotonically increasing")
         return None
 
     backend = str(handle.attrs.get("backend", "simulation"))
@@ -276,9 +308,20 @@ def load_trace_forces(path: Path) -> ForceTorqueSeries | None:
                 grp = handle["force_torque_series"]
                 if isinstance(grp, h5py.Group):
                     return _load_group_forces(grp)
+                logger.warning(
+                    "Trace %s has 'force_torque_series' that is not an HDF5 group",
+                    path,
+                )
                 return None
-            return _load_fallback_trace_forces(handle)
-    except (OSError, ValueError, TypeError, KeyError):
+            res = _load_fallback_trace_forces(handle)
+            if res is None and "wrench" in handle:
+                logger.warning(
+                    "Trace %s has 'wrench' dataset but forces could not be loaded",
+                    path,
+                )
+            return res
+    except (OSError, ValueError, TypeError, KeyError) as exc:
+        logger.warning("Failed to load trace forces from %s: %s", path, exc)
         return None
 
 

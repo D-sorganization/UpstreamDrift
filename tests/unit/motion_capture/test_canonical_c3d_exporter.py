@@ -10,6 +10,7 @@ simulation-pipeline internals (trace_io, protocol, pose_interchange).
 import ast
 import importlib.util
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -73,6 +74,20 @@ class TestExportPreconditions:
         with pytest.raises(FileNotFoundError):
             export_markers_to_c3d(np.zeros((10, 1, 3)), ["M1"], 100.0, missing)
 
+    @pytest.mark.unit
+    def test_raises_on_invalid_up_axis(self, tmp_path: Path) -> None:
+        out = tmp_path / "out.c3d"
+        with pytest.raises(ValueError, match="up_axis"):
+            export_markers_to_c3d(np.zeros((10, 1, 3)), ["M1"], 100.0, out, up_axis="x")
+
+    @pytest.mark.unit
+    def test_raises_on_invalid_units(self, tmp_path: Path) -> None:
+        out = tmp_path / "out.c3d"
+        with pytest.raises(ValueError, match="units"):
+            export_markers_to_c3d(
+                np.zeros((10, 1, 3)), ["M1"], 100.0, out, units="inches"
+            )
+
     @pytest.mark.skipif(
         _ezc3d_available, reason="ezc3d installed; ImportError won't fire"
     )
@@ -80,6 +95,158 @@ class TestExportPreconditions:
         out = tmp_path / "out.c3d"
         with pytest.raises(ImportError, match="ezc3d"):
             export_markers_to_c3d(np.zeros((10, 1, 3)), ["M1"], 100.0, out)
+
+
+@pytest.mark.unit
+class TestExportLogicWithMock:
+    """Test export logic with mocked ezc3d to verify residual and axis handling."""
+
+    def test_nan_markers_export_as_negative_residual_and_homogeneous_ones(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        captured_c3d: dict[str, Any] = {}
+
+        class DummyC3D(dict):
+            def __init__(self) -> None:
+                super().__init__(
+                    {
+                        "parameters": {
+                            "POINT": {
+                                "RATE": {},
+                                "LABELS": {},
+                                "UNITS": {},
+                                "DESCRIPTIONS": {},
+                            }
+                        },
+                        "data": {"points": None, "meta_points": {}},
+                    }
+                )
+
+            def write(self, path: str) -> None:
+                captured_c3d["data"] = self["data"]
+                captured_c3d["parameters"] = self["parameters"]
+                Path(path).touch()
+
+        dummy_mod = type("DummyModule", (), {"c3d": DummyC3D})
+        monkeypatch.setattr(
+            "src.motion_capture.canonical_c3d_exporter.import_ezc3d",
+            lambda: dummy_mod,
+        )
+
+        # 3 frames, 2 markers. Marker 1 in frame 1 has NaN.
+        markers = np.zeros((3, 2, 3), dtype=np.float64)
+        markers[1, 1] = [np.nan, 0.0, 0.0]
+
+        out = export_markers_to_c3d(markers, ["M1", "M2"], 100.0, tmp_path / "out.c3d")
+        assert out.exists()
+
+        data = captured_c3d["data"]
+        # Check homogeneous 4th row is all 1.0
+        points = data["points"]
+        assert points.shape == (4, 2, 3)
+        np.testing.assert_allclose(points[3, :, :], 1.0)
+
+        # Check meta_points residuals
+        residuals = data["meta_points"]["residuals"]
+        assert residuals.shape == (1, 2, 3)
+        assert residuals[0, 1, 1] == -1.0
+        assert residuals[0, 0, 0] == 0.0
+        assert residuals[0, 0, 1] == 0.0
+
+    def test_y_up_to_z_up_axis_conversion_and_metadata(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        captured_c3d: dict[str, Any] = {}
+
+        class DummyC3D(dict):
+            def __init__(self) -> None:
+                super().__init__(
+                    {
+                        "parameters": {
+                            "POINT": {
+                                "RATE": {},
+                                "LABELS": {},
+                                "UNITS": {},
+                                "DESCRIPTIONS": {},
+                            }
+                        },
+                        "data": {"points": None, "meta_points": {}},
+                    }
+                )
+
+            def write(self, path: str) -> None:
+                captured_c3d["data"] = self["data"]
+                captured_c3d["parameters"] = self["parameters"]
+                Path(path).touch()
+
+        dummy_mod = type("DummyModule", (), {"c3d": DummyC3D})
+        monkeypatch.setattr(
+            "src.motion_capture.canonical_c3d_exporter.import_ezc3d",
+            lambda: dummy_mod,
+        )
+
+        # Y-up coordinate: X=1.0, Y=2.5 (up), Z=-0.5 (depth)
+        markers = np.array([[[1.0, 2.5, -0.5]]], dtype=np.float64)  # (1, 1, 3)
+
+        export_markers_to_c3d(markers, ["M1"], 100.0, tmp_path / "out.c3d", up_axis="y")
+        points = captured_c3d["data"]["points"]  # (4, 1, 1)
+
+        # Converted to Z-up: X_zup=1.0, Y_zup=0.5, Z_zup=2.5
+        np.testing.assert_allclose(points[0, 0, 0], 1.0)
+        np.testing.assert_allclose(points[1, 0, 0], 0.5)
+        np.testing.assert_allclose(points[2, 0, 0], 2.5)
+
+        # Check axis convention metadata stored
+        params = captured_c3d["parameters"]
+        descs = params["POINT"]["DESCRIPTIONS"]["value"]
+        assert any("Z" in d or "up_axis" in d for d in descs)
+
+    def test_units_mm_scaling(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        captured_c3d: dict[str, Any] = {}
+
+        class DummyC3D(dict):
+            def __init__(self) -> None:
+                super().__init__(
+                    {
+                        "parameters": {
+                            "POINT": {
+                                "RATE": {},
+                                "LABELS": {},
+                                "UNITS": {},
+                                "DESCRIPTIONS": {},
+                            }
+                        },
+                        "data": {"points": None, "meta_points": {}},
+                    }
+                )
+
+            def write(self, path: str) -> None:
+                captured_c3d["data"] = self["data"]
+                captured_c3d["parameters"] = self["parameters"]
+                Path(path).touch()
+
+        dummy_mod = type("DummyModule", (), {"c3d": DummyC3D})
+        monkeypatch.setattr(
+            "src.motion_capture.canonical_c3d_exporter.import_ezc3d",
+            lambda: dummy_mod,
+        )
+
+        markers = np.array([[[1.2, 3.4, 5.6]]], dtype=np.float64)  # (1, 1, 3) in metres
+        export_markers_to_c3d(markers, ["M1"], 100.0, tmp_path / "out.c3d", units="mm")
+
+        points = captured_c3d["data"]["points"]
+        np.testing.assert_allclose(points[0, 0, 0], 1200.0)
+        np.testing.assert_allclose(points[1, 0, 0], 3400.0)
+        np.testing.assert_allclose(points[2, 0, 0], 5600.0)
+        assert captured_c3d["parameters"]["POINT"]["UNITS"]["value"] == ["mm"]
+
+    def test_exposed_in_motion_capture_package(self) -> None:
+        import src.motion_capture as mc
+
+        assert hasattr(mc, "export_markers_to_c3d")
+        assert callable(mc.export_markers_to_c3d)
 
 
 # ---------------------------------------------------------------------------
