@@ -2047,6 +2047,7 @@
 {"path": "plotting/renderers/_coordination_phase.py", "classification": "ud-only", "package": "plotting", "spelling_only": false}
 {"path": "plotting/renderers/_coordination_sequence.py", "classification": "ud-only", "package": "plotting", "spelling_only": false}
 {"path": "plotting/renderers/_coordination_synergy.py", "classification": "ud-only", "package": "plotting", "spelling_only": false}
+{"path": "plotting/renderers/_cop_ellipse.py", "classification": "ud-only", "package": "plotting", "spelling_only": false}
 {"path": "plotting/renderers/base.py", "classification": "ud-only", "package": "plotting", "spelling_only": false}
 {"path": "plotting/renderers/club.py", "classification": "ud-only", "package": "plotting", "spelling_only": false}
 {"path": "plotting/renderers/comparison.py", "classification": "ud-only", "package": "plotting", "spelling_only": false}
