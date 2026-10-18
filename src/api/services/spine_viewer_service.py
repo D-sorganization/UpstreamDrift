@@ -16,14 +16,14 @@ from typing import Any, Mapping
 from src.engines.physics_engines.opensim.python.spine.assets import (
     DEFAULT_MANIFEST_PATH,
     SpineAssetStatus,
-    _load_entry,
     admit_spine_asset,
     resolve_spine_asset,
 )
-from src.engines.physics_engines.opensim.python.spine.study import (
-    SpineStudyRequest,
-    _ID_RE,
-)
+from src.engines.physics_engines.opensim.python.spine.study import SpineStudyRequest
+
+#: Status reported for the synthetic fixture model: always available, never
+#: scientifically qualified (its values are invented, ADR-0055).
+FIXTURE_ASSET_STATUS = "fixture"
 from src.tools.spine_viewer import core
 
 __all__ = [
@@ -145,7 +145,7 @@ def list_spine_assets(env: Mapping[str, str] | None = None) -> list[dict[str, An
     results.append(
         {
             "asset_id": "fixture",
-            "status": SpineAssetStatus.QUALIFIED.value,
+            "status": FIXTURE_ASSET_STATUS,
             "simtk_url": None,
             "env_var": None,
             "model_sha256": None,
@@ -153,7 +153,7 @@ def list_spine_assets(env: Mapping[str, str] | None = None) -> list[dict[str, An
             "licence_id": None,
             "citation": None,
             "owner_accepted_terms_on": None,
-            "note": "Always-available synthetic spine fixture model",
+            "note": "Synthetic fixture model; always available, not scientifically qualified",
             "is_fixture": True,
         }
     )
@@ -186,29 +186,24 @@ def parse_study_request(
         raise TypeError("root must be a Path")
 
     study_id = payload.get("study_id")
-    if not isinstance(study_id, str) or not _ID_RE.fullmatch(study_id):
-        raise ValueError(
-            f"study_id must be a string matching {_ID_RE.pattern}: {study_id!r}"
-        )
+    if not isinstance(study_id, str) or not study_id.strip():
+        raise ValueError(f"study_id must be a non-empty string: {study_id!r}")
 
-    out_candidate = payload.get("output_dir")
-    if out_candidate is not None:
-        if not isinstance(out_candidate, (str, Path)):
-            raise TypeError("output_dir must be a string or Path")
-        out_path = Path(out_candidate)
-        if "\\" in str(out_path) or "\x00" in str(out_path):
-            raise ValueError("output_dir must use '/' separators and no control bytes")
-        if ".." in out_path.parts:
-            raise ValueError("output_dir must not contain '..' components")
-        resolved_out = (target_root / out_path).resolve()
-        try:
-            resolved_out.relative_to(target_root.resolve())
-        except ValueError as exc:
-            raise ValueError(
-                f"output_dir must be inside study root ({target_root}): {resolved_out}"
-            ) from exc
-    else:
-        resolved_out = (target_root / study_id).resolve()
+    out_candidate = payload.get("output_dir", study_id)
+    if not isinstance(out_candidate, (str, Path)):
+        raise TypeError("output_dir must be a string or Path")
+    out_path = Path(out_candidate)
+    if "\\" in str(out_path) or "\x00" in str(out_path):
+        raise ValueError("output_dir must use '/' separators and no control bytes")
+    if ".." in out_path.parts:
+        raise ValueError("output_dir must not contain '..' components")
+    resolved_out = (target_root / out_path).resolve()
+    try:
+        resolved_out.relative_to(target_root.resolve())
+    except ValueError as exc:
+        raise ValueError(
+            f"output_dir must be inside study root ({target_root}): {resolved_out}"
+        ) from exc
 
     values = dict(payload)
     values["output_dir"] = resolved_out
@@ -241,7 +236,7 @@ def parse_study_request(
 
     if request.asset_id is not None:
         try:
-            _load_entry(request.asset_id, DEFAULT_MANIFEST_PATH)
+            resolve_spine_asset(request.asset_id)
         except ValueError as exc:
             raise ValueError(f"unknown spine asset: {exc}") from exc
 

@@ -113,14 +113,20 @@ def test_assets_listing_includes_manifest_entries_and_fixture(
     assert "assets" in body
     assets = {a["asset_id"]: a for a in body["assets"]}
 
-    # Fixture is always available and qualified
+    # The synthetic fixture is always available but never reported qualified
     assert "fixture" in assets
-    assert assets["fixture"]["status"] == "qualified"
+    assert assets["fixture"]["status"] == "fixture"
+    assert assets["fixture"]["status"] != "qualified"
     assert assets["fixture"]["is_fixture"] is True
 
     # Manifest assets
     assert "bruno2015_fullbody_os4_v2" in assets
-    assert assets["bruno2015_fullbody_os4_v2"]["status"] in ("missing", "qualified")
+    assert assets["bruno2015_fullbody_os4_v2"]["status"] in {
+        "missing",
+        "unpinned",
+        "hash_mismatch",
+        "qualified",
+    }
     assert assets["bruno2015_fullbody_os4_v2"]["is_fixture"] is False
 
     assert "senteler2016_lumbspine_3dof" in assets
