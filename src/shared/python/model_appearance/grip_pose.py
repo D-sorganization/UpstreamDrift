@@ -33,6 +33,14 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import ensure, require
+from src.shared.python.core.handedness import (
+    DEFAULT_HANDEDNESS,
+    Handedness,
+    Side,
+    lead_side,
+    trail_side,
+    validate_handedness,
+)
 
 #: Nominal point of the hand body (metres, hand frame) that sits on the grip:
 #: about 6 cm distal to the wrist origin along the hand's ``-y``.  The OSV-9
@@ -69,7 +77,7 @@ _PALM_TARGET_SIGN: dict[str, float] = {"lead": -1.0, "trail": 1.0}
 
 
 class Hand(str, Enum):
-    """The two hands of a right-handed golfer (lead = left, trail = right)."""
+    """The two hands of a golfer (right-handed: lead = left, trail = right)."""
 
     LEAD = "lead"
     TRAIL = "trail"
@@ -106,7 +114,13 @@ class HandPlacement:
 
 @dataclass(frozen=True)
 class GripPose:
-    """Neutral two-hand grip for a right-handed golfer.
+    """Neutral two-hand grip, for a right-handed golfer unless ``handedness``
+    says otherwise (HRG-GR0, #13201).
+
+    ``handedness`` only decides which anatomical side each hand is
+    (:meth:`side`) and which way the target lies in the golfer's body frame
+    (:meth:`landmarks`); every distance and angle is in lead/trail terms and
+    is identical for both, so the right-handed output is unchanged.
 
     Preconditions (checked in ``__post_init__``): finite values,
     ``lead_below_butt_m`` in [0, 0.1], ``hand_spacing_m`` in (0, 0.2],
@@ -129,6 +143,8 @@ class GripPose:
     trail_lifeline_over_lead_thumb: bool = True
     #: Shaft angle across the palm from the radial axis toward the fingers.
     palm_diagonal_deg: float = PALM_DIAGONAL_DEG
+    #: ``"right"`` or ``"left"``; the lead hand is on the left of a right-hander.
+    handedness: Handedness = DEFAULT_HANDEDNESS
 
     def __post_init__(self) -> None:
         require(
@@ -150,6 +166,7 @@ class GripPose:
             )
             require(lo <= value <= hi, f"{name} must be in [{lo}, {hi}], got {value}")
         require(self.hand_spacing_m > 0.0, "hand_spacing_m must be positive")
+        validate_handedness(self.handedness)
         ensure(
             self.distance_below_butt_m(Hand.TRAIL)
             > self.distance_below_butt_m(Hand.LEAD),
@@ -162,6 +179,45 @@ class GripPose:
         if hand is Hand.LEAD:
             return self.lead_below_butt_m
         return self.lead_below_butt_m + self.hand_spacing_m
+
+    def side(self, hand: Hand) -> Side:
+        """Anatomical side (``"L"``/``"R"``) of ``hand`` for this golfer."""
+        require(isinstance(hand, Hand), f"hand must be a Hand, got {hand!r}")
+        if hand is Hand.LEAD:
+            return lead_side(self.handedness)
+        return trail_side(self.handedness)
+
+    def landmarks(self, hand: Hand) -> dict[str, NDArray[np.float64]]:
+        """Grip landmarks of ``hand`` in the golfer's body frame (metres).
+
+        Body frame: x anterior, y toward the golfer's anatomical left, z up;
+        the sagittal plane is x-z, so the lateral axis is **y**. The grip axis
+        is idealised as vertical, running down -z from the butt at the origin.
+        The target lies toward +y for a right-hander and -y for a left-hander;
+        the toe axis is +x. Landmarks: ``centre`` (hand centre on the grip),
+        ``v_direction`` and ``thumb_direction`` (unit vectors at the V and
+        thumb azimuths of :class:`HandPlacement`, azimuth 0 = away from the
+        target, increasing toward the golfer) and ``palm_normal`` (unit,
+        ``palm_target_sign`` times the target direction). Postcondition:
+        reflecting the right-handed set by diag(1, -1, 1) gives the
+        left-handed set.
+        """
+        placed = self.placement(hand)
+        target = 1.0 if self.handedness == "right" else -1.0
+        away, toe = np.array([0.0, -target, 0.0]), np.array([1.0, 0.0, 0.0])
+
+        def direction(azimuth_deg: float) -> NDArray[np.float64]:
+            a = math.radians(azimuth_deg)
+            return math.cos(a) * away - math.sin(a) * toe
+
+        return {
+            "centre": np.array([0.0, 0.0, -placed.distance_below_butt_m]),
+            "v_direction": direction(placed.v_azimuth_deg),
+            "thumb_direction": direction(placed.thumb_offset_deg),
+            "palm_normal": self.palm_target_sign(hand)
+            * target
+            * np.array([0.0, 1.0, 0.0]),
+        }
 
     def club_y_m(self, hand: Hand) -> float:
         """Hand-centre y in the OpenSim club frame (origin at the butt, -y shaft)."""

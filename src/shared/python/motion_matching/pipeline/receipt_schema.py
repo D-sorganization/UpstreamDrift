@@ -13,6 +13,8 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 
 from src.shared.python.motion_matching.pipeline.address_feet import MODES
 
+from src.shared.python.core.handedness import Handedness
+
 from .receipt_components import (
     AcceptanceGateReport,
     AcceptanceReceipt,
@@ -272,6 +274,14 @@ class Receipt(BaseModel):
         None,
         description="Fitted constant grip roll rotations for lead and trail hands",
         json_schema_extra={"unit": "deg", "stage": "metadata"},
+    )
+    handedness: Handedness | None = Field(
+        None,
+        description=(
+            "Golfer handedness from subject.handedness; a spec without the "
+            "field resolves to the declared default 'right' (HRG-GR0, #13201)"
+        ),
+        json_schema_extra={"unit": "text", "stage": "metadata"},
     )
     wrists_bounded: bool | None = Field(
         None,

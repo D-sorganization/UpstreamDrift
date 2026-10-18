@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from src.shared.python.core.handedness import subject_handedness
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
 from src.shared.python.motion_matching.pipeline.address import posture_summary
 from src.shared.python.motion_matching.pipeline.address_feet import MODES
@@ -182,6 +183,7 @@ def build_ground_support_receipt(
         "grip_rotation_deg": inputs.base_spec.get("subject", {}).get(
             "grip_rotation_deg"
         ),
+        "handedness": subject_handedness(inputs.base_spec),
         "wrists_bounded": any(name in lane.bounds for name in IK_UNBOUNDED),
         "labels": list(lane.labels),
         "ground": {
