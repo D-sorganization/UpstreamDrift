@@ -393,6 +393,20 @@
       "id": "loop_nullspace_exploration"
     },
     {
+      "feature_id": "loop_nullspace_variability",
+      "title": "Closed-loop null-space variability and consistency (NSX-100): kernel heatmap, variance budget, strategy Pareto and face dispersion from the plot model 2.0.0 sensitivity panels, with disturbance, mechanism, strategy, outcome-priority and engine controls",
+      "status": "parity",
+      "pyqt": "src/tools/grip_wrench_plots/variability_tab.py",
+      "api": "src/api/routes/analysis_loop_nullspace.py",
+      "web": "ui/src/components/analysis/loopNullSpace/VariabilityView.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "NSX-100 (#12729). Both surfaces render only the sensitivity panels of the framework-free NSXPlotModel 2.0.0 (NSX-99 #12728): decision labels, UNVALIDATED badges and hypothesis chips are the payload's own text, a withheld item keeps its reason and no number, and a capability-limited engine reads UNAVAILABLE with the capability registry's reason. The PyQt6 Variability & Consistency tab (variability_view.py is the pure view, variability_request.py the pure request builder) and the React section of LoopNullSpacePanel build the request options from the backend catalogue served by GET /analysis/loop-nullspace/sensitivity-options (sensitivity_options.option_catalogue); the request flows through the NSX-40 job service, whose cache key covers the sensitivity options. Outcome priority is an order (face angle first), not weights. Both are tested against tests/fixtures/loop_nullspace/goldens/report_v2_variability.json and the shared string list tests/fixtures/loop_nullspace/goldens/variability_view_text.json (regenerate with python3 -m tests.unit.loop_nullspace.variability_view_text --write).",
+      "id": "loop_nullspace_variability"
+    },
+    {
       "feature_id": "mocap.breadth",
       "title": "Motion-capture breadth (C3D upload/playback, OpenPose source)",
       "status": "parity",
@@ -3248,7 +3262,7 @@
   "inputs": {
     "src/config/models.yaml": "64caf5311e4be2c75e742dc053b425a528f851638ca2773423fcc77d40b5d419",
     "src/config/launcher_manifest.json": "c9844ac6e0cd9c6cc867bda7cfd44edf1199ac85a07af5b9a83bec70a65d00bc",
-    "src/config/feature_parity.json": "7122e8dc9abdb135672b4e4caf201cdb039e45888b827c02a132682f8abcb793",
+    "src/config/feature_parity.json": "c084c32ed44dcac3e627254a19c1968eea93424a6879cd69ed3da27355aab500",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
