@@ -17,6 +17,7 @@ from typing import Any
 
 from src.shared.python.humanoid_character_builder import spec_export
 from src.shared.python.humanoid_character_builder.spec_export import CompiledCharacter
+from src.shared.python.humanoid_character_builder.spec_params import serialize_spec
 from src.shared.python.motion_matching.execution.grip_selection import (
     GRIP_PRESET_CHOICES,
     GRIP_STYLE_CHOICES,
@@ -211,9 +212,7 @@ def compile_with_grip(
     if not overrides.has_physical:
         return character
     document, _grip = apply_grip_selection(character.document, overrides)
-    sha = hashlib.sha256(
-        spec_export.serialize_spec(document).encode("utf-8")
-    ).hexdigest()
+    sha = hashlib.sha256(serialize_spec(document).encode("utf-8")).hexdigest()
     return replace(character, document=document, sha256=sha)
 
 
