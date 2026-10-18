@@ -15,9 +15,12 @@ it as plot traces that sit beside the model's computed ground reaction:
 * ``measured_<foot>_cop_sigma_m`` - that CoP's random 1-sigma (the declared
   CoP uncertainty combined with the timing skew): ``x`` and ``y`` for world x
   and y (``FootSample.cop_sigma_random_xy_m``), ``z`` for the worse axis
-  (``cop_sigma_random_m``), and ``None`` wherever the CoP is.  There is one
-  sigma per axis and no x-y covariance, so it supports an axis-aligned
-  ellipse with those semi-axes, not a tilted, fitted one.
+  (``cop_sigma_random_m``), and ``None`` wherever the CoP is.  The per-axis
+  values bound each world axis through ``|R_xy|``;
+* ``measured_<foot>_cop_cov_m2`` - that CoP's exact random covariance in world
+  axes (``FootSample.cop_cov_random_xy_m2``): ``x`` = var_x, ``y`` = var_y,
+  ``z`` = cov_xy [m^2], ``None`` wherever the CoP is.  Its 1-sigma ellipse is
+  tilted with the plate yaw and fits inside the per-axis box.
 
 A model frame the trial does not cover is ``None`` in every trace, never
 extrapolated.  ``qualified`` carries the trial's provenance: an overlay from an
@@ -61,6 +64,8 @@ MEASURED_PREFIX = "measured_"
 #: Matches the sample-snap tolerance of ``readings.reading_at``.
 _SNAP_ULPS = 4
 _Trace = dict[str, list[float | None]]
+#: load, load sigma, CoP, CoP sigma and CoP covariance.
+_TRACES_PER_FOOT = 5
 
 
 @dataclass(frozen=True)
@@ -124,10 +129,11 @@ class _FootTraces:
     force_sigma: _Trace
     cop: _Trace
     cop_sigma: _Trace
+    cop_cov: _Trace
 
     @classmethod
     def empty(cls) -> _FootTraces:
-        return cls(_empty_trace(), _empty_trace(), _empty_trace(), _empty_trace())
+        return cls(*(_empty_trace() for _ in range(_TRACES_PER_FOOT)))
 
     def named(self, foot: str) -> dict[str, _Trace]:
         prefix = f"{MEASURED_PREFIX}{foot}"
@@ -136,23 +142,33 @@ class _FootTraces:
             f"{prefix}_force_sigma_n": self.force_sigma,
             f"{prefix}_cop_m": self.cop,
             f"{prefix}_cop_sigma_m": self.cop_sigma,
+            f"{prefix}_cop_cov_m2": self.cop_cov,
         }
+
+    def _cop_traces(self) -> tuple[_Trace, _Trace, _Trace]:
+        return self.cop, self.cop_sigma, self.cop_cov
 
     def append(self, sample: FootSample | None) -> None:
         if sample is None:
-            for trace in (self.force, self.force_sigma, self.cop, self.cop_sigma):
+            for trace in (self.force, self.force_sigma):
                 _append(trace, None, None, None)
+            self._append_cop(None)
             return
         _append(self.force, None, None, sample.load_n)
         _append(self.force_sigma, None, None, sample.load_sigma_random_n)
-        point = sample.cop_m
-        if point is None:
-            _append(self.cop, None, None, None)
-            _append(self.cop_sigma, None, None, None)
-        else:
-            _append(self.cop, float(point[0]), float(point[1]), float(point[2]))
-            sx, sy = sample.cop_sigma_random_xy_m or (None, None)
-            _append(self.cop_sigma, sx, sy, sample.cop_sigma_random_m)
+        self._append_cop(sample)
+
+    def _append_cop(self, sample: FootSample | None) -> None:
+        point = None if sample is None else sample.cop_m
+        if sample is None or point is None:
+            for trace in self._cop_traces():
+                _append(trace, None, None, None)
+            return
+        _append(self.cop, float(point[0]), float(point[1]), float(point[2]))
+        sx, sy = sample.cop_sigma_random_xy_m or (None, None)
+        _append(self.cop_sigma, sx, sy, sample.cop_sigma_random_m)
+        xx, yy, xy = sample.cop_cov_random_xy_m2 or (None, None, None)
+        _append(self.cop_cov, xx, yy, xy)
 
 
 def _check_times(times_s: Sequence[float]) -> list[float]:
