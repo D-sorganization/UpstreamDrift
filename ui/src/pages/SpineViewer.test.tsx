@@ -193,4 +193,106 @@ describe('SpineViewerPage', () => {
     expect(screen.queryByTestId('spine-heatmap')).not.toBeInTheDocument();
     expect(screen.queryByTestId('spine-status-banner')).not.toBeInTheDocument();
   });
+
+  it('fetches assets and shows honest model status in the run study panel', async () => {
+    apiFetchMock.mockImplementation(async (url: string) => {
+      if (url.includes('/receipts')) return { receipts: [] };
+      if (url.includes('/assets')) {
+        return {
+          assets: [
+            { asset_id: 'bruno2015_fullbody_os4_v2', status: 'missing', is_fixture: false },
+            { asset_id: 'fixture', status: 'fixture', is_fixture: true },
+          ],
+        };
+      }
+      return study();
+    });
+    render(<SpineViewerPage />);
+    const fixtureOption = await screen.findByRole('option', { name: /fixture/i });
+    expect(fixtureOption).toBeInTheDocument();
+
+    const statusEl = screen.getByTestId('model-status');
+    // Fixture is selected by default; status must be honest (unqualified)
+    expect(statusEl.textContent?.toLowerCase()).toContain('fixture');
+    expect(statusEl.textContent?.toLowerCase().replace('unqualified', '')).not.toContain('qualified');
+
+    // Switch to bruno asset
+    fireEvent.change(screen.getByLabelText('Model'), {
+      target: { value: 'bruno2015_fullbody_os4_v2' },
+    });
+    expect(screen.getByTestId('model-status').textContent?.toLowerCase()).toContain('missing');
+  });
+
+  it('runs a study, polls until completed, and automatically loads the receipt', async () => {
+    let pollCount = 0;
+    apiFetchMock.mockImplementation(async (url: string, init?: RequestInit) => {
+      if (url.includes('/receipts')) {
+        return { receipts: pollCount > 0 ? ['auto/new_receipt.json'] : [] };
+      }
+      if (url.includes('/assets')) {
+        return {
+          assets: [{ asset_id: 'fixture', status: 'fixture', is_fixture: true }],
+        };
+      }
+      if (url.includes('/studies/') && !url.includes('/studies?')) {
+        pollCount += 1;
+        if (pollCount === 1) {
+          return { job_id: 'job-123', status: 'running', receipt_path: null, error: null };
+        }
+        return {
+          job_id: 'job-123',
+          status: 'completed',
+          receipt_path: 'auto/new_receipt.json',
+          error: null,
+        };
+      }
+      if (url.includes('/studies') && init?.method === 'POST') {
+        return { job_id: 'job-123', status: 'pending', receipt_path: null, error: null };
+      }
+      if (url.includes('/study?')) {
+        return study({ study_id: 'new_study' });
+      }
+      return {};
+    });
+
+    render(<SpineViewerPage />);
+    await screen.findByRole('option', { name: /fixture/i });
+
+    fireEvent.change(screen.getByLabelText('Study ID'), {
+      target: { value: 'new_study' },
+    });
+    fireEvent.change(screen.getByLabelText('Swing source'), {
+      target: { value: 'tests/data/motion_pipeline/golden/sample.sto' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Run Study' }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId('spine-status-banner')).toBeInTheDocument(),
+    );
+    expect(screen.getByTestId('spine-status-banner')).toHaveAttribute(
+      'data-status',
+      'unqualified',
+    );
+  });
+
+  it('surfaces error when study submission or job fails', async () => {
+    apiFetchMock.mockImplementation(async (url: string, init?: RequestInit) => {
+      if (url.includes('/receipts')) return { receipts: [] };
+      if (url.includes('/assets')) {
+        return {
+          assets: [{ asset_id: 'fixture', status: 'fixture', is_fixture: true }],
+        };
+      }
+      if (url.includes('/studies') && init?.method === 'POST') {
+        throw new Error('motion file not found: missing.sto');
+      }
+      return {};
+    });
+
+    render(<SpineViewerPage />);
+    await screen.findByRole('option', { name: /fixture/i });
+    fireEvent.click(screen.getByRole('button', { name: 'Run Study' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('missing.sto');
+  });
 });

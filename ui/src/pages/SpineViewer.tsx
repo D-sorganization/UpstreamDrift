@@ -16,6 +16,7 @@ import {
 } from '@/api/spineViewer';
 import { SpineHeatmap } from '@/components/spine/SpineHeatmap';
 import { SpineStatusBanner } from '@/components/spine/SpineStatusBanner';
+import { SpineStudyPanel } from '@/components/spine/SpineStudyPanel';
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
@@ -53,6 +54,22 @@ export function SpineViewerPage() {
     }
   }, [selected]);
 
+  const handleStudyCompleted = useCallback(async (receiptPath: string) => {
+    try {
+      const updatedList = await fetchSpineReceipts();
+      setReceipts(updatedList);
+      setSelected(receiptPath);
+      setLoading(true);
+      setError(null);
+      const data = await fetchSpineStudy(receiptPath);
+      setStudy(data);
+    } catch (e: unknown) {
+      setError(messageOf(e));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const heatmap = study?.heatmaps[quantity];
 
   return (
@@ -63,6 +80,7 @@ export function SpineViewerPage() {
           Per-level spinal loads from hash-verified study receipts
         </p>
       </div>
+      <SpineStudyPanel onStudyCompleted={handleStudyCompleted} />
       <div className="flex flex-wrap items-end gap-4 px-6 py-4">
         <label className="text-xs text-gray-300">
           Study receipt

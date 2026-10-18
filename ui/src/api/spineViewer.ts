@@ -73,6 +73,42 @@ export function binRows(rows: number[][], limit: number): number[][] {
   return out;
 }
 
+export interface SpineAssetItem {
+  asset_id: string;
+  status: string;
+  is_fixture: boolean;
+  simtk_url?: string | null;
+  env_var?: string | null;
+  note?: string | null;
+  citation?: { text?: string; doi?: string } | null;
+}
+
+export interface SpineStudyJobStatus {
+  job_id: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  receipt_path: string | null;
+  error: string | null;
+}
+
+export interface RunSpineStudyPayload {
+  study_id: string;
+  asset_id?: string;
+  model_id?: string;
+  coupling_law_id?: string | null;
+  motion_path: string;
+  golf_model_path?: string;
+  model_path?: string;
+  pelvis?: string;
+  [key: string]: unknown;
+}
+
+export interface PollOptions {
+  intervalMs?: number;
+  timeoutMs?: number;
+  signal?: AbortSignal;
+  onStatus?: (status: SpineStudyJobStatus) => void;
+}
+
 const BASE = '/api/tools/spine-viewer';
 
 export async function fetchSpineReceipts(): Promise<string[]> {
@@ -85,3 +121,53 @@ export function fetchSpineStudy(receipt: string): Promise<SpineStudyPayload> {
     `${BASE}/study?receipt=${encodeURIComponent(receipt)}`,
   );
 }
+
+export async function fetchSpineAssets(): Promise<SpineAssetItem[]> {
+  const body = await apiFetch<{ assets?: SpineAssetItem[] }>(`${BASE}/assets`);
+  return Array.isArray(body?.assets) ? body.assets : [];
+}
+
+export async function submitSpineStudy(
+  payload: RunSpineStudyPayload,
+): Promise<SpineStudyJobStatus> {
+  return apiFetch<SpineStudyJobStatus>(`${BASE}/studies`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function fetchSpineStudyJob(
+  jobId: string,
+): Promise<SpineStudyJobStatus> {
+  return apiFetch<SpineStudyJobStatus>(
+    `${BASE}/studies/${encodeURIComponent(jobId)}`,
+  );
+}
+
+export async function pollSpineStudyJob(
+  jobId: string,
+  options?: PollOptions,
+): Promise<SpineStudyJobStatus> {
+  const intervalMs = options?.intervalMs ?? 500;
+  const timeoutMs = options?.timeoutMs ?? 60_000;
+  const start = Date.now();
+  while (true) {
+    if (options?.signal?.aborted) {
+      throw new DOMException('The poll was aborted', 'AbortError');
+    }
+    if (Date.now() - start > timeoutMs) {
+      throw new Error(`Spine study job timed out after ${timeoutMs}ms`);
+    }
+    const status = await fetchSpineStudyJob(jobId);
+    options?.onStatus?.(status);
+    if (
+      status.status === 'completed' ||
+      status.status === 'failed' ||
+      status.status === 'cancelled'
+    ) {
+      return status;
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+}
+
