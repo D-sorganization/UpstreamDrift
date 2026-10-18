@@ -52,7 +52,13 @@ IK_RESIDUAL_THRESHOLDS_M = {
     "shoulder_r": 0.0151,
     "bar": 0.0001,
 }
-CLOSURE_THRESHOLD_M = 6.4e-8
+#: OSL-17 (#13131): racking the bar on the cited high-bar position puts the
+#: elbows near their -150 deg bound and the left wrist on its 25 deg bound, so
+#: the arm solve trades the grip weld against the bar target.  The standing
+#: pose (frame 0) closes to 2.911e-7 m (17 of 151 frames above the earlier
+#: 6.4e-8 m); 300 tracking iterations leave it unchanged and 1000 standing
+#: iterations raise it to 4.725e-7 m.  Evidence on #13131.
+CLOSURE_THRESHOLD_M = 3.0e-7
 FOOT_PENETRATION_THRESHOLD_M = 7.0e-4
 #: Committed bar-loaded bundle size bound (bytes).  OSL-16 (#13104): a loaded
 #: bundle records its 0.25 ms hold efforts (``hold_efforts``, 4 per step) so
@@ -134,9 +140,7 @@ def test_ik_from_the_recorded_solution_meets_thresholds(
     if geom_rec is not None:
         from src.shared.python.lifting.back_bar import BackBarGeometry
 
-        geometry = BackBarGeometry.from_standard(
-            geom_rec["lift"], height_m=geom_rec["height_m"]
-        )
+        geometry = BackBarGeometry.from_record(geom_rec)
     balance = bundle.provenance["ik"].get("balance")
     load = None
     if balance is not None:

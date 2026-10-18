@@ -282,13 +282,22 @@ def test_start_pose_carries_the_bar_on_the_back_per_the_standard(
 
 @pytest.mark.integration
 @pytest.mark.requires_mujoco
-def test_committed_bundle_start_pose_matches_the_standard() -> None:
-    """The issue's acceptance item, verified on the regenerated back_bar bundle."""
+def test_committed_bundle_start_pose_keeps_the_standard_grip() -> None:
+    """Grip width, bar axis and handedness of the committed back_bar bundle.
+
+    OSL-17 (#13131): the committed bundle racks the bar on the cited high-bar
+    position (``test_back_rack``), not on the standard's start-pose bar
+    position, which lies above the shoulders; the grip is still the standard's.
+    """
     pytest.importorskip("mujoco")
     bundle = InputBundle.load(BACK_SQUAT_BUNDLE)
     q = np.asarray(bundle.provenance["ik"]["q_standing"], dtype=float)
     height = float(bundle.provenance["optimizer"]["height_m"])
-    assert_matches_the_standard(measure_start_pose(bundle.spec_bytes, q, height))
+    pose = measure_start_pose(bundle.spec_bytes, q, height)
+    grip = lift_spec.lift_grip(LIFT)
+    assert pose.grip_width_m == pytest.approx(grip.width_m, abs=GRIP_TOLERANCE_M)
+    assert pose.axis_angle_deg <= AXIS_TOLERANCE_DEG
+    assert pose.left_hand_is_left
 
 
 @pytest.mark.integration

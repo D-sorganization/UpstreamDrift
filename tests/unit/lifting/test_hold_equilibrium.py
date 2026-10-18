@@ -2,9 +2,9 @@
 
 The LIFT-4 hold used to start from ``preload_feet``: the IK standing pose
 translated down until its lowest contact sphere (the toes) sank to the
-equal-share depth ``W / (6 k)``.  At that state the feet carried 1051.8 N of
-the 1768.3 N body plus bar, and their centre of pressure lay 6.7 cm ahead of
-the combined centre of mass.  The body fell 2.1 degrees back onto its heels,
+equal-share depth ``W / (6 k)``.  At that state (before OSL-17) the feet
+carried 1051.8 N of the 1768.3 N body plus bar, and their centre of pressure
+lay 6.7 cm ahead of the combined centre of mass.  The body fell 2.1 degrees back onto its heels,
 which rang a lightly damped fore-aft sway of the whole body (about 0.5 Hz)
 whose CoM deceleration is the steady -102 N horizontal ground force and the
 0.982 sag of the last 0.5 s.
@@ -45,6 +45,7 @@ def setting():  # type: ignore[no-untyped-def]
     from src.shared.python.lifting.barbell_bushing import Barbell
     from src.shared.python.lifting.barbell_runs import (
         bushing_body_spec,
+        hold_pose,
         rigid_bar_spec,
     )
     from src.shared.python.motion_matching import full_body_forward_dynamics as fs
@@ -56,7 +57,7 @@ def setting():  # type: ignore[no-untyped-def]
     simulator = fs.FullBodySimulator(
         NativeMujocoFullBodyModel(rigid_bar_spec(body, barbell))
     )
-    q_hold = np.asarray(source.provenance["ik"]["q_standing"], dtype=float)
+    q_hold = hold_pose(source)
     return simulator, q_hold, body, barbell
 
 
@@ -67,15 +68,21 @@ def _contact(simulator, q):  # type: ignore[no-untyped-def]
 
 
 def test_preloaded_start_is_out_of_balance(setting) -> None:  # type: ignore[no-untyped-def]
-    """The measured cause: the old start's CoP is 6.7 cm ahead of the CoM."""
+    """The measured cause: the preloaded start does not carry body plus bar.
+
+    Measured at the balanced IK standing pose (``hold_pose``, OSL-17 #13131):
+    the equal-share preload carries 0.764 W, with the CoP 0.08 mm from the
+    CoM.  (At the pre-balance ``q_standing`` it carries 0.595 W with the CoP
+    18.6 cm ahead; before OSL-17 it was 0.595 W and 6.7 cm.)
+    """
     from src.shared.python.motion_matching import full_body_forward_dynamics as fs
 
     simulator, q_hold, _, _ = setting
     force, moment = _contact(simulator, fs.preload_feet(simulator, q_hold))
     weight = simulator.mass_kg * float(np.linalg.norm(simulator.gravity))
-    assert force[2] / weight == pytest.approx(0.595, abs=0.005)
-    # CoP ahead of the CoM: -M_y / F_z.
-    assert -moment[1] / force[2] == pytest.approx(0.067, abs=0.002)
+    assert force[2] / weight == pytest.approx(0.764, abs=0.005)
+    # CoP relative to the CoM: -M_y / F_z.
+    assert -moment[1] / force[2] == pytest.approx(0.0, abs=0.002)
 
 
 def test_contact_equilibrium_carries_the_weight_under_the_com(setting) -> None:  # type: ignore[no-untyped-def]

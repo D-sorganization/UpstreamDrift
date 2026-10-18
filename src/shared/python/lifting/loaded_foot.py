@@ -51,6 +51,7 @@ __all__ = [
     "FOOT_JOINTS",
     "LOADED_FOOT_RECORD",
     "TOE_TIP_M",
+    "balanced_ik_track",
     "balanced_ik_window",
     "window_reference",
     "foot_joint_error_rad",
@@ -145,6 +146,21 @@ def balanced_ik_window(bundle: Any) -> tuple[Array, Array, float]:
     Raises:
         ValueError: If the bundle's IK did not balance a bar load.
     """
+    times, track, window, lead = balanced_ik_track(bundle)
+    start = int(np.searchsorted(times, times[0] + lead * bundle.dt_s - 1e-12))
+    return times[start:], track[start:], window
+
+
+def balanced_ik_track(bundle: Any) -> tuple[Array, Array, float, int]:
+    """:func:`balanced_ik_window` from the bundle's lead-in sample (OSL-17).
+
+    Returns the sample times and IK trajectory from the sample the bundle's
+    tracking run started at, the window length and the lead-in steps
+    (``provenance["lead_in"]``, 0 without one).
+
+    Raises:
+        ValueError: If the bundle's IK did not balance a bar load.
+    """
     from src.shared.python.lifting.back_bar import BackBarGeometry
     from src.shared.python.lifting.bundles import (
         LIFT_SPEC,
@@ -158,18 +174,19 @@ def balanced_ik_window(bundle: Any) -> tuple[Array, Array, float]:
     balance = prov.get("ik", {}).get("balance")
     if balance is None:
         raise ValueError("bundle is not bar-load balanced (#13093)")
-    geom = prov["ik"]["back_bar"]["geometry"]
     solution = SagittalSolution.from_record(prov["sagittal_solution"])
     lift = lift_to_full_body(
         LIFT_SPEC.read_bytes(),
         solution,
         load_seed_pose(),
-        geometry=BackBarGeometry.from_standard(geom["lift"], height_m=geom["height_m"]),
+        geometry=BackBarGeometry.from_record(prov["ik"]["back_bar"]["geometry"]),
         load=load_balance_from_record(balance["load"]),
     )
     window = prov["window"]
-    start = int(np.searchsorted(solution.time_s, window["start_s"] - 1e-12))
-    return solution.time_s[start:], lift.q[start:], float(window["duration_s"])
+    lead = int(prov.get("lead_in", {}).get("steps", 0))
+    start_s = float(window["start_s"]) - lead * float(bundle.dt_s)
+    start = int(np.searchsorted(solution.time_s, start_s - 1e-12))
+    return solution.time_s[start:], lift.q[start:], float(window["duration_s"]), lead
 
 
 def window_reference(time_s: Array, track: Array, run_time_s: Array) -> Array:

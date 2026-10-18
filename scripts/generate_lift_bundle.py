@@ -26,12 +26,19 @@ grip): regenerating it with ``back_bar`` changes the inputs of the bar-path,
 kinetics and barbell evidence (#12340, #12341, #12345), so that happens
 together with their regeneration, not before.
 
+Since #13131 (OSL-17) the back-bar squat carries the bar on the cited
+high-bar rack (``--rack high_bar``, :mod:`~src.shared.python.lifting.back_rack`)
+and ``--lead-in`` tracks the lift for that long before the window, so the
+bundle's first state is settled on its contact.
+
 Since #13093 the back-bar squat IK balances the optimizer's bar load over
 mid-foot with ``--load-balance`` (opt-in), and the bundle's spec then carries
 that bar as a rigid solid on the hands (:func:`lift_bundle_spec`).  The
-committed squat bundle is not balanced: tracking the balanced IK with the bar
-load loses the feet within the window (OSL-15 measurements in
-``docs/research/lift_models/lift_models.tex``).
+committed squat bundle is balanced and tracked with the loaded policy (OSL-16,
+#13104).  It is regenerated with::
+
+    python3 scripts/generate_lift_bundle.py --lift squat --load-balance \
+        --lead-in 0.1
 """
 
 from __future__ import annotations
@@ -57,6 +64,7 @@ from src.shared.python.lifting.back_bar import (  # noqa: E402
     BACK_SQUAT,
     BackBarGeometry,
 )
+from src.shared.python.lifting.back_rack import RACKS  # noqa: E402
 from src.shared.python.lifting.barbell_bushing import Barbell  # noqa: E402
 from src.shared.python.lifting.bench_press import (  # noqa: E402
     BenchLift,
@@ -118,6 +126,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="squat only. back_bar: #12347 geometry (committed); legacy: golf grip",
     )
     parser.add_argument(
+        "--rack",
+        choices=("high_bar", "standard"),
+        default="high_bar",
+        help="back_bar only: cited rack (OSL-17, #13131, committed) or the "
+        "standard's start-pose bar position (above the shoulders)",
+    )
+    parser.add_argument(
+        "--lead-in",
+        type=float,
+        default=0.0,
+        help="seconds tracked before the window so its first state is settled "
+        "on the contact (OSL-17, #13131); a multiple of the solution spacing",
+    )
+    parser.add_argument(
         "--load-balance",
         action="store_true",
         help="back_bar only: balance the bar load over mid-foot (#13093, opt-in)",
@@ -138,7 +160,10 @@ def _full_body(args: argparse.Namespace, lift: LiftRecipe, solution: Any) -> Any
         return lift_hands_to_full_body(spec, solution, load_seed_pose(), lift.lift)
     if args.geometry != "back_bar":
         return lift_to_full_body(spec, solution, load_seed_pose())
-    geometry = BackBarGeometry.from_standard(BACK_SQUAT, height_m=args.height)
+    rack = None if args.rack == "standard" else RACKS[args.rack]
+    geometry = BackBarGeometry.from_standard(
+        BACK_SQUAT, height_m=args.height, rack=rack
+    )
     load = (
         LoadBalance(Barbell(float(solution.source["bar_mass_kg"])))
         if args.load_balance
@@ -190,6 +215,7 @@ def main(argv: list[str] | None = None) -> int:
         lift_name=lift_recipe.bundle_name,
         window_start_s=start,
         window_s=args.window,
+        lead_in_s=args.lead_in,
         provenance={
             "source_commit": _git("rev-parse", "HEAD"),
             "tools_pin": tools_pin,

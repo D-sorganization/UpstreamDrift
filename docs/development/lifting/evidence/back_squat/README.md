@@ -204,3 +204,48 @@ records now read:
   The old start sat 6.7 cm out of balance and toppled backwards. This evidence
   is on the pre-#13102 lift body.
 - **Size:** loaded bundles carry their hold efforts, up to 600,000 bytes.
+
+## High-Bar Rack and Settled Start (OSL-17, #13131)
+
+The bar sits on the cited high-bar rack: one shaft radius (14 mm) behind the
+lift body's C7 landmark (`BackTop`), along the trunk's posterior axis. The
+source is Glassbrook et al. 2019 (J Strength Cond Res 33(S1):S1-S18), citing
+Wretenberg et al. 1996. It is defined in
+`src/shared/python/lifting/back_rack.py`. It replaces the parity standard's
+start-pose bar position, which lies above the shoulders.
+
+Both bundles start after a 0.1 s lead-in (100 steps, recorded as
+`provenance["lead_in"]` and `provenance["barbell"]["lead_in"]`), so state 0
+is settled on its contact. The source bundle's state-0 vertical force is
+2224.2 N, steady over the first 20 states; before, it was 1346.6 N rising to
+1771.4 N. The OpenSim squat now passes the Hicks residual gate on all 41
+states. The numbers and the failed experiments are in
+`docs/research/lift_models/lift_models.tex` (OSL-17). Regenerate with:
+
+```bash
+python3 scripts/generate_lift_bundle.py --lift squat --load-balance --lead-in 0.1
+python3 scripts/generate_barbell_squat_evidence.py --part bundle --source-commit <sha>
+python3 scripts/generate_barbell_squat_evidence.py --part parity --source-commit <sha>
+```
+
+The barbell hold starts from the balanced IK standing pose
+(`barbell_runs.hold_pose`, recorded as `provenance["ik"]["q_balanced_standing"]`):
+at the pre-balance `q_standing` the body-plus-bar centre of mass lies 18.6 cm
+behind the centre of pressure and no contact equilibrium exists.
+
+Open regressions on the rack bundle, recorded as strict xfails with the bounds
+unchanged (#13131):
+
+- Full-window cross-engine coordinates: 6.0e-5 rad (Drake), 2.0e-5 rad
+  (Pinocchio) and 1.4e-5 rad (OpenSim) against 1e-6 rad; before, 2e-10 rad.
+  The bar stays within 8.0e-7 m and every 20-step segment within 4.8e-13 rad.
+- Re-track bar deviation: 6.79 mm against the 3.6 mm LIFT-5 bound; before,
+  2.03 mm.
+- OpenSim arm reach: the Rajagopal arm ranges stop the hands 4.63 cm (left)
+  and 6.03 cm (right) from the high-bar grips against the 1 mm reach bound,
+  and the IK carries the arm coordinates up to 1.21e-3 rad past their ranges.
+- Body-alone centre of mass: 11.9 cm forward, ahead of the forefoot spheres
+  (10.4 cm); body plus bar is over the feet.
+
+All numbers here are on the lift body before the de Leva whole-row fix
+(#13102).
