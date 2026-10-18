@@ -2574,6 +2574,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12973 · OpenCap Augmenter Non-Zero Base Joint Derivation, NaN Marker Propagation, and Gap Counting
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12973
+- **Branch:** merged via #13230
+- **PR:** #13230
+- **Paths:** see #13230
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`3f7b262f`; collated from changes/12973-opencap-augmenter-impute-nan-handling.md)
+- **Summary:** OpenCap augmenter non-zero base joint derivation, NaN marker propagation, and gap counting
+- **Next step:** Shipped in PR #13230.
+
 ### DL-#13131 · OSL-17: Back-Squat Bar on the Cited High-Bar Rack (One Shaft Radius Behind the C7 Landmark, Glassbrook 2019 / Wretenberg 1996) and a 0.1 s Lead-In so the Bundle and Barbell Re-Track Start Settled; OpenSim Squat Hicks Gate Passes on All 41 States
 
 - **State:** shipped
