@@ -11,14 +11,31 @@ const CAT: SensitivityCatalogue = {
   spectra: [{ id: 'white', label: 'WHITE' }],
   mechanisms: [{ id: 'H-NOISE-SIGNAL-DEPENDENT', label: 'M1', note: 'needs a signal law' }],
   strategies: [
-    { id: 'S1', name: 'free', mechanism: 'm', availability: 'implemented', reason: '' },
-    { id: 'S4', name: 'share', mechanism: 'm', availability: 'not_implemented', reason: 'no model' },
+    {
+      id: 'S1',
+      name: 'free',
+      mechanism: 'm',
+      availability: 'implemented',
+      reason: '',
+    },
+    {
+      id: 'S4',
+      name: 'share',
+      mechanism: 'm',
+      availability: 'not_implemented',
+      reason: 'no model',
+    },
   ],
   outcomes: [{ id: 'face_angle', label: 'face angle' }],
   default_outcome_priority: ['face_angle'],
   engines: [
     { id: 'pinocchio', method: 'analytic', available: true, reason: '' },
-    { id: 'simscape', method: 'none', available: false, reason: 'snapshot grid only' },
+    {
+      id: 'simscape',
+      method: 'none',
+      available: false,
+      reason: 'snapshot grid only',
+    },
   ],
 };
 
@@ -45,9 +62,11 @@ describe('VariabilityControls', () => {
 
   it('defaults to face angle first and the whole strategy catalogue', () => {
     const onChange = setup();
-    expect((screen.getByLabelText('Primary outcome') as HTMLSelectElement).value).toBe('face_angle');
+    expect((screen.getByLabelText('Primary outcome') as HTMLSelectElement).value).toBe(
+      'face_angle',
+    );
     expect(onChange).toHaveBeenCalled();
-    const state = onChange.mock.calls.at(-1)![0];
+    const state = onChange.mock.calls[onChange.mock.calls.length - 1][0];
     expect(state.enabled).toBe(false);
     expect(state.choices.strategies).toBeNull();
     expect(state.choices.outcomePriority).toEqual(['face_angle']);
@@ -67,8 +86,10 @@ describe('VariabilityControls', () => {
       target: { value: 'shoulder=0.004, elbow=0.009' },
     });
     fireEvent.click(screen.getByLabelText(/S4/));
-    fireEvent.change(screen.getByLabelText('Engine'), { target: { value: 'simscape' } });
-    const state = onChange.mock.calls.at(-1)![0];
+    fireEvent.change(screen.getByLabelText('Engine'), {
+      target: { value: 'simscape' },
+    });
+    const state = onChange.mock.calls[onChange.mock.calls.length - 1][0];
     expect(state.enabled).toBe(true);
     expect(state.error).toBeNull();
     expect(state.engine).toBe('simscape');
@@ -80,6 +101,6 @@ describe('VariabilityControls', () => {
     fireEvent.change(screen.getByLabelText('Channels and amplitudes (variance)'), {
       target: { value: 'shoulder' },
     });
-    expect(onChange.mock.calls.at(-1)![0].error).not.toBeNull();
+    expect(onChange.mock.calls[onChange.mock.calls.length - 1][0].error).not.toBeNull();
   });
 });

@@ -14,7 +14,7 @@ import {
   nextLoopNullspaceDelay,
   submitLoopNullspaceJob,
   type LoopNullspaceJobStatusV1,
-  type LoopNullspaceRequest,
+  type LoopNullspaceJobRequest,
 } from './loopNullSpace';
 
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
@@ -48,7 +48,7 @@ export function useLoopNullspaceJob() {
   }, []);
 
   const start = useCallback(
-    async (request: LoopNullspaceRequest) => {
+    async (request: LoopNullspaceJobRequest) => {
       stopTimer();
       const token = ++run.current;
       setError(null);

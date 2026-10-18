@@ -102,7 +102,10 @@ describe('plot model 2.0.0 (NSX-100)', () => {
   const v2 = (
     JSON.parse(
       readFileSync(
-        resolve(__dirname, '../../../tests/fixtures/loop_nullspace/goldens/report_v2_variability.json'),
+        resolve(
+          __dirname,
+          '../../../tests/fixtures/loop_nullspace/goldens/report_v2_variability.json',
+        ),
         'utf8',
       ),
     ) as { plot_model: unknown }
@@ -114,7 +117,8 @@ describe('plot model 2.0.0 (NSX-100)', () => {
   });
 
   it('refuses a 2.0.0 model without sensitivity and any other version', () => {
-    const { sensitivity: _drop, ...rest } = v2 as Record<string, unknown>;
+    const rest = { ...(v2 as Record<string, unknown>) };
+    delete rest.sensitivity;
     expect(asPlotModel(rest)).toBeNull();
     expect(asPlotModel({ ...(v2 as object), schema_version: '3.0.0' })).toBeNull();
   });
@@ -133,7 +137,7 @@ describe('sensitivity options', () => {
   it('returns the served catalogue and rejects a malformed one', async () => {
     vi.mocked(apiFetch).mockResolvedValue(cat);
     await expect(fetchLoopNullspaceSensitivityOptions()).resolves.toEqual(cat);
-    expect(vi.mocked(apiFetch).mock.calls.at(-1)![0]).toBe(
+    expect(vi.mocked(apiFetch).mock.calls[vi.mocked(apiFetch).mock.calls.length - 1][0]).toBe(
       '/api/analysis/loop-nullspace/sensitivity-options',
     );
     vi.mocked(apiFetch).mockResolvedValue({ stages: 3 });

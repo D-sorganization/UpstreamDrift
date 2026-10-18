@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { buildSensitivityOptions, parseChannels, type VariabilityChoices } from './variabilityRequest';
+import {
+  buildSensitivityOptions,
+  parseChannels,
+  type VariabilityChoices,
+} from './variabilityRequest';
 import type { SensitivityCatalogue } from '@/api/loopNullSpace';
 
 const CAT: SensitivityCatalogue = {
@@ -7,8 +11,20 @@ const CAT: SensitivityCatalogue = {
   spectra: [{ id: 'white', label: 'WHITE' }],
   mechanisms: [{ id: 'H-NOISE-SIGNAL-DEPENDENT', label: 'M1', note: '' }],
   strategies: [
-    { id: 'S1', name: 'free', mechanism: 'm', availability: 'implemented', reason: '' },
-    { id: 'S2', name: 'imp', mechanism: 'm', availability: 'implemented', reason: '' },
+    {
+      id: 'S1',
+      name: 'free',
+      mechanism: 'm',
+      availability: 'implemented',
+      reason: '',
+    },
+    {
+      id: 'S2',
+      name: 'imp',
+      mechanism: 'm',
+      availability: 'implemented',
+      reason: '',
+    },
   ],
   outcomes: [{ id: 'face_angle', label: 'face angle' }],
   default_outcome_priority: ['face_angle'],

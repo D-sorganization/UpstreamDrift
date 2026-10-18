@@ -24,12 +24,25 @@ const CAT: SensitivityCatalogue = {
   stages: [{ id: 'torque', label: 'TORQUE' }],
   spectra: [{ id: 'white', label: 'WHITE' }],
   mechanisms: [],
-  strategies: [{ id: 'S1', name: 'free', mechanism: 'm', availability: 'implemented', reason: '' }],
+  strategies: [
+    {
+      id: 'S1',
+      name: 'free',
+      mechanism: 'm',
+      availability: 'implemented',
+      reason: '',
+    },
+  ],
   outcomes: [{ id: 'face_angle', label: 'face angle' }],
   default_outcome_priority: ['face_angle'],
   engines: [
     { id: 'pinocchio', method: 'analytic', available: true, reason: '' },
-    { id: 'simscape', method: 'none', available: false, reason: 'snapshot grid only' },
+    {
+      id: 'simscape',
+      method: 'none',
+      available: false,
+      reason: 'snapshot grid only',
+    },
   ],
 };
 const job = (over: Partial<LoopNullspaceJobStatusV1>): LoopNullspaceJobStatusV1 => ({
@@ -49,7 +62,9 @@ afterEach(() => {
 });
 
 beforeEach(() => {
-  vi.spyOn(api, 'fetchLoopNullspacePresets').mockResolvedValue([{ id: 'envelope_only', label: 'E' }]);
+  vi.spyOn(api, 'fetchLoopNullspacePresets').mockResolvedValue([
+    { id: 'envelope_only', label: 'E' },
+  ]);
   vi.spyOn(api, 'fetchLoopNullspaceSensitivityOptions').mockResolvedValue(CAT);
 });
 
@@ -60,8 +75,12 @@ describe('Variability and Consistency in the panel', () => {
       .mockResolvedValue(job({ result: { plot_model: v2 } }));
     render(<LoopNullSpacePanel />);
     await act(async () => {});
-    fireEvent.change(screen.getByLabelText('Source'), { target: { value: 'src1' } });
-    fireEvent.change(screen.getByLabelText('Engine'), { target: { value: 'simscape' } });
+    fireEvent.change(screen.getByLabelText('Source'), {
+      target: { value: 'src1' },
+    });
+    fireEvent.change(screen.getByLabelText('Engine'), {
+      target: { value: 'simscape' },
+    });
     fireEvent.click(screen.getByLabelText('Run variability analysis'));
     fireEvent.change(screen.getByLabelText('Channels and amplitudes (variance)'), {
       target: { value: 'shoulder=0.004, elbow=0.009' },
@@ -84,7 +103,9 @@ describe('Variability and Consistency in the panel', () => {
     const submit = vi.spyOn(api, 'submitLoopNullspaceJob').mockResolvedValue(job({ result: {} }));
     render(<LoopNullSpacePanel />);
     await act(async () => {});
-    fireEvent.change(screen.getByLabelText('Source'), { target: { value: 'src1' } });
+    fireEvent.change(screen.getByLabelText('Source'), {
+      target: { value: 'src1' },
+    });
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Run' }));
     });
@@ -95,7 +116,9 @@ describe('Variability and Consistency in the panel', () => {
     const submit = vi.spyOn(api, 'submitLoopNullspaceJob');
     render(<LoopNullSpacePanel />);
     await act(async () => {});
-    fireEvent.change(screen.getByLabelText('Source'), { target: { value: 'src1' } });
+    fireEvent.change(screen.getByLabelText('Source'), {
+      target: { value: 'src1' },
+    });
     fireEvent.click(screen.getByLabelText('Run variability analysis'));
     fireEvent.change(screen.getByLabelText('Channels and amplitudes (variance)'), {
       target: { value: 'oops' },
