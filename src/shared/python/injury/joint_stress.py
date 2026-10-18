@@ -24,6 +24,8 @@ import numpy as np
 
 from src.shared.python.core.constants import GRAVITY_M_S2
 
+_WRIST_SIGN_CONVENTIONS = ("ulnar_positive", "radial_positive")
+
 
 class JointSide(Enum):
     """Which side of the body (for bilateral joints)."""
@@ -73,6 +75,72 @@ class JointStressResult:
 
     # Risk score (0-100)
     risk_score: float = 0.0
+
+    # Set when inputs were missing; values are then NaN, never zero.
+    unavailable_reason: str | None = None
+
+
+@dataclass(frozen=True)
+class WristDeviation:
+    """Signed, side-tagged radial/ulnar deviation time series for one wrist.
+
+    Both ``side`` and ``sign_convention`` are required. An unsigned magnitude
+    cannot be interpreted, so it is rejected rather than guessed.
+
+    Fixing the sign does not validate the injury heuristic: the risk thresholds
+    in ``JointStressAnalyzer`` remain unvalidated screening values.
+
+    Attributes:
+        angles_rad: (N,) measured deviation in radians.
+        side: ``JointSide.LEAD`` or ``JointSide.TRAIL``.
+        sign_convention: ``"ulnar_positive"`` if positive values are ulnar
+            deviation, ``"radial_positive"`` if positive values are radial.
+    """
+
+    angles_rad: np.ndarray
+    side: JointSide
+    sign_convention: str
+
+    def __post_init__(self) -> None:
+        angles = np.asarray(self.angles_rad, dtype=float)
+        if angles.ndim != 1 or angles.size == 0:
+            raise ValueError(
+                "WristDeviation.angles_rad must be a non-empty 1-D array, "
+                f"got shape {angles.shape}"
+            )
+        if self.side not in (JointSide.LEAD, JointSide.TRAIL):
+            raise ValueError(
+                "WristDeviation.side must be JointSide.LEAD or JointSide.TRAIL, "
+                f"got {self.side!r}"
+            )
+        if self.sign_convention not in _WRIST_SIGN_CONVENTIONS:
+            raise ValueError(
+                "WristDeviation.sign_convention must be one of "
+                f"{_WRIST_SIGN_CONVENTIONS}, got {self.sign_convention!r}; "
+                "unsigned deviation input is not accepted"
+            )
+        object.__setattr__(self, "angles_rad", angles)
+
+    def ulnar_degrees(self) -> np.ndarray:
+        """Return the deviation in degrees, positive = ulnar (postcondition)."""
+        deg = np.degrees(self.angles_rad)
+        return deg if self.sign_convention == "ulnar_positive" else -deg
+
+
+def _unavailable_result(
+    joint_name: str, side: JointSide, time: np.ndarray, reasons: list[str]
+) -> JointStressResult:
+    """Return a result whose values are NaN and whose reason names the gap."""
+    nan = float("nan")
+    return JointStressResult(
+        joint_name=joint_name,
+        side=side,
+        time=time,
+        peak_shear=nan,
+        rom_utilization=nan,
+        risk_score=nan,
+        unavailable_reason="; ".join(reasons),
+    )
 
 
 @dataclass
@@ -197,6 +265,7 @@ class JointStressAnalyzer:
         joint_velocities: dict[str, np.ndarray],
         joint_torques: dict[str, np.ndarray],
         time: np.ndarray,
+        wrist_deviation: dict[JointSide, WristDeviation] | None = None,
     ) -> dict[str, JointStressResult]:
         """
         Analyze stress on all major joints.
@@ -206,12 +275,15 @@ class JointStressAnalyzer:
             joint_velocities: Dictionary of joint velocity time series
             joint_torques: Dictionary of joint torque time series
             time: Time array
+            wrist_deviation: Signed, side-tagged radial/ulnar deviation per side.
+                Wrists without an entry are reported as unavailable.
 
         Returns:
             Dictionary mapping joint names to JointStressResult
         """
         assert joint_angles is not None, "joint_angles must be provided"
         assert joint_angles is not None, "joint_angles must be provided"
+        deviations = wrist_deviation or {}
         results = {}
 
         # Analyze each joint pair
@@ -237,10 +309,20 @@ class JointStressAnalyzer:
         )
 
         results["wrist_lead"] = self.analyze_wrist(
-            joint_angles, joint_velocities, joint_torques, time, JointSide.LEAD
+            joint_angles,
+            joint_velocities,
+            joint_torques,
+            time,
+            JointSide.LEAD,
+            deviation=deviations.get(JointSide.LEAD),
         )
         results["wrist_trail"] = self.analyze_wrist(
-            joint_angles, joint_velocities, joint_torques, time, JointSide.TRAIL
+            joint_angles,
+            joint_velocities,
+            joint_torques,
+            time,
+            JointSide.TRAIL,
+            deviation=deviations.get(JointSide.TRAIL),
         )
 
         return results
@@ -387,25 +469,59 @@ class JointStressAnalyzer:
         joint_torques: dict[str, np.ndarray],
         time: np.ndarray,
         side: JointSide,
+        deviation: WristDeviation | None = None,
     ) -> JointStressResult:
-        """Analyze wrist joint stress (TFCC and hamate risk)."""
+        """Analyze wrist joint stress (TFCC and hamate risk).
+
+        ``deviation`` must be a signed, side-tagged ``WristDeviation``. The legacy
+        ``wrist_cock`` key is flexion, so it is never read as deviation. The
+        deviation rate is derived from ``deviation`` itself.
+
+        Missing ``deviation`` or ``wrist_rotation`` returns an unavailable result
+        (NaN values and ``unavailable_reason``), never zeros.
+
+        Fixing the sign does not validate the injury heuristic. The thresholds
+        below remain unvalidated screening values.
+
+        Raises:
+            ValueError: If ``deviation`` is untagged (a raw array), its side does
+                not match ``side``, or its length differs from ``time``.
+        """
         assert joint_angles is not None, "joint_angles must be provided"
-        assert joint_angles is not None, "joint_angles must be provided"
-        result = JointStressResult(joint_name="wrist", side=side, time=time)
+        if deviation is not None and not isinstance(deviation, WristDeviation):
+            raise ValueError(
+                "deviation must be a WristDeviation with an explicit sign convention "
+                f"and side, got {type(deviation).__name__}"
+            )
+        if deviation is not None and deviation.side != side:
+            raise ValueError(
+                f"deviation side {deviation.side.value!r} does not match analysis "
+                f"side {side.value!r}"
+            )
         n_frames = len(time)
+        if deviation is not None and deviation.angles_rad.shape[0] != n_frames:
+            raise ValueError(
+                f"deviation has {deviation.angles_rad.shape[0]} samples but time has "
+                f"{n_frames}"
+            )
+        if deviation is not None and n_frames < 2:
+            raise ValueError("wrist analysis needs at least 2 time samples")
 
-        # Get wrist angles
-        cock = joint_angles.get(
-            "wrist_cock", np.zeros(n_frames)
-        )  # Ulnar/radial deviation
-        rotation = joint_angles.get("wrist_rotation", np.zeros(n_frames))
+        rotation = joint_angles.get("wrist_rotation")
+        reasons: list[str] = []
+        if deviation is None:
+            reasons.append("wrist radial/ulnar deviation input missing")
+        if rotation is None:
+            reasons.append("wrist_rotation missing")
+        if reasons:
+            return _unavailable_result("wrist", side, time, reasons)
 
-        # Get velocity for impact stress estimation
-        velocity = joint_velocities.get("wrist_cock", np.zeros(n_frames))
+        result = JointStressResult(joint_name="wrist", side=side, time=time)
 
-        # Ulnar deviation in degrees
-        ulnar_dev = np.degrees(cock)
+        # Positive = ulnar, in degrees; the rate is in rad/s
+        ulnar_dev = deviation.ulnar_degrees()
         max_ulnar = np.max(ulnar_dev)
+        velocity = np.gradient(deviation.angles_rad, time)
 
         # TFCC stress increases with ulnar deviation + rotation + impact forces
         tfcc_stress = np.abs(ulnar_dev) * np.abs(np.degrees(rotation)) / 100
@@ -439,7 +555,11 @@ class JointStressAnalyzer:
         return result
 
     def get_summary(self, results: dict[str, JointStressResult]) -> dict[str, object]:
-        """Get a summary of all joint stress results."""
+        """Get a summary of all joint stress results.
+
+        Unavailable joints are listed under ``unavailable_joints`` and excluded
+        from the total, so a NaN never enters the average.
+        """
         assert results is not None, "results must be provided"
         assert results is not None, "results must be provided"
         summary: dict[str, object] = {
@@ -448,10 +568,15 @@ class JointStressAnalyzer:
             "joints_at_risk": [],
             "total_risk_score": 0.0,
             "recommendations": [],
+            "unavailable_joints": [
+                name for name, r in results.items() if r.unavailable_reason is not None
+            ],
         }
 
         risk_scores = []
         for name, result in results.items():
+            if result.unavailable_reason is not None:
+                continue
             risk_scores.append((name, result.risk_score))
             if result.risk_score > float(summary["highest_risk_score"]):  # type: ignore[arg-type]
                 summary["highest_risk_score"] = result.risk_score
@@ -470,8 +595,10 @@ class JointStressAnalyzer:
                     f"{name}: Overload risk - reduce intensity or modify technique"
                 )
 
-        summary["total_risk_score"] = sum(score for _, score in risk_scores) / len(
-            risk_scores
+        summary["total_risk_score"] = (
+            sum(score for _, score in risk_scores) / len(risk_scores)
+            if risk_scores
+            else float("nan")
         )
 
         return summary
@@ -491,8 +618,14 @@ if __name__ == "__main__":
         "shoulder_horizontal": np.sin(2 * np.pi * time) * 1.2,
         "shoulder_vertical": np.cos(2 * np.pi * time) * 0.8,
         "elbow_flexion": np.sin(2 * np.pi * time) * 1.5 + 1.0,
-        "wrist_cock": np.sin(4 * np.pi * time) * 0.5,
         "wrist_rotation": np.cos(4 * np.pi * time) * 0.3,
+    }
+    wrist_deviation = {
+        JointSide.LEAD: WristDeviation(
+            np.sin(4 * np.pi * time) * 0.5,
+            JointSide.LEAD,
+            sign_convention="ulnar_positive",
+        ),
     }
 
     dt = time[1] - time[0]
@@ -501,7 +634,11 @@ if __name__ == "__main__":
 
     # Analyze all joints
     results = analyzer.analyze_all_joints(
-        joint_angles, joint_velocities, joint_torques, time
+        joint_angles,
+        joint_velocities,
+        joint_torques,
+        time,
+        wrist_deviation=wrist_deviation,
     )
 
     for _name, _result in results.items():
