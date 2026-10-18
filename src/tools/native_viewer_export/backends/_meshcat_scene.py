@@ -208,6 +208,8 @@ def _plain_items(
     for n, cap in enumerate(skeleton.capsules):
         if cap.body == head_body:
             continue
+        if club and library.is_grip_hand_standoff(cap.body):
+            continue  # the club's grip hand replaces the standoff capsule
         rot, centre, length = z_axis_frame(cap.start_m, cap.end_m)
         items.append(
             VisualItem(

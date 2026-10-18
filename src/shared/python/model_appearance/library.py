@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 
 from src.shared.python.core.handedness import lead_side, trail_side
 from src.shared.python.model_appearance import defaults
+from src.shared.python.motion_matching.club_models import HAND_STANDOFF_SUFFIX
 from src.shared.python.model_appearance.grip_pose import Hand
 from src.shared.python.model_appearance.schema import (
     DEFAULT_CLOTHING,
@@ -448,6 +449,16 @@ def hand_material_name_for(hand: Hand, doc: AppearanceDocument) -> str:
     always matches the body skin (custom colour included).
     """
     return GLOVE_MATERIAL if hand in gloved_hands(doc) else doc.skin_tone
+
+
+def is_grip_hand_standoff(body_name: str) -> bool:
+    """True for the standoff body whose generic hand shape the club's grip hand
+    replaces whenever the club (and so the grip hands) is drawn.
+
+    The one predicate shared by the dressed resolution and every plain render
+    path, so no engine draws a second hand over the grip hand.
+    """
+    return body_name.rsplit("/", 1)[-1].endswith(HAND_STANDOFF_SUFFIX)
 
 
 def garment_name_for(doc: AppearanceDocument, body_name: str) -> str | None:
