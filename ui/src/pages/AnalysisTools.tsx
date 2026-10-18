@@ -15,6 +15,7 @@ import { CounterfactualPanel } from '@/components/analysis/CounterfactualPanel';
 import { ImpactParametersPanel } from '@/components/analysis/ImpactParametersPanel';
 import { GripWrenchCharts } from '@/components/analysis/GripWrenchCharts';
 import { GroundReactionCharts } from '@/components/analysis/GroundReactionCharts';
+import { LoopNullSpacePanel } from '@/components/analysis/LoopNullSpacePanel';
 import { PlotsSection } from '@/components/analysis/PlotsSection';
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 export type {
@@ -194,6 +195,9 @@ export function AnalysisToolsPage() {
 
             {/* Ground reaction under the feet (GCV-5, #11711) */}
             <GroundReactionCharts />
+
+            {/* Closed-loop null-space exploration (NSX-44, #12576) */}
+            <LoopNullSpacePanel />
 
             {/* Export Section */}
             <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">

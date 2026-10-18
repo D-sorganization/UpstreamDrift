@@ -28,10 +28,14 @@ from src.shared.python.loop_nullspace.evidence import (
 )
 from src.shared.python.loop_nullspace.grip_split import SPLIT_COLUMN_NAMES
 from src.shared.python.loop_nullspace.output_policy_integration import (
+    DisplayAction,
     DisplayDecision,
     display_decision,
 )
-from src.shared.python.loop_nullspace.plot_model import decision_key
+from src.shared.python.loop_nullspace.plot_model import (
+    build_plot_model,
+    decision_key,
+)
 from src.shared.python.loop_nullspace.plot_model_sensitivity import (
     sensitivity_quantities,
 )
@@ -171,3 +175,58 @@ def report_decisions(
             asker.ask(decision_key("diagnostics", level), adm["residuals"][level])
     _ask_sensitivity(asker, report)
     return asker.out
+
+
+def _apply_withhold_overrides(
+    decisions: dict[str, DisplayDecision],
+    overrides: Mapping[str, DisplayDecision],
+) -> None:
+    """Tighten ``decisions`` in place; an override may only withhold."""
+    for key, override in overrides.items():
+        if key not in decisions:
+            raise ValueError(f"override names an unknown decision key {key!r}")
+        if override.action is not DisplayAction.WITHHOLD:
+            raise ValueError(
+                f"override for {key!r} may only withhold, got {override.action}"
+            )
+        decisions[key] = override
+
+
+def plot_model_payload(
+    report: Mapping[str, Any],
+    *,
+    preset: str | None = None,
+    surface: str = "research_view",
+    decision_overrides: Mapping[str, DisplayDecision] | None = None,
+) -> dict[str, Any]:
+    """The JSON-safe plot model of ``report`` (the cross-UI ``to_dict`` form).
+
+    Runs :func:`report_decisions` (one ``display_decision`` per quantity) and
+    :func:`~.plot_model.build_plot_model`; this helper decides nothing.
+    ``decision_overrides`` replaces the answer for an existing decision key
+    with ``WITHHOLD`` only, so a fixture (the golden) can exercise the withheld
+    path; an override can tighten a decision but never admit a value the
+    output policy did not.  Production callers pass none.  ``preset``, when
+    given, must be the report's own preset.
+
+    Raises:
+        TypeError: ``report`` is not a mapping.
+        ValueError: ``report`` is malformed (missing sections or keys, a preset
+            that differs from ``preset``), an override key that names no
+            decision, or an override whose action is not ``WITHHOLD``.
+    """
+    if not isinstance(report, Mapping):
+        raise TypeError("report must be the mapping returned by analyze()")
+    if preset is not None and report.get("preset") != preset:
+        raise ValueError(
+            f"report preset {report.get('preset')!r} differs from requested {preset!r}"
+        )
+    try:
+        decisions = report_decisions(report, surface)
+    except (KeyError, AttributeError) as error:
+        raise ValueError(f"malformed report: {error!r}") from error
+    _apply_withhold_overrides(decisions, decision_overrides or {})
+    try:
+        return build_plot_model(report, decisions).to_dict()
+    except (KeyError, AttributeError) as error:
+        raise ValueError(f"malformed report: {error!r}") from error

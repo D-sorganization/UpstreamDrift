@@ -52,6 +52,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1134 | `src/shared/python/shadow_tracker/segmentation.py` |
 | 1134 | `src/tools/model_explorer/model_library.py` |
 | 1128 | `src/tools/starting_pose_matcher/gui_main_widget.py` |
+| 1127 | `src/shared/python/swing_comparison/metrics.py` |
 | 1125 | `src/tools/bunker_shot_gui/model.py` |
 | 1118 | `src/motion_capture/rig/__main__.py` |
 | 1115 | `src/bunkershot3d/ball/qualification.py` |
@@ -66,7 +67,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1096 | `src/learning/retargeting/retargeter.py` |
 | 1089 | `src/shared/python/motion_pipeline/contracts.py` |
 | 1073 | `src/shared/python/sidekick/calculators/thermo/steam_engine.py` |
-| 1068 | `src/shared/python/swing_comparison/metrics.py` |
 | 1066 | `src/tools/bunker_shot_gui/crosstier.py` |
 | 1065 | `src/shared/python/pendulum_simulator/gui/toolstrip_widget.py` |
 | 1063 | `src/bunkershot3d/metrics/divot.py` |

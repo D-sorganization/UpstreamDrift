@@ -212,14 +212,13 @@
       "notes": "GCV-8 (#11714): MuJoCo, MyoSuite and Drake emit per-hand WrenchKind.GRIP frames, Pinocchio the allocation net, OpenSim reports unavailable. GCV-10 (#11716): one glyph frame (force_overlay.grip_frame) and one plot series (biomechanics.grip_plot_model) feed the PyQt6 plot tool and Visualization-tab group toggles, GET /api/analysis/grip-wrench with the web charts and ForceOverlayPanel group toggles, and the native video export (per-hand arrows at each grip point, net arrow and couple arc at the midpoint, hands close-up camera). The split_method is labelled on the legend, the plots and the HUD; an unavailable split is listed as unavailable, never drawn as zero."
     },
     "loop_nullspace_exploration": {
-      "title": "Closed-loop null-space exploration (NSX): invariants, envelopes, hand split and diagnostics tabs with a registry preset selector",
+      "title": "Closed-loop null-space exploration (NSX): invariants, envelopes, hand split and diagnostics from one plot model, with a registry preset selector",
       "pyqt": "src/tools/grip_wrench_plots/window.py",
       "api": "src/api/routes/analysis_loop_nullspace.py",
-      "web": null,
-      "status": "gap",
-      "issue": 12576,
+      "web": "ui/src/components/analysis/LoopNullSpacePanel.tsx",
+      "status": "parity",
       "tiles": [],
-      "notes": "NSX-43 (#12575; hosted by the grip_wrench_plots tile, which analysis.grip_wrench already claims): the Grip Wrench Plots window is tabbed (the grip view first, then Invariants, Envelopes, Hand Split and Diagnostics) and renders only the framework-free NSXPlotModel (src/tools/grip_wrench_plots/nsx_view.py derives each panel, nsx_draw.py draws it); every shown, withheld, band, segment class and reason is the model's display_decision outcome and unknown states withhold. The preset selector lists the NSX-11 registry presets, runs go through a QThreadPool worker over the NSX-40 service with progress and cancel, and tests render the shared golden tests/fixtures/loop_nullspace/goldens/plot_model_v1.json. The React panel over the same golden is NSX-44 (#12576); until it lands the web column is a gap."
+      "notes": "Both surfaces render only the framework-free NSXPlotModel (src/shared/python/loop_nullspace/plot_model.py, NSX-42 #12574); every shown, withheld, band, segment class and reason is the model's display_decision outcome (ADR-0054 D7 Option A) and unknown states withhold. NSX-43 (#12575; hosted by the grip_wrench_plots tile, which analysis.grip_wrench already claims): the Grip Wrench Plots window is tabbed (the grip view first, then Invariants, Envelopes, Hand Split and Diagnostics), with a registry preset selector and a QThreadPool worker over the NSX-40 service. NSX-44 (#12576): the React panel consumes the NSX-40 job routes with a preset selector served by GET /analysis/loop-nullspace/presets, cancel and partial results; the job result and each partial carry plot_model built by plot_model_payload. Badges, display classes and reasons are text, not colour alone. Both are tested against the single golden tests/fixtures/loop_nullspace/goldens/plot_model_v1.json."
     },
     "analysis.ground_reaction": {
       "title": "Ground reaction plots: per-foot and net force (N and body weights), vertical load share, CoP path, free moment and moment about CoM",
