@@ -313,8 +313,9 @@ def blend_scale(garment: bool, part: str = "upper_arm") -> float:
 
 # Pelvis solid (HRG-C1, #13164): lofted on the hip landmarks, see
 # ``body_meshes._pelvis_segment``.
-PELVIS_HIP_MARGIN_M = 0.01  # skin clearance beyond the femur at the widest level
-PELVIS_CROTCH_DROP_M = PART_RADIUS_M["thigh"]  # solid runs this far below the HJCs
+# Width is ``pelvis_width`` (HRG-C4); the lower pole hangs below the MEAN HJC.
+PELVIS_CROTCH_DROP_M = PART_RADIUS_M["thigh"]  # pole below the mean HJC height
+PELVIS_MIN_BELOW_HJC_M = 0.025  # the lowest HJC keeps at least this much solid below
 PELVIS_WAIST_RATIO = 0.75  # flat cap at the lumbar plane / widest half width
 
 
