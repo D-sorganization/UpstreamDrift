@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { LoopNullSpacePanel } from './LoopNullSpacePanel';
 import { PlotModelView } from './loopNullSpace/PlotModelView';
@@ -201,6 +201,11 @@ function fill() {
 }
 
 describe('LoopNullSpacePanel job flow', () => {
+  beforeEach(() => {
+    // A late poll must never reach the unmocked network layer.
+    vi.spyOn(api, 'getLoopNullspaceJob').mockResolvedValue(job({}));
+  });
+
   it('offers the registry presets and refuses an incomplete form', () => {
     render(<LoopNullSpacePanel />);
     expect(within(screen.getByLabelText('Preset')).getAllByRole('option')).toHaveLength(
@@ -258,6 +263,7 @@ describe('LoopNullSpacePanel job flow', () => {
     vi.spyOn(api, 'submitLoopNullspaceJob').mockResolvedValue(
       job({ partial: { plot_model: model } }),
     );
+    vi.spyOn(api, 'getLoopNullspaceJob').mockResolvedValue(job({ partial: { plot_model: model } }));
     render(<LoopNullSpacePanel />);
     fill();
     await act(async () => {
