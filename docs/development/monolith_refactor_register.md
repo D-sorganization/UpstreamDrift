@@ -27,7 +27,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1196 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
 | 1195 | `src/tools/shot_pattern_analysis/matched_supplement_figures.py` |
 | 1193 | `src/launchers/model_card.py` |
-| 1186 | `src/shared/python/lifting/bundles.py` |
 | 1185 | `src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m` |
 | 1184 | `src/bunkershot3d/ball/splash.py` |
 | 1183 | `src/launchers/launcher_simulation.py` |
@@ -40,6 +39,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1167 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
 | 1167 | `src/launchers/settings_dialog.py` |
 | 1166 | `src/shared/python/analysis/orchestrator.py` |
+| 1166 | `src/shared/python/lifting/bundles.py` |
 | 1165 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py` |
 | 1164 | `src/shared/python/physics/terrain_representation.py` |
 | 1158 | `src/engines/simscape/adapter.py` |

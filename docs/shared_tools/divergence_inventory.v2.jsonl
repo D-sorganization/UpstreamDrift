@@ -1042,6 +1042,7 @@
 {"path": "lifting/barbell_runs.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/baseline_view.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/bench_press.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
+{"path": "lifting/bundle_stability.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/bundle_targets.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/bundles.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/kinetics_parity.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
