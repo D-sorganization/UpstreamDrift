@@ -103,6 +103,14 @@
     "club_finish": { "$ref": "#/$defs/name" },
     "glove": { "enum": ["none", "lead", "trail", "both"] },
     "handedness": { "enum": ["right", "left"] },
+    "grip": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "style": { "enum": ["overlap", "interlock", "ten_finger"] },
+        "lead_thumb_offset_deg": { "type": "number", "minimum": 0, "maximum": 45 }
+      }
+    },
     "materials": {
       "type": "object",
       "propertyNames": { "$ref": "#/$defs/name" },

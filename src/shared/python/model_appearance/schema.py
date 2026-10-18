@@ -178,6 +178,9 @@ class AppearanceDocument:
     ball: BallSettings = field(default_factory=BallSettings)
     glove: str = DEFAULT_GLOVE
     handedness: str = DEFAULT_HANDEDNESS
+    #: Visual grip picks (``style``, ``lead_thumb_offset_deg``); never a physical
+    #: value (HRG-GR4, #13205).  ``None`` leaves the spec's own visual hints.
+    grip: dict[str, Any] | None = None
 
 
 @lru_cache(maxsize=1)
@@ -340,6 +343,7 @@ def document_from_dict(data: Mapping[str, Any]) -> AppearanceDocument:
         ball=_ball_settings(data.get("ball", {})),
         glove=data.get("glove", DEFAULT_GLOVE),
         handedness=data.get("handedness", DEFAULT_HANDEDNESS),
+        grip=None if "grip" not in data else dict(data["grip"]),
     )
     library.check_references(doc)
     return doc
@@ -406,6 +410,8 @@ def document_to_dict(doc: AppearanceDocument) -> dict[str, Any]:
         out["glove"] = doc.glove
     if doc.handedness != DEFAULT_HANDEDNESS:
         out["handedness"] = doc.handedness
+    if doc.grip is not None:
+        out["grip"] = dict(doc.grip)
     validate_document(out)
     return out
 
