@@ -1,0 +1,118 @@
+% HRG-C2 (#13168): MAP hip joint centre estimation.
+% Standalone section; the HRG reference (HRG-00, #13184) can \input{sections/hip_centres}.
+\section{Hip Joint Centre Estimation with Uncertainty}
+\label{sec:hrg-hjc-map}
+
+\paragraph{Status.} Estimation only. Applying an estimate to a model is HRG-C3
+(\#13172); \texttt{apply\_hip\_calibration} is unchanged. Software correctness
+only; scientific qualification stays in the design-manual pathway.
+
+\subsection{Model and Assumptions}
+Pelvis frame: the \texttt{Hip} frame of the full-body specification
+($x$ forward, $y$ left, $z$ up, metres), recovered per frame by a rigid fit of
+the four waist markers (\texttt{WaistLeft}, \texttt{WaistRight},
+\texttt{WaistLBack}, \texttt{WaistRBack}; no ASIS/PSIS exist in this capture,
+so Harrington~(2007) and Bell regressions cannot be evaluated). For side
+$s\in\{R,L\}$ the lateral knee marker $p_i$ (60~mm off the knee axis) is a
+point rigidly fixed to the femur, so
+\begin{equation}
+  \lVert p_i - c_s\rVert = r_s + e_i,\qquad e_i\sim\mathcal N(0,\sigma_s^2),
+\end{equation}
+with $c_s$ the hip joint centre and $r_s$ a nuisance radius. The lateral
+offset changes $r_s$, not $c_s$.
+
+\subsection{Estimator}
+With $x=(c_R,c_L)$ and prior $x\sim\mathcal N(\mu,\Sigma_p)$ the estimate is
+\begin{equation}
+  \hat x = \arg\min \sum_s\sum_i\Bigl(\tfrac{\lVert p_i-c_s\rVert-r_s}{\sigma_s}\Bigr)^2
+  + (x-\mu)^\top\Sigma_p^{-1}(x-\mu),
+\end{equation}
+solved by Levenberg--Marquardt from the prior mean. The posterior covariance is
+the inverse of the final Gauss--Newton information $J^\top J$ (radii marginalised).
+$\sigma_s$ is the residual SD of the data-only geometric fit with $n-4$ degrees of
+freedom, floored at 1~$\mu$m, and inflated by $\sqrt{\tau}$ where $\tau=1+2\sum_k\rho_k$
+is the integrated autocorrelation time of the residual series (initial positive
+sequence), because swing frames are not independent. Derived quantities
+(inter-HJC distance $\lVert c_R-c_L\rVert$, height difference $(c_R-c_L)\cdot\hat u$,
+roll $=\operatorname{atan2}$ of that height over the horizontal span, positive when
+the right centre is higher) use 4000 fixed-seed draws from the Gaussian posterior,
+because a delta-method interval undercovers when the AP/SI prior SD (30~mm on the
+inter-HJC vector) exceeds the lateral one (6~mm).
+
+\subsection{Declared Prior (Stature)}
+\begin{itemize}
+  \item Inter-HJC distance $0.104\times$stature (\texttt{HIP\_HALF\_WIDTH\_FRACTION\_OF\_STATURE}
+  $=0.052$): 177.8~mm at 1.71~m. Half-vector SD 3~mm laterally (6~mm on the distance),
+  15~mm in AP and SI (about $\pm5^\circ$ roll at 178~mm).
+  \item Midpoint: builder values $(0,0,0)$ with SD $(50,10,50)$~mm; the waist-frame
+  origin is only loosely tied to the joint, so AP/SI are weak.
+  \item Not implemented: a waist-marker pelvic-width proxy (Harrington 2007 needs ASIS and
+  a single stated regression variant). Documented follow-up.
+\end{itemize}
+These widths are declared assumptions, not measurements.
+
+\subsection{Status Rules}
+\texttt{degenerate}: either knee arc subtends a full cone angle below 20$^\circ$, or a
+side's data-information eigenvalue ratio is below $10^{-8}$. \texttt{prior\_dominated}:
+more than 0.5 of the posterior information is the prior ($w=\operatorname{tr}(\Sigma_{post}\Sigma_p^{-1})/6$).
+Otherwise \texttt{identified}. The 20$^\circ$ and 0.5 thresholds are engineering
+choices, not physiological limits. Left/right symmetry is never imposed; it is
+reported as a $\chi^2_2$ test of equal AP and SI position using the data-only fit.
+
+\subsection{Knee-Marker Bias Test}
+Synthetic rigid femur rotating about a known centre (flexion $\pm25^\circ$, abduction
+$\pm12^\circ$, axial rotation $\pm18^\circ$) with a femur-fixed marker 60~mm lateral:
+noiseless centre error $7\times10^{-13}$~mm; with 2~mm noise over 100 trials the
+mean right-centre bias is $(-0.02,0.31,0.45)$~mm with standard errors
+$(0.05,0.52,1.3)$~mm. Astra's position holds (no bias); the claimed $\sim21$~mm
+per side is not reproduced. No medialisation is applied. Soft-tissue artefact and
+waist-frame error are not covered by this test and are the larger risk.
+
+\subsection{Verification}
+Noiseless recovery within $10^{-6}$~m; short arcs flagged \texttt{degenerate}; 95\%
+interval coverage over 300 seeded trials with truth drawn from the prior (60 frames,
+4~mm noise, $14^\circ/7^\circ/9^\circ$ cone) must lie in 0.90--0.99
+(\texttt{tests/unit/motion\_matching/test\_hip\_centre\_map.py}).
+
+\subsection{Best-Fit Driver Capture}
+Capture \texttt{data/C3D\_TA\_Driver.c3d} (stature 1.71~m from
+\texttt{full\_body\_spec\_anthro\_driver.json}), 649 frames per side. Waist rigid-fit residual:
+RMS 13.3~mm, maximum absolute component 27.8~mm. Knee arcs span $110^\circ$ (R) and $58^\circ$ (L);
+$\tau\approx90$ frames per independent sample.
+
+\begin{center}
+\begin{tabular}{lccc}
+\hline
+ & MAP (stature prior) & Likelihood only & MAP, $\tau=1$ (iid; optimistic) \\
+\hline
+Status & identified ($w=0.25$) & identified & identified ($w=0.01$) \\
+Inter-HJC (mm) & 186.9 [178.8, 197.9] & 215.6 [193.6, 253.7] & 213.7 [210.8, 216.7] \\
+Height R$-$L (mm) & $-20.2$ [$-60.2$, 20.4] & 32.8 [$-34.5$, 101.6] & 29.2 [22.2, 36.2] \\
+Roll ($^\circ$) & $-6.2$ [$-18.2$, 6.0] & 8.8 [$-9.9$, 23.8] & 7.9 [6.0, 9.6] \\
+\hline
+\end{tabular}
+\end{center}
+Legacy algebraic fit: 220~mm, R 39~mm higher, roll $10.2^\circ$. With dependence between
+frames accounted for, the data alone give $215.6$~mm [193.6, 253.7] and cannot distinguish
+a level hip line; the stature prior moves the distance to the edge of its
+interval (177.8~mm prior vs 178.8~mm lower bound) and the height/roll intervals contain zero.
+Symmetry test (data only, $\tau$ inflated): $\chi^2_2=1.46$, $p=0.48$; with iid frames
+$\chi^2_2=131$, so the asymmetry claim depends entirely on the independence assumption.
+The 13~mm waist residual is a likely common-mode error in the pelvis frame and is not
+modelled. Reported against the prior; no universal $\pm12$~mm, $<5$~mm or $<2^\circ$ gate is applied.
+
+\subsection{Reproduction}
+\begin{verbatim}
+PYTHONPATH=.:src python3 - <<'PY'   # from the repository root
+import json, numpy as np
+from src.shared.python.motion_matching.pipeline.lane import Lane
+from src.shared.python.motion_matching.pipeline.address import pelvis_marker_offsets
+from src.shared.python.motion_matching.hip_centre_map import (
+    HipCentrePrior, estimate_hip_centres_from_capture)
+spec = json.load(open("docs/development/full_body_models/full_body_spec_anthro_driver.json"))
+labels = tuple(json.load(open(RECEIPT))["labels"])  # run receipt label list
+lane = Lane(labels, "data/C3D_TA_Driver.c3d")
+est = estimate_hip_centres_from_capture(lane.points, lane.valid, lane.labels,
+    pelvis_marker_offsets(spec), HipCentrePrior.from_stature(1.71))
+PY
+\end{verbatim}
