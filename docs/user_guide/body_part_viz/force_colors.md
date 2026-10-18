@@ -58,6 +58,38 @@ the toggle can always turn off the display even when an unapplied edit is invali
 
 For non-MuJoCo engines, `axial_loads_from_reactions(frame, axes, source)` in `src/shared/python/force_overlay/conversions.py` provides the single shared path to compute segment axial loads from `JOINT_REACTION` overlay wrenches. By mapping each segment to its proximal reaction joint via `SegmentAxis(segment, joint_label, proximal_m, distal_m)`, it invokes `axial_force_from_proximal_reaction` to yield an `AxialLoadFrame` (or `frame_with_axial_loads` to produce an annotated `ForceTorqueFrame`) with positive values for tension and negative for compression. Missing reaction wrenches or force-less reactions leave corresponding segment values as `None` (never zero-filled).
 
+## Desktop Controls: Opacity, Blend Mode and Colors
+
+The shared PyQt6 `ForceColorControls` widget (used by the MuJoCo, Drake,
+Pinocchio, Simscape and pendulum GUIs through **Segment Force Colors…**) edits
+every `ForceColorScale` field:
+
+- **Overlay Opacity** (0-100 %) sets `opacity`; it applies immediately.
+- **Blend Mode** sets `blend_mode`. *Tint over model* shifts each segment's own
+  color toward the tension or compression color in proportion to the load, so
+  unloaded segments keep their appearance. *Replace colour* paints the load
+  color (blended with the base by the opacity).
+- Each of the tension, compression and neutral colors has a hex field plus a
+  picker button with a live swatch. **Reset Colours** restores the default blue,
+  red and white and keeps every other setting.
+- Limits and hex edits still apply atomically with **Apply Colors and Ranges**:
+  an invalid edit keeps the previous scale and reports the error.
+
+### Inline Toggles and Persistence
+
+The MuJoCo **Visualization** tab adds **Show Segment Tension/Compression** and
+**Overlay Opacity** beside **Show Joint Torque Vectors (curl arrows)** and
+**Show Joint Force Vectors**, plus a **Segment Force Colors…** button that opens
+the full dialog. Drake and Pinocchio add the same inline shading checkbox next to
+their Show Forces and Show Torques boxes. Dialog and inline controls share one
+`ForceColorHub`, so a change in either place appears in the other.
+
+The scale (`to_dict`) and the force and torque toggles are saved with `QSettings`
+under organization and application `UpstreamDrift` (key `force_color/<engine>`) and
+restored at startup by MuJoCo, Drake and Pinocchio. Corrupt or legacy values fall
+back to defaults and log a warning. Other engines can reuse
+`bind_force_color_persistence` or `force_color_settings.py`.
+
 ## Web Hosts
 
 `Scene3D` has a collapsible Segment Force Colors panel. Supply the optional

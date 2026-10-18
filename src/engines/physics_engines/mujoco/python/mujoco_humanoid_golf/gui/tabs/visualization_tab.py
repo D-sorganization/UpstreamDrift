@@ -14,6 +14,10 @@ from typing import TYPE_CHECKING
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+from src.shared.python.body_part_viz.force_color_controls import (
+    ForceColorHub,
+    InlineForceColorControls,
+)
 from src.shared.python.core.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.style_constants import Styles
@@ -386,9 +390,54 @@ class VisualizationTab(QtWidgets.QWidget):
         self.isolate_forces_cb.stateChanged.connect(self.on_isolate_forces_changed)
         force_layout.addWidget(self.isolate_forces_cb)
 
-        self.show_torques_cb = QtWidgets.QCheckBox("Show Joint Torque Vectors")
+        self.show_torques_cb = QtWidgets.QCheckBox(
+            "Show Joint Torque Vectors (curl arrows)"
+        )
+        self.show_torques_cb.setToolTip(
+            "Curved arrows showing the torque at each joint"
+        )
+        self._restore_checkbox(
+            self.show_torques_cb, getattr(self.sim_widget, "show_torque_vectors", None)
+        )
         self.show_torques_cb.stateChanged.connect(self.on_show_torques_changed)
         force_layout.addWidget(self.show_torques_cb)
+        self._create_segment_shading_controls(force_layout)
+
+    @staticmethod
+    def _restore_checkbox(box: QtWidgets.QCheckBox, stored: object) -> None:
+        """Show a persisted state without firing the change handler."""
+        if stored is True:
+            box.blockSignals(True)
+            box.setChecked(True)
+            box.blockSignals(False)
+
+    def _create_segment_shading_controls(
+        self, force_layout: QtWidgets.QVBoxLayout
+    ) -> None:
+        """Inline tension/compression toggle, opacity and dialog button.
+
+        The sim widget's ``ForceColorHub`` is the shared state, so these stay in
+        sync with the Segment Force Colors dialog in both directions.
+        """
+        if force_layout is None:
+            raise ValueError("force_layout must be provided")
+        hub = getattr(self.sim_widget, "force_color_hub", None)
+        if not isinstance(hub, ForceColorHub):
+            hub = ForceColorHub(parent=self)
+            hub.scale_changed.connect(self.sim_widget.set_axial_color_scale)
+        self.segment_shading_controls = InlineForceColorControls(hub, show_opacity=True)
+        self.segment_shading_controls.setToolTip(
+            "Colour model segments by axial tension (blue) / compression (red)"
+        )
+        force_layout.addWidget(self.segment_shading_controls)
+        dialog_button = QtWidgets.QPushButton("Segment Force Colors…")
+        dialog_button.setObjectName("open_segment_force_colors")
+        dialog_button.setToolTip("Limits, colours and blend mode (Ctrl+Shift+F)")
+        dialog_button.clicked.connect(self._open_force_color_dialog)
+        force_layout.addWidget(dialog_button)
+
+    def _open_force_color_dialog(self) -> None:
+        self.sim_widget.open_force_color_dialog()
 
     def _create_torque_scale_controls(
         self, force_layout: QtWidgets.QVBoxLayout
@@ -413,7 +462,14 @@ class VisualizationTab(QtWidgets.QWidget):
     def _create_force_scale_controls(self, force_layout: QtWidgets.QVBoxLayout) -> None:
         if force_layout is None:
             raise ValueError("force_layout must be provided")
-        self.show_forces_cb = QtWidgets.QCheckBox("Show Constraint Forces")
+        self.show_forces_cb = QtWidgets.QCheckBox("Show Joint Force Vectors")
+        self.show_forces_cb.setToolTip(
+            "Straight arrows for the force half of every overlay wrench: "
+            "joint reaction, contact and constraint forces"
+        )
+        self._restore_checkbox(
+            self.show_forces_cb, getattr(self.sim_widget, "show_force_vectors", None)
+        )
         self.show_forces_cb.stateChanged.connect(self.on_show_forces_changed)
         force_layout.addWidget(self.show_forces_cb)
 

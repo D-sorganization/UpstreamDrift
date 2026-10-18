@@ -33,6 +33,11 @@ os.environ.setdefault(
     "UPSTREAM_DRIFT_OUTPUT_DIR",
     _tempfile.mkdtemp(prefix="upstream_drift_test_output_"),
 )
+# Tests must never read or write the user's real QSettings (e.g.
+# ~/.config/UpstreamDrift/UpstreamDrift.conf). On Linux the native format
+# follows XDG_CONFIG_HOME, so redirect it before Qt is imported; the autouse
+# ``_isolate_qsettings`` fixture below covers other platforms.
+os.environ["XDG_CONFIG_HOME"] = _tempfile.mkdtemp(prefix="upstream_drift_test_xdg_")
 # ---------------------------------------------------------------------------
 # Patch broken transitive imports before any test module is collected.
 # Other agents are refactoring src.shared.python.data_io and
@@ -282,6 +287,23 @@ if not _has_pyqt6:
     sys.modules["PyQt6.QtGui"] = pyqt_mock.QtGui
     sys.modules["PyQt6.QtWidgets"] = pyqt_mock.QtWidgets
     sys.modules["PyQt6.QtWebEngineWidgets"] = pyqt_mock.QtWebEngineWidgets
+
+
+@pytest.fixture(autouse=True)
+def _isolate_qsettings(tmp_path_factory):
+    """Point QSettings at a temp dir; a no-op when PyQt6 is not loaded."""
+    qtcore = sys.modules.get("PyQt6.QtCore")
+    if qtcore is None:
+        yield
+        return
+    settings_cls = qtcore.QSettings
+    previous = settings_cls.defaultFormat()
+    root = tmp_path_factory.mktemp("qsettings")
+    settings_cls.setDefaultFormat(settings_cls.Format.IniFormat)
+    for scope in (settings_cls.Scope.UserScope, settings_cls.Scope.SystemScope):
+        settings_cls.setPath(settings_cls.Format.IniFormat, scope, str(root))
+    yield
+    settings_cls.setDefaultFormat(previous)
 
 
 @pytest.fixture(autouse=True)
