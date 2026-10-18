@@ -287,7 +287,8 @@ def _sole_basis(
     spheres: Sequence[Mapping[str, Any]], section: BodySection, side: str
 ) -> _Basis:
     up, left = section.depth_axis, section.ml_axis
-    flat = _Basis(np.cross(left, up), up, left, 1.0 if side == "right" else -1.0)
+    fwd = np.asarray(np.cross(left, up), dtype=np.float64)
+    flat = _Basis(fwd, up, left, 1.0 if side == "right" else -1.0)
     return _pitch_about_left(
         flat,
         [np.asarray(sp["position_m"], float) for sp in spheres],
