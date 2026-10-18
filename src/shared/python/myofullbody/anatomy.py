@@ -273,3 +273,20 @@ def world_alignment(spec: SegmentFrames, myo: SegmentFrames) -> Array:
     1.5 degree skewed line and are not used for the world alignment.
     """
     return myo.thorax_frame @ spec.thorax_frame.T
+
+
+def segment_rotation_isb(
+    frames: SegmentFrames, name: str, body_rotation_world: Array, basis: Any
+) -> Array:
+    """World rotation of segment ``name`` in the ISB axes (HRG-E2, #13169).
+
+    ``F(q) = R_body(q) K`` is the segment frame in this module's labelling
+    (x right, y up, z posterior); ``basis`` is the explicit
+    :class:`~src.shared.python.anatomical_angles.basis.BasisMap` (use
+    ``ISB_FROM_MYOFULLBODY``) that relabels it to ISB (X anterior, Y up, Z
+    right). Wu-frame offsets for the radius and hand are a further calibration
+    (``wu_wrist_frame``), not a property of this segment frame.
+    """
+    require(name in frames.constant, f"unknown segment {name!r}")
+    body = np.asarray(body_rotation_world, dtype=float)
+    return np.asarray(basis.apply_rotation(body @ frames.constant[name]))

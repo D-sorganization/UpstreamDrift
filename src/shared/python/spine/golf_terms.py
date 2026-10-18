@@ -31,6 +31,7 @@ from typing import Any, Literal
 
 import numpy as np
 
+from src.shared.python.anatomical_angles import terms as _wrist_terms
 from src.shared.python.contracts import ensure
 from src.shared.python.spine._golf_term_impl import (
     Handedness,
@@ -372,6 +373,23 @@ _TERMS: dict[str, _Term] = {
         ),
     )
 }
+
+# HRG-E2 (#13169): wrist and forearm terms extend this one registry.
+_TERMS.update(
+    {
+        w.term_id: _term(
+            w.term_id,
+            _wrist_terms.evaluator(w),  # type: ignore[arg-type]
+            description=w.description,
+            frame=w.frame,
+            sign_convention=w.sign_convention,
+            units="deg",
+            required_inputs=(w.required_input,),
+            reference=_wrist_terms.wrist_term_reference(),
+        )
+        for w in _wrist_terms.wrist_term_specs()
+    }
+)
 
 _JCS_TERMS = ("x_factor_jcs_axial", "trunk_extension_jcs", "trunk_lateral_flexion_jcs")
 
