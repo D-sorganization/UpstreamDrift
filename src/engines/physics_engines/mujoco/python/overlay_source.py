@@ -158,6 +158,19 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
         except (KeyError, ValueError, ArithmeticError, np.linalg.LinAlgError) as exc:
             return GripClosure.unavailable(f"closure solve failed: {exc}")
 
+    def club_frame_world(
+        self, coordinates: Mapping[str, float]
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """World rotation (3x3) and origin of the club body (the weld's site B body).
+
+        Used to carry club-frame geometry (e.g. the palm-on-thumb patch, #13189)
+        to the world. Read-only: no model field is modified.
+        """
+        self._forward(coordinates)
+        body = int(self.model.site_bodyid[self._closure[1]])
+        rotation = np.array(self.data.xmat[body], dtype=float).reshape(3, 3)
+        return rotation, np.array(self.data.xpos[body], dtype=float)
+
     def _forward(self, coordinates: Mapping[str, float]) -> None:
         self.data.qpos[:] = self._vector(coordinates)
         self._mj.mj_fwdPosition(self.model, self.data)

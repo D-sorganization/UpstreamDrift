@@ -7980,6 +7980,60 @@ smoothness is imposed.
 \item v1-specific consumers outside the registry are left v1-only, for example
 the Crocoddyl \texttt{TorsoInput} weights.
 \end{itemize}
+
+\section{Allocated Trail-Palm-on-Lead-Thumb Force (HRG-H1)}
+\subsection{Scope and Status}
+In the full-body model the lead hand is the club body (\texttt{Clubface Vector})
+and the trail hand \texttt{RHandStandoff} is closed onto it by the loop
+constraint \texttt{RightHandOnClubForce}. Only the closure multiplier
+$\lambda$ is observable: a palm--thumb force would act between the same two
+bodies as the weld. The reported palm-on-thumb force is therefore an
+\emph{allocated equivalent} of $-\lambda$, labelled \texttt{method="allocation"}.
+It is not a new contact, not a measured biological force, and it never enters
+the equations of motion. The compiled \texttt{body\_mass}, \texttt{body\_inertia}
+and \texttt{eq\_data} and the physics-spec hash are unchanged (tested).
+
+\subsection{Patch Frame}
+Work in the lead hand-grip frame (origin on the grip axis at the lead hand
+centre, $z$ butt toward head, $x$ the toe axis, $y=z\times x$; units m). The
+palm reference $Q$ is the vertex centroid of the trail palm shell moved along
+$z$ by the hand spacing. The lead thumb is a capsule of radius $r$ (0.0095 m)
+whose axis lies at the thumb azimuth and radius $R_g+c+r$ ($R_g$ the grip
+radius, $c$ the pad clearance) between the declared stations
+\texttt{thumb\_stations\_m}. With $A$ the axis point nearest $Q$,
+$n=(Q-A)/\lVert Q-A\rVert$ (thumb toward palm) and the patch point is
+$P=A+rn$. A left-handed golfer's patch is the exact reflection of the
+right-handed one in the plane of the shaft and the face normal. The frame
+comes from \texttt{thumb\_palm\_patch}, the single function GR2 will later feed
+from \texttt{GripSpec}. Spacing of the default pose leaves only the thumb tip
+under the trail palm: the patch sits on the distal end cap (axial station 46 mm).
+
+\subsection{Allocation}
+The closing-hand load on the lead side is $(F,M_O)=(-\lambda_f,-\lambda_m)$ at
+the closure site $O$. At $P$: $M_P=M_O-(P-O)\times F$ (the residual couple is
+kept). A palm force pushes the thumb along $-n$, so
+$F_n=\max(0,-F\cdot n)$; $F\cdot n\ge 0$ is tension and is flagged
+\texttt{unloaded}. $F_t=\lVert F-(F\cdot n)n\rVert$, the friction ratio is
+$F_t/(\mu F_n)$ with the spec static friction $\mu=0.9$, and the share is
+$F_n/\lVert F\rVert$. When $\lambda$ is unavailable every quantity is
+\texttt{None} with a reason, never zero.
+
+\subsection{Evidence and Limitations}
+Tests: \texttt{test\_grip\_contact\_patch.py} (surface within 1 mm, palm
+margin 2 mm, mirror $10^{-9}$), \texttt{test\_palm\_thumb.py} ($\lambda$
+reproduced to $10^{-10}$, third law $10^{-9}$, static hold at 12 attitudes),
+\texttt{test\_palm\_thumb\_real\_spec\_13189.py}. On the driver bundle
+\texttt{r9b/driver\_bundle.npz} (61 of 1814 steps sampled), the peak allocated
+normal force is 94.2~N at step 1470 (closure force 170.0~N, share 0.554, friction
+ratio 1.67 against $\mu=0.9$); 19 of 61 sampled frames are unloaded. The
+allocation is not unique ($\lambda$ has no information on where the load acts),
+the share depends on the declared patch, and the friction ratio above one marks
+frames where the allocation lies outside the cone, not a slip.
+
+Reproduce: build the patch with \texttt{thumb\_palm\_patch} from the spec club,
+call \texttt{BundleOverlayProvider.with\_palm\_thumb} on a
+\texttt{MujocoOverlaySource} and read \texttt{frame.metadata["palm\_thumb"]}.
+
 \begin{thebibliography}{9}
 \bibitem{MathWorksPSUnits}
 MathWorks. \emph{Simulink-PS Converter: Unit Conversion and Checking}.

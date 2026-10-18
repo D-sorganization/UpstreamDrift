@@ -39,6 +39,7 @@ from src.shared.python.force_overlay.contracts import (
 )
 from src.shared.python.force_overlay.conversions import joint_torque_wrench
 from src.shared.python.force_overlay.grip_frame import grip_wrenches_and_metadata
+from src.shared.python.grip_contact.palm_thumb import allocate_from_closure
 from src.shared.python.force_overlay.series import ForceTorqueSeries
 from src.shared.python.motion_matching.same_input import InputBundle
 
@@ -234,6 +235,7 @@ class BundleOverlayProvider:
         if not engine:
             raise ValueError("engine must be a non-empty string")
         self._grip: GripSource | None = None
+        self._palm_thumb: tuple[Any, Any, float] | None = None
         self._axial: AxialLoadSource | None = None
         self._axial_impact: tuple[float, float] | None = None
         self._accelerations: Array | None = None
@@ -274,6 +276,50 @@ class BundleOverlayProvider:
         if source:
             self._grip_source = source
         return self
+
+    def with_palm_thumb(
+        self, source: Any, patch: Any, *, static_friction: float
+    ) -> BundleOverlayProvider:
+        """Report the allocated palm-on-thumb force per frame (HRG-H1); returns ``self``.
+
+        Reporting only (``frame.metadata["palm_thumb"]``, ``method`` ``allocation``):
+        no wrench is added and the dynamics are unchanged. ``source`` provides
+        ``closure_wrench``, ``club_frame_world`` and ``closing_hand_side`` (the
+        MuJoCo overlay source); ``patch`` is a ``ThumbPatch``. Raises ``TypeError``
+        for a source without the accessors and ``ValueError`` if the source's
+        closing hand is not the patch's trail hand.
+        """
+        for name in ("closure_wrench", "club_frame_world"):
+            if not callable(getattr(source, name, None)):
+                raise TypeError(f"source must provide {name}(...)")
+        if getattr(source, "closing_hand_side", None) != patch.trail_side:
+            raise ValueError(
+                f"closing hand {getattr(source, 'closing_hand_side', None)!r} is not "
+                f"the patch trail hand {patch.trail_side!r}"
+            )
+        self._palm_thumb = (source, patch, float(static_friction))
+        return self
+
+    def _palm_thumb_meta(
+        self,
+        coords: Mapping[str, float],
+        rates: Mapping[str, float],
+        efforts: Mapping[str, float],
+    ) -> dict[str, Any]:
+        """``{"palm_thumb": record}`` for the state, or ``{}`` without the hook."""
+        if self._palm_thumb is None:
+            return {}
+        source, patch, friction = self._palm_thumb
+        closure = source.closure_wrench(coords, rates, efforts)
+        rotation, origin = source.club_frame_world(coords)
+        result = allocate_from_closure(
+            closure,
+            club_rotation=rotation,
+            club_origin=origin,
+            patch=patch,
+            static_friction=friction,
+        )
+        return {"palm_thumb": result.to_dict()}
 
     def with_axial_loads(self, axial: AxialLoadSource) -> BundleOverlayProvider:
         """Attach per-frame segment axial loads (``frame.axial_loads``); returns ``self``.
@@ -401,6 +447,7 @@ class BundleOverlayProvider:
             index, coords, rates, ground, named_efforts
         )
         metadata.update(axial_meta)
+        metadata.update(self._palm_thumb_meta(coords, rates, named_efforts))
         return ForceTorqueFrame(
             time_s=float(index * self._bundle.dt_s),
             engine=self._engine,
