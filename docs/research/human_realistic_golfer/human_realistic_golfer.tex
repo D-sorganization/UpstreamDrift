@@ -334,6 +334,22 @@ python3 -m pytest tests/unit/grip_contact/test_contact_topology.py \
 \textbf{Limitation.} No finger markers exist in the capture, so finger contact
 locations are not identifiable from data; the table fixes them by assumption.
 
+\subsection{Topology-Driven Finger Pose and Visual Roll (HRG-GS-G4, \#13302)}
+\textbf{Method.} Visual finger placement in \texttt{model\_appearance} is driven directly by \texttt{ContactTopology} contact sites instead of the legacy \texttt{\_FINGER\_LINKS} string table. The lead index finger, trail little finger, and optional trail index trigger are placed by inverting the three-phalanx parametric wrap so that the distal phalanx centroid matches the corresponding topology site centre to within $\le 1$\,mm while ensuring that non-penetrating grip pad clearance is maintained. Per-hand visual roll rotates each hand body about the grip axis by its respective roll offset $\alpha$, absorbing issue \#13166.
+
+\textbf{Parameters.} The topology site centre $\mathbf{c}_{\mathrm{site}} = (x, y, z)$ in the shared grip frame defines the axial target $z_{\mathrm{hand}} = x - d_{\mathrm{butt}}$, radial target $\rho = \sqrt{y^2+z^2}$, and azimuthal target $\theta = \operatorname{atan2}(z, y)$. For unlinked fingers, nominal curl angles are computed from $V$-azimuth $v = 20^\circ + \alpha$ and knuckle offset $110^\circ$. For topology-driven fingers, a 1D monotonic solve determines tangent radius $d$ and metacarpophalangeal azimuth $\theta_{\mathrm{mcp}}$ such that the distal phalanx vertex centroid achieves sub-millimetre agreement with $\mathbf{c}_{\mathrm{site}}$. Thumb azimuth is shifted by $\alpha$ to preserve hand-rigid rotation.
+
+\textbf{Acceptance Criteria.} (1) Rendered fingertip positions match \texttt{ContactTopology} site centres to $\le 1$\,mm across all styles (overlap, interlock, ten-finger) and trigger mode; (2) Overlap, interlock, and ten-finger produce visibly distinct finger geometries with appropriate \texttt{on\_grip} flags and match golden mesh summaries; (3) Per-hand roll follows $\alpha$ to $\le 0.1^\circ$ across fingertips, palm, and thumb; (4) The duplicate \texttt{\_FINGER\_LINKS} table is eliminated from \texttt{grip\_pose}.
+
+\textbf{Reproduce.} Reproduce with:
+\begin{verbatim}
+python3 -m pytest tests/unit/model_appearance/test_grip_finger_topology.py \
+    tests/unit/model_appearance/test_grip_hand_mesh.py \
+    tests/unit/model_appearance/test_grip_pose.py
+\end{verbatim}
+
+\textbf{Limitations.} Hand phalanges remain rigid capsules wrapped on the grip cylinder; individual phalanx flexion dynamics during the swing are visual approximations rather than musculoskeletal coordinate solves.
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
