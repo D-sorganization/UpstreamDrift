@@ -530,6 +530,12 @@ matrix with `python3 -m scripts.generate_feature_parity_matrix`. NSX-43 uses
 a lazy embed adapter (PyQt6 imports inside `create_main_widget`). Both assert
 use of `display_decision`.
 
+The React panel (`ui/src/components/analysis/LoopNullSpacePanel.tsx`) reads the
+plot model from `result.plot_model` (or `partial.plot_model` while running) of
+the NSX-40 job status and, when the job carries none, draws nothing and says so.
+Its Vitest suite reads the golden above in place. The NSX-40 routes return the
+report today; attaching the plot model to the job body is an API follow-up.
+
 ## NSX-50 Dynamic Dual Transforms (#12578)
 
 `velocity_map`, `acceleration_map` (with the `Tdot v` term for nonlinear
