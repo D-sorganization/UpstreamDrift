@@ -43,13 +43,14 @@ class PresetChoice:
 
 @dataclass(frozen=True)
 class NSXRequest:
-    """What the user chose: registered source, preset, frames, allocation."""
+    """What the user chose: source, preset, frames, allocation, sensitivity (NSX-100)."""
 
     source_id: str
     preset: str
     frame_indices: tuple[int, ...]
     engine: str = "pinocchio"
     include_allocation: bool = False
+    sensitivity: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
         if not self.source_id:
@@ -83,7 +84,12 @@ def request_job(request: NSXRequest) -> NSXJob:
         preset=request.preset,
         frame_indices=list(request.frame_indices),
         options=service.LoopNullspaceOptions(
-            include_allocation=request.include_allocation
+            include_allocation=request.include_allocation,
+            sensitivity=(
+                None
+                if request.sensitivity is None
+                else service.SensitivityOptions.model_validate(request.sensitivity)
+            ),
         ),
     )
 

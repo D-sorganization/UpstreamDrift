@@ -12,8 +12,11 @@ Tolerances were fixed before measuring and are never loosened:
 * Full 200-step window and the 20-step re-anchored segmented replay
   (committed record, measured by ``scripts/measure_lift_bar_path_parity.py``):
   the epic #11605 level-L2 frame bound (1e-3 m) and coordinate bound
-  (1e-6 rad).  The full-window coordinate bound is not met (open-loop
-  instability) and is recorded as a strict xfail with the measured numbers.
+  (1e-6 rad).  Until OSL-16 (#13104) both coordinate bounds failed (up to
+  4.5e-3 rad in subtalar_angle_r from the 80-100 ms segment): the replay
+  integrated the stiff foot contact outside RK4's stability region.  At the
+  bundle's 64 substeps the full window agrees within 2.2e-9 rad and 4.3e-12 m
+  of bar path, and every segment within 2.2e-13 rad.
 """
 
 from __future__ import annotations
@@ -94,15 +97,30 @@ def test_full_window_bar_path_is_inside_the_l2_frame_bound(record) -> None:
         assert entry["max_bar_deviation_m"] <= FRAME_BOUND_M, engine
 
 
-@pytest.mark.xfail(
+#: OSL-17 (#13131) regression, measured on the high-bar rack bundle: the
+#: full 0.2 s window ends 6.0e-5 (Drake), 2.0e-5 (Pinocchio) and 1.4e-5 rad
+#: (OpenSim) from MuJoCo (worst coordinate LWInputY), above the 1e-6 rad
+#: bound; before the rack it was 2e-10 rad.  On the #13037 whole-row lift body
+#: it is 8.5e-4, 2.7e-3 and 8.6e-5 rad (bar 3.7e-5 m), while every 20-step
+#: re-anchored segment stays within 7.0e-13 rad.  Cause (#13041): the
+#: open-loop dynamics under the recorded efforts have an unstable left-wrist
+#: mode (largest real eigenvalue, LWInputY, 116-132 1/s on the whole-row body,
+#: 101-115 1/s on the earlier rack body; before the rack 64-70 1/s, on
+#: SpineInputX), so engine round-off (1e-14) grows by exp(lambda * 0.2 s), 1e9 to
+#: 1e11, over the window.  It is a physical instability of the open-loop
+#: posture, not an integration error (the run is inside the RK4 limit).  The
+#: bound is not loosened.
+_RACK_COORDINATE_REGRESSION = pytest.mark.xfail(
     strict=True,
     reason=(
-        "Measured full 0.2 s window: Drake, Pinocchio and OpenSim end up to "
-        "4.5e-3 rad from MuJoCo (worst coordinate subtalar_angle_r; the bar "
-        "only 5.0e-6 m), above the 1e-6 rad L2 coordinate bound.  The "
-        "divergence starts in the 80-100 ms segment; see the segmented xfail."
+        "OSL-20 #13159: high-bar rack full-window coordinates "
+        "8.5e-4 rad (Drake) > 1e-6 rad bound; round-off grown by the open-loop "
+        "unstable LWInputY mode (116-132 1/s); bound not loosened."
     ),
 )
+
+
+@_RACK_COORDINATE_REGRESSION
 def test_full_window_coordinates_are_inside_the_l2_coordinate_bound(
     record,
 ) -> None:
@@ -120,17 +138,6 @@ def test_segmented_replay_bar_and_frames_are_inside_the_l2_frame_bound(
         assert segmented["max_frame_error_m"] <= FRAME_BOUND_M, engine
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "Measured 20-step re-anchored replay: the 80-100 ms segment, ending at "
-        "the squat bottom, ends 1.8e-4 (Drake), 1.9e-4 (Pinocchio) and 2.0e-4 rad "
-        "(OpenSim) from MuJoCo in subtalar_angle_r, above the 1e-6 rad L2 "
-        "coordinate bound; the other nine segments stay within 2.3e-7 rad and "
-        "every spec frame within 2.2e-7 m.  Tracked on #11745; the bound is "
-        "not loosened."
-    ),
-)
 def test_segmented_replay_coordinates_are_inside_the_l2_coordinate_bound(
     record,
 ) -> None:
