@@ -4,7 +4,7 @@ HRG-C4 (#13187). Only the femoral heads belong inside the pelvis solid (the
 thigh blends in through the hip ball), so the width is
 
 1. the subject's measured hip breadth, when the spec provides one; else
-2. ``HIP_BREADTH_STATURE_FRACTION * stature`` (a prior, not a measurement); else
+2. ``HIP_BREADTH_STATURE_FRACTION * stature`` (the ANSUR II male mean, a population prior, not a measurement); else
 3. the spec's own hint width (``spec_hint``);
 
 raised only when the femoral heads need more room: each hip joint centre
@@ -21,10 +21,16 @@ import numpy as np
 
 FEMORAL_HEAD_RADIUS_M = 0.025
 HIP_CONTAINMENT_MARGIN_M = 0.010
-# UNVERIFIED PRIOR (see the appearance reference, Pelvis Width): the ANSUR II
-# male standing hip breadth could not be checked against the published table
-# in this work; 0.195 is the panel's working figure (about 0.333 m at 1.71 m).
-HIP_BREADTH_STATURE_FRACTION = 0.195
+# Standing hip breadth / stature, per-subject ratio, ANSUR II (2012 U.S. Army
+# anthropometric survey; Gordon et al. 2015, NATICK/TR-15/007; public CSV from
+# https://www.openlab.psu.edu/ansur2/). Column ``hipbreadth`` over ``stature``.
+# Male, n = 4082 (sha256 0547aea0170e5293de519389981135e75803f02e6d40c77ace740decc0caac64):
+#   mean 0.1970, sd 0.0129, median 0.1964, p5 0.1770, p95 0.2200.
+# The spec records no subject sex; the AN-1 driver subject is male (de Leva
+# 1996 male table), so the male mean is used. A female subject needs 0.2174
+# (n = 1986, sd 0.0153, p5 0.1928, p95 0.2430, sha256 ed7e800a...1757a), or
+# ``subject.hip_breadth_m``.
+HIP_BREADTH_STATURE_FRACTION = 0.1970
 _MAX_LEVEL = 0.999
 
 

@@ -10,6 +10,7 @@ export const COMPLETE_PLATE_FORM: Readonly<Record<string, string>> = {
   sensing_depth_m: '0.015',
   sensing_depth_sigma_m: '0.002',
   capacity_n: '3923',
+  skew_s: '0',
   origin_m: '0, 0, 0',
   offset_s: '0',
   sigma_offset_s: '0.001',

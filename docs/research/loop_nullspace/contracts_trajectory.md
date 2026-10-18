@@ -476,13 +476,51 @@ provenance, model provenance, registry version, preset and options.
 `display_decision(record, surface) -> DisplayDecision` per ADR-0054 decision
 D7 once the owner accepts an option. Unknown combinations default to withhold.
 
-## NSX-42 Plot Model (#12574)
+## NSX-42 Plot Model Contract (#12574)
 
-`build_plot_model(report, display_decisions) -> NSXPlotModel`. Panels:
-`invariants`, `envelopes`, `hand_split`, `allocation`, `diagnostics`.
-Envelope segments carry `display_class` in `DETERMINED_SIGN`, `INDETERMINATE`,
-`UNBOUNDED`. A representative never appears without its band. The golden JSON
-plot model is checked in by NSX-42 and consumed by NSX-43 and NSX-44.
+`build_plot_model(report, display_decisions) -> NSXPlotModel`
+(`loop_nullspace/plot_model.py`; framework-free, frozen dataclasses,
+`to_dict()`/`from_dict()` round-trip). `display_decisions` maps
+`decision_key(panel, name[, frame])` to the `DisplayDecision` that
+`display_decision` returned (`plot_model_decisions.report_decisions` asks it once
+per report quantity). The model obeys the decisions and re-decides nothing: a
+quantity whose decision does not admit a band or value is a `WithheldItem` (or
+an unshown value) carrying the decision's reason and no number; a missing
+decision withholds by name; an unused decision key raises `ValueError`.
+
+Panels: `invariants`, `envelopes`, `hand_split` (grip-frame coordinates routed
+by `SPLIT_COLUMN_NAMES`), `allocation`, `diagnostics` (rank, condition,
+admission verdict and scaled residuals, allocation KKT residuals).
+
+- **Segments.** A band is split into maximal runs of adjacent feasible frames
+  with equal `display_class`, `sign_class`, active constraints and binding
+  hypotheses. `display_class` is `UNBOUNDED` when either bound is not `BOUNDED`
+  (hatched), else `DETERMINED_SIGN` for sign class positive, negative or zero,
+  else `INDETERMINATE` (shaded). An infeasible frame is listed on the band and
+  never inside a segment.
+- **Binding.** `active_constraints` are the row labels active at the optimum of
+  the bounding LPs (slack within `1e-8`, NSX-22), which by complementary
+  slackness contain every row with a non-zero optimal dual;
+  `binding_hypotheses` are their hypothesis ids. The test solves the LPs and
+  checks the dual support lies inside the reported ids.
+- **Representative.** An `Overlay` names its band and aligns to its frames; the
+  model refuses (`ValueError`) an overlay without a shown band, with other
+  frames, or whose decision is not `SHOW_REPRESENTATIVE_ON_BAND`. A withheld
+  band takes its representative with it.
+- **Report 1.1.0.** The plot model needs per-bound `sign_class`,
+  `binding_lower/upper`, `binding_hypotheses_lower/upper` and the top-level
+  `frame_diagnostics`; NSX-40 emits them additively (an older report raises
+  `ValueError`).
+- **Open point.** `EnvelopeSeries.records()` makes a quantity `UNAVAILABLE`
+  when any frame is not `BOUNDED`, and NSX-41 then answers `SHOW_REASON`, so
+  with real decisions an `UNBOUNDED` segment is not reachable from a report
+  today. The model supports it whenever a decision admits the band.
+
+Golden: `tests/fixtures/loop_nullspace/goldens/plot_model_v1.json`
+(`{"fixture": ..., "plot_model": ...}`), read by NSX-43 and NSX-44.
+Regenerate with `python3 -m tests.unit.loop_nullspace.plot_model_golden --write`
+(`--check` fails when stale). It is the real planar report with four listed
+fixture-only overrides so every display class is present.
 
 ## NSX-43 PyQt Tabs (#12575) and NSX-44 React Panel (#12576)
 
@@ -491,6 +529,14 @@ Render only from `NSXPlotModel`; no math in either UI. Parity entry
 matrix with `python3 -m scripts.generate_feature_parity_matrix`. NSX-43 uses
 a lazy embed adapter (PyQt6 imports inside `create_main_widget`). Both assert
 use of `display_decision`.
+
+The React panel (`ui/src/components/analysis/LoopNullSpacePanel.tsx`) reads the
+plot model from `result.plot_model` (or `partial.plot_model` while running) of
+the NSX-40 job status. The service attaches it with
+`plot_model_payload(report, preset=...)` (`plot_model_decisions.py`: `report_decisions`
+then `build_plot_model`, no gate of its own); a partial that cannot build a valid
+model omits it and the panel draws nothing. Presets come from
+`GET /analysis/loop-nullspace/presets`. Its Vitest suite reads the golden above in place.
 
 ## NSX-50 Dynamic Dual Transforms (#12578)
 
@@ -662,3 +708,9 @@ envelope union contains every member. NSX-62 samples only along unidentified
 directions inside the pseudo-inertia constraint; identified combinations stay
 fixed (see the NSX-62 section below).
 
+
+## NSX-43 PyQt Tabs (#12575)
+
+The desktop surface is `src/tools/grip_wrench_plots/` (tile `grip_wrench_plots`). `window.GripWrenchTabsWidget` keeps the existing grip view as the first tab and adds Invariants, Envelopes, Hand Split and Diagnostics. `nsx_view.panel_views(model)` derives each tab from an `NSXPlotModel` and nothing else: rows, curves, segment display classes, overlays, withheld items and the evidence badge are read from the model's `DecisionView` objects, an unmarked quantity carries no number, and the allocation is only ever a dashed overlay on its band (its status, withheld items and non-claim are notes on the Envelopes tab). `nsx_draw.draw_panel` draws a view with matplotlib (solid fill for `DETERMINED_SIGN`, shading for `INDETERMINATE`, hatching for `UNBOUNDED`). `nsx_job.request_job` runs the NSX-40 service, then `report_decisions` and `build_plot_model`; `nsx_worker.NSXWorker` runs it on a `QThreadPool` thread with queued progress, cancel and failure signals. The preset selector lists `registry.load_registry().presets`.
+
+Tests (`tests/unit/tools/grip_wrench_plots/`) load the single shared golden `tests/fixtures/loop_nullspace/goldens/plot_model_v1.json` and assert the widgets show exactly what it says. The invariants stage reports progress first, but the model is built from the complete report, so the tabs fill when the run finishes and the Invariants tab is the first NSX tab selected.

@@ -18,6 +18,7 @@ from src.shared.python.motion_matching.contact_law import (
     ContactSample,
     GroundPlane,
     sphere_ground_contact,
+    support_planes,
 )
 from src.shared.python.motion_matching.full_body_spec import (
     FULL_BODY_SCHEMA_VERSION,
@@ -821,6 +822,8 @@ class FullBodyPinocchioModel(NativePinocchioModel):
         normal = (float(unit_g[0]), float(unit_g[1]), float(unit_g[2]))
         height = float(contact_spec["ground"]["height_m"] or 0.0)
         self.ground = GroundPlane(normal=normal, height_m=height)
+        # Raised supports (a bench top, #11745); other spheres use the ground.
+        self._support_planes = support_planes(contact_spec, self.ground)
         self.contact_spheres = tuple(
             ContactSphere(
                 s["name"], s["body"], tuple(s["position_m"]), float(s["radius_m"])
@@ -873,8 +876,9 @@ class FullBodyPinocchioModel(NativePinocchioModel):
                 ref_frame,
             )
             velocity = frame_vel.linear.copy()
+            plane = self._support_planes.get(sphere.name, self.ground)
             samples[sphere.name] = sphere_ground_contact(
-                center, velocity, sphere.radius_m, self.ground, self.contact_parameters
+                center, velocity, sphere.radius_m, plane, self.contact_parameters
             )
         return samples
 
@@ -908,7 +912,16 @@ class FullBodyPinocchioModel(NativePinocchioModel):
         Matrices are owned, read-only, and ordered by ``coordinates``.
         ``differentiable`` is false at activation/clipping boundaries; the
         shared law's documented inactive branch is selected at those kinks.
+
+        Raises:
+            NotImplementedError: For a spec with raised supports (#11745): the
+                differentiator knows only the ground plane, so the partials
+                are unavailable rather than wrong.
         """
+        if self._support_planes:
+            raise NotImplementedError(  # tracked: #11745
+                "contact derivatives do not model raised supports"
+            )
         result = self._contact_differentiator.evaluate(
             self.configuration(coordinates),
             self._velocity_vector(rates),

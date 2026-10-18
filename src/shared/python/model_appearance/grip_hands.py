@@ -16,10 +16,14 @@ Visual only: nothing here touches a mass, an inertia or a constraint.
 Hand-grip frame in the club-body frame
 --------------------------------------
 ``z`` is the grip axis ``g`` from the butt toward the head (club ``+y``);
-``x`` is :mod:`grip_pose` azimuth 0, ``-n`` with ``n`` the face normal
-projected off the shaft (the rendered head, so the club's ``face_roll_deg``
-squares the hands with the face); ``y = z x x`` is azimuth 90 deg, ``-t``
-with ``t`` the heel-to-toe axis. The origin is on the grip axis
+``x`` is :mod:`grip_pose` azimuth 0, ``+t`` with ``t`` the heel-to-toe axis
+projected off the shaft, which is the top of the grip toward the golfer's chin
+(the shaft leans toward the golfer, so the top is the toe side, not ``-n``);
+``y = z x x`` is azimuth 90 deg, ``-n`` with ``n`` the face normal projected
+off the shaft (the rendered head, so the club's ``face_roll_deg`` squares the
+hands with the face), which is the trail side (away from the target). HRG-A1
+(#13162) replaced the earlier ``x = -n`` convention, which rolled both hands
+about 90 deg under the grip. The origin is on the grip axis
 ``GripPose.distance_below_butt_m(hand)`` below the butt.
 """
 
@@ -86,8 +90,8 @@ def grip_hand_frame(
     """4x4 transform from ``hand``'s hand-grip frame to the club-body frame.
 
     Postconditions: a proper rotation whose ``z`` column is the grip axis
-    (butt toward head) and whose ``x`` column is minus the face normal
-    projected off the shaft; the origin on the grip axis at the pose depth.
+    (butt toward head), whose ``x`` column is the toe axis ``t = g x n`` (``n`` the
+    face normal projected off the shaft) and whose ``y`` column is ``-n``; the origin on the grip axis at the pose depth.
     """
     _check_club(club)
     if not isinstance(hand, Hand):
@@ -98,7 +102,7 @@ def grip_hand_frame(
     size = float(np.linalg.norm(normal))
     if size < 1e-6:
         raise ValueError("the club face normal is parallel to the shaft")
-    x = -normal / size
+    x = np.cross(_GRIP_AXIS, normal / size)  # +t: the top of the grip (chin side)
     frame = np.eye(4)
     frame[:3, 0], frame[:3, 1], frame[:3, 2] = x, np.cross(_GRIP_AXIS, x), _GRIP_AXIS
     butt = np.array([0.0, -club.length_m, club.axis_offset_m])

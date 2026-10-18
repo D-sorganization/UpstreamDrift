@@ -1,0 +1,307 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\geometry{margin=22mm}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black}
+\makeatletter\g@addto@macro\UrlBreaks{\do\_\do\=\do\-\do\<\do\>\do0\do1\do2\do3\do4\do5\do6\do7\do8\do9\do a\do b\do c\do d\do e\do f}\makeatother
+\newcommand{\R}{\mathbb{R}}
+
+\title{Human-Realistic Golfer: Calculation-Level Reference\\[4pt]
+\large Coordinate Conventions, Sign Map and Human-Range Baseline (HRG-00)}
+\author{UpstreamDrift Estimation Working Reference}
+\date{Revision 2026-10-17 \quad (separate research and experiment record)}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Epic \#13160 asks that the best tour-average driver fit stay inside human
+joint ranges without losing its marker fit.  Before any model change can be
+judged, the 44 coordinates of the full-body v1 model need a pinned definition:
+which axis each one turns about, and what a positive value means anatomically.
+This reference records that definition as a table measured from compiled
+geometry (not from comments), the basis map to ISB, the baseline violations of
+the human ranges by the current best fit, and the exact reproduction commands.
+Each later HRG child appends its own section here, including failed
+experiments.  Nothing in this document qualifies the model scientifically.
+\end{abstract}
+
+\tableofcontents
+
+\section{Status, Scope and Governance}
+
+This is an editable standalone research and experiment record in the sense of
+\texttt{AGENTS.md} (``Modeling Reference Documentation''); it is not the
+engineering design manual, whose only editable source is
+\texttt{manuals/upstreamdrift}.  It follows
+\path{docs/research/model_aware_matching/model_aware_matching.tex} in
+style.  Software correctness is recorded here; scientific qualification stays
+in the design-manual governance pathway.
+
+\paragraph{Status of This Revision (Truthful).}
+\begin{itemize}[nosep]
+  \item Measured: axes and signs of all 44 coordinates in the
+    hip-calibrated anthropometric family (\S\ref{sec:signmap}), against
+    compiled MuJoCo, and re-asserted from Drake and Pinocchio forward
+    kinematics.
+  \item Measured: the baseline range violations of the private best-fit
+    bundle (\S\ref{sec:ranges}).
+  \item Convention, not measurement: neutral forearm pronation at $q=0$
+    (\S\ref{sec:wrist}).  The specification has no palm or thumb landmark.
+  \item Placeholders: grip, appearance, pelvis and hip centres, segmental trunk
+    and anatomical angles.  No fix is claimed here.
+\end{itemize}
+
+\section{Model Under Review}
+\label{sec:model}
+
+The model is the anthropometric full-body candidate v1 (\texttt{full-body-v1},
+44 coordinates, AN-1 \#10099, ``upper body unqualified'') after hip
+calibration and segment scaling, fitted to the tour-average driver capture.
+The specification and bundle are private run artefacts outside the repository
+and are not committed; only hashes and aggregate numbers appear below.
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{62mm}p{100mm}@{}}
+\toprule
+Artefact & SHA-256 \\
+\midrule
+Best-fit spec (\texttt{full\_body\_spec\_hipcal\_scaled.json}) &
+  {\scriptsize\path{d1829abf69ca4fae73d9c553440aa73d367a5fc03efa5efec5b845197560b296}} \\
+Bundle (\texttt{bundles/driver.npz}) &
+  {\scriptsize\path{bfa1a9a86cc84c8c7d2f1bce821750d10564d1aa5f59549d082c87e855cdfe91}} \\
+Fit receipt (\texttt{receipt.json}) &
+  {\scriptsize\path{97fe499b4432277cb33a8d6c007794011ddf7b71d72fb30c090956f926382187}} \\
+Hip-calibrated spec before scaling &
+  {\scriptsize\path{88938935123772790a764a2bf4dc7b00677b1117b32fb5ad209b938ba3f61a88}} \\
+Upper body (\texttt{upper\_body\_sha256}) &
+  {\scriptsize\path{090341b1ad5ce51b917df617c3ce91c8e1d71e41e6398f6c218f8e2feefad558}} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Bundle content: 1815 frames at 1 kHz, \texttt{reference\_q} of shape
+$1815\times 44$ in the spec coordinate order.  Marker RMS of this fit is
+50.93\,mm (issue \#13161).  The spec records grip rotation (deg, extrinsic
+x-y-z) $L=(-90,47,0)$ and $R=(-34,46,62)$ and \texttt{upper body unqualified}.
+The in-repository fixture used by the tests,
+\path{docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/full_body_spec_hipcal_scaled.json},
+is the same build family with a different per-capture grip rotation
+($L=(-36.9,57.3,70.9)$, $R=(9.8,52.9,83.9)$) and different hip-calibration
+radii; its hashes differ, its coordinate order, wrist basis and topology are
+identical.  Axes of the hip and leg coordinates depend on the calibration, so
+the pinned table is exact for the fixture and approximate (a few degrees) for
+the private spec.
+
+\paragraph{Reproduction (Private Paths Described Generically).}
+\begin{enumerate}[nosep]
+  \item Hash the private spec and bundle with \texttt{sha256sum}; compare with
+    the table above.
+  \item Sign map:
+    \path{pytest -o addopts="" -q -n 0 tests/unit/motion_matching/test_full_body_coordinate_sign_map.py}
+  \item Range report (set the variable to the private bundle path):\\
+    \path{HRG_BEST_FIT_BUNDLE=<private-bundle> pytest -o addopts="" -q -n 0 -s tests/unit/motion_matching/test_bundle_human_range_characterisation.py}
+  \item Headless environment: \texttt{QT\_QPA\_PLATFORM=offscreen
+    MPLBACKEND=Agg MUJOCO\_GL=egl PYTHONPATH=.:src}.
+\end{enumerate}
+
+\section{Coordinate Conventions and Sign Map}
+\label{sec:signmap}
+
+\paragraph{Frames and Method.}
+The model frame at $q=0$ is the pelvis frame: $x$ forward, $y$ left, $z$ up
+(right-handed).  For each coordinate the test compiles the specification to
+MuJoCo, sets that coordinate to $+10^{\circ}$ (or $+10$\,mm for the slides) with
+all others zero, and records (i) the rotation axis of the child body, from
+$R_1R_0^{\top}$ expressed in the pelvis frame, and (ii) the motion of a probe
+point fixed in the child body $0.1$\,m from the joint anchor along the first
+of forward, up, left that is not within $60^{\circ}$ of the axis.  The
+perturbation is a single hinge, so the result is the axis and the sense of a
+positive increment.  Drake and Pinocchio forward kinematics give the same
+axes to within $0.5^{\circ}$.  The table is
+\path{src/shared/python/motion_matching/coordinate_sign_map.py}.
+
+{\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{longtable}{@{}l l l l p{50mm}@{}}
+\toprule
+Coordinate & Body & Axis in model basis & Probe motion & Meaning of a positive value \\
+\midrule
+\endhead
+\texttt{TranslationInputX} & LowerTorso & $+1.000, +0.000, +0.000$ & origin: forward & pelvis translation forward \\
+\texttt{TranslationInputY} & LowerTorso & $+0.000, +1.000, +0.000$ & origin: left & pelvis translation to the left \\
+\texttt{TranslationInputZ} & LowerTorso & $+0.000, +0.000, +1.000$ & origin: up & pelvis translation upward \\
+\texttt{HipInputX} & LowerTorso & $+1.000, +0.000, +0.000$ & up: right & pelvis lateral tilt: left side up, right side down \\
+\texttt{HipInputY} & LowerTorso & $+0.000, +1.000, +0.000$ & forward: down & pelvis forward pitch (anterior tilt): front down, top forward \\
+\texttt{HipInputZ} & LowerTorso & $+0.000, +0.000, +1.000$ & forward: left & pelvis axial rotation to the left (counterclockwise seen from above) \\
+\texttt{SpineInputX} & COMRod & $+1.000, +0.000, +0.000$ & up: right & trunk lateral flexion to the right (top moves right) \\
+\texttt{SpineInputY} & COMRod & $+0.000, +1.000, +0.000$ & forward: down & trunk forward flexion (top moves forward) \\
+\texttt{TorsoInput} & UpperTorsoBase & $+0.000, +0.000, +1.000$ & forward: left & axial rotation to the left of the upper torso on the pelvis (twist about pelvis z) \\
+\texttt{LEInput} & Spherical Solid & $+0.000, +1.000, +0.000$ & forward: down & left elbow extension (flexion is negative; forearm tip moves down) \\
+\texttt{LFInput} & LLowerForearm & $-1.000, +0.000, +0.000$ & up: left & supination of the left forearm (about the proximal direction; neutral at zero) \\
+\texttt{LScapInputX} & HubtoLS & $+1.000, +0.000, +0.000$ & up: right & elevation of the left shoulder \\
+\texttt{LScapInputY} & HubtoLS & $+0.000, +0.000, +1.000$ & forward: left & retraction of the left shoulder (moves backward) \\
+\texttt{LSInputX} & LUpperArm & $+0.000, +0.000, +1.000$ & forward: left & left shoulder horizontal abduction (arm swings away from the midline) \\
+\texttt{LSInputY} & LUpperArm & $+0.000, +1.000, +0.000$ & forward: down & lowering of the forward-raised left arm (arm tip moves down) \\
+\texttt{LSInputZ} & LUpperArm & $-1.000, +0.000, +0.000$ & up: left & left humeral external rotation (at the forward-raised zero pose) \\
+\texttt{LWInputX} & Clubface Vector & $+0.000, -1.000, +0.000$ & forward: up & radial deviation of the left wrist (cock; toward the elbow pit; ulnar is negative) \\
+\texttt{LWInputY} & Clubface Vector & $+0.000, +0.000, +1.000$ & forward: left & extension of the left wrist (toward the dorsum; flexion is negative) \\
+\texttt{REInput} & Spherical Solid1 & $+0.000, +1.000, +0.000$ & forward: down & right elbow extension (flexion is negative; forearm tip moves down) \\
+\texttt{RFInput} & RLowerForearm & $-1.000, +0.000, +0.000$ & up: left & pronation of the right forearm (about the proximal direction; neutral at zero) \\
+\texttt{RScapInputX} & HubtoRS & $+1.000, +0.000, +0.000$ & up: right & depression of the right shoulder (elevation is negative) \\
+\texttt{RScapInputY} & HubtoRS & $+0.000, +0.000, +1.000$ & forward: left & protraction of the right shoulder (moves forward) \\
+\texttt{RSInputX} & RUpperArm & $+0.000, +0.000, +1.000$ & forward: left & right shoulder horizontal adduction (arm swings toward the midline) \\
+\texttt{RSInputY} & RUpperArm & $+0.000, +1.000, +0.000$ & forward: down & lowering of the forward-raised right arm (arm tip moves down) \\
+\texttt{RSInputZ} & RUpperArm & $-1.000, +0.000, +0.000$ & up: left & right humeral internal rotation (at the forward-raised zero pose) \\
+\texttt{RWInputX} & RHandStandoff & $+0.000, -1.000, +0.000$ & forward: up & radial deviation of the right wrist (cock; toward the elbow pit; ulnar is negative) \\
+\texttt{RWInputY} & RHandStandoff & $+0.000, +0.000, +1.000$ & forward: left & flexion of the right wrist (toward the palm; extension is negative) \\
+\texttt{NeckInputX} & Head & $+1.000, +0.000, +0.000$ & up: right & head lateral flexion to the right \\
+\texttt{NeckInputY} & Head & $+0.000, +1.000, +0.000$ & forward: down & head flexion (nod forward) \\
+\texttt{NeckInputZ} & Head & $+0.000, +0.000, +1.000$ & forward: left & head axial rotation to the left \\
+\texttt{hip\_flexion\_r} & femur\_r & $-0.074, -0.981, +0.177$ & forward: up & flexion of the right hip (thigh swings forward) \\
+\texttt{hip\_adduction\_r} & femur\_r & $+0.997, -0.072, +0.018$ & up: right & adduction of the right hip (thigh swings toward the midline) \\
+\texttt{hip\_rotation\_r} & femur\_r & $-0.005, +0.178, +0.984$ & forward: left & internal rotation of the right hip (toes turn toward the midline) \\
+\texttt{knee\_angle\_r} & tibia\_r & $-0.075, -0.966, +0.246$ & forward: up & extension of the right knee (flexion is negative; shank swings forward) \\
+\texttt{ankle\_angle\_r} & talus\_r & $-0.342, -0.940, -0.008$ & forward: up & dorsiflexion of the right ankle (forefoot rises) \\
+\texttt{subtalar\_angle\_r} & calcn\_r & $+0.790, +0.033, +0.613$ & left: up & inversion of the right subtalar joint (oblique axis; sole turns medially) \\
+\texttt{mtp\_angle\_r} & toes\_r & $+0.764, +0.636, -0.111$ & up: right & flexion of the right toes (oblique axis; toe tip moves down) \\
+\texttt{hip\_flexion\_l} & femur\_l & $+0.453, -0.877, +0.161$ & forward: up & flexion of the left hip (thigh swings forward) \\
+\texttt{hip\_adduction\_l} & femur\_l & $-0.891, -0.447, +0.076$ & up: left & adduction of the left hip (thigh swings toward the midline) \\
+\texttt{hip\_rotation\_l} & femur\_l & $+0.005, -0.178, -0.984$ & forward: right & internal rotation of the left hip (toes turn toward the midline) \\
+\texttt{knee\_angle\_l} & tibia\_l & $+0.452, -0.887, +0.091$ & forward: up & extension of the left knee (flexion is negative; shank swings forward) \\
+\texttt{ankle\_angle\_l} & talus\_l & $+0.672, -0.677, +0.302$ & up: right & dorsiflexion of the left ankle (forefoot rises) \\
+\texttt{subtalar\_angle\_l} & calcn\_l & $-0.699, -0.478, -0.532$ & left: down & inversion of the left subtalar joint (oblique axis; sole turns medially) \\
+\texttt{mtp\_angle\_l} & toes\_l & $-0.953, +0.296, -0.058$ & up: left & flexion of the left toes (oblique axis; toe tip moves down) \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Wrist Labels and Forearm Pronation}
+\label{sec:wrist}
+
+The panel disagreed on \texttt{LWInputX} versus \texttt{LWInputY}.  The probe
+answers it, in the rolled (\texttt{WRIST\_ROLL}) family:
+\begin{itemize}[nosep]
+  \item \texttt{*WInputX} turns about $-y$, exactly parallel to the elbow axis
+    ($|\hat a_{\mathrm{wrist}}\cdot\hat a_{\mathrm{elbow}}|=1$).  A positive
+    value lifts the forward hand, the way elbow flexion does (elbow $+$ lowers
+    it).  It is therefore cock: radial deviation, with ulnar negative.  This
+    matches \texttt{HUMAN\_RANGES\_DEG} ($-40..25$).
+  \item \texttt{*WInputY} turns about $+z$, perpendicular to the elbow axis and
+    to the forearm.  It is flexion/extension.  The axis and the probe motion
+    ($+y$, left) are the same on both sides, which is opposite on the two
+    hands: extension on the left (dorsum faces $+y$) and flexion on the right
+    (palm faces $+y$).  The symmetric range $\pm70$ hides this.
+  \item \texttt{*FInput} turns about $-x$, the proximal direction of both
+    forearms.  A positive value is supination on the left and pronation on the
+    right.
+\end{itemize}
+These labels assume that the forearm is neutral (thumb side toward the elbow
+flexion side) at $q=0$.  That is the convention \texttt{WRIST\_ROLL} and the
+range table are written for; the geometry confirms the axis relations but not
+the convention, because the specification carries no palm landmark.  If the
+zero forearm were supinated, \texttt{*WInputX} would be flexion and
+\texttt{*WInputY} deviation.
+
+\subsection{Trunk Order}
+Order, proximal to distal: \texttt{TorsoInput} (about pelvis $z$), then
+\texttt{SpineInputX}, \texttt{SpineInputY}.  The test twists by $30^{\circ}$ and
+finds the tilt axes yawed to $(\cos30^{\circ},\sin30^{\circ},0)$ and
+$(-\sin30^{\circ},\cos30^{\circ},0)$, while the twist axis stays at the pelvis
+$z$ axis for any tilt.  A positive twist turns the upper torso to the left
+(counterclockwise seen from above); a right-handed backswing is negative.
+
+\subsection{Spec Family: Was the Wrist Roll Applied?}
+Two families exist.  Native specs (\path{full_body_spec_v1.json}, \path{full_body_spec_v2.json},
+primitives Rx, Ry) keep the native wrist base, whose second primitive spins
+about the forearm and is redundant with pronation.  Anthropometric specs
+(primitives Rx, Rz) use $\mathrm{WRIST\_ROLL}\cdot R_{\mathrm{native}}$ with
+\begin{equation}
+\mathrm{WRIST\_ROLL}=\begin{pmatrix}0&1&0\\-1&0&0\\0&0&1\end{pmatrix}.
+\end{equation}
+\texttt{wrist\_roll\_applied(spec, native)} returns true, false, or raises
+\texttt{ValueError} for any other basis.  The compiled geometry agrees: the
+dot product of the second wrist axis with the forearm axis is 1 for native
+specs and 0 for rolled ones.  Comparing the cock axis with the elbow axis does
+not separate the families, because the native elbow is itself tilted.
+
+\section{ISB Basis Map}
+\label{sec:isb}
+
+ISB (Wu et al.) uses $X$ anterior, $Y$ up, $Z$ right.  With the model basis
+above, a vector $v=(x,y,z)$ becomes
+\begin{equation}
+v_{\mathrm{ISB}}=\underbrace{\begin{pmatrix}1&0&0\\0&0&1\\0&-1&0\end{pmatrix}}_{M}v,
+\qquad M^{\top}M=I,\ \det M=+1,
+\end{equation}
+and a rotation $R$ becomes $MRM^{\top}$, which preserves angle and
+handedness.  A left twist (positive about model $z$) is positive about ISB $Y$.
+Implemented and tested as \texttt{model\_to\_isb}, \texttt{isb\_to\_model},
+\texttt{model\_rotation\_to\_isb} in \texttt{coordinate\_sign\_map.py}.
+
+\section{Human-Range Characterisation}
+\label{sec:ranges}
+
+The report-only test
+\path{test_bundle_human_range_characterisation.py} prints, per coordinate,
+the minimum and maximum of \texttt{reference\_q} (degrees, wrapped to
+$\pm180^{\circ}$) against \texttt{HUMAN\_RANGES\_DEG}.  It never fails.  Applied
+to the private bundle (1815 frames, 32 ranged coordinates), 12 coordinates
+exceed their range with no tolerance:
+
+\begin{center}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Coordinate & Min (deg) & Max (deg) & Range low & Range high \\
+\midrule
+\texttt{LWInputX} & $-49.4$ & $40.1$ & $-40$ & $25$ \\
+\texttt{RWInputX} & $-53.4$ & $12.8$ & $-40$ & $25$ \\
+\texttt{RWInputY} & $-74.4$ & $49.3$ & $-70$ & $70$ \\
+\texttt{hip\_rotation\_r} & $-43.7$ & $18.8$ & $-40$ & $40$ \\
+\texttt{hip\_rotation\_l} & $-10.1$ & $40.7$ & $-40$ & $40$ \\
+\texttt{LEInput} & $-116.9$ & $5.7$ & $-150$ & $5$ \\
+\texttt{RScapInputX} & $-21.7$ & $12.5$ & $-30$ & $10$ \\
+\texttt{NeckInputZ} & $-80.1$ & $71.6$ & $-80$ & $80$ \\
+\texttt{subtalar\_angle\_r} & $-13.7$ & $20.3$ & $-20$ & $20$ \\
+\texttt{subtalar\_angle\_l} & $-1.2$ & $39.7$ & $-20$ & $20$ \\
+\texttt{mtp\_angle\_r} & $-32.9$ & $28.0$ & $-30$ & $30$ \\
+\texttt{mtp\_angle\_l} & $-23.9$ & $34.0$ & $-30$ & $30$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The four values quoted by the panel (\texttt{LWInputX}, \texttt{RWInputX},
+\texttt{hip\_rotation\_r}, \texttt{hip\_rotation\_l}) are reproduced exactly.
+The repository helper \texttt{violations()} applies a $0.5^{\circ}$ tolerance,
+so it reports fewer marginal cases (\texttt{LEInput}, \texttt{NeckInputZ},
+\texttt{mtp\_angle\_*}); the report here is strict on purpose.  Marker RMS of
+the same fit is 50.93\,mm, the number later children must hold while the
+violations go to zero.
+
+\section{Grip}
+Placeholder for HRG grip children.  Append method, equations, parameters,
+acceptance criteria, provenance, limitations and failed experiments.
+
+\section{Appearance}
+Placeholder for HRG appearance children.
+
+\section{Pelvis and Hip Centres}
+Placeholder for HRG pelvis and hip-centre children.
+
+\section{Segmental Trunk}
+Placeholder for HRG segmental-trunk children.
+
+\section{Anatomical Angles}
+Placeholder for HRG anatomical-angle children.
+
+\end{document}

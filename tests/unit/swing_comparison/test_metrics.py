@@ -457,8 +457,69 @@ class TestWristMetrics:
 
         res = compute_wrist_metrics(motion, events)
         assert isinstance(res, WristMetrics)
-        assert np.isclose(res.hinge_angle_top, 90.0, atol=1e-3)
-        assert np.isclose(res.hinge_angle_impact, 10.0, atol=1e-3)
+        assert np.isclose(res.lever_angle_top, 90.0, atol=1e-3)
+        assert np.isclose(res.lever_angle_impact, 10.0, atol=1e-3)
+        assert res.unavailable_reason is None
+
+    @staticmethod
+    def _wrist_motion(*, forearm: bool, club: bool) -> tuple[SwingMotion, SwingEvents]:
+        n = 100
+        t = np.arange(n, dtype=np.float64) * 0.01
+        E = np.tile([0.0, 0.0, 1.0], (n, 1))
+        W = np.tile([0.0, 0.3, 1.0], (n, 1))
+        alpha = np.full(n, 10.0)
+        alpha[45] = 90.0
+        a = np.radians(alpha)
+        grip = W.copy()
+        head = grip + np.column_stack([np.sin(a), np.cos(a), np.zeros(n)])
+        markers: dict[str, np.ndarray] = {}
+        if forearm:
+            markers["LElbowOut"] = E
+            markers["LWristTop"] = W
+        if club:
+            markers["Marker_2:2:1"] = head
+            markers["Marker_3:3:1"] = grip
+        motion = SwingMotion(
+            t=t,
+            markers=markers,
+            club_head=head if club else None,
+            grip=grip if club else None,
+        )
+        events = SwingEvents(
+            address_idx=0,
+            address_time=0.0,
+            top_idx=45,
+            top_time=0.45,
+            impact_idx=70,
+            impact_time=0.70,
+            finish_idx=95,
+            finish_time=0.95,
+        )
+        return motion, events
+
+    def test_missing_forearm_markers_gives_nan_with_reason(self) -> None:
+        motion, events = self._wrist_motion(forearm=False, club=True)
+        res = compute_wrist_metrics(motion, events)
+        assert math.isnan(res.lever_angle_top)
+        assert math.isnan(res.lever_angle_impact)
+        assert np.all(np.isnan(res.lever_angle_deg))
+        assert res.unavailable_reason is not None
+        assert "LElbowOut" in res.unavailable_reason
+
+    def test_missing_club_endpoints_gives_nan_with_reason(self) -> None:
+        motion, events = self._wrist_motion(forearm=True, club=False)
+        res = compute_wrist_metrics(motion, events)
+        assert math.isnan(res.lever_angle_top)
+        assert math.isnan(res.lever_angle_impact)
+        assert res.unavailable_reason is not None
+        assert "club" in res.unavailable_reason
+
+    def test_hinge_alias_is_deprecated_and_warns(self) -> None:
+        motion, events = self._wrist_motion(forearm=True, club=True)
+        res = compute_wrist_metrics(motion, events)
+        with pytest.warns(DeprecationWarning, match="lever_angle_top"):
+            value = res.hinge_angle_top
+        assert np.isclose(value, 90.0, atol=1e-3)
 
 
 @pytest.mark.unit

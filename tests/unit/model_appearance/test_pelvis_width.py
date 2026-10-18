@@ -141,3 +141,15 @@ def test_json_roundtrip_of_the_spec_is_unchanged() -> None:
         json.loads(ANTHRO.read_text(encoding="utf-8"))["subject"]["stature_m"] == 1.71
     )
     assert SYMMETRIC_HIPS  # fixture is shared with the C1 gates
+
+
+# ANSUR II male standing hip breadth / stature, per-subject ratio, n = 4082
+# (public CSV sha256 0547aea0...caac64): mean 0.1970, sd 0.0129, p5 0.1770,
+# p95 0.2200. Female (n = 1986) mean is 0.2174; a female subject needs that.
+ANSUR_II_MALE_MEAN = 0.1970
+ANSUR_II_MALE_SD = 0.0129
+
+
+def test_hip_breadth_prior_matches_the_ansur_ii_male_mean() -> None:
+    assert pytest.approx(ANSUR_II_MALE_MEAN, abs=5e-4) == HIP_BREADTH_STATURE_FRACTION
+    assert abs(HIP_BREADTH_STATURE_FRACTION - ANSUR_II_MALE_MEAN) < ANSUR_II_MALE_SD

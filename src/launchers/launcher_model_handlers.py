@@ -20,54 +20,30 @@ from src.launchers._dockable_resolution import (
     _registry_dockable_ui,
     _warn_legacy_embed_fallback,
 )
+from src.launchers.launch_failure_message import (
+    format_physics_informed_status,
+    format_source_root_not_found,
+    format_truthfulness_audit_message,
+)
 from src.launchers.launcher_model_sources import (
-    get_model_source_root,
+    _package_main_module_name,
     get_model_python_paths,
+    get_model_source_root,
     get_model_working_directory,
+    require_model_source_root,
     resolve_model_artifact_path,
 )
 from src.launchers.task_launch_truthfulness import (
     LaunchDisposition,
     get_launch_truthfulness_audit,
 )
+from src.shared.python.config.model_source_providers import SourceRootNotFoundError
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
     from src.launchers.launcher_process_manager import ProcessManager
 
 logger = get_logger(__name__)
-
-
-def _package_main_module_name(
-    model_path: str,
-    *,
-    source_root: Path,
-    launcher_root: Path,
-) -> str | None:
-    """Return the importable module for a package ``__main__`` launcher path.
-
-    Local ``src/tools`` tiles need the ``src`` package prefix because the
-    launcher places the repository root before ``repo/src`` on ``PYTHONPATH``
-    and the repository root has another ``tools`` package.  Other packages
-    retain their established ``repo/src`` import style.  Sibling providers
-    expose their own ``src`` directory as an extra Python path, so their
-    package modules deliberately omit that prefix.
-    """
-    normalized_path = model_path.replace("\\", "/")
-    if not normalized_path.startswith("src/") or not normalized_path.endswith(
-        "/__main__.py"
-    ):
-        return None
-    module_parts = normalized_path.removesuffix("/__main__.py").split("/")
-    is_local_tool_package = (
-        source_root.resolve() == launcher_root.resolve()
-        and module_parts[:2] == ["src", "tools"]
-    )
-    if not is_local_tool_package:
-        module_parts = module_parts[1:]
-    if not module_parts or not all(part.isidentifier() for part in module_parts):
-        return None
-    return ".".join(module_parts)
 
 
 class ModelHandler(Protocol):
@@ -279,6 +255,9 @@ class SpecialAppHandler:
 
     MODEL_TYPES = {"special_app"}
 
+    def __init__(self) -> None:
+        self._status_messages: dict[str, str] = {}
+
     def can_handle(self, model_type: str) -> bool:
         """Check if this handler supports the model type."""
         return model_type.lower() in self.MODEL_TYPES
@@ -323,6 +302,14 @@ class SpecialAppHandler:
                 )
                 return False
 
+        try:
+            source_root = require_model_source_root(model, repo_path)
+        except SourceRootNotFoundError as exc:
+            msg = format_source_root_not_found(exc)
+            self._status_messages[model_id] = msg
+            logger.error("SpecialAppHandler: %s", msg)
+            return False
+
         model_path = getattr(model, "path", None) or ""
         if not model_path:
             logger.error(
@@ -342,7 +329,7 @@ class SpecialAppHandler:
         python_paths = get_model_python_paths(model, repo_path)
         package_module = _package_main_module_name(
             model_path,
-            source_root=get_model_source_root(model, repo_path),
+            source_root=source_root,
             launcher_root=repo_path,
         )
         if package_module is not None:
@@ -366,13 +353,11 @@ class SpecialAppHandler:
     def status_message(self, model: Any) -> str | None:
         """Return user-facing explanation when a special application cannot launch."""
         model_id = getattr(model, "id", None) or ""
-        audit = get_launch_truthfulness_audit(model_id)
-        if audit is not None:
-            if audit.disposition == LaunchDisposition.LIBRARY_ONLY:
-                return f"{audit.label}: {audit.explanation} Next action: {audit.next_action}"
-            if audit.disposition == LaunchDisposition.PARAMETRIC_CLI:
-                return f"{audit.label}: {audit.explanation} Next action: {audit.next_action}"
-        return None
+        if model_id in self._status_messages:
+            return self._status_messages[model_id]
+        return format_truthfulness_audit_message(
+            get_launch_truthfulness_audit(model_id)
+        )
 
     def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
         """Try to load the special app script and get its dockable UI widget."""
@@ -1000,12 +985,10 @@ class PhysicsInformedHandler:
 
     def status_message(self, model: Any) -> str:
         """Return a user-facing explanation of why this tile cannot launch."""
-        mode = getattr(model, "mode", None) or "unknown"
-        name = getattr(model, "name", None) or getattr(model, "id", "unknown")
-        return (
-            f"{name} (mode={mode}) has no interactive UI yet. The physics-informed "
-            f"models are available as a library only ({self.PACKAGE}/); see epic "
-            "#5419. Tracking issue for a launcher front-end: #7984."
+        return format_physics_informed_status(
+            getattr(model, "name", None) or getattr(model, "id", "unknown"),
+            getattr(model, "mode", None) or "unknown",
+            self.PACKAGE,
         )
 
     def launch(

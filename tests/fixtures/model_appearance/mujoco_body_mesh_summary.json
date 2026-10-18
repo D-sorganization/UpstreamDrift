@@ -94,8 +94,8 @@
         "n_vertices": 948
       },
       {
-        "bbox_max": [0.045697, 0.023448, 0.063927],
-        "bbox_min": [-0.055698, -0.048653, -0.019558],
+        "bbox_max": [0.034259, 0.029106, 0.063924],
+        "bbox_min": [-0.055696, -0.043243, -0.021692],
         "label": "lead_hand",
         "material": "mat_glove_white",
         "n_vertices": 3102
@@ -108,8 +108,8 @@
         "n_vertices": 50
       },
       {
-        "bbox_max": [0.10787, 0.027114, 0.10132],
-        "bbox_min": [-0.031581, -0.050053, 0.026196],
+        "bbox_max": [0.094402, 0.036844, 0.100775],
+        "bbox_min": [-0.026476, -0.04787, -0.003279],
         "label": "trail_hand",
         "material": "mat_glove_white",
         "n_vertices": 3102
@@ -471,8 +471,8 @@
         "n_vertices": 948
       },
       {
-        "bbox_max": [0.04107, 0.039425, 0.06633],
-        "bbox_min": [-0.040584, -0.052603, -0.01438],
+        "bbox_max": [0.050942, 0.031572, 0.066228],
+        "bbox_min": [-0.04249, -0.050546, -0.016415],
         "label": "lead_hand",
         "material": "mat_glove_white",
         "n_vertices": 3102
@@ -485,8 +485,8 @@
         "n_vertices": 50
       },
       {
-        "bbox_max": [0.082221, 0.092789, 0.093484],
-        "bbox_min": [-0.032609, -0.033522, 0.017565],
+        "bbox_max": [0.091238, 0.086187, 0.090068],
+        "bbox_min": [-0.030778, -0.00118, -0.009144],
         "label": "trail_hand",
         "material": "mat_glove_white",
         "n_vertices": 3102
@@ -848,8 +848,8 @@
         "n_vertices": 948
       },
       {
-        "bbox_max": [0.036731, 0.024, 0.061266],
-        "bbox_min": [-0.030015, -0.06275, -0.005877],
+        "bbox_max": [0.031277, 0.024, 0.062131],
+        "bbox_min": [-0.035866, -0.06275, -0.004615],
         "label": "lead_hand",
         "material": "mat_glove_white",
         "n_vertices": 3102
@@ -862,8 +862,8 @@
         "n_vertices": 50
       },
       {
-        "bbox_max": [0.029938, 0.1002, 0.069571],
-        "bbox_min": [-0.045184, -0.0233, -0.00549],
+        "bbox_max": [0.03089, 0.1002, 0.055338],
+        "bbox_min": [-0.044171, -0.0233, -0.019784],
         "label": "trail_hand",
         "material": "mat_glove_white",
         "n_vertices": 3102

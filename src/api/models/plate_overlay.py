@@ -1,9 +1,9 @@
 """Request model for the measured plate overlay (OF-07, #13087).
 
 Everything a swing file cannot carry is declared by the caller and validated
-again by the force-plate domain objects: plate uncertainty and geometry, where
-the stance frame sits in the model's world, and how the plate clock maps onto
-model time.  The trial itself is named by a path *relative* to the server's
+again by the force-plate domain objects: plate uncertainty and geometry, the
+channels' timing skew, where the stance frame sits in the model's world, and
+how the plate clock maps onto model time.  The trial itself is named by a path *relative* to the server's
 allow-listed plate-trial root, never an arbitrary file.
 """
 
@@ -25,6 +25,15 @@ class PlateDeclarationsModel(BaseModel):
     sensing_depth_m: float
     capacity_n: float
     device: str | None = None
+
+
+class PlateReadingModel(BaseModel):
+    """Declared channel timing (see ``DeclaredReading``)."""
+
+    skew_s: float = Field(..., ge=0.0, description="Timing skew within a sample (s)")
+    cop_skew: Literal["unknown", "independent", "common"] = Field(
+        ..., description="How the two CoP channels' skews relate"
+    )
 
 
 class PlateAlignmentModel(BaseModel):
@@ -57,4 +66,5 @@ class PlateOverlayRequest(BaseModel):
     )
     declared: PlateDeclarationsModel
     alignment: PlateAlignmentModel
+    reading: PlateReadingModel
     coverage: float = Field(2.0, description="Band factor for the interpolation bias")

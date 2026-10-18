@@ -449,7 +449,12 @@ def raise_api_error(
     raise APIException(code=code, message=message, details=details or None)
 
 
+class ClientInputError(ValueError):
+    """Exception raised for client input errors where the message is safe to return to the client."""
+
+
 __all__ = [
+    "ClientInputError",
     "ErrorCategory",
     "ErrorCode",
     "ERROR_METADATA",

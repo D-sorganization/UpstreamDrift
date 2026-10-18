@@ -48,6 +48,7 @@ from src.shared.python.motion_matching.contact_law import (
     ContactSample,
     GroundPlane,
     sphere_ground_contact,
+    support_planes,
 )
 from src.shared.python.motion_matching.full_body_spec import (
     FULL_BODY_SCHEMA_VERSION,
@@ -278,6 +279,8 @@ class FullBodyDrakeModel:
             normal=(float(up_vec[0]), float(up_vec[1]), float(up_vec[2])),
             height_m=h_m,
         )
+        # Raised supports (a bench top, #11745); other spheres use the ground.
+        self._support_planes = support_planes(c_spec, self.ground_plane)
 
         self._spheres: dict[str, dict[str, Any]] = {}
         for sphere in c_spec["spheres"]:
@@ -462,8 +465,9 @@ class FullBodyDrakeModel:
         samples: dict[str, ContactSample] = {}
         for s_name in self._spheres:
             pos, vel, radius = self.get_sphere_kinematics(s_name, coordinates, rates)
+            plane = self._support_planes.get(s_name, self.ground_plane)
             samples[s_name] = sphere_ground_contact(
-                pos, vel, radius, self.ground_plane, self.contact_parameters
+                pos, vel, radius, plane, self.contact_parameters
             )
         return samples
 
