@@ -74,6 +74,8 @@ class TestJointStressAnalyzer:
         mock_data["joint_torques"]["elbow_flexion"] = np.full(
             20, 200.0
         )  # High torque (200 * 0.3 = 60 > 35)
+        # The wrist-flexor term is required; zero it so the elbow term alone decides
+        mock_data["joint_torques"]["wrist_cock"] = np.zeros(20)
 
         result = analyzer.analyze_elbow(
             mock_data["joint_angles"],

@@ -130,16 +130,41 @@ class WristDeviation:
 def _unavailable_result(
     joint_name: str, side: JointSide, time: np.ndarray, reasons: list[str]
 ) -> JointStressResult:
-    """Return a result whose values are NaN and whose reason names the gap."""
+    """Return a result whose values are all NaN and whose reason names the gap."""
     nan = float("nan")
     return JointStressResult(
         joint_name=joint_name,
         side=side,
         time=time,
+        peak_compression=nan,
         peak_shear=nan,
+        peak_torsion=nan,
         rom_utilization=nan,
         risk_score=nan,
         unavailable_reason="; ".join(reasons),
+    )
+
+
+def _first_series(mapping: dict[str, np.ndarray], *keys: str) -> np.ndarray | None:
+    """Return the first present series for ``keys``, or None (never zeros)."""
+    for key in keys:
+        if mapping.get(key) is not None:
+            return mapping[key]
+    return None
+
+
+def _unavailable_if_missing(
+    joint_name: str,
+    side: JointSide,
+    time: np.ndarray,
+    required: dict[str, np.ndarray | None],
+) -> JointStressResult | None:
+    """Return an unavailable result if any required series is None, else None."""
+    missing = [label for label, series in required.items() if series is None]
+    if not missing:
+        return None
+    return _unavailable_result(
+        joint_name, side, time, [f"{label} missing" for label in missing]
     )
 
 
@@ -338,17 +363,19 @@ class JointStressAnalyzer:
         """Analyze hip joint stress."""
         assert joint_angles is not None, "joint_angles must be provided"
         assert joint_angles is not None, "joint_angles must be provided"
-        result = JointStressResult(joint_name="hip", side=side, time=time)
-        n_frames = len(time)
-
         # Get angle data (use generic if side-specific not available)
         prefix = "hip_lead" if side == JointSide.LEAD else "hip_trail"
-        rotation = joint_angles.get(
-            f"{prefix}_rotation", joint_angles.get("hip_rotation", np.zeros(n_frames))
+        rotation = _first_series(joint_angles, f"{prefix}_rotation", "hip_rotation")
+        flexion = _first_series(joint_angles, f"{prefix}_flexion", "hip_flexion")
+        unavailable = _unavailable_if_missing(
+            "hip",
+            side,
+            time,
+            {"hip rotation": rotation, "hip flexion": flexion},
         )
-        flexion = joint_angles.get(
-            f"{prefix}_flexion", joint_angles.get("hip_flexion", np.zeros(n_frames))
-        )
+        if unavailable is not None:
+            return unavailable
+        result = JointStressResult(joint_name="hip", side=side, time=time)
 
         # Compute internal rotation range
         rotation_deg = np.degrees(rotation)
@@ -385,18 +412,23 @@ class JointStressAnalyzer:
         """Analyze shoulder joint stress."""
         assert joint_angles is not None, "joint_angles must be provided"
         assert joint_angles is not None, "joint_angles must be provided"
+        # Get angle, torque and velocity data; all three are required
+        horizontal = joint_angles.get("shoulder_horizontal")
+        torque = joint_torques.get("shoulder_horizontal")
+        velocity = joint_velocities.get("shoulder_horizontal")
+        unavailable = _unavailable_if_missing(
+            "shoulder",
+            side,
+            time,
+            {
+                "shoulder horizontal angle": horizontal,
+                "shoulder torque": torque,
+                "shoulder velocity": velocity,
+            },
+        )
+        if unavailable is not None:
+            return unavailable
         result = JointStressResult(joint_name="shoulder", side=side, time=time)
-        n_frames = len(time)
-
-        # Get angle and torque data
-        horizontal = joint_angles.get("shoulder_horizontal", np.zeros(n_frames))
-        joint_angles.get("shoulder_vertical", np.zeros(n_frames))
-
-        # Get torques
-        torque = joint_torques.get("shoulder_horizontal", np.zeros(n_frames))
-
-        # Compute shear and torsion from velocities and torques
-        velocity = joint_velocities.get("shoulder_horizontal", np.zeros(n_frames))
 
         # Peak values
         result.peak_torsion = np.max(np.abs(torque))
@@ -428,18 +460,31 @@ class JointStressAnalyzer:
         time: np.ndarray,
         side: JointSide,
     ) -> JointStressResult:
-        """Analyze elbow joint stress (golfer's elbow risk)."""
-        assert joint_angles is not None, "joint_angles must be provided"
-        assert joint_angles is not None, "joint_angles must be provided"
-        result = JointStressResult(joint_name="elbow", side=side, time=time)
-        n_frames = len(time)
+        """Analyze elbow joint stress (golfer's elbow risk).
 
+        The valgus estimate is a sum of elbow and wrist-flexor torque terms.
+        A missing term would silently understate the risk, so a missing elbow
+        flexion, elbow torque or ``wrist_cock`` torque gives an unavailable
+        result rather than dropping the term.
+        """
         # Get flexion angle and torque
-        flexion = joint_angles.get("elbow_flexion", np.zeros(n_frames))
-        torque = joint_torques.get("elbow_flexion", np.zeros(n_frames))
-
+        flexion = joint_angles.get("elbow_flexion")
+        torque = joint_torques.get("elbow_flexion")
         # Wrist flexor loading contributes to medial epicondyle stress
-        wrist_torque = joint_torques.get("wrist_cock", np.zeros(n_frames))
+        wrist_torque = joint_torques.get("wrist_cock")
+        unavailable = _unavailable_if_missing(
+            "elbow",
+            side,
+            time,
+            {
+                "elbow flexion": flexion,
+                "elbow torque": torque,
+                "wrist_cock torque": wrist_torque,
+            },
+        )
+        if unavailable is not None:
+            return unavailable
+        result = JointStressResult(joint_name="elbow", side=side, time=time)
 
         # Valgus torque estimate (simplified)
         # In golf, this relates to the "casting" motion

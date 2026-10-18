@@ -231,3 +231,56 @@ class TestAnalyzeWristDeviation:
         )
         assert math.isfinite(results["wrist_lead"].rom_utilization)
         assert math.isnan(results["wrist_trail"].risk_score)
+
+
+class TestNoSilentZeroDefaults:
+    """Missing required series give unavailable results, never zero-filled ones."""
+
+    def _elbow_inputs(self, with_wrist_torque: bool) -> tuple[dict, dict]:
+        angles = {"elbow_flexion": np.radians(np.full(5, 60.0))}
+        torques = {"elbow_flexion": np.full(5, 10.0)}
+        if with_wrist_torque:
+            torques["wrist_cock"] = np.full(5, 4.0)
+        return angles, torques
+
+    def test_elbow_missing_wrist_torque_is_unavailable(self) -> None:
+        a = _make_analyzer()
+        angles, torques = self._elbow_inputs(with_wrist_torque=False)
+        result = a.analyze_elbow(angles, {}, torques, _T, JointSide.LEAD)
+        assert result.unavailable_reason is not None
+        assert "wrist_cock" in result.unavailable_reason
+        assert math.isnan(result.risk_score)
+        assert math.isnan(result.peak_torsion)
+        assert result.overload_risk is False
+
+    def test_elbow_with_wrist_torque_is_available(self) -> None:
+        a = _make_analyzer()
+        angles, torques = self._elbow_inputs(with_wrist_torque=True)
+        result = a.analyze_elbow(angles, {}, torques, _T, JointSide.LEAD)
+        assert result.unavailable_reason is None
+        assert math.isfinite(result.risk_score)
+
+    def test_elbow_missing_flexion_is_unavailable(self) -> None:
+        a = _make_analyzer()
+        _, torques = self._elbow_inputs(with_wrist_torque=True)
+        result = a.analyze_elbow({}, {}, torques, _T, JointSide.TRAIL)
+        assert result.unavailable_reason is not None
+        assert "elbow flexion" in result.unavailable_reason
+        assert math.isnan(result.rom_utilization)
+
+    def test_hip_missing_inputs_is_unavailable(self) -> None:
+        a = _make_analyzer()
+        result = a.analyze_hip({}, {}, {}, _T, JointSide.LEAD)
+        assert result.unavailable_reason is not None
+        assert math.isnan(result.risk_score)
+        assert math.isnan(result.rom_utilization)
+        assert result.impingement_risk is False
+
+    def test_shoulder_missing_torque_is_unavailable(self) -> None:
+        a = _make_analyzer()
+        angles = {"shoulder_horizontal": np.radians(np.full(5, 20.0))}
+        result = a.analyze_shoulder(angles, {}, {}, _T, JointSide.TRAIL)
+        assert result.unavailable_reason is not None
+        assert "shoulder torque" in result.unavailable_reason
+        assert math.isnan(result.risk_score)
+        assert math.isnan(result.peak_torsion)
