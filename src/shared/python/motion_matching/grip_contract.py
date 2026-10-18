@@ -32,6 +32,7 @@ neutral transform ``M_0 = R_x(-50 deg)``, i.e. the Euler triple
 from __future__ import annotations
 
 import math
+import types
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from typing import Any, ClassVar, Final
@@ -237,6 +238,15 @@ class GripSpec:
     ) -> GripSpec:
         """Both hands at a named strength and palm preset, or a named full preset."""
         if strength in NAMED_GRIP_PRESETS:
+            if palm != "neutral" or shared:
+                extra = []
+                if palm != "neutral":
+                    extra.append(f"palm={palm!r}")
+                if shared:
+                    extra.extend(f"{k}={v!r}" for k, v in sorted(shared.items()))
+                raise ValueError(
+                    f"named preset {strength!r} does not accept extra arguments: {', '.join(extra)}"
+                )
             return cls.named_preset(strength, handedness=handedness)
         if strength not in GRIP_STRENGTH_PRESETS_DEG:
             raise ValueError(
@@ -269,38 +279,39 @@ class GripSpec:
         )
 
 
+def _require_text(value: Any, field: str) -> None:
+    """Validate that ``value`` is a non-empty, non-blank string."""
+    if not isinstance(value, str):
+        raise TypeError(f"{field} must be a str, got {type(value).__name__}")
+    if not value.strip():
+        raise ValueError(f"{field} must be a non-empty string")
+
+
 @dataclass(frozen=True)
 class NamedGripPreset:
     """Historical/consensus named grip preset backed by photo estimates.
 
-    Each preset specifies full double-precision starting values for both hands,
-    grip linking style, hand spacing along the shaft, trigger finger state,
-    a qualitative source citation, and a license-clean evidence still description.
+    The numeric values are photo_estimate assumptions, not measurements; no
+    image is committed in the repository. Each preset specifies full
+    double-precision starting values for both hands, grip linking style, hand
+    spacing along the shaft, trigger finger state, a qualitative source citation
+    actually consulted, and the photographic evidence still requirement needed
+    to qualify the estimate.
     """
 
     name: str
     label: str
     spec: GripSpec
     qualitative_source: str
-    evidence_still_description: str
+    evidence_still_requirement: str
 
     def __post_init__(self) -> None:
-        if not isinstance(self.name, str) or not self.name.strip():
-            raise TypeError("name must be a non-empty string")
-        if not isinstance(self.label, str) or not self.label.strip():
-            raise TypeError("label must be a non-empty string")
+        _require_text(self.name, "name")
+        _require_text(self.label, "label")
         if not isinstance(self.spec, GripSpec):
             raise TypeError(f"spec must be a GripSpec, got {type(self.spec).__name__}")
-        if (
-            not isinstance(self.qualitative_source, str)
-            or not self.qualitative_source.strip()
-        ):
-            raise TypeError("qualitative_source must be a non-empty string")
-        if (
-            not isinstance(self.evidence_still_description, str)
-            or not self.evidence_still_description.strip()
-        ):
-            raise TypeError("evidence_still_description must be a non-empty string")
+        _require_text(self.qualitative_source, "qualitative_source")
+        _require_text(self.evidence_still_requirement, "evidence_still_requirement")
 
     @property
     def style(self) -> GripStyle:
@@ -331,8 +342,17 @@ class NamedGripPreset:
         """Return a :class:`GripSpec` for the requested handedness."""
         return replace(self.spec, handedness=handedness)
 
+    def to_library_dict(self) -> dict[str, Any]:
+        """Dictionary representation for the appearance library API."""
+        return {
+            "label": self.label,
+            "qualitative_source": self.qualitative_source,
+            "evidence_still_requirement": self.evidence_still_requirement,
+            **grip_spec_to_physical(self.spec),
+        }
 
-NAMED_GRIP_PRESETS: Final[dict[str, NamedGripPreset]] = {
+
+_NAMED_GRIP_PRESETS: dict[str, NamedGripPreset] = {
     "palmer_overlap": NamedGripPreset(
         name="palmer_overlap",
         label="Palmer Overlap",
@@ -344,17 +364,17 @@ NAMED_GRIP_PRESETS: Final[dict[str, NamedGripPreset]] = {
             trigger_finger=True,
         ),
         qualitative_source=(
-            "Arnold Palmer classic strong overlap grip: lead hand rotated strong "
-            "showing ~3 knuckles (+12 deg), palm diagonal across lifeline (45 deg), "
-            "trail hand matching shaft rotation (+12 deg) seated in fingers (35 deg), "
-            "tight hand spacing (0.074 m) with separated index trigger finger. "
-            "Sources: Palmer, 'Go for Broke' (1960); Golf Digest retrospective archive."
+            "golf.com's published excerpt from the book 'Arnold Palmer: American Hero'. "
+            "Palmer describes: an overlap grip; both Vs pointing at the right shoulder "
+            "seam (strong-ish); the right lifeline folding over the left thumb; "
+            "a slight right-index trigger; a palm-finger hold for the left hand."
         ),
-        evidence_still_description=(
-            "Archival photographic reference from 1960 US Open (Cherry Hills): "
-            "high-resolution face-on address still showing trail index trigger finger "
-            "extended down the shaft, lead thumb nestled in trail thenar pocket, trail "
-            "little finger riding over lead index knuckle."
+        evidence_still_requirement=(
+            "Face-on high-speed camera still required at address: must clearly show "
+            "the trail index trigger finger extended on the grip, the lead thumb nested "
+            "under the trail thenar lifeline, and the trail little finger overlapping "
+            "the lead index knuckle. Numeric values are photo_estimate assumptions, "
+            "not measurements; no image is committed in the repository."
         ),
     ),
     "woods_interlock": NamedGripPreset(
@@ -368,18 +388,16 @@ NAMED_GRIP_PRESETS: Final[dict[str, NamedGripPreset]] = {
             trigger_finger=False,
         ),
         qualitative_source=(
-            "Tiger Woods signature interlock grip: neutral-to-slight strong orientation "
-            "(+2 deg on both hands), fingers nestled moderately in palm lifeline "
-            "(38 deg lead, 34 deg trail), compact hand spacing (0.069 m) from deep "
-            "interlocking of trail little finger between lead index and middle digits, "
-            "curled index finger without trigger separation. "
-            "Sources: Woods, 'How I Play Golf' (2001), Chapter 1; PGA Tour player profile."
+            "An interlock grip seen in published photos of Tiger Woods: a neutral lead hand, "
+            "with about 2 to 2.5 knuckles showing; the trail little finger hooked between "
+            "the lead index and middle fingers; the right palm over the left thumb."
         ),
-        evidence_still_description=(
-            "Archival tournament broadcast high-speed still from 2000-2001 major "
-            "championship address: face-on close-up showing trail little finger deeply "
-            "interlocked between lead index and middle fingers, compact unified hand "
-            "unit, trail index curled flush against shaft."
+        evidence_still_requirement=(
+            "Face-on high-speed camera still required at address: must clearly show "
+            "the trail little finger interlocked between the lead index and middle fingers, "
+            "approximately 2 to 2.5 knuckles visible on the lead hand, and the trail palm "
+            "seated over the lead thumb. Numeric values are photo_estimate assumptions, "
+            "not measurements; no image is committed in the repository."
         ),
     ),
     "ten_finger": NamedGripPreset(
@@ -393,20 +411,25 @@ NAMED_GRIP_PRESETS: Final[dict[str, NamedGripPreset]] = {
             trigger_finger=False,
         ),
         qualitative_source=(
-            "Classical baseball or ten-finger grip (as advocated by Bob Rosburg and modern "
-            "coaching consensus): all ten digits making direct contact with the grip cylinder, "
+            "The general instructional description, with no named person: all ten digits "
+            "making direct contact with the grip cylinder without overlap or interlock, "
             "mild rotation (+5 deg on both hands), lead palm diagonal 40 deg, trail finger "
-            "diagonal 32 deg, wider hand spacing (0.090 m) accommodating un-overlapped little "
-            "finger, trigger finger off. Sources: PGA instructional literature consensus."
+            "diagonal 32 deg, 90 mm hand spacing, and curled index finger without "
+            "trigger separation."
         ),
-        evidence_still_description=(
-            "High-speed instructional camera still at address: face-on view showing all "
-            "eight fingers and two thumbs directly contacting grip wrapper, trail little finger "
-            "positioned immediately adjacent to lead index finger without overlap or interlock, "
-            "90 mm hand spacing."
+        evidence_still_requirement=(
+            "Face-on camera still required at address: must clearly show all eight fingers "
+            "and two thumbs contacting the grip cylinder directly, with the trail little "
+            "finger positioned flush against the lead index finger without overlap or "
+            "interlocking. Numeric values are photo_estimate assumptions, not measurements; "
+            "no image is committed in the repository."
         ),
     ),
 }
+
+NAMED_GRIP_PRESETS: types.MappingProxyType[str, NamedGripPreset] = (
+    types.MappingProxyType(_NAMED_GRIP_PRESETS)
+)
 
 
 def named_grip_preset(name: str) -> NamedGripPreset:

@@ -13,6 +13,7 @@
 
 import { DEFAULT_SKIN_HEX } from './appearanceDefaults.generated';
 import { customizeDocument, type ColourPicks } from './appearanceDocument';
+import type { GripStyle, HandAngles } from './gripSelection';
 
 export interface AppearanceMaterial {
   base_color: number[];
@@ -21,12 +22,25 @@ export interface AppearanceMaterial {
   texture?: Record<string, unknown>;
 }
 
+export interface NamedGripPresetEntry {
+  label: string;
+  qualitative_source: string;
+  evidence_still_requirement: string;
+  lead: HandAngles;
+  trail: HandAngles;
+  lead_below_butt_m: number;
+  hand_spacing_m: number;
+  handedness: 'right' | 'left';
+  style?: GripStyle;
+  trigger_finger?: boolean;
+}
+
 export interface AppearanceLibrary {
   schema_version: string;
   glove?: string[];
   grip?: {
     presets: Record<string, number>;
-    named_presets?: Record<string, unknown>;
+    named_presets?: Record<string, NamedGripPresetEntry>;
     styles: string[];
   };
   skin_tones: string[];

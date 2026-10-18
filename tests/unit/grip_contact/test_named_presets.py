@@ -9,6 +9,7 @@ desktop, web).
 from __future__ import annotations
 
 import json
+import types
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -19,6 +20,7 @@ from src.api.routes.character_appearance import (
     GripRevisionRequest,
     build_grip_revision,
 )
+from src.api.services.character_appearance_service import appearance_library
 from src.shared.python.grip_contact.contact_topology import (
     GripStyle,
     contact_topology,
@@ -95,9 +97,16 @@ def test_palmer_overlap_pinned_values_and_ranges() -> None:
     assert -180.0 <= spec.trail.gamma_deg <= 180.0
     assert 0.0 <= spec.pose().lead_v_azimuth_deg <= 90.0
 
-    # Qualitative source & evidence still citation
+    # Qualitative source & evidence still requirement
     assert len(preset.qualitative_source) > 20
-    assert len(preset.evidence_still_description) > 20
+    assert len(preset.evidence_still_requirement) > 20
+    assert "American Hero" in preset.qualitative_source
+    assert "golf.com" in preset.qualitative_source
+    assert "Go for Broke" not in preset.qualitative_source
+    assert "Golf Digest" not in preset.qualitative_source
+    assert "Cherry Hills" not in preset.evidence_still_requirement
+    assert "photo_estimate" in preset.evidence_still_requirement
+    assert "no image is committed" in preset.evidence_still_requirement
 
 
 def test_woods_interlock_pinned_values_and_ranges() -> None:
@@ -129,9 +138,18 @@ def test_woods_interlock_pinned_values_and_ranges() -> None:
     assert -180.0 <= spec.trail.gamma_deg <= 180.0
     assert 0.0 <= spec.pose().lead_v_azimuth_deg <= 90.0
 
-    # Qualitative source & evidence still citation
+    # Qualitative source & evidence still requirement
     assert len(preset.qualitative_source) > 20
-    assert len(preset.evidence_still_description) > 20
+    assert len(preset.evidence_still_requirement) > 20
+    assert "Tiger Woods" in preset.qualitative_source
+    assert "How I Play Golf" not in preset.qualitative_source
+    assert "PGA Tour player profile" not in preset.qualitative_source
+    assert (
+        "2000-2001 major championship broadcast"
+        not in preset.evidence_still_requirement
+    )
+    assert "photo_estimate" in preset.evidence_still_requirement
+    assert "no image is committed" in preset.evidence_still_requirement
 
 
 def test_ten_finger_pinned_values_and_ranges() -> None:
@@ -163,9 +181,13 @@ def test_ten_finger_pinned_values_and_ranges() -> None:
     assert -180.0 <= spec.trail.gamma_deg <= 180.0
     assert 0.0 <= spec.pose().lead_v_azimuth_deg <= 90.0
 
-    # Qualitative source & evidence still citation
+    # Qualitative source & evidence still requirement (no named person)
     assert len(preset.qualitative_source) > 20
-    assert len(preset.evidence_still_description) > 20
+    assert len(preset.evidence_still_requirement) > 20
+    assert "Bob Rosburg" not in preset.qualitative_source
+    assert "Rosburg" not in preset.qualitative_source
+    assert "photo_estimate" in preset.evidence_still_requirement
+    assert "no image is committed" in preset.evidence_still_requirement
 
 
 @pytest.mark.parametrize("name", ["palmer_overlap", "woods_interlock", "ten_finger"])
@@ -239,3 +261,173 @@ def test_dbc_preconditions_reject_bad_inputs() -> None:
         GripSpec.named_preset("nonexistent")
     with pytest.raises(TypeError):
         named_grip_preset(123)  # type: ignore[arg-type]
+
+
+def test_dbc_blank_string_is_value_error_and_wrong_type_is_type_error() -> None:
+    """DbC: blank or empty string is ValueError, wrong type is TypeError."""
+    base_spec = named_grip_preset("palmer_overlap").spec
+
+    # Wrong types raise TypeError
+    with pytest.raises(TypeError, match="name must be a str"):
+        NamedGripPreset(
+            name=123,  # type: ignore[arg-type]
+            label="Label",
+            spec=base_spec,
+            qualitative_source="Source text",
+            evidence_still_requirement="Still requirement",
+        )
+    with pytest.raises(TypeError, match="label must be a str"):
+        NamedGripPreset(
+            name="custom",
+            label=123,  # type: ignore[arg-type]
+            spec=base_spec,
+            qualitative_source="Source text",
+            evidence_still_requirement="Still requirement",
+        )
+    with pytest.raises(TypeError, match="spec must be a GripSpec"):
+        NamedGripPreset(
+            name="custom",
+            label="Label",
+            spec="not_a_spec",  # type: ignore[arg-type]
+            qualitative_source="Source text",
+            evidence_still_requirement="Still requirement",
+        )
+    with pytest.raises(TypeError, match="qualitative_source must be a str"):
+        NamedGripPreset(
+            name="custom",
+            label="Label",
+            spec=base_spec,
+            qualitative_source=None,  # type: ignore[arg-type]
+            evidence_still_requirement="Still requirement",
+        )
+    with pytest.raises(TypeError, match="evidence_still_requirement must be a str"):
+        NamedGripPreset(
+            name="custom",
+            label="Label",
+            spec=base_spec,
+            qualitative_source="Source text",
+            evidence_still_requirement=456,  # type: ignore[arg-type]
+        )
+
+    # Empty or whitespace-only strings raise ValueError
+    with pytest.raises(ValueError, match="name must be a non-empty string"):
+        NamedGripPreset(
+            name="   ",
+            label="Label",
+            spec=base_spec,
+            qualitative_source="Source text",
+            evidence_still_requirement="Still requirement",
+        )
+    with pytest.raises(ValueError, match="label must be a non-empty string"):
+        NamedGripPreset(
+            name="custom",
+            label="",
+            spec=base_spec,
+            qualitative_source="Source text",
+            evidence_still_requirement="Still requirement",
+        )
+    with pytest.raises(
+        ValueError, match="qualitative_source must be a non-empty string"
+    ):
+        NamedGripPreset(
+            name="custom",
+            label="Label",
+            spec=base_spec,
+            qualitative_source="   ",
+            evidence_still_requirement="Still requirement",
+        )
+    with pytest.raises(
+        ValueError, match="evidence_still_requirement must be a non-empty string"
+    ):
+        NamedGripPreset(
+            name="custom",
+            label="Label",
+            spec=base_spec,
+            qualitative_source="Source text",
+            evidence_still_requirement="",
+        )
+
+
+def test_named_grip_presets_is_read_only_mapping_proxy() -> None:
+    """NAMED_GRIP_PRESETS is read-only types.MappingProxyType."""
+    assert isinstance(NAMED_GRIP_PRESETS, types.MappingProxyType)
+    with pytest.raises(TypeError):
+        NAMED_GRIP_PRESETS["new_preset"] = NAMED_GRIP_PRESETS["palmer_overlap"]  # type: ignore[index]
+
+
+def test_grip_spec_preset_rejects_extra_arguments_with_named_preset() -> None:
+    """GripSpec.preset raises ValueError when extra arguments accompany a named preset."""
+    # Default palm="neutral" and no shared is accepted
+    spec = GripSpec.preset("palmer_overlap")
+    assert spec == named_grip_preset("palmer_overlap").spec
+
+    # Handedness alone is accepted
+    spec_l = GripSpec.preset("palmer_overlap", handedness="left")
+    assert spec_l.handedness == "left"
+
+    # Non-neutral palm raises ValueError
+    with pytest.raises(ValueError, match="does not accept extra arguments"):
+        GripSpec.preset("palmer_overlap", palm="finger")
+
+    # Extra shared kwargs raise ValueError
+    with pytest.raises(ValueError, match="does not accept extra arguments"):
+        GripSpec.preset("palmer_overlap", style=GripStyle.INTERLOCK)
+
+    with pytest.raises(ValueError, match="does not accept extra arguments"):
+        GripSpec.preset("woods_interlock", hand_spacing_m=0.08)
+
+
+def test_named_preset_to_library_dict_matches_appearance_library() -> None:
+    """Named preset entries in appearance_library use to_library_dict."""
+    lib = appearance_library()
+    named_dict = lib["grip"]["named_presets"]
+
+    for name, preset in NAMED_GRIP_PRESETS.items():
+        entry = named_dict[name]
+        assert entry == preset.to_library_dict()
+        assert entry["label"] == preset.label
+        assert entry["qualitative_source"] == preset.qualitative_source
+        assert entry["evidence_still_requirement"] == preset.evidence_still_requirement
+        assert entry["hand_spacing_m"] == preset.hand_spacing_m
+        assert entry["lead"] == {
+            "alpha_deg": preset.lead.alpha_deg,
+            "psi_deg": preset.lead.psi_deg,
+            "gamma_deg": preset.lead.gamma_deg,
+        }
+        assert entry["trail"] == {
+            "alpha_deg": preset.trail.alpha_deg,
+            "psi_deg": preset.trail.psi_deg,
+            "gamma_deg": preset.trail.gamma_deg,
+        }
+
+
+def test_apply_grip_selection_sidecar_with_physical_key_raises() -> None:
+    """apply_grip_selection raises ValueError when sidecar carries physical key."""
+    with pytest.raises(ValueError, match="only visual grip values"):
+        apply_grip_selection(
+            DRIVER,
+            GripOverrides(),
+            sidecar_grip={"hand_spacing_m": 0.08},
+        )
+    with pytest.raises(ValueError, match="only visual grip values"):
+        apply_grip_selection(
+            DRIVER,
+            GripOverrides(preset="palmer_overlap"),
+            sidecar_grip={"lead_below_butt_m": 0.04},
+        )
+
+
+def test_apply_grip_selection_restores_sidecar_visual_picks_in_returned_grip() -> None:
+    """apply_grip_selection returned grip includes sidecar and override visual picks."""
+    configured_doc = apply_grip_config(DRIVER, GripSpec())
+    overrides = GripOverrides(grip_style="ten_finger")
+    doc, grip = apply_grip_selection(
+        configured_doc,
+        overrides,
+        sidecar_grip={"lead_thumb_offset_deg": 18.0},
+    )
+    assert grip is not None
+    assert grip.style is GripStyle.TEN_FINGER
+    assert grip.lead_thumb_offset_deg == pytest.approx(18.0)
+    # The document physics hash is unchanged
+    assert physics_spec_sha256(doc) == physics_spec_sha256(configured_doc)

@@ -339,43 +339,66 @@ locations are not identifiable from data; the table fixes them by assumption.
 ---\texttt{palmer\_overlap}, \texttt{woods\_interlock}, and
 \texttt{ten\_finger}---are formalised over \texttt{GripSpec}, parameterising
 inter-hand linking style, golf angles ($\alpha, \psi, \gamma$) for both hands,
-hand spacing, and trigger-finger extension.  Every parameter records
-\texttt{photo\_estimate} provenance in \texttt{subject.grip\_provenance},
-distinguishing photographic reference estimates from direct kinetic or marker measurements.
+hand spacing, and trigger-finger extension. The numeric values are
+\texttt{photo\_estimate} assumptions, not measurements; no image is committed
+in the repository. Every parameter records \texttt{photo\_estimate} provenance
+in \texttt{subject.grip\_provenance}, distinguishing photo-estimate assumptions
+from direct kinetic or marker measurements.
 
-\textbf{Parameters.} The panel-consensus starting values are:
+\textbf{Parameters.} The panel-consensus starting values and actually consulted
+qualitative sources are:
 \begin{itemize}[nosep]
   \item \textbf{Palmer Overlap}: \texttt{GripStyle.OVERLAP}, lead
     $\alpha=+12^{\circ}$, $\psi=45^{\circ}$, $\gamma=0^{\circ}$; trail
     $\alpha=+12^{\circ}$, $\psi=35^{\circ}$, $\gamma=0^{\circ}$; spacing
-    $0.074$\,m; trigger finger on.  Qualitative source: Palmer (1960) strong
-    overlap grip with extended index trigger finger; 1960 Cherry Hills address still.
+    $0.074$\,m; trigger finger on. Qualitative source: golf.com's published
+    excerpt from the book \emph{Arnold Palmer: American Hero}. Palmer describes
+    an overlap grip, both Vs pointing at the right shoulder seam (strong-ish),
+    the right lifeline folding over the left thumb, a slight right-index trigger,
+    and a palm-finger hold for the left hand. Evidence still requirement: face-on
+    high-speed camera still required at address showing the trail index trigger
+    finger extended down the shaft, the lead thumb nested in the trail thenar pocket,
+    and the trail little finger riding over the lead index knuckle.
   \item \textbf{Woods Interlock}: \texttt{GripStyle.INTERLOCK}, lead
     $\alpha=+2^{\circ}$, $\psi=38^{\circ}$, $\gamma=0^{\circ}$; trail
     $\alpha=+2^{\circ}$, $\psi=34^{\circ}$, $\gamma=0^{\circ}$; spacing
-    $0.069$\,m; trigger finger off.  Qualitative source: Woods (2001) Chapter 1
-    compact interlock grip; 2000--2001 tournament broadcast close-up still.
+    $0.069$\,m; trigger finger off. Qualitative source: an interlock grip seen
+    in published photos of Tiger Woods: a neutral lead hand with about 2 to 2.5
+    knuckles showing, the trail little finger hooked between the lead index and
+    middle fingers, and the right palm over the left thumb. Evidence still
+    requirement: face-on high-speed camera still required at address showing
+    the trail little finger deeply interlocked between the lead index and middle
+    fingers, 2 to 2.5 knuckles visible on the lead hand, and the right palm
+    covering the left thumb.
   \item \textbf{Ten-Finger}: \texttt{GripStyle.TEN\_FINGER}, lead
     $\alpha=+5^{\circ}$, $\psi=40^{\circ}$, $\gamma=0^{\circ}$; trail
     $\alpha=+5^{\circ}$, $\psi=32^{\circ}$, $\gamma=0^{\circ}$; spacing
-    $0.090$\,m; trigger finger off.  Qualitative source: Classical baseball grip
-    consensus for unlinked finger placement; instructional address still.
+    $0.090$\,m; trigger finger off. Qualitative source: general instructional
+    description with no named person: all ten digits making direct contact with
+    the grip cylinder without overlap or interlock, mild rotation (+5$^{\circ}$ on
+    both hands), lead palm diagonal 40$^{\circ}$, trail finger diagonal 32$^{\circ}$,
+    90\,mm hand spacing, and no trigger-finger separation. Evidence still
+    requirement: face-on camera still required at address showing all eight fingers
+    and two thumbs directly contacting the grip wrapper, with the trail little
+    finger flush adjacent to the lead index finger without overlap or interlock.
 \end{itemize}
 
 \textbf{Acceptance.} Presets load across CLI (\texttt{--grip-preset}), desktop
 (\texttt{CharacterBuilderModel}) and web API surfaces (\texttt{/api/character-builder/grip}),
 round-tripping through \texttt{apply\_grip\_config} with provenance
-\texttt{photo\_estimate}, never \texttt{measured}.  All angles remain strictly
-within the GR1 anatomical bounds.  Feature parity registry entry
-\texttt{tools.character\_builder\_grip} is updated.  Reproduce with:
+\texttt{photo\_estimate}, never \texttt{measured}. All angles remain strictly
+within the GR1 anatomical bounds. Feature parity registry entry
+\texttt{tools.character\_builder\_grip} is updated. Reproduce with:
 \begin{verbatim}
 python3 -m pytest tests/unit/grip_contact/test_named_presets.py \
     tests/unit/motion_matching/test_grip_selection.py
 \end{verbatim}
 
-\textbf{Limitation.} Starting angles and spacing represent photographic
-pose estimations rather than dynamic motion-capture measurements; individual
-grip variations across club selections or swing phases are unmodelled.
+\textbf{Limitation.} Numeric values are \texttt{photo\_estimate} assumptions,
+not measurements, and no image is committed in the repository. Starting angles
+and spacing represent photographic pose estimations rather than dynamic
+motion-capture measurements; individual grip variations across club selections
+or swing phases are unmodelled.
 
 \section{Appearance}
 Placeholder for HRG appearance children.

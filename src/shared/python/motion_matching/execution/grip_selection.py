@@ -213,6 +213,25 @@ def _with_visual(grip: GripSpec, style: Any, thumb: Any) -> GripSpec:
     return out
 
 
+def _apply_named_preset(grip: GripSpec, name: str) -> GripSpec:
+    """Apply a named grip preset, keeping the grip's handedness."""
+    preset = named_grip_preset(name)
+    return preset.for_handedness(grip.handedness)
+
+
+def _named_preset_provenance(overrides: GripOverrides) -> dict[str, str]:
+    """Per-parameter provenance for a named preset with any explicit overrides."""
+    prov_map = dict.fromkeys(GRIP_PARAMETERS, "photo_estimate")
+    for pick, (hand, angle) in _HAND_PICKS.items():
+        if getattr(overrides, pick) is not None:
+            prov_map[f"{hand}.{angle}"] = "user_declared"
+    if overrides.lead_below_butt is not None:
+        prov_map["lead_below_butt_m"] = "user_declared"
+    if overrides.hand_spacing is not None:
+        prov_map["hand_spacing_m"] = "user_declared"
+    return prov_map
+
+
 def resolve_grip(
     overrides: GripOverrides | None,
     document: GripSpec | None = None,
@@ -234,18 +253,7 @@ def resolve_grip(
         )
     if picks.preset is not None:
         if picks.preset in NAMED_GRIP_PRESETS:
-            named_spec = NAMED_GRIP_PRESETS[picks.preset].for_handedness(
-                grip.handedness
-            )
-            grip = replace(
-                grip,
-                lead=named_spec.lead,
-                trail=named_spec.trail,
-                style=named_spec.style,
-                trigger_finger=named_spec.trigger_finger,
-                hand_spacing_m=named_spec.hand_spacing_m,
-                lead_below_butt_m=named_spec.lead_below_butt_m,
-            )
+            grip = _apply_named_preset(grip, picks.preset)
         else:
             hand = GripSpec.preset(picks.preset)
             grip = replace(grip, lead=hand.lead, trail=hand.trail)
@@ -269,8 +277,15 @@ def apply_grip_selection(
     hands are not a golf grip.  ``ValueError`` if a physical pick has to start
     from such a fit and does not name every angle of both hands: give a
     ``preset`` or all six angles.
+
+    ``provenance`` controls the recorded ``subject.grip_provenance`` source
+    for physical parameters (defaults to :data:`photo_estimate` for named
+    presets with ``user_declared`` overrides, or ``user_declared`` for standard
+    presets and explicit picks).
     """
     require(isinstance(overrides, GripOverrides), "overrides must be GripOverrides")
+    if sidecar_grip is not None:
+        check_sidecar_grip(sidecar_grip)
     base = document_grip(document)
     if base is None:
         if overrides.has_physical and not _determines_both_hands(overrides):
@@ -283,24 +298,20 @@ def apply_grip_selection(
         if not overrides.has_physical:
             return {**document}, None
         base = GripSpec(handedness=subject_handedness(document))
-    physical_picks = GripOverrides(**overrides.physical)
-    grip = resolve_grip(physical_picks, base)
+    grip = resolve_grip(overrides, base, sidecar_grip)
     if overrides.has_physical:
-        prov = provenance
-        if prov is None:
-            if overrides.preset in NAMED_GRIP_PRESETS:
-                prov_map = dict.fromkeys(GRIP_PARAMETERS, "photo_estimate")
-                for pick, (hand, angle) in _HAND_PICKS.items():
-                    if getattr(overrides, pick) is not None:
-                        prov_map[f"{hand}.{angle}"] = "user_declared"
-                if overrides.lead_below_butt is not None:
-                    prov_map["lead_below_butt_m"] = "user_declared"
-                if overrides.hand_spacing is not None:
-                    prov_map["hand_spacing_m"] = "user_declared"
-                prov = prov_map
-            else:
-                prov = "user_declared"
-        return apply_grip_config(document, grip, provenance=prov), grip
+        physical_picks = GripOverrides(**overrides.physical)
+        physical_grip = resolve_grip(physical_picks, base)
+        prov = (
+            provenance
+            if provenance is not None
+            else (
+                _named_preset_provenance(overrides)
+                if overrides.preset in NAMED_GRIP_PRESETS
+                else "user_declared"
+            )
+        )
+        return apply_grip_config(document, physical_grip, provenance=prov), grip
     return {**document}, grip
 
 
