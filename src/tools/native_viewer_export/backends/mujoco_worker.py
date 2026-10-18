@@ -23,6 +23,9 @@ from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs import (
     add_glyphs_to_scene,
 )
+from src.shared.python.body_part_viz.mujoco_force_colors import (
+    apply_mujoco_scene_colors,
+)
 from src.shared.python.model_appearance import document_from_dict
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.tools.native_viewer_export.backends._ball import draw_job_ball
@@ -66,6 +69,7 @@ def main(job_path: str) -> None:
     data = mujoco.MjData(model)
     adr = [model.joint(n).qposadr[0] for n in bundle.coordinate_order]
     glyph_sets = job.load_glyph_sets()
+    axial_frames, shading = job.load_axial_frames(), job.load_shading()
     cams = {v: make_camera(mujoco, v, job) for v in job.views}
     renderer = mujoco.Renderer(model, job.height, job.width)
     try:
@@ -75,6 +79,10 @@ def main(job_path: str) -> None:
             for view in job.views:
                 cams[view].lookat[:] = job.lookat_for(view, pos)
                 renderer.update_scene(data, camera=cams[view])
+                if axial_frames is not None and shading is not None:
+                    apply_mujoco_scene_colors(
+                        model, renderer.scene, axial_frames[pos], shading
+                    )
                 if glyph_sets is not None:
                     add_glyphs_to_scene(renderer.scene, glyph_sets[pos])
                 draw_job_ball(renderer.scene, job, pos)

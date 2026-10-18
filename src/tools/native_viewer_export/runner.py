@@ -108,6 +108,8 @@ def run_export(
             results.append(ExportResult(engine, {}, 0, skipped_reason=reason))
             continue
         swing = _swing_for(job, bundle, engine)
+        if settings.shading_enabled and engine != "mujoco":
+            logger.warning("segment shading is MuJoCo-only; %s is unshaded", engine)
         feed, per_settings = None, settings
         if settings.impact_time_s is None and not swing.has_impact_provenance:
             try:

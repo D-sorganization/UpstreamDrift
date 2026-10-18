@@ -16,6 +16,7 @@ import numpy as np
 from src.shared.python.force_overlay.glyphs import GlyphSet
 from src.tools.native_viewer_export.backends._ball import ball_visibility
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
+from src.tools.native_viewer_export.shading import frames_to_json
 from src.tools.native_viewer_export.core import (
     ExportSettings,
     Image8,
@@ -57,6 +58,11 @@ def stage_job(
         glyphs_path.write_text(
             json.dumps([g.to_dict() for g in sets]), encoding="utf-8"
         )
+    axial_path, shading = None, None
+    if overlay is not None and settings.shading_enabled and settings.shading:
+        axial_path = work / "axial.json"
+        frames_to_json([overlay.axial_at(k) for k in indices], axial_path)
+        shading = settings.shading.to_dict()
     frames = work / "frames"
     frames.mkdir()
     visible = ball_visibility(swing, indices)
@@ -77,6 +83,8 @@ def stage_job(
         },
         ball=swing.ball.to_dict() if swing.ball is not None else None,
         ball_visible=visible,
+        axial_path=str(axial_path) if axial_path else None,
+        shading=shading,
     )
 
 

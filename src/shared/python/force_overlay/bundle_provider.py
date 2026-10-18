@@ -25,6 +25,7 @@ from typing import Any, NamedTuple, Protocol, TypeAlias, runtime_checkable
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
 from src.shared.python.biomechanics.grip_extraction import unavailable_analysis
 from src.shared.python.biomechanics.grip_wrench import GripAnalysis
 from src.shared.python.biomechanics.ground_reaction_wrenches import (
@@ -104,6 +105,21 @@ class GripSource(Protocol):
         ...
 
 
+@runtime_checkable
+class AxialLoadSource(Protocol):
+    """An engine adapter that can report segment axial loads (tension positive)."""
+
+    def axial_load_frame(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        accelerations: Mapping[str, float],
+        time_s: float,
+    ) -> AxialLoadFrame | None:
+        """Axial loads for a prescribed motion, or ``None`` when unqualified."""
+        ...
+
+
 _GRIP_FAILURES = (ValueError, ArithmeticError, RuntimeError, np.linalg.LinAlgError)
 
 
@@ -171,6 +187,8 @@ class BundleOverlayProvider:
         if not engine:
             raise ValueError("engine must be a non-empty string")
         self._grip: GripSource | None = None
+        self._axial: AxialLoadSource | None = None
+        self._accelerations: Array | None = None
         self._grip_cache: dict[int, GripAnalysis] = {}
         self._grip_source = f"{engine}:grip"
         if not (math.isfinite(torque_floor_nm) and torque_floor_nm >= 0.0):
@@ -209,6 +227,38 @@ class BundleOverlayProvider:
             self._grip_source = source
         return self
 
+    def with_axial_loads(self, axial: AxialLoadSource) -> BundleOverlayProvider:
+        """Attach per-frame segment axial loads (``frame.axial_loads``); returns ``self``.
+
+        Kinematics are exactly those of the torque/contact wrenches (the provider's
+        ``q`` and ``v``); accelerations are the central finite difference of ``v``
+        on the bundle time grid (one-sided at the ends), unfiltered. Raises
+        ``TypeError`` if ``axial`` has no ``axial_load_frame``.
+        """
+        if not isinstance(axial, AxialLoadSource):
+            raise TypeError("axial must provide axial_load_frame(q, v, a, time_s)")
+        self._axial = axial
+        self._accelerations = None
+        return self
+
+    def _axial_frame(
+        self, index: int, coords: Mapping[str, float], rates: Mapping[str, float]
+    ) -> AxialLoadFrame | None:
+        if self._axial is None:
+            return None
+        if self._accelerations is None:
+            self._accelerations = np.gradient(self._v, float(self._bundle.dt_s), axis=0)
+        accel = dict(
+            zip(
+                self._bundle.coordinate_order,
+                map(float, self._accelerations[index]),
+                strict=True,
+            )
+        )
+        return self._axial.axial_load_frame(
+            coords, rates, accel, float(index * self._bundle.dt_s)
+        )
+
     def __len__(self) -> int:
         return int(self._q.shape[0])
 
@@ -239,6 +289,7 @@ class BundleOverlayProvider:
             time_s=float(index * self._bundle.dt_s),
             engine=self._engine,
             wrenches=tuple(wrenches),
+            axial_loads=self._axial_frame(index, coords, rates),
             metadata=metadata,
         )
 
