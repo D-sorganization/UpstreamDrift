@@ -14,6 +14,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 ROOT = Path(__file__).resolve().parents[3]
 GATE = ROOT / "docs/research/loop_nullspace/publication_gate.md"
 DV = ROOT / "docs/development/planning/DV-12554.md"
