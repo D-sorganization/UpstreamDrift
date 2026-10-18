@@ -306,6 +306,7 @@ class DrakePhysicsEngine(BasePhysicsEngine):
             contact_forces=CapabilityLevel.FULL,
             force_visualization=CapabilityLevel.FULL,
             inverse_dynamics=CapabilityLevel.FULL,
+            drift_acceleration=CapabilityLevel.FULL,
             parameter_gradients=CapabilityLevel.PARTIAL,
             state_control_gradients=CapabilityLevel.FULL,
             forward_sim=CapabilityLevel.FULL,
