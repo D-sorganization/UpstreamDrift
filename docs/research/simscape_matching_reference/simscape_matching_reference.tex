@@ -6389,6 +6389,82 @@ licence still has to be confirmed and recorded before any asset-based variant.
  claimed; its welds are exact at the calibrated address pose only.
 \end{itemize}
 
+\subsection{Anatomical Wrist and Forearm Angles}
+HRG-E2 (\#13169) adds the package \texttt{anatomical\_angles} and eight terms
+(lead/trail wrist flexion--extension, ulnar deviation, wrist axial rotation,
+forearm pronation) to the single golf-term registry
+(\texttt{spine/golf\_terms.py}); there is no second registry. Segment poses are
+passed as \texttt{AnatomicalFrame} objects; an engine adapter supplies body
+poses and a calibration, so no engine joint name or sign enters the angles.
+
+\paragraph{Conventions and frames.}
+Wu et al.\ (2005, ISB part II, section 4.3) frames: the radius and the third
+metacarpal (hand). Both sides use the proper frame with columns
+$X$ volar, $Y$ proximal and $Z=X\times Y$ (radial on the right, ulnar on the
+left). The printed left-side triad (dorsal, distal, ulnar) is left-handed if
+read literally, so it is realised by the proper frame above plus the
+side-sign table below. The wrist uses the ISB \texttt{isb\_wrist} Cardan
+sequence $R=R_z(a)R_x(b)R_y(c)$ on $R_{\mathrm{rad}}^{\top}R_{\mathrm{hand}}$:
+$a$ flexion (about the radius $Z$), $b$ ulnar deviation (floating axis) and $c$
+a third angle about the hand long axis. Forearm pronation is the third angle of
+the ISB elbow sequence (\texttt{isb\_elbow}, $ZXY$) on
+$R_{\mathrm{hum}}^{\top}R_{\mathrm{forearm}}$, whose frames differ from the
+wrist frames; it is reported as its own series and is not the wrist third
+angle. Angles are radians in the code and degrees in the registry.
+Basis maps are explicit: \texttt{ISB\_FROM\_MYOFULLBODY} relabels MyoFullBody
+($x$ right, $y$ up, $z$ posterior) to ISB ($X$ anterior, $Y$ up, $Z$ right) by
+$P R P^{\top}$ with $P=\left[\begin{smallmatrix}0&0&-1\\0&1&0\\1&0&0\end{smallmatrix}\right]$.
+
+\paragraph{Equations.}
+With $s_R=(1,1,1)$ and $s_L=(1,-1,-1)$ the anatomical-sign angles are
+$\theta=s_{\mathrm{side}}\odot(a,b,c)$, so that flexion, ulnar deviation and
+pronation are positive on both sides and a motion reflected across the
+sagittal plane gives identical values. The hand frame is
+$R_{\mathrm{hand}}=R_{\mathrm{club}}\,N\,M(\alpha,\psi,\gamma)$ with
+$M=R_y(\alpha)R_x(\psi-90^\circ)R_z(\gamma)$ from the physical grip contract
+(\texttt{follower\_rotation}); only $\alpha,\psi,\gamma$ enter, never
+\texttt{GripPose} style, thumb or lifeline. At $|b|=90^\circ$ the components
+$a$ and $c$ are indeterminate and are NaN with a reason; $b$ stays valid.
+Reconstruction $R_z(a)R_x(b)R_y(c)$ matches the input rotation to
+$10^{-10}$ rad.
+
+\paragraph{Golf aliases.}
+\begin{center}
+\begin{tabular}{lll}
+\hline
+Golf word & Component & Sense \\
+\hline
+cupped & flexion--extension & extension (negative flexion) \\
+bowed & flexion--extension & flexion (positive) \\
+hinge, cock & ulnar deviation & radial deviation (negative ulnar) \\
+release & none & event and motion description; no sign alias \\
+\hline
+\end{tabular}
+\end{center}
+Lead and trail map to anatomical sides through \texttt{core.handedness}.
+
+\paragraph{Observability limits.}
+Every wrist series carries \texttt{observability = fitted\_grip\_rotation} and a
+receipt path. The capture has no hand markers; the hand frame is the club body
+plus a fitted physical grip rotation, so wrist angles are model-estimated, not
+measured hand anatomy, and a wrong grip constant moves angle between flexion,
+deviation and the third angle. The direction convention of the native
+rotation $N$ follows \texttt{child\_to\_follower} and is the adapter's duty.
+
+\paragraph{Best-fit values.}
+Not reported. The committed best driver fit (\texttt{s32-fw-drv}) stores the
+grip as golf angles (lead $\alpha=0^\circ,\psi=25.0^\circ,\gamma=47.0^\circ$;
+trail $\alpha=-14.0^\circ,\psi=61.9^\circ,\gamma=77.2^\circ$), but its
+forearm and hand bodies have no declared Wu volar/proximal calibration, so a
+wrist angle at address, top and impact would rest on an assumed neutral-wrist
+alignment. The calibration is a follow-up; no value is claimed here.
+
+\paragraph{Reproduction.}
+\begin{verbatim}
+PYTHONPATH=.:src python3 -m pytest -o addopts="" -q -n 4 \
+    tests/unit/anatomical_angles tests/shared/python/spine/test_golf_terms.py
+\end{verbatim}
+
 \section{Clubhead Speed Timing and the Ball Collision Impulse (GCV-20)}
 \label{sec:gcv20_speed_timing}
 This section records a change to the shared Python ground-support pipeline

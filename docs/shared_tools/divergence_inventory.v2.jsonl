@@ -177,6 +177,12 @@
 {"path": "analysis/stability_metrics.py", "classification": "ud-only", "package": "analysis", "spelling_only": false}
 {"path": "analysis/swing_events.py", "classification": "ud-only", "package": "analysis", "spelling_only": false}
 {"path": "analysis/swing_metrics.py", "classification": "ud-only", "package": "analysis", "spelling_only": false}
+{"path": "anatomical_angles/__init__.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
+{"path": "anatomical_angles/basis.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
+{"path": "anatomical_angles/golf_aliases.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
+{"path": "anatomical_angles/hand_frame.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
+{"path": "anatomical_angles/terms.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
+{"path": "anatomical_angles/wrist.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
 {"path": "anthropometrics/__init__.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/_subject_anthropometrics.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/_types.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
