@@ -227,3 +227,66 @@ def test_no_engine_defines_its_own_grip_orientation_angle() -> None:
         if pattern.search(p.read_text(encoding="utf-8", errors="ignore"))
     ]
     assert not offenders, offenders
+
+
+def test_neutral_v_azimuth_and_derived_range_bound() -> None:
+    """NEUTRAL_V_AZIMUTH_DEG and ALPHA_RANGE_DEG define the lead V azimuth lower bound."""
+    from src.shared.python.model_appearance import grip_pose
+    from src.shared.python.motion_matching import grip_contract
+
+    assert hasattr(grip_pose, "NEUTRAL_V_AZIMUTH_DEG")
+    assert grip_pose.NEUTRAL_V_AZIMUTH_DEG == 20.0
+    assert grip_contract.NEUTRAL_V_AZIMUTH_DEG == grip_pose.NEUTRAL_V_AZIMUTH_DEG
+
+    assert hasattr(grip_pose, "ALPHA_RANGE_DEG")
+    assert grip_pose.ALPHA_RANGE_DEG == (-60.0, 60.0)
+    assert grip_contract.ALPHA_RANGE_DEG == grip_pose.ALPHA_RANGE_DEG
+
+    assert hasattr(grip_pose, "LEAD_V_AZIMUTH_MIN_DEG")
+    expected_min = grip_pose.NEUTRAL_V_AZIMUTH_DEG + grip_pose.ALPHA_RANGE_DEG[0]
+    assert expected_min == grip_pose.LEAD_V_AZIMUTH_MIN_DEG
+    assert grip_pose.LEAD_V_AZIMUTH_MIN_DEG == -40.0
+
+    # Test boundary enforcement on lead_v_azimuth_deg
+    valid_lower = GripPose(lead_v_azimuth_deg=-40.0)
+    assert valid_lower.lead_v_azimuth_deg == -40.0
+    with pytest.raises(ValueError, match="lead_v_azimuth_deg"):
+        GripPose(lead_v_azimuth_deg=-40.1)
+
+
+def test_topology_of_pose_helper() -> None:
+    """topology_of_pose builds ContactTopology carrying all pose attributes."""
+    from src.shared.python.model_appearance.grip_pose import topology_of_pose
+
+    pose = GripPose(
+        style=GripStyle.INTERLOCK,
+        trigger_finger=True,
+        lead_below_butt_m=0.035,
+        hand_spacing_m=0.080,
+        lead_v_azimuth_deg=35.0,  # roll = 15.0
+        trail_v_offset_deg=-10.0,  # roll = 5.0
+        lead_thumb_offset_deg=12.0,
+        handedness="left",
+    )
+    topo = topology_of_pose(pose, grip_radius_m=0.015)
+    assert topo.style == GripStyle.INTERLOCK
+    assert topo.trigger_finger is True
+    assert topo.grip_radius_m == pytest.approx(0.015)
+
+    # Check trigger site is present because trigger_finger is True
+    assert topo.site("trail_index_trigger") is not None
+
+    # Check lead heel site encodes lead_below_butt_m (x_lead - 0.020)
+    lead_heel = topo.site("lead_heel_pad")
+    assert lead_heel.centre_m[0] == pytest.approx(0.035 - 0.020)
+
+    # Check lead thumb site encodes alpha_lead (15 deg) + lead_thumb_offset_deg (12 deg) = 27 deg
+    lead_thumb = topo.site("lead_thumb")
+    thumb_theta = math.atan2(lead_thumb.centre_m[2], lead_thumb.centre_m[1])
+    assert math.degrees(thumb_theta) == pytest.approx(15.0 + 12.0)
+
+    # Check trail site encodes x_trail (lead_below_butt_m + hand_spacing_m = 0.115 m) and alpha_trail (5 deg)
+    trail_palm = topo.site("trail_palm_proximal")
+    assert trail_palm.centre_m[0] == pytest.approx(0.035 + 0.080 - 0.015)
+    palm_theta = math.atan2(trail_palm.centre_m[2], trail_palm.centre_m[1])
+    assert math.degrees(palm_theta) == pytest.approx(-175.0)

@@ -31,6 +31,7 @@ import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
+from typing import TYPE_CHECKING
 
 import numpy as np
 from numpy.typing import NDArray
@@ -45,6 +46,20 @@ from src.shared.python.core.handedness import (
     validate_handedness,
 )
 from src.shared.python.grip_contact.contact_topology import GripStyle as GripStyle
+from src.shared.python.grip_contact.pad_layout import GRIP_RADIUS_M
+
+if TYPE_CHECKING:
+    from src.shared.python.grip_contact.contact_topology import ContactTopology
+
+#: Lead V azimuth (deg) of the neutral grip: ``GripPose`` default, alpha = 0.
+NEUTRAL_V_AZIMUTH_DEG: float = 20.0
+#: Permitted range of hand roll (alpha) away from neutral (degrees).
+#: Matches HandAngles.alpha_deg validation range in motion_matching.grip_contract.
+ALPHA_RANGE_DEG: tuple[float, float] = (-60.0, 60.0)
+#: Minimum lead V azimuth derived from neutral V azimuth plus minimum alpha:
+#: 20.0 deg + (-60.0 deg) = -40.0 deg.
+LEAD_V_AZIMUTH_MIN_DEG: float = NEUTRAL_V_AZIMUTH_DEG + ALPHA_RANGE_DEG[0]
+LEAD_V_AZIMUTH_MAX_DEG: float = 90.0
 
 #: Nominal point of the hand body (metres, hand frame) that sits on the grip:
 #: about 6 cm distal to the wrist origin along the hand's ``-y``.  The OSV-9
@@ -127,7 +142,7 @@ class GripPose:
     hand_spacing_m: float = NATIVE_HAND_SPACING_M
     #: Lead "V" (thumb/index crease) between the chin (~10 deg) and the trail
     #: shoulder (~35 deg).
-    lead_v_azimuth_deg: float = 20.0
+    lead_v_azimuth_deg: float = NEUTRAL_V_AZIMUTH_DEG
     #: Trail V relative to the lead V; zero keeps the two parallel.
     trail_v_offset_deg: float = 0.0
     #: Short lead thumb, slightly to the trail side of centre.
@@ -153,7 +168,7 @@ class GripPose:
             (
                 ("lead_below_butt_m", 0.0, 0.1),
                 ("hand_spacing_m", 0.0, 0.2),
-                ("lead_v_azimuth_deg", -40.0, 90.0),
+                ("lead_v_azimuth_deg", LEAD_V_AZIMUTH_MIN_DEG, LEAD_V_AZIMUTH_MAX_DEG),
                 ("trail_v_offset_deg", -30.0, 30.0),
                 ("lead_thumb_offset_deg", 0.0, 45.0),
                 ("palm_diagonal_deg", 0.0, 90.0),
@@ -224,7 +239,7 @@ class GripPose:
             azimuth, thumb = self.lead_v_azimuth_deg, self.lead_thumb_offset_deg
         else:
             azimuth, thumb = self.lead_v_azimuth_deg + self.trail_v_offset_deg, 0.0
-        roll = azimuth - 20.0
+        roll = azimuth - NEUTRAL_V_AZIMUTH_DEG
         return HandPlacement(
             hand, self.distance_below_butt_m(hand), azimuth, thumb, roll
         )
@@ -236,30 +251,24 @@ class GripPose:
         Positive is stronger (rolled toward the trail side), negative is weaker.
         Absorbs #13166.
         """
-        return self.lead_v_azimuth_deg - 20.0
+        return self.lead_v_azimuth_deg - NEUTRAL_V_AZIMUTH_DEG
 
     def roll_offset_deg(self, hand: Hand) -> float:
         """Visual roll angle of ``hand`` away from nominal neutral (20 deg V azimuth).
 
-        Lead hand roll is ``lead_v_azimuth_deg - 20.0``; trail hand roll is
-        ``(lead_v_azimuth_deg + trail_v_offset_deg) - 20.0``.
+        Lead hand roll is ``lead_v_azimuth_deg - NEUTRAL_V_AZIMUTH_DEG``; trail hand roll is
+        ``(lead_v_azimuth_deg + trail_v_offset_deg) - NEUTRAL_V_AZIMUTH_DEG``.
         Absorbs #13166.
         """
         require(isinstance(hand, Hand), f"hand must be a Hand, got {hand!r}")
-        return self.placement(hand).v_azimuth_deg - 20.0
+        return self.placement(hand).v_azimuth_deg - NEUTRAL_V_AZIMUTH_DEG
 
     def linked_fingers(self) -> tuple[str, ...]:
         """The finger link between the hands, as a tuple of pair names.
 
-        Delegates to :func:`~src.shared.python.grip_contact.contact_topology.contact_topology`
-        inter-hand finger contact pairs instead of duplicate string tags.
+        Delegates to :func:`topology_of_pose` inter-hand finger contact pairs.
         """
-        from src.shared.python.grip_contact.contact_topology import contact_topology
-        from src.shared.python.motion_matching.grip_contract import GripSpec
-
-        topo = contact_topology(
-            GripSpec(style=self.style, trigger_finger=self.trigger_finger)
-        )
+        topo = topology_of_pose(self)
         return tuple(
             p.name for p in topo.hand_hand_pairs() if p.name != "trail_palm_lead_thumb"
         )
@@ -302,6 +311,32 @@ class GripPose:
     def interlocked(self) -> bool:
         """True when the little finger passes between the lead fingers."""
         return self.style is GripStyle.INTERLOCK
+
+
+def topology_of_pose(
+    pose: GripPose, grip_radius_m: float = GRIP_RADIUS_M
+) -> ContactTopology:
+    """Build the :class:`ContactTopology` corresponding to a :class:`GripPose`.
+
+    Transfers style, trigger_finger, lead_below_butt_m, hand_spacing_m,
+    handedness, lead_thumb_offset_deg, and per-hand alpha (from roll_offset_deg)
+    to a :class:`~src.shared.python.motion_matching.grip_contract.GripSpec`.
+    """
+    from src.shared.python.grip_contact.contact_topology import contact_topology
+    from src.shared.python.motion_matching.grip_contract import GripSpec, HandAngles
+
+    require(isinstance(pose, GripPose), f"pose must be a GripPose, got {pose!r}")
+    spec = GripSpec(
+        lead=HandAngles(alpha_deg=pose.roll_offset_deg(Hand.LEAD)),
+        trail=HandAngles(alpha_deg=pose.roll_offset_deg(Hand.TRAIL)),
+        style=pose.style,
+        trigger_finger=pose.trigger_finger,
+        lead_below_butt_m=pose.lead_below_butt_m,
+        hand_spacing_m=pose.hand_spacing_m,
+        lead_thumb_offset_deg=pose.lead_thumb_offset_deg,
+        handedness=pose.handedness,
+    )
+    return contact_topology(spec, grip_radius_m=grip_radius_m)
 
 
 def require_fields_in_range(

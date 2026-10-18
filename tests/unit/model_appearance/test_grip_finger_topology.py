@@ -371,3 +371,61 @@ def test_independent_per_hand_roll() -> None:
         - _azimuth_deg(palm_trail_base.mesh.vertices)
     )
     assert abs(d_trail - (-15.0)) <= 0.1
+
+
+# =====================================================================
+# 5. Solver constants, distal index, non-convergence error & site map
+# =====================================================================
+
+
+def test_solver_constants_and_divergence_error() -> None:
+    """_solve_topology_finger uses named constants and raises ValueError if not converged."""
+    from src.shared.python.grip_contact.contact_topology import ContactSite
+    from src.shared.python.model_appearance import grip_hand_mesh
+    from src.shared.python.model_appearance.grip_hand_mesh import (
+        _DISTAL_INDEX,
+        _SOLVER_MAX_ITERATIONS,
+        _SOLVER_MIN_OFF_GRIP_TANGENT_RADIUS_M,
+        _SOLVER_ON_GRIP_RADIAL_MARGIN_M,
+        _SOLVER_STEP_RELAXATION,
+        _SOLVER_TOLERANCE_M,
+        _solve_topology_finger,
+    )
+
+    assert _DISTAL_INDEX == 2
+    assert _SOLVER_ON_GRIP_RADIAL_MARGIN_M == 0.0001
+    assert _SOLVER_MIN_OFF_GRIP_TANGENT_RADIUS_M == 0.005
+    assert _SOLVER_STEP_RELAXATION == 0.95
+    assert _SOLVER_MAX_ITERATIONS == 5
+    assert _SOLVER_TOLERANCE_M == 1e-6
+
+    # Test that a site geometrically impossible to converge raises ValueError
+    # Target site with rho = 1 mm cannot be reached because d is bounded below by d_min
+    impossible_site = ContactSite(
+        name="impossible_site",
+        hand="lead",
+        segment="distal",
+        primitive="sphere",
+        centre_m=(0.05, 0.001, 0.0),
+        radius_m=0.008,
+    )
+    with pytest.raises(ValueError, match="failed to converge"):
+        _solve_topology_finger(
+            lengths=(0.040, 0.024, 0.019),
+            r=0.008,
+            target_site=impossible_site,
+            distance_below_butt_m=0.032,
+            grip_radius=0.014,
+            curl=-1,
+            sides=16,
+        )
+
+
+def test_topology_site_map_routing() -> None:
+    """_TOPOLOGY_SITE_MAP routes (hand, finger) pairs to canonical site names."""
+    from src.shared.python.model_appearance.grip_hand_mesh import _TOPOLOGY_SITE_MAP
+
+    assert _TOPOLOGY_SITE_MAP == {
+        (Hand.LEAD, "index"): "lead_index",
+        (Hand.TRAIL, "little"): "trail_little_finger",
+    }
