@@ -611,7 +611,7 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
             inputs (reads data.qacc after mj_forward with ctrl=0). On
             unconstrained models without ground or active contacts, this
             analytically equals the unconstrained rigid-body drift
-            -M(q)^-1 * (C(q,v)v + g(q)).
+            M(q)^-1 * (-C(q,v)v - g(q)).
 
         Returns:
             q_ddot_drift: Drift acceleration vector (nv,) [rad/s² or m/s²]
