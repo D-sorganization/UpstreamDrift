@@ -700,6 +700,20 @@
       "id": "tools.character_builder"
     },
     {
+      "feature_id": "tools.character_builder_grip",
+      "title": "Grip presets and sliders (weak, neutral, strong; rotation, palm diagonal, spacing, style)",
+      "status": "parity",
+      "pyqt": "src/tools/character_builder/gui.py",
+      "api": "src/api/routes/character_appearance.py",
+      "web": "ui/src/components/character/GripControls.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "HRG-GR4 (#13205). One resolver (src/shared/python/motion_matching/execution/grip_selection.py) with the override, document, default precedence of the appearance colours. Physical picks (strength preset, rotation about the shaft, palm diagonal, set angle, depth, hand spacing) make a new spec revision through apply_grip_config and need a refit; they are never written to the .appearance.json sidecar. Picture-only picks (style, lead thumb) go in the sidecar's grip block and leave physics_spec_sha256 unchanged. The desktop Grip group, the web GripControls and POST /api/character-builder/grip are held equal to the Python resolver by tests/fixtures/grip/grip_roundtrip.json. The CLI flags live in spec_builder (physical) and native_viewer_export (picture-only; a physical flag is refused).",
+      "id": "tools.character_builder_grip"
+    },
+    {
       "feature_id": "tools.data_explorer",
       "title": "Data Explorer (import/filter/visualize datasets)",
       "status": "parity",
@@ -866,7 +880,7 @@
       "reason": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL); the artefacts are mp4 files, so there is no interactive browser equivalent (epic #11673).",
       "pending_decision": false,
       "tiles": [],
-      "notes": "Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; the matching interactive controls are tracked under tools.character_builder.",
+      "notes": "Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; --grip-style (HRG-GR4, #13205) is picture-only and goes in the appearance sidecar's grip block, while a physical grip flag (--grip-preset, --lead-shaft-rotation, ...) is refused with a message pointing to spec_builder, which writes the new model revision; the matching interactive controls are tracked under tools.character_builder.",
       "id": "tools.native_viewer_export"
     },
     {
@@ -3248,7 +3262,7 @@
   "inputs": {
     "src/config/models.yaml": "64caf5311e4be2c75e742dc053b425a528f851638ca2773423fcc77d40b5d419",
     "src/config/launcher_manifest.json": "c9844ac6e0cd9c6cc867bda7cfd44edf1199ac85a07af5b9a83bec70a65d00bc",
-    "src/config/feature_parity.json": "cbd71b2f75f2bcaaf5579ca3b84077c64c89ebabd0b5d7f814aa8bba5571b173",
+    "src/config/feature_parity.json": "7599c32cf8820d29bd3a39d98132901f90486af0ff8a89bc50d24c22cbfa4f00",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
