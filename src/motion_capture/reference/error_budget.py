@@ -212,6 +212,28 @@ def get_default_guidance_rules() -> dict[str, GuidanceRule]:
     return dict(_DEFAULT_GUIDANCE_RULES)
 
 
+FALLBACK_THRESHOLDS_PER_UNIT: dict[str, tuple[float, float]] = {
+    "mm": (30.0, 60.0),
+    "deg": (5.0, 10.0),
+    "px": (20.0, 40.0),
+    "m": (0.03, 0.06),
+}
+
+_LEVEL_ORDER: dict[str, int] = {
+    "L0": 0,
+    "L1": 1,
+    "L2": 2,
+    "L3": 3,
+}
+
+
+def _comparison_level_rank(level: str) -> int:
+    prefix = level.strip().split("_")[0].upper()
+    if prefix in _LEVEL_ORDER:
+        return _LEVEL_ORDER[prefix]
+    raise ValueError(f"Unknown comparison level: {level!r}")
+
+
 def _canonical_cell_key(c: ErrorBudgetCell) -> tuple[str, ...]:
     return (
         c.source,
@@ -256,6 +278,13 @@ def _extract_summary_record(
     else:
         receipt_hashes = ()
 
+    unit_raw = data.get("unit")
+    require(
+        unit_raw is not None and str(unit_raw).strip() != "",
+        f"Summary record for {joint} ({metric}) is missing required 'unit'",
+    )
+    unit = str(unit_raw).strip()
+
     cell = ErrorBudgetCell(
         source=source,
         joint_or_landmark=joint,
@@ -264,7 +293,7 @@ def _extract_summary_record(
         grade=str(data.get("grade", "A")),
         comparison_level=str(data.get("level") or data.get("comparison_level", "L2")),
         metric=metric,
-        unit=str(data.get("unit", "px")),
+        unit=unit,
         n_swings=n_swings,
         n_frames=n_frames,
         p50=float(data["p50"]),
@@ -311,7 +340,10 @@ def build_error_budget(
     )
 
     if created_utc is None:
-        created_utc = max(timestamps) if timestamps else "2026-10-04T00:00:00Z"
+        if timestamps:
+            created_utc = max(timestamps)
+        else:
+            created_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     raw_payload = json.dumps(
         {
@@ -346,6 +378,37 @@ def _classify_cell_guidance(
     thresh_ind = rule.max_indicative_p95
     obs_p95 = cell.p95
 
+    cell_rank = _comparison_level_rank(cell.comparison_level)
+    req_rank = _comparison_level_rank(rule.requires_level)
+
+    # Preconditions: unit, metric, and comparison level must match the rule
+    if (
+        cell.unit != rule.unit
+        or cell.metric != rule.target_metric
+        or cell_rank < req_rank
+    ):
+        reasons: list[str] = []
+        if cell.unit != rule.unit:
+            reasons.append(f"unit mismatch ('{cell.unit}' != rule '{rule.unit}')")
+        if cell.metric != rule.target_metric:
+            reasons.append(
+                f"metric mismatch ('{cell.metric}' != rule '{rule.target_metric}')"
+            )
+        if cell_rank < req_rank:
+            reasons.append(
+                f"comparison level {cell.comparison_level} < required {rule.requires_level}"
+            )
+        return GuidanceItem(
+            quantity_name=rule.quantity_name,
+            classification="not assessed at required level",
+            threshold_x=thresh_x,
+            observed_p95=obs_p95,
+            unit=cell.unit,
+            comparison_level=cell.comparison_level,
+            source=cell.source,
+            rationale=f"Preconditions not met: {'; '.join(reasons)}",
+        )
+
     if not cell.resolvable:
         classification = "not recoverable from single view"
         rationale = (
@@ -353,20 +416,20 @@ def _classify_cell_guidance(
         )
     elif obs_p95 < thresh_x:
         classification = f"trustworthy at p95 < {thresh_x}"
-        rationale = f"Observed p95 ({obs_p95:.1f} {rule.unit}) meets target bound (< {thresh_x} {rule.unit})"
+        rationale = f"Observed p95 ({obs_p95:.1f} {cell.unit}) meets target bound (< {thresh_x} {cell.unit})"
     elif obs_p95 < thresh_ind:
         classification = "indicative"
-        rationale = f"Observed p95 ({obs_p95:.1f} {rule.unit}) meets indicative bound (< {thresh_ind} {rule.unit})"
+        rationale = f"Observed p95 ({obs_p95:.1f} {cell.unit}) meets indicative bound (< {thresh_ind} {cell.unit})"
     else:
         classification = "not recoverable from single view"
-        rationale = f"Observed p95 ({obs_p95:.1f} {rule.unit}) exceeds bounds (>= {thresh_ind} {rule.unit})"
+        rationale = f"Observed p95 ({obs_p95:.1f} {cell.unit}) exceeds bounds (>= {thresh_ind} {cell.unit})"
 
     return GuidanceItem(
         quantity_name=rule.quantity_name,
         classification=classification,
         threshold_x=thresh_x,
         observed_p95=obs_p95,
-        unit=rule.unit,
+        unit=cell.unit,
         comparison_level=cell.comparison_level,
         source=cell.source,
         rationale=rationale,
@@ -395,11 +458,17 @@ def derive_guidance(
         name = cell.joint_or_landmark
         rule = effective_rules.get(name)
         if rule is None:
+            if cell.unit not in FALLBACK_THRESHOLDS_PER_UNIT:
+                raise ValueError(
+                    f"Unknown or unsupported unit {cell.unit!r} for fallback guidance rule. "
+                    f"Supported units: {', '.join(sorted(FALLBACK_THRESHOLDS_PER_UNIT))}"
+                )
+            t_x, t_ind = FALLBACK_THRESHOLDS_PER_UNIT[cell.unit]
             rule = GuidanceRule(
                 quantity_name=name,
                 target_metric=cell.metric,
-                max_trustworthy_p95=30.0 if cell.unit == "mm" else 0.02,
-                max_indicative_p95=60.0 if cell.unit == "mm" else 0.04,
+                max_trustworthy_p95=t_x,
+                max_indicative_p95=t_ind,
                 unit=cell.unit,
                 requires_level="L2",
                 is_per_frame=True,

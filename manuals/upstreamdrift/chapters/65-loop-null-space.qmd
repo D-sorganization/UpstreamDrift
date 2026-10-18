@@ -50,6 +50,91 @@ joints inside the loop.
 The full derivations, goldens and worked examples are in the research
 reference and in `tests/fixtures/loop_nullspace/goldens`.
 
+## Variability Sensitivity
+
+Evidence class: software specification of a first-order model, not approved.
+Phase 8 (NSX-80 to NSX-100) asks how much the face angle at impact varies under
+declared disturbances and which strategies change that. The contract text is
+`docs/research/loop_nullspace/contracts_variability.md`; the derivations are in
+the standalone reference `docs/research/loop_nullspace/loop_nullspace.tex`
+(section `sec:variability`). No number below describes a real golfer.
+
+### Model and Equations
+
+1. Linearization. On the tangent bundle of the closed-loop manifold, with the
+   reactions re-solved, the state error $\delta x_t$ evolves as
+   $$\delta x_{t+1} = A_t\,\delta x_t + B_t\,w_t, \qquad
+   w_t \sim (0, \Sigma_t),$$
+   where $w_t$ is the declared disturbance, $\Sigma_t$ its covariance from the
+   disturbance specification (a spectral density, with the time step
+   declared), and $A_t$, $B_t$ the derivatives of the constrained solve.
+2. Covariance recursion.
+   $$P_{t+1} = A_t P_t A_t^{\top} + B_t \Sigma_t B_t^{\top}.$$
+3. Outcome variance. For an outcome row $C$ (the face-angle row of the impact
+   outcome map, or $C\,\Pi$ across an impact event with saltation matrix $S$),
+   $$\operatorname{Var}(y) = C P_T C^{\top}.$$
+   The adjoint form gives the same value through kernels $S_{y,x_0}$ and
+   $S_{y,\tau}(t)$ and splits it by input class and by step. The parts sum to
+   the total; shares are unavailable when the total is not positive.
+4. Mechanisms. M1 signal-dependent noise, M2 geometric preload and M3 muscle
+   impedance are declared one at a time. With none declared and additive noise,
+   the objective gradient is zero and every allocation is equivalent; the
+   result is flagged objective-flat rather than ranked.
+5. Face angle. The error is wrapped to $(-\pi, \pi]$. Reported outcomes are
+   bias, standard deviation, interquartile range, exceedance and miss
+   probability. A coefficient of variation is not used for a zero-centred
+   outcome.
+6. Strategy comparison. Each arm is a strategy at a declared setting. Arms are
+   ordered by the ratio of their face-angle variance to the strategy-off
+   baseline of their own model representation. An arm whose ratio is not below
+   one cannot win. Arms outside the matched-speed or matched-effort limits are
+   excluded, not relaxed.
+7. Structure of real variability (NSX-97). For swing states $x_i$ and the
+   outcome Jacobian $C$, the variance in $\ker C$ (UCM) and in its orthogonal
+   complement (ORT) are divided by their dimensions, with
+   $$\Delta V = \frac{V_{\mathrm{UCM}}/d_{\mathrm{UCM}} - V_{\mathrm{ORT}}/d_{\mathrm{ORT}}}
+   {V_{\mathrm{TOT}}/n}.$$
+   The tolerance-noise-covariation decomposition uses permutation, shift and
+   rotation costs and satisfies $C_0 = T + N + C_{\mathrm{floor}} - \mathrm{Cov}$
+   exactly. Noise amplitudes are fitted on training sessions only; a test
+   session reaching the fit is an error.
+
+### Units, Frames, and Validity
+
+Covariances carry the squared units of their channels, and the outcome in
+radians (reported in degrees). Joint channels use the joint coordinates of the
+model; the closure rows use the grip frame above. A linear result is valid
+only inside the nonlinearity gate, whose threshold has no default and must be
+supplied by the caller. Near-grazing contact, saturation and slip need Monte
+Carlo, and the linear and paired Monte Carlo values are reported together.
+
+### Implemented and Unavailable Pieces
+
+Strategies S1, S2, S3, S5, S7 and S8 are implemented. S4, S6, S9, S11 and S12
+are not implemented and S10 is unavailable (rigid club); these are listed as
+not attempted with their reason and no numbers. The only sensitivity provider is
+a pendulum test fixture with invented amplitudes. No real-engine provider is
+wired. The real-capture UCM and TNC report is deferred.
+
+### Acceptance and Open Validation
+
+Software acceptance is the NSX test suite and the golden fixtures, which show
+that the code reproduces its own equations. Physical acceptance needs the five
+preregistered experiments in `docs/development/planning/DV-12554.md`
+(calibrated face and launch measurement, instrumented grip, perturbation-derived
+impedance, EMG co-contraction ratios, randomized strategy interventions). None
+has been run. Every claim type is blocked or deferred in
+`docs/research/loop_nullspace/publication_gate.md`.
+
+### Limitations and Non-Claims
+
+Noise amplitudes, impedance and delay are declared hypotheses, not measurements.
+The model is first order about the nominal swing and uses a rigid club. No
+claim that any golfer uses a minimum-variance allocation, that a modelled
+dispersion is a measured one, or that any strategy ranking is a coaching
+prescription. No stiffness, co-contraction or muscle force is inferred from net
+joint torques. EMG is an activation proxy only.
+
 ## Unavailable Values
 
 Any quantity whose validity gate fails, whose direction is unbounded, or whose

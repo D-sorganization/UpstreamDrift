@@ -385,3 +385,241 @@ def test_synthetic_guidance_classifications_match_profile_tiers() -> None:
         "indicative",
         "not recoverable from single view",
     ]
+
+
+def test_guidance_rejects_unit_metric_and_level_mismatches() -> None:
+    """Preconditions in _classify_cell_guidance reject unit, metric, or level mismatches as not assessed."""
+    # 1. Unit mismatch: hand_path_depth in meters (p95=0.30m = 300mm), rule is in mm (< 40.0mm)
+    cell_meters = ErrorBudgetCell(
+        source="mediapipe",
+        joint_or_landmark="hand_path_depth",
+        phase_bin="all",
+        view="dtl",
+        grade="A",
+        comparison_level="L3",
+        metric="depth_error",
+        unit="m",
+        n_swings=5,
+        n_frames=600,
+        p50=0.15,
+        p95=0.30,
+        worst=0.45,
+        resolvable=True,
+    )
+
+    # 2. Unit mismatch: hand_path_depth in pixels (p95=35.0px), rule is in mm (< 40.0mm)
+    cell_pixels = ErrorBudgetCell(
+        source="mediapipe",
+        joint_or_landmark="hand_path_depth",
+        phase_bin="all",
+        view="dtl",
+        grade="A",
+        comparison_level="L3",
+        metric="depth_error",
+        unit="px",
+        n_swings=5,
+        n_frames=600,
+        p50=20.0,
+        p95=35.0,
+        worst=50.0,
+        resolvable=True,
+    )
+
+    # 3. Level mismatch: pelvis_rotation_top at L2 (rule requires_level="L3")
+    cell_level = ErrorBudgetCell(
+        source="mediapipe",
+        joint_or_landmark="pelvis_rotation_top",
+        phase_bin="all",
+        view="dtl",
+        grade="A",
+        comparison_level="L2",
+        metric="angle_error",
+        unit="deg",
+        n_swings=5,
+        n_frames=600,
+        p50=2.0,
+        p95=4.0,
+        worst=6.0,
+        resolvable=True,
+    )
+
+    # 4. Metric mismatch: hand_path_depth with metric="residual" (rule target_metric="depth_error")
+    cell_metric = ErrorBudgetCell(
+        source="mediapipe",
+        joint_or_landmark="hand_path_depth",
+        phase_bin="all",
+        view="dtl",
+        grade="A",
+        comparison_level="L3",
+        metric="residual",
+        unit="mm",
+        n_swings=5,
+        n_frames=600,
+        p50=200.0,
+        p95=500.0,
+        worst=800.0,
+        resolvable=True,
+    )
+
+    budget = ErrorBudget(
+        schema_version=ERROR_BUDGET_SCHEMA_VERSION,
+        cells=(cell_meters, cell_pixels, cell_level, cell_metric),
+        created_utc="2026-10-18T12:00:00Z",
+        receipt_digest="0" * 64,
+    )
+
+    report = derive_guidance(budget)
+    assert len(report.items) == 4
+
+    item_m, item_px, item_lvl, item_met = report.items
+
+    # Item unit must equal cell unit, never copied from mismatched rule
+    assert item_m.unit == "m"
+    assert item_m.classification == "not assessed at required level"
+    assert "trustworthy" not in item_m.classification
+
+    assert item_px.unit == "px"
+    assert item_px.classification == "not assessed at required level"
+    assert "trustworthy" not in item_px.classification
+
+    assert item_lvl.unit == "deg"
+    assert item_lvl.classification == "not assessed at required level"
+    assert "trustworthy" not in item_lvl.classification
+
+    assert item_met.unit == "mm"
+    assert item_met.classification == "not assessed at required level"
+    assert "trustworthy" not in item_met.classification
+
+
+def test_guidance_fallback_per_unit_table_and_unknown_unit_rejection() -> None:
+    """Fallback thresholds per unit from one table (mm, deg, px, m); raise on unknown units."""
+    # 1. Elbow with unit="deg" and p95=3.0 deg -> fallback threshold 5.0 deg -> trustworthy
+    cell_deg = ErrorBudgetCell(
+        source="mediapipe",
+        joint_or_landmark="elbow",
+        phase_bin="all",
+        view="dtl",
+        grade="A",
+        comparison_level="L2",
+        metric="angle_error",
+        unit="deg",
+        n_swings=5,
+        n_frames=600,
+        p50=1.5,
+        p95=3.0,
+        worst=5.0,
+        resolvable=True,
+    )
+
+    # 2. Unruled quantity in px with p95=10.0 -> trustworthy (< 20.0 px)
+    cell_px = ErrorBudgetCell(
+        source="mediapipe",
+        joint_or_landmark="custom_landmark_px",
+        phase_bin="all",
+        view="dtl",
+        grade="A",
+        comparison_level="L2",
+        metric="pixel_residual",
+        unit="px",
+        n_swings=5,
+        n_frames=600,
+        p50=5.0,
+        p95=10.0,
+        worst=15.0,
+        resolvable=True,
+    )
+
+    # 3. Unruled quantity in m with p95=0.02 -> trustworthy (< 0.03 m)
+    cell_m = ErrorBudgetCell(
+        source="mediapipe",
+        joint_or_landmark="custom_distance_m",
+        phase_bin="all",
+        view="dtl",
+        grade="A",
+        comparison_level="L2",
+        metric="distance_error",
+        unit="m",
+        n_swings=5,
+        n_frames=600,
+        p50=0.01,
+        p95=0.02,
+        worst=0.025,
+        resolvable=True,
+    )
+
+    budget = ErrorBudget(
+        schema_version=ERROR_BUDGET_SCHEMA_VERSION,
+        cells=(cell_deg, cell_px, cell_m),
+        created_utc="2026-10-18T12:00:00Z",
+        receipt_digest="0" * 64,
+    )
+
+    report = derive_guidance(budget)
+    assert report.items[0].classification == "trustworthy at p95 < 5.0"
+    assert report.items[0].unit == "deg"
+
+    assert report.items[1].classification == "trustworthy at p95 < 20.0"
+    assert report.items[1].unit == "px"
+
+    assert report.items[2].classification == "trustworthy at p95 < 0.03"
+    assert report.items[2].unit == "m"
+
+    # 4. Unknown unit raises ValueError
+    cell_unknown = ErrorBudgetCell(
+        source="mediapipe",
+        joint_or_landmark="unknown_qty",
+        phase_bin="all",
+        view="dtl",
+        grade="A",
+        comparison_level="L2",
+        metric="custom_metric",
+        unit="furlongs",
+        n_swings=5,
+        n_frames=600,
+        p50=1.0,
+        p95=2.0,
+        worst=3.0,
+        resolvable=True,
+    )
+    budget_unknown = ErrorBudget(
+        schema_version=ERROR_BUDGET_SCHEMA_VERSION,
+        cells=(cell_unknown,),
+        created_utc="2026-10-18T12:00:00Z",
+        receipt_digest="0" * 64,
+    )
+    with pytest.raises(ValueError, match="Unknown or unsupported unit 'furlongs'"):
+        derive_guidance(budget_unknown)
+
+
+def test_build_error_budget_does_not_default_missing_unit() -> None:
+    """_extract_summary_record / build_error_budget must not default missing unit to 'px'."""
+    summary_missing_unit = {
+        "backend": "mediapipe",
+        "joint_or_landmark": "lead_wrist",
+        "metric": "residual",
+        "n_swings": 5,
+        "n_frames": 600,
+        "p50": 10.0,
+        "p95": 20.0,
+        "worst": 30.0,
+    }
+    with pytest.raises(ValueError, match="missing required 'unit'"):
+        build_error_budget([summary_missing_unit])
+
+
+def test_build_error_budget_does_not_invent_hardcoded_timestamp() -> None:
+    """build_error_budget stamps timestamp from clock or caller, never hardcoded '2026-10-04T00:00:00Z'."""
+    summary_no_ts = {
+        "backend": "mediapipe",
+        "joint_or_landmark": "lead_wrist",
+        "metric": "residual",
+        "unit": "mm",
+        "n_swings": 5,
+        "n_frames": 600,
+        "p50": 10.0,
+        "p95": 20.0,
+        "worst": 30.0,
+    }
+    budget = build_error_budget([summary_no_ts])
+    assert budget.created_utc != "2026-10-04T00:00:00Z"
+    assert budget.created_utc.endswith("Z")
