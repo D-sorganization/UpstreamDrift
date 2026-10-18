@@ -16,6 +16,8 @@ import numpy as np
 from src.engines.physics_engines.mujoco.python.full_body_model import (
     NativeMujocoFullBodyModel,
 )
+from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
+from src.shared.python.body_part_viz.mujoco_axial_loads import MujocoAxialLoadSource
 from src.shared.python.force_overlay.bundle_provider import JointFrame
 
 Vec3 = tuple[float, float, float]
@@ -27,6 +29,31 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
     def __init__(self, model_bytes: bytes) -> None:
         super().__init__(model_bytes)
         self.total_mass_kg: float = float(self.model.body_subtreemass[0])
+        self._axial_source: MujocoAxialLoadSource | None = None
+
+    def axial_load_frame(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        accelerations: Mapping[str, float],
+        time_s: float,
+    ) -> AxialLoadFrame | None:
+        """Segment axial loads of a prescribed motion (inverse dynamics).
+
+        Uses the ``kinematic`` axis policy (every body with a defined axis).
+        Postcondition: tension positive, keyed by MuJoCo body name; ``None`` when
+        the model has tendons, plugins or callbacks.
+        """
+        if self._axial_source is None:
+            self._axial_source = MujocoAxialLoadSource(
+                self.model, axis_policy="kinematic"
+            )
+        return self._axial_source.sample_prescribed(
+            self._vector(coordinates),
+            self._vector(rates),
+            self._vector(accelerations),
+            time_s,
+        )
 
     def _forward(self, coordinates: Mapping[str, float]) -> None:
         self.data.qpos[:] = self._vector(coordinates)

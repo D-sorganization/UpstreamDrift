@@ -46,12 +46,23 @@ def _grip_source(swing: SwingInput, engine: str, mujoco_source: Any) -> tuple[An
 
 
 def build_overlay_feed(
-    swing: SwingInput, engine: str, *, grip: bool = False
+    swing: SwingInput,
+    engine: str,
+    *,
+    grip: bool = False,
+    axial: bool = False,
+    show_force: bool = True,
+    show_torque: bool = True,
 ) -> tuple[OverlayFeed, tuple[float, float, float]]:
     """Overlay feed for ``swing`` plus the framing look-at point.
 
     With ``grip`` the feed also carries the per-hand/net/couple grip wrenches
-    and the grip midpoint (camera focus for tracking views).
+    and the grip midpoint (camera focus for tracking views). With ``axial`` each
+    frame also carries the segment axial loads (tension positive) from inverse
+    dynamics at the provider's own kinematics (``q`` of ``swing``, bundle
+    reference velocity, accelerations by finite difference of that velocity), so
+    the torque arcs and the shading come from one evaluation. ``show_force`` and
+    ``show_torque`` choose the glyph kinds drawn.
 
     Raises ``BackendUnavailable`` when MuJoCo is not installed.
     """
@@ -76,6 +87,8 @@ def build_overlay_feed(
     )
     if grip_source is not None:
         provider.with_grip(grip_source, grip_name)
+    if axial:
+        provider.with_axial_loads(source)
     names = swing.bundle.coordinate_order
     com = source.center_of_mass_m(dict(zip(names, map(float, swing.q[0]), strict=True)))
     lookat = (float(com[0]), float(com[1]), LOOKAT_HEIGHT_M)
@@ -84,6 +97,8 @@ def build_overlay_feed(
         provider.frame_at,
         style,
         grip_analyses=provider.grip_analyses if grip else None,
+        show_force=show_force,
+        show_torque=show_torque,
     )
     return feed, lookat
 

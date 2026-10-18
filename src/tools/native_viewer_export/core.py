@@ -19,6 +19,8 @@ import warnings
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.body_part_viz.force_colors import ForceColorScale
+from src.shared.python.force_overlay.conversions import restrict_frame
 from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, GlyphSet
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import legend_text
 from src.shared.python.golf_view_presets import (
@@ -43,6 +45,7 @@ from src.tools.native_viewer_export.compositor import (
     draw_label,
 )
 from src.tools.native_viewer_export.impact_card import impact_card_for
+from src.tools.native_viewer_export.shading import shading_legend
 from src.tools.native_viewer_export.inset_strip import (
     StripRenderer,
     StripSeries,
@@ -112,6 +115,17 @@ class ExportSettings:
     grip: bool = False  # hands/grip overlay (GCV-10); hands_closeup tracks it
     lookat_m: tuple[float, float, float] = (1.0, 0.0, 0.9)
     distance_m: float | None = None
+    #: tension/compression segment shading (MuJoCo viewer); ``None`` or a disabled
+    #: scale leaves the segments unshaded. Needs ``overlays`` (the axial loads
+    #: ride on the overlay frames).
+    shading: ForceColorScale | None = None
+    force_vectors: bool = True  # straight joint/contact force arrows
+    torque_vectors: bool = True  # curling joint torque arcs
+
+    @property
+    def shading_enabled(self) -> bool:
+        """True when segments are shaded in this export."""
+        return self.overlays and self.shading is not None and self.shading.enabled
 
     @classmethod
     def preview(cls, **overrides: Any) -> ExportSettings:
@@ -169,6 +183,11 @@ class ExportSettings:
             raise ValueError("distance_m must be positive and finite")
         if self.multiview and len(self.views) != 4:
             raise ValueError("the 2x2 grid needs exactly four views")
+        if self.shading is not None and not isinstance(self.shading, ForceColorScale):
+            raise TypeError("shading must be a ForceColorScale or None")
+        for flag in ("force_vectors", "torque_vectors"):
+            if not isinstance(getattr(self, flag), bool):
+                raise TypeError(f"{flag} must be bool")
 
     def effective_speeds(self, dt_s: float) -> tuple[float, ...]:
         """Speeds to export; a deprecated ``stride`` maps to its equivalent speed."""
@@ -357,6 +376,9 @@ class OverlayFeed:
     build: Callable[[Any, ForceGlyphStyle], GlyphSet] | None = None
     #: grip analyses at given indices (set when the grip overlay is enabled)
     grip_analyses: Callable[[Sequence[int]], list[Any]] | None = None
+    #: glyph kinds drawn; the frame (and its axial loads) is never restricted
+    show_force: bool = True
+    show_torque: bool = True
     _frames: dict[int, Any] = field(
         default_factory=dict, init=False, repr=False, compare=False
     )
@@ -372,7 +394,16 @@ class OverlayFeed:
             from src.shared.python.force_overlay.glyphs import build_glyphs
 
             build = build_glyphs
-        return build(self._frame(index), self.style)
+        frame = self._frame(index)
+        if not (self.show_force and self.show_torque):
+            frame = restrict_frame(
+                frame, show_force=self.show_force, show_torque=self.show_torque
+            )
+        return build(frame, self.style)
+
+    def axial_at(self, index: int) -> Any:
+        """``AxialLoadFrame`` of state ``index``, or ``None`` when not computed."""
+        return getattr(self._frame(index), "axial_loads", None)
 
     def focus_at(self, index: int) -> tuple[float, float, float] | None:
         """Grip midpoint of state ``index`` (camera focus), or ``None`` if unknown."""
@@ -615,6 +646,9 @@ def _export_clip(
                 OverlayFeed.legend(glyphs),
                 speed=plan.speed,
                 ms_from_impact=(t - impact) * 1000.0,
+                shading_legend=shading_legend(settings.shading)
+                if settings.shading_enabled
+                else "",
             )
             labelled = {
                 v: draw_label(tiles[v], get_view_preset(v).label, (8, 6))
