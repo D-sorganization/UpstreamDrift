@@ -23,6 +23,7 @@ from pydantic import BaseModel, ConfigDict
 
 from src.shared.python.core.contracts import require
 
+from .bundle import frame_index
 from .temporal import SmootherOptions, smooth
 
 CLEAN_SCHEMA_VERSION = "view-observations-clean/1.0.0"
@@ -66,7 +67,7 @@ def _tracks(
     px = np.full((total, k, 2), np.nan)
     conf = np.zeros((total, k))
     for row in payload["frames"]:
-        t = int(round(float(row["time_s"]) * fps))
+        t = frame_index(row["time_s"], fps)
         if 0 <= t < total:
             px[t] = np.asarray(row["keypoints_px"], dtype=float)
             conf[t] = np.asarray(row["confidence"], dtype=float)
@@ -120,7 +121,7 @@ def clean_view(
     out["schema_version"] = CLEAN_SCHEMA_VERSION
     frames: list[dict[str, Any]] = []
     for row in payload["frames"]:
-        t = int(round(float(row["time_s"]) * fps))
+        t = frame_index(row["time_s"], fps)
         new = dict(row)
         new["confidence"] = clean_conf[t].tolist()
         new["fit_px"] = np.nan_to_num(fit[t], nan=0.0).tolist()

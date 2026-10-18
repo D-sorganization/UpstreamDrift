@@ -314,7 +314,8 @@
       "acceptance": [
         "Verify net bare-club wrench balance W_L + W_R == W_net^bare within propagated sensor and kinematic noise on held-out swings before evaluating internal hand splits.",
         "Test whether measured 6-D grip-split coordinates s_1..s_6 lie within NSX-22/NSX-25 feasible envelopes and satisfy pre-registered sign/timing certificates without post-hoc weight tuning.",
-        "Evaluate surface EMG only through a pre-declared activation-proxy observation model, never as direct hand-wrench ground truth."
+        "Evaluate surface EMG only through a pre-declared activation-proxy observation model, never as direct hand-wrench ground truth.",
+        "Variability sensitivity (NSX-101): the five preregistered experiments EXP-V1 to EXP-V5 in DV-12554.md must each be executed on real data and meet their pass rules before any VAR-01 to VAR-10 row in publication_gate.md leaves BLOCKED or DEFERRED; no coaching prescription is validated by any of them alone."
       ],
       "board": {
         "decision": "pending",

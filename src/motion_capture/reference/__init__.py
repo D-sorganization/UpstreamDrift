@@ -40,6 +40,7 @@ from .comparison_3d import (
 )
 from .error_budget import (
     ERROR_BUDGET_SCHEMA_VERSION,
+    FALLBACK_THRESHOLDS_PER_UNIT,
     ErrorBudget,
     ErrorBudgetCell,
     GuidanceItem,
@@ -112,6 +113,7 @@ __all__ = [
     "ComparisonLevel",
     "ComparisonSession",
     "ERROR_BUDGET_SCHEMA_VERSION",
+    "FALLBACK_THRESHOLDS_PER_UNIT",
     "ErrorBudget",
     "ErrorBudgetCell",
     "EventAnchors",
