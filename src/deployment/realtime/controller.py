@@ -595,28 +595,44 @@ class RealTimeController:
                 command.validate(self._loopback_joint_count())
 
                 if command.mode == ControlMode.TORQUE:
-                    torque_commands = self._copy_command_vector(command.torque_commands)
+                    torque_raw = command.torque_commands
+                    if torque_raw is None:
+                        raise ValueError("Torque mode requires torque_commands")
+                    torque_commands = self._copy_command_vector(torque_raw)
                     damping = 0.1
                     qdd = torque_commands - damping * qd
                     qd = qd + qdd * self.dt
                     q = q + qd * self.dt
 
                 elif command.mode == ControlMode.POSITION:
-                    q = self._copy_command_vector(command.position_targets)
+                    position_raw = command.position_targets
+                    if position_raw is None:
+                        raise ValueError("Position mode requires position_targets")
+                    q = self._copy_command_vector(position_raw)
                     qd = np.zeros_like(q)
 
                 elif command.mode == ControlMode.VELOCITY:
-                    qd = self._copy_command_vector(command.velocity_targets)
+                    velocity_raw = command.velocity_targets
+                    if velocity_raw is None:
+                        raise ValueError("Velocity mode requires velocity_targets")
+                    qd = self._copy_command_vector(velocity_raw)
                     q = q + qd * self.dt
 
                 elif command.mode == ControlMode.IMPEDANCE:
-                    position_targets = self._copy_command_vector(
-                        command.position_targets
-                    )
-                    stiffness = self._copy_command_vector(command.stiffness)
-                    damping = self._copy_command_vector(command.damping)
+                    position_raw = command.position_targets
+                    stiffness_raw = command.stiffness
+                    damping_raw = command.damping
+                    if position_raw is None:
+                        raise ValueError("Impedance mode requires position_targets")
+                    if stiffness_raw is None:
+                        raise ValueError("Impedance mode requires stiffness")
+                    if damping_raw is None:
+                        raise ValueError("Impedance mode requires damping")
+                    position_targets = self._copy_command_vector(position_raw)
+                    stiffness = self._copy_command_vector(stiffness_raw)
+                    damping_coeffs = self._copy_command_vector(damping_raw)
                     q_err = position_targets - q
-                    tau = stiffness * q_err - damping * qd
+                    tau = stiffness * q_err - damping_coeffs * qd
                     if command.feedforward_torque is not None:
                         tau += self._copy_command_vector(command.feedforward_torque)
                     qdd = tau
