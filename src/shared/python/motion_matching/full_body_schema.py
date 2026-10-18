@@ -28,10 +28,13 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any
 
+from src.shared.python.core.error_utils import ModelError
+
 __all__ = [
     "DEFAULT_FULL_BODY_SCHEMA",
     "ISB_SPINE_AXES",
     "FullBodySchema",
+    "SchemaFeatureUnavailableError",
     "TrunkJointDefinition",
     "TrunkTopology",
     "full_body_schema",
@@ -49,6 +52,40 @@ _PROVIDERS: Mapping[str, str] = MappingProxyType(
         "full-body-v2": "src.shared.python.motion_matching.full_body_v2",
     }
 )
+
+
+class SchemaFeatureUnavailableError(ModelError, NotImplementedError):
+    """A consumer feature is not yet provided for a registered schema.
+
+    The schema itself is supported; one feature of one consumer is delivered
+    by a later, tracked HRG child. The consumer fails closed instead of
+    returning a silently wrong result. ``schema_id``, ``feature``, ``child``
+    and ``issue`` are kept as attributes; the message names all of them.
+    """
+
+    def __init__(
+        self,
+        schema_id: str,
+        *,
+        consumer: str,
+        feature: str,
+        child: str,
+        issue: int,
+    ) -> None:
+        if not isinstance(issue, int) or issue <= 0:
+            raise ValueError(f"issue must be a positive issue number, got {issue!r}")
+        if not child or not feature:
+            raise ValueError("child and feature must be non-empty")
+        self.schema_id = schema_id
+        self.feature = feature
+        self.child = child
+        self.issue = issue
+        super().__init__(
+            schema_id,
+            consumer,
+            f"{feature} is not available for {schema_id} until {child} "
+            f"(tracked: #{issue})",
+        )
 
 
 @dataclass(frozen=True)

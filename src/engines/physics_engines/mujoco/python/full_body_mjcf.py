@@ -23,7 +23,10 @@ from src.engines.physics_engines.mujoco.python.native_mjcf import (
     _numbers,
 )
 from src.shared.python.model_appearance.schema import AppearanceDocument
-from src.shared.python.motion_matching.full_body_schema import require_full_body_schema
+from src.shared.python.motion_matching.full_body_schema import (
+    SchemaFeatureUnavailableError,
+    require_full_body_schema,
+)
 from src.shared.python.motion_matching.full_body_spec import order_full_body_joints
 
 
@@ -139,9 +142,13 @@ def export_full_body_mjcf(
     if (visual or with_head or appearance is not None) and (
         schema.schema_id != "full-body-v1"
     ):
-        raise NotImplementedError(
-            f"The visual layer of {schema.schema_id} (regional trunk skin and "
-            "capsules) is HRG-D3 work; export physics only (visual=False)"
+        raise SchemaFeatureUnavailableError(
+            schema.schema_id,
+            consumer="MJCF export",
+            feature="the visual layer (regional trunk skin and capsules; "
+            "export physics only with visual=False)",
+            child="HRG-D3",
+            issue=13174,
         )
     if not isinstance(spec.get("closure"), dict):
         raise ValueError("Missing closure specification")

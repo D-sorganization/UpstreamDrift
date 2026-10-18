@@ -16,7 +16,11 @@ import pytest
 
 from src.shared.python.model_appearance.skinned_body import spec_body_poses
 from src.shared.python.motion_matching import full_body_v2 as v2
+from src.shared.python.motion_matching.full_body_schema import (
+    SchemaFeatureUnavailableError,
+)
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
+from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[3]
@@ -83,17 +87,23 @@ def test_mujoco_visual_layer_is_not_implemented_for_v2(v2_bytes) -> None:
         export_full_body_mjcf,
     )
 
-    with pytest.raises(NotImplementedError, match="HRG-D3"):
+    with pytest.raises(
+        SchemaFeatureUnavailableError, match=r"HRG-D3 \(tracked: #13174\)"
+    ):
         export_full_body_mjcf(v2_bytes, visual=True)
 
 
-def test_urdf_bundle_and_drake_model_accept_v2(v2_doc, v2_bytes) -> None:
+def test_urdf_bundle_accepts_v2(v2_doc, v2_bytes) -> None:
     from src.engines.physics_engines.drake.python.full_body_urdf import (
         export_full_body_urdf,
     )
 
     _, sidecar = export_full_body_urdf(v2_bytes)
     assert list(sidecar["coordinate_order"]) == v2_doc["coordinate_order"]
+
+
+@pytest.mark.requires_drake
+def test_drake_model_accepts_v2(v2_doc) -> None:
     pytest.importorskip("pydrake.all")
     from src.engines.physics_engines.drake.python.full_body_model import (
         FullBodyDrakeModel,
@@ -108,6 +118,7 @@ def test_urdf_bundle_and_drake_model_accept_v2(v2_doc, v2_bytes) -> None:
         np.testing.assert_allclose(got[name], expected[name], atol=1e-9)
 
 
+@pytest.mark.requires_pinocchio
 def test_pinocchio_model_accepts_v2_and_upper_model_is_deferred(v2_doc) -> None:
     pytest.importorskip("pinocchio")
     from src.engines.physics_engines.pinocchio.python.native_model import (
@@ -121,7 +132,9 @@ def test_pinocchio_model_accepts_v2_and_upper_model_is_deferred(v2_doc) -> None:
     got = model.frame_poses(q)
     for name in ("Hub", "Spine", "Torso"):
         np.testing.assert_allclose(np.asarray(got[name]), expected[name], atol=1e-9)
-    with pytest.raises(NotImplementedError, match="HRG-D2"):
+    with pytest.raises(
+        SchemaFeatureUnavailableError, match=r"HRG-D2 \(tracked: #13173\)"
+    ):
         model.upper_body_model()
 
 
@@ -132,7 +145,7 @@ def test_opensim_export_and_parity_adapter_accept_v2(v2_doc, v2_bytes) -> None:
 
     xml, meta = export_full_body_osim(v2_bytes, club_geometry_ref=None)
     assert "lumbar_flexion" in xml and "TorsoInput" not in xml
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory) / "v2.osim"
         path.write_text(xml, encoding="utf-8")
@@ -158,7 +171,9 @@ def test_opensim_musculoskeletal_graft_stays_v1_only(v2_bytes) -> None:
         spec_document,
     )
 
-    with pytest.raises(NotImplementedError, match="HRG-D2"):
+    with pytest.raises(
+        SchemaFeatureUnavailableError, match=r"HRG-Q1 \(tracked: #13176\)"
+    ):
         spec_document(v2_bytes)
 
 

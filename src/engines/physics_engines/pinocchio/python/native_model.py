@@ -20,7 +20,10 @@ from src.shared.python.motion_matching.contact_law import (
     sphere_ground_contact,
     support_planes,
 )
-from src.shared.python.motion_matching.full_body_schema import require_full_body_schema
+from src.shared.python.motion_matching.full_body_schema import (
+    SchemaFeatureUnavailableError,
+    require_full_body_schema,
+)
 from src.shared.python.motion_matching.full_body_spec import (
     FULL_BODY_SCHEMA_VERSION,
     ContactSphere,
@@ -843,13 +846,16 @@ class FullBodyPinocchioModel(NativePinocchioModel):
     def upper_body_model(self) -> NativePinocchioModel:
         """Construct the qualified upper-body model from this spec's upper-body slice.
 
-        Raises ``NotImplementedError`` for ``full-body-v2``: its slice has the
+        Raises ``SchemaFeatureUnavailableError`` for ``full-body-v2``: its slice has the
         regional trunk, which the qualified upper-body model does not (HRG-D2).
         """
         if self.specification["schema_version"] != FULL_BODY_SCHEMA_VERSION:
-            raise NotImplementedError(
-                "The upper-body model of a full-body-v2 spec needs the "
-                "regional-trunk upper body (HRG-D2)"
+            raise SchemaFeatureUnavailableError(
+                self.specification["schema_version"],
+                consumer="Pinocchio full-body model",
+                feature="the upper-body model (needs the regional-trunk upper body)",
+                child="HRG-D2",
+                issue=13173,
             )
         return NativePinocchioModel(upper_body_slice(self.specification))
 

@@ -32,7 +32,10 @@ import numpy as np
 from numpy.typing import ArrayLike
 from scipy.spatial.transform import Rotation
 
-from src.shared.python.motion_matching.full_body_schema import require_full_body_schema
+from src.shared.python.motion_matching.full_body_schema import (
+    SchemaFeatureUnavailableError,
+    require_full_body_schema,
+)
 from src.shared.python.contracts import require
 
 Array = np.ndarray
@@ -180,8 +183,13 @@ def spec_document(spec_bytes: bytes) -> dict[str, Any]:
     spec = json.loads(spec_bytes)
     schema = require_full_body_schema(spec, consumer="musculoskeletal graft")
     if schema.schema_id != "full-body-v1":
-        raise NotImplementedError(
-            "Grafting muscles onto the full-body-v2 regional trunk needs the "
-            "per-level spine geometry and muscle paths (HRG-D2, HRG-Q1)"
+        raise SchemaFeatureUnavailableError(
+            schema.schema_id,
+            consumer="musculoskeletal graft",
+            feature="grafting muscles onto the regional trunk (needs the "
+            "regional-trunk geometry of HRG-D2 and the muscle paths qualified "
+            "by HRG-Q1)",
+            child="HRG-Q1",
+            issue=13176,
         )
     return spec
