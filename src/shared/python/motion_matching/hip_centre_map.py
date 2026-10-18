@@ -51,7 +51,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TypeAlias
 
 import numpy as np
@@ -425,48 +425,103 @@ def _symmetry_test(theta_data: Array, cov_data: Array) -> SymmetryTest:
     return SymmetryTest(chi2, math.exp(-0.5 * chi2))
 
 
+@dataclass(frozen=True)
+class HipCentreOptions:
+    """Estimator options for :func:`estimate_hip_centres`.
+
+    ``superior_axis`` is the pelvis frame's up direction (height difference and
+    roll). ``noise_sd_m`` overrides the per-side residual SD estimated from the
+    sphere fit (floored at ``MIN_NOISE_SD_M``); ``frames_per_independent_sample``
+    (>= 1; ``None`` estimates it from the residual autocorrelation, see
+    :func:`integrated_autocorrelation_time`) inflates the covariance for
+    autocorrelated frames. ``use_prior=False`` gives the likelihood-only fit.
+    ``waist_residual_*`` are passed through for reporting.
+
+    Raises ``ValueError`` for a non-finite or zero ``superior_axis``, a
+    non-positive ``noise_sd_m`` or ``frames_per_independent_sample`` < 1.
+    """
+
+    superior_axis: tuple[float, float, float] = (0.0, 0.0, 1.0)
+    noise_sd_m: float | None = None
+    frames_per_independent_sample: float | None = 1.0
+    use_prior: bool = True
+    waist_residual_rms_m: float = float("nan")
+    waist_residual_max_m: float = float("nan")
+
+    def __post_init__(self) -> None:
+        up = np.asarray(self.superior_axis, dtype=float)
+        if up.shape != (3,) or not np.isfinite(up).all() or np.linalg.norm(up) < 1e-9:
+            raise ValueError("superior_axis must be a finite nonzero 3-vector")
+        noise = self.noise_sd_m
+        if noise is not None and not (math.isfinite(noise) and noise > 0):
+            raise ValueError("noise_sd_m must be finite and positive")
+        tau = self.frames_per_independent_sample
+        if tau is not None and not (math.isfinite(tau) and tau >= 1.0):
+            raise ValueError("frames_per_independent_sample must be finite and >= 1")
+
+
+def _map_fit(
+    tracks: tuple[Array, Array],
+    prior: HipCentrePrior,
+    sigma: tuple[float, float],
+    theta0: Array,
+    use_prior: bool,
+) -> tuple[Array, Array, Array]:
+    """The MAP (or likelihood-only) solve; returns (theta, information, prior_info)."""
+    prior_info: Array = np.asarray(np.linalg.inv(prior.covariance()), dtype=float)
+    if not use_prior:
+        theta, info = _solve(tracks, theta0, sigma, None)
+        return theta, info, prior_info
+    prior_mean: Array = np.asarray(
+        np.concatenate([prior.mean_r, prior.mean_l]), dtype=float
+    )
+    # Start at the prior mean: weak data can send the free fit far away.
+    radii = [
+        float(np.linalg.norm(t - m, axis=1).mean())
+        for t, m in zip(tracks, (prior.mean_r, prior.mean_l), strict=True)
+    ]
+    theta, info = _solve(
+        tracks, np.array([*prior_mean, *radii]), sigma, (prior_mean, prior_info)
+    )
+    return theta, info, prior_info
+
+
+def _side_diagnostics(
+    tracks: tuple[Array, Array], theta: Array
+) -> tuple[list[float], list[float]]:
+    """Per-side knee arc span (deg) and weakest/strongest information ratio."""
+    spans, ratios = [], []
+    for s in (0, 1):
+        centre = theta[3 * s : 3 * s + 3]
+        spans.append(_arc_span_deg(tracks[s], centre))
+        _, jac = _jacobian_rows(tracks[s], centre)
+        eig = np.linalg.eigvalsh(jac.T @ jac)
+        ratios.append(float(eig[0] / eig[-1]) if eig[-1] > 0 else 0.0)
+    return spans, ratios
+
+
 def estimate_hip_centres(
     knee_r: Array,
     knee_l: Array,
     prior: HipCentrePrior,
-    *,
-    superior_axis: Sequence[float] = (0.0, 0.0, 1.0),
-    noise_sd_m: float | None = None,
-    frames_per_independent_sample: float | None = 1.0,
-    use_prior: bool = True,
-    waist_residual_rms_m: float = float("nan"),
-    waist_residual_max_m: float = float("nan"),
+    options: HipCentreOptions | None = None,
 ) -> HipCentreEstimate:
     """MAP hip centres from pelvis-frame knee marker tracks.
 
     ``knee_r``/``knee_l`` are (frames, 3) knee marker positions in the pelvis
-    frame. ``superior_axis`` is that frame's up direction (used for the height
-    difference and roll). ``noise_sd_m`` overrides the per-side residual SD
-    estimated from the sphere fit (floored at ``MIN_NOISE_SD_M``);
-    ``frames_per_independent_sample`` (>= 1; ``None`` estimates it from the
-    residual autocorrelation, see :func:`integrated_autocorrelation_time`) inflates the covariance for
-    autocorrelated frames. ``use_prior=False`` gives the likelihood-only fit.
-    ``waist_residual_*`` are passed through for reporting.
+    frame; ``options`` (see :class:`HipCentreOptions`) defaults to
+    ``HipCentreOptions()``.
 
-    Preconditions: finite tracks of >= ``MIN_FRAMES`` frames, finite nonzero
-    ``superior_axis``, positive ``noise_sd_m`` and ``frames_per_independent_sample``.
-    Raises ``ValueError`` otherwise. Postconditions: the result never forces
+    Preconditions: finite tracks of >= ``MIN_FRAMES`` frames. Raises
+    ``ValueError`` otherwise. Postconditions: the result never forces
     left/right symmetry; ``status`` is one of ``STATUSES``; covariances are
     symmetric positive definite; a degenerate geometry returns a result (mostly
     prior) with ``status == "degenerate"`` instead of raising.
     """
+    opts = options if options is not None else HipCentreOptions()
     r_pts, l_pts = _as_track(knee_r, "knee_r"), _as_track(knee_l, "knee_l")
-    up = np.asarray(superior_axis, dtype=float)
-    if up.shape != (3,) or not np.isfinite(up).all() or np.linalg.norm(up) < 1e-9:
-        raise ValueError("superior_axis must be a finite nonzero 3-vector")
+    up = np.asarray(opts.superior_axis, dtype=float)
     up = up / np.linalg.norm(up)
-    if noise_sd_m is not None and not (math.isfinite(noise_sd_m) and noise_sd_m > 0):
-        raise ValueError("noise_sd_m must be finite and positive")
-    if frames_per_independent_sample is not None and not (
-        math.isfinite(frames_per_independent_sample)
-        and frames_per_independent_sample >= 1.0
-    ):
-        raise ValueError("frames_per_independent_sample must be finite and >= 1")
 
     tracks = (r_pts, l_pts)
     fits = [fit_sphere(t) for t in tracks]
@@ -476,38 +531,17 @@ def estimate_hip_centres(
     theta0, _ = _solve(tracks, start, (1.0, 1.0), None)  # data-only geometric LS
     tau = (
         _mean_residual_tau(tracks, theta0)
-        if frames_per_independent_sample is None
-        else float(frames_per_independent_sample)
+        if opts.frames_per_independent_sample is None
+        else float(opts.frames_per_independent_sample)
     )
-    sigma = _noise_sds(tracks, theta0, noise_sd_m, math.sqrt(tau))
+    sigma = _noise_sds(tracks, theta0, opts.noise_sd_m, math.sqrt(tau))
     data_info = _data_information(tracks, theta0, sigma)
 
-    prior_info: Array = np.asarray(np.linalg.inv(prior.covariance()), dtype=float)
-    prior_mean: Array = np.asarray(
-        np.concatenate([prior.mean_r, prior.mean_l]), dtype=float
-    )
-    if use_prior:
-        # Start at the prior mean: weak data can send the free fit far away.
-        radii = [
-            float(np.linalg.norm(t - m, axis=1).mean())
-            for t, m in zip(tracks, (prior.mean_r, prior.mean_l), strict=True)
-        ]
-        theta, info = _solve(
-            tracks, np.array([*prior_mean, *radii]), sigma, (prior_mean, prior_info)
-        )
-    else:
-        theta, info = _solve(tracks, theta0, sigma, None)
-    cov8 = _invert(info)
-    cov6 = cov8[:6, :6]
-    weight = float(np.trace(cov6 @ prior_info) / 6.0) if use_prior else 0.0
+    theta, info, prior_info = _map_fit(tracks, prior, sigma, theta0, opts.use_prior)
+    cov6 = _invert(info)[:6, :6]
+    weight = float(np.trace(cov6 @ prior_info) / 6.0) if opts.use_prior else 0.0
     weight = min(max(weight, 0.0), 1.0)
-    spans, ratios = [], []
-    for s in (0, 1):
-        centre = theta[3 * s : 3 * s + 3]
-        spans.append(_arc_span_deg(tracks[s], centre))
-        _, jac = _jacobian_rows(tracks[s], centre)
-        eig = np.linalg.eigvalsh(jac.T @ jac)
-        ratios.append(float(eig[0] / eig[-1]) if eig[-1] > 0 else 0.0)
+    spans, ratios = _side_diagnostics(tracks, theta)
     status, reason = _classify((spans[0], spans[1]), (ratios[0], ratios[1]), weight)
     inter, height, roll = _derived(theta[:6], cov6, up)
     sym = (
@@ -537,10 +571,12 @@ def estimate_hip_centres(
         arc_span_deg_l=spans[1],
         frames_r=len(r_pts),
         frames_l=len(l_pts),
-        prior_provenance=prior.provenance if use_prior else "none (likelihood only)",
-        waist_residual_rms_m=waist_residual_rms_m,
-        waist_residual_max_m=waist_residual_max_m,
-        used_prior=use_prior,
+        prior_provenance=prior.provenance
+        if opts.use_prior
+        else "none (likelihood only)",
+        waist_residual_rms_m=opts.waist_residual_rms_m,
+        waist_residual_max_m=opts.waist_residual_max_m,
+        used_prior=opts.use_prior,
         frames_per_independent_sample=tau,
     )
 
@@ -551,12 +587,9 @@ def estimate_hip_centres_from_capture(
     labels: Sequence[str],
     waist_offsets: Mapping[str, Sequence[float]],
     prior: HipCentrePrior,
+    options: HipCentreOptions | None = None,
     *,
     knee_labels: tuple[str, str] = ("RKneeOut", "LKneeOut"),
-    superior_axis: Sequence[float] = (0.0, 0.0, 1.0),
-    noise_sd_m: float | None = None,
-    frames_per_independent_sample: float | None = None,
-    use_prior: bool = True,
 ) -> HipCentreEstimate:
     """:func:`estimate_hip_centres` for a marker capture with a waist marker set.
 
@@ -565,14 +598,14 @@ def estimate_hip_centres_from_capture(
     reported as RMS and maximum absolute component on the result.
     """
     tracks = pelvis_frame_tracks(points, valid, labels, waist_offsets, knee_labels)
-    return estimate_hip_centres(
-        tracks.tracks[0],
-        tracks.tracks[1],
-        prior,
-        superior_axis=superior_axis,
-        noise_sd_m=noise_sd_m,
-        frames_per_independent_sample=frames_per_independent_sample,
-        use_prior=use_prior,
+    base = (
+        options
+        if options is not None
+        else HipCentreOptions(frames_per_independent_sample=None)
+    )
+    reported = replace(
+        base,
         waist_residual_rms_m=tracks.rms_m,
         waist_residual_max_m=tracks.max_abs_m,
     )
+    return estimate_hip_centres(tracks.tracks[0], tracks.tracks[1], prior, reported)
