@@ -222,11 +222,8 @@ def parse_study_request(
                 write_fixture_osim,
             )
 
-            try:
-                fixture_path.parent.mkdir(parents=True, exist_ok=True)
-                write_fixture_osim(FixtureSpec(), fixture_path, muscles=True)
-            except OSError:
-                pass
+            fixture_path.parent.mkdir(parents=True, exist_ok=True)
+            write_fixture_osim(FixtureSpec(), fixture_path, muscles=True)
         values["model_path"] = fixture_path
         values.setdefault("pelvis", "fixture")
 

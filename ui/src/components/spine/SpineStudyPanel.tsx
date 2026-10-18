@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 import {
   fetchSpineAssets,
   pollSpineStudyJob,
   submitSpineStudy,
   type SpineAssetItem,
   type SpineStudyJobStatus,
-} from '@/api/spineViewer';
+} from "@/api/spineViewer";
 
 const COUPLING_LAWS = [
-  'bruno2015_regional',
-  'fujii2007_lumbar',
-  'uniform_reference',
+  "bruno2015_regional",
+  "fujii2007_lumbar",
+  "uniform_reference",
 ] as const;
 
 export interface SpineStudyPanelProps {
@@ -23,12 +23,12 @@ function messageOf(error: unknown): string {
 
 export function SpineStudyPanel({ onStudyCompleted }: SpineStudyPanelProps) {
   const [assets, setAssets] = useState<SpineAssetItem[]>([]);
-  const [selectedAssetId, setSelectedAssetId] = useState('');
-  const [couplingLaw, setCouplingLaw] = useState('');
+  const [selectedAssetId, setSelectedAssetId] = useState("");
+  const [couplingLaw, setCouplingLaw] = useState("");
   const [motionPath, setMotionPath] = useState(
-    'tests/data/motion_pipeline/golden/sample.sto',
+    "tests/data/motion_pipeline/golden/sample.sto",
   );
-  const [studyId, setStudyId] = useState('spine_study_1');
+  const [studyId, setStudyId] = useState("spine_study_1");
   const [jobStatus, setJobStatus] = useState<SpineStudyJobStatus | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +41,9 @@ export function SpineStudyPanel({ onStudyCompleted }: SpineStudyPanelProps) {
         const list = Array.isArray(rawList) ? rawList : [];
         setAssets(list);
         if (list.length > 0) {
-          const fixture = list.find((a) => a.is_fixture || a.asset_id === 'fixture');
+          const fixture = list.find(
+            (a) => a.is_fixture || a.asset_id === "fixture",
+          );
           setSelectedAssetId(fixture ? fixture.asset_id : list[0].asset_id);
         }
       })
@@ -75,27 +77,34 @@ export function SpineStudyPanel({ onStudyCompleted }: SpineStudyPanelProps) {
         onStatus: (st) => setJobStatus(st),
       });
 
-      if (terminal.status === 'completed' && terminal.receipt_path) {
+      if (terminal.status === "completed" && terminal.receipt_path) {
         await onStudyCompleted(terminal.receipt_path);
-      } else if (terminal.status === 'failed') {
-        setError(terminal.error ?? 'Study execution failed');
+      } else if (terminal.status === "failed") {
+        setError(terminal.error ?? "Study execution failed");
       }
     } catch (e: unknown) {
       setError(messageOf(e));
     } finally {
       setIsRunning(false);
     }
-  }, [studyId, motionPath, selectedAssetId, couplingLaw, isRunning, onStudyCompleted]);
+  }, [
+    studyId,
+    motionPath,
+    selectedAssetId,
+    couplingLaw,
+    isRunning,
+    onStudyCompleted,
+  ]);
 
   // Model status display text
-  let statusText = 'unknown';
+  let statusText = "unknown";
   let isQualified = false;
   if (selectedAsset) {
-    if (selectedAsset.is_fixture || selectedAsset.asset_id === 'fixture') {
-      statusText = 'fixture (synthetic, unqualified)';
+    if (selectedAsset.is_fixture || selectedAsset.asset_id === "fixture") {
+      statusText = "fixture (synthetic, unqualified)";
     } else {
       statusText = selectedAsset.status;
-      isQualified = selectedAsset.status === 'qualified';
+      isQualified = selectedAsset.status === "qualified";
     }
   }
 
@@ -130,12 +139,12 @@ export function SpineStudyPanel({ onStudyCompleted }: SpineStudyPanelProps) {
         <span
           data-testid="model-status"
           className={
-            'text-xs ' +
+            "text-xs " +
             (isQualified
-              ? 'text-green-400'
+              ? "text-green-400"
               : selectedAsset?.is_fixture
-              ? 'text-amber-400'
-              : 'text-red-400')
+                ? "text-amber-400"
+                : "text-red-400")
           }
         >
           Model status: {statusText}
@@ -171,12 +180,13 @@ export function SpineStudyPanel({ onStudyCompleted }: SpineStudyPanelProps) {
           disabled={isRunning || !studyId || !motionPath}
           className="rounded bg-indigo-700 px-3 py-1 text-xs font-medium text-white hover:bg-indigo-600 disabled:opacity-50"
         >
-          {isRunning ? 'Running...' : 'Run Study'}
+          {isRunning ? "Running..." : "Run Study"}
         </button>
       </div>
       {isRunning && (
         <div className="mt-2 text-xs text-indigo-300">
-          Running study background job (status: {jobStatus?.status ?? 'starting'})...
+          Running study background job (status:{" "}
+          {jobStatus?.status ?? "starting"})...
         </div>
       )}
       {error && (

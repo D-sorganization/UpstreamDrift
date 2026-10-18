@@ -7,16 +7,16 @@
  * qualified.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 import {
   fetchSpineReceipts,
   fetchSpineStudy,
   SPINE_QUANTITIES,
   type SpineStudyPayload,
-} from '@/api/spineViewer';
-import { SpineHeatmap } from '@/components/spine/SpineHeatmap';
-import { SpineStatusBanner } from '@/components/spine/SpineStatusBanner';
-import { SpineStudyPanel } from '@/components/spine/SpineStudyPanel';
+} from "@/api/spineViewer";
+import { SpineHeatmap } from "@/components/spine/SpineHeatmap";
+import { SpineStatusBanner } from "@/components/spine/SpineStatusBanner";
+import { SpineStudyPanel } from "@/components/spine/SpineStudyPanel";
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
@@ -24,7 +24,7 @@ function messageOf(error: unknown): string {
 
 export function SpineViewerPage() {
   const [receipts, setReceipts] = useState<string[]>([]);
-  const [selected, setSelected] = useState('');
+  const [selected, setSelected] = useState("");
   const [quantity, setQuantity] = useState<string>(SPINE_QUANTITIES[0]);
   const [study, setStudy] = useState<SpineStudyPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
