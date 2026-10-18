@@ -217,8 +217,37 @@ describe('GroundReactionCharts', () => {
       expect(screen.queryByTestId('ground-reaction-cop-sigma-Measured Left-2')).toBeNull();
       expect(screen.getByText('Measured Left \u00b11\u03c3 per axis')).toBeInTheDocument();
       expect(screen.getByTestId('ground-reaction-uncertainty-caption')).toHaveTextContent(
-        'circles: measured CoP \u00b11\u03c3 per axis',
+        'ellipses: measured CoP \u00b11\u03c3 per axis',
       );
+    });
+
+    it('draws per-axis ellipses, and worse-axis circles without per-axis data', async () => {
+      const data = withBand();
+      data.traces = {
+        ...data.traces,
+        // Left: sigma 4 mm on world x, 1 mm on y. Right: only the worse axis, 4 mm.
+        measured_left_cop_sigma_m: {
+          x: [0.004, 0.004, null],
+          y: [0.001, 0.001, null],
+          z: [0.004, 0.004, null],
+          magnitude: unobserved,
+        },
+        measured_right_cop_m: {
+          x: [0.02, 0.03, null],
+          y: [0, 0.01, null],
+          z: unobserved,
+          magnitude: unobserved,
+        },
+        measured_right_cop_sigma_m: measured([0.004, 0.004, null]),
+      };
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(data);
+      render(<GroundReactionCharts runId="r1" />);
+      const left = await screen.findByTestId('ground-reaction-cop-sigma-Measured Left-0');
+      const right = screen.getByTestId('ground-reaction-cop-sigma-Measured Right-0');
+      const attr = (e: HTMLElement, a: string) => Number(e.getAttribute(a));
+      // Same panel, same scale: equal x semi-axes, left y semi-axis a quarter of right's.
+      expect(attr(left, 'rx')).toBeCloseTo(attr(right, 'rx'));
+      expect(attr(left, 'ry')).toBeCloseTo(attr(right, 'ry') / 4);
     });
 
     it('draws no band or caption when the overlay carries no sigma trace', async () => {

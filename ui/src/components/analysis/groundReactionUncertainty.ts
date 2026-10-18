@@ -3,9 +3,9 @@
  *
  * Mirrors the PyQt renderer (plotting/renderers/ground_reaction.py): the
  * measured load is shaded by its random 1-sigma and sampled measured CoP
- * points are ringed by theirs. The CoP sigma is one sigma per horizontal axis
- * (no 2-D covariance), so it is a circle in data units; the web panel scales x
- * and y separately, which draws that circle as an SVG ellipse.
+ * points are ringed by theirs: an axis-aligned ellipse whose semi-axes are the
+ * per-world-axis sigmas (no x-y covariance is known, so it is never tilted),
+ * or a circle of the worse-axis sigma when a payload has only that.
  */
 
 /** Legend suffix of a 1-sigma band or ring (the PyQt `SIGMA_BAND_SUFFIX`). */
@@ -33,14 +33,33 @@ export function copMarkerIndices(
 /** What the bands and rings show and where the declared uncertainty came from. */
 export function uncertaintyCaption(
   banded: boolean,
-  circled: boolean,
+  ringed: boolean,
   source: string | null | undefined,
 ): string | null {
   const parts = [
     ...(banded ? [`shaded: measured load ${SIGMA_BAND_SUFFIX}`] : []),
-    ...(circled ? [`circles: measured CoP ${SIGMA_BAND_SUFFIX} ${PER_AXIS}`] : []),
+    ...(ringed ? [`ellipses: measured CoP ${SIGMA_BAND_SUFFIX} ${PER_AXIS}`] : []),
   ];
   if (parts.length === 0) return null;
   const text = parts.join('; ');
   return `${text[0].toUpperCase()}${text.slice(1)} (declared uncertainty: ${source ?? 'not stated'})`;
+}
+
+/** A CoP sigma trace: `x`/`y` per world axis, `z` the worse axis. */
+export interface CopSigmaTrace {
+  x?: Array<number | null>;
+  y?: Array<number | null>;
+  z?: Array<number | null>;
+}
+
+/**
+ * Semi-axes `[x, y]` of the 1-sigma ellipse at frame `i`: the per-world-axis
+ * sigmas, else a circle of the worse axis; `null` without a worse-axis sigma.
+ */
+export function copSemiAxes(sigma: CopSigmaTrace, i: number): [number, number] | null {
+  const worse = sigma.z?.[i];
+  if (!finite(worse)) return null;
+  const sx = sigma.x?.[i];
+  const sy = sigma.y?.[i];
+  return finite(sx) && finite(sy) ? [sx, sy] : [worse, worse];
 }

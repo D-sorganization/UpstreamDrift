@@ -12,11 +12,12 @@ it as plot traces that sit beside the model's computed ground reaction:
   ``bias / coverage`` and is not a 1-sigma, so it is never plotted as one;
 * ``measured_<foot>_cop_m`` - the centre of pressure on the force-sensing
   plane, ``None`` where the foot is unloaded;
-* ``measured_<foot>_cop_sigma_m`` - ``z`` is that CoP's random 1-sigma per
-  horizontal axis (``FootSample.cop_sigma_random_m``: the declared CoP
-  uncertainty combined with the timing skew, for the worse world axis), and
-  ``None`` wherever the CoP is.  It is one sigma per axis, not a 2-D
-  covariance, so it supports a circle of that radius, not a fitted ellipse.
+* ``measured_<foot>_cop_sigma_m`` - that CoP's random 1-sigma (the declared
+  CoP uncertainty combined with the timing skew): ``x`` and ``y`` for world x
+  and y (``FootSample.cop_sigma_random_xy_m``), ``z`` for the worse axis
+  (``cop_sigma_random_m``), and ``None`` wherever the CoP is.  There is one
+  sigma per axis and no x-y covariance, so it supports an axis-aligned
+  ellipse with those semi-axes, not a tilted, fitted one.
 
 A model frame the trial does not cover is ``None`` in every trace, never
 extrapolated.  ``qualified`` carries the trial's provenance: an overlay from an
@@ -150,7 +151,8 @@ class _FootTraces:
             _append(self.cop_sigma, None, None, None)
         else:
             _append(self.cop, float(point[0]), float(point[1]), float(point[2]))
-            _append(self.cop_sigma, None, None, sample.cop_sigma_random_m)
+            sx, sy = sample.cop_sigma_random_xy_m or (None, None)
+            _append(self.cop_sigma, sx, sy, sample.cop_sigma_random_m)
 
 
 def _check_times(times_s: Sequence[float]) -> list[float]:

@@ -112,8 +112,10 @@ class FootSample:
     sample.  ``sigma_load_n`` and ``sigma_cop_m`` are worst-case band-equivalent
     sigmas (module docstring), the CoP one per horizontal axis for the worst
     axis; ``*_sigma_random_*`` and ``*_bias_*`` are their components (``None``
-    when a sample was built without them).  ``sigma_sensing_m`` is the
-    uncertainty of the sensing-plane depth.
+    when a sample was built without them).  ``cop_sigma_random_xy_m`` is the
+    CoP's random 1-sigma for world x and y separately, whose maximum is
+    ``cop_sigma_random_m``.  ``sigma_sensing_m`` is the uncertainty of the
+    sensing-plane depth.
     """
 
     load_n: float
@@ -125,6 +127,7 @@ class FootSample:
     load_bias_n: float | None = None
     cop_sigma_random_m: float | None = None
     cop_bias_m: float | None = None
+    cop_sigma_random_xy_m: tuple[float, float] | None = None
 
     def __post_init__(self) -> None:
         finite_real(self.load_n, "load_n")
@@ -138,8 +141,19 @@ class FootSample:
             "cop_bias_m",
         ):
             _optional_non_negative(getattr(self, name), name)
+        _check_axis_pair(self.cop_sigma_random_xy_m, "cop_sigma_random_xy_m")
         if self.cop_m is not None:
             object.__setattr__(self, "cop_m", _frozen_world_point(self.cop_m))
+
+
+def _check_axis_pair(value: tuple[float, float] | None, name: str) -> None:
+    """``None`` or two finite non-negative numbers (world x, world y)."""
+    if value is None:
+        return
+    if len(value) != _STANCE_DIM:
+        raise ValueError(f"{name} must hold one value per world axis, got {value!r}")
+    for axis in value:
+        finite_non_negative(axis, name)
 
 
 def _frozen_world_point(value: Array) -> Array:
@@ -223,10 +237,12 @@ def _budget(base: float, estimate: Estimate, options: ReadingOptions) -> _Budget
 
 @dataclass(frozen=True, eq=False)
 class _CopEstimate:
-    """Interpolated stance CoP ``(2,)`` with the worst-axis bias and rate."""
+    """Interpolated stance CoP ``(2,)``, the worst-axis bias and rate, and the
+    rate on each world axis ``(2,)``."""
 
     xy: Array
     estimate: Estimate
+    world_rates: Array
 
 
 def _cop_estimate(
@@ -245,12 +261,26 @@ def _cop_estimate(
         interpolate(replace(channel, values=channel.values[:, axis]), index, t)
         for axis in range(_STANCE_DIM)
     ]
+    world_rates = gain @ np.array([axis.rate for axis in axes])
     merged = Estimate(
         value=0.0,
         bias=float(np.max(gain @ np.array([axis.bias for axis in axes]))),
-        rate=float(np.max(gain @ np.array([axis.rate for axis in axes]))),
+        rate=float(np.max(world_rates)),
     )
-    return _CopEstimate(np.array([axis.value for axis in axes]), merged)
+    return _CopEstimate(np.array([axis.value for axis in axes]), merged, world_rates)
+
+
+def _cop_random_xy(
+    cop: _CopEstimate | None, base: float, skew_s: float
+) -> tuple[float, float]:
+    """Random 1-sigma on world x and y: ``hypot(base, skew * world rate)``.
+
+    An unloaded CoP has no rate, so both axes carry the declared ``base``.
+    """
+    if cop is None:
+        return base, base
+    sx, sy = (math.hypot(base, skew_s * float(rate)) for rate in cop.world_rates)
+    return sx, sy
 
 
 def _world_cop(placed: PlacedTrial, stance_xy: Array) -> Array:
@@ -302,6 +332,7 @@ def _foot_sample(
         load_bias_n=load_budget.bias,
         cop_sigma_random_m=cop_budget.random,
         cop_bias_m=cop_budget.bias,
+        cop_sigma_random_xy_m=_cop_random_xy(cop, base_cop, options.skew_s),
     )
 
 

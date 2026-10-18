@@ -207,14 +207,19 @@ def test_web_chart_uses_the_same_uncertainty_wording_and_cap() -> None:
     assert f"export const MAX_COP_MARKERS = {gr.MAX_COP_MARKERS};" in source
     for phrase in (
         "shaded: measured load ${SIGMA_BAND_SUFFIX}",
-        "circles: measured CoP ${SIGMA_BAND_SUFFIX} ${PER_AXIS}",
+        "ellipses: measured CoP ${SIGMA_BAND_SUFFIX} ${PER_AXIS}",
         "(declared uncertainty: ${source ?? 'not stated'})",
     ):
         assert phrase in source, phrase
 
 
-def _cop_series(n: int, sigma: float | None = 0.01):
-    """A measured left CoP path of ``n`` frames with a constant sigma."""
+def _cop_series(
+    n: int, sigma: float | None = 0.01, sigma_xy: tuple[float, float] | None = None
+):
+    """A measured left CoP path of ``n`` frames with a constant sigma.
+
+    ``sigma`` is the worse-axis value (``z``); ``sigma_xy`` adds per-axis values.
+    """
     base = _plot()
     times = tuple(i * 0.01 for i in range(n))
     nothing = {a: [None] * n for a in ("x", "y", "z", "magnitude")}
@@ -222,6 +227,10 @@ def _cop_series(n: int, sigma: float | None = 0.01):
     traces = {"measured_left_cop_m": cop}
     if sigma is not None:
         traces["measured_left_cop_sigma_m"] = {**nothing, "z": [sigma] * n}
+    if sigma_xy is not None:
+        traces["measured_left_cop_sigma_m"].update(
+            x=[sigma_xy[0]] * n, y=[sigma_xy[1]] * n
+        )
     return replace(
         base,
         time_s=times,
@@ -233,25 +242,36 @@ def _cop_series(n: int, sigma: float | None = 0.01):
     )
 
 
-def _circles(fig):
-    from matplotlib.patches import Circle
+def _ellipses(fig):
+    from matplotlib.patches import Ellipse
 
-    return [p for p in fig.axes[3].patches if isinstance(p, Circle)]
+    return [p for p in fig.axes[3].patches if isinstance(p, Ellipse)]
 
 
-def test_cop_markers_are_one_sigma_circles_on_the_path() -> None:
+def test_cop_markers_are_per_axis_one_sigma_ellipses_on_the_path() -> None:
     from src.shared.python.plotting.renderers.ground_reaction import (
         MAX_COP_MARKERS,
     )
 
     fig = Figure()
-    plot_ground_reaction(fig, _cop_series(50))
-    circles = _circles(fig)
-    assert 1 < len(circles) <= MAX_COP_MARKERS
-    assert all(c.radius == pytest.approx(0.01) for c in circles)
-    assert circles[0].center == (0.0, 0.0)
+    plot_ground_reaction(fig, _cop_series(50, 0.02, sigma_xy=(0.02, 0.005)))
+    ellipses = _ellipses(fig)
+    assert 1 < len(ellipses) <= MAX_COP_MARKERS
+    # Axis-aligned: full width and height are twice sigma_x and sigma_y.
+    assert all(e.width == pytest.approx(0.04) for e in ellipses)
+    assert all(e.height == pytest.approx(0.01) for e in ellipses)
+    assert all(e.angle == 0.0 for e in ellipses)
+    assert ellipses[0].center == (0.0, 0.0)
     legend = [t.get_text() for t in fig.axes[3].get_legend().get_texts()]
     assert legend.count("Measured Left \u00b11\u03c3 per axis") == 1
+
+
+def test_without_per_axis_sigma_the_marker_is_a_circle_of_the_worse_axis() -> None:
+    fig = Figure()
+    plot_ground_reaction(fig, _cop_series(5, 0.01))
+    ellipses = _ellipses(fig)
+    assert ellipses
+    assert all(e.width == e.height == pytest.approx(0.02) for e in ellipses)
 
 
 def test_cop_markers_skip_frames_without_a_cop_or_sigma() -> None:
@@ -271,12 +291,12 @@ def test_cop_markers_are_captioned_with_the_declared_source() -> None:
     plot_ground_reaction(fig, _cop_series(5))
     texts = [t.get_text() for t in fig.texts]
     assert (
-        "Circles: measured CoP ±1σ per axis (declared uncertainty: datasheet rev 3)"
+        "Ellipses: measured CoP ±1σ per axis (declared uncertainty: datasheet rev 3)"
     ) in texts
 
 
 def test_no_cop_markers_without_a_cop_sigma_trace() -> None:
     fig = Figure()
     plot_ground_reaction(fig, _cop_series(5, sigma=None))
-    assert _circles(fig) == []
-    assert not any("Circles" in t.get_text() for t in fig.texts)
+    assert _ellipses(fig) == []
+    assert not any("Ellipses" in t.get_text() for t in fig.texts)

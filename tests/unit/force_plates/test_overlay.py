@@ -212,7 +212,13 @@ def test_cop_sigma_is_the_random_one_sigma_per_axis() -> None:
     expected = [None if f.cop_m is None else f.cop_sigma_random_m for f in feet]
     assert expected[0] is not None, "fixture must load the left foot at t=0"
     assert sigma["z"] == expected
-    assert sigma["x"] == sigma["y"] == sigma["magnitude"] == [None, None]
+    # x and y carry the per-world-axis random sigma; z keeps the worse axis.
+    per_axis = [None if f.cop_m is None else f.cop_sigma_random_xy_m for f in feet]
+    assert [None if a is None else (a[0], a[1]) for a in per_axis] == [
+        None if x is None else (x, y)
+        for x, y in zip(sigma["x"], sigma["y"], strict=True)
+    ]
+    assert sigma["magnitude"] == [None, None]
 
 
 def test_cop_sigma_is_none_where_the_cop_is() -> None:
