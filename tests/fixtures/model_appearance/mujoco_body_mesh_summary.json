@@ -297,7 +297,7 @@
       {
         "bbox_max": [0.036212, 0.019288, 0.032694],
         "bbox_min": [-0.03522, -0.059648, -0.039695],
-        "label": "skin0",
+        "label": "ankle0",
         "material": "mat_skin_medium",
         "n_vertices": 242
       }
@@ -306,7 +306,7 @@
       {
         "bbox_max": [0.036212, 0.019288, 0.039694],
         "bbox_min": [-0.03522, -0.059637, -0.032694],
-        "label": "skin0",
+        "label": "ankle0",
         "material": "mat_skin_medium",
         "n_vertices": 242
       }
@@ -660,7 +660,7 @@
       {
         "bbox_max": [0.036212, 0.019288, 0.032694],
         "bbox_min": [-0.03522, -0.059648, -0.039695],
-        "label": "skin0",
+        "label": "ankle0",
         "material": "mat_skin_medium",
         "n_vertices": 242
       }
@@ -669,7 +669,7 @@
       {
         "bbox_max": [0.036212, 0.019288, 0.039694],
         "bbox_min": [-0.03522, -0.059637, -0.032694],
-        "label": "skin0",
+        "label": "ankle0",
         "material": "mat_skin_medium",
         "n_vertices": 242
       }

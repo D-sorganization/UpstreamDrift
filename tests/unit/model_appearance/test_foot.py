@@ -309,4 +309,4 @@ def test_ankle_stub_wears_the_trouser_leg_or_shows_skin(
         {"schema_version": "appearance-v1", "clothing": "golf_polo_shorts"}
     )
     (bare,) = [m for m in body_meshes(spec, shorts) if m.body == "talus_r"]
-    assert bare.label.startswith("skin") and bare.material_name == shorts.skin_tone
+    assert bare.label == "ankle0" and bare.material_name == shorts.skin_tone

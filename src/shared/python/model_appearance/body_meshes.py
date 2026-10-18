@@ -398,8 +398,9 @@ def _segment_meshes(
 def _foot_meshes(ctx: _Context, body: str) -> list[BodyMesh]:
     """Shoe (garment), bare-foot (skin) and ankle-stub shells of one foot body.
 
-    A bare foot (no shoe garment) shows the foot shell only; the ankle stub
-    takes the shin garment (trouser leg) when the outfit has one, else skin.
+    A bare foot (no shoe garment) shows the foot shell only; the ``ankle`` stub
+    takes the shin garment (trouser leg) when the outfit has one, else skin. It
+    has its own label so "every foot garment is a shoe" stays true.
     """
     base = library.material_name_for(ctx.doc, body)
     garment = library.garment_name_for(ctx.doc, body)
@@ -407,7 +408,7 @@ def _foot_meshes(ctx: _Context, body: str) -> list[BodyMesh]:
     plan = (
         ("skin", "skin", base),
         ("garment", "garment", garment),
-        ("ankle", "garment" if shin else "skin", shin or base),
+        ("ankle", "ankle", shin or base),
     )
     out: list[BodyMesh] = []
     counts: dict[str, int] = {}
