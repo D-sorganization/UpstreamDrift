@@ -301,6 +301,17 @@ Placeholder for HRG pelvis and hip-centre children.
 \section{Segmental Trunk}
 Placeholder for HRG segmental-trunk children.
 
+\subsection{The \texttt{full-body-v2} Schema (HRG-D1, \#13170)}
+The \texttt{full-body-v2} schema replaces the v1 trunk (\texttt{TorsoInput}
+and \texttt{SpineInputX/Y}) with two regional 3-DOF joints, lumbar (L5/S1)
+and thoracic (T12/L1), each ISB \texttt{isb\_spine} ZXY. Coordinates migrate
+from v1 through a constrained rotation solve with the
+\texttt{bruno2015\_regional} prior. The solve reports its residuals and its
+non-uniqueness. \texttt{full-body-v1} stays the default. The definition,
+equations and residual report are in the Simscape matching reference,
+section ``The full-body-v2 Schema and Trunk Coordinate Migration''. The geometry
+is HRG-D2.
+
 \section{Anatomical Angles}
 Placeholder for HRG anatomical-angle children.
 

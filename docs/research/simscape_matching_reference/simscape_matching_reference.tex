@@ -7473,6 +7473,174 @@ The implementation is in \texttt{full\_body\_ik.py},
 \texttt{pipeline/lane.py} and \texttt{pipeline/constants.py}. The tests are
 \texttt{test\_ik\_restart\_continuity.py} and \texttt{pipeline/test\_lane.py}.
 
+\section{The \texttt{full-body-v2} Schema and Trunk Coordinate Migration (HRG-D1, \#13170)}
+\label{sec:full-body-v2}
+
+\subsection{Status and Scope}
+This section is a research record. It is not part of the engineering design
+manual. It defines the \texttt{full-body-v2} schema, the migration of
+\texttt{full-body-v1} coordinates to it, and the residual report of that
+migration. The v2 joint locations are declared stand-ins. Spine geometry,
+regional mass and cross-engine qualification belong to HRG-D2 (\#13173),
+HRG-D3 and HRG-Q1. \texttt{full-body-v1} stays the default schema. Its
+committed documents keep their bytes and canonical hashes, because receipts
+are keyed by \texttt{spec\_sha256} and are never rewritten. The test
+\texttt{test\_full\_body\_schema\_registry.py} pins both hashes of the four
+committed v1 documents.
+
+The file name \texttt{full\_body\_spec\_v2.json} is a revision of a
+\texttt{full-body-v1} document. It has nothing to do with the
+\texttt{full-body-v2} schema.
+
+\subsection{Schema Registry}
+Each consumer dispatches on \texttt{schema\_version} through one registry,
+\texttt{motion\_matching/full\_body\_schema.py}. The registry maps each schema
+id to the module that provides it. The function
+\texttt{require\_full\_body\_schema(spec, consumer, accepted)} fails closed,
+naming the consumer and the accepted ids. Each schema declares three things:
+\begin{itemize}
+\item its trunk joints (primitive sequence, coordinates, ISB axis and sign, and
+soft limits in ISB sign);
+\item its document validator;
+\item its upper-body label.
+\end{itemize}
+The function \texttt{upper\_body\_slice} and the validators dispatch through
+the registry.
+
+The consumers that accept both schemas are the MuJoCo, URDF/Drake and
+Pinocchio models, the OpenSim export and parity adapter, the Pink task builder
+and the polynomial actuation. Pelvis relocation accepts v1 only. Three
+consumers raise \texttt{NotImplementedError} for v2:
+\begin{itemize}
+\item the MuJoCo visual layer (HRG-D3);
+\item the qualified upper-body Pinocchio model (HRG-D2);
+\item the musculoskeletal graft (HRG-D2, HRG-Q1).
+\end{itemize}
+
+\subsection{Trunk Definition}
+In v1 the trunk is one pivot, 0.138~m above the pelvis.
+\texttt{TorsoInput} is $R_z$ (axial). The universal joint
+\texttt{SpineInputX}/\texttt{SpineInputY} is $R_x$ (lateral) then $R_y$
+(flexion), through the 0.3~kg dummy body \texttt{UpperTorsoBase}. In v2 the
+trunk is two regional lumped 3-DOF joints, each with model primitives
+$R_y R_x R_z$. This sequence is ISB \texttt{isb\_spine} ZXY, with
+$\mathrm{FE}=-\phi_{\mathrm{flex}}$, $\mathrm{LB}=+\phi_{\mathrm{lat}}$ and
+$\mathrm{AR}=+\phi_{\mathrm{ax}}$ (ADR-0055):
+\begin{center}
+\begin{tabular}{lllll}
+Joint & Level & Parent $\to$ Child & Solid & Soft Limits FE/LB/AR (deg, ISB) \\
+\hline
+\texttt{lumbar\_L5\_S1} & L5/S1 & pelvis $\to$ \texttt{trunk\_lumbar} &
+\texttt{middle\_trunk} & $-40..15$, $\pm20$, $\pm15$ \\
+\texttt{thoracic\_T12\_L1} & T12/L1 & \texttt{trunk\_lumbar} $\to$ thorax &
+\texttt{upper\_trunk} & $-30..15$, $\pm25$, $\pm50$ \\
+\end{tabular}
+\end{center}
+These are the minimum D2 needs: two levels, three rotations each, and named
+segment boundaries. The six coordinates replace the three v1 trunk coordinates
+at the first v1 trunk index. Every other coordinate keeps its order. The
+derivation \texttt{derive\_full\_body\_v2\_spec} drops \texttt{UpperTorsoBase}
+($-0.3$~kg, recorded in \texttt{trunk\_topology.dropped\_bodies}) and
+reparents the de~Leva solids. Each v2 document records three hashes:
+\texttt{source\_spec\_sha256}, the canonical hash of the v1 document;
+\texttt{base\_upper\_body\_sha256}; and its own \texttt{upper\_body\_sha256}.
+
+The stand-in locations are as follows. L5/S1 is the v1 pivot. T12/L1 is the
+xiphion boundary, which lies on the thorax axis at half the Hub height. At the
+neutral pose the stand-ins reproduce every retained body, solid and frame
+exactly (atol $10^{-12}$). Neutral lordosis and kyphosis belong to D2.
+
+\subsection{Migration Equations}
+Let $R_1(q)$ be the v1 pelvis-to-thorax rotation. Let
+$R_2(\phi)=R_2(\phi_L,\phi_T)$ be the v2 rotation, composed by forward
+kinematics of each specification (\texttt{spec\_body\_poses}). Angles are never
+added. The migration solves
+\begin{equation}
+\phi^\ast=\arg\min_{\phi\in\mathbb{R}^6}\ \lVert D\phi\rVert^2
+\quad\text{s.t.}\quad c(\phi)=\log\!\big(R_1^{\mathsf T}R_2(\phi)\big)^\vee=0,
+\end{equation}
+where $D\in\mathbb{R}^{3\times6}$ is the regional-split regulariser. For each
+ISB axis $a$,
+$(D\phi)_a=s_{T,a}\,\theta_{L,a}-s_{L,a}\,\theta_{T,a}$, where
+$\theta=\text{sign}\cdot\phi$ and $s$ are the \texttt{bruno2015\_regional}
+shares: FE 51/49, LB 27/73 and AR 17/83 (lumbar/thoracic). The result's
+\texttt{distribution\_source} is \texttt{prior:bruno2015\_regional@1}. The
+problem is solved with SLSQP, using a central-difference Jacobian of $c$. It is
+then polished with minimum-norm Gauss--Newton steps.
+
+The constraint has rank 3 in six unknowns, so the rotation alone leaves a
+three-dimensional null space. The split is a declared assumption, not a
+measurement. Every frame reports the following:
+\begin{itemize}
+\item the geodesic rotation residual $\lVert c(\phi^\ast)\rVert$;
+\item the constraint rank and the null-space dimension;
+\item two exact witness solutions, all-lumbar and all-thoracic, with their
+residuals and their largest distance from $\phi^\ast$ (the spread);
+\item the residual of the \textbf{rejected} per-axis mapping
+($\texttt{TorsoInput}=\text{lumbar}+\text{thoracic axial}$, with the same
+shares applied to each Cardan angle);
+\item the Hub position residual in the pelvis frame;
+\item the soft-limit excess.
+\end{itemize}
+The soft limits are reported, not enforced. The rejected mapping is exact only
+for a single-axis motion. In the unit test it is $<10^{-9}$~rad for a pure
+twist and $>1^\circ$ for the pose $(-58^\circ,8^\circ,25^\circ)$. The Hub
+residual is non-zero because v2 has two pivots.
+
+\subsection{Residual Report}
+The migration was run on the best-fit trajectory, which loads cheaply. That
+trajectory is the private \texttt{s32-fw-drv} driver bundle: 1815 frames, with
+source \texttt{spec\_sha256} \texttt{bdd634fa\ldots}. The results are listed
+below. The wall time was 87~s.
+\begin{center}
+\begin{tabular}{lr}
+Quantity & Value \\
+\hline
+Max / RMS rotation residual & $9.3\times10^{-16}$ / $2.0\times10^{-16}$ rad \\
+Constraint rank / null-space dimension & 3 / 3 (every frame) \\
+Max prior deviation $\lVert D\phi^\ast\rVert$ & $1.9\times10^{-8}$ rad \\
+Max witness spread & 1.25 rad \\
+Max rejected axial-sum residual & 0.364 rad (20.8$^\circ$) \\
+Max / RMS Hub position residual & 67.8 / 37.0 mm \\
+Frames over a soft limit & 0 \\
+All frames converged & yes \\
+\end{tabular}
+\end{center}
+The rotation is reproduced to machine precision. The prior selects the split
+exactly, because the constraint plus $D\phi=0$ gives six equations in six
+unknowns. The witness spread of 1.25~rad shows that the split is not
+identified by the rotation. The rejected mapping would have introduced up to
+$20.8^\circ$ of thorax orientation error.
+
+The Hub position residual (up to 68~mm) is a property of the stand-in two-pivot
+geometry, not a solver error. The migration matches orientation only. Position
+fidelity needs the D2 geometry and a refit. Neither the private bundle nor its
+specification is committed. The evidence JSON and plot are under
+\texttt{\textasciitilde/Videos/HRG\_2026-10-17/D1/}.
+
+\subsection{Reproduction and Limitations}
+\begin{verbatim}
+PYTHONPATH=.:src python3 -m pytest -o addopts="" -q \
+  tests/unit/motion_matching/test_full_body_schema_registry.py \
+  tests/unit/motion_matching/test_full_body_v2_spec.py \
+  tests/unit/motion_matching/test_full_body_v1_v2_migration.py \
+  tests/unit/motion_matching/test_full_body_v2_exporters.py
+\end{verbatim}
+The residual report uses \texttt{TrunkMigrator(v1, v2).migrate\_trajectory(q,
+order).as\_document()}, applied to the bundle's \texttt{reference\_q} and its
+embedded specification.
+
+Limitations:
+\begin{itemize}
+\item The joint locations, neutral curvature and regional mass split are
+stand-ins (HRG-D2).
+\item No v2 dynamics has been qualified in any engine (HRG-Q1).
+\item The split is a prior and not a measurement.
+\item The migration is applied frame by frame, with a warm start. No temporal
+smoothness is imposed.
+\item v1-specific consumers outside the registry are left v1-only, for example
+the Crocoddyl \texttt{TorsoInput} weights.
+\end{itemize}
 \begin{thebibliography}{9}
 \bibitem{MathWorksPSUnits}
 MathWorks. \emph{Simulink-PS Converter: Unit Conversion and Checking}.
