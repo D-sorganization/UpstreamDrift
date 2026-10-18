@@ -459,3 +459,83 @@ reaction is a simulation, not a force plate); the hull is not a confidence set;
 three short windows do not characterise the swing; the capacity prior is ASSUMED
 and unchanged. Bi-level inertia learning is out of scope.
 
+
+## NSX-99 Sensitivity Stage and Report Schema Version 2 (#12728)
+
+`facade.analyze` gains a `sensitivity` stage (progress 99.5, after the envelope
+and allocation stages). It runs only when `AnalysisOptions.disturbance_spec`
+is declared; without it the report is the unchanged version 1 report. One
+computation path serves both UIs: the PyQt tabs and the React panel draw the
+plot model built from the report and compute nothing themselves.
+
+Options (all additive; `mechanisms`, `strategy_set` and `outcome_priority`
+without a `disturbance_spec` are refused):
+
+| Field              | Meaning                                                          | Default            |
+| ------------------ | ---------------------------------------------------------------- | ------------------ |
+| `disturbance_spec` | One or more NSX-82 `DisturbanceSpec` (spectral-density covariance) | none (stage off)   |
+| `mechanisms`       | Declared mechanism ids (M1 signal-dependent noise, M2, M3)       | empty              |
+| `strategy_set`     | NSX-95 catalogue ids to compare                                  | all twelve         |
+| `outcome_priority` | Ordered outcome names; the first is the primary outcome          | `face_angle` first |
+
+M1 must be declared exactly when a disturbance carries a signal law; a
+disagreement is a `ValueError`, because silently adding or dropping M1 would
+change the evidence typing of every variance. The priority is an order, not a
+set of weights: nothing is blended across outcomes.
+
+Engine seam. The linearised variance model (dynamics, outcome rows, input
+classes, optional strategy contexts and Monte Carlo evidence) cannot be built
+from the snapshots alone, so `EngineContext.sensitivity_provider` maps a
+`SensitivityRequest` to `SensitivityInputs`. An engine without a provider that
+is asked for the stage refuses with a `ValueError`; no number is invented.
+
+Report schema 2.0.0 (`schemas/loop-nullspace-report-v2.json`, version 1 stays
+valid and unchanged) adds three nullable sections.
+
+- `sensitivity`: status, options, `cache_identity`, the primary outcome, the
+  kernel `inputs[t]` as a quantity, the face-dispersion standard deviation
+  (linear, per strategy arm, and paired Monte Carlo checks), the linear-validity
+  verdict, the nonlinearity gate numbers and the non-claims.
+- `variance_budget`: parts, shares and per-step parts of the primary outcome
+  variance by input class. Parts, shares and per-step parts inherit the
+  evidence axes of the variance they decompose; shares are `UNAVAILABLE` with a
+  reason when the total is not positive.
+- `strategies`: the NSX-95 ranked comparison. A strategy with no implemented
+  evaluator is listed in `not_attempted` with its catalogue reason and carries
+  no numbers.
+
+Every quantity has the six evidence axes of `QuantityRecord` and, when present,
+the orthogonal `conditioning` axis (noise-model hypotheses). `quantity_dict`
+writes `conditioning` only when non-empty, so version 1 reports are byte
+identical.
+
+Display gating. `report_decisions` asks `display_decision` (ADR-0054 D7
+Option A) for every sensitivity quantity: kernel, budget parts, each admitted
+arm ratio, the linear and per-arm standard deviations and each Monte Carlo
+standard deviation. `plot_model_sensitivity` has no gate of its own: a number
+is drawn only when its decision admits it. A `FAMILY_DEPENDENT` quantity with
+an unverified or unknown hypothesis is `WITHHOLD`. A `FAMILY_DEPENDENT`
+quantity is drawn only with a family band; the report carries none for these
+quantities (one allocation is not a band), so the panel states that reason.
+
+Plot model version 2.0.0 adds `sensitivity` with four panels: `kernel_heatmap`
+(joint by time, band-first), `variance_budget`, `strategy_pareto` (fronts and
+the winner are restricted to shown points) and `face_dispersion`. The shared
+golden for both UIs is
+`tests/fixtures/loop_nullspace/goldens/report_v2_variability.json` (keys
+`fixture`, `report`, `plot_model`); regenerate with
+`python3 -m tests.unit.loop_nullspace.variability_golden --write`.
+
+Cache identity. `cache_identity` is the SHA-256 of a canonical encoding of the
+options (every covariance entry, gain, bound, mechanism, strategy and priority),
+the variance problem and declaration, the gate, comparison and arm settings,
+context labels and the provider's `provenance`. The service cache key adds the
+full `sensitivity` options, so a changed assumption is a miss. Limit, stated:
+a context's bulky payload (feasible sets, muscle models) is identified by the
+provider's `provenance`, not hashed, and a callable by its qualified name.
+
+Non-claims: the fixture provider is a pendulum test plant with invented
+amplitudes, not a golfer measurement; linear variance is conditioned on the
+declared noise hypotheses, which stay unvalidated; a ranking is a ranking
+under the declared assumptions, not a prediction of any golfer's best
+strategy.

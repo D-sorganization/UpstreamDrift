@@ -1633,6 +1633,23 @@ export interface DisplayRequest {
 }
 
 /**
+ * One declared disturbance (mirrors ``DisturbanceSpec``; NSX-99, #12728).
+ */
+export interface DisturbanceModel {
+  name: string;
+  stage: string;
+  channels: string[];
+  units: string;
+  covariance: number[][];
+  spectrum?: string | null;
+  persistent: boolean;
+  bandwidth_hz?: number | null;
+  band_hz?: [number, number] | null;
+  signal_gain?: number[] | null;
+  signal_bounds?: [number, number][] | null;
+}
+
+/**
  * Request body for realized drift-to-input ratio analysis.
  */
 export interface DriftControlRatioRequest {
@@ -2512,6 +2529,7 @@ export interface LoopNullspaceOptions {
   include_allocation: boolean;
   effort_weight: number;
   rate_weight: number;
+  sensitivity?: SensitivityOptions | null;
 }
 
 /**
@@ -3304,6 +3322,16 @@ export interface ScatterAnalysisResponse {
   total_simulations: number;
   average_distance_from_hole: number;
   make_percentage: number;
+}
+
+/**
+ * The four sensitivity declarations of ``AnalysisOptions`` (NSX-99, #12728). Every field enters the cache key through ``model_dump``, so a changed covariance, gain, bound, mechanism, strategy or outcome priority is a miss.
+ */
+export interface SensitivityOptions {
+  disturbance_spec: DisturbanceModel[];
+  mechanisms?: string[];
+  strategy_set?: string[] | null;
+  outcome_priority?: string[] | null;
 }
 
 export interface SessionAggregateV1 {

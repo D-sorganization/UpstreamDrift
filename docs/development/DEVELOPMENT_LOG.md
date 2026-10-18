@@ -2561,6 +2561,71 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13165 · HRG-E1: Wrist Lever Angle Renamed With NaN-Plus-Reason on Missing Markers; Joint_Stress Requires Signed, Side-Tagged WristDeviation
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13165
+- **Branch:** fix/13165-legacy-angle-validity
+- **PR:** #13180
+- **Paths:** see #13180
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`610d9a0b`; collated from changes/13165-hrg-e1-wrist-lever-angle-renamed-with-na.md)
+- **Summary:** HRG-E1: wrist lever angle renamed with NaN-plus-reason on missing markers; joint_stress requires signed, side-tagged WristDeviation
+- **Next step:** Shipped in PR #13180.
+
+### DL-#12575 · NSX-43: Tabbed Grip Wrench Window With NSX Plot-Model Tabs, Preset Selector and QThreadPool Runner
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12575
+- **Branch:** merged via #13197
+- **PR:** #13197
+- **Paths:** see #13197
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`c3ee8732`; collated from changes/12575-nsx-43-pyqt-tabbed-nsx-window.md)
+- **Summary:** NSX-43: tabbed Grip Wrench window with NSX plot-model tabs, preset selector and QThreadPool runner
+- **Next step:** Shipped in PR #13197.
+
+### DL-#13172 · HRG-C3: Pelvis Frame Re-Expression (Invariant) and Documented HJC/COM/L5S1 Relocation as a New Spec Revision
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13172
+- **Branch:** feat/13172-pelvis-reexpression
+- **PR:** #13194
+- **Paths:** see #13194
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`d2777a49`; collated from changes/13172-hrg-c3-pelvis-frame-re-expression-invari.md)
+- **Summary:** HRG-C3: pelvis frame re-expression (invariant) and documented HJC/COM/L5S1 relocation as a new spec revision
+- **Next step:** Shipped in PR #13194.
+
+### DL-#13168 · HRG-C2: MAP Hip Joint Centre Estimator With Covariance, Status and Stature Prior (Estimation Only)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13168
+- **Branch:** feat/13168-hjc-map-estimation
+- **PR:** #13192
+- **Paths:** see #13192
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`8eee78d6`; collated from changes/13168-hrg-c2-map-hip-joint-centre-estimator-wi.md)
+- **Summary:** HRG-C2: MAP hip joint centre estimator with covariance, status and stature prior (estimation only)
+- **Next step:** Shipped in PR #13192.
+
+### DL-#13162 · Grip Hand Frame Rolled -90 Deg About the Shaft so Azimuth 0 Is the Top of the Grip (HRG-A1)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13162
+- **Branch:** fix/13162-grip-hand-frame
+- **PR:** #13206
+- **Paths:** see #13206
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`fa401cf2`; collated from changes/13162-grip-hand-frame-rolled-90-deg-about-the.md)
+- **Summary:** Grip hand frame rolled -90 deg about the shaft so azimuth 0 is the top of the grip (HRG-A1)
+- **Next step:** Shipped in PR #13206.
+
 ### DL-#13164 · HRG-C1: Loft the Pelvis Visual on the Hip Landmarks (Centred on the HJC Midpoint, Ends at the Lumbar Plane) and Shrink the Hip Blend Ball; Visual Only
 
 - **State:** shipped

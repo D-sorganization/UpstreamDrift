@@ -52,6 +52,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1134 | `src/shared/python/shadow_tracker/segmentation.py` |
 | 1134 | `src/tools/model_explorer/model_library.py` |
 | 1128 | `src/tools/starting_pose_matcher/gui_main_widget.py` |
+| 1127 | `src/shared/python/swing_comparison/metrics.py` |
 | 1125 | `src/tools/bunker_shot_gui/model.py` |
 | 1118 | `src/motion_capture/rig/__main__.py` |
 | 1115 | `src/bunkershot3d/ball/qualification.py` |
@@ -66,7 +67,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1096 | `src/learning/retargeting/retargeter.py` |
 | 1089 | `src/shared/python/motion_pipeline/contracts.py` |
 | 1073 | `src/shared/python/sidekick/calculators/thermo/steam_engine.py` |
-| 1068 | `src/shared/python/swing_comparison/metrics.py` |
 | 1066 | `src/tools/bunker_shot_gui/crosstier.py` |
 | 1065 | `src/shared/python/pendulum_simulator/gui/toolstrip_widget.py` |
 | 1063 | `src/bunkershot3d/metrics/divot.py` |
@@ -111,6 +111,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 967 | `src/shared/python/motion_matching/club_only/matrix_qualification.py` |
 | 966 | `src/launchers/launcher_process_manager.py` |
 | 965 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py` |
+| 964 | `src/shared/python/loop_nullspace/plot_model.py` |
 | 964 | `src/shared/python/sidekick/lab/bio/c3d_reader.py` |
 | 962 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_whole_body_ik.m` |
 | 957 | `src/bunkershot3d/solvers/mpm/solver.py` |
@@ -134,7 +135,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 926 | `src/shared/python/engine_core/cross_engine_validator.py` |
 | 924 | `src/engines/physics_engines/opensim/python/muscle_analysis.py` |
 | 924 | `src/research/differentiable/engine.py` |
-| 923 | `src/shared/python/loop_nullspace/plot_model.py` |
 | 922 | `src/shared/python/shadow_tracker/service.py` |
 | 919 | `src/bunkershot3d/vandv/ledger.py` |
 | 916 | `src/tools/bunker_shot_gui/export.py` |
