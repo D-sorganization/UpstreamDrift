@@ -1352,8 +1352,10 @@ def run_address_stage(args: argparse.Namespace) -> dict[str, Any]:
 
     Adds ``hip_coordinates_deg``: the six hip coordinates at the calibrated
     address, so a coordinate at its range limit is visible in the report.
+
+    The address stage runs no neural inference and writes no receipt, so the
+    neural disposition (#12970) is resolved only by :func:`run_pipeline`.
     """
-    _neural_receipt_from_args(args)
     cal_res = calibrate_run(args).cal_res
     report = cal_res.address_report
     names = list(cal_res.kin.coordinate_order)
