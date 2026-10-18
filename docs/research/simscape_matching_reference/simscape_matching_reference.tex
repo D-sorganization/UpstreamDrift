@@ -6397,7 +6397,7 @@ forearm pronation) to the single golf-term registry
 passed as \texttt{AnatomicalFrame} objects; an engine adapter supplies body
 poses and a calibration, so no engine joint name or sign enters the angles.
 
-\paragraph{Conventions and frames.}
+\paragraph{Conventions and Frames.}
 Wu et al.\ (2005, ISB part II, section 4.3) frames: the radius and the third
 metacarpal (hand). Both sides use the proper frame with columns
 $X$ volar, $Y$ proximal and $Z=X\times Y$ (radial on the right, ulnar on the
@@ -6428,7 +6428,7 @@ $a$ and $c$ are indeterminate and are NaN with a reason; $b$ stays valid.
 Reconstruction $R_z(a)R_x(b)R_y(c)$ matches the input rotation to
 $10^{-10}$ rad.
 
-\paragraph{Golf aliases.}
+\paragraph{Golf Aliases.}
 \begin{center}
 \begin{tabular}{lll}
 \hline
@@ -6443,7 +6443,7 @@ release & none & event and motion description; no sign alias \\
 \end{center}
 Lead and trail map to anatomical sides through \texttt{core.handedness}.
 
-\paragraph{Observability limits.}
+\paragraph{Observability Limits.}
 Every wrist series carries \texttt{observability = fitted\_grip\_rotation} and a
 receipt path. The capture has no hand markers; the hand frame is the club body
 plus a fitted physical grip rotation, so wrist angles are model-estimated, not
@@ -6451,7 +6451,7 @@ measured hand anatomy, and a wrong grip constant moves angle between flexion,
 deviation and the third angle. The direction convention of the native
 rotation $N$ follows \texttt{child\_to\_follower} and is the adapter's duty.
 
-\paragraph{Best-fit values.}
+\paragraph{Best-Fit Values.}
 Not reported. The committed best driver fit (\texttt{s32-fw-drv}) stores the
 grip as golf angles (lead $\alpha=0^\circ,\psi=25.0^\circ,\gamma=47.0^\circ$;
 trail $\alpha=-14.0^\circ,\psi=61.9^\circ,\gamma=77.2^\circ$), but its
