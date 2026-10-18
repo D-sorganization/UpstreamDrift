@@ -78,8 +78,15 @@ def _get_config_dir() -> Path:
     return new_dir
 
 
-CONFIG_DIR = _get_config_dir()
-LAYOUT_CONFIG_FILE = CONFIG_DIR / "layout.json"
+def __getattr__(name: str) -> Any:
+    """Resolve config paths lazily so test XDG redirects stay consistent (#13146)."""
+    if name == "CONFIG_DIR":
+        return _get_config_dir()
+    if name == "LAYOUT_CONFIG_FILE":
+        return _get_config_dir() / "layout.json"
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
 GRID_COLUMNS = 4  # Changed to 3x4 grid (12 tiles total)
 
 # Async startup is normally well under a second; 30s is a generous ceiling

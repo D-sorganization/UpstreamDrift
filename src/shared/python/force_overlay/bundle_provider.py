@@ -20,7 +20,7 @@ from collections.abc import Mapping, Sequence
 import json
 import math
 import re
-from typing import Any, NamedTuple, Protocol, TypeAlias, runtime_checkable
+from typing import Any, NamedTuple, Protocol, TypeAlias, cast, runtime_checkable
 
 import numpy as np
 from numpy.typing import NDArray
@@ -356,7 +356,7 @@ class BundleOverlayProvider:
             rates,
             accel,
             float(index * self._bundle.dt_s),
-            external_wrenches=ground,
+            external_wrenches=cast(Sequence[ExternalWrench], ground),
             **kwargs,
         )
         if frame is not None and self._in_impact_window(frame.time_s):
