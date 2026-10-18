@@ -1376,10 +1376,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #11745
 - **Branch:** claude/lift-5-squat-bundle
-- **PR:** #12245, #12340, #13052, #13047
+- **PR:** #12245, #12340, #13052, #13047, #13263
 - **Paths:** see #12245
 - **Started:** 2026-10-14
-- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/11745-snatch-bundle.md)
+- **Last verified:** 2026-10-18 (`5841213b`; collated from changes/11745-bump-vendor-ud-tools-to-a459505-tools-56.md)
 - **Summary:** LIFT-5 slice 1: back-squat same-input bundle from the Movement Optimizer via full-body marker IK, with provenance, regeneration script and MuJoCo replay smoke test
 - **Next step:** Bump vendor/ud-tools to the Tools #5653 merge commit and regenerate the snatch bundle and parity record so tools_pin matches
 
@@ -2573,6 +2573,19 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13157 · OSL-18: OpenSim Lift Foot Carries the Bundle's 10 Deg Tibial Torsion and Is Sized From the Bundle's Calcaneus Stations; Squat IK Marker RMS 1.93 cm / Max 3.55 cm, Inside the Unchanged 2/4 cm Gate; Marker-Gate Xfails Removed
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13157
+- **Branch:** merged via #13264
+- **PR:** #13264
+- **Paths:** see #13264
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`9834a7c7`; collated from changes/13157-osl-18-opensim-lift-foot-carries-the-bun.md)
+- **Summary:** OSL-18: OpenSim lift foot carries the bundle's 10 deg tibial torsion and is sized from the bundle's calcaneus stations; squat IK marker RMS 1.93 cm / max 3.55 cm, inside the unchanged 2/4 cm gate; marker-gate xfails removed
+- **Next step:** Shipped in PR #13264.
 
 ### DL-#12998 · Add JaxSim Launcher Dashboard Tile and Engine Tile Coverage Test
 
