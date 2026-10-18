@@ -2561,6 +2561,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13139 · Ground Reaction Overlay Shades Measured Plate Load by Its 1-Sigma Uncertainty and Names the Declared Uncertainty Source
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13139
+- **Branch:** merged via #13139
+- **PR:** #13139
+- **Paths:** see #13139
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`e0f06035`; collated from changes/13139-ground-reaction-overlay-shades-measured.md)
+- **Summary:** Ground reaction overlay shades measured plate load by its 1-sigma uncertainty and names the declared uncertainty source
+- **Next step:** Shipped in PR #13139.
+
 ### DL-#13134 · Plate Declarations Dialog and Web Form Offer the Cross_Correlation Alignment and Require the Model It Was Fitted Against
 
 - **State:** shipped

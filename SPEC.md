@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-18 | #13139 | Ground reaction overlay shades measured plate load by its 1-sigma uncertainty and names the declared uncertainty source |
 | 2026-10-17 | #13117 | Shoulder orientation solve keeps its Euler branch (continuity rule); fullbody reports orientation_max_step_rad |
 | 2026-10-17 | #13134 | Plate declarations dialog and web form offer the cross_correlation alignment and require the model it was fitted against |
 | 2026-10-17 | #13125 | Web Analysis Tools ground reaction charts gain the plate declarations form (same fields as the PyQt6 dialog, guarded by a cross-language parity test); analysis.ground_reaction back to parity |
