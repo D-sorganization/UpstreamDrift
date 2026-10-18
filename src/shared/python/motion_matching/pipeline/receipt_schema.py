@@ -283,6 +283,23 @@ class Receipt(BaseModel):
         ),
         json_schema_extra={"unit": "text", "stage": "metadata"},
     )
+    grip_provenance: dict[str, str] | None = Field(
+        None,
+        description=(
+            "Source of each physical grip parameter: user_declared, "
+            "rom_set_identified or default (HRG-GR2, #13203); absent for a "
+            "spec without a configured grip"
+        ),
+        json_schema_extra={"unit": "text", "stage": "metadata"},
+    )
+    spec_revision: dict[str, Any] | None = Field(
+        None,
+        description=(
+            "Revision record of a configured spec: version, configuration and "
+            "the parent canonical and physics hashes (HRG-GR2, #13203)"
+        ),
+        json_schema_extra={"unit": "compound", "stage": "metadata"},
+    )
     wrists_bounded: bool | None = Field(
         None,
         description="Whether wrist and forearm joints were bounded to human ranges",

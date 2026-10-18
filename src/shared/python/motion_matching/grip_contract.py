@@ -34,7 +34,7 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field, replace
-from typing import Any
+from typing import Any, ClassVar
 
 import numpy as np
 from numpy.typing import NDArray
@@ -78,6 +78,7 @@ GRIP_STRENGTH_PRESETS_DEG: dict[str, float] = {
 #: Presets for ``psi``, the palm diagonal: shaft more in the fingers, neutral
 #: (the ``GripPose`` nominal 40 deg), or more in the palm.
 PALM_PRESETS_DEG: dict[str, float] = {"fingers": 25.0, "neutral": 40.0, "palm": 65.0}
+_DEFAULT_THUMB_DEG = GripPose().lead_thumb_offset_deg
 #: Singularity guard: the Y-X-Z middle angle ``psi - 90`` may not reach +-90.
 _SINGULAR_TOL = 1e-9
 _ALPHA_RANGE = (-60.0, 60.0)
@@ -106,6 +107,8 @@ class HandAngles:
     alpha_deg: float = 0.0
     psi_deg: float = PALM_DIAGONAL_DEG
     gamma_deg: float = 0.0
+
+    FIELDS: ClassVar[tuple[str, ...]] = ("alpha_deg", "psi_deg", "gamma_deg")
 
     def __post_init__(self) -> None:
         for name, (lo, hi) in (
@@ -199,6 +202,8 @@ class GripSpec:
     lead_below_butt_m: float = LEAD_BELOW_BUTT_M
     hand_spacing_m: float = NATIVE_HAND_SPACING_M
     handedness: Handedness = DEFAULT_HANDEDNESS
+    #: Visual only (HRG-GR2): never reaches the physics hash with ``style``.
+    lead_thumb_offset_deg: float = _DEFAULT_THUMB_DEG
 
     def __post_init__(self) -> None:
         require(isinstance(self.lead, HandAngles), "lead must be a HandAngles")
@@ -240,6 +245,7 @@ class GripSpec:
             lead_below_butt_m=self.lead_below_butt_m,
             hand_spacing_m=self.hand_spacing_m,
             lead_v_azimuth_deg=NEUTRAL_V_AZIMUTH_DEG + self.lead.alpha_deg,
+            lead_thumb_offset_deg=self.lead_thumb_offset_deg,
             trail_v_offset_deg=self.trail.alpha_deg - self.lead.alpha_deg,
             palm_diagonal_deg=self.lead.psi_deg,
             handedness=self.handedness,
@@ -274,3 +280,67 @@ def from_grip_rotation(
         lead=hand_from_euler(rotation_deg[lead_side(base.handedness)]),
         trail=hand_from_euler(rotation_deg[trail_side(base.handedness)]),
     )
+
+
+#: ``GripPose`` fields that restate a physical grip parameter (HRG-GR2).
+_PHYSICAL_POSE_FIELDS = (
+    "lead_v_azimuth_deg",
+    "trail_v_offset_deg",
+    "palm_diagonal_deg",
+    "lead_below_butt_m",
+    "hand_spacing_m",
+    "handedness",
+)
+
+
+def resolve_visual_pose(
+    grip: GripSpec,
+    override: GripPose | None = None,
+    *,
+    allow_physical_override: bool = False,
+) -> GripPose:
+    """Visual pose of ``grip``, optionally restyled, never silently diverged.
+
+    Visual hands default to ``grip.pose()``, so the picture and the physical
+    model cannot desynchronise.  ``override`` may change visual-only values
+    (``style``, thumb, lifeline).  If it restates a physical value (V azimuth,
+    trail V, palm diagonal, depth, spacing, handedness) differently, raise
+    ``ValueError`` unless ``allow_physical_override`` is explicitly True.
+    """
+    require(isinstance(grip, GripSpec), "grip must be a GripSpec")
+    derived = grip.pose()
+    if override is None:
+        return derived
+    require(isinstance(override, GripPose), "override must be a GripPose")
+    if not allow_physical_override:
+        moved = [
+            name
+            for name in _PHYSICAL_POSE_FIELDS
+            if getattr(override, name) != getattr(derived, name)
+        ]
+        if moved:
+            raise ValueError(
+                f"visual override of physical grip parameters {moved} would "
+                "desynchronise picture and model; change the GripSpec, or pass "
+                "allow_physical_override=True to flag it"
+            )
+    return override
+
+
+def grip_spec_to_physical(grip: GripSpec) -> dict[str, Any]:
+    """JSON form of the physical part of ``grip`` (full double precision)."""
+    return {
+        "lead": {
+            "alpha_deg": grip.lead.alpha_deg,
+            "psi_deg": grip.lead.psi_deg,
+            "gamma_deg": grip.lead.gamma_deg,
+        },
+        "trail": {
+            "alpha_deg": grip.trail.alpha_deg,
+            "psi_deg": grip.trail.psi_deg,
+            "gamma_deg": grip.trail.gamma_deg,
+        },
+        "lead_below_butt_m": grip.lead_below_butt_m,
+        "hand_spacing_m": grip.hand_spacing_m,
+        "handedness": grip.handedness,
+    }
