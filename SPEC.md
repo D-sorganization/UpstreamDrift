@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-18 | #13196 | Procedural shoe-last feet (HRG-F1): heel counter, medial arch, instep ramp, asymmetric toe box, flat sole sized from spec foot length and a cited breadth ratio; foot.model option |
 | 2026-10-18 | #13243 | Align multi-view observations by physical time across different frame rates and report dropped frames |
 | 2026-10-18 | #13182 | HRG-B1: default golfer is light skin with mid brown hair from one serialized appearance-defaults contract (Python + generated TS), skin_1..8 and hair palettes |
 | 2026-10-18 | #13232 | Export NaN markers with negative residual, homogeneous coordinates, and axis convention in canonical_c3d_exporter |
