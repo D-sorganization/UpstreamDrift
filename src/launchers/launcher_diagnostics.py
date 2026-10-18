@@ -25,8 +25,8 @@ from src.launchers.layout_config_backup import replace_existing_layout_backup
 from src.launchers.launcher_shared_tools_diagnostics import (
     inspect_shared_tools_freshness,
 )
+from src.launchers import launcher_constants as _launcher_constants
 from src.shared.python.data_io.path_utils import get_repo_root
-from src.shared.python.data_io.user_config_root import user_config_dir
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -34,8 +34,15 @@ logger = get_logger(__name__)
 # Constants — use centralized root discovery (issue #2354)
 REPOS_ROOT = get_repo_root()
 ASSETS_DIR = Path(__file__).parent / "assets"
-CONFIG_DIR = user_config_dir()
-LAYOUT_CONFIG_FILE = CONFIG_DIR / "layout.json"
+
+
+def __getattr__(name: str) -> Any:
+    """Delegate config paths to launcher_constants (lazy, test XDG-safe)."""
+    if name == "CONFIG_DIR":
+        return _launcher_constants.CONFIG_DIR
+    if name == "LAYOUT_CONFIG_FILE":
+        return _launcher_constants.LAYOUT_CONFIG_FILE
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def _load_parent_model_ids(models_yaml_path: Path) -> list[str]:
@@ -550,13 +557,13 @@ class LauncherDiagnostics:
         """Check saved layout configuration."""
         start = time.time()
         details: dict[str, Any] = {
-            "config_dir": str(CONFIG_DIR),
-            "config_dir_exists": CONFIG_DIR.exists(),
-            "layout_file": str(LAYOUT_CONFIG_FILE),
-            "layout_file_exists": LAYOUT_CONFIG_FILE.exists(),
+            "config_dir": str(_launcher_constants.CONFIG_DIR),
+            "config_dir_exists": _launcher_constants.CONFIG_DIR.exists(),
+            "layout_file": str(_launcher_constants.LAYOUT_CONFIG_FILE),
+            "layout_file_exists": _launcher_constants.LAYOUT_CONFIG_FILE.exists(),
         }
 
-        if not LAYOUT_CONFIG_FILE.exists():
+        if not _launcher_constants.LAYOUT_CONFIG_FILE.exists():
             result = DiagnosticResult(
                 name="layout_config",
                 status="pass",
@@ -568,7 +575,9 @@ class LauncherDiagnostics:
             return result
 
         try:
-            with open(LAYOUT_CONFIG_FILE, encoding="utf-8") as f:
+            with open(
+                _launcher_constants.LAYOUT_CONFIG_FILE, encoding="utf-8"
+            ) as f:
                 layout_data = json.load(f)
 
             details["layout_content"] = layout_data
@@ -1073,7 +1082,7 @@ def generate_recommendations(  # noqa: C901
                 details = result.details
                 if details.get("missing_from_saved"):
                     recommendations.append(
-                        f"LIKELY CAUSE: Saved layout is missing tiles. Delete {LAYOUT_CONFIG_FILE} to reset to defaults with all 17 tiles"
+                        f"LIKELY CAUSE: Saved layout is missing tiles. Delete {_launcher_constants.LAYOUT_CONFIG_FILE} to reset to defaults with all 17 tiles"
                     )
             elif result.name == "asset_files":
                 recommendations.append("Some tile icons may not display correctly")
@@ -1113,7 +1122,9 @@ def reset_layout_config() -> bool:
         True if reset was successful, False otherwise
     """
     try:
-        backup_path = replace_existing_layout_backup(LAYOUT_CONFIG_FILE)
+        backup_path = replace_existing_layout_backup(
+            _launcher_constants.LAYOUT_CONFIG_FILE
+        )
         if backup_path is not None:
             logger.info("Backed up existing config to %s", backup_path)
 

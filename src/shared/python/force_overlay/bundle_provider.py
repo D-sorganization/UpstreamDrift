@@ -20,16 +20,13 @@ from collections.abc import Mapping, Sequence
 import json
 import math
 import re
-from typing import Any, NamedTuple, Protocol, TypeAlias, cast, runtime_checkable
+from typing import Any, NamedTuple, Protocol, TypeAlias, runtime_checkable
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
-from src.shared.python.body_part_viz.mujoco_axial_loads import (
-    ExternalWrench,
-    GripClosure,
-)
+from src.shared.python.body_part_viz.mujoco_axial_loads import GripClosure
 from src.shared.python.biomechanics.grip_extraction import unavailable_analysis
 from src.shared.python.biomechanics.grip_wrench import GripAnalysis
 from src.shared.python.biomechanics.ground_reaction_wrenches import (
@@ -119,8 +116,7 @@ class AxialLoadSource(Protocol):
         rates: Mapping[str, float],
         accelerations: Mapping[str, float],
         time_s: float,
-        external_wrenches: Sequence[ExternalWrench] | None = None,
-        closure: GripClosure | None = None,
+        external_wrenches: Sequence[OverlayWrench] | None = None,
     ) -> AxialLoadFrame | None:
         """Axial loads for a prescribed motion, or ``None`` when unqualified.
 
@@ -356,7 +352,7 @@ class BundleOverlayProvider:
             rates,
             accel,
             float(index * self._bundle.dt_s),
-            external_wrenches=cast(Sequence[ExternalWrench], ground),
+            external_wrenches=ground,
             **kwargs,
         )
         if frame is not None and self._in_impact_window(frame.time_s):

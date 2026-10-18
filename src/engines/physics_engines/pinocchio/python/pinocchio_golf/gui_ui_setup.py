@@ -338,8 +338,8 @@ class UISetupMixin:
             if widget:
                 widget.deleteLater()
 
-        self.joint_sliders: list[QtWidgets.QSlider] = []
-        self.joint_spinboxes: list[QtWidgets.QDoubleSpinBox] = []
+        self.joint_sliders = []
+        self.joint_spinboxes = []
         self.joint_names = []
 
         # Populate joint_names for joints 1..N (excluding Universe at index 0).
