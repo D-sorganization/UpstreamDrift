@@ -1211,6 +1211,7 @@
 {"path": "model_appearance/head_mesh.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/library.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/mesh_io.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/pelvis_width.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/schema.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/skinned_body.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_generation/__init__.py", "classification": "diverged", "package": "model_generation", "spelling_only": false}
