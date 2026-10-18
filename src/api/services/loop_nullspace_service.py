@@ -27,8 +27,10 @@ version -- is a miss; a failed or cancelled run is never cached.
 from __future__ import annotations
 
 import hashlib
+import importlib
 import json
 import logging
+import sys
 import threading
 from collections import OrderedDict
 from collections.abc import Callable, Mapping
@@ -46,6 +48,36 @@ if TYPE_CHECKING:
     )
 
 logger = logging.getLogger(__name__)
+
+# Heavy collaborators are resolved on first use so importing this service (and
+# the route that mounts it) stays inside the API startup budget (#12901). They
+# remain module attributes -- ``facade`` and ``plot_model_payload`` -- so a
+# caller or test can still substitute them on this module (PEP 562).
+_LAZY_ATTRIBUTES: dict[str, tuple[str, str | None]] = {
+    "facade": ("src.shared.python.loop_nullspace.facade", None),
+    "plot_model_payload": (
+        "src.shared.python.loop_nullspace.plot_model_decisions",
+        "plot_model_payload",
+    ),
+}
+
+
+def __getattr__(name: str) -> Any:
+    """Import a deferred collaborator on first access and cache it here."""
+    try:
+        module_name, attribute = _LAZY_ATTRIBUTES[name]
+    except KeyError:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from None
+    module = importlib.import_module(module_name)
+    value = module if attribute is None else getattr(module, attribute)
+    globals()[name] = value
+    return value
+
+
+def _collaborator(name: str) -> Any:
+    """The current binding of a deferred collaborator (honours substitution)."""
+    return getattr(sys.modules[__name__], name)
+
 
 __all__ = [
     "MAX_FRAMES",
@@ -350,10 +382,7 @@ def public_partial(
     in_progress = partial.get("report")
     if in_progress is not None:
         try:
-            from src.shared.python.loop_nullspace.plot_model_decisions import (
-                plot_model_payload,
-            )
-
+            plot_model_payload = _collaborator("plot_model_payload")
             shown["plot_model"] = plot_model_payload(in_progress, preset=preset)
         except (ValueError, TypeError):
             logger.info("partial result cannot yet produce a plot model")
@@ -380,8 +409,8 @@ def run(
     if hit is not None:
         return hit
     trajectory, engine = _source(request.source_id).load(request)
-    from src.shared.python.loop_nullspace import facade
-    from src.shared.python.loop_nullspace.plot_model_decisions import plot_model_payload
+    facade = _collaborator("facade")
+    plot_model_payload = _collaborator("plot_model_payload")
 
     report = facade.analyze(
         trajectory,
