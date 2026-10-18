@@ -13,7 +13,9 @@ lists, unit in ``units``):
 * ``<key>_free_moment_nm`` - free moment at the CoP;
 * ``<key>_moment_com_nm`` - moment about the whole-body centre of mass;
 * ``measured_<foot>_force_sigma_n`` - with a plate overlay, the random
-  1-sigma of the measured load (``z``), interpolation bias excluded.
+  1-sigma of the measured load (``z``), interpolation bias excluded;
+* ``measured_<foot>_cop_sigma_m`` - likewise the random 1-sigma per axis of
+  the measured CoP (``z``).
 
 ``load_share`` holds each foot's share of the summed vertical force, ``None``
 when the feet together carry less than :data:`COP_MIN_FZ_N`.
@@ -48,6 +50,7 @@ __all__ = [
 _QUANTITIES: tuple[tuple[str, str, str], ...] = (
     ("force_sigma_n", "Force Uncertainty (1 Sigma)", "N"),
     ("force_n", "Force", "N"),
+    ("cop_sigma_m", "Centre of Pressure Uncertainty (1 Sigma)", "m"),
     ("force_bw", "Force in Body Weights", "BW"),
     ("cop_m", "Centre of Pressure", "m"),
     ("free_moment_nm", "Free Moment", "N*m"),

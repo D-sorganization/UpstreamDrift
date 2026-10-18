@@ -10,8 +10,13 @@ panel without data says "unavailable" with the reason.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+import math
+from typing import Any
+
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from matplotlib.patches import Circle
 import numpy as np
 
 from src.shared.python.biomechanics.ground_reaction_plot_model import (
@@ -23,8 +28,10 @@ from src.shared.python.plotting.renderers.time_panels import (
 )
 
 __all__ = [
+    "MAX_COP_MARKERS",
     "PANEL_TITLES",
     "SIGMA_BAND_SUFFIX",
+    "cop_marker_indices",
     "UNQUALIFIED_BANNER",
     "plot_ground_reaction",
 ]
@@ -118,10 +125,14 @@ def _cop_path(ax: Axes, series: GroundReactionPlotSeries) -> None:
 
 #: Banner shown whenever the overlaid plate trial has no device qualification.
 UNQUALIFIED_BANNER = "Unqualified measurement"
-_MEASURED_STYLE = {"linestyle": "--", "linewidth": 1.4, "alpha": 0.9}
+_MEASURED_STYLE: dict[str, Any] = {"linestyle": "--", "linewidth": 1.4, "alpha": 0.9}
 #: Legend suffix of the shaded 1-sigma band around a measured load.
 SIGMA_BAND_SUFFIX = "\u00b11\u03c3"
 _BAND_ALPHA = 0.2
+#: CoP uncertainty circles drawn per foot at most, so the path stays legible.
+MAX_COP_MARKERS = 12
+#: The CoP sigma is one sigma per horizontal axis, not a 2-D covariance.
+_PER_AXIS = "per axis"
 
 
 def _measured_keys(series: GroundReactionPlotSeries) -> list[tuple[str, str, str]]:
@@ -129,7 +140,64 @@ def _measured_keys(series: GroundReactionPlotSeries) -> list[tuple[str, str, str
         (f"measured_{key}", f"Measured {label}", color)
         for key, label, color in _keys(series)
         if f"measured_{key}_force_n" in series.traces
+        or f"measured_{key}_cop_m" in series.traces
     ]
+
+
+def cop_marker_indices(
+    cop_x: Sequence[float | None],
+    sigma: Sequence[float | None],
+    max_markers: int,
+) -> list[int]:
+    """Evenly spaced frames, at most ``max_markers``, with both a CoP and a sigma.
+
+    Raises ``ValueError`` for a non-positive ``max_markers`` or unequal lengths.
+    """
+    if max_markers < 1:
+        raise ValueError("max_markers must be positive")
+    if len(cop_x) != len(sigma):
+        raise ValueError("cop_x and sigma must have equal lengths")
+    usable = [
+        i
+        for i, (x, s) in enumerate(zip(cop_x, sigma, strict=True))
+        if x is not None and s is not None and math.isfinite(x) and math.isfinite(s)
+    ]
+    stride = max(1, math.ceil(len(usable) / max_markers))
+    return usable[::stride]
+
+
+def _draw_cop_circles(
+    ax: Axes, series: GroundReactionPlotSeries, key: str, style: tuple[str, str]
+) -> bool:
+    """Circles of radius sigma at sampled CoP points; False without a sigma trace."""
+    label, color = style
+    cop = series.traces.get(f"{key}_cop_m")
+    sigma = series.traces.get(f"{key}_cop_sigma_m")
+    if cop is None or sigma is None:
+        return False
+    rings = [
+        (x, y, r)
+        for i in cop_marker_indices(cop["x"], sigma["z"], MAX_COP_MARKERS)
+        if (x := cop["x"][i]) is not None
+        and (y := cop["y"][i]) is not None
+        and (r := sigma["z"][i]) is not None
+    ]
+    if not rings:
+        return False
+    # One legend entry per foot: only the first circle carries the label.
+    names = [f"{label} {SIGMA_BAND_SUFFIX} {_PER_AXIS}"] + ["_nolegend_"] * len(rings)
+    for (x, y, r), name in zip(rings, names, strict=False):
+        ax.add_patch(
+            Circle(
+                (x, y),
+                r,
+                facecolor=color,
+                edgecolor=color,
+                alpha=_BAND_ALPHA,
+                label=name,
+            )
+        )
+    return True
 
 
 def _draw_band(
@@ -152,42 +220,65 @@ def _draw_band(
     return True
 
 
+def _draw_measured_load(
+    ax: Axes, series: GroundReactionPlotSeries, key: str, style: tuple[str, str]
+) -> bool:
+    """Dashed measured load and its band; True when the band was drawn."""
+    label, color = style
+    load = _component(series, f"{key}_force_n", "z")
+    if load is None:
+        return False
+    ax.plot(series.time_s, load, color=color, label=label, **_MEASURED_STYLE)
+    return _draw_band(ax, series, key, label, color)
+
+
 def _draw_measured(
     axes: np.ndarray, series: GroundReactionPlotSeries, in_bw: bool
-) -> bool:
-    """Dashed measured load with its 1-sigma band (N panels only) and CoP path.
+) -> tuple[bool, bool]:
+    """Dashed measured load with its 1-sigma band (N panels only) and CoP path
+    with its 1-sigma circles.
 
-    Returns True when at least one band was drawn.
+    Returns whether any load band and any CoP circle was drawn.
     """
-    banded = False
+    banded = circled = False
     for key, label, color in _measured_keys(series):
         if not in_bw:
-            load = _component(series, f"{key}_force_n", "z")
-            axes[0].plot(
-                series.time_s, load, color=color, label=label, **_MEASURED_STYLE
-            )
-            banded = _draw_band(axes[0], series, key, label, color) or banded
+            banded = _draw_measured_load(axes[0], series, key, (label, color)) or banded
         x = _component(series, f"{key}_cop_m", "x")
         y = _component(series, f"{key}_cop_m", "y")
         if x is not None and y is not None:
             axes[3].plot(x, y, color=color, label=label, **_MEASURED_STYLE)
-    if _measured_keys(series):
-        axes[0].legend(fontsize=7, loc="upper left")
-        axes[3].legend(fontsize=7, loc="upper left")
-    return banded
+            circled = _draw_cop_circles(axes[3], series, key, (label, color)) or circled
+    for ax in (axes[0], axes[3]):
+        if ax.get_legend_handles_labels()[0]:
+            ax.legend(fontsize=7, loc="upper left")
+    return banded, circled
 
 
-def _band_caption(series: GroundReactionPlotSeries) -> str:
+def _uncertainty_caption(
+    series: GroundReactionPlotSeries, banded: bool, circled: bool
+) -> str | None:
+    """What the band and circles show and where their uncertainty came from."""
+    parts = []
+    if banded:
+        parts.append(f"shaded: measured load {SIGMA_BAND_SUFFIX}")
+    if circled:
+        parts.append(f"circles: measured CoP {SIGMA_BAND_SUFFIX} {_PER_AXIS}")
+    if not parts:
+        return None
+    text = "; ".join(parts)
     source = series.measured_uncertainty_source or "not stated"
-    return f"Shaded: measured load {SIGMA_BAND_SUFFIX} (declared uncertainty: {source})"
+    return f"{text[0].upper()}{text[1:]} (declared uncertainty: {source})"
 
 
-def _draw_banner(fig: Figure, series: GroundReactionPlotSeries, banded: bool) -> None:
+def _draw_banner(
+    fig: Figure, series: GroundReactionPlotSeries, caption: str | None
+) -> None:
     lines = []
     if series.measured_qualified is False:
         lines.append((UNQUALIFIED_BANNER, "#B45309"))
-    if banded:
-        lines.append((_band_caption(series), "#4B5563"))
+    if caption is not None:
+        lines.append((caption, "#4B5563"))
     for row, (text, color) in enumerate(lines):
         fig.text(0.01, 0.99 - 0.03 * row, text, color=color, fontsize=8, va="top")
 
@@ -230,9 +321,9 @@ def plot_ground_reaction(fig: Figure, series: GroundReactionPlotSeries) -> None:
             reason=reason,
         )
     _cop_path(axes[3], series)
-    banded = _draw_measured(axes, series, in_bw)
+    banded, circled = _draw_measured(axes, series, in_bw)
     for ax in axes[4:]:
         ax.set_xlabel("Time (s)", fontsize=8)
     fig.suptitle("Ground Reaction (on the body, world axes)", fontsize=9)
-    _draw_banner(fig, series, banded)
+    _draw_banner(fig, series, _uncertainty_caption(series, banded, circled))
     fig.tight_layout(rect=(0, 0, 1, 0.95))

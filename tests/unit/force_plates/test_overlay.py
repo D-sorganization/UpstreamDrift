@@ -200,3 +200,35 @@ def test_uncertainty_source_travels_with_the_overlay() -> None:
 
 def test_plain_payload_has_no_uncertainty_source() -> None:
     assert "measured_uncertainty_source" not in _model_series((0.0,)).to_dict()
+
+
+def test_cop_sigma_is_the_random_one_sigma_per_axis() -> None:
+    from src.shared.python.force_plates import reading_at
+
+    placed, times = _placed(), (0.0, 0.005)
+    overlay = measured_overlay(placed, _align(), times, _opts())
+    sigma = overlay.traces["measured_left_cop_sigma_m"]
+    feet = [reading_at(placed, t, _align(), _opts()).feet["left"] for t in times]
+    expected = [None if f.cop_m is None else f.cop_sigma_random_m for f in feet]
+    assert expected[0] is not None, "fixture must load the left foot at t=0"
+    assert sigma["z"] == expected
+    assert sigma["x"] == sigma["y"] == sigma["magnitude"] == [None, None]
+
+
+def test_cop_sigma_is_none_where_the_cop_is() -> None:
+    overlay = measured_overlay(_placed(), _align(), (-1.0, 0.0), _opts())
+    assert overlay.traces["measured_left_cop_sigma_m"]["z"][0] is None
+    for foot in ("left", "right"):
+        cop = overlay.traces[f"measured_{foot}_cop_m"]["x"]
+        sigma = overlay.traces[f"measured_{foot}_cop_sigma_m"]["z"]
+        assert [c is None for c in cop] == [s is None for s in sigma]
+
+
+def test_cop_sigma_trace_is_labelled() -> None:
+    series = overlay_on_series(
+        _model_series((0.0, 0.005)), _placed(), _align(), _opts()
+    )
+    assert series.labels["measured_left_cop_sigma_m"] == (
+        "Measured Left Centre of Pressure Uncertainty (1 Sigma)"
+    )
+    assert series.units["measured_left_cop_sigma_m"] == "m"

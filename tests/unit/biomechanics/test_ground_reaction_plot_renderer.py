@@ -191,19 +191,92 @@ def test_no_band_or_caption_without_a_sigma_trace() -> None:
     assert not any("±1σ" in t.get_text() for t in fig.texts)
 
 
-def test_web_chart_uses_the_same_band_suffix_and_caption() -> None:
+def test_web_chart_uses_the_same_uncertainty_wording_and_cap() -> None:
     from pathlib import Path
 
-    from src.shared.python.plotting.renderers.ground_reaction import (
-        SIGMA_BAND_SUFFIX,
+    from src.shared.python.plotting.renderers import ground_reaction as gr
+
+    module = Path(__file__).resolve().parents[3] / (
+        "ui/src/components/analysis/groundReactionUncertainty.ts"
+    )
+    source = module.read_text(encoding="utf-8")
+    suffix = gr.SIGMA_BAND_SUFFIX
+    escaped = "".join(c if c.isascii() else f"\\u{ord(c):04x}" for c in suffix)
+    assert f"export const SIGMA_BAND_SUFFIX = '{escaped}';" in source
+    assert f"export const PER_AXIS = '{gr._PER_AXIS}';" in source
+    assert f"export const MAX_COP_MARKERS = {gr.MAX_COP_MARKERS};" in source
+    for phrase in (
+        "shaded: measured load ${SIGMA_BAND_SUFFIX}",
+        "circles: measured CoP ${SIGMA_BAND_SUFFIX} ${PER_AXIS}",
+        "(declared uncertainty: ${source ?? 'not stated'})",
+    ):
+        assert phrase in source, phrase
+
+
+def _cop_series(n: int, sigma: float | None = 0.01):
+    """A measured left CoP path of ``n`` frames with a constant sigma."""
+    base = _plot()
+    times = tuple(i * 0.01 for i in range(n))
+    nothing = {a: [None] * n for a in ("x", "y", "z", "magnitude")}
+    cop = {**nothing, "x": [0.001 * i for i in range(n)], "y": [0.0] * n}
+    traces = {"measured_left_cop_m": cop}
+    if sigma is not None:
+        traces["measured_left_cop_sigma_m"] = {**nothing, "z": [sigma] * n}
+    return replace(
+        base,
+        time_s=times,
+        traces=traces,
+        load_share={},
+        events={},
+        measured_qualified=False,
+        measured_uncertainty_source="datasheet rev 3",
     )
 
-    chart = Path(__file__).resolve().parents[3] / (
-        "ui/src/components/analysis/GroundReactionCharts.tsx"
+
+def _circles(fig):
+    from matplotlib.patches import Circle
+
+    return [p for p in fig.axes[3].patches if isinstance(p, Circle)]
+
+
+def test_cop_markers_are_one_sigma_circles_on_the_path() -> None:
+    from src.shared.python.plotting.renderers.ground_reaction import (
+        MAX_COP_MARKERS,
     )
-    source = chart.read_text(encoding="utf-8")
-    escaped = "".join(
-        c if c.isascii() else f"\\u{ord(c):04x}" for c in SIGMA_BAND_SUFFIX
+
+    fig = Figure()
+    plot_ground_reaction(fig, _cop_series(50))
+    circles = _circles(fig)
+    assert 1 < len(circles) <= MAX_COP_MARKERS
+    assert all(c.radius == pytest.approx(0.01) for c in circles)
+    assert circles[0].center == (0.0, 0.0)
+    legend = [t.get_text() for t in fig.axes[3].get_legend().get_texts()]
+    assert legend.count("Measured Left \u00b11\u03c3 per axis") == 1
+
+
+def test_cop_markers_skip_frames_without_a_cop_or_sigma() -> None:
+    from src.shared.python.plotting.renderers.ground_reaction import (
+        cop_marker_indices,
     )
-    assert f"const SIGMA_BAND_SUFFIX = '{escaped}';" in source
-    assert "Shaded: measured load {SIGMA_BAND_SUFFIX} (declared uncertainty:" in source
+
+    assert cop_marker_indices([0.1, None, 0.2], [0.01, 0.01, None], 12) == [0]
+    assert cop_marker_indices([0.0] * 5, [0.01] * 5, 12) == [0, 1, 2, 3, 4]
+    picked = cop_marker_indices([0.0] * 100, [0.01] * 100, 12)
+    assert len(picked) <= 12 and picked[0] == 0
+    assert cop_marker_indices([], [], 12) == []
+
+
+def test_cop_markers_are_captioned_with_the_declared_source() -> None:
+    fig = Figure()
+    plot_ground_reaction(fig, _cop_series(5))
+    texts = [t.get_text() for t in fig.texts]
+    assert (
+        "Circles: measured CoP ±1σ per axis (declared uncertainty: datasheet rev 3)"
+    ) in texts
+
+
+def test_no_cop_markers_without_a_cop_sigma_trace() -> None:
+    fig = Figure()
+    plot_ground_reaction(fig, _cop_series(5, sigma=None))
+    assert _circles(fig) == []
+    assert not any("Circles" in t.get_text() for t in fig.texts)
