@@ -12,7 +12,7 @@ axes are (along grip, across, across) for both hands.
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -31,6 +31,120 @@ from src.shared.python.grip_contact.parameters import (
 )
 
 SIDES = ("L", "R")
+
+#: Orthonormal permutation matrix converting from appearance grip frame
+#: (z = grip axis butt->head, x = toe axis, y = trail axis)
+#: to shared grip frame (x = grip axis butt->head, y = toe axis, z = trail axis).
+R_APPEARANCE_TO_SHARED = np.array(
+    [[0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]], dtype=float
+)
+#: Inverse permutation converting from shared grip frame to appearance grip frame.
+R_SHARED_TO_APPEARANCE = np.array(
+    [[0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]], dtype=float
+)
+
+
+def appearance_to_shared_grip_frame(
+    target: Sequence[float] | np.ndarray,
+) -> np.ndarray:
+    """Convert coordinates or transform from appearance grip frame to shared grip frame.
+
+    The appearance convention (used in :mod:`model_appearance.grip_hands` and meshes)
+    places ``z`` along the grip axis (butt toward head), ``x`` along the toe axis,
+    and ``y`` along the trail axis.
+
+    The shared convention (used in :mod:`grip_contact.pad_layout` and :class:`GripFrame`)
+    places ``x`` along the grip axis (butt toward head), ``y`` along the toe axis,
+    and ``z`` along the trail axis.
+
+    Parameters:
+        target: A finite 3-vector (or sequence), an (N, 3) array of points, a proper (3, 3)
+            rotation matrix, or a proper 4x4 homogeneous transformation matrix.
+
+    Returns:
+        The converted vector, points, rotation, or 4x4 matrix in the shared frame.
+
+    Raises:
+        TypeError: if input cannot be converted to a float array.
+        ValueError: if input is not finite, has an unsupported shape, or is not a proper rotation.
+
+    Postconditions:
+        The conversion is a bijection satisfying
+        ``shared_to_appearance_grip_frame(appearance_to_shared_grip_frame(target)) == target``.
+    """
+    arr = np.asarray(target, dtype=float)
+    if not np.isfinite(arr).all():
+        raise ValueError("input contains non-finite values")
+    if arr.ndim == 1:
+        if arr.shape != (3,):
+            raise ValueError(f"expected 1D vector of length 3, got shape {arr.shape}")
+        return R_APPEARANCE_TO_SHARED @ arr
+    if arr.ndim == 2:
+        if arr.shape == (3, 3):
+            if not (
+                np.allclose(arr.T @ arr, np.eye(3), atol=1e-9)
+                and math.isclose(float(np.linalg.det(arr)), 1.0, abs_tol=1e-9)
+            ):
+                raise ValueError("3x3 matrix must be a proper rotation")
+            return arr @ R_SHARED_TO_APPEARANCE
+        if arr.shape == (4, 4):
+            rot = arr[:3, :3]
+            if not (
+                np.allclose(rot.T @ rot, np.eye(3), atol=1e-9)
+                and math.isclose(float(np.linalg.det(rot)), 1.0, abs_tol=1e-9)
+            ):
+                raise ValueError("4x4 matrix rotation must be a proper rotation")
+            out = np.eye(4)
+            out[:3, :3] = rot @ R_SHARED_TO_APPEARANCE
+            out[:3, 3] = arr[:3, 3]
+            return out
+        if arr.shape[1] == 3:
+            return (R_APPEARANCE_TO_SHARED @ arr.T).T
+        raise ValueError(
+            f"unsupported 2D array shape {arr.shape}; expected (3, 3), (4, 4) or (N, 3)"
+        )
+    raise ValueError(f"unsupported array dimension {arr.ndim}; expected 1D or 2D")
+
+
+def shared_to_appearance_grip_frame(
+    target: Sequence[float] | np.ndarray,
+) -> np.ndarray:
+    """Convert coordinates or transform from shared grip frame to appearance grip frame.
+
+    Exact inverse of :func:`appearance_to_shared_grip_frame`.
+    """
+    arr = np.asarray(target, dtype=float)
+    if not np.isfinite(arr).all():
+        raise ValueError("input contains non-finite values")
+    if arr.ndim == 1:
+        if arr.shape != (3,):
+            raise ValueError(f"expected 1D vector of length 3, got shape {arr.shape}")
+        return R_SHARED_TO_APPEARANCE @ arr
+    if arr.ndim == 2:
+        if arr.shape == (3, 3):
+            if not (
+                np.allclose(arr.T @ arr, np.eye(3), atol=1e-9)
+                and math.isclose(float(np.linalg.det(arr)), 1.0, abs_tol=1e-9)
+            ):
+                raise ValueError("3x3 matrix must be a proper rotation")
+            return arr @ R_APPEARANCE_TO_SHARED
+        if arr.shape == (4, 4):
+            rot = arr[:3, :3]
+            if not (
+                np.allclose(rot.T @ rot, np.eye(3), atol=1e-9)
+                and math.isclose(float(np.linalg.det(rot)), 1.0, abs_tol=1e-9)
+            ):
+                raise ValueError("4x4 matrix rotation must be a proper rotation")
+            out = np.eye(4)
+            out[:3, :3] = rot @ R_APPEARANCE_TO_SHARED
+            out[:3, 3] = arr[:3, 3]
+            return out
+        if arr.shape[1] == 3:
+            return (R_SHARED_TO_APPEARANCE @ arr.T).T
+        raise ValueError(
+            f"unsupported 2D array shape {arr.shape}; expected (3, 3), (4, 4) or (N, 3)"
+        )
+    raise ValueError(f"unsupported array dimension {arr.ndim}; expected 1D or 2D")
 
 
 @dataclass(frozen=True)
