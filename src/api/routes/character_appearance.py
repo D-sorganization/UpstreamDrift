@@ -203,7 +203,9 @@ def build_grip_revision(request: GripRevisionRequest) -> dict[str, Any]:
     """
     picks = request.model_dump(exclude={"character"}, exclude_none=True)
     try:
-        compiled = _compile(request.character or CharacterSpecRequest.model_validate({}))
+        compiled = _compile(
+            request.character or CharacterSpecRequest.model_validate({})
+        )
         return grip_revision_summary(compiled, GripOverrides.from_picks(picks))
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
