@@ -2,7 +2,8 @@
 
 Each stance CoP channel carries its own random 1-sigma,
 ``hypot(declared CoP sigma, skew * stance rate)``, independently of the other
-channel, so the stance covariance is diagonal.  The plate yaw ``R`` carries it
+channel, so the stance covariance is diagonal: an assumption the caller must
+declare (``ReadingOptions.cop_skew_independent``) whenever ``skew_s > 0``.  The plate yaw ``R`` carries it
 to the world as ``R_xy diag(var) R_xy^T``: its principal axes are the plate's
 axes, so the ellipse turns with the plate.  The per-axis ``|R_xy|`` bound of
 ``cop_sigma_random_xy_m`` is never smaller than the exact world-axis sigma.
@@ -33,16 +34,18 @@ _ALIGN = PlateTimeAlignment(
 # Right CoP of the factory trial in [0, 0.005]: stance x rate 1 m/s, y rate
 # 6 m/s; declared CoP sigma 0.010 m, skew 1 ms (as test_readings_cop_axes).
 _BASE, _SKEW = 0.010, 1.0e-3
-_OPTS = ReadingOptions(coverage=2.0, skew_s=_SKEW, cop_curvature_floor=1.0)
+_OPTS = ReadingOptions(
+    coverage=2.0, skew_s=_SKEW, cop_curvature_floor=1.0, cop_skew_independent=True
+)
 _VAR_X = _BASE**2 + (_SKEW * 1.0) ** 2
 _VAR_Y = _BASE**2 + (_SKEW * 6.0) ** 2
 _YAWS = [0.0, math.pi / 6, math.pi / 4, math.pi / 2, 2.0]
 
 
-def _right(yaw: float) -> FootSample:
+def _right(yaw: float, options: ReadingOptions = _OPTS) -> FootSample:
     placement = PlatePlacement.from_yaw(yaw, origin_m=[0.0, 0.0, 0.0])
     placed = PlacedTrial(tf.make_trial(), placement)
-    return reading_at(placed, 0.0025, _ALIGN, _OPTS).feet["right"]
+    return reading_at(placed, 0.0025, _ALIGN, options).feet["right"]
 
 
 def _matrix(cov: tuple[float, float, float] | None) -> np.ndarray:
@@ -111,3 +114,26 @@ def test_covariance_is_validated(bad: tuple[float, ...]) -> None:
             sigma_sensing_m=0.0,
             cop_cov_random_xy_m2=bad,  # type: ignore[arg-type]
         )
+
+
+def test_a_skewed_reading_without_declared_independence_has_no_covariance() -> None:
+    # A skew shared by both channels would correlate them along the signed CoP
+    # velocity, which the reading does not keep: no covariance is claimed.
+    undeclared = ReadingOptions(coverage=2.0, skew_s=_SKEW, cop_curvature_floor=1.0)
+    right = _right(0.5, undeclared)
+    assert right.cop_cov_random_xy_m2 is None
+    assert right.cop_sigma_random_xy_m == _right(0.5).cop_sigma_random_xy_m
+
+
+def test_without_skew_the_covariance_needs_no_declaration() -> None:
+    # No skew term: only the declared per-axis sigma remains, whatever the
+    # channels' timing correlation.
+    right = _right(0.5, ReadingOptions(coverage=2.0, cop_curvature_floor=1.0))
+    xx, yy, xy = right.cop_cov_random_xy_m2
+    assert (xx, yy) == pytest.approx((_BASE**2, _BASE**2))
+    assert xy == pytest.approx(0.0, abs=1e-18)
+
+
+def test_skew_independence_must_be_a_bool() -> None:
+    with pytest.raises(TypeError, match="cop_skew_independent"):
+        ReadingOptions(coverage=2.0, cop_skew_independent=1)  # type: ignore[arg-type]

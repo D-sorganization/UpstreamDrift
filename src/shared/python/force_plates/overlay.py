@@ -19,8 +19,10 @@ it as plot traces that sit beside the model's computed ground reaction:
   values bound each world axis through ``|R_xy|``;
 * ``measured_<foot>_cop_cov_m2`` - that CoP's exact random covariance in world
   axes (``FootSample.cop_cov_random_xy_m2``): ``x`` = var_x, ``y`` = var_y,
-  ``z`` = cov_xy [m^2], ``None`` wherever the CoP is.  Its 1-sigma ellipse is
-  tilted with the plate yaw and fits inside the per-axis box.
+  ``z`` = cov_xy [m^2], ``None`` wherever the CoP is, and wherever a skew is
+  declared without declaring the channels' skews independent (the per-axis
+  bound is then all the plot can show).  Its 1-sigma ellipse is tilted with
+  the plate yaw and fits inside the per-axis box.
 
 A model frame the trial does not cover is ``None`` in every trace, never
 extrapolated.  ``qualified`` carries the trial's provenance: an overlay from an

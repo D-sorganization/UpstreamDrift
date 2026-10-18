@@ -273,3 +273,11 @@ def test_cop_covariance_trace_is_labelled() -> None:
         "Measured Left Centre of Pressure Covariance (1 Sigma)"
     )
     assert series.units["measured_left_cop_cov_m2"] == "m^2"
+
+
+def test_undeclared_skew_independence_leaves_only_the_per_axis_sigma() -> None:
+    opts = ReadingOptions(coverage=2.0, skew_s=1.0e-3)
+    overlay = measured_overlay(_placed(), _align(), (0.0, 0.005), opts)
+    cov = overlay.traces["measured_left_cop_cov_m2"]
+    assert cov["x"] == cov["y"] == cov["z"] == [None, None]
+    assert overlay.traces["measured_left_cop_sigma_m"]["x"][0] is not None

@@ -89,8 +89,13 @@ class ReadingOptions:
     ``load_curvature_floor`` [N/s^2] and ``cop_curvature_floor`` [m/s^2] are
     optional declared floors on ``|y''|`` for the load and the CoP; they are
     required wherever the curvature cannot be estimated from the data.
+    ``cop_skew_independent`` declares that the two stance CoP channels' skews
+    are independent; with ``skew_s > 0`` the CoP covariance is only reported
+    when it is ``True`` (a skew common to both channels would correlate them
+    along the signed CoP velocity, which a reading does not keep).
 
-    Raises ``TypeError`` for non-numbers, ``ValueError`` for out-of-range values.
+    Raises ``TypeError`` for non-numbers or a non-bool ``cop_skew_independent``,
+    ``ValueError`` for out-of-range values.
     """
 
     coverage: float
@@ -98,8 +103,11 @@ class ReadingOptions:
     offset_shift_s: float = 0.0
     load_curvature_floor: float | None = None
     cop_curvature_floor: float | None = None
+    cop_skew_independent: bool = False
 
     def __post_init__(self) -> None:
+        if not isinstance(self.cop_skew_independent, bool):
+            raise TypeError("cop_skew_independent must be a bool")
         finite_positive(self.coverage, "coverage")
         finite_non_negative(self.skew_s, "skew_s")
         finite_real(self.offset_shift_s, "offset_shift_s")
@@ -119,8 +127,9 @@ class FootSample:
     when a sample was built without them).  ``cop_sigma_random_xy_m`` is the
     CoP's random 1-sigma for world x and y separately, whose maximum is
     ``cop_sigma_random_m``; it bounds each world axis through ``|R_xy|``.
-    ``cop_cov_random_xy_m2`` is the CoP's exact random covariance in world
-    ``(var_x, var_y, cov_xy)`` [m^2]; its principal axes are the plate's.
+    ``cop_cov_random_xy_m2`` is the CoP's random covariance in world
+    ``(var_x, var_y, cov_xy)`` [m^2], its principal axes the plate's; ``None``
+    when a skew is declared without declaring the channels' skews independent.
     ``sigma_sensing_m`` is the uncertainty of the sensing-plane depth.
     """
 
@@ -312,17 +321,20 @@ def _cop_random_xy(
 
 
 def _cop_random_cov(
-    cop: _CopEstimate | None, base: float, skew_s: float, rotation_xy: Array
-) -> tuple[float, float, float]:
-    """World random covariance ``(var_x, var_y, cov_xy)`` of the CoP.
+    cop: _CopEstimate | None, base: float, options: ReadingOptions, rotation_xy: Array
+) -> tuple[float, float, float] | None:
+    """World random covariance ``(var_x, var_y, cov_xy)`` of the CoP, or ``None``.
 
-    Each stance channel has its own skew, independent of the other, so the
-    stance covariance is ``diag(base^2 + (skew * stance rate)^2)``; the yaw
+    With independent channel skews (declared, or no skew at all) the stance
+    covariance is ``diag(base^2 + (skew * stance rate)^2)`` and the yaw
     carries it to world axes as ``R_xy diag R_xy^T``.  An unloaded CoP has no
-    rate: ``base^2`` on both stance axes, which no rotation changes.
+    rate: ``base^2`` on both stance axes, which no rotation changes.  A skew
+    without declared independence gives ``None``: its cross term is unknown.
     """
+    if options.skew_s > 0.0 and not options.cop_skew_independent:
+        return None
     rates = np.zeros(_STANCE_DIM) if cop is None else cop.stance_rates
-    stance_var = base**2 + (skew_s * rates) ** 2
+    stance_var = base**2 + (options.skew_s * rates) ** 2
     cov = rotation_xy @ np.diag(stance_var) @ rotation_xy.T
     # Average the off-diagonals so the reported matrix is exactly symmetric.
     return float(cov[0, 0]), float(cov[1, 1]), 0.5 * float(cov[0, 1] + cov[1, 0])
@@ -379,7 +391,7 @@ def _foot_sample(
         cop_bias_m=cop_budget.bias,
         cop_sigma_random_xy_m=_cop_random_xy(cop, base_cop, options.skew_s),
         cop_cov_random_xy_m2=_cop_random_cov(
-            cop, base_cop, options.skew_s, placed.horizontal_rotation()
+            cop, base_cop, options, placed.horizontal_rotation()
         ),
     )
 
