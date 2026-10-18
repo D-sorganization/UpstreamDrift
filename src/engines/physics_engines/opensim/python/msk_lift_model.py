@@ -60,6 +60,9 @@ import numpy as np
 from scipy.optimize import brentq
 from scipy.spatial.transform import Rotation
 
+from src.engines.physics_engines.opensim.python.msk_lift_foot import (
+    apply_tibial_torsion,
+)
 from src.engines.physics_engines.opensim.python.musculoskeletal_swing import (
     resolve_base_model,
 )
@@ -566,6 +569,7 @@ def build_lift_model(
     base_model_path: str | Path | None = None,
     segment_scales: Mapping[str, SegmentScale] | None = None,
     arm_coordinates: Mapping[str, float] | None = None,
+    tibial_torsion: Mapping[str, Any] | None = None,
 ) -> LiftModelBuild:
     """Compose the musculoskeletal OpenSim model of one barbell lift.
 
@@ -575,7 +579,11 @@ def build_lift_model(
     ``arm_coordinates`` (radians, arm chain only) replaces the hold pose's
     arms; the grip width is then whatever those arms give, not solved
     (OSL-12 seeds the arms on a bundle's grips).  A standing hold is
-    balanced by an ankle lean (:func:`_balance_lean`).
+    balanced by an ankle lean (:func:`_balance_lean`).  ``tibial_torsion`` (a
+    bundle spec's ``tibial_torsion_deg`` record) turns each foot out about its
+    shank as the bundle's foot is turned (OSL-18, #13157;
+    :func:`.msk_lift_foot.apply_tibial_torsion`); ``None`` keeps the
+    generic Rajagopal foot.
 
     Postconditions: the returned model passes ``initSystem``; its skeleton
     mass equals ``body_mass_kg``; without ``arm_coordinates`` the hand-centre
@@ -586,7 +594,8 @@ def build_lift_model(
     Raises:
         ValueError: on an unknown lift, a non-positive input, a bar lighter
             than the shared 20 kg shaft, an unreachable grip width, or an
-            ``arm_coordinates`` entry outside the arm chain or not finite.
+            ``arm_coordinates`` entry outside the arm chain or not finite, or
+            a tibial-torsion offset outside the cited adult range.
         FileNotFoundError: when the muscle-bearing body is not available.
     """
     _require_inputs(lift, body_mass_kg, height_m, bar_mass_kg)
@@ -596,6 +605,7 @@ def build_lift_model(
     Barbell(load_kg=float(bar_mass_kg))  # precondition: at least the shaft mass
     model = osim.Model(str(base_path))
     model.setName(f"{BODY_SOURCE}_{lift}")
+    torsion = apply_tibial_torsion(model, tibial_torsion)
     scale = float(height_m) / GENERIC_STATURE_M
     factors = _scale_body(model, scale, body_mass_kg, segment_scales)
     skeleton_mass = float(sum(body.getMass() for body in model.getBodySet()))
@@ -614,6 +624,7 @@ def build_lift_model(
         },
         "skeleton_mass_kg": skeleton_mass,
         "bar_mass_kg": float(bar_mass_kg),
+        "tibial_torsion": torsion,
         "hold_pose": posed.hold_record(),
         "grip_width_m": grip_width,
         "grip_width_target_m": posed.target_width_m,

@@ -8,6 +8,8 @@ from fastapi.testclient import TestClient
 from src.api.routes.core import router
 from src.api.dependencies import get_engine_manager
 
+pytestmark = pytest.mark.unit
+
 
 class MockEngineManager:
     def get_available_engines(self):
@@ -54,13 +56,40 @@ def test_routes_core_health_check(client: TestClient) -> None:
 
 
 @patch("src.api.routes.core.is_production", return_value=False)
-def test_get_diagnostics_development(mock_is_prod, client: TestClient) -> None:
-    """Test the diagnostics endpoint in development."""
+def test_get_diagnostics_unauthenticated_remote_rejected(
+    mock_is_prod, client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """In remote mode and development, unauthenticated requests return 401."""
+    monkeypatch.setenv("GOLF_SUITE_MODE", "remote")
+    monkeypatch.setenv("GOLF_AUTH_DISABLED", "false")
+    from src.shared.python.config import environment
+
+    environment.get_environment.cache_clear()
+    response = client.get("/api/diagnostics")
+    assert response.status_code == 401
+    assert "not authenticated" in response.json()["detail"].lower()
+
+
+@patch("src.api.routes.core.is_production", return_value=False)
+def test_get_diagnostics_local_mode(
+    mock_is_prod, client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """In local mode, diagnostics endpoint returns measured runtime probes."""
+    monkeypatch.setenv("GOLF_SUITE_MODE", "local")
+    monkeypatch.setenv("GOLF_AUTH_DISABLED", "true")
+    from src.shared.python.config import environment
+
+    environment.get_environment.cache_clear()
     response = client.get("/api/diagnostics")
     assert response.status_code == 200
     data = response.json()
     assert data["backend"]["running"] is True
+    assert isinstance(data["backend"]["pid"], int)
+    assert isinstance(data["backend"]["port"], int)
+    assert data["backend"]["port"] == 8000
     assert data["python_found"] is True
+    assert data["local_server_found"] is True
+    assert data["repo_root"] == "."
 
 
 @patch("src.api.routes.core.is_production", return_value=True)

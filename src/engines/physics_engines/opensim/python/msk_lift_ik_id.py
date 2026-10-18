@@ -63,6 +63,9 @@ from numpy.typing import NDArray
 from scipy.optimize import brentq, least_squares, root
 from scipy.spatial.transform import Rotation
 
+from src.engines.physics_engines.opensim.python.msk_lift_foot import (
+    bundle_foot_scale,
+)
 from src.engines.physics_engines.opensim.python.msk_lift_model import (
     BAR_BODY,
     BENCH_TOP,
@@ -237,8 +240,11 @@ def bundle_segment_scales(
 ) -> dict[str, float | tuple[float, float, float]]:
     """Per-body scale factors fitting the generic body to the bundle (frame 0).
 
-    Thigh (``femur``, ``patella``): hip-to-knee distance; shank (``tibia``,
-    ``talus``, ``calcn``, ``toes``): knee-to-ankle distance; ``torso``: the
+    Thigh (``femur``, ``patella``): hip-to-knee distance; shank (``tibia``):
+    knee-to-ankle distance; foot (``talus``, ``calcn``, ``toes``): the
+    bundle's heel-to-forefoot distance over the same two calcaneus stations'
+    separation (:func:`.msk_lift_foot.bundle_foot_scale`; OSL-18 #13157: the bundle foot is the
+    generic size, 0.150 m, while the shank ratio is 1.10); ``torso``: the
     triple (trunk, trunk, shoulder width) -- hip-centre midpoint to
     shoulder-centre midpoint along x and y, bundle shoulder-centre separation
     over the generic ``RSJC``-``LSJC`` one along the torso ``z`` (OSL-14: the
@@ -263,8 +269,10 @@ def bundle_segment_scales(
         g_shank = np.linalg.norm(generic[f"{prefix}KJC"] - generic[f"{prefix}AJC"])
         for body in (f"femur_{side}", f"patella_{side}"):
             factors[body] = float(thigh / g_thigh)
-        for body in (f"tibia_{side}", f"talus_{side}", f"calcn_{side}", f"toes_{side}"):
-            factors[body] = float(shank / g_shank)
+        factors[f"tibia_{side}"] = float(shank / g_shank)
+        foot = bundle_foot_scale(targets, side)
+        for body in (f"talus_{side}", f"calcn_{side}", f"toes_{side}"):
+            factors[body] = foot
     mid = {
         key: 0.5 * (pts[f"{key}_l"] + pts[f"{key}_r"])
         for key, pts in (("hip", bundle), ("shoulder", bundle))
