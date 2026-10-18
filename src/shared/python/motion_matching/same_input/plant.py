@@ -180,3 +180,25 @@ class VectorPlant:
             name: np.asarray(pose, dtype=float)
             for name, pose in self._adapter.frame_poses(self._named(q)).items()
         }
+
+    def kinematic_frame(self, q: Array, name: str) -> Array:
+        """Engine forward kinematics of one spec frame at ``q`` (4x4 pose).
+
+        Postcondition: equal, bit for bit, to ``kinematic_frames(q)[name]``;
+        an adapter with a native single-frame ``ordered_frame_pose`` skips the
+        other frames (#11744).
+
+        Raises:
+            TypeError: If ``name`` is not a string.
+            KeyError: If the spec has no frame ``name``.
+            ValueError: If ``q`` is not finite in spec order.
+        """
+        if not isinstance(name, str):
+            raise TypeError("frame name must be a string")
+        single = getattr(self._adapter, "ordered_frame_pose", None)
+        if single is None:
+            return self.kinematic_frames(q)[name]
+        vector = np.asarray(q, dtype=float)
+        if vector.shape != (self.nv,) or not np.isfinite(vector).all():
+            raise ValueError(f"Expected {self.nv} finite values in spec order")
+        return np.asarray(single(vector, name), dtype=float)

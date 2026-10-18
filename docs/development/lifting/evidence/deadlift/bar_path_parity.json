@@ -1,11 +1,11 @@
 {
   "lift": "deadlift",
   "bundle": "docs/development/lifting/evidence/deadlift/deadlift_bundle.npz",
-  "bundle_spec_sha256": "a1c68f43573d6581e36f2c27bebe549a537718b7ff73328ca29f25aa1060994b",
+  "bundle_spec_sha256": "97c9c5f2565abc0747ea1b73ae9f245f2d1126644fce0649401da1521d81b804",
   "bundle_steps": 200,
   "dt_s": 0.001,
   "reference": "window_bar_path_m (MuJoCo, recorded at bundle generation)",
-  "source_commit": "37aaf45983518c791db508c7857c026151e497b2",
+  "source_commit": "33abf79c74fdbae407242d61ec81d19de7cb5bcb",
   "generator": "scripts/measure_lift_bar_path_parity.py",
   "engines": {
     "mujoco": {
@@ -24,109 +24,82 @@
         "max_frame_error_m": 0.0,
         "worst_segment_start_s": 0.0,
         "coordinate_error_rad_by_segment": [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         ]
       },
-      "wall_time_s": 74.1
+      "wall_time_s": 105.1
     },
     "drake": {
       "engine": "drake",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 1.0972140668505546e-08,
-      "final_bar_deviation_m": 1.0972140668505546e-08,
-      "max_coordinate_error_rad": 0.00019822363003463295,
-      "worst_final_coordinate": "subtalar_angle_r",
+      "max_bar_deviation_m": 3.820568861884042e-15,
+      "final_bar_deviation_m": 3.820568861884042e-15,
+      "max_coordinate_error_rad": 1.6908696665041134e-13,
+      "worst_final_coordinate": "LWInputY",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 4.381329424330005e-05,
-        "max_frame_error_m": 8.418301270991889e-09,
-        "worst_segment_start_s": 0.14,
+        "max_coordinate_error_rad": 8.237334425675868e-15,
+        "max_frame_error_m": 6.77599954797753e-16,
+        "worst_segment_start_s": 0.0,
         "coordinate_error_rad_by_segment": [
-          1.7763568394002505e-14,
-          1.1857181902996672e-13,
-          4.027889133340068e-13,
-          2.0650148258027912e-14,
-          1.532107773982716e-14,
-          5.4067861299245124e-14,
-          1.3072876114961218e-14,
-          4.381329424330005e-05,
-          1.2932233062201703e-10,
-          1.3322676295501878e-13
+          8.237334425675868e-15, 2.831068712794149e-15, 8.052586375484339e-15,
+          5.181619022742723e-15, 6.958843223880962e-15, 1.7763568394002505e-15,
+          2.3037127760972e-15, 4.838143774499315e-15, 5.2475385148298415e-15,
+          3.219646771412954e-15
         ]
       },
-      "wall_time_s": 48.6
+      "wall_time_s": 94.4
     },
     "pinocchio": {
       "engine": "pinocchio",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 1.1059855068860648e-08,
-      "final_bar_deviation_m": 1.1059855068860648e-08,
-      "max_coordinate_error_rad": 0.00019939651529021774,
-      "worst_final_coordinate": "subtalar_angle_r",
+      "max_bar_deviation_m": 1.6363859778907817e-14,
+      "final_bar_deviation_m": 1.6363859778907817e-14,
+      "max_coordinate_error_rad": 9.14823772291129e-14,
+      "worst_final_coordinate": "LFInput",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 4.289842277227507e-05,
-        "max_frame_error_m": 8.338782362022531e-09,
-        "worst_segment_start_s": 0.14,
+        "max_coordinate_error_rad": 5.437490735449302e-15,
+        "max_frame_error_m": 1.355199909595506e-15,
+        "worst_segment_start_s": 0.16,
         "coordinate_error_rad_by_segment": [
-          1.865174681370263e-14,
-          1.028066520802895e-13,
-          4.0389913635863195e-13,
-          2.1274648709379562e-14,
-          1.354472090042691e-14,
-          5.4289905904170155e-14,
-          1.2032042029375134e-14,
-          4.289842277227507e-05,
-          2.729159120917757e-10,
-          6.235012506294879e-13
+          4.839878497975292e-15, 2.348815586472597e-15, 3.0808688933348094e-15,
+          3.9968028886505635e-15, 2.5053743801795036e-15,
+          2.0972806824559598e-15, 3.9065972678997696e-15, 2.815456201510358e-15,
+          5.437490735449302e-15, 2.6645352591003757e-15
         ]
       },
-      "wall_time_s": 39.7
+      "wall_time_s": 62.3
     },
     "opensim": {
       "engine": "opensim",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 1.1497374083639518e-08,
-      "final_bar_deviation_m": 1.1497374083639518e-08,
-      "max_coordinate_error_rad": 0.00020520844554550166,
-      "worst_final_coordinate": "subtalar_angle_r",
+      "max_bar_deviation_m": 1.137640067256873e-15,
+      "final_bar_deviation_m": 1.0333129057397298e-15,
+      "max_coordinate_error_rad": 3.078115019816696e-14,
+      "worst_final_coordinate": "mtp_angle_r",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 4.183472133423294e-05,
-        "max_frame_error_m": 8.246833882081332e-09,
-        "worst_segment_start_s": 0.14,
+        "max_coordinate_error_rad": 4.623471744347185e-15,
+        "max_frame_error_m": 6.9831616186284e-16,
+        "worst_segment_start_s": 0.1,
         "coordinate_error_rad_by_segment": [
-          1.6431300764452317e-14,
-          2.1094237467877974e-14,
-          1.554312234475219e-14,
-          8.770761894538737e-15,
-          4.440892098500626e-15,
-          3.774758283725532e-15,
-          4.551914400963142e-15,
-          4.183472133423294e-05,
-          6.148770381741997e-10,
-          2.9043434324194095e-13
+          4.419208055050916e-15, 1.807581861967833e-15, 1.6792123247455493e-15,
+          2.6211671722009555e-15, 3.5849144833233204e-15, 4.623471744347185e-15,
+          3.936087566991375e-15, 1.7208456881689926e-15, 3.737461728992031e-15,
+          1.1102230246251565e-15
         ]
       },
-      "wall_time_s": 89.4
+      "wall_time_s": 132.3
     }
   }
 }

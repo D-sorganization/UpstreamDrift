@@ -228,6 +228,10 @@ class DerivativeCapabilityRegistry:
         self._entries[engine] = decl
         return decl
 
+    def engines(self) -> tuple[str, ...]:
+        """Declared engine names, in declaration order."""
+        return tuple(self._entries)
+
     def declaration(self, engine: str) -> DerivativeCapabilityDeclaration:
         """Return the declaration of ``engine`` whatever its level.
 

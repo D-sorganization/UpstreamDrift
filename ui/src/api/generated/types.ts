@@ -1116,6 +1116,16 @@ export interface CharacterAppearanceRequest {
   headwear_material?: string | null;
   /** Ground material name */
   ground_material?: string | null;
+  /** Custom skin colour #rrggbb */
+  skin_color?: string | null;
+  /** Custom hair colour #rrggbb */
+  hair_color?: string | null;
+  /** Custom shirt colour #rrggbb */
+  top_color?: string | null;
+  /** Custom trousers/shorts colour #rrggbb */
+  bottom_color?: string | null;
+  /** Golf glove by role; the lead hand is the left of a right-hander */
+  glove?: "none" | "lead" | "trail" | "both" | null;
   /** Appearance document name (letters, digits, '_' or '-') */
   name?: string | null;
 }
@@ -1630,6 +1640,23 @@ export interface DisplayRequest {
   result: Record<string, unknown>;
   selected?: string[] | null;
   angle_unit: "deg" | "rad";
+}
+
+/**
+ * One declared disturbance (mirrors ``DisturbanceSpec``; NSX-99, #12728).
+ */
+export interface DisturbanceModel {
+  name: string;
+  stage: string;
+  channels: string[];
+  units: string;
+  covariance: number[][];
+  spectrum?: string | null;
+  persistent: boolean;
+  bandwidth_hz?: number | null;
+  band_hz?: [number, number] | null;
+  signal_gain?: number[] | null;
+  signal_bounds?: [number, number][] | null;
 }
 
 /**
@@ -2512,6 +2539,7 @@ export interface LoopNullspaceOptions {
   include_allocation: boolean;
   effort_weight: number;
   rate_weight: number;
+  sensitivity?: SensitivityOptions | null;
 }
 
 /**
@@ -3304,6 +3332,16 @@ export interface ScatterAnalysisResponse {
   total_simulations: number;
   average_distance_from_hole: number;
   make_percentage: number;
+}
+
+/**
+ * The four sensitivity declarations of ``AnalysisOptions`` (NSX-99, #12728). Every field enters the cache key through ``model_dump``, so a changed covariance, gain, bound, mechanism, strategy or outcome priority is a miss.
+ */
+export interface SensitivityOptions {
+  disturbance_spec: DisturbanceModel[];
+  mechanisms?: string[];
+  strategy_set?: string[] | null;
+  outcome_priority?: string[] | null;
 }
 
 export interface SessionAggregateV1 {

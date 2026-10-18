@@ -390,7 +390,13 @@ class BarbellBushingPlant:
 
     # -- hand (club body) kinematics -------------------------------------
     def _hand_pose(self, q_body: Array) -> Array:
-        frame = self._plant.kinematic_frames(q_body)[HAND_BODY_FRAME]
+        # One frame only (#11744): the finite-difference Jacobian calls this
+        # many times per RK4 stage; the pose equals the all-frames FK exactly.
+        single = getattr(self._plant, "kinematic_frame", None)
+        if single is None:
+            frame = self._plant.kinematic_frames(q_body)[HAND_BODY_FRAME]
+        else:
+            frame = single(q_body, HAND_BODY_FRAME)
         return np.asarray(frame, dtype=float) @ self._hand_to_frame
 
     def _hand_jacobian(self, q_body: Array) -> Array:

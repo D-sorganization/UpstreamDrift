@@ -72,6 +72,7 @@ providers = {
     "ALL_ENGINES": "plant", "OPTIONAL_ENGINES": "plant",
     "PARITY_ENGINES": "plant", "VectorPlant": "plant",
     "closed_loop": "reference", "generate_reference_bundle": "reference",
+    "hold_policy": "reference",
     "ReplayScore": "scoring", "growth_rate": "scoring",
     "score_replay": "scoring", "segmented_replay": "scoring",
     "DEFAULT_EFFORT_HOLD_DT_S": "bundle",

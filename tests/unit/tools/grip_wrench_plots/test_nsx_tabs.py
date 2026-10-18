@@ -60,6 +60,7 @@ def test_first_tab_is_the_existing_grip_view_then_the_four_panels(window) -> Non
         "Envelopes",
         "Hand Split",
         "Diagnostics",
+        "Variability & Consistency",
     ]
     assert window.tabs.widget(0) is window.grip_widget
 

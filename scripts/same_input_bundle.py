@@ -46,6 +46,7 @@ from src.shared.python.motion_matching.same_input import (
     VectorPlant,
     closed_loop,
     generate_reference_bundle,
+    hold_policy,
     open_loop,
     score_replay,
     segmented_replay,
@@ -146,7 +147,7 @@ def export(
         duration_s=duration_s,
         impact=impact,
         split_time_s=split,
-        effort_hold_s=effort_hold_ms * 1e-3,
+        policy=hold_policy(effort_hold_ms * 1e-3),
         provenance={
             "run_dir": run_dir.name,
             "capture": receipt.get("capture"),
