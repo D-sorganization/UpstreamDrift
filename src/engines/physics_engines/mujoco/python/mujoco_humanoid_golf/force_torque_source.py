@@ -58,7 +58,7 @@ class MujocoForceTorqueSource:
             raise TypeError("model must be an instance of mujoco.MjModel")
         self._model = model
         self._scratch = mujoco.MjData(model)
-        self._axial_source = MujocoAxialLoadSource(model)
+        self._axial_source = MujocoAxialLoadSource(model, axis_policy="kinematic")
 
     @property
     def model(self) -> mujoco.MjModel:
