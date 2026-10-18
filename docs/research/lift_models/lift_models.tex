@@ -1437,6 +1437,60 @@ and the tests fail until that is decided.
   0.05--0.09$^\circ$ both before and after this regeneration, so that figure
   was stale and is corrected there.
 \end{itemize}
+\subsection{Snatch Same-Input Bundle (LIFT-5, Issue \#11745)}
+\paragraph{Planar Pull.} The previous Tools snatch configuration ran from
+the floor setup to the overhead-squat catch through one mid-time via point.
+With the bundle problem (80\,kg, 1.78\,m, 100\,kg bar, 2.0\,s, 151 samples),
+the shoulder fell from 0.876 to 0.653\,m in the first 0.93\,s. The bar model
+held the bar overhead at the floor (1.565\,m at the setup), and the catch
+trunk leaned $59.3^\circ$.
+
+Tools \#5653 (issue Tools\#5652) adds an ordered, timed via schedule. Via
+poses sit at the parity standard's phase starts: knee pass at 0.30, power
+position at 0.45, catch at 0.55 and recovery at 0.70. The catch keeps the
+standard's knee flexion ($-87.8^\circ$) and trunk lean ($18.70^\circ$); its
+shank is solved so that the centre of mass is over the inner base of
+support. The bar-knee clearance ends at the turnover. The phase-correct bar
+hangs one arm length below the shoulder through the pulls and sits one arm
+length above it from the catch on, with a smoothstep blend across the
+turnover.
+
+The shoulder now rises monotonically by 0.390\,m through the pull, to a peak
+of 1.376\,m at 0.907\,s. The setup bar is at 0.187\,m. The catch trunk is
+$18.70^\circ$, inside the $3.87^\circ$ tolerance; that tolerance is the
+standard's catch lumbar flexion, because the planar trunk is one segment.
+
+\paragraph{Wide-Grip Arm Hang.} At the 0.9\,m snatch grip, the arm solve of
+the hang search settled in a hyperextended-elbow minimum when started from
+the straight-armed seed. The right elbow sat at its $+5^\circ$ limit, and
+the bar was 139\,mm off at 0.3\,m and 54\,mm off at 0.45\,m. Retrying the
+bracket's lower end from a $-0.8$\,rad bent-elbow seed reaches 0.3\,m within
+2.3\,mm (deadlift and clean 2.4--2.6\,mm), so this is a seed minimum, not a
+reach limit. The other lifts reach 0.3\,m from the first seed and are
+unchanged. The arms hang the bar at most 0.475\,m below the shoulders, so
+the bar offset is scaled by 0.689.
+
+\paragraph{Bundle and Parity.} The 0.2\,s window starts at 0.467\,s and is
+centred on the knee pass. Through the pull and the window, the IK residuals
+match the deadlift: knee\_r at most 11.2\,mm, the bar 0.23\,mm, and the
+feet 0.69\,mm into the ground. The full-body model cannot follow the turnover
+(bar 40.1\,mm at 0.50) or reach the planar deep-squat catch (legs 43--50\,mm,
+feet 2.07\,mm into the ground at 0.53--0.77). A strict xfail records this
+against the deadlift bounds, which are not loosened.
+
+In open-loop replay over the full window, the bar agrees with MuJoCo to
+$6.2\times10^{-14}$\,m (Drake), $4.7\times10^{-14}$\,m (Pinocchio) and
+$1.6\times10^{-15}$\,m (OpenSim). The coordinates agree to
+$2.9\times10^{-12}$, $2.1\times10^{-12}$ and $1.1\times10^{-12}$\,rad, and
+MuJoCo is bit exact (\texttt{docs/development/lifting/evidence/snatch/}).
+
+\paragraph{Limitations.} The bundle covers the pull only. It is not in
+\texttt{SAME\_INPUT\_LIFT\_BUNDLES}, because the OpenSim IK/ID needs a LIFT-4
+barbell record (measured: ``IK/ID setup failed: bundle carries no barbell
+record''), as for the deadlift and the clean. The bar is hand-held with no
+barbell body (LIFT-4, \#11744). Reproduce with
+\texttt{MUJOCO\_GL=egl python3 scripts/generate\_lift\_bundle.py --lift snatch}
+then \texttt{scripts/measure\_lift\_bar\_path\_parity.py --lift snatch}.
 
 \section{Measured Parity Results}
 All figures below are read from the committed receipt,

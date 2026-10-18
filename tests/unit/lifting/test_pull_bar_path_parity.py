@@ -44,6 +44,7 @@ _ENGINE_MODULE = {
 PULL_COORDINATE_CASES = [
     "deadlift",
     "clean_and_jerk",
+    "snatch",
     "bench_press",
 ]
 
@@ -60,7 +61,9 @@ def _measured(record: dict) -> dict:
     }
 
 
-@pytest.fixture(scope="module", params=("deadlift", "clean_and_jerk", "bench_press"))
+@pytest.fixture(
+    scope="module", params=("deadlift", "clean_and_jerk", "snatch", "bench_press")
+)
 def lift(request: pytest.FixtureRequest) -> str:
     return str(request.param)
 
