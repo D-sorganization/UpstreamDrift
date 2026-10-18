@@ -272,7 +272,12 @@ def test_feed_fixture_study_receipt_through_injury_analyzer(tmp_path: Path) -> N
     assert provider.provider_id.startswith("spine_study_")
 
     analyzer = SpinalLoadAnalyzer(body_weight=80.0, provider=provider)
-    result = analyzer.analyze_study_receipt(receipt_path)
+    result = analyzer.analyze(
+        joint_angles={},
+        joint_velocities={},
+        joint_torques={},
+        time=provider.series.time_s,
+    )
 
     assert result.is_model_based is True
     assert result.risk_assessed is False
@@ -285,3 +290,14 @@ def test_feed_fixture_study_receipt_through_injury_analyzer(tmp_path: Path) -> N
     expected_peak_bw = 300.0 / analyzer.body_weight_N
     assert result.peak_compression_bw == pytest.approx(expected_peak_bw, abs=1e-5)
     assert result.cumulative_compression_impulse > 0
+
+
+@pytest.mark.parametrize("bad", [None, 42, object()])
+def test_from_study_receipt_rejects_unsupported_inputs(bad: object) -> None:
+    with pytest.raises(TypeError):
+        ModelSpinalLoadProvider.from_study_receipt(bad)
+
+
+def test_from_study_receipt_rejects_empty_path() -> None:
+    with pytest.raises(ValueError, match="non-empty"):
+        ModelSpinalLoadProvider.from_study_receipt("   ")
