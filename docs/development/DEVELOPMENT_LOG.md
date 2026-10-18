@@ -2561,6 +2561,45 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13152 · Ground-Reaction Overlay Draws Measured CoP 1-Sigma Covariance Ellipses, Tilted With the Plate Yaw (Cop_Cov_Random_Xy_M2 = R_Xy Diag R_Xy^T)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13152
+- **Branch:** merged via #13152
+- **PR:** #13152
+- **Paths:** see #13152
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`8582cf13`; collated from changes/13152-ground-reaction-overlay-draws-measured-c.md)
+- **Summary:** Ground-reaction overlay draws measured CoP 1-sigma covariance ellipses, tilted with the plate yaw (cop_cov_random_xy_m2 = R_xy diag R_xy^T)
+- **Next step:** Shipped in PR #13152.
+
+### DL-#12965 · Infra: Handle_Api_Errors Leaks Absolute Server Paths and Internals via Str(E) in 400/403/404 Bodies
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #12965
+- **Branch:** fix/12965-sanitize-api-errors
+- **PR:** #13155
+- **Paths:** src/api/middleware/error_handler.py,src/api/utils/error_codes.py,tests/unit/api/test_error_handler.py
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`6c4b5e9f`; collated from changes/12965-sanitize-400-403-404-error-details-in-ha.md)
+- **Summary:** Sanitize 400/403/404 error details in handle_api_errors to prevent path leaks
+- **Next step:** Shipped in PR #13155.
+
+### DL-#12574 · NSX-42: Framework-Free NSX Plot Model and Cross-UI Golden
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12574
+- **Branch:** merged via #13154
+- **PR:** #13154
+- **Paths:** see #13154
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`bfc324fd`; collated from changes/12574-nsx-42-framework-free-nsx-plot-model-and.md)
+- **Summary:** NSX-42: framework-free NSX plot model and cross-UI golden
+- **Next step:** Shipped in PR #13154.
+
 ### DL-#13113 · Label the Dockerfile.Modular Runtime Stage Keep=True so Host Prune Jobs Spare Every Profile Image; Contract Test Guards It
 
 - **State:** shipped
