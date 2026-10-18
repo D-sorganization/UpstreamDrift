@@ -178,6 +178,24 @@ class TestInventoryLoad:
         errors = inventory.verify_declared_hashes()
         assert errors == [], errors
 
+    def test_segmental_spine_models_listed_with_spine_viewer_tile(
+        self, inventory: EngineModelInventory
+    ) -> None:
+        spine_packages = [
+            p for p in inventory.packages if "spine_viewer" in p.launcher_tile_ids
+        ]
+        assert spine_packages, "no spine packages found with spine_viewer tile"
+        ids = {p.id for p in spine_packages}
+        assert "opensim/fixture" in ids
+        assert "opensim/bruno2015_fullbody_os4_v2" in ids
+        assert "opensim/senteler2016_lumbspine_3dof" in ids
+        assert "opensim/senteler2016_lumbspine_30dof" in ids
+        for p in spine_packages:
+            assert p.engine == "opensim"
+            assert p.model_family == "segmental_spine"
+            assert p.flagship is False
+            assert "spine_viewer" in p.launcher_tile_ids
+
 
 # ---------------------------------------------------------------------------
 # Hash helper
