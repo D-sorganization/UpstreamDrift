@@ -41,14 +41,19 @@ from src.shared.python.loop_nullspace.facade import (
     EngineContext,
     TrajectoryInput,
 )
+from src.shared.python.loop_nullspace.sensitivity_options import (
+    disturbance_from_dict,
+)
 
 __all__ = [
     "MAX_FRAMES",
     "RESULT_CACHE",
+    "DisturbanceModel",
     "LoopNullspaceOptions",
     "LoopNullspaceRequest",
     "RequestRefusedError",
     "ResultCache",
+    "SensitivityOptions",
     "SourceDescription",
     "TrajectorySource",
     "cache_key",
@@ -73,6 +78,52 @@ class RequestRefusedError(ValueError):
         self.code = code
 
 
+class DisturbanceModel(BaseModel):
+    """One declared disturbance (mirrors ``DisturbanceSpec``; NSX-99, #12728)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=128)
+    stage: str
+    channels: list[str] = Field(min_length=1)
+    units: str = Field(min_length=1)
+    covariance: list[list[float]]
+    spectrum: str | None = None
+    persistent: bool = False
+    bandwidth_hz: float | None = Field(default=None, allow_inf_nan=False)
+    band_hz: tuple[float, float] | None = None
+    signal_gain: list[float] | None = None
+    signal_bounds: list[tuple[float, float]] | None = None
+
+
+class SensitivityOptions(BaseModel):
+    """The four sensitivity declarations of ``AnalysisOptions`` (NSX-99, #12728).
+
+    Every field enters the cache key through ``model_dump``, so a changed
+    covariance, gain, bound, mechanism, strategy or outcome priority is a miss.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    disturbance_spec: list[DisturbanceModel] = Field(min_length=1)
+    mechanisms: list[str] = Field(default_factory=list)
+    strategy_set: list[str] | None = None
+    outcome_priority: list[str] | None = None
+
+    def to_kwargs(self) -> dict[str, Any]:
+        """``AnalysisOptions`` keyword arguments (``ValueError`` if invalid)."""
+        specs = [disturbance_from_dict(d.model_dump()) for d in self.disturbance_spec]
+        out: dict[str, Any] = {
+            "disturbance_spec": specs,
+            "mechanisms": list(self.mechanisms),
+        }
+        if self.strategy_set is not None:
+            out["strategy_set"] = list(self.strategy_set)
+        if self.outcome_priority is not None:
+            out["outcome_priority"] = list(self.outcome_priority)
+        return out
+
+
 class LoopNullspaceOptions(BaseModel):
     """What to compute (mirrors :class:`AnalysisOptions`)."""
 
@@ -84,9 +135,14 @@ class LoopNullspaceOptions(BaseModel):
     effort_weight: float = Field(default=1.0, ge=0.0, allow_inf_nan=False)
     rate_weight: float = Field(default=0.0, ge=0.0, allow_inf_nan=False)
 
+    sensitivity: SensitivityOptions | None = None
+
     def to_analysis_options(self) -> AnalysisOptions:
         """The facade options (``ValueError`` on an invalid combination)."""
-        return AnalysisOptions(**self.model_dump())
+        base = self.model_dump(exclude={"sensitivity"})
+        if self.sensitivity is None:
+            return AnalysisOptions(**base)
+        return AnalysisOptions(**base, **self.sensitivity.to_kwargs())
 
 
 class LoopNullspaceRequest(BaseModel):
