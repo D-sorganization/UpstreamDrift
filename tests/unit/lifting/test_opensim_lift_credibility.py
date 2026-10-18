@@ -42,12 +42,13 @@ pytestmark = pytest.mark.unit
 #: OSL-17 (#13131) regression on the high-bar rack bundle: the IK carries
 #: the Rajagopal arm_flex, arm_rot, pro_sup and elbow_flex coordinates up to
 #: 1.21e-3 rad past their ranges (the arms cannot reach a grip behind the
-#: neck; see ``test_opensim_lift_bar_reach``).  Not loosened.
+#: neck; see ``test_opensim_lift_bar_reach``).  Not loosened.  On the
+#: #13037 whole-row lift body (#13041): up to 8.0e-4 rad (arm_rot_l).
 _RAJAGOPAL_ARM_RANGES = pytest.mark.xfail(
     strict=True,
     reason=(
-        "OSL-17 #13131: high-bar grip pushes Rajagopal arm coordinates up to "
-        "1.21e-3 rad past their ranges."
+        "OSL-17 #13131 / #13041: high-bar grip pushes Rajagopal arm "
+        "coordinates up to 8.0e-4 rad past their ranges."
     ),
 )
 #: Bundle hip-centre separation (OSL-14, #13057: the AN-1 lift body's de Leva

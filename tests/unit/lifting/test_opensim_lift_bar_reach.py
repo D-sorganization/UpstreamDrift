@@ -48,12 +48,19 @@ _REACH_TOL_M = 1e-3
 #: reach solve stops on those bounds 4.63 cm (L) and 6.03 cm (R) from the
 #: grips, against the 1 mm reach bound, and the IK then carries arm_flex,
 #: arm_rot, pro_sup and elbow_flex up to 1.21e-3 rad past their ranges.  The
-#: marker and Hicks gates still pass.  The bounds are not loosened.
+#: bounds are not loosened.  On the #13037 whole-row lift body (#13041) the
+#: reach stops 3.81 cm (L) and 5.69 cm (R) short and the ranges are exceeded
+#: by up to 8.0e-4 rad.  Shared cause with the pre-rack whole-row elbow-limit
+#: miss (8.3/21.5 mm): the folded Rajagopal arm cannot bring the hand within
+#: about 0.20 m of its shoulder landmark in these directions (shoulder-to-grip
+#: distance plus reach miss 0.198-0.213 m in all four cases), and the grips
+#: sit 0.146-0.190 m from the shoulders.
 _RAJAGOPAL_ARM_RANGES = pytest.mark.xfail(
     strict=True,
     reason=(
-        "OSL-17 #13131: Rajagopal arm ranges cannot reach the high-bar grip "
-        "(reach 4.63/6.03 cm > 1 mm; ranges exceeded by up to 1.21e-3 rad)."
+        "OSL-17 #13131 / #13041: Rajagopal arm ranges cannot reach the "
+        "high-bar grip (reach 3.81/5.69 cm > 1 mm; ranges exceeded by up to "
+        "8.0e-4 rad); the folded arm stops about 0.20 m from the shoulder."
     ),
 )
 
