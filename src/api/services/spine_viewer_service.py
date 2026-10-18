@@ -8,15 +8,30 @@ fail-closed scientific status and the view model all come from the core.
 
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path, PurePosixPath
+from typing import Any, Mapping
 
+from src.engines.physics_engines.opensim.python.spine.assets import (
+    DEFAULT_MANIFEST_PATH,
+    SpineAssetStatus,
+    _load_entry,
+    admit_spine_asset,
+    resolve_spine_asset,
+)
+from src.engines.physics_engines.opensim.python.spine.study import (
+    SpineStudyRequest,
+    _ID_RE,
+)
 from src.tools.spine_viewer import core
 
 __all__ = [
     "STUDY_ROOT_ENV",
     "list_receipts",
+    "list_spine_assets",
     "load_study_payload",
+    "parse_study_request",
     "safe_relative_receipt",
     "study_root",
 ]
@@ -85,3 +100,149 @@ def load_study_payload(receipt_path: Path) -> dict[str, object]:
     if not isinstance(receipt_path, Path):
         raise TypeError("receipt_path must be a Path")
     return core.view_to_dict(core.open_study(receipt_path))
+
+
+def list_spine_assets(env: Mapping[str, str] | None = None) -> list[dict[str, Any]]:
+    """List spine model asset entries from manifest with admission status, plus fixture.
+
+    Precondition: ``env`` is None or a mapping of strings.
+    Postcondition: Never returns licensed file contents or numerical values from them.
+    """
+    if env is not None and not isinstance(env, Mapping):
+        raise TypeError("env must be a mapping or None")
+    manifest_data = json.loads(DEFAULT_MANIFEST_PATH.read_text(encoding="utf-8"))
+    raw_assets = manifest_data.get("assets", {})
+    results: list[dict[str, Any]] = []
+
+    for asset_id, entry in raw_assets.items():
+        if entry.get("model_sha256") is None:
+            status = SpineAssetStatus.UNPINNED.value
+        else:
+            resolved = resolve_spine_asset(asset_id, env)
+            if resolved is None:
+                status = SpineAssetStatus.MISSING.value
+            else:
+                receipt = admit_spine_asset(resolved)
+                status = receipt.status.value
+
+        results.append(
+            {
+                "asset_id": asset_id,
+                "status": status,
+                "simtk_url": entry.get("simtk_url"),
+                "env_var": entry.get("env_var"),
+                "model_sha256": entry.get("model_sha256"),
+                "resource_sha256": entry.get("resource_sha256", {}),
+                "licence_id": entry.get("licence_id"),
+                "citation": entry.get("citation"),
+                "owner_accepted_terms_on": entry.get("owner_accepted_terms_on"),
+                "note": entry.get("note"),
+                "is_fixture": False,
+            }
+        )
+
+    # Always-available synthetic fixture model
+    results.append(
+        {
+            "asset_id": "fixture",
+            "status": SpineAssetStatus.QUALIFIED.value,
+            "simtk_url": None,
+            "env_var": None,
+            "model_sha256": None,
+            "resource_sha256": {},
+            "licence_id": None,
+            "citation": None,
+            "owner_accepted_terms_on": None,
+            "note": "Always-available synthetic spine fixture model",
+            "is_fixture": True,
+        }
+    )
+
+    results.sort(key=lambda x: str(x["asset_id"]))
+    return results
+
+
+def parse_study_request(
+    payload: Mapping[str, Any], root: Path | None = None
+) -> SpineStudyRequest:
+    """Validate and build a :class:`SpineStudyRequest` from a client payload.
+
+    Args:
+        payload: JSON-compatible mapping with study request attributes.
+        root: Directory under which output must reside (default ``study_root()``).
+
+    Returns:
+        A validated :class:`SpineStudyRequest` targeting an output directory inside ``root``.
+
+    Raises:
+        TypeError: ``payload`` is not a mapping or ``root`` is not a Path.
+        ValueError: missing required fields, bad identifiers, path escapes,
+            missing inputs, or invalid request options.
+    """
+    if not isinstance(payload, Mapping):
+        raise TypeError("payload must be a mapping")
+    target_root = study_root() if root is None else root
+    if not isinstance(target_root, Path):
+        raise TypeError("root must be a Path")
+
+    study_id = payload.get("study_id")
+    if not isinstance(study_id, str) or not _ID_RE.fullmatch(study_id):
+        raise ValueError(
+            f"study_id must be a string matching {_ID_RE.pattern}: {study_id!r}"
+        )
+
+    out_candidate = payload.get("output_dir")
+    if out_candidate is not None:
+        if not isinstance(out_candidate, (str, Path)):
+            raise TypeError("output_dir must be a string or Path")
+        out_path = Path(out_candidate)
+        if "\\" in str(out_path) or "\x00" in str(out_path):
+            raise ValueError("output_dir must use '/' separators and no control bytes")
+        if ".." in out_path.parts:
+            raise ValueError("output_dir must not contain '..' components")
+        resolved_out = (target_root / out_path).resolve()
+        try:
+            resolved_out.relative_to(target_root.resolve())
+        except ValueError as exc:
+            raise ValueError(
+                f"output_dir must be inside study root ({target_root}): {resolved_out}"
+            ) from exc
+    else:
+        resolved_out = (target_root / study_id).resolve()
+
+    values = dict(payload)
+    values["output_dir"] = resolved_out
+
+    # Resolve relative paths against _PROJECT_ROOT
+    for name in ("motion_path", "golf_model_path", "model_path", "external_loads"):
+        val = values.get(name)
+        if val is not None:
+            if not isinstance(val, (str, Path)):
+                raise TypeError(f"{name} must be a string or Path")
+            p = Path(val)
+            values[name] = (
+                (_PROJECT_ROOT / p).resolve() if not p.is_absolute() else p.resolve()
+            )
+
+    try:
+        request = SpineStudyRequest(**values)
+    except TypeError as exc:
+        raise ValueError(f"invalid request parameters: {exc}") from exc
+
+    # Precondition: check required input files exist on disk
+    for label, path in (
+        ("motion", request.motion_path),
+        ("golf model", request.golf_model_path),
+        ("segmental model", request.model_path),
+        ("external loads", request.external_loads),
+    ):
+        if path is not None and not path.is_file():
+            raise ValueError(f"{label} file not found: {path.name}")
+
+    if request.asset_id is not None:
+        try:
+            _load_entry(request.asset_id, DEFAULT_MANIFEST_PATH)
+        except ValueError as exc:
+            raise ValueError(f"unknown spine asset: {exc}") from exc
+
+    return request

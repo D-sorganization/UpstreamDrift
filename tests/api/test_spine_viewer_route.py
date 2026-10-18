@@ -383,8 +383,12 @@ def test_opensim_fixture_study_end_to_end(
         "motion_path": str(motion_path),
         "golf_model_path": str(golf_model_path),
         "model_path": str(model_path),
-        "events": {"mid": 0.2},
+        "events": {"mid": 0.2, "late": 0.3},
         "max_frames": 5,
+        "residual_force_fraction_bw": 1e3,
+        "residual_moment_fraction": 1e3,
+        "reserve_limit_nm": 1e6,
+        "reserve_max_share": 1e3,
         "torso_alignment": [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
         "torso_alignment_source": "test fixture: identity by construction",
     }
@@ -410,5 +414,5 @@ def test_opensim_fixture_study_end_to_end(
     view_resp = client.get(
         "/api/tools/spine-viewer/study", params={"receipt": receipt_path}
     )
-    assert view_resp.status_code == 200
+    assert view_resp.status_code == 200, view_resp.text
     assert view_resp.json()["study_id"] == "e2e_fixture"
