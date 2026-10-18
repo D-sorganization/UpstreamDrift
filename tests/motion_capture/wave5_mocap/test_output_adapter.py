@@ -186,7 +186,8 @@ def test_parse_happy_path_with_conf(tmp_path: Path) -> None:
     assert session.session_id == "custom-id"
     assert len(session.frames) == 4
     assert session.calibration == {"cameras": ["c0", "c1"]}
-    assert session.metadata == {"fps": 30}
+    assert session.metadata["fps"] == 30
+    assert session.metadata["min_confidence"] == pytest.approx(0.5)
 
     first = session.frames[0]
     assert first.frame_number == 0
@@ -293,3 +294,157 @@ def test_find_landmarks_csv(tmp_path: Path) -> None:
     a = FreeMoCapOutputAdapter(tmp_path)
     found = a._find_landmarks_csv()
     assert len(found) == 2
+
+
+# ---------------------------------------------------------------------------
+# Issue #12977: FreeMoCap adapter integrity tests
+# ---------------------------------------------------------------------------
+
+
+def test_parse_multiple_landmark_files_raises(tmp_path: Path) -> None:
+    csv1 = tmp_path / "freemocap_3d_landmarks_body.csv"
+    csv2 = tmp_path / "freemocap_3d_landmarks_hands.csv"
+    _write_landmarks_csv(csv1, rows=2)
+    _write_landmarks_csv(csv2, rows=2)
+
+    adapter = FreeMoCapOutputAdapter(tmp_path)
+    with pytest.raises(ValueError, match="Multiple landmark CSV files|Ambiguous"):
+        adapter.parse()
+
+
+def test_parse_multiple_landmark_files_with_explicit_csv_path(tmp_path: Path) -> None:
+    csv1 = tmp_path / "freemocap_3d_landmarks_body.csv"
+    csv2 = tmp_path / "freemocap_3d_landmarks_hands.csv"
+    _write_landmarks_csv(csv1, rows=2)
+    _write_landmarks_csv(csv2, rows=3)
+
+    adapter = FreeMoCapOutputAdapter(tmp_path)
+    session = adapter.parse(csv_path=csv2)
+    assert len(session.frames) == 3
+
+
+def test_parse_nan_confidence_marks_point_invisible(tmp_path: Path) -> None:
+    csv_path = tmp_path / "freemocap_3d_landmarks_main.csv"
+    header = [
+        "frame_num",
+        "timestamp",
+        "nose_x",
+        "nose_y",
+        "nose_z",
+        "nose_conf",
+    ]
+    with open(csv_path, "w", newline="") as fh:
+        writer = csv.writer(fh)
+        writer.writerow(header)
+        writer.writerow([0, 0.0, 1.0, 2.0, 3.0, "nan"])
+        writer.writerow([1, 0.1, 1.0, 2.0, 3.0, 0.9])
+
+    adapter = FreeMoCapOutputAdapter(tmp_path)
+    session = adapter.parse()
+    p0 = session.frames[0].get_point("nose")
+    assert p0 is not None
+    assert p0.visible is False
+    assert np.isnan(p0.x) and np.isnan(p0.y) and np.isnan(p0.z)
+
+    p1 = session.frames[1].get_point("nose")
+    assert p1 is not None
+    assert p1.visible is True
+
+
+def test_parse_visible_postcondition_requires_finite_coordinates(
+    tmp_path: Path,
+) -> None:
+    csv_path = tmp_path / "freemocap_3d_landmarks_main.csv"
+    header = [
+        "frame_num",
+        "timestamp",
+        "nose_x",
+        "nose_y",
+        "nose_z",
+        "nose_conf",
+    ]
+    with open(csv_path, "w", newline="") as fh:
+        writer = csv.writer(fh)
+        writer.writerow(header)
+        writer.writerow([0, 0.0, "nan", 2.0, 3.0, 0.95])
+
+    adapter = FreeMoCapOutputAdapter(tmp_path)
+    session = adapter.parse()
+    p0 = session.frames[0].get_point("nose")
+    assert p0 is not None
+    assert p0.visible is False
+
+
+def test_parse_non_monotonic_timestamps_raises(tmp_path: Path) -> None:
+    csv_path = tmp_path / "freemocap_3d_landmarks_main.csv"
+    header = [
+        "frame_num",
+        "timestamp",
+        "nose_x",
+        "nose_y",
+        "nose_z",
+        "nose_conf",
+    ]
+    with open(csv_path, "w", newline="") as fh:
+        writer = csv.writer(fh)
+        writer.writerow(header)
+        writer.writerow([0, 0.0, 1.0, 2.0, 3.0, 0.9])
+        writer.writerow([1, 0.03, 1.0, 2.0, 3.0, 0.9])
+        writer.writerow([2, 0.06, 1.0, 2.0, 3.0, 0.9])
+        writer.writerow([3, 0.0, 1.0, 2.0, 3.0, 0.9])
+
+    adapter = FreeMoCapOutputAdapter(tmp_path)
+    with pytest.raises(ValueError, match="Non-monotonic timestamp|strictly increasing"):
+        adapter.parse()
+
+
+def test_parse_duplicate_timestamps_raises(tmp_path: Path) -> None:
+    csv_path = tmp_path / "freemocap_3d_landmarks_main.csv"
+    header = [
+        "frame_num",
+        "timestamp",
+        "nose_x",
+        "nose_y",
+        "nose_z",
+        "nose_conf",
+    ]
+    with open(csv_path, "w", newline="") as fh:
+        writer = csv.writer(fh)
+        writer.writerow(header)
+        writer.writerow([0, 0.0, 1.0, 2.0, 3.0, 0.9])
+        writer.writerow([1, 0.03, 1.0, 2.0, 3.0, 0.9])
+        writer.writerow([2, 0.03, 1.0, 2.0, 3.0, 0.9])
+
+    adapter = FreeMoCapOutputAdapter(tmp_path)
+    with pytest.raises(ValueError, match="Non-monotonic timestamp|strictly increasing"):
+        adapter.parse()
+
+
+def test_parse_min_confidence_parameter_and_metadata(tmp_path: Path) -> None:
+    csv_path = tmp_path / "freemocap_3d_landmarks_main.csv"
+    header = [
+        "frame_num",
+        "timestamp",
+        "nose_x",
+        "nose_y",
+        "nose_z",
+        "nose_conf",
+    ]
+    with open(csv_path, "w", newline="") as fh:
+        writer = csv.writer(fh)
+        writer.writerow(header)
+        writer.writerow([0, 0.0, 1.0, 2.0, 3.0, 0.6])
+        writer.writerow([1, 0.1, 1.0, 2.0, 3.0, 0.8])
+
+    adapter = FreeMoCapOutputAdapter(tmp_path)
+    session = adapter.parse(min_confidence=0.7)
+    assert session.metadata["min_confidence"] == 0.7
+    assert session.frames[0].get_point("nose").visible is False
+    assert session.frames[1].get_point("nose").visible is True
+
+    with pytest.raises(ValueError, match="min_confidence must be between"):
+        adapter.parse(min_confidence=-0.1)
+    with pytest.raises(ValueError, match="min_confidence must be between"):
+        adapter.parse(min_confidence=1.5)
+    with pytest.raises(ValueError, match="min_confidence must be between"):
+        adapter.parse(min_confidence=float("nan"))

@@ -188,8 +188,8 @@ class FreeMoCapOutputAdapter:
         self._session: LandmarkSession | None = None
 
     def _find_landmarks_csv(self) -> list[Path]:
-        """Find landmark CSV files in output directory."""
-        return list(self.output_dir.glob(self.LANDMARKS_CSV_PATTERN))
+        """Find landmark CSV files in output directory (sorted for determinism)."""
+        return sorted(self.output_dir.glob(self.LANDMARKS_CSV_PATTERN))
 
     def _load_calibration(self) -> dict | None:
         """Load camera calibration data."""
@@ -207,7 +207,11 @@ class FreeMoCapOutputAdapter:
                 return json.load(f)
         return {}
 
-    def _parse_landmark_csv(self, csv_path: Path) -> list[LandmarkFrame]:
+    def _parse_landmark_csv(
+        self,
+        csv_path: Path,
+        min_confidence: float = 0.5,
+    ) -> list[LandmarkFrame]:
         """
         Parse a FreeMoCap landmark CSV file.
 
@@ -216,11 +220,16 @@ class FreeMoCapOutputAdapter:
 
         Args:
             csv_path: Path to CSV file.
+            min_confidence: Minimum confidence threshold for points to be considered visible.
 
         Returns:
             List of LandmarkFrame objects.
+
+        Raises:
+            ValueError: If timestamps are non-monotonic.
         """
         frames = []
+        prev_timestamp: float | None = None
 
         with open(csv_path, newline="") as f:
             reader = csv.reader(f)
@@ -257,6 +266,14 @@ class FreeMoCapOutputAdapter:
                 frame_num = int(row[0])
                 timestamp = float(row[1])
 
+                if prev_timestamp is not None and timestamp <= prev_timestamp:
+                    raise ValueError(
+                        f"Non-monotonic timestamp in {csv_path.name} at frame {frame_num}: "
+                        f"timestamp {timestamp} <= previous {prev_timestamp}. "
+                        "Timestamps must be strictly increasing."
+                    )
+                prev_timestamp = timestamp
+
                 points = []
                 for name in schema:
                     coords = landmark_data[name]
@@ -268,16 +285,18 @@ class FreeMoCapOutputAdapter:
                             else 1.0
                         )
                     except (ValueError, IndexError, TypeError):
-                        conf = 0.0
+                        conf = float("nan")
 
-                    # Drop coordinates that fail to parse or are low-confidence:
+                    # Drop coordinates that fail to parse, are NaN, or are low-confidence:
                     # represent them as NaN so the row stays fixed-width.
                     try:
-                        if conf <= 0.5:
-                            raise ValueError("low confidence")
+                        if not np.isfinite(conf) or conf <= min_confidence:
+                            raise ValueError("low or invalid confidence")
                         x = float(row[coords["x"]])
                         y = float(row[coords["y"]])
                         z = float(row[coords["z"]])
+                        if not (np.isfinite(x) and np.isfinite(y) and np.isfinite(z)):
+                            raise ValueError("non-finite coordinates")
                         visible = True
                     except (ValueError, IndexError, TypeError):
                         x = y = z = float("nan")
@@ -304,37 +323,66 @@ class FreeMoCapOutputAdapter:
 
         return frames
 
-    def parse(self, session_id: str | None = None) -> LandmarkSession:
+    def parse(
+        self,
+        session_id: str | None = None,
+        csv_path: Path | str | None = None,
+        min_confidence: float = 0.5,
+    ) -> LandmarkSession:
         """
         Parse all output files and return a complete session.
 
         Args:
             session_id: Optional session ID override.
+            csv_path: Optional explicit path to landmark CSV file. If None,
+                expects exactly one matching CSV in output_dir.
+            min_confidence: Minimum confidence threshold (0.0 to 1.0) for points
+                to be marked visible.
 
         Returns:
-            LandmarkSession with all parsed data.
+            LandmarkSession with all parsed data and min_confidence recorded in metadata.
 
         Raises:
-            FileNotFoundError: If no landmark CSV files found.
+            FileNotFoundError: If output directory or landmark CSV files are not found.
+            ValueError: If multiple landmark CSV files exist without explicit csv_path,
+                or if min_confidence is invalid.
         """
+        if not np.isfinite(min_confidence) or not (0.0 <= min_confidence <= 1.0):
+            raise ValueError(
+                f"min_confidence must be between 0.0 and 1.0, got {min_confidence}"
+            )
+
         if not self.output_dir.exists():
             raise FileNotFoundError(f"Output directory not found: {self.output_dir}")
 
-        # Find landmark files
-        landmark_files = self._find_landmarks_csv()
-        if not landmark_files:
-            raise FileNotFoundError(f"No landmark CSV files found in {self.output_dir}")
+        if csv_path is not None:
+            main_file = Path(csv_path)
+            if not main_file.exists():
+                raise FileNotFoundError(f"Landmark CSV file not found: {main_file}")
+        else:
+            # Find landmark files
+            landmark_files = self._find_landmarks_csv()
+            if not landmark_files:
+                raise FileNotFoundError(
+                    f"No landmark CSV files found in {self.output_dir}"
+                )
+            if len(landmark_files) > 1:
+                filenames = [f.name for f in landmark_files]
+                raise ValueError(
+                    f"Multiple landmark CSV files found in {self.output_dir}: {filenames}. "
+                    "Specify an explicit csv_path to resolve ambiguity."
+                )
+            main_file = landmark_files[0]
 
-        # Use first landmark file (typically the main body tracking)
-        main_file = landmark_files[0]
         logger.info(f"Parsing landmark file: {main_file}")
 
-        frames = self._parse_landmark_csv(main_file)
+        frames = self._parse_landmark_csv(main_file, min_confidence=min_confidence)
         logger.info(f"Parsed {len(frames)} frames")
 
         # Load optional calibration and metadata
         calibration = self._load_calibration()
         metadata = self._load_metadata()
+        metadata["min_confidence"] = min_confidence
 
         # Determine session ID
         if session_id is None:
