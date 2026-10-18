@@ -202,6 +202,73 @@ def test_compact_and_expand_frames_keep_only_observed_frames() -> None:
         compact_frames(Observations(("a", "b"), px, np.zeros((c, t, k))))
 
 
+def test_behind_camera_observation_produces_large_residual_and_is_rejected() -> None:
+    """An observation whose 3D point is behind a camera contributes a large penalty and is rejected (#13003)."""
+    from src.motion_capture.reconstruct.bundle import _Problem, _residual_map
+
+    cams, obs, truth = _scene(
+        RenderOptions(noise_px=0.0, occlusion_rate=0.0, outlier_rate=0.0, seed=42),
+        n_frames=2,
+    )
+    joints = np.array(truth.joints_3d_m)[:2].copy()
+    # Camera 'face_on' is at (0, 1.2, 4) looking at (0, 1, 0) (so looking towards -z).
+    # A point at z = +8 is at depth < 0 (behind camera 'face_on').
+    neck_idx = JOINT_NAMES.index("neck")
+    joints[0, neck_idx] = np.array([0.0, 1.2, 8.0])
+
+    opts = BundleOptions(scale_anchor=("neck", truth.bone_lengths_m["neck"]))
+    problem = _Problem(
+        cams, obs, joints, DEFAULT_LENGTHS_M, DEFAULT_LENGTHS_M, opts, JOINT_NAMES
+    )
+    residuals = problem.residuals(problem.x0)
+    face_on_idx = [c.camera_id for c in cams].index("face_on")
+    res_map = _residual_map(cams, joints, obs, problem.mask)
+    assert res_map[face_on_idx, 0, neck_idx] >= 1000.0
+    assert np.all(np.isfinite(residuals))
+    assert np.max(np.abs(residuals)) >= 1000.0
+
+    # Add a camera facing away from the scene so the reconstructed scene is behind it.
+    behind_cam = PinholeCamera(
+        "behind_cam",
+        cams[0].matrix,
+        look_at(np.array([0.0, 1.2, -4.0]), np.array([0.0, 1.0, -8.0])),
+        np.array([0.0, 1.2, -4.0]),
+        (1920, 1200),
+    )
+    all_cams = [*cams, behind_cam]
+    c, t, k, _ = obs.pixels.shape
+    new_pixels = np.zeros((c + 1, t, k, 2))
+    new_pixels[:c] = obs.pixels
+    new_pixels[c, 0, neck_idx] = [960.0, 600.0]
+    new_conf = np.zeros((c + 1, t, k))
+    new_conf[:c] = obs.confidence
+    new_conf[c, 0, neck_idx] = 1.0
+    new_obs = Observations(
+        tuple(cam.camera_id for cam in all_cams), new_pixels, new_conf
+    )
+
+    res = bundle_adjust(
+        all_cams, new_obs, length_prior_m=DEFAULT_LENGTHS_M, options=opts
+    )
+    rejected_keys = {(r.camera_id, r.frame, r.joint) for r in res.rejected}
+    assert ("behind_cam", 0, "neck") in rejected_keys
+
+
+def test_bundle_converged_reflects_least_squares_status() -> None:
+    """BundleResult.converged must be False when max_iterations is exceeded (#13003)."""
+    cams, obs, truth = _scene(
+        RenderOptions(noise_px=1.0, occlusion_rate=0.0, outlier_rate=0.0, seed=1),
+        n_frames=2,
+    )
+    start = _perturbed(cams, deg=5.0, metres=0.2, seed=2)
+    opts = BundleOptions(
+        scale_anchor=("neck", truth.bone_lengths_m["neck"]),
+        max_iterations=1,
+    )
+    res = bundle_adjust(start, obs, length_prior_m=DEFAULT_LENGTHS_M, options=opts)
+    assert res.converged is False
+
+
 def test_observations_from_views_mixed_fps_pairs_by_physical_time() -> None:
     """Views at different fps associate by physical time and drop no frames (#13002)."""
     layout = {"keypoint_names": ["nose", "neck"]}
