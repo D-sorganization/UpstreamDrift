@@ -2561,6 +2561,45 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13023 · Surface Searched Paths and Submodule Remedy in Tile Launch Failure Toast
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13023
+- **Branch:** merged via #13219
+- **PR:** #13219
+- **Paths:** see #13219
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`b997dddd`; collated from changes/13023-surface-searched-paths-and-submodule-rem.md)
+- **Summary:** Surface searched paths and submodule remedy in tile launch failure toast
+- **Next step:** Shipped in PR #13219.
+
+### DL-#12984 · Resolve MATLAB Default Slx Path Under Production Src Root and Raise GolfModelingError on Missing Default Model
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12984
+- **Branch:** merged via #13222
+- **PR:** #13222
+- **Paths:** see #13222
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`9cf31a81`; collated from changes/12984-resolve-matlab-default-slx-path-under-pr.md)
+- **Summary:** Resolve MATLAB default slx path under production src root and raise GolfModelingError on missing default model
+- **Next step:** Shipped in PR #13222.
+
+### DL-#12576 · NSX-44: React Loop Null-Space Panel Rendering the Shared Plot-Model Golden
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12576
+- **Branch:** merged via #13215
+- **PR:** #13215
+- **Paths:** see #13215
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`b13bbb0e`; collated from changes/12576-nsx44-react-panel.md)
+- **Summary:** NSX-44: React loop null-space panel rendering the shared plot-model golden
+- **Next step:** Shipped in PR #13215.
+
 ### DL-#13161 · HRG-00: Measured Coordinate Sign Map, ISB Basis Map, Human-Range Characterisation and HRG Calculation Reference
 
 - **State:** shipped

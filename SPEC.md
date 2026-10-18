@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-18 | #13219 | Surface searched paths and submodule remedy in tile launch failure toast |
+| 2026-10-18 | #13222 | Resolve MATLAB default slx path under production src root and raise GolfModelingError on missing default model |
+| 2026-10-18 | #13215 | NSX-44: React loop null-space panel rendering the shared plot-model golden |
 | 2026-10-18 | #13184 | HRG-00: measured coordinate sign map, ISB basis map, human-range characterisation and HRG calculation reference |
 | 2026-10-18 | #13195 | NSX-99: sensitivity stage, report schema v2 and variability panels |
 | 2026-10-18 | #13180 | HRG-E1: wrist lever angle renamed with NaN-plus-reason on missing markers; joint_stress requires signed, side-tagged WristDeviation |
