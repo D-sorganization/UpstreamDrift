@@ -700,3 +700,9 @@ envelope union contains every member. NSX-62 samples only along unidentified
 directions inside the pseudo-inertia constraint; identified combinations stay
 fixed (see the NSX-62 section below).
 
+
+## NSX-43 PyQt Tabs (#12575)
+
+The desktop surface is `src/tools/grip_wrench_plots/` (tile `grip_wrench_plots`). `window.GripWrenchTabsWidget` keeps the existing grip view as the first tab and adds Invariants, Envelopes, Hand Split and Diagnostics. `nsx_view.panel_views(model)` derives each tab from an `NSXPlotModel` and nothing else: rows, curves, segment display classes, overlays, withheld items and the evidence badge are read from the model's `DecisionView` objects, an unmarked quantity carries no number, and the allocation is only ever a dashed overlay on its band (its status, withheld items and non-claim are notes on the Envelopes tab). `nsx_draw.draw_panel` draws a view with matplotlib (solid fill for `DETERMINED_SIGN`, shading for `INDETERMINATE`, hatching for `UNBOUNDED`). `nsx_job.request_job` runs the NSX-40 service, then `report_decisions` and `build_plot_model`; `nsx_worker.NSXWorker` runs it on a `QThreadPool` thread with queued progress, cancel and failure signals. The preset selector lists `registry.load_registry().presets`.
+
+Tests (`tests/unit/tools/grip_wrench_plots/`) load the single shared golden `tests/fixtures/loop_nullspace/goldens/plot_model_v1.json` and assert the widgets show exactly what it says. The invariants stage reports progress first, but the model is built from the complete report, so the tabs fill when the run finishes and the Invariants tab is the first NSX tab selected.
