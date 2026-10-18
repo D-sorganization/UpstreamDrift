@@ -69,3 +69,17 @@ def test_receipt_without_totals_raises(tmp_path: Path) -> None:
     receipt.write_text(json.dumps({"sides": {"lead": {}}}), encoding="utf-8")
     with pytest.raises(ValueError, match="total_deg"):
         main(["apply", str(receipt), str(document)])
+
+
+def test_apply_reports_the_grip_in_golf_terms(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    document = tmp_path / "driver.json"
+    shutil.copy(DOCS / "full_body_spec_anthro_driver.json", document)
+    receipt = _receipt(tmp_path / "fit.json", [-80.0, 40.0, 5.0], [-30.0, 50.0, 60.0])
+    with caplog.at_level("INFO"):
+        assert main(["apply", str(receipt), str(document)]) == 0
+    text = caplog.text
+    assert "lead (L): alpha=" in text and "trail (R): alpha=" in text
+    assert "psi=" in text and "gamma=" in text
+    assert "set-identified" in text, "observability caveat must accompany the report"

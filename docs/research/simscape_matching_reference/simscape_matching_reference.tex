@@ -6203,6 +6203,74 @@ at $s=0.0123456789$~m is $4.5\times10^{-17}$~m; style and thumb leave
 and the physics hash identical. Reproduce with
 \texttt{pytest tests/unit/motion\_matching/test\_grip\_config.py}.
 
+\subsection{Grip Fitting Modes and Golf-Language Reporting}
+Definition (HRG-GR3, \#13204; \texttt{motion\_matching/grip\_fit\_modes.py},
+\texttt{grip\_report.py}). \emph{Observability.} The capture has no hand or
+finger markers and the three-coordinate forearm-plus-wrist chain spans
+$SO(3)$, so a constant grip rotation is absorbed with no change of marker
+residual. The fit therefore \emph{set-identifies} the grip through the
+joint-range excess only: it is regularised, not measured. Style, thumb offset,
+depth and spacing are unobservable and stay user-declared. The global marker
+residual (50.9~mm in the HRG record) is never an angular interval and is not
+reported as one.
+
+\paragraph{Objective.}
+Let $\theta=(\alpha,\psi,\gamma)$ be the golf angles of the total hand offset,
+$M(\theta)=R_y(\alpha)R_x(\psi-90^\circ)R_z(\gamma)$, and $\theta_u$ the
+declared grip carried by the document. The stack $A_k$ of forearm-to-hand
+rotations is measured with $\theta_u$ in place, so a candidate turns it by
+$E(\theta)=M(\theta_u)^{\mathsf T}M(\theta)$ (the $25^\circ$ ulnar factor
+cancels). With $e_j(\cdot)$ the degrees beyond the human range of wrist
+coordinate $j$ (pronation, cock, flexion) of $A_kE$,
+\begin{equation}
+J(\theta)=\sqrt{\tfrac1{3K}\textstyle\sum_{k,j}e_j(A_kE(\theta))^2},\qquad
+F(\theta)=J(\theta)+\lambda\,\lVert\theta-\theta_0\rVert^2 .
+\end{equation}
+Units: $J$ degrees, $\lambda$ per square degree. Modes (\texttt{subject.grip\_mode},
+default \texttt{user\_fixed}):
+\texttt{user\_fixed} runs no fit and returns $\theta_u$ (drift exactly zero);
+\texttt{bounded\_prior} minimises $F$ with $\theta_0=\theta_u$,
+$\lambda=10^{-4}$, inside $\theta_u\pm h$ ($h=(20,20,30)^\circ$ default,
+intersected with the physical ranges $\alpha\in[-60,60]$, $\psi\in[5,85]$,
+$\gamma\in[-180,180]$); \texttt{free\_fit} minimises $F$ over the physical
+ranges with $\theta_0=(0,40,0)^\circ$ (neutral) and $\lambda=10^{-5}$, so a
+zero-cost plateau has one answer. Method: a seven-point-per-axis grid seeds
+Nelder--Mead from the declared, prior and three best grid points
+(deterministic, independent of the multistart seed). Postcondition
+$J(\theta^\ast)\le J(\theta_u)$ in every mode, enforced by falling back to
+$\theta_u$ and flagging it. The legacy Euler search \texttt{fit\_grip\_rotation}
+is unchanged and shares the cost \texttt{ExcessObjective}.
+
+\paragraph{Reporting and Uncertainty.}
+Each hand is reported as $(\alpha,\psi,\gamma)$ with the nearest product
+preset in golf words (weak, neutral, strong; fingers, neutral, palm), the
+declared value, the drift, bound hits and $J$ before and after.
+\emph{Feasible interval:} for each angle, the other two are minimised over a
+61-point profile scan of the search box; the interval is the hull of values
+whose profile $J$ is within $0.1^\circ$ of the minimum, with the grid
+resolution and an at-edge flag. \emph{Sensitivity:} seeded random starts are
+polished on $F$; the per-angle spread among starts within $0.1^\circ$ of the
+best $J$ is reported. Unavailable items (\texttt{user\_fixed}, not requested)
+are \texttt{null} with a reason, never zero. A fit stamps
+\texttt{rom\_set\_identified} (through \texttt{apply\_grip\_config}) on the
+angles it moved by more than $10^{-3\circ}$ only; depth and spacing stay
+\texttt{user\_declared}, and \texttt{fitted\_grip} then follows the bound-wrist
+rule. \texttt{scripts/set\_spec\_grip\_rotation.py} logs the applied totals in
+the same golf terms with the set-identification caveat.
+
+\paragraph{Results (Synthetic Fixtures).}
+Plateau ($J=0$ at the declared grip): with $\lambda=0$ the equally-good
+multistart solutions spread by $88^\circ$, $25^\circ$ and $64^\circ$ in
+$\alpha,\psi,\gamma$; with the tie-breaker they spread by at most
+$5\times10^{-4\circ}$ and land on the neutral grip. Bounded example (hidden
+$(45,-35,30)^\circ$ rotation, $h=(10,10,15)^\circ$): $J$ falls from
+$7.24^\circ$ to $2.08^\circ$ with all three angles on a bound (interval
+widths $0.7^\circ$, $0.7^\circ$, $4^\circ$ at the bound), which reads as
+\emph{bounds too tight}, not as an identified anatomy. Real-capture
+validation is deferred. Reproduce with
+\texttt{pytest tests/unit/motion\_matching/test\_grip\_fit\_modes.py
+tests/scripts/test\_set\_spec\_grip\_rotation.py}.
+
 \subsection{Reconciling the Hand Spacing}
 \texttt{club\_geometry.py} previously placed the hands 0.035 m apart
 ($-0.025$ and $-0.06$ m) while the native spec places them 0.0762 m apart.

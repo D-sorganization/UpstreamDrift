@@ -28,6 +28,7 @@ from scripts.mirror_spec_left_hip import format_json
 from src.shared.python.motion_matching.execution.grip_rotation import (
     apply_grip_rotation,
 )
+from src.shared.python.motion_matching.grip_report import describe_rotation_deg
 
 LOGGER = logging.getLogger(__name__)
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -81,6 +82,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     changed = set_document_grip_rotation(args.receipt, args.document)
     LOGGER.info("%s: %s", args.document, "updated" if changed else "already set")
+    for line in describe_rotation_deg(read_totals(args.receipt)):
+        LOGGER.info("grip %s", line)
+    LOGGER.info(
+        "grip angles are set-identified through the joint-range cost, "
+        "not measured (no hand markers)"
+    )
     return 0
 
 
