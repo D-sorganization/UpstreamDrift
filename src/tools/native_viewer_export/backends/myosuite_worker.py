@@ -32,7 +32,7 @@ from src.shared.python.model_appearance.schema import AppearanceDocument
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
 from src.tools.native_viewer_export.backends._ball import draw_job_ball
-from src.tools.native_viewer_export.backends._body import default_appearance
+from src.tools.native_viewer_export.backends._body import appearance_for
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.backends.myosuite_compat import (
     find_scene,
@@ -140,7 +140,7 @@ def main(job_path: str) -> None:
     bundle = InputBundle.load(Path(job.bundle_path))
     q = np.load(job.q_path)
     skeleton = derive_visual_skeleton(json.loads(bundle.spec_bytes))
-    xml, _ = build_spec_xml(bundle.spec_bytes, default_appearance())
+    xml, _ = build_spec_xml(bundle.spec_bytes, appearance_for(job.appearance))
     scene_xml = merge_arena(xml, skeleton.ground.height_m, job.width, job.height)
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "scene.xml"

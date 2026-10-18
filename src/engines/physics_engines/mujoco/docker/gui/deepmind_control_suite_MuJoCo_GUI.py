@@ -19,6 +19,7 @@ import platform
 import subprocess
 import sys
 import threading
+import warnings
 from functools import partial
 from pathlib import Path
 
@@ -137,6 +138,14 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
                 with open(self.config_path) as f:
                     data = json.load(f)
                     if "colors" in data:
+                        warnings.warn(
+                            "simulation_config.json 'colors' is deprecated: use an "
+                            "appearance-v1 document or <spec>.appearance.json sidecar "
+                            "(model_appearance.appearance_selection."
+                            "overrides_from_legacy_config converts it once)",
+                            DeprecationWarning,
+                            stacklevel=2,
+                        )
                         for k, v in data["colors"].items():
                             self.colors[k] = v
 

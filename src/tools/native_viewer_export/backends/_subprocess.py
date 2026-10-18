@@ -77,6 +77,7 @@ def stage_job(
         },
         ball=swing.ball.to_dict() if swing.ball is not None else None,
         ball_visible=visible,
+        appearance=settings.appearance,
     )
 
 

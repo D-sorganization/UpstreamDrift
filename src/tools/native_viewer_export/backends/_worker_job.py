@@ -30,6 +30,9 @@ class WorkerJob:
     #: decorative golf ball (``BallPlacement.to_dict()``) and its visibility per position
     ball: dict[str, Any] | None = None
     ball_visible: list[bool] | None = None
+    #: resolved appearance-v1 document the worker dresses the body with
+    #: (``None`` = the contract default; HRG-B2, #13167)
+    appearance: dict[str, Any] | None = None
 
     def lookat_for(self, view: str, position: int) -> list[float]:
         """Look-at point of ``view`` at ``position`` (static ``lookat_m`` if unset)."""

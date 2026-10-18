@@ -1181,6 +1181,7 @@
 {"path": "math_utils/__init__.py", "classification": "ud-only", "package": "math_utils", "spelling_only": false}
 {"path": "math_utils/quaternion.py", "classification": "ud-only", "package": "math_utils", "spelling_only": false}
 {"path": "model_appearance/__init__.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/appearance_selection.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/appearance_v1.schema.json", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/ball.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/body_meshes.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
@@ -3265,6 +3266,7 @@
 {"path": "ui/dialogs/install_prompt.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
 {"path": "ui/function_generator_widget.py", "classification": "tools-only", "package": "ui", "spelling_only": false}
 {"path": "ui/helpful_field.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
+{"path": "ui/hex_color_field.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
 {"path": "ui/hover_copy_browser.py", "classification": "tools-only", "package": "ui", "spelling_only": false}
 {"path": "ui/info_button.py", "classification": "ud-only", "package": "ui", "spelling_only": false}
 {"path": "ui/loading_button.py", "classification": "ud-only", "package": "ui", "spelling_only": false}

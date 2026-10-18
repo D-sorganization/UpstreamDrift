@@ -39,7 +39,7 @@ from src.shared.python.motion_matching.visual_skeleton import derive_visual_skel
 from src.tools.native_viewer_export.ball import BALL_RGBA, BallPlacement
 from src.tools.native_viewer_export.backends._body import (
     body_mesh_files,
-    default_appearance,
+    appearance_for,
 )
 from src.tools.native_viewer_export.backends._club import club_parts
 from src.tools.native_viewer_export.backends._opensim_framing import (
@@ -384,7 +384,9 @@ def main(job_path: str) -> None:
     job = WorkerJob.load(Path(job_path))
     bundle = InputBundle.load(Path(job.bundle_path))
     q = np.load(job.q_path)
-    model, ground_h = build_model(osim, bundle.spec_bytes, default_appearance())
+    model, ground_h = build_model(
+        osim, bundle.spec_bytes, appearance_for(job.appearance)
+    )
     ball_coord = attach_ball(osim, model, job.ball) if job.ball else None
     model.setUseVisualizer(True)
     state = model.initSystem()

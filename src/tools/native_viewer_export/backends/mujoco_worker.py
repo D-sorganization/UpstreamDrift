@@ -10,6 +10,7 @@ torque glyphs are added to the MuJoCo scene before each render.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 import os
 from pathlib import Path
 import sys
@@ -37,13 +38,20 @@ from src.tools.native_viewer_export.backends.myosuite_worker import make_camera
 APPEARANCE = {**default_document_dict(), "ball": {"enabled": False}}
 
 
-def build_scene_xml(spec_bytes: bytes) -> tuple[str, dict[str, Any]]:
-    """Full-body MJCF with the default appearance document (body, club, scene).
+def build_scene_xml(
+    spec_bytes: bytes, appearance: Mapping[str, Any] | None = None
+) -> tuple[str, dict[str, Any]]:
+    """Full-body MJCF with the appearance document (body, club, scene).
+
+    ``appearance`` is the resolved document of the job (``None``: the contract
+    default); the exporter's own ball stays off either way.
 
     Postcondition: the returned summary's ``visual_layer`` records the mesh
     count and whether the club assembly was attached.
     """
-    return export_full_body_mjcf(spec_bytes, appearance=document_from_dict(APPEARANCE))
+    document = {**(APPEARANCE if appearance is None else appearance)}
+    document["ball"] = {"enabled": False}
+    return export_full_body_mjcf(spec_bytes, appearance=document_from_dict(document))
 
 
 def grow_offscreen_buffer(model: Any, width: int, height: int) -> None:
@@ -60,7 +68,7 @@ def main(job_path: str) -> None:
     job = WorkerJob.load(Path(job_path))
     bundle = InputBundle.load(Path(job.bundle_path))
     q = np.load(job.q_path)
-    xml, _ = build_scene_xml(bundle.spec_bytes)
+    xml, _ = build_scene_xml(bundle.spec_bytes, job.appearance)
     model = mujoco.MjModel.from_xml_string(xml)
     # the default offscreen buffer is 640x480; grow it to the requested size
     grow_offscreen_buffer(model, job.width, job.height)

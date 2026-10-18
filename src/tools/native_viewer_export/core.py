@@ -112,6 +112,9 @@ class ExportSettings:
     grip: bool = False  # hands/grip overlay (GCV-10); hands_closeup tracks it
     lookat_m: tuple[float, float, float] = (1.0, 0.0, 0.9)
     distance_m: float | None = None
+    #: resolved appearance-v1 document (``resolve_appearance``: CLI override, then
+    #: document / sidecar, then contract defaults); ``None`` = contract defaults
+    appearance: dict[str, Any] | None = None
 
     @classmethod
     def preview(cls, **overrides: Any) -> ExportSettings:
