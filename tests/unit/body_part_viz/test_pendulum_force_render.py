@@ -73,3 +73,31 @@ def test_native_painter_seek_and_toggle(monkeypatch):
         painter.end()
         widget.close()
         app.processEvents()
+
+
+def test_axial_segment_color_honours_opacity_and_tint():
+    pytest.importorskip("PyQt6")
+    from PyQt6.QtGui import QColor
+
+    app = QApplication.instance() or QApplication([])
+    widget = PendulumWidget()
+    try:
+        base = QColor("#ffff00")
+        base.setAlphaF(0.5)
+        widget.set_axial_color_scale(
+            ForceColorScale(
+                enabled=True, tension_limit_n=1, compression_limit_n=1, opacity=0.5
+            )
+        )
+        shaded = widget._axial_segment_color(10.0, base)
+        assert shaded.name() == "#808080"
+        assert shaded.alphaF() == pytest.approx(0.5, abs=0.01)
+        widget.set_axial_color_scale(
+            ForceColorScale(enabled=True, opacity=0.5, blend_mode="tint")
+        )
+        assert widget._axial_segment_color(0.0, base).name() == "#ffff00"
+        widget.set_axial_color_scale(ForceColorScale())
+        assert widget._axial_segment_color(10.0, base).name() == "#ffff00"
+    finally:
+        widget.close()
+        app.processEvents()

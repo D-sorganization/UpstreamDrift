@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defaultForceColorScale, forceColor, validateForceColorScale } from './forceColors';
+import { defaultForceColorScale, forceColor, forceShade, validateForceColorScale } from './forceColors';
 import examples from '../../../../schemas/force-color-examples.json';
 
 describe('signed axial force colors', () => {
@@ -34,6 +34,19 @@ describe('signed axial force colors', () => {
     for (const edit of [{ tension_limit_n: 0 }, { deadband_n: -1 },
       { compression_limit_n: Infinity }, { neutral_color: '#ffffff00' }]) {
       expect(() => validateForceColorScale({ ...defaultForceColorScale, ...edit })).toThrow();
+    }
+  });
+  it('matches the shared translucent overlay examples', () => {
+    for (const entry of examples.shade_cases) {
+      const scale = validateForceColorScale({ ...defaultForceColorScale, ...entry.settings } as never);
+      expect(forceShade(entry.force_n, entry.base_color, scale)).toBe(entry.expected);
+    }
+  });
+  it('defaults legacy settings to the opaque replace look and validates the new fields', () => {
+    const { opacity: _o, blend_mode: _b, ...legacy } = defaultForceColorScale;
+    expect(validateForceColorScale(legacy)).toEqual(defaultForceColorScale);
+    for (const edit of [{ opacity: -0.1 }, { opacity: 1.1 }, { opacity: NaN }, { blend_mode: 'multiply' }]) {
+      expect(() => validateForceColorScale({ ...defaultForceColorScale, ...edit } as never)).toThrow();
     }
   });
 });

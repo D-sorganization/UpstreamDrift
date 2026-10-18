@@ -169,3 +169,27 @@ def test_mujoco_meshcat_uses_native_commands_without_changing_geometry(monkeypat
     assert command["value"][3] == pytest.approx(0.8)
     adapter.update_force_colors(None, ForceColorScale())
     assert window.commands[-1]["value"][:3] == pytest.approx([0.2, 0.4, 0.6])
+
+
+def test_translucent_overlay_blends_base_rgb_and_preserves_alpha():
+    calls = []
+    display = MeshcatForceColors(
+        lambda path, prop, value: calls.append(value),
+        {"link": {"/a/<object>": (1.0, 1.0, 0.0, 0.3)}},
+    )
+    half = ForceColorScale(
+        enabled=True, tension_limit_n=1, compression_limit_n=1, opacity=0.5
+    )
+    display.apply(AxialLoadFrame(0, {"link": 10}, "Known section"), half)
+    assert calls[-1] == pytest.approx([0.5, 0.5, 0.5, 0.3])
+    tint = ForceColorScale(
+        enabled=True,
+        tension_limit_n=1,
+        compression_limit_n=1,
+        opacity=0.5,
+        blend_mode="tint",
+    )
+    display.apply(AxialLoadFrame(1, {"link": 0}, "Known section"), tint)
+    assert calls[-1] == pytest.approx([1.0, 1.0, 0.0, 0.3])
+    display.apply(AxialLoadFrame(2, {"link": -10}, "Known section"), tint)
+    assert calls[-1] == pytest.approx([1.0, 0.5, 0.0, 0.3])

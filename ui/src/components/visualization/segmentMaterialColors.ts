@@ -19,6 +19,10 @@ export function bindSegmentMeshes(root: THREE.Object3D, segmentIds: readonly str
   return result;
 }
 
+/** A fixed #RRGGBB, or a function of each material's original #RRGGBB color
+ * (translucent overlays blend with it); null/undefined restores the original. */
+export type SegmentColorOverride = string | ((baseHex: string) => string | null) | null;
+
 interface Entry {
   mesh: THREE.Mesh;
   original: THREE.Material | THREE.Material[];
@@ -45,9 +49,9 @@ export class SegmentMaterialColors {
     }
   }
 
-  apply(colors: Readonly<Record<string, string | null>>): void {
+  apply(colors: Readonly<Record<string, SegmentColorOverride>>): void {
     for (const color of Object.values(colors)) {
-      if (color !== null && !/^#[0-9a-fA-F]{6}$/.test(color)) {
+      if (typeof color === 'string' && !/^#[0-9a-fA-F]{6}$/.test(color)) {
         throw new TypeError('Overrides must be opaque #RRGGBB colors or null');
       }
     }
@@ -64,11 +68,19 @@ export class SegmentMaterialColors {
             ? entry.original.map(material => material.clone()) : entry.original.clone();
         }
         const materials = Array.isArray(entry.override) ? entry.override : [entry.override];
-        for (const material of materials) {
+        const originals = Array.isArray(entry.original) ? entry.original : [entry.original];
+        materials.forEach((material, index) => {
           if ('color' in material && material.color instanceof THREE.Color) {
-            material.color.set(color);
+            const original = originals[index];
+            const base = 'color' in original && original.color instanceof THREE.Color
+              ? '#' + original.color.getHexString() : '#ffffff';
+            const resolved = typeof color === 'function' ? color(base) : color;
+            if (!/^#[0-9a-fA-F]{6}$/.test(resolved ?? base)) {
+              throw new TypeError('Overrides must be opaque #RRGGBB colors or null');
+            }
+            material.color.set(resolved ?? base);
           }
-        }
+        });
         entry.mesh.material = entry.override;
       }
     }
