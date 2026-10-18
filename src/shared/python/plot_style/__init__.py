@@ -14,14 +14,14 @@ cross-engine dashboard, per-engine viz modules):
 - ``markers`` / ``shapes`` — ``MarkerStyle``, ``MarkerShape``,
   ``CustomMeshSpec`` and the built-in shape primitives.
 - ``renderers`` — ``MatplotlibMarkerRenderer`` (canonical 2D/3D
-  scatter backend) and ``PyQtGLMarkerRenderer`` (lazy-loaded via
-  ``__getattr__`` to keep PyQt6 optional).
+  scatter backend) and ``PyQtGLMarkerRenderer``, both lazy-loaded via
+  ``__getattr__`` to keep matplotlib and PyQt6 optional.
 - ``resolvers`` — Static / Palette / DataDriven color resolvers
   registered in ``RESOLVER_REGISTRY``.
 - ``widgets`` — optional Qt widgets (``MarkerStylePicker``,
   ``ColorPicker``, ``ColormapPicker``, ``DataChannelEditor``) imported
-  only when PyQt6 is available; their names join ``__all__`` via the
-  UNION resolution from #4807.
+  lazily on first attribute access; their names join ``__all__`` via
+  the UNION resolution from #4807 when PyQt6 is installed.
 - ``persistence`` / ``preset_library`` — ``PlotStyleSet`` /
   ``PlotStyleSpec`` JSON v1 schema and the built-in preset library.
 
@@ -30,6 +30,8 @@ See ADR-0011 (Plot Style Toolkit). Epic #4796 shipped the full stack.
 
 from __future__ import annotations
 
+import importlib
+import importlib.util
 from typing import TYPE_CHECKING, Any
 
 from ._types import RGBATuple
@@ -63,32 +65,47 @@ from .registry import (
     register_custom_colormap,
     unregister_custom_colormap,
 )
-from .renderers import MatplotlibMarkerRenderer
 from .resolvers import RESOLVER_REGISTRY
 
-# Qt widgets are an optional surface — we expose their names in
-# ``__all__`` (UNION resolution per #4807) but only import them when
-# PyQt6 is available so that headless / non-GUI consumers can still
-# import this package.
-try:
-    from .widgets import (  # noqa: F401
+# Qt widgets and the matplotlib renderer are optional, heavy surfaces.
+# They are re-exported lazily through ``__getattr__`` so that headless
+# consumers (force_overlay, loop_nullspace, docs builder) can import
+# this package without loading PyQt6 or matplotlib.
+_LAZY_EXPORTS: dict[str, str] = {
+    "ColormapPicker": ".widgets",
+    "ColorPicker": ".widgets",
+    "DataChannelEditor": ".widgets",
+    "MarkerStylePicker": ".widgets",
+    "MatplotlibMarkerRenderer": ".renderers.matplotlib",
+    "PyQtGLMarkerRenderer": ".renderers.pyqtgl",
+}
+
+
+def _pyqt6_installed() -> bool:
+    """Return whether PyQt6 is discoverable, without importing it."""
+    try:
+        return importlib.util.find_spec("PyQt6") is not None
+    except (ImportError, ValueError):
+        return False
+
+
+# UNION resolution (#4807): widget names join ``__all__`` only when
+# PyQt6 is installed.
+_WIDGET_NAMES: tuple[str, ...] = (
+    ("ColormapPicker", "ColorPicker", "DataChannelEditor", "MarkerStylePicker")
+    if _pyqt6_installed()
+    else ()
+)
+
+if TYPE_CHECKING:  # pragma: no cover - typing only
+    from .renderers.matplotlib import MatplotlibMarkerRenderer
+    from .renderers.pyqtgl import PyQtGLMarkerRenderer
+    from .widgets import (
         ColormapPicker,
         ColorPicker,
         DataChannelEditor,
         MarkerStylePicker,
     )
-
-    _WIDGET_NAMES: tuple[str, ...] = (
-        "ColormapPicker",
-        "ColorPicker",
-        "DataChannelEditor",
-        "MarkerStylePicker",
-    )
-except Exception:  # pragma: no cover - optional GUI dependency (PyQt6)  # noqa: BLE001
-    _WIDGET_NAMES = ()
-
-if TYPE_CHECKING:  # pragma: no cover - typing only
-    from .renderers.pyqtgl import PyQtGLMarkerRenderer
 
 __all__ = [
     "BUILTIN_PRESET_NAMES",
@@ -127,18 +144,20 @@ __all__ = [
     "slice_channel",
     "unregister_custom_colormap",
 ]
-# UNION resolution (#4807): widget names are appended only when the
-# optional PyQt6 import succeeded above.
 __all__.extend(_WIDGET_NAMES)
 __all__.sort()
 
 
 def __getattr__(name: str) -> Any:
-    """Lazy attribute access for optional / heavy renderers."""
-    if name == "PyQtGLMarkerRenderer":
-        from .renderers.pyqtgl import (  # noqa: PLC0415 - intentional lazy import
-            PyQtGLMarkerRenderer,
-        )
+    """Lazy attribute access for optional / heavy renderers and widgets."""
+    module_name = _LAZY_EXPORTS.get(name)
+    if module_name is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    value = getattr(importlib.import_module(module_name, __name__), name)
+    globals()[name] = value
+    return value
 
-        return PyQtGLMarkerRenderer
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+def __dir__() -> list[str]:
+    """Include lazily exported names in ``dir()``."""
+    return sorted(set(globals()) | set(_LAZY_EXPORTS))
