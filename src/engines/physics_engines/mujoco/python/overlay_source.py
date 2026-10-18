@@ -8,7 +8,7 @@ contact law is validated on.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 import numpy as np
@@ -17,7 +17,10 @@ from src.engines.physics_engines.mujoco.python.full_body_model import (
     NativeMujocoFullBodyModel,
 )
 from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
-from src.shared.python.body_part_viz.mujoco_axial_loads import MujocoAxialLoadSource
+from src.shared.python.body_part_viz.mujoco_axial_loads import (
+    ExternalWrench,
+    MujocoAxialLoadSource,
+)
 from src.shared.python.force_overlay.bundle_provider import JointFrame
 
 Vec3 = tuple[float, float, float]
@@ -37,12 +40,15 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
         rates: Mapping[str, float],
         accelerations: Mapping[str, float],
         time_s: float,
+        external_wrenches: Sequence[ExternalWrench] | None = None,
     ) -> AxialLoadFrame | None:
         """Segment axial loads of a prescribed motion (inverse dynamics).
 
         Uses the ``kinematic`` axis policy (every body with a defined axis).
         Postcondition: tension positive, keyed by MuJoCo body name; ``None`` when
-        the model has tendons, plugins or callbacks.
+        the model has tendons, plugins or callbacks. The ground reaction comes from
+        the shared contact law (``external_wrenches``), not MuJoCo contacts, which a
+        prescribed pose lacks; see ``MujocoAxialLoadSource.sample_prescribed``.
         """
         if self._axial_source is None:
             self._axial_source = MujocoAxialLoadSource(
@@ -53,6 +59,7 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
             self._vector(rates),
             self._vector(accelerations),
             time_s,
+            external_wrenches,
         )
 
     def _forward(self, coordinates: Mapping[str, float]) -> None:

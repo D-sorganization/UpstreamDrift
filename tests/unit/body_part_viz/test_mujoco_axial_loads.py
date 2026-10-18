@@ -312,3 +312,123 @@ def test_sample_prescribed_unavailable_without_axes():
     model = mujoco.MjModel.from_xml_string(PENDULUM)
     source = MujocoAxialLoadSource(model)  # rod policy: no qualified bodies
     assert source.sample_prescribed(np.zeros(2), np.zeros(2), np.zeros(2), 0.0) is None
+
+
+# --- external ground-reaction wrenches (issue #13146) -----------------------
+
+LEG = """<mujoco><option gravity="0 0 -9.81"/><worldbody>
+<body name="pelvis" pos="0 0 1">
+<joint name="sx" type="slide" axis="1 0 0"/><joint name="sy" type="slide" axis="0 1 0"/>
+<joint name="sz" type="slide" axis="0 0 1"/>
+<geom type="sphere" size="0.1" mass="60"/>
+<body name="upper"><joint name="hip" type="hinge" axis="0 1 0"/>
+<geom type="sphere" size="0.05" pos="0 0 -0.25" mass="8"/>
+<body name="lower" pos="0 0 -0.5"><joint name="knee" type="hinge" axis="0 1 0"/>
+<geom type="sphere" size="0.05" pos="0 0 -0.25" mass="4"/>
+<body name="foot" pos="0 0 -0.5">
+<geom type="sphere" size="0.02" mass="1"/></body></body></body></body>
+%s</worldbody></mujoco>"""
+FLOOR = '<geom name="floor" type="plane" size="2 2 0.1"/>'
+LEG_G = 9.81
+
+
+class _Wrench:
+    def __init__(self, body, point, force, torque=None):
+        self.body, self.point_m = body, point
+        self.force_n, self.torque_nm = force, torque
+
+
+def _leg(floor: str = ""):
+    model = mujoco.MjModel.from_xml_string(LEG % floor)
+    return model, MujocoAxialLoadSource(model, axis_policy="kinematic")
+
+
+def test_leg_without_external_wrench_hangs_from_root():
+    model, source = _leg()
+    zero = np.zeros(model.nv)
+    frame = source.sample_prescribed(np.zeros(model.nq), zero, zero, 0.0)
+    # No ground: the root residual carries everything, the lower leg hangs.
+    assert frame.values_n["lower"] == pytest.approx(5 * LEG_G, rel=1e-2)
+
+
+@pytest.mark.parametrize("floor", ["", FLOOR])
+def test_leg_with_ground_reaction_reads_compression_of_mass_above(floor):
+    model, source = _leg(floor)
+    zero = np.zeros(model.nv)
+    ground = _Wrench("foot", (0.0, 0.0, 0.0), (0.0, 0.0, 73 * LEG_G))
+    frame = source.sample_prescribed(
+        np.zeros(model.nq), zero, zero, 0.0, external_wrenches=[ground]
+    )
+    assert frame.values_n["lower"] == pytest.approx(-68 * LEG_G, rel=1e-2)
+    # The hip section carries only the pelvis; the knee section also the thigh.
+    assert frame.values_n["upper"] == pytest.approx(-60 * LEG_G, rel=1e-2)
+
+
+def test_leg_root_residual_vanishes_with_ground_reaction():
+    """Newton check: qfrc_inverse minus the applied-wrench generalized force."""
+    model, source = _leg()
+    ground = _Wrench("foot", (0.0, 0.0, 0.0), (0.0, 0.0, 73 * LEG_G))
+    free, data = source._contactless_pair()
+    source._apply_external(free, data, [ground])
+    mujoco.mj_inverse(free, data)
+    applied = np.zeros(model.nv)
+    foot = model.body("foot").id
+    mujoco.mj_applyFT(
+        free, data, [0.0, 0.0, 73 * LEG_G], np.zeros(3), np.zeros(3), foot, applied
+    )
+    residual = data.qfrc_inverse - applied
+    assert abs(residual[2]) < 0.01 * 73 * LEG_G  # root slide z: nothing left to hold
+    # Without the wrench the root must carry the whole weight.
+    bare = mujoco.MjData(model)
+    mujoco.mj_inverse(model, bare)
+    assert bare.qfrc_inverse[2] == pytest.approx(73 * LEG_G, rel=1e-3)
+
+
+def test_external_wrench_off_axis_point_adds_com_torque():
+    model, source = _leg()
+    data = mujoco.MjData(model)
+    mujoco.mj_kinematics(model, data)
+    body = model.body("foot").id
+    point = data.xipos[body] + np.array([0.1, 0.0, 0.0])
+    source._apply_external(
+        source.model, data, [_Wrench("foot", point, (0.0, 0.0, 10.0))]
+    )
+    np.testing.assert_allclose(data.xfrc_applied[body], [0, 0, 10, 0, -1.0, 0])
+
+
+def test_external_wrenches_do_not_touch_live_model_or_inputs():
+    model, source = _leg(FLOOR)
+    flags = int(model.opt.disableflags)
+    zero = np.zeros(model.nv)
+    source.sample_prescribed(np.zeros(model.nq), zero, zero, 0.0, external_wrenches=[])
+    assert int(model.opt.disableflags) == flags
+
+
+def test_external_wrenches_validate_body_and_values():
+    model, source = _leg()
+    zero = np.zeros(model.nv)
+    q = np.zeros(model.nq)
+    with pytest.raises(ValueError, match="unknown body"):
+        source.sample_prescribed(
+            q,
+            zero,
+            zero,
+            0.0,
+            external_wrenches=[_Wrench("nope", (0, 0, 0), (0, 0, 1))],
+        )
+    with pytest.raises(ValueError, match="force_n"):
+        source.sample_prescribed(
+            q,
+            zero,
+            zero,
+            0.0,
+            external_wrenches=[_Wrench("foot", (0, 0, 0), (0, 0, float("nan")))],
+        )
+    with pytest.raises(ValueError, match="point_m"):
+        source.sample_prescribed(
+            q,
+            zero,
+            zero,
+            0.0,
+            external_wrenches=[_Wrench("foot", (0, 0), (0, 0, 1))],
+        )

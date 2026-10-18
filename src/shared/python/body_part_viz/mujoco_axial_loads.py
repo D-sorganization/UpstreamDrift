@@ -6,10 +6,11 @@ https://mujoco.readthedocs.io/en/stable/APIreference/APIfunctions.html#mj-rnepos
 
 from __future__ import annotations
 
+import copy
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from types import MappingProxyType
-from typing import Any
+from typing import Any, Protocol
 
 import numpy as np
 
@@ -19,6 +20,19 @@ from .axial_loads import AxialLoadFrame, axial_force_from_proximal_reaction
 AXIS_POLICIES = ("rod", "kinematic")
 _ANCHOR_TOL = 1e-9
 _MIN_AXIS_LENGTH_M = 1e-6
+
+
+class ExternalWrench(Protocol):
+    """An external wrench on a named body, applied at a world-frame point.
+
+    Structurally satisfied by ``force_overlay.contracts.OverlayWrench``.
+    ``force_n``/``torque_nm`` are world-frame vectors or ``None`` (absent half).
+    """
+
+    body: str
+    point_m: Sequence[float]
+    force_n: Sequence[float] | None
+    torque_nm: Sequence[float] | None
 
 
 class MujocoAxialLoadSource:
@@ -62,6 +76,7 @@ class MujocoAxialLoadSource:
         self.axis_policy = axis_policy
         self._native = mujoco
         self._scratch = mujoco.MjData(model)
+        self._contactless: tuple[Any, Any] | None = None
         self._axes, sources = self._discover_axes()
         self._axis_sources = MappingProxyType(sources)
 
@@ -179,9 +194,8 @@ class MujocoAxialLoadSource:
         )
         return not any(get_callback() is not None for get_callback in callbacks)
 
-    def _project(self, time_s: float) -> AxialLoadFrame:
+    def _project(self, time_s: float, scratch: Any, note: str = "") -> AxialLoadFrame:
         """Project scratch cfrc_int onto each qualified axis (scratch is solved)."""
-        scratch = self._scratch
         values = {}
         for body, (name, proximal, distal) in self._axes.items():
             rotation = scratch.xmat[body].reshape(3, 3)
@@ -195,7 +209,7 @@ class MujocoAxialLoadSource:
             float(time_s),
             values,
             "MuJoCo cfrc_int parent-on-body reaction; proximal section of "
-            f"{self.axis_policy}-policy segment axis; world XYZ",
+            f"{self.axis_policy}-policy segment axis; world XYZ{note}",
         )
 
     def sample(self, data: Any) -> AxialLoadFrame | None:
@@ -210,7 +224,7 @@ class MujocoAxialLoadSource:
         copy_mjdata_state(self._scratch, data)
         native.mj_forward(model, self._scratch)
         native.mj_rnePostConstraint(model, self._scratch)
-        return self._project(data.time)
+        return self._project(data.time, self._scratch)
 
     def _checked(self, name: str, value: Any, size: int) -> np.ndarray:
         array = np.asarray(value, dtype=float)
@@ -220,8 +234,50 @@ class MujocoAxialLoadSource:
             raise ValueError(f"{name} must be finite")
         return array
 
+    def _contactless_pair(self) -> tuple[Any, Any]:
+        """Private model copy with native contact disabled, plus its scratch data.
+
+        The live model is never touched: only this copy carries the flag.
+        """
+        if self._contactless is None:
+            model = copy.copy(self.model)
+            model.opt.disableflags |= int(self._native.mjtDisableBit.mjDSBL_CONTACT)
+            self._contactless = (model, self._native.MjData(model))
+        return self._contactless
+
+    def _apply_external(
+        self, model: Any, data: Any, wrenches: Sequence[ExternalWrench]
+    ) -> None:
+        """Write ``wrenches`` into ``data.xfrc_applied`` (MuJoCo COM convention).
+
+        xfrc_applied is a world-frame force and torque ABOUT the body COM
+        (``xipos``); a force ``F`` at point ``p`` therefore adds ``(p - xipos) x F``
+        to the torque. Needs ``data`` kinematics (``xipos``) to be current.
+        """
+        native = self._native
+        native.mj_kinematics(model, data)
+        data.xfrc_applied[:] = 0.0
+        for wrench in wrenches:
+            body = native.mj_name2id(model, native.mjtObj.mjOBJ_BODY, wrench.body)
+            if body < 0:
+                raise ValueError(f"external wrench on unknown body {wrench.body!r}")
+            point = self._checked("external wrench point_m", wrench.point_m, 3)
+            if wrench.force_n is not None:
+                force = self._checked("external wrench force_n", wrench.force_n, 3)
+                data.xfrc_applied[body, :3] += force
+                data.xfrc_applied[body, 3:] += np.cross(point - data.xipos[body], force)
+            if wrench.torque_nm is not None:
+                data.xfrc_applied[body, 3:] += self._checked(
+                    "external wrench torque_nm", wrench.torque_nm, 3
+                )
+
     def sample_prescribed(
-        self, qpos: Any, qvel: Any, qacc: Any, time_s: float
+        self,
+        qpos: Any,
+        qvel: Any,
+        qacc: Any,
+        time_s: float,
+        external_wrenches: Sequence[ExternalWrench] | None = None,
     ) -> AxialLoadFrame | None:
         """Axial loads for a prescribed motion via inverse dynamics.
 
@@ -231,6 +287,17 @@ class MujocoAxialLoadSource:
         Preconditions: shapes (nq,), (nv,), (nv,); all finite; finite ``time_s``
         (ValueError otherwise). Postcondition: same projection and sign as
         ``sample`` (tension positive); returns None when the model is unsupported.
+
+        ``external_wrenches`` (default ``None``: MuJoCo's own contacts decide) is
+        the single source of truth for ground reaction when the model's support
+        comes from an external contact law instead of native geoms: a prescribed
+        pose has no penetration-dependent native contact, so without it the root
+        residual carries the body and the legs read tension. Passing a sequence
+        (possibly empty, e.g. no foot loaded) disables native contacts on a
+        private model copy, so nothing is counted twice, and applies each wrench
+        through ``xfrc_applied``, which ``mj_inverse`` and ``mj_rnePostConstraint``
+        include in the section loads. Raises ValueError for an unknown body or a
+        non-finite wrench.
         """
         model, native, scratch = self.model, self._native, self._scratch
         q = self._checked("qpos", qpos, model.nq)
@@ -240,10 +307,16 @@ class MujocoAxialLoadSource:
             raise ValueError("time_s must be finite")
         if not self._available():
             return None
+        note = ""
+        if external_wrenches is not None:
+            model, scratch = self._contactless_pair()
+            note = "; external contact wrenches, native contacts off"
         native.mj_resetData(model, scratch)
         scratch.qpos[:], scratch.qvel[:], scratch.qacc[:] = q, v, a
         scratch.time = float(time_s)
+        if external_wrenches is not None:
+            self._apply_external(model, scratch, external_wrenches)
         native.mj_inverse(model, scratch)
         scratch.qacc[:] = a  # mj_inverse consumes qacc; make the invariant explicit
         native.mj_rnePostConstraint(model, scratch)
-        return self._project(time_s)
+        return self._project(time_s, scratch, note)

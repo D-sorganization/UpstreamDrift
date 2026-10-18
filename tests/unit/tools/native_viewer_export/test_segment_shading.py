@@ -222,8 +222,11 @@ class _Axial:
     def __init__(self) -> None:
         self.calls: list[tuple[dict, dict, dict, float]] = []
 
-    def axial_load_frame(self, coordinates, rates, accelerations, time_s):
+    def axial_load_frame(
+        self, coordinates, rates, accelerations, time_s, external_wrenches=None
+    ):
         self.calls.append((coordinates, rates, accelerations, time_s))
+        self.wrenches = external_wrenches
         return AxialLoadFrame(time_s, {"seg": 1.0}, "fake")
 
 
@@ -258,6 +261,30 @@ def test_provider_attaches_axial_loads_from_its_own_kinematics() -> None:
     assert t == pytest.approx(0.02) and frame.axial_loads.time_s == t
     with pytest.raises(TypeError):
         provider.with_axial_loads(object())  # type: ignore[arg-type]
+
+
+def test_provider_passes_its_contact_wrenches_to_the_axial_source() -> None:
+    """One source of truth: the drawn ground wrenches also support the legs."""
+    from types import SimpleNamespace
+
+    sample = SimpleNamespace(
+        normal_force_n=(0.0, 0.0, 400.0),
+        friction_force_n=(0.0, 0.0, 0.0),
+        contact_point_m=(0.1, 0.0, 0.0),
+    )
+
+    class _Ground(_Kin):
+        def evaluate_contact_samples(self, coordinates, rates):
+            return {"sphere_foot": sample}
+
+    kin, axial = _Ground(), _Axial()
+    provider = BundleOverlayProvider(
+        _tiny_bundle(), kin, kin, engine="mujoco"
+    ).with_axial_loads(axial)
+    provider.frame_at(1)
+    (wrench,) = axial.wrenches
+    assert wrench.force_n == (0.0, 0.0, 400.0) and wrench.point_m == (0.1, 0.0, 0.0)
+    assert wrench.body == "foot"
 
 
 def test_axial_frames_round_trip_json(tmp_path: Path) -> None:
