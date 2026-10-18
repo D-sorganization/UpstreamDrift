@@ -135,6 +135,25 @@ class TestFillShortGaps:
         assert filled[2, 1] == 30.0
         np.testing.assert_allclose(filled[1:3, 2], [200.0, 300.0])
 
+    def test_infinite_neighbour_treated_as_gap_and_filled_correctly(self) -> None:
+        # Issue #12978: fill_short_gaps(np.array([1, nan, inf, nan, 4.]), 3)
+        # inf inside the gap should not act as a valid boundary or produce inf/nan garbage.
+        x = np.array([1.0, np.nan, np.inf, np.nan, 4.0])
+        filled, count = fill_short_gaps(x, max_gap=3)
+        assert count == 3
+        expected = np.array([1.0, 1.75, 2.5, 3.25, 4.0])
+        np.testing.assert_allclose(filled, expected)
+        assert np.isfinite(filled).all()
+
+    def test_unfilled_gap_with_inf_normalized_to_nan(self) -> None:
+        # Issue #12978: When gap exceeds max_gap, non-finite values normalize to NaN
+        x = np.array([1.0, np.inf, np.nan, np.nan, 5.0])
+        filled, count = fill_short_gaps(x, max_gap=2)
+        assert count == 0
+        assert np.isnan(filled[1:4]).all()
+        assert filled[0] == 1.0
+        assert filled[4] == 5.0
+
 
 # ---------------------------------------------------------------------------
 # 2. relabel_markers
@@ -225,6 +244,28 @@ class TestRelabelMarkers:
         np.testing.assert_allclose(reordered[:, 0, :], 1.0)
         assert np.isnan(reordered[:, 1, :]).all()
         np.testing.assert_allclose(reordered[:, 2, :], 1.0)
+
+    def test_precondition_duplicate_source_labels_raises(self) -> None:
+        # Issue #12978: relabel_markers(p, ["A", "A"], ["A"]) silently picked 2nd marker
+        points = np.zeros((4, 2, 3))
+        points[:, 0, :] = 1.0
+        points[:, 1, :] = 2.0
+        with pytest.raises((PreconditionError, ValueError), match="duplicate"):
+            relabel_markers(points, ["A", "A"], ["A"])
+
+        points3 = np.zeros((4, 3, 3))
+        with pytest.raises((PreconditionError, ValueError), match="duplicate"):
+            relabel_markers(points3, ["A", "B", "A"], ["A", "B"])
+
+    def test_relabel_markers_normalizes_infinite_values_to_nan(self) -> None:
+        # Issue #12978: infinite samples are treated as invalid (normalized to NaN)
+        points = np.ones((4, 2, 3))
+        points[1, 0, :] = np.inf
+        points[2, 1, 0] = -np.inf
+        reordered = relabel_markers(points, ["A", "B"], ["B", "A"])
+        assert np.isnan(reordered[1, 1, :]).all()
+        assert np.isnan(reordered[2, 0, 0])
+        assert reordered[0, 0, 0] == 1.0
 
 
 # ---------------------------------------------------------------------------
@@ -412,6 +453,23 @@ class TestDetectImpactFrame:
             "dropout" in rec.message.lower() or "gap" in rec.message.lower()
             for rec in caplog.records
         )
+
+    def test_infinite_sample_treated_as_gap_and_not_selected(self) -> None:
+        # Issue #12978: inf sample at impact peak must not corrupt speeds or be selected
+        club_head, t = self._generate_synthetic_arc_swing(n_frames=101, peak_frame=60)
+        club_head[60, :] = np.inf
+        impact = detect_impact_frame(club_head, t)
+        assert impact in (58, 59, 61, 62)
+        assert impact != 60
+        assert np.isfinite(club_head[impact]).all()
+
+    def test_precondition_insufficient_finite_frames_raises(self) -> None:
+        # Issue #12978: Array with inf values where finite frames < 2 must raise
+        t = np.linspace(0, 1, 10)
+        club_head = np.full((10, 3), np.inf)
+        club_head[5] = [1.0, 2.0, 3.0]  # Only 1 finite frame
+        with pytest.raises((PreconditionError, ValueError)):
+            detect_impact_frame(club_head, t)
 
 
 # ---------------------------------------------------------------------------

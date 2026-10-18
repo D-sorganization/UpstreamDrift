@@ -1606,6 +1606,18 @@
       "evidence": "src/tools/grip_wrench_plots/window.py",
       "acceptance_owner": "tests/unit/tools/grip_wrench_plots/test_nsx_tabs.py"
     },
+    "loop_nullspace_variability": {
+      "id": "loop_nullspace_variability",
+      "name": "Closed-loop null-space variability and consistency (NSX-100) panels rendered from the plot model",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/grip_wrench_plots/variability_tab.py",
+      "acceptance_owner": "tests/unit/tools/grip_wrench_plots/test_variability_tab.py"
+    },
     "tools.spine_viewer": {
       "id": "tools.spine_viewer",
       "name": "Segmental spine viewer",

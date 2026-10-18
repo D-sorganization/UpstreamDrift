@@ -256,3 +256,11 @@ def test_unbuildable_partial_has_no_plot_model(client, gated, monkeypatch) -> No
     assert "plot_model" not in mid["partial"] and mid["partial"]["invariants"]
     gated.release.set()
     _wait(client, job["job_id"], "failed")
+
+
+def test_sensitivity_options_are_served_from_the_catalogue(client) -> None:
+    from src.shared.python.loop_nullspace import sensitivity_options as opts
+
+    served = client.get("/analysis/loop-nullspace/sensitivity-options")
+    assert served.status_code == 200
+    assert served.json() == opts.option_catalogue()

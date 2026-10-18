@@ -13,8 +13,17 @@ read one table:
 * the deadlift and the clean-and-jerk are pulls: the bar hangs in the hands
   (the optimizer's ``deadlift`` bar model) and the window is centred on the
   knee pass;
-* the bench press and the snatch are :data:`DEFERRED_LIFTS`, each with the
-  measured reason no credible trajectory comes out of this pipeline.
+* the bench press lies supine on a bench contact body (:mod:`.bench_press`):
+  the optimizer's arm-chain bar model is applied to the model's shoulders and
+  the window is centred on the bottom (the bar at the chest);
+* the snatch is a pull with a phase-correct bar: the Tools snatch
+  configuration pins a via pose at each phase start of the standard, the bar
+  hangs in the hands through both pulls and is overhead from the catch on
+  (``bar_convention="snatch"``, :func:`movement_optimizer.exercises.snatch.
+  snatch_bar_path`), and the window is centred on the knee pass.
+
+:data:`DEFERRED_LIFTS` lists any lift without a credible trajectory from this
+pipeline, with the measured reason.
 """
 
 from __future__ import annotations
@@ -36,6 +45,9 @@ _REPO = Path(__file__).resolve().parents[4]
 EVIDENCE_DIR = _REPO / "docs/development/lifting/evidence"
 #: Window events a recipe may centre its bundle on.
 WINDOW_EVENTS: tuple[str, ...] = ("bottom", "knee_pass")
+#: Bar conventions whose bar is held in the hands (the ``snatch`` bar hangs
+#: through the pulls and is overhead from the catch on).
+HAND_HELD_CONVENTIONS: tuple[str, ...] = ("deadlift", "snatch")
 
 
 @dataclass(frozen=True)
@@ -84,8 +96,13 @@ class LiftRecipe:
 
     @property
     def hand_held(self) -> bool:
-        """True when the bar hangs in the hands rather than on a torso shelf."""
-        return self.bar_convention == "deadlift"
+        """True when the bar is held in the hands rather than on a torso shelf."""
+        return self.bar_convention in HAND_HELD_CONVENTIONS
+
+    @property
+    def supine(self) -> bool:
+        """True when the lifter lies on the bench contact body (#11745)."""
+        return self.bar_convention == "bench_press"
 
 
 _PULL_RATIONALE = (
@@ -135,31 +152,53 @@ RECIPES: Mapping[str, LiftRecipe] = MappingProxyType(
                 "the rack, the jerk and the overhead phases are not in it."
             ),
         ),
+        "snatch": LiftRecipe(
+            lift="snatch",
+            bundle_name="snatch",
+            exercise="snatch",
+            bar_convention="snatch",
+            window_event="knee_pass",
+            phase="first_pull",
+            duration_s=2.0,
+            bar_mass_kg=100.0,
+            rationale=(
+                "The Tools snatch configuration pins a via pose at the start "
+                "of each phase of the standard (knee pass at 0.30, full "
+                "extension at 0.45, catch at 0.55 held to 0.70), so the "
+                "shoulder rises through the first and second pulls before the "
+                "lifter drops under the bar into a catch with the standard's "
+                "trunk lean. Its phase-correct bar hangs in the hands through "
+                "the pulls, turns over across the turnover and is overhead "
+                "from the catch on, applied to the model's shoulders. The "
+                "window spans the knee pass, from the end of the first pull "
+                "into the second; the turnover, catch and recovery are not in "
+                "it, and the full-body IK does not follow them (#11745)."
+            ),
+        ),
+        "bench_press": LiftRecipe(
+            lift="bench_press",
+            bundle_name="bench_press",
+            exercise="bench_press",
+            bar_convention="bench_press",
+            window_event="bottom",
+            phase="chest_touch",
+            duration_s=2.0,
+            bar_mass_kg=100.0,
+            rationale=(
+                "Supine on a bench contact body: four back spheres (OSL-2 "
+                "geometry) press on a raised support and the feet stand on "
+                "the floor. The bar path is the optimizer's bench arm-chain "
+                "bar model (arm tip relative to the shoulder) applied to the "
+                "model's shoulders, scaled by its straight-up reach; only the "
+                "arms move. The window is centred on the bottom (chest touch)."
+            ),
+        ),
     }
 )
 
 #: Lifts without a credible trajectory from this pipeline, with the reason.
-DEFERRED_LIFTS: Mapping[str, str] = MappingProxyType(
-    {
-        "bench_press": (
-            "Supine on a bench: the same-input full-body spec has contact "
-            "spheres on the feet only and an unactuated floating root, so "
-            "nothing supports a supine trunk and it falls under gravity; the "
-            "optimizer's bench model is an arm chain only. Needs a bench "
-            "contact body in the spec."
-        ),
-        "snatch": (
-            "The optimizer's snatch configuration interpolates from the "
-            "floor setup straight to the overhead-squat catch (via point at "
-            "mid-time): with the measured 2.0 s solve the shoulder drops "
-            "0.24 m in the first 0.93 s instead of rising, so there is no "
-            "first or second pull, and its bar model keeps the bar overhead "
-            "even at the floor. The catch it reaches leans the trunk 62 deg "
-            "forward against the standard's 19 deg. Needs a Tools snatch "
-            "configuration with a pull phase."
-        ),
-    }
-)
+#: Empty since the snatch got its pull phase (Tools snatch via schedule).
+DEFERRED_LIFTS: Mapping[str, str] = MappingProxyType({})
 
 
 def bundle_lifts() -> tuple[str, ...]:

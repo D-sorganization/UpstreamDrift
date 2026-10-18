@@ -2,9 +2,11 @@
 
 The IK thresholds below are the residuals measured when the committed bundle
 was generated (``scripts/generate_lift_bundle.py``), rounded up to 0.1 mm;
-they are recorded evidence, not tuning targets.  The dominant residuals come
-from the full-body spec's own left/right segment-length and pelvis asymmetry,
-which a symmetric sagittal chain cannot match exactly.
+they are recorded evidence, not tuning targets.  Since OSL-14 (#13057) the
+bundle replays the AN-1 lift body under its cited ranges: the hip stops at its
+120 deg limit near the bottom, where the optimizer's planar trunk-thigh fold
+asks for more, so the knee, hip and shoulder landmarks trail their sagittal
+targets by up to 2.2 cm there (the Rajagopal legs are also mildly asymmetric).
 """
 
 from __future__ import annotations
@@ -29,20 +31,47 @@ from src.shared.python.motion_matching.same_input import InputBundle
 
 pytestmark = pytest.mark.unit
 
-# Measured maxima over all 151 frames (metres); see module docstring.
+# Measured maxima over all 151 frames (metres); see module docstring.  The
+# widened entries (golf body: knee_r 0.0110, hip_l 0.0149, shoulders 0.0098,
+# penetration 5.4e-4) and their physical reasons are recorded on #13057
+# (issuecomment-6229479012); the #13072 re-track fix does not change them.
+# OSL-16 (#13104): the committed source is now the bar-balanced IK (#13093),
+# whose more upright trunk moves the right ankle to 3.59 mm and the right hip
+# to 9.13 mm (were 3.08 and 6.32 mm), so those two bounds are widened with the
+# evidence on #13104; every other landmark fell (ankle_l 4.37, knee_l 3.15,
+# knee_r 11.68, hip_l 8.07, shoulder_l 3.65, shoulder_r 3.04 mm, bar 0.01 mm)
+# and keeps its earlier bound.
+# #13037 (whole-row de Leva lift body plus the 10 deg tibial torsion of
+# #12814): ankle_r 4.43 mm, hip_r 9.32 mm and the closure 8.97e-8 m exceed
+# their snapshots, which are re-derived with the same rounding; evidence on
+# #13041 (issuecomment-6243170509).  On the OSL-17 high-bar rack (#13131) the
+# whole-row body gives ankle_r 4.89 mm (rack on the earlier body 3.53 mm), so
+# that snapshot is re-derived again with the same rounding.
 IK_RESIDUAL_THRESHOLDS_M = {
-    "ankle_l": 0.0083,
-    "ankle_r": 0.0054,
-    "knee_l": 0.0270,
-    "knee_r": 0.0110,
-    "hip_l": 0.0149,
-    "hip_r": 0.0153,
-    "shoulder_l": 0.0098,
-    "shoulder_r": 0.0098,
-    "bar": 0.0044,
+    "ankle_l": 0.0057,
+    "ankle_r": 0.0049,
+    "knee_l": 0.0152,
+    "knee_r": 0.0225,
+    "hip_l": 0.0178,
+    "hip_r": 0.0094,
+    "shoulder_l": 0.0196,
+    "shoulder_r": 0.0151,
+    "bar": 0.0001,
 }
-CLOSURE_THRESHOLD_M = 1.9e-6
-FOOT_PENETRATION_THRESHOLD_M = 5.4e-4
+#: OSL-17 (#13131): racking the bar on the cited high-bar position puts the
+#: elbows near their -150 deg bound and the left wrist on its 25 deg bound, so
+#: the arm solve trades the grip weld against the bar target.  The standing
+#: pose (frame 0) closes to 2.911e-7 m (17 of 151 frames above the earlier
+#: 6.4e-8 m); 300 tracking iterations leave it unchanged and 1000 standing
+#: iterations raise it to 4.725e-7 m.  Evidence on #13131.
+CLOSURE_THRESHOLD_M = 3.0e-7
+FOOT_PENETRATION_THRESHOLD_M = 7.0e-4
+#: Committed bar-loaded bundle size bound (bytes).  OSL-16 (#13104): a loaded
+#: bundle records its 0.25 ms hold efforts (``hold_efforts``, 4 per step) so
+#: a replay reproduces it exactly; at 200 steps that table is 281,728 raw
+#: bytes (about 233 KB compressed, full-precision torques).  The earlier
+#: 300,000 byte bound plus that raw table, rounded up; evidence on #13104.
+LOADED_BUNDLE_MAX_BYTES = 600_000
 
 
 @pytest.fixture(scope="module")
@@ -51,7 +80,7 @@ def bundle() -> InputBundle:
 
 
 def test_committed_bundle_is_small(bundle: InputBundle) -> None:
-    assert BACK_SQUAT_BUNDLE.stat().st_size <= 300_000
+    assert BACK_SQUAT_BUNDLE.stat().st_size <= LOADED_BUNDLE_MAX_BYTES
     assert bundle.reference_engine == "mujoco"
 
 
@@ -82,7 +111,17 @@ def test_bundle_carries_provenance(bundle: InputBundle) -> None:
         from src.shared.python.lifting.back_bar import apply_grip_width
 
         width = ik["back_bar"]["geometry"]["grip_width_m"]
-        assert bundle.spec_bytes == apply_grip_width(LIFT_SPEC.read_bytes(), width)
+        derived = apply_grip_width(LIFT_SPEC.read_bytes(), width)
+        if "balance" in ik:
+            # #13093: the balanced source's dynamics carry the bar load.
+            from src.shared.python.lifting.barbell_runs import rigid_bar_spec
+            from src.shared.python.lifting.loaded_balance import (
+                load_balance_from_record,
+            )
+
+            load = load_balance_from_record(ik["balance"]["load"])
+            derived = rigid_bar_spec(derived, load.barbell)
+        assert bundle.spec_bytes == derived
     else:
         assert bundle.spec_bytes == LIFT_SPEC.read_bytes()
 
@@ -107,12 +146,24 @@ def test_ik_from_the_recorded_solution_meets_thresholds(
     if geom_rec is not None:
         from src.shared.python.lifting.back_bar import BackBarGeometry
 
-        geometry = BackBarGeometry.from_standard(
-            geom_rec["lift"], height_m=geom_rec["height_m"]
-        )
+        geometry = BackBarGeometry.from_record(geom_rec)
+    balance = bundle.provenance["ik"].get("balance")
+    load = None
+    if balance is not None:
+        from src.shared.python.lifting.loaded_balance import load_balance_from_record
+
+        load = load_balance_from_record(balance["load"])
+    # The generator solves the back bar from the lift-body spec (it derives
+    # the grip-width spec itself); a legacy bundle carries that spec.
+    body = bundle.spec_bytes if geometry is None else LIFT_SPEC.read_bytes()
     lift = lift_to_full_body(
-        bundle.spec_bytes, solution, load_seed_pose(), geometry=geometry
+        body, solution, load_seed_pose(), geometry=geometry, load=load
     )
+    if balance is not None:
+        assert lift.balance is not None
+        np.testing.assert_allclose(
+            lift.balance["correction_rad"], balance["correction_rad"], atol=1e-9
+        )
     residual = lift.max_residual_by_landmark()
     for label, limit in IK_RESIDUAL_THRESHOLDS_M.items():
         assert residual[label] <= limit, (label, residual[label])
@@ -135,7 +186,12 @@ def test_mujoco_replay_reproduces_the_bar_path(bundle: InputBundle) -> None:
     steps = 10
     plant = VectorPlant("mujoco", bundle.spec_bytes)
     rollout = open_loop(
-        plant, bundle.q0, bundle.v0, bundle.efforts[:steps], dt_s=bundle.dt_s
+        plant,
+        bundle.q0,
+        bundle.v0,
+        bundle.replay_efforts(steps),
+        dt_s=bundle.dt_s,
+        policy=bundle.step_policy(),
     )
     np.testing.assert_array_equal(rollout.q, bundle.reference_q[: steps + 1])
     recorded = np.asarray(bundle.provenance["window_bar_path_m"], dtype=float)

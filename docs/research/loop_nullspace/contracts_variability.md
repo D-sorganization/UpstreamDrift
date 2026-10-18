@@ -539,3 +539,39 @@ amplitudes, not a golfer measurement; linear variance is conditioned on the
 declared noise hypotheses, which stay unvalidated; a ranking is a ranking
 under the declared assumptions, not a prediction of any golfer's best
 strategy.
+
+## NSX-100 Variability & Consistency Views (#12729)
+
+Both UIs render the `sensitivity` panels of plot model 2.0.0 and build the
+sensitivity request from one backend catalogue.
+
+Catalogue. `sensitivity_options.option_catalogue()` (served by
+`GET /analysis/loop-nullspace/sensitivity-options`) lists the injection
+stages and spectra of `DisturbanceSpec`, the mechanism ids with their notes, the
+strategy catalogue entries with availability and reason, the outcomes this stage
+ranks (`face_angle`, default priority first), and the engines of the derivative
+capability registry with `available` and the registry reason. The UIs offer
+exactly these values and `variability_request` / `variabilityRequest.ts` refuse
+any other id. Channel names are free text because they are model joint names.
+
+Request. The controls produce the `SensitivityOptions` JSON of the NSX-40
+service: one disturbance with a diagonal covariance (the typed variances, no
+derived value), `mechanisms`, `strategy_set` (`null` when every strategy is
+chosen) and `outcome_priority` (an order, not weights). The signal-dependent
+mechanism must agree with a signal law, which the controls cannot declare, so the
+service refuses that combination and the refusal is shown.
+
+Display. Zero math: decision labels, `UNVALIDATED` badges and hypothesis chips
+are the payload's text; a withheld point or standard deviation keeps its reason
+and no number; a stage that did not run reads `UNAVAILABLE:` plus its reason in
+the status and every panel. A 1.0.0 model has no `sensitivity` and reads "not
+requested". `asPlotModel` accepts 1.0.0, and 2.0.0 only with its panels.
+
+Parity evidence. `tests/fixtures/loop_nullspace/goldens/variability_view_text.json`
+lists every string both UIs must show for the shared golden and for a
+capability-limited (Simscape) model; the PyQt test and the Vitest test each
+assert every string is on screen. Regenerate with
+`python3 -m tests.unit.loop_nullspace.variability_view_text --write`.
+
+Non-claims: the views add no validation; amplitudes remain declared hypotheses.
+
