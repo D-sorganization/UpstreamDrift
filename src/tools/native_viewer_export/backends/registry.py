@@ -65,3 +65,11 @@ def make_backend(engine: str) -> NativeBackend:
             f"unknown engine {engine!r}; expected one of {list(ENGINES)}"
         ) from None
     return factory()
+
+
+#: Engines whose renderer can recolour segments per frame (``--segment-shading``).
+#: OpenSim is absent: the simbody visualizer caches geometry (and its colour) at
+#: ``initSystem`` and exposes no per-frame recolouring from Python.
+SHADING_ENGINES: frozenset[str] = frozenset(
+    {"mujoco", "myosuite", "drake", "pinocchio"}
+)
