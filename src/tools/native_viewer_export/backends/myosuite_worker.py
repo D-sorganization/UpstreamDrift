@@ -4,8 +4,8 @@ Runs in a Python that can import ``myosuite`` (often a separate virtual
 environment). The specification MJCF carries the shared appearance layer (the MuJoCo
 exporter's, from the same document; R9b #12689), is merged with the MyoSuite
 arena scene assets (floor texture, headlight), loaded as a raw ``mujoco``
-model and rendered with MyoSuite's ``MJRenderer`` (2.x or 3.x import path), with 3D force/torque glyphs added to the
-MuJoCo scene before each render.
+model and rendered with MyoSuite's ``MJRenderer`` (2.x or 3.x import path), with the segment shading and 3D force/torque glyphs
+added to the MuJoCo scene before each render.
 """
 
 from __future__ import annotations
@@ -23,20 +23,23 @@ import numpy as np
 from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
     export_full_body_mjcf,
 )
-from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs import (
-    add_glyphs_to_scene,
-)
-from src.shared.python.force_overlay.glyphs import GlyphSet
 from src.shared.python.golf_view_presets import mujoco_camera_params
 from src.shared.python.model_appearance.schema import AppearanceDocument
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
 from src.tools.native_viewer_export.backends._ball import draw_job_ball
 from src.tools.native_viewer_export.backends._body import default_appearance
+from src.tools.native_viewer_export.backends._scene_overlays import (
+    apply_scene_overlays,
+)
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.backends.myosuite_compat import (
     find_scene,
     import_mj_renderer,
+)
+from src.tools.native_viewer_export.shading import (
+    log_coverage,
+    mujoco_scene_coverage,
 )
 
 
@@ -154,6 +157,9 @@ def main(job_path: str) -> None:
     renderer = mj_renderer._renderer  # noqa: SLF001 - MJRenderer's mujoco.Renderer
     option = mj_renderer._scene_option  # noqa: SLF001
     glyph_sets = job.load_glyph_sets()
+    axial_frames, shading = job.load_axial_frames(), job.load_shading()
+    if axial_frames is not None and shading is not None:
+        log_coverage("myosuite", *mujoco_scene_coverage(model, axial_frames))
     cams = {v: make_camera(mujoco, v, job) for v in job.views}
     for pos, k in enumerate(job.indices):
         data.qpos[adr] = q[k]
@@ -161,8 +167,9 @@ def main(job_path: str) -> None:
         for view in job.views:
             cams[view].lookat[:] = job.lookat_for(view, pos)
             renderer.update_scene(data, camera=cams[view], scene_option=option)
-            if glyph_sets is not None:
-                add_glyphs_to_scene(renderer.scene, glyph_sets[pos])
+            apply_scene_overlays(
+                model, renderer.scene, pos, axial_frames, shading, glyph_sets
+            )
             draw_job_ball(renderer.scene, job, pos)
             np.save(job.frame_path(view, pos), renderer.render().copy())
 

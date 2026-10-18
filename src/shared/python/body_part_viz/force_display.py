@@ -80,7 +80,10 @@ class ForceColorDisplay:
     """
 
     def __init__(
-        self, renderer: ColorOverrideRenderer, segment_handles: Mapping[str, str]
+        self,
+        renderer: ColorOverrideRenderer,
+        segment_handles: Mapping[str, str],
+        base_colors: Mapping[str, str] | None = None,
     ) -> None:
         if not isinstance(renderer, ColorOverrideRenderer):
             raise TypeError("renderer must support set_color(handle, color)")
@@ -94,8 +97,13 @@ class ForceColorDisplay:
             raise ValueError("segment identifiers and handles must be nonempty strings")
         if len(set(segment_handles.values())) != len(segment_handles):
             raise ValueError("each segment must have a distinct renderer handle")
+        if base_colors is not None and not isinstance(base_colors, Mapping):
+            raise TypeError("base_colors must be a segment-to-#RRGGBB mapping")
         self._renderer = renderer
         self._handles = dict(segment_handles)
+        # Segment base colors let translucent overlays blend with the original;
+        # segments without one blend against the scale's neutral color.
+        self._base_colors = dict(base_colors or {})
         self._scale = ForceColorScale()
         self._loads: SegmentLoadSeries | None = None
         self._frame = 0
@@ -133,9 +141,6 @@ class ForceColorDisplay:
                 if self._loads is None
                 else self._loads.value_at(segment, self._frame)
             )
-            color = (
-                self._scale.color(value, "")
-                if self._scale.enabled and value is not None
-                else ""
-            )
-            self._renderer.set_color(handle, color or None)
+            base = self._base_colors.get(segment, self._scale.neutral_color)
+            color = self._scale.shade_hex(value, base)
+            self._renderer.set_color(handle, color)

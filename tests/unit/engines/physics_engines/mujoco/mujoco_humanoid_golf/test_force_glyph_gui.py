@@ -292,3 +292,156 @@ def test_widget_style_options_reach_the_renderer() -> None:
     glyphs = widget._render_force_glyphs(_scene())
     assert glyphs is not None
     assert glyphs.arrows[0].tip_m[2] == pytest.approx(0.4)  # 100 N / 50 N * 0.2 m
+
+
+# --- Inline tension/compression controls and persistence (#13146) -------------
+
+
+class _FakeSettings:
+    def __init__(self, data: dict[str, Any] | None = None) -> None:
+        self.data: dict[str, Any] = dict(data or {})
+
+    def value(self, key: str, default: Any = None) -> Any:
+        return self.data.get(key, default)
+
+    def setValue(self, key: str, value: Any) -> None:  # noqa: N802
+        self.data[key] = value
+
+
+@pytest.fixture
+def gui(monkeypatch: pytest.MonkeyPatch) -> Any:
+    try:
+        from PyQt6 import QtWidgets
+    except (ImportError, OSError) as exc:  # pragma: no cover
+        pytest.skip(f"PyQt6 not loadable: {exc}")
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf import (
+        sim_force_color_mixin as mixin_mod,
+        sim_widget as sim_widget_mod,
+    )
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.visualization_tab import (
+        VisualizationTab,
+    )
+
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    store = _FakeSettings()
+    monkeypatch.setattr(
+        mixin_mod, "open_force_color_settings", lambda: store, raising=True
+    )
+
+    def no_meshcat() -> Any:
+        raise RuntimeError("meshcat disabled in tests")
+
+    monkeypatch.setattr(sim_widget_mod, "MuJoCoMeshcatAdapter", no_meshcat)
+
+    def build() -> tuple[Any, Any]:
+        sim = sim_widget_mod.MuJoCoSimWidget(None, 320, 240, 1)
+        sim.timer.stop()
+        return sim, VisualizationTab(sim)
+
+    sim, tab = build()
+    yield SimpleNamespace(sim=sim, tab=tab, store=store, build=build, qt=QtWidgets)
+    tab.deleteLater()
+    sim.deleteLater()
+    app.processEvents()
+
+
+def _inline(tab: Any, qt: Any) -> tuple[Any, Any]:
+    return (
+        tab.findChild(qt.QCheckBox, "force_color_inline_enabled"),
+        tab.findChild(qt.QSlider, "force_color_inline_opacity"),
+    )
+
+
+def _open_dialog(sim: Any, qt: Any) -> Any:
+    sim.open_force_color_dialog()
+    dialog = sim.findChild(qt.QDialog, "segment_force_colors_dialog")
+    assert dialog is not None
+    return dialog
+
+
+def test_inline_checkbox_toggles_sim_scale(gui: Any) -> None:
+    check, _ = _inline(gui.tab, gui.qt)
+    assert check is not None and not check.isChecked()
+    check.setChecked(True)
+    assert gui.sim.axial_color_scale.enabled
+    check.setChecked(False)
+    assert not gui.sim.axial_color_scale.enabled
+
+
+def test_inline_opacity_slider_updates_sim_scale(gui: Any) -> None:
+    _, slider = _inline(gui.tab, gui.qt)
+    assert slider is not None and slider.value() == 100
+    slider.setValue(30)
+    assert gui.sim.axial_color_scale.opacity == pytest.approx(0.3)
+
+
+def test_dialog_changes_update_inline_controls(gui: Any) -> None:
+    from src.shared.python.body_part_viz.force_color_controls import (
+        ForceColorControls,
+    )
+
+    check, slider = _inline(gui.tab, gui.qt)
+    dialog = _open_dialog(gui.sim, gui.qt)
+    controls = dialog.findChild(ForceColorControls)
+    controls.findChild(gui.qt.QCheckBox, "force_color_enabled").setChecked(True)
+    controls.findChild(gui.qt.QSlider, "force_color_opacity").setValue(45)
+    assert check.isChecked() and slider.value() == 45
+    assert gui.sim.axial_color_scale.enabled
+    # and the other direction: inline edits reach the open dialog
+    slider.setValue(80)
+    assert controls.findChild(gui.qt.QSlider, "force_color_opacity").value() == 80
+    check.setChecked(False)
+    assert not controls.findChild(gui.qt.QCheckBox, "force_color_enabled").isChecked()
+
+
+def test_programmatic_scale_updates_inline_controls(gui: Any) -> None:
+    from src.shared.python.body_part_viz import ForceColorScale
+
+    check, slider = _inline(gui.tab, gui.qt)
+    gui.sim.set_axial_color_scale(ForceColorScale(enabled=True, opacity=0.5))
+    assert check.isChecked() and slider.value() == 50
+
+
+def test_dialog_button_opens_full_dialog(gui: Any) -> None:
+    button = gui.tab.findChild(gui.qt.QPushButton, "open_segment_force_colors")
+    assert button is not None
+    button.click()
+    assert gui.sim.findChild(gui.qt.QDialog, "segment_force_colors_dialog")
+
+
+def test_vector_labels_are_accurate_and_names_kept(gui: Any) -> None:
+    assert gui.tab.show_torques_cb.text() == "Show Joint Torque Vectors (curl arrows)"
+    assert gui.tab.show_forces_cb.text() == "Show Joint Force Vectors"
+
+
+def test_state_persists_across_instances(gui: Any) -> None:
+    check, slider = _inline(gui.tab, gui.qt)
+    check.setChecked(True)
+    slider.setValue(40)
+    gui.tab.show_torques_cb.setChecked(True)
+    gui.tab.show_forces_cb.setChecked(True)
+    sim2, tab2 = gui.build()
+    try:
+        assert sim2.axial_color_scale.enabled
+        assert sim2.axial_color_scale.opacity == pytest.approx(0.4)
+        assert sim2.show_torque_vectors and sim2.show_force_vectors
+        check2, slider2 = _inline(tab2, gui.qt)
+        assert check2.isChecked() and slider2.value() == 40
+        assert tab2.show_torques_cb.isChecked() and tab2.show_forces_cb.isChecked()
+    finally:
+        tab2.deleteLater()
+        sim2.deleteLater()
+
+
+def test_corrupt_stored_value_falls_back_to_defaults(
+    gui: Any, caplog: pytest.LogCaptureFixture
+) -> None:
+    gui.store.data["force_color/mujoco"] = "{not json"
+    sim2, tab2 = gui.build()
+    try:
+        assert not sim2.axial_color_scale.enabled
+        assert sim2.axial_color_scale.opacity == 1.0
+        assert not sim2.show_force_vectors and not sim2.show_torque_vectors
+    finally:
+        tab2.deleteLater()
+        sim2.deleteLater()

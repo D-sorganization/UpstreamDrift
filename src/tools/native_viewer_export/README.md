@@ -37,7 +37,11 @@ python3 -m src.tools.native_viewer_export \
 - `--receipt-<engine>` plays that engine's closed-loop rollout (the receipt's
   specification hash must match the bundle); without it the bundle reference
   trajectory is shown.
-- `--no-overlay`, `--no-grid`, `--views`, `--fps` (default 60), `--size` and
+- `--no-overlay` disables every overlay; `--force-vectors/--no-force-vectors`
+  and `--torque-vectors/--no-torque-vectors` switch the straight force arrows and
+  the curling torque arcs independently (both on by default). See
+  [Segment Shading](#segment-shading).
+- `--no-grid`, `--views`, `--fps` (default 60), `--size` and
   `--preset hq|preview` control the output. `hq` is 1280x720, libx264,
   `yuv420p`, CRF 18; `preview` is 640x544.
 - `--grip` adds the grip overlay (per-hand force, net force and couple at the
@@ -85,6 +89,53 @@ build renders much faster than the headless shell), and
 
 The OpenSim backend only ever runs under `xvfb-run` and refuses to start when
 `NATIVE_VIEWER_XVFB` is missing or `DISPLAY` is a real display.
+
+## Segment Shading
+
+`--segment-shading` (off by default; engine support below) paints each segment
+that has a defined axis translucently by its axial load: tension positive,
+compression negative, from inverse dynamics (`mj_inverse` with the provider's
+own `q`, the bundle reference velocity and accelerations by an unfiltered
+central finite difference of that velocity, then the `cfrc_int` reaction at the
+proximal section projected on the segment axis). The torque arcs and the shading
+come from one evaluation per frame (`ForceTorqueFrame.axial_loads`).
+
+| Option | Meaning |
+| --- | --- |
+| `--shading-opacity 0..1` | strength (default 0.6; 0 is identical to off) |
+| `--shading-mode tint\|replace` | `tint` keeps unloaded segments' own colour (default); `replace` blends every loaded segment to the load colour |
+| `--tension-color`, `--compression-color` | `#RRGGBB` (defaults blue, red) |
+| `--shading-limit-n N` | load that saturates the colour, both signs (default 1000) |
+| `--tension-limit-n`, `--compression-limit-n` | separate saturation loads |
+
+One `ForceColorScale` validates all of these (the CLI exits with status 2 and an
+`error:` line on a bad value). The HUD gains a legend line with both colours, the
+saturation load, opacity and mode (`--no-hud` hides it). Segments without a
+defined axis are never shaded (the club shaft shades with its own load).
+
+Every engine is shaded from that one MuJoCo evaluation. The axial loads are
+keyed by the specification body name, which is also the body name of every
+engine's model and of the exporter's visual items, so no per-engine name
+translation exists: a segment without a load, or without geometry in a viewer,
+simply stays unshaded. Each run logs one debug line per engine with the number
+of shaded over total segments (`shading.log_coverage`).
+
+| Engine | Segment shading | How |
+| --- | --- | --- |
+| MuJoCo | yes | `apply_mujoco_scene_colors` on the render scene (`backends/_scene_overlays.py`) |
+| MyoSuite | yes | the same helper as MuJoCo (same `mujoco.Renderer` scene) |
+| Drake | yes | MeshCat `color` property per illustration geometry (`drake_color_bindings`), base colour from the geometry, alpha kept |
+| Pinocchio | yes | MeshCat `color` property per visual (`pinocchio_color_bindings`), base colour from the visual item, alpha kept |
+| OpenSim | no | the simbody visualizer caches geometry and its colour at `initSystem` and exposes no per-frame recolouring from Python (the ball needs a sliding body for the same reason); the export logs a warning and renders unshaded |
+
+The supported set is `backends.registry.SHADING_ENGINES`; the runner warns only
+for engines outside it. All blending is `ForceColorScale.shade_rgb`. Example:
+
+```bash
+python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
+  --engines mujoco --views face_on --speeds 1 --no-grid --segment-shading \
+  --shading-opacity 0.5 --shading-limit-n 800 --no-force-vectors --out out/
+```
 
 ## Layout
 

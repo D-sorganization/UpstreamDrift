@@ -19,14 +19,14 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "435ee6e7fed2f8484472ccef85b0295dbe5fd38467d268ef9a024eb871551de8",
+      "fingerprint": "85a49b0f20f218eed7983e6d7bd943a29ec94b984c1c5d9c985fe7be0e91e71a",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "2225d24e04f23390308e0991570901f3d2df875d300fe26561c79bcb8347136d",
+        "src/config/feature_parity.json": "15a2d74b0fd1913786aff1f621f3e6942576c41a8e0b3cff40a808d562ee49e4",
         "src/config/launcher_manifest.json": "c9844ac6e0cd9c6cc867bda7cfd44edf1199ac85a07af5b9a83bec70a65d00bc",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
         "src/config/models.yaml": "64caf5311e4be2c75e742dc053b425a528f851638ca2773423fcc77d40b5d419",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Merged origin/main at 3f7b262; regenerated capability atlas after PR #13163 appearance_defaults.json and feature_parity body-appearance notes. Re-read launcher-atlas inputs and ran tests/scripts/test_capability_atlas.py, tests/config/test_launcher_manifest.py, and tests/launchers/test_launcher_manifest_categories.py (56 passed)."
+      "rationale": "Merged main after #13182 appearance_defaults; regenerated capability atlas graph.json and re-read launcher-atlas inputs for closure-wrench/force-color overlay changes. Ran tests/scripts/test_capability_atlas.py, tests/config/test_launcher_manifest.py, and tests/launchers/test_launcher_manifest_categories.py (56 passed)."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",

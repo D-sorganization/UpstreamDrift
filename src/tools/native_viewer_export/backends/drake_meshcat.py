@@ -36,6 +36,11 @@ from src.tools.native_viewer_export.backends._meshcat_page import (
     playwright_unavailable_reason,
 )
 from src.tools.native_viewer_export.backends._subprocess import export_urdf
+from src.engines.physics_engines.drake.python.src.drake_force_overlay import (
+    drake_color_bindings,
+    illustration_base_rgba,
+)
+from src.tools.native_viewer_export.shading import build_meshcat_shading
 from src.tools.native_viewer_export.core import (
     ExportSettings,
     Image8,
@@ -87,7 +92,9 @@ class DrakeMeshcatBackend:
                 np.array(item.rgba),
             )
 
-    def _build(self, swing: SwingInput) -> tuple[Any, Any, Any, Any, Any, list[int]]:
+    def _build(
+        self, swing: SwingInput
+    ) -> tuple[Any, Any, Any, Any, Any, list[int], dict[str, Any]]:
         from pydrake.geometry import (
             Box,
             Meshcat,
@@ -139,7 +146,18 @@ class DrakeMeshcatBackend:
             for nm in swing.bundle.coordinate_order
         ]
         _ = Rgba
-        return plant, diagram, ctx, pctx, meshcat, starts
+        inspector = scene_graph.model_inspector()
+        bindings = drake_color_bindings(
+            plant,
+            inspector,
+            {
+                plant.GetBodyByName(link, inst).index(): spec_body
+                for spec_body, link in links.items()
+                if spec_body != "world"
+            },
+            base_rgba_of=illustration_base_rgba(inspector),
+        )
+        return plant, diagram, ctx, pctx, meshcat, starts, bindings
 
     def render(
         self,
@@ -152,7 +170,7 @@ class DrakeMeshcatBackend:
             DrakeMeshcatSink,
         )
 
-        plant, diagram, ctx, pctx, meshcat, starts = self._build(swing)
+        plant, diagram, ctx, pctx, meshcat, starts, bindings = self._build(swing)
 
         def set_state(index: int) -> None:
             full = np.zeros(plant.num_positions())
@@ -177,17 +195,33 @@ class DrakeMeshcatBackend:
             if swing.ball is not None
             else None
         )
-        with MeshcatPage(meshcat.web_url(), settings.width, settings.height) as page:
-            looks = view_lookats(settings, indices, overlay)
-            for pos, k in enumerate(indices):
-                set_state(k)
-                update_meshcat_frame(ball, glyphs, overlay, swing, k)
-                tiles: dict[str, Image8] = {}
-                for view in settings.views:
-                    eye, target = drake_meshcat_camera_pose(
-                        view, looks[view][pos], settings.distance_m
-                    )
-                    meshcat.SetCameraPose(list(eye), list(target))
-                    page.settle()
-                    tiles[view] = page.screenshot()
-                yield tiles
+        shading = (
+            build_meshcat_shading(
+                self.engine,
+                settings.shading if settings.shading_enabled else None,
+                meshcat.SetProperty,
+                bindings,
+            )
+            if overlay is not None
+            else None
+        )
+        try:
+            with MeshcatPage(
+                meshcat.web_url(), settings.width, settings.height
+            ) as page:
+                looks = view_lookats(settings, indices, overlay)
+                for pos, k in enumerate(indices):
+                    set_state(k)
+                    update_meshcat_frame(ball, glyphs, overlay, swing, k, shading)
+                    tiles: dict[str, Image8] = {}
+                    for view in settings.views:
+                        eye, target = drake_meshcat_camera_pose(
+                            view, looks[view][pos], settings.distance_m
+                        )
+                        meshcat.SetCameraPose(list(eye), list(target))
+                        page.settle()
+                        tiles[view] = page.screenshot()
+                    yield tiles
+        finally:
+            if shading is not None:
+                shading.log_summary()

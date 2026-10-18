@@ -37,6 +37,14 @@ def install_force_torque_visibility_toggles(
     ft_grid.addWidget(host.chk_show_forces, 0, 0)
     ft_grid.addWidget(host.chk_show_torques, 0, 1)
     ft_grid.addWidget(host.chk_show_gravity, 0, 2)
+    # Inline segment shading, bound to the same hub as the Force Colors dialog.
+    from src.shared.python.body_part_viz.force_color_controls import (
+        install_inline_shading_toggle,
+    )
+
+    install_inline_shading_toggle(
+        host, ft_grid, attr="chk_show_shading", grid_position=(1, 0, 1, 3)
+    )
 
 
 def repopulate_induced_source_combo(

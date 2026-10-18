@@ -21,4 +21,12 @@ describe('force color controls', () => {
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getByRole('alert')).toHaveTextContent('limits');
   });
+  it('applies overlay opacity and blend mode', () => {
+    const onChange = vi.fn();
+    render(<ForceColorControls scale={defaultForceColorScale} onChange={onChange} />);
+    fireEvent.change(screen.getByLabelText('Overlay Opacity'), { target: { value: '0.4' } });
+    fireEvent.change(screen.getByLabelText('Blend Mode'), { target: { value: 'tint' } });
+    fireEvent.click(screen.getByText('Apply Colors and Ranges'));
+    expect(onChange.mock.lastCall?.[0]).toMatchObject({ opacity: 0.4, blend_mode: 'tint' });
+  });
 });

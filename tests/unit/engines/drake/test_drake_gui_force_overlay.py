@@ -330,3 +330,47 @@ def test_real_drake_plant_draws_arrows_and_binds_shading() -> None:
     text = ctl.tick(forces=True, torques=True, gravity=True)
     assert "Engine: drake" in text
     assert meshcat.HasPath("force_overlay")
+
+
+_APP: list = []  # keep the QApplication alive for the module
+
+
+def test_visibility_toggles_add_inline_shading_bound_to_hub() -> None:
+    try:
+        from PyQt6 import QtWidgets
+    except (ImportError, OSError) as exc:  # pragma: no cover
+        pytest.skip(f"PyQt6 not loadable: {exc}")
+    from src.engines.physics_engines.drake.python.src.drake_gui_ui_helpers import (
+        install_force_torque_visibility_toggles,
+    )
+    from src.shared.python.body_part_viz.force_color_controls import ForceColorHub
+
+    _APP.append(QtWidgets.QApplication.instance() or QtWidgets.QApplication([]))
+    host = QtWidgets.QWidget()
+    host.force_color_hub = ForceColorHub()
+    grid = QtWidgets.QGridLayout()
+    install_force_torque_visibility_toggles(host, grid, lambda: None)
+    assert host.chk_show_shading is host.segment_shading_controls.enabled_checkbox
+    assert grid.count() == 4
+    host.chk_show_shading.setChecked(True)
+    assert host.force_color_hub.scale.enabled
+    host.force_color_hub.set_scale(ForceColorScale(enabled=False))
+    assert not host.chk_show_shading.isChecked()
+    # independent of the existing force/torque toggles
+    assert not host.chk_show_forces.isChecked()
+
+
+def test_visibility_toggles_without_hub_keep_legacy_layout() -> None:
+    try:
+        from PyQt6 import QtWidgets
+    except (ImportError, OSError) as exc:  # pragma: no cover
+        pytest.skip(f"PyQt6 not loadable: {exc}")
+    from src.engines.physics_engines.drake.python.src.drake_gui_ui_helpers import (
+        install_force_torque_visibility_toggles,
+    )
+
+    _APP.append(QtWidgets.QApplication.instance() or QtWidgets.QApplication([]))
+    host = QtWidgets.QWidget()
+    grid = QtWidgets.QGridLayout()
+    install_force_torque_visibility_toggles(host, grid, lambda: None)
+    assert grid.count() == 3 and not hasattr(host, "chk_show_shading")

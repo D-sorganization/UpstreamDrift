@@ -10,6 +10,12 @@ import logging
 from pathlib import Path
 import sys
 
+from src.shared.python.body_part_viz.force_colors import (
+    BLEND_MODES,
+    DEFAULT_COMPRESSION_COLOR,
+    DEFAULT_TENSION_COLOR,
+    ForceColorScale,
+)
 from src.shared.python.golf_view_presets import VIEW_ORDER
 from src.tools.native_viewer_export.core import (
     DEFAULT_SPEEDS,
@@ -20,6 +26,86 @@ from src.tools.native_viewer_export.overlay import build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
 
 logger = logging.getLogger(__name__)
+
+
+def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
+    """Add the overlay and segment-shading options."""
+    p.add_argument(
+        "--no-overlay",
+        action="store_true",
+        help="disable every overlay (force and torque vectors, segment shading)",
+    )
+    p.add_argument(
+        "--force-vectors",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="draw straight force arrows (default: on)",
+    )
+    p.add_argument(
+        "--torque-vectors",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="draw curling joint-torque arcs (default: on)",
+    )
+    shade = p.add_argument_group(
+        "segment shading",
+        "Translucent tension/compression shading of the golfer's segments "
+        "(MuJoCo viewer only; axial loads from inverse dynamics, tension "
+        "positive). Loads beyond the limit saturate.",
+    )
+    shade.add_argument(
+        "--segment-shading",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="shade segments by axial load (default: off)",
+    )
+    shade.add_argument(
+        "--shading-opacity",
+        type=float,
+        default=0.6,
+        metavar="0..1",
+        help="shading strength, 0 (invisible) to 1 (full colour; default 0.6)",
+    )
+    shade.add_argument(
+        "--shading-mode",
+        choices=BLEND_MODES,
+        default="tint",
+        help="tint: unloaded segments keep their colour (default); "
+        "replace: every loaded segment blends to the load colour",
+    )
+    shade.add_argument(
+        "--tension-color",
+        default=DEFAULT_TENSION_COLOR,
+        metavar="#RRGGBB",
+        help="tension colour (default %(default)s)",
+    )
+    shade.add_argument(
+        "--compression-color",
+        default=DEFAULT_COMPRESSION_COLOR,
+        metavar="#RRGGBB",
+        help="compression colour (default %(default)s)",
+    )
+    shade.add_argument(
+        "--shading-limit-n",
+        type=float,
+        default=1000.0,
+        metavar="N",
+        help="load in newtons that saturates the colour, both signs (default 1000)",
+    )
+    shade.add_argument(
+        "--tension-limit-n",
+        type=float,
+        default=None,
+        metavar="N",
+        help="tension saturation load (default: --shading-limit-n)",
+    )
+    shade.add_argument(
+        "--compression-limit-n",
+        type=float,
+        default=None,
+        metavar="N",
+        help="compression saturation load (default: --shading-limit-n)",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -97,7 +183,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--size", default=None, help="tile size WIDTHxHEIGHT (overrides the preset)"
     )
-    p.add_argument("--no-overlay", action="store_true", help="skip force/torque glyphs")
+    _add_overlay_arguments(p)
     p.add_argument(
         "--grip",
         action="store_true",
@@ -129,6 +215,28 @@ def parse_speeds(text: str) -> tuple[float, ...]:
         raise ValueError(f"--speeds must look like 1,0.5,0.25, got {text!r}") from None
 
 
+def build_shading(args: argparse.Namespace) -> ForceColorScale | None:
+    """The one ``ForceColorScale`` of the shading options (``ValueError`` if invalid).
+
+    Postcondition: ``None`` when shading is off or ``--no-overlay`` is set.
+    """
+    if not args.segment_shading or args.no_overlay:
+        return None
+    tension, compression = (
+        args.shading_limit_n if own is None else own
+        for own in (args.tension_limit_n, args.compression_limit_n)
+    )
+    return ForceColorScale(
+        enabled=True,
+        tension_limit_n=tension,
+        compression_limit_n=compression,
+        tension_color=args.tension_color,
+        compression_color=args.compression_color,
+        opacity=args.shading_opacity,
+        blend_mode=args.shading_mode,
+    )
+
+
 def build_settings(args: argparse.Namespace) -> ExportSettings:
     """``ExportSettings`` from parsed arguments (raises ``ValueError``)."""
     base = ExportSettings.preview() if args.preset == "preview" else ExportSettings()
@@ -146,6 +254,9 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         impact_time_s=args.impact_time,
         impact_window_s=args.impact_window,
         overlays=not args.no_overlay,
+        shading=build_shading(args),
+        force_vectors=args.force_vectors,
+        torque_vectors=args.torque_vectors,
         multiview=not args.no_grid,
         grip=args.grip,
         hud=not args.no_hud,
@@ -181,7 +292,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         results = run_export(
             job,
             settings,
-            overlay_factory=partial(build_overlay_feed, grip=settings.grip),
+            overlay_factory=partial(
+                build_overlay_feed,
+                grip=settings.grip,
+                axial=settings.shading_enabled,
+                show_force=settings.force_vectors,
+                show_torque=settings.torque_vectors,
+            ),
         )
     except (ValueError, FileNotFoundError) as exc:
         sys.stderr.write(f"error: {exc}\n")

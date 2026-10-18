@@ -58,6 +58,38 @@ the toggle can always turn off the display even when an unapplied edit is invali
 
 For non-MuJoCo engines, `axial_loads_from_reactions(frame, axes, source)` in `src/shared/python/force_overlay/conversions.py` provides the single shared path to compute segment axial loads from `JOINT_REACTION` overlay wrenches. By mapping each segment to its proximal reaction joint via `SegmentAxis(segment, joint_label, proximal_m, distal_m)`, it invokes `axial_force_from_proximal_reaction` to yield an `AxialLoadFrame` (or `frame_with_axial_loads` to produce an annotated `ForceTorqueFrame`) with positive values for tension and negative for compression. Missing reaction wrenches or force-less reactions leave corresponding segment values as `None` (never zero-filled).
 
+## Desktop Controls: Opacity, Blend Mode and Colors
+
+The shared PyQt6 `ForceColorControls` widget (used by the MuJoCo, Drake,
+Pinocchio, Simscape and pendulum GUIs through **Segment Force Colors…**) edits
+every `ForceColorScale` field:
+
+- **Overlay Opacity** (0-100 %) sets `opacity`; it applies immediately.
+- **Blend Mode** sets `blend_mode`. *Tint over model* shifts each segment's own
+  color toward the tension or compression color in proportion to the load, so
+  unloaded segments keep their appearance. *Replace colour* paints the load
+  color (blended with the base by the opacity).
+- Each of the tension, compression and neutral colors has a hex field plus a
+  picker button with a live swatch. **Reset Colours** restores the default blue,
+  red and white and keeps every other setting.
+- Limits and hex edits still apply atomically with **Apply Colors and Ranges**:
+  an invalid edit keeps the previous scale and reports the error.
+
+### Inline Toggles and Persistence
+
+The MuJoCo **Visualization** tab adds **Show Segment Tension/Compression** and
+**Overlay Opacity** beside **Show Joint Torque Vectors (curl arrows)** and
+**Show Joint Force Vectors**, plus a **Segment Force Colors…** button that opens
+the full dialog. Drake and Pinocchio add the same inline shading checkbox next to
+their Show Forces and Show Torques boxes. Dialog and inline controls share one
+`ForceColorHub`, so a change in either place appears in the other.
+
+The scale (`to_dict`) and the force and torque toggles are saved with `QSettings`
+under organization and application `UpstreamDrift` (key `force_color/<engine>`) and
+restored at startup by MuJoCo, Drake and Pinocchio. Corrupt or legacy values fall
+back to defaults and log a warning. Other engines can reuse
+`bind_force_color_persistence` or `force_color_settings.py`.
+
 ## Web Hosts
 
 `Scene3D` has a collapsible Segment Force Colors panel. Supply the optional
@@ -74,6 +106,52 @@ adapter clones materials while coloring to avoid altering shared glTF assets,
 reuses clones during playback, and restores/disposes only owned clones on cleanup.
 Python and JavaScript share conformance examples in
 `schemas/force-color-examples.json`.
+
+## Closed-Loop Terms in Prescribed-Motion Loads (#13179)
+
+A fitted (prescribed) motion has no forward simulation behind it, so the segment
+loads come from inverse dynamics on a private model copy. Three terms that the
+open chain does not contain are handled explicitly:
+
+- **Grip weld closure wrench.** The `native_grip` weld (trail hand
+  `RHandStandoff` to the club) is a rigid loop. The prescribed inverse has a
+  nullspace over the loop, so MuJoCo's soft weld would split the force by
+  solref/solimp impedance rather than by physics. With the bundle efforts the
+  explicit KKT solve of the full-body model gives the physical 6-D multiplier
+  `lambda` (`[force; torque]`, world frame). The weld is disabled
+  (`mjDSBL_EQUALITY`) on the private copy and `+lambda` is applied on the hand
+  closure body and `-lambda` on the club through `xfrc_applied`, so the pair
+  obeys Newton's third law exactly and the loop is not counted twice. Without
+  efforts, or if the solve fails, the closure is unavailable: every segment on
+  the loop path (the bodies between the two weld bodies below their lowest common
+  ancestor) reports `None`, never zero and never the impedance value, and the
+  frame metadata reads `axial_closure: unavailable` with `axial_closure_reason`.
+  When applied, the frame carries `axial_closure: applied` and the 6-D
+  `axial_closure_multiplier`.
+- **Ball impact.** The impact impulse is not modelled. Frames within one bundle
+  step of the detected impact time report `None` for every segment
+  (`axial_impact: unavailable`) instead of an open-loop load.
+- **Ground free moment.** The spin-friction moment about the ground normal is
+  carried as the torque of each ground contact wrench (`contact_free_moments`),
+  so it reaches the inverse and the ground-reaction glyphs. It is zero (absent)
+  when the specification declares no torsion patch.
+
+Public accessor for later consumers (for example transporting the grip load onto a
+palm patch): `MujocoOverlaySource.closure_wrench(coordinates, rates, efforts)`
+returns a `GripClosure` (`wrenches`, `multiplier_world`, `available`, `reason`).
+
+Reproduce the consistency check (`qfrc_inverse - efforts`, with the contact
+force applied at the contact sphere centre, the forward model's line of action):
+
+```bash
+python3 -m pytest -o addopts="" -q -n 0 \
+  tests/unit/body_part_viz/test_mujoco_axial_closure.py \
+  tests/unit/motion_matching/test_closure_wrench_overlay_13179.py
+```
+
+The prescribed accelerations are the unfiltered finite difference of the bundle
+velocity, so on a real fit the residual also carries that numerical noise; with
+the forward solve's own accelerations the residual is at round-off.
 
 ## Qualification Status
 
