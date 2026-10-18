@@ -56,9 +56,13 @@ class TrainingConfig:
         if self.batch_size <= 0:
             raise ValueError(f"batch_size must be positive, got {self.batch_size}")
         if self.learning_rate <= 0:
-            raise ValueError(f"learning_rate must be positive, got {self.learning_rate}")
+            raise ValueError(
+                f"learning_rate must be positive, got {self.learning_rate}"
+            )
         if self.weight_decay < 0:
-            raise ValueError(f"weight_decay must be non-negative, got {self.weight_decay}")
+            raise ValueError(
+                f"weight_decay must be non-negative, got {self.weight_decay}"
+            )
         if not 0.0 <= self.dropout < 1.0:
             raise ValueError(f"dropout must be in [0.0, 1.0), got {self.dropout}")
         if self.activation not in SUPPORTED_ACTIVATIONS:
@@ -201,7 +205,7 @@ class ImitationLearner(ABC):
         return self._training_history.copy()
 
 
-def apply_activation(x: NDArray[np.floating], activation: str) -> NDArray[np.floating]:
+def apply_activation(x: NDArray[Any], activation: str) -> NDArray[Any]:
     """Apply configured activation function."""
     if activation == "relu":
         return np.maximum(0.0, x)
@@ -213,10 +217,10 @@ def apply_activation(x: NDArray[np.floating], activation: str) -> NDArray[np.flo
 
 
 def apply_activation_grad(
-    grad: NDArray[np.floating],
-    activated: NDArray[np.floating],
+    grad: NDArray[Any],
+    activated: NDArray[Any],
     activation: str,
-) -> NDArray[np.floating]:
+) -> NDArray[Any]:
     """Backpropagate gradient through configured activation function."""
     if activation == "relu":
         return grad * (activated > 0)
@@ -235,9 +239,7 @@ def validate_dataset_and_split(
     if dataset is None:
         raise ValueError("dataset must be provided")
     if not 0.0 <= validation_split < 1.0:
-        raise ValueError(
-            f"validation_split must be in [0, 1), got {validation_split}"
-        )
+        raise ValueError(f"validation_split must be in [0, 1), got {validation_split}")
     states, actions = dataset.to_state_action_pairs()
     if len(states) == 0:
         raise ValueError("Dataset has no state-action pairs")

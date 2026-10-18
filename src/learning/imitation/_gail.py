@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import json
 import numpy as np
@@ -487,7 +487,7 @@ class GAIL(ImitationLearner):
             raise ValueError("path must be provided")
         path = Path(path)
 
-        save_data = {
+        save_data: dict[str, Any] = {
             "observation_dim": np.array(self.observation_dim),
             "action_dim": np.array(self.action_dim),
             "num_policy_layers": np.array(len(self._policy)),

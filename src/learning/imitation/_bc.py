@@ -148,7 +148,7 @@ class BehaviorCloning(ImitationLearner):
 
         predictions, cache = self._forward_with_cache(observations, training=True)
         gradients: list[dict[str, NDArray[np.floating]]] = []
-        delta = 2 * (predictions - actions) / batch_size  # MSE gradient
+        delta: NDArray[Any] = 2 * (predictions - actions) / batch_size  # MSE gradient
 
         for i in range(len(self._policy) - 1, -1, -1):
             layer = self._policy[i]
@@ -281,7 +281,7 @@ class BehaviorCloning(ImitationLearner):
             raise ValueError("path must be provided")
         path = Path(path)
 
-        save_data = {
+        save_data: dict[str, Any] = {
             "observation_dim": np.array(self.observation_dim),
             "action_dim": np.array(self.action_dim),
             "num_layers": np.array(len(self._policy)),

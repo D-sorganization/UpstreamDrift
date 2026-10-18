@@ -59,14 +59,16 @@ class TestValidationSplitContract:
     def test_bc_validation_split_leaves_no_training_samples_raises(self) -> None:
         bc = BehaviorCloning(4, 2, TrainingConfig(epochs=1, batch_size=4))
         # 1 transition only
-        ds = DemonstrationDataset([
-            Demonstration(
-                timestamps=np.array([0.0, 0.01]),
-                joint_positions=np.zeros((2, 2)),
-                joint_velocities=np.zeros((2, 2)),
-                actions=np.zeros((2, 2)),
-            )
-        ])
+        ds = DemonstrationDataset(
+            [
+                Demonstration(
+                    timestamps=np.array([0.0, 0.01]),
+                    joint_positions=np.zeros((2, 2)),
+                    joint_velocities=np.zeros((2, 2)),
+                    actions=np.zeros((2, 2)),
+                )
+            ]
+        )
         with pytest.raises(ValueError, match="training samples"):
             bc.train(ds, validation_split=0.99)
 
@@ -191,9 +193,13 @@ class TestDAggerImmutabilityAndTrajectory:
 
         d = DAgger(5, 2, TrainingConfig(epochs=1, batch_size=4))
         with pytest.raises(ValueError, match="even"):
-            d._collect_trajectory(OddObsEnv(), expert=lambda o: np.zeros(2), beta=0.5, max_steps=5)
+            d._collect_trajectory(
+                OddObsEnv(), expert=lambda o: np.zeros(2), beta=0.5, max_steps=5
+            )
 
-    def test_dagger_collect_trajectory_success_not_blindly_true_on_truncation(self) -> None:
+    def test_dagger_collect_trajectory_success_not_blindly_true_on_truncation(
+        self,
+    ) -> None:
         class TruncatingEnv:
             def reset(self):
                 return np.zeros(4), {}
@@ -203,6 +209,8 @@ class TestDAggerImmutabilityAndTrajectory:
                 return np.zeros(4), 0.0, False, True, {}
 
         d = DAgger(4, 2, TrainingConfig(epochs=1, batch_size=4))
-        demo, _ = d._collect_trajectory(TruncatingEnv(), expert=lambda o: np.zeros(2), beta=0.5, max_steps=5)
+        demo, _ = d._collect_trajectory(
+            TruncatingEnv(), expert=lambda o: np.zeros(2), beta=0.5, max_steps=5
+        )
         # Previously success=not terminated would evaluate to True on truncated rollouts!
         assert demo.success is False
