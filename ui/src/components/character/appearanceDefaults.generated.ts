@@ -8,7 +8,7 @@ export const DEFAULT_HAIR_MATERIAL = 'hair_brown';
 export const DEFAULT_CLOTHING = 'golf_polo_trousers';
 export const DEFAULT_CLUB_FINISH = 'satin_steel';
 export const DEFAULT_SKIN_HEX = '#edc2a8';
-export const DEFAULT_HAIR_HEX = '#5c3b24';
+export const DEFAULT_HAIR_HEX = '#734a2b';
 
 export const SKIN_HEX: Record<string, string> = {
   skin_1: '#f5d9c4',
@@ -28,7 +28,7 @@ export const SKIN_HEX: Record<string, string> = {
 export const HAIR_HEX: Record<string, string> = {
   hair_black: '#0d0b0b',
   hair_dark_brown: '#382417',
-  hair_brown: '#5c3b24',
+  hair_brown: '#734a2b',
   hair_light_brown: '#855c38',
   hair_auburn: '#73331f',
   hair_blond: '#b28c4c',
