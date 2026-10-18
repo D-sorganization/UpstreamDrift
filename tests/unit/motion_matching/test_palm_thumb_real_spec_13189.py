@@ -19,6 +19,7 @@ pytest.importorskip("mujoco")
 from src.engines.physics_engines.mujoco.python.overlay_source import (  # noqa: E402
     MujocoOverlaySource,
 )
+from src.shared.python.core.handedness import subject_handedness  # noqa: E402
 from src.shared.python.grip_contact.palm_thumb import (  # noqa: E402
     allocate_from_closure,
 )
@@ -71,7 +72,10 @@ def patch(spec):
     pose = DEFAULT_GRIP_POSE
     radius = grip_radius_at(club, pose.distance_below_butt_m(Hand.LEAD))
     return thumb_palm_patch(
-        grip_hand_frame(club, Hand.LEAD, pose), grip_radius_m=radius, pose=pose
+        grip_hand_frame(club, Hand.LEAD, pose),
+        grip_radius_m=radius,
+        pose=pose,
+        handedness=subject_handedness(spec),
     )
 
 
@@ -134,3 +138,31 @@ def test_missing_efforts_make_the_allocation_unavailable(spec, patch) -> None:
         static_friction=0.9,
     )
     assert not out.available and out.reason and out.normal_force_n is None
+
+
+def test_club_frame_maps_the_closure_placement_onto_the_weld_site(spec) -> None:
+    """The spec club frame is not the MJCF body frame: placement_b must land on
+    the weld site, and the patch must sit within a hand's reach of the grip."""
+    source = MujocoOverlaySource(json.dumps(spec).encode("utf-8"))
+    q, _, _ = _state(source, np.random.default_rng(7))
+    rot, origin = source.club_frame_world(q)
+    placement = np.asarray(spec["closure"]["placement_b"], dtype=float)
+    site = source.data.site_xpos[source._closure[1]]
+    np.testing.assert_allclose(rot @ placement[:3, 3] + origin, site, atol=1e-9)
+    np.testing.assert_allclose(
+        rot @ placement[:3, :3],
+        source.data.site_xmat[source._closure[1]].reshape(3, 3),
+        atol=1e-9,
+    )
+
+
+def test_feed_patch_helper_matches_the_spec_patch_and_friction(spec, patch) -> None:
+    from src.tools.native_viewer_export.overlay import palm_thumb_patch_for_spec
+
+    got, friction = palm_thumb_patch_for_spec(json.dumps(spec).encode("utf-8"))
+    assert got == patch
+    assert friction == spec["contact"]["parameters"]["static_friction"]
+    with pytest.raises(ValueError, match="static_friction"):
+        broken = json.loads(json.dumps(spec))
+        del broken["contact"]["parameters"]["static_friction"]
+        palm_thumb_patch_for_spec(json.dumps(broken).encode("utf-8"))

@@ -39,7 +39,11 @@ from src.shared.python.force_overlay.contracts import (
 )
 from src.shared.python.force_overlay.conversions import joint_torque_wrench
 from src.shared.python.force_overlay.grip_frame import grip_wrenches_and_metadata
-from src.shared.python.grip_contact.palm_thumb import allocate_from_closure
+from src.shared.python.grip_contact.palm_thumb import (
+    METHOD as PALM_THUMB_METHOD,
+    PALM_THUMB_LABEL,
+    allocate_from_closure,
+)
 from src.shared.python.force_overlay.series import ForceTorqueSeries
 from src.shared.python.motion_matching.same_input import InputBundle
 
@@ -300,15 +304,21 @@ class BundleOverlayProvider:
         self._palm_thumb = (source, patch, float(static_friction))
         return self
 
-    def _palm_thumb_meta(
+    def _palm_thumb_report(
         self,
         coords: Mapping[str, float],
         rates: Mapping[str, float],
         efforts: Mapping[str, float],
-    ) -> dict[str, Any]:
-        """``{"palm_thumb": record}`` for the state, or ``{}`` without the hook."""
+    ) -> tuple[tuple[OverlayWrench, ...], dict[str, Any]]:
+        """Palm-thumb wrench (loaded frames only) and ``palm_thumb`` metadata.
+
+        The wrench is the normal force on the thumb at the patch, labelled
+        ``PALM_THUMB_LABEL`` and sourced ``<engine>:allocation``; it is a
+        drawing aid of an allocated equivalent, never to be summed with the
+        other wrenches. Unloaded or unavailable frames carry no wrench.
+        """
         if self._palm_thumb is None:
-            return {}
+            return (), {}
         source, patch, friction = self._palm_thumb
         closure = source.closure_wrench(coords, rates, efforts)
         rotation, origin = source.club_frame_world(coords)
@@ -319,7 +329,25 @@ class BundleOverlayProvider:
             patch=patch,
             static_friction=friction,
         )
-        return {"palm_thumb": result.to_dict()}
+        meta = {"palm_thumb": result.to_dict()}
+        point = result.patch_point_m
+        if (
+            not result.available
+            or result.unloaded
+            or not result.normal_force_n
+            or point is None
+        ):
+            return (), meta
+        push = -result.normal_force_n * np.asarray(result.patch_normal, dtype=float)
+        wrench = OverlayWrench(
+            WrenchKind.GRIP,
+            PALM_THUMB_LABEL,
+            closure.wrenches[-1].body,
+            point,
+            force_n=(float(push[0]), float(push[1]), float(push[2])),
+            source=f"{self._engine}:{PALM_THUMB_METHOD}",
+        )
+        return (wrench,), meta
 
     def with_axial_loads(self, axial: AxialLoadSource) -> BundleOverlayProvider:
         """Attach per-frame segment axial loads (``frame.axial_loads``); returns ``self``.
@@ -447,7 +475,9 @@ class BundleOverlayProvider:
             index, coords, rates, ground, named_efforts
         )
         metadata.update(axial_meta)
-        metadata.update(self._palm_thumb_meta(coords, rates, named_efforts))
+        palm_wrenches, palm_meta = self._palm_thumb_report(coords, rates, named_efforts)
+        wrenches.extend(palm_wrenches)
+        metadata.update(palm_meta)
         return ForceTorqueFrame(
             time_s=float(index * self._bundle.dt_s),
             engine=self._engine,

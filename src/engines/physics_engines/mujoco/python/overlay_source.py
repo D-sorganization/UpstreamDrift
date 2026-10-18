@@ -161,15 +161,24 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
     def club_frame_world(
         self, coordinates: Mapping[str, float]
     ) -> tuple[np.ndarray, np.ndarray]:
-        """World rotation (3x3) and origin of the club body (the weld's site B body).
+        """World rotation (3x3) and origin of the *specification* club frame.
 
-        Used to carry club-frame geometry (e.g. the palm-on-thumb patch, #13189)
-        to the world. Read-only: no model field is modified.
+        This is the frame the club geometry, the grip frames and the palm-thumb
+        patch are expressed in (``closure.placement_b`` is a pose in it). It is
+        not the MJCF body frame, which the export re-centres: the weld site's
+        world pose is ``club_frame @ placement_b``, so the club frame is
+        ``site_pose @ inv(placement_b)``. Read-only (#13189).
         """
         self._forward(coordinates)
-        body = int(self.model.site_bodyid[self._closure[1]])
-        rotation = np.array(self.data.xmat[body], dtype=float).reshape(3, 3)
-        return rotation, np.array(self.data.xpos[body], dtype=float)
+        site = self._closure[1]
+        pose = np.eye(4)
+        pose[:3, :3] = np.asarray(self.data.site_xmat[site], dtype=float).reshape(3, 3)
+        pose[:3, 3] = self.data.site_xpos[site]
+        placement = np.asarray(
+            self._spec_for_partition["closure"]["placement_b"], dtype=float
+        )
+        frame = pose @ np.linalg.inv(placement)
+        return frame[:3, :3].copy(), frame[:3, 3].copy()
 
     def _forward(self, coordinates: Mapping[str, float]) -> None:
         self.data.qpos[:] = self._vector(coordinates)

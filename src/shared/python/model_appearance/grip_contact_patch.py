@@ -23,8 +23,8 @@ at the lead hand centre, ``z`` butt toward head, ``x`` the toe axis, ``y = z x x
 A left-handed golfer's grip is the reflection of the right-handed one in the
 plane of the shaft and the face normal (the hand-grip frame ``x`` axis is the
 mirror normal), so the left-handed patch is the exact reflection of the
-right-handed one. ``handedness`` follows ``subject.handedness`` (default
-``"right"``). Visual-geometry reference only: nothing here touches a mass, an
+right-handed one. ``handedness`` is ``subject_handedness(spec)`` (default ``"right"``).
+Visual-geometry reference only: nothing here touches a mass, an
 inertia or a constraint.
 """
 
@@ -37,6 +37,11 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.core.handedness import (
+    lead_side,
+    trail_side,
+    validate_handedness,
+)
 from src.shared.python.model_appearance.grip_hand_mesh import (
     DEFAULT_HAND_MESH_PARAMS,
     GRIP_RADIUS_RANGE_M,
@@ -54,9 +59,6 @@ Vec3 = tuple[float, float, float]
 
 #: Tolerance on the orthonormality of the lead hand-grip frame rotation.
 ROTATION_TOLERANCE = 1e-9
-HANDEDNESS_CHOICES = ("right", "left")
-#: Anatomical side letters of (lead, trail) hand for each handedness.
-_SIDES = {"right": ("L", "R"), "left": ("R", "L")}
 
 
 @dataclass(frozen=True)
@@ -91,8 +93,7 @@ def _check(
     handedness: object,
     params: object,
 ) -> Array:
-    if handedness not in HANDEDNESS_CHOICES:
-        raise ValueError(f"handedness must be 'right' or 'left', got {handedness!r}")
+    validate_handedness(handedness)
     frame = np.asarray(lead_frame, dtype=float)
     if frame.shape != (4, 4) or not np.isfinite(frame).all():
         raise ValueError("lead_frame must be a finite 4x4 transform")
@@ -177,7 +178,6 @@ def thumb_palm_patch(
             v * mirror for v in (point, normal, palm, axis_point)
         )
     rot, origin = frame[:3, :3], frame[:3, 3]
-    lead_side, trail_side = _SIDES[handedness]
     return ThumbPatch(
         point_club_m=_vec3(rot @ point + origin),
         normal_club=_vec3(rot @ normal),
@@ -186,6 +186,6 @@ def thumb_palm_patch(
         station_m=float(axis_point[2]),
         thumb_radius_m=params.scale * params.thumb_radius_m,
         handedness=handedness,
-        lead_side=lead_side,
-        trail_side=trail_side,
+        lead_side=lead_side(handedness),
+        trail_side=trail_side(handedness),
     )

@@ -54,6 +54,44 @@ def _impact_or_none(swing: SwingInput) -> float | None:
         return None
 
 
+def palm_thumb_patch_for_spec(spec_bytes: bytes) -> tuple[Any, float]:
+    """(``ThumbPatch``, spec static friction) of a full-body specification.
+
+    The club comes from the spec (``assembly_from_spec``), the hands from the
+    default grip pose and the sides from ``subject_handedness(spec)``.
+    Raises ``ValueError`` if the spec has no club or no static friction.
+    """
+    from src.shared.python.core.handedness import subject_handedness
+    from src.shared.python.model_appearance.club_assembly import assembly_from_spec
+    from src.shared.python.model_appearance.grip_contact_patch import (
+        thumb_palm_patch,
+    )
+    from src.shared.python.model_appearance.grip_hands import (
+        grip_hand_frame,
+        grip_radius_at,
+    )
+    from src.shared.python.model_appearance.grip_pose import (
+        DEFAULT_GRIP_POSE,
+        Hand,
+    )
+
+    spec = json.loads(spec_bytes)
+    club = assembly_from_spec(spec)
+    if club is None:
+        raise ValueError("the specification has no club for the palm-thumb patch")
+    friction = spec.get("contact", {}).get("parameters", {}).get("static_friction")
+    if friction is None:
+        raise ValueError("the specification has no contact static_friction")
+    pose = DEFAULT_GRIP_POSE
+    patch = thumb_palm_patch(
+        grip_hand_frame(club, Hand.LEAD, pose),
+        grip_radius_m=grip_radius_at(club, pose.distance_below_butt_m(Hand.LEAD)),
+        pose=pose,
+        handedness=subject_handedness(spec),
+    )
+    return patch, float(friction)
+
+
 def build_overlay_feed(
     swing: SwingInput,
     engine: str,
@@ -63,6 +101,7 @@ def build_overlay_feed(
     impact_time_s: float | None = None,
     show_force: bool = True,
     show_torque: bool = True,
+    palm_thumb: bool = False,
 ) -> tuple[OverlayFeed, tuple[float, float, float]]:
     """Overlay feed for ``swing`` plus the framing look-at point.
 
@@ -76,7 +115,10 @@ def build_overlay_feed(
     impact (``impact_time_s``, default the shared detector's; frames within one
     bundle step) the loads are unavailable, as the impact impulse is not
     modelled (#13179). ``show_force`` and
-    ``show_torque`` choose the glyph kinds drawn.
+    ``show_torque`` choose the glyph kinds drawn. With ``palm_thumb`` each loaded
+    frame also carries the allocated trail-palm-on-lead-thumb normal force
+    (HRG-H1, #13189), drawn independently of the other vectors; it is reporting
+    only and leaves the compiled model unchanged.
 
     Raises ``BackendUnavailable`` when MuJoCo is not installed.
     """
@@ -106,6 +148,9 @@ def build_overlay_feed(
         impact = _impact_or_none(swing) if impact_time_s is None else impact_time_s
         if impact is not None:
             provider.with_axial_impact_window(impact, float(swing.bundle.dt_s))
+    if palm_thumb:
+        patch, friction = palm_thumb_patch_for_spec(swing.bundle.spec_bytes)
+        provider.with_palm_thumb(source, patch, static_friction=friction)
     names = swing.bundle.coordinate_order
     com = source.center_of_mass_m(dict(zip(names, map(float, swing.q[0]), strict=True)))
     lookat = (float(com[0]), float(com[1]), LOOKAT_HEIGHT_M)
@@ -116,6 +161,7 @@ def build_overlay_feed(
         grip_analyses=provider.grip_analyses if grip else None,
         show_force=show_force,
         show_torque=show_torque,
+        show_palm_thumb=palm_thumb,
     )
     return feed, lookat
 

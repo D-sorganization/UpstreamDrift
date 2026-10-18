@@ -101,3 +101,22 @@ def test_allocate_from_closure_uses_the_club_side_wrench() -> None:
         static_friction=0.9,
     )
     assert out.force_on_lead_n == pytest.approx((0.0, -5.0, 0.0))
+
+
+def test_loaded_frame_carries_one_labelled_force_wrench_on_the_club() -> None:
+    from src.shared.python.grip_contact.palm_thumb import PALM_THUMB_LABEL
+
+    frame = _provider(_Source()).frame_at(2)
+    wrench = next(w for w in frame.wrenches if w.label == PALM_THUMB_LABEL)
+    assert wrench.body == "club" and wrench.torque_nm is None
+    # The palm pushes the thumb along -normal with the normal force (5 N).
+    assert wrench.force_n == pytest.approx((0.0, -5.0, 0.0))
+    assert wrench.point_m == pytest.approx((0.0, 0.0, 0.1))
+    assert "allocation" in wrench.source
+
+
+def test_unavailable_closure_adds_no_wrench() -> None:
+    from src.shared.python.grip_contact.palm_thumb import PALM_THUMB_LABEL
+
+    frame = _provider(_Source(available=False)).frame_at(1)
+    assert all(w.label != PALM_THUMB_LABEL for w in frame.wrenches)

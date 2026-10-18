@@ -8024,11 +8024,21 @@ margin 2 mm, mirror $10^{-9}$), \texttt{test\_palm\_thumb.py} ($\lambda$
 reproduced to $10^{-10}$, third law $10^{-9}$, static hold at 12 attitudes),
 \texttt{test\_palm\_thumb\_real\_spec\_13189.py}. On the driver bundle
 \texttt{r9b/driver\_bundle.npz} (61 of 1814 steps sampled), the peak allocated
-normal force is 94.2~N at step 1470 (closure force 170.0~N, share 0.554, friction
-ratio 1.67 against $\mu=0.9$); 19 of 61 sampled frames are unloaded. The
-allocation is not unique ($\lambda$ has no information on where the load acts),
-the share depends on the declared patch, and the friction ratio above one marks
-frames where the allocation lies outside the cone, not a slip.
+normal force is 342.8~N at step 1410 (closure force 343.9~N, share 0.997,
+friction ratio 0.088 against $\mu=0.9$); the median share is 0.550 and 10 of 61
+sampled frames are unloaded. The patch is carried to the world by the
+\emph{specification} club frame, $\mathrm{site}_b\,\mathrm{placement}_b^{-1}$,
+not by the MJCF body frame (the export re-centres it; a test checks that
+\texttt{placement\_b} lands on the weld site). The allocation is not unique
+($\lambda$ has no information on where the load acts) and the share depends on
+the declared patch.
+
+\subsection{Viewer Toggle}
+\texttt{--palm-thumb-force} draws the normal force on the thumb at the patch as
+a sky-blue arrow, scaled like the other force arrows, with the legend suffix
+``allocated (not measured)''. It is independent of
+\texttt{--force-vectors} and \texttt{--torque-vectors}; unloaded frames draw
+nothing. Stills: \texttt{\~{}/Videos/HRG\_2026-10-17/H1/}.
 
 Reproduce: build the patch with \texttt{thumb\_palm\_patch} from the spec club,
 call \texttt{BundleOverlayProvider.with\_palm\_thumb} on a

@@ -65,6 +65,14 @@ def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
         default=True,
         help="draw curling joint-torque arcs (default: on)",
     )
+    p.add_argument(
+        "--palm-thumb-force",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="draw the allocated trail-palm-on-lead-thumb normal force at the "
+        "contact patch (an equivalent of the grip closure force, not a "
+        "measured contact; unloaded frames draw nothing; default: off)",
+    )
     shade = p.add_argument_group(
         "segment shading",
         "Translucent tension/compression shading of the golfer's segments "
@@ -360,6 +368,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         shading=build_shading(args),
         force_vectors=args.force_vectors,
         torque_vectors=args.torque_vectors,
+        palm_thumb_force=args.palm_thumb_force,
         multiview=not args.no_grid,
         grip=args.grip,
         hud=not args.no_hud,
@@ -402,6 +411,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 axial=settings.shading_enabled,
                 show_force=settings.force_vectors,
                 show_torque=settings.torque_vectors,
+                palm_thumb=settings.palm_thumb_force,
             ),
         )
     except (ValueError, FileNotFoundError) as exc:

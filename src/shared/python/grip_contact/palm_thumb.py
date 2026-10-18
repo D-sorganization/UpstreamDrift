@@ -32,6 +32,8 @@ from typing import Any
 import numpy as np
 
 METHOD = "allocation"
+#: Overlay wrench label of the drawn normal force (ungrouped, never summed).
+PALM_THUMB_LABEL = "external:palm_thumb_allocated"
 #: Tolerance on the unit length of the patch normal.
 NORMAL_TOLERANCE = 1e-9
 #: Closure forces below this (N) have no meaningful share or direction.
