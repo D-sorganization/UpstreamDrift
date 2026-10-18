@@ -11,7 +11,7 @@ Pipeline for one lift:
    MuJoCo marker IK (:class:`FullBodyMarkerKinematics`), feet held flat on
    the ground.
 3. :func:`build_lift_bundle` tracks a window of that joint trajectory in
-   MuJoCo with the pipeline controller (:func:`generate_reference_bundle`) and
+   MuJoCo with the pipeline controller (:func:`generate_lead_in_bundle`) and
    packages it as an :class:`InputBundle` with provenance.
 
 Model limitations are recorded in every bundle's provenance
@@ -44,6 +44,11 @@ from src.shared.python.lifting.back_bar import (
     pose_axis_world,
     standard_bar_world,
 )
+from src.shared.python.lifting.back_rack import rack_bar_world
+from src.shared.python.lifting.bundle_stability import (
+    bundle_rk4_stability as bundle_rk4_stability,
+)
+from src.shared.python.lifting.bundle_stability import stable_tracking_bundle
 from src.shared.python.lifting.barbell_runs import (
     LOADED_TRACKING_POLICY,
     rigid_bar_spec,
@@ -70,13 +75,12 @@ from src.shared.python.lifting.sagittal_retarget import (
 from src.shared.python.motion_matching.same_input import (
     InputBundle,
     VectorPlant,
-    generate_reference_bundle,
+)
+from src.shared.python.motion_matching.pipeline.constants import DT_S
+from src.shared.python.motion_matching.same_input.reference import (
+    generate_lead_in_bundle,
 )
 from src.shared.python.motion_matching.same_input.integrator import DEFAULT_POLICY
-from src.shared.python.motion_matching.same_input.stiffness import (
-    rk4_stability_record,
-    stable_substeps,
-)
 
 Array = NDArray[np.float64]
 
@@ -103,12 +107,6 @@ SAME_INPUT_LIFT_BUNDLES: Mapping[str, Path | None] = MappingProxyType(
 )
 
 BAR_FRAME = "Hub"
-#: Reference steps between the states sampled for ``rk4_stability``.
-STABILITY_SAMPLE_EVERY = 5
-#: Bundle runs tried while raising the substeps to the recorded stiffest rate
-#: (:func:`~src.shared.python.motion_matching.same_input.stiffness.\
-#: stable_substeps`); each retry at least doubles them.
-STABILITY_ATTEMPTS = 4
 LIMITATIONS = (
     "The only spec the same-input harness replays in every engine is the golf "
     "full-body spec, so the lifter keeps that spec's arms and dual-grip club; "
@@ -128,6 +126,13 @@ BACK_BAR_LIMITATIONS = (
     "bar sits at the standard's start-pose position; the golf humanoid's "
     "torso is not the standard's, so that shelf is not a measured anatomical "
     "site. The scapulae are held at the seed pose and the arm chain is solved."
+)
+#: Replaces the shelf sentence of :data:`BACK_BAR_LIMITATIONS` on a rack.
+RACK_LIMITATIONS = (
+    " Rack (OSL-17, #13131): the shelf is not fitted to the standard's "
+    "start-pose bar (which lies above the shoulders) but to a cited back-squat "
+    "rack on the lift body's trunk landmark (back_bar.geometry.rack); the rack "
+    "is a landmark rule, not a measured bar position of a lifter."
 )
 #: Appended to :data:`BACK_BAR_LIMITATIONS` when the IK balances the bar load.
 LOAD_BALANCE_LIMITATIONS = (
@@ -294,6 +299,9 @@ class FullBodyLift:
         }
         if self.balance is not None:
             record["balance"] = dict(self.balance)
+            # OSL-17 (#13131): the balanced first frame (the lift starts
+            # standing); q_standing is the pose before the bar-load balance.
+            record["q_balanced_standing"] = self.q[0].tolist()
         if isinstance(self.back_bar, BackBarSetup):
             record["back_bar"] = self.back_bar.to_record()
         elif self.back_bar is not None:
@@ -634,7 +642,11 @@ def _back_bar_pose(
         raise TypeError("geometry must be a BackBarGeometry")
     kin, q = standing.kin, standing.q
     mid_foot = stance_mid_foot(kin, q, standing.ground)
-    bar_target = standard_bar_world(geometry, mid_foot, standing.frame)
+    bar_target = (
+        standard_bar_world(geometry, mid_foot, standing.frame)
+        if geometry.rack is None
+        else rack_bar_world(geometry.rack, spec_bytes, kin, q)
+    )
     hub_rotation, hub_origin = kin.body_poses(q, [SHELF_FRAME])[SHELF_FRAME]
     shelf = fit_bar_shelf(SHELF_FRAME, hub_rotation, hub_origin, bar_target)
     setup = BackBarSetup(
@@ -1034,7 +1046,8 @@ def _limitations(setup: BackBarSetup | HandBarSetup | None) -> str:
         return LIMITATIONS
     if isinstance(setup, HandBarSetup):
         return HAND_BAR_LIMITATIONS
-    return BACK_BAR_LIMITATIONS
+    rack = "" if setup.geometry.rack is None else RACK_LIMITATIONS
+    return BACK_BAR_LIMITATIONS + rack
 
 
 def bar_path(plant: VectorPlant, q_rows: Array, frame: str = BAR_FRAME) -> Array:
@@ -1081,6 +1094,7 @@ def build_lift_bundle(
     window_start_s: float,
     window_s: float,
     provenance: Mapping[str, Any] | None = None,
+    lead_in_s: float = 0.0,
 ) -> InputBundle:
     """Same-input bundle for a window of the full-body lift.
 
@@ -1088,17 +1102,26 @@ def build_lift_bundle(
     ``window_s``; MuJoCo tracks the joint trajectory from there with the
     pipeline controller held per step, or under
     :data:`~.barbell_runs.LOADED_TRACKING_POLICY` when the IK balanced a bar
-    load (OSL-16, #13104).  If the run's stiffest rate leaves the RK4 real
-    stability region, it is regenerated with the substeps that rate needs
-    (#13041; the floor pulls at eight substeps were outside it).  The provenance records the planar solution, the
-    IK summary, the window's bar path, the RK4 stability margin of the run
-    (``rk4_stability``) and ``provenance``.
+    load (OSL-16, #13104), at the substeps that keep the run inside the RK4
+    real stability region (:func:`.bundle_stability.stable_tracking_bundle`,
+    #13041).  The provenance records the planar solution, the IK summary, the window's bar path, the RK4 stability margin of the run
+    (``rk4_stability``) and ``provenance``.  With ``lead_in_s`` (OSL-17,
+    #13131) the tracking run starts that long before the window, at a
+    solution sample, so the bundle's first state is settled on its contact
+    (:func:`generate_lead_in_bundle`).
 
     Raises:
-        ValueError: For a window outside the lift, a missing ``lift``, or a
-            back-bar ``lift`` whose derived spec is not ``spec_bytes``.
+        ValueError: For a window outside the lift, a missing ``lift``, a
+            back-bar ``lift`` whose derived spec is not ``spec_bytes``, or a
+            lead-in that is negative, before the lift or not on a sample.
     """
     start = _window_indices(solution.time_s, float(window_start_s), float(window_s))
+    track = _window_indices(
+        solution.time_s, float(window_start_s) - float(lead_in_s), float(window_s)
+    )
+    if track > start:
+        raise ValueError(f"lead_in_s must be non-negative: {lead_in_s!r}")
+    lead_in_steps = int(round((solution.time_s[start] - solution.time_s[track]) / DT_S))
     if lift is None or lift.q.shape[0] != solution.time_s.size:
         raise ValueError("lift must be the full-body trajectory of solution")
     if not lift_name:
@@ -1119,24 +1142,19 @@ def build_lift_bundle(
         + ("" if lift.balance is None else LOAD_BALANCE_LIMITATIONS),
         **dict(provenance or {}),
     }
-    policy = DEFAULT_POLICY if lift.balance is None else LOADED_TRACKING_POLICY
-    plant = VectorPlant("mujoco", bytes(spec_bytes))
-    for _ in range(STABILITY_ATTEMPTS):
-        bundle = generate_reference_bundle(
+    bundle, stability, plant = stable_tracking_bundle(
+        lambda policy: generate_lead_in_bundle(
             bytes(spec_bytes),
-            times,
-            lift.q[start:],
+            solution.time_s[track:],
+            lift.q[track:],
             duration_s=float(window_s),
+            lead_in_steps=lead_in_steps,
             provenance=record,
             policy=policy,
-        )
-        stability = bundle_rk4_stability(bundle, plant)
-        substeps = stable_substeps(stability, bundle.dt_s, policy.substeps)
-        if substeps == policy.substeps:
-            break
-        policy = replace(policy, substeps=substeps)
-    else:
-        raise ValueError(f"no stable RK4 substep count for {lift_name}: {stability}")
+        ),
+        DEFAULT_POLICY if lift.balance is None else LOADED_TRACKING_POLICY,
+        label=lift_name,
+    )
     window_bar = bar_path(plant, bundle.reference_q, lift.bar_frame)
     return replace(
         bundle,
@@ -1145,27 +1163,4 @@ def build_lift_bundle(
             "window_bar_path_m": window_bar.tolist(),
             "rk4_stability": stability,
         },
-    )
-
-
-def bundle_rk4_stability(
-    bundle: InputBundle, plant: Any, every: int = STABILITY_SAMPLE_EVERY
-) -> dict[str, float | int]:
-    """RK4 margin of ``bundle``'s reference run, sampled every ``every`` steps.
-
-    The stiffest open-loop rate of ``plant`` (the bundle's MuJoCo plant) at
-    each sampled reference state under its recorded effort, times the
-    bundle's RK4 substep (see
-    :func:`~src.shared.python.motion_matching.same_input.stiffness.\
-rk4_stability_record`).
-    """
-    if isinstance(every, bool) or not isinstance(every, int) or every < 1:
-        raise ValueError("every must be a positive integer")
-    rows = np.arange(0, bundle.steps, every)
-    return rk4_stability_record(
-        plant,
-        bundle.reference_q[rows],
-        bundle.reference_v[rows],
-        bundle.efforts[rows],
-        bundle.dt_s / bundle.substeps,
     )

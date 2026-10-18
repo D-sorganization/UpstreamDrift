@@ -27,6 +27,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1196 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
 | 1195 | `src/tools/shot_pattern_analysis/matched_supplement_figures.py` |
 | 1193 | `src/launchers/model_card.py` |
+| 1186 | `src/shared/python/lifting/bundles.py` |
 | 1185 | `src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m` |
 | 1184 | `src/bunkershot3d/ball/splash.py` |
 | 1183 | `src/launchers/launcher_simulation.py` |
@@ -54,7 +55,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1134 | `src/tools/model_explorer/model_library.py` |
 | 1128 | `src/tools/starting_pose_matcher/gui_main_widget.py` |
 | 1125 | `src/tools/bunker_shot_gui/model.py` |
-| 1119 | `src/shared/python/lifting/bundles.py` |
 | 1118 | `src/motion_capture/rig/__main__.py` |
 | 1115 | `src/bunkershot3d/ball/qualification.py` |
 | 1114 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py` |

@@ -37,6 +37,7 @@ if str(ROOT) not in sys.path:
 
 from src.shared.python.lifting.barbell_bushing import Barbell  # noqa: E402
 from src.shared.python.lifting.barbell_runs import (  # noqa: E402
+    hold_pose,
     build_barbell_bundle,
     instantaneous_parity,
     quasi_static_hold,
@@ -66,14 +67,14 @@ def _write_json(path: Path, record: dict[str, Any]) -> None:
 
 def run_hold(source: InputBundle, commit: str) -> None:
     barbell = Barbell(_bar_mass(source))
-    q_hold = np.asarray(source.provenance["ik"]["q_standing"], dtype=float)
+    q_hold = hold_pose(source)
     result = quasi_static_hold(
         source.spec_bytes, q_hold, barbell, duration_s=HOLD_DURATION_S
     )
     record = {
         "lift": "back_squat",
         "pose": (
-            "IK standing pose (provenance ik.q_standing), root in contact "
+            "balanced IK standing pose (barbell_runs.hold_pose), root in contact "
             "equilibrium for body plus bar (barbell_runs.hold_start, #11744)"
         ),
         "source_commit": commit,
