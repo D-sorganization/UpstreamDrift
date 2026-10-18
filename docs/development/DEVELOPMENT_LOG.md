@@ -2561,6 +2561,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12728 · NSX-99: Sensitivity Stage, Report Schema V2 and Variability Panels
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12728
+- **Branch:** merged via #13195
+- **PR:** #13195
+- **Paths:** see #13195
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`878ab14f`; collated from changes/12728-nsx99-variability-service.md)
+- **Summary:** NSX-99: sensitivity stage, report schema v2 and variability panels
+- **Next step:** Shipped in PR #13195.
+
 ### DL-#13165 · HRG-E1: Wrist Lever Angle Renamed With NaN-Plus-Reason on Missing Markers; Joint_Stress Requires Signed, Side-Tagged WristDeviation
 
 - **State:** shipped
