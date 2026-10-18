@@ -1117,6 +1117,25 @@ models:
       status: "experimental"
       default_launch: "tab"
 
+  - id: "jaxsim_dashboard"
+    help: "docs/help/simulation_backends.md"
+    name: "JaxSim Dashboard"
+    description: "Interactive JaxSim simulation dashboard (capabilities, kinematics, forward dynamics, and parameter sensitivity — #6658)"
+    type: "special_app"
+    path: "src/launchers/jaxsim_dashboard.py"
+    engine_type: "jaxsim"
+    capabilities:
+      - "rigid_body"
+      - "dashboard"
+      - "advanced_mode"
+      - "recorder"
+    launcher:
+      category: "physics_engine"
+      logo: "cross_engine.svg"
+      status: "experimental"
+      default_launch: "tab"
+
+
   # =============================================================================
   # PHYSICS-INFORMED NEURAL NETWORKS
   # =============================================================================

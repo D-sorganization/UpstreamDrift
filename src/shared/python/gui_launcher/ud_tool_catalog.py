@@ -206,6 +206,14 @@ def _build_catalog() -> list[UDToolEntry]:
             command="src.launchers.pinocchio_dashboard",
             icon="pinocchio",
         ),
+        UDToolEntry(
+            tool_id="jaxsim_dashboard",
+            title="JaxSim Dashboard",
+            category="Physics Engines",
+            description="Launch the JaxSim simulation and kinematics dashboard.",
+            command="src.launchers.jaxsim_dashboard",
+            icon="cross_engine",
+        ),
         # ── Biomechanics ──────────────────────────────────────────────
         UDToolEntry(
             tool_id="cross_engine_dashboard",
