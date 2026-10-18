@@ -1,0 +1,3372 @@
+{
+  "fixture": {
+    "id": "report_v2_variability",
+    "issue": "D-sorganization/UpstreamDrift#12728",
+    "source": "analyze() on the planar NSX-00 fixture with the pendulum variance fixture, preset envelope_only; decisions from display_decision (research_view)",
+    "report_schema_version": "2.0.0",
+    "decimals": 8,
+    "regenerate": "python3 -m tests.unit.loop_nullspace.variability_golden --write",
+    "consumers": [
+      "NSX-43 (PyQt tabs)",
+      "NSX-44 (React panel)"
+    ]
+  },
+  "report": {
+    "schema_version": "2.0.0",
+    "status": "complete",
+    "registry_version": "0.1.0",
+    "preset": "envelope_only",
+    "engine": {
+      "name": "planar-numpy",
+      "model_provenance": {
+        "name": "planar_two_arm_golfer_numpy",
+        "version": "1",
+        "content_hash": "abc"
+      }
+    },
+    "options": {
+      "metric": "identity",
+      "include_envelopes": true,
+      "include_allocation": false,
+      "effort_weight": 1.0,
+      "rate_weight": 0.0,
+      "sensitivity": {
+        "disturbance_spec": [
+          {
+            "name": "torque_add",
+            "stage": "torque",
+            "channels": [
+              "shoulder",
+              "elbow"
+            ],
+            "units": "N m",
+            "covariance": [
+              [
+                0.004,
+                0.0
+              ],
+              [
+                0.0,
+                0.009
+              ]
+            ],
+            "spectrum": "white",
+            "persistent": false,
+            "bandwidth_hz": null,
+            "band_hz": null,
+            "signal_gain": null,
+            "signal_bounds": null
+          }
+        ],
+        "mechanisms": [],
+        "strategy_set": [
+          "S1",
+          "S2",
+          "S3",
+          "S4",
+          "S5",
+          "S6",
+          "S7",
+          "S8",
+          "S9",
+          "S10",
+          "S11",
+          "S12"
+        ],
+        "outcome_priority": [
+          "face_angle"
+        ]
+      }
+    },
+    "hypotheses": {
+      "registry_version": "0.1.0",
+      "preset": "envelope_only",
+      "preset_label": "Envelope Only",
+      "hypotheses": [
+        {
+          "id": "H-TORQUE-CAPACITY",
+          "statement": "Each actuated joint can sustain a torque of at most its declared capacity in each direction; torques beyond capacity are excluded from the feasible set.",
+          "verification_status": "NOT_APPLICABLE",
+          "citation_id": null,
+          "source_note": "Capacities are a population prior; values and sources arrive with NSX-04."
+        },
+        {
+          "id": "H-FRICTION-CONE",
+          "statement": "Contact loads lie inside a friction cone with a declared coefficient, approximated by a polyhedron with a declared facet count and error bound.",
+          "verification_status": "NOT_APPLICABLE",
+          "citation_id": null,
+          "source_note": "Modelling choice."
+        },
+        {
+          "id": "H-GRIP-PRELOAD",
+          "statement": "Each hand keeps at least a declared axial squeeze on the club, so hand contact never goes slack.",
+          "verification_status": "NOT_APPLICABLE",
+          "citation_id": null,
+          "source_note": "Preload magnitudes are not sourced here; Choi and Park 2020 measured internal grip forces but no value is adopted."
+        }
+      ],
+      "conventions": [
+        {
+          "id": "C-FRAME-GRIP",
+          "statement": "Closure rows and hand wrenches are expressed in the grip frame: origin at the midpoint of the two grip points, u along the shaft toward the clubhead, v the face-normal projection orthogonal to u, w = u x v."
+        },
+        {
+          "id": "C-SCALE-FORCE-MOMENT",
+          "statement": "Forces are scaled by a characteristic force and moments by a characteristic moment before rank decisions and in null-space coordinates."
+        },
+        {
+          "id": "C-RANK-TOLERANCE",
+          "statement": "Numerical rank uses a relative singular-value tolerance against the largest singular value of the scaled matrix."
+        }
+      ]
+    },
+    "non_claims": [
+      "Static per-frame feasible sets over-approximate trajectory-feasible ranges.",
+      "FAMILY_DEPENDENT quantities are conditional on the declared hypotheses; torque capacities are priors, not measurements.",
+      "An allocation is a hypothesis-conditioned representative of the admissible family, not an estimate of the true hand loads or joint torques.",
+      "Refused, rejected and infeasible frames are reported as such and are never repaired or given a relaxed tolerance.",
+      "Restriction sensitivity is not computed by this contract version."
+    ],
+    "admission": {
+      "verdict": "ADMITTED",
+      "reasons": [],
+      "failing_frames": [],
+      "repaired": false,
+      "derivative_method": "analytic",
+      "noise_floor": 0.0,
+      "position_evaluated": false,
+      "gates": {
+        "phi_tol": 1e-06,
+        "phi_dot_tol": 1e-06,
+        "phi_ddot_tol": 1e-06,
+        "require_position": false,
+        "length_scale_m": 1.0,
+        "time_scale_s": 1.0
+      },
+      "residuals": {
+        "phi": {
+          "values": null,
+          "units": "1",
+          "allocation_dependence": "UNAVAILABLE",
+          "validation_status": "UNVALIDATED",
+          "model_provenance": {
+            "name": "planar_two_arm_golfer_numpy",
+            "version": "1",
+            "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+          },
+          "input_provenance": {
+            "kind": "synthetic",
+            "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+            "note": "actuation=club_unactuated"
+          },
+          "conventions": [
+            "C-SCALE-ADMISSION: Phi/L, Phi_dot*T/L, Phi_ddot*T^2/L"
+          ],
+          "hypotheses": [],
+          "reason": "position residual not evaluated: no plant"
+        },
+        "phi_dot": {
+          "values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "units": "1",
+          "allocation_dependence": "INVARIANT",
+          "validation_status": "UNVALIDATED",
+          "model_provenance": {
+            "name": "planar_two_arm_golfer_numpy",
+            "version": "1",
+            "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+          },
+          "input_provenance": {
+            "kind": "synthetic",
+            "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+            "note": "actuation=club_unactuated"
+          },
+          "conventions": [
+            "C-SCALE-ADMISSION: Phi/L, Phi_dot*T/L, Phi_ddot*T^2/L"
+          ],
+          "hypotheses": [],
+          "reason": null
+        },
+        "phi_ddot": {
+          "values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "units": "1",
+          "allocation_dependence": "INVARIANT",
+          "validation_status": "UNVALIDATED",
+          "model_provenance": {
+            "name": "planar_two_arm_golfer_numpy",
+            "version": "1",
+            "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+          },
+          "input_provenance": {
+            "kind": "synthetic",
+            "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+            "note": "actuation=club_unactuated"
+          },
+          "conventions": [
+            "C-SCALE-ADMISSION: Phi/L, Phi_dot*T/L, Phi_ddot*T^2/L"
+          ],
+          "hypotheses": [],
+          "reason": null
+        }
+      }
+    },
+    "invariants": {
+      "metric_label": "C-METRIC-IDENTITY",
+      "gates": {
+        "phi_dot_tol": 1e-06,
+        "phi_ddot_tol": 1e-06,
+        "length_scale_m": 1.0,
+        "time_scale_s": 1.0
+      },
+      "frames": [
+        {
+          "index": 0,
+          "quantities": {
+            "net_club_wrench": {
+              "values": null,
+              "units": "N,N,N,N m,N m,N m",
+              "allocation_dependence": "UNAVAILABLE",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [],
+              "hypotheses": [],
+              "reason": "club_ne (bare-club Newton-Euler keywords) not supplied"
+            },
+            "loop_power": {
+              "values": [
+                22.57882927
+              ],
+              "units": "W",
+              "allocation_dependence": "INVARIANT",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [
+                "gate: scaled phi_dot <= 1.0e-06"
+              ],
+              "hypotheses": [],
+              "reason": null
+            },
+            "base_centroidal_rows": {
+              "values": null,
+              "units": "generalised force",
+              "allocation_dependence": "UNAVAILABLE",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [],
+              "hypotheses": [],
+              "reason": "no floating base: no unactuated coordinate lies outside the loop support"
+            },
+            "tangent_pairing": {
+              "values": [
+                1.08697912,
+                4.1442165,
+                6.83938262
+              ],
+              "units": "generalised force",
+              "allocation_dependence": "INVARIANT",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [
+                "gate: scaled phi_dot <= 1.0e-06",
+                "C-TANGENT-BASIS: orthonormal SVD null space"
+              ],
+              "hypotheses": [],
+              "reason": null
+            },
+            "min_metric_torque": {
+              "values": [
+                1.65823821,
+                -3.53094141,
+                2.64579593,
+                8.50135228
+              ],
+              "units": "N m",
+              "allocation_dependence": "INVARIANT",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [
+                "C-METRIC-IDENTITY"
+              ],
+              "hypotheses": [],
+              "reason": null
+            }
+          }
+        },
+        {
+          "index": 3,
+          "quantities": {
+            "net_club_wrench": {
+              "values": null,
+              "units": "N,N,N,N m,N m,N m",
+              "allocation_dependence": "UNAVAILABLE",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [],
+              "hypotheses": [],
+              "reason": "club_ne (bare-club Newton-Euler keywords) not supplied"
+            },
+            "loop_power": {
+              "values": [
+                22.57882927
+              ],
+              "units": "W",
+              "allocation_dependence": "INVARIANT",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [
+                "gate: scaled phi_dot <= 1.0e-06"
+              ],
+              "hypotheses": [],
+              "reason": null
+            },
+            "base_centroidal_rows": {
+              "values": null,
+              "units": "generalised force",
+              "allocation_dependence": "UNAVAILABLE",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [],
+              "hypotheses": [],
+              "reason": "no floating base: no unactuated coordinate lies outside the loop support"
+            },
+            "tangent_pairing": {
+              "values": [
+                1.08697912,
+                4.1442165,
+                6.83938262
+              ],
+              "units": "generalised force",
+              "allocation_dependence": "INVARIANT",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [
+                "gate: scaled phi_dot <= 1.0e-06",
+                "C-TANGENT-BASIS: orthonormal SVD null space"
+              ],
+              "hypotheses": [],
+              "reason": null
+            },
+            "min_metric_torque": {
+              "values": [
+                1.65823821,
+                -3.53094141,
+                2.64579593,
+                8.50135228
+              ],
+              "units": "N m",
+              "allocation_dependence": "INVARIANT",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [
+                "C-METRIC-IDENTITY"
+              ],
+              "hypotheses": [],
+              "reason": null
+            }
+          }
+        },
+        {
+          "index": 6,
+          "quantities": {
+            "net_club_wrench": {
+              "values": null,
+              "units": "N,N,N,N m,N m,N m",
+              "allocation_dependence": "UNAVAILABLE",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [],
+              "hypotheses": [],
+              "reason": "club_ne (bare-club Newton-Euler keywords) not supplied"
+            },
+            "loop_power": {
+              "values": [
+                22.57882927
+              ],
+              "units": "W",
+              "allocation_dependence": "INVARIANT",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [
+                "gate: scaled phi_dot <= 1.0e-06"
+              ],
+              "hypotheses": [],
+              "reason": null
+            },
+            "base_centroidal_rows": {
+              "values": null,
+              "units": "generalised force",
+              "allocation_dependence": "UNAVAILABLE",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [],
+              "hypotheses": [],
+              "reason": "no floating base: no unactuated coordinate lies outside the loop support"
+            },
+            "tangent_pairing": {
+              "values": [
+                1.08697912,
+                4.1442165,
+                6.83938262
+              ],
+              "units": "generalised force",
+              "allocation_dependence": "INVARIANT",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [
+                "gate: scaled phi_dot <= 1.0e-06",
+                "C-TANGENT-BASIS: orthonormal SVD null space"
+              ],
+              "hypotheses": [],
+              "reason": null
+            },
+            "min_metric_torque": {
+              "values": [
+                1.65823821,
+                -3.53094141,
+                2.64579593,
+                8.50135228
+              ],
+              "units": "N m",
+              "allocation_dependence": "INVARIANT",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [
+                "C-METRIC-IDENTITY"
+              ],
+              "hypotheses": [],
+              "reason": null
+            }
+          }
+        },
+        {
+          "index": 9,
+          "quantities": {
+            "net_club_wrench": {
+              "values": null,
+              "units": "N,N,N,N m,N m,N m",
+              "allocation_dependence": "UNAVAILABLE",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [],
+              "hypotheses": [],
+              "reason": "club_ne (bare-club Newton-Euler keywords) not supplied"
+            },
+            "loop_power": {
+              "values": [
+                22.57882927
+              ],
+              "units": "W",
+              "allocation_dependence": "INVARIANT",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [
+                "gate: scaled phi_dot <= 1.0e-06"
+              ],
+              "hypotheses": [],
+              "reason": null
+            },
+            "base_centroidal_rows": {
+              "values": null,
+              "units": "generalised force",
+              "allocation_dependence": "UNAVAILABLE",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [],
+              "hypotheses": [],
+              "reason": "no floating base: no unactuated coordinate lies outside the loop support"
+            },
+            "tangent_pairing": {
+              "values": [
+                1.08697912,
+                4.1442165,
+                6.83938262
+              ],
+              "units": "generalised force",
+              "allocation_dependence": "INVARIANT",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [
+                "gate: scaled phi_dot <= 1.0e-06",
+                "C-TANGENT-BASIS: orthonormal SVD null space"
+              ],
+              "hypotheses": [],
+              "reason": null
+            },
+            "min_metric_torque": {
+              "values": [
+                1.65823821,
+                -3.53094141,
+                2.64579593,
+                8.50135228
+              ],
+              "units": "N m",
+              "allocation_dependence": "INVARIANT",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "planar_two_arm_golfer_numpy",
+                "version": "1",
+                "content_hash": "d684ffe9c33d0fdc3576b3b611f3ccd4ebb9a5cb7d6fa1b99323211c4b7f693e"
+              },
+              "input_provenance": {
+                "kind": "synthetic",
+                "source": "nsx-00-golden:planar_two_arm_club_unactuated",
+                "note": "actuation=club_unactuated"
+              },
+              "conventions": [
+                "C-METRIC-IDENTITY"
+              ],
+              "hypotheses": [],
+              "reason": null
+            }
+          }
+        }
+      ]
+    },
+    "envelopes": {
+      "label": "STATIC",
+      "chebyshev_metric": "euclidean",
+      "quantities": {
+        "tau_1": {
+          "values": [
+            [
+              -355.49488162,
+              362.61128277
+            ],
+            [
+              -355.49488162,
+              362.61128277
+            ],
+            [
+              -355.49488162,
+              362.61128277
+            ],
+            [
+              -355.49488162,
+              362.61128277
+            ]
+          ],
+          "units": "N m",
+          "allocation_dependence": "FAMILY_DEPENDENT",
+          "validation_status": "UNVALIDATED",
+          "model_provenance": {
+            "name": "planar_two_arm_golfer_numpy",
+            "version": "1",
+            "content_hash": "abc"
+          },
+          "input_provenance": {
+            "kind": "synthetic",
+            "source": "planar-fixture",
+            "note": "repeated frame"
+          },
+          "conventions": [
+            "STATIC: per-frame feasible sets; trajectory coupling is not represented"
+          ],
+          "hypotheses": [
+            "H-TORQUE-CAPACITY",
+            "H-FRICTION-CONE",
+            "H-GRIP-PRELOAD"
+          ],
+          "reason": null
+        },
+        "tau_2": {
+          "values": [
+            [
+              -165.31111283,
+              156.54609304
+            ],
+            [
+              -165.31111283,
+              156.54609304
+            ],
+            [
+              -165.31111283,
+              156.54609304
+            ],
+            [
+              -165.31111283,
+              156.54609304
+            ]
+          ],
+          "units": "N m",
+          "allocation_dependence": "FAMILY_DEPENDENT",
+          "validation_status": "UNVALIDATED",
+          "model_provenance": {
+            "name": "planar_two_arm_golfer_numpy",
+            "version": "1",
+            "content_hash": "abc"
+          },
+          "input_provenance": {
+            "kind": "synthetic",
+            "source": "planar-fixture",
+            "note": "repeated frame"
+          },
+          "conventions": [
+            "STATIC: per-frame feasible sets; trajectory coupling is not represented"
+          ],
+          "hypotheses": [
+            "H-TORQUE-CAPACITY",
+            "H-FRICTION-CONE",
+            "H-GRIP-PRELOAD"
+          ],
+          "reason": null
+        },
+        "tau_3": {
+          "values": [
+            [
+              -500.0,
+              500.0
+            ],
+            [
+              -500.0,
+              500.0
+            ],
+            [
+              -500.0,
+              500.0
+            ],
+            [
+              -500.0,
+              500.0
+            ]
+          ],
+          "units": "N m",
+          "allocation_dependence": "FAMILY_DEPENDENT",
+          "validation_status": "UNVALIDATED",
+          "model_provenance": {
+            "name": "planar_two_arm_golfer_numpy",
+            "version": "1",
+            "content_hash": "abc"
+          },
+          "input_provenance": {
+            "kind": "synthetic",
+            "source": "planar-fixture",
+            "note": "repeated frame"
+          },
+          "conventions": [
+            "STATIC: per-frame feasible sets; trajectory coupling is not represented"
+          ],
+          "hypotheses": [
+            "H-TORQUE-CAPACITY",
+            "H-FRICTION-CONE",
+            "H-GRIP-PRELOAD"
+          ],
+          "reason": null
+        },
+        "tau_4": {
+          "values": [
+            [
+              -10.1345238,
+              27.33550445
+            ],
+            [
+              -10.1345238,
+              27.33550445
+            ],
+            [
+              -10.1345238,
+              27.33550445
+            ],
+            [
+              -10.1345238,
+              27.33550445
+            ]
+          ],
+          "units": "N m",
+          "allocation_dependence": "FAMILY_DEPENDENT",
+          "validation_status": "UNVALIDATED",
+          "model_provenance": {
+            "name": "planar_two_arm_golfer_numpy",
+            "version": "1",
+            "content_hash": "abc"
+          },
+          "input_provenance": {
+            "kind": "synthetic",
+            "source": "planar-fixture",
+            "note": "repeated frame"
+          },
+          "conventions": [
+            "STATIC: per-frame feasible sets; trajectory coupling is not represented"
+          ],
+          "hypotheses": [
+            "H-TORQUE-CAPACITY",
+            "H-FRICTION-CONE",
+            "H-GRIP-PRELOAD"
+          ],
+          "reason": null
+        }
+      },
+      "bounds": {
+        "tau_1": {
+          "units": "N m",
+          "lower": [
+            -355.49488162,
+            -355.49488162,
+            -355.49488162,
+            -355.49488162
+          ],
+          "upper": [
+            362.61128277,
+            362.61128277,
+            362.61128277,
+            362.61128277
+          ],
+          "status_lower": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "status_upper": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "sign_class": [
+            "indeterminate",
+            "indeterminate",
+            "indeterminate",
+            "indeterminate"
+          ],
+          "binding_lower": [
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ]
+          ],
+          "binding_upper": [
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ]
+          ],
+          "binding_hypotheses_lower": [
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ]
+          ],
+          "binding_hypotheses_upper": [
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ]
+          ]
+        },
+        "tau_2": {
+          "units": "N m",
+          "lower": [
+            -165.31111283,
+            -165.31111283,
+            -165.31111283,
+            -165.31111283
+          ],
+          "upper": [
+            156.54609304,
+            156.54609304,
+            156.54609304,
+            156.54609304
+          ],
+          "status_lower": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "status_upper": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "sign_class": [
+            "indeterminate",
+            "indeterminate",
+            "indeterminate",
+            "indeterminate"
+          ],
+          "binding_lower": [
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ]
+          ],
+          "binding_upper": [
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ]
+          ],
+          "binding_hypotheses_lower": [
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ]
+          ],
+          "binding_hypotheses_upper": [
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ]
+          ]
+        },
+        "tau_3": {
+          "units": "N m",
+          "lower": [
+            -500.0,
+            -500.0,
+            -500.0,
+            -500.0
+          ],
+          "upper": [
+            500.0,
+            500.0,
+            500.0,
+            500.0
+          ],
+          "status_lower": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "status_upper": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "sign_class": [
+            "indeterminate",
+            "indeterminate",
+            "indeterminate",
+            "indeterminate"
+          ],
+          "binding_lower": [
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ]
+          ],
+          "binding_upper": [
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ]
+          ],
+          "binding_hypotheses_lower": [
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ]
+          ],
+          "binding_hypotheses_upper": [
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ]
+          ]
+        },
+        "tau_4": {
+          "units": "N m",
+          "lower": [
+            -10.1345238,
+            -10.1345238,
+            -10.1345238,
+            -10.1345238
+          ],
+          "upper": [
+            27.33550445,
+            27.33550445,
+            27.33550445,
+            27.33550445
+          ],
+          "status_lower": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "status_upper": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "sign_class": [
+            "indeterminate",
+            "indeterminate",
+            "indeterminate",
+            "indeterminate"
+          ],
+          "binding_lower": [
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:upper"
+            ]
+          ],
+          "binding_upper": [
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ],
+            [
+              "H-TORQUE-CAPACITY:j2:lower"
+            ]
+          ],
+          "binding_hypotheses_lower": [
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ]
+          ],
+          "binding_hypotheses_upper": [
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ],
+            [
+              "H-TORQUE-CAPACITY"
+            ]
+          ]
+        }
+      },
+      "frames": [
+        {
+          "index": 0,
+          "chebyshev_status": "BOUNDED",
+          "chebyshev_margin": 128.78265708,
+          "feasible": true,
+          "conflict_hypotheses": [],
+          "hypothesis_ids": [
+            "H-TORQUE-CAPACITY",
+            "H-FRICTION-CONE",
+            "H-GRIP-PRELOAD"
+          ],
+          "rests_on_unverified": true
+        },
+        {
+          "index": 3,
+          "chebyshev_status": "BOUNDED",
+          "chebyshev_margin": 128.78265708,
+          "feasible": true,
+          "conflict_hypotheses": [],
+          "hypothesis_ids": [
+            "H-TORQUE-CAPACITY",
+            "H-FRICTION-CONE",
+            "H-GRIP-PRELOAD"
+          ],
+          "rests_on_unverified": true
+        },
+        {
+          "index": 6,
+          "chebyshev_status": "BOUNDED",
+          "chebyshev_margin": 128.78265708,
+          "feasible": true,
+          "conflict_hypotheses": [],
+          "hypothesis_ids": [
+            "H-TORQUE-CAPACITY",
+            "H-FRICTION-CONE",
+            "H-GRIP-PRELOAD"
+          ],
+          "rests_on_unverified": true
+        },
+        {
+          "index": 9,
+          "chebyshev_status": "BOUNDED",
+          "chebyshev_margin": 128.78265708,
+          "feasible": true,
+          "conflict_hypotheses": [],
+          "hypothesis_ids": [
+            "H-TORQUE-CAPACITY",
+            "H-FRICTION-CONE",
+            "H-GRIP-PRELOAD"
+          ],
+          "rests_on_unverified": true
+        }
+      ],
+      "simplex_iterations": 24,
+      "warm_started": true,
+      "non_claims": [
+        "static per-frame sets: over-approximates trajectory-feasible ranges",
+        "conditional on the declared hypotheses; capacities are priors"
+      ]
+    },
+    "allocation": null,
+    "restriction_sensitivity": null,
+    "sensitivity": {
+      "status": "complete",
+      "reason": null,
+      "primary_outcome": "face_angle",
+      "skipped_priority": [],
+      "outcome_units": "rad",
+      "input_labels": [
+        "shoulder",
+        "elbow"
+      ],
+      "input_units": "N m",
+      "step_times_s": [
+        0.0,
+        0.1,
+        0.2,
+        0.3,
+        0.4,
+        0.5
+      ],
+      "declared_mechanisms": [],
+      "noise_hypotheses": [
+        "H-NOISE-ADDITIVE"
+      ],
+      "linear_validity": "NOT_ASSESSED",
+      "gate": null,
+      "kernel": {
+        "outcome": "face_angle",
+        "quantity": {
+          "values": [
+            [
+              0.0156267,
+              0.01172002
+            ],
+            [
+              0.02670404,
+              0.02002803
+            ],
+            [
+              0.0349504,
+              0.0262128
+            ],
+            [
+              0.03996,
+              0.02997
+            ],
+            [
+              0.0416,
+              0.0312
+            ],
+            [
+              0.04,
+              0.03
+            ]
+          ],
+          "units": "(rad)/(N m)",
+          "allocation_dependence": "INVARIANT",
+          "validation_status": "UNVALIDATED",
+          "model_provenance": {
+            "name": "pendulum-fixture",
+            "version": "1",
+            "content_hash": ""
+          },
+          "input_provenance": {
+            "kind": "fixture",
+            "source": "nsx99-tests",
+            "note": ""
+          },
+          "conventions": [],
+          "hypotheses": [],
+          "reason": null
+        }
+      },
+      "face_dispersion": {
+        "outcome": "face_angle",
+        "linear": {
+          "variance": {
+            "values": [
+              0.13230378
+            ],
+            "units": "(rad)^2",
+            "allocation_dependence": "INVARIANT",
+            "validation_status": "UNVALIDATED",
+            "model_provenance": {
+              "name": "pendulum-fixture",
+              "version": "1",
+              "content_hash": ""
+            },
+            "input_provenance": {
+              "kind": "fixture",
+              "source": "nsx99-tests",
+              "note": ""
+            },
+            "conventions": [],
+            "hypotheses": [],
+            "reason": null,
+            "conditioning": [
+              "H-NOISE-ADDITIVE"
+            ]
+          },
+          "sd": {
+            "values": [
+              0.36373587
+            ],
+            "units": "rad",
+            "allocation_dependence": "INVARIANT",
+            "validation_status": "UNVALIDATED",
+            "model_provenance": {
+              "name": "pendulum-fixture",
+              "version": "1",
+              "content_hash": ""
+            },
+            "input_provenance": {
+              "kind": "fixture",
+              "source": "nsx99-tests",
+              "note": ""
+            },
+            "conventions": [],
+            "hypotheses": [],
+            "reason": null,
+            "conditioning": [
+              "H-NOISE-ADDITIVE"
+            ]
+          }
+        },
+        "arms": [
+          {
+            "label": "fixture/S1 free",
+            "sd": {
+              "values": [
+                0.64483641
+              ],
+              "units": "rad",
+              "allocation_dependence": "FAMILY_DEPENDENT",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "pendulum-nsx80",
+                "version": "1",
+                "content_hash": ""
+              },
+              "input_provenance": {
+                "kind": "fixture",
+                "source": "pendulum",
+                "note": "NSX-92 test"
+              },
+              "conventions": [],
+              "hypotheses": [
+                "H-NOISE-SIGNAL-DEPENDENT"
+              ],
+              "reason": null,
+              "conditioning": [
+                "H-NOISE-SIGNAL-DEPENDENT"
+              ]
+            },
+            "reason": null
+          },
+          {
+            "label": "fixture/S2 impedance",
+            "sd": {
+              "values": [
+                0.00917403
+              ],
+              "units": "rad",
+              "allocation_dependence": "INVARIANT",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "double-integrator",
+                "version": "1",
+                "content_hash": ""
+              },
+              "input_provenance": {
+                "kind": "fixture",
+                "source": "nsx95-tests",
+                "note": ""
+              },
+              "conventions": [],
+              "hypotheses": [],
+              "reason": null,
+              "conditioning": [
+                "H-DECLARED-JOINT-IMPEDANCE",
+                "H-NOISE-ADDITIVE"
+              ]
+            },
+            "reason": null
+          },
+          {
+            "label": "fixture/S7 feedback",
+            "sd": {
+              "values": [
+                0.00990532
+              ],
+              "units": "rad",
+              "allocation_dependence": "INVARIANT",
+              "validation_status": "UNVALIDATED",
+              "model_provenance": {
+                "name": "double-integrator",
+                "version": "1",
+                "content_hash": ""
+              },
+              "input_provenance": {
+                "kind": "fixture",
+                "source": "nsx95-tests",
+                "note": ""
+              },
+              "conventions": [],
+              "hypotheses": [],
+              "reason": null,
+              "conditioning": [
+                "H-NOISE-ADDITIVE",
+                "H-SENSORIMOTOR-DELAY"
+              ]
+            },
+            "reason": null
+          }
+        ],
+        "mc": []
+      },
+      "options": {
+        "disturbance_spec": [
+          {
+            "name": "torque_add",
+            "stage": "torque",
+            "channels": [
+              "shoulder",
+              "elbow"
+            ],
+            "units": "N m",
+            "covariance": [
+              [
+                0.004,
+                0.0
+              ],
+              [
+                0.0,
+                0.009
+              ]
+            ],
+            "spectrum": "white",
+            "persistent": false,
+            "bandwidth_hz": null,
+            "band_hz": null,
+            "signal_gain": null,
+            "signal_bounds": null
+          }
+        ],
+        "mechanisms": [],
+        "strategy_set": [
+          "S1",
+          "S2",
+          "S3",
+          "S4",
+          "S5",
+          "S6",
+          "S7",
+          "S8",
+          "S9",
+          "S10",
+          "S11",
+          "S12"
+        ],
+        "outcome_priority": [
+          "face_angle"
+        ]
+      },
+      "cache_identity": "0ecc35779d35cc6bff7474dc0c4066e8ce0d8bb902b78a0818f6452a0587719d",
+      "outcomes": [
+        "face_angle"
+      ],
+      "outcome_priority": [
+        "face_angle"
+      ],
+      "provenance": {
+        "fixture": "pendulum",
+        "z": 0.0,
+        "steps": 6
+      },
+      "non_claims": [
+        "Linear prediction in the tangent basis at the nominal motion; it does not cover saturation, slip or missed impacts. Noise amplitudes are declared hypotheses, not measurements.",
+        "Rankings are conditional on the declared disturbance priors, mechanisms and the linear tangent model at the nominal motion; they compare mechanisms inside a model, not golfers, and are not coaching advice until externally validated.",
+        "Disturbance amplitudes, mechanisms and impedance values are declared hypotheses, not measurements of any golfer."
+      ]
+    },
+    "variance_budget": {
+      "status": "complete",
+      "reason": null,
+      "outcome": "face_angle",
+      "units": "(rad)^2",
+      "classes": [
+        "state",
+        "torque"
+      ],
+      "noise_classes": [
+        "torque"
+      ],
+      "step_times_s": [
+        0.0,
+        0.1,
+        0.2,
+        0.3,
+        0.4,
+        0.5
+      ],
+      "parts": {
+        "values": [
+          0.13165978,
+          0.000644
+        ],
+        "units": "(rad)^2",
+        "allocation_dependence": "INVARIANT",
+        "validation_status": "UNVALIDATED",
+        "model_provenance": {
+          "name": "pendulum-fixture",
+          "version": "1",
+          "content_hash": ""
+        },
+        "input_provenance": {
+          "kind": "fixture",
+          "source": "nsx99-tests",
+          "note": ""
+        },
+        "conventions": [],
+        "hypotheses": [],
+        "reason": null,
+        "conditioning": [
+          "H-NOISE-ADDITIVE"
+        ]
+      },
+      "shares": {
+        "values": [
+          0.99513242,
+          0.00486758
+        ],
+        "units": "1",
+        "allocation_dependence": "INVARIANT",
+        "validation_status": "UNVALIDATED",
+        "model_provenance": {
+          "name": "pendulum-fixture",
+          "version": "1",
+          "content_hash": ""
+        },
+        "input_provenance": {
+          "kind": "fixture",
+          "source": "nsx99-tests",
+          "note": ""
+        },
+        "conventions": [],
+        "hypotheses": [],
+        "reason": null,
+        "conditioning": [
+          "H-NOISE-ADDITIVE"
+        ]
+      },
+      "by_time": {
+        "values": [
+          [
+            2.213e-05,
+            6.463e-05,
+            0.0001107,
+            0.00014471,
+            0.00015683,
+            0.000145
+          ]
+        ],
+        "units": "(rad)^2",
+        "allocation_dependence": "INVARIANT",
+        "validation_status": "UNVALIDATED",
+        "model_provenance": {
+          "name": "pendulum-fixture",
+          "version": "1",
+          "content_hash": ""
+        },
+        "input_provenance": {
+          "kind": "fixture",
+          "source": "nsx99-tests",
+          "note": ""
+        },
+        "conventions": [],
+        "hypotheses": [],
+        "reason": null,
+        "conditioning": [
+          "H-NOISE-ADDITIVE"
+        ]
+      }
+    },
+    "strategies": {
+      "status": "complete",
+      "reason": null,
+      "strategy_set": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5",
+        "S6",
+        "S7",
+        "S8",
+        "S9",
+        "S10",
+        "S11",
+        "S12"
+      ],
+      "mode": "unconstrained",
+      "settings": {
+        "reference_chs_mps": 40.0,
+        "chs_rel_tol": 0.02,
+        "effort_cap": null,
+        "effort_basis": null
+      },
+      "primary_outcome": "face_angle_variance",
+      "ranking_basis": "variance_ratio_to_strategy_off_baseline",
+      "assumptions": [
+        "linear tangent model at the nominal motion; saturation, slip and missed impacts are outside it",
+        "disturbance amplitudes are declared hypotheses, not measurements",
+        "ranking basis is the face-angle variance ratio to the strategy-off baseline of each arm's own representation; absolute variances are not compared across representations",
+        "effort bases (allocated torque, layer torque, muscle activation) are separate lines and are only compared within one basis",
+        "clubhead speed is an allocation-invariant input of each case"
+      ],
+      "arms": [
+        {
+          "label": "fixture/S1 free",
+          "strategy": "S1",
+          "status": "ok",
+          "reason": "",
+          "admitted": true,
+          "rank": 3,
+          "exclusion": null,
+          "beats_baseline": true,
+          "chs_mps": 40.0,
+          "effort": 0.19160839,
+          "effort_basis": "capacity_weighted_allocation_effort",
+          "certificate": "global-convex",
+          "mechanisms": [
+            "H-NOISE-SIGNAL-DEPENDENT"
+          ],
+          "hypotheses": [
+            "H-TORQUE-CAPACITY",
+            "H-NOISE-SIGNAL-DEPENDENT"
+          ],
+          "unverified_hypothesis_ids": [],
+          "ratio": {
+            "values": [
+              0.49001678
+            ],
+            "units": "1",
+            "allocation_dependence": "FAMILY_DEPENDENT",
+            "validation_status": "UNVALIDATED",
+            "model_provenance": {
+              "name": "pendulum-nsx80",
+              "version": "1",
+              "content_hash": ""
+            },
+            "input_provenance": {
+              "kind": "fixture",
+              "source": "pendulum",
+              "note": "NSX-92 test"
+            },
+            "conventions": [],
+            "hypotheses": [
+              "H-NOISE-SIGNAL-DEPENDENT"
+            ],
+            "reason": null,
+            "conditioning": [
+              "H-NOISE-SIGNAL-DEPENDENT"
+            ]
+          }
+        },
+        {
+          "label": "fixture/S2 impedance",
+          "strategy": "S2",
+          "status": "ok",
+          "reason": "",
+          "admitted": true,
+          "rank": 1,
+          "exclusion": null,
+          "beats_baseline": true,
+          "chs_mps": 40.0,
+          "effort": 1.24823883,
+          "effort_basis": "expected_layer_l2_effort",
+          "certificate": "linear-closed-form",
+          "mechanisms": [],
+          "hypotheses": [
+            "H-DECLARED-JOINT-IMPEDANCE"
+          ],
+          "unverified_hypothesis_ids": [],
+          "ratio": {
+            "values": [
+              0.12500966
+            ],
+            "units": "1",
+            "allocation_dependence": "INVARIANT",
+            "validation_status": "UNVALIDATED",
+            "model_provenance": {
+              "name": "double-integrator",
+              "version": "1",
+              "content_hash": ""
+            },
+            "input_provenance": {
+              "kind": "fixture",
+              "source": "nsx95-tests",
+              "note": ""
+            },
+            "conventions": [],
+            "hypotheses": [],
+            "reason": null,
+            "conditioning": [
+              "H-DECLARED-JOINT-IMPEDANCE",
+              "H-NOISE-ADDITIVE"
+            ]
+          }
+        },
+        {
+          "label": "fixture/S7 feedback",
+          "strategy": "S7",
+          "status": "ok",
+          "reason": "",
+          "admitted": true,
+          "rank": 2,
+          "exclusion": null,
+          "beats_baseline": true,
+          "chs_mps": 40.0,
+          "effort": 1.43495385,
+          "effort_basis": "expected_layer_l2_effort",
+          "certificate": "linear-closed-form",
+          "mechanisms": [],
+          "hypotheses": [
+            "H-SENSORIMOTOR-DELAY"
+          ],
+          "unverified_hypothesis_ids": [],
+          "ratio": {
+            "values": [
+              0.14573386
+            ],
+            "units": "1",
+            "allocation_dependence": "INVARIANT",
+            "validation_status": "UNVALIDATED",
+            "model_provenance": {
+              "name": "double-integrator",
+              "version": "1",
+              "content_hash": ""
+            },
+            "input_provenance": {
+              "kind": "fixture",
+              "source": "nsx95-tests",
+              "note": ""
+            },
+            "conventions": [],
+            "hypotheses": [],
+            "reason": null,
+            "conditioning": [
+              "H-NOISE-ADDITIVE",
+              "H-SENSORIMOTOR-DELAY"
+            ]
+          }
+        },
+        {
+          "label": "fixture/S4",
+          "strategy": "S4",
+          "status": "not_implemented",
+          "reason": "S4: no per-joint effort-share parameterisation exists; no muscle-level evaluator exists for this mechanism",
+          "admitted": false,
+          "rank": null,
+          "exclusion": "not_attempted",
+          "beats_baseline": false,
+          "chs_mps": null,
+          "effort": null,
+          "effort_basis": "",
+          "certificate": "",
+          "mechanisms": [],
+          "hypotheses": [],
+          "unverified_hypothesis_ids": [],
+          "ratio": null
+        },
+        {
+          "label": "fixture/S6",
+          "strategy": "S6",
+          "status": "not_implemented",
+          "reason": "S6: no UCM computation exists in the repository; no muscle-level evaluator exists for this mechanism",
+          "admitted": false,
+          "rank": null,
+          "exclusion": "not_attempted",
+          "beats_baseline": false,
+          "chs_mps": null,
+          "effort": null,
+          "effort_basis": "",
+          "certificate": "",
+          "mechanisms": [],
+          "hypotheses": [],
+          "unverified_hypothesis_ids": [],
+          "ratio": null
+        },
+        {
+          "label": "fixture/S9",
+          "strategy": "S9",
+          "status": "not_implemented",
+          "reason": "S9: a joint-torque model has no biarticular muscles to couple; no biarticular comparison is built on the NSX-94 frame",
+          "admitted": false,
+          "rank": null,
+          "exclusion": "not_attempted",
+          "beats_baseline": false,
+          "chs_mps": null,
+          "effort": null,
+          "effort_basis": "",
+          "certificate": "",
+          "mechanisms": [],
+          "hypotheses": [],
+          "unverified_hypothesis_ids": [],
+          "ratio": null
+        },
+        {
+          "label": "fixture/S10",
+          "strategy": "S10",
+          "status": "unavailable",
+          "reason": "S10: the rigid club has no shaft flexibility to phase-match; the rigid club in the muscle-driven model has no shaft flexibility to phase-match",
+          "admitted": false,
+          "rank": null,
+          "exclusion": "not_attempted",
+          "beats_baseline": false,
+          "chs_mps": null,
+          "effort": null,
+          "effort_basis": "",
+          "certificate": "",
+          "mechanisms": [],
+          "hypotheses": [],
+          "unverified_hypothesis_ids": [],
+          "ratio": null
+        },
+        {
+          "label": "fixture/S11",
+          "strategy": "S11",
+          "status": "not_implemented",
+          "reason": "S11: no timing-disturbance variance evaluator exists; no muscle-level evaluator exists for this mechanism",
+          "admitted": false,
+          "rank": null,
+          "exclusion": "not_attempted",
+          "beats_baseline": false,
+          "chs_mps": null,
+          "effort": null,
+          "effort_basis": "",
+          "certificate": "",
+          "mechanisms": [],
+          "hypotheses": [],
+          "unverified_hypothesis_ids": [],
+          "ratio": null
+        },
+        {
+          "label": "fixture/S12",
+          "strategy": "S12",
+          "status": "not_implemented",
+          "reason": "S12: no address-consistency cost model exists; no muscle-level evaluator exists for this mechanism",
+          "admitted": false,
+          "rank": null,
+          "exclusion": "not_attempted",
+          "beats_baseline": false,
+          "chs_mps": null,
+          "effort": null,
+          "effort_basis": "",
+          "certificate": "",
+          "mechanisms": [],
+          "hypotheses": [],
+          "unverified_hypothesis_ids": [],
+          "ratio": null
+        }
+      ],
+      "fronts": {
+        "variance_vs_chs": [
+          "fixture/S2 impedance"
+        ],
+        "variance_vs_effort:capacity_weighted_allocation_effort": [
+          "fixture/S1 free"
+        ],
+        "variance_vs_effort:expected_layer_l2_effort": [
+          "fixture/S2 impedance"
+        ]
+      },
+      "failure_rate": 0.0,
+      "not_attempted": [
+        {
+          "label": "fixture/S4",
+          "reason": "S4: no per-joint effort-share parameterisation exists; no muscle-level evaluator exists for this mechanism"
+        },
+        {
+          "label": "fixture/S6",
+          "reason": "S6: no UCM computation exists in the repository; no muscle-level evaluator exists for this mechanism"
+        },
+        {
+          "label": "fixture/S9",
+          "reason": "S9: a joint-torque model has no biarticular muscles to couple; no biarticular comparison is built on the NSX-94 frame"
+        },
+        {
+          "label": "fixture/S10",
+          "reason": "S10: the rigid club has no shaft flexibility to phase-match; the rigid club in the muscle-driven model has no shaft flexibility to phase-match"
+        },
+        {
+          "label": "fixture/S11",
+          "reason": "S11: no timing-disturbance variance evaluator exists; no muscle-level evaluator exists for this mechanism"
+        },
+        {
+          "label": "fixture/S12",
+          "reason": "S12: no address-consistency cost model exists; no muscle-level evaluator exists for this mechanism"
+        },
+        {
+          "label": "S3",
+          "reason": "the engine's sensitivity provider declared no arm setting for this strategy"
+        },
+        {
+          "label": "S5",
+          "reason": "the engine's sensitivity provider declared no arm setting for this strategy"
+        },
+        {
+          "label": "S8",
+          "reason": "the engine's sensitivity provider declared no arm setting for this strategy"
+        }
+      ],
+      "winner": "fixture/S2 impedance",
+      "non_claim": "Rankings are conditional on the declared disturbance priors, mechanisms and the linear tangent model at the nominal motion; they compare mechanisms inside a model, not golfers, and are not coaching advice until externally validated.",
+      "contexts": [
+        "fixture"
+      ]
+    },
+    "trajectory": {
+      "input_provenance": {
+        "kind": "synthetic",
+        "source": "planar-fixture",
+        "note": "repeated frame"
+      },
+      "n_input_frames": 4,
+      "frame_indices": [
+        0,
+        3,
+        6,
+        9
+      ],
+      "analyzed_frame_indices": [
+        0,
+        3,
+        6,
+        9
+      ],
+      "refused_frames": []
+    },
+    "frame_diagnostics": [
+      {
+        "index": 0,
+        "rank_A": 5,
+        "nullity": 1,
+        "rank_J_c": 2,
+        "condition_number": 73.55482685
+      },
+      {
+        "index": 3,
+        "rank_A": 5,
+        "nullity": 1,
+        "rank_J_c": 2,
+        "condition_number": 73.55482685
+      },
+      {
+        "index": 6,
+        "rank_A": 5,
+        "nullity": 1,
+        "rank_J_c": 2,
+        "condition_number": 73.55482685
+      },
+      {
+        "index": 9,
+        "rank_A": 5,
+        "nullity": 1,
+        "rank_J_c": 2,
+        "condition_number": 73.55482685
+      }
+    ]
+  },
+  "plot_model": {
+    "schema_version": "2.0.0",
+    "status": "complete",
+    "reason": null,
+    "preset": "envelope_only",
+    "registry_version": "0.1.0",
+    "engine_name": "planar-numpy",
+    "frame_indices": [
+      0,
+      3,
+      6,
+      9
+    ],
+    "non_claims": [
+      "Static per-frame feasible sets over-approximate trajectory-feasible ranges.",
+      "FAMILY_DEPENDENT quantities are conditional on the declared hypotheses; torque capacities are priors, not measurements.",
+      "An allocation is a hypothesis-conditioned representative of the admissible family, not an estimate of the true hand loads or joint torques.",
+      "Refused, rejected and infeasible frames are reported as such and are never repaired or given a relaxed tolerance.",
+      "Restriction sensitivity is not computed by this contract version."
+    ],
+    "invariants": {
+      "series": [
+        {
+          "name": "net_club_wrench",
+          "units": "N,N,N,N m,N m,N m",
+          "frames": [
+            {
+              "frame_index": 0,
+              "shown": false,
+              "values": [],
+              "decision": {
+                "action": "SHOW_REASON",
+                "reason": "unavailable: club_ne (bare-club Newton-Euler keywords) not supplied",
+                "label": "",
+                "badges": [],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "unavailable: club_ne (bare-club Newton-Euler keywords) not supplied"
+            },
+            {
+              "frame_index": 3,
+              "shown": false,
+              "values": [],
+              "decision": {
+                "action": "SHOW_REASON",
+                "reason": "unavailable: club_ne (bare-club Newton-Euler keywords) not supplied",
+                "label": "",
+                "badges": [],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "unavailable: club_ne (bare-club Newton-Euler keywords) not supplied"
+            },
+            {
+              "frame_index": 6,
+              "shown": false,
+              "values": [],
+              "decision": {
+                "action": "SHOW_REASON",
+                "reason": "unavailable: club_ne (bare-club Newton-Euler keywords) not supplied",
+                "label": "",
+                "badges": [],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "unavailable: club_ne (bare-club Newton-Euler keywords) not supplied"
+            },
+            {
+              "frame_index": 9,
+              "shown": false,
+              "values": [],
+              "decision": {
+                "action": "SHOW_REASON",
+                "reason": "unavailable: club_ne (bare-club Newton-Euler keywords) not supplied",
+                "label": "",
+                "badges": [],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "unavailable: club_ne (bare-club Newton-Euler keywords) not supplied"
+            }
+          ]
+        },
+        {
+          "name": "loop_power",
+          "units": "W",
+          "frames": [
+            {
+              "frame_index": 0,
+              "shown": true,
+              "values": [
+                22.57882927
+              ],
+              "decision": {
+                "action": "SHOW_VALUE",
+                "reason": "invariant given model",
+                "label": "INVARIANT, unconditioned (given the model)",
+                "badges": [
+                  "model: planar_two_arm_golfer_numpy 1",
+                  "UNVALIDATED"
+                ],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "invariant given model"
+            },
+            {
+              "frame_index": 3,
+              "shown": true,
+              "values": [
+                22.57882927
+              ],
+              "decision": {
+                "action": "SHOW_VALUE",
+                "reason": "invariant given model",
+                "label": "INVARIANT, unconditioned (given the model)",
+                "badges": [
+                  "model: planar_two_arm_golfer_numpy 1",
+                  "UNVALIDATED"
+                ],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "invariant given model"
+            },
+            {
+              "frame_index": 6,
+              "shown": true,
+              "values": [
+                22.57882927
+              ],
+              "decision": {
+                "action": "SHOW_VALUE",
+                "reason": "invariant given model",
+                "label": "INVARIANT, unconditioned (given the model)",
+                "badges": [
+                  "model: planar_two_arm_golfer_numpy 1",
+                  "UNVALIDATED"
+                ],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "invariant given model"
+            },
+            {
+              "frame_index": 9,
+              "shown": true,
+              "values": [
+                22.57882927
+              ],
+              "decision": {
+                "action": "SHOW_VALUE",
+                "reason": "invariant given model",
+                "label": "INVARIANT, unconditioned (given the model)",
+                "badges": [
+                  "model: planar_two_arm_golfer_numpy 1",
+                  "UNVALIDATED"
+                ],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "invariant given model"
+            }
+          ]
+        },
+        {
+          "name": "base_centroidal_rows",
+          "units": "generalised force",
+          "frames": [
+            {
+              "frame_index": 0,
+              "shown": false,
+              "values": [],
+              "decision": {
+                "action": "SHOW_REASON",
+                "reason": "unavailable: no floating base: no unactuated coordinate lies outside the loop support",
+                "label": "",
+                "badges": [],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "unavailable: no floating base: no unactuated coordinate lies outside the loop support"
+            },
+            {
+              "frame_index": 3,
+              "shown": false,
+              "values": [],
+              "decision": {
+                "action": "SHOW_REASON",
+                "reason": "unavailable: no floating base: no unactuated coordinate lies outside the loop support",
+                "label": "",
+                "badges": [],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "unavailable: no floating base: no unactuated coordinate lies outside the loop support"
+            },
+            {
+              "frame_index": 6,
+              "shown": false,
+              "values": [],
+              "decision": {
+                "action": "SHOW_REASON",
+                "reason": "unavailable: no floating base: no unactuated coordinate lies outside the loop support",
+                "label": "",
+                "badges": [],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "unavailable: no floating base: no unactuated coordinate lies outside the loop support"
+            },
+            {
+              "frame_index": 9,
+              "shown": false,
+              "values": [],
+              "decision": {
+                "action": "SHOW_REASON",
+                "reason": "unavailable: no floating base: no unactuated coordinate lies outside the loop support",
+                "label": "",
+                "badges": [],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "unavailable: no floating base: no unactuated coordinate lies outside the loop support"
+            }
+          ]
+        },
+        {
+          "name": "tangent_pairing",
+          "units": "generalised force",
+          "frames": [
+            {
+              "frame_index": 0,
+              "shown": true,
+              "values": [
+                1.08697912,
+                4.1442165,
+                6.83938262
+              ],
+              "decision": {
+                "action": "SHOW_VALUE",
+                "reason": "invariant given model",
+                "label": "INVARIANT, unconditioned (given the model)",
+                "badges": [
+                  "model: planar_two_arm_golfer_numpy 1",
+                  "UNVALIDATED"
+                ],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "invariant given model"
+            },
+            {
+              "frame_index": 3,
+              "shown": true,
+              "values": [
+                1.08697912,
+                4.1442165,
+                6.83938262
+              ],
+              "decision": {
+                "action": "SHOW_VALUE",
+                "reason": "invariant given model",
+                "label": "INVARIANT, unconditioned (given the model)",
+                "badges": [
+                  "model: planar_two_arm_golfer_numpy 1",
+                  "UNVALIDATED"
+                ],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "invariant given model"
+            },
+            {
+              "frame_index": 6,
+              "shown": true,
+              "values": [
+                1.08697912,
+                4.1442165,
+                6.83938262
+              ],
+              "decision": {
+                "action": "SHOW_VALUE",
+                "reason": "invariant given model",
+                "label": "INVARIANT, unconditioned (given the model)",
+                "badges": [
+                  "model: planar_two_arm_golfer_numpy 1",
+                  "UNVALIDATED"
+                ],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "invariant given model"
+            },
+            {
+              "frame_index": 9,
+              "shown": true,
+              "values": [
+                1.08697912,
+                4.1442165,
+                6.83938262
+              ],
+              "decision": {
+                "action": "SHOW_VALUE",
+                "reason": "invariant given model",
+                "label": "INVARIANT, unconditioned (given the model)",
+                "badges": [
+                  "model: planar_two_arm_golfer_numpy 1",
+                  "UNVALIDATED"
+                ],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "invariant given model"
+            }
+          ]
+        },
+        {
+          "name": "min_metric_torque",
+          "units": "N m",
+          "frames": [
+            {
+              "frame_index": 0,
+              "shown": true,
+              "values": [
+                1.65823821,
+                -3.53094141,
+                2.64579593,
+                8.50135228
+              ],
+              "decision": {
+                "action": "SHOW_VALUE",
+                "reason": "invariant given model",
+                "label": "INVARIANT, unconditioned (given the model)",
+                "badges": [
+                  "model: planar_two_arm_golfer_numpy 1",
+                  "UNVALIDATED"
+                ],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "invariant given model"
+            },
+            {
+              "frame_index": 3,
+              "shown": true,
+              "values": [
+                1.65823821,
+                -3.53094141,
+                2.64579593,
+                8.50135228
+              ],
+              "decision": {
+                "action": "SHOW_VALUE",
+                "reason": "invariant given model",
+                "label": "INVARIANT, unconditioned (given the model)",
+                "badges": [
+                  "model: planar_two_arm_golfer_numpy 1",
+                  "UNVALIDATED"
+                ],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "invariant given model"
+            },
+            {
+              "frame_index": 6,
+              "shown": true,
+              "values": [
+                1.65823821,
+                -3.53094141,
+                2.64579593,
+                8.50135228
+              ],
+              "decision": {
+                "action": "SHOW_VALUE",
+                "reason": "invariant given model",
+                "label": "INVARIANT, unconditioned (given the model)",
+                "badges": [
+                  "model: planar_two_arm_golfer_numpy 1",
+                  "UNVALIDATED"
+                ],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "invariant given model"
+            },
+            {
+              "frame_index": 9,
+              "shown": true,
+              "values": [
+                1.65823821,
+                -3.53094141,
+                2.64579593,
+                8.50135228
+              ],
+              "decision": {
+                "action": "SHOW_VALUE",
+                "reason": "invariant given model",
+                "label": "INVARIANT, unconditioned (given the model)",
+                "badges": [
+                  "model: planar_two_arm_golfer_numpy 1",
+                  "UNVALIDATED"
+                ],
+                "hypothesis_chips": [],
+                "conditioning_chips": [],
+                "preset": null
+              },
+              "reason": "invariant given model"
+            }
+          ]
+        }
+      ],
+      "unavailable_reason": null
+    },
+    "envelopes": {
+      "bands": [
+        {
+          "quantity_id": "tau_1",
+          "units": "N m",
+          "frame_indices": [
+            0,
+            3,
+            6,
+            9
+          ],
+          "lower": [
+            -355.49488162,
+            -355.49488162,
+            -355.49488162,
+            -355.49488162
+          ],
+          "upper": [
+            362.61128277,
+            362.61128277,
+            362.61128277,
+            362.61128277
+          ],
+          "status_lower": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "status_upper": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "segments": [
+            {
+              "first_frame_index": 0,
+              "last_frame_index": 9,
+              "display_class": "INDETERMINATE",
+              "sign_class": "indeterminate",
+              "binding_hypotheses": [
+                "H-TORQUE-CAPACITY"
+              ],
+              "active_constraints": [
+                "H-TORQUE-CAPACITY:j2:lower",
+                "H-TORQUE-CAPACITY:j2:upper"
+              ]
+            }
+          ],
+          "infeasible_frame_indices": [],
+          "decision": {
+            "action": "SHOW_BAND",
+            "reason": "family band",
+            "label": "FAMILY_DEPENDENT",
+            "badges": [
+              "model: planar_two_arm_golfer_numpy 1",
+              "UNVALIDATED"
+            ],
+            "hypothesis_chips": [
+              "H-TORQUE-CAPACITY",
+              "H-FRICTION-CONE",
+              "H-GRIP-PRELOAD"
+            ],
+            "conditioning_chips": [],
+            "preset": null
+          }
+        },
+        {
+          "quantity_id": "tau_2",
+          "units": "N m",
+          "frame_indices": [
+            0,
+            3,
+            6,
+            9
+          ],
+          "lower": [
+            -165.31111283,
+            -165.31111283,
+            -165.31111283,
+            -165.31111283
+          ],
+          "upper": [
+            156.54609304,
+            156.54609304,
+            156.54609304,
+            156.54609304
+          ],
+          "status_lower": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "status_upper": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "segments": [
+            {
+              "first_frame_index": 0,
+              "last_frame_index": 9,
+              "display_class": "INDETERMINATE",
+              "sign_class": "indeterminate",
+              "binding_hypotheses": [
+                "H-TORQUE-CAPACITY"
+              ],
+              "active_constraints": [
+                "H-TORQUE-CAPACITY:j2:lower",
+                "H-TORQUE-CAPACITY:j2:upper"
+              ]
+            }
+          ],
+          "infeasible_frame_indices": [],
+          "decision": {
+            "action": "SHOW_BAND",
+            "reason": "family band",
+            "label": "FAMILY_DEPENDENT",
+            "badges": [
+              "model: planar_two_arm_golfer_numpy 1",
+              "UNVALIDATED"
+            ],
+            "hypothesis_chips": [
+              "H-TORQUE-CAPACITY",
+              "H-FRICTION-CONE",
+              "H-GRIP-PRELOAD"
+            ],
+            "conditioning_chips": [],
+            "preset": null
+          }
+        },
+        {
+          "quantity_id": "tau_3",
+          "units": "N m",
+          "frame_indices": [
+            0,
+            3,
+            6,
+            9
+          ],
+          "lower": [
+            -500.0,
+            -500.0,
+            -500.0,
+            -500.0
+          ],
+          "upper": [
+            500.0,
+            500.0,
+            500.0,
+            500.0
+          ],
+          "status_lower": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "status_upper": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "segments": [
+            {
+              "first_frame_index": 0,
+              "last_frame_index": 9,
+              "display_class": "INDETERMINATE",
+              "sign_class": "indeterminate",
+              "binding_hypotheses": [
+                "H-TORQUE-CAPACITY"
+              ],
+              "active_constraints": [
+                "H-TORQUE-CAPACITY:j2:lower",
+                "H-TORQUE-CAPACITY:j2:upper"
+              ]
+            }
+          ],
+          "infeasible_frame_indices": [],
+          "decision": {
+            "action": "SHOW_BAND",
+            "reason": "family band",
+            "label": "FAMILY_DEPENDENT",
+            "badges": [
+              "model: planar_two_arm_golfer_numpy 1",
+              "UNVALIDATED"
+            ],
+            "hypothesis_chips": [
+              "H-TORQUE-CAPACITY",
+              "H-FRICTION-CONE",
+              "H-GRIP-PRELOAD"
+            ],
+            "conditioning_chips": [],
+            "preset": null
+          }
+        },
+        {
+          "quantity_id": "tau_4",
+          "units": "N m",
+          "frame_indices": [
+            0,
+            3,
+            6,
+            9
+          ],
+          "lower": [
+            -10.1345238,
+            -10.1345238,
+            -10.1345238,
+            -10.1345238
+          ],
+          "upper": [
+            27.33550445,
+            27.33550445,
+            27.33550445,
+            27.33550445
+          ],
+          "status_lower": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "status_upper": [
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED",
+            "BOUNDED"
+          ],
+          "segments": [
+            {
+              "first_frame_index": 0,
+              "last_frame_index": 9,
+              "display_class": "INDETERMINATE",
+              "sign_class": "indeterminate",
+              "binding_hypotheses": [
+                "H-TORQUE-CAPACITY"
+              ],
+              "active_constraints": [
+                "H-TORQUE-CAPACITY:j2:lower",
+                "H-TORQUE-CAPACITY:j2:upper"
+              ]
+            }
+          ],
+          "infeasible_frame_indices": [],
+          "decision": {
+            "action": "SHOW_BAND",
+            "reason": "family band",
+            "label": "FAMILY_DEPENDENT",
+            "badges": [
+              "model: planar_two_arm_golfer_numpy 1",
+              "UNVALIDATED"
+            ],
+            "hypothesis_chips": [
+              "H-TORQUE-CAPACITY",
+              "H-FRICTION-CONE",
+              "H-GRIP-PRELOAD"
+            ],
+            "conditioning_chips": [],
+            "preset": null
+          }
+        }
+      ],
+      "withheld": [],
+      "frames": [
+        {
+          "index": 0,
+          "feasible": true,
+          "chebyshev_status": "BOUNDED",
+          "chebyshev_margin": 128.78265708,
+          "conflict_hypotheses": [],
+          "rests_on_unverified": true
+        },
+        {
+          "index": 3,
+          "feasible": true,
+          "chebyshev_status": "BOUNDED",
+          "chebyshev_margin": 128.78265708,
+          "conflict_hypotheses": [],
+          "rests_on_unverified": true
+        },
+        {
+          "index": 6,
+          "feasible": true,
+          "chebyshev_status": "BOUNDED",
+          "chebyshev_margin": 128.78265708,
+          "conflict_hypotheses": [],
+          "rests_on_unverified": true
+        },
+        {
+          "index": 9,
+          "feasible": true,
+          "chebyshev_status": "BOUNDED",
+          "chebyshev_margin": 128.78265708,
+          "conflict_hypotheses": [],
+          "rests_on_unverified": true
+        }
+      ],
+      "unavailable_reason": null
+    },
+    "hand_split": {
+      "frame": "grip frame",
+      "bands": [],
+      "withheld": [],
+      "unavailable_reason": "no hand-split coordinate in the report"
+    },
+    "allocation": {
+      "status": null,
+      "reason": null,
+      "overlays": [],
+      "withheld": [],
+      "excluded_frame_indices": [],
+      "objective_total": null,
+      "non_claim": null,
+      "unavailable_reason": "allocation not requested"
+    },
+    "diagnostics": {
+      "frames": [
+        {
+          "index": 0,
+          "rank_A": 5,
+          "nullity": 1,
+          "rank_J_c": 2,
+          "condition_number": 73.55482685
+        },
+        {
+          "index": 3,
+          "rank_A": 5,
+          "nullity": 1,
+          "rank_J_c": 2,
+          "condition_number": 73.55482685
+        },
+        {
+          "index": 6,
+          "rank_A": 5,
+          "nullity": 1,
+          "rank_J_c": 2,
+          "condition_number": 73.55482685
+        },
+        {
+          "index": 9,
+          "rank_A": 5,
+          "nullity": 1,
+          "rank_J_c": 2,
+          "condition_number": 73.55482685
+        }
+      ],
+      "admission": {
+        "verdict": "ADMITTED",
+        "reasons": [],
+        "failing_frames": [],
+        "derivative_method": "analytic",
+        "noise_floor": 0.0,
+        "position_evaluated": false
+      },
+      "residuals": [
+        {
+          "name": "phi",
+          "units": "1",
+          "shown": false,
+          "values": [],
+          "decision": {
+            "action": "SHOW_REASON",
+            "reason": "unavailable: position residual not evaluated: no plant",
+            "label": "",
+            "badges": [],
+            "hypothesis_chips": [],
+            "conditioning_chips": [],
+            "preset": null
+          },
+          "reason": "unavailable: position residual not evaluated: no plant"
+        },
+        {
+          "name": "phi_dot",
+          "units": "1",
+          "shown": true,
+          "values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "decision": {
+            "action": "SHOW_VALUE",
+            "reason": "invariant given model",
+            "label": "INVARIANT, unconditioned (given the model)",
+            "badges": [
+              "model: planar_two_arm_golfer_numpy 1",
+              "UNVALIDATED"
+            ],
+            "hypothesis_chips": [],
+            "conditioning_chips": [],
+            "preset": null
+          },
+          "reason": "invariant given model"
+        },
+        {
+          "name": "phi_ddot",
+          "units": "1",
+          "shown": true,
+          "values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "decision": {
+            "action": "SHOW_VALUE",
+            "reason": "invariant given model",
+            "label": "INVARIANT, unconditioned (given the model)",
+            "badges": [
+              "model: planar_two_arm_golfer_numpy 1",
+              "UNVALIDATED"
+            ],
+            "hypothesis_chips": [],
+            "conditioning_chips": [],
+            "preset": null
+          },
+          "reason": "invariant given model"
+        }
+      ],
+      "kkt": null
+    },
+    "sensitivity": {
+      "status": "complete",
+      "reason": null,
+      "primary_outcome": "face_angle",
+      "skipped_priority": [],
+      "outcomes": [
+        "face_angle"
+      ],
+      "declared_mechanisms": [],
+      "noise_hypotheses": [
+        "H-NOISE-ADDITIVE"
+      ],
+      "linear_validity": "NOT_ASSESSED",
+      "cache_identity": "0ecc35779d35cc6bff7474dc0c4066e8ce0d8bb902b78a0818f6452a0587719d",
+      "non_claims": [
+        "Linear prediction in the tangent basis at the nominal motion; it does not cover saturation, slip or missed impacts. Noise amplitudes are declared hypotheses, not measurements.",
+        "Rankings are conditional on the declared disturbance priors, mechanisms and the linear tangent model at the nominal motion; they compare mechanisms inside a model, not golfers, and are not coaching advice until externally validated.",
+        "Disturbance amplitudes, mechanisms and impedance values are declared hypotheses, not measurements of any golfer."
+      ],
+      "kernel_heatmap": {
+        "outcome": "face_angle",
+        "units": "(rad)/(N m)",
+        "shown": true,
+        "input_labels": [
+          "shoulder",
+          "elbow"
+        ],
+        "step_times_s": [
+          0.0,
+          0.1,
+          0.2,
+          0.3,
+          0.4,
+          0.5
+        ],
+        "lower": [
+          [
+            0.0156267,
+            0.01172002
+          ],
+          [
+            0.02670404,
+            0.02002803
+          ],
+          [
+            0.0349504,
+            0.0262128
+          ],
+          [
+            0.03996,
+            0.02997
+          ],
+          [
+            0.0416,
+            0.0312
+          ],
+          [
+            0.04,
+            0.03
+          ]
+        ],
+        "upper": [
+          [
+            0.0156267,
+            0.01172002
+          ],
+          [
+            0.02670404,
+            0.02002803
+          ],
+          [
+            0.0349504,
+            0.0262128
+          ],
+          [
+            0.03996,
+            0.02997
+          ],
+          [
+            0.0416,
+            0.0312
+          ],
+          [
+            0.04,
+            0.03
+          ]
+        ],
+        "is_band": false,
+        "decision": {
+          "action": "SHOW_VALUE",
+          "reason": "invariant given model",
+          "label": "INVARIANT, unconditioned (given the model)",
+          "badges": [
+            "model: pendulum-fixture 1",
+            "UNVALIDATED"
+          ],
+          "hypothesis_chips": [],
+          "conditioning_chips": [],
+          "preset": null
+        },
+        "reason": "shown"
+      },
+      "variance_budget": {
+        "outcome": "face_angle",
+        "units": "(rad)^2",
+        "shown": true,
+        "step_times_s": [
+          0.0,
+          0.1,
+          0.2,
+          0.3,
+          0.4,
+          0.5
+        ],
+        "parts": [
+          {
+            "input_class": "state",
+            "variance": 0.13165978,
+            "share": 0.99513242,
+            "by_time": []
+          },
+          {
+            "input_class": "torque",
+            "variance": 0.000644,
+            "share": 0.00486758,
+            "by_time": [
+              2.213e-05,
+              6.463e-05,
+              0.0001107,
+              0.00014471,
+              0.00015683,
+              0.000145
+            ]
+          }
+        ],
+        "decision": {
+          "action": "SHOW_VALUE",
+          "reason": "invariant given model",
+          "label": "INVARIANT, conditioned on H-NOISE-ADDITIVE",
+          "badges": [
+            "model: pendulum-fixture 1",
+            "UNVALIDATED"
+          ],
+          "hypothesis_chips": [],
+          "conditioning_chips": [
+            "H-NOISE-ADDITIVE"
+          ],
+          "preset": null
+        },
+        "reason": "shown"
+      },
+      "strategy_pareto": {
+        "mode": "unconstrained",
+        "ranking_basis": "variance_ratio_to_strategy_off_baseline",
+        "points": [
+          {
+            "label": "fixture/S1 free",
+            "strategy": "S1",
+            "status": "ok",
+            "shown": false,
+            "rank": null,
+            "beats_baseline": true,
+            "variance_ratio": null,
+            "chs_mps": null,
+            "effort": null,
+            "effort_basis": "capacity_weighted_allocation_effort",
+            "mechanisms": [
+              "H-NOISE-SIGNAL-DEPENDENT"
+            ],
+            "decision": {
+              "action": "SHOW_BAND",
+              "reason": "family band",
+              "label": "FAMILY_DEPENDENT, conditioned on H-NOISE-SIGNAL-DEPENDENT",
+              "badges": [
+                "model: pendulum-nsx80 1",
+                "UNVALIDATED"
+              ],
+              "hypothesis_chips": [
+                "H-NOISE-SIGNAL-DEPENDENT"
+              ],
+              "conditioning_chips": [
+                "H-NOISE-SIGNAL-DEPENDENT"
+              ],
+              "preset": null
+            },
+            "reason": "family band; this panel shows values only, not a family band"
+          },
+          {
+            "label": "fixture/S2 impedance",
+            "strategy": "S2",
+            "status": "ok",
+            "shown": true,
+            "rank": 1,
+            "beats_baseline": true,
+            "variance_ratio": 0.12500966,
+            "chs_mps": 40.0,
+            "effort": 1.24823883,
+            "effort_basis": "expected_layer_l2_effort",
+            "mechanisms": [],
+            "decision": {
+              "action": "SHOW_VALUE",
+              "reason": "invariant given model",
+              "label": "INVARIANT, conditioned on H-DECLARED-JOINT-IMPEDANCE, H-NOISE-ADDITIVE",
+              "badges": [
+                "model: double-integrator 1",
+                "UNVALIDATED"
+              ],
+              "hypothesis_chips": [],
+              "conditioning_chips": [
+                "H-DECLARED-JOINT-IMPEDANCE",
+                "H-NOISE-ADDITIVE"
+              ],
+              "preset": null
+            },
+            "reason": "shown"
+          },
+          {
+            "label": "fixture/S7 feedback",
+            "strategy": "S7",
+            "status": "ok",
+            "shown": true,
+            "rank": 2,
+            "beats_baseline": true,
+            "variance_ratio": 0.14573386,
+            "chs_mps": 40.0,
+            "effort": 1.43495385,
+            "effort_basis": "expected_layer_l2_effort",
+            "mechanisms": [],
+            "decision": {
+              "action": "SHOW_VALUE",
+              "reason": "invariant given model",
+              "label": "INVARIANT, conditioned on H-NOISE-ADDITIVE, H-SENSORIMOTOR-DELAY",
+              "badges": [
+                "model: double-integrator 1",
+                "UNVALIDATED"
+              ],
+              "hypothesis_chips": [],
+              "conditioning_chips": [
+                "H-NOISE-ADDITIVE",
+                "H-SENSORIMOTOR-DELAY"
+              ],
+              "preset": null
+            },
+            "reason": "shown"
+          }
+        ],
+        "fronts": [
+          {
+            "name": "variance_vs_chs",
+            "labels": [
+              "fixture/S2 impedance"
+            ],
+            "withheld_count": 0
+          },
+          {
+            "name": "variance_vs_effort:capacity_weighted_allocation_effort",
+            "labels": [],
+            "withheld_count": 1
+          },
+          {
+            "name": "variance_vs_effort:expected_layer_l2_effort",
+            "labels": [
+              "fixture/S2 impedance"
+            ],
+            "withheld_count": 0
+          }
+        ],
+        "skipped": [
+          {
+            "label": "fixture/S4",
+            "status": "not_implemented",
+            "exclusion": "not_attempted",
+            "reason": "S4: no per-joint effort-share parameterisation exists; no muscle-level evaluator exists for this mechanism"
+          },
+          {
+            "label": "fixture/S6",
+            "status": "not_implemented",
+            "exclusion": "not_attempted",
+            "reason": "S6: no UCM computation exists in the repository; no muscle-level evaluator exists for this mechanism"
+          },
+          {
+            "label": "fixture/S9",
+            "status": "not_implemented",
+            "exclusion": "not_attempted",
+            "reason": "S9: a joint-torque model has no biarticular muscles to couple; no biarticular comparison is built on the NSX-94 frame"
+          },
+          {
+            "label": "fixture/S10",
+            "status": "unavailable",
+            "exclusion": "not_attempted",
+            "reason": "S10: the rigid club has no shaft flexibility to phase-match; the rigid club in the muscle-driven model has no shaft flexibility to phase-match"
+          },
+          {
+            "label": "fixture/S11",
+            "status": "not_implemented",
+            "exclusion": "not_attempted",
+            "reason": "S11: no timing-disturbance variance evaluator exists; no muscle-level evaluator exists for this mechanism"
+          },
+          {
+            "label": "fixture/S12",
+            "status": "not_implemented",
+            "exclusion": "not_attempted",
+            "reason": "S12: no address-consistency cost model exists; no muscle-level evaluator exists for this mechanism"
+          },
+          {
+            "label": "S3",
+            "status": "not_attempted",
+            "exclusion": null,
+            "reason": "the engine's sensitivity provider declared no arm setting for this strategy"
+          },
+          {
+            "label": "S5",
+            "status": "not_attempted",
+            "exclusion": null,
+            "reason": "the engine's sensitivity provider declared no arm setting for this strategy"
+          },
+          {
+            "label": "S8",
+            "status": "not_attempted",
+            "exclusion": null,
+            "reason": "the engine's sensitivity provider declared no arm setting for this strategy"
+          }
+        ],
+        "failure_rate": 0.0,
+        "winner": "fixture/S2 impedance",
+        "assumptions": [
+          "linear tangent model at the nominal motion; saturation, slip and missed impacts are outside it",
+          "disturbance amplitudes are declared hypotheses, not measurements",
+          "ranking basis is the face-angle variance ratio to the strategy-off baseline of each arm's own representation; absolute variances are not compared across representations",
+          "effort bases (allocated torque, layer torque, muscle activation) are separate lines and are only compared within one basis",
+          "clubhead speed is an allocation-invariant input of each case"
+        ],
+        "non_claim": "Rankings are conditional on the declared disturbance priors, mechanisms and the linear tangent model at the nominal motion; they compare mechanisms inside a model, not golfers, and are not coaching advice until externally validated.",
+        "unavailable_reason": null
+      },
+      "face_dispersion": {
+        "outcome": "face_angle",
+        "units": "rad",
+        "linear": {
+          "label": "linear",
+          "units": "rad",
+          "shown": true,
+          "lower": 0.36373587,
+          "upper": 0.36373587,
+          "is_band": false,
+          "decision": {
+            "action": "SHOW_VALUE",
+            "reason": "invariant given model",
+            "label": "INVARIANT, conditioned on H-NOISE-ADDITIVE",
+            "badges": [
+              "model: pendulum-fixture 1",
+              "UNVALIDATED"
+            ],
+            "hypothesis_chips": [],
+            "conditioning_chips": [
+              "H-NOISE-ADDITIVE"
+            ],
+            "preset": null
+          },
+          "reason": "shown"
+        },
+        "arms": [
+          {
+            "label": "fixture/S1 free",
+            "units": "rad",
+            "shown": false,
+            "lower": null,
+            "upper": null,
+            "is_band": false,
+            "decision": {
+              "action": "SHOW_BAND",
+              "reason": "family band",
+              "label": "FAMILY_DEPENDENT, conditioned on H-NOISE-SIGNAL-DEPENDENT",
+              "badges": [
+                "model: pendulum-nsx80 1",
+                "UNVALIDATED"
+              ],
+              "hypothesis_chips": [
+                "H-NOISE-SIGNAL-DEPENDENT"
+              ],
+              "conditioning_chips": [
+                "H-NOISE-SIGNAL-DEPENDENT"
+              ],
+              "preset": null
+            },
+            "reason": "family band; the report carries no family band (one allocation is not a band)"
+          },
+          {
+            "label": "fixture/S2 impedance",
+            "units": "rad",
+            "shown": true,
+            "lower": 0.00917403,
+            "upper": 0.00917403,
+            "is_band": false,
+            "decision": {
+              "action": "SHOW_VALUE",
+              "reason": "invariant given model",
+              "label": "INVARIANT, conditioned on H-DECLARED-JOINT-IMPEDANCE, H-NOISE-ADDITIVE",
+              "badges": [
+                "model: double-integrator 1",
+                "UNVALIDATED"
+              ],
+              "hypothesis_chips": [],
+              "conditioning_chips": [
+                "H-DECLARED-JOINT-IMPEDANCE",
+                "H-NOISE-ADDITIVE"
+              ],
+              "preset": null
+            },
+            "reason": "shown"
+          },
+          {
+            "label": "fixture/S7 feedback",
+            "units": "rad",
+            "shown": true,
+            "lower": 0.00990532,
+            "upper": 0.00990532,
+            "is_band": false,
+            "decision": {
+              "action": "SHOW_VALUE",
+              "reason": "invariant given model",
+              "label": "INVARIANT, conditioned on H-NOISE-ADDITIVE, H-SENSORIMOTOR-DELAY",
+              "badges": [
+                "model: double-integrator 1",
+                "UNVALIDATED"
+              ],
+              "hypothesis_chips": [],
+              "conditioning_chips": [
+                "H-NOISE-ADDITIVE",
+                "H-SENSORIMOTOR-DELAY"
+              ],
+              "preset": null
+            },
+            "reason": "shown"
+          }
+        ],
+        "mc": [],
+        "unavailable_reason": null
+      }
+    }
+  }
+}
