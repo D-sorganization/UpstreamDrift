@@ -64,7 +64,7 @@ def test_model_registry_explicit_local_only_ignores_hybrid_environment(
     )
 
     assert registry.discovery_mode == "local-only"
-    assert len(registry.get_all_models()) == 69
+    assert len(registry.get_all_models()) == 70
 
 
 def test_catalog_reconciles_current_registries_without_schema_count_constants(
@@ -564,7 +564,7 @@ def test_screenshots_payload_is_governed_with_captured_and_pending_records() -> 
     captured = [r for r in screenshots["records"] if r["status"] == "captured"]
     pending = [r for r in screenshots["records"] if r["status"] == "pending"]
     assert len(captured) == 6
-    assert len(pending) == 76
+    assert len(pending) == 77
 
     for record in pending:
         assert record["status"] == "pending"
@@ -604,7 +604,7 @@ def test_screenshots_payload_is_governed_with_captured_and_pending_records() -> 
         assert record["caption"] is not None
 
     # The top-level manifest inventory contains the governed records with source_commit
-    assert len(payloads.catalog["screenshots"]) == 82
+    assert len(payloads.catalog["screenshots"]) == 83
     assert all("source_commit" in r for r in payloads.catalog["screenshots"])
 
 

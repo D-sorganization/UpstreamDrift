@@ -244,7 +244,8 @@ class ForceColorControls(QWidget):
             raise TypeError("scale must be ForceColorScale or None")
         super().__init__(parent)
         self._scale = scale or ForceColorScale()
-        self._color_picker: Callable[[str, QWidget], str | None] = _pick_color
+        picker: ColorPicker = color_picker or _pick_color
+        self._color_picker: Callable[[str, QWidget], str | None] = picker
         layout = QFormLayout(self)
         self._enabled = QCheckBox("Color Segments by Axial Force")
         self._enabled.setObjectName("force_color_enabled")
@@ -284,8 +285,9 @@ class ForceColorControls(QWidget):
         self._colors: dict[str, QLineEdit] = {}
         for name, label, _default in _COLOR_FIELDS:
             field_widget = HexColorField(
-                getattr(self._scale, name), object_name=name, color_picker=color_picker
+                getattr(self._scale, name), object_name=name, color_picker=picker
             )
+            field_widget.colour_changed.connect(lambda _hex: self._apply_edits())
             self._colors[name] = field_widget.line_edit
             layout.addRow(label, field_widget)
         apply_button = QPushButton("Apply Colors and Ranges")
