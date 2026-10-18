@@ -228,14 +228,6 @@ def _committed_squat_receipt() -> dict:
     return json.loads(RECEIPTS.read_text())["lifts"]["squat"]["ik_id"]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "OSL-18 #13157: committed squat marker RMS 2.45 cm > 2 cm gate; the "
-        "torsion-free Rajagopal foot cannot follow the 17.9 deg bundle foot "
-        "yaw; gate not loosened."
-    ),
-)
 def test_committed_receipt_meets_the_marker_gate() -> None:
     squat = _committed_squat_receipt()
     markers = squat["ik"]["marker_error"]

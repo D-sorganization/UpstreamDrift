@@ -187,6 +187,7 @@ def reaching_lift_build(
         "bar_mass_kg": targets.bar_mass_kg,
         "base_model_path": base_model_path,
         "segment_scales": segment_scales,
+        "tibial_torsion": targets.tibial_torsion,
     }
     seed_build = build_lift_model(lift, **common)
     pelvis = ikid.pelvis_landmark_targets(seed_build, targets, base_model_path)

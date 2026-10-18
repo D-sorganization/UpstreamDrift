@@ -213,7 +213,8 @@ def test_parse_with_calibration_and_metadata(tmp_path: Path):
     session = adapter.parse(session_id="custom")
     assert session.session_id == "custom"
     assert session.calibration == {"fx": 500}
-    assert session.metadata == {"fps": 30}
+    assert session.metadata["fps"] == 30
+    assert session.metadata["min_confidence"] == pytest.approx(0.5)
 
 
 def test_parse_skips_blank_rows(tmp_path: Path):
