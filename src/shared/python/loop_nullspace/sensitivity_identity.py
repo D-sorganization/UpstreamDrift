@@ -9,9 +9,16 @@ speeds of the comparison contexts and the provider's own ``provenance``.  A chan
 of any one of them changes the digest, so a report computed under another prior
 can never be mistaken for this one.
 
+Every float, scalar or array element, is encoded at ``_SIGNIFICANT`` significant
+digits (signed zero folded to zero) before hashing, so last-bit noise from a
+different BLAS or numpy build does not change the digest while any change a
+declaration can carry does.
+
 Limit, stated rather than hidden: a context's bulky payload (feasible sets,
 muscle models) is identified by the provider's ``provenance`` mapping, not hashed
 here, and a callable (the nonlinear rollout) is identified by its qualified name.
+A value lying exactly on a 12-digit rounding boundary can still flip; that is
+far below any declared assumption's precision.
 """
 
 from __future__ import annotations
@@ -29,8 +36,14 @@ import numpy as np
 __all__ = ["assumption_digest", "canonical"]
 
 
-def _float(value: float) -> Any:
-    return value if math.isfinite(value) else repr(value)
+_SIGNIFICANT = 12
+
+
+def _float(value: float) -> str:
+    """``value`` at ``_SIGNIFICANT`` significant digits; non-finite as its name."""
+    if not math.isfinite(value):
+        return repr(value)
+    return format(value + 0.0, f".{_SIGNIFICANT}g")
 
 
 def _opaque(obj: Any) -> dict[str, str]:
@@ -41,10 +54,11 @@ def _opaque(obj: Any) -> dict[str, str]:
 def canonical(obj: Any) -> Any:
     """A JSON-safe, order-stable encoding of ``obj`` (arrays hashed by content)."""
     if isinstance(obj, np.ndarray):
-        flat = np.ascontiguousarray(obj, dtype=np.float64)
+        flat = np.asarray(obj, dtype=np.float64).ravel()
+        text = ",".join(_float(float(v)) for v in flat)
         return {
             "ndarray": list(obj.shape),
-            "sha256": hashlib.sha256(flat.tobytes()).hexdigest(),
+            "sha256": hashlib.sha256(text.encode("ascii")).hexdigest(),
         }
     if isinstance(obj, Enum):
         return obj.value

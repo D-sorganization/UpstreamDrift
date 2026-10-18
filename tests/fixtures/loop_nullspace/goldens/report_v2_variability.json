@@ -1559,7 +1559,7 @@
           "face_angle"
         ]
       },
-      "cache_identity": "0ecc35779d35cc6bff7474dc0c4066e8ce0d8bb902b78a0818f6452a0587719d",
+      "cache_identity": "5705733f6bbe201cc3f3f610137ceb58cc5d1710740e6f23e342e1df53e26d2e",
       "outcomes": [
         "face_angle"
       ],
@@ -2941,7 +2941,7 @@
         "H-NOISE-ADDITIVE"
       ],
       "linear_validity": "NOT_ASSESSED",
-      "cache_identity": "0ecc35779d35cc6bff7474dc0c4066e8ce0d8bb902b78a0818f6452a0587719d",
+      "cache_identity": "5705733f6bbe201cc3f3f610137ceb58cc5d1710740e6f23e342e1df53e26d2e",
       "non_claims": [
         "Linear prediction in the tangent basis at the nominal motion; it does not cover saturation, slip or missed impacts. Noise amplitudes are declared hypotheses, not measurements.",
         "Rankings are conditional on the declared disturbance priors, mechanisms and the linear tangent model at the nominal motion; they compare mechanisms inside a model, not golfers, and are not coaching advice until externally validated.",
