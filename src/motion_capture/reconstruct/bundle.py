@@ -28,7 +28,16 @@ import dataclasses
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
+import logging
 from typing import Any, TypeAlias
+
+logger = logging.getLogger(__name__)
+
+
+def frame_index(time_s: float, fps: float) -> int:
+    """Discretise physical time in seconds to an integer frame index at the given frame rate."""
+    return int(round(float(time_s) * float(fps)))
+
 
 import numpy as np
 import numpy.typing as npt
@@ -92,6 +101,8 @@ class Observations:
     camera_ids: tuple[str, ...]
     pixels: Array  # (C, T, K, 2)
     confidence: Array  # (C, T, K)
+    fps: float = 0.0
+    dropped_frames: int = 0
 
     def __post_init__(self) -> None:
         c, t, k, two = self.pixels.shape
@@ -619,23 +630,68 @@ def bundle_adjust(
 def observations_from_views(
     views: Mapping[str, Mapping[str, Any]], camera_ids: Sequence[str]
 ) -> Observations:
-    """Stack ``view-observations`` payloads (same layout, same frame count)."""
+    """Stack ``view-observations`` payloads, aligning views on a common time clock."""
     require(len(camera_ids) >= 2, "need at least two views")
+    require(
+        all(cid in views for cid in camera_ids),
+        "all requested camera_ids must be present in views",
+    )
     first = views[camera_ids[0]]
     names = list(first["detector_layout"]["keypoint_names"])
-    total = int(first["frames_total"])
-    px = np.full((len(camera_ids), total, len(names), 2), np.nan)
-    conf = np.zeros((len(camera_ids), total, len(names)))
-    for c, cid in enumerate(camera_ids):
+
+    # Preconditions: consistent detector layout and positive fps across all views
+    for cid in camera_ids:
         payload = views[cid]
         require(
             list(payload["detector_layout"]["keypoint_names"]) == names,
             "views must share one detector layout",
         )
+        require(float(payload["fps"]) > 0, "fps must be positive", cid)
+
+    # Base clock rate: maximum fps across the views ensures physical time alignment
+    base_fps = max(float(views[cid]["fps"]) for cid in camera_ids)
+
+    # Calculate total required slots across all views so no frames are dropped
+    total = 0
+    for cid in camera_ids:
+        payload = views[cid]
         fps = float(payload["fps"])
-        for row in payload["frames"]:
-            t = int(round(float(row["time_s"]) * fps))
-            if 0 <= t < total:
+        if "frames_total" in payload:
+            duration_s = float(payload["frames_total"]) / fps
+            total = max(total, int(round(duration_s * base_fps)))
+        for row in payload.get("frames", []):
+            t = frame_index(float(row["time_s"]), base_fps)
+            total = max(total, t + 1)
+    require(total >= 1, "at least one frame slot required")
+
+    px = np.full((len(camera_ids), total, len(names), 2), np.nan)
+    conf = np.zeros((len(camera_ids), total, len(names)))
+    dropped_count = 0
+
+    for c, cid in enumerate(camera_ids):
+        payload = views[cid]
+        seen_t: set[int] = set()
+        for row in payload.get("frames", []):
+            t = frame_index(float(row["time_s"]), base_fps)
+            if 0 <= t < total and t not in seen_t:
                 px[c, t] = np.asarray(row["keypoints_px"], dtype=float)
                 conf[c, t] = np.asarray(row["confidence"], dtype=float)
-    return Observations(tuple(camera_ids), px, conf)
+                seen_t.add(t)
+            else:
+                dropped_count += 1
+                logger.warning(
+                    "observations_from_views: dropping frame in view %s (t=%d, time_s=%.4f)",
+                    cid,
+                    t,
+                    float(row.get("time_s", float("nan"))),
+                )
+
+    if dropped_count > 0:
+        logger.warning(
+            "observations_from_views: dropped %d frame(s) during multi-view time alignment",
+            dropped_count,
+        )
+
+    return Observations(
+        tuple(camera_ids), px, conf, fps=base_fps, dropped_frames=dropped_count
+    )
