@@ -623,7 +623,7 @@ def run_inverse_kinematics(
     )
 
 
-def _segment_angles(points: Array) -> Array:
+def _segment_angles(points: Any) -> Any:
     by_label = dict(zip(IK_LANDMARKS, points[: len(IK_LANDMARKS)], strict=True))
     return segment_angles({x: by_label[x] for x in LANDMARK_LABELS}, _OPENSIM_SAGITTAL)
 
@@ -771,7 +771,7 @@ def _splines(ik: IKResult, time_s: Array) -> Any:
     table = osim.TimeSeriesTable()
     table.setColumnLabels(labels)
     for t, row in zip(time_s, ik.q, strict=True):
-        table.appendRow(float(t), osim.RowVector(list(map(float, row))))
+        table.appendRow(float(t), osim.RowVector([float(x) for x in row]))
     return osim.GCVSplineSet(table, osim.StdVectorString(), _GCV_DEGREE, 0.0)
 
 
