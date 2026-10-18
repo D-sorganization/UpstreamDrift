@@ -136,10 +136,11 @@ the 2.785 limit.
   the back squat.
 - **Scaled bar offset.** The bar offset is scaled to the model's arm hang
   (0.689).
-- **Provenance pin.** The bundle was generated against the Tools PR #5653
-  code checked out in `vendor/ud-tools`, while the recorded `tools_pin` is the
-  committed gitlink. Regenerate it after the pin bump to the Tools merge
-  commit.
+- **Provenance pin.** The bundle and `bar_path_parity.json` are regenerated
+  on the vendor pin bump to the Tools #5653 merge commit (`a4595051`); the
+  recorded `tools_pin` is now that commit. Against the bundle generated on the
+  PR head (`b7f36b35`) the efforts differ by at most 5.2e-10 and the reference
+  coordinates by 2.1e-13 rad.
 
 ## Regenerate
 
