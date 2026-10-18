@@ -1,4 +1,4 @@
-"""Cross-engine bar-path parity of the pull bundles (LIFT-5, #11745).
+"""Cross-engine bar-path parity of the pull and bench bundles (LIFT-5, #11745).
 
 Same protocol and the same never-loosened tolerances as the back squat
 (``test_bar_path_parity.py``): every engine replays the committed bundle open
@@ -7,9 +7,7 @@ loop and places the bar (``Grip`` frame) with its own forward kinematics.
 * CI replay of the first :data:`CI_STEPS` steps: 1e-9 m on the bar path.
 * Full 200-step window and 20-step re-anchored segments (committed record,
   ``scripts/measure_lift_bar_path_parity.py --lift ...``): epic #11605
-  level-L2 frame bound (1e-3 m) and coordinate bound (1e-6 rad).  Where a
-  coordinate bound is not met the test is a strict xfail with the measured
-  numbers.
+  level-L2 frame bound (1e-3 m) and coordinate bound (1e-6 rad).
 """
 
 from __future__ import annotations
@@ -39,21 +37,15 @@ _ENGINE_MODULE = {
     "pinocchio": "pinocchio",
     "opensim": "opensim",
 }
-_DEADLIFT_COORDINATES = pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "Measured deadlift window: the 140-160 ms re-anchored segment ends "
-        "4.4e-5 (Drake), 4.3e-5 (Pinocchio) and 4.2e-5 rad (OpenSim) from "
-        "MuJoCo, and the full 0.2 s window 2.0e-4 to 2.1e-4 rad (worst final "
-        "coordinate subtalar_angle_r), above the 1e-6 rad L2 coordinate bound; the other nine "
-        "segments stay within 6.2e-10 rad and the bar within 1.2e-8 m.  "
-        "Same foot-contact signature as the back squat; tracked on #11745, "
-        "the bound is not loosened."
-    ),
-)
+# The deadlift was a strict xfail here while its window ran at the default
+# eight RK4 substeps outside the real stability region (|z| = 4.24; full
+# window 9.9e-5 rad on subtalar).  At the 16 substeps its recorded rate needs
+# (#13041, |z| = 2.49) every engine replays it within 1.7e-13 rad.
 PULL_COORDINATE_CASES = [
-    pytest.param("deadlift", marks=_DEADLIFT_COORDINATES),
+    "deadlift",
     "clean_and_jerk",
+    "snatch",
+    "bench_press",
 ]
 
 
@@ -69,7 +61,9 @@ def _measured(record: dict) -> dict:
     }
 
 
-@pytest.fixture(scope="module", params=("deadlift", "clean_and_jerk"))
+@pytest.fixture(
+    scope="module", params=("deadlift", "clean_and_jerk", "snatch", "bench_press")
+)
 def lift(request: pytest.FixtureRequest) -> str:
     return str(request.param)
 

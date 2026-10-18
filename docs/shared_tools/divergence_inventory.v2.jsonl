@@ -1040,14 +1040,21 @@
 {"path": "lifting/_canonical/biomech_parity_standard.json", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/additional_movements.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/back_bar.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
+{"path": "lifting/back_rack.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/bar_path_parity.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/barbell_bushing.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/barbell_runs.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/baseline_view.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
+{"path": "lifting/bench_press.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
+{"path": "lifting/bundle_stability.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
+{"path": "lifting/bundle_targets.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/bundles.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/kinetics_parity.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
+{"path": "lifting/lift_body.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/lift_recipes.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/lift_spec.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
+{"path": "lifting/loaded_balance.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
+{"path": "lifting/loaded_foot.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/opensim_full_body_lifts.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/pack_audit/__init__.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/pack_audit/adapters/__init__.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
@@ -1141,6 +1148,7 @@
 {"path": "loop_nullspace/plate_screen.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/plot_model.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/plot_model_decisions.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/plot_model_sensitivity.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/probe_certificates.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/probes.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/provider.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
@@ -1156,7 +1164,11 @@
 {"path": "loop_nullspace/restriction_hand_split.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/restriction_report.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/sampled_marginals.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/sensitivity_identity.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/sensitivity_options.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/sensitivity_records.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/sensitivity_sections.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/sensitivity_stage.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/simscape_export.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/simscape_linearization.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/simscape_rig_spec.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
@@ -1374,6 +1386,7 @@
 {"path": "motion_matching/contact_wrench_qp.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/control_loop_tuning.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/control_names.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/coordinate_sign_map.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/coordinate_slice.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/cost.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/counterfactual.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1577,6 +1590,7 @@
 {"path": "motion_matching/same_input/plant.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/same_input/reference.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/same_input/scoring.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/same_input/stiffness.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/segment_scaling.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/sim_out.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/simscape_block_budget.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}

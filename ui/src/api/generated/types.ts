@@ -1116,6 +1116,20 @@ export interface CharacterAppearanceRequest {
   headwear_material?: string | null;
   /** Ground material name */
   ground_material?: string | null;
+  /** Custom skin colour #rrggbb */
+  skin_color?: string | null;
+  /** Custom hair colour #rrggbb */
+  hair_color?: string | null;
+  /** Custom shirt colour #rrggbb */
+  top_color?: string | null;
+  /** Custom trousers/shorts colour #rrggbb */
+  bottom_color?: string | null;
+  /** Golf glove by role; the lead hand is the left of a right-hander */
+  glove?: "none" | "lead" | "trail" | "both" | null;
+  /** Grip style (picture only): overlap, interlock, ten_finger */
+  grip_style?: "overlap" | "interlock" | "ten_finger" | null;
+  /** Lead thumb offset, degrees (picture only) */
+  grip_thumb_offset_deg?: number | null;
   /** Appearance document name (letters, digits, '_' or '-') */
   name?: string | null;
 }
@@ -1633,6 +1647,23 @@ export interface DisplayRequest {
 }
 
 /**
+ * One declared disturbance (mirrors ``DisturbanceSpec``; NSX-99, #12728).
+ */
+export interface DisturbanceModel {
+  name: string;
+  stage: string;
+  channels: string[];
+  units: string;
+  covariance: number[][];
+  spectrum?: string | null;
+  persistent: boolean;
+  bandwidth_hz?: number | null;
+  band_hz?: [number, number] | null;
+  signal_gain?: number[] | null;
+  signal_bounds?: [number, number][] | null;
+}
+
+/**
  * Request body for realized drift-to-input ratio analysis.
  */
 export interface DriftControlRatioRequest {
@@ -1999,6 +2030,24 @@ export interface GreenReadingResponse {
   aim_point: number[];
   elevations: number[];
   slopes: number[][];
+}
+
+/**
+ * Grip picks for a character: physical ones make a new model revision. Golf words: ``preset`` is the grip strength; the ``*_shaft_rotation`` values turn a hand about the shaft (positive is stronger); the ``*_palm_diagonal`` values set where the shaft crosses the palm; the ``*_set_angle`` values the angle at the wrist; ``lead_below_butt`` and ``hand_spacing`` are metres. ``grip_style`` and ``grip_thumb_offset_deg`` are picture-only.
+ */
+export interface GripRevisionRequest {
+  character?: CharacterSpecRequest | null;
+  preset?: "weak" | "neutral" | "strong" | null;
+  lead_shaft_rotation?: number | null;
+  trail_shaft_rotation?: number | null;
+  lead_palm_diagonal?: number | null;
+  trail_palm_diagonal?: number | null;
+  lead_set_angle?: number | null;
+  trail_set_angle?: number | null;
+  lead_below_butt?: number | null;
+  hand_spacing?: number | null;
+  grip_style?: "overlap" | "interlock" | "ten_finger" | null;
+  grip_thumb_offset_deg?: number | null;
 }
 
 /**
@@ -2512,6 +2561,7 @@ export interface LoopNullspaceOptions {
   include_allocation: boolean;
   effort_weight: number;
   rate_weight: number;
+  sensitivity?: SensitivityOptions | null;
 }
 
 /**
@@ -3304,6 +3354,16 @@ export interface ScatterAnalysisResponse {
   total_simulations: number;
   average_distance_from_hole: number;
   make_percentage: number;
+}
+
+/**
+ * The four sensitivity declarations of ``AnalysisOptions`` (NSX-99, #12728). Every field enters the cache key through ``model_dump``, so a changed covariance, gain, bound, mechanism, strategy or outcome priority is a miss.
+ */
+export interface SensitivityOptions {
+  disturbance_spec: DisturbanceModel[];
+  mechanisms?: string[];
+  strategy_set?: string[] | null;
+  outcome_priority?: string[] | null;
 }
 
 export interface SessionAggregateV1 {

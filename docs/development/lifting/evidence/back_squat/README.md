@@ -107,6 +107,41 @@ MUJOCO_GL=egl python3 scripts/measure_lift_bar_path_parity.py
   recorded: TODO(#11745) add cited reference values as evidence, not tuning
   targets.
 
+## Lift Body (OSL-14, #13057)
+
+The bundles now replay the AN-1 lift body
+(`docs/development/lifting/evidence/lift_body/lift_body_spec.json`, from
+`src/shared/python/lifting/lift_body.py`), not the golf spec. The limitation
+text above, which describes the golf spec, is kept for the bundle provenance.
+The lift body has:
+
+- a lumbar joint at L5/S1;
+- de Leva hips 0.1851 m apart;
+- cited ranges, solved as bounded (TRF) IK.
+
+The grip-width shift also moves the left wrist joint. Every coordinate of the
+squat bundle stays inside its cited range.
+
+The LIFT-4 barbell re-track (`back_squat_barbell_bundle.npz`) still leaves its
+source (#13072). The controller is now built on the rigid-bar spec
+(`barbell_runs.rigid_bar_spec`), which removed the fast divergence. Before that,
+the bar-weight feedforward left out the bar's load on the floating base. The
+SpineInputY error went from 0.99 deg to 0.0002 deg at step 3, and from
+9.76 deg to 0.0001 deg at step 10.
+
+The loaded body still pivots forward on its toes. With the bar in the hands,
+the source kinematics put the combined centre of mass 0.15-0.17 m ahead of the
+forefoot spheres, while the body alone sits 0.039 m inside them. By step 200:
+
+- pelvis pitch is 11.8 deg off the source;
+- the shoulder landmarks are 13.2 cm off;
+- the LIFT-5 bounds are crossed from step 58 (ankle) onwards.
+
+The deviation per landmark is recorded in the provenance under
+`retrack_landmark_deviation_m`. The bound test is a strict xfail in
+`tests/unit/lifting/test_barbell_evidence.py`. See `lift_models.tex`, #13072
+subsection.
+
 ## Regenerate
 
 ```bash
@@ -141,3 +176,154 @@ committed: it changes the bundle spec hash recorded in the bar-path, kinetics
 and barbell evidence (#12340, #12341, #12345) and exceeds two recorded IK
 thresholds (`hip_r` 0.0153 m against 0.0138 m, closure 1.9e-6 m against
 1.5e-6 m), so it lands with that evidence in the next slice.
+
+## Loaded Foot Stability (OSL-16, #13104)
+
+The committed bundles are the bar-balanced source (#13093,
+`--load-balance`) tracked at 64 RK4 substeps with a 0.25 ms effort hold
+(`barbell_runs.LOADED_TRACKING_POLICY`). At the original eight substeps the
+stiffest loaded foot-contact mode (1.3e5 1/s) left the RK4 stability region,
+and the right foot points ran 0.23 m from the IK. The sweep is in
+`loaded_foot_tracking.json` (`scripts/measure_loaded_foot_tracking.py`), and
+`lift_models.tex` (OSL-16 subsection) holds the full account. The earlier
+sections above describe the eight-substep records. They stay for history; the
+records now read:
+
+- **Feet:** foot points within 1.81/1.79 mm of the IK, against the ankle
+  bounds 3.6/5.7 mm.
+- **Bar-path parity:** over the full window the engines agree within 2.2e-9
+  rad and the bar within 4.3e-12 m. The coordinate xfails are now plain
+  tests.
+- **Re-track:** every landmark is within its LIFT-5 bound. Ankles 0.97,
+  knees 1.21, hips 1.39, shoulders 1.83 and bar 2.03 mm. The bar is bounded
+  by the tightest body-landmark bound (3.6 mm), not the IK's 0.1 mm
+  constraint precision.
+- **Hold:** the hold starts in contact equilibrium (`barbell_runs.hold_start`,
+  #11744), with the CoP under the combined CoM. Body plus bar is carried over the
+  whole 1.5 s: ground 1.000, hands 1.000, left share 0.500, deflection 0.49 mm.
+  The old start sat 6.7 cm out of balance and toppled backwards.
+- **Size:** loaded bundles carry their hold efforts, up to 600,000 bytes.
+
+## Whole-Row Lift Body (#13037)
+
+Every record in this directory is regenerated on the AN-1 lift body built from
+the whole de Leva Table 4 rows (#13102) with the default 10 deg tibial torsion
+(#12814). The numbers in the previous section were measured on the earlier
+body. The list below was measured on the whole-row body before the OSL-17
+rack and is kept for history; the current records are in the last section.
+
+- **Source IK:** max residuals ankle 4.99/4.43, knee 3.62/11.82, hip
+  8.11/9.32, shoulder 3.65/3.04 and bar 0.01 mm (left/right); closure 9.0e-8
+  m; lowest sphere 0.69 mm; balance offset 0.207 m to 1.3e-4 m in five
+  corrections; 463,674 bytes. The regression-snapshot bounds in
+  `tests/unit/lifting/test_lift_bundles.py` for `ankle_r` (3.6 to 4.5 mm),
+  `hip_r` (9.2 to 9.4 mm) and the closure (6.4e-8 to 9.0e-8 m) are re-derived
+  with their original rounding (#13041, issuecomment-6243170509; see
+  `lift_models.tex`, "Lift Body on the Whole de Leva Rows").
+- **Feet:** foot points within 1.77/1.75 mm of the IK at 64 substeps and a
+  0.25 ms hold; 64 against 128 substeps moves no coordinate by more than
+  1.6e-8 rad.
+- **Bar-path parity:** full window within 6.3e-10 rad and the bar within
+  7.5e-12 m.
+- **Re-track:** ankles 0.99/1.00, knees 1.19/1.22, hips 1.39/1.38,
+  shoulders 1.85/1.55 and bar 1.87 mm; 496,399 bytes. Bushing parity largest
+  difference 6.2e-7 (body acceleration, scale 1.0e3).
+- **Hold:** from `barbell_runs.hold_start`, ground 1.000, hands 1.000, left
+  share 0.500, peak deflection 0.49 mm.
+
+## High-Bar Rack and Settled Start (OSL-17, #13131)
+
+The bar sits on the cited high-bar rack: one shaft radius (14 mm) behind the
+lift body's C7 landmark (`BackTop`), along the trunk's posterior axis. The
+source is Glassbrook et al. 2019 (J Strength Cond Res 33(S1):S1-S18), citing
+Wretenberg et al. 1996. It is defined in
+`src/shared/python/lifting/back_rack.py`. It replaces the parity standard's
+start-pose bar position, which lies above the shoulders.
+
+Both bundles start after a 0.1 s lead-in (100 steps, recorded as
+`provenance["lead_in"]` and `provenance["barbell"]["lead_in"]`), so state 0
+is settled on its contact. The source bundle's state-0 vertical force is
+2224.2 N, steady over the first 20 states; before, it was 1346.6 N rising to
+1771.4 N. The OpenSim squat now passes the Hicks residual gate on all 41
+states. The numbers and the failed experiments are in
+`docs/research/lift_models/lift_models.tex` (OSL-17). Regenerate with:
+
+```bash
+python3 scripts/generate_lift_bundle.py --lift squat --load-balance --lead-in 0.1
+python3 scripts/generate_barbell_squat_evidence.py --part bundle --source-commit <sha>
+python3 scripts/generate_barbell_squat_evidence.py --part parity --source-commit <sha>
+```
+
+The barbell hold starts from the balanced IK standing pose
+(`barbell_runs.hold_pose`, recorded as `provenance["ik"]["q_balanced_standing"]`):
+at the pre-balance `q_standing` the body-plus-bar centre of mass lies 18.6 cm
+behind the centre of pressure and no contact equilibrium exists.
+
+Open regressions on the rack bundle, recorded as strict xfails with the bounds
+unchanged (#13131):
+
+- Full-window cross-engine coordinates: 6.0e-5 rad (Drake), 2.0e-5 rad
+  (Pinocchio) and 1.4e-5 rad (OpenSim) against 1e-6 rad; before, 2e-10 rad.
+  The bar stays within 8.0e-7 m and every 20-step segment within 4.8e-13 rad.
+- Re-track bar deviation: 6.79 mm against the 3.6 mm LIFT-5 bound; before,
+  2.03 mm.
+- OpenSim arm reach: the Rajagopal arm ranges stop the hands 4.63 cm (left)
+  and 6.03 cm (right) from the high-bar grips against the 1 mm reach bound,
+  and the IK carries the arm coordinates up to 1.21e-3 rad past their ranges.
+- Body-alone centre of mass: 11.9 cm forward, ahead of the forefoot spheres
+  (10.4 cm); body plus bar is over the feet.
+
+All numbers here are on the lift body before the de Leva whole-row fix
+(#13102).
+
+## High-Bar Rack on the Whole-Row Lift Body (#13041)
+
+Every record in this directory is now the OSL-17 rack regenerated on the
+whole-row lift body (#13037), with the commands above and the default thread
+count (the OSL-17 bundle was built without `OMP_NUM_THREADS=1`; the committed
+policy run reproduces the bundle).
+
+- **Source IK:** max residuals ankle 4.70/4.89, knee 8.32/14.80, hip
+  12.48/6.91, shoulder 8.22/4.66 and bar 0.05 mm (left/right); closure 2.81e-7
+  m; lowest sphere 0.69 mm; balance offset 0.097 m to 6.9e-6 m in four
+  corrections; 519,569 bytes; 64 RK4 substeps, |z| 2.21. Only `ankle_r`
+  exceeds its snapshot (rack on the earlier body 3.53 mm); it is re-derived
+  from 4.5 to 4.9 mm with the same rounding.
+- **Bar-path parity:** the bar within 3.7e-5 m (Pinocchio) and every 20-step
+  segment within 7.0e-13 rad; the full window ends 8.5e-4 (Drake), 2.7e-3
+  (Pinocchio) and 8.6e-5 rad (OpenSim) from MuJoCo on `LWInputY`.
+- **Barbell parity:** largest engine difference 5.5e-7 (body acceleration).
+
+The OSL-17 strict xfails, re-measured with the bounds unchanged; every one
+still fails:
+
+| Regression                               | Rack, Earlier Body | Rack, Whole-Row Body |
+| ---------------------------------------- | ------------------ | -------------------- |
+| Full-window coordinates, Drake (rad)     | 6.0e-5             | 8.5e-4               |
+| Re-track bar deviation (mm, bound 3.6)   | 6.79               | 6.45                 |
+| Body-alone CoM / forefoot (cm)           | 11.9 / 10.4        | 11.65 / 10.02        |
+| OpenSim reach miss L / R (cm, bound 0.1) | 4.63 / 6.03        | 3.81 / 5.69          |
+| Arm range overshoot (rad)                | 1.21e-3            | 8.0e-4               |
+
+- **Full-window coordinates.** The open-loop dynamics under the recorded
+  efforts have an unstable left-wrist mode: the largest real eigenvalue of the
+  state Jacobian is on `LWInputY`, 116-132 1/s (101-115 1/s on the earlier
+  rack body; before the rack 64-70 1/s on `SpineInputX`). Engine round-off of
+  about 1e-14 grows by exp(lambda x 0.2 s), 1e9 to 1e11, over the window,
+  which matches every measured case. The run is inside the RK4 limit, so this
+  is a physical instability of the open-loop posture, not an integration error.
+- **OpenSim reach.** This miss and the pre-rack whole-row elbow-limit miss
+  (8.3/21.5 mm) have one cause: the folded Rajagopal arm cannot bring the hand
+  within about 0.20 m of its shoulder landmark in these directions
+  (shoulder-to-grip distance plus reach miss is 0.198-0.213 m in all four
+  cases), while the grips sit 0.146-0.190 m from the shoulders.
+- **New failure, OpenSim marker gate.** Marker RMS is 2.45 cm against the
+  2 cm gate (maximum 3.81 cm, inside 4 cm); it was 1.94 cm. The foot markers
+  rise (forefoot 2.4 to 3.8 cm, heel 1.5 to 2.3 cm, ankle 1.0 to 1.6 cm): the
+  10 deg tibial torsion (#12814) turns the bundle feet out from 8.8 to 17.9 deg,
+  and the torsion-free Rajagopal foot cannot follow. The gate is a
+  best-practice threshold and is not loosened, so the marker-gate tests are
+  strict xfails tracked by OSL-18 (#13157). The Hicks gate passes (146.6 N,
+  18.5 N m) and stays a passing test.
+- **Follow-ups.** The arm reach is tracked by OSL-19 (#13158). The open-loop
+  left-wrist mode that blocks full-window parity is tracked by OSL-20 (#13159).
