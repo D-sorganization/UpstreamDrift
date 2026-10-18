@@ -2831,8 +2831,19 @@ export interface PlateOverlayRequest {
   target_dir?: number[];
   declared: PlateDeclarationsModel;
   alignment: PlateAlignmentModel;
+  reading: PlateReadingModel;
   /** Band factor for the interpolation bias */
   coverage: number;
+}
+
+/**
+ * Declared channel timing (see ``DeclaredReading``).
+ */
+export interface PlateReadingModel {
+  /** Timing skew within a sample (s) */
+  skew_s: number;
+  /** How the two CoP channels' skews relate */
+  cop_skew: "unknown" | "independent" | "common";
 }
 
 /**

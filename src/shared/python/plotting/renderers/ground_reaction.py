@@ -22,6 +22,11 @@ import numpy as np
 from src.shared.python.biomechanics.ground_reaction_plot_model import (
     GroundReactionPlotSeries,
 )
+from src.shared.python.plotting.renderers._cop_ellipse import (
+    COVARIANCE,
+    PER_AXIS,
+    marker_ellipse,
+)
 from src.shared.python.plotting.renderers.time_panels import (
     draw_time_panel,
     mark_unavailable,
@@ -131,8 +136,9 @@ SIGMA_BAND_SUFFIX = "\u00b11\u03c3"
 _BAND_ALPHA = 0.2
 #: CoP uncertainty ellipses drawn per foot at most, so the path stays legible.
 MAX_COP_MARKERS = 12
-#: The CoP sigma is one sigma per horizontal axis, not a 2-D covariance.
-_PER_AXIS = "per axis"
+#: What the CoP ellipses show (legend and caption wording).
+_PER_AXIS = PER_AXIS
+_COVARIANCE = COVARIANCE
 
 
 def _measured_keys(series: GroundReactionPlotSeries) -> list[tuple[str, str, str]]:
@@ -166,49 +172,47 @@ def cop_marker_indices(
     return usable[::stride]
 
 
-def _semi_axes(sigma: Mapping[str, list[float | None]], i: int) -> tuple[float, float]:
-    """Per-world-axis sigma at frame ``i``, else the worse axis on both."""
-    worse = sigma["z"][i]
-    assert worse is not None, "cop_marker_indices keeps only frames with a sigma"
-    sx, sy = sigma["x"][i], sigma["y"][i]
-    return (worse, worse) if sx is None or sy is None else (sx, sy)
-
-
 def _draw_cop_ellipses(
     ax: Axes, series: GroundReactionPlotSeries, key: str, style: tuple[str, str]
-) -> bool:
-    """Axis-aligned 1-sigma ellipses at sampled CoP points.
+) -> str | None:
+    """1-sigma ellipses at sampled CoP points; what they show, or ``None``.
 
-    The semi-axes are the per-world-axis sigmas (a circle of the worse-axis
-    sigma when a payload has only that).  False without a CoP sigma trace.
+    Each is the CoP covariance ellipse, tilted with the plate (``_COVARIANCE``),
+    or, for a payload without the covariance, an axis-aligned ellipse of the
+    per-axis sigmas or a circle of the worse axis (``_PER_AXIS``).  ``None``
+    without a CoP sigma trace.
     """
     label, color = style
     cop = series.traces.get(f"{key}_cop_m")
     sigma = series.traces.get(f"{key}_cop_sigma_m")
     if cop is None or sigma is None:
-        return False
+        return None
+    cov = series.traces.get(f"{key}_cop_cov_m2")
     rings = [
-        ((x, y), _semi_axes(sigma, i))
+        ((x, y), marker_ellipse(sigma, cov, i))
         for i in cop_marker_indices(cop["x"], sigma["z"], MAX_COP_MARKERS)
         if (x := cop["x"][i]) is not None and (y := cop["y"][i]) is not None
     ]
     if not rings:
-        return False
+        return None
+    every = all(marker.kind == _COVARIANCE for _, marker in rings)
+    kind = _COVARIANCE if every else _PER_AXIS
     # One legend entry per foot: only the first ellipse carries the label.
-    names = [f"{label} {SIGMA_BAND_SUFFIX} {_PER_AXIS}"] + ["_nolegend_"] * len(rings)
-    for (center, (sx, sy)), name in zip(rings, names, strict=False):
+    names = [f"{label} {SIGMA_BAND_SUFFIX} {kind}"] + ["_nolegend_"] * len(rings)
+    for (center, (semi_x, semi_y, angle, _)), name in zip(rings, names, strict=False):
         ax.add_patch(
             Ellipse(
                 center,
-                2.0 * sx,
-                2.0 * sy,
+                2.0 * semi_x,
+                2.0 * semi_y,
+                angle=angle,
                 facecolor=color,
                 edgecolor=color,
                 alpha=_BAND_ALPHA,
                 label=name,
             )
         )
-    return True
+    return kind
 
 
 def _draw_band(
@@ -245,13 +249,15 @@ def _draw_measured_load(
 
 def _draw_measured(
     axes: np.ndarray, series: GroundReactionPlotSeries, in_bw: bool
-) -> tuple[bool, bool]:
+) -> tuple[bool, str | None]:
     """Dashed measured load with its 1-sigma band (N panels only) and CoP path
     with its 1-sigma ellipses.
 
-    Returns whether any load band and any CoP ellipse was drawn.
+    Returns whether any load band was drawn and what the CoP ellipses show
+    (``_COVARIANCE`` only when every ringed foot carried one), or ``None``.
     """
-    banded = ringed = False
+    banded = False
+    kinds: set[str] = set()
     for key, label, color in _measured_keys(series):
         if not in_bw:
             banded = _draw_measured_load(axes[0], series, key, (label, color)) or banded
@@ -259,22 +265,25 @@ def _draw_measured(
         y = _component(series, f"{key}_cop_m", "y")
         if x is not None and y is not None:
             axes[3].plot(x, y, color=color, label=label, **_MEASURED_STYLE)
-            ringed = _draw_cop_ellipses(axes[3], series, key, (label, color)) or ringed
+            kind = _draw_cop_ellipses(axes[3], series, key, (label, color))
+            kinds.update([] if kind is None else [kind])
     for ax in (axes[0], axes[3]):
         if ax.get_legend_handles_labels()[0]:
             ax.legend(fontsize=7, loc="upper left")
-    return banded, ringed
+    if not kinds:
+        return banded, None
+    return banded, _COVARIANCE if kinds == {_COVARIANCE} else _PER_AXIS
 
 
 def _uncertainty_caption(
-    series: GroundReactionPlotSeries, banded: bool, ringed: bool
+    series: GroundReactionPlotSeries, banded: bool, ringed: str | None
 ) -> str | None:
     """What the band and ellipses show and where their uncertainty came from."""
     parts = []
     if banded:
         parts.append(f"shaded: measured load {SIGMA_BAND_SUFFIX}")
-    if ringed:
-        parts.append(f"ellipses: measured CoP {SIGMA_BAND_SUFFIX} {_PER_AXIS}")
+    if ringed is not None:
+        parts.append(f"ellipses: measured CoP {SIGMA_BAND_SUFFIX} {ringed}")
     if not parts:
         return None
     text = "; ".join(parts)

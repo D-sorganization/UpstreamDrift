@@ -18,9 +18,10 @@ from src.api.services.ground_reaction_service import compute_ground_reaction_plo
 from src.shared.python.biomechanics.ground_reaction_plot_model import (
     series_from_payload,
 )
-from src.shared.python.force_plates import PlateTimeAlignment, ReadingOptions
+from src.shared.python.force_plates import PlateTimeAlignment
 from src.shared.python.force_plates.open_fp_format.declared_import import (
     DeclaredPlate,
+    DeclaredReading,
     DeclaredStance,
 )
 from src.shared.python.force_plates.open_fp_format.overlay_file import (
@@ -114,6 +115,8 @@ def compute_ground_reaction_overlay(
         declared=DeclaredPlate(**request.declared.model_dump()).to_declarations(),
         placement=_stance(request).to_placement(frame_label="request"),
         alignment=alignment,
-        options=ReadingOptions(coverage=request.coverage),
+        options=DeclaredReading(**request.reading.model_dump()).to_options(
+            request.coverage
+        ),
     )
     return overlaid.to_dict()
