@@ -5,11 +5,15 @@ This module handles reading FreeMoCap's output files (CSV/numpy) and converting
 them to UpstreamDrift's internal landmark format for downstream processing.
 """
 
+from __future__ import annotations
+
 import csv
 import json
 import logging
+import math
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -124,8 +128,8 @@ class LandmarkSession:
 
     session_id: str
     frames: list[LandmarkFrame] = field(default_factory=list)
-    calibration: dict | None = None
-    metadata: dict = field(default_factory=dict)
+    calibration: dict[str, Any] | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_array(self) -> np.ndarray:
         """
@@ -191,7 +195,7 @@ class FreeMoCapOutputAdapter:
         """Find landmark CSV files in output directory (sorted for determinism)."""
         return sorted(self.output_dir.glob(self.LANDMARKS_CSV_PATTERN))
 
-    def _load_calibration(self) -> dict | None:
+    def _load_calibration(self) -> dict[str, Any] | None:
         """Load camera calibration data."""
         calib_file = self.output_dir / self.CALIBRATION_FILE
         if calib_file.exists():
@@ -199,13 +203,74 @@ class FreeMoCapOutputAdapter:
                 return json.load(f)
         return None
 
-    def _load_metadata(self) -> dict:
+    def _load_metadata(self) -> dict[str, Any]:
         """Load recording metadata."""
         meta_file = self.output_dir / self.METADATA_FILE
         if meta_file.exists():
             with open(meta_file) as f:
                 return json.load(f)
         return {}
+
+    @staticmethod
+    def _parse_landmark_header(
+        header: list[str],
+    ) -> tuple[dict[str, dict[str, int]], list[str]]:
+        """Parse header row to extract landmark coordinate column mappings and schema."""
+        landmark_data: dict[str, dict[str, int]] = {}
+        for i, col in enumerate(header[2:], start=2):
+            parts = col.rsplit("_", 1)
+            if len(parts) == 2:
+                name, coord = parts
+                if name not in landmark_data:
+                    landmark_data[name] = {}
+                landmark_data[name][coord] = i
+
+        schema: list[str] = [
+            name
+            for name, coords in landmark_data.items()
+            if {"x", "y", "z"} <= coords.keys()
+        ]
+        return landmark_data, schema
+
+    @staticmethod
+    def _parse_landmark_point(
+        row: list[str],
+        name: str,
+        coords: dict[str, int],
+        min_confidence: float,
+    ) -> LandmarkPoint:
+        """Parse a single landmark point from a CSV row."""
+        conf_idx = coords.get("conf")
+        try:
+            conf = (
+                float(row[conf_idx])
+                if conf_idx is not None and conf_idx < len(row)
+                else 1.0
+            )
+        except (ValueError, IndexError, TypeError):
+            conf = float("nan")
+
+        try:
+            if not math.isfinite(conf) or conf <= min_confidence:
+                raise ValueError("low or invalid confidence")
+            x = float(row[coords["x"]])
+            y = float(row[coords["y"]])
+            z = float(row[coords["z"]])
+            if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+                raise ValueError("non-finite coordinates")
+            visible = True
+        except (ValueError, IndexError, TypeError):
+            x = y = z = float("nan")
+            visible = False
+
+        return LandmarkPoint(
+            name=name,
+            x=x,
+            y=y,
+            z=z,
+            confidence=conf,
+            visible=visible,
+        )
 
     def _parse_landmark_csv(
         self,
@@ -228,37 +293,14 @@ class FreeMoCapOutputAdapter:
         Raises:
             ValueError: If timestamps are non-monotonic.
         """
-        frames = []
+        frames: list[LandmarkFrame] = []
         prev_timestamp: float | None = None
 
         with open(csv_path, newline="") as f:
             reader = csv.reader(f)
             header = next(reader)
+            landmark_data, schema = self._parse_landmark_header(header)
 
-            # Parse header to find landmark columns
-            # Format: frame_num, timestamp, nose_x, nose_y, nose_z, nose_conf, ...
-            landmark_data: dict[str, dict[str, int]] = {}
-            for i, col in enumerate(header[2:], start=2):
-                parts = col.rsplit("_", 1)
-                if len(parts) == 2:
-                    name, coord = parts
-                    if name not in landmark_data:
-                        landmark_data[name] = {}
-                    landmark_data[name][coord] = i
-
-            # Build a FIXED landmark schema from the header (#6639 F5): the set
-            # and order of landmarks is fixed once, so every frame emits the
-            # same number of points in the same column order. Missing or
-            # low-confidence cells become NaN coordinates rather than being
-            # dropped, which previously produced ragged frames and crashed
-            # ``to_array``/``np.stack`` or silently shifted every column.
-            schema: list[str] = [
-                name
-                for name, coords in landmark_data.items()
-                if {"x", "y", "z"} <= coords.keys()
-            ]
-
-            # Read data rows
             for row in reader:
                 if not row:
                     continue
@@ -274,44 +316,12 @@ class FreeMoCapOutputAdapter:
                     )
                 prev_timestamp = timestamp
 
-                points = []
-                for name in schema:
-                    coords = landmark_data[name]
-                    conf_idx = coords.get("conf")
-                    try:
-                        conf = (
-                            float(row[conf_idx])
-                            if conf_idx is not None and conf_idx < len(row)
-                            else 1.0
-                        )
-                    except (ValueError, IndexError, TypeError):
-                        conf = float("nan")
-
-                    # Drop coordinates that fail to parse, are NaN, or are low-confidence:
-                    # represent them as NaN so the row stays fixed-width.
-                    try:
-                        if not np.isfinite(conf) or conf <= min_confidence:
-                            raise ValueError("low or invalid confidence")
-                        x = float(row[coords["x"]])
-                        y = float(row[coords["y"]])
-                        z = float(row[coords["z"]])
-                        if not (np.isfinite(x) and np.isfinite(y) and np.isfinite(z)):
-                            raise ValueError("non-finite coordinates")
-                        visible = True
-                    except (ValueError, IndexError, TypeError):
-                        x = y = z = float("nan")
-                        visible = False
-
-                    points.append(
-                        LandmarkPoint(
-                            name=name,
-                            x=x,
-                            y=y,
-                            z=z,
-                            confidence=conf,
-                            visible=visible,
-                        )
+                points = [
+                    self._parse_landmark_point(
+                        row, name, landmark_data[name], min_confidence
                     )
+                    for name in schema
+                ]
 
                 frames.append(
                     LandmarkFrame(
