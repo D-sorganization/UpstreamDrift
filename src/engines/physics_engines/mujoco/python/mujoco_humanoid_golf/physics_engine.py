@@ -605,6 +605,14 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
         Section F Implementation: Uses MuJoCo's mj_forward with zero control
         to compute passive dynamics due to gravity and Coriolis/centrifugal forces.
 
+        Contact Handling:
+            Includes active constraint and contact forces (e.g., ground reaction
+            forces) resolved by MuJoCo's constraint solver under zero control
+            inputs (reads data.qacc after mj_forward with ctrl=0). On
+            unconstrained models without ground or active contacts, this
+            analytically equals the unconstrained rigid-body drift
+            -M(q)^-1 * (C(q,v)v + g(q)).
+
         Returns:
             q_ddot_drift: Drift acceleration vector (nv,) [rad/s² or m/s²]
         """
@@ -641,7 +649,9 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
 
         Legacy method - use compute_drift_acceleration() for Section F compliance.
 
-        Returns acceleration when tau = 0 (and no active control).
+        Returns acceleration when tau = 0 (and no active control). Includes
+        active contact and constraint forces from forward dynamics (mj_forward).
+        On models without active contacts/ground, this matches -M(q)^-1 * bias.
         """
         if self.model is None or self.data is None:
             return np.array([])
