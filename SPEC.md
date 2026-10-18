@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-18 | #13180 | HRG-E1: wrist lever angle renamed with NaN-plus-reason on missing markers; joint_stress requires signed, side-tagged WristDeviation |
+| 2026-10-18 | #13197 | NSX-43: tabbed Grip Wrench window with NSX plot-model tabs, preset selector and QThreadPool runner |
 | 2026-10-18 | #13194 | HRG-C3: pelvis frame re-expression (invariant) and documented HJC/COM/L5S1 relocation as a new spec revision |
 | 2026-10-18 | #13192 | HRG-C2: MAP hip joint centre estimator with covariance, status and stature prior (estimation only) |
 | 2026-10-18 | #13206 | Grip hand frame rolled -90 deg about the shaft so azimuth 0 is the top of the grip (HRG-A1) |
