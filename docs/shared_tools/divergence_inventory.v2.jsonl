@@ -1,4 +1,4 @@
-{"schema_version": 2, "tools_pin": "a45950518465b9c72e5693212eaca03c37b068aa", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
+{"schema_version": 2, "tools_pin": "0c585b393b456dc1e749681d768414e11ee33bae", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
 {"path": "README.md", "classification": "tools-only", "package": "README.md", "spelling_only": false}
 {"path": "README_PACKAGE.md", "classification": "ud-only", "package": "README_PACKAGE.md", "spelling_only": false}
 {"path": "__init__.py", "classification": "diverged", "package": "__init__.py", "spelling_only": false}
@@ -1081,6 +1081,7 @@
 {"path": "lifting/pack_audit/report.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/pack_audit/start_conformance.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/pack_audit/stills.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
+{"path": "lifting/phase_bar_paths.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "lifting/sagittal_retarget.py", "classification": "ud-only", "package": "lifting", "spelling_only": false}
 {"path": "logging_pkg/__init__.py", "classification": "tools-only", "package": "logging_pkg", "spelling_only": false}
 {"path": "logging_pkg/logger_utils.py", "classification": "tools-only", "package": "logging_pkg", "spelling_only": false}
