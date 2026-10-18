@@ -9,6 +9,7 @@ matrix leg to its own shard while still feeding ``quality-gate``.
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -113,7 +114,14 @@ def test_workflow_runs_each_matrix_leg_on_its_own_shard() -> None:
     )
 
 
-def _collected(*extra: str) -> set[str]:
+_COLLECT_DIR = "tests/helpers"
+
+
+def _collected_files(shard: str) -> set[str]:
+    """Return the test files a real ``--collect-only`` run assigns to *shard*."""
+    # Without UNIT_GATE_QUARANTINE the child does not arm the root conftest's
+    # hang watchdog, and it inherits nothing from the parent's xdist worker.
+    env = {k: v for k, v in os.environ.items() if k != "UNIT_GATE_QUARANTINE"}
     proc = subprocess.run(
         [
             sys.executable,
@@ -127,27 +135,35 @@ def _collected(*extra: str) -> set[str]:
             "no:cacheprovider",
             "-p",
             "scripts.ci.pytest_unit_gate_shard",
-            *extra,
-            "tests/helpers",
+            f"--unit-gate-shard={shard}",
+            _COLLECT_DIR,
         ],
         cwd=REPO_ROOT,
+        env=env,
         capture_output=True,
         text=True,
-        timeout=180,
+        timeout=150,
         check=False,
     )
     assert proc.returncode in (0, 5), proc.stdout + proc.stderr
-    return {line for line in proc.stdout.splitlines() if "::" in line}
+    return {line.split("::", 1)[0] for line in proc.stdout.splitlines() if "::" in line}
 
 
 @pytest.mark.unit
+# Two child pytest sessions each import the repository conftest; that is
+# legitimately slower than the 60 s per-test hang guard on a loaded runner.
+@pytest.mark.timeout(320)
 def test_real_collection_partitions_under_the_repository_conftest() -> None:
     # tests/conftest.py's own ignore hook returns False; the shard hook must
     # still win, or every leg would silently run the whole suite.
-    full = _collected()
-    first = _collected("--unit-gate-shard=1/2")
-    second = _collected("--unit-gate-shard=2/2")
-    assert full, "expected tests under tests/helpers"
-    assert first | second == full
+    every_file = {
+        path.relative_to(REPO_ROOT).as_posix()
+        for path in (REPO_ROOT / _COLLECT_DIR).glob("test_*.py")
+    }
+    first = _collected_files("1/2")
+    second = _collected_files("2/2")
+    assert first and second, f"{_COLLECT_DIR} should span both shards"
     assert not first & second
-    assert first and second, "tests/helpers should span both shards"
+    assert first | second == every_file
+    assert {shard_of(rel, 2) for rel in first} == {1}
+    assert {shard_of(rel, 2) for rel in second} == {2}
