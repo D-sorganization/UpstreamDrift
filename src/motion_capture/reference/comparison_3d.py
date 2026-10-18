@@ -17,11 +17,16 @@ import numpy as np
 import numpy.typing as npt
 from pydantic import BaseModel, ConfigDict, Field
 
+from src.motion_capture.reconstruct.skeleton import (
+    CANONICAL_JOINT_ALIASES,
+    canonicalize_joint_name,
+)
 from src.motion_capture.reference.fit_alignment import estimate_reference_transform
 from src.motion_capture.reference.registration import ReferenceTransform
 from src.shared.python.body_part_viz.fitters._kabsch import kabsch_rotation
 from src.shared.python.core.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
+
 
 logger = get_logger(__name__)
 
@@ -81,8 +86,8 @@ class L3ComparisonResult(BaseModel):
     phase_angle_errors_deg: Mapping[str, Mapping[str, float]] = Field(
         default_factory=dict
     )
-    kinematic_sequence_order_agreement: bool
-    kinematic_sequence_timing_error_phase: float
+    kinematic_sequence_order_agreement: bool | None = None
+    kinematic_sequence_timing_error_phase: float | None = None
     physical_clock: str = "unknown"
     velocity_metrics: Mapping[str, Any] | None = None
     evaluated_frames_count: int
@@ -271,6 +276,33 @@ def validate_laterality(
             )
 
 
+_BILATERAL_CANONICAL_PAIRS: tuple[tuple[str, str], ...] = (
+    ("left_shoulder", "right_shoulder"),
+    ("left_hip", "right_hip"),
+    ("left_elbow", "right_elbow"),
+    ("left_wrist", "right_wrist"),
+    ("left_knee", "right_knee"),
+    ("left_ankle", "right_ankle"),
+)
+
+
+def _resolve_canonical_indices(joint_names: Sequence[str]) -> dict[str, int]:
+    """Map canonical, aliased, and literal joint names to trajectory column indices."""
+    mapping: dict[str, int] = {}
+    for idx, name in enumerate(joint_names):
+        mapping[name] = idx
+        canon = canonicalize_joint_name(name)
+        if canon not in mapping:
+            mapping[canon] = idx
+        legacy = CANONICAL_JOINT_ALIASES.get(name)
+        if legacy and legacy not in mapping:
+            mapping[legacy] = idx
+        legacy_canon = CANONICAL_JOINT_ALIASES.get(canon)
+        if legacy_canon and legacy_canon not in mapping:
+            mapping[legacy_canon] = idx
+    return mapping
+
+
 def _compute_joint_summaries(
     pred: np.ndarray,
     ref: np.ndarray,
@@ -307,61 +339,152 @@ def _compute_kinematic_angles_and_sequence(
     pred: np.ndarray,
     ref: np.ndarray,
     joint_names: Sequence[str],
-) -> tuple[dict[str, float], dict[str, dict[str, float]], bool, float]:
+    event_frames: Mapping[str, int] | None = None,
+) -> tuple[dict[str, float], dict[str, dict[str, float]], bool | None, float | None]:
     """Compute biomechanical axial angles, X-factor, and kinematic sequence timing."""
     t_len = pred.shape[0]
     angle_errors_deg: dict[str, float] = {}
     phase_angles: dict[str, dict[str, float]] = {"P1": {}, "P4": {}, "P7": {}}
 
-    # If thorax and pelvis markers exist, compute axial rotation and X-factor
-    name_to_idx = {name: idx for idx, name in enumerate(joint_names)}
-    has_pelvis = "hip_left" in name_to_idx and "hip_right" in name_to_idx
-    has_thorax = "shoulder_left" in name_to_idx and "shoulder_right" in name_to_idx
+    name_to_idx = _resolve_canonical_indices(joint_names)
+    has_pelvis = "left_hip" in name_to_idx and "right_hip" in name_to_idx
+    has_thorax = "left_shoulder" in name_to_idx and "right_shoulder" in name_to_idx
 
-    p1_f, p4_f, p7_f = 0, int(0.4 * t_len), int(0.7 * t_len)
-    if has_pelvis and has_thorax:
-        hl, hr = name_to_idx["hip_left"], name_to_idx["hip_right"]
-        sl, sr = name_to_idx["shoulder_left"], name_to_idx["shoulder_right"]
-        pelvis_ref = np.arctan2(
-            ref[:, hr, 2] - ref[:, hl, 2], ref[:, hr, 0] - ref[:, hl, 0]
-        )
-        pelvis_pred = np.arctan2(
-            pred[:, hr, 2] - pred[:, hl, 2], pred[:, hr, 0] - pred[:, hl, 0]
-        )
-        thorax_ref = np.arctan2(
-            ref[:, sr, 2] - ref[:, sl, 2], ref[:, sr, 0] - ref[:, sl, 0]
-        )
-        thorax_pred = np.arctan2(
-            pred[:, sr, 2] - pred[:, sl, 2], pred[:, sr, 0] - pred[:, sl, 0]
-        )
+    # Event frames resolution
+    if event_frames is not None:
+        p1_f = int(event_frames.get("P1", event_frames.get("address", 0)))
+        p4_f = int(event_frames.get("P4", event_frames.get("top", int(0.4 * t_len))))
+        p7_f = int(event_frames.get("P7", event_frames.get("impact", int(0.7 * t_len))))
+    else:
+        p1_f, p4_f, p7_f = 0, int(0.4 * t_len), int(0.7 * t_len)
 
-        xfactor_ref = np.degrees(thorax_ref - pelvis_ref)
-        xfactor_pred = np.degrees(thorax_pred - pelvis_pred)
-        angle_errors_deg["pelvis_axial_rotation"] = float(
-            np.degrees(np.sqrt(np.mean((pelvis_pred - pelvis_ref) ** 2)))
-        )
-        angle_errors_deg["thorax_axial_rotation"] = float(
-            np.degrees(np.sqrt(np.mean((thorax_pred - thorax_ref) ** 2)))
-        )
-        angle_errors_deg["x_factor"] = float(
-            np.sqrt(np.mean((xfactor_pred - xfactor_ref) ** 2))
-        )
+    p1_f = max(0, min(p1_f, t_len - 1))
+    p4_f = max(0, min(p4_f, t_len - 1))
+    p7_f = max(0, min(p7_f, t_len - 1))
 
-        for key, f_idx in (("P1", p1_f), ("P4", p4_f), ("P7", p7_f)):
-            phase_angles[key] = {
-                "pelvis_deg": float(
-                    np.degrees(abs(pelvis_pred[f_idx] - pelvis_ref[f_idx]))
-                ),
-                "thorax_deg": float(
-                    np.degrees(abs(thorax_pred[f_idx] - thorax_ref[f_idx]))
-                ),
-                "x_factor_deg": float(abs(xfactor_pred[f_idx] - xfactor_ref[f_idx])),
-            }
+    if not (has_pelvis and has_thorax):
+        return angle_errors_deg, phase_angles, None, None
 
-    # Kinematic sequence timing
-    p_peaks = np.array([p1_f, p4_f, p7_f])
-    order_agree = True
-    timing_err_phase = 0.0
+    hl, hr = name_to_idx["left_hip"], name_to_idx["right_hip"]
+    sl, sr = name_to_idx["left_shoulder"], name_to_idx["right_shoulder"]
+    pelvis_ref = np.arctan2(
+        ref[:, hr, 2] - ref[:, hl, 2], ref[:, hr, 0] - ref[:, hl, 0]
+    )
+    pelvis_pred = np.arctan2(
+        pred[:, hr, 2] - pred[:, hl, 2], pred[:, hr, 0] - pred[:, hl, 0]
+    )
+    thorax_ref = np.arctan2(
+        ref[:, sr, 2] - ref[:, sl, 2], ref[:, sr, 0] - ref[:, sl, 0]
+    )
+    thorax_pred = np.arctan2(
+        pred[:, sr, 2] - pred[:, sl, 2], pred[:, sr, 0] - pred[:, sl, 0]
+    )
+
+    # Detect events from thorax rotation if event_frames was not provided
+    if event_frames is None and t_len >= 5:
+        unwrapped_t = np.unwrap(thorax_ref)
+        if float(np.ptp(unwrapped_t)) > np.radians(10.0):
+            top_cand = int(np.argmax(np.abs(unwrapped_t - unwrapped_t[0])))
+            if 0 < top_cand < t_len - 2:
+                p4_f = top_cand
+                p7_f = min(t_len - 1, p4_f + max(1, int(0.5 * (t_len - p4_f))))
+
+    xfactor_ref = np.degrees(thorax_ref - pelvis_ref)
+    xfactor_pred = np.degrees(thorax_pred - pelvis_pred)
+    angle_errors_deg["pelvis_axial_rotation"] = float(
+        np.degrees(np.sqrt(np.mean((pelvis_pred - pelvis_ref) ** 2)))
+    )
+    angle_errors_deg["thorax_axial_rotation"] = float(
+        np.degrees(np.sqrt(np.mean((thorax_pred - thorax_ref) ** 2)))
+    )
+    angle_errors_deg["x_factor"] = float(
+        np.sqrt(np.mean((xfactor_pred - xfactor_ref) ** 2))
+    )
+
+    for key, f_idx in (("P1", p1_f), ("P4", p4_f), ("P7", p7_f)):
+        phase_angles[key] = {
+            "pelvis_deg": float(
+                np.degrees(abs(pelvis_pred[f_idx] - pelvis_ref[f_idx]))
+            ),
+            "thorax_deg": float(
+                np.degrees(abs(thorax_pred[f_idx] - thorax_ref[f_idx]))
+            ),
+            "x_factor_deg": float(abs(xfactor_pred[f_idx] - xfactor_ref[f_idx])),
+        }
+
+    if t_len < 3:
+        return angle_errors_deg, phase_angles, None, None
+
+    # Kinematic sequence angular speeds
+    omega_pelvis_ref = np.abs(np.gradient(np.unwrap(pelvis_ref)))
+    omega_pelvis_pred = np.abs(np.gradient(np.unwrap(pelvis_pred)))
+    omega_thorax_ref = np.abs(np.gradient(np.unwrap(thorax_ref)))
+    omega_thorax_pred = np.abs(np.gradient(np.unwrap(thorax_pred)))
+
+    ref_dynamic = (float(np.ptp(omega_pelvis_ref)) > 1e-4) or (
+        float(np.ptp(omega_thorax_ref)) > 1e-4
+    )
+    pred_dynamic = (float(np.ptp(omega_pelvis_pred)) > 1e-4) or (
+        float(np.ptp(omega_thorax_pred)) > 1e-4
+    )
+    if not (ref_dynamic and pred_dynamic):
+        return angle_errors_deg, phase_angles, None, None
+
+    # Search window around downswing
+    w_start = min(p4_f, p7_f)
+    w_end = min(t_len, max(p4_f, p7_f) + max(1, int(0.15 * t_len)))
+    if w_end <= w_start:
+        w_start, w_end = 0, t_len
+    win = slice(w_start, w_end)
+
+    peak_p_ref = w_start + int(np.argmax(omega_pelvis_ref[win]))
+    peak_t_ref = w_start + int(np.argmax(omega_thorax_ref[win]))
+    peak_p_pred = w_start + int(np.argmax(omega_pelvis_pred[win]))
+    peak_t_pred = w_start + int(np.argmax(omega_thorax_pred[win]))
+
+    ref_segments: list[tuple[str, int]] = [
+        ("pelvis", peak_p_ref),
+        ("thorax", peak_t_ref),
+    ]
+    pred_segments: list[tuple[str, int]] = [
+        ("pelvis", peak_p_pred),
+        ("thorax", peak_t_pred),
+    ]
+
+    # Include lead arm if available
+    if "left_wrist" in name_to_idx and "left_shoulder" in name_to_idx:
+        wl, sl_idx = name_to_idx["left_wrist"], name_to_idx["left_shoulder"]
+        arm_ref = np.arctan2(
+            ref[:, wl, 2] - ref[:, sl_idx, 2], ref[:, wl, 0] - ref[:, sl_idx, 0]
+        )
+        arm_pred = np.arctan2(
+            pred[:, wl, 2] - pred[:, sl_idx, 2], pred[:, wl, 0] - pred[:, sl_idx, 0]
+        )
+        omega_arm_ref = np.abs(np.gradient(np.unwrap(arm_ref)))
+        omega_arm_pred = np.abs(np.gradient(np.unwrap(arm_pred)))
+        if float(np.ptp(omega_arm_ref)) > 1e-4 and float(np.ptp(omega_arm_pred)) > 1e-4:
+            ref_segments.append(
+                ("lead_arm", w_start + int(np.argmax(omega_arm_ref[win])))
+            )
+            pred_segments.append(
+                ("lead_arm", w_start + int(np.argmax(omega_arm_pred[win])))
+            )
+
+    order_ref = [name for name, _ in sorted(ref_segments, key=lambda s: s[1])]
+    order_pred = [name for name, _ in sorted(pred_segments, key=lambda s: s[1])]
+    order_agree = bool(order_pred == order_ref)
+
+    phase_span = float(max(1, abs(p7_f - p4_f)))
+    timing_err_phase = float(
+        np.mean(
+            [
+                abs(pf - rf)
+                for (_, pf), (_, rf) in zip(pred_segments, ref_segments, strict=True)
+            ]
+        )
+        / phase_span
+    )
+
     return angle_errors_deg, phase_angles, order_agree, timing_err_phase
 
 
@@ -375,6 +498,11 @@ def compute_l3_paired_comparison(
     video_swing_id: str = "video-swing",
     paired_capture_swing_id: str = "capture-O-swing",
     backend: str = "necromatcher",
+    camera: Any | None = None,
+    depth_axis: Sequence[float] | np.ndarray | None = None,
+    view: str | None = None,
+    event_frames: Mapping[str, int] | None = None,
+    require_laterality: bool = True,
 ) -> L3ComparisonResult:
     """Compute L3 paired comparison between video 3D fit and capture-O marker IK."""
     pred = np.asarray(predicted_trajectories, dtype=float)
@@ -385,32 +513,69 @@ def compute_l3_paired_comparison(
         f"joint_names ({len(joint_names)}) must match landmark dimension ({pred.shape[1]})",
     )
 
-    # Laterality validation if bilateral joints present
-    name_to_idx = {name: idx for idx, name in enumerate(joint_names)}
-    pairs = [("shoulder_left", "shoulder_right"), ("hip_left", "hip_right")]
-    l_idx = [
-        name_to_idx[l_name]
-        for l_name, r_name in pairs
-        if l_name in name_to_idx and r_name in name_to_idx
-    ]
-    r_idx = [
-        name_to_idx[r_name]
-        for l_name, r_name in pairs
-        if l_name in name_to_idx and r_name in name_to_idx
-    ]
+    # Laterality validation with canonical alias resolution
+    canonical_indices = _resolve_canonical_indices(joint_names)
+    l_idx: list[int] = []
+    r_idx: list[int] = []
+    for l_name, r_name in _BILATERAL_CANONICAL_PAIRS:
+        if l_name in canonical_indices and r_name in canonical_indices:
+            l_idx.append(canonical_indices[l_name])
+            r_idx.append(canonical_indices[r_name])
+
+    if require_laterality and not l_idx:
+        raise ValueError(
+            "Laterality check failed closed: no bilateral joint pairs found in joint_names "
+            f"to validate laterality ({joint_names})"
+        )
     if l_idx:
         validate_laterality(pred, ref, left_indices=l_idx, right_indices=r_idx)
 
     # Fixed-scale rigid alignment on address frame
     aligned_pred, _ = align_trajectories_rigid_fixed_scale(pred, ref)
 
-    depth_axis = np.array([0.0, 0.0, 1.0], dtype=float)
+    # Depth axis resolution following camera / view
+    if depth_axis is not None:
+        d_arr = np.asarray(depth_axis, dtype=float)
+        norm_d = float(np.linalg.norm(d_arr))
+        require(norm_d > 1e-8, "depth_axis cannot be zero")
+        resolved_depth_axis = d_arr / norm_d
+    elif camera is not None:
+        if hasattr(camera, "rotation_world_from_camera"):
+            r_wc = np.asarray(camera.rotation_world_from_camera, dtype=float)
+            d_arr = r_wc[:, 2]
+        elif hasattr(camera, "extrinsics") and hasattr(
+            camera.extrinsics, "rotation_world_from_camera"
+        ):
+            r_wc = np.asarray(camera.extrinsics.rotation_world_from_camera, dtype=float)
+            d_arr = r_wc[:, 2]
+        else:
+            raise ValueError(
+                f"Unable to extract optical axis from camera of type {type(camera)}"
+            )
+        norm_d = float(np.linalg.norm(d_arr))
+        require(norm_d > 1e-8, "camera optical axis cannot be zero")
+        resolved_depth_axis = d_arr / norm_d
+    elif view is not None:
+        v = view.strip().lower()
+        if v in ("dtl", "down_the_line"):
+            # ADR-0041: X is toward the target (down-the-line optical axis)
+            resolved_depth_axis = np.array([1.0, 0.0, 0.0], dtype=float)
+        elif v in ("face_on", "fo", "faceon"):
+            # ADR-0041: Z is lateral / golfer right (face-on optical axis)
+            resolved_depth_axis = np.array([0.0, 0.0, 1.0], dtype=float)
+        else:
+            resolved_depth_axis = np.array([0.0, 0.0, 1.0], dtype=float)
+    else:
+        resolved_depth_axis = np.array([0.0, 0.0, 1.0], dtype=float)
+
     overall_mpjpe, overall_pa, _, _ = compute_mpjpe_and_pa_mpjpe(aligned_pred, ref)
     summaries, depth_err, img_err = _compute_joint_summaries(
-        aligned_pred, ref, joint_names, depth_axis
+        aligned_pred, ref, joint_names, resolved_depth_axis
     )
     angles_deg, phase_angles, order_ok, time_err = (
-        _compute_kinematic_angles_and_sequence(aligned_pred, ref, joint_names)
+        _compute_kinematic_angles_and_sequence(
+            aligned_pred, ref, joint_names, event_frames=event_frames
+        )
     )
 
     # Velocity metrics emitted ONLY when physical_clock == "known"
