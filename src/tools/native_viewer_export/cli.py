@@ -23,7 +23,18 @@ from src.shared.python.model_appearance.appearance_selection import (
     AppearanceOverrides,
     resolve_appearance,
 )
-from src.shared.python.model_appearance.schema import GLOVE_CHOICES, document_from_dict
+from src.shared.python.model_appearance.schema import (
+    GLOVE_CHOICES,
+    document_from_dict,
+    document_to_dict,
+)
+from src.shared.python.motion_matching.execution.grip_selection import (
+    add_grip_arguments,
+    apply_visual_picks,
+    check_sidecar_grip,
+    overrides_from_args,
+    refuse_physical_in_sidecar,
+)
 from src.tools.native_viewer_export.core import (
     DEFAULT_SPEEDS,
     ENGINES,
@@ -205,6 +216,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--no-grid", action="store_true", help="skip the 2x2 clip")
     add_appearance_arguments(p)
+    add_grip_arguments(p, physical=True)
     return p
 
 
@@ -263,6 +275,8 @@ def load_appearance_document(path: Path) -> dict[str, Any]:
         raise ValueError(f"cannot read --appearance {path}: {exc}") from exc
     if not isinstance(data, dict):
         raise ValueError(f"--appearance {path} must hold a JSON object")
+    if "grip" in data:
+        check_sidecar_grip(data["grip"])  # a clear message before the schema's
     document_from_dict(data)  # validates (fail closed)
     return data
 
@@ -278,12 +292,15 @@ def build_appearance(args: argparse.Namespace) -> dict[str, Any] | None:
         bottom_color=args.bottom_color,
         glove=args.glove,
     )
-    if args.appearance is None and overrides.is_empty:
+    grip = overrides_from_args(args)
+    refuse_physical_in_sidecar(grip)  # never silently applied picture-only
+    if args.appearance is None and overrides.is_empty and not grip.has_visual:
         return None
     document = (
         None if args.appearance is None else load_appearance_document(args.appearance)
     )
-    return resolve_appearance(overrides, document)
+    resolved = resolve_appearance(overrides, document)
+    return document_to_dict(document_from_dict(apply_visual_picks(resolved, grip)))
 
 
 def parse_size(text: str) -> tuple[int, int]:

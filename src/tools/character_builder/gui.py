@@ -18,6 +18,11 @@ from src.shared.python.model_appearance.appearance_selection import rgb_to_hex
 from src.shared.python.model_appearance.schema import document_from_dict
 from src.shared.python.ui.hex_color_field import ColorPicker, HexColorField
 
+from src.shared.python.motion_matching.execution.grip_selection import (
+    GRIP_PRESET_CHOICES,
+    GRIP_STYLE_CHOICES,
+)
+
 from .core import PARAMETER_RANGES, CharacterBuilderModel
 
 logger = get_logger(__name__)
@@ -59,6 +64,24 @@ _COLOUR_FIELDS = (
     ("top_color", "Shirt Color"),
     ("bottom_color", "Trousers/Shorts Color"),
 )
+
+
+# (grip pick, label, min, max, step, decimals, (hand, field) of the resolved grip)
+_GRIP_SPINS = (
+    ("lead_shaft_rotation", "Lead Hand Rotation (deg, + Stronger)", -60, 60, 1, 1),
+    ("trail_shaft_rotation", "Trail Hand Rotation (deg, + Stronger)", -60, 60, 1, 1),
+    ("lead_palm_diagonal", "Lead Palm Diagonal (deg)", 5, 85, 1, 1),
+    ("trail_palm_diagonal", "Trail Palm Diagonal (deg)", 5, 85, 1, 1),
+    ("hand_spacing", "Hand Spacing (m)", 0.01, 0.2, 0.0025, 4),
+)
+_GRIP_VALUE = {
+    "lead_shaft_rotation": lambda g: g.lead.alpha_deg,
+    "trail_shaft_rotation": lambda g: g.trail.alpha_deg,
+    "lead_palm_diagonal": lambda g: g.lead.psi_deg,
+    "trail_palm_diagonal": lambda g: g.trail.psi_deg,
+    "hand_spacing": lambda g: g.hand_spacing_m,
+}
+_HAND_PICKS = tuple(_GRIP_VALUE)
 
 
 def _library_options(library: dict[str, Any], key: str) -> list[str]:
@@ -105,6 +128,16 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         form.addRow("Club", self.club_combo)
         layout.addLayout(form)
         layout.addWidget(self._build_appearance_group())
+        scroll = QtWidgets.QScrollArea()  # keeps the builder's minimum height
+        scroll.setWidgetResizable(True)
+        scroll.setMaximumHeight(240)
+        scroll.setMinimumHeight(0)
+        scroll.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Ignored,
+        )
+        scroll.setWidget(self._build_grip_group())
+        layout.addWidget(scroll, 1)
         self.summary = QtWidgets.QPlainTextEdit()
         self.summary.setReadOnly(True)
         layout.addWidget(self.summary, 1)
@@ -150,6 +183,103 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         for name, label in _COLOUR_FIELDS:
             form.addRow(label, self._build_colour_row(name))
         return group
+
+    def _build_grip_group(self) -> QtWidgets.QGroupBox:
+        """Grip presets and sliders; the summary above is the live preview."""
+        group = QtWidgets.QGroupBox("Grip")
+        form = QtWidgets.QFormLayout(group)
+        self.grip_preset_combo = QtWidgets.QComboBox()
+        self.grip_preset_combo.addItem("From the model", None)
+        for name in GRIP_PRESET_CHOICES:
+            self.grip_preset_combo.addItem(name.title(), name)
+        self.grip_preset_combo.currentIndexChanged.connect(self._on_grip_preset)
+        form.addRow("Grip Strength", self.grip_preset_combo)
+        self.grip_spins: dict[str, QtWidgets.QDoubleSpinBox] = {}
+        for name, label, low, high, step, decimals in _GRIP_SPINS:
+            spin = QtWidgets.QDoubleSpinBox()
+            spin.setRange(low, high)
+            spin.setSingleStep(step)
+            spin.setDecimals(decimals)
+            spin.setObjectName(f"grip_{name}")
+            spin.valueChanged.connect(lambda v, n=name: self._on_grip_pick(n, v))
+            self.grip_spins[name] = spin
+            form.addRow(label, spin)
+        self.grip_style_combo = QtWidgets.QComboBox()
+        self.grip_style_combo.addItem("From the model", None)
+        for name in GRIP_STYLE_CHOICES:
+            self.grip_style_combo.addItem(name, name)
+        self.grip_style_combo.currentIndexChanged.connect(self._on_grip_style)
+        form.addRow("Grip Style (Picture Only)", self.grip_style_combo)
+        self.grip_thumb_spin = QtWidgets.QDoubleSpinBox()
+        self.grip_thumb_spin.setRange(0.0, 45.0)
+        self.grip_thumb_spin.setObjectName("grip_grip_thumb_offset_deg")
+        self.grip_thumb_spin.setValue(10.0)
+        self.grip_thumb_spin.valueChanged.connect(
+            lambda v: self._on_grip_pick("grip_thumb_offset_deg", v)
+        )
+        form.addRow("Lead Thumb Offset (deg, Picture Only)", self.grip_thumb_spin)
+        reset = QtWidgets.QPushButton("Reset Grip")
+        reset.setObjectName("reset_grip")
+        reset.clicked.connect(lambda _c=False: self._on_grip_reset())
+        form.addRow(reset)
+        form.addRow(
+            QtWidgets.QLabel(
+                "Strength, palm diagonal and spacing change the physics: they make "
+                "a new model revision that needs a refit."
+            )
+        )
+        return group
+
+    def _sync_grip_spins(self) -> None:
+        """Show the resolved grip in the spin boxes without making picks."""
+        try:
+            grip = self.model.resolved_grip()
+        except ValueError as exc:
+            self.status.setText(str(exc))
+            return
+        if grip is None:
+            return
+        was, self._syncing = self._syncing, True
+        try:
+            for name, spin in self.grip_spins.items():
+                spin.setValue(_GRIP_VALUE[name](grip))
+        finally:
+            self._syncing = was
+
+    def _set_grip(self, name: str, value: float | str | None) -> bool:
+        try:
+            self.model.set_grip(name, value)
+        except ValueError as exc:
+            self.status.setText(str(exc))
+            return False
+        self._refresh()
+        return True
+
+    def _on_grip_preset(self, _index: int) -> None:
+        if self._syncing:
+            return
+        for name in _HAND_PICKS:  # a preset resets the hands it names
+            self.model.set_grip(name, None)
+        if self._set_grip("preset", self.grip_preset_combo.currentData()):
+            self._sync_grip_spins()
+
+    def _on_grip_pick(self, name: str, value: float) -> None:
+        if not self._syncing:
+            self._set_grip(name, value)
+
+    def _on_grip_style(self, _index: int) -> None:
+        if not self._syncing:
+            self._set_grip("grip_style", self.grip_style_combo.currentData())
+
+    def _on_grip_reset(self) -> None:
+        for name in self.model.grip_picks():
+            self.model.set_grip(name, None)
+        self._syncing = True
+        self.grip_preset_combo.setCurrentIndex(0)
+        self.grip_style_combo.setCurrentIndex(0)
+        self._syncing = False
+        self._sync_grip_spins()
+        self._refresh()
 
     def _current_colours(self) -> dict[str, str]:
         """Hex of the document's current skin, hair, shirt and trousers."""
@@ -229,6 +359,7 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         finally:
             self._syncing = False
         self._refresh()
+        self._sync_grip_spins()
 
     def _on_spin(self, name: str, value: float) -> None:
         self._on_edit(name, value)

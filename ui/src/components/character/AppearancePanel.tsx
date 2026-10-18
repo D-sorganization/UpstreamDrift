@@ -12,6 +12,8 @@ import {
   DEFAULT_SKIN_TONE,
 } from './appearanceDefaults.generated';
 import { DEFAULT_GLOVE, GLOVE_CHOICES, hexToRgb, type ColourPicks, type GloveChoice } from './appearanceDocument';
+import { GripControls } from './GripControls';
+import type { GripPicks } from './gripSelection';
 import {
   appearancePalette,
   rgbaToHex,
@@ -179,6 +181,7 @@ export function AppearancePanel({
   const [library, setLibrary] = useState<AppearanceLibrary | null>(null);
   const [libraryError, setLibraryError] = useState<string | null>(null);
   const [picks, setPicks] = useState<AppearancePicks | null>(null);
+  const [grip, setGrip] = useState<GripPicks>({});
 
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -277,6 +280,13 @@ export function AppearancePanel({
 
   const handleExport = useCallback(async () => {
     if (!picks) return;
+    // Only the picture-only grip picks go in the sidecar; physical ones never do.
+    const visualPicks = {
+      ...(grip.grip_style !== undefined && { grip_style: grip.grip_style }),
+      ...(grip.grip_thumb_offset_deg !== undefined && {
+        grip_thumb_offset_deg: grip.grip_thumb_offset_deg,
+      }),
+    };
     setExporting(true);
     setExportError(null);
     try {
@@ -285,7 +295,9 @@ export function AppearancePanel({
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(character ? { ...picks, character } : picks),
+          body: JSON.stringify(
+            character ? { ...picks, ...visualPicks, character } : { ...picks, ...visualPicks },
+          ),
         },
       );
       if (!response.ok) {
@@ -320,7 +332,7 @@ export function AppearancePanel({
     } finally {
       setExporting(false);
     }
-  }, [picks, character]);
+  }, [picks, grip, character]);
 
   if (libraryError) {
     return (
@@ -416,6 +428,8 @@ export function AppearancePanel({
         onChange={handleGroundChange}
         options={library.ground_materials}
       />
+
+      <GripControls picks={grip} onChange={setGrip} character={character} />
 
       <button
         type="button"
