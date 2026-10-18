@@ -137,6 +137,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             force_visualization=CapabilityLevel.FULL,
             inverse_dynamics=CapabilityLevel.FULL,
             drift_acceleration=CapabilityLevel.FULL,
+            forward_sim=CapabilityLevel.FULL,
             extra={"spatial_jacobian_order": "angular_linear"},
         )
 

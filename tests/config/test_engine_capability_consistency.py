@@ -49,6 +49,14 @@ ENGINE_SOURCES: dict[str, tuple[str, str]] = {
         "src.engines.physics_engines.jaxsim.jaxsim_backend",
         "JaxSimBackend",
     ),
+    "putting_green": (
+        "src.engines.physics_engines.putting_green.python.simulator",
+        "PuttingGreenSimulator",
+    ),
+    "double_pendulum": (
+        "src.engines.physics_engines.pendulum.python.pendulum_physics_engine",
+        "PendulumPhysicsEngine",
+    ),
 }
 
 

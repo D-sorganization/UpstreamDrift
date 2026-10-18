@@ -33,6 +33,14 @@ class SimulationInterface(Checkpointable, Protocol):
         """
         ...
 
+    @property
+    def is_initialized(self) -> bool:
+        """Check if engine is initialized (model loaded).
+
+        Default returns False for uninitialized or skeleton implementations.
+        """
+        return False
+
     @abstractmethod
     def load_from_path(self, path: str) -> None:
         """Load a model from a file path.
@@ -273,8 +281,14 @@ class SimulationInterface(Checkpointable, Protocol):
             EngineCapabilities,
         )
 
+        name = (
+            getattr(self, "engine_type", None)
+            or getattr(self, "ENGINE_NAME", None)
+            or getattr(self, "model_name", None)
+            or type(self).__name__
+        )
         return EngineCapabilities(
-            engine_name="unknown",
+            engine_name=str(name),
             mass_matrix=CapabilityLevel.NONE,
             jacobian=CapabilityLevel.NONE,
             contact_forces=CapabilityLevel.NONE,
