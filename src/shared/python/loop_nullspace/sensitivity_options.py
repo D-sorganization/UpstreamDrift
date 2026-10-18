@@ -27,7 +27,11 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.loop_nullspace.strategy_spec import StrategyId
+from src.shared.python.loop_nullspace.derivative_capability import (
+    DerivativeMethod,
+    default_registry,
+)
+from src.shared.python.loop_nullspace.strategy_spec import CATALOGUE, StrategyId
 from src.shared.python.loop_nullspace.variance_records import (
     Mechanism,
     declared_mechanisms,
@@ -44,6 +48,7 @@ __all__ = [
     "SensitivitySpec",
     "disturbance_dict",
     "disturbance_from_dict",
+    "option_catalogue",
 ]
 
 FACE_OUTCOME = "face_angle"
@@ -218,3 +223,67 @@ class SensitivitySpec:
             "strategy_set": [s.value for s in self.strategies],
             "outcome_priority": list(self.outcome_priority),
         }
+
+
+_MECHANISM_NOTES = {
+    Mechanism.SIGNAL_DEPENDENT_NOISE: (
+        "declared exactly when a disturbance carries a signal-dependent law"
+    ),
+}
+
+
+def _strategy_entry(strategy: StrategyId) -> dict[str, Any]:
+    entry = CATALOGUE[strategy]
+    reasons = [r.reason for r in entry.representations if r.reason]
+    return {
+        "id": strategy.value,
+        "name": entry.name,
+        "mechanism": entry.mechanism,
+        "availability": entry.availability.value,
+        "reason": "; ".join(dict.fromkeys(reasons)),
+    }
+
+
+def _engine_entries() -> list[dict[str, Any]]:
+    registry = default_registry()
+    out: list[dict[str, Any]] = []
+    for name in registry.engines():
+        decl = registry.declaration(name)
+        out.append(
+            {
+                "id": name,
+                "method": decl.method.value,
+                "available": decl.method is not DerivativeMethod.NONE,
+                "reason": decl.reason,
+            }
+        )
+    return out
+
+
+def option_catalogue() -> dict[str, Any]:
+    """Every value a sensitivity request may name, as JSON (NSX-100, #12729).
+
+    The PyQt6 and React controls list exactly these values and invent none.
+    ``outcomes`` is the outcome names this stage ranks by default; an engine
+    may produce others, which an ``outcome_priority`` can name only through the
+    API.  ``engines`` come from the derivative capability registry; an engine
+    that is not ``available`` carries the reason it is not.
+
+    Postcondition: the result is JSON-serialisable and deterministic.
+    """
+    return {
+        "stages": [{"id": s.value, "label": s.name} for s in InjectionStage],
+        "spectra": [{"id": s.value, "label": s.name} for s in Spectrum],
+        "mechanisms": [
+            {
+                "id": m.value,
+                "label": m.name,
+                "note": _MECHANISM_NOTES.get(m, ""),
+            }
+            for m in Mechanism
+        ],
+        "strategies": [_strategy_entry(s) for s in StrategyId],
+        "outcomes": [{"id": FACE_OUTCOME, "label": "face angle"}],
+        "default_outcome_priority": list(DEFAULT_OUTCOME_PRIORITY),
+        "engines": _engine_entries(),
+    }

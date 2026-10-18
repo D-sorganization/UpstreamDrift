@@ -45,6 +45,7 @@ from src.shared.python.loop_nullspace.facade import (
 from src.shared.python.loop_nullspace.plot_model_decisions import plot_model_payload
 from src.shared.python.loop_nullspace.sensitivity_options import (
     disturbance_from_dict,
+    option_catalogue,
 )
 
 logger = logging.getLogger(__name__)
@@ -67,6 +68,7 @@ __all__ = [
     "register_source",
     "registered_sources",
     "run",
+    "sensitivity_catalogue",
     "unregister_source",
     "validate",
 ]
@@ -323,6 +325,11 @@ def lookup(request: LoopNullspaceRequest) -> dict[str, Any] | None:
 def presets() -> list[dict[str, str]]:
     """The registry's presets as ``{"id", "label"}``, in registry order."""
     return [{"id": p.id, "label": p.label} for p in registry.load_registry().presets]
+
+
+def sensitivity_catalogue() -> dict[str, Any]:
+    """The allowed sensitivity options (``sensitivity_options.option_catalogue``)."""
+    return option_catalogue()
 
 
 def public_partial(
