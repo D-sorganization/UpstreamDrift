@@ -37,7 +37,14 @@ os.environ.setdefault(
 # ~/.config/UpstreamDrift/UpstreamDrift.conf). On Linux the native format
 # follows XDG_CONFIG_HOME, so redirect it before Qt is imported; the autouse
 # ``_isolate_qsettings`` fixture below covers other platforms.
-os.environ["XDG_CONFIG_HOME"] = _tempfile.mkdtemp(prefix="upstream_drift_test_xdg_")
+# conftest can be imported more than once per process (as ``conftest`` and
+# ``tests.conftest``); a sentinel keeps every import on the same root so modules
+# that cached the config dir at import time agree with later lookups.
+os.environ.setdefault(
+    "UPSTREAM_DRIFT_TEST_XDG_CONFIG_HOME",
+    _tempfile.mkdtemp(prefix="upstream_drift_test_xdg_"),
+)
+os.environ["XDG_CONFIG_HOME"] = os.environ["UPSTREAM_DRIFT_TEST_XDG_CONFIG_HOME"]
 # ---------------------------------------------------------------------------
 # Patch broken transitive imports before any test module is collected.
 # Other agents are refactoring src.shared.python.data_io and
