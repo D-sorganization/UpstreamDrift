@@ -378,12 +378,7 @@ class ZMPComputer(ContractChecker):
                 pass
 
         if self._prev_com_velocity is None or effective_dt is None:
-            self._prev_com_velocity = curr_v.copy()
-            if hasattr(self._engine, "get_time") and callable(self._engine.get_time):
-                try:
-                    self._prev_time = float(self._engine.get_time())
-                except (ValueError, TypeError, AttributeError):
-                    pass
+            self._record_velocity_history(curr_v)
             raise ValueError(
                 "Cannot estimate COM acceleration: finite-difference history "
                 "(previous velocity and dt) is unavailable. Provide com_acceleration "
@@ -391,13 +386,17 @@ class ZMPComputer(ContractChecker):
             )
 
         accel = (curr_v - self._prev_com_velocity) / effective_dt
-        self._prev_com_velocity = curr_v.copy()
+        self._record_velocity_history(curr_v)
+        return accel
+
+    def _record_velocity_history(self, velocity: NDArray[np.float64]) -> None:
+        """Update cached previous COM velocity and engine timestamp."""
+        self._prev_com_velocity = np.asarray(velocity, dtype=np.float64).copy()
         if hasattr(self._engine, "get_time") and callable(self._engine.get_time):
             try:
                 self._prev_time = float(self._engine.get_time())
             except (ValueError, TypeError, AttributeError):
                 pass
-        return accel
 
     def _estimate_mass(self, mass: float | None = None) -> float:
         """Estimate or validate total robot mass.
@@ -443,17 +442,10 @@ class ZMPComputer(ContractChecker):
 
         accel = np.asarray(com_acceleration, dtype=np.float64)
         if com_velocity is not None:
-            self._prev_com_velocity = np.asarray(
-                com_velocity, dtype=np.float64
-            ).copy()
+            self._record_velocity_history(com_velocity)
         elif self._is_humanoid:
             try:
-                self._prev_com_velocity = self._get_com_velocity().copy()
-            except (ValueError, TypeError, AttributeError):
-                pass
-        if hasattr(self._engine, "get_time") and callable(self._engine.get_time):
-            try:
-                self._prev_time = float(self._engine.get_time())
+                self._record_velocity_history(self._get_com_velocity())
             except (ValueError, TypeError, AttributeError):
                 pass
         return accel, False

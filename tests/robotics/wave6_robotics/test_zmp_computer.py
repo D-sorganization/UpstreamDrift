@@ -7,6 +7,8 @@ import pytest
 
 from src.robotics.locomotion.zmp_computer import ZMPComputer, ZMPResult
 
+pytestmark = pytest.mark.unit
+
 
 class FakeRC:
     def get_state(self):
