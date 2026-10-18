@@ -247,6 +247,7 @@ class GripSpec:
         """Visual :class:`GripPose` of this spec (V azimuth = 20 deg + alpha)."""
         return GripPose(
             style=self.style,
+            trigger_finger=self.trigger_finger,
             lead_below_butt_m=self.lead_below_butt_m,
             hand_spacing_m=self.hand_spacing_m,
             lead_v_azimuth_deg=NEUTRAL_V_AZIMUTH_DEG + self.lead.alpha_deg,

@@ -87,25 +87,21 @@ class Hand(str, Enum):
     TRAIL = "trail"
 
 
-_FINGER_LINKS: dict[GripStyle, tuple[str, ...]] = {
-    GripStyle.OVERLAP: ("trail_little_over_lead_index_middle_gap",),
-    GripStyle.INTERLOCK: ("trail_little_between_lead_index_middle",),
-    GripStyle.TEN_FINGER: (),
-}
-
-
 @dataclass(frozen=True)
 class HandPlacement:
     """One hand on the grip.
 
     ``thumb_offset_deg`` is the azimuth of the thumb away from the top-centre
     of the grip toward the trail side (zero for a thumb straight down the top).
+    ``roll_offset_deg`` is the visual roll angle away from nominal neutral
+    (20 deg V azimuth).
     """
 
     hand: Hand
     distance_below_butt_m: float
     v_azimuth_deg: float
     thumb_offset_deg: float
+    roll_offset_deg: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -120,12 +116,13 @@ class GripPose:
 
     Preconditions (checked in ``__post_init__``): finite values,
     ``lead_below_butt_m`` in [0, 0.1], ``hand_spacing_m`` in (0, 0.2],
-    ``lead_v_azimuth_deg`` in [0, 90], ``lead_thumb_offset_deg`` in [0, 45],
+    ``lead_v_azimuth_deg`` in [-40, 90], ``lead_thumb_offset_deg`` in [0, 45],
     ``style`` a :class:`GripStyle`.
     Postcondition: the trail hand is strictly below the lead hand on the grip.
     """
 
     style: GripStyle = GripStyle.OVERLAP
+    trigger_finger: bool = False
     lead_below_butt_m: float = LEAD_BELOW_BUTT_M
     hand_spacing_m: float = NATIVE_HAND_SPACING_M
     #: Lead "V" (thumb/index crease) between the chin (~10 deg) and the trail
@@ -147,12 +144,16 @@ class GripPose:
             isinstance(self.style, GripStyle),
             f"style must be a GripStyle, got {self.style!r}",
         )
+        if not isinstance(self.trigger_finger, bool):
+            raise TypeError(
+                f"trigger_finger must be a bool, got {self.trigger_finger!r}"
+            )
         require_fields_in_range(
             self,
             (
                 ("lead_below_butt_m", 0.0, 0.1),
                 ("hand_spacing_m", 0.0, 0.2),
-                ("lead_v_azimuth_deg", 0.0, 90.0),
+                ("lead_v_azimuth_deg", -40.0, 90.0),
                 ("trail_v_offset_deg", -30.0, 30.0),
                 ("lead_thumb_offset_deg", 0.0, 45.0),
                 ("palm_diagonal_deg", 0.0, 90.0),
@@ -223,11 +224,45 @@ class GripPose:
             azimuth, thumb = self.lead_v_azimuth_deg, self.lead_thumb_offset_deg
         else:
             azimuth, thumb = self.lead_v_azimuth_deg + self.trail_v_offset_deg, 0.0
-        return HandPlacement(hand, self.distance_below_butt_m(hand), azimuth, thumb)
+        roll = azimuth - 20.0
+        return HandPlacement(
+            hand, self.distance_below_butt_m(hand), azimuth, thumb, roll
+        )
+
+    @property
+    def grip_strength_deg(self) -> float:
+        """Lead-hand visual roll away from nominal neutral (20 deg V azimuth).
+
+        Positive is stronger (rolled toward the trail side), negative is weaker.
+        Absorbs #13166.
+        """
+        return self.lead_v_azimuth_deg - 20.0
+
+    def roll_offset_deg(self, hand: Hand) -> float:
+        """Visual roll angle of ``hand`` away from nominal neutral (20 deg V azimuth).
+
+        Lead hand roll is ``lead_v_azimuth_deg - 20.0``; trail hand roll is
+        ``(lead_v_azimuth_deg + trail_v_offset_deg) - 20.0``.
+        Absorbs #13166.
+        """
+        require(isinstance(hand, Hand), f"hand must be a Hand, got {hand!r}")
+        return self.placement(hand).v_azimuth_deg - 20.0
 
     def linked_fingers(self) -> tuple[str, ...]:
-        """The finger link between the hands, as a one-element tuple, or none."""
-        return _FINGER_LINKS[self.style]
+        """The finger link between the hands, as a tuple of pair names.
+
+        Delegates to :func:`~src.shared.python.grip_contact.contact_topology.contact_topology`
+        inter-hand finger contact pairs instead of duplicate string tags.
+        """
+        from src.shared.python.grip_contact.contact_topology import contact_topology
+        from src.shared.python.motion_matching.grip_contract import GripSpec
+
+        topo = contact_topology(
+            GripSpec(style=self.style, trigger_finger=self.trigger_finger)
+        )
+        return tuple(
+            p.name for p in topo.hand_hand_pairs() if p.name != "trail_palm_lead_thumb"
+        )
 
     def palm_target_sign(self, hand: Hand) -> float:
         """Sign on the target direction of the side ``hand``'s palm faces.

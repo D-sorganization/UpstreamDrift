@@ -75,11 +75,12 @@ def test_neutral_v_angles() -> None:
 def test_default_style_is_overlap_and_options_exist() -> None:
     assert DEFAULT_GRIP_POSE.style is GripStyle.OVERLAP
     assert {s.value for s in GripStyle} == {"overlap", "interlock", "ten_finger"}
-    assert DEFAULT_GRIP_POSE.linked_fingers() == (
-        "trail_little_over_lead_index_middle_gap",
-    )
+    assert DEFAULT_GRIP_POSE.linked_fingers() == ("overlap_little_finger_lead_index",)
     interlock = GripPose(style=GripStyle.INTERLOCK)
-    assert interlock.linked_fingers() == ("trail_little_between_lead_index_middle",)
+    assert interlock.linked_fingers() == (
+        "interlock_little_finger_lead_middle",
+        "interlock_lead_index_wrap",
+    )
     assert interlock.interlocked is True and DEFAULT_GRIP_POSE.interlocked is False
     ten = GripPose(style=GripStyle.TEN_FINGER)
     assert ten.linked_fingers() == ()
