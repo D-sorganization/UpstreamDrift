@@ -24,6 +24,7 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs
     add_glyphs_to_scene,
 )
 from src.shared.python.model_appearance import document_from_dict
+from src.shared.python.model_appearance.defaults import default_document_dict
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.tools.native_viewer_export.backends._ball import draw_job_ball
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
@@ -33,7 +34,7 @@ from src.tools.native_viewer_export.backends.myosuite_worker import make_camera
 #: reference pose, not the address pose, so it landed away from the face and
 #: duplicated the worker's ball (``draw_job_ball``, the single shared
 #: placement from ``native_viewer_export.ball``; #12955).
-APPEARANCE = {"schema_version": "appearance-v1", "ball": {"enabled": False}}
+APPEARANCE = {**default_document_dict(), "ball": {"enabled": False}}
 
 
 def build_scene_xml(spec_bytes: bytes) -> tuple[str, dict[str, Any]]:

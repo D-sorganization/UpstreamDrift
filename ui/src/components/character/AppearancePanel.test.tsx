@@ -6,7 +6,7 @@ import { rgbaToHex, type AppearanceLibrary } from './appearanceTypes';
 
 const LIBRARY: AppearanceLibrary = {
   schema_version: 'appearance-v1',
-  skin_tones: ['skin_light', 'skin_medium'],
+  skin_tones: ['skin_1', 'skin_2'],
   clothing: {
     golf_polo_shorts: {
       torso: 'polo_navy',
@@ -25,8 +25,8 @@ const LIBRARY: AppearanceLibrary = {
   headwear_default_material: { hair: 'hair_brown', cap: 'cap_navy' },
   ground_materials: ['turf', 'studio_floor'],
   materials: {
-    skin_light: { base_color: [0.93, 0.76, 0.66, 1.0], roughness: 0.55, metallic: 0 },
-    skin_medium: { base_color: [0.8, 0.6, 0.46, 1.0], roughness: 0.55, metallic: 0 },
+    skin_1: { base_color: [0.96, 0.85, 0.77, 1.0], roughness: 0.55, metallic: 0 },
+    skin_2: { base_color: [0.93, 0.76, 0.66, 1.0], roughness: 0.55, metallic: 0 },
     polo_navy: { base_color: [0.16, 0.27, 0.55, 1.0], roughness: 0.85, metallic: 0 },
     polo_white: { base_color: [0.93, 0.93, 0.92, 1.0], roughness: 0.85, metallic: 0 },
     shorts_khaki: { base_color: [0.78, 0.7, 0.52, 1.0], roughness: 0.9, metallic: 0 },
@@ -79,14 +79,14 @@ describe('AppearancePanel', () => {
   it('loads the library on mount and populates the selects', async () => {
     render(<AppearancePanel />);
 
-    expect(await screen.findByRole('option', { name: 'skin_light' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'skin_1' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'golf_polo_shorts' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'golf_polo_trousers' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'satin_steel' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'turf' })).toBeInTheDocument();
 
-    // Defaults mirror AppearanceDocument (schema.py), not the first option.
-    expect((screen.getByLabelText(/Skin Tone/i) as HTMLSelectElement).value).toBe('skin_medium');
+    // Defaults mirror the appearance defaults contract, not the first option.
+    expect((screen.getByLabelText(/Skin Tone/i) as HTMLSelectElement).value).toBe('skin_2');
     expect((screen.getByLabelText(/Clothing/i) as HTMLSelectElement).value).toBe('golf_polo_trousers');
     expect((screen.getByLabelText(/Headwear/i) as HTMLSelectElement).value).toBe('hair');
   });
@@ -95,7 +95,7 @@ describe('AppearancePanel', () => {
     const onPaletteChange = vi.fn();
     render(<AppearancePanel onPaletteChange={onPaletteChange} />);
 
-    await screen.findByRole('option', { name: 'skin_light' });
+    await screen.findByRole('option', { name: 'skin_1' });
 
     expect(onPaletteChange).toHaveBeenCalledWith(
       expect.objectContaining({ trunk: rgbaToHex(LIBRARY.materials.polo_white.base_color) }),
@@ -106,7 +106,7 @@ describe('AppearancePanel', () => {
     const onPaletteChange = vi.fn();
     render(<AppearancePanel onPaletteChange={onPaletteChange} />);
 
-    await screen.findByRole('option', { name: 'skin_light' });
+    await screen.findByRole('option', { name: 'skin_1' });
     onPaletteChange.mockClear();
 
     const clothingSelect = screen.getByLabelText(/Clothing/i) as HTMLSelectElement;
@@ -141,7 +141,7 @@ describe('AppearancePanel', () => {
     });
 
     render(<AppearancePanel />);
-    await screen.findByRole('option', { name: 'skin_light' });
+    await screen.findByRole('option', { name: 'skin_1' });
     // Unbound: no spec character, so no binding line and no `character` key.
     expect(screen.queryByTestId('appearance-spec-binding')).not.toBeInTheDocument();
 
@@ -150,7 +150,7 @@ describe('AppearancePanel', () => {
     });
 
     const expectedBody = JSON.stringify({
-      skin_tone: 'skin_medium',
+      skin_tone: 'skin_2',
       clothing: 'golf_polo_trousers',
       club_finish: 'satin_steel',
       headwear: 'hair',
@@ -200,7 +200,7 @@ describe('AppearancePanel', () => {
     });
 
     render(<AppearancePanel character={character} />);
-    await screen.findByRole('option', { name: 'skin_light' });
+    await screen.findByRole('option', { name: 'skin_1' });
 
     expect(screen.getByTestId('appearance-spec-binding')).toHaveTextContent(
       'Bound to the current spec character (preset: golfer_pro)',
@@ -211,7 +211,7 @@ describe('AppearancePanel', () => {
     });
 
     const expectedBody = JSON.stringify({
-      skin_tone: 'skin_medium',
+      skin_tone: 'skin_2',
       clothing: 'golf_polo_trousers',
       club_finish: 'satin_steel',
       headwear: 'hair',
@@ -245,7 +245,7 @@ describe('AppearancePanel', () => {
     });
 
     render(<AppearancePanel />);
-    await screen.findByRole('option', { name: 'skin_light' });
+    await screen.findByRole('option', { name: 'skin_1' });
 
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Export Appearance/i }));

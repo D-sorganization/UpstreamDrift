@@ -6,6 +6,12 @@ import {
   type CharacterSpecRequestBody,
 } from './characterSpecTypes';
 import {
+  DEFAULT_CLOTHING,
+  DEFAULT_CLUB_FINISH,
+  DEFAULT_HEADWEAR,
+  DEFAULT_SKIN_TONE,
+} from './appearanceDefaults.generated';
+import {
   appearancePalette,
   type AppearanceLibrary,
   type AppearancePalette,
@@ -74,10 +80,10 @@ function pickDefault(options: string[], preferred: string): string {
  * matches the document the desktop and engines use by default.
  */
 function defaultPicks(library: AppearanceLibrary): AppearancePicks {
-  const skin_tone = pickDefault(library.skin_tones, 'skin_medium');
-  const clothing = pickDefault(Object.keys(library.clothing), 'golf_polo_trousers');
-  const club_finish = pickDefault(library.club_finishes, 'satin_steel');
-  const headwear = pickDefault(library.headwear, 'hair');
+  const skin_tone = pickDefault(library.skin_tones, DEFAULT_SKIN_TONE);
+  const clothing = pickDefault(Object.keys(library.clothing), DEFAULT_CLOTHING);
+  const club_finish = pickDefault(library.club_finishes, DEFAULT_CLUB_FINISH);
+  const headwear = pickDefault(library.headwear, DEFAULT_HEADWEAR);
   const ground_material = pickDefault(library.ground_materials, 'turf');
   const headwear_material =
     headwear === 'none'

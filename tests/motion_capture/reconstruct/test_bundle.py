@@ -267,3 +267,88 @@ def test_bundle_converged_reflects_least_squares_status() -> None:
     )
     res = bundle_adjust(start, obs, length_prior_m=DEFAULT_LENGTHS_M, options=opts)
     assert res.converged is False
+
+
+def test_observations_from_views_mixed_fps_pairs_by_physical_time() -> None:
+    """Views at different fps associate by physical time and drop no frames (#13002)."""
+    layout = {"keypoint_names": ["nose", "neck"]}
+    frames_x = [
+        {
+            "time_s": i / 30.0,
+            "keypoints_px": [[100.0 * (i / 30.0), 200.0], [150.0, 250.0]],
+            "confidence": [0.9, 0.9],
+        }
+        for i in range(15)
+    ]
+    frames_y = [
+        {
+            "time_s": i / 60.0,
+            "keypoints_px": [[100.0 * (i / 60.0), 200.0], [150.0, 250.0]],
+            "confidence": [0.9, 0.9],
+        }
+        for i in range(30)
+    ]
+    payloads = {
+        "x": {
+            "view": "x",
+            "fps": 30.0,
+            "frames_total": 15,
+            "detector_layout": layout,
+            "frames": frames_x,
+        },
+        "y": {
+            "view": "y",
+            "fps": 60.0,
+            "frames_total": 30,
+            "detector_layout": layout,
+            "frames": frames_y,
+        },
+    }
+    obs = observations_from_views(payloads, ["x", "y"])
+    assert obs.pixels.shape[1] == 30
+    assert getattr(obs, "dropped_frames", 0) == 0
+    # In both views, slot t corresponds to the same physical time (t / 60.0)
+    # At t = 2 (t_s = 2/60 = 1/30 s), both views should have observations with matching px
+    np.testing.assert_allclose(obs.pixels[0, 2, 0], obs.pixels[1, 2, 0])
+    # At t = 1 (t_s = 1/60 s), view x has no frame (must be NaN, conf 0.0)
+    assert np.isnan(obs.pixels[0, 1]).all()
+    assert obs.confidence[0, 1].sum() == 0.0
+    # View y has a frame at t = 1
+    assert np.isfinite(obs.pixels[1, 1]).all()
+    # At t = 28 (t_s = 28/60 = 14/30 s), both views match
+    np.testing.assert_allclose(obs.pixels[0, 28, 0], obs.pixels[1, 28, 0])
+    # The last frame of y (t = 29) is preserved, not dropped
+    assert np.isfinite(obs.pixels[1, 29]).all()
+
+
+def test_observations_from_views_unequal_frame_counts_same_fps() -> None:
+    """Views with unequal total frames at same fps preserve all frames (#13002)."""
+    layout = {"keypoint_names": ["neck"]}
+    frames_a = [
+        {"time_s": i / 30.0, "keypoints_px": [[10.0, 20.0]], "confidence": [0.8]}
+        for i in range(10)
+    ]
+    frames_b = [
+        {"time_s": i / 30.0, "keypoints_px": [[10.0, 20.0]], "confidence": [0.8]}
+        for i in range(25)
+    ]
+    payloads = {
+        "a": {
+            "view": "a",
+            "fps": 30.0,
+            "frames_total": 10,
+            "detector_layout": layout,
+            "frames": frames_a,
+        },
+        "b": {
+            "view": "b",
+            "fps": 30.0,
+            "frames_total": 25,
+            "detector_layout": layout,
+            "frames": frames_b,
+        },
+    }
+    obs = observations_from_views(payloads, ["a", "b"])
+    assert obs.pixels.shape[1] == 25
+    assert getattr(obs, "dropped_frames", 0) == 0
+    assert np.isfinite(obs.pixels[1, 24]).all()

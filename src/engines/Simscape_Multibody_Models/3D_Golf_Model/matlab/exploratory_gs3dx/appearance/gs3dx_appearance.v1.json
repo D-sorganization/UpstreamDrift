@@ -4,10 +4,10 @@
     "spec": "docs/development/full_body_models/full_body_spec_anthro_driver.json",
     "appearance": "golf_default",
     "clothing": "golf_polo_trousers",
-    "skin_tone": "skin_medium"
+    "skin_tone": "skin_2"
   },
   "colours": {
-    "skin": [0.8, 0.6, 0.46],
+    "skin": [0.93, 0.76, 0.66],
     "top": [0.93, 0.93, 0.92],
     "pants": [0.3, 0.32, 0.35],
     "shoe": [0.06, 0.06, 0.07],
@@ -98,7 +98,7 @@
       "name": "L Forearm Upper",
       "parent": "Left Forearm/LUpperForearm",
       "role": "skin",
-      "rgb": [0.8, 0.6, 0.46],
+      "rgb": [0.93, 0.76, 0.66],
       "radii_m": [0.04212, 0.04212, 0.08],
       "offset_m": [0.0, 0.0, 0.0],
       "rotation_z_deg": 0.0,
@@ -108,7 +108,7 @@
       "name": "L Forearm Lower",
       "parent": "Left Forearm/LLowerForearm",
       "role": "skin",
-      "rgb": [0.8, 0.6, 0.46],
+      "rgb": [0.93, 0.76, 0.66],
       "radii_m": [0.03096, 0.03096, 0.08],
       "offset_m": [0.0, 0.0, 0.0],
       "rotation_z_deg": 0.0,
@@ -118,7 +118,7 @@
       "name": "R Forearm Upper",
       "parent": "Right Forearm/RUpperForearm",
       "role": "skin",
-      "rgb": [0.8, 0.6, 0.46],
+      "rgb": [0.93, 0.76, 0.66],
       "radii_m": [0.04212, 0.04212, 0.08],
       "offset_m": [0.0, 0.0, 0.0],
       "rotation_z_deg": 0.0,
@@ -128,7 +128,7 @@
       "name": "R Forearm Lower",
       "parent": "Right Forearm/RLowerForearm",
       "role": "skin",
-      "rgb": [0.8, 0.6, 0.46],
+      "rgb": [0.93, 0.76, 0.66],
       "radii_m": [0.03096, 0.03096, 0.08],
       "offset_m": [0.0, 0.0, 0.0],
       "rotation_z_deg": 0.0,
@@ -138,7 +138,7 @@
   "recolour": [
     {
       "block": "Hips and Torso Inputs/Head",
-      "rgb": [0.8, 0.6, 0.46],
+      "rgb": [0.93, 0.76, 0.66],
       "role": "skin"
     },
     {
@@ -175,7 +175,7 @@
   "neck": {
     "radius_m": 0.052,
     "below_c7_m": 0.05,
-    "rgb": [0.8, 0.6, 0.46]
+    "rgb": [0.93, 0.76, 0.66]
   },
   "shoe_rgb": [0.06, 0.06, 0.07]
 }
