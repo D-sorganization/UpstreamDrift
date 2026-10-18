@@ -2561,6 +2561,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13156 · Plate Import Forms (PyQt and Web) and the Plate-Overlay Route Declare Channel Timing Skew and the CoP Skew Relation (DeclaredReading); Only Independent Allows the CoP Covariance
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13156
+- **Branch:** merged via #13156
+- **PR:** #13156
+- **Paths:** see #13156
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`ef519eca`; collated from changes/13156-plate-import-forms-pyqt-and-web-and-the.md)
+- **Summary:** Plate import forms (PyQt and web) and the plate-overlay route declare channel timing skew and the CoP skew relation (DeclaredReading); only independent allows the CoP covariance
+- **Next step:** Shipped in PR #13156.
+
 ### DL-#13152 · Ground-Reaction Overlay Draws Measured CoP 1-Sigma Covariance Ellipses, Tilted With the Plate Yaw (Cop_Cov_Random_Xy_M2 = R_Xy Diag R_Xy^T)
 
 - **State:** shipped

@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-18 | #13156 | Plate import forms (PyQt and web) and the plate-overlay route declare channel timing skew and the CoP skew relation (DeclaredReading); only independent allows the CoP covariance |
 | 2026-10-18 | #13152 | Ground-reaction overlay draws measured CoP 1-sigma covariance ellipses, tilted with the plate yaw (cop_cov_random_xy_m2 = R_xy diag R_xy^T) |
 | 2026-10-18 | #13155 | Sanitize 400/403/404 error details in handle_api_errors to prevent path leaks |
 | 2026-10-18 | #13154 | NSX-42: framework-free NSX plot model and cross-UI golden |
