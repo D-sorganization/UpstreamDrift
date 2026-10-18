@@ -11,6 +11,7 @@ from scipy.spatial.transform import Rotation
 from src.shared.python.motion_matching import hip_centre_map as module
 from src.shared.python.motion_matching.hip_centre_map import (
     HipCentrePrior,
+    HipCentreOptions,
     estimate_hip_centres,
 )
 
@@ -100,7 +101,10 @@ def test_rigid_femur_lateral_marker_does_not_bias_the_centre() -> None:
     for _ in range(40):
         r, lk = _tracks(TRUTH, rng, frames=150, noise_sd_m=0.002)
         est = estimate_hip_centres(
-            r, lk, HipCentrePrior.from_stature(STATURE_M), use_prior=False
+            r,
+            lk,
+            HipCentrePrior.from_stature(STATURE_M),
+            HipCentreOptions(use_prior=False),
         )
         biases.append(
             [np.array(est.centre_r) - TRUTH["r"], np.array(est.centre_l) - TRUTH["l"]]
@@ -153,8 +157,7 @@ def test_interval_semantics_and_waist_residual_fields() -> None:
         r,
         lk,
         HipCentrePrior.from_stature(STATURE_M),
-        waist_residual_rms_m=0.01,
-        waist_residual_max_m=0.0278,
+        HipCentreOptions(waist_residual_rms_m=0.01, waist_residual_max_m=0.0278),
     )
     d = est.inter_hjc_m
     assert d.lo < d.estimate < d.hi
@@ -209,9 +212,11 @@ def test_rejects_bad_superior_axis_and_noise() -> None:
     r, lk = _tracks(TRUTH, rng, noise_sd_m=0.001)
     prior = HipCentrePrior.from_stature(STATURE_M)
     with pytest.raises(ValueError, match="superior"):
-        estimate_hip_centres(r, lk, prior, superior_axis=(0.0, 0.0, 0.0))
+        estimate_hip_centres(
+            r, lk, prior, HipCentreOptions(superior_axis=(0.0, 0.0, 0.0))
+        )
     with pytest.raises(ValueError, match="noise"):
-        estimate_hip_centres(r, lk, prior, noise_sd_m=-1.0)
+        estimate_hip_centres(r, lk, prior, HipCentreOptions(noise_sd_m=-1.0))
 
 
 def _coverage(trials: int, seed: int) -> dict[str, float]:
