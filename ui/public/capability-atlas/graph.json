@@ -379,6 +379,20 @@
       "id": "lifting.five_lift_viewing"
     },
     {
+      "feature_id": "loop_nullspace_exploration",
+      "title": "Closed-loop null-space exploration (NSX): invariants, envelopes, hand split and diagnostics tabs with a registry preset selector",
+      "status": "gap",
+      "pyqt": "src/tools/grip_wrench_plots/window.py",
+      "api": "src/api/routes/analysis_loop_nullspace.py",
+      "web": null,
+      "issue": 12576,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "NSX-43 (#12575; hosted by the grip_wrench_plots tile, which analysis.grip_wrench already claims): the Grip Wrench Plots window is tabbed (the grip view first, then Invariants, Envelopes, Hand Split and Diagnostics) and renders only the framework-free NSXPlotModel (src/tools/grip_wrench_plots/nsx_view.py derives each panel, nsx_draw.py draws it); every shown, withheld, band, segment class and reason is the model's display_decision outcome and unknown states withhold. The preset selector lists the NSX-11 registry presets, runs go through a QThreadPool worker over the NSX-40 service with progress and cancel, and tests render the shared golden tests/fixtures/loop_nullspace/goldens/plot_model_v1.json. The React panel over the same golden is NSX-44 (#12576); until it lands the web column is a gap.",
+      "id": "loop_nullspace_exploration"
+    },
+    {
       "feature_id": "mocap.breadth",
       "title": "Motion-capture breadth (C3D upload/playback, OpenPose source)",
       "status": "parity",
@@ -3234,7 +3248,7 @@
   "inputs": {
     "src/config/models.yaml": "64caf5311e4be2c75e742dc053b425a528f851638ca2773423fcc77d40b5d419",
     "src/config/launcher_manifest.json": "c9844ac6e0cd9c6cc867bda7cfd44edf1199ac85a07af5b9a83bec70a65d00bc",
-    "src/config/feature_parity.json": "ccd3ad6a651dcbe4eb169c743453093e742fa7f74d40d1d695045fb9b56ddb80",
+    "src/config/feature_parity.json": "629a0f8b554d0755562c0f5fd3e0cf1aca51cdac31539e579d4cc20b75315b12",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
