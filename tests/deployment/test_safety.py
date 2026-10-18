@@ -5,6 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 class TestSafetyLimits:
     """Tests for SafetyLimits."""
@@ -408,3 +410,195 @@ class TestIssue2477EStopPositionMode:
 
         assert safe.position_targets is not None
         np.testing.assert_array_almost_equal(safe.position_targets, targets)
+
+
+class TestSafetyMonitorNonFiniteAndShapes:
+    """Issue #12972: SafetyMonitor must reject NaN/inf inputs and validate array shapes."""
+
+    @staticmethod
+    def _make_monitor(n_joints: int = 3):
+        from src.deployment.realtime import RobotConfig
+        from src.deployment.safety import SafetyLimits, SafetyMonitor
+
+        config = RobotConfig(
+            name="test",
+            n_joints=n_joints,
+            velocity_limits=np.ones(n_joints) * 2.0,
+            torque_limits=np.ones(n_joints) * 50.0,
+        )
+        limits = SafetyLimits.from_config(config)
+        limits.joint_limits_lower = np.ones(n_joints) * -1.0
+        limits.joint_limits_upper = np.ones(n_joints) * 1.0
+        return SafetyMonitor(config, limits)
+
+    @staticmethod
+    def _make_state(
+        n_joints: int = 3,
+        pos: np.ndarray | None = None,
+        vel: np.ndarray | None = None,
+        tau: np.ndarray | None = None,
+    ):
+        from src.deployment.realtime import RobotState
+
+        return RobotState(
+            timestamp=0.0,
+            joint_positions=pos if pos is not None else np.zeros(n_joints),
+            joint_velocities=vel if vel is not None else np.zeros(n_joints),
+            joint_torques=tau if tau is not None else np.zeros(n_joints),
+        )
+
+    @pytest.mark.parametrize(
+        "field_name", ["joint_positions", "joint_velocities", "joint_torques"]
+    )
+    @pytest.mark.parametrize("bad_val", [np.nan, np.inf, -np.inf])
+    def test_check_state_rejects_nan_and_inf(
+        self, field_name: str, bad_val: float
+    ) -> None:
+        from src.deployment.safety import SafetyStatusLevel
+
+        monitor = self._make_monitor(3)
+        kwargs = {
+            "joint_positions": np.zeros(3),
+            "joint_velocities": np.zeros(3),
+            "joint_torques": np.zeros(3),
+        }
+        arr = np.zeros(3)
+        arr[1] = bad_val
+        kwargs[field_name] = arr
+
+        from src.deployment.realtime import RobotState
+
+        state = RobotState(timestamp=0.0, **kwargs)
+        status = monitor.check_state(state)
+
+        assert status.level == SafetyStatusLevel.ERROR
+        assert not status.is_safe
+        assert any(field_name in v for v in status.violations)
+
+    @pytest.mark.parametrize("wrong_len", [2, 4])
+    @pytest.mark.parametrize(
+        "field_name", ["joint_positions", "joint_velocities", "joint_torques"]
+    )
+    def test_check_state_rejects_wrong_shape_without_crash(
+        self, field_name: str, wrong_len: int
+    ) -> None:
+        from src.deployment.safety import SafetyStatusLevel
+        from src.deployment.realtime import RobotState
+
+        monitor = self._make_monitor(3)
+        kwargs = {
+            "joint_positions": np.zeros(3),
+            "joint_velocities": np.zeros(3),
+            "joint_torques": np.zeros(3),
+        }
+        kwargs[field_name] = np.zeros(wrong_len)
+        state = RobotState(timestamp=0.0, **kwargs)
+
+        status = monitor.check_state(state)
+        assert status.level == SafetyStatusLevel.ERROR
+        assert not status.is_safe
+        assert any(field_name in v for v in status.violations)
+
+    @pytest.mark.parametrize(
+        "field_name",
+        [
+            "position_targets",
+            "velocity_targets",
+            "torque_commands",
+            "feedforward_torque",
+        ],
+    )
+    @pytest.mark.parametrize("bad_val", [np.nan, np.inf, -np.inf])
+    def test_check_command_rejects_nan_and_inf(
+        self, field_name: str, bad_val: float
+    ) -> None:
+        from src.deployment.realtime import ControlCommand, ControlMode
+        from src.deployment.safety import SafetyStatusLevel
+
+        monitor = self._make_monitor(3)
+        kwargs = {
+            "position_targets": np.zeros(3),
+            "velocity_targets": np.zeros(3),
+            "torque_commands": np.zeros(3),
+            "feedforward_torque": np.zeros(3),
+        }
+        arr = np.zeros(3)
+        arr[0] = bad_val
+        kwargs[field_name] = arr
+
+        cmd = ControlCommand(timestamp=0.0, mode=ControlMode.POSITION, **kwargs)
+        status = monitor.check_command(cmd)
+
+        assert status.level == SafetyStatusLevel.ERROR
+        assert not status.is_safe
+        assert any(field_name in v for v in status.violations)
+
+    @pytest.mark.parametrize("wrong_len", [1, 5])
+    @pytest.mark.parametrize(
+        "field_name",
+        [
+            "position_targets",
+            "velocity_targets",
+            "torque_commands",
+            "feedforward_torque",
+        ],
+    )
+    def test_check_command_rejects_wrong_shape_without_crash(
+        self, field_name: str, wrong_len: int
+    ) -> None:
+        from src.deployment.realtime import ControlCommand, ControlMode
+        from src.deployment.safety import SafetyStatusLevel
+
+        monitor = self._make_monitor(3)
+        kwargs = {
+            "position_targets": np.zeros(3),
+            "velocity_targets": np.zeros(3),
+            "torque_commands": np.zeros(3),
+            "feedforward_torque": np.zeros(3),
+        }
+        kwargs[field_name] = np.zeros(wrong_len)
+
+        cmd = ControlCommand(timestamp=0.0, mode=ControlMode.POSITION, **kwargs)
+        status = monitor.check_command(cmd)
+
+        assert status.level == SafetyStatusLevel.ERROR
+        assert not status.is_safe
+        assert any(field_name in v for v in status.violations)
+
+    @pytest.mark.parametrize("bad_val", [np.nan, np.inf, -np.inf])
+    def test_compute_safe_command_sanitizes_nan_and_inf(self, bad_val: float) -> None:
+        from src.deployment.realtime import ControlCommand, ControlMode
+
+        monitor = self._make_monitor(3)
+        state = self._make_state(3, pos=np.array([0.2, -0.3, 0.5]))
+
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.POSITION,
+            position_targets=np.array([bad_val, 0.0, 0.0]),
+            velocity_targets=np.array([bad_val, 1.0, 0.0]),
+            torque_commands=np.array([bad_val, 0.0, -10.0]),
+            feedforward_torque=np.array([bad_val, 0.0, 0.0]),
+        )
+
+        safe = monitor.compute_safe_command(cmd, state)
+
+        # Output arrays must all be strictly finite
+        assert safe.position_targets is not None
+        assert safe.velocity_targets is not None
+        assert safe.torque_commands is not None
+        assert np.all(np.isfinite(safe.position_targets))
+        assert np.all(np.isfinite(safe.velocity_targets))
+        assert np.all(np.isfinite(safe.torque_commands))
+
+        # Finite positions must be held safely within joint limits
+        np.testing.assert_allclose(safe.position_targets, state.joint_positions)
+        # Velocities and torques must be zeroed for safety on invalid inputs
+        assert safe.velocity_targets[0] == 0.0
+        assert safe.torque_commands[0] == 0.0
+
+    @pytest.mark.parametrize("bad_val", [float("nan"), float("inf"), float("-inf")])
+    def test_set_speed_override_rejects_non_finite(self, bad_val: float) -> None:
+        monitor = self._make_monitor(3)
+        with pytest.raises(ValueError, match="finite"):
+            monitor.set_speed_override(bad_val)

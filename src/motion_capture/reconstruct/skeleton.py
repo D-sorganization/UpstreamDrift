@@ -38,6 +38,53 @@ JOINT_NAMES: tuple[str, ...] = (
     "right_knee",
     "right_ankle",
 )
+
+# Bidirectional / normalizing alias mapping between reconstruct JOINT_NAMES and legacy / detector names
+CANONICAL_JOINT_ALIASES: dict[str, str] = {
+    # Legacy / anatomical suffix -> Canonical prefix
+    "shoulder_left": "left_shoulder",
+    "shoulder_right": "right_shoulder",
+    "elbow_left": "left_elbow",
+    "elbow_right": "right_elbow",
+    "wrist_left": "left_wrist",
+    "wrist_right": "right_wrist",
+    "hip_left": "left_hip",
+    "hip_right": "right_hip",
+    "knee_left": "left_knee",
+    "knee_right": "right_knee",
+    "ankle_left": "left_ankle",
+    "ankle_right": "right_ankle",
+    "pelvis": "mid_hip",
+    "thorax": "neck",
+    "chest": "neck",
+    # Canonical prefix -> Legacy suffix
+    "left_shoulder": "shoulder_left",
+    "right_shoulder": "shoulder_right",
+    "left_elbow": "elbow_left",
+    "right_elbow": "elbow_right",
+    "left_wrist": "wrist_left",
+    "right_wrist": "wrist_right",
+    "left_hip": "hip_left",
+    "right_hip": "hip_right",
+    "left_knee": "knee_left",
+    "right_knee": "knee_right",
+    "left_ankle": "ankle_left",
+    "right_ankle": "ankle_right",
+    "mid_hip": "pelvis",
+    "neck": "thorax",
+}
+
+
+def canonicalize_joint_name(name: str) -> str:
+    """Normalize a joint name to the reconstruct JOINT_NAMES canonical naming convention."""
+    if name in JOINT_NAMES:
+        return name
+    alias = CANONICAL_JOINT_ALIASES.get(name)
+    if alias in JOINT_NAMES:
+        return alias
+    return name
+
+
 PARENTS: dict[str, str | None] = {
     "mid_hip": None,
     "neck": "mid_hip",

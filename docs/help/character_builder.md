@@ -105,12 +105,26 @@ stamps the compiled spec's hash onto the appearance document as
 An appearance document (schema version `appearance-v1`,
 `src/shared/python/model_appearance/schema.py`,
 `appearance_v1.schema.json`) is the purely visual counterpart to a physics
-spec: skin tone (`skin_light`, `skin_medium`, `skin_tan`, `skin_dark`),
+spec: skin tone (the swatches `skin_1` to `skin_8`, light to dark; default `skin_2`.
+The older names `skin_light`, `skin_medium`, `skin_tan` and `skin_dark` remain
+as aliases of `skin_2`, `skin_4`, `skin_6` and `skin_8`),
 a clothing preset (`none`, `golf_polo_shorts`, `golf_polo_trousers` —
 each maps an anatomical part such as `torso` or `thigh` to a material; an
 unmapped part shows skin), a club finish (`satin_steel`, `chrome`,
 `graphite`, `black_pvd`), headwear (`none`, `hair`, `cap`, defaulting to
-`hair_brown` or `cap_navy`) and a ground material (`turf`, `studio_floor`).
+`hair_brown` (mid brown) or `cap_navy`; the hair palette is `hair_black`,
+`hair_dark_brown`, `hair_brown`, `hair_light_brown`, `hair_auburn`,
+`hair_blond` and `hair_grey`) and a ground material (`turf`, `studio_floor`).
+The default golfer (light skin, mid brown hair, polo and charcoal trousers)
+and both palettes live in one contract, `src/config/appearance_defaults.json`,
+read by `model_appearance/defaults.py`; the web UI reads a generated module
+(`python3 -m scripts.generate_appearance_defaults_ts`, kept fresh by a test).
+
+**Colour space.** Every colour is authored as non-linear sRGB (0 to 1). MuJoCo
+`rgba` takes the values directly; three.js converts sRGB to linear through its
+own colour management, and the UI passes hex strings unchanged. No global
+linearisation is applied anywhere.
+
 Named materials (`library.py`) are metallic-roughness PBR definitions
 (base colour, roughness, metallic, optional texture); an unknown name
 fails closed with `ValueError`.
