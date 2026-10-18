@@ -5,7 +5,7 @@
   "bundle_steps": 200,
   "dt_s": 0.001,
   "reference": "window_bar_path_m (MuJoCo, recorded at bundle generation)",
-  "source_commit": "858f4c03ed48dd8293d6831b1eb1661c8ee07b7f",
+  "source_commit": "33abf79c74fdbae407242d61ec81d19de7cb5bcb",
   "generator": "scripts/measure_lift_bar_path_parity.py",
   "engines": {
     "mujoco": {
@@ -27,7 +27,7 @@
           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         ]
       },
-      "wall_time_s": 109.3
+      "wall_time_s": 69.9
     },
     "drake": {
       "engine": "drake",
@@ -51,7 +51,7 @@
           5.67774993687209e-15
         ]
       },
-      "wall_time_s": 68.9
+      "wall_time_s": 42.0
     },
     "pinocchio": {
       "engine": "pinocchio",
@@ -75,7 +75,7 @@
           2.6038199374411874e-15
         ]
       },
-      "wall_time_s": 50.9
+      "wall_time_s": 30.5
     },
     "opensim": {
       "engine": "opensim",
@@ -99,7 +99,7 @@
           2.1547433975976915e-15
         ]
       },
-      "wall_time_s": 111.9
+      "wall_time_s": 72.8
     }
   }
 }

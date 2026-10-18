@@ -7,9 +7,7 @@ loop and places the bar (``Grip`` frame) with its own forward kinematics.
 * CI replay of the first :data:`CI_STEPS` steps: 1e-9 m on the bar path.
 * Full 200-step window and 20-step re-anchored segments (committed record,
   ``scripts/measure_lift_bar_path_parity.py --lift ...``): epic #11605
-  level-L2 frame bound (1e-3 m) and coordinate bound (1e-6 rad).  Where a
-  coordinate bound is not met the test is a strict xfail with the measured
-  numbers.
+  level-L2 frame bound (1e-3 m) and coordinate bound (1e-6 rad).
 """
 
 from __future__ import annotations
@@ -39,22 +37,12 @@ _ENGINE_MODULE = {
     "pinocchio": "pinocchio",
     "opensim": "opensim",
 }
-_DEADLIFT_COORDINATES = pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "Measured deadlift window (whole-row de Leva lift body, #13037): the "
-        "120-140 ms re-anchored segment ends 4.4e-5 (Drake), 4.5e-5 "
-        "(Pinocchio) and 6.3e-6 rad (OpenSim) from MuJoCo, and the full 0.2 s "
-        "window 9.5e-5, 9.9e-5 and 4.6e-5 rad (worst final coordinate "
-        "subtalar_angle_r; subtalar_angle_l in OpenSim), above the 1e-6 rad "
-        "L2 coordinate bound; the other "
-        "nine segments stay within 8.2e-13 rad and the bar within 2.9e-8 m.  "
-        "Same foot-contact signature as the back squat; tracked on #11745, "
-        "the bound is not loosened."
-    ),
-)
+# The deadlift was a strict xfail here while its window ran at the default
+# eight RK4 substeps outside the real stability region (|z| = 4.24; full
+# window 9.9e-5 rad on subtalar).  At the 16 substeps its recorded rate needs
+# (#13041, |z| = 2.49) every engine replays it within 1.7e-13 rad.
 PULL_COORDINATE_CASES = [
-    pytest.param("deadlift", marks=_DEADLIFT_COORDINATES),
+    "deadlift",
     "clean_and_jerk",
     "bench_press",
 ]
