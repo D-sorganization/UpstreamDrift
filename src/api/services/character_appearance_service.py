@@ -21,6 +21,7 @@ from src.shared.python.model_appearance.appearance_selection import (
     hex_to_rgb,
 )
 from src.shared.python.model_appearance.schema import (
+    GLOVE_CHOICES,
     HEADWEAR,
     SCHEMA_VERSION,
     AppearanceDocument,
@@ -66,6 +67,7 @@ def appearance_library() -> dict[str, Any]:
         "skin_tones": list(library.SKIN_TONES),
         "clothing": {preset: dict(parts) for preset, parts in library.CLOTHING.items()},
         "club_finishes": list(library.CLUB_FINISHES),
+        "glove": list(GLOVE_CHOICES),
         "headwear": list(HEADWEAR),
         "headwear_default_material": dict(library.HEADWEAR_DEFAULT_MATERIAL),
         "ground_materials": list(GROUND_MATERIALS),
@@ -119,7 +121,8 @@ def build_appearance(
     ``choices`` may set ``skin_tone``, ``clothing``, ``club_finish``,
     ``headwear``, ``headwear_material``, ``ground_material`` and ``name``,
     plus the custom ``#rrggbb`` colours ``skin_color``, ``hair_color``,
-    ``top_color`` and ``bottom_color`` (written as document ``materials``);
+    ``top_color`` and ``bottom_color`` (written as document ``materials``) and
+    the ``glove`` option (``none``, ``lead``, ``trail`` or ``both``);
     absent or ``None`` entries keep the ``AppearanceDocument`` default.
     ``spec_sha256``, when given, binds the appearance sidecar to the compiled
     physics spec it was picked for.
@@ -161,6 +164,8 @@ def build_appearance(
     for choice in COLOUR_CHOICES:
         if choices.get(choice) is not None:
             hex_to_rgb(choices[choice])  # ValueError unless #rrggbb
+    if choices.get("glove") is not None:  # HRG-G1: an option, not a colour
+        colours["glove"] = choices["glove"]
     if colours:
         data = apply_overrides(data, AppearanceOverrides(**colours))
     return data

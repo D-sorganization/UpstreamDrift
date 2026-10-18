@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel, Field
@@ -40,6 +40,7 @@ _CHOICE_FIELDS = (
     "hair_color",
     "top_color",
     "bottom_color",
+    "glove",
     "name",
 )
 
@@ -77,6 +78,10 @@ class CharacterAppearanceRequest(BaseModel):
     )
     bottom_color: str | None = Field(
         None, pattern=_HEX_PATTERN, description="Custom trousers/shorts colour #rrggbb"
+    )
+    glove: Literal["none", "lead", "trail", "both"] | None = Field(
+        None,
+        description="Golf glove by role; the lead hand is the left of a right-hander",
     )
     # The name becomes the export filename stem, so it is restricted to a
     # header- and path-safe identifier.

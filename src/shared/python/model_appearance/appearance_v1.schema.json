@@ -101,6 +101,8 @@
     "skin_tone": { "$ref": "#/$defs/name" },
     "clothing": { "$ref": "#/$defs/name" },
     "club_finish": { "$ref": "#/$defs/name" },
+    "glove": { "enum": ["none", "lead", "trail", "both"] },
+    "handedness": { "enum": ["right", "left"] },
     "materials": {
       "type": "object",
       "propertyNames": { "$ref": "#/$defs/name" },

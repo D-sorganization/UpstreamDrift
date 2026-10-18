@@ -156,6 +156,7 @@ describe('AppearancePanel', () => {
       headwear: 'hair',
       headwear_material: 'hair_brown',
       ground_material: 'turf',
+      glove: 'none',
     });
 
     await waitFor(() =>
@@ -217,6 +218,7 @@ describe('AppearancePanel', () => {
       headwear: 'hair',
       headwear_material: 'hair_brown',
       ground_material: 'turf',
+      glove: 'none',
       character,
     });
 
@@ -321,6 +323,20 @@ describe('AppearancePanel', () => {
       const body = JSON.parse(call![1].body as string);
       expect(body.hair_color).toBe('#336699');
       expect(body).not.toHaveProperty('skin_color');
+    });
+
+    it('defaults to no glove and sends the chosen glove on export (HRG-G1)', async () => {
+      exportStub();
+      render(<AppearancePanel />);
+      await screen.findByRole('option', { name: 'skin_1' });
+      const select = screen.getByLabelText('Glove') as HTMLSelectElement;
+      expect(select.value).toBe('none');
+      fireEvent.change(select, { target: { value: 'lead' } });
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: /Export Appearance/i }));
+      });
+      const call = mockFetch.mock.calls.find(([u]) => String(u).includes('/export'));
+      expect(JSON.parse(call![1].body as string).glove).toBe('lead');
     });
 
     it('disables the hair colour (and drops it) when headwear is not hair', async () => {

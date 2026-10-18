@@ -34,6 +34,7 @@ from typing import Any
 from src.shared.python.model_appearance import library
 from src.shared.python.model_appearance.defaults import default_document_dict
 from src.shared.python.model_appearance.schema import (
+    GLOVE_CHOICES,
     Material,
     document_from_dict,
     document_to_dict,
@@ -77,7 +78,9 @@ class AppearanceOverrides:
     """Explicit appearance choices; ``None`` leaves a field to lower layers.
 
     ``skin_tone`` and ``hair`` take a library id or a ``#rrggbb`` colour;
-    ``clothing`` is a preset id; ``top_color`` / ``bottom_color`` are hex.
+    ``clothing`` is a preset id; ``top_color`` / ``bottom_color`` are hex;
+    ``glove`` is ``none``, ``lead``, ``trail`` or ``both`` (golf roles; the
+    document's ``handedness`` maps them to a side).
     """
 
     skin_tone: str | None = None
@@ -85,6 +88,7 @@ class AppearanceOverrides:
     clothing: str | None = None
     top_color: str | None = None
     bottom_color: str | None = None
+    glove: str | None = None  # none | lead | trail | both (HRG-G1, #13186)
 
     def __post_init__(self) -> None:
         for name in ("top_color", "bottom_color"):
@@ -164,6 +168,12 @@ def apply_overrides(
             raise ValueError(f"unknown clothing preset: {overrides.clothing!r}")
         doc["clothing"] = overrides.clothing
     doc.setdefault("clothing", default_document_dict()["clothing"])
+    if overrides.glove is not None:
+        if overrides.glove not in GLOVE_CHOICES:
+            raise ValueError(
+                f"glove must be one of {GLOVE_CHOICES}, got {overrides.glove!r}"
+            )
+        doc["glove"] = overrides.glove
     if overrides.skin_tone is not None:
         _set_skin(doc, overrides.skin_tone)
     if overrides.hair is not None:

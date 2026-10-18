@@ -301,3 +301,14 @@ converters, library) and `src/shared/python/humanoid_character_builder`
 - [Character presets reference](../user_guide/character_presets.md)
 - [Engine Selection](engine_selection.md)
 - [Project Map](../architecture/PROJECT_MAP.md)
+
+### Hands and Golf Glove
+
+The grip hands are bare and take the skin colour by default (HRG-G1, #13186), so
+a custom skin colour colours the hands too. The **Glove** control (desktop combo,
+web select, `--glove` on the export CLI) puts the white golf glove on `none`,
+`lead`, `trail` or `both` grip hands. The choice is by golf role: the lead hand is
+the left hand of a right-handed golfer. The document's `handedness` field
+(`right` by default) maps role to side; the compiled spec has no handedness. A
+document saved before this option existed has no `glove` field and shows bare
+hands.
