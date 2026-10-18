@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import json
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -170,7 +171,9 @@ def test_binding_ids_equal_active_constraints_from_the_duals(report) -> None:
             )
             support_rows, support_hyps = set(), set()
             for sign in (+1.0, -1.0):
-                res = solve_lp(sign * dec.N[j], None, None, a_ub, b_ub, [(None, None)] * fs.n_z)
+                res = solve_lp(
+                    sign * dec.N[j], None, None, a_ub, b_ub, [(None, None)] * fs.n_z
+                )
                 duals = np.abs(np.asarray(res.row_dual, dtype=float))
                 for r, d in zip(fs.rows, duals, strict=True):
                     if d > 1e-9:
@@ -240,7 +243,9 @@ def test_infeasible_frames_are_listed_not_segmented(report, decisions) -> None:
     band = model.envelopes.bands[0]
     frame = band.frame_indices[1]
     assert frame in band.infeasible_frame_indices
-    assert all(not (s.first_frame_index <= frame <= s.last_frame_index) for s in band.segments)
+    assert all(
+        not (s.first_frame_index <= frame <= s.last_frame_index) for s in band.segments
+    )
     assert model.envelopes.frames[1].feasible is False
 
 
@@ -270,11 +275,15 @@ def test_every_shown_item_has_a_shown_decision(report, decisions) -> None:
         assert band["decision"]["action"] in shown_actions
     for series in model["invariants"]["series"]:
         for f in series["frames"]:
-            assert f["shown"] == (f["decision"]["action"] == "SHOW_VALUE" and bool(f["values"]))
+            assert f["shown"] == (
+                f["decision"]["action"] == "SHOW_VALUE" and bool(f["values"])
+            )
 
 
 def test_missing_decision_withholds_by_name(report, decisions) -> None:
-    dec = {k: v for k, v in decisions.items() if k != decision_key("envelopes", "tau_4")}
+    dec = {
+        k: v for k, v in decisions.items() if k != decision_key("envelopes", "tau_4")
+    }
     model = build_plot_model(report, dec)
     item = next(w for w in model.envelopes.withheld if w.quantity_id == "tau_4")
     assert "no display decision" in item.reason
@@ -300,7 +309,9 @@ def test_hand_split_quantities_route_to_their_panel(report, decisions) -> None:
     env["quantities"][name] = copy.deepcopy(env["quantities"]["tau_1"])
     env["bounds"][name] = copy.deepcopy(env["bounds"]["tau_1"])
     dec = dict(decisions)
-    dec[decision_key("hand_split", name)] = decisions[decision_key("envelopes", "tau_1")]
+    dec[decision_key("hand_split", name)] = decisions[
+        decision_key("envelopes", "tau_1")
+    ]
     model = build_plot_model(rep, dec)
     assert [b.quantity_id for b in model.hand_split.bands] == [name]
     assert all(b.quantity_id != name for b in model.envelopes.bands)
@@ -318,9 +329,7 @@ def test_diagnostics_carry_rank_condition_and_residuals(report, decisions) -> No
 
 
 def test_non_complete_report_yields_an_honest_empty_model() -> None:
-    rep = analyze(
-        planar_trajectory((0, 3)), planar_engine(), PRESET, AnalysisOptions()
-    )
+    rep = analyze(planar_trajectory((0, 3)), planar_engine(), PRESET, AnalysisOptions())
     assert rep["status"] == "insufficient_frames"
     model = build_plot_model(rep, {})
     assert model.status == "insufficient_frames"
@@ -382,8 +391,15 @@ def test_value_errors(report, decisions) -> None:
 
 
 def test_module_is_framework_free() -> None:
+    import ast
+
     import src.shared.python.loop_nullspace.plot_model as pm
 
-    source = open(pm.__file__, encoding="utf-8").read()
-    for banned in ("PyQt", "matplotlib", "import numpy", "from numpy"):
-        assert banned not in source
+    tree = ast.parse(Path(pm.__file__).read_text(encoding="utf-8"))
+    roots = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            roots |= {a.name.split(".")[0] for a in node.names}
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            roots.add(node.module.split(".")[0])
+    assert not roots & {"PyQt6", "PyQt5", "matplotlib", "numpy", "scipy"}
