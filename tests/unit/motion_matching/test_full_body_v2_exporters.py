@@ -19,7 +19,10 @@ from src.shared.python.motion_matching import full_body_v2 as v2
 from src.shared.python.motion_matching.full_body_schema import (
     SchemaFeatureUnavailableError,
 )
-from src.shared.python.motion_matching.full_body_spec import canonical_sha256
+from src.shared.python.motion_matching.full_body_spec import (
+    canonical_sha256,
+    upper_body_slice,
+)
 from tests.helpers.opensim_support import require_opensim
 
 pytestmark = pytest.mark.unit
@@ -119,7 +122,7 @@ def test_drake_model_accepts_v2(v2_doc) -> None:
 
 
 @pytest.mark.requires_pinocchio
-def test_pinocchio_model_accepts_v2_and_upper_model_is_deferred(v2_doc) -> None:
+def test_pinocchio_model_accepts_v2_and_builds_the_v2_upper_model(v2_doc) -> None:
     pytest.importorskip("pinocchio")
     from src.engines.physics_engines.pinocchio.python.native_model import (
         FullBodyPinocchioModel,
@@ -132,10 +135,14 @@ def test_pinocchio_model_accepts_v2_and_upper_model_is_deferred(v2_doc) -> None:
     got = model.frame_poses(q)
     for name in ("Hub", "Spine", "Torso"):
         np.testing.assert_allclose(np.asarray(got[name]), expected[name], atol=1e-9)
-    with pytest.raises(
-        SchemaFeatureUnavailableError, match=r"HRG-D2 \(tracked: #13173\)"
-    ):
-        model.upper_body_model()
+    upper = model.upper_body_model()  # HRG-D2: the regional-trunk upper body
+    full_q = dict.fromkeys(v2_doc["coordinate_order"], 0.0)
+    full_q.update(dict.fromkeys(v2.V2_TRUNK.coordinates, 0.1))
+    names = upper_body_slice(v2_doc)["coordinate_order"]
+    upper_q = {c: full_q[c] for c in names}
+    full = model.frame_poses(full_q)
+    for name, pose in upper.frame_poses(upper_q).items():
+        np.testing.assert_allclose(np.asarray(pose), np.asarray(full[name]), atol=1e-12)
 
 
 def test_opensim_export_and_parity_adapter_accept_v2(v2_doc, v2_bytes) -> None:
@@ -171,6 +178,7 @@ def test_opensim_musculoskeletal_graft_stays_v1_only(v2_bytes) -> None:
         spec_document,
     )
 
+    # Deferred to HRG-Q1 (decision recorded by HRG-D2, #13173).
     with pytest.raises(
         SchemaFeatureUnavailableError, match=r"HRG-Q1 \(tracked: #13176\)"
     ):
