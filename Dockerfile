@@ -261,10 +261,10 @@ USER root
 # rather than shipping an installer in the production runtime target.
 COPY --from=builder /opt/venv /opt/venv
 
-# PyTorch cu124 wheels bundle CUDA runtime libs; host driver provides libcuda via nvidia-container-toolkit
-# Pinned versions for reproducible builds
+# PyTorch cu128 wheels bundle CUDA runtime libs; host driver provides libcuda via nvidia-container-toolkit
+# Pinned versions for reproducible builds (see training_torch_pin.py)
 RUN /opt/venv/bin/pip install --no-cache-dir \
-    "torch==2.8.0" --index-url https://download.pytorch.org/whl/cu124
+    "torch==2.9.0" --index-url https://download.pytorch.org/whl/cu128
 
 RUN /opt/venv/bin/pip install --no-cache-dir \
     "gymnasium==1.1.1" \

@@ -24,6 +24,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
+from .training_torch_pin import torch_cuda_pip_install_command
+
 EngineTier = Literal["core", "extended", "experimental", "tooling"]
 """Tier alignment with :mod:`src.engines.tiers`.
 
@@ -231,14 +233,11 @@ FEATURES: tuple[Feature, ...] = (
     # ---- ML / training stack --------------------------------------------
     Feature(
         name="torch-cuda",
-        display_name="PyTorch (CUDA 12.4)",
+        display_name="PyTorch (CUDA 12.8)",
         description="GPU PyTorch wheels for RL training and ML pipelines.",
         probe_key="torch",
         install_channel="pip",
-        install_command=(
-            "pip install 'torch==2.8.0' "
-            "--index-url https://download.pytorch.org/whl/cu124"
-        ),
+        install_command=torch_cuda_pip_install_command(),
         pip_extra=None,
         docker_stage="training",
         approx_size_mb=2800,
