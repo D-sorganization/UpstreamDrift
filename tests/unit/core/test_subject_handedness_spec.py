@@ -13,6 +13,8 @@ from src.shared.python.motion_matching.anthropometric_geometry import (
     build_upper_body,
 )
 
+pytestmark = pytest.mark.unit
+
 REPO = Path(__file__).resolve().parents[3]
 COMMITTED = REPO / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
 

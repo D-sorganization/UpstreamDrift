@@ -8,12 +8,12 @@ import sys
 def main() -> int:
     from PyQt6.QtWidgets import QApplication
 
-    from src.tools.grip_wrench_plots.gui import GripWrenchPlotWidget
+    from src.tools.grip_wrench_plots.window import GripWrenchTabsWidget
 
     app = QApplication.instance() or QApplication(sys.argv)
-    widget = GripWrenchPlotWidget()
+    widget = GripWrenchTabsWidget()
     widget.setWindowTitle("Grip Wrench Plots")
-    widget.resize(560, 760)
+    widget.resize(900, 820)
     widget.show()
     return app.exec()
 

@@ -7,6 +7,8 @@ import pytest
 
 from src.shared.python.model_appearance.grip_pose import GripPose, Hand
 
+pytestmark = pytest.mark.unit
+
 # Body frame: x anterior, y toward the golfer's anatomical left, z up.  The
 # sagittal plane is x-z, so its reflection flips y (the lateral axis).
 P = np.diag([1.0, -1.0, 1.0])
