@@ -180,8 +180,7 @@ def thumb_palm_patch(
     """Palm-on-thumb patch point and normal in the club-body frame.
 
     ``lead_frame`` is the 4x4 lead hand-grip to club-body transform
-    (``grip_hands.grip_hand_frame(club, Hand.LEAD, pose)`` or the shared
-    convention where x is the grip axis) and ``grip_radius_m``
+    (``grip_hands.grip_hand_frame(club, Hand.LEAD, pose)``) and ``grip_radius_m``
     the grip radius the hands were baked on. Preconditions: a finite 4x4 with a
     proper rotation, a radius in ``GRIP_RADIUS_RANGE_M``, a :class:`GripPose`,
     :class:`HandMeshParams` and ``handedness`` ``"right"`` or ``"left"``
@@ -190,8 +189,6 @@ def thumb_palm_patch(
     palm, and the left-handed patch is the reflection of the right-handed one.
     """
     frame = _check(lead_frame, grip_radius_m, pose, handedness, params)
-    if abs(frame[1, 0]) > 0.9:
-        frame = shared_to_appearance_grip_frame(frame)
     point, normal, palm, axis_point = _patch_in_hand_frame(
         float(grip_radius_m), pose, params
     )
