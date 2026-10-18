@@ -35,7 +35,7 @@ from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.optimize import least_squares, minimize
+from scipy.optimize import NonlinearConstraint, least_squares, minimize
 from scipy.spatial.transform import Rotation
 
 from src.shared.python.model_appearance.skinned_body import spec_body_poses
@@ -81,8 +81,8 @@ class RegionalPrior:
         percentages that do not add to 100 per axis.
         """
         entry = load_coupling_laws().get(law_id)
-        dist = None if entry is None else entry.get("distribution", {})
-        if not dist or dist.get("type") != "regional_split":
+        dist: Mapping[str, Any] = {} if entry is None else entry.get("distribution", {})
+        if entry is None or dist.get("type") != "regional_split":
             raise ValueError(f"{law_id!r} is not an available regional_split law")
         shares = {}
         for axis in ISB_SPINE_AXES:
@@ -362,17 +362,24 @@ class TrunkMigrator:
         rejected = self._rejected_mapping(v1_values)
         start = rejected if phi0 is None else np.asarray(phi0, dtype=float)
         split = self._split
+
+        def objective(x: Array) -> float:
+            return float(np.sum((split @ x) ** 2))
+
+        def gradient(x: Array) -> Array:
+            return 2.0 * split.T @ (split @ x)
+
+        def closure(x: Array) -> Array:
+            return self._constraint(target, x)
+
+        def closure_jacobian(x: Array) -> Array:
+            return self._constraint_jacobian(target, x)
+
         sol = minimize(
-            lambda x: float(np.sum((split @ x) ** 2)),
+            objective,
             start,
-            jac=lambda x: 2.0 * split.T @ (split @ x),
-            constraints=(
-                {
-                    "type": "eq",
-                    "fun": lambda x: self._constraint(target, x),
-                    "jac": lambda x: self._constraint_jacobian(target, x),
-                },
-            ),
+            jac=gradient,
+            constraints=NonlinearConstraint(closure, 0.0, 0.0, jac=closure_jacobian),
             method="SLSQP",
             options={"ftol": 1e-15, "maxiter": 200},
         )

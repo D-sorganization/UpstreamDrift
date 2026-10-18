@@ -36,7 +36,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import ArrayLike, NDArray
 
 from src.shared.python.motion_matching.full_body_schema import (
     FullBodySchema,
@@ -197,7 +197,7 @@ class TrunkJointLocations:
         object.__setattr__(self, "t12l1_in_pelvis_m", up)
 
 
-def _translation(vector: Sequence[float]) -> Array:
+def _translation(vector: ArrayLike) -> Array:
     out = np.eye(4)
     out[:3, 3] = np.asarray(vector, dtype=float)
     return out
