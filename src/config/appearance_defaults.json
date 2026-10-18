@@ -1,0 +1,185 @@
+{
+  "schema_version": "appearance-defaults-v1",
+  "colour_space": "sRGB. Every colour here is authored as non-linear sRGB in 0..1. MuJoCo rgba takes it directly; three.js converts sRGB to linear through its own colour management (THREE.ColorManagement, sRGB output) - no global linearisation is applied anywhere.",
+  "default": {
+    "skin_tone": "skin_2",
+    "headwear": "hair",
+    "headwear_material": "hair_brown",
+    "clothing": "golf_polo_trousers",
+    "club_finish": "satin_steel"
+  },
+  "skin_palette": [
+    {
+      "id": "skin_1",
+      "srgb": [
+        0.96,
+        0.85,
+        0.77
+      ],
+      "hex": "#f5d9c4",
+      "description": "Very light, pale with pink undertone"
+    },
+    {
+      "id": "skin_2",
+      "srgb": [
+        0.93,
+        0.76,
+        0.66
+      ],
+      "hex": "#edc2a8",
+      "description": "Light, fair (the default golfer)"
+    },
+    {
+      "id": "skin_3",
+      "srgb": [
+        0.87,
+        0.68,
+        0.54
+      ],
+      "hex": "#dead8a",
+      "description": "Light-medium, warm beige"
+    },
+    {
+      "id": "skin_4",
+      "srgb": [
+        0.8,
+        0.6,
+        0.46
+      ],
+      "hex": "#cc9975",
+      "description": "Medium, golden tan"
+    },
+    {
+      "id": "skin_5",
+      "srgb": [
+        0.73,
+        0.53,
+        0.38
+      ],
+      "hex": "#ba8761",
+      "description": "Medium-deep, olive brown"
+    },
+    {
+      "id": "skin_6",
+      "srgb": [
+        0.66,
+        0.45,
+        0.32
+      ],
+      "hex": "#a87352",
+      "description": "Deep, warm brown"
+    },
+    {
+      "id": "skin_7",
+      "srgb": [
+        0.52,
+        0.35,
+        0.25
+      ],
+      "hex": "#855940",
+      "description": "Deeper, rich brown"
+    },
+    {
+      "id": "skin_8",
+      "srgb": [
+        0.4,
+        0.27,
+        0.2
+      ],
+      "hex": "#664533",
+      "description": "Deepest, dark brown"
+    }
+  ],
+  "skin_aliases": {
+    "skin_light": "skin_2",
+    "skin_medium": "skin_4",
+    "skin_tan": "skin_6",
+    "skin_dark": "skin_8"
+  },
+  "hair_palette": [
+    {
+      "id": "hair_black",
+      "srgb": [
+        0.05,
+        0.045,
+        0.045
+      ],
+      "hex": "#0d0b0b",
+      "description": "Black",
+      "roughness": 0.75,
+      "noise": 0.04
+    },
+    {
+      "id": "hair_dark_brown",
+      "srgb": [
+        0.22,
+        0.14,
+        0.09
+      ],
+      "hex": "#382417",
+      "description": "Dark brown",
+      "roughness": 0.8,
+      "noise": 0.05
+    },
+    {
+      "id": "hair_brown",
+      "srgb": [
+        0.36,
+        0.23,
+        0.14
+      ],
+      "hex": "#5c3b24",
+      "description": "Mid brown (the default golfer)",
+      "roughness": 0.8,
+      "noise": 0.05
+    },
+    {
+      "id": "hair_light_brown",
+      "srgb": [
+        0.52,
+        0.36,
+        0.22
+      ],
+      "hex": "#855c38",
+      "description": "Light brown",
+      "roughness": 0.8,
+      "noise": 0.05
+    },
+    {
+      "id": "hair_auburn",
+      "srgb": [
+        0.45,
+        0.2,
+        0.12
+      ],
+      "hex": "#73331f",
+      "description": "Auburn, reddish brown",
+      "roughness": 0.8,
+      "noise": 0.05
+    },
+    {
+      "id": "hair_blond",
+      "srgb": [
+        0.7,
+        0.55,
+        0.3
+      ],
+      "hex": "#b28c4c",
+      "description": "Blonde",
+      "roughness": 0.8,
+      "noise": 0.05
+    },
+    {
+      "id": "hair_grey",
+      "srgb": [
+        0.62,
+        0.62,
+        0.62
+      ],
+      "hex": "#9e9e9e",
+      "description": "Grey",
+      "roughness": 0.8,
+      "noise": 0.05
+    }
+  ]
+}
