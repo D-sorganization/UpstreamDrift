@@ -2561,6 +2561,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13113 · Label the Dockerfile.Modular Runtime Stage Keep=True so Host Prune Jobs Spare Every Profile Image; Contract Test Guards It
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13113
+- **Branch:** merged via #13138
+- **PR:** #13138
+- **Paths:** see #13138
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`dea902bb`; collated from changes/13113-label-the-dockerfile-modular-runtime-sta.md)
+- **Summary:** Label the Dockerfile.modular runtime stage keep=true so host prune jobs spare every profile image; contract test guards it
+- **Next step:** Shipped in PR #13138.
+
 ### DL-#12573 · NSX-41: Display_Decision Output-Policy Integration (ADR-0054 D7 Option A)
 
 - **State:** shipped

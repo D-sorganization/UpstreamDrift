@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-18 | #13138 | Label the Dockerfile.modular runtime stage keep=true so host prune jobs spare every profile image; contract test guards it |
 | 2026-10-18 | #13149 | NSX-41: display_decision output-policy integration (ADR-0054 D7 Option A) |
 | 2026-10-18 | #13147 | Ground reaction overlay draws measured CoP uncertainty as per-world-axis 1-sigma ellipses |
 | 2026-10-18 | #13141 | Ground reaction overlay rings measured CoP points by their 1-sigma per axis |
