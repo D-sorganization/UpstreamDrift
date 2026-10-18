@@ -2741,6 +2741,23 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-18 | #13225 | Reject duplicate source labels and handle inf values in capture export |
+| 2026-10-18 | #13219 | Surface searched paths and submodule remedy in tile launch failure toast |
+| 2026-10-18 | #13222 | Resolve MATLAB default slx path under production src root and raise GolfModelingError on missing default model |
+| 2026-10-18 | #13215 | NSX-44: React loop null-space panel rendering the shared plot-model golden |
+| 2026-10-18 | #13184 | HRG-00: measured coordinate sign map, ISB basis map, human-range characterisation and HRG calculation reference |
+| 2026-10-18 | #13195 | NSX-99: sensitivity stage, report schema v2 and variability panels |
+| 2026-10-18 | #13180 | HRG-E1: wrist lever angle renamed with NaN-plus-reason on missing markers; joint_stress requires signed, side-tagged WristDeviation |
+| 2026-10-18 | #13197 | NSX-43: tabbed Grip Wrench window with NSX plot-model tabs, preset selector and QThreadPool runner |
+| 2026-10-18 | #13194 | HRG-C3: pelvis frame re-expression (invariant) and documented HJC/COM/L5S1 relocation as a new spec revision |
+| 2026-10-18 | #13192 | HRG-C2: MAP hip joint centre estimator with covariance, status and stature prior (estimation only) |
+| 2026-10-18 | #13206 | Grip hand frame rolled -90 deg about the shaft so azimuth 0 is the top of the grip (HRG-A1) |
+| 2026-10-18 | #13183 | HRG-C1: loft the pelvis visual on the hip landmarks (centred on the HJC midpoint, ends at the lumbar plane) and shrink the hip blend ball; visual only |
+| 2026-10-18 | #13156 | Plate import forms (PyQt and web) and the plate-overlay route declare channel timing skew and the CoP skew relation (DeclaredReading); only independent allows the CoP covariance |
+| 2026-10-18 | #13152 | Ground-reaction overlay draws measured CoP 1-sigma covariance ellipses, tilted with the plate yaw (cop_cov_random_xy_m2 = R_xy diag R_xy^T) |
+| 2026-10-18 | #13155 | Sanitize 400/403/404 error details in handle_api_errors to prevent path leaks |
+| 2026-10-18 | #13154 | NSX-42: framework-free NSX plot model and cross-UI golden |
+| 2026-10-18 | #13138 | Label the Dockerfile.modular runtime stage keep=true so host prune jobs spare every profile image; contract test guards it |
 | 2026-10-18 | #13149 | NSX-41: display_decision output-policy integration (ADR-0054 D7 Option A) |
 | 2026-10-18 | #13147 | Ground reaction overlay draws measured CoP uncertainty as per-world-axis 1-sigma ellipses |
 | 2026-10-18 | #13141 | Ground reaction overlay rings measured CoP points by their 1-sigma per axis |

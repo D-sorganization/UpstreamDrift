@@ -13,9 +13,12 @@ Distances are metres measured **down the shaft from the butt end** of the grip
 
 Angles are rotations about the grip axis ``g`` (butt toward head) in the plane
 perpendicular to the shaft.  With ``n`` the face normal (toward the target) and
-``t`` the toe axis (heel toward toe), azimuth 0 is the direction ``-n`` (away
-from the target, toward the golfer's chin line) and azimuth increases toward
-``-t`` (toward the golfer, i.e. toward the trail shoulder).
+``t`` the toe axis (heel toward toe), both projected off the shaft, azimuth 0
+is the direction ``+t``: the top of the grip, toward the golfer's chin line
+(the shaft leans toward the golfer, so the toe-ward direction is the top).
+Azimuth increases toward ``-n``: away from the target, the trail side.  (HRG-A1,
+#13162: the earlier text put azimuth 0 at ``-n``, which is false and rolled both
+hands about 90 deg under the grip.)
 
 Values are nominal coaching-convention parameters for a neutral grip, not
 measurements: the captures carry no hand markers, so the hand roll that the

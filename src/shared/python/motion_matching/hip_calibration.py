@@ -138,6 +138,75 @@ def select_hip_zero_twist(mode: str, measured: HipRotationZero) -> HipRotationZe
     )
 
 
+@dataclass(frozen=True)
+class PelvisFrameTracks:
+    """Marker tracks expressed in the pelvis frame, with the waist fit residuals.
+
+    ``max_abs_m`` is the largest absolute Cartesian component of the waist
+    rigid-fit residual (the statistic ``waist_fit_max_residual_m`` reports) and
+    ``rms_m`` the root mean square over all residual components.
+    """
+
+    tracks: tuple[Array, ...]
+    max_abs_m: float
+    rms_m: float
+    waist_frames: int
+
+
+def pelvis_frame_tracks(
+    points: Array,
+    valid: NDArray[Any],
+    labels: Sequence[str],
+    waist_offsets: Mapping[str, Sequence[float]],
+    track_labels: Sequence[str],
+) -> PelvisFrameTracks:
+    """Express ``track_labels`` markers in the pelvis frame of each frame.
+
+    The pelvis pose per frame is the rigid fit of ``waist_offsets`` to the
+    captured waist markers (frames with an incomplete waist are skipped).
+    Preconditions: points (frames, markers, 3) with matching validity, at
+    least three waist labels present, every track label a capture label, at
+    least four frames with a complete pelvis and each track marker (``ValueError``
+    otherwise). Postcondition: ``tracks[k]`` is (n_k, 3) in the pelvis frame.
+    """
+    pts = np.asarray(points, dtype=float)
+    mask = np.asarray(valid, dtype=bool)
+    labels = tuple(labels)
+    if pts.ndim != 3 or pts.shape[2] != 3 or mask.shape != pts.shape[:2]:
+        raise ValueError("Points must be (frames, markers, 3) with matching validity")
+    waist = [label for label in waist_offsets if label in labels]
+    if len(waist) < 3:
+        raise ValueError("At least three waist markers with offsets are required")
+    if any(label not in labels for label in track_labels):
+        raise ValueError("Both knee labels must be capture labels")
+    waist_cols = [labels.index(label) for label in waist]
+    offsets = np.asarray([waist_offsets[label] for label in waist], dtype=float)
+    cols = [labels.index(label) for label in track_labels]
+    local: list[list[Array]] = [[] for _ in cols]
+    residual = 0.0
+    sum_sq, count, waist_frames = 0.0, 0, 0
+    for f in range(pts.shape[0]):
+        if not mask[f, waist_cols].all():
+            continue
+        rotation, translation = rigid_pose_from_markers(offsets, pts[f, waist_cols])
+        err = offsets @ rotation.T + translation - pts[f, waist_cols]
+        residual = max(residual, float(np.abs(err).max()))
+        sum_sq += float(np.sum(err * err))
+        count += err.size
+        waist_frames += 1
+        for side, col in enumerate(cols):
+            if mask[f, col]:
+                local[side].append(rotation.T @ (pts[f, col] - translation))
+    if min(len(t) for t in local) < 4:
+        raise ValueError("Too few frames with a complete pelvis and knee marker")
+    return PelvisFrameTracks(
+        tuple(np.array(t) for t in local),
+        residual,
+        float(np.sqrt(sum_sq / count)),
+        waist_frames,
+    )
+
+
 def functional_hip_calibration(
     points: Array,
     valid: NDArray[Any],
@@ -162,37 +231,10 @@ def functional_hip_calibration(
     forward, up, right in the pelvis frame) and the right axis points from
     the left to the right hip centre.
     """
-    pts = np.asarray(points, dtype=float)
-    mask = np.asarray(valid, dtype=bool)
-    labels = tuple(labels)
-    if pts.ndim != 3 or pts.shape[2] != 3 or mask.shape != pts.shape[:2]:
-        raise ValueError("Points must be (frames, markers, 3) with matching validity")
-    waist = [label for label in waist_offsets if label in labels]
-    if len(waist) < 3:
-        raise ValueError("At least three waist markers with offsets are required")
-    if any(label not in labels for label in knee_labels):
-        raise ValueError("Both knee labels must be capture labels")
-    waist_cols = [labels.index(label) for label in waist]
-    offsets = np.asarray([waist_offsets[label] for label in waist], dtype=float)
-    knee_cols = [labels.index(label) for label in knee_labels]
-    local: list[list[Array]] = [[], []]
-    residual = 0.0
-    for f in range(pts.shape[0]):
-        if not mask[f, waist_cols].all():
-            continue
-        rotation, translation = rigid_pose_from_markers(offsets, pts[f, waist_cols])
-        residual = max(
-            residual,
-            float(
-                np.abs(offsets @ rotation.T + translation - pts[f, waist_cols]).max()
-            ),
-        )
-        for side, col in enumerate(knee_cols):
-            if mask[f, col]:
-                local[side].append(rotation.T @ (pts[f, col] - translation))
-    if min(len(local[0]), len(local[1])) < 4:
-        raise ValueError("Too few frames with a complete pelvis and knee marker")
-    fit_r, fit_l = fit_sphere(np.array(local[0])), fit_sphere(np.array(local[1]))
+    tracks = pelvis_frame_tracks(points, valid, labels, waist_offsets, knee_labels)
+    local = [tracks.tracks[0], tracks.tracks[1]]
+    residual = tracks.max_abs_m
+    fit_r, fit_l = fit_sphere(local[0]), fit_sphere(local[1])
     c_r, c_l = np.array(fit_r.centre), np.array(fit_l.centre)
     right = c_r - c_l
     if np.linalg.norm(right) < 1e-6:

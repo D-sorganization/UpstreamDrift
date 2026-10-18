@@ -67,6 +67,8 @@ def facade_calls(monkeypatch):
         return dict(REPORT)
 
     monkeypatch.setattr(svc.facade, "analyze", fake)
+    # The stub report is not a real one; the plot model has its own tests.
+    monkeypatch.setattr(svc, "plot_model_payload", lambda report, **kw: {"stub": 1})
     return calls
 
 

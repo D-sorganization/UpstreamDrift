@@ -75,6 +75,27 @@ def test_create_returns_a_job_id_and_the_job_completes(client) -> None:
     assert done["result"]["service"]["cache_key"] == job["cache_key"]
 
 
+def test_completed_result_carries_a_valid_plot_model(client) -> None:
+    from src.shared.python.loop_nullspace.plot_model import NSXPlotModel
+
+    job = client.post(BASE, json=BODY).json()
+    done = _wait(client, job["job_id"], "completed")
+    model = done["result"]["plot_model"]
+    assert model["schema_version"] == "1.0.0"
+    assert model["preset"] == BODY["preset"]
+    assert NSXPlotModel.from_dict(model).to_dict() == model
+    hit = client.post(BASE, json=BODY).json()
+    assert hit["cache_hit"] is True and hit["result"]["plot_model"] == model
+
+
+def test_presets_are_served_from_the_registry(client) -> None:
+    from src.shared.python.loop_nullspace import registry
+
+    listed = client.get("/analysis/loop-nullspace/presets").json()
+    assert [p["id"] for p in listed] == [p.id for p in registry.load_registry().presets]
+    assert all(p["label"] for p in listed)
+
+
 def test_identical_request_is_served_from_the_cache(client, monkeypatch) -> None:
     first = client.post(BASE, json=BODY).json()
     _wait(client, first["job_id"], "completed")
@@ -137,6 +158,8 @@ def test_poll_shows_partial_invariants_first(client, gated) -> None:
     assert mid["status"] == "running" and mid["stage"] == "invariants"
     assert mid["result"] is None
     assert mid["partial"]["invariants"]["frames"]
+    assert "report" not in mid["partial"]
+    assert mid["partial"]["plot_model"]["preset"] == BODY["preset"]
     assert 0.0 < mid["progress_percent"] < 100.0
     gated.release.set()
     _wait(client, job["job_id"], "completed")
@@ -220,3 +243,24 @@ def test_pool_saturation_is_429(client, gated, monkeypatch) -> None:
     gated.release.set()
     _wait(client, first["job_id"], "completed")
     assert routes.JOB_POOL.drain(WAIT_S)
+
+
+def test_unbuildable_partial_has_no_plot_model(client, gated, monkeypatch) -> None:
+    def refuse(*a, **k):
+        raise ValueError("cannot build")
+
+    monkeypatch.setattr(svc, "plot_model_payload", refuse)
+    job = client.post(BASE, json=BODY).json()
+    assert gated.entered.wait(WAIT_S)
+    mid = client.get(f"{BASE}/{job['job_id']}").json()
+    assert "plot_model" not in mid["partial"] and mid["partial"]["invariants"]
+    gated.release.set()
+    _wait(client, job["job_id"], "failed")
+
+
+def test_sensitivity_options_are_served_from_the_catalogue(client) -> None:
+    from src.shared.python.loop_nullspace import sensitivity_options as opts
+
+    served = client.get("/analysis/loop-nullspace/sensitivity-options")
+    assert served.status_code == 200
+    assert served.json() == opts.option_catalogue()

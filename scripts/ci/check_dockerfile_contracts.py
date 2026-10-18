@@ -56,6 +56,34 @@ def _service_block(compose: str, name: str) -> str | None:
     return match.group(1) if match else None
 
 
+def _stage_body(dockerfile: str, stage: str) -> str | None:
+    """Return the instructions of ``FROM ... AS <stage>`` up to the next FROM."""
+    match = re.search(
+        rf"^FROM\s+\S+\s+AS\s+{re.escape(stage)}\s*$(.*?)(?=^FROM\s|\Z)",
+        dockerfile,
+        re.MULTILINE | re.DOTALL,
+    )
+    return match.group(1) if match else None
+
+
+def runtime_retention_failures(modular: str) -> list[str]:
+    """Profile images build from ``runtime``; host prune jobs spare only label keep.
+
+    UD #13113: without it, ControlTower's disk guard deleted upstream-drift:full
+    (and ud-sim built on it), which then had to be rebuilt over a cellular link.
+    Every stage derived from ``runtime`` inherits the label.
+    """
+    body = _stage_body(modular, "runtime")
+    if body is None:
+        return ["Dockerfile.modular is missing the runtime stage"]
+    if not re.search(r'^LABEL\s+keep="?true"?\s*$', body, re.MULTILINE):
+        return [
+            'Dockerfile.modular runtime stage must set LABEL keep="true" (host '
+            "prune jobs spare it; profile images were deleted without it)"
+        ]
+    return []
+
+
 def explorer_contract_failures(root: Path) -> list[str]:
     """Check the model-explorer Docker surface: stages, services, entrypoint."""
     failures: list[str] = []
@@ -155,6 +183,7 @@ def docker_contract_failures(root: Path = Path(".")) -> list[str]:
         failures.append("Dockerfile healthcheck must use Python urllib, not curl")
 
     modular = _read(root / "Dockerfile.modular")
+    failures.extend(runtime_retention_failures(modular))
     first_dry_run = modular.find("install_features.py --profile")
     feature_registry_copy = modular.find("COPY src/shared/python/feature_registry/")
     engine_core_copy = modular.find("COPY src/shared/python/engine_core/")

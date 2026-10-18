@@ -38,11 +38,14 @@ Articulation
     The ``talus`` carries an ankle stub (skin) joining the shank to the shoe.
 
 Parameter provenance
-    ``BREADTH_OVER_LENGTH`` is the ratio of the horizontal foot breadth to the
-    foot length from the ANSUR II survey medians (Gordon et al. 2014,
-    NATICK/TR-15/007, read through the ANSUR II data explorer):
-    men 10.2 cm / 27.1 cm = 0.376; women 9.3 cm / 24.6 cm = 0.378. The
-    profile knots below are modelling parameters, not measurements.
+    ``BREADTH_OVER_LENGTH`` is the pooled-sex median of the per-subject ratio
+    ``footbreadthhorizontal / footlength`` in the public ANSUR II files (2012
+    U.S. Army survey, Gordon et al. 2015, NATICK/TR-15/007): n = 6068
+    (4082 men + 1986 women), median 0.3759, mean 0.3762, sd 0.0175; men
+    median 0.3755, women 0.3766. It rounds to 0.376. Datasets: sha256
+    0547aea0170e5293de519389981135e75803f02e6d40c77ace740decc0caac64 (male),
+    ed7e800aa97a4d42f8286b988be2fe1883a2e789588169db959864b707d1757a (female).
+    The profile knots below are modelling parameters, not measurements.
 """
 
 from __future__ import annotations
@@ -72,7 +75,8 @@ __all__ = [
 ]
 
 FOOT_MODELS = ("procedural", "cc0_mesh")
-BREADTH_OVER_LENGTH = 0.377  # ANSUR II median breadth / length, both sexes
+# ANSUR II pooled median breadth / length, n = 6068, sd 0.0175 (see docstring)
+BREADTH_OVER_LENGTH = 0.376
 REFERENCE_LENGTH_M = 0.2581  # the spec foot length the height profile is drawn at
 HEEL_CENTRE_TO_BACK_M = 0.022  # rearmost contact-sphere centre to the heel back
 SOLE_CLEARANCE_M = 0.0005  # lowest sole point above the lowest sphere nadir

@@ -250,6 +250,36 @@ describe('GroundReactionCharts', () => {
       expect(attr(left, 'ry')).toBeCloseTo(attr(right, 'ry') / 4);
     });
 
+    it('tilts the ellipse by the CoP covariance and names it covariance', async () => {
+      const data = withBand();
+      // var_x = var_y with a positive covariance: the major axis is at +45 deg
+      // in data, i.e. rotate(-45) in SVG (y down) when both scales are equal.
+      const cov = (xx: number, yy: number, xy: number) => ({
+        x: [xx, xx, null],
+        y: [yy, yy, null],
+        z: [xy, xy, null],
+        magnitude: unobserved,
+      });
+      data.traces = {
+        ...data.traces,
+        measured_left_cop_sigma_m: measured([0.016, 0.016, null]),
+        measured_left_cop_cov_m2: cov(2.5e-4, 2.5e-4, 1.5e-4),
+      };
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(data);
+      render(<GroundReactionCharts runId="r1" />);
+      const first = await screen.findByTestId('ground-reaction-cop-sigma-Measured Left-0');
+      const rotate = /^rotate\((-?[\d.e-]+) /.exec(first.getAttribute('transform') ?? '');
+      expect(rotate).not.toBeNull();
+      expect(Math.abs(Number(rotate?.[1]))).toBeGreaterThan(0);
+      // Semi-axes 20 mm and 10 mm in data: their ratio survives any scaling.
+      const [rx, ry] = ['rx', 'ry'].map((a) => Number(first.getAttribute(a)));
+      expect(Math.max(rx, ry) / Math.min(rx, ry)).toBeGreaterThan(1);
+      expect(screen.getByText('Measured Left \u00b11\u03c3 covariance')).toBeInTheDocument();
+      expect(screen.getByTestId('ground-reaction-uncertainty-caption')).toHaveTextContent(
+        'ellipses: measured CoP \u00b11\u03c3 covariance',
+      );
+    });
+
     it('draws no band or caption when the overlay carries no sigma trace', async () => {
       vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(withOverlay(false));
       render(<GroundReactionCharts runId="r1" />);
@@ -290,6 +320,7 @@ describe('GroundReactionCharts', () => {
           capacity_n: 3923,
         },
         alignment: { offset_s: 0, sigma_offset_s: 0.001, kind: 'manual', note: 'clock' },
+        reading: { skew_s: 0, cop_skew: 'unknown' },
       };
       render(<GroundReactionCharts runId="r1" overlay={request} />);
       await screen.findByTestId('ground-reaction-unqualified-banner');
@@ -311,6 +342,7 @@ describe('GroundReactionCharts', () => {
       expect(request.run_id).toBe('r1');
       expect(request.trial).toBe('session-1/swing-0001.json');
       expect(request.declared.capacity_n).toBe(3923);
+      expect(request.reading).toEqual({ skew_s: 0, cop_skew: 'unknown' });
     });
 
     it('shows a server refusal next to the form and returns to the model', async () => {

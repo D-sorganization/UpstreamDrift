@@ -172,27 +172,65 @@ class LeadArmMetrics:
         }
 
 
+def _warn_hinge_alias(old: str, new: str) -> None:
+    """Emit the DeprecationWarning for a legacy wrist "hinge" name."""
+    warnings.warn(
+        f"{old} is deprecated and will be removed in the next release; "
+        f"use {new} instead.",
+        DeprecationWarning,
+        stacklevel=3,
+    )
+
+
 @dataclass(frozen=True)
 class WristMetrics:
-    """Lead wrist hinge angle metrics.
+    """Lead wrist lever-angle metrics.
 
-    Angle between forearm vector (elbow -> wrist) and club shaft vector (grip -> clubhead).
+    The lever angle is the UNSIGNED angle between the forearm vector (elbow -> wrist)
+    and the club shaft vector (grip -> clubhead). It is not an anatomical wrist
+    flexion/extension or radial/ulnar deviation angle. When inputs are missing every
+    value is NaN and ``unavailable_reason`` names what was missing.
 
     Attributes:
-        hinge_angle_deg: Time series of wrist hinge angle (N,) in degrees.
-        hinge_angle_top: Wrist hinge angle at top of backswing in degrees.
-        hinge_angle_impact: Wrist hinge angle at impact in degrees.
+        lever_angle_deg: Time series (N,) of lever angle in degrees (NaN if unavailable).
+        lever_angle_top: Lever angle at top of backswing in degrees.
+        lever_angle_impact: Lever angle at impact in degrees.
+        unavailable_reason: Why the values are NaN, or None when they are available.
     """
 
-    hinge_angle_deg: np.ndarray
-    hinge_angle_top: float
-    hinge_angle_impact: float
+    lever_angle_deg: np.ndarray
+    lever_angle_top: float
+    lever_angle_impact: float
+    unavailable_reason: str | None = None
+
+    @property
+    def hinge_angle_deg(self) -> np.ndarray:
+        """Deprecated alias of ``lever_angle_deg``."""
+        _warn_hinge_alias("hinge_angle_deg", "lever_angle_deg")
+        return self.lever_angle_deg
+
+    @property
+    def hinge_angle_top(self) -> float:
+        """Deprecated alias of ``lever_angle_top``."""
+        _warn_hinge_alias("hinge_angle_top", "lever_angle_top")
+        return self.lever_angle_top
+
+    @property
+    def hinge_angle_impact(self) -> float:
+        """Deprecated alias of ``lever_angle_impact``."""
+        _warn_hinge_alias("hinge_angle_impact", "lever_angle_impact")
+        return self.lever_angle_impact
 
     def to_dict(self) -> dict[str, float]:
-        return {
-            "hinge_angle_top_deg": float(self.hinge_angle_top),
-            "hinge_angle_impact_deg": float(self.hinge_angle_impact),
+        out = {
+            "lever_angle_top_deg": float(self.lever_angle_top),
+            "lever_angle_impact_deg": float(self.lever_angle_impact),
         }
+        # Legacy keys, kept for one release; they warn so consumers migrate.
+        _warn_hinge_alias("hinge_angle_top_deg", "lever_angle_top_deg")
+        out["hinge_angle_top_deg"] = float(self.lever_angle_top)
+        out["hinge_angle_impact_deg"] = float(self.lever_angle_impact)
+        return out
 
 
 @dataclass(frozen=True)
@@ -657,10 +695,10 @@ def compute_wrist_metrics(
     motion: SwingMotion,
     events: SwingEvents,
 ) -> WristMetrics:
-    """Compute lead wrist hinge angle at top of backswing and impact.
+    """Compute the lead wrist lever angle at top of backswing and impact.
 
     Definitions:
-    - Hinge angle: Angle between forearm vector (elbow -> wrist) and club shaft
+    - Lever angle: Unsigned angle between forearm vector (elbow -> wrist) and club shaft
       vector (grip -> clubhead) in degrees.
       ~90 deg at top of backswing indicates a full 90-degree wrist set/lag.
       ~0-15 deg at impact indicates shaft alignment with lead forearm.
@@ -673,7 +711,8 @@ def compute_wrist_metrics(
         events: SwingEvents instance.
 
     Returns:
-        WristMetrics with hinge angle time series and event values.
+        WristMetrics with lever angle time series and event values. Missing
+        inputs give NaN values and a reason; no fallback vector is substituted.
     """
     n = len(motion.t)
     require(
@@ -681,13 +720,15 @@ def compute_wrist_metrics(
         "Events must satisfy 0 <= top <= impact < n",
     )
 
+    reasons: list[str] = []
+
     # Forearm: elbow -> wrist
     e_pt = motion.markers.get("LElbowOut")
     w_pt = motion.markers.get("LWristTop")
     if e_pt is not None and w_pt is not None:
         v_forearm = _fill_nans_3d(w_pt) - _fill_nans_3d(e_pt)
     else:
-        v_forearm = np.tile([0.0, 1.0, 0.0], (n, 1))
+        reasons.append("forearm markers LElbowOut/LWristTop missing")
 
     # Shaft: grip -> head
     head_pt, grip_pt = _club_endpoints(motion)
@@ -697,19 +738,28 @@ def compute_wrist_metrics(
     elif motion.shaft_axis is not None:
         v_shaft = motion.shaft_axis
     else:
-        v_shaft = np.tile([0.0, 1.0, 0.0], (n, 1))
+        reasons.append("club endpoints (clubhead/grip) and shaft_axis missing")
+
+    if reasons:
+        nan_series = np.full(n, np.nan)
+        return WristMetrics(
+            lever_angle_deg=nan_series,
+            lever_angle_top=float("nan"),
+            lever_angle_impact=float("nan"),
+            unavailable_reason="; ".join(reasons),
+        )
 
     dot = np.sum(v_forearm * v_shaft, axis=-1)
     n1 = np.linalg.norm(v_forearm, axis=-1)
     n2 = np.linalg.norm(v_shaft, axis=-1)
     denom = np.where(n1 * n2 == 0, 1.0, n1 * n2)
     cos_ang = np.clip(dot / denom, -1.0, 1.0)
-    hinge_angle = np.degrees(np.arccos(cos_ang))
+    lever_angle = np.degrees(np.arccos(cos_ang))
 
     return WristMetrics(
-        hinge_angle_deg=hinge_angle,
-        hinge_angle_top=float(hinge_angle[events.top_idx]),
-        hinge_angle_impact=float(hinge_angle[events.impact_idx]),
+        lever_angle_deg=lever_angle,
+        lever_angle_top=float(lever_angle[events.top_idx]),
+        lever_angle_impact=float(lever_angle[events.impact_idx]),
     )
 
 
@@ -955,10 +1005,15 @@ def _compute_scalar_metric_differences(
         ),
         "elbow_max_flexion_deg": metrics_b.lead_arm.max_flexion_deg
         - metrics_a.lead_arm.max_flexion_deg,
-        "wrist_hinge_top_deg": metrics_b.wrist.hinge_angle_top
-        - metrics_a.wrist.hinge_angle_top,
-        "wrist_hinge_impact_deg": metrics_b.wrist.hinge_angle_impact
-        - metrics_a.wrist.hinge_angle_impact,
+        "wrist_lever_top_deg": metrics_b.wrist.lever_angle_top
+        - metrics_a.wrist.lever_angle_top,
+        "wrist_lever_impact_deg": metrics_b.wrist.lever_angle_impact
+        - metrics_a.wrist.lever_angle_impact,
+        # Deprecated keys (same values) kept for one release.
+        "wrist_hinge_top_deg": metrics_b.wrist.lever_angle_top
+        - metrics_a.wrist.lever_angle_top,
+        "wrist_hinge_impact_deg": metrics_b.wrist.lever_angle_impact
+        - metrics_a.wrist.lever_angle_impact,
         "hand_path_length_swing_m": (
             metrics_b.hand_path.path_length_swing_m
             - metrics_a.hand_path.path_length_swing_m
@@ -984,7 +1039,11 @@ def _compute_scalar_metric_differences(
             else None
         ),
     }
-    # Unavailable turn lines are NaN; report "no comparison" instead of a NaN.
+    return _null_nan_turn_diffs(diffs)
+
+
+def _null_nan_turn_diffs(diffs: dict[str, float | None]) -> dict[str, float | None]:
+    """Report "no comparison" (None) instead of NaN for unavailable turn lines."""
     turn_prefixes = ("shoulder_girdle", "upper_trunk", "thorax", "x_factor")
     for key, value in diffs.items():
         if key.startswith(turn_prefixes) and value is not None and value != value:

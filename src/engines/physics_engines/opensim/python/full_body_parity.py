@@ -59,6 +59,7 @@ from src.shared.python.motion_matching.contact_law import (
     ContactSample,
     GroundPlane,
     sphere_ground_contact,
+    support_planes,
 )
 from src.shared.python.motion_matching.full_body_spec import FULL_BODY_SCHEMA_VERSION
 
@@ -200,6 +201,8 @@ class OpenSimFullBodyParityAdapter:
             normal=(float(up[0]), float(up[1]), float(up[2])),
             height_m=float(contact["ground"]["height_m"] or 0.0),
         )
+        # Raised supports (a bench top, #11745); other spheres use the ground.
+        self._support_planes = support_planes(contact, self.ground)
         self._spheres = [
             (
                 sphere["name"],
@@ -342,8 +345,9 @@ class OpenSimFullBodyParityAdapter:
             jacobian = self._ordered(_to_array(jac))
             center = body.findStationLocationInGround(self._state, point)
             position = np.array([center.get(i) for i in range(3)])
+            plane = self._support_planes.get(name, self.ground)
             sample = sphere_ground_contact(
-                position, jacobian @ u, radius, self.ground, self.contact_parameters
+                position, jacobian @ u, radius, plane, self.contact_parameters
             )
             result[name] = (sample, jacobian)
         return result

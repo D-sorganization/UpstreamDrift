@@ -310,3 +310,16 @@ def test_ankle_stub_wears_the_trouser_leg_or_shows_skin(
     )
     (bare,) = [m for m in body_meshes(spec, shorts) if m.body == "talus_r"]
     assert bare.label == "ankle0" and bare.material_name == shorts.skin_tone
+
+
+# ANSUR II public CSVs, per-subject footbreadthhorizontal / footlength, both
+# sexes pooled (n = 4082 + 1986 = 6068): median 0.3759, mean 0.3762, sd 0.0175
+# (male 0.3755 / 0.3759, female 0.3766 / 0.3768). Datasets sha256 0547aea0...
+# (male) and ed7e800a... (female).
+ANSUR_II_POOLED_MEDIAN = 0.3759
+ANSUR_II_POOLED_SD = 0.0175
+
+
+def test_breadth_over_length_matches_the_ansur_ii_pooled_median() -> None:
+    assert pytest.approx(ANSUR_II_POOLED_MEDIAN, abs=5e-4) == foot.BREADTH_OVER_LENGTH
+    assert abs(foot.BREADTH_OVER_LENGTH - ANSUR_II_POOLED_MEDIAN) < ANSUR_II_POOLED_SD

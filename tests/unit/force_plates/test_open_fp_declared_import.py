@@ -13,7 +13,9 @@ import pytest
 from src.shared.python.force_plates import PlateUncertainty
 from src.shared.python.force_plates.open_fp_format import PlateDeclarations
 from src.shared.python.force_plates.open_fp_format.declared_import import (
+    COP_SKEW_CHOICES,
     DeclaredPlate,
+    DeclaredReading,
     DeclaredStance,
 )
 from src.shared.python.impact_parameters.target_frame import UD_DEFAULT_TARGET_DIR
@@ -101,3 +103,31 @@ def test_frame_label_is_required() -> None:
     stance = DeclaredStance(handedness="RH", origin_m=(0.0, 0.0, 0.0))
     with pytest.raises(ValueError, match="frame_label"):
         stance.to_placement(frame_label=" ")
+
+
+def test_cop_skew_choices_put_the_conservative_one_first() -> None:
+    assert COP_SKEW_CHOICES == ("unknown", "independent", "common")
+
+
+def test_declared_reading_becomes_reading_options() -> None:
+    options = DeclaredReading(skew_s=5e-4, cop_skew="independent").to_options(2.5)
+    assert options.skew_s == 5e-4
+    assert options.cop_skew_independent is True
+    assert options.coverage == 2.5
+
+
+@pytest.mark.parametrize("cop_skew", ["unknown", "common"])
+def test_only_declared_independent_skews_allow_a_covariance(cop_skew: str) -> None:
+    options = DeclaredReading(skew_s=5e-4, cop_skew=cop_skew).to_options(2.0)
+    assert options.cop_skew_independent is False
+
+
+@pytest.mark.parametrize(
+    ("skew_s", "cop_skew", "match"),
+    [(5e-4, "shared", "cop_skew"), (-1e-4, "unknown", "skew_s")],
+)
+def test_invalid_reading_declarations_are_refused(
+    skew_s: float, cop_skew: str, match: str
+) -> None:
+    with pytest.raises(ValueError, match=match):
+        DeclaredReading(skew_s=skew_s, cop_skew=cop_skew).to_options(2.0)

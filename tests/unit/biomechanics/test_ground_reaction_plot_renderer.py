@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import math
 
 from matplotlib.figure import Figure
 import numpy as np
@@ -204,10 +205,11 @@ def test_web_chart_uses_the_same_uncertainty_wording_and_cap() -> None:
     escaped = "".join(c if c.isascii() else f"\\u{ord(c):04x}" for c in suffix)
     assert f"export const SIGMA_BAND_SUFFIX = '{escaped}';" in source
     assert f"export const PER_AXIS = '{gr._PER_AXIS}';" in source
+    assert f"export const COVARIANCE = '{gr._COVARIANCE}';" in source
     assert f"export const MAX_COP_MARKERS = {gr.MAX_COP_MARKERS};" in source
     for phrase in (
         "shaded: measured load ${SIGMA_BAND_SUFFIX}",
-        "ellipses: measured CoP ${SIGMA_BAND_SUFFIX} ${PER_AXIS}",
+        "ellipses: measured CoP ${SIGMA_BAND_SUFFIX} ${ringed}",
         "(declared uncertainty: ${source ?? 'not stated'})",
     ):
         assert phrase in source, phrase
@@ -300,3 +302,31 @@ def test_no_cop_markers_without_a_cop_sigma_trace() -> None:
     plot_ground_reaction(fig, _cop_series(5, sigma=None))
     assert _ellipses(fig) == []
     assert not any("Ellipses" in t.get_text() for t in fig.texts)
+
+
+def _cov_series(n: int, cov: tuple[float, float, float]):
+    series = _cop_series(n, 0.02, sigma_xy=(0.02, 0.02))
+    nothing = {a: [None] * n for a in ("x", "y", "z", "magnitude")}
+    trace = {**nothing, "x": [cov[0]] * n, "y": [cov[1]] * n, "z": [cov[2]] * n}
+    return replace(series, traces={**series.traces, "measured_left_cop_cov_m2": trace})
+
+
+def test_cop_markers_are_rotated_covariance_ellipses() -> None:
+    angle = math.radians(30.0)
+    rot = np.array(
+        [[math.cos(angle), -math.sin(angle)], [math.sin(angle), math.cos(angle)]]
+    )
+    cov = rot @ np.diag([0.02**2, 0.005**2]) @ rot.T
+    fig = Figure()
+    plot_ground_reaction(fig, _cov_series(5, (cov[0, 0], cov[1, 1], cov[0, 1])))
+    ellipses = _ellipses(fig)
+    assert ellipses
+    assert all(e.width == pytest.approx(0.04) for e in ellipses)
+    assert all(e.height == pytest.approx(0.01) for e in ellipses)
+    assert all(e.angle == pytest.approx(30.0) for e in ellipses)
+    legend = [t.get_text() for t in fig.axes[3].get_legend().get_texts()]
+    assert legend.count("Measured Left ±1σ covariance") == 1
+    texts = [t.get_text() for t in fig.texts]
+    assert (
+        "Ellipses: measured CoP ±1σ covariance (declared uncertainty: datasheet rev 3)"
+    ) in texts

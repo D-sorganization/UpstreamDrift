@@ -100,12 +100,25 @@ through the sphere centres; the medial side is $+\hat\ell$ for the right foot.
 \texttt{anthropometry.segments.foot.length\_m} ($0.2581$\,m) or a measurement
 (\texttt{foot\_parts(length\_m=)}); the heel back is $22$\,mm behind the
 rearmost sphere centre and the toe tip is $L$ ahead of it. The widest
-cross-section (lateral plus medial extent) is $B=0.377\,L$. Source of $0.377$:
-ANSUR II survey medians (Gordon et al., 2014, NATICK/TR-15/007), read through
-the ANSUR II data explorer: men $10.2/27.1=0.376$, women $9.3/24.6=0.378$
-(horizontal foot breadth over foot length). The primary report tables were not
-opened, so this is a secondary read; the ratio is a median ratio, not a
-regression with uncertainty. Heights scale with $L/0.2581$.
+cross-section (lateral plus medial extent) is $B=0.376\,L$. Source: the public
+ANSUR II files (2012 U.S.\ Army Anthropometric Survey; Gordon et al.\ 2015,
+Report NATICK/TR-15/007), per-subject ratio \texttt{footbreadthhorizontal}/\texttt{footlength},
+both sexes pooled ($n=6068$): median $0.3759$, mean $0.3762$, SD $0.0175$
+(men median $0.3755$, women $0.3766$). The ratio is a median of per-subject
+ratios, not a regression with uncertainty; it supersedes the earlier
+$0.377$ read from survey summary medians through a secondary data explorer.
+Heights scale with $L/0.2581$.
+
+\paragraph{Reproducing the ANSUR II Breadth Ratio.}
+Datasets: \texttt{https://tools.openlab.psu.edu/publicData/ANSUR\_II\_MALE\_Public.csv}
+(SHA-256 \texttt{0547aea0170e5293de519389981135e75803f02e6d40c77ace740decc0caac64},
+$n=4082$) and \texttt{ANSUR\_II\_FEMALE\_Public.csv} (SHA-256
+\texttt{ed7e800aa97a4d42f8286b988be2fe1883a2e789588169db959864b707d1757a},
+$n=1986$), listed at \texttt{https://www.openlab.psu.edu/ansur2/}. Columns:
+\texttt{footbreadthhorizontal} and \texttt{footlength} (mm). Formula:
+$r_i=\mathrm{footbreadthhorizontal}_i/\mathrm{footlength}_i$ per subject, pooled over
+both files; report the median, mean and sample SD of $r_i$. The files are not
+committed to the repository.
 
 \paragraph{Shape.} Stations $a$ run heel back to toe tip (cosine spaced, 46
 rings of 40 points). Each ring is a flat sole, $7$\,mm rounded sole edges and a
