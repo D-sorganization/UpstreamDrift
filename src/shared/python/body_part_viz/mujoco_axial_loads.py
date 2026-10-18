@@ -35,6 +35,11 @@ class ExternalWrench(Protocol):
     torque_nm: Sequence[float] | None
 
 
+def _enum(native: Any, group: str, name: str) -> int:
+    """Return the integer value of a native enum member (``native.<group>.<name>``)."""
+    return int(getattr(getattr(native, group), name))
+
+
 class MujocoAxialLoadSource:
     """Extract proximal reactions for named bodies with an unambiguous axis.
 
@@ -95,7 +100,7 @@ class MujocoAxialLoadSource:
         do not share one anchor. With ``first_joint`` the first joint's anchor wins.
         """
         model = self.model
-        free = int(self._native.mjtJoint.mjJNT_FREE)
+        free = int(_enum(self._native, "mjtJoint", "mjJNT_FREE"))
         start, count = model.body_jntadr[body], model.body_jntnum[body]
         joints = list(range(start, start + count))
         if any(int(model.jnt_type[j]) == free for j in joints):
@@ -135,7 +140,7 @@ class MujocoAxialLoadSource:
         if model.body_parentid[body] != 0:
             return False
         start, count = model.body_jntadr[body], model.body_jntnum[body]
-        slide = int(self._native.mjtJoint.mjJNT_SLIDE)
+        slide = int(_enum(self._native, "mjtJoint", "mjJNT_SLIDE"))
         kinds = [int(model.jnt_type[j]) for j in range(start, start + count)]
         return kinds.count(slide) >= 3
 
@@ -241,7 +246,9 @@ class MujocoAxialLoadSource:
         """
         if self._contactless is None:
             model = copy.copy(self.model)
-            model.opt.disableflags |= int(self._native.mjtDisableBit.mjDSBL_CONTACT)
+            model.opt.disableflags |= int(
+                _enum(self._native, "mjtDisableBit", "mjDSBL_CONTACT")
+            )
             self._contactless = (model, self._native.MjData(model))
         return self._contactless
 

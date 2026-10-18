@@ -297,6 +297,10 @@ def _isolate_qsettings(tmp_path_factory):
         yield
         return
     settings_cls = qtcore.QSettings
+    if not hasattr(settings_cls, "defaultFormat"):
+        # Headless stubs (DummyQSettings) have no native format to isolate.
+        yield
+        return
     previous = settings_cls.defaultFormat()
     root = tmp_path_factory.mktemp("qsettings")
     settings_cls.setDefaultFormat(settings_cls.Format.IniFormat)
