@@ -138,6 +138,8 @@ class PinocchioGUI(
         super().__init__()
 
         from src.shared.python.body_part_viz.force_color_controls import (
+            ForceColorHub,
+            bind_force_color_persistence,
             install_force_color_menu,
         )
         from src.shared.python.body_part_viz.meshcat_force_colors import (
@@ -145,6 +147,7 @@ class PinocchioGUI(
         )
 
         self.segment_force_colors = MeshcatForceColorSession()
+        self.force_color_hub = ForceColorHub()
 
         self._init_internal_state()
 
@@ -161,7 +164,14 @@ class PinocchioGUI(
 
         self._setup_ui()
 
-        install_force_color_menu(self, lambda: [self.segment_force_colors])
+        install_force_color_menu(
+            self, lambda: [self.segment_force_colors], hub=self.force_color_hub
+        )
+        bind_force_color_persistence(
+            self.force_color_hub,
+            "pinocchio",
+            {"show_forces": self.chk_forces, "show_torques": self.chk_torques},
+        )
 
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self._game_loop)
