@@ -647,7 +647,7 @@ def _export_clip(
                 speed=plan.speed,
                 ms_from_impact=(t - impact) * 1000.0,
                 shading_legend=shading_legend(settings.shading)
-                if settings.shading_enabled
+                if settings.shading is not None and settings.shading_enabled
                 else "",
             )
             labelled = {
