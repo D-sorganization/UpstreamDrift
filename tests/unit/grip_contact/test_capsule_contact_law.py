@@ -20,13 +20,17 @@ import pytest
 
 from src.shared.python.grip_contact import BushingState, GripInterface
 from src.shared.python.grip_contact.pad_contact import (
+    build_pad_model,
+    pad_wrench,
+)
+from src.shared.python.grip_contact.pair_contact import (
     ContactCapsule,
     ContactSphere,
     PairWrench,
-    build_pad_model,
     capsule_capsule,
+    capsule_sphere,
+    closest_point_segment,
     closest_points_segments,
-    pad_wrench,
     sphere_capsule,
 )
 from src.shared.python.grip_contact.pad_layout import PadLayout
@@ -472,6 +476,35 @@ def test_dbc_preconditions(default_law: ContactParameters) -> None:
 
     with pytest.raises(TypeError, match="law"):
         sphere_capsule(sph, cap, law="not_a_law")  # type: ignore[arg-type]
+
+    with pytest.raises(TypeError, match="ContactSphere"):
+        sphere_capsule("not_a_sphere", cap, law=default_law)  # type: ignore[arg-type]
+
+    with pytest.raises(TypeError, match="ContactCapsule"):
+        sphere_capsule(sph, "not_a_capsule", law=default_law)  # type: ignore[arg-type]
+
+    with pytest.raises(TypeError, match="ContactCapsule"):
+        capsule_capsule("not_a_capsule", cap, law=default_law)  # type: ignore[arg-type]
+
+    with pytest.raises(TypeError, match="ContactCapsule"):
+        capsule_capsule(cap, "not_a_capsule", law=default_law)  # type: ignore[arg-type]
+
+    with pytest.raises(TypeError, match="ContactCapsule"):
+        capsule_sphere("not_a_capsule", sph, law=default_law)  # type: ignore[arg-type]
+
+    with pytest.raises(TypeError, match="ContactSphere"):
+        capsule_sphere(cap, "not_a_sphere", law=default_law)  # type: ignore[arg-type]
+
+    with pytest.raises(TypeError, match="ndarray"):
+        closest_point_segment([0, 0, 0], np.zeros(3), np.ones(3))  # type: ignore[arg-type]
+
+    with pytest.raises(TypeError, match="ndarray"):
+        closest_points_segments(
+            [0, 0, 0],
+            np.zeros(3),
+            np.zeros(3),
+            np.ones(3),  # type: ignore[arg-type]
+        )
 
 
 def test_closest_points_segments_exact_geometry() -> None:
