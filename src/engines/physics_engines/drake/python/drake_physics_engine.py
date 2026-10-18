@@ -55,6 +55,17 @@ if DRAKE_AVAILABLE:
     )
     from pydrake.multibody.tree import JointActuatorIndex
 
+    try:
+        from pydrake.multibody.tree import JointIndex
+    except ImportError:
+        JointIndex = getattr(pydrake.multibody.tree, "JointIndex", lambda i: i)  # type: ignore[misc,assignment]
+else:
+    DiagramBuilder: Any = None  # type: ignore[no-redef]
+    MultibodyPlant: Any = None  # type: ignore[no-redef]
+    JointActuatorIndex: Any = None  # type: ignore[no-redef]
+    JointIndex: Any = None  # type: ignore[no-redef]
+    AddMultibodyPlantSceneGraph: Any = None  # type: ignore[no-redef]
+
 from src.engines.physics_engines.drake.python.drake_forces import (
     gravity_external_forces,
 )
@@ -314,21 +325,73 @@ class DrakePhysicsEngine(BasePhysicsEngine):
         return 0.0
 
     def get_joint_names(self) -> list[str]:
-        """Get list of joint names."""
+        """Get list of joint names matching generalized velocity dimensions (nv).
+
+        Returns:
+            List of unique, non-empty joint names of length nv in model order.
+            Empty list if no model is loaded.
+        """
         if not self.plant:
             return []
 
-        # Drake has actuators.
-        names = []
-        for i in range(self.plant.num_actuators()):
-            actuator_idx = JointActuatorIndex(i)
-            act = self.plant.get_joint_actuator(actuator_idx)
-            names.append(act.name())
+        nv = int(self.plant.num_velocities())
+        if nv == 0:
+            return []
 
-        if not names:
-            # If there are no actuators defined, fall back to generic names
-            # derived from the number of generalized velocities (dofs).
-            names.extend([f"dof_{i}" for i in range(self.plant.num_velocities())])
+        names: list[str] = [""] * nv
+        num_joints = 0
+        if hasattr(self.plant, "num_joints"):
+            try:
+                val = self.plant.num_joints()
+                if isinstance(val, (int, np.integer)):
+                    num_joints = int(val)
+            except (RuntimeError, ValueError, AttributeError, TypeError) as e:
+                logger.debug("Failed querying Drake num_joints: %s", e)
+                num_joints = 0
+
+        joint_index_fn = JointIndex if JointIndex is not None else lambda i: i
+
+        for i in range(num_joints):
+            try:
+                joint = self.plant.get_joint(joint_index_fn(i))
+                num_v_raw = (
+                    joint.num_velocities() if hasattr(joint, "num_velocities") else None
+                )
+                if not isinstance(num_v_raw, (int, np.integer)):
+                    continue
+                num_v = int(num_v_raw)
+                if num_v == 0:
+                    continue
+                start_v_raw = (
+                    joint.velocity_start() if hasattr(joint, "velocity_start") else None
+                )
+                if not isinstance(start_v_raw, (int, np.integer)):
+                    continue
+                start_v = int(start_v_raw)
+
+                name_raw = joint.name() if hasattr(joint, "name") else ""
+                raw_name = str(name_raw) if isinstance(name_raw, str) else ""
+                j_name = raw_name if raw_name else f"joint_{i}"
+                if num_v == 1:
+                    if 0 <= start_v < nv:
+                        names[start_v] = j_name
+                else:
+                    for d in range(num_v):
+                        if 0 <= start_v + d < nv:
+                            names[start_v + d] = f"{j_name}_{d}"
+            except (
+                RuntimeError,
+                ValueError,
+                AttributeError,
+                TypeError,
+                IndexError,
+            ) as e:
+                logger.debug("Failed querying Drake joint %d: %s", i, e)
+                continue
+
+        for k in range(nv):
+            if not names[k]:
+                names[k] = f"dof_{k}"
 
         return names
 
