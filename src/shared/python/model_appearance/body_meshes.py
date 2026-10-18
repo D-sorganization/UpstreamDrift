@@ -70,6 +70,10 @@ from src.shared.python.model_appearance.cross_section import (
     width_hint_for,
 )
 from src.shared.python.model_appearance.grip_hands import assembly_meshes_with_hands
+from src.shared.python.model_appearance.pelvis_width import (
+    PelvisWidth,
+    resolve_pelvis_width,
+)
 from src.shared.python.model_appearance.schema import AppearanceDocument, Material
 from src.shared.python.motion_matching.visual_skeleton import (
     Capsule,
@@ -232,6 +236,8 @@ class _Context:
     pelvis: Mapping[str, PelvisLandmarks]
     shapes: Mapping[str, Sequence[Shape]]
     club: ClubAssembly | None
+    #: Spec ``subject`` block (stature, optional measured hip breadth).
+    subject: Mapping[str, Any]
     #: The parametric head draws the head body (skull, face, ears, neck).
     head_enabled: bool
     #: Procedural shoe-last shells of the foot bodies that could be sized (F1).
@@ -289,44 +295,80 @@ class _PelvisSegment(_Segment):
     shape: geometry.SplitEllipsoid | None = None
 
 
-def _pelvis_shape(
-    ctx: _Context, body: str, size: SectionSize, scale: float
-) -> geometry.SplitEllipsoid:
-    """Hip-centred solid from the lowest HJC level up to the lumbar plane.
+def _pelvis_plan(
+    marks: PelvisLandmarks,
+    section: BodySection,
+    size: SectionSize,
+    scale: float,
+    subject: Mapping[str, Any],
+) -> tuple[geometry.SplitEllipsoid, PelvisWidth]:
+    """Hip-centred solid from the lower pole up to the lumbar plane (HRG-C4).
 
-    Centre: the HJC midpoint, in the horizontal plane; widest level: the
-    lowest HJC. Half width: the larger of the hint ML semi-axis and what
-    encloses every HJC plus the femur radius and a margin. Half depth: the
-    hint AP semi-axis. It runs ``PELVIS_CROTCH_DROP_M`` below the lowest HJC
-    and is cut flat exactly at the lumbar-joint plane (the chest starts there).
+    Centre: the HJC midpoint, in the horizontal plane, at the lowest HJC
+    level (the widest level). Width: ``pelvis_width.resolve_pelvis_width``
+    (measured breadth or stature prior, raised for femoral-head containment).
+    Half depth: the hint AP semi-axis. The lower pole is
+    ``PELVIS_CROTCH_DROP_M`` below the *mean* HJC height, so vertical HJC
+    asymmetry does not stretch it; the top is cut flat at the lumbar plane.
     """
-    marks, section = ctx.pelvis[body], ctx.sections[body]
     up, ml = section.trunk_up_axis(), section.ml_axis
     hjc = np.stack([marks.hjc_r, marks.hjc_l])
     z_hjc = hjc @ up
-    top = float(marks.lumbar @ up - z_hjc.min())
+    z_low = float(z_hjc.min())
+    top = float(marks.lumbar @ up - z_low)
     if top <= 0:
-        raise ValueError(f"{body}: the lumbar joint is not above the hip joints")
-    ratio = library.PELVIS_WAIST_RATIO
-    half_up = top / math.sqrt(1.0 - ratio**2)
-    femur = library.PART_RADIUS_M["thigh"] + library.PELVIS_HIP_MARGIN_M
+        raise ValueError(f"{marks.body}: the lumbar joint is not above the hip joints")
+    half_up = top / math.sqrt(1.0 - library.PELVIS_WAIST_RATIO**2)
     mid = hjc.mean(axis=0)
-    centre = mid - (mid @ up) * up + z_hjc.min() * up
-    half_width = scale * size.radius_m
-    for point in hjc:
-        level = float(np.clip((point @ up - z_hjc.min()) / half_up, 0.0, 0.999))
-        lateral = abs(float((point - mid) @ ml)) + femur
-        half_width = max(half_width, lateral / math.sqrt(1.0 - level**2))
-    return geometry.SplitEllipsoid(
+    centre = mid - (mid @ up) * up + z_low * up
+    width = resolve_pelvis_width(
+        np.abs((hjc - mid) @ ml),
+        np.clip((z_hjc - z_low) / half_up, 0.0, 0.999),
+        hip_breadth_m=subject.get("hip_breadth_m"),
+        stature_m=subject.get("stature_m"),
+        hint_width_m=2.0 * size.radius_m,
+    )
+    pole = float(z_hjc.mean()) - library.PELVIS_CROTCH_DROP_M
+    half_down = max(z_low - pole, library.PELVIS_MIN_BELOW_HJC_M)
+    shape = geometry.SplitEllipsoid(
         centre,
         up,
         ml,
-        half_width,
+        scale * width.width_m / 2.0,
         scale * size.radius_m * size.aspect,
         half_up,
-        library.PELVIS_CROTCH_DROP_M,
+        half_down,
         top,
     )
+    return shape, width
+
+
+def _pelvis_shape(
+    ctx: _Context, body: str, size: SectionSize, scale: float
+) -> geometry.SplitEllipsoid:
+    """The pelvis solid of ``body`` (see :func:`_pelvis_plan`)."""
+    shape, _ = _pelvis_plan(
+        ctx.pelvis[body], ctx.sections[body], size, scale, ctx.subject
+    )
+    return shape
+
+
+def pelvis_width_report(spec: Mapping[str, Any]) -> dict[str, PelvisWidth]:
+    """Resolved width, source and status (``containment_dominated`` ...) per pelvis.
+
+    Postcondition: one entry per body with hip and lumbar landmarks.
+    """
+    sections = body_sections(spec)
+    out: dict[str, PelvisWidth] = {}
+    for body, marks in pelvis_landmarks(spec).items():
+        if body not in sections:
+            continue
+        shapes = [s for s in derive_visual_skeleton(spec).shapes if s.body == body]
+        size = _section_size(library.classify_body(body), shapes, sections[body])
+        out[body] = _pelvis_plan(
+            marks, sections[body], size, 1.0, spec.get("subject", {})
+        )[1]
+    return out
 
 
 def _pelvis_segment(
@@ -471,6 +513,7 @@ def body_meshes(
         pelvis_landmarks(spec),
         shapes,
         club,
+        spec.get("subject", {}),
         doc.head.enabled,
         foot.foot_parts(spec, sections, model=doc.foot.model),
     )

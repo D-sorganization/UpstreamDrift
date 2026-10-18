@@ -22,6 +22,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, cast
 
+from src.shared.python.model_appearance.defaults import default_fields
+
 SCHEMA_VERSION = "appearance-v1"
 SCHEMA_PATH = Path(__file__).with_name("appearance_v1.schema.json")
 APPEARANCE_SUFFIX = ".appearance.json"
@@ -29,7 +31,11 @@ APPEARANCE_SUFFIX = ".appearance.json"
 VISUAL_ONLY_SPEC_KEYS = ("visual_hints", "appearance")
 # Owner ruling (#12685): the default outfit is charcoal trousers. The preset
 # itself is defined in ``library.CLOTHING``, which checks this name exists.
-DEFAULT_CLOTHING = "golf_polo_trousers"
+# Every default comes from the one contract (HRG-B1, #13163; see ``defaults``).
+_DEFAULTS = default_fields()
+DEFAULT_CLOTHING = _DEFAULTS["clothing"]
+DEFAULT_SKIN_TONE = _DEFAULTS["skin_tone"]
+DEFAULT_CLUB_FINISH = _DEFAULTS["club_finish"]
 
 
 @dataclass(frozen=True)
@@ -156,9 +162,9 @@ class FootSettings:
 @dataclass(frozen=True)
 class AppearanceDocument:
     name: str = "default"
-    skin_tone: str = "skin_medium"
+    skin_tone: str = DEFAULT_SKIN_TONE
     clothing: str = DEFAULT_CLOTHING
-    club_finish: str = "satin_steel"
+    club_finish: str = DEFAULT_CLUB_FINISH
     materials: dict[str, Material] = field(default_factory=dict)
     segments: tuple[SegmentRule, ...] = ()
     environment: Environment = field(default_factory=Environment)
@@ -309,9 +315,9 @@ def document_from_dict(data: Mapping[str, Any]) -> AppearanceDocument:
     )
     doc = AppearanceDocument(
         name=data.get("name", "default"),
-        skin_tone=data.get("skin_tone", "skin_medium"),
+        skin_tone=data.get("skin_tone", DEFAULT_SKIN_TONE),
         clothing=data.get("clothing", DEFAULT_CLOTHING),
-        club_finish=data.get("club_finish", "satin_steel"),
+        club_finish=data.get("club_finish", DEFAULT_CLUB_FINISH),
         materials=materials,
         segments=tuple(
             SegmentRule(

@@ -68,8 +68,8 @@ _KEYPOINT_SYNONYMS: dict[str, str] = {
     "pelvis": "mid_hip",
     "neck": "neck",
     "nose": "nose",
-    "head": "nose",
-    "c7": "neck",
+    "head": "head",
+    "c7": "c7",
     "right_shoulder": "r_shoulder",
     "rshoulder": "r_shoulder",
     "r_shoulder": "r_shoulder",
@@ -118,6 +118,12 @@ _KEYPOINT_SYNONYMS: dict[str, str] = {
     "left_big_toe": "l_toe",
     "lbigtoe": "l_toe",
     "l_toe": "l_toe",
+    "right_foot_index": "r_toe",
+    "r_foot_index": "r_toe",
+    "rfootindex": "r_toe",
+    "left_foot_index": "l_toe",
+    "l_foot_index": "l_toe",
+    "lfootindex": "l_toe",
     "right_small_toe": "r_small_toe",
     "rsmalltoe": "r_small_toe",
     "left_small_toe": "l_small_toe",
@@ -278,29 +284,45 @@ class OpenCapMarkerAugmenter:
                 _KEYPOINT_SYNONYMS.get(k.lower(), k.lower()): np.asarray(v, dtype=float)
                 for k, v in keypoints.items()
             }
-            n_frames = next(iter(kpt_dict.values())).shape[0]
+            n_frames = next(iter(kpt_dict.values())).shape[0] if kpt_dict else 0
             times = np.arange(n_frames, dtype=float) / fps
+            require(
+                all(arr.shape[0] == n_frames for arr in kpt_dict.values()),
+                "All keypoint arrays must share length n_frames",
+            )
             return kpt_dict, times
 
         raise TypeError(f"Unsupported keypoints input type: {type(keypoints)}")
 
     @staticmethod
     def _from_canonical_obs(obs: CanonicalObservations) -> dict[str, np.ndarray]:
-        kpt_dict: dict[str, list[list[float]]] = {}
+        n_frames = len(obs.frames)
+        all_canons: set[str] = set()
         for frame in obs.frames:
+            for name in frame.markers:
+                all_canons.add(_KEYPOINT_SYNONYMS.get(name.lower(), name.lower()))
+        kpt_dict = {c: np.full((n_frames, 3), np.nan, dtype=float) for c in all_canons}
+        for f_idx, frame in enumerate(obs.frames):
             for name, m in frame.markers.items():
                 canon = _KEYPOINT_SYNONYMS.get(name.lower(), name.lower())
-                kpt_dict.setdefault(canon, []).append([m.x, m.y, m.z])
-        return {k: np.array(v, dtype=float) for k, v in kpt_dict.items()}
+                if not m.occluded and np.all(np.isfinite([m.x, m.y, m.z])):
+                    kpt_dict[canon][f_idx] = [m.x, m.y, m.z]
+        return kpt_dict
 
     @staticmethod
     def _from_marker_traj(traj: MarkerTrajectory) -> dict[str, np.ndarray]:
-        kpt_dict: dict[str, list[list[float]]] = {}
+        n_frames = len(traj.frames)
+        all_canons: set[str] = set()
         for frame in traj.frames:
+            for name in frame.markers:
+                all_canons.add(_KEYPOINT_SYNONYMS.get(name.lower(), name.lower()))
+        kpt_dict = {c: np.full((n_frames, 3), np.nan, dtype=float) for c in all_canons}
+        for f_idx, frame in enumerate(traj.frames):
             for name, m in frame.markers.items():
                 canon = _KEYPOINT_SYNONYMS.get(name.lower(), name.lower())
-                kpt_dict.setdefault(canon, []).append([m.x, m.y, m.z])
-        return {k: np.array(v, dtype=float) for k, v in kpt_dict.items()}
+                if not m.occluded and np.all(np.isfinite([m.x, m.y, m.z])):
+                    kpt_dict[canon][f_idx] = [m.x, m.y, m.z]
+        return kpt_dict
 
     def _synthesize_markers(
         self,
@@ -309,27 +331,48 @@ class OpenCapMarkerAugmenter:
     ) -> CanonicalObservations:
         """Synthesize 43 LaiUhlrich2022 markers from input keypoints."""
         n_frames = len(times)
-        base = _extract_base_keypoints(kpts, n_frames)
+        base, imputed_keypoints = _extract_base_keypoints(kpts, n_frames)
         markers_43: dict[str, np.ndarray] = {}
-        _compute_pelvis_and_leg_markers(base, markers_43)
-        _compute_arm_and_cluster_markers(base, markers_43)
+        _compute_pelvis_and_leg_markers(base, markers_43, imputed_keypoints)
+        _compute_arm_and_cluster_markers(base, markers_43, imputed_keypoints)
 
-        # Build CanonicalObservationFrames
+        # Build CanonicalObservationFrames with NaN-safe propagation and gap counting
+        gap_count = 0
         frames: list[CanonicalObservationFrame] = []
         for i, t in enumerate(times):
             frame_m: dict[str, Marker] = {}
+            frame_gaps = 0
             for m_name in OPENCAP_AUGMENTED_MARKERS:
                 pos = markers_43[m_name][i]
-                frame_m[m_name] = Marker(
-                    name=m_name,
-                    x=float(pos[0]),
-                    y=float(pos[1]),
-                    z=float(pos[2]),
-                )
+                if np.all(np.isfinite(pos)):
+                    frame_m[m_name] = Marker(
+                        name=m_name,
+                        x=float(pos[0]),
+                        y=float(pos[1]),
+                        z=float(pos[2]),
+                        occluded=False,
+                    )
+                else:
+                    gap_count += 1
+                    frame_gaps += 1
+                    frame_m[m_name] = Marker.model_construct(
+                        name=m_name,
+                        x=float(pos[0]),
+                        y=float(pos[1]),
+                        z=float(pos[2]),
+                        residual=None,
+                        occluded=True,
+                    )
+            frame_meta = {"gap_count": frame_gaps} if frame_gaps else {}
             frames.append(
-                CanonicalObservationFrame(timestamp=float(t), markers=frame_m)
+                CanonicalObservationFrame(
+                    timestamp=float(t),
+                    markers=frame_m,
+                    metadata=frame_meta,
+                )
             )
 
+        imputed_list = sorted(imputed_keypoints)
         return CanonicalObservations(
             id="augmented-opencap-markers",
             frames=frames,
@@ -339,33 +382,96 @@ class OpenCapMarkerAugmenter:
                 "source": "opencap_marker_augmenter",
                 "subject_height_m": self.config.height_m,
                 "subject_mass_kg": self.config.mass_kg,
+                "imputed_keypoints": imputed_list,
+                "gap_count": gap_count,
             },
             source_provenance={
                 "evidence_level": "model-conditioned",
                 "generator": "opencap-marker-augmenter",
+                "imputed_keypoints": imputed_list,
+                "gap_count": gap_count,
             },
         )
 
 
+def _derive_mid_hip(
+    kpts: dict[str, np.ndarray], n_frames: int, imputed: set[str]
+) -> np.ndarray:
+    """Derive mid_hip from available keypoints before falling back to offsets."""
+    if "mid_hip" in kpts:
+        return kpts["mid_hip"]
+    imputed.add("mid_hip")
+    if "r_hip" in kpts and "l_hip" in kpts:
+        return (kpts["r_hip"] + kpts["l_hip"]) / 2.0
+    if "r_hip" in kpts:
+        return kpts["r_hip"] + np.array([0.0, 0.0, -0.10])
+    if "l_hip" in kpts:
+        return kpts["l_hip"] + np.array([0.0, 0.0, 0.10])
+    if "neck" in kpts:
+        return kpts["neck"] - np.array([0.0, 0.60, 0.0])
+    if "r_shoulder" in kpts and "l_shoulder" in kpts:
+        sh_mid = (kpts["r_shoulder"] + kpts["l_shoulder"]) / 2.0
+        return sh_mid - np.array([0.0, 0.55, 0.0])
+    if "r_shoulder" in kpts:
+        return kpts["r_shoulder"] - np.array([0.0, 0.55, 0.20])
+    if "l_shoulder" in kpts:
+        return kpts["l_shoulder"] - np.array([0.0, 0.55, -0.20])
+    if "r_knee" in kpts and "l_knee" in kpts:
+        return (kpts["r_knee"] + kpts["l_knee"]) / 2.0 + np.array([0.0, 0.40, 0.0])
+    if len(kpts) > 0:
+        return next(iter(kpts.values())).copy()
+    return np.zeros((n_frames, 3))
+
+
+def _derive_neck(
+    kpts: dict[str, np.ndarray], mid_hip: np.ndarray, imputed: set[str]
+) -> np.ndarray:
+    """Derive neck from available keypoints before falling back to mid_hip offset."""
+    if "neck" in kpts:
+        return kpts["neck"]
+    imputed.add("neck")
+    if "c7" in kpts:
+        return kpts["c7"] + np.array([0.05, -0.02, 0.0])
+    if "r_shoulder" in kpts and "l_shoulder" in kpts:
+        sh_mid = (kpts["r_shoulder"] + kpts["l_shoulder"]) / 2.0
+        return sh_mid + np.array([0.0, 0.05, 0.0])
+    if "r_shoulder" in kpts:
+        return kpts["r_shoulder"] + np.array([0.0, 0.05, -0.20])
+    if "l_shoulder" in kpts:
+        return kpts["l_shoulder"] + np.array([0.0, 0.05, 0.20])
+    if "nose" in kpts:
+        return kpts["nose"] - np.array([0.0, 0.20, 0.0])
+    return mid_hip + np.array([0.0, 0.60, 0.0])
+
+
 def _extract_base_keypoints(
     kpts: dict[str, np.ndarray], n_frames: int
-) -> dict[str, np.ndarray]:
+) -> tuple[dict[str, np.ndarray], set[str]]:
     """Extract and impute canonical base joint keypoints."""
-    mid_hip = kpts.get("mid_hip", np.zeros((n_frames, 3)))
-    neck = kpts.get("neck", mid_hip + np.array([0.0, 0.60, 0.0]))
-    r_hip = kpts.get("r_hip", mid_hip + np.array([0.0, 0.0, 0.10]))
-    l_hip = kpts.get("l_hip", mid_hip + np.array([0.0, 0.0, -0.10]))
-    r_knee = kpts.get("r_knee", r_hip + np.array([0.0, -0.40, 0.0]))
-    l_knee = kpts.get("l_knee", l_hip + np.array([0.0, -0.40, 0.0]))
-    r_ank = kpts.get("r_ankle", r_knee + np.array([0.0, -0.40, 0.0]))
-    l_ank = kpts.get("l_ankle", l_knee + np.array([0.0, -0.40, 0.0]))
-    r_sh = kpts.get("r_shoulder", neck + np.array([0.0, -0.05, 0.20]))
-    l_sh = kpts.get("l_shoulder", neck + np.array([0.0, -0.05, -0.20]))
-    r_elb = kpts.get("r_elbow", r_sh + np.array([0.0, -0.28, 0.0]))
-    l_elb = kpts.get("l_elbow", l_sh + np.array([0.0, -0.28, 0.0]))
-    r_wri = kpts.get("r_wrist", r_elb + np.array([0.0, -0.24, 0.0]))
-    l_wri = kpts.get("l_wrist", l_elb + np.array([0.0, -0.24, 0.0]))
-    return {
+    imputed: set[str] = set()
+    mid_hip = _derive_mid_hip(kpts, n_frames, imputed)
+    neck = _derive_neck(kpts, mid_hip, imputed)
+
+    def _resolve(key: str, fallback_calc: Any) -> np.ndarray:
+        if key in kpts:
+            return kpts[key]
+        imputed.add(key)
+        return fallback_calc()
+
+    r_hip = _resolve("r_hip", lambda: mid_hip + np.array([0.0, 0.0, 0.10]))
+    l_hip = _resolve("l_hip", lambda: mid_hip + np.array([0.0, 0.0, -0.10]))
+    r_knee = _resolve("r_knee", lambda: r_hip + np.array([0.0, -0.40, 0.0]))
+    l_knee = _resolve("l_knee", lambda: l_hip + np.array([0.0, -0.40, 0.0]))
+    r_ank = _resolve("r_ankle", lambda: r_knee + np.array([0.0, -0.40, 0.0]))
+    l_ank = _resolve("l_ankle", lambda: l_knee + np.array([0.0, -0.40, 0.0]))
+    r_sh = _resolve("r_shoulder", lambda: neck + np.array([0.0, -0.05, 0.20]))
+    l_sh = _resolve("l_shoulder", lambda: neck + np.array([0.0, -0.05, -0.20]))
+    r_elb = _resolve("r_elbow", lambda: r_sh + np.array([0.0, -0.28, 0.0]))
+    l_elb = _resolve("l_elbow", lambda: l_sh + np.array([0.0, -0.28, 0.0]))
+    r_wri = _resolve("r_wrist", lambda: r_elb + np.array([0.0, -0.24, 0.0]))
+    l_wri = _resolve("l_wrist", lambda: l_elb + np.array([0.0, -0.24, 0.0]))
+
+    base = {
         "mid_hip": mid_hip,
         "neck": neck,
         "r_hip": r_hip,
@@ -381,10 +487,27 @@ def _extract_base_keypoints(
         "r_wri": r_wri,
         "l_wri": l_wri,
     }
+    for opt in (
+        "c7",
+        "nose",
+        "head",
+        "r_toe",
+        "l_toe",
+        "r_heel",
+        "l_heel",
+        "r_small_toe",
+        "l_small_toe",
+    ):
+        if opt in kpts:
+            base[opt] = kpts[opt]
+
+    return base, imputed
 
 
 def _compute_pelvis_and_leg_markers(
-    base: dict[str, np.ndarray], markers: dict[str, np.ndarray]
+    base: dict[str, np.ndarray],
+    markers: dict[str, np.ndarray],
+    imputed: set[str] | None = None,
 ) -> None:
     """Compute pelvis and lower extremity anatomical markers."""
     r_hip, l_hip = base["r_hip"], base["l_hip"]
@@ -402,21 +525,55 @@ def _compute_pelvis_and_leg_markers(
     markers["r_mknee_study"] = r_knee + np.array([0.0, 0.0, -0.05])
     markers["r_ankle_study"] = r_ank + np.array([0.0, 0.0, 0.04])
     markers["r_mankle_study"] = r_ank + np.array([0.0, 0.0, -0.04])
-    markers["r_calc_study"] = r_ank + np.array([-0.06, -0.04, 0.0])
-    markers["r_toe_study"] = r_ank + np.array([0.16, -0.06, 0.0])
-    markers["r_5meta_study"] = r_ank + np.array([0.14, -0.06, 0.04])
+
+    if "r_calc" in base:
+        markers["r_calc_study"] = base["r_calc"].copy()
+    elif "r_heel" in base:
+        markers["r_calc_study"] = base["r_heel"].copy()
+    else:
+        markers["r_calc_study"] = r_ank + np.array([-0.06, -0.04, 0.0])
+
+    if "r_toe" in base:
+        markers["r_toe_study"] = base["r_toe"].copy()
+    else:
+        markers["r_toe_study"] = r_ank + np.array([0.16, -0.06, 0.0])
+        if imputed is not None:
+            imputed.add("r_toe")
+
+    if "r_small_toe" in base:
+        markers["r_5meta_study"] = base["r_small_toe"].copy()
+    else:
+        markers["r_5meta_study"] = r_ank + np.array([0.14, -0.06, 0.04])
 
     markers["L_knee_study"] = l_knee + np.array([0.0, 0.0, -0.05])
     markers["L_mknee_study"] = l_knee + np.array([0.0, 0.0, 0.05])
     markers["L_ankle_study"] = l_ank + np.array([0.0, 0.0, -0.04])
     markers["L_mankle_study"] = l_ank + np.array([0.0, 0.0, 0.04])
-    markers["L_calc_study"] = l_ank + np.array([-0.06, -0.04, 0.0])
-    markers["L_toe_study"] = l_ank + np.array([0.16, -0.06, 0.0])
-    markers["L_5meta_study"] = l_ank + np.array([0.14, -0.06, -0.04])
+
+    if "l_calc" in base:
+        markers["L_calc_study"] = base["l_calc"].copy()
+    elif "l_heel" in base:
+        markers["L_calc_study"] = base["l_heel"].copy()
+    else:
+        markers["L_calc_study"] = l_ank + np.array([-0.06, -0.04, 0.0])
+
+    if "l_toe" in base:
+        markers["L_toe_study"] = base["l_toe"].copy()
+    else:
+        markers["L_toe_study"] = l_ank + np.array([0.16, -0.06, 0.0])
+        if imputed is not None:
+            imputed.add("l_toe")
+
+    if "l_small_toe" in base:
+        markers["L_5meta_study"] = base["l_small_toe"].copy()
+    else:
+        markers["L_5meta_study"] = l_ank + np.array([0.14, -0.06, -0.04])
 
 
 def _compute_arm_and_cluster_markers(
-    base: dict[str, np.ndarray], markers: dict[str, np.ndarray]
+    base: dict[str, np.ndarray],
+    markers: dict[str, np.ndarray],
+    imputed: set[str] | None = None,
 ) -> None:
     """Compute upper body anatomical markers and limb tracking clusters."""
     neck = base["neck"]
@@ -429,7 +586,14 @@ def _compute_arm_and_cluster_markers(
 
     markers["r_shoulder_study"] = r_sh + np.array([0.0, 0.02, 0.02])
     markers["L_shoulder_study"] = l_sh + np.array([0.0, 0.02, -0.02])
-    markers["C7_study"] = neck + np.array([-0.05, 0.02, 0.0])
+
+    if "c7" in base:
+        markers["C7_study"] = base["c7"].copy()
+    else:
+        markers["C7_study"] = neck + np.array([-0.05, 0.02, 0.0])
+        if imputed is not None:
+            imputed.add("c7")
+
     markers["r_lelbow_study"] = r_elb + np.array([0.0, 0.0, 0.03])
     markers["r_melbow_study"] = r_elb + np.array([0.0, 0.0, -0.03])
     markers["r_lwrist_study"] = r_wri + np.array([0.0, 0.0, 0.025])

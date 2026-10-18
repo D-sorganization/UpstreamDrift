@@ -54,7 +54,7 @@ def test_build_with_defaults_validates(client: TestClient) -> None:
     body = r.json()
     assert body["spec_sha256"] is None
     doc = document_from_dict(body["appearance"])
-    assert doc.skin_tone == "skin_medium"
+    assert doc.skin_tone == "skin_2"
 
 
 def test_build_applies_picks(client: TestClient) -> None:

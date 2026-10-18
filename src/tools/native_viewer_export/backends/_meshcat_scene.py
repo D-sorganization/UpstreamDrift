@@ -42,6 +42,7 @@ from numpy.typing import NDArray
 
 from src.shared.python.model_appearance import library
 from src.shared.python.model_appearance.body_meshes import resolve_appearance
+from src.shared.python.model_appearance.defaults import default_appearance
 from src.shared.python.model_appearance.club_assembly import assembly_from_spec
 from src.shared.python.model_appearance.schema import (
     AppearanceDocument,
@@ -115,11 +116,6 @@ class SceneVisuals:
 
     def bodies(self) -> set[str]:
         return {item.body for item in self.items}
-
-
-def default_appearance() -> AppearanceDocument:
-    """The default appearance document every engine renders (as MuJoCo does)."""
-    return document_from_dict({"schema_version": "appearance-v1"})
 
 
 def check_bodies(scene: SceneVisuals, known: Collection[str]) -> None:
