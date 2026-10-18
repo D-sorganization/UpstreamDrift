@@ -26,7 +26,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .analytics import SwingDataUnavailable, summarize_swing
 from .cameras import PinholeCamera
-from .camera_source import CameraSourceEvidence
+from .camera_source import CameraSourceEvidence, validate_camera_baselines
 from .clean import CleanReport, clean_view
 from .bundle import compact_frames, observations_from_views
 from .measurements import expand_measurements, gauge
@@ -192,6 +192,7 @@ def reconstruct_session(
         assert intrinsics is not None
         start_cameras = _initial_cameras(out_dir, ids, intrinsics, scale_anchor)
     start_cameras = retain_camera_lenses(start_cameras, corrections)
+    validate_camera_baselines(start_cameras)
     record: Reconstruction = fit_bundle(
         out_dir,
         base=session_dir,

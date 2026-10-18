@@ -107,3 +107,44 @@ def test_contracts() -> None:
         triangulate(cams, np.zeros((3, 2)), gate_px=0)
     res = reprojection_residuals(cams, np.array([0.0, 1.0, 10.0]), np.zeros((3, 2)))
     assert np.isnan(res[0])  # behind camera a, which sits at z = 4 looking at -z
+
+
+def test_triangulate_degenerate_cameras_fails_closed() -> None:
+    k = intrinsics_from_fov(1920, 1200, 70.0)
+    target = np.array([0.0, 1.0, 0.0])
+
+    # Case 1: identical camera poses (coincident cameras)
+    pos1 = np.array([3.0, 1.0, 0.5])
+    cam_a = PinholeCamera("a", k, look_at(pos1, target), pos1, (1920, 1200))
+    cam_c = PinholeCamera("c", k, look_at(pos1, target), pos1, (1920, 1200))
+    px1 = np.vstack(
+        [
+            cam_a.project(target[None, :])[0][0],
+            cam_c.project(target[None, :])[0][0],
+        ]
+    )
+    res1 = triangulate([cam_a, cam_c], px1)
+    assert not res1.ok
+    assert np.isnan(res1.point_m).all()
+    assert set(res1.rejected) == {"a", "c"}
+    assert res1.contributing == ()
+    assert res1.covariance_m2 is None
+
+    # Case 2: collinear cameras where target point lies on the baseline
+    pos_d = np.array([6.0, 1.0, 0.0])
+    pos_e = np.array([3.0, 1.0, 0.0])
+    cam_d = PinholeCamera("d", k, look_at(pos_d, target), pos_d, (1920, 1200))
+    cam_e = PinholeCamera("e", k, look_at(pos_e, target), pos_e, (1920, 1200))
+    px2 = np.vstack(
+        [
+            cam_d.project(target[None, :])[0][0],
+            cam_e.project(target[None, :])[0][0],
+        ]
+    )
+    res2 = triangulate([cam_d, cam_e], px2)
+    assert not res2.ok
+    assert np.isnan(res2.point_m).all()
+    assert set(res2.rejected) == {"d", "e"}
+    assert res2.contributing == ()
+    assert res2.covariance_m2 is None
+
