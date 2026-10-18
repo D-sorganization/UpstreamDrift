@@ -26,10 +26,12 @@ from src.shared.python.motion_matching.execution.grip_selection import (
     GripOverrides,
     apply_grip_selection,
     apply_visual_picks,
+    resolve_grip,
     visual_grip_block,
 )
 from src.shared.python.motion_matching.grip_contract import (
     GRIP_STRENGTH_PRESETS_DEG,
+    NAMED_GRIP_PRESETS,
     grip_spec_to_physical,
 )
 from src.shared.python.model_appearance.schema import physics_spec_sha256
@@ -90,6 +92,27 @@ def appearance_library() -> dict[str, Any]:
         "glove": list(GLOVE_CHOICES),
         "grip": {
             "presets": dict(GRIP_STRENGTH_PRESETS_DEG),
+            "named_presets": {
+                name: {
+                    "label": p.label,
+                    "style": p.style.value,
+                    "trigger_finger": p.trigger_finger,
+                    "hand_spacing_m": p.hand_spacing_m,
+                    "lead": {
+                        "alpha_deg": p.lead.alpha_deg,
+                        "psi_deg": p.lead.psi_deg,
+                        "gamma_deg": p.lead.gamma_deg,
+                    },
+                    "trail": {
+                        "alpha_deg": p.trail.alpha_deg,
+                        "psi_deg": p.trail.psi_deg,
+                        "gamma_deg": p.trail.gamma_deg,
+                    },
+                    "qualitative_source": p.qualitative_source,
+                    "evidence_still_description": p.evidence_still_description,
+                }
+                for name, p in NAMED_GRIP_PRESETS.items()
+            },
             "styles": list(GRIP_STYLE_CHOICES),
         },
         "headwear": list(HEADWEAR),
@@ -228,9 +251,10 @@ def grip_revision_summary(
     """
     document, grip = apply_grip_selection(character.document, overrides)
     revised = compile_with_grip(character, overrides)
+    visual_grip = resolve_grip(overrides, grip) if grip is not None else None
     return {
         "grip": None if grip is None else grip_spec_to_physical(grip),
-        "visual": None if grip is None else visual_grip_block(grip),
+        "visual": None if visual_grip is None else visual_grip_block(visual_grip),
         "spec_sha256": revised.sha256,
         "physics_spec_sha256": physics_spec_sha256(document),
         "parent_physics_spec_sha256": physics_spec_sha256(character.document),

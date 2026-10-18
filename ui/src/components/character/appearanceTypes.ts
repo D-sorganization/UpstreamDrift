@@ -24,7 +24,11 @@ export interface AppearanceMaterial {
 export interface AppearanceLibrary {
   schema_version: string;
   glove?: string[];
-  grip?: { presets: Record<string, number>; styles: string[] };
+  grip?: {
+    presets: Record<string, number>;
+    named_presets?: Record<string, unknown>;
+    styles: string[];
+  };
   skin_tones: string[];
   clothing: Record<string, Record<string, string>>;
   club_finishes: string[];

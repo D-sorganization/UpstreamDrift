@@ -31,17 +31,21 @@ from src.shared.python.core.handedness import subject_handedness
 from src.shared.python.contracts import require
 from src.shared.python.model_appearance.grip_pose import GripStyle
 from src.shared.python.motion_matching.execution.grip_rotation import (
+    GRIP_PARAMETERS,
     apply_grip_config,
     grip_spec_of,
 )
 from src.shared.python.motion_matching.grip_contract import (
     GRIP_STRENGTH_PRESETS_DEG,
+    NAMED_GRIP_PRESETS,
     GripSpec,
     HandAngles,
     from_grip_rotation,
+    named_grip_preset,
 )
 
-GRIP_PRESET_CHOICES = tuple(GRIP_STRENGTH_PRESETS_DEG)
+NAMED_PRESET_CHOICES = tuple(NAMED_GRIP_PRESETS)
+GRIP_PRESET_CHOICES = (*GRIP_STRENGTH_PRESETS_DEG, *NAMED_PRESET_CHOICES)
 GRIP_STYLE_CHOICES = tuple(s.value for s in GripStyle)
 #: The only keys a sidecar's ``grip`` block may carry (visual values).
 VISUAL_KEYS = ("style", "lead_thumb_offset_deg")
@@ -229,8 +233,22 @@ def resolve_grip(
             grip, sidecar_grip.get("style"), sidecar_grip.get("lead_thumb_offset_deg")
         )
     if picks.preset is not None:
-        hand = GripSpec.preset(picks.preset)
-        grip = replace(grip, lead=hand.lead, trail=hand.trail)
+        if picks.preset in NAMED_GRIP_PRESETS:
+            named_spec = NAMED_GRIP_PRESETS[picks.preset].for_handedness(
+                grip.handedness
+            )
+            grip = replace(
+                grip,
+                lead=named_spec.lead,
+                trail=named_spec.trail,
+                style=named_spec.style,
+                trigger_finger=named_spec.trigger_finger,
+                hand_spacing_m=named_spec.hand_spacing_m,
+                lead_below_butt_m=named_spec.lead_below_butt_m,
+            )
+        else:
+            hand = GripSpec.preset(picks.preset)
+            grip = replace(grip, lead=hand.lead, trail=hand.trail)
     grip = _with_hand_picks(grip, picks)
     return _with_visual(grip, picks.grip_style, picks.grip_thumb_offset_deg)
 
@@ -239,6 +257,8 @@ def apply_grip_selection(
     document: Mapping[str, Any],
     overrides: GripOverrides,
     sidecar_grip: Mapping[str, Any] | None = None,
+    *,
+    provenance: str | Mapping[str, str] | None = None,
 ) -> tuple[dict[str, Any], GripSpec | None]:
     """``(document, grip)`` with the picks resolved against ``document``.
 
@@ -263,9 +283,24 @@ def apply_grip_selection(
         if not overrides.has_physical:
             return {**document}, None
         base = GripSpec(handedness=subject_handedness(document))
-    grip = resolve_grip(overrides, base, sidecar_grip)
+    physical_picks = GripOverrides(**overrides.physical)
+    grip = resolve_grip(physical_picks, base)
     if overrides.has_physical:
-        return apply_grip_config(document, grip), grip
+        prov = provenance
+        if prov is None:
+            if overrides.preset in NAMED_GRIP_PRESETS:
+                prov_map = dict.fromkeys(GRIP_PARAMETERS, "photo_estimate")
+                for pick, (hand, angle) in _HAND_PICKS.items():
+                    if getattr(overrides, pick) is not None:
+                        prov_map[f"{hand}.{angle}"] = "user_declared"
+                if overrides.lead_below_butt is not None:
+                    prov_map["lead_below_butt_m"] = "user_declared"
+                if overrides.hand_spacing is not None:
+                    prov_map["hand_spacing_m"] = "user_declared"
+                prov = prov_map
+            else:
+                prov = "user_declared"
+        return apply_grip_config(document, grip, provenance=prov), grip
     return {**document}, grip
 
 
