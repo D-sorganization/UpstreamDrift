@@ -28,7 +28,16 @@ import dataclasses
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
+import logging
 from typing import Any, TypeAlias
+
+logger = logging.getLogger(__name__)
+
+
+def frame_index(time_s: float, fps: float) -> int:
+    """Discretise physical time in seconds to an integer frame index at the given frame rate."""
+    return int(round(float(time_s) * float(fps)))
+
 
 import numpy as np
 import numpy.typing as npt
@@ -44,6 +53,7 @@ from .skeleton import JOINT_NAMES, PARENTS, SYMMETRIC_PAIRS
 
 Array: TypeAlias = npt.NDArray[np.float64]
 Mask: TypeAlias = npt.NDArray[np.bool_]
+BEHIND_CAMERA_PENALTY_PX: float = 10_000.0
 
 
 @dataclass(frozen=True)
@@ -92,6 +102,8 @@ class Observations:
     camera_ids: tuple[str, ...]
     pixels: Array  # (C, T, K, 2)
     confidence: Array  # (C, T, K)
+    fps: float = 0.0
+    dropped_frames: int = 0
 
     def __post_init__(self) -> None:
         c, t, k, two = self.pixels.shape
@@ -262,9 +274,18 @@ class _Problem:
         out = []
         flat = joints.reshape(-1, 3)
         for c, cam in enumerate(cams):
-            px, _ = cam.project(flat)
+            px, in_front = cam.project(flat)
             px = px.reshape(self.n_t, self.n_k, 2)
+            in_front = in_front.reshape(self.n_t, self.n_k)
             diff = (px - self.obs.pixels[c]) * self.weights[c][..., None] / o.sigma_px
+            behind = ~in_front
+            if behind.any():
+                penalty_comp = (
+                    BEHIND_CAMERA_PENALTY_PX
+                    / (np.sqrt(2.0) * o.sigma_px)
+                    * self.weights[c][..., None]
+                )
+                diff = np.where(behind[..., None], penalty_comp, diff)
             out.append(np.nan_to_num(diff[self.mask[c]]).ravel())
         for s, (child, parent, _) in enumerate(self.segments):
             diff = joints[:, child] - joints[:, parent]
@@ -300,7 +321,6 @@ class _Problem:
         rows: list[int] = []
         cols: list[int] = []
         vals: list[float] = []
-        flat = joints.reshape(-1, 3)
         row = 0
         eps = 1e-6
         for c, cam in enumerate(cams):
@@ -311,26 +331,30 @@ class _Problem:
             fx, fy = cam.matrix[0, 0], cam.matrix[1, 1]
             pts = joints[idx[:, 0], idx[:, 1]]  # (M, 3)
             pc = (pts - cam.translation_world_from_camera_m) @ r_cw.T
-            z = np.maximum(pc[:, 2], 1e-9)
+            in_front = pc[:, 2] > 1e-6
+            z = np.maximum(pc[:, 2], 1e-6)
             w = self.weights[c][idx[:, 0], idx[:, 1]] / self.options.sigma_px  # (M,)
             # d uv / d pc, per observation: (M, 2, 3)
             d_uv = np.zeros((len(idx), 2, 3))
-            d_uv[:, 0, 0] = fx / z
-            d_uv[:, 0, 2] = -fx * pc[:, 0] / z**2
-            d_uv[:, 1, 1] = fy / z
-            d_uv[:, 1, 2] = -fy * pc[:, 1] / z**2
+            d_uv[in_front, 0, 0] = fx / z[in_front]
+            d_uv[in_front, 0, 2] = -fx * pc[in_front, 0] / z[in_front] ** 2
+            d_uv[in_front, 1, 1] = fy / z[in_front]
+            d_uv[in_front, 1, 2] = -fy * pc[in_front, 1] / z[in_front] ** 2
             d_x = np.einsum("mij,jk->mik", d_uv, r_cw) * w[:, None, None]  # d/dX
             rot_cols: Array | None = None
             if c > 0:
-                base_px, _ = cam.project(pts)
+                base_px, base_in_front = cam.project(pts)
                 rot_cols = np.zeros((len(idx), 2, 3))
                 c0, _ = self._camera_columns(c)
                 for a in range(3):
                     xp = x.copy()
                     xp[c0 + a] += eps
                     cam_p = self.unpack(xp)[0][c]
-                    px_p, _ = cam_p.project(pts)
-                    rot_cols[:, :, a] = (px_p - base_px) / eps * w[:, None]
+                    px_p, p_in_front = cam_p.project(pts)
+                    valid = base_in_front & p_in_front
+                    diff_rot = np.zeros_like(px_p)
+                    diff_rot[valid] = (px_p[valid] - base_px[valid]) / eps
+                    rot_cols[:, :, a] = diff_rot * w[:, None]
             for m, (t_i, k_i) in enumerate(idx):
                 j0 = self._joint_column(int(t_i), int(k_i))
                 for r in range(2):
@@ -433,12 +457,14 @@ def _residual_map(
     flat = joints.reshape(-1, 3)
     n_t, n_k = joints.shape[:2]
     for c, cam in enumerate(cams):
-        px, _ = cam.project(flat)
+        px, in_front = cam.project(flat)
+        in_front = in_front.reshape(n_t, n_k)
         diff = px.reshape(n_t, n_k, 2) - obs.pixels[c]
         d = np.sqrt(
             np.einsum("ijk,ijk->ij", diff, diff)
         )  # ⚡ Bolt: np.sqrt(np.einsum) is ~10x faster than np.linalg.norm(..., axis=2)
-        out[c] = np.where(mask[c], d, np.nan)
+        d_penalized = np.where(in_front, d, BEHIND_CAMERA_PENALTY_PX)
+        out[c] = np.where(mask[c], d_penalized, np.nan)
     return out
 
 
@@ -459,12 +485,16 @@ def _leave_one_out_rejections(
             c = obs.camera_ids.index(cid)
             if obs.confidence[c, t, k] > 0:
                 reject[c, t, k] = True
+        for c in range(len(cams)):
+            if residual_px[c, t, k] >= BEHIND_CAMERA_PENALTY_PX:
+                if obs.confidence[c, t, k] > 0:
+                    reject[c, t, k] = True
     return reject
 
 
 def _solve(
     problem: _Problem, x_start: Array, options: BundleOptions
-) -> tuple[Array, int]:
+) -> tuple[Array, int, bool]:
     fit = least_squares(
         problem.residuals,
         x_start,
@@ -475,7 +505,9 @@ def _solve(
         xtol=1e-8,
         x_scale="jac",
     )
-    return np.asarray(fit.x, dtype=float), int(fit.nfev)
+    x = np.asarray(fit.x, dtype=float)
+    converged = bool(fit.status > 0 and np.isfinite(x).all())
+    return x, int(fit.nfev), converged
 
 
 def _segment_units(problem: _Problem, x: Array, options: BundleOptions) -> Array:
@@ -493,7 +525,7 @@ def _segment_units(problem: _Problem, x: Array, options: BundleOptions) -> Array
 
 def _robust_fit(
     problem: _Problem, obs: Observations, options: BundleOptions
-) -> tuple[Array, int]:
+) -> tuple[Array, int, bool]:
     """Iteratively reweighted least squares, robust on reprojection and segments.
 
     SciPy's ``loss=`` would also flatten the anchor and rigid-segment
@@ -502,6 +534,7 @@ def _robust_fit(
     """
     x = problem.x0
     total = 0
+    converged = True
     base = problem.weights.copy()
     widths = (
         None,
@@ -518,15 +551,16 @@ def _robust_fit(
             problem.seg_weights = np.sqrt(
                 _huber_weight(_segment_units(problem, x, options), delta)
             )
-        x, nfev = _solve(problem, x, options)
+        x, nfev, stage_converged = _solve(problem, x, options)
         total += nfev
+        converged = stage_converged
     problem.weights = base
-    return x, total
+    return x, total, converged
 
 
 def _reject_and_refit(
     problem: _Problem, obs: Observations, options: BundleOptions, x: Array
-) -> tuple[Array, Mask, int]:
+) -> tuple[Array, Mask, int, bool]:
     """Leave-one-out rejection per point, drop unobservable points, refit once.
 
     A gross detection drags its 3-D point, so the innocent views of the same
@@ -541,11 +575,11 @@ def _reject_and_refit(
     lonely = survivors.sum(axis=0) < 2
     reject |= survivors & lonely[None, :, :]
     if not reject.any():
-        return x, reject, 0
+        return x, reject, 0, True
     problem.weights = np.where(reject, 0.0, problem.weights)
     problem.mask = problem.mask & ~reject
-    x, nfev = _solve(problem, x, options)
-    return x, reject, nfev
+    x, nfev, converged = _solve(problem, x, options)
+    return x, reject, nfev, converged
 
 
 def bundle_adjust(
@@ -584,9 +618,12 @@ def bundle_adjust(
     r0 = problem.residuals(problem.x0)
     n_obs = 2 * int(problem.mask.sum())
     initial_rms = float(np.sqrt(np.mean(r0[:n_obs] ** 2))) * options.sigma_px
-    x, total_nfev = _robust_fit(problem, obs, options)
-    x, reject_mask, refit_nfev = _reject_and_refit(problem, obs, options, x)
+    x, total_nfev, fit_converged = _robust_fit(problem, obs, options)
+    x, reject_mask, refit_nfev, refit_converged = _reject_and_refit(
+        problem, obs, options, x
+    )
     total_nfev += refit_nfev
+    converged = bool(fit_converged and refit_converged and np.isfinite(x).all())
     cams_out, joints, lengths = problem.unpack(x)
     residual_px = _residual_map(cams_out, joints, obs, problem.mask | reject_mask)
     over_gate = np.nan_to_num(residual_px, nan=0.0) > options.gate_px
@@ -608,7 +645,7 @@ def bundle_adjust(
         rejected=rejected,
         rms_px=float(np.sqrt(np.mean(kept**2))) if kept.size else float("nan"),
         iterations=total_nfev,
-        converged=bool(np.isfinite(x).all()),
+        converged=converged,
         initial_rms_px=initial_rms,
         unobservable_points=int(
             ((problem.mask | reject_mask) & ~flagged).sum(axis=0).__lt__(2).sum()
@@ -619,23 +656,68 @@ def bundle_adjust(
 def observations_from_views(
     views: Mapping[str, Mapping[str, Any]], camera_ids: Sequence[str]
 ) -> Observations:
-    """Stack ``view-observations`` payloads (same layout, same frame count)."""
+    """Stack ``view-observations`` payloads, aligning views on a common time clock."""
     require(len(camera_ids) >= 2, "need at least two views")
+    require(
+        all(cid in views for cid in camera_ids),
+        "all requested camera_ids must be present in views",
+    )
     first = views[camera_ids[0]]
     names = list(first["detector_layout"]["keypoint_names"])
-    total = int(first["frames_total"])
-    px = np.full((len(camera_ids), total, len(names), 2), np.nan)
-    conf = np.zeros((len(camera_ids), total, len(names)))
-    for c, cid in enumerate(camera_ids):
+
+    # Preconditions: consistent detector layout and positive fps across all views
+    for cid in camera_ids:
         payload = views[cid]
         require(
             list(payload["detector_layout"]["keypoint_names"]) == names,
             "views must share one detector layout",
         )
+        require(float(payload["fps"]) > 0, "fps must be positive", cid)
+
+    # Base clock rate: maximum fps across the views ensures physical time alignment
+    base_fps = max(float(views[cid]["fps"]) for cid in camera_ids)
+
+    # Calculate total required slots across all views so no frames are dropped
+    total = 0
+    for cid in camera_ids:
+        payload = views[cid]
         fps = float(payload["fps"])
-        for row in payload["frames"]:
-            t = int(round(float(row["time_s"]) * fps))
-            if 0 <= t < total:
+        if "frames_total" in payload:
+            duration_s = float(payload["frames_total"]) / fps
+            total = max(total, int(round(duration_s * base_fps)))
+        for row in payload.get("frames", []):
+            t = frame_index(float(row["time_s"]), base_fps)
+            total = max(total, t + 1)
+    require(total >= 1, "at least one frame slot required")
+
+    px = np.full((len(camera_ids), total, len(names), 2), np.nan)
+    conf = np.zeros((len(camera_ids), total, len(names)))
+    dropped_count = 0
+
+    for c, cid in enumerate(camera_ids):
+        payload = views[cid]
+        seen_t: set[int] = set()
+        for row in payload.get("frames", []):
+            t = frame_index(float(row["time_s"]), base_fps)
+            if 0 <= t < total and t not in seen_t:
                 px[c, t] = np.asarray(row["keypoints_px"], dtype=float)
                 conf[c, t] = np.asarray(row["confidence"], dtype=float)
-    return Observations(tuple(camera_ids), px, conf)
+                seen_t.add(t)
+            else:
+                dropped_count += 1
+                logger.warning(
+                    "observations_from_views: dropping frame in view %s (t=%d, time_s=%.4f)",
+                    cid,
+                    t,
+                    float(row.get("time_s", float("nan"))),
+                )
+
+    if dropped_count > 0:
+        logger.warning(
+            "observations_from_views: dropped %d frame(s) during multi-view time alignment",
+            dropped_count,
+        )
+
+    return Observations(
+        tuple(camera_ids), px, conf, fps=base_fps, dropped_frames=dropped_count
+    )

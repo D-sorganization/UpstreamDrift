@@ -118,6 +118,8 @@ class HudInfo:
     legend: str
     speed: float | None = None
     ms_from_impact: float | None = None
+    #: tension/compression shading key line (its own line when non-empty)
+    shading_legend: str = ""
 
     def __post_init__(self) -> None:
         if not math.isfinite(self.time_s):
@@ -143,6 +145,8 @@ class HudInfo:
         out = [head]
         if self.legend:
             out.append(self.legend)
+        if self.shading_legend:
+            out.append(self.shading_legend)
         return out
 
 

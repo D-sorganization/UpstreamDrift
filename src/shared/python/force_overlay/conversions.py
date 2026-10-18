@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Sequence
+import dataclasses
 from dataclasses import dataclass
 from typing import Any
 
@@ -367,3 +368,28 @@ def frame_with_axial_loads(
         world_frame=frame.world_frame,
         units=frame.units,
     )
+
+
+def restrict_frame(
+    frame: ForceTorqueFrame,
+    *,
+    show_force: bool,
+    show_torque: bool,
+    body_name: str | None = None,
+) -> ForceTorqueFrame:
+    """Keep only the enabled halves (and optionally one body) of a frame.
+
+    Postcondition: the result contains no force half unless ``show_force`` and no
+    torque half unless ``show_torque``; wrenches left with neither half are
+    dropped. ``axial_loads`` is preserved.
+    """
+    kept: list[OverlayWrench] = []
+    for wrench in frame.wrenches:
+        if body_name is not None and wrench.body != body_name:
+            continue
+        force = wrench.force_n if show_force else None
+        torque = wrench.torque_nm if show_torque else None
+        if force is None and torque is None:
+            continue
+        kept.append(dataclasses.replace(wrench, force_n=force, torque_nm=torque))
+    return dataclasses.replace(frame, wrenches=tuple(kept))

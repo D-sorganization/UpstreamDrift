@@ -10,6 +10,9 @@ from typing import Any
 
 from PyQt6 import QtCore, QtWidgets
 
+from src.shared.python.body_part_viz.force_color_controls import (
+    install_inline_shading_toggle,
+)
 from src.shared.python.dashboard.widgets import LivePlotWidget
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.ui.widgets import LogPanel, SignalBlocker
@@ -176,6 +179,7 @@ class UISetupMixin:
         self.chk_torques.toggled.connect(self._toggle_torques)
         chk_layout.addWidget(self.chk_torques)
         vis_layout.addLayout(chk_layout)
+        install_inline_shading_toggle(self, vis_layout, attr="chk_shading")
 
     def _setup_ellipsoid_controls(self: Any, vis_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the manipulability ellipsoid toggles and body selection grid."""
@@ -334,8 +338,8 @@ class UISetupMixin:
             if widget:
                 widget.deleteLater()
 
-        self.joint_sliders = []
-        self.joint_spinboxes = []
+        self.joint_sliders: list[QtWidgets.QSlider] = []
+        self.joint_spinboxes: list[QtWidgets.QDoubleSpinBox] = []
         self.joint_names = []
 
         # Populate joint_names for joints 1..N (excluding Universe at index 0).

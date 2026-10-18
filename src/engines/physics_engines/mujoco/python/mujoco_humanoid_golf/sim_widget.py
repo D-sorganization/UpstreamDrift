@@ -34,6 +34,7 @@ from .interactive_manipulation import InteractiveManipulator
 from .meshcat_adapter import MuJoCoMeshcatAdapter
 from .physics_engine import MuJoCoPhysicsEngine
 from .sim_camera_mixin import SimCameraMixin
+from .sim_force_color_mixin import SimForceColorMixin
 from .sim_rendering_mixin import SimRenderingMixin
 from .telemetry import TelemetryRecorder
 
@@ -69,6 +70,7 @@ class ModelLoaderThread(QtCore.QThread):
 
 class MuJoCoSimWidget(  # type: ignore[misc]
     SimCameraMixin,
+    SimForceColorMixin,
     SimRenderingMixin,
     QtWidgets.QWidget,
 ):
@@ -89,6 +91,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         from src.shared.python.body_part_viz import ForceColorScale
 
         self.axial_color_scale = ForceColorScale()
+        self._init_force_color_hub()
         self.force_legend_text = ""
         self.show_force_vectors = False
         self.show_torque_vectors = False
@@ -199,7 +202,10 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         )
 
         force_menu = QtWidgets.QMenu(self)
-        force_action = install_force_color_action(force_menu, lambda: [self])
+        force_action = install_force_color_action(
+            force_menu, lambda: [self], hub=self.force_color_hub
+        )
+        self._force_color_action = force_action
         force_button = QtWidgets.QToolButton(self)
         force_button.setObjectName("segment_force_colors")
         force_button.setDefaultAction(force_action)
@@ -215,15 +221,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.timer.start(int(1000 / self.fps))
 
         self.loader_thread: ModelLoaderThread | None = None
-
-    def set_axial_color_scale(self, scale: Any) -> None:
-        """Apply the shared force-color settings and repaint the current frame."""
-        from src.shared.python.body_part_viz import ForceColorScale
-
-        if not isinstance(scale, ForceColorScale):
-            raise TypeError("scale must be ForceColorScale")
-        self.axial_color_scale = scale
-        self._render_once()
+        self.restore_force_overlay_settings()
 
     @property
     def model(self) -> mujoco.MjModel | None:
@@ -679,6 +677,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.show_torque_vectors = enabled
         if scale is not None:
             self.torque_scale = scale
+        self._persist_force_overlay_state()
 
     def set_live_kinematics_visualization(
         self,
@@ -700,6 +699,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.show_force_vectors = enabled
         if scale is not None:
             self.force_scale = scale
+        self._persist_force_overlay_state()
 
     def set_force_style_options(self, options: dict[str, Any] | None) -> None:
         """Set GRF scale mode, reference and group toggles (GCV-4, #11710).

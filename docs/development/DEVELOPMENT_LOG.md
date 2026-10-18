@@ -2574,6 +2574,136 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13188 · Procedural Shoe-Last Feet (HRG-F1): Heel Counter, Medial Arch, Instep Ramp, Asymmetric Toe Box, Flat Sole Sized From Spec Foot Length and a Cited Breadth Ratio; Foot.Model Option
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13188
+- **Branch:** feat/13188-procedural-feet
+- **PR:** #13196
+- **Paths:** see #13196
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`b0aba425`; collated from changes/13188-procedural-shoe-last-feet-hrg-f1-heel-co.md)
+- **Summary:** Procedural shoe-last feet (HRG-F1): heel counter, medial arch, instep ramp, asymmetric toe box, flat sole sized from spec foot length and a cited breadth ratio; foot.model option
+- **Next step:** Shipped in PR #13196.
+
+### DL-#13002 · Align Multi-View Observations by Physical Time Across Different Frame Rates and Report Dropped Frames
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13002
+- **Branch:** merged via #13243
+- **PR:** #13243
+- **Paths:** see #13243
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`412e4fbf`; collated from changes/13002-observations-from-views-fps.md)
+- **Summary:** Align multi-view observations by physical time across different frame rates and report dropped frames
+- **Next step:** Shipped in PR #13243.
+
+### DL-#13163 · HRG-B1: Default Golfer Is Light Skin With Mid Brown Hair From One Serialized Appearance-Defaults Contract (Python + Generated TS), Skin_1..8 and Hair Palettes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13163
+- **Branch:** feat/13163-appearance-default-contract
+- **PR:** #13182
+- **Paths:** see #13182
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`9ef639a9`; collated from changes/13163-hrg-b1-default-golfer-is-light-skin-with.md)
+- **Summary:** HRG-B1: default golfer is light skin with mid brown hair from one serialized appearance-defaults contract (Python + generated TS), skin_1..8 and hair palettes
+- **Next step:** Shipped in PR #13182.
+
+### DL-#13009 · Export NaN Markers With Negative Residual, Homogeneous Coordinates, and Axis Convention in Canonical_C3d_Exporter
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13009
+- **Branch:** merged via #13232
+- **PR:** #13232
+- **Paths:** see #13232
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`c245e9c9`; collated from changes/13009-c3d-exporter-nan-residuals-and-axis.md)
+- **Summary:** Export NaN markers with negative residual, homogeneous coordinates, and axis convention in canonical_c3d_exporter
+- **Next step:** Shipped in PR #13232.
+
+### DL-#13006 · Map Reconstruct and Legacy Joint Names in L3 Paired 3D Comparisons, Fail Closed on Missing or Swapped Bilateral Joints, Compute Kinematic Sequence Order and Timing Error From Angular Velocity Peaks With Explicit Unmeasured None, and Isolate Depth Axis According to Camera Pose and View.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13006
+- **Branch:** merged via #13237
+- **PR:** #13237
+- **Paths:** see #13237
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`da3a7975`; collated from changes/13006-l3-comparison-laterality-angles.md)
+- **Summary:** Map reconstruct and legacy joint names in L3 paired 3D comparisons, fail closed on missing or swapped bilateral joints, compute kinematic sequence order and timing error from angular velocity peaks with explicit unmeasured None, and isolate depth axis according to camera pose and view.
+- **Next step:** Shipped in PR #13237.
+
+### DL-#12972 · Reject Non-Finite Inputs and Validate Shapes in SafetyMonitor
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12972
+- **Branch:** merged via #13229
+- **PR:** #13229
+- **Paths:** see #13229
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`74de6533`; collated from changes/12972-reject-non-finite-inputs-and-validate-sh.md)
+- **Summary:** Reject non-finite inputs and validate shapes in SafetyMonitor
+- **Next step:** Shipped in PR #13229.
+
+### DL-#13187 · HRG-C4: Pelvis Skin Width From Measured Hip Breadth or Stature Prior With Femoral-Head Containment
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13187
+- **Branch:** fix/13187-pelvis-width-prior
+- **PR:** #13193
+- **Paths:** see #13193
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`bb7ad6f3`; collated from changes/13187-hrg-c4-pelvis-skin-width-from-measured-h.md)
+- **Summary:** HRG-C4: pelvis skin width from measured hip breadth or stature prior with femoral-head containment
+- **Next step:** Shipped in PR #13193.
+
+### DL-#13007 · Handle Numeric Array Wrench Point Attributes Without Boolean Evaluation Error and Log Warnings for Unparseable Points in Load_Trace_Forces
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13007
+- **Branch:** merged via #13234
+- **PR:** #13234
+- **Paths:** see #13234
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`03bd87ab`; collated from changes/13007-force-alignment-numeric-attr.md)
+- **Summary:** Handle numeric array wrench point attributes without boolean evaluation error and log warnings for unparseable points in load_trace_forces
+- **Next step:** Shipped in PR #13234.
+
+### DL-#13005 · Enforce Unit, Metric, and Level Preconditions in Error-Budget Guidance Classification
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13005
+- **Branch:** merged via #13236
+- **PR:** #13236
+- **Paths:** see #13236
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`4198982e`; collated from changes/13005-error-budget-guidance-unit-level-matching.md)
+- **Summary:** Enforce unit, metric, and level preconditions in error-budget guidance classification
+- **Next step:** Shipped in PR #13236.
+
+### DL-#12730 · NSX-101: Variability Interpretation Guide, Ten Publication-Gate Rows (All Blocked or Deferred), Five Preregistered External Experiments in DV-12554, and a Variability Sensitivity Section in the Design-Manual QMD Chapter; No Coaching Prescription Validated
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12730
+- **Branch:** merged via #13233
+- **PR:** #13233
+- **Paths:** see #13233
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`913b5eac`; collated from changes/12730-nsx101-variability-docs-gates.md)
+- **Summary:** NSX-101: variability interpretation guide, ten publication-gate rows (all blocked or deferred), five preregistered external experiments in DV-12554, and a Variability Sensitivity section in the design-manual QMD chapter; no coaching prescription validated
+- **Next step:** Shipped in PR #13233.
+
 ### DL-#12973 · OpenCap Augmenter Non-Zero Base Joint Derivation, NaN Marker Propagation, and Gap Counting
 
 - **State:** shipped

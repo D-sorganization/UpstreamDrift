@@ -32,6 +32,7 @@ def test_synth_then_fit_writes_reconstruction_with_metrics(tmp_path: Path) -> No
     assert record["schema_version"].startswith("reconstruction/")
     assert record["frames"] == 24 and len(record["cameras"]) == 3
     assert record["rms_px"] < 2.0
+    assert record["converged"] is True
     assert set(record["metrics"]) == {"cameras", "joints", "bone_length_relative_error"}
     assert all(v["rotation_deg"] < 0.5 for v in record["metrics"]["cameras"].values())
     # the shortest segments (nose, hips) are the least constrained by 24 frames

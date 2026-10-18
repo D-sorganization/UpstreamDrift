@@ -147,6 +147,8 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
         super().__init__()
 
         from src.shared.python.body_part_viz.force_color_controls import (
+            ForceColorHub,
+            bind_force_color_persistence,
             install_force_color_menu,
         )
         from src.shared.python.body_part_viz.meshcat_force_colors import (
@@ -154,6 +156,7 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
         )
 
         self.segment_force_colors = MeshcatForceColorSession()
+        self.force_color_hub = ForceColorHub()
         self._force_overlay: ForceOverlayController | None = None
 
         # Simulation State
@@ -194,7 +197,19 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
         self._drake_ui_initialized = True
 
         install_force_color_menu(
-            self, lambda: [self._force_overlay or self.segment_force_colors]
+            self,
+            lambda: [self._force_overlay or self.segment_force_colors],
+            hub=self.force_color_hub,
+        )
+        # vars(): the checkboxes exist only once _setup_ui has run.
+        toggles = {
+            "show_forces": vars(self).get("chk_show_forces"),
+            "show_torques": vars(self).get("chk_show_torques"),
+        }
+        bind_force_color_persistence(
+            self.force_color_hub,
+            "drake",
+            {name: box for name, box in toggles.items() if box is not None},
         )
 
         # Sync initial state to UI
