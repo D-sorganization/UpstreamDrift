@@ -1,24 +1,22 @@
 """Unit tests for the dataset API route."""
 
+from pathlib import Path
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.api.routes.dataset import router
 from src.api.dependencies import get_engine_manager
+from src.shared.python.engine_core.mock_engine import MockPhysicsEngine
 
 pytestmark = pytest.mark.unit
-
-
-class MockEngine:
-    def __init__(self):
-        self.engine_type = "mock_engine"
 
 
 class MockEngineManager:
     def __init__(self, has_engine=True):
         self.has_engine = has_engine
-        self.engine = MockEngine() if has_engine else None
+        self.engine = MockPhysicsEngine() if has_engine else None
 
     def get_active_physics_engine(self):
         return self.engine
@@ -145,4 +143,84 @@ def app_routes(client: TestClient):
     """Yield the APIRoute objects registered on the client's app."""
     from fastapi.routing import APIRoute
 
-    return [r for r in client.app.routes if isinstance(r, APIRoute)]
+    routes = []
+    app = getattr(client, "app", None)
+    app_routes_list = getattr(app, "routes", [])
+    for r in app_routes_list:
+        if isinstance(r, APIRoute):
+            routes.append(r)
+        elif hasattr(r, "original_router") and hasattr(r.original_router, "routes"):
+            routes.extend(
+                [sub for sub in r.original_router.routes if isinstance(sub, APIRoute)]
+            )
+    return routes
+
+
+def test_dataset_generate_and_export_contract(
+    client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """POST /dataset/generate returns UI GenerateResult shape and export streams the file (#12967)."""
+    output_root = tmp_path / "output"
+    output_root.mkdir(parents=True, exist_ok=True)
+    monkeypatch.chdir(tmp_path)
+    from src.api.routes import dataset as dataset_module
+
+    monkeypatch.setattr(dataset_module, "_dataset_output_roots", lambda: [output_root])
+
+    payload = {
+        "num_samples": 2,
+        "duration": 0.02,
+        "timestep": 0.01,
+        "export_format": "csv",
+        "output_path": "output/test_dataset",
+    }
+    response = client.post("/dataset/generate", json=payload)
+    assert response.status_code == 200, response.text
+    data = response.json()
+
+    # Required by UI GenerateResult contract (#12967)
+    assert "dataset_id" in data
+    assert isinstance(data["dataset_id"], str) and data["dataset_id"].startswith("ds_")
+    assert "name" in data and data["name"] == "test_dataset"
+    assert "rows" in data and isinstance(data["rows"], int) and data["rows"] > 0
+    assert (
+        "columns" in data
+        and isinstance(data["columns"], list)
+        and len(data["columns"]) > 0
+    )
+    assert "created_at" in data and isinstance(data["created_at"], str)
+
+    # Legacy fields preserved
+    assert data["status"] == "success"
+    assert data["num_samples"] == 2
+    assert data["total_frames"] == data["rows"]
+    assert "export_path" in data
+    assert data["export_format"] == "csv"
+
+    # Export route GET /dataset/export/{dataset_id}
+    export_resp = client.get(f"/dataset/export/{data['dataset_id']}?format=csv")
+    assert export_resp.status_code == 200, export_resp.text
+    assert export_resp.headers.get("content-type", "").startswith("text/csv")
+    assert f'filename="{data["dataset_id"]}.csv"' in export_resp.headers.get(
+        "content-disposition", ""
+    )
+    assert len(export_resp.content) > 0
+
+
+def test_dataset_export_rejects_path_traversal(client: TestClient) -> None:
+    """GET /dataset/export/{dataset_id} rejects path-traversal tokens."""
+    # Parent directory escape
+    resp = client.get("/dataset/export/../../etc/passwd")
+    assert resp.status_code in {400, 404}
+
+    # URL-encoded traversal
+    resp = client.get("/dataset/export/..%2F..%2Fetc%2Fpasswd")
+    assert resp.status_code in {400, 404}
+
+    # Non-opaque characters
+    resp = client.get("/dataset/export/bad;id")
+    assert resp.status_code == 400
+
+    # Unmapped dataset ID
+    resp = client.get("/dataset/export/ds_nonexistent123")
+    assert resp.status_code == 404
