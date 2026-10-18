@@ -241,6 +241,9 @@ unchanged (#13131):
   The bar stays within 8.0e-7 m and every 20-step segment within 4.8e-13 rad.
 - Re-track bar deviation: 6.79 mm against the 3.6 mm LIFT-5 bound; before,
   2.03 mm.
+- OpenSim arm reach: the Rajagopal arm ranges stop the hands 4.63 cm (left)
+  and 6.03 cm (right) from the high-bar grips against the 1 mm reach bound,
+  and the IK carries the arm coordinates up to 1.21e-3 rad past their ranges.
 - Body-alone centre of mass: 11.9 cm forward, ahead of the forefoot spheres
   (10.4 cm); body plus bar is over the feet.
 

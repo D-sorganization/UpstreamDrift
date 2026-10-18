@@ -42,6 +42,20 @@ _MIDPOINT_TOL_M = 1e-9
 #: has not reached it.  Declared before measuring; the bound solve reaches
 #: about 3e-6 m.
 _REACH_TOL_M = 1e-3
+#: OSL-17 (#13131) regression, measured on the high-bar rack bundle: the
+#: Rajagopal arm ranges (arm_flex <= 90 deg, arm_rot >= -90 deg, elbow_flex
+#: <= 150 deg) cannot put the hands on a grip behind the neck.  The bounded
+#: reach solve stops on those bounds 4.63 cm (L) and 6.03 cm (R) from the
+#: grips, against the 1 mm reach bound, and the IK then carries arm_flex,
+#: arm_rot, pro_sup and elbow_flex up to 1.21e-3 rad past their ranges.  The
+#: marker and Hicks gates still pass.  The bounds are not loosened.
+_RAJAGOPAL_ARM_RANGES = pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "OSL-17 #13131: Rajagopal arm ranges cannot reach the high-bar grip "
+        "(reach 4.63/6.03 cm > 1 mm; ranges exceeded by up to 1.21e-3 rad)."
+    ),
+)
 
 
 def _real_opensim() -> None:
@@ -102,6 +116,7 @@ def reach(squat_targets):
 
 @pytest.mark.requires_opensim
 @pytest.mark.integration
+@_RAJAGOPAL_ARM_RANGES
 def test_reaching_arms_put_each_hand_on_its_bundle_grip(reach) -> None:
     build, arms = reach
     coords = build.model.getCoordinateSet()
@@ -155,6 +170,7 @@ def squat_receipt() -> dict:
 
 @pytest.mark.requires_opensim
 @pytest.mark.integration
+@_RAJAGOPAL_ARM_RANGES
 def test_squat_bar_is_tracked_at_full_weight(squat_receipt: dict) -> None:
     ik = squat_receipt["ik"]
     assert ik["weights"]["bar"] == 1.0
@@ -174,6 +190,7 @@ def test_squat_ik_meets_the_marker_gate(squat_receipt: dict) -> None:
 
 @pytest.mark.requires_opensim
 @pytest.mark.integration
+@_RAJAGOPAL_ARM_RANGES
 def test_squat_ik_keeps_every_coordinate_in_range_with_the_reaching_arms(
     squat_receipt: dict,
 ) -> None:

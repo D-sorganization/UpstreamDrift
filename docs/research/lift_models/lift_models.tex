@@ -1358,6 +1358,15 @@ whole-row fix (\#13102); they are regenerated once that body lands.
   \texttt{HipInputY} 0.008\,rad, root $x$ 3.7\,mm), above the 3.6\,mm LIFT-5
   bound; before the rack it was 2.03\,mm. \textbf{Regression, open}: strict
   xfail, bound not loosened.
+\item \textbf{OpenSim Arm Reach.} The Rajagopal arm ranges
+  (\texttt{arm\_flex} $\le 90^\circ$, \texttt{arm\_rot} $\ge -90^\circ$,
+  \texttt{elbow\_flex} $\le 150^\circ$) cannot put the hands on a grip behind
+  the neck: the bounded reach solve stops on them 4.63\,cm (left) and
+  6.03\,cm (right) from the grips, against the 1\,mm reach bound, and the IK
+  carries \texttt{arm\_flex}, \texttt{arm\_rot}, \texttt{pro\_sup} and
+  \texttt{elbow\_flex} up to $1.21\times10^{-3}$\,rad past their ranges.
+  The marker and Hicks gates still pass. \textbf{Regression, open}: strict
+  xfails, bounds not loosened.
 \end{itemize}
 
 \paragraph{Failed Experiments.}
