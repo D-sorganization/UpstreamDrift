@@ -10,12 +10,27 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   availableRange,
+  bandSegments,
   fetchGroundReaction,
   fetchGroundReactionOverlay,
   pathSegments,
   type GroundReactionResponse,
   type PlateOverlayRequest,
 } from '@/api/groundReaction';
+import { PlateImportForm } from './PlateImportForm';
+import {
+  BAND_OPACITY,
+  MAX_COP_MARKERS,
+  PER_AXIS,
+  SIGMA_BAND_SUFFIX,
+  copMarkerIndices,
+  COVARIANCE,
+  copMarkerCovariance,
+  svgEllipse,
+  type Covariance,
+  type RingKind,
+  uncertaintyCaption,
+} from './groundReactionUncertainty';
 
 const W = 360;
 const H = 120;
@@ -58,6 +73,22 @@ type Row = {
   dashed?: boolean;
 };
 type Entry = { key: string; label: string; color: string };
+/** A shaded `lower..upper` region, e.g. a measured load +/- its 1-sigma. */
+type Band = {
+  label: string;
+  color: string;
+  lower: Array<number | null>;
+  upper: Array<number | null>;
+};
+/** Sampled measured CoP points ringed by their 1-sigma (data-unit covariance). */
+type Ring = {
+  label: string;
+  /** `Measured <Foot>`: names the ellipses' test ids. */
+  foot: string;
+  color: string;
+  kind: RingKind;
+  points: Array<{ frame: number; x: number; y: number; terms: Covariance }>;
+};
 
 function titleCase(key: string): string {
   return key
@@ -100,6 +131,58 @@ function measuredRows(data: GroundReactionResponse, quantity: string, field: str
       dashed: true,
       y: (data.traces?.[`measured_${e.key}_${quantity}`]?.[field] ?? []) as Array<number | null>,
     }));
+}
+
+/** Measured load +/- its 1-sigma, per foot whose overlay carries a sigma trace. */
+function measuredLoadBands(data: GroundReactionResponse): Band[] {
+  return footKeys(data, false).flatMap((e) => {
+    const load = data.traces?.[`measured_${e.key}_force_n`]?.z;
+    const sigma = data.traces?.[`measured_${e.key}_force_sigma_n`]?.z;
+    if (!load || !sigma) return [];
+    // A bound is available only where both the load and its sigma are.
+    const bound = (sign: 1 | -1) =>
+      load.map((f, i) => {
+        const s = sigma[i];
+        return f === null || s === null || s === undefined ? null : f + sign * s;
+      });
+    return [
+      {
+        label: `Measured ${e.label} ${SIGMA_BAND_SUFFIX}`,
+        color: e.color,
+        lower: bound(-1),
+        upper: bound(1),
+      },
+    ];
+  });
+}
+
+/** 1-sigma rings at sampled measured CoP points, per foot with a CoP sigma trace. */
+function measuredCopRings(data: GroundReactionResponse): Ring[] {
+  return footKeys(data, false).flatMap((e) => {
+    const cop = data.traces?.[`measured_${e.key}_cop_m`];
+    const sigma = data.traces?.[`measured_${e.key}_cop_sigma_m`];
+    const cov = data.traces?.[`measured_${e.key}_cop_cov_m2`];
+    if (!cop || !sigma?.z) return [];
+    const x = (cop.x ?? []) as Array<number | null>;
+    const y = (cop.y ?? []) as Array<number | null>;
+    const markers = copMarkerIndices(x, sigma.z, MAX_COP_MARKERS).flatMap((i) => {
+      const marker = copMarkerCovariance(sigma, cov, i);
+      const yi = y[i];
+      if (marker === null || yi === null || yi === undefined) return [];
+      return [{ frame: i, x: x[i] as number, y: yi, terms: marker.terms, kind: marker.kind }];
+    });
+    if (markers.length === 0) return [];
+    const kind = markers.every((m) => m.kind === COVARIANCE) ? COVARIANCE : PER_AXIS;
+    const foot = `Measured ${e.label}`;
+    const points = markers.map(({ frame, x: px, y: py, terms }) => ({ frame, x: px, y: py, terms }));
+    return [{ label: `${foot} ${SIGMA_BAND_SUFFIX} ${kind}`, foot, color: e.color, kind, points }];
+  });
+}
+
+/** What every foot's ellipses show, `per axis` if any foot lacks a covariance. */
+function ringKind(rings: Ring[]): RingKind | null {
+  if (rings.length === 0) return null;
+  return rings.every((g) => g.kind === COVARIANCE) ? COVARIANCE : PER_AXIS;
 }
 
 /** One row per key, read straight from `load_share` (feet only, never net). */
@@ -174,6 +257,25 @@ function MeasurementBanner({ data }: { data: GroundReactionResponse }) {
   );
 }
 
+/** Says what the shaded bands are and where their declared uncertainty came from. */
+function UncertaintyCaption({
+  data,
+  banded,
+  ringed,
+}: {
+  data: GroundReactionResponse;
+  banded: boolean;
+  ringed: RingKind | null;
+}) {
+  const caption = uncertaintyCaption(banded, ringed, data.measured_uncertainty_source);
+  if (caption === null) return null;
+  return (
+    <div data-testid="ground-reaction-uncertainty-caption" className="text-xs text-gray-400 mb-2">
+      {caption}
+    </div>
+  );
+}
+
 /** Shared figure/svg/legend chrome for a chart panel. */
 function ChartFrame({
   id,
@@ -215,6 +317,7 @@ function TimePanel({
   unit,
   t,
   rows,
+  bands = [],
   events,
 }: {
   id: string;
@@ -222,10 +325,14 @@ function TimePanel({
   unit: string;
   t: number[];
   rows: Row[];
+  bands?: Band[];
   events: Record<string, number>;
 }) {
   const { x0, x1, y0, y1 } = BOUNDS;
-  const yr = availableRange(rows.map((r) => r.y));
+  const yr = availableRange([
+    ...rows.map((r) => r.y),
+    ...bands.flatMap((b) => [b.lower, b.upper]),
+  ]);
   const xr: [number, number] = [t[0] ?? 0, t[t.length - 1] ?? 1];
   const yRange: [number, number] = yr ?? [0, 1];
   const sx = (v: number) => x0 + ((v - xr[0]) / (xr[1] - xr[0] || 1)) * (x1 - x0);
@@ -234,7 +341,20 @@ function TimePanel({
   );
 
   return (
-    <ChartFrame id={id} title={title} suffix={unit} legend={rows}>
+    <ChartFrame id={id} title={title} suffix={unit} legend={[...rows, ...bands]}>
+      {bands.map((b) => {
+        const segs = bandSegments(t, b.lower, b.upper, x0, x1, y0, y1, xr, yRange);
+        return segs.length === 0 ? null : (
+          <path
+            key={b.label}
+            data-testid={`ground-reaction-band-${id}-${b.label.replace(` ${SIGMA_BAND_SUFFIX}`, '')}`}
+            d={segs.join('')}
+            fill={b.color}
+            fillOpacity={BAND_OPACITY}
+            stroke="none"
+          />
+        );
+      })}
       <text x={2} y={y0 + 8} fontSize="8" fill="#9ca3af">
         {yr ? yr[1].toFixed(2) : ''}
       </text>
@@ -270,26 +390,66 @@ function TimePanel({
   );
 }
 
+/** Each ring's data-unit extremes, so the axis ranges never clip a ring. */
+function ringExtents(rings: Ring[], axis: 'x' | 'y'): number[][] {
+  // A 1-sigma ellipse reaches sqrt(var) along each axis, whatever its tilt.
+  const term = axis === 'x' ? 0 : 1;
+  return rings.map((g) =>
+    g.points.flatMap((p) => {
+      const half = Math.sqrt(p.terms[term]);
+      return [p[axis] - half, p[axis] + half];
+    }),
+  );
+}
+
 function PathPanel({
   id,
   title,
   rows,
+  rings = [],
   reason,
 }: {
   id: string;
   title: string;
   rows: Row[];
+  rings?: Ring[];
   reason: string | null | undefined;
 }) {
   const { x0, x1, y0, y1 } = BOUNDS;
-  const xr = availableRange(rows.map((r) => r.x ?? []));
-  const yr = availableRange(rows.map((r) => r.y));
+  const xr = availableRange([...rows.map((r) => r.x ?? []), ...ringExtents(rings, 'x')]);
+  const yr = availableRange([...rows.map((r) => r.y), ...ringExtents(rings, 'y')]);
   const hasData = xr !== null && yr !== null;
   const xRange: [number, number] = xr ?? [0, 1];
   const yRange: [number, number] = yr ?? [0, 1];
+  // Data-unit covariances become SVG units through separate x and y scales.
+  const kx = (x1 - x0) / (xRange[1] - xRange[0] || 1);
+  const ky = (y1 - y0) / (yRange[1] - yRange[0] || 1);
 
   return (
-    <ChartFrame id={id} title={title} suffix="m" legend={rows}>
+    <ChartFrame id={id} title={title} suffix="m" legend={[...rows, ...rings]}>
+      {hasData &&
+        rings.flatMap((g) =>
+          g.points.map((p) => {
+            const cx = x0 + (p.x - xRange[0]) * kx;
+            const cy = y1 - (p.y - yRange[0]) * ky;
+            const e = svgEllipse(p.terms, kx, ky);
+            return (
+              <ellipse
+                key={`${g.label}-${p.frame}`}
+                data-testid={`ground-reaction-cop-sigma-${g.foot}-${p.frame}`}
+                cx={cx}
+                cy={cy}
+                rx={e.rx}
+                ry={e.ry}
+                transform={e.rotateDeg === 0 ? undefined : `rotate(${e.rotateDeg} ${cx} ${cy})`}
+                fill={g.color}
+                fillOpacity={BAND_OPACITY}
+                stroke={g.color}
+                strokeOpacity={BAND_OPACITY}
+              />
+            );
+          }),
+        )}
       {hasData ? (
         rows.map((r) => {
           const segs = pathSegments(r.x ?? [], r.y, x0, x1, y0, y1, xRange, yRange);
@@ -330,12 +490,16 @@ export function GroundReactionCharts({
 }) {
   const [data, setData] = useState<GroundReactionResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [formOverlay, setFormOverlay] = useState<PlateOverlayRequest | null>(null);
+  const [plateError, setPlateError] = useState<string | null>(null);
+  const activeOverlay = overlay ?? formOverlay;
+  const fromForm = overlay === null && formOverlay !== null;
 
   useEffect(() => {
     const controller = new AbortController();
-    const request = overlay
+    const request = activeOverlay
       ? fetchGroundReactionOverlay(
-          { ...overlay, run_id: overlay.run_id ?? runId },
+          { ...activeOverlay, run_id: activeOverlay.run_id ?? runId },
           controller.signal,
         )
       : fetchGroundReaction({ runId }, controller.signal);
@@ -346,17 +510,33 @@ export function GroundReactionCharts({
       })
       .catch((e: unknown) => {
         if (controller.signal.aborted) return;
+        const message = e instanceof Error ? e.message : String(e);
+        if (fromForm) {
+          // A refused declaration belongs next to the form; show the model again.
+          setPlateError(message);
+          setFormOverlay(null);
+          return;
+        }
         setData(null);
-        setError(e instanceof Error ? e.message : String(e));
+        setError(message);
       });
     return () => controller.abort();
-  }, [runId, overlay]);
+  }, [runId, activeOverlay, fromForm]);
+
+  const submitPlateForm = (request: PlateOverlayRequest) => {
+    setPlateError(null);
+    setFormOverlay(request);
+  };
 
   const panels = useMemo(() => {
     if (!data || !data.available) return null;
     const inBw = Boolean(data.traces?.net_force_bw);
     const forceQuantity = inBw ? 'force_bw' : 'force_n';
+    const loadBands = inBw ? [] : measuredLoadBands(data);
+    const copRings = measuredCopRings(data);
     return {
+      banded: loadBands.length > 0,
+      rings: copRings,
       t: data.time_s ?? [],
       events: data.events ?? {},
       time: [
@@ -368,6 +548,7 @@ export function GroundReactionCharts({
             ...quantityRows(data, footKeys(data, true), forceQuantity, 'z'),
             ...(inBw ? [] : measuredRows(data, 'force_n', 'z')),
           ],
+          bands: loadBands,
         },
         {
           id: 'net_force',
@@ -404,6 +585,14 @@ export function GroundReactionCharts({
       data-testid="ground-reaction-charts"
     >
       <h3 className="text-sm font-semibold text-gray-300 mb-2">Ground Reaction</h3>
+      {overlay === null && (
+        <PlateImportForm
+          onSubmit={submitPlateForm}
+          onClear={() => setFormOverlay(null)}
+          serverError={plateError}
+          active={formOverlay !== null}
+        />
+      )}
       {error && (
         <div role="alert" className="text-xs text-red-400">
           Ground reaction unavailable: {error}
@@ -417,6 +606,9 @@ export function GroundReactionCharts({
       {data && data.available && panels && (
         <>
           <MeasurementBanner data={data} />
+          <UncertaintyCaption data={data} banded={panels.banded}
+            ringed={ringKind(panels.rings)}
+          />
           {panels.time.slice(0, 3).map((p) => (
             <TimePanel key={p.id} {...p} t={panels.t} events={panels.events} />
           ))}
@@ -424,6 +616,7 @@ export function GroundReactionCharts({
             id="cop_path"
             title={PANEL_TITLES[3]}
             rows={panels.cop}
+            rings={panels.rings}
             reason={data.reason}
           />
           {panels.time.slice(3).map((p) => (

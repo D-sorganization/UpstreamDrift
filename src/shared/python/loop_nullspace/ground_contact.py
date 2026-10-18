@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import dataclasses
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -66,6 +66,7 @@ __all__ = [
     "GroundObservation",
     "ObservationAccounting",
     "ObservationInconsistentError",
+    "ObservationProvider",
     "contact_frame",
     "foot_friction_cones",
     "observation_accounting",
@@ -422,7 +423,8 @@ class FootLoadReading:
     the load row and ``max(N_F, sigma_force_n) * hypot(sigma_cop_m,
     mu_F * sigma_sensing_m)`` for the moment rows, ``mu_F`` the foot's largest
     declared friction coefficient (``|t_i . f| <= mu n . f`` bounds the effect
-    of the depth uncertainty).
+    of the depth uncertainty; that bound holds only where the friction cones
+    are imposed, so a non-zero ``sigma_sensing_m`` needs ``H-FRICTION-CONE``).
 
     ``cop_m`` is the measured centre of pressure **on the plate's force-sensing
     plane** (its normal coordinate is the height of that plane), or ``None``
@@ -567,6 +569,11 @@ def _plate_rows(
         (reading.sigma_force_n, sig_m, sig_m),
         ("normal_load", "cop_moment_t1", "cop_moment_t2"),
     )
+
+
+#: Supplies a frame's ground observation, or ``None`` when no data cover it
+#: (the facade's ``EngineContext.observation_for`` and the OF-12 plate screen).
+ObservationProvider = Callable[[int, ClosedLoopSnapshot], GroundObservation | None]
 
 
 def _positive(value: float, name: str) -> float:

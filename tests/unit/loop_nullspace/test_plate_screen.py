@@ -1,0 +1,468 @@
+"""OF-12 (#13070): family-wise screen that eliminates inconsistent candidates.
+
+The spatial two-point-feet fixture is the candidate; its own contact loads,
+seen through a vertical-cell plate (OF-11) with a 2 cm sensing depth, are the
+"measurement".  Statistical claims are checked by seeded Monte Carlo against
+the declared Gaussian noise; the elimination frames of a wrong model are
+computed by hand from the loads, not read back from the screen.
+"""
+
+from __future__ import annotations
+
+import dataclasses
+from statistics import NormalDist
+
+import numpy as np
+import pytest
+
+from src.shared.python.loop_nullspace.contracts import ClosedLoopSnapshot
+from src.shared.python.loop_nullspace.decomposition import Decomposition, decompose
+from src.shared.python.loop_nullspace.fixtures import spatial_two_arm_club_snapshot
+from src.shared.python.loop_nullspace.ground_contact import (
+    GRF_ID,
+    FootLoadReading,
+    GroundObservation,
+)
+from src.shared.python.loop_nullspace.plate_screen import (
+    FamilyWiseRule,
+    PlateConsistencyReport,
+    ScreenFrame,
+    ScreenSetup,
+    offset_grid,
+    plate_consistency,
+)
+from tests.unit.loop_nullspace._ground_fixtures import (
+    hypothesis_set,
+    make_consistent,
+    scaled_mass_model,
+)
+
+pytestmark = [pytest.mark.unit, pytest.mark.requires_pinocchio]
+
+DEPTH_M = 0.02
+N_FRAMES = 12
+ALPHA = 0.05
+
+
+@pytest.fixture(scope="module")
+def truth():
+    pytest.importorskip("highspy")
+    snap, _ = spatial_two_arm_club_snapshot(
+        floating_root=True, feet=True, zero_root_pose=True, foot_points=1
+    )
+    snap = make_consistent(snap)
+    dec = decompose(snap, weights=np.eye(snap.topology.n_actuated))
+    return snap, dec
+
+
+def _groups(snap: ClosedLoopSnapshot) -> dict[str, list[str]]:
+    names = [c.name for c in snap.foot_contacts]
+    return {"left": [names[0]], "right": [names[1]]}
+
+
+def _loads(snap: ClosedLoopSnapshot, dec: Decomposition) -> np.ndarray:
+    lead = dec.n_actuated + dec.m
+    return np.asarray(dec.x_p[lead:]).reshape(-1, 3)
+
+
+def _plate_reading(snap, dec, member: int) -> tuple[float, np.ndarray]:
+    """Hand oracle: per-foot load and CoP on the sensing plane (point foot)."""
+    f = _loads(snap, dec)[member]
+    p = snap.foot_contacts[member].position
+    sensing_z = p[2] - DEPTH_M
+    cop = np.array(
+        [
+            p[0] - (p[2] - sensing_z) * f[0] / f[2],
+            p[1] - (p[2] - sensing_z) * f[1] / f[2],
+            sensing_z,
+        ]
+    )
+    return float(f[2]), cop
+
+
+@dataclasses.dataclass(frozen=True)
+class Sigmas:
+    force_n: float
+    cop_m: float
+
+
+def _readings(snap, dec, sigmas: Sigmas, rng=None) -> dict[str, FootLoadReading]:
+    out = {}
+    for label, member in (("left", 0), ("right", 1)):
+        load, cop = _plate_reading(snap, dec, member)
+        if rng is not None:
+            load += rng.normal(0.0, sigmas.force_n)
+            cop[:2] += rng.normal(0.0, sigmas.cop_m, size=2)
+        out[label] = FootLoadReading(
+            normal_load_n=load,
+            cop_m=cop,
+            sigma_force_n=sigmas.force_n,
+            sigma_cop_m=sigmas.cop_m,
+            sigma_sensing_m=0.0,
+        )
+    return out
+
+
+def _sigmas(truth) -> Sigmas:
+    snap, dec = truth
+    loads = _loads(snap, dec)[:, 2]
+    return Sigmas(force_n=0.005 * float(loads.min()), cop_m=0.002)
+
+
+def _static_provider(snap, readings_by_frame):
+    """Provider factory: the same data for every offset shift."""
+
+    def factory(_shift_s: float, coverage: float):
+        def provider(index: int, snapshot: ClosedLoopSnapshot):
+            readings = readings_by_frame.get(index)
+            if readings is None:
+                return None
+            return GroundObservation.from_vertical_plates(
+                snapshot, readings, _groups(snapshot), coverage=coverage
+            )
+
+        return provider
+
+    return factory
+
+
+def _frames(snap, dec, n=N_FRAMES) -> tuple[ScreenFrame, ...]:
+    return tuple(ScreenFrame(i, snap, dec) for i in range(n))
+
+
+def _setup(offsets=(0.0,)) -> ScreenSetup:
+    return ScreenSetup(
+        rule=FamilyWiseRule(alpha=ALPHA),
+        hypotheses=hypothesis_set(GRF_ID),
+        offsets_s=offsets,
+    )
+
+
+# ------------------------------------------------------------------- rule --
+def test_family_wise_rule_is_the_bonferroni_normal_quantile() -> None:
+    rule = FamilyWiseRule(alpha=0.05)
+    assert rule.coverage(1) == pytest.approx(NormalDist().inv_cdf(1 - 0.025))
+    assert rule.coverage(100) == pytest.approx(NormalDist().inv_cdf(1 - 0.05 / 200))
+    assert rule.coverage(100) > rule.coverage(10) > rule.coverage(1)
+
+
+@pytest.mark.parametrize("alpha", [0.0, 1.0, -0.1, float("nan")])
+def test_family_wise_rule_rejects_a_bad_level(alpha) -> None:
+    with pytest.raises(ValueError, match="alpha"):
+        FamilyWiseRule(alpha=alpha)
+
+
+def test_family_wise_rule_needs_a_positive_row_count() -> None:
+    with pytest.raises(ValueError, match="n_rows"):
+        FamilyWiseRule(alpha=0.05).coverage(0)
+
+
+# ------------------------------------------------------------- statistics --
+def test_true_candidate_survives_noise_at_the_declared_level(truth) -> None:
+    snap, dec = truth
+    sigmas = _sigmas(truth)
+    rng = np.random.default_rng(13070)
+    runs, eliminated = 200, 0
+    for _ in range(runs):
+        data = {i: _readings(snap, dec, sigmas, rng) for i in range(N_FRAMES)}
+        report = plate_consistency(
+            _frames(snap, dec), _static_provider(snap, data), _setup()
+        )
+        eliminated += report.eliminated
+    # Bonferroni bounds the family-wise rate by alpha; allow a 3-sigma binomial margin.
+    margin = 3.0 * np.sqrt(ALPHA * (1 - ALPHA) / runs)
+    assert eliminated / runs <= ALPHA + margin
+
+
+def test_noise_free_truth_is_consistent_in_both_verdicts(truth) -> None:
+    snap, dec = truth
+    data = {i: _readings(snap, dec, _sigmas(truth)) for i in range(N_FRAMES)}
+    report = plate_consistency(
+        _frames(snap, dec), _static_provider(snap, data), _setup()
+    )
+    assert isinstance(report, PlateConsistencyReport)
+    assert not report.eliminated
+    (only,) = report.offsets
+    assert only.n_rows == 6 * N_FRAMES
+    assert only.coverage == pytest.approx(FamilyWiseRule(ALPHA).coverage(6 * N_FRAMES))
+    assert all(f.wls_within_band and f.joint_feasible for f in only.frames)
+    assert report.surviving_shifts_s == (0.0,)
+
+
+# ---------------------------------------------------------- falsification --
+def test_a_five_percent_light_model_is_eliminated_where_the_loads_disagree(
+    truth,
+) -> None:
+    snap, dec = truth
+    sigmas = _sigmas(truth)
+    data = {i: _readings(snap, dec, sigmas) for i in range(N_FRAMES)}
+    light, light_dec = scaled_mass_model(snap, 0.95)
+    k = FamilyWiseRule(ALPHA).coverage(6 * N_FRAMES)
+    # Hand oracle: a point foot's vertical load is fixed by the balance, so the
+    # light model's load row misses the data by |N_meas - N_model|.
+    obs = GroundObservation.from_vertical_plates(light, data[0], _groups(light))
+    lead = light_dec.n_actuated + light_dec.m
+    load_rows = [
+        i for i, label in enumerate(obs.labels) if label.endswith("normal_load")
+    ]
+    # Premise of the oracle: the load rows see no null direction (fixed by the balance).
+    assert np.allclose(obs.selector[load_rows] @ light_dec.N[lead:], 0.0, atol=1e-9)
+    delta = np.abs(_loads(snap, dec)[:, 2] - _loads(light, light_dec)[:, 2])
+    expect_eliminated = bool(np.any(delta > k * sigmas.force_n))
+    assert expect_eliminated, "fixture must make the 5 % error visible"
+    report = plate_consistency(
+        _frames(light, light_dec), _static_provider(light, data), _setup()
+    )
+    assert report.eliminated
+    (only,) = report.offsets
+    assert only.first_eliminating_index == 0
+    assert not any(f.joint_feasible for f in only.frames)
+    assert GRF_ID in only.frames[0].conflict
+
+
+# ------------------------------------------------------- offset profiling --
+def _offset_provider(snap, dec, sigmas, true_shift: float, wrong):
+    """Data are right only when the profiled shift matches ``true_shift``."""
+    right = _readings(snap, dec, sigmas)
+
+    def factory(shift_s: float, coverage: float):
+        readings = right if abs(shift_s - true_shift) < 1e-12 else wrong
+
+        def provider(index: int, snapshot: ClosedLoopSnapshot):
+            return GroundObservation.from_vertical_plates(
+                snapshot, readings, _groups(snapshot), coverage=coverage
+            )
+
+        return provider
+
+    return factory
+
+
+def test_offset_profiling_survives_iff_the_grid_reaches_the_true_offset(truth) -> None:
+    snap, dec = truth
+    sigmas = _sigmas(truth)
+    light, light_dec = scaled_mass_model(snap, 0.95)
+    wrong = _readings(light, light_dec, sigmas)
+    factory = _offset_provider(snap, dec, sigmas, 0.004, wrong)
+    reached = plate_consistency(
+        _frames(snap, dec), factory, _setup(offsets=(-0.004, 0.0, 0.004))
+    )
+    assert not reached.eliminated
+    assert reached.surviving_shifts_s == (0.004,)
+    missed = plate_consistency(_frames(snap, dec), factory, _setup(offsets=(0.0,)))
+    assert missed.eliminated
+
+
+def test_offset_grid_is_symmetric_includes_zero_and_respects_the_step() -> None:
+    grid = offset_grid(sigma_offset_s=0.010, reach_sigmas=2.0, max_step_s=0.005)
+    assert grid[0] == pytest.approx(-0.020) and grid[-1] == pytest.approx(0.020)
+    assert 0.0 in grid
+    assert np.all(np.diff(grid) <= 0.005 + 1e-12)
+    assert offset_grid(sigma_offset_s=0.0, reach_sigmas=3.0, max_step_s=0.005) == (0.0,)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"sigma_offset_s": -1.0, "reach_sigmas": 2.0, "max_step_s": 0.005},
+        {"sigma_offset_s": 0.01, "reach_sigmas": 0.0, "max_step_s": 0.005},
+        {"sigma_offset_s": 0.01, "reach_sigmas": 2.0, "max_step_s": 0.0},
+    ],
+)
+def test_offset_grid_validates_its_inputs(kwargs) -> None:
+    with pytest.raises(ValueError):
+        offset_grid(**kwargs)
+
+
+# ---------------------------------------------------------- missing data --
+def test_frames_without_data_are_untested_never_fabricated(truth) -> None:
+    snap, dec = truth
+    data = {0: _readings(snap, dec, _sigmas(truth))}
+    report = plate_consistency(
+        _frames(snap, dec), _static_provider(snap, data), _setup()
+    )
+    (only,) = report.offsets
+    assert only.n_rows == 6
+    tested = [f for f in only.frames if f.tested]
+    assert [f.index for f in tested] == [0]
+    assert not report.eliminated
+
+
+def test_a_trajectory_without_any_data_is_not_a_verdict(truth) -> None:
+    snap, dec = truth
+    report = plate_consistency(_frames(snap, dec), _static_provider(snap, {}), _setup())
+    assert not report.eliminated
+    assert report.offsets[0].n_rows == 0
+    assert not report.tested
+
+
+# ---------------------------------------------------------- preconditions --
+def test_setup_requires_the_grf_hypothesis() -> None:
+    with pytest.raises(ValueError, match="H-GRF-OBSERVATION"):
+        ScreenSetup(
+            rule=FamilyWiseRule(ALPHA),
+            hypotheses=hypothesis_set("H-FRICTION-CONE"),
+            offsets_s=(0.0,),
+        )
+
+
+@pytest.mark.parametrize("offsets", [(), (np.nan,), (0.0, 0.0)])
+def test_setup_requires_distinct_finite_offsets(offsets) -> None:
+    with pytest.raises(ValueError, match="offsets_s"):
+        _setup(offsets=offsets)
+
+
+def test_frames_must_be_unique_and_typed(truth) -> None:
+    snap, dec = truth
+    with pytest.raises(ValueError, match="unique"):
+        plate_consistency(
+            (ScreenFrame(0, snap, dec), ScreenFrame(0, snap, dec)),
+            _static_provider(snap, {}),
+            _setup(),
+        )
+    with pytest.raises(TypeError, match="decomposition"):
+        ScreenFrame(0, snap, "dec")  # type: ignore[arg-type]
+
+
+def test_report_serialises_to_plain_json(truth) -> None:
+    import json
+
+    snap, dec = truth
+    data = {i: _readings(snap, dec, _sigmas(truth)) for i in range(2)}
+    report = plate_consistency(
+        _frames(snap, dec, 2), _static_provider(snap, data), _setup()
+    )
+    payload = report.to_dict()
+    json.dumps(payload)
+    assert payload["deciding_verdict"] == "joint"
+    assert payload["alpha"] == ALPHA
+
+
+# ------------------------------------------------------ exact calibration --
+def _single_row_provider(snap, dec, sigma_n: float, rng):
+    """One left-foot load row (no null response): the screen is an exact z-test."""
+    load = _plate_reading(snap, dec, 0)[0]
+    names = [c.name for c in snap.foot_contacts]
+
+    def factory(_shift_s: float, coverage: float):
+        def provider(index: int, snapshot: ClosedLoopSnapshot):
+            value = load + rng.normal(0.0, sigma_n)
+            selector = np.zeros((1, 3 * len(names)))
+            selector[0, 2] = 1.0
+            return GroundObservation(
+                selector,
+                np.array([value]),
+                np.array([sigma_n]),
+                ("left:normal_load",),
+                "calibration test",
+                coverage,
+            )
+
+        return provider
+
+    return factory
+
+
+def test_single_row_screen_is_calibrated_at_alpha(truth) -> None:
+    snap, dec = truth
+    rng = np.random.default_rng(130701)
+    sigma_n = _sigmas(truth).force_n
+    runs = 400
+    rate = (
+        sum(
+            plate_consistency(
+                _frames(snap, dec, 1),
+                _single_row_provider(snap, dec, sigma_n, rng),
+                _setup(),
+            ).eliminated
+            for _ in range(runs)
+        )
+        / runs
+    )
+    # M = 1: exact two-sided z-test, so the rate must match alpha from both sides.
+    margin = 3.0 * np.sqrt(ALPHA * (1 - ALPHA) / runs)
+    assert abs(rate - ALPHA) <= margin
+
+
+@pytest.mark.parametrize(("factor", "eliminated"), [(0.95, False), (1.05, True)])
+def test_elimination_boundary_is_k_sigma_on_a_fixed_load_row(
+    truth, factor, eliminated
+) -> None:
+    snap, dec = truth
+    sigmas = _sigmas(truth)
+    k = FamilyWiseRule(ALPHA).coverage(6)
+    readings = _readings(snap, dec, sigmas)
+    shifted = dataclasses.replace(
+        readings["left"],
+        normal_load_n=readings["left"].normal_load_n + factor * k * sigmas.force_n,
+    )
+    data = {0: {**readings, "left": shifted}}
+    report = plate_consistency(
+        _frames(snap, dec, 1), _static_provider(snap, data), _setup()
+    )
+    assert report.eliminated is eliminated
+
+
+def test_a_shift_without_data_makes_the_screen_inconclusive(truth) -> None:
+    """A vacuous shift could be the true offset: no elimination is claimed.
+
+    The candidate fails at every data-bearing shift, but at the vacuous shift
+    nothing was tested, so the false-elimination guarantee does not cover it.
+    """
+    snap, dec = truth
+    sigmas = _sigmas(truth)
+    light, light_dec = scaled_mass_model(snap, 0.95)
+    wrong = _readings(light, light_dec, sigmas)
+    right = _readings(snap, dec, sigmas)
+
+    def factory(shift_s: float, coverage: float):
+        def provider(index: int, snapshot: ClosedLoopSnapshot):
+            if shift_s > 0.0:
+                return None  # this shift moves every frame outside the trial
+            return GroundObservation.from_vertical_plates(
+                snapshot,
+                wrong if shift_s == 0.0 else right,
+                _groups(snapshot),
+                coverage=coverage,
+            )
+
+        return provider
+
+    report = plate_consistency(_frames(snap, dec), factory, _setup(offsets=(0.0, 0.01)))
+    assert report.tested and not report.conclusive
+    assert not report.eliminated
+    assert report.vacuous_shifts_s == (0.01,)
+    assert report.surviving_shifts_s == ()
+    assert report.to_dict()["conclusive"] is False
+
+
+def test_provider_coverage_is_the_family_wise_coverage(truth) -> None:
+    snap, dec = truth
+    seen: list[float] = []
+    readings = _readings(snap, dec, _sigmas(truth))
+
+    def factory(_shift_s: float, coverage: float):
+        seen.append(coverage)
+
+        def provider(index: int, snapshot: ClosedLoopSnapshot):
+            return GroundObservation.from_vertical_plates(
+                snapshot, readings, _groups(snapshot), coverage=coverage
+            )
+
+        return provider
+
+    plate_consistency(_frames(snap, dec, 3), factory, _setup())
+    # The final pass reads the plates at the Bonferroni coverage for M = 18 rows.
+    assert seen[-1] == pytest.approx(FamilyWiseRule(ALPHA).coverage(18))
+
+
+def test_providers_must_return_observations(truth) -> None:
+    snap, dec = truth
+
+    def factory(_shift_s: float, _coverage: float):
+        return lambda index, snapshot: "not an observation"
+
+    with pytest.raises(TypeError, match="GroundObservation"):
+        plate_consistency(_frames(snap, dec, 1), factory, _setup())
+    with pytest.raises(TypeError, match="callable"):
+        plate_consistency(_frames(snap, dec, 1), "factory", _setup())  # type: ignore[arg-type]

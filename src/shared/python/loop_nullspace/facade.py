@@ -64,6 +64,7 @@ from src.shared.python.loop_nullspace.envelopes import (
 from src.shared.python.loop_nullspace.feasible_set import FeasibleSet
 from src.shared.python.loop_nullspace.ground_contact import (
     GroundObservation,
+    ObservationProvider,
     foot_friction_cones,
 )
 from src.shared.python.loop_nullspace.ground_envelopes import (
@@ -75,6 +76,7 @@ from src.shared.python.loop_nullspace.report_serialization import (
     admission_dict,
     allocation_dict,
     envelope_dict,
+    frame_diagnostics_dict,
     hypotheses_dict,
     invariants_dict,
     json_float,
@@ -94,7 +96,7 @@ __all__ = [
     "analyze",
 ]
 
-REPORT_SCHEMA_VERSION = "1.0.0"
+REPORT_SCHEMA_VERSION = "1.1.0"
 STAGES = (
     "decomposition",
     "admission",
@@ -124,7 +126,6 @@ NON_CLAIMS = (
 
 StageHook = Callable[[str, float, "Mapping[str, Any] | None"], None]
 CancelCheck = Callable[[], bool]
-ObservationProvider = Callable[[int, ClosedLoopSnapshot], "GroundObservation | None"]
 ClubNewtonEuler = Callable[[ClosedLoopSnapshot], Mapping[str, Any]]
 
 
@@ -549,6 +550,7 @@ def analyze(
     indices = [trajectory.frame_indices[p] for p in kept]
     times = [trajectory.times_s[p] for p in kept]
     report["trajectory"] = _trajectory_section(trajectory, indices, refused)
+    report["frame_diagnostics"] = frame_diagnostics_dict(decs, indices)
     run.done("decomposition")
     if len(snaps) < 3:
         report["status"] = "insufficient_frames"

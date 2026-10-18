@@ -18,16 +18,42 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13070 · Add the Family-Wise Plate Consistency Screen and Plate Observation Provider That Eliminate Candidate Swing Solutions Inconsistent With Vertical Force-Plate Data (OF-12)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13070
+- **Branch:** feat/13070-of-12-plate-screen
+- **PR:** #13079
+- **Paths:** see #13079
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`a9998da0`; collated from changes/13070-add-the-family-wise-plate-consistency-sc.md)
+- **Summary:** Add the family-wise plate consistency screen and plate observation provider that eliminate candidate swing solutions inconsistent with vertical force-plate data (OF-12)
+- **Next step:** Review and merge after #13074, #13075, the OF-05 PR and #13077.
+
+### DL-#13088 · Add Optional Live Open-Fp Bridge to Realtime IPC (OF-09)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13088
+- **Branch:** feat/13088-of-09-live-bridge
+- **PR:** #13097
+- **Paths:** see #13097
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`cd301b48`; collated from changes/13088-add-optional-live-open-fp-bridge-to-real.md)
+- **Summary:** Add optional live open-fp bridge to realtime IPC (OF-09)
+- **Next step:** Review and merge after #13085
+
 ### DL-#13087 · Overlay Measured Plate Trials on the Ground Reaction Tile (OF-07)
 
 - **State:** in_review
 - **Owner:** unassigned
 - **Issue:** #13087
 - **Branch:** feat/13087-of-07-plate-overlay
-- **PR:** #13100
+- **PR:** #13100, #13124
 - **Paths:** see #13100
 - **Started:** 2026-10-17
-- **Last verified:** 2026-10-17 (`181406be`; collated from changes/13087-overlay-measured-plate-trials-on-the-gro.md)
+- **Last verified:** 2026-10-17 (`c1e4d044`; collated from changes/13087-ground-reaction-tile-asks-for-plate-decl.md)
 - **Summary:** Overlay measured plate trials on the ground reaction tile (OF-07)
 - **Next step:** Review and merge after #13090, #13091
 
@@ -63,10 +89,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13106
 - **Branch:** fix/13106-src-pivot-healed-parent
-- **PR:** #13107
+- **PR:** #13107, #13118
 - **Paths:** see #13107
 - **Started:** 2026-10-17
-- **Last verified:** 2026-10-17 (`f3fdae33`; collated from changes/13106-src-pivot-hygiene-test-accepts-the-pivot.md)
+- **Last verified:** 2026-10-17 (`2c2b6698`; collated from changes/13106-fix-order-dependent-keyerror-in-the-pivo.md)
 - **Summary:** Src-pivot hygiene test accepts the pivot's documented parent healing, removing an order-dependent unit-test-gate failure
 - **Next step:** Review and merge; then the force-plate PRs blocked by it can re-queue
 
@@ -2535,6 +2561,149 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13152 · Ground-Reaction Overlay Draws Measured CoP 1-Sigma Covariance Ellipses, Tilted With the Plate Yaw (Cop_Cov_Random_Xy_M2 = R_Xy Diag R_Xy^T)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13152
+- **Branch:** merged via #13152
+- **PR:** #13152
+- **Paths:** see #13152
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`8582cf13`; collated from changes/13152-ground-reaction-overlay-draws-measured-c.md)
+- **Summary:** Ground-reaction overlay draws measured CoP 1-sigma covariance ellipses, tilted with the plate yaw (cop_cov_random_xy_m2 = R_xy diag R_xy^T)
+- **Next step:** Shipped in PR #13152.
+
+### DL-#12965 · Infra: Handle_Api_Errors Leaks Absolute Server Paths and Internals via Str(E) in 400/403/404 Bodies
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #12965
+- **Branch:** fix/12965-sanitize-api-errors
+- **PR:** #13155
+- **Paths:** src/api/middleware/error_handler.py,src/api/utils/error_codes.py,tests/unit/api/test_error_handler.py
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`6c4b5e9f`; collated from changes/12965-sanitize-400-403-404-error-details-in-ha.md)
+- **Summary:** Sanitize 400/403/404 error details in handle_api_errors to prevent path leaks
+- **Next step:** Shipped in PR #13155.
+
+### DL-#12574 · NSX-42: Framework-Free NSX Plot Model and Cross-UI Golden
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12574
+- **Branch:** merged via #13154
+- **PR:** #13154
+- **Paths:** see #13154
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`bfc324fd`; collated from changes/12574-nsx-42-framework-free-nsx-plot-model-and.md)
+- **Summary:** NSX-42: framework-free NSX plot model and cross-UI golden
+- **Next step:** Shipped in PR #13154.
+
+### DL-#13113 · Label the Dockerfile.Modular Runtime Stage Keep=True so Host Prune Jobs Spare Every Profile Image; Contract Test Guards It
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13113
+- **Branch:** merged via #13138
+- **PR:** #13138
+- **Paths:** see #13138
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`dea902bb`; collated from changes/13113-label-the-dockerfile-modular-runtime-sta.md)
+- **Summary:** Label the Dockerfile.modular runtime stage keep=true so host prune jobs spare every profile image; contract test guards it
+- **Next step:** Shipped in PR #13138.
+
+### DL-#12573 · NSX-41: Display_Decision Output-Policy Integration (ADR-0054 D7 Option A)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12573
+- **Branch:** merged via #13149
+- **PR:** #13149
+- **Paths:** see #13149
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`551c914c`; collated from changes/12573-nsx-41-display-decision-output-policy-in.md)
+- **Summary:** NSX-41: display_decision output-policy integration (ADR-0054 D7 Option A)
+- **Next step:** Shipped in PR #13149.
+
+### DL-#13147 · Ground Reaction Overlay Draws Measured CoP Uncertainty as Per-World-Axis 1-Sigma Ellipses
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13147
+- **Branch:** merged via #13147
+- **PR:** #13147
+- **Paths:** see #13147
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`35a56c55`; collated from changes/13147-ground-reaction-overlay-draws-measured-c.md)
+- **Summary:** Ground reaction overlay draws measured CoP uncertainty as per-world-axis 1-sigma ellipses
+- **Next step:** Shipped in PR #13147.
+
+### DL-#13141 · Ground Reaction Overlay Rings Measured CoP Points by Their 1-Sigma per Axis
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13141
+- **Branch:** merged via #13141
+- **PR:** #13141
+- **Paths:** see #13141
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`2dc3724e`; collated from changes/13141-ground-reaction-overlay-rings-measured-c.md)
+- **Summary:** Ground reaction overlay rings measured CoP points by their 1-sigma per axis
+- **Next step:** Shipped in PR #13141.
+
+### DL-#13139 · Ground Reaction Overlay Shades Measured Plate Load by Its 1-Sigma Uncertainty and Names the Declared Uncertainty Source
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13139
+- **Branch:** merged via #13139
+- **PR:** #13139
+- **Paths:** see #13139
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`e0f06035`; collated from changes/13139-ground-reaction-overlay-shades-measured.md)
+- **Summary:** Ground reaction overlay shades measured plate load by its 1-sigma uncertainty and names the declared uncertainty source
+- **Next step:** Shipped in PR #13139.
+
+### DL-#13134 · Plate Declarations Dialog and Web Form Offer the Cross_Correlation Alignment and Require the Model It Was Fitted Against
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13134
+- **Branch:** merged via #13134
+- **PR:** #13134
+- **Paths:** see #13134
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`2f95b7c6`; collated from changes/13134-plate-declarations-dialog-and-web-form-o.md)
+- **Summary:** Plate declarations dialog and web form offer the cross_correlation alignment and require the model it was fitted against
+- **Next step:** Shipped in PR #13134.
+
+### DL-#13122 · Web Analysis Tools Ground Reaction Charts Gain the Plate Declarations Form (Same Fields as the PyQt6 Dialog, Guarded by a Cross-Language Parity Test); Analysis.Ground_Reaction Back to Parity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13122
+- **Branch:** merged via #13125
+- **PR:** #13125
+- **Paths:** see #13125
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`00019c88`; collated from changes/13122-web-analysis-tools-ground-reaction-chart.md)
+- **Summary:** Web Analysis Tools ground reaction charts gain the plate declarations form (same fields as the PyQt6 dialog, guarded by a cross-language parity test); analysis.ground_reaction back to parity
+- **Next step:** Shipped in PR #13125.
+
+### DL-#13082 · Add DV-13082 Deferred-Validation Record for OF-HW Open-Fp Device Qualification; Refresh DV-13061 Now That the Software Children Have Landed
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13082
+- **Branch:** merged via #13129
+- **PR:** #13129
+- **Paths:** see #13129
+- **Started:** 2026-10-17
+- **Last verified:** 2026-10-17 (`e98259fe`; collated from changes/13082-add-dv-13082-deferred-validation-record.md)
+- **Summary:** Add DV-13082 deferred-validation record for OF-HW open-fp device qualification; refresh DV-13061 now that the software children have landed
+- **Next step:** Shipped in PR #13129.
+
 ### DL-#13110 · Sidekick Smoke-Test Checks Fixtures Out Into an Isolated Path so the Shared Self-Hosted Workspace Is Never Left a Sparse Partial Clone
 
 - **State:** shipped
@@ -2619,10 +2788,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13056
 - **Branch:** merged via #13060
-- **PR:** #13060, #13076, #13101
+- **PR:** #13060, #13076, #13101, #13117
 - **Paths:** see #13060
 - **Started:** 2026-10-17
-- **Last verified:** 2026-10-17 (`e52429c3`; collated from changes/13056-full-body-spine-stage-poses-arms-and-grf.md)
+- **Last verified:** 2026-10-17 (`bb5df06b`; collated from changes/13056-shoulder-orientation-solve-keeps-its-eul.md)
 - **Summary:** OS-8 branch-continuous capture-A IK: constant marker set, warm-started tie-break IK, continuous through impact
 - **Next step:** Shipped in PR #13060.
 
@@ -5362,10 +5531,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12347
 - **Branch:** merged via #12488
-- **PR:** #12488, #12534
+- **PR:** #12488, #12534, #13063
 - **Paths:** see #12488
 - **Started:** 2026-10-14
-- **Last verified:** 2026-10-14 (`aca30fca`; collated from changes/12347-back-squat-lift-body.md)
+- **Last verified:** 2026-10-17 (`3b1ef961`; collated from changes/12347-prettier-format-the-back-squat-barbell-h.md)
 - **Summary:** Back-squat bar geometry slice 1: torso bar shelf, standard grip width and medio-lateral bar axis from the parity standard (back_bar.py, lift_to_full_body geometry option, generate_lift_bundle --geometry back_bar); committed bundle and evidence not regenerated
 - **Next step:** Shipped in PR #12488.
 

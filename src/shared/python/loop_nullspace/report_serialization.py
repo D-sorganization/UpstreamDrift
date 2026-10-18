@@ -25,6 +25,7 @@ from src.shared.python.loop_nullspace.admission import (
     VerdictKind,
 )
 from src.shared.python.loop_nullspace.allocation_spec import AllocationResult
+from src.shared.python.loop_nullspace.decomposition import Decomposition
 from src.shared.python.loop_nullspace.envelopes import BoundStatus, EnvelopeSeries
 from src.shared.python.loop_nullspace.evidence import (
     AllocationDependence,
@@ -37,6 +38,7 @@ __all__ = [
     "admission_dict",
     "allocation_dict",
     "envelope_dict",
+    "frame_diagnostics_dict",
     "hypotheses_dict",
     "invariants_dict",
     "json_float",
@@ -143,6 +145,17 @@ def _status_names(rows: Sequence[Sequence[BoundStatus]], j: int) -> list[str]:
     return [row[j].name for row in rows]
 
 
+def _per_frame_rows(
+    table: Sequence[Sequence[Sequence[str]]], j: int
+) -> list[list[str]]:
+    return [list(row[j]) for row in table]
+
+
+def _sign_names(series: EnvelopeSeries, j: int) -> list[str | None]:
+    classes = [row[j] for row in series.sign_class]
+    return [None if c is None else c.value for c in classes]
+
+
 def envelope_dict(
     series: EnvelopeSeries,
     records: dict[str, QuantityRecord],
@@ -162,6 +175,15 @@ def envelope_dict(
             "upper": _array(series.upper[:, j]),
             "status_lower": _status_names(series.status_lower, j),
             "status_upper": _status_names(series.status_upper, j),
+            "sign_class": _sign_names(series, j),
+            "binding_lower": _per_frame_rows(series.binding_lower, j),
+            "binding_upper": _per_frame_rows(series.binding_upper, j),
+            "binding_hypotheses_lower": _per_frame_rows(
+                series.binding_hypotheses_lower, j
+            ),
+            "binding_hypotheses_upper": _per_frame_rows(
+                series.binding_hypotheses_upper, j
+            ),
         }
         for j, name in enumerate(series.names)
     }
@@ -229,6 +251,22 @@ def allocation_dict(
         },
     }
     return out
+
+
+def frame_diagnostics_dict(
+    decompositions: Sequence[Decomposition], frame_indices: Sequence[int]
+) -> list[dict[str, Any]]:
+    """Per-frame rank and condition of the decomposition (schema 1.1.0)."""
+    return [
+        {
+            "index": int(frame_indices[k]),
+            "rank_A": int(d.counts.rank_A),
+            "nullity": int(d.counts.nullity),
+            "rank_J_c": int(d.counts.rank_J_c),
+            "condition_number": json_float(d.condition_number),
+        }
+        for k, d in enumerate(decompositions)
+    ]
 
 
 def hypotheses_dict(registry: Registry, preset: HypothesisSet) -> dict[str, Any]:

@@ -12,7 +12,7 @@
 import { apiFetch } from './fetch';
 import type { GroundReactionResponse } from './generated/types';
 
-export { availableRange, pathSegments } from './traceGeometry';
+export { availableRange, bandSegments, pathSegments } from './traceGeometry';
 
 export type { GroundReactionResponse };
 
@@ -60,6 +60,16 @@ export interface PlateAlignment {
 }
 
 /**
+ * Declared channel timing (mirrors the API `PlateReadingModel`): the skew
+ * within one sample, and how the two CoP channels' skews relate. Only
+ * `independent` lets a skewed reading carry the CoP covariance.
+ */
+export interface PlateReading {
+  skew_s: number;
+  cop_skew: 'unknown' | 'independent' | 'common';
+}
+
+/**
  * POST /api/analysis/ground-reaction/plate-overlay (OF-07, #13087). `trial` is
  * a swing `<id>.json` relative to the server's plate-trial root; the server
  * refuses anything outside it. Shear is `null` in the measured traces (a
@@ -75,6 +85,7 @@ export interface PlateOverlayRequest {
   target_dir?: [number, number, number];
   declared: PlateDeclarations;
   alignment: PlateAlignment;
+  reading: PlateReading;
   coverage?: number;
 }
 

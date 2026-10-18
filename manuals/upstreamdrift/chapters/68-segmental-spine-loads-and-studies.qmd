@@ -323,6 +323,10 @@ Request fields, all recorded in the receipt:
   for the shoulder orientation match and the ground-reaction estimate and
   carries the drive's series for them; holding them at the file default
   there put the arms on a different trunk from the driven one (#13056).
+  The shoulder orientation solve keeps the local solution nearest the
+  previous frame (among converged candidates, or within 0.1 rad of the best
+  residual for an out-of-range target), and the stage reports the largest
+  frame-to-frame step as `orientation_max_step_rad`.
 
 Both options enter the request hash only when set to a non-default value.
 Static optimisation provenance also records `moment_arm_screen` (path-length

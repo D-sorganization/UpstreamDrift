@@ -8,6 +8,21 @@
  * unavailable and must be drawn as a gap, never as zero.
  */
 
+/** Data-to-SVG maps for the x and y axes (y grows downward on screen). */
+function scalers(
+  x0: number,
+  x1: number,
+  y0: number,
+  y1: number,
+  xRange: [number, number],
+  yRange: [number, number],
+): [(v: number) => number, (v: number) => number] {
+  return [
+    (v) => x0 + ((v - xRange[0]) / (xRange[1] - xRange[0] || 1)) * (x1 - x0),
+    (v) => y1 - ((v - yRange[0]) / (yRange[1] - yRange[0] || 1)) * (y1 - y0),
+  ];
+}
+
 /** Runs of consecutive available samples as SVG path data; null breaks the line. */
 export function pathSegments(
   t: number[],
@@ -19,10 +34,7 @@ export function pathSegments(
   xRange: [number, number],
   yRange: [number, number],
 ): string[] {
-  const sx = (v: number) =>
-    x0 + ((v - xRange[0]) / (xRange[1] - xRange[0] || 1)) * (x1 - x0);
-  const sy = (v: number) =>
-    y1 - ((v - yRange[0]) / (yRange[1] - yRange[0] || 1)) * (y1 - y0);
+  const [sx, sy] = scalers(x0, x1, y0, y1, xRange, yRange);
   const out: string[] = [];
   let cur = '';
   y.forEach((v, i) => {
@@ -50,4 +62,41 @@ export function availableRange(series: Array<Array<number | null>>): [number, nu
     }),
   );
   return Number.isFinite(lo) ? [lo, hi] : null;
+}
+
+const finite = (v: number | null | undefined): v is number =>
+  v !== null && v !== undefined && Number.isFinite(v);
+
+/**
+ * Closed SVG polygons shading `lower..upper`, one per run of two or more
+ * samples where both bounds are available; an unavailable bound breaks the
+ * band rather than bridging it.
+ */
+export function bandSegments(
+  t: number[],
+  lower: Array<number | null>,
+  upper: Array<number | null>,
+  x0: number,
+  x1: number,
+  y0: number,
+  y1: number,
+  xRange: [number, number],
+  yRange: [number, number],
+): string[] {
+  const [sx, sy] = scalers(x0, x1, y0, y1, xRange, yRange);
+  const point = (i: number, v: number) => `${sx(t[i]).toFixed(2)},${sy(v).toFixed(2)}`;
+  const close = (run: number[]) => {
+    const top = run.map((i, k) => `${k ? 'L' : 'M'}${point(i, upper[i] as number)}`);
+    const bottom = [...run].reverse().map((i) => `L${point(i, lower[i] as number)}`);
+    return `${top.join('')}${bottom.join('')}Z`;
+  };
+  const out: string[] = [];
+  let run: number[] = [];
+  const flush = () => {
+    if (run.length > 1) out.push(close(run));
+    run = [];
+  };
+  t.forEach((_, i) => (finite(lower[i]) && finite(upper[i]) ? run.push(i) : flush()));
+  flush();
+  return out;
 }

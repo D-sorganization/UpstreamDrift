@@ -59,9 +59,14 @@ models at the all-zero pose), the target humerus is asked to reach
 and the three target shoulder coordinates solve
 $\min_{q}\bigl\|\log\bigl(R_T(q)^{\top}R_T^{\star}\bigr)\bigr\|$ per frame by
 bounded least squares inside the coordinate ranges (warm start from the previous
-frame plus deterministic restarts). The geodesic residual is reported per frame
-and never repaired; an out-of-range request gives the closest in-range solution and
-a positive residual. The solve assumes the two zero poses are anatomically
+frame plus deterministic restarts). The local solution kept is the one nearest the
+previous frame among the converged candidates or, when the request is out of range,
+among those within $\delta=0.1$\,rad (\texttt{continuity\_slack\_rad}) of the
+best residual, so the solve leaves an Euler branch only for a clear gain in
+accuracy (\#13056). The geodesic residual is reported per frame and never repaired,
+and the largest frame-to-frame coordinate step is reported as
+\texttt{orientation\_max\_step\_rad}; an out-of-range request gives the closest
+in-range solution on the current branch and a positive residual. The solve assumes the two zero poses are anatomically
 equivalent; any posture difference there becomes a constant orientation offset.
 
 \paragraph{Club and Ground Loads.}

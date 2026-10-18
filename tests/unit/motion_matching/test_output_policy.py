@@ -253,3 +253,16 @@ class TestOutputPolicyPayload:
         markdown = render_output_policy_markdown(evaluate_output_policy(_receipt()))
         for row in payload["outputs"]:
             assert f"| `{row['name']}` | **{row['label']}** |" in markdown
+
+
+def test_admitted_is_true_only_for_statuses_that_carry_a_value() -> None:
+    """Callers ask the policy whether it shows an output, not its vocabulary."""
+    statuses = evaluate_output_policy(
+        _receipt(
+            {"joint_loads": {"validated": True, "calibration": "c", "evidence": "e"}}
+        )
+    )
+    for name, status in statuses.items():
+        assert status.admitted == (status.status in {"advertised", "validated"}), name
+    assert statuses["joint_loads"].admitted
+    assert not evaluate_output_policy(_receipt())["joint_loads"].admitted

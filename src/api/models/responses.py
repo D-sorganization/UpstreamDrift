@@ -987,3 +987,8 @@ class GroundReactionResponse(BaseModel):
     observability: dict[str, bool] | None = Field(
         None, description="Which components the overlaid plates observe"
     )
+    measured_uncertainty_source: str | None = Field(
+        None,
+        description="Set when a plate trial is overlaid: where the declared "
+        "plate uncertainty behind the measured_<foot>_force_sigma_n band came from",
+    )

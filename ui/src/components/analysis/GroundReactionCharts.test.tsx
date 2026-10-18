@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { GroundReactionCharts } from './GroundReactionCharts';
 import * as api from '@/api/groundReaction';
 import type { GroundReactionResponse } from '@/api/groundReaction';
+import { fillPlateForm, submitPlateForm } from './plateImportForm.fixture';
 
 vi.mock('@/api/fetch', () => ({ apiFetch: vi.fn() }));
 
@@ -178,6 +179,115 @@ describe('GroundReactionCharts', () => {
       expect(cop.getAttribute('stroke-dasharray')).toBe('4 2');
     });
 
+    const withBand = (): GroundReactionResponse => ({
+      ...withOverlay(false),
+      measured_uncertainty_source: 'datasheet rev 3',
+      traces: {
+        ...withOverlay(false).traces,
+        measured_left_force_sigma_n: measured([1, 2, null]),
+      },
+    });
+
+    it('shades the measured load by its 1-sigma uncertainty and names the source', async () => {
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(withBand());
+      render(<GroundReactionCharts runId="r1" />);
+      const band = await screen.findByTestId('ground-reaction-band-vertical_force-Measured Left');
+      expect(band.getAttribute('d')).toMatch(/Z$/);
+      expect(band.getAttribute('fill-opacity')).toBe('0.2');
+      expect(screen.getByTestId('ground-reaction-uncertainty-caption')).toHaveTextContent(
+        'Shaded: measured load \u00b11\u03c3 (declared uncertainty: datasheet rev 3)',
+      );
+      expect(screen.getByText('Measured Left \u00b11\u03c3')).toBeInTheDocument();
+    });
+
+    it('rings sampled measured CoP points with their 1-sigma per axis', async () => {
+      const data = withBand();
+      data.traces = {
+        ...data.traces,
+        measured_left_cop_sigma_m: measured([0.005, 0.005, null]),
+      };
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(data);
+      render(<GroundReactionCharts runId="r1" />);
+      // Frames 0 and 1 have both a CoP and a sigma; frame 2 has neither.
+      const first = await screen.findByTestId('ground-reaction-cop-sigma-Measured Left-0');
+      expect(first.tagName.toLowerCase()).toBe('ellipse');
+      expect(Number(first.getAttribute('rx'))).toBeGreaterThan(0);
+      expect(Number(first.getAttribute('ry'))).toBeGreaterThan(0);
+      expect(screen.getByTestId('ground-reaction-cop-sigma-Measured Left-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('ground-reaction-cop-sigma-Measured Left-2')).toBeNull();
+      expect(screen.getByText('Measured Left \u00b11\u03c3 per axis')).toBeInTheDocument();
+      expect(screen.getByTestId('ground-reaction-uncertainty-caption')).toHaveTextContent(
+        'ellipses: measured CoP \u00b11\u03c3 per axis',
+      );
+    });
+
+    it('draws per-axis ellipses, and worse-axis circles without per-axis data', async () => {
+      const data = withBand();
+      data.traces = {
+        ...data.traces,
+        // Left: sigma 4 mm on world x, 1 mm on y. Right: only the worse axis, 4 mm.
+        measured_left_cop_sigma_m: {
+          x: [0.004, 0.004, null],
+          y: [0.001, 0.001, null],
+          z: [0.004, 0.004, null],
+          magnitude: unobserved,
+        },
+        measured_right_cop_m: {
+          x: [0.02, 0.03, null],
+          y: [0, 0.01, null],
+          z: unobserved,
+          magnitude: unobserved,
+        },
+        measured_right_cop_sigma_m: measured([0.004, 0.004, null]),
+      };
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(data);
+      render(<GroundReactionCharts runId="r1" />);
+      const left = await screen.findByTestId('ground-reaction-cop-sigma-Measured Left-0');
+      const right = screen.getByTestId('ground-reaction-cop-sigma-Measured Right-0');
+      const attr = (e: HTMLElement, a: string) => Number(e.getAttribute(a));
+      // Same panel, same scale: equal x semi-axes, left y semi-axis a quarter of right's.
+      expect(attr(left, 'rx')).toBeCloseTo(attr(right, 'rx'));
+      expect(attr(left, 'ry')).toBeCloseTo(attr(right, 'ry') / 4);
+    });
+
+    it('tilts the ellipse by the CoP covariance and names it covariance', async () => {
+      const data = withBand();
+      // var_x = var_y with a positive covariance: the major axis is at +45 deg
+      // in data, i.e. rotate(-45) in SVG (y down) when both scales are equal.
+      const cov = (xx: number, yy: number, xy: number) => ({
+        x: [xx, xx, null],
+        y: [yy, yy, null],
+        z: [xy, xy, null],
+        magnitude: unobserved,
+      });
+      data.traces = {
+        ...data.traces,
+        measured_left_cop_sigma_m: measured([0.016, 0.016, null]),
+        measured_left_cop_cov_m2: cov(2.5e-4, 2.5e-4, 1.5e-4),
+      };
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(data);
+      render(<GroundReactionCharts runId="r1" />);
+      const first = await screen.findByTestId('ground-reaction-cop-sigma-Measured Left-0');
+      const rotate = /^rotate\((-?[\d.e-]+) /.exec(first.getAttribute('transform') ?? '');
+      expect(rotate).not.toBeNull();
+      expect(Math.abs(Number(rotate?.[1]))).toBeGreaterThan(0);
+      // Semi-axes 20 mm and 10 mm in data: their ratio survives any scaling.
+      const [rx, ry] = ['rx', 'ry'].map((a) => Number(first.getAttribute(a)));
+      expect(Math.max(rx, ry) / Math.min(rx, ry)).toBeGreaterThan(1);
+      expect(screen.getByText('Measured Left \u00b11\u03c3 covariance')).toBeInTheDocument();
+      expect(screen.getByTestId('ground-reaction-uncertainty-caption')).toHaveTextContent(
+        'ellipses: measured CoP \u00b11\u03c3 covariance',
+      );
+    });
+
+    it('draws no band or caption when the overlay carries no sigma trace', async () => {
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(withOverlay(false));
+      render(<GroundReactionCharts runId="r1" />);
+      await screen.findByTestId('ground-reaction-line-vertical_force-Measured Left');
+      expect(screen.queryByTestId('ground-reaction-band-vertical_force-Measured Left')).toBeNull();
+      expect(screen.queryByTestId('ground-reaction-uncertainty-caption')).toBeNull();
+    });
+
     it('hides the banner for a qualified measurement and for plain runs', async () => {
       vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(withOverlay(true));
       const { unmount } = render(<GroundReactionCharts runId="r1" />);
@@ -210,11 +320,46 @@ describe('GroundReactionCharts', () => {
           capacity_n: 3923,
         },
         alignment: { offset_s: 0, sigma_offset_s: 0.001, kind: 'manual', note: 'clock' },
+        reading: { skew_s: 0, cop_skew: 'unknown' },
       };
       render(<GroundReactionCharts runId="r1" overlay={request} />);
       await screen.findByTestId('ground-reaction-unqualified-banner');
       expect(post).toHaveBeenCalledWith({ ...request, run_id: 'r1' }, expect.any(AbortSignal));
       expect(get).not.toHaveBeenCalled();
+    });
+
+    it('overlays the trial declared in the form', async () => {
+      vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(base);
+      const post = vi
+        .spyOn(api, 'fetchGroundReactionOverlay')
+        .mockResolvedValue(withOverlay(false));
+      render(<GroundReactionCharts runId="r1" />);
+      await screen.findByTestId('ground-reaction-chart-vertical_force');
+      fillPlateForm();
+      submitPlateForm();
+      await screen.findByTestId('ground-reaction-unqualified-banner');
+      const [request] = post.mock.calls[0];
+      expect(request.run_id).toBe('r1');
+      expect(request.trial).toBe('session-1/swing-0001.json');
+      expect(request.declared.capacity_n).toBe(3923);
+      expect(request.reading).toEqual({ skew_s: 0, cop_skew: 'unknown' });
+    });
+
+    it('shows a server refusal next to the form and returns to the model', async () => {
+      const get = vi.spyOn(api, 'fetchGroundReaction').mockResolvedValue(base);
+      vi.spyOn(api, 'fetchGroundReactionOverlay').mockRejectedValue(
+        new Error('capacity_n must be positive'),
+      );
+      render(<GroundReactionCharts runId="r1" />);
+      await screen.findByTestId('ground-reaction-chart-vertical_force');
+      fillPlateForm();
+      submitPlateForm();
+      expect(await screen.findByTestId('plate-import-error')).toHaveTextContent(
+        'Plate overlay refused: capacity_n must be positive',
+      );
+      await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+      expect(screen.queryByRole('alert', { name: /Ground reaction unavailable/ })).toBeNull();
+      expect(await screen.findByTestId('ground-reaction-chart-vertical_force')).toBeTruthy();
     });
 
     it('does not draw measured load in BW mode (the plate has no model body weight)', async () => {

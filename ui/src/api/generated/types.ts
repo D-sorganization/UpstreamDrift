@@ -2046,6 +2046,8 @@ export interface GroundReactionResponse {
   measured_qualified?: boolean | null;
   /** Which components the overlaid plates observe */
   observability?: Record<string, boolean> | null;
+  /** Set when a plate trial is overlaid: where the declared plate uncertainty behind the measured_<foot>_force_sigma_n band came from */
+  measured_uncertainty_source?: string | null;
 }
 
 export interface GroupSummaryV1 {
@@ -2829,8 +2831,19 @@ export interface PlateOverlayRequest {
   target_dir?: number[];
   declared: PlateDeclarationsModel;
   alignment: PlateAlignmentModel;
+  reading: PlateReadingModel;
   /** Band factor for the interpolation bias */
   coverage: number;
+}
+
+/**
+ * Declared channel timing (see ``DeclaredReading``).
+ */
+export interface PlateReadingModel {
+  /** Timing skew within a sample (s) */
+  skew_s: number;
+  /** How the two CoP channels' skews relate */
+  cop_skew: "unknown" | "independent" | "common";
 }
 
 /**

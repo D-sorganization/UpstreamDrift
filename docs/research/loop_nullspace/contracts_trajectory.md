@@ -476,13 +476,51 @@ provenance, model provenance, registry version, preset and options.
 `display_decision(record, surface) -> DisplayDecision` per ADR-0054 decision
 D7 once the owner accepts an option. Unknown combinations default to withhold.
 
-## NSX-42 Plot Model (#12574)
+## NSX-42 Plot Model Contract (#12574)
 
-`build_plot_model(report, display_decisions) -> NSXPlotModel`. Panels:
-`invariants`, `envelopes`, `hand_split`, `allocation`, `diagnostics`.
-Envelope segments carry `display_class` in `DETERMINED_SIGN`, `INDETERMINATE`,
-`UNBOUNDED`. A representative never appears without its band. The golden JSON
-plot model is checked in by NSX-42 and consumed by NSX-43 and NSX-44.
+`build_plot_model(report, display_decisions) -> NSXPlotModel`
+(`loop_nullspace/plot_model.py`; framework-free, frozen dataclasses,
+`to_dict()`/`from_dict()` round-trip). `display_decisions` maps
+`decision_key(panel, name[, frame])` to the `DisplayDecision` that
+`display_decision` returned (`plot_model_decisions.report_decisions` asks it once
+per report quantity). The model obeys the decisions and re-decides nothing: a
+quantity whose decision does not admit a band or value is a `WithheldItem` (or
+an unshown value) carrying the decision's reason and no number; a missing
+decision withholds by name; an unused decision key raises `ValueError`.
+
+Panels: `invariants`, `envelopes`, `hand_split` (grip-frame coordinates routed
+by `SPLIT_COLUMN_NAMES`), `allocation`, `diagnostics` (rank, condition,
+admission verdict and scaled residuals, allocation KKT residuals).
+
+- **Segments.** A band is split into maximal runs of adjacent feasible frames
+  with equal `display_class`, `sign_class`, active constraints and binding
+  hypotheses. `display_class` is `UNBOUNDED` when either bound is not `BOUNDED`
+  (hatched), else `DETERMINED_SIGN` for sign class positive, negative or zero,
+  else `INDETERMINATE` (shaded). An infeasible frame is listed on the band and
+  never inside a segment.
+- **Binding.** `active_constraints` are the row labels active at the optimum of
+  the bounding LPs (slack within `1e-8`, NSX-22), which by complementary
+  slackness contain every row with a non-zero optimal dual;
+  `binding_hypotheses` are their hypothesis ids. The test solves the LPs and
+  checks the dual support lies inside the reported ids.
+- **Representative.** An `Overlay` names its band and aligns to its frames; the
+  model refuses (`ValueError`) an overlay without a shown band, with other
+  frames, or whose decision is not `SHOW_REPRESENTATIVE_ON_BAND`. A withheld
+  band takes its representative with it.
+- **Report 1.1.0.** The plot model needs per-bound `sign_class`,
+  `binding_lower/upper`, `binding_hypotheses_lower/upper` and the top-level
+  `frame_diagnostics`; NSX-40 emits them additively (an older report raises
+  `ValueError`).
+- **Open point.** `EnvelopeSeries.records()` makes a quantity `UNAVAILABLE`
+  when any frame is not `BOUNDED`, and NSX-41 then answers `SHOW_REASON`, so
+  with real decisions an `UNBOUNDED` segment is not reachable from a report
+  today. The model supports it whenever a decision admits the band.
+
+Golden: `tests/fixtures/loop_nullspace/goldens/plot_model_v1.json`
+(`{"fixture": ..., "plot_model": ...}`), read by NSX-43 and NSX-44.
+Regenerate with `python3 -m tests.unit.loop_nullspace.plot_model_golden --write`
+(`--check` fails when stale). It is the real planar report with four listed
+fixture-only overrides so every display class is present.
 
 ## NSX-43 PyQt Tabs (#12575) and NSX-44 React Panel (#12576)
 
@@ -591,6 +629,14 @@ Implementation (`loop_nullspace/ground_contact.py`, `ground_envelopes.py`):
   `from_vertical_plates` (OF-11, #13067: per-foot `FootLoadReading` load and
   CoP rows about the plate's force-sensing plane, with the exact shear lever
   arm; shear is never assigned a value).
+- Plate screen (OF-12, #13070): `plate_screen.plate_consistency(frames,
+  providers, setup)` screens a candidate's `ScreenFrame`s with a Bonferroni
+  `FamilyWiseRule`, profiles the common-mode clock offset over
+  `ScreenSetup.offsets_s` and decides on the joint feasible-set verdict
+  (observation-only verdict reported beside it);
+  `plate_provider.PlateObservationProvider` is the `ObservationProvider` that
+  reads a `VerticalPlateTrial` at each frame's time, and `screen_with_plates`
+  refuses an alignment derived from the model under test.
   `observation_accounting` reports `rank(E_x N)`, the observed nullity, the
   singular values of `diag(1/sigma) E_x N` and the chi-square disagreement with
   the balance; `restrict_to_observation` is the zero-uncertainty limit (drops the

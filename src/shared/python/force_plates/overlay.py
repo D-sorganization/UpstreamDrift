@@ -5,8 +5,24 @@ it as plot traces that sit beside the model's computed ground reaction:
 
 * ``measured_<foot>_force_n`` - ``x`` and ``y`` are ``None`` (a vertical plate
   does not observe shear; unobserved is never zero), ``z`` is the load;
+* ``measured_<foot>_force_sigma_n`` - ``z`` is that load's random 1-sigma:
+  the declared measurement uncertainty combined with the declared timing skew
+  (``FootSample.load_sigma_random_n``).  The interpolation bias is an
+  estimate, not a random error, so it is left out; ``sigma_load_n`` adds it as
+  ``bias / coverage`` and is not a 1-sigma, so it is never plotted as one;
 * ``measured_<foot>_cop_m`` - the centre of pressure on the force-sensing
-  plane, ``None`` where the foot is unloaded.
+  plane, ``None`` where the foot is unloaded;
+* ``measured_<foot>_cop_sigma_m`` - that CoP's random 1-sigma (the declared
+  CoP uncertainty combined with the timing skew): ``x`` and ``y`` for world x
+  and y (``FootSample.cop_sigma_random_xy_m``), ``z`` for the worse axis
+  (``cop_sigma_random_m``), and ``None`` wherever the CoP is.  The per-axis
+  values bound each world axis through ``|R_xy|``;
+* ``measured_<foot>_cop_cov_m2`` - that CoP's exact random covariance in world
+  axes (``FootSample.cop_cov_random_xy_m2``): ``x`` = var_x, ``y`` = var_y,
+  ``z`` = cov_xy [m^2], ``None`` wherever the CoP is, and wherever a skew is
+  declared without declaring the channels' skews independent (the per-axis
+  bound is then all the plot can show).  Its 1-sigma ellipse is tilted with
+  the plate yaw and fits inside the per-axis box.
 
 A model frame the trial does not cover is ``None`` in every trace, never
 extrapolated.  ``qualified`` carries the trial's provenance: an overlay from an
@@ -50,6 +66,8 @@ MEASURED_PREFIX = "measured_"
 #: Matches the sample-snap tolerance of ``readings.reading_at``.
 _SNAP_ULPS = 4
 _Trace = dict[str, list[float | None]]
+#: load, load sigma, CoP, CoP sigma and CoP covariance.
+_TRACES_PER_FOOT = 5
 
 
 @dataclass(frozen=True)
@@ -59,7 +77,8 @@ class MeasuredOverlay:
     ``traces`` maps ``measured_<foot>_{force_n,cop_m}`` to
     ``{"x", "y", "z", "magnitude"}`` lists; ``covered`` is True for each model
     frame the trial spans; ``events`` are ``force.<name>`` times on the model
-    clock; ``observability`` says which components a vertical plate observes.
+    clock; ``observability`` says which components a vertical plate observes;
+    ``uncertainty_source`` is where the declared plate uncertainty came from.
     """
 
     traces: Mapping[str, Mapping[str, list[float | None]]]
@@ -67,6 +86,7 @@ class MeasuredOverlay:
     qualified: bool
     observability: Mapping[str, bool]
     events: Mapping[str, float]
+    uncertainty_source: str
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "traces", MappingProxyType(dict(self.traces)))
@@ -103,17 +123,54 @@ def _covers(
     return start - tol <= t <= stop + tol
 
 
-def _append_foot(force: _Trace, cop: _Trace, sample: FootSample | None) -> None:
-    if sample is None:
-        _append(force, None, None, None)
-        _append(cop, None, None, None)
-        return
-    _append(force, None, None, sample.load_n)
-    point = sample.cop_m
-    if point is None:
-        _append(cop, None, None, None)
-    else:
-        _append(cop, float(point[0]), float(point[1]), float(point[2]))
+@dataclass(frozen=True)
+class _FootTraces:
+    """The traces one foot fills: load, its sigma, CoP and the CoP sigma."""
+
+    force: _Trace
+    force_sigma: _Trace
+    cop: _Trace
+    cop_sigma: _Trace
+    cop_cov: _Trace
+
+    @classmethod
+    def empty(cls) -> _FootTraces:
+        return cls(*(_empty_trace() for _ in range(_TRACES_PER_FOOT)))
+
+    def named(self, foot: str) -> dict[str, _Trace]:
+        prefix = f"{MEASURED_PREFIX}{foot}"
+        return {
+            f"{prefix}_force_n": self.force,
+            f"{prefix}_force_sigma_n": self.force_sigma,
+            f"{prefix}_cop_m": self.cop,
+            f"{prefix}_cop_sigma_m": self.cop_sigma,
+            f"{prefix}_cop_cov_m2": self.cop_cov,
+        }
+
+    def _cop_traces(self) -> tuple[_Trace, _Trace, _Trace]:
+        return self.cop, self.cop_sigma, self.cop_cov
+
+    def append(self, sample: FootSample | None) -> None:
+        if sample is None:
+            for trace in (self.force, self.force_sigma):
+                _append(trace, None, None, None)
+            self._append_cop(None)
+            return
+        _append(self.force, None, None, sample.load_n)
+        _append(self.force_sigma, None, None, sample.load_sigma_random_n)
+        self._append_cop(sample)
+
+    def _append_cop(self, sample: FootSample | None) -> None:
+        point = None if sample is None else sample.cop_m
+        if sample is None or point is None:
+            for trace in self._cop_traces():
+                _append(trace, None, None, None)
+            return
+        _append(self.cop, float(point[0]), float(point[1]), float(point[2]))
+        sx, sy = sample.cop_sigma_random_xy_m or (None, None)
+        _append(self.cop_sigma, sx, sy, sample.cop_sigma_random_m)
+        xx, yy, xy = sample.cop_cov_random_xy_m2 or (None, None, None)
+        _append(self.cop_cov, xx, yy, xy)
 
 
 def _check_times(times_s: Sequence[float]) -> list[float]:
@@ -138,8 +195,7 @@ def measured_overlay(
     entry per model time.
     """
     times = _check_times(times_s)
-    force = {foot: _empty_trace() for foot in FOOT_LABELS}
-    cop = {foot: _empty_trace() for foot in FOOT_LABELS}
+    feet = {foot: _FootTraces.empty() for foot in FOOT_LABELS}
     covered: list[bool] = []
     for when in times:
         inside = _covers(placed, when, alignment, options)
@@ -147,11 +203,10 @@ def measured_overlay(
         reading = reading_at(placed, when, alignment, options) if inside else None
         for foot in FOOT_LABELS:
             sample = None if reading is None else reading.feet[foot]
-            _append_foot(force[foot], cop[foot], sample)
+            feet[foot].append(sample)
     traces: dict[str, Mapping[str, list[float | None]]] = {}
     for foot in FOOT_LABELS:
-        traces[f"{MEASURED_PREFIX}{foot}_force_n"] = force[foot]
-        traces[f"{MEASURED_PREFIX}{foot}_cop_m"] = cop[foot]
+        traces.update(feet[foot].named(foot))
     trial = placed.trial
     return MeasuredOverlay(
         traces=traces,
@@ -159,6 +214,7 @@ def measured_overlay(
         qualified=trial.provenance.qualified,
         observability=observability(),
         events=force_event_markers(trial, alignment=alignment),
+        uncertainty_source=trial.uncertainty.source,
     )
 
 
@@ -186,6 +242,7 @@ def attach_measured_overlay(
         events=events,
         measured_qualified=overlay.qualified,
         observability=dict(overlay.observability),
+        measured_uncertainty_source=overlay.uncertainty_source,
     )
 
 

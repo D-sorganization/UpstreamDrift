@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import math
 
 from matplotlib.figure import Figure
 import numpy as np
@@ -136,3 +137,196 @@ def test_measured_overlay_is_dashed_and_unqualified_banner_is_drawn() -> None:
     assert "Unqualified measurement" in [t.get_text() for t in fig.texts]
     plot_ground_reaction(fig, replace(series, measured_qualified=True))
     assert "Unqualified measurement" not in [t.get_text() for t in fig.texts]
+
+
+def _measured_series(**changes):
+    base = _plot()
+    unobserved = {a: [None] * 3 for a in ("x", "y", "z", "magnitude")}
+    series = replace(
+        base,
+        traces={
+            **base.traces,
+            "measured_left_force_n": {**unobserved, "z": [400.0, 600.0, None]},
+            "measured_left_force_sigma_n": {**unobserved, "z": [10.0, 20.0, None]},
+        },
+        measured_qualified=False,
+        measured_uncertainty_source="datasheet rev 3",
+    )
+    return replace(series, **changes)
+
+
+def _bands(fig):
+    from matplotlib.collections import PolyCollection
+
+    return [
+        c
+        for c in fig.axes[0].collections
+        if isinstance(c, PolyCollection) and c.get_label().startswith("Measured")
+    ]
+
+
+def test_measured_load_carries_a_one_sigma_band() -> None:
+    fig = Figure()
+    plot_ground_reaction(fig, _measured_series())
+    (band,) = _bands(fig)
+    assert band.get_label() == "Measured Left ±1σ"
+    ys = np.concatenate([p.vertices[:, 1] for p in band.get_paths()])
+    assert ys.min() == pytest.approx(390.0)
+    assert ys.max() == pytest.approx(620.0)
+
+
+def test_the_band_names_its_declared_uncertainty_source() -> None:
+    fig = Figure()
+    plot_ground_reaction(fig, _measured_series())
+    texts = [t.get_text() for t in fig.texts]
+    assert any("datasheet rev 3" in t and "±1σ" in t for t in texts)
+
+
+def test_no_band_or_caption_without_a_sigma_trace() -> None:
+    series = _measured_series(measured_uncertainty_source=None)
+    traces = dict(series.traces)
+    traces.pop("measured_left_force_sigma_n")
+    fig = Figure()
+    plot_ground_reaction(fig, replace(series, traces=traces))
+    assert _bands(fig) == []
+    assert not any("±1σ" in t.get_text() for t in fig.texts)
+
+
+def test_web_chart_uses_the_same_uncertainty_wording_and_cap() -> None:
+    from pathlib import Path
+
+    from src.shared.python.plotting.renderers import ground_reaction as gr
+
+    module = Path(__file__).resolve().parents[3] / (
+        "ui/src/components/analysis/groundReactionUncertainty.ts"
+    )
+    source = module.read_text(encoding="utf-8")
+    suffix = gr.SIGMA_BAND_SUFFIX
+    escaped = "".join(c if c.isascii() else f"\\u{ord(c):04x}" for c in suffix)
+    assert f"export const SIGMA_BAND_SUFFIX = '{escaped}';" in source
+    assert f"export const PER_AXIS = '{gr._PER_AXIS}';" in source
+    assert f"export const COVARIANCE = '{gr._COVARIANCE}';" in source
+    assert f"export const MAX_COP_MARKERS = {gr.MAX_COP_MARKERS};" in source
+    for phrase in (
+        "shaded: measured load ${SIGMA_BAND_SUFFIX}",
+        "ellipses: measured CoP ${SIGMA_BAND_SUFFIX} ${ringed}",
+        "(declared uncertainty: ${source ?? 'not stated'})",
+    ):
+        assert phrase in source, phrase
+
+
+def _cop_series(
+    n: int, sigma: float | None = 0.01, sigma_xy: tuple[float, float] | None = None
+):
+    """A measured left CoP path of ``n`` frames with a constant sigma.
+
+    ``sigma`` is the worse-axis value (``z``); ``sigma_xy`` adds per-axis values.
+    """
+    base = _plot()
+    times = tuple(i * 0.01 for i in range(n))
+    nothing = {a: [None] * n for a in ("x", "y", "z", "magnitude")}
+    cop = {**nothing, "x": [0.001 * i for i in range(n)], "y": [0.0] * n}
+    traces = {"measured_left_cop_m": cop}
+    if sigma is not None:
+        traces["measured_left_cop_sigma_m"] = {**nothing, "z": [sigma] * n}
+    if sigma_xy is not None:
+        traces["measured_left_cop_sigma_m"].update(
+            x=[sigma_xy[0]] * n, y=[sigma_xy[1]] * n
+        )
+    return replace(
+        base,
+        time_s=times,
+        traces=traces,
+        load_share={},
+        events={},
+        measured_qualified=False,
+        measured_uncertainty_source="datasheet rev 3",
+    )
+
+
+def _ellipses(fig):
+    from matplotlib.patches import Ellipse
+
+    return [p for p in fig.axes[3].patches if isinstance(p, Ellipse)]
+
+
+def test_cop_markers_are_per_axis_one_sigma_ellipses_on_the_path() -> None:
+    from src.shared.python.plotting.renderers.ground_reaction import (
+        MAX_COP_MARKERS,
+    )
+
+    fig = Figure()
+    plot_ground_reaction(fig, _cop_series(50, 0.02, sigma_xy=(0.02, 0.005)))
+    ellipses = _ellipses(fig)
+    assert 1 < len(ellipses) <= MAX_COP_MARKERS
+    # Axis-aligned: full width and height are twice sigma_x and sigma_y.
+    assert all(e.width == pytest.approx(0.04) for e in ellipses)
+    assert all(e.height == pytest.approx(0.01) for e in ellipses)
+    assert all(e.angle == 0.0 for e in ellipses)
+    assert ellipses[0].center == (0.0, 0.0)
+    legend = [t.get_text() for t in fig.axes[3].get_legend().get_texts()]
+    assert legend.count("Measured Left \u00b11\u03c3 per axis") == 1
+
+
+def test_without_per_axis_sigma_the_marker_is_a_circle_of_the_worse_axis() -> None:
+    fig = Figure()
+    plot_ground_reaction(fig, _cop_series(5, 0.01))
+    ellipses = _ellipses(fig)
+    assert ellipses
+    assert all(e.width == e.height == pytest.approx(0.02) for e in ellipses)
+
+
+def test_cop_markers_skip_frames_without_a_cop_or_sigma() -> None:
+    from src.shared.python.plotting.renderers.ground_reaction import (
+        cop_marker_indices,
+    )
+
+    assert cop_marker_indices([0.1, None, 0.2], [0.01, 0.01, None], 12) == [0]
+    assert cop_marker_indices([0.0] * 5, [0.01] * 5, 12) == [0, 1, 2, 3, 4]
+    picked = cop_marker_indices([0.0] * 100, [0.01] * 100, 12)
+    assert len(picked) <= 12 and picked[0] == 0
+    assert cop_marker_indices([], [], 12) == []
+
+
+def test_cop_markers_are_captioned_with_the_declared_source() -> None:
+    fig = Figure()
+    plot_ground_reaction(fig, _cop_series(5))
+    texts = [t.get_text() for t in fig.texts]
+    assert (
+        "Ellipses: measured CoP ±1σ per axis (declared uncertainty: datasheet rev 3)"
+    ) in texts
+
+
+def test_no_cop_markers_without_a_cop_sigma_trace() -> None:
+    fig = Figure()
+    plot_ground_reaction(fig, _cop_series(5, sigma=None))
+    assert _ellipses(fig) == []
+    assert not any("Ellipses" in t.get_text() for t in fig.texts)
+
+
+def _cov_series(n: int, cov: tuple[float, float, float]):
+    series = _cop_series(n, 0.02, sigma_xy=(0.02, 0.02))
+    nothing = {a: [None] * n for a in ("x", "y", "z", "magnitude")}
+    trace = {**nothing, "x": [cov[0]] * n, "y": [cov[1]] * n, "z": [cov[2]] * n}
+    return replace(series, traces={**series.traces, "measured_left_cop_cov_m2": trace})
+
+
+def test_cop_markers_are_rotated_covariance_ellipses() -> None:
+    angle = math.radians(30.0)
+    rot = np.array(
+        [[math.cos(angle), -math.sin(angle)], [math.sin(angle), math.cos(angle)]]
+    )
+    cov = rot @ np.diag([0.02**2, 0.005**2]) @ rot.T
+    fig = Figure()
+    plot_ground_reaction(fig, _cov_series(5, (cov[0, 0], cov[1, 1], cov[0, 1])))
+    ellipses = _ellipses(fig)
+    assert ellipses
+    assert all(e.width == pytest.approx(0.04) for e in ellipses)
+    assert all(e.height == pytest.approx(0.01) for e in ellipses)
+    assert all(e.angle == pytest.approx(30.0) for e in ellipses)
+    legend = [t.get_text() for t in fig.axes[3].get_legend().get_texts()]
+    assert legend.count("Measured Left ±1σ covariance") == 1
+    texts = [t.get_text() for t in fig.texts]
+    assert (
+        "Ellipses: measured CoP ±1σ covariance (declared uncertainty: datasheet rev 3)"
+    ) in texts

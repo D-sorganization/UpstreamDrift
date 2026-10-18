@@ -401,7 +401,32 @@
       "disposition": "split",
       "kind": "physical-measurement",
       "status": "deferred",
-      "rationale": "Imported open-fp vertical force and centre of pressure can be displayed and compared, but may not support model acceptance until a physical device passes open-fp's M4 static calibration and M6 real-swing capture checks with production firmware; no plates exist for this repository to measure, so the hardware gate is parked while software children OF-01 to OF-09 stay active under epic #13061.",
+      "rationale": "Epic #13061's software children OF-01 to OF-12 have landed and keep every open-fp result labelled unqualified; the physical qualification of a device cannot be done in software and is the external-only work item #13082, recorded as DV-13082, while OF-00 (#13081) and OF-07b (#13122) stay active under the epic.",
+      "prerequisites": [
+        {
+          "name": "The DV-13082 prerequisites: an assembled open-fp pair with production firmware, a per-device M4 calibration, reference masses and scale, a golfer and capture session, and a named owner",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Satisfied only when DV-13082 (#13082) is satisfied; its acceptance criteria are binding here, and bench-only, simulator or synthetic data is never acceptance evidence."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
+    },
+    {
+      "id": "DV-13082",
+      "title": "Qualified Open-FP Device Record for Measured Vertical Ground Reaction",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/13082",
+      "source_snapshot": "source-13082.json",
+      "record": "DV-13082.md",
+      "disposition": "defer",
+      "kind": "physical-measurement",
+      "status": "deferred",
+      "rationale": "UpstreamDrift reads, places, aligns, overlays, compares and screens open-fp trials, but a reading is only trustworthy once a physical device passes open-fp's M4 static calibration and M6 real-swing capture checks with production firmware; no plates exist for this repository to measure, so every open-fp trial stays unqualified measurement and is never acceptance evidence until this record is satisfied.",
       "prerequisites": [
         {
           "name": "Assembled open-fp plate pair with all eight load cells reading and production MCU firmware (open-fp M2/M3)",
@@ -412,19 +437,23 @@
           "evidence": null
         },
         {
-          "name": "Reference masses and a bathroom or reference scale for the M4 static checks",
+          "name": "Reference masses and a reference scale for the M4 static checks",
           "evidence": null
         },
         {
-          "name": "Golfer and capture session for M6 real-swing capture and false-trigger checks",
+          "name": "Golfer and capture session for the M6 real-swing and false-trigger checks",
+          "evidence": null
+        },
+        {
+          "name": "Named owner accountable for the device and the qualification session",
           "evidence": null
         }
       ],
       "acceptance": [
-        "Record a per-device calibration file and show open-fp M4 static checks on that device: total force within 1 %, CoP within 10 mm at marked spots, body weight within 1 % of a reference scale.",
-        "Show open-fp M6 on the same device and production firmware: 20 real swings captured with none missed and no false triggers during 2 minutes of quiet standing, plus M3 200 Hz frames with no sequence gaps over 10 minutes.",
-        "Record temperature, auto-zero drift and tare movement over a session, and the open-fp commit, firmware and calibration ids used.",
-        "Only then may OF-08 drop the unqualified label or OF-10 use measured wrenches; bench-only, simulator or synthetic data is never acceptance evidence."
+        "Record a per-device calibration file and show the open-fp M4 checks on that device: total force within 1 %, CoP within 10 mm at marked spots, body weight within 1 % of a reference scale.",
+        "Show open-fp M6 on the same device and production firmware: 20 real swings captured with none missed, no false triggers during 2 minutes of quiet standing, and M3 200 Hz frames with no sequence gaps over 10 minutes.",
+        "Record temperature, auto-zero drift and tare movement over a session, with the open-fp commit, firmware and calibration ids used.",
+        "Record a qualification reference for that device in PlateProvenance.qualification for its trials, and update this record through the deferred-validation process (publish, verify, close, in that order); bench-only, simulator or synthetic data is never acceptance evidence."
       ],
       "board": {
         "decision": "pending",

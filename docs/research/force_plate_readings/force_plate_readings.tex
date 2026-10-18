@@ -76,7 +76,52 @@ $R$: a stance error $e$ becomes $R e$, so $|R_{xy}|\,|e|$ bounds each world
 component. The reported CoP bias and rate are the worst world axis,
 $\max_j (|R_{xy}|\,b_s)_j$ and $\max_j (|R_{xy}|\,r_s)_j$. Under a $45^\circ$
 yaw a CoP moving at $r$ along both stance axes thus has world rate
-$\sqrt2\,r$.
+$\sqrt2\,r$. The reading also keeps the random sigma of each world axis,
+$\sigma_{\mathrm{random},j} = \operatorname{hypot}\bigl(\sigma_m,
+s\,(|R_{xy}|\,r_s)_j\bigr)$ for $j \in \{x, y\}$
+(\texttt{cop\_sigma\_random\_xy\_m}), whose maximum is the worst-axis
+random sigma; an unloaded CoP carries $\sigma_m$ on both axes. These are
+per-axis bounds, not a covariance.
+
+\paragraph{CoP Covariance.} Each stance CoP channel has its own skew,
+independent of the other, so the stance random covariance is diagonal,
+$\Sigma_s = \operatorname{diag}\bigl(\sigma_m^2 + s^2 r_{s,x}^2,\;
+\sigma_m^2 + s^2 r_{s,y}^2\bigr)$, and the yaw carries it to world axes
+exactly:
+\begin{equation}
+  \Sigma_w = R_{xy}\,\Sigma_s\,R_{xy}^{\mathsf T}
+\end{equation}
+(\texttt{cop\_cov\_random\_xy\_m2}, reported as
+$(\Sigma_{xx}, \Sigma_{yy}, \Sigma_{xy})$). Its principal axes are the
+plate's axes and its eigenvalues the stance variances, whatever the yaw; an
+unloaded CoP has $\Sigma_w = \sigma_m^2 I$. Because
+$\sum_j R_{ij}^2 = 1$ and $\sum_j R_{ij}^2 r_j^2 \le (\sum_j |R_{ij}|\,r_j)^2$,
+$\sqrt{\Sigma_{ii}} \le \sigma_{\mathrm{random},i}$: the exact world-axis
+sigma never exceeds the per-axis bound above. The overlay draws the 1-sigma
+ellipse of $\Sigma_w$, the points at Mahalanobis distance one, with
+semi-axes $\sqrt{\lambda_\pm}$,
+$\lambda_\pm = \tfrac12(\Sigma_{xx}+\Sigma_{yy}) \pm
+\operatorname{hypot}\bigl(\tfrac12(\Sigma_{xx}-\Sigma_{yy}), \Sigma_{xy}\bigr)$,
+tilted by $\theta = \tfrac12\operatorname{atan2}(2\Sigma_{xy},
+\Sigma_{xx}-\Sigma_{yy})$ from $+x$. It reaches $\pm\sqrt{\Sigma_{ii}}$ along
+each world axis; for a Gaussian error it holds $1 - e^{-1/2} \approx 39\,\%$
+of the probability in two dimensions, not the one-dimensional $68\,\%$.
+Assumptions: the declared per-axis CoP sigma $\sigma_m$ is uncorrelated
+between the stance axes, and, when $s > 0$, the two channels' skews are
+independent. The second must be declared
+(\texttt{ReadingOptions.cop\_skew\_independent}); without it a skewed reading
+reports no covariance and the overlay keeps the per-axis bound. A skew common
+to both channels (one sample clock for the whole CoP) would add the rank-one
+term $s^2\,(R_{xy}\dot c)(R_{xy}\dot c)^{\mathsf T}$, which needs the signed
+rate $\dot c$; the reading keeps only rate magnitudes, so that case is not
+modelled. With $s = 0$ neither skew model matters and $\Sigma_w = \sigma_m^2
+I$. Both import paths (the PyQt tile's Plate Trial Declarations dialog and
+the plate-overlay route, which the web form posts to) ask for $s$ and for the
+skew relation (\texttt{unknown}, \texttt{independent} or \texttt{common};
+\texttt{open\_fp\_format.declared\_import.DeclaredReading}). The relation
+starts at \texttt{unknown}, so a skewed reading claims no covariance until
+independence is declared; \texttt{common} is offered so it can be recorded,
+but it too keeps the per-axis bound.
 
 \paragraph{Composition.} With declared measurement sigma $\sigma_m$ and
 band factor $k$,
@@ -111,6 +156,15 @@ quadratic bias estimate equal to the true interpolation error; the literal
 composition of measurement, skew and bias; refusal of extrapolation;
 snapping of clock rounding at the last and at an interior sample; and the
 world-axis CoP rate and bias under $45^\circ$ and $90^\circ$ yaw.
+\path{test_readings_cop_axes.py} checks the per-world-axis CoP random sigma,
+its axis swap under a $90^\circ$ yaw and that its maximum equals the
+worst-axis value. \path{test_readings_cop_covariance.py} checks that the
+covariance is $R_{xy}\Sigma_sR_{xy}^{\mathsf T}$ at five yaws, that its
+eigenvectors turn with the plate, that it never exceeds the per-axis bound,
+the unloaded case, the refusal of an undeclared skewed covariance and its
+validation;
+\path{tests/unit/biomechanics/test_cop_covariance_ellipse.py} checks the
+ellipse geometry against a table shared with the web chart's tests.
 
 \section{Limitations}
 
