@@ -173,3 +173,34 @@ class JaxSimDashboard(QWidget):
         )
         self.feature_controls["Parameter sensitivity (ZTCF)"] = button
         return button
+
+
+def get_dockable_ui() -> QWidget:
+    """Return the dockable widget instance for docking in the unified launcher."""
+    return JaxSimDashboard()
+
+
+def main() -> None:
+    """Main entry point for standalone launch."""
+    import argparse
+    import sys
+    from src.shared.python.ui.qt.utils import get_qapp
+
+    parser = argparse.ArgumentParser(description="JaxSim Dashboard Launcher")
+    parser.add_argument(
+        "--exercise",
+        type=str,
+        default="gait",
+        help="Biomechanical exercise to focus on (default: gait)",
+    )
+    args = parser.parse_args()
+
+    app = get_qapp()
+    widget = JaxSimDashboard(exercise_filter=args.exercise)
+    widget.setWindowTitle("JaxSim Dashboard")
+    widget.show()
+    sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()

@@ -6,6 +6,7 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 
 | ID | Name | Entity Kind | Primary Workspace | Secondary Links | Authority | Lifecycle | Evidence | Acceptance Owner |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `native_viewer_export` | Tools Package: native_viewer_export | `cli_tool` | `simulation` | `analysis` | `core` | 🟣 intentionally_headless | `src/tools/native_viewer_export/__init__.py` | `tests/config/test_registry_exclusions.py` |
 | `offline_validation` | Tools Package: offline_validation | `library` | `simulation` | `analysis` | `core` | 🟣 intentionally_headless | `src/tools/offline_validation/__init__.py` | `tests/config/test_registry_exclusions.py` |
 | `onboarding.about_version` | About/version info + onboarding | `feature` | `simulation` | — | `core` | 🔵 planned | `src/launchers/about_dialog.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `opensim_golf` | OpenSim | `model` | `simulation` | — | `opensim` | 🟢 active_feature | `src/engines/physics_engines/opensim/python/opensim_gui.py` | `tests/config/test_launcher_registry_parity.py` |
@@ -30,4 +31,3 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `pinocchio_models-snatch` | Snatch | `model` | `simulation` | — | `pinocchio` | 🟢 active_feature | `src/pinocchio_models/exercises/snatch` | `tests/config/test_launcher_registry_parity.py` |
 | `pinocchio_models-squat` | Squat | `model` | `simulation` | — | `pinocchio` | 🟢 active_feature | `src/pinocchio_models/exercises/squat` | `tests/config/test_launcher_registry_parity.py` |
 | `pinocchio_models_shared` | Pinocchio Models | `model` | `simulation` | — | `pinocchio` | 🟢 active_feature | `Pinocchio_Models` | `tests/config/test_launcher_registry_parity.py` |
-| `realtime_ws` | Realtime WebSocket | `service` | `simulation` | — | `core` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
