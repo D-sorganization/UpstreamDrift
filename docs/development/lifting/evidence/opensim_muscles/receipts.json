@@ -1,0 +1,376 @@
+{
+  "generator": "scripts/measure_opensim_lift_muscles.py",
+  "issue": "#13042 (OSL-4)",
+  "source_commit": "e40c9962547943b9eb6ec57c1b7db43efbe503e5",
+  "reserve_share_threshold": 0.05,
+  "citation": "Rajagopal A, Dembia CL, DeMers MS, Delp DD, Hicks JL, Delp SL. Full-Body Musculoskeletal Model for Muscle-Driven Simulation of Human Gait. IEEE Trans Biomed Eng. 2016;63(10):2068-2079. doi:10.1109/TBME.2016.2586862",
+  "lifts": {
+    "squat": {
+      "lift": "squat",
+      "status": "complete",
+      "classification": "unqualified",
+      "reserve_share": 0.568069179166055,
+      "mean_reserve_share": 0.5679658309137081,
+      "peak_reserve_share": 0.6723738008905368,
+      "reserve_share_threshold": 0.05,
+      "moment_balance_max_error_nm": 1.1368683772161603e-13,
+      "frames": 41,
+      "stride": 5,
+      "major_groups": {
+        "quadriceps": {
+          "n_muscles": 8,
+          "peak_activation": 1.0,
+          "mean_activation": 0.7801599649374066,
+          "peak_force_n": 4561.791986563241,
+          "mean_force_n": 1927.6386783193427
+        },
+        "gluteals": {
+          "n_muscles": 18,
+          "peak_activation": 1.0,
+          "mean_activation": 0.36029380590873833,
+          "peak_force_n": 1157.049525938256,
+          "mean_force_n": 345.53741753478585
+        },
+        "hamstrings": {
+          "n_muscles": 8,
+          "peak_activation": 1.0,
+          "mean_activation": 0.4089210579595504,
+          "peak_force_n": 2145.8608324360266,
+          "mean_force_n": 440.210787417595
+        },
+        "erector spinae": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        },
+        "deltoids": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        },
+        "trapezius": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        },
+        "triceps": {
+          "n_muscles": 0,
+          "peak_activation": null,
+          "mean_activation": null,
+          "peak_force_n": null,
+          "mean_force_n": null
+        }
+      },
+      "phases": {
+        "standing": {
+          "quadriceps": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.8223390782492958,
+            "peak_force_n": 4561.791986563241,
+            "mean_force_n": 2214.053858692035
+          },
+          "gluteals": {
+            "n_muscles": 18,
+            "peak_activation": 1.0,
+            "mean_activation": 0.5427218252301282,
+            "peak_force_n": 1145.988172052895,
+            "mean_force_n": 438.1778011739262
+          },
+          "hamstrings": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.3774075843679688,
+            "peak_force_n": 1509.9597732688826,
+            "mean_force_n": 364.5343552428333
+          },
+          "erector spinae": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "deltoids": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "trapezius": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "triceps": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          }
+        },
+        "descent": {
+          "quadriceps": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.8086065433738031,
+            "peak_force_n": 4480.228595332194,
+            "mean_force_n": 2112.969746598084
+          },
+          "gluteals": {
+            "n_muscles": 18,
+            "peak_activation": 1.0,
+            "mean_activation": 0.3625801662407628,
+            "peak_force_n": 1148.6488448168957,
+            "mean_force_n": 347.9205651968597
+          },
+          "hamstrings": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.4512359159172305,
+            "peak_force_n": 1580.3137064469847,
+            "mean_force_n": 401.50868655808995
+          },
+          "erector spinae": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "deltoids": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "trapezius": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "triceps": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          }
+        },
+        "bottom": {
+          "quadriceps": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.75,
+            "peak_force_n": 4167.32289361967,
+            "mean_force_n": 1935.0944062818412
+          },
+          "gluteals": {
+            "n_muscles": 18,
+            "peak_activation": 1.0,
+            "mean_activation": 0.3333333333333333,
+            "peak_force_n": 1149.153747945503,
+            "mean_force_n": 336.3827091867668
+          },
+          "hamstrings": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.4108135498233221,
+            "peak_force_n": 946.1887659278771,
+            "mean_force_n": 370.90645697256724
+          },
+          "erector spinae": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "deltoids": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "trapezius": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "triceps": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          }
+        },
+        "ascent": {
+          "quadriceps": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.7761144812061486,
+            "peak_force_n": 4136.855016161007,
+            "mean_force_n": 1802.0651014358775
+          },
+          "gluteals": {
+            "n_muscles": 18,
+            "peak_activation": 1.0,
+            "mean_activation": 0.32343142197347513,
+            "peak_force_n": 1157.049525938256,
+            "mean_force_n": 330.7623244838171
+          },
+          "hamstrings": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.39555514196390795,
+            "peak_force_n": 2137.449581259167,
+            "mean_force_n": 486.01781053353005
+          },
+          "erector spinae": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "deltoids": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "trapezius": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "triceps": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          }
+        },
+        "lockout": {
+          "quadriceps": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.6491732121434832,
+            "peak_force_n": 3766.014786774806,
+            "mean_force_n": 1427.513705618497
+          },
+          "gluteals": {
+            "n_muscles": 18,
+            "peak_activation": 1.0,
+            "mean_activation": 0.2426263557162941,
+            "peak_force_n": 1152.139631036517,
+            "mean_force_n": 263.91443472795686
+          },
+          "hamstrings": {
+            "n_muscles": 8,
+            "peak_activation": 1.0,
+            "mean_activation": 0.375,
+            "peak_force_n": 2145.8608324360266,
+            "mean_force_n": 502.15349784166244
+          },
+          "erector spinae": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "deltoids": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "trapezius": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          },
+          "triceps": {
+            "n_muscles": 0,
+            "peak_activation": null,
+            "mean_activation": null,
+            "peak_force_n": null,
+            "mean_force_n": null
+          }
+        }
+      },
+      "moco": {
+        "solver": "opensim.MocoInverse",
+        "converged": false,
+        "status": "Failed: std::exception in 'OpenSim::MocoStudy OpenSim::MocoInverse::initialize() const': Coordinate '/jointset/subtalar_r/subtalar_angle_r' is locked, but Moco does not support locked coordinates. Consider replacing the joint for this coordinate with a WeldJoint instead.\n\tThrown at MocoProblemRep.cpp:92 in initialize().",
+        "error": "std::exception in 'OpenSim::MocoStudy OpenSim::MocoInverse::initialize() const': Coordinate '/jointset/subtalar_r/subtalar_angle_r' is locked, but Moco does not support locked coordinates. Consider replacing the joint for this coordinate with a WeldJoint instead.\n\tThrown at MocoProblemRep.cpp:92 in initialize()."
+      },
+      "citation": "Rajagopal A, Dembia CL, DeMers MS, Delp DD, Hicks JL, Delp SL. Full-Body Musculoskeletal Model for Muscle-Driven Simulation of Human Gait. IEEE Trans Biomed Eng. 2016;63(10):2068-2079. doi:10.1109/TBME.2016.2586862"
+    },
+    "deadlift": {
+      "lift": "deadlift",
+      "status": "unavailable",
+      "classification": "unqualified",
+      "reason": "no LIFT-5 same-input bundle is registered for 'deadlift' in SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit",
+      "reserve_share": null,
+      "major_groups": null,
+      "phases": null,
+      "moco": null
+    },
+    "bench_press": {
+      "lift": "bench_press",
+      "status": "unavailable",
+      "classification": "unqualified",
+      "reason": "no LIFT-5 same-input bundle is registered for 'bench_press' in SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit",
+      "reserve_share": null,
+      "major_groups": null,
+      "phases": null,
+      "moco": null
+    },
+    "snatch": {
+      "lift": "snatch",
+      "status": "unavailable",
+      "classification": "unqualified",
+      "reason": "no LIFT-5 same-input bundle is registered for 'snatch' in SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit",
+      "reserve_share": null,
+      "major_groups": null,
+      "phases": null,
+      "moco": null
+    },
+    "clean_and_jerk": {
+      "lift": "clean_and_jerk",
+      "status": "unavailable",
+      "classification": "unqualified",
+      "reason": "no LIFT-5 same-input bundle is registered for 'clean_and_jerk' in SAME_INPUT_LIFT_BUNDLES (#11745), so there is no input to fit",
+      "reserve_share": null,
+      "major_groups": null,
+      "phases": null,
+      "moco": null
+    }
+  }
+}

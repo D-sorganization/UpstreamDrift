@@ -1679,6 +1679,57 @@ errors are the shoulders and bar, from the rack grip and arm reach (OSL-19,
 \#13158), and a forefoot error of about 2.1\,cm that predates the torsion
 (2.4\,cm on the earlier body). The static holds, which have no bundle, keep
 the generic foot.
+
+\subsection{OpenSim Muscle Forces and Activations (OSL-4, Issue \#13042)}\label{sec:opensim-muscles}
+\paragraph{Method and Formulation.}
+OSL-4 completes the muscle-force and activation pipeline for the five barbell
+lifts using OpenSim \texttt{StaticOptimization} and \texttt{MocoInverse} (where
+converging), reusing the reserve-share formulation from
+\texttt{musculoskeletal\_static\_opt.py} and \texttt{musculoskeletal\_solvers.py}.
+At each sampled frame $t$, the muscle redundancy is resolved against the inverse-dynamics
+joint moments $\boldsymbol{\tau}$ for rigid-tendon Millard muscles
+(Rajagopal et al.\ 2016, 80 lower-limb muscles across 14 degrees of freedom):
+\begin{equation}
+\min_{\mathbf{a}} \sum_{m=1}^{80} a_m^2 + w \sum_{c=1}^{14} r_c^2 \quad \text{s.t.} \quad 0 \le a_m \le 1,\quad \boldsymbol{\tau} = \mathbf{R}^\top (\mathbf{F}_\text{pas} + \mathbf{a} \odot \mathbf{F}_\text{act}) + \mathbf{r}
+\end{equation}
+The reserve actuator share across the lift is defined as:
+\begin{equation}
+\text{Reserve Share} = \frac{\sum_t \sum_c |r_c(t)|}{\sum_t \sum_c |\tau_c(t)|}
+\end{equation}
+A lift is classified as \texttt{qualified} only when the reserve share is strictly below 5\% ($< 0.05$).
+
+\paragraph{Measured Numbers.}
+For the back squat (the only lift with a credible same-input bundle today),
+the moment balance holds with maximum error $1.14 \times 10^{-13}\,\mathrm{N\,m}$.
+The overall reserve share is 56.8\% (mean 56.8\%, peak 67.2\%), so the squat is classified
+as \texttt{unqualified} due to heavy physiological torque demands exceeding muscle capacity
+at deep knee and hip flexion. The major muscle groups yield:
+\begin{center}\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccccc}
+\toprule
+Muscle Group & Muscles & Peak Act & Mean Act & Peak Force (N) & Mean Force (N)\\
+\midrule
+Quadriceps & 8 & 1.000 & 0.780 & 4561.8 & 1927.6\\
+Gluteals & 18 & 1.000 & 0.360 & 1157.0 & 345.5\\
+Hamstrings & 8 & 1.000 & 0.409 & 2145.9 & 440.2\\
+Erector Spinae & 0 & --- & --- & --- & ---\\
+Deltoids & 0 & --- & --- & --- & ---\\
+Trapezius & 0 & --- & --- & --- & ---\\
+Triceps & 0 & --- & --- & --- & ---\\
+\bottomrule
+\end{tabular}
+\end{center}
+The upper-body and trunk muscle groups are absent in the Rajagopal 80-muscle lower-limb model
+and are driven by coordinate actuators. The remaining four lifts (bench press, deadlift,
+snatch, clean and jerk) are reported as \texttt{unavailable} pending barbell bundles and IK/ID receipts.
+
+\paragraph{Reproduction Command.}
+\begin{verbatim}
+QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \
+    python3 scripts/measure_opensim_lift_muscles.py \
+    --out docs/development/lifting/evidence/opensim_muscles/receipts.json
+\end{verbatim}
+
 \subsection{Snatch Same-Input Bundle (LIFT-5, Issue \#11745)}
 \paragraph{Planar Pull.} The previous Tools snatch configuration ran from
 the floor setup to the overhead-squat catch through one mid-time via point.

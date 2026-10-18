@@ -33,6 +33,8 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Final
 
+import numpy as np
+
 from src.shared.python.biomechanics.grip_extraction import unavailable_analysis
 from src.shared.python.biomechanics.grip_wrench import GripAnalysis
 from src.shared.python.biomechanics.ground_reaction import FootReaction
@@ -490,7 +492,41 @@ def evaluate_opensim_lift_kinetics(
             spec, "No kinematics trajectory or bundle provided for inverse dynamics"
         )
 
-    return _unqualified_kinetics(
-        spec,
-        "OpenSim full-body kinetics pipeline execution requires valid solver context",
+    from src.engines.physics_engines.opensim.python.msk_lift_muscles import (
+        evaluate_lift_muscles,
     )
+
+    try:
+        stride = (
+            bundle_or_trajectory
+            if isinstance(bundle_or_trajectory, int)
+            else IK_ID_STRIDE
+        )
+        muscle_res = evaluate_lift_muscles(spec.lift, stride=stride, run_moco=False)
+        if muscle_res["status"] != "complete":
+            return _unqualified_kinetics(spec, muscle_res.get("reason", "unavailable"))
+
+        forces = muscle_res.get("forces")
+        names = muscle_res.get("muscle_names", [])
+        muscle_forces_map: dict[str, float] = {}
+        if forces is not None and len(forces) > 0:
+            mean_forces = np.mean(forces, axis=0)
+            muscle_forces_map = {
+                name: float(mean_forces[i]) for i, name in enumerate(names)
+            }
+
+        return OpenSimLiftKineticsResult(
+            status=muscle_res["classification"],
+            lift=spec.lift,
+            joint_moments_nm=None,
+            hand_wrench=unavailable_analysis(
+                "Grip loop-closure reaction acts on hand coordinates"
+            ),
+            grf=None,
+            l5_s1_load_n=None,
+            muscle_forces_n=muscle_forces_map or None,
+            reserve_share=muscle_res.get("reserve_share"),
+            reason=muscle_res.get("reason", ""),
+        )
+    except Exception as exc:  # noqa: BLE001
+        return _unqualified_kinetics(spec, f"Muscle kinetics failed: {exc}")
