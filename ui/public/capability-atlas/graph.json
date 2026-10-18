@@ -724,7 +724,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "HRG-GR4 (#13205). One resolver (src/shared/python/motion_matching/execution/grip_selection.py) with the override, document, default precedence of the appearance colours. Physical picks (strength preset, rotation about the shaft, palm diagonal, set angle, depth, hand spacing) make a new spec revision through apply_grip_config and need a refit; they are never written to the .appearance.json sidecar. Picture-only picks (style, lead thumb) go in the sidecar's grip block and leave physics_spec_sha256 unchanged. The desktop Grip group, the web GripControls and POST /api/character-builder/grip are held equal to the Python resolver by tests/fixtures/grip/grip_roundtrip.json. The CLI flags live in spec_builder (physical) and native_viewer_export (picture-only; a physical flag is refused).",
+      "notes": "HRG-GR4 (#13205), HRG-A2 (#13166). One resolver (src/shared/python/motion_matching/execution/grip_selection.py) with the override, document, default precedence of the appearance colours. Physical picks (strength preset, rotation about the shaft, palm diagonal, set angle, depth, hand spacing) make a new spec revision through apply_grip_config and need a refit; they are never written to the .appearance.json sidecar. Picture-only picks (style, lead thumb, visual grip strength, lead roll offset, trail roll offset) go in the sidecar's grip block and leave physics_spec_sha256 unchanged. The desktop Grip group, the web GripControls and POST /api/character-builder/grip are held equal to the Python resolver by tests/fixtures/grip/grip_roundtrip.json. The CLI flags live in spec_builder (physical) and native_viewer_export (picture-only; a physical flag is refused).",
       "id": "tools.character_builder_grip"
     },
     {
@@ -894,7 +894,7 @@
       "reason": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL); the artefacts are mp4 files, so there is no interactive browser equivalent (epic #11673).",
       "pending_decision": false,
       "tiles": [],
-      "notes": "Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; --grip-style (HRG-GR4, #13205) is picture-only and goes in the appearance sidecar's grip block, while a physical grip flag (--grip-preset, --lead-shaft-rotation, ...) is refused with a message pointing to spec_builder, which writes the new model revision; the matching interactive controls are tracked under tools.character_builder.",
+      "notes": "Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; --grip-style, --visual-grip-strength, --lead-roll-offset, --trail-roll-offset (HRG-GR4, #13205, HRG-A2, #13166) are picture-only and go in the appearance sidecar's grip block, while a physical grip flag (--grip-preset, --lead-shaft-rotation, ...) is refused with a message pointing to spec_builder, which writes the new model revision; the matching interactive controls are tracked under tools.character_builder.",
       "id": "tools.native_viewer_export"
     },
     {
@@ -3293,7 +3293,7 @@
   "inputs": {
     "src/config/models.yaml": "eb564e4c2961c6963c0331621f8a69907d47b7dffaf7673ae448cbde3a679852",
     "src/config/launcher_manifest.json": "d96bb6570c18b2c03febaad6af071fd2a4153adcefea41c5218c8445e799cfcc",
-    "src/config/feature_parity.json": "3d4c353dc22334368618d21e27eba2b9ce520c41c878d62932fef8fbe2d821dc",
+    "src/config/feature_parity.json": "ca8044bcd49f191f3004084f6105eaf0783dbea579ca989459cbb6e8d79ef00d",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
