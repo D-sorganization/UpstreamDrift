@@ -107,7 +107,12 @@ def test_trunk_and_pelvis_extents_equal_the_spec_hint_semi_axes(
         ml = float(np.ptp(verts @ sections[body].ml_axis))
         ap = float(np.ptp(verts @ sections[body].depth_axis))
         hint_ml, hint_ap = _hint_semi_axes(spec, body)
-        assert ml == pytest.approx(2 * hint_ml, rel=0.05), (body, ml, hint_ml)
+        if library.classify_body(body) == "pelvis":
+            # HRG-C1 (#13164): the pelvis is at least the hint wide and grows to
+            # enclose both HJCs plus the femur radii (test_pelvis_loft.py).
+            assert ml >= 2 * hint_ml * 0.95, (body, ml, hint_ml)
+        else:
+            assert ml == pytest.approx(2 * hint_ml, rel=0.05), (body, ml, hint_ml)
         assert ap == pytest.approx(2 * hint_ap, rel=0.05), (body, ap, hint_ap)
         assert ml > ap, (body, ml, ap)
         seen.add(library.classify_body(body))

@@ -26,7 +26,18 @@ Sizing rule
     semi-axis, aspect = the largest anteroposterior (AP) semi-axis over it,
     with ML/AP from the spec landmarks (``cross_section``). A trunk body
     without hint shapes uses the documented library default
-    (``source="library_default"``). See
+    (``source="library_default"``). The chest's lower tip is its joint origin
+    (the lumbar plane).
+
+Pelvis rule (HRG-C1, #13164)
+    A pelvis body that parents two hips and a torso joint is NOT lofted on a
+    capsule (the longest one was the left hip after a hip calibration). It is
+    a convex split ellipsoid centred on the HJC midpoint, vertical along the
+    body's up axis, wide along the hip line: widest at the lowest HJC, running
+    ``PELVIS_CROTCH_DROP_M`` below it and cut flat exactly at the lumbar plane.
+    Half width = max(hint ML, HJC offset + femur radius + margin); half depth =
+    the hint AP semi-axis. A pelvis without those landmarks keeps the loft.
+    See
     ``docs/development/full_body_models/appearance_reference/shared_appearance_spec.tex``.
 
 Head and club meshes stay in their own shared modules (``head``,
@@ -36,6 +47,7 @@ CC0 asset of ``model_appearance.head_mesh`` when ``head.model`` is ``cc0_mesh``.
 
 from __future__ import annotations
 
+import dataclasses
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
@@ -52,7 +64,9 @@ from src.shared.python.model_appearance.club_assembly import (
 from src.shared.python.model_appearance.cross_section import (
     TRUNK_PARTS,
     BodySection,
+    PelvisLandmarks,
     body_sections,
+    pelvis_landmarks,
     width_hint_for,
 )
 from src.shared.python.model_appearance.grip_hands import assembly_meshes_with_hands
@@ -81,6 +95,8 @@ SIZING_SOURCES = ("visual_hints", "library_default")
 # does not balloon (library-default sizing only; hint sizes are anthropometric).
 _MAX_RADIUS_OVER_LENGTH = 0.6
 _BLEND_RINGS, _BLEND_SIDES = 14, 24
+# The pelvis skin cap is recessed under the garment cap (no coplanar z-fighting).
+_SKIN_CAP_INSET_M = 0.003
 
 
 @dataclass(frozen=True)
@@ -213,6 +229,7 @@ class _Context:
 
     doc: AppearanceDocument
     sections: Mapping[str, BodySection]
+    pelvis: Mapping[str, PelvisLandmarks]
     shapes: Mapping[str, Sequence[Shape]]
     club: ClubAssembly | None
     #: The parametric head draws the head body (skull, face, ears, neck).
@@ -246,18 +263,96 @@ def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Se
 def _trunk_segment(
     ctx: _Context, body: str, part: str, caps: Sequence[Capsule], scale: float
 ) -> _Segment:
-    """One trunk solid along the body's longest capsule (no overlapping lofts)."""
+    """One trunk solid along the body's longest capsule (no overlapping lofts).
+
+    The spindle's lower tip is the body's joint origin (the loft overshoots a
+    segment by half a radius, so the segment starts that much above it): the
+    chest then begins at the lumbar plane where the pelvis solid ends.
+    """
     spine = max(caps, key=lambda c: c.length_m())  # first wins on a tie
     size = _section_size(part, ctx.shapes.get(body, ()), ctx.sections.get(body))
     radius = scale * size.radius_m
     if size.source == "library_default":
         radius = min(radius, _MAX_RADIUS_OVER_LENGTH * spine.length_m())
-    return _Segment(
-        np.asarray(spine.start_m), np.asarray(spine.end_m), radius, size.aspect
+    start, end = np.asarray(spine.start_m), np.asarray(spine.end_m)
+    axis = (end - start) / spine.length_m()
+    over = min(0.5 * radius, 0.5 * spine.length_m())  # keep a positive length
+    return _Segment(start + over * axis, end, radius, size.aspect)
+
+
+@dataclass(frozen=True)
+class _PelvisSegment(_Segment):
+    """Pelvis solid: a split ellipsoid on the hip landmarks (see HRG-C1)."""
+
+    shape: geometry.SplitEllipsoid | None = None
+
+
+def _pelvis_shape(
+    ctx: _Context, body: str, size: SectionSize, scale: float
+) -> geometry.SplitEllipsoid:
+    """Hip-centred solid from the lowest HJC level up to the lumbar plane.
+
+    Centre: the HJC midpoint, in the horizontal plane; widest level: the
+    lowest HJC. Half width: the larger of the hint ML semi-axis and what
+    encloses every HJC plus the femur radius and a margin. Half depth: the
+    hint AP semi-axis. It runs ``PELVIS_CROTCH_DROP_M`` below the lowest HJC
+    and is cut flat exactly at the lumbar-joint plane (the chest starts there).
+    """
+    marks, section = ctx.pelvis[body], ctx.sections[body]
+    up, ml = section.trunk_up_axis(), section.ml_axis
+    hjc = np.stack([marks.hjc_r, marks.hjc_l])
+    z_hjc = hjc @ up
+    top = float(marks.lumbar @ up - z_hjc.min())
+    if top <= 0:
+        raise ValueError(f"{body}: the lumbar joint is not above the hip joints")
+    ratio = library.PELVIS_WAIST_RATIO
+    half_up = top / math.sqrt(1.0 - ratio**2)
+    femur = library.PART_RADIUS_M["thigh"] + library.PELVIS_HIP_MARGIN_M
+    mid = hjc.mean(axis=0)
+    centre = mid - (mid @ up) * up + z_hjc.min() * up
+    half_width = scale * size.radius_m
+    for point in hjc:
+        level = float(np.clip((point @ up - z_hjc.min()) / half_up, 0.0, 0.999))
+        lateral = abs(float((point - mid) @ ml)) + femur
+        half_width = max(half_width, lateral / math.sqrt(1.0 - level**2))
+    return geometry.SplitEllipsoid(
+        centre,
+        up,
+        ml,
+        half_width,
+        scale * size.radius_m * size.aspect,
+        half_up,
+        library.PELVIS_CROTCH_DROP_M,
+        top,
+    )
+
+
+def _pelvis_segment(
+    ctx: _Context, body: str, part: str, caps: Sequence[Capsule], scale: float
+) -> _Segment:
+    """The pelvis solid; bodies without hip and lumbar landmarks keep the loft."""
+    if body not in ctx.pelvis or body not in ctx.sections:
+        return _trunk_segment(ctx, body, part, caps, scale)
+    size = _section_size(part, ctx.shapes.get(body, ()), ctx.sections[body])
+    shape = _pelvis_shape(ctx, body, size, scale)
+    centre = np.asarray(shape.centre)
+    return _PelvisSegment(
+        centre, centre + shape.top * shape.up, shape.half_width, 1.0, shape
     )
 
 
 def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mesh:
+    if isinstance(seg, _PelvisSegment) and seg.shape is not None:
+        thickness = extra.get("thickness", 1.0)
+        shape = seg.shape
+        if thickness == 1.0:  # skin sits just under the garment's flat cap
+            shape = dataclasses.replace(shape, top=shape.top - _SKIN_CAP_INSET_M)
+        return geometry.split_ellipsoid_mesh(
+            shape,
+            thickness=thickness,
+            rings=library.LOFT_RINGS // 2,
+            sides=library.LOFT_SIDES,
+        )
     return geometry.lofted_segment(
         seg.start,
         seg.end,
@@ -283,7 +378,7 @@ def _segment_meshes(
         if part in library.BLEND_PARTS:  # ball joint hides the segment seam
             ball = geometry.ellipsoid_mesh(
                 seg.start,
-                np.full(3, seg.radius * library.blend_scale(garment is not None)),
+                np.full(3, seg.radius * library.blend_scale(garment is not None, part)),
                 seg.end - seg.start,
                 rings=_BLEND_RINGS,
                 sides=_BLEND_SIDES,
@@ -311,7 +406,9 @@ def _meshes_for_body(
         finish = library.material_name_for(ctx.doc, body)
         return [BodyMesh(body, *item) for item in club_meshes(ctx.club, finish)]
     scale = 1.0 if rule is None else rule.radius_scale
-    if part in TRUNK_PARTS:
+    if part == "pelvis":
+        segments = [_pelvis_segment(ctx, body, part, caps, scale)]
+    elif part in TRUNK_PARTS:
         segments = [_trunk_segment(ctx, body, part, caps, scale)]
     else:
         segments = _limb_segments(part, caps, scale)
@@ -337,7 +434,14 @@ def body_meshes(
     shapes: dict[str, list[Shape]] = {}
     for shape in skeleton.shapes:
         shapes.setdefault(shape.body, []).append(shape)
-    ctx = _Context(doc, body_sections(spec), shapes, club, doc.head.enabled)
+    ctx = _Context(
+        doc,
+        body_sections(spec),
+        pelvis_landmarks(spec),
+        shapes,
+        club,
+        doc.head.enabled,
+    )
     by_body: dict[str, list[Capsule]] = {}
     for cap in skeleton.capsules:
         by_body.setdefault(cap.body, []).append(cap)
