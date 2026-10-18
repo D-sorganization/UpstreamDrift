@@ -197,10 +197,13 @@ class TestForceClosure:
 
 
 class _FakeEngine:
-    """Non-humanoid engine stub; ZMPComputer falls back to DEFAULT_MASS_KG."""
+    """Non-humanoid engine stub providing total mass."""
 
     def get_com_velocity(self) -> np.ndarray:
         return np.zeros(3)
+
+    def get_total_mass(self) -> float:
+        return DEFAULT_MASS_KG
 
 
 def _residual_horizontal_moment(
