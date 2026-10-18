@@ -81,6 +81,13 @@
       }
     },
     "body_model": { "enum": ["ellipsoid", "meshes"] },
+    "foot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "model": { "enum": ["procedural", "cc0_mesh"] }
+      }
+    },
     "ball": {
       "type": "object",
       "additionalProperties": false,

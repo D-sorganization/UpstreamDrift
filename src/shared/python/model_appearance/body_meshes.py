@@ -55,7 +55,7 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.model_appearance import geometry, library
+from src.shared.python.model_appearance import foot, geometry, library
 from src.shared.python.model_appearance import head_mesh as head_mesh_asset
 from src.shared.python.model_appearance.club_assembly import (
     PART_MATERIALS,
@@ -234,6 +234,8 @@ class _Context:
     club: ClubAssembly | None
     #: The parametric head draws the head body (skull, face, ears, neck).
     head_enabled: bool
+    #: Procedural shoe-last shells of the foot bodies that could be sized (F1).
+    feet: Mapping[str, Sequence[foot.FootPart]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -393,6 +395,31 @@ def _segment_meshes(
     return out
 
 
+def _foot_meshes(ctx: _Context, body: str) -> list[BodyMesh]:
+    """Shoe (garment), bare-foot (skin) and ankle-stub shells of one foot body.
+
+    A bare foot (no shoe garment) shows the foot shell only; the ankle stub
+    takes the shin garment (trouser leg) when the outfit has one, else skin.
+    """
+    base = library.material_name_for(ctx.doc, body)
+    garment = library.garment_name_for(ctx.doc, body)
+    shin = library.CLOTHING[ctx.doc.clothing].get("shin")
+    plan = (
+        ("skin", "skin", base),
+        ("garment", "garment", garment),
+        ("ankle", "garment" if shin else "skin", shin or base),
+    )
+    out: list[BodyMesh] = []
+    counts: dict[str, int] = {}
+    for role, label, material in plan:
+        if material is None:
+            continue
+        for part in (p for p in ctx.feet[body] if p.role == role):
+            i = counts[label] = counts.get(label, -1) + 1
+            out.append(BodyMesh(body, f"{label}{i}", part.mesh, material))
+    return out
+
+
 def _meshes_for_body(
     ctx: _Context, body: str, caps: Sequence[Capsule]
 ) -> list[BodyMesh]:
@@ -405,6 +432,8 @@ def _meshes_for_body(
     if part == "club" and ctx.club is not None:
         finish = library.material_name_for(ctx.doc, body)
         return [BodyMesh(body, *item) for item in club_meshes(ctx.club, finish)]
+    if body in ctx.feet:
+        return _foot_meshes(ctx, body)
     scale = 1.0 if rule is None else rule.radius_scale
     if part == "pelvis":
         segments = [_pelvis_segment(ctx, body, part, caps, scale)]
@@ -434,13 +463,15 @@ def body_meshes(
     shapes: dict[str, list[Shape]] = {}
     for shape in skeleton.shapes:
         shapes.setdefault(shape.body, []).append(shape)
+    sections = body_sections(spec)
     ctx = _Context(
         doc,
-        body_sections(spec),
+        sections,
         pelvis_landmarks(spec),
         shapes,
         club,
         doc.head.enabled,
+        foot.foot_parts(spec, sections, model=doc.foot.model),
     )
     by_body: dict[str, list[Capsule]] = {}
     for cap in skeleton.capsules:
