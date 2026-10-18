@@ -115,8 +115,14 @@ class AxialLoadSource(Protocol):
         rates: Mapping[str, float],
         accelerations: Mapping[str, float],
         time_s: float,
+        external_wrenches: Sequence[OverlayWrench] | None = None,
     ) -> AxialLoadFrame | None:
-        """Axial loads for a prescribed motion, or ``None`` when unqualified."""
+        """Axial loads for a prescribed motion, or ``None`` when unqualified.
+
+        ``external_wrenches`` are the ground contact wrenches the provider also
+        draws (one source of truth for the support reaction); ``None`` leaves
+        the engine's own contact handling in charge.
+        """
         ...
 
 
@@ -242,7 +248,11 @@ class BundleOverlayProvider:
         return self
 
     def _axial_frame(
-        self, index: int, coords: Mapping[str, float], rates: Mapping[str, float]
+        self,
+        index: int,
+        coords: Mapping[str, float],
+        rates: Mapping[str, float],
+        ground: Sequence[OverlayWrench],
     ) -> AxialLoadFrame | None:
         if self._axial is None:
             return None
@@ -256,7 +266,11 @@ class BundleOverlayProvider:
             )
         )
         return self._axial.axial_load_frame(
-            coords, rates, accel, float(index * self._bundle.dt_s)
+            coords,
+            rates,
+            accel,
+            float(index * self._bundle.dt_s),
+            external_wrenches=ground,
         )
 
     def __len__(self) -> int:
@@ -271,8 +285,9 @@ class BundleOverlayProvider:
         rates = dict(zip(names, map(float, self._v[index]), strict=True))
         efforts = self._bundle.efforts[min(index, self._bundle.steps - 1)]
         named_efforts = dict(zip(names, efforts, strict=True))
+        ground = self._ground_wrenches(coords, rates)
         wrenches = [
-            *self._contact_wrenches(coords, rates),
+            *self._contact_wrenches(ground, coords),
             *self._torque_wrenches(coords, named_efforts),
             *self._weight_wrenches(coords),
         ]
@@ -289,7 +304,7 @@ class BundleOverlayProvider:
             time_s=float(index * self._bundle.dt_s),
             engine=self._engine,
             wrenches=tuple(wrenches),
-            axial_loads=self._axial_frame(index, coords, rates),
+            axial_loads=self._axial_frame(index, coords, rates, ground),
             metadata=metadata,
         )
 
@@ -328,8 +343,21 @@ class BundleOverlayProvider:
         frames = tuple(self.frame_at(k) for k in range(0, len(self), stride))
         return ForceTorqueSeries(frames=frames, engine=self._engine)
 
-    def _contact_wrenches(
+    def _ground_wrenches(
         self, coords: Mapping[str, float], rates: Mapping[str, float]
+    ) -> list[OverlayWrench]:
+        """Loaded shared-law contact spheres as per-sphere ground wrenches.
+
+        The one evaluation of the contact law per frame: it feeds both the
+        ground-reaction glyphs and the axial-load inverse dynamics.
+        """
+        samples = self._contact.evaluate_contact_samples(coords, rates)
+        return contact_sample_wrenches(
+            samples, self._sphere_body, source=f"{self._engine}:shared_contact_law"
+        )
+
+    def _contact_wrenches(
+        self, ground: Sequence[OverlayWrench], coords: Mapping[str, float]
     ) -> list[OverlayWrench]:
         """Per-foot and net GRF breakdown of the shared contact law (GCV-2, GCV-6).
 
@@ -337,13 +365,9 @@ class BundleOverlayProvider:
         the shared ground-reaction core groups them by foot and reports the
         per-foot and net force, CoP, free moment and moment about the CoM.
         """
-        samples = self._contact.evaluate_contact_samples(coords, rates)
-        ground = contact_sample_wrenches(
-            samples, self._sphere_body, source=f"{self._engine}:shared_contact_law"
-        )
         return list(
             ground_reaction_overlay(
-                ground,
+                list(ground),
                 self._kin.center_of_mass_m(coords),
                 source=f"{self._engine}:shared_contact_law",
             )
