@@ -2574,6 +2574,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13188 · Procedural Shoe-Last Feet (HRG-F1): Heel Counter, Medial Arch, Instep Ramp, Asymmetric Toe Box, Flat Sole Sized From Spec Foot Length and a Cited Breadth Ratio; Foot.Model Option
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13188
+- **Branch:** feat/13188-procedural-feet
+- **PR:** #13196
+- **Paths:** see #13196
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`b0aba425`; collated from changes/13188-procedural-shoe-last-feet-hrg-f1-heel-co.md)
+- **Summary:** Procedural shoe-last feet (HRG-F1): heel counter, medial arch, instep ramp, asymmetric toe box, flat sole sized from spec foot length and a cited breadth ratio; foot.model option
+- **Next step:** Shipped in PR #13196.
+
 ### DL-#13002 · Align Multi-View Observations by Physical Time Across Different Frame Rates and Report Dropped Frames
 
 - **State:** shipped

@@ -8,6 +8,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
+    from src.shared.python.body_part_viz.force_colors import ForceColorScale
     from src.shared.python.force_overlay.glyphs import GlyphSet
 
 
@@ -33,6 +35,10 @@ class WorkerJob:
     #: resolved appearance-v1 document the worker dresses the body with
     #: (``None`` = the contract default; HRG-B2, #13167)
     appearance: dict[str, Any] | None = None
+    #: axial-load frames (JSON list aligned to indices) and the ``ForceColorScale``
+    #: dict that shades the segments (MuJoCo worker only)
+    axial_path: str | None = None
+    shading: dict[str, Any] | None = None
 
     def lookat_for(self, view: str, position: int) -> list[float]:
         """Look-at point of ``view`` at ``position`` (static ``lookat_m`` if unset)."""
@@ -50,6 +56,22 @@ class WorkerJob:
 
     def frame_path(self, view: str, position: int) -> Path:
         return Path(self.out_dir) / f"{view}_{position:05d}.npy"
+
+    def load_axial_frames(self) -> list[AxialLoadFrame | None] | None:
+        """Per-position axial frames staged for this job, or ``None`` if unshaded."""
+        if not self.axial_path:
+            return None
+        from src.tools.native_viewer_export.shading import frames_from_json
+
+        return frames_from_json(Path(self.axial_path))
+
+    def load_shading(self) -> ForceColorScale | None:
+        """The staged segment-shading scale, or ``None`` when shading is off."""
+        if self.shading is None:
+            return None
+        from src.shared.python.body_part_viz.force_colors import ForceColorScale
+
+        return ForceColorScale.from_dict(self.shading)
 
     def load_glyph_sets(self) -> list[GlyphSet] | None:
         """Per-frame glyph sets staged for this job, or ``None`` without overlays."""

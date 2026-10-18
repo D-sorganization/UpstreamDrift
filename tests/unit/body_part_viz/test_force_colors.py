@@ -88,3 +88,114 @@ def test_force_requires_numeric_or_missing():
         scale.color("123", "#abcdef")
     with pytest.raises(TypeError):
         scale.color(True, "#abcdef")
+
+
+# --- Translucent overlay policy (opacity + blend mode) -----------------------
+
+
+def _scale(**kw):
+    return ForceColorScale(enabled=True, **kw)
+
+
+def test_overlay_defaults_are_backward_compatible():
+    from src.shared.python.body_part_viz.force_colors import BLEND_MODES
+
+    scale = ForceColorScale()
+    assert (scale.opacity, scale.blend_mode) == (1.0, "replace")
+    assert BLEND_MODES == ("replace", "tint")
+    legacy = {"enabled": True, "tension_limit_n": 50.0}
+    assert ForceColorScale.from_dict(legacy).opacity == 1.0
+    assert ForceColorScale.from_dict(scale.to_dict()) == scale
+    assert scale.to_dict()["opacity"] == 1.0
+
+
+@pytest.mark.parametrize("bad", [-0.1, 1.1, math.nan, math.inf])
+def test_opacity_range_validated(bad):
+    with pytest.raises(ValueError):
+        ForceColorScale(opacity=bad)
+
+
+@pytest.mark.parametrize("bad", ["0.5", None, True])
+def test_opacity_type_validated(bad):
+    with pytest.raises(TypeError):
+        ForceColorScale(opacity=bad)
+
+
+def test_blend_mode_validated():
+    with pytest.raises(ValueError):
+        ForceColorScale(blend_mode="multiply")
+    with pytest.raises(TypeError):
+        ForceColorScale(blend_mode=1)
+
+
+def test_shade_rgb_returns_none_when_disabled_or_unavailable():
+    base = (0.2, 0.4, 0.6)
+    assert ForceColorScale().shade_rgb(500, base) is None
+    for force in (None, math.nan, math.inf):
+        assert _scale().shade_rgb(force, base) is None
+
+
+def test_shade_rgb_validates_inputs():
+    scale = _scale()
+    for bad in ((0.1, 0.2), (0.1, 0.2, 1.5), (0.1, 0.2, math.nan), "abc"):
+        with pytest.raises((TypeError, ValueError)):
+            scale.shade_rgb(10, bad)
+    with pytest.raises(TypeError):
+        scale.shade_rgb("x", (0, 0, 0))
+
+
+def test_replace_full_opacity_matches_color():
+    scale = _scale()
+    for force in (-2000, -500, 0, 250, 1000, 5000):
+        rgb = scale.shade_rgb(force, (0.2, 0.4, 0.6))
+        expected = scale.color(force, "#000000")
+        got = "#" + "".join(f"{round(c * 255):02x}" for c in rgb)
+        assert got == expected
+
+
+def test_replace_half_opacity_is_midpoint_of_base_and_color():
+    scale = _scale(opacity=0.5)
+    rgb = scale.shade_rgb(1000, (1.0, 1.0, 0.0))  # target blue
+    assert rgb == pytest.approx((0.5, 0.5, 0.5))
+    assert scale.shade_hex(1000, "#ffff00") == "#808080"
+
+
+def test_tint_keeps_base_in_deadband_and_for_zero_load():
+    scale = _scale(blend_mode="tint", deadband_n=100.0)
+    base = (0.3, 0.5, 0.7)
+    assert scale.shade_rgb(0, base) == pytest.approx(base)
+    assert scale.shade_rgb(-100, base) == pytest.approx(base)
+
+
+def test_tint_saturates_to_lerp_of_base_and_endpoint():
+    scale = _scale(blend_mode="tint", opacity=0.4)
+    base = (0.5, 0.5, 0.5)
+    tension = scale.shade_rgb(10000, base)
+    assert tension == pytest.approx((0.5 * 0.6, 0.5 * 0.6, 0.5 * 0.6 + 0.4))
+    compression = scale.shade_rgb(-10000, base)
+    assert compression == pytest.approx((0.5 * 0.6 + 0.4, 0.5 * 0.6, 0.5 * 0.6))
+    half = scale.shade_rgb(500, base)  # fraction 0.5 -> weight 0.2
+    assert half == pytest.approx((0.4, 0.4, 0.6))
+
+
+def test_zero_opacity_keeps_base_in_every_mode():
+    base = (0.1, 0.2, 0.3)
+    for mode in ("replace", "tint"):
+        scale = _scale(opacity=0.0, blend_mode=mode)
+        assert scale.shade_rgb(1000, base) == pytest.approx(base)
+
+
+def test_shade_hex_none_when_disabled_and_validates_base():
+    assert ForceColorScale().shade_hex(10, "#123456") is None
+    assert _scale().shade_hex(None, "#123456") is None
+    with pytest.raises(ValueError):
+        _scale(opacity=0.5).shade_hex(1000, "not-a-color")
+    # Opaque replace never needs the base, so legacy blank bases keep working.
+    assert _scale().shade_hex(1000, "") == "#0000ff"
+
+
+def test_cross_runtime_shade_examples():
+    path = Path(__file__).resolve().parents[3] / "schemas/force-color-examples.json"
+    for case in json.loads(path.read_text())["shade_cases"]:
+        scale = ForceColorScale.from_dict(case["settings"])
+        assert scale.shade_hex(case["force_n"], case["base_color"]) == case["expected"]

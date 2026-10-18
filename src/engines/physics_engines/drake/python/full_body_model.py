@@ -50,8 +50,8 @@ from src.shared.python.motion_matching.contact_law import (
     sphere_ground_contact,
     support_planes,
 )
+from src.shared.python.motion_matching.full_body_schema import require_full_body_schema
 from src.shared.python.motion_matching.full_body_spec import (
-    FULL_BODY_SCHEMA_VERSION,
     upper_body_slice,
 )
 
@@ -170,8 +170,7 @@ class FullBodyDrakeModel:
     """Full-body Drake adapter combining 41-DOF tree, weld closure, and FB-2 contact."""
 
     def __init__(self, specification: Mapping[str, Any]) -> None:
-        if specification.get("schema_version") != FULL_BODY_SCHEMA_VERSION:
-            raise ValueError("Unsupported full-body schema: expected full-body-v1")
+        require_full_body_schema(specification, consumer="Drake full-body model")
         self.specification = specification
         spec_bytes = json.dumps(specification).encode("utf-8")
         self.xml, self.metadata = export_full_body_urdf(spec_bytes)

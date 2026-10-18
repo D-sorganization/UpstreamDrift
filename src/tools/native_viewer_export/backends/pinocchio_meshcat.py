@@ -43,6 +43,14 @@ from src.tools.native_viewer_export.core import (
     SwingInput,
     view_lookats,
 )
+from src.tools.native_viewer_export.shading import (
+    build_meshcat_shading,
+    pinocchio_color_bindings,
+)
+
+
+#: MeshCat root node of the golfer; segment-shading paths hang under it.
+ROOT_NODE = "golfer"
 
 
 def _primitive(coal: Any, item: VisualItem) -> Any:
@@ -74,7 +82,7 @@ class PinocchioMeshcatBackend:
                 return f"{module} is not installed"
         return playwright_unavailable_reason()
 
-    def _build(self, swing: SwingInput) -> tuple[Any, Any, Any]:
+    def _build(self, swing: SwingInput) -> tuple[Any, Any, Any, Any]:
         import coal
         import meshcat
         import pinocchio as pin
@@ -116,8 +124,8 @@ class PinocchioMeshcatBackend:
         geometry.addGeometryObject(floor)  # type: ignore[attr-defined]
         viz = MeshcatVisualizer(adapter.model, geometry, geometry)
         viz.initViewer(viewer=meshcat.Visualizer(), open=False, loadModel=False)
-        viz.loadViewerModel(rootNodeName="golfer")
-        return adapter, viz, meshcat
+        viz.loadViewerModel(rootNodeName=ROOT_NODE)
+        return adapter, viz, meshcat, scene
 
     def render(
         self,
@@ -127,7 +135,7 @@ class PinocchioMeshcatBackend:
         overlay: OverlayFeed | None,
     ) -> Iterator[dict[str, Image8]]:
         self._apply_settings(settings)
-        adapter, viz, _ = self._build(swing)
+        adapter, viz, _, scene = self._build(swing)
         names = swing.bundle.coordinate_order
 
         def set_state(index: int) -> None:
@@ -150,18 +158,34 @@ class PinocchioMeshcatBackend:
             if swing.ball is not None
             else None
         )
-        with MeshcatPage(node.url(), settings.width, settings.height, 3000) as page:
-            looks = view_lookats(settings, indices, overlay)
-            for pos, k in enumerate(indices):
-                set_state(k)
-                update_meshcat_frame(ball, glyphs, overlay, swing, k)
-                tiles: dict[str, Image8] = {}
-                for view in settings.views:
-                    cam = meshcat_camera(view, looks[view][pos], settings.distance_m)
-                    node["/Cameras/default/rotated/<object>"].set_property(
-                        "position", list(cam.position_three)
-                    )
-                    page.look_at(cam.target_three)
-                    page.settle()
-                    tiles[view] = page.screenshot()
-                yield tiles
+        shading = (
+            build_meshcat_shading(
+                self.engine,
+                settings.shading if settings.shading_enabled else None,
+                lambda path, prop, value: node[path].set_property(prop, value),
+                pinocchio_color_bindings(scene.items, ROOT_NODE),
+            )
+            if overlay is not None
+            else None
+        )
+        try:
+            with MeshcatPage(node.url(), settings.width, settings.height, 3000) as page:
+                looks = view_lookats(settings, indices, overlay)
+                for pos, k in enumerate(indices):
+                    set_state(k)
+                    update_meshcat_frame(ball, glyphs, overlay, swing, k, shading)
+                    tiles: dict[str, Image8] = {}
+                    for view in settings.views:
+                        cam = meshcat_camera(
+                            view, looks[view][pos], settings.distance_m
+                        )
+                        node["/Cameras/default/rotated/<object>"].set_property(
+                            "position", list(cam.position_three)
+                        )
+                        page.look_at(cam.target_three)
+                        page.settle()
+                        tiles[view] = page.screenshot()
+                    yield tiles
+        finally:
+            if shading is not None:
+                shading.log_summary()

@@ -12,7 +12,10 @@ from src.shared.python.biomechanics.grip_plot_model import (
     plot_series_to_json,
 )
 from src.shared.python.motion_matching.same_input import InputBundle
-from src.tools.native_viewer_export.backends.registry import make_backend
+from src.tools.native_viewer_export.backends.registry import (
+    SHADING_ENGINES,
+    make_backend,
+)
 from src.tools.native_viewer_export.core import (
     ENGINES,
     BackendUnavailable,
@@ -108,6 +111,13 @@ def run_export(
             results.append(ExportResult(engine, {}, 0, skipped_reason=reason))
             continue
         swing = _swing_for(job, bundle, engine)
+        if settings.shading_enabled and engine not in SHADING_ENGINES:
+            logger.warning(
+                "segment shading is not supported by %s (supported: %s); "
+                "it renders unshaded",
+                engine,
+                ", ".join(sorted(SHADING_ENGINES)),
+            )
         feed, per_settings = None, settings
         if settings.impact_time_s is None and not swing.has_impact_provenance:
             try:

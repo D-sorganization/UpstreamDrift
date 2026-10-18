@@ -91,3 +91,26 @@ def test_display_rejects_duplicate_handles_and_wrong_inputs():
         display.configure({})
     with pytest.raises(TypeError):
         display.set_loads({})
+
+
+def test_translucent_overlay_blends_with_declared_base_colors():
+    renderer = Renderer()
+    display = ForceColorDisplay(
+        renderer,
+        {"a": "ha", "b": "hb"},
+        base_colors={"a": "#ffff00"},
+    )
+    display.set_loads(
+        SegmentLoadSeries((0.0,), {"a": (1000.0,), "b": (1000.0,)}, "fixture")
+    )
+    display.configure(ForceColorScale(enabled=True, opacity=0.5))
+    assert renderer.colors["ha"] == "#808080"
+    # Undeclared base falls back to the neutral color: white -> blue at 50 %.
+    assert renderer.colors["hb"] == "#8080ff"
+    display.configure(ForceColorScale(enabled=True, opacity=0.5, blend_mode="tint"))
+    assert renderer.colors["ha"] == "#808080"
+
+
+def test_base_colors_must_be_a_mapping_of_strings():
+    with pytest.raises(TypeError):
+        ForceColorDisplay(Renderer(), {"a": "h"}, base_colors=["#fff"])

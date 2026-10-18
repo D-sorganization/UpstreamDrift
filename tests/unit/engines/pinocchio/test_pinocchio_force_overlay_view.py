@@ -292,3 +292,72 @@ def test_ztcf_toggle_produces_cf_labelled_glyphs_only_when_enabled() -> None:
     assert any("cf:" in p for p in paths_with_ztcf), (
         f"Expected cf: glyph missing from {paths_with_ztcf}"
     )
+
+
+_APP: list = []  # keep the QApplication alive for the module
+
+
+def _qt_widgets() -> Any:
+    try:
+        from PyQt6 import QtWidgets
+    except (ImportError, OSError) as exc:  # pragma: no cover
+        pytest.skip(f"PyQt6 not loadable: {exc}")
+    _APP.append(QtWidgets.QApplication.instance() or QtWidgets.QApplication([]))
+    return QtWidgets
+
+
+def _pinocchio_host(hub: Any) -> Any:
+    from src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui_ui_setup import (
+        UISetupMixin,
+    )
+
+    qt = _qt_widgets()
+
+    class Host(qt.QWidget):
+        def _toggle_frames(self, *_a: Any) -> None: ...
+        def _toggle_coms(self, *_a: Any) -> None: ...
+        def _toggle_forces(self, *_a: Any) -> None: ...
+        def _toggle_torques(self, *_a: Any) -> None: ...
+
+    host = Host()
+    if hub is not None:
+        host.force_color_hub = hub
+    layout = qt.QVBoxLayout()
+    UISetupMixin._setup_overlay_checkboxes(host, layout)
+    return host, layout
+
+
+def test_chk_shading_is_real_and_synced_with_shared_scale() -> None:
+    from src.shared.python.body_part_viz.force_color_controls import ForceColorHub
+    from src.shared.python.body_part_viz.force_colors import ForceColorScale
+
+    hub = ForceColorHub()
+    host, layout = _pinocchio_host(hub)
+    assert layout.count() == 2  # checkbox row + shading controls
+    host.chk_shading.setChecked(True)
+    assert hub.scale.enabled
+    hub.set_scale(ForceColorScale(enabled=False))
+    assert not host.chk_shading.isChecked()
+    hub.set_scale(ForceColorScale(enabled=True))
+    assert host.chk_shading.isChecked()
+
+
+def test_overlay_toggles_report_shading_from_real_checkbox() -> None:
+    from src.engines.physics_engines.pinocchio.python.pinocchio_golf.pinocchio_visualization_mixin import (
+        PinocchioVisualizationMixin,
+    )
+    from src.shared.python.body_part_viz.force_color_controls import ForceColorHub
+
+    host, _ = _pinocchio_host(ForceColorHub())
+    assert (
+        PinocchioVisualizationMixin._get_force_overlay_toggles(host)["shading"] is False
+    )
+    host.chk_shading.setChecked(True)
+    assert (
+        PinocchioVisualizationMixin._get_force_overlay_toggles(host)["shading"] is True
+    )
+
+
+def test_no_hub_means_no_shading_checkbox() -> None:
+    host, layout = _pinocchio_host(None)
+    assert layout.count() == 1 and not hasattr(host, "chk_shading")

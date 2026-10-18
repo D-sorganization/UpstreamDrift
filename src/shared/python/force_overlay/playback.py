@@ -248,7 +248,8 @@ def _draw_single_frame(ctx: _RenderContext, src_idx: int) -> None:
         p = ctx.seg_series.proximal[src_idx, s_idx]
         d = ctx.seg_series.distal[src_idx, s_idx]
         load_val = axial_map.get(name)
-        color = ctx.color_scale.color(load_val, ctx.opts.base_segment_color)
+        base_color = ctx.opts.base_segment_color
+        color = ctx.color_scale.shade_hex(load_val, base_color) or base_color
         ax.plot(
             [p[0], d[0]],
             [p[1], d[1]],

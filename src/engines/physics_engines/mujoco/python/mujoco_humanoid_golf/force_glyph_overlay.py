@@ -10,12 +10,12 @@ testable headless.
 
 from __future__ import annotations
 
-import dataclasses
 import math
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-from src.shared.python.force_overlay.contracts import ForceTorqueFrame, OverlayWrench
+from src.shared.python.force_overlay.contracts import ForceTorqueFrame
+from src.shared.python.force_overlay.conversions import restrict_frame
 from src.shared.python.force_overlay.glyphs import (
     ForceGlyphStyle,
     GlyphSet,
@@ -103,31 +103,6 @@ def overlay_style(
         torque_scale_m_per_nm=_check_scale("torque_scale", torque_scale),
         **extra,
     )
-
-
-def restrict_frame(
-    frame: ForceTorqueFrame,
-    *,
-    show_force: bool,
-    show_torque: bool,
-    body_name: str | None = None,
-) -> ForceTorqueFrame:
-    """Keep only the enabled halves (and optionally one body) of a frame.
-
-    Postcondition: the result contains no force half unless ``show_force`` and no
-    torque half unless ``show_torque``; wrenches left with neither half are
-    dropped. ``axial_loads`` is preserved.
-    """
-    kept: list[OverlayWrench] = []
-    for wrench in frame.wrenches:
-        if body_name is not None and wrench.body != body_name:
-            continue
-        force = wrench.force_n if show_force else None
-        torque = wrench.torque_nm if show_torque else None
-        if force is None and torque is None:
-            continue
-        kept.append(dataclasses.replace(wrench, force_n=force, torque_nm=torque))
-    return dataclasses.replace(frame, wrenches=tuple(kept))
 
 
 def build_overlay_glyphs(

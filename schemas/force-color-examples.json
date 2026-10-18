@@ -1,17 +1,53 @@
 {
   "description": "Cross-runtime signed axial force color conformance; N, tension positive, opaque sRGB interpolation",
   "cases": [
-    { "settings": { "enabled": true }, "force_n": 1000, "expected": "#0000ff" },
     {
-      "settings": { "enabled": true },
+      "settings": {
+        "enabled": true
+      },
+      "force_n": 1000,
+      "expected": "#0000ff"
+    },
+    {
+      "settings": {
+        "enabled": true
+      },
       "force_n": -1000,
       "expected": "#ff0000"
     },
-    { "settings": { "enabled": true }, "force_n": 0, "expected": "#ffffff" },
-    { "settings": { "enabled": true }, "force_n": 500, "expected": "#8080ff" },
-    { "settings": { "enabled": true }, "force_n": -500, "expected": "#ff8080" },
-    { "settings": { "enabled": true }, "force_n": null, "expected": "#123456" },
-    { "settings": {}, "force_n": 1000, "expected": "#123456" },
+    {
+      "settings": {
+        "enabled": true
+      },
+      "force_n": 0,
+      "expected": "#ffffff"
+    },
+    {
+      "settings": {
+        "enabled": true
+      },
+      "force_n": 500,
+      "expected": "#8080ff"
+    },
+    {
+      "settings": {
+        "enabled": true
+      },
+      "force_n": -500,
+      "expected": "#ff8080"
+    },
+    {
+      "settings": {
+        "enabled": true
+      },
+      "force_n": null,
+      "expected": "#123456"
+    },
+    {
+      "settings": {},
+      "force_n": 1000,
+      "expected": "#123456"
+    },
     {
       "settings": {
         "enabled": true,
@@ -22,6 +58,73 @@
       },
       "force_n": 60,
       "expected": "#008000"
+    }
+  ],
+  "shade_cases": [
+    {
+      "settings": {
+        "enabled": true,
+        "opacity": 0.5
+      },
+      "force_n": 1000,
+      "base_color": "#ffff00",
+      "expected": "#808080"
+    },
+    {
+      "settings": {
+        "enabled": true,
+        "opacity": 0.4,
+        "blend_mode": "tint"
+      },
+      "force_n": 10000,
+      "base_color": "#808080",
+      "expected": "#4d4db3"
+    },
+    {
+      "settings": {
+        "enabled": true,
+        "opacity": 0.4,
+        "blend_mode": "tint"
+      },
+      "force_n": 500,
+      "base_color": "#808080",
+      "expected": "#666699"
+    },
+    {
+      "settings": {
+        "enabled": true,
+        "blend_mode": "tint",
+        "deadband_n": 100
+      },
+      "force_n": 50,
+      "base_color": "#123456",
+      "expected": "#123456"
+    },
+    {
+      "settings": {
+        "enabled": true,
+        "opacity": 1
+      },
+      "force_n": -1000,
+      "base_color": "#123456",
+      "expected": "#ff0000"
+    },
+    {
+      "settings": {
+        "enabled": true,
+        "opacity": 0.5
+      },
+      "force_n": null,
+      "base_color": "#123456",
+      "expected": null
+    },
+    {
+      "settings": {
+        "opacity": 0.5
+      },
+      "force_n": 1000,
+      "base_color": "#123456",
+      "expected": null
     }
   ]
 }

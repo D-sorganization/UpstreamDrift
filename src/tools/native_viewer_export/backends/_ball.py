@@ -80,12 +80,16 @@ def update_meshcat_frame(
     overlay: Any,
     swing: SwingInput,
     index: int,
+    shading: Any = None,
 ) -> None:
-    """Per-frame MeshCat decorations: ball visibility, then the force glyphs.
+    """Per-frame MeshCat decorations: ball visibility, segment shading, glyphs.
 
-    Shared by the Drake and Pinocchio backends; ``ball``, ``glyphs`` and
-    ``overlay`` may each be ``None`` (that decoration is then skipped).
+    Shared by the Drake and Pinocchio backends; ``ball``, ``glyphs``,
+    ``overlay`` and ``shading`` (a ``MeshcatShading``) may each be ``None``
+    (that decoration is then skipped).
     """
+    if shading is not None and overlay is not None:
+        shading.update(overlay.axial_at(index))
     if ball is not None:
         ball.update(swing.time_s(index))
     if glyphs is not None and overlay is not None:

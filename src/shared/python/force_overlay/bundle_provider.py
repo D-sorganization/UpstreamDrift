@@ -25,6 +25,8 @@ from typing import Any, NamedTuple, Protocol, TypeAlias, runtime_checkable
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
+from src.shared.python.body_part_viz.mujoco_axial_loads import GripClosure
 from src.shared.python.biomechanics.grip_extraction import unavailable_analysis
 from src.shared.python.biomechanics.grip_wrench import GripAnalysis
 from src.shared.python.biomechanics.ground_reaction_wrenches import (
@@ -104,6 +106,58 @@ class GripSource(Protocol):
         ...
 
 
+@runtime_checkable
+class AxialLoadSource(Protocol):
+    """An engine adapter that can report segment axial loads (tension positive)."""
+
+    def axial_load_frame(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        accelerations: Mapping[str, float],
+        time_s: float,
+        external_wrenches: Sequence[OverlayWrench] | None = None,
+    ) -> AxialLoadFrame | None:
+        """Axial loads for a prescribed motion, or ``None`` when unqualified.
+
+        ``external_wrenches`` are the ground contact wrenches the provider also
+        draws (one source of truth for the support reaction); ``None`` leaves
+        the engine's own contact handling in charge.
+        """
+        ...
+
+
+@runtime_checkable
+class ClosureAxialLoadSource(AxialLoadSource, Protocol):
+    """An axial-load source that closes a rigid grip loop with a physical wrench.
+
+    ``closure_wrench`` resolves the weld multiplier from the applied efforts; its
+    result is passed back to ``axial_load_frame`` as ``closure`` so the loop is
+    not closed by a soft constraint's impedance (#13179).
+    """
+
+    def closure_wrench(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        primitive_efforts: Mapping[str, float] | None,
+    ) -> GripClosure:
+        """Closure wrench at the state, or an unavailable closure with a reason."""
+        ...
+
+    def axial_load_frame(  # type: ignore[override]
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        accelerations: Mapping[str, float],
+        time_s: float,
+        external_wrenches: Sequence[OverlayWrench] | None = None,
+        closure: GripClosure | None = None,
+    ) -> AxialLoadFrame | None:
+        """As :meth:`AxialLoadSource.axial_load_frame`, with the closure wrench."""
+        ...
+
+
 _GRIP_FAILURES = (ValueError, ArithmeticError, RuntimeError, np.linalg.LinAlgError)
 
 
@@ -118,13 +172,17 @@ def contact_sample_wrenches(
     sphere_body: Mapping[str, str],
     *,
     source: str,
+    free_moments: Mapping[str, Any] | None = None,
 ) -> list[OverlayWrench]:
     """Loaded shared-law contact samples as ground ``CONTACT`` wrenches.
 
     ``samples`` maps sphere name to a ``ContactSample``; ``sphere_body`` maps
     sphere name to its spec body (default: the name's last ``_`` part).
     Postcondition: unloaded spheres (``|F| <= 1e-9 N``) are omitted, so a foot
-    off the ground has no wrench rather than a zero one.
+    off the ground has no wrench rather than a zero one. ``free_moments`` (sphere
+    name to world-frame moment about the contact normal, N m) is carried as the
+    wrench's ``torque_nm`` so the ground free moment is not dropped (#13179);
+    ``None`` or a missing sphere leaves the wrench torque-free.
     """
     ground: list[OverlayWrench] = []
     for name, sample in samples.items():
@@ -138,6 +196,11 @@ def contact_sample_wrenches(
                 sphere_body.get(name, name.rsplit("_", 1)[-1]),
                 _tuple3(np.asarray(sample.contact_point_m, float)),
                 force_n=_tuple3(force),
+                torque_nm=(
+                    _tuple3(free_moments[name])
+                    if free_moments and name in free_moments
+                    else None
+                ),
                 source=source,
             )
         )
@@ -171,6 +234,9 @@ class BundleOverlayProvider:
         if not engine:
             raise ValueError("engine must be a non-empty string")
         self._grip: GripSource | None = None
+        self._axial: AxialLoadSource | None = None
+        self._axial_impact: tuple[float, float] | None = None
+        self._accelerations: Array | None = None
         self._grip_cache: dict[int, GripAnalysis] = {}
         self._grip_source = f"{engine}:grip"
         if not (math.isfinite(torque_floor_nm) and torque_floor_nm >= 0.0):
@@ -209,6 +275,101 @@ class BundleOverlayProvider:
             self._grip_source = source
         return self
 
+    def with_axial_loads(self, axial: AxialLoadSource) -> BundleOverlayProvider:
+        """Attach per-frame segment axial loads (``frame.axial_loads``); returns ``self``.
+
+        Kinematics are exactly those of the torque/contact wrenches (the provider's
+        ``q`` and ``v``); accelerations are the central finite difference of ``v``
+        on the bundle time grid (one-sided at the ends), unfiltered. Raises
+        ``TypeError`` if ``axial`` has no ``axial_load_frame``.
+        """
+        if not isinstance(axial, AxialLoadSource):
+            raise TypeError("axial must provide axial_load_frame(q, v, a, time_s)")
+        self._axial = axial
+        self._accelerations = None
+        return self
+
+    def with_axial_impact_window(
+        self, impact_time_s: float, half_width_s: float
+    ) -> BundleOverlayProvider:
+        """Report axial loads as unavailable around ball impact; returns ``self``.
+
+        The ball impact impulse is not modelled, so an open-loop segment load
+        there (the root residual reaches about 3 kN) must not be shown. Frames
+        with ``|t - impact_time_s| <= half_width_s`` carry ``None`` for every
+        segment (never zero) and ``axial_impact: unavailable`` metadata.
+        Raises ValueError for a non-finite time or a negative/non-finite width.
+        """
+        if not math.isfinite(impact_time_s):
+            raise ValueError(f"impact_time_s must be finite, got {impact_time_s!r}")
+        if not math.isfinite(half_width_s) or half_width_s < 0:
+            raise ValueError(
+                f"half_width_s must be >= 0 and finite, got {half_width_s!r}"
+            )
+        self._axial_impact = (float(impact_time_s), float(half_width_s))
+        return self
+
+    def _axial_frame(
+        self,
+        index: int,
+        coords: Mapping[str, float],
+        rates: Mapping[str, float],
+        ground: Sequence[OverlayWrench],
+        efforts: Mapping[str, float] | None = None,
+    ) -> tuple[AxialLoadFrame | None, dict[str, Any]]:
+        """Axial loads at ``index`` plus the closure status metadata.
+
+        A source with ``closure_wrench`` gets the physical grip closure for the
+        state's efforts; its status (``axial_closure``: ``applied`` or
+        ``unavailable``, with ``axial_closure_reason`` and the world-frame 6-D
+        ``axial_closure_multiplier``) is reported so shading can say why a load
+        is blank. Sources without it are called exactly as before.
+        """
+        if self._axial is None:
+            return None, {}
+        if self._accelerations is None:
+            self._accelerations = np.gradient(self._v, float(self._bundle.dt_s), axis=0)
+        accel = dict(
+            zip(
+                self._bundle.coordinate_order,
+                map(float, self._accelerations[index]),
+                strict=True,
+            )
+        )
+        extra: dict[str, Any] = {}
+        kwargs: dict[str, Any] = {}
+        if isinstance(self._axial, ClosureAxialLoadSource):
+            closure = self._axial.closure_wrench(coords, rates, efforts)
+            kwargs["closure"] = closure
+            if closure.available:
+                extra["axial_closure"] = "applied"
+                extra["axial_closure_multiplier"] = list(closure.multiplier_world or ())
+            else:
+                extra["axial_closure"] = "unavailable"
+                extra["axial_closure_reason"] = closure.reason
+        frame = self._axial.axial_load_frame(
+            coords,
+            rates,
+            accel,
+            float(index * self._bundle.dt_s),
+            external_wrenches=ground,
+            **kwargs,
+        )
+        if frame is not None and self._in_impact_window(frame.time_s):
+            frame = AxialLoadFrame(
+                frame.time_s,
+                dict.fromkeys(frame.values_n),
+                f"{frame.source}; unavailable: ball impact impulse is not modelled",
+            )
+            extra["axial_impact"] = "unavailable"
+        return frame, extra
+
+    def _in_impact_window(self, time_s: float) -> bool:
+        if self._axial_impact is None:
+            return False
+        centre, half = self._axial_impact
+        return abs(time_s - centre) <= half + 1e-12
+
     def __len__(self) -> int:
         return int(self._q.shape[0])
 
@@ -221,8 +382,9 @@ class BundleOverlayProvider:
         rates = dict(zip(names, map(float, self._v[index]), strict=True))
         efforts = self._bundle.efforts[min(index, self._bundle.steps - 1)]
         named_efforts = dict(zip(names, efforts, strict=True))
+        ground = self._ground_wrenches(coords, rates)
         wrenches = [
-            *self._contact_wrenches(coords, rates),
+            *self._contact_wrenches(ground, coords),
             *self._torque_wrenches(coords, named_efforts),
             *self._weight_wrenches(coords),
         ]
@@ -235,10 +397,15 @@ class BundleOverlayProvider:
         )
         wrenches.extend(grip_wrenches)
         metadata.update(grip_meta)
+        axial, axial_meta = self._axial_frame(
+            index, coords, rates, ground, named_efforts
+        )
+        metadata.update(axial_meta)
         return ForceTorqueFrame(
             time_s=float(index * self._bundle.dt_s),
             engine=self._engine,
             wrenches=tuple(wrenches),
+            axial_loads=axial,
             metadata=metadata,
         )
 
@@ -277,8 +444,25 @@ class BundleOverlayProvider:
         frames = tuple(self.frame_at(k) for k in range(0, len(self), stride))
         return ForceTorqueSeries(frames=frames, engine=self._engine)
 
-    def _contact_wrenches(
+    def _ground_wrenches(
         self, coords: Mapping[str, float], rates: Mapping[str, float]
+    ) -> list[OverlayWrench]:
+        """Loaded shared-law contact spheres as per-sphere ground wrenches.
+
+        The one evaluation of the contact law per frame: it feeds both the
+        ground-reaction glyphs and the axial-load inverse dynamics.
+        """
+        samples = self._contact.evaluate_contact_samples(coords, rates)
+        moments = getattr(self._contact, "contact_free_moments", None)
+        return contact_sample_wrenches(
+            samples,
+            self._sphere_body,
+            source=f"{self._engine}:shared_contact_law",
+            free_moments=moments(coords, rates) if moments else None,
+        )
+
+    def _contact_wrenches(
+        self, ground: Sequence[OverlayWrench], coords: Mapping[str, float]
     ) -> list[OverlayWrench]:
         """Per-foot and net GRF breakdown of the shared contact law (GCV-2, GCV-6).
 
@@ -286,13 +470,9 @@ class BundleOverlayProvider:
         the shared ground-reaction core groups them by foot and reports the
         per-foot and net force, CoP, free moment and moment about the CoM.
         """
-        samples = self._contact.evaluate_contact_samples(coords, rates)
-        ground = contact_sample_wrenches(
-            samples, self._sphere_body, source=f"{self._engine}:shared_contact_law"
-        )
         return list(
             ground_reaction_overlay(
-                ground,
+                list(ground),
                 self._kin.center_of_mass_m(coords),
                 source=f"{self._engine}:shared_contact_law",
             )

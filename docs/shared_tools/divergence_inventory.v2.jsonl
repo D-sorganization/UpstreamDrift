@@ -287,6 +287,7 @@
 {"path": "body_part_viz/fitters/cluster_kabsch.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/fitters/procrustes_anisotropic.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/force_color_controls.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/force_color_settings.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/force_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/force_display.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/meshcat_force_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
@@ -1435,8 +1436,11 @@
 {"path": "motion_matching/force_torque.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/full_body_forward_dynamics.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/full_body_ik.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/full_body_migration.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/full_body_schema.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/full_body_spec.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/full_body_step.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/full_body_v2.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/full_marker_terminal.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/full_swing_qualification.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/gaze.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}

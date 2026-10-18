@@ -21,15 +21,19 @@ import numpy as np
 from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
     export_full_body_mjcf,
 )
-from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs import (
-    add_glyphs_to_scene,
-)
 from src.shared.python.model_appearance import document_from_dict
 from src.shared.python.model_appearance.defaults import default_document_dict
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.tools.native_viewer_export.backends._ball import draw_job_ball
+from src.tools.native_viewer_export.backends._scene_overlays import (
+    apply_scene_overlays,
+)
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.backends.myosuite_worker import make_camera
+from src.tools.native_viewer_export.shading import (
+    log_coverage,
+    mujoco_scene_coverage,
+)
 
 #: The exporter's own decorative ball is off: it is placed from the static
 #: reference pose, not the address pose, so it landed away from the face and
@@ -75,6 +79,9 @@ def main(job_path: str) -> None:
     data = mujoco.MjData(model)
     adr = [model.joint(n).qposadr[0] for n in bundle.coordinate_order]
     glyph_sets = job.load_glyph_sets()
+    axial_frames, shading = job.load_axial_frames(), job.load_shading()
+    if axial_frames is not None and shading is not None:
+        log_coverage("mujoco", *mujoco_scene_coverage(model, axial_frames))
     cams = {v: make_camera(mujoco, v, job) for v in job.views}
     renderer = mujoco.Renderer(model, job.height, job.width)
     try:
@@ -84,8 +91,9 @@ def main(job_path: str) -> None:
             for view in job.views:
                 cams[view].lookat[:] = job.lookat_for(view, pos)
                 renderer.update_scene(data, camera=cams[view])
-                if glyph_sets is not None:
-                    add_glyphs_to_scene(renderer.scene, glyph_sets[pos])
+                apply_scene_overlays(
+                    model, renderer.scene, pos, axial_frames, shading, glyph_sets
+                )
                 draw_job_ball(renderer.scene, job, pos)
                 np.save(job.frame_path(view, pos), renderer.render().copy())
     finally:

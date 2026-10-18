@@ -138,7 +138,8 @@ class BasePendulumWidget(QWidget):
         self.update()
 
     def _axial_segment_color(self, force_n: float | None, base: QColor) -> QColor:
-        color = QColor(self._axial_color_scale.color(force_n, base.name()))
+        shaded = self._axial_color_scale.shade_hex(force_n, base.name())
+        color = QColor(shaded or base.name())
         color.setAlphaF(base.alphaF())
         return color
 

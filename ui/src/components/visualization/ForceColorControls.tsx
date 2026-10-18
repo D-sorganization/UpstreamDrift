@@ -1,6 +1,6 @@
 import { useId, useState } from 'react';
-import { validateForceColorScale } from './forceColors';
-import type { ForceColorScale } from './forceColors';
+import { BLEND_MODES, validateForceColorScale } from './forceColors';
+import type { BlendMode, ForceColorScale } from './forceColors';
 
 interface Props {
   scale: ForceColorScale;
@@ -44,6 +44,20 @@ export function ForceColorControls({ scale, onChange }: Props) {
       <input id={`${id}-${key}`} type="color" value={draft[key]}
         onChange={event => setEdits({ ...edits, [key]: event.target.value })} />
     </div>)}
+    <div>
+      <label htmlFor={`${id}-opacity`}>Overlay Opacity</label>
+      <input id={`${id}-opacity`} type="range" min="0" max="1" step="0.05" value={draft.opacity}
+        onChange={event => setEdits({ ...edits, opacity: Number(event.target.value) })} />
+      <output htmlFor={`${id}-opacity`}>{Math.round(draft.opacity * 100)}%</output>
+    </div>
+    <div>
+      <label htmlFor={`${id}-blend_mode`}>Blend Mode</label>
+      <select id={`${id}-blend_mode`} value={draft.blend_mode}
+        onChange={event => setEdits({ ...edits, blend_mode: event.target.value as BlendMode })}>
+        {BLEND_MODES.map(mode => <option key={mode} value={mode}>
+          {mode === 'replace' ? 'Replace Segment Color' : 'Tint Segment Color'}</option>)}
+      </select>
+    </div>
     <button type="button" onClick={apply}>Apply Colors and Ranges</button>
     {error && <p role="alert">{error}</p>}
     <p>
