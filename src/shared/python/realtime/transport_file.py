@@ -122,6 +122,7 @@ class FileTransport:
         return token
 
     def unsubscribe(self, token: int) -> None:
+        thread_to_join: threading.Thread | None = None
         with self._lock:
             channel = self._token_to_channel.pop(token, None)
             if channel is None:
@@ -130,6 +131,18 @@ class FileTransport:
             if tail is None:
                 return
             tail.callbacks.pop(token, None)
+            if not tail.callbacks:
+                self._channels.pop(channel, None)
+            if not self._channels:
+                self._stop_event.set()
+                if (
+                    self._poll_thread is not None
+                    and threading.current_thread() != self._poll_thread
+                ):
+                    thread_to_join = self._poll_thread
+                self._poll_thread = None
+        if thread_to_join is not None:
+            thread_to_join.join(timeout=1.0)
 
     # ---- polling ------------------------------------------------------
 
@@ -213,8 +226,14 @@ class FileTransport:
 
     def shutdown(self) -> None:
         """Stop the poll thread (mostly used in tests)."""
-        self._stop_event.set()
-        thread = self._poll_thread
-        if thread is not None:
-            thread.join(timeout=1.0)
-        self._poll_thread = None
+        thread_to_join: threading.Thread | None = None
+        with self._lock:
+            self._stop_event.set()
+            if (
+                self._poll_thread is not None
+                and threading.current_thread() != self._poll_thread
+            ):
+                thread_to_join = self._poll_thread
+            self._poll_thread = None
+        if thread_to_join is not None:
+            thread_to_join.join(timeout=1.0)

@@ -272,7 +272,7 @@ class TestReadNewLines:
             t.shutdown()
 
 
-# ----------------------------- shutdown ---------------------------------------
+pytestmark = pytest.mark.unit
 
 
 def test_shutdown_stops_poll_thread(tmp_path: Path) -> None:
@@ -282,6 +282,56 @@ def test_shutdown_stops_poll_thread(tmp_path: Path) -> None:
     t.shutdown()
     assert t._poll_thread is None
     t.unsubscribe(tok)
+
+
+def test_unsubscribe_last_subscriber_stops_and_joins_poll_thread(
+    tmp_path: Path,
+) -> None:
+    t = _make_transport(tmp_path)
+    try:
+        tok = t.subscribe("scope/topic", lambda p: None)
+        assert t._poll_thread is not None and t._poll_thread.is_alive()
+        assert "scope/topic" in t._channels
+
+        t.unsubscribe(tok)
+        assert "scope/topic" not in t._channels
+        assert not t._channels
+        assert t._poll_thread is None or not t._poll_thread.is_alive()
+
+        # Resubscribing restarts poll thread and works normally
+        received = []
+        evt = threading.Event()
+        tok2 = t.subscribe("scope/topic", lambda p: (received.append(p), evt.set()))
+        assert t._poll_thread is not None and t._poll_thread.is_alive()
+        t.publish("scope/topic", {"resub": True})
+        assert evt.wait(2.0)
+        assert received == [{"resub": True}]
+        t.unsubscribe(tok2)
+        assert t._poll_thread is None or not t._poll_thread.is_alive()
+    finally:
+        t.shutdown()
+
+
+def test_unsubscribe_one_channel_retains_poll_thread_until_last_channel(
+    tmp_path: Path,
+) -> None:
+    t = _make_transport(tmp_path)
+    try:
+        tok1 = t.subscribe("scope/ch1", lambda p: None)
+        tok2 = t.subscribe("scope/ch2", lambda p: None)
+        assert len(t._channels) == 2
+        assert t._poll_thread is not None and t._poll_thread.is_alive()
+
+        t.unsubscribe(tok1)
+        assert "scope/ch1" not in t._channels
+        assert "scope/ch2" in t._channels
+        assert t._poll_thread is not None and t._poll_thread.is_alive()
+
+        t.unsubscribe(tok2)
+        assert not t._channels
+        assert t._poll_thread is None or not t._poll_thread.is_alive()
+    finally:
+        t.shutdown()
 
 
 def test_ensure_poll_thread_idempotent(tmp_path: Path) -> None:
