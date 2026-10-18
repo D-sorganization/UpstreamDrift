@@ -1,7 +1,8 @@
 """Declared plate facts and stance placement for a trial import (OF-07, #13087).
 
 A swing file cannot carry the plate's uncertainty, sensing depth or capacity,
-nor where the stance frame sits in the model's world.  The desktop
+how its channels' sampling is skewed, nor where the stance frame sits in the
+model's world.  The desktop
 declarations dialog and the plate-overlay API both collect those as plain
 values; this module is the one place that turns them into the domain objects,
 which validate them again.
@@ -17,12 +18,19 @@ from src.shared.python.force_plates.model_frame import (
     placement_for_target,
 )
 from src.shared.python.force_plates.open_fp_format.reader import PlateDeclarations
+from src.shared.python.force_plates.readings import ReadingOptions
 from src.shared.python.impact_parameters.target_frame import (
     UD_DEFAULT_TARGET_DIR,
     TargetFrame,
 )
 
-__all__ = ["DeclaredPlate", "DeclaredStance"]
+__all__ = ["COP_SKEW_CHOICES", "DeclaredPlate", "DeclaredReading", "DeclaredStance"]
+
+#: How the two stance CoP channels' timing skews relate, conservative first.
+#: Only ``independent`` lets a skewed reading report the CoP covariance;
+#: ``common`` (one sample clock for both) and ``unknown`` keep the per-axis
+#: bound, since a common skew's cross term needs the signed CoP rate.
+COP_SKEW_CHOICES = ("unknown", "independent", "common")
 
 _FRAME_HANDEDNESS = {"RH": "right", "LH": "left"}
 
@@ -58,6 +66,32 @@ class DeclaredPlate:
             sensing_depth_m=self.sensing_depth_m,
             capacity_n=self.capacity_n,
             **extra,
+        )
+
+
+@dataclass(frozen=True)
+class DeclaredReading:
+    """Declared channel timing: ``skew_s`` [s] within one sample, and how the
+    two CoP channels' skews relate (one of :data:`COP_SKEW_CHOICES`)."""
+
+    skew_s: float
+    cop_skew: str
+
+    def to_options(self, coverage: float) -> ReadingOptions:
+        """The :class:`ReadingOptions` for band factor ``coverage``.
+
+        Raises ``ValueError`` for a ``cop_skew`` outside
+        :data:`COP_SKEW_CHOICES`, and whatever ``ReadingOptions`` refuses
+        (a negative or non-finite ``skew_s``, a non-positive ``coverage``).
+        """
+        if self.cop_skew not in COP_SKEW_CHOICES:
+            raise ValueError(
+                f"cop_skew must be one of {COP_SKEW_CHOICES}, got {self.cop_skew!r}"
+            )
+        return ReadingOptions(
+            coverage=coverage,
+            skew_s=self.skew_s,
+            cop_skew_independent=self.cop_skew == "independent",
         )
 
 

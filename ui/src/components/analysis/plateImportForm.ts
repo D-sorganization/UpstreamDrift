@@ -7,7 +7,7 @@
  * start empty: they are declared, never assumed. The server validates again
  * and stays authoritative; this only refuses what cannot be sent.
  */
-import type { PlateAlignment, PlateOverlayRequest } from '@/api/groundReaction';
+import type { PlateAlignment, PlateOverlayRequest, PlateReading } from '@/api/groundReaction';
 
 export type PlateFormSection = 'Trial' | 'Plate' | 'Stance' | 'Clock';
 
@@ -31,6 +31,11 @@ export const ALIGNMENT_KINDS = [
   'cross_correlation',
 ] as const;
 export const HANDEDNESS_CHOICES = ['RH', 'LH'] as const;
+/**
+ * How the two CoP channels' timing skews relate, conservative first. Only
+ * `independent` lets a skewed reading carry the CoP covariance.
+ */
+export const COP_SKEW_CHOICES = ['unknown', 'independent', 'common'] as const;
 
 const field = (
   key: string,
@@ -49,6 +54,11 @@ export const PLATE_FORM_FIELDS: readonly PlateFormField[] = [
   field('sensing_depth_m', 'Sensing plane depth [m]', 'Plate'),
   field('sensing_depth_sigma_m', 'Sensing depth uncertainty [m]', 'Plate'),
   field('capacity_n', 'Pair capacity [N]', 'Plate'),
+  field('skew_s', 'Channel timing skew within a sample [s]', 'Plate'),
+  field('cop_skew', 'CoP channel skews', 'Plate', {
+    choices: COP_SKEW_CHOICES,
+    initial: COP_SKEW_CHOICES[0],
+  }),
   field('handedness', 'Handedness', 'Stance', { choices: HANDEDNESS_CHOICES, initial: 'RH' }),
   field('origin_m', 'Stance origin x, y, z [m]', 'Stance'),
   field('target_dir', 'Target direction x, y, z', 'Stance', { initial: '0, -1, 0' }),
@@ -185,6 +195,10 @@ function build(texts: Record<string, string>): PlateOverlayRequest {
       kind,
       note: text(texts, 'alignment_note'),
       derived_from_model: derivedFromModel(texts, kind),
+    },
+    reading: {
+      skew_s: number(texts, 'skew_s'),
+      cop_skew: choice<PlateReading['cop_skew']>(texts, 'cop_skew'),
     },
   };
 }

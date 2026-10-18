@@ -115,8 +115,13 @@ to both channels (one sample clock for the whole CoP) would add the rank-one
 term $s^2\,(R_{xy}\dot c)(R_{xy}\dot c)^{\mathsf T}$, which needs the signed
 rate $\dot c$; the reading keeps only rate magnitudes, so that case is not
 modelled. With $s = 0$ neither skew model matters and $\Sigma_w = \sigma_m^2
-I$. Both shipped import paths (the PyQt tile and the plate-overlay route)
-currently read with $s = 0$, so their ellipses are circles of $\sigma_m$.
+I$. Both import paths (the PyQt tile's Plate Trial Declarations dialog and
+the plate-overlay route, which the web form posts to) ask for $s$ and for the
+skew relation (\texttt{unknown}, \texttt{independent} or \texttt{common};
+\texttt{open\_fp\_format.declared\_import.DeclaredReading}). The relation
+starts at \texttt{unknown}, so a skewed reading claims no covariance until
+independence is declared; \texttt{common} is offered so it can be recorded,
+but it too keeps the per-axis bound.
 
 \paragraph{Composition.} With declared measurement sigma $\sigma_m$ and
 band factor $k$,
