@@ -2574,6 +2574,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12998 · Add JaxSim Launcher Dashboard Tile and Engine Tile Coverage Test
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12998
+- **Branch:** merged via #13224
+- **PR:** #13224
+- **Paths:** see #13224
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`3dec2e7c`; collated from changes/12998-add-jaxsim-launcher-dashboard-tile-and-e.md)
+- **Summary:** Add JaxSim launcher dashboard tile and engine tile coverage test
+- **Next step:** Shipped in PR #13224.
+
+### DL-#12977 · Pipeline: FreeMoCap Adapter Deterministic CSV Selection, NaN Confidence Handling, Non-Monotonic Time Rejection, and Configurable Min_Confidence
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12977
+- **Branch:** fix/12977-freemocap-adapter-integrity
+- **PR:** #13252
+- **Paths:** see #13252
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`9843b55e`; collated from changes/12977-freemocap-adapter-integrity.md)
+- **Summary:** pipeline: FreeMoCap adapter deterministic CSV selection, NaN confidence handling, non-monotonic time rejection, and configurable min_confidence
+- **Next step:** Shipped in PR #13252.
+
 ### DL-#12968 · Robotics: Eliminate Silent Velocity, Acceleration, and Mass Fallbacks in ZMPComputer and Support Finite-Difference Acceleration
 
 - **State:** shipped
@@ -2606,10 +2632,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13170
 - **Branch:** feat/13170-full-body-v2-schema
-- **PR:** #13244
+- **PR:** #13244, #13224
 - **Paths:** see #13244
 - **Started:** 2026-10-18
-- **Last verified:** 2026-10-18 (`657b64c4`; collated from changes/13170-full-body-v2-schema-regional-lumbar-l5-s.md)
+- **Last verified:** 2026-10-18 (`3dec2e7c`; collated from changes/13170-full-body-v2-schema-regional-lumbar-l5-s.md)
 - **Summary:** full-body-v2 schema (regional lumbar L5/S1 and thoracic T12/L1 trunk), one schema registry for exporters and consumers, and a constrained v1->v2 trunk migration with residual and non-uniqueness report; v1 stays default and byte-identical
 - **Next step:** Shipped in PR #13244.
 
@@ -2632,10 +2658,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13004
 - **Branch:** merged via #13239
-- **PR:** #13239
+- **PR:** #13239, #13224
 - **Paths:** see #13239
 - **Started:** 2026-10-18
-- **Last verified:** 2026-10-18 (`46afb82e`; collated from changes/13004-triangulate-degenerate-cameras.md)
+- **Last verified:** 2026-10-18 (`3dec2e7c`; collated from changes/13004-triangulate-degenerate-cameras.md)
 - **Summary:** Fail closed with ok=False and rejected cameras on degenerate or collinear camera pairs
 - **Next step:** Shipped in PR #13239.
 
