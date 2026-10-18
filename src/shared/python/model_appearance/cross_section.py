@@ -66,7 +66,7 @@ class BodySection:
         Precondition: a trunk section, whose depth axis is horizontal (AP);
         a foot section's depth axis is already "up".
         """
-        return np.cross(self.depth_axis, self.ml_axis)
+        return np.asarray(np.cross(self.depth_axis, self.ml_axis), dtype=np.float64)
 
     def width_axis(self, start: ArrayLike, end: ArrayLike) -> Array:
         """Full-radius axis for the segment ``start -> end`` of this body."""
