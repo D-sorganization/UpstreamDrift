@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -37,50 +38,26 @@ __all__ = ["export_markers_to_c3d"]
 logger = logging.getLogger(__name__)
 
 
-def export_markers_to_c3d(
+_CANONICAL_TO_ADR0041 = np.array(
+    [
+        [1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0],
+        [0.0, -1.0, 0.0],
+    ],
+    dtype=np.float64,
+)
+_ADR0041_TO_CANONICAL = _CANONICAL_TO_ADR0041.T
+
+
+def _validate_c3d_export_preconditions(
     markers: np.ndarray,
     marker_names: list[str],
     sample_rate: float,
+    up_axis: str,
+    units: str,
     output_path: str | Path,
 ) -> Path:
-    """Export marker position data to a C3D file.
-
-    This is a **one-way, output-only** export.  The resulting file is
-    intended for external biomechanical tools and must never be read back
-    into the pipeline as a canonical data source.
-
-    Preconditions:
-        - ``markers`` is a ``numpy.ndarray`` with shape ``(T, n_markers, 3)``
-          where T >= 1 and n_markers >= 1.
-        - ``len(marker_names) == markers.shape[1]``
-        - ``sample_rate > 0.0``
-        - Parent directory of ``output_path`` must exist.
-        - ``ezc3d >= 1.5.0`` must be installed.
-
-    Postconditions:
-        - A valid C3D file is written to ``output_path``.
-        - The returned path is absolute (resolved).
-        - Marker labels, positions, units (``"m"``), and sample rate are
-          preserved across a write / read round-trip.
-
-    Args:
-        markers: Marker positions in metres, shape ``(T, n_markers, 3)``.
-        marker_names: Ordered list of marker label strings.
-            ``len(marker_names)`` must equal ``markers.shape[1]``.
-        sample_rate: Acquisition rate in Hz.  Must be strictly positive.
-        output_path: Destination file path.  Parent directory must exist.
-
-    Returns:
-        Resolved :class:`~pathlib.Path` of the written C3D file.
-
-    Raises:
-        TypeError: When ``markers`` is not a :class:`numpy.ndarray`.
-        ValueError: When shape, rate, or name-count constraints are violated.
-        FileNotFoundError: When the parent directory of ``output_path`` does
-            not exist.
-        ImportError: When ``ezc3d`` is not installed.
-    """
-    # --- DbC preconditions (validated before the optional ezc3d import) ---
+    """Validate all DbC preconditions before C3D export."""
     if not isinstance(markers, np.ndarray):
         raise TypeError(
             f"markers must be a numpy.ndarray, got {type(markers).__name__!r}"
@@ -106,12 +83,72 @@ def export_markers_to_c3d(
         )
     if not isinstance(sample_rate, (int, float)) or sample_rate <= 0.0:
         raise ValueError(f"sample_rate must be a positive number, got {sample_rate!r}")
+    if not isinstance(up_axis, str) or up_axis.lower() not in ("y", "z"):
+        raise ValueError(f"up_axis must be 'y' or 'z', got {up_axis!r}")
+    if not isinstance(units, str) or units.lower() not in ("m", "mm"):
+        raise ValueError(f"units must be 'm' or 'mm', got {units!r}")
 
     dest = Path(output_path)
     if not dest.parent.exists():
         raise FileNotFoundError(f"Output directory does not exist: {dest.parent}")
+    return dest
 
-    # --- Optional dependency: ezc3d ---
+
+def _populate_c3d_data(
+    c: Any,
+    coords: np.ndarray,
+    is_nan: np.ndarray,
+    marker_names: list[str],
+    sample_rate: float,
+    norm_units: str,
+    up_axis: str,
+) -> None:
+    """Populate parameters, point arrays, and metadata residuals in an ezc3d object."""
+    n_frames, n_markers, _ = coords.shape
+    c["parameters"]["POINT"]["RATE"]["value"] = [float(sample_rate)]
+    c["parameters"]["POINT"]["LABELS"]["value"] = list(marker_names)
+    c["parameters"]["POINT"]["UNITS"]["value"] = [norm_units]
+
+    if "DESCRIPTIONS" not in c["parameters"]["POINT"]:
+        c["parameters"]["POINT"]["DESCRIPTIONS"] = {}
+    c["parameters"]["POINT"]["DESCRIPTIONS"]["value"] = [
+        f"up_axis=Z (source={up_axis.upper()})" for _ in marker_names
+    ]
+
+    if "AXIS_CONVENTION" not in c["parameters"]:
+        c["parameters"]["AXIS_CONVENTION"] = {}
+    if "UP_AXIS" not in c["parameters"]["AXIS_CONVENTION"]:
+        c["parameters"]["AXIS_CONVENTION"]["UP_AXIS"] = {}
+    c["parameters"]["AXIS_CONVENTION"]["UP_AXIS"]["value"] = ["Z"]
+
+    # Point data with homogeneous 4th row
+    data_xyz = np.transpose(coords, (2, 1, 0))  # (3, n_markers, T)
+    homogeneous = np.ones((1, n_markers, n_frames), dtype=np.float64)
+    c["data"]["points"] = np.concatenate([data_xyz, homogeneous], axis=0)
+
+    # Residuals: valid = 0.0, NaN/missing = -1.0
+    residuals = np.where(is_nan.T[np.newaxis, :, :], -1.0, 0.0).astype(np.float64)
+    if "meta_points" not in c["data"]:
+        c["data"]["meta_points"] = {}
+    c["data"]["meta_points"]["residuals"] = residuals
+
+
+def export_markers_to_c3d(
+    markers: np.ndarray,
+    marker_names: list[str],
+    sample_rate: float,
+    output_path: str | Path,
+    *,
+    up_axis: str = "z",
+    units: str = "m",
+) -> Path:
+    """Export marker position data to a C3D file."""
+    dest = _validate_c3d_export_preconditions(
+        markers, marker_names, sample_rate, up_axis, units, output_path
+    )
+    norm_up_axis = up_axis.lower()
+    norm_units = units.lower()
+
     try:
         ezc3d = import_ezc3d()
     except ModuleNotFoundError as exc:
@@ -121,19 +158,23 @@ def export_markers_to_c3d(
             "(or: pip install 'ezc3d>=1.5.0')"
         ) from exc
 
-    # Build the C3D object
-    c = ezc3d.c3d()
-    c["parameters"]["POINT"]["RATE"]["value"] = [float(sample_rate)]
-    c["parameters"]["POINT"]["LABELS"]["value"] = list(marker_names)
-    c["parameters"]["POINT"]["UNITS"]["value"] = ["m"]
+    coords = markers.astype(np.float64)
+    if norm_up_axis == "y":
+        coords = coords @ _ADR0041_TO_CANONICAL.T
+    if norm_units == "mm":
+        coords = coords * 1000.0
 
-    # ezc3d stores data as (4, n_markers, T): rows are [X, Y, Z, residual].
-    # Transpose from (T, n_markers, 3) → (3, n_markers, T), then append
-    # a zero-residual row to make it (4, n_markers, T).
-    data_xyz = np.transpose(markers.astype(np.float64), (2, 1, 0))  # (3, n_markers, T)
-    residuals = np.zeros((1, n_markers, n_frames), dtype=np.float64)
-    c["data"]["points"] = np.concatenate([data_xyz, residuals], axis=0)
+    is_nan = np.isnan(markers).any(axis=-1)
+    c = ezc3d.c3d()
+    _populate_c3d_data(
+        c, coords, is_nan, marker_names, sample_rate, norm_units, up_axis
+    )
 
     c.write(str(dest))
-    logger.info("Exported %d-frame C3D (%d markers) → %s", n_frames, n_markers, dest)
+    logger.info(
+        "Exported %d-frame C3D (%d markers) → %s",
+        markers.shape[0],
+        markers.shape[1],
+        dest,
+    )
     return dest.resolve()
