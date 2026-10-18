@@ -2561,6 +2561,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12978 · Reject Duplicate Source Labels and Handle Inf Values in Capture Export
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12978
+- **Branch:** merged via #13225
+- **PR:** #13225
+- **Paths:** see #13225
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`6e9291cc`; collated from changes/12978-reject-duplicate-source-labels-and-handl.md)
+- **Summary:** Reject duplicate source labels and handle inf values in capture export
+- **Next step:** Shipped in PR #13225.
+
 ### DL-#13023 · Surface Searched Paths and Submodule Remedy in Tile Launch Failure Toast
 
 - **State:** shipped

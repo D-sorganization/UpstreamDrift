@@ -196,9 +196,37 @@ def test_apply_grip_width_leaves_the_rest_of_the_spec_alone(spec_bytes: bytes) -
     derived = json.loads(apply_grip_width(spec_bytes, 0.6))
     original = json.loads(spec_bytes)
     changed = {key for key in original if original[key] != derived[key]}
-    assert changed == {"frames", "bodies"}
+    assert changed == {"frames", "bodies", "joints"}
     assert derived["closure"] == original["closure"]
     assert derived["coordinate_order"] == original["coordinate_order"]
+
+
+def _left_wrist_joint(spec: dict) -> dict:
+    (frame,) = (f for f in spec["frames"] if f["name"] == LEFT_HAND_FRAME)
+    (joint,) = (j for j in spec["joints"] if j["child"] == frame["body"])
+    return joint
+
+
+def test_apply_grip_width_moves_the_left_wrist_with_its_frame(
+    spec_bytes: bytes,
+) -> None:
+    """The left hand itself moves, not only its frame (OSL-14, #13057).
+
+    The club body hangs from the left wrist joint; moving only the
+    ``LW`` frame left the wrist at the golf grip, so both real hands stayed
+    0.08 m apart on one side of the bar centre.
+    """
+    derived = json.loads(apply_grip_width(spec_bytes, 0.6))
+    original = json.loads(spec_bytes)
+    joint, before = _left_wrist_joint(derived), _left_wrist_joint(original)
+    assert float(joint["child_to_follower"][1][3]) == pytest.approx(
+        _frame_y(derived, LEFT_HAND_FRAME), abs=1e-12
+    )
+    assert float(before["child_to_follower"][1][3]) == pytest.approx(
+        _frame_y(original, LEFT_HAND_FRAME), abs=1e-12
+    )
+    others = [j for j in derived["joints"] if j["name"] != joint["name"]]
+    assert others == [j for j in original["joints"] if j["name"] != joint["name"]]
 
 
 @pytest.mark.parametrize("width", [0.0, -0.6, float("nan"), float("inf")])
@@ -254,13 +282,22 @@ def test_start_pose_carries_the_bar_on_the_back_per_the_standard(
 
 @pytest.mark.integration
 @pytest.mark.requires_mujoco
-def test_committed_bundle_start_pose_matches_the_standard() -> None:
-    """The issue's acceptance item, verified on the regenerated back_bar bundle."""
+def test_committed_bundle_start_pose_keeps_the_standard_grip() -> None:
+    """Grip width, bar axis and handedness of the committed back_bar bundle.
+
+    OSL-17 (#13131): the committed bundle racks the bar on the cited high-bar
+    position (``test_back_rack``), not on the standard's start-pose bar
+    position, which lies above the shoulders; the grip is still the standard's.
+    """
     pytest.importorskip("mujoco")
     bundle = InputBundle.load(BACK_SQUAT_BUNDLE)
     q = np.asarray(bundle.provenance["ik"]["q_standing"], dtype=float)
     height = float(bundle.provenance["optimizer"]["height_m"])
-    assert_matches_the_standard(measure_start_pose(bundle.spec_bytes, q, height))
+    pose = measure_start_pose(bundle.spec_bytes, q, height)
+    grip = lift_spec.lift_grip(LIFT)
+    assert pose.grip_width_m == pytest.approx(grip.width_m, abs=GRIP_TOLERANCE_M)
+    assert pose.axis_angle_deg <= AXIS_TOLERANCE_DEG
+    assert pose.left_hand_is_left
 
 
 @pytest.mark.integration

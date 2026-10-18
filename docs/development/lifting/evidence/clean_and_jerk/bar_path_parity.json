@@ -1,11 +1,11 @@
 {
   "lift": "clean_and_jerk",
   "bundle": "docs/development/lifting/evidence/clean_and_jerk/clean_and_jerk_bundle.npz",
-  "bundle_spec_sha256": "81a9edf3ad70e8022973be46900a1d902a268725641f3b6e566ce939ba6ed535",
+  "bundle_spec_sha256": "617433abe253d7a658372efb4463aec9dfe7f59256628450d8bae7ec36f6e4d8",
   "bundle_steps": 200,
   "dt_s": 0.001,
   "reference": "window_bar_path_m (MuJoCo, recorded at bundle generation)",
-  "source_commit": "37aaf45983518c791db508c7857c026151e497b2",
+  "source_commit": "33abf79c74fdbae407242d61ec81d19de7cb5bcb",
   "generator": "scripts/measure_lift_bar_path_parity.py",
   "engines": {
     "mujoco": {
@@ -24,109 +24,82 @@
         "max_frame_error_m": 0.0,
         "worst_segment_start_s": 0.0,
         "coordinate_error_rad_by_segment": [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         ]
       },
-      "wall_time_s": 72.5
+      "wall_time_s": 69.9
     },
     "drake": {
       "engine": "drake",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 1.2136746562939178e-12,
-      "final_bar_deviation_m": 1.2136746562939178e-12,
-      "max_coordinate_error_rad": 3.4204017396177733e-10,
-      "worst_final_coordinate": "LSInputX",
+      "max_bar_deviation_m": 1.1281139774473572e-14,
+      "final_bar_deviation_m": 1.115872193199299e-14,
+      "max_coordinate_error_rad": 5.115907697472721e-13,
+      "worst_final_coordinate": "LWInputY",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 1.2931877790833823e-12,
-        "max_frame_error_m": 3.884194229483362e-15,
-        "worst_segment_start_s": 0.18,
+        "max_coordinate_error_rad": 1.2212453270876722e-14,
+        "max_frame_error_m": 1.2758510841771824e-15,
+        "worst_segment_start_s": 0.04,
         "coordinate_error_rad_by_segment": [
-          3.9968028886505635e-15,
-          9.547918011776346e-15,
-          1.180349221141519e-14,
-          2.01349353856628e-14,
-          2.784925068333166e-14,
-          1.029037965949442e-13,
-          2.4973079160162115e-14,
-          4.741346204539809e-14,
-          1.7985612998927536e-14,
-          1.2931877790833823e-12
+          5.835176092316985e-15, 9.103828801926284e-15, 1.2212453270876722e-14,
+          8.881784197001252e-15, 6.493937332319177e-15, 6.173447170132462e-15,
+          5.10702591327572e-15, 4.884981308350689e-15, 4.828657005490067e-15,
+          5.67774993687209e-15
         ]
       },
-      "wall_time_s": 46.8
+      "wall_time_s": 42.0
     },
     "pinocchio": {
       "engine": "pinocchio",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 4.5406938941181726e-13,
-      "final_bar_deviation_m": 4.5406938941181726e-13,
-      "max_coordinate_error_rad": 1.236887259281616e-10,
-      "worst_final_coordinate": "LSInputX",
+      "max_bar_deviation_m": 2.0210728917903972e-14,
+      "final_bar_deviation_m": 2.0210728917903972e-14,
+      "max_coordinate_error_rad": 4.1100456371623295e-13,
+      "worst_final_coordinate": "LWInputY",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 3.0375701953744283e-13,
-        "max_frame_error_m": 2.848582188796671e-14,
-        "worst_segment_start_s": 0.18,
+        "max_coordinate_error_rad": 1.199040866595169e-14,
+        "max_frame_error_m": 2.6109426709817012e-15,
+        "worst_segment_start_s": 0.04,
         "coordinate_error_rad_by_segment": [
-          5.0844745080880216e-15,
-          9.103828801926284e-15,
-          1.1546319456101628e-14,
-          1.918343955908952e-14,
-          2.671474153004283e-14,
-          1.319985787340272e-13,
-          2.6423307986078726e-14,
-          5.084821452783217e-14,
-          1.68962066560141e-14,
-          3.0375701953744283e-13
+          4.578802614840782e-15, 7.882583474838611e-15, 1.199040866595169e-14,
+          5.995204332975845e-15, 4.757045451997399e-15, 3.583505020499089e-15,
+          3.774758283725532e-15, 3.552713678800501e-15, 1.7763568394002505e-15,
+          2.6038199374411874e-15
         ]
       },
-      "wall_time_s": 37.3
+      "wall_time_s": 30.5
     },
     "opensim": {
       "engine": "opensim",
       "steps": 200,
       "duration_s": 0.2,
       "failure": null,
-      "max_bar_deviation_m": 7.191929913491342e-13,
-      "final_bar_deviation_m": 7.191929913491342e-13,
-      "max_coordinate_error_rad": 2.0483026386131087e-10,
-      "worst_final_coordinate": "LSInputX",
+      "max_bar_deviation_m": 1.683965335188277e-15,
+      "final_bar_deviation_m": 1.56542430709323e-15,
+      "max_coordinate_error_rad": 8.405364078367672e-14,
+      "worst_final_coordinate": "subtalar_angle_r",
       "segmented": {
         "segment_steps": 20,
         "segments": 10,
-        "max_coordinate_error_rad": 6.128431095930864e-14,
-        "max_frame_error_m": 2.9955454923751383e-15,
-        "worst_segment_start_s": 0.18,
+        "max_coordinate_error_rad": 5.048045315092509e-15,
+        "max_frame_error_m": 8.087309868639295e-16,
+        "worst_segment_start_s": 0.02,
         "coordinate_error_rad_by_segment": [
-          1.7763568394002505e-15,
-          3.8354736053847205e-15,
-          7.105427357601002e-15,
-          3.4416913763379853e-15,
-          5.540706782269922e-15,
-          4.978656376053436e-15,
-          4.440892098500626e-15,
-          3.1086244689504383e-15,
-          2.220446049250313e-15,
-          6.128431095930864e-14
+          2.7417304537813436e-15, 5.048045315092509e-15, 2.3991225672759242e-15,
+          2.628973427842851e-15, 3.6121279578527066e-15, 2.6168303635110135e-15,
+          2.02247073255446e-15, 1.2212453270876722e-15, 1.7295193055488767e-15,
+          2.1547433975976915e-15
         ]
       },
-      "wall_time_s": 88.7
+      "wall_time_s": 72.8
     }
   }
 }
