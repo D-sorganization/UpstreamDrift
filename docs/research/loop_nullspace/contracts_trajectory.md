@@ -532,9 +532,11 @@ use of `display_decision`.
 
 The React panel (`ui/src/components/analysis/LoopNullSpacePanel.tsx`) reads the
 plot model from `result.plot_model` (or `partial.plot_model` while running) of
-the NSX-40 job status and, when the job carries none, draws nothing and says so.
-Its Vitest suite reads the golden above in place. The NSX-40 routes return the
-report today; attaching the plot model to the job body is an API follow-up.
+the NSX-40 job status. The service attaches it with
+`plot_model_payload(report, preset=...)` (`plot_model_decisions.py`: `report_decisions`
+then `build_plot_model`, no gate of its own); a partial that cannot build a valid
+model omits it and the panel draws nothing. Presets come from
+`GET /analysis/loop-nullspace/presets`. Its Vitest suite reads the golden above in place.
 
 ## NSX-50 Dynamic Dual Transforms (#12578)
 

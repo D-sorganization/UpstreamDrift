@@ -19,6 +19,10 @@ const GOLDEN = resolve(
   '../../../../tests/fixtures/loop_nullspace/goldens/plot_model_v1.json',
 );
 const model = (JSON.parse(readFileSync(GOLDEN, 'utf8')) as { plot_model: NSXPlotModel }).plot_model;
+const PRESETS = [
+  { id: 'envelope_only', label: 'Envelope Only' },
+  { id: 'smooth_capacity', label: 'Smooth Capacity-Weighted Effort' },
+];
 const JOB = '123e4567-e89b-42d3-a456-426614174000';
 
 afterEach(() => {
@@ -204,12 +208,13 @@ describe('LoopNullSpacePanel job flow', () => {
   beforeEach(() => {
     // A late poll must never reach the unmocked network layer.
     vi.spyOn(api, 'getLoopNullspaceJob').mockResolvedValue(job({}));
+    vi.spyOn(api, 'fetchLoopNullspacePresets').mockResolvedValue(PRESETS);
   });
 
-  it('offers the registry presets and refuses an incomplete form', () => {
+  it('offers the served presets and refuses an incomplete form', async () => {
     render(<LoopNullSpacePanel />);
-    expect(within(screen.getByLabelText('Preset')).getAllByRole('option')).toHaveLength(
-      api.LOOP_NULLSPACE_PRESETS.length,
+    expect(await within(screen.getByLabelText('Preset')).findAllByRole('option')).toHaveLength(
+      PRESETS.length,
     );
     const submit = vi.spyOn(api, 'submitLoopNullspaceJob');
     fireEvent.click(screen.getByRole('button', { name: 'Run' }));
@@ -230,6 +235,7 @@ describe('LoopNullSpacePanel job flow', () => {
       }),
     );
     render(<LoopNullSpacePanel />);
+    await act(async () => {});
     fill();
     fireEvent.change(screen.getByLabelText('Preset'), {
       target: { value: 'smooth_capacity' },
@@ -265,6 +271,7 @@ describe('LoopNullSpacePanel job flow', () => {
     );
     vi.spyOn(api, 'getLoopNullspaceJob').mockResolvedValue(job({ partial: { plot_model: model } }));
     render(<LoopNullSpacePanel />);
+    await act(async () => {});
     fill();
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Run' }));
@@ -279,6 +286,7 @@ describe('LoopNullSpacePanel job flow', () => {
       .spyOn(api, 'cancelLoopNullspaceJob')
       .mockResolvedValue(job({ status: 'cancelled', worker_active: false }));
     render(<LoopNullSpacePanel />);
+    await act(async () => {});
     fill();
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Run' }));
@@ -294,6 +302,7 @@ describe('LoopNullSpacePanel job flow', () => {
   it('shows a refused submission and a completed job without a model', async () => {
     vi.spyOn(api, 'submitLoopNullspaceJob').mockRejectedValueOnce(new Error('unknown preset'));
     render(<LoopNullSpacePanel />);
+    await act(async () => {});
     fill();
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Run' }));
@@ -307,5 +316,19 @@ describe('LoopNullSpacePanel job flow', () => {
     });
     expect(screen.getByTestId('nsx-job-status')).toHaveTextContent('served from cache');
     expect(screen.getByTestId('nsx-no-model')).toHaveTextContent('no plot model');
+  });
+});
+
+describe('LoopNullSpacePanel presets', () => {
+  it('says so and refuses to run when the presets cannot be loaded', async () => {
+    vi.spyOn(api, 'fetchLoopNullspacePresets').mockRejectedValue(new Error('offline'));
+    const submit = vi.spyOn(api, 'submitLoopNullspaceJob');
+    render(<LoopNullSpacePanel />);
+    expect(await screen.findByTestId('nsx-preset-error')).toHaveTextContent('offline');
+    fireEvent.change(screen.getByLabelText('Source'), { target: { value: 's' } });
+    fireEvent.change(screen.getByLabelText('Engine'), { target: { value: 'e' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Run' }));
+    expect(screen.getByTestId('nsx-form-error')).toHaveTextContent('No preset');
+    expect(submit).not.toHaveBeenCalled();
   });
 });

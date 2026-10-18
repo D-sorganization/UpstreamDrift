@@ -24,6 +24,7 @@ Honesty rules (R-series of the epic):
 
 from __future__ import annotations
 
+import copy
 import logging
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
@@ -507,7 +508,9 @@ def _invariants_stage(
     )
     inv = invariants_dict(compute_invariants(admitted, decs, club_ne=club), indices)
     report["invariants"] = inv
-    run.done("invariants", {"invariants": inv})
+    # ``report`` is the in-progress report so the service layer can build a
+    # partial plot model; it is not part of the public partial.
+    run.done("invariants", {"invariants": inv, "report": copy.deepcopy(report)})
 
 
 def analyze(
@@ -522,8 +525,9 @@ def analyze(
     """Run the loop-nullspace analysis and return the report mapping.
 
     ``on_stage(stage, percent, partial)`` is called after each stage; the
-    ``invariants`` stage passes ``{"invariants": ...}`` so a client can show
-    the invariant quantities while the envelopes are still being solved.
+    ``invariants`` stage passes ``{"invariants": ..., "report": <copy of the
+    in-progress report>}`` so a client can show the invariant quantities (and a
+    service can build a partial plot model) while the envelopes are solved.
     ``should_cancel()`` is checked between stages; ``AnalysisCancelledError``
     is raised once it returns ``True``.
 

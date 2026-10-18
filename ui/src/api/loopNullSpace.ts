@@ -24,19 +24,15 @@ export type { LoopNullspaceJobStatusV1, LoopNullspaceOptions, LoopNullspaceReque
 export const PLOT_MODEL_SCHEMA_VERSION = '1.0.0';
 export const LOOP_NULLSPACE_PATH = '/api/analysis/loop-nullspace';
 
-/** Registry presets (`src/config/loop_nullspace_registry.json`), id and label. */
-export const LOOP_NULLSPACE_PRESETS: ReadonlyArray<{
+export interface LoopNullspacePreset {
   id: string;
   label: string;
-}> = [
-  { id: 'envelope_only', label: 'Envelope Only' },
-  {
-    id: 'envelope_grf_observed',
-    label: 'Envelope With Observed Ground Reaction',
-  },
-  { id: 'capacity_min_effort', label: 'Capacity-Weighted Minimum Effort' },
-  { id: 'smooth_capacity', label: 'Smooth Capacity-Weighted Effort' },
-];
+}
+
+/** The registry presets served by `GET .../presets` (no copy is kept here). */
+export function fetchLoopNullspacePresets(signal?: AbortSignal): Promise<LoopNullspacePreset[]> {
+  return apiFetch<LoopNullspacePreset[]>(`${LOOP_NULLSPACE_PATH}/presets`, { signal });
+}
 
 // ----------------------------------------------------------- plot model
 export type DisplayAction =

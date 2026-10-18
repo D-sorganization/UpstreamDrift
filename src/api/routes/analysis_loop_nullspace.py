@@ -118,7 +118,7 @@ def _running(tm: TaskManager, job_id: str) -> bool:
 
 
 def _stage_hook(
-    tm: TaskManager, job_id: str
+    tm: TaskManager, job_id: str, preset: str
 ) -> Callable[[str, float, Mapping[str, Any] | None], None]:
     """Record each finished stage; its partial result is shown while it runs."""
 
@@ -128,7 +128,7 @@ def _stage_hook(
             return
         task["stage"] = stage
         if partial is not None:
-            task["partial"] = dict(partial)
+            task["partial"] = service.public_partial(partial, preset)
         tm.update_progress(job_id, percent)
 
     return on_stage
@@ -143,7 +143,7 @@ def _run_job(
     try:
         report = service.run(
             request,
-            on_stage=_stage_hook(tm, job_id),
+            on_stage=_stage_hook(tm, job_id, request.preset),
             should_cancel=lambda: not _running(tm, job_id),
         )
         tm.mark_completed(job_id, report)
@@ -198,6 +198,12 @@ def _admit_run(
         ) from saturated
     JOB_POOL.start(job_id, lambda: _run_job(tm, job_id, request))
     return _status_view(tm, job_id)
+
+
+@router.get("/presets")
+def list_presets() -> list[dict[str, str]]:
+    """The registry presets (id and label) a request may name."""
+    return service.presets()
 
 
 @router.post(

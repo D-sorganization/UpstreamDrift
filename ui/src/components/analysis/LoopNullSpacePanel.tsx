@@ -9,11 +9,12 @@
  * and shows nothing in its place.
  */
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import {
-  LOOP_NULLSPACE_PRESETS,
+  fetchLoopNullspacePresets,
   isTerminalLoopNullspaceJob,
   plotModelOf,
+  type LoopNullspacePreset,
   type LoopNullspaceRequest,
 } from '@/api/loopNullSpace';
 import { useLoopNullspaceJob } from '@/api/useLoopNullspaceJob';
@@ -26,13 +27,32 @@ export function LoopNullSpacePanel() {
   const { job, error, busy, start, cancel } = useLoopNullspaceJob();
   const [sourceId, setSourceId] = useState('');
   const [engine, setEngine] = useState('');
-  const [preset, setPreset] = useState(LOOP_NULLSPACE_PRESETS[0].id);
+  const [presets, setPresets] = useState<LoopNullspacePreset[]>([]);
+  const [presetError, setPresetError] = useState<string | null>(null);
+  const [preset, setPreset] = useState('');
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchLoopNullspacePresets(controller.signal)
+      .then((list) => {
+        setPresets(list);
+        setPreset((current) => current || list[0]?.id || '');
+      })
+      .catch((e: unknown) => {
+        if (!controller.signal.aborted) setPresetError(e instanceof Error ? e.message : String(e));
+      });
+    return () => controller.abort();
+  }, []);
   const [frames, setFrames] = useState('0');
   const [formError, setFormError] = useState<string | null>(null);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
     const indices = parseFrameIndices(frames);
+    if (!preset) {
+      setFormError('No preset is available; the preset list has not loaded.');
+      return;
+    }
     if (!sourceId.trim() || !engine.trim()) {
       setFormError('Source and engine are required.');
       return;
@@ -73,7 +93,7 @@ export function LoopNullSpacePanel() {
         <label className="text-xs text-gray-300 flex flex-col gap-1">
           Preset
           <select className={FIELD} value={preset} onChange={(e) => setPreset(e.target.value)}>
-            {LOOP_NULLSPACE_PRESETS.map((p) => (
+            {presets.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.label}
               </option>
@@ -100,6 +120,11 @@ export function LoopNullSpacePanel() {
           Cancel
         </button>
       </form>
+      {presetError && (
+        <p role="alert" data-testid="nsx-preset-error" className="text-sm text-red-300">
+          Presets unavailable: {presetError}
+        </p>
+      )}
       {formError && (
         <p role="alert" data-testid="nsx-form-error" className="text-sm text-red-300">
           {formError}
