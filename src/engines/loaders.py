@@ -36,6 +36,16 @@ Supported engines
   model shell)
 - ``MATLAB_3D`` — :func:`load_matlab_3d_engine` (Simscape Multibody bridge,
   see ``motion_matching/option4_python_bridge``)
+
+Root Convention
+---------------
+Engine loaders accept ``suite_root`` as either the repository root (e.g.
+``UpstreamDrift/``) or the production source root (``UpstreamDrift/src/``,
+as returned by :func:`src.shared.python.data_io.path_utils.get_src_root` and
+passed by :class:`src.shared.python.engine_core.engine_manager.EngineManager`).
+The helper :func:`_resolve_engine_path` normalizes relative engine model paths
+under either root convention, preventing duplicated ``src/src/`` path segments
+while ensuring default models resolve reliably.
 """
 
 from __future__ import annotations
@@ -55,6 +65,7 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 __all__ = [
+    "_resolve_engine_path",
     "load_mujoco_engine",
     "load_drake_engine",
     "load_pinocchio_engine",
@@ -118,6 +129,56 @@ def _ensure_engine_loaded(engine: PhysicsEngine, engine_name: str) -> None:
             f"DbC postcondition violated: {engine_name} loader returned None. "
             "The engine constructor must not return None."
         )
+
+
+# ---------------------------------------------------------------------------
+# Path resolution helpers
+# ---------------------------------------------------------------------------
+
+
+def _resolve_engine_path(suite_root: Path, relpath: Path | str) -> Path:
+    """Resolve an engine model relative path against suite_root.
+
+    Normalizes relative paths across both suite root conventions:
+    - Production convention: ``suite_root`` points to ``<repo_root>/src``
+      (as returned by :func:`src.shared.python.data_io.path_utils.get_src_root`).
+    - Repository convention: ``suite_root`` points to ``<repo_root>``.
+
+    Preconditions (DbC):
+        - ``suite_root`` is an instance of :class:`pathlib.Path`.
+
+    Postconditions (DbC):
+        - Returned path is an absolute or resolved :class:`pathlib.Path`.
+    """
+    if not isinstance(suite_root, Path):
+        raise TypeError(f"suite_root must be a Path, got {type(suite_root).__name__}")
+
+    rel = Path(relpath)
+    if rel.is_absolute():
+        return rel
+
+    candidates: list[Path] = []
+    if suite_root.name == "src":
+        # Production root is already under <repo>/src
+        if rel.parts and rel.parts[0] == "src":
+            candidates.append(suite_root / Path(*rel.parts[1:]))
+        else:
+            candidates.append(suite_root / rel)
+    else:
+        # Repository root or other parent root
+        if rel.parts and rel.parts[0] != "src":
+            candidates.append(suite_root / "src" / rel)
+        candidates.append(suite_root / rel)
+
+    direct = suite_root / rel
+    if direct not in candidates:
+        candidates.append(direct)
+
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+
+    return candidates[0]
 
 
 # ---------------------------------------------------------------------------
@@ -221,13 +282,9 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
         from src.shared.python.engine_core.engine_probes import MuJoCoProbe
 
         def _model_path(root: Path) -> Path:
-            return (
-                root
-                / "engines"
-                / "physics_engines"
-                / "mujoco"
-                / "models"
-                / "simple_pendulum.xml"
+            return _resolve_engine_path(
+                root,
+                "engines/physics_engines/mujoco/models/simple_pendulum.xml",
             )
 
         return _load_engine_with_probe(
@@ -259,14 +316,9 @@ def load_drake_engine(suite_root: Path) -> PhysicsEngine:
         from src.shared.python.engine_core.engine_probes import DrakeProbe
 
         def _model_path(root: Path) -> Path:
-            return (
-                root
-                / "engines"
-                / "physics_engines"
-                / "pinocchio"
-                / "models"
-                / "generated"
-                / "golfer.urdf"
+            return _resolve_engine_path(
+                root,
+                "engines/physics_engines/pinocchio/models/generated/golfer.urdf",
             )
 
         return _load_engine_with_probe(
@@ -296,14 +348,9 @@ def load_pinocchio_engine(suite_root: Path) -> PhysicsEngine:
         from src.shared.python.engine_core.engine_probes import PinocchioProbe
 
         def _model_path(root: Path) -> Path:
-            return (
-                root
-                / "engines"
-                / "physics_engines"
-                / "pinocchio"
-                / "models"
-                / "generated"
-                / "golfer.urdf"
+            return _resolve_engine_path(
+                root,
+                "engines/physics_engines/pinocchio/models/generated/golfer.urdf",
             )
 
         return _load_engine_with_probe(
@@ -489,7 +536,7 @@ def _load_simscape_adapter(
 
     engine: PhysicsEngine = SimscapeAdapter()  # type: ignore[assignment]
 
-    model_path = suite_root / default_model_relpath
+    model_path = _resolve_engine_path(suite_root, default_model_relpath)
     if load_default_model and model_path.exists():
         logger.info("Loading default %s model: %s", engine_name, model_path)
         try:
@@ -500,10 +547,8 @@ def _load_simscape_adapter(
                 f"'{model_path}': {exc}"
             ) from exc
     elif load_default_model:
-        logger.warning(
-            "Default %s model not found at %s; returning unloaded adapter",
-            engine_name,
-            model_path,
+        raise GolfModelingError(
+            f"Default {engine_name} model not found at '{model_path}'"
         )
     else:
         logger.warning(

@@ -643,6 +643,11 @@
         }
       }
     },
+    "plot_model": {
+      "type": "object",
+      "description": "Added by the service layer: the NSXPlotModel JSON (plot_model.py, schema 1.0.0) built from this report with display_decision.",
+      "required": ["schema_version"]
+    },
     "frame_diagnostics": {
       "type": "array",
       "description": "Per analysed frame: rank and condition number of the decomposition.",

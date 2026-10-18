@@ -380,16 +380,16 @@
     },
     {
       "feature_id": "loop_nullspace_exploration",
-      "title": "Closed-loop null-space exploration (NSX): invariants, envelopes, hand split and diagnostics tabs with a registry preset selector",
-      "status": "gap",
+      "title": "Closed-loop null-space exploration (NSX): invariants, envelopes, hand split and diagnostics from one plot model, with a registry preset selector",
+      "status": "parity",
       "pyqt": "src/tools/grip_wrench_plots/window.py",
       "api": "src/api/routes/analysis_loop_nullspace.py",
-      "web": null,
-      "issue": 12576,
+      "web": "ui/src/components/analysis/LoopNullSpacePanel.tsx",
+      "issue": null,
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "NSX-43 (#12575; hosted by the grip_wrench_plots tile, which analysis.grip_wrench already claims): the Grip Wrench Plots window is tabbed (the grip view first, then Invariants, Envelopes, Hand Split and Diagnostics) and renders only the framework-free NSXPlotModel (src/tools/grip_wrench_plots/nsx_view.py derives each panel, nsx_draw.py draws it); every shown, withheld, band, segment class and reason is the model's display_decision outcome and unknown states withhold. The preset selector lists the NSX-11 registry presets, runs go through a QThreadPool worker over the NSX-40 service with progress and cancel, and tests render the shared golden tests/fixtures/loop_nullspace/goldens/plot_model_v1.json. The React panel over the same golden is NSX-44 (#12576); until it lands the web column is a gap.",
+      "notes": "Both surfaces render only the framework-free NSXPlotModel (src/shared/python/loop_nullspace/plot_model.py, NSX-42 #12574); every shown, withheld, band, segment class and reason is the model's display_decision outcome (ADR-0054 D7 Option A) and unknown states withhold. NSX-43 (#12575; hosted by the grip_wrench_plots tile, which analysis.grip_wrench already claims): the Grip Wrench Plots window is tabbed (the grip view first, then Invariants, Envelopes, Hand Split and Diagnostics), with a registry preset selector and a QThreadPool worker over the NSX-40 service. NSX-44 (#12576): the React panel consumes the NSX-40 job routes with a preset selector served by GET /analysis/loop-nullspace/presets, cancel and partial results; the job result and each partial carry plot_model built by plot_model_payload. Badges, display classes and reasons are text, not colour alone. Both are tested against the single golden tests/fixtures/loop_nullspace/goldens/plot_model_v1.json.",
       "id": "loop_nullspace_exploration"
     },
     {
@@ -3265,7 +3265,7 @@
   "inputs": {
     "src/config/models.yaml": "466d22c9bf9805b10b6a0f5c203b61c76193e0787c27bc9fcbc86e0bb0626886",
     "src/config/launcher_manifest.json": "d83ef13993ea3aa766bc6274e4e94b50738146b293f670c7df8e6448a5366d14",
-    "src/config/feature_parity.json": "5343971b88c86a0655b1dcadc93f1a0a1e5943a16abfae0daaef81d0e70da8b5",
+    "src/config/feature_parity.json": "7122e8dc9abdb135672b4e4caf201cdb039e45888b827c02a132682f8abcb793",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

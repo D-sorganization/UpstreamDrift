@@ -52,6 +52,8 @@ For exploratory GS3DX matching, the separate reference is
 The separate research record for the MOSAIC estimator (model-aware multi-trial
 forward-dynamics matching) and the canonical ZTCF/ZVCF nomenclature is
 `docs/research/model_aware_matching/model_aware_matching.tex`.
+The human-realistic golfer record (HRG, epic #13160: coordinate sign map, ISB basis map and
+human-range baseline) is `docs/research/human_realistic_golfer/human_realistic_golfer.tex`.
 Record compilation and evidence checks truthfully; unresolved modeling gates
 remain open even when the documentation or video export is complete.
 

@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import threading
 from collections import OrderedDict
 from collections.abc import Callable, Mapping
@@ -41,9 +42,12 @@ from src.shared.python.loop_nullspace.facade import (
     EngineContext,
     TrajectoryInput,
 )
+from src.shared.python.loop_nullspace.plot_model_decisions import plot_model_payload
 from src.shared.python.loop_nullspace.sensitivity_options import (
     disturbance_from_dict,
 )
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "MAX_FRAMES",
@@ -58,6 +62,8 @@ __all__ = [
     "TrajectorySource",
     "cache_key",
     "lookup",
+    "presets",
+    "public_partial",
     "register_source",
     "registered_sources",
     "run",
@@ -314,6 +320,30 @@ def lookup(request: LoopNullspaceRequest) -> dict[str, Any] | None:
     return RESULT_CACHE.get(cache_key(request))
 
 
+def presets() -> list[dict[str, str]]:
+    """The registry's presets as ``{"id", "label"}``, in registry order."""
+    return [{"id": p.id, "label": p.label} for p in registry.load_registry().presets]
+
+
+def public_partial(
+    partial: Mapping[str, Any], preset: str | None = None
+) -> dict[str, Any]:
+    """The partial a client may see: its sections plus a plot model if one builds.
+
+    The in-progress ``report`` the facade passes is consumed here, never
+    exposed.  When it cannot produce a valid model (``ValueError``/``TypeError``)
+    ``plot_model`` is absent; none is ever made up.
+    """
+    shown = {k: v for k, v in partial.items() if k != "report"}
+    in_progress = partial.get("report")
+    if in_progress is not None:
+        try:
+            shown["plot_model"] = plot_model_payload(in_progress, preset=preset)
+        except (ValueError, TypeError):
+            logger.info("partial result cannot yet produce a plot model")
+    return shown
+
+
 def run(
     request: LoopNullspaceRequest,
     *,
@@ -343,5 +373,6 @@ def run(
         should_cancel=should_cancel,
     )
     report["service"] = {"cache_key": key, "source_id": request.source_id}
+    report["plot_model"] = plot_model_payload(report, preset=request.preset)
     RESULT_CACHE.put(key, report)
     return report
