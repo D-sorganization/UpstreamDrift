@@ -90,7 +90,9 @@ def test_no_row_reads_validated_while_blocker_is_open() -> None:
     assert entry["status"] == "deferred"
     for rid, cells in _rows().items():
         for cell in cells[3:5]:
-            assert not re.search(r"(?<!un)(?<!not )\bvalidated\b", cell, re.I), rid
+            assert not re.search(
+                r"(?<!un)(?<!not )\bvalidated\b", cell, re.IGNORECASE
+            ), rid
         assert cells[3] != "VALIDATED", rid
 
 
