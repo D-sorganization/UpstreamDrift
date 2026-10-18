@@ -25,7 +25,8 @@ import pytest
 pytestmark = pytest.mark.unit
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
-_FORBIDDEN_ROOT = "src.bunkershot3d"
+_PACKAGE_NAME = "bunkershot3d"
+_FORBIDDEN_ROOT = f"src.{_PACKAGE_NAME}"
 
 #: Directories scanned for the forbidden import form.
 _SCAN_ROOTS = ("src", "tests", "scripts", "notebooks")
@@ -61,8 +62,17 @@ def test_no_module_imports_bunkershot3d_under_the_src_prefix() -> None:
     offenders: list[str] = []
     for path in _python_files():
         try:
-            tree = ast.parse(path.read_text(encoding="utf-8"))
-        except (SyntaxError, UnicodeDecodeError):  # not our concern here
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:  # not our concern here
+            continue
+        # An offending import must spell the package name, so a file without
+        # it cannot offend; skipping its parse keeps the scan well inside the
+        # per-test timeout without narrowing what is checked.
+        if _PACKAGE_NAME not in text:
+            continue
+        try:
+            tree = ast.parse(text)
+        except SyntaxError:  # not our concern here
             continue
         for name in _imported_names(tree):
             if name == _FORBIDDEN_ROOT or name.startswith(_FORBIDDEN_ROOT + "."):

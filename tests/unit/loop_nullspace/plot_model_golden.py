@@ -44,8 +44,8 @@ from src.shared.python.loop_nullspace.output_policy_integration import (
     DisplayAction,
     DisplayDecision,
 )
-from src.shared.python.loop_nullspace.plot_model import build_plot_model, decision_key
-from src.shared.python.loop_nullspace.plot_model_decisions import report_decisions
+from src.shared.python.loop_nullspace.plot_model import decision_key
+from src.shared.python.loop_nullspace.plot_model_decisions import plot_model_payload
 from tests.unit.loop_nullspace.report_support import planar_engine, planar_trajectory
 
 GOLDEN_PATH = (
@@ -120,13 +120,14 @@ def fixture_report() -> dict[str, Any]:
 def build_golden() -> dict[str, Any]:
     """The golden document: provenance block plus the plot model."""
     report = fixture_report()
-    decisions = report_decisions(report, "research_view")
-    decisions[decision_key("envelopes", "tau_4")] = DisplayDecision(
-        "research_view",
-        DisplayAction.WITHHOLD,
-        "fixture: withheld to exercise the withheld path",
-    )
-    model = build_plot_model(report, decisions)
+    withheld = {
+        decision_key("envelopes", "tau_4"): DisplayDecision(
+            "research_view",
+            DisplayAction.WITHHOLD,
+            "fixture: withheld to exercise the withheld path",
+        )
+    }
+    model = plot_model_payload(report, decision_overrides=withheld)
     return {
         "fixture": {
             "id": "plot_model_v1",
@@ -139,7 +140,7 @@ def build_golden() -> dict[str, Any]:
             "regenerate": REGENERATE,
             "consumers": ["NSX-43 (PyQt tabs)", "NSX-44 (React panel)"],
         },
-        "plot_model": _round(model.to_dict()),
+        "plot_model": _round(model),
     }
 
 

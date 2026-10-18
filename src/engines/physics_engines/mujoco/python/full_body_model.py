@@ -49,6 +49,7 @@ from src.shared.python.motion_matching.contact_law import (
     ContactSample,
     GroundPlane,
     sphere_ground_contact,
+    support_planes,
     torsional_friction_moment,
 )
 
@@ -106,6 +107,9 @@ class NativeMujocoFullBodyModel:
             [self._indices[name] for name in self.passive_coordinates], dtype=int
         )
 
+        self._order_dofs = np.array(
+            [self._indices[name] for name in self.coordinate_order], dtype=int
+        )
         self._sites = {
             name: self.model.site(site).id
             for name, site in self.metadata["frame_sites"].items()
@@ -129,6 +133,8 @@ class NativeMujocoFullBodyModel:
             ground_cfg["height_m"] if ground_cfg["height_m"] is not None else 0.0
         )
         self.ground_plane = GroundPlane(normal=ground_normal, height_m=ground_height)
+        # Raised supports (a bench top, #11745); other spheres use the ground.
+        self._support_planes = support_planes(contact_cfg, self.ground_plane)
 
         # Optional spin-friction patch (#11671); absent means point contacts.
         torsion = contact_cfg.get("torsion") or {}
@@ -179,6 +185,27 @@ class NativeMujocoFullBodyModel:
         self._mj.mj_kinematics(self.model, self.data)
         return _extract_frame_poses(self.data, self._sites)
 
+    def ordered_frame_pose(self, values: np.ndarray, name: str) -> np.ndarray:
+        """4x4 pose of one frame site at ``values`` (``coordinate_order``).
+
+        The forward kinematics of :meth:`frame_poses`, extracting only the
+        requested site: equal, bit for bit, to
+        ``frame_poses(dict(zip(coordinate_order, values)))[name]`` (#11744).
+
+        Raises:
+            KeyError: If ``name`` is not a frame site of this model.
+            ValueError: If ``values`` is not finite with one per coordinate.
+        """
+        index = self._sites[name]
+        ordered = np.asarray(values, dtype=float)
+        if ordered.shape != (len(self._order_dofs),) or not np.isfinite(ordered).all():
+            raise ValueError("Coordinates and rates must be finite")
+        qpos = np.zeros(self.model.nv)
+        qpos[self._order_dofs] = ordered
+        self.data.qpos[:] = qpos
+        self._mj.mj_kinematics(self.model, self.data)
+        return _extract_frame_poses(self.data, {name: index})[name]
+
     def kinematic_closure_residuals(
         self, coordinates: Mapping[str, float]
     ) -> np.ndarray:
@@ -207,8 +234,9 @@ class NativeMujocoFullBodyModel:
             self._mj.mj_jacSite(self.model, self.data, jac_pos, None, site_id)
             vel = jac_pos @ self.data.qvel
 
+            plane = self._support_planes.get(s_name, self.ground_plane)
             sample = sphere_ground_contact(
-                pos, vel, radius, self.ground_plane, self.contact_parameters
+                pos, vel, radius, plane, self.contact_parameters
             )
             samples[s_name] = sample
 

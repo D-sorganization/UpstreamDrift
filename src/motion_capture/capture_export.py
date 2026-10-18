@@ -30,25 +30,39 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
+def _valid_mask(arr: np.ndarray, *, axis: int | None = None) -> np.ndarray:
+    """Return a boolean mask where True indicates valid, finite samples.
+
+    Treats NaN, +inf, and -inf as invalid (non-finite) values.
+    If ``axis`` is specified, reduces along that axis with ``.all(axis=axis)``.
+    """
+    finite = np.isfinite(arr)
+    if axis is not None:
+        return finite.all(axis=axis)
+    return finite
+
+
 # ---------------------------------------------------------------------------
 # 1. fill_short_gaps
 # ---------------------------------------------------------------------------
 
 
 def _fill_column_linear(col: np.ndarray, max_gap: int) -> int:
-    """Linear fill of internal NaN runs <= max_gap in a 1D column (in-place).
+    """Linear fill of internal invalid (NaN/inf) runs <= max_gap in a 1D column (in-place).
 
-    Returns the count of samples filled.
+    Returns the count of samples filled. Non-finite values in unfilled gaps
+    or boundaries normalize to NaN.
     """
     n = col.shape[0]
     filled_count = 0
     i = 0
+    valid = _valid_mask(col)
     while i < n:
-        if not np.isnan(col[i]):
+        if valid[i]:
             i += 1
             continue
         start = i
-        while i < n and np.isnan(col[i]):
+        while i < n and not valid[i]:
             i += 1
         end = i
         gap_len = end - start
@@ -59,7 +73,10 @@ def _fill_column_linear(col: np.ndarray, max_gap: int) -> int:
             y1 = col[end]
             # Linearly interpolate between y0 and y1
             col[start:end] = np.linspace(y0, y1, gap_len + 2)[1:-1]
+            valid[start:end] = True
             filled_count += gap_len
+        else:
+            col[start:end] = np.nan
     return filled_count
 
 
@@ -114,7 +131,7 @@ def fill_short_gaps(x: np.ndarray, max_gap: int) -> tuple[np.ndarray, int]:
 
     ensure(out.shape == x.shape, "Output shape must match input shape")
     ensure(total_filled >= 0, "Samples filled count must be non-negative")
-    valid_mask = ~np.isnan(x)
+    valid_mask = _valid_mask(x)
     ensure(
         bool(np.all(out[valid_mask] == x[valid_mask])),
         "Pre-existing valid samples must be preserved",
@@ -149,6 +166,11 @@ def _validate_relabel_inputs(
         points.shape[1] == len(labels),
         "points.shape[1] must match len(labels)",
         (points.shape[1], len(labels)),
+    )
+    require(
+        len(labels) == len(set(labels)),
+        "labels must not contain duplicate marker labels",
+        labels,
     )
 
 
@@ -203,6 +225,7 @@ def _build_relabeled_points(
         for j, tgt in enumerate(target_labels):
             if tgt in label_map:
                 out[:, j, :] = points[:, label_map[tgt], :]
+    out[~_valid_mask(out)] = np.nan
     return out
 
 
@@ -454,7 +477,7 @@ def _validate_impact_frame_inputs(club_head: np.ndarray, t: np.ndarray) -> np.nd
         "Time array t must be strictly increasing",
     )
 
-    valid_mask = ~np.isnan(club_head).any(axis=1)
+    valid_mask = _valid_mask(club_head, axis=1)
     require(
         bool(np.sum(valid_mask) >= 2),
         "At least 2 valid frames in club_head are required",
@@ -509,7 +532,7 @@ def _select_impact_frame_index(
         search_speeds[end_w:] = np.nan
 
     require(
-        bool(np.any(~np.isnan(search_speeds))),
+        bool(np.any(_valid_mask(search_speeds))),
         "No valid speed values could be evaluated in search range",
     )
     return int(np.nanargmax(search_speeds))
@@ -589,7 +612,7 @@ def detect_impact_frame(
         valid_mask[impact_idx],
         "impact_frame must be a valid frame, not a gap frame",
     )
-    ensure(not np.isnan(speeds[impact_idx]), "impact_frame must have valid speed")
+    ensure(bool(_valid_mask(speeds)[impact_idx]), "impact_frame must have valid speed")
     return impact_idx
 
 
