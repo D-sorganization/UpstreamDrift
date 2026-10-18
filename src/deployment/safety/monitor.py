@@ -346,27 +346,111 @@ class SafetyMonitor:
 
         return self._build_status(violations, warnings)
 
-    def compute_safe_command(  # noqa: C901
+    def _check_invalid_command_or_state(
+        self,
+        state: RobotState,
+        desired: ControlCommand,
+    ) -> bool:
+        """Check if desired command or state has non-finite entries or shape mismatch."""
+        n_joints = self.config.n_joints
+        return (
+            not _validate_joint_array(
+                state.joint_positions, "joint_positions", n_joints, []
+            )
+            or not _validate_joint_array(
+                state.joint_velocities, "joint_velocities", n_joints, []
+            )
+            or not _validate_joint_array(
+                state.joint_torques, "joint_torques", n_joints, []
+            )
+            or not _validate_joint_array(
+                desired.position_targets, "position_targets", n_joints, []
+            )
+            or not _validate_joint_array(
+                desired.velocity_targets, "velocity_targets", n_joints, []
+            )
+            or not _validate_joint_array(
+                desired.torque_commands, "torque_commands", n_joints, []
+            )
+            or not _validate_joint_array(
+                desired.feedforward_torque, "feedforward_torque", n_joints, []
+            )
+        )
+
+    def _apply_fallback_or_estop(
+        self,
+        safe_command: ControlCommand,
+        state: RobotState,
+    ) -> None:
+        """Zero out velocities/torques and hold position on E-stop or invalid input."""
+        n_joints = self.config.n_joints
+        if safe_command.position_targets is not None:
+            if (
+                state.joint_positions is not None
+                and isinstance(state.joint_positions, np.ndarray)
+                and state.joint_positions.shape == (n_joints,)
+                and np.all(np.isfinite(state.joint_positions))
+            ):
+                safe_command.position_targets = state.joint_positions.copy()
+            else:
+                safe_command.position_targets = np.zeros(n_joints)
+        if safe_command.velocity_targets is not None:
+            safe_command.velocity_targets = np.zeros(n_joints)
+        if safe_command.torque_commands is not None:
+            safe_command.torque_commands = np.zeros(n_joints)
+        if safe_command.feedforward_torque is not None:
+            safe_command.feedforward_torque = np.zeros(n_joints)
+
+    def _clip_command_limits(self, safe_command: ControlCommand) -> None:
+        """Clip velocity, torque, and position targets to safety limits."""
+        if safe_command.velocity_targets is not None:
+            safe_command.velocity_targets = np.clip(
+                safe_command.velocity_targets,
+                -self.limits.max_joint_velocity,
+                self.limits.max_joint_velocity,
+            )
+        if safe_command.torque_commands is not None:
+            safe_command.torque_commands = np.clip(
+                safe_command.torque_commands,
+                -self.limits.max_joint_torque,
+                self.limits.max_joint_torque,
+            )
+        if safe_command.position_targets is not None:
+            pos_targets = safe_command.position_targets
+            if self.limits.joint_limits_lower is not None:
+                pos_targets = np.maximum(pos_targets, self.limits.joint_limits_lower)
+            if self.limits.joint_limits_upper is not None:
+                pos_targets = np.minimum(pos_targets, self.limits.joint_limits_upper)
+            safe_command.position_targets = pos_targets
+
+    def _sanitize_finite_command_arrays(self, safe_command: ControlCommand) -> None:
+        """Ensure all output command arrays are strictly finite."""
+        for attr in (
+            "position_targets",
+            "velocity_targets",
+            "torque_commands",
+            "feedforward_torque",
+        ):
+            val = getattr(safe_command, attr)
+            if val is not None and not np.all(np.isfinite(val)):
+                setattr(
+                    safe_command,
+                    attr,
+                    np.nan_to_num(val, nan=0.0, posinf=0.0, neginf=0.0),
+                )
+
+    def compute_safe_command(
         self,
         desired: ControlCommand,
         state: RobotState,
     ) -> ControlCommand:
-        """Modify command to ensure safety.
-
-        Args:
-            desired: Desired control command.
-            state: Current robot state.
-
-        Returns:
-            Safe control command.
-        """
-        if not (desired is not None):
+        """Modify command to ensure safety."""
+        if desired is None:
             raise ValueError("desired must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         from src.deployment.realtime import ControlCommand
 
-        # Start with desired command
         safe_command = ControlCommand(
             timestamp=desired.timestamp,
             mode=desired.mode,
@@ -393,103 +477,21 @@ class SafetyMonitor:
             stiffness=(
                 desired.stiffness.copy() if desired.stiffness is not None else None
             ),
-            damping=desired.damping.copy() if desired.damping is not None else None,
+            damping=(desired.damping.copy() if desired.damping is not None else None),
         )
 
-        # Apply speed override
         if self._speed_override < 1.0:
             if safe_command.velocity_targets is not None:
                 safe_command.velocity_targets *= self._speed_override
             if safe_command.torque_commands is not None:
                 safe_command.torque_commands *= self._speed_override
 
-        # Check if desired command or state has any non-finite entries or shape mismatch
-        n_joints = self.config.n_joints
-        has_invalid = (
-            not _validate_joint_array(
-                state.joint_positions, "joint_positions", n_joints, []
-            )
-            or not _validate_joint_array(
-                state.joint_velocities, "joint_velocities", n_joints, []
-            )
-            or not _validate_joint_array(
-                state.joint_torques, "joint_torques", n_joints, []
-            )
-            or not _validate_joint_array(
-                desired.position_targets, "position_targets", n_joints, []
-            )
-            or not _validate_joint_array(
-                desired.velocity_targets, "velocity_targets", n_joints, []
-            )
-            or not _validate_joint_array(
-                desired.torque_commands, "torque_commands", n_joints, []
-            )
-            or not _validate_joint_array(
-                desired.feedforward_torque, "feedforward_torque", n_joints, []
-            )
-        )
-
-        # Enforce E-stop or fallback safe command on invalid inputs
+        has_invalid = self._check_invalid_command_or_state(state, desired)
         if self._emergency_stop or has_invalid:
-            if safe_command.position_targets is not None:
-                if (
-                    state.joint_positions is not None
-                    and isinstance(state.joint_positions, np.ndarray)
-                    and state.joint_positions.shape == (n_joints,)
-                    and np.all(np.isfinite(state.joint_positions))
-                ):
-                    safe_command.position_targets = state.joint_positions.copy()
-                else:
-                    safe_command.position_targets = np.zeros(n_joints)
-            if safe_command.velocity_targets is not None:
-                safe_command.velocity_targets = np.zeros(n_joints)
-            if safe_command.torque_commands is not None:
-                safe_command.torque_commands = np.zeros(n_joints)
-            if safe_command.feedforward_torque is not None:
-                safe_command.feedforward_torque = np.zeros(n_joints)
+            self._apply_fallback_or_estop(safe_command, state)
 
-        # Clip velocity targets
-        if safe_command.velocity_targets is not None:
-            safe_command.velocity_targets = np.clip(
-                safe_command.velocity_targets,
-                -self.limits.max_joint_velocity,
-                self.limits.max_joint_velocity,
-            )
-
-        # Clip torque commands
-        if safe_command.torque_commands is not None:
-            safe_command.torque_commands = np.clip(
-                safe_command.torque_commands,
-                -self.limits.max_joint_torque,
-                self.limits.max_joint_torque,
-            )
-
-        # Clip position targets
-        if safe_command.position_targets is not None:
-            pos_targets = safe_command.position_targets
-            if self.limits.joint_limits_lower is not None:
-                lower = self.limits.joint_limits_lower
-                pos_targets = np.maximum(pos_targets, lower)  # type: ignore[arg-type]
-            if self.limits.joint_limits_upper is not None:
-                upper = self.limits.joint_limits_upper
-                pos_targets = np.minimum(pos_targets, upper)  # type: ignore[arg-type]
-            safe_command.position_targets = pos_targets
-
-        # Ensure postcondition: all output command arrays are strictly finite
-        for attr in (
-            "position_targets",
-            "velocity_targets",
-            "torque_commands",
-            "feedforward_torque",
-        ):
-            val = getattr(safe_command, attr)
-            if val is not None and not np.all(np.isfinite(val)):
-                setattr(
-                    safe_command,
-                    attr,
-                    np.nan_to_num(val, nan=0.0, posinf=0.0, neginf=0.0),
-                )
-
+        self._clip_command_limits(safe_command)
+        self._sanitize_finite_command_arrays(safe_command)
         return safe_command
 
     def get_stopping_distance(
