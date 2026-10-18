@@ -32,21 +32,18 @@ import logging
 import threading
 from collections import OrderedDict
 from collections.abc import Callable, Mapping
-from typing import Any, NamedTuple, Protocol
+from typing import TYPE_CHECKING, Any, NamedTuple, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from src.shared.python.loop_nullspace import facade, registry
-from src.shared.python.loop_nullspace.facade import (
-    AnalysisOptions,
-    EngineContext,
-    TrajectoryInput,
-)
-from src.shared.python.loop_nullspace.plot_model_decisions import plot_model_payload
-from src.shared.python.loop_nullspace.sensitivity_options import (
-    disturbance_from_dict,
-    option_catalogue,
-)
+from src.shared.python.loop_nullspace import registry
+
+if TYPE_CHECKING:
+    from src.shared.python.loop_nullspace.facade import (
+        AnalysisOptions,
+        EngineContext,
+        TrajectoryInput,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -120,6 +117,10 @@ class SensitivityOptions(BaseModel):
 
     def to_kwargs(self) -> dict[str, Any]:
         """``AnalysisOptions`` keyword arguments (``ValueError`` if invalid)."""
+        from src.shared.python.loop_nullspace.sensitivity_options import (
+            disturbance_from_dict,
+        )
+
         specs = [disturbance_from_dict(d.model_dump()) for d in self.disturbance_spec]
         out: dict[str, Any] = {
             "disturbance_spec": specs,
@@ -147,6 +148,8 @@ class LoopNullspaceOptions(BaseModel):
 
     def to_analysis_options(self) -> AnalysisOptions:
         """The facade options (``ValueError`` on an invalid combination)."""
+        from src.shared.python.loop_nullspace.facade import AnalysisOptions
+
         base = self.model_dump(exclude={"sensitivity"})
         if self.sensitivity is None:
             return AnalysisOptions(**base)
@@ -329,6 +332,8 @@ def presets() -> list[dict[str, str]]:
 
 def sensitivity_catalogue() -> dict[str, Any]:
     """The allowed sensitivity options (``sensitivity_options.option_catalogue``)."""
+    from src.shared.python.loop_nullspace.sensitivity_options import option_catalogue
+
     return option_catalogue()
 
 
@@ -345,6 +350,10 @@ def public_partial(
     in_progress = partial.get("report")
     if in_progress is not None:
         try:
+            from src.shared.python.loop_nullspace.plot_model_decisions import (
+                plot_model_payload,
+            )
+
             shown["plot_model"] = plot_model_payload(in_progress, preset=preset)
         except (ValueError, TypeError):
             logger.info("partial result cannot yet produce a plot model")
@@ -371,6 +380,9 @@ def run(
     if hit is not None:
         return hit
     trajectory, engine = _source(request.source_id).load(request)
+    from src.shared.python.loop_nullspace import facade
+    from src.shared.python.loop_nullspace.plot_model_decisions import plot_model_payload
+
     report = facade.analyze(
         trajectory,
         engine,
