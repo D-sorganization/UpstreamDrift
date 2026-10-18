@@ -28,6 +28,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 import fcntl
 import logging
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -42,7 +43,7 @@ BUILDER_NAME = "ud-buildkit"
 #: (the cache state volume is kept).
 BUILDKIT_IMAGE = "moby/buildkit:v0.33.1"
 BUILDKITD_CONFIG = Path(__file__).with_name("buildkitd.ud.toml")
-DEFAULT_LOCK_PATH = Path("/tmp/ud-buildkit.lock")
+LOCK_NAME = "ud-buildkit.lock"
 DEFAULT_LOCK_TIMEOUT_S = 600.0
 INSPECT_TIMEOUT_S = 120.0
 CREATE_TIMEOUT_S = 300.0
@@ -171,10 +172,23 @@ def _reconcile(run: Runner) -> EnsureResult:
     return EnsureResult(BUILDER_NAME, action, state.detail)
 
 
+def default_lock_path() -> Path:
+    """Lock file beside buildx's own builder store.
+
+    Builder definitions live in ``$DOCKER_CONFIG/buildx`` (default
+    ``~/.docker/buildx``) of the docker-client user, so a lock there has exactly
+    the scope of what it serialises: every runner sharing that user. Unlike a
+    fixed ``/tmp`` path it cannot be pre-created by another local user.
+    """
+    config = os.environ.get("DOCKER_CONFIG")
+    base = Path(config) if config else Path.home() / ".docker"
+    return base / "buildx" / LOCK_NAME
+
+
 def ensure_builder(
     run: Runner = run_docker,
     *,
-    lock_path: Path = DEFAULT_LOCK_PATH,
+    lock_path: Path | None = None,
     lock_timeout_s: float = DEFAULT_LOCK_TIMEOUT_S,
 ) -> EnsureResult:
     """Make the shared builder healthy on the pinned image, or report a fallback.
@@ -185,6 +199,7 @@ def ensure_builder(
     """
     if lock_timeout_s <= 0:
         raise ValueError(f"lock_timeout_s must be positive, got {lock_timeout_s}")
+    lock_path = lock_path or default_lock_path()
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     with lock_path.open("a") as lock_file:
         if not _acquire(lock_file, lock_timeout_s):

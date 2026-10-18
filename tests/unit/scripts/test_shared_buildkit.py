@@ -213,3 +213,19 @@ def test_main_strict_mode_fails_on_fallback(
 def test_lock_timeout_must_be_positive(lock: Path) -> None:
     with pytest.raises(ValueError, match="lock_timeout_s"):
         sb.ensure_builder(FakeDocker(), lock_path=lock, lock_timeout_s=0)
+
+
+def test_default_lock_lives_beside_the_buildx_builder_store(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The lock guards buildx builder definitions, which are per docker-client
+    user, so it lives in that user's buildx store, not world-writable /tmp."""
+    monkeypatch.delenv("DOCKER_CONFIG", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setattr(sb.Path, "home", classmethod(lambda cls: tmp_path))
+    assert (
+        sb.default_lock_path() == tmp_path / ".docker" / "buildx" / "ud-buildkit.lock"
+    )
+
+    monkeypatch.setenv("DOCKER_CONFIG", str(tmp_path / "cfg"))
+    assert sb.default_lock_path() == tmp_path / "cfg" / "buildx" / "ud-buildkit.lock"
