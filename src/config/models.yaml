@@ -1131,7 +1131,7 @@ models:
       - "recorder"
     launcher:
       category: "physics_engine"
-      logo: "cross_engine.svg"
+      logo: "jaxsim.svg"
       status: "experimental"
       default_launch: "tab"
 
