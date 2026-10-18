@@ -1,0 +1,166 @@
+% HRG-C3 (#13172): pelvis frame re-expression and documented HJC relocation.
+% Standalone section; the HRG reference (HRG-00, #13184) can \input{sections/pelvis_frame}.
+\section{Pelvis Frame Re-Expression and Hip Centre Relocation}
+\label{sec:hrg-pelvis-frame}
+
+\paragraph{Status.} Software correctness only; scientific qualification stays in the
+design-manual pathway. No refit was run: the joint trajectory is the fitted bundle's,
+so the numbers below describe the model change, not a better match. The fit's inverse
+dynamics are replayed state by state (inverse kinematics plus \texttt{mj\_inverse}),
+not an independent open-loop simulation.
+
+\subsection{Problem}
+\texttt{apply\_hip\_calibration} moves only the hip joints. On the best driver fit
+(\texttt{full-body-v1}, 44 coordinates, AN-1 upper body) the pelvis centre of mass
+(COM) and L5/S1 stayed at their design offsets from the pelvis origin, which the
+builder places at the hip-joint-centre (HJC) midpoint, while the midpoint itself moved
+down 78.7~mm: COM 163.7~mm and L5/S1 217.3~mm above the midpoint against 84.5~mm and
+138.2~mm by design. The hip lever arms were therefore wrong.
+
+\subsection{Operation (A): Pure Re-Expression}
+Let $F$ be the pelvis body frame of the specification and $F'=FT$ the new frame, with
+$T=(R,t)\in SE(3)$ its pose in $F$. The MuJoCo body frame $J$ (the frame the six root
+coordinates act on) is not moved, so coordinates keep their meaning. Every quantity
+stored in $F$ is re-expressed with $T^{-1}$:
+\begin{align}
+  p' &= R^\top (p - t), &
+  c' &= R^\top (c - t),\quad I'_{c} = R^\top I_{c} R, \\
+  P' &= T^{-1} P \text{ (child joint frames, named frames, closure placements)}, &
+  C' &= T^{-1} C \text{ (pelvis to $J$, \texttt{child\_to\_follower})},
+\end{align}
+with $c$ the solid COM and $I_c$ its inertia tensor about $c$. Visual ellipsoids are
+axis aligned, so a rotation is refused when the body carries one (translation only).
+Markers attach to named frames and are untouched.
+
+\paragraph{Invariance Sketch.} A body's world pose is $X_J\,C^{-1}$-composed with its
+content: a point $p$ in $F$ is at $X_J C^{-1} p$ in the world ($C$ the pelvis-to-$J$
+transform). After the change it is $X_J C'^{-1} p' = X_J (T^{-1}C)^{-1} T^{-1}p
+= X_J C^{-1} T T^{-1} p = X_J C^{-1}p$. A child joint frame obeys the same identity, so
+child poses are unchanged for every coordinate vector. Mass and the world inertia
+$R_w I_c R_w^\top$ are unchanged because $R_w$ absorbs $R$ and $I'_c=R^\top I_c R$.
+All terms of the equations of motion are functions of these world quantities and the
+unchanged coordinates, so $\mathbf q$, $\dot{\mathbf q}$, $\ddot{\mathbf q}$ and the
+generalised forces (\texttt{qfrc\_inverse}) are identical. Composition holds,
+$\mathrm{reexpress}(T_1)\circ\mathrm{reexpress}(T_2)=\mathrm{reexpress}(T_1T_2)$, and
+$T^{-1}$ undoes $T$ to $10^{-12}$.
+
+\paragraph{Test.} \texttt{tests/unit/motion\_matching/test\_pelvis\_frame.py}: world
+landmarks (frame and contact sites), per-body COM and mass, world inertia tensor,
+whole-body COM and \texttt{qfrc\_inverse}, relative to the largest entry, $\le10^{-9}$,
+for a translation and a $12^\circ,-25^\circ,140^\circ$ rotation plus translation, on
+\texttt{full\_body\_spec\_anthro\_driver} and \texttt{full\_body\_spec\_v1}. A mutation
+test (tensor left unrotated) fails the same check, so the check is not vacuous. On the
+best-fit specification (private, by path): relative differences $0$ for the translation
+and $\le 10^{-15}$ (COM $2.9\times10^{-16}$, world inertia $1.0\times10^{-15}$,
+\texttt{qfrc\_inverse} $8.8\times10^{-16}$, sites $4.4\times10^{-16}$~m) for the
+rotation, with $\max|\mathtt{qfrc}|=615$~N\,m at a random state.
+
+\subsection{Operation (B): Documented Physical Relocation}
+Inputs: HJCs $c_R,c_L$ in the \texttt{Hip} (waist marker) frame from HRG-C2
+(\texttt{hip\_centre\_map}); status must be \texttt{identified} (fails closed on
+\texttt{prior\_dominated} or \texttt{degenerate} unless accepted explicitly).
+With $m=\tfrac12(c_R+c_L)$:
+\begin{enumerate}
+  \item The pelvis frame origin moves to $m$ by operation (a), axes unchanged.
+  \item Hip joint translations are set to $c_R,c_L$ ($R$ blocks, hence hip axes and
+  zero-twist calibration, unchanged).
+  \item The pelvis COM, the L5/S1 pivots (\texttt{TorsoInput} and the spine universal
+  joint) and the pelvis visual hint keep their \emph{design offsets from $m$}
+  (read from the input; $d_{COM}=(0,0,0.0845)$, $d_{L5S1}=(0,0,0.1382)$~m here).
+  \item The bodies hung on L5/S1 keep their fitted pose at zero twist and spine
+  angles: the joint pivot moves by $\delta=m$, the follower offset takes the same shift
+  ($C_u'=F_u^{-1}\,\mathrm{Trans}(\delta)\,J_u$, likewise for the spine joint). The
+  twist and spine rotation centres therefore change, which is the intended effect on
+  the L5/S1 torques; trunk, arms, head, markers and total mass do not move.
+\end{enumerate}
+The output is a NEW document (\texttt{spec\_revision} block: issue, parent canonical
+hash, centres, offsets, report) with its own \texttt{spec\_sha256}; the writer refuses
+to overwrite a spec or receipt. The parent and all historical receipts are untouched.
+
+\subsection{Independent Pelvic-Plane Reference}
+Aligning the pelvis $y$ axis to the hip line makes the two HJC heights equal by
+construction, so equal heights then say nothing. The reference here is the waist
+marker plane (the \texttt{Hip} frame $z$ axis), and the hip line is a measured quantity
+with an interval (\texttt{pelvic\_plane\_report}). On the best capture the MAP height
+difference is $-20.2$ mm [$-60.2$, 20.4] and the roll $-6.2^\circ$ [$-18.2$, 6.0]: the
+data do not exclude a level hip line, so the frame is \emph{not} rotated to the hip
+line. Caveat: the same four markers define the plane and feed the estimate, so common-mode
+marker error (13.3 mm waist residual) is shared; there is no ASIS reference in this
+capture.
+
+\subsection{Results on the Best Driver Fit}
+HJC displacements (original pelvis frame): right $(0.2,\,5.6,\,11.2)$ mm, left
+$(2.9,\,-25.4,\,70.6)$ mm; inter-HJC 220.3 to 186.9 mm. L5/S1 to HJC midpoint 217.3 to
+138.2 mm (inside 0.13--0.15 m; this equals the design offset by construction, and the
+compiled-model geometry confirms it independently). Pelvis COM to midpoint 163.7 to
+84.5 mm.
+
+\begin{center}
+\begin{tabular}{lcc}
+\hline
+Address lever arms (horizontal, m, $x$ forward, $y$ left) & Before & After \\
+\hline
+Pelvis COM from right HJC & $(-0.068,-0.106)$ & $(-0.037,-0.095)$ \\
+Pelvis COM from left HJC & $(-0.104,\ 0.109)$ & $(-0.041,\ 0.091)$ \\
+Above-hip COM from right HJC & $(-0.232,-0.104)$ & $(-0.226,-0.098)$ \\
+Above-hip COM from left HJC & $(-0.269,\ 0.111)$ & $(-0.231,\ 0.088)$ \\
+Above-hip COM height over right / left HJC & 0.297 / 0.328 & 0.279 / 0.258 \\
+\hline
+\end{tabular}
+\end{center}
+
+\paragraph{Inverse Dynamics.} 91 frames (every 20th of the 1815-frame bundle, 1 ms
+sampling, acceleration by central difference of the bundle velocity; impact near frame
+1323). The hip reaction wrench is the force and moment about the HJC midpoint that the
+legs must apply to the pelvis, from \texttt{qfrc\_inverse} through the root Jacobian,
+with the legs given negligible mass (so no leg motion or ground contact is needed). The
+L5/S1 torques depend only on the bodies above.
+\begin{center}
+\begin{tabular}{lcc}
+\hline
+Peak over the slice & Before & After \\
+\hline
+Hip reaction force (N) & 1433.5 & 1396.3 \\
+Hip reaction moment about HJC midpoint (N\,m) & 316.2 & 414.2 \\
+$|\tau|$ \texttt{SpineInputX} (N\,m) & 177.1 & 178.8 \\
+$|\tau|$ \texttt{SpineInputY} (N\,m) & 256.2 & 355.2 \\
+$|\tau|$ \texttt{TorsoInput} (N\,m) & 222.4 & 244.7 \\
+\hline
+\end{tabular}
+\end{center}
+The changes follow from the geometry: the above-hip COM, the pelvis COM and the L5/S1
+pivots changed distance to the pivots while the upper-body motion did not. They do not
+mean the new torques are more accurate. Stills:
+\texttt{HRG\_2026-10-17/HRG-C3/before\_after\_hip\_reaction\_l5s1.png}.
+
+\subsection{Limitations and Failed Attempts}
+\begin{itemize}
+  \item The left HJC rises 70.6 mm relative to the pelvis markers, so at the fitted
+  joint angles the left foot is lifted by the same amount; a contact-aware whole-body
+  inverse dynamics on this trajectory would mostly measure that, so none is reported.
+  The refit is a later wave.
+  \item A first test compared upper-body poses at random spine angles and failed:
+  the bodies keep their pose only at zero twist and spine angles, because the rotation
+  centre moved. The test now zeroes those coordinates and says so.
+  \item The native \texttt{full\_body\_spec\_v1} has spine pivots not colocated with
+  the twist pivot, so (b) refuses it (\texttt{ValueError}); (a) works on it.
+  \item The root coordinates stay at the body frame $J$; moving them to $m$ needs a state
+  map (Euler recovery, velocity, acceleration) and belongs to \texttt{full-body-v2}.
+  \item Only a pure translation is applied in (b) and rotations are refused with visual
+  ellipsoids; pelvis width is HRG-C4.
+\end{itemize}
+
+\subsection{Reproduction}
+\begin{verbatim}
+# tests (red before the module existed: ImportError at collection)
+PYTHONPATH=.:src python3 -m pytest -o addopts="" -q -n 4 \
+    tests/unit/motion_matching/test_pelvis_frame.py
+# best-fit revision and comparison (private inputs by path; outputs outside the repository)
+R=$HOME/fleet24/brick-sim-s32/ct/s32-fw-drv/runs
+PYTHONPATH=.:src python3 -m scripts.research.hrg_c3_pelvis_revision \
+    --spec $R/driver/full_body_spec_hipcal_scaled.json --receipt $R/driver/receipt.json \
+    --capture data/C3D_TA_Driver.c3d --bundle $R/bundles/driver.npz \
+    --out-dir $HOME/fleet24/hrg-c3 --stride 20
+\end{verbatim}
+Revision \texttt{spec\_sha256} 0d08a23a\ldots{} (canonical 314a7f1d\ldots{}) from parent
+\texttt{d1829abf\ldots{}}.
