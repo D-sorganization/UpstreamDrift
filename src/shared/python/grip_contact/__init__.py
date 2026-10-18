@@ -37,7 +37,7 @@ from src.shared.python.grip_contact.force_decomposition import (
     decompose_hand_forces,
 )
 from src.shared.python.grip_contact.interface import GripFrame, GripInterface
-from src.shared.python.grip_contact.pad_contact import (
+from src.shared.python.grip_contact.pair_contact import (
     ContactCapsule,
     ContactSphere,
     PairWrench,
