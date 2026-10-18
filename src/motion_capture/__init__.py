@@ -5,6 +5,7 @@ This module provides motion capture integration capabilities,
 including FreeMoCap sidecar pipeline support.
 """
 
+from .canonical_c3d_exporter import export_markers_to_c3d
 from .freemocap_ingest import launcher, output_adapter
 from .opencap_ingest import (
     OpenCapAugmenterConfig,
@@ -30,6 +31,7 @@ __all__ = [
     "OpenCapPipelineResult",
     "OpenCapSidecarNotFoundError",
     "create_opencap_rig",
+    "export_markers_to_c3d",
     "launcher",
     "output_adapter",
     "run_opencap_pipeline_from_keypoints",
