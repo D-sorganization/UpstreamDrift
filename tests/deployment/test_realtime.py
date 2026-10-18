@@ -216,7 +216,7 @@ class TestRealTimeController:
         )
         controller._send_command(cmd)
 
-        q, qd = controller._sim_state  # type: ignore
+        q, qd = controller._sim_state  # type: ignore[attr-defined]
         # After 1 step (dt=0.01) with tau=1: v=0.01, p=0.0001
         assert qd[0] > 0
         assert q[0] > 0
@@ -229,7 +229,7 @@ class TestRealTimeController:
         )
         controller._send_command(cmd_vel)
 
-        q_new, qd_new = controller._sim_state  # type: ignore
+        q_new, qd_new = controller._sim_state  # type: ignore[attr-defined]
         assert qd_new[0] == 2.0
         assert q_new[0] > q[0]
 
@@ -241,7 +241,7 @@ class TestRealTimeController:
         )
         controller._send_command(cmd_pos)
 
-        q_pos, qd_pos = controller._sim_state  # type: ignore
+        q_pos, qd_pos = controller._sim_state  # type: ignore[attr-defined]
         assert q_pos[0] == 10.0
         assert qd_pos[0] == 0.0
 
