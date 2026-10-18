@@ -1039,7 +1039,11 @@ def _compute_scalar_metric_differences(
             else None
         ),
     }
-    # Unavailable turn lines are NaN; report "no comparison" instead of a NaN.
+    return _null_nan_turn_diffs(diffs)
+
+
+def _null_nan_turn_diffs(diffs: dict[str, float | None]) -> dict[str, float | None]:
+    """Report "no comparison" (None) instead of NaN for unavailable turn lines."""
     turn_prefixes = ("shoulder_girdle", "upper_trunk", "thorax", "x_factor")
     for key, value in diffs.items():
         if key.startswith(turn_prefixes) and value is not None and value != value:

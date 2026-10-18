@@ -375,6 +375,7 @@ class JointStressAnalyzer:
         )
         if unavailable is not None:
             return unavailable
+        assert rotation is not None and flexion is not None  # narrowed
         result = JointStressResult(joint_name="hip", side=side, time=time)
 
         # Compute internal rotation range
@@ -428,6 +429,8 @@ class JointStressAnalyzer:
         )
         if unavailable is not None:
             return unavailable
+        assert horizontal is not None and torque is not None
+        assert velocity is not None  # narrowed by the availability check
         result = JointStressResult(joint_name="shoulder", side=side, time=time)
 
         # Peak values
@@ -484,6 +487,8 @@ class JointStressAnalyzer:
         )
         if unavailable is not None:
             return unavailable
+        assert flexion is not None and torque is not None
+        assert wrist_torque is not None  # narrowed by the availability check
         result = JointStressResult(joint_name="elbow", side=side, time=time)
 
         # Valgus torque estimate (simplified)
@@ -560,6 +565,7 @@ class JointStressAnalyzer:
             reasons.append("wrist_rotation missing")
         if reasons:
             return _unavailable_result("wrist", side, time, reasons)
+        assert deviation is not None and rotation is not None  # narrowed
 
         result = JointStressResult(joint_name="wrist", side=side, time=time)
 
