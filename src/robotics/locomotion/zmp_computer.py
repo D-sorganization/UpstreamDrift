@@ -172,26 +172,9 @@ class ZMPComputer(ContractChecker):
         if com_position is None:
             com_position = self._get_com_position()
 
-        acceleration_estimated = False
-        if com_acceleration is None:
-            com_acceleration = self._estimate_com_acceleration(com_velocity, dt=dt)
-            acceleration_estimated = True
-        else:
-            com_acceleration = np.asarray(com_acceleration, dtype=np.float64)
-            if com_velocity is not None:
-                self._prev_com_velocity = np.asarray(
-                    com_velocity, dtype=np.float64
-                ).copy()
-            elif self._is_humanoid:
-                try:
-                    self._prev_com_velocity = self._get_com_velocity().copy()
-                except (ValueError, TypeError, AttributeError):
-                    pass
-            if hasattr(self._engine, "get_time") and callable(self._engine.get_time):
-                try:
-                    self._prev_time = float(self._engine.get_time())
-                except (ValueError, TypeError, AttributeError):
-                    pass
+        com_acceleration, acceleration_estimated = self._resolve_com_acceleration(
+            com_velocity, com_acceleration, dt
+        )
 
         if angular_momentum_rate is None:
             angular_momentum_rate = np.zeros(3)
@@ -207,16 +190,7 @@ class ZMPComputer(ContractChecker):
 
         # Avoid division by zero (free fall)
         if abs(denom) < 1e-6:
-            # Robot is in free fall, ZMP is undefined
-            return ZMPResult(
-                zmp_position=np.array([0.0, 0.0, self._ground_height]),
-                cop_position=np.array([0.0, 0.0, self._ground_height]),
-                is_valid=False,
-                support_margin=-1.0,
-                total_normal_force=0.0,
-                ground_height=self._ground_height,
-                validity_reason="Robot is in free fall (vertical acceleration cancels gravity)",
-            )
+            return self._free_fall_result()
 
         # ZMP calculation.  The angular-momentum-rate term is NOT scaled by the
         # CoM height: only the linear-acceleration term is (issue #8017).
@@ -230,35 +204,20 @@ class ZMPComputer(ContractChecker):
             - z_rel * com_acceleration[1] / denom
             + angular_momentum_rate[0] / (robot_mass * denom)
         )
-        zmp_z = self._ground_height
-
-        zmp = np.array([zmp_x, zmp_y, zmp_z])
-        cop = zmp.copy()  # CoP == ZMP for flat ground
-
-        # Compute total normal force
-        total_force = robot_mass * denom
+        zmp = np.array([zmp_x, zmp_y, self._ground_height])
 
         # Check if ZMP is in support polygon
         is_in_support, margin = self._check_support(zmp[:2], support_polygon)
-
-        if not is_in_support:
-            is_valid = False
-            validity_reason = "ZMP outside support polygon"
-            if acceleration_estimated:
-                validity_reason += "; COM acceleration estimated via finite difference"
-        elif acceleration_estimated:
-            is_valid = False
-            validity_reason = "COM acceleration estimated via finite difference"
-        else:
-            is_valid = True
-            validity_reason = ""
+        is_valid, validity_reason = self._build_validity(
+            is_in_support, acceleration_estimated
+        )
 
         return ZMPResult(
             zmp_position=zmp,
-            cop_position=cop,
+            cop_position=zmp.copy(),  # CoP == ZMP for flat ground
             is_valid=is_valid,
             support_margin=margin,
-            total_normal_force=total_force,
+            total_normal_force=robot_mass * denom,
             ground_height=self._ground_height,
             validity_reason=validity_reason,
         )
@@ -470,6 +429,60 @@ class ZMPComputer(ContractChecker):
         raise ValueError(
             "Cannot determine robot mass: engine does not implement "
             "HumanoidCapable. Provide mass explicitly."
+        )
+
+    def _resolve_com_acceleration(
+        self,
+        com_velocity: NDArray[np.float64] | None,
+        com_acceleration: NDArray[np.float64] | None,
+        dt: float | None,
+    ) -> tuple[NDArray[np.float64], bool]:
+        """Resolve COM acceleration directly or via finite differences."""
+        if com_acceleration is None:
+            return self._estimate_com_acceleration(com_velocity, dt=dt), True
+
+        accel = np.asarray(com_acceleration, dtype=np.float64)
+        if com_velocity is not None:
+            self._prev_com_velocity = np.asarray(
+                com_velocity, dtype=np.float64
+            ).copy()
+        elif self._is_humanoid:
+            try:
+                self._prev_com_velocity = self._get_com_velocity().copy()
+            except (ValueError, TypeError, AttributeError):
+                pass
+        if hasattr(self._engine, "get_time") and callable(self._engine.get_time):
+            try:
+                self._prev_time = float(self._engine.get_time())
+            except (ValueError, TypeError, AttributeError):
+                pass
+        return accel, False
+
+    def _build_validity(
+        self,
+        is_in_support: bool,
+        acceleration_estimated: bool,
+    ) -> tuple[bool, str]:
+        """Determine ZMP validity flag and reason string."""
+        if not is_in_support:
+            reason = "ZMP outside support polygon"
+            if acceleration_estimated:
+                reason += "; COM acceleration estimated via finite difference"
+            return False, reason
+        if acceleration_estimated:
+            return False, "COM acceleration estimated via finite difference"
+        return True, ""
+
+    def _free_fall_result(self) -> ZMPResult:
+        """Return invalid ZMPResult corresponding to free fall."""
+        return ZMPResult(
+            zmp_position=np.array([0.0, 0.0, self._ground_height]),
+            cop_position=np.array([0.0, 0.0, self._ground_height]),
+            is_valid=False,
+            support_margin=-1.0,
+            total_normal_force=0.0,
+            ground_height=self._ground_height,
+            validity_reason="Robot is in free fall (vertical acceleration cancels gravity)",
         )
 
     def _check_support(
