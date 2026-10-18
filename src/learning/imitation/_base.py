@@ -119,7 +119,10 @@ class ImitationLearner(ABC):
         self.action_dim = action_dim
         self.config = config or TrainingConfig()
         self.device = device
-        self._rng: np.random.Generator = np.random.default_rng(self.config.seed)
+        if self.config.seed is not None:
+            self._rng = np.random.default_rng(self.config.seed)
+        else:
+            self._rng = np.random.default_rng(int(np.random.randint(0, 2**31 - 1)))
         self._policy: Any = None  # Neural network policy
         self._training_history: dict[str, list[float]] = {}
 
