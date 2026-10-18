@@ -289,8 +289,55 @@ the same fit is 50.93\,mm, the number later children must hold while the
 violations go to zero.
 
 \section{Grip}
-Placeholder for HRG grip children.  Append method, equations, parameters,
-acceptance criteria, provenance, limitations and failed experiments.
+
+\subsection{Cross-Model Grip Capability Inventory (HRG-GS-M0, \#13322)}
+To support the cross-engine grip contact and hand-coupling objectives of epic
+\#13297, a machine-readable capability manifest is established at
+\texttt{src/config/grip\_capability\_inventory.json} under schema
+\texttt{grip-capability-inventory/v1}. The inventory classifies every model asset
+across four capabilities:
+\begin{enumerate}
+\item \texttt{visual\_style}: Rendering of hand-hand grip overlap, interlock, or ten-finger configurations.
+\item \texttt{allocated\_hand\_hand}: Static or kinematic allocation of dual-hand wrenches onto bilateral hand-hand pairs.
+\item \texttt{physical\_pad\_grip}: Dynamic contact between designated anatomical hand pads and the club grip cylinder.
+\item \texttt{physical\_hand\_hand}: Dynamic inter-hand pad-to-pad contact dynamics.
+\end{enumerate}
+
+Every entry records its verified mechanical attachment mode
+(such as \texttt{rigid\_branch\_kinematic}, \texttt{closure\_weld},
+\texttt{bushing\_compliance}, \texttt{free\_plus\_bushings},
+\texttt{site\_weld}, \texttt{mocap\_weld}, or \texttt{direct\_mid\_hands})
+and finger kinematic fidelity (\texttt{none}, \texttt{rigid\_proxy}, or \texttt{articulated}).
+By contract, no capability may claim \texttt{available = true} without an active
+\texttt{evidence\_test} verifying the code path; currently, only the full-body-v1
+spec export path (exercised in \texttt{test\_engine\_grip\_contact.py} and
+\texttt{test\_opensim\_contact\_grip.py}) provides physical pad-grip contact
+evidence. All other capabilities remain \texttt{available = false} with explicit
+diagnostic reasons and tracking issues mapped to epic children (\#13326--\#13336).
+
+Non-hand-bearing models (\texttt{putting\_green}, \texttt{putting\_green\_gui},
+\texttt{pendulum\_simulator}, and \texttt{swing\_objective\_lab}) are explicitly
+segregated in an \texttt{excluded} list with formal justifications.
+
+Empirical verification against source assets revealed several divergences from
+initial panel assumptions:
+\begin{itemize}
+\item \textbf{MyoSuite sim repository}: Panel notes assumed \texttt{shared/models/myosuite/myo\_sim}
+held an active 23-DOF hand model; verification confirmed the path is an unpopulated checkout directory,
+\texttt{myoarm\_simple.xml} lacks hands, and \texttt{golfer\_myobody\_driver.xml} utilizes rigid
+ellipsoid hands with site-welds.
+\item \textbf{MuJoCo golfer kinematics}: \texttt{golfer.xml} attaches the club shaft as a direct
+kinematic child of \texttt{hand\_left}, leaving \texttt{hand\_right} entirely uncoupled without equality welds.
+\item \textbf{Drake URDF topology}: The club shaft is rigidly fixed to \texttt{right\_hand} with no finger
+links, leaving \texttt{left\_hand} disconnected.
+\item \textbf{Pinocchio URDF topology}: The club shaft attaches to a \texttt{mid\_hands} frame connected
+directly to \texttt{thorax3}, bypassing both left and right hand branches.
+\end{itemize}
+
+A Design-by-Contract loader at
+\texttt{src/shared/python/grip\_contact/capability\_inventory.py}
+strictly validates the manifest against disk paths, schema versioning, non-empty diagnostics,
+and tracking issue conventions.
 
 \section{Appearance}
 Placeholder for HRG appearance children.
