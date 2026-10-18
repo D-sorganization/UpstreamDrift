@@ -17,7 +17,7 @@ builder places at the hip-joint-centre (HJC) midpoint, while the midpoint itself
 down 78.7~mm: COM 163.7~mm and L5/S1 217.3~mm above the midpoint against 84.5~mm and
 138.2~mm by design. The hip lever arms were therefore wrong.
 
-\subsection{Operation (a): Pure Re-Expression}
+\subsection{Operation (A): Pure Re-Expression}
 Let $F$ be the pelvis body frame of the specification and $F'=FT$ the new frame, with
 $T=(R,t)\in SE(3)$ its pose in $F$. The MuJoCo body frame $J$ (the frame the six root
 coordinates act on) is not moved, so coordinates keep their meaning. Every quantity
@@ -32,7 +32,7 @@ with $c$ the solid COM and $I_c$ its inertia tensor about $c$. Visual ellipsoids
 axis aligned, so a rotation is refused when the body carries one (translation only).
 Markers attach to named frames and are untouched.
 
-\paragraph{Invariance sketch.} A body's world pose is $X_J\,C^{-1}$-composed with its
+\paragraph{Invariance Sketch.} A body's world pose is $X_J\,C^{-1}$-composed with its
 content: a point $p$ in $F$ is at $X_J C^{-1} p$ in the world ($C$ the pelvis-to-$J$
 transform). After the change it is $X_J C'^{-1} p' = X_J (T^{-1}C)^{-1} T^{-1}p
 = X_J C^{-1} T T^{-1} p = X_J C^{-1}p$. A child joint frame obeys the same identity, so
@@ -55,7 +55,7 @@ and $\le 10^{-15}$ (COM $2.9\times10^{-16}$, world inertia $1.0\times10^{-15}$,
 \texttt{qfrc\_inverse} $8.8\times10^{-16}$, sites $4.4\times10^{-16}$~m) for the
 rotation, with $\max|\mathtt{qfrc}|=615$~N\,m at a random state.
 
-\subsection{Operation (b): Documented Physical Relocation}
+\subsection{Operation (B): Documented Physical Relocation}
 Inputs: HJCs $c_R,c_L$ in the \texttt{Hip} (waist marker) frame from HRG-C2
 (\texttt{hip\_centre\_map}); status must be \texttt{identified} (fails closed on
 \texttt{prior\_dominated} or \texttt{degenerate} unless accepted explicitly).
@@ -109,7 +109,7 @@ Above-hip COM height over right / left HJC & 0.297 / 0.328 & 0.279 / 0.258 \\
 \end{tabular}
 \end{center}
 
-\paragraph{Inverse dynamics.} 91 frames (every 20th of the 1815-frame bundle, 1 ms
+\paragraph{Inverse Dynamics.} 91 frames (every 20th of the 1815-frame bundle, 1 ms
 sampling, acceleration by central difference of the bundle velocity; impact near frame
 1323). The hip reaction wrench is the force and moment about the HJC midpoint that the
 legs must apply to the pelvis, from \texttt{qfrc\_inverse} through the root Jacobian,

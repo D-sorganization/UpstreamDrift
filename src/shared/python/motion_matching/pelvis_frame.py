@@ -381,7 +381,38 @@ def relocate_pelvis(
     report = _relocation_report(
         spec, out, pelvis_body, hip_frame, c_r, c_l, mid, design
     )
-    out["spec_revision"] = {
+    out["spec_revision"] = _revision_record(
+        spec, hip_frame, (c_r, c_l), mid, design, estimate_summary, report
+    )
+    out["provenance"] = (
+        str(spec.get("provenance", ""))
+        + " | HRG-C3 (#13172) pelvis revision: pelvis frame origin at the HJC "
+        f"midpoint, hip centres relocated (inter-HJC {inter * 1e3:.1f} mm), "
+        "pelvis COM / L5-S1 / pelvis visual at design offsets from the "
+        "midpoint; upper body pose unchanged; not refitted"
+    )
+    parent_bytes = json.dumps(spec, indent=2, sort_keys=True) + "\n"
+    return PelvisRevision(
+        out,
+        canonical_sha256(out),
+        canonical_sha256(spec),
+        hashlib.sha256(parent_bytes.encode("utf-8")).hexdigest(),
+        report,
+    )
+
+
+def _revision_record(
+    spec: Mapping[str, Any],
+    hip_frame: str,
+    centres: tuple[Array, Array],
+    mid: Array,
+    design: PelvisDesign,
+    estimate_summary: Mapping[str, Any] | None,
+    report: Mapping[str, Any],
+) -> dict[str, Any]:
+    """The ``spec_revision`` block recorded on a relocated document."""
+    c_r, c_l = centres
+    return {
         "issue": REVISION_ISSUE,
         "name": "hrg-c3-pelvis-relocation",
         "parent_canonical_sha256": canonical_sha256(spec),
@@ -404,21 +435,6 @@ def relocate_pelvis(
         "estimate": dict(estimate_summary) if estimate_summary else None,
         "report": report,
     }
-    out["provenance"] = (
-        str(spec.get("provenance", ""))
-        + " | HRG-C3 (#13172) pelvis revision: pelvis frame origin at the HJC "
-        f"midpoint, hip centres relocated (inter-HJC {inter * 1e3:.1f} mm), "
-        "pelvis COM / L5-S1 / pelvis visual at design offsets from the "
-        "midpoint; upper body pose unchanged; not refitted"
-    )
-    parent_bytes = json.dumps(spec, indent=2, sort_keys=True) + "\n"
-    return PelvisRevision(
-        out,
-        canonical_sha256(out),
-        canonical_sha256(spec),
-        hashlib.sha256(parent_bytes.encode("utf-8")).hexdigest(),
-        report,
-    )
 
 
 def _relocation_report(
