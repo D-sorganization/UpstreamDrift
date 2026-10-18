@@ -45,6 +45,7 @@ class PairingOptions(BaseModel):
     reference_backend: str = DEFAULT_REFERENCE_BACKEND
     expected_receipt_hashes: Mapping[str, str] | None = None
     dtw_window: int | None = None
+    allow_single_candidate: bool = False
 
 
 class SideEvidence(BaseModel):
@@ -196,8 +197,9 @@ def _validate_phase_alignment(
 def _check_leakage(
     video_swing: SwingPairingFeatures,
     options: PairingOptions,
+    capture_swings: Mapping[str, SwingPairingFeatures] | None = None,
 ) -> None:
-    """Enforce leakage guard: observations must come from reference backend."""
+    """Enforce leakage guard: observations must come from reference backend and match receipts."""
     if video_swing.backend != options.reference_backend:
         require(
             False,
@@ -208,18 +210,52 @@ def _check_leakage(
             f"leakage guard: evaluation backend '{video_swing.backend}' cannot be used; "
             f"must use reference backend '{options.reference_backend}'"
         )
+    if capture_swings is not None:
+        for cap_swing in capture_swings.values():
+            if cap_swing.backend != options.reference_backend:
+                require(
+                    False,
+                    f"leakage guard: capture backend '{cap_swing.backend}' cannot be used; "
+                    f"must use reference backend '{options.reference_backend}'",
+                )
+                raise ValueError(
+                    f"leakage guard: capture backend '{cap_swing.backend}' cannot be used; "
+                    f"must use reference backend '{options.reference_backend}'"
+                )
+
     if options.expected_receipt_hashes is not None:
-        expected = options.expected_receipt_hashes.get(video_swing.swing_id)
-        if expected is not None and video_swing.receipt_hash != expected:
-            require(
-                False,
-                f"Receipt hash mismatch for '{video_swing.swing_id}': "
-                f"expected '{expected}', got '{video_swing.receipt_hash}'",
-            )
-            raise ValueError(
-                f"Receipt hash mismatch for '{video_swing.swing_id}': "
-                f"expected '{expected}', got '{video_swing.receipt_hash}'"
-            )
+        all_swings = [video_swing]
+        if capture_swings is not None:
+            all_swings.extend(capture_swings.values())
+
+        for sw in all_swings:
+            if not sw.receipt_hash:
+                require(
+                    False,
+                    f"Receipt hash for '{sw.swing_id}' must be non-empty when expected_receipt_hashes is provided",
+                )
+                raise ValueError(
+                    f"Receipt hash for '{sw.swing_id}' must be non-empty when expected_receipt_hashes is provided"
+                )
+            if sw.swing_id not in options.expected_receipt_hashes:
+                require(
+                    False,
+                    f"Receipt hash for '{sw.swing_id}' missing from expected_receipt_hashes",
+                )
+                raise ValueError(
+                    f"Receipt hash for '{sw.swing_id}' missing from expected_receipt_hashes"
+                )
+            expected = options.expected_receipt_hashes[sw.swing_id]
+            if sw.receipt_hash != expected:
+                require(
+                    False,
+                    f"Receipt hash mismatch for '{sw.swing_id}': "
+                    f"expected '{expected}', got '{sw.receipt_hash}'",
+                )
+                raise ValueError(
+                    f"Receipt hash mismatch for '{sw.swing_id}': "
+                    f"expected '{expected}', got '{sw.receipt_hash}'"
+                )
 
 
 def compute_inter_capture_envelope_median(
@@ -292,7 +328,11 @@ def pair_video_swing(
 ) -> SwingPairingResult:
     """Pair a single video swing against capture swings with confidence and abstention."""
     opts = options or PairingOptions()
-    _check_leakage(video_swing, opts)
+    _check_leakage(video_swing, opts, capture_swings=capture_swings)
+
+    if not capture_swings:
+        require(False, "At least one capture swing required for pairing")
+        raise ValueError("At least one capture swing required for pairing")
 
     envelope_median = (
         inter_capture_median
@@ -319,9 +359,12 @@ def pair_video_swing(
     best_id, best_norm = sorted_candidates[0]
     second_norm = sorted_candidates[1][1] if len(sorted_candidates) > 1 else None
 
-    margin = float(second_norm - best_norm) if second_norm is not None else float("inf")
-    if math.isinf(margin):
+    if second_norm is not None:
+        margin = float(second_norm - best_norm)
+    elif opts.allow_single_candidate:
         margin = 1.0
+    else:
+        margin = 0.0
 
     confidence = PairingConfidence(
         margin=margin,
@@ -355,8 +398,7 @@ def pair_video_swing(
 
     hashes = {video_swing.swing_id: video_swing.receipt_hash}
     for k, v in capture_swings.items():
-        if v.receipt_hash:
-            hashes[k] = v.receipt_hash
+        hashes[k] = v.receipt_hash
 
     return SwingPairingResult(
         video_swing_id=video_swing.swing_id,
@@ -388,6 +430,9 @@ def build_pairing_matrix(
 
     results: dict[str, SwingPairingResult] = {}
     all_receipt_hashes: dict[str, str] = dict(receipt_hashes or {})
+    for k, v in capture_swings.items():
+        if k not in all_receipt_hashes:
+            all_receipt_hashes[k] = v.receipt_hash
 
     for video_swing in video_swings:
         evidence = side_evidence.get(video_swing.swing_id) if side_evidence else None

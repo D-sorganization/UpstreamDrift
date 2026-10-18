@@ -378,3 +378,187 @@ def test_pairing_matrix_missing_key_raises_key_error(
     )
     with pytest.raises(KeyError, match="not found"):
         matrix.get_result("nonexistent-swing")
+
+
+def test_leakage_guard_rejects_empty_receipt_hash_when_expected_map_provided(
+    synthetic_phase_bins: np.ndarray,
+    synthetic_capture_swings: dict[str, SwingPairingFeatures],
+) -> None:
+    """When expected receipt hashes are provided, empty hash on any participant raises ValueError."""
+    # Video swing has empty hash
+    v_empty = SwingPairingFeatures(
+        swing_id="cov-v-empty",
+        phase_bins=synthetic_phase_bins,
+        features=synthetic_capture_swings["capture-O-s01"].features,
+        backend="reference",
+        receipt_hash="",
+    )
+    expected_map = {
+        "cov-v-empty": "hash_v",
+        "capture-O-s01": "ref_receipt_hash_01",
+        "capture-O-s02": "ref_receipt_hash_02",
+        "capture-O-s03": "ref_receipt_hash_03",
+        "capture-O-s04": "ref_receipt_hash_04",
+        "capture-O-s05": "ref_receipt_hash_05",
+    }
+    with pytest.raises(
+        ValueError, match="Receipt hash for 'cov-v-empty' must be non-empty"
+    ):
+        pair_video_swing(
+            v_empty,
+            synthetic_capture_swings,
+            options=PairingOptions(expected_receipt_hashes=expected_map),
+        )
+
+    # Capture swing has empty hash
+    v_valid = SwingPairingFeatures(
+        swing_id="cov-v-valid",
+        phase_bins=synthetic_phase_bins,
+        features=synthetic_capture_swings["capture-O-s01"].features,
+        backend="reference",
+        receipt_hash="hash_v",
+    )
+    tampered_captures = dict(synthetic_capture_swings)
+    tampered_captures["capture-O-s02"] = SwingPairingFeatures(
+        swing_id="capture-O-s02",
+        phase_bins=synthetic_phase_bins,
+        features=synthetic_capture_swings["capture-O-s02"].features,
+        backend="reference",
+        receipt_hash="",
+    )
+    expected_map_valid = dict(expected_map)
+    expected_map_valid["cov-v-valid"] = "hash_v"
+    with pytest.raises(
+        ValueError, match="Receipt hash for 'capture-O-s02' must be non-empty"
+    ):
+        pair_video_swing(
+            v_valid,
+            tampered_captures,
+            options=PairingOptions(expected_receipt_hashes=expected_map_valid),
+        )
+
+
+def test_leakage_guard_rejects_missing_swing_id_in_expected_hashes(
+    synthetic_phase_bins: np.ndarray,
+    synthetic_capture_swings: dict[str, SwingPairingFeatures],
+) -> None:
+    """When expected receipt hashes map is provided, any participant absent from the map raises ValueError."""
+    v_valid = SwingPairingFeatures(
+        swing_id="cov-v-valid",
+        phase_bins=synthetic_phase_bins,
+        features=synthetic_capture_swings["capture-O-s01"].features,
+        backend="reference",
+        receipt_hash="hash_v",
+    )
+    # Expected map only has video swing, missing capture swings
+    partial_map = {"cov-v-valid": "hash_v"}
+    with pytest.raises(ValueError, match="missing from expected_receipt_hashes"):
+        pair_video_swing(
+            v_valid,
+            synthetic_capture_swings,
+            options=PairingOptions(expected_receipt_hashes=partial_map),
+        )
+
+
+def test_leakage_guard_rejects_tampered_capture_swing_receipt_hash(
+    synthetic_phase_bins: np.ndarray,
+    synthetic_capture_swings: dict[str, SwingPairingFeatures],
+) -> None:
+    """Tampered hash on a capture swing raises ValueError even when video swing matches."""
+    v_valid = SwingPairingFeatures(
+        swing_id="cov-v-valid",
+        phase_bins=synthetic_phase_bins,
+        features=synthetic_capture_swings["capture-O-s01"].features,
+        backend="reference",
+        receipt_hash="hash_v",
+    )
+    tampered_captures = dict(synthetic_capture_swings)
+    tampered_captures["capture-O-s03"] = SwingPairingFeatures(
+        swing_id="capture-O-s03",
+        phase_bins=synthetic_phase_bins,
+        features=synthetic_capture_swings["capture-O-s03"].features,
+        backend="reference",
+        receipt_hash="TAMPERED_HASH",
+    )
+    expected_map = {
+        "cov-v-valid": "hash_v",
+        "capture-O-s01": "ref_receipt_hash_01",
+        "capture-O-s02": "ref_receipt_hash_02",
+        "capture-O-s03": "ref_receipt_hash_03",
+        "capture-O-s04": "ref_receipt_hash_04",
+        "capture-O-s05": "ref_receipt_hash_05",
+    }
+    with pytest.raises(ValueError, match="Receipt hash mismatch for 'capture-O-s03'"):
+        pair_video_swing(
+            v_valid,
+            tampered_captures,
+            options=PairingOptions(expected_receipt_hashes=expected_map),
+        )
+
+
+def test_pairing_matrix_receipt_hashes_preserves_all_participants_including_empty(
+    synthetic_phase_bins: np.ndarray,
+    synthetic_capture_swings: dict[str, SwingPairingFeatures],
+) -> None:
+    """Result receipt_hashes contains all participants, including capture swings with empty hashes."""
+    v_swing = SwingPairingFeatures(
+        swing_id="cov-v",
+        phase_bins=synthetic_phase_bins,
+        features=synthetic_capture_swings["capture-O-s01"].features,
+        backend="reference",
+        receipt_hash="",
+    )
+    captures = dict(synthetic_capture_swings)
+    captures["capture-O-s02"] = SwingPairingFeatures(
+        swing_id="capture-O-s02",
+        phase_bins=synthetic_phase_bins,
+        features=synthetic_capture_swings["capture-O-s02"].features,
+        backend="reference",
+        receipt_hash="",
+    )
+
+    result = pair_video_swing(v_swing, captures)
+    assert "cov-v" in result.receipt_hashes
+    assert result.receipt_hashes["cov-v"] == ""
+    assert "capture-O-s02" in result.receipt_hashes
+    assert result.receipt_hashes["capture-O-s02"] == ""
+    for k in synthetic_capture_swings:
+        assert k in result.receipt_hashes
+
+
+def test_single_candidate_capture_swing_abstains_without_explicit_opt_in(
+    synthetic_phase_bins: np.ndarray,
+    synthetic_capture_swings: dict[str, SwingPairingFeatures],
+) -> None:
+    """Single candidate capture swing abstains by default, and only pairs when allow_single_candidate=True."""
+    c1 = synthetic_capture_swings["capture-O-s01"]
+    v_matching = SwingPairingFeatures(
+        swing_id="cov-v-match",
+        phase_bins=synthetic_phase_bins,
+        features=c1.features,
+        backend="reference",
+        receipt_hash="hash_v",
+    )
+    single_capture = {"capture-O-s01": c1}
+
+    # Default options: allow_single_candidate is False. Even though distance is 0, must abstain.
+    result_default = pair_video_swing(
+        v_matching,
+        single_capture,
+        inter_capture_median=1.0,
+    )
+    assert result_default.status == PairingDecisionStatus.AMBIGUOUS
+    assert result_default.paired_capture_swing_id is None
+    assert result_default.confidence.margin == 0.0
+
+    # With allow_single_candidate=True: pairs with candidate
+    opt_in = PairingOptions(allow_single_candidate=True)
+    result_opt_in = pair_video_swing(
+        v_matching,
+        single_capture,
+        options=opt_in,
+        inter_capture_median=1.0,
+    )
+    assert result_opt_in.status == PairingDecisionStatus.PAIRED
+    assert result_opt_in.paired_capture_swing_id == "capture-O-s01"
+    assert result_opt_in.confidence.margin >= opt_in.tau_pair
