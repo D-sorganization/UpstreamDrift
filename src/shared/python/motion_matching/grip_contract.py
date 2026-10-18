@@ -34,7 +34,7 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field, replace
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Final
 
 import numpy as np
 from numpy.typing import NDArray
@@ -217,6 +217,16 @@ class GripSpec:
         self.pose()  # validates the shared values and the V azimuth range
 
     @classmethod
+    def named_preset(
+        cls,
+        name: str,
+        *,
+        handedness: Handedness = DEFAULT_HANDEDNESS,
+    ) -> GripSpec:
+        """A named grip preset (palmer_overlap, woods_interlock, ten_finger)."""
+        return named_grip_preset(name).for_handedness(handedness)
+
+    @classmethod
     def preset(
         cls,
         strength: str = "neutral",
@@ -225,7 +235,9 @@ class GripSpec:
         handedness: Handedness = DEFAULT_HANDEDNESS,
         **shared: Any,
     ) -> GripSpec:
-        """Both hands at a named strength and palm preset (golf words)."""
+        """Both hands at a named strength and palm preset, or a named full preset."""
+        if strength in NAMED_GRIP_PRESETS:
+            return cls.named_preset(strength, handedness=handedness)
         if strength not in GRIP_STRENGTH_PRESETS_DEG:
             raise ValueError(
                 f"unknown strength preset {strength!r}; "
@@ -255,6 +267,164 @@ class GripSpec:
             palm_diagonal_deg=self.lead.psi_deg,
             handedness=self.handedness,
         )
+
+
+@dataclass(frozen=True)
+class NamedGripPreset:
+    """Historical/consensus named grip preset backed by photo estimates.
+
+    Each preset specifies full double-precision starting values for both hands,
+    grip linking style, hand spacing along the shaft, trigger finger state,
+    a qualitative source citation, and a license-clean evidence still description.
+    """
+
+    name: str
+    label: str
+    spec: GripSpec
+    qualitative_source: str
+    evidence_still_description: str
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.name, str) or not self.name.strip():
+            raise TypeError("name must be a non-empty string")
+        if not isinstance(self.label, str) or not self.label.strip():
+            raise TypeError("label must be a non-empty string")
+        if not isinstance(self.spec, GripSpec):
+            raise TypeError(f"spec must be a GripSpec, got {type(self.spec).__name__}")
+        if (
+            not isinstance(self.qualitative_source, str)
+            or not self.qualitative_source.strip()
+        ):
+            raise TypeError("qualitative_source must be a non-empty string")
+        if (
+            not isinstance(self.evidence_still_description, str)
+            or not self.evidence_still_description.strip()
+        ):
+            raise TypeError("evidence_still_description must be a non-empty string")
+
+    @property
+    def style(self) -> GripStyle:
+        """The grip linking style (:class:`GripStyle`)."""
+        return self.spec.style
+
+    @property
+    def trigger_finger(self) -> bool:
+        """True when the trail index trigger finger is separated on the grip."""
+        return self.spec.trigger_finger
+
+    @property
+    def hand_spacing_m(self) -> float:
+        """Hand spacing along the shaft in metres."""
+        return self.spec.hand_spacing_m
+
+    @property
+    def lead(self) -> HandAngles:
+        """Lead hand golf angles."""
+        return self.spec.lead
+
+    @property
+    def trail(self) -> HandAngles:
+        """Trail hand golf angles."""
+        return self.spec.trail
+
+    def for_handedness(self, handedness: Handedness = DEFAULT_HANDEDNESS) -> GripSpec:
+        """Return a :class:`GripSpec` for the requested handedness."""
+        return replace(self.spec, handedness=handedness)
+
+
+NAMED_GRIP_PRESETS: Final[dict[str, NamedGripPreset]] = {
+    "palmer_overlap": NamedGripPreset(
+        name="palmer_overlap",
+        label="Palmer Overlap",
+        spec=GripSpec(
+            lead=HandAngles(alpha_deg=12.0, psi_deg=45.0, gamma_deg=0.0),
+            trail=HandAngles(alpha_deg=12.0, psi_deg=35.0, gamma_deg=0.0),
+            style=GripStyle.OVERLAP,
+            hand_spacing_m=0.074,
+            trigger_finger=True,
+        ),
+        qualitative_source=(
+            "Arnold Palmer classic strong overlap grip: lead hand rotated strong "
+            "showing ~3 knuckles (+12 deg), palm diagonal across lifeline (45 deg), "
+            "trail hand matching shaft rotation (+12 deg) seated in fingers (35 deg), "
+            "tight hand spacing (0.074 m) with separated index trigger finger. "
+            "Sources: Palmer, 'Go for Broke' (1960); Golf Digest retrospective archive."
+        ),
+        evidence_still_description=(
+            "Archival photographic reference from 1960 US Open (Cherry Hills): "
+            "high-resolution face-on address still showing trail index trigger finger "
+            "extended down the shaft, lead thumb nestled in trail thenar pocket, trail "
+            "little finger riding over lead index knuckle."
+        ),
+    ),
+    "woods_interlock": NamedGripPreset(
+        name="woods_interlock",
+        label="Woods Interlock",
+        spec=GripSpec(
+            lead=HandAngles(alpha_deg=2.0, psi_deg=38.0, gamma_deg=0.0),
+            trail=HandAngles(alpha_deg=2.0, psi_deg=34.0, gamma_deg=0.0),
+            style=GripStyle.INTERLOCK,
+            hand_spacing_m=0.069,
+            trigger_finger=False,
+        ),
+        qualitative_source=(
+            "Tiger Woods signature interlock grip: neutral-to-slight strong orientation "
+            "(+2 deg on both hands), fingers nestled moderately in palm lifeline "
+            "(38 deg lead, 34 deg trail), compact hand spacing (0.069 m) from deep "
+            "interlocking of trail little finger between lead index and middle digits, "
+            "curled index finger without trigger separation. "
+            "Sources: Woods, 'How I Play Golf' (2001), Chapter 1; PGA Tour player profile."
+        ),
+        evidence_still_description=(
+            "Archival tournament broadcast high-speed still from 2000-2001 major "
+            "championship address: face-on close-up showing trail little finger deeply "
+            "interlocked between lead index and middle fingers, compact unified hand "
+            "unit, trail index curled flush against shaft."
+        ),
+    ),
+    "ten_finger": NamedGripPreset(
+        name="ten_finger",
+        label="Ten-Finger",
+        spec=GripSpec(
+            lead=HandAngles(alpha_deg=5.0, psi_deg=40.0, gamma_deg=0.0),
+            trail=HandAngles(alpha_deg=5.0, psi_deg=32.0, gamma_deg=0.0),
+            style=GripStyle.TEN_FINGER,
+            hand_spacing_m=0.090,
+            trigger_finger=False,
+        ),
+        qualitative_source=(
+            "Classical baseball or ten-finger grip (as advocated by Bob Rosburg and modern "
+            "coaching consensus): all ten digits making direct contact with the grip cylinder, "
+            "mild rotation (+5 deg on both hands), lead palm diagonal 40 deg, trail finger "
+            "diagonal 32 deg, wider hand spacing (0.090 m) accommodating un-overlapped little "
+            "finger, trigger finger off. Sources: PGA instructional literature consensus."
+        ),
+        evidence_still_description=(
+            "High-speed instructional camera still at address: face-on view showing all "
+            "eight fingers and two thumbs directly contacting grip wrapper, trail little finger "
+            "positioned immediately adjacent to lead index finger without overlap or interlock, "
+            "90 mm hand spacing."
+        ),
+    ),
+}
+
+
+def named_grip_preset(name: str) -> NamedGripPreset:
+    """Return the :class:`NamedGripPreset` with the given identifier.
+
+    Preconditions:
+        ``name`` is a string in :data:`NAMED_GRIP_PRESETS`.
+    Postconditions:
+        Returns a valid immutable :class:`NamedGripPreset`.
+    """
+    if not isinstance(name, str):
+        raise TypeError(f"preset name must be a str, got {type(name).__name__}")
+    if name not in NAMED_GRIP_PRESETS:
+        raise ValueError(
+            f"unknown named grip preset {name!r}; "
+            f"choose from {sorted(NAMED_GRIP_PRESETS)}"
+        )
+    return NAMED_GRIP_PRESETS[name]
 
 
 def to_grip_rotation(spec: GripSpec) -> dict[Side, Euler]:
