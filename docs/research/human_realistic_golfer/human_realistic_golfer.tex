@@ -766,6 +766,72 @@ python3 scripts/grip/grip_style_parity_report.py --out /tmp/g10_parity_report
 python3 -m pytest tests/unit/grip_contact/test_grip_style_parity_report.py
 \end{verbatim}
 
+\subsection{Separated Hands and Physical Hand--Hand Contact in \texttt{full-body-v2} (HRG-GS-G11, \#13309)}
+\textbf{Model Topology and Opt-In Contract.} In the default \texttt{full-body-v1} and \texttt{full-body-v2} schemas, the lead and trail hand solids (\texttt{LHand}, \texttt{LHandStandoff}, \texttt{RHand}) are welded to the club body (\texttt{Clubface Vector}, parented by \texttt{Left Wrist Kinetically Driven}) and the right wrist (\texttt{RHandStandoff}, parented by \texttt{Right Wrist Kinetically Driven}) closes the loop through a 6-DOF bilateral weld constraint. Under that welded topology, hand--hand contact pairs have zero relative motion unless driven by an analytical proxy. HRG-GS-G11 (\path{src/shared/python/motion_matching/full_body_v2.py}, \texttt{derive\_full\_body\_v2\_spec(..., separate\_hands=True)} and \texttt{separate\_v2\_hands}) adds an explicit opt-in \texttt{full-body-v2} topology option (\texttt{mode="separated\_v2"}):
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \textbf{Lead Hand Body (\texttt{LHandBody}):} Parented by \texttt{Left Wrist Kinetically Driven} with the original wrist follower transform preserved so its body frame coincides with the welded club frame at $\mathbf{q} = \mathbf{0}$. Carries the \texttt{LHand} and \texttt{LHandStandoff} solids ($0.4945\text{ kg}$ total) and the \texttt{Grip\_LeftHand} frame.
+\item \textbf{Trail Hand Body (\texttt{RHandStandoff}):} Parented by \texttt{Right Wrist Kinetically Driven}. Carries the \texttt{RHand} solid ($0.4600\text{ kg}$), re-expressed via $\mathbf{T}_{R \leftarrow C} = \mathbf{T}_{a}\,\mathbf{T}_{b}^{-1}$ so its neutral world pose and inertia are unchanged.
+\item \textbf{Bare Club Body (\texttt{Clubface Vector}):} Rooted at \texttt{world} via the 6-DOF \texttt{ClubFreeJoint} (\texttt{ClubFreeRx..Rz}, \texttt{ClubFreePx..Pz}) with neutral \texttt{parent\_to\_base} equal to the welded neutral club pose. Retains only the bare club solids (\texttt{Clubhead}, \texttt{Rigid Shaft}, \texttt{Grip}; $0.3130\text{ kg}$).
+\item \textbf{Immutability of Defaults:} When \texttt{separate\_hands=False} (default), \texttt{v1} and \texttt{v2} bytes and SHA256 digests are untouched. When \texttt{separate\_hands=True}, \texttt{FullBodyPinocchioModel} (\path{src/engines/physics_engines/pinocchio/python/native_model.py}) builds the tree with zero bilateral weld constraints (\texttt{len(constraints) == 0}) and couples both hands to the bare club through the shared retention law.
+\end{itemize}
+
+\textbf{Frames, Equations, and Physical Hand--Hand Contact Law.} Let $\mathbf{T}_{W,L}(t) = (\mathbf{R}_L, \mathbf{p}_L)$ and $\mathbf{T}_{W,R}(t) = (\mathbf{R}_R, \mathbf{p}_R)$ denote the world poses of the lead and trail hand grip frames evaluated by Pinocchio forward kinematics along the left-wrist (\texttt{LHandBody}) and right-wrist (\texttt{RHandStandoff}) chains, with spatial velocities $(\mathbf{v}_L, \boldsymbol{\omega}_L)$ and $(\mathbf{v}_R, \boldsymbol{\omega}_R)$. Each hand applies a retention wrench $\mathbf{w}_s^{\mathrm{club}} = (\mathbf{F}_s^{\mathrm{club}}, \mathbf{M}_s^{\mathrm{club}})$ ($s \in \{L, R\}$) to the free bare club via the shared 6-axis compliance law. Simultaneously, in \texttt{mode="separated\_v2"} (\path{src/shared/python/grip_contact/topology_contact.py}, \texttt{topology\_hand\_hand\_wrenches}), every active hand--hand pair $p \in \mathcal{P}_{\mathrm{HH}}(\text{style})$ (\texttt{trail\_palm\_lead\_thumb} in all styles; \texttt{overlap\_little\_finger\_lead\_index} in \texttt{overlap}; \texttt{interlock\_little\_finger\_lead\_middle} and \texttt{interlock\_lead\_index\_wrap} in \texttt{interlock}) is evaluated from the two independent hand states using the shared \texttt{pair\_contact} primitives (\texttt{sphere\_capsule}, \texttt{capsule\_capsule}, and oriented \texttt{capsule\_sphere}):
+\begin{equation}
+f_{n,p} = \max\!\bigl(0,\; k_n \delta_p^{3/2}(1 + c_n \dot{\delta}_p)\bigr), \qquad
+\mathbf{f}_{t,p} = -\mu f_{n,p}\tanh\!\left(\frac{\|\mathbf{v}_{t,p}\|}{v_{\mathrm{tr}}}\right)\frac{\mathbf{v}_{t,p}}{\|\mathbf{v}_{t,p}\| + \epsilon}, \qquad
+\|\mathbf{f}_{t,p}\| \le \mu f_{n,p}.
+\end{equation}
+For each pair $p$ with contact midpoint $\mathbf{c}_p$ and contact force $\mathbf{F}_p = f_{n,p}\mathbf{n}_p + \mathbf{f}_{t,p}$ acting on the lead hand, equal and opposite wrenches are applied to the lead and trail hands:
+\begin{equation}
+\mathbf{F}_{\mathrm{lead},p} = +\mathbf{F}_p, \quad
+\mathbf{F}_{\mathrm{trail},p} = -\mathbf{F}_p, \quad
+\mathbf{M}_{\mathrm{lead},p} = (\mathbf{c}_p - \mathbf{p}_L) \times \mathbf{F}_p, \quad
+\mathbf{M}_{\mathrm{trail},p} = (\mathbf{c}_p - \mathbf{p}_R) \times (-\mathbf{F}_p),
+\end{equation}
+satisfying exact action--reaction balance $\mathbf{F}_{\mathrm{lead}} + \mathbf{F}_{\mathrm{trail}} = \mathbf{0}$ and $\mathbf{M}_{O,\mathrm{lead}} + \mathbf{M}_{O,\mathrm{trail}} = \mathbf{0}$ about any common world point $O$ to $\le 10^{-15}\text{ N}$ ($\le 10^{-9}\text{ N}$ contract). To preserve exact right-wrist chain kinematics at every sample node $t_k$ while avoiding sub-sample Euclidean chord distortion during adaptive RK8 (\texttt{DOP853}) club integration, the right-hand state is interpolated via its $\mathrm{SE}(3)$ relative transform in the lead-hand frame, $\mathbf{R}_{L\to R}(t_k) = \mathbf{R}_L(t_k)^\top\mathbf{R}_R(t_k)$ and $\mathbf{p}_{L\to R}(t_k) = \mathbf{R}_L(t_k)^\top(\mathbf{p}_R(t_k) - \mathbf{p}_L(t_k))$.
+
+\textbf{Identifiability Note (Unobservability of Finger Contact from Markers).} Standard full-body motion-capture marker sets carry wrist and forearm markers but no individual finger or phalanx markers (\texttt{HAND\_HAND\_IDENTIFIABILITY\_NOTE}). Consequently, individual finger and palm--thumb contact forces ($\mathbf{F}_p$ for $p \in \mathcal{P}_{\mathrm{HH}}$) and the internal inter-hand squeeze are \emph{not observable from markers}. Only the net closure wrench $(\mathbf{F}_{\mathrm{net}}, \mathbf{M}_{\mathrm{com}})$ applied by the two hands to the rigid club is dynamically identified by club kinematics; the individual hand--club and hand--hand pair forces depend on the chosen retention stiffness, preload geometry, and contact material parameters.
+
+\textbf{Failed Experiments.}
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \emph{Independent Joint-Coordinate Low-Pass Filtering (Rejected):} Filtering the 44 joint coordinates $\mathbf{q}(t)$ independently with a $25\text{ Hz}$ fourth-order zero-phase Butterworth filter (\texttt{sosfiltfilt}) prior to forward kinematics broke the nonlinear closed-loop kinematic consistency between the left and right arm chains across the ball-impact deceleration ($t = 1.325\text{ s}$), creating $1.85\text{ mm}$ of artificial inter-wrist separation and inflating the peak \texttt{net\_force} error to $11.51\%$ and \texttt{net\_moment\_com} error to $22.49\%$.
+\item \emph{Independent World-Frame Euclidean Hand Splines (Rejected):} Interpolating $\mathbf{p}_L(t)$ and $\mathbf{p}_R(t)$ with independent world-frame cubic splines while projecting $\mathbf{R}_L(t)$ onto $\mathrm{SO}(3)$ via $\tfrac{1}{2}\mathbf{R}(3\mathbf{I} - \mathbf{R}^\top\mathbf{R})$ introduced sub-sample lever-arm mismatch between the two hands at impact, inflating the pointwise moment error to $15.44\%$.
+\end{enumerate}
+
+\textbf{Measured Acceptance on Best-Fit and Synthetic Swings.} On the private best-fit driver swing ($1{,}815$ frames, $\Delta t = 0.001\text{ s}$, duration $1.814\text{ s}$; bundle SHA256 \texttt{bfa1a9a86cc84c8c...55cdfe91}, spec SHA256 \texttt{d1829abf69ca4fae...97560b296}), migrating $\mathbf{q}_{\mathrm{v1}}(t) \to \mathbf{q}_{\mathrm{v2}}(t)$ via \texttt{TrunkMigrator.migrate\_coordinates} and integrating the separated-hand \texttt{v2} model via \texttt{simulate\_separated\_v2\_grip} yields Table~\ref{tab:g11_separated_v2_acceptance}:
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\begin{tabular}{llrrrrll}
+\toprule
+\textbf{Dataset} & \textbf{Quantity / Pair} & \textbf{Ref.\ Peak} & \textbf{Cand.\ Peak} & \textbf{Peak Err.\ (\%)} & \textbf{RMS Err.\ (\%)} & \textbf{Chatter (\%)} & \textbf{Gate} \\
+\midrule
+Best-Fit ($1.814\text{ s}$) & \texttt{net\_force} ($\text{N}$) & $947.01$ & $953.13$ & $0.646\%$ & $0.196\%$ & --- & pass ($\le 5\% / 2\%$) \\
+Best-Fit ($1.814\text{ s}$) & \texttt{net\_moment\_com} ($\text{N}\cdot\text{m}$) & $124.19$ & $124.59$ & $0.323\%$ & $0.041\%$ & --- & pass ($\le 5\% / 2\%$) \\
+Best-Fit ($1.814\text{ s}$) & \texttt{trail\_palm\_lead\_thumb} ($f_n$, $\text{N}$) & --- & $53.39$ & --- & --- & $0.000\%$ ($0/1814$) & pass ($< 1\%$) \\
+Best-Fit ($1.814\text{ s}$) & \texttt{overlap\_little\_finger\_lead\_index} ($f_n$, $\text{N}$) & --- & $17.85$ & --- & --- & $0.000\%$ ($0/1814$) & pass ($< 1\%$) \\
+Best-Fit ($1.814\text{ s}$) & \texttt{interlock\_little\_finger\_lead\_middle} ($f_n$, $\text{N}$) & --- & $23.62$ & --- & --- & $0.000\%$ ($0/1814$) & pass ($< 1\%$) \\
+Best-Fit ($1.814\text{ s}$) & \texttt{interlock\_lead\_index\_wrap} ($f_n$, $\text{N}$) & --- & $15.72$ & --- & --- & $0.000\%$ ($0/1814$) & pass ($< 1\%$) \\
+\bottomrule
+\end{tabular}
+\caption{Measured separated-hand \texttt{full-body-v2} acceptance on the best-fit driver swing (aggregate statistics only; action--reaction residual $\le 1.0 \times 10^{-15}\text{ N}$ across all steps).}
+\label{tab:g11_separated_v2_acceptance}
+\end{table}
+
+\textbf{Limitations.}
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item Hand--hand pair forces are unobservable from standard motion-capture markers and are determined by the modelled geometry and contact stiffness.
+\item Because each hand body has a single rigid coordinate frame driven by its wrist chain, finger-specific flexion degrees of freedom are represented by fixed anatomical capsule/sphere offsets in the hand frame rather than articulated phalanx joints.
+\end{enumerate}
+
+\textbf{Reproduction Commands.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_separated_v2_hands.py
+UD_BEST_FIT_BUNDLE=/path/to/driver.npz UD_BEST_FIT_SPEC=/path/to/full_body_spec_hipcal_scaled.json \
+  python3 -m pytest tests/unit/grip_contact/test_separated_v2_hands.py -k test_best_fit_swing
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
