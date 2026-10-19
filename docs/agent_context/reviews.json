@@ -73,7 +73,7 @@
       "rationale": "NSX-50 (#12578): MujocoAdapter now mixes in DynamicMapsMixin with a NativeDynamicLayout (quat_wxyz, linear world, angular body); static pose translation in canonical.py/protocol.py is unchanged. Contract updated for the dynamic-map surface and the multi-DOF ValueError. Validated: test_mujoco_protocol.py plus the NSX-50 dynamic-map unit and engine tests (64 passed)."
     },
     "project-task-native-replay": {
-      "fingerprint": "c0d2feff8bc9217b912dc693741475b04be094d8c833db756966bbe6e80a1447",
+      "fingerprint": "355cb2b917454602cac558d4f819fe2e80504d8498ef4cbdcea5c1181d796813",
       "inputs": {
         "docs/agent_context/contracts/project-task-native-replay.md": "754359ce3d2ccfe8d80a31a1cd8867f151dc5bd63bf0023231a2cc797fc3f254",
         "src/engines/myosuite_project_command_solve.py": "a8b3168dfb20b8f94322d2b8dc1e2b8570d4e11b3d4222f8b1300e71711cd2e2",
@@ -95,12 +95,12 @@
         "tests/unit/engines/myosuite/test_project_task_feedback.py": "d9d8f9ae7b58e3c5fb9e641a32b1eeacf7b9873a26839d4c0724c27ad3ceff00",
         "tests/unit/engines/myosuite/test_project_task_forecast.py": "a35bdf3f3ab2d8941743f1409d36a925c8f07f366ffd6cb58ac0719dd4d97fc1",
         "tests/unit/engines/myosuite/test_project_task_native_search.py": "63795cc637ab7b62cca3ef213836584df94383dfdc9cfb10ef14352962dde63b",
-        "tests/unit/engines/myosuite/test_project_task_producer.py": "ead3c9f3eb031cf78bc63e011b8a9e1fe203a6b16af3c3e8f3120950f81f6faf",
+        "tests/unit/engines/myosuite/test_project_task_producer.py": "97f77ae7a53a4f5a85bd07e1586342219c817e97362846a17dee96202163dd20",
         "tests/unit/engines/myosuite/test_project_task_tracking.py": "8b329a3e676b28906e3c5a0f7439d483625ce071400f949420be0021488c0dc4",
         "tests/unit/motion_matching/test_bounded_candidate_search.py": "5a256b469fe1f4fdd502626f125cd50eb64a62b1ec304488eda64335ca72ee4d",
         "tests/unit/repo_hygiene/test_pinned_tools_package_loader.py": "98bf31807478472f8e15310c73d1e92552feb74a84988e32df905a80019c64c9"
       },
-      "rationale": "Re-reviewed after merging main's #12268 movement-optimizer retarget with #12418: _seam_redirect.py differs from main only by the signal_toolkit split-root redirect; load_pinned_tools_package and the private replay path are unchanged. The registered boundary suite gives 62 passed and 123 skipped (MyoSuite unavailable on this Windows host); CI runs the full suite. Software evidence only, no physical qualification."
+      "rationale": "Synchronize test_project_task_producer.py with updated MyoSuite golfer scene hashes (#13297, #13422)"
     }
   },
   "version": 1
