@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-19 | #13318 | Unify grip frames across model_appearance and grip_contact, fix Drake contact normal recording |
 | 2026-10-19 | #13337 | Add cross-model grip capability inventory manifest, DbC loader, and verification suite |
 | 2026-10-19 | #13217 | Report the allocated trail-palm-on-lead-thumb force (patch frame, allocation, provider metadata); physics unchanged |
 | 2026-10-19 | #13284 | Run real-OpenSim lift tests in a dedicated CI job (OSL-13) |
