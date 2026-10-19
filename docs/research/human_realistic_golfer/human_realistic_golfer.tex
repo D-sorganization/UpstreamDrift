@@ -524,6 +524,33 @@ pairs remain allocated equivalents (reporting only, governed by an explicit prio
 python3 -m pytest tests/unit/grip_contact/test_grip_binding.py
 \end{verbatim}
 
+\subsection{Grip Binding Manifests (HRG-GS-M2, \#13324)}
+\textbf{Manifest Schema and Calibration-Time Resolution.}
+To avoid duplicating contact site geometry across disparate model formats, versioned grip binding manifests use schema \texttt{grip-binding/v1} (\path{src/config/grip_bindings/<model_id>.json}). Each manifest specifies model identification and provenance (\texttt{model\_id}, \texttt{model\_hash}, \texttt{calibration\_pose}, \texttt{units} $\{ \texttt{"length"}\!: \texttt{"m"}, \texttt{"angle"}\!: \texttt{"rad"} \}$, \texttt{provenance}), kinematic roles (\texttt{handedness} $\in \{\texttt{right}, \texttt{left}\}$, \texttt{side\_roles} mapping anatomical side to lead/trail role, \texttt{attachment\_mode}, \texttt{club\_body}, \texttt{lead\_hand\_body}, \texttt{trail\_hand\_body}, optional \texttt{segment\_map}), and explicitly unavailable sites (\texttt{unavailable\_sites} $\{ s \mapsto \text{reason} \}$).
+Site geometry is never stored statically in the manifest; instead, \texttt{binding\_from\_manifest(manifest, topology, interface)} resolves site positions dynamically from the canonical \texttt{ContactTopology} into body-local frames at the declared calibration pose via the model kinematics interface.
+
+\textbf{Geometric Validation and Frame Bounds.}
+The validator \texttt{validate\_resolved\_binding(binding, topology, interface)} enforces strict spatial and orientation consistency:
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \textit{Shaft Alignment}: The grip coordinate frame $+x$ axis points from the butt toward the clubhead. With unit direction $u_x = R_{F_{\mathrm{club}}} \hat{e}_x$ and expected axis $u_{\mathrm{exp}} = [1, 0, 0]^{\top}$, the directional alignment must satisfy:
+\begin{equation}
+u_x \cdot u_{\mathrm{exp}} \ge 0.999999.
+\end{equation}
+\item \textit{Radial and Axial Bounds}: For every bound site $s \in \mathcal{S}$ with body-local position mapped into the grip frame $p_{\mathrm{grip}}(s) = (x_s, y_s, z_s)$, the radial distance $r_s = \sqrt{y_s^2 + z_s^2}$ and axial position $x_s$ must satisfy:
+\begin{equation}
+0.005\,\mathrm{m} \le r_s \le 0.060\,\mathrm{m}, \quad -0.35\,\mathrm{m} \le x_s \le 0.05\,\mathrm{m}.
+\end{equation}
+\item \textit{Handedness Reversal}: In left-handed configurations (\texttt{handedness} = \texttt{"left"}), the lead/trail roles map to the mirrored anatomical bodies (right hand becomes lead, left hand becomes trail), and the resolved site positions mirror symmetrically along the local $z$-axis ($p_{\mathrm{grip},z} \mapsto -p_{\mathrm{grip},z}$).
+\item \textit{Schema and Invariant Integrity}: Schema identifier must equal \texttt{"grip-binding/v1"}, length units must be metres (\texttt{"m"}), angle units must be radians (\texttt{"rad"}), every rotation matrix $R$ must be proper orthogonal ($\|R^{\top}R - I_3\|_{\max} \le 10^{-9}$, $|\det(R) - 1| \le 10^{-9}$), and bound sites and unavailable sites must be strictly disjoint with union equal to all topology sites.
+\end{enumerate}
+
+\textbf{Limitations.} Manifests configure kinematic body assignment and site resolution at static calibration poses; dynamic deformation of hand tissues during high-load impact or active finger re-gripping is not represented by the rigid-proxy attachment mode.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_grip_binding_manifests.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
