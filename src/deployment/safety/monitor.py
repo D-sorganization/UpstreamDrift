@@ -50,6 +50,34 @@ def _validate_joint_array(
 NEAR_LIMIT_MARGIN_RAD = 0.1
 
 
+def _zone_bounds(
+    zone: Any,
+) -> tuple[NDArray[np.floating], NDArray[np.floating]] | None:
+    """Lower/upper corners of an axis-aligned box zone, or ``None`` if unshaped.
+
+    Accepts ``[xmin, xmax, ymin, ymax, zmin, zmax]`` (shape ``(6,)``) or
+    ``[[xmin, xmax], [ymin, ymax], [zmin, zmax]]`` (shape ``(3, 2)``).
+    """
+    z = np.asarray(zone, dtype=float)
+    if z.shape == (6,):
+        return z[0::2], z[1::2]
+    if z.shape == (3, 2):
+        return z[:, 0], z[:, 1]
+    return None
+
+
+def _append_flagged(mask: Any, message: str, sink: list[str]) -> None:
+    """Append ``"<message> [joints]"`` when any joint in ``mask`` is flagged."""
+    if np.any(mask):
+        joints = list(np.where(mask)[0])
+        sink.append(f"{message} {joints}")
+
+
+def _fmt_point(pt: NDArray[np.floating]) -> str:
+    """``[x, y, z]`` with millimetre precision for violation messages."""
+    return f"[{pt[0]:.3f}, {pt[1]:.3f}, {pt[2]:.3f}]"
+
+
 class SafetyStatusLevel(Enum):
     """Safety status levels."""
 
@@ -296,46 +324,20 @@ class SafetyMonitor:
         for i, zone in enumerate(self.limits.forbidden_zones):
             if isinstance(zone, Obstacle):
                 self._forbidden_obstacles.append(zone)
-            else:
-                z = np.asarray(zone, dtype=float)
-                if z.shape == (6,):
-                    center = np.array(
-                        [(z[0] + z[1]) / 2.0, (z[2] + z[3]) / 2.0, (z[4] + z[5]) / 2.0]
-                    )
-                    dims = np.array([z[1] - z[0], z[3] - z[2], z[5] - z[4]])
-                    self._forbidden_obstacles.append(
-                        Obstacle(
-                            name=f"zone_{i}",
-                            obstacle_type=ObstacleType.BOX,
-                            position=center,
-                            dimensions=dims,
-                            inflation=0.0,
-                        )
-                    )
-                elif z.shape == (3, 2):
-                    center = np.array(
-                        [
-                            (z[0, 0] + z[0, 1]) / 2.0,
-                            (z[1, 0] + z[1, 1]) / 2.0,
-                            (z[2, 0] + z[2, 1]) / 2.0,
-                        ]
-                    )
-                    dims = np.array(
-                        [
-                            z[0, 1] - z[0, 0],
-                            z[1, 1] - z[1, 0],
-                            z[2, 1] - z[2, 0],
-                        ]
-                    )
-                    self._forbidden_obstacles.append(
-                        Obstacle(
-                            name=f"zone_{i}",
-                            obstacle_type=ObstacleType.BOX,
-                            position=center,
-                            dimensions=dims,
-                            inflation=0.0,
-                        )
-                    )
+                continue
+            bounds = _zone_bounds(zone)
+            if bounds is None:
+                continue
+            lower, upper = bounds
+            self._forbidden_obstacles.append(
+                Obstacle(
+                    name=f"zone_{i}",
+                    obstacle_type=ObstacleType.BOX,
+                    position=(lower + upper) / 2.0,
+                    dimensions=upper - lower,
+                    inflation=0.0,
+                )
+            )
 
     def _build_status(self, violations: list[str], warnings: list[str]) -> SafetyStatus:
         if self._emergency_stop:
@@ -409,7 +411,169 @@ class SafetyMonitor:
                 pass
         return None
 
-    def check_state(self, state: RobotState) -> SafetyStatus:  # noqa: C901
+    def _outside_workspace(self, pt: NDArray[np.floating]) -> bool:
+        """True when ``pt`` lies outside the configured workspace box."""
+        wb = self.limits.workspace_bounds
+        if wb is None:
+            return False
+        return bool(
+            pt[0] < wb[0]
+            or pt[0] > wb[1]
+            or pt[1] < wb[2]
+            or pt[1] > wb[3]
+            or pt[2] < wb[4]
+            or pt[2] > wb[5]
+        )
+
+    def _check_joint_bounds(
+        self,
+        positions: NDArray[np.floating],
+        below: str,
+        above: str,
+        violations: list[str],
+    ) -> None:
+        """Flag joints outside the configured lower/upper position limits."""
+        if self.limits.joint_limits_lower is not None:
+            _append_flagged(
+                positions < self.limits.joint_limits_lower, below, violations
+            )
+        if self.limits.joint_limits_upper is not None:
+            _append_flagged(
+                positions > self.limits.joint_limits_upper, above, violations
+            )
+
+    def _check_near_limits(
+        self, positions: NDArray[np.floating], warnings: list[str]
+    ) -> None:
+        """Warn symmetrically when joints approach either position limit."""
+        if self.limits.joint_limits_upper is not None:
+            _append_flagged(
+                positions > self.limits.joint_limits_upper - NEAR_LIMIT_MARGIN_RAD,
+                "Approaching upper limit on joints",
+                warnings,
+            )
+        if self.limits.joint_limits_lower is not None:
+            _append_flagged(
+                positions < self.limits.joint_limits_lower + NEAR_LIMIT_MARGIN_RAD,
+                "Approaching lower limit on joints",
+                warnings,
+            )
+
+    def _check_state_points(
+        self,
+        fk: Callable[[NDArray[np.floating]], Any],
+        positions: NDArray[np.floating],
+        violations: list[str],
+    ) -> None:
+        """Workspace and forbidden-zone checks for the current FK points."""
+        try:
+            points = self._extract_points(fk(positions))
+            wb = self.limits.workspace_bounds
+            for name, pt in points:
+                if wb is not None and self._outside_workspace(pt):
+                    bounds = ", ".join(f"{v:.3f}" for v in wb)
+                    violations.append(
+                        f"Workspace bounds exceeded for {name}: position "
+                        f"{_fmt_point(pt)} outside bounds [{bounds}]"
+                    )
+                for obs in self._forbidden_obstacles:
+                    if obs.get_distance(pt) <= 0:
+                        violations.append(
+                            f"Forbidden zone violation for {name}: position "
+                            f"{_fmt_point(pt)} inside forbidden zone '{obs.name}'"
+                        )
+        except (ValueError, TypeError, RuntimeError, ArithmeticError) as exc:
+            violations.append(f"FK computation error in check_state: {exc}")
+
+    def _check_command_points(
+        self,
+        fk: Callable[[NDArray[np.floating]], Any],
+        targets: NDArray[np.floating],
+        violations: list[str],
+    ) -> None:
+        """Workspace and forbidden-zone checks for commanded FK points."""
+        try:
+            points = self._extract_points(fk(targets))
+            for name, pt in points:
+                if self._outside_workspace(pt):
+                    violations.append(
+                        f"Command target for {name} outside workspace bounds: "
+                        f"position {_fmt_point(pt)}"
+                    )
+                for obs in self._forbidden_obstacles:
+                    if obs.get_distance(pt) <= 0:
+                        violations.append(
+                            f"Command target for {name} inside forbidden zone "
+                            f"'{obs.name}': position {_fmt_point(pt)}"
+                        )
+        except (ValueError, TypeError, RuntimeError, ArithmeticError) as exc:
+            violations.append(f"FK computation error in check_command: {exc}")
+
+    def _check_cartesian_speed(
+        self,
+        positions: NDArray[np.floating],
+        velocities: NDArray[np.floating],
+        label: str,
+        violations: list[str],
+    ) -> None:
+        """Flag a Cartesian speed above ``max_cartesian_velocity``."""
+        limit = self.limits.max_cartesian_velocity
+        cart_vel = self._compute_cartesian_velocity(positions, velocities)
+        if cart_vel is None or limit is None:
+            return
+        cart_speed = float(np.linalg.norm(cart_vel[:3]))
+        if cart_speed > limit:
+            violations.append(
+                f"{label} {cart_speed:.3f} m/s exceeds limit {limit:.3f} m/s"
+            )
+
+    def _check_pressure(self, pressure: float, sensor: str, sink: list[str]) -> None:
+        """Flag a contact pressure (N/cm²) above ``max_pressure``."""
+        limit = self.limits.max_pressure
+        if limit is not None and pressure > limit:
+            sink.append(
+                f"Contact pressure {pressure:.1f} N/cm² exceeds limit "
+                f"{limit:.1f} N/cm² on sensor '{sensor}'"
+            )
+
+    def _check_force(self, f_mag: float, sensor: str, sink: list[str]) -> None:
+        """Contact force, Cartesian force and derived pressure for one sensor."""
+        for kind, limit in (
+            ("Contact force", self.limits.max_contact_force),
+            ("Cartesian force", self.limits.max_cartesian_force),
+        ):
+            if limit is not None and f_mag > limit:
+                sink.append(
+                    f"{kind} {f_mag:.1f} N exceeds limit {limit:.1f} N "
+                    f"on sensor '{sensor}'"
+                )
+        area = self._contact_surface_area_cm2
+        if area is not None and area > 0:
+            self._check_pressure(f_mag / area, sensor, sink)
+
+    def _check_wrenches(self, wrenches: Any, violations: list[str]) -> None:
+        """Validate F/T sensor readings and check force and pressure limits."""
+        for sensor_name, wrench in (wrenches or {}).items():
+            if wrench is None:
+                continue
+            if not isinstance(wrench, np.ndarray):
+                violations.append(
+                    f"Invalid type for ft_wrenches on sensor '{sensor_name}'"
+                )
+                continue
+            if not np.all(np.isfinite(wrench)):
+                violations.append(
+                    f"Non-finite values in ft_wrenches on sensor '{sensor_name}'"
+                )
+                continue
+            if wrench.size >= 3:
+                self._check_force(
+                    float(np.linalg.norm(wrench[:3])), sensor_name, violations
+                )
+            elif wrench.size == 1:
+                self._check_pressure(float(wrench[0]), sensor_name, violations)
+
+    def check_state(self, state: RobotState) -> SafetyStatus:
         """Check if current state is safe.
 
         Args:
@@ -434,159 +598,46 @@ class SafetyMonitor:
             state.joint_torques, "joint_torques", n_joints, violations
         )
 
-        # Check joint velocities
         if vel_valid:
-            vel_violation = (
-                np.abs(state.joint_velocities) > self.limits.max_joint_velocity
+            _append_flagged(
+                np.abs(state.joint_velocities) > self.limits.max_joint_velocity,
+                "Joint velocity exceeded on joints",
+                violations,
             )
-            if np.any(vel_violation):
-                joints = list(np.where(vel_violation)[0])
-                violations.append(f"Joint velocity exceeded on joints {joints}")
-
-        # Check joint torques
         if tau_valid:
-            torque_violation = (
-                np.abs(state.joint_torques) > self.limits.max_joint_torque
+            _append_flagged(
+                np.abs(state.joint_torques) > self.limits.max_joint_torque,
+                "Joint torque exceeded on joints",
+                violations,
             )
-            if np.any(torque_violation):
-                joints = list(np.where(torque_violation)[0])
-                violations.append(f"Joint torque exceeded on joints {joints}")
-
-        # Check joint limits
         if pos_valid:
-            if self.limits.joint_limits_lower is not None:
-                lower_violation = state.joint_positions < self.limits.joint_limits_lower
-                if np.any(lower_violation):
-                    joints = list(np.where(lower_violation)[0])
-                    violations.append(f"Lower joint limit exceeded on joints {joints}")
-
-            if self.limits.joint_limits_upper is not None:
-                upper_violation = state.joint_positions > self.limits.joint_limits_upper
-                if np.any(upper_violation):
-                    joints = list(np.where(upper_violation)[0])
-                    violations.append(f"Upper joint limit exceeded on joints {joints}")
-
-            # Check for approaching limits (warnings) — symmetric on both bounds.
-            if self.limits.joint_limits_upper is not None:
-                near_upper = (
-                    state.joint_positions
-                    > self.limits.joint_limits_upper - NEAR_LIMIT_MARGIN_RAD
-                )
-                if np.any(near_upper):
-                    joints = list(np.where(near_upper)[0])
-                    warnings.append(f"Approaching upper limit on joints {joints}")
-
-            if self.limits.joint_limits_lower is not None:
-                near_lower = (
-                    state.joint_positions
-                    < self.limits.joint_limits_lower + NEAR_LIMIT_MARGIN_RAD
-                )
-                if np.any(near_lower):
-                    joints = list(np.where(near_lower)[0])
-                    warnings.append(f"Approaching lower limit on joints {joints}")
-
-        # Check workspace bounds and forbidden zones via FK
-        if pos_valid and self.fk_callback is not None:
-            try:
-                fk_res = self.fk_callback(state.joint_positions)
-                points = self._extract_points(fk_res)
-                for name, pt in points:
-                    if self.limits.workspace_bounds is not None:
-                        wb = self.limits.workspace_bounds
-                        if (
-                            pt[0] < wb[0]
-                            or pt[0] > wb[1]
-                            or pt[1] < wb[2]
-                            or pt[1] > wb[3]
-                            or pt[2] < wb[4]
-                            or pt[2] > wb[5]
-                        ):
-                            violations.append(
-                                f"Workspace bounds exceeded for {name}: position "
-                                f"[{pt[0]:.3f}, {pt[1]:.3f}, {pt[2]:.3f}] outside bounds "
-                                f"[{wb[0]:.3f}, {wb[1]:.3f}, {wb[2]:.3f}, {wb[3]:.3f}, {wb[4]:.3f}, {wb[5]:.3f}]"
-                            )
-                    for obs in self._forbidden_obstacles:
-                        if obs.get_distance(pt) <= 0:
-                            violations.append(
-                                f"Forbidden zone violation for {name}: position "
-                                f"[{pt[0]:.3f}, {pt[1]:.3f}, {pt[2]:.3f}] inside forbidden zone '{obs.name}'"
-                            )
-            except (ValueError, TypeError, RuntimeError, ArithmeticError) as exc:
-                violations.append(f"FK computation error in check_state: {exc}")
-
-        # Check Cartesian velocity
-        if vel_valid and pos_valid:
-            cart_vel = self._compute_cartesian_velocity(
-                state.joint_positions, state.joint_velocities
+            self._check_joint_bounds(
+                state.joint_positions,
+                "Lower joint limit exceeded on joints",
+                "Upper joint limit exceeded on joints",
+                violations,
             )
-            if cart_vel is not None and self.limits.max_cartesian_velocity is not None:
-                cart_speed = float(np.linalg.norm(cart_vel[:3]))
-                if cart_speed > self.limits.max_cartesian_velocity:
-                    violations.append(
-                        f"Cartesian velocity {cart_speed:.3f} m/s exceeds limit {self.limits.max_cartesian_velocity:.3f} m/s"
-                    )
-
-        # Check contact force, Cartesian force, and pressure from F/T sensors
+            self._check_near_limits(state.joint_positions, warnings)
+            if self.fk_callback is not None:
+                self._check_state_points(
+                    self.fk_callback, state.joint_positions, violations
+                )
+        if vel_valid and pos_valid:
+            self._check_cartesian_speed(
+                state.joint_positions,
+                state.joint_velocities,
+                "Cartesian velocity",
+                violations,
+            )
         if state.ft_wrenches:
-            for sensor_name, wrench in state.ft_wrenches.items():
-                if wrench is None:
-                    continue
-                if not isinstance(wrench, np.ndarray):
-                    violations.append(
-                        f"Invalid type for ft_wrenches on sensor '{sensor_name}'"
-                    )
-                    continue
-                if not np.all(np.isfinite(wrench)):
-                    violations.append(
-                        f"Non-finite values in ft_wrenches on sensor '{sensor_name}'"
-                    )
-                    continue
+            self._check_wrenches(state.ft_wrenches, violations)
 
-                if wrench.size >= 3:
-                    f_mag = float(np.linalg.norm(wrench[:3]))
-                    if (
-                        self.limits.max_contact_force is not None
-                        and f_mag > self.limits.max_contact_force
-                    ):
-                        violations.append(
-                            f"Contact force {f_mag:.1f} N exceeds limit {self.limits.max_contact_force:.1f} N on sensor '{sensor_name}'"
-                        )
-                    if (
-                        self.limits.max_cartesian_force is not None
-                        and f_mag > self.limits.max_cartesian_force
-                    ):
-                        violations.append(
-                            f"Cartesian force {f_mag:.1f} N exceeds limit {self.limits.max_cartesian_force:.1f} N on sensor '{sensor_name}'"
-                        )
-                    area = self._contact_surface_area_cm2
-                    if (
-                        area is not None
-                        and area > 0
-                        and self.limits.max_pressure is not None
-                    ):
-                        pressure = f_mag / area
-                        if pressure > self.limits.max_pressure:
-                            violations.append(
-                                f"Contact pressure {pressure:.1f} N/cm² exceeds limit {self.limits.max_pressure:.1f} N/cm² on sensor '{sensor_name}'"
-                            )
-                elif wrench.size == 1:
-                    p_val = float(wrench[0])
-                    if (
-                        self.limits.max_pressure is not None
-                        and p_val > self.limits.max_pressure
-                    ):
-                        violations.append(
-                            f"Contact pressure {p_val:.1f} N/cm² exceeds limit {self.limits.max_pressure:.1f} N/cm² on sensor '{sensor_name}'"
-                        )
-
-        # Emergency stop check
         if self._emergency_stop:
             violations.append("Emergency stop active")
 
         return self._build_status(violations, warnings)
 
-    def check_command(self, command: ControlCommand) -> SafetyStatus:  # noqa: C901
+    def check_command(self, command: ControlCommand) -> SafetyStatus:
         """Check if command would result in safe state.
 
         Args:
@@ -614,91 +665,41 @@ class SafetyMonitor:
             command.feedforward_torque, "feedforward_torque", n_joints, violations
         )
 
-        # Check torque limits
         if tau_valid and command.torque_commands is not None:
-            torque_violation = (
-                np.abs(command.torque_commands) > self.limits.max_joint_torque
+            _append_flagged(
+                np.abs(command.torque_commands) > self.limits.max_joint_torque,
+                "Command torque exceeds limit on joints",
+                violations,
             )
-            if np.any(torque_violation):
-                joints = list(np.where(torque_violation)[0])
-                violations.append(f"Command torque exceeds limit on joints {joints}")
-
-        # Check velocity limits
         if vel_valid and command.velocity_targets is not None:
-            velocity_violation = (
-                np.abs(command.velocity_targets) > self.limits.max_joint_velocity
+            _append_flagged(
+                np.abs(command.velocity_targets) > self.limits.max_joint_velocity,
+                "Command velocity exceeds limit on joints",
+                violations,
             )
-            if np.any(velocity_violation):
-                joints = list(np.where(velocity_violation)[0])
-                violations.append(f"Command velocity exceeds limit on joints {joints}")
-
-        # Check position targets against limits
         if pos_valid and command.position_targets is not None:
-            if self.limits.joint_limits_lower is not None:
-                lower_violation = (
-                    command.position_targets < self.limits.joint_limits_lower
+            self._check_joint_bounds(
+                command.position_targets,
+                "Position target below limit on joints",
+                "Position target above limit on joints",
+                violations,
+            )
+            if self.fk_callback is not None:
+                self._check_command_points(
+                    self.fk_callback, command.position_targets, violations
                 )
-                if np.any(lower_violation):
-                    joints = list(np.where(lower_violation)[0])
-                    violations.append(f"Position target below limit on joints {joints}")
-
-            if self.limits.joint_limits_upper is not None:
-                upper_violation = (
-                    command.position_targets > self.limits.joint_limits_upper
-                )
-                if np.any(upper_violation):
-                    joints = list(np.where(upper_violation)[0])
-                    violations.append(f"Position target above limit on joints {joints}")
-
-        # Check workspace bounds and forbidden zones for command position targets
-        if (
-            pos_valid
-            and command.position_targets is not None
-            and self.fk_callback is not None
-        ):
-            try:
-                fk_res = self.fk_callback(command.position_targets)
-                points = self._extract_points(fk_res)
-                for name, pt in points:
-                    if self.limits.workspace_bounds is not None:
-                        wb = self.limits.workspace_bounds
-                        if (
-                            pt[0] < wb[0]
-                            or pt[0] > wb[1]
-                            or pt[1] < wb[2]
-                            or pt[1] > wb[3]
-                            or pt[2] < wb[4]
-                            or pt[2] > wb[5]
-                        ):
-                            violations.append(
-                                f"Command target for {name} outside workspace bounds: position "
-                                f"[{pt[0]:.3f}, {pt[1]:.3f}, {pt[2]:.3f}]"
-                            )
-                    for obs in self._forbidden_obstacles:
-                        if obs.get_distance(pt) <= 0:
-                            violations.append(
-                                f"Command target for {name} inside forbidden zone '{obs.name}': position "
-                                f"[{pt[0]:.3f}, {pt[1]:.3f}, {pt[2]:.3f}]"
-                            )
-            except (ValueError, TypeError, RuntimeError, ArithmeticError) as exc:
-                violations.append(f"FK computation error in check_command: {exc}")
-
-        # Check command Cartesian velocity
         if vel_valid and command.velocity_targets is not None:
             ref_pos = (
                 command.position_targets
                 if command.position_targets is not None
                 else np.zeros(n_joints)
             )
-            cart_vel = self._compute_cartesian_velocity(
-                ref_pos, command.velocity_targets
+            self._check_cartesian_speed(
+                ref_pos,
+                command.velocity_targets,
+                "Command Cartesian velocity",
+                violations,
             )
-            if cart_vel is not None and self.limits.max_cartesian_velocity is not None:
-                cart_speed = float(np.linalg.norm(cart_vel[:3]))
-                if cart_speed > self.limits.max_cartesian_velocity:
-                    violations.append(
-                        f"Command Cartesian velocity {cart_speed:.3f} m/s exceeds limit {self.limits.max_cartesian_velocity:.3f} m/s"
-                    )
 
         if self._emergency_stop:
             violations.append("Emergency stop active")
