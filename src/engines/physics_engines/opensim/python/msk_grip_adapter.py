@@ -40,6 +40,7 @@ from src.engines.physics_engines.opensim.python.msk_club import (
     load_calibration,
     load_msk_club,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 from src.shared.python.grip_contact import (
     BushingState,
     ClubDynamics,
@@ -168,7 +169,7 @@ def _hand_interface_transforms(
 def _try_import_opensim() -> Any | None:
     """Import ``opensim`` if available as a real runtime module."""
     try:
-        import opensim as osim
+        osim = import_opensim()
 
         if hasattr(osim, "Model"):
             return osim
