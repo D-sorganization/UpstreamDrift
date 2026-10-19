@@ -66,7 +66,6 @@ if TYPE_CHECKING:
     # Annotation only: grip_contract imports model_appearance.grip_pose, which
     # imports this package, so a module-level import closes an import cycle.
     from src.shared.python.motion_matching.grip_contract import GripSpec
-from src.shared.python.motion_matching.grip_contract import GripSpec
 
 METHOD = "allocation"
 #: Legacy overlay wrench label of the drawn palm-thumb normal force.
