@@ -18,6 +18,7 @@ from src.shared.python.grip_contact.bushing_law import (
     body_xyz_angles,
     body_xyz_n_matrix,
     bushing_wrench,
+    rotation_errors,
 )
 from src.shared.python.grip_contact.parameters import BushingParameters
 from tests.helpers.opensim_support import require_opensim
@@ -119,6 +120,44 @@ def test_preconditions() -> None:
         BushingState(2.0 * np.eye(3), np.zeros(3), np.zeros(3), np.zeros(3))
     with pytest.raises(ValueError, match="finite 3-vector"):
         BushingState(np.eye(3), np.array([np.nan, 0, 0]), np.zeros(3), np.zeros(3))
+
+
+def test_preconditions_reject_bad_shapes_and_values() -> None:
+    still = np.zeros(3)
+    with pytest.raises(ValueError, match="finite 3x3 matrix"):
+        BushingState(np.eye(2), still, still, still)
+    with pytest.raises(ValueError, match="finite 3x3 matrix"):
+        BushingState(np.full((3, 3), np.inf), still, still, still)
+    with pytest.raises(ValueError, match="velocity_m_s must be a finite 3-vector"):
+        BushingState(np.eye(3), still, np.zeros(4), still)
+    with pytest.raises(ValueError, match="omega_rad_s must be a finite 3-vector"):
+        BushingState(np.eye(3), still, still, np.array([0.0, np.inf, 0.0]))
+    # an improper rotation is orthonormal: BushingState accepts it
+    BushingState(np.diag([1.0, 1.0, -1.0]), still, still, still)
+
+
+def test_rotation_errors_match_numpy_gram_and_determinant() -> None:
+    """Python-float ``max|R^T R - I|`` and ``det R`` agree with numpy to round-off."""
+    rng = np.random.default_rng(11739)
+    for _ in range(500):
+        rot = Rotation.from_rotvec(rng.normal(size=3)).as_matrix()
+        rot = rot + rng.normal(scale=rng.choice([0.0, 1e-8, 1e-6, 1e-3]), size=(3, 3))
+        gram, det = rotation_errors(rot.tolist())
+        assert gram == pytest.approx(np.abs(rot.T @ rot - np.eye(3)).max(), abs=1e-15)
+        assert det == pytest.approx(np.linalg.det(rot), abs=1e-14)
+
+
+@pytest.mark.parametrize("scale", [0.5e-6, 2e-6])
+def test_orthonormality_threshold_is_unchanged(scale: float) -> None:
+    """``BushingState`` still accepts ``max|R^T R - I| <= 1e-6`` and rejects above."""
+    rot = np.eye(3)
+    rot[0, 0] = math.sqrt(1.0 + scale)  # column 0 squared norm is 1 + scale
+    still = np.zeros(3)
+    if scale <= 1e-6:
+        BushingState(rot, still, still, still)
+    else:
+        with pytest.raises(ValueError, match="orthonormal"):
+            BushingState(rot, still, still, still)
 
 
 # --------------------------------------------------------------- OpenSim

@@ -33,9 +33,10 @@ from src.shared.python.grip_contact.topology_contact import (
 )
 from src.shared.python.motion_matching.grip_contract import GripSpec
 
-# Every case integrates a stiff contact model (~15-50 s on a loaded host), so
-# the whole module is slow; the pure law checks live in test_topology_contact.
-pytestmark = [pytest.mark.unit, pytest.mark.requires_pinocchio, pytest.mark.slow]
+# The 0.04 s cases cost 3.2-3.7 s CPU each after the batched law (#13384) and the
+# memoised hand kinematics; the longer runs and the timestep halving stay slow.
+# The pure law checks live in test_topology_contact.
+pytestmark = [pytest.mark.unit, pytest.mark.requires_pinocchio]
 
 ROOT = Path(__file__).resolve().parents[3]
 MODELS = ROOT / "docs/development/full_body_models"
@@ -166,6 +167,7 @@ def test_pinocchio_topology_swing_replay_fast(style: GripStyle) -> None:
         assert np.all(fn_trace >= 0.0)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
@@ -222,6 +224,7 @@ def test_pinocchio_topology_timestep_halving(style: GripStyle) -> None:
     )
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
@@ -245,6 +248,7 @@ def test_pinocchio_topology_static_hold_0_2s(style: GripStyle) -> None:
         assert run.squeeze_n[side][-1] > 0.0
 
 
+@pytest.mark.slow
 @pytest.mark.timeout(600)
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
