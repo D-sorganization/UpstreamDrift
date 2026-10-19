@@ -2639,6 +2639,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13377 · Bump Vendor/Ud-Tools to Tools 96A1684 (Coriolis Christoffel Term, Tools #5664; Standard Gravity, Tools #5668)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13377
+- **Branch:** merged via #13378
+- **PR:** #13378
+- **Paths:** see #13378
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`3462c62b`; collated from changes/13377-bump-vendor-ud-tools-to-tools-96a1684-co.md)
+- **Summary:** Bump vendor/ud-tools to Tools 96a1684 (Coriolis Christoffel term, Tools #5664; standard gravity, Tools #5668)
+- **Next step:** Shipped in PR #13378.
+
 ### DL-#13159 · Fix(Lifting): Resolve Unstable Open-Loop Wrist Mode on High-Bar Rack
 
 - **State:** shipped
