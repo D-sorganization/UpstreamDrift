@@ -69,6 +69,9 @@ SCENE_PY = (
 ADAPTER_PY = (
     ROOT / "src/engines/physics_engines/myosuite/python/myohand_bilateral_adapter.py"
 )
+CONTROLLER_PY = (
+    ROOT / "src/engines/physics_engines/myosuite/python/myohand_grip_controller.py"
+)
 
 ALLOWED_HAND_SEGMENT_TOKENS = (
     "distph",
@@ -526,43 +529,30 @@ def test_club_inverse_dynamics_requirement_is_non_circular_and_sliding_cone_rati
     assert report_1x.grasp_synthesis.residual_inf_n <= 1e-9
     assert report_1x.per_hand_split_status == "INDETERMINATE"
     assert report_1x.squeeze_status == "INDETERMINATE"
+    assert report_1x.contact_regime == "quasi_stick"
+    assert report_1x.min_squeeze_for_stick_n > 0.0
+    assert report_1x.lead_squeeze_normal_force_n > report_1x.min_squeeze_for_stick_n
+    assert report_1x.trail_squeeze_normal_force_n > report_1x.min_squeeze_for_stick_n
+    assert len(report_1x.nullspace_split_vector) == 6
+    assert float(np.linalg.norm(report_1x.nullspace_split_vector)) > 0.0
 
-    # Every loaded hand-club pair sits at saturated dynamic friction:
-    # |v_t| = sqrt(0.015^2 + 0.005^2) = 0.0158114 m/s >> v_tr = 0.001 m/s,
-    # so |f_t| / (mu_s * f_n) = mu_d / mu_s = 0.7 / 0.9 = 7/9 ≈ 0.777778.
+    # Every hand-club and hand-hand pair is held in bilateral compression and
+    # regularized quasi-stick (0 < |v_t| < v_tr = 1.0 mm/s, 0 < |f_t|/(mu_s*f_n) < 1).
     law = adapter.topology_model().law
-    expected_cone_ratio = law.dynamic_friction / law.static_friction
-    hh_names = {p.name for p in adapter.topology().hand_hand_pairs()}
+    v_tr = float(law.transition_velocity_m_s)
     assert len(report_1x.friction_cone_ratios) == len(adapter.topology().pairs)
     for pair_name, ratio in report_1x.friction_cone_ratios.items():
         v_slip = report_1x.slip_velocities_m_s[pair_name]
-        if pair_name in hh_names:
-            assert np.isclose(v_slip, 0.0, atol=1e-12)
-            assert ratio is not None and np.isclose(ratio, 0.0, atol=1e-12)
-        elif ratio is not None:
-            assert np.isclose(v_slip, float(np.hypot(0.015, 0.005)), atol=1e-6)
-            assert np.isclose(ratio, expected_cone_ratio, rtol=1e-6)
+        assert ratio is not None, f"Expected active compression on {pair_name}"
+        assert 0.0 < ratio < 0.25, (
+            f"Expected quasi-stick cone ratio < 0.25 on {pair_name}, got {ratio}"
+        )
+        assert 0.0 < v_slip < v_tr, (
+            f"Expected quasi-stick micro-slip < {v_tr} m/s on {pair_name}, got {v_slip}"
+        )
 
 
 @pytest.mark.requires_mujoco
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "build_prescribed_grip_trajectory prescribes independent hand and club kinematics "
-        "with unidirectional -y_grip compression (-1.5 to -1.8 mm, unloading the 5 palm/heel "
-        "pads) and tangential relative slip |v_t| up to 15.811 mm/s >> v_tr = 1.0 mm/s, "
-        "driving all loaded hand-club pads into saturated sliding friction (|f_t|=mu_d*f_n, "
-        "|F_hand| ~ 2140-2568 N) rather than the small club inverse-dynamics requirement "
-        "m*(a_com - g) (~3.45 N driver, ~4.56 N iron). Measured (force_peak_rel_error, "
-        "force_rms_rel_error) and (moment_peak_rel_error, moment_rms_rel_error): "
-        "driver overlap/interlock (596.59, 509.84) and (1814.00, 1530.33); "
-        "driver ten_finger (716.11, 611.94) and (2182.02, 1840.83); "
-        "iron overlap/interlock (449.56, 384.21) and (1584.99, 1328.52); "
-        "iron ten_finger (539.67, 461.19) and (1907.68, 1599.07) "
-        "(exceeding PEAK_TOLERANCE=0.05, RMS_TOLERANCE=0.02)."
-    ),
-)
 @pytest.mark.parametrize(
     "model_id",
     [
@@ -613,7 +603,9 @@ def test_dbc_preconditions_and_missing_assets(tmp_path: Path) -> None:
     pytest.importorskip("mujoco")
     _require_myohand_assets()
     from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
+        ClubInertialProperties,
         MyoHandBilateralGripAdapter,
+        solve_force_regulated_hand_frames,
     )
     from src.engines.physics_engines.myosuite.python.myohand_bilateral_scene import (
         check_myohand_assets_available,
@@ -637,6 +629,20 @@ def test_dbc_preconditions_and_missing_assets(tmp_path: Path) -> None:
             squeeze_n=-10.0,
         )
 
+    with pytest.raises(ValueError, match="mass_kg"):
+        ClubInertialProperties(
+            mass_kg=0.0,
+            com_local_m=(0.0, -0.2, 0.0),
+            inertia_com_kg_m2=np.eye(3),
+        )
+
+    with pytest.raises(TypeError, match="topology_model"):
+        solve_force_regulated_hand_frames(
+            "not_a_model",  # type: ignore[arg-type]
+            {},
+            np.zeros(6),
+        )
+
 
 def _attribute_chain_depth(node: ast.AST) -> int:
     depth = 0
@@ -656,7 +662,7 @@ def _attribute_chain_depth(node: ast.AST) -> int:
 
 def test_ast_file_function_and_lod_budgets() -> None:
     """Enforce <= 1200 lines/file, <= 100 lines and <= 8 params/fn, <= 2 dots LoD."""
-    for path in (SCENE_PY, ADAPTER_PY):
+    for path in (SCENE_PY, ADAPTER_PY, CONTROLLER_PY):
         assert path.is_file(), f"Missing implementation file: {path}"
         source = path.read_text(encoding="utf-8")
         lines = source.splitlines()
