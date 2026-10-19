@@ -10,6 +10,15 @@ from src.shared.python.grip_contact.closure_series import (
     closure_series_from_residuals,
 )
 from src.shared.python.grip_contact.club_dynamics import ClubDynamics
+from src.shared.python.grip_contact.contact_topology import (
+    GRIP,
+    ContactPair,
+    ContactSite,
+    ContactTopology,
+    GripStyle,
+    HandAnatomy,
+    contact_topology,
+)
 from src.shared.python.grip_contact.damping import (
     DEFAULT_DAMPING_RATIO,
     design_damping,
@@ -63,12 +72,19 @@ __all__ = [
     "BushingState",
     "BushingWrench",
     "ContactCapsule",
+    "ContactPair",
+    "ContactSite",
     "ContactSphere",
+    "ContactTopology",
     "CoordinateSpline",
+    "GRIP",
+    "GripStyle",
+    "HandAnatomy",
     "PairWrench",
     "RigidBodyState",
     "bushing_wrench",
     "capsule_capsule",
+    "contact_topology",
     "hand_frame_states",
     "sphere_capsule",
     "GripClosureSeries",
