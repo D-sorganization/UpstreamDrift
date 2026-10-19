@@ -154,7 +154,8 @@
           },
           "lead_below_butt_m": 0.032,
           "hand_spacing_m": 0.0762,
-          "handedness": "right"
+          "handedness": "right",
+          "style": "ten_finger"
         },
         "sidecar_grip": {
           "style": "ten_finger"
