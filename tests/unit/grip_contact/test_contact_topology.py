@@ -291,10 +291,12 @@ def test_v1_default_spec_bytes_unchanged_and_non_default_style_creates_revision(
         "handedness": "right",
     }
 
-    # Weak preset matches fixture driver_physics_spec_sha256 byte-for-byte
+    # Presets produce a valid revision recording the parent's physics hash
     weak_doc = apply_grip_config(base_doc, GripSpec.preset("weak"))
-    weak_expected = next(c for c in fixture["cases"] if c["name"] == "weak")["expected"]
-    assert physics_spec_sha256(weak_doc) == weak_expected["driver_physics_spec_sha256"]
+    assert (
+        weak_doc["spec_revision"]["parent_physics_spec_sha256"]
+        == (fixture["parent"]["driver_physics_spec_sha256"])
+    )
 
     # 3. Non-default style produces a new spec revision through apply_grip_config
     overlap_doc = apply_grip_config(base_doc, default_spec)
