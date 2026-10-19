@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-19 | #13435 | Retrofit Drake golfer joint actuators when URDF omits transmissions; fail closed on unwired torque (#13421). |
+| 2026-10-19 | #13436 | Lock baseline receipt provenance to tibial-torsion anthropometry (#12789 closure). |
 | 2026-10-19 | #13414 | Pinocchio grip-contact adapter from shared topology (HRG-GS-G6) |
 | 2026-10-19 | #13430 | Docker CI builds on the host's shared ud-buildkit builder (one layer cache per host); per-runner local cache import/export removed, cold throwaway-builder fallback |
 | 2026-10-19 | #13431 | Bench press supine OpenSim IK/ID with bench contact support |

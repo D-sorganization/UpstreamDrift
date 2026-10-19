@@ -2652,6 +2652,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13421 · Retrofit Drake Golfer Joint Actuators When URDF Omits Transmissions; Fail Closed on Unwired Torque (#13421).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13421
+- **Branch:** merged via #13435
+- **PR:** #13435
+- **Paths:** see #13435
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`9f93fa1e`; collated from changes/13421-retrofit-drake-golfer-joint-actuators-wh.md)
+- **Summary:** Retrofit Drake golfer joint actuators when URDF omits transmissions; fail closed on unwired torque (#13421).
+- **Next step:** Shipped in PR #13435.
+
 ### DL-#13304 · Pinocchio Grip-Contact Adapter From Shared Topology (HRG-GS-G6)
 
 - **State:** shipped
@@ -4101,10 +4114,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12789
 - **Branch:** merged via #12814
-- **PR:** #12814
+- **PR:** #12814, #13436
 - **Paths:** see #12814
 - **Started:** 2026-10-17
-- **Last verified:** 2026-10-17 (`72a4f96c`; collated from changes/12789-static-10-deg-external-tibial-torsion-of.md)
+- **Last verified:** 2026-10-19 (`148e34f5`; collated from changes/12789-lock-baseline-receipt-provenance-to-tibi.md)
 - **Summary:** Static 10 deg external tibial-torsion offset in the shared full-body spec (ankle base frames, cited Seber 2000 range); 7-iron trail toe-out reaches 19.97 deg with hip_rotation_r off its limit; the four canonical ground-support receipts are regenerated on the default style feet (calibrated 7-iron dynamics 64.35 mm, G3 passes)
 - **Next step:** Shipped in PR #12814.
 
