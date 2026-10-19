@@ -44,7 +44,14 @@ from src.shared.python.grip_contact.force_decomposition import (
     ForceDecomposition,
     decompose_hand_forces,
 )
-from src.shared.python.grip_contact.interface import GripFrame, GripInterface
+from src.shared.python.grip_contact.interface import (
+    R_APPEARANCE_TO_SHARED,
+    R_SHARED_TO_APPEARANCE,
+    GripFrame,
+    GripInterface,
+    appearance_to_shared_grip_frame,
+    shared_to_appearance_grip_frame,
+)
 from src.shared.python.grip_contact.pair_contact import (
     ContactCapsule,
     ContactSphere,
@@ -119,6 +126,10 @@ __all__ = [
     "ForceDecomposition",
     "GripFrame",
     "GripInterface",
+    "R_APPEARANCE_TO_SHARED",
+    "R_SHARED_TO_APPEARANCE",
+    "appearance_to_shared_grip_frame",
+    "shared_to_appearance_grip_frame",
     "condition_trajectory",
     "decompose_hand_forces",
     "default_bushing",

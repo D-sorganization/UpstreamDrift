@@ -42,6 +42,10 @@ from src.shared.python.core.handedness import (
     trail_side,
     validate_handedness,
 )
+from src.shared.python.grip_contact.interface import (
+    appearance_to_shared_grip_frame,
+    shared_to_appearance_grip_frame,
+)
 from src.shared.python.model_appearance.grip_hand_mesh import (
     DEFAULT_HAND_MESH_PARAMS,
     GRIP_RADIUS_RANGE_M,
@@ -131,22 +135,38 @@ def _palm_reference(
     return palm.mesh.vertices.mean(axis=0) + np.array([0.0, 0.0, shift])
 
 
-def _patch_in_hand_frame(
+def _patch_in_shared_frame(
     grip_radius_m: float, pose: GripPose, params: HandMeshParams
 ) -> tuple[Array, Array, Array, Array]:
-    """(point, normal, palm reference, thumb axis point) of a right-handed grip."""
+    """(point, normal, palm reference, thumb axis point) in the shared grip frame (x = grip axis)."""
     k = params.scale
     radius = k * params.thumb_radius_m
     azimuth = math.radians(pose.placement(Hand.LEAD).thumb_offset_deg)
     offset = grip_radius_m + params.pad_clearance_m + radius
-    axis_xy = offset * np.array([math.cos(azimuth), math.sin(azimuth)])
-    palm = _palm_reference(grip_radius_m, pose, params)
-    z_lo, z_hi = k * params.thumb_stations_m[0], k * params.thumb_stations_m[2]
-    station = float(np.clip(palm[2], z_lo, z_hi))
-    axis_point = np.array([axis_xy[0], axis_xy[1], station])
+    axis_yz = offset * np.array([math.cos(azimuth), math.sin(azimuth)])
+    palm_app = _palm_reference(grip_radius_m, pose, params)
+    palm = appearance_to_shared_grip_frame(palm_app)
+    x_lo, x_hi = k * params.thumb_stations_m[0], k * params.thumb_stations_m[2]
+    station = float(np.clip(palm[0], x_lo, x_hi))
+    axis_point = np.array([station, axis_yz[0], axis_yz[1]])
     toward = palm - axis_point
     normal = toward / np.linalg.norm(toward)
     return axis_point + radius * normal, normal, palm, axis_point
+
+
+def _patch_in_hand_frame(
+    grip_radius_m: float, pose: GripPose, params: HandMeshParams
+) -> tuple[Array, Array, Array, Array]:
+    """(point, normal, palm reference, thumb axis point) of a right-handed grip."""
+    p_shared, n_shared, palm_shared, axis_shared = _patch_in_shared_frame(
+        grip_radius_m, pose, params
+    )
+    return (
+        shared_to_appearance_grip_frame(p_shared),
+        shared_to_appearance_grip_frame(n_shared),
+        shared_to_appearance_grip_frame(palm_shared),
+        shared_to_appearance_grip_frame(axis_shared),
+    )
 
 
 def thumb_palm_patch(
