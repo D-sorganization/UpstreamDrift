@@ -2652,6 +2652,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13304 · Pinocchio Grip-Contact Adapter From Shared Topology (HRG-GS-G6)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13304
+- **Branch:** merged via #13414
+- **PR:** #13414
+- **Paths:** see #13414
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`d7005811`; collated from changes/13304-pinocchio-grip-contact-adapter.md)
+- **Summary:** Pinocchio grip-contact adapter from shared topology (HRG-GS-G6)
+- **Next step:** Shipped in PR #13414.
+
 ### DL-#12941 · Repo-Manage Docker-Cache-Prune Host Script With Keep-Label Spare and Contract Tests
 
 - **State:** shipped
@@ -2710,10 +2723,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13208
 - **Branch:** merged via #13277
-- **PR:** #13277
+- **PR:** #13277, #13430
 - **Paths:** see #13277
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`8895cafc`; collated from changes/13208-add-scripts-ci-shared-buildkit-py-idempo.md)
+- **Last verified:** 2026-10-19 (`dbbc5eb4`; collated from changes/13208-docker-ci-builds-on-the-host-s-shared-ud.md)
 - **Summary:** Add scripts/ci/shared_buildkit.py: idempotent, flock-serialised manager for one persistent GC-bounded BuildKit builder per host (create/upgrade/repair, cold-build fallback)
 - **Next step:** Shipped in PR #13277.
 
@@ -3724,10 +3737,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13041
 - **Branch:** merged via #13047
-- **PR:** #13047, #13404
+- **PR:** #13047, #13404, #13431
 - **Paths:** see #13047
 - **Started:** 2026-10-18
-- **Last verified:** 2026-10-19 (`895916b1`; collated from changes/13041-add-barbell-bundles-and-opensim-ik-id-re.md)
+- **Last verified:** 2026-10-19 (`9866f8c1`; collated from changes/13041-bench-press-supine-opensim-ik-id-with-be.md)
 - **Summary:** Lift body and every derived lift input (squat on the OSL-17 rack, deadlift, clean, snatch, bench) regenerated on the whole-row de Leva table (#13037) with main's tibial torsion; regression-snapshot IK bounds re-derived; bundle builder picks RK4-stable substeps (deadlift 8 -> 16, parity xfail removed); follow-ups OSL-18 #13157 (foot torsion marker gate, strict xfail), OSL-19 #13158 (arm reach), OSL-20 #13159 (open-loop wrist mode)
 - **Next step:** Shipped in PR #13047.
 
@@ -5141,10 +5154,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12761
 - **Branch:** merged via #12796
-- **PR:** #12796, #12958
+- **PR:** #12796, #12958, #13429
 - **Paths:** see #12796
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-17 (`aa63c0da`; collated from changes/12761-opt-in-muscle-model-policy-and-unlock-dr.md)
+- **Last verified:** 2026-10-19 (`9969c0aa`; collated from changes/12761-record-native-bruno-capture-a-runs-pelvi.md)
 - **Summary:** SPN-10b: trunk static optimisation with cost exponent p in {2,3}, lexicographic reserves with flagging, shared numeric core with the leg SO, per-coordinate ID accessor
 - **Next step:** Shipped in PR #12796.
 
