@@ -2741,6 +2741,7 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-19 | #13366 | ci(quality-gate): aggregate frontend-tests and the other gating CI Standard jobs so a red job blocks the merge queue |
 | 2026-10-19 | #13361 | fix(ui): include physical style in resolveGrip to resolve red main on frontend-tests |
 | 2026-10-19 | #13358 | fix(launcher): renumber jaxsim_dashboard to order 105 to resolve duplicate tile order 33 |
 | 2026-10-19 | #13359 | fix(data_io): make c3d_loader resilient to sidekick.lab.bio test pollution |
