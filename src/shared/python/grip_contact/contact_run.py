@@ -43,6 +43,7 @@ class ContactRun:
     channel_reasons: Mapping[str, str] | None = None
     hand_states: Mapping[str, list[Any]] | None = None
     club_states: Mapping[str, list[Any]] | None = None
+    pair_contact_point_drift_m: Mapping[str, np.ndarray] | None = None
 
     @property
     def squeeze_n(self) -> dict[str, np.ndarray]:
@@ -67,6 +68,9 @@ class ContactRun:
         if self.pair_tangential_force_n is not None:
             for k, v in self.pair_tangential_force_n.items():
                 extra[f"pair_tangential_force_n:{k}"] = np.asarray(v)
+        if self.pair_contact_point_drift_m is not None:
+            for k, v in self.pair_contact_point_drift_m.items():
+                extra[f"pair_contact_point_drift_m:{k}"] = np.asarray(v)
         np.savez_compressed(path.with_suffix(".contact.npz"), **extra)
 
     @classmethod
@@ -90,6 +94,11 @@ class ContactRun:
                 for k in data.files
                 if k.startswith("pair_tangential_force_n:")
             }
+            pair_drift = {
+                k[len("pair_contact_point_drift_m:") :]: np.asarray(data[k])
+                for k in data.files
+                if k.startswith("pair_contact_point_drift_m:")
+            }
             return cls(
                 series,
                 {s: np.asarray(data[f"normal_force_{s}_n"]) for s in SIDES},
@@ -98,6 +107,7 @@ class ContactRun:
                 tangential_force_n=tangential,
                 pair_normal_force_n=pair_normal or None,
                 pair_tangential_force_n=pair_tangential or None,
+                pair_contact_point_drift_m=pair_drift or None,
             )
 
 

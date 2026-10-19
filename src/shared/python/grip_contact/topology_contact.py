@@ -45,6 +45,7 @@ from src.shared.python.grip_contact.pair_contact import (
     ContactSphere,
     PairWrench,
     capsule_capsule,
+    closest_point_segment,
     sphere_capsule,
 )
 from src.shared.python.motion_matching.contact_law import ContactParameters
@@ -484,6 +485,19 @@ def build_topology_model(
     return TopologyContactModel.from_pad_model(pads, topo)
 
 
+def _contact_point_in_club_frame(
+    c_in_club: np.ndarray,
+    radius_m: float,
+    grip_cap: ContactCapsule,
+) -> np.ndarray:
+    """Project site center ``c_in_club`` onto ``grip_cap`` in the club grip frame."""
+    p_axis, _ = closest_point_segment(c_in_club, grip_cap.p0_m, grip_cap.p1_m)
+    diff = p_axis - c_in_club
+    dist = float(np.linalg.norm(diff))
+    normal = diff / dist if dist > 1e-12 else np.array([0.0, 0.0, 1.0])
+    return c_in_club + radius_m * normal
+
+
 class PairTraceRecorder:
     """Engine-agnostic per-step pair trace and state recorder (HRG-GS-G6, #13304).
 
@@ -511,6 +525,28 @@ class PairTraceRecorder:
         self._pair_tangential: dict[str, list[float]] = {
             p.name: [] for p in model.topology.pairs
         }
+        self._pair_drift: dict[str, list[float]] = {
+            p.name: [] for p in model.topology.pairs
+        }
+        self._nominal_site_info: dict[
+            str, tuple[str, np.ndarray, float, ContactCapsule, np.ndarray]
+        ] = {}
+        for side in SIDES:
+            gcap = model.grip_capsule(side)
+            for pair, prim_a in model.physical_pair_primitives(side):
+                c_hand = (
+                    prim_a.center_m
+                    if isinstance(prim_a, ContactSphere)
+                    else 0.5 * (prim_a.p0_m + prim_a.p1_m)
+                )
+                p_nom = _contact_point_in_club_frame(c_hand, prim_a.radius_m, gcap)
+                self._nominal_site_info[pair.name] = (
+                    side,
+                    c_hand,
+                    prim_a.radius_m,
+                    gcap,
+                    p_nom,
+                )
         self._channel_reasons: dict[str, str] = {
             p.name: (
                 "hand-hand pairs are allocated, not physical forces under prescribed hand motion"
@@ -521,13 +557,31 @@ class PairTraceRecorder:
         self._hand_states: dict[str, list[Any]] = {s: [] for s in SIDES}
         self._club_states: dict[str, list[Any]] = {s: [] for s in SIDES}
 
+    def _pair_contact_drift_m(
+        self,
+        pname: str,
+        hand_frames: Mapping[str, Any],
+        club_frames: Mapping[str, Any],
+    ) -> float:
+        """Compute Euclidean contact-point drift (m) in the club grip frame."""
+        side, c_hand, r_site, gcap, p_nom = self._nominal_site_info[pname]
+        hf = hand_frames[side]
+        cf = club_frames[side]
+        h_rot = np.asarray(hf.rotation, dtype=float)
+        h_pos = np.asarray(hf.position_m, dtype=float)
+        c_rot = np.asarray(cf.rotation, dtype=float)
+        c_pos = np.asarray(cf.position_m, dtype=float)
+        c_in_club = c_rot.T @ (h_pos + h_rot @ c_hand - c_pos)
+        p_cur = _contact_point_in_club_frame(c_in_club, r_site, gcap)
+        return float(np.linalg.norm(p_cur - p_nom))
+
     def record(
         self,
         side_wrenches: Mapping[str, TopologySideWrench],
         hand_frames: Mapping[str, Any],
         club_frames: Mapping[str, Any],
     ) -> None:
-        """Append one sample of pair forces and frame states.
+        """Append one sample of pair forces, contact-point drift, and frame states.
 
         Preconditions:
             Every pair in ``model.topology`` must be recorded exactly once.
@@ -547,6 +601,9 @@ class PairTraceRecorder:
                 recorded_pairs.add(pname)
                 self._pair_normal[pname].append(float(pw.normal_force_mag_n))
                 self._pair_tangential[pname].append(float(pw.tangential_force_mag_n))
+                self._pair_drift[pname].append(
+                    self._pair_contact_drift_m(pname, hand_frames, club_frames)
+                )
 
         for pname in self._hand_hand_pair_names:
             if pname in recorded_pairs:
@@ -556,6 +613,7 @@ class PairTraceRecorder:
             recorded_pairs.add(pname)
             self._pair_normal[pname].append(float("nan"))
             self._pair_tangential[pname].append(float("nan"))
+            self._pair_drift[pname].append(float("nan"))
 
         if len(recorded_pairs) != len(self._all_pair_names):
             missing = self._all_pair_names - recorded_pairs
@@ -575,6 +633,9 @@ class PairTraceRecorder:
             "pair_tangential_force_n": {
                 p: np.asarray(vals, dtype=float)
                 for p, vals in self._pair_tangential.items()
+            },
+            "pair_contact_point_drift_m": {
+                p: np.asarray(vals, dtype=float) for p, vals in self._pair_drift.items()
             },
             "channel_reasons": dict(self._channel_reasons),
             "hand_states": {s: list(states) for s, states in self._hand_states.items()},

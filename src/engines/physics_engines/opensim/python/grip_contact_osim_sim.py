@@ -253,6 +253,7 @@ class OpenSimContactRun(BushingRun):
     channel_reasons: Mapping[str, str] | None = None
     hand_states: Mapping[str, list[Any]] | None = None
     club_states: Mapping[str, list[Any]] | None = None
+    pair_contact_point_drift_m: Mapping[str, np.ndarray] | None = None
 
     @property
     def squeeze_n(self) -> dict[str, np.ndarray]:
@@ -282,6 +283,7 @@ class OpenSimContactRun(BushingRun):
             channel_reasons=self.channel_reasons,
             hand_states=self.hand_states,
             club_states=self.club_states,
+            pair_contact_point_drift_m=self.pair_contact_point_drift_m,
         )
 
 
@@ -745,6 +747,7 @@ class ContactGripSimulator(BushingGripSimulator):
             channel_reasons=extra.get("channel_reasons"),
             hand_states=extra.get("hand_states"),
             club_states=extra.get("club_states"),
+            pair_contact_point_drift_m=extra.get("pair_contact_point_drift_m"),
         )
 
 
