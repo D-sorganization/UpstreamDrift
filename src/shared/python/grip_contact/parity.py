@@ -56,13 +56,20 @@ PARITY_QUANTITIES = (
 
 __all__ = [
     "PARITY_QUANTITIES",
+    "PARITY_STATUSES",
     "PEAK_TOLERANCE",
     "RMS_TOLERANCE",
     "BushingProbe",
+    "ChannelParityResult",
     "GripKineticsSeries",
     "QuantityError",
+    "TopologyParityReport",
+    "compare_topology_series",
+    "compute_quantity_error",
     "parity_errors",
 ]
+
+PARITY_STATUSES = ("passed", "failed", "unavailable")
 
 
 def _per_side(name: str, value: Mapping[str, Any], shape: tuple[int, ...]) -> dict:
@@ -293,6 +300,37 @@ class QuantityError:
         }
 
 
+def compute_quantity_error(
+    candidate: np.ndarray,
+    reference: np.ndarray,
+    *,
+    name: str = "quantity",
+    allow_zero_reference: bool = False,
+) -> QuantityError:
+    """Compute peak and RMS error of ``candidate`` against ``reference``."""
+    cand_arr = np.asarray(candidate, dtype=float)
+    ref_arr = np.asarray(reference, dtype=float)
+    x = cand_arr.reshape(cand_arr.shape[0], -1)
+    x_ref = ref_arr.reshape(ref_arr.shape[0], -1)
+    mag = np.linalg.norm(x, axis=1)
+    mag_ref = np.linalg.norm(x_ref, axis=1)
+    peak_ref = float(mag_ref.max())
+    peak_cand = float(mag.max())
+    if peak_ref <= 0.0:
+        if not allow_zero_reference:
+            raise ValueError(f"reference peak of {name} is zero")
+        if peak_cand <= 1e-15:
+            return QuantityError(0.0, peak_cand, 0.0, 0.0)
+        return QuantityError(0.0, peak_cand, float("inf"), float("inf"))
+    rms = float(np.sqrt(np.mean(np.sum((x - x_ref) ** 2, axis=1))))
+    return QuantityError(
+        peak_reference=peak_ref,
+        peak_candidate=peak_cand,
+        peak_error=abs(peak_cand - peak_ref) / peak_ref,
+        rms_error=rms / peak_ref,
+    )
+
+
 def parity_errors(
     candidate: GripKineticsSeries,
     reference: GripKineticsSeries,
@@ -310,18 +348,299 @@ def parity_errors(
         raise ValueError("candidate and reference must share their sample times")
     keep = np.ones(t.size, bool) if t_end_s is None else t <= t_end_s + 1e-12
     cand, ref = candidate.quantities(), reference.quantities()
-    out = {}
-    for name in PARITY_QUANTITIES:
-        x, x_ref = cand[name][keep], ref[name][keep]
-        mag, mag_ref = np.linalg.norm(x, axis=1), np.linalg.norm(x_ref, axis=1)
-        peak_ref = float(mag_ref.max())
-        if peak_ref <= 0.0:
-            raise ValueError(f"reference peak of {name} is zero")
-        rms = float(np.sqrt(np.mean(np.sum((x - x_ref) ** 2, axis=1))))
-        out[name] = QuantityError(
-            peak_reference=peak_ref,
-            peak_candidate=float(mag.max()),
-            peak_error=abs(float(mag.max()) - peak_ref) / peak_ref,
-            rms_error=rms / peak_ref,
+    return {
+        name: compute_quantity_error(
+            cand[name][keep], ref[name][keep], name=name, allow_zero_reference=False
+        )
+        for name in PARITY_QUANTITIES
+    }
+
+
+@dataclass(frozen=True)
+class ChannelParityResult:
+    """Three-state parity outcome for a single topology channel."""
+
+    channel: str
+    status: str
+    passed: bool
+    label: str = "physical"
+    error: QuantityError | None = None
+    reason: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.status not in PARITY_STATUSES:
+            raise ValueError(
+                f"status must be one of {PARITY_STATUSES}, got {self.status!r}"
+            )
+        if self.status == "passed" and not self.passed:
+            raise ValueError("passed must be True when status == 'passed'")
+        if self.status != "passed" and self.passed:
+            raise ValueError("passed must be False when status != 'passed'")
+        if self.status == "unavailable" and not (
+            isinstance(self.reason, str) and self.reason.strip()
+        ):
+            raise ValueError("unavailable channel must carry a non-empty reason")
+
+    @property
+    def state(self) -> str:
+        """Alias for :attr:`status`."""
+        return self.status
+
+    def passes(self) -> bool:
+        """True only when ``status == 'passed'``."""
+        return self.passed
+
+    def to_dict(self) -> dict[str, Any]:
+        """JSON-ready representation of the channel parity result."""
+        err_dict = None if self.error is None else self.error.to_dict()
+        return {
+            "channel": self.channel,
+            "status": self.status,
+            "passed": self.passed,
+            "label": self.label,
+            "reason": self.reason,
+            "error": err_dict,
+        }
+
+
+@dataclass(frozen=True)
+class TopologyParityReport:
+    """Three-state parity report comparing candidate and reference topology series."""
+
+    status: str
+    passed: bool
+    channels: Mapping[str, ChannelParityResult]
+    allocated_channels: Mapping[str, ChannelParityResult] = field(default_factory=dict)
+    unavailable_reasons: Mapping[str, str] = field(default_factory=dict)
+    reason: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.status not in PARITY_STATUSES:
+            raise ValueError(
+                f"status must be one of {PARITY_STATUSES}, got {self.status!r}"
+            )
+        if self.status == "passed" and not self.passed:
+            raise ValueError("passed must be True when status == 'passed'")
+        if self.status != "passed" and self.passed:
+            raise ValueError("passed must be False when status != 'passed'")
+
+    @property
+    def physical_channels(self) -> Mapping[str, ChannelParityResult]:
+        """Alias for :attr:`channels`."""
+        return self.channels
+
+    @property
+    def allocated(self) -> Mapping[str, ChannelParityResult]:
+        """Alias for :attr:`allocated_channels`."""
+        return self.allocated_channels
+
+    def passes(self) -> bool:
+        """True only when all required physical channels pass."""
+        return self.passed
+
+    def to_dict(self) -> dict[str, Any]:
+        """JSON-ready representation of the full parity report."""
+        return {
+            "status": self.status,
+            "passed": self.passed,
+            "reason": self.reason,
+            "unavailable_reasons": dict(self.unavailable_reasons),
+            "channels": {k: v.to_dict() for k, v in self.channels.items()},
+            "allocated_channels": {
+                k: v.to_dict() for k, v in self.allocated_channels.items()
+            },
+        }
+
+
+def _evaluate_one_channel(
+    channel_key: str,
+    kind: str,
+    item_name: str,
+    ref_map: Mapping[str, np.ndarray],
+    cand_map: Mapping[str, np.ndarray],
+    reference: Any,
+    candidate: Any,
+    label: str,
+) -> ChannelParityResult:
+    """Compare one channel between ``reference`` and ``candidate``."""
+    if item_name not in ref_map or item_name not in cand_map:
+        missing_side = "reference" if item_name not in ref_map else "candidate"
+        return ChannelParityResult(
+            channel=channel_key,
+            status="unavailable",
+            passed=False,
+            label=label,
+            reason=f"missing channel {channel_key!r} in {missing_side}",
+        )
+    ref_arr = ref_map[item_name]
+    cand_arr = cand_map[item_name]
+    if bool(np.isnan(ref_arr).any()) or bool(np.isnan(cand_arr).any()):
+        reason = (
+            candidate.reason_for(kind, item_name)
+            or reference.reason_for(kind, item_name)
+            or f"NaN in channel {channel_key!r}"
+        )
+        return ChannelParityResult(
+            channel=channel_key,
+            status="unavailable",
+            passed=False,
+            label=label,
+            reason=reason,
+        )
+    err = compute_quantity_error(
+        cand_arr, ref_arr, name=channel_key, allow_zero_reference=True
+    )
+    ok = err.passes()
+    return ChannelParityResult(
+        channel=channel_key,
+        status="passed" if ok else "failed",
+        passed=ok,
+        label=label,
+        error=err,
+    )
+
+
+def _compare_pair_channels(
+    pair_name: str,
+    reference: Any,
+    candidate: Any,
+    label: str,
+) -> dict[str, ChannelParityResult]:
+    """Compare normal, tangential, and spin channels for ``pair_name``."""
+    specs = (
+        ("normal", reference.pair_normal_force_n, candidate.pair_normal_force_n),
+        (
+            "tangential",
+            reference.pair_tangential_force_n,
+            candidate.pair_tangential_force_n,
+        ),
+        ("spin", reference.pair_spin_moment_nm, candidate.pair_spin_moment_nm),
+    )
+    out: dict[str, ChannelParityResult] = {}
+    for kind, ref_map, cand_map in specs:
+        ch_key = f"{kind}:{pair_name}"
+        out[ch_key] = _evaluate_one_channel(
+            ch_key, kind, pair_name, ref_map, cand_map, reference, candidate, label
         )
     return out
+
+
+def _compare_resultant_channels(
+    reference: Any,
+    candidate: Any,
+) -> dict[str, ChannelParityResult]:
+    """Compare per-hand resultant force and moment channels."""
+    out: dict[str, ChannelParityResult] = {}
+    for s in SIDES:
+        f_key = f"force_{s}"
+        out[f_key] = _evaluate_one_channel(
+            f_key,
+            "force",
+            s,
+            reference.force_on_club_n,
+            candidate.force_on_club_n,
+            reference,
+            candidate,
+            "physical",
+        )
+        m_key = f"moment_{s}"
+        out[m_key] = _evaluate_one_channel(
+            m_key,
+            "moment",
+            s,
+            reference.moment_on_club_nm,
+            candidate.moment_on_club_nm,
+            reference,
+            candidate,
+            "physical",
+        )
+    return out
+
+
+def compare_topology_series(
+    reference: Any,
+    candidate: Any,
+) -> TopologyParityReport:
+    """Compare ``candidate`` against ``reference`` with a 3-state availability envelope."""
+    t_ref = reference.time_s
+    t_cand = candidate.time_s
+    if t_cand.shape != t_ref.shape or not bool(np.allclose(t_cand, t_ref, atol=1e-9)):
+        raise ValueError("candidate and reference must share their sample times")
+
+    if reference.mapping_hash != candidate.mapping_hash:
+        mismatch_reason = "mapping hash mismatch"
+        return TopologyParityReport(
+            status="unavailable",
+            passed=False,
+            channels={},
+            allocated_channels={},
+            unavailable_reasons={"mapping_hash": mismatch_reason},
+            reason=mismatch_reason,
+        )
+
+    ref_labels = reference.labels
+    cand_labels = candidate.labels
+    all_pairs = list(dict.fromkeys([*ref_labels.keys(), *cand_labels.keys()]))
+
+    channels: dict[str, ChannelParityResult] = {}
+    allocated_channels: dict[str, ChannelParityResult] = {}
+
+    for p_name in all_pairs:
+        r_lbl = ref_labels.get(p_name)
+        c_lbl = cand_labels.get(p_name)
+        if r_lbl == "allocated" and c_lbl == "allocated":
+            allocated_channels.update(
+                _compare_pair_channels(p_name, reference, candidate, "allocated")
+            )
+        elif r_lbl == "physical" and c_lbl == "physical":
+            channels.update(
+                _compare_pair_channels(p_name, reference, candidate, "physical")
+            )
+        elif r_lbl == "physical" or c_lbl == "physical":
+            for kind in ("normal", "tangential", "spin"):
+                ch_key = f"{kind}:{p_name}"
+                channels[ch_key] = ChannelParityResult(
+                    channel=ch_key,
+                    status="unavailable",
+                    passed=False,
+                    label="physical",
+                    reason=(
+                        f"missing or mismatched pair {p_name!r} "
+                        f"(reference={r_lbl!r}, candidate={c_lbl!r})"
+                    ),
+                )
+
+    channels.update(_compare_resultant_channels(reference, candidate))
+
+    unavail = {
+        k: v.reason
+        for k, v in channels.items()
+        if v.status == "unavailable" and v.reason is not None
+    }
+    if unavail:
+        first_reason = next(iter(unavail.values()))
+        return TopologyParityReport(
+            status="unavailable",
+            passed=False,
+            channels=channels,
+            allocated_channels=allocated_channels,
+            unavailable_reasons=unavail,
+            reason=first_reason,
+        )
+    if any(v.status == "failed" for v in channels.values()):
+        return TopologyParityReport(
+            status="failed",
+            passed=False,
+            channels=channels,
+            allocated_channels=allocated_channels,
+            unavailable_reasons={},
+            reason=None,
+        )
+    return TopologyParityReport(
+        status="passed",
+        passed=True,
+        channels=channels,
+        allocated_channels=allocated_channels,
+        unavailable_reasons={},
+        reason=None,
+    )

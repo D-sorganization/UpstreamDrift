@@ -588,6 +588,21 @@ class GripStepReport:
             net = net + force
         return float(np.linalg.norm(net))
 
+    def applied_allocated_force_n(self) -> float:
+        """Total force magnitude (N) from allocated pairs in ``pair_wrenches``.
+
+        Postconditions:
+            Equals ``0.0`` in every valid physical evaluation because allocated
+            pairs are reporting-only and never enter ``pair_wrenches`` or
+            ``body_wrenches()``.
+        """
+        total = 0.0
+        labels = self.pair_labels
+        for pair_name, pw in self.pair_wrenches.items():
+            if labels.get(pair_name) == "allocated":
+                total += float(np.linalg.norm(pw.force_b_n))
+        return total
+
 
 def _extract_rigid_state(states: Mapping[str, Any], body_id: str) -> RigidBodyState:
     """Convert ``states[body_id]`` into a validated :class:`RigidBodyState`."""
@@ -943,5 +958,11 @@ def apply_report(adapter: ModelGripAdapter, report: GripStepReport) -> None:
         _raise_unavailable(
             "wrench_application",
             "adapter does not support external wrench application",
+        )
+    allocated_force = report.applied_allocated_force_n()
+    if allocated_force != 0.0:
+        raise ValueError(
+            "allocated pairs must never be applied physically; "
+            f"got applied allocated force {allocated_force} N"
         )
     adapter.apply_wrenches(report.body_wrenches())

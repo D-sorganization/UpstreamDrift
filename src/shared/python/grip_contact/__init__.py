@@ -73,12 +73,21 @@ from src.shared.python.grip_contact.binding import (
     site_transform_in_hand_frame,
     validate_binding,
 )
+from src.shared.python.grip_contact.parity import (
+    ChannelParityResult,
+    TopologyParityReport,
+    compare_topology_series,
+)
 from src.shared.python.grip_contact.topology_contact import (
     TopologyContactModel,
     TopologySideWrench,
     build_topology_model,
     map_site_to_hand_frame,
     topology_side_wrench,
+)
+from src.shared.python.grip_contact.topology_series import (
+    TopologyKineticsSeries,
+    law_level_series,
 )
 from src.shared.python.grip_contact.trajectory_conditioning import (
     ConditioningReport,
@@ -92,6 +101,7 @@ __all__ = [
     "BodyStates",
     "BushingState",
     "BushingWrench",
+    "ChannelParityResult",
     "ContactPair",
     "ContactSite",
     "ContactTopology",
@@ -105,9 +115,12 @@ __all__ = [
     "ModelGripAdapter",
     "RigidBodyState",
     "SiteBinding",
+    "TopologyKineticsSeries",
+    "TopologyParityReport",
     "apply_report",
     "bind_rigid_hand_sites",
     "bushing_wrench",
+    "compare_topology_series",
     "contact_topology",
     "ContactCapsule",
     "ContactSphere",
@@ -115,6 +128,7 @@ __all__ = [
     "capsule_capsule",
     "evaluate_contacts",
     "hand_frame_states",
+    "law_level_series",
     "site_transform_in_hand_frame",
     "sphere_capsule",
     "validate_binding",
