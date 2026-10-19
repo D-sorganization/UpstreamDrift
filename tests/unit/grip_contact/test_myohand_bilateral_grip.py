@@ -454,6 +454,92 @@ def test_frozen_finger_law_level_parity_on_identical_site_states(
         "myosuite_myohand_bilateral_iron",
     ],
 )
+def test_mujoco_free_joint_mj_inverse_frame_conversion_convention(
+    model_id: str,
+) -> None:
+    """Verify MuJoCo freejoint mj_inverse conversion (world linear DOFs, body angular DOFs about xpos)."""
+    mujoco = pytest.importorskip("mujoco")
+    _require_myohand_assets()
+    from scipy.spatial.transform import Rotation
+
+    from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
+        MyoHandBilateralGripAdapter,
+    )
+
+    adapter = MyoHandBilateralGripAdapter(model_id, contact_mode="shared")
+    rot_club = Rotation.from_euler("XYZ", [0.32, -0.41, 0.68]).as_matrix()
+    q_xyzw = Rotation.from_matrix(rot_club).as_quat()
+    q_wxyz = np.array([q_xyzw[3], q_xyzw[0], q_xyzw[1], q_xyzw[2]], dtype=float)
+    p_origin = np.array([0.12, -0.18, 0.45], dtype=float)
+    v_origin_w = np.array([0.35, -0.25, 0.15], dtype=float)
+    omega_w = np.array([1.1, -0.75, 0.55], dtype=float)
+    a_origin_w = np.array([-1.8, 1.4, 0.65], dtype=float)
+    alpha_w = np.array([2.8, -2.2, 3.6], dtype=float)
+
+    qpos_club = np.concatenate([p_origin, q_wxyz])
+    qvel_club = np.concatenate([v_origin_w, rot_club.T @ omega_w])
+    qacc_club = np.concatenate([a_origin_w, rot_club.T @ alpha_w])
+
+    f_mj, m_mj_com, m_mj_origin, c_norm = adapter.club_mj_inverse_requirement(
+        qpos_club=qpos_club,
+        qvel_club=qvel_club,
+        qacc_club=qacc_club,
+    )
+    assert c_norm == 0.0
+
+    # 1. Exact 3D Newton-Euler using scene mass/inertia matches mj_inverse to machine precision
+    scene_props = adapter.club_scene_inertial_properties()
+    f_sc, m_sc_com, m_sc_origin = scene_props.inverse_dynamics_at_phase(
+        0.0,
+        0.0,
+        0.0,
+        rotation=rot_club,
+        origin_accel_m_s2=a_origin_w,
+        alpha_rad_s2=alpha_w,
+        omega_rad_s=omega_w,
+    )
+    assert np.allclose(f_mj, f_sc, atol=1e-13, rtol=1e-13)
+    assert np.allclose(m_mj_com, m_sc_com, atol=1e-13, rtol=1e-13)
+    assert np.allclose(m_mj_origin, m_sc_origin, atol=1e-13, rtol=1e-13)
+
+    # 2. Analytic ClubSpec properties match mass, COM, I_xx, I_zz; iron I_yy reflects boundinertia=1e-4
+    f_ana, m_ana_com, m_ana_origin = adapter.club_inverse_dynamics_requirement(
+        origin_accel_m_s2=a_origin_w,
+        alpha_rad_s2=alpha_w,
+        omega_rad_s=omega_w,
+        rotation=rot_club,
+    )
+    assert np.allclose(f_mj, f_ana, atol=1e-13, rtol=1e-13)
+    if model_id == "myosuite_myohand_bilateral_driver":
+        assert np.allclose(m_mj_com, m_ana_com, atol=1e-13, rtol=1e-13)
+        assert np.allclose(m_mj_origin, m_ana_origin, atol=1e-13, rtol=1e-13)
+    else:
+        assert scene_props.inertia_com_kg_m2[1, 1] == pytest.approx(1e-4, abs=1e-16)
+
+    # 3. Round-trip (f_mj, m_mj_com) through xfrc_applied + mj_forward recovers qacc_club
+    bid = adapter._club_body_id()
+    qadr, vadr = adapter._club_joint_addrs()
+    adapter._data.qpos[qadr : qadr + 7] = qpos_club
+    adapter._data.qvel[:] = 0.0
+    adapter._data.qvel[vadr : vadr + 6] = qvel_club
+    adapter._data.qacc[:] = 0.0
+    adapter._data.xfrc_applied[:] = 0.0
+    adapter._data.xfrc_applied[bid, :3] = f_mj
+    adapter._data.xfrc_applied[bid, 3:6] = m_mj_com
+    mujoco.mj_forward(adapter._model, adapter._data)
+    assert np.allclose(
+        adapter._data.qacc[vadr : vadr + 6], qacc_club, atol=1e-11, rtol=1e-11
+    )
+
+
+@pytest.mark.requires_mujoco
+@pytest.mark.parametrize(
+    "model_id",
+    [
+        "myosuite_myohand_bilateral_driver",
+        "myosuite_myohand_bilateral_iron",
+    ],
+)
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
@@ -461,7 +547,7 @@ def test_club_inverse_dynamics_requirement_is_non_circular_and_sliding_cone_rati
     model_id: str,
     style: GripStyle,
 ) -> None:
-    """Prescribed club requirement is independent of applied wrench; scaling wrench x2 changes error."""
+    """Both analytic and MuJoCo mj_inverse requirements are independent of applied hand wrenches."""
     pytest.importorskip("mujoco")
     _require_myohand_assets()
     from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
@@ -483,20 +569,36 @@ def test_club_inverse_dynamics_requirement_is_non_circular_and_sliding_cone_rati
     adapter.set_prescribed_grip_state(hand_seq[-1], club_seq[-1])
     rep = adapter.evaluate_contacts()
     adapter.apply_report(rep)
-    f_req_1, m_req_com_1, m_req_orig_1 = adapter.club_inverse_dynamics_requirement()
+    f_req_1, m_req_com_1, m_req_orig_1 = adapter.club_inverse_dynamics_requirement(
+        t_s=float(times[-1]), n_steps=21, dt_s=FIXTURE_DT_S
+    )
+    f_mj_1, m_mj_com_1, m_mj_orig_1, c_norm_1 = adapter.club_mj_inverse_requirement(
+        t_s=float(times[-1]), n_steps=21, dt_s=FIXTURE_DT_S
+    )
+    assert c_norm_1 == 0.0
 
-    # Apply a deliberately wrong (scaled x2) contact wrench: requirement must NOT change.
+    # Apply a deliberately wrong (scaled x2) contact wrench: neither analytic nor
+    # MuJoCo mj_inverse requirement may change.
     wrenches_x2 = {
         body_id: (2.0 * f, 2.0 * m) for body_id, (f, m) in rep.body_wrenches().items()
     }
     adapter.apply_wrenches(wrenches_x2)
-    f_req_2, m_req_com_2, m_req_orig_2 = adapter.club_inverse_dynamics_requirement()
+    f_req_2, m_req_com_2, m_req_orig_2 = adapter.club_inverse_dynamics_requirement(
+        t_s=float(times[-1]), n_steps=21, dt_s=FIXTURE_DT_S
+    )
+    f_mj_2, m_mj_com_2, m_mj_orig_2, c_norm_2 = adapter.club_mj_inverse_requirement(
+        t_s=float(times[-1]), n_steps=21, dt_s=FIXTURE_DT_S
+    )
+    assert c_norm_2 == 0.0
     assert np.allclose(f_req_1, f_req_2, atol=0.0, rtol=0.0)
     assert np.allclose(m_req_com_1, m_req_com_2, atol=0.0, rtol=0.0)
     assert np.allclose(m_req_orig_1, m_req_orig_2, atol=0.0, rtol=0.0)
+    assert np.allclose(f_mj_1, f_mj_2, atol=0.0, rtol=0.0)
+    assert np.allclose(m_mj_com_1, m_mj_com_2, atol=0.0, rtol=0.0)
+    assert np.allclose(m_mj_orig_1, m_mj_orig_2, atol=0.0, rtol=0.0)
 
     # Full trajectory report at 1x vs 2x scaled contact wrench:
-    # required wrench is unchanged while measured errors change.
+    # both MuJoCo mj_inverse and analytic requirements are unchanged while measured errors change.
     report_1x = evaluate_grasp_resultant_newton_check(
         adapter, n_steps=21, dt_s=FIXTURE_DT_S, wrench_scale=1.0
     )
@@ -505,6 +607,11 @@ def test_club_inverse_dynamics_requirement_is_non_circular_and_sliding_cone_rati
     )
     assert report_1x.required_force_n == report_2x.required_force_n
     assert report_1x.required_moment_com_nm == report_2x.required_moment_com_nm
+    assert report_1x.analytic_required_force_n == report_2x.analytic_required_force_n
+    assert (
+        report_1x.analytic_required_moment_com_nm
+        == report_2x.analytic_required_moment_com_nm
+    )
     assert not np.isclose(
         report_1x.force_peak_rel_error, report_2x.force_peak_rel_error, rtol=1e-3
     )
@@ -516,6 +623,16 @@ def test_club_inverse_dynamics_requirement_is_non_circular_and_sliding_cone_rati
     )
     assert not np.isclose(
         report_1x.moment_rms_rel_error, report_2x.moment_rms_rel_error, rtol=1e-3
+    )
+    assert not np.isclose(
+        report_1x.mj_central_diff_force_rms_rel_error,
+        report_2x.mj_central_diff_force_rms_rel_error,
+        rtol=1e-3,
+    )
+    assert not np.isclose(
+        report_1x.mj_central_diff_moment_rms_rel_error,
+        report_2x.mj_central_diff_moment_rms_rel_error,
+        rtol=1e-3,
     )
     assert not np.isclose(
         report_1x.newton_force_rel_error, report_2x.newton_force_rel_error, rtol=1e-3
@@ -563,11 +680,11 @@ def test_club_inverse_dynamics_requirement_is_non_circular_and_sliding_cone_rati
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
-def test_grasp_resultant_matches_prescribed_inverse_dynamics_within_m3_tolerances(
+def test_grasp_synthesis_solver_closure_residual(
     model_id: str,
     style: GripStyle,
 ) -> None:
-    """Compare hands' net club wrench to prescribed club requirement within 5% peak / 2% RMS."""
+    """Grasp-synthesis closure (solver residual + adapter site-mapping check, not acceptance evidence)."""
     pytest.importorskip("mujoco")
     _require_myohand_assets()
     from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
@@ -582,14 +699,78 @@ def test_grasp_resultant_matches_prescribed_inverse_dynamics_within_m3_tolerance
         contact_mode="shared",
         frozen_fingers=True,
     )
+    report = evaluate_grasp_resultant_newton_check(adapter, n_steps=21)
+    assert report.solver_closure_force_peak_rel_error <= 1e-10
+    assert report.solver_closure_force_rms_rel_error <= 1e-10
+    assert report.solver_closure_moment_peak_rel_error <= 1e-10
+    assert report.solver_closure_moment_rms_rel_error <= 1e-10
+
+
+@pytest.mark.requires_mujoco
+@pytest.mark.parametrize(
+    "model_id",
+    [
+        "myosuite_myohand_bilateral_driver",
+        "myosuite_myohand_bilateral_iron",
+    ],
+)
+@pytest.mark.parametrize(
+    "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
+)
+def test_grasp_resultant_matches_prescribed_inverse_dynamics_within_m3_tolerances(
+    model_id: str,
+    style: GripStyle,
+) -> None:
+    """Acceptance gate: MuJoCo mj_inverse requirement (analytic & central-diff qacc) + forward replay."""
+    pytest.importorskip("mujoco")
+    _require_myohand_assets()
+    from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
+        MyoHandBilateralGripAdapter,
+        evaluate_grasp_resultant_newton_check,
+        replay_club_forward_trajectory,
+    )
+
+    spec = GripSpec(style=style, trigger_finger=True)
+    adapter = MyoHandBilateralGripAdapter(
+        model_id,
+        grip_spec=spec,
+        contact_mode="shared",
+        frozen_fingers=True,
+    )
     newton_report = evaluate_grasp_resultant_newton_check(adapter, n_steps=21)
 
+    # Step 2a: Hand contact resultant vs MuJoCo mj_inverse (analytic qacc)
+    assert newton_report.max_club_constraint_force_n == 0.0
     assert newton_report.force_peak_rel_error <= PEAK_TOLERANCE
     assert newton_report.force_rms_rel_error <= RMS_TOLERANCE
     assert newton_report.moment_peak_rel_error <= PEAK_TOLERANCE
     assert newton_report.moment_rms_rel_error <= RMS_TOLERANCE
     assert newton_report.newton_force_rel_error <= PEAK_TOLERANCE
     assert newton_report.newton_moment_com_residual_nm <= 1e-3
+
+    # Step 2b: Hand contact resultant vs MuJoCo mj_inverse (central-difference qacc of prescribed qvel)
+    assert newton_report.mj_central_diff_force_peak_rel_error <= PEAK_TOLERANCE
+    assert newton_report.mj_central_diff_force_rms_rel_error <= RMS_TOLERANCE
+    assert newton_report.mj_central_diff_moment_peak_rel_error <= PEAK_TOLERANCE
+    assert newton_report.mj_central_diff_moment_rms_rel_error <= RMS_TOLERANCE
+
+    # Step 2c: Analytic ClubInertialProperties vs MuJoCo mj_inverse discrepancy (mass/inertia check)
+    assert newton_report.analytic_vs_mj_force_peak_rel_error <= PEAK_TOLERANCE
+    assert newton_report.analytic_vs_mj_force_rms_rel_error <= RMS_TOLERANCE
+    assert newton_report.analytic_vs_mj_moment_peak_rel_error <= PEAK_TOLERANCE
+    assert newton_report.analytic_vs_mj_moment_rms_rel_error <= RMS_TOLERANCE
+
+    # Step 3: Open-loop forward replay with mj_step under solved hand contact wrenches + gravity
+    replay_report = replay_club_forward_trajectory(adapter, n_steps=21, substeps=10)
+    assert replay_report.integrator == "semi_implicit_euler"
+    assert replay_report.integrator_order == 1
+    assert replay_report.max_active_club_weld_count == 0
+    assert replay_report.max_club_constraint_force_n == 0.0
+    assert replay_report.com_pos_peak_rel_error <= PEAK_TOLERANCE
+    assert replay_report.com_pos_rms_rel_error <= RMS_TOLERANCE
+    assert replay_report.orientation_peak_rel_error <= PEAK_TOLERANCE
+    assert replay_report.orientation_rms_rel_error <= RMS_TOLERANCE
+    assert replay_report.passed is True
 
 
 # ---------------------------------------------------------------------------

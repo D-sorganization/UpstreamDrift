@@ -36,10 +36,12 @@ from src.engines.physics_engines.myosuite.python.myohand_grip_controller import 
     DRIVER_CLUB_PROPERTIES,
     IRON_CLUB_PROPERTIES,
     ClubInertialProperties,
+    ForwardReplayClubReport,
     GraspResultantNewtonReport,
     build_prescribed_grip_trajectory,
     evaluate_grasp_resultant_newton_check,
     register_interface_context,
+    replay_club_forward_trajectory,
     solve_force_regulated_hand_frames,
 )
 from src.shared.python.grip_contact.bushing_law import BushingState
@@ -94,12 +96,14 @@ from src.shared.python.motion_matching.grip_contract import GripSpec
 __all__ = [
     "ClubInertialProperties",
     "FINGER_POSE_JOINT_MAP",
+    "ForwardReplayClubReport",
     "GraspResultantNewtonReport",
     "MYOHAND_BILATERAL_MODEL_IDS",
     "MyoHandBilateralGripAdapter",
     "build_prescribed_grip_trajectory",
     "evaluate_grasp_resultant_newton_check",
     "pose_to_myohand_joint_targets",
+    "replay_club_forward_trajectory",
     "run_myohand_frozen_qualification_series",
     "solve_force_regulated_hand_frames",
 ]
@@ -824,9 +828,113 @@ class MyoHandBilateralGripAdapter(ModelGripAdapter):
             )
         )
 
+    def _club_joint_addrs(self) -> tuple[int, int]:
+        mujoco = self._mujoco
+        jid = int(
+            mujoco.mj_name2id(self._model, mujoco.mjtObj.mjOBJ_JOINT, "club_free")
+        )
+        return int(self._model.jnt_qposadr[jid]), int(self._model.jnt_dofadr[jid])
+
     def club_mass_kg(self) -> float:
         """Return mass (kg) of the free golf_club body."""
         return float(self._model.body_mass[self._club_body_id()])
+
+    def club_scene_inertial_properties(self) -> ClubInertialProperties:
+        """Return compiled MuJoCo ``MjModel`` mass, COM offset, and body-frame COM inertia of ``golf_club``."""
+        from scipy.spatial.transform import Rotation
+
+        bid = self._club_body_id()
+        mass = float(self._model.body_mass[bid])
+        ipos = np.asarray(self._model.body_ipos[bid], dtype=float)
+        inertia = np.asarray(self._model.body_inertia[bid], dtype=float)
+        iquat = np.asarray(self._model.body_iquat[bid], dtype=float)
+        q_xyzw = np.array([iquat[1], iquat[2], iquat[3], iquat[0]], dtype=float)
+        r_iquat = np.asarray(Rotation.from_quat(q_xyzw).as_matrix(), dtype=float)
+        inertia_body = r_iquat @ np.diag(inertia) @ r_iquat.T
+        opt = self._model.opt
+        grav = np.asarray(opt.gravity, dtype=float)
+        return ClubInertialProperties(
+            mass_kg=mass,
+            com_local_m=(float(ipos[0]), float(ipos[1]), float(ipos[2])),
+            inertia_com_kg_m2=inertia_body,
+            gravity_m_s2=(float(grav[0]), float(grav[1]), float(grav[2])),
+        )
+
+    def club_free_qpos_qvel(self) -> tuple[np.ndarray, np.ndarray]:
+        """Return ``(qpos_club[7], qvel_club[6])`` for ``club_free``."""
+        qadr, vadr = self._club_joint_addrs()
+        qpos_c = np.asarray(self._data.qpos[qadr : qadr + 7], dtype=float).copy()
+        qvel_c = np.asarray(self._data.qvel[vadr : vadr + 6], dtype=float).copy()
+        return qpos_c, qvel_c
+
+    def club_com_and_rotation(self) -> tuple[np.ndarray, np.ndarray]:
+        """Return ``(xipos[3], xmat[3, 3])`` of ``golf_club`` in world coordinates."""
+        bid = self._club_body_id()
+        com_w = np.asarray(self._data.xipos[bid], dtype=float).copy()
+        xmat_flat = np.asarray(self._data.xmat[bid], dtype=float).copy()
+        rot_w = xmat_flat.reshape(3, 3)
+        return com_w, rot_w
+
+    def active_club_weld_count(self) -> int:
+        """Return count of active equality constraints attached to ``golf_club`` (must be 0)."""
+        bid = self._club_body_id()
+        neq = int(self._model.neq)
+        if neq == 0:
+            return 0
+        eq_type = np.asarray(self._model.eq_type, dtype=int)
+        eq_obj1 = np.asarray(self._model.eq_obj1id, dtype=int)
+        eq_obj2 = np.asarray(self._model.eq_obj2id, dtype=int)
+        eq_act = np.asarray(self._data.eq_active, dtype=int)
+        mujoco = self._mujoco
+        weld_type = int(mujoco.mjtEq.mjEQ_WELD)
+        count = 0
+        for i in range(neq):
+            if eq_act[i] != 0 and eq_type[i] == weld_type:
+                if eq_obj1[i] == bid or eq_obj2[i] == bid:
+                    count += 1
+        return count
+
+    def integrator_info(self) -> tuple[str, int]:
+        """Return ``(integrator_name, integrator_order)`` configured on ``MjModel.opt``."""
+        opt = self._model.opt
+        int_code = int(opt.integrator)
+        mujoco = self._mujoco
+        if int_code == int(mujoco.mjtIntegrator.mjINT_RK4):
+            return ("rk4", 4)
+        if int_code == int(mujoco.mjtIntegrator.mjINT_IMPLICIT):
+            return ("implicit_euler", 1)
+        if int_code == int(mujoco.mjtIntegrator.mjINT_IMPLICITFAST):
+            return ("implicit_fast_euler", 1)
+        return ("semi_implicit_euler", 1)
+
+    def step_club_with_wrench(
+        self,
+        force_n: np.ndarray,
+        moment_com_nm: np.ndarray,
+        *,
+        dt_s: float = FIXTURE_DT_S,
+    ) -> float:
+        """Advance ``mj_step`` by ``dt_s`` with only ``(force_n, moment_com_nm)`` on ``golf_club``."""
+        if not math.isfinite(dt_s) or dt_s <= 0.0:
+            raise ValueError(f"dt_s must be finite and > 0, got {dt_s}")
+        bid = self._club_body_id()
+        _, vadr = self._club_joint_addrs()
+        opt = self._model.opt
+        orig_dt = float(opt.timestep)
+        opt.timestep = float(dt_s)
+        try:
+            self._data.xfrc_applied[:] = 0.0
+            self._data.xfrc_applied[bid, :3] = np.asarray(force_n, dtype=float)
+            self._data.xfrc_applied[bid, 3:6] = np.asarray(moment_com_nm, dtype=float)
+            self._data.ctrl[:] = 0.0
+            self._data.qvel[:vadr] = 0.0
+            self._mujoco.mj_step(self._model, self._data)
+            qfrc_con = np.asarray(
+                self._data.qfrc_constraint[vadr : vadr + 6], dtype=float
+            )
+            return float(np.linalg.norm(qfrc_con))
+        finally:
+            opt.timestep = orig_dt
 
     def club_moment_about_com(
         self, force_n: np.ndarray, moment_origin_nm: np.ndarray
@@ -847,58 +955,154 @@ class MyoHandBilateralGripAdapter(ModelGripAdapter):
         dt_s: float = FIXTURE_DT_S,
         origin_accel_m_s2: np.ndarray | None = None,
         alpha_rad_s2: np.ndarray | None = None,
+        omega_rad_s: np.ndarray | None = None,
+        rotation: np.ndarray | None = None,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Compute prescribed (F_req, M_req_com, M_req_origin) from prescribed club kinematics.
+        """Compute analytical (F_req, M_req_com, M_req_origin) from ``ClubInertialProperties``.
 
-        Evaluates ``F_req(t) = m (a_com(t) - g)`` and ``M_req,com(t) = I alpha + w x I w``
-        from :func:`build_prescribed_grip_trajectory`, independent of ``xfrc_applied``/``cacc``.
+        Uses closed-form :class:`ClubInertialProperties` derived from :class:`ClubSpec`
+        (independent of ``MjModel``/``MjData``, ``xfrc_applied``, and ``cacc``).
         """
         if n_steps < 2:
             raise ValueError(f"n_steps must be >= 2, got {n_steps}")
         if not math.isfinite(dt_s) or dt_s <= 0.0:
             raise ValueError(f"dt_s must be finite and > 0, got {dt_s}")
-        bid = self._club_body_id()
-        mass = float(self._model.body_mass[bid])
-        opt = self._model.opt
-        gravity = np.asarray(opt.gravity, dtype=float)
-        xpos = np.asarray(self._data.xpos[bid], dtype=float)
-        xipos = np.asarray(self._data.xipos[bid], dtype=float)
-        r_com = xipos - xpos
 
         omega_freq = 2.0 * math.pi / (float(n_steps - 1) * float(dt_s))
+        rot_club = rotation
         if t_s is not None:
             phase = omega_freq * float(t_s)
             sin_p, cos_p = math.sin(phase), math.cos(phase)
+            if rot_club is None:
+                theta_z = (0.15 / omega_freq) * (1.0 - cos_p)
+                ct, st = math.cos(theta_z), math.sin(theta_z)
+                rot_club = np.array(
+                    [[ct, -st, 0.0], [st, ct, 0.0], [0.0, 0.0, 1.0]], dtype=float
+                )
         elif self._prescribed_club_frames is not None:
             c_state = self._current_club_state(self._prescribed_club_frames)
             sin_p = float(c_state.omega_rad_s[2]) / 0.15
             cos_p = float(c_state.velocity_m_s[0]) / 0.02
+            if rot_club is None:
+                rot_club = c_state.rotation
         else:
             sin_p, cos_p, omega_freq = 0.0, 0.0, 0.0
 
-        omega_w = np.array([0.0, 0.0, 0.15 * sin_p], dtype=float)
-        a_origin = (
-            np.asarray(origin_accel_m_s2, dtype=float)
-            if origin_accel_m_s2 is not None
-            else np.array([-0.02 * omega_freq * sin_p, 0.0, 0.0], dtype=float)
+        return self._club_properties.inverse_dynamics_at_phase(
+            sin_p,
+            cos_p,
+            omega_freq,
+            rotation=rot_club,
+            origin_accel_m_s2=origin_accel_m_s2,
+            alpha_rad_s2=alpha_rad_s2,
+            omega_rad_s=omega_rad_s,
         )
-        alpha_w = (
-            np.asarray(alpha_rad_s2, dtype=float)
-            if alpha_rad_s2 is not None
-            else np.array([0.0, 0.0, 0.15 * omega_freq * cos_p], dtype=float)
-        )
-        a_com = (
-            a_origin
-            + np.cross(alpha_w, r_com)
-            + np.cross(omega_w, np.cross(omega_w, r_com))
-        )
-        f_req = mass * (a_com - gravity)
 
-        r_imat = np.asarray(self._data.ximat[bid], dtype=float).reshape(3, 3)
-        i_com = r_imat @ np.diag(self._model.body_inertia[bid]) @ r_imat.T
-        m_req_com = i_com @ alpha_w + np.cross(omega_w, i_com @ omega_w)
-        m_req_origin = m_req_com + np.cross(r_com, f_req)
-        return f_req, m_req_com, m_req_origin
+    def club_mj_inverse_requirement(
+        self,
+        *,
+        t_s: float | None = None,
+        n_steps: int = 21,
+        dt_s: float = FIXTURE_DT_S,
+        qpos_club: np.ndarray | None = None,
+        qvel_club: np.ndarray | None = None,
+        qacc_club: np.ndarray | None = None,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
+        """Compute independent MuJoCo ``mj_inverse`` requirement on ``club_free``.
+
+        Sets ``club_free`` ``qpos``, ``qvel``, and ``qacc`` from the prescribed trajectory
+        (or caller-supplied arrays), zeroes ``xfrc_applied`` and ``ctrl``, runs
+        ``mujoco.mj_inverse``, and converts ``qfrc_inverse`` on the 6 ``club_free`` DOFs
+        (world-frame linear force at ``xpos``, body-local torque about ``xpos``) into
+        ``(F_mj_w, M_mj_com_w, M_mj_origin_w, constraint_force_norm)``.
+        """
+        if n_steps < 2:
+            raise ValueError(f"n_steps must be >= 2, got {n_steps}")
+        if not math.isfinite(dt_s) or dt_s <= 0.0:
+            raise ValueError(f"dt_s must be finite and > 0, got {dt_s}")
+
+        qpos_p, qvel_p, qacc_p = _prescribed_club_qpos_qvel_qacc(t_s, n_steps, dt_s)
+        qpos_c = (
+            np.asarray(qpos_club, dtype=float)
+            if qpos_club is not None
+            else (qpos_p if t_s is not None else self.club_free_qpos_qvel()[0])
+        )
+        qvel_c = (
+            np.asarray(qvel_club, dtype=float)
+            if qvel_club is not None
+            else (qvel_p if t_s is not None else self.club_free_qpos_qvel()[1])
+        )
+        qacc_c = np.asarray(qacc_club, dtype=float) if qacc_club is not None else qacc_p
+
+        mujoco = self._mujoco
+        data = self._data
+        bid = self._club_body_id()
+        qadr, vadr = self._club_joint_addrs()
+        qpos_saved = data.qpos.copy()
+        qvel_saved = data.qvel.copy()
+        qacc_saved = data.qacc.copy()
+        xfrc_saved = data.xfrc_applied.copy()
+        ctrl_saved = data.ctrl.copy()
+        try:
+            data.qvel[:] = 0.0
+            data.qacc[:] = 0.0
+            data.qpos[qadr : qadr + 7] = qpos_c
+            data.qvel[vadr : vadr + 6] = qvel_c
+            data.qacc[vadr : vadr + 6] = qacc_c
+            data.xfrc_applied[:] = 0.0
+            data.ctrl[:] = 0.0
+            mujoco.mj_inverse(self._model, data)
+
+            qfrc_inv = np.asarray(
+                data.qfrc_inverse[vadr : vadr + 6], dtype=float
+            ).copy()
+            qfrc_con = np.asarray(
+                data.qfrc_constraint[vadr : vadr + 6], dtype=float
+            ).copy()
+            c_norm = float(np.linalg.norm(qfrc_con))
+            qfrc_net = qfrc_inv + qfrc_con
+
+            f_mj_w = qfrc_net[:3].copy()
+            rot_w = np.asarray(data.xmat[bid], dtype=float).reshape(3, 3)
+            m_origin_w = rot_w @ qfrc_net[3:6]
+            xpos = np.asarray(data.xpos[bid], dtype=float)
+            xipos = np.asarray(data.xipos[bid], dtype=float)
+            m_com_w = m_origin_w + np.cross(xpos - xipos, f_mj_w)
+            return f_mj_w, m_com_w, m_origin_w, c_norm
+        finally:
+            data.qpos[:] = qpos_saved
+            data.qvel[:] = qvel_saved
+            data.qacc[:] = qacc_saved
+            data.xfrc_applied[:] = xfrc_saved
+            data.ctrl[:] = ctrl_saved
+            mujoco.mj_forward(self._model, data)
+
+
+def _prescribed_club_qpos_qvel_qacc(
+    t_s: float | None,
+    n_steps: int,
+    dt_s: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    if t_s is None:
+        qpos0 = np.array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], dtype=float)
+        z6 = np.zeros(6, dtype=float)
+        return qpos0, z6, z6.copy()
+    omega_freq = 2.0 * math.pi / (float(n_steps - 1) * float(dt_s))
+    phase = omega_freq * float(t_s)
+    sp, cp = math.sin(phase), math.cos(phase)
+    pos_w = np.array([(0.02 / omega_freq) * sp, 0.0, 0.0], dtype=float)
+    theta_z = (0.15 / omega_freq) * (1.0 - cp)
+    half_th = 0.5 * theta_z
+    q_wxyz = np.array([math.cos(half_th), 0.0, 0.0, math.sin(half_th)], dtype=float)
+    vel_w = np.array([0.02 * cp, 0.0, 0.0], dtype=float)
+    omega_local = np.array([0.0, 0.0, 0.15 * sp], dtype=float)
+    acc_w = np.array([-0.02 * omega_freq * sp, 0.0, 0.0], dtype=float)
+    alpha_local = np.array([0.0, 0.0, 0.15 * omega_freq * cp], dtype=float)
+    return (
+        np.concatenate([pos_w, q_wxyz]),
+        np.concatenate([vel_w, omega_local]),
+        np.concatenate([acc_w, alpha_local]),
+    )
 
 
 def run_myohand_frozen_qualification_series(

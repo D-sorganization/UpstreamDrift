@@ -28,6 +28,7 @@ from typing import Any, Final, Literal
 
 import numpy as np
 from scipy.optimize import root
+from scipy.spatial.transform import Rotation
 
 from src.engines.physics_engines.myosuite.python.golfer_grip_adapter import (
     BimanualGraspSynthesis,
@@ -39,7 +40,11 @@ from src.shared.python.grip_contact.contact_topology import (
     contact_topology,
 )
 from src.shared.python.grip_contact.interface import GripInterface
-from src.shared.python.grip_contact.parity import compute_quantity_error
+from src.shared.python.grip_contact.parity import (
+    PEAK_TOLERANCE,
+    RMS_TOLERANCE,
+    compute_quantity_error,
+)
 from src.shared.python.grip_contact.prescribed_motion import (
     RigidBodyState,
     hand_frame_states,
@@ -57,16 +62,19 @@ from src.shared.python.loop_nullspace.grip_split import (
     grasp_map,
     split_coordinates,
 )
+from src.shared.python.motion_matching.club_models import CLUBS, ClubSpec
 from src.shared.python.motion_matching.grip_contract import GripSpec
 
 __all__ = [
     "ClubInertialProperties",
     "DRIVER_CLUB_PROPERTIES",
+    "ForwardReplayClubReport",
     "GraspResultantNewtonReport",
     "IRON_CLUB_PROPERTIES",
     "build_prescribed_grip_trajectory",
     "evaluate_grasp_resultant_newton_check",
     "register_interface_context",
+    "replay_club_forward_trajectory",
     "solve_force_regulated_hand_frames",
 ]
 
@@ -82,7 +90,7 @@ _TRAJECTORY_CACHE: dict[
 
 @dataclass(frozen=True)
 class ClubInertialProperties:
-    """Rigid-body inertial properties of the free ``golf_club`` body in club frame."""
+    """Analytical rigid-body inertial properties of ``golf_club`` derived from ``ClubSpec``."""
 
     mass_kg: float
     com_local_m: tuple[float, float, float]
@@ -103,6 +111,56 @@ class ClubInertialProperties:
             raise ValueError("gravity_m_s2 must be a finite 3-tuple")
         object.__setattr__(self, "inertia_com_kg_m2", inertia.copy())
 
+    @classmethod
+    def from_club_spec(
+        cls,
+        club: ClubSpec,
+        gravity_m_s2: tuple[float, float, float] = (0.0, 0.0, -9.81),
+    ) -> ClubInertialProperties:
+        """Compute analytical mass, COM, and COM inertia tensor from ``ClubSpec`` primitive geoms."""
+        if not isinstance(club, ClubSpec):
+            raise TypeError(f"club must be a ClubSpec, got {type(club).__name__}")
+        m_s = float(club.shaft_mass_kg + club.grip_mass_kg)
+        m_h = float(club.head_mass_kg)
+        m_tot = m_s + m_h
+        length = float(club.length_m)
+        radius = float(club.shaft_radius_m)
+        y_com = (m_s * (-0.5 * length)) / m_tot
+
+        vol_cyl = math.pi * radius**2 * length
+        vol_sph = (4.0 / 3.0) * math.pi * radius**3
+        m_cyl = m_s * vol_cyl / (vol_cyl + vol_sph)
+        m_sph = m_s * vol_sph / (vol_cyl + vol_sph)
+        i_cap_ax = 0.5 * m_cyl * radius**2 + 0.4 * m_sph * radius**2
+        i_cap_tr = m_cyl * (length**2 / 12.0 + 0.25 * radius**2) + m_sph * (
+            0.4 * radius**2 + 0.25 * length**2 + 0.375 * length * radius
+        )
+        hx, hy, hz = (float(x) for x in club.head_half_size_m)
+        coeff = 0.2 if club.head_shape == "ellipsoid" else (1.0 / 3.0)
+        i_head = np.array(
+            [
+                coeff * m_h * (hy**2 + hz**2),
+                coeff * m_h * (hx**2 + hz**2),
+                coeff * m_h * (hx**2 + hy**2),
+            ],
+            dtype=float,
+        )
+        i_cap = np.array([i_cap_tr, i_cap_ax, i_cap_tr], dtype=float)
+        dy_s = -0.5 * length - y_com
+        dy_h = -y_com
+        i_diag = (
+            i_cap
+            + m_s * np.array([dy_s**2, 0.0, dy_s**2], dtype=float)
+            + i_head
+            + m_h * np.array([dy_h**2, 0.0, dy_h**2], dtype=float)
+        )
+        return cls(
+            mass_kg=m_tot,
+            com_local_m=(0.0, y_com, 0.0),
+            inertia_com_kg_m2=np.diag(i_diag),
+            gravity_m_s2=gravity_m_s2,
+        )
+
     def inverse_dynamics_at_phase(
         self,
         sin_p: float,
@@ -111,11 +169,22 @@ class ClubInertialProperties:
         *,
         origin_accel_m_s2: np.ndarray | None = None,
         alpha_rad_s2: np.ndarray | None = None,
+        omega_rad_s: np.ndarray | None = None,
+        rotation: np.ndarray | None = None,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Compute ``(F_req, M_req_com, M_req_origin)`` analytically from club kinematics."""
-        r_com = np.asarray(self.com_local_m, dtype=float)
+        rot = (
+            np.asarray(rotation, dtype=float)
+            if rotation is not None
+            else np.eye(3, dtype=float)
+        )
+        r_com = rot @ np.asarray(self.com_local_m, dtype=float)
         gravity = np.asarray(self.gravity_m_s2, dtype=float)
-        omega_w = np.array([0.0, 0.0, 0.15 * sin_p], dtype=float)
+        omega_w = (
+            np.asarray(omega_rad_s, dtype=float)
+            if omega_rad_s is not None
+            else np.array([0.0, 0.0, 0.15 * sin_p], dtype=float)
+        )
         a_origin = (
             np.asarray(origin_accel_m_s2, dtype=float)
             if origin_accel_m_s2 is not None
@@ -132,35 +201,58 @@ class ClubInertialProperties:
             + np.cross(omega_w, np.cross(omega_w, r_com))
         )
         f_req = float(self.mass_kg) * (a_com - gravity)
-        i_com = self.inertia_com_kg_m2
+        i_com = rot @ self.inertia_com_kg_m2 @ rot.T
         m_req_com = i_com @ alpha_w + np.cross(omega_w, i_com @ omega_w)
         m_req_origin = m_req_com + np.cross(r_com, f_req)
         return f_req, m_req_com, m_req_origin
 
 
-DRIVER_CLUB_PROPERTIES: Final[ClubInertialProperties] = ClubInertialProperties(
-    mass_kg=0.313,
-    com_local_m=(0.0, -0.21236421725239617, 0.0),
-    inertia_com_kg_m2=np.diag([0.03744414, 0.00024399, 0.0374877]),
+DRIVER_CLUB_PROPERTIES: Final[ClubInertialProperties] = (
+    ClubInertialProperties.from_club_spec(CLUBS["driver"])
 )
 
-IRON_CLUB_PROPERTIES: Final[ClubInertialProperties] = ClubInertialProperties(
-    mass_kg=0.428,
-    com_local_m=(0.0, -0.17570093457943925, 0.0),
-    inertia_com_kg_m2=np.diag([0.0343317, 0.0001, 0.03428158]),
+IRON_CLUB_PROPERTIES: Final[ClubInertialProperties] = (
+    ClubInertialProperties.from_club_spec(CLUBS["iron7"])
 )
+
+
+@dataclass(frozen=True)
+class ForwardReplayClubReport:
+    """Open-loop forward-dynamics club replay report under solved hand contact wrenches."""
+
+    model_id: str
+    style: str
+    integrator: str
+    integrator_order: int
+    dt_s: float
+    substeps: int
+    substep_dt_s: float
+    n_steps: int
+    com_motion_amplitude_m: float
+    orientation_amplitude_rad: float
+    com_pos_peak_error_m: float
+    com_pos_rms_error_m: float
+    com_pos_peak_rel_error: float
+    com_pos_rms_rel_error: float
+    orientation_peak_error_rad: float
+    orientation_rms_error_rad: float
+    orientation_peak_rel_error: float
+    orientation_rms_rel_error: float
+    max_active_club_weld_count: int
+    max_club_constraint_force_n: float
+    passed: bool
 
 
 @dataclass(frozen=True)
 class GraspResultantNewtonReport:
     """Grasp-resultant inverse-dynamics and Newton-Euler balance report (HRG-GS-M8).
 
-    ``per_hand_split_status`` and ``squeeze_status`` are explicitly labelled
-    ``"INDETERMINATE"`` because a hyperstatic two-hand grip has a 6-D internal
-    nullspace and cannot uniquely determine per-hand split or internal squeeze
-    from club dynamics alone. The explicit choices made by the controller are
-    reported in ``lead_squeeze_normal_force_n``, ``trail_squeeze_normal_force_n``,
-    ``min_squeeze_for_stick_n``, ``nullspace_split_vector``, and ``contact_regime``.
+    Primary ``force_*`` and ``moment_*`` error fields compare the hand contact resultant
+    against the independent MuJoCo ``mj_inverse`` requirement on ``club_free`` (analytic
+    ``qacc``), while ``mj_central_diff_*`` compares against ``mj_inverse`` with central
+    differences of ``qvel``, ``analytic_vs_mj_*`` reports the analytical-vs-MuJoCo club
+    mass/inertia discrepancy, and ``solver_closure_*`` records the root-solver closure
+    residual against the analytic ``ClubInertialProperties`` target (not acceptance evidence).
     """
 
     model_id: str
@@ -193,6 +285,25 @@ class GraspResultantNewtonReport:
         0.0,
         0.0,
     )
+    analytic_required_force_n: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    analytic_required_moment_com_nm: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    solver_closure_force_peak_rel_error: float = 0.0
+    solver_closure_force_rms_rel_error: float = 0.0
+    solver_closure_moment_peak_rel_error: float = 0.0
+    solver_closure_moment_rms_rel_error: float = 0.0
+    mj_central_diff_force_peak_rel_error: float = 0.0
+    mj_central_diff_force_rms_rel_error: float = 0.0
+    mj_central_diff_moment_peak_rel_error: float = 0.0
+    mj_central_diff_moment_rms_rel_error: float = 0.0
+    analytic_vs_mj_force_peak_rel_error: float = 0.0
+    analytic_vs_mj_force_rms_rel_error: float = 0.0
+    analytic_vs_mj_moment_peak_rel_error: float = 0.0
+    analytic_vs_mj_moment_rms_rel_error: float = 0.0
+    analytic_vs_mj_cd_force_peak_rel_error: float = 0.0
+    analytic_vs_mj_cd_force_rms_rel_error: float = 0.0
+    analytic_vs_mj_cd_moment_peak_rel_error: float = 0.0
+    analytic_vs_mj_cd_moment_rms_rel_error: float = 0.0
+    max_club_constraint_force_n: float = 0.0
 
 
 def register_interface_context(
@@ -332,6 +443,11 @@ def solve_force_regulated_hand_frames(
     return _bimanual_states_from_q(club_frames, q_opt * _Q_SCALE), q_opt
 
 
+def _rot_z(theta_rad: float) -> np.ndarray:
+    ct, st = math.cos(theta_rad), math.sin(theta_rad)
+    return np.array([[ct, -st, 0.0], [st, ct, 0.0], [0.0, 0.0, 1.0]], dtype=float)
+
+
 def build_prescribed_grip_trajectory(
     interface: GripInterface,
     *,
@@ -342,9 +458,10 @@ def build_prescribed_grip_trajectory(
 ) -> tuple[np.ndarray, list[dict[str, BushingState]], list[dict[str, BushingState]]]:
     """Build deterministic 2 ms force-regulated grip trajectory for M3 parity & Newton balance.
 
-    At each step ``t_k``, prescribes the club state and solves for the bilateral hand
-    frame states ``(hand_frames['L'], hand_frames['R'])`` via
-    :func:`solve_force_regulated_hand_frames` so the shared contact law holds the club
+    At each step ``t_k``, prescribes kinematically consistent club pose and velocity
+    (``p_origin(t) = int_0^t v_origin(tau) dtau``, ``R_club(t) = R_z(int_0^t omega_z(tau) dtau)``)
+    and solves for the bilateral hand frame states ``(hand_frames['L'], hand_frames['R'])``
+    via :func:`solve_force_regulated_hand_frames` so the shared contact law holds the club
     in regularized quasi-stick with bilateral pad compression and matches the analytic
     inverse-dynamics wrench ``(F_req(t_k), M_req,com(t_k))``.
     """
@@ -363,7 +480,7 @@ def build_prescribed_grip_trajectory(
     topo = topo_model.topology
     law = topo_model.law
     cache_key = (
-        topo.style.value,
+        len(topo.hand_grip_pairs()),
         topo.trigger_finger,
         round(float(law.stiffness_n_m), 3),
         round(float(club_props.mass_kg), 6),
@@ -384,16 +501,20 @@ def build_prescribed_grip_trajectory(
     for t in times:
         phase = omega_freq * float(t)
         sp, cp = math.sin(phase), math.cos(phase)
-        club_pos = np.array([0.002 * sp, 0.0, 0.0], dtype=float)
+        club_pos = np.array([(0.02 / omega_freq) * sp, 0.0, 0.0], dtype=float)
+        theta_z = (0.15 / omega_freq) * (1.0 - cp)
+        rot_club = _rot_z(theta_z)
         club_state = RigidBodyState(
-            rotation=np.eye(3, dtype=float),
+            rotation=rot_club,
             position_m=club_pos,
             velocity_m_s=np.array([0.02 * cp, 0.0, 0.0], dtype=float),
             omega_rad_s=np.array([0.0, 0.0, 0.15 * sp], dtype=float),
         )
         c_frames = hand_frame_states(club_state, interface)
-        f_req, m_req_com, _ = club_props.inverse_dynamics_at_phase(sp, cp, omega_freq)
-        xipos = club_pos + r_com_local
+        f_req, m_req_com, _ = club_props.inverse_dynamics_at_phase(
+            sp, cp, omega_freq, rotation=rot_club
+        )
+        xipos = club_pos + rot_club @ r_com_local
         r_l = np.asarray(c_frames["L"].position_m, dtype=float)
         r_r = np.asarray(c_frames["R"].position_m, dtype=float)
         r_mid = 0.5 * (r_l + r_r)
@@ -484,6 +605,20 @@ def _vec6_tuple(vec: np.ndarray) -> tuple[float, float, float, float, float, flo
     )
 
 
+@dataclass(frozen=True)
+class _StepWrenchSeries:
+    f_hand: np.ndarray
+    m_hand_com: np.ndarray
+    f_req_ana: np.ndarray
+    m_req_ana_com: np.ndarray
+    f_req_mj: np.ndarray
+    m_req_mj_com: np.ndarray
+    f_req_mj_cd: np.ndarray
+    m_req_mj_cd_com: np.ndarray
+    max_club_constraint_force_n: float
+    last_report: GripStepReport
+
+
 def _evaluate_step_wrenches(
     adapter: Any,
     times: np.ndarray,
@@ -491,96 +626,155 @@ def _evaluate_step_wrenches(
     club_seq: list[dict[str, BushingState]],
     dt_s: float,
     wrench_scale: float,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, GripStepReport]:
+) -> _StepWrenchSeries:
     n_steps = len(times)
     f_hand_seq = np.zeros((n_steps, 3), dtype=float)
-    f_req_seq = np.zeros((n_steps, 3), dtype=float)
     m_hand_com_seq = np.zeros((n_steps, 3), dtype=float)
-    m_req_com_seq = np.zeros((n_steps, 3), dtype=float)
+    f_req_ana_seq = np.zeros((n_steps, 3), dtype=float)
+    m_req_ana_seq = np.zeros((n_steps, 3), dtype=float)
+    f_req_mj_seq = np.zeros((n_steps, 3), dtype=float)
+    m_req_mj_seq = np.zeros((n_steps, 3), dtype=float)
+    f_req_mj_cd_seq = np.zeros((n_steps, 3), dtype=float)
+    m_req_mj_cd_seq = np.zeros((n_steps, 3), dtype=float)
+    qpos_seq = np.zeros((n_steps, 7), dtype=float)
+    qvel_seq = np.zeros((n_steps, 6), dtype=float)
     last_report: GripStepReport | None = None
     binding = adapter.resolve_binding(adapter.topology())
     club_body = binding.club_body
+    max_c_norm = 0.0
 
     for k in range(n_steps):
         adapter.set_prescribed_grip_state(hand_seq[k], club_seq[k])
+        qpos_k, qvel_k = adapter.club_free_qpos_qvel()
+        qpos_seq[k], qvel_seq[k] = qpos_k, qvel_k
         rep = adapter.evaluate_contacts()
         scaled_wrenches = {
             b: (wrench_scale * f, wrench_scale * m)
             for b, (f, m) in rep.body_wrenches().items()
         }
         adapter.apply_wrenches(scaled_wrenches)
-        f_req, m_req_com, _ = adapter.club_inverse_dynamics_requirement(
-            t_s=float(times[k]), n_steps=n_steps, dt_s=dt_s
+        t_k = float(times[k])
+        f_ana, m_ana_com, _ = adapter.club_inverse_dynamics_requirement(
+            t_s=t_k, n_steps=n_steps, dt_s=dt_s
         )
+        f_mj, m_mj_com, _, c_norm = adapter.club_mj_inverse_requirement(
+            t_s=t_k,
+            n_steps=n_steps,
+            dt_s=dt_s,
+            qpos_club=qpos_k,
+            qvel_club=qvel_k,
+        )
+        max_c_norm = max(max_c_norm, float(c_norm))
         f_net, m_origin = scaled_wrenches[club_body]
         m_hand_com = adapter.club_moment_about_com(f_net, m_origin)
-        f_hand_seq[k], f_req_seq[k] = f_net, f_req
-        m_hand_com_seq[k], m_req_com_seq[k] = m_hand_com, m_req_com
+        f_hand_seq[k], m_hand_com_seq[k] = f_net, m_hand_com
+        f_req_ana_seq[k], m_req_ana_seq[k] = f_ana, m_ana_com
+        f_req_mj_seq[k], m_req_mj_seq[k] = f_mj, m_mj_com
         last_report = rep
 
+    qacc_cd_seq = np.gradient(qvel_seq, float(dt_s), axis=0, edge_order=2)
+    for k in range(n_steps):
+        f_cd, m_cd_com, _, c_norm_cd = adapter.club_mj_inverse_requirement(
+            qpos_club=qpos_seq[k],
+            qvel_club=qvel_seq[k],
+            qacc_club=qacc_cd_seq[k],
+        )
+        max_c_norm = max(max_c_norm, float(c_norm_cd))
+        f_req_mj_cd_seq[k], m_req_mj_cd_seq[k] = f_cd, m_cd_com
+
     assert last_report is not None
-    return f_hand_seq, f_req_seq, m_hand_com_seq, m_req_com_seq, last_report
+    return _StepWrenchSeries(
+        f_hand=f_hand_seq,
+        m_hand_com=m_hand_com_seq,
+        f_req_ana=f_req_ana_seq,
+        m_req_ana_com=m_req_ana_seq,
+        f_req_mj=f_req_mj_seq,
+        m_req_mj_com=m_req_mj_seq,
+        f_req_mj_cd=f_req_mj_cd_seq,
+        m_req_mj_cd_com=m_req_mj_cd_seq,
+        max_club_constraint_force_n=max_c_norm,
+        last_report=last_report,
+    )
 
 
-def evaluate_grasp_resultant_newton_check(
+def _peak_rms(cand: np.ndarray, ref: np.ndarray, name: str) -> tuple[float, float]:
+    err = compute_quantity_error(cand, ref, name=name)
+    return float(err.peak_error), float(err.rms_error)
+
+
+def _pair_errors(
+    f_cand: np.ndarray,
+    m_cand: np.ndarray,
+    f_ref: np.ndarray,
+    m_ref: np.ndarray,
+    tag: str,
+) -> tuple[float, float, float, float]:
+    f_pk, f_rms = _peak_rms(f_cand, f_ref, f"{tag}_force_n")
+    m_pk, m_rms = _peak_rms(m_cand, m_ref, f"{tag}_moment_com_nm")
+    return f_pk, f_rms, m_pk, m_rms
+
+
+def _build_newton_report(
     adapter: Any,
-    *,
-    n_steps: int = 21,
-    dt_s: float = FIXTURE_DT_S,
-    wrench_scale: float = 1.0,
+    topo_model: TopologyContactModel,
+    ws: _StepWrenchSeries,
+    hand_last: Mapping[str, BushingState],
+    club_last: Mapping[str, BushingState],
 ) -> GraspResultantNewtonReport:
-    """Compare hands' net club contact wrench to the prescribed club inverse-dynamics requirement."""
-    if not math.isfinite(wrench_scale) or wrench_scale <= 0.0:
-        raise ValueError(f"wrench_scale must be finite and > 0, got {wrench_scale}")
-    iface = adapter.interface()
-    topo_model = adapter.topology_model()
-    times, hand_seq, club_seq = build_prescribed_grip_trajectory(
-        iface, n_steps=n_steps, dt_s=dt_s, topology_model=topo_model
+    f_mj_pk, f_mj_rms, m_mj_pk, m_mj_rms = _pair_errors(
+        ws.f_hand, ws.m_hand_com, ws.f_req_mj, ws.m_req_mj_com, "club_net"
     )
-    f_hand_seq, f_req_seq, m_hand_com_seq, m_req_com_seq, last_report = (
-        _evaluate_step_wrenches(adapter, times, hand_seq, club_seq, dt_s, wrench_scale)
+    f_cd_pk, f_cd_rms, m_cd_pk, m_cd_rms = _pair_errors(
+        ws.f_hand, ws.m_hand_com, ws.f_req_mj_cd, ws.m_req_mj_cd_com, "club_net_cd"
     )
-    f_err = compute_quantity_error(f_hand_seq, f_req_seq, name="club_net_force_n")
-    m_err = compute_quantity_error(
-        m_hand_com_seq, m_req_com_seq, name="club_net_moment_com_nm"
+    f_cl_pk, f_cl_rms, m_cl_pk, m_cl_rms = _pair_errors(
+        ws.f_hand, ws.m_hand_com, ws.f_req_ana, ws.m_req_ana_com, "solver_closure"
     )
-    f_last, f_req_last = f_hand_seq[-1], f_req_seq[-1]
-    m_last, m_req_last = m_hand_com_seq[-1], m_req_com_seq[-1]
+    f_am_pk, f_am_rms, m_am_pk, m_am_rms = _pair_errors(
+        ws.f_req_ana, ws.m_req_ana_com, ws.f_req_mj, ws.m_req_mj_com, "analytic_vs_mj"
+    )
+    f_ac_pk, f_ac_rms, m_ac_pk, m_ac_rms = _pair_errors(
+        ws.f_req_ana,
+        ws.m_req_ana_com,
+        ws.f_req_mj_cd,
+        ws.m_req_mj_cd_com,
+        "analytic_vs_mj_cd",
+    )
+    f_last, f_req_last = ws.f_hand[-1], ws.f_req_mj[-1]
+    m_last, m_req_last = ws.m_hand_com[-1], ws.m_req_mj_com[-1]
     newton_f_rel = float(
         np.linalg.norm(f_last - f_req_last)
         / max(float(np.linalg.norm(f_req_last)), 1e-9)
     )
     newton_m_res = float(np.linalg.norm(m_last - m_req_last))
+    last_rep = ws.last_report
     cone_ratios, slip_speeds = terminal_cone_and_slip(
-        adapter, last_report, hand_seq[-1], club_seq[-1]
+        adapter, last_rep, hand_last, club_last
     )
-    r_l = np.asarray(club_seq[-1]["L"].position_m, dtype=float)
-    r_r = np.asarray(club_seq[-1]["R"].position_m, dtype=float)
-    synthesis = synthesize_club_grasp(last_report, r_l, r_r)
+    r_l = np.asarray(club_last["L"].position_m, dtype=float)
+    r_r = np.asarray(club_last["R"].position_m, dtype=float)
+    synthesis = synthesize_club_grasp(last_rep, r_l, r_r)
     y_vec = synthesis.hand_wrench_vector
     s_vec = split_coordinates(y_vec[:6], y_vec[6:])
-    sw_map = last_report.side_wrenches
+    sw_map = last_rep.side_wrenches
     lead_sq = float(sw_map["L"].total_normal_force_n)
     trail_sq = float(sw_map["R"].total_normal_force_n)
     law = topo_model.law
-    mu_s = float(law.static_friction)
-    v_tr = float(law.transition_velocity_m_s)
+    mu_s, v_tr = float(law.static_friction), float(law.transition_velocity_m_s)
     min_sq = float(np.linalg.norm(f_req_last)) / mu_s
     max_slip = max(slip_speeds.values()) if slip_speeds else 0.0
     regime: Literal["quasi_stick", "sliding"] = (
         "quasi_stick" if max_slip < v_tr else "sliding"
     )
     topo = adapter.topology()
-    style_enum = topo.style
-
     return GraspResultantNewtonReport(
         model_id=adapter.model_id,
-        style=style_enum.value,
+        style=topo.style.value,
         club_mass_kg=adapter.club_mass_kg(),
-        force_peak_rel_error=float(f_err.peak_error),
-        force_rms_rel_error=float(f_err.rms_error),
-        moment_peak_rel_error=float(m_err.peak_error),
-        moment_rms_rel_error=float(m_err.rms_error),
+        force_peak_rel_error=f_mj_pk,
+        force_rms_rel_error=f_mj_rms,
+        moment_peak_rel_error=m_mj_pk,
+        moment_rms_rel_error=m_mj_rms,
         newton_force_rel_error=newton_f_rel,
         newton_moment_com_residual_nm=newton_m_res,
         net_hand_force_n=_vec3_tuple(f_last),
@@ -595,4 +789,206 @@ def evaluate_grasp_resultant_newton_check(
         trail_squeeze_normal_force_n=trail_sq,
         min_squeeze_for_stick_n=min_sq,
         nullspace_split_vector=_vec6_tuple(s_vec),
+        analytic_required_force_n=_vec3_tuple(ws.f_req_ana[-1]),
+        analytic_required_moment_com_nm=_vec3_tuple(ws.m_req_ana_com[-1]),
+        solver_closure_force_peak_rel_error=f_cl_pk,
+        solver_closure_force_rms_rel_error=f_cl_rms,
+        solver_closure_moment_peak_rel_error=m_cl_pk,
+        solver_closure_moment_rms_rel_error=m_cl_rms,
+        mj_central_diff_force_peak_rel_error=f_cd_pk,
+        mj_central_diff_force_rms_rel_error=f_cd_rms,
+        mj_central_diff_moment_peak_rel_error=m_cd_pk,
+        mj_central_diff_moment_rms_rel_error=m_cd_rms,
+        analytic_vs_mj_force_peak_rel_error=f_am_pk,
+        analytic_vs_mj_force_rms_rel_error=f_am_rms,
+        analytic_vs_mj_moment_peak_rel_error=m_am_pk,
+        analytic_vs_mj_moment_rms_rel_error=m_am_rms,
+        analytic_vs_mj_cd_force_peak_rel_error=f_ac_pk,
+        analytic_vs_mj_cd_force_rms_rel_error=f_ac_rms,
+        analytic_vs_mj_cd_moment_peak_rel_error=m_ac_pk,
+        analytic_vs_mj_cd_moment_rms_rel_error=m_ac_rms,
+        max_club_constraint_force_n=float(ws.max_club_constraint_force_n),
+    )
+
+
+def evaluate_grasp_resultant_newton_check(
+    adapter: Any,
+    *,
+    n_steps: int = 21,
+    dt_s: float = FIXTURE_DT_S,
+    wrench_scale: float = 1.0,
+) -> GraspResultantNewtonReport:
+    """Compare hands' net club contact wrench to MuJoCo ``mj_inverse`` and analytic requirements."""
+    if not math.isfinite(wrench_scale) or wrench_scale <= 0.0:
+        raise ValueError(f"wrench_scale must be finite and > 0, got {wrench_scale}")
+    iface = adapter.interface()
+    topo_model = adapter.topology_model()
+    times, hand_seq, club_seq = build_prescribed_grip_trajectory(
+        iface, n_steps=n_steps, dt_s=dt_s, topology_model=topo_model
+    )
+    ws = _evaluate_step_wrenches(adapter, times, hand_seq, club_seq, dt_s, wrench_scale)
+    return _build_newton_report(adapter, topo_model, ws, hand_seq[-1], club_seq[-1])
+
+
+def _geodesic_angle_rad(r_a: np.ndarray, r_b: np.ndarray) -> float:
+    trace_val = float(np.trace(r_a.T @ r_b))
+    cos_theta = float(np.clip(0.5 * (trace_val - 1.0), -1.0, 1.0))
+    return float(math.acos(cos_theta))
+
+
+def _collect_prescribed_club_wrenches(
+    adapter: Any,
+    hand_seq: list[dict[str, BushingState]],
+    club_seq: list[dict[str, BushingState]],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    n_steps = len(hand_seq)
+    binding = adapter.resolve_binding(adapter.topology())
+    club_body = binding.club_body
+    prescribed_com = np.zeros((n_steps, 3), dtype=float)
+    prescribed_rot = np.zeros((n_steps, 3, 3), dtype=float)
+    f_club_seq = np.zeros((n_steps, 3), dtype=float)
+    m_club_com_seq = np.zeros((n_steps, 3), dtype=float)
+    for k in range(n_steps):
+        adapter.set_prescribed_grip_state(hand_seq[k], club_seq[k])
+        com_k, rot_k = adapter.club_com_and_rotation()
+        prescribed_com[k], prescribed_rot[k] = com_k, rot_k
+        rep = adapter.evaluate_contacts()
+        f_net, m_origin = rep.body_wrenches()[club_body]
+        f_club_seq[k] = f_net
+        m_club_com_seq[k] = adapter.club_moment_about_com(f_net, m_origin)
+    return prescribed_com, prescribed_rot, f_club_seq, m_club_com_seq
+
+
+def _compute_replay_errors(
+    replayed_com: np.ndarray,
+    prescribed_com: np.ndarray,
+    replayed_rot: np.ndarray,
+    prescribed_rot: np.ndarray,
+) -> tuple[float, float, float, float, float, float, float, float, float, float]:
+    n_steps = len(prescribed_com)
+    pos_err_vec = np.linalg.norm(replayed_com - prescribed_com, axis=1)
+    rot_err_vec = np.array(
+        [
+            _geodesic_angle_rad(replayed_rot[k], prescribed_rot[k])
+            for k in range(n_steps)
+        ],
+        dtype=float,
+    )
+    com_disp = np.linalg.norm(prescribed_com - prescribed_com[0], axis=1)
+    rot_disp = np.array(
+        [
+            _geodesic_angle_rad(prescribed_rot[k], prescribed_rot[0])
+            for k in range(n_steps)
+        ],
+        dtype=float,
+    )
+    com_amp, rot_amp = float(np.max(com_disp)), float(np.max(rot_disp))
+    pos_peak = float(np.max(pos_err_vec))
+    pos_rms = float(np.sqrt(np.mean(pos_err_vec**2)))
+    rot_peak = float(np.max(rot_err_vec))
+    rot_rms = float(np.sqrt(np.mean(rot_err_vec**2)))
+    pos_peak_rel = pos_peak / max(com_amp, 1e-12)
+    pos_rms_rel = pos_rms / max(com_amp, 1e-12)
+    rot_peak_rel = rot_peak / max(rot_amp, 1e-12)
+    rot_rms_rel = rot_rms / max(rot_amp, 1e-12)
+    return (
+        com_amp,
+        rot_amp,
+        pos_peak,
+        pos_rms,
+        pos_peak_rel,
+        pos_rms_rel,
+        rot_peak,
+        rot_rms,
+        rot_peak_rel,
+        rot_rms_rel,
+    )
+
+
+def replay_club_forward_trajectory(
+    adapter: Any,
+    *,
+    n_steps: int = 21,
+    dt_s: float = FIXTURE_DT_S,
+    substeps: int = 10,
+) -> ForwardReplayClubReport:
+    """Replay free ``golf_club`` forward under ``mj_step`` with solved hand wrenches via ``xfrc_applied``."""
+    if n_steps < 2:
+        raise ValueError(f"n_steps must be >= 2, got {n_steps}")
+    if not math.isfinite(dt_s) or dt_s <= 0.0:
+        raise ValueError(f"dt_s must be finite and > 0, got {dt_s}")
+    if substeps < 1:
+        raise ValueError(f"substeps must be >= 1, got {substeps}")
+
+    _, hand_seq, club_seq = build_prescribed_grip_trajectory(
+        adapter.interface(),
+        n_steps=n_steps,
+        dt_s=dt_s,
+        topology_model=adapter.topology_model(),
+    )
+    prescribed_com, prescribed_rot, f_club_seq, m_club_com_seq = (
+        _collect_prescribed_club_wrenches(adapter, hand_seq, club_seq)
+    )
+    adapter.set_prescribed_grip_state(hand_seq[0], club_seq[0])
+    replayed_com = np.zeros((n_steps, 3), dtype=float)
+    replayed_rot = np.zeros((n_steps, 3, 3), dtype=float)
+    replayed_com[0], replayed_rot[0] = adapter.club_com_and_rotation()
+
+    dt_sub = float(dt_s) / float(substeps)
+    max_weld = int(adapter.active_club_weld_count())
+    max_c_norm = 0.0
+    for k in range(n_steps - 1):
+        for s in range(substeps):
+            alpha = (float(s) + 0.5) / float(substeps)
+            f_sub = (1.0 - alpha) * f_club_seq[k] + alpha * f_club_seq[k + 1]
+            m_sub = (1.0 - alpha) * m_club_com_seq[k] + alpha * m_club_com_seq[k + 1]
+            c_norm = adapter.step_club_with_wrench(f_sub, m_sub, dt_s=dt_sub)
+            max_c_norm = max(max_c_norm, float(c_norm))
+        max_weld = max(max_weld, int(adapter.active_club_weld_count()))
+        replayed_com[k + 1], replayed_rot[k + 1] = adapter.club_com_and_rotation()
+
+    (
+        com_amp,
+        rot_amp,
+        pos_peak,
+        pos_rms,
+        pos_peak_rel,
+        pos_rms_rel,
+        rot_peak,
+        rot_rms,
+        rot_peak_rel,
+        rot_rms_rel,
+    ) = _compute_replay_errors(
+        replayed_com, prescribed_com, replayed_rot, prescribed_rot
+    )
+    int_name, int_order = adapter.integrator_info()
+    topo = adapter.topology()
+    passed = bool(
+        max_weld == 0
+        and max_c_norm == 0.0
+        and max(pos_peak_rel, rot_peak_rel) <= 0.05
+        and max(pos_rms_rel, rot_rms_rel) <= 0.02
+    )
+    return ForwardReplayClubReport(
+        model_id=adapter.model_id,
+        style=topo.style.value,
+        integrator=int_name,
+        integrator_order=int_order,
+        dt_s=float(dt_s),
+        substeps=substeps,
+        substep_dt_s=dt_sub,
+        n_steps=n_steps,
+        com_motion_amplitude_m=com_amp,
+        orientation_amplitude_rad=rot_amp,
+        com_pos_peak_error_m=pos_peak,
+        com_pos_rms_error_m=pos_rms,
+        com_pos_peak_rel_error=pos_peak_rel,
+        com_pos_rms_rel_error=pos_rms_rel,
+        orientation_peak_error_rad=rot_peak,
+        orientation_rms_error_rad=rot_rms,
+        orientation_peak_rel_error=rot_peak_rel,
+        orientation_rms_rel_error=rot_rms_rel,
+        max_active_club_weld_count=max_weld,
+        max_club_constraint_force_n=max_c_norm,
+        passed=passed,
     )
