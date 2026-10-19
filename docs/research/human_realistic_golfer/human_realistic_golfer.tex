@@ -738,8 +738,8 @@ unchanged.
 \item \textbf{Runtime margin.} The default-lane margin is about $1.3$\,s of CPU on this host, so wall time on a loaded
   machine can still exceed $5$\,s. The native Pinocchio lane (\texttt{-m requires\_pinocchio}) runs every case either
   way, and the standard CI unit lane excludes \texttt{requires\_pinocchio}.
-\item \textbf{Remaining cost.} The contact law is now about half the RHS. Radau's finite-difference Jacobian is the
-  next lever; an analytic Jacobian was not attempted.
+\item \textbf{Remaining cost.} The contact law is now about half the RHS. The finite-difference Jacobian is
+  \emph{not} a significant cost (see the assessment below).
 \item \textbf{Compilation.} This document was not compiled locally (no \texttt{pdflatex} on the host).
 \end{itemize}
 
