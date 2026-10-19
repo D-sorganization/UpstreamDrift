@@ -8,49 +8,42 @@ Tests the actual functionality without complex PyQt6 mocking.
 import subprocess
 import sys
 import unittest
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 class TestLauncherCommands(unittest.TestCase):
     """Test launcher command functionality."""
 
     def test_engine_launch_commands(self) -> None:
-        """Test individual engine launch commands."""
+        """--engine choices are accepted by the canonical launcher CLI."""
         engines = ["mujoco", "drake", "pinocchio"]
 
         for engine in engines:
             with self.subTest(engine=engine):
-                # Test that command is recognized and doesn't fail immediately
-                try:
-                    result = subprocess.run(
-                        [sys.executable, "launch_golf_suite.py", "--engine", engine],
-                        capture_output=True,
-                        text=True,
-                        timeout=5,  # Increased timeout for Windows
-                    )
-
-                    # Check for immediate failures (import errors, etc.)
-                    if result.returncode != 0:
-                        # Module not found or engine not available is expected
-                        # in environments without all engines installed
-                        stderr = result.stderr.lower()
-                        if any(
-                            msg in stderr
-                            for msg in [
-                                "not ready",
-                                "not available",
-                                "no module named",
-                                "failed to launch",
-                            ]
-                        ):
-                            pass
-                        else:
-                            self.fail(f"Engine {engine} launch failed: {result.stderr}")
-                    else:
-                        pass
-
-                except subprocess.TimeoutExpired:
-                    # Timeout is good - means GUI started and didn't crash immediately
-                    pass
+                parse_result = subprocess.run(
+                    [
+                        sys.executable,
+                        "-c",
+                        (
+                            "import launch_golf_suite as lg, sys; "
+                            f"sys.argv = ['launch_golf_suite.py', '--engine', '{engine}']; "
+                            "args = lg.parse_arguments(); "
+                            f"assert args.engine == '{engine}'"
+                        ),
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    cwd=REPO_ROOT,
+                )
+                self.assertEqual(
+                    parse_result.returncode,
+                    0,
+                    msg=parse_result.stderr,
+                )
+                self.assertNotIn("Traceback", parse_result.stderr)
 
 
 if __name__ == "__main__":

@@ -23,6 +23,10 @@ from src.shared.python.core.contracts import (
 from src.shared.python.engine_core.base_physics_engine import (
     BasePhysicsEngine,
 )
+from src.shared.python.engine_core.capabilities import (
+    CapabilityLevel,
+    EngineCapabilities,
+)
 from src.shared.python.engine_core.checkpoint import StateCheckpoint
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -75,6 +79,18 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
     def engine_type(self) -> str:
         """Get engine type identifier."""
         return "pendulum"
+
+    def get_capabilities(self) -> EngineCapabilities:
+        """Report Pendulum engine capabilities."""
+        return EngineCapabilities(
+            engine_name="Pendulum",
+            mass_matrix=CapabilityLevel.FULL,
+            jacobian=CapabilityLevel.FULL,
+            contact_forces=CapabilityLevel.NONE,
+            inverse_dynamics=CapabilityLevel.FULL,
+            drift_acceleration=CapabilityLevel.FULL,
+            forward_sim=CapabilityLevel.FULL,
+        )
 
     def _load_from_path_impl(self, path: str) -> None:
         """Engine-specific load from path (no-op for pendulum)."""
@@ -280,9 +296,44 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
         return a_control
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
-        """Compute spatial Jacobian for a specific body."""
-        # Placeholder -- not yet implemented for double pendulum
-        return None
+        """Compute spatial Jacobian for a named body ('wrist', 'arm', 'tip', 'club')."""
+        if body_name is None:
+            raise ValueError("body_name must be provided")
+        body = body_name.lower()
+        if body not in {"wrist", "tip", "club", "arm"}:
+            return None
+
+        theta1 = float(self._pendulum_state.theta1)
+        theta2 = float(self._pendulum_state.theta2)
+        parameters = self.dynamics.parameters
+        l1 = parameters.upper_segment.length_m
+        l2 = parameters.lower_segment.length_m
+        abs2 = theta1 + theta2
+
+        if body in {"wrist", "arm"}:
+            linear = np.array(
+                [
+                    [l1 * np.cos(theta1), 0.0],
+                    [l1 * np.sin(theta1), 0.0],
+                    [0.0, 0.0],
+                ]
+            )
+            angular = np.array([[0.0, 0.0], [0.0, 0.0], [1.0, 0.0]])
+        else:  # tip, club
+            linear = np.array(
+                [
+                    [l1 * np.cos(theta1) + l2 * np.cos(abs2), l2 * np.cos(abs2)],
+                    [l1 * np.sin(theta1) + l2 * np.sin(abs2), l2 * np.sin(abs2)],
+                    [0.0, 0.0],
+                ]
+            )
+            angular = np.array([[0.0, 0.0], [0.0, 0.0], [1.0, 1.0]])
+
+        return {
+            "linear": linear,
+            "angular": angular,
+            "spatial": np.vstack([angular, linear]),
+        }
 
     # ---- Section G: Counterfactual Experiments (Implementation) ----
 
