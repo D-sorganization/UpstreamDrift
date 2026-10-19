@@ -11,9 +11,19 @@ Verifies:
 
 from __future__ import annotations
 
+import json
 import math
+from pathlib import Path
 import numpy as np
 import pytest
+
+_REPO = Path(__file__).resolve().parents[3]
+RECEIPTS_PATH = (
+    _REPO / "docs/development/lifting/evidence/opensim_muscles/receipts.json"
+)
+IK_ID_RECEIPTS_PATH = (
+    _REPO / "docs/development/lifting/evidence/opensim_ik_id/receipts.json"
+)
 
 from src.engines.physics_engines.opensim.python.msk_lift_muscles import (
     GROUP_TO_RAJAGOPAL_MUSCLES,
@@ -82,12 +92,15 @@ def test_reserve_share_infinite_when_demand_zero_and_reserves_present() -> None:
 
 
 def test_classification_logic() -> None:
-    """Qualified only when reserve share < 5% (0.05)."""
+    """Qualified only when reserve share < 5% (0.05) AND residual gate passes."""
     assert classify_lift_reserves(0.0) == "qualified"
     assert classify_lift_reserves(0.049) == "qualified"
     assert classify_lift_reserves(0.05) == "unqualified"
     assert classify_lift_reserves(0.051) == "unqualified"
     assert classify_lift_reserves(0.568) == "unqualified"
+    # Even with low reserve share, failing residual gate disqualifies the lift
+    assert classify_lift_reserves(0.01, residual_gate_passed=False) == "unqualified"
+    assert classify_lift_reserves(0.01, residual_gate_passed=True) == "qualified"
 
 
 def test_major_muscle_groups_table() -> None:
@@ -154,16 +167,143 @@ def test_deep_squat_window_never_labeled_standing() -> None:
         assert not any(disallowed in name for name in all_names)
 
 
-@pytest.mark.parametrize("lift", [lift for lift in LIFTS if lift != "squat"])
-def test_unavailable_lifts_reported_with_reason_never_zero(lift: str) -> None:
-    """Non-squat lifts must report status='unavailable' with reason, never fake numbers."""
-    receipt = evaluate_lift_muscles(lift)
+def test_bench_press_unavailable_due_to_supine_ik_reason() -> None:
+    """Bench press IK does not pose a supine lifter, so it stays unavailable with that reason."""
+    receipt = evaluate_lift_muscles("bench_press")
     assert receipt["status"] == "unavailable"
-    assert "reason" in receipt and receipt["reason"]
+    assert "supine" in receipt["reason"].lower()
     assert receipt["forces"] is None
     assert receipt["activations"] is None
     assert receipt["reserve_share"] is None
     assert receipt["classification"] == "unqualified"
+
+
+def test_deadlift_window_never_labeled_with_nonexistent_phases() -> None:
+    """A partial engine window covering deadlift pull never falsely labels setup or lockout."""
+    times = np.linspace(0.0, 0.2, 41)
+    coord_names = ["hip_flexion_r", "hip_flexion_l", "knee_angle_r", "knee_angle_l"]
+    q = np.zeros((41, 4))
+    q[:, 0] = np.radians(90.0)
+    q[:, 1] = np.radians(90.0)
+    q[:, 2] = np.radians(70.0)
+    q[:, 3] = np.radians(70.0)
+
+    segments = detect_motion_phases("deadlift", times, coord_names, q)
+    assert len(segments) == 1
+    seg_name, t0, t1 = segments[0]
+    assert "pull" in seg_name
+    assert "engine window 0.0-0.2 s" in seg_name
+    all_names = [s[0].lower() for s in segments]
+    for disallowed in ("setup", "lockout", "descent"):
+        assert not any(disallowed in name for name in all_names)
+
+
+def test_snatch_window_never_labeled_with_nonexistent_phases() -> None:
+    """A partial engine window covering snatch pull never falsely labels turnover or catch."""
+    times = np.linspace(0.0, 0.2, 41)
+    coord_names = ["hip_flexion_r", "hip_flexion_l", "knee_angle_r", "knee_angle_l"]
+    q = np.zeros((41, 4))
+    q[:, 0] = np.radians(85.0)
+    q[:, 1] = np.radians(85.0)
+    q[:, 2] = np.radians(50.0)
+    q[:, 3] = np.radians(50.0)
+
+    segments = detect_motion_phases("snatch", times, coord_names, q)
+    assert len(segments) == 1
+    seg_name, t0, t1 = segments[0]
+    assert "pull" in seg_name
+    assert "engine window 0.0-0.2 s" in seg_name
+    all_names = [s[0].lower() for s in segments]
+    for disallowed in ("turnover", "catch", "recovery"):
+        assert not any(disallowed in name for name in all_names)
+
+
+def test_clean_and_jerk_window_never_labeled_with_nonexistent_phases() -> None:
+    """A partial engine window covering clean pull never falsely labels jerk phases."""
+    times = np.linspace(0.0, 0.2, 41)
+    coord_names = ["hip_flexion_r", "hip_flexion_l", "knee_angle_r", "knee_angle_l"]
+    q = np.zeros((41, 4))
+    q[:, 0] = np.radians(95.0)
+    q[:, 1] = np.radians(95.0)
+    q[:, 2] = np.radians(50.0)
+    q[:, 3] = np.radians(50.0)
+
+    segments = detect_motion_phases("clean_and_jerk", times, coord_names, q)
+    assert len(segments) == 1
+    seg_name, t0, t1 = segments[0]
+    assert "pull" in seg_name
+    assert "engine window 0.0-0.2 s" in seg_name
+    all_names = [s[0].lower() for s in segments]
+    for disallowed in (
+        "rack_catch",
+        "rack_recovery",
+        "jerk_dip_drive",
+        "overhead_catch",
+        "overhead_recovery",
+    ):
+        assert not any(disallowed in name for name in all_names)
+
+
+def test_muscle_receipts_recorded_for_all_lifts() -> None:
+    """Verify docs/development/lifting/evidence/opensim_muscles/receipts.json."""
+    if not RECEIPTS_PATH.is_file():
+        pytest.skip(f"receipts file not found: {RECEIPTS_PATH}")
+    data = json.loads(RECEIPTS_PATH.read_text(encoding="utf-8"))
+    lifts = data["lifts"]
+    assert set(lifts.keys()) == set(LIFTS)
+    assert lifts["bench_press"]["status"] == "unavailable"
+    assert "supine" in lifts["bench_press"]["reason"].lower()
+    for lift in ("squat", "deadlift", "snatch", "clean_and_jerk"):
+        entry = lifts[lift]
+        assert entry["status"] == "complete", f"{lift}: {entry.get('reason')}"
+        assert entry["classification"] == "unqualified"
+        assert entry["reserve_share"] is not None and entry["reserve_share"] > 0.05
+        assert "residual_status" in entry
+
+
+def test_muscle_receipts_carry_measured_ik_id_residuals() -> None:
+    """Every complete record must carry IK/ID residual status matching IK/ID receipts."""
+    if not RECEIPTS_PATH.is_file() or not IK_ID_RECEIPTS_PATH.is_file():
+        pytest.skip("receipts files not found")
+    m_data = json.loads(RECEIPTS_PATH.read_text(encoding="utf-8"))["lifts"]
+    ik_data = json.loads(IK_ID_RECEIPTS_PATH.read_text(encoding="utf-8"))["lifts"]
+    for lift in ("squat", "deadlift", "snatch", "clean_and_jerk"):
+        m_rec = m_data[lift]
+        assert m_rec["status"] == "complete"
+        res_status = m_rec["residual_status"]
+        ik_id_id = ik_data[lift]["ik_id"]["id"]
+        gate = ik_id_id["residual_gate"]
+        residuals = ik_id_id["residuals"]
+        peak_f = max(
+            residuals["pelvis_tx"]["max_abs"],
+            residuals["pelvis_ty"]["max_abs"],
+            residuals["pelvis_tz"]["max_abs"],
+        )
+        peak_m = max(
+            residuals["pelvis_tilt"]["max_abs"],
+            residuals["pelvis_list"]["max_abs"],
+            residuals["pelvis_rotation"]["max_abs"],
+        )
+        assert res_status["forces_within"] == gate["forces_within"]
+        assert res_status["moments_within"] == gate["moments_within"]
+        assert res_status["measured_pelvis_residual_force_n"] == pytest.approx(
+            peak_f, abs=1e-3
+        )
+        assert res_status["hicks_force_limit_n"] == pytest.approx(
+            gate["max_force_n"], abs=1e-3
+        )
+        assert res_status["measured_pelvis_residual_moment_nm"] == pytest.approx(
+            peak_m, abs=1e-3
+        )
+        assert res_status["hicks_moment_limit_nm"] == pytest.approx(
+            gate["max_moment_nm"], abs=1e-3
+        )
+        if lift != "squat":
+            assert res_status["forces_within"] is False
+            assert res_status["moments_within"] is False
+        else:
+            assert res_status["forces_within"] is True
+            assert res_status["moments_within"] is True
 
 
 # -------------------------------------------------------------------------
@@ -279,3 +419,23 @@ def test_hip_demand_asymmetry_cause_quotes_the_measured_values() -> None:
     for value in ("-111.11", "-222.22", "-33.33", "-44.44", "+12.50", "-7.50"):
         assert value in record["cause"]
     assert "-434.68" not in record["cause"]
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+@pytest.mark.parametrize("lift", ["deadlift", "snatch", "clean_and_jerk"])
+def test_live_remaining_lifts_muscle_solutions(lift: str) -> None:
+    """Live static optimization solve for deadlift, snatch, and clean & jerk."""
+    _real_opensim()
+    _require_body()
+    receipt = evaluate_lift_muscles(lift, stride=5, run_moco=False)
+    assert receipt["status"] == "complete", receipt.get("reason", "")
+    assert receipt["classification"] == "unqualified"
+    assert receipt["reserve_share"] is not None and receipt["reserve_share"] > 0.05
+    assert receipt["moment_balance_max_error_nm"] < 1e-4
+    assert "residual_status" in receipt
+    assert receipt["residual_status"]["forces_within"] is False
+    assert receipt["residual_status"]["moments_within"] is False
+    phase_names = list(receipt["phases"].keys())
+    assert len(phase_names) == 1
+    assert "pull" in phase_names[0]
