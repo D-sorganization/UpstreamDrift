@@ -63,6 +63,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Any
 from functools import cached_property
 
 import numpy as np
@@ -129,7 +130,7 @@ _BOX_HYPOTHESIS = "H-ACTIVATION-BOX"
 """Hypothesis id of the ``0 <= a <= 1`` rows handed to :func:`hit_and_run`."""
 
 
-def _solve_lp(cost: Array, what: str, **kwargs: object) -> tuple[Array, float]:
+def _solve_lp(cost: Array, what: str, **kwargs: Any) -> tuple[Array, float]:
     """HiGHS at the module's tightened tolerances; fail closed on non-optimum."""
     res = linprog(
         cost,
@@ -138,7 +139,7 @@ def _solve_lp(cost: Array, what: str, **kwargs: object) -> tuple[Array, float]:
             "primal_feasibility_tolerance": _LP_TOL,
             "dual_feasibility_tolerance": _LP_TOL,
         },
-        **kwargs,  # type: ignore[arg-type]
+        **kwargs,
     )
     if res.status != 0 or res.x is None or res.fun is None:
         raise FiberInfeasibleError(f"{what} failed: {res.message}")
