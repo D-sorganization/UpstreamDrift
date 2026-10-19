@@ -654,6 +654,48 @@ python3 -m pytest tests/unit/grip_contact/test_topology_parity_harness.py \
     tests/unit/grip_contact/test_grip_parity_metrics.py
 \end{verbatim}
 
+\subsection{Array-Namespace Contact Kernel (HRG-GS-M14, \#13336)}
+\textbf{Kernel Equations and Sign Conventions.}
+The module \path{src/shared/python/grip_contact/contact_kernel.py} extracts the single qualified Hunt-Crossley normal, regularised Coulomb--Stribeck tangential, and torsional spin-friction law evaluated per contact pair in \path{pair_contact.py} (HRG-GS-G2, \#13300) and \path{pad_contact.py} (\#11739) into one pure array-namespace kernel \texttt{contact\_law\_kernel(penetration\_m, normal\_velocity\_m\_s, tangential\_velocity\_m\_s, params, spin\_rate\_rad\_s=0.0, *, xp=np)}. Given penetration depth $\delta$ ($\mathrm{m}$, positive when overlapping, $\le 0$ when separated), normal relative velocity $v_n = \hat{n} \cdot v_{\mathrm{rel}} = -\dot{\delta}$ ($\mathrm{m/s}$, negative when approaching/deepening), tangential slip velocity $v_t$ ($\mathrm{m/s}$, scalar of shape $S$ or 3-vector in the contact plane of shape $(S, 3)$), normal relative spin rate $\omega_n = \hat{n} \cdot \omega_{\mathrm{rel}}$ ($\mathrm{rad/s}$), and parameter tuple $\theta = (k, c, \mu_s, \mu_d, \mu_v, v_{\mathrm{tr}}, r_{\mathrm{patch}}, \omega_{\mathrm{tr}})$ (\texttt{ContactKernelParams}), the kernel evaluates:
+\begin{align}
+\delta_+ &= \operatorname{where}(\delta > 0,\, \delta,\, 0), \qquad
+\tilde{f}_n = k\,\delta_+\,(1 - c\,v_n), \qquad
+f_n = \operatorname{where}\!\left((\delta > 0) \land (\tilde{f}_n > 0),\, \tilde{f}_n,\, 0\right), \\
+s &= \|v_t\|_2, \qquad
+\mu(s) = \mu_d + (\mu_s - \mu_d)\exp\!\left(-\left(\frac{s}{v_{\mathrm{tr}}}\right)^2\right) + \mu_v s, \\
+f_t &= \operatorname{where}\!\left((s > 0) \land (f_n > 0),\, \mu(s)\,f_n\,\tanh\!\left(\frac{s}{v_{\mathrm{tr}}}\right),\, 0\right), \qquad
+\vec{f}_t = \operatorname{where}\!\left((s > 0) \land (f_n > 0),\, -\frac{v_t}{s_{\mathrm{safe}}}\,f_t,\, \vec{0}\right), \\
+m_s &= \operatorname{where}\!\left(f_n > 0,\, -\mu_s\,f_n\,r_{\mathrm{patch}}\,\tanh\!\left(\frac{\omega_n}{\omega_{\mathrm{tr}}}\right),\, 0\right).
+\end{align}
+Here $s_{\mathrm{safe}} = \operatorname{where}(s^2 > 0, \sqrt{\operatorname{where}(s^2 > 0, s^2, 1)}, 1)$ applies the double-\texttt{xp.where} idiom so that both value evaluation and reverse-mode automatic differentiation (\texttt{jax.grad}, \texttt{jax.jacrev}) remain free of $0/0$ and $1/(2\sqrt{0})$ \texttt{NaN} propagation on the unselected branch at $v_t = 0$.
+
+\textbf{Validation Split, DRY Delegation, and Batched Composition.}
+Design-by-Contract validation ($k > 0$, $v_{\mathrm{tr}} > 0$, $\omega_{\mathrm{tr}} > 0$, $c \ge 0$, $\mu_s \ge \mu_d \ge 0$, $\mu_v \ge 0$, $r_{\mathrm{patch}} \ge 0$, finiteness, and array shape compatibility) executes strictly outside the traced kernel in \texttt{validate\_kernel\_params}, \texttt{evaluate\_contact\_kernel} (NumPy), and \texttt{evaluate\_contact\_kernel\_jax} (JAX). The pure kernel contains zero Python control-flow branches on state values and operates identically on scalar ($0$-D) pairs and batched $(N,)$ arrays (composing directly with the stacked per-side \texttt{SideBatch} representation of \texttt{perf/grip-contact-batched}). Both \path{pair_contact.py} and \path{pad_contact.py} delegate their plane contact evaluation to \texttt{sample\_plane\_contact} $\to$ \texttt{contact\_law\_kernel}. \texttt{jax.numpy} is imported lazily inside \texttt{evaluate\_contact\_kernel\_jax} and \texttt{jax\_contact\_kernel} so that importing \texttt{src.shared.python.grip\_contact} in a cold process never loads \texttt{jax}.
+
+\textbf{Non-Differentiable Loci and Opt-In Smooth Relaxation.}
+The qualified law is preserved without silent smoothing; its three non-smooth regimes are:
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \textit{Contact Onset at Zero Penetration ($\delta = 0$) and Damping Liftoff ($v_n = 1/c$)}: The unilateral hinge $\max(0, \delta)$ has left derivative $\partial_- f_n / \partial \delta = 0$ and right derivative $\partial_+ f_n / \partial \delta = k(1 - c\,v_n) > 0$ at $\delta = 0$ (and $\partial_\pm f_n / \partial v_n$ jumps from $-k c \delta$ to $0$ at $v_n = 1/c$).
+\item \textit{Zero Tangential Speed ($v_t = 0$)}: The Euclidean speed $s = \|v_t\|_2$ has a $C^0$ cone singularity at $v_t = 0$, causing the tangential force magnitude $f_t(v_t)$ to have opposite one-sided derivatives $\partial_\pm f_t / \partial v_t|_{0^\pm} = \pm \mu_s f_n / v_{\mathrm{tr}}$.
+\item \textit{Stick/Slip Transition ($|v_t| \sim v_{\mathrm{tr}}$)}: Across the boundary layer $s \approx v_{\mathrm{tr}}$ ($10^{-3}\,\mathrm{m/s}$), the tangent modulus $\partial f_t / \partial s$ collapses by $> 10^3\times$ from the stick stiffness $\mu_s f_n / v_{\mathrm{tr}}$ ($s \ll v_{\mathrm{tr}}$) to the viscous slip slope $\mu_v f_n$ ($s \gg v_{\mathrm{tr}}$), causing finite-difference steps of scale $h \sim v_{\mathrm{tr}}$ across the knee to incur $O(1)$ relative error ($> 10\%$).
+\end{enumerate}
+For gradient-based trajectory optimization requiring $C^\infty$ derivatives across $\delta = 0$ and $v_t = 0$, the separately named function \texttt{smooth\_contact\_law\_kernel} replaces $\max(0, x)$ with $\frac{1}{2}(x + \sqrt{x^2 + \varepsilon_\delta^2})$ and $\|v_t\|_2$ with $\sqrt{v_t \cdot v_t + \varepsilon_v^2} - \varepsilon_v$, converging to \texttt{contact\_law\_kernel} as $(\varepsilon_\delta, \varepsilon_v) \to (0^+, 0^+)$ and never replacing the default law.
+
+\textbf{Measured Parity and Gradient Errors.}
+Evaluated in \texttt{float64} (\texttt{jax\_enable\_x64 = True} inside tests) across $200$ seeded random states ($\text{seed} = 13336$, spanning separated, zero-penetration, penetrating, liftoff, zero-slip, stick, and slip states):
+\begin{itemize}[leftmargin=*,noitemsep]
+\item Value parity vs.\ NumPy ($\le 10^{-10}$ gate): maximum absolute error is $0.0\,\mathrm{N}$ on $f_n$, $5.68 \times 10^{-14}\,\mathrm{N}$ on scalar $f_t$, $1.14 \times 10^{-13}\,\mathrm{N}$ on 3-vector $\vec{f}_t$, and $8.88 \times 10^{-16}\,\mathrm{N\cdot m}$ on $m_s$.
+\item Smooth-region gradient parity vs.\ central differences ($h = 10^{-7}$, $\le 10^{-5}$ gate across $25$ seeded states): maximum relative $\ell_2$ gradient error is $5.92 \times 10^{-12}$ on $\nabla f_n$, $8.97 \times 10^{-9}$ on $\nabla f_t$, and $9.78 \times 10^{-12}$ on $\nabla m_s$.
+\end{itemize}
+
+\textbf{Limitations.}
+The kernel evaluates point/patch contact forces from local penetration and relative velocity; multi-body contact geometry (closest-point queries on capsules and cylinders) remains in the calling geometry layer. Rigid-proxy hand bindings do not identify biological finger articulation or co-contraction squeeze.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+JAX_PLATFORMS=cpu python3 -m pytest tests/unit/grip_contact/test_contact_kernel.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
