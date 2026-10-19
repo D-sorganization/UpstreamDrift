@@ -10,6 +10,15 @@ from src.shared.python.grip_contact.closure_series import (
     closure_series_from_residuals,
 )
 from src.shared.python.grip_contact.club_dynamics import ClubDynamics
+from src.shared.python.grip_contact.contact_kernel import (
+    ContactKernelParams,
+    ContactKernelResult,
+    contact_law_kernel,
+    evaluate_contact_kernel,
+    evaluate_contact_kernel_jax,
+    jax_contact_kernel,
+    smooth_contact_law_kernel,
+)
 from src.shared.python.grip_contact.contact_topology import (
     GRIP,
     ContactPair,
@@ -169,4 +178,11 @@ __all__ = [
     "build_topology_model",
     "map_site_to_hand_frame",
     "topology_side_wrench",
+    "ContactKernelParams",
+    "ContactKernelResult",
+    "contact_law_kernel",
+    "evaluate_contact_kernel",
+    "evaluate_contact_kernel_jax",
+    "jax_contact_kernel",
+    "smooth_contact_law_kernel",
 ]

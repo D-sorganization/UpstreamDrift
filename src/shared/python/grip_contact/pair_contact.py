@@ -14,12 +14,14 @@ from dataclasses import dataclass
 import numpy as np
 
 from src.shared.python.grip_contact.bushing_law import BushingState, cross3
+from src.shared.python.grip_contact.contact_kernel import (
+    ContactKernelParams,
+    sample_plane_contact,
+)
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
     ContactSample,
     GroundPlane,
-    sphere_ground_contact,
-    torsional_friction_moment,
 )
 
 __all__ = [
@@ -289,16 +291,19 @@ def _sample_contact(
     spin_transition_rad_s: float,
 ) -> tuple[ContactSample, np.ndarray]:
     """Sample Hunt-Crossley / Coulomb contact and torsional spin moment."""
-    sample = sphere_ground_contact(sphere_center, rel_vel, sphere_radius, plane, law)
-    spin = torsional_friction_moment(
-        sample.normal_force_n,
-        rel_omega,
-        plane,
+    params = ContactKernelParams.from_contact_parameters(
+        law,
         patch_radius_m=patch_radius_m,
-        friction=law.static_friction,
-        transition_rad_s=spin_transition_rad_s,
+        spin_transition_rad_s=spin_transition_rad_s,
     )
-    return sample, spin
+    return sample_plane_contact(
+        sphere_center,
+        rel_vel,
+        sphere_radius,
+        plane,
+        rel_omega,
+        params,
+    )
 
 
 def _pair_wrench_from_forces(
