@@ -12,8 +12,10 @@ preserving all required invariants:
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only
 
 from defusedxml import minidom
@@ -24,6 +26,9 @@ from tools.model_converter.schema_validator import (
     RootBody,
     Segment,
 )
+
+from src.shared.python.grip_contact.contact_topology import contact_topology
+from src.shared.python.grip_contact.topology_contact import hand_x_origin
 
 logger = logging.getLogger(__name__)
 
@@ -296,14 +301,45 @@ def _add_fixed_joint(
     )
 
 
-def export_urdf(model: CanonicalModel, out_path: Path | None = None) -> str:
+def _add_separate_hand_frames(robot: ET.Element) -> None:
+    """Attach massless ``lead_hand`` and ``trail_hand`` grip frames to ``mid_hands``."""
+    topology = contact_topology()
+    spacing_m = hand_x_origin(topology, "trail") - hand_x_origin(topology, "lead")
+    half_spacing = 0.5 * spacing_m
+    pitch_rad = math.pi / 2.0
+    for hand_name, z_offset in (
+        ("lead_hand", half_spacing),
+        ("trail_hand", -half_spacing),
+    ):
+        hand_link = ET.SubElement(robot, "link")
+        hand_link.set("name", hand_name)
+        _add_fixed_joint(
+            robot,
+            name=f"mid_hands_to_{hand_name}",
+            parent="mid_hands",
+            child=hand_name,
+            origin_xyz=(0.0, 0.0, z_offset),
+            origin_rpy=(0.0, pitch_rad, 0.0),
+        )
+
+
+def export_urdf(
+    model: CanonicalModel,
+    out_path: Path | None = None,
+    *,
+    hands: Literal["merged", "separate"] = "merged",
+) -> str:
     """Generate URDF XML string from canonical model and optionally save to disk.
 
     Preconditions:
         - model is a valid CanonicalModel instance
+        - hands is ``"merged"`` (default) or ``"separate"``
     Postconditions:
         - Returns valid URDF XML string conforming to schema and physics contracts
     """
+    if hands not in ("merged", "separate"):
+        raise ValueError(f"hands must be 'merged' or 'separate', got {hands!r}")
+
     robot = ET.Element("robot")
     robot.set("name", "golfer")
 
@@ -331,6 +367,9 @@ def export_urdf(model: CanonicalModel, out_path: Path | None = None) -> str:
         origin_xyz="0.0 0.0 -0.17",
         origin_rpy="0.0 0.0 0.0",
     )
+
+    if hands == "separate":
+        _add_separate_hand_frames(robot)
 
     # club_shaft link + joint welded to mid_hands
     shaft_seg = model.get_segment("club_shaft")
