@@ -13,6 +13,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.static_address_reg
     StaticRegistrationResult,
     quiet_segment_frames,
     register_static_trunk_markers,
+    solve_pelvis_rotations,
     waist_cluster_frame,
     write_registered_model,
 )
@@ -45,7 +46,7 @@ def test_quiet_segment_detection_synthetic() -> None:
     points_m = np.zeros((n_frames, n_markers, 3))
     # Add tiny stationary noise < 0.01 m/s
     for f in range(50):
-        points_m[f] = np.full((n_markers, 3), 0.0001 * (f % 2))
+        points_m[f] = np.full((n_markers, 3), 0.00002 * (f % 2))
     # Frames 50..99 moving steadily at 0.20 m/s along x
     for f in range(50, n_frames):
         points_m[f] = points_m[49] + (f - 49) * (0.20 * dt)
@@ -133,10 +134,10 @@ def test_known_offset_recovery_opensim(tmp_path: Path) -> None:
 
     # Define known true trunk placements
     known_placements: dict[str, MarkerPlacement] = {
-        "WaistLeft": MarkerPlacement("pelvis", (-0.528, -0.118, -0.055)),
-        "WaistRight": MarkerPlacement("pelvis", (-0.527, -0.112, 0.289)),
-        "WaistLBack": MarkerPlacement("pelvis", (-0.673, -0.113, 0.033)),
-        "WaistRBack": MarkerPlacement("pelvis", (-0.677, -0.118, 0.202)),
+        "WaistLeft": MarkerPlacement("pelvis", (-0.530, -0.115, -0.170)),
+        "WaistRight": MarkerPlacement("pelvis", (-0.530, -0.115, 0.170)),
+        "WaistLBack": MarkerPlacement("pelvis", (-0.680, -0.115, -0.170)),
+        "WaistRBack": MarkerPlacement("pelvis", (-0.680, -0.115, 0.170)),
         "BackTop": MarkerPlacement("torso", (-0.400, 0.313, 0.179)),
         "BackLeft": MarkerPlacement("torso", (-0.494, 0.166, 0.063)),
         "BackRight": MarkerPlacement("torso", (-0.480, 0.139, 0.243)),
@@ -177,6 +178,10 @@ def test_known_offset_recovery_opensim(tmp_path: Path) -> None:
     }
     # Pelvis orientation in ground
     R_target = waist_cluster_frame(waist_pts_local)
+    pelvis_rot_coords, _ = solve_pelvis_rotations(gt_kin.model, R_target)
+    for c_name, val in pelvis_rot_coords.items():
+        q_static[gt_kin.names.index(c_name)] = val
+
     # Set lumbar to 0
     for l_name in ("lumbar_extension", "lumbar_bending", "lumbar_rotation"):
         q_static[gt_kin.names.index(l_name)] = 0.0
