@@ -135,7 +135,7 @@ mujoco = ["mujoco>=3.6.0,<4.0.0"]
 
 # Upper bounds added per issue #5914 to prevent silent breakage on
 # upstream major releases of these physics engines.
-drake = ["drake>=1.22.0,<2.0.0"]
+drake = ["drake>=1.57.0,<1.59.0"]
 # pin-pink is imported by four production modules in the Pinocchio engine
 # (dtack/ik, dtack/backends, motion_training) and was declared only in the
 # engine's requirements.txt (epic #8390, A4/#8394). Guarded imports keep the

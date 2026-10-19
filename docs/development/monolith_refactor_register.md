@@ -98,6 +98,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 999 | `src/shared/python/estimation/dime_contracts.py` |
 | 994 | `src/api/models/responses.py` |
 | 993 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
+| 993 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 990 | `src/shared/python/estimation/map_estimator.py` |
 | 988 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_data_core.py` |
 | 984 | `src/tools/bunker_shot_gui/viewport_widgets.py` |
@@ -116,14 +117,13 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 964 | `src/shared/python/loop_nullspace/plot_model.py` |
 | 964 | `src/shared/python/sidekick/lab/bio/c3d_reader.py` |
 | 962 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_whole_body_ik.m` |
+| 959 | `src/engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py` |
 | 957 | `src/bunkershot3d/solvers/mpm/solver.py` |
 | 955 | `src/shared/python/force_overlay/glyphs.py` |
 | 955 | `src/shared/python/pendulum_simulator/gui/simulation_panel.py` |
 | 954 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 954 | `src/tools/shot_pattern_analysis/matched_gui.py` |
-| 953 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 952 | `src/shared/python/pendulum_simulator/gui/panel_builders.py` |
-| 950 | `src/engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py` |
 | 950 | `src/shared/python/dashboard/widgets.py` |
 | 950 | `src/shared/python/signal_toolkit/signal_processing.py` |
 | 948 | `src/shared/python/sidekick/process_calculators/acid_gas_dewpoint_calculator.py` |
@@ -168,11 +168,12 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 864 | `src/tools/simulation_backends_launcher/gui.py` |
 | 862 | `src/shared/python/motion_matching/pipeline/dynamics.py` |
 | 862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py` |
+| 861 | `src/shared/python/motion_matching/pipeline/lane.py` |
 | 859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m` |
+| 854 | `src/shared/python/grip_contact/contact_topology.py` |
 | 853 | `src/shared/python/ai/gui/assistant_panel.py` |
 | 853 | `src/shared/python/sidekick/process_calculators/constants.py` |
 | 850 | `src/shared/python/chat/_chat_dock_widget_qt.py` |
-| 850 | `src/shared/python/motion_matching/pipeline/lane.py` |
 | 849 | `src/tools/training_controller/gui.py` |
 | 848 | `src/shared/python/motion_matching/club_only/reproduction.py` |
 | 847 | `src/api/routes/bunker_workbench.py` |
