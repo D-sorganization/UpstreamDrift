@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13364 · Ci(Quality-Gate): Aggregate Frontend-Tests and the Other Gating CI Standard Jobs so a Red Job Blocks the Merge Queue
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13364
+- **Branch:** cursor/merge-queue-gate-13364
+- **PR:** #13366
+- **Paths:** see #13366
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`65857013`; collated from changes/13364-quality-gate-aggregates-gating-jobs.md)
+- **Summary:** ci(quality-gate): aggregate frontend-tests and the other gating CI Standard jobs so a red job blocks the merge queue
+- **Next step:** Merge the PR.
+
 ### DL-#13355 · Fix(Ui): Include Physical Style in resolveGrip to Resolve Red Main on Frontend-Tests
 
 - **State:** in_review
