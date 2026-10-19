@@ -656,7 +656,7 @@ python3 -m pytest tests/unit/grip_contact/test_topology_parity_harness.py \
 
 \subsection{Array-Namespace Contact Kernel (HRG-GS-M14, \#13336)}
 \textbf{Kernel Equations and Sign Conventions.}
-The module \path{src/shared/python/grip_contact/contact_kernel.py} extracts the single qualified Hunt-Crossley normal, regularised Coulomb--Stribeck tangential, and torsional spin-friction law evaluated per contact pair in \path{pair_contact.py} (HRG-GS-G2, \#13300) and \path{pad_contact.py} (\#11739) into one pure array-namespace kernel \texttt{contact\_law\_kernel(penetration\_m, normal\_velocity\_m\_s, tangential\_velocity\_m\_s, params, spin\_rate\_rad\_s=0.0, *, xp=np)}. Given penetration depth $\delta$ ($\mathrm{m}$, positive when overlapping, $\le 0$ when separated), normal relative velocity $v_n = \hat{n} \cdot v_{\mathrm{rel}} = -\dot{\delta}$ ($\mathrm{m/s}$, negative when approaching/deepening), tangential slip velocity $v_t$ ($\mathrm{m/s}$, scalar of shape $S$ or 3-vector in the contact plane of shape $(S, 3)$), normal relative spin rate $\omega_n = \hat{n} \cdot \omega_{\mathrm{rel}}$ ($\mathrm{rad/s}$), and parameter tuple $\theta = (k, c, \mu_s, \mu_d, \mu_v, v_{\mathrm{tr}}, r_{\mathrm{patch}}, \omega_{\mathrm{tr}})$ (\texttt{ContactKernelParams}), the kernel evaluates:
+The module \path{src/shared/python/motion_matching/contact_kernel.py} holds the single implementation of the qualified Hunt-Crossley normal, regularised Coulomb--Stribeck tangential, and torsional spin-friction law in \texttt{contact\_law\_kernel(penetration\_m, normal\_velocity\_m\_s, tangential\_velocity\_m\_s, params, spin\_rate\_rad\_s=0.0, *, xp=np)} and \texttt{torsional\_moment\_kernel}. Given penetration depth $\delta$ ($\mathrm{m}$, positive when overlapping, $\le 0$ when separated), normal relative velocity $v_n = \hat{n} \cdot v_{\mathrm{rel}} = -\dot{\delta}$ ($\mathrm{m/s}$, negative when approaching/deepening), tangential slip velocity $v_t$ ($\mathrm{m/s}$, scalar of shape $S$ or 3-vector in the contact plane of shape $(S, 3)$), normal relative spin rate $\omega_n = \hat{n} \cdot \omega_{\mathrm{rel}}$ ($\mathrm{rad/s}$), and parameter tuple $\theta = (k, c, \mu_s, \mu_d, \mu_v, v_{\mathrm{tr}}, r_{\mathrm{patch}}, \omega_{\mathrm{tr}})$ (\texttt{ContactKernelParams}), the kernel evaluates:
 \begin{align}
 \delta_+ &= \operatorname{where}(\delta > 0,\, \delta,\, 0), \qquad
 \tilde{f}_n = k\,\delta_+\,(1 - c\,v_n), \qquad
@@ -669,8 +669,14 @@ m_s &= \operatorname{where}\!\left(f_n > 0,\, -\mu_s\,f_n\,r_{\mathrm{patch}}\,\
 \end{align}
 Here $s_{\mathrm{safe}} = \operatorname{where}(s^2 > 0, \sqrt{\operatorname{where}(s^2 > 0, s^2, 1)}, 1)$ applies the double-\texttt{xp.where} idiom so that both value evaluation and reverse-mode automatic differentiation (\texttt{jax.grad}, \texttt{jax.jacrev}) remain free of $0/0$ and $1/(2\sqrt{0})$ \texttt{NaN} propagation on the unselected branch at $v_t = 0$.
 
-\textbf{Validation Split, DRY Delegation, and Batched Composition.}
-Design-by-Contract validation ($k > 0$, $v_{\mathrm{tr}} > 0$, $\omega_{\mathrm{tr}} > 0$, $c \ge 0$, $\mu_s \ge \mu_d \ge 0$, $\mu_v \ge 0$, $r_{\mathrm{patch}} \ge 0$, finiteness, and array shape compatibility) executes strictly outside the traced kernel in \texttt{validate\_kernel\_params}, \texttt{evaluate\_contact\_kernel} (NumPy), and \texttt{evaluate\_contact\_kernel\_jax} (JAX). The pure kernel contains zero Python control-flow branches on state values and operates identically on scalar ($0$-D) pairs and batched $(N,)$ arrays (composing directly with the stacked per-side \texttt{SideBatch} representation of \texttt{perf/grip-contact-batched}). Both \path{pair_contact.py} and \path{pad_contact.py} delegate their plane contact evaluation to \texttt{sample\_plane\_contact} $\to$ \texttt{contact\_law\_kernel}. \texttt{jax.numpy} is imported lazily inside \texttt{evaluate\_contact\_kernel\_jax} and \texttt{jax\_contact\_kernel} so that importing \texttt{src.shared.python.grip\_contact} in a cold process never loads \texttt{jax}.
+\textbf{Single Kernel Callers, Scalar Fast Path, and Validation Split.}
+All NumPy and JAX contact-law entry points delegate to this single kernel:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \path{src/shared/python/motion_matching/contact_law.py}: \texttt{sphere\_ground\_contact} calls \texttt{contact\_law\_kernel(..., xp=np)} and \texttt{torsional\_friction\_moment} calls \texttt{torsional\_moment\_kernel(..., xp=np)}.
+\item \path{src/shared/python/motion_matching/jax_contact.py}: \texttt{sphere\_ground\_contact\_jax} calls \texttt{contact\_law\_kernel(..., xp=jnp)}.
+\item \path{src/shared/python/grip_contact/pair_contact.py} and \path{pad_contact.py}: call \texttt{sphere\_ground\_contact} and \texttt{torsional\_friction\_moment} in \path{contact_law.py}, reaching the same kernel without maintaining a separate formula in \path{grip_contact}.
+\end{itemize}
+When \texttt{xp is np} and scalar kinematics are supplied, the kernel binds \texttt{ops} to \texttt{\_ScalarMathOps} (backed by Python \texttt{math.exp}, \texttt{math.tanh}, \texttt{math.sqrt}, and ternary \texttt{where}) inside the same single-formula body, avoiding $0$-D \texttt{ndarray} ufunc overhead on the hot scalar path ($100\text{k}$ calls, best of $5$: $5.9685\,\mathrm{s}$ pre-refactor vs.\ $5.6782\,\mathrm{s}$ post-refactor, $0.951\times$, compared with $9.3722\,\mathrm{s}$ / $1.48\times$ when routing scalars through $0$-D NumPy ufuncs). Design-by-Contract validation executes outside the traced kernel in \texttt{validate\_kernel\_params}, \texttt{evaluate\_contact\_kernel}, \texttt{evaluate\_contact\_kernel\_jax}, \texttt{sphere\_ground\_contact}, \texttt{torsional\_friction\_moment}, and \texttt{sphere\_ground\_contact\_jax}. \texttt{jax.numpy} is imported lazily inside \texttt{evaluate\_contact\_kernel\_jax} and \texttt{jax\_contact\_kernel} so cold imports of \texttt{motion\_matching} and \texttt{grip\_contact} never load \texttt{jax}.
 
 \textbf{Non-Differentiable Loci and Opt-In Smooth Relaxation.}
 The qualified law is preserved without silent smoothing; its three non-smooth regimes are:
@@ -681,10 +687,10 @@ The qualified law is preserved without silent smoothing; its three non-smooth re
 \end{enumerate}
 For gradient-based trajectory optimization requiring $C^\infty$ derivatives across $\delta = 0$ and $v_t = 0$, the separately named function \texttt{smooth\_contact\_law\_kernel} replaces $\max(0, x)$ with $\frac{1}{2}(x + \sqrt{x^2 + \varepsilon_\delta^2})$ and $\|v_t\|_2$ with $\sqrt{v_t \cdot v_t + \varepsilon_v^2} - \varepsilon_v$, converging to \texttt{contact\_law\_kernel} as $(\varepsilon_\delta, \varepsilon_v) \to (0^+, 0^+)$ and never replacing the default law.
 
-\textbf{Measured Parity and Gradient Errors.}
-Evaluated in \texttt{float64} (\texttt{jax\_enable\_x64 = True} inside tests) across $200$ seeded random states ($\text{seed} = 13336$, spanning separated, zero-penetration, penetrating, liftoff, zero-slip, stick, and slip states):
+\textbf{Measured Equivalence, Parity, and Gradient Errors.}
 \begin{itemize}[leftmargin=*,noitemsep]
-\item Value parity vs.\ NumPy ($\le 10^{-10}$ gate): maximum absolute error is $0.0\,\mathrm{N}$ on $f_n$, $5.68 \times 10^{-14}\,\mathrm{N}$ on scalar $f_t$, $1.14 \times 10^{-13}\,\mathrm{N}$ on 3-vector $\vec{f}_t$, and $8.88 \times 10^{-16}\,\mathrm{N\cdot m}$ on $m_s$.
+\item Pre-refactor oracle equivalence ($\le 10^{-12}$ gate across $500$ seeded states including zero-penetration, zero-speed, and damping-liftoff edges): maximum absolute error is $0.0\,\mathrm{N}$ on \texttt{sphere\_ground\_contact} normal force, $0.0\,\mathrm{N}$ on friction force, and $1.14 \times 10^{-13}\,\mathrm{N\cdot m}$ on \texttt{torsional\_friction\_moment}.
+\item JAX vs.\ NumPy \texttt{float64} value parity ($\le 10^{-10}$ gate across $200$ seeded states): maximum absolute error is $0.0\,\mathrm{N}$ on $f_n$, $5.68 \times 10^{-14}\,\mathrm{N}$ on scalar $f_t$, $1.14 \times 10^{-13}\,\mathrm{N}$ on 3-vector $\vec{f}_t$, and $8.88 \times 10^{-16}\,\mathrm{N\cdot m}$ on $m_s$.
 \item Smooth-region gradient parity vs.\ central differences ($h = 10^{-7}$, $\le 10^{-5}$ gate across $25$ seeded states): maximum relative $\ell_2$ gradient error is $5.92 \times 10^{-12}$ on $\nabla f_n$, $8.97 \times 10^{-9}$ on $\nabla f_t$, and $9.78 \times 10^{-12}$ on $\nabla m_s$.
 \end{itemize}
 
@@ -693,7 +699,9 @@ The kernel evaluates point/patch contact forces from local penetration and relat
 
 \textbf{Reproduction Command.}
 \begin{verbatim}
-JAX_PLATFORMS=cpu python3 -m pytest tests/unit/grip_contact/test_contact_kernel.py
+JAX_PLATFORMS=cpu python3 -m pytest tests/unit/grip_contact/test_contact_kernel.py \
+    tests/unit/motion_matching/test_contact_law.py \
+    tests/unit/motion_matching/test_jax_contact.py
 \end{verbatim}
 
 \section{Appearance}
