@@ -133,7 +133,10 @@ export function resolveGrip(picks: GripPicks, base: PhysicalGrip = DEFAULT_GRIP)
   trail = withPick(trail, 'gamma_deg', picks.trail_set_angle);
   const spacing = picks.hand_spacing ?? base.hand_spacing_m;
   if (!(spacing > 0)) throw new Error(`hand_spacing must be positive, got ${spacing}`);
+<<<<<<< HEAD
   const style = picks.grip_style ?? base.style;
+=======
+>>>>>>> origin/main
   const out: PhysicalGrip = {
     lead,
     trail,
@@ -141,6 +144,7 @@ export function resolveGrip(picks: GripPicks, base: PhysicalGrip = DEFAULT_GRIP)
     hand_spacing_m: spacing,
     handedness: base.handedness,
   };
+  const style = picks.grip_style ?? base.style;
   if (style !== undefined && style !== 'overlap') {
     out.style = style;
   }
