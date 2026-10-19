@@ -75,14 +75,14 @@
       "length_m": 1.156,
       "total_mass_kg": 0.313,
       "xml": "golfer_myobody_driver.xml",
-      "sha256": "133ad3e0f40affe97b77da0b815fd27b72d6481994deb7126de0ede1c134a426"
+      "sha256": "3a007bd960bb7edc37e04eb610b141b19d55e2f2f2381a7075a14dccd24f7154"
     },
     "iron": {
       "name": "iron7",
       "length_m": 0.94,
       "total_mass_kg": 0.428,
       "xml": "golfer_myobody_iron.xml",
-      "sha256": "f387f7d62d3f59ef8ee4dfc5fbfbeee151e22e087a7c0e8f5bfe4f6280df9356"
+      "sha256": "550b000e48398b86bc5c881dd8fae27cd6d74209474775cbfe76b7234449aa9a"
     }
   },
   "qualification": {

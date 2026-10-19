@@ -160,6 +160,56 @@ class TestGolferSceneXml:
             assert sites["grip_site_club_l"][1] == pytest.approx(expected_l)
             assert sites["grip_site_club_r"][1] == pytest.approx(expected_r)
 
+    @pytest.mark.parametrize(
+        "xml_name",
+        ["golfer_myobody_driver.xml", "golfer_myobody_iron.xml"],
+    )
+    def test_club_weld_residuals_at_qpos0_are_zero(
+        self,
+        body_dir: Path,
+        xml_name: str,
+    ) -> None:
+        mujoco = pytest.importorskip("mujoco")
+        import numpy as np
+
+        myo_body = (
+            REPO_ROOT / "shared/models/myosuite/myo_sim/body/myobody_simpleupper.xml"
+        )
+        if not myo_body.is_file():
+            pytest.skip("myo_sim not initialized; run scripts/setup_myosuite_models.sh")
+
+        xml_path = body_dir / xml_name
+        model = mujoco.MjModel.from_xml_path(str(xml_path.resolve()))
+        data = mujoco.MjData(model)
+        mujoco.mj_forward(model, data)
+
+        for weld_name, hand_site, club_site in (
+            ("grip_weld_l", "grip_site_hand_l", "grip_site_club_l"),
+            ("grip_weld_r", "grip_site_hand_r", "grip_site_club_r"),
+        ):
+            sid_h = int(mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, hand_site))
+            sid_c = int(mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, club_site))
+            assert sid_h >= 0 and sid_c >= 0
+            pos_h = np.asarray(data.site_xpos[sid_h], dtype=float)
+            pos_c = np.asarray(data.site_xpos[sid_c], dtype=float)
+            dist_m = float(np.linalg.norm(pos_h - pos_c))
+
+            rot_h = np.asarray(data.site_xmat[sid_h], dtype=float).reshape(3, 3)
+            rot_c = np.asarray(data.site_xmat[sid_c], dtype=float).reshape(3, 3)
+            cos_theta = float(
+                np.clip((np.trace(rot_h.T @ rot_c) - 1.0) / 2.0, -1.0, 1.0)
+            )
+            angle_deg = float(np.degrees(np.arccos(cos_theta)))
+
+            assert dist_m <= 1e-6, (
+                f"{xml_name} {weld_name}: qpos0 site distance residual "
+                f"{dist_m:.6f} m > 1e-6 m"
+            )
+            assert angle_deg <= 1e-3, (
+                f"{xml_name} {weld_name}: qpos0 rotation angle residual "
+                f"{angle_deg:.4f} deg > 1e-3 deg"
+            )
+
 
 class TestCoordinateMap:
     def test_every_mapped_source_resolves_to_myosuite_joint(self) -> None:

@@ -11,7 +11,7 @@
       <include file="../../myo_sim/leg/assets/myolegs_chain.xml"/>
       <freejoint/>
     </body>
-    <body name="golf_club" pos="0.3 0 1.0">
+    <body name="golf_club" pos="-0.000030737471 -0.150075072061 1.737778984701" quat="0.500148107528 0.500249971406 -0.499851767479 -0.499749984685">
       <freejoint name="club_free"/>
       <geom name="club_shaft" type="capsule" fromto="0 -0.94 0 0 0 0" size="0.0065" mass="0.16" rgba="0.75 0.75 0.8 1"/>
       <geom name="club_head" type="box" size="0.008 0.04 0.025" pos="0 0 0" mass="0.268" rgba="0.1 0.1 0.15 1"/>
