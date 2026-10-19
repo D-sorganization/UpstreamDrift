@@ -184,6 +184,12 @@ def simulate_with_coefficients(
        thread-safety; reuse via a `lru_cache`-keyed-on-options helper if
        wall-clock becomes a problem).
     2. Load the canonical humanoid URDF via `load_humanoid_into_plant`.
+       The generated golfer URDF does not declare `<transmission>` elements;
+       `load_humanoid_into_plant` therefore calls
+       `ensure_revolute_joint_actuators` to add one Drake joint actuator per
+       single-DOF revolute joint (joint-index order, 19 actuators for the
+       25-velocity model). `simulate_with_coefficients` fails closed if the
+       torque source cannot connect to `get_actuation_input_port()` (#13421).
     3. Add a `LeafSystem` actuator that evaluates
             tau_j(t) = A_j + B_j*t + C_j*t^2 + D_j*t^3 + E_j*t^4 + F_j*t^5 + G_j*t^6
        from theta, mirroring the Simscape Stateflow torque polynomial

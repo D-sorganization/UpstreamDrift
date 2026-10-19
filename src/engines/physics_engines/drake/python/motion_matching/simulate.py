@@ -448,8 +448,18 @@ def _wire_actuation_and_logger(
         if hasattr(plant, "get_actuation_input_port")
         else None
     )
+    actuation_wired = False
     if actuation_port is not None and plant.num_actuators() == n_actuators:
         builder.Connect(torque_source.get_output_port(0), actuation_port)
+        actuation_wired = True
+    if n_actuators > 0 and not actuation_wired:
+        msg = (
+            "cannot wire polynomial torque to the plant: "
+            f"num_actuators()={plant.num_actuators()} but simulate expects "
+            f"{n_actuators} actuated joints; URDF transmissions or joint "
+            "actuators must match the theta packing order"
+        )
+        raise ValueError(msg)
 
     # State logger (for q, qd extraction)
     log_sink = api.log_sink_cls(plant.num_multibody_states())
