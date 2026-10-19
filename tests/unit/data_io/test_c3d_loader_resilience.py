@@ -67,3 +67,21 @@ def test_c3d_reader_class_resilient_to_polluted_bio_package(
     reader_cls = c3d_reader_class()
     assert reader_cls is not None
     assert reader_cls.__name__ == "C3DDataReader"
+
+
+def test_c3d_reader_class_resilient_to_empty_cached_module(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """c3d_reader_class() recovers when an unpopulated c3d_reader module is cached in sys.modules."""
+    empty_mod = types.ModuleType("shared.python.sidekick.lab.bio.c3d_reader")
+    monkeypatch.setitem(
+        sys.modules, "shared.python.sidekick.lab.bio.c3d_reader", empty_mod
+    )
+    monkeypatch.setitem(
+        sys.modules, "src.shared.python.sidekick.lab.bio.c3d_reader", empty_mod
+    )
+    monkeypatch.setitem(sys.modules, "sidekick.lab.bio.c3d_reader", empty_mod)
+
+    reader_cls = c3d_reader_class()
+    assert reader_cls is not None
+    assert reader_cls.__name__ == "C3DDataReader"
