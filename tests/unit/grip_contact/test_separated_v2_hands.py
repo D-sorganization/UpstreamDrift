@@ -36,6 +36,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -51,22 +52,27 @@ from src.shared.python.grip_contact.contact_topology import (
     contact_topology,
 )
 from src.shared.python.grip_contact.parity import (
+    INDETERMINATE_LABEL,
     PEAK_TOLERANCE,
     RMS_TOLERANCE,
+    QuantityClassification,
     parity_errors,
 )
 from src.shared.python.grip_contact.topology_contact import (
+    CONSTANT_PRELOAD_CHATTER_STATUS,
     HAND_HAND_IDENTIFIABILITY_NOTE,
     PairTraceRecorder,
     TopologyContactModel,
     TopologyHandHandWrench,
     build_topology_model,
     contact_transition_fraction,
+    evaluate_pair_chatter,
     topology_hand_hand_pair_wrench,
     topology_hand_hand_wrenches,
     topology_pair_wrench,
     topology_side_wrench,
 )
+
 from src.shared.python.model_appearance.skinned_body import spec_body_poses
 from src.shared.python.motion_matching.full_body_migration import TrunkMigrator
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
@@ -442,6 +448,43 @@ def test_hrg_tex_g11_has_no_private_hashes_or_paths() -> None:
     assert re.search(r"/home/", g11_sec) is None
 
 
+@pytest.mark.unit
+def test_honest_chatter_metric_rejects_constant_preload() -> None:
+    """A pair whose normal force never changes must report 'constant (preload only)' and not pass chatter."""
+    const_fn = np.full(1815, 42.67310790188361, dtype=float)
+    frac_const = contact_transition_fraction(const_fn)
+    assert np.isnan(frac_const)
+    assert not (frac_const < CHATTER_TOLERANCE)
+
+    chatter_const = evaluate_pair_chatter(const_fn, chatter_tolerance=CHATTER_TOLERANCE)
+    assert chatter_const.is_constant is True
+    assert chatter_const.passes_chatter is False
+    assert chatter_const.status == CONSTANT_PRELOAD_CHATTER_STATUS
+    assert chatter_const.status == "constant (preload only)"
+    assert chatter_const.to_dict()["transition_fraction"] is None
+    assert chatter_const.to_dict()["passes_chatter"] is False
+    assert chatter_const.to_dict()["chatter_status"] == "constant (preload only)"
+
+    # Varying force with 0 contact-loss transitions passes chatter
+    t = np.linspace(0.0, 1.0, 100)
+    varying_fn = 100.0 + 25.0 * np.sin(2.0 * np.pi * t)
+    frac_var = contact_transition_fraction(varying_fn)
+    assert frac_var == 0.0
+    chatter_var = evaluate_pair_chatter(varying_fn, chatter_tolerance=CHATTER_TOLERANCE)
+    assert chatter_var.is_constant is False
+    assert chatter_var.passes_chatter is True
+    assert chatter_var.status == "pass"
+
+    # Chattering force fails chatter
+    chattering_fn = np.where(np.arange(100) % 2 == 0, 50.0, 0.0)
+    chatter_bad = evaluate_pair_chatter(
+        chattering_fn, chatter_tolerance=CHATTER_TOLERANCE
+    )
+    assert chatter_bad.is_constant is False
+    assert chatter_bad.passes_chatter is False
+    assert chatter_bad.status == "fail"
+
+
 def _write_grip_receipt(
     out_path_str: str,
     *,
@@ -449,28 +492,62 @@ def _write_grip_receipt(
     dt_s: float,
     net_force_err: object,
     net_moment_err: object,
-    pair_normal_forces: dict[str, np.ndarray],
-    max_action_reaction_error_n: float,
+    style_runs: dict[GripStyle, Any],
     bundle_sha256: str = "",
     spec_sha256: str = "",
-) -> dict:
+) -> dict[str, Any]:
     """Build and optionally write the G11 acceptance receipt outside the repository."""
     n_samples = int(time_s.size)
     n_steps = max(0, n_samples - 1)
-    pair_summary: dict[str, dict[str, float | int | bool]] = {}
-    for pname, fn_arr in pair_normal_forces.items():
-        arr = np.asarray(fn_arr, dtype=float)
-        frac = contact_transition_fraction(arr)
-        active = arr > 0.0
-        transitions = (
-            int(np.count_nonzero(active[1:] != active[:-1])) if arr.size >= 2 else 0
-        )
-        pair_summary[pname] = {
-            "peak_normal_force_n": float(np.max(arr)),
-            "transition_count": transitions,
-            "step_count": n_steps,
-            "transition_fraction": float(frac),
-            "passes_chatter": bool(frac < CHATTER_TOLERANCE),
+    first_run: Any = next(iter(style_runs.values()))
+    rel_pose_summary = {
+        **first_run.relative_hand_drift.summary(),
+        "reason": (
+            "Migrated full-body-v2 coordinates preserve the full-body-v1 closed-loop "
+            "left and right arm joint angles descending from Hub, so the two hands "
+            "move as one rigid chain and carry no inter-hand relative motion."
+        ),
+    }
+
+    styles_dict: dict[str, dict[str, Any]] = {}
+    max_ar = 0.0
+    for style, run_obj in style_runs.items():
+        run: Any = run_obj
+        topo = contact_topology(GripSpec(style=style))
+        hg_names = [p.name for p in topo.hand_grip_pairs()]
+        hh_names = [p.name for p in topo.hand_hand_pairs()]
+        active_names = [p.name for p in topo.pairs]
+        style_pairs: dict[str, dict[str, Any]] = {}
+        for p in topo.pairs:
+            pname = p.name
+            fn_arr = np.asarray(run.pair_normal_force_n[pname], dtype=float)
+            pen_mm_arr = 1.0e3 * np.asarray(run.pair_penetration_m[pname], dtype=float)
+            chatter = evaluate_pair_chatter(fn_arr, chatter_tolerance=CHATTER_TOLERANCE)
+            pen_min_mm = float(np.min(pen_mm_arr))
+            pen_max_mm = float(np.max(pen_mm_arr))
+            style_pairs[pname] = {
+                "kind": "hand_hand" if p.is_hand_hand else "hand_grip",
+                "classification": QuantityClassification.INDETERMINATE.value,
+                "classification_label": INDETERMINATE_LABEL,
+                "reported_as": (
+                    "calibration preload"
+                    if p.is_hand_hand
+                    else "hand-on-club retention contact"
+                ),
+                "penetration_min_mm": pen_min_mm,
+                "penetration_max_mm": pen_max_mm,
+                "penetration_range_mm": float(pen_max_mm - pen_min_mm),
+                **chatter.to_dict(),
+            }
+        run_ar = float(run.max_action_reaction_error_n)
+        max_ar = max(max_ar, run_ar)
+        styles_dict[style.value] = {
+            "style": style.value,
+            "active_pairs": active_names,
+            "active_hand_grip_pairs": hg_names,
+            "active_hand_hand_pairs": hh_names,
+            "max_action_reaction_error_n": run_ar,
+            "pairs": style_pairs,
         }
 
     receipt = {
@@ -481,10 +558,17 @@ def _write_grip_receipt(
         "duration_s": float(time_s[-1] - time_s[0]),
         "bundle_sha256": bundle_sha256,
         "spec_sha256": spec_sha256,
-        "net_force": net_force_err.to_dict(),  # type: ignore[attr-defined]
-        "net_moment_com": net_moment_err.to_dict(),  # type: ignore[attr-defined]
-        "max_action_reaction_error_n": float(max_action_reaction_error_n),
-        "pairs": pair_summary,
+        "net_force": {
+            **net_force_err.to_dict(),  # type: ignore[attr-defined]
+            "classification": QuantityClassification.DETERMINATE.value,
+        },
+        "net_moment_com": {
+            **net_moment_err.to_dict(),  # type: ignore[attr-defined]
+            "classification": QuantityClassification.DETERMINATE.value,
+        },
+        "relative_hand_pose": rel_pose_summary,
+        "max_action_reaction_error_n": max_ar,
+        "styles": styles_dict,
     }
     if out_path_str:
         out_path = Path(out_path_str).resolve()
@@ -497,17 +581,63 @@ def _write_grip_receipt(
     return receipt
 
 
+def _assert_style_runs_contract(
+    style_runs: dict[GripStyle, Any], receipt: dict[str, Any]
+) -> None:
+    """Verify per-style pair isolation, honest chatter on hand-grip vs hand-hand, and relative pose."""
+    assert "pairs" not in receipt, "Receipt must key pairs per style, never merged"
+    assert set(receipt["styles"]) == {s.value for s in style_runs}
+    rel_pose = receipt["relative_hand_pose"]
+    assert rel_pose["translation_peak_mm"] < 1.0e-6
+    assert rel_pose["translation_rms_mm"] < 1.0e-6
+    assert rel_pose["rotation_peak_deg"] < 1.0e-6
+    assert rel_pose["rotation_rms_deg"] < 1.0e-6
+
+    for style, run in style_runs.items():
+        topo = contact_topology(GripSpec(style=style))
+        s_rec = receipt["styles"][style.value]
+        assert s_rec["active_pairs"] == list(topo.pair_names())
+        assert s_rec["active_hand_grip_pairs"] == [
+            p.name for p in topo.hand_grip_pairs()
+        ]
+        assert s_rec["active_hand_hand_pairs"] == [
+            p.name for p in topo.hand_hand_pairs()
+        ]
+        assert set(s_rec["pairs"]) == set(topo.pair_names())
+        assert run.max_action_reaction_error_n <= ACTION_REACTION_TOL_N
+
+        for p in topo.hand_grip_pairs():
+            p_rec = s_rec["pairs"][p.name]
+            assert p_rec["kind"] == "hand_grip"
+            assert p_rec["is_constant"] is False
+            assert p_rec["passes_chatter"] is True
+            assert p_rec["chatter_status"] == "pass"
+            assert p_rec["transition_fraction"] < CHATTER_TOLERANCE
+
+        for p in topo.hand_hand_pairs():
+            p_rec = s_rec["pairs"][p.name]
+            assert p_rec["kind"] == "hand_hand"
+            assert p_rec["classification"] == QuantityClassification.INDETERMINATE.value
+            assert p_rec["classification_label"] == INDETERMINATE_LABEL
+            assert p_rec["reported_as"] == "calibration preload"
+            assert p_rec["penetration_range_mm"] < 1.0e-6
+            assert p_rec["is_constant"] is True
+            assert p_rec["passes_chatter"] is False
+            assert p_rec["chatter_status"] == CONSTANT_PRELOAD_CHATTER_STATUS
+            assert p_rec["transition_fraction"] is None
+
+
 @pytest.mark.unit
 @pytest.mark.requires_pinocchio
 @pytest.mark.timeout(600)
 def test_synthetic_swing_separated_v2_closure_wrench_and_no_chatter(
     v1_driver_spec: dict, v2_separated_spec: dict, tmp_path: Path
 ) -> None:
-    """Synthetic committed swing: separated-hand v2 matches v1 wrench within 5%/2% with <1% chatter."""
+    """Synthetic committed swing: separated-hand v2 matches v1 wrench within 5%/2% with honest chatter."""
     pytest.importorskip("pinocchio")
     from src.engines.physics_engines.pinocchio.python.grip_bushing import (
         simulate_grip_bushing,
-        simulate_separated_v2_grip,
+        simulate_separated_v2_grip_styles,
     )
     from src.engines.physics_engines.pinocchio.python.native_model import (
         FullBodyPinocchioModel,
@@ -573,12 +703,13 @@ def test_synthetic_swing_separated_v2_closure_wrench_and_no_chatter(
         sha256="1" * 64,
     )
 
-    sep_run = simulate_separated_v2_grip(
+    style_runs = simulate_separated_v2_grip_styles(
         json.dumps(v2_separated_spec).encode("utf-8"),
         swing_v2,
         interface=interface,
-        style=GripStyle.OVERLAP,
+        styles=(GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER),
     )
+    sep_run = style_runs[GripStyle.OVERLAP]
 
     errors = parity_errors(sep_run.series, ref_series)
     m_err = sep_run.net_moment_com_error(ref_series)
@@ -587,16 +718,6 @@ def test_synthetic_swing_separated_v2_closure_wrench_and_no_chatter(
     assert m_err.peak_error <= PEAK_TOLERANCE
     assert m_err.rms_error <= RMS_TOLERANCE
 
-    # No chatter: per-pair normal-force sign changes occur in < 1% of steps
-    for pair_name, fn_series in sep_run.pair_normal_force_n.items():
-        frac = contact_transition_fraction(fn_series)
-        assert frac < CHATTER_TOLERANCE, (
-            f"pair {pair_name} transition fraction {frac:.4f} >= {CHATTER_TOLERANCE}"
-        )
-
-    # Action-reaction <= 1e-9 N at every sample
-    assert sep_run.max_action_reaction_error_n <= ACTION_REACTION_TOL_N
-
     receipt_file = tmp_path / "synthetic_receipt.json"
     receipt = _write_grip_receipt(
         str(receipt_file),
@@ -604,8 +725,7 @@ def test_synthetic_swing_separated_v2_closure_wrench_and_no_chatter(
         dt_s=0.001,
         net_force_err=errors["net_force"],
         net_moment_err=m_err,
-        pair_normal_forces=dict(sep_run.pair_normal_force_n),
-        max_action_reaction_error_n=sep_run.max_action_reaction_error_n,
+        style_runs=style_runs,
     )
     assert receipt_file.is_file()
     loaded = json.loads(receipt_file.read_text(encoding="utf-8"))
@@ -613,7 +733,7 @@ def test_synthetic_swing_separated_v2_closure_wrench_and_no_chatter(
     assert loaded["step_count"] == n_steps - 1
     assert loaded["net_force"]["passes"] is True
     assert loaded["net_moment_com"]["passes"] is True
-    assert "trail_palm_lead_thumb" in receipt["pairs"]
+    _assert_style_runs_contract(style_runs, loaded)
 
 
 @pytest.mark.unit
@@ -640,12 +760,9 @@ def test_best_fit_swing_separated_v2_acceptance() -> None:
     import hashlib
 
     from src.engines.physics_engines.pinocchio.python.grip_bushing import (
-        SeparatedHandsKinematics,
-        _build_se3_hand_source,
         simulate_grip_bushing,
-        simulate_separated_v2_grip,
+        simulate_separated_v2_grip_styles,
     )
-    from src.shared.python.grip_contact import CoordinateSpline
 
     bundle_sha = hashlib.sha256(bundle_path.read_bytes()).hexdigest()
     spec_bytes = spec_path.read_bytes()
@@ -685,46 +802,25 @@ def test_best_fit_swing_separated_v2_acceptance() -> None:
         swing_v1,
         interface=interface,
     )
-    sep_run = simulate_separated_v2_grip(
+    style_runs = simulate_separated_v2_grip_styles(
         v2_sep_bytes,
         swing_v2,
         interface=interface,
-        style=GripStyle.OVERLAP,
+        styles=(GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER),
     )
-
-    # Also evaluate interlock hand-hand pairs on the same separated-v2 hand trajectory
-    # so the receipt records every hand-hand pair reported in the HRG table.
-    kin = SeparatedHandsKinematics(v2_sep, order2)
-    spline = CoordinateSpline(time_s, q_v2)
-    hand_eval = _build_se3_hand_source(kin, spline, time_s)
-    interlock_topo = contact_topology(GripSpec(style=GripStyle.INTERLOCK))
-    interlock_model = build_topology_model(interface, topology=interlock_topo)
-    all_pair_normal: dict[str, np.ndarray] = dict(sep_run.pair_normal_force_n)
-    missing_hh = [
-        p for p in interlock_topo.hand_hand_pairs() if p.name not in all_pair_normal
-    ]
-    for p in missing_hh:
-        all_pair_normal[p.name] = np.zeros(time_s.size, dtype=float)
-    for k, t_val in enumerate(time_s):
-        hs = hand_eval(float(t_val))
-        hh_il = topology_hand_hand_wrenches(
-            interlock_model, hs["L"], hs["R"], mode="separated_v2"
-        )
-        for p in missing_hh:
-            all_pair_normal[p.name][k] = hh_il.pairs[p.name].normal_force_n
+    sep_run = style_runs[GripStyle.OVERLAP]
 
     errs = parity_errors(sep_run.series, ref_series)
     m_err = sep_run.net_moment_com_error(ref_series)
 
     receipt_out = os.environ.get("UD_GRIP_RECEIPT_OUT", "").strip()
-    _write_grip_receipt(
+    receipt = _write_grip_receipt(
         receipt_out,
         time_s=time_s,
         dt_s=dt_s,
         net_force_err=errs["net_force"],
         net_moment_err=m_err,
-        pair_normal_forces=all_pair_normal,
-        max_action_reaction_error_n=sep_run.max_action_reaction_error_n,
+        style_runs=style_runs,
         bundle_sha256=bundle_sha,
         spec_sha256=spec_sha,
     )
@@ -741,11 +837,4 @@ def test_best_fit_swing_separated_v2_acceptance() -> None:
     assert m_err.rms_error <= RMS_TOLERANCE, (
         f"net_moment_com RMS error {m_err.rms_error:.4%} > {RMS_TOLERANCE:.1%}"
     )
-
-    for pair_name, fn_series in all_pair_normal.items():
-        frac = contact_transition_fraction(fn_series)
-        assert frac < CHATTER_TOLERANCE, (
-            f"pair {pair_name} transition fraction {frac:.4%} >= {CHATTER_TOLERANCE:.1%}"
-        )
-
-    assert sep_run.max_action_reaction_error_n <= ACTION_REACTION_TOL_N
+    _assert_style_runs_contract(style_runs, receipt)

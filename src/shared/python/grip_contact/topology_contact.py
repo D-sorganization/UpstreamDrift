@@ -82,8 +82,17 @@ HAND_HAND_IDENTIFIABILITY_NOTE = (
     "and contact parameters."
 )
 
+#: Chatter status reported when a contact pair's normal force never varies over a run.
+CONSTANT_PRELOAD_CHATTER_STATUS = "constant (preload only)"
+
+#: Minimum normal-force peak-to-peak range (N) required for a pair to be considered dynamically varying.
+DEFAULT_FORCE_VARIATION_TOL_N = 1.0e-6
+
 __all__ = [
+    "CONSTANT_PRELOAD_CHATTER_STATUS",
+    "DEFAULT_FORCE_VARIATION_TOL_N",
     "HAND_HAND_IDENTIFIABILITY_NOTE",
+    "PairChatterSummary",
     "PairTraceRecorder",
     "TopologyContactModel",
     "TopologyHandHandWrench",
@@ -91,6 +100,7 @@ __all__ = [
     "aggregate_side_wrench",
     "build_topology_model",
     "contact_transition_fraction",
+    "evaluate_pair_chatter",
     "hand_x_origin",
     "map_site_to_hand_frame",
     "site_primitive_in_hand_frame",
@@ -99,6 +109,7 @@ __all__ = [
     "topology_pair_wrench",
     "topology_side_wrench",
 ]
+
 
 SIDES = ("L", "R")
 HAND_ROLES = ("lead", "trail")
@@ -641,25 +652,133 @@ def topology_hand_hand_wrenches(
     )
 
 
+@dataclass(frozen=True)
+class PairChatterSummary:
+    """Honest per-pair chatter summary distinguishing dynamic contact from constant preload."""
+
+    min_normal_force_n: float
+    peak_normal_force_n: float
+    normal_force_range_n: float
+    transition_count: int
+    step_count: int
+    transition_fraction: float
+    is_constant: bool
+    passes_chatter: bool
+    status: str
+
+    def to_dict(self) -> dict[str, float | int | bool | str | None]:
+        """Return JSON-safe dictionary representation (NaN transition_fraction becomes None)."""
+        return {
+            "min_normal_force_n": self.min_normal_force_n,
+            "peak_normal_force_n": self.peak_normal_force_n,
+            "normal_force_range_n": self.normal_force_range_n,
+            "transition_count": self.transition_count,
+            "step_count": self.step_count,
+            "transition_fraction": (
+                None
+                if math.isnan(self.transition_fraction)
+                else self.transition_fraction
+            ),
+            "is_constant": self.is_constant,
+            "passes_chatter": self.passes_chatter,
+            "chatter_status": self.status,
+        }
+
+
 def contact_transition_fraction(
-    normal_force_n: np.ndarray, threshold_n: float = 0.0
+    normal_force_n: np.ndarray,
+    threshold_n: float = 0.0,
+    *,
+    variation_tol_n: float = DEFAULT_FORCE_VARIATION_TOL_N,
 ) -> float:
     """Fraction of adjacent time-step transitions where contact activates or separates.
 
+    A contact pair whose normal force never varies (``ptp <= variation_tol_n``)
+    carries only static preload and returns ``NaN`` so it is never silently
+    counted as passing a chatter test.
+
     Preconditions:
         ``normal_force_n`` is a finite 1-D array with at least 2 samples;
-        ``threshold_n >= 0``.
+        ``threshold_n >= 0``; ``variation_tol_n >= 0``.
     Postconditions:
-        Returns a float in ``[0.0, 1.0]``.
+        Returns ``NaN`` when ``ptp(normal_force_n) <= variation_tol_n``,
+        otherwise a float in ``[0.0, 1.0]``.
     """
     arr = np.asarray(normal_force_n, dtype=float)
     if arr.ndim != 1 or arr.size < 2 or not np.all(np.isfinite(arr)):
         raise ValueError("normal_force_n must be a finite 1-D array with >= 2 samples")
     if not math.isfinite(threshold_n) or threshold_n < 0.0:
         raise ValueError(f"threshold_n must be finite and >= 0, got {threshold_n}")
+    if not math.isfinite(variation_tol_n) or variation_tol_n < 0.0:
+        raise ValueError(
+            f"variation_tol_n must be finite and >= 0, got {variation_tol_n}"
+        )
+    if float(np.ptp(arr)) <= variation_tol_n:
+        return float("nan")
     active = arr > threshold_n
     transitions = int(np.sum(active[1:] != active[:-1]))
     return float(transitions) / float(arr.size - 1)
+
+
+def evaluate_pair_chatter(
+    normal_force_n: np.ndarray,
+    *,
+    chatter_tolerance: float = 0.01,
+    threshold_n: float = 0.0,
+    variation_tol_n: float = DEFAULT_FORCE_VARIATION_TOL_N,
+) -> PairChatterSummary:
+    """Evaluate honest chatter status for a single contact pair's normal-force trace.
+
+    If the normal force never changes beyond ``variation_tol_n``, the pair is
+    classified as ``'constant (preload only)'`` with ``passes_chatter=False``
+    and ``transition_fraction=NaN``.
+
+    Preconditions:
+        ``normal_force_n`` is a finite 1-D array with at least 2 samples;
+        ``0 < chatter_tolerance <= 1``; ``threshold_n >= 0``; ``variation_tol_n >= 0``.
+    """
+    if (
+        not math.isfinite(chatter_tolerance)
+        or chatter_tolerance <= 0.0
+        or chatter_tolerance > 1.0
+    ):
+        raise ValueError(
+            f"chatter_tolerance must be in (0, 1], got {chatter_tolerance}"
+        )
+    frac = contact_transition_fraction(
+        normal_force_n, threshold_n=threshold_n, variation_tol_n=variation_tol_n
+    )
+    arr = np.asarray(normal_force_n, dtype=float)
+    n_steps = int(arr.size - 1)
+    f_min = float(np.min(arr))
+    f_max = float(np.max(arr))
+    f_range = float(f_max - f_min)
+    if math.isnan(frac):
+        return PairChatterSummary(
+            min_normal_force_n=f_min,
+            peak_normal_force_n=f_max,
+            normal_force_range_n=f_range,
+            transition_count=0,
+            step_count=n_steps,
+            transition_fraction=float("nan"),
+            is_constant=True,
+            passes_chatter=False,
+            status=CONSTANT_PRELOAD_CHATTER_STATUS,
+        )
+    active = arr > threshold_n
+    transitions = int(np.count_nonzero(active[1:] != active[:-1]))
+    passes = bool(frac < chatter_tolerance)
+    return PairChatterSummary(
+        min_normal_force_n=f_min,
+        peak_normal_force_n=f_max,
+        normal_force_range_n=f_range,
+        transition_count=transitions,
+        step_count=n_steps,
+        transition_fraction=frac,
+        is_constant=False,
+        passes_chatter=passes,
+        status="pass" if passes else "fail",
+    )
 
 
 def topology_side_wrench(
@@ -772,7 +891,7 @@ class PairTraceRecorder:
     Pre-creates trace buffers per topology pair. In default ``mode='contact'``,
     hand-hand pairs are recorded as ``NaN`` with an ``allocated`` reason. In
     ``mode='separated_v2'``, hand-hand pairs are evaluated physically and recorded
-    with finite normal force, tangential force, and contact-point drift.
+    with finite normal force, tangential force, penetration, and contact-point drift.
     """
 
     def __init__(self, model: TopologyContactModel, mode: str = "contact") -> None:
@@ -803,6 +922,9 @@ class PairTraceRecorder:
             p.name: [] for p in model.topology.pairs
         }
         self._pair_drift: dict[str, list[float]] = {
+            p.name: [] for p in model.topology.pairs
+        }
+        self._pair_penetration: dict[str, list[float]] = {
             p.name: [] for p in model.topology.pairs
         }
         self._nominal_site_info: dict[
@@ -897,6 +1019,7 @@ class PairTraceRecorder:
                 self._pair_drift[pname].append(
                     self._pair_contact_drift_m(pname, hand_frames, club_frames)
                 )
+                self._pair_penetration[pname].append(float(pw.penetration_m))
 
         if self._mode in PHYSICAL_HAND_HAND_MODES:
             hh = hand_hand or topology_hand_hand_wrenches(
@@ -916,6 +1039,7 @@ class PairTraceRecorder:
                 self._pair_drift[pname].append(
                     self._hh_contact_drift_m(pname, pw, hand_frames["L"])
                 )
+                self._pair_penetration[pname].append(float(pw.penetration_m))
         else:
             for pname in self._hand_hand_pair_names:
                 if pname in recorded_pairs:
@@ -926,6 +1050,7 @@ class PairTraceRecorder:
                 self._pair_normal[pname].append(float("nan"))
                 self._pair_tangential[pname].append(float("nan"))
                 self._pair_drift[pname].append(float("nan"))
+                self._pair_penetration[pname].append(float("nan"))
 
         if len(recorded_pairs) != len(self._all_pair_names):
             missing = self._all_pair_names - recorded_pairs
@@ -934,6 +1059,13 @@ class PairTraceRecorder:
         for s in SIDES:
             self._hand_states[s].append(hand_frames[s])
             self._club_states[s].append(club_frames[s])
+
+    def pair_penetration_m(self) -> dict[str, np.ndarray]:
+        """Return per-pair penetration depth traces (m) as 1-D numpy arrays."""
+        return {
+            p: np.asarray(vals, dtype=float)
+            for p, vals in self._pair_penetration.items()
+        }
 
     def result(self) -> dict[str, Any]:
         """Return dict matching ContactRun fields with numpy arrays for pair traces."""

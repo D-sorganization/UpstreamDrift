@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Sequence
 from dataclasses import dataclass
 from importlib import import_module
 from typing import Any
@@ -42,6 +43,10 @@ from src.shared.python.grip_contact.bushing_law import cross3
 from src.shared.python.grip_contact.contact_topology import (
     GripStyle,
     contact_topology,
+)
+from src.shared.python.grip_contact.hand_drift import (
+    HandDrift,
+    hand_relative_drift,
 )
 from src.shared.python.grip_contact.parity import (
     BushingProbe,
@@ -419,7 +424,9 @@ class SeparatedGripRun:
     pair_normal_force_n: dict[str, np.ndarray]
     pair_tangential_force_n: dict[str, np.ndarray]
     pair_contact_point_drift_m: dict[str, np.ndarray]
+    pair_penetration_m: dict[str, np.ndarray]
     hand_hand_wrenches: tuple[TopologyHandHandWrench, ...]
+    relative_hand_drift: HandDrift
     max_action_reaction_error_n: float
 
     def net_moment_com_nm(self, target: GripKineticsSeries | None = None) -> np.ndarray:
@@ -502,21 +509,23 @@ def _build_se3_hand_source(
     return evaluate_hands
 
 
-def simulate_separated_v2_grip(
+def simulate_separated_v2_grip_styles(
     spec_bytes: bytes,
     swing: CoordinateSwing,
     interface: GripInterface | None = None,
-    style: GripStyle = GripStyle.OVERLAP,
+    styles: Sequence[GripStyle] = (
+        GripStyle.OVERLAP,
+        GripStyle.INTERLOCK,
+        GripStyle.TEN_FINGER,
+    ),
     rtol: float = DEFAULT_RTOL,
     atol: float = DEFAULT_ATOL,
     max_step_s: float = DEFAULT_MAX_STEP_S,
-) -> SeparatedGripRun:
-    """Simulate separated-hand ``full-body-v2`` grip retention and physical hand-hand contact (#13309).
-
-    Evaluates ``LHandBody`` from the left-wrist chain and ``RHandStandoff`` from
-    the right-wrist chain, retains each hand on the free bare club via the shared
-    retention law, and evaluates physical hand-hand pairs with ``mode='separated_v2'``.
-    """
+) -> dict[GripStyle, SeparatedGripRun]:
+    """Integrate the separated-v2 club once and collect per-style contact traces without cross-style merging."""
+    style_tuple = tuple(GripStyle(s) for s in styles)
+    if not style_tuple:
+        raise ValueError("styles must contain at least one GripStyle")
     spec = json.loads(spec_bytes)
     if not spec.get("hand_separation", {}).get("enabled"):
         spec = separate_v2_hands(spec)
@@ -580,9 +589,39 @@ def simulate_separated_v2_grip(
     )
     if not sol.success:
         raise RuntimeError(f"separated v2 club integration failed: {sol.message}")
-    return _collect_separated_run(
-        sol.y, times, hand_eval, interface, club_dyn, GripStyle(style), int(sol.nfev)
-    )
+    return {
+        st: _collect_separated_run(
+            sol.y, times, hand_eval, interface, club_dyn, st, int(sol.nfev)
+        )
+        for st in style_tuple
+    }
+
+
+def simulate_separated_v2_grip(
+    spec_bytes: bytes,
+    swing: CoordinateSwing,
+    interface: GripInterface | None = None,
+    style: GripStyle = GripStyle.OVERLAP,
+    rtol: float = DEFAULT_RTOL,
+    atol: float = DEFAULT_ATOL,
+    max_step_s: float = DEFAULT_MAX_STEP_S,
+) -> SeparatedGripRun:
+    """Simulate separated-hand ``full-body-v2`` grip retention and physical hand-hand contact (#13309).
+
+    Evaluates ``LHandBody`` from the left-wrist chain and ``RHandStandoff`` from
+    the right-wrist chain, retains each hand on the free bare club via the shared
+    retention law, and evaluates physical hand-hand pairs with ``mode='separated_v2'``.
+    """
+    target_style = GripStyle(style)
+    return simulate_separated_v2_grip_styles(
+        spec_bytes,
+        swing,
+        interface=interface,
+        styles=(target_style,),
+        rtol=rtol,
+        atol=atol,
+        max_step_s=max_step_s,
+    )[target_style]
 
 
 def _collect_separated_run(
@@ -613,10 +652,10 @@ def _collect_separated_run(
         topo_law = {
             s: topology_side_wrench(topo_model, s, hands[s], frames[s]) for s in SIDES
         }
-        recorder.record(topo_law, hands, frames)
         hh = topology_hand_hand_wrenches(
             topo_model, hands["L"], hands["R"], mode="separated_v2"
         )
+        recorder.record(topo_law, hands, frames, hand_hand=hh)
         hh_list.append(hh)
         ar_err = float(np.linalg.norm(hh.force_on_lead_n + hh.force_on_trail_n))
         max_ar_err = max(max_ar_err, ar_err)
@@ -633,6 +672,8 @@ def _collect_separated_run(
         for name, d in (("w", wrench), ("h", hand_pose), ("c", club_pose))
     }
     rec = recorder.result()
+    pen_m = recorder.pair_penetration_m()
+    drift = hand_relative_drift(arrays["h"])
     series = GripKineticsSeries.from_frames(
         ENGINE,
         times,
@@ -645,6 +686,8 @@ def _collect_separated_run(
             "grip_style": style.value,
             "rhs_evaluations": nfev,
             "identifiability_note": HAND_HAND_IDENTIFIABILITY_NOTE,
+            "pair_penetration_m": pen_m,
+            "relative_hand_pose": drift.summary(),
             **rec,
         },
     )
@@ -654,6 +697,8 @@ def _collect_separated_run(
         pair_normal_force_n=rec["pair_normal_force_n"],
         pair_tangential_force_n=rec["pair_tangential_force_n"],
         pair_contact_point_drift_m=rec["pair_contact_point_drift_m"],
+        pair_penetration_m=pen_m,
         hand_hand_wrenches=tuple(hh_list),
+        relative_hand_drift=drift,
         max_action_reaction_error_n=max_ar_err,
     )
