@@ -589,6 +589,45 @@ python3 -m pytest tests/unit/grip_contact/test_topology_parity_harness.py \
     tests/unit/grip_contact/test_grip_parity_metrics.py
 \end{verbatim}
 
+\subsection{Native Pinocchio Golfer Grip Adapter (HRG-GS-M9, \#13331)}
+\textbf{Two-Hand Variant Topology and Frame Geometry.}
+In the default native Pinocchio golfer (\path{src/engines/physics_engines/pinocchio/models/generated/golfer.urdf}, loaded by \path{src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py} and exported by \path{src/tools/model_converter/urdf_exporter.py}), the club assembly (\texttt{club\_shaft} and \texttt{club\_head}) hangs from a single virtual \texttt{mid\_hands} frame welded to \texttt{thorax3} at translation $[0, 0, -0.17]^{\top}\,\mathrm{m}$, with the shaft axis directed along $-z_{\mathrm{mid}} = [0, 0, -1]^{\top}$ toward \texttt{club\_shaft} ($[0, 0, -0.05]^{\top}\,\mathrm{m}$) and \texttt{club\_head} ($[0, 0, -0.55]^{\top}\,\mathrm{m}$).
+To make both hands independently addressable without altering existing single-frame consumers, \texttt{export\_urdf(..., hands="separate")}, \texttt{SimOptions(hands="separate")}, and \texttt{build\_golfer\_model(hands="separate")} attach two massless body frames---\texttt{lead\_hand} and \texttt{trail\_hand}---welded to \texttt{mid\_hands} on parent joint \texttt{thorax2\_to\_thorax3} while retaining \texttt{mid\_hands} unchanged. With the default \texttt{hands="merged"}, the exported URDF bytes, joint counts ($n_q = 43$, $n_v = 43$, $n_{\mathrm{frames}} = 96$), link masses/inertias, frame table, and forward kinematics of every frame are byte- and numerically identical to the baseline.
+
+Let $\Delta x_{\mathrm{hands}} = x_0(\mathrm{trail}) - x_0(\mathrm{lead}) = 0.0762\,\mathrm{m}$ be the axial hand spacing from \texttt{ContactTopology} (\texttt{hand\_x\_origin}), matching the shaft-axis separation of the left and right grip frames in \texttt{GripInterface}. Rotating from the canonical grip basis ($+x_{\mathrm{grip}}$ along the shaft from butt to clubhead) into \texttt{mid\_hands} ($-z_{\mathrm{mid}}$ along the shaft) via a $+\pi/2$ pitch about $+y$,
+\begin{equation}
+R_{\mathrm{mid}\leftarrow\mathrm{grip}} = R_y\!\left(\tfrac{\pi}{2}\right) =
+\begin{bmatrix}
+0 & 0 & 1 \\
+0 & 1 & 0 \\
+-1 & 0 & 0
+\end{bmatrix}, \qquad
+p_{\mathrm{mid},\mathrm{lead}} = \begin{bmatrix} 0 \\ 0 \\ +\tfrac{1}{2}\Delta x_{\mathrm{hands}} \end{bmatrix}, \qquad
+p_{\mathrm{mid},\mathrm{trail}} = \begin{bmatrix} 0 \\ 0 \\ -\tfrac{1}{2}\Delta x_{\mathrm{hands}} \end{bmatrix},
+\end{equation}
+places \texttt{lead\_hand} and \texttt{trail\_hand} symmetrically about \texttt{mid\_hands} with Euclidean separation $\|p_{\mathrm{trail}} - p_{\mathrm{lead}}\|_2 = \Delta x_{\mathrm{hands}} = 0.0762\,\mathrm{m}$ (within $0\,\mathrm{mm}$ of the topology hand spacing) and zero added mass or inertia, so open-loop forward dynamics ($\mathrm{ABA}$) are unchanged.
+
+\textbf{Manifest Resolution, FK State Sampling, and Joint Wrench Mapping.}
+\texttt{NativePinocchioGolferGripAdapter} (\path{src/engines/physics_engines/pinocchio/python/native_golfer_grip_adapter.py}) implements \texttt{ModelGripAdapter} over the \texttt{hands="separate"} model:
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \textit{Binding Resolution}: \texttt{resolve\_binding(topology)} validates \path{src/config/grip_bindings/pinocchio_native_golfer.json} (\texttt{schema = "grip-binding/v1"}, \texttt{club\_body = "club\_shaft"}, \texttt{lead\_hand\_body = "lead\_hand"}, \texttt{trail\_hand\_body = "trail\_hand"}) via \texttt{binding\_from\_manifest} and \texttt{validate\_resolved\_binding}, resolving $100\%$ of topology sites across \texttt{overlap}, \texttt{interlock}, and \texttt{ten\_finger} (with and without \texttt{trigger\_finger}) using the club-local grip transforms $T_{\mathrm{shaft},\sigma} = ({}^{\mathcal{W}}T_{\mathrm{shaft}})^{-1}\,{}^{\mathcal{W}}T_{\sigma}$ for $\sigma \in \{\mathrm{lead}, \mathrm{trail}\}$.
+\item \textit{Kinematic State Sampling}: \texttt{sample\_states(binding)} calls \texttt{pinocchio.forwardKinematics(model, data, q, v)} and \texttt{pinocchio.framesForwardKinematics(model, data, q)} to extract $4\times 4$ world poses ${}^{\mathcal{W}}T_B = \texttt{data.oMf}[f_B]$ and queries \texttt{pinocchio.getFrameVelocity(model, data, f\_B, LOCAL\_WORLD\_ALIGNED)} for world-aligned linear and angular velocities $(v_B, \omega_B)$.
+\item \textit{External Force Application}: Because Pinocchio provides no native compliant contact solver for the grip (\texttt{native\_contact = False}), \texttt{apply\_wrenches} maps each physical body wrench $(F_B^{\mathcal{W}}, M_B^{\mathcal{W}})$ (evaluated by the shared law \texttt{evaluate\_contacts} in \texttt{topology\_contact.py} and guarded by \texttt{apply\_report}) from frame $f_B$ (with local placement ${}^{j(B)}T_{f_B} = \texttt{frame.placement}$ on parent joint $j(B)$ and world rotation $R_B = {}^{\mathcal{W}}R_{f_B}$) into a joint-local \texttt{pinocchio.Force}:
+\begin{equation}
+\mathcal{F}_{f_B}^{\mathrm{local}} = \mathrm{Force}\!\left(R_B^{\top} F_B^{\mathcal{W}},\, R_B^{\top} M_B^{\mathcal{W}}\right), \qquad
+\mathcal{F}_{j(B)} \mathrel{+}= {}^{j(B)}T_{f_B} \cdot \mathcal{F}_{f_B}^{\mathrm{local}}.
+\end{equation}
+Allocated hand--hand channels carry zero physical force (\texttt{applied\_allocated\_force\_n} $= 0.0\,\mathrm{N}$), and on a $0.04\,\mathrm{s}$ hold trajectory on the $2\,\mathrm{ms}$ grid, the adapter's \texttt{TopologyKineticsSeries} passes \texttt{compare\_topology\_series} against \texttt{law\_level\_series} (\texttt{status = "passed"}).
+\end{enumerate}
+
+\textbf{Limitations.}
+In the native Pinocchio golfer URDF, \texttt{lead\_hand}, \texttt{trail\_hand}, and \texttt{club\_shaft} are rigidly welded to \texttt{mid\_hands} on \texttt{thorax2\_to\_thorax3}; equal-and-opposite physical hand--club wrenches therefore cancel in net generalized torque on the welded parent joint unless the hand--club weld is relaxed into independent wrist/club degrees of freedom.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_pinocchio_native_golfer_grip.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
