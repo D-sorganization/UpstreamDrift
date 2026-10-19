@@ -1428,8 +1428,16 @@ equivalent to a reserve.  A frame whose reserves carry the load produces no
 numerical record.
 
 \paragraph{Activation Fibre.}  $\mathcal{F}(\tau)=\{a\in[0,1]^m: Ga=\tau-R^{\top}f_p\}$
-has an affine hull parallel to $\ker G$ (\texttt{ForceNullSpace.from\_balance},
-not re-implemented).  Co-contraction is a \emph{declared} linear index
+lies in the affine space $\{Ga=b\}$, parallel to $\ker G$
+(\texttt{ForceNullSpace.from\_balance}, not re-implemented), but its own affine
+hull has dimension $m-\operatorname{rank}G$ only when a strictly box-feasible
+point exists (sufficient, not necessary): the box can force coordinates
+(implicit equalities), e.g.\ $G=[1\;1\;0]$, $b=2$, $a\in[0,1]^3$ gives the
+segment $\{(1,1,t)\}$ although $\dim\ker G=2$.  The hull is therefore computed
+by detecting implicit equalities with the same LP backend (a coordinate whose LP
+range is at most $10^{-8}$ is fixed), and hit-and-run runs in the hull's
+coordinates; only a hull of dimension zero is reported as a singleton.
+Co-contraction is a \emph{declared} linear index
 $c(a)=w^{\top}a$ (default total activation) and a declared list of levels.  The
 level range is two linear programs (\texttt{scipy.optimize.linprog}, HiGHS,
 tolerance $10^{-10}$; \texttt{highspy} is not installed, so the persistent
@@ -1437,8 +1445,11 @@ sessions of rule R11 are not used).  The representative at level $c$ is
 $a^*(c)=\arg\min\tfrac12\lVert a\rVert^2$ subject to $Ga=b$, $w^{\top}a=c$,
 $0\le a\le1$, solved through the dual $a(\mu)=\operatorname{clip}(-E^{\top}\mu,0,1)$,
 $E=[G;w^{\top}]$, by a semismooth Newton iteration.  It is a declared selection
-rule, not physiology; the sub-fibre of dimension $m-\operatorname{rank}G-1$
-inside one level is explored only by hit-and-run \emph{coverage}, never as a
+rule, not physiology; the sub-fibre inside one level (dimension
+$m-\operatorname{rank}G-1$ only if additionally $w\notin\operatorname{range}G^{\top}$,
+the level is strictly inside $(c_{\min},c_{\max})$ and the fibre is
+full-dimensional; otherwise computed from its own hull, e.g.\ a point for
+$w=e_3$ on the segment above) is explored only by hit-and-run \emph{coverage}, never as a
 probability.  Net-torque invariance holds to
 $(m+2)\varepsilon\sum_k\lvert G_k\rvert\approx10^{-13}$ N m, inside the issue's
 $10^{-12}$.
