@@ -279,7 +279,12 @@ def test_provenance_is_recorded_per_parameter_and_validated(base) -> None:
     assert mixed["subject"]["grip_provenance"]["lead.alpha_deg"] == "rom_set_identified"
     assert mixed["subject"]["grip_provenance"]["hand_spacing_m"] == "default"
     assert mixed["subject"]["grip_provenance"]["trail.psi_deg"] == "user_declared"
-    assert GRIP_PROVENANCE_SOURCES == ("user_declared", "rom_set_identified", "default")
+    assert GRIP_PROVENANCE_SOURCES == (
+        "user_declared",
+        "rom_set_identified",
+        "default",
+        "photo_estimate",
+    )
     with pytest.raises(ValueError, match="provenance"):
         apply_grip_config(base, _cfg(), provenance="guessed")
     with pytest.raises(ValueError, match="provenance"):

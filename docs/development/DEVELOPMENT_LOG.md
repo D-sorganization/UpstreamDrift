@@ -2652,6 +2652,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13260 · Add Run Study Panel and Worker Across PyQt and React Spine Viewers
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13260
+- **Branch:** merged via #13279
+- **PR:** #13279
+- **Paths:** see #13279
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`38eebd22`; collated from changes/13260-add-run-study-panel-and-worker-across-py.md)
+- **Summary:** Add Run Study panel and worker across PyQt and React spine viewers
+- **Next step:** Shipped in PR #13279.
+
 ### DL-#13302 · Drive Finger Pose From Contact Topology With Per-Hand Roll, Absorbing #13166
 
 - **State:** shipped
@@ -3607,10 +3620,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13041
 - **Branch:** merged via #13047
-- **PR:** #13047
+- **PR:** #13047, #13404
 - **Paths:** see #13047
 - **Started:** 2026-10-18
-- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/13041-osl-3-opensim-ik-and-inverse-dynamics-of.md)
+- **Last verified:** 2026-10-19 (`895916b1`; collated from changes/13041-add-barbell-bundles-and-opensim-ik-id-re.md)
 - **Summary:** Lift body and every derived lift input (squat on the OSL-17 rack, deadlift, clean, snatch, bench) regenerated on the whole-row de Leva table (#13037) with main's tibial torsion; regression-snapshot IK bounds re-derived; bundle builder picks RK4-stable substeps (deadlift 8 -> 16, parity xfail removed); follow-ups OSL-18 #13157 (foot torsion marker gate, strict xfail), OSL-19 #13158 (arm reach), OSL-20 #13159 (open-loop wrist mode)
 - **Next step:** Shipped in PR #13047.
 
