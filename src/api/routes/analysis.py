@@ -36,13 +36,6 @@ from ..models.responses import (
     GroundReactionResponse,
     ImpactParametersResponse,
 )
-from ..services.grip_wrench_service import compute_grip_plot
-from ..services.ground_reaction_service import compute_ground_reaction_plot
-from ..services.impact_parameters_service import compute_impact_card
-from ..services.plate_overlay_service import (
-    PlateRootNotConfiguredError,
-    compute_ground_reaction_overlay,
-)
 from ..utils.datetime_compat import UTC
 
 if TYPE_CHECKING:
@@ -295,6 +288,8 @@ async def get_impact_parameters(
     run = service.get_run(run_id)
     if run is None:
         raise HTTPException(status_code=404, detail="No such simulation run")
+    from ..services.impact_parameters_service import compute_impact_card
+
     try:
         card = compute_impact_card(
             run,
@@ -352,6 +347,8 @@ async def get_grip_wrench(
     left/right split was obtained.  404 for an unknown run, 400 for malformed
     grip data.
     """
+    from ..services.grip_wrench_service import compute_grip_plot
+
     run, payload = _run_plot_payload(
         service, run_id, compute_grip_plot, impact_time_s=impact_time_s
     )
@@ -375,6 +372,8 @@ async def get_ground_reaction(
     the centre of mass and vertical load share.  Unavailable samples are
     ``null``, never zero.  404 for an unknown run, 400 for malformed data.
     """
+    from ..services.ground_reaction_service import compute_ground_reaction_plot
+
     run, payload = _run_plot_payload(
         service, run_id, compute_ground_reaction_plot, impact_time_s=impact_time_s
     )
@@ -398,6 +397,11 @@ async def post_ground_reaction_plate_overlay(
     run = service.get_run(request.run_id)
     if run is None:
         raise HTTPException(status_code=404, detail="No such simulation run")
+    from ..services.plate_overlay_service import (
+        PlateRootNotConfiguredError,
+        compute_ground_reaction_overlay,
+    )
+
     try:
         payload = compute_ground_reaction_overlay(run, request)
     except PlateRootNotConfiguredError as exc:

@@ -81,6 +81,11 @@ class MarkerFrameSource:
     def frame_count(self) -> int:
         return len(self.time_s)
 
+    @property
+    def markers(self) -> NDArray[np.float64]:
+        """Model marker trajectories across frames, shape (n, k, 3)."""
+        return self.model_markers_m
+
 
 def _from_npz(npz_path: Path) -> MarkerFrameSource:
     try:

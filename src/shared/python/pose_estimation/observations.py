@@ -13,13 +13,15 @@ import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Final
+from typing import TYPE_CHECKING, Any, Final
 
 import numpy as np
 import numpy.typing as npt
 
 from src.shared.python.core.contracts import check_finite, require
-from src.shared.python.simulation_backends.protocol import Trace
+
+if TYPE_CHECKING:
+    from src.shared.python.simulation_backends.protocol import Trace
 
 CANONICAL_OBSERVATIONS_SCHEMA_VERSION: Final[str] = "1.0.0"
 TRACE_META_OBSERVATIONS_JSON: Final[str] = "canonical_observations_json"
@@ -409,6 +411,8 @@ class CanonicalObservations:
         metadata so :func:`simulation_backends.trace_io.write_trace` preserves it
         without extending the result schema.
         """
+        from src.shared.python.simulation_backends.protocol import Trace
+
         sample_times = sorted({frame.time_s for frame in self.frames})
         t = np.asarray(sample_times, dtype=float)
         empty_state = np.empty((t.shape[0], 0), dtype=float)
@@ -429,6 +433,8 @@ class CanonicalObservations:
     @classmethod
     def from_trace(cls, trace: Trace) -> CanonicalObservations:
         """Recover observations embedded by :meth:`to_trace`."""
+        from src.shared.python.simulation_backends.protocol import Trace
+
         require(isinstance(trace, Trace), "trace must be a Trace")
         encoded = trace.meta.get(TRACE_META_OBSERVATIONS_JSON)
         require(
