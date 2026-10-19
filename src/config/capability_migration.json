@@ -1639,7 +1639,7 @@
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
-      "evidence": "tests/tools/spine_viewer",
+      "evidence": "src/api/routes/spine_viewer.py",
       "acceptance_owner": "tests/api/test_spine_viewer_route.py"
     },
     "analysis.ground_reaction": {

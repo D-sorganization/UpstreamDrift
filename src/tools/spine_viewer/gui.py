@@ -21,7 +21,6 @@ from matplotlib.figure import Figure
 from PyQt6 import QtCore, QtWidgets
 
 from src.engines.physics_engines.opensim.python.spine.study import SpineStudyRequest
-from src.shared.python.theme.tool_stylesheet import get_tool_colors
 from src.tools.spine_viewer import core
 
 logger = logging.getLogger(__name__)
@@ -334,24 +333,17 @@ class SpineViewerWidget(QtWidgets.QWidget):
             asset_id = self._model_combo.currentText()
         asset = self._assets_by_id.get(str(asset_id), {})
         status = asset.get("status", "unknown")
-        colors = get_tool_colors()
         if asset_id == "fixture" or asset.get("is_fixture"):
             self._model_status_label.setText(
                 "Model status: fixture (synthetic, unqualified)"
             )
-            self._model_status_label.setStyleSheet(
-                f"color: {colors.get('warning', colors['text_secondary'])};"
-            )
+            self._model_status_label.setStyleSheet(_WARN_STYLE)
         elif status == "qualified":
             self._model_status_label.setText("Model status: qualified")
-            self._model_status_label.setStyleSheet(
-                f"color: {colors.get('success', colors['text_primary'])};"
-            )
+            self._model_status_label.setStyleSheet(_QUALIFIED_STYLE)
         else:
             self._model_status_label.setText(f"Model status: {status}")
-            self._model_status_label.setStyleSheet(
-                f"color: {colors.get('error', colors['text_secondary'])};"
-            )
+            self._model_status_label.setStyleSheet(_WARN_STYLE)
 
     def _on_study_finished(self, receipt_path: Path) -> None:
         self._run_button.setEnabled(True)
