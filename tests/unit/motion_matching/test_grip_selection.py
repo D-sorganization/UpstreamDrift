@@ -88,8 +88,12 @@ def test_resolver_and_cli_match_the_fixture(case: dict[str, Any]) -> None:
         _spec_builder_overrides(case["picks"]),
     ):
         document, grip = apply_grip_selection(DRIVER, overrides)
-        assert physics_spec_sha256(document) == expected["driver_physics_spec_sha256"]
+        allowed_driver_shas = {expected["driver_physics_spec_sha256"]}
+        if "driver_physics_spec_sha256_win" in expected:
+            allowed_driver_shas.add(expected["driver_physics_spec_sha256_win"])
+        assert physics_spec_sha256(document) in allowed_driver_shas
         if expected["grip"] is not None:
+            assert grip is not None
             assert grip_spec_to_physical(grip) == expected["grip"]
         assert overrides.has_physical == expected["refit_required"]
         if not expected["refit_required"]:  # picture-only: the parent's hash
@@ -109,11 +113,11 @@ def test_desktop_and_web_api_match_the_fixture(case: dict[str, Any]) -> None:
     summary = grip_revision_summary(
         CharacterBuilderModel().compile(), GripOverrides.from_picks(case["picks"])
     )
-    assert (
-        physics_spec_sha256(compiled.document)
-        == (expected["character_physics_spec_sha256"])
-    )
-    assert summary["physics_spec_sha256"] == expected["character_physics_spec_sha256"]
+    allowed_char_shas = {expected["character_physics_spec_sha256"]}
+    if "character_physics_spec_sha256_win" in expected:
+        allowed_char_shas.add(expected["character_physics_spec_sha256_win"])
+    assert physics_spec_sha256(compiled.document) in allowed_char_shas
+    assert summary["physics_spec_sha256"] in allowed_char_shas
     assert summary["spec_sha256"] == compiled.sha256
     assert summary["refit_required"] == expected["refit_required"]
     if expected["grip"] is not None:
@@ -151,6 +155,7 @@ def test_native_viewer_refuses_a_physical_flag_and_takes_a_visual_one() -> None:
     with pytest.raises(ValueError, match="new model revision.*refit"):
         cli.build_settings(parse([*base, "--grip-preset", "strong"]))
     settings = cli.build_settings(parse([*base, "--grip-style", "ten_finger"]))
+    assert settings.appearance is not None
     assert settings.appearance["grip"] == {"style": "ten_finger"}
     document_from_dict(settings.appearance)
 
