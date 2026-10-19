@@ -269,12 +269,17 @@ def _solve_quiet_ik(
     out_mot = work_dir / "ik_quiet.mot"
     tool.setOutputMotionFileName(str(out_mot))
 
+    # MarkersReference gives markers without a task its default weight (1.0),
+    # so every other model marker needs an explicit task with apply=False.
     tasks = tool.getIKTaskSet()
-    for marker_name in non_trunk_markers:
+    keep = set(non_trunk_markers)
+    marker_set = model.getMarkerSet()
+    for i in range(marker_set.getSize()):
+        marker_name = str(marker_set.get(i).getName())
         task = opensim.IKMarkerTask()
         task.setName(marker_name)
         task.setWeight(1.0)
-        task.setApply(True)
+        task.setApply(marker_name in keep)
         tasks.cloneAndAppend(task)
     tool.run()
 
@@ -474,6 +479,10 @@ def register_static_trunk_markers(
             non_trunk,
             coord_names,
             tmp_path,
+        )
+        require(
+            q_quiet.shape[0] == len(quiet_frames),
+            f"IK returned {q_quiet.shape[0]} rows for {len(quiet_frames)} quiet frames",
         )
         quiet_poses, non_trunk_rms = _compute_quiet_poses_and_rms(
             locked_osim,
