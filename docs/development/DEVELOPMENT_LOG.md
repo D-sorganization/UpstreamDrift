@@ -2587,6 +2587,58 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13299 · Engine-Agnostic Grip-Style Contact Topology: GripStyle and Trigger Finger Join the Physical GripSpec; Per-Style Contact Pair Tables With Anatomy Scaling.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13299
+- **Branch:** merged via #13320
+- **PR:** #13320
+- **Paths:** see #13320
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`10e75c0b`; collated from changes/13299-engine-agnostic-grip-style-contact-topol.md)
+- **Summary:** Engine-agnostic grip-style contact topology: GripStyle and trigger finger join the physical GripSpec; per-style contact pair tables with anatomy scaling.
+- **Next step:** Shipped in PR #13320.
+
+### DL-#13339 · Test_Check_Windows_Deps No Longer Races Real Engine Imports Against a 3s Wait; the Probe Is Tested Synchronously With Optional Engines Forced Absent
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13339
+- **Branch:** merged via #13341
+- **PR:** #13341
+- **Paths:** see #13341
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`588068ae`; collated from changes/13339-test-check-windows-deps-no-longer-races.md)
+- **Summary:** test_check_windows_deps no longer races real engine imports against a 3s wait; the probe is tested synchronously with optional engines forced absent
+- **Next step:** Shipped in PR #13341.
+
+### DL-#13258 · Route Web Launcher to /Tools/Spine-Viewer, Update Ch68 Manual and Ignore Licensed_Assets
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13258
+- **Branch:** merged via #13269
+- **PR:** #13269
+- **Paths:** see #13269
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`ac929b64`; collated from changes/13258-route-web-launcher-to-tools-spine-viewer.md)
+- **Summary:** Route web launcher to /tools/spine-viewer, update Ch68 manual and ignore licensed_assets
+- **Next step:** Shipped in PR #13269.
+
+### DL-#13042 · Compute Muscle Forces and Activations for Barbell Squat (OSL-4)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13042
+- **Branch:** merged via #13288
+- **PR:** #13288
+- **Paths:** see #13288
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`e16d848e`; collated from changes/13042-compute-muscle-forces-and-activations-fo.md)
+- **Summary:** Compute muscle forces and activations for barbell squat (OSL-4)
+- **Next step:** Shipped in PR #13288.
+
 ### DL-#13314 · Shard Unit-Test-Gate Into a 2-Leg File-Hash Matrix so Each Leg Stays Well Under the 35 Min Limit Without Raising It
 
 - **State:** shipped
@@ -2606,10 +2658,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13300
 - **Branch:** feat/13300-capsule-contact-law
-- **PR:** #13319
+- **PR:** #13319, #13320
 - **Paths:** see #13319
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`c2ebbf6e`; collated from changes/13300-generalised-shared-contact-law-sphere-ca.md)
+- **Last verified:** 2026-10-19 (`10e75c0b`; collated from changes/13300-generalised-shared-contact-law-sphere-ca.md)
 - **Summary:** generalised shared contact law: sphere-capsule and capsule-capsule
 - **Next step:** Shipped in PR #13319.
 
