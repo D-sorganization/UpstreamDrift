@@ -72,11 +72,11 @@ and are not committed; only hashes and aggregate numbers appear below.
 
 \begin{center}
 \small
-\begin{tabular}{@{}p{62mm}p{100mm}@{}}
+\begin{tabular}{@{}p{58mm}p{100mm}@{}}
 \toprule
 Artefact & SHA-256 \\
 \midrule
-Best-fit spec (\texttt{full\_body\_spec\_hipcal\_scaled.json}) &
+Best-fit spec\newline {\footnotesize\texttt{full\_body\_spec\_hipcal\_scaled.json}} &
   {\scriptsize\path{d1829abf69ca4fae73d9c553440aa73d367a5fc03efa5efec5b845197560b296}} \\
 Bundle (\texttt{bundles/driver.npz}) &
   {\scriptsize\path{bfa1a9a86cc84c8c7d2f1bce821750d10564d1aa5f59549d082c87e855cdfe91}} \\
@@ -108,11 +108,22 @@ the private spec.
   \item Hash the private spec and bundle with \texttt{sha256sum}; compare with
     the table above.
   \item Sign map:
-    \path{pytest -o addopts="" -q -n 0 tests/unit/motion_matching/test_full_body_coordinate_sign_map.py}
-  \item Range report (set the variable to the private bundle path):\\
-    \path{HRG_BEST_FIT_BUNDLE=<private-bundle> pytest -o addopts="" -q -n 0 -s tests/unit/motion_matching/test_bundle_human_range_characterisation.py}
-  \item Headless environment: \texttt{QT\_QPA\_PLATFORM=offscreen
-    MPLBACKEND=Agg MUJOCO\_GL=egl PYTHONPATH=.:src}.
+{\small
+\begin{verbatim}
+pytest -o addopts="" -q -n 0 \
+  tests/unit/motion_matching/test_full_body_coordinate_sign_map.py
+\end{verbatim}}
+  \item Range report (set the variable to the private bundle path):
+{\small
+\begin{verbatim}
+HRG_BEST_FIT_BUNDLE=<private-bundle> pytest -o addopts="" -q -n 0 -s \
+  tests/unit/motion_matching/test_bundle_human_range_characterisation.py
+\end{verbatim}}
+  \item Headless environment:
+{\small
+\begin{verbatim}
+QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl PYTHONPATH=.:src
+\end{verbatim}}
 \end{enumerate}
 
 \section{Coordinate Conventions and Sign Map}
@@ -328,11 +339,15 @@ across four capabilities:
 \item \texttt{physical\_hand\_hand}: Dynamic inter-hand pad-to-pad contact dynamics.
 \end{enumerate}
 
-Every entry records its verified mechanical attachment mode
-(such as \texttt{rigid\_branch\_kinematic}, \texttt{closure\_weld},
-\texttt{bushing\_compliance}, \texttt{free\_plus\_bushings},
-\texttt{site\_weld}, \texttt{mocap\_weld}, or \texttt{direct\_mid\_hands})
-and finger kinematic fidelity (\texttt{none}, \texttt{rigid\_proxy}, or \texttt{articulated}).
+Every entry records its verified mechanical attachment mode and its finger
+kinematic fidelity.  The attachment modes are
+\begin{itemize}[nosep]
+  \item \texttt{rigid\_branch\_kinematic}, \texttt{closure\_weld}, \texttt{site\_weld},
+    \texttt{mocap\_weld} and \texttt{direct\_mid\_hands};
+  \item \texttt{bushing\_compliance} and \texttt{free\_plus\_bushings};
+\end{itemize}
+and the finger fidelities are \texttt{none}, \texttt{rigid\_proxy} and
+\texttt{articulated}.
 By contract, no capability may claim \texttt{available = true} without an active
 \texttt{evidence\_test} verifying the code path; currently, only the full-body-v1
 spec export path (exercised in \texttt{test\_engine\_grip\_contact.py} and
@@ -340,9 +355,10 @@ spec export path (exercised in \texttt{test\_engine\_grip\_contact.py} and
 evidence. All other capabilities remain \texttt{available = false} with explicit
 diagnostic reasons and tracking issues mapped to epic children (\#13326--\#13336).
 
-Non-hand-bearing models (\texttt{putting\_green}, \texttt{putting\_green\_gui},
-\texttt{pendulum\_simulator}, and \texttt{swing\_objective\_lab}) are explicitly
-segregated in an \texttt{excluded} list with formal justifications.
+Models that carry no hands are explicitly segregated in an \texttt{excluded}
+list with formal justifications: \texttt{putting\_green},
+\texttt{putting\_green\_gui}, \texttt{pendulum\_simulator} and
+\texttt{swing\_objective\_lab}.
 
 Empirical verification against source assets revealed several divergences from
 initial panel assumptions:
@@ -432,8 +448,10 @@ f_{t,i}/(\mu f_{n,i})$. Unloaded flags mark tensile configurations ($-f_i
 \cdot \hat{n}_i \le 0$).
 
 \textbf{Parameters.} Static friction coefficient $\mu = 0.9$; equal-split pair
-weights prior (\texttt{name="equal\_split"}, $w_i = 1/N_{\mathrm{pairs}}$); normal tolerance $10^{-9}$; minimum
-closure force $10^{-9}$\,N. Hand--club reactions default to zero (\texttt{hand\_club\_source="not\_supplied"}).
+weights prior, $w_i = 1/N_{\mathrm{pairs}}$ (\texttt{name="equal\_split"});
+normal tolerance $10^{-9}$; minimum closure force $10^{-9}$\,N.  Hand--club
+reactions default to zero, recorded as
+\texttt{hand\_club\_source="not\_supplied"}.
 
 \textbf{Acceptance Criteria.}
 \begin{enumerate}[leftmargin=*,noitemsep]
