@@ -385,6 +385,66 @@ python3 -m pytest tests/unit/grip_contact/test_allocated_hand_contact.py \
     tests/unit/grip_contact/test_palm_thumb.py
 \end{verbatim}
 
+\subsection{Pinocchio Topology Contact Reference (HRG-GS-G6, \#13304)}
+\textbf{Topology Contact Model.} The engine-agnostic contact model (\path{src/shared/python/grip_contact/topology_contact.py})
+evaluates compliant physical contact between anatomical hand sites $\mathcal{S}$ defined in \texttt{ContactTopology} $\mathcal{T}$
+(HRG-GS-G1, \#13299) and the club grip cylinder via the G2 pairwise kernels (\path{pair_contact.py}, \#13300).
+Sites ride on the prescribed hand frame, while the club grip cylinder rides on the dynamic club frame.
+Physical hand--grip contact pairs are evaluated using \texttt{sphere\_capsule} for spherical sites (palm and finger pads, heel pad)
+and \texttt{capsule\_capsule} for cylindrical finger segments (such as the optional trail index trigger finger).
+
+For each physical pair $i$, the signed penetration depth $\delta_i = \max(0, r_{A,i} + r_{B,i} - d(p_A, p_B))$ and relative contact point
+velocity $v_{c,i}$ yield compressive normal force $f_{n,i}$ and regularized friction force $f_{t,i}$:
+\begin{align}
+f_{n,i} &= k \delta_i \left(1 + d \dot{\delta}_i\right) \hat{n}_i, \\
+f_{t,i} &= -\mu f_{n,i} \, \mathrm{step}\left(\frac{\|v_{t,i}\|}{v_{\mathrm{trans}}}\right) \frac{v_{t,i}}{\|v_{t,i}\|},
+\end{align}
+where $\hat{n}_i$ is the outward unit normal on the club grip cylinder at the closest point, $v_{t,i} = v_{c,i} - (v_{c,i} \cdot \hat{n}_i)\hat{n}_i$,
+and $\mathrm{step}(x) = \min(1, x)$ is the Stribeck transition function.
+The total hand wrench on the club in world axes about the club grip-frame origin matches the \texttt{PadWrench} convention:
+\begin{equation}
+F_{\mathrm{club}} = \sum_{i} f_{b,i}, \quad
+M_{\mathrm{club}} = \sum_{i} \left[ m_{b,i} + (p_{c,i} - p_{\mathrm{club\_orig}}) \times f_{b,i} \right].
+\end{equation}
+
+\textbf{Coordinate Frames.} Sites in \texttt{ContactTopology} are defined in the shared butt-origin grip frame ($+x$ axial from butt to head,
+$y=z=0$ along the shaft axis). In \texttt{GripInterface}, each hand's local grip frame origin lies along the shaft axis at the hand centre
+$x_{\mathrm{orig}} = \frac{1}{2}(x_{\mathrm{palm\_proximal}} + x_{\mathrm{palm\_distal}})$, with transverse offset $[0, 0, -r_{\mathrm{grip}}]$
+for the lead hand (Left) and $[0, 0, +r_{\mathrm{grip}}]$ for the trail hand (Right).
+The helper \texttt{map\_site\_to\_hand\_frame} transforms site primitives into the hand frame:
+\begin{equation}
+p_{\mathrm{hand}} = p_{\mathrm{axis\_offset}} + \begin{bmatrix} x_{\mathrm{site}} - x_{\mathrm{orig}} \\ y_{\mathrm{site}} \\ z_{\mathrm{site}} \end{bmatrix}.
+\end{equation}
+At the weld pose, every physical pad--grip site's surface gap is exactly $-0.250$\,mm, satisfying the $\pm 0.5$\,mm neutral preload contract.
+
+\textbf{Pinocchio Adapter.} \texttt{ClubInHands} in \path{src/engines/physics_engines/pinocchio/python/grip_contact_sim.py} accepts an optional
+\texttt{topology\_model: TopologyContactModel}. When supplied, \texttt{wrenches()} evaluates \texttt{topology\_side\_wrench} and caches per-pair
+wrenches in \texttt{last\_pads}. \texttt{simulate\_grip\_contact} integrates the club equations of motion using SciPy Radau implicit integration
+and logs per-pair normal and tangential force traces in \texttt{ContactRun.pair\_normal\_force\_n} and \texttt{ContactRun.pair\_tangential\_force\_n}.
+Unavailable channels (such as allocated hand--hand pairs) are recorded as \texttt{NaN} with explanatory reasons in \texttt{channel\_reasons}.
+
+\textbf{Parameters.} Stiffness $k = 1.6 \times 10^5$\,N/m, dissipation $d = 0.5$\,s/m, static and dynamic friction coefficient $\mu = 0.90$,
+velocity transition $v_{\mathrm{trans}} = 0.01$\,m/s, patch radius $r_{\mathrm{patch}} \approx 4.47$\,mm matched to $1100$\,N squeeze per hand.
+
+\textbf{Acceptance Criteria.}
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item Zero force at separation; unilateral normal force ($f_n \ge 0$).
+\item Friction cone constraint: $\|f_t\| \le \mu f_n$ (with regularized Stribeck allowance).
+\item Action--reaction balance: $f_a + f_b = 0$ and net moment about arbitrary points $\le 10^{-12}$\,N$\cdot$m.
+\item Resultant wrench matches sum of individual pair wrenches to $\le 10^{-12}$.
+\item Per-pair force traces match \texttt{topology\_side\_wrench} re-evaluated at recorded states to $\le 10^{-9}$\,N across overlap, interlock, and ten-finger styles.
+\item Timestep halving ($2 \times 10^{-4}$\,s vs $1 \times 10^{-4}$\,s) changes peak pair normal force by $< 2\%$ ($0.0000\%$ observed across all three styles).
+\end{enumerate}
+
+\textbf{Limitations.} Hand segments are treated as rigid bodies driven by prescribed kinematics without articulated finger degrees of freedom;
+hand--hand pairs are allocated (reporting only, HRG-GS-G3) and do not exert physical forces on the rigid weld kinematics.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_topology_contact.py \
+    tests/unit/grip_contact/test_pinocchio_topology_grip.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
