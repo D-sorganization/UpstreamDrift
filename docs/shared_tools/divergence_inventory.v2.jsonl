@@ -1766,6 +1766,7 @@
 {"path": "neural_motion/episodes/store.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
 {"path": "neural_motion/episodes/views.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
 {"path": "neural_motion/experiment.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
+{"path": "neural_motion/golfer_udim_addendum.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
 {"path": "neural_motion/inference/__init__.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
 {"path": "neural_motion/inference/distribution.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
 {"path": "neural_motion/inference/orchestration.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
