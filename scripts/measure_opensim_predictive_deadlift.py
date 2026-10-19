@@ -154,6 +154,23 @@ def _parse_solve_log(log_path: Path) -> dict[str, Any]:
     if m_time:
         wall_clock = float(m_time.group(1))
 
+    if iterations is None:
+        iter_matches = list(
+            re.finditer(
+                r"^\s*(\d+)\s+([+-]?[\d.eE+-]+)\s+([+-]?[\d.eE+-]+)\s+([+-]?[\d.eE+-]+)",
+                text,
+                re.MULTILINE,
+            )
+        )
+        if iter_matches:
+            last = iter_matches[-1]
+            iterations = int(last.group(1))
+            objective = float(last.group(2))
+            cv = float(last.group(3))
+            status = "Timeout_Interrupted"
+            if wall_clock is None:
+                wall_clock = 7200.0
+
     return {
         "converged": converged,
         "solver_status": status,

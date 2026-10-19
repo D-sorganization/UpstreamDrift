@@ -6,19 +6,23 @@ using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
 ## Result Status: Exploratory
 
 ### Stage 1: Torque-Driven Solve
-- **Actuation:** `CoordinateActuator`s (500 N·m optimal force) on free coordinates; muscles removed
-- **Solver Status:** `Maximum_Iterations_Exceeded`
+- **Actuation:** `CoordinateActuator`s (1000 N·m optimal force) on free coordinates; pelvis residuals (optimal force 1, weight 100); muscles removed
+- **Solver Status:** `Timeout_Interrupted`
 - **Converged:** `False`
-- **Iterations:** 100
-- **Objective:** 1844.187478122922
-- **Scaled Constraint Violation:** 74.1596931108721
-- **Wall Clock Time:** 231.37 s
-- **Solution File:** `predictive_solution_stage1.sto` (unsealed Moco solution iterate)
+- **Iterations:** 1056
+- **Objective:** 20049.777
+- **Scaled Constraint Violation:** 654.0
+- **Wall Clock Time:** 7200.00 s
+- **Total Weight (m g):** 1765.20 N
+- **Residual Peak:** None N
+- **Residual RMS:** None N
+- **Residual Ratio:** None
+- **Residual Assisted:** None
 
 ### Stage 2: Muscle-Driven Solve
 - **Actuation:** 80 Rajagopal lower-limb muscles (DeGroote-Fregly 2016)
 - **Status:** `not run`
-- **Reason:** Stage 1 torque-driven solve did not converge (Maximum_Iterations_Exceeded)
+- **Reason:** Stage 1 torque-driven solve did not converge (Timeout_Interrupted)
 
 ## Kinematic Comparison
 
