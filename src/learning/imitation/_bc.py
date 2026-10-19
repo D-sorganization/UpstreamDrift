@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import json
 import numpy as np
@@ -11,7 +11,13 @@ import numpy as np
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-from src.learning.imitation._base import ImitationLearner, TrainingConfig
+from src.learning.imitation._base import (
+    ImitationLearner,
+    TrainingConfig,
+    apply_activation,
+    apply_activation_grad,
+    validate_dataset_and_split,
+)
 from src.learning.imitation.dataset import DemonstrationDataset
 
 
@@ -39,15 +45,13 @@ class BehaviorCloning(ImitationLearner):
     def _build_policy(self) -> None:
         """Build the neural network policy."""
         # Build a simple MLP policy
-        # In production, would use PyTorch/JAX
-        # Here we implement a simple numpy-based MLP for demonstration
         layers = []
         input_dim = self.observation_dim
 
         for hidden_dim in self.config.hidden_sizes:
             layers.append(
                 {
-                    "W": np.random.randn(input_dim, hidden_dim) * 0.01,
+                    "W": self._rng.normal(0.0, 0.01, size=(input_dim, hidden_dim)),
                     "b": np.zeros(hidden_dim),
                 }
             )
@@ -56,30 +60,52 @@ class BehaviorCloning(ImitationLearner):
         # Output layer
         layers.append(
             {
-                "W": np.random.randn(input_dim, self.action_dim) * 0.01,
+                "W": self._rng.normal(0.0, 0.01, size=(input_dim, self.action_dim)),
                 "b": np.zeros(self.action_dim),
             }
         )
 
         self._policy = layers
 
-    def _forward(self, x: NDArray[np.floating]) -> NDArray[np.floating]:
+    def _forward_with_cache(
+        self, x: NDArray[np.floating], training: bool = False
+    ) -> tuple[NDArray[np.floating], list[dict[str, Any]]]:
+        """Forward pass caching intermediate activations and dropout masks."""
+        if x is None:
+            raise ValueError("x must be provided")
+        cache: list[dict[str, Any]] = []
+        out = x
+        n_layers = len(self._policy)
+        for i, layer in enumerate(self._policy):
+            in_act = out
+            z = in_act @ layer["W"] + layer["b"]
+            if i < n_layers - 1:
+                out = apply_activation(z, self.config.activation)
+                mask = None
+                if training and self.config.dropout > 0.0:
+                    keep_prob = 1.0 - self.config.dropout
+                    mask = (self._rng.random(size=out.shape) < keep_prob) / keep_prob
+                    out = out * mask
+                cache.append({"in": in_act, "out": out, "mask": mask})
+            else:
+                out = z  # Linear output
+                cache.append({"in": in_act, "out": out, "mask": None})
+        return out, cache
+
+    def _forward(
+        self, x: NDArray[np.floating], training: bool = False
+    ) -> NDArray[np.floating]:
         """Forward pass through network.
 
         Args:
             x: Input observations.
+            training: If True, apply dropout during forward pass.
 
         Returns:
             Predicted actions.
         """
-        if x is None:
-            raise ValueError("x must be provided")
-        for i, layer in enumerate(self._policy):
-            x = x @ layer["W"] + layer["b"]
-            # ReLU activation for hidden layers
-            if i < len(self._policy) - 1:
-                x = np.maximum(0, x)
-        return x
+        out, _ = self._forward_with_cache(x, training=training)
+        return out
 
     def _compute_loss(
         self,
@@ -120,22 +146,14 @@ class BehaviorCloning(ImitationLearner):
             raise ValueError("observations must be provided")
         batch_size = len(observations)
 
-        # Forward pass with caching
-        activations = [observations]
-        x = observations
-        for i, layer in enumerate(self._policy):
-            z = x @ layer["W"] + layer["b"]
-            x = np.maximum(0, z) if i < len(self._policy) - 1 else z  # Linear output
-            activations.append(x)
-
-        # Backward pass
+        predictions, cache = self._forward_with_cache(observations, training=True)
         gradients: list[dict[str, NDArray[np.floating]]] = []
-        predictions = activations[-1]
-        delta = 2 * (predictions - actions) / batch_size  # MSE gradient
+        delta: NDArray[Any] = 2 * (predictions - actions) / batch_size  # MSE gradient
 
         for i in range(len(self._policy) - 1, -1, -1):
             layer = self._policy[i]
-            a = activations[i]
+            layer_cache = cache[i]
+            a = layer_cache["in"]
 
             grad_W = a.T @ delta
             grad_b = delta.sum(axis=0)
@@ -143,8 +161,12 @@ class BehaviorCloning(ImitationLearner):
 
             if i > 0:
                 delta = delta @ layer["W"].T
-                # ReLU gradient
-                delta = delta * (activations[i] > 0)
+                prev_cache = cache[i - 1]
+                if prev_cache["mask"] is not None:
+                    delta = delta * prev_cache["mask"]
+                delta = apply_activation_grad(
+                    delta, prev_cache["out"], self.config.activation
+                )
 
         return gradients
 
@@ -157,29 +179,28 @@ class BehaviorCloning(ImitationLearner):
 
         Args:
             dataset: Demonstration dataset.
-            validation_split: Fraction for validation.
+            validation_split: Fraction for validation. Must be in [0, 1).
 
         Returns:
             Training history.
         """
-        # Get training data
-        if dataset is None:
-            raise ValueError("dataset must be provided")
-        observations, actions = dataset.to_state_action_pairs()
-
-        if len(observations) == 0:
-            raise ValueError("Dataset has no state-action pairs")
+        observations, actions = validate_dataset_and_split(dataset, validation_split)
 
         # Split data
         n = len(observations)
-        n_val = int(n * validation_split)
-        indices = np.random.permutation(n)
+        n_val = int(round(n * validation_split))
+        if n_val >= n:
+            raise ValueError("validation_split leaves no training samples")
+        indices = self._rng.permutation(n)
 
         train_idx = indices[n_val:]
         val_idx = indices[:n_val]
 
         train_obs = observations[train_idx]
         train_act = actions[train_idx]
+        if len(train_obs) == 0:
+            raise ValueError("validation_split leaves no training samples")
+
         val_obs = observations[val_idx] if n_val > 0 else train_obs[:100]
         val_act = actions[val_idx] if n_val > 0 else train_act[:100]
 
@@ -189,7 +210,7 @@ class BehaviorCloning(ImitationLearner):
 
         for _epoch in range(self.config.epochs):
             # Shuffle training data
-            perm = np.random.permutation(len(train_obs))
+            perm = self._rng.permutation(len(train_obs))
             train_obs = train_obs[perm]
             train_act = train_act[perm]
 
@@ -243,7 +264,7 @@ class BehaviorCloning(ImitationLearner):
         if observation.ndim == 1:
             observation = observation.reshape(1, -1)
 
-        action = self._forward(observation)
+        action = self._forward(observation, training=False)
 
         if observation.shape[0] == 1:
             action = action.flatten()
@@ -260,20 +281,13 @@ class BehaviorCloning(ImitationLearner):
             raise ValueError("path must be provided")
         path = Path(path)
 
-        save_data = {
+        save_data: dict[str, Any] = {
             "observation_dim": np.array(self.observation_dim),
             "action_dim": np.array(self.action_dim),
             "num_layers": np.array(len(self._policy)),
         }
 
-        config_dict = {
-            "epochs": self.config.epochs,
-            "batch_size": self.config.batch_size,
-            "learning_rate": self.config.learning_rate,
-            "weight_decay": self.config.weight_decay,
-            "hidden_sizes": self.config.hidden_sizes,
-        }
-        save_data["config_json"] = np.array(json.dumps(config_dict))
+        save_data["config_json"] = np.array(json.dumps(self.config.to_dict()))
 
         for i, layer in enumerate(self._policy):
             save_data[f"layer_{i}_W"] = layer["W"]

@@ -8044,6 +8044,220 @@ Reproduce: build the patch with \texttt{thumb\_palm\_patch} from the spec club,
 call \texttt{BundleOverlayProvider.with\_palm\_thumb} on a
 \texttt{MujocoOverlaySource} and read \texttt{frame.metadata["palm\_thumb"]}.
 
+\section{Landmark Regional Trunk Joints for \texttt{full-body-v2} (HRG-D2, \#13173)}
+\label{sec:hrg-d2}
+
+\subsection{Status and Scope}
+HRG-D2 replaces the D1 stand-in pivots with landmark joint centres. It also
+re-parents the de Leva trunk solids, moves the trunk range of motion to soft
+limits and reports how well the back markers observe the two regional joints.
+The code is \texttt{src/shared/python/motion\_matching/full\_body\_v2\_geometry.py},
+with \texttt{derive\_landmark\_v2\_spec(v1, provenance=...)} as the entry
+point. ADR-0055 and the \#12736 conventions are unchanged. The neutral offset
+is excluded from the angles, every regional output carries a
+\texttt{distribution\_source}, and the coupling law is not altered. The MuJoCo
+visual layer is HRG-D3. Dynamics qualification and the muscle graft are
+HRG-Q1. This section reports software and geometric correctness only, and it
+is not a scientific qualification.
+
+\subsection{Joint Centres}
+All locations are in the pelvis frame at $q=0$.
+\begin{itemize}
+\item \textbf{L5/S1.} This is the HRG-C3 design offset
+$(0,0,0.23\,L_\mathrm{trunk})$ above the hip-joint-centre (HJC) midpoint. If
+the specification carries a C3 \texttt{spec\_revision}, its recorded
+\texttt{design\_offsets\_from\_hjc\_midpoint\_m.l5s1} is used. If the HJC
+midpoint is at the origin, the builder design is used. Any other pelvis fails
+closed with a \texttt{ValueError} that names \texttt{relocate\_pelvis}. The
+un-relocated best-fit bundle specification has its HJC midpoint at
+$(-11.7, 6.0, -78.7)$~mm and is therefore refused.
+\item \textbf{C7/T1.} This is the neck-joint centre at the de Leva
+cervicale \cite{deLeva1996}.
+\item \textbf{T12/L1.} This point lies on the L5/S1 to C7/T1 line, at the
+lumbar fraction of the thoracolumbar length:
+\[
+p_{T12/L1} = p_{L5/S1} + f\,(p_{C7/T1} - p_{L5/S1}), \qquad
+f = \frac{18}{18+28} = 0.3913,
+\]
+with the male regional lengths from Gray \cite{Gray1918} (lumbar 18~cm,
+thoracic about 28~cm).
+\end{itemize}
+On the C3 revision of the best-fit specification
+(\texttt{full\_body\_spec\_pelvis\_rev1}) these give L5/S1 at
+$(0, 0, 138.2)$~mm, C7/T1 at $(10.2, 3.9, 638.6)$~mm and T12/L1 at
+$(4.0, 1.5, 334.0)$~mm. The D1 stand-in placed T12/L1 at
+$(10.2, 3.9, 387.3)$~mm. On the anthropometric driver fixture, T12/L1 is at
+$(0, 0, 319.2)$~mm, compared with 349.5~mm in D1.
+
+\subsection{Neutral Curvature Check}
+Each region is modelled with uniform curvature, so a regional joint is the
+chord of its region. The angle between the thoracic and lumbar chords is then
+$(\mathrm{LL}-\mathrm{TK})/2$. From Yukawa et al.\ \cite{Yukawa2018}
+(626 asymptomatic subjects, LL $49.7\pm11.2^\circ$, TK $36.0\pm10.1^\circ$),
+this is $6.85^\circ$ of ISB extension, with SD
+$\tfrac12\sqrt{11.2^2+10.1^2}=7.54^\circ$. The model's two chords are
+collinear ($0^\circ$, $z=-0.91$), which is within 2~SD. The lumbar chord's
+absolute sagittal tilt ($1.17^\circ$) is recorded as \emph{not comparable}
+with the sacral slope. The pelvis frame is the waist-marker plane, not the
+sacral endplate, and $q=0$ is a modelling neutral rather than a measured
+standing posture. The joint primitives act about the model axes, so the
+neutral rotation is the identity and the curvature is carried by the chord
+geometry (ADR-0055). The report is stored in
+\texttt{trunk\_topology.locations\_evidence.neutral\_curvature}.
+
+\subsection{Bodies and Mass}
+The pelvis carries the lower-trunk solid. \texttt{trunk\_lumbar} carries the
+de Leva \texttt{middle\_trunk} solid, and the COMRod thorax carries
+\texttt{upper\_trunk}. Solids are re-parented and never re-split. Only the
+0.3~kg \texttt{UpperTorsoBase} dummy is dropped. The results below were
+measured on both the fixture and the rev1 specification.
+\begin{center}
+\begin{tabular}{lrr}
+Acceptance quantity & Measured & Required \\
+\hline
+Relative mass error vs.\ $m_{v1}-0.3$ & $1.8\times10^{-16}$ & $\le10^{-10}$ \\
+Reference-pose COM shift (fixture / rev1) & 0.20 / 0.28 mm & $\le1$ mm \\
+Locked aggregate inertia vs.\ v1 without dummy & $2.1\times10^{-16}$ & $\le10^{-6}$ \\
+Locked aggregate inertia vs.\ v1 with dummy & $9.2\times10^{-5}$ & (reported) \\
+MuJoCo compiled mass / subtree COM & $\le10^{-10}$ rel.\ / $\le10^{-9}$ m & \\
+\end{tabular}
+\end{center}
+The COM shift and the with-dummy inertia change both come from the dropped
+dummy. The issue's ``true 78.0~kg'' is \emph{not} reached. The v2 human
+mass is 78.7455~kg, against a subject mass of 78.0~kg. The ledger
+(\texttt{human\_mass\_ledger}) attributes the 0.7455~kg excess as follows:
+clavicle links not in de Leva $+0.8455$~kg ($0.2\times$ upper arm), native
+hand mass $+0.1467$~kg, hand standoffs $+0.020$~kg and Rajagopal lower limbs
+$-0.2667$~kg. The residual is below $10^{-14}$~kg. Correcting the mass budget
+changes the anthropometric driver and its fixtures, so it is a follow-up.
+
+\subsection{Range of Motion Policy}
+The v2 trunk range of motion, in ISB sign (lumbar FE $-40..15$, LB $\pm20$,
+AR $\pm15$; thoracic FE $-30..15$, LB $\pm25$, AR $\pm50$ degrees), is written
+to \texttt{soft\_limits\_deg}. It is no longer in
+\texttt{coordinate\_ranges\_deg}, which the inverse-kinematics lanes consume
+as hard bounds. \texttt{trunk\_topology.hard\_range\_policy} is
+\texttt{report\_only}. Exporters keep the engine-default joint ranges, and a
+soft-limit excess is reported (for example by the migration's
+\texttt{soft\_limit\_frames}) rather than enforced. A soft-limit penalty in
+inverse kinematics is not implemented here.
+
+\subsection{Observability From the Back Markers}
+The trunk markers of the tour capture contract are BackTop, BackLeft and
+BackRight. The waist markers hold the pelvis. \texttt{trunk\_observability}
+linearises the marker positions in the six trunk coordinates, using a
+marker noise of $\sigma=13.3$~mm and a prior SD of $5^\circ$ on
+$D\phi$ from \texttt{bruno2015\_regional}. The information matrix is
+$F=J^{\mathsf T}J/\sigma^2$, and the posterior covariance is
+$(F + D^{\mathsf T}D/\sigma_p^2)^{-1}$.
+
+The rank is structurally 5 in \emph{every} pose. T12/L1 sits a fixed
+distance from L5/S1, so the thorax has only five degrees of freedom relative
+to the pelvis. The null direction is equal and opposite spins about the
+L5/S1--T12/L1 chord. These spins move the lumbar body, which carries no
+markers, and leave the thorax unchanged.
+\begin{center}
+\begin{tabular}{lll}
+Quantity & Neutral (rev1) & Worst-Hub frame (1490) \\
+\hline
+Singular values (m/rad) & 1.164, 1.150, 0.187, 0.068, 0.049, 0 & 1.136, 1.071, 0.192, 0.115, 0.051, 0 \\
+Rank / null dimension & 5 / 1 & 5 / 1 \\
+Largest null share (AR pair) & 0.707 & 0.696 \\
+Thorax orientation data SD $x/y/z$ (deg) & 4.36 / 3.31 / 5.98 & 3.24 / 3.96 / 5.77 \\
+Posterior SD, lumbar FE/LB/AR (deg) & 3.37 / 3.99 / 5.09 & 3.56 / 3.35 / 5.06 \\
+Posterior SD, thoracic FE/LB/AR (deg) & 5.07 / 5.92 / 6.84 & 4.93 / 5.06 / 6.69 \\
+\end{tabular}
+\end{center}
+Every individual regional coordinate has a nonzero null share. Its data-only
+variance is therefore unbounded, and it is reported as \texttt{degenerate}.
+On an exactly symmetric specification, only the two axial rotations are
+touched. The composed thorax orientation is identified from the data alone.
+The regional split is \texttt{regularised}, with
+\texttt{distribution\_source = prior:bruno2015\_regional@1}. It is never
+reported as identified. The issue text mentions four back markers, but the
+contract defines three trunk markers. More markers would add information,
+but they cannot raise the rank above 5 for this topology.
+
+\subsection{Cross-Engine Kinematics and Export Status}
+Each exporter is compared with the specification's own forward kinematics
+on all 17 named frames, over 120 seeded configurations. Trunk coordinates
+span their soft limits $\pm20\%$, other rotations span $\pm0.6$~rad and
+translations span $\pm0.5$~m. The test tolerance is $10^{-12}$ (the issue
+requires $10^{-6}$).
+\begin{center}
+\begin{tabular}{lrrl}
+Engine & Max position (m) & Max rotation (rad) & Status \\
+\hline
+MuJoCo (MJCF) & $1.9\times10^{-15}$ & $2.9\times10^{-15}$ & exported \\
+Drake (URDF) & $1.2\times10^{-15}$ & $1.3\times10^{-15}$ & exported \\
+Pinocchio & $8.3\times10^{-16}$ & $1.0\times10^{-15}$ & exported, v2 upper body built \\
+OpenSim (CustomJoint) & $1.3\times10^{-15}$ & $1.3\times10^{-15}$ & exported \\
+MyoSuite & -- & -- & mapped through the thorax only \\
+\end{tabular}
+\end{center}
+\textbf{Exporter defect found and fixed.} OpenSim composes
+\texttt{rotation1..3} as successive body-fixed rotations, but the exporter
+always filled these slots in $x,y,z$ order. The v2 joints are
+$R_yR_xR_z$, so any configuration with two or more nonzero trunk angles was
+wrong by 0.20 to 0.63~m at the arms and club. Single-coordinate checks and
+the D1 mass-only test did not detect this. The slots now follow the
+primitive order. Joints whose rotations are already in $x$-before-$y$-before-$z$
+order keep the historical layout. That covers every v1 joint in the four
+committed v1 specifications, so v1 exports are byte-identical. MyoSuite is
+reached by segment-orientation IK, and the thorax keeps its v1 body name.
+MyoFullBody has no lumbar body, so the regional split is exempt there. The
+OpenSim musculoskeletal graft still refuses v2 and names HRG-Q1, because the
+lumbar and thoracic attachment bodies and the per-level muscle paths belong
+to epic \#12735.
+
+\subsection{Best-Fit Trajectory Migration With Landmark Geometry}
+The D1 migration script was copied out of the repository and rerun on the
+same 1815-frame \texttt{reference\_q}. The rotation residual is
+$9.3\times10^{-16}$~rad in all cases.
+\begin{center}
+\begin{tabular}{llr}
+Case & Specification & Max / RMS Hub residual (mm) \\
+\hline
+D1 stand-in & bundle (\texttt{bdd634fa\ldots}) & 67.8 / 37.0 \\
+D1 stand-in & C3 rev1 (\texttt{314a7f1d\ldots}) & 79.2 / 43.8 \\
+D2 landmarks & C3 rev1 (\texttt{314a7f1d\ldots}) & 61.9 / 34.3 \\
+\end{tabular}
+\end{center}
+On the same rev1 specification, the landmark geometry lowers the Hub residual
+from 79.2 to 61.9~mm at its maximum and from 43.8 to 34.3~mm RMS. Compared
+with the D1 number, the maximum falls by 5.9~mm and the RMS by 2.7~mm. The
+residual is still a geometric consequence of migrating orientation only.
+Position fidelity needs a refit on v2. The evidence (JSON, plot, observability
+and cross-engine FK) is under
+\texttt{\textasciitilde/Videos/HRG\_2026-10-17/D2/}. Neither the private
+bundle nor its specifications are committed.
+
+\subsection{Reproduction, Failed Experiments and Limitations}
+\begin{verbatim}
+PYTHONPATH=.:src python3 -m pytest -o addopts="" -q \
+  tests/unit/motion_matching/test_full_body_v2_geometry.py \
+  tests/unit/motion_matching/test_full_body_v2_cross_engine.py \
+  tests/unit/motion_matching/test_full_body_v2_spec.py \
+  tests/unit/motion_matching/test_full_body_v2_exporters.py \
+  tests/unit/motion_matching/test_full_body_v1_v2_migration.py
+\end{verbatim}
+Failed experiments and corrections:
+\begin{itemize}
+\item The first observability test expected rank 6 away from neutral. The
+measured rank is 5 in every pose, and the reason is structural (above).
+\item An arccos-of-trace rotation error saturated near $5\times10^{-8}$~rad.
+The chord form $2\arcsin(\lVert R-I\rVert_F/2\sqrt2)$ keeps full precision.
+\end{itemize}
+Limitations:
+\begin{itemize}
+\item The T12/L1 fraction comes from adult male regional lengths, not from
+this subject.
+\item The neutral curvature is checked, not fitted. The model has zero
+relative chord angle.
+\item The mass excess of 0.7455~kg is reported, not corrected.
+\item No v2 dynamics has been qualified (HRG-Q1), and no IK soft-limit
+penalty is implemented.
+\end{itemize}
 \begin{thebibliography}{9}
 \bibitem{MathWorksPSUnits}
 MathWorks. \emph{Simulink-PS Converter: Unit Conversion and Checking}.
@@ -8082,6 +8296,18 @@ identifies a new execution.
 MathWorks, \emph{addFrameVariables: Create Kinematic Variables from Select
 Frame Pair in KinematicsSolver Object},
 \url{https://www.mathworks.com/help/sm/ref/simscape.multibody.kinematicssolver.addframevariables.html}.
+
+\bibitem{Gray1918}
+H.~Gray. \emph{Anatomy of the Human Body}, 20th ed., revised by W.~H.~Lewis.
+Lea \& Febiger, Philadelphia, 1918. Section ``The Vertebral Column as a
+Whole'': male column 71~cm; cervical 12.5, thoracic about 28, lumbar 18,
+sacrum and coccyx 12.5~cm.
+\bibitem{Yukawa2018}
+Y.~Yukawa, F.~Kato, K.~Suda, M.~Yamagata and T.~Ueta. Normative data for
+parameters of sagittal spinal alignment in healthy subjects: an analysis of
+gender specific differences and changes with aging in 626 asymptomatic
+individuals. \emph{European Spine Journal}, 27(2):426--432, 2018.
+\href{https://doi.org/10.1007/s00586-016-4807-7}{doi:10.1007/s00586-016-4807-7}.
 
 \end{thebibliography}
 \end{document}
