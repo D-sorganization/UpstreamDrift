@@ -34,6 +34,7 @@ from pathlib import Path
 from types import MappingProxyType, SimpleNamespace
 from typing import Any, Final, Literal
 
+import defusedxml.ElementTree as DefusedET
 import mujoco
 import numpy as np
 from numpy import linalg as npla
@@ -453,7 +454,7 @@ def build_humanoid_grip_mjcf(
     lead_body = str(resolved_manifest.get("lead_hand_body", "hand_left"))
     trail_body = str(resolved_manifest.get("trail_hand_body", "hand_right"))
 
-    root = ET.fromstring(raw_xml)
+    root = DefusedET.fromstring(raw_xml)  # nosec B314  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
     visual_geoms: tuple[str, ...] = ()
     if attach_visual_style:
         visual_geoms = _attach_visual_style_geoms(root, lead_body, trail_body, spec)
