@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -57,8 +58,8 @@ class DAgger(ImitationLearner):
         """
         if dataset is None:
             raise ValueError("dataset must be provided")
-        self._aggregated_dataset = dataset
-        return self._bc.train(dataset, validation_split)
+        self._aggregated_dataset = copy.deepcopy(dataset)
+        return self._bc.train(self._aggregated_dataset, validation_split)
 
     @staticmethod
     def _compute_beta(iteration: int, iterations: int, schedule: str) -> float:
@@ -80,6 +81,10 @@ class DAgger(ImitationLearner):
         if expert is None:
             raise ValueError("expert must be provided")
         obs, info = env.reset()
+        if obs.shape[0] % 2 != 0:
+            raise ValueError(
+                f"Observation dimension must be even to split into positions and velocities, got {obs.shape[0]}"
+            )
         demo_timestamps = [0.0]
         demo_positions = [obs[: obs.shape[0] // 2]]
         demo_velocities = [obs[obs.shape[0] // 2 :]]
@@ -88,17 +93,23 @@ class DAgger(ImitationLearner):
         total_reward = 0.0
         step = 0
         terminated = False
+        truncated = False
 
         while step < max_steps:
             policy_action = self.predict(obs)
             expert_action = expert(obs)
             demo_actions.append(expert_action)
 
-            action = expert_action if np.random.random() < beta else policy_action
+            action = expert_action if self._rng.random() < beta else policy_action
 
             obs, reward, terminated, truncated, info = env.step(action)
             total_reward += reward
             step += 1
+
+            if obs.shape[0] % 2 != 0:
+                raise ValueError(
+                    f"Observation dimension must be even to split into positions and velocities, got {obs.shape[0]}"
+                )
 
             demo_timestamps.append(step * 0.01)
             demo_positions.append(obs[: obs.shape[0] // 2])
@@ -107,13 +118,18 @@ class DAgger(ImitationLearner):
             if terminated or truncated:
                 break
 
+        if "success" in info:
+            success = bool(info["success"])
+        else:
+            success = bool(terminated and not truncated)
+
         demo = Demonstration(
             timestamps=np.array(demo_timestamps[:-1]),
             joint_positions=np.array(demo_positions[:-1]),
             joint_velocities=np.array(demo_velocities[:-1]),
             actions=np.array(demo_actions),
             source="dagger",
-            success=not terminated,
+            success=success,
         )
         return demo, total_reward
 

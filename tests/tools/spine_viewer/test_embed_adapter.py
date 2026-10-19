@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import os
 import sys
 
@@ -16,10 +17,22 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 pytestmark = pytest.mark.unit
 
+_ADAPTER_MODULE = "src.tools.spine_viewer._embed_adapter"
 
-def test_importing_adapter_registers_without_loading_pyqt6() -> None:
+
+def test_importing_adapter_registers_without_loading_pyqt6(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     had_qt = "PyQt6" in sys.modules
-    from src.tools.spine_viewer import _embed_adapter
+    import src.tools.spine_viewer as spine_pkg
+
+    # Import the adapter fresh: if an earlier test imported it inside a
+    # registry snapshot, the cached module would make this a no-op (#13314).
+    monkeypatch.delitem(sys.modules, _ADAPTER_MODULE, raising=False)
+    if hasattr(spine_pkg, "_embed_adapter"):
+        monkeypatch.delattr(spine_pkg, "_embed_adapter")
+    monkeypatch.delitem(EMBEDDABLE_TOOL_REGISTRY, "spine_viewer", raising=False)
+    _embed_adapter = importlib.import_module(_ADAPTER_MODULE)
 
     assert "spine_viewer" in EMBEDDABLE_TOOL_REGISTRY
     assert isinstance(EMBEDDABLE_TOOL_REGISTRY["spine_viewer"], EmbeddableTool)
