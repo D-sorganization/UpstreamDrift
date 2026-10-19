@@ -29,7 +29,11 @@ from src.shared.python.grip_contact.batched_pair_contact import (
     SideBatch,
     side_rows_wrench,
 )
-from src.shared.python.grip_contact.bushing_law import BushingState, cross3
+from src.shared.python.grip_contact.bushing_law import (
+    BushingState,
+    cross3,
+    rotation_errors,
+)
 from src.shared.python.grip_contact.contact_topology import (
     GRIP,
     PHYSICAL_HAND_GRIP_MODES,
@@ -96,19 +100,10 @@ def _validate_bushing_state(state: BushingState, name: str) -> None:
     rot = np.asarray(state.rotation, dtype=float)
     if rot.shape != (3, 3):
         raise ValueError(f"{name}.rotation must be a finite 3x3 matrix")
-    (a, b, c), (d, e, f), (g, h, i) = rot.tolist()
-    if not all(map(math.isfinite, (a, b, c, d, e, f, g, h, i))):
+    rows = rot.tolist()
+    if not all(map(math.isfinite, rows[0] + rows[1] + rows[2])):
         raise ValueError(f"{name}.rotation must be a finite 3x3 matrix")
-    # Gram matrix of the columns (a, d, g), (b, e, h), (c, f, i).
-    gram_error = max(
-        abs(a * a + d * d + g * g - 1.0),
-        abs(b * b + e * e + h * h - 1.0),
-        abs(c * c + f * f + i * i - 1.0),
-        abs(a * b + d * e + g * h),
-        abs(a * c + d * f + g * i),
-        abs(b * c + e * f + h * i),
-    )
-    det = a * (e * i - h * f) + d * (h * c - b * i) + g * (b * f - e * c)
+    gram_error, det = rotation_errors(rows)
     if gram_error > 1e-5 or abs(det - 1.0) > 1e-5:
         raise ValueError(f"{name}.rotation must be a proper rotation matrix")
     for field_name in ("position_m", "velocity_m_s", "omega_rad_s"):
