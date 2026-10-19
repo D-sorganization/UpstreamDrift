@@ -1,32 +1,10 @@
-"""Same-input grip-kinetics parity across engines (issue #11739, OSV-7 phase 2; #13308, HRG-GS-G10).
+"""Same-input grip-kinetics parity across engines (#11739, #13308).
 
-:class:`GripKineticsSeries` is the engine-agnostic record of one bushing-grip or
-contact-grip run (OpenSim, MuJoCo, Drake, Pinocchio): per-hand wrench ON THE
-CLUB in the world frame with the free torque at the grip point, the grip
-points, and the hand-to-club deflections. :func:`parity_errors` compares a
-candidate with the reference on the shared 2 ms sample times.
-
-Metric (binding, fixed before any comparison was run). For a quantity
-``x(t)`` (vector or scalar) with reference ``x_ref(t)``:
-
-* peak error ``|max_t |x| - max_t |x_ref|| / max_t |x_ref|`` and
-* RMS error ``sqrt(mean_t |x - x_ref|^2) / max_t |x_ref|`` (normalised by the
-  reference peak, so near-zero samples do not inflate it).
-
-Acceptance: peak error at most :data:`PEAK_TOLERANCE` (5 %) and RMS error at
-most :data:`RMS_TOLERANCE` (2 %).
-
-For two-hand contact grips (HRG-GS-G10, #13308), quantities are explicitly
-classified into:
-
-* :data:`DETERMINATE_QUANTITIES` (``net_force`` and ``net_moment_com``, which
-  club kinematics fix) — must pass :data:`PEAK_TOLERANCE` and
-  :data:`RMS_TOLERANCE`;
-* :data:`INDETERMINATE_QUANTITIES` (per-hand split, internal force, squeeze,
-  couple, deflections, rotations, and per-pair normal force, tangential force,
-  and contact-point drift of the hyperstatic two-hand grip) — reported with
-  measured error and labelled :data:`INDETERMINATE_LABEL`, citing
-  ``docs/development/full_body_models/GRIP_PARITY_DECISIONS.md`` section 19.
+:class:`GripKineticsSeries` records per-hand club wrenches, grip points, and
+deflections on shared 2 ms sample times. :func:`parity_errors` compares peak
+(<= 5 %) and reference-peak-normalised RMS (<= 2 %) errors. For two-hand
+contact grips (#13308), :data:`DETERMINATE_QUANTITIES` must pass tolerances
+while :data:`INDETERMINATE_QUANTITIES` are reported with :data:`INDETERMINATE_LABEL`.
 """
 
 from __future__ import annotations
@@ -79,10 +57,7 @@ PAIR_PARITY_QUANTITIES = (
     "contact_point_drift",
 )
 #: Quantities dynamically determined by the rigid club's 6-DOF equation of motion.
-DETERMINATE_QUANTITIES = (
-    "net_force",
-    "net_moment_com",
-)
+DETERMINATE_QUANTITIES = ("net_force", "net_moment_com")
 #: Quantities belonging to the hyperstatic two-hand internal force/pair partitioning.
 INDETERMINATE_QUANTITIES = (
     "force_L",
@@ -97,10 +72,7 @@ INDETERMINATE_QUANTITIES = (
     *PAIR_PARITY_QUANTITIES,
 )
 #: Complete table of quantities reported in a grip-style contact parity report.
-STYLE_PARITY_QUANTITIES = (
-    *DETERMINATE_QUANTITIES,
-    *INDETERMINATE_QUANTITIES,
-)
+STYLE_PARITY_QUANTITIES = (*DETERMINATE_QUANTITIES, *INDETERMINATE_QUANTITIES)
 #: Canonical engines compared in grip-style parity reports.
 PARITY_ENGINES = ("pinocchio", "opensim", "mujoco", "drake")
 #: Required label for indeterminate quantities in the hyperstatic two-hand grip.
@@ -112,6 +84,7 @@ INDETERMINACY_CITATION = (
     "docs/development/full_body_models/GRIP_PARITY_DECISIONS.md "
     "section 19 (Indeterminacy Report)"
 )
+PARITY_STATUSES = ("passed", "failed", "unavailable")
 
 
 class QuantityClassification(str, Enum):
@@ -138,10 +111,12 @@ __all__ = [
     "PAIR_PARITY_QUANTITIES",
     "PARITY_ENGINES",
     "PARITY_QUANTITIES",
+    "PARITY_STATUSES",
     "PEAK_TOLERANCE",
     "RMS_TOLERANCE",
     "STYLE_PARITY_QUANTITIES",
     "BushingProbe",
+    "ChannelParityResult",
     "ClassifiedQuantityResult",
     "EngineParityRow",
     "GripKineticsSeries",
@@ -149,24 +124,17 @@ __all__ = [
     "QuantityClassification",
     "QuantityError",
     "StyleParityReport",
+    "TopologyParityReport",
     "build_style_parity_report",
     "classify_parity_quantity",
+    "compare_topology_series",
+    "compute_quantity_error",
     "parity_errors",
 ]
 
 
 def classify_parity_quantity(name: str) -> QuantityClassification:
-    """Return the explicit observability classification of ``name``.
-
-    Preconditions:
-        ``name`` is a known quantity in :data:`STYLE_PARITY_QUANTITIES` or a
-        per-pair key prefixed with ``<pair_metric>:``.
-    Postconditions:
-        Returns :attr:`QuantityClassification.DETERMINATE` only for
-        ``net_force`` and ``net_moment_com``, and
-        :attr:`QuantityClassification.INDETERMINATE` for all hyperstatic
-        split/pair quantities.
-    """
+    """Return the explicit observability classification of ``name``."""
     if not isinstance(name, str):
         raise TypeError(f"quantity name must be a str, got {type(name).__name__}")
     if name in DETERMINATE_QUANTITIES:
@@ -243,10 +211,7 @@ class GripKineticsSeries:
         club_rotation: np.ndarray,
         metadata: Mapping[str, Any] | None = None,
     ) -> GripKineticsSeries:
-        """Build from per-side ``(force, torque)`` and frame ``(R, p)`` series.
-
-        Deflections are computed here, identically for every engine.
-        """
+        """Build from per-side ``(force, torque)`` and frame ``(R, p)`` series."""
         defl, angle = {}, {}
         for side in SIDES:
             r1, p1 = (np.asarray(a, float) for a in hand_pose[side])
@@ -254,33 +219,35 @@ class GripKineticsSeries:
             defl[side] = np.einsum("nji,nj->ni", r1, p2 - p1)
             rel = np.einsum("nji,njk->nik", r1, r2)
             angle[side] = np.linalg.norm(Rotation.from_matrix(rel).as_rotvec(), axis=1)
+        f_club = {s: wrench[s][0] for s in SIDES}
+        t_club = {s: wrench[s][1] for s in SIDES}
+        g_pt = {s: club_frame_pose[s][1] for s in SIDES}
         return cls(
-            engine=engine,
-            time_s=time_s,
-            force_on_club_n={s: wrench[s][0] for s in SIDES},
-            torque_on_club_nm={s: wrench[s][1] for s in SIDES},
-            grip_point_m={s: club_frame_pose[s][1] for s in SIDES},
-            deflection_m=defl,
-            rotation_deflection_rad=angle,
-            club_rotation=club_rotation,
-            metadata=dict(metadata or {}),
+            engine,
+            time_s,
+            f_club,
+            t_club,
+            g_pt,
+            defl,
+            angle,
+            club_rotation,
+            dict(metadata or {}),
         )
 
     @classmethod
     def from_bushing_run(cls, engine: str, run: Any) -> GripKineticsSeries:
         """Adopt an OpenSim :class:`BushingRun` (same field names)."""
         return cls(
-            engine=engine,
-            time_s=run.time_s,
-            force_on_club_n=run.force_on_club_n,
-            torque_on_club_nm=run.torque_on_club_nm,
-            grip_point_m=run.grip_point_m,
-            deflection_m=run.deflection_m,
-            rotation_deflection_rad=run.rotation_deflection_rad,
-            club_rotation=run.club_rotation,
+            engine,
+            run.time_s,
+            run.force_on_club_n,
+            run.torque_on_club_nm,
+            run.grip_point_m,
+            run.deflection_m,
+            run.rotation_deflection_rad,
+            run.club_rotation,
         )
 
-    # ------------------------------------------------------------ analysis
     def analyses(self) -> list[GripAnalysis]:
         """Per-sample :func:`analyze_grip` (``split_method="bushing"``)."""
         out = []
@@ -316,16 +283,14 @@ class GripKineticsSeries:
     ) -> np.ndarray:
         """Net moment on the club about the club centre of mass as an ``(n, 3)`` array."""
         if club is not None and interface is not None:
-            dp_l = np.asarray(club.com_m, dtype=float) - np.asarray(
-                interface.left.position_m, dtype=float
+            dp_l = np.asarray(club.com_m, float) - np.asarray(
+                interface.left.position_m, float
             )
         elif "club_com_offset_l_m" in self.metadata:
-            dp_l = np.asarray(self.metadata["club_com_offset_l_m"], dtype=float)
+            dp_l = np.asarray(self.metadata["club_com_offset_l_m"], float)
         else:
-            # Canonical driver bare-club COM offset from lead grip point in club frame
             dp_l = np.array(
-                (0.02501411692651008, 0.8679856230031948, 0.004910663712740029),
-                dtype=float,
+                (0.02501411692651008, 0.8679856230031948, 0.004910663712740029), float
             )
         p_com = self.grip_point_m["L"] + np.einsum(
             "nij,j->ni", self.club_rotation, dp_l
@@ -359,7 +324,6 @@ class GripKineticsSeries:
             out[f"rotation_{side}"] = self.rotation_deflection_rad[side][:, None]
         return {k: np.asarray(v, dtype=float) for k, v in out.items()}
 
-    # ----------------------------------------------------------- storage
     def save_npz(self, path: Path) -> None:
         """Write the series to ``path`` (overwritten by name)."""
         arrays: dict[str, Any] = {
@@ -386,26 +350,20 @@ class GripKineticsSeries:
                 return {s: np.asarray(data[key.format(s=s)]) for s in SIDES}
 
             return cls(
-                engine=str(data["engine"]),
-                time_s=np.asarray(data["time_s"]),
-                force_on_club_n=side("force_on_club_{s}_n"),
-                torque_on_club_nm=side("torque_on_club_{s}_nm"),
-                grip_point_m=side("grip_point_{s}_m"),
-                deflection_m=side("deflection_{s}_m"),
-                rotation_deflection_rad=side("rotation_deflection_{s}_rad"),
-                club_rotation=np.asarray(data["club_rotation"]),
+                str(data["engine"]),
+                np.asarray(data["time_s"]),
+                side("force_on_club_{s}_n"),
+                side("torque_on_club_{s}_nm"),
+                side("grip_point_{s}_m"),
+                side("deflection_{s}_m"),
+                side("rotation_deflection_{s}_rad"),
+                np.asarray(data["club_rotation"]),
             )
 
 
 @dataclass(frozen=True)
 class BushingProbe:
-    """Bushing forces at a static club displacement (``F = K delta`` checks).
-
-    ``force_n`` is the per-hand force on the club, ``hand_rotation`` the
-    (shared) world rotation of the hand frames, and ``engine_total_force_n``
-    the total force read back from the engine's own generalised force on the
-    club.
-    """
+    """Bushing forces at a static club displacement (``F = K delta`` checks)."""
 
     force_n: Mapping[str, np.ndarray]
     hand_rotation: np.ndarray
@@ -436,28 +394,36 @@ class QuantityError:
         }
 
 
+def compute_quantity_error(
+    candidate: np.ndarray,
+    reference: np.ndarray,
+    *,
+    name: str = "quantity",
+    allow_zero_reference: bool = False,
+) -> QuantityError:
+    """Compute peak and RMS error of ``candidate`` against ``reference``."""
+    cand_arr, ref_arr = np.asarray(candidate, float), np.asarray(reference, float)
+    x = cand_arr.reshape(cand_arr.shape[0], -1)
+    x_ref = ref_arr.reshape(ref_arr.shape[0], -1)
+    mag, mag_ref = np.linalg.norm(x, axis=1), np.linalg.norm(x_ref, axis=1)
+    peak_ref, peak_cand = float(mag_ref.max()), float(mag.max())
+    if peak_ref <= 0.0:
+        if not allow_zero_reference:
+            raise ValueError(f"reference peak of {name} is zero")
+        if peak_cand <= 1e-15:
+            return QuantityError(0.0, peak_cand, 0.0, 0.0)
+        return QuantityError(0.0, peak_cand, float("inf"), float("inf"))
+    rms = float(np.sqrt(np.mean(np.sum((x - x_ref) ** 2, axis=1))))
+    return QuantityError(
+        peak_ref, peak_cand, abs(peak_cand - peak_ref) / peak_ref, rms / peak_ref
+    )
+
+
 def _compute_quantity_error(
-    x: np.ndarray, x_ref: np.ndarray, name: str
+    x: np.ndarray, x_ref: np.ndarray, name: str = "quantity"
 ) -> QuantityError:
     """Compute peak and RMS error of ``x`` against ``x_ref`` on matching samples."""
-    x_arr = np.asarray(x, dtype=float)
-    x_ref_arr = np.asarray(x_ref, dtype=float)
-    if x_arr.ndim == 1:
-        x_arr = x_arr[:, None]
-    if x_ref_arr.ndim == 1:
-        x_ref_arr = x_ref_arr[:, None]
-    mag = np.linalg.norm(x_arr, axis=1)
-    mag_ref = np.linalg.norm(x_ref_arr, axis=1)
-    peak_ref = float(mag_ref.max())
-    if peak_ref <= 0.0:
-        raise ValueError(f"reference peak of {name} is zero")
-    rms = float(np.sqrt(np.mean(np.sum((x_arr - x_ref_arr) ** 2, axis=1))))
-    return QuantityError(
-        peak_reference=peak_ref,
-        peak_candidate=float(mag.max()),
-        peak_error=abs(float(mag.max()) - peak_ref) / peak_ref,
-        rms_error=rms / peak_ref,
-    )
+    return compute_quantity_error(x, x_ref, name=name)
 
 
 def _unwrap_series_and_run(
@@ -487,23 +453,19 @@ def _extract_physical_pair_arrays(
     """Stack finite physical hand-grip pair traces into ``(n, n_phys)`` arrays."""
     out: dict[str, tuple[np.ndarray, np.ndarray]] = {}
     for metric, attr in _PAIR_METRIC_ATTRS:
-        c_map = getattr(cand_run, attr, None)
-        r_map = getattr(ref_run, attr, None)
+        c_map, r_map = getattr(cand_run, attr, None), getattr(ref_run, attr, None)
         if c_map is None or r_map is None:
             raise ValueError(
-                f"{attr} must be populated on both candidate and reference ContactRun "
-                f"to evaluate {metric}"
+                f"{attr} must be populated on both candidate and reference ContactRun to evaluate {metric}"
             )
-        c_cols: list[np.ndarray] = []
-        r_cols: list[np.ndarray] = []
+        c_cols, r_cols = [], []
         for pname, r_vals in r_map.items():
             r_arr = np.asarray(r_vals, dtype=float)[keep]
             if np.all(np.isnan(r_arr)):
                 continue
             if pname not in c_map:
                 raise ValueError(f"candidate ContactRun missing pair {pname!r}")
-            c_arr = np.asarray(c_map[pname], dtype=float)[keep]
-            c_cols.append(c_arr)
+            c_cols.append(np.asarray(c_map[pname], dtype=float)[keep])
             r_cols.append(r_arr)
         if not r_cols:
             raise ValueError(f"no physical pairs found for {metric}")
@@ -519,17 +481,7 @@ def parity_errors(
     club: ClubDynamics | None = None,
     interface: GripInterface | None = None,
 ) -> dict[str, QuantityError]:
-    """Peak and RMS errors of every parity quantity (see module docstring).
-
-    When ``candidate`` and ``reference`` are :class:`GripKineticsSeries`
-    instances, compares :data:`PARITY_QUANTITIES`. When both are
-    :class:`ContactRun` instances, also compares ``net_moment_com`` and
-    :data:`PAIR_PARITY_QUANTITIES` using the same :class:`QuantityError` metric
-    and tolerances.
-
-    Raises:
-        ValueError: if the two time bases differ or a reference peak is zero.
-    """
+    """Peak and RMS errors of every parity quantity."""
     cand_series, cand_run = _unwrap_series_and_run(candidate, "candidate")
     ref_series, ref_run = _unwrap_series_and_run(reference, "reference")
     t = ref_series.time_s
@@ -539,32 +491,24 @@ def parity_errors(
         raise ValueError("candidate and reference must share their sample times")
     keep = np.ones(t.size, bool) if t_end_s is None else t <= t_end_s + 1e-12
     cand_q, ref_q = cand_series.quantities(), ref_series.quantities()
-    out: dict[str, QuantityError] = {}
-    for name in PARITY_QUANTITIES:
-        out[name] = _compute_quantity_error(cand_q[name][keep], ref_q[name][keep], name)
+    out = {
+        name: _compute_quantity_error(cand_q[name][keep], ref_q[name][keep], name)
+        for name in PARITY_QUANTITIES
+    }
     if cand_run is not None and ref_run is not None:
         m_cand = cand_series.net_moment_com_nm(club, interface)[keep]
         m_ref = ref_series.net_moment_com_nm(club, interface)[keep]
         out["net_moment_com"] = _compute_quantity_error(m_cand, m_ref, "net_moment_com")
-        pair_arrays = _extract_physical_pair_arrays(cand_run, ref_run, keep)
-        for metric, (x_c, x_r) in pair_arrays.items():
+        for metric, (x_c, x_r) in _extract_physical_pair_arrays(
+            cand_run, ref_run, keep
+        ).items():
             out[metric] = _compute_quantity_error(x_c, x_r, metric)
     return out
 
 
 @dataclass(frozen=True)
 class ClassifiedQuantityResult:
-    """Classified parity result for one quantity in an engine row (#13308).
-
-    Invariants (enforced in ``__post_init__``):
-    - Unavailable quantities store ``NaN`` for ``peak_candidate``,
-      ``peak_error``, and ``rms_error``, and require a non-empty ``reason``.
-    - Indeterminate quantities have ``state == ParityState.INDETERMINATE`` (when
-      available), are labelled with :data:`INDETERMINATE_LABEL`, and are never
-      counted as a pass (``passes()`` is ``False``).
-    - Determinate quantities pass if and only if available and within
-      :data:`PEAK_TOLERANCE` and :data:`RMS_TOLERANCE`.
-    """
+    """Classified parity result for one quantity in an engine row (#13308)."""
 
     quantity: str
     classification: QuantityClassification
@@ -581,18 +525,15 @@ class ClassifiedQuantityResult:
         expected_cls = classify_parity_quantity(self.quantity)
         if self.classification != expected_cls:
             raise ValueError(
-                f"quantity {self.quantity!r} must have classification "
-                f"{expected_cls.value!r}, got {self.classification!r}"
+                f"quantity {self.quantity!r} must have classification {expected_cls.value!r}, got {self.classification!r}"
             )
         if self.state == ParityState.UNAVAILABLE:
-            if not (
-                math.isnan(self.peak_candidate)
-                and math.isnan(self.peak_error)
-                and math.isnan(self.rms_error)
+            if not all(
+                math.isnan(v)
+                for v in (self.peak_candidate, self.peak_error, self.rms_error)
             ):
                 raise ValueError(
-                    f"unavailable quantity {self.quantity!r} must have NaN errors, "
-                    f"never zero"
+                    f"unavailable quantity {self.quantity!r} must have NaN errors, never zero"
                 )
             if not self.reason.strip():
                 raise ValueError(
@@ -600,11 +541,14 @@ class ClassifiedQuantityResult:
                 )
             return
 
-        if not (
-            math.isfinite(self.peak_reference)
-            and math.isfinite(self.peak_candidate)
-            and math.isfinite(self.peak_error)
-            and math.isfinite(self.rms_error)
+        if not all(
+            math.isfinite(v)
+            for v in (
+                self.peak_reference,
+                self.peak_candidate,
+                self.peak_error,
+                self.rms_error,
+            )
         ):
             raise ValueError(
                 f"available quantity {self.quantity!r} must have finite values"
@@ -612,18 +556,15 @@ class ClassifiedQuantityResult:
         if self.classification == QuantityClassification.INDETERMINATE:
             if self.state != ParityState.INDETERMINATE:
                 raise ValueError(
-                    f"indeterminate quantity {self.quantity!r} must have state "
-                    f"'indeterminate', got {self.state.value!r}"
+                    f"indeterminate quantity {self.quantity!r} must have state 'indeterminate', got {self.state.value!r}"
                 )
             if self.label != INDETERMINATE_LABEL:
                 raise ValueError(
-                    f"indeterminate quantity {self.quantity!r} must carry "
-                    f"INDETERMINATE_LABEL"
+                    f"indeterminate quantity {self.quantity!r} must carry INDETERMINATE_LABEL"
                 )
             if self.citation != INDETERMINACY_CITATION:
                 raise ValueError(
-                    f"indeterminate quantity {self.quantity!r} must carry "
-                    f"INDETERMINACY_CITATION"
+                    f"indeterminate quantity {self.quantity!r} must carry INDETERMINACY_CITATION"
                 )
         else:
             within = (
@@ -632,8 +573,7 @@ class ClassifiedQuantityResult:
             expected_state = ParityState.PASS if within else ParityState.FAIL
             if self.state != expected_state:
                 raise ValueError(
-                    f"determinate quantity {self.quantity!r} state mismatch: "
-                    f"expected {expected_state.value!r}, got {self.state.value!r}"
+                    f"determinate quantity {self.quantity!r} state mismatch: expected {expected_state.value!r}, got {self.state.value!r}"
                 )
 
     def passes(self) -> bool:
@@ -648,58 +588,42 @@ class ClassifiedQuantityResult:
         cls, quantity: str, qe: QuantityError
     ) -> ClassifiedQuantityResult:
         """Classify a measured :class:`QuantityError`."""
-        classification = classify_parity_quantity(quantity)
-        if classification == QuantityClassification.INDETERMINATE:
-            return cls(
-                quantity=quantity,
-                classification=classification,
-                state=ParityState.INDETERMINATE,
-                peak_reference=qe.peak_reference,
-                peak_candidate=qe.peak_candidate,
-                peak_error=qe.peak_error,
-                rms_error=qe.rms_error,
-                label=INDETERMINATE_LABEL,
-                citation=INDETERMINACY_CITATION,
+        cls_val = classify_parity_quantity(quantity)
+        vals = (qe.peak_reference, qe.peak_candidate, qe.peak_error, qe.rms_error)
+        if cls_val == QuantityClassification.INDETERMINATE:
+            st, lbl, cit = (
+                ParityState.INDETERMINATE,
+                INDETERMINATE_LABEL,
+                INDETERMINACY_CITATION,
             )
-        state = ParityState.PASS if qe.passes() else ParityState.FAIL
-        return cls(
-            quantity=quantity,
-            classification=classification,
-            state=state,
-            peak_reference=qe.peak_reference,
-            peak_candidate=qe.peak_candidate,
-            peak_error=qe.peak_error,
-            rms_error=qe.rms_error,
-            label=state.value,
-        )
+        else:
+            st = ParityState.PASS if qe.passes() else ParityState.FAIL
+            lbl, cit = st.value, ""
+        return cls(quantity, cls_val, st, *vals, lbl, citation=cit)
 
     @classmethod
     def unavailable(
-        cls,
-        quantity: str,
-        reason: str,
-        peak_reference: float = float("nan"),
+        cls, quantity: str, reason: str, peak_reference: float = float("nan")
     ) -> ClassifiedQuantityResult:
         """Construct an unavailable quantity result with NaN values and ``reason``."""
         if not isinstance(reason, str) or not reason.strip():
             raise ValueError("reason must be a non-empty string")
-        classification = classify_parity_quantity(quantity)
-        nan = float("nan")
+        cls_val = classify_parity_quantity(quantity)
+        nans = (float("nan"), float("nan"), float("nan"))
+        cit = (
+            INDETERMINACY_CITATION
+            if cls_val == QuantityClassification.INDETERMINATE
+            else ""
+        )
         return cls(
-            quantity=quantity,
-            classification=classification,
-            state=ParityState.UNAVAILABLE,
-            peak_reference=peak_reference,
-            peak_candidate=nan,
-            peak_error=nan,
-            rms_error=nan,
-            label=f"unavailable ({reason})",
-            reason=reason,
-            citation=(
-                INDETERMINACY_CITATION
-                if classification == QuantityClassification.INDETERMINATE
-                else ""
-            ),
+            quantity,
+            cls_val,
+            ParityState.UNAVAILABLE,
+            peak_reference,
+            *nans,
+            f"unavailable ({reason})",
+            reason,
+            cit,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -755,9 +679,7 @@ class EngineParityRow:
 
     def determinate_passes(self) -> bool:
         """True if the engine is available and every DETERMINATE quantity passes."""
-        if not self.available:
-            return False
-        return all(
+        return self.available and all(
             self.quantities[q].passes()
             for q in DETERMINATE_QUANTITIES
             if q in self.quantities
@@ -834,8 +756,7 @@ class StyleParityReport:
             f"### Style: `{self.style}` ({self.motion}, {self.duration_s:.3f} s)",
             "",
             f"- Reference engine: `{self.reference_engine}`",
-            f"- Determinate tolerances: Peak <= {PEAK_TOLERANCE * 100:.1f} %, "
-            f"RMS <= {RMS_TOLERANCE * 100:.1f} %",
+            f"- Determinate tolerances: Peak <= {PEAK_TOLERANCE * 100:.1f} %, RMS <= {RMS_TOLERANCE * 100:.1f} %",
             f"- Indeterminate citation: `{self.citation}`",
             "",
             "| Engine | Quantity | Classification | Peak Error (%) | RMS Error (%) | State / Label |",
@@ -844,15 +765,12 @@ class StyleParityReport:
         for eng, row in self.rows.items():
             for q_name in STYLE_PARITY_QUANTITIES:
                 q = row.quantity(q_name)
-                peak_str = (
+                p_str = (
                     "NaN" if math.isnan(q.peak_error) else f"{q.peak_error * 100:.3f}"
                 )
-                rms_str = (
-                    "NaN" if math.isnan(q.rms_error) else f"{q.rms_error * 100:.3f}"
-                )
+                r_str = "NaN" if math.isnan(q.rms_error) else f"{q.rms_error * 100:.3f}"
                 lines.append(
-                    f"| `{eng}` | `{q_name}` | `{q.classification.value}` | "
-                    f"{peak_str} | {rms_str} | {q.label} |"
+                    f"| `{eng}` | `{q_name}` | `{q.classification.value}` | {p_str} | {r_str} | {q.label} |"
                 )
         lines.append("")
         return "\n".join(lines)
@@ -869,26 +787,28 @@ def _build_pair_breakdown(
 
     for pname, r_norm_vals in ref_normal.items():
         r_norm_arr = np.asarray(r_norm_vals, dtype=float)[keep]
-        pair_res: dict[str, ClassifiedQuantityResult] = {}
         if np.all(np.isnan(r_norm_arr)):
             reason = (
                 c_reasons.get(pname)
                 or r_reasons.get(pname)
                 or "hand-hand pairs are allocated, not physical forces under prescribed hand motion"
             )
-            for metric, _ in _PAIR_METRIC_ATTRS:
-                q_key = f"{metric}:{pname}"
-                pair_res[metric] = ClassifiedQuantityResult.unavailable(q_key, reason)
+            out[pname] = {
+                m: ClassifiedQuantityResult.unavailable(f"{m}:{pname}", reason)
+                for m, _ in _PAIR_METRIC_ATTRS
+            }
         else:
-            for metric, attr in _PAIR_METRIC_ATTRS:
-                q_key = f"{metric}:{pname}"
-                c_arr = np.asarray(getattr(cand_run, attr)[pname], dtype=float)[keep]
-                r_arr = np.asarray(getattr(ref_run, attr)[pname], dtype=float)[keep]
-                qe = _compute_quantity_error(c_arr, r_arr, q_key)
-                pair_res[metric] = ClassifiedQuantityResult.from_quantity_error(
-                    q_key, qe
+            out[pname] = {
+                m: ClassifiedQuantityResult.from_quantity_error(
+                    f"{m}:{pname}",
+                    _compute_quantity_error(
+                        np.asarray(getattr(cand_run, attr)[pname], dtype=float)[keep],
+                        np.asarray(getattr(ref_run, attr)[pname], dtype=float)[keep],
+                        f"{m}:{pname}",
+                    ),
                 )
-        out[pname] = pair_res
+                for m, attr in _PAIR_METRIC_ATTRS
+            }
     return out
 
 
@@ -907,15 +827,11 @@ def _build_available_engine_row(
     t = ref_run.series.time_s
     keep = np.ones(t.size, bool) if t_end_s is None else t <= t_end_s + 1e-12
     quantities = {
-        q_name: ClassifiedQuantityResult.from_quantity_error(q_name, raw_errors[q_name])
-        for q_name in STYLE_PARITY_QUANTITIES
+        q: ClassifiedQuantityResult.from_quantity_error(q, raw_errors[q])
+        for q in STYLE_PARITY_QUANTITIES
     }
-    pair_quantities = _build_pair_breakdown(cand_run, ref_run, keep)
     return EngineParityRow(
-        engine=engine,
-        available=True,
-        quantities=quantities,
-        pair_quantities=pair_quantities,
+        engine, True, quantities, _build_pair_breakdown(cand_run, ref_run, keep)
     )
 
 
@@ -929,31 +845,22 @@ def _build_unavailable_engine_row(
     if not isinstance(reason, str) or not reason.strip():
         raise ValueError(f"unavailable engine {engine!r} requires a non-empty reason")
     quantities = {
-        q_name: ClassifiedQuantityResult.unavailable(
-            q_name,
+        q: ClassifiedQuantityResult.unavailable(
+            q,
             reason,
-            peak_reference=(
-                ref_errors[q_name].peak_reference
-                if q_name in ref_errors
-                else float("nan")
-            ),
+            ref_errors[q].peak_reference if q in ref_errors else float("nan"),
         )
-        for q_name in STYLE_PARITY_QUANTITIES
+        for q in STYLE_PARITY_QUANTITIES
     }
     ref_normal = getattr(ref_run, "pair_normal_force_n", None) or {}
-    pair_quantities: dict[str, dict[str, ClassifiedQuantityResult]] = {}
-    for pname in ref_normal:
-        pair_quantities[pname] = {
-            metric: ClassifiedQuantityResult.unavailable(f"{metric}:{pname}", reason)
-            for metric in PAIR_PARITY_QUANTITIES
+    pair_quantities = {
+        pname: {
+            m: ClassifiedQuantityResult.unavailable(f"{m}:{pname}", reason)
+            for m in PAIR_PARITY_QUANTITIES
         }
-    return EngineParityRow(
-        engine=engine,
-        available=False,
-        quantities=quantities,
-        pair_quantities=pair_quantities,
-        unavailable_reason=reason,
-    )
+        for pname in ref_normal
+    }
+    return EngineParityRow(engine, False, quantities, pair_quantities, reason)
 
 
 def build_style_parity_report(
@@ -967,18 +874,7 @@ def build_style_parity_report(
     club: ClubDynamics | None = None,
     interface: GripInterface | None = None,
 ) -> StyleParityReport:
-    """Build a cross-engine parity report for one style across Pinocchio, OpenSim, MuJoCo, and Drake.
-
-    Preconditions:
-        ``style`` is a :class:`GripStyle` or non-empty string;
-        ``motion`` in ``('hold', 'swing')``;
-        ``duration_s > 0`` and finite;
-        ``reference_run`` is a valid :class:`ContactRun` (Pinocchio reference).
-    Postconditions:
-        Returns a :class:`StyleParityReport` with one :class:`EngineParityRow`
-        per engine in :data:`PARITY_ENGINES`. Unavailable engines report ``NaN``
-        plus their reason and never pass.
-    """
+    """Build a cross-engine parity report for one style across Pinocchio, OpenSim, MuJoCo, and Drake."""
     style_name = style.value if hasattr(style, "value") else str(style)
     if not style_name.strip():
         raise ValueError("style must be non-empty")
@@ -999,56 +895,273 @@ def build_style_parity_report(
         )
 
     ref_errors = parity_errors(
-        reference_run,
-        reference_run,
-        t_end_s=duration_s,
-        club=club,
-        interface=interface,
+        reference_run, reference_run, t_end_s=duration_s, club=club, interface=interface
     )
     rows: dict[str, EngineParityRow] = {
         "pinocchio": _build_available_engine_row(
-            "pinocchio",
-            reference_run,
-            reference_run,
-            duration_s,
-            club,
-            interface,
+            "pinocchio", reference_run, reference_run, duration_s, club, interface
         )
     }
 
-    ordered_engines = list(PARITY_ENGINES)
-    for extra_eng in (*cand_map, *unavail_map):
-        if extra_eng not in ordered_engines:
-            ordered_engines.append(extra_eng)
-
+    ordered_engines = list(dict.fromkeys([*PARITY_ENGINES, *cand_map, *unavail_map]))
     for eng in ordered_engines:
         if eng == "pinocchio":
             continue
         if eng in cand_map:
             rows[eng] = _build_available_engine_row(
-                eng,
-                cand_map[eng],
-                reference_run,
-                duration_s,
-                club,
-                interface,
-            )
-        elif eng in unavail_map:
-            rows[eng] = _build_unavailable_engine_row(
-                eng, unavail_map[eng], ref_errors, reference_run
+                eng, cand_map[eng], reference_run, duration_s, club, interface
             )
         else:
+            reason = unavail_map.get(eng, f"engine {eng!r} was not executed")
             rows[eng] = _build_unavailable_engine_row(
-                eng,
-                f"engine {eng!r} was not executed",
-                ref_errors,
-                reference_run,
+                eng, reason, ref_errors, reference_run
             )
 
-    return StyleParityReport(
-        style=style_name,
-        motion=motion,
-        duration_s=float(duration_s),
-        reference_engine="pinocchio",
-        rows=rows,
+    return StyleParityReport(style_name, motion, float(duration_s), "pinocchio", rows)
+
+
+@dataclass(frozen=True)
+class ChannelParityResult:
+    """Three-state parity outcome for a single topology channel."""
+
+    channel: str
+    status: str
+    passed: bool
+    label: str = "physical"
+    error: QuantityError | None = None
+    reason: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.status not in PARITY_STATUSES:
+            raise ValueError(
+                f"status must be one of {PARITY_STATUSES}, got {self.status!r}"
+            )
+        if (self.status == "passed") != self.passed:
+            raise ValueError("passed must match status == 'passed'")
+        if self.status == "unavailable" and not (
+            isinstance(self.reason, str) and self.reason.strip()
+        ):
+            raise ValueError("unavailable channel must carry a non-empty reason")
+
+    @property
+    def state(self) -> str:
+        """Alias for :attr:`status`."""
+        return self.status
+
+    def passes(self) -> bool:
+        """True only when ``status == 'passed'``."""
+        return self.passed
+
+    def to_dict(self) -> dict[str, Any]:
+        """JSON-ready representation of the channel parity result."""
+        return {
+            "channel": self.channel,
+            "status": self.status,
+            "passed": self.passed,
+            "label": self.label,
+            "reason": self.reason,
+            "error": None if self.error is None else self.error.to_dict(),
+        }
+
+
+@dataclass(frozen=True)
+class TopologyParityReport:
+    """Three-state parity report comparing candidate and reference topology series."""
+
+    status: str
+    passed: bool
+    channels: Mapping[str, ChannelParityResult]
+    allocated_channels: Mapping[str, ChannelParityResult] = field(default_factory=dict)
+    unavailable_reasons: Mapping[str, str] = field(default_factory=dict)
+    reason: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.status not in PARITY_STATUSES:
+            raise ValueError(
+                f"status must be one of {PARITY_STATUSES}, got {self.status!r}"
+            )
+        if (self.status == "passed") != self.passed:
+            raise ValueError("passed must match status == 'passed'")
+
+    @property
+    def physical_channels(self) -> Mapping[str, ChannelParityResult]:
+        """Alias for :attr:`channels`."""
+        return self.channels
+
+    @property
+    def allocated(self) -> Mapping[str, ChannelParityResult]:
+        """Alias for :attr:`allocated_channels`."""
+        return self.allocated_channels
+
+    def passes(self) -> bool:
+        """True only when all required physical channels pass."""
+        return self.passed
+
+    def to_dict(self) -> dict[str, Any]:
+        """JSON-ready representation of the full parity report."""
+        return {
+            "status": self.status,
+            "passed": self.passed,
+            "reason": self.reason,
+            "unavailable_reasons": dict(self.unavailable_reasons),
+            "channels": {k: v.to_dict() for k, v in self.channels.items()},
+            "allocated_channels": {
+                k: v.to_dict() for k, v in self.allocated_channels.items()
+            },
+        }
+
+
+def _evaluate_one_channel(
+    channel_key: str,
+    kind: str,
+    item_name: str,
+    ref_map: Mapping[str, np.ndarray],
+    cand_map: Mapping[str, np.ndarray],
+    reference: Any,
+    candidate: Any,
+    label: str,
+) -> ChannelParityResult:
+    """Compare one channel between ``reference`` and ``candidate``."""
+    if item_name not in ref_map or item_name not in cand_map:
+        side = "reference" if item_name not in ref_map else "candidate"
+        return ChannelParityResult(
+            channel_key,
+            "unavailable",
+            False,
+            label,
+            reason=f"missing channel {channel_key!r} in {side}",
+        )
+    ref_arr, cand_arr = ref_map[item_name], cand_map[item_name]
+    if bool(np.isnan(ref_arr).any()) or bool(np.isnan(cand_arr).any()):
+        reason = (
+            candidate.reason_for(kind, item_name)
+            or reference.reason_for(kind, item_name)
+            or f"NaN in channel {channel_key!r}"
+        )
+        return ChannelParityResult(
+            channel_key, "unavailable", False, label, reason=reason
+        )
+    err = compute_quantity_error(
+        cand_arr, ref_arr, name=channel_key, allow_zero_reference=True
     )
+    ok = err.passes()
+    return ChannelParityResult(
+        channel_key, "passed" if ok else "failed", ok, label, error=err
+    )
+
+
+def _compare_pair_channels(
+    pair_name: str, reference: Any, candidate: Any, label: str
+) -> dict[str, ChannelParityResult]:
+    """Compare normal, tangential, and spin channels for ``pair_name``."""
+    specs = (
+        ("normal", reference.pair_normal_force_n, candidate.pair_normal_force_n),
+        (
+            "tangential",
+            reference.pair_tangential_force_n,
+            candidate.pair_tangential_force_n,
+        ),
+        ("spin", reference.pair_spin_moment_nm, candidate.pair_spin_moment_nm),
+    )
+    return {
+        f"{kind}:{pair_name}": _evaluate_one_channel(
+            f"{kind}:{pair_name}",
+            kind,
+            pair_name,
+            ref_map,
+            cand_map,
+            reference,
+            candidate,
+            label,
+        )
+        for kind, ref_map, cand_map in specs
+    }
+
+
+def _compare_resultant_channels(
+    reference: Any, candidate: Any
+) -> dict[str, ChannelParityResult]:
+    """Compare per-hand resultant force and moment channels."""
+    out: dict[str, ChannelParityResult] = {}
+    for s in SIDES:
+        out[f"force_{s}"] = _evaluate_one_channel(
+            f"force_{s}",
+            "force",
+            s,
+            reference.force_on_club_n,
+            candidate.force_on_club_n,
+            reference,
+            candidate,
+            "physical",
+        )
+        out[f"moment_{s}"] = _evaluate_one_channel(
+            f"moment_{s}",
+            "moment",
+            s,
+            reference.moment_on_club_nm,
+            candidate.moment_on_club_nm,
+            reference,
+            candidate,
+            "physical",
+        )
+    return out
+
+
+def compare_topology_series(reference: Any, candidate: Any) -> TopologyParityReport:
+    """Compare ``candidate`` against ``reference`` with a 3-state availability envelope."""
+    t_ref, t_cand = reference.time_s, candidate.time_s
+    if t_cand.shape != t_ref.shape or not bool(np.allclose(t_cand, t_ref, atol=1e-9)):
+        raise ValueError("candidate and reference must share their sample times")
+
+    if reference.mapping_hash != candidate.mapping_hash:
+        mismatch_reason = "mapping hash mismatch"
+        return TopologyParityReport(
+            "unavailable",
+            False,
+            {},
+            {},
+            {"mapping_hash": mismatch_reason},
+            mismatch_reason,
+        )
+
+    ref_labels, cand_labels = reference.labels, candidate.labels
+    all_pairs = list(dict.fromkeys([*ref_labels.keys(), *cand_labels.keys()]))
+    channels: dict[str, ChannelParityResult] = {}
+    allocated_channels: dict[str, ChannelParityResult] = {}
+
+    for p_name in all_pairs:
+        r_lbl, c_lbl = ref_labels.get(p_name), cand_labels.get(p_name)
+        if r_lbl == "allocated" and c_lbl == "allocated":
+            allocated_channels.update(
+                _compare_pair_channels(p_name, reference, candidate, "allocated")
+            )
+        elif r_lbl == "physical" and c_lbl == "physical":
+            channels.update(
+                _compare_pair_channels(p_name, reference, candidate, "physical")
+            )
+        elif r_lbl == "physical" or c_lbl == "physical":
+            msg = f"missing or mismatched pair {p_name!r} (reference={r_lbl!r}, candidate={c_lbl!r})"
+            for kind in ("normal", "tangential", "spin"):
+                ch_key = f"{kind}:{p_name}"
+                channels[ch_key] = ChannelParityResult(
+                    ch_key, "unavailable", False, "physical", reason=msg
+                )
+
+    channels.update(_compare_resultant_channels(reference, candidate))
+    unavail = {
+        k: v.reason
+        for k, v in channels.items()
+        if v.status == "unavailable" and v.reason is not None
+    }
+    if unavail:
+        return TopologyParityReport(
+            "unavailable",
+            False,
+            channels,
+            allocated_channels,
+            unavail,
+            next(iter(unavail.values())),
+        )
+    if any(v.status == "failed" for v in channels.values()):
+        return TopologyParityReport("failed", False, channels, allocated_channels)
+    return TopologyParityReport("passed", True, channels, allocated_channels)
