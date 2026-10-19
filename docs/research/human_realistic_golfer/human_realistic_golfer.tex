@@ -615,6 +615,48 @@ allocated analytically rather than physically integrated in the forward dynamics
 python3 -m pytest tests/unit/grip_contact/test_opensim_topology_grip.py
 \end{verbatim}
 
+\subsection{Drake Two-Hand Topology Contact (HRG-GS-G9, \#13307)}
+\textbf{Body Topology.} \texttt{ClubInHands} in \path{src/engines/physics_engines/drake/python/grip_contact_sim.py} instantiates two distinct
+prescribed hand bodies in the Drake \texttt{MultibodyPlant}: \texttt{lead\_hand} (side \texttt{L}) and \texttt{trail\_hand} (side \texttt{R}),
+alongside the free \texttt{club} body. At every derivative evaluation, each hand body's pose and spatial velocity are set from its own
+\texttt{GripInterface} hand frame via \texttt{hand\_frame\_states(weld, interface)[side]}. Each side's pads or \texttt{ContactTopology} site frames
+are attached exclusively to that side's hand body in local hand-grip coordinates via \texttt{hand\_site\_attachments}. In native pad mode,
+inter-hand and intra-hand pad--pad collisions are excluded in \texttt{SceneGraph} via \texttt{CollisionFilterDeclaration().ExcludeWithin(pad\_set)},
+preserving exact numerical equivalence with the legacy pad contact baseline.
+
+\textbf{Force Application Equations.} When \texttt{topology\_model: TopologyContactModel} is supplied, the adapter evaluates the shared G2/G6
+contact law \texttt{topology\_side\_wrench(topology\_model, side, hand\_frame, club\_frame)} for each side $s \in \{\mathrm{L}, \mathrm{R}\}$
+and applies an \texttt{ExternallyAppliedSpatialForce} to the club body at its side-$s$ grip-frame offset $p_{BoBq,B}^{(s)} = p_{\mathrm{offset},s}$:
+\begin{equation}
+F_{Bq,W}^{\mathrm{club},(s)} = \begin{bmatrix} M_{\mathrm{club},s} \\ F_{\mathrm{club},s} \end{bmatrix},
+\end{equation}
+together with the equal and opposite reaction spatial force on hand body $s$ about its origin $p_{HoHq,H}^{(s)} = 0$:
+\begin{equation}
+F_{Hq,W}^{\mathrm{hand},(s)} = \begin{bmatrix} -M_{\mathrm{club},s} - (p_{\mathrm{club},s} - p_{\mathrm{hand},s}) \times F_{\mathrm{club},s} \\ -F_{\mathrm{club},s} \end{bmatrix}.
+\end{equation}
+Using the shared contact law rather than Drake native point or hydroelastic capsule contact provides exact force-law parity (including torsional
+patch friction) while keeping native capsule contact out of scope. Per-pair normal and tangential force traces are recorded via
+\texttt{PairTraceRecorder}, and allocated hand--hand pairs are reported as \texttt{NaN} with explanatory reasons in \texttt{channel\_reasons}.
+
+\textbf{Measured Parity vs.\ Pinocchio Topology Reference.} Across all 10 quantities in \texttt{PARITY\_QUANTITIES} on the driver fixture
+($1100$\,N squeeze per hand, $0.04$\,s static hold and $0.04$\,s swing replay), worst-case peak and RMS errors remain well inside the binding
+$5\%$ peak and $2\%$ RMS tolerances:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \texttt{overlap}: static hold peak $0.3333\%$, RMS $0.4670\%$; swing replay peak $0.3152\%$, RMS $1.7122\%$.
+\item \texttt{interlock}: static hold peak $0.3333\%$, RMS $0.4670\%$; swing replay peak $0.3152\%$, RMS $1.7122\%$.
+\item \texttt{ten\_finger}: static hold peak $0.4794\%$, RMS $0.2616\%$; swing replay peak $1.1222\%$, RMS $1.6485\%$.
+\end{itemize}
+Per-pair force traces match \texttt{topology\_side\_wrench} re-evaluated at the recorded states to $\le 10^{-9}$\,N.
+
+\textbf{Limitations.} Hand bodies are prescribed from the weld trajectory, so the equal-and-opposite reaction spatial force applied to
+\texttt{lead\_hand} and \texttt{trail\_hand} does not alter their prescribed trajectories; hand--hand contact remains allocated (HRG-GS-G3)
+and native hydroelastic capsule contact is out of scope.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_drake_topology_grip.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 

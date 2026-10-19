@@ -362,3 +362,35 @@ def test_pair_trace_recorder_dbc(interface: GripInterface) -> None:
     """PairTraceRecorder validates model type and duplicate/missing pairs."""
     with pytest.raises(TypeError, match="TopologyContactModel"):
         PairTraceRecorder("not_a_model")  # type: ignore[arg-type]
+
+
+def test_drake_hand_body_assignment_pure_without_plant(
+    interface: GripInterface,
+) -> None:
+    """Pure Drake helper computes hand-body assignment of every site without a plant (#13307)."""
+    from src.engines.physics_engines.drake.python.grip_contact_sim import (
+        HAND_BODY_NAMES,
+        hand_body_name,
+        hand_site_attachments,
+    )
+
+    assert hand_body_name("L") == "lead_hand"
+    assert hand_body_name("lead") == "lead_hand"
+    assert hand_body_name("R") == "trail_hand"
+    assert hand_body_name("trail") == "trail_hand"
+    assert HAND_BODY_NAMES == {"L": "lead_hand", "R": "trail_hand"}
+
+    pads = build_pad_model(interface, 1100.0)
+    for att in hand_site_attachments(pads=pads):
+        assert att.hand_body_name == ("lead_hand" if att.side == "L" else "trail_hand")
+
+    for style in GripStyle:
+        topo = contact_topology(GripSpec(style=style))
+        topo_model = build_topology_model(interface, topo, squeeze_per_hand_n=1100.0)
+        atts = hand_site_attachments(topology_model=topo_model)
+        assert len(atts) == len(topo.sites)
+        for att in atts:
+            site = topo.site(att.name)
+            expected_side = "L" if site.hand == "lead" else "R"
+            assert att.side == expected_side
+            assert att.hand_body_name == HAND_BODY_NAMES[expected_side]
