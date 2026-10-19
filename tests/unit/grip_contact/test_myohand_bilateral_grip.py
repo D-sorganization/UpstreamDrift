@@ -1,0 +1,579 @@
+"""Tests for MyoHub myoHand articulated bilateral grip fixture (HRG-GS-M8, #13330).
+
+Covers:
+1. Pure-function scene composer generating driver/iron bilateral myoHand MJCFs
+   and committed receipt JSON with SHA-256 provenance and pin verification
+   without copying meshes from shared/models/myosuite/myo_sim.
+2. Sagittal reflection verification for the mirrored left myoHand (body
+   positions, COMs, proper rotations, masses, world inertia tensors, joint axes).
+3. Segment-mapped grip-binding/v1 manifests with 100% coverage of all
+   ContactTopology sites onto distph/midph/proxph/metacarpal/thumb bodies
+   across overlap, interlock, and ten_finger (with and without trigger_finger).
+4. Frozen-finger mode: GripPose-to-myoHand joint mapping, equality joint-locking,
+   inactive muscle actuators, mutual exclusion of native vs shared contact, and
+   M3 qualification harness parity against Pinocchio within 5% peak / 2% RMS.
+5. Grasp-resultant inverse-dynamics check (m(a - g) and moment within 5% peak /
+   2% RMS), Newton-Euler balance, honest friction-cone ratios, and hyperstatic
+   INDETERMINATE labels for per-hand split and squeeze.
+6. Design-by-Contract negative tests and AST/LoD/file-size budget checks.
+"""
+
+from __future__ import annotations
+
+import ast
+import json
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from src.shared.python.grip_contact.binding import (
+    SchemaFeatureUnavailableError,
+)
+from src.shared.python.grip_contact.binding_manifest import (
+    binding_from_manifest,
+    validate_manifest,
+    validate_resolved_binding,
+)
+from src.shared.python.grip_contact.contact_topology import (
+    GripStyle,
+    contact_topology,
+)
+from src.shared.python.grip_contact.interface import GripInterface
+from src.shared.python.grip_contact.parity import (
+    PEAK_TOLERANCE,
+    RMS_TOLERANCE,
+    compare_topology_series,
+)
+from src.shared.python.grip_contact.topology_series import (
+    FIXTURE_DT_S,
+    law_level_series,
+)
+from src.shared.python.model_appearance.grip_pose import (
+    DEFAULT_GRIP_POSE,
+    GripPose,
+    Hand,
+)
+from src.shared.python.motion_matching.grip_contract import GripSpec
+
+pytestmark = pytest.mark.unit
+
+ROOT = Path(__file__).resolve().parents[3]
+SPEC_PATH = ROOT / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+MANIFESTS_DIR = ROOT / "src/config/grip_bindings"
+MYO_SIM_HAND_XML = ROOT / "shared/models/myosuite/myo_sim/hand/myohand.xml"
+HAND_SCENE_DIR = ROOT / "shared/models/myosuite/golf/hand"
+SCENE_PY = (
+    ROOT / "src/engines/physics_engines/myosuite/python/myohand_bilateral_scene.py"
+)
+ADAPTER_PY = (
+    ROOT / "src/engines/physics_engines/myosuite/python/myohand_bilateral_adapter.py"
+)
+
+ALLOWED_HAND_SEGMENT_TOKENS = (
+    "distph",
+    "midph",
+    "proxph",
+    "firstmc",
+    "secondmc",
+    "thirdmc",
+    "fourthmc",
+    "fifthmc",
+    "proximal_thumb",
+    "distal_thumb",
+)
+
+
+def _require_myohand_assets() -> None:
+    if not MYO_SIM_HAND_XML.is_file():
+        pytest.skip(
+            "shared/models/myosuite/myo_sim/hand/myohand.xml not populated; "
+            "run scripts/setup_myosuite_models.sh"
+        )
+
+
+@pytest.fixture(scope="module")
+def interface() -> GripInterface:
+    spec_dict = json.loads(SPEC_PATH.read_text(encoding="utf-8"))
+    return GripInterface.from_spec(spec_dict)
+
+
+# ---------------------------------------------------------------------------
+# 1. Pure-function scene composer & receipt provenance
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.requires_mujoco
+def test_scene_generator_creates_driver_iron_and_receipt() -> None:
+    """Scene generator writes driver/iron MJCFs and receipt without copying meshes."""
+    pytest.importorskip("mujoco")
+    _require_myohand_assets()
+    from src.engines.physics_engines.myosuite.python.myohand_bilateral_scene import (
+        MYO_SIM_PIN_SHA,
+        generate_myohand_bilateral_scene,
+    )
+
+    paths = generate_myohand_bilateral_scene(repo_root=ROOT, output_root=HAND_SCENE_DIR)
+    assert paths.driver.is_file()
+    assert paths.iron.is_file()
+    assert paths.receipt.is_file()
+
+    # Verify no .stl or .png files were copied into HAND_SCENE_DIR
+    copied_meshes = list(HAND_SCENE_DIR.rglob("*.stl"))
+    copied_textures = list(HAND_SCENE_DIR.rglob("*.png"))
+    assert copied_meshes == [], f"Unexpected copied meshes: {copied_meshes}"
+    assert copied_textures == [], f"Unexpected copied textures: {copied_textures}"
+
+    receipt = json.loads(paths.receipt.read_text(encoding="utf-8"))
+    assert receipt["issue"] == 13330
+    assert receipt["myo_sim_pin"] == MYO_SIM_PIN_SHA
+    assert "hand/myohand.xml" in receipt["source_xml_sha256"]
+    assert "hand/assets/myohand_assets.xml" in receipt["source_xml_sha256"]
+    assert "hand/assets/myohand_body.xml" in receipt["source_xml_sha256"]
+    assert "driver" in receipt["clubs"] and "iron" in receipt["clubs"]
+    assert receipt["left_hand_mirror"]["supported"] is True
+    assert receipt["qualification"]["is_contact_fixture"] is True
+    assert receipt["qualification"]["muscle_recruitment_in_scope"] is False
+    assert receipt["qualification"]["actuators_active"] is False
+
+
+# ---------------------------------------------------------------------------
+# 2. Left-hand sagittal reflection verification
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.requires_mujoco
+def test_left_hand_is_exact_sagittal_reflection_of_right_hand() -> None:
+    """Left myoHand is a sagittal reflection (S_W = diag(-1, 1, 1)) of right myoHand."""
+    pytest.importorskip("mujoco")
+    _require_myohand_assets()
+    from src.engines.physics_engines.myosuite.python.myohand_bilateral_scene import (
+        verify_left_hand_sagittal_reflection,
+    )
+
+    report = verify_left_hand_sagittal_reflection(repo_root=ROOT)
+    assert report.supported is True
+    assert report.body_count == 37
+    assert report.joint_count == 23
+    assert report.max_xpos_error_m <= 1e-6
+    assert report.max_xipos_error_m <= 1e-6
+    assert report.max_rotation_error <= 1e-6
+    assert report.max_mass_error_kg <= 1e-12
+    assert report.max_world_inertia_error_kg_m2 <= 1e-6
+    assert report.max_articulated_xpos_error_m <= 1e-6
+    assert report.max_articulated_xipos_error_m <= 1e-6
+    assert report.max_normal_reflection_error <= 1e-6
+
+
+# ---------------------------------------------------------------------------
+# 3. Segment-mapped manifests & 100% topology coverage
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "model_id",
+    [
+        "myosuite_myohand_bilateral_driver",
+        "myosuite_myohand_bilateral_iron",
+    ],
+)
+@pytest.mark.parametrize(
+    "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
+)
+@pytest.mark.parametrize("trigger_finger", [True, False])
+def test_segment_mapped_manifests_100_percent_coverage_all_styles(
+    interface: GripInterface,
+    model_id: str,
+    style: GripStyle,
+    trigger_finger: bool,
+) -> None:
+    """Every requested topology site is mapped onto a distinct phalanx/metacarpal/thumb body."""
+    manifest_path = MANIFESTS_DIR / f"{model_id}.json"
+    assert manifest_path.is_file(), f"Missing manifest: {manifest_path}"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    validate_manifest(manifest)
+    assert manifest["attachment_mode"] == "separated_v2"
+
+    spec = GripSpec(style=style, trigger_finger=trigger_finger)
+    topo = contact_topology(spec)
+    binding = binding_from_manifest(manifest, topo, interface)
+    validate_resolved_binding(binding, topo, interface)
+
+    expected_sites = set(topo.site_names())
+    bound_sites = {sb.site_id for sb in binding.sites}
+    assert bound_sites == expected_sites
+    assert len(binding.unavailable_sites) == 0
+
+    body_ids = [sb.body_id for sb in binding.sites]
+    assert len(set(body_ids)) == len(body_ids), (
+        f"Expected distinct segment bodies per site, got duplicates in {body_ids}"
+    )
+    for sb in binding.sites:
+        assert sb.representation == "phalange"
+        expected_prefix = "lh_" if sb.site_id.startswith("lead_") else "rh_"
+        assert sb.body_id.startswith(expected_prefix)
+        assert any(tok in sb.body_id for tok in ALLOWED_HAND_SEGMENT_TOKENS), (
+            f"Site {sb.site_id} mapped to {sb.body_id}, not in {ALLOWED_HAND_SEGMENT_TOKENS}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# 4. Frozen-finger mode: pose mapping, joint-locking, inactive actuators
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.requires_mujoco
+@pytest.mark.parametrize(
+    "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
+)
+def test_grip_pose_maps_to_myohand_joints_and_freezes_without_muscles(
+    style: GripStyle,
+) -> None:
+    """Style finger pose maps to myoHand joints, locks via equality, and leaves muscles inactive."""
+    pytest.importorskip("mujoco")
+    _require_myohand_assets()
+    from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
+        FINGER_POSE_JOINT_MAP,
+        MyoHandBilateralGripAdapter,
+        pose_to_myohand_joint_targets,
+    )
+
+    assert len(FINGER_POSE_JOINT_MAP) == 23
+    spec = GripSpec(style=style, trigger_finger=True)
+    pose = GripPose(style=style)
+    targets = pose_to_myohand_joint_targets(pose, trigger_finger=spec.trigger_finger)
+    assert len(targets[Hand.LEAD]) == 23
+    assert len(targets[Hand.TRAIL]) == 23
+
+    # Also verify an explicit custom GripPose (simulating a G5 preset) plugs in directly
+    custom_pose = GripPose(
+        style=style,
+        lead_v_azimuth_deg=28.0,
+        trail_v_offset_deg=4.0,
+        lead_thumb_offset_deg=12.0,
+        palm_diagonal_deg=42.0,
+        grip_strength_deg=8.0,
+        lead_roll_offset_deg=3.0,
+        trail_roll_offset_deg=-3.0,
+    )
+    adapter = MyoHandBilateralGripAdapter(
+        "myosuite_myohand_bilateral_driver",
+        grip_spec=spec,
+        grip_pose=custom_pose,
+        contact_mode="shared",
+        frozen_fingers=True,
+    )
+    caps = adapter.capabilities()
+    assert caps.supports_physical_pairs is True
+    assert caps.supports_wrench_application is True
+    assert caps.native_contact is False
+    assert adapter.actuators_active() is False
+
+    q_before = adapter.finger_joint_positions().copy()
+    report = adapter.step_with_contacts(FIXTURE_DT_S)
+    q_after = adapter.finger_joint_positions().copy()
+    assert np.allclose(q_before, q_after, atol=1e-9)
+    assert report.applied_allocated_force_n() == 0.0
+    assert adapter.max_actuator_force_n() == 0.0
+
+
+# ---------------------------------------------------------------------------
+# 5. Native vs shared contact exclusion & physical hand-hand wrenches
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.requires_mujoco
+@pytest.mark.parametrize(
+    "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
+)
+def test_shared_vs_native_contact_mutual_exclusion_and_hand_hand_pairs(
+    style: GripStyle,
+) -> None:
+    """Native and shared contact are never applied on the same pair; hand-hand pairs are physical."""
+    pytest.importorskip("mujoco")
+    _require_myohand_assets()
+    from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
+        MyoHandBilateralGripAdapter,
+    )
+
+    spec = GripSpec(style=style, trigger_finger=True)
+    shared_adapter = MyoHandBilateralGripAdapter(
+        "myosuite_myohand_bilateral_driver",
+        grip_spec=spec,
+        contact_mode="shared",
+        frozen_fingers=True,
+    )
+    assert shared_adapter.registered_grip_collision_count() == 0
+    report = shared_adapter.evaluate_contacts()
+    assert all(lbl == "physical" for lbl in report.pair_labels.values())
+    assert report.applied_allocated_force_n() == 0.0
+
+    hh_names = [p.name for p in shared_adapter.topology().hand_hand_pairs()]
+    assert "trail_palm_lead_thumb" in hh_names
+    for hh_name in hh_names:
+        pw = report.pair_wrenches[hh_name]
+        assert pw.normal_force_mag_n > 0.0, (
+            f"Expected positive normal force on {hh_name}"
+        )
+
+    shared_adapter.apply_report(report)
+    net_xfrc_force = shared_adapter.total_applied_xfrc_force_n()
+    assert float(np.linalg.norm(net_xfrc_force)) <= 1e-10
+
+    native_adapter = MyoHandBilateralGripAdapter(
+        "myosuite_myohand_bilateral_driver",
+        grip_spec=spec,
+        contact_mode="native",
+        frozen_fingers=True,
+    )
+    assert native_adapter.capabilities().native_contact is True
+    assert native_adapter.capabilities().supports_wrench_application is False
+    assert native_adapter.registered_grip_collision_count() > 0
+    with pytest.raises(SchemaFeatureUnavailableError, match="native"):
+        native_adapter.apply_report(report)
+
+
+# ---------------------------------------------------------------------------
+# 6. Frozen-finger M3 parity against Pinocchio and law-level reference
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.requires_mujoco
+@pytest.mark.parametrize(
+    "model_id",
+    [
+        "myosuite_myohand_bilateral_driver",
+        "myosuite_myohand_bilateral_iron",
+    ],
+)
+@pytest.mark.parametrize(
+    "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
+)
+def test_frozen_finger_mode_matches_pinocchio_and_law_level_within_m3_tolerances(
+    model_id: str,
+    style: GripStyle,
+) -> None:
+    """Frozen-finger mode matches Pinocchio rigid-hand reference within 5% peak / 2% RMS."""
+    pytest.importorskip("mujoco")
+    _require_myohand_assets()
+    from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
+        MyoHandBilateralGripAdapter,
+        build_prescribed_grip_trajectory,
+        run_myohand_frozen_qualification_series,
+    )
+    from src.engines.physics_engines.pinocchio.python.grip_binding_adapter import (
+        PinocchioGripAdapter,
+    )
+    from src.shared.python.grip_contact.binding import (
+        GripStepReport,
+        evaluate_contacts,
+    )
+    from src.shared.python.grip_contact.topology_series import (
+        TopologyKineticsSeries,
+        topology_mapping_hash,
+    )
+
+    spec = GripSpec(style=style, trigger_finger=True)
+    adapter = MyoHandBilateralGripAdapter(
+        model_id,
+        grip_spec=spec,
+        contact_mode="shared",
+        frozen_fingers=True,
+    )
+    times, hand_frames_seq, club_frames_seq = build_prescribed_grip_trajectory(
+        adapter.interface(), n_steps=21, dt_s=FIXTURE_DT_S
+    )
+    candidate_series = run_myohand_frozen_qualification_series(
+        adapter, hand_frames_seq, club_frames_seq, times
+    )
+    assert candidate_series.applied_allocated_force_n == 0.0
+
+    # Law-level parity check
+    topo_model = adapter.topology_model()
+    m_hash = topology_mapping_hash(topo_model)
+    law_series = law_level_series(
+        topo_model,
+        hand_frames_seq,
+        club_frames_seq,
+        times,
+        model_id=model_id,
+        mapping_hash=m_hash,
+    )
+    law_report = compare_topology_series(law_series, candidate_series)
+    assert law_report.passed is True, f"Law parity failed: {law_report.to_dict()}"
+    for ch, m in law_report.channels.items():
+        assert m.error is not None
+        assert m.error.peak_error <= PEAK_TOLERANCE, f"{ch} peak {m.error.peak_error}"
+        assert m.error.rms_error <= RMS_TOLERANCE, f"{ch} rms {m.error.rms_error}"
+
+    # Pinocchio adapter parity check
+    pin_adapter = PinocchioGripAdapter(adapter.interface(), model_hash=m_hash)
+    pin_binding = pin_adapter.resolve_binding(adapter.topology())
+    closure = adapter.synthesise_closure_from_net_wrench()
+    pin_reports: list[GripStepReport] = []
+    for h_frames, c_frames in zip(hand_frames_seq, club_frames_seq, strict=True):
+        club_state = adapter._current_club_state(c_frames)
+        pin_adapter.set_prescribed_states(hand_states=h_frames, club_state=club_state)
+        pin_states = pin_adapter.sample_states(pin_binding)
+        pin_rep = evaluate_contacts(
+            topo_model, pin_binding, pin_states, closure=closure
+        )
+        pin_reports.append(pin_rep)
+    pin_series = TopologyKineticsSeries.from_step_reports(
+        times,
+        pin_reports,
+        engine="pinocchio_reference",
+        mapping_hash=m_hash,
+        binding=pin_binding,
+    )
+    pin_report = compare_topology_series(pin_series, candidate_series)
+    assert pin_report.passed is True, f"Pinocchio parity failed: {pin_report.to_dict()}"
+    for ch, m in pin_report.channels.items():
+        assert m.error is not None
+        assert m.error.peak_error <= PEAK_TOLERANCE, f"{ch} peak {m.error.peak_error}"
+        assert m.error.rms_error <= RMS_TOLERANCE, f"{ch} rms {m.error.rms_error}"
+
+
+# ---------------------------------------------------------------------------
+# 7. Grasp-resultant inverse-dynamics check, Newton check, friction-cone, INDETERMINATE
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.requires_mujoco
+@pytest.mark.parametrize(
+    "model_id",
+    [
+        "myosuite_myohand_bilateral_driver",
+        "myosuite_myohand_bilateral_iron",
+    ],
+)
+@pytest.mark.parametrize(
+    "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
+)
+def test_grasp_resultant_matches_inverse_dynamics_and_newton_check(
+    model_id: str,
+    style: GripStyle,
+) -> None:
+    """Net club wrench matches m(a - g) and moment within 5% peak / 2% RMS; split is INDETERMINATE."""
+    pytest.importorskip("mujoco")
+    _require_myohand_assets()
+    from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
+        MyoHandBilateralGripAdapter,
+        evaluate_grasp_resultant_newton_check,
+    )
+
+    spec = GripSpec(style=style, trigger_finger=True)
+    adapter = MyoHandBilateralGripAdapter(
+        model_id,
+        grip_spec=spec,
+        contact_mode="shared",
+        frozen_fingers=True,
+    )
+    newton_report = evaluate_grasp_resultant_newton_check(adapter, n_steps=21)
+
+    assert newton_report.force_peak_rel_error <= PEAK_TOLERANCE
+    assert newton_report.force_rms_rel_error <= RMS_TOLERANCE
+    assert newton_report.moment_peak_rel_error <= PEAK_TOLERANCE
+    assert newton_report.moment_rms_rel_error <= RMS_TOLERANCE
+    assert newton_report.newton_force_rel_error <= 1e-5
+    assert newton_report.newton_moment_com_residual_nm <= 1e-5
+    assert newton_report.grasp_synthesis.residual_inf_n <= 1e-9
+
+    # Hyperstatic per-hand split and squeeze must be labelled INDETERMINATE
+    assert newton_report.per_hand_split_status == "INDETERMINATE"
+    assert newton_report.squeeze_status == "INDETERMINATE"
+
+    # Honest friction-cone ratios reported for every pair
+    assert len(newton_report.friction_cone_ratios) == len(adapter.topology().pairs)
+    for pair_name, ratio in newton_report.friction_cone_ratios.items():
+        if ratio is not None:
+            assert np.isfinite(ratio) and ratio >= 0.0, (
+                f"Invalid friction ratio for {pair_name}: {ratio}"
+            )
+
+
+# ---------------------------------------------------------------------------
+# 8. DbC negative tests & AST / LoD / file-size budgets
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.requires_mujoco
+def test_dbc_preconditions_and_missing_assets(tmp_path: Path) -> None:
+    """Verify DbC preconditions and missing myo_sim failure mode."""
+    pytest.importorskip("mujoco")
+    _require_myohand_assets()
+    from src.engines.physics_engines.myosuite.python.myohand_bilateral_adapter import (
+        MyoHandBilateralGripAdapter,
+    )
+    from src.engines.physics_engines.myosuite.python.myohand_bilateral_scene import (
+        check_myohand_assets_available,
+    )
+
+    with pytest.raises(SchemaFeatureUnavailableError, match="myohand.xml"):
+        check_myohand_assets_available(repo_root=tmp_path)
+
+    with pytest.raises(ValueError, match="Unsupported model_id"):
+        MyoHandBilateralGripAdapter("unknown_model")
+
+    with pytest.raises(ValueError, match="contact_mode"):
+        MyoHandBilateralGripAdapter(
+            "myosuite_myohand_bilateral_driver",
+            contact_mode="invalid_mode",  # type: ignore[arg-type]
+        )
+
+    with pytest.raises(ValueError, match="squeeze_n"):
+        MyoHandBilateralGripAdapter(
+            "myosuite_myohand_bilateral_driver",
+            squeeze_n=-10.0,
+        )
+
+
+def _attribute_chain_depth(node: ast.AST) -> int:
+    depth = 0
+    cur = node
+    while True:
+        if isinstance(cur, ast.Attribute):
+            depth += 1
+            cur = cur.value
+        elif isinstance(cur, ast.Call):
+            cur = cur.func
+        elif isinstance(cur, ast.Subscript):
+            cur = cur.value
+        else:
+            break
+    return depth
+
+
+def test_ast_file_function_and_lod_budgets() -> None:
+    """Enforce <= 1200 lines/file, <= 100 lines and <= 8 params/fn, <= 2 dots LoD."""
+    for path in (SCENE_PY, ADAPTER_PY):
+        assert path.is_file(), f"Missing implementation file: {path}"
+        source = path.read_text(encoding="utf-8")
+        lines = source.splitlines()
+        assert len(lines) <= 1200, f"{path.name} has {len(lines)} lines > 1200"
+
+        tree = ast.parse(source, filename=str(path))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Attribute):
+                depth = _attribute_chain_depth(node)
+                assert depth <= 2, (
+                    f"{path.name}:{node.lineno} has attribute chain depth {depth} > 2: "
+                    f"{ast.unparse(node)}"
+                )
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+                assert node.end_lineno is not None
+                length = node.end_lineno - node.lineno + 1
+                assert length <= 100, f"{path.name}:{node.name} is {length} lines > 100"
+                args = node.args
+                n_params = (
+                    len(args.posonlyargs)
+                    + len(args.args)
+                    + len(args.kwonlyargs)
+                    + (1 if args.vararg else 0)
+                    + (1 if args.kwarg else 0)
+                )
+                if args.args and args.args[0].arg in ("self", "cls"):
+                    n_params -= 1
+                assert n_params <= 8, (
+                    f"{path.name}:{node.name} has {n_params} params > 8"
+                )
