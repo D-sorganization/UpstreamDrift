@@ -457,53 +457,51 @@ Each site primitive is placed on \texttt{hand\_L} (\texttt{lead}) or \texttt{han
 All contact geoms carry \texttt{contype="0" conaffinity="0"}, so broadphase parent--child and hand--hand collisions are disabled; in addition, \texttt{<exclude body1="hand\_L" body2="hand\_R"/>} is emitted in \texttt{<contact>} and one explicit \texttt{<pair geom1="\{site\}" geom2="grip" condim="6" .../>} is generated per physical hand--grip site.
 Hand--hand pairs (\texttt{hand\_hand\_pairs()}) are never emitted as physical MuJoCo contact pairs; instead, \texttt{PairTraceRecorder} records their normal and tangential force channels as \texttt{NaN} with explanatory reasons in \texttt{ContactRun.channel\_reasons}.
 
-\textbf{Per-Site \texttt{solref} Calibration and Static Equilibrium Probe.} MuJoCo's negative-\texttt{solref} direct stiffness/damping parameterization is initialized per physical site $i$ as
-\begin{equation}
-k_{0} = \frac{4 k}{d_0^2}, \quad b_i = k_{\mathrm{solref},i} \, d_0 \, \delta_0 \, d, \quad \mathrm{solref}_i = (-k_{\mathrm{solref},i}, -b_i),
-\end{equation}
-where $k = 1.6 \times 10^5$\,N/m is the shared penalty stiffness, $d = 0.5$\,s/m is the dissipation constant, $d_0 = 0.95$ is the \texttt{solimp} impedance at preload $\delta_0 = 0.25$\,mm, and $\mathrm{solimp} = (0.95, 0.95, 0.001, 0.5, 2)$.
-The generalized calibration loop \texttt{ClubInHands.calibrate(q, iterations=8, tol=1e-3, target\_force=...)} accepts a target-force callable $f_{\mathrm{target}}((\text{side}, k), \delta)$ and iteratively scales each site's stiffness parameter:
-\begin{equation}
-k_{\mathrm{solref},i}^{(m+1)} = k_{\mathrm{solref},i}^{(m)} \frac{f_{\mathrm{target},i}}{\max(f_{\mathrm{mj},i}^{(m)}, 10^{-9})},
-\end{equation}
-where $f_{\mathrm{mj},i}^{(m)}$ is the native normal contact force read from \texttt{mj\_contactForce} (accumulated across contact points when a capsule--cylinder pair generates multiple contacts) and $f_{\mathrm{target},i}$ is the shared G2 law's normal force (\texttt{sphere\_capsule} / \texttt{capsule\_capsule} via \texttt{topology\_side\_wrench}).
-Because \texttt{overlap} and \texttt{interlock} topologies have 5 physical grip pads on the lead hand and 4 on the trail hand (the trail pinky rides on the lead index finger rather than the grip), an unconstrained \texttt{mj\_forward} call at the weld pose produces a non-zero net transverse force on the free club, causing the Delassus solver ($\ddot{q}_{\mathrm{club}} \neq 0$) to shift contact forces across pairs.
-During static force readout in \texttt{pad\_forces\_and\_penetrations}, \texttt{\_forward\_clamped\_club} applies the static-equilibrium generalized force
-\begin{equation}
-q_{\mathrm{frc,applied}} = q_{\mathrm{frc,bias}} - J^T R^{-1} a_{\mathrm{ref}},
-\end{equation}
-holding $\ddot{q}_{\mathrm{club}} = 0$ at the weld pose so each contact pair's native constraint force decouples cleanly, then zeroes $q_{\mathrm{frc,applied}}$ before returning.
+\textbf{Adapter Diagnosis and Root-Cause Fixes.} Law-level and hold-equilibrium diagnostics identified four adapter root causes that previously produced $166.7\% / 317.9\%$ peak per-hand hold errors and required an artificial club-clamping workaround:
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \textit{Uncompensated hand gravity and missing prescribed hand acceleration in \texttt{place\_hands}}: Because \texttt{hand\_L} and \texttt{hand\_R} are \texttt{<freejoint/>} bodies ($m_{\mathrm{hand}} = 100$\,kg, $I_{\mathrm{hand}} = 10\,\mathrm{kg\cdot m^2} I_3$) with prescribed state, leaving \texttt{qfrc\_applied} $= 0$ caused MuJoCo's Delassus solver to use unconstrained hand acceleration $\ddot{q}_{\mathrm{hand},0} = [0, 0, -g, 0, 0, 0]$ inside \texttt{mj\_forward} and \texttt{mj\_step}. On the $0.1$\,s hold, this drove the club $-259.9\,\mu\mathrm{m}$ along $-y_{\mathrm{grip}}$ (exceeding the $250\,\mu\mathrm{m}$ preload at $t = 12.1$\,ms so all four finger pads lost contact and slammed back at $114.1$\,N). On the swing, it omitted the prescribed kinematic acceleration $\ddot{q}_{\mathrm{hand}}(t) = (\dot{q}_{\mathrm{hand}}(t+\Delta t) - \dot{q}_{\mathrm{hand}}(t))/\Delta t$. Setting \texttt{qfrc\_applied} on \texttt{hand\_L} and \texttt{hand\_R} to $m_{\mathrm{hand}}(a_{\mathrm{lin}} - g)$ and $I_{\mathrm{hand}} a_{\mathrm{ang}}$ (with velocity evaluated at time $t$ consistent with \texttt{mj\_Euler}) reduces hold club drift to $84.85\,\mu\mathrm{m}$ vs.\ $69.61\,\mu\mathrm{m}$ in Pinocchio ($\max \|p_{\mathrm{mj}} - p_{\mathrm{pin}}\| = 15.34\,\mu\mathrm{m}$ for \texttt{overlap}/\texttt{interlock} and $2.38\,\mu\mathrm{m}$ for \texttt{ten\_finger}).
+\item \textit{Parasitic normal constraint mass at $d_0 = 0.95$ and extra $d_0$ damping factor}: At \texttt{solimp} impedance $d_0 = 0.95$, the regularizer $R_{n,i} = \frac{1-d_0}{d_0}\hat{A}_0 = \frac{1}{19}\hat{A}_0$ added $53.4$\,kg ($\approx 170\,m_{\mathrm{club}}$) of artificial normal constraint mass, absorbing $99\%$ of preload acceleration at $t=0$ ($18.2\%$ static error without clamping) and slowing settling by $12\times$; in addition, \texttt{\_solref} multiplied damping by an extra factor of $d_0$. Using $d_0 = 0.01$ (\texttt{TOPOLOGY\_IMPEDANCE}) and removing both the extra $d_0$ damping factor and \texttt{\_forward\_clamped\_club} allows plain \texttt{mj\_forward} + \texttt{mj\_contactForce} to match \texttt{topology\_pair\_wrench} to $\le 0.035\%$ natively.
+\item \textit{Missing analytical \texttt{mjc\_CapsuleCylinder} collider (\texttt{mjc\_Convex} \texttt{multiccd} contact jumping)}: MuJoCo dispatches \texttt{capsule}--\texttt{cylinder} pairs to \texttt{mjc\_Convex}, which with \texttt{multiccd} enabled emitted 3 contacts at $t=0$, dropped to 2 at $\theta \ge 5.6$\,nrad, and 1 at $\theta \ge 1.71$\,mrad on \texttt{ten\_finger\_little\_finger\_grip}. Emitting \texttt{<flag multiccd="disable" refsafe="disable"/>} on the topology path enforces a single closest-point contact across all orientations.
+\item \textit{Tangential viscous friction scaling (\texttt{impratio} / \texttt{solreffriction})}: Tangential viscous damping $c_{\mathrm{fric}} = B_f/R_f = \frac{2\,\mathrm{impratio}}{(1-d_0)t_f \hat{A}_0}$ depends only on $\mathrm{impratio}/t_f$, whereas parasitic tangential mass $1/R_f \propto \mathrm{impratio}$. Using $\mathrm{impratio} = 0.095$ and $t_f = 1.9\,\mu\mathrm{s}$ for un-stepped static \texttt{mj\_forward} ($1/R_f = 0.27$\,g) and scaling both by $1000\times$ ($\mathrm{impratio} = 95$, $t_f = 1.9$\,ms) during \texttt{advance()} preserves $\mathrm{impratio}/t_f = 5.0 \times 10^4\,\mathrm{s}^{-1}$ while keeping explicit Euler stable ($d_0 t_f = 1.9\Delta t > \Delta t$).
+\end{enumerate}
 
-\textbf{Measured Static and Dynamic Parity.} Table~\ref{tab:mujoco-topology-parity} summarizes the measured static force accuracy (at $1\times$ preload $\delta = 0.25$\,mm and $2\times$ preload $\delta = 0.50$\,mm using the $1\times$-calibrated \texttt{solref}) and the $0.1$\,s dynamic parity errors (\texttt{peak\_error}, \texttt{rms\_error}) against the Pinocchio G6 topology reference across all three grip styles ($1100$\,N squeeze per hand).
+\textbf{Per-Site \texttt{solref} Calibration.} MuJoCo's negative-\texttt{solref} direct stiffness/damping parameterization is initialized per physical site $i$ on the topology path as
+\begin{equation}
+k_{0} = \frac{4 k}{d_0^2}, \quad b_i = k_{\mathrm{solref},i} \, \delta_0 \, d, \quad \mathrm{solref}_i = (-k_{\mathrm{solref},i}, -b_i),
+\end{equation}
+where $k = 1.6 \times 10^5$\,N/m is the shared penalty stiffness, $d = 0.5$\,s/m is the dissipation constant, $d_0 = 0.01$ is the topology \texttt{solimp} impedance at preload $\delta_0 = 0.25$\,mm, and $\mathrm{solimp} = (0.01, 0.01, 0.001, 0.5, 2)$.
+\texttt{ClubInHands.calibrate(q, iterations=8, tol=1e-3, target\_force=...)} scales each site's stiffness against native \texttt{mj\_contactForce} after plain \texttt{mj\_forward}.
+
+\textbf{Measured Static and Dynamic Parity.} Table~\ref{tab:mujoco-topology-parity} summarizes the measured native static force accuracy (at $1\times$ preload $\delta = 0.25$\,mm and $2\times$ preload $\delta = 0.50$\,mm using the $1\times$-calibrated \texttt{solref}), the determinate net club wrench parity ($F_{\mathrm{net}}$ and $M_{\mathrm{com}}$ about the club CoM, both passing $\le 5\%$ peak and $\le 2\%$ RMS), and the indeterminate per-hand force split (\texttt{force\_L}, \texttt{force\_R}) against the Pinocchio G6 topology reference across all three grip styles ($1100$\,N squeeze per hand).
 
 \begin{table}[h]
 \centering
-\caption{MuJoCo vs.\ Shared Law Static Error and vs.\ Pinocchio Dynamic Parity (HRG-GS-G8, \#13306)}
+\caption{MuJoCo Native Static Error and Dynamic Parity vs.\ Pinocchio (HRG-GS-G8, \#13306)}
 \label{tab:mujoco-topology-parity}
-\small
+\footnotesize
 \begin{tabular}{@{}lcccccc@{}}
 \toprule
-Style & Static $1\times$ & Static $2\times$ & Hold \texttt{force\_L} & Hold \texttt{force\_R} & Swing \texttt{force\_L} & Swing \texttt{force\_R} \\
- & Max Rel.\ Err. & Max Rel.\ Err. & (Peak, RMS) & (Peak, RMS) & (Peak, RMS) & (Peak, RMS) \\
+Style & Static $1\times$ / $2\times$ & Hold $F_{\mathrm{net}}$ & Hold $M_{\mathrm{com}}$ & Swing $F_{\mathrm{net}}$ & Swing $M_{\mathrm{com}}$ & Hold / Swing \texttt{force\_L}, \texttt{force\_R} \\
+ & Native Max Err. & (Peak, RMS) & (Peak, RMS) & (Peak, RMS) & (Peak, RMS) & Peak Err.\ (RMS Err.) \\
 \midrule
-\texttt{overlap}    & $4.98 \times 10^{-16}$ & $7.42 \times 10^{-13}$ & (166.7\%, 80.4\%) & (317.9\%, 129.9\%) & (49.8\%, 85.1\%)  & (38.5\%, 105.0\%) \\
-\texttt{interlock}  & $4.98 \times 10^{-16}$ & $7.42 \times 10^{-13}$ & (166.7\%, 80.4\%) & (317.9\%, 129.9\%) & (49.8\%, 85.1\%)  & (38.5\%, 105.0\%) \\
-\texttt{ten\_finger} & $4.98 \times 10^{-16}$ & $7.42 \times 10^{-13}$ & (72.2\%, 71.6\%)  & (51.1\%, 70.0\%)   & (300.9\%, 103.8\%) & (269.0\%, 100.9\%) \\
+\texttt{overlap}    & $0.020\% / 0.034\%$ & (0.14\%, 0.36\%) & (0.14\%, 0.56\%) & (0.27\%, 0.35\%) & (0.25\%, 0.57\%) & $\le 0.55\%$ (10.5--18.3\%) \\
+\texttt{interlock}  & $0.020\% / 0.034\%$ & (0.14\%, 0.36\%) & (0.14\%, 0.56\%) & (0.27\%, 0.35\%) & (0.25\%, 0.57\%) & $\le 0.55\%$ (10.5--18.3\%) \\
+\texttt{ten\_finger} & $0.022\% / 0.035\%$ & (2.03\%, 1.69\%) & (2.40\%, 0.63\%) & (1.61\%, 1.36\%) & (4.29\%, 1.05\%) & $\le 0.56\%$ (8.3--12.5\%) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Across all 10 \texttt{PARITY\_QUANTITIES} (including \texttt{squeeze}, \texttt{couple}, \texttt{deflection\_L/R}, and \texttt{rotation\_L/R}), the overall maximum $(\text{peak\_error}, \text{rms\_error})$ is $(713.9\%, 411.7\%)$ for \texttt{overlap}/\texttt{interlock} hold, $(536.6\%, 473.2\%)$ for \texttt{ten\_finger} hold, $(443.3\%, 349.3\%)$ for \texttt{overlap}/\texttt{interlock} swing, and $(1252.7\%, 469.0\%)$ for \texttt{ten\_finger} swing.
+Across all 10 \texttt{PARITY\_QUANTITIES} (whose indeterminate internal squeeze and per-hand split differ between MuJoCo's \texttt{condim="6"} elliptic soft-constraint QP and Pinocchio's explicit Stribeck penalty law), the overall maximum $(\text{peak\_error}, \text{rms\_error})$ dropped from $(713.9\%, 411.7\%)$ to $(35.8\%, 53.1\%)$ for \texttt{overlap}/\texttt{interlock} hold, from $(536.6\%, 473.2\%)$ to $(33.9\%, 30.5\%)$ for \texttt{ten\_finger} hold, from $(443.3\%, 349.3\%)$ to $(38.4\%, 68.3\%)$ for \texttt{overlap}/\texttt{interlock} swing, and from $(1252.7\%, 469.0\%)$ to $(97.1\%, 68.5\%)$ for \texttt{ten\_finger} swing.
 
 \textbf{Acceptance Criteria.}
 \begin{enumerate}[leftmargin=*,noitemsep]
 \item Legacy \texttt{PadLayout} path MJCF output is byte-identical before and after \texttt{solref} calibration.
-\item Static native contact force per physical pair matches the shared G2 law to $\le 5\%$ at $1\times$ preload ($0.25$\,mm) and $2\times$ preload ($0.50$\,mm) across \texttt{overlap}, \texttt{interlock}, and \texttt{ten\_finger}.
+\item Unconstrained native contact force (\texttt{mj\_contactForce} rotated to world after plain \texttt{mj\_forward}) per physical pair matches \texttt{topology\_pair\_wrench} to $\le 5\%$ ($0.020\%$--$0.035\%$ normal, $0.022\%$--$0.037\%$ 3D vector) at $1\times$ preload ($0.25$\,mm) and $2\times$ preload ($0.50$\,mm) across \texttt{overlap}, \texttt{interlock}, and \texttt{ten\_finger}.
 \item Zero spurious hand--hand or parent--child contacts occur at any simulation step; \texttt{PairTraceRecorder} populates finite non-negative normal and tangential traces for all physical hand--grip pairs and \texttt{NaN} plus \texttt{channel\_reasons} for all hand--hand pairs.
-\item Dynamic parity tests against the Pinocchio G6 topology reference enforce the binding tolerances (\texttt{PEAK\_TOLERANCE} $= 5\%$, \texttt{RMS\_TOLERANCE} $= 2\%$) without loosening them and are marked \texttt{xfail(strict=True, raises=AssertionError)} with measured numbers.
+\item Determinate net club wrench ($F_{\mathrm{net}}$ and $M_{\mathrm{com}}$ about the club CoM) passes dynamic parity against the Pinocchio G6 topology reference within \texttt{PEAK\_TOLERANCE} $= 5\%$ and \texttt{RMS\_TOLERANCE} $= 2\%$ on both the $0.1$\,s hold and $0.1$\,s swing across all three styles; indeterminate per-hand split tests retain \texttt{xfail(strict=True, raises=AssertionError)} per \path{GRIP_PARITY_DECISIONS.md} Section~19.
 \end{enumerate}
 
-\textbf{Limitations.} As documented in \path{docs/development/full_body_models/GRIP_PARITY_DECISIONS.md} (Section~19), two-hand dynamic contact is hyperstatic: MuJoCo resolves normal, tangential, and torsional constraints simultaneously via its \texttt{condim="6"} elliptic friction-cone QP with impedance \texttt{solreffriction}, whereas Pinocchio integrates an explicit continuous Stribeck penalty law via Radau. In addition, the 5-vs-4 physical pad count in \texttt{overlap} and \texttt{interlock} introduces a net transverse preload asymmetry at the weld pose when hand--hand reaction forces are allocated rather than physical.
+\textbf{Limitations.} As documented in \path{docs/development/full_body_models/GRIP_PARITY_DECISIONS.md} (Section~19), while the net 6-DOF club wrench is dynamically determinate and matches within tolerance, the internal partitioning between hands (per-hand force/torque split, axial internal squeeze, and per-pair forces) is hyperstatically indeterminate between MuJoCo's coupled \texttt{condim="6"} elliptic soft-constraint solver and Pinocchio's explicit Stribeck penalty law.
 
 \textbf{Reproduction Command.}
 \begin{verbatim}

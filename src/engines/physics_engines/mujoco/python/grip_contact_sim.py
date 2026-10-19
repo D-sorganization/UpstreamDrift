@@ -63,7 +63,12 @@ DEFAULT_TIMESTEP_S = 1.0e-5
 #: following the club (issue #11986), or only the lead hand gripping.
 HAND_MODES = ("prescribed", "trail_follows_club", "lead_only")
 HAND_MASS_KG = 100.0
+HAND_INERTIA_KG_M2 = 10.0
 IMPEDANCE = 0.95
+TOPOLOGY_IMPEDANCE = 0.01
+TOPOLOGY_IMPRATIO_STATIC = 0.095
+TOPOLOGY_FRICTION_TIME_STATIC_S = 1.9e-6
+TOPOLOGY_STEP_SCALE = 1000.0
 
 
 def _nums(values: Any) -> str:
@@ -110,7 +115,7 @@ def _topology_bodies_and_pairs(
                 f'friction="{mu:.17g} {mu:.17g} {torsional:.17g} 1e-5 1e-5" '
                 f'solref="{ref[0]:.17g} {ref[1]:.17g}" '
                 f'solreffriction="{friction_time_s:.17g} 1" '
-                f'solimp="{IMPEDANCE} {IMPEDANCE} 0.001 0.5 2"/>'
+                f'solimp="{TOPOLOGY_IMPEDANCE} {TOPOLOGY_IMPEDANCE} 0.001 0.5 2"/>'
             )
         bodies.append(
             f'<body name="hand_{side}"><freejoint name="hand_{side}_free"/>'
@@ -137,10 +142,6 @@ def contact_mjcf(
     timesteps). ``topology_model`` optionally supplies a :class:`TopologyContactModel`
     (or legacy ``sides`` tuple when called positionally on the pad path).
     """
-    if friction_time_s is None:
-        friction_time_s = 2.0 * timestep_s
-    if not friction_time_s > 0.0:
-        raise ValueError("friction_time_s must be positive")
     topo: TopologyContactModel | None = None
     sides: tuple[str, ...] = SIDES
     if isinstance(topology_model, tuple):
@@ -157,6 +158,12 @@ def contact_mjcf(
         )
     if isinstance(pads, TopologyContactModel):
         topo = pads
+    if friction_time_s is None:
+        friction_time_s = (
+            TOPOLOGY_FRICTION_TIME_STATIC_S if topo is not None else 2.0 * timestep_s
+        )
+    if not friction_time_s > 0.0:
+        raise ValueError("friction_time_s must be positive")
     i = club.inertia_com_kg_m2
     full = (i[0, 0], i[1, 1], i[2, 2], i[0, 1], i[0, 2], i[1, 2])
     if topo is not None:
@@ -167,6 +174,12 @@ def contact_mjcf(
         a0, a1 = pos_r + rot_r @ cap_r.p0_m, pos_r + rot_r @ cap_r.p1_m
         grip_radius_m = topo.cylinder.radius_m
         bodies, pairs = _topology_bodies_and_pairs(topo, solref, friction_time_s, sides)
+        option_xml = (
+            f'<option timestep="{timestep_s:.17g}" integrator="Euler" '
+            f'cone="elliptic" impratio="{TOPOLOGY_IMPRATIO_STATIC:.17g}" '
+            f'gravity="{_nums(gravity)}">'
+            '<flag multiccd="disable" refsafe="disable"/></option>'
+        )
     else:
         if not isinstance(pads, PadContactModel):
             raise ValueError("either pads or topology_model must be provided")
@@ -198,11 +211,14 @@ def contact_mjcf(
                 + "".join(geoms)
                 + "</body>"
             )
+        option_xml = (
+            f'<option timestep="{timestep_s:.17g}" integrator="Euler" '
+            f'cone="elliptic" impratio="10" gravity="{_nums(gravity)}"/>'
+        )
     return (
         '<mujoco model="grip_contact"><compiler inertiafromgeom="false"/>'
-        f'<option timestep="{timestep_s:.17g}" integrator="Euler" '
-        f'cone="elliptic" impratio="10" gravity="{_nums(gravity)}"/>'
-        '<worldbody><body name="club"><freejoint name="club_free"/>'
+        + option_xml
+        + '<worldbody><body name="club"><freejoint name="club_free"/>'
         f'<inertial pos="{_nums(club.com_m)}" mass="{club.mass_kg:.17g}" '
         f'fullinertia="{_nums(full)}"/>'
         f'<geom name="grip" type="cylinder" fromto="{_nums(a0)} {_nums(a1)}" '
@@ -278,7 +294,7 @@ class ClubInHands:
                 -pair_surface_gap_m(topo, first_pair), DEFAULT_TOPOLOGY_PRELOAD_M
             )
             self._dissipation_s_m = law.dissipation_s_m
-            k0 = law.stiffness_n_m * 4.0 / IMPEDANCE**2
+            k0 = law.stiffness_n_m * 4.0 / TOPOLOGY_IMPEDANCE**2
             self.solref = {
                 (s, k): self._solref(k0)
                 for s in self.pad_sides
@@ -299,6 +315,9 @@ class ClubInHands:
         self.kinematics = WeldClubKinematics(spec_bytes, names)
         self.club = ClubDynamics.from_spec(spec)
         self.gravity = np.asarray(spec["gravity_m_s2"], float)
+        self._stepped = False
+        self._hand_cache_src: Any = None
+        self._hand_cache: dict[int, dict[str, Any]] = {}
         self._rebuild()
         self.delta0 = self._preload_m
         self.hand_source: Any = None
@@ -306,8 +325,19 @@ class ClubInHands:
         self.trail_shift_m: np.ndarray = np.zeros(3)
 
     def _solref(self, k_solref: float) -> tuple[float, float]:
+        if self.topology_model is not None:
+            damping = k_solref * self._preload_m * self._dissipation_s_m
+            return (-k_solref, -damping)
         damping = k_solref * IMPEDANCE * self._preload_m * self._dissipation_s_m
         return (-k_solref, -damping)
+
+    def _set_step_scaling(self, active: bool) -> None:
+        if self.topology_model is None or self._stepped == active:
+            return
+        scale = TOPOLOGY_STEP_SCALE if active else (1.0 / TOPOLOGY_STEP_SCALE)
+        self.model.opt.impratio *= scale
+        self.model.pair_solreffriction[:, 0] *= scale
+        self._stepped = active
 
     def _rebuild(self) -> None:
         mj = self._mj
@@ -326,6 +356,7 @@ class ClubInHands:
         )
         self.model = mj.MjModel.from_xml_string(xml)
         self.data = mj.MjData(self.model)
+        self._stepped = False
         self._club = int(self.model.body("club").id)
         self._hand = {s: int(self.model.body(f"hand_{s}").id) for s in self.pad_sides}
         self._offsets = {s: self.interface.frame(s).matrix() for s in SIDES}
@@ -355,6 +386,22 @@ class ClubInHands:
     def _dof(self, body: int) -> int:
         return int(self.model.body_dofadr[body])
 
+    def _eval_hands(self, t: float) -> dict[str, Any]:
+        if self._hand_cache_src is not self.hand_source:
+            self._hand_cache_src = self.hand_source
+            self._hand_cache.clear()
+        key = int(round(t * 1e9))
+        cached = self._hand_cache.get(key)
+        if cached is not None:
+            return cached
+        q, qdot = self.hand_source(t)
+        weld = self.kinematics.state(q, qdot)
+        hands = {s: weld.frame(self._offsets[s]) for s in SIDES}
+        if len(self._hand_cache) >= 8:
+            self._hand_cache.clear()
+        self._hand_cache[key] = hands
+        return hands
+
     def place_hands(self, t: float, velocity_time: float | None = None) -> dict:
         """Overwrite both hand bodies from the prescribed swing at ``t``.
 
@@ -371,7 +418,43 @@ class ClubInHands:
                 dof = self._dof(body)
                 self.data.qpos[qadr : qadr + 7] = self._held_qpos[s]
                 self.data.qvel[dof : dof + 6] = 0.0
+                if self.topology_model is not None:
+                    self.data.qfrc_applied[dof : dof + 3] = -HAND_MASS_KG * self.gravity
+                    self.data.qfrc_applied[dof + 3 : dof + 6] = 0.0
             return self._held_hands
+
+        if self.topology_model is not None:
+            base_hands = self._eval_hands(t)
+            hands = dict(base_hands)
+            next_hands = self._eval_hands(t + self.timestep_s)
+            inv_dt = 1.0 / self.timestep_s
+            for s in self.pad_sides:
+                h = hands[s]
+                if s == "R" and self.hand_mode == "trail_follows_club":
+                    h = hands[s] = self.club_state_now().frame(self._offsets[s])
+                if s == "R" and self.trail_shift_m.any():
+                    h = hands[s] = replace(
+                        h, position_m=h.position_m + h.rotation @ self.trail_shift_m
+                    )
+                self._set_free(self._hand[s], h.rotation, h.position_m)
+                dof = self._dof(self._hand[s])
+                qvel_ang = h.rotation.T @ h.omega_rad_s
+                self.data.qvel[dof : dof + 3] = h.velocity_m_s
+                self.data.qvel[dof + 3 : dof + 6] = qvel_ang
+                if s == "R" and self.hand_mode == "trail_follows_club":
+                    self.data.qfrc_applied[dof : dof + 3] = -HAND_MASS_KG * self.gravity
+                    self.data.qfrc_applied[dof + 3 : dof + 6] = 0.0
+                else:
+                    hn = next_hands[s]
+                    a_lin = (hn.velocity_m_s - h.velocity_m_s) * inv_dt
+                    a_ang = ((hn.rotation.T @ hn.omega_rad_s) - qvel_ang) * inv_dt
+                    self.data.qfrc_applied[dof : dof + 3] = HAND_MASS_KG * (
+                        a_lin - self.gravity
+                    )
+                    self.data.qfrc_applied[dof + 3 : dof + 6] = (
+                        HAND_INERTIA_KG_M2 * a_ang
+                    )
+            return hands
 
         q, qdot = self.hand_source(t)
         weld = self.kinematics.state(q, qdot)
@@ -398,6 +481,7 @@ class ClubInHands:
 
     def place_club(self, state: RigidBodyState) -> None:
         """Set the club pose and velocity (world) from ``state``."""
+        self._set_step_scaling(False)
         self._set_free(self._club, state.rotation, state.position_m)
         dof = self._dof(self._club)
         self.data.qvel[dof : dof + 3] = state.velocity_m_s
@@ -513,45 +597,25 @@ class ClubInHands:
             self._held_source = _hold_src
         return hands
 
-    def _forward_clamped_club(self) -> None:
-        """Run ``mj_forward`` with the free club held in static equilibrium."""
-        mj, m, d = self._mj, self.model, self.data
-        d.qfrc_applied[:] = 0.0
-        mj.mj_forward(m, d)
-        if d.nefc > 0:
-            j_mat = np.asarray(d.efc_J).reshape(d.nefc, m.nv)
-            f_eq = np.asarray(d.efc_aref) / np.asarray(d.efc_R)
-            d.qfrc_applied[:] = d.qfrc_bias - j_mat.T @ f_eq
-            mj.mj_forward(m, d)
-
     def pad_forces_and_penetrations(self) -> tuple[dict, dict]:
         """Normal force and penetration of every pad/site contact after ``mj_forward``."""
         mj, m, d = self._mj, self.model, self.data
-        if self.topology_model is None:
-            mj.mj_forward(m, d)
-            res = np.zeros(6)
-            force, depth = {}, {}
-            for i in range(d.ncon):
-                c = d.contact[i]
-                hit = self._pad_geom.get(int(c.geom1))
-                if hit is None:
-                    continue
-                mj.mj_contactForce(m, d, i, res)
-                force[hit], depth[hit] = float(res[0]), float(-c.dist)
-            return force, depth
-
-        self._forward_clamped_club()
+        self._set_step_scaling(False)
+        mj.mj_forward(m, d)
         res = np.zeros(6)
-        force, depth = {}, {}
+        force: dict[tuple[str, int], float] = {}
+        depth: dict[tuple[str, int], float] = {}
         for i in range(d.ncon):
             c = d.contact[i]
             hit = self._pad_geom.get(int(c.geom1))
             if hit is None:
                 continue
             mj.mj_contactForce(m, d, i, res)
-            force[hit] = force.get(hit, 0.0) + float(res[0])
-            depth[hit] = max(depth.get(hit, 0.0), float(-c.dist))
-        d.qfrc_applied[:] = 0.0
+            if self.topology_model is None:
+                force[hit], depth[hit] = float(res[0]), float(-c.dist)
+            else:
+                force[hit] = force.get(hit, 0.0) + float(res[0])
+                depth[hit] = max(depth.get(hit, 0.0), float(-c.dist))
         return force, depth
 
     def _default_target_force(
@@ -611,6 +675,8 @@ class ClubInHands:
         """``steps`` Euler steps with the hands re-prescribed before each."""
         mj, m, d = self._mj, self.model, self.data
         dt = self.timestep_s
+        if steps > 0:
+            self._set_step_scaling(True)
         for _ in range(steps):
             t = float(d.time)
             self.place_hands(t, velocity_time=t + 0.5 * dt)
