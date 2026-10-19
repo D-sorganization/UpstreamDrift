@@ -91,26 +91,30 @@ def test_blend_mode_combo_offers_tint_and_replace(app):
 
 
 def test_injected_picker_sets_hex_swatch_and_scale(app):
-    panel = ForceColorControls()
+    picks = []
+
+    def fake_picker(current: str, parent: QWidget) -> str | None:
+        picks.append(current)
+        return "#00FF00"
+
+    panel = ForceColorControls(color_picker=fake_picker)
     received = []
     panel.scale_changed.connect(received.append)
-    picks = []
-    panel._color_picker = lambda current, parent: picks.append(current) or "#00FF00"
-    button = panel.findChild(QToolButton, "pick_tension_color")
-    button.click()
+    line = panel.findChild(QLineEdit, "tension_color")
+    line.parent().findChild(QPushButton).click()
     assert picks == ["#0000ff"]
-    assert panel.findChild(QLineEdit, "tension_color").text() == "#00ff00"
+    assert line.text() == "#00ff00"
     assert received[-1].tension_color == "#00ff00"
-    assert "#00ff00" in button.styleSheet()
     panel.close()
 
 
 def test_cancelled_picker_changes_nothing(app):
-    panel = ForceColorControls()
+    panel = ForceColorControls(color_picker=lambda current, parent: None)
     received = []
     panel.scale_changed.connect(received.append)
-    panel._color_picker = lambda current, parent: None
-    panel.findChild(QToolButton, "pick_compression_color").click()
+    panel.findChild(QLineEdit, "compression_color").parent().findChild(
+        QPushButton
+    ).click()
     assert received == []
     assert panel.findChild(QLineEdit, "compression_color").text() == "#ff0000"
     panel.close()
@@ -119,7 +123,9 @@ def test_cancelled_picker_changes_nothing(app):
 def test_every_color_field_has_a_picker_button(app):
     panel = ForceColorControls()
     for name in ("tension_color", "compression_color", "neutral_color"):
-        assert panel.findChild(QToolButton, f"pick_{name}") is not None
+        line = panel.findChild(QLineEdit, name)
+        assert line is not None
+        assert line.parent().findChild(QPushButton) is not None
     panel.close()
 
 

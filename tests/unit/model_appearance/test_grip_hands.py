@@ -215,4 +215,4 @@ def test_assembly_with_hands_adds_two_glove_meshes_and_keeps_the_club() -> None:
     for part in ("shaft", "grip", "head"):
         np.testing.assert_array_equal(full[part].vertices, plain[part].vertices)
     for part in ("lead_hand", "trail_hand"):
-        assert ca.PART_MATERIALS[part] == "glove_white"
+        assert part not in ca.PART_MATERIALS  # skin or glove: the document decides

@@ -406,8 +406,8 @@ class TrunkMigrator:
             alternative_residuals_rad=(r_l, r_t),
             alternative_spread_rad=float(
                 max(
-                    np.linalg.norm(lumbar_only - phi),
-                    np.linalg.norm(thoracic_only - phi),
+                    float(np.linalg.norm(lumbar_only - phi)),
+                    float(np.linalg.norm(thoracic_only - phi)),
                 )
             ),
             rejected_axial_sum_residual_rad=rejected_resid,

@@ -28,9 +28,18 @@ def root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 
 @pytest.fixture
-def client(root: Path) -> TestClient:
-    if getattr(app.state, "task_manager", None) is None:
-        app.state.task_manager = TaskManager()
+def client(root: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    # A fresh task manager and job pool per test: another test may have
+    # closed the app's manager, and the module-level pool keeps its slots.
+    from src.api.routes import spine_viewer as spine_routes
+    from src.api.routes.bunker_workbench_jobs import BunkerJobPool
+
+    monkeypatch.setattr(app.state, "task_manager", TaskManager(), raising=False)
+    monkeypatch.setattr(
+        spine_routes,
+        "JOB_POOL",
+        BunkerJobPool(spine_routes.MAX_SPINE_STUDY_JOBS),
+    )
     return TestClient(app)
 
 

@@ -49,6 +49,10 @@ from src.shared.python.lifting.bundles import (
 )
 from src.shared.python.lifting.sagittal_retarget import LANDMARK_LABELS
 from src.shared.python.motion_matching.same_input import InputBundle
+from src.shared.python.motion_matching.tibial_torsion import (
+    TIBIAL_TORSION_KEY,
+    validate_tibial_torsion,
+)
 
 Array = NDArray[np.float64]
 
@@ -129,7 +133,11 @@ class LiftTargets:
     model's arms on them); ``pelvis_rotation`` (N, 3, 3) holds the bundle's
     Rajagopal pelvis axes
     (columns) in the OpenSim frame; ``source_coordinates`` maps each
-    :data:`SOURCE_HIP_COORDINATES` name to its (N,) bundle values (radians).
+    :data:`SOURCE_HIP_COORDINATES` name to its (N,) bundle values (radians);
+    ``tibial_torsion`` is the spec's ``tibial_torsion_deg`` record (per-side
+    foot turn-out offset in degrees and its source; empty for the generic
+    Rajagopal leg), which the OpenSim model must carry for its foot stations
+    to be the bundle's (OSL-18, #13157).
     """
 
     lift: str
@@ -151,6 +159,7 @@ class LiftTargets:
     height_m: float
     frame: LiftFrame
     provenance: Mapping[str, Any] = field(default_factory=dict)
+    tibial_torsion: Mapping[str, Any] = field(default_factory=dict)
 
     def landmarks(self, k: int) -> dict[str, Array]:
         """Landmark positions of state ``k`` (of the selection) by label."""
@@ -324,6 +333,7 @@ def lift_targets(lift: str, path: Path, *, stride: int = 1) -> LiftTargets:
     if not isinstance(record, Mapping):
         raise ValueError("bundle carries no barbell record (LIFT-4 bar states)")
     spec = json.loads(bundle.spec_bytes)
+    validate_tibial_torsion(spec)
     stations = _foot_stations(spec)
     attachments = {
         label: LANDMARK_ATTACHMENTS[label] for label in LANDMARK_LABELS
@@ -370,6 +380,7 @@ def lift_targets(lift: str, path: Path, *, stride: int = 1) -> LiftTargets:
         bar_mass_kg=float(record["bar_mass_kg"]),
         height_m=float(bundle.provenance["optimizer"]["height_m"]),
         frame=frame,
+        tibial_torsion=dict(spec.get(TIBIAL_TORSION_KEY) or {}),
         provenance={
             "reference_engine": bundle.reference_engine,
             "dt_s": float(bundle.dt_s),

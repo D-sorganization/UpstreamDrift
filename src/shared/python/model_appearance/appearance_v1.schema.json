@@ -108,6 +108,35 @@
     "skin_tone": { "$ref": "#/$defs/name" },
     "clothing": { "$ref": "#/$defs/name" },
     "club_finish": { "$ref": "#/$defs/name" },
+    "glove": { "enum": ["none", "lead", "trail", "both"] },
+    "handedness": { "enum": ["right", "left"] },
+    "grip": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "style": { "enum": ["overlap", "interlock", "ten_finger"] },
+        "lead_thumb_offset_deg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 45
+        },
+        "grip_strength_deg": {
+          "type": "number",
+          "minimum": -30,
+          "maximum": 30
+        },
+        "lead_roll_offset_deg": {
+          "type": "number",
+          "minimum": -30,
+          "maximum": 30
+        },
+        "trail_roll_offset_deg": {
+          "type": "number",
+          "minimum": -30,
+          "maximum": 30
+        }
+      }
+    },
     "materials": {
       "type": "object",
       "propertyNames": { "$ref": "#/$defs/name" },

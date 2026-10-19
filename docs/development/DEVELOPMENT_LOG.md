@@ -1376,10 +1376,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #11745
 - **Branch:** claude/lift-5-squat-bundle
-- **PR:** #12245, #12340, #13052, #13047
+- **PR:** #12245, #12340, #13052, #13047, #13263
 - **Paths:** see #12245
 - **Started:** 2026-10-14
-- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/11745-snatch-bundle.md)
+- **Last verified:** 2026-10-18 (`5841213b`; collated from changes/11745-bump-vendor-ud-tools-to-a459505-tools-56.md)
 - **Summary:** LIFT-5 slice 1: back-squat same-input bundle from the Movement Optimizer via full-body marker IK, with provenance, regeneration script and MuJoCo replay smoke test
 - **Next step:** Bump vendor/ud-tools to the Tools #5653 merge commit and regenerate the snatch bundle and parity record so tools_pin matches
 
@@ -2573,6 +2573,136 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13157 · OSL-18: OpenSim Lift Foot Carries the Bundle's 10 Deg Tibial Torsion and Is Sized From the Bundle's Calcaneus Stations; Squat IK Marker RMS 1.93 cm / Max 3.55 cm, Inside the Unchanged 2/4 cm Gate; Marker-Gate Xfails Removed
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13157
+- **Branch:** merged via #13264
+- **PR:** #13264
+- **Paths:** see #13264
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`9834a7c7`; collated from changes/13157-osl-18-opensim-lift-foot-carries-the-bun.md)
+- **Summary:** OSL-18: OpenSim lift foot carries the bundle's 10 deg tibial torsion and is sized from the bundle's calcaneus stations; squat IK marker RMS 1.93 cm / max 3.55 cm, inside the unchanged 2/4 cm gate; marker-gate xfails removed
+- **Next step:** Shipped in PR #13264.
+
+### DL-#12998 · Add JaxSim Launcher Dashboard Tile and Engine Tile Coverage Test
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12998
+- **Branch:** merged via #13224
+- **PR:** #13224
+- **Paths:** see #13224
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`3dec2e7c`; collated from changes/12998-add-jaxsim-launcher-dashboard-tile-and-e.md)
+- **Summary:** Add JaxSim launcher dashboard tile and engine tile coverage test
+- **Next step:** Shipped in PR #13224.
+
+### DL-#12977 · Pipeline: FreeMoCap Adapter Deterministic CSV Selection, NaN Confidence Handling, Non-Monotonic Time Rejection, and Configurable Min_Confidence
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12977
+- **Branch:** fix/12977-freemocap-adapter-integrity
+- **PR:** #13252
+- **Paths:** see #13252
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`9843b55e`; collated from changes/12977-freemocap-adapter-integrity.md)
+- **Summary:** pipeline: FreeMoCap adapter deterministic CSV selection, NaN confidence handling, non-monotonic time rejection, and configurable min_confidence
+- **Next step:** Shipped in PR #13252.
+
+### DL-#12968 · Robotics: Eliminate Silent Velocity, Acceleration, and Mass Fallbacks in ZMPComputer and Support Finite-Difference Acceleration
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12968
+- **Branch:** fix/12968-zmp-computer-velocity-fallback
+- **PR:** #13250
+- **Paths:** see #13250
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`77c7b1d9`; collated from changes/12968-zmp-computer-velocity-fallback.md)
+- **Summary:** robotics: eliminate silent velocity, acceleration, and mass fallbacks in ZMPComputer and support finite-difference acceleration
+- **Next step:** Shipped in PR #13250.
+
+### DL-#13179 · Close the Segment Axial-Load Evaluation Over the Grip Weld: Physical KKT Closure Wrench Replaces the Soft Weld in the Prescribed Inverse, Ball-Impact Frames Are Unavailable, Ground Free Moment Is Carried
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13179
+- **Branch:** fix/13179-closure-wrench-overlay
+- **PR:** #13200
+- **Paths:** see #13200
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`33b2d5eb`; collated from changes/13179-close-the-segment-axial-load-evaluation.md)
+- **Summary:** Close the segment axial-load evaluation over the grip weld: physical KKT closure wrench replaces the soft weld in the prescribed inverse, ball-impact frames are unavailable, ground free moment is carried
+- **Next step:** Shipped in PR #13200.
+
+### DL-#13170 · Full-Body-V2 Schema (Regional Lumbar L5/S1 and Thoracic T12/L1 Trunk), One Schema Registry for Exporters and Consumers, and a Constrained V1->V2 Trunk Migration With Residual and Non-Uniqueness Report; V1 Stays Default and Byte-Identical
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13170
+- **Branch:** feat/13170-full-body-v2-schema
+- **PR:** #13244, #13224
+- **Paths:** see #13244
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`3dec2e7c`; collated from changes/13170-full-body-v2-schema-regional-lumbar-l5-s.md)
+- **Summary:** full-body-v2 schema (regional lumbar L5/S1 and thoracic T12/L1 trunk), one schema registry for exporters and consumers, and a constrained v1->v2 trunk migration with residual and non-uniqueness report; v1 stays default and byte-identical
+- **Next step:** Shipped in PR #13244.
+
+### DL-#13146 · Translucent Tension/Compression Segment Shading With Independent Force/Torque Vector Toggles, User Colours and Opacity Across MuJoCo GUI, Drake/Pinocchio GUIs, Web and Native_Viewer_Export (MuJoCo, Drake, Pinocchio, MyoSuite)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13146
+- **Branch:** feat/tension-compression-overlay
+- **PR:** #13200
+- **Paths:** see #13200
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`33b2d5eb`; collated from changes/13146-translucent-tension-compression-segment.md)
+- **Summary:** Translucent tension/compression segment shading with independent force/torque vector toggles, user colours and opacity across MuJoCo GUI, Drake/Pinocchio GUIs, web and native_viewer_export (MuJoCo, Drake, Pinocchio, MyoSuite)
+- **Next step:** Shipped in PR #13200.
+
+### DL-#13004 · Fail Closed With Ok=False and Rejected Cameras on Degenerate or Collinear Camera Pairs
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13004
+- **Branch:** merged via #13239
+- **PR:** #13239, #13224
+- **Paths:** see #13239
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`3dec2e7c`; collated from changes/13004-triangulate-degenerate-cameras.md)
+- **Summary:** Fail closed with ok=False and rejected cameras on degenerate or collinear camera pairs
+- **Next step:** Shipped in PR #13239.
+
+### DL-#13003 · Penalize Behind-Camera Observations in Bundle Adjustment and Propagate Optimizer Convergence
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13003
+- **Branch:** merged via #13242
+- **PR:** #13242
+- **Paths:** see #13242
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`0a104862`; collated from changes/13003-bundle-behind-camera-convergence.md)
+- **Summary:** Penalize behind-camera observations in bundle adjustment and propagate optimizer convergence
+- **Next step:** Shipped in PR #13242.
+
+### DL-#12975 · Verify All Participating Swing Receipt Hashes in Leakage Guard, Preserve All Participant Hashes, and Abstain on Single Candidates
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12975
+- **Branch:** merged via #13249
+- **PR:** #13249
+- **Paths:** see #13249
+- **Started:** 2026-10-18
+- **Last verified:** 2026-10-18 (`6f3a0ad9`; collated from changes/12975-swing-pairing-receipt-hash-guard.md)
+- **Summary:** Verify all participating swing receipt hashes in leakage guard, preserve all participant hashes, and abstain on single candidates
+- **Next step:** Shipped in PR #13249.
 
 ### DL-#13188 · Procedural Shoe-Last Feet (HRG-F1): Heel Counter, Medial Arch, Instep Ramp, Asymmetric Toe Box, Flat Sole Sized From Spec Foot Length and a Cited Breadth Ratio; Foot.Model Option
 

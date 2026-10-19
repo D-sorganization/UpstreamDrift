@@ -21,7 +21,6 @@ from numpy.typing import NDArray
 from src.robotics.core.protocols import HumanoidCapable, RoboticsCapable
 from src.shared.python.core.constants import GRAVITY_FLOAT as _GRAVITY_CONST
 from src.shared.python.core.contracts import ContractChecker
-from src.shared.python.model_generation.core.constants import DEFAULT_MASS_KG
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +36,7 @@ class ZMPResult:
         support_margin: Distance from ZMP to nearest support boundary [m].
         total_normal_force: Total vertical ground reaction force [N].
         ground_height: Height of ground plane [m].
+        validity_reason: Reason for invalidity or estimation caveat; empty if valid.
     """
 
     zmp_position: NDArray[np.float64]
@@ -45,6 +45,7 @@ class ZMPResult:
     support_margin: float
     total_normal_force: float
     ground_height: float = 0.0
+    validity_reason: str = ""
 
 
 class ZMPComputer(ContractChecker):
@@ -92,6 +93,13 @@ class ZMPComputer(ContractChecker):
         self._engine = engine
         self._ground_height = ground_height
         self._is_humanoid = isinstance(engine, HumanoidCapable)
+        self._prev_com_velocity: NDArray[np.float64] | None = None
+        self._prev_time: float | None = None
+
+    def reset(self) -> None:
+        """Reset internal history state (previous velocity and timestamp)."""
+        self._prev_com_velocity = None
+        self._prev_time = None
 
     def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
         """Define class invariants for ZMPComputer."""
@@ -123,6 +131,8 @@ class ZMPComputer(ContractChecker):
         com_acceleration: NDArray[np.float64] | None = None,
         angular_momentum_rate: NDArray[np.float64] | None = None,
         support_polygon: NDArray[np.float64] | None = None,
+        dt: float | None = None,
+        mass: float | None = None,
     ) -> ZMPResult:
         """Compute Zero Moment Point.
 
@@ -141,24 +151,36 @@ class ZMPComputer(ContractChecker):
 
         Args:
             com_position: CoM position (3,). Uses engine if None.
-            com_velocity: CoM velocity (3,). Uses numerical diff if None.
-            com_acceleration: CoM acceleration (3,). Estimated if None.
+            com_velocity: CoM velocity (3,). Uses engine if None. Used for
+                finite-difference acceleration estimation when com_acceleration is None.
+            com_acceleration: CoM acceleration (3,). If None, estimated via
+                finite differences from velocity history and dt.
             angular_momentum_rate: Angular momentum rate (3,). Zero if None.
             support_polygon: Support polygon vertices (n, 2). Uses default if None.
+            dt: Time step [s] for finite-difference acceleration estimation.
+            mass: Total robot mass [kg]. Uses engine if None.
 
         Returns:
-            ZMPResult with ZMP position and validity.
+            ZMPResult with ZMP position, validity, and validity_reason. If
+            acceleration is estimated via finite differences, is_valid is False
+            with validity_reason explaining the estimation caveat.
         """
+        if dt is not None and dt <= 0:
+            raise ValueError(f"dt must be positive, got {dt}")
+
         # Get CoM state
         if com_position is None:
             com_position = self._get_com_position()
-        if com_acceleration is None:
-            com_acceleration = self._estimate_com_acceleration(com_velocity)
+
+        com_acceleration, acceleration_estimated = self._resolve_com_acceleration(
+            com_velocity, com_acceleration, dt
+        )
+
         if angular_momentum_rate is None:
             angular_momentum_rate = np.zeros(3)
 
         # Get robot mass
-        mass = self._estimate_mass()
+        robot_mass = self._estimate_mass(mass=mass)
 
         # Height above ground
         z_rel = com_position[2] - self._ground_height
@@ -168,46 +190,36 @@ class ZMPComputer(ContractChecker):
 
         # Avoid division by zero (free fall)
         if abs(denom) < 1e-6:
-            # Robot is in free fall, ZMP is undefined
-            return ZMPResult(
-                zmp_position=np.array([0.0, 0.0, self._ground_height]),
-                cop_position=np.array([0.0, 0.0, self._ground_height]),
-                is_valid=False,
-                support_margin=-1.0,
-                total_normal_force=0.0,
-                ground_height=self._ground_height,
-            )
+            return self._free_fall_result()
 
         # ZMP calculation.  The angular-momentum-rate term is NOT scaled by the
         # CoM height: only the linear-acceleration term is (issue #8017).
         zmp_x = (
             com_position[0]
             - z_rel * com_acceleration[0] / denom
-            - angular_momentum_rate[1] / (mass * denom)
+            - angular_momentum_rate[1] / (robot_mass * denom)
         )
         zmp_y = (
             com_position[1]
             - z_rel * com_acceleration[1] / denom
-            + angular_momentum_rate[0] / (mass * denom)
+            + angular_momentum_rate[0] / (robot_mass * denom)
         )
-        zmp_z = self._ground_height
-
-        zmp = np.array([zmp_x, zmp_y, zmp_z])
-        cop = zmp.copy()  # CoP == ZMP for flat ground
-
-        # Compute total normal force
-        total_force = mass * denom
+        zmp = np.array([zmp_x, zmp_y, self._ground_height])
 
         # Check if ZMP is in support polygon
-        is_valid, margin = self._check_support(zmp[:2], support_polygon)
+        is_in_support, margin = self._check_support(zmp[:2], support_polygon)
+        is_valid, validity_reason = self._build_validity(
+            is_in_support, acceleration_estimated
+        )
 
         return ZMPResult(
             zmp_position=zmp,
-            cop_position=cop,
+            cop_position=zmp.copy(),  # CoP == ZMP for flat ground
             is_valid=is_valid,
             support_margin=margin,
-            total_normal_force=total_force,
+            total_normal_force=robot_mass * denom,
             ground_height=self._ground_height,
+            validity_reason=validity_reason,
         )
 
     def compute_capture_point(
@@ -227,11 +239,16 @@ class ZMPComputer(ContractChecker):
 
         Returns:
             Capture point position (3,).
+
+        Raises:
+            ValueError: If com_position or com_velocity cannot be determined.
         """
         if com_position is None:
             com_position = self._get_com_position()
         if com_velocity is None:
             com_velocity = self._get_com_velocity()
+        else:
+            com_velocity = np.asarray(com_velocity, dtype=np.float64)
 
         z_rel = com_position[2] - self._ground_height
         if z_rel <= 0:
@@ -299,38 +316,166 @@ class ZMPComputer(ContractChecker):
         )
 
     def _get_com_velocity(self) -> NDArray[np.float64]:
-        """Get CoM velocity from engine."""
+        """Get CoM velocity from engine.
+
+        Returns:
+            CoM velocity (3,) [m/s].
+
+        Raises:
+            ValueError: If engine does not implement HumanoidCapable. Provide com_velocity explicitly.
+        """
         if self._is_humanoid:
             engine = self._engine
             if isinstance(engine, HumanoidCapable):
                 return engine.get_com_velocity()
 
-        return np.zeros(3)
+        if hasattr(self._engine, "get_com_velocity") and callable(
+            self._engine.get_com_velocity
+        ):
+            return np.asarray(self._engine.get_com_velocity(), dtype=np.float64)
+
+        raise ValueError(
+            "Cannot determine COM velocity: engine does not implement "
+            "HumanoidCapable. Provide com_velocity explicitly."
+        )
 
     def _estimate_com_acceleration(
         self,
-        com_velocity: NDArray[np.float64] | None,
+        com_velocity: NDArray[np.float64] | None = None,
+        dt: float | None = None,
     ) -> NDArray[np.float64]:
-        """Estimate CoM acceleration.
+        """Estimate CoM acceleration using finite differences from velocity history.
 
-        Simple estimation assuming quasi-static (zero acceleration).
+        Args:
+            com_velocity: Current CoM velocity (3,). Uses engine if None.
+            dt: Time step [s]. Uses engine time delta if None.
+
+        Returns:
+            Estimated CoM acceleration (3,).
+
+        Raises:
+            ValueError: If finite-difference history (previous velocity and dt) is unavailable.
         """
-        # For now, assume quasi-static
-        logger.warning(
-            "Using quasi-static assumption (zero COM acceleration). "
-            "This is inaccurate for dynamic motions such as walking or running."
-        )
-        return np.zeros(3)
+        if com_velocity is None:
+            curr_v = self._get_com_velocity()
+        else:
+            curr_v = np.asarray(com_velocity, dtype=np.float64)
 
-    def _estimate_mass(self) -> float:
-        """Estimate total robot mass."""
+        effective_dt = dt
+        if effective_dt is not None:
+            if effective_dt <= 0:
+                raise ValueError(f"dt must be positive, got {effective_dt}")
+        elif (
+            hasattr(self._engine, "get_time")
+            and callable(self._engine.get_time)
+            and self._prev_time is not None
+        ):
+            try:
+                diff = float(self._engine.get_time()) - self._prev_time
+                if diff > 0:
+                    effective_dt = diff
+            except (ValueError, TypeError, AttributeError):
+                pass
+
+        if self._prev_com_velocity is None or effective_dt is None:
+            self._record_velocity_history(curr_v)
+            raise ValueError(
+                "Cannot estimate COM acceleration: finite-difference history "
+                "(previous velocity and dt) is unavailable. Provide com_acceleration "
+                "explicitly or provide velocity history with dt."
+            )
+
+        accel = (curr_v - self._prev_com_velocity) / effective_dt
+        self._record_velocity_history(curr_v)
+        return accel
+
+    def _record_velocity_history(self, velocity: NDArray[np.float64]) -> None:
+        """Update cached previous COM velocity and engine timestamp."""
+        self._prev_com_velocity = np.asarray(velocity, dtype=np.float64).copy()
+        if hasattr(self._engine, "get_time") and callable(self._engine.get_time):
+            try:
+                self._prev_time = float(self._engine.get_time())
+            except (ValueError, TypeError, AttributeError):
+                pass
+
+    def _estimate_mass(self, mass: float | None = None) -> float:
+        """Estimate or validate total robot mass.
+
+        Args:
+            mass: Explicit robot mass [kg] if provided.
+
+        Returns:
+            Total robot mass [kg].
+
+        Raises:
+            ValueError: If mass is invalid or cannot be determined from engine.
+        """
+        if mass is not None:
+            if mass <= 0:
+                raise ValueError(f"Robot mass must be positive, got {mass}")
+            return float(mass)
+
         if self._is_humanoid:
             engine = self._engine
             if isinstance(engine, HumanoidCapable):
-                return engine.get_total_mass()
+                return float(engine.get_total_mass())
 
-        # Default mass from humanoid model constants
-        return DEFAULT_MASS_KG
+        if hasattr(self._engine, "get_total_mass") and callable(
+            self._engine.get_total_mass
+        ):
+            return float(self._engine.get_total_mass())
+
+        raise ValueError(
+            "Cannot determine robot mass: engine does not implement "
+            "HumanoidCapable. Provide mass explicitly."
+        )
+
+    def _resolve_com_acceleration(
+        self,
+        com_velocity: NDArray[np.float64] | None,
+        com_acceleration: NDArray[np.float64] | None,
+        dt: float | None,
+    ) -> tuple[NDArray[np.float64], bool]:
+        """Resolve COM acceleration directly or via finite differences."""
+        if com_acceleration is None:
+            return self._estimate_com_acceleration(com_velocity, dt=dt), True
+
+        accel = np.asarray(com_acceleration, dtype=np.float64)
+        if com_velocity is not None:
+            self._record_velocity_history(com_velocity)
+        elif self._is_humanoid:
+            try:
+                self._record_velocity_history(self._get_com_velocity())
+            except (ValueError, TypeError, AttributeError):
+                pass
+        return accel, False
+
+    def _build_validity(
+        self,
+        is_in_support: bool,
+        acceleration_estimated: bool,
+    ) -> tuple[bool, str]:
+        """Determine ZMP validity flag and reason string."""
+        if not is_in_support:
+            reason = "ZMP outside support polygon"
+            if acceleration_estimated:
+                reason += "; COM acceleration estimated via finite difference"
+            return False, reason
+        if acceleration_estimated:
+            return False, "COM acceleration estimated via finite difference"
+        return True, ""
+
+    def _free_fall_result(self) -> ZMPResult:
+        """Return invalid ZMPResult corresponding to free fall."""
+        return ZMPResult(
+            zmp_position=np.array([0.0, 0.0, self._ground_height]),
+            cop_position=np.array([0.0, 0.0, self._ground_height]),
+            is_valid=False,
+            support_margin=-1.0,
+            total_normal_force=0.0,
+            ground_height=self._ground_height,
+            validity_reason="Robot is in free fall (vertical acceleration cancels gravity)",
+        )
 
     def _check_support(
         self,

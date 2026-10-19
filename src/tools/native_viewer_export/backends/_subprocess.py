@@ -83,6 +83,7 @@ def stage_job(
         },
         ball=swing.ball.to_dict() if swing.ball is not None else None,
         ball_visible=visible,
+        appearance=settings.appearance,
         axial_path=str(axial_path) if axial_path else None,
         shading=shading,
     )

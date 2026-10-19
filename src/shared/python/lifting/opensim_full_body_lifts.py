@@ -460,6 +460,7 @@ def opensim_lift_ik_id(
                 "segment_scale_factors",
                 "skeleton_mass_kg",
                 "bar_mass_kg",
+                "tibial_torsion",
             )
         },
         "ik": {**ikid.ik_receipt(targets, ik, pelvis), "arm_reach": reach.record()},

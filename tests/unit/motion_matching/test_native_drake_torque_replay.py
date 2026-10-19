@@ -6,6 +6,9 @@ from typing import Any
 import numpy as np
 import pytest
 
+from src.engines.physics_engines.drake.python.drake_native_policy import (
+    skip_unless_reviewed_native_drake,
+)
 from src.engines.physics_engines.drake.python.native_torque_replay import (
     build_native_drake_torque_bundle,
     replay_native_drake_torque_bundle,
@@ -17,6 +20,7 @@ URDF = '<robot name="replay_probe"><link name="base"><inertial><mass value="1"/>
 
 @pytest.fixture
 def native_fixture(tmp_path: Path) -> tuple[Path, Any, Any]:
+    skip_unless_reviewed_native_drake()
     module = pytest.importorskip("pydrake.multibody.plant")
     if not isinstance(getattr(module, "__file__", None), str):
         pytest.skip("real native Drake binding required; mock is not evidence")

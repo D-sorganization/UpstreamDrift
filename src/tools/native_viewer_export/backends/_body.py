@@ -11,20 +11,45 @@ its own body-frame transform explicitly. Visual only.
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from src.shared.python.model_appearance.body_meshes import (
     SPEC_BODY_FRAME,
     ResolvedAppearance,
 )
 from src.shared.python.model_appearance.defaults import default_appearance
+from src.shared.python.model_appearance.schema import (
+    AppearanceDocument,
+    document_from_dict,
+)
 from src.tools.native_viewer_export.backends._head import write_obj
 
 _UNSAFE = re.compile(r"[^A-Za-z0-9_.-]+")
 # The default appearance document every native-viewer backend renders: the one
 # contract in ``model_appearance.defaults`` (HRG-B1, #13163), re-exported here.
 default_appearance = default_appearance
+
+
+def appearance_for(document: Mapping[str, Any] | None) -> AppearanceDocument:
+    """The document a backend renders: ``document`` (the resolved appearance
+    carried by ``ExportSettings`` / ``WorkerJob``) or the contract default.
+
+    Postcondition: ``None`` gives exactly :func:`default_appearance`; any other
+    mapping is validated by ``document_from_dict`` (``ValueError`` if invalid).
+    """
+    if document is None:
+        return default_appearance()
+    return document_from_dict(document)
+
+
+def scene_appearance(
+    plain: bool, document: Mapping[str, Any] | None
+) -> AppearanceDocument | None:
+    """MeshCat scene appearance: ``None`` (grey skeleton) when ``plain``."""
+    return None if plain else appearance_for(document)
 
 
 @dataclass(frozen=True)

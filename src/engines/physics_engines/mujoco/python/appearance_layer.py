@@ -292,17 +292,22 @@ def attach_club_meshes(
     body: str,
     club: ClubAssembly,
     finish: str = "satin_steel",
+    doc: AppearanceDocument | None = None,
 ) -> int:
     """Add only the shaft, grip, mesh head and grip hands of ``club`` (plain layer).
+
+    ``doc`` (default: the contract default) decides the hands: bare skin, or
+    the glove its ``glove`` field names.
 
     For the plain ``visual=True`` export, which keeps its capsule skeleton but
     should still show the real head (GCV-11) and both hands wrapped on the
     grip (OSV-2). Visual only, massless,
     non-colliding. Returns the number of meshes added.
     """
-    doc = document_from_dict({"schema_version": "appearance-v1"})
+    if doc is None:
+        doc = document_from_dict({"schema_version": "appearance-v1"})
     assets = _Assets(root, doc)
-    for label, mesh, material in club_meshes(club, finish):
+    for label, mesh, material in club_meshes(club, finish, doc):
         _add_mesh_visual(
             assets, elements[body], f"vmesh_club_{label}", offsets[body], mesh, material
         )

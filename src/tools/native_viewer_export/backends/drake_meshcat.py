@@ -29,8 +29,9 @@ from src.tools.native_viewer_export.backends._meshcat_scene import (
     SceneVisuals,
     build_scene_visuals,
     check_bodies,
-    default_appearance,
+    default_appearance as default_appearance,
 )
+from src.tools.native_viewer_export.backends._body import scene_appearance
 from src.tools.native_viewer_export.backends._meshcat_page import (
     MeshcatPage,
     playwright_unavailable_reason,
@@ -57,7 +58,12 @@ class DrakeMeshcatBackend:
 
     def __init__(self, plain: bool = False) -> None:
         """``plain`` draws the grey library skeleton instead of the appearance."""
-        self._appearance = None if plain else default_appearance()
+        self._plain = plain
+        self._appearance = scene_appearance(plain, None)
+
+    def _apply_settings(self, settings: ExportSettings) -> None:
+        """Adopt the export's resolved appearance document (HRG-B2, #13167)."""
+        self._appearance = scene_appearance(self._plain, settings.appearance)
 
     def unavailable_reason(self) -> str | None:
         if find_spec("pydrake") is None:
@@ -170,6 +176,7 @@ class DrakeMeshcatBackend:
             DrakeMeshcatSink,
         )
 
+        self._apply_settings(settings)
         plant, diagram, ctx, pctx, meshcat, starts, bindings = self._build(swing)
 
         def set_state(index: int) -> None:

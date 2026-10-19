@@ -1635,10 +1635,50 @@ Arm range overshoot (rad) & $1.21\times10^{-3}$ & $8.0\times10^{-4}$\\
   earlier rack body). The foot markers carry it (forefoot 2.4 to 3.8\,cm):
   the 10$^\circ$ tibial torsion (\#12814) turns the bundle feet out from
   8.8 to 17.9$^\circ$, which the torsion-free Rajagopal foot cannot follow.
-  The gate is not loosened; the marker-gate tests are strict xfails
-  tracked by OSL-18 (\#13157). The Hicks gate passes (146.6\,N,
+  The gate is not loosened; the marker-gate tests were strict xfails
+  tracked by OSL-18 (\#13157), fixed below. The Hicks gate passes (146.6\,N,
   18.5\,N\,m) and stays a separate passing test.
 \end{itemize}
+\paragraph{OpenSim Foot Fitted to the Bundle Foot (OSL-18, \#13157).}
+The bundle's leg is the Rajagopal leg with the \#12814 offset applied: its
+spec records \texttt{tibial\_torsion\_deg} $=10^\circ$ per side (Seber et
+al.\ 2000, CT tibiofibular torsion of 50 adult men, 16--50$^\circ$) on top of
+the 6.06$^\circ$ the generic leg carries, and the bundle foot is rotated by it
+about the shank axis through the ankle centre. The lift body therefore truly
+has the torsion, so the model is given the same torsion instead of the foot
+markers being remapped (a remap would hide that kinematic difference).
+\texttt{msk\_lift\_foot.apply\_tibial\_torsion} rotates each OpenSim
+\texttt{ankle\_<side>} parent frame on the tibia by the recorded offset about
+the model's own shank axis (\texttt{walker\_knee} tibia frame to ankle
+centre), toes lateral, before scaling. The joint child frame and the coordinate
+set are unchanged; the talus-in-tibia rotation equals the spec's within
+$0.05^\circ$ (test). A second mismatch was measured with it: the foot was
+scaled by the knee-to-ankle ratio (1.10), but the bundle's heel and forefoot
+stations are 0.150\,m apart, the generic separation, so the model foot was
+10\,\% long (0.165\,m). \texttt{bundle\_foot\_scale} now sizes the talus,
+calcaneus and toes from those stations (factor 1.000). Squat IK, committed
+rack bundle, gate unchanged (RMS / max, cm):
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llll}
+\toprule
+Marker & Before & Torsion Only & Torsion and Foot Size\\
+\midrule
+All markers & 2.448 / 3.81 & 1.996 / 3.56 & 1.929 / 3.55\\
+Forefoot l / r & 3.66 / 3.65 & 2.31 / 2.30 & 2.17 / 2.13\\
+Heel l / r & 2.26 / 2.27 & 1.54 / 1.55 & 1.29 / 1.27\\
+Ankle l / r & 1.59 / 1.59 & 0.97 / 0.96 & 0.93 / 0.90\\
+Knee l / r & 1.63 / 1.59 & 1.28 / 1.26 & 1.24 / 1.22\\
+Hip l / r & 0.64 / 0.69 & 0.71 / 0.74 & 0.74 / 0.77\\
+Shoulder l / r & 3.40 / 3.16 & 3.43 / 3.19 & 3.42 / 3.18\\
+Bar & 2.87 & 2.87 & 2.87\\
+\bottomrule
+\end{tabular}
+\end{center}
+The Hicks gate still passes (146.6\,N, 18.5\,N\,m). The largest remaining
+errors are the shoulders and bar, from the rack grip and arm reach (OSL-19,
+\#13158), and a forefoot error of about 2.1\,cm that predates the torsion
+(2.4\,cm on the earlier body). The static holds, which have no bundle, keep
+the generic foot.
 \subsection{Snatch Same-Input Bundle (LIFT-5, Issue \#11745)}
 \paragraph{Planar Pull.} The previous Tools snatch configuration ran from
 the floor setup to the overhead-squat catch through one mid-time via point.

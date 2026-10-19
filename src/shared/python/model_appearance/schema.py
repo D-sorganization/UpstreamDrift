@@ -22,6 +22,10 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, cast
 
+from src.shared.python.core.handedness import (
+    DEFAULT_HANDEDNESS,
+    HANDEDNESS_CHOICES,
+)
 from src.shared.python.model_appearance.defaults import default_fields
 
 SCHEMA_VERSION = "appearance-v1"
@@ -36,6 +40,14 @@ _DEFAULTS = default_fields()
 DEFAULT_CLOTHING = _DEFAULTS["clothing"]
 DEFAULT_SKIN_TONE = _DEFAULTS["skin_tone"]
 DEFAULT_CLUB_FINISH = _DEFAULTS["club_finish"]
+#: Which grip hands wear the golf glove, by golf role (HRG-G1, #13186). The
+#: owner default is bare, skin-coloured hands; a document written before this
+#: field existed resolves to ``"none"``.
+GLOVE_CHOICES = ("none", "lead", "trail", "both")
+DEFAULT_GLOVE = "none"
+#: Maps the lead/trail roles to the anatomical side: the lead hand is the left
+#: one for a right-handed golfer. The compiled spec carries no handedness, so
+#: it is a document field that defaults to ``"right"``.
 
 
 @dataclass(frozen=True)
@@ -172,7 +184,12 @@ class AppearanceDocument:
     head: HeadSettings = field(default_factory=HeadSettings)
     body_model: str = "ellipsoid"
     ball: BallSettings = field(default_factory=BallSettings)
+    glove: str = DEFAULT_GLOVE
+    handedness: str = DEFAULT_HANDEDNESS
     foot: FootSettings = field(default_factory=FootSettings)
+    #: Visual grip picks (``style``, ``lead_thumb_offset_deg``); never a physical
+    #: value (HRG-GR4, #13205).  ``None`` leaves the spec's own visual hints.
+    grip: dict[str, Any] | None = None
 
 
 @lru_cache(maxsize=1)
@@ -333,7 +350,10 @@ def document_from_dict(data: Mapping[str, Any]) -> AppearanceDocument:
         head=_head_settings(data.get("head", {})),
         body_model=data.get("body_model", "ellipsoid"),
         ball=_ball_settings(data.get("ball", {})),
+        glove=data.get("glove", DEFAULT_GLOVE),
+        handedness=data.get("handedness", DEFAULT_HANDEDNESS),
         foot=FootSettings(data.get("foot", {}).get("model", FootSettings().model)),
+        grip=None if "grip" not in data else dict(data["grip"]),
     )
     library.check_references(doc)
     return doc
@@ -398,6 +418,12 @@ def document_to_dict(doc: AppearanceDocument) -> dict[str, Any]:
         out["foot"] = {"model": doc.foot.model}
     if doc.spec_sha256 is not None:
         out["spec_sha256"] = doc.spec_sha256
+    if doc.glove != DEFAULT_GLOVE:  # defaults are omitted: old documents round-trip
+        out["glove"] = doc.glove
+    if doc.handedness != DEFAULT_HANDEDNESS:
+        out["handedness"] = doc.handedness
+    if doc.grip is not None:
+        out["grip"] = dict(doc.grip)
     validate_document(out)
     return out
 
