@@ -60,6 +60,13 @@ from src.shared.python.grip_contact.swing_input import (
     load_coordinate_swing,
     map_coordinates,
 )
+from src.shared.python.grip_contact.topology_contact import (
+    TopologyContactModel,
+    TopologySideWrench,
+    build_topology_model,
+    map_site_to_hand_frame,
+    topology_side_wrench,
+)
 from src.shared.python.grip_contact.trajectory_conditioning import (
     ConditioningReport,
     condition_trajectory,
@@ -115,4 +122,9 @@ __all__ = [
     "map_coordinates",
     "modal_damping",
     "unwrap_angular",
+    "TopologyContactModel",
+    "TopologySideWrench",
+    "build_topology_model",
+    "map_site_to_hand_frame",
+    "topology_side_wrench",
 ]
