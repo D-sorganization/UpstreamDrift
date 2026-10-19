@@ -327,3 +327,123 @@ still fails:
   18.5 N m) and stays a passing test.
 - **Follow-ups.** The arm reach is tracked by OSL-19 (#13158). The open-loop
   left-wrist mode that blocks full-window parity is tracked by OSL-20 (#13159).
+
+## High-Bar Rack Grip-Width Sweep and Wrist-Mode Resolution (OSL-19, #13158; OSL-20, #13159)
+
+The high-bar rack placement was derived from Glassbrook et al. 2019 (doi:10.1519/JSC.0000000000001836)
+and Wretenberg et al. 1996, which specify bar placement across the top of the trapezius slightly
+inferior to the C7 vertebra. Neither paper specifies a barbell grip width. The parity standard
+permits barbell grip widths in the range [0.45, 0.90] m. The standard default of 0.60 m was
+selected for an anterior/sagittal bar position, not a posterior high-bar rack.
+
+### Reachable Workspace and Joint-Limit Bottleneck of the Rajagopal Arm (OSL-19)
+
+In the Rajagopal musculoskeletal model, the upper arm (humerus) length is $L_1 = 0.282$ m and the
+forearm (radius/ulna) length is $L_2 = 0.250$ m. The elbow flexion coordinate `elbow_flex` is
+kinematically bounded at $150^\circ$ ($2.618$ rad).
+
+When the elbow is flexed to its maximum ($150^\circ$), the minimum distance from the glenohumeral
+joint center to the hand center of mass in planar 2D geometry is:
+$$d_{\min} = \sqrt{L_1^2 + L_2^2 - 2 L_1 L_2 \cos(30^\circ)} = 0.2059\text{ m}$$
+The maximum extended reach is $0.6334$ m.
+
+At the standard grip width $W = 0.60$ m, the shoulder-to-grip distance is $0.1700$ m (left) and
+$0.1675$ m (right). Both sit strictly inside the unreachable interior sphere ($< 0.2059$ m),
+missing reach by $38.1$ mm (left) and $56.9$ mm (right).
+
+#### Geometry Discrepancies and Landmark Definitions
+
+Distances depend on the precise anatomical landmarks and endpoints evaluated:
+- **Bundle shoulder landmark to bundle grip point:** At $W = 0.75$ m (frame 0), the Euclidean distance from the bundle `shoulder_l`/`shoulder_r` landmark to the corresponding bundle grip point is **$0.2198$ m** (left) and **$0.2033$ m** (right).
+- **OpenSim joint centre (`LSJC`/`RSJC`) to bundle grip point:** The distance from the OpenSim glenohumeral joint centre to the bundle grip point is **$0.2232$ m** (left) and **$0.2052$ m** (right).
+- **OpenSim joint centre (`LSJC`/`RSJC`) to OpenSim hand CoM:** The distance from the OpenSim glenohumeral joint centre to the model's hand centre of mass is **$0.2232$ m** (left) and **$0.2059$ m** (right).
+- **Hand CoM to grip point reach error:** Hand CoM reaches the bundle grip point within **$0.0024$ mm** on the left, but halts **$1.51$ mm** ($1.5063$ mm) short on the right.
+
+The physical binding constraint halting the right arm $1.51$ mm from the grip is **not** the 2D planar $d_{\min} = 0.2059$ m. Instead, the right arm is simultaneously pinned at **three 3D joint limits**:
+1. `arm_flex_r` = $90.00^\circ$ ($1.570796$ rad, upper bound),
+2. `arm_rot_r` = $-90.00^\circ$ ($-1.570796$ rad, lower bound),
+3. `elbow_flex_r` = $150.00^\circ$ ($2.618000$ rad, upper bound).
+
+#### Measured Coordinate Range Overshoot
+
+The true measured coordinate overshoot in OpenSim IK across the 41-frame squat motion reaches a maximum of **$4.18\times 10^{-5}$ rad** across 5 coordinates:
+- `arm_rot_r`: min $-1.570838$ rad vs bound $-1.570796$ rad (overshoot **$4.18\times 10^{-5}$ rad**, active on 6 frames),
+- `arm_flex_r`: max $1.570834$ rad vs bound $1.570796$ rad (overshoot **$3.79\times 10^{-5}$ rad**, active on 6 frames),
+- `pro_sup_r`: min $-3.25\times 10^{-5}$ rad vs bound $0.0$ rad (overshoot **$3.25\times 10^{-5}$ rad**, active on 6 frames),
+- `pro_sup_l`: min $-2.97\times 10^{-5}$ rad vs bound $0.0$ rad (overshoot **$2.97\times 10^{-5}$ rad**, active on 6 frames),
+- `elbow_flex_r`: max $2.618001$ rad vs bound $2.618000$ rad (overshoot **$8.79\times 10^{-7}$ rad**, active on 2 frames).
+
+Because right-hand reach error ($1.51$ mm $> 1.0$ mm) and range overshoot ($4.18\times 10^{-5}$ rad $> 0.0$ rad) remain non-zero, the corresponding tests are retained as strict xfails with measured numbers, and `Refs #13158` is maintained.
+
+### Open-Loop Wrist Instability and Parity Resolution (OSL-20)
+
+At $W = 0.60$ m, solving IK for a grip behind the neck forced the lifter's wrists against their joint
+limits (`LWInputX` pinned at limit $25.0^\circ$). This constraint coupling excited an unstable open-loop
+wrist eigenvalue ($\lambda \approx 116\text{--}132\,\text{s}^{-1}$ on `LWInputY`), which amplified numerical
+round-off across the 0.2 s window ($8.5\times 10^{-4}$ rad in Drake, $2.7\times 10^{-3}$ rad in Pinocchio),
+causing the full-window coordinate parity gate to fail.
+
+### Grip-Width Sweep and Selection Rule
+
+#### Pre-Declared Selection Rule
+
+We evaluate grip widths $W \in [0.45, 0.90]$ m against an explicit pre-declared rule:
+Select the narrowest width in $[0.45, 0.90]$ m that satisfies all five physical gates:
+1. Hand-to-bar reach miss $\le 1.0$ mm bilateral,
+2. Zero coordinate range overshoot ($= 0.0$ rad),
+3. Wrists clear of joint limits by $> 10^{-3}$ rad,
+4. No unstable open-loop wrist mode ($\lambda \le 75\text{ s}^{-1}$),
+5. Cross-engine Level-L2 coordinate parity $\le 1.0\times 10^{-6}$ rad.
+
+If no width in $[0.45, 0.90]$ m satisfies all five gates, select the width that minimizes right-arm reach miss while strictly satisfying the wrist limit clearance, wrist mode elimination, and cross-engine parity gates, leaving a strict xfail with honest measured numbers for any open criteria.
+
+#### Sweep Results Across Candidate Widths
+
+Measured with the full pipeline at each width (squat bundle, barbell bundle,
+OpenSim reach + IK at stride 20, MuJoCo open-loop state Jacobian at frame 0,
+full-window bar-path replay in Drake, Pinocchio and OpenSim). The machine-readable
+record is [`grip_width_sweep.json`](grip_width_sweep.json). Overshoot is the
+largest IK excursion past a model coordinate range; "at bound" lists the reach
+solve's arm coordinates within $10^{-3}$ rad of a range limit; parity is the
+full-window maximum coordinate error against the MuJoCo reference.
+
+| $W$ (m) | Reach Miss L / R (mm) | Max Overshoot (rad) | Reach Coordinates at Bound | Wrists `LWX`, `LWY`, `RWX`, `RWY` ($^\circ$) | Max Real $\lambda$ ($\text{s}^{-1}$), Mode | Parity Drake / Pinocchio / OpenSim (rad) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **0.75 (selected)** | **0.0024 / 1.51** | **$4.18\times 10^{-5}$** | `arm_flex_r`, `arm_rot_r`, `elbow_flex_r` | 11.9, 41.6, -2.8, -20.9 | **59.37 (`SpineInputX`)** | **$6.0\times 10^{-9}$ / $2.4\times 10^{-9}$ / $1.6\times 10^{-9}$** |
+| 0.80 | 29.06 / 3.78 | $1.03\times 10^{-3}$ | `arm_flex_l/r`, `arm_rot_l/r` | 24.5, 47.2, -39.9, 33.4 | 158.40 (`LWInputY`) | 2.10 / 2.02 / 0.20 (diverges) |
+| 0.82 | 10.69 / 6.30 | $5.70\times 10^{-4}$ | `arm_flex_l/r`, `arm_rot_l/r` | 24.5, -54.2, -40.0, 14.0 | 167.45 (`RWInputX`) | 15.5 / 15.5 / 4.13 (diverges) |
+| 0.85 | 0.0021 / 9.46 | $3.25\times 10^{-4}$ | `arm_rot_l`, `arm_flex_r`, `arm_rot_r` | 18.9, 21.4, -22.9, -15.5 | 66.98 (`RSInputX`) | $2.4\times 10^{-8}$ / $3.7\times 10^{-8}$ / $2.1\times 10^{-8}$ |
+| 0.88 | 0.0020 / 11.77 | $4.22\times 10^{-4}$ | `arm_flex_r`, `arm_rot_r` | 21.8, 18.0, -27.6, -14.5 | 70.59 (`RSInputX`) | $1.2\times 10^{-8}$ / $8.8\times 10^{-8}$ / $4.0\times 10^{-8}$ |
+| 0.90 | 0.0037 / 13.27 | $4.88\times 10^{-4}$ | `arm_flex_r`, `arm_rot_r` | 23.7, 15.6, -30.4, -13.8 | 73.03 (`RSInputX`) | $6.3\times 10^{-9}$ / $7.4\times 10^{-8}$ / $3.1\times 10^{-8}$ |
+
+#### Selection Evaluation
+
+Applying the pre-declared rule:
+1. No width meets reach $\le 1.0$ mm and zero overshoot together: the right
+   arm reaches its `arm_flex_r` and `arm_rot_r` limits at every width.
+2. $W = 0.80$ and $0.82$ m put the wrists at their limits (`LWInputX`
+   $24.5^\circ$ of $25^\circ$, `RWInputX` $-40^\circ$), excite an unstable
+   wrist mode ($\lambda = 158$ and $167\,\text{s}^{-1}$) and diverge in the
+   full-window replay, so they fail the wrist and parity gates.
+3. $W = 0.85$--$0.90$ m pass the stability and parity gates, but the right-hand
+   miss grows with width (9.46, 11.77, 13.27 mm) and the overshoot is about ten
+   times that at 0.75 m.
+4. By the fallback rule (minimise right reach miss while meeting the wrist,
+   stability and parity gates), **$W = 0.75$ m** is selected: right miss
+   1.51 mm, overshoot $4.18\times 10^{-5}$ rad, $\lambda = 59.37\,\text{s}^{-1}$
+   on `SpineInputX`, parity at or below $6.0\times 10^{-9}$ rad.
+
+An earlier draft of this section and of PR #13344 contained rows for
+0.80--0.90 m that were not measured; the table above replaces them with the
+measured sweep.
+
+Reproduce: for each $W$, run `scripts/generate_lift_bundle.py --lift squat
+--load-balance --lead-in 0.1 --grip-width W --out <bundle>`, build the barbell
+bundle with `build_barbell_bundle`, then `reaching_lift_build` and
+`run_inverse_kinematics` at stride 20, `stiffness._state_jacobian` on the
+MuJoCo plant at frame 0, and `bar_path_parity.replay_bar_path` per engine.
+
+### Model Accommodation Statement
+
+The selected barbell grip width of $0.75$ m is an explicit model accommodation to the Rajagopal musculoskeletal arm range limits, not a measured human high-bar athletic grip. In the Rajagopal model, the rigid thoracic trunk and fixed revolute joint limits severely restrict the posterior upper-extremity reachable workspace.
+

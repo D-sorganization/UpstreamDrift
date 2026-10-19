@@ -10,9 +10,8 @@ read one table:
 
 * the back squat keeps its committed recipe (``full_squat``, bar on a
   torso shelf, window centred on the bottom);
-* the deadlift and the clean-and-jerk are pulls: the bar hangs in the hands
-  (the optimizer's ``deadlift`` bar model) and the window is centred on the
-  knee pass;
+* the deadlift is a pull: the bar hangs in the hands (the optimizer's
+  ``deadlift`` bar model) and the window is centred on the knee pass;
 * the bench press lies supine on a bench contact body (:mod:`.bench_press`):
   the optimizer's arm-chain bar model is applied to the model's shoulders and
   the window is centred on the bottom (the bar at the chest);
@@ -20,7 +19,13 @@ read one table:
   configuration pins a via pose at each phase start of the standard, the bar
   hangs in the hands through both pulls and is overhead from the catch on
   (``bar_convention="snatch"``, :func:`movement_optimizer.exercises.snatch.
-  snatch_bar_path`), and the window is centred on the knee pass.
+  snatch_bar_path`), and the window is centred on the knee pass;
+* the clean and jerk is the whole lift with a phase-correct bar: the Tools
+  clean-and-jerk configuration pins a via pose at each phase start of the
+  standard, the bar hangs in the hands through the pulls, is on the shoulders
+  from the front-squat catch to the jerk drive and is overhead from the
+  power-jerk catch on (``bar_convention="clean_and_jerk"``,
+  :mod:`.phase_bar_paths`), and the window is centred on the knee pass.
 
 :data:`DEFERRED_LIFTS` lists any lift without a credible trajectory from this
 pipeline, with the measured reason.
@@ -45,9 +50,10 @@ _REPO = Path(__file__).resolve().parents[4]
 EVIDENCE_DIR = _REPO / "docs/development/lifting/evidence"
 #: Window events a recipe may centre its bundle on.
 WINDOW_EVENTS: tuple[str, ...] = ("bottom", "knee_pass")
-#: Bar conventions whose bar is held in the hands (the ``snatch`` bar hangs
-#: through the pulls and is overhead from the catch on).
-HAND_HELD_CONVENTIONS: tuple[str, ...] = ("deadlift", "snatch")
+#: Bar conventions whose bar is held in the hands (the ``snatch`` and
+#: ``clean_and_jerk`` bars hang through the pulls, then go to the rack or
+#: overhead; :mod:`.phase_bar_paths`).
+HAND_HELD_CONVENTIONS: tuple[str, ...] = ("deadlift", "snatch", "clean_and_jerk")
 
 
 @dataclass(frozen=True)
@@ -138,18 +144,26 @@ RECIPES: Mapping[str, LiftRecipe] = MappingProxyType(
         "clean_and_jerk": LiftRecipe(
             lift="clean_and_jerk",
             bundle_name="clean_and_jerk",
-            exercise="clean",
-            bar_convention="deadlift",
+            exercise="clean_and_jerk",
+            bar_convention="clean_and_jerk",
             window_event="knee_pass",
             phase="first_pull",
-            duration_s=1.2,
+            duration_s=4.0,
             bar_mass_kg=100.0,
             rationale=(
-                _PULL_RATIONALE
-                + " The optimizer's clean bar model keeps the bar on the "
-                "shoulders for the whole lift (front rack), which is not where "
-                "it is during the pull. The window covers the first pull only; "
-                "the rack, the jerk and the overhead phases are not in it."
+                "The Tools clean-and-jerk configuration solves the whole lift: "
+                "it pins a via pose at the start of each phase of the standard "
+                "(bar off the floor at 0.08, knee pass at 0.20, front-squat "
+                "catch at 0.30 held to 0.40, standing rack at 0.55, power-jerk "
+                "catch at 0.70 held to 0.85) and at the full extension (0.25), "
+                "the dip bottom (0.60) and the drive (0.65). Its phase-correct "
+                "bar hangs in the hands through the pulls, is on the shoulders "
+                "from the catch to the jerk drive and is overhead from the "
+                "overhead catch on, applied to the model's shoulders. The "
+                "sagittal solution and the full-body IK cover the whole lift; "
+                "the 0.2 s window spans the knee pass, from the end of the "
+                "first pull into the second, and the rack, jerk and overhead "
+                "phases are not in it (#11745)."
             ),
         ),
         "snatch": LiftRecipe(
