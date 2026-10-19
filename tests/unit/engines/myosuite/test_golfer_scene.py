@@ -87,6 +87,79 @@ class TestGolferSceneXml:
         assert receipt["myo_sim_pin"] == MYO_SIM_PIN_SHA
         assert (body_dir / "golfer_myobody_iron.xml").is_file()
 
+    @pytest.mark.parametrize(
+        ("kind", "xml_name", "spec_name"),
+        [
+            (ClubKind.DRIVER, "golfer_myobody_driver.xml", "driver"),
+            (ClubKind.IRON, "golfer_myobody_iron.xml", "iron7"),
+        ],
+    )
+    def test_club_shaft_spans_full_length_and_grip_sites_lie_within_grip_length(
+        self,
+        body_dir: Path,
+        kind: ClubKind,
+        xml_name: str,
+        spec_name: str,
+    ) -> None:
+        from src.engines.physics_engines.myosuite.python.golfer_scene import (
+            _DEFAULT_CONTACT,
+            _worldbody_addons,
+        )
+        from src.shared.python.model_appearance.grip_pose import DEFAULT_GRIP_POSE, Hand
+        from src.shared.python.motion_matching.club_models import CLUBS
+
+        club = CLUBS[spec_name]
+        xml_path = body_dir / xml_name
+        committed_root = ET.fromstring(xml_path.read_text(encoding="utf-8"))
+        generated_root = ET.fromstring(
+            f"<worldbody>{_worldbody_addons(club, _DEFAULT_CONTACT)}</worldbody>"
+        )
+
+        for label, root in (
+            ("generated", generated_root),
+            ("committed", committed_root),
+        ):
+            shaft = next(
+                el for el in root.iter("geom") if el.get("name") == "club_shaft"
+            )
+            fromto = [float(v) for v in (shaft.get("fromto") or "").split()]
+            assert len(fromto) == 6, f"{label} {xml_name}: invalid fromto"
+            butt_y = min(fromto[1], fromto[4])
+            head_y = max(fromto[1], fromto[4])
+            assert butt_y == pytest.approx(-club.length_m), (
+                f"{label} {xml_name}: shaft butt_y={butt_y} != {-club.length_m}"
+            )
+            assert head_y == pytest.approx(0.0), (
+                f"{label} {xml_name}: shaft head_y={head_y} != 0.0"
+            )
+
+            grip_y_min = -club.length_m
+            grip_y_max = -(club.length_m - club.grip_length_m)
+            sites = {
+                el.get("name"): [float(v) for v in (el.get("pos") or "").split()]
+                for el in root.iter("site")
+                if (el.get("name") or "").startswith("grip_site_club_")
+            }
+            assert set(sites) == {"grip_site_club_l", "grip_site_club_r"}
+            for site_name, pos in sites.items():
+                assert pos[0] == pytest.approx(0.0)
+                assert pos[2] == pytest.approx(0.0)
+                assert butt_y <= pos[1] <= head_y, (
+                    f"{label} {xml_name}: {site_name} y={pos[1]} outside shaft [{butt_y}, {head_y}]"
+                )
+                assert grip_y_min <= pos[1] <= grip_y_max, (
+                    f"{label} {xml_name}: {site_name} y={pos[1]} outside grip [{grip_y_min}, {grip_y_max}]"
+                )
+
+            expected_l = -(
+                club.length_m - DEFAULT_GRIP_POSE.distance_below_butt_m(Hand.LEAD)
+            )
+            expected_r = -(
+                club.length_m - DEFAULT_GRIP_POSE.distance_below_butt_m(Hand.TRAIL)
+            )
+            assert sites["grip_site_club_l"][1] == pytest.approx(expected_l)
+            assert sites["grip_site_club_r"][1] == pytest.approx(expected_r)
+
 
 class TestCoordinateMap:
     def test_every_mapped_source_resolves_to_myosuite_joint(self) -> None:

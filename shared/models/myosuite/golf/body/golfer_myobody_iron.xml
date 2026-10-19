@@ -13,10 +13,10 @@
     </body>
     <body name="golf_club" pos="0.3 0 1.0">
       <freejoint name="club_free"/>
-      <geom name="club_shaft" type="capsule" fromto="0 -0.47 0 0 0 0" size="0.0065" mass="0.16" rgba="0.75 0.75 0.8 1"/>
+      <geom name="club_shaft" type="capsule" fromto="0 -0.94 0 0 0 0" size="0.0065" mass="0.16" rgba="0.75 0.75 0.8 1"/>
       <geom name="club_head" type="box" size="0.008 0.04 0.025" pos="0 0 0" mass="0.268" rgba="0.1 0.1 0.15 1"/>
-      <site name="grip_site_club_r" pos="0 -0.95 0" size="0.006"/>
-      <site name="grip_site_club_l" pos="0 -0.88 0" size="0.006"/>
+      <site name="grip_site_club_r" pos="0 -0.8318 0" size="0.006"/>
+      <site name="grip_site_club_l" pos="0 -0.908 0" size="0.006"/>
     </body>
     <body name="ud_contact_heel_r">
       <freejoint/>

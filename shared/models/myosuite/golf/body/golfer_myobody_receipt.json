@@ -18,25 +18,41 @@
     {
       "name": "heel_r",
       "body": "calcn_r",
-      "position_m": [0.01, -0.005, 0.0],
+      "position_m": [
+        0.01,
+        -0.005,
+        0.0
+      ],
       "radius_m": 0.035
     },
     {
       "name": "forefoot_r",
       "body": "calcn_r",
-      "position_m": [0.16, -0.005, 0.0],
+      "position_m": [
+        0.16,
+        -0.005,
+        0.0
+      ],
       "radius_m": 0.03
     },
     {
       "name": "heel_l",
       "body": "calcn_l",
-      "position_m": [0.01, -0.005, 0.0],
+      "position_m": [
+        0.01,
+        -0.005,
+        0.0
+      ],
       "radius_m": 0.035
     },
     {
       "name": "forefoot_l",
       "body": "calcn_l",
-      "position_m": [0.16, -0.005, 0.0],
+      "position_m": [
+        0.16,
+        -0.005,
+        0.0
+      ],
       "radius_m": 0.03
     }
   ],
@@ -48,7 +64,10 @@
       "grip_site_club_r",
       "grip_site_club_l"
     ],
-    "welds": ["grip_weld_r", "grip_weld_l"]
+    "welds": [
+      "grip_weld_r",
+      "grip_weld_l"
+    ]
   },
   "clubs": {
     "driver": {
@@ -56,14 +75,14 @@
       "length_m": 1.156,
       "total_mass_kg": 0.313,
       "xml": "golfer_myobody_driver.xml",
-      "sha256": "8e941be1c5a7d4b2a32a6fb7949ff527200eda069fee00a05664a81850fbc39b"
+      "sha256": "133ad3e0f40affe97b77da0b815fd27b72d6481994deb7126de0ede1c134a426"
     },
     "iron": {
       "name": "iron7",
       "length_m": 0.94,
       "total_mass_kg": 0.428,
       "xml": "golfer_myobody_iron.xml",
-      "sha256": "ddd93a125771f5712c1f8e62d676510b6df138290a58b20c2555817906f31086"
+      "sha256": "f387f7d62d3f59ef8ee4dfc5fbfbeee151e22e087a7c0e8f5bfe4f6280df9356"
     }
   },
   "qualification": {

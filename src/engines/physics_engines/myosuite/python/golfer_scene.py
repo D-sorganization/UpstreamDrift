@@ -204,7 +204,6 @@ def _club_grip_site(name: str, club: ClubSpec, hand: Hand) -> str:
 
 def _worldbody_addons(club: ClubSpec, contact: ContactParameters) -> str:
     """Club + contact sphere bodies placed inside ``<worldbody>``."""
-    shaft_half = 0.5 * club.length_m
     head = club.head_half_size_m
     head_type = "ellipsoid" if club.head_shape == "ellipsoid" else "box"
     solref = f"{1.0 / contact.stiffness_n_m:.6g} {contact.dissipation_s_m:.6g}"
@@ -230,7 +229,7 @@ def _worldbody_addons(club: ClubSpec, contact: ContactParameters) -> str:
                 ]
             )
         )
-    club_y = -shaft_half
+    club_y = -club.length_m
     return "\n".join(
         [
             '    <body name="golf_club" pos="0.3 0 1.0">',
