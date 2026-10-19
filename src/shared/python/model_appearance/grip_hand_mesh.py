@@ -54,6 +54,7 @@ from src.shared.python.model_appearance.geometry import (
 )
 from src.shared.python.model_appearance.grip_pose import (
     DEFAULT_GRIP_POSE,
+    NEUTRAL_V_AZIMUTH_DEG,
     GripPose,
     GripStyle,
     Hand,
@@ -452,7 +453,9 @@ def build_grip_hand_mesh(
         params.sides,
     )
     parts.append(HandComponent("palm", "palm", palm, True))
-    thumb_azimuth = math.radians(placement.thumb_offset_deg + placement.roll_offset_deg)
+    roll_deg = placement.v_azimuth_deg - NEUTRAL_V_AZIMUTH_DEG
+    thumb_azimuth_deg = placement.thumb_offset_deg + roll_deg
+    thumb_azimuth = math.radians(thumb_azimuth_deg)
     parts += _thumb(radius, thumb_azimuth, params)
 
     on_grip_vertices = np.vstack([p.mesh.vertices for p in parts if p.on_grip])
@@ -466,7 +469,7 @@ def build_grip_hand_mesh(
         grip_radius_m=radius,
         distance_below_butt_m=placement.distance_below_butt_m,
         v_azimuth_deg=placement.v_azimuth_deg,
-        thumb_azimuth_deg=placement.thumb_offset_deg + placement.roll_offset_deg,
+        thumb_azimuth_deg=thumb_azimuth_deg,
         curl_sign=curl,
         components=tuple(parts),
         mesh=concat_meshes(*(p.mesh for p in parts)),

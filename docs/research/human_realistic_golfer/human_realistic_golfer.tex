@@ -289,8 +289,31 @@ the same fit is 50.93\,mm, the number later children must hold while the
 violations go to zero.
 
 \section{Grip}
-Placeholder for HRG grip children.  Append method, equations, parameters,
-acceptance criteria, provenance, limitations and failed experiments.
+
+\subsection{Subject Handedness and Lead-Trail Sides (HRG-GR0, \#13201)}
+
+\paragraph{Definition.}
+\texttt{subject.handedness} is \texttt{"right"} or \texttt{"left"}: the hand that
+is \emph{lead} (nearer the target) is the anatomical left hand of a right-handed
+golfer and the right hand of a left-handed golfer. \texttt{core.handedness} is the
+single resolver: \texttt{lead\_side} yields \texttt{"L"} for right and \texttt{"R"}
+for left, \texttt{trail\_side} the opposite, and any other value raises \texttt{ValueError}.
+A specification without the field resolves to \texttt{"right"} through
+\texttt{subject\_handedness}; this is a declared default, not an inference from data.
+The builder writes the key only for a non-default value, so every specification and
+receipt committed before this change remains byte-identical. The receipt schema records
+an optional \texttt{handedness} field that is \texttt{null} on legacy receipts.
+
+\paragraph{Sign Conventions and Sagittal Reflection.}
+\texttt{GripPose.landmarks} uses the golfer body frame with $x$ anterior, $y$ toward
+the golfer's anatomical left, and $z$ up. The sagittal plane is $x$--$z$, so the lateral
+axis is $y$ and the sagittal reflection is $P = \mathrm{diag}(1, -1, 1)$. The target
+lies toward $+y$ for a right-hander and $-y$ for a left-hander; the toe axis is $+x$;
+the grip axis is idealized as vertical, down $-z$ from the butt. Every distance and
+angle of the grip is expressed in lead/trail terms and is identical for both handednesses;
+only the target direction, hence the azimuth and palm-normal vectors, changes sign in $y$.
+Consequently, $P\,\ell_{\mathrm{right}} = \ell_{\mathrm{left}}$ for each landmark $\ell$,
+asserted within $10^{-9}$~m.
 
 \subsection{Grip-Style Contact Topology (HRG-GS-G1, \#13299)}
 \textbf{Contract.} \texttt{GripStyle} (overlap, interlock, ten-finger) and
@@ -369,6 +392,18 @@ non-uniqueness. \texttt{full-body-v1} stays the default. The definition,
 equations and residual report are in the Simscape matching reference,
 section ``The full-body-v2 Schema and Trunk Coordinate Migration''. The geometry
 is HRG-D2.
+
+\subsection{Landmark Regional Trunk Joints (HRG-D2, \#13173)}
+HRG-D2 places L5/S1 at the HRG-C3 design offset and C7/T1 at the cervicale.
+T12/L1 is placed at the Gray lumbar fraction $18/46$, and the neutral
+curvature is checked against Yukawa et al.\ 2018. The de Leva trunk solids
+are re-parented and the dummy body is dropped. The ROM becomes soft limits,
+with hard ranges report-only. The back markers observe rank 5 of the six
+trunk coordinates, so the split is regularised by
+\texttt{bruno2015\_regional}. The details, the mass ledger, the cross-engine
+results and the best-fit Hub residual (61.9 / 34.3~mm) are in the Simscape
+matching reference, section ``Landmark Regional Trunk Joints for
+full-body-v2''.
 
 \section{Anatomical Angles}
 Placeholder for HRG anatomical-angle children.

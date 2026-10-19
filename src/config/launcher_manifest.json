@@ -1293,8 +1293,8 @@
       "capabilities": ["spine", "joint_reaction", "study_receipt"],
       "order": 104,
       "web": {
-        "mode": "unavailable",
-        "reason": "PyQt6 desktop viewer; no React or Tauri counterpart yet (tracked in #12772)"
+        "mode": "route",
+        "route": "/tools/spine-viewer"
       }
     }
   ]
