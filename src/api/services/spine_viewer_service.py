@@ -162,29 +162,7 @@ def list_spine_assets(env: Mapping[str, str] | None = None) -> list[dict[str, An
     return results
 
 
-def parse_study_request(
-    payload: Mapping[str, Any], root: Path | None = None
-) -> SpineStudyRequest:
-    """Validate and build a :class:`SpineStudyRequest` from a client payload.
-
-    Args:
-        payload: JSON-compatible mapping with study request attributes.
-        root: Directory under which output must reside (default ``study_root()``).
-
-    Returns:
-        A validated :class:`SpineStudyRequest` targeting an output directory inside ``root``.
-
-    Raises:
-        TypeError: ``payload`` is not a mapping or ``root`` is not a Path.
-        ValueError: missing required fields, bad identifiers, path escapes,
-            missing inputs, or invalid request options.
-    """
-    if not isinstance(payload, Mapping):
-        raise TypeError("payload must be a mapping")
-    target_root = study_root() if root is None else root
-    if not isinstance(target_root, Path):
-        raise TypeError("root must be a Path")
-
+def _resolve_study_output_dir(payload: Mapping[str, Any], target_root: Path) -> Path:
     study_id = payload.get("study_id")
     if not isinstance(study_id, str) or not study_id.strip():
         raise ValueError(f"study_id must be a non-empty string: {study_id!r}")
@@ -204,10 +182,10 @@ def parse_study_request(
         raise ValueError(
             f"output_dir must be inside study root ({target_root}): {resolved_out}"
         ) from exc
+    return resolved_out
 
-    values = dict(payload)
-    values["output_dir"] = resolved_out
 
+def _resolve_study_model_paths(values: dict[str, Any], target_root: Path) -> None:
     # Normalize fixture asset_id if selected as asset
     if values.get("asset_id") == "fixture":
         values["asset_id"] = None
@@ -254,11 +232,8 @@ def parse_study_request(
                 (_PROJECT_ROOT / p).resolve() if not p.is_absolute() else p.resolve()
             )
 
-    try:
-        request = SpineStudyRequest(**values)
-    except TypeError as exc:
-        raise ValueError(f"invalid request parameters: {exc}") from exc
 
+def _validate_study_inputs(request: SpineStudyRequest) -> None:
     # Precondition: check required input files exist on disk
     for label, path in (
         ("motion", request.motion_path),
@@ -274,5 +249,43 @@ def parse_study_request(
             resolve_spine_asset(request.asset_id)
         except ValueError as exc:
             raise ValueError(f"unknown spine asset: {exc}") from exc
+
+
+def parse_study_request(
+    payload: Mapping[str, Any], root: Path | None = None
+) -> SpineStudyRequest:
+    """Validate and build a :class:`SpineStudyRequest` from a client payload.
+
+    Args:
+        payload: JSON-compatible mapping with study request attributes.
+        root: Directory under which output must reside (default ``study_root()``).
+
+    Returns:
+        A validated :class:`SpineStudyRequest` targeting an output directory inside ``root``.
+
+    Raises:
+        TypeError: ``payload`` is not a mapping or ``root`` is not a Path.
+        ValueError: missing required fields, bad identifiers, path escapes,
+            missing inputs, or invalid request options.
+    """
+    if not isinstance(payload, Mapping):
+        raise TypeError("payload must be a mapping")
+    target_root = study_root() if root is None else root
+    if not isinstance(target_root, Path):
+        raise TypeError("root must be a Path")
+
+    resolved_out = _resolve_study_output_dir(payload, target_root)
+
+    values = dict(payload)
+    values["output_dir"] = resolved_out
+
+    _resolve_study_model_paths(values, target_root)
+
+    try:
+        request = SpineStudyRequest(**values)
+    except TypeError as exc:
+        raise ValueError(f"invalid request parameters: {exc}") from exc
+
+    _validate_study_inputs(request)
 
     return request
