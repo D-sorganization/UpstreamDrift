@@ -167,6 +167,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 873 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py` |
 | 871 | `src/shared/python/grip_contact/contact_topology.py` |
 | 870 | `src/shared/python/model_generation/cli/main.py` |
+| 869 | `src/shared/python/grip_contact/topology_contact.py` |
 | 868 | `src/shared/python/workspace/necromatcher_video_jobs.py` |
 | 866 | `src/engines/feedback_observation_qualification.py` |
 | 864 | `src/tools/shot_pattern_analysis/matched_report_plots.py` |
