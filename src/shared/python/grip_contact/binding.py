@@ -13,7 +13,7 @@ Pure NumPy module with no physics-engine imports.
 from __future__ import annotations
 
 import math
-from collections.abc import Collection, Mapping
+from collections.abc import Collection, Mapping, Sequence
 from dataclasses import dataclass, field
 from types import MappingProxyType, SimpleNamespace
 from typing import Any, Final, Literal, Protocol, runtime_checkable
@@ -42,6 +42,7 @@ from src.shared.python.grip_contact.hand_hand_allocation import (
     AllocationPrior,
     allocate_hand_hand_from_closure,
 )
+from src.shared.python.grip_contact.interface import GripInterface
 from src.shared.python.grip_contact.pair_contact import PairWrench
 from src.shared.python.grip_contact.prescribed_motion import RigidBodyState
 from src.shared.python.grip_contact.topology_contact import (
@@ -56,8 +57,12 @@ from src.shared.python.motion_matching.full_body_schema import (
 )
 
 __all__ = [
+    "AXIAL_BOUNDS_M",
+    "AXIS_ALIGNMENT_TOL",
     "KNOWN_ATTACHMENT_MODES",
+    "MANIFEST_SCHEMA",
     "PAIR_LABELS",
+    "RADIAL_BOUNDS_M",
     "ROTATION_TOLERANCE",
     "SITE_REPRESENTATIONS",
     "BodyStates",
@@ -70,9 +75,12 @@ __all__ = [
     "SiteRepresentation",
     "apply_report",
     "bind_rigid_hand_sites",
+    "binding_from_manifest",
     "evaluate_contacts",
     "site_transform_in_hand_frame",
     "validate_binding",
+    "validate_manifest",
+    "validate_resolved_binding",
 ]
 
 ROTATION_TOLERANCE: Final[float] = 1e-9
@@ -366,11 +374,17 @@ def site_transform_in_hand_frame(
     topology: ContactTopology,
     site: ContactSite | str,
     side: str | None = None,
+    handedness: Handedness = DEFAULT_HANDEDNESS,
 ) -> np.ndarray:
     """Return the 4x4 transform ``^{F_hand} T_site`` in the hand grip frame."""
     target = topology.site(site) if isinstance(site, str) else site
-    side_char = side if side is not None else ("L" if target.hand == "lead" else "R")
-    mapped = map_site_to_hand_frame(topology, target, side_char)
+    if side is not None:
+        side_char = side
+    else:
+        side_char = (
+            lead_side(handedness) if target.hand == "lead" else trail_side(handedness)
+        )
+    mapped = map_site_to_hand_frame(topology, target, side_char, handedness=handedness)
     mat = np.eye(4)
     mat[:3, 3] = np.asarray(mapped.centre_m, dtype=float)
     mat.setflags(write=False)
@@ -384,6 +398,7 @@ def bind_rigid_hand_sites(
     trail_hand_body: str = "hand_r",
     lead_hand_to_grip: np.ndarray | None = None,
     trail_hand_to_grip: np.ndarray | None = None,
+    handedness: Handedness = DEFAULT_HANDEDNESS,
 ) -> tuple[SiteBinding, ...]:
     """Build ``rigid_proxy`` :class:`SiteBinding` tuples for all sites in ``topology``."""
     if not isinstance(topology, ContactTopology):
@@ -400,13 +415,17 @@ def bind_rigid_hand_sites(
         if trail_hand_to_grip is None
         else _validate_transform_4x4(trail_hand_to_grip, "trail_hand_to_grip")
     )
+    l_side = lead_side(handedness)
+    t_side = trail_side(handedness)
     bindings: list[SiteBinding] = []
     for site in topology.sites:
         is_lead = site.hand == "lead"
         body_id = lead_hand_body if is_lead else trail_hand_body
         base_t = t_lead if is_lead else t_trail
-        side_char = "L" if is_lead else "R"
-        site_t = site_transform_in_hand_frame(topology, site, side_char)
+        side_char = l_side if is_lead else t_side
+        site_t = site_transform_in_hand_frame(
+            topology, site, side_char, handedness=handedness
+        )
         bindings.append(
             SiteBinding(
                 site_id=site.name,
@@ -521,6 +540,17 @@ def validate_binding(
                     model_id,
                     f"physical site {s_name!r} (pair {pair.name!r}) has no binding and is not listed unavailable",
                 )
+
+
+from src.shared.python.grip_contact.binding_manifest import (
+    AXIAL_BOUNDS_M,
+    AXIS_ALIGNMENT_TOL,
+    MANIFEST_SCHEMA,
+    RADIAL_BOUNDS_M,
+    binding_from_manifest,
+    validate_manifest,
+    validate_resolved_binding,
+)
 
 
 @dataclass(frozen=True)

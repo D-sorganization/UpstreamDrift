@@ -24,6 +24,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from src.shared.python.contracts import require
+from src.shared.python.core.handedness import (
+    DEFAULT_HANDEDNESS,
+    Handedness,
+    lead_side,
+    trail_side,
+)
 from src.shared.python.grip_contact.bushing_law import BushingState
 from src.shared.python.grip_contact.contact_topology import (
     GRIP,
@@ -69,14 +75,20 @@ SIDES = ("L", "R")
 HAND_ROLES = ("lead", "trail")
 
 
-def _normalize_side(side: str) -> tuple[str, str]:
+def _normalize_side(
+    side: str, handedness: Handedness = DEFAULT_HANDEDNESS
+) -> tuple[str, str]:
     """Return ``(hand_role, side_char)`` from 'L', 'R', 'lead', or 'trail'."""
     if not isinstance(side, str):
         raise TypeError(f"side must be a string, got {type(side).__name__}")
-    if side in ("L", "lead"):
-        return "lead", "L"
-    if side in ("R", "trail"):
-        return "trail", "R"
+    if side == "lead":
+        return "lead", lead_side(handedness)
+    if side == "trail":
+        return "trail", trail_side(handedness)
+    if side == "L":
+        return ("lead" if lead_side(handedness) == "L" else "trail"), "L"
+    if side == "R":
+        return ("lead" if lead_side(handedness) == "R" else "trail"), "R"
     raise ValueError(f"side must be one of ('L', 'R', 'lead', 'trail'), got {side!r}")
 
 
@@ -129,6 +141,7 @@ def map_site_to_hand_frame(
     site: ContactSite | str,
     side: str,
     x_origin: float | None = None,
+    handedness: Handedness = DEFAULT_HANDEDNESS,
 ) -> ContactSite:
     """Map a :class:`ContactSite` into the hand grip frame of ``side``.
 
@@ -150,7 +163,7 @@ def map_site_to_hand_frame(
         target_site = site
     else:
         raise TypeError(f"site must be ContactSite or str, got {type(site).__name__}")
-    role, side_char = _normalize_side(side)
+    role, side_char = _normalize_side(side, handedness=handedness)
     if target_site.hand != role:
         raise ValueError(
             f"site {target_site.name!r} belongs to hand {target_site.hand!r}, "
@@ -169,6 +182,8 @@ def map_site_to_hand_frame(
         ]
     )
     cx, cy, cz = target_site.centre_m
+    if handedness == "left":
+        cz = -cz
     p_hand = axis_offset + np.array([cx - x_origin, cy, cz])
     return replace(
         target_site,
