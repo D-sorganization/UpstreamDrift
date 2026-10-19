@@ -92,7 +92,12 @@ def apply_grip_rotation(
 
 
 #: Where each physical grip parameter came from (``subject.grip_provenance``).
-GRIP_PROVENANCE_SOURCES = ("user_declared", "rom_set_identified", "default")
+GRIP_PROVENANCE_SOURCES = (
+    "user_declared",
+    "rom_set_identified",
+    "default",
+    "photo_estimate",
+)
 #: The physical grip parameters, in the key form used by the provenance map.
 GRIP_PARAMETERS = tuple(
     [f"{hand}.{angle}" for hand in ("lead", "trail") for angle in HandAngles.FIELDS]
