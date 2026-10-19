@@ -156,17 +156,78 @@ possible for capacities of that order, which the fixture does not produce.
 The reserve share in these frames stays high by design of the fixture and the
 frames remain \texttt{unqualified}.
 
+\paragraph{Native Bruno Run on Capture-A.}
+Static optimization was evaluated on 2026-10-19 on main \texttt{fc49cd6e6f}
+under OpenSim 4.6 using the licensed model \texttt{bruno2015\_fullbody\_os4\_v2}
+(model SHA-256
+\texttt{e488ae2cf67be3de36f569cab514e181bfa89d5186d998f1627b461b4498fd47})
+and capture-A continuous IK (SHA-256
+\texttt{69fd5b8ea56b237bbbcd7e733a72807d087c831913fbf9de59f09c6ed4e8fc93};
+530 frames, 1.469\,s). Body weight is 764.6\,N, 446 Thelen2003 muscles are
+swapped for Millard2012 (\texttt{millard\_equivalent}), 22 thoracic LB/AR
+coordinates are unlocked, and coupling law is \texttt{bruno2015\_regional}.
+The solver is lexicographic: bounded linear least squares (BVLS) reserve
+minimization in stage one, followed by $\min \sum a^p$ in stage two ($p=3$ via
+\texttt{clarabel\_irls}; $p=2$ via \texttt{clarabel\_qp}). Across 51 DOFs (17
+levels from L5--S1 to T1--T2 $\times$ 3 axes) with reserve limit 1\,N$\cdot$m per
+DOF and max share 0.05, all 3 event frames solved (0 unsuccessful) and all 3 are
+flagged for reserve use. The maximum $|r_j|$ is 341.6\,N$\cdot$m. All stages
+completed with status \texttt{ok}, but the receipt is \texttt{unqualified}
+(\texttt{scientific\_status unqualified}) due to identity torso alignment, pelvis
+residuals exceeding budget, and the 3 flagged frames.
+
+\begin{center}
+\begin{tabular}{lrrr}
+\hline
+Event & Reserve Share & Activations ($a=1$ / $a=0$ / Interior) & L5/S1 Compression [BW] \\
+\hline
+Address (0.211\,s) & 1.344 & 84 / 348 / 14 & 4.87 \\
+Top (1.103\,s)     & 0.146 & 152 / 278 / 16 & 9.15 \\
+Impact (1.319\,s)  & 0.425 & 145 / 296 / 5  & 5.70 \\
+\hline
+\end{tabular}
+\end{center}
+
+Reserve share ($\sum|r|/\sum|\tau|$) and activations are identical for $p=2$ and
+$p=3$ (activation difference maximum $4.7\times 10^{-8}$; reserve difference
+$8.4\times 10^{-9}$\,N$\cdot$m) because stage one fixes the reserves and leaves
+stage two almost no freedom: only 14, 16, and 5 activations out of 446 are
+strictly interior. The cost exponent $p$ is therefore not identifiable on this input.
+
+An address anomaly was identified (filed as \#13427): required moments are small
+($|M|\le 35$\,N$\cdot$m per level/axis), yet 49 of 51 DOFs exceed the 1\,N$\cdot$m
+reserve limit, axial-rotation reserves ($-18$ to $-54$\,N$\cdot$m) exceed the
+axial-rotation demand ($-9$ to $-19$\,N$\cdot$m), and some flexion reserves oppose
+the demand (L5--S1 demand $-29.5$\,N$\cdot$m, reserve $+35.2$\,N$\cdot$m).
+L5/S1 compression at address of 4.87\,BW reflects co-contraction rather than
+demand. Hypotheses include passive fibre force after the Millard swap (affine
+model intercept from $a=0.5$ and $a=1$), affine extrapolation error, or thoracic
+AR moment-arm screening.
+
+In joint reactions (compression defined as $+F_y$ on the superior by the inferior
+in the inferior frame, under \texttt{bruno2015\_regional}, $p=3$), L5/S1
+compression is 4.87\,BW at address, 9.15\,BW at top, and 5.70\,BW at impact;
+impact peak compression is 8.29\,BW at L2--L3. Maximum resultant shear is
+2.11\,BW at address, 2.75\,BW at top, and 8.73\,BW at impact. Context-band ratios
+against literature (model peak divided by literature band, descriptive only,
+never acceptance) are: Lim 2012 L4/L5 compression peak 1.41; Hosea 1990 L3/L4
+professional 0.80, amateur 1.00; Lim 2012 L4/L5 AP shear 4.8, ML shear 6.93.
+
 \paragraph{Limitations and Deferred Work.}
 The rigid-tendon affine force model is a declared approximation; activations
 below the minimum activation are a model of $a=0$, not a simulated force. The
-native run on the Bruno full-body model for three swing events with reserve
-share reported is owner-workstation work blocked on the licensed asset
-(\#12749) and is deferred; no result is claimed here. Muscle wrapping and
-via-point discontinuities are inherited from the model.
+native run on the Bruno full-body model was executed on capture-A (reported
+above), is unqualified, and the address anomaly is open in \#13427. Muscle
+wrapping and via-point discontinuities are inherited from the model.
 
 \paragraph{Reproduction.}
 \begin{verbatim}
 python -m pytest tests/unit/engines/opensim/test_static_opt_core.py \
   tests/opensim/spine/test_static_optimization.py \
   tests/opensim/spine/test_static_optimization_early_samples.py -q -n 0
+UD_SPINE_BRUNO_SOURCE=<local MaleFullBody.osim> \
+  python3 -m src.engines.physics_engines.opensim.python.spine.study --request base_p2.json
 \end{verbatim}
+with \texttt{base\_p2.json} holding the request fields listed above
+(\texttt{cost\_exponent} 2, \texttt{coupling\_law\_id}
+\texttt{bruno2015\_regional}).
