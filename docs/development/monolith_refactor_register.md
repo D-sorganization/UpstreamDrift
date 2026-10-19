@@ -25,8 +25,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1197 | `src/launchers/launcher_diagnostics.py` |
 | 1196 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
 | 1195 | `src/tools/shot_pattern_analysis/matched_supplement_figures.py` |
+| 1194 | `src/engines/physics_engines/opensim/python/msk_lift_ik_id.py` |
 | 1193 | `src/launchers/model_card.py` |
-| 1186 | `src/engines/physics_engines/opensim/python/msk_lift_ik_id.py` |
 | 1185 | `src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m` |
 | 1184 | `src/bunkershot3d/ball/splash.py` |
 | 1183 | `src/launchers/launcher_simulation.py` |
@@ -35,6 +35,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1178 | `src/engines/physics_engines/pinocchio/python/full_body_fit.py` |
 | 1174 | `src/shared/python/lifting/bundles.py` |
 | 1170 | `src/config/launcher_manifest_loader.py` |
+| 1170 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py` |
 | 1168 | `src/api/local_server.py` |
 | 1168 | `src/api/routes/data_explorer.py` |
 | 1168 | `src/shared/python/shadow_tracker/ingestion.py` |
@@ -58,7 +59,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1125 | `src/tools/bunker_shot_gui/model.py` |
 | 1118 | `src/motion_capture/rig/__main__.py` |
 | 1115 | `src/bunkershot3d/ball/qualification.py` |
-| 1114 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py` |
 | 1113 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/PostProcessingModule.m` |
 | 1110 | `src/tools/shot_pattern_analysis/academic_plots.py` |
 | 1106 | `src/shared/python/motion_matching/leaderboard.py` |
