@@ -1,0 +1,28 @@
+{
+  "schema": "grip-binding/v1",
+  "model_id": "pinocchio_native_golfer",
+  "model_hash": "sha256:1a91720cd7539fb009b2ab42b62526213152d78cf7af5bb1865913c2d6e9f824",
+  "handedness": "right",
+  "side_roles": {
+    "left": "lead",
+    "right": "trail"
+  },
+  "calibration_pose": {
+    "name": "neutral_address",
+    "description": "Neutral Pinocchio configuration q0 with lead_hand and trail_hand frames on grip axis around mid_hands"
+  },
+  "units": {
+    "length": "m",
+    "angle": "rad"
+  },
+  "provenance": {
+    "source": "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf",
+    "date": "2026-10-18",
+    "method": "native_urdf_grip_frames"
+  },
+  "attachment_mode": "contact",
+  "club_body": "club_shaft",
+  "lead_hand_body": "lead_hand",
+  "trail_hand_body": "trail_hand",
+  "unavailable_sites": {}
+}
