@@ -82,6 +82,32 @@ _GRIP_VALUE = {
     "hand_spacing": lambda g: g.hand_spacing_m,
 }
 _HAND_PICKS = tuple(_GRIP_VALUE)
+_VISUAL_GRIP_SPINS = (
+    (
+        "grip_strength_deg",
+        "Visual Grip Strength (deg, Picture Only)",
+        -30.0,
+        30.0,
+        1.0,
+        1,
+    ),
+    (
+        "lead_roll_offset_deg",
+        "Lead Roll Offset (deg, Picture Only)",
+        -30.0,
+        30.0,
+        1.0,
+        1,
+    ),
+    (
+        "trail_roll_offset_deg",
+        "Trail Roll Offset (deg, Picture Only)",
+        -30.0,
+        30.0,
+        1.0,
+        1,
+    ),
+)
 
 
 def _library_options(library: dict[str, Any], key: str) -> list[str]:
@@ -219,6 +245,17 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
             lambda v: self._on_grip_pick("grip_thumb_offset_deg", v)
         )
         form.addRow("Lead Thumb Offset (deg, Picture Only)", self.grip_thumb_spin)
+        self.visual_grip_spins: dict[str, QtWidgets.QDoubleSpinBox] = {}
+        for name, label, low, high, step, decimals in _VISUAL_GRIP_SPINS:
+            vspin = QtWidgets.QDoubleSpinBox()
+            vspin.setRange(low, high)
+            vspin.setSingleStep(step)
+            vspin.setDecimals(decimals)
+            vspin.setObjectName(f"grip_{name}")
+            vspin.setValue(0.0)
+            vspin.valueChanged.connect(lambda v, n=name: self._on_grip_pick(n, v))
+            self.visual_grip_spins[name] = vspin
+            form.addRow(label, vspin)
         reset = QtWidgets.QPushButton("Reset Grip")
         reset.setObjectName("reset_grip")
         reset.clicked.connect(lambda _c=False: self._on_grip_reset())
@@ -282,6 +319,9 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         self._syncing = True
         self.grip_preset_combo.setCurrentIndex(0)
         self.grip_style_combo.setCurrentIndex(0)
+        self.grip_thumb_spin.setValue(10.0)
+        for spin in self.visual_grip_spins.values():
+            spin.setValue(0.0)
         self._syncing = False
         self._sync_grip_spins()
         self._refresh()

@@ -111,9 +111,10 @@ class CharacterBuilderModel:
 
         Physical picks (``preset``, ``lead_shaft_rotation``, ..., ``grip_style``)
         change the compiled spec into a new revision that needs a refit;
-        ``grip_thumb_offset_deg`` is picture-only and goes in the appearance
-        sidecar.  ``ValueError`` for an unknown pick or an invalid value; the
-        picks are unchanged then.
+        ``grip_thumb_offset_deg``, ``grip_strength_deg``,
+        ``lead_roll_offset_deg`` and ``trail_roll_offset_deg`` are picture-only
+        and go in the appearance sidecar.  ``ValueError`` for an unknown pick or
+        an invalid value; the picks are unchanged then.
         """
         if name not in (*PHYSICAL_PICKS, *VISUAL_PICKS):
             raise ValueError(f"unknown grip pick: {name!r}")

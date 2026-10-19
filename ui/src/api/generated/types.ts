@@ -3572,6 +3572,16 @@ export interface SpeedControlResponse {
   status: string;
 }
 
+/**
+ * Lifecycle and result information for a spine study background job.
+ */
+export interface SpineStudyJobStatusV1 {
+  job_id: string;
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
+  receipt_path?: string | null;
+  error?: string | null;
+}
+
 export interface StrokesGainedAnalysisResultV1 {
   contract_version: "launch-monitor-strokes-gained-analysis/1.0.0";
   status: "available" | "partial" | "unavailable";

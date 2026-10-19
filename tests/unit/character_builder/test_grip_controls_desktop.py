@@ -60,11 +60,21 @@ def test_style_creates_revision_and_thumb_lands_in_the_sidecar(widget) -> None:
     assert "refit" in widget.summary.toPlainText()
 
     widget.grip_thumb_spin.setValue(20.0)
+    widget.visual_grip_spins["grip_strength_deg"].setValue(10.0)
+    widget.visual_grip_spins["lead_roll_offset_deg"].setValue(-5.0)
+    widget.visual_grip_spins["trail_roll_offset_deg"].setValue(8.0)
     assert physics_spec_sha256(widget.model.compile().document) == after_style
-    assert widget.model.appearance_document()["grip"] == {"lead_thumb_offset_deg": 20.0}
+    assert widget.model.appearance_document()["grip"] == {
+        "lead_thumb_offset_deg": 20.0,
+        "grip_strength_deg": 10.0,
+        "lead_roll_offset_deg": -5.0,
+        "trail_roll_offset_deg": 8.0,
+    }
 
 
 def test_a_refused_pick_shows_the_message_and_changes_nothing(widget) -> None:
     widget.grip_spins["lead_shaft_rotation"].setValue(-60.0)
     assert widget.model.grip_picks() == {}
-    assert "lead_v_azimuth_deg" in widget.status.text()
+    # -60 deg is the lead alpha bound (lead V azimuth -40 deg, HRG-GS-G4); the
+    # trail hand then sits outside the trail V offset range: still impossible.
+    assert "trail_v_offset_deg" in widget.status.text()

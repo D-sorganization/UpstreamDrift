@@ -18,8 +18,9 @@ Two kinds of pick are kept apart:
   ``grip_style`` is the only physical pick and equals the document's current
   physical style (default ``overlap``), it is a no-op and the v1 bytes stay
   identical.
-* **Visual** picks (the lead thumb offset) only change the picture.  They go
-  in the sidecar's ``grip`` block and never move ``physics_spec_sha256``.
+* **Visual** picks (the lead thumb offset, visual grip strength, and per-hand
+  roll offsets) only change the picture.  They go in the sidecar's ``grip``
+  block and never move ``physics_spec_sha256``.
 """
 
 from __future__ import annotations
@@ -50,7 +51,12 @@ NAMED_PRESET_CHOICES = tuple(NAMED_GRIP_PRESETS)
 GRIP_PRESET_CHOICES = (*GRIP_STRENGTH_PRESETS_DEG, *NAMED_PRESET_CHOICES)
 GRIP_STYLE_CHOICES = tuple(s.value for s in GripStyle)
 #: The only keys a sidecar's ``grip`` block may carry (visual values).
-VISUAL_KEYS = ("lead_thumb_offset_deg",)
+VISUAL_KEYS = (
+    "lead_thumb_offset_deg",
+    "grip_strength_deg",
+    "lead_roll_offset_deg",
+    "trail_roll_offset_deg",
+)
 #: pick name -> (hand, angle) of the physical hand angles.
 _HAND_PICKS = {
     "lead_shaft_rotation": ("lead", "alpha_deg"),
@@ -65,7 +71,12 @@ _SHARED_PICKS = {
     "hand_spacing": "hand_spacing_m",
 }
 PHYSICAL_PICKS = ("preset", *_HAND_PICKS, *_SHARED_PICKS, "grip_style")
-VISUAL_PICKS = ("grip_thumb_offset_deg",)
+VISUAL_PICKS = (
+    "grip_thumb_offset_deg",
+    "grip_strength_deg",
+    "lead_roll_offset_deg",
+    "trail_roll_offset_deg",
+)
 
 
 @dataclass(frozen=True)
@@ -75,7 +86,8 @@ class GripOverrides:
     ``preset`` names a grip strength (``weak``, ``neutral``, ``strong``) or
     a named preset and sets both hands; an explicit hand pick then wins over
     it.  ``grip_style`` is physical (selects the contact topology since G1).
-    ``grip_thumb_offset_deg`` is visual (picture only).
+    ``grip_thumb_offset_deg``, ``grip_strength_deg``, ``lead_roll_offset_deg``
+    and ``trail_roll_offset_deg`` are visual (picture only).
     """
 
     preset: str | None = None
@@ -89,6 +101,9 @@ class GripOverrides:
     hand_spacing: float | None = None
     grip_style: str | None = None  # physical (selects contact topology)
     grip_thumb_offset_deg: float | None = None  # visual
+    grip_strength_deg: float | None = None  # visual
+    lead_roll_offset_deg: float | None = None  # visual
+    trail_roll_offset_deg: float | None = None  # visual
 
     def __post_init__(self) -> None:
         require(
@@ -99,7 +114,14 @@ class GripOverrides:
             self.grip_style is None or self.grip_style in GRIP_STYLE_CHOICES,
             f"grip style must be one of {GRIP_STYLE_CHOICES}, got {self.grip_style!r}",
         )
-        for name in (*_HAND_PICKS, *_SHARED_PICKS, "grip_thumb_offset_deg"):
+        for name in (
+            *_HAND_PICKS,
+            *_SHARED_PICKS,
+            "grip_thumb_offset_deg",
+            "grip_strength_deg",
+            "lead_roll_offset_deg",
+            "trail_roll_offset_deg",
+        ):
             value = getattr(self, name)
             require(
                 value is None
@@ -190,9 +212,6 @@ def migrate_sidecar_grip(
         return {}
     require(isinstance(block, Mapping), "sidecar grip block must be a mapping")
     cleaned = dict(block)
-    other_moved = sorted(set(cleaned) - set(VISUAL_KEYS) - {"style"})
-    if other_moved:
-        check_sidecar_grip(cleaned)
     if "style" in cleaned:
         raw_legacy = cleaned.pop("style")
         legacy = (
@@ -378,11 +397,21 @@ def apply_grip_selection(
     return {**document}, grip
 
 
-def visual_grip_block(grip: GripSpec) -> dict[str, Any]:
+def visual_grip_block(
+    grip: GripSpec, overrides: GripOverrides | None = None
+) -> dict[str, Any]:
     """The sidecar ``grip`` block of ``grip``: visual values only."""
-    return {
+    block: dict[str, Any] = {
         "lead_thumb_offset_deg": grip.lead_thumb_offset_deg,
     }
+    if overrides is not None:
+        if overrides.grip_strength_deg is not None:
+            block["grip_strength_deg"] = float(overrides.grip_strength_deg)
+        if overrides.lead_roll_offset_deg is not None:
+            block["lead_roll_offset_deg"] = float(overrides.lead_roll_offset_deg)
+        if overrides.trail_roll_offset_deg is not None:
+            block["trail_roll_offset_deg"] = float(overrides.trail_roll_offset_deg)
+    return block
 
 
 def apply_visual_picks(
@@ -399,6 +428,12 @@ def apply_visual_picks(
     check_sidecar_grip(block)
     if overrides.grip_thumb_offset_deg is not None:
         block["lead_thumb_offset_deg"] = float(overrides.grip_thumb_offset_deg)
+    if overrides.grip_strength_deg is not None:
+        block["grip_strength_deg"] = float(overrides.grip_strength_deg)
+    if overrides.lead_roll_offset_deg is not None:
+        block["lead_roll_offset_deg"] = float(overrides.lead_roll_offset_deg)
+    if overrides.trail_roll_offset_deg is not None:
+        block["trail_roll_offset_deg"] = float(overrides.trail_roll_offset_deg)
     if block:
         out["grip"] = block
     return out
@@ -454,16 +489,18 @@ _FLAGS: tuple[tuple[str, str, type, str], ...] = (
 
 
 def add_grip_arguments(parser: argparse.ArgumentParser, *, physical: bool) -> None:
-    """The grip flags (HRG-GR4).  ``physical`` False keeps only visual flags.
+    """The grip flags (HRG-GR4, HRG-A2).  ``physical`` False keeps picture-only flags.
 
     Precedence: a flag, then the document, then the defaults.  Physical flags
     (including ``--grip-style`` since HRG-GS-G1) make a new model revision that
-    needs a refit; ``--grip-thumb-offset-deg`` is picture-only.
+    needs a refit; ``--grip-thumb-offset-deg``, ``--visual-grip-strength``,
+    ``--lead-roll-offset`` and ``--trail-roll-offset`` are picture-only.
     """
     group = parser.add_argument_group(
         "grip",
         "golf grip; physical flags (including --grip-style) make a new model "
-        "revision (refit needed), --grip-thumb-offset-deg is picture-only",
+        "revision (refit needed), --grip-thumb-offset-deg, --visual-grip-strength, "
+        "--lead-roll-offset, and --trail-roll-offset are picture-only",
     )
     group.add_argument(
         "--grip-thumb-offset-deg",
@@ -471,6 +508,27 @@ def add_grip_arguments(parser: argparse.ArgumentParser, *, physical: bool) -> No
         type=float,
         default=None,
         help="lead thumb azimuth offset from shaft top, degrees (picture only; no refit)",
+    )
+    group.add_argument(
+        "--visual-grip-strength",
+        dest="grip_strength_deg",
+        type=float,
+        default=None,
+        help="visual grip strength azimuth shift in degrees ([-30, 30]; picture only; no refit)",
+    )
+    group.add_argument(
+        "--lead-roll-offset",
+        dest="lead_roll_offset_deg",
+        type=float,
+        default=None,
+        help="visual lead hand roll offset in degrees ([-30, 30]; picture only; no refit)",
+    )
+    group.add_argument(
+        "--trail-roll-offset",
+        dest="trail_roll_offset_deg",
+        type=float,
+        default=None,
+        help="visual trail hand roll offset in degrees ([-30, 30]; picture only; no refit)",
     )
     if not physical:
         return
@@ -499,6 +557,9 @@ def overrides_from_args(args: argparse.Namespace) -> GripOverrides:
         *(dest for _f, dest, _k, _t in _FLAGS),
         "grip_style",
         "grip_thumb_offset_deg",
+        "grip_strength_deg",
+        "lead_roll_offset_deg",
+        "trail_roll_offset_deg",
     )
     picks = {n: getattr(args, f"grip_{n}" if n == "preset" else n, None) for n in names}
     return GripOverrides(**picks)

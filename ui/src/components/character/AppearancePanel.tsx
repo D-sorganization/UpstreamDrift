@@ -285,6 +285,15 @@ export function AppearancePanel({
       ...(grip.grip_thumb_offset_deg !== undefined && {
         grip_thumb_offset_deg: grip.grip_thumb_offset_deg,
       }),
+      ...(grip.grip_strength_deg !== undefined && {
+        grip_strength_deg: grip.grip_strength_deg,
+      }),
+      ...(grip.lead_roll_offset_deg !== undefined && {
+        lead_roll_offset_deg: grip.lead_roll_offset_deg,
+      }),
+      ...(grip.trail_roll_offset_deg !== undefined && {
+        trail_roll_offset_deg: grip.trail_roll_offset_deg,
+      }),
     };
     setExporting(true);
     setExportError(null);

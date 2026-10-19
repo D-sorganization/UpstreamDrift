@@ -32,12 +32,22 @@ const SLIDERS: ReadonlyArray<readonly [keyof GripPicks, string, number, number, 
   ['trail_palm_diagonal', 'Trail Palm Diagonal (deg)', 5, 85, 1],
   ['hand_spacing', 'Hand Spacing (m)', 0.01, 0.2, 0.0025],
 ];
+const VISUAL_SLIDERS: ReadonlyArray<readonly [keyof GripPicks, string, number, number, number]> = [
+  ['grip_thumb_offset_deg', 'Lead Thumb Offset (deg, Picture Only)', 0, 45, 1],
+  ['grip_strength_deg', 'Visual Grip Strength (deg, Picture Only)', -30, 30, 1],
+  ['lead_roll_offset_deg', 'Lead Roll Offset (deg, Picture Only)', -30, 30, 1],
+  ['trail_roll_offset_deg', 'Trail Roll Offset (deg, Picture Only)', -30, 30, 1],
+];
 const SLIDER_DEFAULT: Partial<Record<keyof GripPicks, number>> = {
   lead_shaft_rotation: 0,
   trail_shaft_rotation: 0,
   lead_palm_diagonal: 40,
   trail_palm_diagonal: 40,
   hand_spacing: 0.0762,
+  grip_thumb_offset_deg: 10,
+  grip_strength_deg: 0,
+  lead_roll_offset_deg: 0,
+  trail_roll_offset_deg: 0,
 };
 
 function Slider({
@@ -93,7 +103,8 @@ function Slider({
  *
  * Strength, palm diagonal, spacing and style are physical: the Build button
  * asks the server for the new model revision (hashes), which needs a refit.
- * The lead thumb offset is picture-only and goes in the appearance export.
+ * The lead thumb offset, visual grip strength and per-hand roll offsets are
+ * picture-only and go in the appearance export.
  */
 export function GripControls({ picks, onChange, character }: GripControlsProps) {
   const [revision, setRevision] = useState<GripRevision | null>(null);
@@ -175,18 +186,22 @@ export function GripControls({ picks, onChange, character }: GripControlsProps) 
           ))}
         </select>
       </div>
-      <Slider
-        name="grip_thumb_offset_deg"
-        label="Lead Thumb Offset (deg, Picture Only)"
-        min={0}
-        max={45}
-        step={1}
-        value={picks.grip_thumb_offset_deg}
-        onChange={(v) => set({ grip_thumb_offset_deg: v })}
-      />
+      {VISUAL_SLIDERS.map(([name, label, min, max, step]) => (
+        <Slider
+          key={name}
+          name={name}
+          label={label}
+          min={min}
+          max={max}
+          step={step}
+          value={picks[name] as number | undefined}
+          onChange={(v) => set({ [name]: v } as GripPicks)}
+        />
+      ))}
       <p className="text-xs text-gray-400">
         Strength, palm diagonal, spacing and style change the physics: they make a new model
-        revision that needs a refit. Thumb offset changes the picture only.
+        revision that needs a refit. Thumb offset, visual strength and roll offsets change the
+        picture only.
       </p>
       <button
         type="button"

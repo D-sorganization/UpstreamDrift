@@ -241,7 +241,7 @@ def grip_revision_summary(
     )
     return {
         "grip": physical_config,
-        "visual": None if grip is None else visual_grip_block(grip),
+        "visual": None if grip is None else visual_grip_block(grip, overrides),
         "spec_sha256": revised.sha256,
         "physics_spec_sha256": spec_sha,
         "parent_physics_spec_sha256": parent_sha,

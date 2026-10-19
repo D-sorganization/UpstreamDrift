@@ -64,6 +64,9 @@ _FLAGS = {
     "hand_spacing": "--hand-spacing",
     "grip_style": "--grip-style",
     "grip_thumb_offset_deg": "--grip-thumb-offset-deg",
+    "grip_strength_deg": "--visual-grip-strength",
+    "lead_roll_offset_deg": "--lead-roll-offset",
+    "trail_roll_offset_deg": "--trail-roll-offset",
 }
 IDS = [c["name"] for c in CASES]
 
@@ -90,10 +93,22 @@ def _summary(document: dict[str, Any], grip: GripSpec) -> dict[str, Any]:
 
 
 def test_grip_style_is_classified_as_physical_and_not_visual() -> None:
+    # HRG-GS-G1 (#13346) classifies grip_style as physical while keeping
+    # HRG-A2's (#13166) three visual keys alongside grip_thumb_offset_deg.
     assert "grip_style" in PHYSICAL_PICKS
     assert "grip_style" not in VISUAL_PICKS
-    assert VISUAL_PICKS == ("grip_thumb_offset_deg",)
-    assert VISUAL_KEYS == ("lead_thumb_offset_deg",)
+    assert VISUAL_PICKS == (
+        "grip_thumb_offset_deg",
+        "grip_strength_deg",
+        "lead_roll_offset_deg",
+        "trail_roll_offset_deg",
+    )
+    assert VISUAL_KEYS == (
+        "lead_thumb_offset_deg",
+        "grip_strength_deg",
+        "lead_roll_offset_deg",
+        "trail_roll_offset_deg",
+    )
 
 
 @pytest.mark.parametrize("style", ["interlock", "ten_finger"])
@@ -151,7 +166,13 @@ def test_sidecar_and_physical_style_can_never_disagree(
 ) -> None:
     spec = GripSpec(style=physical_style)
     doc = apply_grip_config(DRIVER, spec)
-    legacy_sidecar = {"style": sidecar_style.value, "lead_thumb_offset_deg": 18.0}
+    legacy_sidecar = {
+        "style": sidecar_style.value,
+        "lead_thumb_offset_deg": 18.0,
+        "grip_strength_deg": 10.0,
+        "lead_roll_offset_deg": -5.0,
+        "trail_roll_offset_deg": 8.0,
+    }
 
     if physical_style is not sidecar_style:
         pattern = rf"({physical_style.value}.*{sidecar_style.value}|{sidecar_style.value}.*{physical_style.value})"
@@ -163,7 +184,12 @@ def test_sidecar_and_physical_style_can_never_disagree(
             apply_grip_selection(doc, GripOverrides(), legacy_sidecar)
     else:
         migrated = migrate_sidecar_grip(legacy_sidecar, doc)
-        assert migrated == {"lead_thumb_offset_deg": 18.0}
+        assert migrated == {
+            "lead_thumb_offset_deg": 18.0,
+            "grip_strength_deg": 10.0,
+            "lead_roll_offset_deg": -5.0,
+            "trail_roll_offset_deg": 8.0,
+        }
         assert "style" not in migrated
         resolved = resolve_grip(None, spec, legacy_sidecar)
         assert resolved.style is physical_style

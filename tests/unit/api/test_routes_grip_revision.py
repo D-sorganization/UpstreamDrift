@@ -47,16 +47,26 @@ def test_route_refuses_an_unknown_pick_and_an_impossible_one(
 ) -> None:
     assert client.post("/character-builder/grip", json={"spin": 1}).status_code == 422
     r = client.post("/character-builder/grip", json={"lead_shaft_rotation": -60})
-    assert r.status_code == 422 and "lead_v_azimuth_deg" in r.json()["detail"]
+    # -60 deg is the lead alpha bound (lead V azimuth -40 deg, HRG-GS-G4); the
+    # trail hand then sits outside the trail V offset range: still impossible.
+    assert r.status_code == 422 and "trail_v_offset_deg" in r.json()["detail"]
 
 
 def test_appearance_export_carries_only_picture_picks(client: TestClient) -> None:
     ok = client.post(
         "/character-builder/appearance",
-        json={"grip_thumb_offset_deg": 20},
+        json={
+            "grip_thumb_offset_deg": 20,
+            "grip_strength_deg": 10,
+            "lead_roll_offset_deg": -5,
+            "trail_roll_offset_deg": 8,
+        },
     ).json()
     assert ok["appearance"]["grip"] == {
         "lead_thumb_offset_deg": 20.0,
+        "grip_strength_deg": 10.0,
+        "lead_roll_offset_deg": -5.0,
+        "trail_roll_offset_deg": 8.0,
     }
     # Since HRG-GS-G1 (#13346), grip_style is a physical pick (selects contact
     # topology and requires a refit), so the appearance sidecar route refuses it

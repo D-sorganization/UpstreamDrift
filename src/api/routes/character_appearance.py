@@ -46,6 +46,9 @@ _CHOICE_FIELDS = (
     "bottom_color",
     "glove",
     "grip_thumb_offset_deg",
+    "grip_strength_deg",
+    "lead_roll_offset_deg",
+    "trail_roll_offset_deg",
     "name",
 )
 
@@ -90,6 +93,24 @@ class CharacterAppearanceRequest(BaseModel):
     )
     grip_thumb_offset_deg: float | None = Field(
         None, ge=0.0, le=45.0, description="Lead thumb offset, degrees (picture only)"
+    )
+    grip_strength_deg: float | None = Field(
+        None,
+        ge=-30.0,
+        le=30.0,
+        description="Visual grip strength azimuth shift, degrees (picture only)",
+    )
+    lead_roll_offset_deg: float | None = Field(
+        None,
+        ge=-30.0,
+        le=30.0,
+        description="Visual lead hand roll offset, degrees (picture only)",
+    )
+    trail_roll_offset_deg: float | None = Field(
+        None,
+        ge=-30.0,
+        le=30.0,
+        description="Visual trail hand roll offset, degrees (picture only)",
     )
     # The name becomes the export filename stem, so it is restricted to a
     # header- and path-safe identifier.
@@ -171,8 +192,9 @@ class GripRevisionRequest(BaseModel):
     stronger); the ``*_palm_diagonal`` values set where the shaft crosses the
     palm; the ``*_set_angle`` values the angle at the wrist; ``lead_below_butt``
     and ``hand_spacing`` are metres; ``grip_style`` selects the contact
-    topology (physical since G1).  Only ``grip_thumb_offset_deg`` is
-    picture-only.
+    topology (physical since G1).  ``grip_thumb_offset_deg``,
+    ``grip_strength_deg``, ``lead_roll_offset_deg`` and
+    ``trail_roll_offset_deg`` are picture-only.
     """
 
     character: CharacterSpecRequest | None = None
@@ -197,6 +219,9 @@ class GripRevisionRequest(BaseModel):
     hand_spacing: float | None = None
     grip_style: Literal["overlap", "interlock", "ten_finger"] | None = None
     grip_thumb_offset_deg: float | None = None
+    grip_strength_deg: float | None = None
+    lead_roll_offset_deg: float | None = None
+    trail_roll_offset_deg: float | None = None
 
     model_config = {"extra": "forbid"}
 

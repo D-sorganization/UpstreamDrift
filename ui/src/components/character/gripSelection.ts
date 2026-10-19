@@ -88,6 +88,9 @@ export interface PhysicalGripPicks {
 
 export interface VisualGripPicks {
   grip_thumb_offset_deg?: number;
+  grip_strength_deg?: number;
+  lead_roll_offset_deg?: number;
+  trail_roll_offset_deg?: number;
 }
 
 export type GripPicks = PhysicalGripPicks & VisualGripPicks;
@@ -213,6 +216,19 @@ export function visualGripBlock(picks: VisualGripPicks): Record<string, number> 
       throw new Error(`grip_thumb_offset_deg must be in [0, 45], got ${t}`);
     }
     block.lead_thumb_offset_deg = t;
+  }
+  for (const key of [
+    'grip_strength_deg',
+    'lead_roll_offset_deg',
+    'trail_roll_offset_deg',
+  ] as const) {
+    const v = picks[key];
+    if (v !== undefined) {
+      if (!Number.isFinite(v) || v < -30 || v > 30) {
+        throw new Error(`${key} must be in [-30, 30], got ${v}`);
+      }
+      block[key] = v;
+    }
   }
   return block;
 }

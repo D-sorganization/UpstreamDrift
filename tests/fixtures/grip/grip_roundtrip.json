@@ -121,7 +121,10 @@
       "name": "style_only",
       "picks": {
         "grip_style": "interlock",
-        "grip_thumb_offset_deg": 20.0
+        "grip_thumb_offset_deg": 20.0,
+        "grip_strength_deg": 10.0,
+        "lead_roll_offset_deg": -5.0,
+        "trail_roll_offset_deg": 8.0
       },
       "expected": {
         "grip": {
@@ -141,11 +144,35 @@
           "style": "interlock"
         },
         "sidecar_grip": {
-          "lead_thumb_offset_deg": 20.0
+          "lead_thumb_offset_deg": 20.0,
+          "grip_strength_deg": 10.0,
+          "lead_roll_offset_deg": -5.0,
+          "trail_roll_offset_deg": 8.0
         },
         "refit_required": true,
         "driver_physics_spec_sha256": "98bd6b2e79578602c99bc5572423380d3cfb553307f5ef1d2298f8c4861d976b",
         "character_physics_spec_sha256": "0ec1ec964086d35b6cf7c9d646dfbb8605bc2f8dc1283bd54c2afa4787dd378c"
+      }
+    },
+    {
+      "name": "visual_only",
+      "picks": {
+        "grip_thumb_offset_deg": 20.0,
+        "grip_strength_deg": 10.0,
+        "lead_roll_offset_deg": -5.0,
+        "trail_roll_offset_deg": 8.0
+      },
+      "expected": {
+        "grip": null,
+        "sidecar_grip": {
+          "lead_thumb_offset_deg": 20.0,
+          "grip_strength_deg": 10.0,
+          "lead_roll_offset_deg": -5.0,
+          "trail_roll_offset_deg": 8.0
+        },
+        "refit_required": false,
+        "driver_physics_spec_sha256": "296bdc363b3f68cbfba3a651efc45e818b3946331802e8fa113a650eb973537f",
+        "character_physics_spec_sha256": "d7b5b93bcfc9bb619d8c8d01d83f192bb0d9d55f19dd507668158e575ab8df45"
       }
     },
     {
