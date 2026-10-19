@@ -43,6 +43,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1165 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py` |
 | 1164 | `src/shared/python/physics/terrain_representation.py` |
 | 1163 | `src/engines/simscape/adapter.py` |
+| 1162 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py` |
 | 1161 | `src/engines/physics_engines/opensim/python/msk_lift_ik_id.py` |
 | 1153 | `src/tools/motion_matching/gui.py` |
 | 1150 | `src/tools/bunker_shot_gui/gui.py` |
@@ -58,7 +59,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1125 | `src/tools/bunker_shot_gui/model.py` |
 | 1118 | `src/motion_capture/rig/__main__.py` |
 | 1115 | `src/bunkershot3d/ball/qualification.py` |
-| 1114 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py` |
 | 1113 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/PostProcessingModule.m` |
 | 1110 | `src/tools/shot_pattern_analysis/academic_plots.py` |
 | 1106 | `src/shared/python/motion_matching/leaderboard.py` |

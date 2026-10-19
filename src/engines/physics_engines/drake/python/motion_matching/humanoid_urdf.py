@@ -50,10 +50,12 @@ __all__ = [
     "SHARED_DIMENSIONS_YAML",
     "SHARED_INERTIA_YAML",
     "SHARED_TOPOLOGY_YAML",
+    "VALID_ATTACHMENT_MODES",
     "DimensionEntry",
     "HumanoidDimensions",
     "JointSpec",
     "SegmentSpec",
+    "add_bilateral_left_hand_bushing",
     "build_humanoid_urdf",
     "load_humanoid_dimensions",
     "load_humanoid_into_plant",
@@ -760,12 +762,13 @@ def _add_joint(
     jtype: str,
     parent: str,
     child: str,
-    origin_xyz: tuple[float, float, float],
-    origin_rpy: tuple[float, float, float],
-    axis: tuple[float, float, float] | None = None,
-    limits: tuple[float, float] | None = None,
-    damping: float = 0.0,
+    origin: tuple[tuple[float, float, float], tuple[float, float, float]],
+    dof_opts: tuple[
+        tuple[float, float, float] | None, tuple[float, float] | None, float
+    ] = (None, None, 0.0),
 ) -> None:
+    origin_xyz, origin_rpy = origin
+    axis, limits, damping = dof_opts
     joint = ET.SubElement(root, "joint", name=name, type=jtype)
     ET.SubElement(joint, "parent", link=parent)
     ET.SubElement(joint, "child", link=child)
@@ -796,8 +799,7 @@ def _emit_segment(root: ET.Element, seg: SegmentSpec) -> None:
     j = seg.joint
     jtype = j.type
 
-    if jtype == "floating":
-        # Drake supports <joint type="floating">. URDF spec also allows it.
+    if jtype in {"floating", "fixed"}:
         _add_link(
             root,
             name=seg.name,
@@ -808,30 +810,10 @@ def _emit_segment(root: ET.Element, seg: SegmentSpec) -> None:
         _add_joint(
             root,
             name=j.name,
-            jtype="floating",
+            jtype=jtype,
             parent=seg.parent,
             child=seg.name,
-            origin_xyz=seg.origin_xyz,
-            origin_rpy=seg.origin_rpy,
-        )
-        return
-
-    if jtype == "fixed":
-        _add_link(
-            root,
-            name=seg.name,
-            mass=seg.mass,
-            inertia=seg.inertia,
-            geometry=seg.geometry,
-        )
-        _add_joint(
-            root,
-            name=j.name,
-            jtype="fixed",
-            parent=seg.parent,
-            child=seg.name,
-            origin_xyz=seg.origin_xyz,
-            origin_rpy=seg.origin_rpy,
+            origin=(seg.origin_xyz, seg.origin_rpy),
         )
         return
 
@@ -849,11 +831,12 @@ def _emit_segment(root: ET.Element, seg: SegmentSpec) -> None:
             jtype="revolute",
             parent=seg.parent,
             child=seg.name,
-            origin_xyz=seg.origin_xyz,
-            origin_rpy=seg.origin_rpy,
-            axis=j.axes[0],
-            limits=j.limits[0] if j.limits else (-3.14159, 3.14159),
-            damping=j.damping,
+            origin=(seg.origin_xyz, seg.origin_rpy),
+            dof_opts=(
+                j.axes[0],
+                j.limits[0] if j.limits else (-3.14159, 3.14159),
+                j.damping,
+            ),
         )
         return
 
@@ -892,11 +875,8 @@ def _emit_segment(root: ET.Element, seg: SegmentSpec) -> None:
                 jtype="revolute",
                 parent=prev_link,
                 child=child,
-                origin_xyz=origin_xyz,
-                origin_rpy=origin_rpy,
-                axis=j.axes[idx],
-                limits=limit_pair,
-                damping=j.damping,
+                origin=(origin_xyz, origin_rpy),
+                dof_opts=(j.axes[idx], limit_pair, j.damping),
             )
             prev_link = child
         return
@@ -965,42 +945,110 @@ def build_humanoid_urdf(
 # Drake loader (lazy pydrake import)
 # ---------------------------------------------------------------------------
 
+VALID_ATTACHMENT_MODES: tuple[str, ...] = ("unilateral", "bilateral")
+
+
+def add_bilateral_left_hand_bushing(
+    plant: MultibodyPlant,
+    *,
+    topology: Any | None = None,
+    bushing: Any | None = None,
+) -> Any:
+    """Attach ``left_hand`` to ``club_shaft`` via ``LinearBushingRollPitchYaw``."""
+    from importlib import import_module  # noqa: PLC0415
+
+    import numpy as np  # noqa: PLC0415
+
+    from src.shared.python.grip_contact.contact_topology import (  # noqa: PLC0415
+        contact_topology,
+    )
+    from src.shared.python.grip_contact.parameters import (  # noqa: PLC0415
+        BushingParameters,
+        default_bushing,
+    )
+    from src.shared.python.grip_contact.topology_contact import (  # noqa: PLC0415
+        hand_x_origin,
+    )
+
+    math_mod: Any = import_module("pydrake.math")
+    tree_mod: Any = import_module("pydrake.multibody.tree")
+
+    topo = topology if topology is not None else contact_topology()
+    b_params = bushing if bushing is not None else default_bushing()
+    if not isinstance(b_params, BushingParameters):
+        raise TypeError(
+            f"bushing must be BushingParameters, got {type(b_params).__name__}"
+        )
+
+    dx = hand_x_origin(topo, "lead") - hand_x_origin(topo, "trail")
+    club_body = plant.GetBodyByName("club_shaft")
+    left_hand_body = plant.GetBodyByName("left_hand")
+    right_hand_body = plant.GetBodyByName("right_hand")
+    club_lead_tf = math_mod.RigidTransform(np.array([dx, 0.0, 0.10], dtype=float))
+    club_trail_tf = math_mod.RigidTransform(np.array([0.0, 0.0, 0.10], dtype=float))
+    ident_tf = math_mod.RigidTransform()
+
+    frame_club_lead = plant.AddFrame(
+        tree_mod.FixedOffsetFrame(
+            "club_lead_grip", club_body.body_frame(), club_lead_tf
+        )
+    )
+    plant.AddFrame(
+        tree_mod.FixedOffsetFrame(
+            "club_trail_grip", club_body.body_frame(), club_trail_tf
+        )
+    )
+    frame_left_hand = plant.AddFrame(
+        tree_mod.FixedOffsetFrame(
+            "left_hand_grip", left_hand_body.body_frame(), ident_tf
+        )
+    )
+    plant.AddFrame(
+        tree_mod.FixedOffsetFrame(
+            "right_hand_grip", right_hand_body.body_frame(), ident_tf
+        )
+    )
+    return plant.AddForceElement(
+        tree_mod.LinearBushingRollPitchYaw(
+            frame_left_hand,
+            frame_club_lead,
+            np.asarray(b_params.rotational_stiffness_nm_rad, dtype=float),
+            np.asarray(b_params.rotational_damping_nms_rad, dtype=float),
+            np.asarray(b_params.translational_stiffness_n_m, dtype=float),
+            np.asarray(b_params.translational_damping_ns_m, dtype=float),
+        )
+    )
+
 
 def load_humanoid_into_plant(
     plant: MultibodyPlant,
     urdf_path: Path | str | None = None,
+    *,
+    attachment: str = "unilateral",
+    topology: Any | None = None,
+    bushing: Any | None = None,
 ) -> ModelInstanceIndex:
-    """Add the canonical humanoid URDF to a Drake ``MultibodyPlant``.
+    """Add the canonical humanoid URDF to a Drake ``MultibodyPlant``."""
+    if not isinstance(attachment, str) or attachment not in VALID_ATTACHMENT_MODES:
+        raise ValueError(
+            f"attachment must be one of {VALID_ATTACHMENT_MODES}, got {attachment!r}"
+        )
 
-    Args:
-        plant: A pre-finalized :class:`pydrake.multibody.plant.MultibodyPlant`.
-        urdf_path: URDF source path. ``None`` -> :data:`CANONICAL_URDF`. If
-            the file does not exist, it is regenerated from the shared YAML.
-
-    Returns:
-        The :class:`pydrake.multibody.tree.ModelInstanceIndex` for the
-        added humanoid.
-
-    Raises:
-        ImportError: if ``pydrake`` is not installed.
-        FileNotFoundError: if ``urdf_path`` is missing and the YAML is also
-            missing (so the URDF cannot be regenerated).
-    """
-    # Explicit imports per CLAUDE.md ("Drake: Must use explicit imports:
-    # from pydrake.X import Y").
     from pydrake.multibody.parsing import Parser  # noqa: PLC0415
 
     path = Path(urdf_path) if urdf_path is not None else CANONICAL_URDF
     if not path.exists():
-        # Regenerate from the YAML; this is the path the build script and
-        # CI gate use.
         build_humanoid_urdf(out_path=path)
 
     parser = Parser(plant)
-    models = parser.AddModels(str(path))
+    models = parser.AddModels(str(path))  # type: ignore[arg-type]
     if not models:  # pragma: no cover - Drake raises before reaching here
         msg = f"Drake Parser returned no model instances for {path}"
         raise RuntimeError(msg)
+
+    if attachment == "bilateral":
+        add_bilateral_left_hand_bushing(plant, topology=topology, bushing=bushing)
+
     return models[0]
 
 

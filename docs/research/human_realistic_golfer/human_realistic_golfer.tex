@@ -1837,6 +1837,67 @@ In the native Pinocchio golfer URDF, \texttt{lead\_hand}, \texttt{trail\_hand}, 
 python3 -m pytest tests/unit/grip_contact/test_pinocchio_native_golfer_grip.py
 \end{verbatim}
 
+\subsection{Native Drake Golfer Grip Adapter (HRG-GS-M10, \#13332)}
+\textbf{Bilateral Attachment Topology and Parameters.}
+In the canonical Drake golf humanoid (\path{src/engines/physics_engines/drake/models/generated/golfer.urdf}, loaded via \path{src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py}), \texttt{club\_shaft} is welded to the trail hand (\texttt{right\_hand}) at local offset $p_{\mathrm{weld}} = (0, 0, -0.10)\,\mathrm{m}$ via fixed joint \texttt{grip\_lead}, leaving the lead hand (\texttt{left\_hand}) disconnected by default (\texttt{attachment="unilateral"}). Because the torso, right arm, club, and left arm form a closed kinematic loop, \texttt{load\_humanoid\_into\_plant(..., attachment="bilateral")} attaches \texttt{left\_hand} to \texttt{club\_shaft} using a compliant \texttt{LinearBushingRollPitchYaw} force element (never a second tree joint, leaving \texttt{num\_positions()} $= 35$, \texttt{num\_velocities()} $= 34$, and \texttt{golfer.urdf} byte-identical). The trail-hand grip anchor on \texttt{club\_shaft} sits at $p_{\mathrm{trail}}^{\mathrm{club}} = (0, 0, +0.10)\,\mathrm{m}$, and the lead-hand grip frame \texttt{club\_lead\_grip} is placed at the axial offset from \texttt{hand\_x\_origin} (\path{src/shared/python/grip_contact/topology_contact.py}):
+\begin{equation}
+\Delta x_{\mathrm{lead}} = x_{\mathrm{origin}}(\mathcal{T}, \mathrm{lead}) - x_{\mathrm{origin}}(\mathcal{T}, \mathrm{trail}) = -0.0725\,\mathrm{m} - 0.0000\,\mathrm{m} = -0.0725\,\mathrm{m}, \qquad
+p_{\mathrm{lead}}^{\mathrm{club}} = \begin{bmatrix} \Delta x_{\mathrm{lead}} \\ 0 \\ 0.10 \end{bmatrix}\,\mathrm{m}.
+\end{equation}
+The bushing reuses the shared \texttt{BushingParameters} (\texttt{default\_bushing()} in \path{src/shared/python/grip_contact/parameters.py}):
+\begin{equation}
+k_{\mathrm{trans}} = (8000, 8000, 8000)\,\mathrm{N/m}, \quad
+c_{\mathrm{trans}} = (160, 160, 160)\,\mathrm{N\cdot s/m}, \quad
+k_{\mathrm{rot}} = (80, 150, 150)\,\mathrm{N\cdot m/rad}, \quad
+c_{\mathrm{rot}} = (1.6, 3.0, 3.0)\,\mathrm{N\cdot m\cdot s/rad}.
+\end{equation}
+Over a $0.04\,\mathrm{s}$ prescribed hold at the bilateral IK address pose, the maximum world-space gap between \texttt{left\_hand\_grip} and \texttt{club\_lead\_grip} is $9.73 \times 10^{-6}\,\mathrm{m}$ ($0.0097\,\mathrm{mm} < 1.0\,\mathrm{mm}$).
+
+\textbf{Adapter Equations and Contact Normal Projection.}
+\texttt{NativeDrakeGolferGripAdapter} (\path{src/engines/physics_engines/drake/python/native_golfer_grip_adapter.py}) resolves its \texttt{HandClubBinding} from \path{src/config/grip_bindings/drake_native_golfer.json} (\texttt{grip-binding/v1}), samples body poses ${}^{W}T_{B}$ and spatial velocities $(v_{B,W}, \omega_{B,W})$ from the Drake \texttt{MultibodyPlant} context, and applies physical body wrenches $(F_{B,W}, M_{B,W})$ as \texttt{ExternallyAppliedSpatialForce} entries about body origins $p_{BoBq,B} = 0$ on \texttt{plant.get\_applied\_spatial\_force\_input\_port()}. Zero native collision geometries are registered on the grip pairs (\texttt{registered\_grip\_collision\_count()} $= 0$), ensuring contact is never applied twice.
+Following the G0 Drake frame convention, let $\hat{n}_{BA,W}$ be the unit contact normal pointing from body $B$ (\texttt{club\_shaft}) toward body $A$ (hand site) in world axes, so the inward normal into the club is $\hat{n}_{\mathrm{in}} = -\hat{n}_{BA,W}$. The recorded contact normal force $f_n$ and tangential friction magnitude $f_t$ (\texttt{project\_pair\_contact\_normal}) are:
+\begin{equation}
+f_n = \max\!\left(0,\, F_{b,W} \cdot (-\hat{n}_{BA,W})\right), \qquad
+f_t = \left\| F_{b,W} - f_n\,(-\hat{n}_{BA,W}) \right\|_2.
+\end{equation}
+Under pure tangential axial slip ($v_{\mathrm{slip}} = 0.05\,\hat{e}_{x,\mathrm{club}}\,\mathrm{m/s}$, orthogonal to $\hat{n}_{BA,W}$), $f_n$ remains invariant to $\le 10^{-12}\,\mathrm{N}$.
+
+\textbf{Per-Hand Capability Table and Physics Honesty.}
+Per the physics-honesty rule, \texttt{supports\_physical\_pairs} is \texttt{True} only for a hand that is a distinct rigid body from \texttt{club\_shaft} and is not welded to it (\texttt{plant.GetBodiesWeldedTo(club\_body)}). Because \texttt{right\_hand} is welded to \texttt{club\_shaft}, its hand--club pairs act within a single rigid body and are reporting/allocated only; calling \texttt{apply\_wrenches} or \texttt{apply\_pair\_wrench} on \texttt{right\_hand} or any welded pair raises \texttt{ValueError} rather than silently cancelling. Under the bilateral bushing, \texttt{left\_hand} is a distinct unwelded body, so its pad pairs can act physically in parallel with the bushing:
+\begin{center}
+\begin{tabular}{llllll}
+\toprule
+Role / Pair Group & Model Body & Kinematic Relation to \texttt{club\_shaft} & \texttt{supports\_physical\_pairs} & \texttt{supports\_wrench\_application} & Force Application Policy \\
+\midrule
+Lead hand (\texttt{L}) & \texttt{left\_hand} & Distinct body (\texttt{LinearBushingRollPitchYaw}) & \texttt{True} & \texttt{True} & Physical pad wrenches in parallel with bushing \\
+Trail hand (\texttt{R}) & \texttt{right\_hand} & Welded (\texttt{grip\_lead} fixed joint) & \texttt{False} & \texttt{False} & Reporting/allocated only; raises \texttt{ValueError} if applied \\
+Hand--hand pairs & \texttt{left\_hand}--\texttt{right\_hand} & Cross-hand overlap/interlock/abutment & \texttt{False} & \texttt{False} & Allocated (\texttt{NaN} + reason); $0.0\,\mathrm{N}$ applied \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{M3 Qualification Parity Table.}
+Across all three grip styles on the $0.04\,\mathrm{s}$ prescribed hold ($1100\,\mathrm{N}$ squeeze per hand, $\Delta t = 2\,\mathrm{ms}$), \texttt{compare\_topology\_series} passes under the unchanged $5\%$ peak and $2\%$ RMS tolerances with zero applied allocated force (\texttt{applied\_allocated\_force\_n} $= 0.0\,\mathrm{N}$):
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+Grip Style & Plant Hold vs.\ \texttt{law\_level\_series} & Plant Hold vs.\ \texttt{PinocchioGripAdapter} & Dynamic Hold Peak Error vs.\ Pinocchio & Dynamic Hold RMS Error vs.\ Pinocchio & Verdict \\
+\midrule
+\texttt{overlap} & $0.0000\%$ peak / $0.0000\%$ RMS & $0.0000\%$ peak / $0.0000\%$ RMS & $0.2733\%$ ($\le 5.0\%$) & $0.5090\%$ ($\le 2.0\%$) & \texttt{passed} \\
+\texttt{interlock} & $0.0000\%$ peak / $0.0000\%$ RMS & $0.0000\%$ peak / $0.0000\%$ RMS & $0.2733\%$ ($\le 5.0\%$) & $0.5090\%$ ($\le 2.0\%$) & \texttt{passed} \\
+\texttt{ten\_finger} & $0.0000\%$ peak / $0.0000\%$ RMS & $0.0000\%$ peak / $0.0000\%$ RMS & $0.2996\%$ ($\le 5.0\%$) & $0.3001\%$ ($\le 2.0\%$) & \texttt{passed} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Limitations.}
+Rigid hand segments (\texttt{representation="rigid\_proxy"}) carry fixed contact-site proxies without finger articulation or intrinsic muscle recruitment. Because \texttt{right\_hand} is welded to \texttt{club\_shaft} in the canonical URDF, trail-hand pad forces act within one rigid body and are reporting/allocated only; lead-hand pad forces under \texttt{attachment="bilateral"} act in parallel with the compliant \texttt{LinearBushingRollPitchYaw}. Hand--hand pairs are allocated equivalents (\texttt{NaN} plus structured reason when no closure wrench is supplied) and never enter force application.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_drake_native_golfer_grip.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
