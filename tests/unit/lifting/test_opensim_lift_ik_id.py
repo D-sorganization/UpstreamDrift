@@ -135,8 +135,8 @@ _RESIDUAL_GATE_XFAILS = {
         "moments_within=False (peak pelvis_tilt 147.88 Nm > 18.28 Nm) (#13041)"
     ),
     "bench_press": (
-        "forces_within=False (peak pelvis_ty 4598.27 N > 32.49 N), "
-        "moments_within=False (peak pelvis_tilt 1575.93 Nm > 3.30 Nm) (#13041)"
+        "forces_within=False (peak pelvis_ty 511.26 N > 32.49 N), "
+        "moments_within=False (peak pelvis_tilt 318.13 Nm > 3.45 Nm) (#13041)"
     ),
     "snatch": (
         "forces_within=False (peak pelvis_tx 463.57 N > 155.12 N), "
@@ -253,3 +253,41 @@ def test_squat_live_id_residuals_reported(squat_receipt: dict) -> None:
     for name in _RESIDUAL_FORCES + _RESIDUAL_MOMENTS:
         entry = residuals[name]
         assert math.isfinite(entry["max_abs"]) and math.isfinite(entry["rms"])
+
+
+def test_bench_press_id_external_loads_include_bench() -> None:
+    receipts = _load_receipts()
+    entry = receipts["lifts"]["bench_press"]["ik_id"]
+    loads = entry["id"]["external_loads"]
+    assert "bench" in loads, "bench contact must be documented in external_loads"
+    assert "back" in loads["bench"]
+
+
+def test_bench_press_ik_pelvis_and_torso_supine() -> None:
+    receipts = _load_receipts()
+    entry = receipts["lifts"]["bench_press"]["ik_id"]
+    pelvis = entry["ik"]["pelvis_landmarks"]
+    tilt_span = pelvis["model_pelvis_tilt_rad"]
+    for tilt in tilt_span:
+        elevation = abs(abs(tilt) - math.pi / 2.0)
+        assert elevation <= math.radians(20.0), (
+            f"pelvis elevation {math.degrees(elevation):.1f} deg > 20 deg"
+        )
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_bench_press_live_supine_and_bench_loads() -> None:
+    _real_opensim()
+    _require_body()
+    receipt = opensim_lift_ik_id(OpenSimFullBodyLiftSpec("bench_press"))
+    assert receipt["status"] == "complete", receipt["reason"]
+    loads = receipt["id"]["external_loads"]
+    assert "bench" in loads
+    pelvis = receipt["ik"]["pelvis_landmarks"]
+    tilt_span = pelvis["model_pelvis_tilt_rad"]
+    for tilt in tilt_span:
+        elevation = abs(abs(tilt) - math.pi / 2.0)
+        assert elevation <= math.radians(20.0), (
+            f"pelvis elevation {math.degrees(elevation):.1f} deg > 20 deg"
+        )
