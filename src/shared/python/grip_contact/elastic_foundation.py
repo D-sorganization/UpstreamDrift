@@ -34,9 +34,11 @@ from dataclasses import dataclass, replace
 
 from src.shared.python.grip_contact.pad_contact import PadContactModel
 from src.shared.python.grip_contact.pad_layout import PadLayout
+from src.shared.python.motion_matching.contact_law import ContactParameters
 
 __all__ = [
     "ElasticFoundationParameters",
+    "elastic_foundation_for_law",
     "elastic_foundation_parameters",
     "winkler_patch_factor_m",
 ]
@@ -96,16 +98,54 @@ class ElasticFoundationParameters:
         return replace(self, stiffness_n_m3=stiffness_n_m3)
 
 
-def elastic_foundation_parameters(pads: PadContactModel) -> ElasticFoundationParameters:
-    """Match the elastic foundation to ``pads`` at the preload operating point.
+def elastic_foundation_for_law(
+    law: ContactParameters,
+    grip_radius_m: float,
+    pad_radius_m: float,
+    preload_m: float,
+    layout: PadLayout | None = None,
+) -> ElasticFoundationParameters:
+    """Match the elastic foundation to contact law and pad geometry at preload.
 
-    Postconditions: ``analytic_force_n(preload) == force_per_pad_n`` and the
-    analytic tangent stiffness at the preload equals the shared pad stiffness.
+    Preconditions:
+        ``law`` must be a :class:`ContactParameters` instance with positive stiffness.
+        ``grip_radius_m``, ``pad_radius_m``, and ``preload_m`` must be positive finite floats.
+        ``layout``, if provided, must be a :class:`PadLayout`.
+
+    Postconditions:
+        ``analytic_force_n(preload_penetration_m) == force_per_pad_n``.
+        The analytic tangent stiffness at the operating point matches ``law.stiffness_n_m``.
     """
-    law, layout = pads.law, pads.layout
-    f_pad = law.stiffness_n_m * layout.preload_penetration_m
+    if not isinstance(law, ContactParameters):
+        raise TypeError(f"law must be ContactParameters, got {type(law).__name__}")
+    for name, v in (
+        ("grip_radius_m", grip_radius_m),
+        ("pad_radius_m", pad_radius_m),
+        ("preload_m", preload_m),
+    ):
+        if not (math.isfinite(v) and v > 0.0):
+            raise ValueError(f"{name} must be positive and finite, got {v}")
+    if layout is not None and not isinstance(layout, PadLayout):
+        raise TypeError(
+            f"layout must be PadLayout or None, got {type(layout).__name__}"
+        )
+
+    f_pad = law.stiffness_n_m * preload_m
     delta0 = 2.0 * f_pad / law.stiffness_n_m
-    factor = winkler_patch_factor_m(layout.pad_radius_m, layout.grip_radius_m)
+    factor = winkler_patch_factor_m(pad_radius_m, grip_radius_m)
+    if layout is None:
+        target_layout = PadLayout(
+            grip_radius_m=grip_radius_m,
+            pad_radius_m=pad_radius_m,
+            preload_penetration_m=delta0,
+        )
+    else:
+        target_layout = replace(
+            layout,
+            grip_radius_m=grip_radius_m,
+            pad_radius_m=pad_radius_m,
+            preload_penetration_m=delta0,
+        )
     return ElasticFoundationParameters(
         stiffness_n_m3=f_pad / (factor * delta0 * delta0),
         dissipation_s_m=law.dissipation_s_m,
@@ -117,5 +157,20 @@ def elastic_foundation_parameters(pads: PadContactModel) -> ElasticFoundationPar
         force_per_pad_n=f_pad,
         pad_stiffness_n_m=law.stiffness_n_m,
         patch_factor_m=factor,
-        layout=replace(layout, preload_penetration_m=delta0),
+        layout=target_layout,
+    )
+
+
+def elastic_foundation_parameters(pads: PadContactModel) -> ElasticFoundationParameters:
+    """Match the elastic foundation to ``pads`` at the preload operating point.
+
+    Postconditions: ``analytic_force_n(preload) == force_per_pad_n`` and the
+    analytic tangent stiffness at the preload equals the shared pad stiffness.
+    """
+    return elastic_foundation_for_law(
+        pads.law,
+        pads.layout.grip_radius_m,
+        pads.layout.pad_radius_m,
+        pads.layout.preload_penetration_m,
+        layout=pads.layout,
     )
