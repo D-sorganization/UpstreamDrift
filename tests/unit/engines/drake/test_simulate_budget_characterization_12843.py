@@ -266,13 +266,18 @@ _N_V = 5
 
 
 def _make_env(
-    *, advance_error_at: float | None = None, actuators: int = _N_ACT
+    *,
+    advance_error_at: float | None = None,
+    actuators: int = _N_ACT,
+    effort_limit: float = np.inf,
 ) -> tuple[dict[str, MagicMock], MagicMock, MagicMock]:
     mocks = {key: MagicMock() for key in _PYDRAKE_KEYS}
     plant = MagicMock(name="plant")
     plant.num_positions.return_value = _N_Q
     plant.num_velocities.return_value = _N_V
     plant.num_actuators.return_value = actuators
+    plant.GetEffortUpperLimits.return_value = np.full(actuators, effort_limit)
+    plant.GetEffortLowerLimits.return_value = np.full(actuators, -effort_limit)
     plant.num_multibody_states.return_value = _N_Q + _N_V
     clock = {"k": 0}
 
@@ -398,6 +403,49 @@ def test_drake_motion_matching_never_calls_removed_publish_setter_13391() -> Non
         if "set_publish_every_time_step" in path.read_text(encoding="utf-8")
     ]
     assert offenders == []
+
+
+@pytest.mark.unit
+def test_simulate_rejects_plant_without_actuators_13421(
+    _no_urdf_load: MagicMock,
+) -> None:
+    """A plant with no actuators cannot apply theta, so fail closed (#13421).
+
+    The old ``num_velocities() - 6`` fallback sized theta for 19 joints but
+    left the torque source disconnected, so the run reported success with no
+    torque applied.
+    """
+    mocks, plant, _sim = _make_env(actuators=0)
+    with patch.dict(sys.modules, mocks):
+        with pytest.raises(ValueError, match="declares no joint actuators"):
+            simulate_with_coefficients(np.zeros(19 * COEFFS_PER_JOINT), _opts())
+    plant.builder.Connect.assert_not_called()
+
+
+@pytest.mark.unit
+def test_simulate_rejects_torque_beyond_effort_limit_13421(
+    _no_urdf_load: MagicMock,
+) -> None:
+    """Drake clamps actuation at the effort limit; refuse instead (#13421)."""
+    mocks, _plant, simulator = _make_env(effort_limit=1.0)
+    theta = np.zeros(_N_ACT * COEFFS_PER_JOINT)
+    theta[COEFFS_PER_JOINT] = 1.5  # joint 1 commands a constant 1.5 N*m
+    with patch.dict(sys.modules, mocks):
+        with pytest.raises(ValueError, match="exceeds the actuator effort limit"):
+            simulate_with_coefficients(theta, _opts())
+    simulator.AdvanceTo.assert_not_called()
+
+
+@pytest.mark.unit
+def test_simulate_connects_torque_source_to_actuation_port_13421(
+    _no_urdf_load: MagicMock,
+) -> None:
+    """With actuators present, the source drives the actuation input."""
+    mocks, plant, _sim = _make_env()
+    with patch.dict(sys.modules, mocks):
+        simulate_with_coefficients(_theta(), _opts())
+    targets = [call.args[1] for call in plant.builder.Connect.call_args_list]
+    assert plant.get_actuation_input_port.return_value in targets
 
 
 @pytest.mark.unit

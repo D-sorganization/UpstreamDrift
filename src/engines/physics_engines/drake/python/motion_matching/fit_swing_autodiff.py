@@ -71,7 +71,12 @@ import numpy as np
 from numpy.typing import NDArray
 
 from .humanoid_urdf import CANONICAL_URDF, load_humanoid_into_plant
-from .simulate import COEFFS_PER_JOINT, SimOptions, evaluate_torque_polynomial
+from .simulate import (
+    COEFFS_PER_JOINT,
+    SimOptions,
+    _resolve_n_actuators,
+    evaluate_torque_polynomial,
+)
 
 if TYPE_CHECKING:  # pragma: no cover - import-time only
     from pathlib import Path
@@ -463,9 +468,7 @@ def _build_autodiff_plant(
 
     n_q = int(plant_float.num_positions())
     n_v = int(plant_float.num_velocities())
-    n_actuators = int(plant_float.num_actuators())
-    if n_actuators == 0:
-        n_actuators = max(n_v - 6, 0)
+    n_actuators = _resolve_n_actuators(plant_float)
 
     plant_ad = plant_float.ToAutoDiffXd()
     return plant_ad, plant_float, n_q, n_v, n_actuators

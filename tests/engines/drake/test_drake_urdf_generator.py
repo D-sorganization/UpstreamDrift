@@ -18,6 +18,7 @@ from pathlib import Path
 
 import pytest
 from src.engines.physics_engines.drake.python.motion_matching.humanoid_urdf import (
+    ACTUATOR_EFFORT_LIMIT_NM,
     CANONICAL_URDF,
     EXPECTED_NUM_REVOLUTE_DOF,
     EXPECTED_NUM_VELOCITIES,
@@ -97,6 +98,50 @@ def test_revolute_joint_count_matches_expected_dof() -> None:
         f"{len(revolute)}: "
         f"{sorted(j.get('name') for j in revolute)}"
     )
+
+
+@pytest.mark.unit
+def test_every_revolute_joint_has_one_transmission_in_order() -> None:
+    """Each revolute joint is actuated, in URDF joint order (#13421).
+
+    Without transmissions Drake builds zero actuators and the torque source
+    is never connected, so theta has no effect on the motion.
+    """
+    root = ET.fromstring(render_urdf_string(load_humanoid_dimensions()))
+    revolute = [
+        j.get("name") for j in root.findall("joint") if j.get("type") == "revolute"
+    ]
+    transmissions = root.findall("transmission")
+    assert [t.find("joint").get("name") for t in transmissions] == revolute
+    for transmission in transmissions:
+        assert transmission.findtext("type") == (
+            "transmission_interface/SimpleTransmission"
+        )
+        actuator = transmission.find("actuator")
+        assert actuator is not None
+        assert actuator.findtext("mechanicalReduction") == "1"
+
+
+@pytest.mark.unit
+def test_actuator_effort_limit_admits_every_in_bounds_theta() -> None:
+    """Drake clamps actuation at the URDF effort limit (#13421).
+
+    The limit must exceed the largest torque an in-bounds theta can command
+    over a unit horizon (the sum of the per-coefficient bounds), so the
+    clamp never silently clips a fitted torque profile.
+    """
+    from src.engines.physics_engines.drake.python.simulate_with_coefficients import (
+        POLY_BOUNDS,
+    )
+
+    assert sum(POLY_BOUNDS) < ACTUATOR_EFFORT_LIMIT_NM
+    root = ET.fromstring(render_urdf_string(load_humanoid_dimensions()))
+    efforts = {
+        float(j.find("limit").get("effort"))
+        for j in root.findall("joint")
+        if j.get("type") == "revolute"
+    }
+    assert efforts == {ACTUATOR_EFFORT_LIMIT_NM}
 
 
 @pytest.mark.unit
@@ -347,3 +392,26 @@ def test_drake_topology_joint_names_present(
     # tolerate that by checking subset of expected revolute names.
     missing = {n for n in expected if "_floating" not in n} - plant_joint_names
     assert not missing, f"Missing joints in plant: {sorted(missing)}"
+
+
+@pytest.mark.integration
+@pytest.mark.requires_drake
+def test_drake_builds_one_actuator_per_revolute_joint(
+    drake_modules, generated_urdf: Path
+) -> None:
+    """Drake parses every transmission into an actuator, in joint order."""
+    plant = drake_modules["MultibodyPlant"](time_step=1e-3)
+    drake_modules["Parser"](plant).AddModels(str(generated_urdf))
+    plant.Finalize()
+
+    root = ET.fromstring(generated_urdf.read_text(encoding="utf-8"))
+    revolute = [
+        j.get("name") for j in root.findall("joint") if j.get("type") == "revolute"
+    ]
+    actuated = [
+        plant.get_joint_actuator(index).joint().name()
+        for index in plant.GetJointActuatorIndices()
+    ]
+    assert plant.num_actuators() == EXPECTED_NUM_REVOLUTE_DOF
+    assert actuated == revolute
+    assert set(plant.GetEffortUpperLimits()) == {ACTUATOR_EFFORT_LIMIT_NM}

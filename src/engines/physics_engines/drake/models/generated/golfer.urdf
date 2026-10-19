@@ -60,7 +60,7 @@
     <child link="lower_spine_spine_universal_dummy_1"/>
     <origin xyz="0 0 0.1" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-0.6" upper="0.6" effort="200" velocity="20"/>
+    <limit lower="-0.6" upper="0.6" effort="10000" velocity="20"/>
     <dynamics damping="0.5"/>
   </joint>
   <joint name="spine_universal_2" type="revolute">
@@ -68,7 +68,7 @@
     <child link="lower_spine"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-0.6" upper="0.6" effort="200" velocity="20"/>
+    <limit lower="-0.6" upper="0.6" effort="10000" velocity="20"/>
     <dynamics damping="0.5"/>
   </joint>
   <link name="upper_spine">
@@ -96,7 +96,7 @@
     <child link="upper_spine"/>
     <origin xyz="0 0 0.25" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-1" upper="1" effort="200" velocity="20"/>
+    <limit lower="-1" upper="1" effort="10000" velocity="20"/>
     <dynamics damping="0.5"/>
   </joint>
   <link name="upper_torso_hub">
@@ -156,7 +156,7 @@
     <child link="right_scapula_rod_right_scapula_universal_dummy_1"/>
     <origin xyz="0 -0.18 0.1" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-0.5" upper="0.5" effort="200" velocity="20"/>
+    <limit lower="-0.5" upper="0.5" effort="10000" velocity="20"/>
     <dynamics damping="0.3"/>
   </joint>
   <joint name="right_scapula_universal_2" type="revolute">
@@ -164,7 +164,7 @@
     <child link="right_scapula_rod"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-0.5" upper="0.5" effort="200" velocity="20"/>
+    <limit lower="-0.5" upper="0.5" effort="10000" velocity="20"/>
     <dynamics damping="0.3"/>
   </joint>
   <link name="right_upper_arm_right_shoulder_gimbal_dummy_1">
@@ -206,7 +206,7 @@
     <child link="right_upper_arm_right_shoulder_gimbal_dummy_1"/>
     <origin xyz="0 0 0.12" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14" upper="3.14" effort="200" velocity="20"/>
+    <limit lower="-3.14" upper="3.14" effort="10000" velocity="20"/>
     <dynamics damping="0.3"/>
   </joint>
   <joint name="right_shoulder_gimbal_2" type="revolute">
@@ -214,7 +214,7 @@
     <child link="right_upper_arm_right_shoulder_gimbal_dummy_2"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-1.5" upper="1.5" effort="200" velocity="20"/>
+    <limit lower="-1.5" upper="1.5" effort="10000" velocity="20"/>
     <dynamics damping="0.3"/>
   </joint>
   <joint name="right_shoulder_gimbal_3" type="revolute">
@@ -222,7 +222,7 @@
     <child link="right_upper_arm"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-1.5" upper="1.5" effort="200" velocity="20"/>
+    <limit lower="-1.5" upper="1.5" effort="10000" velocity="20"/>
     <dynamics damping="0.3"/>
   </joint>
   <link name="right_forearm">
@@ -250,7 +250,7 @@
     <child link="right_forearm"/>
     <origin xyz="0 0 -0.3" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-2.5" upper="0" effort="200" velocity="20"/>
+    <limit lower="-2.5" upper="0" effort="10000" velocity="20"/>
     <dynamics damping="0.3"/>
   </joint>
   <link name="right_hand_right_wrist_universal_dummy_1">
@@ -285,7 +285,7 @@
     <child link="right_hand_right_wrist_universal_dummy_1"/>
     <origin xyz="0 0 -0.27" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-1" upper="1" effort="200" velocity="20"/>
+    <limit lower="-1" upper="1" effort="10000" velocity="20"/>
     <dynamics damping="0.2"/>
   </joint>
   <joint name="right_wrist_universal_2" type="revolute">
@@ -293,7 +293,7 @@
     <child link="right_hand"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-1" upper="1" effort="200" velocity="20"/>
+    <limit lower="-1" upper="1" effort="10000" velocity="20"/>
     <dynamics damping="0.2"/>
   </joint>
   <link name="left_scapula_rod_left_scapula_universal_dummy_1">
@@ -328,7 +328,7 @@
     <child link="left_scapula_rod_left_scapula_universal_dummy_1"/>
     <origin xyz="0 0.18 0.1" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-0.5" upper="0.5" effort="200" velocity="20"/>
+    <limit lower="-0.5" upper="0.5" effort="10000" velocity="20"/>
     <dynamics damping="0.3"/>
   </joint>
   <joint name="left_scapula_universal_2" type="revolute">
@@ -336,7 +336,7 @@
     <child link="left_scapula_rod"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-0.5" upper="0.5" effort="200" velocity="20"/>
+    <limit lower="-0.5" upper="0.5" effort="10000" velocity="20"/>
     <dynamics damping="0.3"/>
   </joint>
   <link name="left_upper_arm_left_shoulder_gimbal_dummy_1">
@@ -378,7 +378,7 @@
     <child link="left_upper_arm_left_shoulder_gimbal_dummy_1"/>
     <origin xyz="0 0 0.12" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14" upper="3.14" effort="200" velocity="20"/>
+    <limit lower="-3.14" upper="3.14" effort="10000" velocity="20"/>
     <dynamics damping="0.3"/>
   </joint>
   <joint name="left_shoulder_gimbal_2" type="revolute">
@@ -386,7 +386,7 @@
     <child link="left_upper_arm_left_shoulder_gimbal_dummy_2"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-1.5" upper="1.5" effort="200" velocity="20"/>
+    <limit lower="-1.5" upper="1.5" effort="10000" velocity="20"/>
     <dynamics damping="0.3"/>
   </joint>
   <joint name="left_shoulder_gimbal_3" type="revolute">
@@ -394,7 +394,7 @@
     <child link="left_upper_arm"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-1.5" upper="1.5" effort="200" velocity="20"/>
+    <limit lower="-1.5" upper="1.5" effort="10000" velocity="20"/>
     <dynamics damping="0.3"/>
   </joint>
   <link name="left_forearm">
@@ -422,7 +422,7 @@
     <child link="left_forearm"/>
     <origin xyz="0 0 -0.3" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-2.5" upper="0" effort="200" velocity="20"/>
+    <limit lower="-2.5" upper="0" effort="10000" velocity="20"/>
     <dynamics damping="0.3"/>
   </joint>
   <link name="left_hand_left_wrist_universal_dummy_1">
@@ -457,7 +457,7 @@
     <child link="left_hand_left_wrist_universal_dummy_1"/>
     <origin xyz="0 0 -0.27" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-1" upper="1" effort="200" velocity="20"/>
+    <limit lower="-1" upper="1" effort="10000" velocity="20"/>
     <dynamics damping="0.2"/>
   </joint>
   <joint name="left_wrist_universal_2" type="revolute">
@@ -465,7 +465,7 @@
     <child link="left_hand"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-1" upper="1" effort="200" velocity="20"/>
+    <limit lower="-1" upper="1" effort="10000" velocity="20"/>
     <dynamics damping="0.2"/>
   </joint>
   <link name="club_shaft">
@@ -493,4 +493,175 @@
     <child link="club_shaft"/>
     <origin xyz="0 0 -0.1" rpy="0 0 0"/>
   </joint>
+  <transmission name="spine_universal_1_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="spine_universal_1">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="spine_universal_1_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="spine_universal_2_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="spine_universal_2">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="spine_universal_2_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="spine_twist_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="spine_twist">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="spine_twist_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="right_scapula_universal_1_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_scapula_universal_1">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_scapula_universal_1_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="right_scapula_universal_2_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_scapula_universal_2">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_scapula_universal_2_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="right_shoulder_gimbal_1_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_shoulder_gimbal_1">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_shoulder_gimbal_1_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="right_shoulder_gimbal_2_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_shoulder_gimbal_2">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_shoulder_gimbal_2_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="right_shoulder_gimbal_3_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_shoulder_gimbal_3">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_shoulder_gimbal_3_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="right_elbow_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_elbow">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_elbow_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="right_wrist_universal_1_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_wrist_universal_1">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_wrist_universal_1_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="right_wrist_universal_2_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_wrist_universal_2">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_wrist_universal_2_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="left_scapula_universal_1_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="left_scapula_universal_1">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="left_scapula_universal_1_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="left_scapula_universal_2_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="left_scapula_universal_2">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="left_scapula_universal_2_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="left_shoulder_gimbal_1_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="left_shoulder_gimbal_1">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="left_shoulder_gimbal_1_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="left_shoulder_gimbal_2_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="left_shoulder_gimbal_2">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="left_shoulder_gimbal_2_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="left_shoulder_gimbal_3_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="left_shoulder_gimbal_3">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="left_shoulder_gimbal_3_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="left_elbow_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="left_elbow">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="left_elbow_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="left_wrist_universal_1_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="left_wrist_universal_1">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="left_wrist_universal_1_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="left_wrist_universal_2_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="left_wrist_universal_2">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="left_wrist_universal_2_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
 </robot>

@@ -226,6 +226,9 @@ def _make_plant_mock(n_q: int = 25, n_v: int = 25, n_actuators: int = 19) -> Mag
     plant.num_positions.return_value = n_q
     plant.num_velocities.return_value = n_v
     plant.num_actuators.return_value = n_actuators
+    # Real Drake reports one effort limit per actuator (#13421).
+    plant.GetEffortUpperLimits.return_value = np.full(n_actuators, np.inf)
+    plant.GetEffortLowerLimits.return_value = np.full(n_actuators, -np.inf)
     plant.num_multibody_states.return_value = n_q + n_v
     plant.GetPositions.return_value = np.zeros(n_q)
     plant.GetVelocities.return_value = np.zeros(n_v)
@@ -546,3 +549,39 @@ def test_live_simulate_zero_theta_falls_under_gravity() -> None:
     )
     assert out.solver_status in {"success", "warning"}
     assert np.all(np.isfinite(out.q))
+
+
+@pytest.mark.requires_drake
+@pytest.mark.skipif(
+    not _pydrake_available, reason="pydrake multibody modules not installed"
+)
+def test_live_simulate_nonzero_theta_changes_the_motion_13421() -> None:
+    """Commanded torque must reach the plant on the default golfer URDF.
+
+    Before #13421 the generated URDF declared no transmissions, so the torque
+    source was never connected: a 20 N*m command on every joint produced a
+    trajectory identical to zero torque while ``tau`` logged 20 N*m and the
+    run reported ``success``.
+    """
+    from pydrake.multibody.parsing import Parser
+    from pydrake.multibody.plant import MultibodyPlant
+
+    from src.engines.physics_engines.drake.python.motion_matching.simulate import (
+        DEFAULT_GOLFER_URDF,
+    )
+
+    plant = MultibodyPlant(0.001)
+    Parser(plant).AddModels(str(DEFAULT_GOLFER_URDF))
+    plant.Finalize()
+    n_act = plant.num_actuators()
+    assert n_act == plant.num_velocities() - 6
+
+    options = SimOptions(simulation_time_s=0.05, sample_rate_hz=1000.0)
+    zero = simulate_with_coefficients(np.zeros(n_act * COEFFS_PER_JOINT), options)
+    theta = np.zeros(n_act * COEFFS_PER_JOINT)
+    theta[::COEFFS_PER_JOINT] = 20.0
+    driven = simulate_with_coefficients(theta, options)
+
+    assert zero.solver_status == driven.solver_status == "success"
+    np.testing.assert_allclose(driven.tau, 20.0)
+    assert np.max(np.abs(driven.q - zero.q)) > 1.0e-3

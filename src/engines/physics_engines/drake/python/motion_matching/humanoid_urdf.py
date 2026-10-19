@@ -46,6 +46,7 @@ if TYPE_CHECKING:  # pragma: no cover - import-time hint only
 
 
 __all__ = [
+    "ACTUATOR_EFFORT_LIMIT_NM",
     "CANONICAL_URDF",
     "SHARED_DIMENSIONS_YAML",
     "SHARED_INERTIA_YAML",
@@ -116,6 +117,14 @@ EXPECTED_NUM_VELOCITIES: int = 25
 #: Number of revolute (single-DOF) joints in the canonical model. This is
 #: ``EXPECTED_NUM_VELOCITIES - 6 (floating root)``.
 EXPECTED_NUM_REVOLUTE_DOF: int = 19
+#: Effort limit (N*m) on every revolute joint, emitted as ``<limit effort>``.
+#: Each revolute joint carries a ``SimpleTransmission`` so Drake builds one
+#: actuator per joint (#13421), and Drake clamps actuation at this limit. The
+#: model is torque-driven with no physiological torque ceiling, so the limit
+#: sits above the largest torque an in-bounds theta can command over a unit
+#: horizon (sum of ``POLY_BOUNDS`` = 3225 N*m); ``simulate_with_coefficients``
+#: rejects any request beyond it rather than letting the clamp clip silently.
+ACTUATOR_EFFORT_LIMIT_NM: float = 1.0e4
 
 #: Allowed joint-type strings in the YAML.
 _VALID_JOINT_TYPES = frozenset({"floating", "revolute", "universal", "gimbal", "fixed"})
@@ -778,13 +787,14 @@ def _add_joint(
     if axis is not None:
         ET.SubElement(joint, "axis", xyz=_vec_to_str(axis))
     if limits is not None:
-        # URDF revolute joints require effort + velocity; pick generous defaults.
+        # URDF revolute joints require effort + velocity. Drake clamps
+        # actuation at ``effort``; see ACTUATOR_EFFORT_LIMIT_NM.
         ET.SubElement(
             joint,
             "limit",
             lower=f"{limits[0]:.9g}",
             upper=f"{limits[1]:.9g}",
-            effort="200",
+            effort=f"{ACTUATOR_EFFORT_LIMIT_NM:.9g}",
             velocity="20",
         )
     if damping > 0.0:
@@ -905,6 +915,28 @@ def _emit_segment(root: ET.Element, seg: SegmentSpec) -> None:
     raise ValueError(msg)
 
 
+def _add_transmissions(root: ET.Element) -> None:
+    """Actuate every revolute joint, in URDF joint order (#13421).
+
+    Drake numbers actuators in transmission declaration order, so theta
+    channel ``i`` drives the ``i``-th revolute joint of the rendered URDF.
+    """
+    for joint in root.findall("joint"):
+        if joint.get("type") != "revolute":
+            continue
+        name = joint.get("name")
+        transmission = ET.SubElement(root, "transmission", name=f"{name}_transmission")
+        ET.SubElement(
+            transmission, "type"
+        ).text = "transmission_interface/SimpleTransmission"
+        tjoint = ET.SubElement(transmission, "joint", name=name)
+        ET.SubElement(
+            tjoint, "hardwareInterface"
+        ).text = "hardware_interface/EffortJointInterface"
+        actuator = ET.SubElement(transmission, "actuator", name=f"{name}_actuator")
+        ET.SubElement(actuator, "mechanicalReduction").text = "1"
+
+
 def render_urdf_string(dims: HumanoidDimensions) -> str:
     """Render the parsed dimensions to a pretty-printed URDF string.
 
@@ -921,6 +953,7 @@ def render_urdf_string(dims: HumanoidDimensions) -> str:
     # children so URDF parser order is satisfied.
     for seg in dims.segments:
         _emit_segment(root, seg)
+    _add_transmissions(root)
 
     raw_xml = ET.tostring(root, encoding="utf-8")
     return minidom.parseString(raw_xml).toprettyxml(indent="  ")

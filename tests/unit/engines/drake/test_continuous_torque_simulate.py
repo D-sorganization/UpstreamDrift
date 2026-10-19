@@ -443,6 +443,9 @@ def _mock_drake_harness() -> Generator[dict[str, Any], None, None]:
     plant.num_positions.return_value = n_q
     plant.num_velocities.return_value = n_v
     plant.num_actuators.return_value = n_act
+    # Real Drake reports one effort limit per actuator (#13421).
+    plant.GetEffortUpperLimits.return_value = np.full(n_act, np.inf)
+    plant.GetEffortLowerLimits.return_value = np.full(n_act, -np.inf)
     plant.num_multibody_states.return_value = n_q + n_v
     plant.GetPositions.return_value = np.zeros(n_q)
     plant.GetVelocities.return_value = np.zeros(n_v)

@@ -362,14 +362,58 @@ def _sample_grid(
 
 
 def _resolve_n_actuators(plant: MultibodyPlant) -> int:
-    """Return the number of actuators / actuated DOFs in the plant."""
+    """Return the number of joint actuators theta drives.
+
+    Raises:
+        ValueError: if the plant declares no actuators. The torque source can
+            only reach the plant through its actuation input, so a model
+            without ``<transmission>`` elements cannot apply theta (#13421).
+    """
     n = int(plant.num_actuators())
-    if n > 0:
-        return n
-    # Fallback to velocity dimension minus 6 (floating root) which matches the
-    # actuated chain in the canonical URDF.
-    nv = int(plant.num_velocities())
-    return max(nv - 6, 0)
+    if n <= 0:
+        msg = (
+            "plant declares no joint actuators, so theta cannot be applied; "
+            "load a URDF with one <transmission> per driven joint (#13421)"
+        )
+        raise ValueError(msg)
+    return n
+
+
+def _check_torque_within_effort_limits(
+    plant: MultibodyPlant,
+    theta: NDArray[np.float64],
+    n_actuators: int,
+    opts: SimOptions,
+) -> None:
+    """Refuse torque the plant would clamp at its actuator effort limits.
+
+    Drake clamps actuation at each joint's effort limit, which would leave
+    the logged ``tau`` reporting torque the plant never applied (#13421). A
+    discrete plant samples its actuation input at every step, so the check
+    evaluates the polynomial at each step time over the horizon.
+    """
+    upper = np.asarray(plant.GetEffortUpperLimits(), dtype=np.float64)
+    lower = np.asarray(plant.GetEffortLowerLimits(), dtype=np.float64)
+    n_steps = int(np.ceil(opts.simulation_time_s / opts.time_step_s))
+    for t in np.linspace(0.0, n_steps * opts.time_step_s, n_steps + 1):
+        tau = evaluate_torque_polynomial(
+            theta,
+            float(t),
+            n_actuators,
+            basis=opts.basis,
+            T_s=opts.simulation_time_s,
+            t0=opts.t0,
+        )
+        over = (tau > upper) | (tau < lower)
+        if np.any(over):
+            joint = int(np.flatnonzero(over)[0])
+            msg = (
+                f"commanded torque {tau[joint]:.6g} N*m on actuator {joint} at "
+                f"t={t:.6g} s exceeds the actuator effort limit "
+                f"[{lower[joint]:.6g}, {upper[joint]:.6g}] N*m; Drake would "
+                "clamp it while tau still logged the request (#13421)"
+            )
+            raise ValueError(msg)
 
 
 @dataclass(frozen=True)
@@ -442,14 +486,7 @@ def _wire_actuation_and_logger(
         t0=opts.t0,
     )
     builder.AddSystem(torque_source)
-
-    actuation_port = (
-        plant.get_actuation_input_port()
-        if hasattr(plant, "get_actuation_input_port")
-        else None
-    )
-    if actuation_port is not None and plant.num_actuators() == n_actuators:
-        builder.Connect(torque_source.get_output_port(0), actuation_port)
+    builder.Connect(torque_source.get_output_port(0), plant.get_actuation_input_port())
 
     # State logger (for q, qd extraction)
     log_sink = api.log_sink_cls(plant.num_multibody_states())
@@ -544,6 +581,7 @@ def simulate_with_coefficients(
     n_actuators = _resolve_n_actuators(plant)
     check_theta_matches_actuators(theta, n_actuators)
     theta = validate_theta(theta, n_joints=n_actuators)
+    _check_torque_within_effort_limits(plant, theta, n_actuators, opts)
     _wire_actuation_and_logger(api, builder, plant, theta, opts)
 
     diagram = builder.Build()
