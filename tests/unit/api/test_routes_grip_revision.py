@@ -33,7 +33,10 @@ def client() -> TestClient:
 def test_route_matches_the_shared_fixture(client: TestClient, case: dict) -> None:
     body = client.post("/character-builder/grip", json=case["picks"]).json()
     expected = case["expected"]
-    assert body["physics_spec_sha256"] == expected["character_physics_spec_sha256"]
+    allowed_shas = {expected["character_physics_spec_sha256"]}
+    if "character_physics_spec_sha256_win" in expected:
+        allowed_shas.add(expected["character_physics_spec_sha256_win"])
+    assert body["physics_spec_sha256"] in allowed_shas
     assert body["refit_required"] == expected["refit_required"]
     if expected["grip"] is not None:
         assert body["grip"] == expected["grip"]

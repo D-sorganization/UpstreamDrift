@@ -203,6 +203,15 @@
       "tiles": ["spine_viewer"],
       "notes": "SPN-15c (#12815): GET /api/tools/spine-viewer/study opens a receipt under the allowed study root, verifies the loads artifact SHA-256 server-side through study_aggregation.load_verified_run and returns the src/tools/spine_viewer/core.py view model (view_to_dict). The web heatmap and status banner always show scientific_status and distribution_source; anything but the exact status qualified reads UNQUALIFIED. Angle-stack plots are not part of the web view."
     },
+    "tools.spine_study": {
+      "title": "Segmental spine study execution and model asset selection",
+      "pyqt": "src/tools/spine_viewer/gui.py",
+      "api": "src/api/routes/spine_viewer.py",
+      "web": "ui/src/pages/SpineViewer.tsx",
+      "status": "parity",
+      "tiles": [],
+      "notes": "SPN-17c (#13260): Run Study panel on both PyQt and React surfaces. Allows configuring and executing spine studies (model: synthetic fixture or licensed asset with admission status from the assets service, coupling law, swing source) through the background study runner API (/tools/spine-viewer/studies), polling the job to completion, and opening the resulting receipt."
+    },
     "analysis.grip_wrench": {
       "title": "Per-hand grip wrench on the club (weld multipliers and efc_force): overlay glyphs and force/couple plots",
       "pyqt": "src/tools/grip_wrench_plots/gui.py",
@@ -419,13 +428,13 @@
       "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM/glTF, presets). The web page now drives presets, preview/build and spec/URDF/MJCF/OSIM/glTF export through the spec API (CMB-7a, #11658), and picks skin tone, clothing, club finish, headwear and ground from the model_appearance library with a recoloured preview and an appearance-v1 sidecar export (CMB-7b/7c, #11658); the desktop tool now also picks the same appearance choices and exports the same appearance-v1 sidecar through the shared character_appearance_service (CMB-7e, #11658). A rigidly skinned glTF export of the spec skeleton landed under CMB-6 (#11657). The web page can preview that glTF body live, refetched (debounced) as the spec sliders move and tinted with the appearance trunk colour (CMB-7f, #11658); the desktop tool keeps its primitive preview. Custom skin, hair, shirt and trousers colours (HRG-B2, #13167) are picked with a shared Qt colour field on the desktop and `<input type=\"color\">` controls on the web; both write the same appearance-v1 document `materials` entries through the one shared writer (`model_appearance/appearance_selection.py`), held equal by a shared JSON fixture. HRG-G1 (#13186): grip hands are skin-coloured by default; the optional white golf glove (glove none/lead/trail/both, a Glove combo on the desktop and a Glove select on the web) goes through the same writer."
     },
     "tools.character_builder_grip": {
-      "title": "Grip presets and sliders (weak, neutral, strong; rotation, palm diagonal, spacing, style)",
+      "title": "Grip presets and sliders (weak, neutral, strong, Palmer overlap, Woods interlock, ten-finger; rotation, palm diagonal, spacing, style)",
       "pyqt": "src/tools/character_builder/gui.py",
       "api": "src/api/routes/character_appearance.py",
       "web": "ui/src/components/character/GripControls.tsx",
       "status": "parity",
       "tiles": [],
-      "notes": "HRG-GR4 (#13205), HRG-A2 (#13166). One resolver (src/shared/python/motion_matching/execution/grip_selection.py) with the override, document, default precedence of the appearance colours. Physical picks (strength preset, rotation about the shaft, palm diagonal, set angle, depth, hand spacing) make a new spec revision through apply_grip_config and need a refit; they are never written to the .appearance.json sidecar. Picture-only picks (style, lead thumb, visual grip strength, lead roll offset, trail roll offset) go in the sidecar's grip block and leave physics_spec_sha256 unchanged. The desktop Grip group, the web GripControls and POST /api/character-builder/grip are held equal to the Python resolver by tests/fixtures/grip/grip_roundtrip.json. The CLI flags live in spec_builder (physical) and native_viewer_export (picture-only; a physical flag is refused)."
+      "notes": "HRG-GR4 (#13205), HRG-A2 (#13166), HRG-GS-G5 (#13303). One resolver (src/shared/python/motion_matching/execution/grip_selection.py) with the override, document, default precedence of the appearance colours. Physical picks (strength presets weak/neutral/strong, named presets palmer_overlap, woods_interlock, ten_finger with photo_estimate provenance; rotation about the shaft, palm diagonal, set angle, depth, hand spacing) make a new spec revision through apply_grip_config and need a refit; they are never written to the .appearance.json sidecar. Picture-only picks (style, lead thumb, visual grip strength, lead roll offset, trail roll offset) go in the sidecar's grip block and leave physics_spec_sha256 unchanged. The desktop Grip group, the web GripControls and POST /api/character-builder/grip are held equal to the Python resolver by tests/fixtures/grip/grip_roundtrip.json. The CLI flags live in spec_builder (physical) and native_viewer_export (picture-only; a physical flag is refused)."
     },
     "tools.data_explorer": {
       "title": "Data Explorer (import/filter/visualize datasets)",

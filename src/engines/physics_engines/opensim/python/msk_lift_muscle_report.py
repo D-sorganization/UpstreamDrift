@@ -180,41 +180,48 @@ def compute_hip_demand_asymmetry(
     hip_l_idx = leg_coords.index("hip_flexion_l")
     knee_r_idx = leg_coords.index("knee_angle_r")
     knee_l_idx = leg_coords.index("knee_angle_l")
-    return {
-        "frame0_hip_demand_r_nm": round(float(tau_targets[0, hip_r_idx]), 2),
-        "frame0_hip_demand_l_nm": round(float(tau_targets[0, hip_l_idx]), 2),
-        "frame0_knee_demand_r_nm": round(float(tau_targets[0, knee_r_idx]), 2),
-        "frame0_knee_demand_l_nm": round(float(tau_targets[0, knee_l_idx]), 2),
+    tau0 = tau_targets[0]
+    grf_l = targets.grf_force_n["left"][0]
+    grf_r = targets.grf_force_n["right"][0]
+    record: dict[str, Any] = {
+        "frame0_hip_demand_r_nm": round(float(tau0[hip_r_idx]), 2),
+        "frame0_hip_demand_l_nm": round(float(tau0[hip_l_idx]), 2),
+        "frame0_knee_demand_r_nm": round(float(tau0[knee_r_idx]), 2),
+        "frame0_knee_demand_l_nm": round(float(tau0[knee_l_idx]), 2),
         "frame0_total_sagittal_r_nm": round(
-            float(tau_targets[0, hip_r_idx] + tau_targets[0, knee_r_idx]), 2
+            float(tau0[hip_r_idx] + tau0[knee_r_idx]), 2
         ),
         "frame0_total_sagittal_l_nm": round(
-            float(tau_targets[0, hip_l_idx] + tau_targets[0, knee_l_idx]), 2
+            float(tau0[hip_l_idx] + tau0[knee_l_idx]), 2
         ),
-        "frame0_grf_vertical_l_n": round(float(targets.grf_force_n["left"][0, 1]), 2),
-        "frame0_grf_vertical_r_n": round(float(targets.grf_force_n["right"][0, 1]), 2),
-        "frame0_grf_anterior_shear_l_n": round(
-            float(targets.grf_force_n["left"][0, 0]), 2
-        ),
-        "frame0_grf_anterior_shear_r_n": round(
-            float(targets.grf_force_n["right"][0, 0]), 2
-        ),
-        "shear_differential_n": round(
-            float(
-                targets.grf_force_n["left"][0, 0] - targets.grf_force_n["right"][0, 0]
-            ),
-            2,
-        ),
-        "cause": (
-            "Total sagittal leg extension demand at frame 0 is virtually identical across legs "
-            "(-434.68 N m right vs -434.89 N m left, within 0.05%), matching vertical GRF (~1135 N each). "
-            "The hip-vs-knee demand split asymmetry (-220.0 N m vs -381.9 N m hip demand) is driven by "
-            "anterior-posterior ground shear force: +208.96 N forward shear on left foot vs -127.35 N "
-            "backward shear on right foot (a 336.31 N differential). Forward shear shifts the left GRF "
-            "line of action forward, reducing knee extension demand (-53.0 N m vs -214.7 N m) and "
-            "increasing hip extension demand (-381.9 N m vs -220.0 N m)."
-        ),
+        "frame0_grf_vertical_l_n": round(float(grf_l[1]), 2),
+        "frame0_grf_vertical_r_n": round(float(grf_r[1]), 2),
+        "frame0_grf_anterior_shear_l_n": round(float(grf_l[0]), 2),
+        "frame0_grf_anterior_shear_r_n": round(float(grf_r[0]), 2),
+        "shear_differential_n": round(float(grf_l[0] - grf_r[0]), 2),
     }
+    record["cause"] = _asymmetry_cause(record)
+    return record
+
+
+def _asymmetry_cause(r: dict[str, float]) -> str:
+    """Describe the frame-0 hip/knee demand split from the measured record."""
+    tot_r, tot_l = r["frame0_total_sagittal_r_nm"], r["frame0_total_sagittal_l_nm"]
+    rel = abs(tot_r - tot_l) / max(abs(tot_r), abs(tot_l), 1e-12)
+    return (
+        f"Total sagittal leg extension demand at frame 0 is {tot_r:.2f} N m right vs "
+        f"{tot_l:.2f} N m left ({100.0 * rel:.2f}% apart), with vertical GRF "
+        f"{r['frame0_grf_vertical_r_n']:.2f} N right vs "
+        f"{r['frame0_grf_vertical_l_n']:.2f} N left. The hip-vs-knee split "
+        f"(hip {r['frame0_hip_demand_r_nm']:.2f} N m right vs "
+        f"{r['frame0_hip_demand_l_nm']:.2f} N m left; knee "
+        f"{r['frame0_knee_demand_r_nm']:.2f} N m right vs "
+        f"{r['frame0_knee_demand_l_nm']:.2f} N m left) follows the "
+        f"anterior-posterior ground shear: {r['frame0_grf_anterior_shear_l_n']:+.2f} N "
+        f"on the left foot vs {r['frame0_grf_anterior_shear_r_n']:+.2f} N on the right "
+        f"(a {r['shear_differential_n']:.2f} N differential), which moves each GRF "
+        "line of action and so trades knee extension demand for hip extension demand."
+    )
 
 
 def extract_start_pose(ik: ikid.IKResult) -> dict[str, float]:
