@@ -738,8 +738,8 @@ unchanged.
 \item \textbf{Runtime margin.} The default-lane margin is about $1.3$\,s of CPU on this host, so wall time on a loaded
   machine can still exceed $5$\,s. The native Pinocchio lane (\texttt{-m requires\_pinocchio}) runs every case either
   way, and the standard CI unit lane excludes \texttt{requires\_pinocchio}.
-\item \textbf{Remaining cost.} The contact law is now about half the RHS. Radau's finite-difference Jacobian is the
-  next lever; an analytic Jacobian was not attempted.
+\item \textbf{Remaining cost.} The contact law is now about half the RHS. The finite-difference Jacobian is
+  \emph{not} a significant cost (see the assessment below).
 \item \textbf{Compilation.} This document was not compiled locally (no \texttt{pdflatex} on the host).
 \end{itemize}
 
@@ -751,6 +751,27 @@ python3 -m pytest -n 0 tests/unit/grip_contact/test_pinocchio_hand_frame_cache.p
 python3 -m pytest -n 0 -m "slow and requires_pinocchio" \
     tests/unit/grip_contact/test_pinocchio_topology_grip.py
 \end{verbatim}
+
+\textbf{Rejected Follow-Up: Analytic Jacobian (Assessment Only).} Before an analytic $\partial f/\partial y$ was built,
+the six $0.04$\,s topology cases were instrumented. SciPy's \texttt{radau.num\_jac} was wrapped for its call count and
+CPU time, \texttt{radau.solve\_collocation\_system} for Newton iterations and failures, and \texttt{Radau.\_step\_impl}
+for accepted step sizes. Results on brick at load average 8--12:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \textbf{Jacobian cost.} The finite-difference Jacobian is evaluated 15--54 times per case and costs 5--15\% of CPU.
+  Its 13 columns share one stage time, so they reuse the memoised hand frames.
+\item \textbf{Newton iterations.} 283--362 steps are accepted per case at 2.10--2.25 simplified-Newton iterations per
+  step. Each iteration costs three RHS evaluations, so Newton iterations account for most of the RHS calls. Newton
+  failed on 1--17 steps per case.
+\item \textbf{Step sizes.} 46--61\% of accepted steps sit at the $2\times10^{-4}$\,s \texttt{max\_step} cap, which is an
+  accuracy setting and is not relaxed.
+\end{itemize}
+An exact Jacobian would remove at most the 5--15\% spent in \texttt{num\_jac}, less the cost of evaluating it. It
+cannot reduce the iteration count much below the two iterations Radau needs to confirm convergence, and it could at
+best avoid the few Newton-failure step cuts. It would also need derivatives of the regularised friction, the Stribeck
+curve and Pinocchio's \texttt{aba}, and it would change the trajectories within the integrator tolerance instead of
+reproducing them bit for bit. It was therefore not built. The remaining levers are the per-RHS cost (the contact law
+is about half of it) and the number of RHS evaluations, which the step cap and the stiffness fix.
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
