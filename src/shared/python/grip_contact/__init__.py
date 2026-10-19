@@ -5,6 +5,14 @@ from src.shared.python.grip_contact.bushing_law import (
     BushingWrench,
     bushing_wrench,
 )
+from src.shared.python.grip_contact.capability_inventory import (
+    DEFAULT_INVENTORY_PATH,
+    ExcludedModel,
+    GripCapabilityInventory,
+    GripFeatureCapability,
+    ModelGripCapability,
+    load_grip_capability_inventory,
+)
 from src.shared.python.grip_contact.closure_series import (
     GripClosureSeries,
     closure_series_from_residuals,
@@ -105,6 +113,12 @@ from src.shared.python.grip_contact.trajectory_conditioning import (
 )
 
 __all__ = [
+    "DEFAULT_INVENTORY_PATH",
+    "ExcludedModel",
+    "GripCapabilityInventory",
+    "GripFeatureCapability",
+    "ModelGripCapability",
+    "load_grip_capability_inventory",
     "BodyStates",
     "BushingState",
     "BushingWrench",
@@ -132,8 +146,12 @@ __all__ = [
     "bushing_wrench",
     "compare_topology_series",
     "contact_topology",
+    "ContactCapsule",
+    "ContactSphere",
+    "PairWrench",
     "capsule_capsule",
     "evaluate_contacts",
+    "contact_topology",
     "hand_frame_states",
     "law_level_series",
     "site_transform_in_hand_frame",

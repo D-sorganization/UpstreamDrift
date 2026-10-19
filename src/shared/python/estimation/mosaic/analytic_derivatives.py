@@ -10,6 +10,7 @@ Implements:
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 import time
 from typing import Any, TypeAlias
@@ -438,8 +439,16 @@ def compare_runtime(
     a: FloatArray,
     pi: FloatArray,
     n_repeats: int = 20,
+    *,
+    clock: Callable[[], float] = time.perf_counter,
 ) -> RuntimeComparison:
-    """Benchmark analytic inverse dynamics derivatives against finite differences."""
+    """Benchmark analytic inverse dynamics derivatives against finite differences.
+
+    ``clock`` is the monotonic time source (seconds), called exactly four times:
+    start/stop of the analytic loop, then start/stop of the finite-difference
+    loop. Inject a deterministic clock to test the report without depending on
+    wall-clock behaviour of a shared host (#13390).
+    """
     require(n_repeats >= 1, "n_repeats must be >= 1", n_repeats)
     q_arr = np.asarray(q, dtype=np.float64)
     v_arr = np.asarray(v, dtype=np.float64)
@@ -447,22 +456,22 @@ def compare_runtime(
     pi_arr = np.asarray(pi, dtype=np.float64)
 
     # Analytic timing
-    t0 = time.perf_counter()
+    t0 = clock()
     analytic_res = None
     for _ in range(n_repeats):
         analytic_res = _planar_chain_inverse_dynamics_derivatives(
             model, q_arr, v_arr, a_arr, pi_arr
         )
-    t_analytic = (time.perf_counter() - t0) / n_repeats
+    t_analytic = (clock() - t0) / n_repeats
 
     # Finite difference timing
-    t0 = time.perf_counter()
+    t0 = clock()
     fd_res = None
     for _ in range(n_repeats):
         fd_res = _finite_difference_inverse_dynamics_derivatives(
             model, q_arr, v_arr, a_arr, pi_arr
         )
-    t_fd = (time.perf_counter() - t0) / n_repeats
+    t_fd = (clock() - t0) / n_repeats
 
     assert analytic_res is not None and fd_res is not None
     denom = np.maximum(1e-12, np.abs(analytic_res.d_tau_dq) + np.abs(fd_res.d_tau_dq))

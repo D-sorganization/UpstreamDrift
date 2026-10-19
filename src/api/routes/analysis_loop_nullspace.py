@@ -41,7 +41,6 @@ from src.api.job_cancellation import cancel_unsettled_job
 from src.api.routes.bunker_workbench_jobs import BunkerJobPool
 from src.api.services import loop_nullspace_service as service
 from src.api.task_manager import TaskManager, TaskStatus
-from src.shared.python.loop_nullspace.facade import AnalysisCancelledError
 
 logger = logging.getLogger(__name__)
 
@@ -138,6 +137,8 @@ def _run_job(
     tm: TaskManager, job_id: str, request: service.LoopNullspaceRequest
 ) -> None:
     """Worker body: run the service; a job never stays ``running`` after it."""
+    from src.shared.python.loop_nullspace.facade import AnalysisCancelledError
+
     if not tm.mark_running(job_id):
         return
     try:
