@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
+import pytest
 
 from src.motion_capture.c3d_simscape_preview import (
     canonicalize_rotation,
@@ -12,6 +13,8 @@ from src.motion_capture.c3d_simscape_preview import (
 )
 from tests.unit.sidekick.lab.bio._synthetic import _synthetic_c3d_dict
 from tests.unit.sidekick.lab.bio.test_c3d_reader import _patched_reader
+
+pytestmark = pytest.mark.unit
 
 
 class TestC3DSimscapePreview(unittest.TestCase):
