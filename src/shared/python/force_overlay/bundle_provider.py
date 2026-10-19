@@ -368,7 +368,7 @@ class BundleOverlayProvider:
 
             wrenches: list[OverlayWrench] = []
             body_name = closure.wrenches[-1].body if closure.available else "club"
-            for pair_force in allocations:
+            for pair_force in allocations.pairs.values():
                 if (
                     not pair_force.available
                     or pair_force.unloaded

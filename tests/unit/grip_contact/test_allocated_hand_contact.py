@@ -26,12 +26,15 @@ from src.shared.python.grip_contact.palm_thumb import (
     PALM_THUMB_LABEL,
     AllocatedHandContacts,
     AllocatedPairForce,
+    AllocationPrior,
     PalmThumbForce,
     allocate_from_closure,
     allocate_hand_hand_from_closure,
     allocate_pair_force,
     allocate_palm_thumb,
+    equal_split_prior,
     pair_contact_patch,
+    require_allocated_mode,
     unavailable_pair_force,
     unavailable_palm_thumb,
 )
@@ -137,10 +140,12 @@ def test_sum_of_allocated_forces_reproduces_closure_lambda_without_hand_club_for
         assert out.available is True
         assert out.method == "allocation"
         assert len(out.pairs) == len(topo.hand_hand_pairs())
+        assert out.prior_name == "equal_split"
+        assert out.hand_club_source == "not_supplied"
 
         # Sum of forces on lead hand
         sum_f_lead = np.zeros(3)
-        for pair_force in out:
+        for pair_force in out.pairs.values():
             assert pair_force.force_on_lead_n is not None
             sum_f_lead += np.asarray(pair_force.force_on_lead_n)
 
@@ -191,7 +196,8 @@ def test_sum_of_allocated_hand_hand_and_hand_club_forces_reproduces_lambda(
         )
 
         assert out.available is True
-        sum_f_hh = sum(np.asarray(p.force_on_lead_n) for p in out)
+        assert out.hand_club_source == "supplied"
+        sum_f_hh = sum(np.asarray(p.force_on_lead_n) for p in out.pairs.values())
         total_f = sum_f_hh + np.asarray(f_hc)
 
         expected_f = np.asarray(closure.wrenches[-1].force_n)
@@ -219,7 +225,7 @@ def test_every_allocated_output_carries_method_allocation_and_user_visible_label
 
     for pair in topo.hand_hand_pairs():
         assert pair.name in out.pairs
-        pair_force = out[pair.name]
+        pair_force = out.pairs[pair.name]
         assert isinstance(pair_force, AllocatedPairForce)
         assert pair_force.method == "allocation"
         assert pair_force.label == pair.allocated_label
@@ -232,30 +238,186 @@ def test_every_allocated_output_carries_method_allocation_and_user_visible_label
         assert d["label"] == pair.allocated_label
         assert d["pair_name"] == pair.name
 
+    out_dict = out.to_dict()
+    assert out_dict["prior_name"] == "equal_split"
+    assert out_dict["hand_club_source"] == "not_supplied"
 
-def test_physical_mode_on_welded_topology_raises_schema_feature_unavailable_error() -> (
-    None
-):
-    """Physical-mode output for a welded topology raises SchemaFeatureUnavailableError."""
-    topo = contact_topology()
-    closure = _synthetic_closure()
 
+def test_require_allocated_mode_raises_schema_feature_unavailable_error() -> None:
+    """require_allocated_mode raises SchemaFeatureUnavailableError for physical modes."""
     with pytest.raises(SchemaFeatureUnavailableError) as exc_info:
-        allocate_hand_hand_from_closure(
-            closure,
-            club_rotation=np.eye(3),
-            club_origin=np.zeros(3),
-            topology=topo,
-            static_friction=0.9,
-            mode="physical",
-            schema_id="full-body-v1",
-        )
+        require_allocated_mode(mode="physical", schema_id="full-body-v1")
 
     err = exc_info.value
     assert err.schema_id == "full-body-v1"
     assert err.issue == 13309
     assert err.child == "HRG-GS-G11"
     assert "physical hand-hand contact" in err.feature
+
+    with pytest.raises(SchemaFeatureUnavailableError):
+        require_allocated_mode(mode="separated_v2", schema_id="full-body-v1")
+
+    with pytest.raises(ValueError, match="unsupported mode"):
+        require_allocated_mode(mode="bogus_mode", schema_id="full-body-v1")
+
+    # Valid allocated modes do not raise
+    require_allocated_mode(mode="closure", schema_id="full-body-v1")
+    require_allocated_mode(mode="weld", schema_id="full-body-v1")
+    require_allocated_mode(mode="allocation", schema_id="full-body-v1")
+
+
+def test_allocation_prior_dbc_and_validation() -> None:
+    """AllocationPrior enforces finite non-negative weights summing to 1.0 within 1e-9 and topology keys."""
+    topo = contact_topology()
+    pairs = topo.hand_hand_pairs()
+    pair_names = [p.name for p in pairs]
+
+    # Valid prior
+    w = {name: 1.0 / len(pair_names) for name in pair_names}
+    prior = AllocationPrior(name="test_prior", weights=w)
+    assert prior.name == "test_prior"
+    assert prior.weights == w
+    prior.validate_for_topology(topo)
+
+    # Empty name
+    with pytest.raises(ValueError, match="name"):
+        AllocationPrior(name="", weights=w)
+
+    # Negative weight
+    bad_neg = dict(w)
+    bad_neg[pair_names[0]] = -0.1
+    bad_neg[pair_names[1]] = 1.1
+    with pytest.raises(ValueError, match="finite and >= 0"):
+        AllocationPrior(name="neg", weights=bad_neg)
+
+    # Non-finite weight
+    bad_nan = dict(w)
+    bad_nan[pair_names[0]] = float("nan")
+    with pytest.raises(ValueError, match="finite and >= 0"):
+        AllocationPrior(name="nan", weights=bad_nan)
+
+    # Sum does not equal 1.0 within 1e-9
+    bad_sum = dict(w)
+    bad_sum[pair_names[0]] += 1e-5
+    with pytest.raises(ValueError, match="sum to 1.0"):
+        AllocationPrior(name="sum", weights=bad_sum)
+
+    # Keys mismatch with topology
+    mismatched = {"bogus_pair": 1.0}
+    prior_mismatch = AllocationPrior(name="mismatch", weights=mismatched)
+    with pytest.raises(ValueError, match="do not match topology hand-hand pairs"):
+        prior_mismatch.validate_for_topology(topo)
+
+
+def test_equal_split_prior() -> None:
+    """equal_split_prior constructs an equal split prior matching topology pairs."""
+    topo = contact_topology()
+    prior = equal_split_prior(topo)
+    assert prior.name == "equal_split"
+    pairs = topo.hand_hand_pairs()
+    assert set(prior.weights.keys()) == {p.name for p in pairs}
+    for w in prior.weights.values():
+        assert w == pytest.approx(1.0 / len(pairs))
+
+
+def test_custom_allocation_prior_in_allocate_hand_hand_from_closure() -> None:
+    """allocate_hand_hand_from_closure accepts a custom AllocationPrior and records prior_name."""
+    topo = contact_topology(GripSpec(style=GripStyle.OVERLAP))
+    pairs = topo.hand_hand_pairs()
+    assert len(pairs) == 2
+    prior = AllocationPrior(
+        name="custom_70_30",
+        weights={pairs[0].name: 0.7, pairs[1].name: 0.3},
+    )
+    closure = _synthetic_closure()
+
+    out = allocate_hand_hand_from_closure(
+        closure,
+        club_rotation=np.eye(3),
+        club_origin=np.zeros(3),
+        topology=topo,
+        static_friction=0.9,
+        prior=prior,
+    )
+    assert out.prior_name == "custom_70_30"
+    assert out.hand_club_source == "not_supplied"
+    assert out.reproduction_error_n <= LAMBDA_TOL
+
+    # Force shares match prior
+    f_lead = np.asarray(closure.wrenches[-1].force_n)
+    f0 = np.asarray(out.pairs[pairs[0].name].force_on_lead_n)
+    f1 = np.asarray(out.pairs[pairs[1].name].force_on_lead_n)
+    assert np.allclose(f0, 0.7 * f_lead)
+    assert np.allclose(f1, 0.3 * f_lead)
+
+
+def test_allocated_hand_contacts_magic_methods_removed() -> None:
+    """AllocatedHandContacts does not implement __getitem__, __iter__, __len__, or get."""
+    topo = contact_topology()
+    closure = _synthetic_closure()
+    out = allocate_hand_hand_from_closure(
+        closure,
+        club_rotation=np.eye(3),
+        club_origin=np.zeros(3),
+        topology=topo,
+        static_friction=0.9,
+    )
+    with pytest.raises(TypeError):
+        _ = out["trail_palm_lead_thumb"]
+    with pytest.raises(TypeError):
+        for _ in out:
+            pass
+    with pytest.raises(TypeError):
+        _ = len(out)
+    assert not hasattr(out, "get")
+    assert out.palm_thumb is not None
+
+
+def test_allocate_from_closure_has_original_signature_and_behaviour() -> None:
+    """allocate_from_closure accepts only original HRG-H1 parameters and returns PalmThumbForce."""
+    closure = _synthetic_closure()
+
+    class _MockPatch:
+        point_club_m = (0.01, 0.02, 0.03)
+        normal_club = (0.0, 1.0, 0.0)
+
+    patch = _MockPatch()
+    result = allocate_from_closure(
+        closure,
+        club_rotation=np.eye(3),
+        club_origin=np.zeros(3),
+        patch=patch,
+        static_friction=0.9,
+    )
+    assert isinstance(result, PalmThumbForce)
+    assert result.method == "allocation"
+
+
+def test_pair_contact_patch_rejects_sphere_sphere() -> None:
+    """pair_contact_patch raises ValueError for unsupported sphere-sphere pair."""
+    from src.shared.python.grip_contact.contact_topology import (
+        ContactPair,
+        ContactSite,
+    )
+
+    topo = contact_topology()
+    site_a = ContactSite(
+        "site_a", "lead", "lead_hand", "sphere", centre_m=(0.0, 0.0, 0.0), radius_m=0.01
+    )
+    site_b = ContactSite(
+        "site_b",
+        "trail",
+        "trail_hand",
+        "sphere",
+        centre_m=(0.0, 0.0, 0.02),
+        radius_m=0.01,
+    )
+    custom_topo = replace(topo, sites=(*topo.sites, site_a, site_b))
+    pair = ContactPair(
+        "a_b", "site_a", "site_b", ("sphere", "sphere"), "external:a_b_allocated"
+    )
+    with pytest.raises(ValueError, match="unsupported primitive pair"):
+        pair_contact_patch(custom_topo, pair)
 
 
 @pytest.mark.parametrize(
