@@ -9,7 +9,6 @@ or contact qualification.
 from __future__ import annotations
 
 import hashlib
-import importlib.metadata
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,6 +24,10 @@ from src.engines.native_replay_contracts import (
     require_native_replay_equivalence,
     validate_frozen_torque_history,
     validate_native_replay_bundle,
+)
+from src.engines.physics_engines.drake.python.drake_native_policy import (
+    installed_drake_distribution_version,
+    require_reviewed_native_drake_version,
 )
 
 if TYPE_CHECKING:
@@ -117,13 +120,12 @@ def _load_native(path: Path, timestep: float) -> tuple[Any, Any]:
 def _abstract_parameter_identity(plant: Any, context: Any) -> dict[str, Any]:
     """Admit only reviewed factory defaults, never caller-supplied parameters.
 
-    Drake v1.57.0 plant DeclareParameters creates two internal constraint maps.
-    Their Python values are unbound. GetConstraintIds must prove both empty;
-    the owned default context and boolean prefix are recorded explicitly.
-    Another native version/layout requires another reviewed policy.
+    Reviewed Drake 1.57.x/1.58.x plant DeclareParameters creates two internal
+    constraint maps. Their Python values are unbound. GetConstraintIds must
+    prove both empty; the owned default context and boolean prefix are recorded
+    explicitly. Another native version/layout requires another reviewed policy.
     """
-    if importlib.metadata.version("drake") != "1.57.0":
-        raise ValueError("native abstract parameter policy requires Drake 1.57.0")
+    drake_version = require_reviewed_native_drake_version()
     if plant.GetConstraintIds() or plant.num_constraints():
         raise ValueError("constraint parameters require another native policy")
     size = context.num_abstract_parameters()
@@ -136,7 +138,7 @@ def _abstract_parameter_identity(plant: Any, context: Any) -> dict[str, Any]:
         "factory_default_boolean_parameters": flags,
         "constraint_active_status": [],
         "distance_constraint_parameters": [],
-        "layout_source": "drake-v1.57.0-MultibodyPlant-DeclareParameters",
+        "layout_source": (f"drake-v{drake_version}-MultibodyPlant-DeclareParameters"),
     }
 
 
@@ -242,7 +244,7 @@ def _identity(plant: Any, context: Any, path: Path, contracts: Any) -> Any:
         _VERSION,
         hashlib.sha256(path.read_bytes()).hexdigest(),
         "drake-native-torque-replay",
-        importlib.metadata.version("drake"),
+        installed_drake_distribution_version(),
         provider.hexdigest(),
         contracts.InitialStateSchema("drake-native-discrete", _VERSION, specs),
         tuple(a.name() for a in _actuators(plant)),

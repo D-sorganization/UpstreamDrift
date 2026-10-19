@@ -32,6 +32,7 @@ from .spinal_load_providers import (
     HeuristicSpinalLoadProvider,
     ModelSpinalLoadProvider,
     SpinalLoadProvider,
+    model_spinal_load_provider_from_receipt,
 )
 from .swing_modifications import SwingModification, SwingModificationRecommender
 
@@ -43,6 +44,7 @@ __all__ = [
     "HeuristicSpinalLoadProvider",
     "ModelSpinalLoadProvider",
     "HEURISTIC_PROVIDER_ID",
+    "model_spinal_load_provider_from_receipt",
     "JointStressAnalyzer",
     "JointStressResult",
     "InjuryRiskScorer",
