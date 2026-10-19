@@ -9,6 +9,7 @@ reason, never a default number.
 from __future__ import annotations
 
 import logging
+import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -26,10 +27,37 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-TRACKED_SOLUTION_UNAVAILABLE_REASON = (
-    "unavailable: no OSL-3 deadlift IK/ID receipts on main yet "
-    "(OSL-3 #13041 is still open)"
+#: OSL-3 IK/ID receipts; the tracked row's status is read from here, never
+#: asserted in code.
+OSL3_IK_ID_RECEIPT = (
+    Path(__file__).resolve().parents[5]
+    / "docs/development/lifting/evidence/opensim_ik_id/receipts.json"
 )
+
+
+def tracked_opensim_record(path: Path = OSL3_IK_ID_RECEIPT) -> dict[str, str]:
+    """Status of the tracked OpenSim deadlift row, derived from the OSL-3 receipt.
+
+    The predictive solution is not yet compared with the tracked IK/ID one, so
+    the row is never a measured value; its reason states which input exists.
+    """
+    try:
+        lifts = json.loads(path.read_text(encoding="utf-8"))["lifts"]
+        ik_id = lifts["deadlift"]["ik_id"]
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        return {"status": "unavailable", "reason": f"OSL-3 receipt unreadable: {exc}"}
+    if ik_id.get("status") != "complete":
+        return {
+            "status": "unavailable",
+            "reason": f"OSL-3 deadlift IK/ID is {ik_id.get('status')!r}: "
+            f"{ik_id.get('reason')}",
+        }
+    return {
+        "status": "not compared",
+        "reason": "the OSL-3 deadlift IK/ID receipt is complete, but the "
+        "predictive-versus-tracked comparison (joint moments, GRF) is not "
+        "implemented yet",
+    }
 
 
 def compute_bundle_metrics(bundle_path: Path | str) -> dict[str, float]:
@@ -55,7 +83,7 @@ def compute_bundle_metrics(bundle_path: Path | str) -> dict[str, float]:
     if isinstance(sagittal, dict) and "time_s" in sagittal:
         times = np.asarray(sagittal["time_s"], dtype=float)
     else:
-        times = np.linspace(0.0, 2.0, len(path))
+        raise ValueError(f"bundle at {p} has no sagittal_solution time_s")
 
     z = path[:, 2]
     start_h = float(z[0])
@@ -260,9 +288,6 @@ def build_comparison_table(
                 f"{config.bar_mass_kg:g} kg bar"
             ),
         },
-        "tracked_opensim": {
-            "status": "unavailable",
-            "reason": TRACKED_SOLUTION_UNAVAILABLE_REASON,
-        },
+        "tracked_opensim": tracked_opensim_record(),
         "quantities": quantities,
     }

@@ -31,7 +31,6 @@ from src.engines.physics_engines.opensim.python.msk_lift_model import (
     build_lift_model,
 )
 from src.engines.physics_engines.opensim.python.msk_lift_predictive_report import (
-    TRACKED_SOLUTION_UNAVAILABLE_REASON,
     _extract_bar_kinematics,
     _extract_residual_metrics,
     build_comparison_table,

@@ -37,7 +37,6 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.engines.physics_engines.opensim.python.msk_lift_predictive import (  # noqa: E402
-    TRACKED_SOLUTION_UNAVAILABLE_REASON,
     PredictiveDeadliftConfig,
     build_predictive_deadlift_study,
     compute_bundle_metrics,

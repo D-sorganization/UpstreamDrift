@@ -16,13 +16,15 @@ from pathlib import Path
 import pytest
 
 from src.engines.physics_engines.opensim.python.msk_lift_predictive import (
-    TRACKED_SOLUTION_UNAVAILABLE_REASON,
     PredictiveDeadliftConfig,
     build_comparison_table,
     build_predictive_deadlift_study,
     compute_bundle_metrics,
     create_predictive_deadlift_spec,
     format_predictive_receipt,
+)
+from src.engines.physics_engines.opensim.python.msk_lift_predictive_report import (
+    tracked_opensim_record,
 )
 
 pytestmark = pytest.mark.unit
@@ -109,9 +111,9 @@ def test_comparison_table_reports_unavailable_for_tracked_opensim() -> None:
 
     assert "quantities" in table
     assert "tracked_opensim" in table
-    assert table["tracked_opensim"]["status"] == "unavailable"
-    assert table["tracked_opensim"]["reason"] == TRACKED_SOLUTION_UNAVAILABLE_REASON
-    assert "OSL-3 #13041 is still open" in table["tracked_opensim"]["reason"]
+    assert table["tracked_opensim"] == tracked_opensim_record()
+    assert table["tracked_opensim"]["status"] in {"unavailable", "not compared"}
+    assert table["tracked_opensim"]["reason"]
 
     # Bundle kinematics row must exist
     assert "bundle_kinematics" in table
@@ -533,3 +535,29 @@ def test_stage2_guess_is_built_from_stage1_states() -> None:
         guess.getControl(shared).to_numpy(), stage1.getControl(shared).to_numpy()
     )
     assert any("activation" in n for n in guess.getStateNames())
+
+
+def test_tracked_row_follows_the_osl3_receipt(tmp_path: Path) -> None:
+    """The tracked row reports the receipt's state, never a hard-coded claim."""
+    import json
+
+    from src.engines.physics_engines.opensim.python.msk_lift_predictive_report import (
+        tracked_opensim_record,
+    )
+
+    missing = tracked_opensim_record(tmp_path / "absent.json")
+    assert missing["status"] == "unavailable"
+    assert "unreadable" in missing["reason"]
+    receipt = tmp_path / "receipts.json"
+    receipt.write_text(
+        json.dumps(
+            {"lifts": {"deadlift": {"ik_id": {"status": "unavailable", "reason": "x"}}}}
+        ),
+        encoding="utf-8",
+    )
+    assert tracked_opensim_record(receipt)["status"] == "unavailable"
+    receipt.write_text(
+        json.dumps({"lifts": {"deadlift": {"ik_id": {"status": "complete"}}}}),
+        encoding="utf-8",
+    )
+    assert tracked_opensim_record(receipt)["status"] == "not compared"
