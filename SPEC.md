@@ -2741,6 +2741,8 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-19 | #13419 | Record OSL-4 muscle forces, activations, and residual status across barbell lifts |
+| 2026-10-19 | #13424 | Gate compose training service behind profile; pin PyTorch cu128 wheels for training stage; Resolve Tools gitlink for Docker explorer on WSL Windows worktrees; Repo-manage docker-cache-prune host script with keep-label spare and contract tests |
 | 2026-10-19 | #13418 | Fix three Drake continuous-torque tests that failed with pydrake installed: hide every cached pydrake module and size the live theta via _resolve_n_actuators |
 | 2026-10-19 | #13277 | Add scripts/ci/shared_buildkit.py: idempotent, flock-serialised manager for one persistent GC-bounded BuildKit builder per host (create/upgrade/repair, cold-build fallback) |
 | 2026-10-19 | #13406 | Predictive Moco simulation of deadlift lift (OSL-7) |

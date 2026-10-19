@@ -2652,6 +2652,45 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#12941 · Repo-Manage Docker-Cache-Prune Host Script With Keep-Label Spare and Contract Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12941
+- **Branch:** merged via #13424
+- **PR:** #13424
+- **Paths:** see #13424
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`c49b57a6`; collated from changes/12941-repo-manage-docker-cache-prune-host-scri.md)
+- **Summary:** Repo-manage docker-cache-prune host script with keep-label spare and contract tests
+- **Next step:** Shipped in PR #13424.
+
+### DL-#12940 · Resolve Tools Gitlink for Docker Explorer on WSL Windows Worktrees
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12940
+- **Branch:** merged via #13424
+- **PR:** #13424
+- **Paths:** see #13424
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`c49b57a6`; collated from changes/12940-resolve-tools-gitlink-for-docker-explore.md)
+- **Summary:** Resolve Tools gitlink for Docker explorer on WSL Windows worktrees
+- **Next step:** Shipped in PR #13424.
+
+### DL-#12938 · Gate Compose Training Service Behind Profile; Pin PyTorch Cu128 Wheels for Training Stage
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12938
+- **Branch:** merged via #13424
+- **PR:** #13424
+- **Paths:** see #13424
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`c49b57a6`; collated from changes/12938-gate-compose-training-service-behind-pro.md)
+- **Summary:** Gate compose training service behind profile; pin PyTorch cu128 wheels for training stage
+- **Next step:** Shipped in PR #13424.
+
 ### DL-#13416 · Fix Three Drake Continuous-Torque Tests That Failed With Pydrake Installed: Hide Every Cached Pydrake Module and Size the Live Theta via _Resolve_N_Actuators
 
 - **State:** shipped
@@ -3100,10 +3139,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13042
 - **Branch:** merged via #13288
-- **PR:** #13288
+- **PR:** #13288, #13419
 - **Paths:** see #13288
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`e16d848e`; collated from changes/13042-compute-muscle-forces-and-activations-fo.md)
+- **Last verified:** 2026-10-19 (`d1880753`; collated from changes/13042-record-osl-4-muscle-forces-activations-a.md)
 - **Summary:** Compute muscle forces and activations for barbell squat (OSL-4)
 - **Next step:** Shipped in PR #13288.
 
