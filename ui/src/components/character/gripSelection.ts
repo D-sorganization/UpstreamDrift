@@ -41,6 +41,7 @@ export interface PhysicalGrip {
   lead_below_butt_m: number;
   hand_spacing_m: number;
   handedness: 'right' | 'left';
+  style?: GripStyle;
 }
 
 export interface PhysicalGripPicks {
@@ -132,13 +133,18 @@ export function resolveGrip(picks: GripPicks, base: PhysicalGrip = DEFAULT_GRIP)
   trail = withPick(trail, 'gamma_deg', picks.trail_set_angle);
   const spacing = picks.hand_spacing ?? base.hand_spacing_m;
   if (!(spacing > 0)) throw new Error(`hand_spacing must be positive, got ${spacing}`);
-  return {
+  const style = picks.grip_style ?? base.style;
+  const out: PhysicalGrip = {
     lead,
     trail,
     lead_below_butt_m: picks.lead_below_butt ?? base.lead_below_butt_m,
     hand_spacing_m: spacing,
     handedness: base.handedness,
   };
+  if (style !== undefined && style !== 'overlap') {
+    out.style = style;
+  }
+  return out;
 }
 
 /** The sidecar `grip` block of the visual picks (only the picked keys). */
