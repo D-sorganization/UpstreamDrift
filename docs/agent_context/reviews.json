@@ -19,7 +19,7 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "80f48f6dbb3680286664ebbd0e30d1e7a22eb86f5a2c861d1a551801b3b891fa",
+      "fingerprint": "8f45ccb0111677ae7a9286f88a4b7819ee5b0877bd5fe14eb682b7d79b4f9f64",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
@@ -27,7 +27,7 @@
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
         "src/config/feature_parity.json": "1959dd8fc9e462ac1c10dbbe476f7de86d9fab08186e3dc25742f529aee7204d",
-        "src/config/launcher_manifest.json": "d34c707ab37b9853c3d9e6b7f3b11460643f3671eb92023621fce7d65e6f03b2",
+        "src/config/launcher_manifest.json": "3477e8acef5919731d06ef6594a1e9d503f0e0c3d05e96c92038ff6903c1263f",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
         "src/config/models.yaml": "7c868b0c444389fad39bdd30469abd32439f5bd11b9b5019c941ac0049e0763c",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Merged main into #13260 (after #13259 landed): feature contract tools.spine_study (parity) and widened spine_viewer tile description; regenerated parity matrix and capability atlas; ran tests/config/feature_parity, tests/scripts/test_capability_atlas.py and tests/config/test_launcher_manifest.py."
+      "rationale": "Reviewed after merging main into #13279: launcher-atlas inputs differ from main only in the spine_viewer tile description (now mentions the study runner), the tools.spine_study feature_parity entry (parity, no tiles) and the regenerated capability atlas; tile ids, routes and order are unchanged."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",
