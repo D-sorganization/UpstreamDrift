@@ -619,11 +619,14 @@ Python floats:
 \item capsule site $i$ (reference \texttt{capsule\_capsule}): closest segment points $(a_i, b_i)$ (general, parallel and
   degenerate branches), contact $\tfrac12[(a_i + r_i \hat n_i) + (b_i - r_g \hat n_i)]$; the grip is sampled against the plane
   $(\hat n_i,\; a_i + r_i\hat n_i)$ with the exactly negated relative velocity and spin;
-\item both rows then apply the shared law of \texttt{sphere\_ground\_contact} and \texttt{torsional\_friction\_moment}:
-  $f_n = \max\!\big(0,\, k\,\delta\,(1 + d\,\dot\delta)\big)$,
-  $\mu(s) = \mu_d + (\mu_s - \mu_d)e^{-(s/v_{\mathrm{trans}})^2} + \mu_v s$,
-  $f_t = -\tfrac{v_t}{s}\,\mu(s)\,f_n \tanh(s/v_{\mathrm{trans}})$, and
-  $M_{\mathrm{spin}} = -\hat u\,\mu_s f_n r_{\mathrm{patch}} \tanh(\omega_n/\omega_0)$,
+\item \texttt{sphere\_ground\_contact} and \texttt{torsional\_friction\_moment} give the shared law that both rows
+  then apply, term for term:
+  \begin{gather*}
+  f_n = \max\!\big(0,\, k\,\delta\,(1 + d\,\dot\delta)\big), \qquad
+  \mu(s) = \mu_d + (\mu_s - \mu_d)e^{-(s/v_{\mathrm{trans}})^2} + \mu_v s, \\
+  f_t = -\tfrac{v_t}{s}\,\mu(s)\,f_n \tanh(s/v_{\mathrm{trans}}), \qquad
+  M_{\mathrm{spin}} = -\hat u\,\mu_s f_n r_{\mathrm{patch}} \tanh(\omega_n/\omega_0),
+  \end{gather*}
   where $s = \|v_t\|$, $\hat u$ is the re-normalised plane normal, and the plane height is taken along the raw normal, as
   \texttt{GroundPlane} does.
 \end{itemize}
@@ -655,9 +658,9 @@ last bit and were rejected.
   style/trigger/side cases, the reference took $1437\,\mu$s and the batched path $146\,\mu$s on average, a ratio of means of
   $9.9\times$ (per-case range $8.7$--$13.8\times$). The original PR-head code measured $1337$--$1467\,\mu$s on average, so
   the gain over it is similar. The regression guard asserts $\ge 6\times$.
-\item Pinocchio (\texttt{simulate\_grip\_contact}, $0.04$\,s window, \texttt{topology\_model}), CPU per case: before
+\item Pinocchio (\path{simulate_grip_contact}, $0.04$\,s window, \path{topology_model}), CPU per case: before
   $10.9$--$13.8$\,s, after $3.8$--$4.8$\,s. Wall time was $5.2$--$11.3$\,s on the loaded host, so
-  \texttt{test\_pinocchio\_topology\_grip.py} stayed in the slow lane at this step (see the next subsection). Its pytest wall times at load average 6--12 are:
+  \path{test_pinocchio_topology_grip.py} stayed in the slow lane at this step (see the next subsection). Its pytest wall times at load average 6--12 are:
   \texttt{\_fast} cases $3.0$--$6.0$\,s, timestep halving $8.6$--$11.0$\,s, $0.2$\,s static hold $12.7$--$14.2$\,s, and
   $1$\,s swing replay $52$--$75$\,s. The non-law right-hand-side costs (prescribed motion, bushing state construction,
   Radau overhead) now dominate.
@@ -674,13 +677,14 @@ shared host and vary by about $\pm15\%$ between runs. The G6 parameter line abov
 $v_{\mathrm{trans}} = 0.01$\,m/s, $r_{\mathrm{patch}} \approx 4.47$\,mm) does not match the values that
 \texttt{build\_pad\_model} returns for the anthropometric driver spec ($k \approx 1.71\times10^5$\,N/m, $d \approx 0.383$\,s/m,
 $v_{\mathrm{trans}} = 10^{-3}$\,m/s, $r_{\mathrm{patch}} \approx 2.29$\,mm, $\mu_v = 0$). That discrepancy is recorded for
-follow-up and not corrected here. This document was not compiled locally (no \texttt{pdflatex} on the host).
+follow-up and not corrected here.
 
 \textbf{Reproduction Commands.}
 \begin{verbatim}
 python3 -m pytest -n 0 tests/unit/grip_contact/test_topology_contact_batched.py \
     tests/unit/grip_contact/test_topology_contact.py
-python3 -m pytest -n 0 -m slow tests/unit/grip_contact/test_pinocchio_topology_grip.py
+python3 -m pytest -n 0 -m slow \
+    tests/unit/grip_contact/test_pinocchio_topology_grip.py
 \end{verbatim}
 
 \subsection{Pinocchio Grip Right-Hand-Side Cost (\#13396)}
@@ -702,10 +706,10 @@ unchanged.
 \item \textbf{One club state per RHS.} \texttt{ClubOnBushings.evaluate} returns hands, club state, club frames and the
   law together. \texttt{derivatives} reuses that club state for the joint torque and the translational rate.
   \texttt{ClubInHands} overrides only \texttt{contact\_law}, which dispatches to the pad or topology law.
-\item \textbf{Python-float preconditions.} \texttt{rotation\_errors}
-  (\path{src/shared/python/grip_contact/bushing_law.py}) returns $\max_{ij}|R^{\mathsf T}R - I|_{ij}$ and $\det R$ in
-  Python floats (column dot products and cofactor expansion). \texttt{BushingState.\_\_post\_init\_\_} keeps its
-  $10^{-6}$ orthonormality threshold and its messages. \texttt{topology\_contact.\_validate\_bushing\_state} keeps its
+\item \textbf{Python-float preconditions.} \path{rotation_errors} returns $\max_{ij}|R^{\mathsf T}R - I|_{ij}$ and
+  $\det R$ in Python floats (column dot products and cofactor expansion); it is defined in
+  \path{src/shared/python/grip_contact/bushing_law.py}. \path{BushingState.__post_init__} keeps its
+  $10^{-6}$ orthonormality threshold and its messages. \path{topology_contact._validate_bushing_state} keeps its
   $10^{-5}$ Gram and determinant thresholds and now shares this helper instead of its own copy. Only the precondition
   checks changed; the stored arrays and every computed quantity are untouched.
 \end{itemize}
@@ -740,7 +744,8 @@ unchanged.
   way, and the standard CI unit lane excludes \texttt{requires\_pinocchio}.
 \item \textbf{Remaining cost.} The contact law is now about half the RHS. The finite-difference Jacobian is
   \emph{not} a significant cost (see the assessment below).
-\item \textbf{Compilation.} This document was not compiled locally (no \texttt{pdflatex} on the host).
+\item \textbf{Compilation.} The document compiles with pdfTeX 1.40.25 (TeX Live 2023, Debian packages) in two
+  \texttt{pdflatex -halt-on-error} passes, with no errors or undefined references (15 pages).
 \end{itemize}
 
 \textbf{Reproduction Commands.}
