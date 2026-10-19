@@ -1,0 +1,28 @@
+{
+  "schema": "grip-binding/v1",
+  "model_id": "myosuite_golfer_driver",
+  "model_hash": "sha256:133ad3e0f40affe97b77da0b815fd27b72d6481994deb7126de0ede1c134a426",
+  "handedness": "right",
+  "side_roles": {
+    "left": "lead",
+    "right": "trail"
+  },
+  "calibration_pose": {
+    "name": "neutral_address",
+    "description": "MyoSuite MS-51 golfer_myobody_driver.xml at qpos0 with golf_club site-welded to hand_l and hand_r via grip_weld_l and grip_weld_r"
+  },
+  "units": {
+    "length": "m",
+    "angle": "rad"
+  },
+  "provenance": {
+    "source": "shared/models/myosuite/golf/body/golfer_myobody_driver.xml",
+    "date": "2026-10-19",
+    "method": "myosuite_dual_site_weld_grip"
+  },
+  "attachment_mode": "weld",
+  "club_body": "golf_club",
+  "lead_hand_body": "hand_l",
+  "trail_hand_body": "hand_r",
+  "unavailable_sites": {}
+}
