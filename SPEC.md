@@ -2741,6 +2741,9 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-19 | #13341 | test_check_windows_deps no longer races real engine imports against a 3s wait; the probe is tested synchronously with optional engines forced absent |
+| 2026-10-19 | #13269 | Route web launcher to /tools/spine-viewer, update Ch68 manual and ignore licensed_assets |
+| 2026-10-19 | #13288 | Compute muscle forces and activations for barbell squat (OSL-4) |
 | 2026-10-19 | #13316 | Shard unit-test-gate into a 2-leg file-hash matrix so each leg stays well under the 35 min limit without raising it |
 | 2026-10-19 | #13319 | generalised shared contact law: sphere-capsule and capsule-capsule |
 | 2026-10-19 | #13274 | Feed finished spine study receipts into injury analysis via ModelSpinalLoadProvider; spine models stay out of the feedback inventory |
