@@ -55,6 +55,9 @@ class FakeEngine:
     def get_actuator_gains(self) -> np.ndarray:
         return self.actuator_gains
 
+    def set_actuator_gains(self, v: np.ndarray) -> None:
+        self.actuator_gains = v
+
 
 class TestConfig:
     def test_defaults(self) -> None:
