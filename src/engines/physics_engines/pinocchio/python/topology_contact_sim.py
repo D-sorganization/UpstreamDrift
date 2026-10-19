@@ -23,11 +23,9 @@ from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
-from scipy.integrate import solve_ivp
 
 from src.engines.physics_engines.pinocchio.python import grip_bushing as bushing
 from src.shared.python.grip_contact import (
-    CoordinateSpline,
     CoordinateSwing,
     GripInterface,
     RigidBodyState,
@@ -183,6 +181,41 @@ def _resolve_hand_state(
     return state
 
 
+def _grip_surface_forces(
+    p_site: np.ndarray,
+    p_surf: np.ndarray,
+    n_rad: np.ndarray,
+    st_hand: BushingState,
+    club: BushingState | RigidBodyState,
+    radius: float,
+    law: ContactParameters,
+    spin_args: tuple[float, float],
+) -> tuple[float, float, np.ndarray, np.ndarray]:
+    """Calculate normal/tangential magnitudes, club force, and club moment from contact."""
+    patch_radius_m, spin_transition_rad_s = spin_args
+    v_a = st_hand.velocity_m_s + cross3(
+        st_hand.omega_rad_s, p_site - st_hand.position_m
+    )
+    v_c = club.velocity_m_s + cross3(club.omega_rad_s, p_surf - club.position_m)
+    plane = GroundPlane(
+        (float(n_rad[0]), float(n_rad[1]), float(n_rad[2])), float(n_rad @ p_surf)
+    )
+    sample = sphere_ground_contact(p_site, v_a - v_c, radius, plane, law)
+    spin = torsional_friction_moment(
+        sample.normal_force_n,
+        st_hand.omega_rad_s - club.omega_rad_s,
+        plane,
+        patch_radius_m=patch_radius_m,
+        friction=law.static_friction,
+        transition_rad_s=spin_transition_rad_s,
+    )
+    f_on_club = -(sample.normal_force_n + sample.friction_force_n)
+    m_on_club = cross3(p_surf - club.position_m, f_on_club) - spin
+    fn_mag = float(np.linalg.norm(sample.normal_force_n))
+    ft_mag = float(np.linalg.norm(sample.friction_force_n))
+    return fn_mag, ft_mag, f_on_club, m_on_club
+
+
 def _evaluate_hand_grip_sphere(
     site: ContactSite,
     st_hand: BushingState,
@@ -207,24 +240,16 @@ def _evaluate_hand_grip_sphere(
     if pen <= 0.0:
         return 0.0, 0.0, 0.0, np.zeros(3), np.zeros(3), p_surf, n_rad
 
-    v_a = st_hand.velocity_m_s + cross3(st_hand.omega_rad_s, c_w - st_hand.position_m)
-    v_c = club.velocity_m_s + cross3(club.omega_rad_s, p_surf - club_pos)
-    plane = GroundPlane(
-        (float(n_rad[0]), float(n_rad[1]), float(n_rad[2])), float(n_rad @ p_surf)
+    fn_mag, ft_mag, f_on_club, m_on_club = _grip_surface_forces(
+        c_w,
+        p_surf,
+        n_rad,
+        st_hand,
+        club,
+        site.radius_m,
+        law,
+        (patch_radius_m, spin_transition_rad_s),
     )
-    sample = sphere_ground_contact(c_w, v_a - v_c, site.radius_m, plane, law)
-    spin = torsional_friction_moment(
-        sample.normal_force_n,
-        st_hand.omega_rad_s - club.omega_rad_s,
-        plane,
-        patch_radius_m=patch_radius_m,
-        friction=law.static_friction,
-        transition_rad_s=spin_transition_rad_s,
-    )
-    f_on_club = -(sample.normal_force_n + sample.friction_force_n)
-    m_on_club = cross3(p_surf - club_pos, f_on_club) - spin
-    fn_mag = float(np.linalg.norm(sample.normal_force_n))
-    ft_mag = float(np.linalg.norm(sample.friction_force_n))
     return pen, fn_mag, ft_mag, f_on_club, m_on_club, p_surf, n_rad
 
 
@@ -257,24 +282,16 @@ def _evaluate_hand_grip_capsule(
     if pen <= 0.0:
         return 0.0, 0.0, 0.0, np.zeros(3), np.zeros(3), p_surf, n_rad
 
-    v_a = st_hand.velocity_m_s + cross3(st_hand.omega_rad_s, p_cap - st_hand.position_m)
-    v_c = club.velocity_m_s + cross3(club.omega_rad_s, p_surf - club_pos)
-    plane = GroundPlane(
-        (float(n_rad[0]), float(n_rad[1]), float(n_rad[2])), float(n_rad @ p_surf)
+    fn_mag, ft_mag, f_on_club, m_on_club = _grip_surface_forces(
+        p_cap,
+        p_surf,
+        n_rad,
+        st_hand,
+        club,
+        site.radius_m,
+        law,
+        (patch_radius_m, spin_transition_rad_s),
     )
-    sample = sphere_ground_contact(p_cap, v_a - v_c, site.radius_m, plane, law)
-    spin = torsional_friction_moment(
-        sample.normal_force_n,
-        st_hand.omega_rad_s - club.omega_rad_s,
-        plane,
-        patch_radius_m=patch_radius_m,
-        friction=law.static_friction,
-        transition_rad_s=spin_transition_rad_s,
-    )
-    f_on_club = -(sample.normal_force_n + sample.friction_force_n)
-    m_on_club = cross3(p_surf - club_pos, f_on_club) - spin
-    fn_mag = float(np.linalg.norm(sample.normal_force_n))
-    ft_mag = float(np.linalg.norm(sample.friction_force_n))
     return pen, fn_mag, ft_mag, f_on_club, m_on_club, p_surf, n_rad
 
 
@@ -507,42 +524,7 @@ class TopologyClubInHands(bushing.ClubOnBushings):
         _, _, _, club_wrench = self.wrenches(t, y, hand_source)
         club = self.club_state(y)
         tau = self.joint_torque_from_wrench(club, club_wrench)
-        quat = y[3:7] / np.linalg.norm(y[3:7])
-        q = np.concatenate([y[:3], quat])
-        v = y[7:13]
-        accel = np.array(self._pin.aba(self.model, self.data, q, v, tau))
-        omega = v[3:]
-        qv, qw = quat[:3], quat[3]
-        quat_dot = 0.5 * np.concatenate(
-            [qw * omega + cross3(qv, omega), [-float(qv @ omega)]]
-        )
-        return np.concatenate([club.rotation @ v[:3], quat_dot, accel])
-
-
-def hold_state(sim: TopologyClubInHands, q: np.ndarray) -> tuple[Any, np.ndarray]:
-    """Return hand source at rest and club initial state for static hold."""
-    still = np.zeros_like(q)
-    weld = sim.kinematics.state(q, still)
-    y = bushing._initial_state(weld, sim._pin)  # noqa: SLF001
-    return (lambda _t: (q, still)), y
-
-
-def _setup_initial_sim_state(
-    sim: TopologyClubInHands,
-    swing: CoordinateSwing,
-    times: np.ndarray,
-    hold: bool,
-) -> tuple[Any, np.ndarray]:
-    """Return hand kinematics source and initial club state vector."""
-    if hold:
-        return hold_state(sim, np.asarray(swing.q[0], float))
-    spline = CoordinateSpline(swing.time_s, swing.q)
-    source = spline.evaluate
-    weld0 = sim.kinematics.state(*source(float(times[0])))
-    y0 = bushing._initial_state(weld0, sim._pin)  # noqa: SLF001
-    y0[7:10] = weld0.rotation.T @ weld0.velocity_m_s
-    y0[10:13] = weld0.rotation.T @ weld0.omega_rad_s
-    return source, y0
+        return self.free_flyer_aba_derivatives(club, y, tau)
 
 
 def _accumulate_topology_traces(
@@ -600,16 +582,19 @@ def _accumulate_topology_traces(
 
         club_rot.append(sim.club_state(y).rotation)
 
-    arrays = {
-        name: {s: (np.array(d[s][0]), np.array(d[s][1])) for s in SIDES}
-        for name, d in (("w", wrench), ("h", hand_pose), ("c", club_pose))
+    w_series = {s: (np.asarray(wrench[s][0]), np.asarray(wrench[s][1])) for s in SIDES}
+    h_series = {
+        s: (np.asarray(hand_pose[s][0]), np.asarray(hand_pose[s][1])) for s in SIDES
+    }
+    c_series = {
+        s: (np.asarray(club_pose[s][0]), np.asarray(club_pose[s][1])) for s in SIDES
     }
     pair_traces_arr = {k: np.array(v) for k, v in pair_traces_list.items()}
     pair_normal_arr = {k: np.array(v) for k, v in pair_normal_list.items()}
     return (
-        arrays["w"],
-        arrays["h"],
-        arrays["c"],
+        w_series,
+        h_series,
+        c_series,
         np.array(club_rot),
         pair_traces_arr,
         pair_normal_arr,
@@ -642,18 +627,8 @@ def simulate_topology_contact(
     if t_end_s is not None:
         times = times[times <= t_end_s + 1e-12]
 
-    source, y0 = _setup_initial_sim_state(sim, swing, times, hold)
-
-    sol = solve_ivp(
-        lambda t, y: sim.derivatives(t, y, source),
-        (float(times[0]), float(times[-1])),
-        y0,
-        method="Radau",
-        t_eval=times,
-        rtol=tol.rtol,
-        atol=tol.atol,
-        max_step=tol.max_step_s,
-    )
+    source, y0 = bushing.initial_swing_state(sim, swing, times, hold)
+    sol = bushing.integrate_free_flyer_radau(sim, source, times, y0, tol)
     if not sol.success:
         raise RuntimeError(
             f"pinocchio topology contact integration failed: {sol.message}"
