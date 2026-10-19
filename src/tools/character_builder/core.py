@@ -109,9 +109,9 @@ class CharacterBuilderModel:
     def set_grip(self, name: str, value: float | str | None) -> None:
         """Set (or, with ``None``, clear) one grip pick (HRG-GR4, #13205).
 
-        Physical picks (``preset``, ``lead_shaft_rotation``, ...) change the
-        compiled spec into a new revision that needs a refit; ``grip_style`` and
-        ``grip_thumb_offset_deg`` are picture-only and go in the appearance
+        Physical picks (``preset``, ``lead_shaft_rotation``, ..., ``grip_style``)
+        change the compiled spec into a new revision that needs a refit;
+        ``grip_thumb_offset_deg`` is picture-only and goes in the appearance
         sidecar.  ``ValueError`` for an unknown pick or an invalid value; the
         picks are unchanged then.
         """
@@ -167,7 +167,8 @@ class CharacterBuilderModel:
             f"{grip.trail.alpha_deg:.1f} deg about the shaft (positive is stronger); "
             f"{grip.style.value}"
         ]
-        if self.grip_overrides().has_physical:
+        base = spec_export.compile_character(None, self._params.to_dict())
+        if self.compile().sha256 != base.sha256:
             lines.append("Grip change makes a new model revision: refit it.")
         return lines
 

@@ -53,12 +53,18 @@ def test_route_refuses_an_unknown_pick_and_an_impossible_one(
 def test_appearance_export_carries_only_picture_picks(client: TestClient) -> None:
     ok = client.post(
         "/character-builder/appearance",
-        json={"grip_style": "interlock", "grip_thumb_offset_deg": 20},
+        json={"grip_thumb_offset_deg": 20},
     ).json()
     assert ok["appearance"]["grip"] == {
-        "style": "interlock",
         "lead_thumb_offset_deg": 20.0,
     }
+    # Since HRG-GS-G1 (#13346), grip_style is a physical pick (selects contact
+    # topology and requires a refit), so the appearance sidecar route refuses it
+    # alongside other physical grip parameters.
+    bad_style = client.post(
+        "/character-builder/appearance", json={"grip_style": "interlock"}
+    )
+    assert bad_style.status_code == 422
     # a physical value is not an appearance field: refused, never written
     bad = client.post("/character-builder/appearance", json={"hand_spacing": 0.1})
     assert bad.status_code == 422

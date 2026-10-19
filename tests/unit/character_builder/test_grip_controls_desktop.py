@@ -47,15 +47,21 @@ def test_a_slider_is_a_pick_and_reset_clears_it(widget) -> None:
     assert widget.model.compile().sha256 != parent  # back to the unrevised spec
 
 
-def test_style_is_picture_only_and_lands_in_the_sidecar(widget) -> None:
+def test_style_creates_revision_and_thumb_lands_in_the_sidecar(widget) -> None:
     from src.shared.python.model_appearance.schema import physics_spec_sha256
 
     before = physics_spec_sha256(widget.model.compile().document)
     widget.grip_style_combo.setCurrentIndex(
         widget.grip_style_combo.findData("interlock")
     )
-    assert physics_spec_sha256(widget.model.compile().document) == before
-    assert widget.model.appearance_document()["grip"] == {"style": "interlock"}
+    after_style = physics_spec_sha256(widget.model.compile().document)
+    assert after_style != before
+    assert "grip" not in widget.model.appearance_document()
+    assert "refit" in widget.summary.toPlainText()
+
+    widget.grip_thumb_spin.setValue(20.0)
+    assert physics_spec_sha256(widget.model.compile().document) == after_style
+    assert widget.model.appearance_document()["grip"] == {"lead_thumb_offset_deg": 20.0}
 
 
 def test_a_refused_pick_shows_the_message_and_changes_nothing(widget) -> None:

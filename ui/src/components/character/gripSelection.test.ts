@@ -17,8 +17,8 @@ describe('resolveGrip', () => {
       if (c.expected.grip !== null) {
         expect(resolveGrip(picks)).toEqual(c.expected.grip);
       }
-      const { grip_style, grip_thumb_offset_deg } = picks;
-      expect(visualGripBlock({ grip_style, grip_thumb_offset_deg })).toEqual(
+      const { grip_thumb_offset_deg } = picks;
+      expect(visualGripBlock({ grip_thumb_offset_deg })).toEqual(
         c.expected.sidecar_grip,
       );
     });
@@ -37,11 +37,15 @@ describe('resolveGrip', () => {
     expect(resolveGrip({}, base)).toEqual(base);
   });
 
-  it('refuses out-of-range picks and keeps visual picks out of the physical request', () => {
+  it('refuses out-of-range picks and classifies grip_style as physical', () => {
     expect(() => resolveGrip({ lead_palm_diagonal: 200 })).toThrow(/psi_deg/);
     expect(() => resolveGrip({ hand_spacing: 0 })).toThrow(/positive/);
     expect(() => visualGripBlock({ grip_thumb_offset_deg: 90 })).toThrow(/thumb/);
-    expect(hasPhysicalPick({ grip_style: 'interlock' })).toBe(false);
+    expect(hasPhysicalPick({ grip_style: 'interlock' })).toBe(true);
+    expect(hasPhysicalPick({ grip_style: 'ten_finger' })).toBe(true);
+    expect(hasPhysicalPick({ grip_style: 'overlap' })).toBe(false);
+    expect(hasPhysicalPick({ grip_thumb_offset_deg: 20 })).toBe(false);
     expect(gripRequestBody({ preset: 'weak', hand_spacing: undefined })).toEqual({ preset: 'weak' });
   });
 });
+

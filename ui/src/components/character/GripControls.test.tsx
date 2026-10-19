@@ -30,11 +30,17 @@ describe('GripControls', () => {
     render(<Harness />);
     const button = screen.getByRole('button', { name: 'Build Grip Revision' });
     expect(button).toBeDisabled();
-    fireEvent.change(screen.getByLabelText('Grip Style (Picture Only)'), {
-      target: { value: 'interlock' },
+    fireEvent.change(screen.getByLabelText(/^Lead Thumb Offset/), {
+      target: { value: '20' },
     });
     expect(button).toBeDisabled(); // a picture-only pick is not a revision
-    fireEvent.change(screen.getByLabelText('Grip Strength'), { target: { value: 'strong' } });
+    fireEvent.change(screen.getByLabelText('Grip Style'), {
+      target: { value: 'overlap' },
+    });
+    expect(button).toBeDisabled(); // unchanged default physical style is a no-op
+    fireEvent.change(screen.getByLabelText('Grip Style'), {
+      target: { value: 'interlock' },
+    });
     expect(button).toBeEnabled();
   });
 
