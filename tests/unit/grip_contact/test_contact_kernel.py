@@ -1,25 +1,28 @@
 """Tests for the shared array-namespace contact kernel (HRG-GS-M14, #13336).
 
 Acceptance criteria:
-- Pure array-namespace kernel ``contact_law_kernel`` shared by NumPy and JAX,
-  using ``xp.where`` with no Python branching on traced values.
-- DbC validation (``ValueError``/``TypeError`` on shapes, signs, parameter
-  ranges) happens outside the traced kernel in thin public wrappers.
-- Existing NumPy code paths in ``pair_contact`` and ``pad_contact`` delegate to
-  this kernel (DRY).
-- Importing ``src.shared.python.grip_contact`` in a cold process never imports
-  ``jax``.
-- Float64 value error vs NumPy <= 1e-10 over 200 seeded random states.
-- Smooth-region gradient (``jax.grad``) vs central differences relative error
-  <= 1e-5.
+- One pure array-namespace kernel in ``src/shared/python/motion_matching/contact_kernel.py``
+  shared by ``contact_law.sphere_ground_contact``, ``contact_law.torsional_friction_moment``,
+  and ``jax_contact.sphere_ground_contact_jax``, plus ``grip_contact.pair_contact`` and
+  ``grip_contact.pad_contact`` through ``contact_law``.
+- DbC validation (``ValueError``/``TypeError`` on shapes, signs, parameter ranges)
+  happens outside the traced kernel in thin public wrappers.
+- Importing ``motion_matching``, ``contact_law``, ``contact_kernel``, or ``grip_contact``
+  in a cold process never imports ``jax``.
+- Refactored ``sphere_ground_contact`` and ``torsional_friction_moment`` match a frozen
+  copy of the pre-refactor formulas to <= 1e-12 over 500 seeded random states,
+  including zero-penetration, zero-speed, and liftoff edges.
+- Float64 value error between JAX and NumPy <= 1e-10 over 200 seeded random states.
+- Smooth-region gradient (``jax.grad``) vs central differences relative error <= 1e-5.
 - Non-differentiable / non-smooth regimes (contact onset at zero penetration,
   stick/slip transition, zero tangential speed) are tested and documented.
-- Smooth variant ``smooth_contact_law_kernel`` is separately named and never
-  the default.
+- Smooth variant ``smooth_contact_law_kernel`` is separately named and never the default.
 """
 
 from __future__ import annotations
 
+import json
+import math
 import subprocess
 import sys
 from pathlib import Path
@@ -28,17 +31,6 @@ import numpy as np
 import pytest
 
 from src.shared.python.grip_contact.bushing_law import BushingState
-from src.shared.python.grip_contact.contact_kernel import (
-    ContactKernelParams,
-    ContactKernelResult,
-    contact_law_kernel,
-    evaluate_contact_kernel,
-    evaluate_contact_kernel_jax,
-    jax_contact_kernel,
-    sample_plane_contact,
-    smooth_contact_law_kernel,
-    validate_kernel_params,
-)
 from src.shared.python.grip_contact.interface import GripInterface
 from src.shared.python.grip_contact.pad_contact import build_pad_model, pad_wrench
 from src.shared.python.grip_contact.pair_contact import (
@@ -47,12 +39,87 @@ from src.shared.python.grip_contact.pair_contact import (
     capsule_capsule,
     sphere_capsule,
 )
-from src.shared.python.motion_matching.contact_law import ContactParameters
+from src.shared.python.motion_matching.contact_kernel import (
+    ContactKernelParams,
+    contact_law_kernel,
+    evaluate_contact_kernel,
+    evaluate_contact_kernel_jax,
+    jax_contact_kernel,
+    smooth_contact_law_kernel,
+    torsional_moment_kernel,
+    validate_kernel_params,
+)
+from src.shared.python.motion_matching.contact_law import (
+    ContactParameters,
+    ContactSample,
+    GroundPlane,
+    sphere_ground_contact,
+    torsional_friction_moment,
+)
 
 pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+
+
+def _frozen_pre_refactor_sphere_ground_contact(
+    center_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    radius_m: float,
+    ground: GroundPlane,
+    parameters: ContactParameters,
+) -> ContactSample:
+    """Frozen pre-refactor oracle of contact_law.sphere_ground_contact (kept only in test)."""
+    center = np.asarray(center_m, dtype=float)
+    velocity = np.asarray(velocity_m_s, dtype=float)
+    normal = np.asarray(ground.normal)
+    signed_distance = float(normal @ center) - ground.height_m - radius_m
+    penetration = max(0.0, -signed_distance)
+    rate = float(-(normal @ velocity))
+    point = center - normal * radius_m
+    zero = np.zeros(3)
+    if penetration <= 0.0:
+        return ContactSample(0.0, rate, point, zero, zero)
+    magnitude = (
+        parameters.stiffness_n_m
+        * penetration
+        * (1.0 + parameters.dissipation_s_m * rate)
+    )
+    magnitude = max(0.0, magnitude)
+    normal_force = normal * magnitude
+    tangential = velocity - normal * float(normal @ velocity)
+    speed = float(math.sqrt(tangential.dot(tangential)))
+    if speed <= 0.0 or magnitude <= 0.0:
+        return ContactSample(penetration, rate, point, normal_force, zero)
+    ratio = speed / parameters.transition_velocity_m_s
+    mu = (
+        parameters.dynamic_friction
+        + (parameters.static_friction - parameters.dynamic_friction)
+        * math.exp(-(ratio**2))
+        + parameters.viscous_friction * speed
+    )
+    friction = -tangential / speed * mu * magnitude * math.tanh(ratio)
+    return ContactSample(penetration, rate, point, normal_force, friction)
+
+
+def _frozen_pre_refactor_torsional_friction_moment(
+    normal_force_n: np.ndarray,
+    angular_velocity_rad_s: np.ndarray,
+    ground: GroundPlane,
+    *,
+    patch_radius_m: float,
+    friction: float,
+    transition_rad_s: float,
+) -> np.ndarray:
+    """Frozen pre-refactor oracle of contact_law.torsional_friction_moment (kept only in test)."""
+    force = np.asarray(normal_force_n, dtype=float)
+    omega = np.asarray(angular_velocity_rad_s, dtype=float)
+    normal = np.asarray(ground.normal)
+    load = max(0.0, float(normal @ force))
+    spin = float(normal @ omega)
+    limit = friction * load * patch_radius_m
+    return -normal * limit * math.tanh(spin / transition_rad_s)
 
 
 @pytest.fixture(scope="module")
@@ -76,12 +143,14 @@ def default_params(default_law: ContactParameters) -> ContactKernelParams:
     )
 
 
-def test_cold_process_import_grip_contact_does_not_import_jax() -> None:
-    """Importing grip_contact and contact_kernel in a cold process must never import jax."""
+def test_cold_process_import_does_not_import_jax() -> None:
+    """Importing motion_matching, contact_law, contact_kernel, and grip_contact never imports jax."""
     code = (
         "import sys; "
+        "import src.shared.python.motion_matching; "
+        "import src.shared.python.motion_matching.contact_law; "
+        "import src.shared.python.motion_matching.contact_kernel; "
         "import src.shared.python.grip_contact; "
-        "import src.shared.python.grip_contact.contact_kernel; "
         "loaded = [m for m in sys.modules if m == 'jax' or m.startswith('jax.')]; "
         "assert not loaded, f'jax unexpectedly imported: {loaded}'"
     )
@@ -209,24 +278,50 @@ def test_dbc_validation_rejects_invalid_parameters_and_inputs(
         )
 
 
-def test_pair_and_pad_contact_delegate_to_shared_kernel(
+def test_all_callers_delegate_to_single_shared_kernel(
     default_law: ContactParameters,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """sphere_capsule, capsule_capsule, and pad_wrench must call the shared kernel (DRY)."""
-    import json
-    import src.shared.python.grip_contact.pad_contact as pad_mod
-    import src.shared.python.grip_contact.pair_contact as pair_mod
+    """contact_law, jax_contact, pair_contact, and pad_contact all call the single kernel."""
+    import src.shared.python.motion_matching.contact_law as law_mod
 
-    call_count = 0
+    kernel_calls = 0
+    spin_calls = 0
 
-    def wrapped_sample(*args: object, **kwargs: object):
-        nonlocal call_count
-        call_count += 1
-        return sample_plane_contact(*args, **kwargs)  # type: ignore[arg-type]
+    def wrapped_kernel(*args: object, **kwargs: object):
+        nonlocal kernel_calls
+        kernel_calls += 1
+        return contact_law_kernel(*args, **kwargs)  # type: ignore[arg-type]
 
-    monkeypatch.setattr(pair_mod, "sample_plane_contact", wrapped_sample)
-    monkeypatch.setattr(pad_mod, "sample_plane_contact", wrapped_sample)
+    def wrapped_spin(*args: object, **kwargs: object):
+        nonlocal spin_calls
+        spin_calls += 1
+        return torsional_moment_kernel(*args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(law_mod, "contact_law_kernel", wrapped_kernel)
+    monkeypatch.setattr(law_mod, "torsional_moment_kernel", wrapped_spin)
+
+    ground = GroundPlane(normal=(0.0, 0.0, 1.0), height_m=0.0)
+    sample = sphere_ground_contact(
+        np.array([0.0, 0.0, 0.01]),
+        np.array([0.1, 0.0, -0.2]),
+        0.03,
+        ground,
+        default_law,
+    )
+    assert sample.normal_force_n[2] > 0.0
+    assert kernel_calls == 1
+
+    moment = torsional_friction_moment(
+        sample.normal_force_n,
+        np.array([0.0, 0.0, 1.5]),
+        ground,
+        patch_radius_m=0.01,
+        friction=0.8,
+        transition_rad_s=0.5,
+    )
+    assert moment[2] < 0.0
+    assert spin_calls == 1
 
     sph = ContactSphere(center_m=np.zeros(3), radius_m=0.02)
     cap_a = ContactCapsule(
@@ -241,11 +336,13 @@ def test_pair_and_pad_contact_delegate_to_shared_kernel(
     )
     w_sc = sphere_capsule(sph, cap_b, law=default_law, patch_radius_m=0.003)
     assert w_sc.normal_force_mag_n > 0.0
-    assert call_count == 1
+    assert kernel_calls == 2
+    assert spin_calls == 2
 
     w_cc = capsule_capsule(cap_a, cap_b, law=default_law, patch_radius_m=0.003)
     assert w_cc.normal_force_mag_n > 0.0
-    assert call_count == 2
+    assert kernel_calls == 3
+    assert spin_calls == 3
 
     interface = GripInterface.from_spec(json.loads(SPEC.read_text()))
     pad_model = build_pad_model(interface, squeeze_per_hand_n=1000.0)
@@ -253,7 +350,133 @@ def test_pair_and_pad_contact_delegate_to_shared_kernel(
     club = BushingState(np.eye(3), np.zeros(3), np.zeros(3), np.zeros(3))
     w_pad = pad_wrench(pad_model, "R", hand, club)
     assert w_pad.normal_force_n.sum() > 0.0
-    assert call_count > 2
+    assert kernel_calls > 3
+    assert spin_calls > 3
+
+    jax = pytest.importorskip("jax")
+    import jax.numpy as jnp
+    import src.shared.python.motion_matching.jax_contact as jax_mod
+
+    jax_calls = 0
+
+    def wrapped_jax_kernel(*args: object, **kwargs: object):
+        nonlocal jax_calls
+        jax_calls += 1
+        return contact_law_kernel(*args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(jax_mod, "contact_law_kernel", wrapped_jax_kernel)
+    fn_j, ft_j = jax_mod.sphere_ground_contact_jax(
+        jnp.array([0.0, 0.0, 0.01]),
+        jnp.array([0.1, 0.0, -0.2]),
+        0.03,
+        ground,
+        default_law,
+    )
+    assert float(fn_j[2]) > 0.0
+    assert float(ft_j[0]) < 0.0
+    assert jax_calls == 1
+
+
+def test_refactored_contact_law_matches_frozen_pre_refactor_oracle_500_states(
+    default_law: ContactParameters,
+) -> None:
+    """Refactored sphere_ground_contact and torsional_friction_moment match frozen pre-refactor formulas to <= 1e-12 over 500 states."""
+    ground = GroundPlane(normal=(0.1, -0.2, 0.95), height_m=-0.01)
+    n_vec = np.asarray(ground.normal)
+    tangent_dir = np.array([n_vec[2], 0.0, -n_vec[0]])
+    tangent_dir = tangent_dir / np.linalg.norm(tangent_dir)
+    radius = 0.03
+
+    rng = np.random.default_rng(13336)
+    n_states = 500
+    centers = rng.uniform(-0.2, 0.2, size=(n_states, 3))
+    velocities = rng.normal(scale=1.0, size=(n_states, 3))
+    omegas = rng.normal(scale=2.0, size=(n_states, 3))
+
+    # Explicit edge states:
+    # 0: Exact zero penetration (signed_distance == 0)
+    centers[0] = n_vec * (ground.height_m + radius)
+    velocities[0] = -0.3 * n_vec + 0.1 * tangent_dir
+    # 1: Separated state (penetration < 0)
+    centers[1] = n_vec * (ground.height_m + 1.5 * radius)
+    velocities[1] = -0.5 * n_vec + 0.2 * tangent_dir
+    # 2: Penetrating with exact zero tangential speed (v_t == 0)
+    centers[2] = n_vec * (ground.height_m + 0.5 * radius)
+    velocities[2] = -0.4 * n_vec
+    # 3: Penetrating at exact damping liftoff threshold (1 + c * rate == 0 => v_n = 1 / c)
+    centers[3] = n_vec * (ground.height_m + 0.5 * radius)
+    velocities[3] = (1.0 / default_law.dissipation_s_m) * n_vec + 0.15 * tangent_dir
+    # 4: Penetrating beyond damping liftoff (1 + c * rate < 0 => v_n > 1 / c)
+    centers[4] = n_vec * (ground.height_m + 0.5 * radius)
+    velocities[4] = (
+        1.0 / default_law.dissipation_s_m + 0.5
+    ) * n_vec + 0.15 * tangent_dir
+    # 5: Zero spin rate with positive normal load
+    centers[5] = n_vec * (ground.height_m + 0.4 * radius)
+    velocities[5] = -0.2 * n_vec + 0.05 * tangent_dir
+    omegas[5] = np.zeros(3)
+
+    max_pen_err = 0.0
+    max_rate_err = 0.0
+    max_pt_err = 0.0
+    max_fn_err = 0.0
+    max_ft_err = 0.0
+    max_tfm_err = 0.0
+
+    for i in range(n_states):
+        c = centers[i]
+        v = velocities[i]
+        w = omegas[i]
+
+        expected = _frozen_pre_refactor_sphere_ground_contact(
+            c, v, radius, ground, default_law
+        )
+        actual = sphere_ground_contact(c, v, radius, ground, default_law)
+
+        max_pen_err = max(
+            max_pen_err, abs(actual.penetration_m - expected.penetration_m)
+        )
+        max_rate_err = max(
+            max_rate_err,
+            abs(actual.penetration_rate_m_s - expected.penetration_rate_m_s),
+        )
+        max_pt_err = max(
+            max_pt_err,
+            float(np.max(np.abs(actual.contact_point_m - expected.contact_point_m))),
+        )
+        max_fn_err = max(
+            max_fn_err,
+            float(np.max(np.abs(actual.normal_force_n - expected.normal_force_n))),
+        )
+        max_ft_err = max(
+            max_ft_err,
+            float(np.max(np.abs(actual.friction_force_n - expected.friction_force_n))),
+        )
+
+        m_expected = _frozen_pre_refactor_torsional_friction_moment(
+            expected.normal_force_n,
+            w,
+            ground,
+            patch_radius_m=0.015,
+            friction=default_law.static_friction,
+            transition_rad_s=0.5,
+        )
+        m_actual = torsional_friction_moment(
+            actual.normal_force_n,
+            w,
+            ground,
+            patch_radius_m=0.015,
+            friction=default_law.static_friction,
+            transition_rad_s=0.5,
+        )
+        max_tfm_err = max(max_tfm_err, float(np.max(np.abs(m_actual - m_expected))))
+
+    assert max_pen_err <= 1e-12
+    assert max_rate_err <= 1e-12
+    assert max_pt_err <= 1e-12
+    assert max_fn_err <= 1e-12
+    assert max_ft_err <= 1e-12
+    assert max_tfm_err <= 1e-12
 
 
 def test_jax_vs_numpy_float64_value_parity_200_random_states(
@@ -379,8 +602,6 @@ def test_jax_grad_matches_central_differences_in_smooth_region(
     )
 
     for _ in range(25):
-        # Smooth region: strictly penetrating (delta > 0), compressive damping (1 - c*v_n > 0),
-        # nonzero slip speed away from 0, finite spin rate.
         d0 = float(rng.uniform(0.001, 0.005))
         vn0 = float(rng.uniform(-0.8, 0.5))
         vt0 = float(rng.uniform(0.0004, 0.02)) * float(rng.choice([-1.0, 1.0]))
@@ -405,7 +626,6 @@ def test_jax_grad_matches_central_differences_in_smooth_region(
                 f"rel_err={rel_err}, grad_ad={grad_ad}, grad_fd={grad_fd}"
             )
 
-    # Also check 3D tangential velocity vector Jacobian in the smooth region
     vt_vec0 = jnp.array([0.003, -0.004, 0.002], dtype=jnp.float64)
     jac_ad = np.asarray(
         jax.jacrev(
@@ -450,7 +670,6 @@ def test_non_differentiable_points_contact_onset_stick_slip_and_zero_tangential_
     w = 0.5
 
     # 1. Contact onset at zero penetration (delta = 0):
-    # Left derivative is 0; right derivative is k * (1 - c * v_n) > 0.
     f_0 = float(evaluate_contact_kernel(0.0, vn, vt, default_params, w).normal_force_n)
     f_left = float(
         evaluate_contact_kernel(-eps, vn, vt, default_params, w).normal_force_n
@@ -468,7 +687,6 @@ def test_non_differentiable_points_contact_onset_stick_slip_and_zero_tangential_
     assert abs(d_right_onset - d_left_onset) > 1.0e4
 
     # 2. Zero tangential speed (v_t = 0):
-    # Tangential force magnitude f_t(v_t) = mu(|v_t|) * f_n * tanh(|v_t| / v_tr) has a V-cusp at v_t = 0.
     delta = 0.002
     fn_val = float(
         evaluate_contact_kernel(delta, vn, 0.0, default_params, w).normal_force_n
@@ -504,10 +722,6 @@ def test_non_differentiable_points_contact_onset_stick_slip_and_zero_tangential_
     assert np.isfinite(jac_at_zero).all()
 
     # 3. Stick/slip transition (|v_t| ~ v_transition):
-    # Across the stick-to-slip knee s = v_tr, the tangent modulus collapses from
-    # the stiff pseudo-stick slope +mu_s * f_n / v_tr (at s << v_tr) by over 3 orders of
-    # magnitude to the viscous slip slope mu_v * f_n (at s >> v_tr), and coarse central
-    # differences across the v_tr knee fail to match jax.grad.
     v_tr = default_params.transition_velocity_m_s
     grad_ft_fn = jax.grad(
         lambda s: jax_contact_kernel(delta, vn, s, default_params, w).tangential_force_n
@@ -520,8 +734,6 @@ def test_non_differentiable_points_contact_onset_stick_slip_and_zero_tangential_
     )
     assert slope_stick / slope_full_slip > 1.0e3
 
-    # Central difference of step h = v_tr at the stick/slip transition knee s = v_tr
-    # incurs an O(1) relative error (> 0.1 >> 1e-5) against the exact derivative.
     slope_knee_exact = float(grad_ft_fn(jnp.asarray(v_tr, dtype=jnp.float64)))
     ft_knee_plus = float(
         evaluate_contact_kernel(
@@ -535,7 +747,6 @@ def test_non_differentiable_points_contact_onset_stick_slip_and_zero_tangential_
     knee_rel_err = abs(slope_knee_coarse_fd - slope_knee_exact) / abs(slope_knee_exact)
     assert knee_rel_err > 0.1
 
-    # At the damping liftoff boundary v_n = 1 / c, both normal and stick/slip friction forces have a C^0 kink
     vn_liftoff = 1.0 / default_params.dissipation_s_m
     ft_before_liftoff = float(
         evaluate_contact_kernel(
@@ -559,7 +770,6 @@ def test_smooth_contact_law_kernel_is_separate_and_c_infinity_at_kinks(
     jax.config.update("jax_enable_x64", True)
     import jax.numpy as jnp
 
-    # Qualified law is strictly 0 at delta <= 0; smooth variant is strictly positive
     qual_at_zero = contact_law_kernel(0.0, 0.0, 0.01, default_params)
     smooth_at_zero = smooth_contact_law_kernel(
         0.0, 0.0, 0.01, default_params, smoothing_m=1e-5, velocity_eps_m_s=1e-5
@@ -567,7 +777,6 @@ def test_smooth_contact_law_kernel_is_separate_and_c_infinity_at_kinks(
     assert float(qual_at_zero.normal_force_n) == 0.0
     assert float(smooth_at_zero.normal_force_n) > 0.0
 
-    # Smooth variant is differentiable at delta = 0 and v_t = 0 (grad matches central differences)
     eps = 1.0e-8
     for d_test, vt_test in ((0.0, 0.005), (0.002, 0.0)):
         x0 = jnp.array([d_test, -0.1, vt_test], dtype=jnp.float64)
@@ -593,7 +802,6 @@ def test_smooth_contact_law_kernel_is_separate_and_c_infinity_at_kinks(
             grad_fd[k] = (f_p - f_m) / (2.0 * eps)
         np.testing.assert_allclose(grad_ad, grad_fd, rtol=1e-5, atol=1e-7)
 
-    # Convergence to qualified law in the interior as smoothing -> 0
     qual = contact_law_kernel(0.003, -0.2, 0.01, default_params, 0.5)
     smooth_tight = smooth_contact_law_kernel(
         0.003,
