@@ -44,6 +44,7 @@ from src.shared.python.core.handedness import (
     trail_side,
     validate_handedness,
 )
+from src.shared.python.grip_contact.contact_topology import GripStyle as GripStyle
 
 #: Nominal point of the hand body (metres, hand frame) that sits on the grip:
 #: about 6 cm distal to the wrist origin along the hand's ``-y``.  The OSV-9
@@ -84,14 +85,6 @@ class Hand(str, Enum):
 
     LEAD = "lead"
     TRAIL = "trail"
-
-
-class GripStyle(str, Enum):
-    """How the little finger of the trail hand relates to the lead hand."""
-
-    OVERLAP = "overlap"
-    INTERLOCK = "interlock"
-    TEN_FINGER = "ten_finger"
 
 
 _FINGER_LINKS: dict[GripStyle, tuple[str, ...]] = {
@@ -146,6 +139,12 @@ class GripPose:
     trail_lifeline_over_lead_thumb: bool = True
     #: Shaft angle across the palm from the radial axis toward the fingers.
     palm_diagonal_deg: float = PALM_DIAGONAL_DEG
+    #: Visual grip strength in degrees ([-30, 30]; positive rotates towards trail side).
+    grip_strength_deg: float = 0.0
+    #: Visual roll offset for the lead hand in degrees ([-30, 30]).
+    lead_roll_offset_deg: float = 0.0
+    #: Visual roll offset for the trail hand in degrees ([-30, 30]).
+    trail_roll_offset_deg: float = 0.0
     #: ``"right"`` or ``"left"``; the lead hand is on the left of a right-hander.
     handedness: Handedness = DEFAULT_HANDEDNESS
 
@@ -163,6 +162,9 @@ class GripPose:
                 ("trail_v_offset_deg", -30.0, 30.0),
                 ("lead_thumb_offset_deg", 0.0, 45.0),
                 ("palm_diagonal_deg", 0.0, 90.0),
+                ("grip_strength_deg", -30.0, 30.0),
+                ("lead_roll_offset_deg", -30.0, 30.0),
+                ("trail_roll_offset_deg", -30.0, 30.0),
             ),
         )
         require(self.hand_spacing_m > 0.0, "hand_spacing_m must be positive")
@@ -223,13 +225,31 @@ class GripPose:
         """Hand-centre y in the OpenSim club frame (origin at the butt, -y shaft)."""
         return -self.distance_below_butt_m(hand)
 
+    def roll_offset_deg(self, hand: Hand) -> float:
+        """Per-hand visual roll offset in degrees."""
+        require(isinstance(hand, Hand), f"hand must be a Hand, got {hand!r}")
+        if hand is Hand.LEAD:
+            return self.lead_roll_offset_deg
+        return self.trail_roll_offset_deg
+
     def placement(self, hand: Hand) -> HandPlacement:
         """Full placement of one hand (position along the grip and angles)."""
         require(isinstance(hand, Hand), f"hand must be a Hand, got {hand!r}")
         if hand is Hand.LEAD:
-            azimuth, thumb = self.lead_v_azimuth_deg, self.lead_thumb_offset_deg
+            azimuth = (
+                self.lead_v_azimuth_deg
+                + self.grip_strength_deg
+                + self.lead_roll_offset_deg
+            )
+            thumb = self.lead_thumb_offset_deg
         else:
-            azimuth, thumb = self.lead_v_azimuth_deg + self.trail_v_offset_deg, 0.0
+            azimuth = (
+                self.lead_v_azimuth_deg
+                + self.trail_v_offset_deg
+                + self.grip_strength_deg
+                + self.trail_roll_offset_deg
+            )
+            thumb = 0.0
         return HandPlacement(hand, self.distance_below_butt_m(hand), azimuth, thumb)
 
     def linked_fingers(self) -> tuple[str, ...]:

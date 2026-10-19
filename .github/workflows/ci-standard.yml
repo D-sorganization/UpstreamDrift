@@ -1088,15 +1088,26 @@ jobs:
   # markers (optional native engines, GL, slow, live) are excluded so the gate
   # stays green on the standard runner without the heavy extras installed; those
   # stacks are covered by their own provisioned lanes.
+  #
+  # Sharded (#13314): one leg reached ~34.5 of its 35 minutes (3 min setup,
+  # 3 min collection, 28 min execution). Each leg collects and runs only the
+  # test modules hashed to its shard (scripts/ci/pytest_unit_gate_shard.py), so
+  # every module runs in exactly one leg. The job key is unchanged, so
+  # `needs.unit-test-gate.result` in quality-gate fails if any leg fails.
   unit-test-gate:
-    name: unit-test-gate
+    name: unit-test-gate (${{ matrix.shard }}/2)
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.code == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     runs-on: >-
       ${{ github.event.pull_request &&
       github.event.pull_request.head.repo.full_name != github.repository &&
       'ubuntu-latest' || needs.pick-runner.outputs.runner }}
-    # 25 min of pytest plus a cached-registry release build of one crate.
+    # Per leg: ~3 min setup (incl. a cached-registry release build of one
+    # crate) plus half the suite's collection and execution.
     timeout-minutes: 35
     env:
       CARGO_NET_GIT_FETCH_WITH_CLI: true
@@ -1243,6 +1254,8 @@ jobs:
           set +e
           xvfb-run --auto-servernum python -m pytest \
             -p no:xvfb \
+            -p scripts.ci.pytest_unit_gate_shard \
+            --unit-gate-shard=${{ matrix.shard }}/2 \
             -m "unit and not slow and not live_simulation and not requires_gl and not requires_drake and not requires_opensim and not requires_mujoco and not requires_pinocchio and not requires_myosuite and not requires_jaxsim and not requires_nimble and not requires_rerun and not requires_casadi and not requires_crocoddyl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
             -n 4 \
             --timeout=60 \
@@ -1570,10 +1583,25 @@ jobs:
         shared-tools-consumer-contracts,
         seam-drift-gate,
         impact-explorer-web-build,
+        # Issue #13364: these jobs gate code PRs but were not aggregated, so
+        # the merge queue landed #13320 and #13360 while frontend-tests was red.
+        frontend-tests,
+        core-only-install,
+        dependency-consistency,
+        alembic-postgres-round-trip,
+        rust-quality-gate,
+        rust-quickstart,
+        local-only-workflows,
+        pinned-actions,
+        workflow-inventory,
+        urdf-layering,
       ]
     if: always()
-    # This job is the ONLY required branch-protection check on `main`, and it
-    # carries no scientific logic of its own - it aggregates the split jobs.
+    # This job is the ONLY required branch-protection check on `main` (org
+    # ruleset Repository_Protections), and it carries no scientific logic of
+    # its own - it aggregates the split jobs. Every job that gates a code PR
+    # MUST be listed in `needs` and checked below; a job left out can fail
+    # while the merge queue still lands the PR (issue #13364).
     # Pinning it to the fleet meant every merge in the repo waited on a
     # self-hosted Docker slot for a five-second summary job. It deliberately
     # does NOT consume `needs.pick-runner.outputs.runner`: the required check
@@ -1613,6 +1641,17 @@ jobs:
           IMPACT_EXPLORER_WEB_BUILD: ${{ needs.impact-explorer-web-build.result }}
           SEAM_DRIFT_GATE: ${{ needs.seam-drift-gate.result }}
           ALWAYS_ON_UNIT_LANE: ${{ needs.always-on-unit-lane.result }}
+          FRONTEND_TESTS: ${{ needs.frontend-tests.result }}
+          CORE_ONLY_INSTALL: ${{ needs.core-only-install.result }}
+          DEPENDENCY_CONSISTENCY: ${{ needs.dependency-consistency.result }}
+          ALEMBIC_POSTGRES_ROUND_TRIP: ${{ needs.alembic-postgres-round-trip.result }}
+          RUST_QUALITY_GATE: ${{ needs.rust-quality-gate.result }}
+          RUST_QUICKSTART: ${{ needs.rust-quickstart.result }}
+          LOCAL_ONLY_WORKFLOWS: ${{ needs.local-only-workflows.result }}
+          PINNED_ACTIONS: ${{ needs.pinned-actions.result }}
+          WORKFLOW_INVENTORY: ${{ needs.workflow-inventory.result }}
+          URDF_LAYERING: ${{ needs.urdf-layering.result }}
+          IS_FORK_PR: ${{ github.event.pull_request && github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
           set -uo pipefail
           failed=0
@@ -1627,6 +1666,22 @@ jobs:
           gates="$gates shared-tools-consumer-contracts:$SHARED_TOOLS_CONSUMER_CONTRACTS"
           gates="$gates seam-drift-gate:$SEAM_DRIFT_GATE"
           gates="$gates impact-explorer-web-build:$IMPACT_EXPLORER_WEB_BUILD"
+
+          # Fleet-only gates (issue #13364). They carry the RM#1989 fork guard,
+          # so on a fork PR they are skipped by design; everywhere else
+          # (same-repo PRs, merge_group, push) they follow the code/docs split
+          # exactly like the gates above. Entries use `name=result` (not
+          # `name:result`) so the job ids here never read as YAML job keys.
+          fleet_gates="frontend-tests=$FRONTEND_TESTS"
+          fleet_gates="$fleet_gates core-only-install=$CORE_ONLY_INSTALL"
+          fleet_gates="$fleet_gates dependency-consistency=$DEPENDENCY_CONSISTENCY"
+          fleet_gates="$fleet_gates alembic-postgres-round-trip=$ALEMBIC_POSTGRES_ROUND_TRIP"
+          fleet_gates="$fleet_gates rust-quality-gate=$RUST_QUALITY_GATE"
+          fleet_gates="$fleet_gates rust-quickstart=$RUST_QUICKSTART"
+          fleet_gates="$fleet_gates local-only-workflows=$LOCAL_ONLY_WORKFLOWS"
+          fleet_gates="$fleet_gates pinned-actions=$PINNED_ACTIONS"
+          fleet_gates="$fleet_gates workflow-inventory=$WORKFLOW_INVENTORY"
+          fleet_gates="$fleet_gates urdf-layering=$URDF_LAYERING"
 
           {
             echo "## Quality Gate Summary"
@@ -1644,6 +1699,10 @@ jobs:
           for entry in $gates; do
             echo "${entry%%:*}: ${entry#*:}"
             echo "| ${entry%%:*} | ${entry#*:} |" >> "$GITHUB_STEP_SUMMARY"
+          done
+          for entry in $fleet_gates; do
+            echo "${entry%%=*}: ${entry#*=}"
+            echo "| ${entry%%=*} | ${entry#*=} |" >> "$GITHUB_STEP_SUMMARY"
           done
 
           if [ "$PUBLICATION_CHANGED" = "true" ]; then
@@ -1705,6 +1764,20 @@ jobs:
             result="${entry#*:}"
             if [ "$result" != "$expected" ]; then
               echo "::error::$name reported '$result', expected '$expected'."
+              failed=1
+            fi
+          done
+
+          if [ "$IS_FORK_PR" = "true" ]; then
+            fleet_expected="skipped"
+          else
+            fleet_expected="$expected"
+          fi
+          for entry in $fleet_gates; do
+            name="${entry%%=*}"
+            result="${entry#*=}"
+            if [ "$result" != "$fleet_expected" ]; then
+              echo "::error::$name reported '$result', expected '$fleet_expected'."
               failed=1
             fi
           done

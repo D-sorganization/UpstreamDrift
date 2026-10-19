@@ -10,6 +10,8 @@ import numpy as np
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+from src.learning.imitation._base import apply_activation, apply_activation_grad
+
 logger = logging.getLogger(__name__)
 
 _ADAM_BETA1: float = 0.9
@@ -92,25 +94,69 @@ def _build_mlp(
     return layers
 
 
+def _dropout_masks(
+    layers: list[dict[str, NDArray[np.floating]]],
+    batch_size: int,
+    dropout: float,
+    rng: np.random.Generator,
+) -> list[NDArray[np.floating]] | None:
+    """Inverted-dropout masks for every hidden layer, or ``None`` if disabled.
+
+    Each mask entry is ``0`` (dropped) or ``1 / keep_prob`` (kept), so the
+    expected activation is unchanged and evaluation needs no rescaling.
+
+    Args:
+        layers: Layer dicts with ``W`` and ``b``.
+        batch_size: Number of rows in the batch the masks will be applied to.
+        dropout: Drop probability in ``[0, 1)``.
+        rng: Generator used to draw the masks (keeps training seeded).
+
+    Returns:
+        One mask per hidden layer (``len(layers) - 1`` masks), or ``None`` when
+        ``dropout`` is ``0``.
+
+    Raises:
+        ValueError: If ``dropout`` is outside ``[0, 1)``.
+    """
+    if not 0.0 <= dropout < 1.0:
+        raise ValueError(f"dropout must be in [0.0, 1.0), got {dropout}")
+    if dropout == 0.0:
+        return None
+    keep_prob = 1.0 - dropout
+    return [
+        (rng.random(size=(batch_size, layer["W"].shape[1])) < keep_prob) / keep_prob
+        for layer in layers[:-1]
+    ]
+
+
 def _mlp_forward(
     layers: list[dict[str, NDArray[np.floating]]],
     x: NDArray[np.floating],
+    activation: str = "relu",
+    masks: list[NDArray[np.floating]] | None = None,
 ) -> tuple[NDArray[np.floating], list[NDArray[np.floating]]]:
-    """Forward pass through a ReLU MLP, retaining per-layer inputs.
+    """Forward pass through an MLP, retaining per-layer inputs.
 
     Args:
         layers: Layer dicts with ``W`` and ``b``.
         x: Batched input, shape ``(N, in_dim)`` or ``(in_dim,)``.
+        activation: Hidden-layer activation name (see ``SUPPORTED_ACTIVATIONS``).
+        masks: Optional per-hidden-layer dropout masks from
+            :func:`_dropout_masks`; ``None`` runs without dropout.
 
     Returns:
         ``(output, activations)`` where ``activations[i]`` is the input fed to
         ``layers[i]``. Postcondition: ``len(activations) == len(layers)``.
 
     Raises:
-        ValueError: If input is None.
+        ValueError: If input is None or ``masks`` does not match the hidden layers.
     """
     if x is None:
         raise ValueError("x must be provided")
+    if masks is not None and len(masks) != len(layers) - 1:
+        raise ValueError(
+            f"masks length ({len(masks)}) must match hidden layer count ({len(layers) - 1})"
+        )
 
     activations: list[NDArray[np.floating]] = []
     current = x
@@ -118,7 +164,9 @@ def _mlp_forward(
         activations.append(current)
         current = current @ layer["W"] + layer["b"]
         if i < len(layers) - 1:
-            current = np.maximum(0.0, current)
+            current = apply_activation(current, activation)
+            if masks is not None:
+                current = current * masks[i]
     return current, activations
 
 
@@ -126,13 +174,17 @@ def _mlp_backward(
     layers: list[dict[str, NDArray[np.floating]]],
     activations: list[NDArray[np.floating]],
     grad_output: NDArray[np.floating],
+    activation: str = "relu",
+    masks: list[NDArray[np.floating]] | None = None,
 ) -> tuple[list[dict[str, NDArray[np.floating]]], NDArray[np.floating]]:
-    """Backpropagate ``grad_output`` through a ReLU MLP.
+    """Backpropagate ``grad_output`` through an MLP.
 
     Args:
         layers: Layer dicts with ``W`` and ``b``.
         activations: Per-layer inputs from :func:`_mlp_forward`.
         grad_output: Gradient of the loss w.r.t. the network output.
+        activation: Hidden-layer activation used in the forward pass.
+        masks: The dropout masks used in the forward pass, if any.
 
     Returns:
         ``(grads, grad_input)`` where ``grads[i]`` holds ``dW``/``db`` for
@@ -155,8 +207,15 @@ def _mlp_backward(
         grads[i] = {"W": a.T @ grad, "b": grad.sum(axis=0)}
         grad = grad @ layers[i]["W"].T
         if i > 0:
-            # ReLU derivative: activations[i] is the post-ReLU output of i-1.
-            grad = grad * (a > 0)
+            # activations[i] is the (possibly dropped-out) output of layer i-1.
+            activated = a
+            if masks is not None:
+                mask = masks[i - 1]
+                grad = grad * mask
+                # Undo the inverted-dropout scaling to recover the activation
+                # value; dropped units already carry a zero gradient.
+                activated = np.divide(a, mask, out=np.zeros_like(a), where=mask != 0)
+            grad = apply_activation_grad(grad, activated, activation)
     return grads, grad
 
 

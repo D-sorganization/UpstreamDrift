@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 import warnings
 
 import numpy as np
@@ -16,11 +16,12 @@ if TYPE_CHECKING:
 from src.learning.imitation._base import (
     ImitationLearner,
     TrainingConfig,
-    validated_state_action_pairs,
+    validate_dataset_and_split,
 )
 from src.learning.imitation._mlp import (
     _adam_step,
     _build_mlp,
+    _dropout_masks,
     _init_adam_state,
     _mlp_backward,
     _mlp_forward,
@@ -73,6 +74,7 @@ class BehaviorCloning(ImitationLearner):
             output_dim=self.action_dim,
             hidden_sizes=self.config.hidden_sizes,
             init="he",
+            rng=self._rng,
         )
 
     def _forward(self, x: NDArray[np.floating]) -> NDArray[np.floating]:
@@ -86,7 +88,7 @@ class BehaviorCloning(ImitationLearner):
         """
         if x is None:
             raise ValueError("x must be provided")
-        out, _ = _mlp_forward(self._policy, x)
+        out, _ = _mlp_forward(self._policy, x, activation=self.config.activation)
         return out
 
     def _compute_loss(
@@ -119,6 +121,9 @@ class BehaviorCloning(ImitationLearner):
     ) -> list[dict[str, NDArray[np.floating]]]:
         """Compute gradients via backpropagation.
 
+        Dropout (``config.dropout``) is applied to the hidden layers of this
+        training-mode forward pass only; :meth:`_forward` evaluates without it.
+
         Args:
             observations: Batch of observations.
             actions: Batch of target actions.
@@ -131,9 +136,15 @@ class BehaviorCloning(ImitationLearner):
         if actions is None:
             raise ValueError("actions must be provided")
         batch_size = len(observations)
-        predictions, activations = _mlp_forward(self._policy, observations)
+        activation = self.config.activation
+        masks = _dropout_masks(self._policy, batch_size, self.config.dropout, self._rng)
+        predictions, activations = _mlp_forward(
+            self._policy, observations, activation=activation, masks=masks
+        )
         delta = 2.0 * (predictions - actions) / batch_size
-        gradients, _ = _mlp_backward(self._policy, activations, delta)
+        gradients, _ = _mlp_backward(
+            self._policy, activations, delta, activation=activation, masks=masks
+        )
         return gradients
 
     def train(
@@ -145,20 +156,23 @@ class BehaviorCloning(ImitationLearner):
 
         Args:
             dataset: Demonstration dataset.
-            validation_split: Fraction for validation.
+            validation_split: Fraction for validation. Must be in [0, 1).
 
         Returns:
             Training history.
 
         Raises:
-            ValueError: If dataset is invalid or validation_split is out of bounds.
+            ValueError: If dataset is invalid, validation_split is out of
+                bounds, or the split leaves no training samples.
         """
-        observations, actions = validated_state_action_pairs(dataset, validation_split)
+        observations, actions = validate_dataset_and_split(dataset, validation_split)
 
         # Split data
         n = len(observations)
-        n_val = int(n * validation_split)
-        indices = np.random.permutation(n)
+        n_val = int(round(n * validation_split))
+        if n_val >= n:
+            raise ValueError("validation_split leaves no training samples")
+        indices = self._rng.permutation(n)
 
         train_idx = indices[n_val:]
         val_idx = indices[:n_val]
@@ -167,9 +181,6 @@ class BehaviorCloning(ImitationLearner):
         train_act = actions[train_idx]
         val_obs = observations[val_idx] if n_val > 0 else train_obs[:100]
         val_act = actions[val_idx] if n_val > 0 else train_act[:100]
-
-        if len(train_obs) == 0:
-            raise ValueError("validation_split leaves no training samples")
 
         # Training loop
         history: dict[str, list[float]] = {"train_loss": [], "val_loss": []}
@@ -181,7 +192,7 @@ class BehaviorCloning(ImitationLearner):
 
         for _epoch in range(self.config.epochs):
             # Shuffle training data
-            perm = np.random.permutation(len(train_obs))
+            perm = self._rng.permutation(len(train_obs))
             train_obs = train_obs[perm]
             train_act = train_act[perm]
 
@@ -256,26 +267,19 @@ class BehaviorCloning(ImitationLearner):
             raise ValueError("path must be provided")
         path = Path(path)
 
-        save_data = {
+        save_data: dict[str, Any] = {
             "observation_dim": np.array(self.observation_dim),
             "action_dim": np.array(self.action_dim),
             "num_layers": np.array(len(self._policy)),
         }
 
-        config_dict = {
-            "epochs": self.config.epochs,
-            "batch_size": self.config.batch_size,
-            "learning_rate": self.config.learning_rate,
-            "weight_decay": self.config.weight_decay,
-            "hidden_sizes": self.config.hidden_sizes,
-        }
-        save_data["config_json"] = np.array(json.dumps(config_dict))
+        save_data["config_json"] = np.array(json.dumps(self.config.to_dict()))
 
         for i, layer in enumerate(self._policy):
             save_data[f"layer_{i}_W"] = layer["W"]
             save_data[f"layer_{i}_b"] = layer["b"]
 
-        np.savez(path, **save_data)  # type: ignore[arg-type]
+        np.savez(path, **save_data)
 
     def load(self, path: str | Path) -> None:
         """Load policy from disk.

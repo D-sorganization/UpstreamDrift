@@ -340,8 +340,9 @@ class TestBehaviorCloning:
         )
         dataset = DemonstrationDataset([demo])
 
-        # Setting learning_rate to 0 prevents loss reduction, triggering the warning
-        cfg = TrainingConfig(epochs=2, learning_rate=0.0)
+        # A vanishing (but contract-valid, > 0) learning rate cannot cut the loss
+        # by 1 % in two epochs, triggering the warning (#13013 rejects lr == 0).
+        cfg = TrainingConfig(epochs=2, learning_rate=1e-12)
         bc = BehaviorCloning(6, 2, config=cfg)
 
         with pytest.warns(
@@ -468,3 +469,59 @@ class TestMLPUtilities:
 
         with pytest.raises(ValueError, match="step must be positive"):
             _adam_step(layers, grads, state, lr=1e-3, step=0)
+
+    @pytest.mark.parametrize("activation", ["relu", "tanh", "identity"])
+    @pytest.mark.parametrize("dropout", [0.0, 0.3])
+    def test_mlp_backward_matches_finite_differences(
+        self, activation: str, dropout: float
+    ) -> None:
+        """Analytic gradients agree with central differences for every
+        supported activation, with and without fixed dropout masks."""
+        from src.learning.imitation._mlp import (
+            _build_mlp,
+            _dropout_masks,
+            _mlp_backward,
+            _mlp_forward,
+        )
+
+        rng = np.random.default_rng(3)
+        layers = _build_mlp(3, 2, [5, 4], init="he", rng=rng)
+        x = rng.standard_normal((6, 3))
+        target = rng.standard_normal((6, 2))
+        masks = _dropout_masks(layers, len(x), dropout, rng)
+
+        def loss() -> float:
+            out, _ = _mlp_forward(layers, x, activation=activation, masks=masks)
+            return float(0.5 * np.sum((out - target) ** 2))
+
+        out, acts = _mlp_forward(layers, x, activation=activation, masks=masks)
+        grads, _ = _mlp_backward(
+            layers, acts, out - target, activation=activation, masks=masks
+        )
+
+        eps = 1e-6
+        for layer, grad in zip(layers, grads, strict=True):
+            w = layer["W"]
+            for idx in [(0, 0), (w.shape[0] - 1, w.shape[1] - 1)]:
+                original = w[idx]
+                w[idx] = original + eps
+                up = loss()
+                w[idx] = original - eps
+                down = loss()
+                w[idx] = original
+                np.testing.assert_allclose(
+                    grad["W"][idx], (up - down) / (2 * eps), rtol=1e-5, atol=1e-7
+                )
+
+    def test_dropout_masks_contract(self) -> None:
+        from src.learning.imitation._mlp import _build_mlp, _dropout_masks
+
+        layers = _build_mlp(4, 2, [8, 6])
+        rng = np.random.default_rng(0)
+        assert _dropout_masks(layers, 5, 0.0, rng) is None
+        masks = _dropout_masks(layers, 5, 0.5, rng)
+        assert masks is not None
+        assert [m.shape for m in masks] == [(5, 8), (5, 6)]
+        assert set(np.unique(np.concatenate([m.ravel() for m in masks]))) <= {0.0, 2.0}
+        with pytest.raises(ValueError, match="dropout"):
+            _dropout_masks(layers, 5, 1.0, rng)

@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
+import json
 import numpy as np
 
 if TYPE_CHECKING:
@@ -13,20 +14,16 @@ if TYPE_CHECKING:
 from src.learning.imitation._base import (
     ImitationLearner,
     TrainingConfig,
-    validated_state_action_pairs,
+    validate_dataset_and_split,
 )
-from src.learning.imitation.dataset import DemonstrationDataset
-
 from src.learning.imitation._mlp import (
-    _ADAM_BETA1,
-    _ADAM_BETA2,
-    _ADAM_EPS,
     _adam_step,
     _build_mlp,
     _init_adam_state,
     _mlp_backward,
     _mlp_forward,
 )
+from src.learning.imitation.dataset import DemonstrationDataset
 
 
 class GAIL(ImitationLearner):
@@ -72,19 +69,21 @@ class GAIL(ImitationLearner):
             output_dim=self.action_dim,
             hidden_sizes=self.config.hidden_sizes,
             init="small",
+            rng=self._rng,
         )
         self._discriminator = _build_mlp(
             input_dim=self.observation_dim + self.action_dim,
             output_dim=1,
             hidden_sizes=self.config.hidden_sizes,
             init="small",
+            rng=self._rng,
         )
 
     def _forward_policy(self, x: NDArray[np.floating]) -> NDArray[np.floating]:
         """Forward pass through policy network."""
         if x is None:
             raise ValueError("x must be provided")
-        output, _ = _mlp_forward(self._policy, x)
+        output, _ = _mlp_forward(self._policy, x, activation=self.config.activation)
         return output
 
     @staticmethod
@@ -110,7 +109,9 @@ class GAIL(ImitationLearner):
         if state is None:
             raise ValueError("state must be provided")
         x = np.concatenate([state, action], axis=-1)
-        logits, _ = _mlp_forward(self._discriminator, x)
+        logits, _ = _mlp_forward(
+            self._discriminator, x, activation=self.config.activation
+        )
         return logits
 
     def _forward_discriminator(
@@ -151,7 +152,7 @@ class GAIL(ImitationLearner):
             ValueError: If ``dataset`` is empty or ``validation_split`` is
                 outside ``[0, 1)``.
         """
-        expert_states, expert_actions = validated_state_action_pairs(
+        expert_states, expert_actions = validate_dataset_and_split(
             dataset, validation_split
         )
 
@@ -176,7 +177,7 @@ class GAIL(ImitationLearner):
         step = 0
 
         for _epoch in range(self.config.epochs):
-            order = np.random.permutation(len(train_states))
+            order = self._rng.permutation(len(train_states))
             epoch_disc: list[float] = []
             epoch_policy: list[float] = []
 
@@ -234,15 +235,19 @@ class GAIL(ImitationLearner):
         """
         n = len(states)
         # Exploration noise stands in for the missing environment rollout.
-        policy_states = states + np.random.randn(*states.shape) * 0.1
+        policy_states = states + self._rng.normal(0.0, 0.1, size=states.shape)
 
         # --- Discriminator update: expert -> 1, policy -> 0. ---
         policy_actions = self._forward_policy(policy_states)
         expert_in = np.concatenate([states, actions], axis=-1)
         policy_in = np.concatenate([policy_states, policy_actions], axis=-1)
 
-        expert_logits, expert_acts = _mlp_forward(self._discriminator, expert_in)
-        policy_logits, policy_acts = _mlp_forward(self._discriminator, policy_in)
+        expert_logits, expert_acts = _mlp_forward(
+            self._discriminator, expert_in, activation=self.config.activation
+        )
+        policy_logits, policy_acts = _mlp_forward(
+            self._discriminator, policy_in, activation=self.config.activation
+        )
 
         # Stable BCE via softplus (issue #7567).
         disc_loss = float(
@@ -253,8 +258,18 @@ class GAIL(ImitationLearner):
         # d/dz softplus(-z) = sigmoid(z) - 1 ; d/dz softplus(z) = sigmoid(z).
         grad_expert = (self._stable_sigmoid(expert_logits) - 1.0) / n
         grad_policy = self._stable_sigmoid(policy_logits) / n
-        disc_grads_e, _ = _mlp_backward(self._discriminator, expert_acts, grad_expert)
-        disc_grads_p, _ = _mlp_backward(self._discriminator, policy_acts, grad_policy)
+        disc_grads_e, _ = _mlp_backward(
+            self._discriminator,
+            expert_acts,
+            grad_expert,
+            activation=self.config.activation,
+        )
+        disc_grads_p, _ = _mlp_backward(
+            self._discriminator,
+            policy_acts,
+            grad_policy,
+            activation=self.config.activation,
+        )
         disc_grads = [
             {"W": ge["W"] + gp["W"], "b": ge["b"] + gp["b"]}
             for ge, gp in zip(disc_grads_e, disc_grads_p, strict=True)
@@ -262,15 +277,29 @@ class GAIL(ImitationLearner):
         _adam_step(self._discriminator, disc_grads, disc_state, lr, step, weight_decay)
 
         # --- Policy update: make the (updated) discriminator call us expert. ---
-        policy_out, policy_net_acts = _mlp_forward(self._policy, policy_states)
+        policy_out, policy_net_acts = _mlp_forward(
+            self._policy, policy_states, activation=self.config.activation
+        )
         disc_in = np.concatenate([policy_states, policy_out], axis=-1)
-        logits, disc_acts = _mlp_forward(self._discriminator, disc_in)
+        logits, disc_acts = _mlp_forward(
+            self._discriminator, disc_in, activation=self.config.activation
+        )
         policy_loss = float(np.mean(np.logaddexp(0.0, -logits)))
 
         grad_logits = (self._stable_sigmoid(logits) - 1.0) / n
-        _, grad_disc_in = _mlp_backward(self._discriminator, disc_acts, grad_logits)
+        _, grad_disc_in = _mlp_backward(
+            self._discriminator,
+            disc_acts,
+            grad_logits,
+            activation=self.config.activation,
+        )
         grad_action = grad_disc_in[:, self.observation_dim :]
-        policy_grads, _ = _mlp_backward(self._policy, policy_net_acts, grad_action)
+        policy_grads, _ = _mlp_backward(
+            self._policy,
+            policy_net_acts,
+            grad_action,
+            activation=self.config.activation,
+        )
         _adam_step(self._policy, policy_grads, policy_state, lr, step, weight_decay)
 
         return disc_loss, policy_loss
@@ -297,7 +326,7 @@ class GAIL(ImitationLearner):
         action = self._forward_policy(observation)
 
         if not deterministic:
-            action = action + np.random.randn(*action.shape) * 0.1
+            action = action + self._rng.normal(0.0, 0.1, size=action.shape)
 
         if observation.shape[0] == 1:
             action = action.flatten()
@@ -335,12 +364,14 @@ class GAIL(ImitationLearner):
             raise ValueError("path must be provided")
         path = Path(path)
 
-        save_data = {
+        save_data: dict[str, Any] = {
             "observation_dim": np.array(self.observation_dim),
             "action_dim": np.array(self.action_dim),
             "num_policy_layers": np.array(len(self._policy)),
             "num_disc_layers": np.array(len(self._discriminator)),
         }
+
+        save_data["config_json"] = np.array(json.dumps(self.config.to_dict()))
 
         for i, layer in enumerate(self._policy):
             save_data[f"policy_{i}_W"] = layer["W"]

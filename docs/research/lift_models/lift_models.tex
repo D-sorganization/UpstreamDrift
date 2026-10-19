@@ -1679,6 +1679,176 @@ errors are the shoulders and bar, from the rack grip and arm reach (OSL-19,
 \#13158), and a forefoot error of about 2.1\,cm that predates the torsion
 (2.4\,cm on the earlier body). The static holds, which have no bundle, keep
 the generic foot.
+
+\paragraph{High-Bar Grip-Width Sweep and Wrist-Mode Resolution (OSL-19, \#13158; OSL-20, \#13159).}
+The high-bar rack placement was derived from Glassbrook et al.\ 2019 (doi:10.1519/JSC.0000000000001836)
+and Wretenberg et al.\ 1996, which specify bar placement across the top of the trapezius slightly
+inferior to the C7 spinous process, but neither paper reports a barbell grip width. The parity
+standard allows grip widths in the range $[0.45, 0.90]$\,m; the standard default of 0.60\,m was
+defined for an anterior/sagittal bar position, not a posterior high-bar rack.
+
+\subparagraph{Reachable Workspace and Joint-Limit Bottleneck of the Rajagopal Arm (OSL-19).}
+In the Rajagopal model, the humerus length is $L_1 = 0.282$\,m and forearm (radius/ulna) length
+$L_2 = 0.250$\,m. Elbow flexion is bounded at $150^\circ$ ($2.618$\,rad). In planar 2D geometry,
+the kinematic minimum distance from the glenohumeral joint center to the hand mass center is:
+\begin{equation}
+d_{\min} = \sqrt{L_1^2 + L_2^2 - 2 L_1 L_2 \cos(30^\circ)} = 0.2059\,\mathrm{m}.
+\end{equation}
+The maximum reach is $0.6334$\,m. At the standard grip width $W = 0.60$\,m, the shoulder-to-grip
+distances are 0.1700\,m (left) and 0.1675\,m (right), which lie strictly inside the unreachable
+interior hollow ($< 0.2059$\,m), resulting in reach misses of 38.1\,mm (left) and 56.9\,mm (right).
+
+\subparagraph{Geometry Discrepancies and Landmark Definitions.}
+Reported distances depend strictly on the landmark definitions and endpoints:
+\begin{itemize}[noitemsep]
+\item \textbf{Bundle shoulder landmark to bundle grip point:} At $W = 0.75$\,m (frame 0), the Euclidean
+  distance from the bundle \texttt{shoulder\_l}/\texttt{shoulder\_r} landmark to the bundle grip point
+  is 0.2198\,m (left) and 0.2033\,m (right).
+\item \textbf{OpenSim joint centre (\texttt{LSJC}/\texttt{RSJC}) to bundle grip point:} Glenohumeral
+  joint centre to bundle grip point is 0.2232\,m (left) and 0.2052\,m (right).
+\item \textbf{OpenSim joint centre (\texttt{LSJC}/\texttt{RSJC}) to OpenSim hand CoM:} Glenohumeral
+  joint centre to the model hand centre of mass is 0.2232\,m (left) and 0.2059\,m (right).
+\item \textbf{Hand CoM to grip point reach error:} Left hand reach error is 0.0024\,mm; right hand
+  reach error halts at 1.51\,mm ($1.5063$\,mm).
+\end{itemize}
+The binding constraint that halts the right arm 1.51\,mm short of the grip is \emph{not} the 2D planar
+$d_{\min} = 0.2059$\,m. Instead, the right arm is simultaneously pinned at \textbf{three 3D joint limits}:
+$\texttt{arm\_flex\_r} = 90.00^\circ$ ($1.570796$\,rad upper bound),
+$\texttt{arm\_rot\_r} = -90.00^\circ$ ($-1.570796$\,rad lower bound), and
+$\texttt{elbow\_flex\_r} = 150.00^\circ$ ($2.618000$\,rad upper bound).
+
+\subparagraph{Measured Coordinate Range Overshoot.}
+The true measured coordinate overshoot in OpenSim IK across the 41-frame squat motion reaches a maximum of
+$4.18\times 10^{-5}$\,rad across 5 coordinates:
+\texttt{arm\_rot\_r} ($4.18\times 10^{-5}$\,rad, 6 frames),
+\texttt{arm\_flex\_r} ($3.79\times 10^{-5}$\,rad, 6 frames),
+\texttt{pro\_sup\_r} ($3.25\times 10^{-5}$\,rad, 6 frames),
+\texttt{pro\_sup\_l} ($2.97\times 10^{-5}$\,rad, 6 frames), and
+\texttt{elbow\_flex\_r} ($8.79\times 10^{-7}$\,rad, 2 frames).
+Because right reach ($1.51$\,mm $> 1.0$\,mm) and range overshoot ($4.18\times 10^{-5}$\,rad $> 0.0$\,rad)
+remain non-zero, the corresponding tests are strict xfails and \texttt{Refs \#13158} is retained.
+
+\subparagraph{Open-Loop Wrist Instability and Parity Resolution (OSL-20).}
+At $W = 0.60$\,m, IK forced the lifter's wrists against their joint limits (\texttt{LWInputX}
+pinned at $25.0^\circ$). This limit coupling produced an unstable open-loop wrist eigenvalue
+($\lambda \approx 116$--$132\,\mathrm{s}^{-1}$ on \texttt{LWInputY}), which amplified integration
+round-off across the 0.2\,s window ($8.5\times 10^{-4}$\,rad in Drake, $2.7\times 10^{-3}$\,rad
+in Pinocchio), violating the Level-L2 coordinate parity gate ($1.0\times 10^{-6}$\,rad).
+
+\subparagraph{Pre-Declared Selection Rule and Sweep Evaluation.}
+Candidate grip widths $W \in [0.45, 0.90]$\,m are evaluated against a pre-declared rule: select the
+narrowest width meeting all physical gates (reach $\le 1.0$\,mm, overshoot $= 0.0$\,rad, wrists clear
+by $> 10^{-3}$\,rad, no wrist mode $\lambda \le 75\,\mathrm{s}^{-1}$, Level-L2 parity $\le 1.0\times 10^{-6}$\,rad);
+if no width passes all gates, select the width minimizing right reach error while strictly satisfying wrist
+limit, stability, and parity gates.
+
+\begin{center}\footnotesize\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lllllll}
+\toprule
+$W$ (m) & Reach L / R (mm) & Overshoot (rad) & Reach Coordinates at Bound & Wrist Angles ($^\circ$) & $\lambda$ ($\mathrm{s}^{-1}$), Mode & Parity D / P / O (rad)\\
+\midrule
+\textbf{0.75} & \textbf{0.0024 / 1.51} & $\mathbf{4.18\times 10^{-5}}$ & \texttt{arm\_flex/rot\_r}, \texttt{elbow\_flex\_r} & 11.9, 41.6, -2.8, -20.9 & \textbf{59.37 (\texttt{SpineX})} & $6.0/2.4/1.6\times 10^{-9}$\\
+0.80 & 29.06 / 3.78 & $1.03\times 10^{-3}$ & \texttt{arm\_flex/rot\_l/r} & 24.5, 47.2, -39.9, 33.4 & 158.40 (\texttt{LWY}) & 2.10 / 2.02 / 0.20\\
+0.82 & 10.69 / 6.30 & $5.70\times 10^{-4}$ & \texttt{arm\_flex/rot\_l/r} & 24.5, -54.2, -40.0, 14.0 & 167.45 (\texttt{RWX}) & 15.5 / 15.5 / 4.13\\
+0.85 & 0.0021 / 9.46 & $3.25\times 10^{-4}$ & \texttt{arm\_rot\_l}, \texttt{arm\_flex/rot\_r} & 18.9, 21.4, -22.9, -15.5 & 66.98 (\texttt{RSX}) & $2.4/3.7/2.1\times 10^{-8}$\\
+0.88 & 0.0020 / 11.77 & $4.22\times 10^{-4}$ & \texttt{arm\_flex/rot\_r} & 21.8, 18.0, -27.6, -14.5 & 70.59 (\texttt{RSX}) & $1.2/8.8/4.0\times 10^{-8}$\\
+0.90 & 0.0037 / 13.27 & $4.88\times 10^{-4}$ & \texttt{arm\_flex/rot\_r} & 23.7, 15.6, -30.4, -13.8 & 73.03 (\texttt{RSX}) & $0.6/7.4/3.1\times 10^{-8}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+All rows are measured (record: \texttt{grip\_width\_sweep.json} in the back-squat evidence directory).
+No width meets reach $\le 1$\,mm with zero overshoot: \texttt{arm\_flex\_r} and \texttt{arm\_rot\_r}
+reach their limits at every width. At 0.80 and 0.82\,m the wrists reach their limits, an unstable wrist
+mode appears ($\lambda = 158$ and $167\,\mathrm{s}^{-1}$) and the full-window replay diverges. From 0.85
+to 0.90\,m the replay is stable but the right-hand miss grows (9.46--13.27\,mm) and the overshoot is about
+ten times that at 0.75\,m. By the fallback rule, $W = 0.75$\,m is selected (right miss 1.51\,mm, overshoot
+$4.18\times 10^{-5}$\,rad, $\lambda = 59.37\,\mathrm{s}^{-1}$, parity $\le 6.0\times 10^{-9}$\,rad). An
+earlier draft listed unmeasured rows for 0.80--0.90\,m; this table replaces them.
+
+\subparagraph{Model Accommodation Statement.}
+The barbell grip width of 0.75\,m is an explicit model accommodation to the Rajagopal musculoskeletal arm
+range limits, not a measured human athletic high-bar grip. In the Rajagopal model, the rigid thoracic trunk and revolute bounds
+restrict the posterior reachable workspace.
+
+\subsection{OpenSim Muscle Forces and Activations (OSL-4, Issue \#13042)}\label{sec:opensim-muscles}
+\paragraph{Method and Formulation.}
+OSL-4 completes the muscle-force and activation pipeline for the five barbell
+lifts using OpenSim \texttt{StaticOptimization} and \texttt{MocoInverse} (where
+converging), reusing the reserve-share formulation from
+\texttt{musculoskeletal\_static\_opt.py} and \texttt{musculoskeletal\_solvers.py}.
+At each sampled frame $t$, the muscle redundancy is resolved against the inverse-dynamics
+joint moments $\boldsymbol{\tau}$ for rigid-tendon Millard muscles
+(Rajagopal et al.\ 2016, 80 lower-limb muscles across 14 degrees of freedom):
+\begin{equation}
+\min_{\mathbf{a}} \sum_{m=1}^{80} a_m^2 + w \sum_{c=1}^{14} r_c^2 \quad \text{s.t.} \quad 0 \le a_m \le 1,\quad \boldsymbol{\tau} = \mathbf{R}^\top (\mathbf{F}_\text{pas} + \mathbf{a} \odot \mathbf{F}_\text{act}) + \mathbf{r}
+\end{equation}
+The reserve actuator share across the lift is defined as:
+\begin{equation}
+\text{Reserve Share} = \frac{\sum_t \sum_c |r_c(t)|}{\sum_t \sum_c |\tau_c(t)|}
+\end{equation}
+A lift is classified as \texttt{qualified} only when the reserve share is strictly below 5\% ($< 0.05$).
+
+\paragraph{Measured Numbers.}
+For the back squat (the only lift with a credible same-input bundle today),
+the 0.2\,s engine window is located entirely at the deep squat bottom (mean knee
+angle $109.8^\circ$, hip flexion at the $120.0^\circ$ model upper bound). The motion
+does not reach standing ($< 25^\circ$), descent, or lockout; the pipeline reports the
+single honest segment \texttt{bottom (engine window 0.0-0.2 s)}. The moment balance
+residual error holds below $1.14 \times 10^{-13}\,\mathrm{N\,m}$ by construction because
+reserve actuators close any remainder in the static optimization solve; this is an
+internal sanity check and does not constitute evidence of physical acceptance.
+The overall reserve share is 56.8\% (mean 56.8\%, peak 67.2\%), so the squat is classified
+as \texttt{unqualified} due to heavy physiological torque demands exceeding muscle capacity
+at deep knee and hip flexion. The major muscle groups yield:
+\begin{center}\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccccc}
+\toprule
+Muscle Group & Muscles & Peak Act & Mean Act & Peak Force (N) & Mean Force (N)\\
+\midrule
+Quadriceps & 8 & 1.000 & 0.780 & 4561.8 & 1927.6\\
+Gluteals & 18 & 1.000 & 0.360 & 1157.0 & 345.5\\
+Hamstrings & 8 & 1.000 & 0.409 & 2145.9 & 440.2\\
+Erector Spinae & 0 & --- & --- & --- & ---\\
+Deltoids & 0 & --- & --- & --- & ---\\
+Trapezius & 0 & --- & --- & --- & ---\\
+Triceps & 0 & --- & --- & --- & ---\\
+\bottomrule
+\end{tabular}
+\end{center}
+The upper-body and trunk muscle groups are absent in the Rajagopal 80-muscle lower-limb model
+and are driven by coordinate actuators. The remaining four lifts (bench press, deadlift,
+snatch, clean and jerk) are reported as \texttt{unavailable} pending barbell bundles and IK/ID receipts.
+
+\paragraph{Coordinate Breakdown and Ground Shear Asymmetry.}
+At frame~0, total sagittal extension demand ($\tau_\text{hip} + \tau_\text{knee}$) is virtually
+identical across legs: $-434.68\,\mathrm{N\,m}$ (right) vs $-434.89\,\mathrm{N\,m}$ (left),
+matching vertical ground reaction forces ($1139.2\,\mathrm{N}$ right vs $1131.0\,\mathrm{N}$ left).
+The hip-extension demand asymmetry ($-219.96\,\mathrm{N\,m}$ right vs $-381.92\,\mathrm{N\,m}$ left)
+against extensor muscle capacities of $-204.64\,\mathrm{N\,m}$ and $-200.02\,\mathrm{N\,m}$
+is driven by anterior-posterior ground shear: $+208.96\,\mathrm{N}$ forward on the left foot vs
+$-127.35\,\mathrm{N}$ backward on the right foot ($336.31\,\mathrm{N}$ differential). Forward shear
+shifts the ground reaction force line of action forward, reducing knee extension demand
+($-52.97\,\mathrm{N\,m}$ vs $-214.72\,\mathrm{N\,m}$) and increasing hip extension demand.
+The primary reserve drivers across the window are \texttt{hip\_flexion\_r}, \texttt{hip\_flexion\_l},
+\texttt{hip\_adduction\_r}, and \texttt{hip\_adduction\_l}.
+
+\paragraph{Coordinate Range Bounds and Solver Comparison.}
+Both \texttt{hip\_flexion\_r} and \texttt{hip\_flexion\_l} sit pinned at the $120.0^\circ$ model
+bound throughout all 41 frames ($100\%$ pinned, margin $< 0.002^\circ$). An IK result pinned at a
+coordinate bound is not a credible posture and represents a model limit rather than an unconstrained
+equilibrium.
+In addition to StaticOptimization (54\,s wall clock, 56.8\% reserve share), \texttt{MocoInverse}
+was configured with \texttt{ModelProcessor} welding the locked \texttt{mtp}, \texttt{subtalar},
+and wrist joints. In a 20-iteration pilot (143\,s wall clock), it completed cleanly without locked
+coordinate errors and reached \texttt{Maximum\_Iterations\_Exceeded} with objective $142{,}168$.
+
+\paragraph{Reproduction Command.}
+\begin{verbatim}
+QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \
+    python3 scripts/measure_opensim_lift_muscles.py \
+    --out docs/development/lifting/evidence/opensim_muscles/receipts.json
+\end{verbatim}
+
 \subsection{Snatch Same-Input Bundle (LIFT-5, Issue \#11745)}
 \paragraph{Planar Pull.} The previous Tools snatch configuration ran from
 the floor setup to the overhead-squat catch through one mid-time via point.
@@ -1746,6 +1916,73 @@ record''), as for the deadlift and the clean. The bar is hand-held with no
 barbell body (LIFT-4, \#11744). Reproduce with
 \texttt{MUJOCO\_GL=egl python3 scripts/generate\_lift\_bundle.py --lift snatch}
 then \texttt{scripts/measure\_lift\_bar\_path\_parity.py --lift snatch}.
+
+\subsection{Clean-and-Jerk Whole-Lift Bundle (LIFT-5, Issue \#11745)}
+\paragraph{Planar Lift.} The previous clean-and-jerk bundle solved the Tools
+\texttt{clean} exercise (1.2\,s, one mid-time via point) and kept only its
+first pull. Its bar model held the bar on the shoulders for the whole lift
+(0.890\,m at the floor setup), the knee never flexed past its $90.5^\circ$
+setup flexion, so there was no front-squat catch, and the bar never went
+overhead (highest point 1.347\,m).
+
+Tools \#5662 (issue Tools\#5661) adds \texttt{make\_clean\_and\_jerk\_config}:
+the whole lift in 4.0\,s, with a via schedule at the standard's eight phase
+starts (setup 0, first pull 0.08, second pull 0.2, rack catch 0.3, rack
+recovery 0.4, jerk dip-drive 0.55, overhead catch 0.7, overhead recovery
+0.85) and three events inside them (full extension 0.25, dip bottom 0.6,
+drive extension 0.65). The rack catch keeps the standard's knee flexion
+($-97.2^\circ$) and trunk lean ($18.31^\circ$, inside the $2.78^\circ$
+lumbar tolerance); its shank is solved so that the centre of mass is over
+the inner base of support, which needs a $46^\circ$ shank and so the model's
+$50^\circ$ ankle limit. The standard's symmetric stance makes the jerk a
+power jerk, caught at the jerk dip depth ($-52^\circ$ knee) with the
+lockout trunk lean ($-0.05^\circ$, inside $3.64^\circ$). The phase-correct
+bar hangs one arm length below the shoulder through the pulls, sits at the
+shoulder from the rack catch to the drive extension and is one arm length
+above it from the overhead catch on, with smoothstep blends across the
+turnover and the drive. The \texttt{clean} and \texttt{jerk} exercises are
+unchanged.
+
+The shoulder rises monotonically from 0.890 to 1.376\,m through the pulls,
+with a peak bar velocity of 1.72\,m/s at 0.85\,s. The bar is at the
+shoulder (1.064\,m) at the catch, dips from 1.380 to 1.291\,m and drives back
+to 1.376\,m in the jerk, is overhead at 1.978\,m at the catch and ends at
+2.068\,m. The optimizer reports a maximum joint speed of 6.26\,rad/s, above
+its 2\,rad/s slow-movement assumption, so the omitted Coriolis terms make its
+torques indicative.
+
+\paragraph{Bundle and IK.} The 0.6\,m grip arms hang the bar at most
+0.562\,m below the shoulders (offset scale 0.816). The 0.2\,s engine window
+is centred on the knee pass and starts at 0.693\,s; it does not cover the
+rack, the jerk or the overhead phases, which are in the recorded solution
+and IK only. \texttt{bundle\_stability} selects 16 RK4 substeps
+($|z|=1.88$). The pull, the window and the overhead recovery are deadlift
+class (\texttt{knee\_r} at most 11.1\,mm, window bar 0.34\,mm, feet
+0.69\,mm). The full-body model cannot follow the front rack: the planar rack
+bar sits at the shoulder joints, which the hands cannot reach at the
+0.6\,m grip (bar 39--57\,mm off from the turnover to the drive), and the
+deep planar front squat leaves the legs 31--74\,mm off with the feet up to
+2.55\,mm into the ground. The power-jerk catch leaves the legs 19--29\,mm
+off. The whole-lift IK maxima (ankles 71.6/74.4, knees 69.8/66.4, hips
+56.5/57.6, shoulders 27.3/29.7, bar 56.5\,mm; closure
+$3.8\times10^{-4}$\,m; feet 2.55\,mm) replace the first-pull snapshot as the
+regression thresholds, the convention of the pull bundles; a strict xfail
+records them against the deadlift bounds, which are not loosened.
+
+\paragraph{Parity.} In open-loop replay over the full window, the bar agrees with
+MuJoCo to $3.0\times10^{-15}$\,m (Drake), $4.3\times10^{-14}$\,m (Pinocchio)
+and $2.7\times10^{-15}$\,m (OpenSim). The coordinates agree to
+$2.2\times10^{-12}$, $1.4\times10^{-12}$ and $9.6\times10^{-13}$\,rad, and
+MuJoCo is bit exact (\texttt{docs/development/lifting/evidence/clean\_and\_jerk/}).
+The parity covers the knee-pass window only.
+
+\paragraph{Limitations.} As for the snatch, the bundle is not in
+\texttt{SAME\_INPUT\_LIFT\_BUNDLES} and has no OpenSim IK/ID (LIFT-4,
+\#11744). A forward front-rack bar offset in the planar model would let the
+hands reach the rack; it is not attempted. Reproduce with
+\texttt{MUJOCO\_GL=egl python3 scripts/generate\_lift\_bundle.py --lift
+clean\_and\_jerk} then
+\texttt{scripts/measure\_lift\_bar\_path\_parity.py --lift clean\_and\_jerk}.
 
 \section{Measured Parity Results}
 All figures below are read from the committed receipt,

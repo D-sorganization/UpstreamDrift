@@ -29,6 +29,7 @@ from src.shared.python.lifting.back_bar import (
     fit_bar_shelf,
     standard_bar_world,
 )
+from src.shared.python.lifting.back_rack import HIGH_BAR
 from src.shared.python.lifting.bundles import (
     BACK_SQUAT_BUNDLE,
     LIFT_SPEC,
@@ -135,6 +136,31 @@ def test_geometry_scales_the_start_bar_position_with_height() -> None:
 def test_geometry_rejects_a_bad_height(height: float) -> None:
     with pytest.raises(ValueError, match="height_m"):
         BackBarGeometry.from_standard(LIFT, height_m=height)
+
+
+@pytest.mark.parametrize("grip_width", [0.0, -0.5, float("nan"), float("inf")])
+def test_geometry_rejects_a_bad_grip_width(grip_width: float) -> None:
+    with pytest.raises(ValueError, match="grip_width_m"):
+        BackBarGeometry.from_standard(LIFT, height_m=HEIGHT_M, grip_width_m=grip_width)
+
+
+def test_geometry_grip_width_precedence() -> None:
+    geom_std = BackBarGeometry.from_standard(LIFT, height_m=HEIGHT_M)
+    assert geom_std.grip_width_m == lift_spec.lift_grip(LIFT).width_m
+
+    geom_rack = BackBarGeometry.from_standard(LIFT, height_m=HEIGHT_M, rack=HIGH_BAR)
+    assert geom_rack.grip_width_m == HIGH_BAR.grip_width_m
+
+    geom_explicit = BackBarGeometry.from_standard(
+        LIFT, height_m=HEIGHT_M, rack=HIGH_BAR, grip_width_m=0.82
+    )
+    assert geom_explicit.grip_width_m == 0.82
+
+    rec = geom_explicit.to_record()
+    assert rec["grip_width_m"] == 0.82
+    roundtrip = BackBarGeometry.from_record(rec)
+    assert roundtrip.grip_width_m == 0.82
+    assert roundtrip.rack == HIGH_BAR
 
 
 @pytest.mark.parametrize("lift", ["deadlift", "bench_press", "not_a_lift"])
@@ -287,15 +313,22 @@ def test_committed_bundle_start_pose_keeps_the_standard_grip() -> None:
 
     OSL-17 (#13131): the committed bundle racks the bar on the cited high-bar
     position (``test_back_rack``), not on the standard's start-pose bar
-    position, which lies above the shoulders; the grip is still the standard's.
+    position, which lies above the shoulders.
+    OSL-19/20 (#13158, #13159): at high-bar rack, the bundle uses
+    ``HIGH_BAR_GRIP_WIDTH_M`` (0.75 m), recorded in its back_bar provenance.
     """
     pytest.importorskip("mujoco")
     bundle = InputBundle.load(BACK_SQUAT_BUNDLE)
     q = np.asarray(bundle.provenance["ik"]["q_standing"], dtype=float)
     height = float(bundle.provenance["optimizer"]["height_m"])
     pose = measure_start_pose(bundle.spec_bytes, q, height)
-    grip = lift_spec.lift_grip(LIFT)
-    assert pose.grip_width_m == pytest.approx(grip.width_m, abs=GRIP_TOLERANCE_M)
+    geometry_rec = (
+        bundle.provenance.get("ik", {}).get("back_bar", {}).get("geometry", {})
+    )
+    expected_grip_m = float(
+        geometry_rec.get("grip_width_m", lift_spec.lift_grip(LIFT).width_m)
+    )
+    assert pose.grip_width_m == pytest.approx(expected_grip_m, abs=GRIP_TOLERANCE_M)
     assert pose.axis_angle_deg <= AXIS_TOLERANCE_DEG
     assert pose.left_hand_is_left
 
