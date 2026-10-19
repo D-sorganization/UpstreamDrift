@@ -149,6 +149,14 @@ class ContactGripConfig:
         """OBJ path of ``side``'s grip mesh."""
         return self.mesh_dir / f"grip_mesh_{side}.obj"
 
+    def site_foundation(
+        self, radius_m: float, count: int = 1
+    ) -> ElasticFoundationParameters:
+        """Return the calibrated foundation for ``(radius_m, count)``, or ``self.ef``."""
+        if self.site_foundations and (radius_m, count) in self.site_foundations:
+            return self.site_foundations[(radius_m, count)]
+        return self.ef
+
 
 def _grip_axis(interface: GripInterface, cfg: ContactGripConfig) -> tuple:
     rot = np.asarray(interface.right.rotation, dtype=float)
@@ -233,6 +241,24 @@ def _foundation_force(
     )
 
 
+def shift_topology_site_inward(
+    pos_hand_m: Sequence[float] | np.ndarray,
+    side: str,
+    grip_radius_m: float,
+    extra_penetration_m: float,
+) -> np.ndarray:
+    """Shift a hand-frame site centre radially toward the grip axis by ``extra_penetration_m``."""
+    pos = np.asarray(pos_hand_m, dtype=float)
+    if extra_penetration_m == 0.0:
+        return pos
+    z_axis = -grip_radius_m if side == "L" else grip_radius_m
+    radial = np.array([0.0, pos[1], pos[2] - z_axis], dtype=float)
+    norm_rad = float(np.linalg.norm(radial))
+    if norm_rad <= 1e-12:
+        return pos
+    return pos - extra_penetration_m * (radial / norm_rad)
+
+
 def _build_topology_contact(
     geometry: ET.Element,
     forces: ET.Element,
@@ -243,6 +269,7 @@ def _build_topology_contact(
 ) -> dict[str, Any]:
     assert cfg.topology_model is not None
     topo = cfg.topology_model.topology
+    grip_r = cfg.topology_model.cylinder.radius_m
     ef = cfg.ef
     for side in SIDES:
         _contact_mesh(geometry, f"grip_mesh_{side}", club, cfg.mesh_path(side))
@@ -258,7 +285,11 @@ def _build_topology_contact(
                     if cfg.site_foundations
                     else ef
                 )
-                location = hand_frame[:3, :3] @ mapped.centre_m + hand_frame[:3, 3]
+                extra = ef_site.preload_penetration_m - DEFAULT_TOPOLOGY_PRELOAD_M
+                c_pos = shift_topology_site_inward(
+                    np.asarray(mapped.centre_m, dtype=float), side, grip_r, extra
+                )
+                location = hand_frame[:3, :3] @ c_pos + hand_frame[:3, 3]
                 _contact_sphere(
                     geometry,
                     f"grip_pad_{pair.name}",
@@ -280,10 +311,12 @@ def _build_topology_contact(
                     if cfg.site_foundations
                     else ef
                 )
+                extra = ef_site.preload_penetration_m - DEFAULT_TOPOLOGY_PRELOAD_M
                 for k in range(count):
                     t = k / (count - 1)
                     c_k = np.asarray(p0) + t * (np.asarray(p1) - np.asarray(p0))
-                    location = hand_frame[:3, :3] @ c_k + hand_frame[:3, 3]
+                    c_pos = shift_topology_site_inward(c_k, side, grip_r, extra)
+                    location = hand_frame[:3, :3] @ c_pos + hand_frame[:3, 3]
                     _contact_sphere(
                         geometry,
                         f"grip_pad_{pair.name}_{k}",
