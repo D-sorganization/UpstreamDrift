@@ -72,6 +72,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1066 | `src/tools/bunker_shot_gui/crosstier.py` |
 | 1065 | `src/shared/python/pendulum_simulator/gui/toolstrip_widget.py` |
 | 1063 | `src/bunkershot3d/metrics/divot.py` |
+| 1054 | `src/shared/python/grip_contact/parity.py` |
 | 1053 | `src/engines/model_inventory.py` |
 | 1053 | `src/tools/tour_matching_viewer/core.py` |
 | 1052 | `src/shared/python/motion_matching/pinocchio_g2_g3.py` |
@@ -216,10 +217,12 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 810 | `src/shared/python/humanoid_character_builder/mesh/mesh_processor.py` |
 | 809 | `src/shared/python/model_generation/converters/urdf_parser.py` |
 | 809 | `src/shared/python/pose_editor/widgets.py` |
+| 808 | `src/shared/python/grip_contact/topology_contact.py` |
 | 806 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_main_application.py` |
 | 806 | `src/launchers/_launcher_navigation_ui.py` |
 | 804 | `src/shared/python/spine/movement_variants.py` |
 | 803 | `src/shared/python/ui/qt/widgets/signal_toolkit_processing_mixin.py` |
+| 802 | `src/engines/physics_engines/opensim/python/grip_contact_osim_sim.py` |
 | 802 | `src/shared/python/plotting/renderers/kinetics.py` |
 | 801 | `src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py` |
 | 801 | `src/shared/python/sidekick/ui/tools_sidebar/sidebar.py` |
