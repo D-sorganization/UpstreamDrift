@@ -641,5 +641,4 @@ def evaluate_lift_muscles(
         diag,
         moco_record,
         RAJAGOPAL_MODEL_CITATION,
-        residual_status=residual_status,
     )

@@ -321,15 +321,9 @@ def format_squat_solution(
     diag: SquatDiagnostics,
     moco_record: dict[str, Any],
     citation: str,
-    *,
-    residual_status: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Assemble the complete solution dictionary for a barbell lift."""
-    status = (
-        residual_status
-        if residual_status is not None
-        else load_ik_id_residual_status(lift)
-    )
+    status = load_ik_id_residual_status(lift)
     return {
         "lift": lift,
         "status": "complete",
