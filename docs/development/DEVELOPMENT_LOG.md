@@ -2652,6 +2652,45 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13416 · Fix Three Drake Continuous-Torque Tests That Failed With Pydrake Installed: Hide Every Cached Pydrake Module and Size the Live Theta via _Resolve_N_Actuators
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13416
+- **Branch:** merged via #13418
+- **PR:** #13418
+- **Paths:** see #13418
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`648fd33e`; collated from changes/13416-fix-three-drake-continuous-torque-tests.md)
+- **Summary:** Fix three Drake continuous-torque tests that failed with pydrake installed: hide every cached pydrake module and size the live theta via _resolve_n_actuators
+- **Next step:** Shipped in PR #13418.
+
+### DL-#13208 · Add Scripts/Ci/shared_buildkit.py: Idempotent, Flock-Serialised Manager for One Persistent GC-Bounded BuildKit Builder per Host (Create/Upgrade/Repair, Cold-Build Fallback)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13208
+- **Branch:** merged via #13277
+- **PR:** #13277
+- **Paths:** see #13277
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8895cafc`; collated from changes/13208-add-scripts-ci-shared-buildkit-py-idempo.md)
+- **Summary:** Add scripts/ci/shared_buildkit.py: idempotent, flock-serialised manager for one persistent GC-bounded BuildKit builder per host (create/upgrade/repair, cold-build fallback)
+- **Next step:** Shipped in PR #13277.
+
+### DL-#13044 · Predictive Moco Simulation of Deadlift Lift (OSL-7)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13044
+- **Branch:** merged via #13406
+- **PR:** #13406
+- **Paths:** see #13406
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`54a19254`; collated from changes/13044-predictive-moco-simulation-of-deadlift-l.md)
+- **Summary:** Predictive Moco simulation of deadlift lift (OSL-7)
+- **Next step:** Shipped in PR #13406.
+
 ### DL-#13392 · Fix(Pinocchio): CMB-11 Parity Evaluates the Full Neutral Coordinate Set
 
 - **State:** shipped
