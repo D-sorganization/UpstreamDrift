@@ -1,11 +1,11 @@
 {
   "reviews": {
     "capture-atlas": {
-      "fingerprint": "61f9a62332025150b8c22fb64bccb071585ca14d5c742da5b960a82dcdaa5773",
+      "fingerprint": "c3e97bb1820b578a4d0ac11c7081a30aea1cccfc121829e1870ccb4158154af6",
       "inputs": {
         "docs/agent_context/contracts/capture-atlas.md": "f247f8c3e26b102c1cffb1a132c7dd1a7610377c846cf330953d0ccbf90baec4",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
-        "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
+        "scripts/capability_atlas/model.py": "122475bfa6e445ee8a2d4e1f94eae41c3b0e6bce954d1eb8ea44a1e40662e052",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
@@ -16,17 +16,17 @@
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414",
         "tests/tools/capture_rig/test_workflow.py": "f583fecf6ebe50173a9e5b5108f4b105ec8636cec926ce665393fcd90669dbe2"
       },
-      "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
+      "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01; model.py updated for worktree vendor resolution."
     },
     "launcher-atlas": {
-      "fingerprint": "f91ca0fdeb1cd87db58cd4e5c74966e37259708531403e343d26994ce737e3fa",
+      "fingerprint": "c32d0548c6bd1ede848fc2a76223f13846d93326ff8e2b26a513cabe95b4defb",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
-        "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
+        "scripts/capability_atlas/model.py": "122475bfa6e445ee8a2d4e1f94eae41c3b0e6bce954d1eb8ea44a1e40662e052",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "1959dd8fc9e462ac1c10dbbe476f7de86d9fab08186e3dc25742f529aee7204d",
+        "src/config/feature_parity.json": "16da3586691a3c05c88df5482f1fe309976dcbdbe6dc21c816cb8706b1d0d1cb",
         "src/config/launcher_manifest.json": "26337829a1de75576be220e293c6d4f012f97303c0639401a8d902e76c418f37",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
         "src/config/models.yaml": "7c868b0c444389fad39bdd30469abd32439f5bd11b9b5019c941ac0049e0763c",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Reviewed after merging main into #13279 again: launcher-atlas inputs differ from main only in the spine_viewer tile description and the tools.spine_study parity entry (no tiles); capability atlas regenerated; tile ids, routes and order unchanged."
+      "rationale": "Reviewed after merging origin/main into feat/13303-grip-style-presets: launcher-atlas inputs include worktree vendor resolution in model.py and merged feature_parity.json; capability atlas regenerated cleanly with --check verified; tile ids, routes and order unchanged."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",
