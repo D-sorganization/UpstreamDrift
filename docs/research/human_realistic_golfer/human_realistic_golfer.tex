@@ -334,6 +334,24 @@ python3 -m pytest tests/unit/grip_contact/test_contact_topology.py \
 \textbf{Limitation.} No finger markers exist in the capture, so finger contact
 locations are not identifiable from data; the table fixes them by assumption.
 
+\textbf{Pick Classification and Sidecar Migration (HRG-GS, \#13346).} Because
+\texttt{GripSpec.style} selects the physical contact topology since G1,
+\texttt{grip\_style} is classified in \texttt{PHYSICAL\_PICKS} across the CLI
+(\texttt{spec\_builder}), desktop (\texttt{CharacterBuilderModel}) and web API
+(\texttt{/api/character-builder/grip}) surfaces. A style-only pick that changes
+the physical style (\texttt{overlap}$\to$\texttt{interlock} or
+\texttt{overlap}$\to$\texttt{ten\_finger}) writes a new spec revision via
+\texttt{apply\_grip\_config} with provenance, returning
+\texttt{refit\_required: true} and a new \texttt{physics\_spec\_sha256}; picking
+the unchanged default style (\texttt{overlap}) is a no-op that preserves the v1
+document bytes and hash identically. The \texttt{.appearance.json} sidecar
+retains only \texttt{lead\_thumb\_offset\_deg} in \texttt{VISUAL\_KEYS} and no
+longer writes \texttt{style}. For backward compatibility, a legacy sidecar
+\texttt{grip.style} is read-only: \texttt{migrate\_sidecar\_grip} compares it
+against \texttt{subject.grip\_config.style} (default \texttt{overlap}), raises a
+\texttt{ValueError} naming both values if they disagree, and drops the legacy
+key on agreement so physical and sidecar styles can never disagree silently.
+
 \subsection{Named Grip Presets (HRG-GS-G5, \#13303)}
 \textbf{Method.} Three historical and coaching consensus two-handed grip presets
 ---\texttt{palmer\_overlap}, \texttt{woods\_interlock}, and
