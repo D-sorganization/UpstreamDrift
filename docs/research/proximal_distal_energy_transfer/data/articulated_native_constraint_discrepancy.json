@@ -77,7 +77,7 @@
     "scripts/research/proximal_distal_energy/articulated_forward_contract.py": "c2f2a89bbb90da5e41488e4763327afe126f6be6be70da73c41c74adca52349a",
     "scripts/research/proximal_distal_energy/articulated_forward_integration.py": "85e03a999fb27599eff2e83a17104ad765bcac392ec145a07457564bca43e85b",
     "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py": "e1c6f0f066e4ad3f157557d003e4e12ae83842cc275ccc0965f263e1fc21220a",
-    "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py": "854b4432e9fbee7def1848229fd779d2877b7f0b5c85677e02081b7d80f3ceb5",
+    "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py": "6bef8a15d9b74e5c60dbf01b26dff68720f06a26c814fd9c06b01d3154bc07c2",
     "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py": "6a3d450ac009efd777b0051ab988171952b975ed7c6e61628f2d009bccd04f49",
     "scripts/research/proximal_distal_energy/spatial_full_body.py": "b386ec2119ebc10f18a404ceba8b304827e418b9c2973641e644b2953d5f17d2",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8",

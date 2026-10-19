@@ -402,86 +402,93 @@ def _evaluate_native_result(
     )
 
 
+@dataclass(frozen=True, slots=True)
+class _ControlEvaluationContext:
+    result: GeneralizedDynamicsAttribution
+    matrix: FloatArray
+    bias: FloatArray
+    static_bias: FloatArray
+    contact_force: FloatArray
+    velocity: FloatArray
+    coordinate_scale: FloatArray
+    config: ArticulatedAttributionConfig
+
+
 def _evaluate_controls(
-    *,
     buffers: _AttributionBuffers,
     index: tuple[int, int, int],
-    result: GeneralizedDynamicsAttribution,
-    matrix: FloatArray,
-    bias: FloatArray,
-    static_bias: FloatArray,
-    contact_force: FloatArray,
-    velocity: FloatArray,
-    coordinate_scale: FloatArray,
-    config: ArticulatedAttributionConfig,
+    context: _ControlEvaluationContext,
 ) -> None:
-    zero = np.zeros_like(contact_force)
+    zero = np.zeros_like(context.contact_force)
     zero_contact = _evaluate_native_result(
-        matrix=matrix,
-        bias=bias,
-        static_bias=static_bias,
+        matrix=context.matrix,
+        bias=context.bias,
+        static_bias=context.static_bias,
         contact_force=zero,
-        velocity=velocity,
-        config=config,
+        velocity=context.velocity,
+        config=context.config,
     )
     buffers.zero_contact_norm[index] = np.linalg.norm(
         zero_contact.acceleration_contributions[2]
     )
     zero_velocity = _evaluate_native_result(
-        matrix=matrix,
-        bias=static_bias,
-        static_bias=static_bias,
-        contact_force=contact_force,
+        matrix=context.matrix,
+        bias=context.static_bias,
+        static_bias=context.static_bias,
+        contact_force=context.contact_force,
         velocity=zero,
-        config=config,
+        config=context.config,
     )
     buffers.zero_velocity_norm[index] = np.linalg.norm(
         zero_velocity.acceleration_contributions[1]
     )
     gravity_off = _evaluate_native_result(
-        matrix=matrix,
-        bias=bias - static_bias,
+        matrix=context.matrix,
+        bias=context.bias - context.static_bias,
         static_bias=zero,
-        contact_force=contact_force,
-        velocity=velocity,
-        config=config,
+        contact_force=context.contact_force,
+        velocity=context.velocity,
+        config=context.config,
     )
     buffers.gravity_off_norm[index] = np.linalg.norm(
         gravity_off.acceleration_contributions[0]
     )
 
     scaled_arguments = scale_generalized_coordinates(
-        mass_matrix=matrix,
-        bias_force=bias,
-        zero_velocity_bias_force=static_bias,
-        contact_force=contact_force,
+        mass_matrix=context.matrix,
+        bias_force=context.bias,
+        zero_velocity_bias_force=context.static_bias,
+        contact_force=context.contact_force,
         active_force=zero,
-        velocity=velocity,
-        coordinate_scale=coordinate_scale,
+        velocity=context.velocity,
+        coordinate_scale=context.coordinate_scale,
     )
     scaled = decompose_generalized_dynamics(
-        **scaled_arguments, share_denominator_floor=config.share_denominator_floor
+        **scaled_arguments,
+        share_denominator_floor=context.config.share_denominator_floor,
     )
     buffers.scaling_power_error[index] = np.abs(
-        scaled.generalized_powers_w - result.generalized_powers_w
+        scaled.generalized_powers_w - context.result.generalized_powers_w
     )
-    if result.acceleration_share_adequacy is AttributionAdequacy.ADEQUATE:
+    if context.result.acceleration_share_adequacy is AttributionAdequacy.ADEQUATE:
         buffers.scaling_share_error[index] = np.abs(
             scaled.mass_metric_acceleration_shares
-            - result.mass_metric_acceleration_shares
+            - context.result.mass_metric_acceleration_shares
         )
     else:
         buffers.scaling_share_error[index] = 0.0
 
-    corruption = np.zeros_like(contact_force)
-    corruption[0] = config.corruption_force_nm
-    corrupted_contact_acceleration = np.linalg.solve(matrix, contact_force + corruption)
-    corrupted_sum = np.sum(result.acceleration_contributions, axis=0)
+    corruption = np.zeros_like(context.contact_force)
+    corruption[0] = context.config.corruption_force_nm
+    corrupted_contact_acceleration = np.linalg.solve(
+        context.matrix, context.contact_force + corruption
+    )
+    corrupted_sum = np.sum(context.result.acceleration_contributions, axis=0)
     corrupted_sum += (
-        corrupted_contact_acceleration - result.acceleration_contributions[2]
+        corrupted_contact_acceleration - context.result.acceleration_contributions[2]
     )
     buffers.corruption_detection_residual[index] = np.linalg.norm(
-        corrupted_sum - result.total_acceleration
+        corrupted_sum - context.result.total_acceleration
     )
 
 
@@ -558,16 +565,18 @@ def _evaluate_case(
             index = (case, sample, engine)
             _store_attribution(buffers, index, result)
             _evaluate_controls(
-                buffers=buffers,
-                index=index,
-                result=result,
-                matrix=matrix,
-                bias=bias,
-                static_bias=static_bias,
-                contact_force=contact.generalized_contact_force,
-                velocity=qd_eval,
-                coordinate_scale=scale,
-                config=config,
+                buffers,
+                index,
+                _ControlEvaluationContext(
+                    result=result,
+                    matrix=matrix,
+                    bias=bias,
+                    static_bias=static_bias,
+                    contact_force=contact.generalized_contact_force,
+                    velocity=qd_eval,
+                    coordinate_scale=scale,
+                    config=config,
+                ),
             )
         for contribution in range(len(CONTRIBUTION_NAMES)):
             buffers.engine_contribution_error[case, sample, contribution] = (

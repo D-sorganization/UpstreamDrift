@@ -94,7 +94,7 @@
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json": "c5a019edc85b4b9f4715bf72683a1ec73ae14a1461bf677380b6dcc146e1e9f5",
     "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.npz": "fa91f1b06178a97a43f532f52d5e581fb93f2e91ed336b9e62c58ea06755eb01",
-    "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py": "4a7508f6f033ff2f490b0221a96fef6494a2a8a24e506dbf3ffb2adbfec3d720",
+    "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py": "f92637dd29cea3d8e34db1600d4af46dffa9f40dd2c349c0490b6defb60972c2",
     "scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py": "bce22951219072ef520e08f83487b9b9a66656d884c2b4b8b8930672b16b450d",
     "tests/research/test_articulated_drift_contact_attribution.py": "5c990b06aab49a7e743681c63a155e0b58465ea7e7e2e80097c5f04ada63d0b8"
   }

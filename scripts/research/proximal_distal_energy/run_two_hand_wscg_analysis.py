@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -174,9 +175,49 @@ def _interval_signal_metrics(
     }
 
 
-def _analyze_case(
-    name: str, data: np.ndarray, geometry: np.ndarray
-) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
+@dataclass(frozen=True, slots=True)
+class _WscgForceGeometry:
+    time: np.ndarray
+    lead_position: np.ndarray
+    trail_position: np.ndarray
+    midpoint: np.ndarray
+    lead_force: np.ndarray
+    trail_force: np.ndarray
+    lead_axial: np.ndarray
+    trail_axial: np.ndarray
+    lead_normal: np.ndarray
+    trail_normal: np.ndarray
+    lead_out: np.ndarray
+    trail_out: np.ndarray
+    reconstructed_local_forces: np.ndarray
+    archived_local_forces: np.ndarray
+    maximum_in_plane_force: float
+    resultant: np.ndarray
+    reconstructed_couple_global: np.ndarray
+    source_resultant: np.ndarray
+    source_couple_global: np.ndarray
+    force_moment: np.ndarray
+    free_torque: np.ndarray
+    equivalent_couple: np.ndarray
+    grip_separation: np.ndarray
+    grip_vector: np.ndarray
+    lead_velocity: np.ndarray
+    trail_velocity: np.ndarray
+
+
+@dataclass(frozen=True, slots=True)
+class _WscgPowerSeries:
+    contact_force_power: np.ndarray
+    source_linear_power: np.ndarray
+    source_angular_power: np.ndarray
+    rigid_force_power: np.ndarray
+    deformation_power: np.ndarray
+    decomposed_force_power: np.ndarray
+    contact_power: np.ndarray
+    contact_omega_rad_s: np.ndarray
+
+
+def _case_force_geometry(data: np.ndarray, geometry: np.ndarray) -> _WscgForceGeometry:
     time = data["time_s"]
     lead_position, trail_position, midpoint = geometry
     lead_force = _vector(data, "lead_force_global", "n")
@@ -227,90 +268,151 @@ def _analyze_case(
     free_torque = free_torque_global @ OUT_OF_PLANE_AXIS
     equivalent_couple = source_couple_local[:, 2]
 
-    midpoint_velocity = 0.5 * (lead_velocity + trail_velocity)
+    return _WscgForceGeometry(
+        time=time,
+        lead_position=lead_position,
+        trail_position=trail_position,
+        midpoint=midpoint,
+        lead_force=lead_force,
+        trail_force=trail_force,
+        lead_axial=lead_axial,
+        trail_axial=trail_axial,
+        lead_normal=lead_normal,
+        trail_normal=trail_normal,
+        lead_out=lead_out,
+        trail_out=trail_out,
+        reconstructed_local_forces=reconstructed_local_forces,
+        archived_local_forces=archived_local_forces,
+        maximum_in_plane_force=maximum_in_plane_force,
+        resultant=resultant,
+        reconstructed_couple_global=reconstructed_couple_global,
+        source_resultant=source_resultant,
+        source_couple_global=source_couple_global,
+        force_moment=force_moment,
+        free_torque=free_torque,
+        equivalent_couple=equivalent_couple,
+        grip_separation=grip_separation,
+        grip_vector=grip_vector,
+        lead_velocity=lead_velocity,
+        trail_velocity=trail_velocity,
+    )
+
+
+def _case_power_series(
+    forces: _WscgForceGeometry, data: np.ndarray
+) -> _WscgPowerSeries:
+    midpoint_velocity = 0.5 * (forces.lead_velocity + forces.trail_velocity)
     contact_force_power = np.sum(
-        lead_force * lead_velocity + trail_force * trail_velocity, axis=1
+        forces.lead_force * forces.lead_velocity
+        + forces.trail_force * forces.trail_velocity,
+        axis=1,
     )
     source_linear_power = data["lead_linear_power_w"] + data["trail_linear_power_w"]
     source_angular_power = data["lead_angular_power_w"] + data["trail_angular_power_w"]
-    relative_velocity = trail_velocity - lead_velocity
-    differential_force = 0.5 * (trail_force - lead_force)
+    relative_velocity = forces.trail_velocity - forces.lead_velocity
+    differential_force = 0.5 * (forces.trail_force - forces.lead_force)
     contact_omega_rad_s = np.sum(
-        np.cross(grip_vector, relative_velocity) * OUT_OF_PLANE_AXIS, axis=1
-    ) / np.sum(grip_vector**2, axis=1)
+        np.cross(forces.grip_vector, relative_velocity) * OUT_OF_PLANE_AXIS, axis=1
+    ) / np.sum(forces.grip_vector**2, axis=1)
     rigid_relative_velocity = contact_omega_rad_s[:, None] * np.cross(
-        OUT_OF_PLANE_AXIS, grip_vector
+        OUT_OF_PLANE_AXIS, forces.grip_vector
     )
     deformation_power = np.sum(
         differential_force * (relative_velocity - rigid_relative_velocity), axis=1
     )
     rigid_force_power = (
-        np.sum(resultant * midpoint_velocity, axis=1)
-        + force_moment * contact_omega_rad_s
+        np.sum(forces.resultant * midpoint_velocity, axis=1)
+        + forces.force_moment * contact_omega_rad_s
     )
     decomposed_force_power = rigid_force_power + deformation_power
     contact_power = source_linear_power + source_angular_power
+    return _WscgPowerSeries(
+        contact_force_power=contact_force_power,
+        source_linear_power=source_linear_power,
+        source_angular_power=source_angular_power,
+        rigid_force_power=rigid_force_power,
+        deformation_power=deformation_power,
+        decomposed_force_power=decomposed_force_power,
+        contact_power=contact_power,
+        contact_omega_rad_s=contact_omega_rad_s,
+    )
 
-    crossing = _crossing_record(time, equivalent_couple)
-    minimum_index = int(np.argmin(equivalent_couple))
-    negative = equivalent_couple < 0.0
-    negative_impulse = float(np.trapezoid(np.minimum(equivalent_couple, 0.0), time))
+
+def _case_metrics(
+    data: np.ndarray, forces: _WscgForceGeometry, power: _WscgPowerSeries
+) -> dict[str, Any]:
+    crossing = _crossing_record(forces.time, forces.equivalent_couple)
+    minimum_index = int(np.argmin(forces.equivalent_couple))
+    negative = forces.equivalent_couple < 0.0
+    negative_impulse = float(
+        np.trapezoid(np.minimum(forces.equivalent_couple, 0.0), forces.time)
+    )
     lead_command = data["lead_command_torque_nm"]
     trail_command = data["trail_command_torque_nm"]
     interval_metrics = _interval_signal_metrics(
-        time, crossing, contact_force_power, source_linear_power
+        forces.time, crossing, power.contact_force_power, power.source_linear_power
     )
-    metrics: dict[str, Any] = {
-        "sample_count": int(time.size),
-        "time_step_s": float(np.median(np.diff(time))),
-        "grip_separation_mean_m": float(np.mean(grip_separation)),
+    return {
+        "sample_count": int(forces.time.size),
+        "time_step_s": float(np.median(np.diff(forces.time))),
+        "grip_separation_mean_m": float(np.mean(forces.grip_separation)),
         "grip_separation_range_m": [
-            float(np.min(grip_separation)),
-            float(np.max(grip_separation)),
+            float(np.min(forces.grip_separation)),
+            float(np.max(forces.grip_separation)),
         ],
         "maximum_resultant_reconstruction_residual_n": float(
-            np.max(np.abs(resultant - source_resultant))
+            np.max(np.abs(forces.resultant - forces.source_resultant))
         ),
         "maximum_couple_reconstruction_residual_nm": float(
-            np.max(np.abs(reconstructed_couple_global - source_couple_global))
+            np.max(
+                np.abs(forces.reconstructed_couple_global - forces.source_couple_global)
+            )
         ),
         "maximum_out_of_plane_hand_force_n": float(
-            max(np.max(np.abs(lead_out)), np.max(np.abs(trail_out)))
+            max(np.max(np.abs(forces.lead_out)), np.max(np.abs(forces.trail_out)))
         ),
-        "maximum_in_plane_hand_force_n": maximum_in_plane_force,
+        "maximum_in_plane_hand_force_n": forces.maximum_in_plane_force,
         "maximum_out_of_plane_to_in_plane_force_ratio": float(
-            max(np.max(np.abs(lead_out)), np.max(np.abs(trail_out)))
-            / maximum_in_plane_force
+            max(np.max(np.abs(forces.lead_out)), np.max(np.abs(forces.trail_out)))
+            / forces.maximum_in_plane_force
         ),
         "maximum_local_force_projection_residual_n": float(
-            np.max(np.abs(reconstructed_local_forces - archived_local_forces))
+            np.max(
+                np.abs(forces.reconstructed_local_forces - forces.archived_local_forces)
+            )
         ),
         "maximum_internal_force_power_identity_residual_w": float(
-            np.max(np.abs(contact_force_power - decomposed_force_power))
+            np.max(np.abs(power.contact_force_power - power.decomposed_force_power))
         ),
         "maximum_archived_linear_power_discrepancy_w": float(
-            np.max(np.abs(contact_force_power - source_linear_power))
+            np.max(np.abs(power.contact_force_power - power.source_linear_power))
         ),
-        "maximum_abs_deformation_power_w": float(np.max(np.abs(deformation_power))),
-        "minimum_equivalent_couple_nm": float(equivalent_couple[minimum_index]),
-        "minimum_couple_time_s": float(time[minimum_index]),
-        "force_moment_at_minimum_nm": float(force_moment[minimum_index]),
-        "free_torque_at_minimum_nm": float(free_torque[minimum_index]),
+        "maximum_abs_deformation_power_w": float(
+            np.max(np.abs(power.deformation_power))
+        ),
+        "minimum_equivalent_couple_nm": float(forces.equivalent_couple[minimum_index]),
+        "minimum_couple_time_s": float(forces.time[minimum_index]),
+        "force_moment_at_minimum_nm": float(forces.force_moment[minimum_index]),
+        "free_torque_at_minimum_nm": float(forces.free_torque[minimum_index]),
         "reconstructed_force_power_at_minimum_w": float(
-            contact_force_power[minimum_index]
+            power.contact_force_power[minimum_index]
         ),
         "clubhead_speed_at_minimum_mph": float(
             data["clubhead_speed_mph"][minimum_index]
         ),
         "maximum_clubhead_speed_mph": float(np.max(data["clubhead_speed_mph"])),
         "maximum_clubhead_speed_time_s": float(
-            time[int(np.argmax(data["clubhead_speed_mph"]))]
+            forces.time[int(np.argmax(data["clubhead_speed_mph"]))]
         ),
-        "negative_duration_s": float(np.sum(negative) * np.median(np.diff(time))),
+        "negative_duration_s": float(
+            np.sum(negative) * np.median(np.diff(forces.time))
+        ),
         "negative_angular_impulse_nm_s": negative_impulse,
         "crossings": crossing,
         "late_crossing_resampling": _resampling_sensitivity(
-            time, equivalent_couple, float(crossing["late"]["time_s"])
+            forces.time,
+            forces.equivalent_couple,
+            float(crossing["late"]["time_s"]),
         ),
         "maximum_abs_individual_command_torque_nm": float(
             max(np.max(np.abs(lead_command)), np.max(np.abs(trail_command)))
@@ -319,36 +421,50 @@ def _analyze_case(
             np.max(np.abs(lead_command + trail_command))
         ),
         "maximum_free_torque_command_residual_nm": float(
-            np.max(np.abs(free_torque - lead_command - trail_command))
+            np.max(np.abs(forces.free_torque - lead_command - trail_command))
         ),
         **interval_metrics,
     }
-    arrays = {
-        "time": time,
-        "lead_position": lead_position,
-        "trail_position": trail_position,
-        "midpoint": midpoint,
-        "lead_force": lead_force,
-        "trail_force": trail_force,
-        "lead_axial": lead_axial,
-        "trail_axial": trail_axial,
-        "lead_normal": lead_normal,
-        "trail_normal": trail_normal,
-        "resultant": resultant,
-        "force_moment": force_moment,
-        "free_torque": free_torque,
-        "equivalent_couple": equivalent_couple,
-        "contact_force_power": contact_force_power,
-        "source_angular_power": source_angular_power,
-        "rigid_force_power": rigid_force_power,
-        "deformation_power": deformation_power,
-        "contact_power": contact_power,
-        "decomposed_force_power": decomposed_force_power,
-        "contact_omega_rad_s": contact_omega_rad_s,
-        "grip_separation": grip_separation,
+
+
+def _case_arrays(
+    data: np.ndarray, forces: _WscgForceGeometry, power: _WscgPowerSeries
+) -> dict[str, np.ndarray]:
+    return {
+        "time": forces.time,
+        "lead_position": forces.lead_position,
+        "trail_position": forces.trail_position,
+        "midpoint": forces.midpoint,
+        "lead_force": forces.lead_force,
+        "trail_force": forces.trail_force,
+        "lead_axial": forces.lead_axial,
+        "trail_axial": forces.trail_axial,
+        "lead_normal": forces.lead_normal,
+        "trail_normal": forces.trail_normal,
+        "resultant": forces.resultant,
+        "force_moment": forces.force_moment,
+        "free_torque": forces.free_torque,
+        "equivalent_couple": forces.equivalent_couple,
+        "contact_force_power": power.contact_force_power,
+        "source_angular_power": power.source_angular_power,
+        "rigid_force_power": power.rigid_force_power,
+        "deformation_power": power.deformation_power,
+        "contact_power": power.contact_power,
+        "decomposed_force_power": power.decomposed_force_power,
+        "contact_omega_rad_s": power.contact_omega_rad_s,
+        "grip_separation": forces.grip_separation,
         "clubhead_speed_mph": data["clubhead_speed_mph"],
     }
-    return metrics, arrays
+
+
+def _analyze_case(
+    name: str, data: np.ndarray, geometry: np.ndarray
+) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
+    if name not in CASE_NAMES:
+        raise ValueError(f"unknown case {name!r}")
+    forces = _case_force_geometry(data, geometry)
+    power = _case_power_series(forces, data)
+    return _case_metrics(data, forces, power), _case_arrays(data, forces, power)
 
 
 def _geometry_sweep(arrays: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
@@ -418,6 +534,89 @@ def _geometry_sweep(arrays: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
     }
 
 
+def _wscg_state_match(loaded: dict[str, np.ndarray]) -> dict[str, Any]:
+    return {
+        "maximum_contact_position_difference_m": float(
+            max(
+                np.max(
+                    np.abs(
+                        _vector(loaded["base"], name, "m")
+                        - _vector(loaded["ztcf"], name, "m")
+                    )
+                )
+                for name in (
+                    "lead_position",
+                    "trail_position",
+                    "midpoint_position",
+                )
+            )
+        ),
+        "maximum_contact_velocity_difference_m_s": float(
+            max(
+                np.max(
+                    np.abs(
+                        _vector(loaded["base"], name, "m_s")
+                        - _vector(loaded["ztcf"], name, "m_s")
+                    )
+                )
+                for name in ("lead_velocity_global", "trail_velocity_global")
+            )
+        ),
+        "maximum_clubhead_speed_difference_mph": float(
+            np.max(
+                np.abs(
+                    loaded["base"]["clubhead_speed_mph"]
+                    - loaded["ztcf"]["clubhead_speed_mph"]
+                )
+            )
+        ),
+        "interpretation": (
+            "The exported ZTCF state matches BASE to the recorded cache precision; "
+            "the residuals are reported rather than rounded to exact zero."
+        ),
+    }
+
+
+def _wscg_couple_decomposition(
+    case_arrays: dict[str, dict[str, np.ndarray]],
+) -> dict[str, Any]:
+    base_couple = case_arrays["base"]["equivalent_couple"]
+    ztcf_couple = case_arrays["ztcf"]["equivalent_couple"]
+    delta_couple = case_arrays["delta"]["equivalent_couple"]
+    return {
+        "maximum_abs_base_minus_ztcf_minus_delta_couple_residual_nm": float(
+            np.max(np.abs(base_couple - ztcf_couple - delta_couple))
+        ),
+        "minimum_ztcf_to_base_couple_ratio_at_base_minimum": float(
+            ztcf_couple[np.argmin(base_couple)] / np.min(base_couple)
+        ),
+        "interpretation": (
+            "The nonzero ZTCF equivalent couple is a constraint-reaction wrench at "
+            "the achieved BASE states. It is passive in the pointwise actuation "
+            "sense, but it is not an unforced future trajectory."
+        ),
+    }
+
+
+def _wscg_geometry_sweep_record(
+    case_arrays: dict[str, dict[str, np.ndarray]], sweep: dict[str, np.ndarray]
+) -> dict[str, Any]:
+    return {
+        "source_case": "ztcf",
+        "source_time_s": float(case_arrays["ztcf"]["time"][int(sweep["source_index"])]),
+        "spacing_scale_range": [0.0, 2.0],
+        "orientation_range_deg": [-120.0, 120.0],
+        "maximum_co_rotation_residual_nm": float(
+            np.max(
+                np.abs(
+                    sweep["co_rotated_force_moment_nm"]
+                    - sweep["co_rotated_force_moment_nm"][120]
+                )
+            )
+        ),
+    }
+
+
 def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     """Build the machine-readable audit and plot-ready arrays."""
     loaded = {name: _load_case(name) for name in CASE_NAMES}
@@ -461,78 +660,11 @@ def build_outputs() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         case_arrays[name] = computed
         arrays.update({f"{name}__{key}": value for key, value in computed.items()})
 
-    base_couple = case_arrays["base"]["equivalent_couple"]
-    ztcf_couple = case_arrays["ztcf"]["equivalent_couple"]
-    delta_couple = case_arrays["delta"]["equivalent_couple"]
-    record["state_match"] = {
-        "maximum_contact_position_difference_m": float(
-            max(
-                np.max(
-                    np.abs(
-                        _vector(loaded["base"], name, "m")
-                        - _vector(loaded["ztcf"], name, "m")
-                    )
-                )
-                for name in (
-                    "lead_position",
-                    "trail_position",
-                    "midpoint_position",
-                )
-            )
-        ),
-        "maximum_contact_velocity_difference_m_s": float(
-            max(
-                np.max(
-                    np.abs(
-                        _vector(loaded["base"], name, "m_s")
-                        - _vector(loaded["ztcf"], name, "m_s")
-                    )
-                )
-                for name in ("lead_velocity_global", "trail_velocity_global")
-            )
-        ),
-        "maximum_clubhead_speed_difference_mph": float(
-            np.max(
-                np.abs(
-                    loaded["base"]["clubhead_speed_mph"]
-                    - loaded["ztcf"]["clubhead_speed_mph"]
-                )
-            )
-        ),
-        "interpretation": (
-            "The exported ZTCF state matches BASE to the recorded cache precision; "
-            "the residuals are reported rather than rounded to exact zero."
-        ),
-    }
-    record["decomposition"] = {
-        "maximum_abs_base_minus_ztcf_minus_delta_couple_residual_nm": float(
-            np.max(np.abs(base_couple - ztcf_couple - delta_couple))
-        ),
-        "minimum_ztcf_to_base_couple_ratio_at_base_minimum": float(
-            ztcf_couple[np.argmin(base_couple)] / np.min(base_couple)
-        ),
-        "interpretation": (
-            "The nonzero ZTCF equivalent couple is a constraint-reaction wrench at "
-            "the achieved BASE states. It is passive in the pointwise actuation "
-            "sense, but it is not an unforced future trajectory."
-        ),
-    }
+    record["state_match"] = _wscg_state_match(loaded)
+    record["decomposition"] = _wscg_couple_decomposition(case_arrays)
     sweep = _geometry_sweep(case_arrays["ztcf"])
     arrays.update({f"sweep__{key}": value for key, value in sweep.items()})
-    record["geometry_sweep"] = {
-        "source_case": "ztcf",
-        "source_time_s": float(case_arrays["ztcf"]["time"][int(sweep["source_index"])]),
-        "spacing_scale_range": [0.0, 2.0],
-        "orientation_range_deg": [-120.0, 120.0],
-        "maximum_co_rotation_residual_nm": float(
-            np.max(
-                np.abs(
-                    sweep["co_rotated_force_moment_nm"]
-                    - sweep["co_rotated_force_moment_nm"][120]
-                )
-            )
-        ),
-    }
+    record["geometry_sweep"] = _wscg_geometry_sweep_record(case_arrays, sweep)
     return record, arrays
 
 
