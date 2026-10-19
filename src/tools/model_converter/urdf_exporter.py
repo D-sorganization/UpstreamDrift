@@ -405,6 +405,35 @@ def build_canonical_grip_binding_manifest(
     return manifest
 
 
+def _add_club_links(robot: ET.Element, model: CanonicalModel) -> None:
+    """Weld ``club_shaft`` to ``mid_hands`` and ``club_head`` to the shaft, if present."""
+    # club_shaft link + joint welded to mid_hands
+    shaft_seg = model.get_segment("club_shaft")
+    if shaft_seg:
+        _add_body_link(robot, shaft_seg)
+        _add_fixed_joint(
+            robot,
+            name="mid_hands_to_club_shaft",
+            parent="mid_hands",
+            child=shaft_seg.name,
+            origin_xyz="0.0 0.0 -0.05",
+            origin_rpy="0.0 0.0 0.0",
+        )
+
+    # club_head link + joint welded to club_shaft
+    head_seg = model.get_segment("club_head")
+    if head_seg:
+        _add_body_link(robot, head_seg)
+        _add_fixed_joint(
+            robot,
+            name="club_shaft_to_club_head",
+            parent="club_shaft",
+            child=head_seg.name,
+            origin_xyz=head_seg.origin.xyz,
+            origin_rpy=head_seg.origin.rpy,
+        )
+
+
 def export_urdf(
     model: CanonicalModel,
     out_path: Path | None = None,
@@ -460,31 +489,7 @@ def export_urdf(
     if hands == "separate":
         _add_separate_hand_frames(robot)
 
-    # club_shaft link + joint welded to mid_hands
-    shaft_seg = model.get_segment("club_shaft")
-    if shaft_seg:
-        _add_body_link(robot, shaft_seg)
-        _add_fixed_joint(
-            robot,
-            name="mid_hands_to_club_shaft",
-            parent="mid_hands",
-            child=shaft_seg.name,
-            origin_xyz="0.0 0.0 -0.05",
-            origin_rpy="0.0 0.0 0.0",
-        )
-
-    # club_head link + joint welded to club_shaft
-    head_seg = model.get_segment("club_head")
-    if head_seg:
-        _add_body_link(robot, head_seg)
-        _add_fixed_joint(
-            robot,
-            name="club_shaft_to_club_head",
-            parent="club_shaft",
-            child=head_seg.name,
-            origin_xyz=head_seg.origin.xyz,
-            origin_rpy=head_seg.origin.rpy,
-        )
+    _add_club_links(robot, model)
 
     # Convert to pretty XML string
     raw_xml = ET.tostring(robot, encoding="utf-8")
