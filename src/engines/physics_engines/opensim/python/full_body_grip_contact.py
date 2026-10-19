@@ -58,7 +58,7 @@ def capsule_sphere_count(half_length_m: float, radius_m: float) -> int:
         ``radius_m`` must be a positive finite float.
 
     Postconditions:
-        Returns an integer >= 2 ensuring sphere center spacing <= radius_m.
+        Returns an integer >= 2 ensuring sphere center spacing <= radius_m / 2.
     """
     if not (math.isfinite(half_length_m) and half_length_m >= 0.0):
         raise ValueError(

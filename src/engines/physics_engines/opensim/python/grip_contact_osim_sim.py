@@ -216,11 +216,6 @@ def _calibrated_site_foundation_cached(
     )
     with tempfile.TemporaryDirectory(prefix="calib_site_") as tmp:
         calibrated = calibrated_foundation(ef, Path(tmp))
-    if count > 1:
-        # Two-penetration calibration for capsule sphere-chain approximation:
-        # reconciles the quadratic foundation scaling with the linear shared law
-        # over the dynamic excursion window [preload, 2 * preload] (issue #13305).
-        calibrated = calibrated.with_stiffness(calibrated.stiffness_n_m3 * 1.03)
     return calibrated
 
 

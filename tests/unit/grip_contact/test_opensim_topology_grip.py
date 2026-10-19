@@ -48,7 +48,14 @@ from src.shared.python.grip_contact.topology_contact import (
 )
 from src.shared.python.motion_matching.grip_contract import GripSpec
 
-pytestmark = [pytest.mark.unit, pytest.mark.requires_opensim, pytest.mark.timeout(300)]
+# Every case integrates OpenSim and Pinocchio stiff contact (~20-60 s on a loaded
+# host), so the whole module is slow; pure law checks live elsewhere.
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.requires_opensim,
+    pytest.mark.requires_pinocchio,
+    pytest.mark.slow,
+]
 
 ROOT = Path(__file__).resolve().parents[3]
 MODELS = ROOT / "docs/development/full_body_models"
@@ -185,7 +192,6 @@ def test_opensim_topology_swing_replay_fast(style: GripStyle) -> None:
     _check_parity_versus_pinocchio(run_osim, run_pin, f"swing_fast_{style.value}")
 
 
-@pytest.mark.slow
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
@@ -215,7 +221,6 @@ def test_opensim_topology_static_hold_slow(style: GripStyle) -> None:
     _check_parity_versus_pinocchio(run_osim, run_pin, f"hold_slow_{style.value}")
 
 
-@pytest.mark.slow
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )

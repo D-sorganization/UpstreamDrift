@@ -486,9 +486,9 @@ The sphere centers are linearly spaced between capsule endpoints $p_0$ and $p_1$
 \begin{equation}
 c_k = p_0 + \frac{k}{N - 1}(p_1 - p_0), \quad k \in \{0, \dots, N - 1\}.
 \end{equation}
-The target stiffness and force per sphere are scaled by $1/N$ ($k_k = k_{\mathrm{lin}}/N$, $f_k = f_{\mathrm{target}}/N$),
-with a dynamic two-penetration calibration factor ($1.03\times$) over $[\delta_0, 2\delta_0]$ reconciling the quadratic
-foundation force with the shared linear law during dynamic swing excursions.
+The target stiffness and force per sphere are scaled by $1/N$ ($k_k = k_{\mathrm{lin}}/N$, $f_k = f_{\mathrm{target}}/N$).
+No empirical correction factor is applied: each sphere is calibrated only at the preload by the native-force
+measurement above.
 
 \textbf{Per-Pair Traces and Channel Accounting.} At each integration sample step, individual pair wrenches
 are extracted from OpenSim's \texttt{ElasticFoundationForce} record labels (\texttt{force.X} and \texttt{torque.X}
@@ -511,14 +511,14 @@ Overlap & Hold (0.1\,s) & 1.397\% & 0.830\% & 0.398\% & 0.348\% \\
 Overlap & Swing (0.1\,s) & 1.397\% & 1.327\% & 0.840\% & 0.625\% \\
 Interlock & Hold (0.1\,s) & 1.397\% & 0.830\% & 0.398\% & 0.348\% \\
 Interlock & Swing (0.1\,s) & 1.397\% & 1.327\% & 0.840\% & 0.625\% \\
-Ten-Finger & Hold (0.1\,s) & 1.397\% & 1.339\% & 0.858\% & 0.793\% \\
-Ten-Finger & Swing (0.1\,s) & 1.397\% & 1.334\% & 1.087\% & 1.047\% \\
+Ten-Finger & Hold (0.1\,s) & 1.397\% & 1.364\% & 0.319\% & 0.265\% \\
+Ten-Finger & Swing (0.1\,s) & 1.397\% & 1.358\% & 0.539\% & 0.540\% \\
 \bottomrule
 \end{tabular}
 \caption{OpenSim vs Pinocchio total normal force parity across grip styles (limits: peak $\le 5.0\%$, RMS $\le 2.0\%$).}
 \label{tab:osim_pin_parity}
 \end{table}
-All styles pass well within the strict tolerances (\texttt{PEAK\_TOLERANCE} $= 5.0\%$, \texttt{RMS\_TOLERANCE} $= 2.0\%$). In particular, the short (0.04\,s) swing RMS for ten-finger improves from $1.997\%$ to $1.964\%$, safely clear of the $2.0\%$ boundary.
+All styles pass the strict tolerances (\texttt{PEAK\_TOLERANCE} $= 5.0\%$, \texttt{RMS\_TOLERANCE} $= 2.0\%$). The tightest case is the short (0.04\,s) ten-finger swing, whose lead-side RMS error is $1.997\%$ (hold: $1.850\%$): it passes with a margin of only $0.003$ percentage points, dominated by the start-up transient of the stiffer five-sphere capsule chains. This margin is recorded as an open risk; the tolerance is not widened and no correction factor is tuned to it.
 
 \textbf{Limitations.} OpenSim utilizes implicit BDF integration (\texttt{CPodes}) on the multi-mesh contact geometry;
 dynamic hand deformation is not modeled (rigid hand bodies follow prescribed kinematics); hand--hand contact pairs are
