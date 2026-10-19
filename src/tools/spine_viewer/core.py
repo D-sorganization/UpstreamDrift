@@ -12,20 +12,22 @@ promotes a status; the pass/fail verdict of a run is not a qualification.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from matplotlib.figure import Figure
 from numpy.typing import ArrayLike
 
+from src.engines.physics_engines.opensim.python.spine.study import SpineStudyRequest
 from src.engines.physics_engines.opensim.python.spine.study_aggregation import (
     load_verified_run,
 )
 from src.engines.physics_engines.opensim.python.spine.study_receipt import (
     SpineStudyReceipt,
 )
+from src.shared.python.spine.coupling_data import available_laws
 from src.shared.python.spine.levels import SpinalLevel
 from src.shared.python.spine.loads import LoadObservable, SpinalLoadSeries
 from src.shared.python.spine.plots import plot_angle_stack, plot_load_heatmap
@@ -41,7 +43,11 @@ __all__ = [
     "LOAD_QUANTITIES",
     "SpineStudyView",
     "angle_stack_figure",
+    "build_study_request",
+    "build_study_request_payload",
     "heatmap_figure",
+    "list_available_assets",
+    "list_available_coupling_laws",
     "open_study",
     "resolve_scientific_status",
     "status_banner",
@@ -230,3 +236,107 @@ def view_angle_stack(
 def angle_stack_figure(stack: StackData) -> Figure:
     """Agg figure of a :class:`StackData` (thin pass-through to the plots)."""
     return plot_angle_stack(stack)
+
+
+def list_available_coupling_laws() -> tuple[str, ...]:
+    """Sorted ids of buildable spinal coupling laws."""
+    return available_laws()
+
+
+def list_available_assets(
+    env: Mapping[str, str] | None = None,
+) -> list[dict[str, Any]]:
+    """List spine model asset entries from manifest with admission status, plus fixture."""
+    from src.api.services import spine_viewer_service as service
+
+    return service.list_spine_assets(env=env)
+
+
+def build_study_request_payload(
+    study_id: str,
+    asset_id: str,
+    motion_path: str | Path,
+    coupling_law_id: str | None = None,
+    *,
+    golf_model_path: str | Path | None = None,
+    model_path: str | Path | None = None,
+    output_dir: str | Path | None = None,
+) -> dict[str, Any]:
+    """Build a validated request dictionary for submitting a spine study.
+
+    Args:
+        study_id: File-name-safe identifier (letters, digits, ``_.-``).
+        asset_id: Asset identifier (manifest id or ``"fixture"``).
+        motion_path: Swing motion (``.sto`` or ``.mot``) path.
+        coupling_law_id: Optional coupling law identifier or None.
+        golf_model_path: Optional golf humanoid model path.
+        model_path: Optional segmental model path.
+        output_dir: Optional output directory relative to study root.
+
+    Returns:
+        JSON-compatible mapping suitable for study submission.
+
+    Raises:
+        TypeError: If arguments are of invalid types.
+        ValueError: If required fields are empty or invalid.
+    """
+    if not isinstance(study_id, str):
+        raise TypeError(f"study_id must be a string, got {type(study_id).__name__}")
+    if not study_id.strip():
+        raise ValueError("study_id must be a non-empty string")
+    if not isinstance(asset_id, str):
+        raise TypeError(f"asset_id must be a string, got {type(asset_id).__name__}")
+    if not asset_id.strip():
+        raise ValueError("asset_id must be a non-empty string")
+    if not isinstance(motion_path, (str, Path)):
+        raise TypeError(
+            f"motion_path must be a string or Path, got {type(motion_path).__name__}"
+        )
+    motion_str = str(motion_path).strip()
+    if not motion_str:
+        raise ValueError("motion_path must be a non-empty path")
+    if coupling_law_id is not None and not isinstance(coupling_law_id, str):
+        raise TypeError("coupling_law_id must be a string or None")
+
+    payload: dict[str, Any] = {
+        "study_id": study_id.strip(),
+        "asset_id": asset_id.strip(),
+        "model_id": asset_id.strip(),
+        "motion_path": motion_str,
+    }
+    if asset_id.strip() == "fixture":
+        payload["pelvis"] = "fixture"
+
+    if coupling_law_id and coupling_law_id.strip():
+        payload["coupling_law_id"] = coupling_law_id.strip()
+
+    if golf_model_path is not None:
+        if not isinstance(golf_model_path, (str, Path)):
+            raise TypeError("golf_model_path must be a string or Path")
+        payload["golf_model_path"] = str(golf_model_path)
+
+    if model_path is not None:
+        if not isinstance(model_path, (str, Path)):
+            raise TypeError("model_path must be a string or Path")
+        payload["model_path"] = str(model_path)
+
+    if output_dir is not None:
+        if not isinstance(output_dir, (str, Path)):
+            raise TypeError("output_dir must be a string or Path")
+        payload["output_dir"] = str(output_dir)
+
+    return payload
+
+
+def build_study_request(
+    payload: Mapping[str, Any], root: Path | None = None
+) -> SpineStudyRequest:
+    """Build a validated SpineStudyRequest through the spine viewer service layer.
+
+    Raises:
+        TypeError: If payload is not a mapping or root is not a Path.
+        ValueError: If parameters or input files are invalid.
+    """
+    from src.api.services import spine_viewer_service as service
+
+    return service.parse_study_request(payload, root=root)

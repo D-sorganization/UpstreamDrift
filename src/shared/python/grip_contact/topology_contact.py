@@ -28,7 +28,7 @@ Conventions:
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any
 
@@ -41,7 +41,16 @@ from src.shared.python.core.handedness import (
     lead_side,
     trail_side,
 )
-from src.shared.python.grip_contact.bushing_law import BushingState
+from src.shared.python.grip_contact.batched_pair_contact import (
+    PairRow,
+    SideBatch,
+    side_rows_wrench,
+)
+from src.shared.python.grip_contact.bushing_law import (
+    BushingState,
+    cross3,
+    rotation_errors,
+)
 from src.shared.python.grip_contact.contact_topology import (
     GRIP,
     PHYSICAL_HAND_GRIP_MODES,
@@ -108,6 +117,7 @@ __all__ = [
     "topology_hand_hand_wrenches",
     "topology_pair_wrench",
     "topology_side_wrench",
+    "topology_side_wrench_reference",
 ]
 
 
@@ -133,32 +143,25 @@ def _normalize_side(
 
 
 def _validate_bushing_state(state: BushingState, name: str) -> None:
-    """DbC check for BushingState proper rotation and finite values."""
+    """DbC check for BushingState proper rotation and finite values.
+
+    Runs once per side evaluation on the integrator hot path, so it works on
+    Python floats: ``|R^T R - I|`` entrywise <= 1e-5 and ``|det R - 1|`` <= 1e-5.
+    """
     if not isinstance(state, BushingState):
         raise TypeError(f"{name} must be a BushingState, got {type(state).__name__}")
     rot = np.asarray(state.rotation, dtype=float)
-    if rot.shape != (3, 3) or not np.isfinite(rot).all():
+    if rot.shape != (3, 3):
         raise ValueError(f"{name}.rotation must be a finite 3x3 matrix")
-    rtr = rot.T @ rot
-    if (
-        abs(rtr[0, 0] - 1.0) > 1e-5
-        or abs(rtr[1, 1] - 1.0) > 1e-5
-        or abs(rtr[2, 2] - 1.0) > 1e-5
-        or abs(rtr[0, 1]) > 1e-5
-        or abs(rtr[0, 2]) > 1e-5
-        or abs(rtr[1, 2]) > 1e-5
-    ):
-        raise ValueError(f"{name}.rotation must be a proper rotation matrix")
-    det = (
-        rot[0, 0] * (rot[1, 1] * rot[2, 2] - rot[1, 2] * rot[2, 1])
-        - rot[0, 1] * (rot[1, 0] * rot[2, 2] - rot[1, 2] * rot[2, 0])
-        + rot[0, 2] * (rot[1, 0] * rot[2, 1] - rot[1, 1] * rot[2, 0])
-    )
-    if abs(det - 1.0) > 1e-5:
+    rows = rot.tolist()
+    if not all(map(math.isfinite, rows[0] + rows[1] + rows[2])):
+        raise ValueError(f"{name}.rotation must be a finite 3x3 matrix")
+    gram_error, det = rotation_errors(rows)
+    if gram_error > 1e-5 or abs(det - 1.0) > 1e-5:
         raise ValueError(f"{name}.rotation must be a proper rotation matrix")
     for field_name in ("position_m", "velocity_m_s", "omega_rad_s"):
         val = np.asarray(getattr(state, field_name), dtype=float)
-        if val.shape != (3,) or not np.isfinite(val).all():
+        if val.shape != (3,) or not all(map(math.isfinite, val.tolist())):
             raise ValueError(f"{name}.{field_name} must be a finite 3-vector")
 
 
@@ -254,6 +257,29 @@ def site_primitive_in_hand_frame(
     raise ValueError(f"unknown site primitive {mapped.primitive!r}")
 
 
+def _build_side_batch(
+    pairs: tuple[tuple[ContactPair, ContactSphere | ContactCapsule], ...],
+    grip: ContactCapsule,
+    mode: str,
+) -> SideBatch:
+    """Stack the hand-site primitives of ``pairs`` physical in ``mode``, in order."""
+    prims = [prim for p, prim in pairs if mode in p.physical_modes]
+    starts = [q.center_m if isinstance(q, ContactSphere) else q.p0_m for q in prims]
+    ends = [q.p1_m for q in prims if isinstance(q, ContactCapsule)]
+    end_rows: list[int] = []
+    for q in prims:
+        capsule = isinstance(q, ContactCapsule)
+        end_rows.append(len(prims) + sum(r >= 0 for r in end_rows) if capsule else -1)
+    return SideBatch(
+        pair_names=tuple(p.name for p, _ in pairs if mode in p.physical_modes),
+        hand_points_m=np.array(starts + ends, dtype=float).reshape(-1, 1, 3),
+        capsule_ends=tuple(end_rows),
+        site_radii_m=tuple(float(q.radius_m) for q in prims),
+        grip_points_m=np.array([grip.p0_m, grip.p1_m], dtype=float).reshape(2, 1, 3),
+        grip_radius_m=float(grip.radius_m),
+    )
+
+
 @dataclass(frozen=True)
 class TopologyContactModel:
     """ContactTopology plus contact-law parameters and grip cylinder geometry."""
@@ -269,6 +295,9 @@ class TopologyContactModel:
     _physical_pairs: dict[
         str, tuple[tuple[ContactPair, ContactSphere | ContactCapsule], ...]
     ] = field(init=False, repr=False, compare=False)
+    _batches: dict[tuple[str, str], SideBatch] = field(
+        init=False, repr=False, compare=False
+    )
 
     def __post_init__(self) -> None:
         if not isinstance(self.topology, ContactTopology):
@@ -312,6 +341,7 @@ class TopologyContactModel:
                     p_list.append((p, prim))
             pairs_dict[side_char] = tuple(p_list)
         object.__setattr__(self, "_physical_pairs", pairs_dict)
+        object.__setattr__(self, "_batches", {})
 
     @property
     def parameters(self) -> ContactParameters:
@@ -344,6 +374,19 @@ class TopologyContactModel:
         """Ordered (pair, primitive) tuples for physical pad-grip pairs on ``side``."""
         _, side_char = _normalize_side(side)
         return self._physical_pairs[side_char]
+
+    def side_batch(self, side: str, mode: str = "contact") -> SideBatch:
+        """Stacked hand-site primitives of ``side``'s pairs physical in ``mode``.
+
+        Built once per ``(side, mode)`` and cached; the topology is immutable.
+        """
+        _, side_char = _normalize_side(side)
+        key = (side_char, mode)
+        if key not in self._batches:
+            self._batches[key] = _build_side_batch(
+                self._physical_pairs[side_char], self._grip_capsules[side_char], mode
+            )
+        return self._batches[key]
 
     def _make_grip_capsule(self, side: str) -> ContactCapsule:
         _, side_char = _normalize_side(side)
@@ -383,7 +426,7 @@ class TopologySideWrench:
 
     force_n: np.ndarray
     moment_nm: np.ndarray
-    pair_wrenches: dict[str, PairWrench]
+    pair_wrenches: Mapping[str, PairWrench]
     normal_force_n: np.ndarray
     tangential_force_n: np.ndarray
     total_normal_force_n: float
@@ -409,6 +452,52 @@ class TopologyHandHandWrench:
     force_on_trail_n: np.ndarray
     moment_on_trail_nm: np.ndarray
     pairs: Mapping[str, PairWrench]
+
+
+class _LazyPairWrenches(Mapping[str, PairWrench]):
+    """Per-pair :class:`PairWrench` views of a batched side result, built on access.
+
+    The integrator right-hand side only needs the resultants and force
+    magnitudes, so the validated per-pair objects are built only when a caller
+    (a trace recorder, a test) asks for them.
+    """
+
+    def __init__(
+        self,
+        names: tuple[str, ...],
+        rows: tuple[PairRow, ...],
+        hand_frame: BushingState,
+        club_frame: BushingState,
+    ) -> None:
+        self._rows = dict(zip(names, rows, strict=True))
+        self._hand_frame = hand_frame
+        self._club_frame = club_frame
+
+    def __getitem__(self, name: str) -> PairWrench:
+        row = self._rows[name]
+        force_b = np.array(row.force_n)
+        force_a = -force_b
+        lever_a = np.array(row.contact_point_m) - self._hand_frame.position_m
+        moment_a = cross3(lever_a, force_a) - np.array(row.spin_nm)
+        return PairWrench(
+            force_a_n=force_a,
+            moment_a_nm=moment_a,
+            force_b_n=force_b,
+            moment_b_nm=np.array(row.moment_nm),
+            contact_point_m=np.array(row.contact_point_m),
+            normal=np.array(row.normal),
+            penetration_m=row.penetration_m,
+            point_a_m=self._hand_frame.position_m,
+            point_b_m=self._club_frame.position_m,
+            normal_force_mag_n=row.normal_force_mag_n,
+            tangential_force_mag_n=row.tangential_force_mag_n,
+        )
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._rows)
+
+    def __len__(self) -> int:
+        return len(self._rows)
 
 
 def _evaluate_site_on_grip(
@@ -449,17 +538,7 @@ def topology_pair_wrench(
     club_frame: BushingState,
     mode: str = "contact",
 ) -> PairWrench:
-    """Evaluate physical contact wrench for a single hand-grip pair.
-
-    Preconditions:
-        ``model`` is a :class:`TopologyContactModel`;
-        ``pair`` is a ContactPair in ``model.topology``;
-        ``hand_frame`` and ``club_frame`` are valid :class:`BushingState` instances;
-        ``pair`` must be a physical hand-grip pair in ``mode`` (raises ``ValueError``
-        if a hand-hand pair is passed).
-    Postconditions:
-        Returns :class:`PairWrench` satisfying action/reaction by construction.
-    """
+    """Evaluate physical contact wrench for a single hand-grip pair (DbC validated)."""
     if not isinstance(model, TopologyContactModel):
         raise TypeError(
             f"model must be TopologyContactModel, got {type(model).__name__}"
@@ -499,18 +578,7 @@ def topology_hand_hand_pair_wrench(
     mode: str = "separated_v2",
     handedness: Handedness = DEFAULT_HANDEDNESS,
 ) -> PairWrench:
-    """Evaluate physical contact wrench for a hand-hand pair on separate phalanx/hand bodies.
-
-    Preconditions:
-        ``model`` is a :class:`TopologyContactModel`;
-        ``pair`` is a hand-hand :class:`ContactPair` in ``model.topology``;
-        ``mode`` is in ``pair.physical_modes`` (e.g. ``'separated_v2'``);
-        ``frame_a`` and ``frame_b`` are valid :class:`BushingState` instances.
-    Postconditions:
-        Returns :class:`PairWrench` evaluated via the G2 kernels
-        (:func:`sphere_capsule`, :func:`capsule_sphere`, :func:`capsule_capsule`)
-        satisfying exact action-reaction.
-    """
+    """Evaluate physical contact wrench for a hand-hand pair on separate hand bodies."""
     if not isinstance(model, TopologyContactModel):
         raise TypeError(
             f"model must be TopologyContactModel, got {type(model).__name__}"
@@ -589,23 +657,7 @@ def topology_hand_hand_wrenches(
     *,
     handedness: Handedness = DEFAULT_HANDEDNESS,
 ) -> TopologyHandHandWrench:
-    """Evaluate physical hand-hand contact pairs and equal-and-opposite hand wrenches.
-
-    Loops over :func:`topology_hand_hand_pair_wrench` for every hand-hand pair in
-    ``model.topology``.
-
-    Identifiability limit: finger contact is not observable from motion-capture
-    markers (no finger markers). Only the net club wrench is identified; individual
-    hand-hand pair forces depend on the hand-on-club retention and contact parameters.
-
-    Preconditions:
-        ``model`` is a :class:`TopologyContactModel`;
-        ``lead_frame`` and ``trail_frame`` are valid :class:`BushingState` instances;
-        ``mode`` is in :data:`PHYSICAL_HAND_HAND_MODES` (``'separated_v2'``).
-    Postconditions:
-        ``||force_on_lead_n + force_on_trail_n|| <= 1e-12 N`` and the total moment
-        about any world point vanishes to floating-point round-off.
-    """
+    """Evaluate physical hand-hand contact pairs and equal-and-opposite hand wrenches."""
     if not isinstance(model, TopologyContactModel):
         raise TypeError(
             f"model must be TopologyContactModel, got {type(model).__name__}"
@@ -693,16 +745,7 @@ def contact_transition_fraction(
 ) -> float:
     """Fraction of adjacent time-step transitions where contact activates or separates.
 
-    A contact pair whose normal force never varies (``ptp <= variation_tol_n``)
-    carries only static preload and returns ``NaN`` so it is never silently
-    counted as passing a chatter test.
-
-    Preconditions:
-        ``normal_force_n`` is a finite 1-D array with at least 2 samples;
-        ``threshold_n >= 0``; ``variation_tol_n >= 0``.
-    Postconditions:
-        Returns ``NaN`` when ``ptp(normal_force_n) <= variation_tol_n``,
-        otherwise a float in ``[0.0, 1.0]``.
+    Returns ``NaN`` when ``ptp(normal_force_n) <= variation_tol_n`` (static preload).
     """
     arr = np.asarray(normal_force_n, dtype=float)
     if arr.ndim != 1 or arr.size < 2 or not np.all(np.isfinite(arr)):
@@ -727,16 +770,7 @@ def evaluate_pair_chatter(
     threshold_n: float = 0.0,
     variation_tol_n: float = DEFAULT_FORCE_VARIATION_TOL_N,
 ) -> PairChatterSummary:
-    """Evaluate honest chatter status for a single contact pair's normal-force trace.
-
-    If the normal force never changes beyond ``variation_tol_n``, the pair is
-    classified as ``'constant (preload only)'`` with ``passes_chatter=False``
-    and ``transition_fraction=NaN``.
-
-    Preconditions:
-        ``normal_force_n`` is a finite 1-D array with at least 2 samples;
-        ``0 < chatter_tolerance <= 1``; ``threshold_n >= 0``; ``variation_tol_n >= 0``.
-    """
+    """Evaluate honest chatter status for a single contact pair's normal-force trace."""
     if (
         not math.isfinite(chatter_tolerance)
         or chatter_tolerance <= 0.0
@@ -781,6 +815,22 @@ def evaluate_pair_chatter(
     )
 
 
+def _check_side_inputs(
+    model: TopologyContactModel,
+    side: str,
+    hand_frame: BushingState,
+    club_frame: BushingState,
+) -> None:
+    """DbC of a side evaluation: model type, side name and both frame states."""
+    if not isinstance(model, TopologyContactModel):
+        raise TypeError(
+            f"model must be TopologyContactModel, got {type(model).__name__}"
+        )
+    _normalize_side(side)
+    _validate_bushing_state(hand_frame, "hand_frame")
+    _validate_bushing_state(club_frame, "club_frame")
+
+
 def topology_side_wrench(
     model: TopologyContactModel,
     side: str,
@@ -788,25 +838,57 @@ def topology_side_wrench(
     club_frame: BushingState,
     mode: str = "contact",
 ) -> TopologySideWrench:
-    """Evaluate contact wrench of ``side``'s physical pads on the club grip.
-
-    Preconditions:
-        ``model`` is a :class:`TopologyContactModel`;
-        ``side`` in ``('L', 'R', 'lead', 'trail')``;
-        ``hand_frame`` and ``club_frame`` are valid :class:`BushingState` instances;
-        ``mode`` is a valid execution mode (default ``'contact'``).
-    Postconditions:
-        Resultant force and moment on the club match the sum of individual pair
-        wrenches on the club about the club frame origin.
-    """
-    if not isinstance(model, TopologyContactModel):
-        raise TypeError(
-            f"model must be TopologyContactModel, got {type(model).__name__}"
+    """Contact wrench of ``side``'s physical sites on the grip, in one batched pass."""
+    _check_side_inputs(model, side, hand_frame, club_frame)
+    batch = model.side_batch(side, mode)
+    if not batch.pair_names:
+        return TopologySideWrench(
+            force_n=np.zeros(3),
+            moment_nm=np.zeros(3),
+            pair_wrenches={},
+            normal_force_n=np.zeros(0),
+            tangential_force_n=np.zeros(0),
+            total_normal_force_n=0.0,
         )
-    _role, _side_char = _normalize_side(side)
-    _validate_bushing_state(hand_frame, "hand_frame")
-    _validate_bushing_state(club_frame, "club_frame")
+    side_rows = side_rows_wrench(
+        batch,
+        hand_frame,
+        club_frame,
+        model.law,
+        model.patch_radius_m,
+        model.spin_transition_rad_s,
+    )
+    rows = side_rows.rows
+    normal = [row.normal_force_mag_n for row in rows]
+    # One array for every output keeps the numpy call count per side constant.
+    flat = np.array(
+        [
+            *side_rows.force_n,
+            *side_rows.moment_nm,
+            *normal,
+            *(row.tangential_force_mag_n for row in rows),
+        ]
+    )
+    count = len(rows)
+    return TopologySideWrench(
+        force_n=flat[0:3],
+        moment_nm=flat[3:6],
+        pair_wrenches=_LazyPairWrenches(batch.pair_names, rows, hand_frame, club_frame),
+        normal_force_n=flat[6 : 6 + count],
+        tangential_force_n=flat[6 + count :],
+        total_normal_force_n=sum(normal),
+    )
 
+
+def topology_side_wrench_reference(
+    model: TopologyContactModel,
+    side: str,
+    hand_frame: BushingState,
+    club_frame: BushingState,
+    mode: str = "contact",
+) -> TopologySideWrench:
+    """Per-pair reference: one shared G2 kernel call per physical pair."""
+    _check_side_inputs(model, side, hand_frame, club_frame)
     pairs_with_prims = model.physical_pair_primitives(side)
     grip_cap = model.grip_capsule(side)
     effective_mode = "contact" if mode == "separated_v2" else mode
@@ -824,13 +906,7 @@ def topology_side_wrench(
 def aggregate_side_wrench(
     pair_wrenches: Mapping[str, PairWrench],
 ) -> TopologySideWrench:
-    """Sum per-pair wrenches into one :class:`TopologySideWrench`.
-
-    Postconditions:
-        ``force_n``/``moment_nm`` are the sums of the pairs' club-side
-        (``force_b_n``/``moment_b_nm``) values in insertion order; an empty
-        mapping is a true zero (no pairs, no force), never NaN.
-    """
+    """Sum per-pair wrenches into one :class:`TopologySideWrench`."""
     force = np.zeros(3)
     moment = np.zeros(3)
     normal_forces: list[float] = []
@@ -886,21 +962,10 @@ def _contact_point_in_club_frame(
 
 
 class PairTraceRecorder:
-    """Engine-agnostic per-step pair trace and state recorder (HRG-GS-G6, #13304; HRG-GS-G11, #13309).
-
-    Pre-creates trace buffers per topology pair. In default ``mode='contact'``,
-    hand-hand pairs are recorded as ``NaN`` with an ``allocated`` reason. In
-    ``mode='separated_v2'``, hand-hand pairs are evaluated physically and recorded
-    with finite normal force, tangential force, penetration, and contact-point drift.
-    """
+    """Engine-agnostic per-step pair trace and state recorder (HRG-GS-G6, #13304; HRG-GS-G11, #13309)."""
 
     def __init__(self, model: TopologyContactModel, mode: str = "contact") -> None:
-        """Construct recorder from TopologyContactModel.
-
-        Preconditions:
-            ``model`` must be an instance of :class:`TopologyContactModel`;
-            ``mode`` in ``('contact', 'separated_v2')``.
-        """
+        """Construct recorder from TopologyContactModel."""
         if not isinstance(model, TopologyContactModel):
             raise TypeError(
                 f"model must be TopologyContactModel, got {type(model).__name__}"
