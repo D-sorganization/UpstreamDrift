@@ -22,6 +22,21 @@ pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
+# CI Standard jobs folded into the required `quality-gate` aggregate for
+# issue #13364 (they carry the RM#1989 fork guard).
+QUALITY_GATE_FLEET_GATES = (
+    "frontend-tests",
+    "core-only-install",
+    "dependency-consistency",
+    "alembic-postgres-round-trip",
+    "rust-quality-gate",
+    "rust-quickstart",
+    "local-only-workflows",
+    "pinned-actions",
+    "workflow-inventory",
+    "urdf-layering",
+)
+
 
 def _major_minor(version: str) -> tuple[int, int]:
     """Return a crate/package major.minor tuple from an exact semver string."""
@@ -955,6 +970,9 @@ class TestCIEnvironmentCompatibility:
             "seam-drift-gate",
             "impact-explorer-web-build",
             "always-on-unit-lane",
+            # Issue #13364: gating jobs that previously failed without
+            # blocking the merge queue.
+            *QUALITY_GATE_FLEET_GATES,
         }
         assert job["if"] == "always()"
         aggregate_step = next(
@@ -985,6 +1003,47 @@ class TestCIEnvironmentCompatibility:
             '[ "$PICK_RUNNER" != "success" ] || [ "$CHANGED_PATHS" != "success" ]'
             in aggregate
         )
+
+    def test_quality_gate_aggregates_every_gating_ci_standard_job(self) -> None:
+        """No CI Standard job that gates code PRs may sit outside `quality-gate`.
+
+        `quality-gate` is the only required check, so a gating job missing from
+        its `needs` can fail while the merge queue still lands the PR. That is
+        how #13320 and #13360 merged with `frontend-tests` red (issue #13364).
+        Only disabled jobs (`if: ... (false)`) and schedule/dispatch-only jobs
+        are allowed to stay out of the aggregate.
+        """
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        workflow = yaml.safe_load(
+            (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        jobs = workflow["jobs"]
+        gate = jobs["quality-gate"]
+        aggregated = set(gate["needs"])
+        not_gating = {"quality-gate", "matlab-tests", "arduino-build", "parity-smoke"}
+
+        missing = sorted(set(jobs) - aggregated - not_gating)
+        assert not missing, (
+            f"CI Standard jobs not aggregated by quality-gate: {missing}. "
+            "Add them to quality-gate `needs` and the aggregate step (#13364)."
+        )
+
+        aggregate_step = next(
+            step
+            for step in gate["steps"]
+            if step.get("name") == "Aggregate quality gate results"
+        )
+        env_values = set(aggregate_step["env"].values())
+        for job_id in QUALITY_GATE_FLEET_GATES:
+            assert f"${{{{ needs.{job_id}.result }}}}" in env_values, job_id
+            assert f"{job_id}=$" in aggregate_step["run"], job_id
+        assert "$fleet_gates" in aggregate_step["run"]
 
     def test_ci_standard_runs_on_every_pull_request(self) -> None:
         """CI Standard must not be path-filtered out of any PR.
