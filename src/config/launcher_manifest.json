@@ -799,33 +799,6 @@
       }
     },
     {
-      "id": "jaxsim_dashboard",
-      "name": "JaxSim Dashboard",
-      "description": "Interactive JaxSim simulation dashboard",
-      "category": "physics_engine",
-      "type": "special_app",
-      "path": "src/launchers/jaxsim_dashboard.py",
-      "engine_type": "jaxsim",
-      "logo": "jaxsim.svg",
-      "status": "experimental",
-      "hidden": true,
-      "hidden_reason": "Consolidated into the Engine Hub (#9479): use the JaxSim engine and Cross-Engine Dashboard for comparison. Retained and still resolvable at its own route so no capability is lost.",
-      "hidden_owner": "@launcher",
-      "web_route": "/tools/jaxsim-dashboard",
-      "capabilities": [
-        "rigid_body",
-        "kinematics",
-        "forward_dynamics",
-        "dashboard",
-        "recorder",
-        "advanced_analysis"
-      ],
-      "order": 33,
-      "web": {
-        "mode": "native-window"
-      }
-    },
-    {
       "id": "canonical_core_estimation",
       "name": "Canonical-Core Estimation",
       "description": "Workspace entry point for CC-19 estimation services and canonical-state fit handoff.",
@@ -1293,8 +1266,35 @@
       "capabilities": ["spine", "joint_reaction", "study_receipt"],
       "order": 104,
       "web": {
-        "mode": "unavailable",
-        "reason": "PyQt6 desktop viewer; no React or Tauri counterpart yet (tracked in #12772)"
+        "mode": "route",
+        "route": "/tools/spine-viewer"
+      }
+    },
+    {
+      "id": "jaxsim_dashboard",
+      "name": "JaxSim Dashboard",
+      "description": "Interactive JaxSim simulation dashboard",
+      "category": "physics_engine",
+      "type": "special_app",
+      "path": "src/launchers/jaxsim_dashboard.py",
+      "engine_type": "jaxsim",
+      "logo": "jaxsim.svg",
+      "status": "experimental",
+      "hidden": true,
+      "hidden_reason": "Consolidated into the Engine Hub (#9479): use the JaxSim engine and Cross-Engine Dashboard for comparison. Retained and still resolvable at its own route so no capability is lost.",
+      "hidden_owner": "@launcher",
+      "web_route": "/tools/jaxsim-dashboard",
+      "capabilities": [
+        "rigid_body",
+        "kinematics",
+        "forward_dynamics",
+        "dashboard",
+        "recorder",
+        "advanced_analysis"
+      ],
+      "order": 105,
+      "web": {
+        "mode": "native-window"
       }
     }
   ]
