@@ -89,10 +89,14 @@ from src.shared.python.grip_contact.swing_input import (
     map_coordinates,
 )
 from src.shared.python.grip_contact.topology_contact import (
+    HAND_HAND_IDENTIFIABILITY_NOTE,
     TopologyContactModel,
+    TopologyHandHandWrench,
     TopologySideWrench,
     build_topology_model,
+    contact_transition_fraction,
     map_site_to_hand_frame,
+    topology_hand_hand_wrenches,
     topology_side_wrench,
 )
 from src.shared.python.grip_contact.trajectory_conditioning import (
@@ -117,6 +121,7 @@ __all__ = [
     "EngineParityRow",
     "GRIP",
     "GripStyle",
+    "HAND_HAND_IDENTIFIABILITY_NOTE",
     "HandAnatomy",
     "INDETERMINACY_CITATION",
     "INDETERMINATE_LABEL",
@@ -138,6 +143,7 @@ __all__ = [
     "capsule_capsule",
     "classify_parity_quantity",
     "contact_topology",
+    "contact_transition_fraction",
     "hand_frame_states",
     "parity_errors",
     "sphere_capsule",
@@ -174,8 +180,10 @@ __all__ = [
     "modal_damping",
     "unwrap_angular",
     "TopologyContactModel",
+    "TopologyHandHandWrench",
     "TopologySideWrench",
     "build_topology_model",
     "map_site_to_hand_frame",
+    "topology_hand_hand_wrenches",
     "topology_side_wrench",
 ]
