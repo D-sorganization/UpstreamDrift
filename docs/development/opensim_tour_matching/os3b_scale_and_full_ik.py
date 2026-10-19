@@ -39,6 +39,10 @@ from src.engines.physics_engines.opensim.python.tour_matching import (  # noqa: 
     write_model,
     write_trc,
 )
+from src.engines.physics_engines.opensim.python.tour_matching.static_address_registration import (  # noqa: E402
+    solve_pelvis_rotations,
+    waist_cluster_frame,
+)
 from src.engines.physics_engines.opensim.python.tour_matching.marker_set import (  # noqa: E402
     locked_coordinates,
     parse_model,
@@ -266,6 +270,20 @@ def _run_ik_motion(
         return q
 
 
+def _waist_heading_seed(scaled_osim: Path, cal_capture: TourCapture) -> dict:
+    """Pelvis rotation coordinates whose body frame matches the frame-0 waist axes."""
+    import opensim  # type: ignore[import-not-found]
+
+    points = {
+        k: cal_capture.points_m[0, cal_capture.index(k)]
+        for k in ("WaistLeft", "WaistRight", "WaistLBack", "WaistRBack")
+    }
+    coords, _ = solve_pelvis_rotations(
+        opensim.Model(str(scaled_osim)), waist_cluster_frame(points)
+    )
+    return coords
+
+
 def _prepare_calibration_and_run(
     scaled_osim: Path,
     cal_capture: TourCapture,
@@ -289,6 +307,11 @@ def _prepare_calibration_and_run(
     initial = np.zeros(len(names))
     for axis, key in enumerate(("pelvis_tx", "pelvis_ty", "pelvis_tz")):
         initial[names.index(key)] = float(centroid[axis])
+    # Seed the pelvis heading and tilt from the waist cluster (#13434). A zero
+    # seed faces the model along +x while the golfer faces -x, and the free
+    # calibration then converges on a mirrored, backwards solution.
+    for key, value in _waist_heading_seed(scaled_osim, cal_capture).items():
+        initial[names.index(key)] = value
 
     cal_result = calibrate_marker_offsets(
         cal_capture,
@@ -308,7 +331,9 @@ def _scale_and_setup_model(
 
     scale_res = estimate_segment_scales(full)
     scaled_osim = apply_segment_scaling(
-        osim_path, scale_res.scale_factors, output_dir / "golf_humanoid_scaled.osim"
+        osim_path,
+        scale_res.scale_factors,
+        out_path=output_dir / "golf_humanoid_scaled.osim",
     )
     unlocked_base = write_model(
         tracking_variant(scaled_osim, {"WaistLeft": ("pelvis", (0.0, 0.0, 0.0))}, []),
