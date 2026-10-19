@@ -30,6 +30,20 @@
       "category": "bunkershot3d_solver",
       "host_requirement": "conda-forge python with pychrono (F3 grain simulation)",
       "rationale": "Real 3-D DEM grain simulation via pychrono requires specialized conda-forge binary packages not present in core pip environments. Deferred by owner ruling 2026-10-14 under #12536."
+    },
+    {
+      "id": "HRG-GS-M11",
+      "issue": 13333,
+      "epic_issue": 13298,
+      "title": "HRG-GS-M11: Simscape GolfSwing3D Grip Topology Load and Render Check (MATLAB R2025b Host, Deferred)",
+      "status": "deferred",
+      "category": "simscape_grip_topology_export",
+      "host_requirement": "MATLAB R2025b (DeskComputer / ControlTower, C:/Program Files/MATLAB/R2025b/bin/matlab.exe)",
+      "executable": "C:/Program Files/MATLAB/R2025b/bin/matlab.exe",
+      "export_script": "scripts/export_simscape_grip_topology.py",
+      "matlab_consumer": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_read_grip_topology.m",
+      "artifact_path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/appearance/gs3dx_grip_topology.json",
+      "rationale": "MATLAB R2025b load and render check of gs3dx_grip_topology.json via gs3dx_read_grip_topology.m requires a licensed Windows MATLAB R2025b host (C:/Program Files/MATLAB/R2025b/bin/matlab.exe) and cannot run on Linux headless CI."
     }
   ]
 }
