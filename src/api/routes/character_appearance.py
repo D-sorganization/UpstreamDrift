@@ -178,7 +178,17 @@ class GripRevisionRequest(BaseModel):
     """
 
     character: CharacterSpecRequest | None = None
-    preset: Literal["weak", "neutral", "strong"] | None = None
+    preset: (
+        Literal[
+            "weak",
+            "neutral",
+            "strong",
+            "palmer_overlap",
+            "woods_interlock",
+            "ten_finger",
+        ]
+        | None
+    ) = None
     lead_shaft_rotation: float | None = None
     trail_shaft_rotation: float | None = None
     lead_palm_diagonal: float | None = None

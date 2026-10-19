@@ -2051,7 +2051,7 @@ export interface GreenReadingResponse {
  */
 export interface GripRevisionRequest {
   character?: CharacterSpecRequest | null;
-  preset?: "weak" | "neutral" | "strong" | null;
+  preset?: "weak" | "neutral" | "strong" | "palmer_overlap" | "woods_interlock" | "ten_finger" | null;
   lead_shaft_rotation?: number | null;
   trail_shaft_rotation?: number | null;
   lead_palm_diagonal?: number | null;
