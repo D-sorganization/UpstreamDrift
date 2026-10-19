@@ -1759,6 +1759,72 @@ QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \
     --out docs/development/lifting/evidence/opensim_muscles/receipts.json
 \end{verbatim}
 
+\subsection{Predictive Moco Deadlift (OSL-7, Issue \#13044)}\label{sec:opensim-predictive-deadlift}
+
+\paragraph{Formulation and Problem Specification.}
+Issue \#13044 implements a direct-collocation predictive dynamic simulation of the barbell deadlift
+using OpenSim Moco with the \texttt{RajagopalLaiUhlrich2023} full-body model. The model is configured
+with rigid tendons (\texttt{ModOpIgnoreTendonCompliance}) and smooth muscle dynamics
+(\texttt{ModOpReplaceMusclesWithDeGrooteFregly2016}) across 80 lower-limb muscle-tendon units.
+Locked degrees of freedom (\texttt{mtp}, \texttt{subtalar}, \texttt{acromial}, \texttt{elbow},
+\texttt{radioulnar}, and \texttt{radius\_hand} joints) are replaced with rigid welds via
+\texttt{ModOpReplaceJointsWithWelds}, reducing multibody state coordinates to sagittal degrees of
+freedom. Coordinate actuators drive trunk extension, lateral bending, and axial rotation on the
+\texttt{back} joint. A $100\,\mathrm{kg}$ barbell is welded to the left hand with point contact at the
+right hand, and foot contact is represented by six smooth half-space contact spheres per foot.
+
+The optimal control problem minimizes total muscular and coordinate actuator effort:
+\begin{equation}
+\min_{\mathbf{a}, \mathbf{u}} \int_{0}^{t_f} \left( \sum_{m=1}^{80} a_m^2(t) + \sum_{k=1}^{3} u_k^2(t) \right) \mathrm{d}t
+\end{equation}
+subject to multibody system dynamics, De~Groote--Fregly muscle activation dynamics, kinematic joint
+bounds, and boundary conditions:
+\begin{align}
+\mathbf{q}(0) &\in \mathcal{Q}_\text{floor},\quad \dot{\mathbf{q}}(0) = \mathbf{0}, \\
+\mathbf{q}(t_f) &\in \mathcal{Q}_\text{lockout},\quad \dot{\mathbf{q}}(t_f) = \mathbf{0}, \\
+t_f &\in [0.5,\, 3.0]\,\mathrm{s}.
+\end{align}
+Transcription uses Hermite--Simpson collocation with 15 mesh intervals (31 collocation points) and
+forward finite differences for multibody system acceleration derivatives.
+
+\paragraph{Optimization Results and Exploratory Classification.}
+In a 10-iteration exploratory solve using IPOPT with MUMPS, the solver executed 1586.8\,s in IPOPT
+(1627.0\,s total wall clock) across 5879 variables and 5001 equality constraints. The optimization reached
+\texttt{Maximum\_Iterations\_Exceeded} with an objective value of $60.70$ and unscaled constraint violation
+of $3.03 \times 10^{6}$ ($7.75$ scaled). As the solver did not converge to numerical tolerance within
+10 iterations, this result is explicitly classified as \textbf{exploratory} and does not represent a
+physically validated forward-dynamics match.
+
+\begin{table}[h!]
+\centering\footnotesize\setlength{\tabcolsep}{6pt}
+\caption{Deadlift Kinematic and Performance Comparison: Bundle Kinematics vs Predictive Moco Baseline}\label{tab:predictive-deadlift-comparison}
+\begin{tabular}{lcccc}
+\toprule
+Quantity & Bundle Kinematics & Tracked OpenSim Solution & Predictive Moco Solution & Unit \\
+\midrule
+Bar Start Height & 0.456 & \textit{unavailable}\textsuperscript{*} & 0.456 & $\mathrm{m}$ \\
+Bar Final Height & 0.935 & \textit{unavailable}\textsuperscript{*} & 0.935 & $\mathrm{m}$ \\
+Bar Vertical Rise & 0.479 & \textit{unavailable}\textsuperscript{*} & 0.479 & $\mathrm{m}$ \\
+Peak Vertical Velocity & 0.560 & \textit{unavailable}\textsuperscript{*} & 0.450 & $\mathrm{m\,s^{-1}}$ \\
+Lift Duration & 2.00 & \textit{unavailable}\textsuperscript{*} & 1.50 & $\mathrm{s}$ \\
+Solver Status & --- & \textit{unavailable}\textsuperscript{*} & Maximum\_Iterations\_Exceeded & --- \\
+Converged & --- & \textit{unavailable}\textsuperscript{*} & False & --- \\
+Objective & --- & \textit{unavailable}\textsuperscript{*} & 60.70 & --- \\
+\bottomrule
+\end{tabular}
+\par\vspace{2pt}\raggedright\scriptsize
+\textsuperscript{*}Tracked OpenSim solution is unavailable: no OSL-3 deadlift IK/ID receipts on main yet (OSL-3 \#13041 is still open).
+\end{table}
+
+\paragraph{Reproduction Command.}
+\begin{verbatim}
+QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \
+    python3 scripts/measure_opensim_predictive_deadlift.py \
+    --mesh-intervals 15 --max-iterations 10 \
+    --out docs/development/lifting/evidence/opensim_predictive/receipts.json
+\end{verbatim}
+
+
 \subsection{Snatch Same-Input Bundle (LIFT-5, Issue \#11745)}
 \paragraph{Planar Pull.} The previous Tools snatch configuration ran from
 the floor setup to the overhead-squat catch through one mid-time via point.
