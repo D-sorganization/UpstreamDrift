@@ -84,8 +84,9 @@ NSX research views may display `INVARIANT` quantities, envelopes and
 representatives while `output_policy.py` continues to withhold joint loads from
 swing reports without calibration and evidence.
 
-*Option A (recommended): two surfaces, evidence-axis mapping.*
+_Option A (recommended): two surfaces, evidence-axis mapping._
 `display_decision(record, surface)` returns a decision per surface.
+
 - Research surface (the NSX tabs and panel): `INVARIANT` quantities are shown
   with a model-provenance badge. `FAMILY_DEPENDENT` quantities are shown only
   as bands, or as a labelled representative overlaid on its band under a named
@@ -94,11 +95,11 @@ swing reports without calibration and evidence.
   already admits that output name with calibration and evidence. The default
   for an unknown combination is to withhold.
 
-*Option B: research views only.* NSX is shown in the research tabs. It is
+_Option B: research views only._ NSX is shown in the research tabs. It is
 never exposed to the swing report or any export path, even when the policy
 would admit the output.
 
-*Option C: policy extension.* `output_policy.py` gains a new advertised class
+_Option C: policy extension._ `output_policy.py` gains a new advertised class
 for `INVARIANT` quantities with uncertainty, so they can enter swing reports
 as well.
 
@@ -111,6 +112,21 @@ The owner accepted Option A on 2026-10-17. NSX-41 (#12573) implements it as
 admission to `output_policy.py` and does not restate that policy's rules.
 Options B and C were not adopted. The calibration requirements of
 `output_policy.py` are unchanged.
+
+**D8. Nonlinear solution sets: local continuation only (NSE-UD-2, #13462).**
+`manifold_continuation.py` moves along `F(u) = 0` from an admitted point by a
+tangent predictor and a minimum-norm Newton corrector built on
+`ForceNullSpace` (no second solver stack, no direct `pinv`/`null_space`).
+`variable_scale` is carried by the `ForceNullSpace` basis and is applied once;
+the stored tangent basis satisfies `J N = 0` and `N^T S^-2 N = I` for
+`S = diag(variable_scale)`, i.e. it is orthonormal in the declared scaling, not
+in raw coordinates. Guarantees are local: at constant Jacobian rank the
+implicit function theorem gives a smooth manifold of dimension `n - rank`, and
+a rank change raises `ManifoldSingularityError` (for example `F = u1 u2` at the
+origin). The predictor leaves a residual `O(h^2)` and the corrector converges
+locally and quadratically; no higher order is claimed. Continuation does not
+certify coverage of a connected component, and the minimum-norm correction is
+not the nearest-point projection onto the solution set.
 
 ## Alternatives Considered
 
