@@ -34,7 +34,13 @@ class TestMuJoCoViewerSecurity:
             yield mv
 
     @pytest.fixture
-    def viewer_widget(self, viewer_module):
+    def message_box(self, viewer_module):
+        """Replace the module's QMessageBox so no dialog is shown (#12997)."""
+        with patch.object(viewer_module, "QMessageBox") as box:
+            yield box
+
+    @pytest.fixture
+    def viewer_widget(self, viewer_module, message_box):
         """Return a MuJoCoViewerWidget instance with mocked parent."""
         with patch.object(
             viewer_module.MuJoCoViewerWidget, "__init__", lambda self, parent=None: None
@@ -44,6 +50,7 @@ class TestMuJoCoViewerSecurity:
             )
             widget._urdf_content = "<robot></robot>"
             widget._renderer = None
+            widget._status_label = MagicMock()
             return widget
 
     @patch("src.tools.model_explorer.mujoco_viewer.secure_popen")
@@ -74,6 +81,9 @@ class TestMuJoCoViewerSecurity:
         viewer_widget._launch_external_viewer()
 
         mock_secure_popen.assert_not_called()
+        viewer_widget._status_label.setText.assert_called_with(
+            "No URDF content to view"
+        )
 
     @patch("src.tools.model_explorer.mujoco_viewer.secure_popen")
     def test_launch_external_viewer_command_structure(
@@ -108,7 +118,7 @@ class TestMuJoCoViewerSecurity:
             / "tools"
             / "model_explorer"
             / "mujoco_viewer.py"
-        ).read_text()
+        ).read_text(encoding="utf-8")
         tree = ast.parse(source)
 
         for node in ast.walk(tree):

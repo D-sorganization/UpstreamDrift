@@ -131,9 +131,16 @@ def wave2_baseline_metrics():
     }
 
 
+@pytest.mark.integration
 def test_wave2_baseline_report(wave2_baseline_metrics):
-    """Generate baseline metrics report for monitoring."""
-    # This test always passes but documents current state
-    print("\nWave 2 Baseline Metrics:")
-    for key, value in wave2_baseline_metrics.items():
-        print(f"  {key}: {value}")
+    """Baseline fixture must stay internally consistent for Wave 2 monitoring."""
+    assert set(wave2_baseline_metrics) == {
+        "import_count",
+        "symlink_valid",
+        "tools_api_stable",
+        "manifest_consistent",
+    }
+    assert wave2_baseline_metrics["import_count"] >= 0
+    assert wave2_baseline_metrics["symlink_valid"] is True
+    assert wave2_baseline_metrics["tools_api_stable"] is True
+    assert wave2_baseline_metrics["manifest_consistent"] is True
