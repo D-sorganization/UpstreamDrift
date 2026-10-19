@@ -109,6 +109,20 @@ def _hand_centre(model: Any, state: Any, side: str) -> Array:
     return _vec3(hand.findStationLocationInGround(state, hand.getMassCenter()))
 
 
+#: A side whose reach misses by more than this restarts from the seeds below
+#: (the supine bench press lands far from the standing prior, OSL-3 #13041).
+_REACH_RESTART_TOL_M = 0.01
+#: Restart seeds (shoulder flexion, adduction, rotation, elbow flexion; deg).
+#: The first keeps the prior's shoulder angles and takes these rotation and
+#: elbow values.
+_REACH_RESTART_ELBOW_DEG = ((-60.0, 135.0),)
+_REACH_RESTART_SEEDS_DEG = (
+    (0.0, 0.0, -60.0, 140.0),
+    (45.0, -20.0, -60.0, 130.0),
+    (90.0, -20.0, -60.0, 130.0),
+)
+
+
 def _solve_side(
     model: Any, state: Any, side: str, target: Array
 ) -> tuple[dict[str, float], float]:
@@ -131,27 +145,10 @@ def _solve_side(
         residual, start, bounds=(low, high), xtol=_REACH_XTOL, ftol=_REACH_XTOL
     )
     error = float(np.linalg.norm(residual(fit.x)[:3]))
-    if error > 0.01:
+    if error > _REACH_RESTART_TOL_M:
         candidates = [
-            np.array([prior[0], prior[1], math.radians(-60.0), math.radians(135.0)]),
-            np.array([0.0, 0.0, math.radians(-60.0), math.radians(140.0)]),
-            np.array(
-                [
-                    math.radians(45.0),
-                    math.radians(-20.0),
-                    math.radians(-60.0),
-                    math.radians(130.0),
-                ]
-            ),
-            np.array(
-                [
-                    math.radians(90.0),
-                    math.radians(-20.0),
-                    math.radians(-60.0),
-                    math.radians(130.0),
-                ]
-            ),
-        ]
+            np.array([prior[0], prior[1], *np.radians(_REACH_RESTART_ELBOW_DEG[0])])
+        ] + [np.radians(seed) for seed in _REACH_RESTART_SEEDS_DEG]
         for candidate in candidates:
             s = np.clip(candidate, low, high)
             cand_fit = least_squares(
@@ -161,7 +158,7 @@ def _solve_side(
             if cand_err < error:
                 fit = cand_fit
                 error = cand_err
-                if error <= 0.01:
+                if error <= _REACH_RESTART_TOL_M:
                     break
     return dict(zip(names, map(float, fit.x), strict=True)), error
 
