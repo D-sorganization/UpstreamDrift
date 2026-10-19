@@ -103,6 +103,7 @@ class PredictiveDeadliftConfig:
     finite_difference_scheme: str = "forward"
     residual_force_scale: float = 2.0
     residual_effort_weight: float = 10.0
+    multibody_dynamics_mode: str = "explicit"
     exploratory: bool = True
 
     def __post_init__(self) -> None:
@@ -137,6 +138,8 @@ class PredictiveDeadliftConfig:
             raise ValueError("Weights must be non-negative")
         if self.finite_difference_scheme not in {"central", "forward"}:
             raise ValueError("scheme must be 'central' or 'forward'")
+        if self.multibody_dynamics_mode not in {"explicit", "implicit"}:
+            raise ValueError("multibody_dynamics_mode must be 'explicit' or 'implicit'")
         if self.residual_force_scale <= 0.0 or self.residual_effort_weight < 0.0:
             raise ValueError(
                 "residual_force_scale must be positive and residual_effort_weight "
@@ -531,6 +534,7 @@ def build_predictive_deadlift_study(
     solver = osim.MocoCasADiSolver.safeDownCast(study.initCasADiSolver())
     solver.set_num_mesh_intervals(config.mesh_intervals)
     solver.set_transcription_scheme("hermite-simpson")
+    solver.set_multibody_dynamics_mode(config.multibody_dynamics_mode)
     solver.set_optim_finite_difference_scheme(config.finite_difference_scheme)
     solver.set_optim_max_iterations(config.max_iterations)
     solver.set_optim_convergence_tolerance(config.convergence_tolerance)

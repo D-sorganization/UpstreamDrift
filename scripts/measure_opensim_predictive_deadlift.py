@@ -57,15 +57,22 @@ DEFAULT_LOG_DIR = (
 BUNDLE_PATH = ROOT / "docs/development/lifting/evidence/deadlift/deadlift_bundle.npz"
 
 
-def _git(*args: str) -> str:
-    """Run git command and return stdout."""
-    out = subprocess.run(
-        ["git", "-C", str(ROOT), *args],
-        capture_output=True,
-        text=True,
-        timeout=30,
-        check=True,
-    )
+def _git(*args: str) -> str | None:
+    """Run git command and return stdout, or ``None`` when git is unusable.
+
+    Container jobs mount a worktree whose ``.git`` points outside the
+    container; there the commit comes from ``UPSTREAMDRIFT_SOURCE_COMMIT``.
+    """
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(ROOT), *args],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=True,
+        )
+    except (subprocess.CalledProcessError, OSError):
+        return os.environ.get("UPSTREAMDRIFT_SOURCE_COMMIT")
     return out.stdout.strip()
 
 
@@ -320,7 +327,7 @@ def _run_stage2_if_converged(
     max_iterations: int,
     stage2_log: Path,
     out_dir: Path,
-    residual: dict[str, float],
+    residual: dict[str, Any],
 ) -> dict[str, Any]:
     """Execute Stage 2 muscle-driven solve only if Stage 1 converged."""
     if not stage1_summary.get("converged", False):
@@ -345,7 +352,6 @@ def _run_stage2_if_converged(
         height_m=1.78,
         effort_weight=1.0,
         terminal_lockout_weight=10.0,
-        finite_difference_scheme="forward",
         exploratory=True,
         **residual,
     )
@@ -393,11 +399,13 @@ def run_measurement(
     max_iterations: int = 3000,
     from_log: Path | None = None,
     residual: dict[str, float] | None = None,
+    solver: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Execute staged predictive deadlift measurement and generate honest evidence."""
     out_dir.mkdir(parents=True, exist_ok=True)
     log_dir.mkdir(parents=True, exist_ok=True)
     residual = residual or {}
+    options: dict[str, Any] = {**residual, **(solver or {})}
     stage1_log = log_dir / "stage1_torque.log"
     stage2_log = log_dir / "stage2_muscle.log"
 
@@ -414,9 +422,8 @@ def run_measurement(
         height_m=1.78,
         effort_weight=1.0,
         terminal_lockout_weight=10.0,
-        finite_difference_scheme="forward",
         exploratory=True,
-        **residual,
+        **options,
     )
 
     t_start = time.perf_counter()
@@ -446,7 +453,7 @@ def run_measurement(
         max_iterations,
         stage2_log,
         out_dir,
-        residual,
+        options,
     )
 
     # Format receipt
@@ -485,6 +492,12 @@ def main(argv: list[str] | None = None) -> int:
         help="Pelvis residual optimal force as a multiple of total weight",
     )
     parser.add_argument("--residual-effort-weight", type=float, default=10.0)
+    parser.add_argument(
+        "--fd-scheme", choices=("forward", "central"), default="forward"
+    )
+    parser.add_argument(
+        "--dynamics-mode", choices=("explicit", "implicit"), default="explicit"
+    )
     args = parser.parse_args(argv)
 
     out_dir = args.out_dir
@@ -503,6 +516,10 @@ def main(argv: list[str] | None = None) -> int:
         residual={
             "residual_force_scale": args.residual_force_scale,
             "residual_effort_weight": args.residual_effort_weight,
+        },
+        solver={
+            "finite_difference_scheme": args.fd_scheme,
+            "multibody_dynamics_mode": args.dynamics_mode,
         },
     )
     return 0

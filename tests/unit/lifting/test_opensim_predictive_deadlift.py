@@ -344,3 +344,29 @@ def test_residual_metrics_multiply_controls_by_optimal_force() -> None:
     assert rms == pytest.approx(np.sqrt(0.5) * 0.5 * 200.0)
     assert ratio == pytest.approx(rms / 1000.0)
     assert assisted is True
+
+
+def test_dynamics_mode_validated() -> None:
+    """Only explicit and implicit multibody dynamics modes are accepted."""
+    assert PredictiveDeadliftConfig(multibody_dynamics_mode="implicit")
+    with pytest.raises(ValueError):
+        PredictiveDeadliftConfig(multibody_dynamics_mode="semi")
+
+
+def test_source_commit_falls_back_to_env_without_git(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A container without usable git reads the commit from the environment."""
+    import importlib
+    import subprocess
+
+    mod = importlib.import_module("scripts.measure_opensim_predictive_deadlift")
+
+    def _fail(*_a: object, **_k: object) -> None:
+        raise subprocess.CalledProcessError(128, "git")
+
+    monkeypatch.setattr(mod.subprocess, "run", _fail)
+    monkeypatch.setenv("UPSTREAMDRIFT_SOURCE_COMMIT", "abc123")
+    assert mod._git("rev-parse", "HEAD") == "abc123"
+    monkeypatch.delenv("UPSTREAMDRIFT_SOURCE_COMMIT")
+    assert mod._git("rev-parse", "HEAD") is None
