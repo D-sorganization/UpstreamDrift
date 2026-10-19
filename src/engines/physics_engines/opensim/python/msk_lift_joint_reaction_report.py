@@ -209,7 +209,7 @@ def format_joint_reaction_solution(
     ctx = extra_context or {}
     bw = body_weight_n
     t0, t1 = float(times[0]), float(times[-1])
-    bar_mass = float(ctx.get("bar_mass_kg", 100.0))
+    bar_mass = ctx.get("bar_mass_kg")
     peak_lumbar = ctx.get("peak_lumbar_moment_nm")
     qual = ctx.get("qualification_info") or {}
 
@@ -220,18 +220,21 @@ def format_joint_reaction_solution(
     return {
         "lift": lift,
         "status": "complete",
-        "classification": qual.get("classification", "unqualified"),
-        "qualification": "unqualified: reserve actuator share exceeds 0.05 threshold",
+        "classification": qual.get("classification"),
+        "qualification": (
+            f"{qual.get('classification')}: inherited from the OSL-4 muscle solve "
+            f"(reserve share threshold {qual.get('reserve_share_threshold')})"
+        ),
         "reserve_share": qual.get("reserve_share"),
         "mean_reserve_share": qual.get("mean_reserve_share"),
         "peak_reserve_share": qual.get("peak_reserve_share"),
-        "reserve_share_threshold": qual.get("reserve_share_threshold", 0.05),
+        "reserve_share_threshold": qual.get("reserve_share_threshold"),
         "window_start_s": round(t0, 4),
         "window_end_s": round(t1, 4),
         "duration_s": round(t1 - t0, 4),
         "body_weight_n": round(bw, 2),
         "lifter_mass_kg": round(bw / 9.80665, 2),
-        "bar_mass_kg": round(bar_mass, 2),
+        "bar_mass_kg": None if bar_mass is None else round(float(bar_mass), 2),
         "acceleration_error_max": float(reactions.max_acc_error),
         "l5_s1": l5s1,
         "knee_tibiofemoral": tf,
@@ -261,7 +264,7 @@ def format_joint_reaction_solution(
 
 
 def _eval_mo_planar_curves(
-    targets: Any, torso_angles: np.ndarray
+    targets: Any, torso_angles: np.ndarray, opensim_torso_arms_kg: float
 ) -> tuple[
     np.ndarray,
     np.ndarray,
@@ -298,7 +301,7 @@ def _eval_mo_planar_curves(
     adr_def = to_adr0055_ap_shear(shear_def)
 
     body_aligned = BodyModel(body_mass=targets.body_mass_kg, height=targets.height_m)
-    body_aligned.m_squat[2] = 36.4979
+    body_aligned.m_squat[2] = opensim_torso_arms_kg
     comp_align = spinal_compression(
         q_opt, qd_opt, qdd_opt, body_aligned, bar_mass, "squat"
     )
@@ -319,12 +322,46 @@ def _eval_mo_planar_curves(
     )
 
 
+def _difference_explanation(
+    m_above: float,
+    tol_n: float,
+    mean_dc: float | None,
+    max_dc: float | None,
+    mean_ds: float | None,
+    max_ds: float | None,
+) -> str:
+    """Describe the aligned residual from the computed values only."""
+    base = (
+        "Movement Optimizer is a planar rigid-body estimate (gravity and torso "
+        "inertia, no muscles); OpenSim is a 3D JointReaction with no trunk muscles."
+    )
+    if mean_dc is None or mean_ds is None:
+        return f"{base} No aligned OpenSim torso-frame reaction was supplied."
+    return (
+        f"{base} Rotated into the torso frame with matched m_above "
+        f"({m_above:.2f} kg), the residual is {mean_dc:.2f} N compression "
+        f"(max |{max_dc:.2f}| N) and {mean_ds:.2f} N AP shear (max |{max_ds:.2f}| N) "
+        f"against the {tol_n:.1f} N tolerance. The residual is not yet decomposed "
+        "into its sources (pelvis acceleration, 3D coupling, contact)."
+    )
+
+
 def crosscheck_movement_optimizer_l5s1(
     targets: Any,
     torso_angles: np.ndarray,
     torso_reactions: tuple[np.ndarray, np.ndarray] | None = None,
+    *,
+    opensim_m_above_kg: float,
 ) -> dict[str, Any]:
-    """Compute Movement Optimizer spine_loads.py L5/S1 on squat kinematics."""
+    """Compute Movement Optimizer spine_loads.py L5/S1 on squat kinematics.
+
+    ``opensim_m_above_kg`` is the model mass above L5/S1 including the bar,
+    summed from the OpenSim body set by the caller.
+    """
+    require(
+        opensim_m_above_kg > targets.bar_mass_kg,
+        "opensim_m_above_kg must exceed the bar mass",
+    )
     (
         comp_def,
         shear_def,
@@ -334,7 +371,9 @@ def crosscheck_movement_optimizer_l5s1(
         adr_align,
         m_def,
         m_align,
-    ) = _eval_mo_planar_curves(targets, torso_angles)
+    ) = _eval_mo_planar_curves(
+        targets, torso_angles, opensim_m_above_kg - targets.bar_mass_kg
+    )
 
     tol_n = 50.0
     diff_comp_n = diff_shear_n = None
@@ -359,7 +398,7 @@ def crosscheck_movement_optimizer_l5s1(
         "comparison_frame": "torso frame (longitudinal spine axis, aligned like-for-like)",
         "pre_evaluation_tolerance_n": tol_n,
         "tolerance_satisfied": tol_passed,
-        "opensim_m_above_kg": round(36.4979 + targets.bar_mass_kg, 4),
+        "opensim_m_above_kg": round(opensim_m_above_kg, 4),
         "movement_optimizer_m_above_default_kg": round(m_def, 4),
         "movement_optimizer_m_above_aligned_kg": round(m_align, 4),
         "opensim_angle_definition": "Sagittal tilt of torso frame relative to vertical in ground: atan2(R_torso[0, 1], R_torso[1, 1])",
@@ -388,11 +427,7 @@ def crosscheck_movement_optimizer_l5s1(
             "compression_diff_n": diff_comp_n,
             "shear_diff_n": diff_shear_n,
         },
-        "model_difference_explanation": (
-            "Movement Optimizer computes a planar ergonomic rigid-body estimate based on gravitational and "
-            "inertial torso segment loads. When compared like-for-like against OpenSim reactions rotated into "
-            "the torso frame with matched m_above (136.50 kg), residuals of 379.94 N compression (peak 439.35 N) "
-            "and -396.78 N AP shear (peak -467.04 N) exceed the pre-evaluation tolerance (50.0 N) due to 3D multi-body "
-            "pelvis vertical acceleration (a_y > 0 at bottom inflection), 3D angular coupling, and contact loads."
+        "model_difference_explanation": _difference_explanation(
+            opensim_m_above_kg, tol_n, mean_dc, max_dc, mean_ds, max_ds
         ),
     }

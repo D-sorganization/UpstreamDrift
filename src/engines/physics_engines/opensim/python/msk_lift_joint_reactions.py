@@ -21,6 +21,7 @@ from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
 from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_bound import (
     _UPPER_BODY_NAMES,
     build_real_squat_bound_record,
+    muscles_crossing_joint,
     static_hold_analytic_bound,
 )
 from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_report import (
@@ -343,6 +344,14 @@ def evaluate_lift_joint_reactions(
     )
     w_above_val = m_above * GRAVITY_FLOAT
 
+    crossing = muscles_crossing_joint(build.model, "back")
+    crossing_force = float(
+        sum(
+            solve.forces[min_k, basis.muscle_names.index(m)]
+            for m in crossing
+            if m in basis.muscle_names
+        )
+    )
     real_squat_info = build_real_squat_bound_record(
         frame_idx=min_k,
         time_s=float(targets.time_s[min_k]),
@@ -350,8 +359,8 @@ def evaluate_lift_joint_reactions(
         w_above=w_above_val,
         c_pelvis=float(reactions.l5s1_comp_n[min_k]),
         c_torso=float(reactions.l5s1_torso_comp_n[min_k]),
-        crossing_force=0.0,
-        crossing_count=0,
+        crossing_force=crossing_force,
+        crossing_count=len(crossing),
     )
 
     bw_n = targets.body_mass_kg * GRAVITY_FLOAT
@@ -361,6 +370,7 @@ def evaluate_lift_joint_reactions(
         targets,
         torso_angles,
         (reactions.l5s1_torso_comp_n, reactions.l5s1_torso_ap_shear_n),
+        opensim_m_above_kg=float(m_above),
     )
     static_bound = static_hold_analytic_bound("squat", build.model, real_squat_info)
 

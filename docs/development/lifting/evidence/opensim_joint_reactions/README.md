@@ -16,7 +16,7 @@ OSL-5 computes 3D internal joint reaction loads across the barbell lift motion w
 
 ## Evidence Summary (Back Squat Slice)
 
-- **Source Commit**: `1ff88bd77b7179893b07aabf079e1070d2483d0f`
+- **Source Commit**: `1c1e72588328132f979fa225bd5f37c87a3d7ff2`
 - **Lifter Mass**: 80.31 kg (Body Weight = 787.60 N)
 - **Barbell Mass**: 100.00 kg
 - **Window**: 0.00 s to 0.20 s (41 frames, bottom inflection phase)
@@ -70,7 +70,7 @@ OSL-5 computes 3D internal joint reaction loads across the barbell lift motion w
 - **Residual Differences (OpenSim Torso vs Aligned Movement Optimizer)**:
   - Compression Mean Residual: 379.94 N (Peak: 439.35 N)
   - AP Shear Mean Residual: -396.78 N (Peak: 467.04 N)
-- **Model Difference Analysis**: Movement Optimizer computes a planar ergonomic rigid-body estimate based on gravitational and inertial torso segment loads. When compared like-for-like against OpenSim reactions rotated into the torso frame with matched m_above (136.50 kg), residuals of 379.94 N compression (peak 439.35 N) and -396.78 N AP shear (peak -467.04 N) exceed the pre-evaluation tolerance (50.0 N) due to 3D multi-body pelvis vertical acceleration (a_y > 0 at bottom inflection), 3D angular coupling, and contact loads.
+- **Model Difference Analysis**: Movement Optimizer is a planar rigid-body estimate (gravity and torso inertia, no muscles); OpenSim is a 3D JointReaction with no trunk muscles. Rotated into the torso frame with matched m_above (136.50 kg), the residual is 379.94 N compression (max |439.35| N) and -396.78 N AP shear (max |467.04| N) against the 50.0 N tolerance. The residual is not yet decomposed into its sources (pelvis acceleration, 3D coupling, contact).
 
 ### Status of Other Four Lifts
 
