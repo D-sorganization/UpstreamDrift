@@ -675,6 +675,68 @@ python3 -m pytest tests/unit/grip_contact/test_topology_parity_harness.py \
     tests/unit/grip_contact/test_grip_parity_metrics.py
 \end{verbatim}
 
+\subsection{MuJoCo Humanoid Grip Adapter (HRG-GS-M5, \#13327)}
+\textbf{Method and Admitted Models.}
+In \path{src/engines/physics_engines/mujoco/python/humanoid_grip_adapter.py}, \texttt{MuJoCoHumanoidGripAdapter} implements the shared \texttt{ModelGripAdapter} contract across the five native MuJoCo humanoid golf MJCFs where the club is a child of one rigid hand body and linked to the other hand body by an equality \texttt{<weld>}:
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \texttt{mujoco\_golfer} (\path{src/engines/physics_engines/mujoco/models/generated/golfer.xml}): \texttt{club\_shaft} parented to \texttt{hand\_left}, equality weld \texttt{right\_hand\_grip\_weld} on \texttt{hand\_right};
+\item \texttt{mujoco\_upper\_body\_swing} (\path{src/engines/physics_engines/mujoco/_golf_swing_upper_body_xml.py}): \texttt{club} parented to \texttt{right\_hand} via \texttt{club\_wrist}, equality weld on \texttt{left\_hand};
+\item \texttt{mujoco\_full\_body\_swing} (\path{src/engines/physics_engines/mujoco/_golf_swing_full_body_xml.py}): \texttt{club} parented to \texttt{right\_hand} via \texttt{club\_wrist}, equality weld on \texttt{left\_hand};
+\item \texttt{mujoco\_advanced\_biomechanical\_swing} (\path{src/engines/physics_engines/mujoco/_golf_swing_advanced_xml.py}): \texttt{club\_grip} parented to \texttt{right\_hand}, equality weld on \texttt{left\_hand};
+\item \texttt{mujoco\_canonical\_golf\_humanoid} (\path{src/engines/physics_engines/mujoco/_golf_swing_canonical_xml.py}): \texttt{club\_grip} parented to \texttt{left\_hand}, site equality weld (\texttt{right\_grip\_site} to \texttt{club\_grip\_site}) on \texttt{right\_hand}.
+\end{enumerate}
+Each admitted model has a committed \texttt{grip-binding/v1} manifest under \path{src/config/grip_bindings/<model_id>.json} resolving $100\%$ of canonical \texttt{ContactTopology} sites ($14$ sites across lead and trail rigid hand proxies, or $15$ with \texttt{trigger\_finger=True}) via \texttt{binding\_from\_manifest} and \texttt{validate\_resolved\_binding}. Visual style from \texttt{GripSpec} (\texttt{overlap}, \texttt{interlock}, \texttt{ten\_finger}) is rendered by attaching zero-mass, non-colliding visual proxy geoms (\texttt{contype="0" conaffinity="0" mass="0" group="1"}) at the mapped hand-frame site centres $\mathbf{p}_{s}^{\mathrm{hand}}$ and finger-link stations, leaving \texttt{body\_mass}, \texttt{body\_inertia}, \texttt{body\_ipos}, \texttt{qpos}, \texttt{qvel}, and \texttt{efc\_force} bit-for-bit invariant ($\le 0.0$ difference).
+
+\textbf{Equations and Allocated Weld Constraint Extraction.}
+For an equality weld $e$ connecting body $b_1$ (closing hand) and body $b_2$ (club) with active constraint row indices $\mathcal{I}_e = \{i : \texttt{efc\_type}[i] = \texttt{mjCNSTR\_EQUALITY} \wedge \texttt{efc\_id}[i] = e\}$, the generalized constraint force is:
+\begin{equation}
+\boldsymbol{\tau}_{\mathrm{weld}} = J_{\mathrm{efc}}[\mathcal{I}_e,:]^{\top} \mathbf{f}_{\mathrm{efc}}[\mathcal{I}_e] \in \R^{n_v}.
+\end{equation}
+Evaluating the 6D body Jacobians $J_{b_1}(\mathbf{p}_a), J_{b_2}(\mathbf{p}_a) \in \R^{6 \times n_v}$ at the club-side weld anchor $\mathbf{p}_a \in \R^3$ yields the relative weld Jacobian $J_{\Delta} = J_{b_2}(\mathbf{p}_a) - J_{b_1}(\mathbf{p}_a)$. When $\operatorname{rank}(J_{\Delta}, 10^{-3}) = 6$, \texttt{extract\_weld\_closure\_wrench} delegates directly to \texttt{weld\_wrench\_on\_club}; on planar/reduced-DOF arm chains (\texttt{mujoco\_upper\_body\_swing}, \texttt{mujoco\_full\_body\_swing}) where out-of-plane singular values satisfy $\sigma_{\min}(J_{\Delta}) < 10^{-3}$, it solves the truncated-SVD least-squares system:
+\begin{equation}
+\mathbf{w}_{\mathrm{club}} = \begin{bmatrix} \mathbf{F}_{\mathrm{weld}} \\ \mathbf{M}_{\mathrm{weld}} \end{bmatrix} = \pm \left(J_{\Delta}^{\top}\right)^{+}_{\mathrm{rcond}=10^{-3}} \boldsymbol{\tau}_{\mathrm{weld}} \in \R^6,
+\end{equation}
+with sign $+1$ when the club is object 2 and $-1$ when the club is object 1. The extracted closure wrench $\mathbf{w}_{\mathrm{club}}$ is passed to \texttt{evaluate\_contacts(..., closure=closure, prior=prior)}, which partitions $\mathbf{w}_{\mathrm{club}}$ across the active hand--hand pairs $p \in \mathcal{P}_{\mathrm{hh}}$ via \texttt{allocate\_hand\_hand\_from\_closure} under the named prior $\pi$ (default \texttt{prior\_name="equal\_split"}), labelling every hand--hand output \texttt{"allocated"} (\texttt{external:<pair>\_allocated}) and enforcing \texttt{applied\_allocated\_force\_n()} $= 0.0\,\mathrm{N}$.
+
+\textbf{Physics Honesty and Optional Attachment Redesign.}
+In the default welded mode (\texttt{attachment\_redesign="off"}), \texttt{capabilities()} declares \texttt{attachment\_modes=("weld",)}, \texttt{supports\_physical\_pairs=False}, \texttt{supports\_wrench\_application=False}, and a non-empty \texttt{unavailable\_reason} naming the welded club and hand bodies; both \texttt{apply\_report} and \texttt{apply\_wrenches} raise \texttt{WeldedGripBodyError} (\texttt{SchemaFeatureUnavailableError}, \texttt{ValueError}). Behind the explicit \texttt{attachment\_redesign} flag (off by default), \texttt{build\_humanoid\_grip\_mjcf} detaches the club body to \texttt{<worldbody>} with a \texttt{<freejoint/>}, removes the hand--club \texttt{<weld>} equality, adds \texttt{<exclude>} tags between both hand bodies and the club body, and supports two mutually exclusive physical modes:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \texttt{"free\_club\_shared"}: zero native grip collision pairs (\texttt{registered\_grip\_collision\_count() == 0}), \texttt{supports\_physical\_pairs=True}, \texttt{supports\_wrench\_application=True}, \texttt{native\_contact=False}. Physical body wrenches $(\mathbf{F}_b, \mathbf{M}_b)$ about $\mathbf{x}_b = \texttt{xpos}[b]$ are transferred to the body COM $\mathbf{x}_{\mathrm{com},b} = \texttt{xipos}[b]$ and applied to \texttt{data.xfrc\_applied}:
+\begin{equation}
+\texttt{xfrc\_applied}[b, 0\!:\!3] = \mathbf{F}_b, \qquad \texttt{xfrc\_applied}[b, 3\!:\!6] = \mathbf{M}_b + (\mathbf{x}_b - \mathbf{x}_{\mathrm{com},b}) \times \mathbf{F}_b.
+\end{equation}
+\item \texttt{"free\_club\_native"}: attaches \texttt{contype="0" conaffinity="0" mass="0"} sphere pad geoms and a grip cylinder geom coupled by explicit \texttt{condim="6"} \texttt{<pair>} elements, declaring \texttt{native\_contact=True} and \texttt{supports\_wrench\_application=False}. Calling \texttt{apply\_report} or \texttt{apply\_wrenches} raises \texttt{SchemaFeatureUnavailableError}, ensuring native and shared contact are never applied twice to the same pair.
+\end{itemize}
+
+\textbf{Parameters and Measured Parity.}
+With nominal squeeze $F_{\mathrm{sq}} = 1100.0\,\mathrm{N}$ per hand, sample step $\Delta t = 0.002\,\mathrm{s}$ ($21$ steps over $0.04\,\mathrm{s}$), and pinned M3 tolerances $\varepsilon_{\mathrm{peak}} \le 0.05$ ($5\%$) and $\varepsilon_{\mathrm{rms}} \le 0.02$ ($2\%$), Table~\ref{tab:hrg-gs-m5-parity} summarizes the measured weld closure forces and M3 parity errors against the Pinocchio reference (\texttt{PinocchioGripAdapter}) and \texttt{law\_level\_series} on identical site states across all three grip styles (\texttt{overlap}: $14$ sites, $11$ pairs; \texttt{interlock}: $14$ sites, $12$ pairs; \texttt{ten\_finger}: $14$ sites, $11$ pairs).
+
+\begin{table}[h!]
+\centering
+\caption{Measured Weld Closure Wrenches and M3 Parity Errors Across Admitted MuJoCo Humanoid Models (HRG-GS-M5, \#13327).}
+\label{tab:hrg-gs-m5-parity}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Model ID & $\|\mathbf{F}_{\mathrm{weld}}\|$ (N) & $\|\mathbf{M}_{\mathrm{weld}}\|$ (N$\cdot$m) & Palm--Thumb $f_n$ (N) & Max $\varepsilon_{\mathrm{peak}}$ & Max $\varepsilon_{\mathrm{rms}}$ \\
+\midrule
+\texttt{mujoco\_golfer} & $701.112$ & $11.484$ & $315.717$ & $0.00 \times 10^{0}$ & $0.00 \times 10^{0}$ \\
+\texttt{mujoco\_upper\_body\_swing} & $2137.785$ & $115.064$ & $0.000$ & $0.00 \times 10^{0}$ & $0.00 \times 10^{0}$ \\
+\texttt{mujoco\_full\_body\_swing} & $2276.033$ & $136.728$ & $0.000$ & $0.00 \times 10^{0}$ & $0.00 \times 10^{0}$ \\
+\texttt{mujoco\_advanced\_biomechanical\_swing} & $827.986$ & $407.332$ & $386.115$ & $0.00 \times 10^{0}$ & $0.00 \times 10^{0}$ \\
+\texttt{mujoco\_canonical\_golf\_humanoid} & $804.253$ & $32.312$ & $425.522$ & $0.00 \times 10^{0}$ & $0.00 \times 10^{0}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Limitations.}
+All five admitted MuJoCo humanoid MJCFs represent each hand as a single rigid body (or fixed finger proxy group without articulated phalangeal DOFs), so site bindings use \texttt{representation="rigid\_proxy"}. In the default welded topology, hand--grip and hand--hand forces are reporting/allocated channels rather than dynamically independent contact forces unless \texttt{attachment\_redesign} is explicitly enabled.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_mujoco_humanoid_grip_adapter.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
