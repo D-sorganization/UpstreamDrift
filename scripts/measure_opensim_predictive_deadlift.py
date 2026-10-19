@@ -394,7 +394,6 @@ def _run_stage2_if_converged(
         max_iterations=max_iterations,
         convergence_tolerance=1e-2,
         constraint_tolerance=1e-2,
-        duration_bounds=(0.5, 3.0),
         bar_mass_kg=100.0,
         body_mass_kg=80.0,
         height_m=1.78,
@@ -448,7 +447,7 @@ def run_measurement(
     max_iterations: int = 3000,
     from_log: Path | None = None,
     residual: dict[str, float] | None = None,
-    solver: dict[str, str] | None = None,
+    solver: dict[str, Any] | None = None,
     stage1_guess: Path | None = None,
 ) -> dict[str, Any]:
     """Execute staged predictive deadlift measurement and generate honest evidence."""
@@ -466,7 +465,6 @@ def run_measurement(
         max_iterations=max_iterations,
         convergence_tolerance=1e-2,
         constraint_tolerance=1e-2,
-        duration_bounds=(0.5, 3.0),
         bar_mass_kg=100.0,
         body_mass_kg=80.0,
         height_m=1.78,
@@ -549,6 +547,14 @@ def main(argv: list[str] | None = None) -> int:
         "--dynamics-mode", choices=("explicit", "implicit"), default="explicit"
     )
     parser.add_argument(
+        "--duration-bounds",
+        type=float,
+        nargs=2,
+        metavar=("MIN_S", "MAX_S"),
+        default=None,
+        help="Final-time bounds; equal values fix the duration",
+    )
+    parser.add_argument(
         "--stage1-guess",
         type=Path,
         default=None,
@@ -576,6 +582,11 @@ def main(argv: list[str] | None = None) -> int:
         solver={
             "finite_difference_scheme": args.fd_scheme,
             "multibody_dynamics_mode": args.dynamics_mode,
+            **(
+                {"duration_bounds": tuple(args.duration_bounds)}
+                if args.duration_bounds
+                else {}
+            ),
         },
         stage1_guess=args.stage1_guess,
     )

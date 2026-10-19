@@ -619,3 +619,40 @@ def test_residual_moment_gate_uses_the_hicks_fraction() -> None:
     assert unknown["residual_moment_within_limit"] is None
     with pytest.raises(ValueError):
         residual_moment_gate(5.0, 0.9, 0.0)
+
+
+def test_fixed_duration_is_a_valid_bound() -> None:
+    """Equal bounds pin the final time (the effort goal otherwise hits t_min)."""
+    cfg = PredictiveDeadliftConfig(duration_bounds=(2.0, 2.0))
+    assert cfg.duration_bounds == (2.0, 2.0)
+    with pytest.raises(ValueError, match="duration_bounds"):
+        PredictiveDeadliftConfig(duration_bounds=(0.0, 0.0))
+
+
+def test_cli_duration_bounds_reach_the_stage1_config(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """``--duration-bounds`` sets the stage-1 final-time bounds."""
+    import importlib
+
+    mod = importlib.import_module("scripts.measure_opensim_predictive_deadlift")
+    seen: dict[str, object] = {}
+
+    def _stop(config: PredictiveDeadliftConfig, *args: object) -> dict[str, object]:
+        seen["bounds"] = config.duration_bounds
+        raise SystemExit(0)
+
+    monkeypatch.setattr(mod, "run_stage1_solve", _stop)
+    with pytest.raises(SystemExit):
+        mod.main(
+            [
+                "--out-dir",
+                str(tmp_path),
+                "--log-dir",
+                str(tmp_path),
+                "--duration-bounds",
+                "2.0",
+                "2.0",
+            ]
+        )
+    assert seen["bounds"] == (2.0, 2.0)

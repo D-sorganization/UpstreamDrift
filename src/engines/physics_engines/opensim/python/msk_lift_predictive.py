@@ -141,7 +141,7 @@ class PredictiveDeadliftConfig:
         if self.convergence_tolerance <= 0 or self.constraint_tolerance <= 0:
             raise ValueError("Tolerances must be positive")
         t_min, t_max = self.duration_bounds
-        if not (0.0 < t_min < t_max):
+        if not (0.0 < t_min <= t_max):
             raise ValueError(f"invalid duration_bounds: {self.duration_bounds}")
         if self.bar_mass_kg <= 0.0:
             raise ValueError(f"bar_mass_kg must be positive: {self.bar_mass_kg}")
