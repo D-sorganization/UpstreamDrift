@@ -677,7 +677,7 @@ def write_outputs(output_dir: Path = DATA_DIR) -> tuple[Path, Path]:
     with json_path.open("w", encoding="utf-8") as stream:
         json.dump(record, stream, indent=2)
         stream.write("\n")
-    np.savez_compressed(npz_path, **arrays)
+    np.savez_compressed(npz_path, **arrays)  # type: ignore[arg-type]
     return json_path, npz_path
 
 

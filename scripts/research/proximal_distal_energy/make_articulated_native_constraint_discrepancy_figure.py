@@ -24,7 +24,7 @@ def make_figure(output: Path = OUTPUT) -> Path:
     """Render force, closure, and trajectory-discrepancy observables."""
 
     series = load_discrepancy_series(DATA)
-    figure, axes = plt.subplots(2, 2, figsize=(10.6, 7.4), constrained_layout=True)
+    figure, axes = plt.subplots(2, 2, figsize=(10.6, 7.4), layout="constrained")
     render_discrepancy_panels(figure, axes, series)
     save_vector_figure(
         figure,
