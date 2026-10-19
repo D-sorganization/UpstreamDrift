@@ -44,4 +44,11 @@ describe('resolveGrip', () => {
     expect(hasPhysicalPick({ grip_style: 'interlock' })).toBe(false);
     expect(gripRequestBody({ preset: 'weak', hand_spacing: undefined })).toEqual({ preset: 'weak' });
   });
+
+  it('propagates non-overlap style to physical grip to match Python grip_spec_to_physical', () => {
+    const grip = resolveGrip({ grip_style: 'ten_finger' });
+    expect(grip.style).toBe('ten_finger');
+    const overlapGrip = resolveGrip({ grip_style: 'overlap' });
+    expect(overlapGrip.style).toBeUndefined();
+  });
 });

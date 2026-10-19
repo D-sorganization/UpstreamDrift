@@ -3292,7 +3292,7 @@
   },
   "inputs": {
     "src/config/models.yaml": "eb564e4c2961c6963c0331621f8a69907d47b7dffaf7673ae448cbde3a679852",
-    "src/config/launcher_manifest.json": "5c59c54f8916c78f076d441dd08123142d395567de52d3ea0615a93698916239",
+    "src/config/launcher_manifest.json": "25db68381d3ed142a31ccf4f1d71be285fb58ec8cee1228e0cadd41b700280be",
     "src/config/feature_parity.json": "d44bacecd61c3248c6c166162dc27c3af970682c761aa2eab0863a6469ad2c3a",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
