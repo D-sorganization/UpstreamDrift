@@ -2639,6 +2639,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13301 · Allocated Hand-Hand Contact Reporting for All Style Pairs (HRG-GS-G3)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13301
+- **Branch:** merged via #13342
+- **PR:** #13342
+- **Paths:** see #13342
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`15ef79e2`; collated from changes/13301-allocated-hand-hand-contact-reporting-fo.md)
+- **Summary:** Allocated hand-hand contact reporting for all style pairs (HRG-GS-G3)
+- **Next step:** Shipped in PR #13342.
+
 ### DL-#13377 · Bump Vendor/Ud-Tools to Tools 96A1684 (Coriolis Christoffel Term, Tools #5664; Standard Gravity, Tools #5668)
 
 - **State:** shipped
