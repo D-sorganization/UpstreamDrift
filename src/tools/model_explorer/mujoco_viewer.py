@@ -27,6 +27,7 @@ from PyQt6.QtWidgets import (
     QFrame,
     QHBoxLayout,
     QLabel,
+    QMessageBox,
     QPushButton,
     QVBoxLayout,
     QWidget,
@@ -160,6 +161,7 @@ class MuJoCoViewerWidget(QWidget):
 
         self._launch_btn = QPushButton("Launch Full Viewer")
         self._launch_btn.setToolTip("Open in MuJoCo's interactive viewer")
+        self._launch_btn.setEnabled(False)
         self._launch_btn.clicked.connect(self._launch_external_viewer)
         toolbar.addWidget(self._launch_btn)
 
@@ -246,6 +248,8 @@ class MuJoCoViewerWidget(QWidget):
             raise ValueError("urdf_content must be provided")
         self._urdf_content = urdf_content
         self._urdf_path = urdf_path
+        has_content = bool(urdf_content and urdf_content.strip())
+        self._launch_btn.setEnabled(has_content and MUJOCO_AVAILABLE)
 
         if not MUJOCO_AVAILABLE or not self._renderer:
             # Count elements for display
@@ -451,8 +455,10 @@ class MuJoCoViewerWidget(QWidget):
 
     def _launch_external_viewer(self) -> None:
         """Launch MuJoCo's standalone viewer."""
-        if not self._urdf_content:
+        if not self._urdf_content or not self._urdf_content.strip():
             logger.warning("No URDF content to view")
+            self._status_label.setText("No URDF content to view")
+            QMessageBox.warning(self, "No Model", "No URDF content to view")
             return
 
         try:
@@ -475,13 +481,17 @@ class MuJoCoViewerWidget(QWidget):
             ]
             secure_popen(cmd)
             logger.info("Launched external MuJoCo viewer")
+            self._status_label.setText("Launched external MuJoCo viewer")
 
-        except ImportError as e:
+        except (ValueError, OSError, ImportError) as e:
             logger.error(f"Failed to launch viewer: {e}")
+            self._status_label.setText(f"Failed to launch viewer: {e}")
+            QMessageBox.critical(self, "Viewer Error", f"Failed to launch viewer: {e}")
 
     def clear(self) -> None:
         """Clear the visualization."""
         self._urdf_content = ""
+        self._launch_btn.setEnabled(False)
         self._update_placeholder("No URDF content")
         self._status_label.setText("")
 

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections import Counter
+from dataclasses import dataclass, field
+
 import numpy as np
 import pytest
 
@@ -9,6 +12,7 @@ from src.shared.python.core.contracts import ContractViolationError
 from src.shared.python.estimation.mosaic.analytic_derivatives import (
     ForwardDynamicsDerivatives,
     InverseDynamicsDerivatives,
+    _finite_difference_inverse_dynamics_derivatives,
     compare_runtime,
     forward_dynamics_derivatives,
     inverse_dynamics_derivatives,
@@ -264,19 +268,103 @@ def test_multi_link_chain_scaling() -> None:
         )
 
 
-def test_runtime_comparison_reported() -> None:
-    chain, pi, _ = _triple_pendulum()
+def _runtime_states(
+    n_dof: int, batch: int = 10
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     rng = np.random.default_rng(2026)
-    q = rng.uniform(-1.0, 1.0, size=(10, 3))
-    v = rng.uniform(-1.0, 1.0, size=(10, 3))
-    a = rng.uniform(-2.0, 2.0, size=(10, 3))
+    q = rng.uniform(-1.0, 1.0, size=(batch, n_dof))
+    v = rng.uniform(-1.0, 1.0, size=(batch, n_dof))
+    a = rng.uniform(-2.0, 2.0, size=(batch, n_dof))
+    return q, v, a
 
-    report = compare_runtime(chain, q, v, a, pi, n_repeats=15)
+
+class _ScriptedClock:
+    """Deterministic stand-in for ``time.perf_counter`` returning scripted ticks."""
+
+    def __init__(self, ticks: list[float]) -> None:
+        self._ticks = list(ticks)
+
+    def __call__(self) -> float:
+        return self._ticks.pop(0)
+
+    @property
+    def remaining(self) -> int:
+        return len(self._ticks)
+
+
+def test_runtime_comparison_reported() -> None:
+    """The comparison report is well-formed; timing comes from an injected clock.
+
+    Wall-clock speed ratios are nondeterministic on shared CI runners (#13390),
+    so the unit lane checks structure and arithmetic only. The genuine
+    analytic-is-faster claim lives in
+    ``tests/benchmarks/test_mosaic_analytic_derivatives_benchmark.py``.
+    """
+    chain, pi, _ = _triple_pendulum()
+    q, v, a = _runtime_states(chain.n_links)
+    n_repeats = 4
+    # analytic: start 10.0, stop 11.0 -> 1.0 s total; FD: 20.0 -> 24.0 = 4.0 s
+    clock = _ScriptedClock([10.0, 11.0, 20.0, 24.0])
+
+    report = compare_runtime(chain, q, v, a, pi, n_repeats=n_repeats, clock=clock)
+
+    assert clock.remaining == 0
+    assert report.analytic_time_s == pytest.approx(1.0 / n_repeats)
+    assert report.finite_difference_time_s == pytest.approx(4.0 / n_repeats)
+    assert report.speedup == pytest.approx(4.0)
+    assert report.max_relative_difference < 1e-4
+
+
+def test_runtime_comparison_defaults_to_wall_clock() -> None:
+    """Without an injected clock the report carries positive measured times."""
+    chain, pi, _ = _double_pendulum()
+    q, v, a = _runtime_states(chain.n_links, batch=2)
+
+    report = compare_runtime(chain, q, v, a, pi, n_repeats=1)
+
     assert report.analytic_time_s > 0.0
     assert report.finite_difference_time_s > 0.0
-    assert report.max_relative_difference < 1e-4
-    # Analytic should be faster than numerical finite differences
-    assert report.speedup > 1.0
+    assert report.speedup > 0.0
+
+
+@dataclass(frozen=True)
+class _CountingPlanarChain(PlanarChain):
+    """PlanarChain that counts regressor evaluations (the dominant cost)."""
+
+    calls: Counter[str] = field(default_factory=Counter, compare=False, repr=False)
+
+    def regressor(self, *args: object, **kwargs: object) -> np.ndarray:
+        self.calls["regressor"] += 1
+        return super().regressor(*args, **kwargs)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("link_lengths", [[0.8, 0.5], [0.9, 0.6, 0.4]])
+def test_analytic_derivatives_need_fewer_dynamics_evaluations(
+    link_lengths: list[float],
+) -> None:
+    """Deterministic proxy for the speedup claim: analytic does less model work.
+
+    Analytic: one regressor for d_tau/dpi plus n for the mass matrix (n + 1).
+    Central finite differences: 4n perturbed regressors (q and v, +/-), n for
+    the mass matrix and one for d_tau/dpi (5n + 1).
+    """
+    n_dof = len(link_lengths)
+    _, pi, _ = _triple_pendulum() if n_dof == 3 else _double_pendulum()
+    chain = _CountingPlanarChain(
+        link_lengths=np.array(link_lengths),
+        actuated=np.ones(n_dof, dtype=bool),
+    )
+    q, v, a = _runtime_states(n_dof, batch=3)
+
+    inverse_dynamics_derivatives(chain, q, v, a, pi)
+    analytic_calls = chain.calls["regressor"]
+    chain.calls.clear()
+    _finite_difference_inverse_dynamics_derivatives(chain, q, v, a, pi)
+    fd_calls = chain.calls["regressor"]
+
+    assert analytic_calls == n_dof + 1
+    assert fd_calls == 5 * n_dof + 1
+    assert analytic_calls < fd_calls
 
 
 def test_fallback_to_finite_differences_when_engine_lacks_analytic() -> None:

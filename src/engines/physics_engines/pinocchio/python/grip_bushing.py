@@ -27,7 +27,6 @@ from src.engines.physics_engines.pinocchio.python.native_model import (
     FullBodyPinocchioModel,
 )
 from src.shared.python.grip_contact import (
-    BushingWrench,
     ClubDynamics,
     CoordinateSpline,
     CoordinateSwing,
@@ -44,6 +43,8 @@ DEFAULT_RTOL = 1.0e-9
 DEFAULT_ATOL = 1.0e-12
 DEFAULT_MAX_STEP_S = 2.5e-4
 SIDES = ("L", "R")
+#: Distinct ``(hand_source, t)`` hand-frame evaluations kept (Radau stages + 1).
+HAND_CACHE_SIZE = 8
 
 
 def _pin() -> Any:
@@ -105,6 +106,7 @@ class ClubOnBushings:
         )
         self.model, self.data = model, model.createData()
         self._offsets = {s: interface.frame(s).matrix() for s in SIDES}
+        self._hand_cache: dict[tuple[Any, float], dict[str, Any]] = {}
 
     @staticmethod
     def club_state(y: np.ndarray) -> RigidBodyState:
@@ -120,18 +122,49 @@ class ClubOnBushings:
         )
         return RigidBodyState(rot, y[:3].copy(), rot @ y[7:10], rot @ y[10:13])
 
-    def wrenches(
-        self, t: float, y: np.ndarray, hand_source: Any
-    ) -> tuple[dict[str, Any], dict[str, Any], dict[str, BushingWrench]]:
-        """Hand frames, club frames and bushing wrenches at ``(t, y)``."""
-        q, qdot = hand_source(t)
-        hands = hand_frame_states(self.kinematics.state(q, qdot), self.interface)
-        club = self.club_state(y)
-        frames = {s: club.frame(self._offsets[s]) for s in SIDES}
-        law = {
+    def hand_frames(self, t: float, hand_source: Any) -> dict[str, Any]:
+        """Hand bushing frames at ``t``, memoised for recent times.
+
+        Precondition: ``hand_source`` is a pure function of ``t`` (a spline or
+        a fixed pose).  Radau re-evaluates the right-hand side at the same
+        stage times across Newton iterations and its finite-difference
+        Jacobian, so the weld forward kinematics is computed once per
+        distinct ``(hand_source, t)``; the returned frames are bit-identical
+        to a fresh evaluation.
+        """
+        key = (hand_source, t)
+        hands = self._hand_cache.get(key)
+        if hands is None:
+            q, qdot = hand_source(t)
+            hands = hand_frame_states(self.kinematics.state(q, qdot), self.interface)
+            if len(self._hand_cache) >= HAND_CACHE_SIZE:
+                del self._hand_cache[next(iter(self._hand_cache))]
+            self._hand_cache[key] = hands
+        return dict(hands)
+
+    def contact_law(
+        self, hands: dict[str, Any], frames: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Per-side wrench on the club frame: the shared bushing law."""
+        return {
             s: bushing_wrench(self.interface.bushing, hands[s], frames[s])
             for s in SIDES
         }
+
+    def evaluate(
+        self, t: float, y: np.ndarray, hand_source: Any
+    ) -> tuple[dict[str, Any], RigidBodyState, dict[str, Any], dict[str, Any]]:
+        """Hand frames, club body state, club frames and law at ``(t, y)``."""
+        hands = self.hand_frames(t, hand_source)
+        club = self.club_state(y)
+        frames = {s: club.frame(self._offsets[s]) for s in SIDES}
+        return hands, club, frames, self.contact_law(hands, frames)
+
+    def wrenches(
+        self, t: float, y: np.ndarray, hand_source: Any
+    ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+        """Hand frames, club frames and law wrenches at ``(t, y)``."""
+        hands, _, frames, law = self.evaluate(t, y, hand_source)
         return hands, frames, law
 
     def joint_torque(
@@ -149,8 +182,7 @@ class ClubOnBushings:
 
     def derivatives(self, t: float, y: np.ndarray, hand_source: Any) -> np.ndarray:
         """``d/dt [q, v]`` with ``aba`` for the club acceleration."""
-        _, frames, law = self.wrenches(t, y, hand_source)
-        club = self.club_state(y)
+        _, club, frames, law = self.evaluate(t, y, hand_source)
         tau = self.joint_torque(club, frames, law)
         quat = y[3:7] / np.linalg.norm(y[3:7])
         q = np.concatenate([y[:3], quat])

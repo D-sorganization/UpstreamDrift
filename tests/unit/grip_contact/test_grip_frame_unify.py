@@ -155,8 +155,8 @@ def test_drake_pure_tangential_load_normal_stays_constant() -> None:
     shows the recorded normal stays equal to the static squeeze to <= 1e-9 N,
     and the tangential magnitude matches the applied load to <= 1 %."""
     try:
-        import pydrake  # noqa: F401
-    except ImportError as exc:
+        import pydrake.multibody.plant  # noqa: F401
+    except (ImportError, ModuleNotFoundError) as exc:
         pytest.skip(f"pydrake not installed: {exc}")
 
     from src.engines.physics_engines.drake.python.grip_contact_sim import (

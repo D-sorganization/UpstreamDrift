@@ -65,10 +65,10 @@ def _load_in_opensim(urdf_path: Path) -> None:
     except ImportError:
         pytest.skip("opensim not installed")
 
-    # Try the URDF converter if it exists, or just skip noting the absence.
-    # OpenSim python API doesn't have a direct `opensim.Model(urdf_path)`
-    # They have opensim.URDFConverter if built with it.
-    pytest.skip("OpenSim URDF import path not implemented natively in python API")
+    pytest.xfail(
+        "OpenSim URDF import path not implemented natively in python API (#4535)",
+        strict=True,
+    )
 
 
 def _load_in_engine(engine: str, urdf_path: Path) -> None:

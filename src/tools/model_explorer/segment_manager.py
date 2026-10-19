@@ -1,9 +1,83 @@
-"""Segment manager for handling URDF segment operations."""
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+import defusedxml.ElementTree as dET
+import defusedxml.minidom as minidom
 
 from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
+if TYPE_CHECKING:
+    from typing import Any
+
 logger = get_logger(__name__)
+
+
+def _convert_to_drake_urdf(urdf_content: str) -> str:
+    """Convert generic URDF XML to Drake-optimized URDF."""
+    if not urdf_content or not urdf_content.strip():
+        return ""
+    try:
+        root = dET.fromstring(urdf_content)
+    except (dET.ParseError, ValueError):
+        return f"<!-- Exported for Drake physics engine -->\n{urdf_content}"
+
+    root.set("xmlns:drake", "http://drake.mit.edu")
+
+    has_cfg = any(child.tag.endswith("collision_filter_group") for child in root)
+    if not has_cfg:
+        cfg = root.makeelement("drake:collision_filter_group", {"name": "default"})
+        root.append(cfg)
+        for link in root.findall(".//link"):
+            name = link.get("name")
+            if name:
+                m = cfg.makeelement("drake:member", {"link": name})
+                cfg.append(m)
+
+    rough = dET.tostring(root, encoding="unicode")
+    reparsed = minidom.parseString(rough)
+    xml_str = str(reparsed.toprettyxml(indent="  "))
+    lines = [line for line in xml_str.split("\n") if line.strip()]
+    header = "<!-- Exported for Drake physics engine -->"
+    if lines and lines[0].startswith("<?xml"):
+        lines.insert(1, header)
+    else:
+        lines.insert(0, header)
+    return "\n".join(lines)
+
+
+def _convert_to_pinocchio_urdf(urdf_content: str) -> str:
+    """Convert generic URDF XML to Pinocchio-optimized URDF."""
+    if not urdf_content or not urdf_content.strip():
+        return ""
+    try:
+        root = dET.fromstring(urdf_content)
+    except (dET.ParseError, ValueError):
+        return f"<!-- Exported for Pinocchio physics engine -->\n{urdf_content}"
+
+    if "xmlns:drake" in root.attrib:
+        del root.attrib["xmlns:drake"]
+
+    rough = dET.tostring(root, encoding="unicode")
+    reparsed = minidom.parseString(rough)
+    xml_str = str(reparsed.toprettyxml(indent="  "))
+    lines = [line for line in xml_str.split("\n") if line.strip()]
+    header = "<!-- Exported for Pinocchio physics engine -->"
+    if lines and lines[0].startswith("<?xml"):
+        lines.insert(1, header)
+    else:
+        lines.insert(0, header)
+    return "\n".join(lines)
+
+
+def _convert_to_mujoco_mjcf(urdf_content: str) -> str:
+    """Convert URDF XML to MuJoCo MJCF XML."""
+    if not urdf_content or not urdf_content.strip():
+        return ""
+    from src.tools.model_explorer._mujoco_viewer_backend import URDFToMJCFConverter
+
+    return URDFToMJCFConverter.convert(urdf_content)
 
 
 class SegmentManager:
@@ -332,7 +406,7 @@ class SegmentManager:
         logger.info("Segment manager cleared")
 
     @precondition(
-        lambda self, engine: (
+        lambda self, engine, *args, **kwargs: (
             engine is not None and engine.lower() in ("mujoco", "drake", "pinocchio")
         ),
         "Engine must be one of: 'mujoco', 'drake', 'pinocchio'",
@@ -343,61 +417,86 @@ class SegmentManager:
         ),
         "Export result must be a dictionary containing an 'engine' key",
     )
-    def export_for_engine(self, engine: str) -> dict:
+    def export_for_engine(self, engine: str, urdf_content: str = "") -> dict[str, Any]:
         """Export segment data optimized for a specific physics engine.
 
         Args:
             engine: Target physics engine ('mujoco', 'drake', 'pinocchio').
+            urdf_content: Optional URDF XML string to convert.
 
         Returns:
-            Dictionary containing engine-specific data.
+            Dictionary containing engine-specific data and converted content.
         """
+        if not urdf_content and self.segments:
+            from src.tools.model_explorer.urdf_builder import URDFBuilder
+
+            builder = URDFBuilder()
+            for seg in self.segments.values():
+                builder.add_segment(seg)
+            urdf_content = builder.get_urdf()
+
         if engine.lower() == "mujoco":
-            return self._export_for_mujoco()
+            return self._export_for_mujoco(urdf_content)
         if engine.lower() == "drake":
-            return self._export_for_drake()
+            return self._export_for_drake(urdf_content)
         if engine.lower() == "pinocchio":
-            return self._export_for_pinocchio()
+            return self._export_for_pinocchio(urdf_content)
         raise ValueError(f"Unsupported engine: {engine}")
 
-    def _export_for_mujoco(self) -> dict:
+    def _export_for_mujoco(self, urdf_content: str = "") -> dict[str, Any]:
         """Export data optimized for MuJoCo.
 
         Returns:
             MuJoCo-specific data structure.
         """
-        # Implement MuJoCo-specific optimizations (future enhancement)
+        content = _convert_to_mujoco_mjcf(urdf_content) if urdf_content else ""
         return {
             "engine": "mujoco",
             "segments": self.segments,
             "parallel_chains": self.parallel_chains,
-            "notes": "MuJoCo export - optimizations pending",
+            "notes": "MuJoCo export - MJCF conversion",
+            "content": content,
         }
 
-    def _export_for_drake(self) -> dict:
+    def _export_for_drake(self, urdf_content: str = "") -> dict[str, Any]:
         """Export data optimized for Drake.
 
         Returns:
             Drake-specific data structure.
         """
-        # Implement Drake-specific optimizations (future enhancement)
+        content = _convert_to_drake_urdf(urdf_content) if urdf_content else ""
         return {
             "engine": "drake",
             "segments": self.segments,
             "parallel_chains": self.parallel_chains,
-            "notes": "Drake export - optimizations pending",
+            "notes": "Drake export - Drake-tagged URDF",
+            "content": content,
         }
 
-    def _export_for_pinocchio(self) -> dict:
+    def _export_for_pinocchio(self, urdf_content: str = "") -> dict[str, Any]:
         """Export data optimized for Pinocchio.
 
         Returns:
             Pinocchio-specific data structure.
         """
-        # Implement Pinocchio-specific optimizations (future enhancement)
+        content = _convert_to_pinocchio_urdf(urdf_content) if urdf_content else ""
         return {
             "engine": "pinocchio",
             "segments": self.segments,
             "parallel_chains": self.parallel_chains,
-            "notes": "Pinocchio export - optimizations pending",
+            "notes": "Pinocchio export - Pinocchio-optimized URDF",
+            "content": content,
         }
+
+    def convert_for_engine(self, engine: str, urdf_content: str) -> str:
+        """Convert URDF content to an engine-optimized string format.
+
+        Args:
+            engine: Target physics engine ('mujoco', 'drake', 'pinocchio').
+            urdf_content: URDF XML string to convert.
+
+        Returns:
+            Engine-specific XML/URDF/MJCF string.
+        """
+        export_dict = self.export_for_engine(engine, urdf_content=urdf_content)
+        return str(export_dict.get("content", ""))
