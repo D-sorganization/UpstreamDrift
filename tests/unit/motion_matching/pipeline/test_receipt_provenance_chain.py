@@ -10,6 +10,7 @@ from typing import Any
 
 import pytest
 
+from src.shared.python.motion_matching import tibial_torsion as tt
 from src.shared.python.motion_matching.anthropometry import de_leva_table_sha256
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
 from src.shared.python.motion_matching.pipeline.receipt_provenance import (
@@ -336,6 +337,24 @@ def test_raw_file_sha256_matches_hashlib(tmp_path: Path) -> None:
     path = tmp_path / "blob.bin"
     path.write_bytes(b"abc")
     assert raw_file_sha256(path) == hashlib.sha256(b"abc").hexdigest()
+
+
+@pytest.mark.parametrize(
+    ("_label", "base_path", "capture_dir"),
+    CURRENT_BASELINE_CAPTURES,
+    ids=[row[0] for row in CURRENT_BASELINE_CAPTURES],
+)
+def test_baseline_receipts_hash_specs_with_tibial_torsion_record(
+    _label: str, base_path: Path, capture_dir: Path
+) -> None:
+    """#12789 acceptance 4: ground-support receipts chain through the offset spec."""
+    base_spec = json.loads(base_path.read_text(encoding="utf-8"))
+    receipt = json.loads((capture_dir / "receipt.json").read_text(encoding="utf-8"))
+    assert receipt["base_spec_sha256"] == canonical_sha256(base_spec)
+    tt.validate_tibial_torsion(base_spec)
+    record = base_spec[tt.TIBIAL_TORSION_KEY]
+    assert record["r"] == record["l"] == tt.DEFAULT_TIBIAL_TORSION_OFFSET_DEG
+    assert record["source"] == tt.TIBIAL_TORSION_SOURCE
 
 
 @pytest.mark.parametrize(
