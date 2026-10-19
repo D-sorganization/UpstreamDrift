@@ -29,9 +29,12 @@ from typing import Any
 
 import numpy as np
 
+import math
+
 from src.shared.python.grip_contact import GripInterface
 from src.shared.python.grip_contact.elastic_foundation import (
     ElasticFoundationParameters,
+    elastic_foundation_for_law,
     elastic_foundation_parameters,
 )
 from src.shared.python.grip_contact.grip_mesh import (
@@ -40,11 +43,32 @@ from src.shared.python.grip_contact.grip_mesh import (
 )
 from src.shared.python.grip_contact.contact_topology import DEFAULT_TOPOLOGY_PRELOAD_M
 from src.shared.python.grip_contact.pad_contact import PadContactModel
-from src.shared.python.grip_contact.pad_layout import PadLayout
+from src.shared.python.grip_contact.pad_layout import PAD_RADIUS_M, PadLayout
 from src.shared.python.grip_contact.topology_contact import (
     TopologyContactModel,
     map_site_to_hand_frame,
 )
+
+
+def capsule_sphere_count(half_length_m: float, radius_m: float) -> int:
+    """Number of discrete spheres approximating a capsule medial axis in OpenSim.
+
+    Preconditions:
+        ``half_length_m`` must be a nonnegative finite float.
+        ``radius_m`` must be a positive finite float.
+
+    Postconditions:
+        Returns an integer >= 2 ensuring sphere center spacing <= radius_m.
+    """
+    if not (math.isfinite(half_length_m) and half_length_m >= 0.0):
+        raise ValueError(
+            f"half_length_m must be nonnegative and finite, got {half_length_m}"
+        )
+    if not (math.isfinite(radius_m) and radius_m > 0.0):
+        raise ValueError(f"radius_m must be positive and finite, got {radius_m}")
+    core_len = 2.0 * half_length_m
+    return max(2, int(round(core_len / (0.5 * radius_m))) + 1)
+
 
 CONTACT_FORCE_PREFIX = "grip_contact"
 SIDES = ("L", "R")
@@ -95,33 +119,11 @@ class ContactGripConfig:
                     self, "foundation", elastic_foundation_parameters(self.pads)
                 )
             elif self.topology_model is not None:
-                law = self.topology_model.law
-                grip_r = self.topology_model.cylinder.radius_m
-                pad_r = 0.008
-                delta = DEFAULT_TOPOLOGY_PRELOAD_M
-                f_pad = law.stiffness_n_m * delta
-                from src.shared.python.grip_contact.elastic_foundation import (
-                    winkler_patch_factor_m,
-                )
-
-                factor = winkler_patch_factor_m(pad_r, grip_r)
-                layout_def = PadLayout(
-                    grip_radius_m=grip_r,
-                    pad_radius_m=pad_r,
-                    preload_penetration_m=delta,
-                )
-                ef_def = ElasticFoundationParameters(
-                    stiffness_n_m3=f_pad / (factor * delta * delta),
-                    dissipation_s_m=law.dissipation_s_m,
-                    static_friction=law.static_friction,
-                    dynamic_friction=law.dynamic_friction,
-                    viscous_friction=law.viscous_friction,
-                    transition_velocity_m_s=law.transition_velocity_m_s,
-                    preload_penetration_m=delta,
-                    force_per_pad_n=f_pad,
-                    pad_stiffness_n_m=law.stiffness_n_m,
-                    patch_factor_m=factor,
-                    layout=layout_def,
+                ef_def = elastic_foundation_for_law(
+                    self.topology_model.law,
+                    self.topology_model.cylinder.radius_m,
+                    PAD_RADIUS_M,
+                    DEFAULT_TOPOLOGY_PRELOAD_M,
                 )
                 object.__setattr__(self, "foundation", ef_def)
 
@@ -272,8 +274,7 @@ def _build_topology_contact(
                 )
             elif mapped.primitive == "capsule":
                 p0, p1 = mapped.endpoints_m
-                core_len = 2.0 * mapped.half_length_m
-                count = max(2, int(round(core_len / mapped.radius_m)) + 1)
+                count = capsule_sphere_count(mapped.half_length_m, mapped.radius_m)
                 ef_site = (
                     cfg.site_foundations[(mapped.radius_m, count)]
                     if cfg.site_foundations

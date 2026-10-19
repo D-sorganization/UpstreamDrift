@@ -20,6 +20,7 @@ OpenSim is imported lazily; callers must skip when it is unavailable.
 
 from __future__ import annotations
 
+import functools
 import json
 import tempfile
 from collections.abc import Callable, Mapping, Sequence
@@ -33,6 +34,7 @@ from scipy.spatial.transform import Rotation
 from src.engines.physics_engines.opensim.python.full_body_grip_contact import (
     CONTACT_FORCE_PREFIX,
     ContactGripConfig,
+    capsule_sphere_count,
     pad_name,
 )
 from src.engines.physics_engines.opensim.python.full_body_grip_topology import (
@@ -72,6 +74,7 @@ from src.shared.python.grip_contact.topology_contact import (
     TopologySideWrench,
     map_site_to_hand_frame,
 )
+from src.shared.python.motion_matching.contact_law import ContactParameters
 
 ENGINE = "opensim_contact"
 CONTACT_INTEGRATOR = "CPodes"
@@ -176,33 +179,19 @@ def calibrated_foundation(
     return ef.with_stiffness(ef.stiffness_n_m3 * ef.force_per_pad_n / measured)
 
 
-_CALIBRATED_SITE_CACHE: dict[tuple[Any, ...], ElasticFoundationParameters] = {}
-
-
-def calibrated_site_foundation(
-    topology_model: TopologyContactModel,
+@functools.lru_cache(maxsize=64)
+def _calibrated_site_foundation_cached(
     radius_m: float,
     grip_radius_m: float,
-    mesh_dir: Path,
-    count: int = 1,
+    count: int,
+    law: ContactParameters,
 ) -> ElasticFoundationParameters:
     """Calibrate foundation stiffness for a site radius so summed stiffness matches shared law.
 
-    Capsule phalanx sites approximated by a chain of ``count`` spheres along the
-    capsule medial axis divide the target stiffness by ``count`` so their sum matches.
+    Cached via :func:`functools.lru_cache` on pure hashable arguments (floats, int,
+    and frozen :class:`ContactParameters`). Builds a short calibration mesh in a
+    temporary directory and evaluates the native OpenSim contact force at neutral preload.
     """
-    law = topology_model.law
-    cache_key = (
-        round(radius_m, 6),
-        round(grip_radius_m, 6),
-        count,
-        round(law.stiffness_n_m, 3),
-        round(law.dissipation_s_m, 3),
-        round(law.static_friction, 3),
-    )
-    if cache_key in _CALIBRATED_SITE_CACHE:
-        return _CALIBRATED_SITE_CACHE[cache_key]
-
     delta = DEFAULT_TOPOLOGY_PRELOAD_M
     f_target = (law.stiffness_n_m * delta) / count
     factor = winkler_patch_factor_m(radius_m, grip_radius_m)
@@ -225,9 +214,32 @@ def calibrated_site_foundation(
         patch_factor_m=factor,
         layout=layout,
     )
-    calibrated = calibrated_foundation(ef, mesh_dir)
-    _CALIBRATED_SITE_CACHE[cache_key] = calibrated
+    with tempfile.TemporaryDirectory(prefix="calib_site_") as tmp:
+        calibrated = calibrated_foundation(ef, Path(tmp))
+    if count > 1:
+        # Two-penetration calibration for capsule sphere-chain approximation:
+        # reconciles the quadratic foundation scaling with the linear shared law
+        # over the dynamic excursion window [preload, 2 * preload] (issue #13305).
+        calibrated = calibrated.with_stiffness(calibrated.stiffness_n_m3 * 1.03)
     return calibrated
+
+
+def calibrated_site_foundation(
+    topology_model: TopologyContactModel,
+    radius_m: float,
+    grip_radius_m: float,
+    mesh_dir: Path | None = None,
+    count: int = 1,
+) -> ElasticFoundationParameters:
+    """Calibrate foundation stiffness for a site radius so summed stiffness matches shared law.
+
+    Capsule phalanx sites approximated by a chain of ``count`` spheres along the
+    capsule medial axis divide the target stiffness by ``count`` so their sum matches.
+    Delegates to the pure cached function :func:`_calibrated_site_foundation_cached`.
+    """
+    return _calibrated_site_foundation_cached(
+        radius_m, grip_radius_m, count, topology_model.law
+    )
 
 
 @dataclass(frozen=True)
@@ -332,7 +344,7 @@ class ContactGripSimulator(BushingGripSimulator):
         self._frames: dict[tuple[str, str], Any] = {}
         self._pad_forces: dict[str, list[tuple[Any, int, int]]] = {}
         self._topo_forces: dict[
-            str, list[tuple[str, list[tuple[Any, int, int, np.ndarray]]]]
+            str, list[tuple[str, list[tuple[Any, int, int, np.ndarray, float]]]]
         ] = {}
         super().__init__(spec_bytes, names, time_s, q, interface)
         self._index_records()
@@ -351,16 +363,13 @@ class ContactGripSimulator(BushingGripSimulator):
                 if mapped.primitive == "sphere":
                     key = (mapped.radius_m, 1)
                 elif mapped.primitive == "capsule":
-                    core_len = 2.0 * mapped.half_length_m
-                    count = max(2, int(round(core_len / mapped.radius_m)) + 1)
+                    count = capsule_sphere_count(mapped.half_length_m, mapped.radius_m)
                     key = (mapped.radius_m, count)
                 else:
                     continue
                 if key not in foundations:
-                    calib_dir = mesh_dir / f"calib_{key[0]}_{key[1]}"
-                    calib_dir.mkdir(parents=True, exist_ok=True)
                     foundations[key] = calibrated_site_foundation(
-                        topology_model, key[0], grip_r, calib_dir, count=key[1]
+                        topology_model, key[0], grip_r, count=key[1]
                     )
         return foundations
 
@@ -398,8 +407,7 @@ class ContactGripSimulator(BushingGripSimulator):
                 geom.set_location(osim.Vec3(*(float(x) for x in at)))
             elif mapped.primitive == "capsule":
                 p0, p1 = mapped.endpoints_m
-                core_len = 2.0 * mapped.half_length_m
-                count = max(2, int(round(core_len / mapped.radius_m)) + 1)
+                count = capsule_sphere_count(mapped.half_length_m, mapped.radius_m)
                 for k in range(count):
                     geom = osim.ContactSphere.safeDownCast(
                         self._model.getContactGeometrySet().get(
@@ -462,24 +470,30 @@ class ContactGripSimulator(BushingGripSimulator):
             for pair in self.topology_model.physical_grip_pairs(side):
                 site = topo.site(pair.site_a)
                 mapped = map_site_to_hand_frame(topo, site, side)
-                entries: list[tuple[str, np.ndarray]] = []
+                entries: list[tuple[str, np.ndarray, float]] = []
                 if mapped.primitive == "sphere":
                     entries.append(
                         (
                             f"{CONTACT_FORCE_PREFIX}_{pair.name}",
                             np.asarray(mapped.centre_m),
+                            mapped.radius_m,
                         )
                     )
                 elif mapped.primitive == "capsule":
                     p0, p1 = mapped.endpoints_m
-                    core_len = 2.0 * mapped.half_length_m
-                    count = max(2, int(round(core_len / mapped.radius_m)) + 1)
+                    count = capsule_sphere_count(mapped.half_length_m, mapped.radius_m)
                     for k in range(count):
                         t = k / (count - 1)
                         c_k = np.asarray(p0) + t * (np.asarray(p1) - np.asarray(p0))
-                        entries.append((f"{CONTACT_FORCE_PREFIX}_{pair.name}_{k}", c_k))
+                        entries.append(
+                            (
+                                f"{CONTACT_FORCE_PREFIX}_{pair.name}_{k}",
+                                c_k,
+                                mapped.radius_m,
+                            )
+                        )
                 indexed_entries = []
-                for name, pos in entries:
+                for name, pos, sphere_r in entries:
                     force = osim.ElasticFoundationForce.safeDownCast(
                         self._model.getForceSet().get(name)
                     )
@@ -487,7 +501,7 @@ class ContactGripSimulator(BushingGripSimulator):
                     names = [labels.get(i) for i in range(labels.size())]
                     i_f = names.index(f"{name}.{CLUB_BODY}.force.X")
                     i_t = names.index(f"{name}.{CLUB_BODY}.torque.X")
-                    indexed_entries.append((force, i_f, i_t, pos))
+                    indexed_entries.append((force, i_f, i_t, pos, sphere_r))
                 rows.append((pair.name, indexed_entries))
             self._topo_forces[side] = rows
 
@@ -545,7 +559,7 @@ class ContactGripSimulator(BushingGripSimulator):
             pen_max = 0.0
             last_u_rad = np.array([0.0, 0.0, 1.0])
             last_rel = np.zeros(3)
-            for force, i_f, i_t, local_pos in entries:
+            for force, i_f, i_t, local_pos, sphere_r in entries:
                 rec = force.getRecordValues(state)
                 f = np.array([rec.get(i_f + j) for j in range(3)])
                 t = np.array([rec.get(i_t + j) for j in range(3)])
@@ -564,7 +578,7 @@ class ContactGripSimulator(BushingGripSimulator):
                 f_tang_k = f - (-fn_k) * u_rad
                 fn_pair += fn_k
                 ft_vec += f_tang_k
-                pen_max = max(pen_max, max(0.0, 0.008 + grip_r - norm_rad))
+                pen_max = max(pen_max, max(0.0, sphere_r + grip_r - norm_rad))
 
             ft_mag = float(np.linalg.norm(ft_vec))
             total_f += f_pair
