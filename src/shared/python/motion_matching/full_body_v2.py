@@ -20,10 +20,11 @@ Coordinates are model-axis primitive angles in the sequence Ry, Rx, Rz, which
 is the ISB ``isb_spine`` ZXY sequence through ``MODEL_TO_ISB``
 (ADR-0055 item 1): ``FE = -flexion``, ``LB = +lateral_bending`` (right),
 ``AR = +axial_rotation`` (left). Soft limits are declared in ISB sign
-(extension positive) as HRG-D2 specifies; ``coordinate_ranges_deg`` carries
-them in model sign. Joint locations are an explicit input
-(:class:`TrunkJointLocations`); :func:`segment_boundary_locations` is the
-declared HRG-D1 stand-in, not a landmark estimate.
+(extension positive) as HRG-D2 specifies; ``soft_limits_deg`` carries them
+in model sign (never ``coordinate_ranges_deg``, which IK treats as hard
+bounds). Joint locations are an explicit input (:class:`TrunkJointLocations`);
+:func:`segment_boundary_locations` is the declared HRG-D1 stand-in and
+``full_body_v2_geometry.landmark_trunk_locations`` the HRG-D2 landmark one.
 """
 
 from __future__ import annotations
@@ -58,6 +59,7 @@ Array = NDArray[np.float64]
 __all__ = [
     "FULL_BODY_SCHEMA",
     "FULL_BODY_V2_SCHEMA_VERSION",
+    "HARD_RANGE_POLICY",
     "LUMBAR_BODY",
     "V2_TRUNK",
     "V2_UPPER_BODY_SCHEMA_VERSION",
@@ -79,6 +81,13 @@ _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _REGIONAL_PRIMITIVES = ("Ry", "Rx", "Rz")
 _ISB_ORDER = ("flexion_extension", "lateral_bending", "axial_rotation")
 _ISB_SIGNS = (-1.0, 1.0, 1.0)
+#: HRG-D2: the trunk ROM is a soft limit (``soft_limits_deg``, model sign).
+#: It is never written to ``coordinate_ranges_deg``, which IK consumers treat
+#: as hard bounds; an exceedance is reported, never clamped.
+HARD_RANGE_POLICY = (
+    "report_only: trunk ROM is soft (soft_limits_deg); exceedances are "
+    "reported and never enforced as IK or engine limits"
+)
 
 
 def _regional(
@@ -179,12 +188,15 @@ class TrunkJointLocations:
     """Neutral (q = 0) joint centres in the pelvis frame, metres.
 
     Preconditions (``ValueError``): finite 3-vectors, at least 1 mm apart,
-    non-empty provenance saying where the locations came from.
+    non-empty provenance saying where the locations came from; ``evidence``
+    (optional, JSON-serialisable mapping) is recorded verbatim in the
+    document's ``trunk_topology.locations_evidence``.
     """
 
     l5s1_in_pelvis_m: tuple[float, float, float]
     t12l1_in_pelvis_m: tuple[float, float, float]
     provenance: str
+    evidence: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
         lo = _vec3(self.l5s1_in_pelvis_m, "l5s1_in_pelvis_m")
@@ -193,6 +205,8 @@ class TrunkJointLocations:
             raise ValueError("L5/S1 and T12/L1 must be distinct (>= 1 mm apart)")
         if not self.provenance.strip():
             raise ValueError("Trunk joint locations need a provenance")
+        if self.evidence is not None and not isinstance(self.evidence, Mapping):
+            raise TypeError("Trunk joint location evidence must be a Mapping")
         object.__setattr__(self, "l5s1_in_pelvis_m", lo)
         object.__setattr__(self, "t12l1_in_pelvis_m", up)
 
@@ -396,7 +410,12 @@ def _trunk_record(
         "l5s1_in_pelvis_m": list(locations.l5s1_in_pelvis_m),
         "t12l1_in_pelvis_m": list(locations.t12l1_in_pelvis_m),
         "locations_provenance": locations.provenance,
-        "neutral_rotation": "identity (no lordosis/kyphosis offset; HRG-D2)",
+        "locations_evidence": json.loads(json.dumps(locations.evidence or {})),
+        "neutral_rotation": (
+            "identity: primitives act about the model axes; the neutral "
+            "lordosis/kyphosis is carried by the joint-centre chords (HRG-D2)"
+        ),
+        "hard_range_policy": HARD_RANGE_POLICY,
         **replaced["record"],
     }
 
@@ -431,6 +450,7 @@ def derive_full_body_v2_spec(
     _check_dummy_is_free(v1, trunk_bodies(v1)["twist_base"])
     replaced = _replace_trunk(v1, locations)
     trunk_names = set(V1_TRUNK.coordinates)
+    trunk_names |= set(V2_TRUNK.coordinates)
     ranges = {
         k: v
         for k, v in dict(v1.get("coordinate_ranges_deg", {})).items()
@@ -449,10 +469,8 @@ def derive_full_body_v2_spec(
         "base_upper_body_sha256": v1["upper_body_sha256"],
         "source_spec_sha256": canonical_sha256(v1),
         "coordinate_order": v2_coordinate_order(v1["coordinate_order"]),
-        "coordinate_ranges_deg": {
-            **ranges,
-            **{k: list(v) for k, v in v2_trunk_ranges_deg().items()},
-        },
+        "coordinate_ranges_deg": ranges,
+        "soft_limits_deg": {k: list(v) for k, v in v2_trunk_ranges_deg().items()},
         "bodies": replaced["bodies"],
         "joints": replaced["joints"],
         "frames": replaced["frames"],

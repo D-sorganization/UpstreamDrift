@@ -563,9 +563,14 @@ levels (#12749, Bruno sensitivity table #12769).
 - Plots are static Agg figures whose titles state the scientific status, so
   unqualified data is labelled `UNQUALIFIED`.
 
-The desktop tool `src/tools/spine_viewer/` (#12772) shows hash-verified
-joint-reaction heatmaps from a receipt in an always-visible status banner. It
-has no web counterpart yet (feature-parity gap).
+The desktop tool `src/tools/spine_viewer/` (#12772) and its web counterpart
+at `/tools/spine-viewer` (SPN-15c, #12815, backed by `src/api/routes/spine_viewer.py`
+and `ui/src/pages/SpineViewer.tsx`) show hash-verified joint-reaction heatmaps
+from a study receipt under an always-visible status banner. Both surfaces display
+the run verdict, scientific status, and distribution source; anything other than
+an exact qualified status is marked `UNQUALIFIED`. The web view renders the
+per-level load heatmap for compression, tension, AP shear, or ML shear; angle-stack
+plots are not part of the web view.
 
 ## Software Verification and Scientific Acceptance
 
