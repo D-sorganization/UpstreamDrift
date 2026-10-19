@@ -43,6 +43,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1165 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py` |
 | 1164 | `src/shared/python/physics/terrain_representation.py` |
 | 1163 | `src/engines/simscape/adapter.py` |
+| 1162 | `src/engines/physics_engines/myosuite/python/myohand_bilateral_adapter.py` |
 | 1161 | `src/engines/physics_engines/opensim/python/msk_lift_ik_id.py` |
 | 1153 | `src/tools/motion_matching/gui.py` |
 | 1150 | `src/tools/bunker_shot_gui/gui.py` |
@@ -72,6 +73,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1066 | `src/tools/bunker_shot_gui/crosstier.py` |
 | 1065 | `src/shared/python/pendulum_simulator/gui/toolstrip_widget.py` |
 | 1063 | `src/bunkershot3d/metrics/divot.py` |
+| 1062 | `src/shared/python/grip_contact/binding.py` |
 | 1053 | `src/engines/model_inventory.py` |
 | 1053 | `src/tools/tour_matching_viewer/core.py` |
 | 1052 | `src/shared/python/motion_matching/pinocchio_g2_g3.py` |
@@ -97,7 +99,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1000 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_opengl_renderer.py` |
 | 999 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 999 | `src/shared/python/estimation/dime_contracts.py` |
-| 996 | `src/shared/python/grip_contact/binding.py` |
 | 994 | `src/api/models/responses.py` |
 | 993 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 990 | `src/shared/python/estimation/map_estimator.py` |
@@ -167,6 +168,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 873 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py` |
 | 871 | `src/shared/python/grip_contact/contact_topology.py` |
 | 870 | `src/shared/python/model_generation/cli/main.py` |
+| 869 | `src/shared/python/grip_contact/topology_contact.py` |
 | 868 | `src/shared/python/workspace/necromatcher_video_jobs.py` |
 | 866 | `src/engines/feedback_observation_qualification.py` |
 | 864 | `src/tools/shot_pattern_analysis/matched_report_plots.py` |
