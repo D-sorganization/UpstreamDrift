@@ -39,7 +39,7 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -61,7 +61,11 @@ from src.shared.python.grip_contact.pair_contact import (
 from src.shared.python.motion_matching.full_body_schema import (
     SchemaFeatureUnavailableError,
 )
-from src.shared.python.motion_matching.grip_contract import GripSpec
+
+if TYPE_CHECKING:
+    # Annotation only: grip_contract imports model_appearance.grip_pose, which
+    # imports this package, so a module-level import closes an import cycle.
+    from src.shared.python.motion_matching.grip_contract import GripSpec
 
 METHOD = "allocation"
 #: Legacy overlay wrench label of the drawn palm-thumb normal force.
