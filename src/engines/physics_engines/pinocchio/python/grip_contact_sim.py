@@ -28,7 +28,6 @@ from src.shared.python.grip_contact import (
     CoordinateSpline,
     CoordinateSwing,
     GripInterface,
-    hand_frame_states,
 )
 from src.shared.python.grip_contact.contact_run import ContactRun, slip_from_frames
 from src.shared.python.grip_contact.pad_contact import PadContactModel, pad_wrench
@@ -78,14 +77,10 @@ class ClubInHands(bushing.ClubOnBushings):
         )
         self.last_pads: dict[str, Any] = {}
 
-    def wrenches(
-        self, t: float, y: np.ndarray, hand_source: Any
-    ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
-        """Hand frames, club frames and contact wrenches at ``(t, y)``."""
-        q, qdot = hand_source(t)
-        hands = hand_frame_states(self.kinematics.state(q, qdot), self.interface)
-        club = self.club_state(y)
-        frames = {s: club.frame(self._offsets[s]) for s in SIDES}
+    def contact_law(
+        self, hands: dict[str, Any], frames: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Per-side pad or topology contact wrench on the club frame."""
         law: dict[str, Any]
         if self.pads is None:
             if self.topology_model is None:
@@ -100,7 +95,7 @@ class ClubInHands(bushing.ClubOnBushings):
                 for s in SIDES
             }
         self.last_pads = law
-        return hands, frames, law
+        return law
 
 
 def hold_state(sim: ClubInHands, q: np.ndarray) -> tuple[Any, np.ndarray]:

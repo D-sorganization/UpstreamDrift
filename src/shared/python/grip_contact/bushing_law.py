@@ -41,7 +41,6 @@ from src.shared.python.grip_contact.parameters import BushingParameters
 
 #: Refuse middle angles within this margin of the X-Y-Z gimbal lock (rad).
 GIMBAL_MARGIN_RAD = 1e-3
-_EYE = np.eye(3)
 
 __all__ = [
     "GIMBAL_MARGIN_RAD",
@@ -51,6 +50,7 @@ __all__ = [
     "body_xyz_n_matrix",
     "bushing_wrench",
     "cross3",
+    "rotation_errors",
 ]
 
 
@@ -63,6 +63,25 @@ def cross3(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     a0, a1, a2 = float(a[0]), float(a[1]), float(a[2])
     b0, b1, b2 = float(b[0]), float(b[1]), float(b[2])
     return np.array([a1 * b2 - a2 * b1, a2 * b0 - a0 * b2, a0 * b1 - a1 * b0])
+
+
+def rotation_errors(rows: list[list[float]]) -> tuple[float, float]:
+    """``(max_ij |R^T R - I|_ij, det R)`` of a finite 3x3 matrix given as rows.
+
+    Python-float evaluation for hot-path preconditions; agrees with numpy's
+    ``np.abs(R.T @ R - I).max()`` and ``np.linalg.det(R)`` to round-off.
+    """
+    (a, b, c), (d, e, f), (g, h, i) = rows
+    gram = max(
+        abs(a * a + d * d + g * g - 1.0),
+        abs(b * b + e * e + h * h - 1.0),
+        abs(c * c + f * f + i * i - 1.0),
+        abs(a * b + d * e + g * h),
+        abs(a * c + d * f + g * i),
+        abs(b * c + e * f + h * i),
+    )
+    det = a * (e * i - h * f) + d * (h * c - b * i) + g * (b * f - e * c)
+    return gram, det
 
 
 @dataclass(frozen=True)
@@ -80,15 +99,20 @@ class BushingState:
     omega_rad_s: np.ndarray
 
     def __post_init__(self) -> None:
+        # Constructed several times per integrator right-hand side, so the
+        # checks run on Python floats (a dozen numpy calls cost ~10x more).
         rot = np.asarray(self.rotation, dtype=float)
-        if rot.shape != (3, 3) or not np.isfinite(rot).all():
+        if rot.shape != (3, 3):
             raise ValueError("rotation must be a finite 3x3 matrix")
-        if not np.abs(rot.T @ rot - _EYE).max() <= 1e-6:
+        rows = rot.tolist()
+        if not all(map(math.isfinite, rows[0] + rows[1] + rows[2])):
+            raise ValueError("rotation must be a finite 3x3 matrix")
+        if not rotation_errors(rows)[0] <= 1e-6:
             raise ValueError("rotation must be orthonormal")
         object.__setattr__(self, "rotation", rot)
         for name in ("position_m", "velocity_m_s", "omega_rad_s"):
             vec = np.asarray(getattr(self, name), dtype=float)
-            if vec.shape != (3,) or not np.isfinite(vec).all():
+            if vec.shape != (3,) or not all(map(math.isfinite, vec.tolist())):
                 raise ValueError(f"{name} must be a finite 3-vector")
             object.__setattr__(self, name, vec)
 
