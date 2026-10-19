@@ -12,8 +12,12 @@ through :meth:`ResultsSession.load`:
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
+
+import numpy as np
+from numpy.typing import NDArray
 
 from src.shared.python.motion_matching.export import export_video
 from src.shared.python.motion_matching.video_frame_source import (
@@ -27,10 +31,120 @@ from src.tools.model_explorer.pose_results import (
     load_pose_frame_source,
 )
 
-__all__ = ["ResultsSession"]
+__all__ = ["ResultsSession", "detect_engine_from_archive"]
 
 _VIDEO_SUFFIXES = (".mp4", ".gif")
 FrameSource = MarkerFrameSource | PoseFrameSource
+_KNOWN_ENGINES = ("mujoco", "drake", "pinocchio", "opensim", "myosuite", "simscape")
+
+
+_IGNORED_ENGINE_VALUES = frozenset({"unknown", "engine"})
+
+
+def _normalized_engine(value: object) -> str | None:
+    """Lower-case engine name, or ``None`` for empty or placeholder values."""
+    if not value:
+        return None
+    text = str(value).strip().lower()
+    if not text or text in _IGNORED_ENGINE_VALUES:
+        return None
+    return text
+
+
+def _npz_text(data: Any, key: str) -> str | None:
+    """Engine name stored as a scalar (or first element) under ``key``."""
+    val = data[key]
+    return _normalized_engine(val.item() if getattr(val, "ndim", 0) == 0 else val[0])
+
+
+def _json_engine(text: str, *keys: str, metadata: bool = False) -> str | None:
+    """First engine name under ``keys`` in a JSON object.
+
+    With ``metadata=True`` a nested ``metadata.engine`` is the last resort.
+    """
+    try:
+        document = json.loads(text)
+    except (ValueError, TypeError):
+        return None
+    if not isinstance(document, dict):
+        return None
+    candidates = [document.get(key) for key in keys]
+    nested = document.get("metadata")
+    if metadata and isinstance(nested, dict):
+        candidates.append(nested.get("engine"))
+    for candidate in candidates:
+        if isinstance(candidate, str) and (found := _normalized_engine(candidate)):
+            return found
+    return None
+
+
+def _engine_from_npz(target: Path) -> str | None:
+    """Engine recorded inside an ``.npz`` archive, in order of authority."""
+    try:
+        with np.load(target, allow_pickle=False) as data:
+            files = set(data.files)
+            if "engine" in files and (found := _npz_text(data, "engine")):
+                return found
+            if "manifest_json" in files and (
+                found := _json_engine(
+                    str(data["manifest_json"]), "engine", metadata=True
+                )
+            ):
+                return found
+            if "manifest" in files and (
+                found := _json_engine(
+                    str(data["manifest"]), "engine", "reference_engine"
+                )
+            ):
+                return found
+            if "backend" in files:
+                return _npz_text(data, "backend")
+    except (OSError, ValueError):
+        return None
+    return None
+
+
+def _engine_from_receipt(target: Path) -> str | None:
+    """Engine recorded in a sibling receipt JSON next to the archive."""
+    for candidate in (target.with_suffix(".json"), target.parent / "receipt.json"):
+        if not candidate.is_file():
+            continue
+        try:
+            text = candidate.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        found = _json_engine(text, "engine", "backend")
+        if found is not None:
+            return found
+    return None
+
+
+def _engine_in_name(name: str) -> str | None:
+    """A known engine name appearing as a ``_``/``-`` separated token."""
+    for part in name.lower().replace("-", "_").split("_"):
+        if part in _KNOWN_ENGINES:
+            return part
+    return None
+
+
+def detect_engine_from_archive(path: str | Path) -> str | None:
+    """Extract engine name from an archive's contents, receipts, or metadata.
+
+    Sources are consulted in order: ``.npz`` keys (``engine``,
+    ``manifest_json``, ``manifest``, ``backend``), a sibling receipt JSON, then
+    a known engine token in the file stem or parent folder name. Placeholder
+    values (``unknown``/``engine``) never count.
+    """
+    target = Path(path)
+    if not target.is_file():
+        return None
+    if target.suffix.lower() == ".npz" and (found := _engine_from_npz(target)):
+        return found
+    found = _engine_from_receipt(target)
+    if found is not None:
+        return found
+    parent = target.parent
+    return _engine_in_name(target.stem) or _engine_in_name(parent.name)
 
 
 class ResultsSession:
@@ -49,17 +163,30 @@ class ResultsSession:
         self._playback: Any | None = None
 
     @classmethod
-    def load(cls, path: str | Path, engine: str = "engine") -> ResultsSession:
+    def load(cls, path: str | Path, engine: str | None = None) -> ResultsSession:
         """Load ``path``; raise ``FileNotFoundError`` or ``VideoSourceError``.
 
-        Joint-space runs take their engine from the run itself; ``engine``
-        names marker archives, which do not record one.
+        Joint-space runs take their engine from the run itself; marker
+        archives read engine metadata if present or fall back to ``engine``.
         """
         resolved = Path(path)
         if is_pose_results(resolved):
             pose = load_pose_frame_source(resolved)
             return cls(resolved, pose, pose.engine)
-        return cls(resolved, load_marker_frame_source(resolved), engine)
+        detected = detect_engine_from_archive(resolved)
+        chosen_engine = (
+            engine
+            if (engine is not None and engine != "engine")
+            else (detected or "engine")
+        )
+        return cls(resolved, load_marker_frame_source(resolved), chosen_engine)
+
+    @property
+    def markers(self) -> NDArray[np.float64] | None:
+        """Current marker trajectories across all frames, shape (n, k, 3), or None."""
+        if hasattr(self._source, "markers"):
+            return self._source.markers
+        return None
 
     @property
     def pose_source(self) -> PoseFrameSource | None:

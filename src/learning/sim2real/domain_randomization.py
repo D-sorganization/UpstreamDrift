@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import contextlib
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+
+from src.learning.sim2real.system_identification import UnsupportedParameterError
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -18,23 +21,19 @@ class DomainRandomizationConfig:
     """Configuration for domain randomization.
 
     Randomization ranges are specified as (min_multiplier, max_multiplier)
-    relative to nominal values.
+    relative to nominal values, except ``gravity_range`` which is magnitude
+    in m/s².
 
     Attributes:
         mass_range: Range for link mass randomization.
         friction_range: Range for friction coefficient.
         damping_range: Range for joint damping.
-        motor_strength_range: Range for motor strength.
+        motor_strength_range: Range for motor strength and actuator gains.
         action_delay_range: Range for action delay (timesteps).
         observation_delay_range: Range for observation delay.
         observation_noise_std: Std dev of observation noise.
         action_noise_std: Std dev of action noise.
         gravity_range: Range for gravity magnitude.
-        floor_friction_range: Range for floor friction.
-        inertia_range: Range for link inertia.
-        center_of_mass_range: Range for CoM position offset.
-        joint_offset_range: Range for joint position offsets.
-        actuator_gain_range: Range for actuator gains.
     """
 
     # Dynamics parameters
@@ -42,8 +41,6 @@ class DomainRandomizationConfig:
     friction_range: tuple[float, float] = (0.5, 1.5)
     damping_range: tuple[float, float] = (0.8, 1.2)
     motor_strength_range: tuple[float, float] = (0.9, 1.1)
-    inertia_range: tuple[float, float] = (0.9, 1.1)
-    center_of_mass_range: tuple[float, float] = (-0.01, 0.01)
 
     # Delays and noise
     action_delay_range: tuple[int, int] = (0, 3)
@@ -53,11 +50,6 @@ class DomainRandomizationConfig:
 
     # Environment
     gravity_range: tuple[float, float] = (9.5, 10.1)
-    floor_friction_range: tuple[float, float] = (0.5, 1.5)
-
-    # Actuator
-    joint_offset_range: tuple[float, float] = (-0.02, 0.02)
-    actuator_gain_range: tuple[float, float] = (0.95, 1.05)
 
     # Which parameters to randomize
     randomize_mass: bool = True
@@ -67,6 +59,21 @@ class DomainRandomizationConfig:
     randomize_gravity: bool = True
     randomize_delays: bool = True
     randomize_noise: bool = True
+
+
+#: cache key -> (getter name, setter name, config flag attribute)
+_PHYSICS_SURFACE: dict[str, tuple[str, str, str]] = {
+    "masses": ("get_link_masses", "set_link_masses", "randomize_mass"),
+    "friction": (
+        "get_friction_coefficients",
+        "set_friction_coefficients",
+        "randomize_friction",
+    ),
+    "damping": ("get_joint_damping", "set_joint_damping", "randomize_damping"),
+    "motor_strength": ("get_motor_strength", "set_motor_strength", "randomize_motor"),
+    "actuator_gains": ("get_actuator_gains", "set_actuator_gains", "randomize_motor"),
+    "gravity": ("get_gravity", "set_gravity", "randomize_gravity"),
+}
 
 
 class DomainRandomizer:
@@ -86,19 +93,22 @@ class DomainRandomizer:
         self,
         engine: PhysicsEngineProtocol,
         config: DomainRandomizationConfig | None = None,
+        *,
+        seed: int | None = None,
     ) -> None:
         """Initialize domain randomizer.
 
         Args:
             engine: Physics engine instance.
             config: Randomization configuration.
+            seed: Optional seed for the internal RNG (issue #13014).
         """
         if engine is None:
             raise ValueError("engine must be provided")
         self.engine = engine
         self.config = config or DomainRandomizationConfig()
         self.nominal_params = self._store_nominal_params()
-        self._rng = np.random.default_rng()
+        self._rng = np.random.default_rng(seed)
         self._current_randomization: dict[str, Any] = {}
 
         # Delay buffers
@@ -113,33 +123,66 @@ class DomainRandomizer:
         Returns:
             Dictionary of nominal parameters.
         """
-        params = {}
-
-        # Get link masses if available
-        if hasattr(self.engine, "get_link_masses"):
-            params["masses"] = self.engine.get_link_masses().copy()
-
-        # Get joint damping
-        if hasattr(self.engine, "get_joint_damping"):
-            params["damping"] = self.engine.get_joint_damping().copy()
-
-        # Get friction coefficients
-        if hasattr(self.engine, "get_friction_coefficients"):
-            params["friction"] = self.engine.get_friction_coefficients().copy()
-
-        # Get motor parameters
-        if hasattr(self.engine, "get_motor_strength"):
-            params["motor_strength"] = self.engine.get_motor_strength().copy()
-
-        # Get gravity
-        if hasattr(self.engine, "get_gravity"):
-            params["gravity"] = self.engine.get_gravity().copy()
-
-        # Get actuator gains
-        if hasattr(self.engine, "get_actuator_gains"):
-            params["actuator_gains"] = self.engine.get_actuator_gains().copy()
-
+        params: dict[str, Any] = {}
+        for key, (getter, _setter, _flag) in _PHYSICS_SURFACE.items():
+            fn = getattr(self.engine, getter, None)
+            if fn is None:
+                continue
+            params[key] = np.asarray(fn(), dtype=float).copy()
         return params
+
+    def _requested_physics_keys(self) -> list[str]:
+        keys: list[str] = []
+        for key, (_getter, _setter, flag_name) in _PHYSICS_SURFACE.items():
+            if getattr(self.config, flag_name):
+                keys.append(key)
+        return keys
+
+    def _setter_is_effective(self, key: str, getter: str, setter: str) -> bool:
+        """Return True when ``setter`` measurably changes ``getter`` output."""
+        if key not in self.nominal_params:
+            return False
+        nominal = np.asarray(self.nominal_params[key], dtype=float)
+        if nominal.size == 0:
+            return False
+        probe = nominal * 1.5 + 0.5
+        try:
+            getattr(self.engine, setter)(probe)
+            observed = np.asarray(getattr(self.engine, getter)(), dtype=float)
+        except (TypeError, ValueError, NotImplementedError, AttributeError):
+            return False
+        finally:
+            with contextlib.suppress(
+                TypeError, ValueError, NotImplementedError, AttributeError
+            ):
+                getattr(self.engine, setter)(nominal.copy())
+        return bool(
+            observed.shape == probe.shape and not np.allclose(observed, nominal)
+        )
+
+    def _validate_physics_support(self) -> None:
+        """Refuse silent no-ops when physics randomization was requested (#13014)."""
+        missing: list[str] = []
+        for key in self._requested_physics_keys():
+            hooks = _PHYSICS_SURFACE.get(key)
+            if hooks is None:
+                continue
+            getter_name, setter_name, _flag = hooks
+            if key not in self.nominal_params:
+                missing.append(f"{key}: engine exposes no {getter_name}()")
+                continue
+            if not self._setter_is_effective(key, getter_name, setter_name):
+                missing.append(
+                    f"{key}: requires working {getter_name}()/{setter_name}()"
+                )
+        if not missing:
+            return
+        raise UnsupportedParameterError(
+            "Cannot randomize physics on "
+            f"{type(self.engine).__name__}: " + "; ".join(missing) + ". "
+            "Training would believe dynamics were randomized when they were not "
+            "(issue #13014)."
+        )
 
     def randomize(self, seed: int | None = None) -> dict[str, Any]:  # noqa: C901
         """Randomize simulation parameters.
@@ -149,51 +192,61 @@ class DomainRandomizer:
 
         Returns:
             Dictionary of applied randomization values.
+
+        Raises:
+            UnsupportedParameterError: When a requested physics parameter cannot
+                be applied on this engine.
         """
         if seed is not None:
             self._rng = np.random.default_rng(seed)
 
-        randomization = {}
+        self._validate_physics_support()
+
+        randomization: dict[str, Any] = {}
 
         # Randomize mass
         if self.config.randomize_mass and "masses" in self.nominal_params:
             scale = self._rng.uniform(*self.config.mass_range)
             new_masses = self.nominal_params["masses"] * scale
-            if hasattr(self.engine, "set_link_masses"):
-                self.engine.set_link_masses(new_masses)
+            self.engine.set_link_masses(new_masses)
             randomization["mass_scale"] = scale
 
         # Randomize friction
         if self.config.randomize_friction and "friction" in self.nominal_params:
             scale = self._rng.uniform(*self.config.friction_range)
             new_friction = self.nominal_params["friction"] * scale
-            if hasattr(self.engine, "set_friction_coefficients"):
-                self.engine.set_friction_coefficients(new_friction)
+            self.engine.set_friction_coefficients(new_friction)
             randomization["friction_scale"] = scale
 
         # Randomize damping
         if self.config.randomize_damping and "damping" in self.nominal_params:
             scale = self._rng.uniform(*self.config.damping_range)
             new_damping = self.nominal_params["damping"] * scale
-            if hasattr(self.engine, "set_joint_damping"):
-                self.engine.set_joint_damping(new_damping)
+            self.engine.set_joint_damping(new_damping)
             randomization["damping_scale"] = scale
 
         # Randomize motor strength
         if self.config.randomize_motor and "motor_strength" in self.nominal_params:
             scale = self._rng.uniform(*self.config.motor_strength_range)
             new_strength = self.nominal_params["motor_strength"] * scale
-            if hasattr(self.engine, "set_motor_strength"):
-                self.engine.set_motor_strength(new_strength)
+            self.engine.set_motor_strength(new_strength)
             randomization["motor_scale"] = scale
 
-        # Randomize gravity
+        if self.config.randomize_motor and "actuator_gains" in self.nominal_params:
+            scale = self._rng.uniform(*self.config.motor_strength_range)
+            new_gains = self.nominal_params["actuator_gains"] * scale
+            self.engine.set_actuator_gains(new_gains)
+            randomization["actuator_gain_scale"] = scale
+
+        # Randomize gravity magnitude along the engine's nominal axis
         if self.config.randomize_gravity and "gravity" in self.nominal_params:
             g_mag = self._rng.uniform(*self.config.gravity_range)
-            gravity = self.nominal_params["gravity"].copy()
-            gravity[2] = -g_mag  # Assuming z is up
-            if hasattr(self.engine, "set_gravity"):
-                self.engine.set_gravity(gravity)
+            nominal_g = np.asarray(self.nominal_params["gravity"], dtype=float)
+            axis = int(np.argmax(np.abs(nominal_g)))
+            sign = float(np.sign(nominal_g[axis])) if nominal_g[axis] != 0 else -1.0
+            gravity = nominal_g.copy()
+            gravity[axis] = sign * g_mag
+            self.engine.set_gravity(gravity)
             randomization["gravity"] = g_mag
 
         # Randomize delays
@@ -222,25 +275,22 @@ class DomainRandomizer:
 
     def reset_to_nominal(self) -> None:
         """Reset all parameters to nominal values."""
-        if "masses" in self.nominal_params and hasattr(self.engine, "set_link_masses"):
+        if "masses" in self.nominal_params:
             self.engine.set_link_masses(self.nominal_params["masses"])
 
-        if "friction" in self.nominal_params and hasattr(
-            self.engine, "set_friction_coefficients"
-        ):
+        if "friction" in self.nominal_params:
             self.engine.set_friction_coefficients(self.nominal_params["friction"])
 
-        if "damping" in self.nominal_params and hasattr(
-            self.engine, "set_joint_damping"
-        ):
+        if "damping" in self.nominal_params:
             self.engine.set_joint_damping(self.nominal_params["damping"])
 
-        if "motor_strength" in self.nominal_params and hasattr(
-            self.engine, "set_motor_strength"
-        ):
+        if "motor_strength" in self.nominal_params:
             self.engine.set_motor_strength(self.nominal_params["motor_strength"])
 
-        if "gravity" in self.nominal_params and hasattr(self.engine, "set_gravity"):
+        if "actuator_gains" in self.nominal_params:
+            self.engine.set_actuator_gains(self.nominal_params["actuator_gains"])
+
+        if "gravity" in self.nominal_params:
             self.engine.set_gravity(self.nominal_params["gravity"])
 
         self._action_delay = 0

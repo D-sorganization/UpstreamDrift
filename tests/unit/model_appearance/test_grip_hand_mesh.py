@@ -120,13 +120,20 @@ def test_every_phalanx_is_present():
     assert {"palm", "thumb_proximal", "thumb_distal"} <= names
 
 
-@pytest.mark.parametrize("style", [GripStyle.OVERLAP, GripStyle.INTERLOCK])
-def test_linked_trail_little_finger_leaves_the_grip(style: GripStyle):
-    trail = _build(Hand.TRAIL, 0.0140, style)
-    little = [p for p in trail.components if p.finger == "little"]
-    assert little and not any(p.on_grip for p in little)
-    lead = _build(Hand.LEAD, 0.0140, style)
-    assert all(p.on_grip for p in lead.components if p.finger == "little")
+def test_linked_fingers_leave_the_grip_per_style():
+    # Overlap: trail little finger leaves the grip
+    trail_overlap = _build(Hand.TRAIL, 0.0140, GripStyle.OVERLAP)
+    little_ov = [p for p in trail_overlap.components if p.finger == "little"]
+    assert little_ov and not any(p.on_grip for p in little_ov)
+    lead_overlap = _build(Hand.LEAD, 0.0140, GripStyle.OVERLAP)
+    assert all(p.on_grip for p in lead_overlap.components if p.finger == "index")
+
+    # Interlock: lead index finger wraps and leaves the grip
+    lead_interlock = _build(Hand.LEAD, 0.0140, GripStyle.INTERLOCK)
+    index_il = [p for p in lead_interlock.components if p.finger == "index"]
+    assert index_il and not any(p.on_grip for p in index_il)
+    trail_interlock = _build(Hand.TRAIL, 0.0140, GripStyle.INTERLOCK)
+    assert all(p.on_grip for p in trail_interlock.components if p.finger == "little")
 
 
 def _azimuth_deg(points: np.ndarray) -> float:
@@ -150,14 +157,14 @@ def test_lead_and_trail_fingers_are_mirrored_about_their_v_azimuth():
     v_lead = pose.placement(Hand.LEAD).v_azimuth_deg
     v_trail = pose.placement(Hand.TRAIL).v_azimuth_deg
     assert lead.v_azimuth_deg == v_lead and trail.v_azimuth_deg == v_trail
-    for name in ("palm", "index_proximal", "index_middle", "middle_distal"):
+    for name in ("palm", "middle_proximal", "middle_middle", "middle_distal"):
         a = _wrap(_azimuth_deg(_part(lead, name).mesh.vertices) - v_lead)
         b = _wrap(_azimuth_deg(_part(trail, name).mesh.vertices) - v_trail)
         assert a == pytest.approx(-b, abs=1e-6), name
     # The proximal-to-distal wrap runs in the curl direction of each hand.
     for result in (lead, trail):
-        prox = _azimuth_deg(_part(result, "index_proximal").mesh.vertices)
-        mid = _azimuth_deg(_part(result, "index_middle").mesh.vertices)
+        prox = _azimuth_deg(_part(result, "middle_proximal").mesh.vertices)
+        mid = _azimuth_deg(_part(result, "middle_middle").mesh.vertices)
         assert np.sign(_wrap(mid - prox)) == result.curl_sign
 
 
@@ -193,14 +200,18 @@ def test_hands_are_ordered_along_the_shaft_like_grip_pose():
     assert lead.on_grip_extent_below_butt_m()[0] >= 0.0
 
 
-def test_overlap_little_finger_lies_over_the_lead_index_middle_gap():
+def test_overlap_little_finger_lies_over_the_lead_index():
+    from src.shared.python.grip_contact.contact_topology import contact_topology
+    from src.shared.python.motion_matching.grip_contract import GripSpec
+
     pose = DEFAULT_GRIP_POSE
-    lead = build_grip_hand_mesh(Hand.LEAD, grip_radius_m=0.014, pose=pose)
+    topo = contact_topology(GripSpec(style=GripStyle.OVERLAP), grip_radius_m=0.014)
     trail = build_grip_hand_mesh(Hand.TRAIL, grip_radius_m=0.014, pose=pose)
-    depths = lead.on_grip_depths_below_butt_m()
-    gap = 0.5 * (depths["index"] + depths["middle"])
-    z = _part(trail, "little_proximal").mesh.vertices[:, 2].mean()
-    assert trail.distance_below_butt_m + z == pytest.approx(gap, abs=1e-9)
+    site_lit = topo.site("trail_little_finger")
+    z = _part(trail, "little_distal").mesh.vertices[:, 2].mean()
+    assert trail.distance_below_butt_m + z == pytest.approx(
+        site_lit.centre_m[0], abs=1e-3
+    )
 
 
 @pytest.mark.parametrize("radius", [0.0, -0.01, float("nan"), float("inf"), 0.05])

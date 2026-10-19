@@ -23,10 +23,14 @@ reported unavailable with a reason (unavailable is never zero).
 from __future__ import annotations
 
 import hashlib
+import json
 import math
+from pathlib import Path
 
 import numpy as np
 import pytest
+
+_REPO = Path(__file__).resolve().parents[3]
 
 from src.shared.python.lifting import opensim_full_body_lifts as lifts_mod
 from src.shared.python.lifting.bundles import SAME_INPUT_LIFT_BUNDLES
@@ -66,17 +70,21 @@ def _require_body() -> None:
         pytest.skip(f"muscle-bearing body not available: {exc}")
 
 
-def test_every_lift_has_a_bundle_entry() -> None:
+@pytest.mark.parametrize("lift", LIFTS)
+def test_every_lift_has_a_bundle_entry(lift: str) -> None:
     assert set(SAME_INPUT_LIFT_BUNDLES) == set(LIFTS)
-    squat = SAME_INPUT_LIFT_BUNDLES["squat"]
-    assert squat is not None and squat.is_file()
+    bundle = SAME_INPUT_LIFT_BUNDLES[lift]
+    assert bundle is not None, f"bundle for {lift} must be registered"
+    assert bundle.is_file(), f"bundle file {bundle} must exist"
 
 
-@pytest.mark.parametrize(
-    "lift", [lift for lift in LIFTS if SAME_INPUT_LIFT_BUNDLES[lift] is None]
-)
-def test_lift_without_a_bundle_is_unavailable_never_zero(lift: str) -> None:
-    receipt = opensim_lift_ik_id(OpenSimFullBodyLiftSpec(lift))
+def test_lift_without_a_bundle_is_unavailable_never_zero(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    unregistered = dict(SAME_INPUT_LIFT_BUNDLES)
+    unregistered["squat"] = None
+    monkeypatch.setattr(lifts_mod, "SAME_INPUT_LIFT_BUNDLES", unregistered)
+    receipt = opensim_lift_ik_id(OpenSimFullBodyLiftSpec("squat"))
     assert receipt["status"] == "unavailable"
     assert "LIFT-5" in receipt["reason"]
     assert receipt["bundle"] is None
@@ -119,6 +127,34 @@ def test_static_hold_ground_reaction_equals_body_plus_bar_weight(lift: str) -> N
         assert math.isfinite(hold["balance_residual"][name])
 
 
+RECEIPTS_PATH = _REPO / "docs/development/lifting/evidence/opensim_ik_id/receipts.json"
+
+_RESIDUAL_GATE_XFAILS = {
+    "deadlift": (
+        "forces_within=False (peak pelvis_ty 288.23 N > 110.92 N), "
+        "moments_within=False (peak pelvis_tilt 147.88 Nm > 18.28 Nm) (#13041)"
+    ),
+    "bench_press": (
+        "forces_within=False (peak pelvis_ty 4598.27 N > 32.49 N), "
+        "moments_within=False (peak pelvis_tilt 1575.93 Nm > 3.30 Nm) (#13041)"
+    ),
+    "snatch": (
+        "forces_within=False (peak pelvis_tx 463.57 N > 155.12 N), "
+        "moments_within=False (peak pelvis_tilt 202.60 Nm > 27.10 Nm) (#13041)"
+    ),
+    "clean_and_jerk": (
+        "forces_within=False (peak pelvis_tx 458.52 N > 223.10 N), "
+        "moments_within=False (peak pelvis_tilt 259.03 Nm > 38.77 Nm) (#13041)"
+    ),
+}
+
+
+def _load_receipts() -> dict:
+    if not RECEIPTS_PATH.is_file():
+        pytest.skip(f"receipts file {RECEIPTS_PATH} not found")
+    return json.loads(RECEIPTS_PATH.read_text())
+
+
 @pytest.fixture(scope="module")
 def squat_receipt() -> dict:
     _real_opensim()
@@ -128,23 +164,33 @@ def squat_receipt() -> dict:
     return receipt
 
 
-@pytest.mark.requires_opensim
-@pytest.mark.integration
-def test_squat_receipt_records_bundle_hash(squat_receipt: dict) -> None:
-    path = SAME_INPUT_LIFT_BUNDLES["squat"]
+@pytest.mark.parametrize("lift", LIFTS)
+def test_lift_receipt_complete(lift: str) -> None:
+    receipts = _load_receipts()
+    entry = receipts["lifts"][lift]["ik_id"]
+    assert entry["status"] == "complete", entry["reason"]
+
+
+@pytest.mark.parametrize("lift", LIFTS)
+def test_lift_receipt_records_bundle_hash(lift: str) -> None:
+    receipts = _load_receipts()
+    entry = receipts["lifts"][lift]["ik_id"]
+    assert entry["status"] == "complete", entry["reason"]
+    path = SAME_INPUT_LIFT_BUNDLES[lift]
     assert path is not None
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
-    assert squat_receipt["bundle"]["sha256"] == digest
-    assert squat_receipt["bundle"]["frames"] >= 2
+    assert entry["bundle"]["sha256"] == digest
+    assert entry["bundle"]["frames"] >= 2
 
 
-@pytest.mark.requires_opensim
-@pytest.mark.integration
-def test_squat_ik_coordinate_rms_below_receipt_threshold(squat_receipt: dict) -> None:
-    ik = squat_receipt["ik"]
+@pytest.mark.parametrize("lift", LIFTS)
+def test_lift_ik_error_finite(lift: str) -> None:
+    receipts = _load_receipts()
+    entry = receipts["lifts"][lift]["ik_id"]
+    assert entry["status"] == "complete", entry["reason"]
+    ik = entry["ik"]
     angles = ik["segment_angle_error"]
     assert angles["threshold_rms_rad"] > 0.0
-    assert angles["rms_rad"] < angles["threshold_rms_rad"]
     for segment in ("shank", "thigh", "trunk"):
         assert math.isfinite(angles["per_segment_rms_rad"][segment])
     markers = ik["marker_error"]
@@ -153,18 +199,20 @@ def test_squat_ik_coordinate_rms_below_receipt_threshold(squat_receipt: dict) ->
     assert isinstance(markers["within_best_practice"], bool)
 
 
-@pytest.mark.requires_opensim
-@pytest.mark.integration
-def test_squat_id_moments_finite_and_residuals_reported(squat_receipt: dict) -> None:
-    inverse = squat_receipt["id"]
+@pytest.mark.parametrize("lift", LIFTS)
+def test_lift_id_moments_finite_and_residuals_reported(lift: str) -> None:
+    receipts = _load_receipts()
+    entry = receipts["lifts"][lift]["ik_id"]
+    assert entry["status"] == "complete", entry["reason"]
+    inverse = entry["id"]
     moments = inverse["joint_moments_peak_abs"]
     assert moments, "joint moments must be reported"
     assert all(math.isfinite(v) for v in moments.values())
     assert not set(moments) & set(_RESIDUAL_FORCES + _RESIDUAL_MOMENTS)
     residuals = inverse["residuals"]
     for name in _RESIDUAL_FORCES + _RESIDUAL_MOMENTS:
-        entry = residuals[name]
-        assert math.isfinite(entry["max_abs"]) and math.isfinite(entry["rms"])
+        r_entry = residuals[name]
+        assert math.isfinite(r_entry["max_abs"]) and math.isfinite(r_entry["rms"])
     gate = inverse["residual_gate"]
     assert gate["max_force_n"] > 0.0 and gate["max_moment_nm"] > 0.0
     assert isinstance(gate["forces_within"], bool)
@@ -172,3 +220,36 @@ def test_squat_id_moments_finite_and_residuals_reported(squat_receipt: dict) -> 
     loads = inverse["external_loads"]
     assert loads["feet"].startswith("GCV-1")
     assert loads["hands"].startswith("GCV-7")
+
+
+@pytest.mark.parametrize("lift", LIFTS)
+def test_lift_residual_gate(lift: str, request: pytest.FixtureRequest) -> None:
+    if lift in _RESIDUAL_GATE_XFAILS:
+        request.applymarker(
+            pytest.mark.xfail(strict=True, reason=_RESIDUAL_GATE_XFAILS[lift])
+        )
+    receipts = _load_receipts()
+    gate = receipts["lifts"][lift]["ik_id"]["id"]["residual_gate"]
+    assert gate["forces_within"] is True
+    assert gate["moments_within"] is True
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_squat_live_ik_coordinate_rms_below_receipt_threshold(
+    squat_receipt: dict,
+) -> None:
+    ik = squat_receipt["ik"]
+    angles = ik["segment_angle_error"]
+    assert angles["threshold_rms_rad"] > 0.0
+    assert angles["rms_rad"] < angles["threshold_rms_rad"]
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_squat_live_id_residuals_reported(squat_receipt: dict) -> None:
+    inverse = squat_receipt["id"]
+    residuals = inverse["residuals"]
+    for name in _RESIDUAL_FORCES + _RESIDUAL_MOMENTS:
+        entry = residuals[name]
+        assert math.isfinite(entry["max_abs"]) and math.isfinite(entry["rms"])

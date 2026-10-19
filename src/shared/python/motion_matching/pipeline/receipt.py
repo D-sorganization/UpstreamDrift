@@ -116,6 +116,7 @@ class GroundSupportReceiptInputs:
     tracking_backend: str = "kkt"
     validate: bool = True
     provenance: BaseSpecProvenance | None = None
+    neural: Mapping[str, Any] | None = None
 
 
 def _spec_canonical_sha256(spec_bytes: bytes) -> str:
@@ -210,6 +211,8 @@ def build_ground_support_receipt(
             f"full-body model ({inputs.qualification_note}); not a fit, not acceptance"
         ),
     }
+    if inputs.neural is not None:
+        receipt_dict["neural"] = dict(inputs.neural)
 
     # Evaluate physical & kinematic acceptance under Matched Swing Program contract (MS-01)
     verdict = evaluate(receipt_dict, horizon=Horizon.G3)
