@@ -272,6 +272,7 @@ class GripCapabilities:
     supports_wrench_application: bool
     native_contact: bool = False
     available_bodies: tuple[str, ...] | None = None
+    unavailable_reason: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.attachment_modes, Collection) or isinstance(
@@ -302,6 +303,12 @@ class GripCapabilities:
                 for b in self.available_bodies
             )
             object.__setattr__(self, "available_bodies", bodies)
+
+        if self.unavailable_reason is not None:
+            reason = _require_non_empty_str(
+                self.unavailable_reason, "unavailable_reason"
+            )
+            object.__setattr__(self, "unavailable_reason", reason)
 
 
 class BodyStates(dict[str, np.ndarray]):
@@ -469,17 +476,23 @@ def validate_binding(
 
     mode = binding.attachment_mode
     model_id = binding.model_id
+    reason_suffix = (
+        f" ({capabilities.unavailable_reason})"
+        if capabilities.unavailable_reason
+        else ""
+    )
     if mode not in KNOWN_ATTACHMENT_MODES:
         _raise_unavailable(model_id, f"unknown attachment_mode {mode!r}")
     if mode not in capabilities.attachment_modes:
         _raise_unavailable(
             model_id,
-            f"attachment_mode {mode!r} unsupported by capabilities {capabilities.attachment_modes}",
+            f"attachment_mode {mode!r} unsupported by capabilities "
+            f"{capabilities.attachment_modes}{reason_suffix}",
         )
     if mode in PHYSICAL_HAND_GRIP_MODES and not capabilities.supports_physical_pairs:
         _raise_unavailable(
             model_id,
-            f"physical pairs in attachment_mode {mode!r}",
+            f"physical pairs in attachment_mode {mode!r}{reason_suffix}",
         )
     if capabilities.native_contact and capabilities.supports_wrench_application:
         _raise_unavailable(
@@ -547,6 +560,7 @@ class GripStepReport:
     pair_wrenches: Mapping[str, PairWrench]
     side_wrenches: Mapping[str, TopologySideWrench] = field(default_factory=dict)
     allocated_contacts: AllocatedHandContacts | None = None
+    allocated_labels: Mapping[str, str] = field(default_factory=dict)
     _body_wrenches: Mapping[str, tuple[np.ndarray, np.ndarray]] = field(
         default_factory=dict, repr=False
     )
@@ -660,28 +674,32 @@ def _evaluate_physical_side(
     body_states: Mapping[str, RigidBodyState],
     club_frame: BushingState,
     side_char: str,
-) -> tuple[TopologySideWrench, dict[str, PairWrench]]:
-    """Evaluate one hand's bound physical pairs, each at its site body's frame.
-
-    Each site's implied hand grip frame comes from its own body (rigid proxies
-    or phalanges), so per-pair evaluation via ``topology_pair_wrench`` covers
-    both rigid and articulated hands with one code path.
-    """
+) -> tuple[TopologySideWrench, dict[str, PairWrench], dict[str, PairWrench]]:
+    """Evaluate one hand's bound pairs at FK states, separating physical from reporting."""
     topology = topology_model.topology
     site_map = binding.site_binding_map()
     mode = binding.attachment_mode
-    active: dict[str, PairWrench] = {}
+    evaluated: dict[str, PairWrench] = {}
+    physical: dict[str, PairWrench] = {}
     for pair in topology_model.physical_grip_pairs(side_char):
-        if pair.site_a not in site_map or mode not in pair.physical_modes:
+        if pair.site_a not in site_map:
+            continue
+        is_phys = mode in pair.physical_modes
+        is_alloc = mode in pair.allocated_modes
+        if not (is_phys or is_alloc):
             continue
         sb = site_map[pair.site_a]
         hand_frame = _implied_hand_frame_for_site(
             topology, topology.site(pair.site_a), side_char, sb, body_states[sb.body_id]
         )
-        active[pair.name] = topology_pair_wrench(
-            topology_model, pair, hand_frame, club_frame, mode=mode
+        eval_mode = mode if is_phys else "contact"
+        pw = topology_pair_wrench(
+            topology_model, pair, hand_frame, club_frame, mode=eval_mode
         )
-    return aggregate_side_wrench(active), active
+        evaluated[pair.name] = pw
+        if is_phys:
+            physical[pair.name] = pw
+    return aggregate_side_wrench(evaluated), evaluated, physical
 
 
 def _assemble_body_wrenches(
@@ -691,6 +709,8 @@ def _assemble_body_wrenches(
     physical_pair_wrenches: Mapping[str, PairWrench],
 ) -> dict[str, tuple[np.ndarray, np.ndarray]]:
     """Assemble equal-and-opposite body wrenches from physical pairs only."""
+    if not physical_pair_wrenches:
+        return {}
     site_map = binding.site_binding_map()
     forces: dict[str, np.ndarray] = {b: np.zeros(3) for b in binding.required_bodies()}
     moments: dict[str, np.ndarray] = {b: np.zeros(3) for b in binding.required_bodies()}
@@ -723,7 +743,7 @@ def _assemble_body_wrenches(
 def _record_hand_grip_channels(
     topology: ContactTopology,
     binding: HandClubBinding,
-    physical_pair_wrenches: Mapping[str, PairWrench],
+    evaluated_pair_wrenches: Mapping[str, PairWrench],
     channels: tuple[
         dict[str, float],
         dict[str, float],
@@ -750,8 +770,8 @@ def _record_hand_grip_channels(
             tangential_force_n[pair.name] = float("nan")
             spin_moment_nm[pair.name] = float("nan")
             unavailable_reasons[pair.name] = unavail[pair.site_a]
-        elif is_phys and pair.name in physical_pair_wrenches:
-            pw = physical_pair_wrenches[pair.name]
+        elif pair.name in evaluated_pair_wrenches:
+            pw = evaluated_pair_wrenches[pair.name]
             normal_force_n[pair.name] = float(pw.normal_force_mag_n)
             tangential_force_n[pair.name] = float(pw.tangential_force_mag_n)
             spin_moment_nm[pair.name] = _spin_magnitude_nm(pw)
@@ -885,9 +905,10 @@ def evaluate_contacts(
     club_frames = _build_club_frames(club_state, binding)
 
     side_wrenches: dict[str, TopologySideWrench] = {}
+    evaluated_pair_wrenches: dict[str, PairWrench] = {}
     physical_pair_wrenches: dict[str, PairWrench] = {}
     for side_char in ("L", "R"):
-        sw, active = _evaluate_physical_side(
+        sw, evaluated, physical = _evaluate_physical_side(
             topology_model,
             binding,
             body_states,
@@ -895,7 +916,8 @@ def evaluate_contacts(
             side_char,
         )
         side_wrenches[side_char] = sw
-        physical_pair_wrenches.update(active)
+        evaluated_pair_wrenches.update(evaluated)
+        physical_pair_wrenches.update(physical)
 
     normal_force_n: dict[str, float] = {}
     tangential_force_n: dict[str, float] = {}
@@ -909,10 +931,15 @@ def evaluate_contacts(
         pair_labels,
         unavailable_reasons,
     )
-    _record_hand_grip_channels(topology, binding, physical_pair_wrenches, channels)
+    _record_hand_grip_channels(topology, binding, evaluated_pair_wrenches, channels)
     allocated = _record_allocated_channels(
         topology_model, binding, club_state, closure, prior, channels
     )
+    allocated_labels = {
+        p.name: p.allocated_label
+        for p in topology.pairs
+        if pair_labels.get(p.name) == "allocated"
+    }
     body_wrenches = _assemble_body_wrenches(
         topology, binding, body_states, physical_pair_wrenches
     )
@@ -926,6 +953,7 @@ def evaluate_contacts(
         pair_wrenches=MappingProxyType(physical_pair_wrenches),
         side_wrenches=MappingProxyType(side_wrenches),
         allocated_contacts=allocated,
+        allocated_labels=MappingProxyType(allocated_labels),
         _body_wrenches=MappingProxyType(body_wrenches),
     )
 
