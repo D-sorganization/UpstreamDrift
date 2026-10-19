@@ -112,6 +112,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 973 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_camera_system.py` |
 | 973 | `src/shared/python/estimation/dime_observation_factors.py` |
 | 973 | `src/shared/python/motion_matching/club_only/fast_matching.py` |
+| 968 | `src/shared/python/grip_contact/binding.py` |
 | 967 | `src/shared/python/motion_matching/club_only/matrix_qualification.py` |
 | 966 | `src/launchers/launcher_process_manager.py` |
 | 965 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py` |
@@ -128,7 +129,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 950 | `src/shared/python/signal_toolkit/signal_processing.py` |
 | 948 | `src/shared/python/sidekick/process_calculators/acid_gas_dewpoint_calculator.py` |
 | 947 | `src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/visualization/SkeletonPlotter.m` |
-| 947 | `src/shared/python/grip_contact/binding.py` |
 | 943 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_match_export.m` |
 | 942 | `src/bunkershot3d/solvers/shot.py` |
 | 942 | `src/shared/python/estimation/dime_dynamics_window.py` |
