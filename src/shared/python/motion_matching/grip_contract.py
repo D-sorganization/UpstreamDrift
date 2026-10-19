@@ -51,8 +51,10 @@ from src.shared.python.core.handedness import (
 )
 from src.shared.python.grip_contact.contact_topology import GripStyle as GripStyle
 from src.shared.python.model_appearance.grip_pose import (
+    ALPHA_RANGE_DEG as ALPHA_RANGE_DEG,
     LEAD_BELOW_BUTT_M,
     NATIVE_HAND_SPACING_M,
+    NEUTRAL_V_AZIMUTH_DEG as NEUTRAL_V_AZIMUTH_DEG,
     PALM_DIAGONAL_DEG,
     GripPose,
     require_fields_in_range,
@@ -65,8 +67,6 @@ from src.shared.python.motion_matching.grip_fit import grip_rotation
 Array = NDArray[np.float64]
 Euler = tuple[float, float, float]
 
-#: Lead V azimuth (deg) of the neutral grip: ``GripPose`` default, ``alpha = 0``.
-NEUTRAL_V_AZIMUTH_DEG = 20.0
 #: Product presets for ``alpha`` (rotation about the shaft, positive stronger).
 #: Not anatomical thresholds.  Knuckles are the coaching count of lead-hand
 #: knuckles visible at address: weak about 1, neutral about 2, strong about 3
@@ -82,7 +82,7 @@ PALM_PRESETS_DEG: dict[str, float] = {"fingers": 25.0, "neutral": 40.0, "palm": 
 _DEFAULT_THUMB_DEG = GripPose().lead_thumb_offset_deg
 #: Singularity guard: the Y-X-Z middle angle ``psi - 90`` may not reach +-90.
 _SINGULAR_TOL = 1e-9
-_ALPHA_RANGE = (-60.0, 60.0)
+_ALPHA_RANGE = ALPHA_RANGE_DEG
 _PSI_RANGE = (5.0, 85.0)
 _GAMMA_RANGE = (-180.0, 180.0)
 
@@ -247,6 +247,7 @@ class GripSpec:
         """Visual :class:`GripPose` of this spec (V azimuth = 20 deg + alpha)."""
         return GripPose(
             style=self.style,
+            trigger_finger=self.trigger_finger,
             lead_below_butt_m=self.lead_below_butt_m,
             hand_spacing_m=self.hand_spacing_m,
             lead_v_azimuth_deg=NEUTRAL_V_AZIMUTH_DEG + self.lead.alpha_deg,

@@ -28,14 +28,12 @@ interpreted as multipliers relative to nominal values for most parameters.
 
 **Dynamics parameters:**
 
-| Field                  | Default         | Description                    |
-| ---------------------- | --------------- | ------------------------------ |
-| `mass_range`           | `(0.8, 1.2)`    | Link mass scale factor.        |
-| `friction_range`       | `(0.5, 1.5)`    | Friction coefficient scale.    |
-| `damping_range`        | `(0.8, 1.2)`    | Joint damping scale.           |
-| `motor_strength_range` | `(0.9, 1.1)`    | Motor strength scale.          |
-| `inertia_range`        | `(0.9, 1.1)`    | Link inertia scale.            |
-| `center_of_mass_range` | `(-0.01, 0.01)` | CoM position offset in meters. |
+| Field                  | Default      | Description                             |
+| ---------------------- | ------------ | --------------------------------------- |
+| `mass_range`           | `(0.8, 1.2)` | Link mass scale factor.                 |
+| `friction_range`       | `(0.5, 1.5)` | Friction coefficient scale.             |
+| `damping_range`        | `(0.8, 1.2)` | Joint damping scale.                    |
+| `motor_strength_range` | `(0.9, 1.1)` | Motor strength and actuator gain scale. |
 
 **Delays and noise:**
 
@@ -48,17 +46,9 @@ interpreted as multipliers relative to nominal values for most parameters.
 
 **Environment parameters:**
 
-| Field                  | Default       | Description                 |
-| ---------------------- | ------------- | --------------------------- |
-| `gravity_range`        | `(9.5, 10.1)` | Gravity magnitude in m/s^2. |
-| `floor_friction_range` | `(0.5, 1.5)`  | Floor friction scale.       |
-
-**Actuator parameters:**
-
-| Field                 | Default         | Description                       |
-| --------------------- | --------------- | --------------------------------- |
-| `joint_offset_range`  | `(-0.02, 0.02)` | Joint position offset in radians. |
-| `actuator_gain_range` | `(0.95, 1.05)`  | Actuator gain scale.              |
+| Field           | Default       | Description                 |
+| --------------- | ------------- | --------------------------- |
+| `gravity_range` | `(9.5, 10.1)` | Gravity magnitude in m/s^2. |
 
 **Enable flags.** Each category of randomization can be enabled or disabled
 independently:

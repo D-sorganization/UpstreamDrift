@@ -13,6 +13,8 @@ from src.learning.imitation._dagger import DAgger
 from src.learning.imitation._gail import GAIL
 from src.learning.imitation.dataset import Demonstration, DemonstrationDataset
 
+pytestmark = pytest.mark.unit
+
 
 def _toy_dataset(
     n_demos: int = 2, n_frames: int = 6, n_joints: int = 2
