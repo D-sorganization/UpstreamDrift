@@ -1,0 +1,46 @@
+{
+  "schema": "grip-binding/v1",
+  "model_id": "mujoco_allegro_hand_lab",
+  "model_hash": "sha256:4a8c1e72b90f3d56a71e84c20d9b5f31e6a4c802d7b1e3f5092837465a1b2c3d",
+  "handedness": "right",
+  "side_roles": {
+    "left": "lead",
+    "right": "trail"
+  },
+  "calibration_pose": {
+    "name": "neutral_bimanual_grip_lab",
+    "description": "Wonik Allegro Hand bimanual laboratory scene (lh_* and rh_* with mocap palm welds and free cylindrical club_handle): a contact fixture, not a qualified golfer."
+  },
+  "units": {
+    "length": "m",
+    "angle": "rad"
+  },
+  "provenance": {
+    "source": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/hand_assets/wonik_allegro",
+    "date": "2026-10-19",
+    "method": "phalanx_segment_mapped_separated_v2",
+    "qualification_role": "This is a contact fixture, not a qualified golfer."
+  },
+  "attachment_mode": "separated_v2",
+  "club_body": "club_handle",
+  "lead_hand_body": "lh_palm",
+  "trail_hand_body": "rh_palm",
+  "segment_map": {
+    "lead_palm_proximal": "lh_palm",
+    "lead_palm_distal": "lh_mf_base",
+    "lead_heel_pad": "lh_th_base",
+    "lead_finger_proximal": "lh_rf_proximal",
+    "lead_finger_distal": "lh_rf_distal",
+    "lead_thumb": "lh_th_distal",
+    "lead_middle": "lh_mf_distal",
+    "lead_index": "lh_ff_distal",
+    "trail_palm_proximal": "rh_palm",
+    "trail_palm_distal": "rh_mf_base",
+    "trail_palm_pocket": "rh_th_base",
+    "trail_finger_proximal": "rh_mf_proximal",
+    "trail_finger_distal": "rh_mf_distal",
+    "trail_little_finger": "rh_rf_distal",
+    "trail_index_trigger": "rh_ff_distal"
+  },
+  "unavailable_sites": {}
+}
