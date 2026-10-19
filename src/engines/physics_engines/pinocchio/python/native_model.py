@@ -1086,9 +1086,10 @@ class FullBodyPinocchioModel(NativePinocchioModel):
         v = self._velocity_vector(rates)
         tau = self._velocity_vector(primitive_efforts)
         samples = self.contact_forces(coordinates, rates)
-        self._pin.computeJointJacobians(self.model, self.data, q)
+        pin = self._pin
+        pin.computeJointJacobians(self.model, self.data, q)
         tau_contact = np.zeros(self.model.nv, dtype=float)
-        ref_frame = self._pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+        ref_frame = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
         for sphere in self.contact_spheres:
             sample = samples[sphere.name]
             if sample.penetration_m > 0.0:

@@ -348,6 +348,15 @@ class TopologyContactModel:
         """Alias for ``law`` (:class:`ContactParameters`)."""
         return self.law
 
+    @property
+    def grip_radius_m(self) -> float:
+        """Radius (m) of the club grip cylinder."""
+        return self.cylinder.radius_m
+
+    def origin_axial_m(self, side: str) -> float:
+        """Axial coordinate (m) of ``side``'s grip frame origin."""
+        return self.cylinder.origin_axial_m(side)
+
     @classmethod
     def from_pad_model(
         cls, pads: PadContactModel, topology: ContactTopology

@@ -106,6 +106,15 @@ class PadContactModel:
         if self.patch_radius_m < 0.0 or self.spin_transition_rad_s <= 0.0:
             raise ValueError("patch radius >= 0 and spin transition > 0 required")
 
+    @property
+    def stiffness_n_m(self) -> float:
+        """Normal contact stiffness [N/m] of the pad contact law."""
+        return self.law.stiffness_n_m
+
+    def origin_axial_m(self, side: str) -> float:
+        """Axial coordinate (m) of ``side``'s grip frame origin."""
+        return self.cylinder.origin_axial_m(side)
+
 
 def grip_axis(
     interface: GripInterface, pads: PadContactModel

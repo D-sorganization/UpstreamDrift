@@ -121,7 +121,7 @@ class ContactGripConfig:
             elif self.topology_model is not None:
                 ef_def = elastic_foundation_for_law(
                     self.topology_model.law,
-                    self.topology_model.cylinder.radius_m,
+                    self.topology_model.grip_radius_m,
                     PAD_RADIUS_M,
                     DEFAULT_TOPOLOGY_PRELOAD_M,
                 )
@@ -141,9 +141,9 @@ class ContactGripConfig:
     def origin_axial_m(self, side: str) -> float:
         """Axial origin of ``side``'s pad cylinder."""
         if self.topology_model is not None:
-            return self.topology_model.cylinder.origin_axial_m(side)
+            return self.topology_model.origin_axial_m(side)
         assert self.pads is not None
-        return self.pads.cylinder.origin_axial_m(side)
+        return self.pads.origin_axial_m(side)
 
     def mesh_path(self, side: str) -> Path:
         """OBJ path of ``side``'s grip mesh."""
@@ -267,15 +267,16 @@ def _build_topology_contact(
     body_names: Mapping[str, str],
     club: str,
 ) -> dict[str, Any]:
-    assert cfg.topology_model is not None
-    topo = cfg.topology_model.topology
-    grip_r = cfg.topology_model.cylinder.radius_m
+    topo_model = cfg.topology_model
+    assert topo_model is not None
+    topo = topo_model.topology
+    grip_r = topo_model.grip_radius_m
     ef = cfg.ef
     for side in SIDES:
         _contact_mesh(geometry, f"grip_mesh_{side}", club, cfg.mesh_path(side))
         hand = body_names[frames[side]["hand_body"]]
         hand_frame = np.asarray(frames[side]["hand_frame"], dtype=float)
-        pairs = cfg.topology_model.physical_grip_pairs(side)
+        pairs = topo_model.physical_grip_pairs(side)
         for pair in pairs:
             site = topo.site(pair.site_a)
             mapped = map_site_to_hand_frame(topo, site, side)
@@ -332,9 +333,7 @@ def _build_topology_contact(
                     )
     return {
         "model_type": "topology",
-        "pairs_per_hand": {
-            s: len(cfg.topology_model.physical_grip_pairs(s)) for s in SIDES
-        },
+        "pairs_per_hand": {s: len(topo_model.physical_grip_pairs(s)) for s in SIDES},
     }
 
 

@@ -394,3 +394,18 @@ def test_drake_hand_body_assignment_pure_without_plant(
             expected_side = "L" if site.hand == "lead" else "R"
             assert att.side == expected_side
             assert att.hand_body_name == HAND_BODY_NAMES[expected_side]
+
+
+def test_topology_and_pad_model_lod_delegating_accessors(
+    interface: GripInterface,
+) -> None:
+    """TopologyContactModel and PadContactModel expose 1-hop accessors for LoD compliance."""
+    pads = build_pad_model(interface, 1100.0)
+    topo_model = build_topology_model(interface)
+
+    assert pads.stiffness_n_m == pads.law.stiffness_n_m
+    assert pads.origin_axial_m("L") == pads.cylinder.origin_axial_m("L")
+    assert pads.origin_axial_m("R") == pads.cylinder.origin_axial_m("R")
+    assert topo_model.grip_radius_m == topo_model.cylinder.radius_m
+    assert topo_model.origin_axial_m("L") == topo_model.cylinder.origin_axial_m("L")
+    assert topo_model.origin_axial_m("R") == topo_model.cylinder.origin_axial_m("R")
