@@ -7,9 +7,11 @@ from :class:`~src.shared.python.grip_contact.contact_topology.ContactTopology`.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from collections.abc import Mapping, Sequence
-from typing import Any, Final
+from typing import Any, Final, NoReturn
 
 import numpy as np
 
@@ -26,6 +28,9 @@ from src.shared.python.grip_contact.binding import (
 )
 from src.shared.python.grip_contact.contact_topology import ContactTopology
 from src.shared.python.grip_contact.interface import GripInterface
+from src.shared.python.motion_matching.full_body_schema import (
+    SchemaFeatureUnavailableError,
+)
 
 __all__ = [
     "AXIAL_BOUNDS_M",
@@ -33,6 +38,9 @@ __all__ = [
     "MANIFEST_SCHEMA",
     "RADIAL_BOUNDS_M",
     "binding_from_manifest",
+    "build_spec_grip_binding_manifest",
+    "fail_closed_grip_binding",
+    "has_composed_club_spec",
     "validate_manifest",
     "validate_resolved_binding",
 ]
@@ -305,3 +313,126 @@ def binding_from_manifest(
     )
     validate_resolved_binding(binding, topology, interface_or_resolver)
     return binding
+
+
+def fail_closed_grip_binding(
+    schema_id: str,
+    *,
+    consumer: str,
+    reason: str,
+) -> NoReturn:
+    """Fail closed with :class:`SchemaFeatureUnavailableError` and a reason."""
+    clean_reason = _require_non_empty_str(reason, "reason")
+    clean_consumer = _require_non_empty_str(consumer, "consumer")
+    clean_schema = _require_non_empty_str(schema_id, "schema_id")
+    err = SchemaFeatureUnavailableError(
+        clean_schema,
+        consumer=clean_consumer,
+        feature=f"grip-binding/v1 manifest ({clean_reason})",
+        child="HRG-GS-M13",
+        issue=13335,
+    )
+    err.reason = clean_reason  # type: ignore[attr-defined]
+    raise err
+
+
+def has_composed_club_spec(spec: Mapping[str, Any]) -> bool:
+    """Return True iff ``spec`` composes a club body, hand bodies, and closure."""
+    if not isinstance(spec, Mapping):
+        return False
+    if "constraints" in spec and not spec.get("constraints"):
+        return False
+    club = spec.get("club")
+    closure = spec.get("closure")
+    if not isinstance(club, Mapping) or not str(club.get("name", "")).strip():
+        return False
+    if not isinstance(closure, Mapping) or not closure:
+        return False
+    bodies = spec.get("bodies")
+    if not isinstance(bodies, Sequence):
+        return False
+    body_names = {str(b.get("name", "")) for b in bodies if isinstance(b, Mapping)}
+    club_body = str(closure.get("body_b", ""))
+    hand_body = str(closure.get("body_a", ""))
+    has_closure_bodies = (
+        bool(club_body)
+        and bool(hand_body)
+        and club_body in body_names
+        and hand_body in body_names
+    )
+    has_canonical_bodies = {"club", "hand_l", "hand_r"} <= body_names
+    return has_closure_bodies or has_canonical_bodies
+
+
+def build_spec_grip_binding_manifest(
+    spec: Mapping[str, Any],
+    *,
+    model_id: str = "full_body_v1_spec_export",
+    model_hash: str | None = None,
+    handedness: str = "right",
+    attachment_mode: str = "contact",
+    source: str = "humanoid_character_builder/spec_export",
+    consumer: str = "spec_export",
+) -> dict[str, Any]:
+    """Build and validate a ``grip-binding/v1`` manifest for a club-composed spec.
+
+    Fails closed with :class:`SchemaFeatureUnavailableError` when ``spec`` does
+    not compose a club body and hand-club closure.
+    """
+    if not isinstance(spec, Mapping):
+        raise TypeError(f"spec must be a Mapping, got {type(spec).__name__}")
+    schema_id = str(spec.get("schema_version", "full-body-v1")) or "full-body-v1"
+    if not has_composed_club_spec(spec):
+        fail_closed_grip_binding(
+            schema_id,
+            consumer=consumer,
+            reason=(
+                "clubless specification does not compose a club body and "
+                "hand-club closure required for grip-binding/v1"
+            ),
+        )
+
+    hand = validate_handedness(handedness)
+    if hand == "right":
+        side_roles = {"left": "lead", "right": "trail"}
+        lead_body, trail_body = "hand_l", "hand_r"
+    else:
+        side_roles = {"right": "lead", "left": "trail"}
+        lead_body, trail_body = "hand_r", "hand_l"
+
+    if model_hash is None:
+        canonical_bytes = json.dumps(
+            spec, sort_keys=True, separators=(",", ":")
+        ).encode("utf-8")
+        digest = hashlib.sha256(canonical_bytes).hexdigest()
+        resolved_hash = f"sha256:{digest}"
+    else:
+        clean_hash = _require_non_empty_str(model_hash, "model_hash")
+        resolved_hash = (
+            clean_hash if clean_hash.startswith("sha256:") else f"sha256:{clean_hash}"
+        )
+
+    manifest: dict[str, Any] = {
+        "schema": MANIFEST_SCHEMA,
+        "model_id": _require_non_empty_str(model_id, "model_id"),
+        "model_hash": resolved_hash,
+        "handedness": hand,
+        "side_roles": side_roles,
+        "calibration_pose": {
+            "name": "neutral_address",
+            "description": "Welded hand-club closure frame from full-body-v1 spec",
+        },
+        "units": {"length": "m", "angle": "rad"},
+        "provenance": {
+            "source": _require_non_empty_str(source, "source"),
+            "date": "2026-04-18",
+            "method": "GripInterface.from_spec closure frame mapping",
+        },
+        "attachment_mode": _require_non_empty_str(attachment_mode, "attachment_mode"),
+        "club_body": "club",
+        "lead_hand_body": lead_body,
+        "trail_hand_body": trail_body,
+        "unavailable_sites": {},
+    }
+    validate_manifest(manifest)
+    return manifest

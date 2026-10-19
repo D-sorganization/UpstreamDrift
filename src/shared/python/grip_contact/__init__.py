@@ -11,7 +11,9 @@ from src.shared.python.grip_contact.capability_inventory import (
     GripCapabilityInventory,
     GripFeatureCapability,
     ModelGripCapability,
+    enumerate_advertised_hand_bearing_assets,
     load_grip_capability_inventory,
+    verify_model_library_admission,
 )
 from src.shared.python.grip_contact.closure_series import (
     GripClosureSeries,
@@ -103,7 +105,9 @@ __all__ = [
     "GripCapabilityInventory",
     "GripFeatureCapability",
     "ModelGripCapability",
+    "enumerate_advertised_hand_bearing_assets",
     "load_grip_capability_inventory",
+    "verify_model_library_admission",
     "BushingState",
     "BushingWrench",
     "ContactCapsule",
