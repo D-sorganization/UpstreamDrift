@@ -1,27 +1,42 @@
 """Shared array-namespace contact kernel for NumPy and JAX (HRG-GS-M14, #13336).
 
-Extracts the single qualified Hunt-Crossley normal, regularised Coulomb/Stribeck
-tangential, and torsional spin-friction contact law evaluated per contact pair in
-:mod:`src.shared.python.grip_contact.pair_contact` and
-:mod:`src.shared.python.grip_contact.pad_contact` into one pure array-namespace
-kernel (:func:`contact_law_kernel`).
+Provides the single implementation of the qualified Hunt-Crossley normal,
+regularised Coulomb/Stribeck tangential, and torsional spin-friction contact law
+shared across:
+- :mod:`src.shared.python.motion_matching.contact_law` (:func:`sphere_ground_contact`
+  and :func:`torsional_friction_moment`, called with ``xp=numpy``),
+- :mod:`src.shared.python.motion_matching.jax_contact` (:func:`sphere_ground_contact_jax`,
+  called with ``xp=jax.numpy``), and
+- :mod:`src.shared.python.grip_contact.pair_contact` and
+  :mod:`src.shared.python.grip_contact.pad_contact` (which delegate through
+  :mod:`src.shared.python.motion_matching.contact_law`).
 
 Design invariants:
-1. **Validation split (DbC outside tracing)**: Precondition checks on parameter
+1. **Single formula (DRY)**: :func:`contact_law_kernel` and
+   :func:`torsional_moment_kernel` hold the sole implementation of the normal,
+   tangential, and spin-friction equations. When ``xp is numpy`` and scalar
+   inputs are passed, the kernel dispatches its operations (`where`, `exp`,
+   `tanh`, `sqrt`) through :class:`_ScalarMathOps` (backed by :mod:`math`)
+   within the same function body so the hot scalar path in
+   ``sphere_ground_contact`` avoids 0-D ``ndarray`` allocation overhead while
+   executing the identical mathematical law.
+2. **Validation split (DbC outside tracing)**: Precondition checks on parameter
    ranges, types, shapes, and finiteness execute in thin public wrappers
    (:func:`evaluate_contact_kernel`, :func:`evaluate_contact_kernel_jax`,
-   :func:`validate_kernel_params`) outside the traced kernel.
-2. **Branch-free pure kernel**: :func:`contact_law_kernel` is written against an
-   array namespace ``xp`` (``numpy`` or ``jax.numpy``) with ``xp.where`` and no
-   Python branching on traced state values, supporting scalar, per-side batched
-   ``(N,)`` arrays (composing with ``SideBatch`` in ``perf/grip-contact-batched``),
+   :func:`validate_kernel_params`, :func:`sphere_ground_contact`,
+   :func:`torsional_friction_moment`, :func:`sphere_ground_contact_jax`)
+   outside the traced kernel.
+3. **Branch-free pure kernel on traced values**: State masking uses
+   ``ops.where`` with no Python branching on traced state values, supporting
+   scalar, per-side batched ``(N,)`` arrays (composing with ``SideBatch``),
    and ``jax.jit`` / ``jax.vmap`` / ``jax.grad``.
-3. **No silent smoothing**: :func:`contact_law_kernel` evaluates the exact
+4. **No silent smoothing**: :func:`contact_law_kernel` evaluates the exact
    qualified law. An opt-in $C^\\infty$ relaxation is provided separately as
    :func:`smooth_contact_law_kernel` and is never the default.
-4. **Lazy JAX import**: ``jax`` and ``jax.numpy`` are imported only inside
+5. **Lazy JAX import**: ``jax`` and ``jax.numpy`` are imported only inside
    :func:`evaluate_contact_kernel_jax` and :func:`jax_contact_kernel` so that
-   importing :mod:`src.shared.python.grip_contact` never imports ``jax``.
+   importing :mod:`src.shared.python.motion_matching` or
+   :mod:`src.shared.python.grip_contact` never imports ``jax``.
 
 Non-differentiable / non-smooth loci of the qualified law:
 - **Contact onset at zero penetration ($\\delta = 0$)**: The unilateral clipping
@@ -45,15 +60,12 @@ Non-differentiable / non-smooth loci of the qualified law:
 from __future__ import annotations
 
 import math
-from typing import Any, NamedTuple
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 import numpy as np
 
-from src.shared.python.motion_matching.contact_law import (
-    ContactParameters,
-    ContactSample,
-    GroundPlane,
-)
+if TYPE_CHECKING:
+    from src.shared.python.motion_matching.contact_law import ContactParameters
 
 __all__ = [
     "ContactKernelParams",
@@ -62,12 +74,25 @@ __all__ = [
     "evaluate_contact_kernel",
     "evaluate_contact_kernel_jax",
     "jax_contact_kernel",
-    "sample_plane_contact",
     "smooth_contact_law_kernel",
+    "torsional_moment_kernel",
     "validate_kernel_params",
 ]
 
 _INVALID_INPUT_TYPES = (str, bytes, dict, set, bool)
+_SCALAR_TYPES = (int, float, np.floating)
+
+
+class _ScalarMathOps:
+    """Scalar math namespace matching the array-namespace subset used by the kernel."""
+
+    exp = staticmethod(math.exp)
+    tanh = staticmethod(math.tanh)
+    sqrt = staticmethod(math.sqrt)
+
+    @staticmethod
+    def where(cond: Any, x: Any, y: Any) -> Any:
+        return x if cond else y
 
 
 class ContactKernelParams(NamedTuple):
@@ -142,6 +167,8 @@ def validate_kernel_params(
         ValueError: If any parameter is non-finite or violates physical sign
             and ordering invariants.
     """
+    from src.shared.python.motion_matching.contact_law import ContactParameters
+
     if isinstance(params, ContactKernelParams):
         p_patch = params.patch_radius_m if patch_radius_m is None else patch_radius_m
         p_spin = (
@@ -250,6 +277,50 @@ def _validate_kinematic_inputs(
     return delta, v_n, v_t, omega_n
 
 
+def torsional_moment_kernel(
+    normal_load_n: Any,
+    spin_rate_rad_s: Any,
+    *,
+    friction: float,
+    patch_radius_m: float,
+    transition_rad_s: float,
+    xp: Any = np,
+) -> Any:
+    """Pure array-namespace kernel for the signed torsional spin friction moment.
+
+    Evaluates ``m_s = -friction * max(0, normal_load_n) * patch_radius_m * tanh(spin_rate_rad_s / transition_rad_s)``
+    along the contact normal without Python branching on traced values.
+    """
+    if (
+        xp is np
+        and isinstance(normal_load_n, _SCALAR_TYPES)
+        and isinstance(spin_rate_rad_s, _SCALAR_TYPES)
+    ):
+        ops: Any = _ScalarMathOps
+        f_n: Any = float(normal_load_n)
+        omega_n: Any = float(spin_rate_rad_s)
+        zero: Any = 0.0
+    else:
+        ops = xp
+        f_n = (
+            xp.asarray(normal_load_n, dtype=float)
+            if xp is np
+            else xp.asarray(normal_load_n)
+        )
+        omega_n = xp.broadcast_to(
+            xp.asarray(spin_rate_rad_s, dtype=float)
+            if xp is np
+            else xp.asarray(spin_rate_rad_s, dtype=f_n.dtype),
+            f_n.shape,
+        )
+        zero = xp.zeros_like(f_n)
+
+    load_pos = f_n > 0.0
+    load = ops.where(load_pos, f_n, zero)
+    limit = friction * load * patch_radius_m
+    return ops.where(load_pos, -limit * ops.tanh(omega_n / transition_rad_s), zero)
+
+
 def contact_law_kernel(
     penetration_m: Any,
     normal_velocity_m_s: Any,
@@ -262,7 +333,7 @@ def contact_law_kernel(
     """Pure array-namespace kernel for the qualified Hunt-Crossley / Stribeck / spin law.
 
     Evaluates normal force, tangential friction force, and torsional spin moment
-    without Python branching on traced values (uses ``xp.where``).
+    without Python branching on traced values (uses ``ops.where``).
 
     Sign conventions:
     - ``penetration_m`` ($\\delta$): positive when penetrating, $\\le 0$ when separated.
@@ -278,63 +349,110 @@ def contact_law_kernel(
     2. Zero tangential speed at $v_t = 0$ ($\\|v_t\\|_2 = 0$).
     3. Stick/slip transition knee around $|v_t| \\sim v_{\\mathrm{tr}}$.
     """
-    delta = xp.asarray(penetration_m, dtype=float)
-    v_n = xp.asarray(normal_velocity_m_s, dtype=float)
-    v_t = xp.asarray(tangential_velocity_m_s, dtype=float)
-    omega_n = xp.broadcast_to(xp.asarray(spin_rate_rad_s, dtype=float), delta.shape)
+    if (
+        xp is np
+        and isinstance(penetration_m, _SCALAR_TYPES)
+        and isinstance(normal_velocity_m_s, _SCALAR_TYPES)
+        and isinstance(spin_rate_rad_s, _SCALAR_TYPES)
+        and (
+            isinstance(tangential_velocity_m_s, _SCALAR_TYPES)
+            or (
+                isinstance(tangential_velocity_m_s, np.ndarray)
+                and tangential_velocity_m_s.shape == (3,)
+            )
+        )
+    ):
+        ops: Any = _ScalarMathOps
+        delta: Any = float(penetration_m)
+        v_n: Any = float(normal_velocity_m_s)
+        omega_n: Any = float(spin_rate_rad_s)
+        zero: Any = 0.0
+        if isinstance(tangential_velocity_m_s, np.ndarray):
+            v_t: Any = tangential_velocity_m_s
+            is_vec = True
+            zero_vt: Any = np.zeros(3)
+        else:
+            v_t = float(tangential_velocity_m_s)
+            is_vec = False
+            zero_vt = 0.0
+    else:
+        ops = xp
+        if xp is np:
+            delta = xp.asarray(penetration_m, dtype=float)
+            v_n = xp.asarray(normal_velocity_m_s, dtype=float)
+            v_t = xp.asarray(tangential_velocity_m_s, dtype=float)
+            omega_n = xp.broadcast_to(
+                xp.asarray(spin_rate_rad_s, dtype=float), delta.shape
+            )
+        else:
+            delta = xp.asarray(penetration_m)
+            v_n = xp.asarray(normal_velocity_m_s, dtype=delta.dtype)
+            v_t = xp.asarray(tangential_velocity_m_s, dtype=delta.dtype)
+            omega_n = xp.broadcast_to(
+                xp.asarray(spin_rate_rad_s, dtype=delta.dtype), delta.shape
+            )
+        zero = xp.zeros_like(delta)
+        is_vec = v_t.ndim == delta.ndim + 1
+        zero_vt = xp.zeros_like(v_t) if is_vec else zero
 
     active_contact = delta > 0.0
-    delta_pos = xp.where(active_contact, delta, 0.0)
+    delta_pos = ops.where(active_contact, delta, 0.0)
     rate = -v_n
     raw_fn = params.stiffness_n_m * delta_pos * (1.0 + params.dissipation_s_m * rate)
-    f_n = xp.where(active_contact & (raw_fn > 0.0), raw_fn, xp.zeros_like(delta))
+    f_n = ops.where(active_contact & (raw_fn > 0.0), raw_fn, zero)
 
-    if v_t.ndim == delta.ndim + 1:
+    if is_vec:
         s_sq = (
-            v_t[..., 0] * v_t[..., 0]
+            float(
+                v_t.dot(v_t)
+            )  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for small 1D arrays
+            if ops is _ScalarMathOps
+            else v_t[..., 0] * v_t[..., 0]
             + v_t[..., 1] * v_t[..., 1]
             + v_t[..., 2] * v_t[..., 2]
         )
         s_pos = s_sq > 0.0
-        s_sq_safe = xp.where(s_pos, s_sq, 1.0)
-        speed = xp.where(s_pos, xp.sqrt(s_sq_safe), 0.0)
-        speed_safe = xp.where(s_pos, speed, 1.0)
-        active_slip = s_pos & (f_n > 0.0)
-        ratio = speed / params.transition_velocity_m_s
-        mu = (
-            params.dynamic_friction
-            + (params.static_friction - params.dynamic_friction) * xp.exp(-(ratio**2))
-            + params.viscous_friction * speed
-        )
-        raw_ft = (
-            -v_t
-            / speed_safe[..., None]
-            * mu[..., None]
-            * f_n[..., None]
-            * xp.tanh(ratio)[..., None]
-        )
-        f_t = xp.where(active_slip[..., None], raw_ft, xp.zeros_like(v_t))
+        s_sq_safe = ops.where(s_pos, s_sq, 1.0)
+        speed = ops.where(s_pos, ops.sqrt(s_sq_safe), 0.0)
     else:
-        v_t_sq = v_t * v_t
-        s_pos = v_t_sq > 0.0
-        v_t_sq_safe = xp.where(s_pos, v_t_sq, 1.0)
-        speed = xp.where(s_pos, xp.sqrt(v_t_sq_safe), 0.0)
-        active_slip = s_pos & (f_n > 0.0)
-        ratio = speed / params.transition_velocity_m_s
-        mu = (
-            params.dynamic_friction
-            + (params.static_friction - params.dynamic_friction) * xp.exp(-(ratio**2))
-            + params.viscous_friction * speed
-        )
-        f_t = xp.where(active_slip, mu * f_n * xp.tanh(ratio), xp.zeros_like(delta))
+        speed = ops.where(v_t >= 0.0, v_t, -v_t)
+        s_pos = speed > 0.0
+
+    active_slip = s_pos & (f_n > 0.0)
+    ratio = speed / params.transition_velocity_m_s
+    mu = (
+        params.dynamic_friction
+        + (params.static_friction - params.dynamic_friction) * ops.exp(-(ratio**2))
+        + params.viscous_friction * speed
+    )
+    tanh_ratio = ops.tanh(ratio)
+
+    if is_vec:
+        speed_safe = ops.where(s_pos, speed, 1.0)
+        if ops is _ScalarMathOps:
+            raw_ft = -v_t / speed_safe * mu * f_n * tanh_ratio
+            f_t = ops.where(active_slip, raw_ft, zero_vt)
+        else:
+            raw_ft = (
+                -v_t
+                / speed_safe[..., None]
+                * mu[..., None]
+                * f_n[..., None]
+                * tanh_ratio[..., None]
+            )
+            f_t = ops.where(active_slip[..., None], raw_ft, zero_vt)
+    else:
+        f_t = ops.where(active_slip, mu * f_n * tanh_ratio, zero)
 
     patch_r = getattr(params, "patch_radius_m", 0.0)
     spin_tr = getattr(params, "spin_transition_rad_s", 1.0)
-    limit = params.static_friction * f_n * patch_r
-    m_s = xp.where(
-        f_n > 0.0,
-        -limit * xp.tanh(omega_n / spin_tr),
-        xp.zeros_like(delta),
+    m_s = torsional_moment_kernel(
+        f_n,
+        omega_n,
+        friction=params.static_friction,
+        patch_radius_m=patch_r,
+        transition_rad_s=spin_tr,
+        xp=xp,
     )
     return ContactKernelResult(
         normal_force_n=f_n,
@@ -371,7 +489,8 @@ def evaluate_contact_kernel_jax(
     """Validate inputs (DbC) and evaluate the shared contact kernel in ``jax.numpy``.
 
     Imports ``jax.numpy`` lazily inside the function so importing
-    :mod:`src.shared.python.grip_contact` never imports ``jax``.
+    :mod:`src.shared.python.motion_matching` or :mod:`src.shared.python.grip_contact`
+    never imports ``jax``.
     """
     import jax.numpy as jnp
 
@@ -461,93 +580,35 @@ def smooth_contact_law_kernel(
             + v_t[..., 2] * v_t[..., 2]
         )
         denom = xp.sqrt(s_sq + velocity_eps_m_s * velocity_eps_m_s)
-        speed = denom - velocity_eps_m_s
-        ratio = speed / params.transition_velocity_m_s
-        mu = (
-            params.dynamic_friction
-            + (params.static_friction - params.dynamic_friction) * xp.exp(-(ratio**2))
-            + params.viscous_friction * speed
-        )
-        f_t = (
-            -v_t
-            / denom[..., None]
-            * mu[..., None]
-            * f_n[..., None]
-            * xp.tanh(ratio)[..., None]
-        )
     else:
         denom = xp.sqrt(v_t * v_t + velocity_eps_m_s * velocity_eps_m_s)
-        speed = denom - velocity_eps_m_s
-        ratio = speed / params.transition_velocity_m_s
-        mu = (
-            params.dynamic_friction
-            + (params.static_friction - params.dynamic_friction) * xp.exp(-(ratio**2))
-            + params.viscous_friction * speed
-        )
-        f_t = mu * f_n * xp.tanh(ratio)
+
+    speed = denom - velocity_eps_m_s
+    ratio = speed / params.transition_velocity_m_s
+    mu = (
+        params.dynamic_friction
+        + (params.static_friction - params.dynamic_friction) * xp.exp(-(ratio**2))
+        + params.viscous_friction * speed
+    )
+    f_t_mag = mu * f_n * xp.tanh(ratio)
+
+    if v_t.ndim == delta.ndim + 1:
+        f_t = -v_t / denom[..., None] * f_t_mag[..., None]
+    else:
+        f_t = f_t_mag
 
     patch_r = getattr(params, "patch_radius_m", 0.0)
     spin_tr = getattr(params, "spin_transition_rad_s", 1.0)
-    limit = params.static_friction * f_n * patch_r
-    m_s = -limit * xp.tanh(omega_n / spin_tr)
+    m_s = torsional_moment_kernel(
+        f_n,
+        omega_n,
+        friction=params.static_friction,
+        patch_radius_m=patch_r,
+        transition_rad_s=spin_tr,
+        xp=xp,
+    )
     return ContactKernelResult(
         normal_force_n=f_n,
         tangential_force_n=f_t,
         spin_moment_nm=m_s,
     )
-
-
-def sample_plane_contact(
-    sphere_center_m: np.ndarray,
-    rel_velocity_m_s: np.ndarray,
-    sphere_radius_m: float,
-    plane: GroundPlane,
-    rel_omega_rad_s: np.ndarray,
-    params: ContactKernelParams,
-) -> tuple[ContactSample, np.ndarray]:
-    """Evaluate 3D sphere-on-plane contact and spin moment via :func:`contact_law_kernel`.
-
-    Shared NumPy path called by both :mod:`src.shared.python.grip_contact.pair_contact`
-    and :mod:`src.shared.python.grip_contact.pad_contact`.
-    """
-    center = _coerce_finite_array(sphere_center_m, "sphere_center_m")
-    velocity = _coerce_finite_array(rel_velocity_m_s, "rel_velocity_m_s")
-    omega = _coerce_finite_array(rel_omega_rad_s, "rel_omega_rad_s")
-    if center.shape != (3,) or velocity.shape != (3,) or omega.shape != (3,):
-        raise ValueError(
-            "sphere_center_m, rel_velocity_m_s, and rel_omega_rad_s must be 3-vectors"
-        )
-    if not (math.isfinite(sphere_radius_m) and sphere_radius_m > 0.0):
-        raise ValueError("sphere_radius_m must be finite and positive")
-    if not isinstance(plane, GroundPlane):
-        raise TypeError(f"plane must be GroundPlane, got {type(plane).__name__}")
-    validated_params = validate_kernel_params(params)
-
-    normal = np.asarray(plane.normal, dtype=float)
-    signed_distance = float(normal @ center) - plane.height_m - sphere_radius_m
-    penetration = max(0.0, -signed_distance)
-    v_n = float(normal @ velocity)
-    rate = -v_n
-    point = center - normal * sphere_radius_m
-    tangential = velocity - normal * v_n
-    spin_rate = float(normal @ omega)
-
-    res = contact_law_kernel(
-        penetration,
-        v_n,
-        tangential,
-        validated_params,
-        spin_rate,
-        xp=np,
-    )
-    normal_force = normal * float(res.normal_force_n)
-    friction_force = np.asarray(res.tangential_force_n, dtype=float)
-    spin_moment = normal * float(res.spin_moment_nm)
-    sample = ContactSample(
-        penetration_m=penetration,
-        penetration_rate_m_s=rate,
-        contact_point_m=point,
-        normal_force_n=normal_force,
-        friction_force_n=friction_force,
-    )
-    return sample, spin_moment

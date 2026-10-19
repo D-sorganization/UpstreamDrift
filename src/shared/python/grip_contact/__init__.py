@@ -10,7 +10,7 @@ from src.shared.python.grip_contact.closure_series import (
     closure_series_from_residuals,
 )
 from src.shared.python.grip_contact.club_dynamics import ClubDynamics
-from src.shared.python.grip_contact.contact_kernel import (
+from src.shared.python.motion_matching.contact_kernel import (
     ContactKernelParams,
     ContactKernelResult,
     contact_law_kernel,

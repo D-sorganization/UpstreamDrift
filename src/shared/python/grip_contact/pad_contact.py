@@ -23,15 +23,13 @@ from dataclasses import dataclass, replace
 import numpy as np
 
 from src.shared.python.grip_contact.bushing_law import BushingState, cross3
-from src.shared.python.grip_contact.contact_kernel import (
-    ContactKernelParams,
-    sample_plane_contact,
-)
 from src.shared.python.grip_contact.interface import GripInterface
 from src.shared.python.grip_contact.pad_layout import PadLayout, matched_pad_parameters
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
     GroundPlane,
+    sphere_ground_contact,
+    torsional_friction_moment,
 )
 
 __all__ = [
@@ -190,13 +188,6 @@ def pad_wrench(
     )
     origin_s = model.cylinder.origin_axial_m(side)
     lo, hi = model.cylinder.axial_range_m
-    cyl_radius = model.cylinder.radius_m
-    pad_radius = model.layout.pad_radius_m
-    kernel_params = ContactKernelParams.from_contact_parameters(
-        model.law,
-        patch_radius_m=model.patch_radius_m,
-        spin_transition_rad_s=model.spin_transition_rad_s,
-    )
     force = np.zeros(3)
     moment = np.zeros(3)
     normal = np.zeros(len(pads))
@@ -213,21 +204,24 @@ def pad_wrench(
         if dist < 1e-9:
             continue
         n = rho / dist
-        surface = axis_point + s * axis + cyl_radius * n
+        surface = axis_point + s * axis + model.cylinder.radius_m * n
         v_pad = hand.velocity_m_s + cross3(hand.omega_rad_s, arm)
         v_club = club.velocity_m_s + cross3(club.omega_rad_s, surface - club.position_m)
         plane = GroundPlane((float(n[0]), float(n[1]), float(n[2])), float(n @ surface))
-        sample, spin = sample_plane_contact(
-            centre,
-            v_pad - v_club,
-            pad_radius,
-            plane,
-            hand.omega_rad_s - club.omega_rad_s,
-            kernel_params,
+        sample = sphere_ground_contact(
+            centre, v_pad - v_club, model.layout.pad_radius_m, plane, model.law
         )
         if sample.penetration_m <= 0.0:
             continue
         on_pad = sample.normal_force_n + sample.friction_force_n
+        spin = torsional_friction_moment(
+            sample.normal_force_n,
+            hand.omega_rad_s - club.omega_rad_s,
+            plane,
+            patch_radius_m=model.patch_radius_m,
+            friction=model.law.static_friction,
+            transition_rad_s=model.spin_transition_rad_s,
+        )
         f_club = -on_pad
         force += f_club
         moment += cross3(sample.contact_point_m - club.position_m, f_club) - spin
