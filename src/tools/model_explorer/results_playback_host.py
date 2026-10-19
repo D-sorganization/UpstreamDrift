@@ -32,14 +32,17 @@ class ResultsPlaybackHostMixin:
 
     playback_panel: Any | None
     playback_dock: QDockWidget | None
+    playback_bar: Any | None
     _results: ResultsSession | None
     _inner: Any
     visualization_dock: Any
+    visualization_widget: Any
     status_bar: Any
     export_video_action: Any
 
     # Provided by MainWidget (the File > Open Swing Result handler).
     open_results: Callable[[], None]
+    scrub_results: Callable[[int], None]
 
     def _dialog_parent(self) -> QWidget | None:
         """The host widget (``MainWidget``) as a dialog parent, if it is one."""
@@ -61,7 +64,7 @@ class ResultsPlaybackHostMixin:
         results_path = Path(path)
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         try:
-            session = ResultsSession.load(results_path, engine or "engine")
+            session = ResultsSession.load(results_path, engine)
             # Release the previous run's GL renderer before building the next:
             # closing it afterwards would tear down the new one's context.
             self._discard_results()
@@ -80,6 +83,9 @@ class ResultsPlaybackHostMixin:
             QApplication.restoreOverrideCursor()
         self._discard_results()
         self._results = session
+        if hasattr(self, "playback_bar") and self.playback_bar is not None:
+            self.playback_bar.set_session(session)
+        self.scrub_results(0)
         self._show_playback_panel(panel)
         self.export_video_action.setEnabled(True)
         self.status_bar.showMessage(
@@ -148,6 +154,12 @@ class ResultsPlaybackHostMixin:
             with contextlib.suppress(RuntimeError):
                 panel.stop()
                 panel.deleteLater()
+        if hasattr(self, "playback_bar") and self.playback_bar is not None:
+            self.playback_bar.set_session(None)
+        if hasattr(self, "visualization_widget") and hasattr(
+            self.visualization_widget, "set_markers"
+        ):
+            self.visualization_widget.set_markers(None)
         session, self._results = self._results, None
         if session is not None:
             session.close()

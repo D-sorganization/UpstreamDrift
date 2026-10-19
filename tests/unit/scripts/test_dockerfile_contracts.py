@@ -68,6 +68,15 @@ services:
       - MUJOCO_GL=${MUJOCO_GL:-egl}
       - DISPLAY=${DISPLAY:-:0}
       - UD_EXPLORER_DISPLAY_MODE=host
+  ud-sim:
+    profiles: ["explorer-images"]
+    build:
+      dockerfile: Dockerfile.modular
+      target: explorer-headless
+    image: ud-sim:latest
+    environment:
+      - QT_QPA_PLATFORM=offscreen
+      - MUJOCO_GL=${MUJOCO_GL:-egl}
 """
 
 _EXPLORER_SH_OK = """#!/bin/sh
@@ -84,16 +93,25 @@ die() { echo "ERROR: $*" >&2; exit 64; }
 [ -n "${QT_QPA_PLATFORM:-}" ] || die "QT_QPA_PLATFORM is not set"
 [ -n "${MUJOCO_GL:-}" ] || die "MUJOCO_GL is not set"
 [ -n "${DISPLAY:-}" ] || die "no display: DISPLAY is not set"
+    *)
+        exec "$mode" "$@"
+        ;;
+esac
 """
 
 
 def _write_explorer_tree(root: Path) -> None:
     (root / "docker").mkdir(exist_ok=True)
     (root / "docker" / "explorer").mkdir(exist_ok=True)
+    (root / "docker" / "ud-sim").mkdir(exist_ok=True)
     (root / "scripts" / "docker").mkdir(parents=True, exist_ok=True)
     (root / "scripts" / "docker" / "explorer.sh").write_text(_EXPLORER_SH_OK)
     (root / "docker" / "explorer" / "entrypoint.sh").write_text(
         _ENTRYPOINT_OK, encoding="utf-8"
+    )
+    (root / "docker" / "ud-sim" / "README.md").write_text(
+        "Dockerfile.modular explorer-headless ud-sim:latest\n",
+        encoding="utf-8",
     )
 
 
@@ -415,3 +433,41 @@ def test_explorer_launcher_health_checks_each_required_image(
     launcher.write_text(launcher.read_text().replace(image, "x"), encoding="utf-8")
 
     assert any(image in f for f in _failures(tmp_path))
+
+
+def test_ud_sim_readme_documents_compose_source_of_truth(tmp_path: Path) -> None:
+    _write_minimal_tree(tmp_path)
+    (tmp_path / "docker" / "ud-sim" / "README.md").unlink()
+
+    assert any("ud-sim" in f and "README" in f for f in _failures(tmp_path))
+
+
+def test_ud_sim_service_must_tag_explorer_headless_build(tmp_path: Path) -> None:
+    _write_minimal_tree(tmp_path)
+    compose = (tmp_path / "docker-compose.yml").read_text()
+    start = compose.index("  ud-sim:\n")
+    ud_sim_tail = compose[start:].replace(
+        "target: explorer-headless", "target: runtime", 1
+    )
+    (tmp_path / "docker-compose.yml").write_text(
+        compose[:start] + ud_sim_tail, encoding="utf-8"
+    )
+
+    assert any("explorer-headless" in f and "ud-sim" in f for f in _failures(tmp_path))
+
+
+def test_ud_sim_service_must_not_set_default_command(tmp_path: Path) -> None:
+    _write_minimal_tree(tmp_path)
+    compose = (tmp_path / "docker-compose.yml").read_text()
+    block_start = compose.index("  ud-sim:")
+    (tmp_path / "docker-compose.yml").write_text(
+        compose[:block_start]
+        + compose[block_start:].replace(
+            "    image: ud-sim:latest\n",
+            '    image: ud-sim:latest\n    command: ["engines"]\n',
+            1,
+        ),
+        encoding="utf-8",
+    )
+
+    assert any("command" in f and "ud-sim" in f for f in _failures(tmp_path))

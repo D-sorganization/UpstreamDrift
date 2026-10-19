@@ -149,8 +149,24 @@ def build_overlay_feed(
         if impact is not None:
             provider.with_axial_impact_window(impact, float(swing.bundle.dt_s))
     if palm_thumb:
-        patch, friction = palm_thumb_patch_for_spec(swing.bundle.spec_bytes)
-        provider.with_palm_thumb(source, patch, static_friction=friction)
+        spec = json.loads(swing.bundle.spec_bytes)
+        friction = spec.get("contact", {}).get("parameters", {}).get("static_friction")
+        if friction is None:
+            raise ValueError("the specification has no contact static_friction")
+        try:
+            from src.shared.python.motion_matching.execution.grip_rotation import (
+                grip_spec_of,
+            )
+
+            grip_spec = grip_spec_of(spec)
+        except (ValueError, KeyError):
+            from src.shared.python.motion_matching.grip_contract import GripSpec
+
+            grip_spec = GripSpec()
+        from src.shared.python.grip_contact.contact_topology import contact_topology
+
+        topo = contact_topology(grip_spec)
+        provider.with_allocated_contacts(source, topo, static_friction=float(friction))
     names = swing.bundle.coordinate_order
     com = source.center_of_mass_m(dict(zip(names, map(float, swing.q[0]), strict=True)))
     lookat = (float(com[0]), float(com[1]), LOOKAT_HEIGHT_M)
