@@ -476,6 +476,74 @@ def _move_hand_solids(
     target_body.setdefault("solids", []).extend(moved)
 
 
+def _insert_separated_hand_topology(
+    out: dict[str, Any],
+    left_body: dict[str, Any],
+    free_joint: dict[str, Any],
+) -> None:
+    """Insert ``LEFT_HAND_BODY``, ``CLUB_FREE_JOINT``, and free coordinates into ``out``."""
+    counts = dict(out["upper_body_counts"])
+    n_bodies = int(counts["bodies"])
+    n_joints = int(counts["joints"])
+    n_coords = int(counts["coordinates"])
+    out["bodies"] = [
+        *out["bodies"][:n_bodies],
+        left_body,
+        *out["bodies"][n_bodies:],
+    ]
+    out["joints"] = [
+        *out["joints"][:n_joints],
+        free_joint,
+        *out["joints"][n_joints:],
+    ]
+    out["coordinate_order"] = [
+        *out["coordinate_order"][:n_coords],
+        *CLUB_FREE_COORDINATES,
+        *out["coordinate_order"][n_coords:],
+    ]
+    counts["bodies"] = n_bodies + 1
+    counts["joints"] = n_joints + 1
+    counts["coordinates"] = n_coords + len(CLUB_FREE_COORDINATES)
+    out["upper_body_counts"] = counts
+    out["passive_coordinates"] = list(CLUB_FREE_COORDINATES)
+
+
+def _populate_separated_grip_metadata(
+    out: dict[str, Any],
+    interface: GripInterface,
+    *,
+    club_name: str,
+    right_name: str,
+    club_to_right: Array,
+) -> None:
+    """Populate ``grip_bushing`` and ``hand_separation`` metadata on ``out``."""
+    g_left, g_right = interface.left.matrix(), interface.right.matrix()
+    out["grip_bushing"] = {
+        "L": {
+            "hand_body": LEFT_HAND_BODY,
+            "hand_frame": g_left.tolist(),
+            "club_body": club_name,
+            "club_frame": g_left.tolist(),
+        },
+        "R": {
+            "hand_body": right_name,
+            "hand_frame": (club_to_right @ g_right).tolist(),
+            "club_body": club_name,
+            "club_frame": g_right.tolist(),
+        },
+    }
+    out["hand_separation"] = {
+        "enabled": True,
+        "mode": "separated_v2",
+        "left_hand_body": LEFT_HAND_BODY,
+        "right_hand_body": right_name,
+        "club_body": club_name,
+        "free_joint": CLUB_FREE_JOINT,
+        "free_coordinates": list(CLUB_FREE_COORDINATES),
+        "identifiability_note": HAND_HAND_IDENTIFIABILITY_NOTE,
+    }
+
+
 def separate_v2_hands(v2_spec: Mapping[str, Any]) -> dict[str, Any]:
     """Separate ``LHandBody`` and ``RHandStandoff`` from the bare club in a ``full-body-v2`` document.
 
@@ -533,56 +601,14 @@ def separate_v2_hands(v2_spec: Mapping[str, Any]) -> dict[str, Any]:
         if frame["body"] == club_name and frame["name"] == "Grip_LeftHand":
             frame["body"] = LEFT_HAND_BODY
 
-    counts = dict(out["upper_body_counts"])
-    n_bodies = int(counts["bodies"])
-    n_joints = int(counts["joints"])
-    n_coords = int(counts["coordinates"])
-    out["bodies"] = [
-        *out["bodies"][:n_bodies],
-        left_body,
-        *out["bodies"][n_bodies:],
-    ]
-    out["joints"] = [
-        *out["joints"][:n_joints],
-        free_joint,
-        *out["joints"][n_joints:],
-    ]
-    out["coordinate_order"] = [
-        *out["coordinate_order"][:n_coords],
-        *CLUB_FREE_COORDINATES,
-        *out["coordinate_order"][n_coords:],
-    ]
-    counts["bodies"] = n_bodies + 1
-    counts["joints"] = n_joints + 1
-    counts["coordinates"] = n_coords + len(CLUB_FREE_COORDINATES)
-    out["upper_body_counts"] = counts
-    out["passive_coordinates"] = list(CLUB_FREE_COORDINATES)
-
-    g_left, g_right = interface.left.matrix(), interface.right.matrix()
-    out["grip_bushing"] = {
-        "L": {
-            "hand_body": LEFT_HAND_BODY,
-            "hand_frame": g_left.tolist(),
-            "club_body": club_name,
-            "club_frame": g_left.tolist(),
-        },
-        "R": {
-            "hand_body": right_name,
-            "hand_frame": (club_to_right @ g_right).tolist(),
-            "club_body": club_name,
-            "club_frame": g_right.tolist(),
-        },
-    }
-    out["hand_separation"] = {
-        "enabled": True,
-        "mode": "separated_v2",
-        "left_hand_body": LEFT_HAND_BODY,
-        "right_hand_body": right_name,
-        "club_body": club_name,
-        "free_joint": CLUB_FREE_JOINT,
-        "free_coordinates": list(CLUB_FREE_COORDINATES),
-        "identifiability_note": HAND_HAND_IDENTIFIABILITY_NOTE,
-    }
+    _insert_separated_hand_topology(out, left_body, free_joint)
+    _populate_separated_grip_metadata(
+        out,
+        interface,
+        club_name=club_name,
+        right_name=right_name,
+        club_to_right=club_to_right,
+    )
     out["upper_body_sha256"] = canonical_sha256(upper_body_slice(out))
     validate_full_body_v2_spec(out, upper_body_slice(out))
     return out

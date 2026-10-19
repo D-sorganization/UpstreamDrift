@@ -821,3 +821,11 @@ def test_smooth_contact_law_kernel_is_separate_and_c_infinity_at_kinks(
     assert float(smooth_tight.spin_moment_nm) == pytest.approx(
         float(qual.spin_moment_nm), rel=1e-9
     )
+
+
+def test_contact_law_kernel_fits_architecture_budget() -> None:
+    """contact_law_kernel and its helpers fit the 100-line / 8-parameter architecture budget."""
+    import inspect
+
+    lines = inspect.getsourcelines(contact_law_kernel)[0]
+    assert len(lines) <= 100, f"contact_law_kernel has {len(lines)} lines (> 100)"

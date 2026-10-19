@@ -233,3 +233,11 @@ def test_segment_boundary_locations_are_the_pivot_and_the_xiphion() -> None:
         loc.t12l1_in_pelvis_m, pivot + np.array([0.0, 0.0, 0.5 * hub_z]), atol=1e-15
     )
     assert "HRG-D2" in loc.provenance
+
+
+def test_separate_v2_hands_fits_architecture_budget() -> None:
+    """separate_v2_hands fits the 100-line / 8-parameter architecture budget."""
+    import inspect
+
+    lines = inspect.getsourcelines(v2.separate_v2_hands)[0]
+    assert len(lines) <= 100, f"separate_v2_hands has {len(lines)} lines (> 100)"
