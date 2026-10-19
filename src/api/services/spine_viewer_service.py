@@ -162,6 +162,95 @@ def list_spine_assets(env: Mapping[str, str] | None = None) -> list[dict[str, An
     return results
 
 
+def _resolve_study_output_dir(payload: Mapping[str, Any], target_root: Path) -> Path:
+    study_id = payload.get("study_id")
+    if not isinstance(study_id, str) or not study_id.strip():
+        raise ValueError(f"study_id must be a non-empty string: {study_id!r}")
+
+    out_candidate = payload.get("output_dir", study_id)
+    if not isinstance(out_candidate, (str, Path)):
+        raise TypeError("output_dir must be a string or Path")
+    out_path = Path(out_candidate)
+    if "\\" in str(out_path) or "\x00" in str(out_path):
+        raise ValueError("output_dir must use '/' separators and no control bytes")
+    if ".." in out_path.parts:
+        raise ValueError("output_dir must not contain '..' components")
+    resolved_out = (target_root / out_path).resolve()
+    try:
+        resolved_out.relative_to(target_root.resolve())
+    except ValueError as exc:
+        raise ValueError(
+            f"output_dir must be inside study root ({target_root}): {resolved_out}"
+        ) from exc
+    return resolved_out
+
+
+def _resolve_study_model_paths(values: dict[str, Any], target_root: Path) -> None:
+    # Normalize fixture asset_id if selected as asset
+    if values.get("asset_id") == "fixture":
+        values["asset_id"] = None
+        values.setdefault("model_id", "fixture")
+        values.setdefault("pelvis", "fixture")
+
+    if values.get("model_id") == "fixture" and values.get("model_path") is None:
+        fixture_path = target_root / ".fixtures" / "fixture.osim"
+        if not fixture_path.is_file():
+            from src.engines.physics_engines.opensim.python.spine.fixture_model import (
+                FixtureSpec,
+                write_fixture_osim,
+            )
+
+            fixture_path.parent.mkdir(parents=True, exist_ok=True)
+            write_fixture_osim(FixtureSpec(), fixture_path, muscles=True)
+        values["model_path"] = fixture_path
+        values.setdefault("pelvis", "fixture")
+
+    if values.get("model_id") is None and values.get("asset_id"):
+        values["model_id"] = values["asset_id"]
+
+    if values.get("golf_model_path") is None:
+        default_golf = (
+            _PROJECT_ROOT
+            / "src"
+            / "engines"
+            / "physics_engines"
+            / "opensim"
+            / "models"
+            / "golf_humanoid.osim"
+        )
+        if default_golf.is_file():
+            values["golf_model_path"] = default_golf
+
+    # Resolve relative paths against _PROJECT_ROOT
+    for name in ("motion_path", "golf_model_path", "model_path", "external_loads"):
+        val = values.get(name)
+        if val is not None:
+            if not isinstance(val, (str, Path)):
+                raise TypeError(f"{name} must be a string or Path")
+            p = Path(val)
+            values[name] = (
+                (_PROJECT_ROOT / p).resolve() if not p.is_absolute() else p.resolve()
+            )
+
+
+def _validate_study_inputs(request: SpineStudyRequest) -> None:
+    # Precondition: check required input files exist on disk
+    for label, path in (
+        ("motion", request.motion_path),
+        ("golf model", request.golf_model_path),
+        ("segmental model", request.model_path),
+        ("external loads", request.external_loads),
+    ):
+        if path is not None and not path.is_file():
+            raise ValueError(f"{label} file not found: {path.name}")
+
+    if request.asset_id is not None:
+        try:
+            resolve_spine_asset(request.asset_id)
+        except ValueError as exc:
+            raise ValueError(f"unknown spine asset: {exc}") from exc
+
+
 def parse_study_request(
     payload: Mapping[str, Any], root: Path | None = None
 ) -> SpineStudyRequest:
@@ -185,59 +274,18 @@ def parse_study_request(
     if not isinstance(target_root, Path):
         raise TypeError("root must be a Path")
 
-    study_id = payload.get("study_id")
-    if not isinstance(study_id, str) or not study_id.strip():
-        raise ValueError(f"study_id must be a non-empty string: {study_id!r}")
-
-    out_candidate = payload.get("output_dir", study_id)
-    if not isinstance(out_candidate, (str, Path)):
-        raise TypeError("output_dir must be a string or Path")
-    out_path = Path(out_candidate)
-    if "\\" in str(out_path) or "\x00" in str(out_path):
-        raise ValueError("output_dir must use '/' separators and no control bytes")
-    if ".." in out_path.parts:
-        raise ValueError("output_dir must not contain '..' components")
-    resolved_out = (target_root / out_path).resolve()
-    try:
-        resolved_out.relative_to(target_root.resolve())
-    except ValueError as exc:
-        raise ValueError(
-            f"output_dir must be inside study root ({target_root}): {resolved_out}"
-        ) from exc
+    resolved_out = _resolve_study_output_dir(payload, target_root)
 
     values = dict(payload)
     values["output_dir"] = resolved_out
 
-    # Resolve relative paths against _PROJECT_ROOT
-    for name in ("motion_path", "golf_model_path", "model_path", "external_loads"):
-        val = values.get(name)
-        if val is not None:
-            if not isinstance(val, (str, Path)):
-                raise TypeError(f"{name} must be a string or Path")
-            p = Path(val)
-            values[name] = (
-                (_PROJECT_ROOT / p).resolve() if not p.is_absolute() else p.resolve()
-            )
+    _resolve_study_model_paths(values, target_root)
 
     try:
         request = SpineStudyRequest(**values)
     except TypeError as exc:
         raise ValueError(f"invalid request parameters: {exc}") from exc
 
-    # Precondition: check required input files exist on disk
-    for label, path in (
-        ("motion", request.motion_path),
-        ("golf model", request.golf_model_path),
-        ("segmental model", request.model_path),
-        ("external loads", request.external_loads),
-    ):
-        if path is not None and not path.is_file():
-            raise ValueError(f"{label} file not found: {path.name}")
-
-    if request.asset_id is not None:
-        try:
-            resolve_spine_asset(request.asset_id)
-        except ValueError as exc:
-            raise ValueError(f"unknown spine asset: {exc}") from exc
+    _validate_study_inputs(request)
 
     return request
