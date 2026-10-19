@@ -33,7 +33,7 @@ import json
 import math
 import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # construction only
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -45,18 +45,26 @@ from src.engines.physics_engines.opensim.python.full_body_osim import (
     _make_physical_offset_frame,
     _rotation_matrix_to_xyz_euler,
 )
-from src.shared.python.grip_contact import ClubDynamics, GripInterface
+from src.shared.python.grip_contact import (
+    ClubDynamics,
+    ContactTopology,
+    GripInterface,
+    GripStyle,
+    contact_topology,
+)
 from src.shared.python.model_appearance.club_assembly import (
     ClubAssembly,
     assembly_from_spec,
     clubface_centre,
 )
+from src.shared.python.motion_matching.grip_contract import GripSpec
 
 OPENSIM_DIR = Path(__file__).resolve().parents[1]
 MODELS_DIR = OPENSIM_DIR / "models"
 CALIBRATION_PATH = MODELS_DIR / "msk_club_grip_calibration.json"
 REPO_ROOT = Path(__file__).resolve().parents[5]
 SPEC_DIR = REPO_ROOT / "docs" / "development" / "full_body_models"
+MANIFESTS_DIR = REPO_ROOT / "src" / "config" / "grip_bindings"
 CALIBRATION_SCHEMA = "msk-club-grip-calibration-v1"
 
 #: XML element type of the model trees (built here; parsed with defusedxml).
@@ -91,6 +99,34 @@ HAND_GRIP_FRAMES = {"L": "hand_l_grip_offset", "R": "hand_r_grip_offset"}
 #: phalanges at x up to 0.022, scale 0.85); identical for both hands.
 HAND_GRIP_POINT_M = (0.022, -0.085, 0.0)
 _SOCKETS = {"L": "/bodyset/hand_l", "R": "/bodyset/hand_r"}
+DEFAULT_HOLD_SQUEEZE_N = 1100.0
+GRAVITY_M_S2 = (0.0, -9.80665, 0.0)
+
+
+def _coerce_grip_style(grip_style: GripStyle | str) -> GripStyle:
+    """Validate and coerce ``grip_style`` into a :class:`GripStyle`."""
+    if isinstance(grip_style, GripStyle):
+        return grip_style
+    if isinstance(grip_style, str):
+        try:
+            return GripStyle(grip_style)
+        except ValueError as exc:
+            valid = [s.value for s in GripStyle]
+            raise ValueError(
+                f"grip_style must be one of {valid}, got {grip_style!r}"
+            ) from exc
+    raise TypeError(
+        f"grip_style must be GripStyle or str, got {type(grip_style).__name__}"
+    )
+
+
+def _validate_trigger_finger(trigger_finger: bool) -> bool:
+    """Validate that ``trigger_finger`` is a strict ``bool``."""
+    if not isinstance(trigger_finger, bool):
+        raise TypeError(
+            f"trigger_finger must be bool, got {type(trigger_finger).__name__}"
+        )
+    return trigger_finger
 
 
 @dataclass(frozen=True)
@@ -107,6 +143,11 @@ class MskClub:
     grip_points: dict[str, np.ndarray]
     grip_rotation: np.ndarray
     face_centre: np.ndarray
+    grip_style: GripStyle = GripStyle.OVERLAP
+    trigger_finger: bool = False
+    topology: ContactTopology = field(
+        default_factory=lambda: contact_topology(GripSpec(style=GripStyle.OVERLAP))
+    )
 
 
 def spec_path(club: str) -> Path:
@@ -116,7 +157,12 @@ def spec_path(club: str) -> Path:
     return SPEC_DIR / f"full_body_spec_anthro_{club}.json"
 
 
-def msk_club(spec: Mapping[str, Any]) -> MskClub:
+def msk_club(
+    spec: Mapping[str, Any],
+    *,
+    grip_style: GripStyle | str = GripStyle.OVERLAP,
+    trigger_finger: bool = False,
+) -> MskClub:
     """The club of a ``full-body-v1`` spec, for the musculoskeletal models.
 
     Grip points are the GripInterface positions projected onto the shaft axis
@@ -124,29 +170,42 @@ def msk_club(spec: Mapping[str, Any]) -> MskClub:
     Rajagopal hands have their own wrists). Raises ``ValueError`` when the
     spec carries no club.
     """
+    style = _coerce_grip_style(grip_style)
+    trig = _validate_trigger_finger(trigger_finger)
     assembly = assembly_from_spec(spec)
     if assembly is None:
         raise ValueError("spec has no club body with a Grip solid")
     interface = GripInterface.from_spec(spec)
-    points = {
-        side: np.array(
-            [0.0, float(interface.frame(side).position_m[1]), assembly.axis_offset_m]
-        )
-        for side in HAND_BODIES
-    }
+    points: dict[str, np.ndarray] = {}
+    for side in HAND_BODIES:
+        side_frame = interface.frame(side)
+        y_pos = float(side_frame.position_m[1])
+        points[side] = np.array([0.0, y_pos, assembly.axis_offset_m])
+    right_frame = interface.right
+    topo = contact_topology(GripSpec(style=style, trigger_finger=trig))
     return MskClub(
         assembly=assembly,
         dynamics=ClubDynamics.from_spec(spec),
         interface=interface,
         grip_points=points,
-        grip_rotation=np.asarray(interface.right.rotation, dtype=float),
+        grip_rotation=np.asarray(right_frame.rotation, dtype=float),
         face_centre=np.asarray(clubface_centre(assembly), dtype=float),
+        grip_style=style,
+        trigger_finger=trig,
+        topology=topo,
     )
 
 
-def load_msk_club(club: str = "driver") -> MskClub:
+def load_msk_club(
+    club: str = "driver",
+    *,
+    grip_style: GripStyle | str = GripStyle.OVERLAP,
+    trigger_finger: bool = False,
+) -> MskClub:
     """:func:`msk_club` of the committed anthropometric spec of ``club``."""
-    return msk_club(json.loads(spec_path(club).read_text(encoding="utf-8")))
+    spec_file = spec_path(club)
+    spec_doc = json.loads(spec_file.read_text(encoding="utf-8"))
+    return msk_club(spec_doc, grip_style=grip_style, trigger_finger=trigger_finger)
 
 
 # ------------------------------------------------------------- calibration
@@ -410,6 +469,8 @@ def attach_club(
     *,
     grip_model: str = DEFAULT_GRIP_MODEL,
     finish: str = club_visuals.DEFAULT_FINISH,
+    grip_style: GripStyle | str | None = None,
+    trigger_finger: bool | None = None,
 ) -> None:
     """Replace any club on ``model`` by the shared club held in both hands.
 
@@ -419,11 +480,16 @@ def attach_club(
     ``BushingForce``; coordinate defaults are the calibrated address pose so
     the default state is the closed address pose.
     """
+    if grip_style is not None:
+        _coerce_grip_style(grip_style)
+    if trigger_finger is not None:
+        _validate_trigger_finger(trigger_finger)
     if grip_model not in GRIP_MODELS:
         raise ValueError(f"grip_model must be one of {GRIP_MODELS}, got {grip_model!r}")
-    if calibration.club != club.assembly.head_alias:
+    assembly = club.assembly
+    if calibration.club != assembly.head_alias:
         raise ValueError(
-            f"calibration is for {calibration.club!r}, club is {club.assembly.head_alias!r}"
+            f"calibration is for {calibration.club!r}, club is {assembly.head_alias!r}"
         )
     strip_club(model)
     _objects(model, "BodySet").append(_club_body(club, finish))
@@ -482,7 +548,8 @@ def attach_grip_hands(model: ET.Element, club: MskClub) -> int:
     if len(bodies) != 1:
         raise ValueError("model has no Club body; call attach_club first")
     hide_finger_bones(model)
-    return club_visuals.attach_grip_hand_meshes(bodies[0], club.assembly.head_alias, "")
+    assembly = club.assembly
+    return club_visuals.attach_grip_hand_meshes(bodies[0], assembly.head_alias, "")
 
 
 def _default_pose(model: ET.Element) -> dict[str, float]:
@@ -518,8 +585,12 @@ def unlocked_coordinates(model: ET.Element, exclude: Sequence[str] = ()) -> list
     """Coordinates whose ``locked`` flag is not ``true`` (document order)."""
     names = []
     for coord in model.iter("Coordinate"):
-        locked = (coord.findtext("locked") or "false").strip().lower() == "true"
+        flag = coord.findtext("locked") or "false"
+        locked = flag.strip().lower() == "true"
         name = coord.get("name")
         if name and not locked and name not in exclude:
             names.append(name)
     return names
+
+
+# ------------------------------------------- HRG-GS-M4 OpenSim MSK Grip Adapter

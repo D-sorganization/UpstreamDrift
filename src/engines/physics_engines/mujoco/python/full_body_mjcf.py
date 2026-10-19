@@ -126,6 +126,7 @@ def export_full_body_mjcf(
     visual: bool = False,
     appearance: AppearanceDocument | None = None,
     with_head: bool = False,
+    require_grip_binding: bool = False,
 ) -> tuple[str, dict[str, Any]]:
     """Export the full-body specification to MJCF with 41 scalar joints and contact sites.
 
@@ -137,7 +138,21 @@ def export_full_body_mjcf(
     ``with_head`` adds only the visible head and neck to the legacy capsule
     layer (an appearance document already includes them).
     """
+    from src.shared.python.grip_contact.binding_manifest import (
+        build_spec_grip_binding_manifest,
+        has_composed_club_spec,
+    )
+
     spec = json.loads(model_bytes)
+    model_sha = hashlib.sha256(model_bytes).hexdigest()
+    if require_grip_binding:
+        build_spec_grip_binding_manifest(
+            spec,
+            model_id="full_body_v1_spec_export",
+            model_hash=f"sha256:{model_sha}",
+            source="src/engines/physics_engines/mujoco/python/full_body_mjcf.py",
+            consumer="mujoco.full_body_mjcf",
+        )
     schema = require_full_body_schema(spec, consumer="MJCF export")
     if (visual or with_head or appearance is not None) and (
         schema.schema_id != "full-body-v1"
@@ -184,11 +199,19 @@ def export_full_body_mjcf(
         )
 
     xml = ET.tostring(root, encoding="unicode")
-    extra = {} if visual_meta is None else {"visual_layer": visual_meta}
+    extra: dict[str, Any] = {} if visual_meta is None else {"visual_layer": visual_meta}
+    if has_composed_club_spec(spec):
+        extra["grip_binding"] = build_spec_grip_binding_manifest(
+            spec,
+            model_id="full_body_v1_spec_export",
+            model_hash=f"sha256:{model_sha}",
+            source="src/engines/physics_engines/mujoco/python/full_body_mjcf.py",
+            consumer="mujoco.full_body_mjcf",
+        )
     return xml, {
         **extra,
         "representation": "native-full-body-mjcf-v1",
-        "model_sha256": hashlib.sha256(model_bytes).hexdigest(),
+        "model_sha256": model_sha,
         "mjcf_sha256": hashlib.sha256(xml.encode("utf-8")).hexdigest(),
         "coordinate_order": spec["coordinate_order"],
         "frame_sites": frame_sites,

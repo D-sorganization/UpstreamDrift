@@ -1,0 +1,28 @@
+{
+  "schema": "grip-binding/v1",
+  "model_id": "humanoid_character_builder",
+  "model_hash": "sha256:a45d8c7c7168e8c68fa204f758e5a936b1816dfa256901cf3818d4d992ced930",
+  "handedness": "right",
+  "side_roles": {
+    "left": "lead",
+    "right": "trail"
+  },
+  "calibration_pose": {
+    "name": "neutral_address",
+    "description": "Address pose with club aligned and hands placed on grip"
+  },
+  "units": {
+    "length": "m",
+    "angle": "rad"
+  },
+  "provenance": {
+    "source": "src/shared/python/humanoid_character_builder/spec_export.py",
+    "date": "2026-10-18",
+    "method": "spec_export"
+  },
+  "attachment_mode": "contact",
+  "club_body": "club",
+  "lead_hand_body": "hand_l",
+  "trail_hand_body": "hand_r",
+  "unavailable_sites": {}
+}
