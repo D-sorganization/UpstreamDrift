@@ -1,0 +1,28 @@
+{
+  "schema": "grip-binding/v1",
+  "model_id": "golf_humanoid",
+  "model_hash": "sha256:887286497c8142e182ec720b6f161ea9e932e6965bc220ee27f393dc9f93fcbb",
+  "handedness": "right",
+  "side_roles": {
+    "left": "lead",
+    "right": "trail"
+  },
+  "calibration_pose": {
+    "name": "calibrated_address",
+    "description": "Rajagopal golf_humanoid calibrated two-hand address pose (msk_club_grip_calibration.json)"
+  },
+  "units": {
+    "length": "m",
+    "angle": "rad"
+  },
+  "provenance": {
+    "source": "src/engines/physics_engines/opensim/models/golf_humanoid.osim",
+    "date": "2026-10-19",
+    "method": "opensim_msk_club_calibration"
+  },
+  "attachment_mode": "weld",
+  "club_body": "Club",
+  "lead_hand_body": "hand_l",
+  "trail_hand_body": "hand_r",
+  "unavailable_sites": {}
+}

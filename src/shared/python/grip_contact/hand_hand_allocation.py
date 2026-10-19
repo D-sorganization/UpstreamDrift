@@ -39,7 +39,7 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -60,7 +60,9 @@ from src.shared.python.grip_contact.pair_contact import (
 from src.shared.python.motion_matching.full_body_schema import (
     SchemaFeatureUnavailableError,
 )
-from src.shared.python.motion_matching.grip_contract import GripSpec
+
+if TYPE_CHECKING:
+    from src.shared.python.motion_matching.grip_contract import GripSpec
 
 METHOD = "allocation"
 #: Legacy overlay wrench label of the drawn palm-thumb normal force.
@@ -393,16 +395,7 @@ def equal_split_prior(
     topology: ContactTopology | GripSpec | None = None,
 ) -> AllocationPrior:
     """Construct an equal-split allocation prior for a topology's hand-hand pairs."""
-    if topology is None:
-        topo = contact_topology()
-    elif isinstance(topology, GripSpec):
-        topo = contact_topology(topology)
-    elif isinstance(topology, ContactTopology):
-        topo = topology
-    else:
-        raise TypeError(
-            f"topology must be ContactTopology or GripSpec, got {type(topology).__name__}"
-        )
+    topo = _resolve_topology(topology)
     pairs = topo.hand_hand_pairs()
     n_pairs = len(pairs)
     if n_pairs == 0:
@@ -439,10 +432,12 @@ def _resolve_topology(
     """The topology to allocate over (the default spec's when ``None``)."""
     if topology is None:
         return contact_topology()
-    if isinstance(topology, GripSpec):
-        return contact_topology(topology)
     if isinstance(topology, ContactTopology):
         return topology
+    from src.shared.python.motion_matching.grip_contract import GripSpec
+
+    if isinstance(topology, GripSpec):
+        return contact_topology(topology)
     raise TypeError(
         f"topology must be ContactTopology or GripSpec, got {type(topology).__name__}"
     )
