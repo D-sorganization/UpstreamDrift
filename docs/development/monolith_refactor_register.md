@@ -85,8 +85,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1036 | `src/tools/bunker_shot_gui/report.py` |
 | 1034 | `src/shared/python/motion_matching/pipeline/receipt_components.py` |
 | 1032 | `src/launchers/launcher_ui_setup.py` |
+| 1031 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
 | 1027 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
-| 1022 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
 | 1022 | `src/tools/bunker_shot_gui/render3d.py` |
 | 1021 | `src/tools/bunker_shot_gui/slices.py` |
 | 1020 | `src/tools/bunker_shot_gui/render3d_vtk.py` |
