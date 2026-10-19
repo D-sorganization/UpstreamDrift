@@ -1,3 +1,11 @@
+# Project Steward Pass — 2026-10-19
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `staff/project-steward-task-2307c8`; draft PR opened from this branch (`docs(project): steward status 2026-10-19`).
+- Objective: keep `docs/project/CHARTER.md` and `STATUS.md` in step with the deferred-validation catalog.
+- Completed: added seven catalog entries not previously projected (DV-11984, DV-11542, DV-12554, DV-12583, DV-12718, DV-13061, DV-13082) as parked features and progress rows, each with its Board decision and per-prerequisite decisions under Decisions Needed. CHARTER.md's feature count updated from six to fourteen. `python3 -m shared_scripts.deferred_validation --repo-root .` passes. Verified no open PR already covers these catalog IDs.
+- Not done: no Board proposal filed. The seven pre-existing Board-decision-pending items (DV-9546, DV-9613, DV-9619, DV-9700, DV-10375, DV-10382 first recorded 2026-09-23; DV-11408 first recorded 2026-10-04) are now 13-26 days old, past the 14-day proposal-age limit, and architectural — but this worktree has no `Repository_Management` checkout and therefore no `shared_scripts.board_proposals` CLI to dry-run or submit against. `check_agent_claim`/`post_agent_lease` were likewise not runnable from this worktree; lease step fail-open per CLAUDE.md. This is not tied to a single GitHub issue, so no lease was claimed.
+- Next steps: a run with `shared_scripts.board_proposals` available should submit the seven aged items above as Board proposals and link them back from `STATUS.md`.
+
 # GCV-13 Slice 3: Decorative Address Ball in the MuJoCo, OpenSim and MyoSuite Native Export — #11719
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree `UpstreamDrift-wt/g13c`; branch `claude/gcv-13c-native-ball-backends`; PR: not created (committed locally only, by request; the owner reviews and pushes). Stacked on PR #12114 (`claude/gcv-13b-meshcat-ball`, slice 2), itself stacked on #11992 (slice 1).

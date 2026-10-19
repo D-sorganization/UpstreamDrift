@@ -13,6 +13,10 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
+from src.shared.python.grip_contact.binding_manifest import (
+    build_spec_grip_binding_manifest,
+    has_composed_club_spec,
+)
 from src.shared.python.humanoid_character_builder.presets.loader import (
     CharacterPreset,
     list_character_presets,
@@ -41,6 +45,45 @@ class CompiledCharacter:
     document: dict[str, Any]
     sha256: str
     preset_id: str | None
+
+    @property
+    def json_text(self) -> str:
+        """Canonical JSON text of the compiled specification."""
+        return serialize_spec(self.document)
+
+
+def build_grip_binding_manifest(
+    character_or_spec: CompiledCharacter | Mapping[str, Any],
+    *,
+    handedness: str = "right",
+    attachment_mode: str = "contact",
+) -> dict[str, Any]:
+    """Build and validate a ``grip-binding/v1`` manifest for a character or spec.
+
+    Fails closed with :class:`SchemaFeatureUnavailableError` if no club is composed.
+    """
+    if isinstance(character_or_spec, CompiledCharacter):
+        doc: Mapping[str, Any] = character_or_spec.document
+        sha = character_or_spec.sha256
+        model_id = character_or_spec.preset_id or "humanoid_character_builder"
+    elif isinstance(character_or_spec, Mapping):
+        doc = character_or_spec
+        sha = hashlib.sha256(serialize_spec(dict(doc)).encode("utf-8")).hexdigest()
+        model_id = "humanoid_character_builder"
+    else:
+        raise TypeError(
+            "character_or_spec must be CompiledCharacter or Mapping, "
+            f"got {type(character_or_spec).__name__}"
+        )
+    return build_spec_grip_binding_manifest(
+        doc,
+        model_id=model_id,
+        model_hash=f"sha256:{sha}",
+        handedness=handedness,
+        attachment_mode=attachment_mode,
+        source="src/shared/python/humanoid_character_builder/spec_export.py",
+        consumer="humanoid_character_builder.spec_export",
+    )
 
 
 def resolve_parameters(
@@ -74,8 +117,9 @@ def _body_mass(body: Mapping[str, Any]) -> float:
 def build_summary(character: CompiledCharacter) -> dict[str, Any]:
     """Compact description of a compiled character for the build response."""
     doc = character.document
-    return {
-        "parameters": character.parameters.to_dict(),
+    params = character.parameters
+    summary: dict[str, Any] = {
+        "parameters": params.to_dict(),
         "preset": character.preset_id,
         "spec_sha256": character.sha256,
         "schema_version": doc["schema_version"],
@@ -86,14 +130,18 @@ def build_summary(character: CompiledCharacter) -> dict[str, Any]:
         "total_mass_kg": sum(_body_mass(b) for b in doc["bodies"]),
         "club": doc["club"]["name"],
     }
+    if has_composed_club_spec(doc):
+        summary["grip_binding"] = build_grip_binding_manifest(character)
+    return summary
 
 
 def build_preview(character: CompiledCharacter) -> dict[str, Any]:
     """Body masses and joint topology for a lightweight preview panel."""
     doc = character.document
+    params = character.parameters
     return {
         "spec_sha256": character.sha256,
-        "stature_m": character.parameters.stature_m,
+        "stature_m": params.stature_m,
         "bodies": [
             {"name": b["name"], "mass_kg": _body_mass(b)} for b in doc["bodies"]
         ],
@@ -104,11 +152,18 @@ def build_preview(character: CompiledCharacter) -> dict[str, Any]:
     }
 
 
-def export_character(character: CompiledCharacter, fmt: str) -> tuple[str, str, str]:
+def export_character(
+    character: CompiledCharacter,
+    fmt: str,
+    *,
+    require_grip_binding: bool = False,
+) -> tuple[str, str, str]:
     """Return ``(text, media_type, filename)`` for ``fmt`` in ``EXPORT_FORMATS``.
 
     Engine exporters import lazily so listing presets never needs them.
     """
+    if require_grip_binding:
+        build_grip_binding_manifest(character)
     if fmt not in EXPORT_FORMATS:
         raise ValueError(
             f"Unsupported export format {fmt!r}; use {sorted(EXPORT_FORMATS)}"
@@ -268,7 +323,7 @@ def _verify_pinocchio(
             )
 
             pin_model = FullBodyPinocchioModel(doc)
-            pin_frame_poses = pin_model.frame_poses({})
+            pin_frame_poses = pin_model.frame_poses(pin_model.neutral_coordinates())
             for fname, fpose in pin_frame_poses.items():
                 if fname in spec_frame_origins:
                     err = float(
@@ -367,6 +422,7 @@ def verify_cross_engine_l0_parity(
 __all__ = [
     "EXPORT_FORMATS",
     "CompiledCharacter",
+    "build_grip_binding_manifest",
     "build_preview",
     "build_summary",
     "compile_character",

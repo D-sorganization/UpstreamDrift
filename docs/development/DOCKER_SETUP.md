@@ -263,8 +263,9 @@ Every image built from `Dockerfile.modular` carries the label `keep=true`: it
 is set once in the `runtime` stage, so the profile images (`upstream-drift:full`,
 `:biomech`, `:research`, `:slim`) and the explorer stages built on top of them
 all inherit it (compose `labels:` repeats it for the explorer services). The
-host prune jobs (`runner-cleanup --disk-guard` from Runner_Dashboard and the
-host-only `docker-cache-prune`) skip images with that label
+host prune jobs (`runner-cleanup --disk-guard` from Runner_Dashboard and
+`scripts/docker/docker-cache-prune.sh`, installed to `/usr/local/sbin/docker-cache-prune`
+by Runner_Dashboard deploy) skip images with that label
 (`--filter label!=keep`). Before UD #13113 only the explorer stage was
 labelled, and ControlTower's disk guard deleted every profile image (and
 `ud-sim:latest`, which shares the `explorer-headless` stage in

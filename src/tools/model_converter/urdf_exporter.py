@@ -12,8 +12,10 @@ preserving all required invariants:
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only
 
 from defusedxml import minidom
@@ -24,6 +26,9 @@ from tools.model_converter.schema_validator import (
     RootBody,
     Segment,
 )
+
+from src.shared.python.grip_contact.contact_topology import contact_topology
+from src.shared.python.grip_contact.topology_contact import hand_x_origin
 
 logger = logging.getLogger(__name__)
 
@@ -296,14 +301,163 @@ def _add_fixed_joint(
     )
 
 
-def export_urdf(model: CanonicalModel, out_path: Path | None = None) -> str:
+def _add_separate_hand_frames(robot: ET.Element) -> None:
+    """Attach massless ``lead_hand`` and ``trail_hand`` grip frames to ``mid_hands``."""
+    topology = contact_topology()
+    spacing_m = hand_x_origin(topology, "trail") - hand_x_origin(topology, "lead")
+    half_spacing = 0.5 * spacing_m
+    pitch_rad = math.pi / 2.0
+    for hand_name, z_offset in (
+        ("lead_hand", half_spacing),
+        ("trail_hand", -half_spacing),
+    ):
+        hand_link = ET.SubElement(robot, "link")
+        hand_link.set("name", hand_name)
+        _add_fixed_joint(
+            robot,
+            name=f"mid_hands_to_{hand_name}",
+            parent="mid_hands",
+            child=hand_name,
+            origin_xyz=(0.0, 0.0, z_offset),
+            origin_rpy=(0.0, pitch_rad, 0.0),
+        )
+
+
+def build_canonical_grip_binding_manifest(
+    model: CanonicalModel,
+    *,
+    model_id: str = "golfer_canonical",
+    handedness: str = "right",
+    attachment_mode: str = "weld",
+) -> dict[str, object]:
+    """Build and validate a ``grip-binding/v1`` manifest for a canonical golfer model.
+
+    Fails closed with :class:`SchemaFeatureUnavailableError` when ``model`` does
+    not compose ``club_shaft``, ``left_hand``, and ``right_hand`` segments.
+    """
+    import hashlib
+    import json
+    from src.shared.python.core.handedness import validate_handedness
+    from src.shared.python.grip_contact.binding_manifest import (
+        MANIFEST_SCHEMA,
+        fail_closed_grip_binding,
+        validate_manifest,
+    )
+
+    shaft_seg = model.get_segment("club_shaft")
+    left_hand_seg = model.get_segment("hand_left") or model.get_segment("left_hand")
+    right_hand_seg = model.get_segment("hand_right") or model.get_segment("right_hand")
+    if shaft_seg is None or left_hand_seg is None or right_hand_seg is None:
+        fail_closed_grip_binding(
+            "canonical-golfer-v1",
+            consumer="tools.model_converter.urdf_exporter",
+            reason=(
+                "canonical model does not compose club_shaft, left_hand, and "
+                "right_hand segments required for grip-binding/v1"
+            ),
+        )
+
+    hand = validate_handedness(handedness)
+    if hand == "right":
+        side_roles = {"left": "lead", "right": "trail"}
+        lead_body, trail_body = left_hand_seg.name, right_hand_seg.name
+    else:
+        side_roles = {"right": "lead", "left": "trail"}
+        lead_body, trail_body = right_hand_seg.name, left_hand_seg.name
+
+    seg_names = [model.root.name] + [s.name for s in model.segments]
+    digest = hashlib.sha256(
+        json.dumps(seg_names, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    units_map = dict(model.units) if model.units else {"length": "m", "angle": "rad"}
+    raw_len = str(units_map.get("length", "m"))
+    raw_ang = str(units_map.get("angle", "rad"))
+    norm_len = (
+        "m" if raw_len in ("m", "meter", "meters", "metre", "metres") else raw_len
+    )
+    norm_ang = "rad" if raw_ang in ("rad", "radian", "radians") else raw_ang
+    manifest: dict[str, object] = {
+        "schema": MANIFEST_SCHEMA,
+        "model_id": model_id,
+        "model_hash": f"sha256:{digest}",
+        "handedness": hand,
+        "side_roles": side_roles,
+        "calibration_pose": {
+            "name": "neutral_address",
+            "description": "Welded mid_hands-to-club_shaft address frame from golfer_canonical.yaml",
+        },
+        "units": {
+            "length": norm_len,
+            "angle": norm_ang,
+        },
+        "provenance": {
+            "source": "src/engines/physics_engines/pinocchio/models/spec/golfer_canonical.yaml",
+            "date": "2026-04-18",
+            "method": "canonical model converter URDF export",
+        },
+        "attachment_mode": attachment_mode,
+        "club_body": "club_shaft",
+        "lead_hand_body": lead_body,
+        "trail_hand_body": trail_body,
+        "unavailable_sites": {},
+    }
+    validate_manifest(manifest)
+    return manifest
+
+
+def _add_club_links(robot: ET.Element, model: CanonicalModel) -> None:
+    """Weld ``club_shaft`` to ``mid_hands`` and ``club_head`` to the shaft, if present."""
+    # club_shaft link + joint welded to mid_hands
+    shaft_seg = model.get_segment("club_shaft")
+    if shaft_seg:
+        _add_body_link(robot, shaft_seg)
+        _add_fixed_joint(
+            robot,
+            name="mid_hands_to_club_shaft",
+            parent="mid_hands",
+            child=shaft_seg.name,
+            origin_xyz="0.0 0.0 -0.05",
+            origin_rpy="0.0 0.0 0.0",
+        )
+
+    # club_head link + joint welded to club_shaft
+    head_seg = model.get_segment("club_head")
+    if head_seg:
+        _add_body_link(robot, head_seg)
+        _add_fixed_joint(
+            robot,
+            name="club_shaft_to_club_head",
+            parent="club_shaft",
+            child=head_seg.name,
+            origin_xyz=head_seg.origin.xyz,
+            origin_rpy=head_seg.origin.rpy,
+        )
+
+
+def export_urdf(
+    model: CanonicalModel,
+    out_path: Path | None = None,
+    *,
+    hands: Literal["merged", "separate"] = "merged",
+    emit_grip_binding: bool = False,
+    require_grip_binding: bool = False,
+) -> str:
     """Generate URDF XML string from canonical model and optionally save to disk.
 
     Preconditions:
         - model is a valid CanonicalModel instance
+        - hands is ``"merged"`` (default) or ``"separate"``
     Postconditions:
         - Returns valid URDF XML string conforming to schema and physics contracts
     """
+    if hands not in ("merged", "separate"):
+        raise ValueError(f"hands must be 'merged' or 'separate', got {hands!r}")
+    import json
+
+    grip_manifest: dict[str, object] | None = None
+    if require_grip_binding or emit_grip_binding:
+        grip_manifest = build_canonical_grip_binding_manifest(model)
+
     robot = ET.Element("robot")
     robot.set("name", "golfer")
 
@@ -332,31 +486,10 @@ def export_urdf(model: CanonicalModel, out_path: Path | None = None) -> str:
         origin_rpy="0.0 0.0 0.0",
     )
 
-    # club_shaft link + joint welded to mid_hands
-    shaft_seg = model.get_segment("club_shaft")
-    if shaft_seg:
-        _add_body_link(robot, shaft_seg)
-        _add_fixed_joint(
-            robot,
-            name="mid_hands_to_club_shaft",
-            parent="mid_hands",
-            child=shaft_seg.name,
-            origin_xyz="0.0 0.0 -0.05",
-            origin_rpy="0.0 0.0 0.0",
-        )
+    if hands == "separate":
+        _add_separate_hand_frames(robot)
 
-    # club_head link + joint welded to club_shaft
-    head_seg = model.get_segment("club_head")
-    if head_seg:
-        _add_body_link(robot, head_seg)
-        _add_fixed_joint(
-            robot,
-            name="club_shaft_to_club_head",
-            parent="club_shaft",
-            child=head_seg.name,
-            origin_xyz=head_seg.origin.xyz,
-            origin_rpy=head_seg.origin.rpy,
-        )
+    _add_club_links(robot, model)
 
     # Convert to pretty XML string
     raw_xml = ET.tostring(robot, encoding="utf-8")
@@ -374,6 +507,11 @@ def export_urdf(model: CanonicalModel, out_path: Path | None = None) -> str:
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(xml_content, encoding="utf-8")
         logger.info("Wrote canonical URDF to %s", out_path)
+        if emit_grip_binding and grip_manifest is not None:
+            gb_path = out_path.with_name(f"{out_path.stem}.grip_binding.json")
+            gb_path.write_text(
+                json.dumps(grip_manifest, indent=2) + "\n", encoding="utf-8"
+            )
 
     return xml_content
 

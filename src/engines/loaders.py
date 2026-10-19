@@ -284,7 +284,7 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
         def _model_path(root: Path) -> Path:
             return _resolve_engine_path(
                 root,
-                "engines/physics_engines/mujoco/models/simple_pendulum.xml",
+                "engines/physics_engines/mujoco/models/generated/golfer.xml",
             )
 
         return _load_engine_with_probe(
@@ -318,7 +318,7 @@ def load_drake_engine(suite_root: Path) -> PhysicsEngine:
         def _model_path(root: Path) -> Path:
             return _resolve_engine_path(
                 root,
-                "engines/physics_engines/pinocchio/models/generated/golfer.urdf",
+                "engines/physics_engines/drake/models/generated/golfer.urdf",
             )
 
         return _load_engine_with_probe(

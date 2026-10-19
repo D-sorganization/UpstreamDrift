@@ -1,0 +1,33 @@
+{
+  "cause": "UpstreamDrift #12608 (PR #12668): closure Jacobian rank deficiency correction; prior independent_dof=5 came from the club y-sign bug yielding rank-3 closure.",
+  "checkpoint_invalidation": {
+    "applies_to": "Any neural-motion checkpoint or weight tensor trained assuming constrained_upper_body_golfer u_dim=5 or the rank-3 closure manifold.",
+    "follow_up": "Schedule NM-01 retrain with u_dim=6 after owner accepts compute.",
+    "retrain_required": true,
+    "status": "INVALIDATED"
+  },
+  "content_digest": "be51cf298d8f5359a8a2943f575f3e0ff0ad05b755ce88ab2c27026f41d4dd53",
+  "corrected_checkpoint_layout": "from_identity:q=8,nu=6,nc=4",
+  "corrected_independent_dof": 6,
+  "corrected_q_dim": 8,
+  "effective_date": "2026-10-19",
+  "governing_issue": 12670,
+  "model_id": "constrained_upper_body_golfer",
+  "owner_ruling": "dated_addendum_supersedes_dof_count_option_a",
+  "schema": "neural-sealed-record-addendum/1.0.0",
+  "sealed_records_unchanged": true,
+  "supersedes_documentation": [
+    {
+      "artifact": "nm01_model_roster.json",
+      "field": "entries[constrained_upper_body_golfer].independent_dof",
+      "sealed_value": 5
+    },
+    {
+      "artifact": "checkpoint_matrix.md",
+      "field": "line 18 independent DOF prose",
+      "sealed_value": 5
+    }
+  ],
+  "supersedes_matrix_digest": "a73d0303e16aec98b68cd0bbd69fe2b0fe337474ea0b37ca3830e9a8b6e93b72",
+  "supersedes_roster_content_digest": "1451cfb6cdcd1d8a7e951ec7fa5296f2cc5ee286904a7bb5c062dbb14ad59c6c"
+}

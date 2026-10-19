@@ -39,6 +39,10 @@ from typing import Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from src.shared.python.grip_contact.interface import GripInterface
+from src.shared.python.grip_contact.topology_contact import (
+    HAND_HAND_IDENTIFIABILITY_NOTE,
+)
 from src.shared.python.motion_matching.full_body_schema import (
     FullBodySchema,
     TrunkJointDefinition,
@@ -49,6 +53,7 @@ from src.shared.python.motion_matching.full_body_spec import (
     V1_TRUNK,
     JointSpec,
     canonical_sha256,
+    order_directed_tree,
     upper_body_slice,
     validate_full_body_structure,
     validate_upper_body_identity,
@@ -57,15 +62,19 @@ from src.shared.python.motion_matching.full_body_spec import (
 Array = NDArray[np.float64]
 
 __all__ = [
+    "CLUB_FREE_COORDINATES",
+    "CLUB_FREE_JOINT",
     "FULL_BODY_SCHEMA",
     "FULL_BODY_V2_SCHEMA_VERSION",
     "HARD_RANGE_POLICY",
+    "LEFT_HAND_BODY",
     "LUMBAR_BODY",
     "V2_TRUNK",
     "V2_UPPER_BODY_SCHEMA_VERSION",
     "TrunkJointLocations",
     "derive_full_body_v2_spec",
     "segment_boundary_locations",
+    "separate_v2_hands",
     "trunk_bodies",
     "v2_coordinate_order",
     "v2_trunk_ranges_deg",
@@ -77,6 +86,19 @@ V2_UPPER_BODY_SCHEMA_VERSION = "full-body-v2-upper"
 LUMBAR_BODY = "trunk_lumbar"
 LUMBAR_SOLID = "middle_trunk"
 THORAX_SOLID = "upper_trunk"
+LEFT_HAND_BODY = "solid_reference:GolfSwing3D_Kinetic/Grip/LHandBody"
+CLUB_FREE_JOINT = "GolfSwing3D_Kinetic/Grip/ClubFreeJoint"
+CLUB_FREE_COORDINATES = (
+    "ClubFreeRx",
+    "ClubFreeRy",
+    "ClubFreeRz",
+    "ClubFreePx",
+    "ClubFreePy",
+    "ClubFreePz",
+)
+_FREE_PRIMITIVES = ("Rx", "Ry", "Rz", "Px", "Py", "Pz")
+_LEFT_HAND_SOLIDS = ("LHand", "LHandStandoff")
+_RIGHT_HAND_SOLIDS = ("RHand",)
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _REGIONAL_PRIMITIVES = ("Ry", "Rx", "Rz")
 _ISB_ORDER = ("flexion_extension", "lateral_bending", "axial_rotation")
@@ -224,10 +246,22 @@ def _joint_pose_at_zero(joint: Mapping[str, Any]) -> Array:
 
 
 def _pelvis(spec: Mapping[str, Any]) -> str:
-    roots = [j["child"] for j in spec["joints"] if j["parent"] == "world"]
+    roots = [
+        j["child"]
+        for j in spec["joints"]
+        if j["parent"] == "world" and j["name"] != CLUB_FREE_JOINT
+    ]
     if len(roots) != 1:
         raise ValueError(f"Expected one world root joint, found {len(roots)}")
     return roots[0]
+
+
+def _neutral_body_poses(spec: Mapping[str, Any]) -> dict[str, Array]:
+    """World 4x4 poses of all bodies in ``spec`` at q = 0."""
+    poses: dict[str, Array] = {"world": np.eye(4)}
+    for joint in order_directed_tree(spec["joints"]):
+        poses[joint["child"]] = poses[joint["parent"]] @ _joint_pose_at_zero(joint)
+    return poses
 
 
 def trunk_bodies(spec: Mapping[str, Any]) -> dict[str, str]:
@@ -420,17 +454,161 @@ def _trunk_record(
     }
 
 
+def _move_hand_solids(
+    club_body: dict[str, Any],
+    target_body: dict[str, Any],
+    suffixes: tuple[str, ...],
+    club_to_target: Array,
+) -> None:
+    """Move solids with short names in ``suffixes`` from ``club_body`` to ``target_body``."""
+    keep: list[dict[str, Any]] = []
+    moved: list[dict[str, Any]] = []
+    for solid in club_body["solids"]:
+        short = solid["name"].rsplit("/", 1)[-1]
+        (moved if short in suffixes else keep).append(dict(solid))
+    if {s["name"].rsplit("/", 1)[-1] for s in moved} != set(suffixes):
+        raise ValueError(f"club body lacks hand solids {suffixes}")
+    for solid in moved:
+        solid["placement"] = (
+            club_to_target @ np.asarray(solid["placement"], dtype=float)
+        ).tolist()
+    club_body["solids"] = keep
+    target_body.setdefault("solids", []).extend(moved)
+
+
+def _splice_v2_separated_elements(
+    out: dict[str, Any], left_body: dict[str, Any], free_joint: dict[str, Any]
+) -> None:
+    """Insert left_body, free_joint, and free coordinates into upper-body slices."""
+    counts = dict(out["upper_body_counts"])
+    n_bodies = int(counts["bodies"])
+    n_joints = int(counts["joints"])
+    n_coords = int(counts["coordinates"])
+    out["bodies"] = [
+        *out["bodies"][:n_bodies],
+        left_body,
+        *out["bodies"][n_bodies:],
+    ]
+    out["joints"] = [
+        *out["joints"][:n_joints],
+        free_joint,
+        *out["joints"][n_joints:],
+    ]
+    out["coordinate_order"] = [
+        *out["coordinate_order"][:n_coords],
+        *CLUB_FREE_COORDINATES,
+        *out["coordinate_order"][n_coords:],
+    ]
+    counts["bodies"] = n_bodies + 1
+    counts["joints"] = n_joints + 1
+    counts["coordinates"] = n_coords + len(CLUB_FREE_COORDINATES)
+    out["upper_body_counts"] = counts
+    out["passive_coordinates"] = list(CLUB_FREE_COORDINATES)
+
+
+def separate_v2_hands(v2_spec: Mapping[str, Any]) -> dict[str, Any]:
+    """Separate ``LHandBody`` and ``RHandStandoff`` from the bare club in a ``full-body-v2`` document.
+
+    Opt-in topology transform for HRG-GS-G11 (#13309):
+    - ``LHand`` and ``LHandStandoff`` solids move onto ``LEFT_HAND_BODY`` (child of
+      the left wrist joint, keeping ``child_to_follower`` so the body frame coincides
+      with the original club frame on the left-wrist chain).
+    - ``RHand`` solid moves onto ``RHandStandoff`` (child of the right wrist joint)
+      via ``placement_a @ inv(placement_b)``.
+    - The bare club body (``closure["body_b"]``) is rooted at ``"world"`` through
+      the 6-DOF ``CLUB_FREE_JOINT`` with neutral ``parent_to_base`` equal to its
+      welded neutral world pose, so all body, solid, and frame neutral poses match.
+    - Populates ``grip_bushing`` and ``hand_separation`` metadata (including the
+      marker-unobservability identifiability note).
+    """
+    require_full_body_schema(
+        v2_spec, consumer="separate_v2_hands", accepted=(FULL_BODY_V2_SCHEMA_VERSION,)
+    )
+    if v2_spec.get("hand_separation", {}).get("enabled"):
+        raise ValueError("v2 document already has separated hands")
+    out = json.loads(json.dumps(v2_spec))
+    neutral_poses = _neutral_body_poses(out)
+    interface = GripInterface.from_spec(out)
+    closure = out["closure"]
+    club_name, right_name = closure["body_b"], closure["body_a"]
+    club_world = neutral_poses[club_name]
+
+    joints_to_club = [j for j in out["joints"] if j["child"] == club_name]
+    if len(joints_to_club) != 1:
+        raise ValueError("expected exactly one joint parenting the club")
+    left_joint = joints_to_club[0]
+    pa = np.asarray(closure["placement_a"], dtype=float)
+    pb = np.asarray(closure["placement_b"], dtype=float)
+    club_to_right = pa @ np.linalg.inv(pb)
+
+    bodies_by_name = {b["name"]: b for b in out["bodies"]}
+    club_body = bodies_by_name[club_name]
+    right_body = bodies_by_name[right_name]
+    left_body: dict[str, Any] = {"name": LEFT_HAND_BODY, "solids": []}
+    _move_hand_solids(club_body, left_body, _LEFT_HAND_SOLIDS, np.eye(4))
+    _move_hand_solids(club_body, right_body, _RIGHT_HAND_SOLIDS, club_to_right)
+
+    left_joint["child"] = LEFT_HAND_BODY
+    free_joint = JointSpec(
+        CLUB_FREE_JOINT,
+        "world",
+        club_name,
+        club_world.tolist(),
+        np.eye(4).tolist(),
+        _FREE_PRIMITIVES,
+        CLUB_FREE_COORDINATES,
+    ).as_document()
+
+    for frame in out["frames"]:
+        if frame["body"] == club_name and frame["name"] == "Grip_LeftHand":
+            frame["body"] = LEFT_HAND_BODY
+
+    _splice_v2_separated_elements(out, left_body, free_joint)
+
+    g_left, g_right = interface.left.matrix(), interface.right.matrix()
+    out["grip_bushing"] = {
+        "L": {
+            "hand_body": LEFT_HAND_BODY,
+            "hand_frame": g_left.tolist(),
+            "club_body": club_name,
+            "club_frame": g_left.tolist(),
+        },
+        "R": {
+            "hand_body": right_name,
+            "hand_frame": (club_to_right @ g_right).tolist(),
+            "club_body": club_name,
+            "club_frame": g_right.tolist(),
+        },
+    }
+    out["hand_separation"] = {
+        "enabled": True,
+        "mode": "separated_v2",
+        "left_hand_body": LEFT_HAND_BODY,
+        "right_hand_body": right_name,
+        "club_body": club_name,
+        "free_joint": CLUB_FREE_JOINT,
+        "free_coordinates": list(CLUB_FREE_COORDINATES),
+        "identifiability_note": HAND_HAND_IDENTIFIABILITY_NOTE,
+    }
+    out["upper_body_sha256"] = canonical_sha256(upper_body_slice(out))
+    validate_full_body_v2_spec(out, upper_body_slice(out))
+    return out
+
+
 def derive_full_body_v2_spec(
     v1: Mapping[str, Any],
     locations: TrunkJointLocations,
     *,
     provenance: str,
+    separate_hands: bool = False,
 ) -> dict[str, Any]:
     """Derive a NEW ``full-body-v2`` document from a v1 anthropometric document.
 
     ``v1`` is validated against its own upper-body slice and never modified;
     its identity is recorded as ``source_spec_sha256``. Every retained body,
-    solid and frame keeps its neutral (q = 0) world pose.
+    solid and frame keeps its neutral (q = 0) world pose. When ``separate_hands``
+    is ``True`` (explicit opt-in, default ``False``), :func:`separate_v2_hands`
+    separates ``LHandBody`` and ``RHandStandoff`` from the bare club body.
 
     Raises ``ValueError`` for a non-v1 document, a native spec without the de
     Leva trunk solids, a referenced dummy body or empty provenance, and
@@ -483,6 +661,8 @@ def derive_full_body_v2_spec(
     }
     document["upper_body_sha256"] = canonical_sha256(upper_body_slice(document))
     validate_full_body_v2_spec(document, upper_body_slice(document))
+    if separate_hands:
+        return separate_v2_hands(document)
     return document
 
 

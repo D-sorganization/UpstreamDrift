@@ -13,8 +13,44 @@ real OpenSim 4.6 and the Rajagopal model. For each barbell lift it holds:
   the pelvis residuals with the Hicks et al. (2015) gate, peak joint moments
   and the bundle SHA-256.
 
-Only the back squat has a bundle. The other four lifts are recorded
-`unavailable` with the reason, never as zero.
+Under OSL-3 (#13041), all five barbell lifts have registered LIFT-4 barbell
+bundles in `SAME_INPUT_LIFT_BUNDLES` and complete OpenSim IK and ID receipts.
+No lift is recorded as `unavailable`.
+
+## All Five Barbell Lifts Complete (OSL-3, #13041)
+
+The table below summarizes the measured IK and ID metrics across all five
+barbell lifts from `receipts.json` (41 frames, stride 5):
+
+| Lift | Bundle SHA-256 | Marker RMS / Max (m) | Best Practice | Reach Miss L / R | Max Range Overshoot (rad) | Pelvis Residual Force (N, vs Hicks) | Pelvis Residual Moment (Nm, vs Hicks) | Hicks Gate |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Squat** | `f2fab146...` | 0.0193 / 0.0355 | Pass | 3.81 / 5.69 cm | 8.0e-4 (`arm_flex/rot`, `elbow`, `pro_sup`) | 25.21 (vs 146.59) | 17.43 (vs 18.49) | **Pass** |
+| **Deadlift** | `a8483a37...` | 0.0112 / 0.0390 | Pass | 7.11 / 6.91 µm | 6.5e-4 (`pro_sup_l/r`) | 288.23 (vs 110.92) | 147.88 (vs 18.28) | Fail (xfail) |
+| **Bench Press** | `f700f098...` | 0.0160 / 0.0554 | Fail (bar max) | 12.5 µm / 6.37 mm | 2.1e-3 (`pro_sup_l/r`, `elbow_flex_r`) | 511.26 (vs 32.49) | 318.13 (vs 3.45) | Fail (xfail) |
+| **Snatch** | `24c7e8e4...` | 0.0089 / 0.0579 | Fail (bar max) | 7.68 / 7.57 µm | 3.8e-4 (`pro_sup_l/r`) | 463.57 (vs 155.12) | 202.60 (vs 27.10) | Fail (xfail) |
+| **Clean & Jerk** | `0b5221ff...` | 0.0198 / 0.1612 | Fail (bar max) | 6.43 / 6.02 µm | 2.3e-3 (`pro_sup_l/r`) | 458.52 (vs 223.10) | 259.03 (vs 38.77) | Fail (xfail) |
+
+### Key Findings and Gate Status
+
+1. **Static-Hold Equilibrium:** Across all five lifts, the contact ground
+   reaction equals $(m_{\mathrm{body}} + m_{\mathrm{bar}} + m_{\mathrm{bench}}) \times g$
+   to relative precision $< 3\times 10^{-13}$ (80 kg lifter, 120 kg bar;
+   plus bench 846.8 N for bench press).
+2. **Kinematic Marker Tracking:** Deadlift and back squat pass the best-practice
+   marker tracking gate (RMS $\le 0.02$\,m, max $\le 0.04$\,m). Snatch has low RMS
+   (0.0089\,m) but exceeds the max gate on the bar marker (0.0579\,m). Clean and
+   jerk similarly has low RMS (0.0198\,m) with bar marker max 0.1612\,m.
+   Bench press achieves low marker RMS (0.0160\,m) below the 0.02\,m threshold,
+   exceeding the max gate on the bar marker (0.0554\,m vs 0.04\,m).
+3. **Arm Reach to the Bar:** Deadlift, snatch, and clean-and-jerk hands reach the
+   bundle bar within micrometres ($< 10$\,µm), well within the 1.0\,mm threshold.
+   Bench press reaches within 12.5\,µm (left) and 6.37\,mm (right) via flexed
+   elbow arm seeds. Back squat exhibits the known OSL-19 posterior shoulder
+   workspace bottleneck (3.81 / 5.69\,cm).
+4. **Hicks Residual Gate:** The back squat satisfies the Hicks criteria (forces
+   and moments within thresholds on all 41 states). The other four lifts exceed
+   the thresholds. These failures are strictly xfailed with measured numbers;
+   thresholds are not loosened.
 
 OSL-12 changes the following:
 

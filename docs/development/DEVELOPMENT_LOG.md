@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12985 · Align Default Engine Models to Canonical Golfer and Raise KeyError on Unknown Body in Compute_Jacobian
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12985
+- **Branch:** orch/12985-agy
+- **PR:** #13312
+- **Paths:** see #13312
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`23dbe141`; collated from changes/12985-align-default-engine-models-to-canonical.md)
+- **Summary:** Align default engine models to canonical golfer and raise KeyError on unknown body in compute_jacobian
+- **Next step:** Review and merge PR
+
 ### DL-#12990 · Standardize Get_Joint_Names Across Physics Engines to Match Generalized Velocity Dimensions (Nv) With Per-DOF Expansion for Multi-DOF Joints
 
 - **State:** in_review
@@ -2652,6 +2665,188 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13045 · Kinetics Parity for All Registered Lifts
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13045
+- **Branch:** merged via #13443
+- **PR:** #13443
+- **Paths:** see #13443
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`dcd7e47e`; collated from changes/13045-kinetics-parity-for-all-registered-lifts.md)
+- **Summary:** kinetics parity for all registered lifts
+- **Next step:** Shipped in PR #13443.
+
+### DL-#13423 · Declare Websockets for Realtime Python Backend and Document Qualisys C3D/TRC Export Path in formats.md
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13423
+- **Branch:** merged via #13441
+- **PR:** #13441
+- **Paths:** see #13441
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`bf993892`; collated from changes/13423-declare-websockets-for-realtime-python-b.md)
+- **Summary:** Declare websockets for realtime Python backend and document Qualisys C3D/TRC export path in formats.md
+- **Next step:** Shipped in PR #13441.
+
+### DL-#13421 · Retrofit Drake Golfer Joint Actuators When URDF Omits Transmissions; Fail Closed on Unwired Torque (#13421).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13421
+- **Branch:** merged via #13435
+- **PR:** #13435
+- **Paths:** see #13435
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`9f93fa1e`; collated from changes/13421-retrofit-drake-golfer-joint-actuators-wh.md)
+- **Summary:** Retrofit Drake golfer joint actuators when URDF omits transmissions; fail closed on unwired torque (#13421).
+- **Next step:** Shipped in PR #13435.
+
+### DL-#13304 · Pinocchio Grip-Contact Adapter From Shared Topology (HRG-GS-G6)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13304
+- **Branch:** merged via #13414
+- **PR:** #13414
+- **Paths:** see #13414
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`d7005811`; collated from changes/13304-pinocchio-grip-contact-adapter.md)
+- **Summary:** Pinocchio grip-contact adapter from shared topology (HRG-GS-G6)
+- **Next step:** Shipped in PR #13414.
+
+### DL-#12941 · Repo-Manage Docker-Cache-Prune Host Script With Keep-Label Spare and Contract Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12941
+- **Branch:** merged via #13424
+- **PR:** #13424
+- **Paths:** see #13424
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`c49b57a6`; collated from changes/12941-repo-manage-docker-cache-prune-host-scri.md)
+- **Summary:** Repo-manage docker-cache-prune host script with keep-label spare and contract tests
+- **Next step:** Shipped in PR #13424.
+
+### DL-#12940 · Resolve Tools Gitlink for Docker Explorer on WSL Windows Worktrees
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12940
+- **Branch:** merged via #13424
+- **PR:** #13424
+- **Paths:** see #13424
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`c49b57a6`; collated from changes/12940-resolve-tools-gitlink-for-docker-explore.md)
+- **Summary:** Resolve Tools gitlink for Docker explorer on WSL Windows worktrees
+- **Next step:** Shipped in PR #13424.
+
+### DL-#12938 · Gate Compose Training Service Behind Profile; Pin PyTorch Cu128 Wheels for Training Stage
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12938
+- **Branch:** merged via #13424
+- **PR:** #13424
+- **Paths:** see #13424
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`c49b57a6`; collated from changes/12938-gate-compose-training-service-behind-pro.md)
+- **Summary:** Gate compose training service behind profile; pin PyTorch cu128 wheels for training stage
+- **Next step:** Shipped in PR #13424.
+
+### DL-#13416 · Fix Three Drake Continuous-Torque Tests That Failed With Pydrake Installed: Hide Every Cached Pydrake Module and Size the Live Theta via _Resolve_N_Actuators
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13416
+- **Branch:** merged via #13418
+- **PR:** #13418
+- **Paths:** see #13418
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`648fd33e`; collated from changes/13416-fix-three-drake-continuous-torque-tests.md)
+- **Summary:** Fix three Drake continuous-torque tests that failed with pydrake installed: hide every cached pydrake module and size the live theta via _resolve_n_actuators
+- **Next step:** Shipped in PR #13418.
+
+### DL-#13208 · Add Scripts/Ci/shared_buildkit.py: Idempotent, Flock-Serialised Manager for One Persistent GC-Bounded BuildKit Builder per Host (Create/Upgrade/Repair, Cold-Build Fallback)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13208
+- **Branch:** merged via #13277
+- **PR:** #13277, #13430
+- **Paths:** see #13277
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`dbbc5eb4`; collated from changes/13208-docker-ci-builds-on-the-host-s-shared-ud.md)
+- **Summary:** Add scripts/ci/shared_buildkit.py: idempotent, flock-serialised manager for one persistent GC-bounded BuildKit builder per host (create/upgrade/repair, cold-build fallback)
+- **Next step:** Shipped in PR #13277.
+
+### DL-#13044 · Predictive Moco Simulation of Deadlift Lift (OSL-7)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13044
+- **Branch:** merged via #13406
+- **PR:** #13406
+- **Paths:** see #13406
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`54a19254`; collated from changes/13044-predictive-moco-simulation-of-deadlift-l.md)
+- **Summary:** Predictive Moco simulation of deadlift lift (OSL-7)
+- **Next step:** Shipped in PR #13406.
+
+### DL-#13392 · Fix(Pinocchio): CMB-11 Parity Evaluates the Full Neutral Coordinate Set
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13392
+- **Branch:** merged via #13397
+- **PR:** #13397
+- **Paths:** see #13397
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`7da2a46d`; collated from changes/13392-fix-pinocchio-cmb-11-parity-evaluates-th.md)
+- **Summary:** fix(pinocchio): CMB-11 parity evaluates the full neutral coordinate set
+- **Next step:** Shipped in PR #13397.
+
+### DL-#13303 · Named Grip Presets: Palmer Overlap, Woods Interlock, Ten-Finger With Photo_Estimate Provenance (HRG-GS-G5)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13303
+- **Branch:** merged via #13343
+- **PR:** #13343
+- **Paths:** see #13343
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`fc49cd6e`; collated from changes/13303-named-grip-presets-palmer-overlap-woods.md)
+- **Summary:** Named grip presets: Palmer overlap, Woods interlock, ten-finger with photo_estimate provenance (HRG-GS-G5)
+- **Next step:** Shipped in PR #13343.
+
+### DL-#13260 · Add Run Study Panel and Worker Across PyQt and React Spine Viewers
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13260
+- **Branch:** merged via #13279
+- **PR:** #13279
+- **Paths:** see #13279
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`38eebd22`; collated from changes/13260-add-run-study-panel-and-worker-across-py.md)
+- **Summary:** Add Run Study panel and worker across PyQt and React spine viewers
+- **Next step:** Shipped in PR #13279.
+
+### DL-#13302 · Drive Finger Pose From Contact Topology With Per-Hand Roll, Absorbing #13166
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13302
+- **Branch:** merged via #13338
+- **PR:** #13338
+- **Paths:** see #13338
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`366e8614`; collated from changes/13302-drive-finger-pose-from-contact-topology.md)
+- **Summary:** Drive finger pose from contact topology with per-hand roll, absorbing #13166
+- **Next step:** Shipped in PR #13338.
+
 ### DL-#13391 · Drop the Removed Simulator.Set_Publish_Every_Time_Step Call From Drake Simulate and Fit_Swing_Autodiff; Drake Already Defaults to No Per-Step Publish
 
 - **State:** shipped
@@ -3009,10 +3204,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13042
 - **Branch:** merged via #13288
-- **PR:** #13288
+- **PR:** #13288, #13419
 - **Paths:** see #13288
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`e16d848e`; collated from changes/13042-compute-muscle-forces-and-activations-fo.md)
+- **Last verified:** 2026-10-19 (`d1880753`; collated from changes/13042-record-osl-4-muscle-forces-activations-a.md)
 - **Summary:** Compute muscle forces and activations for barbell squat (OSL-4)
 - **Next step:** Shipped in PR #13288.
 
@@ -3594,10 +3789,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13041
 - **Branch:** merged via #13047
-- **PR:** #13047
+- **PR:** #13047, #13404, #13431
 - **Paths:** see #13047
 - **Started:** 2026-10-18
-- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/13041-osl-3-opensim-ik-and-inverse-dynamics-of.md)
+- **Last verified:** 2026-10-19 (`9866f8c1`; collated from changes/13041-bench-press-supine-opensim-ik-id-with-be.md)
 - **Summary:** Lift body and every derived lift input (squat on the OSL-17 rack, deadlift, clean, snatch, bench) regenerated on the whole-row de Leva table (#13037) with main's tibial torsion; regression-snapshot IK bounds re-derived; bundle builder picks RK4-stable substeps (deadlift 8 -> 16, parity xfail removed); follow-ups OSL-18 #13157 (foot torsion marker gate, strict xfail), OSL-19 #13158 (arm reach), OSL-20 #13159 (open-loop wrist mode)
 - **Next step:** Shipped in PR #13047.
 
@@ -3958,10 +4153,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12789
 - **Branch:** merged via #12814
-- **PR:** #12814
+- **PR:** #12814, #13436
 - **Paths:** see #12814
 - **Started:** 2026-10-17
-- **Last verified:** 2026-10-17 (`72a4f96c`; collated from changes/12789-static-10-deg-external-tibial-torsion-of.md)
+- **Last verified:** 2026-10-19 (`148e34f5`; collated from changes/12789-lock-baseline-receipt-provenance-to-tibi.md)
 - **Summary:** Static 10 deg external tibial-torsion offset in the shared full-body spec (ankle base frames, cited Seber 2000 range); 7-iron trail toe-out reaches 19.97 deg with hip_rotation_r off its limit; the four canonical ground-support receipts are regenerated on the default style feet (calibrated 7-iron dynamics 64.35 mm, G3 passes)
 - **Next step:** Shipped in PR #12814.
 
@@ -5011,10 +5206,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12761
 - **Branch:** merged via #12796
-- **PR:** #12796, #12958
+- **PR:** #12796, #12958, #13429
 - **Paths:** see #12796
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-17 (`aa63c0da`; collated from changes/12761-opt-in-muscle-model-policy-and-unlock-dr.md)
+- **Last verified:** 2026-10-19 (`9969c0aa`; collated from changes/12761-record-native-bruno-capture-a-runs-pelvi.md)
 - **Summary:** SPN-10b: trunk static optimisation with cost exponent p in {2,3}, lexicographic reserves with flagging, shared numeric core with the leg SO, per-coordinate ID accessor
 - **Next step:** Shipped in PR #12796.
 
@@ -5622,10 +5817,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12670
 - **Branch:** merged via #12834
-- **PR:** #12834
+- **PR:** #12834, #13440
 - **Paths:** see #12834
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`bf347e0e`; collated from changes/12670-golfer-generator-adapter-derives-coordin.md)
+- **Last verified:** 2026-10-19 (`42f2f673`; collated from changes/12670-add-dated-nm-addendum-superseding-sealed.md)
 - **Summary:** Golfer generator adapter derives coordinate and control widths from the TB-00 registry (u_dim=6) instead of a literal 5, and rejects a sealed u_dim that disagrees; sealed NM-01/NM-09 records untouched pending owner decision
 - **Next step:** Shipped in PR #12834.
 

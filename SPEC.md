@@ -2741,6 +2741,26 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-19 | #13443 | kinetics parity for all registered lifts |
+| 2026-10-19 | #13312 | Align default engine models to canonical golfer and raise KeyError on unknown body in compute_jacobian |
+| 2026-10-19 | #13441 | Declare websockets for realtime Python backend and document Qualisys C3D/TRC export path in formats.md |
+| 2026-10-19 | #13440 | Add dated NM addendum superseding sealed golfer u_dim=5 records after #12608 |
+| 2026-10-19 | #13435 | Retrofit Drake golfer joint actuators when URDF omits transmissions; fail closed on unwired torque (#13421). |
+| 2026-10-19 | #13436 | Lock baseline receipt provenance to tibial-torsion anthropometry (#12789 closure). |
+| 2026-10-19 | #13414 | Pinocchio grip-contact adapter from shared topology (HRG-GS-G6) |
+| 2026-10-19 | #13430 | Docker CI builds on the host's shared ud-buildkit builder (one layer cache per host); per-runner local cache import/export removed, cold throwaway-builder fallback |
+| 2026-10-19 | #13431 | Bench press supine OpenSim IK/ID with bench contact support |
+| 2026-10-19 | #13429 | Record native Bruno capture-A runs: pelvis residuals (SPN-9c), static-optimisation reserve shares at address/top/impact for p=2 and p=3 (SPN-10b), and the fail-closed empty distribution-sensitivity result (SPN-14a); address reserve anomaly filed as #13427 |
+| 2026-10-19 | #13419 | Record OSL-4 muscle forces, activations, and residual status across barbell lifts |
+| 2026-10-19 | #13424 | Gate compose training service behind profile; pin PyTorch cu128 wheels for training stage; Resolve Tools gitlink for Docker explorer on WSL Windows worktrees; Repo-manage docker-cache-prune host script with keep-label spare and contract tests |
+| 2026-10-19 | #13418 | Fix three Drake continuous-torque tests that failed with pydrake installed: hide every cached pydrake module and size the live theta via _resolve_n_actuators |
+| 2026-10-19 | #13277 | Add scripts/ci/shared_buildkit.py: idempotent, flock-serialised manager for one persistent GC-bounded BuildKit builder per host (create/upgrade/repair, cold-build fallback) |
+| 2026-10-19 | #13406 | Predictive Moco simulation of deadlift lift (OSL-7) |
+| 2026-10-19 | #13397 | fix(pinocchio): CMB-11 parity evaluates the full neutral coordinate set |
+| 2026-10-19 | #13343 | Named grip presets: Palmer overlap, Woods interlock, ten-finger with photo_estimate provenance (HRG-GS-G5) |
+| 2026-10-19 | #13279 | Add Run Study panel and worker across PyQt and React spine viewers |
+| 2026-10-19 | #13404 | add barbell bundles and OpenSim IK/ID receipts for remaining lifts |
+| 2026-10-19 | #13338 | Drive finger pose from contact topology with per-hand roll, absorbing #13166 |
 | 2026-10-19 | #13395 | Drop the removed Simulator.set_publish_every_time_step call from Drake simulate and fit_swing_autodiff; Drake already defaults to no per-step publish |
 | 2026-10-19 | #13394 | Move the MOSAIC analytic-vs-finite-difference wall-clock speedup claim to the benchmark lane; unit lane asserts it deterministically via an injected clock and regressor-evaluation counts |
 | 2026-10-19 | #13345 | Defer heavy route and backend imports so Sidekick API is ready in <15s; theme imports resolve via launcher_compat; Document ud-sim:latest compose source of truth and enforce ct-run contract in CI; Return dataset_id, name, rows, columns from generate; add export stream route; pipeline: wire ground-support CLI neural flags through MotionMatchingController and record neural disposition on receipts; Enforce OpenCap learned augmenter sidecar execution, fail-closed checks, and correct synthetic/model-conditioned provenance labeling; Enforce workspace, forbidden zone, Cartesian velocity, and contact force limits in SafetyMonitor; Fix CentroidalMPC contact count and mass from model; Align engine capability flags and interfaces across registered physics engines; fix(mujoco): eliminate phantom world-fused contact on double-pendulum fixture (#12989); Standardize get_joint_names across physics engines to match generalized velocity dimensions (nv) with per-DOF expansion for multi-DOF joints; Add results playback UI and real engine detection in Model Explorer (#12996); fix(model_explorer): per-engine export converts MJCF/Drake/Pinocchio and viewer handles errors visibly; Restore capture-contract CI coverage and guard addopts marker exclusions (#13000).; Stop c3d_simscape_preview false match success; load C3D via shared reader with unit conversion; learning/imitation: adopt He/Xavier init, Adam optimizer, and shared _mlp helper in BehaviorCloning and DAgger; DomainRandomizer fails loud on unsupported engines; MuJoCo parameter surface; remove dead config ranges |

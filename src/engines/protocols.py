@@ -7,6 +7,17 @@ from typing import Any, Protocol, runtime_checkable
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.grip_contact.binding import (
+    ModelGripAdapter,
+    ModelGripAdapter as GripProvider,
+)
+
+__all__ = [
+    "GripProvider",
+    "ModelGripAdapter",
+    "PhysicsEngineProtocol",
+]
+
 
 @runtime_checkable
 class PhysicsEngineProtocol(Protocol):

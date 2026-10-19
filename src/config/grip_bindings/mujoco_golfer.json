@@ -1,0 +1,28 @@
+{
+  "schema": "grip-binding/v1",
+  "model_id": "mujoco_golfer",
+  "model_hash": "sha256:2d74104727452657d25e65daea3eb90d03f5f04b2fda62d4d67579c3d2c4ca25",
+  "handedness": "right",
+  "side_roles": {
+    "left": "lead",
+    "right": "trail"
+  },
+  "calibration_pose": {
+    "name": "neutral_address",
+    "description": "MuJoCo humanoid golfer.xml at qpos0 with club_shaft parented to hand_left and welded to hand_right via right_hand_grip_weld"
+  },
+  "units": {
+    "length": "m",
+    "angle": "rad"
+  },
+  "provenance": {
+    "source": "src/engines/physics_engines/mujoco/models/generated/golfer.xml",
+    "date": "2026-10-18",
+    "method": "native_mjcf_weld_grip"
+  },
+  "attachment_mode": "weld",
+  "club_body": "club_shaft",
+  "lead_hand_body": "hand_left",
+  "trail_hand_body": "hand_right",
+  "unavailable_sites": {}
+}
