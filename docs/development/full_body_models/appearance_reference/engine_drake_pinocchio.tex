@@ -51,7 +51,16 @@ rigid-motion-invariant sorted centroid-distance signature of each mesh
 Reproduce:
 \texttt{python -m pytest tests/unit/tools/native\_viewer\_export/test\_meshcat\_appearance.py}.
 
+\subsection{Acceptance Stills (R9a Evidence)}
+Capture-A driver address and impact stills (face-on and down-the-line) live under
+\texttt{evidence/appearance/engines/drake\_pinocchio/}. The render script
+\texttt{render\_drake\_pinocchio\_appearance.py} writes per-engine PNGs and a
+horizontal MeshCat-plus-MuJoCo comparison row when Drake and Pinocchio are
+available on the host. \texttt{VISUAL\_DIFFERENCES.md} lists every intentional
+visual difference other than lighting. MuJoCo reference frames may be committed
+from Windows; MeshCat panels require a Linux brick with pydrake, pinocchio,
+coal, meshcat, playwright and Chromium (same stack as R9b OpenSim evidence).
+
 \subsection{Limitations}
-Native-render stills (address and impact, face-on and down-the-line, beside
-MuJoCo) require pydrake, pinocchio, meshcat and headless Chromium together and
-were not captured in this change; no rendering claim is made here.
+Appearance stills are visual evidence only; they do not qualify forward
+dynamics or cross-engine acceleration parity.

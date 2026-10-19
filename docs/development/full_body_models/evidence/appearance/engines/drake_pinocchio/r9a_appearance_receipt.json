@@ -1,0 +1,24 @@
+{
+  "issue": "#12688",
+  "epic": "#12678",
+  "bundle_sha256": "96c8a0b8cfdac80bb44726e9c5b7a9daedc19d1f00bac21396adad1567a3a8dc",
+  "bundle_source": "D:\\FleetData\\swing-datastore\\swings\\capA-driver__mujoco__canonical-seeds\\2026-10-05_best_matches\\artifacts\\anthro_driver_seeds",
+  "swing": {
+    "capture": "capture-A",
+    "club": "Driver",
+    "frames": {
+      "address": 0,
+      "impact": 476
+    },
+    "dt_s": 0.002777777777777768,
+    "impact_split_time_s": 1.322953640157547
+  },
+  "settings": {
+    "size": [960, 720],
+    "views": ["face_on", "down_the_line"],
+    "hud": false,
+    "overlays": false,
+    "ball": false
+  },
+  "command": "PYTHONPATH=.:src python3 docs/development/full_body_models/evidence/appearance/engines/drake_pinocchio/render_drake_pinocchio_appearance.py --datastore D:\\FleetData\\swing-datastore --out <dir>"
+}
