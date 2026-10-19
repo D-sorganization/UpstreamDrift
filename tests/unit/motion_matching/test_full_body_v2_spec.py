@@ -149,8 +149,10 @@ def test_isb_mapping_and_soft_limits_are_declared_in_isb_spine_sign() -> None:
     assert ranges["lumbar_flexion"] == (-15.0, 40.0)
     assert ranges["thoracic_axial_rotation"] == (-50.0, 50.0)
     doc = _v2()
+    # HRG-D2: soft limits, never hard IK bounds (coordinate_ranges_deg).
     for name, bounds in ranges.items():
-        assert tuple(doc["coordinate_ranges_deg"][name]) == bounds
+        assert tuple(doc["soft_limits_deg"][name]) == bounds
+    assert not set(ranges) & set(doc["coordinate_ranges_deg"])
     assert not set(V1_TRUNK) & set(doc["coordinate_ranges_deg"])
 
 

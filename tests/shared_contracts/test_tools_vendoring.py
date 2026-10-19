@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+from collections.abc import Iterator
 from functools import lru_cache
 from pathlib import Path
 from types import ModuleType
@@ -30,6 +31,40 @@ def _load_root_conftest() -> ModuleType:
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
+
+
+_CONTRACT_ALIASES = (
+    "contracts",
+    "shared.python.contracts",
+    "src.shared.python.contracts",
+)
+
+
+@pytest.fixture(autouse=True)
+def _restore_contract_module_identity() -> Iterator[None]:
+    """Undo the contract re-imports and aliasing these tests perform (#13314).
+
+    Executing the root conftest and its ``pytest_configure`` re-imports
+    ``src.shared.python.contracts`` and writes the aliases straight into
+    ``sys.modules``, and the import rebinds the parent package attribute.
+    Left in place, a later test's ``set_contract_level`` updates the
+    ``sys.modules`` copy while ``import src.shared.python.contracts as m``
+    binds the package attribute, so the two disagree.
+    """
+    import src.shared.python as ud_shared_python
+
+    modules = {name: sys.modules.get(name) for name in _CONTRACT_ALIASES}
+    attribute = getattr(ud_shared_python, "contracts", None)
+    try:
+        yield
+    finally:
+        for name, module in modules.items():
+            if module is None:
+                sys.modules.pop(name, None)
+            else:
+                sys.modules[name] = module
+        if attribute is not None:
+            ud_shared_python.contracts = attribute  # type: ignore[attr-defined]
 
 
 class _ConfigStub:

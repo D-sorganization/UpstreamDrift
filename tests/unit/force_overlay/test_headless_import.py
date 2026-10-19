@@ -18,6 +18,7 @@ import sys
 BANNED_PREFIXES = (
     "PyQt6",
     "matplotlib.pyplot",
+    "mpl_toolkits",
     "mujoco",
     "pydrake",
     "pinocchio",
