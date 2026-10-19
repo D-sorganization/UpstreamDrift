@@ -707,6 +707,86 @@ async def get_export_formats() -> list[dict[str, str]]:
     ]
 
 
+def _require_opaque_dataset_id(dataset_id: str) -> None:
+    """Precondition: ``dataset_id`` is an opaque token with no path syntax.
+
+    Raises:
+        HTTPException 400: If the identifier is malformed or attempts traversal.
+    """
+    if (
+        not isinstance(dataset_id, str)
+        or not _DATASET_ID_RE.match(dataset_id)
+        or any(sep in dataset_id for sep in ("/", "\\", ".."))
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid dataset_id: must be an opaque alphanumeric identifier",
+        )
+
+
+def _converted_export_path(record: Any, dataset_id: str, req_format: str) -> Path:
+    """The export path for ``req_format``, converting the dataset when needed.
+
+    Raises:
+        HTTPException 400: If ``req_format`` is not a supported export format.
+    """
+    export_path = Path(record.export_path)
+    if req_format == record.export_format or record.dataset is None:
+        return export_path
+    from src.shared.python.data_io._dataset_export_mixin import _DatasetExportMixin
+
+    target = export_path.parent / f"{record.name}_{dataset_id}"
+    try:
+        new_export = _DatasetExportMixin().export(
+            record.dataset, target, format=req_format
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported export format: {req_format}",
+        ) from exc
+    return Path(new_export)
+
+
+def _first_csv_in(directory: Path, dataset_id: str) -> Path:
+    """The CSV to stream from a directory export (e.g. one file per sample).
+
+    Raises:
+        HTTPException 404: If the directory holds no CSV file.
+    """
+    named = directory / f"{dataset_id}.csv"
+    if named.is_file():
+        return named
+    for pattern in ("sample_*.csv", "*.csv"):
+        candidates = sorted(directory.glob(pattern))
+        if candidates:
+            return candidates[0]
+    raise HTTPException(
+        status_code=404,
+        detail="Exported file not found in dataset directory",
+    )
+
+
+def _export_file_to_serve(export_path: Path, dataset_id: str, req_format: str) -> Path:
+    """The concrete file behind an export path (file, directory or bare stem).
+
+    Raises:
+        HTTPException 404: If no exported file exists on disk.
+    """
+    if export_path.is_file():
+        return export_path
+    if export_path.is_dir():
+        return _first_csv_in(export_path, dataset_id)
+    ext = f".{req_format}" if not req_format.startswith(".") else req_format
+    candidate = export_path.with_suffix(ext)
+    if candidate.is_file():
+        return candidate
+    raise HTTPException(
+        status_code=404,
+        detail="Exported dataset file does not exist on disk",
+    )
+
+
 @router.get("/export/{dataset_id}")
 async def export_dataset(
     dataset_id: str,
@@ -733,15 +813,7 @@ async def export_dataset(
         HTTPException 400: If ``dataset_id`` is malformed or attempts traversal.
         HTTPException 404: If ``dataset_id`` is not found or file is missing.
     """
-    if (
-        not isinstance(dataset_id, str)
-        or not _DATASET_ID_RE.match(dataset_id)
-        or any(sep in dataset_id for sep in ("/", "\\", ".."))
-    ):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid dataset_id: must be an opaque alphanumeric identifier",
-        )
+    _require_opaque_dataset_id(dataset_id)
 
     record = _get_dataset_record(dataset_id)
     if record is None:
@@ -750,60 +822,12 @@ async def export_dataset(
             detail=f"Dataset '{dataset_id}' not found",
         )
 
-    output_roots = _dataset_output_roots()
-    export_path = record.export_path
-
-    # Check if a format conversion is requested and possible
     req_format = (format or record.export_format).lower()
-    if req_format != record.export_format and record.dataset is not None:
-        from src.shared.python.data_io._dataset_export_mixin import _DatasetExportMixin
-
-        exporter = _DatasetExportMixin()
-        target = export_path.parent / f"{record.name}_{dataset_id}"
-        try:
-            new_export = exporter.export(record.dataset, target, format=req_format)
-            export_path = Path(new_export)
-        except ValueError as exc:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Unsupported export format: {req_format}",
-            ) from exc
-
-    # Locate the concrete file to stream
-    if export_path.is_file():
-        file_to_serve = export_path
-    elif export_path.is_dir():
-        # Directory export (e.g. CSV sample directory)
-        candidate = export_path / f"{dataset_id}.csv"
-        if candidate.is_file():
-            file_to_serve = candidate
-        else:
-            candidates = sorted(export_path.glob("sample_*.csv"))
-            if candidates:
-                file_to_serve = candidates[0]
-            else:
-                csvs = sorted(export_path.glob("*.csv"))
-                if csvs:
-                    file_to_serve = csvs[0]
-                else:
-                    raise HTTPException(
-                        status_code=404,
-                        detail="Exported file not found in dataset directory",
-                    )
-    else:
-        # Check if with suffix exists
-        ext = f".{req_format}" if not req_format.startswith(".") else req_format
-        candidate = export_path.with_suffix(ext)
-        if candidate.is_file():
-            file_to_serve = candidate
-        else:
-            raise HTTPException(
-                status_code=404,
-                detail="Exported dataset file does not exist on disk",
-            )
+    export_path = _converted_export_path(record, dataset_id, req_format)
+    file_to_serve = _export_file_to_serve(export_path, dataset_id, req_format)
 
     # Postcondition validation: ensure file_to_serve is contained under allowed roots
-    safe_file = resolve_contained_path(file_to_serve, output_roots)
+    safe_file = resolve_contained_path(file_to_serve, _dataset_output_roots())
 
     ext = safe_file.suffix.lstrip(".").lower() or req_format
     media_type = _EXPORT_MEDIA_TYPES.get(ext, "application/octet-stream")
