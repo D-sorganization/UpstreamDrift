@@ -1441,12 +1441,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #11745
 - **Branch:** claude/lift-5-squat-bundle
-- **PR:** #12245, #12340, #13052, #13047, #13263
+- **PR:** #12245, #12340, #13052, #13047, #13263, #13276
 - **Paths:** see #12245
 - **Started:** 2026-10-14
-- **Last verified:** 2026-10-18 (`5841213b`; collated from changes/11745-bump-vendor-ud-tools-to-a459505-tools-56.md)
+- **Last verified:** 2026-10-19 (`c0d8142c`; collated from changes/11745-lift-5-clean-and-jerk-is-the-whole-lift.md)
 - **Summary:** LIFT-5 slice 1: back-squat same-input bundle from the Movement Optimizer via full-body marker IK, with provenance, regeneration script and MuJoCo replay smoke test
-- **Next step:** Bump vendor/ud-tools to the Tools #5653 merge commit and regenerate the snatch bundle and parity record so tools_pin matches
+- **Next step:** Merge the PR; then the LIFT-4 barbell record for OpenSim IK/ID of the pull bundles
 
 ### DL-#11737 · OSV-6 Lead Foot: Lateral-Marker Zero-Twist Correction (Knee_Flexion_Axis) and Leg-Marker Calibration Constraints Under --Foot-Progression; MuJoCo Address Toe-Out Within 2 Deg on Both Captures (Driver +0.2/-0.3, Iron -0.0/-1.4 Deg); Canonical Receipts Unchanged (Default-On Correction Is a Recorded Failed Experiment)
 
@@ -2638,6 +2638,45 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#13322 · Add Cross-Model Grip Capability Inventory Manifest, DbC Loader, and Verification Suite
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13322
+- **Branch:** merged via #13337
+- **PR:** #13337
+- **Paths:** see #13337
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`a9170eb8`; collated from changes/13322-add-cross-model-grip-capability-inventor.md)
+- **Summary:** Add cross-model grip capability inventory manifest, DbC loader, and verification suite
+- **Next step:** Shipped in PR #13337.
+
+### DL-#13189 · Report the Allocated Trail-Palm-on-Lead-Thumb Force (Patch Frame, Allocation, Provider Metadata); Physics Unchanged
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13189
+- **Branch:** feat/13189-palm-thumb-contact
+- **PR:** #13217
+- **Paths:** see #13217
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`15cafedb`; collated from changes/13189-report-the-allocated-trail-palm-on-lead.md)
+- **Summary:** Report the allocated trail-palm-on-lead-thumb force (patch frame, allocation, provider metadata); physics unchanged
+- **Next step:** Shipped in PR #13217.
+
+### DL-#13049 · Run Real-OpenSim Lift Tests in a Dedicated CI Job (OSL-13)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13049
+- **Branch:** merged via #13284
+- **PR:** #13284
+- **Paths:** see #13284
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`aefee65b`; collated from changes/13049-run-real-opensim-lift-tests-in-a-dedicat.md)
+- **Summary:** Run real-OpenSim lift tests in a dedicated CI job (OSL-13)
+- **Next step:** Shipped in PR #13284.
 
 ### DL-#13299 · Engine-Agnostic Grip-Style Contact Topology: GripStyle and Trigger Finger Join the Physical GripSpec; Per-Style Contact Pair Tables With Anatomy Scaling.
 
