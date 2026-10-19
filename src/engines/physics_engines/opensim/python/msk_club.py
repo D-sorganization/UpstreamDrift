@@ -69,7 +69,10 @@ from src.shared.python.grip_contact import (
     topology_side_wrench,
     validate_binding,
 )
-from src.shared.python.grip_contact.binding_manifest import binding_from_manifest, validate_manifest
+from src.shared.python.grip_contact.binding_manifest import (
+    binding_from_manifest,
+    validate_manifest,
+)
 from src.shared.python.grip_contact.parity import QuantityError, compute_quantity_error
 from src.shared.python.model_appearance.club_assembly import (
     ClubAssembly,
@@ -662,7 +665,14 @@ ADMITTED_OPENSIM_MODELS: dict[str, OpenSimModelAdmission] = {
         "hand_L",
         "hand_R",
         CLUB_BODY,
-        ("pro_sup_l", "wrist_flex_l", "wrist_dev_l", "pro_sup_r", "wrist_flex_r", "wrist_dev_r"),
+        (
+            "pro_sup_l",
+            "wrist_flex_l",
+            "wrist_dev_l",
+            "pro_sup_r",
+            "wrist_flex_r",
+            "wrist_dev_r",
+        ),
         "Bruno 2015 thoracolumbar full-body OpenSim 4 model; forearm (pro_sup_l/r) and wrist (wrist_flex_l/r, wrist_dev_l/r) are locked by default.",
     ),
 }
@@ -729,7 +739,9 @@ def _build_opensim_runtime(
     osim = _try_import_opensim()
     if osim is None:
         return None, None, {}, {}
-    with tempfile.NamedTemporaryFile(mode="wb", suffix=".osim", dir=MODELS_DIR, delete=False) as tmp:
+    with tempfile.NamedTemporaryFile(
+        mode="wb", suffix=".osim", dir=MODELS_DIR, delete=False
+    ) as tmp:
         tmp_path = Path(tmp.name)
         model_tree.write(tmp, encoding="utf-8", xml_declaration=True)
     try:
@@ -744,12 +756,20 @@ def _build_opensim_runtime(
         for side, b_name in GRIP_BUSHINGS.items():
             bushings[side] = osim.BushingForce.safeDownCast(force_set.get(b_name))
         for body_name in (lead_hand_body, trail_hand_body, CLUB_BODY):
-            pf = osim.PrescribedForce(f"shared_grip_force_{body_name}", body_set.get(body_name))
+            pf = osim.PrescribedForce(
+                f"shared_grip_force_{body_name}", body_set.get(body_name)
+            )
             pf.set_pointIsGlobal(False)
             pf.set_forceIsGlobal(True)
-            pf.setForceFunctions(osim.Constant(0.0), osim.Constant(0.0), osim.Constant(0.0))
-            pf.setPointFunctions(osim.Constant(0.0), osim.Constant(0.0), osim.Constant(0.0))
-            pf.setTorqueFunctions(osim.Constant(0.0), osim.Constant(0.0), osim.Constant(0.0))
+            pf.setForceFunctions(
+                osim.Constant(0.0), osim.Constant(0.0), osim.Constant(0.0)
+            )
+            pf.setPointFunctions(
+                osim.Constant(0.0), osim.Constant(0.0), osim.Constant(0.0)
+            )
+            pf.setTorqueFunctions(
+                osim.Constant(0.0), osim.Constant(0.0), osim.Constant(0.0)
+            )
             osim_model.addForce(pf)
             prescribed[body_name] = pf
     state = osim_model.initSystem()
@@ -765,7 +785,9 @@ def _osim_body_state(
     body = body_set.get(body_name)
     xform = body.getTransformInGround(state)
     rot_osim, pos_osim = xform.R(), xform.p()
-    rot_body = np.array([[float(rot_osim.get(i, j)) for j in range(3)] for i in range(3)])
+    rot_body = np.array(
+        [[float(rot_osim.get(i, j)) for j in range(3)] for i in range(3)]
+    )
     pos_body = np.array([float(pos_osim.get(i)) for i in range(3)])
     vel_spatial = body.getVelocityInGround(state)
     ang_osim, lin_osim = vel_spatial.get(0), vel_spatial.get(1)
@@ -773,7 +795,10 @@ def _osim_body_state(
     vel_w = np.array([float(lin_osim.get(i)) for i in range(3)])
     r_world = rot_body @ local_offset[:3, 3]
     return BushingState(
-        rot_body @ local_offset[:3, :3], pos_body + r_world, vel_w + np.cross(omega_w, r_world), omega_w
+        rot_body @ local_offset[:3, :3],
+        pos_body + r_world,
+        vel_w + np.cross(omega_w, r_world),
+        omega_w,
     )
 
 
@@ -785,7 +810,11 @@ def _update_prescribed_force(
     if osim is None:
         return
     cast = osim.Constant.safeDownCast
-    f_set, t_set, p_set = pf.get_forceFunctions(), pf.get_torqueFunctions(), pf.get_pointFunctions()
+    f_set, t_set, p_set = (
+        pf.get_forceFunctions(),
+        pf.get_torqueFunctions(),
+        pf.get_pointFunctions(),
+    )
     for idx in range(3):
         cast(f_set.get(idx)).setValue(float(force_w[idx]))
         cast(t_set.get(idx)).setValue(float(moment_w[idx]))
@@ -796,10 +825,20 @@ class OpenSimMskGripAdapter(ModelGripAdapter):
     """Native OpenSim MSK ``ModelGripAdapter`` for both ``weld`` and ``bushing`` modes."""
 
     def __init__(
-        self, model_id: str, club: MskClub, calibration: GripCalibration, manifest: Mapping[str, Any], *, grip_model: str = DEFAULT_GRIP_MODEL, osim_runtime: tuple[Any | None, Any | None, dict[str, Any], dict[str, Any]] | None = None
+        self,
+        model_id: str,
+        club: MskClub,
+        calibration: GripCalibration,
+        manifest: Mapping[str, Any],
+        *,
+        grip_model: str = DEFAULT_GRIP_MODEL,
+        osim_runtime: tuple[Any | None, Any | None, dict[str, Any], dict[str, Any]]
+        | None = None,
     ) -> None:
         if grip_model not in GRIP_MODELS:
-            raise ValueError(f"grip_model must be one of {GRIP_MODELS}, got {grip_model!r}")
+            raise ValueError(
+                f"grip_model must be one of {GRIP_MODELS}, got {grip_model!r}"
+            )
         validate_manifest(manifest)
         self.model_id = model_id
         self.club = club
@@ -889,7 +928,9 @@ class OpenSimMskGripAdapter(ModelGripAdapter):
     def native_bushings_enabled(self) -> bool:
         """Whether the native OpenSim ``BushingForce`` elements are currently enabled."""
         if self.osim_model is not None and self.state is not None and self._bushings:
-            return any(bool(bf.appliesForce(self.state)) for bf in self._bushings.values())
+            return any(
+                bool(bf.appliesForce(self.state)) for bf in self._bushings.values()
+            )
         return self._bushings_enabled
 
     def capabilities(self) -> GripCapabilities:
@@ -932,10 +973,16 @@ class OpenSimMskGripAdapter(ModelGripAdapter):
         if self.osim_model is not None and self.state is not None:
             return {
                 binding.lead_hand_body: _osim_body_state(
-                    self.osim_model, self.state, binding.lead_hand_body, self._hand_iface_transforms["L"]
+                    self.osim_model,
+                    self.state,
+                    binding.lead_hand_body,
+                    self._hand_iface_transforms["L"],
                 ),
                 binding.trail_hand_body: _osim_body_state(
-                    self.osim_model, self.state, binding.trail_hand_body, self._hand_iface_transforms["R"]
+                    self.osim_model,
+                    self.state,
+                    binding.trail_hand_body,
+                    self._hand_iface_transforms["R"],
                 ),
                 binding.club_body: _osim_body_state(
                     self.osim_model, self.state, binding.club_body, np.eye(4)
@@ -970,9 +1017,14 @@ class OpenSimMskGripAdapter(ModelGripAdapter):
         }
         cleaned: dict[str, tuple[np.ndarray, np.ndarray]] = {}
         for body_name, (force, moment) in wrenches.items():
-            f_arr, m_arr = np.asarray(force, dtype=float), np.asarray(moment, dtype=float)
+            f_arr, m_arr = (
+                np.asarray(force, dtype=float),
+                np.asarray(moment, dtype=float),
+            )
             if f_arr.shape != (3,) or m_arr.shape != (3,):
-                raise ValueError(f"wrench for {body_name!r} must be a pair of 3-vectors")
+                raise ValueError(
+                    f"wrench for {body_name!r} must be a pair of 3-vectors"
+                )
             if not (np.all(np.isfinite(f_arr)) and np.all(np.isfinite(m_arr))):
                 raise ValueError(f"wrench for {body_name!r} must be finite")
             cleaned[body_name] = (f_arr.copy(), m_arr.copy())
@@ -1001,11 +1053,17 @@ class MskGripHoldResult:
 
 
 def _club_side_bushing_state(
-    rot_c: np.ndarray, pos_c: np.ndarray, vel_c: np.ndarray, omega_c: np.ndarray, grip_local: np.ndarray
+    rot_c: np.ndarray,
+    pos_c: np.ndarray,
+    vel_c: np.ndarray,
+    omega_c: np.ndarray,
+    grip_local: np.ndarray,
 ) -> BushingState:
     """World :class:`BushingState` of one club grip frame given club origin state."""
     r_w = rot_c @ grip_local[:3, 3]
-    return BushingState(rot_c @ grip_local[:3, :3], pos_c + r_w, vel_c + np.cross(omega_c, r_w), omega_c)
+    return BushingState(
+        rot_c @ grip_local[:3, :3], pos_c + r_w, vel_c + np.cross(omega_c, r_w), omega_c
+    )
 
 
 def _make_hold_wrench_fns(
@@ -1024,7 +1082,9 @@ def _make_hold_wrench_fns(
             c_state = _club_side_bushing_state(rot, pos, vel, omg, grip_local[side])
             bw = bushing_wrench(bushing_params, hand_fixed[side], c_state)
             f_tot = f_tot + bw.force_n
-            m_tot = m_tot + bw.moment_nm + np.cross(c_state.position_m - pos, bw.force_n)
+            m_tot = (
+                m_tot + bw.moment_nm + np.cross(c_state.position_m - pos, bw.force_n)
+            )
         return f_tot, m_tot
 
     def _contact_fn(
@@ -1035,7 +1095,9 @@ def _make_hold_wrench_fns(
             c_state = _club_side_bushing_state(rot, pos, vel, omg, grip_local[side])
             sw = topology_side_wrench(topo_model, side, hand_fixed[side], c_state)
             f_tot = f_tot + sw.force_n
-            m_tot = m_tot + sw.moment_nm + np.cross(c_state.position_m - pos, sw.force_n)
+            m_tot = (
+                m_tot + sw.moment_nm + np.cross(c_state.position_m - pos, sw.force_n)
+            )
         return f_tot, m_tot
 
     return _bushing_fn, _contact_fn
@@ -1044,7 +1106,10 @@ def _make_hold_wrench_fns(
 def _make_hold_rhs(wrench_fn: Any, dyn: ClubDynamics, rot0: np.ndarray) -> Any:
     """Build ODE RHS ``dy/dt`` for 6-DOF free ``Club`` under gravity and ``wrench_fn``."""
     mass, com_local = float(dyn.mass_kg), np.asarray(dyn.com_m, dtype=float)
-    inertia_local, grav = np.asarray(dyn.inertia_com_kg_m2, dtype=float), np.asarray(GRAVITY_M_S2, dtype=float)
+    inertia_local, grav = (
+        np.asarray(dyn.inertia_com_kg_m2, dtype=float),
+        np.asarray(GRAVITY_M_S2, dtype=float),
+    )
 
     def _rhs(_t: float, y: np.ndarray) -> np.ndarray:
         pos, vel, omg = y[:3], y[6:9], y[9:12]
@@ -1055,7 +1120,11 @@ def _make_hold_rhs(wrench_fn: Any, dyn: ClubDynamics, rot0: np.ndarray) -> Any:
         m_com = m_orig - np.cross(r_com, f_orig)
         i_world = rot @ inertia_local @ rot.T
         alpha = np.linalg.solve(i_world, m_com - np.cross(omg, i_world @ omg))
-        acc_orig = (f_orig + mass * grav) / mass - np.cross(alpha, r_com) - np.cross(omg, np.cross(omg, r_com))
+        acc_orig = (
+            (f_orig + mass * grav) / mass
+            - np.cross(alpha, r_com)
+            - np.cross(omg, np.cross(omg, r_com))
+        )
         return np.concatenate([vel, omg, acc_orig, alpha])
 
     return _rhs
@@ -1071,11 +1140,17 @@ def simulate_msk_grip_hold(
 ) -> MskGripHoldResult:
     """Compare the native OpenSim MSK grip adapter against the ``msk_club`` bushing hold."""
     adapter = OpenSimMskGripAdapter.from_model_id(
-        model_id, club=club, grip_model="bushing", grip_style=grip_style, trigger_finger=trigger_finger
+        model_id,
+        club=club,
+        grip_model="bushing",
+        grip_style=grip_style,
+        trigger_finger=trigger_finger,
     )
     msk = adapter.club
     topo, iface = msk.topology, msk.interface
-    topo_model = build_topology_model(iface, topo, squeeze_per_hand_n=squeeze_per_hand_n)
+    topo_model = build_topology_model(
+        iface, topo, squeeze_per_hand_n=squeeze_per_hand_n
+    )
     binding = adapter.resolve_binding(topo)
     init_states = adapter.sample_states(binding)
     lead_raw = init_states[binding.lead_hand_body]
@@ -1084,12 +1159,18 @@ def simulate_msk_grip_hold(
     assert isinstance(lead_raw, BushingState) and isinstance(trail_raw, BushingState)
     assert isinstance(club_raw, BushingState)
     hand_fixed = {
-        "L": BushingState(lead_raw.rotation, lead_raw.position_m, np.zeros(3), np.zeros(3)),
-        "R": BushingState(trail_raw.rotation, trail_raw.position_m, np.zeros(3), np.zeros(3)),
+        "L": BushingState(
+            lead_raw.rotation, lead_raw.position_m, np.zeros(3), np.zeros(3)
+        ),
+        "R": BushingState(
+            trail_raw.rotation, trail_raw.position_m, np.zeros(3), np.zeros(3)
+        ),
     }
     left_iface, right_iface = iface.left, iface.right
     grip_local = {"L": left_iface.matrix(), "R": right_iface.matrix()}
-    bushing_fn, contact_fn = _make_hold_wrench_fns(topo_model, iface.bushing, hand_fixed, grip_local)
+    bushing_fn, contact_fn = _make_hold_wrench_fns(
+        topo_model, iface.bushing, hand_fixed, grip_local
+    )
     rot0 = club_raw.rotation.copy()
     y0 = np.zeros(12)
     y0[:3] = club_raw.position_m
@@ -1136,11 +1217,18 @@ def simulate_msk_grip_hold(
         apply_report(adapter, rep)
         reports.append(rep)
         for side in ("L", "R"):
-            club_seq[side].append(_club_side_bushing_state(rc, yc[:3], yc[6:9], yc[9:12], grip_local[side]))
+            club_seq[side].append(
+                _club_side_bushing_state(
+                    rc, yc[:3], yc[6:9], yc[9:12], grip_local[side]
+                )
+            )
     b_f_arr, b_m_arr = np.asarray(b_forces, float), np.asarray(b_moments, float)
     c_f_arr, c_m_arr = np.asarray(c_forces, float), np.asarray(c_moments, float)
     times = t_eval - t_eval[0]
-    hand_seq = {"L": [hand_fixed["L"] for _ in times], "R": [hand_fixed["R"] for _ in times]}
+    hand_seq = {
+        "L": [hand_fixed["L"] for _ in times],
+        "R": [hand_fixed["R"] for _ in times],
+    }
     return MskGripHoldResult(
         time_s=times,
         reports=tuple(reports),
@@ -1155,4 +1243,3 @@ def simulate_msk_grip_hold(
         force_error=compute_quantity_error(c_f_arr, b_f_arr, name="net_force"),
         moment_error=compute_quantity_error(c_m_arr, b_m_arr, name="net_moment"),
     )
-

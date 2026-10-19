@@ -77,7 +77,9 @@ pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[3]
 MANIFESTS_DIR = ROOT / "src" / "config" / "grip_bindings"
-MSK_CLUB_PY = ROOT / "src" / "engines" / "physics_engines" / "opensim" / "python" / "msk_club.py"
+MSK_CLUB_PY = (
+    ROOT / "src" / "engines" / "physics_engines" / "opensim" / "python" / "msk_club.py"
+)
 NEUTRAL_PENETRATION_TOL_M = 5.0e-4  # +-0.5 mm
 SQUEEZE_N = 1100.0
 
@@ -103,9 +105,7 @@ def test_msk_club_grip_style_and_trigger_finger(
     style: GripStyle, trigger_finger: bool
 ) -> None:
     """load_msk_club and msk_club accept grip_style and trigger_finger and build topology."""
-    club = mc.load_msk_club(
-        "driver", grip_style=style, trigger_finger=trigger_finger
-    )
+    club = mc.load_msk_club("driver", grip_style=style, trigger_finger=trigger_finger)
     assert club.grip_style == style
     assert club.trigger_finger is trigger_finger
     expected_topo = contact_topology(
@@ -149,9 +149,7 @@ def test_admitted_manifests_validate_and_resolve_all_sites(
     assert manifest["model_id"] == model_id
     assert manifest["club_body"] == "Club"
 
-    club = mc.load_msk_club(
-        "driver", grip_style=style, trigger_finger=trigger_finger
-    )
+    club = mc.load_msk_club("driver", grip_style=style, trigger_finger=trigger_finger)
     topo = club.topology
     binding = binding_from_manifest(manifest, topo, club.interface)
     validate_resolved_binding(binding, topo, club.interface)
@@ -277,17 +275,18 @@ def test_weld_mode_three_styles_allocated_only_and_apply_raises(
         assert report.allocated_labels[hh.name] == hh.allocated_label
         assert np.isfinite(report.normal_force_n[hh.name])
         assert report.normal_force_n[hh.name] >= 0.0
-        assert (
-            report.normal_force_n[hh.name] + report.tangential_force_n[hh.name]
-            > 0.0
-        )
+        assert report.normal_force_n[hh.name] + report.tangential_force_n[hh.name] > 0.0
 
     assert report.pair_wrenches == {}
     assert report.body_wrenches() == {}
     assert report.applied_allocated_force_n() == 0.0
 
     # Applying wrenches to welded bodies must raise ValueError (never silently cancel)
-    for body_name in (binding.lead_hand_body, binding.trail_hand_body, binding.club_body):
+    for body_name in (
+        binding.lead_hand_body,
+        binding.trail_hand_body,
+        binding.club_body,
+    ):
         with pytest.raises(ValueError, match="welded|Weld"):
             adapter.apply_wrenches(
                 {body_name: (np.array([10.0, 0.0, 0.0]), np.zeros(3))}
