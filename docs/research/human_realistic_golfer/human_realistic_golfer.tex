@@ -772,6 +772,30 @@ curve and Pinocchio's \texttt{aba}, and it would change the trajectories within 
 reproducing them bit for bit. It was therefore not built. The remaining levers are the per-RHS cost (the contact law
 is about half of it) and the number of RHS evaluations, which the step cap and the stiffness fix.
 
+\textbf{Rejected Follow-Up: Inlined Row Kernel (Measured, Reverted).} Unprofiled CPU timing showed where the
+simulation time goes: the RHS is about 85\% of simulation CPU, and within it the contact law is about 38\% and
+the memoised hand kinematics about 15\%; Radau's own work is about 12\% and setup is negligible. A bit-identical rewrite
+of the row kernel was then tried:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \textbf{Change.} One inlined pair-row function shared by sphere and capsule sites, reading flat per-side
+  constants with a single tuple unpack. The validated frame floats were reused instead of being converted twice.
+\item \textbf{Bit-identity.} All 3{,}600 side evaluations (every style, trigger, side and mode) matched byte for byte,
+  and so did the seven simulation runs.
+\item \textbf{Speed.} An isolated contact row fell from $9.1$ to $6.9\,\mu$s. On side calls captured from a simulation
+  (every row in contact), timed old against new in one process, the gain was only 2--7\% ($100 \to 95$, $147 \to 137$
+  and $145 \to 142\,\mu$s per side), about 2\% of simulation CPU.
+\end{itemize}
+A side call has no remaining hotspot. Validation, the two stacked transforms, the per-row arithmetic and the output
+assembly are each plain CPython bytecode of a few to a few tens of microseconds, so the pure-Python law is at its
+floor. The denser kernel was not worth 2--7\% and was reverted. Two levers remain, and both need a decision first:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \textbf{Compiled row kernel.} Section~F of \texttt{AGENTS.md} admits Rust only for a kernel shared with another
+  runtime. Bit-identity would also depend on \texttt{exp} and \texttt{tanh} matching the platform \texttt{libm}.
+\item \textbf{Single validation of frame states.} Making the \texttt{BushingState} arrays read-only would let the
+  topology law trust the construction-time checks, worth about 10--15\% of the law. It changes the behaviour of a type
+  shared across engines.
+\end{itemize}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
