@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import json
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+import warnings
 
-import json
 import numpy as np
 
 if TYPE_CHECKING:
@@ -14,11 +16,34 @@ if TYPE_CHECKING:
 from src.learning.imitation._base import (
     ImitationLearner,
     TrainingConfig,
-    apply_activation,
-    apply_activation_grad,
     validate_dataset_and_split,
 )
+from src.learning.imitation._mlp import (
+    _adam_step,
+    _build_mlp,
+    _dropout_masks,
+    _init_adam_state,
+    _mlp_backward,
+    _mlp_forward,
+)
 from src.learning.imitation.dataset import DemonstrationDataset
+
+logger = logging.getLogger(__name__)
+
+
+def _warn_if_loss_stalled(train_loss: list[float]) -> None:
+    """Postcondition check: warn when training did not cut the loss by 1 %."""
+    if len(train_loss) < 2:
+        return
+    initial_loss, final_loss = train_loss[0], train_loss[-1]
+    if initial_loss > 0 and final_loss >= initial_loss * 0.99:
+        msg = (
+            f"Training did not decrease loss significantly: "
+            f"initial loss {initial_loss:.4f}, final loss {final_loss:.4f}."
+        )
+        logger.warning(msg)
+        # stacklevel=3 points at the caller of train(), as before the split.
+        warnings.warn(msg, UserWarning, stacklevel=3)
 
 
 class BehaviorCloning(ImitationLearner):
@@ -43,68 +68,27 @@ class BehaviorCloning(ImitationLearner):
         self._build_policy()
 
     def _build_policy(self) -> None:
-        """Build the neural network policy."""
-        # Build a simple MLP policy
-        layers = []
-        input_dim = self.observation_dim
-
-        for hidden_dim in self.config.hidden_sizes:
-            layers.append(
-                {
-                    "W": self._rng.normal(0.0, 0.01, size=(input_dim, hidden_dim)),
-                    "b": np.zeros(hidden_dim),
-                }
-            )
-            input_dim = hidden_dim
-
-        # Output layer
-        layers.append(
-            {
-                "W": self._rng.normal(0.0, 0.01, size=(input_dim, self.action_dim)),
-                "b": np.zeros(self.action_dim),
-            }
+        """Build the neural network policy with He/Xavier initialisation."""
+        self._policy = _build_mlp(
+            input_dim=self.observation_dim,
+            output_dim=self.action_dim,
+            hidden_sizes=self.config.hidden_sizes,
+            init="he",
+            rng=self._rng,
         )
 
-        self._policy = layers
-
-    def _forward_with_cache(
-        self, x: NDArray[np.floating], training: bool = False
-    ) -> tuple[NDArray[np.floating], list[dict[str, Any]]]:
-        """Forward pass caching intermediate activations and dropout masks."""
-        if x is None:
-            raise ValueError("x must be provided")
-        cache: list[dict[str, Any]] = []
-        out = x
-        n_layers = len(self._policy)
-        for i, layer in enumerate(self._policy):
-            in_act = out
-            z = in_act @ layer["W"] + layer["b"]
-            if i < n_layers - 1:
-                out = apply_activation(z, self.config.activation)
-                mask = None
-                if training and self.config.dropout > 0.0:
-                    keep_prob = 1.0 - self.config.dropout
-                    mask = (self._rng.random(size=out.shape) < keep_prob) / keep_prob
-                    out = out * mask
-                cache.append({"in": in_act, "out": out, "mask": mask})
-            else:
-                out = z  # Linear output
-                cache.append({"in": in_act, "out": out, "mask": None})
-        return out, cache
-
-    def _forward(
-        self, x: NDArray[np.floating], training: bool = False
-    ) -> NDArray[np.floating]:
+    def _forward(self, x: NDArray[np.floating]) -> NDArray[np.floating]:
         """Forward pass through network.
 
         Args:
             x: Input observations.
-            training: If True, apply dropout during forward pass.
 
         Returns:
             Predicted actions.
         """
-        out, _ = self._forward_with_cache(x, training=training)
+        if x is None:
+            raise ValueError("x must be provided")
+        out, _ = _mlp_forward(self._policy, x, activation=self.config.activation)
         return out
 
     def _compute_loss(
@@ -123,6 +107,8 @@ class BehaviorCloning(ImitationLearner):
         """
         if observations is None:
             raise ValueError("observations must be provided")
+        if actions is None:
+            raise ValueError("actions must be provided")
         predictions = self._forward(observations)
         diff = predictions - actions
         # ⚡ Bolt: np.vdot is ~2x faster than np.mean(diff**2) and avoids temporary array allocations
@@ -135,6 +121,9 @@ class BehaviorCloning(ImitationLearner):
     ) -> list[dict[str, NDArray[np.floating]]]:
         """Compute gradients via backpropagation.
 
+        Dropout (``config.dropout``) is applied to the hidden layers of this
+        training-mode forward pass only; :meth:`_forward` evaluates without it.
+
         Args:
             observations: Batch of observations.
             actions: Batch of target actions.
@@ -144,30 +133,18 @@ class BehaviorCloning(ImitationLearner):
         """
         if observations is None:
             raise ValueError("observations must be provided")
+        if actions is None:
+            raise ValueError("actions must be provided")
         batch_size = len(observations)
-
-        predictions, cache = self._forward_with_cache(observations, training=True)
-        gradients: list[dict[str, NDArray[np.floating]]] = []
-        delta: NDArray[Any] = 2 * (predictions - actions) / batch_size  # MSE gradient
-
-        for i in range(len(self._policy) - 1, -1, -1):
-            layer = self._policy[i]
-            layer_cache = cache[i]
-            a = layer_cache["in"]
-
-            grad_W = a.T @ delta
-            grad_b = delta.sum(axis=0)
-            gradients.insert(0, {"W": grad_W, "b": grad_b})
-
-            if i > 0:
-                delta = delta @ layer["W"].T
-                prev_cache = cache[i - 1]
-                if prev_cache["mask"] is not None:
-                    delta = delta * prev_cache["mask"]
-                delta = apply_activation_grad(
-                    delta, prev_cache["out"], self.config.activation
-                )
-
+        activation = self.config.activation
+        masks = _dropout_masks(self._policy, batch_size, self.config.dropout, self._rng)
+        predictions, activations = _mlp_forward(
+            self._policy, observations, activation=activation, masks=masks
+        )
+        delta = 2.0 * (predictions - actions) / batch_size
+        gradients, _ = _mlp_backward(
+            self._policy, activations, delta, activation=activation, masks=masks
+        )
         return gradients
 
     def train(
@@ -183,6 +160,10 @@ class BehaviorCloning(ImitationLearner):
 
         Returns:
             Training history.
+
+        Raises:
+            ValueError: If dataset is invalid, validation_split is out of
+                bounds, or the split leaves no training samples.
         """
         observations, actions = validate_dataset_and_split(dataset, validation_split)
 
@@ -198,15 +179,16 @@ class BehaviorCloning(ImitationLearner):
 
         train_obs = observations[train_idx]
         train_act = actions[train_idx]
-        if len(train_obs) == 0:
-            raise ValueError("validation_split leaves no training samples")
-
         val_obs = observations[val_idx] if n_val > 0 else train_obs[:100]
         val_act = actions[val_idx] if n_val > 0 else train_act[:100]
 
         # Training loop
         history: dict[str, list[float]] = {"train_loss": [], "val_loss": []}
         lr = self.config.learning_rate
+        weight_decay = self.config.weight_decay
+        batch_size = max(1, min(self.config.batch_size, len(train_obs)))
+        adam_state = _init_adam_state(self._policy)
+        step = 0
 
         for _epoch in range(self.config.epochs):
             # Shuffle training data
@@ -214,23 +196,26 @@ class BehaviorCloning(ImitationLearner):
             train_obs = train_obs[perm]
             train_act = train_act[perm]
 
-            # Mini-batch training
             epoch_loss = 0.0
             n_batches = 0
 
-            for i in range(0, len(train_obs), self.config.batch_size):
-                batch_obs = train_obs[i : i + self.config.batch_size]
-                batch_act = train_act[i : i + self.config.batch_size]
+            for i in range(0, len(train_obs), batch_size):
+                batch_obs = train_obs[i : i + batch_size]
+                batch_act = train_act[i : i + batch_size]
+                step += 1
 
                 # Compute gradients
                 gradients = self._backward(batch_obs, batch_act)
 
-                # Update weights
-                for layer, grad in zip(self._policy, gradients, strict=True):
-                    layer["W"] -= lr * (
-                        grad["W"] + self.config.weight_decay * layer["W"]
-                    )
-                    layer["b"] -= lr * grad["b"]
+                # Update weights via Adam
+                _adam_step(
+                    self._policy,
+                    gradients,
+                    adam_state,
+                    lr,
+                    step,
+                    weight_decay,
+                )
 
                 epoch_loss += self._compute_loss(batch_obs, batch_act)
                 n_batches += 1
@@ -242,6 +227,7 @@ class BehaviorCloning(ImitationLearner):
             history["train_loss"].append(train_loss)
             history["val_loss"].append(val_loss)
 
+        _warn_if_loss_stalled(history["train_loss"])
         self._training_history = history
         return history
 
@@ -264,7 +250,7 @@ class BehaviorCloning(ImitationLearner):
         if observation.ndim == 1:
             observation = observation.reshape(1, -1)
 
-        action = self._forward(observation, training=False)
+        action = self._forward(observation)
 
         if observation.shape[0] == 1:
             action = action.flatten()

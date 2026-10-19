@@ -29,6 +29,7 @@ import pytest
 from src.shared.python.lifting.back_bar import BAR_CENTRE_FRAME, BackBarGeometry
 from src.shared.python.lifting.back_rack import (
     HIGH_BAR,
+    HIGH_BAR_GRIP_WIDTH_M,
     RACK_SOURCES,
     TRUNK_POSTERIOR_LOCAL,
     BackRack,
@@ -107,6 +108,17 @@ def test_rack_offset_rejects_a_spec_without_the_landmark() -> None:
 def test_rack_rejects_a_bad_clearance(clearance: float) -> None:
     with pytest.raises(ValueError):
         BackRack("x", "BackTop", "", clearance_m=clearance)
+
+
+def test_high_bar_specifies_grip_width() -> None:
+    assert HIGH_BAR.grip_width_m == HIGH_BAR_GRIP_WIDTH_M == 0.75
+    assert HIGH_BAR.to_record()["grip_width_m"] == 0.75
+
+
+@pytest.mark.parametrize("grip_width", [0.0, -0.5, float("nan"), float("inf")])
+def test_rack_rejects_a_bad_grip_width(grip_width: float) -> None:
+    with pytest.raises(ValueError, match="grip_width_m"):
+        BackRack("x", "BackTop", "", grip_width_m=grip_width)
 
 
 def test_geometry_carries_the_rack_and_rejects_a_non_rack() -> None:

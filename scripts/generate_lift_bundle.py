@@ -144,6 +144,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="back_bar only: balance the bar load over mid-foot (#13093, opt-in)",
     )
+    parser.add_argument(
+        "--grip-width",
+        type=float,
+        default=None,
+        help="meters; default: rack's cited grip width or standard's",
+    )
     return parser
 
 
@@ -162,7 +168,10 @@ def _full_body(args: argparse.Namespace, lift: LiftRecipe, solution: Any) -> Any
         return lift_to_full_body(spec, solution, load_seed_pose())
     rack = None if args.rack == "standard" else RACKS[args.rack]
     geometry = BackBarGeometry.from_standard(
-        BACK_SQUAT, height_m=args.height, rack=rack
+        BACK_SQUAT,
+        height_m=args.height,
+        rack=rack,
+        grip_width_m=args.grip_width,
     )
     load = (
         LoadBalance(Barbell(float(solution.source["bar_mass_kg"])))

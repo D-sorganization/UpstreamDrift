@@ -111,3 +111,82 @@ def test_angle_stack_inherits_study_provenance(study_factory) -> None:
     assert stack.distribution_source == SOURCE
     assert stack.scientific_status == "unqualified"
     assert stack.levels == tuple(SpinalLevel[lv.name] for lv in LEVELS)
+
+
+def test_list_available_coupling_laws() -> None:
+    laws = core.list_available_coupling_laws()
+    assert isinstance(laws, tuple)
+    assert "bruno2015_regional" in laws
+    assert "uniform_reference" in laws
+
+
+def test_list_available_assets() -> None:
+    assets = core.list_available_assets()
+    assert isinstance(assets, list)
+    by_id = {a["asset_id"]: a for a in assets}
+    assert "fixture" in by_id
+    assert by_id["fixture"]["status"] == "fixture"
+    assert by_id["fixture"]["is_fixture"] is True
+    assert "bruno2015_fullbody_os4_v2" in by_id
+
+
+def test_build_study_request_payload_valid() -> None:
+    payload = core.build_study_request_payload(
+        study_id="my_study_01",
+        asset_id="fixture",
+        motion_path="tests/data/motion_pipeline/golden/sample.sto",
+        coupling_law_id="bruno2015_regional",
+    )
+    assert payload["study_id"] == "my_study_01"
+    assert payload["asset_id"] == "fixture"
+    assert payload["model_id"] == "fixture"
+    assert payload["motion_path"] == "tests/data/motion_pipeline/golden/sample.sto"
+    assert payload["coupling_law_id"] == "bruno2015_regional"
+
+
+def test_build_study_request_payload_validation() -> None:
+    with pytest.raises(ValueError, match="study_id"):
+        core.build_study_request_payload(
+            study_id="",
+            asset_id="fixture",
+            motion_path="tests/data/motion_pipeline/golden/sample.sto",
+        )
+    with pytest.raises(TypeError, match="study_id"):
+        core.build_study_request_payload(
+            study_id=123,  # type: ignore[arg-type]
+            asset_id="fixture",
+            motion_path="tests/data/motion_pipeline/golden/sample.sto",
+        )
+    with pytest.raises(ValueError, match="asset_id"):
+        core.build_study_request_payload(
+            study_id="s1",
+            asset_id="  ",
+            motion_path="tests/data/motion_pipeline/golden/sample.sto",
+        )
+    with pytest.raises(ValueError, match="motion_path"):
+        core.build_study_request_payload(
+            study_id="s1",
+            asset_id="fixture",
+            motion_path="",
+        )
+
+
+def test_build_study_request_parses_request(tmp_path) -> None:
+    motion = tmp_path / "swing.sto"
+    motion.write_text("motion")
+    golf_model = tmp_path / "golf.osim"
+    golf_model.write_text("golf")
+    model = tmp_path / "mod.osim"
+    model.write_text("model")
+
+    payload = {
+        "study_id": "study_run",
+        "model_id": "fixture",
+        "motion_path": str(motion),
+        "golf_model_path": str(golf_model),
+        "model_path": str(model),
+        "coupling_law_id": "uniform_reference",
+    }
+    req = core.build_study_request(payload, root=tmp_path)
+    assert req.study_id == "study_run"
+    assert req.coupling_law_id == "uniform_reference"

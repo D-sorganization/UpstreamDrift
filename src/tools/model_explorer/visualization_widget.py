@@ -7,6 +7,7 @@
 import math
 
 import defusedxml.ElementTree as ET
+import numpy as np
 from PyQt6.QtCore import QPointF, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QMouseEvent, QPainter, QPen, QWheelEvent
 from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
@@ -16,6 +17,8 @@ from src.shared.python.engine_core.engine_availability import (  # noqa: E402
 )
 from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
 from src.shared.python.theme.tool_stylesheet import get_tool_colors  # noqa: E402
+from .playback_bar import PlaybackBar
+
 
 logger = get_logger(__name__)
 
@@ -95,7 +98,37 @@ class VisualizationWidget(QWidget):
 
         self._selected_object: str | None = None
 
+        self._marker_positions: np.ndarray | None = None
+
         self._setup_ui()
+
+    @property
+    def marker_positions(self) -> np.ndarray | None:
+        """Current marker positions rendered in the viewport, shape (k, 3) or None."""
+        return self._marker_positions
+
+    @property
+    def current_markers(self) -> np.ndarray | None:
+        """Alias for marker_positions."""
+        return self._marker_positions
+
+    def set_markers(self, markers: np.ndarray | None) -> None:
+        """Update marker positions for the current playback frame."""
+        self._marker_positions = (
+            np.asarray(markers, dtype=float) if markers is not None else None
+        )
+        if hasattr(self, "gl_widget"):
+            self.gl_widget.set_markers(self._marker_positions)
+        if (
+            self.use_mujoco
+            and self.mujoco_widget is not None
+            and hasattr(self.mujoco_widget, "set_markers")
+        ):
+            self.mujoco_widget.set_markers(self._marker_positions)
+        if self._marker_positions is not None:
+            self.info_label.setText(
+                f"Markers: {len(self._marker_positions)} (playback)"
+            )
 
     def _setup_ui(self) -> None:
         """Set up the user interface."""
@@ -147,6 +180,9 @@ class VisualizationWidget(QWidget):
         """)
 
         layout.addWidget(self.info_label)
+
+        self.playback_bar = PlaybackBar(self)
+        layout.addWidget(self.playback_bar)
 
     def update_visualization(
         self, urdf_content: str, urdf_path: str | None = None
@@ -401,13 +437,17 @@ class Simple3DVisualizationWidget(QWidget):
 
         self._highlighted_object: str | None = None
 
+        self._marker_positions: np.ndarray | None = None
+
         # Timer for animation, parented so it stops when the widget is deleted
-
         self.timer = QTimer(self)
-
         self.timer.timeout.connect(self.update)
-
         self.timer.start(16)  # ~60 FPS
+
+    def set_markers(self, markers: np.ndarray | None) -> None:
+        """Set marker positions to render in the fallback view."""
+        self._marker_positions = markers
+        self.update()
 
     def set_highlighted_object(self, name: str | None) -> None:
         """Set the currently highlighted object.
@@ -553,7 +593,19 @@ class Simple3DVisualizationWidget(QWidget):
 
         self._draw_grid(painter)
         self._draw_axes(painter)
+        self._draw_markers(painter)
         self._draw_overlay_info(painter)
+
+    def _draw_markers(self, painter: QPainter) -> None:
+        """Draw 3D markers projected to 2D screen coordinates."""
+        if self._marker_positions is None or len(self._marker_positions) == 0:
+            return
+        painter.setBrush(QColor(255, 127, 14))
+        painter.setPen(QPen(QColor(255, 255, 255), 1))
+        for pt in self._marker_positions:
+            if pt is not None and len(pt) >= 3 and np.all(np.isfinite(pt[:3])):
+                px, py = self.project_point(float(pt[0]), float(pt[1]), float(pt[2]))
+                painter.drawEllipse(QPointF(px, py), 4.0, 4.0)
 
     def mousePressEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse press events.

@@ -466,13 +466,16 @@ class TestTerrainEdgeCases:
         """Queries at terrain boundaries should work."""
         terrain = create_flat_terrain("Test", 100.0, 100.0)
 
-        # Queries at edges
-        terrain.elevation.get_elevation(0.0, 0.0)
-        terrain.elevation.get_elevation(100.0, 0.0)
-        terrain.elevation.get_elevation(0.0, 100.0)
-        terrain.elevation.get_elevation(100.0, 100.0)
-
-        # Should not raise exceptions
+        corners = (
+            (0.0, 0.0),
+            (100.0, 0.0),
+            (0.0, 100.0),
+            (100.0, 100.0),
+        )
+        for x, y in corners:
+            elevation = terrain.elevation.get_elevation(x, y)
+            assert np.isfinite(elevation), f"non-finite elevation at ({x}, {y})"
+            assert elevation == 0.0, f"flat terrain corner elevation at ({x}, {y})"
 
     def test_very_small_penetration(self) -> None:
         """Very small penetrations should produce proportional forces."""
