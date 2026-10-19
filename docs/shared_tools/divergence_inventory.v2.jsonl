@@ -2610,6 +2610,7 @@
 {"path": "sidekick/tests/test_thermal_profile_predictor.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/test_unit_aware_input.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/test_unit_converter_widget.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/tests/test_unit_converter_widget_lifetime.py", "classification": "tools-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/test_unit_preferences_manager.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/ui/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/tests/ui/test_catppuccin_theme.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
