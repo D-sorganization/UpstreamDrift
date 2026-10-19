@@ -38,6 +38,7 @@ Array = NDArray[np.float64]
 __all__ = [
     "BackRack",
     "HIGH_BAR",
+    "HIGH_BAR_GRIP_WIDTH_M",
     "RACK_SOURCES",
     "RACKS",
     "rack_bar_world",
@@ -58,6 +59,12 @@ RACK_SOURCES: tuple[str, ...] = (
 TRUNK_POSTERIOR_LOCAL = (-1.0, 0.0, 0.0)
 #: Men's bar shaft radius (28 mm shaft), :class:`~.barbell_bushing.Barbell`.
 SHAFT_RADIUS_M = 0.014
+#: High-bar grip width, metres: 0.75 m. Chosen from the reachability sweep
+#: inside the parity standard's grip range [0.45, 0.90] m (OSL-19 #13158,
+#: OSL-20 #13159; see docs/development/lifting/evidence/back_squat/README.md).
+#: Note: Glassbrook et al. 2019 and Wretenberg et al. 1996 describe the bar
+#: placement on the trapezius, not a grip width.
+HIGH_BAR_GRIP_WIDTH_M = 0.75
 
 
 @dataclass(frozen=True)
@@ -70,18 +77,28 @@ class BackRack:
         description: Landmark definition, as worded by :data:`RACK_SOURCES`.
         clearance_m: Distance from the skin landmark to the bar's long axis
             along the trunk's posterior axis (the shaft radius).
+        grip_width_m: Grip width for this rack position, metres
+            (OSL-19, #13158; OSL-20, #13159). If ``None``, defaults to the
+            parity standard's grip width.
     """
 
     name: str
     landmark: str
     description: str
     clearance_m: float = SHAFT_RADIUS_M
+    grip_width_m: float | None = None
 
     def __post_init__(self) -> None:
         if not self.name or not self.landmark:
             raise ValueError("a rack needs a name and a landmark")
         if not (math.isfinite(self.clearance_m) and self.clearance_m >= 0.0):
             raise ValueError(f"clearance_m must be finite and >= 0: {self.clearance_m}")
+        if self.grip_width_m is not None and not (
+            math.isfinite(self.grip_width_m) and self.grip_width_m > 0.0
+        ):
+            raise ValueError(
+                f"grip_width_m must be finite and > 0: {self.grip_width_m}"
+            )
 
     def to_record(self) -> dict[str, Any]:
         """JSON-serialisable provenance of the rack definition."""
@@ -90,6 +107,7 @@ class BackRack:
             "landmark": self.landmark,
             "description": self.description,
             "clearance_m": self.clearance_m,
+            "grip_width_m": self.grip_width_m,
             "posterior_axis_local": list(TRUNK_POSTERIOR_LOCAL),
             "sources": list(RACK_SOURCES),
         }
@@ -100,6 +118,7 @@ HIGH_BAR = BackRack(
     landmark="BackTop",
     description="across the top of the trapezius, just below the process of "
     "the C7 vertebra (lift-body marker BackTop: C7 spinous-process surface)",
+    grip_width_m=HIGH_BAR_GRIP_WIDTH_M,
 )
 RACKS: Mapping[str, BackRack] = {HIGH_BAR.name: HIGH_BAR}
 

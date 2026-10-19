@@ -1,30 +1,30 @@
 {
   "bundle": "docs/development/lifting/evidence/back_squat/back_squat_barbell_bundle.npz",
-  "bundle_spec_sha256": "617433abe253d7a658372efb4463aec9dfe7f59256628450d8bae7ec36f6e4d8",
+  "bundle_spec_sha256": "a35950b3680227bc5417b831b5e39a7eed40dd9f3673e71f7b472872496d7d76",
   "engines": {
     "drake": {
-      "bar_acceleration": 1.8866099349423848e-08,
-      "body_acceleration": 5.494533805716628e-07,
-      "hand_force_L": 1.0568462549542801e-08,
-      "hand_force_R": 1.0584402465596554e-08,
-      "hand_moment_L": 5.399907188063935e-10,
-      "hand_moment_R": 5.399907188063935e-10
+      "bar_acceleration": 8.554191355258922e-09,
+      "body_acceleration": 5.026598550728067e-07,
+      "hand_force_L": 1.685196363010455e-08,
+      "hand_force_R": 1.763727402639265e-08,
+      "hand_moment_L": 1.0431307206903995e-09,
+      "hand_moment_R": 1.0431307206903995e-09
     },
     "opensim": {
-      "bar_acceleration": 1.4271418713462936e-08,
-      "body_acceleration": 4.397282165058414e-07,
-      "hand_force_L": 1.2208037691863183e-08,
-      "hand_force_R": 1.2239848690143162e-08,
-      "hand_moment_L": 4.245438445238392e-10,
-      "hand_moment_R": 4.245438445238392e-10
+      "bar_acceleration": 9.747819995631346e-09,
+      "body_acceleration": 4.575730834233127e-07,
+      "hand_force_L": 1.8734087697813706e-08,
+      "hand_force_R": 1.9182264973365156e-08,
+      "hand_moment_L": 9.492714947434422e-10,
+      "hand_moment_R": 9.492714947434422e-10
     },
     "pinocchio": {
-      "bar_acceleration": 1.6114768186525907e-08,
-      "body_acceleration": 3.732712308135433e-07,
-      "hand_force_L": 1.2726744103019882e-08,
-      "hand_force_R": 1.2736330767815218e-08,
-      "hand_moment_L": 4.809459497323587e-10,
-      "hand_moment_R": 4.809459497323587e-10
+      "bar_acceleration": 9.5974732605697e-09,
+      "body_acceleration": 3.357980844498343e-07,
+      "hand_force_L": 1.8233956025626163e-08,
+      "hand_force_R": 1.9009115511982582e-08,
+      "hand_moment_L": 9.87807363683757e-10,
+      "hand_moment_R": 9.87807363683757e-10
     }
   },
   "generator": "scripts/generate_barbell_squat_evidence.py --part parity",
@@ -43,13 +43,13 @@
   ],
   "lift": "back_squat",
   "mujoco_scale": {
-    "bar_acceleration": 7.098112824849612,
-    "body_acceleration": 111.35081415803992,
-    "hand_force_L": 860.9272856488441,
-    "hand_force_R": 829.5489968361171,
-    "hand_moment_L": 7.169347185504905,
-    "hand_moment_R": 7.169347185504905
+    "bar_acceleration": 7.1498382899286534,
+    "body_acceleration": 104.35398314859852,
+    "hand_force_L": 861.8938267946596,
+    "hand_force_R": 833.7550021982057,
+    "hand_moment_L": 6.018580226958171,
+    "hand_moment_R": 6.018580226958171
   },
-  "source_commit": "a53b8cf9c2f28f8e1a5572343205d6b96c8b129f",
+  "source_commit": "f83f2a32846d4a95d9d66a0d6a7048800a88e039",
   "tolerance": "|dX| <= 1e-6 + 1e-8 * max|X| (L1, epic #11605)"
 }
