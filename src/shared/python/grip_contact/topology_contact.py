@@ -51,6 +51,7 @@ from src.shared.python.grip_contact.pair_contact import (
     ContactSphere,
     PairWrench,
     capsule_capsule,
+    capsule_sphere,
     sphere_capsule,
 )
 from src.shared.python.motion_matching.contact_law import ContactParameters
@@ -67,6 +68,7 @@ __all__ = [
     "hand_x_origin",
     "map_site_to_hand_frame",
     "site_primitive_in_hand_frame",
+    "topology_hand_hand_pair_wrench",
     "topology_pair_wrench",
     "topology_side_wrench",
 ]
@@ -256,6 +258,7 @@ class TopologyContactModel:
                 f"got {self.spin_transition_rad_s}"
             )
 
+        topo = self.topology
         capsules = {s: self._make_grip_capsule(s) for s in ("L", "R")}
         object.__setattr__(self, "_grip_capsules", capsules)
 
@@ -264,10 +267,10 @@ class TopologyContactModel:
         ] = {}
         for role, side_char in (("lead", "L"), ("trail", "R")):
             p_list = []
-            for p in self.topology.pairs:
-                if p.is_hand_grip and self.topology.site(p.site_a).hand == role:
-                    site = self.topology.site(p.site_a)
-                    prim = site_primitive_in_hand_frame(self.topology, site, side_char)
+            for p in topo.pairs:
+                site = topo.site(p.site_a)
+                if p.is_hand_grip and site.hand == role:
+                    prim = site_primitive_in_hand_frame(topo, site, side_char)
                     p_list.append((p, prim))
             pairs_dict[side_char] = tuple(p_list)
         object.__setattr__(self, "_physical_pairs", pairs_dict)
@@ -301,19 +304,20 @@ class TopologyContactModel:
 
     def _make_grip_capsule(self, side: str) -> ContactCapsule:
         _, side_char = _normalize_side(side)
+        cyl = self.cylinder
         axis_offset = np.array(
             [
                 0.0,
                 0.0,
-                -self.cylinder.radius_m if side_char == "L" else self.cylinder.radius_m,
+                -cyl.radius_m if side_char == "L" else cyl.radius_m,
             ]
         )
-        origin_s = self.cylinder.origin_axial_m(side_char)
-        s_lo = self.cylinder.axial_range_m[0] - origin_s
-        s_hi = self.cylinder.axial_range_m[1] - origin_s
+        origin_s = cyl.origin_axial_m(side_char)
+        s_lo = cyl.axial_range_m[0] - origin_s
+        s_hi = cyl.axial_range_m[1] - origin_s
         p0 = axis_offset + np.array([s_lo, 0.0, 0.0])
         p1 = axis_offset + np.array([s_hi, 0.0, 0.0])
-        return ContactCapsule(p0_m=p0, p1_m=p1, radius_m=self.cylinder.radius_m)
+        return ContactCapsule(p0_m=p0, p1_m=p1, radius_m=cyl.radius_m)
 
     def grip_capsule(self, side: str) -> ContactCapsule:
         """Grip cylinder segment modeled as a ContactCapsule in ``side``'s club frame."""
@@ -395,7 +399,8 @@ def topology_pair_wrench(
         raise TypeError(
             f"model must be TopologyContactModel, got {type(model).__name__}"
         )
-    target_pair = model.topology.pair(pair) if isinstance(pair, str) else pair
+    topo = model.topology
+    target_pair = topo.pair(pair) if isinstance(pair, str) else pair
     if not isinstance(target_pair, ContactPair):
         raise TypeError(
             f"pair must be ContactPair or str, got {type(target_pair).__name__}"
@@ -413,11 +418,102 @@ def topology_pair_wrench(
     _validate_bushing_state(hand_frame, "hand_frame")
     _validate_bushing_state(club_frame, "club_frame")
 
-    site = model.topology.site(target_pair.site_a)
+    site = topo.site(target_pair.site_a)
     side_char = "L" if site.hand == "lead" else "R"
-    prim_a = site_primitive_in_hand_frame(model.topology, site, side_char)
+    prim_a = site_primitive_in_hand_frame(topo, site, side_char)
     prim_b = model.grip_capsule(side_char)
     return _evaluate_site_on_grip(model, prim_a, prim_b, hand_frame, club_frame)
+
+
+def topology_hand_hand_pair_wrench(
+    model: TopologyContactModel,
+    pair: ContactPair | str,
+    frame_a: BushingState,
+    frame_b: BushingState,
+    *,
+    mode: str = "separated_v2",
+    handedness: Handedness = DEFAULT_HANDEDNESS,
+) -> PairWrench:
+    """Evaluate physical contact wrench for a hand-hand pair on separate phalanx/hand bodies.
+
+    Preconditions:
+        ``model`` is a :class:`TopologyContactModel`;
+        ``pair`` is a hand-hand :class:`ContactPair` in ``model.topology``;
+        ``mode`` is in ``pair.physical_modes`` (e.g. ``'separated_v2'``);
+        ``frame_a`` and ``frame_b`` are valid :class:`BushingState` instances.
+    Postconditions:
+        Returns :class:`PairWrench` evaluated via the G2 kernels
+        (:func:`sphere_capsule`, :func:`capsule_sphere`, :func:`capsule_capsule`)
+        satisfying exact action-reaction.
+    """
+    if not isinstance(model, TopologyContactModel):
+        raise TypeError(
+            f"model must be TopologyContactModel, got {type(model).__name__}"
+        )
+    topo = model.topology
+    target_pair = topo.pair(pair) if isinstance(pair, str) else pair
+    if not isinstance(target_pair, ContactPair):
+        raise TypeError(
+            f"pair must be ContactPair or str, got {type(target_pair).__name__}"
+        )
+    if not target_pair.is_hand_hand:
+        raise ValueError(f"pair {target_pair.name!r} is not a hand-hand pair")
+    if mode not in target_pair.physical_modes:
+        raise ValueError(
+            f"hand-hand pair {target_pair.name!r} is not physical in mode {mode!r} "
+            f"(physical modes: {target_pair.physical_modes})"
+        )
+    _validate_bushing_state(frame_a, "frame_a")
+    _validate_bushing_state(frame_b, "frame_b")
+
+    site_a = topo.site(target_pair.site_a)
+    site_b = topo.site(target_pair.site_b)
+    l_side = lead_side(handedness)
+    t_side = trail_side(handedness)
+    side_a = l_side if site_a.hand == "lead" else t_side
+    side_b = l_side if site_b.hand == "lead" else t_side
+
+    cyl = model.cylinder
+    x_lead = hand_x_origin(topo, "lead")
+    x_trail = x_lead - cyl.left_axial_m if l_side == "L" else x_lead + cyl.left_axial_m
+    x_orig_a = x_lead if site_a.hand == "lead" else x_trail
+    x_orig_b = x_lead if site_b.hand == "lead" else x_trail
+
+    prim_a = site_primitive_in_hand_frame(topo, site_a, side_a, x_origin=x_orig_a)
+    prim_b = site_primitive_in_hand_frame(topo, site_b, side_b, x_origin=x_orig_b)
+    if isinstance(prim_a, ContactSphere) and isinstance(prim_b, ContactCapsule):
+        return sphere_capsule(
+            prim_a,
+            prim_b,
+            frame_a,
+            frame_b,
+            model.law,
+            patch_radius_m=model.patch_radius_m,
+            spin_transition_rad_s=model.spin_transition_rad_s,
+        )
+    if isinstance(prim_a, ContactCapsule) and isinstance(prim_b, ContactSphere):
+        return capsule_sphere(
+            prim_a,
+            prim_b,
+            frame_a,
+            frame_b,
+            model.law,
+            patch_radius_m=model.patch_radius_m,
+            spin_transition_rad_s=model.spin_transition_rad_s,
+        )
+    if isinstance(prim_a, ContactCapsule) and isinstance(prim_b, ContactCapsule):
+        return capsule_capsule(
+            prim_a,
+            prim_b,
+            frame_a,
+            frame_b,
+            model.law,
+            patch_radius_m=model.patch_radius_m,
+            spin_transition_rad_s=model.spin_transition_rad_s,
+        )
+    raise ValueError(
+        f"unsupported hand-hand primitive combination for {target_pair.name!r}"
+    )
 
 
 def topology_side_wrench(

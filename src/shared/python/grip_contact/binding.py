@@ -50,6 +50,7 @@ from src.shared.python.grip_contact.topology_contact import (
     TopologySideWrench,
     aggregate_side_wrench,
     map_site_to_hand_frame,
+    topology_hand_hand_pair_wrench,
     topology_pair_wrench,
 )
 from src.shared.python.motion_matching.full_body_schema import (
@@ -715,13 +716,14 @@ def _assemble_body_wrenches(
     forces: dict[str, np.ndarray] = {b: np.zeros(3) for b in binding.required_bodies()}
     moments: dict[str, np.ndarray] = {b: np.zeros(3) for b in binding.required_bodies()}
     club_body = binding.club_body
-    p_club = body_states[club_body].position_m
 
     for pair_name, pw in physical_pair_wrenches.items():
         pair = topology.pair(pair_name)
         sb_a = site_map[pair.site_a]
         body_a = sb_a.body_id
+        body_b = club_body if pair.site_b == GRIP else site_map[pair.site_b].body_id
         p_body_a = body_states[body_a].position_m
+        p_body_b = body_states[body_b].position_m
 
         forces[body_a] = forces[body_a] + pw.force_a_n
         moments[body_a] = (
@@ -730,14 +732,72 @@ def _assemble_body_wrenches(
             + cross3(pw.point_a_m - p_body_a, pw.force_a_n)
         )
 
-        forces[club_body] = forces[club_body] + pw.force_b_n
-        moments[club_body] = (
-            moments[club_body]
+        forces[body_b] = forces[body_b] + pw.force_b_n
+        moments[body_b] = (
+            moments[body_b]
             + pw.moment_b_nm
-            + cross3(pw.point_b_m - p_club, pw.force_b_n)
+            + cross3(pw.point_b_m - p_body_b, pw.force_b_n)
         )
 
     return {b: (forces[b], moments[b]) for b in forces}
+
+
+def _evaluate_physical_hand_hand_pairs(
+    topology_model: TopologyContactModel,
+    binding: HandClubBinding,
+    body_states: Mapping[str, RigidBodyState],
+    physical_pair_wrenches: dict[str, PairWrench],
+    channels: tuple[
+        dict[str, float],
+        dict[str, float],
+        dict[str, float],
+        dict[str, PairLabel],
+        dict[str, str],
+    ],
+) -> None:
+    """Evaluate physical hand-hand pairs on separate phalanges/hands via G2 kernels."""
+    normal_force_n, tangential_force_n, spin_moment_nm, pair_labels, reasons = channels
+    topology = topology_model.topology
+    site_map = binding.site_binding_map()
+    unavail = binding.unavailable_sites
+    handedness = binding.handedness
+    l_side = lead_side(handedness)
+    t_side = trail_side(handedness)
+    mode = binding.attachment_mode
+
+    for pair in topology.hand_hand_pairs():
+        pair_labels[pair.name] = "physical"
+        site_reason = unavail.get(pair.site_a) or unavail.get(pair.site_b)
+        if site_reason is not None:
+            normal_force_n[pair.name] = float("nan")
+            tangential_force_n[pair.name] = float("nan")
+            spin_moment_nm[pair.name] = float("nan")
+            reasons[pair.name] = site_reason
+            continue
+        site_a = topology.site(pair.site_a)
+        site_b = topology.site(pair.site_b)
+        sb_a = site_map[pair.site_a]
+        sb_b = site_map[pair.site_b]
+        side_a = l_side if site_a.hand == "lead" else t_side
+        side_b = l_side if site_b.hand == "lead" else t_side
+        frame_a = _implied_hand_frame_for_site(
+            topology, site_a, side_a, sb_a, body_states[sb_a.body_id]
+        )
+        frame_b = _implied_hand_frame_for_site(
+            topology, site_b, side_b, sb_b, body_states[sb_b.body_id]
+        )
+        pw = topology_hand_hand_pair_wrench(
+            topology_model,
+            pair,
+            frame_a,
+            frame_b,
+            mode=mode,
+            handedness=handedness,
+        )
+        physical_pair_wrenches[pair.name] = pw
+        normal_force_n[pair.name] = float(pw.normal_force_mag_n)
+        tangential_force_n[pair.name] = float(pw.tangential_force_mag_n)
+        spin_moment_nm[pair.name] = _spin_magnitude_nm(pw)
 
 
 def _record_hand_grip_channels(
@@ -932,9 +992,15 @@ def evaluate_contacts(
         unavailable_reasons,
     )
     _record_hand_grip_channels(topology, binding, evaluated_pair_wrenches, channels)
-    allocated = _record_allocated_channels(
-        topology_model, binding, club_state, closure, prior, channels
-    )
+    allocated: AllocatedHandContacts | None = None
+    if binding.attachment_mode in PHYSICAL_HAND_HAND_MODES:
+        _evaluate_physical_hand_hand_pairs(
+            topology_model, binding, body_states, physical_pair_wrenches, channels
+        )
+    else:
+        allocated = _record_allocated_channels(
+            topology_model, binding, club_state, closure, prior, channels
+        )
     allocated_labels = {
         p.name: p.allocated_label
         for p in topology.pairs

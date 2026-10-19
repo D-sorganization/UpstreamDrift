@@ -214,11 +214,77 @@ def test_headless_showcase_smoke_render(tmp_path: Path) -> None:
     assert manifest["schema"] == "lifting-showcase-manifest/v1"
     assert manifest["lift"] == "overhead_press"
     assert len(manifest["entries"]) == 1
-    # opensim is unavailable, should report unavailable
+    entry = manifest["entries"][0]
+    assert entry["engine"] == "opensim"
+    if render_lifting_showcase.is_engine_available("opensim"):
+        assert entry["status"] == "rendered"
+        assert entry["frame_count"] == 1
+        assert len(entry["rendered_files"]) == 1
+    else:
+        assert entry["status"] == "unavailable"
+        assert entry["rendered_files"] == []
+
+    manifest_file = tmp_path / "overhead_press" / "manifest.json"
+    assert manifest_file.exists()
+    loaded = json.loads(manifest_file.read_text(encoding="utf-8"))
+    assert loaded["lift"] == "overhead_press"
+
+
+def test_headless_showcase_smoke_render_when_opensim_available(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        render_lifting_showcase, "is_engine_available", lambda eng: eng == "opensim"
+    )
+    plan = render_lifting_showcase.plan_lifting_showcase(
+        lift="overhead_press",
+        engines=["opensim"],
+        views=["side"],
+        speeds=[1.0],
+        overlays=["clean"],
+        out_dir=tmp_path,
+    )
+    manifest = render_lifting_showcase.render_lifting_showcase_smoke(
+        plan, frames_per_variant=1
+    )
+    assert manifest["schema"] == "lifting-showcase-manifest/v1"
+    assert manifest["lift"] == "overhead_press"
+    assert len(manifest["entries"]) == 1
+    entry = manifest["entries"][0]
+    assert entry["engine"] == "opensim"
+    assert entry["status"] == "rendered"
+    assert entry["frame_count"] == 1
+    assert len(entry["rendered_files"]) == 1
+    manifest_file = tmp_path / "overhead_press" / "manifest.json"
+    assert manifest_file.exists()
+    loaded = json.loads(manifest_file.read_text(encoding="utf-8"))
+    assert loaded["lift"] == "overhead_press"
+
+
+def test_headless_showcase_smoke_render_when_opensim_unavailable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        render_lifting_showcase, "is_engine_available", lambda _eng: False
+    )
+    plan = render_lifting_showcase.plan_lifting_showcase(
+        lift="overhead_press",
+        engines=["opensim"],
+        views=["side"],
+        speeds=[1.0],
+        overlays=["clean"],
+        out_dir=tmp_path,
+    )
+    manifest = render_lifting_showcase.render_lifting_showcase_smoke(
+        plan, frames_per_variant=1
+    )
+    assert manifest["schema"] == "lifting-showcase-manifest/v1"
+    assert manifest["lift"] == "overhead_press"
+    assert len(manifest["entries"]) == 1
     entry = manifest["entries"][0]
     assert entry["engine"] == "opensim"
     assert entry["status"] == "unavailable"
-
+    assert entry["rendered_files"] == []
     manifest_file = tmp_path / "overhead_press" / "manifest.json"
     assert manifest_file.exists()
     loaded = json.loads(manifest_file.read_text(encoding="utf-8"))
