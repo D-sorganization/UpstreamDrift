@@ -742,34 +742,34 @@ python3 -m pytest tests/unit/grip_contact/test_mujoco_humanoid_grip_adapter.py
 \subsection{MyoSuite Golfer Grip Adapter (HRG-GS-M7, \#13329)}
 \label{sec:hrg-gs-m7-myosuite-grip}
 
-\textbf{Grip-Site and Club-Shaft Geometry Defect and Fix.}
-Prior to HRG-GS-M7, \texttt{\_worldbody\_addons} in \path{src/engines/physics_engines/myosuite/python/golfer_scene.py} defined the club shaft capsule geom with \texttt{fromto="0 \{-0.5 * club.length\_m\} 0 0 0 0"} (spanning only half the club length from the clubhead origin $\mathbf{0}$ toward the grip butt at $-L_{\mathrm{club}}\hat{\mathbf{y}}$), whereas \texttt{\_club\_grip\_sites\_xml} placed \texttt{grip\_site\_club\_l} and \texttt{grip\_site\_club\_r} near the butt using the full length $L_{\mathrm{club}}$:
+\textbf{Grip-Site, Club-Shaft, and Initial Weld Coincidence Defect and Fix.}
+Prior to HRG-GS-M7, \texttt{\_worldbody\_addons} in \path{src/engines/physics_engines/myosuite/python/golfer_scene.py} defined the club shaft capsule geom with \texttt{fromto="0 \{-0.5 * club.length\_m\} 0 0 0 0"} (spanning only half the club length from the clubhead origin $\mathbf{0}$ toward the grip butt at $-L_{\mathrm{club}}\hat{\mathbf{y}}$), whereas \texttt{\_club\_grip\_site} placed \texttt{grip\_site\_club\_l} and \texttt{grip\_site\_club\_r} near the butt using the full length $L_{\mathrm{club}}$:
 \begin{equation}
 y_{\mathrm{L}} = -\left(L_{\mathrm{club}} - \delta_{\mathrm{butt}}\right), \qquad
 y_{\mathrm{R}} = -\left(L_{\mathrm{club}} - \delta_{\mathrm{butt}} - \Delta s_{\mathrm{LR}}\right),
 \end{equation}
-with $\delta_{\mathrm{butt}} = 0.032\,\mathrm{m}$ and $\Delta s_{\mathrm{LR}} = 0.0762\,\mathrm{m}$ (matching the G0 unified \texttt{GripInterface} axial coordinates in \path{docs/development/full_body_models/full_body_spec_anthro_driver.json}). Consequently, the grip sites lay $\sim 0.546\,\mathrm{m}$ beyond the end of the half-length shaft geom, and the committed MJCF scenes under \path{shared/models/myosuite/golf/body/} retained stale site positions ($y = -0.88 / -0.95\,\mathrm{m}$). Fixing \texttt{\_worldbody\_addons} to span the full club length \texttt{fromto="0 \{-club.length\_m\} 0 0 0 0"} and regenerating the committed scenes places every grip site on the shaft segment within the grip section $y \in [-L_{\mathrm{club}}, -(L_{\mathrm{club}} - L_{\mathrm{grip}})]$ with zero fudge factors (Table~\ref{tab:hrg-gs-m7-shaft-fix}).
+with $\delta_{\mathrm{butt}} = 0.032\,\mathrm{m}$ and $\Delta s_{\mathrm{LR}} = 0.0762\,\mathrm{m}$ (matching the G0 unified \texttt{GripInterface} axial coordinates in \path{docs/development/full_body_models/full_body_spec_anthro_driver.json}). In addition, both hand sites were injected at local \texttt{pos="0 -0.05 0"} ($0.400196\,\mathrm{m}$ apart laterally at \texttt{qpos0} due to the symmetric $\pm 0.200098\,\mathrm{m}$ $z_{\mathrm{sacrum}}$ arm chain offsets) while \texttt{golf\_club} was placed at \texttt{pos="0.3 0 1.0"} with identity quaternion, whereas at \texttt{qpos0} both \texttt{hand\_l} and \texttt{hand\_r} inherit the composition of \texttt{root} (\texttt{pos="0 0 1" euler="0 0 -1.57"}) and \texttt{sacrum} (\texttt{quat="0.707035 0.707179 0 0"}), i.e.\ $\mathbf{q}_{\mathrm{hand}} = (0.500148, 0.500250, -0.499852, -0.499750)$ ($119.9804^{\circ}$ from identity). Because MuJoCo site-based \texttt{<weld site1="..." site2="..."/>} constraints enforce exact world coincidence of position and orientation between \texttt{site1} and \texttt{site2}, evaluating \texttt{efc\_force} after a single step from that violated initial state produced artificial constraint-violation spring forces ($\|\mathbf{F}_{\mathrm{L}}\| = 412.5\,\mathrm{N}$, $\|\mathbf{F}_{\mathrm{R}}\| = 419.2\,\mathrm{N}$, $\|\mathbf{F}_{\mathrm{net}}\| = 628.4\,\mathrm{N}$ on a $0.313\,\mathrm{kg}$ driver whose static weight is $m_{\mathrm{club}} g = 3.071\,\mathrm{N}$). Fixing \texttt{\_worldbody\_addons} to span the full club length \texttt{fromto="0 \{-club.length\_m\} 0 0 0 0"}, placing \texttt{grip\_site\_hand\_l} at $(0.25, -0.0881, +0.200098)\,\mathrm{m}$ and \texttt{grip\_site\_hand\_r} at $(0.25, -0.0119, -0.200098)\,\mathrm{m}$ on the sagittal midline separated by $\Delta s_{\mathrm{LR}} = 0.0762\,\mathrm{m}$, and initializing \texttt{golf\_club} at $\mathbf{q}_{\mathrm{club}} = \mathbf{q}_{\mathrm{hand}}$ with world position matching the exact \texttt{root} $\to$ \texttt{sacrum} $\to$ \texttt{lumbar} $\to$ \texttt{humerus\_l} $\to$ \texttt{ulna\_l} $\to$ \texttt{radius\_l} $\to$ \texttt{hand\_l} chain eliminates the \texttt{qpos0} weld violation to floating-point precision (Table~\ref{tab:hrg-gs-m7-shaft-fix}).
 
 \begin{table}[h!]
 \centering
-\caption{Club Shaft Capsule Span and Grip-Site Axial Coordinates Before and After HRG-GS-M7 (\#13329).}
+\caption{Club Shaft Span, Grip-Site Axial Coordinates, and \texttt{qpos0} Site-Weld Residuals Before and After HRG-GS-M7 (\#13329).}
 \label{tab:hrg-gs-m7-shaft-fix}
 \small
 \begin{tabular}{lrrrrr}
 \toprule
-Scene ($L_{\mathrm{club}}$, $L_{\mathrm{grip}}$) & Shaft $y$ Before (m) & Committed Sites Before (m) & Shaft $y$ After (m) & Grip Segment $y$ (m) & Sites After $(y_{\mathrm{L}}, y_{\mathrm{R}})$ (m) \\
+Scene ($L_{\mathrm{club}}$, $m_{\mathrm{club}}$) & Shaft $y$ After (m) & Sites $(y_{\mathrm{L}}, y_{\mathrm{R}})$ (m) & \texttt{qpos0} $\|\Delta \mathbf{p}\|_{\mathrm{L,R}}$ Before (m) & \texttt{qpos0} $\Delta \theta_{\mathrm{L,R}}$ Before ($^\circ$) & \texttt{qpos0} $\|\Delta \mathbf{p}\|_{\mathrm{L,R}}$ / $\Delta \theta$ After \\
 \midrule
-Driver ($1.156\,\mathrm{m}$, $0.265\,\mathrm{m}$) & $[-0.578, 0.000]$ & $(-0.8800, -0.9500)$ & $[-1.156, 0.000]$ & $[-1.156, -0.891]$ & $(-1.1240, -1.0478)$ \\
-7-Iron ($0.940\,\mathrm{m}$, $0.265\,\mathrm{m}$) & $[-0.470, 0.000]$ & $(-0.8800, -0.9500)$ & $[-0.940, 0.000]$ & $[-0.940, -0.675]$ & $(-0.9080, -0.8318)$ \\
+Driver ($1.156\,\mathrm{m}$, $0.313\,\mathrm{kg}$) & $[-1.156, 0.000]$ & $(-1.1240, -1.0478)$ & $1.235240$ / $1.258779$ & $119.9804$ / $119.9804$ & $\le 1.72 \times 10^{-12}\,\mathrm{m}$ / $1.71 \times 10^{-6\,^\circ}$ \\
+7-Iron ($0.940\,\mathrm{m}$, $0.428\,\mathrm{kg}$) & $[-0.940, 0.000]$ & $(-0.9080, -0.8318)$ & $1.021602$ / $1.065566$ & $119.9804$ / $119.9804$ & $\le 9.80 \times 10^{-13}\,\mathrm{m}$ / $1.71 \times 10^{-6\,^\circ}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \textbf{Model Topology, Manifests, and Dual-Mode Contract.}
-In \path{src/engines/physics_engines/myosuite/python/golfer_scene.py}, \texttt{MyoSuiteGolferGripAdapter} implements \texttt{ModelGripAdapter} for the two admitted MyoSuite golfer scenes ($n_{\mathrm{body}} = 33$, $n_{\mathrm{eq}} = 20$), each backed by a \texttt{grip-binding/v1} manifest under \path{src/config/grip_bindings/}:
+Scene generation lives in \path{src/engines/physics_engines/myosuite/python/golfer_scene.py}, while \texttt{MyoSuiteGolferGripAdapter}, \texttt{BimanualGraspSynthesis}, and \texttt{SettledWeldNewtonReport} live in the sibling module \path{src/engines/physics_engines/myosuite/python/golfer_grip_adapter.py} (with no re-export shim in \texttt{golfer\_scene.py}). The adapter implements \texttt{ModelGripAdapter} for the two admitted MyoSuite golfer scenes ($n_{\mathrm{body}} = 33$, $n_{\mathrm{eq}} = 20$), each backed by a \texttt{grip-binding/v1} manifest under \path{src/config/grip_bindings/}:
 \begin{enumerate}[leftmargin=*,noitemsep]
-\item \texttt{myosuite\_golfer\_driver} (\path{shared/models/myosuite/golf/body/golfer_myobody_driver.xml}, SHA-256 \texttt{133ad3e0...});
-\item \texttt{myosuite\_golfer\_iron} (\path{shared/models/myosuite/golf/body/golfer_myobody_iron.xml}, SHA-256 \texttt{f387f7d6...}).
+\item \texttt{myosuite\_golfer\_driver} (\path{shared/models/myosuite/golf/body/golfer_myobody_driver.xml}, SHA-256 \texttt{3a007bd9...});
+\item \texttt{myosuite\_golfer\_iron} (\path{shared/models/myosuite/golf/body/golfer_myobody_iron.xml}, SHA-256 \texttt{550b000e...}).
 \end{enumerate}
 The adapter binds \texttt{lead\_hand\_body="hand\_l"}, \texttt{trail\_hand\_body="hand\_r"}, and \texttt{club\_body="golf\_club"} (where \texttt{golf\_club} sits in \texttt{<worldbody>} with a 6-DOF \texttt{<freejoint name="club\_free"/>} and is coupled to \texttt{hand\_l} and \texttt{hand\_r} by site-weld equalities \texttt{grip\_weld\_l} and \texttt{grip\_weld\_r}), resolving $100\%$ of canonical \texttt{ContactTopology} sites via rigid-hand finger proxies (\texttt{representation="rigid\_proxy"}). Two mutually exclusive operating modes are supported:
 \begin{itemize}[leftmargin=*,noitemsep]
@@ -777,24 +777,52 @@ The adapter binds \texttt{lead\_hand\_body="hand\_l"}, \texttt{trail\_hand\_body
 \item \textbf{Contact Mode (\texttt{contact\_mode=True}):} Disables only \texttt{grip\_weld\_l} and \texttt{grip\_weld\_r} in \texttt{model.eq\_active0} and \texttt{data.eq\_active} (leaving all $18$ patellar/knee and foot-contact equalities active), declares \texttt{supports\_physical\_pairs=True} and \texttt{supports\_wrench\_application=True}, and applies shared-law pad--grip wrenches to \texttt{hand\_l}, \texttt{hand\_r}, and \texttt{golf\_club} through \texttt{data.xfrc\_applied} transferred to each body's COM \texttt{data.xipos}. If either grip weld is re-enabled in \texttt{data.eq\_active}, \texttt{apply\_wrenches} raises \texttt{WeldedGripBodyError} so weld and shared contact are never applied on the same pair.
 \end{itemize}
 
-\textbf{Bimanual Grasp Synthesis and Measured Parity.}
-With midpoint $\mathbf{r}_{\mathrm{M}} = \tfrac{1}{2}(\mathbf{r}_{\mathrm{L}} + \mathbf{r}_{\mathrm{R}})$ and bimanual grasp matrix $\mathbf{G}(\mathbf{r}_{\mathrm{L}}, \mathbf{r}_{\mathrm{R}}) \in \R^{6 \times 12}$ from \texttt{loop\_nullspace.grip\_split.grasp\_map}, the stacked hand wrench vector $\mathbf{y} = [\mathbf{F}_{\mathrm{L}}^{\top}, \boldsymbol{\tau}_{\mathrm{L}}^{\top}, \mathbf{F}_{\mathrm{R}}^{\top}, \boldsymbol{\tau}_{\mathrm{R}}^{\top}]^{\top} \in \R^{12}$ and net club wrench $\mathbf{w}_{\mathrm{club}} = [\mathbf{F}_{\mathrm{net}}^{\top}, \mathbf{M}_{\mathrm{M}}^{\top}]^{\top} \in \R^{6}$ satisfy:
+\textbf{Settled-State Newton--Euler Check, Bimanual Grasp Synthesis, and Measured Parity.}
+In \texttt{settle\_welded\_club(steps=1000)}, all non-club joints are held stationary at \texttt{qpos0} while the free-jointed \texttt{golf\_club} settles under gravity ($\mathbf{g} = [0, 0, -9.81]^{\top}\,\mathrm{m/s^2}$) through the active \texttt{grip\_weld\_l} and \texttt{grip\_weld\_r} constraints without altering \texttt{model.body\_invweight0}. At the settled state, the net hand-on-club weld force $\mathbf{F}_{\mathrm{net}} = \mathbf{F}_{\mathrm{L}} + \mathbf{F}_{\mathrm{R}}$ and net moment about the club COM $\mathbf{x}_{\mathrm{com}} = \texttt{data.xipos}[\texttt{club}]$ satisfy Newton--Euler balance:
 \begin{equation}
-\|\mathbf{G}\mathbf{y} - \mathbf{w}_{\mathrm{club}}\|_{\infty} \le 10^{-9}\,\mathrm{N}
+\frac{\|\mathbf{F}_{\mathrm{net}} - m_{\mathrm{club}}(\mathbf{a}_{\mathrm{com}} - \mathbf{g})\|}{\|m_{\mathrm{club}}(\mathbf{a}_{\mathrm{com}} - \mathbf{g})\|} \le 5.62 \times 10^{-6} \ll 0.05, \qquad
+\left\|\sum_{h \in \{\mathrm{L},\mathrm{R}\}} \big((\mathbf{r}_h - \mathbf{x}_{\mathrm{com}}) \times \mathbf{F}_h + \boldsymbol{\tau}_h\big)\right\| \le 1.08 \times 10^{-5}\,\mathrm{N\cdot m} \ll 10^{-3}\,\mathrm{N\cdot m}.
 \end{equation}
-across all $3$ grip styles (\texttt{overlap}, \texttt{interlock}, \texttt{ten\_finger}) $\times$ $2$ modes (\texttt{weld}, \texttt{contact}). Table~\ref{tab:hrg-gs-m7-parity} reports the measured site-weld constraint wrenches, allocated \texttt{trail\_palm\_lead\_thumb} magnitudes, bimanual grasp synthesis residuals, and M3 qualification harness parity errors against \texttt{PinocchioGripAdapter} and \texttt{law\_level\_series} on identical site states ($F_{\mathrm{sq}} = 1100.0\,\mathrm{N}$, $\Delta t = 0.002\,\mathrm{s}$, $21$ steps).
+With midpoint $\mathbf{r}_{\mathrm{M}} = \tfrac{1}{2}(\mathbf{r}_{\mathrm{L}} + \mathbf{r}_{\mathrm{R}})$ and bimanual grasp matrix $\mathbf{G}(\mathbf{r}_{\mathrm{L}}, \mathbf{r}_{\mathrm{R}}) \in \R^{6 \times 12}$ from \texttt{loop\_nullspace.grip\_split.grasp\_map}, the stacked hand wrench vector $\mathbf{y} = [\mathbf{F}_{\mathrm{L}}^{\top}, \boldsymbol{\tau}_{\mathrm{L}}^{\top}, \mathbf{F}_{\mathrm{R}}^{\top}, \boldsymbol{\tau}_{\mathrm{R}}^{\top}]^{\top} \in \R^{12}$ and net club wrench $\mathbf{w}_{\mathrm{club}} = [\mathbf{F}_{\mathrm{net}}^{\top}, \mathbf{M}_{\mathrm{M}}^{\top}]^{\top} \in \R^{6}$ satisfy $\|\mathbf{G}\mathbf{y} - \mathbf{w}_{\mathrm{club}}\|_{\infty} \le 10^{-9}\,\mathrm{N}$ across all $3$ grip styles (\texttt{overlap}, \texttt{interlock}, \texttt{ten\_finger}) $\times$ $2$ modes (\texttt{weld}, \texttt{contact}). Table~\ref{tab:hrg-gs-m7-parity} reports the settled site-weld constraint wrenches, Newton relative force error, COM moment residual, bimanual grasp synthesis residuals, and M3 qualification harness parity errors against \texttt{PinocchioGripAdapter} and \texttt{law\_level\_series} on identical site states ($F_{\mathrm{sq}} = 1100.0\,\mathrm{N}$, $\Delta t = 0.002\,\mathrm{s}$, $21$ steps).
 
 \begin{table}[h!]
 \centering
-\caption{Measured Site-Weld Constraint Wrenches, Bimanual Grasp Synthesis Residuals, and M3 Parity Errors (HRG-GS-M7, \#13329).}
+\caption{Settled Site-Weld Wrenches, Newton--Euler Residuals, Bimanual Grasp Synthesis Residuals, and M3 Parity Errors (HRG-GS-M7, \#13329).}
 \label{tab:hrg-gs-m7-parity}
 \small
 \begin{tabular}{lrrrrrrr}
 \toprule
-Model ID & $\|\mathbf{F}_{\mathrm{L}}\|$ (N) & $\|\mathbf{F}_{\mathrm{R}}\|$ (N) & $\|\mathbf{F}_{\mathrm{net}}\|$ (N) & $\|\mathbf{M}_{\mathrm{M}}\|$ (N$\cdot$m) & Palm--Thumb $f_t$ (N) & $\|\mathbf{G}\mathbf{y} - \mathbf{w}_{\mathrm{club}}\|_{\infty}$ (N) & Max $\varepsilon_{\mathrm{peak}}$ / $\varepsilon_{\mathrm{rms}}$ \\
+Model ID & $\|\mathbf{F}_{\mathrm{L}}\|$ / $\|\mathbf{F}_{\mathrm{R}}\|$ (N) & $\|\mathbf{F}_{\mathrm{net}}\|$ (N) & $\|\mathbf{M}_{\mathrm{M}}\|$ (N$\cdot$m) & Newton Rel.\ Err.\ & $\|\mathbf{M}_{\mathrm{com}}\|$ (N$\cdot$m) & $\|\mathbf{G}\mathbf{y} - \mathbf{w}_{\mathrm{club}}\|_{\infty}$ (N) & Max $\varepsilon_{\mathrm{peak}}$ / $\varepsilon_{\mathrm{rms}}$ \\
 \midrule
-\texttt{myosuite\_golfer\_driver} & $412.523$ & $419.238$ & $628.390$ & $119.120$ & $153.677$ & $4.26 \times 10^{-14}$ & $0.00 \times 10^{0}$ / $0.00 \times 10^{0}$ \\
-\texttt{myosuite\_golfer\_iron} & $416.452$ & $431.523$ & $638.151$ & $105.344$ & $165.066$ & $7.11 \times 10^{-15}$ & $0.00 \times 10^{0}$ / $0.00 \times 10^{0}$ \\
+\texttt{myosuite\_golfer\_driver} & $1.535$ / $1.535$ & $3.071$ & $6.88 \times 10^{-4}$ & $5.33 \times 10^{-6}$ & $9.22 \times 10^{-6}$ & $1.03 \times 10^{-25}$ & $0.00 \times 10^{0}$ / $0.00 \times 10^{0}$ \\
+\texttt{myosuite\_golfer\_iron} & $2.099$ / $2.099$ & $4.199$ & $7.66 \times 10^{-4}$ & $5.62 \times 10^{-6}$ & $1.08 \times 10^{-5}$ & $1.08 \times 10^{-19}$ & $0.00 \times 10^{0}$ / $0.00 \times 10^{0}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Friction-Cone Reading of the Settled Allocation.}
+Table~\ref{tab:hrg-gs-m7-friction-cone} reports the normal force $f_n$, tangential force $f_t$, and Coulomb friction-cone ratio $\|f_t\| / (\mu f_n)$ ($\mu = 0.9$) per allocated pair on the settled state (\texttt{overlap} topology, \texttt{equal\_split} prior). Because the settled weld closure wrench merely supports club weight ($m_{\mathrm{club}} g = 3.071\,\mathrm{N}$ driver, $4.199\,\mathrm{N}$ 7-iron) without an internal pre-load squeeze in the equality constraint, both hand--hand allocated pairs (\texttt{trail\_palm\_lead\_thumb} and \texttt{overlap\_little\_finger\_lead\_index}) and all four trail pad--grip pairs have $f_n = 0.000\,\mathrm{N}$ with $f_t > 0$ (\texttt{unloaded=True}, \texttt{friction\_ratio=None}, corresponding to an infinite friction-cone ratio $\|f_t\|/(\mu f_n) = \infty$), while the five lead pad--grip pairs carry $f_n \in [0.164, 0.224]\,\mathrm{N}$ (driver) and $[0.224, 0.306]\,\mathrm{N}$ (7-iron) with $\|f_t\| / (\mu f_n) \in [1.042, 1.766] > 1$. As in HRG-GS-M5, these allocated equivalents could not be sustained by unilateral Coulomb contact without grip squeeze and are reported honestly rather than tuned or clipped.
+
+\begin{table}[h!]
+\centering
+\caption{Settled Allocated Pair Forces and Friction-Cone Ratios $\|f_t\| / (\mu f_n)$ ($\mu = 0.9$, \texttt{overlap}, \texttt{equal\_split}; HRG-GS-M7, \#13329).}
+\label{tab:hrg-gs-m7-friction-cone}
+\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Allocated Pair & Driver $f_n$ (N) & Driver $f_t$ (N) & Driver $\|f_t\|/(\mu f_n)$ & 7-Iron $f_n$ (N) & 7-Iron $f_t$ (N) & 7-Iron $\|f_t\|/(\mu f_n)$ \\
+\midrule
+\texttt{trail\_palm\_lead\_thumb} & $0.0000$ & $0.1364$ & \texttt{unloaded} ($\infty$) & $0.0000$ & $0.1870$ & \texttt{unloaded} ($\infty$) \\
+\texttt{overlap\_little\_finger\_lead\_index} & $0.0000$ & $0.0032$ & \texttt{unloaded} ($\infty$) & $0.0000$ & $0.0048$ & \texttt{unloaded} ($\infty$) \\
+\texttt{lead\_palm\_proximal\_grip} & $0.1975$ & $0.2351$ & $1.3226$ & $0.2699$ & $0.3216$ & $1.3237$ \\
+\texttt{lead\_palm\_distal\_grip} & $0.1993$ & $0.2336$ & $1.3021$ & $0.2727$ & $0.3193$ & $1.3011$ \\
+\texttt{lead\_finger\_proximal\_grip} & $0.2224$ & $0.2117$ & $1.0580$ & $0.3040$ & $0.2897$ & $1.0588$ \\
+\texttt{lead\_finger\_distal\_grip} & $0.2240$ & $0.2100$ & $1.0418$ & $0.3064$ & $0.2871$ & $1.0410$ \\
+\texttt{lead\_heel\_pad\_butt} & $0.1636$ & $0.2598$ & $1.7648$ & $0.2236$ & $0.3554$ & $1.7663$ \\
+\texttt{trail\_palm\_proximal\_grip} & $0.0000$ & $0.2939$ & \texttt{unloaded} ($\infty$) & $0.0000$ & $0.4020$ & \texttt{unloaded} ($\infty$) \\
+\texttt{trail\_palm\_distal\_grip} & $0.0000$ & $0.2920$ & \texttt{unloaded} ($\infty$) & $0.0000$ & $0.3991$ & \texttt{unloaded} ($\infty$) \\
+\texttt{trail\_finger\_proximal\_grip} & $0.0000$ & $0.2647$ & \texttt{unloaded} ($\infty$) & $0.0000$ & $0.3621$ & \texttt{unloaded} ($\infty$) \\
+\texttt{trail\_finger\_distal\_grip} & $0.0000$ & $0.2625$ & \texttt{unloaded} ($\infty$) & $0.0000$ & $0.3588$ & \texttt{unloaded} ($\infty$) \\
 \bottomrule
 \end{tabular}
 \end{table}
