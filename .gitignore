@@ -323,3 +323,6 @@ docs/research/shot_pattern_analysis/**/*.jpg
 *Capture.info
 PlayerInfo.bin
 * Capture Files/
+
+# Licensed model files (e.g. SimTK spine models) are private (#13258)
+licensed_assets/
