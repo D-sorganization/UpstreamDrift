@@ -178,6 +178,21 @@ class TestInventoryLoad:
         errors = inventory.verify_declared_hashes()
         assert errors == [], errors
 
+    def test_segmental_spine_models_stay_out_of_feedback_inventory(
+        self, inventory: EngineModelInventory
+    ) -> None:
+        """Spine models are listed by GET /tools/spine-viewer/assets, not here.
+
+        Every package in this inventory becomes a required golf-feedback
+        comparison row, so a spine analysis model would show up as missing
+        feedback evidence (#13261).
+        """
+        families = {p.model_family for p in inventory.packages}
+        assert "segmental_spine" not in families
+        assert not [
+            p for p in inventory.packages if "spine_viewer" in p.launcher_tile_ids
+        ]
+
 
 # ---------------------------------------------------------------------------
 # Hash helper
