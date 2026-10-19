@@ -12,6 +12,9 @@ from src.engines.physics_engines.drake.python.motion_matching import (
 )
 
 
+pytestmark = pytest.mark.unit
+
+
 class _FakePlant:
     def __init__(self, bodies: list[str]) -> None:
         self._bodies = {name: f"body:{name}" for name in bodies}

@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.engines.physics_engines.drake.python.motion_matching import simulate
 from src.engines.physics_engines.drake.python.motion_matching.humanoid_urdf import (
     CANONICAL_URDF,
 )
+
+
+pytestmark = pytest.mark.unit
 
 
 def test_default_golfer_urdf_is_drake_canonical() -> None:
