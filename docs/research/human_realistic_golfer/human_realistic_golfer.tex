@@ -1802,6 +1802,41 @@ python3 -m pytest tests/unit/grip_contact/test_opensim_msk_grip_adapter.py \
     tests/opensim/test_msk_club.py
 \end{verbatim}
 
+\subsection{Native Pinocchio Golfer Grip Adapter (HRG-GS-M9, \#13331)}
+\textbf{Two-Hand Variant Topology and Frame Geometry.}
+In the default native Pinocchio golfer (\path{src/engines/physics_engines/pinocchio/models/generated/golfer.urdf}, loaded by \path{src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py} and exported by \path{src/tools/model_converter/urdf_exporter.py}), the club assembly (\texttt{club\_shaft} and \texttt{club\_head}) hangs from a single virtual \texttt{mid\_hands} frame welded to \texttt{thorax3} at translation $[0, 0, -0.17]^{\top}\,\mathrm{m}$, with the shaft axis directed along $-z_{\mathrm{mid}} = [0, 0, -1]^{\top}$ toward \texttt{club\_shaft} ($[0, 0, -0.05]^{\top}\,\mathrm{m}$) and \texttt{club\_head} ($[0, 0, -0.55]^{\top}\,\mathrm{m}$).
+To make both hands independently addressable without altering existing single-frame consumers, \texttt{export\_urdf(..., hands="separate")}, \texttt{SimOptions(hands="separate")}, and \texttt{build\_golfer\_model(hands="separate")} attach two massless body frames---\texttt{lead\_hand} and \texttt{trail\_hand}---welded to \texttt{mid\_hands} on parent joint \texttt{thorax2\_to\_thorax3} while retaining \texttt{mid\_hands} unchanged. With the default \texttt{hands="merged"}, the exported URDF bytes, joint counts ($n_q = 43$, $n_v = 43$, $n_{\mathrm{frames}} = 96$), link masses/inertias, frame table, and forward kinematics of every frame are byte- and numerically identical to the baseline.
+
+Let $\Delta x_{\mathrm{hands}} = x_0(\mathrm{trail}) - x_0(\mathrm{lead}) = 0.0762\,\mathrm{m}$ be the axial hand spacing from \texttt{ContactTopology} (\texttt{hand\_x\_origin}), matching the shaft-axis separation of the left and right grip frames in \texttt{GripInterface}. Rotating from the canonical grip basis ($+x_{\mathrm{grip}}$ along the shaft from butt to clubhead) into \texttt{mid\_hands} ($-z_{\mathrm{mid}}$ along the shaft) via a $+\pi/2$ pitch about $+y$,
+\begin{equation}
+R_{\mathrm{mid}\leftarrow\mathrm{grip}} = R_y\!\left(\tfrac{\pi}{2}\right) =
+\begin{bmatrix}
+0 & 0 & 1 \\
+0 & 1 & 0 \\
+-1 & 0 & 0
+\end{bmatrix}, \qquad
+p_{\mathrm{mid},\mathrm{lead}} = \begin{bmatrix} 0 \\ 0 \\ +\tfrac{1}{2}\Delta x_{\mathrm{hands}} \end{bmatrix}, \qquad
+p_{\mathrm{mid},\mathrm{trail}} = \begin{bmatrix} 0 \\ 0 \\ -\tfrac{1}{2}\Delta x_{\mathrm{hands}} \end{bmatrix},
+\end{equation}
+places \texttt{lead\_hand} and \texttt{trail\_hand} symmetrically about \texttt{mid\_hands} with Euclidean separation $\|p_{\mathrm{trail}} - p_{\mathrm{lead}}\|_2 = \Delta x_{\mathrm{hands}} = 0.0762\,\mathrm{m}$ (within $0\,\mathrm{mm}$ of the topology hand spacing) and zero added mass or inertia, so open-loop forward dynamics ($\mathrm{ABA}$) are unchanged.
+
+\textbf{Capabilities, Manifest Resolution, and Allocated Reporting Evaluation.}
+\texttt{NativePinocchioGolferGripAdapter} (\path{src/engines/physics_engines/pinocchio/python/native_golfer_grip_adapter.py}) implements \texttt{ModelGripAdapter} over the \texttt{hands="separate"} model:
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \textit{Capabilities and Physical-Mode Refusal}: Because \texttt{lead\_hand}, \texttt{trail\_hand}, and \texttt{club\_shaft} are all fixed (\texttt{type="fixed"}) to \texttt{mid\_hands} on parent joint \texttt{thorax2\_to\_thorax3}, equal-and-opposite hand--club wrenches would cancel on \texttt{thorax2\_to\_thorax3}. Accordingly, \texttt{capabilities()} declares \texttt{attachment\_modes = ("weld",)}, \texttt{supports\_physical\_pairs = False}, \texttt{supports\_wrench\_application = True}, \texttt{native\_contact = False}, and \texttt{unavailable\_reason} naming the shared rigid joint \texttt{thorax2\_to\_thorax3}. Requesting any physical contact mode (\texttt{"contact"}, \texttt{"contact\_v1"}, \texttt{"separated\_v2"}) raises \texttt{SchemaFeatureUnavailableError} naming \texttt{thorax2\_to\_thorax3}.
+\item \textit{Binding Resolution}: \texttt{resolve\_binding(topology)} validates \path{src/config/grip_bindings/pinocchio_native_golfer.json} (\texttt{schema = "grip-binding/v1"}, \texttt{attachment\_mode = "weld"}, \texttt{club\_body = "club\_shaft"}, \texttt{lead\_hand\_body = "lead\_hand"}, \texttt{trail\_hand\_body = "trail\_hand"}) via \texttt{binding\_from\_manifest}, \texttt{validate\_resolved\_binding}, and \texttt{validate\_binding}, resolving $100\%$ of topology sites across \texttt{overlap}, \texttt{interlock}, and \texttt{ten\_finger} (with and without \texttt{trigger\_finger}) using the club-local grip transforms $T_{\mathrm{shaft},\sigma} = ({}^{\mathcal{W}}T_{\mathrm{shaft}})^{-1}\,{}^{\mathcal{W}}T_{\sigma}$ for $\sigma \in \{\mathrm{lead}, \mathrm{trail}\}$.
+\item \textit{Kinematic State Sampling and Allocated Pair Reporting}: \texttt{sample\_states(binding)} calls \texttt{pinocchio.forwardKinematics(model, data, q, v)} and \texttt{pinocchio.framesForwardKinematics(model, data, q)} to extract $4\times 4$ world poses ${}^{\mathcal{W}}T_B = \texttt{data.oMf}[f_B]$ and queries \texttt{pinocchio.getFrameVelocity(model, data, f\_B, LOCAL\_WORLD\_ALIGNED)} for world-aligned linear and angular velocities $(v_B, \omega_B)$. In \texttt{attachment\_mode = "weld"}, \texttt{evaluate\_contacts} evaluates the hand/club pad pairs kinematically at those FK states as reporting-only channels labelled \texttt{pair\_labels[p] = "allocated"} and \texttt{allocated\_labels[p] = "external:" + p + "\_allocated"} (consistent with HRG-H1 and HRG-GS-G3).
+\item \textit{Wrench Application Guard}: In \texttt{attachment\_mode = "weld"}, \texttt{pair\_wrenches} and \texttt{body\_wrenches()} are empty ($\texttt{applied\_allocated\_force\_n} = 0.0\,\mathrm{N}$), so allocated channels never enter \texttt{apply\_wrenches}. Furthermore, \texttt{apply\_wrenches} refuses (raises \texttt{ValueError} naming \texttt{thorax2\_to\_thorax3}) any physical pair wrench targeting bodies that share a single parent joint, preventing a cancelling no-op from passing silently. On a $0.04\,\mathrm{s}$ hold trajectory on the $2\,\mathrm{ms}$ grid, the adapter's kinematic reporting series matches \texttt{law\_level\_series(..., mode="weld")} in \texttt{compare\_topology\_series} (\texttt{status = "passed"}, with every hand--grip pad pair verified in \texttt{allocated\_channels} within the $5\%$ peak and $2\%$ RMS tolerances), while physical-mode reference comparison reports \texttt{status = "unavailable"}.
+\end{enumerate}
+
+\textbf{Limitations.}
+In the native Pinocchio golfer URDF, \texttt{lead\_hand}, \texttt{trail\_hand}, and \texttt{club\_shaft} are rigidly welded to \texttt{mid\_hands} on shared joint \texttt{thorax2\_to\_thorax3}; equal-and-opposite physical hand--club pair wrenches would cancel in net generalized torque on \texttt{thorax2\_to\_thorax3}, which is the reason \texttt{supports\_physical\_pairs = False} is declared, only \texttt{attachment\_modes = ("weld",)} is supported, and hand--club and hand--hand pairs are reporting-only allocated channels until the weld is relaxed into independent wrist/club degrees of freedom.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_pinocchio_native_golfer_grip.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 

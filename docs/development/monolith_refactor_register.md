@@ -183,6 +183,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 846 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_render.m` |
 | 846 | `src/tools/model_explorer/gui.py` |
 | 843 | `src/shared/python/motion_pipeline/orchestrator.py` |
+| 842 | `src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py` |
 | 842 | `src/shared/python/gui_pkg/help_content.py` |
 | 841 | `src/engines/physics_engines/opensim/python/tour_matching/native_constrained_muscle.py` |
 | 841 | `src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py` |
