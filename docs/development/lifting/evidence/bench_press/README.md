@@ -121,6 +121,47 @@ were not re-measured.
 Every coordinate is inside the 1e-6 rad L2 bound (worst final coordinate
 `LSInputX`).
 
+## Barbell Bundle and OpenSim IK/ID (OSL-3, #13041)
+
+`bench_press_barbell_bundle.npz` (SHA-256 `f700f098094a9898c2cf20f5a7bf2c97b6967b44b806f146cd6e958aa83834fb`)
+packages the flat bench press with the LIFT-4 barbell body and load,
+built by `scripts/generate_barbell_squat_evidence.py --lift bench_press --part bundle`
+from `bench_press_bundle.npz`.
+
+### Bar-Hold Metrics (Provenance)
+
+The barbell hold re-tracks the supine bench pose with the bar carried by the hands:
+- **Bar deviation:** 28.18 mm (0.02818 m) against the reference trajectory.
+- **Left hand force:** peak magnitude 1542.41 N (mean [−12.02, 93.84, 1078.87] N),
+  peak torque magnitude 26.44 Nm.
+- **Right hand force:** peak magnitude 1470.90 N (mean [−10.56, 92.65, 1012.81] N),
+  peak torque magnitude 26.44 Nm.
+
+### OpenSim Inverse Kinematics and Inverse Dynamics Receipt
+
+The OpenSim IK/ID receipt (`docs/development/lifting/evidence/opensim_ik_id/receipts.json`)
+is measured with real OpenSim 4.6 and the RajagopalLaiUhlrich2023 model over 41 frames
+(stride 5):
+- **Marker kinematics:** RMS error 0.0581 m (5.81 cm, vs 0.0200 m threshold),
+  maximum marker error 0.2164 m (vs 0.0400 m threshold). The kinematics fails
+  the best-practice marker gate (`within_best_practice = False`).
+- **Segment angles:** sagittal segment-angle RMS error 0.0882 rad (5.05°, vs
+  0.0349 rad / 2.0° threshold).
+- **Arm reach:** Left hand reach miss 0.4179 m, right hand reach miss 0.4329 m;
+  the Rajagopal arm ranges and supine trunk position cannot reach the standard's
+  0.75 m bench press grip width.
+- **Coordinate range violations:** `elbow_flex_l` (41 frames, min −0.00015 rad, range
+  [0.0, 2.618] rad) and `elbow_flex_r` (41 frames, min −0.00044 rad, range [0.0, 2.618] rad).
+- **Hicks residual gate:** peak external force 649.80 N; force threshold 32.49 N
+  (5% of peak external force); moment threshold 3.30 Nm (1% of COM height × peak external force).
+  The residual gate fails for both forces and moments:
+  - Pelvis force: peak $t_x$ 903.04 N (RMS 420.13 N), peak $t_y$ 4598.27 N (RMS 3240.16 N),
+    peak $t_z$ 214.50 N (RMS 76.74 N); max force 4598.27 N vs 32.49 N threshold (`forces_within = False`).
+  - Pelvis moment: peak tilt 1575.93 Nm (RMS 1110.45 Nm), peak list 154.17 Nm (RMS 91.74 Nm),
+    peak rotation 148.36 Nm (RMS 86.89 Nm); max moment 1575.93 Nm vs 3.30 Nm threshold (`moments_within = False`).
+- The residual gate failures are strictly xfailed in `tests/unit/lifting/test_opensim_lift_ik_id.py`
+  with measured numbers; gates are not loosened.
+
 ## Literature Comparison (Evidence, Not Tuning Targets)
 
 These sources were checked on 2026-10-17. Each entry says how.
@@ -163,9 +204,9 @@ These sources were checked on 2026-10-17. Each entry says how.
   the hold, so there is no leg drive, arch change or scapular retraction.
 - The chest has no contact: the bar is not stopped by it. The optimizer's
   chest position lies inside the model's chest (see above).
-- The bar mass enters only the planar optimizer, not the full-body dynamics
-  (LIFT-4, #11744). The bar is the club's `Grip` frame with the left hand
-  moved to the grip width.
+- In `bench_press_bundle.npz` the bar is the club's `Grip` frame with the
+  left hand moved to the grip width; `bench_press_barbell_bundle.npz` adds
+  the LIFT-4 barbell body and load.
 - The bench is a plane, not a finite pad: it has no edge and no width limit.
   The 1e5 N/m sphere stiffness gives 1–3 mm penetration rather than OSL-2's
   stiffer seat.
@@ -173,10 +214,15 @@ These sources were checked on 2026-10-17. Each entry says how.
   `contact_effort_derivatives` raises for a spec with supports; replay and
   forward dynamics are unaffected.
 - The bench height is 0.501 m, above the IPF 0.42–0.45 m range (see above).
+- OpenSim IK and ID fail the best-practice marker gate (RMS 5.81 cm) and Hicks
+  residuals (forces 4598.27 N vs 32.49 N, moments 1575.93 Nm vs 3.30 Nm).
+  Results are software receipts, not physical acceptance.
 
 ## Regenerate
 
 ```bash
 MUJOCO_GL=egl python3 scripts/generate_lift_bundle.py --lift bench_press
 MUJOCO_GL=egl python3 scripts/measure_lift_bar_path_parity.py --lift bench_press
+python3 scripts/generate_barbell_squat_evidence.py --lift bench_press --part bundle --source-commit <sha>
+MUJOCO_GL=egl python3 scripts/measure_opensim_lift_ik_id.py
 ```

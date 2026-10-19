@@ -289,6 +289,53 @@ class TestCentroidalMPC:
         # CoM moves
         assert cmpc._cost.x_ref[-1, 0] > cmpc._cost.x_ref[0, 0]
 
+    def test_dynamics_n_contacts_four(self, fake_engine) -> None:
+        cmpc = CentroidalMPC(fake_engine, horizon=2, dt=0.01, n_contacts=4)
+        assert len(cmpc._contact_positions) == 4
+        x = np.zeros(9)
+        u = np.zeros(12)
+        x_next = cmpc._dynamics(x, u)
+        assert x_next.shape == (9,)
+
+    @pytest.mark.parametrize("n_contacts", [1, 3, 4])
+    def test_rollout_solve_for_n_contacts(self, fake_engine, n_contacts: int) -> None:
+        cmpc = CentroidalMPC(fake_engine, horizon=2, dt=0.05, n_contacts=n_contacts)
+        cmpc._max_iterations = 1
+        x0 = np.zeros(9)
+        x0[2] = 0.9
+        result = cmpc.solve(x0)
+        assert result.optimal_states.shape == (3, 9)
+        assert result.optimal_controls.shape == (2, 3 * n_contacts)
+
+    def test_update_contact_positions_wrong_length_raises(self, fake_engine) -> None:
+        cmpc = CentroidalMPC(fake_engine, horizon=2, n_contacts=4)
+        with pytest.raises(ValueError, match="n_contacts"):
+            cmpc.update_contact_positions([np.zeros(3)])
+
+    def test_mass_from_model_get_total_mass(self) -> None:
+        class MassEngine:
+            n_q = 2
+            n_v = 2
+
+            def get_total_mass(self) -> float:
+                return 72.5
+
+        cmpc = CentroidalMPC(MassEngine(), horizon=2, n_contacts=2)
+        assert cmpc._mass == 72.5
+
+    def test_set_mass_rejects_non_positive(self, fake_engine) -> None:
+        cmpc = CentroidalMPC(fake_engine, horizon=2)
+        with pytest.raises(ValueError, match="mass"):
+            cmpc.set_mass(0.0)
+        with pytest.raises(ValueError, match="mass"):
+            cmpc.set_mass(-1.0)
+
+    def test_n_contacts_out_of_range_raises(self, fake_engine) -> None:
+        with pytest.raises(ValueError, match="n_contacts"):
+            CentroidalMPC(fake_engine, n_contacts=0)
+        with pytest.raises(ValueError, match="n_contacts"):
+            CentroidalMPC(fake_engine, n_contacts=5)
+
 
 class TestWholeBodyMPC:
     def test_construction(self, fake_engine) -> None:

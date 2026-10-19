@@ -30,13 +30,13 @@ continuous, floating, and planar.
 
 ## Outputs
 
-| Output                                      | Format / units                                                                                     |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Saved model                                 | URDF XML written as `*.urdf` or `*.xml`, UTF-8                                                     |
-| Engine export                               | URDF XML via `export_for_engine(engine, default_filename)`                                         |
-| `urdf_generated` signal                     | The current URDF document as a `str`, emitted to the launcher host                                 |
-| `segment_added` / `segment_removed` signals | Segment dict / segment name                                                                        |
-| Web tree response                           | `ModelExplorerResponse` JSON from the REST API, a collapsible node tree parsed from the model file |
+| Output                                      | Format / units                                                                                                      |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Saved model                                 | URDF XML written as `*.urdf` or `*.xml`, UTF-8                                                                      |
+| Engine export                               | MJCF XML (MuJoCo) or engine-annotated URDF XML (Drake, Pinocchio) via `export_for_engine(engine, default_filename)` |
+| `urdf_generated` signal                     | The current URDF document as a `str`, emitted to the launcher host                                                  |
+| `segment_added` / `segment_removed` signals | Segment dict / segment name                                                                                         |
+| Web tree response                           | `ModelExplorerResponse` JSON from the REST API, a collapsible node tree parsed from the model file                  |
 
 ## Method
 
@@ -72,11 +72,7 @@ it on every call:
 
 ## Limitations
 
-- It writes URDF only. `export_for_engine` is a hook, not a converter:
-  its own docstring says it "Currently exports a generic URDF (Drake /
-  Pinocchio / MuJoCo all accept it)", so the MuJoCo, Drake, and
-  Pinocchio menu entries all produce the same bytes. No MJCF or SDF is
-  ever emitted.
+- Engine export supports MuJoCo (MJCF), Drake (Drake-annotated URDF with namespaces and collision filter groups), and Pinocchio (Pinocchio-annotated URDF). Other registered engines are not currently exposed in the export menu.
 - Loading is wider than saving. `.mjcf` and `.osim` can be opened, but
   there is no round-trip: the model is converted to URDF and saved as
   URDF.
