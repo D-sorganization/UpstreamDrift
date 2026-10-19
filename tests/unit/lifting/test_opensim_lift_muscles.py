@@ -256,3 +256,26 @@ def test_squat_muscle_moments_match_joint_moments_within_reserve(
     moco = sol["moco"]
     assert "solver" in moco
     assert isinstance(moco["converged"], bool)
+
+
+def test_hip_demand_asymmetry_cause_quotes_the_measured_values() -> None:
+    """The cause text is built from this run's numbers, never a stale literal."""
+    from types import SimpleNamespace
+
+    from src.engines.physics_engines.opensim.python.msk_lift_muscle_report import (
+        compute_hip_demand_asymmetry,
+    )
+
+    coords = ["hip_flexion_r", "hip_flexion_l", "knee_angle_r", "knee_angle_l"]
+    tau = np.array([[-111.11, -222.22, -33.33, -44.44]])
+    targets = SimpleNamespace(
+        grf_force_n={
+            "left": np.array([[12.5, 700.25, 0.0]]),
+            "right": np.array([[-7.5, 650.75, 0.0]]),
+        }
+    )
+    record = compute_hip_demand_asymmetry(tau, coords, targets)
+    assert record["shear_differential_n"] == pytest.approx(20.0)
+    for value in ("-111.11", "-222.22", "-33.33", "-44.44", "+12.50", "-7.50"):
+        assert value in record["cause"]
+    assert "-434.68" not in record["cause"]

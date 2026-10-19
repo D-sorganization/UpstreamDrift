@@ -267,7 +267,8 @@ host prune jobs (`runner-cleanup --disk-guard` from Runner_Dashboard and the
 host-only `docker-cache-prune`) skip images with that label
 (`--filter label!=keep`). Before UD #13113 only the explorer stage was
 labelled, and ControlTower's disk guard deleted every profile image (and
-`ud-sim`, which is built `FROM upstream-drift:full`). Put the label in the
+`ud-sim:latest`, which shares the `explorer-headless` stage in
+`Dockerfile.modular`). Put the label in the
 Dockerfile, not on the `docker build` command line, so cached and ad-hoc
 rebuilds keep it.
 
@@ -284,6 +285,11 @@ services build them on demand, so a pruned image is rebuilt rather than pulled:
 | `upstream-drift:explorer-gui`      | `explorer-gui`      |
 | `ud-sim:latest`                    | `explorer-images`   |
 | `upstream-drift:full`              | `explorer-images`   |
+
+`ud-sim:latest` is documented in `docker/ud-sim/README.md`: it is **not** a
+separate Dockerfile; the `ud-sim` compose service builds `Dockerfile.modular`
+target `explorer-headless` and tags the result `ud-sim:latest` for ControlTower
+and `ct-run.sh`.
 
 `scripts/docker/explorer.sh` runs `docker image inspect` on the image it is
 about to use and rebuilds it when missing. `scripts/docker/explorer.sh ensure`

@@ -315,6 +315,55 @@ only the target direction, hence the azimuth and palm-normal vectors, changes si
 Consequently, $P\,\ell_{\mathrm{right}} = \ell_{\mathrm{left}}$ for each landmark $\ell$,
 asserted within $10^{-9}$~m.
 
+\subsection{Cross-Model Grip Capability Inventory (HRG-GS-M0, \#13322)}
+To support the cross-engine grip contact and hand-coupling objectives of epic
+\#13297, a machine-readable capability manifest is established at
+\texttt{src/config/grip\_capability\_inventory.json} under schema
+\texttt{grip-capability-inventory/v1}. The inventory classifies every model asset
+across four capabilities:
+\begin{enumerate}
+\item \texttt{visual\_style}: Rendering of hand-hand grip overlap, interlock, or ten-finger configurations.
+\item \texttt{allocated\_hand\_hand}: Static or kinematic allocation of dual-hand wrenches onto bilateral hand-hand pairs.
+\item \texttt{physical\_pad\_grip}: Dynamic contact between designated anatomical hand pads and the club grip cylinder.
+\item \texttt{physical\_hand\_hand}: Dynamic inter-hand pad-to-pad contact dynamics.
+\end{enumerate}
+
+Every entry records its verified mechanical attachment mode
+(such as \texttt{rigid\_branch\_kinematic}, \texttt{closure\_weld},
+\texttt{bushing\_compliance}, \texttt{free\_plus\_bushings},
+\texttt{site\_weld}, \texttt{mocap\_weld}, or \texttt{direct\_mid\_hands})
+and finger kinematic fidelity (\texttt{none}, \texttt{rigid\_proxy}, or \texttt{articulated}).
+By contract, no capability may claim \texttt{available = true} without an active
+\texttt{evidence\_test} verifying the code path; currently, only the full-body-v1
+spec export path (exercised in \texttt{test\_engine\_grip\_contact.py} and
+\texttt{test\_opensim\_contact\_grip.py}) provides physical pad-grip contact
+evidence. All other capabilities remain \texttt{available = false} with explicit
+diagnostic reasons and tracking issues mapped to epic children (\#13326--\#13336).
+
+Non-hand-bearing models (\texttt{putting\_green}, \texttt{putting\_green\_gui},
+\texttt{pendulum\_simulator}, and \texttt{swing\_objective\_lab}) are explicitly
+segregated in an \texttt{excluded} list with formal justifications.
+
+Empirical verification against source assets revealed several divergences from
+initial panel assumptions:
+\begin{itemize}
+\item \textbf{MyoSuite sim repository}: Panel notes assumed \texttt{shared/models/myosuite/myo\_sim}
+held an active 23-DOF hand model; verification confirmed the path is an unpopulated checkout directory,
+\texttt{myoarm\_simple.xml} lacks hands, and \texttt{golfer\_myobody\_driver.xml} utilizes rigid
+ellipsoid hands with site-welds.
+\item \textbf{MuJoCo golfer kinematics}: \texttt{golfer.xml} attaches the club shaft as a direct
+kinematic child of \texttt{hand\_left}, leaving \texttt{hand\_right} entirely uncoupled without equality welds.
+\item \textbf{Drake URDF topology}: The club shaft is rigidly fixed to \texttt{right\_hand} with no finger
+links, leaving \texttt{left\_hand} disconnected.
+\item \textbf{Pinocchio URDF topology}: The club shaft attaches to a \texttt{mid\_hands} frame connected
+directly to \texttt{thorax3}, bypassing both left and right hand branches.
+\end{itemize}
+
+A Design-by-Contract loader at
+\texttt{src/shared/python/grip\_contact/capability\_inventory.py}
+strictly validates the manifest against disk paths, schema versioning, non-empty diagnostics,
+and tracking issue conventions.
+
 \subsection{Grip-Style Contact Topology (HRG-GS-G1, \#13299)}
 \textbf{Contract.} \texttt{GripStyle} (overlap, interlock, ten-finger) and
 \texttt{trigger\_finger} are now physical members of \texttt{GripSpec}; a
@@ -408,6 +457,22 @@ python3 -m pytest tests/unit/grip_contact/test_allocated_hand_contact.py \
     tests/unit/grip_contact/test_palm_thumb.py
 \end{verbatim}
 
+\subsection{Topology-Driven Finger Pose and Visual Roll (HRG-GS-G4, \#13302)}
+\textbf{Method.} Visual finger placement in \texttt{model\_appearance} is driven directly by \texttt{ContactTopology} contact sites instead of the legacy \texttt{\_FINGER\_LINKS} string table. The lead index finger, trail little finger, and optional trail index trigger are placed by inverting the three-phalanx parametric wrap so that the distal phalanx centroid matches the corresponding topology site centre to within $\le 1$\,mm while ensuring that non-penetrating grip pad clearance is maintained. Per-hand visual roll rotates each hand body about the grip axis by its respective roll offset $\alpha$, absorbing issue \#13166.
+
+\textbf{Parameters.} The topology site centre $\mathbf{c}_{\mathrm{site}} = (x, y, z)$ in the shared grip frame defines the axial target $z_{\mathrm{hand}} = x - d_{\mathrm{butt}}$, radial target $\rho = \sqrt{y^2+z^2}$, and azimuthal target $\theta = \operatorname{atan2}(z, y)$. For unlinked fingers, nominal curl angles are computed from $V$-azimuth $v = 20^\circ + \alpha$ and knuckle offset $110^\circ$. For topology-driven fingers, a 1D monotonic solve determines tangent radius $d$ and metacarpophalangeal azimuth $\theta_{\mathrm{mcp}}$ such that the distal phalanx vertex centroid achieves sub-millimetre agreement with $\mathbf{c}_{\mathrm{site}}$. Thumb azimuth is shifted by $\alpha$ to preserve hand-rigid rotation. Symmetric barrel ring stations $(0.2, 0.4, 0.6, 0.8)$ are added alongside the tangent-point station on each phalanx capsule so that relocating the linked finger onto the partner hand leaves no un-sampled barrel gap across the remaining proximal phalanges, raising 36-bin world azimuthal wrap coverage (lead/trail) from $34/36$ ($0.9444$) and $32/36$ ($0.8889$) on driver overlap, $34/36$ ($0.9444$) and $31/36$ ($0.8611$) on iron7 overlap, $33/36$ ($0.9167$) and $34/36$ ($0.9444$) on driver and iron7 interlock, $34/36$ ($0.9444$) and $35/36$ ($0.9722$) on driver ten-finger, and $34/36$ ($0.9444$) and $34/36$ ($0.9444$) on iron7 ten-finger to full $36/36$ ($1.0000$, all 36 bins covered) for every club and style.
+
+\textbf{Acceptance Criteria.} (1) Rendered fingertip positions match \texttt{ContactTopology} site centres to $\le 1$\,mm across all styles (overlap, interlock, ten-finger) and trigger mode; (2) Overlap, interlock, and ten-finger produce visibly distinct finger geometries with appropriate \texttt{on\_grip} flags and match golden mesh summaries; (3) Per-hand roll follows $\alpha$ to $\le 0.1^\circ$ across fingertips, palm, and thumb; (4) The duplicate \texttt{\_FINGER\_LINKS} table is eliminated from \texttt{grip\_pose}.
+
+\textbf{Reproduce.} Reproduce with:
+\begin{verbatim}
+python3 -m pytest tests/unit/model_appearance/test_grip_finger_topology.py \
+    tests/unit/model_appearance/test_grip_hand_mesh.py \
+    tests/unit/model_appearance/test_grip_pose.py
+\end{verbatim}
+
+\textbf{Limitations.} Hand phalanges remain rigid capsules wrapped on the grip cylinder; individual phalanx flexion dynamics during the swing are visual approximations rather than musculoskeletal coordinate solves.
+
 \subsection{Pinocchio Topology Contact Reference (HRG-GS-G6, \#13304)}
 \textbf{Topology Contact Model.} The engine-agnostic contact model (\path{src/shared/python/grip_contact/topology_contact.py})
 evaluates compliant physical contact between anatomical hand sites $\mathcal{S}$ defined in \texttt{ContactTopology} $\mathcal{T}$
@@ -465,6 +530,159 @@ hand--hand pairs are allocated (reporting only, HRG-GS-G3) and do not exert phys
 \textbf{Reproduction Command.}
 \begin{verbatim}
 python3 -m pytest tests/unit/grip_contact/test_topology_contact.py \
+    tests/unit/grip_contact/test_pinocchio_topology_grip.py
+\end{verbatim}
+
+\subsection{Batched One-Side Contact Evaluation (HRG-GS-G6 Follow-Up, \#13384)}
+\textbf{Purpose.} \texttt{topology\_side\_wrench} sits inside every Radau right-hand-side call of the Pinocchio adapter
+(about 3{,}400 calls per $0.04$\,s window), and the per-pair path cost about $1.4$\,ms per side: each pair re-ran the DbC
+checks and about 100 small-array numpy operations. The law, its parameters and its tolerances are unchanged; only the
+evaluation path changed.
+
+\textbf{Method.} \texttt{topology\_side\_wrench} validates the hand and club \texttt{BushingState} once per side call
+(type, finite $3\times3$ rotation with $|R^{\mathsf T}R - I|_{ij} \le 10^{-5}$ and $|\det R - 1| \le 10^{-5}$, finite
+$3$-vectors), then evaluates every physical pair of the side in one pass
+(\path{src/shared/python/grip_contact/batched_pair_contact.py}, \texttt{side\_rows\_wrench}). The hand-site primitives of a
+side and mode are stacked once per \texttt{(side, mode)} and cached on the model (\texttt{TopologyContactModel.side\_batch}).
+Per call, two stacked transforms map the hand sites and the grip capsule ends to world axes; each row is then evaluated in
+Python floats:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item sphere site $i$ (reference \texttt{sphere\_capsule}): closest grip-axis point $q_i$, normal
+  $\hat n_i = (q_i - c_i)/\|q_i - c_i\|$, contact $p_{c,i} = c_i + r_i \hat n_i$; the hand sphere is sampled against the
+  plane $(-\hat n_i,\; q_i - r_g \hat n_i)$ with relative velocity $v_h(p_{c,i}) - v_g(p_{c,i})$;
+\item capsule site $i$ (reference \texttt{capsule\_capsule}): closest segment points $(a_i, b_i)$ (general, parallel and
+  degenerate branches), contact $\tfrac12[(a_i + r_i \hat n_i) + (b_i - r_g \hat n_i)]$; the grip is sampled against the plane
+  $(\hat n_i,\; a_i + r_i\hat n_i)$ with the exactly negated relative velocity and spin;
+\item both rows then apply the shared law of \texttt{sphere\_ground\_contact} and \texttt{torsional\_friction\_moment}:
+  $f_n = \max\!\big(0,\, k\,\delta\,(1 + d\,\dot\delta)\big)$,
+  $\mu(s) = \mu_d + (\mu_s - \mu_d)e^{-(s/v_{\mathrm{trans}})^2} + \mu_v s$,
+  $f_t = -\tfrac{v_t}{s}\,\mu(s)\,f_n \tanh(s/v_{\mathrm{trans}})$, and
+  $M_{\mathrm{spin}} = -\hat u\,\mu_s f_n r_{\mathrm{patch}} \tanh(\omega_n/\omega_0)$,
+  where $s = \|v_t\|$, $\hat u$ is the re-normalised plane normal, and the plane height is taken along the raw normal, as
+  \texttt{GroundPlane} does.
+\end{itemize}
+The side resultant is the left-to-right sum of the pair wrenches on the club, as in the reference loop. Per-pair
+\texttt{PairWrench} objects are built only on access (\texttt{\_LazyPairWrenches}). The integrator needs only the resultants
+and the force magnitudes.
+
+\textbf{Exactness Rules.} The row kernel reproduces the reference arithmetic operation by operation, so it is a
+reformulation and not an approximation:
+(i) $R\,x$ uses a stacked \texttt{np.matmul} that issues one BLAS matrix--vector product per row, the same call as the
+reference's scalar \texttt{R @ x}. A plain 2-D product (\texttt{P @ R.T}) and a Python-float dot product both differ in the
+last bit and were rejected.
+(ii) $3$-vector dot products are summed left to right, as numpy's 1-D \texttt{x @ y}, and cross products use the
+\texttt{cross3} component expressions.
+(iii) Every scalar expression keeps the reference operand order, and the transcendental functions are the same
+\texttt{math.exp} and \texttt{math.tanh}.
+(iv) The sphere-versus-capsule sign changes are negations ($b - a = -(a - b)$ exactly in IEEE arithmetic).
+
+\textbf{Evidence.} The per-pair path is kept as the reference (\texttt{topology\_side\_wrench\_reference}). Commit
+\texttt{8e3b0ff72c} plus this change, on brick (Linux, Python 3.12, numpy 2.5.3, OpenBLAS):
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item Parity test (all three styles, with and without trigger finger, 60 random club poses, hand perturbations of up to
+  $0.08$\,rad and $1.5$\,mm, slip-velocity scales $10^{-4}$, $10^{-3}$ and $10^{-1}$\,m/s, plus no-slip and
+  Fortran-ordered rotations): every resultant, pair force and moment within $10^{-12}$\,N (N$\cdot$m), and contact geometry
+  within $10^{-15}$\,m. Separately, 2{,}400 side evaluations gave a maximum difference of exactly $0$: every resultant and
+  every pair wrench was bit-identical.
+\item Validation runs once per side call (two \texttt{BushingState} checks), and no per-pair kernel is called (tested).
+\item Speed, CPU time (\texttt{time.thread\_time}), best of 9, on a host at load average 12--20 on 4 cores: across the 12
+  style/trigger/side cases, the reference took $1437\,\mu$s and the batched path $146\,\mu$s on average, a ratio of means of
+  $9.9\times$ (per-case range $8.7$--$13.8\times$). The original PR-head code measured $1337$--$1467\,\mu$s on average, so
+  the gain over it is similar. The regression guard asserts $\ge 6\times$.
+\item Pinocchio (\texttt{simulate\_grip\_contact}, $0.04$\,s window, \texttt{topology\_model}), CPU per case: before
+  $10.9$--$13.8$\,s, after $3.8$--$4.8$\,s. Wall time was $5.2$--$11.3$\,s on the loaded host, so
+  \texttt{test\_pinocchio\_topology\_grip.py} stayed in the slow lane at this step (see the next subsection). Its pytest wall times at load average 6--12 are:
+  \texttt{\_fast} cases $3.0$--$6.0$\,s, timestep halving $8.6$--$11.0$\,s, $0.2$\,s static hold $12.7$--$14.2$\,s, and
+  $1$\,s swing replay $52$--$75$\,s. The non-law right-hand-side costs (prescribed motion, bushing state construction,
+  Radau overhead) now dominate.
+\end{enumerate}
+
+\textbf{Failed Experiment.} A row-vectorised numpy pass, with sphere and capsule rows unified by a per-row sign and
+selections, matched to $\le 2.3\times10^{-13}$\,N but was only $2.9\times$ faster ($1525 \to 522\,\mu$s). With four to six
+rows per side, the roughly 120 numpy calls of $1$--$3\,\mu$s each cost more than the arithmetic, so the Python-float row
+kernel replaced it.
+
+\textbf{Limitations.} Bit-identity depends on the BLAS matrix--vector kernel being shared by the stacked and scalar
+products; the tested contract is the $10^{-12}$\,N tolerance, not bit-identity. The speedups were measured on a loaded
+shared host and vary by about $\pm15\%$ between runs. The G6 parameter line above ($k = 1.6\times10^5$\,N/m, $d = 0.5$\,s/m,
+$v_{\mathrm{trans}} = 0.01$\,m/s, $r_{\mathrm{patch}} \approx 4.47$\,mm) does not match the values that
+\texttt{build\_pad\_model} returns for the anthropometric driver spec ($k \approx 1.71\times10^5$\,N/m, $d \approx 0.383$\,s/m,
+$v_{\mathrm{trans}} = 10^{-3}$\,m/s, $r_{\mathrm{patch}} \approx 2.29$\,mm, $\mu_v = 0$). That discrepancy is recorded for
+follow-up and not corrected here. This document was not compiled locally (no \texttt{pdflatex} on the host).
+
+\textbf{Reproduction Commands.}
+\begin{verbatim}
+python3 -m pytest -n 0 tests/unit/grip_contact/test_topology_contact_batched.py \
+    tests/unit/grip_contact/test_topology_contact.py
+python3 -m pytest -n 0 -m slow tests/unit/grip_contact/test_pinocchio_topology_grip.py
+\end{verbatim}
+
+\subsection{Pinocchio Grip Right-Hand-Side Cost (\#13396)}
+\textbf{Purpose.} After the batched law, most of the Pinocchio right-hand side (RHS) was spent outside the contact law.
+A profile of the $0.04$\,s overlap swing showed three costs. The weld-model forward kinematics ran about three times
+per distinct stage time. \texttt{club\_state} was evaluated twice per RHS. The numpy precondition checks in
+\texttt{BushingState} took about 10\% of the RHS. The model, the law, the integrator settings and every tolerance are
+unchanged.
+
+\textbf{Method.}
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \textbf{Memoised hand frames.} \texttt{ClubOnBushings.hand\_frames}
+  (\path{src/engines/physics_engines/pinocchio/python/grip_bushing.py}) caches the hand bushing frames per
+  \texttt{(hand\_source, t)} in a FIFO cache of 8 entries. Radau re-evaluates the RHS at the same stage time across its
+  Newton iterations and its 13 finite-difference Jacobian columns, and the hand source (a swing spline or a fixed pose)
+  is a pure function of $t$. The cached frames are therefore the frames a fresh evaluation would return. The cache key
+  holds the source object, so a recycled \texttt{id} cannot alias an old entry. A shallow copy of the dictionary is
+  returned, so callers cannot change the cached entry.
+\item \textbf{One club state per RHS.} \texttt{ClubOnBushings.evaluate} returns hands, club state, club frames and the
+  law together. \texttt{derivatives} reuses that club state for the joint torque and the translational rate.
+  \texttt{ClubInHands} overrides only \texttt{contact\_law}, which dispatches to the pad or topology law.
+\item \textbf{Python-float preconditions.} \texttt{rotation\_errors}
+  (\path{src/shared/python/grip_contact/bushing_law.py}) returns $\max_{ij}|R^{\mathsf T}R - I|_{ij}$ and $\det R$ in
+  Python floats (column dot products and cofactor expansion). \texttt{BushingState.\_\_post\_init\_\_} keeps its
+  $10^{-6}$ orthonormality threshold and its messages. \texttt{topology\_contact.\_validate\_bushing\_state} keeps its
+  $10^{-5}$ Gram and determinant thresholds and now shares this helper instead of its own copy. Only the precondition
+  checks changed; the stored arrays and every computed quantity are untouched.
+\end{itemize}
+
+\textbf{Evidence.} Brick (Linux, Python 3.12, numpy 2.5.3, OpenBLAS), host at load average 14--28 on 4 cores, CPU time
+(\texttt{time.process\_time}):
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item \textbf{Bit-identity.} Six topology runs (overlap, interlock and ten-finger; hold and swing replay; $0.04$\,s) and
+  \texttt{simulate\_grip\_bushing} ($0.02$\,s) were compared with a snapshot taken from the code before this change.
+  Every output array was bit-identical: the series, pair force traces, hand and club states, and \texttt{nfev}
+  (2{,}734, 2{,}631, 2{,}734, 2{,}631, 2{,}437, 2{,}320).
+\item \textbf{Weld kinematics.} Calls fell from 3{,}355 to 1{,}039 in the overlap swing case.
+\item \textbf{Simulation CPU.} Per $0.04$\,s case it fell from $4.0$--$5.1$\,s to $2.6$--$3.1$\,s, and the six-case total
+  from $27.9$\,s to $17.5$\,s ($-37\%$). The DOP853 bushing run gains little ($5.0 \to 4.1$\,s) because an explicit
+  integrator does not repeat stage times.
+\item \textbf{Pytest CPU.} The six \texttt{\_fast} tests (setup, simulation and the $10^{-9}$\,N trace re-evaluation)
+  took $3.2$--$3.7$\,s each. They are below the $5$\,s \texttt{slow} definition, so they now run in the default lane.
+  The timestep-halving, $0.2$\,s hold and $1$\,s replay tests stay \texttt{slow}.
+\item \textbf{Tests.} \texttt{test\_pinocchio\_hand\_frame\_cache.py} checks that the hand source is called once per
+  distinct $t$ over 14 RHS calls per time and that the derivatives equal a fresh, uncached instance bit for bit. It also
+  checks that the cache is bounded and isolated. \texttt{test\_bushing\_law.py} checks \texttt{rotation\_errors} against
+  numpy on 500 perturbed rotations ($10^{-15}$ Gram, $10^{-14}$ determinant) and pins the $10^{-6}$ threshold on both
+  sides.
+\end{enumerate}
+
+\textbf{Limitations.}
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \textbf{Hand-source purity.} The cache is exact only for a hand source that is a pure function of $t$. Both
+  adapters pass such sources. A stateful source would need its own cache invalidation.
+\item \textbf{Runtime margin.} The default-lane margin is about $1.3$\,s of CPU on this host, so wall time on a loaded
+  machine can still exceed $5$\,s. The native Pinocchio lane (\texttt{-m requires\_pinocchio}) runs every case either
+  way, and the standard CI unit lane excludes \texttt{requires\_pinocchio}.
+\item \textbf{Remaining cost.} The contact law is now about half the RHS. Radau's finite-difference Jacobian is the
+  next lever; an analytic Jacobian was not attempted.
+\item \textbf{Compilation.} This document was not compiled locally (no \texttt{pdflatex} on the host).
+\end{itemize}
+
+\textbf{Reproduction Commands.}
+\begin{verbatim}
+python3 -m pytest -n 0 tests/unit/grip_contact/test_pinocchio_hand_frame_cache.py \
+    tests/unit/grip_contact/test_bushing_law.py \
+    tests/unit/grip_contact/test_pinocchio_topology_grip.py
+python3 -m pytest -n 0 -m "slow and requires_pinocchio" \
     tests/unit/grip_contact/test_pinocchio_topology_grip.py
 \end{verbatim}
 
