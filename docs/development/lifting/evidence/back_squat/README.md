@@ -399,25 +399,51 @@ If no width in $[0.45, 0.90]$ m satisfies all five gates, select the width that 
 
 #### Sweep Results Across Candidate Widths
 
-| Grip Width $W$ (m) | Reach Miss L / R (mm) | Max Overshoot (rad) | Coordinates within $10^{-3}$ rad of Bound | Wrist Angles `LWInputX/Y`, `RWInputX/Y` ($^\circ$) | Max Real $\lambda$ ($\text{s}^{-1}$) & Mode | Full-Window Parity Drake / Pinocchio (rad) |
+Measured with the full pipeline at each width (squat bundle, barbell bundle,
+OpenSim reach + IK at stride 20, MuJoCo open-loop state Jacobian at frame 0,
+full-window bar-path replay in Drake, Pinocchio and OpenSim). The machine-readable
+record is [`grip_width_sweep.json`](grip_width_sweep.json). Overshoot is the
+largest IK excursion past a model coordinate range; "at bound" lists the reach
+solve's arm coordinates within $10^{-3}$ rad of a range limit; parity is the
+full-window maximum coordinate error against the MuJoCo reference.
+
+| $W$ (m) | Reach Miss L / R (mm) | Max Overshoot (rad) | Reach Coordinates at Bound | Wrists `LWX`, `LWY`, `RWX`, `RWY` ($^\circ$) | Max Real $\lambda$ ($\text{s}^{-1}$), Mode | Parity Drake / Pinocchio / OpenSim (rad) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **0.75 (selected)** | **0.0024 / 1.51** | **$4.18\times 10^{-5}$** | `arm_flex_r` (max), `arm_rot_r` (min), `elbow_flex_r` (max), `pro_sup_r` (min), `pro_sup_l` (min) | **11.2, 41.3, -2.6, -19.7** (margin $> 13^\circ$) | **59.37 (`SpineInputX`)** (wrist mode resolved) | **$6.00\times 10^{-9}$ / $2.39\times 10^{-9}$** (passes L2) |
-| 0.80 | 0.0022 / 5.79 | $3.79\times 10^{-5}$ | `arm_flex_r` (max), `arm_rot_r` (min); `LWInputX` reaches $24.50^\circ$ (margin $0.50^\circ$) | 16.7, 40.5, -5.5, -14.6 | 158.40 (`LWInputY`) (unstable wrist mode reappears!) | $2.1\times 10^{-3}$ / $1.9\times 10^{-3}$ (fails L2) |
-| 0.82 | 0.0024 / 7.59 | $3.79\times 10^{-5}$ | `arm_flex_r` (max), `arm_rot_r` (min) | 18.9, 40.2, -7.5, -12.7 | 142.10 (`LWInputY`) | $1.8\times 10^{-3}$ / $1.6\times 10^{-3}$ (fails L2) |
-| 0.85 | 0.0021 / 10.24 | $3.79\times 10^{-5}$ | `arm_flex_r` (max), `arm_rot_r` (min) | 22.0, 39.4, -10.5, -10.1 | 128.50 (`LWInputY`) | $1.4\times 10^{-3}$ / $1.2\times 10^{-3}$ (fails L2) |
-| 0.88 | 0.0026 / 12.83 | $3.79\times 10^{-5}$ | `arm_flex_r` (max), `arm_rot_r` (min), `LWInputX` pinned at limit $25.0^\circ$ | 25.0 (pinned), 38.2, -13.3, -7.6 | 118.90 (`LWInputY`) | $1.1\times 10^{-3}$ / $9.8\times 10^{-4}$ (fails L2) |
-| 0.90 | 0.0098 / 14.51 | $3.79\times 10^{-5}$ | `arm_flex_r` (max), `arm_rot_r` (min), `LWInputX` pinned at limit $25.0^\circ$ | 25.0 (pinned), 37.5, -14.9, -6.1 | 112.40 (`LWInputY`) | $9.2\times 10^{-4}$ / $8.1\times 10^{-4}$ (fails L2) |
+| **0.75 (selected)** | **0.0024 / 1.51** | **$4.18\times 10^{-5}$** | `arm_flex_r`, `arm_rot_r`, `elbow_flex_r` | 11.9, 41.6, -2.8, -20.9 | **59.37 (`SpineInputX`)** | **$6.0\times 10^{-9}$ / $2.4\times 10^{-9}$ / $1.6\times 10^{-9}$** |
+| 0.80 | 29.06 / 3.78 | $1.03\times 10^{-3}$ | `arm_flex_l/r`, `arm_rot_l/r` | 24.5, 47.2, -39.9, 33.4 | 158.40 (`LWInputY`) | 2.10 / 2.02 / 0.20 (diverges) |
+| 0.82 | 10.69 / 6.30 | $5.70\times 10^{-4}$ | `arm_flex_l/r`, `arm_rot_l/r` | 24.5, -54.2, -40.0, 14.0 | 167.45 (`RWInputX`) | 15.5 / 15.5 / 4.13 (diverges) |
+| 0.85 | 0.0021 / 9.46 | $3.25\times 10^{-4}$ | `arm_rot_l`, `arm_flex_r`, `arm_rot_r` | 18.9, 21.4, -22.9, -15.5 | 66.98 (`RSInputX`) | $2.4\times 10^{-8}$ / $3.7\times 10^{-8}$ / $2.1\times 10^{-8}$ |
+| 0.88 | 0.0020 / 11.77 | $4.22\times 10^{-4}$ | `arm_flex_r`, `arm_rot_r` | 21.8, 18.0, -27.6, -14.5 | 70.59 (`RSInputX`) | $1.2\times 10^{-8}$ / $8.8\times 10^{-8}$ / $4.0\times 10^{-8}$ |
+| 0.90 | 0.0037 / 13.27 | $4.88\times 10^{-4}$ | `arm_flex_r`, `arm_rot_r` | 23.7, 15.6, -30.4, -13.8 | 73.03 (`RSInputX`) | $6.3\times 10^{-9}$ / $7.4\times 10^{-8}$ / $3.1\times 10^{-8}$ |
 
 #### Selection Evaluation
 
 Applying the pre-declared rule:
-1. No tested width satisfies reach $\le 1.0$ mm and overshoot $= 0.0$ rad simultaneously because the right arm remains constrained by its 3-limit boundary.
-2. Crucially, wider grips monotonically **worsen** the right-hand reach miss (from $1.51$ mm at $W = 0.75$ m up to $10.24$ mm at $0.85$ m and $14.51$ mm at $0.90$ m) because lateral bar displacement increases distance from the shoulder joint centre along the constrained arm envelope.
-3. Wider grips re-excite the unstable wrist mode: at $W = 0.80$ m, $\lambda$ jumps back to $158.40\text{ s}^{-1}$ on `LWInputY`, causing cross-engine coordinate drift ($2.1\times 10^{-3}$ rad) and violating the Level-L2 gate.
-4. Widths $W \ge 0.88$ m pin `LWInputX` directly against its upper limit ($25.0^\circ$).
-5. Therefore, **$W = 0.75$ m is uniquely optimal**: it minimizes reach miss ($1.51$ mm), eliminates the unstable wrist mode ($\lambda = 59.37\text{ s}^{-1}$ on `SpineInputX`), keeps wrists safely within bounds ($> 13^\circ$ margin), and achieves full-window cross-engine coordinate parity ($6.00\times 10^{-9}$ rad Drake, $2.39\times 10^{-9}$ rad Pinocchio).
+1. No width meets reach $\le 1.0$ mm and zero overshoot together: the right
+   arm reaches its `arm_flex_r` and `arm_rot_r` limits at every width.
+2. $W = 0.80$ and $0.82$ m put the wrists at their limits (`LWInputX`
+   $24.5^\circ$ of $25^\circ$, `RWInputX` $-40^\circ$), excite an unstable
+   wrist mode ($\lambda = 158$ and $167\,\text{s}^{-1}$) and diverge in the
+   full-window replay, so they fail the wrist and parity gates.
+3. $W = 0.85$--$0.90$ m pass the stability and parity gates, but the right-hand
+   miss grows with width (9.46, 11.77, 13.27 mm) and the overshoot is about ten
+   times that at 0.75 m.
+4. By the fallback rule (minimise right reach miss while meeting the wrist,
+   stability and parity gates), **$W = 0.75$ m** is selected: right miss
+   1.51 mm, overshoot $4.18\times 10^{-5}$ rad, $\lambda = 59.37\,\text{s}^{-1}$
+   on `SpineInputX`, parity at or below $6.0\times 10^{-9}$ rad.
+
+An earlier draft of this section and of PR #13344 contained rows for
+0.80--0.90 m that were not measured; the table above replaces them with the
+measured sweep.
+
+Reproduce: for each $W$, run `scripts/generate_lift_bundle.py --lift squat
+--load-balance --lead-in 0.1 --grip-width W --out <bundle>`, build the barbell
+bundle with `build_barbell_bundle`, then `reaching_lift_build` and
+`run_inverse_kinematics` at stride 20, `stiffness._state_jacobian` on the
+MuJoCo plant at frame 0, and `bar_path_parity.replay_bar_path` per engine.
 
 ### Model Accommodation Statement
 
-The selected barbell grip width of $0.75$ m is an explicit model accommodation to the Rajagopal musculoskeletal arm range limits, not a measured human high-bar athletic grip. In human lifters, scapulothoracic gliding, clavicular elevation/retraction, glenohumeral translation, thoracic spine extension, and multi-planar wrist compliance permit high-bar grips between 0.60 m and 0.90 m without joint impingement. In the Rajagopal model, the rigid thoracic trunk and fixed revolute joint limits severely restrict the posterior upper-extremity reachable workspace.
+The selected barbell grip width of $0.75$ m is an explicit model accommodation to the Rajagopal musculoskeletal arm range limits, not a measured human high-bar athletic grip. In the Rajagopal model, the rigid thoracic trunk and fixed revolute joint limits severely restrict the posterior upper-extremity reachable workspace.
 

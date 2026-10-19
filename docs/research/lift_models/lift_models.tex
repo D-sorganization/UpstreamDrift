@@ -1681,7 +1681,7 @@ errors are the shoulders and bar, from the rack grip and arm reach (OSL-19,
 the generic foot.
 
 \paragraph{High-Bar Grip-Width Sweep and Wrist-Mode Resolution (OSL-19, \#13158; OSL-20, \#13159).}
-The high-bar rack placement was derived from Glassbrook et al.\ 2019 (\doi{10.1519/JSC.0000000000001836})
+The high-bar rack placement was derived from Glassbrook et al.\ 2019 (doi:10.1519/JSC.0000000000001836)
 and Wretenberg et al.\ 1996, which specify bar placement across the top of the trapezius slightly
 inferior to the C7 spinous process, but neither paper reports a barbell grip width. The parity
 standard allows grip widths in the range $[0.45, 0.90]$\,m; the standard default of 0.60\,m was
@@ -1745,28 +1745,29 @@ limit, stability, and parity gates.
 \begin{center}\footnotesize\setlength{\tabcolsep}{2.5pt}
 \begin{tabular}{lllllll}
 \toprule
-$W$ (m) & Reach L / R (mm) & Overshoot (rad) & Coordinates Near Bound & Wrist Angles ($^\circ$) & $\lambda$ ($\mathrm{s}^{-1}$), Mode & Parity (rad)\\
+$W$ (m) & Reach L / R (mm) & Overshoot (rad) & Reach Coordinates at Bound & Wrist Angles ($^\circ$) & $\lambda$ ($\mathrm{s}^{-1}$), Mode & Parity D / P / O (rad)\\
 \midrule
-\textbf{0.75} & \textbf{0.0024 / 1.51} & $\mathbf{4.18\times 10^{-5}}$ & \texttt{arm\_flex/rot\_r}, \texttt{elbow\_r}, \texttt{pro\_sup} & 11.2, 41.3, -2.6, -19.7 & \textbf{59.37 (\texttt{SpineX})} & $\mathbf{6.00\times 10^{-9}}$\\
-0.80 & 0.0022 / 5.79 & $3.79\times 10^{-5}$ & \texttt{arm\_flex/rot\_r}; \texttt{LWInputX} $24.5^\circ$ & 16.7, 40.5, -5.5, -14.6 & 158.40 (\texttt{LWY}) & $2.1\times 10^{-3}$\\
-0.82 & 0.0024 / 7.59 & $3.79\times 10^{-5}$ & \texttt{arm\_flex/rot\_r} & 18.9, 40.2, -7.5, -12.7 & 142.10 (\texttt{LWY}) & $1.8\times 10^{-3}$\\
-0.85 & 0.0021 / 10.24 & $3.79\times 10^{-5}$ & \texttt{arm\_flex/rot\_r} & 22.0, 39.4, -10.5, -10.1 & 128.50 (\texttt{LWY}) & $1.4\times 10^{-3}$\\
-0.88 & 0.0026 / 12.83 & $3.79\times 10^{-5}$ & \texttt{arm\_flex/rot\_r}; \texttt{LWInputX} pinned & 25.0, 38.2, -13.3, -7.6 & 118.90 (\texttt{LWY}) & $1.1\times 10^{-3}$\\
-0.90 & 0.0098 / 14.51 & $3.79\times 10^{-5}$ & \texttt{arm\_flex/rot\_r}; \texttt{LWInputX} pinned & 25.0, 37.5, -14.9, -6.1 & 112.40 (\texttt{LWY}) & $9.2\times 10^{-4}$\\
+\textbf{0.75} & \textbf{0.0024 / 1.51} & $\mathbf{4.18\times 10^{-5}}$ & \texttt{arm\_flex/rot\_r}, \texttt{elbow\_flex\_r} & 11.9, 41.6, -2.8, -20.9 & \textbf{59.37 (\texttt{SpineX})} & $6.0/2.4/1.6\times 10^{-9}$\\
+0.80 & 29.06 / 3.78 & $1.03\times 10^{-3}$ & \texttt{arm\_flex/rot\_l/r} & 24.5, 47.2, -39.9, 33.4 & 158.40 (\texttt{LWY}) & 2.10 / 2.02 / 0.20\\
+0.82 & 10.69 / 6.30 & $5.70\times 10^{-4}$ & \texttt{arm\_flex/rot\_l/r} & 24.5, -54.2, -40.0, 14.0 & 167.45 (\texttt{RWX}) & 15.5 / 15.5 / 4.13\\
+0.85 & 0.0021 / 9.46 & $3.25\times 10^{-4}$ & \texttt{arm\_rot\_l}, \texttt{arm\_flex/rot\_r} & 18.9, 21.4, -22.9, -15.5 & 66.98 (\texttt{RSX}) & $2.4/3.7/2.1\times 10^{-8}$\\
+0.88 & 0.0020 / 11.77 & $4.22\times 10^{-4}$ & \texttt{arm\_flex/rot\_r} & 21.8, 18.0, -27.6, -14.5 & 70.59 (\texttt{RSX}) & $1.2/8.8/4.0\times 10^{-8}$\\
+0.90 & 0.0037 / 13.27 & $4.88\times 10^{-4}$ & \texttt{arm\_flex/rot\_r} & 23.7, 15.6, -30.4, -13.8 & 73.03 (\texttt{RSX}) & $0.6/7.4/3.1\times 10^{-8}$\\
 \bottomrule
 \end{tabular}
 \end{center}
-Wider grips monotonically worsen right reach miss (from 1.51\,mm at $W = 0.75$\,m to 14.51\,mm at 0.90\,m),
-re-excite the unstable wrist mode at 0.80\,m ($\lambda = 158.40\,\mathrm{s}^{-1}$), and pin the wrist at
-$W \ge 0.88$\,m. Hence $W = 0.75$\,m is uniquely optimal. At $W = 0.75$\,m, wrists are well clear of limits
-($> 13^\circ$ margin), the wrist mode is eliminated, and full-window coordinate parity drops to
-$6.00\times 10^{-9}$\,rad (Drake) and $2.39\times 10^{-9}$\,rad (Pinocchio).
+All rows are measured (record: \texttt{grip\_width\_sweep.json} in the back-squat evidence directory).
+No width meets reach $\le 1$\,mm with zero overshoot: \texttt{arm\_flex\_r} and \texttt{arm\_rot\_r}
+reach their limits at every width. At 0.80 and 0.82\,m the wrists reach their limits, an unstable wrist
+mode appears ($\lambda = 158$ and $167\,\mathrm{s}^{-1}$) and the full-window replay diverges. From 0.85
+to 0.90\,m the replay is stable but the right-hand miss grows (9.46--13.27\,mm) and the overshoot is about
+ten times that at 0.75\,m. By the fallback rule, $W = 0.75$\,m is selected (right miss 1.51\,mm, overshoot
+$4.18\times 10^{-5}$\,rad, $\lambda = 59.37\,\mathrm{s}^{-1}$, parity $\le 6.0\times 10^{-9}$\,rad). An
+earlier draft listed unmeasured rows for 0.80--0.90\,m; this table replaces them.
 
 \subparagraph{Model Accommodation Statement.}
 The barbell grip width of 0.75\,m is an explicit model accommodation to the Rajagopal musculoskeletal arm
-range limits, not a measured human athletic high-bar grip. In human lifters, scapulothoracic mobility,
-clavicular elevation/retraction, glenohumeral translation, and thoracic extension accommodate widths
-of 0.60--0.90\,m without impingement. In the Rajagopal model, the rigid thoracic trunk and revolute bounds
+range limits, not a measured human athletic high-bar grip. In the Rajagopal model, the rigid thoracic trunk and revolute bounds
 restrict the posterior reachable workspace.
 
 \subsection{Snatch Same-Input Bundle (LIFT-5, Issue \#11745)}
