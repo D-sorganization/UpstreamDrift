@@ -131,13 +131,13 @@ central finite difference of that velocity, then the `cfrc_int` reaction at the
 proximal section projected on the segment axis). The torque arcs and the shading
 come from one evaluation per frame (`ForceTorqueFrame.axial_loads`).
 
-| Option | Meaning |
-| --- | --- |
-| `--shading-opacity 0..1` | strength (default 0.6; 0 is identical to off) |
-| `--shading-mode tint\|replace` | `tint` keeps unloaded segments' own colour (default); `replace` blends every loaded segment to the load colour |
-| `--tension-color`, `--compression-color` | `#RRGGBB` (defaults blue, red) |
-| `--shading-limit-n N` | load that saturates the colour, both signs (default 1000) |
-| `--tension-limit-n`, `--compression-limit-n` | separate saturation loads |
+| Option                                       | Meaning                                                                                                        |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `--shading-opacity 0..1`                     | strength (default 0.6; 0 is identical to off)                                                                  |
+| `--shading-mode tint\|replace`               | `tint` keeps unloaded segments' own colour (default); `replace` blends every loaded segment to the load colour |
+| `--tension-color`, `--compression-color`     | `#RRGGBB` (defaults blue, red)                                                                                 |
+| `--shading-limit-n N`                        | load that saturates the colour, both signs (default 1000)                                                      |
+| `--tension-limit-n`, `--compression-limit-n` | separate saturation loads                                                                                      |
 
 One `ForceColorScale` validates all of these (the CLI exits with status 2 and an
 `error:` line on a bad value). The HUD gains a legend line with both colours, the
@@ -151,13 +151,13 @@ translation exists: a segment without a load, or without geometry in a viewer,
 simply stays unshaded. Each run logs one debug line per engine with the number
 of shaded over total segments (`shading.log_coverage`).
 
-| Engine | Segment shading | How |
-| --- | --- | --- |
-| MuJoCo | yes | `apply_mujoco_scene_colors` on the render scene (`backends/_scene_overlays.py`) |
-| MyoSuite | yes | the same helper as MuJoCo (same `mujoco.Renderer` scene) |
-| Drake | yes | MeshCat `color` property per illustration geometry (`drake_color_bindings`), base colour from the geometry, alpha kept |
-| Pinocchio | yes | MeshCat `color` property per visual (`pinocchio_color_bindings`), base colour from the visual item, alpha kept |
-| OpenSim | no | the simbody visualizer caches geometry and its colour at `initSystem` and exposes no per-frame recolouring from Python (the ball needs a sliding body for the same reason); the export logs a warning and renders unshaded |
+| Engine    | Segment shading | How                                                                                                                                                                                                                        |
+| --------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MuJoCo    | yes             | `apply_mujoco_scene_colors` on the render scene (`backends/_scene_overlays.py`)                                                                                                                                            |
+| MyoSuite  | yes             | the same helper as MuJoCo (same `mujoco.Renderer` scene)                                                                                                                                                                   |
+| Drake     | yes             | MeshCat `color` property per illustration geometry (`drake_color_bindings`), base colour from the geometry, alpha kept                                                                                                     |
+| Pinocchio | yes             | MeshCat `color` property per visual (`pinocchio_color_bindings`), base colour from the visual item, alpha kept                                                                                                             |
+| OpenSim   | no              | the simbody visualizer caches geometry and its colour at `initSystem` and exposes no per-frame recolouring from Python (the ball needs a sliding body for the same reason); the export logs a warning and renders unshaded |
 
 The supported set is `backends.registry.SHADING_ENGINES`; the runner warns only
 for engines outside it. All blending is `ForceColorScale.shade_rgb`. Example:
@@ -167,6 +167,46 @@ python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
   --engines mujoco --views face_on --speeds 1 --no-grid --segment-shading \
   --shading-opacity 0.5 --shading-limit-n 800 --no-force-vectors --out out/
 ```
+
+## Palm-Thumb Force
+
+`--palm-thumb-force` (off by default) draws the allocated trail-palm-on-lead-thumb
+normal force at the contact patch as a sky-blue arrow, independent of
+`--force-vectors` and `--torque-vectors`. It is an equivalent of the grip closure
+force (`method="allocation"`), not a measured contact; unloaded frames draw
+nothing and the legend says "allocated (not measured)". MuJoCo overlay source only;
+the compiled model is unchanged (HRG-H1, #13189).
+
+## Appearance Flags
+
+The golfer's look can be chosen per export (HRG-B2, #13167); without any of
+these flags every engine renders the contract default golfer
+(`src/config/appearance_defaults.json`).
+
+```bash
+python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
+  --out out/ --engines mujoco \
+  --appearance driver.appearance.json \
+  --skin-tone skin_5 --hair '#2a5db0' \
+  --clothing golf_polo_shorts --top-color '#c0392b' --bottom-color '#f4d03f'
+```
+
+- `--appearance PATH` is an `appearance-v1` document or a `<spec>.appearance.json`
+  sidecar. `--skin-tone` and `--hair` take a palette id (`skin_1`..`skin_8`,
+  `hair_brown`, ...) or a `#rrggbb` colour; `--clothing` takes a preset id;
+  `--top-color` and `--bottom-color` take `#rrggbb` and recolour the preset's
+  shirt and trousers/shorts. `--glove {none,lead,trail,both}` (HRG-G1, #13186)
+  puts the white golf glove on the named grip hand by role; the lead hand is the
+  left one for a right-handed golfer (document field `handedness`, default
+  `right`). The default `none` draws bare hands in the skin colour. Custom colours become document `materials` entries
+  (see `docs/help/character_builder.md`).
+- **Precedence:** an explicit flag beats the `--appearance` document, which beats
+  the contract defaults (`model_appearance.appearance_selection.resolve_appearance`).
+  GUI settings (QSettings) are never read.
+- The resolved document travels in `ExportSettings.appearance` and
+  `WorkerJob.appearance` and is applied by the MuJoCo, MyoSuite, OpenSim, Drake
+  and Pinocchio workers. Unknown ids, a malformed colour, a garment colour on
+  the `none` preset, or a hair colour with a cap are errors (exit 2).
 
 ## Layout
 

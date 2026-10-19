@@ -875,6 +875,7 @@
 {"path": "grip_contact/pad_contact.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/pad_layout.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/pair_contact.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/palm_thumb.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/parameters.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/parity.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/prescribed_motion.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
@@ -1217,6 +1218,7 @@
 {"path": "model_appearance/defaults.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/foot.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/geometry.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/grip_contact_patch.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/grip_hand_mesh.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/grip_hands.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/grip_pose.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
