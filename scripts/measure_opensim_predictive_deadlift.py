@@ -222,13 +222,18 @@ using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
 ## Result Status: Exploratory
 
 ### Stage 1: Torque-Driven Solve
-- **Actuation:** `CoordinateActuator`s (500 N·m optimal force) on free coordinates; muscles removed
+- **Actuation:** `CoordinateActuator`s (1000 N·m optimal force) on free coordinates; pelvis residuals (optimal force 1, weight 100); muscles removed
 - **Solver Status:** `{stage1.get("solver_status", "unknown")}`
 - **Converged:** `{stage1.get("converged", False)}`
 - **Iterations:** {stage1.get("iterations", 0)}
 - **Objective:** {stage1.get("objective", float("nan"))}
 - **Scaled Constraint Violation:** {stage1.get("constraint_violation", float("nan"))}
 - **Wall Clock Time:** {stage1.get("wall_clock_s", 0.0):.2f} s
+- **Total Weight (m g):** {receipt.get("total_weight_n", 0.0):.2f} N
+- **Residual Peak:** {receipt.get("residual_peak_n")} N
+- **Residual RMS:** {receipt.get("residual_rms_n")} N
+- **Residual Ratio:** {receipt.get("residual_ratio")}
+- **Residual Assisted:** {receipt.get("residual_assisted")}
 
 ### Stage 2: Muscle-Driven Solve
 - **Actuation:** 80 Rajagopal lower-limb muscles (DeGroote-Fregly 2016)
@@ -270,7 +275,12 @@ def run_stage1_solve(
 
     logger.info("Solving Stage 1 with Moco (log -> %s)...", log_file)
     with _capture_output_to_file(log_file):
-        summary = solve_predictive_deadlift(config, study=study)
+        summary = solve_predictive_deadlift(
+            config,
+            study=study,
+            setup_pose=meta.get("setup_pose"),
+            lockout_pose=meta.get("lockout_pose"),
+        )
 
     # Enhance summary from parsed log
     parsed = _parse_solve_log(log_file)
@@ -372,7 +382,7 @@ def run_measurement(
 
     cfg_stage1 = PredictiveDeadliftConfig(
         actuation_mode="torque",
-        torque_optimal_force_nm=500.0,
+        torque_optimal_force_nm=1000.0,
         mesh_intervals=mesh_intervals,
         max_iterations=max_iterations,
         convergence_tolerance=1e-2,

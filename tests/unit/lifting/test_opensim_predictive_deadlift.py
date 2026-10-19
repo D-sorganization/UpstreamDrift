@@ -241,6 +241,35 @@ def test_format_predictive_receipt() -> None:
     assert "actuators" in receipt
     assert "reproduction_command" in receipt
     assert "comparison_table" in receipt
+    assert "total_weight_n" in receipt
+    assert "residual_peak_n" in receipt
+    assert "residual_rms_n" in receipt
+    assert "residual_ratio" in receipt
+    assert "residual_assisted" in receipt
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.slow
+def test_compute_deadlift_poses() -> None:
+    """Consistent setup and lockout poses place spheres near ground and bar near targets."""
+    from src.engines.physics_engines.opensim.python.msk_lift_model import (
+        build_lift_model,
+    )
+    from src.engines.physics_engines.opensim.python.msk_lift_predictive import (
+        compute_deadlift_poses,
+    )
+
+    built = build_lift_model(
+        "deadlift", body_mass_kg=80.0, height_m=1.78, bar_mass_kg=100.0
+    )
+    setup, lockout = compute_deadlift_poses(built.model)
+
+    assert setup["bar_height_m"] == pytest.approx(0.432, abs=0.01)
+    assert lockout["bar_height_m"] > setup["bar_height_m"]
+    assert lockout["hip_flexion"] == 0.0
+    assert lockout["knee_angle"] == 0.0
+    assert setup["hip_flexion"] > 1.0
+    assert setup["knee_angle"] > 1.0
 
 
 # -------------------------------------------------------------------------
