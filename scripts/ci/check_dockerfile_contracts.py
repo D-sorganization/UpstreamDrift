@@ -44,6 +44,13 @@ EXPLORER_SERVICE_REQUIRES: dict[str, tuple[str, ...]] = {
 }
 # Display / GL prerequisites the entrypoint must refuse to start without (DbC).
 EXPLORER_ENTRYPOINT_GUARDS = ("QT_QPA_PLATFORM", "MUJOCO_GL", "DISPLAY")
+# ud-sim:latest is a ControlTower alias for the explorer-headless image (UD #12939).
+UD_SIM_IMAGE = "ud-sim:latest"
+UD_SIM_BUILD_TARGET = "explorer-headless"
+UD_SIM_PROFILE = "explorer-images"
+UD_SIM_README = Path("docker/ud-sim/README.md")
+UD_SIM_DOC_NEEDLES = ("Dockerfile.modular", "explorer-headless", UD_SIM_IMAGE)
+UD_SIM_ENV = ("QT_QPA_PLATFORM=offscreen", "MUJOCO_GL=")
 
 
 def _service_block(compose: str, name: str) -> str | None:
@@ -82,6 +89,62 @@ def runtime_retention_failures(modular: str) -> list[str]:
             "prune jobs spare it; profile images were deleted without it)"
         ]
     return []
+
+
+def ud_sim_image_contract_failures(root: Path) -> list[str]:
+    """``ud-sim:latest`` has no standalone Dockerfile; compose is the source of truth."""
+    failures: list[str] = []
+    readme = root / UD_SIM_README
+    if not readme.exists():
+        failures.append(
+            f"{UD_SIM_README} must document how to build ud-sim:latest (UD #12939)"
+        )
+    else:
+        text = _read(readme)
+        failures.extend(
+            f"{UD_SIM_README} must mention {needle} (ud-sim source of truth)"
+            for needle in UD_SIM_DOC_NEEDLES
+            if needle not in text
+        )
+
+    compose = _read(root / "docker-compose.yml")
+    block = _service_block(compose, "ud-sim")
+    if block is None:
+        failures.append(
+            "docker-compose.yml is missing the ud-sim service "
+            "(ControlTower ct-run.sh expects ud-sim:latest)"
+        )
+        return failures
+
+    if not re.search(r"^\s+image:\s+ud-sim:latest\s*$", block, re.MULTILINE):
+        failures.append(f"ud-sim service must set image: {UD_SIM_IMAGE}")
+    if f"target: {UD_SIM_BUILD_TARGET}" not in block:
+        failures.append(
+            f"ud-sim must build Dockerfile.modular target {UD_SIM_BUILD_TARGET} "
+            "(there is no separate ud-sim Dockerfile)"
+        )
+    if UD_SIM_PROFILE not in block:
+        failures.append(f"ud-sim must use compose profile {UD_SIM_PROFILE}")
+    failures.extend(
+        f"ud-sim service must set {needle.split('=')[0]} ({needle}) for ct-run jobs"
+        for needle in UD_SIM_ENV
+        if needle not in block
+    )
+    if re.search(r"^\s+command:", block, re.MULTILINE):
+        failures.append(
+            "ud-sim must not set a default command "
+            "(ct-run uses `docker run ud-sim:latest <cmd>`)"
+        )
+
+    entrypoint = root / "docker" / "explorer" / "entrypoint.sh"
+    if entrypoint.exists():
+        script = _read(entrypoint)
+        if 'exec "$mode" "$@"' not in script:
+            failures.append(
+                "docker/explorer/entrypoint.sh must exec arbitrary commands "
+                "for ud-sim / ct-run compatibility"
+            )
+    return failures
 
 
 def explorer_contract_failures(root: Path) -> list[str]:
@@ -149,6 +212,7 @@ def explorer_contract_failures(root: Path) -> list[str]:
                 failures.append(
                     f"docker/explorer/entrypoint.sh must fail fast without {variable}"
                 )
+    failures.extend(ud_sim_image_contract_failures(root))
     return failures
 
 

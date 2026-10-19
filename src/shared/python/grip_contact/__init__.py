@@ -5,6 +5,14 @@ from src.shared.python.grip_contact.bushing_law import (
     BushingWrench,
     bushing_wrench,
 )
+from src.shared.python.grip_contact.capability_inventory import (
+    DEFAULT_INVENTORY_PATH,
+    ExcludedModel,
+    GripCapabilityInventory,
+    GripFeatureCapability,
+    ModelGripCapability,
+    load_grip_capability_inventory,
+)
 from src.shared.python.grip_contact.closure_series import (
     GripClosureSeries,
     closure_series_from_residuals,
@@ -36,7 +44,14 @@ from src.shared.python.grip_contact.force_decomposition import (
     ForceDecomposition,
     decompose_hand_forces,
 )
-from src.shared.python.grip_contact.interface import GripFrame, GripInterface
+from src.shared.python.grip_contact.interface import (
+    R_APPEARANCE_TO_SHARED,
+    R_SHARED_TO_APPEARANCE,
+    GripFrame,
+    GripInterface,
+    appearance_to_shared_grip_frame,
+    shared_to_appearance_grip_frame,
+)
 from src.shared.python.grip_contact.pair_contact import (
     ContactCapsule,
     ContactSphere,
@@ -98,6 +113,12 @@ from src.shared.python.grip_contact.trajectory_conditioning import (
 )
 
 __all__ = [
+    "DEFAULT_INVENTORY_PATH",
+    "ExcludedModel",
+    "GripCapabilityInventory",
+    "GripFeatureCapability",
+    "ModelGripCapability",
+    "load_grip_capability_inventory",
     "BodyStates",
     "BushingState",
     "BushingWrench",
@@ -154,6 +175,10 @@ __all__ = [
     "ForceDecomposition",
     "GripFrame",
     "GripInterface",
+    "R_APPEARANCE_TO_SHARED",
+    "R_SHARED_TO_APPEARANCE",
+    "appearance_to_shared_grip_frame",
+    "shared_to_appearance_grip_frame",
     "condition_trajectory",
     "decompose_hand_forces",
     "default_bushing",

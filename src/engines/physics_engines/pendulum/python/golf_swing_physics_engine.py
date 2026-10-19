@@ -48,6 +48,10 @@ import numpy as np
 
 from src.shared.python.core.contracts import StateError
 from src.shared.python.engine_core.base_physics_engine import BasePhysicsEngine
+from src.shared.python.engine_core.capabilities import (
+    CapabilityLevel,
+    EngineCapabilities,
+)
 from src.shared.python.engine_core.checkpoint import StateCheckpoint
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -171,6 +175,21 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
     @property
     def engine_type(self) -> str:
         return "golf_swing_pendulum"
+
+    def get_capabilities(self) -> EngineCapabilities:
+        """Report Golf Swing Pendulum engine capabilities."""
+        return EngineCapabilities(
+            engine_name="GolfSwingPendulum",
+            mass_matrix=CapabilityLevel.FULL,
+            jacobian=CapabilityLevel.FULL,
+            contact_forces=CapabilityLevel.NONE,
+            inverse_dynamics=CapabilityLevel.FULL,
+            drift_acceleration=CapabilityLevel.FULL,
+            forward_sim=CapabilityLevel.FULL,
+            contact_step=CapabilityLevel.NONE,
+            muscles=CapabilityLevel.NONE,
+            trajectory_opt=CapabilityLevel.NONE,
+        )
 
     def _load_from_path_impl(self, path: str) -> None:
         """No-op: golf-swing pendulum is a parametric model."""
@@ -413,10 +432,10 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
         )
 
     def compute_jacobian(self, body_name: str) -> dict[str, Any] | None:
-        """Compute Jacobian for a named body ('wrist' or 'tip').
+        """Compute Jacobian for a named body ('wrist', 'arm', 'tip', 'club').
 
-        Returns the 2×2 geometric Jacobian mapping joint velocities to
-        Cartesian velocities at the requested point.  Returns ``None`` for
+        Returns the geometric Jacobian mapping joint velocities to
+        Cartesian velocities at the requested point. Returns ``None`` for
         unknown body names.
         """
         if body_name is None:
@@ -425,8 +444,11 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
             return None
 
         body = body_name.lower()
-        if body not in {"wrist", "tip"}:
-            logger.warning("Unknown body '%s'. Valid: 'wrist', 'tip'.", body_name)
+        if body not in {"wrist", "arm", "tip", "club"}:
+            logger.warning(
+                "Unknown body '%s'. Valid: 'wrist', 'arm', 'tip', 'club'.",
+                body_name,
+            )
             return None
 
         theta1, phi = float(self._state[0]), float(self._state[1])
@@ -434,23 +456,35 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
         L2 = self._pendulum_params.L2
         abs2 = theta1 + phi
 
-        if body == "wrist":
+        if body in {"wrist", "arm"}:
             # d(wrist)/d(theta1), d(wrist)/d(phi)
-            J = np.array(
+            linear = np.array(
                 [
                     [L1 * np.cos(theta1), 0.0],
                     [L1 * np.sin(theta1), 0.0],
+                    [0.0, 0.0],
                 ]
             )
-        else:  # tip
-            J = np.array(
+            angular = np.array([[0.0, 0.0], [0.0, 0.0], [1.0, 0.0]])
+            J = linear[:2, :]
+        else:  # tip, club
+            linear = np.array(
                 [
                     [L1 * np.cos(theta1) + L2 * np.cos(abs2), L2 * np.cos(abs2)],
                     [L1 * np.sin(theta1) + L2 * np.sin(abs2), L2 * np.sin(abs2)],
+                    [0.0, 0.0],
                 ]
             )
+            angular = np.array([[0.0, 0.0], [0.0, 0.0], [1.0, 1.0]])
+            J = linear[:2, :]
 
-        return {"J": J, "body": body_name}
+        return {
+            "J": J,
+            "linear": linear,
+            "angular": angular,
+            "spatial": np.vstack([angular, linear]),
+            "body": body_name,
+        }
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         """Zero-Torque Counterfactual at a given state (q, v)."""

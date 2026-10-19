@@ -43,6 +43,10 @@ from src.engines.physics_engines.putting_green.python._sim_config import (
 from src.engines.physics_engines.putting_green.python._wind_physics import (
     compute_wind_force,
 )
+from src.shared.python.engine_core.capabilities import (
+    CapabilityLevel,
+    EngineCapabilities,
+)
 from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
     ROLL_MODEL_FIELD,
     BallRollPhysics,
@@ -136,6 +140,28 @@ class PuttingGreenSimulator:
     def model_name(self) -> str:
         """Return model name."""
         return "putting_green"
+
+    @property
+    def is_initialized(self) -> bool:
+        """Return True when simulator is initialized with a green."""
+        return self.green is not None
+
+    def get_capabilities(self) -> EngineCapabilities:
+        """Report Putting Green engine capabilities."""
+        return EngineCapabilities(
+            engine_name="PuttingGreen",
+            mass_matrix=CapabilityLevel.FULL,
+            jacobian=CapabilityLevel.FULL,
+            contact_forces=CapabilityLevel.PARTIAL,
+            inverse_dynamics=CapabilityLevel.FULL,
+            drift_acceleration=CapabilityLevel.FULL,
+            forward_sim=CapabilityLevel.FULL,
+            contact_step=CapabilityLevel.FULL,
+            model_positioning=CapabilityLevel.FULL,
+            measurements=CapabilityLevel.FULL,
+            dataset_export=CapabilityLevel.PARTIAL,
+            force_visualization=CapabilityLevel.PARTIAL,
+        )
 
     @property
     def roll_model(self) -> str:

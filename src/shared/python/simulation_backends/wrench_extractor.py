@@ -10,12 +10,13 @@ newtons and newton-metres.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TypeAlias
+from typing import TYPE_CHECKING, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
 
-from bunkershot3d.postproc.wrench_trace import WrenchTrace
+if TYPE_CHECKING:
+    from bunkershot3d.postproc.wrench_trace import WrenchTrace
 
 from .protocol import Trace
 
@@ -59,6 +60,7 @@ def wrench_trace_from_force_torque(
     torque_world: object,
 ) -> WrenchTrace:
     """Build the shared WrenchTrace primitive from force and torque arrays."""
+    from bunkershot3d.postproc.wrench_trace import WrenchTrace
 
     time_arr = _time_vector(time)
     force_arr = _component_array(force_world, name="force_world")
@@ -158,6 +160,7 @@ def static_support_wrench_trace(
     gravity_m_s2: float = 9.80665,
 ) -> WrenchTrace:
     """Known-case GRF trace: vertical support force equals body weight."""
+    from bunkershot3d.postproc.wrench_trace import WrenchTrace
 
     if body_mass_kg <= 0.0:
         raise ValueError("body_mass_kg must be positive")

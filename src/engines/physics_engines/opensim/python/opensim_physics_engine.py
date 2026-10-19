@@ -401,7 +401,23 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         if self._model is None or self._state is None:
             return []
         if self._joint_names is None:
-            self._joint_names = self._coordinate_names_in_q_order()
+            try:
+                self._joint_names = self._coordinate_names_in_q_order()
+            except (RuntimeError, ValueError, AttributeError, TypeError) as exc:
+                logger.warning("Failed determining OpenSim coordinate order: %s", exc)
+                try:
+                    cset = self._model.getCoordinateSet()
+                    cnames = [cset.get(i).getName() for i in range(cset.getSize())]
+                    if len(cnames) == self._model.getNumSpeeds():
+                        self._joint_names = cnames
+                    else:
+                        self._joint_names = [
+                            f"dof_{i}" for i in range(self._model.getNumSpeeds())
+                        ]
+                except (RuntimeError, ValueError, AttributeError, TypeError):
+                    self._joint_names = [
+                        f"dof_{i}" for i in range(self._model.getNumSpeeds())
+                    ]
         return list(self._joint_names)
 
     def _coordinate_names_in_q_order(self) -> list[str]:

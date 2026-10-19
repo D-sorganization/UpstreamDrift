@@ -153,12 +153,12 @@ class _Reference:
         data.qfrc_applied[:] = 0.0
         mujoco.mj_forward(model, data)
         mass = full_mass_matrix(mujoco, model, data)
-        # The URDF's collision shapes touch at the joints, so MuJoCo adds contact
-        # forces; the unconstrained acceleration is the comparable drift.
+        # Without phantom contacts (#12989), data.qacc and data.qacc_smooth agree
+        # and give the unconstrained passive drift acceleration directly.
         return {
             "M": mass,
             "bias": data.qfrc_bias.copy(),
-            "drift": data.qacc_smooth.copy(),
+            "drift": data.qacc.copy(),
         }
 
     def pinocchio(self, q: np.ndarray, v: np.ndarray) -> dict[str, np.ndarray]:
