@@ -2587,6 +2587,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13299 · Engine-Agnostic Grip-Style Contact Topology: GripStyle and Trigger Finger Join the Physical GripSpec; Per-Style Contact Pair Tables With Anatomy Scaling.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13299
+- **Branch:** merged via #13320
+- **PR:** #13320
+- **Paths:** see #13320
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`10e75c0b`; collated from changes/13299-engine-agnostic-grip-style-contact-topol.md)
+- **Summary:** Engine-agnostic grip-style contact topology: GripStyle and trigger finger join the physical GripSpec; per-style contact pair tables with anatomy scaling.
+- **Next step:** Shipped in PR #13320.
+
 ### DL-#13339 · Test_Check_Windows_Deps No Longer Races Real Engine Imports Against a 3s Wait; the Probe Is Tested Synchronously With Optional Engines Forced Absent
 
 - **State:** shipped
@@ -2645,10 +2658,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13300
 - **Branch:** feat/13300-capsule-contact-law
-- **PR:** #13319
+- **PR:** #13319, #13320
 - **Paths:** see #13319
 - **Started:** 2026-10-19
-- **Last verified:** 2026-10-19 (`c2ebbf6e`; collated from changes/13300-generalised-shared-contact-law-sphere-ca.md)
+- **Last verified:** 2026-10-19 (`10e75c0b`; collated from changes/13300-generalised-shared-contact-law-sphere-ca.md)
 - **Summary:** generalised shared contact law: sphere-capsule and capsule-capsule
 - **Next step:** Shipped in PR #13319.
 
