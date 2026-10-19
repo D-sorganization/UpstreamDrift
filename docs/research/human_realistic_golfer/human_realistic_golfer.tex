@@ -1999,6 +1999,69 @@ python3 scripts/export_simscape_appearance.py --check
 python3 -m pytest tests/unit/grip_contact/test_simscape_grip_topology_export.py
 \end{verbatim}
 
+\subsection{Character Builder Grip Binding Admission (HRG-GS-M13, \#13335)}
+When the humanoid character builder and multi-engine exporters compose a golf
+club onto the anthropometric golfer topology, they emit and validate a
+\texttt{grip-binding/v1} manifest via
+\texttt{src/shared/python/grip\_contact/binding\_manifest.py} (reusing the M2
+schema without introducing a parallel format):
+\begin{itemize}
+\item \textbf{Exporters wired}: \texttt{spec\_export.build\_grip\_binding\_manifest}
+and \texttt{spec\_export.build\_summary} (embedding \texttt{grip\_binding} in
+summary metadata), \texttt{model\_bundle.export\_model\_bundle} and
+\texttt{export\_full\_body\_urdf} (embedding \texttt{grip\_binding} in
+\texttt{sidecar.json}), \texttt{full\_body\_mjcf.export\_full\_body\_mjcf}
+(embedding \texttt{grip\_binding} in returned metadata),
+\texttt{CharacterBuilderModel.export} (writing \texttt{<stem>.grip\_binding.json}
+next to exported URDF/MJCF/spec artifacts), and
+\texttt{model\_converter.urdf\_exporter} (\texttt{build\_canonical\_grip\_binding\_manifest}
+for \texttt{golfer\_canonical.yaml} when \texttt{club\_shaft}, \texttt{hand\_left},
+and \texttt{hand\_right} are composed).
+\item \textbf{Fail-closed clubless contract}: Any clubless export path that
+requests grip binding (\texttt{require\_grip\_binding=True} on a clubless
+\texttt{full-body-v1} spec, standalone clubless \texttt{HumanoidURDFGenerator},
+or clubless \texttt{CanonicalModel}) raises
+\texttt{SchemaFeatureUnavailableError} with a non-empty \texttt{reason}
+attribute through \texttt{fail\_closed\_grip\_binding}; empty manifests are
+never emitted.
+\item \textbf{Model-library admission}: Every advertised hand-bearing asset
+enumerated by \texttt{enumerate\_advertised\_hand\_bearing\_assets} across
+\texttt{src/config/engine\_model\_inventory.json}, \texttt{src/config/models.yaml}
+launcher tiles, and \texttt{src/shared/python/model\_generation/library/bundled/manifest.json}
+is verified by \texttt{verify\_model\_library\_admission} to be 100\,\% covered:
+either \texttt{bound} via a validated manifest in
+\texttt{src/config/grip\_bindings/} (including
+\texttt{humanoid\_character\_builder.json} and
+\texttt{full\_body\_v1\_spec\_export.json}) or \texttt{reason\_coded} in
+\texttt{src/config/grip\_capability\_inventory.json} (including the bundled
+clubless \texttt{mujoco\_humanoid} asset, while handless bundled assets
+\texttt{simple\_humanoid}, \texttt{simple\_arm}, and \texttt{simple\_quadruped}
+are recorded in \texttt{excluded}).
+\item \textbf{Neutral preload}: At the neutral calibration pose $q_0$ (metres,
+radians, shaft axis aligned with $+x$ in the grip frame), every bound pad site $i$
+ across \texttt{overlap}, \texttt{interlock}, and \texttt{ten\_finger} (with and
+without trigger finger) satisfies
+\[
+  \left|\delta_i(q_0) - \delta_0\right| \le 5.0\times 10^{-4}\text{ m},
+  \qquad \delta_0 = 2.5\times 10^{-4}\text{ m},
+\]
+verified in shared geometry, on the exported URDF via Pinocchio forward
+kinematics, and on the exported MJCF via MuJoCo forward kinematics.
+\end{itemize}
+
+\textbf{Limitations.} The character builder exports rigid-hand proxy bodies
+(\texttt{hand\_l}, \texttt{hand\_r}) rather than articulated 20-DOF phalanx
+chains; articulated finger contact remains tracked in engine-specific child
+issues.
+
+\textbf{Reproduction.}
+\begin{verbatim}
+PYTHONPATH=.:src pytest -o addopts="" -q \
+    tests/unit/humanoid_character_builder/test_character_builder_grip_binding.py \
+    tests/unit/grip_contact/test_grip_capability_inventory.py \
+    tests/unit/grip_contact/test_grip_binding_manifests.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
