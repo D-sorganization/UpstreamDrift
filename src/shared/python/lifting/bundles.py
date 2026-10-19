@@ -65,6 +65,7 @@ from src.shared.python.lifting.loaded_balance import (
     combined_com_offsets,
     load_balance_from_record,
 )
+from src.shared.python.lifting.phase_bar_paths import phase_bar_path
 from src.shared.python.lifting.sagittal_retarget import (
     LANDMARK_LABELS,
     SagittalFrame,
@@ -94,15 +95,32 @@ BACK_SQUAT_BUNDLE = (
 #: The back-squat bundle re-tracked with the LIFT-4 barbell on hand bushings
 #: (its bar states and per-hand wrenches travel in the provenance).
 BACK_SQUAT_BARBELL_BUNDLE = BACK_SQUAT_BUNDLE.with_name("back_squat_barbell_bundle.npz")
+DEADLIFT_BUNDLE = (
+    _REPO / "docs/development/lifting/evidence/deadlift/deadlift_bundle.npz"
+)
+DEADLIFT_BARBELL_BUNDLE = DEADLIFT_BUNDLE.with_name("deadlift_barbell_bundle.npz")
+BENCH_PRESS_BUNDLE = (
+    _REPO / "docs/development/lifting/evidence/bench_press/bench_press_bundle.npz"
+)
+BENCH_PRESS_BARBELL_BUNDLE = BENCH_PRESS_BUNDLE.with_name(
+    "bench_press_barbell_bundle.npz"
+)
+SNATCH_BUNDLE = _REPO / "docs/development/lifting/evidence/snatch/snatch_bundle.npz"
+SNATCH_BARBELL_BUNDLE = SNATCH_BUNDLE.with_name("snatch_barbell_bundle.npz")
+CLEAN_AND_JERK_BUNDLE = (
+    _REPO / "docs/development/lifting/evidence/clean_and_jerk/clean_and_jerk_bundle.npz"
+)
+CLEAN_AND_JERK_BARBELL_BUNDLE = CLEAN_AND_JERK_BUNDLE.with_name(
+    "clean_and_jerk_barbell_bundle.npz"
+)
 #: The LIFT-5 same-input bundle of each barbell lift (``None``: never built).
-#: Only the back squat exists; #11745 closed with one of its five bundles.
 SAME_INPUT_LIFT_BUNDLES: Mapping[str, Path | None] = MappingProxyType(
     {
         "squat": BACK_SQUAT_BARBELL_BUNDLE,
-        "deadlift": None,
-        "bench_press": None,
-        "snatch": None,
-        "clean_and_jerk": None,
+        "deadlift": DEADLIFT_BARBELL_BUNDLE,
+        "bench_press": BENCH_PRESS_BARBELL_BUNDLE,
+        "snatch": SNATCH_BARBELL_BUNDLE,
+        "clean_and_jerk": CLEAN_AND_JERK_BARBELL_BUNDLE,
     }
 )
 
@@ -322,6 +340,7 @@ def _exercise_config(exercise: str, body: Any, bar_mass_kg: float) -> tuple:
         "full_squat": models.make_full_squat_config,
         "deadlift": models.make_deadlift_config,
         "clean": exercises.make_clean_config,
+        "clean_and_jerk": exercises.make_clean_and_jerk_config,
         "snatch": exercises.make_snatch_config,
         "bench_press": models.make_bench_press_config,
     }
@@ -331,20 +350,8 @@ def _exercise_config(exercise: str, body: Any, bar_mass_kg: float) -> tuple:
 
 
 def _bar_path_m(dyn: Any, angles: Array, time_s: Array, convention: str) -> Array:
-    """Planar bar positions (N, 2) of the optimizer's *convention* bar model.
-
-    ``snatch`` is the phase-correct snatch bar (hanging through the pulls,
-    overhead from the catch on); every other convention is the optimizer's
-    configuration-only ``bar_position``.
-    """
-    if convention == "snatch":
-        from movement_optimizer.exercises.snatch import snatch_bar_path
-
-        span = float(time_s[-1] - time_s[0])
-        return np.asarray(
-            snatch_bar_path(dyn, angles, (time_s - time_s[0]) / span), dtype=float
-        )
-    return np.array([dyn.bar_position(q, convention) for q in angles])
+    """Planar bar positions (N, 2): :func:`.phase_bar_paths.phase_bar_path`."""
+    return phase_bar_path(dyn, angles, time_s, convention)
 
 
 def solve_sagittal_lift(
@@ -362,11 +369,12 @@ def solve_sagittal_lift(
 
     Args:
         exercise: Optimizer exercise (``full_squat``, ``deadlift``, ``clean``,
-            ``snatch``, ``bench_press``).
+            ``clean_and_jerk``, ``snatch``, ``bench_press``).
         bar_convention: Optimizer exercise whose bar model places the bar
             (``bar_position``); defaults to *exercise*.  A pull uses
-            ``deadlift`` (arms hanging below the shoulder); ``snatch`` is the
-            phase-correct snatch bar (:func:`_bar_path_m`).
+            ``deadlift`` (arms hanging below the shoulder); ``snatch`` and
+            ``clean_and_jerk`` are the phase-correct bars of those lifts
+            (:mod:`.phase_bar_paths`).
 
     Raises:
         ImportError: When ``movement_optimizer`` (vendored Tools) is absent.

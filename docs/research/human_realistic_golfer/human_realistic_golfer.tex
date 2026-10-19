@@ -289,9 +289,255 @@ the same fit is 50.93\,mm, the number later children must hold while the
 violations go to zero.
 
 \section{Grip}
-Placeholder for HRG grip children.  Append method, equations, parameters,
-acceptance criteria, provenance, limitations and failed experiments.
 
+\subsection{Subject Handedness and Lead-Trail Sides (HRG-GR0, \#13201)}
+
+\paragraph{Definition.}
+\texttt{subject.handedness} is \texttt{"right"} or \texttt{"left"}: the hand that
+is \emph{lead} (nearer the target) is the anatomical left hand of a right-handed
+golfer and the right hand of a left-handed golfer. \texttt{core.handedness} is the
+single resolver: \texttt{lead\_side} yields \texttt{"L"} for right and \texttt{"R"}
+for left, \texttt{trail\_side} the opposite, and any other value raises \texttt{ValueError}.
+A specification without the field resolves to \texttt{"right"} through
+\texttt{subject\_handedness}; this is a declared default, not an inference from data.
+The builder writes the key only for a non-default value, so every specification and
+receipt committed before this change remains byte-identical. The receipt schema records
+an optional \texttt{handedness} field that is \texttt{null} on legacy receipts.
+
+\paragraph{Sign Conventions and Sagittal Reflection.}
+\texttt{GripPose.landmarks} uses the golfer body frame with $x$ anterior, $y$ toward
+the golfer's anatomical left, and $z$ up. The sagittal plane is $x$--$z$, so the lateral
+axis is $y$ and the sagittal reflection is $P = \mathrm{diag}(1, -1, 1)$. The target
+lies toward $+y$ for a right-hander and $-y$ for a left-hander; the toe axis is $+x$;
+the grip axis is idealized as vertical, down $-z$ from the butt. Every distance and
+angle of the grip is expressed in lead/trail terms and is identical for both handednesses;
+only the target direction, hence the azimuth and palm-normal vectors, changes sign in $y$.
+Consequently, $P\,\ell_{\mathrm{right}} = \ell_{\mathrm{left}}$ for each landmark $\ell$,
+asserted within $10^{-9}$~m.
+
+\subsection{Cross-Model Grip Capability Inventory (HRG-GS-M0, \#13322)}
+To support the cross-engine grip contact and hand-coupling objectives of epic
+\#13297, a machine-readable capability manifest is established at
+\texttt{src/config/grip\_capability\_inventory.json} under schema
+\texttt{grip-capability-inventory/v1}. The inventory classifies every model asset
+across four capabilities:
+\begin{enumerate}
+\item \texttt{visual\_style}: Rendering of hand-hand grip overlap, interlock, or ten-finger configurations.
+\item \texttt{allocated\_hand\_hand}: Static or kinematic allocation of dual-hand wrenches onto bilateral hand-hand pairs.
+\item \texttt{physical\_pad\_grip}: Dynamic contact between designated anatomical hand pads and the club grip cylinder.
+\item \texttt{physical\_hand\_hand}: Dynamic inter-hand pad-to-pad contact dynamics.
+\end{enumerate}
+
+Every entry records its verified mechanical attachment mode
+(such as \texttt{rigid\_branch\_kinematic}, \texttt{closure\_weld},
+\texttt{bushing\_compliance}, \texttt{free\_plus\_bushings},
+\texttt{site\_weld}, \texttt{mocap\_weld}, or \texttt{direct\_mid\_hands})
+and finger kinematic fidelity (\texttt{none}, \texttt{rigid\_proxy}, or \texttt{articulated}).
+By contract, no capability may claim \texttt{available = true} without an active
+\texttt{evidence\_test} verifying the code path; currently, only the full-body-v1
+spec export path (exercised in \texttt{test\_engine\_grip\_contact.py} and
+\texttt{test\_opensim\_contact\_grip.py}) provides physical pad-grip contact
+evidence. All other capabilities remain \texttt{available = false} with explicit
+diagnostic reasons and tracking issues mapped to epic children (\#13326--\#13336).
+
+Non-hand-bearing models (\texttt{putting\_green}, \texttt{putting\_green\_gui},
+\texttt{pendulum\_simulator}, and \texttt{swing\_objective\_lab}) are explicitly
+segregated in an \texttt{excluded} list with formal justifications.
+
+Empirical verification against source assets revealed several divergences from
+initial panel assumptions:
+\begin{itemize}
+\item \textbf{MyoSuite sim repository}: Panel notes assumed \texttt{shared/models/myosuite/myo\_sim}
+held an active 23-DOF hand model; verification confirmed the path is an unpopulated checkout directory,
+\texttt{myoarm\_simple.xml} lacks hands, and \texttt{golfer\_myobody\_driver.xml} utilizes rigid
+ellipsoid hands with site-welds.
+\item \textbf{MuJoCo golfer kinematics}: \texttt{golfer.xml} attaches the club shaft as a direct
+kinematic child of \texttt{hand\_left}, leaving \texttt{hand\_right} entirely uncoupled without equality welds.
+\item \textbf{Drake URDF topology}: The club shaft is rigidly fixed to \texttt{right\_hand} with no finger
+links, leaving \texttt{left\_hand} disconnected.
+\item \textbf{Pinocchio URDF topology}: The club shaft attaches to a \texttt{mid\_hands} frame connected
+directly to \texttt{thorax3}, bypassing both left and right hand branches.
+\end{itemize}
+
+A Design-by-Contract loader at
+\texttt{src/shared/python/grip\_contact/capability\_inventory.py}
+strictly validates the manifest against disk paths, schema versioning, non-empty diagnostics,
+and tracking issue conventions.
+
+\subsection{Grip-Style Contact Topology (HRG-GS-G1, \#13299)}
+\textbf{Contract.} \texttt{GripStyle} (overlap, interlock, ten-finger) and
+\texttt{trigger\_finger} are now physical members of \texttt{GripSpec}; a
+non-default value is written by \texttt{apply\_grip\_config} as a new spec
+revision and changes the physics hash.  The default (overlap, no trigger) is
+omitted from the physical JSON, so existing v1 spec bytes are unchanged.
+
+\textbf{Frame.} Sites are expressed in the shared grip frame of
+\texttt{grip\_contact.pad\_layout}: $+x$ along the grip from butt to head,
+$\rho=\sqrt{y^2+z^2}$ radial.  Each site is a sphere or capsule
+(centre, unit axis, half-length, radius).
+
+\textbf{Pair table.} Every style has eight pad--grip pairs (palm and finger,
+proximal and distal, per hand), the lead heel pad on the butt region and the
+trail palm on the lead thumb (sphere--capsule).  Overlap adds the trail little
+finger on the lead index (capsule--capsule); interlock adds the trail little
+finger against the lead middle finger and the lead index wrapping the trail
+little finger (two capsule--capsule pairs); ten-finger puts the trail little
+finger on the grip beside the lead index (capsule--cylinder).  The optional
+trail index trigger adds a capsule--cylinder pair.
+
+\textbf{Anatomy.} Radii scale linearly with hand length $L$
+($L_0=0.19$\,m, valid $0.14\le L\le0.24$\,m): little finger
+$0.0075\,L/L_0$, index $0.008\,L/L_0$, thumb $0.0095\,L/L_0$, heel pad
+$0.012\,L/L_0$\,m.  These are anthropometric assumptions, not measurements.
+
+\textbf{Physics honesty.} In \texttt{full-body-v1} the lead hand is the club
+body and the trail hand is welded to it, so every hand--hand pair is
+\emph{allocated} (reporting only) in weld, closure, bushing and contact modes;
+it is physical only in the separated-hand v2 topology (HRG-GS-G11, \#13309).
+
+\textbf{Acceptance.} Exact pair sets per style; every site within 0.5\,mm of
+the grip surface or its partner at the neutral pose; radii proportional to
+$L$; one \texttt{GripStyle} definition in \texttt{src/}.  Reproduce with:
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_contact_topology.py \
+    tests/unit/motion_matching/test_grip_config.py
+\end{verbatim}
+
+\textbf{Limitation.} No finger markers exist in the capture, so finger contact
+locations are not identifiable from data; the table fixes them by assumption.
+
+\subsection{Allocated Hand--Hand Contact Reporting (HRG-GS-G3, \#13301)}
+\textbf{Method.} We generalize the palm--thumb allocation (\texttt{palm\_thumb.py})
+across every hand--hand pair in the contact topology $\mathcal{T}$ (HRG-GS-G1,
+\#13299). Given the world-frame closure wrench $F_{\mathrm{closure}} =
+(f_{\mathrm{lead}}, \tau_{\mathrm{lead}})$ from the trail-hand-to-club
+constraint and hand--club reactions $(f_{\mathrm{hc}}, \tau_{\mathrm{hc}})$,
+the residual wrench $F_{\mathrm{rem}} = (f_{\mathrm{lead}} -
+f_{\mathrm{hc}}, \tau_{\mathrm{lead}} - \tau_{\mathrm{hc}})$ is
+partitioned among active hand--hand pairs via weights $w_i \ge 0$ ($\sum_i w_i =
+1$). The split across pairs is an explicit, labelled modelling prior
+(\texttt{AllocationPrior}), not an identified physical quantity. Hand--club reactions
+$(f_{\mathrm{hc}}, \tau_{\mathrm{hc}})$ default to zero when not supplied, which attributes
+the entirety of the observable closure wrench to hand--hand pairs, exactly as HRG-H1 did.
+\texttt{AllocatedHandContacts} records the active \texttt{prior\_name} and
+\texttt{hand\_club\_source} (\texttt{"supplied"} vs \texttt{"not\_supplied"}) so this
+modelling assumption is visible to all consumers. For each pair $i$, the patch point $p_i$
+and unit normal $\hat{n}_i$ (pointing lead to trail) are evaluated via primitive distance
+solvers. The force $f_i = w_i f_{\mathrm{rem}}$ is transported to $p_i$, resolving
+couple $c_i = w_i \tau_{\mathrm{rem}} - (p_i - p_{\mathrm{ref}})
+\times f_i$. Compressive normal force is $f_{n,i} = \max(0, -f_i \cdot
+\hat{n}_i)$, tangential force $f_{t,i} = \|f_i - (f_i \cdot
+\hat{n}_i)\hat{n}_i\|$, and friction ratio $\mu_{\mathrm{eff}} =
+f_{t,i}/(\mu f_{n,i})$. Unloaded flags mark tensile configurations ($-f_i
+\cdot \hat{n}_i \le 0$).
+
+\textbf{Parameters.} Static friction coefficient $\mu = 0.9$; equal-split pair
+weights prior (\texttt{name="equal\_split"}, $w_i = 1/N_{\mathrm{pairs}}$); normal tolerance $10^{-9}$; minimum
+closure force $10^{-9}$\,N. Hand--club reactions default to zero (\texttt{hand\_club\_source="not\_supplied"}).
+
+\textbf{Acceptance Criteria.}
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item The sum of allocated hand--hand forces and hand--club forces reproduces closure
+$\lambda$ to $\le 10^{-9}$\,N.
+\item Every allocated channel emits \texttt{method="allocation"}, user-visible
+label \path{external:<pair>_allocated}, \path{prior_name}, and
+\path{hand_club_source}; requesting physical mode on welded
+topology raises \path{SchemaFeatureUnavailableError} via \path{require_allocated_mode}.
+\item Native viewer overlay renders one arrow per allocated pair under the allocated
+contact toggle.
+\end{enumerate}
+
+\textbf{Limitations.} Allocation partitions a single resultant closure wrench
+using an assumed modelling prior rather than solving multi-body compliant contact; internal squeeze co-contraction
+between opposing pairs is not observable from the net closure wrench. Hand--club forces default to zero when not supplied.
+
+\textbf{Reproduction Command.}
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_allocated_hand_contact.py \
+    tests/unit/grip_contact/test_palm_thumb.py
+\end{verbatim}
+
+\subsection{Topology-Driven Finger Pose and Visual Roll (HRG-GS-G4, \#13302)}
+\textbf{Method.} Visual finger placement in \texttt{model\_appearance} is driven directly by \texttt{ContactTopology} contact sites instead of the legacy \texttt{\_FINGER\_LINKS} string table. The lead index finger, trail little finger, and optional trail index trigger are placed by inverting the three-phalanx parametric wrap so that the distal phalanx centroid matches the corresponding topology site centre to within $\le 1$\,mm while ensuring that non-penetrating grip pad clearance is maintained. Per-hand visual roll rotates each hand body about the grip axis by its respective roll offset $\alpha$, absorbing issue \#13166.
+
+\textbf{Parameters.} The topology site centre $\mathbf{c}_{\mathrm{site}} = (x, y, z)$ in the shared grip frame defines the axial target $z_{\mathrm{hand}} = x - d_{\mathrm{butt}}$, radial target $\rho = \sqrt{y^2+z^2}$, and azimuthal target $\theta = \operatorname{atan2}(z, y)$. For unlinked fingers, nominal curl angles are computed from $V$-azimuth $v = 20^\circ + \alpha$ and knuckle offset $110^\circ$. For topology-driven fingers, a 1D monotonic solve determines tangent radius $d$ and metacarpophalangeal azimuth $\theta_{\mathrm{mcp}}$ such that the distal phalanx vertex centroid achieves sub-millimetre agreement with $\mathbf{c}_{\mathrm{site}}$. Thumb azimuth is shifted by $\alpha$ to preserve hand-rigid rotation. Symmetric barrel ring stations $(0.2, 0.4, 0.6, 0.8)$ are added alongside the tangent-point station on each phalanx capsule so that relocating the linked finger onto the partner hand leaves no un-sampled barrel gap across the remaining proximal phalanges, raising 36-bin world azimuthal wrap coverage (lead/trail) from $34/36$ ($0.9444$) and $32/36$ ($0.8889$) on driver overlap, $34/36$ ($0.9444$) and $31/36$ ($0.8611$) on iron7 overlap, $33/36$ ($0.9167$) and $34/36$ ($0.9444$) on driver and iron7 interlock, $34/36$ ($0.9444$) and $35/36$ ($0.9722$) on driver ten-finger, and $34/36$ ($0.9444$) and $34/36$ ($0.9444$) on iron7 ten-finger to full $36/36$ ($1.0000$, all 36 bins covered) for every club and style.
+
+\textbf{Acceptance Criteria.} (1) Rendered fingertip positions match \texttt{ContactTopology} site centres to $\le 1$\,mm across all styles (overlap, interlock, ten-finger) and trigger mode; (2) Overlap, interlock, and ten-finger produce visibly distinct finger geometries with appropriate \texttt{on\_grip} flags and match golden mesh summaries; (3) Per-hand roll follows $\alpha$ to $\le 0.1^\circ$ across fingertips, palm, and thumb; (4) The duplicate \texttt{\_FINGER\_LINKS} table is eliminated from \texttt{grip\_pose}.
+
+\textbf{Reproduce.} Reproduce with:
+\begin{verbatim}
+python3 -m pytest tests/unit/model_appearance/test_grip_finger_topology.py \
+    tests/unit/model_appearance/test_grip_hand_mesh.py \
+    tests/unit/model_appearance/test_grip_pose.py
+\end{verbatim}
+
+\textbf{Limitations.} Hand phalanges remain rigid capsules wrapped on the grip cylinder; individual phalanx flexion dynamics during the swing are visual approximations rather than musculoskeletal coordinate solves.
+
+\subsection{Named Grip Presets (HRG-GS-G5, \#13303)}
+\textbf{Method.} Three historical and coaching consensus two-handed grip presets
+---\texttt{palmer\_overlap}, \texttt{woods\_interlock}, and
+\texttt{ten\_finger}---are formalised over \texttt{GripSpec}, parameterising
+inter-hand linking style, golf angles ($\alpha, \psi, \gamma$) for both hands,
+hand spacing, and trigger-finger extension. The numeric values are
+\texttt{photo\_estimate} assumptions, not measurements; no image is committed
+in the repository. Every parameter records \texttt{photo\_estimate} provenance
+in \texttt{subject.grip\_provenance}, distinguishing photo-estimate assumptions
+from direct kinetic or marker measurements.
+
+\textbf{Parameters.} The panel-consensus starting values and actually consulted
+qualitative sources are:
+\begin{itemize}[nosep]
+  \item \textbf{Palmer Overlap}: \texttt{GripStyle.OVERLAP}, lead
+    $\alpha=+12^{\circ}$, $\psi=45^{\circ}$, $\gamma=0^{\circ}$; trail
+    $\alpha=+12^{\circ}$, $\psi=35^{\circ}$, $\gamma=0^{\circ}$; spacing
+    $0.074$\,m; trigger finger on. Qualitative source: golf.com's published
+    excerpt from the book \emph{Arnold Palmer: American Hero}. Palmer describes
+    an overlap grip, both Vs pointing at the right shoulder seam (strong-ish),
+    the right lifeline folding over the left thumb, a slight right-index trigger,
+    and a palm-finger hold for the left hand. Evidence still requirement: face-on
+    high-speed camera still required at address showing the trail index trigger
+    finger extended down the shaft, the lead thumb nested in the trail thenar pocket,
+    and the trail little finger riding over the lead index knuckle.
+  \item \textbf{Woods Interlock}: \texttt{GripStyle.INTERLOCK}, lead
+    $\alpha=+2^{\circ}$, $\psi=38^{\circ}$, $\gamma=0^{\circ}$; trail
+    $\alpha=+2^{\circ}$, $\psi=34^{\circ}$, $\gamma=0^{\circ}$; spacing
+    $0.069$\,m; trigger finger off. Qualitative source: an interlock grip seen
+    in published photos of Tiger Woods: a neutral lead hand with about 2 to 2.5
+    knuckles showing, the trail little finger hooked between the lead index and
+    middle fingers, and the right palm over the left thumb. Evidence still
+    requirement: face-on high-speed camera still required at address showing
+    the trail little finger deeply interlocked between the lead index and middle
+    fingers, 2 to 2.5 knuckles visible on the lead hand, and the right palm
+    covering the left thumb.
+  \item \textbf{Ten-Finger}: \texttt{GripStyle.TEN\_FINGER}, lead
+    $\alpha=+5^{\circ}$, $\psi=40^{\circ}$, $\gamma=0^{\circ}$; trail
+    $\alpha=+5^{\circ}$, $\psi=32^{\circ}$, $\gamma=0^{\circ}$; spacing
+    $0.090$\,m; trigger finger off. Qualitative source: general instructional
+    description with no named person: all ten digits making direct contact with
+    the grip cylinder without overlap or interlock, mild rotation (+5$^{\circ}$ on
+    both hands), lead palm diagonal 40$^{\circ}$, trail finger diagonal 32$^{\circ}$,
+    90\,mm hand spacing, and no trigger-finger separation. Evidence still
+    requirement: face-on camera still required at address showing all eight fingers
+    and two thumbs directly contacting the grip wrapper, with the trail little
+    finger flush adjacent to the lead index finger without overlap or interlock.
+\end{itemize}
+
+\textbf{Acceptance.} Presets load across CLI (\texttt{--grip-preset}), desktop
+(\texttt{CharacterBuilderModel}) and web API surfaces (\texttt{/api/character-builder/grip}),
+round-tripping through \texttt{apply\_grip\_config} with provenance
+\texttt{photo\_estimate}, never \texttt{measured}. All angles remain strictly
+within the GR1 anatomical bounds. Feature parity registry entry
+\texttt{tools.character\_builder\_grip} is updated. Reproduce with:
+\begin{verbatim}
+python3 -m pytest tests/unit/grip_contact/test_named_presets.py \
+    tests/unit/motion_matching/test_grip_selection.py
+\end{verbatim}
+
+\textbf{Limitation.} Numeric values are \texttt{photo\_estimate} assumptions,
+not measurements, and no image is committed in the repository. Starting angles
+and spacing represent photographic pose estimations rather than dynamic
+motion-capture measurements; individual grip variations across club selections
+or swing phases are unmodelled.
 \section{Appearance}
 Placeholder for HRG appearance children.
 
@@ -311,6 +557,18 @@ non-uniqueness. \texttt{full-body-v1} stays the default. The definition,
 equations and residual report are in the Simscape matching reference,
 section ``The full-body-v2 Schema and Trunk Coordinate Migration''. The geometry
 is HRG-D2.
+
+\subsection{Landmark Regional Trunk Joints (HRG-D2, \#13173)}
+HRG-D2 places L5/S1 at the HRG-C3 design offset and C7/T1 at the cervicale.
+T12/L1 is placed at the Gray lumbar fraction $18/46$, and the neutral
+curvature is checked against Yukawa et al.\ 2018. The de Leva trunk solids
+are re-parented and the dummy body is dropped. The ROM becomes soft limits,
+with hard ranges report-only. The back markers observe rank 5 of the six
+trunk coordinates, so the split is regularised by
+\texttt{bruno2015\_regional}. The details, the mass ledger, the cross-engine
+results and the best-fit Hub residual (61.9 / 34.3~mm) are in the Simscape
+matching reference, section ``Landmark Regional Trunk Joints for
+full-body-v2''.
 
 \section{Anatomical Angles}
 Placeholder for HRG anatomical-angle children.

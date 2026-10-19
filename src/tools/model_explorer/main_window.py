@@ -139,7 +139,7 @@ class URDFGeneratorWindow(QMainWindow):
         self._main_widget.save_urdf_as()
 
     def export_for_mujoco(self) -> None:
-        self._main_widget.export_for_engine("MuJoCo", "golf_robot_mujoco.urdf")
+        self._main_widget.export_for_engine("MuJoCo", "golf_robot_mujoco.xml")
 
     def export_for_drake(self) -> None:
         self._main_widget.export_for_engine("Drake", "golf_robot_drake.urdf")

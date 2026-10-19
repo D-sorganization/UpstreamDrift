@@ -2741,6 +2741,40 @@ Rows dated up to 2026-10-14 (about 1,430 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-19 | #13279 | Add Run Study panel and worker across PyQt and React spine viewers |
+| 2026-10-19 | #13404 | add barbell bundles and OpenSim IK/ID receipts for remaining lifts |
+| 2026-10-19 | #13338 | Drive finger pose from contact topology with per-hand roll, absorbing #13166 |
+| 2026-10-19 | #13395 | Drop the removed Simulator.set_publish_every_time_step call from Drake simulate and fit_swing_autodiff; Drake already defaults to no per-step publish |
+| 2026-10-19 | #13394 | Move the MOSAIC analytic-vs-finite-difference wall-clock speedup claim to the benchmark lane; unit lane asserts it deterministically via an injected clock and regressor-evaluation counts |
+| 2026-10-19 | #13345 | Defer heavy route and backend imports so Sidekick API is ready in <15s; theme imports resolve via launcher_compat; Document ud-sim:latest compose source of truth and enforce ct-run contract in CI; Return dataset_id, name, rows, columns from generate; add export stream route; pipeline: wire ground-support CLI neural flags through MotionMatchingController and record neural disposition on receipts; Enforce OpenCap learned augmenter sidecar execution, fail-closed checks, and correct synthetic/model-conditioned provenance labeling; Enforce workspace, forbidden zone, Cartesian velocity, and contact force limits in SafetyMonitor; Fix CentroidalMPC contact count and mass from model; Align engine capability flags and interfaces across registered physics engines; fix(mujoco): eliminate phantom world-fused contact on double-pendulum fixture (#12989); Standardize get_joint_names across physics engines to match generalized velocity dimensions (nv) with per-DOF expansion for multi-DOF joints; Add results playback UI and real engine detection in Model Explorer (#12996); fix(model_explorer): per-engine export converts MJCF/Drake/Pinocchio and viewer handles errors visibly; Restore capture-contract CI coverage and guard addopts marker exclusions (#13000).; Stop c3d_simscape_preview false match success; load C3D via shared reader with unit conversion; learning/imitation: adopt He/Xavier init, Adam optimizer, and shared _mlp helper in BehaviorCloning and DAgger; DomainRandomizer fails loud on unsupported engines; MuJoCo parameter surface; remove dead config ranges |
+| 2026-10-19 | #13342 | Allocated hand-hand contact reporting for all style pairs (HRG-GS-G3) |
+| 2026-10-19 | #13378 | Bump vendor/ud-tools to Tools 96a1684 (Coriolis Christoffel term, Tools #5664; standard gravity, Tools #5668) |
+| 2026-10-19 | #13344 | feat(lifting): high-bar rack reach sweep and wrist mode resolution; fix(lifting): resolve unstable open-loop wrist mode on high-bar rack |
+| 2026-10-19 | #13318 | Unify grip frames across model_appearance and grip_contact, fix Drake contact normal recording |
+| 2026-10-19 | #13337 | Add cross-model grip capability inventory manifest, DbC loader, and verification suite |
+| 2026-10-19 | #13217 | Report the allocated trail-palm-on-lead-thumb force (patch frame, allocation, provider metadata); physics unchanged |
+| 2026-10-19 | #13284 | Run real-OpenSim lift tests in a dedicated CI job (OSL-13) |
+| 2026-10-19 | #13276 | LIFT-5 clean and jerk is the whole lift: Tools make_clean_and_jerk_config (Tools #5661) on the standard's eight phases with a hang/rack/overhead bar; bundle and parity regenerated, rack/jerk IK strict xfail |
+| 2026-10-19 | #13366 | ci(quality-gate): aggregate frontend-tests and the other gating CI Standard jobs so a red job blocks the merge queue |
+| 2026-10-19 | #13361 | fix(ui): include physical style in resolveGrip to resolve red main on frontend-tests |
+| 2026-10-19 | #13358 | fix(launcher): renumber jaxsim_dashboard to order 105 to resolve duplicate tile order 33 |
+| 2026-10-19 | #13359 | fix(data_io): make c3d_loader resilient to sidekick.lab.bio test pollution |
+| 2026-10-19 | #13320 | Engine-agnostic grip-style contact topology: GripStyle and trigger finger join the physical GripSpec; per-style contact pair tables with anatomy scaling.; generalised shared contact law: sphere-capsule and capsule-capsule |
+| 2026-10-19 | #13341 | test_check_windows_deps no longer races real engine imports against a 3s wait; the probe is tested synchronously with optional engines forced absent |
+| 2026-10-19 | #13269 | Route web launcher to /tools/spine-viewer, update Ch68 manual and ignore licensed_assets |
+| 2026-10-19 | #13288 | Compute muscle forces and activations for barbell squat (OSL-4) |
+| 2026-10-19 | #13316 | Shard unit-test-gate into a 2-leg file-hash matrix so each leg stays well under the 35 min limit without raising it |
+| 2026-10-19 | #13319 | generalised shared contact law: sphere-capsule and capsule-capsule |
+| 2026-10-19 | #13274 | Feed finished spine study receipts into injury analysis via ModelSpinalLoadProvider; spine models stay out of the feedback inventory |
+| 2026-10-19 | #13275 | Add spine study execution and model asset listing API |
+| 2026-10-19 | #13257 | plot_style re-exports Qt widgets and the matplotlib renderer lazily so headless force_overlay/loop_nullspace imports no longer load PyQt6 or mplot3d |
+| 2026-10-19 | #13247 | full-body-v2 landmark lumbar (L5/S1) and thoracic (T12/L1) joints: C3 L5/S1, Gray T12/L1 fraction, Yukawa curvature check, mass ledger, soft-limit ROM, back-marker observability (rank 5, split regularised); fixes OpenSim CustomJoint rotation order |
+| 2026-10-19 | #13198 | HRG-B2: appearance CLI flags, precedence resolver, shared Qt colour field, desktop and web hair/skin/clothing colour pickers; Engine-neutral anatomical angles package with wrist and forearm terms (HRG-E2); HRG-G1: skin-coloured bare grip hands by default and an optional white glove (glove none/lead/trail/both) through CLI, desktop and web; one hand-material resolver; no duplicate RHandStandoff loft; shared core.handedness; Subject handedness in spec, receipts and GripPose (HRG-GR0); Add the anatomical grip contract (GripSpec, exact Euler bijection) and fix the trail grip-roll axis; HRG-GR2: physical grip configuration as an immutable spec revision with hand depth/spacing on the closure and grip provenance; fitted_grip uses provenance; Grip fitting modes (user_fixed, bounded_prior, free_fit), rom_set_identified provenance, golf-language grip report with profile interval and multistart sensitivity (HRG-GR3); HRG-GR4: grip presets and sliders in the spec builder, native viewer export, desktop and web, with one shared resolver |
+| 2026-10-19 | #13311 | HRG-A2: parameterise visual grip strength and per-hand roll offsets in GripPose and grip selection |
+| 2026-10-19 | #13286 | Align native Drake torque replay with reviewed 1.57/1.58 versions and skip unreviewed stacks in tests |
+| 2026-10-19 | #13254 | Enforce imitation learning contracts: seed-based determinism, validation split bounds, activation execution, and DAgger dataset immutability |
+| 2026-10-19 | #13268 | Reject unauthenticated diagnostics in remote mode, redact absolute repo root, and measure runtime probes |
+| 2026-10-19 | #13272 | Abort RealTimeController on unexpected callback errors with zero torque; wire SafetyMonitor on non-simulation backends. |
 | 2026-10-18 | #13264 | OSL-18: OpenSim lift foot carries the bundle's 10 deg tibial torsion and is sized from the bundle's calcaneus stations; squat IK marker RMS 1.93 cm / max 3.55 cm, inside the unchanged 2/4 cm gate; marker-gate xfails removed |
 | 2026-10-18 | #13263 | Bump vendor/ud-tools to a459505 (Tools #5653 snatch pull phase) and regenerate the snatch bundle on the merged pin |
 | 2026-10-18 | #13224 | Add JaxSim launcher dashboard tile and engine tile coverage test; Fail closed with ok=False and rejected cameras on degenerate or collinear camera pairs; full-body-v2 schema (regional lumbar L5/S1 and thoracic T12/L1 trunk), one schema registry for exporters and consumers, and a constrained v1->v2 trunk migration with residual and non-uniqueness report; v1 stays default and byte-identical |

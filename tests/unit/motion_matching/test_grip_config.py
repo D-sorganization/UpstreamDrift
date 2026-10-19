@@ -120,6 +120,8 @@ PHYSICAL_CHANGES = [
     ),
     ("spacing", lambda g: replace(g, hand_spacing_m=g.hand_spacing_m + 0.001)),
     ("depth", lambda g: replace(g, lead_below_butt_m=g.lead_below_butt_m + 0.001)),
+    ("style", lambda g: replace(g, style=GripStyle.INTERLOCK)),
+    ("trigger_finger", lambda g: replace(g, trigger_finger=True)),
 ]
 
 
@@ -161,10 +163,8 @@ def test_apply_is_idempotent_and_chains_revisions(base) -> None:
 
 
 def test_visual_only_parameters_leave_the_compiled_physics_identical(base) -> None:
-    a = apply_grip_config(base, _cfg(style=GripStyle.OVERLAP))
-    b = apply_grip_config(
-        base, _cfg(style=GripStyle.INTERLOCK, lead_thumb_offset_deg=30.0)
-    )
+    a = apply_grip_config(base, _cfg())
+    b = apply_grip_config(base, _cfg(lead_thumb_offset_deg=30.0))
     assert _bytes(a) != _bytes(b)  # the visual hints differ ...
     assert physics_spec_sha256(a) == physics_spec_sha256(b)  # ... the physics does not
     ma, mb = _compiled(a), _compiled(b)
@@ -172,10 +172,8 @@ def test_visual_only_parameters_leave_the_compiled_physics_identical(base) -> No
         np.testing.assert_allclose(
             getattr(ma, field), getattr(mb, field), rtol=0, atol=1e-15
         )
-    # Re-styling an existing revision mints no new physics revision.
-    c = apply_grip_config(
-        a, _cfg(style=GripStyle.INTERLOCK, lead_thumb_offset_deg=30.0)
-    )
+    # Adjusting a visual-only parameter on an existing revision mints no new physics revision.
+    c = apply_grip_config(a, _cfg(lead_thumb_offset_deg=30.0))
     assert physics_spec_sha256(c) == physics_spec_sha256(a)
 
 
@@ -281,7 +279,12 @@ def test_provenance_is_recorded_per_parameter_and_validated(base) -> None:
     assert mixed["subject"]["grip_provenance"]["lead.alpha_deg"] == "rom_set_identified"
     assert mixed["subject"]["grip_provenance"]["hand_spacing_m"] == "default"
     assert mixed["subject"]["grip_provenance"]["trail.psi_deg"] == "user_declared"
-    assert GRIP_PROVENANCE_SOURCES == ("user_declared", "rom_set_identified", "default")
+    assert GRIP_PROVENANCE_SOURCES == (
+        "user_declared",
+        "rom_set_identified",
+        "default",
+        "photo_estimate",
+    )
     with pytest.raises(ValueError, match="provenance"):
         apply_grip_config(base, _cfg(), provenance="guessed")
     with pytest.raises(ValueError, match="provenance"):

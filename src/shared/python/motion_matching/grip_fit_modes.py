@@ -178,9 +178,9 @@ class HandProblem:
         return [self.theta0, self.prior(settings), *best]
 
 
-def _bound_hits(theta: Array, box: Array) -> dict[str, bool]:
+def _bound_hits(theta: Any, box: Any) -> dict[str, bool]:
     return {
-        name: bool(min(t - lo, hi - t) < 1e-6)
+        name: bool(min(float(t) - float(lo), float(hi) - float(t)) < 1e-6)
         for name, t, (lo, hi) in zip(ANGLE_FIELDS, theta, box, strict=True)
     }
 

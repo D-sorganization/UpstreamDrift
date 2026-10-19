@@ -158,6 +158,28 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
         except (KeyError, ValueError, ArithmeticError, np.linalg.LinAlgError) as exc:
             return GripClosure.unavailable(f"closure solve failed: {exc}")
 
+    def club_frame_world(
+        self, coordinates: Mapping[str, float]
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """World rotation (3x3) and origin of the *specification* club frame.
+
+        This is the frame the club geometry, the grip frames and the palm-thumb
+        patch are expressed in (``closure.placement_b`` is a pose in it). It is
+        not the MJCF body frame, which the export re-centres: the weld site's
+        world pose is ``club_frame @ placement_b``, so the club frame is
+        ``site_pose @ inv(placement_b)``. Read-only (#13189).
+        """
+        self._forward(coordinates)
+        site = self._closure[1]
+        pose = np.eye(4)
+        pose[:3, :3] = np.asarray(self.data.site_xmat[site], dtype=float).reshape(3, 3)
+        pose[:3, 3] = self.data.site_xpos[site]
+        placement = np.asarray(
+            self._spec_for_partition["closure"]["placement_b"], dtype=float
+        )
+        frame = pose @ np.linalg.inv(placement)
+        return frame[:3, :3].copy(), frame[:3, 3].copy()
+
     def _forward(self, coordinates: Mapping[str, float]) -> None:
         self.data.qpos[:] = self._vector(coordinates)
         self._mj.mj_fwdPosition(self.model, self.data)

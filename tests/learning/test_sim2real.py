@@ -14,6 +14,7 @@ class MockEngine:
         self._friction = np.ones(10) * 0.5
         self._motor_strength = np.ones(10)
         self._gravity = np.array([0, 0, -9.80665])
+        self._actuator_gains = np.ones(10)
         self._q = np.zeros(10)
         self._v = np.zeros(10)
 
@@ -46,6 +47,12 @@ class MockEngine:
 
     def set_gravity(self, gravity: np.ndarray) -> None:
         self._gravity = gravity.copy()
+
+    def get_actuator_gains(self) -> np.ndarray:
+        return self._actuator_gains.copy()
+
+    def set_actuator_gains(self, gains: np.ndarray) -> None:
+        self._actuator_gains = gains.copy()
 
     def get_joint_positions(self) -> np.ndarray:
         return self._q.copy()

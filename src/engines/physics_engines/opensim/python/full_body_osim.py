@@ -301,6 +301,29 @@ def _build_transform_axis(
         ET.SubElement(fn, "value").text = "0"
 
 
+def _rotation_slot_axes(rotation_order: Sequence[str]) -> list[str]:
+    """Return the axis for OpenSim ``rotation1..3`` honouring primitive order.
+
+    OpenSim composes ``rotation1``, ``rotation2`` and ``rotation3`` as
+    successive body-fixed rotations, so the slots must follow the spec's
+    primitive order (e.g. Ry, Rx, Rz for the full-body-v2 trunk joints). An
+    order that is already x-before-y-before-z keeps the historical x, y, z
+    layout so earlier exports stay byte-identical; unused slots take the
+    remaining axes with a constant zero function.
+    """
+    if len(set(rotation_order)) != len(rotation_order) or not set(rotation_order) <= {
+        "x",
+        "y",
+        "z",
+    }:
+        raise ValueError(
+            f"rotation primitives must be distinct x/y/z: {rotation_order}"
+        )
+    if list(rotation_order) == sorted(rotation_order):
+        return ["x", "y", "z"]
+    return list(rotation_order) + [a for a in "xyz" if a not in rotation_order]
+
+
 def _attach_spatial_transform(
     joint_elem: ET.Element,
     primitives: Sequence[Mapping[str, Any]],
@@ -319,8 +342,11 @@ def _attach_spatial_transform(
             trans_by_axis[kind[1].lower()] = cname
 
     axes = [(1, "x", "1 0 0"), (2, "y", "0 1 0"), (3, "z", "0 0 1")]
-    for idx, ax_char, ax_vec in axes:
-        _build_transform_axis(st, "rotation", idx, ax_vec, rot_by_axis.get(ax_char))
+    vectors = {ax_char: ax_vec for _, ax_char, ax_vec in axes}
+    for idx, ax_char in enumerate(_rotation_slot_axes(list(rot_by_axis)), start=1):
+        _build_transform_axis(
+            st, "rotation", idx, vectors[ax_char], rot_by_axis.get(ax_char)
+        )
 
     for idx, ax_char, ax_vec in axes:
         _build_transform_axis(

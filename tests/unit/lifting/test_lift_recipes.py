@@ -57,14 +57,25 @@ def test_squat_recipe_is_the_committed_back_squat() -> None:
     assert not squat.hand_held
 
 
-@pytest.mark.parametrize("lift", ["deadlift", "clean_and_jerk"])
-def test_pull_recipes_hang_the_bar_and_centre_on_the_knee_pass(lift: str) -> None:
-    pull = recipe(lift)
+def test_deadlift_recipe_hangs_the_bar_and_centres_on_the_knee_pass() -> None:
+    pull = recipe("deadlift")
     assert pull.hand_held
     assert pull.bar_convention == "deadlift"
     assert pull.window_event == "knee_pass"
     assert pull.bundle_path.name == f"{pull.bundle_name}_bundle.npz"
     assert pull.parity_record_path.parent == pull.bundle_path.parent
+
+
+def test_clean_and_jerk_recipe_solves_the_whole_lift_with_a_phase_bar() -> None:
+    cj = recipe("clean_and_jerk")
+    assert cj.hand_held and not cj.supine
+    # The full Tools clean and jerk (floor to overhead lockout), not the clean.
+    assert cj.exercise == cj.bar_convention == "clean_and_jerk"
+    assert cj.duration_s == 4.0
+    assert cj.window_event == "knee_pass"
+    assert cj.phase == "first_pull"
+    assert "overhead" in cj.rationale and "window" in cj.rationale
+    assert "clean_and_jerk" not in DEFERRED_LIFTS
 
 
 def test_bench_press_recipe_lies_supine_and_centres_on_the_chest() -> None:

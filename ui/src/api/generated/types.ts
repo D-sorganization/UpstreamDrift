@@ -1477,13 +1477,27 @@ export interface DatasetGenerationRequest {
 }
 
 /**
- * Response model for dataset generation.
+ * Response model for dataset generation. Carries the backend generation status along with the metadata fields expected by the UI GenerateResult contract (issue #12967).
  */
 export interface DatasetGenerationResponse {
   status: string;
+  /** Unique opaque dataset identifier */
+  dataset_id: string;
+  /** Human-readable dataset name */
+  name: string;
+  /** Total row/frame count across all samples */
+  rows: number;
+  /** Recorded column/channel names */
+  columns: string[];
+  /** ISO 8601 creation timestamp */
+  created_at: string;
+  /** Number of simulation samples */
   num_samples: number;
+  /** Total frames across all samples */
   total_frames: number;
+  /** Filesystem path of the export */
   export_path: string;
+  /** Export format identifier */
   export_format: string;
 }
 
@@ -2037,7 +2051,7 @@ export interface GreenReadingResponse {
  */
 export interface GripRevisionRequest {
   character?: CharacterSpecRequest | null;
-  preset?: "weak" | "neutral" | "strong" | null;
+  preset?: "weak" | "neutral" | "strong" | "palmer_overlap" | "woods_interlock" | "ten_finger" | null;
   lead_shaft_rotation?: number | null;
   trail_shaft_rotation?: number | null;
   lead_palm_diagonal?: number | null;
@@ -3572,6 +3586,16 @@ export interface SpeedControlResponse {
   speed_factor: number;
   /** Status message */
   status: string;
+}
+
+/**
+ * Lifecycle and result information for a spine study background job.
+ */
+export interface SpineStudyJobStatusV1 {
+  job_id: string;
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
+  receipt_path?: string | null;
+  error?: string | null;
 }
 
 export interface StrokesGainedAnalysisResultV1 {

@@ -20,14 +20,13 @@ from src.shared.python.motion_matching.contact_law import (
     sphere_ground_contact,
     support_planes,
 )
-from src.shared.python.motion_matching.full_body_schema import (
-    SchemaFeatureUnavailableError,
-    require_full_body_schema,
-)
+from src.shared.python.motion_matching.full_body_schema import require_full_body_schema
 from src.shared.python.motion_matching.full_body_spec import (
-    FULL_BODY_SCHEMA_VERSION,
     ContactSphere,
     upper_body_slice,
+)
+from src.shared.python.motion_matching.full_body_v2 import (
+    V2_UPPER_BODY_SCHEMA_VERSION,
 )
 from src.shared.python.motion_matching.marker_projection import project_markers
 
@@ -148,6 +147,11 @@ def depth_first_joints(
     return ordered
 
 
+#: Upper-body documents this model builds: the qualified native schema (1)
+#: and the full-body-v2 regional-trunk upper slice (HRG-D2, #13173).
+_UPPER_SCHEMAS = (1, V2_UPPER_BODY_SCHEMA_VERSION)
+
+
 class NativePinocchioModel:
     """Own per-instance Pinocchio data and preserve native primitive coordinates."""
 
@@ -156,7 +160,7 @@ class NativePinocchioModel:
         # Keep that dynamic boundary explicit; public arrays/maps remain typed.
         pin: Any = import_module("pinocchio")
 
-        if specification.get("schema_version") != 1:
+        if specification.get("schema_version") not in _UPPER_SCHEMAS:
             raise ValueError("Unsupported native geometry schema")
         self._pin = pin
         self._build_tree(specification)
@@ -279,6 +283,15 @@ class NativePinocchioModel:
         if not np.all(np.isfinite(q)):
             raise ValueError("Native coordinates must be finite")
         return q
+
+    def neutral_coordinates(self) -> dict[str, float]:
+        """Return the neutral value of every native coordinate, keyed by name.
+
+        Postcondition: the keys are exactly the native coordinate inventory, so
+        the result is a valid argument to :meth:`configuration`.
+        """
+        q = self._pin.neutral(self.model)
+        return {name: float(q[index]) for name, index in self._coordinates.items()}
 
     def velocity(self, rates: Mapping[str, float]) -> NDArray[np.float64]:
         """Generalised velocity for named coordinate rates (1-DOF primitives)."""
@@ -844,19 +857,12 @@ class FullBodyPinocchioModel(NativePinocchioModel):
             )
 
     def upper_body_model(self) -> NativePinocchioModel:
-        """Construct the qualified upper-body model from this spec's upper-body slice.
+        """Construct the upper-body model from this spec's upper-body slice.
 
-        Raises ``SchemaFeatureUnavailableError`` for ``full-body-v2``: its slice has the
-        regional trunk, which the qualified upper-body model does not (HRG-D2).
+        For ``full-body-v1`` this is the qualified native upper body; for
+        ``full-body-v2`` it is the regional-trunk upper slice (labelled
+        ``full-body-v2-upper``, unqualified until HRG-Q1).
         """
-        if self.specification["schema_version"] != FULL_BODY_SCHEMA_VERSION:
-            raise SchemaFeatureUnavailableError(
-                self.specification["schema_version"],
-                consumer="Pinocchio full-body model",
-                feature="the upper-body model (needs the regional-trunk upper body)",
-                child="HRG-D2",
-                issue=13173,
-            )
         return NativePinocchioModel(upper_body_slice(self.specification))
 
     def mass_matrix(self, coordinates: Mapping[str, float]) -> NDArray[np.float64]:

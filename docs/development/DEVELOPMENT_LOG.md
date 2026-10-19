@@ -18,6 +18,84 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#12990 · Standardize Get_Joint_Names Across Physics Engines to Match Generalized Velocity Dimensions (Nv) With Per-DOF Expansion for Multi-DOF Joints
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12990
+- **Branch:** orch/12990-agy
+- **PR:** #13345
+- **Paths:** see #13345
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/12990-standardize-get-joint-names-across-physi.md)
+- **Summary:** Standardize get_joint_names across physics engines to match generalized velocity dimensions (nv) with per-DOF expansion for multi-DOF joints
+- **Next step:** Merge via queue and verify CI
+
+### DL-#13364 · Ci(Quality-Gate): Aggregate Frontend-Tests and the Other Gating CI Standard Jobs so a Red Job Blocks the Merge Queue
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13364
+- **Branch:** cursor/merge-queue-gate-13364
+- **PR:** #13366
+- **Paths:** see #13366
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`65857013`; collated from changes/13364-quality-gate-aggregates-gating-jobs.md)
+- **Summary:** ci(quality-gate): aggregate frontend-tests and the other gating CI Standard jobs so a red job blocks the merge queue
+- **Next step:** Merge the PR.
+
+### DL-#13355 · Fix(Ui): Include Physical Style in resolveGrip to Resolve Red Main on Frontend-Tests
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13355
+- **Branch:** fix/main-grip-selection-style
+- **PR:** #13361
+- **Paths:** see #13361
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`3e195a56`; collated from changes/13355-fix-grip-selection-style.md)
+- **Summary:** fix(ui): include physical style in resolveGrip to resolve red main on frontend-tests
+- **Next step:** Merge the PR.
+
+### DL-#13350 · Fix(Launcher): Renumber Jaxsim_Dashboard to Order 105 to Resolve Duplicate Tile Order 33
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13350
+- **Branch:** fix/13350-launcher-tile-order
+- **PR:** #13358
+- **Paths:** see #13358
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`deec5362`; collated from changes/13350-renumber-jaxsim-dashboard.md)
+- **Summary:** fix(launcher): renumber jaxsim_dashboard to order 105 to resolve duplicate tile order 33
+- **Next step:** Merge the PR.
+
+### DL-#13348 · Fix(Data_Io): Make C3d_Loader Resilient to Sidekick.Lab.Bio Test Pollution
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13348
+- **Branch:** fix/13348-c3d-marker-set-import
+- **PR:** #13359
+- **Paths:** see #13359
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`100b1885`; collated from changes/13348-c3d-loader-bio-resilience.md)
+- **Summary:** fix(data_io): make c3d_loader resilient to sidekick.lab.bio test pollution
+- **Next step:** Merge the PR.
+
+### DL-#13001 · Reject Unauthenticated Diagnostics in Remote Mode, Redact Absolute Repo Root, and Measure Runtime Probes
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13001
+- **Branch:** orch/13001-agy
+- **PR:** #13268
+- **Paths:** see #13268
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`81b34684`; collated from changes/13001-reject-unauthenticated-diagnostics-in-re.md)
+- **Summary:** Reject unauthenticated diagnostics in remote mode, redact absolute repo root, and measure runtime probes
+- **Next step:** Review and land PR
+
 ### DL-#13104 · OSL-16: Bar-Loaded Lifts Track at 64 RK4 Substeps With a 0.25 ms Effort Hold; the Loaded Feet Stay Within the LIFT-5 Ankle Bounds and the Re-Track and Full-Window Bar-Path Parity Close
 
 - **State:** in_review
@@ -1376,12 +1454,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #11745
 - **Branch:** claude/lift-5-squat-bundle
-- **PR:** #12245, #12340, #13052, #13047, #13263
+- **PR:** #12245, #12340, #13052, #13047, #13263, #13276
 - **Paths:** see #12245
 - **Started:** 2026-10-14
-- **Last verified:** 2026-10-18 (`5841213b`; collated from changes/11745-bump-vendor-ud-tools-to-a459505-tools-56.md)
+- **Last verified:** 2026-10-19 (`c0d8142c`; collated from changes/11745-lift-5-clean-and-jerk-is-the-whole-lift.md)
 - **Summary:** LIFT-5 slice 1: back-squat same-input bundle from the Movement Optimizer via full-body marker IK, with provenance, regeneration script and MuJoCo replay smoke test
-- **Next step:** Bump vendor/ud-tools to the Tools #5653 merge commit and regenerate the snatch bundle and parity record so tools_pin matches
+- **Next step:** Merge the PR; then the LIFT-4 barbell record for OpenSim IK/ID of the pull bundles
 
 ### DL-#11737 · OSV-6 Lead Foot: Lateral-Marker Zero-Twist Correction (Knee_Flexion_Axis) and Leg-Marker Calibration Constraints Under --Foot-Progression; MuJoCo Address Toe-Out Within 2 Deg on Both Captures (Driver +0.2/-0.3, Iron -0.0/-1.4 Deg); Canonical Receipts Unchanged (Default-On Correction Is a Recorded Failed Experiment)
 
@@ -2574,6 +2652,630 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13260 · Add Run Study Panel and Worker Across PyQt and React Spine Viewers
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13260
+- **Branch:** merged via #13279
+- **PR:** #13279
+- **Paths:** see #13279
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`38eebd22`; collated from changes/13260-add-run-study-panel-and-worker-across-py.md)
+- **Summary:** Add Run Study panel and worker across PyQt and React spine viewers
+- **Next step:** Shipped in PR #13279.
+
+### DL-#13302 · Drive Finger Pose From Contact Topology With Per-Hand Roll, Absorbing #13166
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13302
+- **Branch:** merged via #13338
+- **PR:** #13338
+- **Paths:** see #13338
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`366e8614`; collated from changes/13302-drive-finger-pose-from-contact-topology.md)
+- **Summary:** Drive finger pose from contact topology with per-hand roll, absorbing #13166
+- **Next step:** Shipped in PR #13338.
+
+### DL-#13391 · Drop the Removed Simulator.Set_Publish_Every_Time_Step Call From Drake Simulate and Fit_Swing_Autodiff; Drake Already Defaults to No Per-Step Publish
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13391
+- **Branch:** merged via #13395
+- **PR:** #13395
+- **Paths:** see #13395
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`d279b256`; collated from changes/13391-drop-the-removed-simulator-set-publish-e.md)
+- **Summary:** Drop the removed Simulator.set_publish_every_time_step call from Drake simulate and fit_swing_autodiff; Drake already defaults to no per-step publish
+- **Next step:** Shipped in PR #13395.
+
+### DL-#13390 · Move the MOSAIC Analytic-vs-Finite-Difference Wall-Clock Speedup Claim to the Benchmark Lane; Unit Lane Asserts It Deterministically via an Injected Clock and Regressor-Evaluation Counts
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13390
+- **Branch:** merged via #13394
+- **PR:** #13394
+- **Paths:** see #13394
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`a491a08e`; collated from changes/13390-move-the-mosaic-analytic-vs-finite-diffe.md)
+- **Summary:** Move the MOSAIC analytic-vs-finite-difference wall-clock speedup claim to the benchmark lane; unit lane asserts it deterministically via an injected clock and regressor-evaluation counts
+- **Next step:** Shipped in PR #13394.
+
+### DL-#13014 · DomainRandomizer Fails Loud on Unsupported Engines; MuJoCo Parameter Surface; Remove Dead Config Ranges
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13014
+- **Branch:** merged via #13345
+- **PR:** #13345
+- **Paths:** see #13345
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/13014-domainrandomizer-fails-loud-on-unsupport.md)
+- **Summary:** DomainRandomizer fails loud on unsupported engines; MuJoCo parameter surface; remove dead config ranges
+- **Next step:** Shipped in PR #13345.
+
+### DL-#13012 · Learning/Imitation: Adopt He/Xavier Init, Adam Optimizer, and Shared _Mlp Helper in BehaviorCloning and DAgger
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13012
+- **Branch:** merged via #13345
+- **PR:** #13345
+- **Paths:** see #13345
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/13012-learning-imitation-adopt-he-xavier-init.md)
+- **Summary:** learning/imitation: adopt He/Xavier init, Adam optimizer, and shared _mlp helper in BehaviorCloning and DAgger
+- **Next step:** Shipped in PR #13345.
+
+### DL-#13008 · Stop C3d_Simscape_Preview False Match Success; Load C3D via Shared Reader With Unit Conversion
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13008
+- **Branch:** merged via #13345
+- **PR:** #13345
+- **Paths:** see #13345
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/13008-stop-c3d-simscape-preview-false-match-su.md)
+- **Summary:** Stop c3d_simscape_preview false match success; load C3D via shared reader with unit conversion
+- **Next step:** Shipped in PR #13345.
+
+### DL-#13000 · Restore Capture-Contract CI Coverage and Guard Addopts Marker Exclusions (#13000).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13000
+- **Branch:** merged via #13345
+- **PR:** #13345
+- **Paths:** see #13345
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/13000-restore-capture-contract-ci-coverage-and.md)
+- **Summary:** Restore capture-contract CI coverage and guard addopts marker exclusions (#13000).
+- **Next step:** Shipped in PR #13345.
+
+### DL-#12997 · Fix(Model_Explorer): Per-Engine Export Converts MJCF/Drake/Pinocchio and Viewer Handles Errors Visibly
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12997
+- **Branch:** merged via #13345
+- **PR:** #13345
+- **Paths:** see #13345
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/12997-fix-model-explorer-per-engine-export-con.md)
+- **Summary:** fix(model_explorer): per-engine export converts MJCF/Drake/Pinocchio and viewer handles errors visibly
+- **Next step:** Shipped in PR #13345.
+
+### DL-#12996 · Add Results Playback UI and Real Engine Detection in Model Explorer (#12996)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12996
+- **Branch:** merged via #13345
+- **PR:** #13345
+- **Paths:** see #13345
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/12996-add-results-playback-ui-and-real-engine.md)
+- **Summary:** Add results playback UI and real engine detection in Model Explorer (#12996)
+- **Next step:** Shipped in PR #13345.
+
+### DL-#12989 · Fix(Mujoco): Eliminate Phantom World-Fused Contact on Double-Pendulum Fixture (#12989)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12989
+- **Branch:** merged via #13345
+- **PR:** #13345
+- **Paths:** see #13345
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/12989-fix-mujoco-eliminate-phantom-world-fused.md)
+- **Summary:** fix(mujoco): eliminate phantom world-fused contact on double-pendulum fixture (#12989)
+- **Next step:** Shipped in PR #13345.
+
+### DL-#12988 · Align Engine Capability Flags and Interfaces Across Registered Physics Engines
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12988
+- **Branch:** merged via #13345
+- **PR:** #13345
+- **Paths:** see #13345
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/12988-align-engine-capability-flags-and-interf.md)
+- **Summary:** Align engine capability flags and interfaces across registered physics engines
+- **Next step:** Shipped in PR #13345.
+
+### DL-#12979 · Fix CentroidalMPC Contact Count and Mass From Model
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12979
+- **Branch:** merged via #13345
+- **PR:** #13345
+- **Paths:** see #13345
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/12979-fix-centroidalmpc-contact-count-and-mass.md)
+- **Summary:** Fix CentroidalMPC contact count and mass from model
+- **Next step:** Shipped in PR #13345.
+
+### DL-#12974 · Enforce Workspace, Forbidden Zone, Cartesian Velocity, and Contact Force Limits in SafetyMonitor
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12974
+- **Branch:** merged via #13345
+- **PR:** #13345
+- **Paths:** see #13345
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/12974-enforce-workspace-forbidden-zone-cartesi.md)
+- **Summary:** Enforce workspace, forbidden zone, Cartesian velocity, and contact force limits in SafetyMonitor
+- **Next step:** Shipped in PR #13345.
+
+### DL-#12971 · Enforce OpenCap Learned Augmenter Sidecar Execution, Fail-Closed Checks, and Correct Synthetic/Model-Conditioned Provenance Labeling
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12971
+- **Branch:** merged via #13345
+- **PR:** #13345
+- **Paths:** see #13345
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/12971-enforce-opencap-learned-augmenter-sideca.md)
+- **Summary:** Enforce OpenCap learned augmenter sidecar execution, fail-closed checks, and correct synthetic/model-conditioned provenance labeling
+- **Next step:** Shipped in PR #13345.
+
+### DL-#12970 · Pipeline: Wire Ground-Support CLI Neural Flags Through MotionMatchingController and Record Neural Disposition on Receipts
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12970
+- **Branch:** orch/12970-cursor
+- **PR:** #13345
+- **Paths:** see #13345
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/12970-pipeline-neural-cli-flags-wired.md)
+- **Summary:** pipeline: wire ground-support CLI neural flags through MotionMatchingController and record neural disposition on receipts
+- **Next step:** Shipped in PR #13345.
+
+### DL-#12967 · Return Dataset_Id, Name, Rows, Columns From Generate; Add Export Stream Route
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12967
+- **Branch:** merged via #13345
+- **PR:** #13345
+- **Paths:** see #13345
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/12967-return-dataset-id-name-rows-columns-from.md)
+- **Summary:** Return dataset_id, name, rows, columns from generate; add export stream route
+- **Next step:** Shipped in PR #13345.
+
+### DL-#12939 · Document Ud-Sim:Latest Compose Source of Truth and Enforce Ct-Run Contract in CI
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12939
+- **Branch:** merged via #13345
+- **PR:** #13345
+- **Paths:** see #13345
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/12939-document-ud-sim-latest-compose-source-of.md)
+- **Summary:** Document ud-sim:latest compose source of truth and enforce ct-run contract in CI
+- **Next step:** Shipped in PR #13345.
+
+### DL-#13301 · Allocated Hand-Hand Contact Reporting for All Style Pairs (HRG-GS-G3)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13301
+- **Branch:** merged via #13342
+- **PR:** #13342
+- **Paths:** see #13342
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`15ef79e2`; collated from changes/13301-allocated-hand-hand-contact-reporting-fo.md)
+- **Summary:** Allocated hand-hand contact reporting for all style pairs (HRG-GS-G3)
+- **Next step:** Shipped in PR #13342.
+
+### DL-#13377 · Bump Vendor/Ud-Tools to Tools 96A1684 (Coriolis Christoffel Term, Tools #5664; Standard Gravity, Tools #5668)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13377
+- **Branch:** merged via #13378
+- **PR:** #13378
+- **Paths:** see #13378
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`3462c62b`; collated from changes/13377-bump-vendor-ud-tools-to-tools-96a1684-co.md)
+- **Summary:** Bump vendor/ud-tools to Tools 96a1684 (Coriolis Christoffel term, Tools #5664; standard gravity, Tools #5668)
+- **Next step:** Shipped in PR #13378.
+
+### DL-#13159 · Fix(Lifting): Resolve Unstable Open-Loop Wrist Mode on High-Bar Rack
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13159
+- **Branch:** merged via #13344
+- **PR:** #13344
+- **Paths:** see #13344
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`ff23d322`; collated from changes/13159-fix-lifting-resolve-unstable-open-loop-w.md)
+- **Summary:** fix(lifting): resolve unstable open-loop wrist mode on high-bar rack
+- **Next step:** Shipped in PR #13344.
+
+### DL-#13158 · Feat(Lifting): High-Bar Rack Reach Sweep and Wrist Mode Resolution
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13158
+- **Branch:** merged via #13344
+- **PR:** #13344
+- **Paths:** see #13344
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`ff23d322`; collated from changes/13158-feat-lifting-high-bar-rack-reach-sweep-a.md)
+- **Summary:** feat(lifting): high-bar rack reach sweep and wrist mode resolution
+- **Next step:** Shipped in PR #13344.
+
+### DL-#13298 · Unify Grip Frames Across Model_Appearance and Grip_Contact, Fix Drake Contact Normal Recording
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13298
+- **Branch:** fix/13298-grip-frame-unify
+- **PR:** #13318
+- **Paths:** see #13318
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`24633553`; collated from changes/13298-unify-grip-frames-across-model-appearanc.md)
+- **Summary:** Unify grip frames across model_appearance and grip_contact, fix Drake contact normal recording
+- **Next step:** Shipped in PR #13318.
+
+### DL-#13322 · Add Cross-Model Grip Capability Inventory Manifest, DbC Loader, and Verification Suite
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13322
+- **Branch:** merged via #13337
+- **PR:** #13337
+- **Paths:** see #13337
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`a9170eb8`; collated from changes/13322-add-cross-model-grip-capability-inventor.md)
+- **Summary:** Add cross-model grip capability inventory manifest, DbC loader, and verification suite
+- **Next step:** Shipped in PR #13337.
+
+### DL-#13189 · Report the Allocated Trail-Palm-on-Lead-Thumb Force (Patch Frame, Allocation, Provider Metadata); Physics Unchanged
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13189
+- **Branch:** feat/13189-palm-thumb-contact
+- **PR:** #13217
+- **Paths:** see #13217
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`15cafedb`; collated from changes/13189-report-the-allocated-trail-palm-on-lead.md)
+- **Summary:** Report the allocated trail-palm-on-lead-thumb force (patch frame, allocation, provider metadata); physics unchanged
+- **Next step:** Shipped in PR #13217.
+
+### DL-#13049 · Run Real-OpenSim Lift Tests in a Dedicated CI Job (OSL-13)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13049
+- **Branch:** merged via #13284
+- **PR:** #13284
+- **Paths:** see #13284
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`aefee65b`; collated from changes/13049-run-real-opensim-lift-tests-in-a-dedicat.md)
+- **Summary:** Run real-OpenSim lift tests in a dedicated CI job (OSL-13)
+- **Next step:** Shipped in PR #13284.
+
+### DL-#13299 · Engine-Agnostic Grip-Style Contact Topology: GripStyle and Trigger Finger Join the Physical GripSpec; Per-Style Contact Pair Tables With Anatomy Scaling.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13299
+- **Branch:** merged via #13320
+- **PR:** #13320
+- **Paths:** see #13320
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`10e75c0b`; collated from changes/13299-engine-agnostic-grip-style-contact-topol.md)
+- **Summary:** Engine-agnostic grip-style contact topology: GripStyle and trigger finger join the physical GripSpec; per-style contact pair tables with anatomy scaling.
+- **Next step:** Shipped in PR #13320.
+
+### DL-#13339 · Test_Check_Windows_Deps No Longer Races Real Engine Imports Against a 3s Wait; the Probe Is Tested Synchronously With Optional Engines Forced Absent
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13339
+- **Branch:** merged via #13341
+- **PR:** #13341
+- **Paths:** see #13341
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`588068ae`; collated from changes/13339-test-check-windows-deps-no-longer-races.md)
+- **Summary:** test_check_windows_deps no longer races real engine imports against a 3s wait; the probe is tested synchronously with optional engines forced absent
+- **Next step:** Shipped in PR #13341.
+
+### DL-#13258 · Route Web Launcher to /Tools/Spine-Viewer, Update Ch68 Manual and Ignore Licensed_Assets
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13258
+- **Branch:** merged via #13269
+- **PR:** #13269
+- **Paths:** see #13269
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`ac929b64`; collated from changes/13258-route-web-launcher-to-tools-spine-viewer.md)
+- **Summary:** Route web launcher to /tools/spine-viewer, update Ch68 manual and ignore licensed_assets
+- **Next step:** Shipped in PR #13269.
+
+### DL-#13042 · Compute Muscle Forces and Activations for Barbell Squat (OSL-4)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13042
+- **Branch:** merged via #13288
+- **PR:** #13288
+- **Paths:** see #13288
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`e16d848e`; collated from changes/13042-compute-muscle-forces-and-activations-fo.md)
+- **Summary:** Compute muscle forces and activations for barbell squat (OSL-4)
+- **Next step:** Shipped in PR #13288.
+
+### DL-#13314 · Shard Unit-Test-Gate Into a 2-Leg File-Hash Matrix so Each Leg Stays Well Under the 35 Min Limit Without Raising It
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13314
+- **Branch:** ci/13314-shard-unit-test-gate
+- **PR:** #13316
+- **Paths:** .github/workflows/ci-standard.yml,scripts/ci/pytest_unit_gate_shard.py,tests/ci/test_unit_gate_shard.py
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`3a8b5173`; collated from changes/13314-shard-unit-test-gate-into-a-2-leg-file-h.md)
+- **Summary:** Shard unit-test-gate into a 2-leg file-hash matrix so each leg stays well under the 35 min limit without raising it
+- **Next step:** Shipped in PR #13316.
+
+### DL-#13300 · Generalised Shared Contact Law: Sphere-Capsule and Capsule-Capsule
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13300
+- **Branch:** feat/13300-capsule-contact-law
+- **PR:** #13319, #13320
+- **Paths:** see #13319
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`10e75c0b`; collated from changes/13300-generalised-shared-contact-law-sphere-ca.md)
+- **Summary:** generalised shared contact law: sphere-capsule and capsule-capsule
+- **Next step:** Shipped in PR #13319.
+
+### DL-#13261 · Feed Finished Spine Study Receipts Into Injury Analysis via ModelSpinalLoadProvider; Spine Models Stay Out of the Feedback Inventory
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13261
+- **Branch:** merged via #13274
+- **PR:** #13274
+- **Paths:** see #13274
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`512400ae`; collated from changes/13261-feed-spine-study-loads-to-injury-analysis.md)
+- **Summary:** Feed finished spine study receipts into injury analysis via ModelSpinalLoadProvider; spine models stay out of the feedback inventory
+- **Next step:** Shipped in PR #13274.
+
+### DL-#13259 · Add Spine Study Execution and Model Asset Listing API
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13259
+- **Branch:** merged via #13275
+- **PR:** #13275
+- **Paths:** see #13275
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`a03af52f`; collated from changes/13259-add-spine-study-execution-and-model-asse.md)
+- **Summary:** Add spine study execution and model asset listing API
+- **Next step:** Shipped in PR #13275.
+
+### DL-#13253 · Lazy Plot Style Qt Widget Re-Exports
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13253
+- **Branch:** fix/plot-style-lazy-widgets
+- **PR:** #13257
+- **Paths:** see #13257
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`9b492271`; collated from changes/13253-plot-style-re-exports-qt-widgets-and-the.md)
+- **Summary:** plot_style re-exports Qt widgets and the matplotlib renderer lazily so headless force_overlay/loop_nullspace imports no longer load PyQt6 or mplot3d
+- **Next step:** Shipped in PR #13257.
+
+### DL-#13205 · HRG-GR4: Grip Presets and Sliders in the Spec Builder, Native Viewer Export, Desktop and Web, With One Shared Resolver
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13205
+- **Branch:** feat/13205-grip-controls
+- **PR:** #13198
+- **Paths:** see #13198
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`5272fa8b`; collated from changes/13205-hrg-gr4-grip-presets-and-sliders-in-the.md)
+- **Summary:** HRG-GR4: grip presets and sliders in the spec builder, native viewer export, desktop and web, with one shared resolver
+- **Next step:** Shipped in PR #13198.
+
+### DL-#13204 · Grip Fitting Modes (User_Fixed, Bounded_Prior, Free_Fit), Rom_Set_Identified Provenance, Golf-Language Grip Report With Profile Interval and Multistart Sensitivity (HRG-GR3)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13204
+- **Branch:** feat/13204-grip-fit-modes
+- **PR:** #13198
+- **Paths:** see #13198
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`5272fa8b`; collated from changes/13204-grip-fitting-modes-user-fixed-bounded-pr.md)
+- **Summary:** Grip fitting modes (user_fixed, bounded_prior, free_fit), rom_set_identified provenance, golf-language grip report with profile interval and multistart sensitivity (HRG-GR3)
+- **Next step:** Shipped in PR #13198.
+
+### DL-#13203 · HRG-GR2: Physical Grip Configuration as an Immutable Spec Revision With Hand Depth/Spacing on the Closure and Grip Provenance; Fitted_Grip Uses Provenance
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13203
+- **Branch:** feat/13203-physical-grip-revision
+- **PR:** #13198
+- **Paths:** see #13198
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`5272fa8b`; collated from changes/13203-hrg-gr2-physical-grip-configuration-as-a.md)
+- **Summary:** HRG-GR2: physical grip configuration as an immutable spec revision with hand depth/spacing on the closure and grip provenance; fitted_grip uses provenance
+- **Next step:** Shipped in PR #13198.
+
+### DL-#13202 · Add the Anatomical Grip Contract (GripSpec, Exact Euler Bijection) and Fix the Trail Grip-Roll Axis
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13202
+- **Branch:** feat/13202-anatomical-grip-contract
+- **PR:** #13198
+- **Paths:** see #13198
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`5272fa8b`; collated from changes/13202-add-the-anatomical-grip-contract-gripspe.md)
+- **Summary:** Add the anatomical grip contract (GripSpec, exact Euler bijection) and fix the trail grip-roll axis
+- **Next step:** Shipped in PR #13198.
+
+### DL-#13201 · Subject Handedness in Spec, Receipts and GripPose (HRG-GR0)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13201
+- **Branch:** feat/13201-subject-handedness
+- **PR:** #13198
+- **Paths:** see #13198
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`5272fa8b`; collated from changes/13201-subject-handedness-in-spec-receipts-and.md)
+- **Summary:** Subject handedness in spec, receipts and GripPose (HRG-GR0)
+- **Next step:** Shipped in PR #13198.
+
+### DL-#13186 · HRG-G1: Skin-Coloured Bare Grip Hands by Default and an Optional White Glove (Glove None/Lead/Trail/Both) Through CLI, Desktop and Web; One Hand-Material Resolver; No Duplicate RHandStandoff Loft; Shared Core.Handedness
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13186
+- **Branch:** feat/13186-bare-hands-lead-glove
+- **PR:** #13198
+- **Paths:** see #13198
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`5272fa8b`; collated from changes/13186-hrg-g1-skin-coloured-bare-grip-hands-by.md)
+- **Summary:** HRG-G1: skin-coloured bare grip hands by default and an optional white glove (glove none/lead/trail/both) through CLI, desktop and web; one hand-material resolver; no duplicate RHandStandoff loft; shared core.handedness
+- **Next step:** Shipped in PR #13198.
+
+### DL-#13173 · Full-Body-V2 Landmark Lumbar (L5/S1) and Thoracic (T12/L1) Joints: C3 L5/S1, Gray T12/L1 Fraction, Yukawa Curvature Check, Mass Ledger, Soft-Limit ROM, Back-Marker Observability (Rank 5, Split Regularised); Fixes OpenSim CustomJoint Rotation Order
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13173
+- **Branch:** feat/13173-regional-trunk-joints
+- **PR:** #13247
+- **Paths:** see #13247
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`b2aec7d0`; collated from changes/13173-full-body-v2-landmark-lumbar-l5-s1-and-t.md)
+- **Summary:** full-body-v2 landmark lumbar (L5/S1) and thoracic (T12/L1) joints: C3 L5/S1, Gray T12/L1 fraction, Yukawa curvature check, mass ledger, soft-limit ROM, back-marker observability (rank 5, split regularised); fixes OpenSim CustomJoint rotation order
+- **Next step:** Shipped in PR #13247.
+
+### DL-#13169 · Engine-Neutral Anatomical Angles Package With Wrist and Forearm Terms (HRG-E2)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13169
+- **Branch:** feat/13169-anatomical-angles
+- **PR:** #13198
+- **Paths:** see #13198
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`5272fa8b`; collated from changes/13169-engine-neutral-anatomical-angles-package.md)
+- **Summary:** Engine-neutral anatomical angles package with wrist and forearm terms (HRG-E2)
+- **Next step:** Shipped in PR #13198.
+
+### DL-#13167 · HRG-B2: Appearance CLI Flags, Precedence Resolver, Shared Qt Colour Field, Desktop and Web Hair/Skin/Clothing Colour Pickers
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13167
+- **Branch:** feat/13167-appearance-colour-controls
+- **PR:** #13198
+- **Paths:** see #13198
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`5272fa8b`; collated from changes/13167-hrg-b2-appearance-cli-flags-precedence-r.md)
+- **Summary:** HRG-B2: appearance CLI flags, precedence resolver, shared Qt colour field, desktop and web hair/skin/clothing colour pickers
+- **Next step:** Shipped in PR #13198.
+
+### DL-#13166 · HRG-A2: Parameterise Visual Grip Strength and Per-Hand Roll Offsets in GripPose and Grip Selection
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13166
+- **Branch:** feat/13166-visual-grip-strength
+- **PR:** #13311
+- **Paths:** see #13311
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`9dfb65ab`; collated from changes/13166-hrg-a2-parameterise-visual-grip-strength.md)
+- **Summary:** HRG-A2: parameterise visual grip strength and per-hand roll offsets in GripPose and grip selection
+- **Next step:** Shipped in PR #13311.
+
+### DL-#13019 · Align Native Drake Torque Replay With Reviewed 1.57/1.58 Versions and Skip Unreviewed Stacks in Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13019
+- **Branch:** merged via #13286
+- **PR:** #13286
+- **Paths:** see #13286
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`e66abba7`; collated from changes/13019-align-native-drake-torque-replay-with-re.md)
+- **Summary:** Align native Drake torque replay with reviewed 1.57/1.58 versions and skip unreviewed stacks in tests
+- **Next step:** Shipped in PR #13286.
+
+### DL-#13013 · Enforce Imitation Learning Contracts: Seed-Based Determinism, Validation Split Bounds, Activation Execution, and DAgger Dataset Immutability
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13013
+- **Branch:** merged via #13254
+- **PR:** #13254
+- **Paths:** see #13254
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`fa374264`; collated from changes/13013-imitation-contracts-and-determinism.md)
+- **Summary:** Enforce imitation learning contracts: seed-based determinism, validation split bounds, activation execution, and DAgger dataset immutability
+- **Next step:** Shipped in PR #13254.
+
+### DL-#12986 · Abort RealTimeController on Unexpected Callback Errors With Zero Torque; Wire SafetyMonitor on Non-Simulation Backends.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12986
+- **Branch:** merged via #13272
+- **PR:** #13272
+- **Paths:** see #13272
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`e40c9962`; collated from changes/12986-abort-realtimecontroller-on-unexpected-c.md)
+- **Summary:** Abort RealTimeController on unexpected callback errors with zero torque; wire SafetyMonitor on non-simulation backends.
+- **Next step:** Shipped in PR #13272.
+
 ### DL-#13157 · OSL-18: OpenSim Lift Foot Carries the Bundle's 10 Deg Tibial Torsion and Is Sized From the Bundle's Calcaneus Stations; Squat IK Marker RMS 1.93 cm / Max 3.55 cm, Inside the Unchanged 2/4 cm Gate; Marker-Gate Xfails Removed
 
 - **State:** shipped
@@ -2918,10 +3620,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #13041
 - **Branch:** merged via #13047
-- **PR:** #13047
+- **PR:** #13047, #13404
 - **Paths:** see #13047
 - **Started:** 2026-10-18
-- **Last verified:** 2026-10-18 (`7fed54d1`; collated from changes/13041-osl-3-opensim-ik-and-inverse-dynamics-of.md)
+- **Last verified:** 2026-10-19 (`895916b1`; collated from changes/13041-add-barbell-bundles-and-opensim-ik-id-re.md)
 - **Summary:** Lift body and every derived lift input (squat on the OSL-17 rack, deadlift, clean, snatch, bench) regenerated on the whole-row de Leva table (#13037) with main's tibial torsion; regression-snapshot IK bounds re-derived; bundle builder picks RK4-stable substeps (deadlift 8 -> 16, parity xfail removed); follow-ups OSL-18 #13157 (foot torsion marker gate, strict xfail), OSL-19 #13158 (arm reach), OSL-20 #13159 (open-loop wrist mode)
 - **Next step:** Shipped in PR #13047.
 
@@ -3529,10 +4231,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12901
 - **Branch:** merged via #13028
-- **PR:** #13028
+- **PR:** #13028, #13345
 - **Paths:** see #13028
 - **Started:** 2026-10-17
-- **Last verified:** 2026-10-17 (`47143bbc`; collated from changes/12901-launcher-theme-imports-resolve-via-launc.md)
+- **Last verified:** 2026-10-19 (`8115b862`; collated from changes/12901-defer-heavy-route-and-backend-imports-so.md)
 - **Summary:** Launcher theme imports resolve via launcher_compat; Sidekick API child runs without uvicorn auto-reload (ready in ~10s); closing an engine tab resets its Running status (#12962)
 - **Next step:** Shipped in PR #13028.
 
