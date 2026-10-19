@@ -90,12 +90,17 @@ IRON_SPEC_PATH = (
 )
 MYO_SIM_BODY = ROOT / "shared/models/myosuite/myo_sim/body/myobody_simpleupper.xml"
 GOLFER_SCENE_PY = ROOT / "src/engines/physics_engines/myosuite/python/golfer_scene.py"
+GOLFER_GRIP_ADAPTER_PY = (
+    ROOT / "src/engines/physics_engines/myosuite/python/golfer_grip_adapter.py"
+)
 
 ADMITTED_SCENE_IDS: tuple[str, ...] = (
     "myosuite_golfer_driver",
     "myosuite_golfer_iron",
 )
 SQUEEZE_N = 1100.0
+NEWTON_FORCE_REL_TOL = 0.05
+COM_MOMENT_ABS_TOL_NM = 1e-3
 
 
 def _require_mujoco_and_myo_sim() -> Any:
@@ -138,6 +143,21 @@ def overlap_model(
     )
 
 
+def test_golfer_scene_has_no_grip_adapter_reexport_shim() -> None:
+    """golfer_scene is for scene generation only; MyoSuiteGolferGripAdapter and
+    BimanualGraspSynthesis live in golfer_grip_adapter without a re-export shim.
+    """
+    from src.engines.physics_engines.myosuite.python import (
+        golfer_grip_adapter,
+        golfer_scene,
+    )
+
+    assert hasattr(golfer_grip_adapter, "MyoSuiteGolferGripAdapter")
+    assert hasattr(golfer_grip_adapter, "BimanualGraspSynthesis")
+    assert not hasattr(golfer_scene, "MyoSuiteGolferGripAdapter")
+    assert not hasattr(golfer_scene, "BimanualGraspSynthesis")
+
+
 @pytest.mark.parametrize("model_id", ADMITTED_SCENE_IDS)
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
@@ -152,7 +172,7 @@ def test_manifests_and_scene_topology_bind_all_sites(
 ) -> None:
     """Both admitted MyoSuite golfer scenes have valid manifests and bind hand_l, hand_r, golf_club."""
     _require_mujoco_and_myo_sim()
-    from src.engines.physics_engines.myosuite.python.golfer_scene import (
+    from src.engines.physics_engines.myosuite.python.golfer_grip_adapter import (
         ADMITTED_MYOSUITE_GOLFER_MODELS,
         MYOSUITE_MANIFEST_PATHS,
         MyoSuiteGolferGripAdapter,
@@ -192,6 +212,95 @@ def test_manifests_and_scene_topology_bind_all_sites(
 
 
 @pytest.mark.parametrize("model_id", ADMITTED_SCENE_IDS)
+def test_settled_weld_newton_force_and_com_moment_balance(
+    model_id: str,
+) -> None:
+    """After settling the welded club in a fixed body pose (bodies held, gravity on,
+    transients decayed), net hand-on-club force matches m_club*(a_com - g) within 5%
+    and moment about the club COM is consistent.
+    """
+    _require_mujoco_and_myo_sim()
+    from src.engines.physics_engines.myosuite.python.golfer_grip_adapter import (
+        MyoSuiteGolferGripAdapter,
+    )
+
+    adapter = MyoSuiteGolferGripAdapter.from_model_id(model_id)
+    residuals = adapter.weld_residuals_at_qpos0()
+    assert set(residuals.keys()) == {"grip_weld_l", "grip_weld_r"}
+    for weld_name, (dist_m, angle_deg) in residuals.items():
+        assert dist_m <= 1e-6, (
+            f"{model_id} {weld_name}: qpos0 site distance {dist_m:.6f} m > 1e-6 m"
+        )
+        assert angle_deg <= 1e-3, (
+            f"{model_id} {weld_name}: qpos0 rotation angle {angle_deg:.4f} deg > 1e-3 deg"
+        )
+
+    newton = adapter.settle_welded_club()
+    assert newton.force_relative_error <= NEWTON_FORCE_REL_TOL, (
+        f"{model_id}: settled net weld force {newton.net_force_n} N vs "
+        f"m_club*(a_com - g) = {newton.expected_force_n} N "
+        f"(rel_err={newton.force_relative_error:.4%}) exceeds {NEWTON_FORCE_REL_TOL:.0%}"
+    )
+    assert newton.com_moment_residual_nm <= COM_MOMENT_ABS_TOL_NM, (
+        f"{model_id}: settled moment residual about club COM "
+        f"{newton.com_moment_residual_nm:.6e} N*m exceeds {COM_MOMENT_ABS_TOL_NM} N*m"
+    )
+
+
+@pytest.mark.parametrize("model_id", ADMITTED_SCENE_IDS)
+def test_settled_allocated_pair_friction_cone_ratios_reported_honestly(
+    model_id: str,
+    overlap_topology: ContactTopology,
+    overlap_model: TopologyContactModel,
+) -> None:
+    """On the settled state, allocated pair forces report f_n, f_t, and the friction-cone
+    ratio f_t/(mu f_n) honestly without tuning or clipping.
+    """
+    _require_mujoco_and_myo_sim()
+    from src.engines.physics_engines.myosuite.python.golfer_grip_adapter import (
+        MyoSuiteGolferGripAdapter,
+    )
+
+    adapter = MyoSuiteGolferGripAdapter.from_model_id(model_id)
+    adapter.settle_welded_club()
+
+    report = adapter.evaluate_contacts(overlap_model)
+    assert report.allocated_contacts is not None
+    assert report.allocated_contacts.available is True
+
+    # Hand-hand allocated pairs have f_n = 0 (unloaded=True) and f_t > 0, so friction_ratio is None with a reason
+    for hh_pair in overlap_topology.hand_hand_pairs():
+        pf = report.allocated_contacts.pairs[hh_pair.name]
+        assert pf.available is True
+        assert pf.normal_force_n == 0.0
+        assert pf.tangential_force_n is not None and pf.tangential_force_n > 0.0
+        assert pf.unloaded is True
+        assert pf.friction_ratio is None
+        assert "unloaded" in pf.friction_reason
+
+    pad_alloc = adapter.allocate_weld_pad_forces(overlap_topology)
+    mu = 0.9
+    for hg_pair in overlap_topology.hand_grip_pairs():
+        pf = pad_alloc[hg_pair.name]
+        assert pf.available is True
+        assert pf.normal_force_n is not None
+        assert pf.tangential_force_n is not None and pf.tangential_force_n > 0.0
+        role = overlap_topology.site(hg_pair.site_a).hand
+        if role == "lead":
+            assert pf.normal_force_n > 0.0
+            assert pf.unloaded is False
+            assert pf.friction_ratio is not None
+            expected_ratio = pf.tangential_force_n / (mu * pf.normal_force_n)
+            assert pf.friction_ratio == pytest.approx(expected_ratio, rel=1e-9)
+            assert pf.friction_ratio > 1.0
+        else:
+            assert pf.normal_force_n == 0.0
+            assert pf.unloaded is True
+            assert pf.friction_ratio is None
+            assert "unloaded" in pf.friction_reason
+
+
+@pytest.mark.parametrize("model_id", ADMITTED_SCENE_IDS)
 def test_site_weld_mode_capabilities_and_allocated_forces_from_efc(
     model_id: str,
     overlap_topology: ContactTopology,
@@ -200,8 +309,8 @@ def test_site_weld_mode_capabilities_and_allocated_forces_from_efc(
     """Site-weld mode reports allocated pad and hand-hand forces from efc_force with prior name,
     declares supports_physical_pairs=False with unavailable_reason, and apply raises.
     """
-    mujoco = _require_mujoco_and_myo_sim()
-    from src.engines.physics_engines.myosuite.python.golfer_scene import (
+    _require_mujoco_and_myo_sim()
+    from src.engines.physics_engines.myosuite.python.golfer_grip_adapter import (
         MyoSuiteGolferGripAdapter,
         WeldedGripBodyError,
     )
@@ -224,7 +333,7 @@ def test_site_weld_mode_capabilities_and_allocated_forces_from_efc(
         with pytest.raises(SchemaFeatureUnavailableError, match="golf_club"):
             adapter.resolve_binding(overlap_topology, attachment_mode=phys_mode)
 
-    mujoco.mj_step(adapter.model, adapter.data)
+    adapter.settle_welded_club()
     closure = adapter.extract_weld_closure()
     assert closure.available is True
     assert len(closure.wrenches) == 2
@@ -296,7 +405,7 @@ def test_contact_mode_disables_grip_welds_and_never_duplicates_weld_and_shared_c
     xfrc_applied, and raises if any grip weld is active when applying wrenches.
     """
     mujoco = _require_mujoco_and_myo_sim()
-    from src.engines.physics_engines.myosuite.python.golfer_scene import (
+    from src.engines.physics_engines.myosuite.python.golfer_grip_adapter import (
         MyoSuiteGolferGripAdapter,
         WeldedGripBodyError,
     )
@@ -370,7 +479,7 @@ def test_missing_bodies_raise_schema_feature_unavailable_before_stepping(
 ) -> None:
     """Missing bodies in manifest/binding raise SchemaFeatureUnavailableError before stepping."""
     _require_mujoco_and_myo_sim()
-    from src.engines.physics_engines.myosuite.python.golfer_scene import (
+    from src.engines.physics_engines.myosuite.python.golfer_grip_adapter import (
         MYOSUITE_MANIFEST_PATHS,
         MyoSuiteGolferGripAdapter,
     )
@@ -401,7 +510,7 @@ def test_three_styles_by_two_modes_run_and_bimanual_grasp_synthesis(
 ) -> None:
     """3 styles x 2 modes run and satisfy bimanual grasp synthesis ||G y - w_club||_inf <= 1e-9 N."""
     mujoco = _require_mujoco_and_myo_sim()
-    from src.engines.physics_engines.myosuite.python.golfer_scene import (
+    from src.engines.physics_engines.myosuite.python.golfer_grip_adapter import (
         MyoSuiteGolferGripAdapter,
     )
 
@@ -433,7 +542,7 @@ def test_three_styles_by_two_modes_run_and_bimanual_grasp_synthesis(
         apply_report(adapter, report)
         mujoco.mj_step(adapter.model, adapter.data)
     else:
-        mujoco.mj_step(adapter.model, adapter.data)
+        adapter.settle_welded_club()
         report = adapter.evaluate_contacts(topo_model, binding)
 
     synthesis = adapter.synthesize_bimanual_grasp(report, binding=binding)
@@ -459,8 +568,8 @@ def test_m3_harness_passes_against_pinocchio_rigid_hand_reference(
     """M3 qualification harness passes against PinocchioGripAdapter and law_level_series
     across 3 styles x 2 modes on identical site states within 5% peak / 2% RMS.
     """
-    mujoco = _require_mujoco_and_myo_sim()
-    from src.engines.physics_engines.myosuite.python.golfer_scene import (
+    _require_mujoco_and_myo_sim()
+    from src.engines.physics_engines.myosuite.python.golfer_grip_adapter import (
         MyoSuiteGolferGripAdapter,
     )
     from src.engines.physics_engines.pinocchio.python.grip_binding_adapter import (
@@ -481,7 +590,7 @@ def test_m3_harness_passes_against_pinocchio_rigid_hand_reference(
         contact_mode=contact_mode,
     )
     if not contact_mode:
-        mujoco.mj_step(adapter.model, adapter.data)
+        adapter.settle_welded_club()
     closure = (
         adapter.extract_weld_closure()
         if not contact_mode
@@ -609,26 +718,30 @@ def _attribute_chain_depth(node: ast.AST) -> int:
     return depth
 
 
-def test_golfer_scene_ast_budgets_and_lod() -> None:
+@pytest.mark.parametrize(
+    "module_path",
+    [GOLFER_SCENE_PY, GOLFER_GRIP_ADAPTER_PY],
+)
+def test_golfer_scene_and_adapter_ast_budgets_and_lod(module_path: Path) -> None:
     """AST check: file <= 1200 lines, functions <= 100 lines, <= 8 params, LoD <= 2 dots."""
-    assert GOLFER_SCENE_PY.is_file()
-    source = GOLFER_SCENE_PY.read_text(encoding="utf-8")
+    assert module_path.is_file(), f"Missing module: {module_path}"
+    source = module_path.read_text(encoding="utf-8")
     lines = source.splitlines()
-    assert len(lines) <= 1200, f"{GOLFER_SCENE_PY.name} has {len(lines)} lines > 1200"
+    assert len(lines) <= 1200, f"{module_path.name} has {len(lines)} lines > 1200"
 
-    tree = ast.parse(source, filename=str(GOLFER_SCENE_PY))
+    tree = ast.parse(source, filename=str(module_path))
     for node in ast.walk(tree):
         if isinstance(node, ast.Attribute):
             depth = _attribute_chain_depth(node)
             assert depth <= 2, (
-                f"{GOLFER_SCENE_PY.name}:{node.lineno} has attribute chain depth {depth} > 2: "
+                f"{module_path.name}:{node.lineno} has attribute chain depth {depth} > 2: "
                 f"{ast.unparse(node)}"
             )
         if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
             assert node.end_lineno is not None
             length = node.end_lineno - node.lineno + 1
             assert length <= 100, (
-                f"{GOLFER_SCENE_PY.name}:{node.name} is {length} lines > 100"
+                f"{module_path.name}:{node.name} is {length} lines > 100"
             )
             args = node.args
             n_params = (
@@ -641,5 +754,5 @@ def test_golfer_scene_ast_budgets_and_lod() -> None:
             if args.args and args.args[0].arg in ("self", "cls"):
                 n_params -= 1
             assert n_params <= 8, (
-                f"{GOLFER_SCENE_PY.name}:{node.name} has {n_params} params > 8"
+                f"{module_path.name}:{node.name} has {n_params} params > 8"
             )

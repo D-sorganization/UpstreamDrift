@@ -1,7 +1,7 @@
 {
   "schema": "grip-binding/v1",
   "model_id": "myosuite_golfer_iron",
-  "model_hash": "sha256:f387f7d62d3f59ef8ee4dfc5fbfbeee151e22e087a7c0e8f5bfe4f6280df9356",
+  "model_hash": "550b000e48398b86bc5c881dd8fae27cd6d74209474775cbfe76b7234449aa9a",
   "handedness": "right",
   "side_roles": {
     "left": "lead",
