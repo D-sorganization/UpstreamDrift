@@ -250,6 +250,26 @@ def _check_law_args(
     return law
 
 
+def _require_sphere_capsule(sphere: object, capsule: object) -> None:
+    """Validate that sphere is ContactSphere and capsule is ContactCapsule."""
+    if not isinstance(sphere, ContactSphere):
+        raise TypeError(f"sphere must be ContactSphere, got {type(sphere).__name__}")
+    if not isinstance(capsule, ContactCapsule):
+        raise TypeError(f"capsule must be ContactCapsule, got {type(capsule).__name__}")
+
+
+def _require_capsule_pair(capsule_a: object, capsule_b: object) -> None:
+    """Validate that capsule_a and capsule_b are ContactCapsule instances."""
+    if not isinstance(capsule_a, ContactCapsule):
+        raise TypeError(
+            f"capsule_a must be ContactCapsule, got {type(capsule_a).__name__}"
+        )
+    if not isinstance(capsule_b, ContactCapsule):
+        raise TypeError(
+            f"capsule_b must be ContactCapsule, got {type(capsule_b).__name__}"
+        )
+
+
 def _contact_plane(normal: np.ndarray, surface_point: np.ndarray) -> GroundPlane:
     """Construct a GroundPlane from unit normal and surface point."""
     return GroundPlane(
@@ -448,10 +468,7 @@ def sphere_capsule_distance(
         normal is a unit vector pointing from body A (sphere) toward body B (capsule).
         contact_point_m is the deepest point of the sphere toward the capsule.
     """
-    if not isinstance(sphere, ContactSphere):
-        raise TypeError(f"sphere must be ContactSphere, got {type(sphere).__name__}")
-    if not isinstance(capsule, ContactCapsule):
-        raise TypeError(f"capsule must be ContactCapsule, got {type(capsule).__name__}")
+    _require_sphere_capsule(sphere, capsule)
     st_a = _resolve_state(state_a, "state_a")
     st_b = _resolve_state(state_b, "state_b")
 
@@ -495,10 +512,7 @@ def sphere_capsule(
         Zero force and moment when separated (gap >= 0.0).
         Normal force is strictly unilateral / compressive (never pulling).
     """
-    if not isinstance(sphere, ContactSphere):
-        raise TypeError(f"sphere must be ContactSphere, got {type(sphere).__name__}")
-    if not isinstance(capsule, ContactCapsule):
-        raise TypeError(f"capsule must be ContactCapsule, got {type(capsule).__name__}")
+    _require_sphere_capsule(sphere, capsule)
     law_params = _check_law_args(law, patch_radius_m, spin_transition_rad_s)
     st_a = _resolve_state(state_a, "state_a")
     st_b = _resolve_state(state_b, "state_b")
@@ -549,14 +563,7 @@ def capsule_capsule_distance(
         normal is a unit vector pointing from body A toward body B.
         contact_point_m is the midpoint of the surface overlap.
     """
-    if not isinstance(capsule_a, ContactCapsule):
-        raise TypeError(
-            f"capsule_a must be ContactCapsule, got {type(capsule_a).__name__}"
-        )
-    if not isinstance(capsule_b, ContactCapsule):
-        raise TypeError(
-            f"capsule_b must be ContactCapsule, got {type(capsule_b).__name__}"
-        )
+    _require_capsule_pair(capsule_a, capsule_b)
     st_a = _resolve_state(state_a, "state_a")
     st_b = _resolve_state(state_b, "state_b")
 
@@ -602,14 +609,7 @@ def capsule_capsule(
         Zero force and moment when separated (gap >= 0.0).
         Normal force is strictly unilateral / compressive (never pulling).
     """
-    if not isinstance(capsule_a, ContactCapsule):
-        raise TypeError(
-            f"capsule_a must be ContactCapsule, got {type(capsule_a).__name__}"
-        )
-    if not isinstance(capsule_b, ContactCapsule):
-        raise TypeError(
-            f"capsule_b must be ContactCapsule, got {type(capsule_b).__name__}"
-        )
+    _require_capsule_pair(capsule_a, capsule_b)
     law_params = _check_law_args(law, patch_radius_m, spin_transition_rad_s)
     st_a = _resolve_state(state_a, "state_a")
     st_b = _resolve_state(state_b, "state_b")

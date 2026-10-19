@@ -459,6 +459,143 @@ def _four_hand_pad_sites(
     )
 
 
+@dataclass(frozen=True)
+class _FingerGeom:
+    r_idx: float
+    r_mid: float
+    r_lit: float
+    hl: float
+    rho_idx_grip: float
+    rho_mid_grip: float
+    rho_lit_grip: float
+
+
+def _finger_geometry(
+    anatomy: HandAnatomy,
+    grip_radius_m: float,
+    preload_m: float,
+) -> _FingerGeom:
+    """Compute shared radii, half-length, and radial offsets for finger sites."""
+    r_idx = anatomy.index_finger_radius_m
+    r_mid = anatomy.index_finger_radius_m
+    r_lit = anatomy.little_finger_radius_m
+    hl = 0.008 * anatomy.scale
+    return _FingerGeom(
+        r_idx=r_idx,
+        r_mid=r_mid,
+        r_lit=r_lit,
+        hl=hl,
+        rho_idx_grip=grip_radius_m + r_idx - preload_m,
+        rho_mid_grip=grip_radius_m + r_mid - preload_m,
+        rho_lit_grip=grip_radius_m + r_lit - preload_m,
+    )
+
+
+def _capsule_site(
+    name: str,
+    hand: str,
+    segment: str,
+    centre_m: tuple[float, float, float],
+    radius_m: float,
+    half_length_m: float,
+) -> ContactSite:
+    """Construct a capsule ContactSite."""
+    return ContactSite(
+        name=name,
+        hand=hand,
+        segment=segment,
+        primitive="capsule",
+        centre_m=centre_m,
+        radius_m=radius_m,
+        half_length_m=half_length_m,
+    )
+
+
+def _finger_sites(
+    g: _FingerGeom,
+    centre_mid: tuple[float, float, float],
+    centre_idx: tuple[float, float, float],
+    centre_lit: tuple[float, float, float],
+) -> tuple[ContactSite, ContactSite, ContactSite]:
+    """Construct (lead_middle, lead_index, trail_little_finger) sites."""
+    return (
+        _capsule_site(
+            "lead_middle", "lead", "middle_finger", centre_mid, g.r_mid, g.hl
+        ),
+        _capsule_site("lead_index", "lead", "index_finger", centre_idx, g.r_idx, g.hl),
+        _capsule_site(
+            "trail_little_finger", "trail", "little_finger", centre_lit, g.r_lit, g.hl
+        ),
+    )
+
+
+def _overlap_finger_sites(
+    x_lead: float,
+    alpha_lead: float,
+    anatomy: HandAnatomy,
+    grip_radius_m: float,
+    preload_m: float,
+) -> tuple[ContactSite, ContactSite, ContactSite]:
+    """Return sites for overlap grip style."""
+    g = _finger_geometry(anatomy, grip_radius_m, preload_m)
+    x_mid = x_lead + 0.022
+    x_idx = x_lead + 0.036
+    rho_lit = g.rho_idx_grip + (g.r_idx + g.r_lit - preload_m)
+    return _finger_sites(
+        g,
+        _cyl_point(x_mid, g.rho_mid_grip, alpha_lead - 0.15),
+        _cyl_point(x_idx, g.rho_idx_grip, alpha_lead),
+        _cyl_point(x_idx, rho_lit, alpha_lead),
+    )
+
+
+def _interlock_finger_sites(
+    x_lead: float,
+    alpha_lead: float,
+    anatomy: HandAnatomy,
+    grip_radius_m: float,
+    preload_m: float,
+) -> tuple[ContactSite, ContactSite, ContactSite]:
+    """Return sites for interlock grip style."""
+    g = _finger_geometry(anatomy, grip_radius_m, preload_m)
+    x_slot = x_lead + 0.032
+    target_mid_lit = g.r_mid + g.r_lit - preload_m
+    cos_dtheta = (g.rho_mid_grip**2 + g.rho_lit_grip**2 - target_mid_lit**2) / (
+        2.0 * g.rho_mid_grip * g.rho_lit_grip
+    )
+    dtheta = math.acos(max(-1.0, min(1.0, cos_dtheta)))
+    rho_idx_wrap = g.rho_lit_grip + (g.r_lit + g.r_idx - preload_m)
+    return _finger_sites(
+        g,
+        _cyl_point(x_slot, g.rho_mid_grip, alpha_lead - dtheta),
+        _cyl_point(x_slot, rho_idx_wrap, alpha_lead),
+        _cyl_point(x_slot, g.rho_lit_grip, alpha_lead),
+    )
+
+
+def _ten_finger_sites(
+    x_lead: float,
+    alpha_lead: float,
+    anatomy: HandAnatomy,
+    grip_radius_m: float,
+    preload_m: float,
+) -> tuple[ContactSite, ContactSite, ContactSite]:
+    """Return sites for ten-finger grip style."""
+    g = _finger_geometry(anatomy, grip_radius_m, preload_m)
+    x_mid = x_lead + 0.022
+    x_idx = x_lead + 0.036
+    target_idx_lit = g.r_idx + g.r_lit - preload_m
+    radial_diff = g.rho_idx_grip - g.rho_lit_grip
+    dx_abut = math.sqrt(max(0.0, target_idx_lit**2 - radial_diff**2))
+    x_lit = x_idx + dx_abut
+    return _finger_sites(
+        g,
+        _cyl_point(x_mid, g.rho_mid_grip, alpha_lead - 0.15),
+        _cyl_point(x_idx, g.rho_idx_grip, alpha_lead),
+        _cyl_point(x_lit, g.rho_lit_grip, alpha_lead),
+    )
+
+
 def _interhand_finger_sites(
     style: GripStyle,
     x_lead: float,
@@ -468,124 +605,15 @@ def _interhand_finger_sites(
     preload_m: float,
 ) -> tuple[ContactSite, ContactSite, ContactSite]:
     """Return ``(lead_middle, lead_index, trail_little_finger)`` for ``style``."""
-    r_idx = anatomy.index_finger_radius_m
-    r_mid = anatomy.index_finger_radius_m
-    r_lit = anatomy.little_finger_radius_m
-    hl = 0.008 * anatomy.scale
-    rho_idx_grip = grip_radius_m + r_idx - preload_m
-    rho_mid_grip = grip_radius_m + r_mid - preload_m
-    rho_lit_grip = grip_radius_m + r_lit - preload_m
-
     if style is GripStyle.OVERLAP:
-        # Lead middle and lead index sit on the grip cylinder; trail little finger
-        # rests on top of the lead index/middle ridge.
-        x_mid = x_lead + 0.022
-        x_idx = x_lead + 0.036
-        rho_lit = rho_idx_grip + (r_idx + r_lit - preload_m)
-        lead_middle = ContactSite(
-            name="lead_middle",
-            hand="lead",
-            segment="middle_finger",
-            primitive="capsule",
-            centre_m=_cyl_point(x_mid, rho_mid_grip, alpha_lead - 0.15),
-            radius_m=r_mid,
-            half_length_m=hl,
+        return _overlap_finger_sites(
+            x_lead, alpha_lead, anatomy, grip_radius_m, preload_m
         )
-        lead_index = ContactSite(
-            name="lead_index",
-            hand="lead",
-            segment="index_finger",
-            primitive="capsule",
-            centre_m=_cyl_point(x_idx, rho_idx_grip, alpha_lead),
-            radius_m=r_idx,
-            half_length_m=hl,
-        )
-        trail_little = ContactSite(
-            name="trail_little_finger",
-            hand="trail",
-            segment="little_finger",
-            primitive="capsule",
-            centre_m=_cyl_point(x_idx, rho_lit, alpha_lead),
-            radius_m=r_lit,
-            half_length_m=hl,
-        )
-        return lead_middle, lead_index, trail_little
-
     if style is GripStyle.INTERLOCK:
-        # Trail little finger wedges into the slot between lead middle and lead
-        # index on the grip; lead index lifts to wrap around trail little finger.
-        x_slot = x_lead + 0.032
-        target_mid_lit = r_mid + r_lit - preload_m
-        cos_dtheta = (rho_mid_grip**2 + rho_lit_grip**2 - target_mid_lit**2) / (
-            2.0 * rho_mid_grip * rho_lit_grip
+        return _interlock_finger_sites(
+            x_lead, alpha_lead, anatomy, grip_radius_m, preload_m
         )
-        dtheta = math.acos(max(-1.0, min(1.0, cos_dtheta)))
-        rho_idx_wrap = rho_lit_grip + (r_lit + r_idx - preload_m)
-        lead_middle = ContactSite(
-            name="lead_middle",
-            hand="lead",
-            segment="middle_finger",
-            primitive="capsule",
-            centre_m=_cyl_point(x_slot, rho_mid_grip, alpha_lead - dtheta),
-            radius_m=r_mid,
-            half_length_m=hl,
-        )
-        trail_little = ContactSite(
-            name="trail_little_finger",
-            hand="trail",
-            segment="little_finger",
-            primitive="capsule",
-            centre_m=_cyl_point(x_slot, rho_lit_grip, alpha_lead),
-            radius_m=r_lit,
-            half_length_m=hl,
-        )
-        lead_index = ContactSite(
-            name="lead_index",
-            hand="lead",
-            segment="index_finger",
-            primitive="capsule",
-            centre_m=_cyl_point(x_slot, rho_idx_wrap, alpha_lead),
-            radius_m=r_idx,
-            half_length_m=hl,
-        )
-        return lead_middle, lead_index, trail_little
-
-    # GripStyle.TEN_FINGER: all fingers on the grip; trail little finger sits
-    # on the grip cylinder abutting lead index along +x (with extra spacing).
-    x_mid = x_lead + 0.022
-    x_idx = x_lead + 0.036
-    target_idx_lit = r_idx + r_lit - preload_m
-    radial_diff = rho_idx_grip - rho_lit_grip
-    dx_abut = math.sqrt(max(0.0, target_idx_lit**2 - radial_diff**2))
-    x_lit = x_idx + dx_abut
-    lead_middle = ContactSite(
-        name="lead_middle",
-        hand="lead",
-        segment="middle_finger",
-        primitive="capsule",
-        centre_m=_cyl_point(x_mid, rho_mid_grip, alpha_lead - 0.15),
-        radius_m=r_mid,
-        half_length_m=hl,
-    )
-    lead_index = ContactSite(
-        name="lead_index",
-        hand="lead",
-        segment="index_finger",
-        primitive="capsule",
-        centre_m=_cyl_point(x_idx, rho_idx_grip, alpha_lead),
-        radius_m=r_idx,
-        half_length_m=hl,
-    )
-    trail_little = ContactSite(
-        name="trail_little_finger",
-        hand="trail",
-        segment="little_finger",
-        primitive="capsule",
-        centre_m=_cyl_point(x_lit, rho_lit_grip, alpha_lead),
-        radius_m=r_lit,
-        half_length_m=hl,
-    )
-    return lead_middle, lead_index, trail_little
+    return _ten_finger_sites(x_lead, alpha_lead, anatomy, grip_radius_m, preload_m)
 
 
 def _build_pairs(style: GripStyle, trigger_finger: bool) -> tuple[ContactPair, ...]:
@@ -673,6 +701,61 @@ def _build_pairs(style: GripStyle, trigger_finger: bool) -> tuple[ContactPair, .
     return tuple(pairs)
 
 
+def _lead_heel_site(
+    x_lead: float,
+    alpha_lead: float,
+    hand_anatomy: HandAnatomy,
+    r_grip: float,
+    preload: float,
+) -> ContactSite:
+    """Return the lead heel pad ContactSite."""
+    r_heel = hand_anatomy.heel_pad_radius_m
+    return ContactSite(
+        name="lead_heel_pad",
+        hand="lead",
+        segment="heel_pad",
+        primitive="sphere",
+        centre_m=_cyl_point(
+            x_lead - 0.020, r_grip + r_heel - preload, alpha_lead + math.pi
+        ),
+        radius_m=r_heel,
+    )
+
+
+def _thumb_palm_sites(
+    x_lead: float,
+    alpha_lead: float,
+    thumb_offset_deg: float,
+    hand_anatomy: HandAnatomy,
+    r_grip: float,
+    preload: float,
+) -> tuple[ContactSite, ContactSite]:
+    """Return (lead_thumb, trail_palm_pocket) ContactSites."""
+    r_thumb = hand_anatomy.thumb_radius_m
+    r_pocket = hand_anatomy.palm_pad_radius_m
+    theta_thumb = alpha_lead + math.radians(thumb_offset_deg)
+    rho_thumb = r_grip + r_thumb - preload
+    rho_pocket = rho_thumb + (r_thumb + r_pocket - preload)
+    x_thumb = x_lead + 0.045
+    lead_thumb = _capsule_site(
+        name="lead_thumb",
+        hand="lead",
+        segment="thumb",
+        centre_m=_cyl_point(x_thumb, rho_thumb, theta_thumb),
+        radius_m=r_thumb,
+        half_length_m=0.010 * hand_anatomy.scale,
+    )
+    trail_palm_pocket = ContactSite(
+        name="trail_palm_pocket",
+        hand="trail",
+        segment="palm_thenar",
+        primitive="sphere",
+        centre_m=_cyl_point(x_thumb, rho_pocket, theta_thumb),
+        radius_m=r_pocket,
+    )
+    return lead_thumb, trail_palm_pocket
+
+
 def contact_topology(
     spec: GripSpec | None = None,
     anatomy: HandAnatomy | float | None = None,
@@ -721,43 +804,15 @@ def contact_topology(
     trail_pads = _four_hand_pad_sites(
         "trail", x_trail, alpha_trail, hand_anatomy, r_grip, preload
     )
-
-    r_heel = hand_anatomy.heel_pad_radius_m
-    lead_heel = ContactSite(
-        name="lead_heel_pad",
-        hand="lead",
-        segment="heel_pad",
-        primitive="sphere",
-        centre_m=_cyl_point(
-            x_lead - 0.020, r_grip + r_heel - preload, alpha_lead + math.pi
-        ),
-        radius_m=r_heel,
+    lead_heel = _lead_heel_site(x_lead, alpha_lead, hand_anatomy, r_grip, preload)
+    lead_thumb, trail_palm_pocket = _thumb_palm_sites(
+        x_lead,
+        alpha_lead,
+        spec.lead_thumb_offset_deg,
+        hand_anatomy,
+        r_grip,
+        preload,
     )
-
-    r_thumb = hand_anatomy.thumb_radius_m
-    r_pocket = hand_anatomy.palm_pad_radius_m
-    theta_thumb = alpha_lead + math.radians(spec.lead_thumb_offset_deg)
-    rho_thumb = r_grip + r_thumb - preload
-    rho_pocket = rho_thumb + (r_thumb + r_pocket - preload)
-    x_thumb = x_lead + 0.045
-    lead_thumb = ContactSite(
-        name="lead_thumb",
-        hand="lead",
-        segment="thumb",
-        primitive="capsule",
-        centre_m=_cyl_point(x_thumb, rho_thumb, theta_thumb),
-        radius_m=r_thumb,
-        half_length_m=0.010 * hand_anatomy.scale,
-    )
-    trail_palm_pocket = ContactSite(
-        name="trail_palm_pocket",
-        hand="trail",
-        segment="palm_thenar",
-        primitive="sphere",
-        centre_m=_cyl_point(x_thumb, rho_pocket, theta_thumb),
-        radius_m=r_pocket,
-    )
-
     lead_middle, lead_index, trail_little = _interhand_finger_sites(
         spec.style, x_lead, alpha_lead, hand_anatomy, r_grip, preload
     )

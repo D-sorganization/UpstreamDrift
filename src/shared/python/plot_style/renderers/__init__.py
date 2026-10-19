@@ -15,16 +15,21 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from .matplotlib import MatplotlibMarkerRenderer
-
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from .matplotlib import MatplotlibMarkerRenderer
     from .pyqtgl import PyQtGLMarkerRenderer
 
 __all__ = ["MatplotlibMarkerRenderer", "PyQtGLMarkerRenderer"]
 
 
 def __getattr__(name: str) -> Any:
-    """Lazy attribute access for optional renderers."""
+    """Lazy attribute access so matplotlib / pyqtgraph load on first use."""
+    if name == "MatplotlibMarkerRenderer":
+        from .matplotlib import (  # noqa: PLC0415 - intentional lazy import
+            MatplotlibMarkerRenderer,
+        )
+
+        return MatplotlibMarkerRenderer
     if name == "PyQtGLMarkerRenderer":
         from .pyqtgl import (  # noqa: PLC0415 - intentional lazy import
             PyQtGLMarkerRenderer,

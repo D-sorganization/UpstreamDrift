@@ -462,7 +462,11 @@ def test_drake_markers_use_native_fk_with_floating_base_and_local_offset(
     registry: FeedbackComparisonRegistry,
     tmp_path: Path,
 ) -> None:
-    pytest.importorskip("pydrake.multibody.plant")
+    from src.engines.physics_engines.drake.python.drake_native_policy import (
+        skip_unless_reviewed_native_drake,
+    )
+
+    skip_unless_reviewed_native_drake()
     from pydrake.math import RigidTransform
     from pydrake.multibody.parsing import Parser
     from pydrake.multibody.plant import MultibodyPlant
