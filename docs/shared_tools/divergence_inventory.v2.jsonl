@@ -873,6 +873,7 @@
 {"path": "grip_contact/interface.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/pad_contact.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/pad_layout.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/pair_contact.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/parameters.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/parity.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/prescribed_motion.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
