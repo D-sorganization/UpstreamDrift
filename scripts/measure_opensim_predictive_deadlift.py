@@ -320,6 +320,7 @@ def _run_stage2_if_converged(
     max_iterations: int,
     stage2_log: Path,
     out_dir: Path,
+    residual: dict[str, float],
 ) -> dict[str, Any]:
     """Execute Stage 2 muscle-driven solve only if Stage 1 converged."""
     if not stage1_summary.get("converged", False):
@@ -346,6 +347,7 @@ def _run_stage2_if_converged(
         terminal_lockout_weight=10.0,
         finite_difference_scheme="forward",
         exploratory=True,
+        **residual,
     )
     study2, _ = build_predictive_deadlift_study(cfg_stage2)
     with _capture_output_to_file(stage2_log):
@@ -390,10 +392,12 @@ def run_measurement(
     mesh_intervals: int = 15,
     max_iterations: int = 3000,
     from_log: Path | None = None,
+    residual: dict[str, float] | None = None,
 ) -> dict[str, Any]:
     """Execute staged predictive deadlift measurement and generate honest evidence."""
     out_dir.mkdir(parents=True, exist_ok=True)
     log_dir.mkdir(parents=True, exist_ok=True)
+    residual = residual or {}
     stage1_log = log_dir / "stage1_torque.log"
     stage2_log = log_dir / "stage2_muscle.log"
 
@@ -412,6 +416,7 @@ def run_measurement(
         terminal_lockout_weight=10.0,
         finite_difference_scheme="forward",
         exploratory=True,
+        **residual,
     )
 
     t_start = time.perf_counter()
@@ -441,6 +446,7 @@ def run_measurement(
         max_iterations,
         stage2_log,
         out_dir,
+        residual,
     )
 
     # Format receipt
@@ -472,6 +478,13 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--mesh-intervals", type=int, default=15)
     parser.add_argument("--max-iterations", type=int, default=3000)
+    parser.add_argument(
+        "--residual-force-scale",
+        type=float,
+        default=2.0,
+        help="Pelvis residual optimal force as a multiple of total weight",
+    )
+    parser.add_argument("--residual-effort-weight", type=float, default=10.0)
     args = parser.parse_args(argv)
 
     out_dir = args.out_dir
@@ -487,6 +500,10 @@ def main(argv: list[str] | None = None) -> int:
         mesh_intervals=args.mesh_intervals,
         max_iterations=args.max_iterations,
         from_log=args.from_log,
+        residual={
+            "residual_force_scale": args.residual_force_scale,
+            "residual_effort_weight": args.residual_effort_weight,
+        },
     )
     return 0
 

@@ -101,6 +101,8 @@ class PredictiveDeadliftConfig:
     effort_weight: float = 1.0
     terminal_lockout_weight: float = 10.0
     finite_difference_scheme: str = "forward"
+    residual_force_scale: float = 2.0
+    residual_effort_weight: float = 10.0
     exploratory: bool = True
 
     def __post_init__(self) -> None:
@@ -135,6 +137,16 @@ class PredictiveDeadliftConfig:
             raise ValueError("Weights must be non-negative")
         if self.finite_difference_scheme not in {"central", "forward"}:
             raise ValueError("scheme must be 'central' or 'forward'")
+        if self.residual_force_scale <= 0.0 or self.residual_effort_weight < 0.0:
+            raise ValueError(
+                "residual_force_scale must be positive and residual_effort_weight "
+                "non-negative"
+            )
+
+    def residual_optimal_force_n(self) -> float:
+        """Residual optimal force: ``residual_force_scale`` times total weight."""
+        total = self.body_mass_kg + self.bar_mass_kg
+        return self.residual_force_scale * total * 9.80665
 
     def to_dict(self) -> dict[str, Any]:
         """Convert configuration to dictionary."""
@@ -257,18 +269,23 @@ def _add_torque_actuators(model: Any, optimal_force_nm: float) -> list[str]:
     return added
 
 
-def _add_pelvis_residuals(model: Any, total_mass_kg: float) -> list[str]:
-    """Add CoordinateActuator residuals for floating pelvis coordinates (OSL-7)."""
+def _add_pelvis_residuals(model: Any, optimal_force_n: float) -> list[str]:
+    """Add CoordinateActuator residuals for floating pelvis coordinates (OSL-7).
+
+    Controls are nondimensional in [-1, 1]; the optimal force carries the
+    scale, so the effort goal sees O(1) residual controls like the joint
+    torques instead of raw newtons.
+    """
+    if optimal_force_n <= 0.0:
+        raise ValueError(f"optimal_force_n must be positive: {optimal_force_n}")
     osim = import_opensim()
-    weight = total_mass_kg * 9.80665
-    bound = 2.0 * weight
     added: list[str] = []
     for coord in ("pelvis_tilt", "pelvis_tx", "pelvis_ty"):
         ca = osim.CoordinateActuator(coord)
         ca.setName(f"residual_{coord}")
-        ca.setOptimalForce(1.0)
-        ca.setMinControl(-bound)
-        ca.setMaxControl(bound)
+        ca.setOptimalForce(optimal_force_n)
+        ca.setMinControl(-1.0)
+        ca.setMaxControl(1.0)
         model.addForce(ca)
         added.append(f"residual_{coord}")
     return added
@@ -472,7 +489,7 @@ def build_predictive_deadlift_study(
     if config.actuation_mode == "torque":
         _add_torque_actuators(model, config.torque_optimal_force_nm)
 
-    _add_pelvis_residuals(model, config.body_mass_kg + config.bar_mass_kg)
+    _add_pelvis_residuals(model, config.residual_optimal_force_n())
     setup_pose, lockout_pose = compute_deadlift_poses(
         model,
         body_mass_kg=config.body_mass_kg,
@@ -505,7 +522,9 @@ def build_predictive_deadlift_study(
     effort = osim.MocoControlGoal("effort")
     effort.setWeight(config.effort_weight)
     for coord in ("pelvis_tilt", "pelvis_tx", "pelvis_ty"):
-        effort.setWeightForControl(f"/forceset/residual_{coord}", 100.0)
+        effort.setWeightForControl(
+            f"/forceset/residual_{coord}", config.residual_effort_weight
+        )
     problem.addGoal(effort)
     _configure_phase_bounds(phase, model, setup_pose, lockout_pose)
 
@@ -635,7 +654,7 @@ def solve_predictive_deadlift(
     obj = float(solution.getObjective())
     tot_weight = (config.body_mass_kg + config.bar_mass_kg) * 9.80665
     res_peak, res_rms, res_ratio, res_assisted = _extract_residual_metrics(
-        solution, tot_weight
+        solution, tot_weight, config.residual_optimal_force_n()
     )
 
     record: dict[str, Any] = {

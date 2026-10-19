@@ -113,9 +113,12 @@ def replay_bar_path_fk(model: Any, states_table: Any) -> tuple[np.ndarray, np.nd
 
 
 def _extract_residual_metrics(
-    solution: Any, total_weight_n: float
+    solution: Any, total_weight_n: float, residual_optimal_force_n: float
 ) -> tuple[float | None, float | None, float | None, bool | None]:
-    """Compute peak force, RMS force, weight ratio, and residual-assisted flag."""
+    """Compute peak force, RMS force, weight ratio, and residual-assisted flag.
+
+    Residual forces are control times ``residual_optimal_force_n``.
+    """
     try:
         ctable = solution.exportToControlsTable()
         labels = [ctable.getColumnLabel(i) for i in range(ctable.getNumColumns())]
@@ -127,8 +130,8 @@ def _extract_residual_metrics(
         )
         mat = ctable.getMatrix().to_numpy()
         if tx_idx is not None and ty_idx is not None:
-            fx = mat[:, tx_idx]
-            fy = mat[:, ty_idx]
+            fx = mat[:, tx_idx] * residual_optimal_force_n
+            fy = mat[:, ty_idx] * residual_optimal_force_n
             f_norm = np.sqrt(fx**2 + fy**2)
             peak = float(np.max(f_norm))
             rms = float(np.sqrt(np.mean(f_norm**2)))

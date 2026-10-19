@@ -291,3 +291,56 @@ def test_build_predictive_deadlift_study_initializes() -> None:
     # Check solver initialization
     solver = study.updSolver()
     assert solver is not None
+
+
+def test_residual_optimal_force_scales_with_total_weight() -> None:
+    """Residual optimal force is the configured multiple of total weight."""
+    cfg = PredictiveDeadliftConfig(
+        body_mass_kg=80.0, bar_mass_kg=100.0, residual_force_scale=2.0
+    )
+    assert cfg.residual_optimal_force_n() == pytest.approx(2.0 * 180.0 * 9.80665)
+    with pytest.raises(ValueError):
+        PredictiveDeadliftConfig(residual_force_scale=0.0)
+    with pytest.raises(ValueError):
+        PredictiveDeadliftConfig(residual_effort_weight=-1.0)
+
+
+def test_residual_metrics_multiply_controls_by_optimal_force() -> None:
+    """Nondimensional residual controls are converted to newtons."""
+    import numpy as np
+
+    from src.engines.physics_engines.opensim.python.msk_lift_predictive_report import (
+        _extract_residual_metrics,
+    )
+
+    controls = np.array([[0.3, 0.4, 0.0], [0.0, 0.0, 0.0]])
+
+    class _Matrix:
+        def to_numpy(self) -> np.ndarray:
+            return controls
+
+    class _Table:
+        labels = [
+            "/forceset/residual_pelvis_tx",
+            "/forceset/residual_pelvis_ty",
+            "/forceset/residual_pelvis_tilt",
+        ]
+
+        def getNumColumns(self) -> int:  # noqa: N802 - OpenSim API name
+            return len(self.labels)
+
+        def getColumnLabel(self, i: int) -> str:  # noqa: N802 - OpenSim API name
+            return self.labels[i]
+
+        def getMatrix(self) -> _Matrix:  # noqa: N802 - OpenSim API name
+            return _Matrix()
+
+    class _Solution:
+        def exportToControlsTable(self) -> _Table:  # noqa: N802 - OpenSim API name
+            return _Table()
+
+    peak, rms, ratio, assisted = _extract_residual_metrics(_Solution(), 1000.0, 200.0)
+    assert peak == pytest.approx(0.5 * 200.0)
+    assert rms == pytest.approx(np.sqrt(0.5) * 0.5 * 200.0)
+    assert ratio == pytest.approx(rms / 1000.0)
+    assert assisted is True
