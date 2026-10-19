@@ -33,7 +33,7 @@ from src.shared.python.grip_contact.topology_contact import (
 )
 from src.shared.python.motion_matching.grip_contract import GripSpec
 
-pytestmark = [pytest.mark.unit, pytest.mark.requires_pinocchio, pytest.mark.slow]
+pytestmark = [pytest.mark.unit, pytest.mark.requires_pinocchio]
 
 ROOT = Path(__file__).resolve().parents[3]
 MODELS = ROOT / "docs/development/full_body_models"
@@ -71,6 +71,31 @@ def _setup(
     return spec_bytes, spec, names, swing, interface, topo_model
 
 
+def _assert_traces_match_law(run: Any, topo_model: TopologyContactModel) -> None:
+    """Every recorded pair trace equals the shared law re-evaluated (<= 1e-9 N)."""
+    assert run.pair_normal_force_n is not None
+    assert run.pair_tangential_force_n is not None
+    assert run.hand_states is not None
+    assert run.club_states is not None
+    for k in range(len(run.series.time_s)):
+        for side in ("L", "R"):
+            re_eval = topology_side_wrench(
+                topo_model, side, run.hand_states[side][k], run.club_states[side][k]
+            )
+            for pair in topo_model.physical_grip_pairs(side):
+                pw = re_eval.pair_wrenches[pair.name]
+                np.testing.assert_allclose(
+                    run.pair_normal_force_n[pair.name][k],
+                    pw.normal_force_mag_n,
+                    atol=1e-9,
+                )
+                np.testing.assert_allclose(
+                    run.pair_tangential_force_n[pair.name][k],
+                    pw.tangential_force_mag_n,
+                    atol=1e-9,
+                )
+
+
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
@@ -92,24 +117,7 @@ def test_pinocchio_topology_static_hold_fast(style: GripStyle) -> None:
     assert run.hand_states is not None
     assert run.club_states is not None
 
-    # Re-evaluate topology_side_wrench at every step and compare
-    for k in range(len(run.series.time_s)):
-        for side in ("L", "R"):
-            h_state = run.hand_states[side][k]
-            c_state = run.club_states[side][k]
-            re_eval = topology_side_wrench(topo_model, side, h_state, c_state)
-            for pair in topo_model.physical_grip_pairs(side):
-                pw = re_eval.pair_wrenches[pair.name]
-                np.testing.assert_allclose(
-                    run.pair_normal_force_n[pair.name][k],
-                    pw.normal_force_mag_n,
-                    atol=1e-9,
-                )
-                np.testing.assert_allclose(
-                    run.pair_tangential_force_n[pair.name][k],
-                    pw.tangential_force_mag_n,
-                    atol=1e-9,
-                )
+    _assert_traces_match_law(run, topo_model)
 
     # Check non-empty physical pairs
     for pair in topo_model.topology.hand_grip_pairs():
@@ -147,28 +155,7 @@ def test_pinocchio_topology_swing_replay_fast(style: GripStyle) -> None:
         hold=False,
         topology_model=topo_model,
     )
-    assert run.pair_normal_force_n is not None
-    assert run.pair_tangential_force_n is not None
-    assert run.hand_states is not None
-    assert run.club_states is not None
-
-    for k in range(len(run.series.time_s)):
-        for side in ("L", "R"):
-            h_state = run.hand_states[side][k]
-            c_state = run.club_states[side][k]
-            re_eval = topology_side_wrench(topo_model, side, h_state, c_state)
-            for pair in topo_model.physical_grip_pairs(side):
-                pw = re_eval.pair_wrenches[pair.name]
-                np.testing.assert_allclose(
-                    run.pair_normal_force_n[pair.name][k],
-                    pw.normal_force_mag_n,
-                    atol=1e-9,
-                )
-                np.testing.assert_allclose(
-                    run.pair_tangential_force_n[pair.name][k],
-                    pw.tangential_force_mag_n,
-                    atol=1e-9,
-                )
+    _assert_traces_match_law(run, topo_model)
 
     # Check physical pairs exist and are finite
     for pair in topo_model.topology.hand_grip_pairs():
@@ -177,14 +164,15 @@ def test_pinocchio_topology_swing_replay_fast(style: GripStyle) -> None:
         assert np.all(fn_trace >= 0.0)
 
 
+@pytest.mark.timeout(180)
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
 def test_pinocchio_topology_timestep_halving(style: GripStyle) -> None:
-    """AC 2: Halving max_step_s changes peak pair normal force by < 2 %."""
+    """AC 2: on the swing replay, halving max_step_s moves the peak pair force < 2 %."""
     module = _pinocchio_sim_module()
     spec_bytes, _, names, swing, interface, topo_model = _setup(style=style)
-    duration = 0.03
+    duration = 0.04
 
     tol_base = module.IntegratorTolerances(max_step_s=2.0e-4)
     tol_half = module.IntegratorTolerances(max_step_s=1.0e-4)
@@ -195,7 +183,7 @@ def test_pinocchio_topology_timestep_halving(style: GripStyle) -> None:
         interface=interface,
         tolerances=tol_base,
         t_end_s=duration,
-        hold=True,
+        hold=False,
         topology_model=topo_model,
     )
     run_half = module.simulate_grip_contact(
@@ -204,7 +192,7 @@ def test_pinocchio_topology_timestep_halving(style: GripStyle) -> None:
         interface=interface,
         tolerances=tol_half,
         t_end_s=duration,
-        hold=True,
+        hold=False,
         topology_model=topo_model,
     )
 
@@ -258,6 +246,7 @@ def test_pinocchio_topology_static_hold_0_2s(style: GripStyle) -> None:
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(600)
 @pytest.mark.parametrize(
     "style", [GripStyle.OVERLAP, GripStyle.INTERLOCK, GripStyle.TEN_FINGER]
 )
@@ -274,4 +263,4 @@ def test_pinocchio_topology_swing_replay_1s(style: GripStyle) -> None:
         hold=False,
         topology_model=topo_model,
     )
-    assert run.pair_normal_force_n is not None
+    _assert_traces_match_law(run, topo_model)

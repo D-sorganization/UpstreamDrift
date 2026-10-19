@@ -32,6 +32,7 @@ from src.shared.python.grip_contact.pair_contact import (
     sphere_capsule_distance,
 )
 from src.shared.python.grip_contact.topology_contact import (
+    PairTraceRecorder,
     TopologyContactModel,
     TopologySideWrench,
     build_topology_model,
@@ -250,3 +251,114 @@ def test_dbc_preconditions(interface: GripInterface) -> None:
     # Invalid mode
     with pytest.raises(ValueError, match="physical in mode"):
         topology_pair_wrench(model, "lead_palm_proximal_grip", hand, club, mode="weld")
+
+
+def test_physical_pair_primitives(interface: GripInterface) -> None:
+    """physical_pair_primitives returns read-only tuple of (ContactPair, primitive)."""
+    model = build_topology_model(interface)
+    for side in ("L", "R"):
+        prims = model.physical_pair_primitives(side)
+        pairs = model.physical_grip_pairs(side)
+        assert len(prims) == len(pairs)
+        for (pair, prim), expected_pair in zip(prims, pairs, strict=True):
+            assert pair == expected_pair
+            site = model.topology.site(pair.site_a)
+            if site.primitive == "sphere":
+                assert isinstance(prim, ContactSphere)
+            elif site.primitive == "capsule":
+                assert isinstance(prim, ContactCapsule)
+
+
+def test_pair_trace_recorder_pure(interface: GripInterface) -> None:
+    """PairTraceRecorder records physical traces and states with correct array lengths."""
+    model = build_topology_model(interface)
+    recorder = PairTraceRecorder(model)
+    st_hand = BushingState(np.eye(3), np.zeros(3), np.zeros(3), np.zeros(3))
+    st_club = BushingState(np.eye(3), np.zeros(3), np.zeros(3), np.zeros(3))
+    wrenches = {s: topology_side_wrench(model, s, st_hand, st_club) for s in ("L", "R")}
+    hands = {"L": st_hand, "R": st_hand}
+    clubs = {"L": st_club, "R": st_club}
+
+    num_samples = 3
+    for _ in range(num_samples):
+        recorder.record(wrenches, hands, clubs)
+
+    result = recorder.result()
+    assert "pair_normal_force_n" in result
+    assert "pair_tangential_force_n" in result
+    assert "channel_reasons" in result
+    assert "hand_states" in result
+    assert "club_states" in result
+
+    for p in model.topology.pairs:
+        fn = result["pair_normal_force_n"][p.name]
+        ft = result["pair_tangential_force_n"][p.name]
+        assert isinstance(fn, np.ndarray)
+        assert isinstance(ft, np.ndarray)
+        assert fn.shape == (num_samples,)
+        assert ft.shape == (num_samples,)
+
+    for s in ("L", "R"):
+        assert len(result["hand_states"][s]) == num_samples
+        assert len(result["club_states"][s]) == num_samples
+
+
+def test_pair_trace_recorder_hand_hand_nan_and_reasons(
+    interface: GripInterface,
+) -> None:
+    """Hand-hand pairs record NaN forces and have allocated reasons."""
+    model = build_topology_model(interface)
+    recorder = PairTraceRecorder(model)
+    st_hand = BushingState(np.eye(3), np.zeros(3), np.zeros(3), np.zeros(3))
+    st_club = BushingState(np.eye(3), np.zeros(3), np.zeros(3), np.zeros(3))
+    wrenches = {s: topology_side_wrench(model, s, st_hand, st_club) for s in ("L", "R")}
+    recorder.record(
+        wrenches, {"L": st_hand, "R": st_hand}, {"L": st_club, "R": st_club}
+    )
+
+    result = recorder.result()
+    hh_pairs = model.topology.hand_hand_pairs()
+    assert len(hh_pairs) > 0
+
+    expected_reason = "hand-hand pairs are allocated, not physical forces under prescribed hand motion"
+    for p in hh_pairs:
+        assert np.isnan(result["pair_normal_force_n"][p.name]).all()
+        assert np.isnan(result["pair_tangential_force_n"][p.name]).all()
+        assert result["channel_reasons"][p.name] == expected_reason
+
+    # Physical pairs must be finite and not in channel_reasons
+    for p in model.topology.hand_grip_pairs():
+        assert np.isfinite(result["pair_normal_force_n"][p.name]).all()
+        assert np.isfinite(result["pair_tangential_force_n"][p.name]).all()
+        assert p.name not in result["channel_reasons"]
+
+
+def test_pair_trace_recorder_unknown_pair(interface: GripInterface) -> None:
+    """record() raises ValueError on unknown pair name."""
+    from src.shared.python.grip_contact.pair_contact import PairWrench
+
+    model = build_topology_model(interface)
+    recorder = PairTraceRecorder(model)
+    st = BushingState(np.eye(3), np.zeros(3), np.zeros(3), np.zeros(3))
+    sw = topology_side_wrench(model, "L", st, st)
+
+    fake_pw = next(iter(sw.pair_wrenches.values()))
+    bad_pair_wrenches = dict(sw.pair_wrenches)
+    bad_pair_wrenches["nonexistent_unknown_pair"] = fake_pw
+    bad_sw = TopologySideWrench(
+        force_n=sw.force_n,
+        moment_nm=sw.moment_nm,
+        pair_wrenches=bad_pair_wrenches,
+        normal_force_n=sw.normal_force_n,
+        tangential_force_n=sw.tangential_force_n,
+        total_normal_force_n=sw.total_normal_force_n,
+    )
+
+    with pytest.raises(ValueError, match="unknown pair"):
+        recorder.record({"L": bad_sw, "R": sw}, {"L": st, "R": st}, {"L": st, "R": st})
+
+
+def test_pair_trace_recorder_dbc(interface: GripInterface) -> None:
+    """PairTraceRecorder validates model type and duplicate/missing pairs."""
+    with pytest.raises(TypeError, match="TopologyContactModel"):
+        PairTraceRecorder("not_a_model")  # type: ignore[arg-type]

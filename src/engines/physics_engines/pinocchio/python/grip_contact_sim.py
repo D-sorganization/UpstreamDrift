@@ -34,6 +34,7 @@ from src.shared.python.grip_contact.contact_run import ContactRun, slip_from_fra
 from src.shared.python.grip_contact.pad_contact import PadContactModel, pad_wrench
 from src.shared.python.grip_contact.parity import GripKineticsSeries
 from src.shared.python.grip_contact.topology_contact import (
+    PairTraceRecorder,
     TopologyContactModel,
     topology_side_wrench,
 )
@@ -86,13 +87,14 @@ class ClubInHands(bushing.ClubOnBushings):
         club = self.club_state(y)
         frames = {s: club.frame(self._offsets[s]) for s in SIDES}
         law: dict[str, Any]
-        if self.topology_model is not None:
+        if self.pads is None:
+            if self.topology_model is None:
+                raise RuntimeError("neither pads nor topology_model is configured")
             law = {
                 s: topology_side_wrench(self.topology_model, s, hands[s], frames[s])
                 for s in SIDES
             }
         else:
-            assert self.pads is not None
             law = {
                 s: pad_wrench(self.pads, s, hands[s], frames[s], self._pad_positions[s])
                 for s in SIDES
@@ -107,6 +109,26 @@ def hold_state(sim: ClubInHands, q: np.ndarray) -> tuple[Any, np.ndarray]:
     weld = sim.kinematics.state(q, still)
     y = bushing._initial_state(weld, sim._pin)  # noqa: SLF001
     return (lambda _t: (q, still)), y
+
+
+def _record_step(
+    hands: dict[str, Any],
+    frames: dict[str, Any],
+    law: dict[str, Any],
+    wrench: dict[str, tuple[list, list]],
+    hand_pose: dict[str, tuple[list, list]],
+    club_pose: dict[str, tuple[list, list]],
+    normal: dict[str, list],
+) -> None:
+    """Record per-side wrenches, normal forces, and frame poses for one time step."""
+    for s in SIDES:
+        wrench[s][0].append(law[s].force_n)
+        wrench[s][1].append(law[s].moment_nm)
+        normal[s].append(law[s].normal_force_n)
+        hand_pose[s][0].append(hands[s].rotation)
+        hand_pose[s][1].append(hands[s].position_m)
+        club_pose[s][0].append(frames[s].rotation)
+        club_pose[s][1].append(frames[s].position_m)
 
 
 def simulate_grip_contact(
@@ -163,57 +185,19 @@ def simulate_grip_contact(
     hand_pose: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
     club_pose: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
     normal: dict[str, list] = {s: [] for s in SIDES}
-    pair_normal: dict[str, list[float]] = {}
-    pair_tangential: dict[str, list[float]] = {}
-    channel_reasons: dict[str, str] = {}
-    hand_states_list: dict[str, list[Any]] = {s: [] for s in SIDES}
-    club_states_list: dict[str, list[Any]] = {s: [] for s in SIDES}
-    if topology_model is not None:
-        for p in topology_model.topology.pairs:
-            pair_normal[p.name] = []
-            pair_tangential[p.name] = []
-            if p.is_hand_hand:
-                channel_reasons[p.name] = (
-                    "hand-hand pairs are allocated, not physical in rigid weld prescribed motion"
-                )
+    recorder = PairTraceRecorder(topology_model) if topology_model is not None else None
     club_rot = []
     for k, t in enumerate(times):
         y = sol.y[:, k]
         hands, frames, law = sim.wrenches(float(t), y, source)
-        for s in SIDES:
-            wrench[s][0].append(law[s].force_n)
-            wrench[s][1].append(law[s].moment_nm)
-            normal[s].append(law[s].normal_force_n)
-            hand_pose[s][0].append(hands[s].rotation)
-            hand_pose[s][1].append(hands[s].position_m)
-            club_pose[s][0].append(frames[s].rotation)
-            club_pose[s][1].append(frames[s].position_m)
-            if topology_model is not None:
-                hand_states_list[s].append(hands[s])
-                club_states_list[s].append(frames[s])
-        if topology_model is not None:
-            for s in SIDES:
-                for pname, pw in law[s].pair_wrenches.items():
-                    pair_normal[pname].append(pw.normal_force_mag_n)
-                    pair_tangential[pname].append(pw.tangential_force_mag_n)
-            for p in topology_model.topology.hand_hand_pairs():
-                pair_normal[p.name].append(float("nan"))
-                pair_tangential[p.name].append(float("nan"))
+        _record_step(hands, frames, law, wrench, hand_pose, club_pose, normal)
+        if recorder is not None:
+            recorder.record(law, hands, frames)
         club_rot.append(sim.club_state(y).rotation)
     arrays = {
         name: {s: (np.array(d[s][0]), np.array(d[s][1])) for s in SIDES}
         for name, d in (("w", wrench), ("h", hand_pose), ("c", club_pose))
     }
-    pair_norm_arrays = (
-        {p: np.array(vals) for p, vals in pair_normal.items()}
-        if topology_model is not None
-        else None
-    )
-    pair_tang_arrays = (
-        {p: np.array(vals) for p, vals in pair_tangential.items()}
-        if topology_model is not None
-        else None
-    )
     force_law_meta = (
         "ContactTopology shared contact law, Pinocchio aba"
         if topology_model is not None
@@ -235,16 +219,13 @@ def simulate_grip_contact(
         },
     )
     axial, roll = slip_from_frames(arrays["h"], arrays["c"])
+    extra = recorder.result() if recorder is not None else {}
     return ContactRun(
         series,
         {s: np.array(normal[s]) for s in SIDES},
         roll,
         axial,
-        pair_normal_force_n=pair_norm_arrays,
-        pair_tangential_force_n=pair_tang_arrays,
-        channel_reasons=channel_reasons or None,
-        hand_states=hand_states_list if topology_model is not None else None,
-        club_states=club_states_list if topology_model is not None else None,
+        **extra,
     )
 
 
