@@ -9,9 +9,11 @@ on:
       - "LICENSE"
       - ".gitignore"
   merge_group:
+  # Pull requests run via pull_request; push covers main only, so a PR branch
+  # does not run the job twice (merge-queue refs are not main).
   push:
-    branches-ignore:
-      - "gh-readonly-queue/**"
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
@@ -128,7 +130,7 @@ jobs:
             -v \
             --junitxml="$RUNNER_TEMP/opensim-results.xml"
 
-          python - <<'PY'
+          python - "$RUNNER_TEMP/opensim-results.xml" <<'PY'
           import sys
           import xml.etree.ElementTree as ET
 
@@ -143,4 +145,4 @@ jobs:
           if passed == 0:
               print("::error::Zero tests passed! All selected tests were skipped or none were run.", file=sys.stderr)
               sys.exit(1)
-          PY "$RUNNER_TEMP/opensim-results.xml"
+          PY
