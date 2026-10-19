@@ -15,6 +15,8 @@ operation:
   BLAS call as the reference's scalar ``R @ x``) and a Python-float add;
 - 3-vector dot products are summed left to right, as numpy's 1-D ``x @ y``;
   cross products use the ``bushing_law.cross3`` component expressions;
+- a capsule site is its axial line-contact nodes, each a sphere row, combined
+  by the shared ``pair_contact.combine_line_nodes`` (#13308);
 - the Hunt-Crossley normal, the regularised Coulomb/Stribeck tangential and the
   torsional spin moment follow
   :func:`src.shared.python.motion_matching.contact_law.sphere_ground_contact`
@@ -33,14 +35,17 @@ from typing import NamedTuple
 import numpy as np
 
 from src.shared.python.grip_contact.bushing_law import BushingState
-from src.shared.python.grip_contact.pair_contact import _orthogonal_unit_vector
+from src.shared.python.grip_contact.pair_contact import (
+    LineNode,
+    _orthogonal_unit_vector,
+    combine_line_nodes,
+)
 from src.shared.python.motion_matching.contact_law import ContactParameters
 
 __all__ = [
     "PairRow",
     "SideBatch",
     "SideRows",
-    "closest_points_segments_floats",
     "rigid_points_floats",
     "side_rows_wrench",
 ]
@@ -58,16 +63,8 @@ def _vec(a: Sequence[float]) -> Vec3:
     return (a[0], a[1], a[2])
 
 
-def _add(a: Sequence[float], b: Sequence[float]) -> Vec3:
-    return (a[0] + b[0], a[1] + b[1], a[2] + b[2])
-
-
 def _sub(a: Sequence[float], b: Sequence[float]) -> Vec3:
     return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
-
-
-def _scale(s: float, a: Sequence[float]) -> Vec3:
-    return (s * a[0], s * a[1], s * a[2])
 
 
 def _dot(a: Sequence[float], b: Sequence[float]) -> float:
@@ -94,69 +91,15 @@ def rigid_points_floats(
     return [(x + a, y + b, z + c) for ((a, b, c),) in rotated]
 
 
-def _segment_params(
-    a: float, b: float, c: float, e: float, f: float
-) -> tuple[float, float]:
-    """Segment parameters ``(s, t)`` of the reference's non-degenerate branches."""
-    denom = max(a * e - b * b, 0.0)
-    if denom < 1e-10 * a * e:  # parallel: centre of the projection overlap
-        s0 = -c / a
-        s1 = (-c + b) / a
-        s_min, s_max = min(s0, s1), max(s0, s1)
-        lo, hi = max(0.0, s_min), min(1.0, s_max)
-        if lo <= hi:
-            s = 0.5 * (lo + hi)
-            return s, _clip01((a * s + c) / b)
-        if s_max < 0.0:
-            return 0.0, _clip01(f / e)
-        return 1.0, _clip01((b + f) / e)
-    s = (b * f - c * e) / denom
-    t = (b * s + f) / e
-    if s < 0.0:
-        return 0.0, _clip01(f / e)
-    if s > 1.0:
-        return 1.0, _clip01((b + f) / e)
-    if t < 0.0:
-        return _clip01(-c / a), 0.0
-    if t > 1.0:
-        return _clip01((b - c) / a), 1.0
-    return s, t
-
-
-def closest_points_segments_floats(
-    a0: Sequence[float], a1: Sequence[float], b0: Sequence[float], b1: Sequence[float]
-) -> tuple[Vec3, Vec3]:
-    """Closest points of segments ``[a0, a1]`` and ``[b0, b1]`` in Python floats.
-
-    Operation-for-operation port of :func:`pair_contact.closest_points_segments`,
-    including its degenerate and parallel branches, without per-call
-    validation: the caller guarantees finite 3-vectors.
-    """
-    d1 = _sub(a1, a0)
-    d2 = _sub(b1, b0)
-    r = _sub(a0, b0)
-    a = _dot(d1, d1)
-    e = _dot(d2, d2)
-    f = _dot(d2, r)
-    if a < _SEGMENT_EPS and e < _SEGMENT_EPS:
-        return _vec(a0), _vec(b0)
-    if a < _SEGMENT_EPS:
-        return _vec(a0), _add(b0, _scale(_clip01(f / e), d2))
-    c = _dot(d1, r)
-    if e < _SEGMENT_EPS:
-        return _add(a0, _scale(_clip01(-c / a), d1)), _vec(b0)
-    s, t = _segment_params(a, _dot(d1, d2), c, e, f)
-    return _add(a0, _scale(s, d1)), _add(b0, _scale(t, d2))
-
-
 class SideBatch(NamedTuple):
     """Hand-site primitives of one side, stacked in topology pair order.
 
     ``pair_names``: the N physical pairs, in topology order.
-    ``hand_points_m``: (N + Nc, 1, 3) hand-frame points; row ``k < N`` is pair
-    ``k``'s sphere centre or capsule start, rows ``N..`` the capsule ends.
-    ``capsule_ends``: per pair, the ``hand_points_m`` row of its capsule end,
-    or ``-1`` for a sphere site.
+    ``hand_points_m``: (K, 1, 3) hand-frame sphere centres: a sphere site's
+    centre, or the axial line-contact nodes of a capsule site
+    (:func:`~src.shared.python.grip_contact.pair_contact.capsule_line_nodes`).
+    ``node_rows``: per pair, the ``hand_points_m`` rows of its nodes; a sphere
+    site has one row, a capsule site its ``n >= 2`` node rows.
     ``site_radii_m``: per-pair site radii.
     ``grip_points_m``: (2, 1, 3) club-frame grip capsule ends.
     ``grip_radius_m``: grip capsule radius.
@@ -164,7 +107,7 @@ class SideBatch(NamedTuple):
 
     pair_names: tuple[str, ...]
     hand_points_m: np.ndarray
-    capsule_ends: tuple[int, ...]
+    node_rows: tuple[tuple[int, ...], ...]
     site_radii_m: tuple[float, ...]
     grip_points_m: np.ndarray
     grip_radius_m: float
@@ -176,6 +119,9 @@ class PairRow(NamedTuple):
     ``force_n``/``moment_nm``: force on the club and moment about the club
     frame origin; ``spin_nm``: the spin part of that moment.  ``normal``
     points from the hand site to the grip; ``penetration_m >= 0``.
+    ``hand_moment_nm``: moment on the hand about the hand frame origin, set
+    for a capsule line contact (whose contact point is a node centroid, not a
+    point of application); ``None`` means ``(p - o_hand) x f_hand - spin``.
     """
 
     force_n: Vec3
@@ -186,6 +132,7 @@ class PairRow(NamedTuple):
     penetration_m: float
     normal_force_mag_n: float
     tangential_force_mag_n: float
+    hand_moment_nm: Vec3 | None = None
 
 
 class SideRows(NamedTuple):
@@ -375,28 +322,49 @@ def _sphere_row(center: Vec3, radius: float, side: _Side) -> PairRow:
     return _club_row((contact, n, penetration), smp, True, side)
 
 
-def _capsule_row(ends: tuple[Vec3, Vec3], radius: float, side: _Side) -> PairRow:
-    """Reference ``capsule_capsule``: A = hand capsule, B = grip (sampled)."""
-    r_grip = side.grip_radius_m
-    pa, pb = closest_points_segments_floats(
-        ends[0], ends[1], side.grip_p0_m, side.grip_p1_m
+def _line_node(row: PairRow, side: _Side) -> LineNode:
+    """A sphere node row as the reference ``sphere_capsule`` pair wrench."""
+    (fx, fy, fz), (sx, sy, sz) = row.force_n, row.spin_nm
+    ax, ay, az = -fx, -fy, -fz
+    px, py, pz = side.hand.position_m
+    cx, cy, cz = row.contact_point_m
+    lx, ly, lz = cx - px, cy - py, cz - pz
+    return LineNode(
+        (ax, ay, az),
+        (
+            (ly * az - lz * ay) - sx,
+            (lz * ax - lx * az) - sy,
+            (lx * ay - ly * ax) - sz,
+        ),
+        row.force_n,
+        row.moment_nm,
+        row.contact_point_m,
+        row.normal,
+        row.penetration_m,
+        row.normal_force_mag_n,
+        row.tangential_force_mag_n,
     )
-    (ax, ay, az), (bx, by, bz) = pa, pb
-    diff = (bx - ax, by - ay, bz - az)
-    dist = math.sqrt(diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2])
-    n = _unit_normal(diff, dist, _sub(ends[1], ends[0]))
-    surface_a = (ax + radius * n[0], ay + radius * n[1], az + radius * n[2])
-    contact = (
-        0.5 * (surface_a[0] + (bx - r_grip * n[0])),
-        0.5 * (surface_a[1] + (by - r_grip * n[1])),
-        0.5 * (surface_a[2] + (bz - r_grip * n[2])),
+
+
+def _capsule_row(centres: list[Vec3], radius: float, side: _Side) -> PairRow:
+    """Reference ``capsule_capsule``: the axial line-contact nodes on the grip."""
+    rows = [_sphere_row(c, radius, side) for c in centres]
+    total = combine_line_nodes([_line_node(r, side) for r in rows])
+    w = 1.0 / len(rows)
+    sx = sy = sz = 0.0
+    for r in rows:
+        sx, sy, sz = sx + w * r.spin_nm[0], sy + w * r.spin_nm[1], sz + w * r.spin_nm[2]
+    return PairRow(
+        total.force_b_n,
+        total.moment_b_nm,
+        (sx, sy, sz),
+        total.contact_point_m,
+        total.normal,
+        total.penetration_m,
+        total.normal_force_mag_n,
+        total.tangential_force_mag_n,
+        total.moment_a_nm,
     )
-    penetration = max(0.0, -(dist - radius - r_grip))
-    if penetration <= 0.0:
-        return PairRow(_ZERO, _ZERO, _ZERO, contact, n, 0.0, 0.0, 0.0)
-    (vx, vy, vz), (wx, wy, wz) = _relative_velocity(side, contact), side.rel_omega
-    smp = _sample((pb, r_grip), (n, surface_a), (-vx, -vy, -vz), (-wx, -wy, -wz), side)
-    return _club_row((contact, n, penetration), smp, False, side)
 
 
 def side_rows_wrench(
@@ -438,11 +406,11 @@ def side_rows_wrench(
     )
     rows = []
     fx = fy = fz = mx = my = mz = 0.0
-    for k, end in enumerate(batch.capsule_ends):
-        if end < 0:
-            row = _sphere_row(points[k], batch.site_radii_m[k], side)
+    for k, nodes in enumerate(batch.node_rows):
+        if len(nodes) == 1:
+            row = _sphere_row(points[nodes[0]], batch.site_radii_m[k], side)
         else:
-            row = _capsule_row((points[k], points[end]), batch.site_radii_m[k], side)
+            row = _capsule_row([points[j] for j in nodes], batch.site_radii_m[k], side)
         rows.append(row)
         (dfx, dfy, dfz), (dmx, dmy, dmz) = row.force_n, row.moment_nm
         fx, fy, fz = fx + dfx, fy + dfy, fz + dfz
