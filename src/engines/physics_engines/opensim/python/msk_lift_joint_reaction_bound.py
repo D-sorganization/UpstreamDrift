@@ -42,6 +42,32 @@ _UPPER_BODY_NAMES: tuple[str, ...] = (
 )
 
 
+def mass_above_l5s1(model: Any) -> float:
+    """Total mass (kg) of the bodies superior to L5/S1 present in *model*."""
+    body_set = model.getBodySet()
+    return float(
+        sum(
+            body_set.get(name).getMass()
+            for name in _UPPER_BODY_NAMES
+            if body_set.contains(name)
+        )
+    )
+
+
+def prepare_reaction_model(model: Any) -> list[str]:
+    """Add residual actuators on every coordinate and regularise massless bodies.
+
+    Returns the coordinate names, in coordinate-set order.
+    """
+    coord_names = [
+        model.getCoordinateSet().get(i).getName()
+        for i in range(model.getCoordinateSet().getSize())
+    ]
+    _add_residual_actuators(model, coord_names)
+    _regularise_massless_bodies(model)
+    return coord_names
+
+
 def muscles_crossing_joint(model: Any, joint_name: str = "back") -> list[str]:
     """Find muscle names whose path points cross between torso and pelvis/legs."""
     torso_side = set(_UPPER_BODY_NAMES)
@@ -142,21 +168,11 @@ def static_hold_analytic_bound(
         _, build, _, _ = _run_lift_ik_id("squat", stride=5)
         model = osim.Model(build.model)
 
-    body_set = model.getBodySet()
-    m_above = sum(
-        body_set.get(name).getMass()
-        for name in _UPPER_BODY_NAMES
-        if body_set.contains(name)
-    )
+    m_above = mass_above_l5s1(model)
     w_above = m_above * GRAVITY_FLOAT
 
     _make_muscles_rigid_tendon(model)
-    coord_names = [
-        model.getCoordinateSet().get(i).getName()
-        for i in range(model.getCoordinateSet().getSize())
-    ]
-    _add_residual_actuators(model, coord_names)
-    _regularise_massless_bodies(model)
+    coord_names = prepare_reaction_model(model)
 
     comp, crossing_force, crossing_count = _solve_default_pose_reaction(
         model, coord_names

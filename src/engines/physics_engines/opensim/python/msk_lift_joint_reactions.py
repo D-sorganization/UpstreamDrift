@@ -19,9 +19,10 @@ import numpy as np
 
 from src.engines.physics_engines.opensim.python import msk_lift_ik_id as ikid
 from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_bound import (
-    _UPPER_BODY_NAMES,
     build_real_squat_bound_record,
+    mass_above_l5s1,
     muscles_crossing_joint,
+    prepare_reaction_model,
     static_hold_analytic_bound,
 )
 from src.engines.physics_engines.opensim.python.msk_lift_joint_reaction_report import (
@@ -77,12 +78,7 @@ def _setup_joint_reaction_model(
     for i in range(model.getMuscles().getSize()):
         model.getMuscles().get(i).set_ignore_tendon_compliance(True)
 
-    coord_names = [
-        model.getCoordinateSet().get(i).getName()
-        for i in range(model.getCoordinateSet().getSize())
-    ]
-    _add_residual_actuators(model, coord_names)
-    _regularise_massless_bodies(model)
+    coord_names = prepare_reaction_model(model)
     return model, coord_names
 
 
@@ -308,12 +304,7 @@ def _min_acceleration_bound(
 ) -> tuple[float, dict[str, Any]]:
     """Mass above L5/S1 and the bound record at the least-accelerated frame."""
     min_k = int(np.argmin(qdd_norms))
-    body_set = model.getBodySet()
-    m_above = sum(
-        body_set.get(name).getMass()
-        for name in _UPPER_BODY_NAMES
-        if body_set.contains(name)
-    )
+    m_above = mass_above_l5s1(model)
     w_above_val = m_above * GRAVITY_FLOAT
 
     crossing = muscles_crossing_joint(model, "back")
