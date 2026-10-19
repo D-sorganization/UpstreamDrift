@@ -47,34 +47,20 @@ def test_a_slider_is_a_pick_and_reset_clears_it(widget) -> None:
     assert widget.model.compile().sha256 != parent  # back to the unrevised spec
 
 
-def test_style_creates_revision_and_thumb_lands_in_the_sidecar(widget) -> None:
+def test_style_is_picture_only_and_lands_in_the_sidecar(widget) -> None:
     from src.shared.python.model_appearance.schema import physics_spec_sha256
 
     before = physics_spec_sha256(widget.model.compile().document)
     widget.grip_style_combo.setCurrentIndex(
         widget.grip_style_combo.findData("interlock")
     )
-    after_style = physics_spec_sha256(widget.model.compile().document)
-    assert after_style != before
-    assert "grip" not in widget.model.appearance_document()
-    assert "refit" in widget.summary.toPlainText()
-
-    widget.grip_thumb_spin.setValue(20.0)
-    widget.visual_grip_spins["grip_strength_deg"].setValue(10.0)
-    widget.visual_grip_spins["lead_roll_offset_deg"].setValue(-5.0)
-    widget.visual_grip_spins["trail_roll_offset_deg"].setValue(8.0)
-    assert physics_spec_sha256(widget.model.compile().document) == after_style
-    assert widget.model.appearance_document()["grip"] == {
-        "lead_thumb_offset_deg": 20.0,
-        "grip_strength_deg": 10.0,
-        "lead_roll_offset_deg": -5.0,
-        "trail_roll_offset_deg": 8.0,
-    }
+    assert physics_spec_sha256(widget.model.compile().document) == before
+    assert widget.model.appearance_document()["grip"] == {"style": "interlock"}
 
 
 def test_a_refused_pick_shows_the_message_and_changes_nothing(widget) -> None:
+    # Lead alpha -60 is a valid lead V (-40 deg, the G4 range floor) but leaves
+    # the untouched trail hand 60 deg stronger, outside the trail-offset range.
     widget.grip_spins["lead_shaft_rotation"].setValue(-60.0)
     assert widget.model.grip_picks() == {}
-    # -60 deg is the lead alpha bound (lead V azimuth -40 deg, HRG-GS-G4); the
-    # trail hand then sits outside the trail V offset range: still impossible.
     assert "trail_v_offset_deg" in widget.status.text()

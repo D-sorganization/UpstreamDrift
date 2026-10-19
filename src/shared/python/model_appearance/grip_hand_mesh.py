@@ -410,8 +410,55 @@ def build_grip_hand_mesh(
     v = math.radians(placement.v_azimuth_deg)
     mcp = v + curl * math.radians(params.mcp_from_v_deg)
     stack = _stack_z(params)
-    clearance, k = params.pad_clearance_m, params.scale
+    k = params.scale
 
+    parts = _finger_components(hand, pose, radius, curl, mcp, stack, params)
+    z_lo = min(stack.values()) - k * params.finger_radius_m["little"] * 0.6
+    z_hi = max(stack.values()) + k * params.finger_radius_m["index"] * 0.6
+    palm = _rounded_block(
+        radius + params.palm_clearance_m,
+        k * params.palm_thickness_m,
+        (v, mcp),
+        (z_lo, z_hi),
+        params.sides,
+    )
+    parts.append(HandComponent("palm", "palm", palm, True))
+    roll_deg = placement.v_azimuth_deg - NEUTRAL_V_AZIMUTH_DEG
+    thumb_azimuth_deg = placement.thumb_offset_deg + roll_deg
+    thumb_azimuth = math.radians(thumb_azimuth_deg)
+    parts += _thumb(radius, thumb_azimuth, params)
+
+    on_grip_vertices = np.vstack([p.mesh.vertices for p in parts if p.on_grip])
+    gap = float(np.min(np.hypot(on_grip_vertices[:, 0], on_grip_vertices[:, 1])))
+    gap -= radius
+    if not 0.0 <= gap <= MAX_PAD_CLEARANCE_M:
+        raise AssertionError(f"pad clearance {gap} m outside [0, 0.003] m")
+    return GripHandMesh(
+        hand=hand,
+        style=grip_style,
+        grip_radius_m=radius,
+        distance_below_butt_m=placement.distance_below_butt_m,
+        v_azimuth_deg=placement.v_azimuth_deg,
+        thumb_azimuth_deg=thumb_azimuth_deg,
+        curl_sign=curl,
+        components=tuple(parts),
+        mesh=concat_meshes(*(p.mesh for p in parts)),
+        min_pad_clearance_m=gap,
+    )
+
+
+def _finger_components(
+    hand: Hand,
+    pose: GripPose,
+    radius: float,
+    curl: int,
+    mcp: float,
+    stack: dict[str, float],
+    params: HandMeshParams,
+) -> list[HandComponent]:
+    """The five curled fingers of ``hand``, each placed on its topology site."""
+    clearance, k = params.pad_clearance_m, params.scale
+    placement = pose.placement(hand)
     topo = topology_of_pose(pose, grip_radius_m=radius)
 
     parts: list[HandComponent] = []
@@ -450,38 +497,7 @@ def build_grip_hand_mesh(
             finger, lengths, r, d, mcp_finger, z, curl, params.sides
         ):
             parts.append(HandComponent(name, finger, mesh, on_grip))
-    z_lo = min(stack.values()) - k * params.finger_radius_m["little"] * 0.6
-    z_hi = max(stack.values()) + k * params.finger_radius_m["index"] * 0.6
-    palm = _rounded_block(
-        radius + params.palm_clearance_m,
-        k * params.palm_thickness_m,
-        (v, mcp),
-        (z_lo, z_hi),
-        params.sides,
-    )
-    parts.append(HandComponent("palm", "palm", palm, True))
-    roll_deg = placement.v_azimuth_deg - NEUTRAL_V_AZIMUTH_DEG
-    thumb_azimuth_deg = placement.thumb_offset_deg + roll_deg
-    thumb_azimuth = math.radians(thumb_azimuth_deg)
-    parts += _thumb(radius, thumb_azimuth, params)
-
-    on_grip_vertices = np.vstack([p.mesh.vertices for p in parts if p.on_grip])
-    gap = float(np.min(np.hypot(on_grip_vertices[:, 0], on_grip_vertices[:, 1])))
-    gap -= radius
-    if not 0.0 <= gap <= MAX_PAD_CLEARANCE_M:
-        raise AssertionError(f"pad clearance {gap} m outside [0, 0.003] m")
-    return GripHandMesh(
-        hand=hand,
-        style=grip_style,
-        grip_radius_m=radius,
-        distance_below_butt_m=placement.distance_below_butt_m,
-        v_azimuth_deg=placement.v_azimuth_deg,
-        thumb_azimuth_deg=thumb_azimuth_deg,
-        curl_sign=curl,
-        components=tuple(parts),
-        mesh=concat_meshes(*(p.mesh for p in parts)),
-        min_pad_clearance_m=gap,
-    )
+    return parts
 
 
 def _solve_topology_finger(
