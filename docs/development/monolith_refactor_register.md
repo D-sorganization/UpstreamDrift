@@ -163,6 +163,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 887 | `src/shared/python/sidekick/process_calculators/syngas_compression_calculator.py` |
 | 887 | `src/tools/bunker_shot_gui/bridge.py` |
 | 885 | `src/shared/python/estimation/dime_report_integration.py` |
+| 884 | `src/engines/physics_engines/mujoco/python/grip_contact_sim.py` |
 | 884 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/grip_modelling_tab.py` |
 | 884 | `src/shared/python/estimation/dime_learned_initializers.py` |
 | 883 | `src/shared/python/config/model_pack_manifest.py` |
