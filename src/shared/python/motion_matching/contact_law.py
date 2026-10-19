@@ -20,6 +20,11 @@ from typing import Any, NamedTuple, TypeAlias
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.motion_matching.contact_kernel import (
+    contact_law_kernel,
+    torsional_moment_kernel,
+)
+
 Array: TypeAlias = NDArray[np.float64]
 
 CONFORMANCE_VERSION: str = "1.0.0"
@@ -168,33 +173,16 @@ def sphere_ground_contact(
     normal = np.asarray(ground.normal)
     signed_distance = float(normal @ center) - ground.height_m - radius_m
     penetration = max(0.0, -signed_distance)
-    rate = float(-(normal @ velocity))  # positive when deepening
+    v_n = float(normal @ velocity)
+    rate = -v_n  # positive when deepening
     point = center - normal * radius_m  # deepest point of the sphere
     zero = np.zeros(3)
     if penetration <= 0.0:
         return ContactSample(0.0, rate, point, zero, zero)
-    magnitude = (
-        parameters.stiffness_n_m
-        * penetration
-        * (1.0 + parameters.dissipation_s_m * rate)
-    )
-    magnitude = max(0.0, magnitude)
-    normal_force = normal * magnitude
-    tangential = velocity - normal * float(normal @ velocity)
-    speed = float(
-        math.sqrt(tangential.dot(tangential))
-    )  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for small 1D arrays
-    if speed <= 0.0 or magnitude <= 0.0:
-        return ContactSample(penetration, rate, point, normal_force, zero)
-    ratio = speed / parameters.transition_velocity_m_s
-    mu = (
-        parameters.dynamic_friction
-        + (parameters.static_friction - parameters.dynamic_friction)
-        * math.exp(-(ratio**2))
-        + parameters.viscous_friction * speed
-    )
-    friction = -tangential / speed * mu * magnitude * math.tanh(ratio)
-    return ContactSample(penetration, rate, point, normal_force, friction)
+    tangential = velocity - normal * v_n
+    res = contact_law_kernel(penetration, v_n, tangential, parameters, xp=np)
+    normal_force = normal * float(res.normal_force_n)
+    return ContactSample(penetration, rate, point, normal_force, res.tangential_force_n)
 
 
 def torsional_friction_moment(
@@ -229,8 +217,17 @@ def torsional_friction_moment(
     normal = np.asarray(ground.normal)
     load = max(0.0, float(normal @ force))
     spin = float(normal @ omega)
-    limit = friction * load * patch_radius_m
-    return -normal * limit * math.tanh(spin / transition_rad_s)
+    moment_scalar = float(
+        torsional_moment_kernel(
+            load,
+            spin,
+            friction=friction,
+            patch_radius_m=patch_radius_m,
+            transition_rad_s=transition_rad_s,
+            xp=np,
+        )
+    )
+    return normal * moment_scalar
 
 
 ContactAdapter = Callable[[Array, Array, float], ContactSample]
