@@ -860,6 +860,8 @@
 {"path": "golf_viz/_colors.py", "classification": "ud-only", "package": "golf_viz", "spelling_only": false}
 {"path": "golf_viz/_geometry.py", "classification": "ud-only", "package": "golf_viz", "spelling_only": false}
 {"path": "grip_contact/__init__.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/binding.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/binding_manifest.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/bushing_law.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/closure_series.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/club_dynamics.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
@@ -883,6 +885,7 @@
 {"path": "grip_contact/static_balance.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/swing_input.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/topology_contact.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/topology_series.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/trajectory_conditioning.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "ground_model/__init__.py", "classification": "ud-only", "package": "ground_model", "spelling_only": false}
 {"path": "ground_model/consumer_gateway.py", "classification": "ud-only", "package": "ground_model", "spelling_only": false}

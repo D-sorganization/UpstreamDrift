@@ -67,12 +67,34 @@ from src.shared.python.grip_contact.swing_input import (
     load_coordinate_swing,
     map_coordinates,
 )
+from src.shared.python.grip_contact.binding import (
+    BodyStates,
+    GripCapabilities,
+    GripStepReport,
+    HandClubBinding,
+    ModelGripAdapter,
+    SiteBinding,
+    apply_report,
+    bind_rigid_hand_sites,
+    evaluate_contacts,
+    site_transform_in_hand_frame,
+    validate_binding,
+)
+from src.shared.python.grip_contact.parity import (
+    ChannelParityResult,
+    TopologyParityReport,
+    compare_topology_series,
+)
 from src.shared.python.grip_contact.topology_contact import (
     TopologyContactModel,
     TopologySideWrench,
     build_topology_model,
     map_site_to_hand_frame,
     topology_side_wrench,
+)
+from src.shared.python.grip_contact.topology_series import (
+    TopologyKineticsSeries,
+    law_level_series,
 )
 from src.shared.python.grip_contact.trajectory_conditioning import (
     ConditioningReport,
@@ -83,8 +105,10 @@ from src.shared.python.grip_contact.trajectory_conditioning import (
 )
 
 __all__ = [
+    "BodyStates",
     "BushingState",
     "BushingWrench",
+    "ChannelParityResult",
     "ContactCapsule",
     "ContactPair",
     "ContactSite",
@@ -92,15 +116,33 @@ __all__ = [
     "ContactTopology",
     "CoordinateSpline",
     "GRIP",
+    "GripCapabilities",
+    "GripStepReport",
     "GripStyle",
     "HandAnatomy",
+    "HandClubBinding",
+    "ModelGripAdapter",
     "PairWrench",
     "RigidBodyState",
+    "SiteBinding",
+    "TopologyKineticsSeries",
+    "TopologyParityReport",
+    "apply_report",
+    "bind_rigid_hand_sites",
     "bushing_wrench",
+    "compare_topology_series",
+    "contact_topology",
+    "ContactCapsule",
+    "ContactSphere",
+    "PairWrench",
     "capsule_capsule",
+    "evaluate_contacts",
     "contact_topology",
     "hand_frame_states",
+    "law_level_series",
+    "site_transform_in_hand_frame",
     "sphere_capsule",
+    "validate_binding",
     "GripClosureSeries",
     "closure_series_from_residuals",
     "DEFAULT_COUPLE_NOISE_FLOOR_NM",

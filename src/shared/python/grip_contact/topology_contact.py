@@ -24,6 +24,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from src.shared.python.contracts import require
+from src.shared.python.core.handedness import (
+    DEFAULT_HANDEDNESS,
+    Handedness,
+    lead_side,
+    trail_side,
+)
 from src.shared.python.grip_contact.bushing_law import BushingState
 from src.shared.python.grip_contact.contact_topology import (
     GRIP,
@@ -56,6 +62,7 @@ __all__ = [
     "PairTraceRecorder",
     "TopologyContactModel",
     "TopologySideWrench",
+    "aggregate_side_wrench",
     "build_topology_model",
     "hand_x_origin",
     "map_site_to_hand_frame",
@@ -68,14 +75,20 @@ SIDES = ("L", "R")
 HAND_ROLES = ("lead", "trail")
 
 
-def _normalize_side(side: str) -> tuple[str, str]:
+def _normalize_side(
+    side: str, handedness: Handedness = DEFAULT_HANDEDNESS
+) -> tuple[str, str]:
     """Return ``(hand_role, side_char)`` from 'L', 'R', 'lead', or 'trail'."""
     if not isinstance(side, str):
         raise TypeError(f"side must be a string, got {type(side).__name__}")
-    if side in ("L", "lead"):
-        return "lead", "L"
-    if side in ("R", "trail"):
-        return "trail", "R"
+    if side == "lead":
+        return "lead", lead_side(handedness)
+    if side == "trail":
+        return "trail", trail_side(handedness)
+    if side == "L":
+        return ("lead" if lead_side(handedness) == "L" else "trail"), "L"
+    if side == "R":
+        return ("lead" if lead_side(handedness) == "R" else "trail"), "R"
     raise ValueError(f"side must be one of ('L', 'R', 'lead', 'trail'), got {side!r}")
 
 
@@ -128,6 +141,7 @@ def map_site_to_hand_frame(
     site: ContactSite | str,
     side: str,
     x_origin: float | None = None,
+    handedness: Handedness = DEFAULT_HANDEDNESS,
 ) -> ContactSite:
     """Map a :class:`ContactSite` into the hand grip frame of ``side``.
 
@@ -149,7 +163,7 @@ def map_site_to_hand_frame(
         target_site = site
     else:
         raise TypeError(f"site must be ContactSite or str, got {type(site).__name__}")
-    role, side_char = _normalize_side(side)
+    role, side_char = _normalize_side(side, handedness=handedness)
     if target_site.hand != role:
         raise ValueError(
             f"site {target_site.name!r} belongs to hand {target_site.hand!r}, "
@@ -168,6 +182,8 @@ def map_site_to_hand_frame(
         ]
     )
     cx, cy, cz = target_site.centre_m
+    if handedness == "left":
+        cz = -cz
     p_hand = axis_offset + np.array([cx - x_origin, cy, cz])
     return replace(
         target_site,
@@ -433,33 +449,43 @@ def topology_side_wrench(
     pairs_with_prims = model.physical_pair_primitives(side)
     grip_cap = model.grip_capsule(side)
 
-    force = np.zeros(3)
-    moment = np.zeros(3)
     pair_wrenches: dict[str, PairWrench] = {}
-    normal_forces: list[float] = []
-    tangential_forces: list[float] = []
-
     for pair, prim_a in pairs_with_prims:
         if mode not in pair.physical_modes:
             continue
-        pw = _evaluate_site_on_grip(model, prim_a, grip_cap, hand_frame, club_frame)
-        pair_wrenches[pair.name] = pw
+        pair_wrenches[pair.name] = _evaluate_site_on_grip(
+            model, prim_a, grip_cap, hand_frame, club_frame
+        )
+    return aggregate_side_wrench(pair_wrenches)
+
+
+def aggregate_side_wrench(
+    pair_wrenches: Mapping[str, PairWrench],
+) -> TopologySideWrench:
+    """Sum per-pair wrenches into one :class:`TopologySideWrench`.
+
+    Postconditions:
+        ``force_n``/``moment_nm`` are the sums of the pairs' club-side
+        (``force_b_n``/``moment_b_nm``) values in insertion order; an empty
+        mapping is a true zero (no pairs, no force), never NaN.
+    """
+    force = np.zeros(3)
+    moment = np.zeros(3)
+    normal_forces: list[float] = []
+    tangential_forces: list[float] = []
+    for pw in pair_wrenches.values():
         force += pw.force_b_n
         moment += pw.moment_b_nm
         normal_forces.append(pw.normal_force_mag_n)
         tangential_forces.append(pw.tangential_force_mag_n)
-
     norm_arr = np.array(normal_forces, dtype=float)
-    tang_arr = np.array(tangential_forces, dtype=float)
-    total_norm = float(np.sum(norm_arr)) if len(norm_arr) > 0 else 0.0
-
     return TopologySideWrench(
         force_n=force,
         moment_nm=moment,
-        pair_wrenches=pair_wrenches,
+        pair_wrenches=dict(pair_wrenches),
         normal_force_n=norm_arr,
-        tangential_force_n=tang_arr,
-        total_normal_force_n=total_norm,
+        tangential_force_n=np.array(tangential_forces, dtype=float),
+        total_normal_force_n=float(np.sum(norm_arr)),
     )
 
 
