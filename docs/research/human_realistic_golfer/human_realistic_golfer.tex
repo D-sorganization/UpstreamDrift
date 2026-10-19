@@ -657,6 +657,115 @@ and native hydroelastic capsule contact is out of scope.
 python3 -m pytest tests/unit/grip_contact/test_drake_topology_grip.py
 \end{verbatim}
 
+\subsection{Cross-Engine Grip-Style Parity Report (HRG-GS-G10, \#13308)}
+\textbf{Per-Pair Parity Extension and Contact-Point Drift.} \path{src/shared/python/grip_contact/parity.py} extends the cross-engine grip-contact comparison with per-pair normal force (\texttt{pair\_normal\_force}), per-pair tangential force (\texttt{pair\_tangential\_force}), and per-pair contact-point drift on the club grip (\texttt{contact\_point\_drift}) via \texttt{PAIR\_PARITY\_QUANTITIES} and \texttt{STYLE\_PARITY\_QUANTITIES}, reusing \texttt{QuantityError}, \texttt{parity\_errors}, \texttt{PEAK\_TOLERANCE} ($5.0\%$), and \texttt{RMS\_TOLERANCE} ($2.0\%$) with no duplicated metric code. \texttt{PairTraceRecorder} in \path{src/shared/python/grip_contact/topology_contact.py} records the Euclidean displacement $\|\mathbf{c}_i^{\mathrm{club}}(t) - \mathbf{c}_i^{\mathrm{club}}(0)\|$ of each physical hand--grip contact site projected onto the grip cylinder axis in the club frame in \texttt{ContactRun.pair\_contact\_point\_drift\_m}, while allocated hand--hand pairs record \texttt{NaN} with the reason \textit{``hand-hand pairs are allocated, not physical forces under prescribed hand motion''}.
+
+\textbf{Classification Rationale (Determinate vs.\ Indeterminate).} Following \path{docs/development/full_body_models/GRIP_PARITY_DECISIONS.md} Section~19 (\textit{Indeterminacy Report}), every parity quantity is explicitly classified by \texttt{classify\_parity\_quantity}:
+\begin{itemize}[leftmargin=*,noitemsep]
+\item \texttt{DETERMINATE} (\texttt{net\_force}, \texttt{net\_moment\_com}): The total wrench acting on the rigid club about its centre of mass is uniquely identified by the club's translational and rotational Newton--Euler equations:
+\begin{equation}
+\mathbf{F}_{\mathrm{net}} = m_{\mathrm{club}}(\ddot{\mathbf{p}}_{\mathrm{com}} - \mathbf{g}), \qquad
+\mathbf{M}_{\mathrm{com}} = \mathbf{I}_{\mathrm{com}}\dot{\boldsymbol{\omega}} + \boldsymbol{\omega} \times (\mathbf{I}_{\mathrm{com}}\boldsymbol{\omega}).
+\end{equation}
+Determinate quantities must satisfy \texttt{PEAK\_TOLERANCE} ($\le 5.0\%$) and \texttt{RMS\_TOLERANCE} ($\le 2.0\%$); tolerances are never loosened.
+\item \texttt{INDETERMINATE} (\texttt{force\_L}, \texttt{force\_R}, \texttt{internal\_force}, \texttt{squeeze}, \texttt{couple}, \texttt{deflection\_L}, \texttt{deflection\_R}, \texttt{rotation\_L}, \texttt{rotation\_R}, \texttt{pair\_normal\_force}, \texttt{pair\_tangential\_force}, \texttt{contact\_point\_drift}): The 6-DOF internal nullspace of the closed two-hand grip loop (opposition force $\mathbf{F}_{\mathrm{int}} = \tfrac{1}{2}(\mathbf{F}_L - \mathbf{F}_R)$, axial squeeze, internal couple about the grip midpoint, compliance deflections, and individual contact-pair forces) is hyperstatic and depends on each engine's contact compliance formulation (analytical penalty capsules in Pinocchio/Drake, calibrated \texttt{solref} capsules in MuJoCo, and discretized multi-sphere \texttt{ElasticFoundationForce} meshes in OpenSim). Every indeterminate quantity is reported with its measured peak and RMS error and labelled \textit{``indeterminate (hyperstatic two-hand grip; not identified by club kinematics)''}; it is never silently counted as a pass (\texttt{passes() == False}) and is never hidden.
+\item \texttt{UNAVAILABLE}: Any engine whose runtime import fails reports \texttt{NaN} for all candidate peaks and errors together with the import failure reason, never zero and never a pass.
+\end{itemize}
+
+\textbf{Measured Cross-Engine Parity Table ($0.04$\,s Hold and Swing).} Table~\ref{tab:g10_determinate_and_pair_parity} summarizes the measured peak and RMS relative errors ($\%$) versus the Pinocchio topology reference across all three grip styles (\texttt{overlap}, \texttt{interlock}, \texttt{ten\_finger}) and all four engines (\texttt{pinocchio}, \texttt{opensim}, \texttt{mujoco}, \texttt{drake}) over the $0.04$\,s static hold and $0.04$\,s swing replay on the canonical driver fixture ($1100$\,N per-hand squeeze).
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\begin{tabular}{lllrrrrrr}
+\toprule
+\textbf{Motion} & \textbf{Style} & \textbf{Engine} & \textbf{\texttt{net\_force}} & \textbf{\texttt{net\_moment\_com}} & \textbf{Det.\ State} & \textbf{\texttt{pair\_normal}} & \textbf{\texttt{pair\_tangential}} & \textbf{\texttt{contact\_drift}} \\
+ &  &  & \textbf{Peak / RMS (\%)} & \textbf{Peak / RMS (\%)} &  & \textbf{Peak / RMS (\%)} & \textbf{Peak / RMS (\%)} & \textbf{Peak / RMS (\%)} \\
+\midrule
+Hold & Overlap & Pinocchio & 0.000 / 0.000 & 0.000 / 0.000 & pass & 0.000 / 0.000 & 0.000 / 0.000 & 0.000 / 0.000 \\
+Hold & Overlap & OpenSim & 1.098 / 1.412 & 1.099 / 0.684 & pass & 0.461 / 3.937 & 6.575 / 24.673 & 50.093 / 35.180 \\
+Hold & Overlap & MuJoCo & 0.143 / 0.565 & 0.136 / 0.875 & pass & 0.001 / 1.280 & 2.923 / 10.416 & 9.891 / 17.029 \\
+Hold & Overlap & Drake & 0.000 / 0.058 & 0.000 / 0.029 & pass & 0.000 / 0.038 & 0.246 / 0.377 & 0.134 / 0.156 \\
+\midrule
+Hold & Interlock & Pinocchio & 0.000 / 0.000 & 0.000 / 0.000 & pass & 0.000 / 0.000 & 0.000 / 0.000 & 0.000 / 0.000 \\
+Hold & Interlock & OpenSim & 1.098 / 1.412 & 1.099 / 0.684 & pass & 0.461 / 3.937 & 6.575 / 24.673 & 50.093 / 35.180 \\
+Hold & Interlock & MuJoCo & 0.143 / 0.565 & 0.136 / 0.875 & pass & 0.001 / 1.280 & 2.923 / 10.416 & 9.891 / 17.029 \\
+Hold & Interlock & Drake & 0.000 / 0.058 & 0.000 / 0.029 & pass & 0.000 / 0.038 & 0.246 / 0.377 & 0.134 / 0.156 \\
+\midrule
+Hold & Ten-Finger & Pinocchio & 0.000 / 0.000 & 0.000 / 0.000 & pass & 0.000 / 0.000 & 0.000 / 0.000 & 0.000 / 0.000 \\
+Hold & Ten-Finger & OpenSim & 0.969 / 9.872 & 17.798 / 4.625 & fail (xfail) & 0.313 / 5.133 & 1.746 / 21.392 & 45.038 / 27.993 \\
+Hold & Ten-Finger & MuJoCo & 2.033 / 2.595 & 2.398 / 0.980 & fail (xfail) & 0.000 / 0.163 & 2.678 / 7.242 & 1.913 / 1.189 \\
+Hold & Ten-Finger & Drake & 0.172 / 0.173 & 0.000 / 0.049 & pass & 0.000 / 0.033 & 0.291 / 0.241 & 0.150 / 0.164 \\
+\midrule
+Swing & Overlap & Pinocchio & 0.000 / 0.000 & 0.000 / 0.000 & pass & 0.000 / 0.000 & 0.000 / 0.000 & 0.000 / 0.000 \\
+Swing & Overlap & OpenSim & 319.750 / 91.599 & 283.326 / 83.529 & fail (xfail) & 0.485 / 4.111 & 4.460 / 22.719 & 46.187 / 27.610 \\
+Swing & Overlap & MuJoCo & 0.269 / 0.531 & 0.253 / 0.896 & pass & 0.000 / 1.171 & 0.318 / 12.462 & 8.406 / 18.168 \\
+Swing & Overlap & Drake & 0.000 / 0.537 & 0.000 / 0.484 & pass & 0.000 / 0.029 & 0.308 / 0.326 & 0.163 / 0.208 \\
+\midrule
+Swing & Interlock & Pinocchio & 0.000 / 0.000 & 0.000 / 0.000 & pass & 0.000 / 0.000 & 0.000 / 0.000 & 0.000 / 0.000 \\
+Swing & Interlock & OpenSim & 319.750 / 91.599 & 283.326 / 83.529 & fail (xfail) & 0.485 / 4.111 & 4.460 / 22.719 & 46.187 / 27.610 \\
+Swing & Interlock & MuJoCo & 0.269 / 0.531 & 0.253 / 0.896 & pass & 0.000 / 1.171 & 0.318 / 12.462 & 8.406 / 18.168 \\
+Swing & Interlock & Drake & 0.000 / 0.537 & 0.000 / 0.484 & pass & 0.000 / 0.029 & 0.308 / 0.326 & 0.163 / 0.208 \\
+\midrule
+Swing & Ten-Finger & Pinocchio & 0.000 / 0.000 & 0.000 / 0.000 & pass & 0.000 / 0.000 & 0.000 / 0.000 & 0.000 / 0.000 \\
+Swing & Ten-Finger & OpenSim & 5995.091 / 1334.628 & 7842.170 / 1731.901 & fail (xfail) & 0.391 / 5.407 & 35.818 / 24.318 & 40.670 / 18.094 \\
+Swing & Ten-Finger & MuJoCo & 1.610 / 2.005 & 4.292 / 1.625 & fail (xfail) & 0.000 / 0.248 & 0.638 / 9.282 & 0.878 / 1.490 \\
+Swing & Ten-Finger & Drake & 0.096 / 1.642 & 0.000 / 0.592 & pass & 0.000 / 0.024 & 0.298 / 0.313 & 0.124 / 0.240 \\
+\bottomrule
+\end{tabular}
+\caption{Cross-engine grip-style parity across Pinocchio (reference), OpenSim, MuJoCo, and Drake over $0.04$\,s static hold and swing replay (determinate limits: peak $\le 5.0\%$, RMS $\le 2.0\%$; pair columns are classified \texttt{indeterminate}).}
+\label{tab:g10_determinate_and_pair_parity}
+\end{table}
+
+Table~\ref{tab:g10_indeterminate_series} records the remaining nine hyperstatic series quantities (\texttt{force\_L}, \texttt{force\_R}, \texttt{internal\_force}, \texttt{squeeze}, \texttt{couple}, \texttt{deflection\_L}, \texttt{deflection\_R}, \texttt{rotation\_L}, \texttt{rotation\_R}), all classified \texttt{indeterminate}.
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\begin{tabular}{lllrrrrrrr}
+\toprule
+\textbf{Motion} & \textbf{Style} & \textbf{Engine} & \textbf{\texttt{force\_L}} & \textbf{\texttt{force\_R}} & \textbf{\texttt{internal}} & \textbf{\texttt{squeeze}} & \textbf{\texttt{couple}} & \textbf{\texttt{defl\_L / R}} & \textbf{\texttt{rot\_L / R}} \\
+ &  &  & \textbf{Pk / RMS} & \textbf{Pk / RMS} & \textbf{Pk / RMS} & \textbf{Pk / RMS} & \textbf{Pk / RMS} & \textbf{RMS (\%)} & \textbf{RMS (\%)} \\
+\midrule
+Hold & Overlap & OpenSim & 1.10 / 16.42 & 3.04 / 28.03 & 3.28 / 29.01 & 13.50 / 23.15 & 0.30 / 17.70 & 36.67 / 36.37 & 32.04 / 32.04 \\
+Hold & Overlap & MuJoCo & 0.08 / 16.27 & 1.00 / 27.20 & 0.59 / 28.47 & 35.76 / 82.55 & 1.43 / 7.33 & 19.98 / 41.66 & 0.78 / 0.78 \\
+Hold & Overlap & Drake & 0.00 / 0.19 & 0.21 / 0.31 & 0.21 / 0.32 & 0.33 / 0.47 & 0.33 / 0.37 & 0.11 / 0.33 & 0.17 / 0.17 \\
+Hold & Interlock & OpenSim & 1.10 / 16.42 & 3.04 / 28.03 & 3.28 / 29.01 & 13.50 / 23.15 & 0.30 / 17.70 & 36.67 / 36.37 & 32.04 / 32.04 \\
+Hold & Interlock & MuJoCo & 0.08 / 16.27 & 1.00 / 27.20 & 0.59 / 28.47 & 35.76 / 82.55 & 1.43 / 7.33 & 19.98 / 41.66 & 0.78 / 0.78 \\
+Hold & Interlock & Drake & 0.00 / 0.19 & 0.21 / 0.31 & 0.21 / 0.32 & 0.33 / 0.47 & 0.33 / 0.37 & 0.11 / 0.33 & 0.17 / 0.17 \\
+Hold & Ten-Finger & OpenSim & 2.13 / 24.00 & 5.95 / 23.42 & 4.04 / 23.71 & 4.50 / 29.07 & 1.13 / 13.12 & 24.14 / 30.31 & 27.78 / 27.78 \\
+Hold & Ten-Finger & MuJoCo & 0.56 / 13.05 & 0.39 / 12.69 & 0.64 / 12.87 & 33.93 / 46.93 & 0.14 / 2.82 & 2.57 / 1.13 & 0.85 / 0.85 \\
+Hold & Ten-Finger & Drake & 0.04 / 0.16 & 0.04 / 0.16 & 0.04 / 0.16 & 0.48 / 0.26 & 0.00 / 0.24 & 0.17 / 0.16 & 0.16 / 0.16 \\
+\midrule
+Swing & Overlap & OpenSim & 130.4 / 53.6 & 258.0 / 75.6 & 21.59 / 32.28 & 10.78 / 26.26 & 8.63 / 11.30 & 29.88 / 32.51 & 20.96 / 20.96 \\
+Swing & Overlap & MuJoCo & 0.14 / 20.13 & 0.73 / 34.35 & 3.18 / 36.36 & 38.36 / 92.68 & 3.62 / 6.53 & 20.55 / 37.47 & 1.10 / 1.10 \\
+Swing & Overlap & Drake & 0.00 / 0.35 & 0.29 / 0.52 & 0.30 / 0.33 & 0.32 / 0.42 & 0.23 / 0.32 & 0.78 / 1.71 & 0.12 / 0.12 \\
+Swing & Interlock & OpenSim & 130.4 / 53.6 & 258.0 / 75.6 & 21.59 / 32.28 & 10.78 / 26.26 & 8.63 / 11.30 & 29.88 / 32.51 & 20.96 / 20.96 \\
+Swing & Interlock & MuJoCo & 0.14 / 20.13 & 0.73 / 34.35 & 3.18 / 36.36 & 38.36 / 92.68 & 3.62 / 6.53 & 20.55 / 37.47 & 1.10 / 1.10 \\
+Swing & Interlock & Drake & 0.00 / 0.35 & 0.29 / 0.52 & 0.30 / 0.33 & 0.32 / 0.42 & 0.23 / 0.32 & 0.78 / 1.71 & 0.12 / 0.12 \\
+Swing & Ten-Finger & OpenSim & 181.8 / 68.2 & 193.3 / 67.7 & 0.34 / 25.87 & 4.54 / 49.82 & 6.73 / 11.68 & 14.66 / 20.08 & 17.89 / 17.89 \\
+Swing & Ten-Finger & MuJoCo & 0.14 / 16.43 & 0.24 / 15.91 & 0.08 / 16.30 & 97.09 / 90.01 & 2.57 / 2.89 & 2.84 / 0.98 & 1.26 / 1.26 \\
+Swing & Ten-Finger & Drake & 0.00 / 0.20 & 0.02 / 0.22 & 0.02 / 0.20 & 1.12 / 0.68 & 0.17 / 0.20 & 1.56 / 1.15 & 0.12 / 0.12 \\
+\bottomrule
+\end{tabular}
+\caption{Measured indeterminate hyperstatic quantities ($\%$) vs.\ Pinocchio reference on $0.04$\,s hold and swing (\texttt{GRIP\_PARITY\_DECISIONS.md} Section~19).}
+\label{tab:g10_indeterminate_series}
+\end{table}
+
+\textbf{Limitations.}
+\begin{enumerate}[leftmargin=*,noitemsep]
+\item Drake passes all determinate quantities across all three styles for both $0.04$\,s hold and $0.04$\,s swing ($\le 0.172\%$ peak, $\le 1.642\%$ RMS).
+\item MuJoCo passes \texttt{overlap} and \texttt{interlock} determinate quantities on both $0.04$\,s hold and $0.04$\,s swing ($\le 0.269\%$ peak, $\le 0.896\%$ RMS). On \texttt{ten\_finger}, MuJoCo's five-capsule initial contact settling transient over the short $0.04$\,s window yields \texttt{net\_force} RMS $= 2.595\%$ (hold) and $2.005\%$ (swing) vs.\ the $2.0\%$ limit (settling to $1.69\%$ and $1.36\%$ over $0.10$\,s); both are recorded as strict \texttt{xfail}s with measured numbers and no loosened tolerances.
+\item OpenSim passes \texttt{overlap} and \texttt{interlock} determinate quantities on $0.04$\,s static hold ($\le 1.099\%$ peak, $\le 1.412\%$ RMS), whereas \texttt{ten\_finger} hold and all three $0.04$\,s swings exhibit large transient tangential/inertial spikes on the discretized 5-sphere \texttt{ElasticFoundationForce} meshes while still matching total per-hand normal squeeze over $0.10$\,s (Table~\ref{tab:osim_pin_parity}); these four cases are recorded as strict \texttt{xfail}s with measured numbers.
+\item Hand--hand pairs (\texttt{overlap} and \texttt{interlock}) are analytically allocated under prescribed hand kinematics and reported as \texttt{NaN} with an explicit reason in every engine row.
+\end{enumerate}
+
+\textbf{Reproduction Commands.}
+\begin{verbatim}
+python3 scripts/grip/grip_style_parity_report.py --out /tmp/g10_parity_report
+python3 -m pytest tests/unit/grip_contact/test_grip_style_parity_report.py
+\end{verbatim}
+
 \section{Appearance}
 Placeholder for HRG appearance children.
 
