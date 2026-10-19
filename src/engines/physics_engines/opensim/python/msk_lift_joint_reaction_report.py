@@ -44,7 +44,7 @@ def unavailable_joint_reaction_record(lift: str, reason: str) -> dict[str, Any]:
         "reserve_share": None,
         "mean_reserve_share": None,
         "peak_reserve_share": None,
-        "reserve_share_threshold": 0.05,
+        "reserve_share_threshold": None,
         "window_start_s": None,
         "window_end_s": None,
         "duration_s": None,

@@ -102,8 +102,8 @@ def build_real_squat_bound_record(
     w_above: float,
     c_pelvis: float,
     c_torso: float,
-    crossing_force: float = 0.0,
-    crossing_count: int = 0,
+    crossing_force: float,
+    crossing_count: int,
 ) -> dict[str, Any]:
     """Format evaluation of the analytic bound on a dynamic squat frame."""
     lower_ok = bool(c_pelvis >= w_above - 1e-4)
@@ -119,11 +119,11 @@ def build_real_squat_bound_record(
         "muscles_crossing_l5s1_count": int(crossing_count),
         "lower_bound_satisfied": lower_ok,
         "upper_bound_satisfied": upper_ok,
-        "passed": False,
+        "passed": lower_ok and upper_ok,
         "note": (
-            "Evaluated on squat frame with minimal generalized acceleration norm. "
-            "Both inequalities do not hold simultaneously due to forward trunk tilt, "
-            "dynamic acceleration, and absence of active trunk extensor muscles."
+            "Evaluated (pelvis-frame compression) on the solved squat frame with "
+            "the smallest generalized acceleration norm; the static bound ignores "
+            "that frame's acceleration and the ideal lumbar actuator."
         ),
     }
 
@@ -178,19 +178,14 @@ def static_hold_analytic_bound(
         ),
     }
 
-    if real_squat_frame_info is not None:
-        real_rec = real_squat_frame_info
-    else:
-        real_rec = build_real_squat_bound_record(
-            frame_idx=40,
-            time_s=0.20,
-            qdd_norm=20.0378,
-            w_above=w_above,
-            c_pelvis=1437.27,
-            c_torso=1030.71,
-            crossing_force=crossing_force,
-            crossing_count=crossing_count,
-        )
+    real_rec: dict[str, Any] = (
+        real_squat_frame_info
+        if real_squat_frame_info is not None
+        else {
+            "passed": None,
+            "reason": "not evaluated: no solved squat frame was supplied",
+        }
+    )
 
     return {
         "frame_sign_self_consistency_at_default_pose": default_rec,

@@ -20,7 +20,9 @@ Verifies:
 
 from __future__ import annotations
 
+import json
 import math
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -150,9 +152,25 @@ def test_static_hold_analytic_bound() -> None:
     assert def_pose["muscles_crossing_l5s1_count"] == 0
     assert def_pose["sum_muscle_forces_crossing_l5s1_n"] == 0.0
 
-    # Dynamic squat frame evaluation (smallest generalized acceleration norm)
+    # Without a solved squat frame the dynamic check is not invented.
+    assert bound["squat_min_acceleration_frame"]["passed"] is None
+    assert "not evaluated" in bound["squat_min_acceleration_frame"]["reason"]
+
+
+@pytest.mark.requires_opensim
+@pytest.mark.integration
+def test_squat_min_acceleration_frame_bound(
+    squat_reaction_solution: dict[str, Any],
+) -> None:
+    """The dynamic bound uses the solved squat frame with the least |qdd|."""
+    bound = squat_reaction_solution["static_hold_analytic_bound"]
     min_acc = bound["squat_min_acceleration_frame"]
-    assert min_acc["frame_index"] == 40
+    lo = squat_reaction_solution["window_start_s"]
+    hi = squat_reaction_solution["window_end_s"]
+    assert lo <= min_acc["time_s"] <= hi
+    assert min_acc["passed"] == (
+        min_acc["lower_bound_satisfied"] and min_acc["upper_bound_satisfied"]
+    )
     assert min_acc["qdd_norm_rad_s2"] > 0.0
     assert min_acc["w_above_n"] > 1000.0
     assert min_acc["l5_s1_compression_pelvis_n"] > 1000.0
@@ -265,3 +283,20 @@ def test_per_phase_metrics(squat_reaction_solution: dict[str, Any]) -> None:
     assert "knee_tf_resultant_mean_n" in bottom
     assert "knee_pf_resultant_mean_n" in bottom
     assert "shoulder_gh_resultant_mean_n" in bottom
+
+
+def test_osl4_qualification_is_read_never_defaulted(tmp_path: Path) -> None:
+    """The inherited qualification comes from the OSL-4 receipt or is ``None``."""
+    from src.engines.physics_engines.opensim.python.msk_lift_joint_reactions import (
+        OSL4_RECEIPT,
+        _read_osl4_qualification,
+    )
+
+    assert OSL4_RECEIPT.is_file()
+    missing = _read_osl4_qualification(tmp_path / "absent.json")
+    assert missing["mean_reserve_share"] is None
+    assert "unreadable" in missing["reason"]
+    real = _read_osl4_qualification()
+    squat = json.loads(OSL4_RECEIPT.read_text(encoding="utf-8"))["lifts"]["squat"]
+    assert real["mean_reserve_share"] == squat["mean_reserve_share"]
+    assert real["peak_reserve_share"] == squat["peak_reserve_share"]

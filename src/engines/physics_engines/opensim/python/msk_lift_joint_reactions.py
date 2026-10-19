@@ -265,34 +265,37 @@ def _compute_reactions_timeseries(
     return series, torso_angles, qdd_norms
 
 
-def _read_osl4_qualification() -> dict[str, Any]:
-    json_path = (
-        Path(__file__).resolve().parents[7]
-        / "docs/development/lifting/evidence/opensim_muscles/receipts.json"
+OSL4_RECEIPT = (
+    Path(__file__).resolve().parents[5]
+    / "docs/development/lifting/evidence/opensim_muscles/receipts.json"
+)
+
+
+def _read_osl4_qualification(path: Path = OSL4_RECEIPT) -> dict[str, Any]:
+    """Squat qualification copied from the OSL-4 muscle receipt.
+
+    Every value comes from the receipt. A missing receipt or squat record
+    yields ``None`` values and a ``reason``, never a default.
+    """
+    keys = (
+        "classification",
+        "reserve_share",
+        "mean_reserve_share",
+        "peak_reserve_share",
+        "reserve_share_threshold",
     )
-    if json_path.exists():
-        try:
-            with open(json_path, encoding="utf-8") as f:
-                data = json.load(f)
-            squat_data = data.get("lifts", {}).get("squat", {})
-            return {
-                "classification": squat_data.get("classification", "unqualified"),
-                "reserve_share": squat_data.get("reserve_share"),
-                "mean_reserve_share": squat_data.get("mean_reserve_share"),
-                "peak_reserve_share": squat_data.get("peak_reserve_share"),
-                "reserve_share_threshold": squat_data.get(
-                    "reserve_share_threshold", 0.05
-                ),
-            }
-        except (json.JSONDecodeError, OSError, KeyError):
-            pass
-    return {
-        "classification": "unqualified",
-        "reserve_share": 0.5681,
-        "mean_reserve_share": 0.5680,
-        "peak_reserve_share": 0.6724,
-        "reserve_share_threshold": 0.05,
-    }
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {**dict.fromkeys(keys), "reason": f"OSL-4 receipt unreadable: {exc}"}
+    squat = data.get("lifts", {}).get("squat")
+    if not isinstance(squat, dict):
+        return {**dict.fromkeys(keys), "reason": f"no squat record in {path.name}"}
+    record = {key: squat.get(key) for key in keys}
+    if record["reserve_share_threshold"] is None:
+        record["reserve_share_threshold"] = data.get("reserve_share_threshold")
+    record["source"] = str(path.relative_to(path.parents[5]))
+    return record
 
 
 def _min_acceleration_bound(
@@ -358,7 +361,9 @@ def evaluate_lift_joint_reactions(
 
     targets, build, ik, inverse = _run_lift_ik_id(lift, stride)
     tmp = scratch_dir or Path(tempfile.mkdtemp(prefix="opensim_lift_reactions_squat_"))
-    model_path, _, loads_xml = _prepare_scratch_assets(build.model, ik, targets, tmp)
+    model_path, _, loads_xml = _prepare_scratch_assets(
+        lift, build.model, ik, targets, tmp
+    )
 
     _make_muscles_rigid_tendon(build.model)
     basis = MuscleBasis(build.model, ik.coordinates)

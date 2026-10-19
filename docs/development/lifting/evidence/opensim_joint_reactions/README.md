@@ -16,11 +16,11 @@ OSL-5 computes 3D internal joint reaction loads across the barbell lift motion w
 
 ## Evidence Summary (Back Squat Slice)
 
-- **Source Commit**: `1c1e72588328132f979fa225bd5f37c87a3d7ff2`
+- **Source Commit**: `b0e08b79d34e1f4e17b4c9ba808941f8b58a35c4`
 - **Lifter Mass**: 80.31 kg (Body Weight = 787.60 N)
 - **Barbell Mass**: 100.00 kg
 - **Window**: 0.00 s to 0.20 s (41 frames, bottom inflection phase)
-- **Inherited OSL-4 Qualification**: unqualified (mean reserve share: 0.5680, peak reserve share: 0.6724, threshold: 0.05)
+- **Inherited OSL-4 Qualification**: unqualified (mean reserve share: 0.5695, peak reserve share: 0.6766, threshold: 0.05)
 
 ### Measured Reaction Loads
 
@@ -55,7 +55,7 @@ OSL-5 computes 3D internal joint reaction loads across the barbell lift motion w
 - **Measured Torso Compression**: 1030.71 N
 - **Lower Bound ($W_{\text{above}} \le \text{Compression}$)**: PASSED
 - **Upper Bound ($\text{Compression} \le W_{\text{above}} + \sum F_m$)**: FAILED
-- **Evaluation Status**: **FAILED** (Evaluated on squat frame with minimal generalized acceleration norm. Both inequalities do not hold simultaneously due to forward trunk tilt, dynamic acceleration, and absence of active trunk extensor muscles.)
+- **Evaluation Status**: **FAILED** (Evaluated (pelvis-frame compression) on the solved squat frame with the smallest generalized acceleration norm; the static bound ignores that frame's acceleration and the ideal lumbar actuator.)
 
 ### Movement Optimizer L5/S1 Cross-Check
 
