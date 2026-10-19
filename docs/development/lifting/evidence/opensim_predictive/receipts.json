@@ -1,9 +1,19 @@
 {
+  "actuation_mode": "torque",
   "actuators": [
-    "lumbar_extension",
-    "lumbar_bending",
-    "lumbar_rotation",
-    "80_rajagopal_lower_limb_muscles"
+    "lumbar_ext",
+    "lumbar_bend",
+    "lumbar_rot",
+    "torque_hip_flexion_r",
+    "torque_hip_adduction_r",
+    "torque_hip_rotation_r",
+    "torque_knee_angle_r",
+    "torque_ankle_angle_r",
+    "torque_hip_flexion_l",
+    "torque_hip_adduction_l",
+    "torque_hip_rotation_l",
+    "torque_knee_angle_l",
+    "torque_ankle_angle_l"
   ],
   "bar_mass_kg": 100.0,
   "body_mass_kg": 80.0,
@@ -11,32 +21,37 @@
     "bundle_kinematics": {
       "label": "bundle kinematics",
       "reference_lifter": "80 kg, 1.78 m, 100 kg bar",
-      "source": "docs/development/lifting/evidence/deadlift/deadlift_bundle.npz"
+      "source": "/home/dieterolson/Repositories/ud-13044/docs/development/lifting/evidence/deadlift/deadlift_bundle.npz"
     },
     "quantities": {
       "bar_final_height_m": {
-        "bundle_kinematics": 0.935,
-        "predictive": 0.935,
+        "bundle_kinematics": 0.9094192166845657,
+        "predictive": null,
+        "reason": "infeasible iterate (constraint violation 74.1596931108721)",
         "unit": "m"
       },
       "bar_start_height_m": {
-        "bundle_kinematics": 0.456,
-        "predictive": 0.456,
+        "bundle_kinematics": 0.43201984819805705,
+        "predictive": null,
+        "reason": "infeasible iterate (constraint violation 74.1596931108721)",
         "unit": "m"
       },
       "bar_vertical_rise_m": {
-        "bundle_kinematics": 0.479,
-        "predictive": 0.479,
+        "bundle_kinematics": 0.47739936848650866,
+        "predictive": null,
+        "reason": "infeasible iterate (constraint violation 74.1596931108721)",
         "unit": "m"
       },
       "lift_duration_s": {
         "bundle_kinematics": 2.0,
-        "predictive": 1.5,
+        "predictive": null,
+        "reason": "infeasible iterate (constraint violation 74.1596931108721)",
         "unit": "s"
       },
       "peak_vertical_velocity_m_s": {
-        "bundle_kinematics": 0.56,
-        "predictive": 0.45,
+        "bundle_kinematics": 0.5605000335510915,
+        "predictive": null,
+        "reason": "infeasible iterate (constraint violation 74.1596931108721)",
         "unit": "m/s"
       }
     },
@@ -45,21 +60,36 @@
       "status": "unavailable"
     }
   },
-  "constraint_violation": 7.747488424537566,
+  "constraint_violation": 74.1596931108721,
   "converged": false,
   "exploratory": true,
   "foot_contact": "6_SmoothSphereHalfSpaceForce_spheres",
   "height_m": 1.78,
-  "iterations": 10,
+  "iterations": 100,
   "lift": "deadlift",
   "mesh_intervals": 15,
   "model": "RajagopalLaiUhlrich2023_deadlift",
-  "objective": 60.69976567541009,
+  "objective": 1844.187478122922,
   "reproduction_command": "python scripts/measure_opensim_predictive_deadlift.py",
   "solver_status": "Maximum_Iterations_Exceeded",
-  "source_commit": "806a8678849bcf9c2465a355f8e224b3245c2deb",
-  "total_script_wall_clock_s": 18.77077603340149,
-  "wall_clock_s": 1627.0,
+  "source_commit": "79c5e73c90de6689cf52c7f9484d94d8ea6bff39",
+  "stage1_torque": {
+    "actuation_mode": "torque",
+    "constraint_violation": 74.1596931108721,
+    "converged": false,
+    "exploratory": true,
+    "iterations": 100,
+    "objective": 1844.187478122922,
+    "solver_status": "Maximum_Iterations_Exceeded",
+    "unscaled_constraint_violation": 43059274.60842881,
+    "wall_clock_s": 231.37316182395443
+  },
+  "stage2_muscle": {
+    "reason": "Stage 1 torque-driven solve did not converge (Maximum_Iterations_Exceeded)",
+    "status": "not run"
+  },
+  "total_script_wall_clock_s": 238.15656076197047,
+  "wall_clock_s": 231.37316182395443,
   "welded_joints": [
     "acromial_l",
     "acromial_r",

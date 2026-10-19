@@ -1,20 +1,21 @@
 """Measure OpenSim predictive Moco simulation of deadlift (OSL-7, #13044).
 
-Usage (headless, from the repository root, real OpenSim 4.6)::
+Usage (headless, from repository root, real OpenSim 4.6)::
 
     QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \\
         python3 scripts/measure_opensim_predictive_deadlift.py \\
-        --out-dir docs/development/lifting/evidence/opensim_predictive \\
-        --log-file /tmp/claude-1000/-home-dieterolson-Repositories-UpstreamDrift/e275def1-d52e-475b-9174-6844c12cb3cc/scratchpad/agy/osl7-logs/predictive_deadlift.log
+        --out-dir docs/development/lifting/evidence/opensim_predictive
 
-Executes the muscle-driven predictive simulation of the barbell deadlift using
-OpenSim Moco, writes the receipt, README, and comparison plots.
+Executes staged predictive simulations of the barbell deadlift using OpenSim Moco:
+- Stage 1: Torque-driven simulation (ModOpRemoveMuscles, CoordinateActuators)
+- Stage 2: Muscle-driven simulation (only if Stage 1 converged)
 All outputs are explicitly labelled exploratory.
 """
 
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import json
 import logging
 import os
@@ -26,7 +27,7 @@ import tempfile
 import time
 from typing import Any
 
-# Ensure headless matplotlib before importing pyplot
+# Ensure headless matplotlib
 os.environ["MPLBACKEND"] = "Agg"
 import matplotlib.pyplot as plt
 import numpy as np
@@ -39,18 +40,21 @@ from src.engines.physics_engines.opensim.python.msk_lift_predictive import (  # 
     TRACKED_SOLUTION_UNAVAILABLE_REASON,
     PredictiveDeadliftConfig,
     build_predictive_deadlift_study,
+    compute_bundle_metrics,
     format_predictive_receipt,
+    replay_bar_path_fk,
     solve_predictive_deadlift,
 )
 
 logger = logging.getLogger("measure_opensim_predictive_deadlift")
 DEFAULT_OUT_DIR = ROOT / "docs/development/lifting/evidence/opensim_predictive"
-SCRATCH_ENV_VAR = "AGY_OSL7_LOG"
-DEFAULT_SCRATCH_LOG = (
-    Path(os.environ[SCRATCH_ENV_VAR])
-    if SCRATCH_ENV_VAR in os.environ
-    else Path(tempfile.gettempdir()) / "osl7_predictive_deadlift.log"
+SCRATCH_LOG_ENV = "AGY_OSL7_LOGS"
+DEFAULT_LOG_DIR = (
+    Path(os.environ[SCRATCH_LOG_ENV])
+    if SCRATCH_LOG_ENV in os.environ
+    else Path(tempfile.gettempdir()) / "osl7-logs"
 )
+BUNDLE_PATH = ROOT / "docs/development/lifting/evidence/deadlift/deadlift_bundle.npz"
 
 
 def _git(*args: str) -> str:
@@ -65,29 +69,135 @@ def _git(*args: str) -> str:
     return out.stdout.strip()
 
 
-def _plot_bar_path(out_path: Path, comp_table: dict[str, Any]) -> None:
-    """Generate bar path comparison plot."""
-    fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
-    q = comp_table.get("quantities", {})
-    bundle_rise = q.get("bar_vertical_rise_m", {}).get("bundle_kinematics", 0.479)
-    pred_rise = q.get("bar_vertical_rise_m", {}).get("predictive", 0.479)
+@contextmanager
+def _capture_output_to_file(file_path: Path):
+    """Capture C and Python stdout and stderr to a log file."""
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(file_path, "w", encoding="utf-8") as f:
+        stdout_fd = sys.stdout.fileno()
+        stderr_fd = sys.stderr.fileno()
+        saved_stdout = os.dup(stdout_fd)
+        saved_stderr = os.dup(stderr_fd)
+        sys.stdout.flush()
+        sys.stderr.flush()
+        os.dup2(f.fileno(), stdout_fd)
+        os.dup2(f.fileno(), stderr_fd)
+        try:
+            yield
+        finally:
+            sys.stdout.flush()
+            sys.stderr.flush()
+            os.dup2(saved_stdout, stdout_fd)
+            os.dup2(saved_stderr, stderr_fd)
+            os.close(saved_stdout)
+            os.close(saved_stderr)
 
-    t = np.linspace(0.0, 1.5, 50)
-    bundle_s = 0.456 + bundle_rise * (1.0 - np.cos(np.pi * t / 1.5)) / 2.0
-    pred_s = 0.456 + pred_rise * (1.0 - np.cos(np.pi * t / 1.5)) / 2.0
 
+def _parse_solve_log(log_path: Path) -> dict[str, Any]:
+    """Extract solve summary directly from Ipopt / MocoCasADi log output.
+
+    Every field is parsed directly; unparsed fields remain None / nan.
+    """
+    if not log_path.is_file():
+        return {
+            "converged": False,
+            "solver_status": "log_file_not_found",
+            "iterations": 0,
+            "objective": float("nan"),
+            "constraint_violation": float("nan"),
+            "unscaled_constraint_violation": None,
+            "wall_clock_s": 0.0,
+        }
+
+    text = log_path.read_text(encoding="utf-8")
+    if "Solve_Succeeded" in text:
+        status = "Solve_Succeeded"
+        converged = True
+    elif "Maximum_Iterations_Exceeded" in text:
+        status = "Maximum_Iterations_Exceeded"
+        converged = False
+    elif "Infeasible_Problem_Detected" in text:
+        status = "Infeasible_Problem_Detected"
+        converged = False
+    elif "Restoration_Failed" in text:
+        status = "Restoration_Failed"
+        converged = False
+    else:
+        status = "Unknown_Or_Interrupted"
+        converged = False
+
+    iterations: int | None = None
+    objective: float | None = None
+    cv: float | None = None
+    unscaled_cv: float | None = None
+    wall_clock: float | None = None
+
+    m_iter = re.search(r"Number of Iterations\.\.\.\.:\s+(\d+)", text)
+    if m_iter:
+        iterations = int(m_iter.group(1))
+
+    m_obj = re.search(
+        r"Objective\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.:\s+([+-]?[\d.eE+-]+)", text
+    )
+    if m_obj:
+        objective = float(m_obj.group(1))
+
+    m_cv = re.search(
+        r"Constraint violation\.\.\.\.:\s+([+-]?[\d.eE+-]+)\s+([+-]?[\d.eE+-]+)",
+        text,
+    )
+    if m_cv:
+        cv = float(m_cv.group(1))
+        unscaled_cv = float(m_cv.group(2))
+
+    m_time = re.search(r"Elapsed real time:\s*([\d.]+)\s*second", text)
+    if m_time:
+        wall_clock = float(m_time.group(1))
+
+    return {
+        "converged": converged,
+        "solver_status": status,
+        "iterations": iterations if iterations is not None else 0,
+        "objective": objective if objective is not None else float("nan"),
+        "constraint_violation": cv if cv is not None else float("nan"),
+        "unscaled_constraint_violation": unscaled_cv,
+        "wall_clock_s": wall_clock if wall_clock is not None else 0.0,
+    }
+
+
+def _plot_real_bar_path(
+    out_path: Path,
+    pred_times: np.ndarray,
+    pred_bar_pos: np.ndarray,
+    bundle_path: Path,
+) -> None:
+    """Plot real measured bar path against bundle kinematics."""
+    from src.shared.python.motion_matching.same_input import InputBundle
+
+    bundle = InputBundle.load(bundle_path)
+    bundle_ik = np.asarray(bundle.provenance["ik_bar_path_m"], dtype=float)
+    bundle_times = np.asarray(
+        bundle.provenance["sagittal_solution"]["time_s"], dtype=float
+    )
+
+    fig, ax = plt.subplots(figsize=(7, 4.5), dpi=150)
     ax.plot(
-        t,
-        bundle_s,
-        label="Bundle Kinematics (AN-1 whole-row)",
+        bundle_times,
+        bundle_ik[:, 2],
+        label="Bundle Kinematics (AN-1)",
         color="black",
         linestyle="--",
+        linewidth=1.5,
     )
     ax.plot(
-        t, pred_s, label="Predictive Moco (Exploratory)", color="#1f77b4", linewidth=2
+        pred_times,
+        pred_bar_pos[:, 1],
+        label="Predictive Moco (Stage 1)",
+        color="#1f77b4",
+        linewidth=2,
     )
     ax.set_xlabel("Time (s)")
-    ax.set_ylabel("Bar Height (m)")
+    ax.set_ylabel("Vertical Bar Position (m)")
     ax.set_title("Barbell Deadlift Vertical Bar Trajectory (OSL-7)")
     ax.legend(loc="upper left", frameon=True)
     ax.grid(True, linestyle=":", alpha=0.6)
@@ -97,65 +207,33 @@ def _plot_bar_path(out_path: Path, comp_table: dict[str, Any]) -> None:
     logger.info("Saved %s", out_path)
 
 
-def _plot_activations(out_path: Path, muscles: list[str]) -> None:
-    """Generate representative muscle group activations plot."""
-    fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
-    t = np.linspace(0.0, 1.5, 50)
-    # Representative activation envelopes
-    ax.plot(
-        t,
-        0.85 * np.exp(-((t - 0.3) ** 2) / 0.1),
-        label="Vastus Lateralis (Quad)",
-        color="#d62728",
-    )
-    ax.plot(
-        t,
-        0.95 * np.exp(-((t - 0.7) ** 2) / 0.15),
-        label="Gluteus Maximus (Hip)",
-        color="#ff7f0e",
-    )
-    ax.plot(
-        t,
-        0.75 * np.exp(-((t - 0.8) ** 2) / 0.2),
-        label="Biceps Femoris (Hamstring)",
-        color="#2ca02c",
-    )
-    ax.plot(
-        t, 0.70 * (t / 1.5), label="Erector Spinae / Lumbar Actuator", color="#9467bd"
-    )
-
-    ax.set_xlabel("Time (s)")
-    ax.set_ylabel("Activation / Control Effort [0, 1]")
-    ax.set_title("Muscle Activations by Group (Predictive Deadlift, OSL-7)")
-    ax.legend(loc="upper right", frameon=True, fontsize=8)
-    ax.set_ylim(-0.05, 1.05)
-    ax.grid(True, linestyle=":", alpha=0.6)
-    fig.tight_layout()
-    fig.savefig(out_path)
-    plt.close(fig)
-    logger.info("Saved %s", out_path)
-
-
 def _write_readme(out_dir: Path, receipt: dict[str, Any]) -> None:
-    """Write documentation README for the predictive deadlift evidence."""
+    """Write documentation README for predictive deadlift evidence."""
     comp = receipt["comparison_table"]
     q = comp["quantities"]
+    stage1 = receipt.get("stage1_torque", {})
+    stage2 = receipt.get("stage2_muscle", {})
+
     readme_content = f"""# Predictive Moco Deadlift Simulation (OSL-7, #13044)
 
 Predictive musculoskeletal simulation of a conventional barbell deadlift
-using OpenSim Moco with DeGroote-Fregly 2016 muscles and foot contact.
+using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
 
 ## Result Status: Exploratory
 
-- **Model:** `{receipt["model"]}` (RajagopalLaiUhlrich2023 base)
-- **Lifter:** {receipt["body_mass_kg"]} kg, {receipt["height_m"]} m, {receipt["bar_mass_kg"]} kg bar
-- **Mesh Intervals:** {receipt["mesh_intervals"]}
-- **Solver Status:** `{receipt["solver_status"]}`
-- **Converged:** `{receipt["converged"]}`
-- **Iterations:** {receipt["iterations"]}
-- **Objective:** {receipt["objective"]:.4f}
-- **Constraint Violation:** {receipt["constraint_violation"]:.4e}
-- **Wall Clock Time:** {receipt["wall_clock_s"]:.2f} s
+### Stage 1: Torque-Driven Solve
+- **Actuation:** `CoordinateActuator`s (500 N·m optimal force) on free coordinates; muscles removed
+- **Solver Status:** `{stage1.get("solver_status", "unknown")}`
+- **Converged:** `{stage1.get("converged", False)}`
+- **Iterations:** {stage1.get("iterations", 0)}
+- **Objective:** {stage1.get("objective", float("nan"))}
+- **Scaled Constraint Violation:** {stage1.get("constraint_violation", float("nan"))}
+- **Wall Clock Time:** {stage1.get("wall_clock_s", 0.0):.2f} s
+
+### Stage 2: Muscle-Driven Solve
+- **Actuation:** 80 Rajagopal lower-limb muscles (DeGroote-Fregly 2016)
+- **Status:** `{stage2.get("status", stage2.get("solver_status", "not run"))}`
+- **Reason:** {stage2.get("reason", "N/A")}
 
 ## Kinematic Comparison
 
@@ -182,73 +260,119 @@ using OpenSim Moco with DeGroote-Fregly 2016 muscles and foot contact.
     logger.info("Saved %s", readme_path)
 
 
-def _parse_solve_log(log_path: Path) -> dict[str, Any]:
-    """Extract solve summary from saved MocoCasADi / Ipopt log."""
-    text = log_path.read_text(encoding="utf-8")
-    status = (
-        "Maximum_Iterations_Exceeded"
-        if "Maximum_Iterations_Exceeded" in text
-        else "Solve_Succeeded"
-        if "Solve_Succeeded" in text
-        else "Unknown"
+def run_stage1_solve(
+    config: PredictiveDeadliftConfig,
+    log_file: Path,
+) -> dict[str, Any]:
+    """Execute Stage 1 torque-driven solve with stdout/stderr captured to log_file."""
+    logger.info("Building Stage 1 torque-driven study...")
+    study, meta = build_predictive_deadlift_study(config)
+
+    logger.info("Solving Stage 1 with Moco (log -> %s)...", log_file)
+    with _capture_output_to_file(log_file):
+        summary = solve_predictive_deadlift(config, study=study)
+
+    # Enhance summary from parsed log
+    parsed = _parse_solve_log(log_file)
+    summary["iterations"] = parsed["iterations"]
+    if not np.isnan(parsed["objective"]):
+        summary["objective"] = parsed["objective"]
+    if not np.isnan(parsed["constraint_violation"]):
+        summary["constraint_violation"] = parsed["constraint_violation"]
+    summary["unscaled_constraint_violation"] = parsed.get(
+        "unscaled_constraint_violation"
     )
-    converged = "Solve_Succeeded" in text
-    iterations = 10
-    objective = 60.6998
-    cv = 7.7475
-    wall_clock = 1627.0
+    return summary
 
-    for line in text.splitlines():
-        if "Number of Iterations....:" in line:
-            parts = line.split(":")
-            if len(parts) > 1:
-                try:
-                    iterations = int(parts[1].strip())
-                except ValueError:
-                    pass
-        elif "Objective...............:" in line:
-            parts = line.split(":")
-            if len(parts) > 1:
-                try:
-                    objective = float(parts[1].split()[0])
-                except (ValueError, IndexError):
-                    pass
-        elif "Constraint violation....:" in line:
-            parts = line.split(":")
-            if len(parts) > 1:
-                try:
-                    cv = float(parts[1].split()[0])
-                except (ValueError, IndexError):
-                    pass
-        elif "Elapsed real time:" in line:
-            m = re.search(r"Elapsed real time:\s*(\d+)\s*second", line)
-            if m:
-                wall_clock = float(m.group(1))
 
-    return {
-        "exploratory": True,
-        "converged": converged,
-        "solver_status": status,
-        "iterations": iterations,
-        "objective": objective,
-        "constraint_violation": cv,
-        "wall_clock_s": wall_clock,
-    }
+def _run_stage2_if_converged(
+    stage1_summary: dict[str, Any],
+    stage1_solution: Any,
+    mesh_intervals: int,
+    max_iterations: int,
+    stage2_log: Path,
+    out_dir: Path,
+) -> dict[str, Any]:
+    """Execute Stage 2 muscle-driven solve only if Stage 1 converged."""
+    if not stage1_summary.get("converged", False):
+        return {
+            "status": "not run",
+            "reason": (
+                f"Stage 1 torque-driven solve did not converge "
+                f"({stage1_summary.get('solver_status', 'unknown')})"
+            ),
+        }
+
+    logger.info("Stage 1 converged! Running Stage 2 muscle-driven solve...")
+    cfg_stage2 = PredictiveDeadliftConfig(
+        actuation_mode="muscle",
+        mesh_intervals=mesh_intervals,
+        max_iterations=max_iterations,
+        convergence_tolerance=1e-2,
+        constraint_tolerance=1e-2,
+        duration_bounds=(0.5, 3.0),
+        bar_mass_kg=100.0,
+        body_mass_kg=80.0,
+        height_m=1.78,
+        effort_weight=1.0,
+        terminal_lockout_weight=10.0,
+        finite_difference_scheme="forward",
+        exploratory=True,
+    )
+    study2, _ = build_predictive_deadlift_study(cfg_stage2)
+    with _capture_output_to_file(stage2_log):
+        stage2_summary = solve_predictive_deadlift(
+            cfg_stage2, study=study2, initial_guess=stage1_solution
+        )
+    parsed2 = _parse_solve_log(stage2_log)
+    stage2_summary["iterations"] = parsed2["iterations"]
+    if not np.isnan(parsed2["objective"]):
+        stage2_summary["objective"] = parsed2["objective"]
+    if not np.isnan(parsed2["constraint_violation"]):
+        stage2_summary["constraint_violation"] = parsed2["constraint_violation"]
+    stage2_solution = stage2_summary.pop("solution", None)
+    if stage2_solution is not None:
+        sto2_path = out_dir / "predictive_solution_stage2.sto"
+        stage2_solution.unseal()
+        stage2_solution.write(str(sto2_path))
+    return stage2_summary
+
+
+def _write_receipt_artifacts(out_dir: Path, receipt: dict[str, Any]) -> None:
+    """Write receipts.json formatted with prettier and generate README."""
+    receipt_path = out_dir / "receipts.json"
+    receipt_path.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    logger.info("Saved %s", receipt_path)
+    try:
+        subprocess.run(
+            ["npx", "--yes", "prettier@3", "--write", str(receipt_path)],
+            check=False,
+            capture_output=True,
+            timeout=30,
+        )
+    except (subprocess.SubprocessError, OSError):
+        pass
+    _write_readme(out_dir, receipt)
 
 
 def run_measurement(
     out_dir: Path,
-    log_file: Path | None = None,
+    log_dir: Path = DEFAULT_LOG_DIR,
     mesh_intervals: int = 15,
-    max_iterations: int = 25,
+    max_iterations: int = 3000,
     from_log: Path | None = None,
 ) -> dict[str, Any]:
-    """Execute predictive deadlift measurement and generate all artifacts."""
+    """Execute staged predictive deadlift measurement and generate honest evidence."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    if log_file:
-        log_file.parent.mkdir(parents=True, exist_ok=True)
+    log_dir.mkdir(parents=True, exist_ok=True)
+    stage1_log = log_dir / "stage1_torque.log"
+    stage2_log = log_dir / "stage2_muscle.log"
 
-    config = PredictiveDeadliftConfig(
+    cfg_stage1 = PredictiveDeadliftConfig(
+        actuation_mode="torque",
+        torque_optimal_force_nm=500.0,
         mesh_intervals=mesh_intervals,
         max_iterations=max_iterations,
         convergence_tolerance=1e-2,
@@ -263,53 +387,45 @@ def run_measurement(
         exploratory=True,
     )
 
-    logger.info("Building predictive deadlift MocoStudy...")
-    t_start = time.time()
-    study, meta = build_predictive_deadlift_study(config)
-
-    if from_log and from_log.exists():
-        logger.info("Extracting solve summary from log: %s", from_log)
-        solve_summary = _parse_solve_log(from_log)
+    t_start = time.perf_counter()
+    if from_log and from_log.is_file():
+        logger.info("Parsing Stage 1 results from existing log: %s", from_log)
+        stage1_summary = _parse_solve_log(from_log)
+        stage1_summary["actuation_mode"] = "torque"
+        stage1_solution = None
     else:
-        logger.info(
-            "Solving predictive deadlift with Moco (max_iterations=%d)...",
-            max_iterations,
-        )
-        solve_summary = solve_predictive_deadlift(config, study=study)
+        stage1_summary = run_stage1_solve(cfg_stage1, stage1_log)
+        stage1_solution = stage1_summary.pop("solution", None)
 
-    logger.info(
-        "Solve finished in %.2f s: %s",
-        solve_summary["wall_clock_s"],
-        solve_summary["solver_status"],
+    # Save Stage 1 solution file if available
+    sto_path = out_dir / "predictive_solution_stage1.sto"
+    if stage1_solution is not None:
+        stage1_solution.unseal()
+        stage1_solution.write(str(sto_path))
+        if sto_path.is_file() and sto_path.stat().st_size > 2 * 1024 * 1024:
+            scratch_sto = log_dir / "predictive_solution_stage1.sto"
+            sto_path.rename(scratch_sto)
+            logger.info("Solution exceeds 2 MB; moved to scratchpad: %s", scratch_sto)
+
+    stage2_summary = _run_stage2_if_converged(
+        stage1_summary,
+        stage1_solution,
+        mesh_intervals,
+        max_iterations,
+        stage2_log,
+        out_dir,
     )
 
-    receipt = format_predictive_receipt(config, solve_summary)
+    # Format receipt
+    receipt = format_predictive_receipt(
+        cfg_stage1, stage1_summary, bundle_path=BUNDLE_PATH
+    )
+    receipt["stage1_torque"] = stage1_summary
+    receipt["stage2_muscle"] = stage2_summary
     receipt["source_commit"] = _git("rev-parse", "HEAD")
-    receipt["total_script_wall_clock_s"] = time.time() - t_start
+    receipt["total_script_wall_clock_s"] = time.perf_counter() - t_start
 
-    # Write receipts.json
-    receipt_path = out_dir / "receipts.json"
-    receipt_path.write_text(
-        json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
-    logger.info("Saved %s", receipt_path)
-
-    # Format with prettier if available
-    try:
-        subprocess.run(
-            ["npx", "--yes", "prettier@3", "--write", str(receipt_path)],
-            check=False,
-            capture_output=True,
-            timeout=30,
-        )
-    except (subprocess.SubprocessError, OSError):
-        pass
-
-    # Generate plots and README
-    _plot_bar_path(out_dir / "bar_path.png", receipt["comparison_table"])
-    _plot_activations(out_dir / "activations.png", meta["actuators"])
-    _write_readme(out_dir, receipt)
-
+    _write_receipt_artifacts(out_dir, receipt)
     return receipt
 
 
@@ -320,7 +436,7 @@ def main(argv: list[str] | None = None) -> int:
         "--out", type=Path, default=None, help="Output receipts.json path"
     )
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
-    parser.add_argument("--log-file", type=Path, default=DEFAULT_SCRATCH_LOG)
+    parser.add_argument("--log-dir", type=Path, default=DEFAULT_LOG_DIR)
     parser.add_argument(
         "--from-log",
         type=Path,
@@ -328,7 +444,7 @@ def main(argv: list[str] | None = None) -> int:
         help="Parse results from existing solve log",
     )
     parser.add_argument("--mesh-intervals", type=int, default=15)
-    parser.add_argument("--max-iterations", type=int, default=25)
+    parser.add_argument("--max-iterations", type=int, default=3000)
     args = parser.parse_args(argv)
 
     out_dir = args.out_dir
@@ -340,7 +456,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     run_measurement(
         out_dir=out_dir,
-        log_file=args.log_file,
+        log_dir=args.log_dir,
         mesh_intervals=args.mesh_intervals,
         max_iterations=args.max_iterations,
         from_log=args.from_log,

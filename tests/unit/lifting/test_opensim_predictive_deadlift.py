@@ -18,6 +18,7 @@ from src.engines.physics_engines.opensim.python.msk_lift_predictive import (
     PredictiveDeadliftConfig,
     build_comparison_table,
     build_predictive_deadlift_study,
+    compute_bundle_metrics,
     create_predictive_deadlift_spec,
     format_predictive_receipt,
 )
@@ -113,6 +114,108 @@ def test_comparison_table_reports_unavailable_for_tracked_opensim() -> None:
     # Bundle kinematics row must exist
     assert "bundle_kinematics" in table
     assert table["bundle_kinematics"]["label"] == "bundle kinematics"
+
+
+def test_compute_bundle_metrics_matches_npz() -> None:
+    """Bundle metrics match direct numpy calculation from deadlift_bundle.npz."""
+    from pathlib import Path
+    import numpy as np
+    from src.shared.python.motion_matching.same_input import InputBundle
+
+    repo_root = Path(__file__).resolve().parents[3]
+    bundle_path = (
+        repo_root / "docs/development/lifting/evidence/deadlift/deadlift_bundle.npz"
+    )
+    assert bundle_path.is_file(), f"missing bundle: {bundle_path}"
+
+    metrics = compute_bundle_metrics(bundle_path)
+
+    # Compute directly from bundle arrays
+    bundle = InputBundle.load(bundle_path)
+    ik_path = np.asarray(bundle.provenance["ik_bar_path_m"], dtype=float)
+    times = np.asarray(bundle.provenance["sagittal_solution"]["time_s"], dtype=float)
+
+    z = ik_path[:, 2]
+    expected_start = float(z[0])
+    expected_final = float(z[-1])
+    expected_rise = float(z[-1] - z[0])
+    expected_duration = float(times[-1] - times[0])
+    expected_peak_v = float(np.max(np.diff(z) / np.diff(times)))
+
+    assert metrics["bar_start_height_m"] == pytest.approx(expected_start, rel=1e-6)
+    assert metrics["bar_final_height_m"] == pytest.approx(expected_final, rel=1e-6)
+    assert metrics["bar_vertical_rise_m"] == pytest.approx(expected_rise, rel=1e-6)
+    assert metrics["lift_duration_s"] == pytest.approx(expected_duration, rel=1e-6)
+    assert metrics["peak_vertical_velocity_m_s"] == pytest.approx(
+        expected_peak_v, rel=1e-6
+    )
+
+
+def test_comparison_table_infeasible_solution_has_none_metrics() -> None:
+    """Infeasible solve must have None for all predictive metrics plus an explicit reason."""
+    cfg = PredictiveDeadliftConfig()
+    infeasible_results = {
+        "converged": False,
+        "solver_status": "Maximum_Iterations_Exceeded",
+        "iterations": 50,
+        "constraint_violation": 61.27,
+    }
+    table = build_comparison_table(infeasible_results, cfg)
+    q = table["quantities"]
+
+    for key, item in q.items():
+        assert item["predictive"] is None, (
+            f"infeasible result must be None for {key}, got {item['predictive']}"
+        )
+        assert "reason" in item, f"missing reason for None predictive metric {key}"
+        assert "infeasible iterate" in item["reason"], (
+            f"reason must mention infeasible iterate: {item['reason']}"
+        )
+        assert "61.27" in item["reason"], (
+            f"reason must mention constraint violation: {item['reason']}"
+        )
+
+
+def test_comparison_table_missing_field_converged_has_none_not_fallback() -> None:
+    """Converged solve with missing field must report None plus reason, NEVER a fallback float."""
+    cfg = PredictiveDeadliftConfig()
+    partial_results = {
+        "converged": True,
+        "solver_status": "Solve_Succeeded",
+        "iterations": 120,
+        "bar_start_height_m": 0.432,
+        # Omit all other metrics
+    }
+    table = build_comparison_table(partial_results, cfg)
+    q = table["quantities"]
+
+    assert q["bar_start_height_m"]["predictive"] == 0.432
+    assert q["bar_final_height_m"]["predictive"] is None
+    assert "missing" in q["bar_final_height_m"]["reason"]
+    assert q["bar_vertical_rise_m"]["predictive"] is None
+    assert "missing" in q["bar_vertical_rise_m"]["reason"]
+    assert q["peak_vertical_velocity_m_s"]["predictive"] is None
+    assert "missing" in q["peak_vertical_velocity_m_s"]["reason"]
+    assert q["lift_duration_s"]["predictive"] is None
+    assert "missing" in q["lift_duration_s"]["reason"]
+
+
+def test_config_actuation_mode() -> None:
+    """Configuration validates torque and muscle actuation modes."""
+    cfg_torque = PredictiveDeadliftConfig(
+        actuation_mode="torque", torque_optimal_force_nm=500.0
+    )
+    assert cfg_torque.actuation_mode == "torque"
+    assert cfg_torque.torque_optimal_force_nm == 500.0
+
+    cfg_muscle = PredictiveDeadliftConfig(actuation_mode="muscle")
+    assert cfg_muscle.actuation_mode == "muscle"
+
+    with pytest.raises(ValueError, match="actuation_mode"):
+        PredictiveDeadliftConfig(actuation_mode="pneumatic")
+
+    with pytest.raises(ValueError, match="torque_optimal_force_nm"):
+        PredictiveDeadliftConfig(torque_optimal_force_nm=0.0)
 
 
 def test_format_predictive_receipt() -> None:

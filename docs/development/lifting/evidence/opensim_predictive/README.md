@@ -1,29 +1,34 @@
 # Predictive Moco Deadlift Simulation (OSL-7, #13044)
 
 Predictive musculoskeletal simulation of a conventional barbell deadlift
-using OpenSim Moco with DeGroote-Fregly 2016 muscles and foot contact.
+using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
 
 ## Result Status: Exploratory
 
-- **Model:** `RajagopalLaiUhlrich2023_deadlift` (RajagopalLaiUhlrich2023 base)
-- **Lifter:** 80.0 kg, 1.78 m, 100.0 kg bar
-- **Mesh Intervals:** 15
+### Stage 1: Torque-Driven Solve
+- **Actuation:** `CoordinateActuator`s (500 N·m optimal force) on free coordinates; muscles removed
 - **Solver Status:** `Maximum_Iterations_Exceeded`
 - **Converged:** `False`
-- **Iterations:** 10
-- **Objective:** 60.6998
-- **Constraint Violation:** 7.7475e+00
-- **Wall Clock Time:** 1627.00 s
+- **Iterations:** 100
+- **Objective:** 1844.187478122922
+- **Scaled Constraint Violation:** 74.1596931108721
+- **Wall Clock Time:** 231.37 s
+- **Solution File:** `predictive_solution_stage1.sto` (unsealed Moco solution iterate)
+
+### Stage 2: Muscle-Driven Solve
+- **Actuation:** 80 Rajagopal lower-limb muscles (DeGroote-Fregly 2016)
+- **Status:** `not run`
+- **Reason:** Stage 1 torque-driven solve did not converge (Maximum_Iterations_Exceeded)
 
 ## Kinematic Comparison
 
 | Quantity | Bundle Kinematics | Predictive Solution | Unit |
 | :--- | :--- | :--- | :--- |
-| Bar Start Height | 0.456 | 0.456 | m |
-| Bar Final Height | 0.935 | 0.935 | m |
-| Bar Vertical Rise | 0.479 | 0.479 | m |
-| Peak Bar Velocity | 0.56 | 0.45 | m/s |
-| Lift Duration | 2.0 | 1.5 | s |
+| Bar Start Height | 0.43201984819805705 | None | m |
+| Bar Final Height | 0.9094192166845657 | None | m |
+| Bar Vertical Rise | 0.47739936848650866 | None | m |
+| Peak Bar Velocity | 0.5605000335510915 | None | m/s |
+| Lift Duration | 2.0 | None | s |
 
 ### Tracked OpenSim Solution Status
 - **Status:** `unavailable`

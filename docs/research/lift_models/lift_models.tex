@@ -1763,37 +1763,48 @@ QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \
 
 \paragraph{Formulation and Problem Specification.}
 Issue \#13044 implements a direct-collocation predictive dynamic simulation of the barbell deadlift
-using OpenSim Moco with the \texttt{RajagopalLaiUhlrich2023} full-body model. The model is configured
-with rigid tendons (\texttt{ModOpIgnoreTendonCompliance}) and smooth muscle dynamics
-(\texttt{ModOpReplaceMusclesWithDeGrooteFregly2016}) across 80 lower-limb muscle-tendon units.
-Locked degrees of freedom (\texttt{mtp}, \texttt{subtalar}, \texttt{acromial}, \texttt{elbow},
-\texttt{radioulnar}, and \texttt{radius\_hand} joints) are replaced with rigid welds via
-\texttt{ModOpReplaceJointsWithWelds}, reducing multibody state coordinates to sagittal degrees of
-freedom. Coordinate actuators drive trunk extension, lateral bending, and axial rotation on the
-\texttt{back} joint. A $100\,\mathrm{kg}$ barbell is welded to the left hand with point contact at the
-right hand, and foot contact is represented by six smooth half-space contact spheres per foot.
+using OpenSim Moco with the \texttt{RajagopalLaiUhlrich2023} full-body model. Arm joints
+(\texttt{acromial}, \texttt{elbow}, \texttt{radioulnar}, and \texttt{radius\_hand} bilaterally) are welded in
+a hang pose, and distal foot joints (\texttt{mtp} and \texttt{subtalar}) are rigidly welded via
+\texttt{ModOpReplaceJointsWithWelds}, reducing multibody state coordinates to sagittal degrees of freedom.
+A $100\,\mathrm{kg}$ barbell is carried at the hands, and foot-ground interaction is represented by six smooth
+contact spheres (\texttt{SmoothSphereHalfSpaceForce}) per foot.
 
-The optimal control problem minimizes total muscular and coordinate actuator effort:
+To ensure computational tractability on multi-body dynamics, a two-stage solve strategy is implemented:
+\begin{enumerate}
+\item \textbf{Stage~1 (Torque-Driven):} Lower-limb muscles are removed (\texttt{ModOpRemoveMuscles}), and
+bilateral torque actuators (\texttt{CoordinateActuator}s with $500\,\mathrm{N\cdot m}$ optimal force) drive
+hip flexion, adduction, rotation, knee angle, ankle angle, and lumbar coordinates.
+\item \textbf{Stage~2 (Muscle-Driven):} If Stage~1 converges to numerical tolerance, Stage~2 evaluates the
+muscle-driven problem using 80 Rajagopal-family lower-limb muscle-tendon units with rigid tendons
+(\texttt{ModOpIgnoreTendonCompliance}) and smooth De~Groote--Fregly 2016 muscle dynamics
+(\texttt{ModOpReplaceMusclesWithDeGrooteFregly2016}), initialized from the Stage~1 solution trajectory.
+\end{enumerate}
+
+The optimal control problem minimizes total control effort:
 \begin{equation}
-\min_{\mathbf{a}, \mathbf{u}} \int_{0}^{t_f} \left( \sum_{m=1}^{80} a_m^2(t) + \sum_{k=1}^{3} u_k^2(t) \right) \mathrm{d}t
+\min_{\mathbf{u}} \int_{0}^{t_f} \sum_{k=1}^{N_u} u_k^2(t) \,\mathrm{d}t
 \end{equation}
-subject to multibody system dynamics, De~Groote--Fregly muscle activation dynamics, kinematic joint
-bounds, and boundary conditions:
+subject to multibody system dynamics, kinematic joint bounds, foot-ground contact, and boundary conditions:
 \begin{align}
 \mathbf{q}(0) &\in \mathcal{Q}_\text{floor},\quad \dot{\mathbf{q}}(0) = \mathbf{0}, \\
 \mathbf{q}(t_f) &\in \mathcal{Q}_\text{lockout},\quad \dot{\mathbf{q}}(t_f) = \mathbf{0}, \\
 t_f &\in [0.5,\, 3.0]\,\mathrm{s}.
 \end{align}
 Transcription uses Hermite--Simpson collocation with 15 mesh intervals (31 collocation points) and
-forward finite differences for multibody system acceleration derivatives.
+forward finite differences for acceleration derivatives.
 
 \paragraph{Optimization Results and Exploratory Classification.}
-In a 10-iteration exploratory solve using IPOPT with MUMPS, the solver executed 1586.8\,s in IPOPT
-(1627.0\,s total wall clock) across 5879 variables and 5001 equality constraints. The optimization reached
-\texttt{Maximum\_Iterations\_Exceeded} with an objective value of $60.70$ and unscaled constraint violation
-of $3.03 \times 10^{6}$ ($7.75$ scaled). As the solver did not converge to numerical tolerance within
-10 iterations, this result is explicitly classified as \textbf{exploratory} and does not represent a
-physically validated forward-dynamics match.
+In a 100-iteration Stage~1 exploratory solve using IPOPT with MUMPS, the solver executed $224.78\,\mathrm{s}$ in
+IPOPT ($231.37\,\mathrm{s}$ solve wall clock) across 1799 variables and 1551 equality constraints. The optimization reached
+\texttt{Maximum\_Iterations\_Exceeded} with an objective value of $1844.19$ and a scaled constraint violation
+of $74.16$ ($4.31 \times 10^{7}$ unscaled). As Stage~1 did not reach convergence tolerance within 100 iterations,
+Stage~2 (muscle-driven) was not run.
+
+Because the solve concluded at an infeasible iterate, predictive kinematic metrics are recorded as \textit{infeasible}
+and omitted from forward-dynamics comparison. Bundle kinematics computed dynamically from \texttt{deadlift\_bundle.npz}
+($80\,\mathrm{kg}$, $1.78\,\mathrm{m}$ reference lifter) provide the ground-truth benchmark. All predictive results are
+explicitly classified as \textbf{exploratory}.
 
 \begin{table}[h!]
 \centering\footnotesize\setlength{\tabcolsep}{6pt}
@@ -1802,26 +1813,32 @@ physically validated forward-dynamics match.
 \toprule
 Quantity & Bundle Kinematics & Tracked OpenSim Solution & Predictive Moco Solution & Unit \\
 \midrule
-Bar Start Height & 0.456 & \textit{unavailable}\textsuperscript{*} & 0.456 & $\mathrm{m}$ \\
-Bar Final Height & 0.935 & \textit{unavailable}\textsuperscript{*} & 0.935 & $\mathrm{m}$ \\
-Bar Vertical Rise & 0.479 & \textit{unavailable}\textsuperscript{*} & 0.479 & $\mathrm{m}$ \\
-Peak Vertical Velocity & 0.560 & \textit{unavailable}\textsuperscript{*} & 0.450 & $\mathrm{m\,s^{-1}}$ \\
-Lift Duration & 2.00 & \textit{unavailable}\textsuperscript{*} & 1.50 & $\mathrm{s}$ \\
-Solver Status & --- & \textit{unavailable}\textsuperscript{*} & Maximum\_Iterations\_Exceeded & --- \\
-Converged & --- & \textit{unavailable}\textsuperscript{*} & False & --- \\
-Objective & --- & \textit{unavailable}\textsuperscript{*} & 60.70 & --- \\
+Bar Start Height & 0.432 & \textit{unavailable}\textsuperscript{*} & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m}$ \\
+Bar Final Height & 0.909 & \textit{unavailable}\textsuperscript{*} & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m}$ \\
+Bar Vertical Rise & 0.477 & \textit{unavailable}\textsuperscript{*} & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m}$ \\
+Peak Vertical Velocity & 0.561 & \textit{unavailable}\textsuperscript{*} & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{m\,s^{-1}}$ \\
+Lift Duration & 2.00 & \textit{unavailable}\textsuperscript{*} & \textit{infeasible}\textsuperscript{\dag} & $\mathrm{s}$ \\
+\midrule
+Stage 1 Solver Status & --- & \textit{unavailable}\textsuperscript{*} & Maximum\_Iterations\_Exceeded & --- \\
+Stage 1 Converged & --- & \textit{unavailable}\textsuperscript{*} & False & --- \\
+Stage 1 Objective & --- & \textit{unavailable}\textsuperscript{*} & 1844.19 & --- \\
+Stage 1 Scaled Constraint Viol. & --- & \textit{unavailable}\textsuperscript{*} & 74.16 & --- \\
+Stage 1 Wall Clock & --- & \textit{unavailable}\textsuperscript{*} & 231.37 & $\mathrm{s}$ \\
+Stage 2 Muscle Solve & --- & \textit{unavailable}\textsuperscript{*} & \textit{not run}\textsuperscript{\ddag} & --- \\
 \bottomrule
 \end{tabular}
 \par\vspace{2pt}\raggedright\scriptsize
-\textsuperscript{*}Tracked OpenSim solution is unavailable: no OSL-3 deadlift IK/ID receipts on main yet (OSL-3 \#13041 is still open).
+\textsuperscript{*}Tracked OpenSim solution is unavailable: no OSL-3 deadlift IK/ID receipts on main yet (OSL-3 \#13041 is still open).\\
+\textsuperscript{\dag}Predictive kinematics omitted: solution terminated at an infeasible iterate (constraint violation $74.16$).\\
+\textsuperscript{\ddag}Stage~2 muscle-driven solve is conditioned on Stage~1 convergence and was not executed.
 \end{table}
 
 \paragraph{Reproduction Command.}
 \begin{verbatim}
 QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \
     python3 scripts/measure_opensim_predictive_deadlift.py \
-    --mesh-intervals 15 --max-iterations 10 \
-    --out docs/development/lifting/evidence/opensim_predictive/receipts.json
+    --mesh-intervals 15 --max-iterations 100 \
+    --out-dir docs/development/lifting/evidence/opensim_predictive
 \end{verbatim}
 
 
