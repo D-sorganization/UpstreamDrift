@@ -11,7 +11,7 @@ import pytest
 import yaml
 
 from src.shared.python.feature_registry import get_feature
-from src.shared.python.feature_registry.training_torch_pin import (
+from src.shared.python.feature_registry.features import (
     TORCH_CUDA_VERSION,
     TORCH_CUDA_WHEEL_INDEX,
     torch_cuda_pip_install_command,

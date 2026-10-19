@@ -262,7 +262,7 @@ USER root
 COPY --from=builder /opt/venv /opt/venv
 
 # PyTorch cu128 wheels bundle CUDA runtime libs; host driver provides libcuda via nvidia-container-toolkit
-# Pinned versions for reproducible builds (see training_torch_pin.py)
+# Pinned versions for reproducible builds (see feature_registry/features.py TORCH_CUDA_*)
 RUN /opt/venv/bin/pip install --no-cache-dir \
     "torch==2.9.0" --index-url https://download.pytorch.org/whl/cu128
 

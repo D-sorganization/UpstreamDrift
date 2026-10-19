@@ -24,7 +24,25 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from .training_torch_pin import torch_cuda_pip_install_command
+# PyTorch CUDA wheel pin for the Docker training stage (issue #12938).
+# Defined inline (not in a sibling module) because
+# ``scripts/docker/install_features.py`` loads this file standalone during
+# the image build, so it must import only the standard library.
+TORCH_CUDA_VERSION = "2.9.0"
+TORCH_CUDA_WHEEL_INDEX = "https://download.pytorch.org/whl/cu128"
+
+
+def torch_cuda_pip_install_command() -> str:
+    """Return the documented pip one-liner for GPU PyTorch in training images."""
+    if not TORCH_CUDA_VERSION.strip():
+        raise ValueError("TORCH_CUDA_VERSION must not be empty")
+    if not TORCH_CUDA_WHEEL_INDEX.startswith("https://"):
+        raise ValueError("TORCH_CUDA_WHEEL_INDEX must be an https URL")
+    return (
+        f"pip install 'torch=={TORCH_CUDA_VERSION}' "
+        f"--index-url {TORCH_CUDA_WHEEL_INDEX}"
+    )
+
 
 EngineTier = Literal["core", "extended", "experimental", "tooling"]
 """Tier alignment with :mod:`src.engines.tiers`.

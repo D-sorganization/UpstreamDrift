@@ -183,7 +183,7 @@ def _probe_torch(_suite_root: Path) -> ProbeOutcome:
             message=f"PyTorch {torch.__version__}{suffix}",
         )
     except ImportError:
-        from .training_torch_pin import torch_cuda_pip_install_command
+        from .features import torch_cuda_pip_install_command
 
         return ProbeOutcome(
             available=False,
