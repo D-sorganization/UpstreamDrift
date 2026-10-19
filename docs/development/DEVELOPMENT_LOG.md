@@ -2652,6 +2652,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#13423 · Declare Websockets for Realtime Python Backend and Document Qualisys C3D/TRC Export Path in formats.md
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13423
+- **Branch:** merged via #13441
+- **PR:** #13441
+- **Paths:** see #13441
+- **Started:** 2026-10-19
+- **Last verified:** 2026-10-19 (`bf993892`; collated from changes/13423-declare-websockets-for-realtime-python-b.md)
+- **Summary:** Declare websockets for realtime Python backend and document Qualisys C3D/TRC export path in formats.md
+- **Next step:** Shipped in PR #13441.
+
 ### DL-#13421 · Retrofit Drake Golfer Joint Actuators When URDF Omits Transmissions; Fail Closed on Unwired Torque (#13421).
 
 - **State:** shipped
@@ -5778,10 +5791,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12670
 - **Branch:** merged via #12834
-- **PR:** #12834
+- **PR:** #12834, #13440
 - **Paths:** see #12834
 - **Started:** 2026-10-16
-- **Last verified:** 2026-10-16 (`bf347e0e`; collated from changes/12670-golfer-generator-adapter-derives-coordin.md)
+- **Last verified:** 2026-10-19 (`42f2f673`; collated from changes/12670-add-dated-nm-addendum-superseding-sealed.md)
 - **Summary:** Golfer generator adapter derives coordinate and control widths from the TB-00 registry (u_dim=6) instead of a literal 5, and rejects a sealed u_dim that disagrees; sealed NM-01/NM-09 records untouched pending owner decision
 - **Next step:** Shipped in PR #12834.
 
