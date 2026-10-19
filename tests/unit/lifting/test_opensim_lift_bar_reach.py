@@ -42,25 +42,18 @@ _MIDPOINT_TOL_M = 1e-9
 #: has not reached it.  Declared before measuring; the bound solve reaches
 #: about 3e-6 m.
 _REACH_TOL_M = 1e-3
-#: OSL-17 (#13131) regression, measured on the high-bar rack bundle: the
-#: Rajagopal arm ranges (arm_flex <= 90 deg, arm_rot >= -90 deg, elbow_flex
-#: <= 150 deg) cannot put the hands on a grip behind the neck.  The bounded
-#: reach solve stops on those bounds 4.63 cm (L) and 6.03 cm (R) from the
-#: grips, against the 1 mm reach bound, and the IK then carries arm_flex,
-#: arm_rot, pro_sup and elbow_flex up to 1.21e-3 rad past their ranges.  The
-#: bounds are not loosened.  On the #13037 whole-row lift body (#13041) the
-#: reach stops 3.81 cm (L) and 5.69 cm (R) short and the ranges are exceeded
-#: by up to 8.0e-4 rad.  Shared cause with the pre-rack whole-row elbow-limit
-#: miss (8.3/21.5 mm): the folded Rajagopal arm cannot bring the hand within
-#: about 0.20 m of its shoulder landmark in these directions (shoulder-to-grip
-#: distance plus reach miss 0.198-0.213 m in all four cases), and the grips
-#: sit 0.146-0.190 m from the shoulders.
+#: OSL-19 (#13158): high-bar rack reach sweep (grip width 0.75 m).
+#: Left hand reach is resolved to 0.002 mm (well inside 1 mm bound).
+#: Right hand reach stops 1.51 mm from the grip (down from 56.9 mm, 97.4%
+#: reduction), slightly exceeding the 1.0 mm bound because the kinematic
+#: minimum shoulder-to-hand distance of the folded Rajagopal arm is 0.2059 m
+#: and right shoulder-to-grip is 0.2033 m. The 1 mm bound is not loosened.
 _RAJAGOPAL_ARM_RANGES = pytest.mark.xfail(
     strict=True,
     reason=(
-        "OSL-19 #13158: Rajagopal arm ranges cannot reach the high-bar grip "
-        "(reach 3.81/5.69 cm > 1 mm; ranges exceeded by up to 8.0e-4 rad); "
-        "the folded arm stops about 0.20 m from the shoulder."
+        "OSL-19 #13158: right hand reach 1.51 mm > 1.0 mm bound "
+        "(left hand reaches at 0.002 mm; folded arm minimum distance 0.2059 m); "
+        "reach bound not loosened."
     ),
 )
 

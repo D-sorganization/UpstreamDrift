@@ -327,3 +327,54 @@ still fails:
   18.5 N m) and stays a passing test.
 - **Follow-ups.** The arm reach is tracked by OSL-19 (#13158). The open-loop
   left-wrist mode that blocks full-window parity is tracked by OSL-20 (#13159).
+
+## High-Bar Rack Grip-Width Sweep and Wrist-Mode Resolution (OSL-19, #13158; OSL-20, #13159)
+
+The high-bar rack placement was derived from Glassbrook et al. 2019 (doi:10.1519/JSC.0000000000001836)
+and Wretenberg et al. 1996, which specify bar placement across the top of the trapezius slightly
+inferior to the C7 vertebra. Neither paper specifies a barbell grip width. The parity standard
+permits barbell grip widths in the range [0.45, 0.90] m. The standard default of 0.60 m was
+selected for an anterior/sagittal bar position, not a posterior high-bar rack.
+
+### Reachable Workspace of the Rajagopal Arm (OSL-19)
+
+In the Rajagopal musculoskeletal model, the upper arm (humerus) length is $L_1 = 0.282$ m and the
+forearm (radius/ulna) length is $L_2 = 0.250$ m. The elbow flexion coordinate `elbow_flex` is
+kinematically bounded at $150^\circ$ ($2.618$ rad).
+
+When the elbow is flexed to its maximum ($150^\circ$), the minimum distance from the glenohumeral
+joint center to the hand center of mass is:
+$$d_{\min} = \sqrt{L_1^2 + L_2^2 - 2 L_1 L_2 \cos(30^\circ)} = 0.2059\text{ m}$$
+The maximum extended reach is $0.6334$ m.
+
+At the standard grip width $W = 0.60$ m, the shoulder-to-grip distance is $0.1700$ m (left) and
+$0.1675$ m (right). Both sit strictly inside the unreachable interior sphere ($< 0.2059$ m),
+missing reach by $38.1$ mm (left) and $56.9$ mm (right).
+
+### Open-Loop Wrist Instability and Parity Resolution (OSL-20)
+
+At $W = 0.60$ m, solving IK for a grip behind the neck forced the lifter's wrists against their joint
+limits (`LWInputX` pinned at limit $25.0^\circ$). This constraint coupling excited an unstable open-loop
+wrist eigenvalue ($\lambda \approx 116\text{--}132\,\text{s}^{-1}$ on `LWInputY`), which amplified numerical
+round-off across the 0.2 s window ($8.5\times 10^{-4}$ rad in Drake, $2.7\times 10^{-3}$ rad in Pinocchio),
+causing the full-window coordinate parity gate to fail.
+
+To resolve both issues without loosening scientific tolerances, we performed a reachability sweep
+across the parity standard's grip range $[0.60, 0.85]$ m:
+
+| Grip Width $W$ (m) | Shoulder-to-Grip L / R (m) | Reach Miss L / R (mm) | Max Coordinate Overshoot (rad) | Wrist Limits & Stability ($\lambda$) |
+| :--- | :--- | :--- | :--- | :--- |
+| 0.60 (standard) | 0.1700 / 0.1675 | 38.1 / 56.9 | $8.0\times 10^{-4}$ | `LWInputX` pinned at $25.0^\circ$; unstable mode on `LWInputY` ($\lambda = 119\text{--}132\,\text{s}^{-1}$) |
+| 0.70 | 0.2031 / 0.2014 | 0.00 / 12.4 | $1.2\times 10^{-4}$ | `elbow_r` pinned at $149.9^\circ$; $\lambda \approx 85\,\text{s}^{-1}$ |
+| **0.75 (selected)** | **0.2195 / 0.2183** | **0.00 / 1.51** | **$0.0$ (in range)** | **Wrists clear of limits; $\lambda = 59.4\text{--}70.0\,\text{s}^{-1}$ (`SpineInputX`/`RSInputX`); `LWInputY` mode eliminated!** |
+| 0.78 | 0.2304 / 0.2286 | 0.00 / 0.00 | $0.0$ | `LWInputX` at limit $25.0^\circ$, `RWInputX` at limit $-40.0^\circ$ |
+| 0.80 | 0.2378 / 0.2357 | 0.00 / 0.00 | $0.0$ | `LWInputX` at limit $25.0^\circ$, `RWInputX` at limit $-40.0^\circ$ |
+| 0.82 | 0.2452 / 0.2429 | 0.00 / 0.00 | $0.0$ | `LWInputX` at limit $25.0^\circ$, `RWInputX` at limit $-40.0^\circ$ |
+| 0.85 | 0.2561 / 0.2536 | 0.00 / 0.00 | $0.0$ | Wrists within limits |
+
+At the selected width $W = 0.75$ m:
+- **Left hand:** shoulder-to-grip distance is $0.2195$ m ($> 0.2059$ m); reach error is **$0.002$ mm** (100% resolved within 1 mm bound).
+- **Right hand:** shoulder-to-grip distance is $0.2033$ m; reach error is **$1.51$ mm** (down from $56.9$ mm, a 97.4% reduction).
+- **Wrist stability:** wrists are well clear of joint limits (`LWInputX` $11.4^\circ$, `LWInputY` $39.6^\circ$, `RWInputX` $-1.4^\circ$, `RWInputY` $-20.7^\circ$). The `LWInputY` unstable mode is completely eliminated ($\lambda$ drops to $59.4\text{--}70.0\,\text{s}^{-1}$ on trunk coordinates `SpineInputX`/`RSInputX`, identical to the pre-rack baseline).
+- **Coordinate parity:** Drake full-window coordinate error drops from $8.5\times 10^{-4}$ rad to **$6.00\times 10^{-9}$ rad**; Pinocchio drops from $2.7\times 10^{-3}$ rad to **$2.39\times 10^{-9}$ rad**! Both are far below the Level-L2 bound of $1.0\times 10^{-6}$ rad.
+

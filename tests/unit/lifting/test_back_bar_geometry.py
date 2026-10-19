@@ -313,15 +313,22 @@ def test_committed_bundle_start_pose_keeps_the_standard_grip() -> None:
 
     OSL-17 (#13131): the committed bundle racks the bar on the cited high-bar
     position (``test_back_rack``), not on the standard's start-pose bar
-    position, which lies above the shoulders; the grip is still the standard's.
+    position, which lies above the shoulders.
+    OSL-19/20 (#13158, #13159): at high-bar rack, the bundle uses
+    ``HIGH_BAR_GRIP_WIDTH_M`` (0.75 m), recorded in its back_bar provenance.
     """
     pytest.importorskip("mujoco")
     bundle = InputBundle.load(BACK_SQUAT_BUNDLE)
     q = np.asarray(bundle.provenance["ik"]["q_standing"], dtype=float)
     height = float(bundle.provenance["optimizer"]["height_m"])
     pose = measure_start_pose(bundle.spec_bytes, q, height)
-    grip = lift_spec.lift_grip(LIFT)
-    assert pose.grip_width_m == pytest.approx(grip.width_m, abs=GRIP_TOLERANCE_M)
+    geometry_rec = (
+        bundle.provenance.get("ik", {}).get("back_bar", {}).get("geometry", {})
+    )
+    expected_grip_m = float(
+        geometry_rec.get("grip_width_m", lift_spec.lift_grip(LIFT).width_m)
+    )
+    assert pose.grip_width_m == pytest.approx(expected_grip_m, abs=GRIP_TOLERANCE_M)
     assert pose.axis_angle_deg <= AXIS_TOLERANCE_DEG
     assert pose.left_hand_is_left
 

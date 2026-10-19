@@ -39,16 +39,18 @@ from src.shared.python.lifting.pack_audit.names import LIFTS
 
 pytestmark = pytest.mark.unit
 
-#: OSL-17 (#13131) regression on the high-bar rack bundle: the IK carries
-#: the Rajagopal arm_flex, arm_rot, pro_sup and elbow_flex coordinates up to
-#: 1.21e-3 rad past their ranges (the arms cannot reach a grip behind the
-#: neck; see ``test_opensim_lift_bar_reach``).  Not loosened.  On the
-#: #13037 whole-row lift body (#13041): up to 8.0e-4 rad (arm_rot_l).
+#: OSL-19 (#13158): high-bar rack reach sweep (grip width 0.75 m).
+#: Left hand reach is resolved to 0.002 mm (well inside 1 mm bound).
+#: Right hand reach stops 1.51 mm from the grip (down from 56.9 mm, 97.4%
+#: reduction), slightly exceeding the 1.0 mm bound because the kinematic
+#: minimum shoulder-to-hand distance of the folded Rajagopal arm is 0.2059 m
+#: and right shoulder-to-grip is 0.2033 m. The 1 mm bound is not loosened.
 _RAJAGOPAL_ARM_RANGES = pytest.mark.xfail(
     strict=True,
     reason=(
-        "OSL-19 #13158: high-bar grip pushes Rajagopal arm coordinates up "
-        "to 8.0e-4 rad past their ranges (folded arm reach about 0.20 m)."
+        "OSL-19 #13158: right hand reach 1.51 mm > 1.0 mm bound "
+        "(left hand reaches at 0.002 mm; folded arm minimum distance 0.2059 m); "
+        "reach bound not loosened."
     ),
 )
 #: Bundle hip-centre separation (OSL-14, #13057: the AN-1 lift body's de Leva
