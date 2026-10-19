@@ -39,8 +39,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1167 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
 | 1167 | `src/launchers/settings_dialog.py` |
 | 1167 | `src/shared/python/grip_contact/parity.py` |
-| 1167 | `src/shared/python/grip_contact/parity.py` |
-| 1167 | `src/shared/python/grip_contact/parity.py` |
 | 1166 | `src/shared/python/analysis/orchestrator.py` |
 | 1165 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py` |
 | 1164 | `src/shared/python/physics/terrain_representation.py` |
@@ -117,9 +115,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 973 | `src/shared/python/estimation/dime_observation_factors.py` |
 | 973 | `src/shared/python/motion_matching/club_only/fast_matching.py` |
 | 970 | `src/engines/physics_engines/mujoco/python/humanoid_grip_adapter.py` |
-| 967 | `src/shared/python/grip_contact/topology_contact.py` |
-| 967 | `src/shared/python/grip_contact/topology_contact.py` |
-| 967 | `src/shared/python/grip_contact/topology_contact.py` |
 | 967 | `src/shared/python/motion_matching/club_only/matrix_qualification.py` |
 | 966 | `src/launchers/launcher_process_manager.py` |
 | 965 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py` |
@@ -129,6 +124,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 959 | `src/engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py` |
 | 957 | `src/bunkershot3d/solvers/mpm/solver.py` |
 | 955 | `src/shared/python/force_overlay/glyphs.py` |
+| 955 | `src/shared/python/grip_contact/topology_contact.py` |
 | 955 | `src/shared/python/pendulum_simulator/gui/simulation_panel.py` |
 | 954 | `src/tools/shot_pattern_analysis/matched_gui.py` |
 | 952 | `src/shared/python/pendulum_simulator/gui/panel_builders.py` |

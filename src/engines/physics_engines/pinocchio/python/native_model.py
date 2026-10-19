@@ -1034,7 +1034,7 @@ class FullBodyPinocchioModel(NativePinocchioModel):
             contact_topology,
         )
         from src.shared.python.grip_contact.topology_contact import (
-            TopologyContactModel,
+            build_topology_model,
             topology_hand_hand_wrenches,
         )
         from src.shared.python.motion_matching.grip_contract import GripSpec
@@ -1055,7 +1055,7 @@ class FullBodyPinocchioModel(NativePinocchioModel):
             for s in ("L", "R")
         }
         topo = contact_topology(GripSpec(style=grip_style))
-        topo_model = TopologyContactModel.from_Spec(topo, self._grip_interface)
+        topo_model = build_topology_model(self._grip_interface, topology=topo)
         hand_hand = topology_hand_hand_wrenches(
             topo_model, hands["L"], hands["R"], mode="separated_v2"
         )

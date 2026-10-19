@@ -52,8 +52,8 @@ from src.shared.python.grip_contact.parity import (
 from src.shared.python.grip_contact.topology_contact import (
     HAND_HAND_IDENTIFIABILITY_NOTE,
     PairTraceRecorder,
-    TopologyContactModel,
     TopologyHandHandWrench,
+    build_topology_model,
     topology_hand_hand_wrenches,
     topology_side_wrench,
 )
@@ -596,7 +596,7 @@ def _collect_separated_run(
 ) -> SeparatedGripRun:
     offsets = {s: interface.frame(s).matrix() for s in SIDES}
     topo = contact_topology(GripSpec(style=style))
-    topo_model = TopologyContactModel.from_Spec(topo, interface)
+    topo_model = build_topology_model(interface, topology=topo)
     recorder = PairTraceRecorder(topo_model, mode="separated_v2")
     wrench: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
     hand_pose: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}

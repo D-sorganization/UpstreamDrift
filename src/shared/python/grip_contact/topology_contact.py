@@ -322,18 +322,6 @@ class TopologyContactModel:
             spin_transition_rad_s=pads.spin_transition_rad_s,
         )
 
-    @classmethod
-    def from_Spec(
-        cls,
-        topology: ContactTopology,
-        interface: GripInterface,
-        squeeze_per_hand_n: float = 1000.0,
-    ) -> TopologyContactModel:
-        """Build a :class:`TopologyContactModel` from ``topology`` and ``interface``."""
-        return build_topology_model(
-            interface, topology=topology, squeeze_per_hand_n=squeeze_per_hand_n
-        )
-
     def physical_grip_pairs(self, side: str) -> tuple[ContactPair, ...]:
         """Ordered physical pad-grip pairs acting on ``side``."""
         _, side_char = _normalize_side(side)
