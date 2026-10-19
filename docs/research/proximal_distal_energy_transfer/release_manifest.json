@@ -650,7 +650,7 @@
       "bytes": 6631
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json": {
-      "sha256": "479f21ad58bd55cd75df035fc2632ba280187f390006c94ec81a2d19b338f56d",
+      "sha256": "5fdb7a04352d7553d2224fdf9de8242b6893af84e03e3235f5293d52f221db57",
       "bytes": 4541
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.npz": {
@@ -2458,8 +2458,8 @@
       "bytes": 2879
     },
     "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py": {
-      "sha256": "6bef8a15d9b74e5c60dbf01b26dff68720f06a26c814fd9c06b01d3154bc07c2",
-      "bytes": 1322
+      "sha256": "170a950d48607f7f1542691cef2213d3ef785d6dfbdb4c68cf62d69ff2c48363",
+      "bytes": 1319
     },
     "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure_support.py": {
       "sha256": "3dfb02a6d202bd910c8c02f4b27a20cd8122e8b3608fa937ad7096482504523b",
@@ -3090,8 +3090,8 @@
       "bytes": 25114
     },
     "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py": {
-      "sha256": "7b563460ee415e0ab0db65e82a5fad7a4785d51ebb7d618e11896f72e2688411",
-      "bytes": 26335
+      "sha256": "133526aa5c2614044215c6a6abb4ed55e311c22daf31aac1213c3fec7851fc8f",
+      "bytes": 26361
     },
     "scripts/research/proximal_distal_energy/run_typed_slack_dynamic_study.py": {
       "sha256": "ee674e0697be9229c66739c2f73f9de2034c3e6961eb5e00acb01cd2ebd4c11d",
