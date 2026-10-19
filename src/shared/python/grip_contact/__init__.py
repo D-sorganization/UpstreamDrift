@@ -36,6 +36,13 @@ from src.shared.python.grip_contact.force_decomposition import (
     decompose_hand_forces,
 )
 from src.shared.python.grip_contact.interface import GripFrame, GripInterface
+from src.shared.python.grip_contact.pair_contact import (
+    ContactCapsule,
+    ContactSphere,
+    PairWrench,
+    capsule_capsule,
+    sphere_capsule,
+)
 from src.shared.python.grip_contact.parameters import (
     BushingParameters,
     ContactMaterial,
@@ -69,10 +76,15 @@ __all__ = [
     "load_grip_capability_inventory",
     "BushingState",
     "BushingWrench",
+    "ContactCapsule",
+    "ContactSphere",
     "CoordinateSpline",
+    "PairWrench",
     "RigidBodyState",
     "bushing_wrench",
+    "capsule_capsule",
     "hand_frame_states",
+    "sphere_capsule",
     "GripClosureSeries",
     "closure_series_from_residuals",
     "DEFAULT_COUPLE_NOISE_FLOOR_NM",

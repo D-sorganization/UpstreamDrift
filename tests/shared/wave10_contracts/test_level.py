@@ -200,8 +200,14 @@ class TestSetGet:
         assert any("WARN" in r.message.upper() for r in caplog.records)
 
     def test_set_propagates_to_aliases(self):
-        # The contracts module is imported, aliases must reflect the new level
-        import src.shared.python.contracts as contracts_mod
+        # The contracts module is imported, aliases must reflect the new level.
+        # set_contract_level updates the modules registered in sys.modules;
+        # read that entry rather than `import ... as`, which binds the parent
+        # package attribute and can be left stale by tests that re-import
+        # the module (#13314).
+        import src.shared.python.contracts  # noqa: F401
+
+        contracts_mod = sys.modules["src.shared.python.contracts"]
 
         set_contract_level(ContractLevel.OFF)
         assert contracts_mod.DBC_LEVEL is contracts_mod.ContractLevel.OFF

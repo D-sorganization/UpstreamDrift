@@ -484,12 +484,38 @@ def test_compare_versions(parent_launcher, qapp) -> None:
     assert dialog._compare_versions("Missing", ">=1.26.4") is False
 
 
+_STUB_WINDOWS_RESULTS = [
+    {"name": "NumPy", "required": ">=1.26.4", "installed": "2.1.0", "status": "ok"},
+    {
+        "name": "Drake",
+        "required": ">=1.22.0",
+        "installed": "Missing (Use Docker/WSL)",
+        "status": "warn",
+    },
+]
+
+
 @patch("PyQt6.QtWidgets.QMessageBox.information")
 @patch("src.launchers.settings_dialog.SettingsWidget._generate_dep_table_html")
+@patch("src.launchers.settings_dialog._check_windows_dependencies_report")
 @pytest.mark.unit
 def test_check_windows_deps(
-    mock_gen_html, mock_info, parent_launcher, qapp, qtbot
+    mock_report_fn, mock_gen_html, mock_info, parent_launcher, qapp, qtbot
 ) -> None:
+    """The dialog renders the worker's report into the information box.
+
+    The report is stubbed: the real probe imports the physics engines, which
+    on a loaded runner outlasts any wait and flaked the merge queue (#13339).
+    The probe itself is covered synchronously below.
+    """
+    from src.launchers.settings_runtime import RuntimeDependencyReport
+
+    mock_report_fn.return_value = RuntimeDependencyReport(
+        dialog_title="Windows Dependency Check",
+        table_title="Windows Environment",
+        environment_name="Native Windows",
+        check_results=_STUB_WINDOWS_RESULTS,
+    )
     mock_gen_html.return_value = "mock_html"
     dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog._check_windows_deps()
@@ -497,16 +523,29 @@ def test_check_windows_deps(
     mock_info.assert_called_once()
     args, kwargs = mock_info.call_args
     assert "mock_html" in args[2]
+    assert mock_gen_html.call_args[0][2] == _STUB_WINDOWS_RESULTS
 
-    # Verify check_results structure
-    check_results = mock_gen_html.call_args[0][2]
-    myosuite_res = next((r for r in check_results if r["name"] == "MyoSuite"), None)
-    assert myosuite_res is not None
-    assert myosuite_res["required"] == ">=2.0.0"
 
-    drake_res = next((r for r in check_results if r["name"] == "Drake"), None)
-    if drake_res and drake_res["installed"] == "Missing (Use Docker/WSL)":
-        assert drake_res["status"] == "warn"
+@pytest.mark.unit
+def test_windows_dependencies_report_marks_missing_optional_engines_warn() -> None:
+    """Optional engines that fail to import are a warning, not an error.
+
+    ``None`` in ``sys.modules`` makes ``import`` raise ImportError at once, so
+    the probe is deterministic and fast whatever the runner has installed.
+    """
+    import sys
+
+    from src.launchers.settings_runtime import check_windows_dependencies_report
+
+    absent = dict.fromkeys(("pydrake", "pinocchio", "opensim", "myosuite"))
+    with patch.dict(sys.modules, absent):
+        report = check_windows_dependencies_report()
+
+    by_name = {r["name"]: r for r in report.check_results}
+    assert by_name["MyoSuite"]["required"] == ">=2.0.0"
+    for name in ("Drake", "Pinocchio", "OpenSim", "MyoSuite"):
+        assert by_name[name]["installed"] == "Missing (Use Docker/WSL)"
+        assert by_name[name]["status"] == "warn"
 
 
 @patch("PyQt6.QtWidgets.QMessageBox.information")

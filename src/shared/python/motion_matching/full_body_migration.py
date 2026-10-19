@@ -96,6 +96,23 @@ class RegionalPrior:
         """``distribution_source`` label of results regularised by this prior."""
         return f"prior:{self.law_id}@{self.version}"
 
+    def split_matrix(self, trunk: TrunkTopology = V2_TRUNK) -> Array:
+        """``D`` (3, n): ``s_T,a theta_L,a - s_L,a theta_T,a`` per ISB axis.
+
+        ``theta = isb_sign * phi`` for the trunk coordinates ``phi`` in
+        ``trunk.coordinates`` order; a coordinate of the ``lumbar`` child role
+        gets the thoracic share, every other one minus the lumbar share.
+        Postcondition: ``D phi = 0`` exactly when each axis splits as the prior.
+        """
+        out = np.zeros((3, len(trunk.coordinates)))
+        region = {c: j.child_role for j in trunk.joints for c in j.coordinates}
+        for k, name in enumerate(trunk.coordinates):
+            axis, sign = trunk.isb_axis(name)
+            share = self.lumbar_share[axis]
+            weight = (1.0 - share) if region[name] == "lumbar" else -share
+            out[ISB_SPINE_AXES.index(axis), k] = weight * sign
+        return out
+
 
 class _TrunkChain:
     """Pelvis -> thorax kinematics of one schema's trunk, from the spec itself."""
@@ -243,23 +260,12 @@ class TrunkMigrator:
         self._v1_order = tuple(v1_spec["coordinate_order"])
         self._v2_order = tuple(v2_spec["coordinate_order"])
         self._prior = prior or RegionalPrior.from_coupling_law()
-        self._split = self._split_matrix()
+        self._split = self._prior.split_matrix(V2_TRUNK)
         self._limits = self._soft_limits()
         self.source_spec_sha256 = source
         self.v2_spec_sha256 = canonical_sha256(v2_spec)
 
     # -- declared operators ---------------------------------------------------
-    def _split_matrix(self) -> Array:
-        """``D`` (3, 6): s_T,a theta_L,a - s_L,a theta_T,a per ISB axis."""
-        out = np.zeros((3, len(V2_TRUNK.coordinates)))
-        region = {c: j.child_role for j in V2_TRUNK.joints for c in j.coordinates}
-        for k, name in enumerate(V2_TRUNK.coordinates):
-            axis, sign = V2_TRUNK.isb_axis(name)
-            share = self._prior.lumbar_share[axis]
-            weight = (1.0 - share) if region[name] == "lumbar" else -share
-            out[ISB_SPINE_AXES.index(axis), k] = weight * sign
-        return out
-
     @staticmethod
     def _soft_limits() -> dict[str, tuple[float, float, float]]:
         out = {}
