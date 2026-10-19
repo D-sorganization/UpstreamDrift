@@ -355,14 +355,12 @@ def test_independent_per_hand_roll() -> None:
     visual_pose = GripPose(lead_roll_offset_deg=10.0, trail_roll_offset_deg=-15.0)
     assert visual_pose.roll_offset_deg(Hand.LEAD) == pytest.approx(10.0)
     assert visual_pose.roll_offset_deg(Hand.TRAIL) == pytest.approx(-15.0)
-    assert (
-        pose.placement(Hand.LEAD).v_azimuth_deg - grip_pose.NEUTRAL_V_AZIMUTH_DEG
-        == pytest.approx(10.0)
-    )
-    assert (
-        pose.placement(Hand.TRAIL).v_azimuth_deg - grip_pose.NEUTRAL_V_AZIMUTH_DEG
-        == pytest.approx(-15.0)
-    )
+    assert pose.placement(
+        Hand.LEAD
+    ).v_azimuth_deg - grip_pose.NEUTRAL_V_AZIMUTH_DEG == pytest.approx(10.0)
+    assert pose.placement(
+        Hand.TRAIL
+    ).v_azimuth_deg - grip_pose.NEUTRAL_V_AZIMUTH_DEG == pytest.approx(-15.0)
 
     base = GripSpec().pose()
     lead_base = build_grip_hand_mesh(Hand.LEAD, grip_radius_m=0.014, pose=base)
