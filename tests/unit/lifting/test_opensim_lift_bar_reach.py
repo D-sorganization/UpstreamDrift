@@ -43,17 +43,26 @@ _MIDPOINT_TOL_M = 1e-9
 #: about 3e-6 m.
 _REACH_TOL_M = 1e-3
 #: OSL-19 (#13158): high-bar rack reach sweep (grip width 0.75 m).
-#: Left hand reach is resolved to 0.002 mm (well inside 1 mm bound).
+#: Left hand reach is resolved to 0.0024 mm (well inside 1 mm bound).
 #: Right hand reach stops 1.51 mm from the grip (down from 56.9 mm, 97.4%
-#: reduction), slightly exceeding the 1.0 mm bound because the kinematic
-#: minimum shoulder-to-hand distance of the folded Rajagopal arm is 0.2059 m
-#: and right shoulder-to-grip is 0.2033 m. The 1 mm bound is not loosened.
+#: reduction), exceeding the 1.0 mm bound. The binding physical constraint is
+#: three simultaneous 3D joint limits on the right arm: arm_flex_r = 90.0 deg
+#: (1.57080 rad), arm_rot_r = -90.0 deg (-1.57080 rad), and elbow_flex_r = 150.0 deg
+#: (2.61800 rad), rather than the 2D planar d_min (0.2059 m).
+#: Bundle shoulder landmark to grip is 0.2033 m (R) / 0.2198 m (L); OpenSim RSJC/LSJC
+#: to bundle grip is 0.2052 m (R) / 0.2232 m (L); OpenSim RSJC/LSJC to hand CoM is
+#: 0.2059 m (R) / 0.2232 m (L).
+#: Coordinate range overshoot reaches a maximum of 4.18e-5 rad across 5 coordinates:
+#: arm_rot_r (4.18e-5 rad, 6 frames), arm_flex_r (3.79e-5 rad, 6 frames),
+#: pro_sup_r (3.25e-5 rad, 6 frames), pro_sup_l (2.97e-5 rad, 6 frames), and
+#: elbow_flex_r (8.79e-7 rad, 2 frames). Neither the reach nor range bounds are loosened.
 _RAJAGOPAL_ARM_RANGES = pytest.mark.xfail(
     strict=True,
     reason=(
-        "OSL-19 #13158: right hand reach 1.51 mm > 1.0 mm bound "
-        "(left hand reaches at 0.002 mm; folded arm minimum distance 0.2059 m); "
-        "reach bound not loosened."
+        "OSL-19 #13158: right hand reach 1.51 mm > 1.0 mm bound and max coordinate "
+        "overshoot 4.18e-5 rad (arm_rot_r 4.18e-5, arm_flex_r 3.79e-5, pro_sup_r 3.25e-5, "
+        "pro_sup_l 2.97e-5, elbow_flex_r 8.79e-7 rad) at 3 pinned limits "
+        "(arm_flex_r 90 deg, arm_rot_r -90 deg, elbow_flex_r 150 deg); bounds not loosened."
     ),
 )
 
