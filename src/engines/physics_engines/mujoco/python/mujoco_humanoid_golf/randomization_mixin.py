@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -26,7 +26,18 @@ if TYPE_CHECKING:
 
 
 class MuJoCoDomainRandomizationMixin:
-    """Optional parameter getters/setters consumed by ``DomainRandomizer``."""
+    """Optional parameter getters/setters consumed by ``DomainRandomizer``.
+
+    The host class must provide ``model`` and ``require_initialized`` (as
+    :class:`BasePhysicsEngine` does); they are declared here for type checking
+    only so the mixin never shadows the host's implementation at runtime.
+    """
+
+    if TYPE_CHECKING:
+        model: Any
+
+        def require_initialized(self, operation: str = "this operation") -> None:
+            """Raise if the host engine has no loaded model."""
 
     def get_link_masses(self) -> NDArray[np.floating]:
         self.require_initialized("get_link_masses")
