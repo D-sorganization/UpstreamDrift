@@ -131,6 +131,38 @@ def _solve_side(
         residual, start, bounds=(low, high), xtol=_REACH_XTOL, ftol=_REACH_XTOL
     )
     error = float(np.linalg.norm(residual(fit.x)[:3]))
+    if error > 0.01:
+        candidates = [
+            np.array([prior[0], prior[1], math.radians(-60.0), math.radians(135.0)]),
+            np.array([0.0, 0.0, math.radians(-60.0), math.radians(140.0)]),
+            np.array(
+                [
+                    math.radians(45.0),
+                    math.radians(-20.0),
+                    math.radians(-60.0),
+                    math.radians(130.0),
+                ]
+            ),
+            np.array(
+                [
+                    math.radians(90.0),
+                    math.radians(-20.0),
+                    math.radians(-60.0),
+                    math.radians(130.0),
+                ]
+            ),
+        ]
+        for candidate in candidates:
+            s = np.clip(candidate, low, high)
+            cand_fit = least_squares(
+                residual, s, bounds=(low, high), xtol=_REACH_XTOL, ftol=_REACH_XTOL
+            )
+            cand_err = float(np.linalg.norm(residual(cand_fit.x)[:3]))
+            if cand_err < error:
+                fit = cand_fit
+                error = cand_err
+                if error <= 0.01:
+                    break
     return dict(zip(names, map(float, fit.x), strict=True)), error
 
 

@@ -26,7 +26,7 @@ barbell lifts from `receipts.json` (41 frames, stride 5):
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Squat** | `f2fab146...` | 0.0193 / 0.0355 | Pass | 3.81 / 5.69 cm | 8.0e-4 (`arm_flex/rot`, `elbow`, `pro_sup`) | 25.21 (vs 146.59) | 17.43 (vs 18.49) | **Pass** |
 | **Deadlift** | `a8483a37...` | 0.0112 / 0.0390 | Pass | 7.11 / 6.91 µm | 6.5e-4 (`pro_sup_l/r`) | 288.23 (vs 110.92) | 147.88 (vs 18.28) | Fail (xfail) |
-| **Bench Press** | `f700f098...` | 0.0581 / 0.2164 | Fail | 0.418 / 0.433 m | 4.4e-4 (`elbow_flex_l/r`) | 4598.27 (vs 32.49) | 1575.93 (vs 3.30) | Fail (xfail) |
+| **Bench Press** | `f700f098...` | 0.0160 / 0.0554 | Fail (bar max) | 12.5 µm / 6.37 mm | 2.1e-3 (`pro_sup_l/r`, `elbow_flex_r`) | 511.26 (vs 32.49) | 318.13 (vs 3.45) | Fail (xfail) |
 | **Snatch** | `24c7e8e4...` | 0.0089 / 0.0579 | Fail (bar max) | 7.68 / 7.57 µm | 3.8e-4 (`pro_sup_l/r`) | 463.57 (vs 155.12) | 202.60 (vs 27.10) | Fail (xfail) |
 | **Clean & Jerk** | `0b5221ff...` | 0.0198 / 0.1612 | Fail (bar max) | 6.43 / 6.02 µm | 2.3e-3 (`pro_sup_l/r`) | 458.52 (vs 223.10) | 259.03 (vs 38.77) | Fail (xfail) |
 
@@ -40,13 +40,13 @@ barbell lifts from `receipts.json` (41 frames, stride 5):
    marker tracking gate (RMS $\le 0.02$\,m, max $\le 0.04$\,m). Snatch has low RMS
    (0.0089\,m) but exceeds the max gate on the bar marker (0.0579\,m). Clean and
    jerk similarly has low RMS (0.0198\,m) with bar marker max 0.1612\,m.
-   Bench press fails marker tracking (RMS 0.0581\,m, max 0.2164\,m) due to the
-   supine posture and wide grip.
+   Bench press achieves low marker RMS (0.0160\,m) below the 0.02\,m threshold,
+   exceeding the max gate on the bar marker (0.0554\,m vs 0.04\,m).
 3. **Arm Reach to the Bar:** Deadlift, snatch, and clean-and-jerk hands reach the
    bundle bar within micrometres ($< 10$\,µm), well within the 1.0\,mm threshold.
-   Back squat exhibits the known OSL-19 posterior shoulder workspace bottleneck
-   (3.81 / 5.69\,cm). Bench press hands miss by $> 0.4$\,m due to the fixed supine
-   trunk and wide grip.
+   Bench press reaches within 12.5\,µm (left) and 6.37\,mm (right) via flexed
+   elbow arm seeds. Back squat exhibits the known OSL-19 posterior shoulder
+   workspace bottleneck (3.81 / 5.69\,cm).
 4. **Hicks Residual Gate:** The back squat satisfies the Hicks criteria (forces
    and moments within thresholds on all 41 states). The other four lifts exceed
    the thresholds. These failures are strictly xfailed with measured numbers;
