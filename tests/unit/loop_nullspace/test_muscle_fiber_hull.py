@@ -87,7 +87,7 @@ def test_singleton_is_explicit_only_for_hull_dimension_zero() -> None:
     assert fib.hull_dimension == 0 and fib.is_degenerate
     result = fib.sample_result(5, rng=np.random.default_rng(0))
     assert result.is_singleton and result.hull_dimension == 0
-    assert np.ptp(result.samples, axis=0).max() == 0.0
+    assert bool(np.all(result.samples == result.samples[0]))
     assert fib.contains(result.samples[0], tol=FEAS_TOL)
 
 
