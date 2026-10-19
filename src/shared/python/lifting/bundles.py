@@ -95,15 +95,32 @@ BACK_SQUAT_BUNDLE = (
 #: The back-squat bundle re-tracked with the LIFT-4 barbell on hand bushings
 #: (its bar states and per-hand wrenches travel in the provenance).
 BACK_SQUAT_BARBELL_BUNDLE = BACK_SQUAT_BUNDLE.with_name("back_squat_barbell_bundle.npz")
+DEADLIFT_BUNDLE = (
+    _REPO / "docs/development/lifting/evidence/deadlift/deadlift_bundle.npz"
+)
+DEADLIFT_BARBELL_BUNDLE = DEADLIFT_BUNDLE.with_name("deadlift_barbell_bundle.npz")
+BENCH_PRESS_BUNDLE = (
+    _REPO / "docs/development/lifting/evidence/bench_press/bench_press_bundle.npz"
+)
+BENCH_PRESS_BARBELL_BUNDLE = BENCH_PRESS_BUNDLE.with_name(
+    "bench_press_barbell_bundle.npz"
+)
+SNATCH_BUNDLE = _REPO / "docs/development/lifting/evidence/snatch/snatch_bundle.npz"
+SNATCH_BARBELL_BUNDLE = SNATCH_BUNDLE.with_name("snatch_barbell_bundle.npz")
+CLEAN_AND_JERK_BUNDLE = (
+    _REPO / "docs/development/lifting/evidence/clean_and_jerk/clean_and_jerk_bundle.npz"
+)
+CLEAN_AND_JERK_BARBELL_BUNDLE = CLEAN_AND_JERK_BUNDLE.with_name(
+    "clean_and_jerk_barbell_bundle.npz"
+)
 #: The LIFT-5 same-input bundle of each barbell lift (``None``: never built).
-#: Only the back squat exists; #11745 closed with one of its five bundles.
 SAME_INPUT_LIFT_BUNDLES: Mapping[str, Path | None] = MappingProxyType(
     {
         "squat": BACK_SQUAT_BARBELL_BUNDLE,
-        "deadlift": None,
-        "bench_press": None,
-        "snatch": None,
-        "clean_and_jerk": None,
+        "deadlift": DEADLIFT_BARBELL_BUNDLE,
+        "bench_press": BENCH_PRESS_BARBELL_BUNDLE,
+        "snatch": SNATCH_BARBELL_BUNDLE,
+        "clean_and_jerk": CLEAN_AND_JERK_BARBELL_BUNDLE,
     }
 )
 

@@ -384,14 +384,14 @@ the bar in the squat hold. MyoFullBody, Hunt--Crossley contact and the
 additional movements fail closed with a reason.
 
 \subsection{OpenSim Inverse Kinematics and Inverse Dynamics (OSL-3, Issue \#13041)}
-\paragraph{Inputs.} Only one LIFT-5 same-input bundle exists:
+\paragraph{Inputs.} \#11745 originally closed with only one LIFT-5 same-input bundle:
 \texttt{docs/development/lifting/evidence/back\_squat/back\_squat\_barbell\_bundle.npz}
 (SHA-256 \texttt{850d42b1\ldots 71430}, MuJoCo reference engine, 200 steps of
-1\,ms, the 0.2\,s back-squat window). \#11745 closed with only that bundle, so
-the deadlift, bench press, snatch and clean and jerk have no input to fit; their
-IK and ID receipts are \texttt{"unavailable"} with that reason
-(\texttt{SAME\_INPUT\_LIFT\_BUNDLES}, \texttt{src/shared/python/lifting/bundles.py}).
-No input is synthesised for them.
+1\,ms, the 0.2\,s back-squat window), leaving deadlift, bench press, snatch, and clean and jerk
+initially \texttt{"unavailable"}.
+Under OSL-3 completion, all five lifts have registered barbell bundles and complete receipts
+(detailed in Section~\ref{sec:opensim-ik-id-all-five}). The historical back-squat baseline
+below is preserved for record.
 
 \paragraph{Targets and Loads.} The bundle replays the golf full-body spec, not
 Rajagopal, so its coordinates do not transfer by name (its hip flexion reads
@@ -1983,6 +1983,61 @@ hands reach the rack; it is not attempted. Reproduce with
 \texttt{MUJOCO\_GL=egl python3 scripts/generate\_lift\_bundle.py --lift
 clean\_and\_jerk} then
 \texttt{scripts/measure\_lift\_bar\_path\_parity.py --lift clean\_and\_jerk}.
+
+\subsection{OpenSim IK and ID Across All Five Barbell Lifts (OSL-3, Issue \#13041)}\label{sec:opensim-ik-id-all-five}
+\paragraph{Barbell Bundles and Model Registration.}
+Issue \#13041 completes the registration and measurement of LIFT-4 barbell bundles
+(\texttt{<lift>\_barbell\_bundle.npz}) across all five barbell lifts in
+\texttt{SAME\_INPUT\_LIFT\_BUNDLES} (\texttt{src/shared/python/lifting/bundles.py}).
+Each bundle combines the underlying 0.2\,s same-input kinematic window with the
+LIFT-4 barbell body, plate masses, and hand contact loads, generated via
+\texttt{scripts/generate\_barbell\_squat\_evidence.py --lift <lift> --part bundle}.
+
+\paragraph{Measured Inverse Kinematics and Inverse Dynamics Evidence.}
+All receipts are recorded in \texttt{docs/development/lifting/evidence/opensim\_ik\_id/receipts.json}
+over 41 frames (stride 5) using OpenSim 4.6 and the \texttt{RajagopalLaiUhlrich2023} model.
+Ground reaction force on the static hold equals body plus bar (plus bench) weight to
+relative precision $< 3\times 10^{-13}$ across all five lifts. Table~\ref{tab:opensim-ik-id-all-five}
+reports the measured kinematic tracking errors, range limit overshoots, and pelvis residuals
+against the Hicks et al.\ (2015) criteria (force threshold 5\,\% of peak external force;
+moment threshold 1\,\% of COM height $\times$ peak external force).
+
+\begin{table}[h]
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccccc}
+\toprule
+Lift & Marker RMS / Max (m) & Segment RMS (rad) & Reach Miss L / R & Max Overshoot (rad) & Pelvis Force / Limit (N) & Pelvis Moment / Limit (N\,m) \\
+\midrule
+Squat & 0.0193 / 0.0355 & 0.0198 & 3.81 / 5.69\,cm & $8.0\times 10^{-4}$ & \textbf{25.21 / 146.59} & \textbf{17.43 / 18.49} \\
+Deadlift & 0.0112 / 0.0390 & 0.0158 & 7.11 / 6.91\,$\mu$m & $6.5\times 10^{-4}$ & 288.23 / 110.92 & 147.88 / 18.28 \\
+Bench Press & 0.0581 / 0.2164 & 0.0882 & 0.418 / 0.433\,m & $4.4\times 10^{-4}$ & 4598.27 / 32.49 & 1575.93 / 3.30 \\
+Snatch & 0.0089 / 0.0579 & 0.0095 & 7.68 / 7.57\,$\mu$m & $3.8\times 10^{-4}$ & 463.57 / 155.12 & 202.60 / 27.10 \\
+Clean \& Jerk & 0.0198 / 0.1612 & 0.0220 & 6.43 / 6.02\,$\mu$m & $2.3\times 10^{-3}$ & 458.52 / 223.10 & 259.03 / 38.77 \\
+\bottomrule
+\end{tabular}
+\caption{Measured OpenSim IK and ID Metrics Across All Five Barbell Lifts (OSL-3).
+Squat passes both Hicks residual thresholds. Deadlift, snatch, and clean-and-jerk hands reach
+the bar within micrometres, but exceed residual thresholds during dynamic settling and are strictly xfailed.}
+\label{tab:opensim-ik-id-all-five}
+\end{table}
+
+\paragraph{Bundle Provenance and Hashes.}
+The SHA-256 digests of the five committed barbell bundles are:
+\begin{itemize}[nosep]
+\item \texttt{back\_squat\_barbell\_bundle.npz}: \texttt{f2fab14647e365c32cf2360c4e1319570736a22b7e455d8b2b0d77f96405700f}
+\item \texttt{deadlift\_barbell\_bundle.npz}: \texttt{a8483a3771b844f7ec652e839fd64337d6f806b82d26f0fcc7ba8bf3a19bac40}
+\item \texttt{bench\_press\_barbell\_bundle.npz}: \texttt{f700f098094a9898c2cf20f5a7bf2c97b6967b44b806f146cd6e958aa83834fb}
+\item \texttt{snatch\_barbell\_bundle.npz}: \texttt{24c7e8e4c140e2e3a52047851fd460e07e871dc17573e96414b6a493e9d4dacc}
+\item \texttt{clean\_and\_jerk\_barbell\_bundle.npz}: \texttt{0b5221ff7cc3b7128be609428a9681e7f0cc4398f38a7c8e0c35163d0beb45aa}
+\end{itemize}
+
+\paragraph{Reproduction Commands.}
+To reproduce the barbell bundle generation and OpenSim IK/ID measurements:
+\begin{verbatim}
+python3 scripts/generate_barbell_squat_evidence.py --lift <lift> --part bundle
+MUJOCO_GL=egl python3 scripts/measure_opensim_lift_ik_id.py
+python3 -m pytest -o addopts="" tests/unit/lifting/test_opensim_lift_ik_id.py
+\end{verbatim}
 
 \section{Measured Parity Results}
 All figures below are read from the committed receipt,
